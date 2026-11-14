@@ -11435,7 +11435,8 @@
       "needsMigration": "Ta funkcja nie jest jeszcze włączona na serwerze. Twój profil pozostaje prywatny.",
       "error": "Nie udało się zapisać. Spróbuj ponownie.",
       "declinedNote": "W porządku — Twój profil pozostaje prywatny. Ten wybór znajdziesz tutaj w każdej chwili.",
-      "readFailed": "Nie udało się sprawdzić, czy pracodawcy widzą Twój profil. To nie znaczy, że widoczność jest wyłączona — spróbuj ponownie później."
+      "readFailed": "Nie udało się sprawdzić, czy pracodawcy widzą Twój profil. To nie znaczy, że widoczność jest wyłączona — spróbuj ponownie później.",
+      "legalTextInEnglish": "Ten tekst prawny jest wyświetlany po angielsku: jego wersja w Twoim języku nie została jeszcze zatwierdzona. Obowiązuje tekst angielski."
     },
     "disclosures": {
       "intro": "Każde przekazanie Twojego CV, danych kontaktowych lub innych danych konkretnej firmie następuje dopiero po Twoim osobnym potwierdzeniu.",

@@ -14,6 +14,7 @@ import { ALL_WORK_TYPE_SLUGS } from "@/lib/taxonomy/work-categories";
 import { isIsoCountry } from "@/lib/location/country-model";
 import { foldText } from "./normalize";
 import { parseWordNumber } from "./word-numbers";
+import { looksSwedish } from "./looks-swedish";
 
 export type StartPeriod = "flexible" | "this_week" | "urgent";
 export type AccommodationOffer =
@@ -103,6 +104,61 @@ export const WORK_TYPE_RULES: { slug: string; needles: string[] }[] = [
   { slug: "farm_worker", needles: ["farm", "agricultur", "žemės ūki", "zemes uki", "сельхоз", "ферм"] },
   { slug: "general_laborer", needles: ["laborer", "labourer", "general worker", "helper", "pagalbinis darbinink", "разнорабоч", "подсобн", "bauhelfer", "pomocnik", "pomocnikow"] },
 ];
+
+/**
+ * The SWEDISH occupation nouns per work type (sv activation, 2026-11-12),
+ * folded ("ställningsbyggare" → `stallningsbyggar`) because the reader matches
+ * the folded sentence as well as the raw one. Without them "Vi behöver 5
+ * svetsare" routed to the need form and arrived there with no work type and no
+ * headcount — the count is read off the recognised noun.
+ *
+ * Apart from `WORK_TYPE_RULES` on purpose: these are needles, matched anywhere
+ * in a word, and several are other languages' words ("lagerpersonal" and
+ * "produktionspersonal" are German, "kock" a surname). They join the rules
+ * only for a sentence `looksSwedish` reads as Swedish — `workTypeRulesFor`.
+ */
+const SV_WORK_TYPE_NEEDLES: Readonly<Record<string, readonly string[]>> = {
+  scaffolder: ["stallningsbyggar"],
+  concrete_worker: ["betongarbetar"],
+  steel_fixer: ["armerare"],
+  insulation_worker: ["isolerare"],
+  welder: ["svets"],
+  electrician: ["elmontor", "elinstallator"],
+  plumber: ["rormokar", "rorlaggar", "vvs-montor", "vvs montor"],
+  carpenter: ["snickar"],
+  mason: ["murare"],
+  painter: ["malare"],
+  tiler: ["plattsattar"],
+  roofer: ["taklaggar"],
+  crane_operator: ["kranforar"],
+  excavator_operator: ["gravmaskin"],
+  forklift_operator: ["truckforar"],
+  truck_driver_c: ["lastbilschauffor", "lastbilsforar"],
+  order_picker: ["orderplock"],
+  warehouse_worker: ["lagerarbetar", "lagerpersonal", "lagermedarbetar"],
+  machine_operator: ["maskinoperator"],
+  production_worker: ["produktionsmedarbetar", "produktionspersonal", "industriarbetar"],
+  cook: ["kock"],
+  kitchen_helper: ["koksbitrad"],
+  dishwasher: ["diskare"],
+  waiter: ["servitor", "servitris"],
+  elderly_carer: ["aldreomsorg", "hemtjanst"],
+  care_assistant: ["underskotersk", "sjukskotersk", "vardbitrad"],
+  cleaner: ["stadare", "lokalvardar"],
+  general_laborer: ["hantlangar", "grovarbetar"],
+};
+
+const SV_WORK_TYPE_RULES: { slug: string; needles: string[] }[] = WORK_TYPE_RULES.map((rule) => ({
+  slug: rule.slug,
+  needles: [...rule.needles, ...(SV_WORK_TYPE_NEEDLES[rule.slug] ?? [])],
+}));
+
+/** The work-type rules for one sentence: the shared table, plus the Swedish
+ *  nouns when — and only when — the sentence is Swedish. */
+export function workTypeRulesFor(swedish: boolean): { slug: string; needles: string[] }[] {
+  return swedish ? SV_WORK_TYPE_RULES : WORK_TYPE_RULES;
+}
+
 
 const KNOWN_SLUGS = new Set(ALL_WORK_TYPE_SLUGS);
 
@@ -282,12 +338,18 @@ function escapeForRegex(s: string): string {
 /** A number directly followed by a word for PEOPLE. */
 const PEOPLE_COUNT_RE =
   /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_PEOPLE_COUNT_RE =
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек|personer|medarbetare|arbetare|anst[äa]llda)/i;
 
 /** Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
  *  halves of pairs whose other half was already here; DE/PL/NL the same
  *  verbs the value-statement reader already knows. */
 const DEMAND_VERB_COUNT_RE =
   /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen|suchen|zoeken|potrzebujemy|szukamy)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_DEMAND_VERB_COUNT_RE =
+  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen|suchen|zoeken|potrzebujemy|szukamy|beh[öo]ver|s[öo]ker)\s+(?:about\s+|apie\s+|около\s+|cirka\s+|ungef[äa]r\s+)?(\d{1,4})\b/i;
 
 /**
  * Words that make the number before them a MEASURE, never a headcount:
@@ -301,12 +363,18 @@ const DEMAND_VERB_COUNT_RE =
  */
 const COUNT_UNIT_WORD_RE =
   /^(?:years?|yrs?|metų|metu|metai|metus|metams|met|m|months?|mėn\p{L}*|mėnes\p{L}*|menes\p{L}*|weeks?|savait\p{L}*|days?|dien\p{L}*|d|hours?|hrs?|h|val\p{L}*|eur\p{L}*|euro|€|nok|sek|dkk|pln|usd|zl|zł|лет|год\p{L}*|месяц\p{L}*|мес|недел\p{L}*|дн\p{L}*|день|час\p{L}*|евро|руб\p{L}*|jahre?n?|monate?n?|monat|wochen?|tage?n?|stunden?|std|lata?|rok\p{L}*|miesi\p{L}*|tygodn\p{L}*|dni|godzin\p{L}*|jaar|jaren|maand\p{L}*|weken|dagen|uur|uren|%|km)$/u;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_COUNT_UNIT_WORD_RE =
+  /^(?:years?|yrs?|metų|metu|metai|metus|metams|met|m|months?|mėn\p{L}*|mėnes\p{L}*|menes\p{L}*|weeks?|savait\p{L}*|days?|dien\p{L}*|d|hours?|hrs?|h|val\p{L}*|eur\p{L}*|euro|€|nok|sek|dkk|pln|usd|zl|zł|лет|год\p{L}*|месяц\p{L}*|мес|недел\p{L}*|дн\p{L}*|день|час\p{L}*|евро|руб\p{L}*|jahre?n?|monate?n?|monat|wochen?|tage?n?|stunden?|std|lata?|rok\p{L}*|miesi\p{L}*|tygodn\p{L}*|dni|godzin\p{L}*|jaar|jaren|maand\p{L}*|weken|dagen|uur|uren|år|månad\p{L}*|manad\p{L}*|veck(?:a|or|ors|an)|dag|dagar|dagars|timm\p{L}*|tim|kr|kronor|%|km)$/u;
 
 /** Is this one token a unit of time, money or percent (see COUNT_UNIT_WORD_RE)? */
-export function isCountUnitWord(token: string | null | undefined): boolean {
+export function isCountUnitWord(token: string | null | undefined, swedish = false): boolean {
   if (!token) return false;
   const lower = token.toLowerCase();
-  return COUNT_UNIT_WORD_RE.test(lower) || COUNT_UNIT_WORD_RE.test(foldText(lower));
+  // `swedish` — whether the SENTENCE the token came from is Swedish; the
+  // Swedish units ("år", "tim", "kr", "dag") are other languages' words.
+  const re = swedish ? SV_COUNT_UNIT_WORD_RE : COUNT_UNIT_WORD_RE;
+  return re.test(lower) || re.test(foldText(lower));
 }
 
 /** The first word of `rest` ("" when none) — what directly follows a number. */
@@ -343,31 +411,51 @@ export type TeamCompositionReading =
 // "бригадир", "brygadzista") is a PERSON, not a team, and is excluded.
 const TEAM_NOUN =
   "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|teams?|бригад(?!ир)\\p{L}*|звен\\p{L}*|команд\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?)";
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_TEAM_NOUN =
+  "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|teams?|бригад(?!ир)\\p{L}*|звен\\p{L}*|команд\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?|arbetslag(?:et|en)?|lag(?:et|en)?)";
 // The generic "team"/"команда" ("our team", "the command") only counts when a
 // number and a size are both stated; a bare mention never asks for a size.
 const STRICT_TEAM_NOUN =
   "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|бригад(?!ир)\\p{L}*|звен\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?)";
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_STRICT_TEAM_NOUN =
+  "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|бригад(?!ир)\\p{L}*|звен\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?|arbetslag(?:et|en)?)";
 /** "po" (lt, pl), "of" (en), "по" (ru), "zu/mit/je/à" (de), "van" (nl) —
  *  and "a team OF n": "iš" (lt), "из" (ru), "aus" (de), "z" (pl), "uit" (nl). */
 const PER_TEAM_WORD = "(?:po|of|по|zu|mit|je|a|van|is|из|aus|z|uit)";
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_PER_TEAM_WORD = "(?:po|of|по|zu|mit|je|a|van|is|из|aus|z|uit|med|om(?!\\s+\\d{1,3}\\s*(?:uur|u(?![\\p{L}])|[:.]\\d)))";
 const EDGE = "(?:^|[^\\p{L}\\p{N}])";
 const COUNT = "(\\d{1,3}|\\p{L}+)";
 const RANGE = "(\\d{1,3})\\s*[-–—]\\s*(\\d{1,3})";
 
 const TEAM_COUNT_RANGE_RE = new RegExp(`${EDGE}${RANGE}\\s+${TEAM_NOUN}`, "u");
+const SV_TEAM_COUNT_RANGE_RE = new RegExp(`${EDGE}${RANGE}\\s+${SV_TEAM_NOUN}`, "u");
 const PER_TEAM_RANGE_RE = new RegExp(`${TEAM_NOUN}\\s+${PER_TEAM_WORD}\\s+${RANGE}`, "u");
+const SV_PER_TEAM_RANGE_RE = new RegExp(`${SV_TEAM_NOUN}\\s+${SV_PER_TEAM_WORD}\\s+${RANGE}`, "u");
 const KNOWN_RE = new RegExp(
   `${EDGE}(?:${COUNT}\\s+)?(${TEAM_NOUN})\\s+${PER_TEAM_WORD}\\s+(\\d{1,3})(?!\\d|\\s*[-–—]\\s*\\d)`,
+  "u",
+);
+const SV_KNOWN_RE = new RegExp(
+  `${EDGE}(?:${COUNT}\\s+)?(${SV_TEAM_NOUN})\\s+${SV_PER_TEAM_WORD}\\s+(\\d{1,3})(?!\\d|\\s*[-–—]\\s*\\d)`,
   "u",
 );
 /** A team noun in the SINGULAR — "brigada iš 4", "бригада из 4", "eine Kolonne
  *  aus 4": one team of that size even with no count word before it. */
 const SINGULAR_TEAM_TOKEN = /^(?:brigada|brigados|crew|team|gang|brigade|бригада|бригаду|kolonne|trupp|brygada|brygady|brygade|ekipa|ekipy|ekipe|ploeg)$/u;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_SINGULAR_TEAM_TOKEN = /^(?:brigada|brigados|crew|team|gang|brigade|бригада|бригаду|kolonne|trupp|brygada|brygady|brygade|ekipa|ekipy|ekipe|ploeg|arbetslag|lag)$/u;
 
 const STRICT_TEAM_TOKEN = new RegExp(`^${STRICT_TEAM_NOUN}$`, "u");
+const SV_STRICT_TEAM_TOKEN = new RegExp(`^${SV_STRICT_TEAM_NOUN}$`, "u");
 /** A verb that REQUESTS what follows it ("reikia brigados", "need a crew"). */
 const TEAM_REQUEST_VERB =
   /^(?:reikia|reikalinga|reikalingos|reikalingi|ieskome|ieskau|need|needs|needed|hiring|seeking|require|нужна|нужны|нужен|нужно|требуется|требуются|ищем|ищу|suchen|brauchen|benotigen|szukamy|potrzebujemy|poszukujemy|zatrudnimy|zoeken|zoekt)$/u;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_TEAM_REQUEST_VERB =
+  /^(?:reikia|reikalinga|reikalingos|reikalingi|ieskome|ieskau|need|needs|needed|hiring|seeking|require|нужна|нужны|нужен|нужно|требуется|требуются|ищем|ищу|suchen|brauchen|benotigen|szukamy|potrzebujemy|poszukujemy|zatrudnimy|zoeken|zoekt|behover|soker|anstaller)$/u;
 /** …or one that follows the noun ("Kolonne gesucht", "ploeg gezocht"). */
 const TEAM_REQUEST_AFTER =
   /^(?:gesucht|gezocht|wanted|needed|nodig|reikalinga|reikalingos|требуется|нужна|potrzebna|potrzebne|poszukiwana)$/u;
@@ -383,6 +471,8 @@ const LEADER_BEFORE = /^(?:kierownik\p{L}*|руководител\p{L}*|нача
 
 /** One team, said with an article or the numeral "one". */
 const ONE_TEAM_WORD = /^(?:a|an|one|ein|eine|einen|een|jedna|jedne|jedno|одна|одну|одной|viena|vienos|vieną)$/u;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_ONE_TEAM_WORD = /^(?:a|an|one|ein|eine|einen|een|jedna|jedne|jedno|одна|одну|одной|viena|vienos|vieną|ett)$/u;
 
 /**
  * A team REQUESTED without a size — "reikia brigados", "Need 2 crews", "Нужна
@@ -390,21 +480,22 @@ const ONE_TEAM_WORD = /^(?:a|an|one|ein|eine|einen|een|jedna|jedne|jedno|одн�
  * ploeg". A team noun used as context ("join our crew") is not one, nor is
  * "5 crew" (five crew members — people, not teams).
  */
-function requestedTeamWithoutSize(folded: string): { teams: number | null } | null {
+function requestedTeamWithoutSize(folded: string, swedish: boolean): { teams: number | null } | null {
   const tokens = folded.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   for (let i = 0; i < tokens.length; i++) {
-    if (!STRICT_TEAM_TOKEN.test(tokens[i])) continue;
+    if (!(swedish ? SV_STRICT_TEAM_TOKEN : STRICT_TEAM_TOKEN).test(tokens[i])) continue;
     const prev = tokens[i - 1];
     const prev2 = tokens[i - 2];
     const next = tokens[i + 1];
     if ((next && LEADER_AFTER.test(next)) || (prev && LEADER_BEFORE.test(prev))) continue;
     if (prev && TEAM_CONTEXT_BEFORE.test(prev)) continue;
-    const count = countWord(prev);
+    const count = countWord(prev, swedish);
+    const requestVerb = swedish ? SV_TEAM_REQUEST_VERB : TEAM_REQUEST_VERB;
     if (tokens[i] === "crew" && count !== null && count > 1) continue;
     const requested =
       count !== null ||
-      (prev !== undefined && TEAM_REQUEST_VERB.test(prev)) ||
-      (prev2 !== undefined && TEAM_REQUEST_VERB.test(prev2) && count !== null) ||
+      (prev !== undefined && requestVerb.test(prev)) ||
+      (prev2 !== undefined && requestVerb.test(prev2) && count !== null) ||
       (next !== undefined && TEAM_REQUEST_AFTER.test(next));
     if (requested) return { teams: count };
   }
@@ -413,34 +504,43 @@ function requestedTeamWithoutSize(folded: string): { teams: number | null } | nu
 
 /** Does the sentence state a count of PEOPLE ("Need 2 welders", "reikia 3
  *  darbuotojų")? Then that count is the headcount, whatever team it joins. */
-function statesPeopleCount(text: string): boolean {
+function statesPeopleCount(text: string, swedish: boolean): boolean {
   const lower = text.toLowerCase();
-  const wt = recognisedWorkType(lower);
-  return detectPeopleCount(wt.hay, wt.needle) !== null;
+  const wt = recognisedWorkType(lower, swedish);
+  return detectPeopleCount(wt.hay, wt.needle, swedish) !== null;
 }
 
 /** A digit or a written number ("dvi", "trys", "three", "a") — null otherwise. */
-function countWord(token: string | undefined): number | null {
+function countWord(token: string | undefined, swedish: boolean): number | null {
   if (!token) return null;
   if (/^\d{1,3}$/.test(token)) return Number.parseInt(token, 10);
-  if (ONE_TEAM_WORD.test(token)) return 1;
-  return parseWordNumber(token);
+  if ((swedish ? SV_ONE_TEAM_WORD : ONE_TEAM_WORD).test(token)) return 1;
+  return parseWordNumber(token, swedish);
 }
 
 /** Teams stated in the sentence — known (teams × size) or needing a question. */
-export function readTeamComposition(text: string | null | undefined): TeamCompositionReading | null {
+export function readTeamComposition(
+  text: string | null | undefined,
+  /** Is the sentence Swedish? Pass it when `text` is no longer the sentence as
+   *  typed (lower-cased, joined): `looksSwedish` reads capitals. */
+  swedish: boolean = looksSwedish(text),
+): TeamCompositionReading | null {
   const folded = foldText(text ?? "");
   if (!folded) return null;
-  if (TEAM_COUNT_RANGE_RE.test(folded)) {
+  // Swedish team words ("lag", "arbetslag", "om", "med") count in a Swedish
+  // sentence only: `lag` is an English noun and the Dutch "lagen" (layers), and
+  // changed the headcount of "We need 5 welders, there is a lag of 2 weeks"
+  // (review finding 5).
+  if ((swedish ? SV_TEAM_COUNT_RANGE_RE : TEAM_COUNT_RANGE_RE).test(folded)) {
     return { status: "unclear", clarification: "team_count_range", teams: null };
   }
-  const known = folded.match(KNOWN_RE);
+  const known = folded.match(swedish ? SV_KNOWN_RE : KNOWN_RE);
   if (known) {
     const perTeam = Number.parseInt(known[3], 10);
     // No count word, but a SINGULAR team noun: "brigada iš 4" is one team.
     const teams =
-      countWord(known[1]) ??
-      (SINGULAR_TEAM_TOKEN.test(known[2]) && !/^(?:reikalingos|reikalingi|нужны|требуются|potrzebne)$/u.test(known[1] ?? "")
+      countWord(known[1], swedish) ??
+      ((swedish ? SV_SINGULAR_TEAM_TOKEN : SINGULAR_TEAM_TOKEN).test(known[2]) && !/^(?:reikalingos|reikalingi|нужны|требуются|potrzebne)$/u.test(known[1] ?? "")
         ? 1
         : null);
     if (teams !== null && teams >= 1 && teams <= 100 && perTeam >= 1 && perTeam <= 100) {
@@ -450,28 +550,31 @@ export function readTeamComposition(text: string | null | undefined): TeamCompos
     // sentence counts the people itself, OUTSIDE the team phrase (the "4
     // žmones" of "po 4 žmones" is the size per team, not a headcount).
     const outside = `${folded.slice(0, known.index)} ${folded.slice((known.index ?? 0) + known[0].length)}`;
-    if (perTeam >= 1 && perTeam <= 100 && teams === null && !statesPeopleCount(outside)) {
+    if (perTeam >= 1 && perTeam <= 100 && teams === null && !statesPeopleCount(outside, swedish)) {
       return { status: "unclear", clarification: "team_count_missing", teams: null };
     }
   }
-  const perRange = folded.match(PER_TEAM_RANGE_RE);
+  const perRange = folded.match(swedish ? SV_PER_TEAM_RANGE_RE : PER_TEAM_RANGE_RE);
   if (perRange) {
     // "3 brigados po 3–4": the teams are known, the size per team is not.
     const before = folded.slice(0, perRange.index).trim().split(/[^\p{L}\p{N}]+/u).pop();
-    return { status: "unclear", clarification: "per_team_range", teams: countWord(before) };
+    return { status: "unclear", clarification: "per_team_range", teams: countWord(before, swedish) };
   }
   // A team requested with no size asks for the size — but an explicit count
   // of people ("Need 2 welders to join a crew") is the headcount already.
-  const missing = requestedTeamWithoutSize(folded);
-  if (missing && !statesPeopleCount(text ?? "")) {
+  const missing = requestedTeamWithoutSize(folded, swedish);
+  if (missing && !statesPeopleCount(text ?? "", swedish)) {
     return { status: "unclear", clarification: "team_size_missing", teams: missing.teams };
   }
   return null;
 }
 
 /** The KNOWN composition only (teams × size), or null. */
-export function detectTeamComposition(text: string | null | undefined): TeamComposition | null {
-  const r = readTeamComposition(text);
+export function detectTeamComposition(
+  text: string | null | undefined,
+  swedish: boolean = looksSwedish(text),
+): TeamComposition | null {
+  const r = readTeamComposition(text, swedish);
   return r?.status === "known" ? { teams: r.teams, perTeam: r.perTeam } : null;
 }
 
@@ -490,42 +593,48 @@ function countFrom(m: RegExpMatchArray | null): number | null {
 
 /** A number that provably counts PEOPLE: followed by a person word or by the
  *  recognised occupation's own noun ("2 mūrininkų", "3 darbuotojų"). */
-function detectPeopleCount(hay: string, occupationNeedle: string | null): number | null {
+function detectPeopleCount(hay: string, occupationNeedle: string | null, swedish: boolean): number | null {
   return (
-    countFrom(hay.match(PEOPLE_COUNT_RE)) ??
+    countFrom(hay.match(swedish ? SV_PEOPLE_COUNT_RE : PEOPLE_COUNT_RE)) ??
     (occupationNeedle ? countFrom(hay.match(adjacentOccupationCountRe(occupationNeedle))) : null)
   );
 }
 
-function detectTeamSize(hay: string, occupationNeedle: string | null): number | null {
+function detectTeamSize(hay: string, occupationNeedle: string | null, swedish: boolean): number | null {
   // A number directly tied to people/workers, OR right after a "need" verb —
   // unless what follows it is a unit (years, months, hours, money): "Need 3
   // years experience" is not three people.
-  const people = countFrom(hay.match(PEOPLE_COUNT_RE));
+  const people = countFrom(hay.match(swedish ? SV_PEOPLE_COUNT_RE : PEOPLE_COUNT_RE));
   if (people !== null) return people;
-  const verb = hay.match(DEMAND_VERB_COUNT_RE);
+  const verb = hay.match(swedish ? SV_DEMAND_VERB_COUNT_RE : DEMAND_VERB_COUNT_RE);
   if (verb && verb.index !== undefined) {
     const next = firstWordOf(hay.slice(verb.index + verb[0].length));
-    const n = isCountUnitWord(next) ? null : countFrom(verb);
+    const n = isCountUnitWord(next, swedish) ? null : countFrom(verb);
     if (n !== null) return n;
   }
   return occupationNeedle ? countFrom(hay.match(adjacentOccupationCountRe(occupationNeedle))) : null;
 }
 
-function detectStartPeriod(hay: string): StartPeriod | null {
+function detectStartPeriod(hay: string, swedish: boolean): StartPeriod | null {
   if (/\b(urgent|urgently|asap|immediately|right away|skub\w*|nedels\w*|срочн\w*|как можно скор)/i.test(hay))
     return "urgent";
+  if (swedish && /\b(akut|omg[åa]ende|snarast|br[åa]dskande)/i.test(hay)) return "urgent";
   if (/\b(this week|within days|next week|šią savait|sia savait|kitą savait|kita savait|на этой недел|на следующей недел)/i.test(hay))
     return "this_week";
+  if (swedish && /\b(den h[äa]r veckan|denna vecka|n[äa]sta vecka)/i.test(hay)) return "this_week";
   if (/\b(next month|in a month|flexible|any time|anytime|lankst\w*|kitą mėn|kita men|через месяц|гибк\w*|со следующего месяца)/i.test(hay))
     return "flexible";
+  if (swedish && /\b(n[äa]sta m[åa]nad|flexibel|flexibelt)/i.test(hay)) return "flexible";
   return null;
 }
 
-function detectAccommodation(hay: string): AccommodationOffer | null {
-  const hasAcc = /(accommodation|housing|lodging|apgyvendin\w*|būst\w*|bust\w*|жиль|прожив\w*|общежит)/i.test(hay);
+function detectAccommodation(hay: string, swedish: boolean): AccommodationOffer | null {
+  const hasAcc =
+    /(accommodation|housing|lodging|apgyvendin\w*|būst\w*|bust\w*|жиль|прожив\w*|общежит)/i.test(hay) ||
+    (swedish && /(boende|bostad|\blogi\b)/i.test(hay));
   if (!hasAcc) return null;
   if (/\b(no|without|not provided|be apgyvendin|без жил)\b/i.test(hay)) return "not_provided";
+  if (swedish && /\b(utan|inget|ingen)\b/i.test(hay)) return "not_provided";
   if (/(deducted|deduct|išskaič|isskaic|удержан)/i.test(hay)) return "provided_deducted";
   if (/(paid accommodation|accommodation.{0,12}paid|mokam\w* apgyvendin|платн\w* жиль)/i.test(hay))
     return "provided_paid";
@@ -537,6 +646,11 @@ const normNeedText = (s: string | null | undefined) => (s ?? "").toLowerCase();
 
 /** Role + description + notes, lowercased — the hay the work type and the
  *  counts are read from. */
+/** Is the need written in Swedish? Read from the fields AS TYPED. */
+function needIsSwedish(input: NeedStructureInput): boolean {
+  return looksSwedish(`${input.role ?? ""} ${input.description ?? ""} ${input.notes ?? ""}`);
+}
+
 function needRoleHay(input: NeedStructureInput): string {
   return `${normNeedText(input.role)} ${normNeedText(input.description)} ${normNeedText(input.notes)}`.trim();
 }
@@ -544,7 +658,7 @@ function needRoleHay(input: NeedStructureInput): string {
 /** The recognised work type and the needle that identified it. The service
  *  noun is masked first: "buhalterijos paslaugos" must not read as a care
  *  assistant because "paslaug" contains the needle "slaug". */
-function recognisedWorkType(roleHay: string): {
+function recognisedWorkType(roleHay: string, swedish: boolean): {
   workType: string | null;
   needle: string | null;
   /** The hay the needle was found in — the counter must read the same one. */
@@ -552,12 +666,13 @@ function recognisedWorkType(roleHay: string): {
 } {
   // Lowercased first (the needles carry their diacritic spellings), then
   // FOLDED: "Schweißer" only meets the needle "schweisser" once ß is ss.
-  const wtHit = firstMatchWithNeedle(WORK_TYPE_RULES, maskServiceNoun(roleHay));
+  const rules = workTypeRulesFor(swedish);
+  const wtHit = firstMatchWithNeedle(rules, maskServiceNoun(roleHay));
   if (wtHit && KNOWN_SLUGS.has(wtHit.rule.slug)) {
     return { workType: wtHit.rule.slug, needle: wtHit.needle, hay: roleHay };
   }
   const foldedHay = foldText(roleHay);
-  const foldedHit = firstMatchWithNeedle(WORK_TYPE_RULES, maskServiceNoun(foldedHay));
+  const foldedHit = firstMatchWithNeedle(rules, maskServiceNoun(foldedHay));
   if (foldedHit && KNOWN_SLUGS.has(foldedHit.rule.slug)) {
     return { workType: foldedHit.rule.slug, needle: foldedHit.needle, hay: foldedHay };
   }
@@ -573,12 +688,13 @@ function recognisedWorkType(roleHay: string): {
  */
 export function countPeopleInNeed(input: NeedStructureInput): number | null {
   const roleHay = needRoleHay(input);
+  const swedish = needIsSwedish(input);
   // "3 brigadų po 4 žmones" is 3 × 4 = 12 people — never 3 or 4. Teams the
   // sentence does not size leave the count unknown.
-  const teams = readTeamComposition(roleHay);
+  const teams = readTeamComposition(roleHay, swedish);
   if (teams) return teams.status === "known" ? teams.total : null;
-  const wt = recognisedWorkType(roleHay);
-  return detectPeopleCount(wt.hay, wt.needle);
+  const wt = recognisedWorkType(roleHay, swedish);
+  return detectPeopleCount(wt.hay, wt.needle, swedish);
 }
 
 export function structureNeed(input: NeedStructureInput): NeedStructureSuggestion {
@@ -589,7 +705,11 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
   const roleHay = needRoleHay(input);
   const locHay = `${normNeedText(input.location)} ${roleHay}`.trim();
 
-  const { workType, needle: occupationNeedle, hay: workTypeHay } = recognisedWorkType(roleHay);
+  // Swedish vocabulary applies to a Swedish need only — read from the text AS
+  // TYPED, before it is lower-cased into the hay.
+  const swedish = needIsSwedish(input);
+
+  const { workType, needle: occupationNeedle, hay: workTypeHay } = recognisedWorkType(roleHay, swedish);
   if (workType) reasons.push(`work_type:${workType}`);
 
   const cc = firstMatch(COUNTRY_RULES, locHay);
@@ -601,20 +721,20 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
   // Teams of a stated size ("3 brigadų po 4 žmones") are 3 teams AND 12
   // workers: the total is the team size, the composition rides beside it.
   // Teams with no size, or a range, leave the count null and ASK.
-  const teams = readTeamComposition(roleHay);
+  const teams = readTeamComposition(roleHay, swedish);
   if (teams?.status === "known") reasons.push(`team_composition:${teams.teams}x${teams.perTeam}`);
   if (teams?.status === "unclear") reasons.push(`team_clarification:${teams.clarification}`);
   const teamSize = teams
     ? teams.status === "known"
       ? teams.total
       : null
-    : detectTeamSize(workTypeHay, occupationNeedle);
+    : detectTeamSize(workTypeHay, occupationNeedle, swedish);
   if (teamSize != null) reasons.push(`team_size:${teamSize}`);
 
-  const startPeriod = detectStartPeriod(roleHay);
+  const startPeriod = detectStartPeriod(roleHay, swedish);
   if (startPeriod) reasons.push(`start_period:${startPeriod}`);
 
-  const accommodation = detectAccommodation(roleHay);
+  const accommodation = detectAccommodation(roleHay, swedish);
   if (accommodation) reasons.push(`accommodation:${accommodation}`);
 
   // Confidence is driven by the two identity fields (work type + country).

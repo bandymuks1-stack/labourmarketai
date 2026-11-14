@@ -81,7 +81,14 @@ describe("the answer adapter reads only what the institution may read", () => {
   });
   it("the chat routes a question kind to the adapter before any programmes read", () => {
     const CHAT = read("components/app/conversation/chat/conversation-chat.tsx");
-    expect(CHAT).toMatch(/const question = educationQuestionKind\(q\);\s*if \(question\) return question;/);
+    // The mode reader moved out of the chat component into this module on
+    // 2026-11-12 (it gained Swedish and became unit-testable). The invariant —
+    // a question kind is returned BEFORE create / cohort / assign / list — is
+    // asserted at its source, and the chat is asserted to call that one reader.
+    const MODE = read("lib/conversation/education-question.ts");
+    expect(MODE).toMatch(/const question = questionKind\(q, swedish\);\s*if \(question\) return question;/);
+    expect(CHAT).toMatch(/educationModeFromText,[\s\S]{0,200}from "@\/lib\/conversation\/education-question"/);
+    expect(CHAT).not.toMatch(/function educationModeFromText/);
     expect(CHAT).toMatch(/if \(isEducationQuestionKind\(mode\)\) \{[\s\S]{0,800}loadEducationAnswerForChat\(mode\)/);
   });
 });

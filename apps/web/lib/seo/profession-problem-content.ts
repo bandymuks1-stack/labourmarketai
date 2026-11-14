@@ -1,5 +1,5 @@
 /**
- * Profession + problem SEO content — pure, per-locale (lt / en / ru / nl / de).
+ * Profession + problem SEO content — pure, per-locale (lt / en / ru / nl / de / pl / sv).
  *
  * Strategy (owner 2026-06-15): LabourMarket.ai is a BROAD labour-market
  * platform. The brand title/description stay cross-sector, but the public
@@ -30,41 +30,41 @@ export interface ProfessionEntry {
  * agriculture, office and sales — breadth, not a single sector.
  */
 export const SEO_PROFESSIONS: readonly ProfessionEntry[] = [
-  { key: "construction-workers", sector: "construction", label: { en: "Construction workers", lt: "Statybininkai", ru: "Строители", nl: "Bouwvakkers", de: "Bauarbeiter", pl: "Pracownicy budowlani" } },
-  { key: "finishers", sector: "construction", label: { en: "Finishers", lt: "Apdailininkai", ru: "Отделочники", nl: "Afbouwers", de: "Ausbaufachkräfte", pl: "Wykończeniowcy" } },
-  { key: "bricklayers", sector: "construction", label: { en: "Bricklayers", lt: "Mūrininkai", ru: "Каменщики", nl: "Metselaars", de: "Maurer", pl: "Murarze" } },
-  { key: "roofers", sector: "construction", label: { en: "Roofers", lt: "Stogdengiai", ru: "Кровельщики", nl: "Dakdekkers", de: "Dachdecker", pl: "Dekarze" } },
-  { key: "concrete-workers", sector: "construction", label: { en: "Concrete workers", lt: "Betonuotojai", ru: "Бетонщики", nl: "Betonwerkers", de: "Betonbauer", pl: "Betoniarze" } },
-  { key: "electricians", sector: "construction", label: { en: "Electricians", lt: "Elektrikai", ru: "Электрики", nl: "Elektriciens", de: "Elektriker", pl: "Elektrycy" } },
-  { key: "plumbers", sector: "construction", label: { en: "Plumbers", lt: "Santechnikai", ru: "Сантехники", nl: "Loodgieters", de: "Klempner", pl: "Hydraulicy" } },
-  { key: "welders", sector: "manufacturing", label: { en: "Welders", lt: "Suvirintojai", ru: "Сварщики", nl: "Lassers", de: "Schweißer", pl: "Spawacze" } },
-  { key: "drivers", sector: "transport_logistics", label: { en: "Drivers", lt: "Vairuotojai", ru: "Водители", nl: "Chauffeurs", de: "Fahrer", pl: "Kierowcy" } },
-  { key: "warehouse-workers", sector: "transport_logistics", label: { en: "Warehouse workers", lt: "Sandėlio darbuotojai", ru: "Работники склада", nl: "Magazijnmedewerkers", de: "Lagerarbeiter", pl: "Pracownicy magazynu" } },
-  { key: "production-operators", sector: "manufacturing", label: { en: "Production operators", lt: "Gamybos operatoriai", ru: "Операторы производства", nl: "Productieoperators", de: "Produktionsmitarbeiter", pl: "Operatorzy produkcji" } },
-  { key: "mechanics", sector: "manufacturing", label: { en: "Mechanics", lt: "Mechanikai", ru: "Механики", nl: "Monteurs", de: "Mechaniker", pl: "Mechanicy" } },
-  { key: "technicians", sector: "manufacturing", label: { en: "Technicians", lt: "Technikai", ru: "Техники", nl: "Technici", de: "Techniker", pl: "Technicy" } },
-  { key: "cleaners", sector: "cleaning_facility", label: { en: "Cleaners", lt: "Valytojai", ru: "Уборщики", nl: "Schoonmakers", de: "Reinigungskräfte", pl: "Pracownicy sprzątający" } },
-  { key: "hotel-staff", sector: "hospitality_food", label: { en: "Hotel staff", lt: "Viešbučių darbuotojai", ru: "Работники гостиниц", nl: "Hotelmedewerkers", de: "Hotelpersonal", pl: "Pracownicy hoteli" } },
-  { key: "cooks", sector: "hospitality_food", label: { en: "Cooks", lt: "Virėjai", ru: "Повара", nl: "Koks", de: "Köche", pl: "Kucharze" } },
-  { key: "general-workers", sector: "other", label: { en: "General / helper workers", lt: "Pagalbiniai darbuotojai", ru: "Подсобные работники", nl: "Algemene / hulparbeiders", de: "Hilfsarbeiter / allgemeine Arbeitskräfte", pl: "Pracownicy ogólni / pomocnicy" } },
-  { key: "care-workers", sector: "care_health", label: { en: "Care workers", lt: "Slaugos / priežiūros darbuotojai", ru: "Работники ухода", nl: "Zorgmedewerkers", de: "Pflegekräfte", pl: "Opiekunowie / pracownicy opieki" } },
-  { key: "agricultural-workers", sector: "agriculture", label: { en: "Agricultural workers", lt: "Žemės ūkio darbuotojai", ru: "Работники сельского хозяйства", nl: "Landbouwmedewerkers", de: "Landwirtschaftliche Arbeitskräfte", pl: "Pracownicy rolni" } },
-  { key: "seasonal-workers", sector: "agriculture", label: { en: "Seasonal workers", lt: "Sezoniniai darbuotojai", ru: "Сезонные работники", nl: "Seizoensarbeiders", de: "Saisonarbeiter", pl: "Pracownicy sezonowi" } },
-  { key: "admin-staff", sector: "office_admin", label: { en: "Administration staff", lt: "Administracijos darbuotojai", ru: "Административные работники", nl: "Administratief medewerkers", de: "Verwaltungsmitarbeiter", pl: "Pracownicy administracji" } },
-  { key: "sales-service", sector: "retail_sales", label: { en: "Sales / customer service", lt: "Pardavimų / klientų aptarnavimo darbuotojai", ru: "Продажи / обслуживание клиентов", nl: "Verkoop / klantenservice", de: "Vertrieb / Kundenservice", pl: "Sprzedaż / obsługa klienta" } },
+  { key: "construction-workers", sector: "construction", label: { en: "Construction workers", lt: "Statybininkai", ru: "Строители", nl: "Bouwvakkers", de: "Bauarbeiter", pl: "Pracownicy budowlani", sv: "Byggarbetare" } },
+  { key: "finishers", sector: "construction", label: { en: "Finishers", lt: "Apdailininkai", ru: "Отделочники", nl: "Afbouwers", de: "Ausbaufachkräfte", pl: "Wykończeniowcy", sv: "Ytskiktsarbetare" } },
+  { key: "bricklayers", sector: "construction", label: { en: "Bricklayers", lt: "Mūrininkai", ru: "Каменщики", nl: "Metselaars", de: "Maurer", pl: "Murarze", sv: "Murare" } },
+  { key: "roofers", sector: "construction", label: { en: "Roofers", lt: "Stogdengiai", ru: "Кровельщики", nl: "Dakdekkers", de: "Dachdecker", pl: "Dekarze", sv: "Takläggare" } },
+  { key: "concrete-workers", sector: "construction", label: { en: "Concrete workers", lt: "Betonuotojai", ru: "Бетонщики", nl: "Betonwerkers", de: "Betonbauer", pl: "Betoniarze", sv: "Betongarbetare" } },
+  { key: "electricians", sector: "construction", label: { en: "Electricians", lt: "Elektrikai", ru: "Электрики", nl: "Elektriciens", de: "Elektriker", pl: "Elektrycy", sv: "Elektriker" } },
+  { key: "plumbers", sector: "construction", label: { en: "Plumbers", lt: "Santechnikai", ru: "Сантехники", nl: "Loodgieters", de: "Klempner", pl: "Hydraulicy", sv: "Rörmokare" } },
+  { key: "welders", sector: "manufacturing", label: { en: "Welders", lt: "Suvirintojai", ru: "Сварщики", nl: "Lassers", de: "Schweißer", pl: "Spawacze", sv: "Svetsare" } },
+  { key: "drivers", sector: "transport_logistics", label: { en: "Drivers", lt: "Vairuotojai", ru: "Водители", nl: "Chauffeurs", de: "Fahrer", pl: "Kierowcy", sv: "Chaufförer" } },
+  { key: "warehouse-workers", sector: "transport_logistics", label: { en: "Warehouse workers", lt: "Sandėlio darbuotojai", ru: "Работники склада", nl: "Magazijnmedewerkers", de: "Lagerarbeiter", pl: "Pracownicy magazynu", sv: "Lagerarbetare" } },
+  { key: "production-operators", sector: "manufacturing", label: { en: "Production operators", lt: "Gamybos operatoriai", ru: "Операторы производства", nl: "Productieoperators", de: "Produktionsmitarbeiter", pl: "Operatorzy produkcji", sv: "Produktionsoperatörer" } },
+  { key: "mechanics", sector: "manufacturing", label: { en: "Mechanics", lt: "Mechanikai", ru: "Механики", nl: "Monteurs", de: "Mechaniker", pl: "Mechanicy", sv: "Mekaniker" } },
+  { key: "technicians", sector: "manufacturing", label: { en: "Technicians", lt: "Technikai", ru: "Техники", nl: "Technici", de: "Techniker", pl: "Technicy", sv: "Tekniker" } },
+  { key: "cleaners", sector: "cleaning_facility", label: { en: "Cleaners", lt: "Valytojai", ru: "Уборщики", nl: "Schoonmakers", de: "Reinigungskräfte", pl: "Pracownicy sprzątający", sv: "Lokalvårdare" } },
+  { key: "hotel-staff", sector: "hospitality_food", label: { en: "Hotel staff", lt: "Viešbučių darbuotojai", ru: "Работники гостиниц", nl: "Hotelmedewerkers", de: "Hotelpersonal", pl: "Pracownicy hoteli", sv: "Hotellpersonal" } },
+  { key: "cooks", sector: "hospitality_food", label: { en: "Cooks", lt: "Virėjai", ru: "Повара", nl: "Koks", de: "Köche", pl: "Kucharze", sv: "Kockar" } },
+  { key: "general-workers", sector: "other", label: { en: "General / helper workers", lt: "Pagalbiniai darbuotojai", ru: "Подсобные работники", nl: "Algemene / hulparbeiders", de: "Hilfsarbeiter / allgemeine Arbeitskräfte", pl: "Pracownicy ogólni / pomocnicy", sv: "Allmänna arbetare / medhjälpare" } },
+  { key: "care-workers", sector: "care_health", label: { en: "Care workers", lt: "Slaugos / priežiūros darbuotojai", ru: "Работники ухода", nl: "Zorgmedewerkers", de: "Pflegekräfte", pl: "Opiekunowie / pracownicy opieki", sv: "Undersköterskor / vårdbiträden" } },
+  { key: "agricultural-workers", sector: "agriculture", label: { en: "Agricultural workers", lt: "Žemės ūkio darbuotojai", ru: "Работники сельского хозяйства", nl: "Landbouwmedewerkers", de: "Landwirtschaftliche Arbeitskräfte", pl: "Pracownicy rolni", sv: "Lantbruksarbetare" } },
+  { key: "seasonal-workers", sector: "agriculture", label: { en: "Seasonal workers", lt: "Sezoniniai darbuotojai", ru: "Сезонные работники", nl: "Seizoensarbeiders", de: "Saisonarbeiter", pl: "Pracownicy sezonowi", sv: "Säsongsarbetare" } },
+  { key: "admin-staff", sector: "office_admin", label: { en: "Administration staff", lt: "Administracijos darbuotojai", ru: "Административные работники", nl: "Administratief medewerkers", de: "Verwaltungsmitarbeiter", pl: "Pracownicy administracji", sv: "Administrativ personal" } },
+  { key: "sales-service", sector: "retail_sales", label: { en: "Sales / customer service", lt: "Pardavimų / klientų aptarnavimo darbuotojai", ru: "Продажи / обслуживание клиентов", nl: "Verkoop / klantenservice", de: "Vertrieb / Kundenservice", pl: "Sprzedaż / obsługa klienta", sv: "Försäljning / kundservice" } },
   // Window 6 (2026-09-06, gap G-D1): the rows above read as manual labour
   // only. The platform is profession-agnostic — the skills, evidence,
   // journal and matching model carry an accountant exactly as they carry a
   // scaffolder — so the professions the page NAMES must say so too.
-  { key: "accountants", sector: "office_admin", label: { en: "Accountants / finance", lt: "Buhalteriai / finansai", ru: "Бухгалтеры / финансы", nl: "Accountants / financiën", de: "Buchhalter / Finanzen", pl: "Księgowi / finanse" } },
-  { key: "lawyers", sector: "office_admin", label: { en: "Lawyers / legal", lt: "Teisininkai", ru: "Юристы", nl: "Juristen", de: "Juristen", pl: "Prawnicy" } },
-  { key: "engineers", sector: "manufacturing", label: { en: "Engineers", lt: "Inžinieriai", ru: "Инженеры", nl: "Ingenieurs", de: "Ingenieure", pl: "Inżynierowie" } },
-  { key: "software-developers", sector: "it_software", label: { en: "Software developers", lt: "Programuotojai", ru: "Программисты", nl: "Softwareontwikkelaars", de: "Softwareentwickler", pl: "Programiści" } },
-  { key: "it-support", sector: "it_software", label: { en: "IT support / administrators", lt: "IT priežiūra / administratoriai", ru: "IT-поддержка / администраторы", nl: "IT-support / beheerders", de: "IT-Support / Administratoren", pl: "Wsparcie IT / administratorzy" } },
-  { key: "sales-managers", sector: "retail_sales", label: { en: "Sales managers", lt: "Pardavimų vadybininkai", ru: "Менеджеры по продажам", nl: "Salesmanagers", de: "Vertriebsmanager", pl: "Menedżerowie sprzedaży" } },
-  { key: "teachers-trainers", sector: "education", label: { en: "Teachers / trainers", lt: "Mokytojai / dėstytojai", ru: "Учителя / преподаватели", nl: "Docenten / trainers", de: "Lehrer / Ausbilder", pl: "Nauczyciele / trenerzy" } },
-  { key: "designers-consultants", sector: "other", label: { en: "Designers / consultants", lt: "Dizaineriai / konsultantai", ru: "Дизайнеры / консультанты", nl: "Ontwerpers / consultants", de: "Designer / Berater", pl: "Projektanci / konsultanci" } },
-  { key: "recruiters-hr", sector: "hr_recruitment", label: { en: "HR / recruiters", lt: "Personalo specialistai", ru: "HR / рекрутеры", nl: "HR / recruiters", de: "HR / Recruiter", pl: "HR / rekruterzy" } },
+  { key: "accountants", sector: "office_admin", label: { en: "Accountants / finance", lt: "Buhalteriai / finansai", ru: "Бухгалтеры / финансы", nl: "Accountants / financiën", de: "Buchhalter / Finanzen", pl: "Księgowi / finanse", sv: "Redovisningsekonomer / ekonomi" } },
+  { key: "lawyers", sector: "office_admin", label: { en: "Lawyers / legal", lt: "Teisininkai", ru: "Юристы", nl: "Juristen", de: "Juristen", pl: "Prawnicy", sv: "Jurister" } },
+  { key: "engineers", sector: "manufacturing", label: { en: "Engineers", lt: "Inžinieriai", ru: "Инженеры", nl: "Ingenieurs", de: "Ingenieure", pl: "Inżynierowie", sv: "Ingenjörer" } },
+  { key: "software-developers", sector: "it_software", label: { en: "Software developers", lt: "Programuotojai", ru: "Программисты", nl: "Softwareontwikkelaars", de: "Softwareentwickler", pl: "Programiści", sv: "Mjukvaruutvecklare" } },
+  { key: "it-support", sector: "it_software", label: { en: "IT support / administrators", lt: "IT priežiūra / administratoriai", ru: "IT-поддержка / администраторы", nl: "IT-support / beheerders", de: "IT-Support / Administratoren", pl: "Wsparcie IT / administratorzy", sv: "IT-support / systemadministratörer" } },
+  { key: "sales-managers", sector: "retail_sales", label: { en: "Sales managers", lt: "Pardavimų vadybininkai", ru: "Менеджеры по продажам", nl: "Salesmanagers", de: "Vertriebsmanager", pl: "Menedżerowie sprzedaży", sv: "Säljchefer" } },
+  { key: "teachers-trainers", sector: "education", label: { en: "Teachers / trainers", lt: "Mokytojai / dėstytojai", ru: "Учителя / преподаватели", nl: "Docenten / trainers", de: "Lehrer / Ausbilder", pl: "Nauczyciele / trenerzy", sv: "Lärare / utbildare" } },
+  { key: "designers-consultants", sector: "other", label: { en: "Designers / consultants", lt: "Dizaineriai / konsultantai", ru: "Дизайнеры / консультанты", nl: "Ontwerpers / consultants", de: "Designer / Berater", pl: "Projektanci / konsultanci", sv: "Designer / konsulter" } },
+  { key: "recruiters-hr", sector: "hr_recruitment", label: { en: "HR / recruiters", lt: "Personalo specialistai", ru: "HR / рекрутеры", nl: "HR / recruiters", de: "HR / Recruiter", pl: "HR / rekruterzy", sv: "HR / rekryterare" } },
 ];
 
 export interface ActorEntry {
@@ -77,7 +77,7 @@ export interface ActorEntry {
 export const SEO_ACTORS: readonly ActorEntry[] = [
   {
     key: "teams",
-    label: { en: "Teams / brigades", lt: "Brigados / komandos", ru: "Бригады / команды", nl: "Teams / ploegen", de: "Teams / Kolonnen", pl: "Zespoły / brygady" },
+    label: { en: "Teams / brigades", lt: "Brigados / komandos", ru: "Бригады / команды", nl: "Teams / ploegen", de: "Teams / Kolonnen", pl: "Zespoły / brygady", sv: "Team / arbetslag" },
     blurb: {
       en: "Find or present a ready team, not just one worker.",
       lt: "Rask arba pristatyk paruoštą brigadą, ne tik vieną darbuotoją.",
@@ -85,11 +85,12 @@ export const SEO_ACTORS: readonly ActorEntry[] = [
       nl: "Vind of presenteer een compleet team, niet slechts één werknemer.",
       de: "Finden oder präsentieren Sie ein einsatzbereites Team, nicht nur eine einzelne Arbeitskraft.",
       pl: "Znajdź lub zaprezentuj gotowy zespół, a nie tylko jednego pracownika.",
+      sv: "Hitta eller presentera ett färdigt team, inte bara en enskild arbetstagare.",
     },
   },
   {
     key: "subcontractors",
-    label: { en: "Subcontractors", lt: "Subrangovai", ru: "Субподрядчики", nl: "Onderaannemers", de: "Subunternehmer", pl: "Podwykonawcy" },
+    label: { en: "Subcontractors", lt: "Subrangovai", ru: "Субподрядчики", nl: "Onderaannemers", de: "Subunternehmer", pl: "Podwykonawcy", sv: "Underentreprenörer" },
     blurb: {
       en: "Coordinate subcontractors against a structured need.",
       lt: "Koordinuok subrangovus pagal struktūruotą poreikį.",
@@ -97,11 +98,12 @@ export const SEO_ACTORS: readonly ActorEntry[] = [
       nl: "Coördineer onderaannemers op basis van een gestructureerde behoefte.",
       de: "Koordinieren Sie Subunternehmer anhand eines strukturierten Bedarfs.",
       pl: "Koordynuj podwykonawców względem ustrukturyzowanego zapotrzebowania.",
+      sv: "Samordna underentreprenörer utifrån ett strukturerat behov.",
     },
   },
   {
     key: "agencies",
-    label: { en: "Staffing agencies", lt: "Įdarbinimo agentūros", ru: "Кадровые агентства", nl: "Uitzendbureaus", de: "Personalvermittlungen", pl: "Agencje pracy" },
+    label: { en: "Staffing agencies", lt: "Įdarbinimo agentūros", ru: "Кадровые агентства", nl: "Uitzendbureaus", de: "Personalvermittlungen", pl: "Agencje pracy", sv: "Bemanningsföretag" },
     blurb: {
       en: "Manage a flow of candidates and employer needs in one place.",
       lt: "Valdyk kandidatų ir darbdavių poreikių srautą vienoje vietoje.",
@@ -109,11 +111,12 @@ export const SEO_ACTORS: readonly ActorEntry[] = [
       nl: "Beheer een stroom van kandidaten en werkgeversbehoeften op één plek.",
       de: "Verwalten Sie den Strom von Kandidaten und Arbeitgeberbedarfen an einem Ort.",
       pl: "Zarządzaj przepływem kandydatów i zapotrzebowań pracodawców w jednym miejscu.",
+      sv: "Hantera flödet av kandidater och arbetsgivares behov på ett ställe.",
     },
   },
   {
     key: "employers",
-    label: { en: "Companies hiring workers", lt: "Įmonės, ieškančios darbuotojų", ru: "Компании, ищущие работников", nl: "Bedrijven die werknemers zoeken", de: "Unternehmen, die Arbeitskräfte suchen", pl: "Firmy zatrudniające pracowników" },
+    label: { en: "Companies hiring workers", lt: "Įmonės, ieškančios darbuotojų", ru: "Компании, ищущие работников", nl: "Bedrijven die werknemers zoeken", de: "Unternehmen, die Arbeitskräfte suchen", pl: "Firmy zatrudniające pracowników", sv: "Företag som söker personal" },
     blurb: {
       en: "Describe a real workforce need and structure the next steps.",
       lt: "Aprašyk realų darbo jėgos poreikį ir struktūruok tolimesnius veiksmus.",
@@ -121,6 +124,7 @@ export const SEO_ACTORS: readonly ActorEntry[] = [
       nl: "Beschrijf een reële personeelsbehoefte en structureer de volgende stappen.",
       de: "Beschreiben Sie einen realen Personalbedarf und strukturieren Sie die nächsten Schritte.",
       pl: "Opisz realne zapotrzebowanie kadrowe i uporządkuj kolejne kroki.",
+      sv: "Beskriv ett verkligt personalbehov och strukturera nästa steg.",
     },
   },
 ];
@@ -142,7 +146,7 @@ export interface ProblemEntry {
 export const SEO_PROBLEMS: readonly ProblemEntry[] = [
   {
     key: "need-workers-fast",
-    question: { en: "We need workers fast", lt: "Trūksta darbuotojų, reikia greitai", ru: "Срочно нужны работники", nl: "We hebben snel werknemers nodig", de: "Wir brauchen schnell Arbeitskräfte", pl: "Pilnie potrzebujemy pracowników" },
+    question: { en: "We need workers fast", lt: "Trūksta darbuotojų, reikia greitai", ru: "Срочно нужны работники", nl: "We hebben snel werknemers nodig", de: "Wir brauchen schnell Arbeitskräfte", pl: "Pilnie potrzebujemy pracowników", sv: "Vi behöver personal snabbt" },
     pain: {
       en: "Open positions stall a project when no structured pipeline exists.",
       lt: "Neužpildytos vietos stabdo projektą, kai nėra struktūruoto srauto.",
@@ -150,6 +154,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Openstaande posities leggen een project stil als er geen gestructureerde pijplijn is.",
       de: "Offene Stellen bringen ein Projekt ins Stocken, wenn keine strukturierte Pipeline existiert.",
       pl: "Nieobsadzone stanowiska hamują projekt, gdy brakuje ustrukturyzowanego przepływu.",
+      sv: "Obemannade tjänster bromsar ett projekt när det saknas ett strukturerat flöde.",
     },
     help: {
       en: "Post a structured workforce need; LabourMarket.ai helps match it to available workers and teams.",
@@ -158,12 +163,13 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Plaats een gestructureerde personeelsbehoefte; LabourMarket.ai helpt deze te matchen met beschikbare werknemers en teams.",
       de: "Stellen Sie einen strukturierten Personalbedarf ein; LabourMarket.ai hilft, ihn mit verfügbaren Arbeitskräften und Teams abzugleichen.",
       pl: "Zgłoś ustrukturyzowane zapotrzebowanie kadrowe; LabourMarket.ai pomaga dopasować je do dostępnych pracowników i zespołów.",
+      sv: "Lägg upp ett strukturerat personalbehov; LabourMarket.ai hjälper till att matcha det mot tillgängliga arbetstagare och team.",
     },
     audience: "employer",
   },
   {
     key: "need-specific-trade",
-    question: { en: "We need welders / drivers / specific trades", lt: "Reikia suvirintojų / vairuotojų / konkrečių specialistų", ru: "Нужны сварщики / водители / конкретные специалисты", nl: "We hebben lassers / chauffeurs / specifieke vakmensen nodig", de: "Wir brauchen Schweißer / Fahrer / bestimmte Fachkräfte", pl: "Potrzebujemy spawaczy / kierowców / konkretnych fachowców" },
+    question: { en: "We need welders / drivers / specific trades", lt: "Reikia suvirintojų / vairuotojų / konkrečių specialistų", ru: "Нужны сварщики / водители / конкретные специалисты", nl: "We hebben lassers / chauffeurs / specifieke vakmensen nodig", de: "Wir brauchen Schweißer / Fahrer / bestimmte Fachkräfte", pl: "Potrzebujemy spawaczy / kierowców / konkretnych fachowców", sv: "Vi behöver svetsare / chaufförer / specifika yrkesgrupper" },
     pain: {
       en: "Generic job ads rarely surface the specific skills a role needs.",
       lt: "Bendri skelbimai retai parodo konkrečius reikalingus įgūdžius.",
@@ -171,6 +177,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Algemene vacatures maken zelden duidelijk welke specifieke vaardigheden een functie vereist.",
       de: "Allgemeine Stellenanzeigen zeigen selten die konkreten Fähigkeiten, die eine Rolle erfordert.",
       pl: "Ogólne ogłoszenia rzadko pokazują konkretne umiejętności wymagane na danym stanowisku.",
+      sv: "Allmänna platsannonser visar sällan vilka specifika färdigheter en roll kräver.",
     },
     help: {
       en: "Describe the profession and skills precisely; matching works on real skills, not job titles only.",
@@ -179,12 +186,13 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Beschrijf het beroep en de vaardigheden precies; matching werkt op echte vaardigheden, niet alleen op functietitels.",
       de: "Beschreiben Sie Beruf und Fähigkeiten präzise; der Abgleich basiert auf echten Fähigkeiten, nicht nur auf Berufsbezeichnungen.",
       pl: "Opisz zawód i umiejętności precyzyjnie; dopasowanie opiera się na realnych umiejętnościach, nie tylko na nazwach stanowisk.",
+      sv: "Beskriv yrket och färdigheterna exakt; matchningen bygger på verkliga färdigheter, inte bara på yrkestitlar.",
     },
     audience: "employer",
   },
   {
     key: "workers-with-accommodation",
-    question: { en: "Workers with accommodation", lt: "Darbuotojai su apgyvendinimu", ru: "Работники с проживанием", nl: "Werknemers met huisvesting", de: "Arbeitskräfte mit Unterkunft", pl: "Pracownicy z zakwaterowaniem" },
+    question: { en: "Workers with accommodation", lt: "Darbuotojai su apgyvendinimu", ru: "Работники с проживанием", nl: "Werknemers met huisvesting", de: "Arbeitskräfte mit Unterkunft", pl: "Pracownicy z zakwaterowaniem", sv: "Personal med boende" },
     pain: {
       en: "Accommodation is often the blocker for relocation and posting.",
       lt: "Apgyvendinimas dažnai yra kliūtis relokacijai ir komandiruotei.",
@@ -192,6 +200,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Huisvesting is vaak het struikelblok voor verhuizing en detachering.",
       de: "Die Unterkunft ist oft das Hindernis für Umzug und Entsendung.",
       pl: "Zakwaterowanie często blokuje relokację i delegowanie.",
+      sv: "Boendet är ofta det som stoppar flytt och utstationering.",
     },
     help: {
       en: "Accommodation is part of the structured need and readiness — not an afterthought.",
@@ -200,12 +209,13 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Huisvesting is onderdeel van de gestructureerde behoefte en gereedheid — geen bijzaak.",
       de: "Die Unterkunft ist Teil des strukturierten Bedarfs und der Einsatzbereitschaft — kein nachträglicher Gedanke.",
       pl: "Zakwaterowanie jest częścią ustrukturyzowanego zapotrzebowania i gotowości — nie dodatkiem na końcu.",
+      sv: "Boende är en del av det strukturerade behovet och beredskapen – inte en eftertanke.",
     },
     audience: "employer",
   },
   {
     key: "foreign-workers",
-    question: { en: "Foreign workers for a company", lt: "Užsienio darbuotojai įmonei", ru: "Иностранные работники для компании", nl: "Buitenlandse werknemers voor een bedrijf", de: "Ausländische Arbeitskräfte für ein Unternehmen", pl: "Pracownicy z zagranicy dla firmy" },
+    question: { en: "Foreign workers for a company", lt: "Užsienio darbuotojai įmonei", ru: "Иностранные работники для компании", nl: "Buitenlandse werknemers voor een bedrijf", de: "Ausländische Arbeitskräfte für ein Unternehmen", pl: "Pracownicy z zagranicy dla firmy", sv: "Utländsk arbetskraft till ett företag" },
     pain: {
       en: "Cross-border hiring adds documents, language and logistics on top.",
       lt: "Tarptautinis įdarbinimas prideda dokumentų, kalbos ir logistikos.",
@@ -213,6 +223,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Grensoverschrijdend werven brengt extra documenten, taal en logistiek met zich mee.",
       de: "Grenzüberschreitende Einstellungen bringen zusätzlich Dokumente, Sprache und Logistik mit sich.",
       pl: "Zatrudnianie transgraniczne dokłada dokumenty, język i logistykę.",
+      sv: "Rekrytering över gränserna lägger till dokument, språk och logistik.",
     },
     help: {
       en: "Profiles, skills, documents and accommodation are structured so the next steps are clear.",
@@ -221,12 +232,13 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Profielen, vaardigheden, documenten en huisvesting worden gestructureerd, zodat de volgende stappen duidelijk zijn.",
       de: "Profile, Fähigkeiten, Dokumente und Unterkunft werden strukturiert, damit die nächsten Schritte klar sind.",
       pl: "Profile, umiejętności, dokumenty i zakwaterowanie są uporządkowane, więc kolejne kroki są jasne.",
+      sv: "Profiler, färdigheter, dokument och boende struktureras så att nästa steg blir tydliga.",
     },
     audience: "employer",
   },
   {
     key: "verify-skills",
-    question: { en: "How to verify a worker's skills", lt: "Kaip patikrinti darbuotojo įgūdžius", ru: "Как проверить навыки работника", nl: "Hoe controleer je de vaardigheden van een werknemer", de: "Wie Sie die Fähigkeiten einer Arbeitskraft überprüfen", pl: "Jak zweryfikować umiejętności pracownika" },
+    question: { en: "How to verify a worker's skills", lt: "Kaip patikrinti darbuotojo įgūdžius", ru: "Как проверить навыки работника", nl: "Hoe controleer je de vaardigheden van een werknemer", de: "Wie Sie die Fähigkeiten einer Arbeitskraft überprüfen", pl: "Jak zweryfikować umiejętności pracownika", sv: "Hur kontrollerar man en arbetstagares färdigheter" },
     pain: {
       en: "Employers can't tell self-claimed skills from proven experience.",
       lt: "Darbdaviai negali atskirti deklaruotų įgūdžių nuo įrodytos patirties.",
@@ -234,6 +246,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Werkgevers kunnen zelfverklaarde vaardigheden niet onderscheiden van bewezen ervaring.",
       de: "Arbeitgeber können selbst angegebene Fähigkeiten nicht von nachgewiesener Erfahrung unterscheiden.",
       pl: "Pracodawcy nie odróżniają deklarowanych umiejętności od potwierdzonego doświadczenia.",
+      sv: "Arbetsgivare kan inte skilja egenangivna färdigheter från styrkt erfarenhet.",
     },
     help: {
       en: "Skills are shown as verified or self-declared — never silently mixed.",
@@ -242,12 +255,13 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Vaardigheden worden getoond als geverifieerd of zelfverklaard — nooit stilzwijgend gemengd.",
       de: "Fähigkeiten werden als verifiziert oder selbst angegeben angezeigt — niemals stillschweigend vermischt.",
       pl: "Umiejętności są oznaczone jako zweryfikowane lub zadeklarowane — nigdy po cichu mieszane.",
+      sv: "Färdigheter visas som verifierade eller egenangivna – de blandas aldrig i tysthet.",
     },
     audience: "employer",
   },
   {
     key: "worker-without-cv",
-    question: { en: "Worker has no CV", lt: "Darbuotojas neturi CV", ru: "У работника нет CV", nl: "Werknemer heeft geen cv", de: "Arbeitskraft hat keinen Lebenslauf", pl: "Pracownik nie ma CV" },
+    question: { en: "Worker has no CV", lt: "Darbuotojas neturi CV", ru: "У работника нет CV", nl: "Werknemer heeft geen cv", de: "Arbeitskraft hat keinen Lebenslauf", pl: "Pracownik nie ma CV", sv: "Arbetstagaren har inget CV" },
     pain: {
       en: "Experienced workers lose opportunities for lack of a written CV.",
       lt: "Patyrę darbuotojai praranda galimybes, nes neturi parašyto CV.",
@@ -255,6 +269,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Ervaren werknemers lopen kansen mis omdat ze geen geschreven cv hebben.",
       de: "Erfahrene Arbeitskräfte verlieren Chancen, weil ein schriftlicher Lebenslauf fehlt.",
       pl: "Doświadczeni pracownicy tracą szanse z powodu braku spisanego CV.",
+      sv: "Erfarna arbetstagare går miste om möjligheter för att de saknar ett skrivet CV.",
     },
     help: {
       en: "A structured intake turns real experience and skills into a usable profile and CV.",
@@ -263,12 +278,13 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Een gestructureerde intake zet echte ervaring en vaardigheden om in een bruikbaar profiel en cv.",
       de: "Eine strukturierte Erfassung verwandelt echte Erfahrung und Fähigkeiten in ein nutzbares Profil und einen Lebenslauf.",
       pl: "Ustrukturyzowany wywiad zamienia realne doświadczenie i umiejętności w gotowy profil i CV.",
+      sv: "En strukturerad registrering gör verklig erfarenhet och verkliga färdigheter till en användbar profil och ett CV.",
     },
     audience: "worker",
   },
   {
     key: "unknown-real-experience",
-    question: { en: "Employer doesn't know a worker's real experience", lt: "Darbdavys nežino realios darbuotojo patirties", ru: "Работодатель не знает реального опыта работника", nl: "Werkgever kent de echte ervaring van een werknemer niet", de: "Arbeitgeber kennt die tatsächliche Erfahrung einer Arbeitskraft nicht", pl: "Pracodawca nie zna realnego doświadczenia pracownika" },
+    question: { en: "Employer doesn't know a worker's real experience", lt: "Darbdavys nežino realios darbuotojo patirties", ru: "Работодатель не знает реального опыта работника", nl: "Werkgever kent de echte ervaring van een werknemer niet", de: "Arbeitgeber kennt die tatsächliche Erfahrung einer Arbeitskraft nicht", pl: "Pracodawca nie zna realnego doświadczenia pracownika", sv: "Arbetsgivaren känner inte till arbetstagarens verkliga erfarenhet" },
     pain: {
       en: "Hiring blind on a title leads to mismatches on site.",
       lt: "Įdarbinimas aklai pagal pareigybę veda prie neatitikimų vietoje.",
@@ -276,6 +292,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Blind aannemen op een functietitel leidt tot mismatches op de werkplek.",
       de: "Blindes Einstellen nach Berufsbezeichnung führt zu Fehlbesetzungen vor Ort.",
       pl: "Zatrudnianie w ciemno po nazwie stanowiska prowadzi do niedopasowania w miejscu pracy.",
+      sv: "Att anställa i blindo utifrån en titel leder till felrekryteringar på arbetsplatsen.",
     },
     help: {
       en: "Profiles surface concrete skills and work history, with verification status visible.",
@@ -284,12 +301,13 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Profielen tonen concrete vaardigheden en werkgeschiedenis, met zichtbare verificatiestatus.",
       de: "Profile zeigen konkrete Fähigkeiten und Berufserfahrung, mit sichtbarem Verifizierungsstatus.",
       pl: "Profile pokazują konkretne umiejętności i historię pracy wraz z widocznym statusem weryfikacji.",
+      sv: "Profilerna visar konkreta färdigheter och arbetslivserfarenhet, med synlig verifieringsstatus.",
     },
     audience: "employer",
   },
   {
     key: "find-team",
-    question: { en: "How to find a reliable team / brigade", lt: "Kaip rasti patikimą brigadą", ru: "Как найти надёжную бригаду", nl: "Hoe vind je een betrouwbaar team / betrouwbare ploeg", de: "Wie Sie ein zuverlässiges Team / eine zuverlässige Kolonne finden", pl: "Jak znaleźć rzetelny zespół / brygadę" },
+    question: { en: "How to find a reliable team / brigade", lt: "Kaip rasti patikimą brigadą", ru: "Как найти надёжную бригаду", nl: "Hoe vind je een betrouwbaar team / betrouwbare ploeg", de: "Wie Sie ein zuverlässiges Team / eine zuverlässige Kolonne finden", pl: "Jak znaleźć rzetelny zespół / brygadę", sv: "Hur hittar man ett pålitligt team / arbetslag" },
     pain: {
       en: "A whole team is harder to assess than a single worker.",
       lt: "Visą brigadą įvertinti sunkiau nei vieną darbuotoją.",
@@ -297,6 +315,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Een heel team is lastiger te beoordelen dan één werknemer.",
       de: "Ein ganzes Team ist schwerer einzuschätzen als eine einzelne Arbeitskraft.",
       pl: "Cały zespół trudniej ocenić niż jednego pracownika.",
+      sv: "Ett helt team är svårare att bedöma än en enskild arbetstagare.",
     },
     help: {
       en: "Teams can be represented and matched as a unit against a structured need.",
@@ -305,12 +324,13 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Teams kunnen als één geheel worden gepresenteerd en gematcht met een gestructureerde behoefte.",
       de: "Teams können als Einheit dargestellt und mit einem strukturierten Bedarf abgeglichen werden.",
       pl: "Zespoły można przedstawiać i dopasowywać jako całość do ustrukturyzowanego zapotrzebowania.",
+      sv: "Team kan presenteras och matchas som en enhet mot ett strukturerat behov.",
     },
     audience: "agency",
   },
   {
     key: "show-skills",
-    question: { en: "How a worker can show what they can do", lt: "Kaip darbuotojui parodyti, ką moka", ru: "Как работнику показать, что он умеет", nl: "Hoe je als werknemer laat zien wat je kunt", de: "Wie eine Arbeitskraft zeigen kann, was sie kann", pl: "Jak pracownik może pokazać, co potrafi" },
+    question: { en: "How a worker can show what they can do", lt: "Kaip darbuotojui parodyti, ką moka", ru: "Как работнику показать, что он умеет", nl: "Hoe je als werknemer laat zien wat je kunt", de: "Wie eine Arbeitskraft zeigen kann, was sie kann", pl: "Jak pracownik może pokazać, co potrafi", sv: "Hur en arbetstagare kan visa vad hen kan" },
     pain: {
       en: "Skills stay invisible without a structured way to present them.",
       lt: "Įgūdžiai lieka nematomi be struktūruoto būdo juos pristatyti.",
@@ -318,6 +338,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Vaardigheden blijven onzichtbaar zonder een gestructureerde manier om ze te presenteren.",
       de: "Fähigkeiten bleiben unsichtbar ohne eine strukturierte Möglichkeit, sie zu präsentieren.",
       pl: "Umiejętności pozostają niewidoczne bez uporządkowanego sposobu ich pokazania.",
+      sv: "Färdigheter förblir osynliga utan ett strukturerat sätt att presentera dem.",
     },
     help: {
       en: "Build a profile with skills, experience and availability that employers can read at a glance.",
@@ -326,12 +347,13 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Bouw een profiel met vaardigheden, ervaring en beschikbaarheid dat werkgevers in één oogopslag kunnen lezen.",
       de: "Erstellen Sie ein Profil mit Fähigkeiten, Erfahrung und Verfügbarkeit, das Arbeitgeber auf einen Blick erfassen können.",
       pl: "Zbuduj profil z umiejętnościami, doświadczeniem i dostępnością, który pracodawca ogarnie jednym spojrzeniem.",
+      sv: "Bygg en profil med färdigheter, erfarenhet och tillgänglighet som arbetsgivare förstår direkt.",
     },
     audience: "worker",
   },
   {
     key: "describe-need-fast",
-    question: { en: "How a company can describe a workforce need fast", lt: "Kaip įmonei greitai aprašyti darbo poreikį", ru: "Как компании быстро описать кадровую потребность", nl: "Hoe een bedrijf snel een personeelsbehoefte beschrijft", de: "Wie ein Unternehmen schnell einen Personalbedarf beschreibt", pl: "Jak firma może szybko opisać zapotrzebowanie kadrowe" },
+    question: { en: "How a company can describe a workforce need fast", lt: "Kaip įmonei greitai aprašyti darbo poreikį", ru: "Как компании быстро описать кадровую потребность", nl: "Hoe een bedrijf snel een personeelsbehoefte beschrijft", de: "Wie ein Unternehmen schnell einen Personalbedarf beschreibt", pl: "Jak firma może szybko opisać zapotrzebowanie kadrowe", sv: "Hur ett företag snabbt beskriver ett personalbehov" },
     pain: {
       en: "Vague requests slow down everyone and produce poor matches.",
       lt: "Neaiškūs prašymai stabdo visus ir duoda prastus atitikimus.",
@@ -339,6 +361,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Vage aanvragen vertragen iedereen en leveren slechte matches op.",
       de: "Vage Anfragen bremsen alle aus und führen zu schlechten Treffern.",
       pl: "Ogólnikowe zgłoszenia spowalniają wszystkich i dają słabe dopasowania.",
+      sv: "Vaga förfrågningar bromsar alla och ger dåliga matchningar.",
     },
     help: {
       en: "A guided need form captures profession, skills, team size, location and start in minutes.",
@@ -347,6 +370,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
       nl: "Een begeleid behoefteformulier legt binnen minuten beroep, vaardigheden, teamgrootte, locatie en startdatum vast.",
       de: "Ein geführtes Bedarfsformular erfasst Beruf, Fähigkeiten, Teamgröße, Standort und Start in Minuten.",
       pl: "Prowadzony formularz zapotrzebowania zbiera zawód, umiejętności, wielkość zespołu, lokalizację i termin startu w kilka minut.",
+      sv: "En guidad behovsbeskrivning fångar yrke, färdigheter, teamstorlek, plats och start på några minuter.",
     },
     audience: "employer",
   },

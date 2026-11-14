@@ -220,7 +220,7 @@ describe("the page", () => {
     expect(d.promise).toBe("Pateikite užklausą – komanda ją išnagrinės ir susisieks su jumis.");
   });
 
-  it.each(["lt", "en", "ru", "nl", "de", "pl"])("%s has every key, and the notice links the policy", (locale) => {
+  it.each(["lt", "en", "ru", "nl", "de", "pl", "sv"])("%s has every key, and the notice links the policy", (locale) => {
     const d = JSON.parse(read(`messages/${locale}.json`)).landing.requestDoors;
     const en = JSON.parse(read("messages/en.json")).landing.requestDoors;
     expect(Object.keys(d).sort()).toEqual(Object.keys(en).sort());

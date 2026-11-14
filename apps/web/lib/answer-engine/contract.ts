@@ -197,3 +197,22 @@ export const EDUCATION_LEVELS = [
   "higher",
   "postgraduate",
 ] as const;
+
+/**
+ * Locales whose answer bodies were machine-written and have NOT yet been read
+ * by a native editor. They are complete and render, but `isIndexable` refuses
+ * anything not HUMAN_APPROVED, so they stay unpublished (no sitemap entry, no
+ * hreflang alternate) until an editor approves them — then remove the locale
+ * here. Doctrine §7: a review state the product shows or acts on may not claim
+ * a review that did not happen.
+ *
+ * sv: added 2026-11-12 with the Swedish activation; awaiting a Swedish editor.
+ */
+export const ANSWER_LOCALES_AWAITING_REVIEW: ReadonlySet<string> = new Set(["sv"]);
+
+/** The review status a content file may honestly stamp on a locale's answer. */
+export function answerReviewStatusFor(
+  locale: string,
+): "HUMAN_APPROVED" | "LOCAL_REVIEW_REQUIRED" {
+  return ANSWER_LOCALES_AWAITING_REVIEW.has(locale) ? "LOCAL_REVIEW_REQUIRED" : "HUMAN_APPROVED";
+}

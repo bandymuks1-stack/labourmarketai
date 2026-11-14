@@ -45,12 +45,17 @@ describe("sitemap matches route reality", () => {
     expect(sitemap).toContain('"/legal/marketplace-rules"');
   });
 
-  it("the /questions hub is listed for every active locale", () => {
-    expect(sitemap).toContain('"/questions"');
+  it("the /questions hub is listed in every locale that has a published answer, and in no other", () => {
+    // A locale whose answers all await review (sv, 2026-11-12) has an empty,
+    // noindex hub: listing it would advertise a page with nothing to read.
     const urls = new Set(sitemapEntries().map((e) => String(e.url)));
+    let listed = 0;
     for (const locale of activeLocales) {
-      expect(urls.has(localizedUrl(locale, "/questions")), `${locale} hub`).toBe(true);
+      const hasAnswers = publishedCategories(locale).length > 0;
+      expect(urls.has(localizedUrl(locale, "/questions")), `${locale} hub`).toBe(hasAnswers);
+      if (hasAnswers) listed += 1;
     }
+    expect(listed).toBeGreaterThan(0);
   });
 
   it("category pages are derived from the publishing layer, never hard-coded", () => {

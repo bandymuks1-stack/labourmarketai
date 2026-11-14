@@ -121,7 +121,7 @@ export async function runFindWork(
         ? facets.countries.join(", ")
         : terms
             .filter((v) => v.dimension === missedDimension && v.available)
-            .map((v) => v.terms[0])
+            .map((v) => v.displayName ?? v.terms[0])
             .filter((label): label is string => typeof label === "string" && label.length > 0)
             .join(", ");
     const honest = alternatives

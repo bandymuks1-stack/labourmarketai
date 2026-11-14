@@ -1,4 +1,5 @@
 import type { JournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 /**
  * THE WORK-EVIDENCE GOAL PAYLOAD — what a multi-turn conversation about REAL
@@ -260,11 +261,13 @@ export function answerDimension(
  */
 export function readRole(text: string): EvidenceRole | null {
   const t = text.toLowerCase();
-  if (/pad[ėe]j|talkin|help|assist|hielp|geholfen|halfen|помог|assisted/.test(t)) {
+  // Swedish words are read in a Swedish sentence only (`looksSwedish`).
+  const swedish = looksSwedish(text);
+  if (/pad[ėe]j|talkin|help|assist|hielp|geholfen|halfen|помог|assisted/.test(t) || (swedish && /hj[äa]lpte|medhj[äa]lp/.test(t))) {
     return "assisted";
   }
-  if (/vadovav|brigadinink|meistr|led\b|lead|leit|руковод|supervis/.test(t)) return "led";
-  if (/pats|pati|montavau|dariau|atlik|myself|self|selbst|zelf|сам/.test(t)) {
+  if (/vadovav|brigadinink|meistr|led\b|lead|leit|руковод|supervis/.test(t) || (swedish && /ledde|arbetsled|lagbas/.test(t))) return "led";
+  if (/pats|pati|montavau|dariau|atlik|myself|self|selbst|zelf|сам/.test(t) || (swedish && /sj[äa]lv|utf[öo]rde/.test(t))) {
     return "performed";
   }
   return null;

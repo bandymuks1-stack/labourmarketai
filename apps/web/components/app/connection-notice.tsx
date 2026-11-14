@@ -20,6 +20,7 @@ const COPY: Record<ActiveLocale, string> = {
   nl: "Geen internetverbinding. Wat je nu opslaat, wordt niet bewaard. Wacht op de verbinding en probeer het opnieuw.",
   de: "Keine Internetverbindung. Was Sie jetzt speichern, wird nicht übernommen. Warten Sie auf die Verbindung und versuchen Sie es erneut.",
   pl: "Brak połączenia z internetem. To, co teraz zapiszesz, nie zostanie zachowane. Poczekaj na połączenie i spróbuj ponownie.",
+  sv: "Ingen internetanslutning. Det du sparar nu kommer inte att lagras. Vänta tills anslutningen är tillbaka och försök igen.",
 };
 
 export function ConnectionNotice({ locale }: { readonly locale: ActiveLocale }) {

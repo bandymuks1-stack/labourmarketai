@@ -129,7 +129,7 @@ describe("the pure mapping and the line the chat says", () => {
 
   it("every AI-state line exists, non-empty and distinct from the generic fallback, in all six active locales", () => {
     const root = join(__dirname, "..", "..", "messages");
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const chat = JSON.parse(readFileSync(join(root, `${locale}.json`), "utf8")).conversation.chat as Record<
         string,
         string

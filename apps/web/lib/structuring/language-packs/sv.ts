@@ -109,7 +109,7 @@ export const SV_PACK: LanguagePack = {
     },
     // ── cleaning & facility ────────────────────────────────────────────────
     "cleaning-services": {
-      exact: ["städade", "städning", "lokalvårdare", "städare"],
+      exact: ["städade", "städning", "lokalvårdare", "städare", "städat"],
     },
     laundry: {
       exact: ["tvättade kläder", "strök kläder", "tvätteri", "strök skjortor"],
@@ -149,7 +149,7 @@ export const SV_PACK: LanguagePack = {
     },
     // ── IT ─────────────────────────────────────────────────────────────────
     programming: {
-      exact: ["programmerade", "skrev kod", "utvecklade hemsida", "fixade buggar"],
+      exact: ["programmerade", "skrev kod", "utvecklade hemsida", "fixade buggar", "programmerat", "programmering"],
     },
     "it-support": {
       exact: ["användarsupport", "it-avdelningen", "hjälpte användare med datorer"],
@@ -176,7 +176,7 @@ export const SV_PACK: LanguagePack = {
       exact: ["målade väggar", "målare", "måleriarbete", "målade huset"],
     },
     tiling: {
-      exact: ["satte kakel", "kaklade", "plattsättare", "kakel och klinker"],
+      exact: ["satte kakel", "kaklade", "plattsättare", "kakel och klinker", "kaklat", "plattsättning"],
     },
     plastering: {
       exact: ["putsade väggar", "putsade fasad", "spacklade"],
@@ -185,7 +185,9 @@ export const SV_PACK: LanguagePack = {
       exact: ["lade golv", "golvläggare", "lade parkett"],
     },
     "welding-blueprint": {
-      exact: ["svetsade", "svetsare", "svetsarbete"],
+      // + supine / noun (2026-11-12): "Hur mycket har jag svetsat?" asks about the
+      // same work in the perfect tense, and read nothing.
+      exact: ["svetsade", "svetsare", "svetsarbete", "svetsat", "svetsning"],
     },
     roofing: {
       exact: ["takläggare", "lade takpannor", "takarbete"],
@@ -197,7 +199,7 @@ export const SV_PACK: LanguagePack = {
       exact: ["rörmokare", "vvs", "drog rör"],
     },
     carpentry: {
-      exact: ["snickare", "snickeri", "snickararbete"],
+      exact: ["snickare", "snickeri", "snickararbete", "snickrade", "snickrat"],
     },
     demolition: {
       exact: ["rivning", "rivningsarbete", "rev väggar"],
@@ -221,7 +223,7 @@ export const SV_PACK: LanguagePack = {
     },
     // ── education & languages ──────────────────────────────────────────────
     teaching: {
-      exact: ["undervisade", "höll lektioner", "utbildade personal"],
+      exact: ["undervisade", "höll lektioner", "utbildade personal", "undervisat", "undervisning"],
     },
     translation: {
       exact: ["översatte", "översättare", "tolkade"],

@@ -197,7 +197,7 @@ describe("3. voice input feeds the ONE existing search pipeline", () => {
   });
 
   it("voice copy exists in every active locale", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const msgs = JSON.parse(
         readFileSync(join(ROOT, "messages", `${loc}.json`), "utf8"),
       ) as Record<string, Record<string, string>>;

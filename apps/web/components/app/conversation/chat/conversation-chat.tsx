@@ -53,10 +53,11 @@ import {
 import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
 import { loadEducationAnswerForChat } from "@/lib/conversation/education-answers";
 import {
-  educationQuestionKind,
+  educationModeFromText,
   isEducationQuestionKind,
   type EducationQuestionKind,
 } from "@/lib/conversation/education-question";
+import { readStatedProgress } from "@/lib/conversation/progress-status-phrase";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { openTeamOfferThreadForChat } from "@/lib/company/team-offer-conversation";
@@ -66,7 +67,7 @@ import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { readMyCvState } from "@/lib/conversation/cv-state-server";
 import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-server";
 import { aiStateMessageKey, understand } from "@/lib/conversation/utterance-understanding";
-import { matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
+import { asksForPersonalWorkspace, matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
 import { readRenameTarget } from "@/lib/conversation/organization-rename-phrase";
 import { readRenameTargetForChat } from "@/lib/conversation/organization-rename-chat";
 import {
@@ -302,22 +303,6 @@ function PersonalWorkspaceIntroPending() {
  * already carries — it pre-fills the ONE field and the person only confirms.
  * Shape gate only; the canonical validators stay authoritative server-side.
  */
-/** Which of the institution's commands a "programmes" sentence asks for —
- *  create / cohort / assign, else a plain list. Folded, five locales. */
-function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" | EducationQuestionKind {
-  const q = (text ?? "").toLowerCase();
-  // Window 6 (lane C): a lecturer's QUESTION about students (outcomes, who
-  // fits, what skills are missing, where to do practice) is answered from the
-  // institution's real reads — never routed to the owner's own worker answer.
-  const question = educationQuestionKind(q);
-  if (question) return question;
-  if (/priskir|assign|zuweis|toewijz|назнач|zapisz/.test(q)) return "assign";
-  const creates = /sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов/.test(q);
-  if (creates && /grup|kohort|cohort|groep|gruppe|групп|поток|когорт/.test(q)) return "cohort";
-  if (creates) return "create";
-  return "list";
-}
-
 function extractEmail(sentence: string): string | null {
   const m = sentence.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
   return m ? m[0].toLowerCase() : null;
@@ -2593,14 +2578,17 @@ export function ConversationChat({
         withTyping(() => assistant(t("switchContextUnavailable")));
         return;
       }
-      const folded = fold(text);
-      // "asmenin…" / "personal" / "личн…" / "persoonlijk…" / "persönlich…"
-      // (folded: persönlich → personlich) — the personal space by name.
-      const wantsPersonal = ["asmenin", "personal", "личн", "persoonlijk", "personlich"].some(
-        (hint) => folded.includes(hint),
-      );
       const organizations = workspaces.filter(
         (w) => w.kind === "organization" && w.name.trim() !== "",
+      );
+      // "asmenin…" / "personal" / "личн…" / "persoonlijk…" / "persönlich…" /
+      // "personlig" / "privat" — the personal space by name. One reader
+      // (`asksForPersonalWorkspace`); a hint inside one of the person's own
+      // organization names is that organization, never the personal space.
+      const wantsPersonal = asksForPersonalWorkspace(
+        text,
+        fold,
+        organizations.map((w) => w.name),
       );
       let target: WorkspaceInfo | undefined = wantsPersonal
         ? workspaces.find((w) => w.kind === "personal")
@@ -4894,11 +4882,14 @@ export function ConversationChat({
   const startTaskStatus = useCallback(
     (sentence: string) => {
       const lower = sentence.toLowerCase();
-      const status: WorkTaskStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял|zablok/.test(lower)
-        ? "blocked"
-        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|rozpocz/.test(lower)
-          ? "in_progress"
-          : "done";
+      // The state the sentence SAYS — never a default. A sentence that names a
+      // task and states no state ("Was ist mit der Aufgabe Malen?") writes
+      // nothing: it used to be recorded as done.
+      const status: WorkTaskStatus | null = readStatedProgress(sentence, "task");
+      if (status === null) {
+        assistant(fallbackText, starterChips);
+        return;
+      }
       setTyping(true);
       loadOpenTasksForChat()
         .then((res) => {
@@ -4927,7 +4918,7 @@ export function ConversationChat({
           assistant(labels.taskUnavailable);
         });
     },
-    [identity, assistant, labels, runTaskStatus],
+    [identity, assistant, labels, runTaskStatus, fallbackText, starterChips],
   );
 
   /** "Kuris projektas rizikoje?" (§11 / §16): every live project with the SAME
@@ -5065,11 +5056,13 @@ export function ConversationChat({
         return;
       }
       const lower = sentence.toLowerCase();
-      const status: StageStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял/.test(lower)
-        ? "blocked"
-        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал/.test(lower)
-          ? "in_progress"
-          : "done";
+      // The state the sentence SAYS — never a default. "Erkläre die Etappe
+      // Fundament" is a question; a stage is not marked done by one.
+      const status: StageStatus | null = readStatedProgress(sentence, "stage");
+      if (status === null) {
+        assistant(fallbackText, [{ id: "projects", label: labels.chipProjects }]);
+        return;
+      }
       setTyping(true);
       loadCompanyStagesForChat()
         .then((res) => {

@@ -29,7 +29,7 @@ const read = (rel: string) => readFileSync(join(WEB, rel), "utf8");
 /** Source with comments stripped — these pins are about CODE, not prose. */
 const code = (source: string) =>
   source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const catalog = (loc: string) =>
   JSON.parse(read(`messages/${loc}.json`)) as {
     landing: { entry: { exampleLabels: Record<string, string> } };
@@ -109,7 +109,7 @@ describe("1. the example chips wrap — the label is never cut", () => {
    * 132.5px wide with a 106.5px text box, set in `500 14px Inter`
    * (`text-support` + `font-medium`; the type ladder is owner-ratified, so
    * this size does not drift casually). `GLYPH` holds the canvas advance of
-   * every glyph the six catalogues use in these labels; whole-string widths
+   * every glyph the active catalogues use in these labels; whole-string widths
    * measured at the same time differed from the per-glyph sum by at most
    * 1.6px (kerning), which the 2px margin on the box absorbs. A glyph this
    * table does not know fails loudly instead of being guessed.
@@ -123,6 +123,9 @@ describe("1. the example chips wrap — the label is never cut", () => {
     "r": 5.41, "s": 7.54, "t": 4.76, "u": 8.42, "v": 8.05, "w": 11.61, "y": 8.05, "z": 7.83,
     "ą": 7.95, "ć": 8.08, "ę": 8.22, "į": 3.53, "ł": 3.53, "ó": 8.46, "š": 7.54, "ū": 8.42,
     "ų": 8.42, "ä": 7.95, "ž": 7.83, "ż": 7.83,
+    // 2026-11-12 (SV active): measured the same way (canvas, 500 14px Inter 4);
+    // the reference glyphs above reproduced exactly in the same run.
+    "J": 8.05, "V": 9.93, "ö": 8.46, "å": 7.95, "Å": 9.93, "Ä": 9.93, "Ö": 10.73,
     "Г": 8.12, "З": 9.05, "И": 10.77, "К": 8.73, "Н": 10.83, "П": 10.77, "У": 9.52,
     "а": 8.34, "б": 8.59, "в": 7.96, "г": 5.47, "д": 8.75, "е": 8.34, "ж": 10.03, "и": 8.37,
     "й": 8.37, "к": 6.56, "л": 8.75, "м": 10.31, "н": 8.28, "о": 8.34, "п": 8.12, "р": 8.34,

@@ -168,7 +168,7 @@ describe("3 · copy in every published locale", () => {
     "source.organization_day",
     "source.organization_period",
   ];
-  for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
+  for (const loc of ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const) {
     it(`${loc}: journal.intelligence.experience, cvExport and playerCard.identity carry the keys with real text`, () => {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as { intelligence: { experience: Record<string, unknown> } };
       const exp = j.intelligence.experience;
@@ -224,7 +224,7 @@ describe("4 · one organization identity with a name history (owner correction 2
     expect(cvPage).toMatch(/const businessPeriods = \(cv\.professionalExperience\?\.roles \?\? \[\]\)\.flatMap\(\(r\) => r\.businessPeriods\);/);
   });
   it("the copy exists in every published locale", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as { intelligence: { experience: Record<string, string> } };
       for (const k of ["formerly", "periodBand", "byPeriodUnplaced"]) {
         expect(j.intelligence.experience[k], `${loc}.experience.${k}`).toMatch(/\S/);
@@ -272,7 +272,7 @@ describe("5 · separate legal entities, one person history (owner final statemen
     expect(doc).toMatch(/Superseded in part by Addendum B/);
   });
   it("the copy exists in every published locale", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const) {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as { intelligence: { experience: Record<string, string> } };
       for (const k of ["earlierEntity", "administeredBy", "continues", "roleDerived"]) {
         expect(j.intelligence.experience[k], `${loc}.experience.${k}`).toMatch(/\S/);

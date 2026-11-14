@@ -15,8 +15,8 @@ import type { ActiveLocale } from "@labourmarket/client-core";
  * missing translation is a typecheck failure, not a string that quietly falls
  * back to English on someone's phone.
  *
- * The six locales here are exactly the ACTIVE set (doctrine §2.4 / the web
- * app's `activeLocales`). The other five exist in the platform's catalogues but
+ * The seven locales here are exactly the ACTIVE set (doctrine §2.4 / the web
+ * app's `activeLocales`). The other four exist in the platform's catalogues but
  * are not offered to anyone yet, on any client.
  */
 
@@ -3063,7 +3063,513 @@ const pl: Catalogue = {
   "account.openFailed": "Nie udało się otworzyć linku na tym telefonie. Nic nie zostało zmienione.",
 };
 
-export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de, pl };
+const sv: Catalogue = {
+  "app.name": "LabourMarket.ai",
+
+  "nav.today": "I dag",
+  "nav.journal": "Arbetsjournal",
+  "nav.profile": "Profil",
+  "nav.settings": "Inställningar",
+
+  "auth.checking": "Kontrollerar din session…",
+  "auth.signIn.title": "Logga in",
+  "auth.signIn.email": "E-post",
+  "auth.signIn.password": "Lösenord",
+  "auth.signIn.submit": "Logga in",
+  "auth.signIn.toRegister": "Skapa ett konto",
+  "auth.register.title": "Skapa ett konto",
+  "auth.register.submit": "Skapa konto",
+  "auth.register.toSignIn": "Jag har redan ett konto",
+  "auth.signIn.forgot": "Har du glömt ditt lösenord?",
+  "auth.register.legal":
+    "Genom att skapa ett konto godkänner du användarvillkoren och integritetspolicyn.",
+  "auth.error.rejected": "E-postadressen och lösenordet stämde inte överens.",
+  "auth.error.unreachable":
+    "Vi kunde inte nå servern, så vi vet inte om uppgifterna stämmer. Kontrollera din anslutning och försök igen.",
+  "auth.error.confirmationRequired":
+    "Ditt konto har skapats. Bekräfta länken i din e-post och logga sedan in.",
+  "auth.error.notConfigured":
+    "Den här versionen saknar serverkonfiguration och kan därför inte logga in någon.",
+  "auth.signOut": "Logga ut",
+
+  "account.title": "Integritet och konto",
+  "account.body":
+    "Dessa öppnas i din webbläsare, på webbplatsen. Där, under Integritet, begär du ut dina uppgifter eller ber om att ditt konto raderas.",
+  "account.privacy": "Integritet, dina uppgifter och radering av ditt konto",
+  "account.terms": "Användarvillkor",
+  "account.privacyPolicy": "Integritetspolicy",
+  "account.deletionInfo": "Så fungerar radering av konto (ingen inloggning krävs)",
+  "account.support": "Kontakta supporten (info@labourmarket.ai)",
+  "account.external": "Webbläsare",
+  "account.openFailed": "Länken kunde inte öppnas på den här telefonen. Inget ändrades.",
+
+  "session.unavailable.title": "Vi kunde inte kontrollera din session",
+  "session.unavailable.body":
+    "Det här är inte samma sak som att vara utloggad – telefonens säkra lagring svarade inte. Försök igen.",
+  "session.unavailable.retry": "Försök igen",
+
+  "route.notFound.title": "Den skärmen finns inte i appen",
+  "route.notFound.body":
+    "Länken du följde leder inte någonstans här. Den kan vara avsedd för webbplatsen, eller så är den inaktuell. Inget skickades någonstans.",
+  "route.notFound.action": "Tillbaka till appen",
+
+  "crash.title": "Ett fel uppstod i appen",
+  "crash.body":
+    "Det här är ett fel i själva appen, inte något du gjorde, och inget skickades någonstans. Försök igen – om det fortsätter att hända, stäng appen och öppna den igen.",
+
+  "config.problem.title": "Den här versionen är inte konfigurerad",
+  "config.problem.body":
+    "Appen kan inte starta förrän dessa värden har angetts. Inga uppgifter har skickats någonstans.",
+
+  "workspace.title": "Agerar för",
+  "workspace.loading": "Läser dina arbetsytor…",
+  "workspace.active": "Aktiv",
+  "workspace.switching": "Byter…",
+  "workspace.failed.title": "Vi kunde inte läsa dina arbetsytor",
+  "workspace.failed.body":
+    "Det här är en misslyckad läsning, inte ett svar: det betyder inte att du inte tillhör någon organisation. Försök igen om en stund.",
+  "workspace.pointerUnavailable":
+    "Det här härleds från vad du tillhör, inte från ett val som sparats åt dig, och det kan inte ändras här ännu.",
+  "workspace.switchFailed": "Arbetsytan ändrades inte. Inget flyttades.",
+  "context.loading": "Läser dina roller…",
+  "context.active": "Aktiv",
+  "context.none": "Ingen deltagarroll är registrerad på det här kontot ännu. Det är vad vi läste – inte ett problem med appen.",
+  "context.title": "Du arbetar som",
+  "context.unavailable.title": "Vi kan inte lista dina kontexter ännu",
+  "context.unavailable.body":
+    "Appen kan logga in dig, men den kan ännu inte läsa vilka organisationer du tillhör. Inget saknas i ditt konto – den här klienten kan helt enkelt inte fråga ännu.",
+  "context.mode.worker": "Jag själv",
+  "context.mode.company": "Företag",
+  "context.mode.agency": "Bemanningsföretag",
+  "context.mode.customer": "Kund",
+
+  "language.title": "Språk",
+  "language.preview": "Förhandsversion av översättningen",
+
+  "domain.loading": "Frågar servern…",
+  "domain.retry": "Försök igen",
+  "domain.failedTitle": "Vi kunde inte läsa in det här",
+  "domain.unavailable.notConnectedYet": "Inte ansluten ännu",
+  "domain.unavailable.signInAgain": "Logga in igen.",
+  "domain.unavailable.offline": "Ingen anslutning. Inget skickades.",
+  "domain.unavailable.unexpectedAnswer":
+    "Servern svarade med något som appen inte förstod.",
+  "domain.refused.no_credentials": "Logga in igen.",
+  "domain.refused.invalid_token": "Din session har upphört. Logga in igen.",
+  "domain.refused.no_profile": "Det här kontot har ingen profil ännu.",
+  "domain.refused.not_authorized":
+    "Servern avböjde den här begäran för det här kontot.",
+  "domain.refused.rate_limited":
+    "Servern bad appen att sakta ner. Försök igen om en stund.",
+  "domain.refused.capability": "Servern avböjde den här begäran.",
+  "domain.refused.identity_unavailable":
+    "Vi kunde inte bekräfta vem du är. Det här är inget avslag – försök igen.",
+
+  "today.signedInAs": "Inloggad som",
+  "today.recentWork": "Senaste arbete",
+  "journal.empty": "Inga poster i arbetsjournalen ännu.",
+  "journal.logWork": "Registrera arbete",
+  "journal.compose.title": "Registrera arbete",
+  "journal.compose.intro":
+    "Skriv vad du gjorde, med dina egna ord. Din arbetsjournal registrerar exakt det du skriver.",
+  "journal.compose.date": "Datum för arbetet",
+  "journal.compose.dateHint": "År-månad-dag, till exempel 2026-09-01",
+  "journal.compose.today": "I dag",
+  "journal.compose.yesterday": "I går",
+  "journal.compose.notes": "Vad du gjorde",
+  "journal.compose.notesHint":
+    "Med dina egna ord. Tider och platser hör också hemma här.",
+  "journal.compose.site": "Arbetsplats eller ort (valfritt)",
+  "journal.compose.context": "Arbetskontext",
+  "journal.compose.contextUnnamed": "Inte namngiven",
+  "journal.compose.review": "Granska innan du sparar",
+  "journal.compose.previewTitle": "Kontrollera detta innan det sparas",
+  "journal.compose.previewNothingSaved":
+    "Inget har sparats ännu. Det här är exakt vad som kommer att registreras.",
+  "journal.compose.save": "Spara i min arbetsjournal",
+  "journal.compose.edit": "Ändra något",
+  "journal.compose.chooseContext": "Vilket arbete hör det här till?",
+  "journal.compose.chooseContextBody":
+    "Den här posten kan höra till fler än en av dina arbetskontexter, så inget förbereddes och inget sparades. Välj en.",
+  "journal.compose.savedTitle": "Sparat i din arbetsjournal",
+  "journal.compose.savedBody":
+    "Det här är nu en registrerad post. Det är vad servern lagrade.",
+  "journal.compose.another": "Registrera ett till",
+  "journal.compose.backToJournal": "Tillbaka till journalen",
+  "journal.compose.checkThis": "Kontrollera detta först",
+  "journal.compose.invalidDate":
+    "Skriv datumet som år-månad-dag, till exempel 2026-09-01. Inget skickades.",
+  "journal.compose.futureDate":
+    "Arbetsdatumet kan inte ligga i framtiden – en journalpost registrerar arbete som redan har utförts. Inget skickades.",
+  "journal.compose.notesRequired":
+    "Skriv vad du gjorde innan du sparar. Inget skickades.",
+  "journal.compose.draftFailedTitle": "Vi kunde inte förbereda den här posten",
+  "journal.compose.saveFailedTitle": "Vi kunde inte spara den här posten",
+  "journal.compose.staleDraft":
+    "Det här sparades inte: din journal ändrades efter att detta förbereddes, så kontrollen det byggde på är inaktuell. Granska det igen.",
+  "journal.compose.noContext":
+    "Det här kontot har ingen aktiv arbetskontext, så en post har ingenstans att registreras. Lägg först till var du arbetar på webbplatsen och registrera sedan arbete här.",
+  "journal.compose.unsureSaved":
+    "Anslutningen bröts efter att detta skickades, så vi vet inte om det kom fram. Öppna din arbetsjournal och kontrollera innan du skriver det igen. Att försöka igen kan inte skapa en dubblett.",
+  "journal.compose.skillsAdded": "Nya färdigheter registrerade",
+  "journal.compose.skillsStrengthened": "Färdigheter med nya belägg",
+  "journal.compose.skillsClaims": "Förmågor som noterats utifrån dina ord",
+  "journal.compose.skillsReview": "Väntar på din granskning",
+  "journal.compose.noCvChange":
+    "Inget nytt lades till i ditt Levande CV från den här posten.",
+  "journal.compose.skillsPartial":
+    "En del av uppdateringen av ditt Levande CV slutfördes inte. Själva posten är sparad.",
+  "journal.compose.skillsFailed":
+    "Uppdateringen av ditt Levande CV kördes inte den här gången. Själva posten är sparad.",
+  "journal.compose.reviewOnWeb":
+    "Det som väntar på granskning bekräftas på webbplatsen.",
+  "profile.skillsEmpty": "Inga färdigheter registrerade ännu.",
+  "journal.correct.action":
+    "Rätta den här posten",
+  "journal.correct.title":
+    "Rätta en post",
+  "journal.correct.intro":
+    "Ändra det som är fel – orden, dagen eller arbetsplatsen. Den tidigare versionen finns kvar i din historik; dina summor räknar den rättade.",
+  "journal.correct.nothingChanged":
+    "Inget har ändrats ännu. Redigera först orden, dagen eller arbetsplatsen.",
+  "journal.correct.previewTitle":
+    "Kontrollera rättelsen innan den sparas",
+  "journal.correct.before":
+    "Nu",
+  "journal.correct.after":
+    "Efter rättelsen",
+  "journal.correct.hours":
+    "Timmar",
+  "journal.correct.output":
+    "Utfört arbete",
+  "journal.correct.wasConfirmed":
+    "En chef bekräftade den här posten. Bekräftelsen ligger kvar på den tidigare versionen; den rättade versionen sparas som ännu inte bekräftad.",
+  "journal.correct.save":
+    "Spara rättelsen",
+  "journal.correct.savedTitle":
+    "Rättelsen sparades",
+  "journal.correct.savedBody":
+    "Din journal och dina summor visar nu den rättade versionen.",
+  "journal.correct.savedConfirmedBody":
+    "Den rättade versionen är sparad och väntar på en chefs bekräftelse; den tidigare bekräftade versionen finns kvar i din historik.",
+  "journal.correct.draftFailedTitle":
+    "Vi kunde inte förbereda den här rättelsen",
+  "journal.correct.saveFailedTitle":
+    "Vi kunde inte spara den här rättelsen",
+  "journal.correct.unsureSaved":
+    "Rättelsen skickades men inget svar kom tillbaka, så vi kan inte avgöra om den sparades. Det är säkert att försöka igen: en rättelse som redan har kommit fram avvisas och sparas aldrig två gånger.",
+  "journal.correct.staleDraft":
+    "Det här sparades inte: din journal ändrades efter att rättelsen förbereddes. Granska den igen.",
+  "journal.correct.superseded":
+    "Den här posten har redan rättats eller tagits bort. Öppna journalen igen och rätta den aktuella versionen.",
+  "journal.correct.notFound":
+    "Den här posten finns inte bland dina senaste journalposter. Den kan redan ha rättats.",
+  "journal.correct.conflict":
+    "De nya orden anger en enda tidsåtgång för hela posten, men posten registrerar också ett utfört arbete, och båda behöver samma fält. Ange tiden per aktivitet, eller rätta posten på webbplatsen.",
+  "journal.correct.missingTitle":
+    "Den här posten kan inte rättas här",
+  "today.openMessages":
+    "Meddelanden",
+  "messages.title":
+    "Meddelanden",
+  "messages.conversation":
+    "Konversation",
+  "messages.intro":
+    "Dina konversationer i LabourMarket.ai. Meddelandena stannar i appen – inget skickas via e-post eller sms. Nya meddelanden visas när du öppnar den här skärmen.",
+  "messages.none":
+    "Du har inga konversationer ännu.",
+  "messages.untitled":
+    "Konversation",
+  "messages.threadEmpty":
+    "Inga meddelanden i den här konversationen ännu.",
+  "messages.fromMe":
+    "Du",
+  "messages.fromThem":
+    "Motparten",
+  "messages.replyLabel":
+    "Ditt svar",
+  "messages.review":
+    "Granska innan du skickar",
+  "messages.emptyBody":
+    "Skriv ett meddelande först.",
+  "messages.previewTitle":
+    "Kontrollera detta innan det skickas",
+  "messages.previewNothingSent":
+    "Inget har skickats ännu. Det här är exakt den text som den andra personen kommer att se.",
+  "messages.send":
+    "Skicka",
+  "messages.sentTitle":
+    "Skickat",
+  "messages.sentBody":
+    "Ditt meddelande finns i konversationen.",
+  "messages.sentUnverified":
+    "Servern tog emot ditt meddelande, men när det lästes tillbaka stämde det inte. Öppna konversationen igen och kontrollera.",
+  "messages.writeAnother":
+    "Skriv ett nytt meddelande",
+  "messages.draftFailedTitle":
+    "Vi kunde inte förbereda det här meddelandet",
+  "messages.sendFailedTitle":
+    "Vi kunde inte skicka det här meddelandet",
+  "messages.unsureSent":
+    "Meddelandet skickades men inget svar kom tillbaka, så vi kan inte avgöra om det kom fram. Öppna konversationen igen innan du skickar det en gång till.",
+  "messages.staleDraft":
+    "Inte skickat: ett nytt meddelande kom in i konversationen efter att du förberett ditt. Läs det och granska sedan ditt svar igen.",
+  "messages.notFound":
+    "Den här konversationen är inte din, eller så finns den inte längre.",
+  "messages.noPermission":
+    "Du får inte skriva i den här konversationen.",
+  "today.openNotifications":
+    "Aviseringar",
+  "notifications.title":
+    "Aviseringar",
+  "notifications.intro":
+    "Det som har hänt i ditt arbete, nyast först. När du öppnar en avisering markeras den som läst. Aviseringar skickas inte som push till din telefon – de visas här när du öppnar den här skärmen.",
+  "notifications.none":
+    "Du har inga aviseringar.",
+  "notifications.unread":
+    "Ny",
+  "notifications.markAll":
+    "Markera alla som lästa",
+  "notifications.markFailedTitle":
+    "Vi kunde inte markera detta som läst",
+  "notifications.type.unknown":
+    "En avisering",
+  "notifications.type.event_absence_approved":
+    "Din frånvaro godkändes",
+  "notifications.type.event_absence_rejected":
+    "Din frånvaro avböjdes",
+  "notifications.type.event_absence_requested":
+    "En frånvaro registrerades för dig",
+  "notifications.type.event_booking_accepted":
+    "Ditt bokningsförslag accepterades",
+  "notifications.type.event_booking_declined":
+    "Ditt bokningsförslag avböjdes",
+  "notifications.type.event_booking_proposed":
+    "Du har fått ett bokningsförslag",
+  "notifications.type.event_booking_withdrawn":
+    "Bokningsförslaget drogs tillbaka",
+  "notifications.type.event_demand_interest_expressed":
+    "En arbetstagare har visat intresse för ditt behov",
+  "notifications.type.event_demand_interest_reviewed":
+    "Ett företag har markerat ditt intresse som granskat",
+  "notifications.type.event_document_ack_assigned":
+    "Du ombads bekräfta att du har läst ett dokument.",
+  "notifications.type.event_document_ack_completed":
+    "Ett dokument som du skickade för bekräftelse har bekräftats.",
+  "notifications.type.event_document_expiring":
+    "Ett dokuments giltighet upphör snart.",
+  "notifications.type.event_engagement_created":
+    "Ett nytt engagemang skapades",
+  "notifications.type.event_engagement_ended":
+    "Engagemanget avslutades",
+  "notifications.type.event_history_link_offered":
+    "En organisation erbjuder att koppla din registrerade arbetshistorik till ditt konto",
+  "notifications.type.event_invitation_accepted":
+    "Någon har tackat ja till din inbjudan",
+  "notifications.type.event_job_alert":
+    "Det finns ett nytt jobb som passar det du söker",
+  "notifications.type.event_journal_review_decided":
+    "Din journalpost har granskats",
+  "notifications.type.event_journal_review_decided_approved":
+    "Din journalpost har bekräftats",
+  "notifications.type.event_journal_review_decided_changes_requested":
+    "Ändringar har begärts i din journalpost",
+  "notifications.type.event_journal_review_decided_rejected":
+    "Din journalpost har avvisats",
+  "notifications.type.event_message_received":
+    "Du har ett nytt meddelande",
+  "notifications.type.event_saved_search_match":
+    "En sparad sökning har nya resultat",
+  "notifications.type.event_weekly_digest":
+    "Din veckoöversikt över arbete och möjligheter är klar",
+  "notifications.type.event_weekly_digest_journal":
+    "Veckans sammanfattning av din arbetsjournal är klar",
+  "notifications.type.event_weekly_digest_profile_completion":
+    "För att visa dig passande jobb, bekräfta vilket arbete du utför",
+  "notifications.type.event_work_task_assigned":
+    "En uppgift har tilldelats dig",
+  "notifications.type.event_workflow_decided":
+    "Ett beslut har fattats om din godkännandeförfrågan",
+  "notifications.type.event_workflow_delegated":
+    "En godkännanderunda har lämnats över till dig",
+  "notifications.type.event_workflow_escalated":
+    "En godkännanderunda har passerat sin frist",
+  "notifications.type.event_workflow_step_pending":
+    "En godkännandeförfrågan väntar på ditt beslut",
+  "today.openProjects":
+    "Mina projekt",
+  "projects.title":
+    "Mina projekt",
+  "projects.detailTitle":
+    "Projekt",
+  "projects.none":
+    "Du är inte tilldelad något projekt.",
+  "projects.active":
+    "Aktivt",
+  "projects.ended":
+    "Avslutat",
+  "projects.asksCount":
+    "Behövs fortfarande från dig",
+  "projects.moreOnWeb":
+    "Bara dina första projekt visas här. Webbplatsen listar alla.",
+  "projects.notFound":
+    "Det här projektet är inte ditt, eller så finns det inte bland projekten som visas här.",
+  "projects.asksTitle":
+    "Behövs fortfarande från dig",
+  "projects.asksShownOf":
+    "Visas här / fortfarande öppet totalt – hela listan finns på webbplatsen",
+  "projects.asksUnavailable":
+    "Det som fortfarande behövs från dig kunde inte läsas just nu. Försök igen, eller öppna projektet på webbplatsen.",
+  "projects.asksNotRead":
+    "Den här tilldelningen har avslutats. Det som begärdes av dig i den finns på projektets webbsida.",
+  "projects.asksIncomplete":
+    "Det finns mer öppet i dina projekt än appen kan lista, så det här projektets del kanske inte visas. Dess webbsida har hela listan.",
+  "projects.asksNone":
+    "Inget är öppet för dig i det här projektet.",
+  "projects.ask.needed":
+    "Behövs",
+  "projects.ask.missing":
+    "Saknas",
+  "projects.ask.rejected":
+    "Avvisat – behöver ett nytt",
+  "projects.ask.expired":
+    "Har gått ut",
+  "projects.instructionTitle":
+    "Senaste instruktion",
+  "projects.answerInstruction":
+    "Svara i Meddelanden",
+  "projects.webDetail":
+    "Hela projektsidan – etapper, dokument och teamet – finns på webbplatsen.",
+  "messages.threadNotShown":
+    "Konversationen visas inte på skärmen ännu. Vänta tills den har lästs in, läs den och granska sedan ditt svar.",
+  "messages.newBeforeReview":
+    "Ett nytt meddelande kom in i konversationen. Det visas nu ovanför – läs det och granska sedan ditt svar igen.",
+  "profile.noWorkerProfile": "Det här kontot har ingen arbetstagarprofil ännu.",
+  "profile.figuresTitle": "Färdigheter, med dina registrerade timmar",
+  "profile.groupManagerConfirmed": "Bekräftade av en chef",
+  "profile.groupJournalBacked": "Styrkta av din arbetsjournal",
+  "profile.groupDeclared": "Angivna av dig",
+  "profile.figuresUnavailable":
+    "Timmar, andel och poster kunde inte läsas den här gången. Färdigheterna nedan är fortfarande dina registrerade färdigheter – inget visas som 0.",
+  "profile.figuresLegend":
+    "Timmar · andel av de timmar som tillskrivs en färdighet · poster, totalt. Samma siffror som på webbplatsen.",
+  "profile.figuresNotRead": "siffrorna kunde inte läsas",
+  "profile.noFigures": "inga registrerade timmar",
+  "profile.involvedUnattributed": "ingår; tiden tillskrivs inte enbart den här färdigheten",
+  "profile.hoursShort": "tim",
+  "profile.entriesLabel": "poster",
+  "profile.selfStatedMissing":
+    "Förmågor som du noterat med dina egna ord visas inte på den här skärmen ännu; webbplatsen visar dem under dina färdigheter.",
+  "profile.openJournal": "Öppna din arbetsjournal",
+  "journal.openProfile": "Se vad dessa poster sammantaget ger på din profil",
+
+  "today.figuresTitle": "Ditt arbete i siffror",
+  "today.periodToday": "I dag",
+  "today.periodWeek": "Senaste 7 dagarna",
+  "today.hoursLabel": "Timmar",
+  "today.daysUnitLabel": "registrerat i dagar",
+  "today.entriesLabel": "Poster",
+  "today.daysLabel": "Dagar",
+  "today.confirmedLabel": "Bekräftat av en chef, tim",
+  "today.periodEmpty": "Inget registrerat under den här perioden.",
+  "today.periodMissing": "Servern skickade ingen siffra för den här perioden.",
+  "today.dominantTitle": "Största andelen av dina timmar, senaste 7 dagarna",
+  "today.dominantShare": "av de timmar som tillskrivs en färdighet",
+  "today.dominantNone":
+    "Inga timmar tillskrivna en enskild färdighet under de senaste 7 dagarna.",
+  "today.coverageTruncated":
+    "Siffrorna bygger på de senast lästa posterna – äldre poster ingår inte.",
+  "today.figuresScope":
+    "Från dina egna poster i arbetsjournalen, enligt samma regel som på webbplatsen. Kalenderdagarna slutar i dag (UTC).",
+  "today.openJournal": "Öppna din arbetsjournal",
+  "today.openProfile": "Öppna din profil och dina färdigheter",
+  "today.openNeed": "Lägg upp ett behov av personal",
+  "need.title": "Lägg upp ett behov",
+  "need.intro": "Ett personalbehov för organisationen du agerar för. Du granskar det innan det skapas; arbetstagare som får se det hittar det på sin tavla.",
+  "need.descriptionLabel": "Vad behöver du?",
+  "need.descriptionHint": "Med dina egna ord – arbetet, när och hur många personer.",
+  "need.roleLabel": "Roll",
+  "need.locationLabel": "Plats",
+  "need.teamSizeLabel": "Hur många personer",
+  "need.teamSizeHint": "Ett heltal",
+  "need.urgencyLabel": "Hur brådskande",
+  "need.urgency.flexible": "Flexibelt",
+  "need.urgency.this_week": "Den här veckan",
+  "need.urgency.urgent": "Brådskande",
+  "need.descriptionRequired": "Skriv åtminstone några ord om vad du behöver. Inget skickades.",
+  "need.teamSizeInvalid": "Antalet personer måste vara ett heltal från 1 och uppåt. Inget skickades.",
+  "need.review": "Granska innan du skapar",
+  "need.cancel": "Tillbaka",
+  "need.previewTitle": "Kontrollera innan du skapar det",
+  "need.previewBody": "Inget har skapats ännu.",
+  "need.actingFor": "För",
+  "need.confirm": "Skapa behovet",
+  "need.edit": "Redigera",
+  "need.sentTitle": "Skapat",
+  "need.sentBody": "Behovet är nu öppet för organisationen. Du kan följa det på webbplatsen.",
+  "need.done": "Tillbaka till I dag",
+  "need.overLimit": "Organisationen har nått gränsen för aktiva tjänster i sin plan. Inget skapades – stäng ett behov eller byt plan på webbplatsen.",
+  "need.draftFailedTitle": "Vi kunde inte förbereda det här behovet",
+  "need.sendFailedTitle": "Vi kunde inte skapa det här behovet",
+  "today.openJobs": "Bläddra bland lediga jobb",
+  "jobs.title": "Jobb",
+  "jobs.intro": "Den offentliga jobbtavlan – samma annonser som på webbplatsen. Detaljer som arbetsgivaren och hur du söker öppnas på webbsidan som du.",
+  "jobs.queryLabel": "Sök",
+  "jobs.queryHint": "Ett yrke eller ett ord ur titeln, på valfritt språk",
+  "jobs.search": "Sök jobb",
+  "jobs.total": "Jobb",
+  "jobs.page": "sida",
+  "jobs.none": "Inga jobb matchar den här sökningen just nu.",
+  "jobs.prev": "Föregående sida",
+  "jobs.next": "Nästa sida",
+  "jobs.openWeb": "Öppna hela annonsen",
+  "jobs.positions": "Tjänster",
+  "jobs.compensation": "Lön",
+  "jobs.published": "Publicerad",
+  "jobs.untitled": "Jobb",
+  "jobs.notProvisioned": "Jobbtavlan är inte aktiverad i den här miljön.",
+  "jobs.unavailable": "Jobbtavlan svarade inte i tid. Det är inte samma sak som att det inte finns några jobb – försök igen.",
+  "jobs.linkedNotFound": "Det jobbet finns inte längre på tavlan (det kan ha stängts).",
+  "today.openOpportunities": "Se behov som är öppna för dig",
+  "today.openAvailability": "Vem i din personalstyrka är ledig",
+  "opportunities.title": "Möjligheter",
+  "opportunities.intro": "Behov som är synliga för dig just nu. När du visar intresse ser behovets ägare det i sin egen vy – inget lämnar plattformen.",
+  "opportunities.noneVisible": "Inga behov är synliga för dig just nu. När en organisation som du är kopplad till öppnar ett behov visas det här.",
+  "opportunities.express": "Jag är intresserad",
+  "opportunities.noteLabel": "Ett meddelande till dem (valfritt)",
+  "opportunities.noteHint": "En mening om varför eller när – de läser den precis som den är skriven.",
+  "opportunities.draft": "Granska innan du skickar",
+  "opportunities.previewTitle": "Kontrollera innan du skickar",
+  "opportunities.previewBody": "Inget har skickats ännu.",
+  "opportunities.alreadyExpressed": "Du har redan visat intresse för det här behovet; om du skickar igen uppdateras det.",
+  "opportunities.confirm": "Skicka",
+  "opportunities.cancel": "Tillbaka",
+  "opportunities.sentTitle": "Skickat",
+  "opportunities.sentBody": "Ägaren av det här behovet kan nu se ditt intresse i sin egen vy.",
+  "opportunities.sentStatus": "Status",
+  "opportunities.another": "Tillbaka till listan",
+  "opportunities.notVisible": "Det behovet är inte längre synligt för dig (det kan ha stängts).",
+  "opportunities.draftFailedTitle": "Vi kunde inte förbereda detta",
+  "opportunities.sendFailedTitle": "Vi kunde inte skicka detta",
+  "availability.title": "Vem är ledig",
+  "availability.intro": "Din aktiva personalstyrka under de kommande 7 dagarna. Bokad är inte detsamma som otillgänglig: en överlappning är en varning, inte ett avslag.",
+  "availability.actingFor": "Agerar för",
+  "availability.window": "Period",
+  "availability.rosterTotal": "Personer i personalstyrkan",
+  "availability.state.free": "ledig",
+  "availability.state.committed": "bokad",
+  "availability.state.unavailable": "otillgänglig",
+  "availability.notFreeUntil": "inte ledig förrän",
+  "availability.committedTo": "bokad för",
+  "availability.overridable": "en behörig person kan åsidosätta",
+  "availability.sourcesPartial": "Inte alla källor svarade: frånvaro eller åtaganden kunde inte läsas, så ingen här rapporteras som säkert ledig.",
+  "availability.personalWorkspace": "Du är i ditt personliga utrymme. Byt till en organisations arbetsyta i Inställningar för att se dess personalstyrka.",
+  "availability.noOrganization": "Det här kontot tillhör ingen organisation, så det finns ingen personalstyrka att rapportera om.",
+  "availability.noRoster": "Den här organisationen har inga aktiva personer i personalstyrkan, så det finns ingen att rapportera om.",
+  "availability.noCompanyContext": "Den här arbetsytan kan inte agera som arbetsgivare, så det finns ingen personalstyrka att rapportera om.",
+};
+
+export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de, pl, sv };
 
 export const LANGUAGE_NAMES: Record<ActiveLocale, string> = {
   // Each language named in itself — a person looking for their own language
@@ -3074,4 +3580,5 @@ export const LANGUAGE_NAMES: Record<ActiveLocale, string> = {
   nl: "Nederlands",
   de: "Deutsch",
   pl: "Polski",
+  sv: "Svenska",
 };

@@ -65,7 +65,7 @@ describe("the control offers the button only when the answer is yes", () => {
   });
 
   it("the off note exists in every active locale, in the claim rule's wording", () => {
-    for (const l of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const l of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const m = JSON.parse(readFileSync(join(process.cwd(), `messages/${l}.json`), "utf8")) as {
         vacancySources: { language: Record<string, string> };
       };

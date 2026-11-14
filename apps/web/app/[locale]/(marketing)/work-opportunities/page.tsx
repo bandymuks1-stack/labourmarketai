@@ -24,6 +24,7 @@ const CTA_PROFILE: L = {
   nl: "Maak je profiel / CV →",
   de: "Profil / Lebenslauf erstellen →",
   pl: "Zbuduj swój profil / CV →",
+  sv: "Skapa din profil / ditt CV →",
 };
 
 const CTA_SKILLS: L = {
@@ -33,6 +34,7 @@ const CTA_SKILLS: L = {
   nl: "Over vaardigheden",
   de: "Über Fähigkeiten",
   pl: "O umiejętnościach",
+  sv: "Om färdigheter",
 };
 
 const INTRO: Record<string, L> = {
@@ -43,6 +45,7 @@ const INTRO: Record<string, L> = {
     nl: "Werkmogelijkheden",
     de: "Arbeitsmöglichkeiten",
     pl: "Możliwości pracy",
+    sv: "Arbetsmöjligheter",
   },
   title: {
     en: "Find work across sectors in Europe",
@@ -51,6 +54,7 @@ const INTRO: Record<string, L> = {
     nl: "Vind werk in verschillende sectoren in Europa",
     de: "Finden Sie Arbeit in verschiedenen Branchen in Europa",
     pl: "Znajdź pracę w wielu branżach w Europie",
+    sv: "Hitta arbete inom olika branscher i Europa",
   },
   subcopy: {
     en: "Whatever your trade — construction, logistics, manufacturing, hospitality, care, cleaning, agriculture or office work — LabourMarket.ai helps you turn real experience into a profile employers can act on.",
@@ -59,6 +63,7 @@ const INTRO: Record<string, L> = {
     nl: "Wat je vak ook is — bouw, logistiek, productie, horeca, zorg, schoonmaak, landbouw of kantoorwerk — LabourMarket.ai helpt je om echte ervaring om te zetten in een profiel waar werkgevers op kunnen reageren.",
     de: "Ganz gleich, welches Gewerk Sie ausüben — Bau, Logistik, Produktion, Gastgewerbe, Pflege, Reinigung, Landwirtschaft oder Büroarbeit — LabourMarket.ai hilft Ihnen, echte Erfahrung in ein Profil zu verwandeln, auf das Arbeitgeber reagieren können.",
     pl: "Niezależnie od branży — budownictwo, logistyka, produkcja, hotelarstwo, opieka, sprzątanie, rolnictwo czy praca biurowa — LabourMarket.ai pomoże Ci zamienić realne doświadczenie w profil, na który pracodawca może zareagować.",
+    sv: "Oavsett yrke – bygg, logistik, tillverkning, hotell och restaurang, vård, städ, jordbruk eller kontorsarbete – hjälper LabourMarket.ai dig att göra verklig erfarenhet till en profil som arbetsgivare kan agera på.",
   },
   stepsTitle: {
     en: "How it works for workers",
@@ -67,6 +72,7 @@ const INTRO: Record<string, L> = {
     nl: "Hoe het werkt voor werknemers",
     de: "So funktioniert es für Arbeitskräfte",
     pl: "Jak to działa dla pracowników",
+    sv: "Så fungerar det för arbetstagare",
   },
   problemsTitle: {
     en: "Questions workers search for",
@@ -75,6 +81,7 @@ const INTRO: Record<string, L> = {
     nl: "Vragen waar werknemers naar zoeken",
     de: "Fragen, nach denen Arbeitskräfte suchen",
     pl: "Pytania, które wyszukują pracownicy",
+    sv: "Frågor som arbetstagare söker efter",
   },
 };
 
@@ -87,6 +94,7 @@ const STEPS: { title: L; body: L }[] = [
       nl: "1. Maak je profiel en CV aan",
       de: "1. Erstellen Sie Ihr Profil und Ihren Lebenslauf",
       pl: "1. Zbuduj profil i CV",
+      sv: "1. Skapa din profil och ditt CV",
     },
     body: {
       en: "A structured intake captures your professions, skills, experience and availability — even if you have no written CV yet.",
@@ -95,6 +103,7 @@ const STEPS: { title: L; body: L }[] = [
       nl: "Een gestructureerde intake legt je beroepen, vaardigheden, ervaring en beschikbaarheid vast — ook als je nog geen geschreven CV hebt.",
       de: "Eine strukturierte Erfassung hält Ihre Berufe, Fähigkeiten, Erfahrung und Verfügbarkeit fest — auch wenn Sie noch keinen geschriebenen Lebenslauf haben.",
       pl: "Ustrukturyzowane zgłoszenie zbiera Twoje zawody, umiejętności, doświadczenie i dostępność — nawet jeśli nie masz jeszcze spisanego CV.",
+      sv: "En strukturerad registrering samlar dina yrken, färdigheter, erfarenheter och din tillgänglighet – även om du ännu inte har något skrivet CV.",
     },
   },
   {
@@ -105,6 +114,7 @@ const STEPS: { title: L; body: L }[] = [
       nl: "2. Laat echte vaardigheden zien",
       de: "2. Zeigen Sie echte Fähigkeiten",
       pl: "2. Pokaż realne umiejętności",
+      sv: "2. Visa verkliga färdigheter",
     },
     body: {
       en: "Skills appear as verified or self-declared, so employers see what you can actually do.",
@@ -113,6 +123,7 @@ const STEPS: { title: L; body: L }[] = [
       nl: "Vaardigheden worden getoond als bevestigd of zelf opgegeven, zodat werkgevers zien wat je echt kunt.",
       de: "Fähigkeiten werden als bestätigt oder selbst angegeben angezeigt, damit Arbeitgeber sehen, was Sie wirklich können.",
       pl: "Umiejętności są widoczne jako zweryfikowane lub zadeklarowane, więc pracodawcy widzą, co naprawdę potrafisz.",
+      sv: "Färdigheter visas som verifierade eller självdeklarerade, så att arbetsgivare ser vad du faktiskt kan.",
     },
   },
   {
@@ -123,6 +134,7 @@ const STEPS: { title: L; body: L }[] = [
       nl: "3. Bereik echte behoeften",
       de: "3. Erreichen Sie echten Bedarf",
       pl: "3. Dotrzyj do realnego zapotrzebowania",
+      sv: "3. Nå verkliga behov",
     },
     body: {
       en: "Your profile is reviewed against employer and agency needs across countries — no fake job promises.",
@@ -131,6 +143,7 @@ const STEPS: { title: L; body: L }[] = [
       nl: "Je profiel wordt beoordeeld aan de hand van de behoeften van werkgevers en uitzendbureaus in verschillende landen — geen valse baanbeloftes.",
       de: "Ihr Profil wird anhand der Bedarfe von Arbeitgebern und Agenturen in verschiedenen Ländern geprüft — keine falschen Jobversprechen.",
       pl: "Twój profil jest zestawiany z zapotrzebowaniem pracodawców i agencji w różnych krajach — bez obiecywania nieistniejącej pracy.",
+      sv: "Din profil jämförs med behov hos arbetsgivare och bemanningsföretag i olika länder – inga falska jobblöften.",
     },
   },
 ];

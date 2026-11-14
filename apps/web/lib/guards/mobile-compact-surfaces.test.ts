@@ -293,7 +293,7 @@ describe("the calendar never claims independence the data cannot support", () =>
    * (`deriveIndependentReviewResult`), but the marker's words still claim no
    * more than the data supports (SEP-3). Found by review on #1729.
    */
-  const SERVED = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+  const SERVED = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
   const MANAGER = /manager|vadov|руковод|Manager/;
 
   for (const loc of SERVED) {
@@ -307,7 +307,7 @@ describe("the calendar never claims independence the data cannot support", () =>
         expect(MANAGER.test(text), `${loc}.${state}: "${text}"`).toBe(false);
       }
       // and the unconfirmed state still names the person's own record
-      expect(conf?.none, loc).toMatch(/paties|self|самостоятельн|zelf|selbst|samodzieln/i);
+      expect(conf?.none, loc).toMatch(/paties|self|самостоятельн|zelf|selbst|samodzieln|egenangiv/i);
     });
   }
 

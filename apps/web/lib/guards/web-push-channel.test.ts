@@ -120,7 +120,7 @@ describe("safety", () => {
 
 describe("copy in the six active locales", () => {
   it("every opt-in string exists", () => {
-    for (const locale of ["lt", "en", "ru", "de", "pl", "nl"]) {
+    for (const locale of ["lt", "en", "ru", "de", "pl", "nl", "sv"]) {
       const cat = JSON.parse(read(`messages/${locale}.json`));
       for (const k of ["title", "intro", "turnOn", "turnOff", "working", "on", "off", "unsupported", "blocked", "error"]) {
         expect(cat.notificationPrefs?.push?.[k], `${locale} notificationPrefs.push.${k}`).toBeTruthy();

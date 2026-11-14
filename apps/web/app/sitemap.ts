@@ -3,7 +3,7 @@ import { activeLocales } from "@/lib/i18n/config";
 import { localizedUrl, hreflangAlternates } from "@/lib/seo/metadata";
 import { SUPPORTED_COUNTRIES, isCountryPageIndexable } from "@/lib/labour-market/country-evidence";
 import { isVisionPublic } from "@/lib/config/vision-publication";
-import { publishedCategories } from "@/lib/answer-engine/publishing";
+import { localesPublishingAnyAnswer, publishedCategories } from "@/lib/answer-engine/publishing";
 import { EMPLOYER_MARKET_PATHS } from "@/lib/marketing/employer-markets";
 
 /**
@@ -53,8 +53,8 @@ const STATIC_PATHS: readonly string[] = [
   "/legal/legal-notice",
   // Answer-engine hub. llms.txt advertised it and every answer page
   // breadcrumbs to it, but no sitemap listed it (SEO/GEO gap, 2026-09-20).
-  // Individual answers ride /questions-sitemap.xml.
-  "/questions",
+  // Individual answers ride /questions-sitemap.xml. The hub itself is emitted
+  // by answerHubEntries(): only where a language has a published answer.
 ];
 
 /** `/vision` follows its publication flag: while the page emits
@@ -94,6 +94,22 @@ function answerCategoryEntries(): MetadataRoute.Sitemap {
     }
   }
   return entries;
+}
+
+/** The questions hub, in each language where it lists at least one answer. A
+ *  locale whose answers all await review shows an empty hub, which is marked
+ *  noindex and must not be advertised here either. */
+function answerHubEntries(): MetadataRoute.Sitemap {
+  const publishedIn = localesPublishingAnyAnswer();
+  const languages: Record<string, string> = {};
+  for (const locale of publishedIn) languages[locale] = localizedUrl(locale, "/questions");
+  if (publishedIn.includes("en")) languages["x-default"] = localizedUrl("en", "/questions");
+  return publishedIn.map((locale) => ({
+    url: localizedUrl(locale, "/questions"),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+    alternates: { languages },
+  }));
 }
 
 /** Per-country labour-market evidence pages, e.g. /labour-market/lt — only the
@@ -144,6 +160,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
+  entries.push(...answerHubEntries());
   entries.push(...answerCategoryEntries());
 
   return entries;

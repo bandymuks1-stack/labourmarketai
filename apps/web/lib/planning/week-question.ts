@@ -1,3 +1,5 @@
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
+
 /**
  * DOES THE SENTENCE ASK ABOUT A WEEK? (owner command 2026-09-29 §21:
  * "Parodyk, ką dirbau šią savaitę" → the calendar becomes the visual answer.)
@@ -9,9 +11,11 @@
  */
 const WEEK_RX =
   /(savait|\bweek\b|недел|woche|\bweek\b|tydzie|tygodni|tygodn)/;
+/** sv "vecka / veckan / veckor" — a Swedish sentence only (`looksSwedish`). */
+const SV_WEEK_RX = /\bveck(a|an|or|ans)\b/;
 
 export function asksAboutAWeek(text: string | null | undefined): boolean {
   if (!text) return false;
   const t = text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-  return WEEK_RX.test(t);
+  return WEEK_RX.test(t) || (looksSwedish(text) && SV_WEEK_RX.test(t));
 }

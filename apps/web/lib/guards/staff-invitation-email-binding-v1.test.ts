@@ -333,7 +333,7 @@ describe("app: the landing page shows the mismatch honestly", () => {
     expect(page).toMatch(/"email_mismatch",/);
   });
 
-  const LOCALES = ["en", "lt", "de", "nl", "pl", "ru"] as const;
+  const LOCALES = ["en", "lt", "de", "nl", "pl", "ru", "sv"] as const;
   for (const loc of LOCALES) {
     it(`${loc}: every key is present, real copy, no "demo"`, () => {
       const msgs = JSON.parse(read(`apps/web/messages/${loc}.json`));

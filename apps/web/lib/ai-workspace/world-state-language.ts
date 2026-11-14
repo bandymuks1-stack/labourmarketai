@@ -41,6 +41,7 @@ import {
   EMPTY_DISCOVERY_FILTERS,
   type DiscoveryFilterState,
 } from "@/lib/opportunities/discovery-filters";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 /** The dimensions a sentence may set, and the canonical filter field each one
  *  writes. Keys are the lock's vocabulary; values are `DiscoveryFilterState`. */
@@ -71,8 +72,20 @@ export interface VocabularyTerm {
   readonly dimension: WorldStateDimension;
   /** The canonical value written into World State (ISO-2 code, slug, enum). */
   readonly value: string;
-  /** Localized names for it, in every language the person might use. */
+  /** Localized names for it, in every language the person might use — except
+   *  Swedish, see `svTerms`. */
   readonly terms: readonly string[];
+  /**
+   * The names only SWEDISH contributes (its catalogue labels and everyday
+   * words). Matched only against a sentence `looksSwedish` reads as Swedish:
+   * a Swedish word in the shared list is matched by its stem at any word
+   * start, and "logi" (lodging) read "logistics", "Logistik" and "Login" as
+   * "accommodation provided" (independent review of PR 3261, finding 10).
+   */
+  readonly svTerms?: readonly string[];
+  /** What to SHOW for the value when it differs from `terms[0]` (a Swedish
+   *  reader's own label, which lives in `svTerms`). */
+  readonly displayName?: string;
   /** False when the value is NOT present on the person's own board — the
    *  caller recognises the word but reports honestly that nothing matches. */
   readonly available: boolean;
@@ -162,9 +175,12 @@ export function readWorldState(
     return { filters: EMPTY_DISCOVERY_FILTERS, matches: [], unsupported: [] };
   }
 
+  // Swedish names are matched against a Swedish sentence only.
+  const swedish = looksSwedish(sentence);
   const best = new Map<WorldStateDimension, WorldStateMatch>();
   for (const entry of vocabulary) {
-    for (const term of entry.terms) {
+    const names = swedish && entry.svTerms ? [...entry.terms, ...entry.svTerms] : entry.terms;
+    for (const term of names) {
       const matchedText = findTerm(sentence, term);
       if (!matchedText) continue;
       const current = best.get(entry.dimension);

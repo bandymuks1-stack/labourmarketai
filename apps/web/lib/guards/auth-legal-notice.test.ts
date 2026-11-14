@@ -32,7 +32,7 @@ import { join } from "node:path";
  *     [locale] segment pages).
  */
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const web = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(web, rel), "utf8");
 
@@ -151,6 +151,7 @@ describe("auth.legalNotice copy exists in every active locale", () => {
       nl: /akkoord met het privacybeleid/i,
       de: /stimme der datenschutzerkl/i,
       pl: /zgadzam się z polityką prywatności|wyrażam zgodę na politykę prywatności/i,
+      sv: /(godkänner|samtycker till|accepterar) integritetspolicy/i,
     };
     for (const loc of ACTIVE_LOCALES) {
       const n = noticeOf(loc);

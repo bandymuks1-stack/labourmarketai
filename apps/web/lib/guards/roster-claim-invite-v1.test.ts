@@ -16,7 +16,7 @@ import { join } from "node:path";
 
 const APP_ROOT = join(__dirname, "..", "..");
 const read = (...p: string[]) => readFileSync(join(APP_ROOT, ...p), "utf8");
-const LOCALES = ["en", "lt", "ru", "nl", "de", "pl"] as const;
+const LOCALES = ["en", "lt", "ru", "nl", "de", "pl", "sv"] as const;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const msgs = (loc: string): any => JSON.parse(read("messages", `${loc}.json`));
 

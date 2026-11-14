@@ -19,7 +19,7 @@ import { join } from "node:path";
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const LEGAL = "app/[locale]/(marketing)/legal";
-const LOCALES = ["lt", "en", "ru", "de", "pl", "nl"] as const;
+const LOCALES = ["lt", "en", "ru", "de", "pl", "nl", "sv"] as const;
 const PAGES = [
   "privacy",
   "terms",

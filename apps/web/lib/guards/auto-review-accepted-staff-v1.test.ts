@@ -77,7 +77,7 @@ describe("the sentence is on every accept path before the automation", () => {
   });
 
   it("the sentence exists in every active locale", () => {
-    for (const loc of ["en", "lt", "de", "nl", "pl", "ru"]) {
+    for (const loc of ["en", "lt", "de", "nl", "pl", "ru", "sv"]) {
       const d = JSON.parse(read(`messages/${loc}.json`)) as { network: { invitePage: Record<string, string> } };
       expect(d.network.invitePage.reviewNotice, loc).toContain("{organization}");
     }

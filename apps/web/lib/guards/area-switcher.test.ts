@@ -48,7 +48,7 @@ describe("one area model per workspace", () => {
   });
 
   it("area labels exist in every routed locale", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const get = (k: string) => k.split(".").reduce((o: Record<string, unknown> | undefined, p) => o?.[p] as Record<string, unknown> | undefined, m);
       for (const a of [...PERSONAL_WORK_AREAS, ...ORGANIZATION_WORK_AREAS]) {

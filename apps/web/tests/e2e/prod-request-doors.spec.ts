@@ -65,7 +65,7 @@ async function fill(page: Page, door: Door): Promise<void> {
 
 test("every door is visible with its promise, on a phone and a computer, in every language", async ({ browser }) => {
   for (const [name, viewport] of [["phone", PHONE], ["computer", { width: 1280, height: 800 }]] as const) {
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const label = `${name} /${locale}`;
       try {
         const { ctx, page } = await open(browser, `/${locale}`, viewport);

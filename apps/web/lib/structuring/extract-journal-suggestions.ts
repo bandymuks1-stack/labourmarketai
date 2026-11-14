@@ -127,6 +127,11 @@ export const HOUR_UNIT_SOURCES: readonly string[] = [
   // the fragment that names the work rode on no time at all.
   "godzin[\\p{L}]*",
   "godz\\.?(?![\\p{L}])",
+  // SV "6 timmar" / "en timme" / "2 tim." (2026-11-12): "Idag svetsade jag rör
+  // i 6 timmar" carried no duration here while the chat's own extractor read
+  // it. The bare abbreviation needs its dot — "tim" alone is also a name.
+  "timm(?:e|es|ar|ars|arna)(?![\\p{L}])",
+  "tim\\.(?![\\p{L}])",
 ];
 export const MINUTE_UNIT_SOURCES: readonly string[] = [
   "minu[čct][\\p{L}]*",
@@ -140,6 +145,7 @@ export const DAY_UNIT_SOURCES: readonly string[] = [
   "день",
   "days?(?![\\p{L}])",
   "dag(?:en)?(?![\\p{L}])",
+  "dagars?(?![\\p{L}])", // sv "2 dagar"
   "tage?(?![\\p{L}])",
   "dni(?![\\p{L}])",
   "dzie[nń](?![\\p{L}])",

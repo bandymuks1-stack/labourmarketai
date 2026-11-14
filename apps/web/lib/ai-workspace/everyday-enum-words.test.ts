@@ -70,7 +70,7 @@ describe("the housing refinement is understood in the words people type", () => 
     expect(SRC).toMatch(/const EVERYDAY_ENUM_WORDS/);
     // The labels are still collected first, so the DISPLAY name of a value
     // stays the catalogue's word in the reader's language.
-    expect(SRC).toMatch(/if \(t\.has\(value\)\) names\.add\(t\(value\) as string\);[\s\S]{0,700}EVERYDAY_ENUM_WORDS/);
+    expect(SRC).toMatch(/if \(t\.has\(value\)\) names\.add\(t\(value\) as string, locale\);[\s\S]{0,700}EVERYDAY_ENUM_WORDS/);
     // Only accommodation is extended today; a new dimension is a deliberate
     // edit, not a silent widening.
     const block = SRC.slice(SRC.indexOf("const EVERYDAY_ENUM_WORDS"), SRC.indexOf("/** Enum dimensions"));

@@ -129,7 +129,7 @@ describe("the app projects shift days from the rule and warns, never refuses", (
   });
 
   it("copy exists in the six active locales", () => {
-    for (const locale of ["lt", "en", "ru", "de", "pl", "nl"]) {
+    for (const locale of ["lt", "en", "ru", "de", "pl", "nl", "sv"]) {
       const cat = JSON.parse(read(`messages/${locale}.json`));
       for (const k of ["legend", "none", "weekly", "cycle", "weekdays", "cycleOn", "cycleOff", "cycleOffset", "hint", "summaryWeekly", "summaryCycle"]) {
         expect(cat.workPlan?.repeat?.[k], `${locale} workPlan.repeat.${k}`).toBeTruthy();

@@ -18,7 +18,7 @@ const APP = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
 
 const UPLOAD = read("components/app/cv-import-upload.tsx");
-const SERVED = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const SERVED = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 type CvCopy = {
   uploadFormats?: string;
@@ -39,7 +39,7 @@ describe("§10 no byte budget is pushed onto the person", () => {
       expect(copy.uploadFormats, `${loc}.uploadFormats`).toBeTruthy();
       // No megabyte figure, in any of the served spellings.
       expect(copy.uploadFormats ?? "").not.toMatch(/\bMB\b|\bМБ\b|megabyte/i);
-      expect(copy.uploadFormats ?? "").not.toMatch(/\biki\b|\bup to\b|\bдо\b/i);
+      expect(copy.uploadFormats ?? "").not.toMatch(/\biki\b|\bup to\b|\bдо\b|\bupp till\b/i);
     });
 
     it(`${loc}: the oversize error tells the person what to DO, not a limit to obey`, () => {

@@ -274,10 +274,10 @@ describe("server action, domain operation and surface", () => {
     "disputeNotStanding", "disputeWithdrawnHistory", "disputeWithdrawFailed",
   ];
   it("every locale carrying the section has all the keys, and the copy never claims erasure", () => {
-    const withFeature = ["en", "lt", "ru", "de", "nl", "pl"].filter((l) =>
+    const withFeature = ["en", "lt", "ru", "de", "nl", "pl", "sv"].filter((l) =>
       Boolean(JSON.parse(read(`apps/web/messages/${l}.json`)).evidenceImport),
     );
-    expect(withFeature.length).toBe(6);
+    expect(withFeature.length).toBe(7);
     for (const loc of withFeature) {
       const r = JSON.parse(read(`apps/web/messages/${loc}.json`)).evidenceImport.records;
       for (const k of KEYS) expect(r[k], `${loc}.${k}`).toBeTruthy();

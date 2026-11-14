@@ -23,7 +23,7 @@ import { reportClientError } from "@/lib/telemetry/report-client-error";
  */
 
 /** Per-locale words for exactly the ACTIVE locales (lib/i18n/config.ts
- *  `activeLocales` — lt, en, ru, nl, de, pl). `Record<ActiveLocale, …>` makes the
+ *  `activeLocales` — lt, en, ru, nl, de, pl, sv). `Record<ActiveLocale, …>` makes the
  *  set exhaustive at compile time: promoting a locale in lib/i18n/config.ts
  *  fails typecheck until a row is added here. PL added 2026-09-20 (#1810). */
 const COPY: Record<ActiveLocale, { readonly body: string; readonly retry: string }> = {
@@ -50,6 +50,10 @@ const COPY: Record<ActiveLocale, { readonly body: string; readonly retry: string
   pl: {
     body: "Coś poszło nie tak. Twoje dane są bezpieczne — spróbuj ponownie.",
     retry: "Spróbuj ponownie",
+  },
+  sv: {
+    body: "Något gick fel. Dina uppgifter är sparade — försök igen.",
+    retry: "Försök igen",
   },
 };
 

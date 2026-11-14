@@ -78,12 +78,12 @@ describe("readiness is a sibling of fit, never an input", () => {
 
 describe("'checked' wording never claims a stored copy or independent verification", () => {
   it("readinessChecks copy (all locales) has no upload / copy-stored claim", () => {
-    for (const loc of ["en", "lt", "de", "nl", "pl", "ru"]) {
+    for (const loc of ["en", "lt", "de", "nl", "pl", "ru", "sv"]) {
       const block = JSON.parse(read("messages", `${loc}.json`)).scouting.readinessChecks;
       expect(block, loc).toBeTruthy();
       for (const k of ["outstanding", "clear", "unknown"]) expect(block[k], `${loc}.${k}`).toBeTruthy();
       for (const st of ["contract", "assignment", "mobilisation", "work_start"]) expect(block.stage[st], `${loc}.${st}`).toBeTruthy();
-      expect(JSON.stringify(block)).not.toMatch(/uploaded|įkelt|hochgeladen|geüpload|przes[łl]an|загруж|stored copy|verified by LabourMarket/i);
+      expect(JSON.stringify(block)).not.toMatch(/uploaded|įkelt|hochgeladen|geüpload|przes[łl]an|загруж|uppladda|laddats upp|stored copy|verified by LabourMarket/i);
     }
   });
 });
@@ -165,7 +165,7 @@ describe("decision 0021 extension — documents never lower readiness, and both 
   });
 
   it("no active locale tells a person they are not ready without documents, or offers a 'standard' list", () => {
-    for (const loc of ["en", "lt", "de", "nl", "pl", "ru"]) {
+    for (const loc of ["en", "lt", "de", "nl", "pl", "ru", "sv"]) {
       const m = JSON.parse(read("messages", `${loc}.json`));
       const countryFit = String(m.playerCard.readinessPanel.countryFit);
       expect(countryFit, loc).not.toMatch(

@@ -1,4 +1,5 @@
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 /**
  * A SKILL SAID IN WORDS (owner continuation 2026-09-29, PERSON chat walk).
@@ -18,9 +19,11 @@ export interface SkillStatement {
 
 const VERB =
   /(?:^|[^\p{L}])(išmokau|ismokau|išmokęs|išmokusi|moku|gebu|sugebu|learned|learnt|i know how to|skilled in|научился|научилась|умею|gelernt|beherrsche|geleerd|beheers|nauczyłem się|nauczyłam się|potrafię|umiem)(?![\p{L}])/iu;
+/** sv "Jag har lärt mig läsa ritningar" — a Swedish sentence only. */
+const SV_VERB = /(?:^|[^\p{L}])(har lärt mig|lärde mig|behärskar|har lart mig|larde mig|beharskar)(?![\p{L}])/iu;
 
 export function readSkillStatement(text: string): SkillStatement | null {
-  const m = VERB.exec(text ?? "");
+  const m = VERB.exec(text ?? "") ?? (looksSwedish(text) ? SV_VERB.exec(text ?? "") : null);
   if (!m) return null;
   const phrase = (text ?? "")
     .slice(m.index + m[0].length)

@@ -83,13 +83,16 @@ describe("4. the service noun is masked in BOTH structurers through ONE helper",
   it("structure-need exports maskServiceNoun and applies it to the work-type match", () => {
     const src = read("lib", "structuring", "structure-need.ts");
     expect(src).toContain("export function maskServiceNoun(");
-    expect(src).toContain("firstMatchWithNeedle(WORK_TYPE_RULES, maskServiceNoun(roleHay))");
+    // The rules are the shared table, plus the Swedish nouns for a Swedish
+    // sentence only (`workTypeRulesFor`) — masked through the same helper.
+    expect(src).toContain("const rules = workTypeRulesFor(swedish);");
+    expect(src).toContain("firstMatchWithNeedle(rules, maskServiceNoun(roleHay))");
   });
 
   it("value-statement imports it (no second copy) and applies it to the work-type match", () => {
     const src = read("lib", "structuring", "value-statement.ts");
     expect(src).toMatch(/import \{[^}]*maskServiceNoun[^}]*\} from "\.\/structure-need"/);
-    expect(src).toContain("firstRuleMatch(WORK_TYPE_RULES, maskServiceNoun(folded))");
+    expect(src).toContain("firstRuleMatch(workTypeRulesFor(V.swedish), maskServiceNoun(folded))");
     expect(src).not.toMatch(/function maskServiceNoun/);
   });
 });

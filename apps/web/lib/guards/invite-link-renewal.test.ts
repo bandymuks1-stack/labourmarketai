@@ -33,7 +33,7 @@ describe("invite link renewal", () => {
   });
 
   it("every catalogue that carries the namespaces carries the new copy", () => {
-    for (const locale of ["en", "lt", "de", "nl", "pl", "ru"]) {
+    for (const locale of ["en", "lt", "de", "nl", "pl", "ru", "sv"]) {
       const text = web(`messages/${locale}.json`);
       expect(text, locale).toMatch(/"alreadyInvitedNewLink": "[^"]+"/);
       expect(text, locale).toMatch(/"newLink": "[^"]+"/);

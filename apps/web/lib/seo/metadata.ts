@@ -13,7 +13,7 @@
  * host (see lib/domain/canonical.ts); every public canonical URL, hreflang
  * alternate and OpenGraph URL points there.
  *
- * Copy lives here as a pure per-locale map (lt / en / ru / nl / de — the
+ * Copy lives here as a pure per-locale map (lt / en / ru / nl / de / pl / sv — the
  * active locales) rather than in messages/*.json so the SEO layer has no
  * i18n-debt / 11-file-parity coupling. RU is included because the
  * worker audience operates in Russian.
@@ -83,6 +83,12 @@ export const BRAND_SEO: Readonly<Record<ActiveLocale, BrandCopy>> = {
     description:
       "LabourMarket.ai: międzynarodowa platforma pracy, specjalistów i usług. W każdej branży znajdź pracę, pracowników, zleceniodawców, usługi i partnerów do projektów.",
   },
+  sv: {
+    title:
+      "LabourMarket.ai — internationell plattform för arbete och tjänster",
+    description:
+      "LabourMarket.ai: internationell plattform för arbete, specialister och tjänster. Hitta jobb, personal, uppdragsgivare, tjänster och projektpartner i alla branscher.",
+  },
 };
 
 /**
@@ -101,6 +107,7 @@ const OG_LOCALE: Readonly<Record<ActiveLocale, string>> = {
   nl: "nl_NL",
   de: "de_DE",
   pl: "pl_PL",
+  sv: "sv_SE",
 };
 
 function isActiveLocale(locale: string): locale is ActiveLocale {
@@ -195,6 +202,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Pracownicy z każdej branży: załóż profil i CV na LabourMarket.ai, pokaż umiejętności i dostępność i bądź widoczny dla pracodawców w Europie.",
     },
+    sv: {
+      title: "För arbetstagare — skapa din profil och ditt CV",
+      description:
+        "Arbetstagare i alla branscher: skapa profil och CV på LabourMarket.ai, visa dina färdigheter och din tillgänglighet och bli synlig för arbetsgivare i Europa.",
+    },
   },
   companies: {
     // §19 terminology: the employer's SUBMITTED REQUEST is an "inquiry", matching
@@ -231,6 +243,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Pracodawcy i wykonawcy: opisz potrzebnych pracowników, zespoły i umiejętności. LabourMarket.ai porządkuje zapytanie i pomaga w dopasowaniu w Europie.",
     },
+    sv: {
+      title: "För arbetsgivare — skicka en förfrågan om personal",
+      description:
+        "Arbetsgivare och entreprenörer: beskriv vilka arbetstagare, team och färdigheter ni behöver. LabourMarket.ai strukturerar förfrågan och nästa steg i Europa.",
+    },
   },
   agencies: {
     en: {
@@ -262,6 +279,11 @@ export const PAGE_SEO: Readonly<
       title: "Dla agencji — koordynuj pracowników i zespoły",
       description:
         "Agencje pracy: koordynuj pracowników, zespoły i zapotrzebowanie pracodawców w jednym miejscu. LabourMarket.ai porządkuje zgłoszenia i zakwaterowanie.",
+    },
+    sv: {
+      title: "För bemanningsföretag — samordna personal och team",
+      description:
+        "Bemanningsföretag: samordna arbetstagare, team och arbetsgivares behov på ett ställe. LabourMarket.ai strukturerar registrering, urval och boende i Europa.",
     },
   },
   workAbroad: {
@@ -295,6 +317,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Rozważasz pracę za granicą? Zobacz, jak LabourMarket.ai porządkuje umiejętności, dopasowanie, dokumenty i zakwaterowanie, aby zaplanować kolejne kroki.",
     },
+    sv: {
+      title: "Arbeta utomlands — jobb i alla branscher i Europa",
+      description:
+        "Funderar du på att arbeta utomlands? Se hur LabourMarket.ai strukturerar färdigheter, urval, dokument och boende så att du kan planera nästa steg i Europa.",
+    },
   },
   companyNeed: {
     en: {
@@ -326,6 +353,11 @@ export const PAGE_SEO: Readonly<
       title: "Zapytanie o pracowników — opisz potrzebną kadrę",
       description:
         "Powiedz LabourMarket.ai, czego potrzebuje projekt: zawody, umiejętności, zespół, miejsce, start. Sprawdzasz szkic — nic nie jest publikowane automatycznie.",
+    },
+    sv: {
+      title: "Förfrågan om personal — beskriv vilka ni behöver",
+      description:
+        "Berätta för LabourMarket.ai vad projektet behöver: yrken, färdigheter, team, plats och start. Du granskar utkastet – inget publiceras automatiskt.",
     },
   },
   workerIntake: {
@@ -359,6 +391,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Zacznij profil pracownika na LabourMarket.ai: zawody, umiejętności, doświadczenie, dostępność. Zgłoszenie tworzy Twoje CV do oceny przez pracodawców.",
     },
+    sv: {
+      title: "Registrering för arbetstagare — profil och CV",
+      description:
+        "Starta din profil på LabourMarket.ai: yrken, färdigheter, erfarenhet och tillgänglighet. Registreringen bygger ditt CV för arbetsgivares granskning.",
+    },
   },
   labourMarket: {
     en: {
@@ -390,6 +427,11 @@ export const PAGE_SEO: Readonly<
       title: "Rynek pracy — dowody i sygnały krajowe w Europie",
       description:
         "Poparte źródłami sygnały rynku pracy w Europie: popyt, umiejętności, mobilność. LabourMarket.ai korzysta z dowodów jakościowych — bez wymyślonych liczb.",
+    },
+    sv: {
+      title: "Arbetsmarknad — underlag och signaler i Europa",
+      description:
+        "Källbaserade arbetsmarknadssignaler för Europa: efterfrågan, färdigheter och rörlighet. LabourMarket.ai använder kvalitativa underlag – inga påhittade siffror.",
     },
   },
   pricing: {
@@ -423,6 +465,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Jak działa cennik LabourMarket.ai we wczesnym dostępie: jasno i uczciwie dla pracowników, pracodawców i agencji, bez ukrytych opłat.",
     },
+    sv: {
+      title: "Priser — en ärlig modell för tidig åtkomst",
+      description:
+        "Så fungerar priserna på LabourMarket.ai under tidig åtkomst: tydligt och ärligt för arbetstagare, arbetsgivare och bemanningsföretag, utan dolda avgifter.",
+    },
   },
   workOpportunities: {
     en: {
@@ -455,6 +502,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Szukasz pracy w Europie? LabourMarket.ai pomaga pracownikom z każdej branży zbudować profil i CV oraz dotrzeć do realnego zapotrzebowania pracodawców.",
     },
+    sv: {
+      title: "Jobbmöjligheter — hitta arbete i alla branscher",
+      description:
+        "Söker du arbete i Europa? LabourMarket.ai hjälper arbetstagare i alla branscher att bygga profil och CV och nå arbetsgivares verkliga behov.",
+    },
   },
   skills: {
     en: {
@@ -486,6 +538,11 @@ export const PAGE_SEO: Readonly<
       title: "Umiejętności — zweryfikowane lub zadeklarowane",
       description:
         "Pokazuj i sprawdzaj realne umiejętności na LabourMarket.ai. Są oznaczone jako zweryfikowane lub zadeklarowane, aby pracodawcy widzieli doświadczenie.",
+    },
+    sv: {
+      title: "Färdigheter — verifierade eller egenangivna",
+      description:
+        "Visa och kontrollera verkliga färdigheter på LabourMarket.ai. De märks som verifierade eller egenangivna, så att arbetsgivare ser verklig erfarenhet.",
     },
   },
   // Titles carry NO brand: buildPageMetadata appends " · LabourMarket.ai"
@@ -522,6 +579,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Aktualne oferty z oficjalnych publicznych źródeł. Stanowisko, kategoria, umowa i czas pracy są jawne; zaloguj się za darmo, by zobaczyć pracodawcę i miejsce.",
     },
+    sv: {
+      title: "Lediga jobb",
+      description:
+        "Aktuella platsannonser från officiella offentliga källor. Titel, kategori, anställningsform och arbetstid är öppna; logga in gratis för arbetsgivare och ort.",
+    },
   },
   professions: {
     en: {
@@ -553,6 +615,11 @@ export const PAGE_SEO: Readonly<
       title: "Zawody i branże — dla kogo jest LabourMarket.ai",
       description:
         "Od magazynu, produkcji, sprzątania, hotelarstwa i opieki po budownictwo, spawanie i transport: zawody i branże, które obejmuje LabourMarket.ai.",
+    },
+    sv: {
+      title: "Yrken och branscher — för vem LabourMarket.ai är",
+      description:
+        "Från lager, produktion, städ, hotell och restaurang och vård till bygg, svetsning och transport: de yrken och branscher som LabourMarket.ai omfattar.",
     },
   },
   projectCostCalculator: {
@@ -586,6 +653,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Darmowy kalkulator kosztów prac: wpisz pracowników, godziny, stawki i materiały, by dostać przejrzysty wstępny kosztorys. Bez zakładania konta.",
     },
+    sv: {
+      title: "Projektkalkylator — räkna på arbete och projekt",
+      description:
+        "Gratis kalkylator för arbets- och projektkostnader: ange egna arbetstagare, timmar, priser och material för en tydlig preliminär kalkyl. Inget konto.",
+    },
   },
   createCv: {
     en: {
@@ -617,6 +689,11 @@ export const PAGE_SEO: Readonly<
       title: "Darmowy kreator CV — stwórz profesjonalne CV online",
       description:
         "Stwórz profesjonalne CV za darmo: zaimportuj PDF lub DOCX albo zacznij od zera, sprawdź każdy fakt, wybierz szablon i pobierz PDF.",
+    },
+    sv: {
+      title: "Gratis CV-verktyg — skapa ett proffsigt CV online",
+      description:
+        "Skapa ett professionellt CV gratis: importera PDF eller DOCX eller börja från noll, kontrollera varje uppgift, välj en mall och ladda ned som PDF.",
     },
   },
 };

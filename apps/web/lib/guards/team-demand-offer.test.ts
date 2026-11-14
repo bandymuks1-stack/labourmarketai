@@ -203,7 +203,7 @@ describe("5. the application side is thin, RPC-only and registered", () => {
 });
 
 describe("6. i18n - every shipped full locale carries the namespace with the same keys", () => {
-  const LOCALES = ["en", "lt", "de", "nl", "pl", "ru"];
+  const LOCALES = ["en", "lt", "de", "nl", "pl", "ru", "sv"];
   const flat = (o: unknown, prefix = ""): string[] =>
     typeof o === "object" && o !== null
       ? Object.entries(o as Record<string, unknown>).flatMap(([k, v]) => flat(v, `${prefix}${k}.`))

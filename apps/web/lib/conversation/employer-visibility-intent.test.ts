@@ -136,7 +136,7 @@ describe("the door, not a second consent path", () => {
     expect(LOADER.startsWith('"use server";')).toBe(true);
     expect(LOADER).toContain("getMyDiscoverabilityState()");
     expect(LOADER).toContain("buildOwnDiscoverabilityPreview()");
-    expect(LOADER).toContain("discoverabilityConsentLabels(tc)");
+    expect(LOADER).toContain("discoverabilityConsentLabels(tc, locale)");
     expect(LOADER).toContain("PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)]");
     expect(LOADER).not.toMatch(/\.rpc\(|\.insert\(|\.update\(|\.upsert\(|\.delete\(/);
     expect(LOADER).not.toMatch(/grantProfileDiscoverability|withdrawProfileDiscoverability/);

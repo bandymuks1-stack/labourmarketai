@@ -36,6 +36,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     nl: "Vast",
     de: "Unbefristet",
     pl: "Na czas nieokreślony",
+    sv: "Tillsvidare",
   },
   temporary: {
     en: "Temporary",
@@ -44,6 +45,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     nl: "Tijdelijk",
     de: "Befristet",
     pl: "Na czas określony",
+    sv: "Visstid",
   },
   seasonal: {
     en: "Seasonal",
@@ -52,6 +54,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     nl: "Seizoenswerk",
     de: "Saisonal",
     pl: "Sezonowa",
+    sv: "Säsongsarbete",
   },
 };
 
@@ -63,6 +66,7 @@ const WORKING_TIME: Record<string, L> = {
     nl: "Voltijd",
     de: "Vollzeit",
     pl: "Pełny etat",
+    sv: "Heltid",
   },
   part_time: {
     en: "Part time",
@@ -71,6 +75,7 @@ const WORKING_TIME: Record<string, L> = {
     nl: "Deeltijd",
     de: "Teilzeit",
     pl: "Niepełny etat",
+    sv: "Deltid",
   },
 };
 
@@ -81,6 +86,7 @@ const POSITIONS: L = {
   nl: "plaatsen",
   de: "Stellen",
   pl: "miejsc",
+  sv: "platser",
 };
 
 /**

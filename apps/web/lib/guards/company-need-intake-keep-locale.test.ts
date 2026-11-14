@@ -54,7 +54,7 @@ describe("the intake RPC keeps every UI locale", () => {
   });
 
   it("every active advert language (de, nl, pl) is in it, and the fallback is still 'lt'", () => {
-    for (const l of ["de", "nl", "pl", "lt", "en", "ru"]) expect(localeSet(forward)).toContain(l);
+    for (const l of ["de", "nl", "pl", "lt", "en", "ru", "sv"]) expect(localeSet(forward)).toContain(l);
     expect(statement(forward)).toContain(
       "v_locale  text := lower(coalesce(nullif(btrim(coalesce(p_locale, '')), ''), 'lt'));",
     );

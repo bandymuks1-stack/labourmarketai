@@ -1,3 +1,5 @@
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
+
 /**
  * THE NEW NAME, READ OUT OF THE SENTENCE — pure, client-safe, no IO.
  *
@@ -58,6 +60,18 @@ const RENAME_VERBS = [
   "przemianuj", "nazwij", // pl
 ] as const;
 
+// ── SWEDISH — read only for a sentence `looksSwedish` reads as Swedish ──────
+// "Tack" closes a Swedish request and ENDS an English company name ("Nordic
+// Tack"); "till" introduces the Swedish name and is an English word. Inside
+// the shared lists they cut "Rename the company to Nordic Tack" down to
+// "Nordic" (review finding 11).
+/** "döp om företaget till X" */
+const SV_RENAME_VERBS = ["döp", "namnge"] as const;
+/** "byt namn på … till X", "ändra företagets namn till X" */
+const SV_CHANGE_VERBS = ["byt", "ändra", "andra", "uppdatera"] as const;
+const SV_MARKER = "till";
+const SV_TRAILING_POLITE_RE = /[,\s]+tack$/iu;
+
 const CHANGE_VERBS = [
   // lt
   "pakei", "keis", "atnaujin", "pataisy", "nustaty", "nurody", "suteik",
@@ -78,6 +92,8 @@ const verbRe = (stems: readonly string[]): RegExp =>
 
 const RENAME_VERB_RE = verbRe(RENAME_VERBS);
 const CHANGE_VERB_RE = verbRe(CHANGE_VERBS);
+const SV_RENAME_VERB_RE = verbRe(SV_RENAME_VERBS);
+const SV_CHANGE_VERB_RE = verbRe(SV_CHANGE_VERBS);
 
 /** Verbs after which `in` introduces the new name (German / Dutch usage). */
 const IN_TAKES_NAME = /^(hernoem|wijzig|verander|umbenenn|benenn|änder|aender)/iu;
@@ -93,12 +109,13 @@ const TRAILING_POLITE_RE =
   /[,\s]+(prašau|prasau|please|bitte|пожалуйста|alsjeblieft|alstublieft|proszę|prosze)$/iu;
 
 /** Tidy a candidate: one line, no trailing punctuation, no separable `um`. */
-function clean(raw: string): string | null {
+function clean(raw: string, swedish: boolean): string | null {
   let name = raw.split(/\r?\n/)[0] ?? "";
   name = name.trim();
   // German separable verb: "Benenne meine Firma in X um".
   name = name.replace(/\s+um[.!…]*$/iu, "");
   name = name.replace(TRAILING_POLITE_RE, "");
+  if (swedish) name = name.replace(SV_TRAILING_POLITE_RE, "");
   // A legal form written with dots ("Sp. z o.o.", "s.r.o.", "a.s.") keeps its
   // final dot — it is part of the name, not the end of the sentence.
   const legalFormDot = /(?:^|\s)(?:\p{L}{1,4}\.){2,}$/u.test(name);
@@ -126,13 +143,18 @@ export function readRenameTarget(text: string): string | null {
   const raw = (text ?? "").trim();
   if (!raw) return null;
 
+  const swedish = looksSwedish(raw);
   const quoted = QUOTED_RE.exec(raw);
   if (quoted?.[1]) {
-    const name = clean(quoted[1]);
+    const name = clean(quoted[1], swedish);
     if (name) return name;
   }
 
-  const verb = RENAME_VERB_RE.exec(raw) ?? CHANGE_VERB_RE.exec(raw);
+  const verb =
+    RENAME_VERB_RE.exec(raw) ??
+    (swedish ? SV_RENAME_VERB_RE.exec(raw) : null) ??
+    CHANGE_VERB_RE.exec(raw) ??
+    (swedish ? SV_CHANGE_VERB_RE.exec(raw) : null);
   const tail = verb ? raw.slice(verb.index + verb[0].length) : raw;
   const inTakesName = verb ? IN_TAKES_NAME.test(verb[1] ?? "") : false;
 
@@ -146,18 +168,18 @@ export function readRenameTarget(text: string): string | null {
       // `i` is Lithuanian `į` typed without the diacritic — but only in lower
       // case, because the English pronoun is always written "I".
       const isMarker =
-        MARKERS.has(lower) || bare === "i" || (inTakesName && lower === "in");
+        MARKERS.has(lower) || (swedish && lower === SV_MARKER) || bare === "i" || (inTakesName && lower === "in");
       if (!isMarker) continue;
       const next = tokens[i + 1];
       if (!next || next.index === undefined) return null;
-      return clean(tail.slice(next.index));
+      return clean(tail.slice(next.index), swedish);
     }
   }
 
   // 3. A colon: "Agentūros pavadinimas: X".
   const colon = tail.indexOf(":");
   if (colon >= 0) {
-    const name = clean(tail.slice(colon + 1));
+    const name = clean(tail.slice(colon + 1), swedish);
     if (name) return name;
   }
 
@@ -165,7 +187,7 @@ export function readRenameTarget(text: string): string | null {
   if (!verb) return null;
   for (const m of tail.matchAll(/\S+/gu)) {
     if (m.index === undefined) continue;
-    if (opensName(m[0])) return clean(tail.slice(m.index));
+    if (opensName(m[0])) return clean(tail.slice(m.index), swedish);
   }
   return null;
 }
