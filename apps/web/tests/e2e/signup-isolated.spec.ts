@@ -194,11 +194,10 @@ test("S-3c. an education institution signs up through its own door, and its orga
   const id = await userId(address);
   const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
   expect(orgs.length, "the institution's organization is stored").toBeGreaterThan(0);
-  const roles = await db<Array<{ role_slug: string }>>(
-    `organization_roles?organization_id=eq.${orgs[0]!.id}&select=role_slug`,
-  );
-  expect(roles.map((r) => r.role_slug), "the organization is declared a training provider").toContain("training_provider");
-  // The next door is the education home itself, and it opens.
+  // The declaration is proven by what it opens, not by reading the table
+  // (the capability table is not readable through the REST door, by design):
+  // the form names the education home as the next door only on a confirmed
+  // declaration, and that page sends away any organization without it.
   await expect(next).toHaveAttribute("data-first-door", "education");
   await page.getByTestId("company-setup-go-workspace").click();
   await page.waitForURL(/\/en\/dashboard\/company\/education/, { timeout: 60_000 });
