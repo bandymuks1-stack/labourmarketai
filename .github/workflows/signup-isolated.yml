@@ -23,6 +23,7 @@ on:
     paths:
       - ".github/workflows/signup-isolated.yml"
       - "apps/web/tests/e2e/signup-isolated.spec.ts"
+      - "apps/web/tests/e2e/cv-examples-isolated.spec.ts"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
@@ -100,7 +101,7 @@ jobs:
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/cv-examples-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -275,6 +276,17 @@ jobs:
           MAIL_APP_BASE: http://127.0.0.1:3001
           APP_MAIL_API: http://127.0.0.1:54334
         run: pnpm exec playwright test $SPEC --reporter=list --trace=off
+
+      # The two example CVs (cv-examples-isolated.spec.ts): synthetic accounts on
+      # this stack only, 375 / 1440 px, light and dark. Kept as a CI artifact.
+      - name: Upload the example CV screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cv-examples
+          path: apps/web/test-results/cv-examples/
+          if-no-files-found: warn
+          retention-days: 14
 
       # APP-ROLLBACK COMPATIBILITY (owner gate for 20261029190000, deploy order
       # migration -> app): the LAST app build before the job-fit code (#2887)
