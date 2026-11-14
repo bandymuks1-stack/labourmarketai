@@ -122,13 +122,19 @@ describe("the landing has one arm", () => {
         `import { ${original} } from "@/components/marketing/`,
       );
     }
+    // 2026-11-12 — owner instruction 2026-11-12 ("Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori atlikti"):
+    // the hero's next step is the goal navigator (six goals, one panel), not
+    // the "Start now" pair. The closing band is unchanged.
     expect(focus).toContain(
-      'import { LandingPrimaryActions, LandingClosingBand } from "@/components/marketing/landing-primary-actions"',
+      'import { LandingClosingBand } from "@/components/marketing/landing-primary-actions"',
+    );
+    expect(focus).toContain(
+      'import { LandingIntentChoice } from "@/components/marketing/landing-intent-choice"',
     );
     // Code only — the file's own history may NAME the retired hero in prose.
     expect(code(focus)).not.toContain("HeroLiveDemo");
     const order = [
-      "LandingPrimaryActions",
+      "LandingIntentChoice",
       "PublicEntry",
       "MarketProofBand",
       "LandingOpenJobsBand",
@@ -140,17 +146,22 @@ describe("the landing has one arm", () => {
     expect(order.every((i) => i > 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // The next step is in the hero, BEFORE the entry — not inside it.
-    expect(code(focus).match(/<LandingPrimaryActions[\s/>]/g) ?? []).toHaveLength(1);
+    expect(code(focus).match(/<LandingIntentChoice[\s/>]/g) ?? []).toHaveLength(1);
+    expect(code(focus).match(/<LandingPrimaryActions[\s/>]/g) ?? []).toHaveLength(0);
     // Its chrome is the (marketing) layout's, reproduced — not approximated.
     expect(focus).toContain("<AmbientGlow />");
-    expect(focus).toContain("<SiteNav />");
+    // The landing shows the six goals as cards, so its header bar does not
+    // repeat them (owner gate 2026-11-12: no duplicated main menu).
+    expect(focus).toContain("<SiteNav goalsOnPage />");
     expect(focus).toContain("<SiteFooter />");
     expect(focus).toContain("<MarketingFunnelBeacon />");
     expect(focus).toContain('id="main-content"');
-    expect(focus).toContain("MARKETING_CLIENT_MESSAGE_ROOTS");
-    // The historical wrapper + the #how-it-works anchor it carried.
+    // The landing ships its own, smaller client pick (2026-11-12).
+    expect(focus).toContain("pickLandingMessages(await getMessages())");
+    // The historical wrapper + the #how-it-works anchor it carried. Its top
+    // padding shrank on phones on 2026-11-12 (owner fix list 2026-11-12 (one navigation; whole logo; Sign in visible on a phone; shorter first screen)).
     expect(focus).toContain(
-      'className="mx-auto max-w-container px-6 py-14 sm:px-12"',
+      'className="mx-auto max-w-container px-4 pb-14 pt-5 sm:px-12 sm:pt-10"',
     );
     expect(focus).toContain('id="how-it-works"');
     expect(focus).toContain("provenance: 7179882");
