@@ -92,6 +92,10 @@ describe("2. every outcome says something DIFFERENT, and none is a dead button",
     expect(button).toContain("{retryable ? (");
     // The success state is a state, not a button that could fire again.
     expect(button).toContain('data-testid="person-service-requested"');
+    // A sent request is not a dead end: it names the page that holds the answer,
+    // in the marketplace namespace's own words (no new vocabulary).
+    expect(button).toMatch(/href=\{"\/dashboard\/service-requests" as "\/dashboard"\}/);
+    expect(page).toContain('myRequests: tMarket("outgoingHeading")');
   });
 
   it("success and failure are BOTH reported to the funnel", () => {

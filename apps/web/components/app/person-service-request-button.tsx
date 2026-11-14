@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Check, Send } from "lucide-react";
+import { Link } from "@/lib/i18n/navigation";
 import { requestServiceOffering } from "@/lib/marketplace/service-requests";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -44,13 +45,21 @@ export type PersonServiceRequestLabels = {
   readonly request: string;
   /** "Requested" — the terminal state after a successful write. */
   readonly requested: string;
+  /** Names the list where the sent request and its answer live. */
+  readonly myRequests: string;
   readonly duplicate: string;
   readonly offeringInactive: string;
   readonly notAvailable: string;
   readonly errorGeneric: string;
 };
 
-type State = "idle" | "sent" | "duplicate" | "inactive" | "unavailable" | "error";
+type State =
+  | "idle"
+  | "sent"
+  | "duplicate"
+  | "inactive"
+  | "unavailable"
+  | "error";
 
 export function PersonServiceRequestButton({
   offeringId,
@@ -63,7 +72,9 @@ export function PersonServiceRequestButton({
   const [pending, startTransition] = useTransition();
 
   function send() {
-    trackFunnel(FUNNEL_EVENTS.serviceRequestStarted, { surface: "person_page" });
+    trackFunnel(FUNNEL_EVENTS.serviceRequestStarted, {
+      surface: "person_page",
+    });
     startTransition(async () => {
       const res = await requestServiceOffering(offeringId);
       trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
@@ -80,11 +91,21 @@ export function PersonServiceRequestButton({
 
   if (state === "sent") {
     return (
-      <span
-        data-testid="person-service-requested"
-        className="inline-flex shrink-0 items-center gap-1 rounded-md border border-state-success/40 px-2 py-1 text-xs text-state-success"
-      >
-        <Check className="h-3 w-3" aria-hidden /> {labels.requested}
+      <span className="inline-flex shrink-0 flex-wrap items-center gap-2">
+        <span
+          data-testid="person-service-requested"
+          className="inline-flex shrink-0 items-center gap-1 rounded-md border border-state-success/40 px-2 py-1 text-xs text-state-success"
+        >
+          <Check className="h-3 w-3" aria-hidden /> {labels.requested}
+        </span>
+        {/* The request and the provider's answer live on one page; say where. */}
+        <Link
+          href={"/dashboard/service-requests" as "/dashboard"}
+          data-testid="person-service-requested-link"
+          className="text-xs text-brand-blue hover:underline"
+        >
+          {labels.myRequests} →
+        </Link>
       </span>
     );
   }
