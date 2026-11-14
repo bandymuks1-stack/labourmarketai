@@ -51,10 +51,12 @@ const PRACTICE_MARK = `practice${RUN}`;
 const PRACTICE = `Practice day ${PRACTICE_MARK}: built a block partition wall under the master's supervision, 4 hours`;
 const RECOGNITION_KEY = `isolated-practice-${RUN}`;
 
-const s: { schoolId: string; orgId: string; learnerId: string; entryId: string } = {
+/** learnerId is the profile (auth) id; learnerWorkerId is `workers.id`, which journal rows reference. */
+const s: { schoolId: string; orgId: string; learnerId: string; learnerWorkerId: string; entryId: string } = {
   schoolId: "",
   orgId: "",
   learnerId: "",
+  learnerWorkerId: "",
   entryId: "",
 };
 
@@ -257,11 +259,15 @@ test("I-4. the learner records a practice day in that learning relationship", as
   await expect(done.or(early).first()).toBeVisible({ timeout: 60_000 });
   await expect(done, "the practice day is saved").toBeVisible();
   await close();
+  // journal_entries.worker_id references workers.id, not the profile id.
+  const [w] = await db<Array<{ id: string }>>(`workers?profile_id=eq.${s.learnerId}&select=id`);
+  expect(w?.id, "the learner has a worker record").toBeTruthy();
+  s.learnerWorkerId = w!.id;
   await expect
     .poll(
       async () => {
         const rows = await db<Array<{ id: string }>>(
-          `journal_entries?worker_id=eq.${s.learnerId}&original_text=ilike.*${PRACTICE_MARK}*&deleted_at=is.null&select=id`,
+          `journal_entries?worker_id=eq.${s.learnerWorkerId}&original_text=ilike.*${PRACTICE_MARK}*&deleted_at=is.null&select=id`,
         );
         s.entryId = rows[0]?.id ?? "";
         return rows.length;
