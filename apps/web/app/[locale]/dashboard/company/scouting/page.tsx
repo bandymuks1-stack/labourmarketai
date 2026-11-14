@@ -17,7 +17,12 @@ import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibilit
 // Real two-subject bridge (issue #859): candidates a connected agency proposed
 // for THIS demand (which the client owns) — reviewed with the SAME canonical
 // controls below, keyed on (requestId, workerId).
-import { listOfferedCandidatesForRequest, readOfferBookingStatuses } from "@/lib/agency/bridge-read";
+import {
+  countOpenCandidateOffersByRequest,
+  listOfferedCandidatesForRequest,
+  readOfferBookingStatuses,
+} from "@/lib/agency/bridge-read";
+import { mostOfferedOpenRequest } from "@/lib/agency/bridge-model";
 import { TeamOffersReceived } from "@/components/app/team-offers-received";
 import { loadTeamOffersForDemand, countOpenTeamOffersByDemand } from "@/lib/company/team-offer";
 import { listManagedProjects } from "@/lib/projects/projects";
@@ -192,7 +197,18 @@ export default async function CompanyScoutingPage({
    */
   // A brigade / team that OFFERED ITSELF waits for this company's own answer
   // first — an organization's offer outranks a worker's interest signal.
-  const teamOffersWaiting = await countOpenTeamOffersByDemand(demands.map((d) => d.id));
+  // An agency's offered candidate waits the same way. The bell's link carries
+  // no `?request=` (its href is per signal type), so without this the page
+  // opened whichever need the rules below picked and the offer the bell
+  // announced was nowhere on it.
+  const [teamOffersWaiting, agencyOffersWaiting] = await Promise.all([
+    countOpenTeamOffersByDemand(demands.map((d) => d.id)),
+    countOpenCandidateOffersByRequest(employerContext.companyId),
+  ]);
+  const mostAgencyOffered = mostOfferedOpenRequest(
+    agencyOffersWaiting,
+    demands.filter((d) => d.status !== "closed").map((d) => d.id),
+  );
   const mostTeamOffered = [...teamOffersWaiting.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0];
   const mostAwaited = [...pendingInterest.entries()]
@@ -201,6 +217,7 @@ export default async function CompanyScoutingPage({
   const selected =
     request ??
     mostTeamOffered ??
+    mostAgencyOffered ??
     mostAwaited ??
     demands.find((d) => d.structured)?.id ??
     demands[0]?.id ??
