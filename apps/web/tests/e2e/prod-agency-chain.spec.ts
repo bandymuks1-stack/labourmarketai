@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { contextPanel } from "./prod-context-panel";
 import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
@@ -155,6 +156,8 @@ test("A-2. the agency puts a person on its roster; the person accepts", async ({
 
     const worker = await as(browser, "worker");
     await worker.page.goto("/lt/dashboard");
+    // The invitation is in the context panel: a column on a desktop, a sheet to open on a phone.
+    await contextPanel(worker.page, "open");
     const accept = worker.page.locator('[data-testid^="worker-invitation-accept-company-"]').first();
     await expect(accept).toBeVisible({ timeout: 30_000 });
     await accept.click();
