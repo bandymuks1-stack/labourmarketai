@@ -196,9 +196,12 @@ for (const phone of PHONES) {
       const card = page.locator(`li[id="opp-${shared.needId}"]`).first();
       await expect(card, "the verified company's need is on the board").toBeVisible({ timeout: 60_000 });
       await expect(card).toContainText(NEED_ROLE);
-      const details = card.getByTestId("opportunity-details");
-      await details.tap();
-      await expect(details, "its details open").toHaveAttribute("aria-expanded", "true", { timeout: 30_000 });
+      // The testid is on the disclosure's wrapper; the toggle and aria-expanded are on its button.
+      const toggle = card.getByTestId("opportunity-details").locator("button[aria-expanded]").first();
+      await toggle.tap();
+      await expect(toggle, "its details open").toHaveAttribute("aria-expanded", "true", { timeout: 30_000 });
+      const region = await toggle.getAttribute("aria-controls");
+      if (region) await expect(card.locator(`[id="${region}"]`), "the details region is shown").toBeVisible();
       await fitsTheScreen(page, "the work board with a need's details open");
       await done();
     });
