@@ -89,7 +89,7 @@ describe("resolveViewerTexts", () => {
       agent: "translation_copy",
       provider: "libretranslate",
       model: "m",
-      value: { data: { localized_copy: "Tomorrow we start at 7.", plain_language_version: null, wording_warnings: [] } },
+      value: { data: { localized_copy: "Tomorrow we start at 7 at Hoofdgracht 3.", plain_language_version: null, wording_warnings: [] } },
     });
     const [a, b] = await Promise.all([first, second]);
     expect(runAiAgent).toHaveBeenCalledTimes(1);
@@ -116,12 +116,12 @@ describe("resolveViewerTexts", () => {
       agent: "translation_copy",
       provider: "deepl",
       model: "deepl",
-      value: { data: { localized_copy: `[${input.locale}] ${"translation"}`, plain_language_version: null, wording_warnings: [] } },
+      value: { data: { localized_copy: `[${input.locale}] translation 7, 3`, plain_language_version: null, wording_warnings: [] } },
     }));
     const forRu = await resolveViewerTexts([lt], "ru", "viewer-4");
     const forNl = await resolveViewerTexts([lt], "nl", "viewer-5");
-    expect(forRu.get("m1")?.text).toBe("[ru] translation");
-    expect(forNl.get("m1")?.text).toBe("[nl] translation");
+    expect(forRu.get("m1")?.text).toBe("[ru] translation 7, 3");
+    expect(forNl.get("m1")?.text).toBe("[nl] translation 7, 3");
     // and the author reads their own words untouched
     const forLt = await resolveViewerTexts([lt], "lt", "viewer-6");
     expect(forLt.get("m1")).toMatchObject({ kind: "original", languageBadge: null });
@@ -268,9 +268,9 @@ describe("a busy provider is retried once and never stops the thread", () => {
   });
 
   it("503 then success → translated, with the original beside it", async () => {
-    runAiAgent.mockResolvedValueOnce(busy).mockResolvedValueOnce(ok("Понял, буду."));
+    runAiAgent.mockResolvedValueOnce(busy).mockResolvedValueOnce(ok("Завтра начинаем в 7 на объекте Hoofdgracht 3."));
     const out = await resolveViewerTexts([lt], "ru", "viewer-busy-1");
-    expect(out.get("m1")).toMatchObject({ kind: "translated", text: "Понял, буду.", original: lt.body });
+    expect(out.get("m1")).toMatchObject({ kind: "translated", text: "Завтра начинаем в 7 на объекте Hoofdgracht 3.", original: lt.body });
     expect(runAiAgent).toHaveBeenCalledTimes(2);
   });
 
@@ -292,5 +292,46 @@ describe("a busy provider is retried once and never stops the thread", () => {
     expect(isTransientProviderRefusal("provider_error", "gemini http 429 RESOURCE_EXHAUSTED")).toBe(true);
     expect(isTransientProviderRefusal("provider_error", "gemini http 400 INVALID_ARGUMENT")).toBe(false);
     expect(isTransientProviderRefusal("timeout", "503")).toBe(false);
+  });
+});
+
+/**
+ * Faithfulness (the vacancy reader's rule, shared): a rendering that loses or
+ * changes a number, or drops a money unit or a contract word, is refused and
+ * the reader sees the ORIGINAL — never a partially wrong translation.
+ */
+describe("an unfaithful rendering is never shown", () => {
+  const ok = (text: string) => ({
+    status: "suggestion", agent: "translation_copy", provider: "gemini", model: "x",
+    value: { data: { localized_copy: text, plain_language_version: null, wording_warnings: [] } },
+  });
+  const pay = { id: "p1", body: "Mokame 18,50 EUR per valandą, sutartis nuo 2026-12-01.", original_language: "lt" };
+
+  it("a faithful rendering (numbers, unit and contract word in other words) is shown", async () => {
+    runAiAgent.mockResolvedValueOnce(ok("We pay 18,50 € per hour, contract from 2026-12-01."));
+    const out = await resolveViewerTexts([pay], "en", "viewer-f1");
+    expect(out.get("p1")).toMatchObject({ kind: "translated", original: pay.body });
+  });
+
+  it.each([
+    ["a changed number", "We pay 18,00 EUR per hour, contract from 2026-12-01."],
+    ["a lost date", "We pay 18,50 EUR per hour, contract from December."],
+    ["a swapped currency", "We pay 18,50 SEK per hour, contract from 2026-12-01."],
+    ["a dropped contract word", "We pay 18,50 EUR per hour from 2026-12-01."],
+  ])("%s → the original, state failed, nothing cached", async (_label, rendering) => {
+    runAiAgent.mockResolvedValue(ok(rendering));
+    const out = await resolveViewerTexts([pay], "en", "viewer-f2");
+    expect(out.get("p1")).toMatchObject({
+      kind: "original",
+      state: "original_foreign",
+      unavailable: "failed",
+      text: pay.body,
+      languageBadge: "lt",
+      provider: null,
+    });
+    // not cached as a rendering: once the failure memo is gone it is asked again
+    __clearTranslationCache();
+    await resolveViewerTexts([pay], "en", "viewer-f2");
+    expect(runAiAgent).toHaveBeenCalledTimes(2);
   });
 });
