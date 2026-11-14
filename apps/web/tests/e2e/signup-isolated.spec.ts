@@ -429,6 +429,103 @@ for (const phone of [
   });
 }
 
+/**
+ * P-3. THE BAR NEVER HIDES WHAT A PERSON IS WORKING ON (independent review of the
+ * phone bar, 2026-11-14, three findings). On the smallest phone, on the profile
+ * step: (1) with a refusal showing above the buttons the bar is at its tallest,
+ * and the end of the form must still be clear of it — the step reserves the
+ * bar's measured height, not a fixed guess; (2) every field that takes focus
+ * ends up above the bar; (3) the country list, opened with its field low on
+ * the screen, is drawn over the bar, not under it.
+ */
+test("P-3. onboarding on a phone: the bar covers neither the end of the form, a focused field, nor an open list (360x560)", async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 560 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  try {
+    await signUp(page, email("phonebar360"));
+    await page.evaluate(() => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    });
+    await page.goto(`${BASE}/en/onboarding`);
+    await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+    await page.getByTestId("onboarding-intent-work").tap();
+    await page.getByTestId("onboarding-intents-continue").click();
+    await expect(page.getByTestId("onboarding-display-name")).toBeVisible({ timeout: 30_000 });
+    const bar = page.getByTestId("onboarding-action-bar");
+    expect(await bar.evaluate((el) => getComputedStyle(el).position), "the profile step's bar is fixed on a phone").toBe("fixed");
+    const barBox = () => bar.evaluate((el) => ({ top: Math.round(el.getBoundingClientRect().top), height: Math.round(el.getBoundingClientRect().height) }));
+    const quiet = await barBox();
+
+    // (1) A refusal makes the bar taller: submit with the required fields empty.
+    await page.getByTestId("onboarding-submit").click();
+    await expect(bar.getByRole("alert"), "the refusal is said in the bar, above the button").toBeVisible({ timeout: 15_000 });
+    const loud = await barBox();
+    expect(loud.height, "the bar grows with the refusal").toBeGreaterThan(quiet.height);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const formEnd = await bar.evaluate((el) => {
+      const form = el.closest("form");
+      if (!form) return null;
+      // The last thing in the form that is not the bar itself.
+      const rest = [...form.querySelectorAll<HTMLElement>("input, select, textarea, button, [role=combobox], label, p")].filter((n) => !el.contains(n) && n.getClientRects().length > 0);
+      const last = rest.reduce<number>((max, n) => Math.max(max, n.getBoundingClientRect().bottom), 0);
+      return Math.round(last);
+    });
+    console.info(`[onboarding-phone] ${JSON.stringify({ phone: "360x560", step: "profile-bar", barQuiet: quiet, barWithRefusal: loud, formEndAtPageBottom: formEnd })}`);
+    expect(formEnd, "the profile form was found").not.toBeNull();
+    expect(formEnd!, "with the refusal showing, the end of the form is clear of the bar").toBeLessThanOrEqual(loud.top);
+
+    // (2) Whatever takes focus is brought above the bar.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const covered = await bar.evaluate(async (el) => {
+      const form = el.closest("form");
+      if (!form) return ["no form"];
+      const fields = [...form.querySelectorAll<HTMLElement>("input:not([type=hidden]), select, textarea, [role=combobox]")].filter(
+        (n) => !el.contains(n) && n.getClientRects().length > 0 && !(n as HTMLInputElement).disabled,
+      );
+      const bad: string[] = [];
+      for (const field of fields) {
+        field.focus();
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const r = field.getBoundingClientRect();
+        const barTop = el.getBoundingClientRect().top;
+        if (r.bottom > barTop || r.top < 0) bad.push(`${field.getAttribute("data-testid") ?? field.getAttribute("name") ?? field.tagName}: ${Math.round(r.top)}–${Math.round(r.bottom)} against bar top ${Math.round(barTop)}`);
+      }
+      return [`fields:${fields.length}`, ...bad];
+    });
+    console.info(`[onboarding-phone] ${JSON.stringify({ phone: "360x560", step: "profile-focus", result: covered })}`);
+    expect(Number(covered[0]?.split(":")[1] ?? 0), "the profile step has fields to focus").toBeGreaterThan(2);
+    expect(covered.slice(1), "no focused field is left under the bar or above the screen").toEqual([]);
+
+    // (3) The country list opened low on the screen is drawn over the bar.
+    await page.keyboard.press("Escape");
+    const country = page.getByTestId("onboarding-country");
+    await country.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      // Put the field just above the bar, so the list must open across it.
+      const bar = document.querySelector('[data-testid="onboarding-action-bar"]')!.getBoundingClientRect();
+      window.scrollBy(0, r.bottom - (bar.top - 12));
+    });
+    await country.tap();
+    const option = page.getByRole("option").first();
+    await expect(option, "the country list opens").toBeVisible({ timeout: 15_000 });
+    const overlap = await option.evaluate((el) => {
+      const list = (el.closest('[role="listbox"]') ?? el) as HTMLElement;
+      const l = list.getBoundingClientRect();
+      const bar = document.querySelector('[data-testid="onboarding-action-bar"]')!.getBoundingClientRect();
+      const y = Math.min(l.bottom, window.innerHeight) - 6;
+      const crossesBar = y > bar.top && l.top < bar.bottom;
+      const top = crossesBar ? document.elementFromPoint(l.left + l.width / 2, y) : null;
+      const popover = list.parentElement ?? list;
+      return { crossesBar, listTop: Math.round(l.top), listBottom: Math.round(l.bottom), barTop: Math.round(bar.top), onTop: crossesBar ? (top !== null && popover.contains(top) ? "list" : "bar-or-other") : "n/a" };
+    });
+    console.info(`[onboarding-phone] ${JSON.stringify({ phone: "360x560", step: "profile-list", overlap })}`);
+    if (overlap.crossesBar) expect(overlap.onTop, "where the open list crosses the bar, the list is on top").toBe("list");
+    await page.keyboard.press("Escape");
+  } finally {
+    await ctx.close();
+  }
+});
 
 test("P-2. on a desktop the onboarding buttons stay where they were, in the page flow", async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });

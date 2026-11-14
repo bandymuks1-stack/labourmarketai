@@ -29,7 +29,34 @@ describe("onboarding: the staff-review notice is met before the submit", () => {
     expect(wizard).toMatch(bar);
     // No unconditional fixed bar on the profile step: the only literal
     // `className="fixed …"` action bar is the role step's (no acceptance there).
-    const unconditional = wizard.match(/<div className="fixed inset-x-0 bottom-0[^"]*" data-testid="onboarding-action-bar">/g) ?? [];
+    // (The bar hands itself to the height measurement through `ref`; that is the only
+    // other attribute it may carry.)
+    const unconditional = wizard.match(/<div className="fixed inset-x-0 bottom-0[^"]*" data-testid="onboarding-action-bar"(?: ref=\{setActionBar\})?>/g) ?? [];
     expect(unconditional).toHaveLength(1);
+    // Every literal fixed bar in the file is one of the two above: nothing fixed slips in beside them.
+    expect(wizard.match(/"fixed inset-x-0 bottom-0/g) ?? []).toHaveLength(2);
+  });
+
+  it("the space reserved for the bar is the bar's measured height, and none is reserved beside a review notice", () => {
+    // Measured, with a fallback for the first paint only — not a fixed guess.
+    expect(wizard).toMatch(/pb-\[var\(--onboarding-bar,8rem\)\] sm:pb-0/);
+    expect(wizard).toMatch(/!reviewNoticeShown && "pb-\[var\(--onboarding-bar,9rem\)\] sm:pb-0"/);
+    expect(wizard).toMatch(/new ResizeObserver\(measure\)/);
+    // With the notice shown the submit is in the page flow, so no space is reserved for a bar.
+    expect(wizard).toMatch(/style=\{reviewNoticeShown \? undefined : barReserve\}/);
+    expect(wizard).not.toMatch(/\bpb-3[26] sm:pb-0/);
+  });
+
+  it("a focused field is moved clear of the bar only while the bar is fixed", () => {
+    expect(wizard).toMatch(/getComputedStyle\(actionBar\)\.position !== "fixed"\) return;/);
+    expect(wizard.match(/onFocus=\{keepFocusClearOfBar\}/g) ?? []).toHaveLength(2);
+  });
+
+  it("the hint under the disabled Continue has its own sentence in every language", () => {
+    expect(wizard).toMatch(/data-testid="onboarding-continue-hint">\s*\{t\("role_step_hint"\)\}/);
+    for (const locale of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
+      const catalog = readFileSync(join(__dirname, "..", "..", "messages", `${locale}.json`), "utf8");
+      expect(catalog.match(/"role_step_hint": "[^"]{10,}"/g) ?? [], locale).toHaveLength(1);
+    }
   });
 });
