@@ -13,7 +13,6 @@ import {
   accessToken,
   isolatedStack,
   lit,
-  setUpCompany,
   signIn,
   signUp,
   sql,
@@ -396,6 +395,26 @@ async function openCv(page: Page): Promise<Locator> {
 /** The CV's own employment line for one organization (its journal figure). */
 function cvHistoryNode(main: Locator, orgName: string): Locator {
   return main.getByTestId("cv-history-node").filter({ hasText: orgName });
+}
+
+/** The company setup form after onboarding, saved as usable now. A click that
+ *  lands before the form is interactive is a no-op, so the save is retried
+ *  until the form reports its result; the form updates the same draft. */
+async function setUpCompany(page: Page, legalName: string): Promise<void> {
+  await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  const form = page.getByTestId("company-setup-form");
+  await expect(form).toBeVisible({ timeout: 30_000 });
+  await page.waitForLoadState("networkidle").catch(() => {});
+  const result = page.getByTestId("company-setup-result");
+  await expect(async () => {
+    if (!(await result.isVisible().catch(() => false))) {
+      await page.getByTestId("company-setup-legal-name").fill(legalName);
+      await page.getByTestId("company-setup-country").selectOption("LT");
+      await page.getByTestId("company-setup-save-draft").click({ timeout: 5_000 });
+    }
+    await expect(result).toBeVisible({ timeout: 10_000 });
+  }).toPass({ timeout: 60_000 });
+  await expect(result, "the company is saved").not.toHaveClass(/state-warning/);
 }
 
 // ── SETUP ───────────────────────────────────────────────────────────────────

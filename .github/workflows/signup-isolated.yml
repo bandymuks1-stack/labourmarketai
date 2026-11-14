@@ -288,7 +288,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: experience-integration
-          path: apps/web/test-results/experience-integration/
+          path: |
+            apps/web/test-results/experience-integration/
+            apps/web/test-results/experience-integration-*/error-context.md
           if-no-files-found: warn
           retention-days: 14
 
