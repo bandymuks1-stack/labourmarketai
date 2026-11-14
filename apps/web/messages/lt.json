@@ -4222,36 +4222,36 @@
     "social": {
       "continueWithLinkedIn": "Tęsti su LinkedIn",
       "continueWithFacebook": "Tęsti su Facebook",
-      "inAppBrowser": "Esi programėlės vidinėje naršyklėje, kurioje prisijungimas per „Google“ dažnai neveikia. Atidaryk šį puslapį telefono naršyklėje („Safari“ arba „Chrome“) arba žemiau naudok el. paštą ir slaptažodį."
+      "inAppBrowser": "Esate programėlės vidinėje naršyklėje, kurioje prisijungimas per „Google“ dažnai neveikia. Atidarykite šį puslapį telefono naršyklėje („Safari“ arba „Chrome“) arba žemiau naudokite el. paštą ir slaptažodį."
     },
     "legalNotice": {
-      "signup": "Kuriant paskyrą patvirtini, kad susipažinai su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
-      "googleLogin": "Jei paskyros dar neturi, prisijungiant per socialinę paskyrą (pvz., „Google“) ji bus sukurta. Kuriant paskyrą patvirtini, kad susipažinai su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
-      "controller": "Tavo paskyros duomenų valdytoja — UAB „Nonstop Group“. Duomenys tvarkomi paskyrai sukurti ir paslaugai teikti; rinkodarai jie nenaudojami be atskiro, neprivalomo sutikimo."
+      "signup": "Kuriant paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
+      "googleLogin": "Jei paskyros dar neturite, prisijungiant per socialinę paskyrą (pvz., „Google“) ji bus sukurta. Kuriant paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
+      "controller": "Jūsų paskyros duomenų valdytoja — UAB „Nonstop Group“. Duomenys tvarkomi paskyrai sukurti ir paslaugai teikti; rinkodarai jie nenaudojami be atskiro, neprivalomo sutikimo."
     },
     "errors": {
-      "userAlreadyRegistered": "Šis el. paštas jau registruotas. Prisijunk vietoj registracijos.",
+      "userAlreadyRegistered": "Šis el. paštas jau registruotas. Prisijunkite vietoj registracijos.",
       "passwordTooShort": "Slaptažodis per trumpas (bent {min} simboliai).",
       "invalidCredentials": "Neteisingas el. paštas arba slaptažodis.",
       "invalidEmail": "Netaisyklingas el. pašto formatas.",
-      "rateLimited": "Per daug bandymų. Pabandyk vėliau.",
-      "generic": "Įvyko klaida. Bandyk dar kartą.",
+      "rateLimited": "Per daug bandymų. Pabandykite vėliau.",
+      "generic": "Įvyko klaida. Bandykite dar kartą.",
       "oauth": {
-        "missing_code": "Prisijungimo paslauga grąžino atgal be prisijungimo kodo. Pabandyk dar kartą — jei kartojasi, perkrauk puslapį.",
-        "exchange_failed": "Prisijungti nepavyko. Pabandyk dar kartą — prisijungimo kodas galioja trumpai ir tik vieną kartą.",
-        "no_user": "Prisijungti pavyko, bet paskyros pasiekti nepavyko. Atsijunk ir prisijunk iš naujo.",
-        "callback": "Įvyko nelaukta klaida prisijungimo metu. Pabandyk dar kartą — jei tęsiasi, atsiųsk žemiau pateiktą trace ID.",
-        "cancelled": "Prisijungimas atšauktas. Su tavo paskyra nieko neįvyko.",
-        "unknown": "Prisijungti nepavyko. Pabandyk dar kartą.",
-        "link_expired": "Ši patvirtinimo nuoroda nebegalioja arba jau buvo panaudota. Jei el. paštą jau patvirtinai, tiesiog prisijunk. Kitu atveju paprašyk naujos nuorodos žemiau.",
-        "confirmed_sign_in": "Tavo el. paštas patvirtintas. Registracija buvo pradėta kitame įrenginyje, todėl čia prisijunk, kad tęstum.",
-        "confirm_link_opened": "Ši patvirtinimo nuoroda atidaryta. Tavo el. paštas greičiausiai jau patvirtintas, todėl pabandyk prisijungti. Jei nepavyks, paprašyk naujos nuorodos žemiau.",
-        "provider_error": "Prisijungimo paslauga negalėjo užbaigti šio prisijungimo, ir pakartojus greičiausiai bus tas pats. Prisijunk tuo būdu, kuriuo registravaisi pirmą kartą, arba el. paštu ir slaptažodžiu."
+        "missing_code": "Prisijungimo paslauga grąžino atgal be prisijungimo kodo. Pabandykite dar kartą — jei kartojasi, perkraukite puslapį.",
+        "exchange_failed": "Prisijungti nepavyko. Pabandykite dar kartą — prisijungimo kodas galioja trumpai ir tik vieną kartą.",
+        "no_user": "Prisijungti pavyko, bet paskyros pasiekti nepavyko. Atsijunkite ir prisijunkite iš naujo.",
+        "callback": "Įvyko nelaukta klaida prisijungimo metu. Pabandykite dar kartą — jei tęsiasi, atsiųskite žemiau pateiktą trace ID.",
+        "cancelled": "Prisijungimas atšauktas. Su jūsų paskyra nieko neįvyko.",
+        "unknown": "Prisijungti nepavyko. Pabandykite dar kartą.",
+        "link_expired": "Ši patvirtinimo nuoroda nebegalioja arba jau buvo panaudota. Jei el. paštą jau patvirtinote, tiesiog prisijunkite. Kitu atveju paprašykite naujos nuorodos žemiau.",
+        "confirmed_sign_in": "Jūsų el. paštas patvirtintas. Registracija buvo pradėta kitame įrenginyje, todėl čia prisijunkite, kad tęstumėte.",
+        "confirm_link_opened": "Ši patvirtinimo nuoroda atidaryta. Jūsų el. paštas greičiausiai jau patvirtintas, todėl pabandykite prisijungti. Jei nepavyks, paprašykite naujos nuorodos žemiau.",
+        "provider_error": "Prisijungimo paslauga negalėjo užbaigti šio prisijungimo, ir pakartojus greičiausiai bus tas pats. Prisijunkite tuo būdu, kuriuo registravotės pirmą kartą, arba el. paštu ir slaptažodžiu."
       },
-      "emailNotConfirmed": "Tavo el. paštas dar nepatvirtintas. Atidaryk atsiųstą patvirtinimo nuorodą arba paprašyk naujos žemiau."
+      "emailNotConfirmed": "Jūsų el. paštas dar nepatvirtintas. Atidarykite atsiųstą patvirtinimo nuorodą arba paprašykite naujos žemiau."
     },
     "signup": {
-      "headline": "Sukurk paskyrą",
+      "headline": "Sukurkite paskyrą",
       "role": {
         "worker": "Darbuotojas",
         "company": "Įmonė",
@@ -4262,7 +4262,7 @@
         "service_provider": "Paslaugų teikėjas",
         "admin": "Administratorius"
       },
-      "subcopy": "Vienas profilis tavo darbo patirčiai ir galimybėms — kitame žingsnyje patikslinsi, ko atėjai.",
+      "subcopy": "Vienas profilis jūsų darbo patirčiai ir galimybėms — kitame žingsnyje patikslinsite, ko atėjote.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
@@ -4270,71 +4270,71 @@
       "email_placeholder": "vardas@example.com",
       "password_label": "Slaptažodis",
       "password_help": "Bent 8 simboliai, 1 didžioji raidė, 1 skaičius, 1 specialusis (!@#$%).",
-      "confirm_password_label": "Pakartok slaptažodį",
+      "confirm_password_label": "Pakartokite slaptažodį",
       "submit_label": "Registruotis",
       "signing": "Kuriama...",
-      "disclaimer": "Tavo atsiliepimai formuoja produktą — parašyk, kas veikia ir ko trūksta.",
-      "has_account": "Jau turi paskyrą?",
+      "disclaimer": "Jūsų atsiliepimai formuoja produktą — parašykite, kas veikia ir ko trūksta.",
+      "has_account": "Jau turite paskyrą?",
       "login_link": "Prisijungti",
-      "error_generic": "Įvyko klaida. Pabandyk dar kartą vėliau.",
-      "error_email": "Įvesk teisingą el. pašto adresą.",
+      "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau.",
+      "error_email": "Įveskite teisingą el. pašto adresą.",
       "error_password_short": "Slaptažodį turi sudaryti bent {min} simboliai.",
       "error_password_mismatch": "Slaptažodžiai nesutampa.",
       "error_password_uppercase": "Slaptažodyje turi būti bent viena didžioji raidė.",
       "error_password_number": "Slaptažodyje turi būti bent vienas skaičius.",
       "error_password_special": "Slaptažodyje turi būti bent vienas specialusis simbolis.",
-      "check_email_title": "Patvirtink el. paštą",
-      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidaryk ją, kad užbaigtum registraciją. Jei laiško nematai — patikrink šlamšto aplanką; naujos nuorodos galėsi paprašyti čia.",
+      "check_email_title": "Patvirtinkite el. paštą",
+      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją. Jei laiško nematote — patikrinkite šlamšto aplanką; naujos nuorodos galėsite paprašyti čia.",
       "resend_label": "Siųsti nuorodą dar kartą",
-      "resend_sent": "Išsiųsta dar kartą. Patikrink pašto dėžutę ir šlamšto aplanką.",
-      "resend_wait": "Naujos nuorodos galėsi paprašyti po {seconds} s.",
-      "invited_email_note": "Tai adresas, kuriuo gavai kvietimą.",
+      "resend_sent": "Išsiųsta dar kartą. Patikrinkite pašto dėžutę ir šlamšto aplanką.",
+      "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s.",
+      "invited_email_note": "Tai adresas, kuriuo gavote kvietimą.",
       "show_password": "Rodyti slaptažodį"
     },
     "login": {
       "headline": "Prisijungti",
-      "subcopy": "Prisijunk su socialine paskyra arba el. paštu ir slaptažodžiu.",
+      "subcopy": "Prisijunkite su socialine paskyra arba el. paštu ir slaptažodžiu.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
       "email_label": "El. paštas",
       "password_label": "Slaptažodis",
-      "forgot_password": "Pamiršai slaptažodį?",
+      "forgot_password": "Pamiršote slaptažodį?",
       "reset_password_cta": "Atkurti slaptažodį",
-      "reset_password_help": "Atsiųsime atkūrimo nuorodą tavo el. paštu — seno slaptažodžio žinoti nereikia.",
-      "reset_success": "Slaptažodis atnaujintas. Prisijunk su nauju slaptažodžiu.",
+      "reset_password_help": "Atsiųsime atkūrimo nuorodą jūsų el. paštu — seno slaptažodžio žinoti nereikia.",
+      "reset_success": "Slaptažodis atnaujintas. Prisijunkite su nauju slaptažodžiu.",
       "submit_label": "Prisijungti",
       "signing": "Jungiamasi...",
-      "no_account": "Neturi paskyros?",
+      "no_account": "Neturite paskyros?",
       "signup_link": "Registruotis",
-      "error_generic": "Įvyko klaida. Pabandyk dar kartą vėliau.",
-      "error_email": "Įvesk teisingą el. pašto adresą.",
-      "error_password_required": "Įvesk slaptažodį.",
+      "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau.",
+      "error_email": "Įveskite teisingą el. pašto adresą.",
+      "error_password_required": "Įveskite slaptažodį.",
       "error_invalid_credentials": "Neteisingas el. paštas arba slaptažodis.",
-      "google_hint": "Registravaisi su socialine paskyra („Google“, „LinkedIn“ ar „Facebook“)? Tuomet slaptažodžio nereikia — spausk tos paslaugos mygtuką viršuje.",
-      "preview_host_notice": "Esi peržiūros versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidaryk https://labourmarket.ai ir prisijunk ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta.",
+      "google_hint": "Registravotės su socialine paskyra („Google“, „LinkedIn“ ar „Facebook“)? Tuomet slaptažodžio nereikia — spauskite tos paslaugos mygtuką viršuje.",
+      "preview_host_notice": "Esate peržiūros versijoje. Google prisijungimas veikia tik tikrojoje svetainėje — atidarykite https://labourmarket.ai ir prisijunkite ten. Prisijungimas el. paštu ir slaptažodžiu čia veikia kaip įprasta.",
       "google_recovery_label": "Prisijungti per Google — atsarginis būdas (laikinas, per išorinį prisijungimo puslapį)",
       "resend_confirmation": "Siųsti naują patvirtinimo nuorodą",
       "resend_sent": "Nauja patvirtinimo nuoroda išsiųsta adresu {email}."
     },
     "forgotPassword": {
-      "headline": "Pamiršai slaptažodį?",
-      "subcopy": "Įvesk savo el. paštą ir atsiųsime nuorodą slaptažodžiui atkurti.",
+      "headline": "Pamiršote slaptažodį?",
+      "subcopy": "Įveskite savo el. paštą ir atsiųsime nuorodą slaptažodžiui atkurti.",
       "email_label": "El. paštas",
       "submit_label": "Siųsti nuorodą",
       "sending": "Siunčiama...",
-      "success_title": "Patikrink savo el. paštą",
+      "success_title": "Patikrinkite savo el. paštą",
       "success_body": "Jei {email} turi paskyrą, išsiuntėme slaptažodžio atkūrimo nuorodą.",
       "back_to_login": "Grįžti į prisijungimą",
-      "error_email": "Įvesk teisingą el. pašto adresą.",
-      "error_generic": "Įvyko klaida. Pabandyk dar kartą vėliau."
+      "error_email": "Įveskite teisingą el. pašto adresą.",
+      "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau."
     },
     "resetPassword": {
       "headline": "Naujas slaptažodis",
-      "subcopy": "Įvesk naują slaptažodį savo paskyrai.",
+      "subcopy": "Įveskite naują slaptažodį savo paskyrai.",
       "checking": "Tikrinama nuoroda...",
       "password_label": "Naujas slaptažodis",
-      "confirm_password_label": "Pakartok slaptažodį",
+      "confirm_password_label": "Pakartokite slaptažodį",
       "submit_label": "Išsaugoti slaptažodį",
       "saving": "Saugoma...",
       "invalid_title": "Nuoroda negalioja",
@@ -4342,31 +4342,31 @@
       "request_new": "Prašyti naujos nuorodos",
       "error_password_short": "Slaptažodį turi sudaryti bent {min} simboliai.",
       "error_password_mismatch": "Slaptažodžiai nesutampa.",
-      "error_generic": "Įvyko klaida. Pabandyk dar kartą vėliau."
+      "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau."
     },
     "callback": {
-      "verifying": "Tikrinama tavo prisijungimo nuoroda...",
+      "verifying": "Tikrinama jūsų prisijungimo nuoroda...",
       "error_title": "Nepavyko prisijungti",
-      "error_body": "Ši nuoroda negalioja arba baigėsi jos galiojimas. Bandyk dar kartą.",
+      "error_body": "Ši nuoroda negalioja arba baigėsi jos galiojimas. Bandykite dar kartą.",
       "retry": "Bandyti dar kartą"
     },
     "onboarding": {
-      "pendingInviteNote": "Turi laukiantį kvietimą iš {org}. Užbaik paskyros nustatymą žemiau — tada galėsi jį priimti savo skydelyje.",
+      "pendingInviteNote": "Turite laukiantį kvietimą iš {org}. Užbaikite paskyros nustatymą žemiau — tada galėsite jį priimti savo skydelyje.",
       "rolePicker": {
         "intentHeading": "Pradėkime",
         "intentLead": "LabourMarket.ai padeda kaupti profesinę istoriją, valdyti dabartinį darbą ir atrasti naujas galimybes.",
-        "intentNote": "Gali pasirinkti kelis variantus ir vėliau juos pakeisti.",
-        "saidLabel": "Tu rašei:",
-        "saidHint": "Pažymėjome, kas tiko. Pataisyk, jei reikia.",
-        "doorLabel": "Tu pasirinkai:",
+        "intentNote": "Galite pasirinkti kelis variantus ir vėliau juos pakeisti.",
+        "saidLabel": "Jūs rašėte:",
+        "saidHint": "Pažymėjome, kas tiko. Pataisykite, jei reikia.",
+        "doorLabel": "Jūs pasirinkote:",
         "intent": {
           "work": {
             "title": "Dirbu / turiu profesinės patirties",
-            "desc": "Tavo darbas, įgūdžiai ir Darbo žurnalas kaupia profesinę istoriją — iš jos atsiranda naujos galimybės."
+            "desc": "Jūsų darbas, įgūdžiai ir Darbo žurnalas kaupia profesinę istoriją — iš jos atsiranda naujos galimybės."
           },
           "member": {
             "title": "Esu įmonės ar komandos dalis",
-            "desc": "Įmonė, komanda ar brigada, su kuria dirbi kasdien — darbas joje kaupiasi tavo profesinėje istorijoje."
+            "desc": "Įmonė, komanda ar brigada, su kuria dirbate kasdien — darbas joje kaupiasi jūsų profesinėje istorijoje."
           },
           "hire": {
             "title": "Vadovauju įmonei ar komandai",
@@ -4378,14 +4378,14 @@
           },
           "student": {
             "title": "Mokausi / ruošiuosi profesijai",
-            "desc": "Mokymasis ir praktika jau yra tavo profesinės istorijos dalis. Prisijunk prie savo mokymo įstaigos."
+            "desc": "Mokymasis ir praktika jau yra jūsų profesinės istorijos dalis. Prisijunkite prie savo mokymo įstaigos."
           },
           "education": {
             "title": "Atstovauju mokymo įstaigai",
-            "desc": "Kviesk besimokančiuosius, matyk jų dalyvavimą ir jungk juos prie praktikų ir darbų."
+            "desc": "Kvieskite besimokančiuosius, matykite jų dalyvavimą ir junkite juos prie praktikų ir darbų."
           }
         },
-        "heading": "Pradedi kaip asmuo ar įmonė?",
+        "heading": "Pradedate kaip asmuo ar įmonė?",
         "worker": {
           "title": "Asmuo",
           "desc": "Ieškau darbo, siūlau savo darbą arba fiksuoju mokslus ir veiklą — profilis, įgūdžiai, CV ir darbo žurnalas."
@@ -4403,53 +4403,53 @@
           "desc": "Užsisakyti paslaugas, gauti ataskaitas."
         },
         "continue": "Tęsti",
-        "multiNote": "Pasirink vieną ar abu — tai tik pradžios taškas. Asmuo ir įmonė yra tapatybės; samdymas, pirkimas, darbuotojų siūlymas ar projektų valdymas yra veiksmai, kuriuos pridėsi vėliau."
+        "multiNote": "Pasirinkite vieną ar abu — tai tik pradžios taškas. Asmuo ir įmonė yra tapatybės; samdymas, pirkimas, darbuotojų siūlymas ar projektų valdymas yra veiksmai, kuriuos pridėsite vėliau."
       },
       "step2": {
-        "studentHeading": "Kur mokaisi?",
+        "studentHeading": "Kur mokotės?",
         "institutionLabel": "Mokymo įstaiga",
         "institutionPlaceholder": "Mokykla, kolegija, universitetas ar mokymų teikėjas",
         "programLabel": "Programa ar kryptis (neprivaloma)",
         "educationTypeLabel": "Studijų tipas",
-        "errorInstitution": "Įrašyk, kur mokaisi (bent 2 simboliai).",
-        "heading": "Šiek tiek apie tave",
+        "errorInstitution": "Įrašykite, kur mokotės (bent 2 simboliai).",
+        "heading": "Šiek tiek apie jus",
         "continue": "Baigti"
       },
       "nextSteps": {
-        "eyebrow": "Po šio žingsnio — tavo realus profilis",
-        "s1": "Importuok CV (nebūtina), kad profilį užpildytum greičiau",
-        "s2": "Pridėk realius įgūdžius",
-        "s3": "Nurodyk prieinamumą",
-        "s4": "Pridėk darbo patirtį ir įrašus",
-        "note": "Įgūdžiai pradžioje yra tavo nurodyti. Dokumentai, darbo žurnalas ir žmonių peržiūros laikui bėgant juos sustiprina."
+        "eyebrow": "Po šio žingsnio — jūsų realus profilis",
+        "s1": "Importuokite CV (nebūtina), kad profilį užpildytumėte greičiau",
+        "s2": "Pridėkite realius įgūdžius",
+        "s3": "Nurodykite prieinamumą",
+        "s4": "Pridėkite darbo patirtį ir įrašus",
+        "note": "Įgūdžiai pradžioje yra jūsų nurodyti. Dokumentai, darbo žurnalas ir žmonių peržiūros laikui bėgant juos sustiprina."
       },
       "nextStepsOrganization": {
-        "eyebrow": "Toliau — tavo organizacija",
-        "s1": "Įvardyk organizaciją ir ką ji daro (įdarbina, tiekia žmones, atrenka, moko, vykdo projektus)",
-        "s2": "Pridėk savo žmones, komandas ar tiekiamą darbo jėgą",
-        "s3": "Paskelbk poreikį, pasiūlyk pajėgumus — arba abu",
-        "s4": "Susisiek su tinkamais žmonėmis ir organizacijomis, tada vykdyk darbą kartu",
+        "eyebrow": "Toliau — jūsų organizacija",
+        "s1": "Įvardykite organizaciją ir ką ji daro (įdarbina, tiekia žmones, atrenka, moko, vykdo projektus)",
+        "s2": "Pridėkite savo žmones, komandas ar tiekiamą darbo jėgą",
+        "s3": "Paskelbkite poreikį, pasiūlykite pajėgumus — arba abu",
+        "s4": "Susisiekite su tinkamais žmonėmis ir organizacijomis, tada vykdykite darbą kartu",
         "note": "Organizacija naudojama iš karto. Patvirtinimas yra atskiras, stipresnis pasitikėjimo žingsnis."
       },
       "display_name_label": "Rodomas vardas",
-      "country_label": "Kur dabar gyveni?",
-      "country_placeholder": "Pasirink šalį",
-      "country_search_placeholder": "Ieškok šalies",
-      "country_search_empty": "Šalies nerasta. Pabandyk kitą pavadinimą.",
-      "error_country_required": "Pasirink šalį.",
-      "error_role_required": "Pirmiausia pasirink, kuo nori naudotis — tada užpildysi profilį.",
-      "role_step_hint": "Pirmiausia pasirink, kuo nori naudotis — tada užpildysi profilį.",
+      "country_label": "Kur dabar gyvenate?",
+      "country_placeholder": "Pasirinkite šalį",
+      "country_search_placeholder": "Ieškokite šalies",
+      "country_search_empty": "Šalies nerasta. Pabandykite kitą pavadinimą.",
+      "error_country_required": "Pasirinkite šalį.",
+      "error_role_required": "Pirmiausia pasirinkite, kuo norite naudotis — tada užpildysite profilį.",
+      "role_step_hint": "Pirmiausia pasirinkite, kuo norite naudotis — tada užpildysite profilį.",
       "profession_label": "Kokia tavo profesija ar darbo patirtis?",
-      "profession_placeholder": "Įrašyk profesiją ar darbo sritį",
+      "profession_placeholder": "Įrašykite profesiją ar darbo sritį",
       "profession_add": "Pridėti",
-      "profession_hint": "Gali nurodyti vieną ar kelias profesijas ar darbo sritis. Vėliau galėsi jas papildyti.",
-      "profession_search_placeholder": "Ieškok profesijos ar darbo srities",
-      "profession_search_empty": "Nieko neatitinka. Profilį galėsi papildyti vėliau.",
+      "profession_hint": "Galite nurodyti vieną ar kelias profesijas ar darbo sritis. Vėliau galėsite jas papildyti.",
+      "profession_search_placeholder": "Ieškokite profesijos ar darbo srities",
+      "profession_search_empty": "Nieko neatitinka. Profilį galėsite papildyti vėliau.",
       "profession_remove": "Pašalinti",
       "back": "Atgal",
       "saving": "Saugoma...",
-      "error_name_required": "Įvesk rodomą vardą.",
-      "error_generic": "Įvyko klaida. Pabandyk dar kartą."
+      "error_name_required": "Įveskite rodomą vardą.",
+      "error_generic": "Įvyko klaida. Pabandykite dar kartą."
     },
     "roleSwitcher": {
       "label": "Vaidmuo",
@@ -5024,8 +5024,8 @@
       }
     },
     "middleware": {
-      "session_expired": "Prisijungimas baigė galioti. Prisijunk iš naujo.",
-      "onboarding_required": "Pirmiausia užpildyk profilį."
+      "session_expired": "Prisijungimas baigė galioti. Prisijunkite iš naujo.",
+      "onboarding_required": "Pirmiausia užpildykite profilį."
     },
     "notifications": {
       "types": {
@@ -5089,8 +5089,8 @@
       }
     },
     "carriedIntent": {
-      "label": "Tęsi",
-      "hint": "Prisijungus iš karto grįši prie šito — sakinys keliauja kartu su tavimi."
+      "label": "Tęsiate",
+      "hint": "Prisijungus iš karto grįšite prie šito — sakinys keliauja kartu su jumis."
     }
   },
   "shared": {
@@ -5554,9 +5554,9 @@
   "pages": {
     "workers": {
       "eyebrow": "Darbuotojams",
-      "title": "Rask darbą",
+      "title": "Raskite darbą",
       "titleAccent": "su vienu nemokamu profiliu.",
-      "subcopy": "Susikurk vieną profilį, nurodyk, kada esi laisvas, ir leisk realiai paklausai tave surasti – ir kitose šalyse.",
+      "subcopy": "Susikurkite vieną profilį, nurodykite, kada esate laisvi, ir leiskite realiai paklausai jus surasti – ir kitose šalyse.",
       "benefits": [
         {
           "title": "Vienas profilis visoms rinkoms",
@@ -5564,15 +5564,15 @@
         },
         {
           "title": "Reali paklausa",
-          "body": "Matyk atvirus darbo poreikius, atitinkančius tavo profesiją, įgūdžius ir miestą — ir vienu paspaudimu pareikšk susidomėjimą."
+          "body": "Matykite atvirus darbo poreikius, atitinkančius jūsų profesiją, įgūdžius ir miestą — ir vienu paspaudimu pareikškite susidomėjimą."
         },
         {
           "title": "Sąžiningi signalai",
           "body": "Skaidrūs, kontekstiniai atitikimo signalai — be išpūstų pažadų, be universalaus įvertinimo, be mokamų reitingų."
         },
         {
-          "title": "Auga, kol dirbi",
-          "body": "Fiksuok atliktus darbus ir rezultatus — tavo profesinė istorija turtėja, o galimybių paieška darosi vis tikslesnė, net kai aktyviai naujo darbo neieškai."
+          "title": "Auga, kol dirbate",
+          "body": "Fiksuokite atliktus darbus ir rezultatus — jūsų profesinė istorija turtėja, o galimybių paieška darosi vis tikslesnė, net kai aktyviai naujo darbo neieškote."
         }
       ],
       "screenshot": "Darbuotojo profilio srautas",
@@ -5580,67 +5580,67 @@
     },
     "companies": {
       "eyebrow": "Įmonėms",
-      "title": "Rask darbuotojų",
+      "title": "Raskite darbuotojų",
       "titleAccent": "savo projektams.",
-      "subcopy": "Nurodyk, kokių specialistų, kiek ir nuo kada reikia kiekvienam projektui. Užklausa nemokama ir be paskyros; su nemokama paskyra dar matysi, kurie laisvi darbuotojai ir agentūros tinka.",
+      "subcopy": "Nurodykite, kokių specialistų, kiek ir nuo kada reikia kiekvienam projektui. Užklausa nemokama ir be paskyros; su nemokama paskyra dar matysite, kurie laisvi darbuotojai ir agentūros tinka.",
       "benefits": [
         {
           "title": "Paklausa pagal projektą",
-          "body": "Apibrėžk pareigybes, žmonių skaičių ir įgūdžius kiekvienam projektui — ne miglotus skelbimus."
+          "body": "Apibrėžkite pareigybes, žmonių skaičių ir įgūdžius kiekvienam projektui — ne miglotus skelbimus."
         },
         {
           "title": "Atitiktis konkrečiam darbui",
-          "body": "Matai, kurie laisvi darbuotojai ir agentūros tinka kiekvienam konkrečiam poreikiui — sąžiningai, pagal poreikį."
+          "body": "Matote, kurie laisvi darbuotojai ir agentūros tinka kiekvienam konkrečiam poreikiui — sąžiningai, pagal poreikį."
         },
         {
           "title": "Agentūros, kai reikia",
-          "body": "Pasinaudok registruotų agentūrų rezervu papildomam pajėgumui neprarasdamas matomumo."
+          "body": "Pasinaudokite registruotų agentūrų rezervu papildomam pajėgumui neprarasdami matomumo."
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
       "cta": "Aprašyti, kokių darbuotojų reikia",
-      "calculatorBody": "Prieš ieškodamas darbuotojų, įvertink darbą: darbo valandas, medžiagas, įrangą ir keliones — savo skaičiais.",
-      "calculatorLink": "Apskaičiuok projekto kainą",
+      "calculatorBody": "Prieš ieškodami darbuotojų, įvertinkite darbą: darbo valandas, medžiagas, įrangą ir keliones — savo skaičiais.",
+      "calculatorLink": "Apskaičiuokite projekto kainą",
       "markets": {
         "lu": {
           "metaTitle": "Specialistai statybvietėms Liuksemburge",
-          "metaDescription": "Statybos įmonėms Liuksemburge: aprašyk, kokių suvirintojų, elektrikų, dailidžių ar pastolių montuotojų reikia. Nemokamai; atsako žmogus.",
+          "metaDescription": "Statybos įmonėms Liuksemburge: aprašykite, kokių suvirintojų, elektrikų, dailidžių ar pastolių montuotojų reikia. Nemokamai; atsako žmogus.",
           "eyebrow": "Darbdaviams Liuksemburge",
-          "title": "Specialistai tavo statybvietėms",
+          "title": "Specialistai jūsų statybvietėms",
           "titleAccent": "Liuksemburge.",
-          "subcopy": "Rangovams ir subrangovams statybose. Parašyk, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
-          "cta": "Aprašyk, ko reikia",
+          "subcopy": "Rangovams ir subrangovams statybose. Parašykite, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
+          "cta": "Aprašykite, ko reikia",
           "points": [
             "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
-            "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
+            "Ieškome žmonių, kurių užfiksuotas darbas atitinka jūsų poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
             "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
           ]
         },
         "nl": {
           "metaTitle": "Specialistai statybvietėms Nyderlanduose",
-          "metaDescription": "Statybos įmonėms Nyderlanduose: aprašyk, kokių suvirintojų, elektrikų, dailidžių ar pastolių montuotojų reikia. Nemokamai; atsako žmogus.",
+          "metaDescription": "Statybos įmonėms Nyderlanduose: aprašykite, kokių suvirintojų, elektrikų, dailidžių ar pastolių montuotojų reikia. Nemokamai; atsako žmogus.",
           "eyebrow": "Darbdaviams Nyderlanduose",
-          "title": "Specialistai tavo statybvietėms",
+          "title": "Specialistai jūsų statybvietėms",
           "titleAccent": "Nyderlanduose.",
-          "subcopy": "Rangovams ir subrangovams statybose. Parašyk, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
-          "cta": "Aprašyk, ko reikia",
+          "subcopy": "Rangovams ir subrangovams statybose. Parašykite, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
+          "cta": "Aprašykite, ko reikia",
           "points": [
             "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
-            "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
+            "Ieškome žmonių, kurių užfiksuotas darbas atitinka jūsų poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
             "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
           ]
         },
         "dk": {
           "metaTitle": "Specialistai statybvietėms Danijoje",
-          "metaDescription": "Statybos įmonėms Danijoje: aprašyk, kokių suvirintojų, elektrikų, dailidžių ar pastolių montuotojų reikia. Nemokamai; atsako žmogus.",
+          "metaDescription": "Statybos įmonėms Danijoje: aprašykite, kokių suvirintojų, elektrikų, dailidžių ar pastolių montuotojų reikia. Nemokamai; atsako žmogus.",
           "eyebrow": "Darbdaviams Danijoje",
-          "title": "Specialistai tavo statybvietėms",
+          "title": "Specialistai jūsų statybvietėms",
           "titleAccent": "Danijoje.",
-          "subcopy": "Rangovams ir subrangovams statybose. Parašyk, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
-          "cta": "Aprašyk, ko reikia",
+          "subcopy": "Rangovams ir subrangovams statybose. Parašykite, kokių specialistų reikia — suvirintojų, elektrikų, dailidžių, pastolių montuotojų, — kiek, kur ir nuo kada.",
+          "cta": "Aprašykite, ko reikia",
           "points": [
             "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
-            "Ieškome žmonių, kurių užfiksuotas darbas atitinka tavo poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
+            "Ieškome žmonių, kurių užfiksuotas darbas atitinka jūsų poreikį. Jei tinkamo dar nėra, taip ir pasakome.",
             "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
           ]
         }
@@ -5648,21 +5648,21 @@
     },
     "agencies": {
       "eyebrow": "Agentūroms",
-      "title": "Tavo rezervas —",
+      "title": "Jūsų rezervas —",
       "titleAccent": "judantis.",
-      "subcopy": "Valdyk kuruojamus darbuotojus, skelbk paklausą klientų vardu ir tarpininkauk — viskas vienoje vietoje.",
+      "subcopy": "Valdykite kuruojamus darbuotojus, skelbkite paklausą klientų vardu ir tarpininkaukite — viskas vienoje vietoje.",
       "benefits": [
         {
-          "title": "Valdyk rezervą",
+          "title": "Valdykite rezervą",
           "body": "Kuruojami darbuotojai, prieinamumas ir būsenos — viskas vienoje darbo erdvėje."
         },
         {
           "title": "Tarpininkavimas su pranašumu",
-          "body": "Dalinkis klientų poreikiais ir greičiau įdarbink tinkamus žmones su paaiškinama atitikimo kryptimi."
+          "body": "Dalinkitės klientų poreikiais ir greičiau įdarbinkite tinkamus žmones su paaiškinama atitikimo kryptimi."
         },
         {
           "title": "Matomumo valdymas",
-          "body": "Pasirink, kas vieša, tik agentūroms ar tiesioginė — matomumą valdai tu."
+          "body": "Pasirinkite, kas vieša, tik agentūroms ar tiesioginė — matomumą valdote jūs."
         }
       ],
       "screenshot": "Agentūros režimo srautas",
@@ -5672,55 +5672,55 @@
       "eyebrow": "Nemokamas CV kūrimas",
       "title": "Profesionalus CV,",
       "titleAccent": "nemokamai.",
-      "subcopy": "Susikurk CV nuo nulio arba importuok esamą PDF ar DOCX. Peržiūrėk kiekvieną ištrauktą faktą, pasirink tvarkingą šabloną ir atsisiųsk PDF — nemokamai. Jei norėsi, ta pati informacija gali tapti tavo darbuotojo profiliu ir parodyti tikrus darbo skelbimus iš oficialių viešų šaltinių.",
+      "subcopy": "Susikurkite CV nuo nulio arba importuokite esamą PDF ar DOCX. Peržiūrėkite kiekvieną ištrauktą faktą, pasirinkite tvarkingą šabloną ir atsisiųskite PDF — nemokamai. Jei norėsite, ta pati informacija gali tapti jūsų darbuotojo profiliu ir parodyti tikrus darbo skelbimus iš oficialių viešų šaltinių.",
       "cta": "Kurti mano CV — nemokamai",
       "benefits": [
         {
-          "title": "Importuok arba pradėk iš naujo",
-          "body": "Įkelk esamą CV (PDF, DOCX ar tekstą) arba pradėk nuo tuščio lapo. Ištraukti faktai lieka pasiūlymais, kol jų nepriimi."
+          "title": "Importuokite arba pradėkite iš naujo",
+          "body": "Įkelkite esamą CV (PDF, DOCX ar tekstą) arba pradėkite nuo tuščio lapo. Ištraukti faktai lieka pasiūlymais, kol jų nepriimate."
         },
         {
           "title": "Sąžininga struktūra",
-          "body": "Tavo patirtis, išsilavinimas, kalbos ir įgūdžiai struktūruojami tavo peržiūrai — niekas neišgalvojama ir niekas neišsaugoma be tavo sutikimo."
+          "body": "Jūsų patirtis, išsilavinimas, kalbos ir įgūdžiai struktūruojami jūsų peržiūrai — niekas neišgalvojama ir niekas neišsaugoma be jūsų sutikimo."
         },
         {
           "title": "Tvarkingi šablonai, tikras PDF",
-          "body": "Pasirink profesionalų šabloną ir eksportuok į A4 PDF per naršyklę — be vandens ženklų, be mokesčių."
+          "body": "Pasirinkite profesionalų šabloną ir eksportuokite į A4 PDF per naršyklę — be vandens ženklų, be mokesčių."
         },
         {
           "title": "Daugiau nei dokumentas",
-          "body": "Su aiškiu tavo sutikimu tie patys faktai gali sukurti darbuotojo profilį, susieti įgūdžius su bendru Europos įgūdžių katalogu ir parodyti tinkamus viešus darbo skelbimus. Ilgainiui fiksuojant atliktus darbus tavo profesinė istorija nuolat auga — o galimybių paieška darosi vis tikslesnė."
+          "body": "Su aiškiu jūsų sutikimu tie patys faktai gali sukurti darbuotojo profilį, susieti įgūdžius su bendru Europos įgūdžių katalogu ir parodyti tinkamus viešus darbo skelbimus. Ilgainiui fiksuojant atliktus darbus jūsų profesinė istorija nuolat auga — o galimybių paieška darosi vis tikslesnė."
         }
       ],
       "stepsTitle": "Kaip tai veikia",
       "steps": [
         {
-          "title": "Registruokis nemokamai",
-          "body": "Paskyra leidžia CV redaguoti, o duomenys lieka tavo kontrolėje — bet kada gali juos ištrinti."
+          "title": "Registruokitės nemokamai",
+          "body": "Paskyra leidžia CV redaguoti, o duomenys lieka jūsų kontrolėje — bet kada galite juos ištrinti."
         },
         {
-          "title": "Pridėk savo patirtį",
-          "body": "Importuok seną CV arba įrašyk pats — tada peržiūrėk kiekvieną faktą ir nuspręsk, ką pasilikti, prieš jį panaudojant."
+          "title": "Pridėkite savo patirtį",
+          "body": "Importuokite seną CV arba įrašykite patys — tada peržiūrėkite kiekvieną faktą ir nuspręskite, ką pasilikti, prieš jį panaudojant."
         },
         {
-          "title": "Atsisiųsk ir spręsk",
-          "body": "Eksportuok CV kaip PDF. Tapti matomam darbdaviams — atskiras, neprivalomas pasirinkimas."
+          "title": "Atsisiųskite ir spręskite",
+          "body": "Eksportuokite CV kaip PDF. Tapti matomam darbdaviams — atskiras, neprivalomas pasirinkimas."
         }
       ],
-      "privacyNote": "Tavo CV pagal nutylėjimą lieka privatus. Niekas nesidalinama su darbdaviais, kol pats neįjungi matomumo, o jį bet kada gali išjungti."
+      "privacyNote": "Jūsų CV pagal nutylėjimą lieka privatus. Niekas nesidalinama su darbdaviais, kol patys neįjungiate matomumo, o jį bet kada galite išjungti."
     }
   },
   "pricing": {
     "checkoutReturn": {
-      "cancelled": "Apmokėjimas atšauktas — niekas nenuskaičiuota ir tavo paskyroje niekas nepasikeitė."
+      "cancelled": "Apmokėjimas atšauktas — niekas nenuskaičiuota ir jūsų paskyroje niekas nepasikeitė."
     },
     "eyebrow": "Kainos",
     "title": "Aiškūs planai —",
     "titleAccent": "sąžininga kaina.",
     "subcopyLive": "Kainos patvirtintos savininko ir galioja. Aktyvavimas vyksta organizacijos paskyroje per saugų Stripe mokėjimą; šiame puslapyje niekas nenuskaičiuojama.",
-    "subcopy": "Kainos dar nėra galutinės ir sąskaitos už tave šiame puslapyje niekada nepradedamos. Žemiau pateikti planai apibūdina apimtį; aktyvavimas vyksta rankiniu būdu — susisiek ir prieš pradedant suderinsime kainą bei apimtį.",
-    "subcopyConfirmed": "Kainos patvirtintos. Aktyvavimas internetu dar neatidarytas — užsirašyk į sąrašą, susisieksime ir organizaciją paleisime rankiniu būdu; šiame puslapyje niekas netraukiama.",
-    "trialNote": "Pirmoji organizacijos prenumerata prasideda 14 dienų bandomuoju laikotarpiu. Po jo kortelė apmokestinama mėnesio kaina, o atšaukti gali iki jo pabaigos.",
+    "subcopy": "Kainos dar nėra galutinės ir sąskaitos už jus šiame puslapyje niekada nepradedamos. Žemiau pateikti planai apibūdina apimtį; aktyvavimas vyksta rankiniu būdu — susisiekite ir prieš pradedant suderinsime kainą bei apimtį.",
+    "subcopyConfirmed": "Kainos patvirtintos. Aktyvavimas internetu dar neatidarytas — užsirašykite į sąrašą, susisieksime ir organizaciją paleisime rankiniu būdu; šiame puslapyje niekas netraukiama.",
+    "trialNote": "Pirmoji organizacijos prenumerata prasideda 14 dienų bandomuoju laikotarpiu. Po jo kortelė apmokestinama mėnesio kaina, o atšaukti galite iki jo pabaigos.",
     "planCta": "Užsirašyti į šio plano sąrašą",
     "featuresLabel": "Apima",
     "plans": {
@@ -5791,8 +5791,8 @@
     "individual": {
       "name": "Ypatingi poreikiai",
       "tagline": "Poreikiams, kurių standartiniai planai neapima",
-      "question": "Turi ką nors konkretaus omenyje?",
-      "body": "Susisiek, jei turi ypatingų poreikių — juos aptariame kartu. Jokio automatinio plano, jokios paskelbtos kainos.",
+      "question": "Turite ką nors konkretaus omenyje?",
+      "body": "Susisiekite, jei turite ypatingų poreikių — juos aptariame kartu. Jokio automatinio plano, jokios paskelbtos kainos.",
       "cta": "Susisiekti"
     },
     "priceFree": "0 €",
@@ -9450,7 +9450,7 @@
   },
   "planBoundary": {
     "title": "Ką apima mokami planai",
-    "subcopy": "Mokėjimai dar neįjungti — jokio mokėjimo puslapio ir jokios kortelės. Mokami planai rodomi, kad žinotum apimtį; piloto prieiga suteikiama rankiniu būdu.",
+    "subcopy": "Mokėjimai dar neįjungti — jokio mokėjimo puslapio ir jokios kortelės. Mokami planai rodomi, kad žinotumėte apimtį; piloto prieiga suteikiama rankiniu būdu.",
     "note": "Planai aprašo apimtį, ne aktyvų mokėjimą. Šiame puslapyje pinigai neimami.",
     "plans": {
       "free_worker": "Nemokamas darbuotojas",
@@ -9484,7 +9484,7 @@
     "limitValue": "iki {count}",
     "freeToday": {
       "freeTitle": "Nemokama šiandien",
-      "free": "Viskas, kuo šiuo metu gali naudotis produkte, yra nemokama — pilotas vyksta be mokėjimų ir kortelės niekas neprašo.",
+      "free": "Viskas, kuo šiuo metu galite naudotis produkte, yra nemokama — pilotas vyksta be mokėjimų ir kortelės niekas neprašo.",
       "paidTitle": "Paruošti mokami planai",
       "paid": "Šiuo metu nepasiekiama.",
       "preparedTitle": "Paruošta, bet neįsigyjama",
@@ -9514,7 +9514,7 @@
     },
     "enforcement": {
       "free_surface": "Prieinama šiandien",
-      "server_gate": "Prieinama šiandien, pagal tavo teises",
+      "server_gate": "Prieinama šiandien, pagal jūsų teises",
       "declared_boundary_only": "Paruošta — įsijungs tik su apmokestinimu",
       "admin_rbac": "Vidinė, tik administratoriui"
     }
@@ -9854,29 +9854,29 @@
     "banner": {
       "badge": "Ankstyvoji prieiga",
       "bodyLive": "Organizacijos planą galima aktyvuoti paskyroje saugiu mokėjimu. Pirmuosius klientus vis tiek aptarnaujame tiesiogiai: darbuotojų užklausa pateikiama nemokamai, o galutinę apimtį suderiname prieš pradedant.",
-      "body": "Vieši mokėjimai dar neįjungti. Pirmuosius klientus aptarnaujame tiesiogiai: darbuotojų užklausos pateikimas nemokamas, o galutinė kaina visada patvirtinama su tavimi prieš pradedant bet kokį mokamą darbą.",
+      "body": "Vieši mokėjimai dar neįjungti. Pirmuosius klientus aptarnaujame tiesiogiai: darbuotojų užklausos pateikimas nemokamas, o galutinė kaina visada patvirtinama su jumis prieš pradedant bet kokį mokamą darbą.",
       "cta": "Pateikti darbuotojų užklausą"
     },
     "title": "Kaip veikia pirmoji mokama paslauga",
     "steps": [
       {
-        "title": "Pateik užklausą nemokamai",
-        "body": "Aprašyk reikalingus darbuotojus ar brigadą užklausos formoje. Jokio mokesčio, jokios kortelės, niekas nepublikuojama automatiškai."
+        "title": "Pateikite užklausą nemokamai",
+        "body": "Aprašykite reikalingus darbuotojus ar brigadą užklausos formoje. Jokio mokesčio, jokios kortelės, niekas nepublikuojama automatiškai."
       },
       {
         "title": "Užklausą peržiūri žmogus",
         "body": "Operatorius perskaito kiekvieną užklausą, susisiekia ir patikslina apimtį, terminus ir sąlygas prieš bet kokį tolimesnį žingsnį."
       },
       {
-        "title": "Gauni rankiniu būdu patikrintą trumpąjį sąrašą",
-        "body": "Realūs kandidatai ar brigados, žmogaus patikrinti pagal tavo užklausą. Jei tinkamo trumpojo sąrašo sudaryti nepavyksta — mokesčio nėra, o mes niekada nežadame, kad kandidatas tikrai bus rastas."
+        "title": "Gaunate rankiniu būdu patikrintą trumpąjį sąrašą",
+        "body": "Realūs kandidatai ar brigados, žmogaus patikrinti pagal jūsų užklausą. Jei tinkamo trumpojo sąrašo sudaryti nepavyksta — mokesčio nėra, o mes niekada nežadame, kad kandidatas tikrai bus rastas."
       },
       {
-        "title": "Moki tik už suteiktą paslaugą",
+        "title": "Mokate tik už suteiktą paslaugą",
         "body": "Fiksuotas sėkmės mokestis taikomas už įdarbintą darbuotoją, brigadą ar įmonę. Atskiras koordinavimo mokestis taikomas tik tada, kai realiai atliekamas dokumentų ar įvedimo koordinavimas. Galutinė kaina patvirtinama prieš pradedant mokamą darbą."
       }
     ],
-    "note": "Kartu veikia du dalykai, o šiame puslapyje aprašytas antrasis. Pati platforma veikia automatiškai: darbo skelbimai yra vieši, atitikimo peržiūra atidaryta be paskyros, o įvardyta užklausa sugeneruoja surikiuotą kandidatų sąrašą su paaiškinimu, kodėl kiekvienas žmogus tinka — viena aktyvi pozicija be mokesčio. Mokama paslauga aukščiau yra žmogaus darbas: operatorius perskaito tavo užklausą, susisiekia su tavimi ir sąrašą patikrina rankomis, prieš pasiūlydamas bet kurį kandidatą. Visa brigada jau gali pasiūlyti save tavo užklausai kaip vienas vienetas ir, abiem pusėms susitarus, prisijungti prie tavo projekto kaip viena komanda; automatinio visų brigadų siūlymo sąraše dar nėra — sąrašas rikiuoja žmones po vieną.",
+    "note": "Kartu veikia du dalykai, o šiame puslapyje aprašytas antrasis. Pati platforma veikia automatiškai: darbo skelbimai yra vieši, atitikimo peržiūra atidaryta be paskyros, o įvardyta užklausa sugeneruoja surikiuotą kandidatų sąrašą su paaiškinimu, kodėl kiekvienas žmogus tinka — viena aktyvi pozicija be mokesčio. Mokama paslauga aukščiau yra žmogaus darbas: operatorius perskaito jūsų užklausą, susisiekia su jumis ir sąrašą patikrina rankomis, prieš pasiūlydamas bet kurį kandidatą. Visa brigada jau gali pasiūlyti save jūsų užklausai kaip vienas vienetas ir, abiem pusėms susitarus, prisijungti prie jūsų projekto kaip viena komanda; automatinio visų brigadų siūlymo sąraše dar nėra — sąrašas rikiuoja žmones po vieną.",
     "ctaLabel": "Pateikti darbuotojų užklausą →"
   },
   "adminLaunchReadiness": {
@@ -19392,23 +19392,23 @@
   },
   "workLifecycle": {
     "pending": "Dar ne",
-    "title": "Kas nutinka su tavo darbu",
-    "titleCompany": "Kas nutinka su tavo vykdomu darbu",
+    "title": "Kas nutinka su jūsų darbu",
+    "titleCompany": "Kas nutinka su jūsų vykdomu darbu",
     "example": "Pavyzdys — ne tikras žmogus ir ne tikri duomenys",
-    "hint": "Pasirink žingsnį. Kiekvienas atveria tikrą vietą tavo darbo erdvėje.",
-    "hintWorkers": "Pasirink žingsnį. Kiekvienas atveria tikrą vietą tavo darbo erdvėje.",
+    "hint": "Pasirinkite žingsnį. Kiekvienas atveria tikrą vietą jūsų darbo erdvėje.",
+    "hintWorkers": "Pasirinkite žingsnį. Kiekvienas atveria tikrą vietą jūsų darbo erdvėje.",
     "open": "Atidaryti darbo erdvėje",
     "list": "Darbo gyvavimo ciklo žingsniai",
     "workers": {
       "person": {
-        "label": "Tu",
+        "label": "Jūs",
         "fact": "Virėja · profesinė tapatybė",
-        "detail": "Viena profesinė tapatybė, kuri priklauso tau — ne vienam darbdaviui."
+        "detail": "Viena profesinė tapatybė, kuri priklauso jums — ne vienam darbdaviui."
       },
       "team": {
         "label": "Komanda",
         "fact": "Virtuvės komanda",
-        "detail": "Prisijungi prie tikros komandos — matai, su kuo dirbi ir kas jai vadovauja."
+        "detail": "Prisijungiate prie tikros komandos — matote, su kuo dirbate ir kas jai vadovauja."
       },
       "project": {
         "label": "Projektas",
@@ -19418,7 +19418,7 @@
       "work": {
         "label": "Darbas",
         "fact": "Vakaro pamaina · 8 val.",
-        "detail": "Ką padarei, kada ir kiek laiko — užfiksuota tada, kai vyksta."
+        "detail": "Ką padarėte, kada ir kiek laiko — užfiksuota tada, kai vyksta."
       },
       "evidence": {
         "label": "Įrodymas",
@@ -19432,20 +19432,20 @@
       },
       "history": {
         "label": "Istorija",
-        "fact": "Įtraukta į tavo istoriją",
-        "detail": "Patvirtintas darbas kuria tavo profesinę istoriją — ji lieka su tavimi kitam darbui."
+        "fact": "Įtraukta į jūsų istoriją",
+        "detail": "Patvirtintas darbas kuria jūsų profesinę istoriją — ji lieka su jumis kitam darbui."
       }
     },
     "companies": {
       "need": {
         "label": "Poreikis",
         "fact": "4 virėjai nuo pirmadienio",
-        "detail": "Tikrą poreikį nurodai vieną kartą: kas, kur ir nuo kada."
+        "detail": "Tikrą poreikį nurodote vieną kartą: kas, kur ir nuo kada."
       },
       "people": {
         "label": "Žmonės",
         "fact": "Tinkami profesionalai",
-        "detail": "Profesionalai, kurių tikra darbo istorija tinka poreikiui — matai, kas patvirtinta, o kas dar ne."
+        "detail": "Profesionalai, kurių tikra darbo istorija tinka poreikiui — matote, kas patvirtinta, o kas dar ne."
       },
       "team": {
         "label": "Komanda",
@@ -19464,8 +19464,8 @@
       },
       "confirmation": {
         "label": "Patvirtinta",
-        "fact": "Laukia tavo patvirtinimo",
-        "detail": "Matai, ką dar reikia patvirtinti ir kas jau atlikta."
+        "fact": "Laukia jūsų patvirtinimo",
+        "detail": "Matote, ką dar reikia patvirtinti ir kas jau atlikta."
       },
       "report": {
         "label": "Ataskaita",
@@ -20443,25 +20443,25 @@
   },
   "pilotPass": {
     "title": "Organizacijos planas — {days} dienų pilotas už 1 €",
-    "intro": "Sumokėk 1 € vieną kartą ir tavo organizacija {days} dienas gauna mokamą Organizacijos planą. Ką jis prideda prie nemokamo plano: be ribos vienu metu atvirų pozicijų ir darbuotojų poreikių (nemokamame plane – vienas). Susirašinėjimas, kandidatų santraukos, komandų parinkimas ir rezervacijos lieka prieinami kaip ir nemokamame plane.",
+    "intro": "Sumokėkite 1 € vieną kartą ir jūsų organizacija {days} dienas gauna mokamą Organizacijos planą. Ką jis prideda prie nemokamo plano: be ribos vienu metu atvirų pozicijų ir darbuotojų poreikių (nemokamame plane – vienas). Susirašinėjimas, kandidatų santraukos, komandų parinkimas ir rezervacijos lieka prieinami kaip ir nemokamame plane.",
     "terms": "Vienkartinis mokėjimas. Niekas neatsinaujina ir daugiau nenuskaičiuojama: po {days} dienų planas baigiasi savaime ir organizacija grįžta į nemokamą planą. Planas pasirodo žemiau, kai tik Stripe patvirtina mokėjimą.",
     "pay": "Mokėti 1 € — {days} dienų pilotas",
     "status": {
       "pilot_pass_disabled": "Pilotas šiuo metu nesiūlomas.",
-      "unauthenticated": "Prisijunk, kad pradėtum pilotą.",
-      "no_organization": "Pirma pasirink savo organizacijos erdvę.",
+      "unauthenticated": "Prisijunkite, kad pradėtumėte pilotą.",
+      "no_organization": "Pirma pasirinkite savo organizacijos erdvę.",
       "not_billing_authority": "Pilotą gali pradėti tik organizacijos mokėjimus valdantis asmuo.",
       "billing_not_active": "Šiai organizacijai mokėjimai nepasiekiami.",
-      "plan_active": "Tavo organizacija jau turi aktyvų planą.",
-      "checkout_failed": "Stripe nesukūrė mokėjimo puslapio. Niekas nenuskaičiuota; bandyk vėliau."
+      "plan_active": "Jūsų organizacija jau turi aktyvų planą.",
+      "checkout_failed": "Stripe nesukūrė mokėjimo puslapio. Niekas nenuskaičiuota; bandykite vėliau."
     },
     "result": {
-      "paid": "Stripe gavo mokėjimą. Planas įsijungia, kai tik ateina patvirtinimas — jei dar nematai, po akimirkos atnaujink puslapį.",
+      "paid": "Stripe gavo mokėjimą. Planas įsijungia, kai tik ateina patvirtinimas — jei dar nematote, po akimirkos atnaujinkite puslapį.",
       "cancelled": "Mokėjimas atšauktas — niekas nenuskaičiuota."
     },
-    "elsewhere": "Viršuje esančiame erdvių pasirinkime pasirink {organization} — pilotas pradedamas iš tos organizacijos erdvės.",
+    "elsewhere": "Viršuje esančiame erdvių pasirinkime pasirinkite {organization} — pilotas pradedamas iš tos organizacijos erdvės.",
     "invite": {
-      "line": "Sumokėk 1 € vieną kartą ir gauk mokamą Organizacijos planą {days} dienoms. Niekas neatsinaujina.",
+      "line": "Sumokėkite 1 € vieną kartą ir gaukite mokamą Organizacijos planą {days} dienoms. Niekas neatsinaujina.",
       "cta": "Atidaryti pilotą"
     }
   },
@@ -20566,9 +20566,9 @@
     },
     "control": {
       "title": "Naudojimo matavimas ir kampanijos priskyrimas",
-      "granted": "Leidai. Gali bet kada atšaukti — tada įrašai pašalinami iš šio įrenginio.",
-      "refused": "Atsisakei. Šiame įrenginyje matavimui niekas nesaugoma.",
-      "undecided": "Dar nepasirinkai, todėl matavimui niekas nesaugoma.",
+      "granted": "Leidote. Galite bet kada atšaukti — tada įrašai pašalinami iš šio įrenginio.",
+      "refused": "Atsisakėte. Šiame įrenginyje matavimui niekas nesaugoma.",
+      "undecided": "Dar nepasirinkote, todėl matavimui niekas nesaugoma.",
       "allow": "Leisti",
       "refuse": "Atsisakyti"
     }

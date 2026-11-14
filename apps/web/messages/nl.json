@@ -4222,12 +4222,12 @@
     "social": {
       "continueWithLinkedIn": "Doorgaan met LinkedIn",
       "continueWithFacebook": "Doorgaan met Facebook",
-      "inAppBrowser": "Je zit in de ingebouwde browser van een app, waar inloggen met Google vaak niet werkt. Open deze pagina in de browser van je telefoon (Safari of Chrome), of gebruik hieronder je e-mailadres en wachtwoord."
+      "inAppBrowser": "U zit in de ingebouwde browser van een app, waar inloggen met Google vaak niet werkt. Open deze pagina in de browser van uw telefoon (Safari of Chrome), of gebruik hieronder uw e-mailadres en wachtwoord."
     },
     "legalNotice": {
-      "signup": "Door een account aan te maken bevestig je dat je de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
-      "googleLogin": "Heb je nog geen account, dan wordt er een aangemaakt wanneer je inlogt met een sociaal account (zoals Google). Door een account aan te maken bevestig je dat je de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
-      "controller": "De verwerkingsverantwoordelijke voor je accountgegevens is UAB “Nonstop Group”. Je gegevens worden verwerkt om je account aan te maken en de dienst te leveren; ze worden niet voor marketing gebruikt zonder je afzonderlijke, optionele toestemming."
+      "signup": "Door een account aan te maken bevestigt u dat u de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> heeft gelezen.",
+      "googleLogin": "Heeft u nog geen account, dan wordt er een aangemaakt wanneer u inlogt met een sociaal account (zoals Google). Door een account aan te maken bevestigt u dat u de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> heeft gelezen.",
+      "controller": "De verwerkingsverantwoordelijke voor uw accountgegevens is UAB “Nonstop Group”. Uw gegevens worden verwerkt om uw account aan te maken en de dienst te leveren; ze worden niet voor marketing gebruikt zonder uw afzonderlijke, optionele toestemming."
     },
     "errors": {
       "userAlreadyRegistered": "Dit e-mailadres is al geregistreerd. Log in plaats daarvan in.",
@@ -4239,19 +4239,19 @@
       "oauth": {
         "missing_code": "De inlogdienst kwam terug zonder inlogcode. Probeer het opnieuw — als het zich herhaalt, laad de pagina dan opnieuw.",
         "exchange_failed": "Inloggen is niet gelukt. Probeer het opnieuw — de inlogcode werkt één keer en verloopt snel.",
-        "no_user": "Je bent ingelogd, maar je account is niet bereikbaar. Log uit en weer in.",
+        "no_user": "U bent ingelogd, maar uw account is niet bereikbaar. Log uit en weer in.",
         "callback": "Onverwachte fout tijdens het inloggen. Probeer het opnieuw — als het aanhoudt, deel dan het trace-ID hieronder.",
-        "cancelled": "Inloggen is geannuleerd. Er is niets met je account gebeurd.",
+        "cancelled": "Inloggen is geannuleerd. Er is niets met uw account gebeurd.",
         "unknown": "Kon niet inloggen. Probeer het opnieuw.",
-        "link_expired": "Deze bevestigingslink is verlopen of al gebruikt. Heb je je e-mailadres al bevestigd, log dan gewoon in. Vraag anders hieronder een nieuwe link aan.",
-        "confirmed_sign_in": "Je e-mailadres is bevestigd. De registratie is op een ander apparaat gestart; log hier in om verder te gaan.",
-        "confirm_link_opened": "Deze bevestigingslink is geopend. Je e-mailadres is hoogstwaarschijnlijk al bevestigd, dus probeer in te loggen. Lukt dat niet, vraag dan hieronder een nieuwe link aan.",
-        "provider_error": "De inlogdienst kon deze aanmelding niet afronden, en opnieuw proberen loopt waarschijnlijk op hetzelfde uit. Log in op de manier waarop je je eerst hebt geregistreerd, of met je e-mailadres en wachtwoord."
+        "link_expired": "Deze bevestigingslink is verlopen of al gebruikt. Heeft u uw e-mailadres al bevestigd, log dan gewoon in. Vraag anders hieronder een nieuwe link aan.",
+        "confirmed_sign_in": "Uw e-mailadres is bevestigd. De registratie is op een ander apparaat gestart; log hier in om verder te gaan.",
+        "confirm_link_opened": "Deze bevestigingslink is geopend. Uw e-mailadres is hoogstwaarschijnlijk al bevestigd, dus probeer in te loggen. Lukt dat niet, vraag dan hieronder een nieuwe link aan.",
+        "provider_error": "De inlogdienst kon deze aanmelding niet afronden, en opnieuw proberen loopt waarschijnlijk op hetzelfde uit. Log in op de manier waarop u zich eerst heeft geregistreerd, of met uw e-mailadres en wachtwoord."
       },
-      "emailNotConfirmed": "Je e-mailadres is nog niet bevestigd. Open de bevestigingslink die we je stuurden, of vraag hieronder een nieuwe aan."
+      "emailNotConfirmed": "Uw e-mailadres is nog niet bevestigd. Open de bevestigingslink die we u stuurden, of vraag hieronder een nieuwe aan."
     },
     "signup": {
-      "headline": "Maak je account aan",
+      "headline": "Maak uw account aan",
       "role": {
         "worker": "Werknemer",
         "company": "Bedrijf",
@@ -4262,7 +4262,7 @@
         "service_provider": "Dienstverlener",
         "admin": "Beheerder"
       },
-      "subcopy": "Eén profiel voor je werkervaring en kansen — in de volgende stap geef je aan waarvoor je komt.",
+      "subcopy": "Eén profiel voor uw werkervaring en kansen — in de volgende stap geeft u aan waarvoor u komt.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
@@ -4273,8 +4273,8 @@
       "confirm_password_label": "Bevestig wachtwoord",
       "submit_label": "Registreren",
       "signing": "Aanmaken...",
-      "disclaimer": "Jouw feedback vormt het product — vertel ons wat werkt en wat er mist.",
-      "has_account": "Heb je al een account?",
+      "disclaimer": "Uw feedback vormt het product — vertel ons wat werkt en wat er mist.",
+      "has_account": "Heeft u al een account?",
       "login_link": "Inloggen",
       "error_generic": "Er is iets misgegaan. Probeer het zo opnieuw.",
       "error_email": "Voer een geldig e-mailadres in.",
@@ -4283,17 +4283,17 @@
       "error_password_uppercase": "Wachtwoord moet een hoofdletter bevatten.",
       "error_password_number": "Wachtwoord moet een cijfer bevatten.",
       "error_password_special": "Wachtwoord moet een speciaal teken bevatten.",
-      "check_email_title": "Bevestig je e-mail",
-      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien. Zie je de e-mail niet? Kijk in je spammap — hier kun je een nieuwe link aanvragen.",
+      "check_email_title": "Bevestig uw e-mail",
+      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om uw account te voltooien. Ziet u de e-mail niet? Kijk in uw spammap — hier kunt u een nieuwe link aanvragen.",
       "resend_label": "Link opnieuw sturen",
-      "resend_sent": "Opnieuw verstuurd. Controleer je inbox en spammap.",
-      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen.",
-      "invited_email_note": "Dit is het adres waarnaar je uitnodiging is gestuurd.",
+      "resend_sent": "Opnieuw verstuurd. Controleer uw inbox en spammap.",
+      "resend_wait": "U kunt over {seconds} s een nieuwe link aanvragen.",
+      "invited_email_note": "Dit is het adres waarnaar uw uitnodiging is gestuurd.",
       "show_password": "Wachtwoord tonen"
     },
     "login": {
       "headline": "Inloggen",
-      "subcopy": "Ga verder met een sociaal account, of log in met je e-mailadres en wachtwoord.",
+      "subcopy": "Ga verder met een sociaal account, of log in met uw e-mailadres en wachtwoord.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
@@ -4301,76 +4301,76 @@
       "password_label": "Wachtwoord",
       "forgot_password": "Wachtwoord vergeten?",
       "reset_password_cta": "Wachtwoord resetten",
-      "reset_password_help": "We e-mailen je een resetlink — je oude wachtwoord heb je niet nodig.",
-      "reset_success": "Wachtwoord bijgewerkt. Log in met je nieuwe wachtwoord.",
+      "reset_password_help": "We e-mailen u een resetlink — uw oude wachtwoord heeft u niet nodig.",
+      "reset_success": "Wachtwoord bijgewerkt. Log in met uw nieuwe wachtwoord.",
       "submit_label": "Inloggen",
       "signing": "Bezig met inloggen...",
       "no_account": "Nog geen account?",
       "signup_link": "Registreren",
       "error_generic": "Er is iets misgegaan. Probeer het zo opnieuw.",
       "error_email": "Voer een geldig e-mailadres in.",
-      "error_password_required": "Voer je wachtwoord in.",
+      "error_password_required": "Voer uw wachtwoord in.",
       "error_invalid_credentials": "Ongeldig e-mailadres of wachtwoord.",
-      "google_hint": "Geregistreerd met een sociaal account (Google, LinkedIn of Facebook)? Dan heb je geen wachtwoord — gebruik hierboven de knop van die aanbieder.",
-      "preview_host_notice": "Je bekijkt een previewversie van de site. Inloggen met Google werkt alleen op de live site — open https://labourmarket.ai om het te gebruiken. Inloggen met e-mailadres en wachtwoord werkt hier gewoon.",
+      "google_hint": "Geregistreerd met een sociaal account (Google, LinkedIn of Facebook)? Dan heeft u geen wachtwoord — gebruik hierboven de knop van die aanbieder.",
+      "preview_host_notice": "U bekijkt een previewversie van de site. Inloggen met Google werkt alleen op de live site — open https://labourmarket.ai om het te gebruiken. Inloggen met e-mailadres en wachtwoord werkt hier gewoon.",
       "google_recovery_label": "Inloggen met Google — reserveroute (tijdelijk, via een externe inlogpagina)",
       "resend_confirmation": "Nieuwe bevestigingslink sturen",
       "resend_sent": "Een nieuwe bevestigingslink is onderweg naar {email}."
     },
     "forgotPassword": {
       "headline": "Wachtwoord vergeten?",
-      "subcopy": "Voer je e-mailadres in en we sturen je een link om je wachtwoord te resetten.",
+      "subcopy": "Voer uw e-mailadres in en we sturen u een link om uw wachtwoord te resetten.",
       "email_label": "E-mailadres",
       "submit_label": "Resetlink versturen",
       "sending": "Versturen...",
-      "success_title": "Check je e-mail",
-      "success_body": "Als er een account bestaat voor {email}, hebben we een link gestuurd om je wachtwoord te resetten.",
+      "success_title": "Check uw e-mail",
+      "success_body": "Als er een account bestaat voor {email}, hebben we een link gestuurd om uw wachtwoord te resetten.",
       "back_to_login": "Terug naar inloggen",
       "error_email": "Voer een geldig e-mailadres in.",
       "error_generic": "Er is iets misgegaan. Probeer het zo opnieuw."
     },
     "resetPassword": {
       "headline": "Nieuw wachtwoord",
-      "subcopy": "Kies een nieuw wachtwoord voor je account.",
+      "subcopy": "Kies een nieuw wachtwoord voor uw account.",
       "checking": "Link controleren...",
       "password_label": "Nieuw wachtwoord",
       "confirm_password_label": "Bevestig wachtwoord",
       "submit_label": "Wachtwoord opslaan",
       "saving": "Opslaan...",
       "invalid_title": "Link niet geldig",
-      "invalid_body": "Deze link om je wachtwoord te resetten is ongeldig of verlopen.",
+      "invalid_body": "Deze link om uw wachtwoord te resetten is ongeldig of verlopen.",
       "request_new": "Nieuwe link aanvragen",
       "error_password_short": "Wachtwoord moet minimaal {min} tekens lang zijn.",
       "error_password_mismatch": "Wachtwoorden komen niet overeen.",
       "error_generic": "Er is iets misgegaan. Probeer het zo opnieuw."
     },
     "callback": {
-      "verifying": "Je inloglink wordt gecontroleerd...",
+      "verifying": "Uw inloglink wordt gecontroleerd...",
       "error_title": "Inloggen mislukt",
       "error_body": "Deze link is ongeldig of verlopen. Probeer het opnieuw.",
       "retry": "Opnieuw proberen"
     },
     "onboarding": {
-      "pendingInviteNote": "Je hebt een openstaande uitnodiging van {org}. Rond hieronder het instellen van je account af — daarna kun je de uitnodiging accepteren op je dashboard.",
+      "pendingInviteNote": "U heeft een openstaande uitnodiging van {org}. Rond hieronder het instellen van uw account af — daarna kunt u de uitnodiging accepteren op uw dashboard.",
       "rolePicker": {
         "intentHeading": "Laten we beginnen",
-        "intentLead": "LabourMarket.ai helpt je je professionele geschiedenis op te bouwen, je huidige werk te beheren en nieuwe kansen te ontdekken.",
-        "intentNote": "Je kunt er meerdere kiezen en ze later wijzigen.",
-        "saidLabel": "Je schreef:",
+        "intentLead": "LabourMarket.ai helpt u uw professionele geschiedenis op te bouwen, uw huidige werk te beheren en nieuwe kansen te ontdekken.",
+        "intentNote": "U kunt er meerdere kiezen en ze later wijzigen.",
+        "saidLabel": "U schreef:",
         "saidHint": "We hebben aangevinkt wat past. Pas het aan als het nodig is.",
-        "doorLabel": "Je koos:",
+        "doorLabel": "U koos:",
         "intent": {
           "work": {
             "title": "Ik werk / heb beroepservaring",
-            "desc": "Je werk, vaardigheden en werkjournaal bouwen je professionele geschiedenis op — daaruit ontstaan nieuwe kansen."
+            "desc": "Uw werk, vaardigheden en werkjournaal bouwen uw professionele geschiedenis op — daaruit ontstaan nieuwe kansen."
           },
           "member": {
             "title": "Ik maak deel uit van een bedrijf of team",
-            "desc": "Het bedrijf, team of de ploeg waarmee je elke dag werkt — het werk daar vult je professionele geschiedenis aan."
+            "desc": "Het bedrijf, team of de ploeg waarmee u elke dag werkt — het werk daar vult uw professionele geschiedenis aan."
           },
           "hire": {
             "title": "Ik leid een bedrijf of team",
-            "desc": "Mensen, teams, projecten, locaties en werk — en nieuwe mensen wanneer je ze nodig hebt."
+            "desc": "Mensen, teams, projecten, locaties en werk — en nieuwe mensen wanneer u ze nodig heeft."
           },
           "agency": {
             "title": "Ik werk in werving of het leveren van personeel",
@@ -4378,14 +4378,14 @@
           },
           "student": {
             "title": "Ik leer / bereid me voor op een beroep",
-            "desc": "Leren en stage horen al bij je professionele geschiedenis. Verbind je met je onderwijsinstelling."
+            "desc": "Leren en stage horen al bij uw professionele geschiedenis. Verbind u met uw onderwijsinstelling."
           },
           "education": {
             "title": "Ik vertegenwoordig een onderwijsinstelling",
             "desc": "Nodig lerenden uit, zie hun deelname en verbind ze met stages en banen."
           }
         },
-        "heading": "Begin je als persoon of als bedrijf?",
+        "heading": "Begint u als persoon of als bedrijf?",
         "worker": {
           "title": "Persoon",
           "desc": "Ik zoek werk, bied mijn eigen werk aan, of leg studie en activiteiten vast — profiel, vaardigheden, cv en een werkjournaal."
@@ -4403,48 +4403,48 @@
           "desc": "Diensten aanvragen, werkrapporten ontvangen."
         },
         "continue": "Doorgaan",
-        "multiNote": "Kies er één of beide — dit is alleen een startpunt. Persoon en bedrijf zijn identiteiten; aannemen, inkopen, werknemers aanbieden of projecten uitvoeren zijn acties die je later toevoegt."
+        "multiNote": "Kies er één of beide — dit is alleen een startpunt. Persoon en bedrijf zijn identiteiten; aannemen, inkopen, werknemers aanbieden of projecten uitvoeren zijn acties die u later toevoegt."
       },
       "step2": {
-        "studentHeading": "Waar studeer je?",
+        "studentHeading": "Waar studeert u?",
         "institutionLabel": "Onderwijsinstelling",
         "institutionPlaceholder": "School, hogeschool, universiteit of opleider",
         "programLabel": "Opleiding of vakgebied (optioneel)",
         "educationTypeLabel": "Soort opleiding",
-        "errorInstitution": "Vul in waar je studeert (minimaal 2 tekens).",
-        "heading": "Iets over jou",
+        "errorInstitution": "Vul in waar u studeert (minimaal 2 tekens).",
+        "heading": "Iets over u",
         "continue": "Afronden"
       },
       "nextSteps": {
-        "eyebrow": "Hierna — jouw echte profiel",
-        "s1": "Importeer je cv (optioneel) om je profiel sneller te vullen",
-        "s2": "Voeg je echte vaardigheden toe",
-        "s3": "Stel je beschikbaarheid in",
+        "eyebrow": "Hierna — uw echte profiel",
+        "s1": "Importeer uw cv (optioneel) om uw profiel sneller te vullen",
+        "s2": "Voeg uw echte vaardigheden toe",
+        "s3": "Stel uw beschikbaarheid in",
         "s4": "Voeg werkervaring en bewijs toe",
-        "note": "Vaardigheden beginnen als zelf opgegeven. Documenten, je werkjournaal en bevestigingen van mensen maken ze na verloop van tijd sterker."
+        "note": "Vaardigheden beginnen als zelf opgegeven. Documenten, uw werkjournaal en bevestigingen van mensen maken ze na verloop van tijd sterker."
       },
       "nextStepsOrganization": {
-        "eyebrow": "Hierna — je organisatie",
-        "s1": "Geef je organisatie een naam en zeg wat ze doet (neemt in dienst, levert mensen, werft, leidt op, voert projecten uit)",
-        "s2": "Voeg je mensen, teams of het personeel dat je levert toe",
+        "eyebrow": "Hierna — uw organisatie",
+        "s1": "Geef uw organisatie een naam en zeg wat ze doet (neemt in dienst, levert mensen, werft, leidt op, voert projecten uit)",
+        "s2": "Voeg uw mensen, teams of het personeel dat u levert toe",
         "s3": "Publiceer een behoefte, bied capaciteit aan — of allebei",
         "s4": "Praat met de mensen en organisaties die passen en voer het werk samen uit",
-        "note": "Je organisatie is meteen bruikbaar. Verificatie is een aparte, sterkere vertrouwensstap."
+        "note": "Uw organisatie is meteen bruikbaar. Verificatie is een aparte, sterkere vertrouwensstap."
       },
       "display_name_label": "Weergavenaam",
-      "country_label": "Waar woon je nu?",
-      "country_placeholder": "Kies je land",
+      "country_label": "Waar woont u nu?",
+      "country_placeholder": "Kies uw land",
       "country_search_placeholder": "Zoek een land",
       "country_search_empty": "Geen land gevonden. Probeer een andere naam.",
       "error_country_required": "Kies een land.",
-      "error_role_required": "Kies eerst waarvoor je LabourMarket.ai wilt gebruiken — vul daarna je profiel in.",
-      "role_step_hint": "Kies eerst waarvoor je LabourMarket.ai wilt gebruiken — vul daarna je profiel in.",
+      "error_role_required": "Kies eerst waarvoor u LabourMarket.ai wilt gebruiken — vul daarna uw profiel in.",
+      "role_step_hint": "Kies eerst waarvoor u LabourMarket.ai wilt gebruiken — vul daarna uw profiel in.",
       "profession_label": "Wat is je beroep of werkervaring?",
       "profession_placeholder": "Typ een beroep of werkgebied",
       "profession_add": "Toevoegen",
-      "profession_hint": "Je kunt één of meerdere beroepen of werkgebieden opgeven. Later kun je er meer toevoegen.",
+      "profession_hint": "U kunt één of meerdere beroepen of werkgebieden opgeven. Later kunt u er meer toevoegen.",
       "profession_search_placeholder": "Zoek een beroep of werkgebied",
-      "profession_search_empty": "Geen resultaten. Je kunt je profiel later aanvullen.",
+      "profession_search_empty": "Geen resultaten. U kunt uw profiel later aanvullen.",
       "profession_remove": "Verwijderen",
       "back": "Terug",
       "saving": "Opslaan...",
@@ -5024,8 +5024,8 @@
       }
     },
     "middleware": {
-      "session_expired": "Je bent uitgelogd. Log opnieuw in.",
-      "onboarding_required": "Rond eerst het instellen van je profiel af."
+      "session_expired": "U bent uitgelogd. Log opnieuw in.",
+      "onboarding_required": "Rond eerst het instellen van uw profiel af."
     },
     "notifications": {
       "types": {
@@ -5089,8 +5089,8 @@
       }
     },
     "carriedIntent": {
-      "label": "Je gaat verder met",
-      "hint": "Na het inloggen kom je hier direct op terug — je zin reist met je mee."
+      "label": "U gaat verder met",
+      "hint": "Na het inloggen komt u hier direct op terug — uw zin reist met u mee."
     }
   },
   "shared": {
@@ -5556,7 +5556,7 @@
       "eyebrow": "Voor werknemers",
       "title": "Vind werk",
       "titleAccent": "met één gratis profiel.",
-      "subcopy": "Bouw één profiel, stel je beschikbaarheid in en laat echte vraag jou over de grens vinden.",
+      "subcopy": "Bouw één profiel, stel uw beschikbaarheid in en laat echte vraag u over de grens vinden.",
       "benefits": [
         {
           "title": "Eén profiel, elke markt",
@@ -5564,15 +5564,15 @@
         },
         {
           "title": "Echte vraag",
-          "body": "Zie open personeelsbehoeften die relevant zijn voor jouw vak, vaardigheden en stad — en toon interesse met één klik."
+          "body": "Zie open personeelsbehoeften die relevant zijn voor uw vak, vaardigheden en stad — en toon interesse met één klik."
         },
         {
           "title": "Eerlijke signalen",
           "body": "Transparante, contextuele fit-signalen — geen opgeblazen claims, geen universele beoordeling, geen betalen-voor-ranking."
         },
         {
-          "title": "Groeit terwijl je werkt",
-          "body": "Leg afgerond werk en resultaten vast — je professionele geschiedenis wordt rijker en het zoeken naar kansen wordt steeds preciezer, ook als je niet actief op zoek bent."
+          "title": "Groeit terwijl u werkt",
+          "body": "Leg afgerond werk en resultaten vast — uw professionele geschiedenis wordt rijker en het zoeken naar kansen wordt steeds preciezer, ook als u niet actief op zoek bent."
         }
       ],
       "screenshot": "Werknemer-avatarflow",
@@ -5581,25 +5581,25 @@
     "companies": {
       "eyebrow": "Voor bedrijven",
       "title": "Vind de mensen",
-      "titleAccent": "die je projecten nodig hebben.",
-      "subcopy": "Vertel ons welke vakmensen elk project nodig heeft, hoeveel en vanaf wanneer. De aanvraag is gratis en zonder account; met een gratis account zie je ook welke beschikbare werknemers en uitzendbureaus passen.",
+      "titleAccent": "die uw projecten nodig hebben.",
+      "subcopy": "Vertel ons welke vakmensen elk project nodig heeft, hoeveel en vanaf wanneer. De aanvraag is gratis en zonder account; met een gratis account ziet u ook welke beschikbare werknemers en uitzendbureaus passen.",
       "benefits": [
         {
-          "title": "Plaats je vraag per project",
+          "title": "Plaats uw vraag per project",
           "body": "Definieer rollen, aantal mensen en vaardigheden per project — geen vage vacatures."
         },
         {
           "title": "Fit op de specifieke klus",
-          "body": "Je ziet welke beschikbare werknemers en uitzendbureaus bij elke concrete behoefte passen — eerlijk, per behoefte."
+          "body": "U ziet welke beschikbare werknemers en uitzendbureaus bij elke concrete behoefte passen — eerlijk, per behoefte."
         },
         {
-          "title": "Uitzendbureaus, wanneer je ze nodig hebt",
+          "title": "Uitzendbureaus, wanneer u ze nodig heeft",
           "body": "Benut de pools van geregistreerde uitzendbureaus voor piekcapaciteit zonder zicht te verliezen."
         }
       ],
       "screenshot": "Bedrijfsvraagflow",
-      "cta": "Beschrijf welke mensen je nodig hebt",
-      "calculatorBody": "Schat het werk in voordat je het uitvraagt: arbeidsuren, materialen, materieel en reizen, met je eigen cijfers.",
+      "cta": "Beschrijf welke mensen u nodig heeft",
+      "calculatorBody": "Schat het werk in voordat u het uitvraagt: arbeidsuren, materialen, materieel en reizen, met uw eigen cijfers.",
       "calculatorLink": "Bereken de kosten van een project",
       "markets": {
         "lu": {
@@ -5648,13 +5648,13 @@
     },
     "agencies": {
       "eyebrow": "Voor uitzendbureaus",
-      "title": "Jouw pool,",
+      "title": "Uw pool,",
       "titleAccent": "in beweging.",
-      "subcopy": "Beheer je werknemers, plaats vraag namens klanten en verzorg introducties — alles op één plek.",
+      "subcopy": "Beheer uw werknemers, plaats vraag namens klanten en verzorg introducties — alles op één plek.",
       "benefits": [
         {
-          "title": "Beheer je pool",
-          "body": "Houd je beheerde werknemers, beschikbaarheid en statussen georganiseerd in één werkruimte."
+          "title": "Beheer uw pool",
+          "body": "Houd uw beheerde werknemers, beschikbaarheid en statussen georganiseerd in één werkruimte."
         },
         {
           "title": "Bemiddel met voorsprong",
@@ -5662,7 +5662,7 @@
         },
         {
           "title": "Zichtbaarheidsinstellingen",
-          "body": "Kies wat openbaar, alleen voor uitzendbureaus of direct is — jij bepaalt de zichtbaarheid."
+          "body": "Kies wat openbaar, alleen voor uitzendbureaus of direct is — u bepaalt de zichtbaarheid."
         }
       ],
       "screenshot": "Uitzendbureau-modusflow",
@@ -5672,56 +5672,56 @@
       "eyebrow": "Gratis cv-maker",
       "title": "Een professioneel cv,",
       "titleAccent": "gratis.",
-      "subcopy": "Maak een cv vanaf nul of importeer je bestaande PDF of DOCX. Controleer elk geëxtraheerd feit, kies een strakke template en download als PDF — gratis. Als je wilt, kan dezelfde informatie je werknemersprofiel opbouwen en echte vacatures uit officiële publieke bronnen tonen.",
+      "subcopy": "Maak een cv vanaf nul of importeer uw bestaande PDF of DOCX. Controleer elk geëxtraheerd feit, kies een strakke template en download als PDF — gratis. Als u wilt, kan dezelfde informatie uw werknemersprofiel opbouwen en echte vacatures uit officiële publieke bronnen tonen.",
       "cta": "Maak mijn cv — gratis",
       "benefits": [
         {
           "title": "Importeer of begin opnieuw",
-          "body": "Upload een bestaand cv (PDF, DOCX of tekst) of begin met een leeg blad. Geëxtraheerde feiten blijven suggesties totdat jij ze accepteert."
+          "body": "Upload een bestaand cv (PDF, DOCX of tekst) of begin met een leeg blad. Geëxtraheerde feiten blijven suggesties totdat u ze accepteert."
         },
         {
           "title": "Eerlijke structuur",
-          "body": "Je ervaring, opleiding, talen en vaardigheden worden gestructureerd voor jouw controle — niets wordt verzonnen en niets wordt opgeslagen zonder jouw toestemming."
+          "body": "Uw ervaring, opleiding, talen en vaardigheden worden gestructureerd voor uw controle — niets wordt verzonnen en niets wordt opgeslagen zonder uw toestemming."
         },
         {
           "title": "Strakke templates, echte PDF",
-          "body": "Kies een professionele template en exporteer naar A4-PDF via je browser — zonder watermerk, zonder betaalmuur."
+          "body": "Kies een professionele template en exporteer naar A4-PDF via uw browser — zonder watermerk, zonder betaalmuur."
         },
         {
           "title": "Meer dan een document",
-          "body": "Met jouw uitdrukkelijke toestemming kunnen dezelfde feiten je werknemersprofiel opbouwen, je vaardigheden koppelen aan de gemeenschappelijke Europese vaardighedencatalogus en passende publieke vacatures tonen. Door afgerond werk vast te leggen groeit je professionele geschiedenis — en wordt het zoeken naar kansen steeds beter."
+          "body": "Met uw uitdrukkelijke toestemming kunnen dezelfde feiten uw werknemersprofiel opbouwen, uw vaardigheden koppelen aan de gemeenschappelijke Europese vaardighedencatalogus en passende publieke vacatures tonen. Door afgerond werk vast te leggen groeit uw professionele geschiedenis — en wordt het zoeken naar kansen steeds beter."
         }
       ],
       "stepsTitle": "Hoe het werkt",
       "steps": [
         {
-          "title": "Meld je gratis aan",
-          "body": "Met een account blijft je cv bewerkbaar en houd jij je gegevens onder controle — je kunt ze op elk moment verwijderen."
+          "title": "Meld u gratis aan",
+          "body": "Met een account blijft uw cv bewerkbaar en houdt u uw gegevens onder controle — u kunt ze op elk moment verwijderen."
         },
         {
-          "title": "Voeg je ervaring toe",
-          "body": "Importeer je oude cv of typ het in — bekijk daarna elk feit en bepaal wat je houdt voordat het wordt gebruikt."
+          "title": "Voeg uw ervaring toe",
+          "body": "Importeer uw oude cv of typ het in — bekijk daarna elk feit en bepaal wat u houdt voordat het wordt gebruikt."
         },
         {
           "title": "Download en beslis",
-          "body": "Exporteer je cv als PDF. Vindbaar worden voor werkgevers blijft een aparte, optionele keuze."
+          "body": "Exporteer uw cv als PDF. Vindbaar worden voor werkgevers blijft een aparte, optionele keuze."
         }
       ],
-      "privacyNote": "Je cv blijft standaard privé. Er wordt niets met werkgevers gedeeld totdat jij vindbaarheid expliciet inschakelt, en je kunt dit op elk moment uitzetten."
+      "privacyNote": "Uw cv blijft standaard privé. Er wordt niets met werkgevers gedeeld totdat u vindbaarheid expliciet inschakelt, en u kunt dit op elk moment uitzetten."
     }
   },
   "pricing": {
     "checkoutReturn": {
-      "cancelled": "De checkout is geannuleerd — er is niets afgeschreven en er is niets veranderd aan je account."
+      "cancelled": "De checkout is geannuleerd — er is niets afgeschreven en er is niets veranderd aan uw account."
     },
     "eyebrow": "Prijzen",
     "title": "Eenvoudige niveaus,",
     "titleAccent": "eerlijk vastgesteld.",
     "subcopyLive": "De prijzen zijn door de eigenaar bevestigd en gelden. Activering gebeurt in het organisatieaccount via een veilige Stripe-betaling; op deze pagina wordt niets afgeschreven.",
-    "subcopy": "De prijzen zijn nog niet definitief en facturering wordt op deze pagina nooit voor je gestart. De niveaus hieronder beschrijven de omvang; activering gebeurt handmatig — neem contact op en we bevestigen prijs en omvang met je voordat er iets start.",
-    "subcopyConfirmed": "De prijzen zijn bevestigd. Online activering is nog niet geopend — zet je op de wachtlijst, dan nemen we contact op en starten we je organisatie handmatig; op deze pagina wordt niets afgeschreven.",
-    "trialNote": "Het eerste abonnement van een organisatie begint met een proefperiode van 14 dagen. Daarna wordt je kaart belast met de maandprijs; je kunt opzeggen voordat de proefperiode eindigt.",
-    "planCta": "Zet je op de wachtlijst voor dit plan",
+    "subcopy": "De prijzen zijn nog niet definitief en facturering wordt op deze pagina nooit voor u gestart. De niveaus hieronder beschrijven de omvang; activering gebeurt handmatig — neem contact op en we bevestigen prijs en omvang met u voordat er iets start.",
+    "subcopyConfirmed": "De prijzen zijn bevestigd. Online activering is nog niet geopend — zet uzelf op de wachtlijst, dan nemen we contact op en starten we uw organisatie handmatig; op deze pagina wordt niets afgeschreven.",
+    "trialNote": "Het eerste abonnement van een organisatie begint met een proefperiode van 14 dagen. Daarna wordt uw kaart belast met de maandprijs; u kunt opzeggen voordat de proefperiode eindigt.",
+    "planCta": "Zet uzelf op de wachtlijst voor dit plan",
     "featuresLabel": "Inbegrepen",
     "plans": {
       "free": {
@@ -5777,7 +5777,7 @@
       },
       {
         "q": "Hoe verloopt de facturering?",
-        "a": "Kaartbetaling via Stripe. Facturen, betalingsgeschiedenis en opzegging vind je in je organisatieaccount."
+        "a": "Kaartbetaling via Stripe. Facturen, betalingsgeschiedenis en opzegging vindt u in uw organisatieaccount."
       },
       {
         "q": "Is er een limiet op actieve posities?",
@@ -5786,13 +5786,13 @@
     ],
     "priceState": {
       "draft_pricing": "De prijzen worden voorbereid — er kan nog niets worden gekocht.",
-      "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in je organisatieaccount; op deze pagina wordt niets afgeschreven."
+      "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in uw organisatieaccount; op deze pagina wordt niets afgeschreven."
     },
     "individual": {
       "name": "Bijzondere wensen",
       "tagline": "Voor behoeften buiten de standaardplannen",
       "question": "Iets specifieks in gedachten?",
-      "body": "Neem contact op als je bijzondere wensen hebt — we spreken ze samen af. Geen automatisch niveau, geen gepubliceerde prijs.",
+      "body": "Neem contact op als u bijzondere wensen heeft — we spreken ze samen af. Geen automatisch niveau, geen gepubliceerde prijs.",
       "cta": "Neem contact op"
     },
     "priceFree": "€ 0",
@@ -9450,7 +9450,7 @@
   },
   "planBoundary": {
     "title": "Wat betaalde plannen omvatten",
-    "subcopy": "Betalingen zijn nog niet ingeschakeld — geen betaalpagina en geen kaart. Betaalde plannen worden getoond zodat je de omvang kent; pilottoegang wordt handmatig verleend.",
+    "subcopy": "Betalingen zijn nog niet ingeschakeld — geen betaalpagina en geen kaart. Betaalde plannen worden getoond zodat u de omvang kent; pilottoegang wordt handmatig verleend.",
     "note": "Plannen beschrijven omvang, geen actieve facturering. Op deze pagina wordt niets in rekening gebracht.",
     "plans": {
       "free_worker": "Gratis Werknemer",
@@ -9484,7 +9484,7 @@
     "limitValue": "tot {count}",
     "freeToday": {
       "freeTitle": "Vandaag gratis",
-      "free": "Alles wat je op dit moment in het product kunt gebruiken is gratis — de pilot draait zonder betalingen en niets vraagt om een kaart.",
+      "free": "Alles wat u op dit moment in het product kunt gebruiken is gratis — de pilot draait zonder betalingen en niets vraagt om een kaart.",
       "paidTitle": "Voorbereide betaalde plannen",
       "paid": "Momenteel niet beschikbaar.",
       "preparedTitle": "Voorbereid, niet koopbaar",
@@ -9514,7 +9514,7 @@
     },
     "enforcement": {
       "free_surface": "Vandaag in het product",
-      "server_gate": "Vandaag beschikbaar, afhankelijk van je rechten",
+      "server_gate": "Vandaag beschikbaar, afhankelijk van uw rechten",
       "declared_boundary_only": "Voorbereid — start pas met facturering",
       "admin_rbac": "Intern, alleen admin"
     }
@@ -9854,29 +9854,29 @@
     "banner": {
       "badge": "Vroege toegang",
       "bodyLive": "Het Organisatieplan kan in het account via een veilige betaling worden geactiveerd. De eerste klanten bedienen we nog steeds rechtstreeks: een personeelsaanvraag indienen is gratis en de definitieve omvang wordt vóór de start afgesproken.",
-      "body": "Publieke betalingen zijn nog niet ingeschakeld. De eerste klanten worden direct bediend: een personeelsaanvraag indienen is gratis, en de definitieve prijs wordt altijd met je bevestigd voordat betaald werk begint.",
+      "body": "Publieke betalingen zijn nog niet ingeschakeld. De eerste klanten worden direct bediend: een personeelsaanvraag indienen is gratis, en de definitieve prijs wordt altijd met u bevestigd voordat betaald werk begint.",
       "cta": "Dien een personeelsaanvraag in"
     },
     "title": "Hoe de eerste betaalde dienst werkt",
     "steps": [
       {
-        "title": "Dien je aanvraag gratis in",
-        "body": "Beschrijf welke werknemers of ploeg je nodig hebt. Geen kosten, geen kaart, niets wordt automatisch gepubliceerd."
+        "title": "Dien uw aanvraag gratis in",
+        "body": "Beschrijf welke werknemers of ploeg u nodig heeft. Geen kosten, geen kaart, niets wordt automatisch gepubliceerd."
       },
       {
         "title": "Een mens beoordeelt hem",
-        "body": "Een operator leest elke aanvraag, neemt contact met je op en verheldert omvang, timing en voorwaarden voordat er iets in gang wordt gezet."
+        "body": "Een operator leest elke aanvraag, neemt contact met u op en verheldert omvang, timing en voorwaarden voordat er iets in gang wordt gezet."
       },
       {
-        "title": "Je krijgt een handmatig gecontroleerde shortlist",
-        "body": "Echte kandidaten of ploegen, door een mens gecontroleerd aan de hand van jouw aanvraag. Als we geen geschikte shortlist kunnen samenstellen, betaal je niets — en we beloven nooit dat er altijd een kandidaat wordt gevonden."
+        "title": "U krijgt een handmatig gecontroleerde shortlist",
+        "body": "Echte kandidaten of ploegen, door een mens gecontroleerd aan de hand van uw aanvraag. Als we geen geschikte shortlist kunnen samenstellen, betaalt u niets — en we beloven nooit dat er altijd een kandidaat wordt gevonden."
       },
       {
-        "title": "Je betaalt alleen voor geleverde dienstverlening",
+        "title": "U betaalt alleen voor geleverde dienstverlening",
         "body": "Per aangenomen werknemer, ploeg of bedrijfsplaatsing geldt een vaste succesfee. Een aparte coördinatievergoeding geldt alleen wanneer document- of onboardingcoördinatie daadwerkelijk wordt geleverd. De definitieve prijs wordt bevestigd voordat betaald werk begint."
       }
     ],
-    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — één actieve positie kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest je aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg kan zich al als één geheel op je aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in je project instappen; de automatische kandidatenlijst stelt nog niet hele ploegen voor — ze rangschikt mensen één voor één.",
+    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — één actieve positie kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg kan zich al als één geheel op uw aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in uw project instappen; de automatische kandidatenlijst stelt nog niet hele ploegen voor — ze rangschikt mensen één voor één.",
     "ctaLabel": "Dien een personeelsaanvraag in →"
   },
   "adminLaunchReadiness": {
@@ -19392,23 +19392,23 @@
   },
   "workLifecycle": {
     "pending": "Nog niet",
-    "title": "Wat er met jouw werk gebeurt",
-    "titleCompany": "Wat er met het werk gebeurt dat je aanstuurt",
+    "title": "Wat er met uw werk gebeurt",
+    "titleCompany": "Wat er met het werk gebeurt dat u aanstuurt",
     "example": "Voorbeeld — geen echt persoon en geen echte gegevens",
-    "hint": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
-    "hintWorkers": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
-    "open": "Openen in je werkruimte",
+    "hint": "Kies een stap. Elke stap opent de echte plek in uw werkruimte.",
+    "hintWorkers": "Kies een stap. Elke stap opent de echte plek in uw werkruimte.",
+    "open": "Openen in uw werkruimte",
     "list": "Stappen in de levenscyclus van werk",
     "workers": {
       "person": {
-        "label": "Jij",
+        "label": "U",
         "fact": "Kok — professionele identiteit",
-        "detail": "Eén professionele identiteit die van jou is — niet gebonden aan één werkgever."
+        "detail": "Eén professionele identiteit die van u is — niet gebonden aan één werkgever."
       },
       "team": {
-        "label": "Je team",
+        "label": "Uw team",
         "fact": "Keukenteam",
-        "detail": "Je sluit je aan bij een echt team, met de mensen met wie je werkt en wie het leidt."
+        "detail": "U sluit zich aan bij een echt team, met de mensen met wie u werkt en wie het leidt."
       },
       "project": {
         "label": "Het project",
@@ -19418,7 +19418,7 @@
       "work": {
         "label": "Werk",
         "fact": "Avonddienst — 8 u",
-        "detail": "Wat je deed, wanneer en hoelang — vastgelegd terwijl het gebeurt."
+        "detail": "Wat u deed, wanneer en hoelang — vastgelegd terwijl het gebeurt."
       },
       "evidence": {
         "label": "Bewijs",
@@ -19432,15 +19432,15 @@
       },
       "history": {
         "label": "Geschiedenis",
-        "fact": "Toegevoegd aan je geschiedenis",
-        "detail": "Bevestigd werk bouwt je professionele geschiedenis op — die blijft bij jou voor de volgende baan."
+        "fact": "Toegevoegd aan uw geschiedenis",
+        "detail": "Bevestigd werk bouwt uw professionele geschiedenis op — die blijft bij u voor de volgende baan."
       }
     },
     "companies": {
       "need": {
         "label": "Vraag",
         "fact": "4 koks, vanaf maandag",
-        "detail": "Je geeft de echte vraag één keer aan: wie, waar en vanaf wanneer."
+        "detail": "U geeft de echte vraag één keer aan: wie, waar en vanaf wanneer."
       },
       "people": {
         "label": "Mensen",
@@ -19448,7 +19448,7 @@
         "detail": "Professionals van wie de echte werkgeschiedenis bij de vraag past — met wat geverifieerd is en wat nog niet."
       },
       "team": {
-        "label": "Je team",
+        "label": "Uw team",
         "fact": "Keukenteam",
         "detail": "Mensen worden een team met een leider, diensten en een werkplek."
       },
@@ -19464,8 +19464,8 @@
       },
       "confirmation": {
         "label": "Bevestigd",
-        "fact": "Wacht op jouw bevestiging",
-        "detail": "Je ziet wat nog bevestigd moet worden en wat al klaar is."
+        "fact": "Wacht op uw bevestiging",
+        "detail": "U ziet wat nog bevestigd moet worden en wat al klaar is."
       },
       "report": {
         "label": "Rapport",
@@ -20443,23 +20443,23 @@
   },
   "pilotPass": {
     "title": "Organisatieplan — pilot van {days} dagen voor 1 €",
-    "intro": "Betaal eenmalig 1 € en je organisatie krijgt {days} dagen lang het betaalde Organisatieplan. Wat het toevoegt aan het gratis plan: geen limiet op gelijktijdig open posities en personeelsbehoeften (het gratis plan staat er één toe). Berichten, kandidaatoverzichten, teamselectie en boekingen blijven beschikbaar zoals in het gratis plan.",
+    "intro": "Betaal eenmalig 1 € en uw organisatie krijgt {days} dagen lang het betaalde Organisatieplan. Wat het toevoegt aan het gratis plan: geen limiet op gelijktijdig open posities en personeelsbehoeften (het gratis plan staat er één toe). Berichten, kandidaatoverzichten, teamselectie en boekingen blijven beschikbaar zoals in het gratis plan.",
     "terms": "Eenmalige betaling. Er wordt niets verlengd en niets opnieuw afgeschreven: na {days} dagen eindigt het plan vanzelf en keert de organisatie terug naar het gratis plan. Het plan verschijnt hieronder zodra Stripe de betaling bevestigt.",
     "pay": "1 € betalen — pilot van {days} dagen",
     "status": {
       "pilot_pass_disabled": "De pilot wordt nu niet aangeboden.",
       "unauthenticated": "Log in om de pilot te starten.",
-      "no_organization": "Kies eerst de werkruimte van je organisatie.",
+      "no_organization": "Kies eerst de werkruimte van uw organisatie.",
       "not_billing_authority": "Alleen wie de betalingen van deze organisatie beheert, kan de pilot starten.",
       "billing_not_active": "Betalingen zijn niet beschikbaar voor deze organisatie.",
-      "plan_active": "Je organisatie heeft al een actief plan.",
+      "plan_active": "Uw organisatie heeft al een actief plan.",
       "checkout_failed": "Stripe heeft geen betaalpagina aangemaakt. Er is niets afgeschreven; probeer het later opnieuw."
     },
     "result": {
       "paid": "Stripe heeft de betaling ontvangen. Het plan wordt actief zodra de bevestiging binnenkomt — vernieuw de pagina zo als het nog niet zichtbaar is.",
       "cancelled": "Betaling geannuleerd — er is niets afgeschreven."
     },
-    "elsewhere": "Kies {organization} in de werkruimtekiezer bovenaan de pagina — de pilot start je vanuit de werkruimte van die organisatie.",
+    "elsewhere": "Kies {organization} in de werkruimtekiezer bovenaan de pagina — de pilot start u vanuit de werkruimte van die organisatie.",
     "invite": {
       "line": "Betaal eenmalig 1 € voor {days} dagen van het betaalde Organisatieplan. Er wordt niets verlengd.",
       "cta": "Pilot openen"
@@ -20566,9 +20566,9 @@
     },
     "control": {
       "title": "Gebruiksmeting en campagnetoewijzing",
-      "granted": "Je hebt toestemming gegeven. Je kunt die altijd intrekken; de items worden dan van dit apparaat verwijderd.",
-      "refused": "Je hebt geweigerd. Op dit apparaat wordt niets voor meting opgeslagen.",
-      "undecided": "Je hebt nog niet gekozen, dus er wordt niets voor meting opgeslagen.",
+      "granted": "U heeft toestemming gegeven. U kunt die altijd intrekken; de items worden dan van dit apparaat verwijderd.",
+      "refused": "U heeft geweigerd. Op dit apparaat wordt niets voor meting opgeslagen.",
+      "undecided": "U heeft nog niet gekozen, dus er wordt niets voor meting opgeslagen.",
       "allow": "Toestaan",
       "refuse": "Weigeren"
     }

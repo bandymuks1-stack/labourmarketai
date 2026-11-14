@@ -4222,36 +4222,36 @@
     "social": {
       "continueWithLinkedIn": "Kontynuuj przez LinkedIn",
       "continueWithFacebook": "Kontynuuj przez Facebook",
-      "inAppBrowser": "Jesteś we wbudowanej przeglądarce aplikacji, w której logowanie przez Google często nie działa. Otwórz tę stronę w przeglądarce telefonu (Safari lub Chrome) albo użyj poniżej e-maila i hasła."
+      "inAppBrowser": "Są Państwo we wbudowanej przeglądarce aplikacji, w której logowanie przez Google często nie działa. Proszę otworzyć tę stronę w przeglądarce telefonu (Safari lub Chrome) albo użyć poniżej e-maila i hasła."
     },
     "legalNotice": {
-      "signup": "Zakładając konto potwierdzasz, że znasz <terms>Regulamin</terms> oraz <privacy>Politykę prywatności</privacy>.",
-      "googleLogin": "Jeśli nie masz jeszcze konta, logowanie kontem społecznościowym (np. Google) je utworzy. Zakładając konto potwierdzasz, że znasz <terms>Regulamin</terms> oraz <privacy>Politykę prywatności</privacy>.",
-      "controller": "Administratorem danych Twojego konta jest UAB „Nonstop Group”. Dane są przetwarzane w celu utworzenia konta i świadczenia usługi; nie są wykorzystywane do marketingu bez Twojej odrębnej, dobrowolnej zgody."
+      "signup": "Zakładając konto potwierdzają Państwo, że znają <terms>Regulamin</terms> oraz <privacy>Politykę prywatności</privacy>.",
+      "googleLogin": "Jeśli nie mają Państwo jeszcze konta, logowanie kontem społecznościowym (np. Google) je utworzy. Zakładając konto potwierdzają Państwo, że znają <terms>Regulamin</terms> oraz <privacy>Politykę prywatności</privacy>.",
+      "controller": "Administratorem danych Państwa konta jest UAB „Nonstop Group”. Dane są przetwarzane w celu utworzenia konta i świadczenia usługi; nie są wykorzystywane do marketingu bez Państwa odrębnej, dobrowolnej zgody."
     },
     "errors": {
-      "userAlreadyRegistered": "Ten e-mail jest już zarejestrowany. Zaloguj się.",
+      "userAlreadyRegistered": "Ten e-mail jest już zarejestrowany. Proszę się zalogować.",
       "passwordTooShort": "Hasło jest za krótkie (co najmniej {min} znaków).",
       "invalidCredentials": "Nieprawidłowy e-mail lub hasło.",
       "invalidEmail": "Nieprawidłowy format adresu e-mail.",
-      "rateLimited": "Zbyt wiele prób. Spróbuj ponownie później.",
-      "generic": "Coś poszło nie tak. Spróbuj ponownie.",
+      "rateLimited": "Zbyt wiele prób. Proszę spróbować ponownie później.",
+      "generic": "Coś poszło nie tak. Proszę spróbować ponownie.",
       "oauth": {
-        "missing_code": "Usługa logowania odesłała Cię bez kodu logowania. Spróbuj ponownie — jeśli się powtórzy, przeładuj stronę.",
-        "exchange_failed": "Logowanie nie zostało dokończone. Spróbuj ponownie — kod logowania działa raz i szybko wygasa.",
-        "no_user": "Logowanie się powiodło, ale nie udało się sięgnąć do Twojego konta. Wyloguj się i zaloguj ponownie.",
-        "callback": "Nieoczekiwany błąd podczas logowania. Spróbuj ponownie — jeśli się utrzymuje, podaj identyfikator „trace” widoczny poniżej.",
-        "cancelled": "Logowanie zostało anulowane. Nic nie zmieniło się na Twoim koncie.",
-        "unknown": "Nie udało się zalogować. Spróbuj ponownie.",
-        "link_expired": "Ten link potwierdzający wygasł lub został już użyty. Jeśli już potwierdzono e-mail, po prostu się zaloguj. W przeciwnym razie poproś poniżej o nowy link.",
-        "confirmed_sign_in": "Twój e-mail został potwierdzony. Rejestrację rozpoczęto na innym urządzeniu, więc zaloguj się tutaj, aby kontynuować.",
-        "confirm_link_opened": "Ten link potwierdzający został otwarty. Twój e-mail jest najprawdopodobniej już potwierdzony, więc spróbuj się zalogować. Jeśli się nie uda, poproś poniżej o nowy link.",
-        "provider_error": "Usługa logowania nie mogła dokończyć tego logowania, a ponowna próba najpewniej skończy się tak samo. Zaloguj się w sposób, w jaki zarejestrowano konto, albo e-mailem i hasłem."
+        "missing_code": "Usługa logowania odesłała Państwa bez kodu logowania. Proszę spróbować ponownie — jeśli się powtórzy, proszę przeładować stronę.",
+        "exchange_failed": "Logowanie nie zostało dokończone. Proszę spróbować ponownie — kod logowania działa raz i szybko wygasa.",
+        "no_user": "Logowanie się powiodło, ale nie udało się sięgnąć do Państwa konta. Proszę się wylogować i zalogować ponownie.",
+        "callback": "Nieoczekiwany błąd podczas logowania. Proszę spróbować ponownie — jeśli się utrzymuje, proszę podać identyfikator „trace” widoczny poniżej.",
+        "cancelled": "Logowanie zostało anulowane. Nic nie zmieniło się na Państwa koncie.",
+        "unknown": "Nie udało się zalogować. Proszę spróbować ponownie.",
+        "link_expired": "Ten link potwierdzający wygasł lub został już użyty. Jeśli już potwierdzono e-mail, wystarczy się zalogować. W przeciwnym razie można poprosić poniżej o nowy link.",
+        "confirmed_sign_in": "Państwa e-mail został potwierdzony. Rejestrację rozpoczęto na innym urządzeniu, więc proszę zalogować się tutaj, aby kontynuować.",
+        "confirm_link_opened": "Ten link potwierdzający został otwarty. Państwa e-mail jest najprawdopodobniej już potwierdzony, więc proszę spróbować się zalogować. Jeśli się nie uda, można poprosić poniżej o nowy link.",
+        "provider_error": "Usługa logowania nie mogła dokończyć tego logowania, a ponowna próba najpewniej skończy się tak samo. Proszę zalogować się w sposób, w jaki zarejestrowano konto, albo e-mailem i hasłem."
       },
-      "emailNotConfirmed": "Twój e-mail nie został jeszcze potwierdzony. Otwórz przesłany link potwierdzający lub poproś poniżej o nowy."
+      "emailNotConfirmed": "Państwa e-mail nie został jeszcze potwierdzony. Proszę otworzyć przesłany link potwierdzający lub poprosić poniżej o nowy."
     },
     "signup": {
-      "headline": "Utwórz konto",
+      "headline": "Utworzenie konta",
       "role": {
         "worker": "Pracownik",
         "company": "Firma",
@@ -4262,7 +4262,7 @@
         "service_provider": "Usługodawca",
         "admin": "Administrator"
       },
-      "subcopy": "Jeden profil dla Twojego doświadczenia zawodowego i możliwości — w następnym kroku wskażesz, po co przychodzisz.",
+      "subcopy": "Jeden profil dla Państwa doświadczenia zawodowego i możliwości — w następnym kroku wskażą Państwo, po co przychodzą.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
@@ -4273,65 +4273,65 @@
       "confirm_password_label": "Powtórz hasło",
       "submit_label": "Zarejestruj się",
       "signing": "Tworzenie...",
-      "disclaimer": "Twoja opinia kształtuje produkt — napisz nam, co działa, a czego brakuje.",
-      "has_account": "Masz już konto?",
-      "login_link": "Zaloguj się",
-      "error_generic": "Coś poszło nie tak. Spróbuj ponownie za chwilę.",
-      "error_email": "Podaj prawidłowy adres e-mail.",
+      "disclaimer": "Państwa opinia kształtuje produkt — prosimy napisać nam, co działa, a czego brakuje.",
+      "has_account": "Mają Państwo już konto?",
+      "login_link": "Logowanie",
+      "error_generic": "Coś poszło nie tak. Proszę spróbować ponownie za chwilę.",
+      "error_email": "Proszę podać prawidłowy adres e-mail.",
       "error_password_short": "Hasło musi mieć co najmniej {min} znaków.",
       "error_password_mismatch": "Hasła nie są takie same.",
       "error_password_uppercase": "Hasło musi zawierać wielką literę.",
       "error_password_number": "Hasło musi zawierać cyfrę.",
       "error_password_special": "Hasło musi zawierać znak specjalny.",
-      "check_email_title": "Potwierdź swój e-mail",
-      "check_email_body": "Wysłaliśmy link potwierdzający na adres {email}. Otwórz go, aby dokończyć tworzenie konta. Jeśli go nie widzisz, sprawdź folder spam — możesz też poprosić tutaj o nowy link.",
+      "check_email_title": "Proszę potwierdzić swój e-mail",
+      "check_email_body": "Wysłaliśmy link potwierdzający na adres {email}. Proszę go otworzyć, aby dokończyć tworzenie konta. Jeśli go Państwo nie widzą, proszę sprawdzić folder spam — można też poprosić tutaj o nowy link.",
       "resend_label": "Wyślij link ponownie",
-      "resend_sent": "Wysłano ponownie. Sprawdź skrzynkę odbiorczą i folder spam.",
-      "resend_wait": "O nowy link możesz poprosić za {seconds} s.",
+      "resend_sent": "Wysłano ponownie. Proszę sprawdzić skrzynkę odbiorczą i folder spam.",
+      "resend_wait": "O nowy link można poprosić za {seconds} s.",
       "invited_email_note": "To adres, na który wysłano zaproszenie.",
       "show_password": "Pokaż hasło"
     },
     "login": {
-      "headline": "Zaloguj się",
-      "subcopy": "Kontynuuj przez konto społecznościowe albo zaloguj się e-mailem i hasłem.",
+      "headline": "Logowanie",
+      "subcopy": "Można kontynuować przez konto społecznościowe albo zalogować się e-mailem i hasłem.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
       "email_label": "E-mail",
       "password_label": "Hasło",
-      "forgot_password": "Nie pamiętasz hasła?",
-      "reset_password_cta": "Zresetuj hasło",
-      "reset_password_help": "Wyślemy Ci e-mailem link do resetu — stare hasło nie jest potrzebne.",
-      "reset_success": "Hasło zostało zmienione. Zaloguj się nowym hasłem.",
+      "forgot_password": "Nie pamiętają Państwo hasła?",
+      "reset_password_cta": "Resetowanie hasła",
+      "reset_password_help": "Wyślemy Państwu e-mailem link do resetu — stare hasło nie jest potrzebne.",
+      "reset_success": "Hasło zostało zmienione. Proszę zalogować się nowym hasłem.",
       "submit_label": "Zaloguj się",
       "signing": "Logowanie...",
-      "no_account": "Nie masz jeszcze konta?",
-      "signup_link": "Zarejestruj się",
-      "error_generic": "Coś poszło nie tak. Spróbuj ponownie za chwilę.",
-      "error_email": "Podaj prawidłowy adres e-mail.",
-      "error_password_required": "Wpisz swoje hasło.",
+      "no_account": "Nie mają Państwo jeszcze konta?",
+      "signup_link": "Rejestracja",
+      "error_generic": "Coś poszło nie tak. Proszę spróbować ponownie za chwilę.",
+      "error_email": "Proszę podać prawidłowy adres e-mail.",
+      "error_password_required": "Proszę wpisać swoje hasło.",
       "error_invalid_credentials": "Nieprawidłowy e-mail lub hasło.",
-      "google_hint": "Rejestracja przez konto społecznościowe (Google, LinkedIn lub Facebook)? W takim razie nie masz hasła — użyj powyżej przycisku tego dostawcy.",
-      "preview_host_notice": "Jesteś na wersji podglądowej serwisu. Logowanie Google działa tylko na wersji produkcyjnej — otwórz https://labourmarket.ai, aby z niego skorzystać. Logowanie e-mailem i hasłem działa tutaj normalnie.",
-      "google_recovery_label": "Zaloguj się przez Google — ścieżka zapasowa (tymczasowa, przez zewnętrzną stronę logowania)",
+      "google_hint": "Rejestracja przez konto społecznościowe (Google, LinkedIn lub Facebook)? W takim razie nie mają Państwo hasła — proszę użyć powyżej przycisku tego dostawcy.",
+      "preview_host_notice": "Są Państwo na wersji podglądowej serwisu. Logowanie Google działa tylko na wersji produkcyjnej — proszę otworzyć https://labourmarket.ai, aby z niego skorzystać. Logowanie e-mailem i hasłem działa tutaj normalnie.",
+      "google_recovery_label": "Logowanie przez Google — ścieżka zapasowa (tymczasowa, przez zewnętrzną stronę logowania)",
       "resend_confirmation": "Wyślij nowy link potwierdzający",
       "resend_sent": "Nowy link potwierdzający jest w drodze na {email}."
     },
     "forgotPassword": {
-      "headline": "Nie pamiętasz hasła?",
-      "subcopy": "Podaj swój e-mail, a wyślemy Ci link do ustawienia nowego hasła.",
+      "headline": "Nie pamiętają Państwo hasła?",
+      "subcopy": "Proszę podać swój e-mail, a wyślemy Państwu link do ustawienia nowego hasła.",
       "email_label": "E-mail",
       "submit_label": "Wyślij link do resetu",
       "sending": "Wysyłanie...",
-      "success_title": "Sprawdź swoją skrzynkę",
+      "success_title": "Proszę sprawdzić swoją skrzynkę",
       "success_body": "Jeśli konto dla {email} istnieje, wysłaliśmy link do zresetowania hasła.",
       "back_to_login": "Powrót do logowania",
-      "error_email": "Podaj prawidłowy adres e-mail.",
-      "error_generic": "Coś poszło nie tak. Spróbuj ponownie za chwilę."
+      "error_email": "Proszę podać prawidłowy adres e-mail.",
+      "error_generic": "Coś poszło nie tak. Proszę spróbować ponownie za chwilę."
     },
     "resetPassword": {
       "headline": "Nowe hasło",
-      "subcopy": "Wybierz nowe hasło do swojego konta.",
+      "subcopy": "Proszę wybrać nowe hasło do swojego konta.",
       "checking": "Sprawdzanie linku...",
       "password_label": "Nowe hasło",
       "confirm_password_label": "Powtórz hasło",
@@ -4342,31 +4342,31 @@
       "request_new": "Poproś o nowy link",
       "error_password_short": "Hasło musi mieć co najmniej {min} znaków.",
       "error_password_mismatch": "Hasła nie są takie same.",
-      "error_generic": "Coś poszło nie tak. Spróbuj ponownie za chwilę."
+      "error_generic": "Coś poszło nie tak. Proszę spróbować ponownie za chwilę."
     },
     "callback": {
-      "verifying": "Weryfikowanie Twojego linku logowania...",
+      "verifying": "Weryfikowanie Państwa linku logowania...",
       "error_title": "Logowanie nie powiodło się",
-      "error_body": "Ten link jest nieprawidłowy lub wygasł. Spróbuj ponownie.",
+      "error_body": "Ten link jest nieprawidłowy lub wygasł. Proszę spróbować ponownie.",
       "retry": "Spróbuj ponownie"
     },
     "onboarding": {
-      "pendingInviteNote": "Masz oczekujące zaproszenie od {org}. Dokończ poniżej konfigurację konta — potem przyjmiesz je w swoim panelu.",
+      "pendingInviteNote": "Mają Państwo oczekujące zaproszenie od {org}. Proszę dokończyć poniżej konfigurację konta — potem przyjmą je Państwo w swoim panelu.",
       "rolePicker": {
         "intentHeading": "Zaczynajmy",
         "intentLead": "LabourMarket.ai pomaga budować historię zawodową, zarządzać bieżącą pracą i odkrywać nowe możliwości.",
-        "intentNote": "Możesz wybrać kilka opcji i później je zmienić.",
+        "intentNote": "Można wybrać kilka opcji i później je zmienić.",
         "saidLabel": "Napisano:",
-        "saidHint": "Zaznaczyliśmy to, co pasuje. Zmień, jeśli trzeba.",
+        "saidHint": "Zaznaczyliśmy to, co pasuje. Proszę zmienić, jeśli trzeba.",
         "doorLabel": "Wybrano:",
         "intent": {
           "work": {
             "title": "Pracuję / mam doświadczenie zawodowe",
-            "desc": "Twoja praca, umiejętności i Dziennik pracy budują historię zawodową — z niej rodzą się nowe możliwości."
+            "desc": "Państwa praca, umiejętności i Dziennik pracy budują historię zawodową — z niej rodzą się nowe możliwości."
           },
           "member": {
             "title": "Jestem częścią firmy lub zespołu",
-            "desc": "Firma, zespół lub brygada, z którą pracujesz na co dzień — praca tam uzupełnia Twoją historię zawodową."
+            "desc": "Firma, zespół lub brygada, z którą Państwo pracują na co dzień — praca tam uzupełnia Państwa historię zawodową."
           },
           "hire": {
             "title": "Kieruję firmą lub zespołem",
@@ -4378,14 +4378,14 @@
           },
           "student": {
             "title": "Uczę się / przygotowuję do zawodu",
-            "desc": "Nauka i praktyki są już częścią Twojej historii zawodowej. Połącz się ze swoją szkołą."
+            "desc": "Nauka i praktyki są już częścią Państwa historii zawodowej. Proszę połączyć się ze swoją szkołą."
           },
           "education": {
             "title": "Reprezentuję instytucję edukacyjną",
-            "desc": "Zapraszaj uczących się, zobacz ich udział i łącz ich z praktykami i pracą."
+            "desc": "Zapraszanie uczących się, wgląd w ich udział i łączenie ich z praktykami i pracą."
           }
         },
-        "heading": "Zaczynasz jako osoba czy jako firma?",
+        "heading": "Zaczynają Państwo jako osoba czy jako firma?",
         "worker": {
           "title": "Osoba",
           "desc": "Szukam pracy, oferuję własną pracę albo zapisuję naukę i aktywność — profil, umiejętności, CV i dziennik pracy."
@@ -4403,53 +4403,53 @@
           "desc": "Zamawiam usługi, otrzymuję raporty z prac."
         },
         "continue": "Kontynuuj",
-        "multiNote": "Wybierz jedno lub oba — to tylko punkt wyjścia. Osoba i firma to tożsamości; zatrudnianie, kupowanie, oferowanie pracowników czy prowadzenie projektów to działania, które dodasz później."
+        "multiNote": "Proszę wybrać jedno lub oba — to tylko punkt wyjścia. Osoba i firma to tożsamości; zatrudnianie, kupowanie, oferowanie pracowników czy prowadzenie projektów to działania, które Państwo dodadzą później."
       },
       "step2": {
-        "studentHeading": "Gdzie się uczysz?",
+        "studentHeading": "Gdzie się Państwo uczą?",
         "institutionLabel": "Szkoła lub uczelnia",
         "institutionPlaceholder": "Szkoła, kolegium, uczelnia lub ośrodek szkoleniowy",
         "programLabel": "Kierunek lub dziedzina (opcjonalnie)",
         "educationTypeLabel": "Rodzaj nauki",
-        "errorInstitution": "Podaj, gdzie się uczysz (co najmniej 2 znaki).",
-        "heading": "Kilka słów o Tobie",
+        "errorInstitution": "Proszę podać, gdzie się Państwo uczą (co najmniej 2 znaki).",
+        "heading": "Kilka słów o Państwu",
         "continue": "Zakończ"
       },
       "nextSteps": {
-        "eyebrow": "Po tym kroku — Twój realny profil",
-        "s1": "Zaimportuj CV (opcjonalnie), aby szybciej uzupełnić profil",
-        "s2": "Dodaj realne umiejętności",
-        "s3": "Ustaw dostępność",
-        "s4": "Dodaj doświadczenie zawodowe i dowody",
-        "note": "Umiejętności są początkowo deklarowane przez Ciebie. Dokumenty, dziennik pracy i potwierdzenia od osób z czasem je wzmacniają."
+        "eyebrow": "Po tym kroku — Państwa realny profil",
+        "s1": "Import CV (opcjonalnie), aby szybciej uzupełnić profil",
+        "s2": "Dodanie realnych umiejętności",
+        "s3": "Ustawienie dostępności",
+        "s4": "Dodanie doświadczenia zawodowego i dowodów",
+        "note": "Umiejętności są początkowo deklarowane przez Państwa. Dokumenty, dziennik pracy i potwierdzenia od osób z czasem je wzmacniają."
       },
       "nextStepsOrganization": {
-        "eyebrow": "Dalej — Twoja organizacja",
-        "s1": "Nazwij organizację i określ, czym się zajmuje (zatrudnia, dostarcza ludzi, rekrutuje, szkoli, prowadzi projekty)",
-        "s2": "Dodaj swoich ludzi, zespoły lub dostarczaną siłę roboczą",
-        "s3": "Opublikuj zapotrzebowanie, zaoferuj moce — albo jedno i drugie",
-        "s4": "Porozmawiaj z pasującymi osobami i organizacjami, a potem realizujcie pracę razem",
+        "eyebrow": "Dalej — Państwa organizacja",
+        "s1": "Nazwanie organizacji i określenie, czym się zajmuje (zatrudnia, dostarcza ludzi, rekrutuje, szkoli, prowadzi projekty)",
+        "s2": "Dodanie własnych ludzi, zespołów lub dostarczanej siły roboczej",
+        "s3": "Opublikowanie zapotrzebowania, zaoferowanie mocy — albo jedno i drugie",
+        "s4": "Rozmowa z pasującymi osobami i organizacjami, a potem wspólna realizacja pracy",
         "note": "Z organizacji można korzystać od razu. Weryfikacja to osobny, silniejszy krok zaufania."
       },
       "display_name_label": "Nazwa wyświetlana",
-      "country_label": "Gdzie teraz mieszkasz?",
-      "country_placeholder": "Wybierz kraj",
-      "country_search_placeholder": "Szukaj kraju",
-      "country_search_empty": "Nie znaleziono kraju. Spróbuj innej nazwy.",
+      "country_label": "Gdzie Państwo teraz mieszkają?",
+      "country_placeholder": "Proszę wybrać kraj",
+      "country_search_placeholder": "Wyszukiwanie kraju",
+      "country_search_empty": "Nie znaleziono kraju. Proszę spróbować innej nazwy.",
       "error_country_required": "Proszę wybrać kraj.",
-      "error_role_required": "Najpierw wybierz, do czego chcesz używać LabourMarket.ai — potem uzupełnij profil.",
-      "role_step_hint": "Najpierw wybierz, do czego chcesz używać LabourMarket.ai — potem uzupełnij profil.",
+      "error_role_required": "Najpierw proszę wybrać, do czego chcą Państwo używać LabourMarket.ai — potem uzupełnić profil.",
+      "role_step_hint": "Najpierw proszę wybrać, do czego chcą Państwo używać LabourMarket.ai — potem uzupełnić profil.",
       "profession_label": "Jaki jest Twój zawód lub doświadczenie zawodowe?",
-      "profession_placeholder": "Wpisz zawód lub obszar pracy",
+      "profession_placeholder": "Proszę wpisać zawód lub obszar pracy",
       "profession_add": "Dodaj",
-      "profession_hint": "Możesz podać jeden lub kilka zawodów albo obszarów pracy. Później możesz dodać więcej.",
-      "profession_search_placeholder": "Szukaj zawodu lub obszaru pracy",
-      "profession_search_empty": "Brak wyników. Profil możesz uzupełnić później.",
+      "profession_hint": "Można podać jeden lub kilka zawodów albo obszarów pracy. Później można dodać więcej.",
+      "profession_search_placeholder": "Wyszukiwanie zawodu lub obszaru pracy",
+      "profession_search_empty": "Brak wyników. Profil można uzupełnić później.",
       "profession_remove": "Usuń",
       "back": "Wstecz",
       "saving": "Zapisywanie...",
-      "error_name_required": "Podaj nazwę wyświetlaną.",
-      "error_generic": "Coś poszło nie tak. Spróbuj ponownie."
+      "error_name_required": "Proszę podać nazwę wyświetlaną.",
+      "error_generic": "Coś poszło nie tak. Proszę spróbować ponownie."
     },
     "roleSwitcher": {
       "label": "Rola",
@@ -5024,8 +5024,8 @@
       }
     },
     "middleware": {
-      "session_expired": "Nastąpiło wylogowanie. Zaloguj się ponownie.",
-      "onboarding_required": "Najpierw dokończ konfigurację swojego profilu."
+      "session_expired": "Nastąpiło wylogowanie. Proszę zalogować się ponownie.",
+      "onboarding_required": "Najpierw proszę dokończyć konfigurację swojego profilu."
     },
     "notifications": {
       "types": {
@@ -5089,8 +5089,8 @@
       }
     },
     "carriedIntent": {
-      "label": "Kontynuujesz",
-      "hint": "Po zalogowaniu wracasz dokładnie tutaj — Twoje zdanie podąża za Tobą."
+      "label": "Kontynuacja",
+      "hint": "Po zalogowaniu wracają Państwo dokładnie tutaj — Państwa zdanie podąża za Państwem."
     }
   },
   "shared": {
@@ -5554,25 +5554,25 @@
   "pages": {
     "workers": {
       "eyebrow": "Dla pracowników",
-      "title": "Znajdź pracę",
+      "title": "Wyszukiwanie pracy",
       "titleAccent": "z jednym darmowym profilem.",
-      "subcopy": "Zbuduj jeden profil, ustaw dostępność i pozwól, by realne zapotrzebowanie znalazło Cię ponad granicami.",
+      "subcopy": "Można zbudować jeden profil, ustawić dostępność i pozwolić, by realne zapotrzebowanie znalazło Państwa ponad granicami.",
       "benefits": [
         {
           "title": "Jeden profil, wszystkie rynki",
-          "body": "Utrzymuj jeden awatar z umiejętnościami popartymi zapisami i z dostępnością — widoczny dla zarejestrowanych pracodawców ponad granicami."
+          "body": "Można utrzymywać jeden awatar z umiejętnościami popartymi zapisami i z dostępnością — widoczny dla zarejestrowanych pracodawców ponad granicami."
         },
         {
           "title": "Realny popyt",
-          "body": "Zobacz otwarte zapotrzebowania na pracowników pasujące do Twojego zawodu, umiejętności i miasta — i zgłoś zainteresowanie jednym kliknięciem."
+          "body": "Można zobaczyć otwarte zapotrzebowania na pracowników pasujące do Państwa zawodu, umiejętności i miasta — i zgłosić zainteresowanie jednym kliknięciem."
         },
         {
           "title": "Uczciwe sygnały",
           "body": "Przejrzyste, kontekstowe sygnały dopasowania — bez zawyżonych deklaracji, bez uniwersalnej oceny, bez płatnego miejsca w rankingu."
         },
         {
-          "title": "Rośnie, gdy pracujesz",
-          "body": "Zapisuj ukończoną pracę i wyniki na bieżąco — Twoja historia zawodowa staje się bogatsza, a wyszukiwanie możliwości coraz precyzyjniejsze, nawet gdy aktywnie nie szukasz."
+          "title": "Rośnie, gdy Państwo pracują",
+          "body": "Ukończoną pracę i wyniki można zapisywać na bieżąco — Państwa historia zawodowa staje się bogatsza, a wyszukiwanie możliwości coraz precyzyjniejsze, nawet gdy Państwo aktywnie nie szukają."
         }
       ],
       "screenshot": "Ścieżka awatara pracownika",
@@ -5580,67 +5580,67 @@
     },
     "companies": {
       "eyebrow": "Dla firm",
-      "title": "Znajdź pracowników",
-      "titleAccent": "do swoich projektów.",
-      "subcopy": "Napisz, jakich specjalistów potrzebuje każdy projekt, ilu i od kiedy. Zgłoszenie jest bezpłatne i nie wymaga konta; z darmowym kontem zobaczysz też, którzy dostępni pracownicy i agencje pasują.",
+      "title": "Wyszukiwanie pracowników",
+      "titleAccent": "do Państwa projektów.",
+      "subcopy": "Proszę napisać, jakich specjalistów potrzebuje każdy projekt, ilu i od kiedy. Zgłoszenie jest bezpłatne i nie wymaga konta; z darmowym kontem zobaczą Państwo też, którzy dostępni pracownicy i agencje pasują.",
       "benefits": [
         {
-          "title": "Zgłaszaj zapotrzebowanie dla każdego projektu",
-          "body": "Określ role, liczbę osób i umiejętności dla każdego projektu — zamiast ogólnikowych ogłoszeń o pracę."
+          "title": "Zgłaszanie zapotrzebowania dla każdego projektu",
+          "body": "Można określić role, liczbę osób i umiejętności dla każdego projektu — zamiast ogólnikowych ogłoszeń o pracę."
         },
         {
           "title": "Dopasowanie do konkretnego zlecenia",
-          "body": "Widzisz, którzy dostępni pracownicy i które agencje pasują do każdego konkretnego zapotrzebowania — uczciwie, osobno dla każdego zapotrzebowania."
+          "body": "Widzą Państwo, którzy dostępni pracownicy i które agencje pasują do każdego konkretnego zapotrzebowania — uczciwie, osobno dla każdego zapotrzebowania."
         },
         {
-          "title": "Agencje, gdy ich potrzebujesz",
-          "body": "Sięgaj po pule zarejestrowanych agencji, gdy potrzebujesz szybko zwiększyć moce, nie tracąc przy tym wglądu."
+          "title": "Agencje, gdy ich Państwo potrzebują",
+          "body": "Można sięgać po pule zarejestrowanych agencji, gdy potrzebują Państwo szybko zwiększyć moce, nie tracąc przy tym wglądu."
         }
       ],
       "screenshot": "Ścieżka zapotrzebowania firmy",
-      "cta": "Opisz, jakich pracowników potrzebujesz",
-      "calculatorBody": "Zanim zgłosisz zapotrzebowanie, oszacuj pracę: godziny, materiały, sprzęt i dojazdy — na własnych liczbach.",
+      "cta": "Proszę opisać, jakich pracowników Państwo potrzebują",
+      "calculatorBody": "Przed zgłoszeniem zapotrzebowania można oszacować pracę: godziny, materiały, sprzęt i dojazdy — na własnych liczbach.",
       "calculatorLink": "Oblicz koszt projektu",
       "markets": {
         "lu": {
           "metaTitle": "Fachowcy na budowy w Luksemburgu",
-          "metaDescription": "Firmy budowlane w Luksemburgu: opisz, jakich spawaczy, elektryków, cieśli lub monterów rusztowań potrzebujesz. Bezpłatnie; odpowiada człowiek.",
+          "metaDescription": "Firmy budowlane w Luksemburgu: proszę opisać, jakich spawaczy, elektryków, cieśli lub monterów rusztowań Państwo potrzebują. Bezpłatnie; odpowiada człowiek.",
           "eyebrow": "Dla pracodawców w Luksemburgu",
-          "title": "Fachowcy na Twoje budowy",
+          "title": "Fachowcy na Państwa budowy",
           "titleAccent": "w Luksemburgu.",
-          "subcopy": "Dla wykonawców i podwykonawców budowlanych. Napisz, jakich specjalistów potrzebujesz — spawaczy, elektryków, cieśli, monterów rusztowań — ilu, gdzie i od kiedy.",
-          "cta": "Opisz, kogo potrzebujesz",
+          "subcopy": "Dla wykonawców i podwykonawców budowlanych. Proszę napisać, jakich specjalistów Państwo potrzebują — spawaczy, elektryków, cieśli, monterów rusztowań — ilu, gdzie i od kiedy.",
+          "cta": "Proszę opisać, kogo Państwo potrzebują",
           "points": [
             "Wysłanie zapytania jest bezpłatne i nie wymaga konta, tylko adresu e-mail do kontaktu. Nic nie jest publikowane automatycznie.",
-            "Szukamy osób, których zapisana praca pasuje do Twoich potrzeb. Jeśli nie ma jeszcze dopasowania, mówimy o tym wprost.",
+            "Szukamy osób, których zapisana praca pasuje do Państwa potrzeb. Jeśli nie ma jeszcze dopasowania, mówimy o tym wprost.",
             "Przy zapytaniach budowlanych nasza firma partnerska może koordynować dokumenty i wdrożenie — każdy krok prowadzi człowiek."
           ]
         },
         "nl": {
           "metaTitle": "Fachowcy na budowy w Holandii",
-          "metaDescription": "Firmy budowlane w Holandii: opisz, jakich spawaczy, elektryków, cieśli lub monterów rusztowań potrzebujesz. Bezpłatnie; odpowiada człowiek.",
+          "metaDescription": "Firmy budowlane w Holandii: proszę opisać, jakich spawaczy, elektryków, cieśli lub monterów rusztowań Państwo potrzebują. Bezpłatnie; odpowiada człowiek.",
           "eyebrow": "Dla pracodawców w Holandii",
-          "title": "Fachowcy na Twoje budowy",
+          "title": "Fachowcy na Państwa budowy",
           "titleAccent": "w Holandii.",
-          "subcopy": "Dla wykonawców i podwykonawców budowlanych. Napisz, jakich specjalistów potrzebujesz — spawaczy, elektryków, cieśli, monterów rusztowań — ilu, gdzie i od kiedy.",
-          "cta": "Opisz, kogo potrzebujesz",
+          "subcopy": "Dla wykonawców i podwykonawców budowlanych. Proszę napisać, jakich specjalistów Państwo potrzebują — spawaczy, elektryków, cieśli, monterów rusztowań — ilu, gdzie i od kiedy.",
+          "cta": "Proszę opisać, kogo Państwo potrzebują",
           "points": [
             "Wysłanie zapytania jest bezpłatne i nie wymaga konta, tylko adresu e-mail do kontaktu. Nic nie jest publikowane automatycznie.",
-            "Szukamy osób, których zapisana praca pasuje do Twoich potrzeb. Jeśli nie ma jeszcze dopasowania, mówimy o tym wprost.",
+            "Szukamy osób, których zapisana praca pasuje do Państwa potrzeb. Jeśli nie ma jeszcze dopasowania, mówimy o tym wprost.",
             "Przy zapytaniach budowlanych nasza firma partnerska może koordynować dokumenty i wdrożenie — każdy krok prowadzi człowiek."
           ]
         },
         "dk": {
           "metaTitle": "Fachowcy na budowy w Danii",
-          "metaDescription": "Firmy budowlane w Danii: opisz, jakich spawaczy, elektryków, cieśli lub monterów rusztowań potrzebujesz. Bezpłatnie; odpowiada człowiek.",
+          "metaDescription": "Firmy budowlane w Danii: proszę opisać, jakich spawaczy, elektryków, cieśli lub monterów rusztowań Państwo potrzebują. Bezpłatnie; odpowiada człowiek.",
           "eyebrow": "Dla pracodawców w Danii",
-          "title": "Fachowcy na Twoje budowy",
+          "title": "Fachowcy na Państwa budowy",
           "titleAccent": "w Danii.",
-          "subcopy": "Dla wykonawców i podwykonawców budowlanych. Napisz, jakich specjalistów potrzebujesz — spawaczy, elektryków, cieśli, monterów rusztowań — ilu, gdzie i od kiedy.",
-          "cta": "Opisz, kogo potrzebujesz",
+          "subcopy": "Dla wykonawców i podwykonawców budowlanych. Proszę napisać, jakich specjalistów Państwo potrzebują — spawaczy, elektryków, cieśli, monterów rusztowań — ilu, gdzie i od kiedy.",
+          "cta": "Proszę opisać, kogo Państwo potrzebują",
           "points": [
             "Wysłanie zapytania jest bezpłatne i nie wymaga konta, tylko adresu e-mail do kontaktu. Nic nie jest publikowane automatycznie.",
-            "Szukamy osób, których zapisana praca pasuje do Twoich potrzeb. Jeśli nie ma jeszcze dopasowania, mówimy o tym wprost.",
+            "Szukamy osób, których zapisana praca pasuje do Państwa potrzeb. Jeśli nie ma jeszcze dopasowania, mówimy o tym wprost.",
             "Przy zapytaniach budowlanych nasza firma partnerska może koordynować dokumenty i wdrożenie — każdy krok prowadzi człowiek."
           ]
         }
@@ -5648,21 +5648,21 @@
     },
     "agencies": {
       "eyebrow": "Dla agencji",
-      "title": "Twoja baza,",
+      "title": "Państwa baza,",
       "titleAccent": "w ruchu.",
-      "subcopy": "Zarządzaj swoimi pracownikami, zgłaszaj zapotrzebowanie w imieniu klientów i kojarz strony — wszystko w jednym miejscu.",
+      "subcopy": "Zarządzanie własnymi pracownikami, zgłaszanie zapotrzebowania w imieniu klientów i kojarzenie stron — wszystko w jednym miejscu.",
       "benefits": [
         {
-          "title": "Zarządzaj swoją pulą",
-          "body": "Utrzymuj zarządzanych pracowników, ich dostępność i statusy uporządkowane w jednej przestrzeni roboczej."
+          "title": "Zarządzanie własną pulą",
+          "body": "Można utrzymywać zarządzanych pracowników, ich dostępność i statusy uporządkowane w jednej przestrzeni roboczej."
         },
         {
-          "title": "Pośrednicz z przewagą",
-          "body": "Udostępniaj zapotrzebowania klientów i szybciej kieruj właściwe osoby dzięki wyjaśnialnemu kierunkowi dopasowania."
+          "title": "Pośrednictwo z przewagą",
+          "body": "Można udostępniać zapotrzebowania klientów i szybciej kierować właściwe osoby dzięki wyjaśnialnemu kierunkowi dopasowania."
         },
         {
           "title": "Kontrola widoczności",
-          "body": "Wybierz, co jest publiczne, dostępne tylko dla agencji lub bezpośrednie — to Ty kontrolujesz widoczność."
+          "body": "Można wybrać, co jest publiczne, dostępne tylko dla agencji lub bezpośrednie — to Państwo kontrolują widoczność."
         }
       ],
       "screenshot": "Ścieżka trybu agencji",
@@ -5672,54 +5672,54 @@
       "eyebrow": "Darmowy kreator CV",
       "title": "Profesjonalne CV,",
       "titleAccent": "za darmo.",
-      "subcopy": "Stwórz CV od zera lub zaimportuj istniejący PDF lub DOCX. Sprawdź każdy wyodrębniony fakt, wybierz przejrzysty szablon i pobierz PDF — za darmo. Jeśli zechcesz, te same informacje mogą zbudować Twój profil pracownika i pokazać prawdziwe ogłoszenia o pracę z oficjalnych publicznych źródeł.",
+      "subcopy": "Można stworzyć CV od zera lub zaimportować istniejący PDF lub DOCX, sprawdzić każdy wyodrębniony fakt, wybrać przejrzysty szablon i pobrać PDF — za darmo. Jeśli Państwo zechcą, te same informacje mogą zbudować Państwa profil pracownika i pokazać prawdziwe ogłoszenia o pracę z oficjalnych publicznych źródeł.",
       "cta": "Utwórz moje CV — za darmo",
       "benefits": [
         {
-          "title": "Zaimportuj lub zacznij od zera",
-          "body": "Wgraj istniejące CV (PDF, DOCX lub tekst) albo zacznij od pustej strony. Wyodrębnione fakty pozostają sugestiami, dopóki ich nie zaakceptujesz."
+          "title": "Import lub start od zera",
+          "body": "Można wgrać istniejące CV (PDF, DOCX lub tekst) albo zacząć od pustej strony. Wyodrębnione fakty pozostają sugestiami, dopóki ich Państwo nie zaakceptują."
         },
         {
           "title": "Uczciwa struktura",
-          "body": "Twoje doświadczenie, wykształcenie, języki i umiejętności są porządkowane do Twojego przeglądu — nic nie jest zmyślane i nic nie jest zapisywane bez Twojej zgody."
+          "body": "Państwa doświadczenie, wykształcenie, języki i umiejętności są porządkowane do Państwa przeglądu — nic nie jest zmyślane i nic nie jest zapisywane bez Państwa zgody."
         },
         {
           "title": "Czytelne szablony, prawdziwy PDF",
-          "body": "Wybierz profesjonalny szablon i wyeksportuj do PDF w formacie A4 przez przeglądarkę — bez znaku wodnego, bez opłat."
+          "body": "Można wybrać profesjonalny szablon i wyeksportować do PDF w formacie A4 przez przeglądarkę — bez znaku wodnego, bez opłat."
         },
         {
           "title": "Więcej niż dokument",
-          "body": "Za Twoją wyraźną zgodą te same fakty mogą zbudować Twój profil pracownika, powiązać Twoje umiejętności ze wspólnym europejskim katalogiem umiejętności i pokazać Ci pasujące publiczne ogłoszenia o pracę. W miarę jak z czasem zapisujesz ukończoną pracę, Twoja historia zawodowa wciąż rośnie — a wyszukiwanie możliwości staje się coraz lepsze."
+          "body": "Za Państwa wyraźną zgodą te same fakty mogą zbudować Państwa profil pracownika, powiązać Państwa umiejętności ze wspólnym europejskim katalogiem umiejętności i pokazać Państwu pasujące publiczne ogłoszenia o pracę. W miarę jak z czasem zapisują Państwo ukończoną pracę, Państwa historia zawodowa wciąż rośnie — a wyszukiwanie możliwości staje się coraz lepsze."
         }
       ],
       "stepsTitle": "Jak to działa",
       "steps": [
         {
-          "title": "Załóż bezpłatne konto",
-          "body": "Konto sprawia, że Twoje CV pozostaje edytowalne, a dane pod Twoją kontrolą — możesz je usunąć w każdej chwili."
+          "title": "Założenie bezpłatnego konta",
+          "body": "Konto sprawia, że Państwa CV pozostaje edytowalne, a dane pod Państwa kontrolą — można je usunąć w każdej chwili."
         },
         {
-          "title": "Dodaj swoje doświadczenie",
-          "body": "Zaimportuj stare CV lub wpisz dane ręcznie — a następnie sprawdź każdy fakt i zdecyduj, co zachować, zanim zostanie użyty."
+          "title": "Dodanie własnego doświadczenia",
+          "body": "Można zaimportować stare CV lub wpisać dane ręcznie — a następnie sprawdzić każdy fakt i zdecydować, co zachować, zanim zostanie użyty."
         },
         {
-          "title": "Pobierz i zdecyduj",
-          "body": "Wyeksportuj CV do PDF. Udostępnienie się pracodawcom pozostaje osobnym, opcjonalnym wyborem."
+          "title": "Pobranie i decyzja",
+          "body": "CV można wyeksportować do PDF. Udostępnienie się pracodawcom pozostaje osobnym, opcjonalnym wyborem."
         }
       ],
-      "privacyNote": "Twoje CV domyślnie pozostaje prywatne. Nic nie jest udostępniane pracodawcom, dopóki wyraźnie nie włączysz widoczności — a możesz ją wyłączyć w każdej chwili."
+      "privacyNote": "Państwa CV domyślnie pozostaje prywatne. Nic nie jest udostępniane pracodawcom, dopóki wyraźnie nie włączą Państwo widoczności — a można ją wyłączyć w każdej chwili."
     }
   },
   "pricing": {
     "checkoutReturn": {
-      "cancelled": "Płatność została anulowana — nic nie pobrano i nic się nie zmieniło na Twoim koncie."
+      "cancelled": "Płatność została anulowana — nic nie pobrano i nic się nie zmieniło na Państwa koncie."
     },
     "eyebrow": "Cennik",
     "title": "Proste plany,",
     "titleAccent": "ustalone uczciwie.",
     "subcopyLive": "Ceny są potwierdzone przez właściciela i obowiązują. Aktywacja odbywa się na koncie organizacji poprzez bezpieczną płatność Stripe; na tej stronie nic nie jest pobierane.",
-    "subcopy": "Ceny nie są jeszcze ostateczne, a rozliczenie nigdy nie jest tu uruchamiane za Ciebie. Poniższe plany opisują zakres; aktywacja jest ręczna — skontaktuj się, a przed rozpoczęciem potwierdzimy z Tobą cenę i zakres.",
-    "subcopyConfirmed": "Ceny są potwierdzone. Aktywacja online nie jest jeszcze otwarta — dołącz do listy oczekujących, skontaktujemy się i uruchomimy organizację ręcznie; na tej stronie nic nie jest pobierane.",
+    "subcopy": "Ceny nie są jeszcze ostateczne, a rozliczenie nigdy nie jest tu uruchamiane za Państwa. Poniższe plany opisują zakres; aktywacja jest ręczna — prosimy o kontakt, a przed rozpoczęciem potwierdzimy z Państwem cenę i zakres.",
+    "subcopyConfirmed": "Ceny są potwierdzone. Aktywacja online nie jest jeszcze otwarta — prosimy dołączyć do listy oczekujących, skontaktujemy się i uruchomimy organizację ręcznie; na tej stronie nic nie jest pobierane.",
     "trialNote": "Pierwsza subskrypcja organizacji zaczyna się od 14-dniowego okresu próbnego. Po nim z karty pobierana jest cena miesięczna; można zrezygnować przed jego końcem.",
     "planCta": "Dołącz do listy oczekujących na ten plan",
     "featuresLabel": "Zawiera",
@@ -5777,7 +5777,7 @@
       },
       {
         "q": "Jak przebiegają rozliczenia?",
-        "a": "Płatność kartą przez Stripe. Faktury, historia płatności i rezygnacja znajdują się na koncie Twojej organizacji."
+        "a": "Płatność kartą przez Stripe. Faktury, historia płatności i rezygnacja znajdują się na koncie Państwa organizacji."
       },
       {
         "q": "Czy jest limit aktywnych stanowisk?",
@@ -5791,14 +5791,14 @@
     "individual": {
       "name": "Szczególne wymagania",
       "tagline": "Dla potrzeb wykraczających poza standardowe plany",
-      "question": "Masz coś konkretnego na myśli?",
-      "body": "Skontaktuj się z nami, jeśli masz szczególne wymagania — ustalamy je wspólnie. Bez automatycznego progu, bez publikowanej ceny.",
-      "cta": "Skontaktuj się"
+      "question": "Mają Państwo coś konkretnego na myśli?",
+      "body": "Prosimy o kontakt, jeśli mają Państwo szczególne wymagania — ustalamy je wspólnie. Bez automatycznego progu, bez publikowanej ceny.",
+      "cta": "Kontakt"
     },
     "priceFree": "0 €",
     "pricePerMonth": "{price} €/mies.",
-    "ctaStartFree": "Zacznij bezpłatnie na koncie organizacji",
-    "ctaSubscribe": "Aktywuj na koncie organizacji"
+    "ctaStartFree": "Bezpłatny start na koncie organizacji",
+    "ctaSubscribe": "Aktywacja na koncie organizacji"
   },
   "privacySelfService": {
     "title": "Prywatność i Twoje dane",
@@ -9450,7 +9450,7 @@
   },
   "planBoundary": {
     "title": "Co obejmują płatne plany",
-    "subcopy": "Płatności nie są jeszcze włączone — brak strony płatności i karty. Płatne plany są pokazane, abyś znał ich zakres; dostęp pilotażowy jest nadawany ręcznie.",
+    "subcopy": "Płatności nie są jeszcze włączone — brak strony płatności i karty. Płatne plany są pokazane, aby znali Państwo ich zakres; dostęp pilotażowy jest nadawany ręcznie.",
     "note": "Plany opisują zakres, a nie aktywne rozliczenia. Na tej stronie nic nie jest naliczane.",
     "plans": {
       "free_worker": "Pracownik — plan bezpłatny",
@@ -9484,7 +9484,7 @@
     "limitValue": "do {count}",
     "freeToday": {
       "freeTitle": "Darmowe dziś",
-      "free": "Wszystko, co obecnie możesz wykorzystać w produkcie, jest darmowe — pilotaż działa bez płatności i nic nie prosi o kartę.",
+      "free": "Wszystko, co obecnie mogą Państwo wykorzystać w produkcie, jest darmowe — pilotaż działa bez płatności i nic nie prosi o kartę.",
       "paidTitle": "Przygotowane płatne plany",
       "paid": "Chwilowo niedostępne.",
       "preparedTitle": "Przygotowane, niedostępne do zakupu",
@@ -9514,7 +9514,7 @@
     },
     "enforcement": {
       "free_surface": "W produkcie już dziś",
-      "server_gate": "Dostępne już dziś, zależnie od Twoich uprawnień",
+      "server_gate": "Dostępne już dziś, zależnie od Państwa uprawnień",
       "declared_boundary_only": "Przygotowane — zacznie działać dopiero z rozliczeniami",
       "admin_rbac": "Wewnętrzne, tylko dla administratora"
     }
@@ -9854,29 +9854,29 @@
     "banner": {
       "badge": "Wczesny dostęp",
       "bodyLive": "Plan Organizacja można aktywować na koncie poprzez bezpieczną płatność. Nadal obsługujemy pierwszych klientów bezpośrednio: złożenie zapytania o siłę roboczą jest bezpłatne, a ostateczny zakres jest ustalany przed rozpoczęciem pracy.",
-      "body": "Publiczne płatności nie są jeszcze włączone. Pierwsi klienci są obsługiwani bezpośrednio: złożenie zapytania o siłę roboczą jest bezpłatne, a ostateczna cena jest zawsze potwierdzana z Tobą przed rozpoczęciem jakiejkolwiek płatnej pracy.",
+      "body": "Publiczne płatności nie są jeszcze włączone. Pierwsi klienci są obsługiwani bezpośrednio: złożenie zapytania o siłę roboczą jest bezpłatne, a ostateczna cena jest zawsze potwierdzana z Państwem przed rozpoczęciem jakiejkolwiek płatnej pracy.",
       "cta": "Złóż zapytanie o siłę roboczą"
     },
     "title": "Jak działa pierwsza płatna usługa",
     "steps": [
       {
-        "title": "Zgłoś zapytanie bezpłatnie",
-        "body": "Opisz w formularzu zapytania, jakich pracowników lub jakiej brygady potrzebujesz. Bez opłat, bez karty, nic nie jest publikowane automatycznie."
+        "title": "Bezpłatne zgłoszenie zapytania",
+        "body": "Proszę opisać w formularzu zapytania, jakich pracowników lub jakiej brygady Państwo potrzebują. Bez opłat, bez karty, nic nie jest publikowane automatycznie."
       },
       {
         "title": "Zapytanie sprawdza człowiek",
-        "body": "Operator czyta każde zapytanie, kontaktuje się z Tobą i doprecyzowuje zakres, terminy oraz warunki, zanim cokolwiek ruszy."
+        "body": "Operator czyta każde zapytanie, kontaktuje się z Państwem i doprecyzowuje zakres, terminy oraz warunki, zanim cokolwiek ruszy."
       },
       {
-        "title": "Otrzymujesz ręcznie sprawdzoną krótką listę",
-        "body": "Prawdziwi kandydaci lub brygady, sprawdzeni przez człowieka pod kątem Twojego zapytania. Jeśli nie uda nam się zebrać odpowiedniej krótkiej listy, nie ma opłaty — i nigdy nie obiecujemy, że kandydat zawsze się znajdzie."
+        "title": "Otrzymują Państwo ręcznie sprawdzoną krótką listę",
+        "body": "Prawdziwi kandydaci lub brygady, sprawdzeni przez człowieka pod kątem Państwa zapytania. Jeśli nie uda nam się zebrać odpowiedniej krótkiej listy, nie ma opłaty — i nigdy nie obiecujemy, że kandydat zawsze się znajdzie."
       },
       {
-        "title": "Płacisz tylko za zrealizowaną usługę",
+        "title": "Płacą Państwo tylko za zrealizowaną usługę",
         "body": "Stała opłata za sukces obowiązuje za każdego zatrudnionego pracownika, brygadę lub skierowaną firmę. Osobna opłata koordynacyjna obowiązuje wyłącznie wtedy, gdy koordynacja dokumentów lub wdrożenia zostanie faktycznie zrealizowana. Ostateczna cena jest potwierdzana przed rozpoczęciem płatnych prac."
       }
     ],
-    "note": "Dwie rzeczy działają równolegle, a ta strona opisuje drugą z nich. Sama platforma jest automatyczna: tablica ofert pracy jest publiczna, podgląd dopasowania jest otwarty bez konta, a podane zapytanie tworzy uporządkowaną krótką listę, która wyjaśnia, dlaczego każda osoba pasuje — jedno aktywne stanowisko bezpłatnie. Powyższa płatna usługa jest usługą ludzką: operator czyta Twoje zapytanie, kontaktuje się z Tobą i ręcznie sprawdza krótką listę, zanim ktokolwiek zostanie Ci zaproponowany. Cała ekipa może już zaoferować się na Twoje zapytanie jako jedna jednostka i, gdy obie strony się porozumieją, dołączyć do Twojego projektu jako jeden zespół; automatyczna krótka lista nie proponuje jeszcze całych ekip — porządkuje osoby pojedynczo.",
+    "note": "Dwie rzeczy działają równolegle, a ta strona opisuje drugą z nich. Sama platforma jest automatyczna: tablica ofert pracy jest publiczna, podgląd dopasowania jest otwarty bez konta, a podane zapytanie tworzy uporządkowaną krótką listę, która wyjaśnia, dlaczego każda osoba pasuje — jedno aktywne stanowisko bezpłatnie. Powyższa płatna usługa jest usługą ludzką: operator czyta Państwa zapytanie, kontaktuje się z Państwem i ręcznie sprawdza krótką listę, zanim ktokolwiek zostanie Państwu zaproponowany. Cała ekipa może już zaoferować się na Państwa zapytanie jako jedna jednostka i, gdy obie strony się porozumieją, dołączyć do Państwa projektu jako jeden zespół; automatyczna krótka lista nie proponuje jeszcze całych ekip — porządkuje osoby pojedynczo.",
     "ctaLabel": "Złóż zapytanie o siłę roboczą →"
   },
   "adminLaunchReadiness": {
@@ -19392,23 +19392,23 @@
   },
   "workLifecycle": {
     "pending": "Jeszcze nie",
-    "title": "Co dzieje się z Twoją pracą",
-    "titleCompany": "Co dzieje się z pracą, którą prowadzisz",
+    "title": "Co dzieje się z Państwa pracą",
+    "titleCompany": "Co dzieje się z pracą, którą Państwo prowadzą",
     "example": "Przykład — to nie jest prawdziwa osoba ani prawdziwe dane",
-    "hint": "Wybierz krok. Każdy krok otwiera prawdziwe miejsce w Twojej przestrzeni roboczej.",
-    "hintWorkers": "Wybierz krok. Każdy krok otwiera prawdziwe miejsce w Twojej przestrzeni roboczej.",
+    "hint": "Proszę wybrać krok. Każdy krok otwiera prawdziwe miejsce w Państwa przestrzeni roboczej.",
+    "hintWorkers": "Proszę wybrać krok. Każdy krok otwiera prawdziwe miejsce w Państwa przestrzeni roboczej.",
     "open": "Otwórz w przestrzeni roboczej",
     "list": "Etapy cyklu życia pracy",
     "workers": {
       "person": {
-        "label": "Ty",
+        "label": "Państwo",
         "fact": "Kucharz — tożsamość zawodowa",
-        "detail": "Jedna tożsamość zawodowa, która należy do Ciebie — niezwiązana z jednym pracodawcą."
+        "detail": "Jedna tożsamość zawodowa, która należy do Państwa — niezwiązana z jednym pracodawcą."
       },
       "team": {
         "label": "Zespół",
         "fact": "Zespół kuchni",
-        "detail": "Dołączasz do prawdziwego zespołu — wiesz, z kim pracujesz i kto nim kieruje."
+        "detail": "Dołączają Państwo do prawdziwego zespołu — wiadomo, z kim Państwo pracują i kto nim kieruje."
       },
       "project": {
         "label": "Projekt",
@@ -19432,15 +19432,15 @@
       },
       "history": {
         "label": "Historia",
-        "fact": "Dodano do Twojej historii",
-        "detail": "Potwierdzona praca buduje Twoją historię zawodową — zostaje z Tobą przy kolejnej pracy."
+        "fact": "Dodano do Państwa historii",
+        "detail": "Potwierdzona praca buduje Państwa historię zawodową — zostaje z Państwem przy kolejnej pracy."
       }
     },
     "companies": {
       "need": {
         "label": "Zapotrzebowanie",
         "fact": "4 kucharzy, od poniedziałku",
-        "detail": "Prawdziwe zapotrzebowanie podajesz raz: kto, gdzie i od kiedy."
+        "detail": "Prawdziwe zapotrzebowanie podają Państwo raz: kto, gdzie i od kiedy."
       },
       "people": {
         "label": "Ludzie",
@@ -19464,8 +19464,8 @@
       },
       "confirmation": {
         "label": "Potwierdzone",
-        "fact": "Czeka na Twoje potwierdzenie",
-        "detail": "Widzisz, co jeszcze wymaga potwierdzenia, a co jest już gotowe."
+        "fact": "Czeka na Państwa potwierdzenie",
+        "detail": "Widzą Państwo, co jeszcze wymaga potwierdzenia, a co jest już gotowe."
       },
       "report": {
         "label": "Raport",
@@ -20443,25 +20443,25 @@
   },
   "pilotPass": {
     "title": "Plan dla organizacji — {days}-dniowy pilotaż za 1 €",
-    "intro": "Zapłać 1 € jednorazowo, a Twoja organizacja na {days} dni otrzyma płatny plan Organizacja. Co dodaje do planu bezpłatnego: brak limitu jednocześnie otwartych stanowisk i potrzeb kadrowych (w planie bezpłatnym – jedno). Wiadomości, podsumowania kandydatów, dobór zespołów i rezerwacje pozostają dostępne jak w planie bezpłatnym.",
+    "intro": "Po jednorazowej płatności 1 € Państwa organizacja na {days} dni otrzyma płatny plan Organizacja. Co dodaje do planu bezpłatnego: brak limitu jednocześnie otwartych stanowisk i potrzeb kadrowych (w planie bezpłatnym – jedno). Wiadomości, podsumowania kandydatów, dobór zespołów i rezerwacje pozostają dostępne jak w planie bezpłatnym.",
     "terms": "Płatność jednorazowa. Nic się nie odnawia i nic nie jest pobierane ponownie: po {days} dniach plan kończy się sam, a organizacja wraca do planu bezpłatnego. Plan pojawi się poniżej, gdy tylko Stripe potwierdzi płatność.",
     "pay": "Zapłać 1 € — {days}-dniowy pilotaż",
     "status": {
       "pilot_pass_disabled": "Pilotaż nie jest teraz oferowany.",
-      "unauthenticated": "Zaloguj się, aby rozpocząć pilotaż.",
-      "no_organization": "Najpierw wybierz przestrzeń swojej organizacji.",
+      "unauthenticated": "Proszę się zalogować, aby rozpocząć pilotaż.",
+      "no_organization": "Najpierw proszę wybrać przestrzeń swojej organizacji.",
       "not_billing_authority": "Pilotaż może rozpocząć tylko osoba zarządzająca płatnościami organizacji.",
       "billing_not_active": "Płatności nie są dostępne dla tej organizacji.",
-      "plan_active": "Twoja organizacja ma już aktywny plan.",
-      "checkout_failed": "Stripe nie utworzył strony płatności. Nic nie pobrano; spróbuj później."
+      "plan_active": "Państwa organizacja ma już aktywny plan.",
+      "checkout_failed": "Stripe nie utworzył strony płatności. Nic nie pobrano; proszę spróbować później."
     },
     "result": {
-      "paid": "Stripe otrzymał płatność. Plan włączy się, gdy tylko nadejdzie potwierdzenie — jeśli go jeszcze nie widać, odśwież stronę za chwilę.",
+      "paid": "Stripe otrzymał płatność. Plan włączy się, gdy tylko nadejdzie potwierdzenie — jeśli go jeszcze nie widać, proszę odświeżyć stronę za chwilę.",
       "cancelled": "Płatność anulowana — nic nie pobrano."
     },
-    "elsewhere": "Wybierz {organization} w przełączniku przestrzeni u góry strony — pilotaż uruchamia się z przestrzeni tej organizacji.",
+    "elsewhere": "Proszę wybrać {organization} w przełączniku przestrzeni u góry strony — pilotaż uruchamia się z przestrzeni tej organizacji.",
     "invite": {
-      "line": "Zapłać 1 € jednorazowo za {days} dni płatnego planu Organizacja. Nic się nie odnawia.",
+      "line": "Jednorazowa płatność 1 € za {days} dni płatnego planu Organizacja. Nic się nie odnawia.",
       "cta": "Otwórz pilotaż"
     }
   },
@@ -20566,7 +20566,7 @@
     },
     "control": {
       "title": "Pomiar korzystania i przypisanie kampanii",
-      "granted": "Zgoda została wyrażona. Możesz ją w każdej chwili wycofać — wtedy wpisy zostaną usunięte z tego urządzenia.",
+      "granted": "Zgoda została wyrażona. Można ją w każdej chwili wycofać — wtedy wpisy zostaną usunięte z tego urządzenia.",
       "refused": "Odmówiono zgody. Na tym urządzeniu nic nie jest zapisywane na potrzeby pomiaru.",
       "undecided": "Wybór nie został jeszcze dokonany, więc nic nie jest zapisywane na potrzeby pomiaru.",
       "allow": "Zezwól",

@@ -155,7 +155,7 @@ describe("7. the onboarding country field is labelled by what it writes (residen
     expect(rpc).toMatch(/current_location_country/);
   });
   const RESIDENCE: Record<string, RegExp> = {
-    lt: /gyveni/i,
+    lt: /gyven(i|ate)/i, // "Kur dabar gyvenate?" since the polite form (owner 2026-11-13)
     en: /live/i,
     ru: /живёте|живете/i,
     nl: /woon/i,
