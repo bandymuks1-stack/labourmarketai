@@ -34,6 +34,7 @@ begin
   end if;
 end $$;
 
+drop function if exists public.list_my_roster_link_organizations_v1();
 drop function if exists public.unlink_roster_person_v1(uuid, text);
 drop function if exists public.revoke_roster_history_claim_v1(uuid);
 drop function if exists public.decide_roster_history_claim_v1(uuid, text, text);

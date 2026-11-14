@@ -530,6 +530,29 @@ begin
 end $$;
 -- ─────────────────────────────────────────────────────────────────────────
 
+-- ── WHO NAMED ME ──────────────────────────────────────────────────────────
+-- A person reads the name of an organization only as its owner or member
+-- (organizations_select). A FORMER worker is neither, so an offered or
+-- confirmed roster link read "an organization" on their own profile — the
+-- one place they decide whether the record is theirs. This returns, for the
+-- caller's OWN roster links only (offered or confirmed), the organization's
+-- id and name: the same two facts the claim preview already tells them, and
+-- nothing else about the organization.
+create or replace function public.list_my_roster_link_organizations_v1()
+returns table (organization_id uuid, organization_name text)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select distinct o.id,
+         coalesce(nullif(btrim(o.display_name), ''), nullif(btrim(o.legal_name), ''))
+    from public.organization_people op
+    join public.organizations o on o.id = op.organization_id
+   where op.linked_profile_id = (select auth.uid())
+     and op.link_state in ('link_proposed', 'linked');
+$$;
+
 -- A SECURITY DEFINER function never inherits a default EXECUTE grant: state each.
 revoke all on function public.create_roster_history_claim_v1(uuid, text) from public;
 revoke all on function public.create_roster_history_claim_v1(uuid, text) from anon;
@@ -552,3 +575,6 @@ grant execute on function public.revoke_roster_history_claim_v1(uuid) to authent
 revoke all on function public.unlink_roster_person_v1(uuid, text) from public;
 revoke all on function public.unlink_roster_person_v1(uuid, text) from anon;
 grant execute on function public.unlink_roster_person_v1(uuid, text) to authenticated;
+revoke all on function public.list_my_roster_link_organizations_v1() from public;
+revoke all on function public.list_my_roster_link_organizations_v1() from anon;
+grant execute on function public.list_my_roster_link_organizations_v1() to authenticated;

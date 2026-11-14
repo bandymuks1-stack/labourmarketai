@@ -342,8 +342,11 @@ test("H-5b. the employer reads as FORMER in the person's own history, the work a
   });
   // The organization's own figures are shown as the organization's, not as
   // the person's own record and not as a manager's confirmation.
-  await ex.goto(`${BASE}/en/dashboard/work-in-numbers`);
-  await expect(ex.locator("body")).toContainText(CO_ORG, { timeout: 30_000 });
+  // Work in Numbers counts organizations and hours; it names no organization
+  // for anybody, so this only proves the page still renders for this person.
+  const win = await ex.goto(`${BASE}/en/dashboard/work-in-numbers`);
+  expect(win?.status(), "work in numbers renders").toBeLessThan(400);
+  await expect(ex.locator("main").first()).toBeVisible({ timeout: 30_000 });
   for (const [width, height] of [
     [1440, 900],
     [390, 844],

@@ -185,6 +185,12 @@ check "a bystander cannot confirm somebody else's offer" "0" \
 check "the person confirms" "1" \
   "$(as $EX new-address@qa.example "update organization_people set link_state='linked', link_method='worker_confirmed' where id='$PEX'; select count(*) from organization_people where id='$PEX' and link_state='linked';")"
 check "now the organization's records are readable to them" "3" "$(ex_reads)"
+check "the former worker can read WHO named them (they are not a member)" "QA-SYNTHETIC Former Employer" \
+  "$(as $EX new-address@qa.example "select organization_name from list_my_roster_link_organizations_v1();")"
+check "a bystander is told of no organization" "0" \
+  "$(as $OTH oth@qa.example "select count(*) from list_my_roster_link_organizations_v1();")"
+check "nor is an anonymous caller allowed to ask" "DENIED" \
+  "$(r=$($PSQL -c "set role anon; select count(*) from public.list_my_roster_link_organizations_v1();" 2>&1 || true); case "$r" in *"permission denied"*) echo DENIED;; *) echo ALLOWED;; esac)"
 check "the link names the person as the confirmer" "$EX" \
   "$(su "select linked_by from organization_people where id='$PEX'")"
 
@@ -240,11 +246,11 @@ check "and nothing was dropped" "1" "$(su "select count(*) from pg_tables where 
 su "delete from organization_person_history_claims" >/dev/null
 run_file "$DOWN"
 check "with no claims the rollback is clean" "0" \
-  "$(su "select (select count(*) from pg_tables where tablename='organization_person_history_claims') + (select count(*) from pg_proc where proname like '%roster_history_claim%' or proname='unlink_roster_person_v1')")"
+  "$(su "select (select count(*) from pg_tables where tablename='organization_person_history_claims') + (select count(*) from pg_proc where proname like '%roster_history_claim%' or proname in ('unlink_roster_person_v1','list_my_roster_link_organizations_v1'))")"
 check "the roster row and its history are still there" "$FP0" "$(su "$FP")"
 run_file "$MIG"
-check "re-apply restores the functions" "7" \
-  "$(su "select count(*) from pg_proc where proname like '%roster_history_claim%' or proname='unlink_roster_person_v1'")"
+check "re-apply restores the functions" "8" \
+  "$(su "select count(*) from pg_proc where proname like '%roster_history_claim%' or proname in ('unlink_roster_person_v1','list_my_roster_link_organizations_v1')")"
 
 echo; echo "=============================================================================="
 printf ' RESULT: %d passed, %d failed\n' "$pass" "$fail"

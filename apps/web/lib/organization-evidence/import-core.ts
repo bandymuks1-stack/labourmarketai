@@ -3830,7 +3830,7 @@ export async function listMyOrganizationEvidence(
     .limit(200);
   if (peopleRes.error) return classify(peopleRes.error);
 
-  const links: SubjectRosterLink[] = (
+  const joined: SubjectRosterLink[] = (
     (peopleRes.data ?? []) as Record<string, unknown>[]
   ).map((r) => {
     const org = r.organizations as {
@@ -3848,6 +3848,27 @@ export async function listMyOrganizationEvidence(
       linkMethod: (r.link_method as string | null) ?? null,
     };
   });
+
+  // WHO NAMED ME. The join above reads the organization only for its owner or
+  // members; a FORMER worker is neither, and their own offer and history then
+  // read "an organization". The narrow subject read names the organizations
+  // behind the caller's OWN roster links and nothing else. Asked only when a
+  // name is missing; where the function is not there yet the name stays
+  // unknown, exactly as before.
+  let links = joined;
+  if (joined.some((l) => !l.organizationName && l.linkState !== "unlinked")) {
+    const namesRes = await db(caller.supabase).rpc("list_my_roster_link_organizations_v1");
+    if (!namesRes.error) {
+      const names = new Map(
+        ((namesRes.data ?? []) as { organization_id: string; organization_name: string | null }[]).map(
+          (n) => [n.organization_id, orgDisplayName(n.organization_name, null)] as const,
+        ),
+      );
+      links = joined.map((l) =>
+        l.organizationName ? l : { ...l, organizationName: names.get(l.organizationId) ?? null },
+      );
+    }
+  }
 
   // Only a CONFIRMED link makes the history this person's. An offer they have
   // not answered must not quietly start showing their name on someone's work.
