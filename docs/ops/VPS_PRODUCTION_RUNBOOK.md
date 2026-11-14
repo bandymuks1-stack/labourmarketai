@@ -149,6 +149,8 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
    3. Agentai side: `agentai-scheduler` joins the network as `external: true` in its compose file,
       and only that service. It calls `http://labourmarket-app:3000/api/internal/commercial-requests/v1`
       with `Host: labourmarket.ai`, `X-Forwarded-Proto: https` and its bearer token.
+      The same path serves `/api/internal/registrations-daily/v1` (owner 2026-11-14: private network only,
+      aggregate counts per platform group, the supply-feed bearer); its public path also answers 404.
    4. Check: from the scheduler, `/api/health` on `labourmarket-app:3000` answers 200; the feed
       answers 401 with no token. One deploy later, the alias is on the new container
       (`docker network inspect lm-agentai-internal`) and the old one is gone.
