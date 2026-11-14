@@ -44,6 +44,34 @@ Until the migration is applied: the request alert is still sent once per stored 
 (unrecorded, logged as `[email/delivery] RECORD UNAVAILABLE`), the registration notice likewise,
 and the welcome e-mail is **not** sent (without the record nothing proves it would not repeat).
 
+## Rollback (changed after the independent security review of 2026-11-14)
+
+- It **refuses** while a delivery record exists, or while any request carries who/when. Nothing is
+  deleted to get past the refusal.
+- It revokes only privileges on what this migration created (the delivery table, the two new
+  columns). The four grants on objects that existed before (three column-scoped reads, one
+  function) are left in place; the rollback file lists the exact statements to remove them, to be
+  run only where the privilege snapshot taken before the apply shows they were absent.
+- Run on a scratch PostgreSQL 16 with a schema of the same shape (not production, not the full
+  schema): apply, apply again, rollback refused with a delivery row (row kept), rollback refused
+  with a who/when record (record kept), rollback on empty data (table and columns gone, the
+  request row and its status kept, a grant that existed before the migration still held), rollback
+  again. All as expected.
+
+## Manual steps after deploy (nothing installs these)
+
+1. **The VPS cron line.** The deploy does not install it. On the VPS, as the existing cron
+   bundle is installed: `sh ops/vps/lm-cron-install.sh --dry-run`, then `sh ops/vps/lm-cron-install.sh`.
+   It adds `*/10 * * * * root sh /root/lm-prod/bin/lm-cron.sh platform-email-retry`. Until then a
+   failed e-mail is recorded and visible but **not retried**.
+2. The mailbox rule on `X-LabourMarket-Notification` (below).
+
+## Test requests are labelled, never silenced
+
+A request whose company name starts with `QA-SYNTHETIC` (the production walks' mark) gets the
+subject `LabourMarket.ai – nauja užklausa: [QA-SYNTHETIC] …`. It is still sent, recorded and counted
+as unhandled, and the header value is unchanged. Typing the mark can only label one's own request.
+
 ## Telling notices apart from customers' e-mails
 
 Every internal notice carries:

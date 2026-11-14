@@ -90,20 +90,89 @@ describe("the migration", () => {
     const store = code(app("lib/email/platform-email-delivery-store.ts"));
     expect(store).toContain('.select("id, legal_name, display_name, country, owner_profile_id")');
     expect(store).toContain('.select("id, email, full_name, locale")');
-    expect(store).toContain('.select("id, source_path")');
+    expect(store).toContain('.select("id, source_path, company_name")');
     expect(store).toContain('.select("organization_id", { count: "exact", head: true })');
   });
 
-  it("ships the paired rollback, which removes only what this migration added", () => {
-    const path = join(REPO, `supabase/rollbacks/${NAME}.down.sql`);
+  it("takes its locks with a timeout, so a busy table fails the apply instead of stalling writes", () => {
+    expect(sql).toMatch(/begin;\s*set local lock_timeout = '5s';/);
+    expect(sql.indexOf("set local lock_timeout")).toBeLessThan(sql.indexOf("create table"));
+  });
+
+  it("status_changed_by has no foreign key, and the migration says why", () => {
+    expect(sql).not.toMatch(/status_changed_by uuid\s+references/);
+    expect(sql).not.toMatch(/foreign key\s*\(\s*status_changed_by/);
+    const header = readFileSync(join(REPO, `supabase/migrations/${NAME}.sql`), "utf8");
+    expect(header).toContain("WITHOUT A FOREIGN KEY, ON PURPOSE");
+    expect(header).toMatch(/erasure executor/);
+  });
+});
+
+/**
+ * THE ROLLBACK (independent security review 2026-11-14, P2): it must not remove
+ * a privilege this migration did not create, and it must not delete data.
+ */
+describe("the rollback", () => {
+  const path = join(REPO, `supabase/rollbacks/${NAME}.down.sql`);
+  const raw = existsSync(path) ? readFileSync(path, "utf8") : "";
+  const down = raw.split(/\r?\n/).map((l) => l.replace(/--.*$/, "")).join("\n").toLowerCase();
+
+  it("exists and carries no approval marker", () => {
     expect(existsSync(path)).toBe(true);
-    const down = readFileSync(path, "utf8").split(/\r?\n/).map((l) => l.replace(/--.*$/, "")).join("\n").toLowerCase();
-    expect(down).toMatch(/drop table if exists public\.platform_email_deliveries_v1/);
-    expect(down).toMatch(/drop column if exists status_changed_by/);
-    expect(down).toMatch(/drop column if exists status_changed_at/);
-    expect(down.match(/\brevoke\b/g)).toHaveLength(6);
-    expect(down).not.toMatch(/drop column if exists status\b/);
-    expect(down).not.toMatch(/company_need_public_intakes;\s*$/m);
+    expect(raw).not.toContain("@human-gate-approved");
+  });
+
+  it("REFUSES while a delivery record or a who/when record exists — before anything is dropped", () => {
+    expect(down).toContain("raise exception 'rollback refused: platform_email_deliveries_v1 contains delivery records'");
+    expect(down).toContain("raise exception 'rollback refused: company_need_public_intakes holds status-change records (who/when)'");
+    expect(down).toMatch(/if exists \(select 1 from public\.platform_email_deliveries_v1\)/);
+    expect(down).toMatch(/where status_changed_at is not null or status_changed_by is not null/);
+    const lastRefusal = down.lastIndexOf("raise exception");
+    for (const destructive of ["drop table", "drop column"]) {
+      expect(down.indexOf(destructive)).toBeGreaterThan(lastRefusal);
+    }
+    // one transaction: a refusal leaves the schema exactly as it was
+    expect(down.trim().startsWith("begin;")).toBe(true);
+    expect(down.trim().endsWith("commit;")).toBe(true);
+  });
+
+  it("never deletes, empties or rewrites a row to get past its own refusal", () => {
+    expect(down).not.toMatch(/\b(delete\s+from|truncate|update\s+public\.)/);
+    expect(down).not.toMatch(/\bcascade\b/);
+  });
+
+  it("revokes ONLY a privilege on an object this migration created", () => {
+    const revokes = [...down.matchAll(/\brevoke\b[\s\S]*?;/g)].map((m) => m[0].replace(/\s+/g, " "));
+    expect(revokes).toEqual([
+      "revoke update (status_changed_at, status_changed_by) on public.company_need_public_intakes from service_role;",
+    ]);
+    // the four grants on objects that existed before are left alone…
+    for (const preExisting of ["public.organizations", "public.profiles", "public.customer_requests", "email_is_verified_v1"]) {
+      expect(down).not.toContain(preExisting);
+    }
+    // …and the file tells the operator exactly how to remove them on evidence
+    for (const manual of [
+      "revoke execute on function public.email_is_verified_v1(uuid, text) from service_role;",
+      "revoke select (organization_id, status) on public.customer_requests from service_role;",
+      "revoke select (full_name) on public.profiles from service_role;",
+    ]) {
+      expect(raw).toContain(`--      ${manual}`);
+    }
+    expect(readFileSync(join(REPO, `supabase/migrations/${NAME}.sql`), "utf8")).toContain("from information_schema.column_privileges");
+  });
+
+  it("drops exactly the one table and the two columns, never `status` or the intake table", () => {
+    expect(down.match(/drop table if exists public\.[a-z0-9_]+/g)).toEqual(["drop table if exists public.platform_email_deliveries_v1"]);
+    expect(down.match(/drop column if exists [a-z_]+/g)).toEqual([
+      "drop column if exists status_changed_by",
+      "drop column if exists status_changed_at",
+    ]);
+  });
+
+  it("can be run twice, and waits for a lock no longer than the migration does", () => {
+    expect(down).toContain("to_regclass('public.platform_email_deliveries_v1') is not null");
+    expect(down).toContain("from information_schema.columns");
+    expect(down).toMatch(/begin;\s*set local lock_timeout = '5s';/);
   });
 });
 

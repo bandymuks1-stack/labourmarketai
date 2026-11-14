@@ -24,6 +24,7 @@ import {
   companyRegistrationNotice,
   companyWelcomeEmail,
   intakeAlertEmail,
+  isSyntheticIntake,
 } from "@/lib/email/company-registration-emails";
 import { reserveDurableEmailSend } from "@/lib/email/durable-send-guard";
 import { notificationEmailLocale } from "@/lib/email/notification-email";
@@ -247,12 +248,19 @@ export function createComposer(getDb: () => Db = createAdminClient, env: Record<
     const any = db as any;
 
     if (row.kind === "intake_alert") {
-      const { data, error } = await any.from("company_need_public_intakes").select("id, source_path").eq("id", row.subjectId).maybeSingle();
+      const { data, error } = await any.from("company_need_public_intakes").select("id, source_path, company_name").eq("id", row.subjectId).maybeSingle();
       if (error) return { kind: "cannot", reason: "intake_unreadable", retryable: true };
       if (!data) return { kind: "cannot", reason: "intake_gone", retryable: false };
       const door = requestDoorFromSourcePath(data.source_path as string | null);
       const title = door ? requestDoorOperatorTitle(door) : "Įmonės poreikio užklausa";
-      const built = intakeAlertEmail({ title, queueUrl: `${CANONICAL_ORIGIN}${ADMIN_QUEUE_PATH}#${row.subjectId}`, siteUrl: CANONICAL_ORIGIN });
+      // The company name is read ONLY to see whether it starts with the test mark;
+      // the name itself never enters the e-mail.
+      const built = intakeAlertEmail({
+        title,
+        queueUrl: `${CANONICAL_ORIGIN}${ADMIN_QUEUE_PATH}#${row.subjectId}`,
+        siteUrl: CANONICAL_ORIGIN,
+        synthetic: isSyntheticIntake(data.company_name as string | null),
+      });
       return {
         kind: "send",
         email: { to: ownerNotifyAddress(env), ...built, headers: { [NOTIFICATION_HEADER]: door ? "request" : "company-need" } },

@@ -257,12 +257,30 @@ export function companyRegistrationNotice(input: RegistrationNoticeInput): Built
 }
 
 /**
+ * The mark a test walk puts at the start of the company name it submits
+ * (`NEED_WALK_MARK` in lib/testing). A LABEL, NEVER AN EXEMPTION: a marked request
+ * is still alerted, recorded and counted as unhandled — only its subject says it is
+ * a test. Anyone can type the mark; all it can do is label their own request.
+ */
+export const SYNTHETIC_INTAKE_MARK = "QA-SYNTHETIC";
+
+export function isSyntheticIntake(companyName: string | null | undefined): boolean {
+  return (companyName ?? "").trimStart().startsWith(SYNTHETIC_INTAKE_MARK);
+}
+
+/**
  * Internal alert for one stored no-signup request: its type and a link to the queue.
  * Never a name, a contact or the request's text — those stay behind the admin sign-in.
  * It says the request is waiting; it promises no time by which it will be answered.
  */
-export function intakeAlertEmail(input: { readonly title: string; readonly queueUrl: string; readonly siteUrl: string }): BuiltEmail {
-  const title = clip(input.title, 120);
+export function intakeAlertEmail(input: {
+  readonly title: string;
+  readonly queueUrl: string;
+  readonly siteUrl: string;
+  /** The stored request is a marked test (`isSyntheticIntake`): the subject says so. */
+  readonly synthetic?: boolean;
+}): BuiltEmail {
+  const title = `${input.synthetic ? `[${SYNTHETIC_INTAKE_MARK}] ` : ""}${clip(input.title, 120)}`;
   const subject = `LabourMarket.ai – nauja užklausa: ${title}`;
   const text = [`${title} laukia peržiūros.`, "", input.queueUrl, "", NOTICE_FOOTER].join("\n");
   const bodyHtml = [

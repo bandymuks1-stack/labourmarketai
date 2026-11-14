@@ -226,6 +226,44 @@ describe("T3/T4 — the request alert is the same e-mail for both no-signup path
   });
 });
 
+describe("a marked test request is labelled, never silenced", () => {
+  const withMark = () => {
+    const tables = baseTables();
+    tables.company_need_public_intakes[0].company_name = "QA-SYNTHETIC need walk 1.1 (not a real company)";
+    tables.company_need_public_intakes[1].company_name = "  QA-SYNTHETIC need walk 2.1 (not a real company)";
+    return tables;
+  };
+
+  it("the subject says QA-SYNTHETIC for both paths; the header a mailbox rule reads is unchanged", async () => {
+    const c = createComposer(() => fakeDb(withMark()), {});
+    const door = await composed(c, row("intake_alert", INTAKE));
+    const need = await composed(c, row("intake_alert", COMPANY));
+    expect(door.subject).toBe("LabourMarket.ai – nauja užklausa: [QA-SYNTHETIC] B2B bendradarbiavimo užklausa");
+    expect(need.subject).toBe("LabourMarket.ai – nauja užklausa: [QA-SYNTHETIC] Įmonės poreikio užklausa");
+    expect(door.headers).toEqual({ [NOTIFICATION_HEADER]: "request" });
+    expect(need.headers).toEqual({ [NOTIFICATION_HEADER]: "company-need" });
+  });
+
+  it("it is still sent to the same mailbox with the same queue link — a label, not an exemption", async () => {
+    const c = createComposer(() => fakeDb(withMark()), {});
+    const email = await composed(c, row("intake_alert", INTAKE));
+    expect(email.to).toBe("info@labourmarket.ai");
+    expect(email.text).toContain(`/lt/dashboard/admin/company-need-intakes#${INTAKE}`);
+  });
+
+  it("only the fixed mark enters the e-mail, never the rest of the name", async () => {
+    const c = createComposer(() => fakeDb(withMark()), {});
+    expect(JSON.stringify(await composed(c, row("intake_alert", INTAKE)))).not.toMatch(/need walk|not a real company/);
+  });
+
+  it("the mark must START the name; a real request is not labelled", async () => {
+    const tables = baseTables();
+    tables.company_need_public_intakes[0].company_name = "UAB Statyba (ne QA-SYNTHETIC)";
+    const c = createComposer(() => fakeDb(tables), {});
+    expect((await composed(c, row("intake_alert", INTAKE))).subject).toBe("LabourMarket.ai – nauja užklausa: B2B bendradarbiavimo užklausa");
+  });
+});
+
 describe("the mailbox sender", () => {
   const email: OutboundEmail = { to: "qa.owner@example.test", subject: "s", text: "t", html: "<p>t</p>", replyTo: "info@labourmarket.ai", organizationId: ORG };
   beforeEach(() => {

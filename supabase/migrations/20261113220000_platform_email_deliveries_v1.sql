@@ -40,8 +40,33 @@
 --
 -- INTAKE STATUS, WHO AND WHEN: two nullable columns on
 -- company_need_public_intakes. status_changed_by is the operator's profile id
--- WITHOUT a foreign key on purpose (an audit pointer must not block or be
--- cascaded by an account erasure; the queue shows it only to superadmins).
+-- WITHOUT A FOREIGN KEY, ON PURPOSE:
+--   * the GDPR erasure executor (20261019140000) refuses to erase an account
+--     while any foreign key onto profiles has no reviewed registry decision;
+--     a new key here would block every operator's erasure until a second RED
+--     migration extended that registry;
+--   * the alternatives are both wrong for an audit pointer: ON DELETE CASCADE
+--     would delete a company's request because an operator left, and
+--     ON DELETE SET NULL would silently rewrite the audit trail.
+--   The value is written only by the server from the signed-in operator's
+--   session (never from a form field), read only by superadmins, and a value
+--   that no longer matches a profile is shown as "unidentified operator".
+--
+-- LOCKS: `set local lock_timeout = '5s'`. Adding a nullable column without a
+-- default takes a brief ACCESS EXCLUSIVE lock on company_need_public_intakes;
+-- if it cannot be had in five seconds the whole migration fails and changes
+-- nothing (retry the apply once).
+--
+-- BEFORE APPLYING, keep the output of this with the apply record — the
+-- rollback leaves the four grants on pre-existing objects in place unless
+-- this shows they were absent:
+--   select table_name, column_name, privilege_type
+--     from information_schema.column_privileges
+--    where grantee = 'service_role' and table_schema = 'public'
+--      and table_name in ('organizations', 'profiles', 'customer_requests')
+--    order by 1, 2;
+--   select has_function_privilege('service_role',
+--          'public.email_is_verified_v1(uuid, text)', 'execute');
 --
 -- READS THE RETRY NEEDS (column-scoped, service_role only). A retry runs from
 -- the scheduled sweep with no signed-in user, and production service_role holds
@@ -72,6 +97,8 @@
 -- supabase/rollbacks/20261113220000_platform_email_deliveries_v1.down.sql
 
 begin;
+
+set local lock_timeout = '5s';
 
 create table if not exists public.platform_email_deliveries_v1 (
   id               uuid primary key default gen_random_uuid(),
@@ -126,7 +153,7 @@ alter table public.company_need_public_intakes
   add column if not exists status_changed_by uuid;
 
 comment on column public.company_need_public_intakes.status_changed_by is
-  'Profile id of the operator who last changed the status. No foreign key on purpose (audit pointer; see migration header).';
+  'Profile id of the operator who last changed the status. No foreign key on purpose (audit pointer that must neither block nor be rewritten by an account erasure; see migration header).';
 
 grant update (status_changed_at, status_changed_by) on public.company_need_public_intakes to service_role;
 
