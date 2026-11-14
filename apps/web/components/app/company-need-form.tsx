@@ -105,6 +105,10 @@ export function CompanyNeedForm({
   const startedRef = useRef(false);
   const submittedRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
+  // Which public button opened the form (`?from=`), sent with the inquiry.
+  // Kept in a ref and written at submit time, like the fill-time stamp below.
+  const entryRef = useRef("");
+  const entryInputRef = useRef<HTMLInputElement>(null);
 
   // Optional bounded prefill from query params (calculator bridge v1) — only
   // fields the server action already accepts, validated by the adapter and
@@ -137,6 +141,8 @@ export function CompanyNeedForm({
     setIf("profession", prefill.profession, [""]);
     setIf("expected_duration", prefill.expectedDuration, [""]);
     setIf("description", prefill.description, [""]);
+    entryRef.current = prefill.entry ?? "";
+    if (entryInputRef.current) entryInputRef.current.value = entryRef.current;
   }, []);
 
   // Spam guard: when the form appeared, sent in a hidden field. Taken after
@@ -157,6 +163,7 @@ export function CompanyNeedForm({
   }, [state]);
   function stampOnSubmit() {
     if (stampRef.current && shownAt.current > 0) stampRef.current.value = String(shownAt.current);
+    if (entryInputRef.current) entryInputRef.current.value = entryRef.current;
   }
 
   function handleFirstInteraction() {
@@ -206,6 +213,7 @@ export function CompanyNeedForm({
         {/* Left empty by a person: out of sight, out of the tab order, not autofilled. */}
         <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
         <input type="hidden" name="started" ref={stampRef} />
+        <input type="hidden" name="from" ref={entryInputRef} />
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.companyName}</span>

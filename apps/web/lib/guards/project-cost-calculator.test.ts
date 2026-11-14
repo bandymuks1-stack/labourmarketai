@@ -210,3 +210,13 @@ describe("company-need prefill bridge — bounded and validated", () => {
     }
   });
 });
+
+describe("company-need prefill: the button that opened the form", () => {
+  const parse = (qs: string) => parseCompanyNeedPrefill(new URLSearchParams(qs));
+  it("keeps a bounded button id and drops anything else", () => {
+    expect(parse("country=LU&from=companies_market_lu").entry).toBe("companies_market_lu");
+    expect(parse("from=Companies-Hero").entry).toBeUndefined();
+    expect(parse("from=a%3Futm_source%3Dx").entry).toBeUndefined();
+    expect(parse(`from=${"a".repeat(41)}`).entry).toBeUndefined();
+  });
+});

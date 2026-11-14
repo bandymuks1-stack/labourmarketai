@@ -35,6 +35,9 @@ describe("a send marked for review is still a company-need request", () => {
     ["/en/company-need", "company-need"],
     ["/lt/company-need?review=no-js", "company-need"],
     ["/lt/company-need?other=1", "other"],
+    ["/de/company-need?from=companies_market_lu", "company-need"],
+    ["/de/company-need?review=no-js&from=companies_hero", "company-need"],
+    ["/de/company-need?from=Bad-Id", "other"],
   ])("%s → %s", (path, type) => {
     expect(commercialRequestType(path)).toBe(type);
   });
