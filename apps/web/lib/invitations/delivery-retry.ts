@@ -197,6 +197,11 @@ export type DeliveryHealth = {
   readonly dead_letter: number;
   /** Pending rows whose failure may or may not have left (incl. unclassified old failures). */
   readonly unknown_outcome_open: number;
+  /**
+   * Diagnostics only: open unknown outcomes the owner already reviewed (known-historical-outcomes.ts).
+   * Kept visible, never alerted. Absent when not read.
+   */
+  readonly known_historical_unknown_outcome?: number;
   /** Bounces recorded in the window. */
   readonly bounced: number;
   readonly stuck_reservations: number;

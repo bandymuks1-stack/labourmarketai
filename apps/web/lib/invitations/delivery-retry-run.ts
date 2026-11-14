@@ -17,6 +17,11 @@ import {
   type RetryReport,
 } from "@/lib/invitations/delivery-retry";
 import { buildInvitationBody, buildInvitationSubject } from "@/lib/invitations/email-content";
+import {
+  countKnownHistorical,
+  KNOWN_HISTORICAL_OUTCOMES,
+  withKnownHistorical,
+} from "@/lib/invitations/known-historical-outcomes";
 import { buildInviteLink } from "@/lib/invitations/model";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -43,11 +48,53 @@ export type DeliveryRetryRunResult =
       readonly alerts: readonly DeliveryAlert[];
     };
 
-/** Health snapshot (`invitation_delivery_health_v1`), or null when unreadable. */
+/**
+ * How many owner-registered historical unknown outcomes are still exactly as reviewed (read only;
+ * see known-historical-outcomes.ts). null = could not be read — the caller then keeps the alert.
+ */
+export async function readKnownHistoricalCount(admin: SupabaseClient): Promise<number | null> {
+  const ids = KNOWN_HISTORICAL_OUTCOMES.map((r) => r.invitationId);
+  if (ids.length === 0) return 0;
+  const rows = await asAny(admin)
+    .from("invitations")
+    .select("id, delivery_failure_class")
+    .in("id", ids)
+    .eq("status", "pending")
+    .eq("delivery_status", "delivery_failed")
+    .is("delivery_bounced_at", null);
+  if (rows.error || !Array.isArray(rows.data)) return null;
+  const open = rows.data as Array<{ id: string; delivery_failure_class: string | null }>;
+  if (open.length === 0) return 0;
+  const attempts = await asAny(admin)
+    .from("invitation_delivery_attempts_v1")
+    .select("invitation_id")
+    .in("invitation_id", open.map((r) => r.id));
+  if (attempts.error || !Array.isArray(attempts.data)) return null;
+  const perInvitation = new Map<string, number>();
+  for (const a of attempts.data as Array<{ invitation_id: string }>) {
+    perInvitation.set(a.invitation_id, (perInvitation.get(a.invitation_id) ?? 0) + 1);
+  }
+  return countKnownHistorical(
+    open.map((r) => ({ id: r.id, delivery_failure_class: r.delivery_failure_class, ledgered_attempts: perInvitation.get(r.id) ?? 0 })),
+  );
+}
+
+/**
+ * Health snapshot (`invitation_delivery_health_v1`), or null when unreadable. Owner-reviewed
+ * historical unknown outcomes are moved to `known_historical_unknown_outcome` (visible, not alerted).
+ */
 export async function readInvitationDeliveryHealth(admin: SupabaseClient, hours = 24): Promise<DeliveryHealth | null> {
   const { data, error } = await asAny(admin).rpc("invitation_delivery_health_v1", { p_hours: hours });
   if (error || !data || typeof data !== "object") return null;
-  return data as DeliveryHealth;
+  const health = data as DeliveryHealth;
+  if (health.unknown_outcome_open <= 0) return withKnownHistorical(health, 0);
+  let known: number | null;
+  try {
+    known = await readKnownHistoricalCount(admin);
+  } catch {
+    known = null;
+  }
+  return withKnownHistorical(health, known);
 }
 
 /**
