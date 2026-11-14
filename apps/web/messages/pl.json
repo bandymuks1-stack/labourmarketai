@@ -16300,6 +16300,16 @@
       "queueEmpty": "Nic nie oczekuje na moderację.",
       "disputeQueueTitle": "Spory",
       "disputeQueueEmpty": "Brak otwartych sporów.",
+      "takeDispute": "Weź spór do rozpatrzenia",
+      "disputeReasonLabel": "Uzasadnienie sporu",
+      "responseQueueTitle": "Odpowiedzi oczekujące na moderację",
+      "responseQueueEmpty": "Żadna odpowiedź nie oczekuje na moderację.",
+      "replyToLabel": "Odpowiedź na to doświadczenie",
+      "disputeOpenedLabel": "Spór otwarty",
+      "disputeReviewStartedLabel": "Rozpatrywanie rozpoczęte",
+      "conflictNotice": "Jesteś stroną tego doświadczenia, więc nie możesz tu decydować. Musi je przejąć inny moderator.",
+      "conflictUnknown": "Nie udało się sprawdzić, czy jesteś stroną tego doświadczenia. Decyzja nie jest teraz możliwa.",
+      "disputeReasonShared": "Uzasadnienie jest pokazywane obu stronom i zapisywane w dzienniku audytu.",
       "take": "Weź do moderacji",
       "publish": "Opublikuj",
       "reject": "Odrzuć",
@@ -16325,6 +16335,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
+        "conflict_of_interest": "Jesteś stroną tego doświadczenia. Decyzję musi podjąć inny moderator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       }
@@ -16341,6 +16352,7 @@
       "cta": "Otwórz spór",
       "sending": "Otwieranie…",
       "openedNote": "Spór otwarty. Doświadczenie pozostaje opublikowane do czasu decyzji moderatora.",
+      "decisionReasonLabel": "Uzasadnienie decyzji",
       "errors": {
         "needs_migration": "Chwilowo niedostępne. Nic nie zapisano.",
         "not_authenticated": "Najpierw się zaloguj.",
@@ -16355,6 +16367,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
+        "conflict_of_interest": "Jesteś stroną tego doświadczenia. Decyzję musi podjąć inny moderator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       }
@@ -16379,6 +16392,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
+        "conflict_of_interest": "Jesteś stroną tego doświadczenia. Decyzję musi podjąć inny moderator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       },
@@ -16413,6 +16427,7 @@
         "dispute_exists": "Spór jest już otwarty.",
         "reason_required": "Uzasadnienie jest wymagane.",
         "invalid_transition": "Ten krok nie jest możliwy z obecnego stanu.",
+        "conflict_of_interest": "Jesteś stroną tego doświadczenia. Decyzję musi podjąć inny moderator.",
         "not_found": "Nie znaleziono.",
         "error": "Coś poszło nie tak. Nic nie zostało zapisane."
       }

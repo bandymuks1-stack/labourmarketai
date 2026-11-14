@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { partyConflict, type PartyRow } from "./experience-conflict";
 import {
   ELIGIBLE_INTERACTION_KINDS,
   type EligibleInteractionKind,
@@ -56,6 +57,7 @@ export type ExperienceActionResult =
         | "reason_required"
         | "invalid_transition"
         | "not_found"
+        | "conflict_of_interest"
         | "error";
     };
 
@@ -76,6 +78,10 @@ const KNOWN_CODES = new Set([
   "reason_required",
   "invalid_transition",
   "not_found",
+  // Also answered by the database once its own party check is applied
+  // (20261114070000, a separate RED PR): it must read as itself, not as a
+  // generic error.
+  "conflict_of_interest",
 ]);
 
 type Db = Awaited<ReturnType<typeof createClient>>;
@@ -127,8 +133,91 @@ export async function submitExperienceRecord(args: {
   return mapRpc(data, error);
 }
 
+/**
+ * CONFLICT OF INTEREST (owner rule 2026-11-13). A platform administrator who is
+ * a PARTY to a record does not review its dispute or moderate its reply; an
+ * independent administrator takes it. A party is: the experience's author, the
+ * person it is about, the reply's author, or a manager of the organization on
+ * either side.
+ *
+ * Resolved on the server from the row and the caller's own session, never from
+ * the form. "unknown" (a read failed) is NOT "clear": the caller refuses.
+ * `lib/guards/experience-dispute-decidable.test.ts` pins that all three
+ * moderator steps go through here.
+ */
+export type ExperienceConflict = "clear" | "conflict" | "unknown";
+
+const PARTY_COLUMNS =
+  "id, author_profile_id, subject_profile_id, subject_organization_id, author_organization_id";
+
+async function managedOrganizations(
+  sb: Db,
+  organizationIds: readonly string[],
+): Promise<Set<string> | null> {
+  const managed = new Set<string>();
+  for (const org of new Set(organizationIds)) {
+    const { data, error } = await rpc(sb, "manages_organization", { org });
+    if (error) return null;
+    if (data === true) managed.add(org);
+  }
+  return managed;
+}
+
+async function conflictForRecord(
+  sb: Db,
+  recordId: string,
+  alsoParty?: string | null,
+): Promise<ExperienceConflict> {
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (!user) return "unknown";
+  if (alsoParty && alsoParty === user.id) return "conflict";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (sb as any)
+    .from("experience_records")
+    .select(PARTY_COLUMNS)
+    .eq("id", recordId)
+    .maybeSingle();
+  if (error || !data) return "unknown";
+  const row = data as PartyRow;
+  const orgs = [row.subject_organization_id, row.author_organization_id].filter(
+    (o): o is string => !!o,
+  );
+  const managed = await managedOrganizations(sb, orgs);
+  if (managed === null) return "unknown";
+  return partyConflict(row, user.id, managed) ? "conflict" : "clear";
+}
+
+/** Tri-state for a queue row: a failed check is "unknown", never "conflict"
+ *  (that would tell a moderator something false) and never "clear". */
+function queueConflict(
+  row: PartyRow,
+  viewerId: string | null,
+  managed: ReadonlySet<string> | null,
+): ExperienceConflict {
+  if (!viewerId || managed === null) return "unknown";
+  return partyConflict(row, viewerId, managed) ? "conflict" : "clear";
+}
+
+function refusalFor(
+  conflict: ExperienceConflict,
+  step: string,
+  recordId: string,
+): ExperienceActionResult | null {
+  if (conflict === "clear") return null;
+  // A party trying to decide their own record is the event this rule exists
+  // for, and it never reaches an RPC, so it would otherwise leave no trace.
+  // Ids only: no names, no text.
+  console.warn("[experience] moderator step refused", { step, recordId, conflict });
+  if (conflict === "conflict") return { ok: false, code: "conflict_of_interest" };
+  return { ok: false, code: "error" };
+}
+
 export async function startExperienceModeration(id: string): Promise<ExperienceActionResult> {
   const sb = await createClient();
+  const refused = refusalFor(await conflictForRecord(sb, id), "start_moderation", id);
+  if (refused) return refused;
   const { data, error } = await rpc(sb, "start_experience_moderation", { p_id: id });
   return mapRpc(data, error);
 }
@@ -140,6 +229,8 @@ export async function decideExperienceModeration(args: {
 }): Promise<ExperienceActionResult> {
   if (args.reason.trim().length < 1) return { ok: false, code: "reason_required" };
   const sb = await createClient();
+  const refused = refusalFor(await conflictForRecord(sb, args.id), "decide_moderation", args.id);
+  if (refused) return refused;
   const { data, error } = await rpc(sb, "decide_experience_moderation", {
     p_id: args.id,
     p_decision: args.decision,
@@ -175,13 +266,74 @@ export async function openExperienceDispute(args: {
   return mapRpc(data, error);
 }
 
-export async function resolveExperienceDispute(args: {
+/**
+ * opened -> under_review. The database refuses a decision on a dispute that is
+ * still 'opened' (`resolve_experience_dispute` answers invalid_transition), so
+ * this step is not optional: without a caller no dispute could ever be
+ * decided. Authorization is the RPC's `is_admin()`.
+ */
+export async function startExperienceDisputeReview(id: string): Promise<ExperienceActionResult> {
+  const sb = await createClient();
+  const refused = refusalFor(await conflictForRecord(sb, id), "review_dispute", id);
+  if (refused) return refused;
+  const { data, error } = await rpc(sb, "review_experience_dispute", { p_id: id });
+  return mapRpc(data, error);
+}
+
+/**
+ * Publish or reject a subject's REPLY. `moderate_experience_response` shipped
+ * with the v1 schema and had no caller, so a reply stayed 'submitted' for good
+ * and the experience's author could never read it. Authorization is the RPC's
+ * `is_admin()`; a reason is mandatory and lands in the audit trail.
+ */
+export async function moderateExperienceResponse(args: {
   id: string;
-  resolution: "upheld" | "changed" | "removed";
+  decision: "published" | "rejected";
   reason: string;
 }): Promise<ExperienceActionResult> {
   if (args.reason.trim().length < 1) return { ok: false, code: "reason_required" };
   const sb = await createClient();
+  // The reply names its record and its author; both sides are parties.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const reply = await (sb as any)
+    .from("experience_responses")
+    .select("experience_record_id, author_profile_id")
+    .eq("id", args.id)
+    .maybeSingle();
+  if (reply.error) return { ok: false, code: "error" };
+  if (!reply.data) return { ok: false, code: "not_found" };
+  const refused = refusalFor(
+    await conflictForRecord(
+      sb,
+      String(reply.data.experience_record_id),
+      reply.data.author_profile_id as string | null,
+    ),
+    "moderate_response",
+    String(reply.data.experience_record_id),
+  );
+  if (refused) return refused;
+  const { data, error } = await rpc(sb, "moderate_experience_response", {
+    p_id: args.id,
+    p_decision: args.decision,
+    p_reason: args.reason.trim(),
+  });
+  return mapRpc(data, error);
+}
+
+/**
+ * `changed` is NOT offered (owner rule 2026-11-13): the schema accepts the
+ * word but nothing changes the text, so it would record a correction that
+ * never happened. The two real outcomes are upheld and removed.
+ */
+export async function resolveExperienceDispute(args: {
+  id: string;
+  resolution: "upheld" | "removed";
+  reason: string;
+}): Promise<ExperienceActionResult> {
+  if (args.reason.trim().length < 1) return { ok: false, code: "reason_required" };
+  const sb = await createClient();
+  const refused = refusalFor(await conflictForRecord(sb, args.id), "resolve_dispute", args.id);
+  if (refused) return refused;
   const { data, error } = await rpc(sb, "resolve_experience_dispute", {
     p_id: args.id,
     p_resolution: args.resolution,
@@ -283,6 +435,24 @@ export type ExperienceRow = {
    * means nothing about replies is known here.
    */
   readonly response: ExperienceResponse | null;
+  /**
+   * Why the subject disputes the record. Read ONLY by the moderator's dispute
+   * queue — the person deciding must see what is contested. Absent (undefined)
+   * on every other list: those do not select the column.
+   */
+  readonly disputeReason?: string | null;
+  /**
+   * The moderator's reason for the dispute decision — shown to BOTH parties
+   * (owner rule 2026-11-13). Null while there is no decision.
+   */
+  readonly disputeResolutionReason?: string | null;
+  /** Moderator queue only: when the dispute entered its CURRENT step (opened,
+   *  or review started). Null = not known; never replaced by today's date. */
+  readonly disputeStepAt?: string | null;
+  /** Moderator queues only: whether the signed-in moderator is a party to this
+   *  record ("conflict"), is not ("clear"), or that could not be checked
+   *  ("unknown" — no decision is offered, and the item says why). */
+  readonly conflict?: ExperienceConflict;
 };
 
 /**
@@ -339,6 +509,7 @@ type RawRows =
  */
 async function readExperienceRows(
   build: (q: unknown) => unknown,
+  extraColumns = "",
 ): Promise<RawRows> {
   const sb = await createClient();
   const query = (select: string) =>
@@ -349,10 +520,10 @@ async function readExperienceRows(
     }>;
 
   let authorSideKnown = true;
-  let { data, error } = await query(EXTENDED_SELECT);
+  let { data, error } = await query(EXTENDED_SELECT + extraColumns);
   if (error && (error.code ?? "") === UNDEFINED_COLUMN_CODE) {
     authorSideKnown = false;
-    ({ data, error } = await query(BASE_SELECT));
+    ({ data, error } = await query(BASE_SELECT + extraColumns));
   }
   if (error) {
     if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
@@ -384,6 +555,12 @@ function mapRow(
         ? "organization"
         : "person",
     response: responses?.get(String(r.id)) ?? null,
+    ...("dispute_reason" in r
+      ? { disputeReason: (r.dispute_reason as string | null) ?? null }
+      : {}),
+    ...("dispute_resolution_reason" in r
+      ? { disputeResolutionReason: (r.dispute_resolution_reason as string | null) ?? null }
+      : {}),
   };
 }
 
@@ -432,6 +609,9 @@ export async function listExperiencesForViewer(
   const res = await readExperienceRows((q) =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (q as any).order("submitted_at", { ascending: false }).limit(100),
+    // The decision's reason, for both parties. RLS already returns this row
+    // to exactly those two sides (and to no one else).
+    ", dispute_resolution_reason",
   );
   if ("state" in res) return res;
   const responses = await readResponsesFor(res.rows.map((r) => String(r.id)));
@@ -455,12 +635,26 @@ export async function listModerationQueue(): Promise<ExperienceListState> {
       .in("moderation_status", ["submitted", "in_moderation"])
       .order("submitted_at", { ascending: true })
       .limit(100),
+    ", subject_profile_id, subject_organization_id, author_organization_id",
   );
   if ("state" in res) return res;
+  const sb = await createClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  const managed = await managedOrganizations(
+    sb,
+    res.rows.flatMap((r) =>
+      [r.subject_organization_id, r.author_organization_id].filter((o): o is string => !!o),
+    ),
+  );
   return {
     state: "list",
     mine: [],
-    aboutMe: res.rows.map((r) => mapRow(r, res.authorSideKnown, null)),
+    aboutMe: res.rows.map((r) => ({
+      ...mapRow(r, res.authorSideKnown, null),
+      conflict: queueConflict(r as PartyRow, user?.id ?? null, managed),
+    })),
     // The queues moderate the RECORD. They do not read replies, so they claim
     // nothing about them — `false` is "not known here", not "there are none".
     responsesRead: false,
@@ -475,14 +669,118 @@ export async function listDisputeQueue(): Promise<ExperienceListState> {
       .in("dispute_status", ["opened", "under_review"])
       .order("submitted_at", { ascending: true })
       .limit(100),
+    // The subject's reason (a v1 column). The moderator cannot decide a
+    // dispute without reading what is contested.
+    ", dispute_reason, updated_at, subject_profile_id, subject_organization_id, author_organization_id",
   );
   if ("state" in res) return res;
+  const sb = await createClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  const managed = await managedOrganizations(
+    sb,
+    res.rows.flatMap((r) =>
+      [r.subject_organization_id, r.author_organization_id].filter((o): o is string => !!o),
+    ),
+  );
   return {
     state: "list",
     mine: [],
-    aboutMe: res.rows.map((r) => mapRow(r, res.authorSideKnown, null)),
+    aboutMe: res.rows.map((r) => ({
+      ...mapRow(r, res.authorSideKnown, null),
+      // The row's updated_at is written by the dispute step itself: for an
+      // 'opened' dispute it IS when it was opened; once the review starts it
+      // is when the review started. The item labels it accordingly — the
+      // opening date of a dispute already under review is in the audit trail,
+      // which this session cannot read.
+      disputeStepAt: (r.updated_at as string | null) ?? null,
+      // Unknown is not clear: when the party check could not run the item
+      // offers no decision.
+      conflict: queueConflict(r as PartyRow, user?.id ?? null, managed),
+    })),
     // The queues moderate the RECORD. They do not read replies, so they claim
     // nothing about them — `false` is "not known here", not "there are none".
     responsesRead: false,
+  };
+}
+
+/** A reply waiting for a moderator, with the experience it answers. */
+export type ExperienceResponseQueueItem = {
+  readonly id: string;
+  readonly body: string;
+  readonly moderationStatus: "submitted" | "in_moderation";
+  readonly createdAt: string | null;
+  /** The experience the reply answers; null when that read failed. */
+  readonly recordBody: string | null;
+  /** Whether the signed-in moderator is a party to the reply or its record. */
+  readonly conflict: ExperienceConflict;
+};
+
+export type ExperienceResponseQueueState =
+  | { readonly state: "list"; readonly items: ExperienceResponseQueueItem[] }
+  | { readonly state: "needs_migration" }
+  | { readonly state: "error" };
+
+/**
+ * Replies needing a moderator decision. Authorization is the select policy's
+ * `is_admin()` branch — a non-admin gets only their own replies back, never the
+ * queue. The reply's author is never selected: the moderator decides on the
+ * text, and the audit trail records the decision.
+ */
+export async function listResponseQueue(): Promise<ExperienceResponseQueueState> {
+  const sb = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (sb as any)
+    .from("experience_responses")
+    .select("id, experience_record_id, author_profile_id, body, moderation_status, created_at")
+    .in("moderation_status", ["submitted", "in_moderation"])
+    .order("created_at", { ascending: true })
+    .limit(100);
+  if (error) {
+    if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
+    return { state: "error" };
+  }
+  const rows = (data ?? []) as Record<string, unknown>[];
+  const recordIds = [...new Set(rows.map((r) => String(r.experience_record_id)))];
+  const bodies = new Map<string, string>();
+  const parties = new Map<string, PartyRow>();
+  if (recordIds.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rec = await (sb as any)
+      .from("experience_records")
+      .select(`${PARTY_COLUMNS}, body`)
+      .in("id", recordIds)
+      .limit(recordIds.length);
+    for (const r of ((rec.data ?? []) as Record<string, unknown>[])) {
+      bodies.set(String(r.id), String(r.body ?? ""));
+      parties.set(String(r.id), r as PartyRow);
+    }
+  }
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  const managed = await managedOrganizations(
+    sb,
+    [...parties.values()].flatMap((r) =>
+      [r.subject_organization_id, r.author_organization_id].filter((o): o is string => !!o),
+    ),
+  );
+  const conflictOf = (r: Record<string, unknown>): ExperienceConflict => {
+    const party = parties.get(String(r.experience_record_id));
+    if (!user || !party) return "unknown";
+    if (r.author_profile_id === user.id) return "conflict";
+    return queueConflict(party, user.id, managed);
+  };
+  return {
+    state: "list",
+    items: rows.map((r) => ({
+      id: String(r.id),
+      body: String(r.body ?? ""),
+      moderationStatus: r.moderation_status as ExperienceResponseQueueItem["moderationStatus"],
+      createdAt: (r.created_at as string | null) ?? null,
+      recordBody: bodies.get(String(r.experience_record_id)) ?? null,
+      conflict: conflictOf(r),
+    })),
   };
 }

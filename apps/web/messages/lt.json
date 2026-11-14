@@ -16300,6 +16300,16 @@
       "queueEmpty": "Moderavimo nelaukia nė viena patirtis.",
       "disputeQueueTitle": "Ginčai",
       "disputeQueueEmpty": "Atvirų ginčų nėra.",
+      "takeDispute": "Imti ginčą nagrinėti",
+      "disputeReasonLabel": "Ginčo priežastis",
+      "responseQueueTitle": "Atsakymai, laukiantys moderavimo",
+      "responseQueueEmpty": "Moderavimo nelaukia nė vienas atsakymas.",
+      "replyToLabel": "Atsakymas į šią patirtį",
+      "disputeOpenedLabel": "Ginčas atidarytas",
+      "disputeReviewStartedLabel": "Nagrinėjimas pradėtas",
+      "conflictNotice": "Esi šios patirties šalis, todėl čia spręsti negali. Ją turi perimti kitas moderatorius.",
+      "conflictUnknown": "Nepavyko patikrinti, ar esi šios patirties šalis. Sprendimo dabar priimti negalima.",
+      "disputeReasonShared": "Priežastis rodoma abiem šalims ir įrašoma į audito istoriją.",
       "take": "Imti moderuoti",
       "publish": "Paskelbti",
       "reject": "Atmesti",
@@ -16325,6 +16335,7 @@
         "dispute_exists": "Ginčas jau atidarytas.",
         "reason_required": "Priežastis privaloma.",
         "invalid_transition": "Šis žingsnis iš dabartinės būsenos negalimas.",
+        "conflict_of_interest": "Esi šios patirties šalis. Sprendimą turi priimti kitas moderatorius.",
         "not_found": "Nerasta.",
         "error": "Kažkas nepavyko. Niekas nebuvo išsaugota."
       }
@@ -16341,6 +16352,7 @@
       "cta": "Atidaryti ginčą",
       "sending": "Atidaroma…",
       "openedNote": "Ginčas atidarytas. Patirtis lieka paskelbta, kol moderatorius priims sprendimą.",
+      "decisionReasonLabel": "Sprendimo priežastis",
       "errors": {
         "needs_migration": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
         "not_authenticated": "Pirma prisijunk.",
@@ -16355,6 +16367,7 @@
         "dispute_exists": "Ginčas jau atidarytas.",
         "reason_required": "Priežastis privaloma.",
         "invalid_transition": "Šis žingsnis iš dabartinės būsenos negalimas.",
+        "conflict_of_interest": "Esi šios patirties šalis. Sprendimą turi priimti kitas moderatorius.",
         "not_found": "Nerasta.",
         "error": "Kažkas nepavyko. Niekas nebuvo išsaugota."
       }
@@ -16379,6 +16392,7 @@
         "dispute_exists": "Ginčas jau atidarytas.",
         "reason_required": "Priežastis privaloma.",
         "invalid_transition": "Šis žingsnis iš dabartinės būsenos negalimas.",
+        "conflict_of_interest": "Esi šios patirties šalis. Sprendimą turi priimti kitas moderatorius.",
         "not_found": "Nerasta.",
         "error": "Kažkas nepavyko. Niekas nebuvo išsaugota."
       },
@@ -16413,6 +16427,7 @@
         "dispute_exists": "Ginčas jau atidarytas.",
         "reason_required": "Priežastis privaloma.",
         "invalid_transition": "Šis žingsnis iš dabartinės būsenos negalimas.",
+        "conflict_of_interest": "Esi šios patirties šalis. Sprendimą turi priimti kitas moderatorius.",
         "not_found": "Nerasta.",
         "error": "Kažkas nepavyko. Niekas nebuvo išsaugota."
       }

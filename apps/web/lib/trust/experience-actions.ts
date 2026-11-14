@@ -9,6 +9,8 @@ import {
   startExperienceModeration,
   decideExperienceModeration,
   resolveExperienceDispute,
+  startExperienceDisputeReview,
+  moderateExperienceResponse,
   type ExperienceActionResult,
 } from "./experience-records";
 import type { EligibleInteractionKind } from "./experience-eligibility";
@@ -143,7 +145,9 @@ export async function resolveDisputeAction(
 ): Promise<ExperienceFormState> {
   const locale = str(formData, "locale") || "lt";
   const resolution = str(formData, "resolution");
-  if (resolution !== "upheld" && resolution !== "changed" && resolution !== "removed") {
+  // "changed" is refused here as well as hidden in the UI: nothing changes the
+  // text, so it must not be recordable as if a correction had been made.
+  if (resolution !== "upheld" && resolution !== "removed") {
     return { ok: false, code: "invalid" };
   }
   const result = await resolveExperienceDispute({
@@ -151,6 +155,43 @@ export async function resolveDisputeAction(
     resolution,
     reason: str(formData, "reason"),
   });
+  if (result.ok) {
+    revalidatePath(`/${locale}/dashboard/admin`);
+    // Both parties read the decision and its reason on their own result.
+    revalidatePath(`/${locale}/dashboard`);
+  }
+  return result;
+}
+
+/** opened -> under_review: the step the database requires before a decision. */
+export async function startDisputeReviewAction(
+  _prev: ExperienceFormState,
+  formData: FormData,
+): Promise<ExperienceFormState> {
+  const locale = str(formData, "locale") || "lt";
+  const result = await startExperienceDisputeReview(str(formData, "experience_id"));
   if (result.ok) revalidatePath(`/${locale}/dashboard/admin`);
+  return result;
+}
+
+/** Publish or reject a subject's reply — authorization is the RPC's `is_admin()`. */
+export async function moderateResponseAction(
+  _prev: ExperienceFormState,
+  formData: FormData,
+): Promise<ExperienceFormState> {
+  const locale = str(formData, "locale") || "lt";
+  const decision = str(formData, "decision");
+  if (decision !== "published" && decision !== "rejected") {
+    return { ok: false, code: "invalid" };
+  }
+  const result = await moderateExperienceResponse({
+    id: str(formData, "response_id"),
+    decision,
+    reason: str(formData, "reason"),
+  });
+  if (result.ok) {
+    revalidatePath(`/${locale}/dashboard/admin`);
+    revalidatePath(`/${locale}/dashboard`);
+  }
   return result;
 }

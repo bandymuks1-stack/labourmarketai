@@ -10,7 +10,11 @@ import { listRequestsForAdminReview } from "@/lib/buyer/admin-request-review";
 import { getFollowUpQueue } from "@/lib/followup/follow-up-tasks";
 import { getLeadIntakeOverview } from "@/lib/sales/lead-intake";
 import { getLaunchSignals } from "@/lib/admin/launch-signals";
-import { listDisputeQueue, listModerationQueue } from "@/lib/trust/experience-records";
+import {
+  listDisputeQueue,
+  listModerationQueue,
+  listResponseQueue,
+} from "@/lib/trust/experience-records";
 import { AdminLaunchBoard } from "@/components/app/admin-launch-board";
 import { ExperienceModerationPanel } from "@/components/app/experience-moderation-panel";
 import { FollowUpQueuePanel } from "@/components/app/follow-up-queue-panel";
@@ -153,6 +157,7 @@ export default async function AdminDashboardPage({
   // would read as "nothing needs a decision".
   const experienceQueue = await listModerationQueue();
   const experienceDisputes = await listDisputeQueue();
+  const experienceResponses = await listResponseQueue();
 
   // 10 most recent profile rows.
   const { data: recent } = await supabase
@@ -614,7 +619,12 @@ export default async function AdminDashboardPage({
           /dashboard/admin/experience-moderation as an undeclared screen, and
           the control room already models "items awaiting a decision". Every
           decision needs a reason and lands in the audit trail. */}
-      <ExperienceModerationPanel queue={experienceQueue} disputes={experienceDisputes} />
+      <ExperienceModerationPanel
+        queue={experienceQueue}
+        disputes={experienceDisputes}
+        responses={experienceResponses}
+        now={new Date().toISOString()}
+      />
 
       <section className="flex flex-col gap-3" data-testid="admin-pilot-drafts">
         <div className="flex flex-col gap-0.5">
