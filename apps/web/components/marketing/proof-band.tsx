@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Reveal } from "@/components/marketing/reveal";
+import { Reveal } from "@/components/marketing/lazy-motion";
 
 /**
  * PROOF BAND — fact vs proven skill vs opinion (landing rebuild 2026-07-29).

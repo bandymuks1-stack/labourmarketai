@@ -3,7 +3,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { FINAL_CTA_LINKS } from "@/lib/marketing/public-doors";
 import { cn } from "@/lib/utils";
-import { Reveal } from "@/components/marketing/reveal";
+import { Reveal } from "@/components/marketing/lazy-motion";
 
 /**
  * PR-H global landing — section I: final CTA band. The doors themselves live

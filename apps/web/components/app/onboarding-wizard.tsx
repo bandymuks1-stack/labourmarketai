@@ -550,7 +550,7 @@ export function OnboardingWizard({
 
   if (step === 1) {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 pb-32 sm:pb-0">
         <header className="flex flex-col gap-3">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("rolePicker.intentHeading")}
@@ -686,32 +686,60 @@ export function OnboardingWizard({
           })}
         </ul>
 
-        <Button
-          type="button"
-          disabled={intents.size === 0}
-          data-testid="onboarding-intents-continue"
-          onClick={() => {
-            // Per-step drop-off signal (Pilot Onboarding and Measurement
-            // v1): the role step is DONE the moment the user advances.
-            // Bounded metadata only — a coarse step label + the intent set.
-            trackFunnel(FUNNEL_EVENTS.onboardingStepRoleCompleted, {
-              step: "role",
-              intent: intentList.join(","),
-            });
-            setStep(2);
-          }}
-          className="w-full rounded-xl sm:w-auto sm:self-start"
-        >
-          {t("rolePicker.continue")}
-        </Button>
-        {error && (
-          <p className="text-xs text-state-danger" role="alert">
-            {error}
-          </p>
-        )}
+        {/* ON A PHONE THE WAY FORWARD STAYS ON SCREEN. Six cards in one column
+            put this button 1.7–2.1 screens down (measured 2026-11-13, 360×560
+            and 390×664), and choosing a card showed only a tick: nothing said
+            a button existed below. The bar is FIXED to the bottom of the
+            screen while the cards scroll under it (`sticky` cannot do this
+            here: `html` and `body` both clip overflow, which makes the body
+            the scroll container and leaves a sticky child at the end of the
+            page). The step reserves the bar's height below its content, so
+            nothing ends up underneath it. From `sm` up it is the ordinary
+            in-flow button it always was. Solid background, no blur. */}
+        <div className="fixed inset-x-0 bottom-0 z-10 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar">
+          {error && (
+            <p className="text-xs text-state-danger" role="alert">
+              {error}
+            </p>
+          )}
+          {/* The disabled button explains itself: until something is chosen
+              the bar says what to do first (the sentence the step already
+              used when a person got here without a choice). It goes away
+              with the first pick, when the button becomes active. */}
+          {!error && intents.size === 0 && (
+            <p className="text-xs leading-relaxed text-text-muted" data-testid="onboarding-continue-hint">
+              {t("error_role_required")}
+            </p>
+          )}
+          <Button
+            type="button"
+            disabled={intents.size === 0}
+            data-testid="onboarding-intents-continue"
+            onClick={() => {
+              // Per-step drop-off signal (Pilot Onboarding and Measurement
+              // v1): the role step is DONE the moment the user advances.
+              // Bounded metadata only — a coarse step label + the intent set.
+              trackFunnel(FUNNEL_EVENTS.onboardingStepRoleCompleted, {
+                step: "role",
+                intent: intentList.join(","),
+              });
+              setStep(2);
+            }}
+            className="min-h-11 w-full rounded-xl sm:w-auto sm:self-start"
+          >
+            {t("rolePicker.continue")}
+          </Button>
+        </div>
       </div>
     );
   }
+
+  // A person joining through a staff invitation must MEET the review notice
+  // before they can accept: submitting records that it was shown. The notice
+  // sits right above the submit, in the page flow, so for them the button
+  // stays in the flow too — fixing it to the screen would let them submit
+  // with the notice still below the fold.
+  const reviewNoticeShown = Boolean(invitationToken && invitationReviewNotice);
 
   return (
     <form
@@ -719,7 +747,7 @@ export function OnboardingWizard({
         e.preventDefault();
         submit();
       }}
-      className="flex flex-col gap-5"
+      className={cn("flex flex-col gap-5", !reviewNoticeShown && "pb-36 sm:pb-0")}
       noValidate
     >
       <header>
@@ -1012,35 +1040,48 @@ export function OnboardingWizard({
         </p>
       </div>
 
-      {error && (
-        <p className="text-xs text-state-danger" role="alert">
-          {error}
-        </p>
-      )}
-
       {invitationToken && invitationReviewNotice ? (
         <StaffReviewNotice text={invitationReviewNotice} testId="onboarding-review-notice" />
       ) : null}
 
-      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <Button
-          type="submit"
-          disabled={pending}
-          data-testid="onboarding-submit"
-          className="w-full rounded-xl sm:w-auto"
-        >
-          {pending ? t("saving") : t("step2.continue")}
-        </Button>
-        {!skipRoleStep && (
-          <button
-            type="button"
-            onClick={() => setStep(1)}
-            disabled={pending}
-            className="text-xs text-text-muted hover:text-text-secondary disabled:opacity-60"
-          >
-            {t("back")}
-          </button>
+      {/* The submit stays on screen on a phone (it sat 2.7–3.4 screens down,
+          below fields that are mostly optional), and a refusal is said right
+          above it instead of somewhere down the page. Same bar as step 1 —
+          except for an invited staff member, who keeps the in-flow button
+          directly under the review notice (see reviewNoticeShown). */}
+      <div
+        className={cn(
+          "flex flex-col gap-2",
+          !reviewNoticeShown &&
+            "fixed inset-x-0 bottom-0 z-10 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:border-0 sm:bg-transparent sm:p-0",
         )}
+        data-testid="onboarding-action-bar"
+      >
+        {error && (
+          <p className="text-xs text-state-danger" role="alert">
+            {error}
+          </p>
+        )}
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+          <Button
+            type="submit"
+            disabled={pending}
+            data-testid="onboarding-submit"
+            className="min-h-11 w-full rounded-xl sm:w-auto"
+          >
+            {pending ? t("saving") : t("step2.continue")}
+          </Button>
+          {!skipRoleStep && (
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              disabled={pending}
+              className="min-h-11 px-2 text-xs text-text-muted hover:text-text-secondary disabled:opacity-60"
+            >
+              {t("back")}
+            </button>
+          )}
+        </div>
       </div>
     </form>
   );

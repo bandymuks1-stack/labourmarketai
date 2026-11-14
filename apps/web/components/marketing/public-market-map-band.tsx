@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { MarketMap } from "@/components/app/market-map/market-map";
-import { Reveal } from "@/components/marketing/reveal";
+import { Reveal } from "@/components/marketing/lazy-motion";
 import {
   coverageCountryCount,
   publicCoverageView,
