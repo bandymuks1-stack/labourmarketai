@@ -195,7 +195,7 @@ export async function SiteNav({
       <div className="mx-auto flex max-w-container items-center gap-2 px-3 py-3 sm:gap-6 sm:px-12 sm:py-4">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
+          className="flex min-h-11 shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
         >
           {/* The mark is decorative here — the wordmark beside it already
               names the product, so announcing both would read it twice. */}

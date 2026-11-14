@@ -383,7 +383,7 @@ export function SignupForm({
               ? `/auth/login?next=${encodeURIComponent(nextPath)}`
               : "/auth/login"
           }
-          className="text-sm text-brand-blue hover:text-brand-champagne"
+          className="inline-flex min-h-11 items-center text-sm text-brand-blue hover:text-brand-champagne"
         >
           {t("login_link")} →
         </Link>

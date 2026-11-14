@@ -847,7 +847,7 @@ export default async function JobsPage({
                 <Link
                   href={`/jobs?profession=${o.slug}`}
                   aria-current={o.slug === profession && !query ? "page" : undefined}
-                  className="inline-block py-1.5 text-text-muted underline underline-offset-4 hover:text-text-primary"
+                  className="inline-block py-3 text-text-muted underline underline-offset-4 hover:text-text-primary"
                 >
                   {o.label}
                 </Link>
