@@ -24,6 +24,7 @@ interface World {
     relationship_kind: string | null;
     link_state: string;
     linked_worker_id: string | null;
+    link_method?: string | null;
   }[];
   records: Record<string, unknown>[];
   signals: Record<string, unknown>[];
@@ -193,13 +194,23 @@ describe("readCompanyPerson - the historical person card for an UNLINKED roster 
     expect((await run(w, "not-a-uuid")).load.kind).toBe("not-found");
   });
 
-  it("states the link: link_proposed carries no worker link, linked carries the worker id", async () => {
+  it("states the link: link_proposed carries no worker link, a link the person confirmed carries the worker id", async () => {
     const proposed = await run(empty({ people: [person({ link_state: "link_proposed", linked_worker_id: "w9" })] }));
     expect(proposed.load.kind === "ready" && proposed.load.person.linkState).toBe("link_proposed");
     expect(proposed.load.kind === "ready" && proposed.load.person.linkedWorkerId).toBeNull();
-    const linked = await run(empty({ people: [person({ link_state: "linked", linked_worker_id: "w9" })] }));
+    const linked = await run(
+      empty({ people: [person({ link_state: "linked", link_method: "worker_confirmed", linked_worker_id: "w9" })] }),
+    );
     expect(linked.load.kind === "ready" && linked.load.person.linkState).toBe("linked");
     expect(linked.load.kind === "ready" && linked.load.person.linkedWorkerId).toBe("w9");
+  });
+
+  it("a link the person did not confirm (manager link, invitation) opens no page of theirs (#3354)", async () => {
+    for (const method of ["manager_link", "invitation", null]) {
+      const r = await run(empty({ people: [person({ link_state: "linked", link_method: method, linked_worker_id: "w9" })] }));
+      expect(r.load.kind === "ready" && r.load.person.linkState).toBe("linked");
+      expect(r.load.kind === "ready" && r.load.person.linkedWorkerId).toBeNull();
+    }
   });
 
   it("an unknown link_state falls back to the conservative unlinked", async () => {
