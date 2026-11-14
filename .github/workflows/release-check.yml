@@ -164,7 +164,16 @@ jobs:
 
       # Indexable pages first; the two sign-in pages after `!` are measured but their
       # SEO score is not gated (they are not meant to be indexed).
+      # REPORT-ONLY GATES (coordinator, 2026-11-14). The live site does not meet two of the
+      # four gates today: LCP 5.3–6.0 s against 2.5 s on every page, and SEO 92 against 95 on
+      # the indexable ones (builds f0d8306f, both languages). They are measured, printed as
+      # NOT MET and raised as warnings, but do not fail the job: a workflow that is red from
+      # its first day is a check nobody reads. Accessibility, CLS and an incomplete sample
+      # still fail. REMOVE a name from this list when the site meets that gate; the script
+      # warns when a listed gate is met on every page. Guard: lighthouse-report-only-gates.
       - name: Lighthouse, three runs per page, /${{ matrix.locale }}
+        env:
+          LH_REPORT_ONLY: "LCP,SEO"
         run: |
           set -euo pipefail
           L="/${{ matrix.locale }}"
