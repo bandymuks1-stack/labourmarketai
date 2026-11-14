@@ -310,7 +310,9 @@ async function crawlPage(context, path, width, discovered, firstFailure = null) 
       raw: a.getAttribute("href"),
       href: a.href,
       text: (a.innerText || a.getAttribute("aria-label") || a.title || "").trim().replace(/\s+/g, " ").slice(0, 60),
-      visible: !!(a.offsetWidth || a.offsetHeight || a.getClientRects().length),
+      // A box alone is not "visible": the content of a closed <details> keeps its box under
+      // `content-visibility: hidden` and cannot be seen or pressed (checkVisibility says so).
+      visible: !!(a.offsetWidth || a.offsetHeight || a.getClientRects().length) && (typeof a.checkVisibility !== "function" || a.checkVisibility()),
     })),
   );
   // Resolve the page's own-site targets six at a time; each distinct target is fetched once per crawl.
@@ -353,8 +355,10 @@ async function crawlPage(context, path, width, discovered, firstFailure = null) 
         // No anchor with that name. It may still be a STATE link the page
         // itself answers (the goal navigator's `#goal=work` opens a panel), so
         // it is judged by pressing it, after every other link has been read.
+        // A hidden link is judged only through a visible copy: nobody can press it (as for an
+        // empty href above). A hidden copy of a state link (a closed "more" fold, the panels
+        // sent before the scripts run) is not a dead link.
         if (link.visible && !stateLinks.some((x) => x.raw === link.raw)) stateLinks.push({ raw: link.raw, id, label });
-        else if (!link.visible) report("dead-link", path, width, `${label} -> #${id} is not on the page`);
       }
       continue;
     }
@@ -430,7 +434,8 @@ async function crawlPage(context, path, width, discovered, firstFailure = null) 
           text: (el.innerText || el.getAttribute("aria-label") || el.getAttribute("title") || "").trim().replace(/\s+/g, " ").slice(0, 60),
           submit: el.tagName === "BUTTON" && !!el.closest("form") && (el.getAttribute("type") ?? "submit") === "submit",
           disabled: el.disabled === true || el.getAttribute("aria-disabled") === "true",
-          visible: !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length),
+          // Same rule as for links: nothing inside a closed <details> is visible.
+          visible: !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length) && (typeof el.checkVisibility !== "function" || el.checkVisibility()),
           inLink: !!el.closest("a[href]"),
           // The step, tab or option a person is already on: pressing it rightly changes nothing.
           current: el.hasAttribute("aria-current") && el.getAttribute("aria-current") !== "false" || el.getAttribute("aria-selected") === "true",
