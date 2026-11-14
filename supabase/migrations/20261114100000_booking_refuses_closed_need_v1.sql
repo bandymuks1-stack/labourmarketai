@@ -3,6 +3,9 @@
 --
 -- RED by rule: a SECURITY DEFINER trigger function on booking_requests.
 -- Needs the human gate (draft PR + needs-human-gate); never auto-applied.
+-- @human-gate-approved — acknowledgement only: the owner chose this RED item
+-- (2026-11-14); the PR stays a draft with needs-human-gate and is applied only
+-- through the owner channel after approval of this exact SQL.
 --
 -- THE DEFECT. A worker could ACCEPT a date proposal after the employer had
 -- closed the need it belongs to. The accept wrote an accepted booking and,
