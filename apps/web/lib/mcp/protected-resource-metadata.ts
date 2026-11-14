@@ -41,11 +41,26 @@
 /** The path of the one protected resource. Pinned by the conformance guard. */
 export const MCP_RESOURCE_PATH = "/api/mcp" as const;
 
+/** The read-only profile of the same door (`lib/mcp/door.ts`): a resource of
+ *  its own, so its `resource` matches the URL a person enters for it. */
+export const MCP_READ_RESOURCE_PATH = "/api/mcp/read" as const;
+
+export type McpResourcePath = typeof MCP_RESOURCE_PATH | typeof MCP_READ_RESOURCE_PATH;
+
 /** RFC 9728 well-known paths at which the document is served. */
 export const PROTECTED_RESOURCE_METADATA_PATHS = [
   "/.well-known/oauth-protected-resource",
   `/.well-known/oauth-protected-resource${MCP_RESOURCE_PATH}`,
 ] as const;
+
+/** The metadata location a 401 points to. The full door keeps the root
+ *  location every connected client already follows; the read door points to
+ *  its own path-suffixed document. */
+export function protectedResourceMetadataPath(resourcePath: string): string {
+  return resourcePath === MCP_RESOURCE_PATH
+    ? PROTECTED_RESOURCE_METADATA_PATHS[0]
+    : `${PROTECTED_RESOURCE_METADATA_PATHS[0]}${resourcePath}`;
+}
 
 export type ProtectedResourceMetadata = {
   readonly resource: string;
@@ -58,13 +73,15 @@ export type ProtectedResourceMetadata = {
  * @param origin        the deployment origin the request arrived at, e.g.
  *                      `https://labourmarket.ai` (no trailing slash)
  * @param supabaseUrl   `NEXT_PUBLIC_SUPABASE_URL`
+ * @param resourcePath  which door the document describes (default `/api/mcp`)
  */
 export function protectedResourceMetadata(
   origin: string,
   supabaseUrl: string,
+  resourcePath: McpResourcePath = MCP_RESOURCE_PATH,
 ): ProtectedResourceMetadata {
   return {
-    resource: `${origin.replace(/\/$/, "")}${MCP_RESOURCE_PATH}`,
+    resource: `${origin.replace(/\/$/, "")}${resourcePath}`,
     // The AS identifier is the auth service path, not the bare project
     // origin: Supabase serves RFC 8414 discovery at
     // /.well-known/oauth-authorization-server/auth/v1, which clients derive

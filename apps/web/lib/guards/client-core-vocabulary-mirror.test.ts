@@ -190,9 +190,12 @@ describe("the canonical transport gate is open, and says so truthfully", () => {
   it("and the boundary it names actually resolves bearer identity", () => {
     // The gate being open is only honest if the server side is real: the MCP
     // route must go through the ONE identity resolver (bearer + cookie), not
-    // a private header parse.
+    // a private header parse. The route is a thin wrapper over the one door
+    // module (both MCP profiles), so both are read.
     const route = readSource(process.cwd(), "app", "api", "mcp", "route.ts");
-    expect(route).toMatch(/resolveApiIdentity/);
+    expect(route).toMatch(/from "@\/lib\/mcp\/door"/);
+    const door = readSource(process.cwd(), "lib", "mcp", "door.ts");
+    expect(door).toMatch(/resolveApiIdentity/);
   });
 
   it("while the request-scoped web client takes bearer identity ONLY from the verified caller scope", () => {

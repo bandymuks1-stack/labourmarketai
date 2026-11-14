@@ -26,6 +26,26 @@ function objectRoot(schema: Record<string, unknown>): Record<string, unknown> {
   return { ...schema, type: "object" };
 }
 
+/**
+ * WHICH TOOLS A DOOR LISTS. `full` is every exposed capability. `read` keeps a
+ * capability only when it is a read in every way the contract can say so:
+ * kind `read`, and annotations that claim no change and no destruction. A
+ * draft writes nothing either, but it mints a confirmation for a write, so it
+ * is not a read here.
+ */
+export type McpProfile = "full" | "read";
+
+export function isReadProfileCapability(c: CapabilityDescriptor): boolean {
+  return c.kind === "read" && c.annotations.readOnlyHint && !c.annotations.destructiveHint;
+}
+
+export function profileCapabilities(
+  capabilities: readonly CapabilityDescriptor[],
+  profile: McpProfile,
+): readonly CapabilityDescriptor[] {
+  return profile === "read" ? capabilities.filter(isReadProfileCapability) : capabilities;
+}
+
 /** The tool list a client is shown — derived from the capability registry. */
 export function toolDefsOf(capabilities: readonly CapabilityDescriptor[]): McpToolDef[] {
   return capabilities.map((c) => ({
