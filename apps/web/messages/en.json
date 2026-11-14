@@ -4437,6 +4437,7 @@
       "country_search_empty": "No country found. Try another name.",
       "error_country_required": "Please choose a country.",
       "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
+      "role_step_hint": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "What is your profession or work experience?",
       "profession_placeholder": "Type a profession or field of work",
       "profession_add": "Add",
