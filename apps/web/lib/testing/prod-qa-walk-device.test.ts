@@ -1,3 +1,4 @@
+import type { BrowserContextOptions } from "@playwright/test";
 import { describe, expect, it } from "vitest";
 
 import { WALK_PHONE, walkDevice, withWalkDevice } from "./prod-qa-walk-device";
@@ -23,7 +24,7 @@ describe("the screen a context is opened with", () => {
   });
 
   it("on a phone a context that names no screen becomes a 390 px touch phone", () => {
-    const made = withWalkDevice("phone", { storageState: "x.json", locale: "lt-LT" });
+    const made: BrowserContextOptions = withWalkDevice<BrowserContextOptions>("phone", { storageState: "x.json", locale: "lt-LT" });
     expect(made).toEqual({ ...WALK_PHONE, storageState: "x.json", locale: "lt-LT" });
     expect(made.viewport).toEqual({ width: 390, height: 844 });
     expect(made.isMobile).toBe(true);
