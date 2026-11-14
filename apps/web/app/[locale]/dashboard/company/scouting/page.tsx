@@ -1481,7 +1481,10 @@ export default async function CompanyScoutingPage({
                 {/* Company acknowledgement of a REAL worker interest signal
                     (PR7) — internal record only; never rendered without an
                     actual signal, nothing is sent anywhere. */}
-                {!actsForClient && result.interestByWorker[c.workerId] ? (
+                {/* Not on a closed need: its people are history (the interest
+                    badge above still says they raised a hand), and a control
+                    that changes the record of a closed need is not offered. */}
+                {needOpen && !actsForClient && result.interestByWorker[c.workerId] ? (
                   <CompanyInterestAck
                     locale={locale}
                     requestId={result.demand.id}
