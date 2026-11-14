@@ -1,3 +1,4 @@
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { PageBack } from "@/components/app/premium/page-back";
 import { Link } from "@/lib/i18n/navigation";
@@ -379,6 +380,7 @@ export default async function BuyerDashboardPage({
         listResult={requestsResult}
         attachmentsResult={attachmentsResult}
         labels={requestsLabels}
+        countryOptions={countryOptionsForLocale(locale)}
       />
 
       <section

@@ -2802,7 +2802,7 @@
         "fieldNeedSummary": "Краткое описание запроса",
         "fieldNeedSummaryPlaceholder": "Кратко о том, что вы ищете.",
         "fieldCountry": "Страна",
-        "fieldCountryPlaceholder": "напр. LT",
+        "fieldCountryPlaceholder": "Выберите страну",
         "fieldLocation": "Место / регион",
         "fieldLocationPlaceholder": "напр. Вильнюс",
         "fieldRole": "Роль / тип работы",

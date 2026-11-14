@@ -2802,7 +2802,7 @@
         "fieldNeedSummary": "Užklausos aprašymas",
         "fieldNeedSummaryPlaceholder": "Trumpas, ką ieškai.",
         "fieldCountry": "Šalis",
-        "fieldCountryPlaceholder": "pvz. LT",
+        "fieldCountryPlaceholder": "Pasirink šalį",
         "fieldLocation": "Vieta / regionas",
         "fieldLocationPlaceholder": "pvz. Vilnius",
         "fieldRole": "Vaidmuo / darbo tipas",

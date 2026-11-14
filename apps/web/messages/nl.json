@@ -2802,7 +2802,7 @@
         "fieldNeedSummary": "Samenvatting van de aanvraag",
         "fieldNeedSummaryPlaceholder": "In het kort wat je zoekt.",
         "fieldCountry": "Land",
-        "fieldCountryPlaceholder": "bv. LT",
+        "fieldCountryPlaceholder": "Kies een land",
         "fieldLocation": "Locatie / regio",
         "fieldLocationPlaceholder": "bv. Vilnius",
         "fieldRole": "Rol / type werk",
