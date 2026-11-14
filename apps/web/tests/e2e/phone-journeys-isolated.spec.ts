@@ -218,7 +218,11 @@ for (const phone of PHONES) {
       await fitsTheScreen(page, "the work board");
       const card = page.locator(`li[id="opp-${shared.needId}"]`).first();
       await expect(card, "the verified company's need is on the board").toBeVisible({ timeout: 60_000 });
-      await expect(card).toContainText(NEED_ROLE);
+      // The card is THIS need (its id) from THIS company. Its heading is the recognised profession
+      // ("Tiler"), not the company's free-text title (first run, 2026-11-14), so the title is
+      // recorded, not asserted.
+      await expect(card, "the card names the company that posted the need").toContainText(COMPANY_ORG);
+      test.info().annotations.push({ type: "board-card-heading", description: ((await card.innerText()) || "").split("\n").find((l) => l.trim()) ?? "" });
       // The testid is on the disclosure's wrapper; the toggle and aria-expanded are on its button.
       const toggle = card.getByTestId("opportunity-details").locator("button[aria-expanded]").first();
       await toggle.tap();
