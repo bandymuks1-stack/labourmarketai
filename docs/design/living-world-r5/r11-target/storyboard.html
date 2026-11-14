@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LM judesio istorija — 8 kadrai</title>
+<style>
+  * { margin: 0; box-sizing: border-box; }
+  body { background: #16242c; color: #e8edf2; font: 14px "Segoe UI", system-ui, sans-serif; padding: 26px; min-height: 100vh; }
+  h1 { font-size: 17px; font-weight: 650; margin-bottom: 4px; } h1 i { font-style: normal; color: #e89b52; }
+  .sub { color: #8fa3af; font-size: 12px; margin-bottom: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 1560px; }
+  figure { background: #0f1a21; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; }
+  svg { display: block; width: 100%; aspect-ratio: 16/10; }
+  figcaption { padding: 9px 13px; font-size: 12px; color: #aebcc6; border-top: 1px solid rgba(255,255,255,0.07); }
+  figcaption b { color: #e8edf2; font-family: ui-monospace, Consolas, monospace; margin-right: 7px; }
+  @media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<h1>LabourMarket<i>.ai</i> — judesio istorija</h1>
+<p class="sub">TOLI → ARČIAU → ŽMOGUS → REZULTATAS · kamera nešа pasakojimą; tekstas tik dinaminis</p>
+<div class="grid" id="grid"></div>
+<script src="lmworld.js"></script>
+<script>
+(function () {
+  var L = window.LM, g = L.g, P = L.P;
+
+  function frame(inner, cap, n) {
+    return '<figure><svg viewBox="0 0 480 300" preserveAspectRatio="xMidYMid slice">' +
+      L.defs() + inner + '</svg><figcaption><b>' + n + "</b>" + cap + "</figcaption></figure>";
+  }
+  var F = [];
+
+  /* 1 · FAR — Europe alive at dusk */
+  F.push(frame(
+    '<rect width="480" height="300" fill="url(#sky)"/>' +
+    '<circle cx="110" cy="70" r="130" fill="url(#sunGlow)"/>' +
+    '<path d="M0 190 Q80 150 150 168 Q220 120 300 150 Q380 128 480 160 L480 300 L0 300 Z" fill="' + P.farLand2 + '"/>' +
+    '<path d="M40 220 Q140 186 260 204 Q360 182 480 206 L480 300 L0 300 Z" fill="' + P.farLand + '"/>' +
+    (function () { var s = ""; for (var i = 0; i < 42; i++) s += '<circle cx="' + ((i * 61 + 17) % 480) + '" cy="' + (170 + (i * 37) % 110) + '" r="' + (0.9 + (i % 3) * 0.5) + '" fill="' + P.farLight + '" opacity="' + (0.45 + (i % 4) * 0.13) + '"/>'; return s; })() +
+    '<path d="M120 244 Q200 236 280 246" stroke="#ffd9a0" stroke-width="1.4" stroke-dasharray="3 5" fill="none" opacity="0.6"/>' +
+    '<path d="M260 210 Q330 198 410 214" stroke="#ffd9a0" stroke-width="1.2" stroke-dasharray="3 5" fill="none" opacity="0.5"/>',
+    "TOLI — gyva Europa: gyvenvietės šviečia, srautai juda", "01"));
+
+  /* 2 · approach — the coast rises */
+  F.push(frame(
+    '<rect width="480" height="300" fill="url(#sky)"/>' +
+    '<path d="M0 60 L480 54 L480 150 L0 156 Z" fill="url(#sea)"/>' +
+    g(150, 116, 0.55, L.ship()) +
+    '<path d="M0 148 Q160 136 330 150 T480 144 L480 300 L0 300 Z" fill="' + P.quay2 + '"/>' +
+    g(60, 190, 0.85, L.portCrane()) + g(120, 184, 0.72, L.portCrane()) +
+    g(30, 160, 0.6, L.containerRow(5)) +
+    '<path d="M300 150 Q390 128 480 146 L480 220 Q390 214 300 220 Z" fill="#79a273"/>' +
+    g(380, 156, 0.6, L.turbine(30)) + g(424, 150, 0.68, L.turbine(-20)) +
+    '<path d="M0 236 Q160 226 330 238 T480 232 L480 300 L0 300 Z" fill="' + P.grass + '"/>' +
+    g(210, 268, 0.75, L.gable(30, 24, 12, P.terra, P.slate) + L.windows(30, 22, 2, 2, 0.8, 2.6, true)) +
+    g(250, 266, 0.75, L.gable(30, 26, 12, P.cream, P.slate2)),
+    "ARTĖJAM — krantas tampa uostu, kalva — energija", "02"));
+
+  /* 3 · MID — the living region */
+  F.push(frame(
+    '<rect width="480" height="300" fill="url(#sky)"/>' +
+    '<path d="M0 46 L480 42 L480 106 L0 110 Z" fill="url(#sea)"/>' +
+    g(210, 100, 0.5, L.ship()) +
+    '<path d="M0 104 Q160 94 330 106 T480 100 L480 300 L0 300 Z" fill="' + P.quay2 + '"/>' +
+    g(36, 140, 0.7, L.portCrane()) + g(84, 136, 0.6, L.portCrane()) +
+    '<path d="M0 168 Q170 158 340 170 T480 164 L480 300 L0 300 Z" fill="' + P.grass + '"/>' +
+    (function () { var s = "", hc = [P.terra, P.cream, P.brick, P.rust]; for (var h = 0; h < 6; h++) s += g(150 + h * 30, 208 + (h % 2) * 4, 0.85, L.gable(26, 21 + (h % 3) * 4, 11, hc[h % 4], P.slate)); return s; })() +
+    g(348, 200, 0.8, '<rect x="0" y="-30" width="10" height="30" fill="' + P.cream + '"/><path d="M-1 -30 L5 -46 L11 -30 Z" fill="' + P.slate2 + '"/>') +
+    '<path d="M0 246 Q170 238 340 248 T480 242 L480 300 L0 300 Z" fill="#8fb87b"/>' +
+    g(40, 278, 0.8, L.fieldRows(90, 22, P.field)) +
+    g(360, 280, 0.85, L.fieldRows(90, 22, "#b9cf8e")) +
+    g(210, 288, 0.9, L.greenhouse()),
+    "REGIONAS — uostas, miestas, laukai: ekonomika matosi", "03"));
+
+  /* 4 · intent — one sentence, the world listens */
+  F.push(frame(
+    '<rect width="480" height="300" fill="url(#sky)"/>' +
+    '<path d="M0 120 Q160 108 330 122 T480 116 L480 300 L0 300 Z" fill="' + P.quay2 + '" opacity="0.9"/>' +
+    g(70, 190, 1.1, L.portCrane()) +
+    g(190, 176, 1, L.box(56, 34, 12, P.brick) + L.windows(56, 34, 4, 2, 0.7, 2.8, true) +
+      '<rect x="22" y="18" width="12" height="16" rx="1" fill="' + P.door + '"/>') +
+    '<circle cx="218" cy="194" r="30" stroke="' + P.thread + '" stroke-width="2.4" fill="none" opacity="0.9"/>' +
+    '<circle cx="218" cy="194" r="44" stroke="' + P.thread + '" stroke-width="1.4" fill="none" opacity="0.5"/>' +
+    '<rect x="90" y="244" width="300" height="34" rx="17" fill="rgba(13,22,32,0.78)" stroke="rgba(244,169,92,0.55)"/>' +
+    '<text x="108" y="266" font-family="Segoe UI" font-size="13" fill="#e8edf2">Ieškau sandėlio darbo…</text>' +
+    '<circle cx="372" cy="261" r="11" fill="#e murky08a3c"/>'.replace("e murky08a3c", "e08a3c") +
+    '<text x="368" y="265" font-family="Segoe UI" font-size="12" fill="#1c1206">→</text>',
+    "INTENCIJA — sakinys; pasaulis paryškina, kur tai gyva", "04"));
+
+  /* 5 · connection — person meets workplace */
+  F.push(frame(
+    '<rect width="480" height="300" fill="url(#sky)"/>' +
+    '<path d="M0 150 Q160 140 330 152 T480 146 L480 300 L0 300 Z" fill="' + P.quay + '"/>' +
+    g(40, 128, 1.15, L.box(96, 60, 15, P.brick) + L.windows(96, 24, 5, 1, 0.85, 3.4)) +
+    g(40 + 1.15 * 62, 128 + 1.15 * 60, 1.15,
+      '<rect x="0" y="-34" width="26" height="34" rx="1.4" fill="' + L.darken(P.brick, 0.3) + '"/>' +
+      '<rect x="2" y="-32" width="22" height="32" rx="1" fill="' + P.door + '"/>' + L.spill(26, 30)) +
+    g(300, 262, 1.9, L.shadowBlob(14, 3, 11) + L.handshake(0, 4)) +
+    '<path d="M296 216 Q240 180 152 172" stroke="url(#thread)" stroke-width="4" fill="none" filter="url(#glowF)"/>' +
+    '<circle cx="298" cy="218" r="4.6" fill="' + P.thread + '" filter="url(#glowF)"/>' +
+    '<circle cx="150" cy="172" r="5" fill="' + P.thread + '" filter="url(#glowF)"/>',
+    "RYŠYS — žmogus ir darbovietė susitinka", "05"));
+
+  /* 6 · work happens */
+  F.push(frame(
+    '<rect width="480" height="300" fill="url(#sky)"/>' +
+    '<path d="M0 160 Q160 150 330 162 T480 156 L480 300 L0 300 Z" fill="' + P.quay + '"/>' +
+    g(90, 262, 1.5, L.shadowBlob(40, 6, 40) + L.siteFrame()) +
+    g(210, 266, 1.5, L.craneTower(-6)) +
+    g(300, 264, 1.6, L.workerVest("carry", 1)) +
+    g(345, 258, 1.5, L.workerVest("point", 2)) +
+    g(390, 262, 1.55, L.forklift()),
+    "DARBAS — kranas kelia, karkasas auga, komanda dirba", "06"));
+
+  /* 7 · completion */
+  F.push(frame(
+    '<rect width="480" height="300" fill="url(#sky)"/>' +
+    '<circle cx="120" cy="60" r="110" fill="url(#sunGlow)"/>' +
+    '<path d="M0 168 Q160 158 330 170 T480 164 L480 300 L0 300 Z" fill="' + P.quay + '"/>' +
+    g(150, 264, 1.7, L.shadowBlob(38, 6, 34) + L.box(52, 60, 13, P.terra) +
+      (function () { var s = ""; for (var r = 0; r < 3; r++) for (var c = 0; c < 4; c++) s += '<rect x="' + (7 + c * 11.5) + '" y="' + (8 + r * 15) + '" width="5" height="6.6" rx="0.8" fill="' + P.win + '"/>'; return s; })() +
+      '<rect x="20" y="47" width="12" height="13" rx="1.2" fill="' + P.door + '"/>') +
+    g(184, 268, 1, L.spill(14, 20)) +
+    g(300, 264, 1.75, g(-16, 0, 1, L.person("wave", 4, 0)) + g(4, 1, 1, L.person("wave", 1, 3)) + g(24, -1, 1, L.person("point", 5, 2))),
+    "UŽBAIGTA — langai užsidega, komanda pasitinka rezultatą", "07"));
+
+  /* 8 · the world grows */
+  F.push(frame(
+    '<rect width="480" height="300" fill="url(#sky)"/>' +
+    '<circle cx="110" cy="70" r="130" fill="url(#sunGlow)"/>' +
+    '<path d="M0 190 Q80 150 150 168 Q220 120 300 150 Q380 128 480 160 L480 300 L0 300 Z" fill="' + P.farLand2 + '"/>' +
+    '<path d="M40 220 Q140 186 260 204 Q360 182 480 206 L480 300 L0 300 Z" fill="' + P.farLand + '"/>' +
+    (function () { var s = ""; for (var i = 0; i < 74; i++) s += '<circle cx="' + ((i * 43 + 11) % 480) + '" cy="' + (166 + (i * 29) % 116) + '" r="' + (0.9 + (i % 3) * 0.55) + '" fill="' + P.farLight + '" opacity="' + (0.5 + (i % 4) * 0.13) + '"/>'; return s; })() +
+    '<path d="M90 240 Q190 228 300 242 M240 206 Q320 194 420 212 M60 206 Q160 194 250 210" stroke="#ffd9a0" stroke-width="1.4" stroke-dasharray="3 5" fill="none" opacity="0.65"/>',
+    "PASAULIS AUGA — daugiau šviesų ir srautų nei pradžioje", "08"));
+
+  document.getElementById("grid").innerHTML = F.join("");
+})();
+</script>
+</body>
+</html>
