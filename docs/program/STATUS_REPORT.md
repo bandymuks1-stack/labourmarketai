@@ -1,20 +1,24 @@
 # LabourMarket.ai — 12 valandų būklės ataskaita
 
-Sugeneruota 2026-11-14 23:12 (Lietuvos laiku). Laikotarpis: nuo 2026-11-14 11:12.
+Sugeneruota 2026-11-14 23:26 (Lietuvos laiku). Laikotarpis: nuo 2026-11-14 11:25.
+
+**Ataskaitos būsena: COMPLETE** — visos užklausos pavyko, registras perskaitytas visas.
+
+Privalomos CI patikros: quality, migration-safety (šaltinis: repository policy (CLAUDE.md); branch protection is not readable with this token). Peržiūra galioja tik su pilnu dabartinės versijos SHA, patikimo autoriaus ir ne senesnė už tą versiją.
 
 Kanoninis dokumentas (savininko nurodymas 2026-11-14, P0). Kiekviena ataskaita perrašo šį failą; ankstesnės ataskaitos — šio failo git istorijoje. Funkcijų būsenos imamos tik iš [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md) eilučių: funkcija laikoma veikiančia tik tada, kai jos eilutė turi produkcijos įrodymą (`LIVE_VERIFIED`). Kodas ar žalias CI veikimo neįrodo. Generatorius: `.github/scripts/status-report.mjs`.
 
-**Produkcija:** versija `43b4bde5`, sveikata gera (DB 136 ms), patikrinta 2026-11-14 23:12.
+**Produkcija:** versija `43b4bde5`, sveikata gera (DB 93 ms), patikrinta 2026-11-14 23:26.
 
 **Funkcijos:** 287 privalomos apimties funkcijų; veikia produkcijoje (įrodyta) 197 (68.6 %). Tai nėra užbaigimo procentas: likusios 90 funkcijų išvardytos A7 dalyje.
 
 ## Pokyčiai nuo ankstesnės ataskaitos
 
-Lyginama su ataskaita, sugeneruota 2026-11-14 22:58.
+Lyginama su ataskaita, sugeneruota 2026-11-14 23:12.
 
 - Veikia produkcijoje: 197 → 197.
-- Atvirų PR: 153 → 154; sujungta per laikotarpį 43.
-- Produkcijos diegimų per laikotarpį: 9 sėkmingi, 0 nepavykę.
+- Atvirų PR: 154 → 155; sujungta per laikotarpį 43.
+- Produkcijos diegimų per laikotarpį: 14 sėkmingi, 0 nepavykę.
 
 Funkcijų būsenų pokyčių registre nėra.
 
@@ -218,6 +222,11 @@ Registro eilutės, kurios sudaro CV sistemą:
 | `12c6c824` | success | 2026-11-14 19:51 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43623053057) |
 | `940b0f97` | success | 2026-11-14 17:37 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43610750664) |
 | `940b0f97` | success | 2026-11-14 17:27 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43609786246) |
+| `7c5e1c24` | success | 2026-11-14 16:28 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43604619275) |
+| `80900292` | success | 2026-11-14 14:11 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43593290300) |
+| `80900292` | success | 2026-11-14 14:01 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43592308949) |
+| `fece3caa` | success | 2026-11-14 13:17 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43588974470) |
+| `fece3caa` | success | 2026-11-14 13:04 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43587863029) |
 
 Nepavykę diegimai: nėra.
 
@@ -275,6 +284,25 @@ Nepavykę diegimai: nėra.
 | [prod-qa-walk jobs-search](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43599956771) | `80900292` | success | 2026-11-14 15:31 |
 | [prod-qa-walk requirements-countries](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43598968358) | `80900292` | success | 2026-11-14 15:20 |
 | [prod-qa-walk public-readiness](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43598017756) | `80900292` | success | 2026-11-14 15:08 |
+| [prod-qa-walk mobile-surfaces](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43596495957) | `80900292` | success | 2026-11-14 14:56 |
+| [prod-qa-walk public-market-direction](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43595604928) | `80900292` | success | 2026-11-14 14:37 |
+| [prod-qa-walk public-org-locales](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43594315767) | `80900292` | failure | 2026-11-14 14:26 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43591312864) | `80900292` | success | 2026-11-14 16:07 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43591308691) | `da15e8aa` | cancelled | 2026-11-14 13:42 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43591304487) | `266a6db5` | cancelled | 2026-11-14 13:42 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43591299098) | `314207f6` | cancelled | 2026-11-14 13:42 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43591294168) | `45893b53` | cancelled | 2026-11-14 13:42 |
+| [prod-qa-walk jobs-search](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43590961764) | `fece3caa` | success | 2026-11-14 13:40 |
+| [prod-qa-walk cohort-join-request](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43589989247) | `fece3caa` | success | 2026-11-14 13:28 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43587257566) | `fece3caa` | cancelled | 2026-11-14 13:42 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43586933368) | `13701e54` | cancelled | 2026-11-14 12:51 |
+| [prod-qa-walk learning-practice](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43586895148) | `af338ca9` | success | 2026-11-14 12:50 |
+| [prod-qa-walk agency-chain](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43585927600) | `af338ca9` | success | 2026-11-14 12:38 |
+| [prod-qa-walk project-execution](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43584639835) | `af338ca9` | success | 2026-11-14 12:25 |
+| [prod-qa-walk brigade-formation](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43583514262) | `af338ca9` | success | 2026-11-14 12:09 |
+| [prod-qa-walk journal-confirm](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43582594402) | `af338ca9` | success | 2026-11-14 11:55 |
+| [prod-qa-walk company-chain](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43581442246) | `af338ca9` | success | 2026-11-14 11:43 |
+| [prod-qa-walk company-chain](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/43580681384) | `af338ca9` | failure | 2026-11-14 11:28 |
 
 ### Sujungti per laikotarpį (43)
 
@@ -322,9 +350,9 @@ Nepavykę diegimai: nėra.
 - #3207 fix(company-need): say how a sent inquiry reaches an account, and that it is not automatic
 - #3203 fix(worker-intake): say the form saves nothing and the details go into the profile
 
-### Atviri PR (154)
+### Atviri PR (155)
 
-Paruošti jungti 4; konfliktuoja 62; CI nepraėjo 47; laukia peržiūros 41; RED (migracijos, RLS, saugumas) 67.
+Kandidatai jungti 2 (prieš jungimą tikrinama iš naujo); konfliktuoja 62; CI nepraėjo 45; laukia peržiūros 41; RED (migracijos, RLS, saugumas) 67.
 
 PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruošti, tada kiti. Blokatorius — pirmoji iš eilės priežastis (konfliktas, CI, peržiūra).
 
@@ -334,29 +362,29 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 |---|---|---|---|---|---|
 | [#2454](https://github.com/bandymuks1-stack/labourmarketai/pull/2454) | test(e2e): external MCP client conformance walk — DCR, PKCE, consent, token, use, refresh, revoke (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#2707](https://github.com/bandymuks1-stack/labourmarketai/pull/2707) | feat(mcp): OAuth permission scopes behind MCP_SCOPE_ENFORCEMENT (RED) (juodraštis) | RED | failure | none / none | CI nepraėjo: quality |
-| [#2713](https://github.com/bandymuks1-stack/labourmarketai/pull/2713) | feat(marketplace): goods purchase requests on listings, delivery fields [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
+| [#2713](https://github.com/bandymuks1-stack/labourmarketai/pull/2713) | feat(marketplace): goods purchase requests on listings, delivery fields [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#2806](https://github.com/bandymuks1-stack/labourmarketai/pull/2806) | fix(auth): third-party OAuth tokens are accepted only at the connector door (RED) (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#2809](https://github.com/bandymuks1-stack/labourmarketai/pull/2809) | ci(oauth): isolated OAuth test job on a local Supabase stack (B5a, RED) (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#2811](https://github.com/bandymuks1-stack/labourmarketai/pull/2811) | feat(db): OAuth door gate for direct database access (B1b, RED, ships off) (juodraštis) | RED | failure | none / none | CI nepraėjo: migration-safety |
 | [#2812](https://github.com/bandymuks1-stack/labourmarketai/pull/2812) | feat(auth): user-controlled OAuth permissions — choose, review, change, revoke (B3, RED) (juodraštis) | RED | failure | none / none | CI nepraėjo: CodeQL, quality, migration-safety |
-| [#2918](https://github.com/bandymuks1-stack/labourmarketai/pull/2918) | fix(auth): bind bearer tokens to the resource they were issued for (C-3, RED) (juodraštis) | RED | success | unclear / none | RED: laukia R2 saugumo peržiūros dabartinei versijai |
-| [#2923](https://github.com/bandymuks1-stack/labourmarketai/pull/2923) | feat(mcp): curated assistant toolset for OAuth clients (10.4, RED draft, X-2) (juodraštis) | RED | success | stale / none | R peržiūra senai versijai (nauja versija) |
-| [#3220](https://github.com/bandymuks1-stack/labourmarketai/pull/3220) | feat(auth): bearer tokens admitted only for their audience (C-3) [owner gate] (juodraštis) | RED | success | unclear / none | RED: laukia R2 saugumo peržiūros dabartinei versijai |
-| [#3226](https://github.com/bandymuks1-stack/labourmarketai/pull/3226) | feat(chat): new-message e-mail on by default, with opt-out (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#3292](https://github.com/bandymuks1-stack/labourmarketai/pull/3292) | feat(invitations): decline an invitation from your own list (RED draft, not applied) (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#3296](https://github.com/bandymuks1-stack/labourmarketai/pull/3296) | perf(auth): the login form is in the server HTML [needs-human-gate] (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#3320](https://github.com/bandymuks1-stack/labourmarketai/pull/3320) | RED draft: company registration e-mails, request alerts and delivery control (Lane N) (juodraštis) | RED | success | none / no-block | konfliktas su main (reikia rebase) |
-| [#3329](https://github.com/bandymuks1-stack/labourmarketai/pull/3329) | test(guards): register the invitation delivery-attempt log (fixes quality on #3318 / #3321) (juodraštis) | RED | success | unclear / none | konfliktas su main (reikia rebase) |
-| [#1835](https://github.com/bandymuks1-stack/labourmarketai/pull/1835) | test(global-access): production walk + local spec for LT SE DE IE VN US SA GE PH — draft keeps the picked country, onboarding offers every ISO country | GREEN | success | none / none | konfliktas su main (reikia rebase) |
-| [#2924](https://github.com/bandymuks1-stack/labourmarketai/pull/2924) | fix(oauth): consent screen names each permission in plain words + revoke path (juodraštis) | GREEN | failure | unclear / none | CI nepraėjo: quality |
+| [#2918](https://github.com/bandymuks1-stack/labourmarketai/pull/2918) | fix(auth): bind bearer tokens to the resource they were issued for (C-3, RED) (juodraštis) | RED | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
+| [#2923](https://github.com/bandymuks1-stack/labourmarketai/pull/2923) | feat(mcp): curated assistant toolset for OAuth clients (10.4, RED draft, X-2) (juodraštis) | RED | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
+| [#3220](https://github.com/bandymuks1-stack/labourmarketai/pull/3220) | feat(auth): bearer tokens admitted only for their audience (C-3) [owner gate] (juodraštis) | RED | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
+| [#3226](https://github.com/bandymuks1-stack/labourmarketai/pull/3226) | feat(chat): new-message e-mail on by default, with opt-out (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3292](https://github.com/bandymuks1-stack/labourmarketai/pull/3292) | feat(invitations): decline an invitation from your own list (RED draft, not applied) (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3296](https://github.com/bandymuks1-stack/labourmarketai/pull/3296) | perf(auth): the login form is in the server HTML [needs-human-gate] (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3320](https://github.com/bandymuks1-stack/labourmarketai/pull/3320) | RED draft: company registration e-mails, request alerts and delivery control (Lane N) (juodraštis) | RED | success | none / no-block | konfliktas su main (reikia atnaujinti šaką) |
+| [#3329](https://github.com/bandymuks1-stack/labourmarketai/pull/3329) | test(guards): register the invitation delivery-attempt log (fixes quality on #3318 / #3321) (juodraštis) | RED | success | untrusted / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#1835](https://github.com/bandymuks1-stack/labourmarketai/pull/1835) | test(global-access): production walk + local spec for LT SE DE IE VN US SA GE PH — draft keeps the picked country, onboarding offers every ISO country | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2924](https://github.com/bandymuks1-stack/labourmarketai/pull/2924) | fix(oauth): consent screen names each permission in plain words + revoke path (juodraštis) | GREEN | failure | untrusted / none | CI nepraėjo: quality |
 | [#3099](https://github.com/bandymuks1-stack/labourmarketai/pull/3099) | docs(register): critical scenarios against the seven questions | GREEN | success | none / none | laukia peržiūros |
 | [#3167](https://github.com/bandymuks1-stack/labourmarketai/pull/3167) | test(ai): Lithuanian evals for every registered agent | GREEN | success | none / none | laukia peržiūros |
-| [#3218](https://github.com/bandymuks1-stack/labourmarketai/pull/3218) | feat(mobile): offers screen answers job proposals and invitations (juodraštis) | GREEN | success | unclear / none | peržiūros verdiktas neaiškus |
+| [#3218](https://github.com/bandymuks1-stack/labourmarketai/pull/3218) | feat(mobile): offers screen answers job proposals and invitations (juodraštis) | GREEN | success | unclear / none | peržiūros išvada neaiški |
 | [#3238](https://github.com/bandymuks1-stack/labourmarketai/pull/3238) | docs(security): chat alert race, one-line status in the register (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
 | [#3282](https://github.com/bandymuks1-stack/labourmarketai/pull/3282) | docs(register): launch state per function and seven missing team/project rows (juodraštis) | GREEN | success | none / none | laukia peržiūros |
-| [#3285](https://github.com/bandymuks1-stack/labourmarketai/pull/3285) | fix(onboarding): fields use the one guarded auth field class (44px floor) (juodraštis) | GREEN | failure | unclear / none | CI nepraėjo: signup-isolated |
+| [#3285](https://github.com/bandymuks1-stack/labourmarketai/pull/3285) | fix(onboarding): fields use the one guarded auth field class (44px floor) (juodraštis) | GREEN | failure | untrusted / none | CI nepraėjo: signup-isolated |
 | [#3289](https://github.com/bandymuks1-stack/labourmarketai/pull/3289) | feat(teams): team structure views on the shared StructureTree; name search when inviting (Lane H, PR 3) (juodraštis) | GREEN | success | none / none | laukia peržiūros |
-| [#3303](https://github.com/bandymuks1-stack/labourmarketai/pull/3303) | test(qa): sign-up and need-intake production walks, dispatch only (juodraštis) | GREEN | success | blocks / none | konfliktas su main (reikia rebase) |
+| [#3303](https://github.com/bandymuks1-stack/labourmarketai/pull/3303) | test(qa): sign-up and need-intake production walks, dispatch only (juodraštis) | GREEN | success | blocks / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3362](https://github.com/bandymuks1-stack/labourmarketai/pull/3362) | fix(i18n): polite form of address on sign-up, onboarding and public pages (juodraštis) | GREEN | failure | none / none | CI nepraėjo: signup-isolated |
 | [#3372](https://github.com/bandymuks1-stack/labourmarketai/pull/3372) | fix(ops): log CLEAR when every invitation-delivery alert clears at once | GREEN | success | none / none | laukia peržiūros |
 
@@ -364,82 +392,82 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#1816](https://github.com/bandymuks1-stack/labourmarketai/pull/1816) | feat(i18n): COMM-1 RED draft — profiles.communication_locale + the read side (needs-human-gate) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#2471](https://github.com/bandymuks1-stack/labourmarketai/pull/2471) | feat(privacy): external profile links shared only through the worker's per-company grant [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#2474](https://github.com/bandymuks1-stack/labourmarketai/pull/2474) | feat(billing): free plan opens 3 unique worker profiles per organization [RED] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#2685](https://github.com/bandymuks1-stack/labourmarketai/pull/2685) | feat(billing): Stripe Tax evidence + review routing, switched OFF (RED) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
+| [#1816](https://github.com/bandymuks1-stack/labourmarketai/pull/1816) | feat(i18n): COMM-1 RED draft — profiles.communication_locale + the read side (needs-human-gate) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2471](https://github.com/bandymuks1-stack/labourmarketai/pull/2471) | feat(privacy): external profile links shared only through the worker's per-company grant [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2474](https://github.com/bandymuks1-stack/labourmarketai/pull/2474) | feat(billing): free plan opens 3 unique worker profiles per organization [RED] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2685](https://github.com/bandymuks1-stack/labourmarketai/pull/2685) | feat(billing): Stripe Tax evidence + review routing, switched OFF (RED) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#2886](https://github.com/bandymuks1-stack/labourmarketai/pull/2886) | feat(agentai): daily aggregate growth export (registrations by utm, active + completed Living CVs) [RED] (juodraštis) | RED | success | none / none | laukia peržiūros |
-| [#3111](https://github.com/bandymuks1-stack/labourmarketai/pull/3111) | feat(db): one CV statement once, at the database [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
+| [#3111](https://github.com/bandymuks1-stack/labourmarketai/pull/3111) | feat(db): one CV statement once, at the database [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3311](https://github.com/bandymuks1-stack/labourmarketai/pull/3311) | RED draft: a former worker can claim the history an organization holds (Lane H) (juodraštis) | RED | success | none / none | laukia peržiūros |
-| [#3324](https://github.com/bandymuks1-stack/labourmarketai/pull/3324) | feat(db): a moderator who is a party to an experience is refused in the database (2.24) [RED] (juodraštis) | RED | success | blocks / no-block | konfliktas su main (reikia rebase) |
+| [#3324](https://github.com/bandymuks1-stack/labourmarketai/pull/3324) | feat(db): a moderator who is a party to an experience is refused in the database (2.24) [RED] (juodraštis) | RED | success | stale / no-block | konfliktas su main (reikia atnaujinti šaką) |
 | [#1166](https://github.com/bandymuks1-stack/labourmarketai/pull/1166) | feat(design-rd): Living Opportunity World R5 — real 3D world + Göteborg cinematic journey | GREEN | failure | none / none | CI nepraėjo: CodeQL |
-| [#1211](https://github.com/bandymuks1-stack/labourmarketai/pull/1211) | design(visual): art direction spec + pipeline audit — PARKED for owner decision (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia rebase) |
+| [#1211](https://github.com/bandymuks1-stack/labourmarketai/pull/1211) | design(visual): art direction spec + pipeline audit — PARKED for owner decision (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#2377](https://github.com/bandymuks1-stack/labourmarketai/pull/2377) | docs(design): Future Experience 2030 — three concepts for owner choice (juodraštis) | GREEN | success | none / none | laukia peržiūros |
 | [#3164](https://github.com/bandymuks1-stack/labourmarketai/pull/3164) | feat(mcp): read-only profile at /api/mcp/read (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
 | [#3219](https://github.com/bandymuks1-stack/labourmarketai/pull/3219) | feat(mcp): curated ChatGPT tool profile at /api/mcp/chatgpt (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
-| [#3254](https://github.com/bandymuks1-stack/labourmarketai/pull/3254) | feat(chat): work history, plan and search reads for assistants (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia rebase) |
-| [#3276](https://github.com/bandymuks1-stack/labourmarketai/pull/3276) | test(e2e): worker fills profile and CV, employer search, CV isolation | GREEN | success | stale / none | R peržiūra senai versijai (nauja versija) |
+| [#3254](https://github.com/bandymuks1-stack/labourmarketai/pull/3254) | feat(chat): work history, plan and search reads for assistants (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3276](https://github.com/bandymuks1-stack/labourmarketai/pull/3276) | test(e2e): worker fills profile and CV, employer search, CV isolation | GREEN | success | stale / none | R peržiūra ne dabartinei versijai (reikia naujos) |
 | [#3291](https://github.com/bandymuks1-stack/labourmarketai/pull/3291) | feat(journal): the review queue can be narrowed to one project (Lane H, PR 4) (juodraštis) | GREEN | success | none / none | laukia peržiūros |
-| [#3301](https://github.com/bandymuks1-stack/labourmarketai/pull/3301) | fix(experience): a dispute can be decided and a reply published (2.24) (juodraštis) | GREEN | success | stale / unclear | R peržiūra senai versijai (nauja versija) |
+| [#3301](https://github.com/bandymuks1-stack/labourmarketai/pull/3301) | fix(experience): a dispute can be decided and a reply published (2.24) (juodraštis) | GREEN | success | stale / unclear | R peržiūra ne dabartinei versijai (reikia naujos) |
 | [#3339](https://github.com/bandymuks1-stack/labourmarketai/pull/3339) | fix(profile): the experience form asks what the engagement was (juodraštis) | GREEN | success | none / none | laukia peržiūros |
-| [#3343](https://github.com/bandymuks1-stack/labourmarketai/pull/3343) | test(education): student→worker history, learner messaging, access after the link ends (Lane L) (juodraštis) | GREEN | failure | blocks / none | konfliktas su main (reikia rebase) |
-| [#3346](https://github.com/bandymuks1-stack/labourmarketai/pull/3346) | test(prod-walk): the recognition walk reuses one marked record instead of leaving new permanent rows (juodraštis) | GREEN | failure | unclear / none | CI nepraėjo: signup-isolated |
-| [#3350](https://github.com/bandymuks1-stack/labourmarketai/pull/3350) | test(e2e): two example CVs from synthetic accounts, kept as CI screenshots (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia rebase) |
+| [#3343](https://github.com/bandymuks1-stack/labourmarketai/pull/3343) | test(education): student→worker history, learner messaging, access after the link ends (Lane L) (juodraštis) | GREEN | failure | blocks / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3346](https://github.com/bandymuks1-stack/labourmarketai/pull/3346) | test(prod-walk): the recognition walk reuses one marked record instead of leaving new permanent rows (juodraštis) | GREEN | failure | stale / none | CI nepraėjo: signup-isolated |
+| [#3350](https://github.com/bandymuks1-stack/labourmarketai/pull/3350) | test(e2e): two example CVs from synthetic accounts, kept as CI screenshots (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3351](https://github.com/bandymuks1-stack/labourmarketai/pull/3351) | test(e2e): K-7 waits for the settled link set, not a mid-replace read (juodraštis) | GREEN | success | none / none | laukia peržiūros |
 | [#3355](https://github.com/bandymuks1-stack/labourmarketai/pull/3355) | fix(journal): a day total that includes its parts is not added to them (juodraštis) | GREEN | success | none / none | laukia peržiūros |
 | [#3356](https://github.com/bandymuks1-stack/labourmarketai/pull/3356) | fix(cv): an archived organization with no name is not a work-history row (juodraštis) | GREEN | success | none / none | laukia peržiūros |
 | [#3359](https://github.com/bandymuks1-stack/labourmarketai/pull/3359) | fix(company): open a person's own page only on their confirmed link (juodraštis) | GREEN | success | none / none | laukia peržiūros |
-| [#3361](https://github.com/bandymuks1-stack/labourmarketai/pull/3361) | test(experience): one history across two organizations on an isolated stack (juodraštis) | GREEN | pending | stale / none | CI vyksta |
+| [#3361](https://github.com/bandymuks1-stack/labourmarketai/pull/3361) | test(experience): one history across two organizations on an isolated stack (juodraštis) | GREEN | pending | stale / none | CI nebaigtas: quality, Analyze (javascript-typescript), signup-isolated, e2e-smoke |
 | [#3363](https://github.com/bandymuks1-stack/labourmarketai/pull/3363) | feat(organization-cv): the organization's projects and the links between them (#3354, Lane H) (juodraštis) | GREEN | failure | none / none | CI nepraėjo: signup-isolated |
-| [#3375](https://github.com/bandymuks1-stack/labourmarketai/pull/3375) | test(prod-walk): the CV as a signed-in person sees it, read only (juodraštis) | GREEN | pending | none / none | CI vyksta |
+| [#3375](https://github.com/bandymuks1-stack/labourmarketai/pull/3375) | test(prod-walk): the CV as a signed-in person sees it, read only (juodraštis) | GREEN | success | none / none | laukia peržiūros |
 
 #### 3. Įmonės darbai ir projektai (10)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#2418](https://github.com/bandymuks1-stack/labourmarketai/pull/2418) | perf(spine): team-offer badge counts in one read [RED, not applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#2795](https://github.com/bandymuks1-stack/labourmarketai/pull/2795) | feat(db): let an acknowledged booking clash be recorded (RED #5 end) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#2816](https://github.com/bandymuks1-stack/labourmarketai/pull/2816) | fix(training): an organization can assign training to its active employees (11.8, RED) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#3230](https://github.com/bandymuks1-stack/labourmarketai/pull/3230) | feat(ops): operator alerts for waiting company applications (RED draft) (juodraštis) | RED | failure | unclear / unclear | konfliktas su main (reikia rebase) |
-| [#3231](https://github.com/bandymuks1-stack/labourmarketai/pull/3231) | feat(db): team_offer_counterpart_v1, the gated recipient of a team offer (RED) (juodraštis) | RED | success | stale / none | R peržiūra senai versijai (nauja versija) |
-| [#3295](https://github.com/bandymuks1-stack/labourmarketai/pull/3295) | RED draft: a team's company, a role in a team (team-lead label), a role on a project (Lane H design note) (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
+| [#2418](https://github.com/bandymuks1-stack/labourmarketai/pull/2418) | perf(spine): team-offer badge counts in one read [RED, not applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2795](https://github.com/bandymuks1-stack/labourmarketai/pull/2795) | feat(db): let an acknowledged booking clash be recorded (RED #5 end) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2816](https://github.com/bandymuks1-stack/labourmarketai/pull/2816) | fix(training): an organization can assign training to its active employees (11.8, RED) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3230](https://github.com/bandymuks1-stack/labourmarketai/pull/3230) | feat(ops): operator alerts for waiting company applications (RED draft) (juodraštis) | RED | failure | untrusted / unclear | konfliktas su main (reikia atnaujinti šaką) |
+| [#3231](https://github.com/bandymuks1-stack/labourmarketai/pull/3231) | feat(db): team_offer_counterpart_v1, the gated recipient of a team offer (RED) (juodraštis) | RED | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
+| [#3295](https://github.com/bandymuks1-stack/labourmarketai/pull/3295) | RED draft: a team's company, a role in a team (team-lead label), a role on a project (Lane H design note) (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3215](https://github.com/bandymuks1-stack/labourmarketai/pull/3215) | feat(seo): B2B intent versions of for-companies (subcontractors, agencies) (juodraštis) | GREEN | success | none / none | laukia peržiūros |
-| [#3241](https://github.com/bandymuks1-stack/labourmarketai/pull/3241) | fix(projects): a project with a place carries its country (juodraštis) | GREEN | success | unclear / none | konfliktas su main (reikia rebase) |
-| [#3258](https://github.com/bandymuks1-stack/labourmarketai/pull/3258) | fix(commercial): accepted proposal becomes a contract in one step | GREEN | success | blocks / none | konfliktas su main (reikia rebase) |
+| [#3241](https://github.com/bandymuks1-stack/labourmarketai/pull/3241) | fix(projects): a project with a place carries its country (juodraštis) | GREEN | success | untrusted / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3258](https://github.com/bandymuks1-stack/labourmarketai/pull/3258) | fix(commercial): accepted proposal becomes a contract in one step | GREEN | missing | blocks / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3279](https://github.com/bandymuks1-stack/labourmarketai/pull/3279) | refactor(teams): team and team-assignment controls use the shared primitives (Lane H, PR 2) (juodraštis) | GREEN | failure | stale / none | CI nepraėjo: signup-isolated |
 
 #### 4. Poreikiai, darbo skelbimai ir atranka (20)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#2227](https://github.com/bandymuks1-stack/labourmarketai/pull/2227) | feat(ingestion): vacancy scheduler watchdog migration (RED - human gate) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#2235](https://github.com/bandymuks1-stack/labourmarketai/pull/2235) | feat(db): RED draft — service_role-only expiry sweeps (needs-human-gate, NOT applied) (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#2693](https://github.com/bandymuks1-stack/labourmarketai/pull/2693) | feat(db): vacancy retention reads protected ids; pin sentinel search_path [RED] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#2993](https://github.com/bandymuks1-stack/labourmarketai/pull/2993) | feat(jobs): country + city for signed-out visitors [RED, not applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#2996](https://github.com/bandymuks1-stack/labourmarketai/pull/2996) | feat(seo): keyset sitemap paging [RED, not applied] (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#3021](https://github.com/bandymuks1-stack/labourmarketai/pull/3021) | chore(db): drop the exact-duplicate vacancy board index [RED, not applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
+| [#2227](https://github.com/bandymuks1-stack/labourmarketai/pull/2227) | feat(ingestion): vacancy scheduler watchdog migration (RED - human gate) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2235](https://github.com/bandymuks1-stack/labourmarketai/pull/2235) | feat(db): RED draft — service_role-only expiry sweeps (needs-human-gate, NOT applied) (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2693](https://github.com/bandymuks1-stack/labourmarketai/pull/2693) | feat(db): vacancy retention reads protected ids; pin sentinel search_path [RED] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2993](https://github.com/bandymuks1-stack/labourmarketai/pull/2993) | feat(jobs): country + city for signed-out visitors [RED, not applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2996](https://github.com/bandymuks1-stack/labourmarketai/pull/2996) | feat(seo): keyset sitemap paging [RED, not applied] (juodraštis) | RED | missing | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3021](https://github.com/bandymuks1-stack/labourmarketai/pull/3021) | chore(db): drop the exact-duplicate vacancy board index [RED, not applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3173](https://github.com/bandymuks1-stack/labourmarketai/pull/3173) | feat(jobs): country filter on the one public search [needs-human-gate] (juodraštis) | RED | failure | none / none | CI nepraėjo: quality |
 | [#3208](https://github.com/bandymuks1-stack/labourmarketai/pull/3208) | fix(company-need): an answer the company did not give is stored as unknown (RED) (juodraštis) | RED | failure | none / none | CI nepraėjo: quality |
-| [#3214](https://github.com/bandymuks1-stack/labourmarketai/pull/3214) | feat(company): signed-in company search, unconfirmed companies marked (RED draft, D2) (juodraštis) | RED | success | unclear / no-block | konfliktas su main (reikia rebase) |
-| [#3221](https://github.com/bandymuks1-stack/labourmarketai/pull/3221) | feat(mcp): public job search without sign-in on the ChatGPT door [owner gate] (juodraštis) | RED | success | unclear / none | RED: laukia R2 saugumo peržiūros dabartinei versijai |
-| [#3256](https://github.com/bandymuks1-stack/labourmarketai/pull/3256) | feat(demand): unconfirmed companies' needs public only by explicit consent (RED, principle C) (juodraštis) | RED | success | none / unclear | konfliktas su main (reikia rebase) |
-| [#3349](https://github.com/bandymuks1-stack/labourmarketai/pull/3349) | fix(booking): a closed need refuses a new proposal or a first accept (juodraštis) | RED | success | none / no-block | konfliktas su main (reikia rebase) |
-| [#3353](https://github.com/bandymuks1-stack/labourmarketai/pull/3353) | RED draft: an agency's placement term, accepted at the hire decision; opt-in to a suggested agency (Lane H) (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#2642](https://github.com/bandymuks1-stack/labourmarketai/pull/2642) | fix(jobs): the saved-jobs view never says nothing saved when it is not (owner waiver needed) | GREEN | failure | none / none | konfliktas su main (reikia rebase) |
+| [#3214](https://github.com/bandymuks1-stack/labourmarketai/pull/3214) | feat(company): signed-in company search, unconfirmed companies marked (RED draft, D2) (juodraštis) | RED | success | untrusted / no-block | konfliktas su main (reikia atnaujinti šaką) |
+| [#3221](https://github.com/bandymuks1-stack/labourmarketai/pull/3221) | feat(mcp): public job search without sign-in on the ChatGPT door [owner gate] (juodraštis) | RED | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
+| [#3256](https://github.com/bandymuks1-stack/labourmarketai/pull/3256) | feat(demand): unconfirmed companies' needs public only by explicit consent (RED, principle C) (juodraštis) | RED | success | none / unclear | konfliktas su main (reikia atnaujinti šaką) |
+| [#3349](https://github.com/bandymuks1-stack/labourmarketai/pull/3349) | fix(booking): a closed need refuses a new proposal or a first accept (juodraštis) | RED | success | none / no-block | konfliktas su main (reikia atnaujinti šaką) |
+| [#3353](https://github.com/bandymuks1-stack/labourmarketai/pull/3353) | RED draft: an agency's placement term, accepted at the hire decision; opt-in to a suggested agency (Lane H) (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2642](https://github.com/bandymuks1-stack/labourmarketai/pull/2642) | fix(jobs): the saved-jobs view never says nothing saved when it is not (owner waiver needed) | GREEN | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3181](https://github.com/bandymuks1-stack/labourmarketai/pull/3181) | fix(seo): each job page gets its own meta description (juodraštis) | GREEN | failure | none / none | CI nepraėjo: quality |
 | [#3202](https://github.com/bandymuks1-stack/labourmarketai/pull/3202) | feat(company-need): an inquiry records which public button opened it | GREEN | success | none / none | laukia peržiūros |
-| [#3222](https://github.com/bandymuks1-stack/labourmarketai/pull/3222) | feat(mcp): job-list widget for the ChatGPT door (Apps SDK) (juodraštis) | GREEN | success | unclear / none | peržiūros verdiktas neaiškus |
+| [#3222](https://github.com/bandymuks1-stack/labourmarketai/pull/3222) | feat(mcp): job-list widget for the ChatGPT door (Apps SDK) (juodraštis) | GREEN | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
 | [#3225](https://github.com/bandymuks1-stack/labourmarketai/pull/3225) | fix(demand): the company-need wizard asks for the work country | GREEN | failure | stale / none | CI nepraėjo: signup-isolated |
-| [#3237](https://github.com/bandymuks1-stack/labourmarketai/pull/3237) | fix(company): setup copy says when workers see a company's needs (juodraštis) | GREEN | success | stale / none | R peržiūra senai versijai (nauja versija) |
-| [#3327](https://github.com/bandymuks1-stack/labourmarketai/pull/3327) | fix(jobs): a typed job word with no catalogue profession is not a zero (juodraštis) | GREEN | failure | unclear / none | CI nepraėjo: quality |
+| [#3237](https://github.com/bandymuks1-stack/labourmarketai/pull/3237) | fix(company): setup copy says when workers see a company's needs (juodraštis) | GREEN | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
+| [#3327](https://github.com/bandymuks1-stack/labourmarketai/pull/3327) | fix(jobs): a typed job word with no catalogue profession is not a zero (juodraštis) | GREEN | failure | untrusted / none | CI nepraėjo: quality |
 
 #### 5. Pokalbiai ir pranešimai (5)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#2440](https://github.com/bandymuks1-stack/labourmarketai/pull/2440) | fix(db): null-safe owner check in append_assistant_message [RED, NOT applied] (juodraštis) | RED | failure | none / none | CI nepraėjo: quality |
+| [#2440](https://github.com/bandymuks1-stack/labourmarketai/pull/2440) | fix(db): null-safe owner check in append_assistant_message [RED, NOT applied] (juodraštis) | RED | failure | none / none | CI nepraėjo: quality, Vercel |
 | [#3168](https://github.com/bandymuks1-stack/labourmarketai/pull/3168) | fix(communication): refuse unfaithful message translations | GREEN | success | none / none | laukia peržiūros |
-| [#3227](https://github.com/bandymuks1-stack/labourmarketai/pull/3227) | fix(notifications): B2B offers tell the other side (juodraštis) | GREEN | failure | stale / none | CI nepraėjo: signup-isolated |
+| [#3227](https://github.com/bandymuks1-stack/labourmarketai/pull/3227) | fix(notifications): B2B offers tell the other side (juodraštis) | GREEN | failure | untrusted / none | CI nepraėjo: signup-isolated |
 | [#3239](https://github.com/bandymuks1-stack/labourmarketai/pull/3239) | test(chat): A-B-C chat-revocation production walk and attachment proof (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
 | [#3249](https://github.com/bandymuks1-stack/labourmarketai/pull/3249) | fix(chat): attachment links work for 60 s instead of 300 s (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
 
@@ -447,52 +475,52 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#1045](https://github.com/bandymuks1-stack/labourmarketai/pull/1045) | fix(admin): repair the founder admin-grant path — narrow service_role column grants (owner-gated, UNAPPLIED) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
+| [#1045](https://github.com/bandymuks1-stack/labourmarketai/pull/1045) | fix(admin): repair the founder admin-grant path — narrow service_role column grants (owner-gated, UNAPPLIED) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#2746](https://github.com/bandymuks1-stack/labourmarketai/pull/2746) | feat(db): listing closed outcome + discarded draft never reopens [RED, NOT applied] (juodraštis) | RED | success | none / none | laukia peržiūros |
-| [#2946](https://github.com/bandymuks1-stack/labourmarketai/pull/2946) | feat(db): RED-1 link an accepted service request to a proposal [RED] (juodraštis) | RED | success | unclear / no-block | konfliktas su main (reikia rebase) |
+| [#2946](https://github.com/bandymuks1-stack/labourmarketai/pull/2946) | feat(db): RED-1 link an accepted service request to a proposal [RED] (juodraštis) | RED | success | untrusted / no-block | konfliktas su main (reikia atnaujinti šaką) |
 
 #### 7. Planai ir mokėjimai (19)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#2165](https://github.com/bandymuks1-stack/labourmarketai/pull/2165) | feat(worker-activation): Nonstop inbound worker -> signup -> existing consent + supply-declaration screen (REVIEW ONLY; migration unapplied) (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#2203](https://github.com/bandymuks1-stack/labourmarketai/pull/2203) | feat(finance): project-to-invoice lifecycle v1 [RED, needs-human-gate, NOT applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#2441](https://github.com/bandymuks1-stack/labourmarketai/pull/2441) | feat(billing): the second owner act — live checkouts need live_payments_enabled [RED: billing, no migration] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#2647](https://github.com/bandymuks1-stack/labourmarketai/pull/2647) | feat(lmc): Stripe TEST top-ups credit once per payment [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#2682](https://github.com/bandymuks1-stack/labourmarketai/pull/2682) | fix(billing): the pilot pass shows its plan name, fixed term and amount (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#2701](https://github.com/bandymuks1-stack/labourmarketai/pull/2701) | fix(billing): drop unproven VAT promise; record Stripe Tax decision (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
+| [#2165](https://github.com/bandymuks1-stack/labourmarketai/pull/2165) | feat(worker-activation): Nonstop inbound worker -> signup -> existing consent + supply-declaration screen (REVIEW ONLY; migration unapplied) (juodraštis) | RED | missing | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2203](https://github.com/bandymuks1-stack/labourmarketai/pull/2203) | feat(finance): project-to-invoice lifecycle v1 [RED, needs-human-gate, NOT applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2441](https://github.com/bandymuks1-stack/labourmarketai/pull/2441) | feat(billing): the second owner act — live checkouts need live_payments_enabled [RED: billing, no migration] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2647](https://github.com/bandymuks1-stack/labourmarketai/pull/2647) | feat(lmc): Stripe TEST top-ups credit once per payment [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2682](https://github.com/bandymuks1-stack/labourmarketai/pull/2682) | fix(billing): the pilot pass shows its plan name, fixed term and amount (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2701](https://github.com/bandymuks1-stack/labourmarketai/pull/2701) | fix(billing): drop unproven VAT promise; record Stripe Tax decision (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#2704](https://github.com/bandymuks1-stack/labourmarketai/pull/2704) | feat(billing): organization invoices inside the account billing section (RED) (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#2752](https://github.com/bandymuks1-stack/labourmarketai/pull/2752) | docs(legal): name the free-tier AI processors before activation [RED] (juodraštis) | RED | success | none / none | laukia peržiūros |
-| [#3019](https://github.com/bandymuks1-stack/labourmarketai/pull/3019) | perf(db): row-independent policy calls run once per statement [RED] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
+| [#3019](https://github.com/bandymuks1-stack/labourmarketai/pull/3019) | perf(db): row-independent policy calls run once per statement [RED] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3047](https://github.com/bandymuks1-stack/labourmarketai/pull/3047) | fix(billing): checkout route refuses a recurring order during the pilot pass [RED] (juodraštis) | RED | success | none / none | laukia peržiūros |
-| [#3250](https://github.com/bandymuks1-stack/labourmarketai/pull/3250) | fix(pricing): public pages show only what works while payment is closed (juodraštis) | RED | success | none / no-block | konfliktas su main (reikia rebase) |
-| [#3252](https://github.com/bandymuks1-stack/labourmarketai/pull/3252) | fix(billing): paused grants no grace; prove the test-mode lifecycle (juodraštis) | RED | success | stale / no-block | R peržiūra senai versijai (nauja versija) |
+| [#3250](https://github.com/bandymuks1-stack/labourmarketai/pull/3250) | fix(pricing): public pages show only what works while payment is closed (juodraštis) | RED | success | none / no-block | konfliktas su main (reikia atnaujinti šaką) |
+| [#3252](https://github.com/bandymuks1-stack/labourmarketai/pull/3252) | fix(billing): paused grants no grace; prove the test-mode lifecycle (juodraštis) | RED | success | untrusted / no-block | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
 | [#3305](https://github.com/bandymuks1-stack/labourmarketai/pull/3305) | test(billing): pin the FREE-limit transition rules (juodraštis) | RED | success | none / none | laukia peržiūros |
-| [#2403](https://github.com/bandymuks1-stack/labourmarketai/pull/2403) | fix(jobs): a title word no longer overrules a publisher's non-catalogue occupation (G-16 waiver needed) (juodraštis) | GREEN | failure | none / none | konfliktas su main (reikia rebase) |
+| [#2403](https://github.com/bandymuks1-stack/labourmarketai/pull/2403) | fix(jobs): a title word no longer overrules a publisher's non-catalogue occupation (G-16 waiver needed) (juodraštis) | GREEN | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#2842](https://github.com/bandymuks1-stack/labourmarketai/pull/2842) | docs(legal): paid-services terms draft v2 + EN + checkout checklist (for legal review, not published) (juodraštis) | GREEN | success | none / none | laukia peržiūros |
 | [#3206](https://github.com/bandymuks1-stack/labourmarketai/pull/3206) | fix(pricing): no payment promise while online payment is closed | GREEN | success | none / none | laukia peržiūros |
 | [#3236](https://github.com/bandymuks1-stack/labourmarketai/pull/3236) | docs(presentations): LT decks, product audit and P0 plan (juodraštis) | GREEN | success | none / none | laukia peržiūros |
-| [#3261](https://github.com/bandymuks1-stack/labourmarketai/pull/3261) | feat(i18n): activate Swedish (sv) as a routed locale across the whole journey (juodraštis) | GREEN | success | no-block / none | konfliktas su main (reikia rebase) |
-| [#3272](https://github.com/bandymuks1-stack/labourmarketai/pull/3272) | docs(design): one UX/UI discrepancy list and rollout plan (tracking) (juodraštis) | GREEN | success | unclear / none | peržiūros verdiktas neaiškus |
+| [#3261](https://github.com/bandymuks1-stack/labourmarketai/pull/3261) | feat(i18n): activate Swedish (sv) as a routed locale across the whole journey (juodraštis) | GREEN | success | no-block / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3272](https://github.com/bandymuks1-stack/labourmarketai/pull/3272) | docs(design): one UX/UI discrepancy list and rollout plan (tracking) (juodraštis) | GREEN | success | stale / none | R peržiūra ne dabartinei versijai (reikia naujos) |
 
 #### 8. Kalbos ir rinkos (8)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#2463](https://github.com/bandymuks1-stack/labourmarketai/pull/2463) | feat(db): ESCO cold locales archived on the VPS, hot set = UI locales [RED, not applied] (decision 0026) (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#3232](https://github.com/bandymuks1-stack/labourmarketai/pull/3232) | feat(privacy): Swedish consent texts with the RED hash re-pin (draft, not applied) (juodraštis) | RED | success | stale / none | konfliktas su main (reikia rebase) |
-| [#3248](https://github.com/bandymuks1-stack/labourmarketai/pull/3248) | feat(db): save_customer_request_v2, a buyer request records kind and language (RED) (juodraštis) | RED | success | stale / none | konfliktas su main (reikia rebase) |
-| [#3345](https://github.com/bandymuks1-stack/labourmarketai/pull/3345) | test(prod-walk): a production walk can run on a 390 px touch phone (juodraštis) | GREEN | success | no-block / none | paruoštas (juodraštis, žymėti ir jungti) |
-| [#3217](https://github.com/bandymuks1-stack/labourmarketai/pull/3217) | ci(mobile): owner-started EAS release build that skips without secrets (juodraštis) | GREEN | success | unclear / none | peržiūros verdiktas neaiškus |
-| [#3332](https://github.com/bandymuks1-stack/labourmarketai/pull/3332) | fix(app): form fields are full touch targets on phones; ranked defect list (juodraštis) | GREEN | success | stale / none | R peržiūra senai versijai (nauja versija) |
-| [#3352](https://github.com/bandymuks1-stack/labourmarketai/pull/3352) | test(e2e): the production locale walk checks the V3 landing's first screen (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia rebase) |
-| [#3366](https://github.com/bandymuks1-stack/labourmarketai/pull/3366) | test(e2e): signed-in phone journeys at 375 and 390 px on the isolated stack (juodraštis) | GREEN | failure | unclear / none | CI nepraėjo: signup-isolated |
+| [#2463](https://github.com/bandymuks1-stack/labourmarketai/pull/2463) | feat(db): ESCO cold locales archived on the VPS, hot set = UI locales [RED, not applied] (decision 0026) (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3232](https://github.com/bandymuks1-stack/labourmarketai/pull/3232) | feat(privacy): Swedish consent texts with the RED hash re-pin (draft, not applied) (juodraštis) | RED | success | untrusted / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3248](https://github.com/bandymuks1-stack/labourmarketai/pull/3248) | feat(db): save_customer_request_v2, a buyer request records kind and language (RED) (juodraštis) | RED | success | untrusted / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3345](https://github.com/bandymuks1-stack/labourmarketai/pull/3345) | test(prod-walk): a production walk can run on a 390 px touch phone (juodraštis) | GREEN | success | no-block / none | kandidatas jungti (juodraštis; prieš jungimą tikrinama iš naujo) |
+| [#3217](https://github.com/bandymuks1-stack/labourmarketai/pull/3217) | ci(mobile): owner-started EAS release build that skips without secrets (juodraštis) | GREEN | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
+| [#3332](https://github.com/bandymuks1-stack/labourmarketai/pull/3332) | fix(app): form fields are full touch targets on phones; ranked defect list (juodraštis) | GREEN | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
+| [#3352](https://github.com/bandymuks1-stack/labourmarketai/pull/3352) | test(e2e): the production locale walk checks the V3 landing's first screen (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3366](https://github.com/bandymuks1-stack/labourmarketai/pull/3366) | test(e2e): signed-in phone journeys at 375 and 390 px on the isolated stack (juodraštis) | GREEN | missing | untrusted / none | trūksta privalomų patikrų: quality, migration-safety |
 
 #### 9. Administravimas, privatumas ir saugumas (1)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#2747](https://github.com/bandymuks1-stack/labourmarketai/pull/2747) | feat(privacy): free workers discoverable by default — one ledger, notice first, one-tap objection [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
+| [#2747](https://github.com/bandymuks1-stack/labourmarketai/pull/2747) | feat(privacy): free workers discoverable by default — one ledger, notice first, one-tap objection [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 
 #### 10. Pagalbininkai ir dirbtinis intelektas (3)
 
@@ -500,14 +528,14 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 |---|---|---|---|---|---|
 | [#2970](https://github.com/bandymuks1-stack/labourmarketai/pull/2970) | fix(ops): ai-failing counts technical failures over attempted runs | GREEN | success | blocks / none | R peržiūra: blokuoja |
 | [#3166](https://github.com/bandymuks1-stack/labourmarketai/pull/3166) | feat(ai): monthly euro cap on AI vendor runs | GREEN | success | none / none | laukia peržiūros |
-| [#3243](https://github.com/bandymuks1-stack/labourmarketai/pull/3243) | fix(mcp): messaging refusals reach the model in English, by code | GREEN | success | no-block / none | konfliktas su main (reikia rebase) |
+| [#3243](https://github.com/bandymuks1-stack/labourmarketai/pull/3243) | fix(mcp): messaging refusals reach the model in English, by code | GREEN | success | no-block / none | konfliktas su main (reikia atnaujinti šaką) |
 
 #### 11. Mokymasis (5)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#3302](https://github.com/bandymuks1-stack/labourmarketai/pull/3302) | fix(pricing): plain wording on the pricing page, no internal terms (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#3216](https://github.com/bandymuks1-stack/labourmarketai/pull/3216) | docs(launch): shortest path to TestFlight and Play internal testing | GREEN | success | no-block / none | paruoštas jungti |
+| [#3302](https://github.com/bandymuks1-stack/labourmarketai/pull/3302) | fix(pricing): plain wording on the pricing page, no internal terms (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3216](https://github.com/bandymuks1-stack/labourmarketai/pull/3216) | docs(launch): shortest path to TestFlight and Play internal testing | GREEN | success | no-block / none | kandidatas jungti (prieš jungimą tikrinama iš naujo) |
 | [#3307](https://github.com/bandymuks1-stack/labourmarketai/pull/3307) | feat(marketing): audience pages for education and service providers (juodraštis) | GREEN | success | none / none | laukia peržiūros |
 | [#3347](https://github.com/bandymuks1-stack/labourmarketai/pull/3347) | docs(education): design for the public programme catalogue and institution↔employer cooperation (Lane L) (juodraštis) | GREEN | success | none / none | laukia peržiūros |
 | [#3368](https://github.com/bandymuks1-stack/labourmarketai/pull/3368) | test(education): L-12 opens the add-programme form before checking it (juodraštis) | GREEN | success | none / none | laukia peržiūros |
@@ -516,36 +544,37 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#3297](https://github.com/bandymuks1-stack/labourmarketai/pull/3297) | docs(launch): launch audit of 2026-11-12, three reports (juodraštis) | GREEN | success | none / stale | paruoštas (juodraštis, žymėti ir jungti) |
 | [#3008](https://github.com/bandymuks1-stack/labourmarketai/pull/3008) | fix(reports): documents tile says unavailable, not a false 0 | GREEN | success | blocks / none | R peržiūra: blokuoja |
-| [#3374](https://github.com/bandymuks1-stack/labourmarketai/pull/3374) | docs(program): 12-hour full status report generator and first report (juodraštis) | GREEN | failure | stale / none | CI nepraėjo: CodeQL |
+| [#3297](https://github.com/bandymuks1-stack/labourmarketai/pull/3297) | docs(launch): launch audit of 2026-11-12, three reports (juodraštis) | GREEN | success | none / stale | laukia peržiūros |
+| [#3374](https://github.com/bandymuks1-stack/labourmarketai/pull/3374) | docs(program): 12-hour full status report generator and first report (juodraštis) | GREEN | pending | stale / none | CI nebaigtas: quality |
 
-#### 13. Infrastruktūra ir veikimas (22)
+#### 13. Infrastruktūra ir veikimas (23)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
-| [#1577](https://github.com/bandymuks1-stack/labourmarketai/pull/1577) | feat(catalogue): office & professional professions — seed, mirror, lexicon (W6 G-D2, RED draft) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#2362](https://github.com/bandymuks1-stack/labourmarketai/pull/2362) | feat(db): historical date correction v1 — 165 dates [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia rebase) |
-| [#2420](https://github.com/bandymuks1-stack/labourmarketai/pull/2420) | perf(db): supply-count cron skips the full scan when nothing changed [RED, not applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia rebase) |
-| [#3330](https://github.com/bandymuks1-stack/labourmarketai/pull/3330) | docs(governance): owner delegation through one coordinator (decision 0031) (juodraštis) | GREEN | success | none / unclear | paruoštas (juodraštis, žymėti ir jungti) |
+| [#1577](https://github.com/bandymuks1-stack/labourmarketai/pull/1577) | feat(catalogue): office & professional professions — seed, mirror, lexicon (W6 G-D2, RED draft) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2362](https://github.com/bandymuks1-stack/labourmarketai/pull/2362) | feat(db): historical date correction v1 — 165 dates [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#2420](https://github.com/bandymuks1-stack/labourmarketai/pull/2420) | perf(db): supply-count cron skips the full scan when nothing changed [RED, not applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#1617](https://github.com/bandymuks1-stack/labourmarketai/pull/1617) | chore(ci): bump github/codeql-action/analyze from 4.37.3 to 4.37.9 | GREEN | failure | none / none | CI nepraėjo: Analyze (javascript-typescript) |
 | [#1619](https://github.com/bandymuks1-stack/labourmarketai/pull/1619) | chore(ci): bump github/codeql-action/init from 4.37.3 to 4.37.9 | GREEN | failure | none / none | CI nepraėjo: Analyze (javascript-typescript) |
 | [#1620](https://github.com/bandymuks1-stack/labourmarketai/pull/1620) | chore(ci): bump actions/upload-artifact from 4 to 7 | GREEN | success | none / none | laukia peržiūros |
 | [#1622](https://github.com/bandymuks1-stack/labourmarketai/pull/1622) | chore(deps-dev): Bump the dev-tooling group across 1 directory with 2 updates | GREEN | success | none / none | laukia peržiūros |
-| [#1623](https://github.com/bandymuks1-stack/labourmarketai/pull/1623) | chore(deps): Bump expo from 57.0.18 to 57.0.26 | GREEN | success | none / none | konfliktas su main (reikia rebase) |
+| [#1623](https://github.com/bandymuks1-stack/labourmarketai/pull/1623) | chore(deps): Bump expo from 57.0.18 to 57.0.26 | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#1624](https://github.com/bandymuks1-stack/labourmarketai/pull/1624) | chore(deps): bump @supabase/supabase-js from 2.106.0 to 2.115.0 | GREEN | success | none / none | laukia peržiūros |
-| [#1625](https://github.com/bandymuks1-stack/labourmarketai/pull/1625) | chore(deps): Bump @expo/metro-runtime from 57.0.14 to 57.0.16 | GREEN | success | none / none | konfliktas su main (reikia rebase) |
+| [#1625](https://github.com/bandymuks1-stack/labourmarketai/pull/1625) | chore(deps): Bump @expo/metro-runtime from 57.0.14 to 57.0.16 | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#2198](https://github.com/bandymuks1-stack/labourmarketai/pull/2198) | feat(voice): transcription production deploy bundle + runbook (COM-6) | GREEN | success | none / none | laukia peržiūros |
 | [#2356](https://github.com/bandymuks1-stack/labourmarketai/pull/2356) | chore(deps-dev): Bump eslint-config-next from 15.5.24 to 15.5.29 in the next-framework group across 1 directory | GREEN | failure | none / none | CI nepraėjo: quality |
-| [#2370](https://github.com/bandymuks1-stack/labourmarketai/pull/2370) | feat(identity): one identity family — re-port of the frozen design class (D2) | GREEN | failure | none / none | konfliktas su main (reikia rebase) |
-| [#3178](https://github.com/bandymuks1-stack/labourmarketai/pull/3178) | feat(seo): RU and TR worker guides for ten European countries (juodraštis) | GREEN | failure | none / none | konfliktas su main (reikia rebase) |
-| [#3263](https://github.com/bandymuks1-stack/labourmarketai/pull/3263) | test(e2e): public CTA crawl and a citable release check (juodraštis) | GREEN | failure | unclear / none | CI nepraėjo: crawl (nl), crawl (en), crawl (ru), crawl (de), crawl (pl), crawl (lt), lighthouse (en) |
-| [#3270](https://github.com/bandymuks1-stack/labourmarketai/pull/3270) | feat(nav): signed-in home on the shared goal navigator (Lane A2 on Lane A's components) (juodraštis) | GREEN | success | unclear / none | peržiūros verdiktas neaiškus |
-| [#3271](https://github.com/bandymuks1-stack/labourmarketai/pull/3271) | ci(smoke): a short check of the main journeys after every production deploy (juodraštis) | GREEN | failure | unclear / no-block | CI nepraėjo: crawl (ru), crawl (lt), crawl (en), crawl (pl), crawl (de), crawl (nl), lighthouse (en) |
-| [#3273](https://github.com/bandymuks1-stack/labourmarketai/pull/3273) | feat(ui): shared primitives for every module + DESIGN.md how-to (juodraštis) | GREEN | success | unclear / none | peržiūros verdiktas neaiškus |
+| [#2370](https://github.com/bandymuks1-stack/labourmarketai/pull/2370) | feat(identity): one identity family — re-port of the frozen design class (D2) | GREEN | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3178](https://github.com/bandymuks1-stack/labourmarketai/pull/3178) | feat(seo): RU and TR worker guides for ten European countries (juodraštis) | GREEN | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3263](https://github.com/bandymuks1-stack/labourmarketai/pull/3263) | test(e2e): public CTA crawl and a citable release check (juodraštis) | GREEN | failure | stale / none | CI nepraėjo: crawl (nl), crawl (en), crawl (ru), crawl (de), crawl (pl), crawl (lt), lighthouse (en) |
+| [#3270](https://github.com/bandymuks1-stack/labourmarketai/pull/3270) | feat(nav): signed-in home on the shared goal navigator (Lane A2 on Lane A's components) (juodraštis) | GREEN | success | stale / none | R peržiūra ne dabartinei versijai (reikia naujos) |
+| [#3271](https://github.com/bandymuks1-stack/labourmarketai/pull/3271) | ci(smoke): a short check of the main journeys after every production deploy (juodraštis) | GREEN | failure | stale / no-block | CI nepraėjo: crawl (ru), crawl (lt), crawl (en), crawl (pl), crawl (de), crawl (nl), lighthouse (en) |
+| [#3273](https://github.com/bandymuks1-stack/labourmarketai/pull/3273) | feat(ui): shared primitives for every module + DESIGN.md how-to (juodraštis) | GREEN | success | unclear / none | peržiūros išvada neaiški |
+| [#3330](https://github.com/bandymuks1-stack/labourmarketai/pull/3330) | docs(governance): owner delegation through one coordinator (decision 0031) (juodraštis) | GREEN | success | none / unclear | laukia peržiūros |
 | [#3348](https://github.com/bandymuks1-stack/labourmarketai/pull/3348) | test(e2e): the production agency walk opens readiness and client records (juodraštis) | GREEN | success | none / none | laukia peržiūros |
 | [#3360](https://github.com/bandymuks1-stack/labourmarketai/pull/3360) | fix(opportunities): one opportunity-type filter group, not two (juodraštis) | GREEN | success | none / none | laukia peržiūros |
 | [#3364](https://github.com/bandymuks1-stack/labourmarketai/pull/3364) | fix(a11y): 44px tap targets on the public and sign-in pages (juodraštis) | GREEN | failure | none / none | CI nepraėjo: signup-isolated |
+| [#3376](https://github.com/bandymuks1-stack/labourmarketai/pull/3376) | fix(opportunities): the opportunity-type filter is listed once on the board (juodraštis) | GREEN | pending | untrusted / none | CI nebaigtas: quality |
 
 ## A5. Realus produkto veikimas pagal sritis
 

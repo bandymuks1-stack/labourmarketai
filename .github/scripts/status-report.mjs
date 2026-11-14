@@ -21,6 +21,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { completeness, isRedPr, prBlocker } from "./status-report-lib.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const REGISTER = join(ROOT, "docs", "program", "FUNCTION_REGISTER.md");
 const OUT_DEFAULT = join(ROOT, "docs", "program", "STATUS_REPORT.md");
@@ -173,6 +175,16 @@ const LANE = {
 const groupOf = (id) => id.split(".")[0];
 
 const data = JSON.parse(readFileSync(DATA, "utf8"));
+
+// The named register is the basis of the report; GitHub and production data are supporting evidence.
+// A register that does not parse into its known shape makes the report PARTIAL, never silently smaller.
+const registerProblems = [];
+if (rows.length < 250) registerProblems.push(`function rows parsed: ${rows.length} (expected about 290)`);
+if (mapRows.size < 250) registerProblems.push(`Lithuanian function map rows parsed: ${mapRows.size}`);
+if (!journeys.size) registerProblems.push("journeys table not found");
+if (data.schema !== 2) registerProblems.push(`fetch data schema ${data.schema ?? "missing"} (expected 2)`);
+const fetchErrors = Array.isArray(data.errors) ? data.errors : [{ path: "fetch", status: "missing", attempts: 0, message: "no error log in the fetch data" }];
+const REPORT_STATE = completeness({ errors: fetchErrors, registerProblems });
 const openNums = new Set(data.prs.map((p) => p.number));
 
 function fnFields(r) {
@@ -272,23 +284,7 @@ function prArea(p) {
   for (const [g, re] of PR_AREAS) if (re.test(hay)) return g;
   return "13";
 }
-const isRed = (p) => p.labels.includes("needs-human-gate") || /migration|rls|\bRED\b/i.test(p.title);
-function prBlocker(p) {
-  const v = p.verdicts;
-  if (p.mergeableState === "dirty") return "konfliktas su main (reikia rebase)";
-  if (p.ci.state === "failure") return `CI nepraėjo: ${p.ci.failed.join(", ")}`;
-  if (p.ci.state === "pending") return "CI vyksta";
-  if (v.review === "blocks") return "R peržiūra: blokuoja";
-  if (isRed(p) && v.security === "blocks") return "R2 saugumo peržiūra: blokuoja";
-  if (v.review === "stale") return "R peržiūra senai versijai (nauja versija)";
-  if (v.review === "none" && v.security === "none") return "laukia peržiūros";
-  if (isRed(p) && v.security !== "no-block") return "RED: laukia R2 saugumo peržiūros dabartinei versijai";
-  if (v.review === "unclear") return "peržiūros verdiktas neaiškus";
-  if (p.mergeableState === "behind") return "atsilieka nuo main (atnaujinti)";
-  if (p.mergeableState === "unknown") return "GitHub dar neapskaičiavo sujungiamumo";
-  return p.draft ? "paruoštas (juodraštis, žymėti ir jungti)" : "paruoštas jungti";
-}
-const prs = data.prs.map((p) => ({ ...p, area: prArea(p), red: isRed(p), blocker: prBlocker(p) }));
+const prs = data.prs.map((p) => ({ ...p, area: prArea(p), red: isRedPr(p), blocker: prBlocker(p) }));
 
 // ---------------------------------------------------------------- narrative
 const narrative = {};
@@ -368,6 +364,19 @@ P(
   "",
   `Sugeneruota ${vilnius(data.fetchedAt)} (Lietuvos laiku). Laikotarpis: nuo ${vilnius(data.sinceIso)}.`,
   "",
+  `**Ataskaitos būsena: ${REPORT_STATE}**${REPORT_STATE === "COMPLETE" ? " — visos užklausos pavyko, registras perskaitytas visas." : " — dalis duomenų nesurinkta; žr. „Duomenų surinkimo klaidos“. Nepilnų PR būsena rodoma kaip nežinoma, ne kaip praėjusi."}`,
+  "",
+  ...(REPORT_STATE === "COMPLETE"
+    ? []
+    : [
+        "### Duomenų surinkimo klaidos",
+        "",
+        ...registerProblems.map((x) => `- registras: ${esc(x)}`),
+        ...fetchErrors.map((e) => `- ${esc(e.status)} po ${e.attempts} bandymų: \`${esc(e.path)}\` — ${esc(e.message)}`),
+        "",
+      ]),
+  `Privalomos CI patikros: ${(data.requiredChecks?.names ?? []).join(", ") || "nežinoma"} (šaltinis: ${esc(data.requiredChecks?.source ?? "nežinomas")}). Peržiūra galioja tik su pilnu dabartinės versijos SHA, patikimo autoriaus ir ne senesnė už tą versiją.`,
+  "",
   "Kanoninis dokumentas (savininko nurodymas 2026-11-14, P0). Kiekviena ataskaita perrašo šį failą; ankstesnės ataskaitos — šio failo git istorijoje. " +
     "Funkcijų būsenos imamos tik iš [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md) eilučių: funkcija laikoma veikiančia tik tada, kai jos eilutė turi produkcijos įrodymą (`LIVE_VERIFIED`). " +
     "Kodas ar žalias CI veikimo neįrodo. Generatorius: `.github/scripts/status-report.mjs`.",
@@ -439,13 +448,13 @@ for (const m of data.merged) P(`- #${m.number} ${esc(m.title)}`);
 const by = (pred) => prs.filter(pred);
 const conflicts = by((p) => p.mergeableState === "dirty");
 const awaitingReview = by((p) => /laukia/.test(p.blocker));
-const ready = by((p) => /^paruoštas/.test(p.blocker));
+const ready = by((p) => /^kandidatas jungti/.test(p.blocker));
 const ciFail = by((p) => p.ci.state === "failure");
 P(
   "",
   `### Atviri PR (${prs.length})`,
   "",
-  `Paruošti jungti ${ready.length}; konfliktuoja ${conflicts.length}; CI nepraėjo ${ciFail.length}; laukia peržiūros ${awaitingReview.length}; RED (migracijos, RLS, saugumas) ${prs.filter((p) => p.red).length}.`,
+  `Kandidatai jungti ${ready.length} (prieš jungimą tikrinama iš naujo); konfliktuoja ${conflicts.length}; CI nepraėjo ${ciFail.length}; laukia peržiūros ${awaitingReview.length}; RED (migracijos, RLS, saugumas) ${prs.filter((p) => p.red).length}.`,
   "",
   "PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruošti, tada kiti. Blokatorius — pirmoji iš eilės priežastis (konfliktas, CI, peržiūra).",
   "",
@@ -453,11 +462,11 @@ P(
 for (const g of [...new Set(prs.map((p) => p.area))].sort((a, b) => a - b)) {
   const list = prs
     .filter((p) => p.area === g)
-    .sort((a, b) => (b.red - a.red) || (/^paruoštas/.test(b.blocker) - /^paruoštas/.test(a.blocker)) || a.number - b.number);
+    .sort((a, b) => (b.red - a.red) || (/^kandidatas/.test(b.blocker) - /^kandidatas/.test(a.blocker)) || a.number - b.number);
   P(`#### ${g}. ${groupsLt.get(g) ?? ""} (${list.length})`, "", "| PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |", "|---|---|---|---|---|---|");
   for (const p of list)
     P(
-      `| [#${p.number}](${REPO_URL}/pull/${p.number}) | ${esc(p.title)}${p.draft ? " (juodraštis)" : ""} | ${p.red ? "RED" : "GREEN"} | ${p.ci.state} | ${p.verdicts.review} / ${p.verdicts.security} | ${esc(p.blocker)} |`,
+      `| [#${p.number}](${REPO_URL}/pull/${p.number}) | ${esc(p.title)}${p.draft ? " (juodraštis)" : ""} | ${p.red ? "RED" : "GREEN"} | ${p.ci.state} | ${p.review?.state ?? "?"} / ${p.security?.state ?? "?"} | ${esc(p.blocker)} |`,
     );
   P("");
 }
@@ -499,4 +508,4 @@ for (const f of fns)
 P("");
 
 writeFileSync(OUT, L.join("\n"));
-console.log(`wrote ${OUT}: ${fns.length} functions, ${prs.length} open PRs, live ${live}/${countedFns.length}`);
+console.log(`wrote ${OUT} [${REPORT_STATE}]: ${fns.length} functions, ${prs.length} open PRs, live ${live}/${countedFns.length}`);
