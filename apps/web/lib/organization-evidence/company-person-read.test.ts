@@ -24,6 +24,7 @@ interface World {
     relationship_kind: string | null;
     link_state: string;
     linked_worker_id: string | null;
+    link_method?: string | null;
   }[];
   records: Record<string, unknown>[];
   signals: Record<string, unknown>[];
