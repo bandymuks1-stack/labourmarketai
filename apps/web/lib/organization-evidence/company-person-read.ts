@@ -114,7 +114,7 @@ export async function readCompanyPerson(input: {
 
   const row = await db(supabase)
     .from("organization_people")
-    .select("id, display_name, relationship_kind, link_state, linked_worker_id")
+    .select("id, display_name, relationship_kind, link_state, link_method, linked_worker_id")
     .eq("id", personId)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -131,7 +131,13 @@ export async function readCompanyPerson(input: {
     name: ((row.data.display_name as string | null) ?? "").trim(),
     relationshipKind: (row.data.relationship_kind as string | null) ?? null,
     linkState,
-    linkedWorkerId: linkState === "linked" ? ((row.data.linked_worker_id as string | null) ?? null) : null,
+    // Identity only by the PERSON's own confirmation (integrity doors v1) —
+    // the same rule the company history uses (#3354): a link a manager made
+    // or an invitation alone never opens the person's own page from here.
+    linkedWorkerId:
+      linkState === "linked" && row.data.link_method === "worker_confirmed"
+        ? ((row.data.linked_worker_id as string | null) ?? null)
+        : null,
   };
 
   // EVERY record of this person — records WITHOUT a work object included.

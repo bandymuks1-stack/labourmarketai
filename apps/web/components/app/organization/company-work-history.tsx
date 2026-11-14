@@ -339,17 +339,22 @@ export async function CompanyPlaceHistory({
                 {/* A linked person opens their own page; an UNLINKED one opens the
                     company's historical card for that roster row — their history
                     is already recorded here before any account claim. */}
+                {/* A person from ANOTHER organization's roster (a record that
+                    organization attributes here) has no card in this one:
+                    the name is shown, never a link that cannot open. */}
                 {wid ? (
                   <Link href={`/dashboard/people/${wid}` as "/dashboard"} data-testid="company-place-person-link">
                     {chip}
                   </Link>
-                ) : (
+                ) : load.ownPeople[pp.id] ? (
                   <Link
                     href={`/dashboard/company/people/${pp.id}` as "/dashboard"}
                     data-testid="company-place-person-history-link"
                   >
                     {chip}
                   </Link>
+                ) : (
+                  <span data-testid="company-place-person-other-roster">{chip}</span>
                 )}
               </li>
             );
