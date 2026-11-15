@@ -60,7 +60,13 @@ export function IntentMegaMenu({
   /** The secondary links (jobs, pricing, about …) behind one "More". */
   more?: {
     readonly label: string;
-    readonly links: ReadonlyArray<{ readonly key: string; readonly href: string; readonly label: string }>;
+    readonly links: ReadonlyArray<{
+      readonly key: string;
+      readonly href: string;
+      readonly label: string;
+      /** Needs an account: shows the same note as a goal link that does. */
+      readonly account?: boolean;
+    }>;
   };
   className?: string;
 }) {
@@ -290,10 +296,18 @@ export function IntentMegaMenu({
                 <li key={link.key}>
                   <Link
                     href={link.href}
+                    prefetch={link.account ? false : undefined}
                     onClick={() => setActive(null)}
-                    className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary motion-reduce:transition-none"
+                    data-testid={`intent-more-link-${link.key}`}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary motion-reduce:transition-none"
                   >
                     {link.label}
+                    {link.account && (
+                      <span className="inline-flex shrink-0 items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
+                        <LogIn aria-hidden className="h-3.5 w-3.5" />
+                        {accountLabel}
+                      </span>
+                    )}
                   </Link>
                 </li>
               ))}
