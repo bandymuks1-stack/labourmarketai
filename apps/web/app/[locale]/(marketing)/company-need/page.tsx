@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
-import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
+import { CompanyNeedAuthLinks } from "@/components/app/company-need-auth-links";
 
 export async function generateMetadata({
   params,
@@ -12,7 +12,6 @@ export async function generateMetadata({
   const { locale } = await params;
   return buildPageMetadataFor("companyNeed", locale, "/company-need");
 }
-import { buttonLinkClassName } from "@/components/ui/Button";
 import {
   CompanyNeedForm,
   type CompanyNeedFormLabels,
@@ -43,7 +42,6 @@ export default async function CompanyNeedPage({
     contactPerson: t("contactPerson"),
     contactPersonHelp: t("contactPersonHelp"),
     contactEmail: t("contactEmail"),
-    contactEmailHelp: t("contactEmailHelp"),
     profession: t("profession"),
     country: t("country"),
     countryHelp: t("countryHelp"),
@@ -158,23 +156,10 @@ export default async function CompanyNeedPage({
           a condition for the inquiry to count. */}
       <div className="card-border flex flex-col gap-3 p-5" data-testid="need-bridge">
         <p className="text-sm leading-relaxed text-text-secondary">{t("bridgeNote")}</p>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          {/* AuthCtaLink (plain <a>, not the SPA Link): auth is a full-page
-              boundary. Single-domain policy: the link stays relative — the
-              whole flow lives on labourmarket.ai. */}
-          <AuthCtaLink
-            relPath={`/${locale}/auth/signup`}
-            className={buttonLinkClassName()}
-          >
-            {t("bridgeSignup")} →
-          </AuthCtaLink>
-          <AuthCtaLink
-            relPath={`/${locale}/auth/login`}
-            className={buttonLinkClassName("secondary")}
-          >
-            {t("bridgeLogin")}
-          </AuthCtaLink>
-        </div>
+        {/* Plain links (auth is a full-page boundary), relative under the
+            single-domain policy. Both come back to this form with what was
+            typed (employer path P0 2026-11-15). */}
+        <CompanyNeedAuthLinks locale={locale} signup={t("bridgeSignup")} login={t("bridgeLogin")} />
       </div>
     </div>
   );
