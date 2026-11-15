@@ -395,7 +395,7 @@
   },
   "commercial": {
     "pageTitle": "Sprzedaż",
-    "pageIntro": "Twoje oferty i umowy, powiązane z popytem i projektami. Faktury i płatności są rejestrowane w Finansach.",
+    "pageIntro": "Twoje oferty i umowy w jednym miejscu. Faktury i płatności są rejestrowane w Finansach.",
     "preApply": "CRM sprzedaży będzie dostępny po zastosowaniu aktualizacji sprzedażowej.",
     "proposalsTitle": "Oferty",
     "honestNote": "Oferta przechodzi przez etapy szkic → wysłana → zaakceptowana/odrzucona tylko wtedy, gdy sam/a to ustawisz. Nic nie jest wysyłane automatycznie.",
@@ -406,6 +406,8 @@
     "noSignatureNote": "Umowy zapisują status i opcjonalne odniesienie do dokumentu. Nie tworzy się ani nie deklaruje żadnego podpisu elektronicznego.",
     "contractsEmpty": "Brak jeszcze umów.",
     "addContract": "Dodaj umowę",
+    "contractFromProposal": "Utwórz umowę",
+    "fromProposal": "Z oferty: {title}",
     "contractTitlePlaceholder": "Tytuł umowy",
     "docRef": "Nr dokumentu",
     "docRefLabel": "Odniesienie do dokumentu",
@@ -2803,7 +2805,7 @@
         "fieldNeedSummary": "Podsumowanie zapytania",
         "fieldNeedSummaryPlaceholder": "Krótko, czego szukasz.",
         "fieldCountry": "Kraj",
-        "fieldCountryPlaceholder": "np. LT",
+        "fieldCountryPlaceholder": "Wybierz kraj",
         "fieldLocation": "Lokalizacja / region",
         "fieldLocationPlaceholder": "np. Wilno",
         "fieldRole": "Rola / rodzaj pracy",
@@ -9253,6 +9255,7 @@
       "view": "Otwórz rozmowę",
       "error": "Nie udało się otworzyć rozmowy. Spróbuj ponownie.",
       "limitReached": "Osiągnięto dzienny limit nowych rozmów. Spróbuj ponownie jutro.",
+      "authorOnly": "Rozmowę może rozpocząć tylko osoba, która dodała tę potrzebę.",
       "shortlistFirst": "Najpierw dodaj osobę do krótkiej listy, wtedy możesz poprosić o rozmowę."
     },
     "how": {
@@ -9334,7 +9337,8 @@
       "title": "Zawęź listę",
       "availableNow": "Dostępny teraz",
       "clear": "Wyczyść filtry",
-      "noMatches": "Żaden kandydat nie pasuje do wybranych filtrów."
+      "noMatches": "Żaden kandydat nie pasuje do wybranych filtrów.",
+      "noMatchesCountry": "W widocznej ofercie nie ma jeszcze nikogo w kraju {country}. Pokaż wszystkich albo poszerz zapotrzebowanie."
     },
     "pool": {
       "factsUnreadable": "Części tego, co te osoby zapisały, nie udało się teraz odczytać, więc ta kolejność nie jest wiarygodna. Nikt nie jest tu pokazany jako mający mniej, niż ma — po prostu brakuje faktów do porównania. Odśwież za chwilę.",
@@ -10594,7 +10598,7 @@
   },
   "workerIntake": {
     "title": "Zgłoszenie pracownika",
-    "subtitle": "Podaj swój zawód i dostępność, a potem załóż bezpłatny profil, aby wszystko zapisać — nic nie jest publikowane automatycznie.",
+    "subtitle": "Podaj swój zawód i dostępność, aby sprawdzić swoje dane. Ten formularz niczego nie zapisuje — aby pracodawcy mogli Cię znaleźć, załóż bezpłatny profil i wpisz tam swoje dane.",
     "fullName": "Imię i nazwisko",
     "profession": "Branża i rodzaj pracy",
     "professionPlaceholder": "Wybierz branżę i rodzaj pracy",
@@ -10624,7 +10628,7 @@
     "submit": "Sprawdź moje dane",
     "aiBadge": "Sugestia AI",
     "aiNotVerified": "Sprawdź przed zapisaniem — nic nie zapisuje się automatycznie.",
-    "aiDisabled": "Nic z tego formularza nie zostało zapisane, a automatyczna propozycja nie jest teraz dostępna. Aby zapisać swoje dane, utwórz poniżej bezpłatny profil pracownika.",
+    "aiDisabled": "Nic z tego formularza nie zostało zapisane, a automatyczna propozycja nie jest teraz dostępna. Aby pracodawcy mogli Cię znaleźć, utwórz poniżej bezpłatny profil pracownika i wpisz tam swoje dane.",
     "aiHeadline": "Proponowany nagłówek",
     "aiSkills": "Proponowane umiejętności",
     "aiMissing": "Wciąż brakuje",
@@ -10717,14 +10721,14 @@
     "aiNone": "Nie wygenerowano propozycji — sprawdź swoje dane.",
     "statusInvalid": "Niektóre dane wymagają poprawy. Sprawdź formularz.",
     "statusError": "Coś poszło nie tak. Spróbuj ponownie.",
-    "bridgeNote": "Wysłanie formularza przesyła Twoje zapytanie — konto nie jest potrzebne. Bezpłatne konto pozwala śledzić zapytanie i nim zarządzać, publikować oferty pracy i zapisywać kandydatów. Masz już konto? Zaloguj się.",
+    "bridgeNote": "Wysłanie formularza przesyła Twoje zapytanie — konto nie jest potrzebne. Bezpłatne konto firmowe z tym samym adresem e-mail może przejąć zapytanie gdy pokażesz, że adres należy do Ciebie, a potem publikować oferty pracy i zapisywać kandydatów. Masz już konto? Zaloguj się.",
     "bridgeSignup": "Załóż bezpłatne konto",
     "bridgeLogin": "Masz już konto? Zaloguj się",
     "autoSuggested": "Zaproponowano na podstawie Twojego opisu — sprawdź i w razie potrzeby popraw. Nic nie jest przesyłane automatycznie.",
     "preparedTitle": "Twoje zapytanie jest przygotowane",
     "preparedBody": "Uporządkowaliśmy Twoje zapytanie. Aby przesłać je do dalszej obsługi, załóż bezpłatne konto lub zaloguj się poniżej — wtedy trafi do zespołu.",
     "receivedTitle": "Zapytanie otrzymane",
-    "receivedBody": "Otrzymaliśmy Twoje zapytanie i zachowujemy je do dalszego kontaktu z Tobą. Aby je zobaczyć i nim zarządzać, załóż konto lub zaloguj się poniżej.",
+    "receivedBody": "Otrzymaliśmy Twoje zapytanie i zachowujemy je do dalszego kontaktu z Tobą. Aby zobaczyć je na koncie, załóż konto firmowe lub zaloguj się tym samym adresem e-mail, który podano tutaj. Gdy pokażesz, że adres należy do Ciebie, zapytanie pojawi się wśród zapytań na Twoim koncie i tam możesz je przejąć. Nie jest łączone automatycznie, a konto z innym adresem go nie widzi.",
     "partnerRouteTitle": "W przypadku zapytań budowlanych — ścieżka firmy partnerskiej",
     "partnerRouteBody": "Jeśli odpowiednie bezpośrednie dopasowanie pracownika nie jest jeszcze dostępne, w przypadku zapytań budowlanych możemy najpierw zaproponować kontakt z naszą firmą partnerską UAB „Nonstop Group” (LT) — operatorem platformy. Może to pomóc szybciej skoordynować dokumenty, obowiązki i wdrożenie, przy udziale osoby koordynującej każdy krok."
   },

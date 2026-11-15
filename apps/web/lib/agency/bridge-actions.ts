@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { resolveCountryCode } from "@/lib/location/country-model";
 import { notifyBooking } from "@/lib/booking/booking-notify";
 import {
   isBridgeUuid,
@@ -382,7 +383,11 @@ export async function draftClientNeedAction(
   await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const connectionId = String(formData.get("connectionId") ?? "");
   const title = String(formData.get("title") ?? "").trim();
-  if (!isBridgeUuid(connectionId) || title.length === 0 || title.length > 200) {
+  // The client's need is found by country, so it must carry one: an ISO code
+  // (or a name resolved to one). The free two-letter field stored "se" or
+  // nothing (Swedish employer audit CL-4).
+  const country = resolveCountryCode(String(formData.get("country") ?? ""));
+  if (!isBridgeUuid(connectionId) || title.length === 0 || title.length > 200 || !country) {
     return { status: "invalid" };
   }
   const size = Number.parseInt(String(formData.get("teamSize") ?? ""), 10);
@@ -391,7 +396,7 @@ export async function draftClientNeedAction(
     p_connection_id: connectionId,
     p_title: title,
     p_role: String(formData.get("role") ?? "").trim() || null,
-    p_country: String(formData.get("country") ?? "").trim() || null,
+    p_country: country,
     p_location: String(formData.get("location") ?? "").trim() || null,
     p_summary: String(formData.get("summary") ?? "").trim() || null,
     p_team_size: Number.isFinite(size) && size > 0 ? size : null,
