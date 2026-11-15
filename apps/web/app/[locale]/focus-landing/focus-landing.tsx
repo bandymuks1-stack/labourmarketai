@@ -10,7 +10,7 @@ import { LandingOpenJobsBand } from "@/components/marketing/landing-open-jobs-ba
 import { LandingHow, LandingMarketFacts, LandingNeedPath } from "@/components/marketing/landing-v3";
 import { PublicEntry } from "@/components/marketing/public-entry";
 import { pickLandingMessages } from "@/lib/i18n/client-messages";
-import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
+import { pickLandingVacancySample, readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 
 /**
@@ -75,7 +75,12 @@ export async function FocusLanding({
           refreshedAt: market.lastRefreshedAt,
         }
       : null;
-  const hasAdverts = market.sample.basis === "live" && market.sample.vacancies.length > 0;
+  // Owner decision 2026-11-15: adverts in the visitor's language first, then
+  // the other suitable adverts — an order, never a filter. The cached snapshot
+  // is shared by every locale, so the pick is made here, per visitor.
+  const adverts =
+    market.sample.basis === "live" ? pickLandingVacancySample(market.sample.vacancies, activeLocale) : [];
+  const hasAdverts = adverts.length > 0;
 
   return (
     <NextIntlClientProvider messages={pickLandingMessages(await getMessages())}>
@@ -124,7 +129,7 @@ export async function FocusLanding({
               market={marketFacts}
               adverts={
                 hasAdverts ? (
-                  <LandingOpenJobsBand sample={market.sample} locale={activeLocale} compact />
+                  <LandingOpenJobsBand sample={{ basis: "live", vacancies: adverts }} locale={activeLocale} compact />
                 ) : undefined
               }
             />

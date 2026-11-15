@@ -55,6 +55,19 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
         maxLength: 120,
       },
       {
+        // WHERE the work is, as a country: visible and required. It used to
+        // ride hidden state from the sentence only, so a sentence naming no
+        // known place created a need no country filter could find. A code or
+        // a name ("SE", "Sweden") — resolved to ISO in `build`; the
+        // structurer still prefills it.
+        name: "country",
+        kind: "text",
+        labelKey: "conversation.forms.fields.demandCountry",
+        placeholderKey: "conversation.forms.fields.demandCountryPlaceholder",
+        required: true,
+        maxLength: 80,
+      },
+      {
         name: "teamSize",
         kind: "number",
         labelKey: "conversation.forms.fields.teamSize",
@@ -124,7 +137,7 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
       // state so the canonical columns (`role_or_work_type`, `country`) are
       // set — before this the chat intake stored only the free-text label.
       workType: s(st.workType) || null,
-      country: s(st.country) || null,
+      country: resolveCountryCode(s(st.country)) ?? null,
       // Teams of a stated size ("3 brigados po 4"), derived the same way and
       // never typed: they reach `structured_v2.team` beside the total.
       teamCount: numOrNull(st.teamCount),
