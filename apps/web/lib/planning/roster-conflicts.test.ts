@@ -56,7 +56,7 @@ describe("the home links straight to the flagged list", () => {
     expect(planning).toContain('id="roster-timeline"');
   });
   it("the label exists in every active locale", () => {
-    for (const loc of ["en", "lt", "de", "nl", "pl", "ru"]) {
+    for (const loc of ["en", "lt", "de", "nl", "pl", "ru", "sv"]) {
       const m = JSON.parse(readFileSync(join(root, `messages/${loc}.json`), "utf8"));
       expect(m.roleDashboards.company.decisions.conflicts, loc).toBeTruthy();
     }

@@ -60,7 +60,7 @@ describe("worker-visibility honesty note (F-E1)", () => {
  */
 describe("needs reach workers only after verification — the copy says so (2026-09-22)", () => {
   const ALL_LOCALES = ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"] as const;
-  const ACTIVE = ["en", "lt", "ru", "nl", "de", "pl"] as const;
+  const ACTIVE = ["en", "lt", "ru", "nl", "de", "pl", "sv"] as const;
   const EXPLAINER_KEYS = ["active_unverified", "needs_checks", "pending_verification", "unverified"] as const;
 
   it("the RPC still shows needs to workers for verified companies only (the fact the copy states)", () => {
@@ -101,6 +101,7 @@ describe("needs reach workers only after verification — the copy says so (2026
       nl: /pas na verificatie van je bedrijf aan werknemers getoond/i,
       de: /erst nach der Verifizierung Ihres Unternehmens angezeigt/i,
       pl: /pokazywane pracownikom dopiero po weryfikacji/i,
+      sv: /visas för arbetstagare först när ditt företag är verifierat/i,
     };
     for (const locale of ACTIVE) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));

@@ -234,7 +234,7 @@ describe("the attach target stack (behaviour, not source)", () => {
 
 /** Every ACTIVE (routable) locale — an untranslated state on a live surface is
  *  a raw key in front of a real worker. */
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 /** The attach question, its answers, the composer chip and the typed photo
  *  door (owner P0 2026-09-23 added everything after `userAttachPhoto`). */
