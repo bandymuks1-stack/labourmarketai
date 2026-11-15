@@ -108,6 +108,7 @@ jobs:
         tests/e2e/social-auth-matrix.spec.ts
         tests/e2e/country-readiness-public.spec.ts
         tests/e2e/translated-page-survives.spec.ts
+        tests/e2e/create-cv-menu-entry.spec.ts
       # Excludes the env-dependent describe block named above. If that title
       # ever changes, the block comes BACK IN and this job goes red — it can
       # never silently drop coverage, which is the safe direction. And if the
@@ -125,7 +126,8 @@ jobs:
       # run against a local `next start` with the runner's own Chromium, all
       # five passed in 7.2 s before this floor was raised.
       # translated-page-survives adds 1 (2026-11-06).
-      MIN_EXPECTED: "33"
+      # create-cv-menu-entry adds 4 (lt + en, 2026-11-15).
+      MIN_EXPECTED: "37"
 
     steps:
       - name: Checkout
