@@ -2052,6 +2052,7 @@
     "addError": "Kunde inte lägga till. Försök igen.",
     "addExperienceTitle": "Lägg till arbetslivserfarenhet",
     "expTitleLabel": "Yrkestitel",
+    "expKindLabel": "Typ av uppdrag",
     "expTitlePlaceholder": "t.ex. svetsare, sjuksköterska, lagerarbetare, utvecklare",
     "expStartLabel": "Från (månad/år)",
     "expEndLabel": "Till (månad/år)",
