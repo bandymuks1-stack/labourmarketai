@@ -280,7 +280,7 @@ describe("what the screen never claims", () => {
   });
 });
 
-describe.each(["lt", "en", "ru", "nl", "de", "pl"])("every key resolves in %s", (locale) => {
+describe.each(["lt", "en", "ru", "nl", "de", "pl", "sv"])("every key resolves in %s", (locale) => {
   it("in the waiting state, with every decision and failure line", async () => {
     reads.reviewable = 2;
     reads.queue = [entry("e1", { hours: { value: 8, unit: "hours", certain: false } }), entry("e2", { hours: null })];

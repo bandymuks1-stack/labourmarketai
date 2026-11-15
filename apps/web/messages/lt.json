@@ -11454,7 +11454,8 @@
       "needsMigration": "Ši funkcija dar neįjungta serveryje. Jūsų profilis lieka privatus.",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "declinedNote": "Gerai — profilis lieka privatus. Šį pasirinkimą rasite čia bet kada.",
-      "readFailed": "Nepavyko patikrinti, ar darbdaviai mato jūsų profilį. Tai nereiškia, kad matomumas išjungtas — pabandykite dar kartą vėliau."
+      "readFailed": "Nepavyko patikrinti, ar darbdaviai mato jūsų profilį. Tai nereiškia, kad matomumas išjungtas — pabandykite dar kartą vėliau.",
+      "legalTextInEnglish": "Šis teisinis tekstas rodomas anglų kalba: jo versija jūsų kalba dar nepatvirtinta. Galioja angliškas tekstas."
     },
     "disclosures": {
       "intro": "Kiekvienas CV, kontaktų ar kitų duomenų perdavimas konkrečiai įmonei vyksta tik po atskiro jūsų patvirtinimo.",

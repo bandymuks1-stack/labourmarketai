@@ -31,7 +31,7 @@ describe("the CV review shows the parser's confidence", () => {
     expect(src).toContain("data-confidence={confidence}");
   });
 
-  for (const l of ["lt", "en", "ru", "nl", "de", "pl"]) {
+  for (const l of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
     it(`${l}: three levels, about the reading, no verification claim`, () => {
       const m = JSON.parse(read(`messages/${l}.json`)) as {
         cvImport: { confidence: Record<string, string> };
@@ -68,7 +68,7 @@ describe("the CV review offers the lines it could not place", () => {
     expect(save).toContain("startYear: null");
   });
 
-  for (const l of ["lt", "en", "ru", "nl", "de", "pl"]) {
+  for (const l of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
     it(`${l}: the copy exists`, () => {
       const m = JSON.parse(read(`messages/${l}.json`)) as {
         cvImport: { groups: Record<string, string>; unplacedHint: string; placeAs: string };
@@ -102,7 +102,7 @@ describe("the CV review lets the person correct a proposal before saving", () =>
     expect(panel).not.toMatch(/\brun\(|confirmCv/);
   });
 
-  for (const l of ["lt", "en", "ru", "nl", "de", "pl"]) {
+  for (const l of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
     it(`${l}: the correction copy exists`, () => {
       const m = JSON.parse(read(`messages/${l}.json`)) as { cvImport: Record<string, unknown> };
       for (const k of ["edit", "editDone", "fieldTitle", "fieldText", "fieldInstitution", "fieldProgram", "fieldKind", "fieldStart", "fieldEnd", "fieldYear", "dateHint"]) {

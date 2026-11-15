@@ -244,11 +244,11 @@ describe("message language chip — data-backed only, never guessed", () => {
 });
 
 describe("UI language status stays honest and discoverable", () => {
-  it("active locales are exactly lt/en/ru/nl/de/pl; RU/NL/DE/PL stay Tier 2 in config (not in the UI)", () => {
-    // NL + DE activated 2026-07-11 (launch repair Scope D), PL 2026-09-20,
+  it("active locales are exactly lt/en/ru/nl/de/pl/sv; RU/NL/DE/PL/SV stay Tier 2 in config (not in the UI)", () => {
+    // NL + DE activated 2026-07-11 (launch repair Scope D), PL 2026-09-20, SV 2026-11-12,
     // with full-parity AI-seeded catalogs pending §7.4 human review. The tier
     // is tracked here, never shown to the person as a badge.
-    expect([...activeLocales]).toEqual(["lt", "en", "ru", "nl", "de", "pl"]);
+    expect([...activeLocales]).toEqual(["lt", "en", "ru", "nl", "de", "pl", "sv"]);
     expect([...tier1Locales]).toEqual(["en", "lt"]);
   });
 
@@ -261,7 +261,7 @@ describe("UI language status stays honest and discoverable", () => {
     expect(switcher).not.toMatch(/tier1Locales/);
     expect(switcher).not.toMatch(/localePreview/);
     // The key is gone from every catalog, so nothing can render it again.
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const common = loadMessages(locale).common as Record<string, unknown>;
       expect(common.localePreview, `${locale}.common.localePreview`).toBeUndefined();
     }

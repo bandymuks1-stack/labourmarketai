@@ -58,7 +58,7 @@ describe("the mutual pre-agreement recommendation depends on the deal — no uni
         }
       }
     }
-    for (const l of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const l of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const m = JSON.parse(readFileSync(join(__dirname, "..", "..", "messages", `${l}.json`), "utf8")) as {
         collaborationChecks: { lead: string; topic: Record<string, string>; basis: Record<string, string> };
       };
