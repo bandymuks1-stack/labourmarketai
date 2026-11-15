@@ -4581,11 +4581,12 @@
             "optionalTag": "(valfritt)",
             "reviewIntro": "Granska och skapa. Förfrågan förblir privat i din yta.",
             "locationLabel": "Plats eller land",
-            "locationPlaceholder": "t.ex. Vilnius, Litauen",
+            "locationPlaceholder": "t.ex. stad, stadsdel eller arbetsplats",
             "skillsLabel": "Nödvändiga färdigheter eller krav",
             "skillsPlaceholder": "t.ex. körkort, engelska, erfarenhet",
             "urgencyLabel": "När du behöver det",
             "urgencyFlexible": "Flexibelt",
+            "countryRequired": "Välj landet där arbetet utförs.",
             "urgencyThisWeek": "Den här veckan",
             "urgencyUrgent": "Brådskande",
             "notesLabel": "Övriga anteckningar",
@@ -4720,10 +4721,7 @@
           "errorOpenNeedLimitIndividual": "Den här organisationen har nått gränsen för aktiva positioner i sin plan. Inget har debiterats eller ändrats. Kontakta oss.",
           "openNeedUsage": "Aktiva positioner: {used} av {limit} använda · {remaining} kvar",
           "openNeedUsageUpgradeCta": "Aktivera planen Organisation",
-          "openNeedUsageIndividual": "Du har nått gränsen för din plan. Kontakta oss för att diskutera dina behov.",
-          "form": {
-            "countryRequired": "Välj landet där arbetet utförs."
-          }
+          "openNeedUsageIndividual": "Du har nått gränsen för din plan. Kontakta oss för att diskutera dina behov."
         }
       },
       "greeting": "Välkommen tillbaka, {name}",
