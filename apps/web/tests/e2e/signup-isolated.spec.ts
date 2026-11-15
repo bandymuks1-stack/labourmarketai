@@ -945,25 +945,42 @@ test("E-4. the institution ends the student link: it loses access, the learner k
   const inst = await a.newPage();
   await signIn(inst, EDU.institution, PASSWORD);
   await inst.goto(`${BASE}/en/dashboard/company/people`);
-  // The lifecycle list sits in folded sections; unfold them.
-  for (let i = 0; i < 12; i++) {
-    const closed = inst.locator("main details:not([open]) > summary");
-    if ((await closed.count()) === 0) break;
-    await closed.first().click();
-  }
-  const member = inst.getByTestId("lifecycle-member").filter({ hasText: "Student" });
-  await expect(member, "the institution's learner is in its people lifecycle").toHaveCount(1, { timeout: 30_000 });
-  await member.getByRole("button", { name: "End employment" }).click();
   await inst.waitForLoadState("networkidle").catch(() => undefined);
+  const member = inst.getByRole("main").getByTestId("lifecycle-member").filter({ hasText: "Student" });
+  await expect(member, "the institution's learner is in its people lifecycle").toHaveCount(1, { timeout: 30_000 });
+  // Each member's controls sit in that member's own fold, and the list itself
+  // may sit in folded sections. Open exactly the folds that hold this learner's
+  // controls (its ancestors and its own), by setting `open`: a click on a
+  // summary toggles, so it can close a fold the page has already opened.
+  await member.evaluate((li) => {
+    for (let el: Element | null = li; el; el = el.parentElement) {
+      if (el instanceof HTMLDetailsElement) el.open = true;
+    }
+    li.querySelectorAll("details").forEach((d) => {
+      (d as HTMLDetailsElement).open = true;
+    });
+  });
+  const end = member.getByRole("button", { name: "End employment" });
+  await expect(end, "the institution is offered an end control for its learner").toBeVisible({ timeout: 30_000 });
+  await end.click();
+
+  // Ending runs as a server action on this same page (no navigation to wait
+  // for): read its outcome back with a fresh load until it shows.
+  await expect
+    .poll(
+      async () => {
+        await inst.goto(`${BASE}/en/dashboard/company/education`);
+        return (await inst.getByTestId("institution-learners-counts").innerText().catch(() => "")).trim();
+      },
+      { message: "no connected learner remains", timeout: 60_000, intervals: [1_000, 2_000, 5_000] },
+    )
+    .toContain("0 connected");
 
   const sid = await userId(EDU.student);
   const links = await dbOrNull<Array<{ relationship_slug: string; status: string }>>(
     `engagement_contexts?profile_id=eq.${sid}&relationship_slug=eq.student&select=relationship_slug,status`,
   );
   if (links) expect(links, "the link is ended, not deleted").toEqual([{ relationship_slug: "student", status: "ended" }]);
-
-  await inst.goto(`${BASE}/en/dashboard/company/education`);
-  await expect(inst.getByTestId("institution-learners-counts"), "no connected learner remains").toContainText("0 connected", { timeout: 30_000 });
   await a.close();
 
   // Access, read under the institution's own RLS: no active link, none of the learner's journal.
