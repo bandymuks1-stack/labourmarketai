@@ -476,3 +476,19 @@ describe("an inclusion word belongs to what stands right before it", () => {
     expect(intakeMinutes("15 Stunden gearbeitet, inkl. Koordination 2 Stunden.")).toBe(15 * 60);
   });
 });
+
+/**
+ * Eleventh review of #3355: "incl. break" keeps splitting the phrase, so the
+ * break clause is dropped on its own and never takes the day's total with it.
+ */
+describe("an included break never drops the day", () => {
+  it.each([
+    ["English 'incl. break' then admin", "Worked 8 h incl. break. Then 2 h of admin.", 10 * 60],
+    ["English 'incl. break' alone", "Worked 8 h incl. break.", 8 * 60],
+    ["English 'incl. a short break'", "Worked 8 h incl. a short break.", 8 * 60],
+    ["German 'inkl. Pause' then paperwork", "8 Stunden gearbeitet inkl. Pause. Danach 2 Stunden Papierkram.", 10 * 60],
+    ["German 'inkl. einer kurzen Pause'", "8 Stunden gearbeitet inkl. einer kurzen Pause.", 8 * 60],
+  ])("%s", (_name, text, expected) => {
+    expect(intakeMinutes(text)).toBe(expected);
+  });
+});
