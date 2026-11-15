@@ -330,8 +330,33 @@ if (existsSync(OUT)) {
 }
 
 // ---------------------------------------------------------------- confirmed walk results
+// The ledger is kept twice: in STATUS_EVIDENCE.json and embedded at the end of the report itself, so a
+// run that commits only the report still carries every confirmed result forward. Both copies (and the
+// committed previous report) are united, newest result per walk and screen wins.
+const EVIDENCE_RE = /<!-- status-evidence-json\n([\s\S]*?)\n-->/;
+const embeddedLedger = (txt) => {
+  const m = String(txt ?? "").match(EVIDENCE_RE);
+  try {
+    return m ? JSON.parse(m[1]) : null;
+  } catch {
+    return null;
+  }
+};
+const asRuns = (l) =>
+  Object.values(l?.walks ?? {}).map((e) => ({
+    id: e.run,
+    title: `prod-qa-walk ${e.spec} ${e.device}`,
+    sha: e.build,
+    conclusion: e.result,
+    status: "completed",
+    at: e.at,
+  }));
 let ledgerIn = { schema: 1, walks: {} };
 if (existsSync(LEDGER)) ledgerIn = JSON.parse(readFileSync(LEDGER, "utf8"));
+for (const src of [existsSync(OUT) ? readFileSync(OUT, "utf8") : null, previousReportTextSafe()]) {
+  const l = embeddedLedger(src);
+  if (l) ledgerIn = mergeWalkLedger(ledgerIn, asRuns(l)).ledger;
+}
 const ledgerMerge = mergeWalkLedger(ledgerIn, data.walks);
 const ledger = ledgerMerge.ledger;
 const discrepancies = [
@@ -349,6 +374,13 @@ const discrepancies = [
 const prev = { states: new Map(), live: null, openPrs: null, at: null };
 // The previous report is the COMMITTED one (git HEAD), not the file on disk: generating twice in one
 // period must not compare a report with itself.
+function previousReportTextSafe() {
+  try {
+    return previousReportText();
+  } catch {
+    return null;
+  }
+}
 function previousReportText() {
   if (PREVIOUS) return readFileSync(PREVIOUS, "utf8");
   const rel = OUT.startsWith(ROOT) ? OUT.slice(ROOT.length + 1) : null;
@@ -615,6 +647,7 @@ for (const f of fns)
   );
 P("");
 
+L.push("", "<!-- status-evidence-json", JSON.stringify(ledger), "-->", "");
 writeFileSync(OUT, L.join("\n"));
 writeFileSync(LEDGER, JSON.stringify(ledger, null, 1) + "\n");
 console.log(`wrote ${OUT} [${REPORT_STATE}]: ${fns.length} functions, ${prs.length} open PRs, live ${live}/${countedFns.length}`);

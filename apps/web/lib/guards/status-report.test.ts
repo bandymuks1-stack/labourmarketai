@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -456,5 +456,10 @@ describe("Report synchronisation — one latest confirmed state, never overwritt
     const older = run("2026-11-15T09:40:00Z", []);
     expect(older.status).toBe(4);
     expect(readFileSync(out, "utf8")).toBe(md);
+    // A run that commits only the report still carries the confirmed results forward.
+    rmSync(join(dir, "STATUS_EVIDENCE.json"));
+    const next = run("2026-11-16T09:40:00Z", []);
+    expect(next.status, next.stderr).toBe(0);
+    expect(readFileSync(out, "utf8")).toMatch(/\| agency-chain \| telefonas 375 px \| sėkmingas \| `d225f58a`/);
   });
 });
