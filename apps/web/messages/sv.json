@@ -16394,16 +16394,16 @@
       "queueEmpty": "Inget väntar på moderering.",
       "disputeQueueTitle": "Invändningar",
       "disputeQueueEmpty": "Inga öppna invändningar.",
-      "takeDispute": "[EN] Take the dispute into review",
-      "disputeReasonLabel": "[EN] Reason for the dispute",
-      "responseQueueTitle": "[EN] Replies awaiting moderation",
-      "responseQueueEmpty": "[EN] No reply is waiting for moderation.",
-      "replyToLabel": "[EN] Reply to this experience",
-      "disputeOpenedLabel": "[EN] Dispute opened",
-      "disputeReviewStartedLabel": "[EN] Review started",
-      "conflictNotice": "[EN] You are a party to this experience, so you cannot decide here. Another moderator must take it.",
-      "conflictUnknown": "[EN] Could not check whether you are a party to this experience. No decision is possible right now.",
-      "disputeReasonShared": "[EN] The reason is shown to both sides and recorded in the audit trail.",
+      "takeDispute": "Ta upp invändningen för granskning",
+      "disputeReasonLabel": "Skäl för invändningen",
+      "responseQueueTitle": "Svar som väntar på moderering",
+      "responseQueueEmpty": "Inget svar väntar på moderering.",
+      "replyToLabel": "Svar på denna upplevelse",
+      "disputeOpenedLabel": "Invändning öppnad",
+      "disputeReviewStartedLabel": "Granskning påbörjad",
+      "conflictNotice": "Du är part i denna upplevelse och kan därför inte besluta här. En annan moderator måste ta den.",
+      "conflictUnknown": "Det gick inte att kontrollera om du är part i denna upplevelse. Inget beslut är möjligt just nu.",
+      "disputeReasonShared": "Skälet visas för båda parter och registreras i granskningsloggen.",
       "take": "Ta till moderering",
       "publish": "Publicera",
       "reject": "Avvisa",
@@ -16429,7 +16429,7 @@
         "dispute_exists": "En invändning är redan öppen.",
         "reason_required": "Ett skäl krävs.",
         "invalid_transition": "Det steget är inte möjligt från nuvarande läge.",
-        "conflict_of_interest": "[EN] You are a party to this experience. Another moderator must decide.",
+        "conflict_of_interest": "Du är part i denna upplevelse. En annan moderator måste besluta.",
         "not_found": "Hittades inte.",
         "error": "Något gick fel. Inget sparades."
       }
@@ -16446,7 +16446,7 @@
       "cta": "Lämna en invändning",
       "sending": "Öppnar…",
       "openedNote": "Invändningen har öppnats. Upplevelsen förblir publicerad tills en moderator beslutar.",
-      "decisionReasonLabel": "[EN] Reason for the decision",
+      "decisionReasonLabel": "Skäl för beslutet",
       "errors": {
         "needs_migration": "Inte tillgängligt just nu. Inget sparades.",
         "not_authenticated": "Logga in först.",
@@ -16461,7 +16461,7 @@
         "dispute_exists": "En invändning är redan öppen.",
         "reason_required": "Ett skäl krävs.",
         "invalid_transition": "Det steget är inte möjligt från nuvarande läge.",
-        "conflict_of_interest": "[EN] You are a party to this experience. Another moderator must decide.",
+        "conflict_of_interest": "Du är part i denna upplevelse. En annan moderator måste besluta.",
         "not_found": "Hittades inte.",
         "error": "Något gick fel. Inget sparades."
       }
@@ -16486,7 +16486,7 @@
         "dispute_exists": "En invändning är redan öppen.",
         "reason_required": "Ett skäl krävs.",
         "invalid_transition": "Det steget är inte möjligt från nuvarande läge.",
-        "conflict_of_interest": "[EN] You are a party to this experience. Another moderator must decide.",
+        "conflict_of_interest": "Du är part i denna upplevelse. En annan moderator måste besluta.",
         "not_found": "Hittades inte.",
         "error": "Något gick fel. Inget sparades."
       },
@@ -16521,7 +16521,7 @@
         "dispute_exists": "En invändning är redan öppen.",
         "reason_required": "Ett skäl krävs.",
         "invalid_transition": "Det steget är inte möjligt från nuvarande läge.",
-        "conflict_of_interest": "[EN] You are a party to this experience. Another moderator must decide.",
+        "conflict_of_interest": "Du är part i denna upplevelse. En annan moderator måste besluta.",
         "not_found": "Hittades inte.",
         "error": "Något gick fel. Inget sparades."
       }
