@@ -313,7 +313,6 @@ export async function OrganizationRosterSection({
                   labels={{
                     offer: t("historyClaim.offer"),
                     offering: t("historyClaim.offering"),
-                    hint: t("historyClaim.offerHint"),
                     created: t("historyClaim.created"),
                     linkLabel: t("historyClaim.linkLabel"),
                     onceOnly: t("historyClaim.onceOnly"),

@@ -18658,7 +18658,6 @@
       "expires": "Ważny do {date}.",
       "offer": "Daj link do historii",
       "offering": "Przygotowywanie…",
-      "offerHint": "Dla osoby, która już tu nie pracuje.",
       "created": "Link gotowy. Przekaż go tej osobie.",
       "linkLabel": "Jednorazowy link do historii",
       "onceOnly": "Pokazywany raz i działa raz.",
@@ -20785,7 +20784,7 @@
   "historyClaim": {
     "title": "Twoja historia pracy u byłego pracodawcy",
     "organization": "{name} zachowała zapis Twojej pracy w tym miejscu.",
-    "explain": "Jeśli to o Tobie, powiedz o tym poniżej. Na razie nic nie jest pokazywane ani dodawane: firma potwierdzi, że to Ty jesteś osobą z zapisu, a potem przyjmiesz go lub odrzucisz w swoim profilu.",
+    "explain": "Na razie nic nie jest pokazywane ani dodawane: firma potwierdzi, że to Ty jesteś osobą z zapisu, a potem przyjmiesz go lub odrzucisz w swoim profilu.",
     "redeem": "To ja",
     "redeeming": "Wysyłanie…",
     "redeemedTitle": "Wysłano do firmy",
@@ -20794,7 +20793,6 @@
     "rejectedByOrganization": "Firma nie potwierdziła tego powiązania. Jeśli to pomyłka, skontaktuj się z nią bezpośrednio.",
     "unavailable": "Ten link nie działa. Mógł zostać użyty, wycofany albo stracić ważność.",
     "unnamedOrganization": "Firma",
-    "privacyNote": "Dopóki firma nie potwierdzi, że to Ty, ta strona nie pokazuje nic o zapisie.",
     "errors": {
       "auth": "Zaloguj się ponownie.",
       "unavailable": "Ten link już nie działa.",

@@ -18658,7 +18658,6 @@
       "expires": "Giltig till {date}.",
       "offer": "Ge en historiklänk",
       "offering": "Förbereder…",
-      "offerHint": "För en person som inte längre arbetar här.",
       "created": "Länken är klar. Lämna den till personen.",
       "linkLabel": "Engångslänk till historiken",
       "onceOnly": "Visas en gång och fungerar en gång.",
@@ -20785,7 +20784,7 @@
   "historyClaim": {
     "title": "Din arbetshistorik hos en tidigare arbetsgivare",
     "organization": "{name} har sparat en post om arbete du gjorde där.",
-    "explain": "Om det gäller dig, säg det nedan. Inget visas eller läggs till ännu: företaget bekräftar att du är personen i posten, och därefter tackar du ja eller nej på din egen profil.",
+    "explain": "Inget visas eller läggs till ännu: företaget bekräftar att du är personen i posten, och därefter tackar du ja eller nej på din egen profil.",
     "redeem": "Det är jag",
     "redeeming": "Skickar…",
     "redeemedTitle": "Skickat till företaget",
@@ -20794,7 +20793,6 @@
     "rejectedByOrganization": "Företaget bekräftade inte kopplingen. Om det är ett misstag, kontakta dem direkt.",
     "unavailable": "Länken fungerar inte. Den kan vara använd, tillbakatagen eller ha gått ut.",
     "unnamedOrganization": "Ett företag",
-    "privacyNote": "Tills företaget bekräftar att det är du visar den här sidan inget om posten.",
     "errors": {
       "auth": "Logga in igen.",
       "unavailable": "Länken fungerar inte längre.",

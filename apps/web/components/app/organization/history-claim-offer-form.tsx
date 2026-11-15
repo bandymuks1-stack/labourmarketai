@@ -28,7 +28,6 @@ export function HistoryClaimOfferForm({
   labels: {
     readonly offer: string;
     readonly offering: string;
-    readonly hint: string;
     readonly created: string;
     readonly linkLabel: string;
     readonly onceOnly: string;
@@ -81,7 +80,6 @@ export function HistoryClaimOfferForm({
         >
           {pending ? labels.offering : labels.offer}
         </Button>
-        <span className="text-meta leading-relaxed text-text-muted">{labels.hint}</span>
       </div>
       <div role="status" aria-live="polite">
         {state && !state.ok ? (

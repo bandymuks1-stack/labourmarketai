@@ -93,7 +93,6 @@ export async function HistoryClaimAnswer({ token }: { token: string }) {
           },
         }}
       />
-      <p className="text-meta leading-relaxed text-text-muted">{t("privacyNote")}</p>
     </>,
   );
 }

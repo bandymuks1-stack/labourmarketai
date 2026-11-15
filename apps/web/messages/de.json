@@ -18658,7 +18658,6 @@
       "expires": "Gültig bis {date}.",
       "offer": "Verlaufs-Link geben",
       "offering": "Wird vorbereitet…",
-      "offerHint": "Für eine Person, die hier nicht mehr arbeitet.",
       "created": "Link bereit. Geben Sie ihn dieser Person.",
       "linkLabel": "Einmaliger Verlaufs-Link",
       "onceOnly": "Wird einmal gezeigt und funktioniert einmal.",
@@ -20785,7 +20784,7 @@
   "historyClaim": {
     "title": "Ihr Arbeitsverlauf bei einem früheren Arbeitgeber",
     "organization": "{name} hat einen Eintrag über Ihre dortige Arbeit aufbewahrt.",
-    "explain": "Wenn es um Sie geht, sagen Sie es unten. Noch wird nichts gezeigt und nichts hinzugefügt: das Unternehmen bestätigt, dass Sie die Person im Eintrag sind, und danach nehmen Sie ihn im eigenen Profil an oder lehnen ab.",
+    "explain": "Noch wird nichts gezeigt und nichts hinzugefügt: das Unternehmen bestätigt, dass Sie die Person im Eintrag sind, und danach nehmen Sie ihn im eigenen Profil an oder lehnen ab.",
     "redeem": "Das bin ich",
     "redeeming": "Wird gesendet…",
     "redeemedTitle": "An das Unternehmen gesendet",
@@ -20794,7 +20793,6 @@
     "rejectedByOrganization": "Das Unternehmen hat diese Verknüpfung nicht bestätigt. Wenn das ein Irrtum ist, wenden Sie sich direkt an das Unternehmen.",
     "unavailable": "Dieser Link funktioniert nicht. Vielleicht wurde er benutzt, zurückgezogen, oder er ist abgelaufen.",
     "unnamedOrganization": "Ein Unternehmen",
-    "privacyNote": "Solange das Unternehmen nicht bestätigt hat, dass Sie es sind, zeigt diese Seite nichts über den Eintrag.",
     "errors": {
       "auth": "Bitte melden Sie sich erneut an.",
       "unavailable": "Dieser Link funktioniert nicht mehr.",

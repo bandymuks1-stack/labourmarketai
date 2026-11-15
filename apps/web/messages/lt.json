@@ -18658,7 +18658,6 @@
       "expires": "Galioja iki {date}.",
       "offer": "Duoti istorijos nuorodą",
       "offering": "Kuriama…",
-      "offerHint": "Žmogui, kuris čia nebedirba.",
       "created": "Nuoroda paruošta. Perduokite ją tam žmogui.",
       "linkLabel": "Vienkartinė istorijos nuoroda",
       "onceOnly": "Parodoma vieną kartą ir veikia vieną kartą.",
@@ -20785,7 +20784,7 @@
   "historyClaim": {
     "title": "Jūsų darbo istorija pas buvusį darbdavį",
     "organization": "{name} išsaugojo įrašą apie jūsų ten atliktą darbą.",
-    "explain": "Jei tai apie jus, pasakykite tai žemiau. Kol kas niekas nerodoma ir nepridedama: įmonė patvirtins, kad įraše esate jūs, o tada jūs pats savo profilyje priimsite arba atsisakysite.",
+    "explain": "Kol kas niekas nerodoma ir nepridedama: įmonė patvirtins, kad įraše esate jūs, o tada jūs pats savo profilyje priimsite arba atsisakysite.",
     "redeem": "Tai aš",
     "redeeming": "Siunčiama…",
     "redeemedTitle": "Išsiųsta įmonei",
@@ -20794,7 +20793,6 @@
     "rejectedByOrganization": "Įmonė šio susiejimo nepatvirtino. Jei tai klaida, kreipkitės į ją tiesiogiai.",
     "unavailable": "Ši nuoroda neveikia. Ji galėjo būti panaudota, atšaukta arba nebegalioti.",
     "unnamedOrganization": "Įmonė",
-    "privacyNote": "Kol įmonė nepatvirtina, kad tai jūs, šis puslapis apie įrašą nieko nerodo.",
     "errors": {
       "auth": "Prisijunkite dar kartą.",
       "unavailable": "Ši nuoroda nebeveikia.",

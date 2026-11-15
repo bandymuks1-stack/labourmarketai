@@ -18658,7 +18658,6 @@
       "expires": "Geldig tot {date}.",
       "offer": "Historielink geven",
       "offering": "Bezig…",
-      "offerHint": "Voor iemand die hier niet meer werkt.",
       "created": "Link klaar. Geef hem aan die persoon.",
       "linkLabel": "Eenmalige historielink",
       "onceOnly": "Wordt één keer getoond en werkt één keer.",
@@ -20785,7 +20784,7 @@
   "historyClaim": {
     "title": "Jouw werkverleden bij een vorige werkgever",
     "organization": "{name} bewaarde een record van werk dat je daar deed.",
-    "explain": "Als dit over jou gaat, zeg dat hieronder. Er wordt nog niets getoond of toegevoegd: het bedrijf bevestigt dat jij de persoon in het record bent, en daarna accepteer of weiger je het op je eigen profiel.",
+    "explain": "Er wordt nog niets getoond of toegevoegd: het bedrijf bevestigt dat jij de persoon in het record bent, en daarna accepteer of weiger je het op je eigen profiel.",
     "redeem": "Dit ben ik",
     "redeeming": "Versturen…",
     "redeemedTitle": "Naar het bedrijf gestuurd",
@@ -20794,7 +20793,6 @@
     "rejectedByOrganization": "Het bedrijf heeft deze koppeling niet bevestigd. Als dat een vergissing is, neem dan rechtstreeks contact op.",
     "unavailable": "Deze link werkt niet. Hij is misschien gebruikt, ingetrokken of verlopen.",
     "unnamedOrganization": "Een bedrijf",
-    "privacyNote": "Zolang het bedrijf niet bevestigt dat jij het bent, toont deze pagina niets over het record.",
     "errors": {
       "auth": "Log opnieuw in.",
       "unavailable": "Deze link werkt niet meer.",
