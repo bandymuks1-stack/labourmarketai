@@ -508,8 +508,11 @@ const DE_HOUR_ABBREVIATION_RX = /((?:^|[^\p{L}])std\.)(?=[ \t]+\p{L})/giu;
 /** "incl.", "inkl." and "в т.ч." name a part of the figure before them, so
  *  their dots never end a phrase ("Worked 15 h, incl. 2 h coordination").
  *  Only before a digit or a lowercase word: "… incl. Then 2 h" still ends one
- *  (no `i` flag: with it `\p{Ll}` would match capitals too). */
-const INCLUSION_ABBREVIATION_RX = /(?<!\p{L})(?:[Ii]ncl|[Ii]nkl|[Тт]\.\s?ч)\.(?=[ \t]+[\d\p{Ll}])/gu;
+ *  (no `i` flag: with it `\p{Ll}` would match capitals too). German "inkl."
+ *  also before a capital, since German nouns are capitalised ("inkl.
+ *  Koordination 2 Stunden"). */
+const INCLUSION_ABBREVIATION_RX =
+  /(?<!\p{L})(?:[Ii]nkl\.(?=[ \t]+[\d\p{L}])|(?:[Ii]ncl|[Тт]\.\s?ч)\.(?=[ \t]+[\d\p{Ll}]))/gu;
 const PROTECTED_DOT = "##DOT##";
 const PROTECTED_COMMA = "##COMMA##";
 
@@ -920,6 +923,12 @@ const WHOLE_DAY_SPAN_RX =
   /(?<!\p{L})(?:nuo\s+(?:\p{L}+\s+)?ryto\s+iki\s+(?:\p{L}+\s+)?(?:vakaro|nakties)|from\s+(?:the\s+)?(?:\p{L}+\s+)?morning\s+(?:till|until|to)\s+(?:the\s+)?(?:\p{L}+\s+)?(?:evening|night)|с\s+(?:\p{L}+\s+)?утра\s+до\s+(?:\p{L}+\s+)?(?:вечера|ночи)|von\s+(?:\p{L}+\s+)?morgens\s+bis\s+(?:\p{L}+\s+)?(?:abends|nachts)|od\s+(?:\p{L}+\s+)?rana\s+do\s+(?:\p{L}+\s+)?(?:wieczora|nocy)|van\s+(?:'s\s+)?(?:\p{L}+\s+)?ochtends\s+tot\s+(?:'s\s+)?(?:\p{L}+\s+)?(?:avonds|nachts))(?!\p{L})/giu;
 const namesPartOfDay = (text: string): boolean => PART_OF_DAY_RX.test(text.replace(WHOLE_DAY_SPAN_RX, " "));
 
+/** Referring words that may stand before an inclusion word without making
+ *  it speak about something else: "This includes 2 hours …", "Tai įskaitant
+ *  …". */
+const REFERRING_WORD_RX =
+  /^(?:this|that|these|those|which|it|tai|šis|ši|šios|šie|jos|tos|это|das|dies|dieses|to)$/iu;
+
 /** Minutes back in the unit a person reads best. */
 function minutesAsTime(minutes: number): { value: number; unitSlug: "hours" | "minutes" } {
   return minutes % 15 === 0
@@ -1061,8 +1070,22 @@ function containedTotal(
     /^[^:\n]{1,60}:\s*(?:\p{L}+\s+){0,2}\d/u.test(totalSentence.trim()) || RESTATED_TOTAL_LEAD_RX.test(
       total.rawPhrase.slice(0, Math.max(0, total.rawPhrase.search(/\d/))),
     );
+  // An inclusion word speaks about the FIGURE before it only when nothing but
+  // punctuation (or one referring word) stands between them: "Dirbau 15 val.,
+  // iš jų 2 val. …" and "Worked 15 hours. This includes 2 hours …" are parts
+  // of the 15; in "Dirbau 8 val. Vakare mokymai, iš jų 2 val. praktikos" the 2
+  // hours are part of the training, on top of the 8.
+  const speaksOfFigureBefore = (f: JournalFragmentSuggestion): boolean => {
+    const digit = f.rawPhrase.search(/\d/);
+    const head = digit > 0 ? f.rawPhrase.slice(0, digit) : f.rawPhrase;
+    const hit = INCLUDED_PART_RX.exec(head);
+    if (!hit) return false;
+    const words = (sinceFigureBefore(f) + head.slice(0, hit.index)).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+    return words.length === 0 || (words.length === 1 && REFERRING_WORD_RX.test(words[0]!));
+  };
   const marked = (f: JournalFragmentSuggestion): boolean =>
-    opensAsIncludedPart(f.rawPhrase) || (totalLabelled && BRACKETED_DURATION_RX.test(f.rawPhrase));
+    (opensAsIncludedPart(f.rawPhrase) && speaksOfFigureBefore(f)) ||
+    (totalLabelled && BRACKETED_DURATION_RX.test(f.rawPhrase));
   let parts: JournalFragmentSuggestion[];
   if (restatements.size > 0) {
     parts = candidates;

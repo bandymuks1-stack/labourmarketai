@@ -453,3 +453,26 @@ describe("abbreviated and more inclusion words", () => {
     expect(minutes("Worked 8 h, all incl. Then 2 h of paperwork.")).toBe(10 * 60);
   });
 });
+
+/**
+ * Re-check of the sweep (#3355): an inclusion word that follows a named
+ * activity speaks about that activity, not about the total before it.
+ */
+describe("an inclusion word belongs to what stands right before it", () => {
+  it.each([
+    ["'iš jų' after the evening training", "Dirbau 8 val. Vakare mokymai, iš jų 2 val. praktikos."],
+    ["'įskaitant' after a course", "Dirbau 8 val. Po to kursai, įskaitant 2 val. teorijos."],
+    ["'including' after a course", "Worked 8 h. Then a course including 2 h of theory."],
+    ["'tarp jų' after the evening training", "Dirbau 8 val. Vakare mokymai, tarp jų 2 val. praktikos."],
+    ["'that includes' after a course", "Worked 8 h. Then a course that includes 2 h of theory."],
+    ["'darunter' after a course", "8 Stunden gearbeitet. Danach ein Kurs, darunter 2 Stunden Theorie."],
+  ])("%s: 8 + 2", (_name, text) => {
+    expect(minutes(text)).toBe(10 * 60);
+    expect(intakeMinutes(text)).toBe(10 * 60);
+  });
+
+  it("German 'inkl.' before a capitalised noun is a part too", () => {
+    expect(minutes("15 Stunden gearbeitet, inkl. Koordination 2 Stunden.")).toBe(15 * 60);
+    expect(intakeMinutes("15 Stunden gearbeitet, inkl. Koordination 2 Stunden.")).toBe(15 * 60);
+  });
+});
