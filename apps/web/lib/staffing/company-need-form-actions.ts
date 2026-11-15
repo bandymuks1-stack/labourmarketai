@@ -10,12 +10,14 @@
  */
 import { getLocale } from "next-intl/server";
 import { draftVacancyFromNeed } from "./company-need-actions";
+import { isSyntheticCommercialRequest } from "./commercial-requests-feed";
 import { persistPublicCompanyNeed } from "./company-need-public-intake";
 import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alerts";
 import { isConstructionWorkType } from "../taxonomy/work-categories";
 import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
 import { NO_JS_REVIEW_MARK, recordPublicFormRefusal, screenPublicFormTiming } from "../security/public-form-guard";
+import { COMPANY_NEED_ENTRY } from "./company-need-prefill";
 
 export interface CompanyNeedFormState {
   readonly ok: boolean;
@@ -128,7 +130,13 @@ export async function submitCompanyNeedAction(
 
   const rawLocale = await getLocale();
   const locale = toAiLocale(rawLocale);
-  const sourcePath = `/${rawLocale}/company-need${needsReview ? NO_JS_REVIEW_MARK : ""}`;
+  // The public button that opened the form rides on source_path (no new
+  // column): "/de/company-need?from=companies_market_lu". Re-validated here.
+  const entryRaw = str(formData.get("from"));
+  const entry = entryRaw && COMPANY_NEED_ENTRY.test(entryRaw) ? entryRaw : null;
+  const sourcePath = `/${rawLocale}/company-need${needsReview ? NO_JS_REVIEW_MARK : ""}${
+    entry ? `${needsReview ? "&" : "?"}from=${entry}` : ""
+  }`;
 
   // Persist the structured need for follow-up (anonymous path, v1). This is
   // the real backend now: a success means a row was stored for the operator.
@@ -192,6 +200,23 @@ export async function submitCompanyNeedAction(
   }
 
   const isConstruction = isConstructionWorkType(raw.profession);
+
+  // OUR TEST REQUESTS NEVER REACH THE AI LAYER (owner order 2026-11-14, PR #3303
+  // need-intake walk). Even with every provider disabled, a call writes an
+  // `ai_runs` audit row, which the Agentai capability readback and the AI-demand
+  // reading count. A row the commercial feed drops (`isSyntheticCommercialRequest`,
+  // the one rule) gets the same honest "no draft" answer a throttled caller gets,
+  // and no model call. A real employer's need is unaffected.
+  if (
+    isSyntheticCommercialRequest({
+      company_name: raw.companyName,
+      contact_name: raw.contactPerson ?? null,
+      contact_email: contactEmail,
+      description: raw.description,
+    })
+  ) {
+    return { ok: true, persisted, isConstruction, draftStatus: "disabled" };
+  }
 
   // The model call gets its OWN throttle. The intake limiter above guards the
   // DB insert, but its `rate_limited` early-return is the ONLY branch that
