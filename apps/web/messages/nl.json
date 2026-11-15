@@ -5256,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Waarom bedrijven",
-      "headline": "Aanbod waar je op kunt handelen",
-      "items": [
-        {
-          "title": "Uitlegbare fit-richting",
-          "desc": "Elk fit-signaal toont de redenen erachter."
-        },
-        {
-          "title": "Werknemerspool over de grens",
-          "desc": "Aanbod uit elke markt waarin we actief zijn, op één plek."
-        },
-        {
-          "title": "Geen ondoorzichtige tussenpersonen",
-          "desc": "Jij ziet en bezit de relatie."
-        },
-        {
-          "title": "Vaardigheidsrecords + fit-signalen",
-          "desc": "Neem aan op basis van records, niet op basis van claims."
-        },
-        {
-          "title": "Aanbodsignalen",
-          "desc": "Zie de opgegeven beschikbaarheid van werknemers terwijl profielen worden bijgewerkt."
-        },
-        {
-          "title": "Direct contact",
-          "desc": "Jij bezit de relatie met de werknemer."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "FAQ voor bedrijven",
       "headline": "Eerlijke antwoorden",
@@ -5351,36 +5321,6 @@
         {
           "title": "Laat je pool groeien",
           "desc": "Voeg capaciteit toe waar de vraag stijgt."
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "Waarom uitzendbureaus",
-      "headline": "Meer slagkracht, geen controleverlies",
-      "items": [
-        {
-          "title": "Beheer je pool",
-          "desc": "Werknemers, beschikbaarheid en status op één plek."
-        },
-        {
-          "title": "Plaats namens klanten",
-          "desc": "Bemiddel in vraag zonder de relatie te verliezen."
-        },
-        {
-          "title": "Gerichte matching",
-          "desc": "Plaats de juiste mensen sneller."
-        },
-        {
-          "title": "Zichtbaarheidsinstellingen",
-          "desc": "Openbaar, alleen voor uitzendbureaus of direct — jij beslist."
-        },
-        {
-          "title": "Grensoverschrijdend bereik",
-          "desc": "Opdrachtgevers en werknemers in elke markt waarin we actief zijn."
-        },
-        {
-          "title": "Laat je bemiddeling groeien",
-          "desc": "Capaciteitsinzichten wanneer de vraag verschuift."
         }
       ]
     },
@@ -19444,8 +19384,6 @@
     "title": "Wat er met jouw werk gebeurt",
     "titleCompany": "Wat er met het werk gebeurt dat je aanstuurt",
     "example": "Voorbeeld — geen echt persoon en geen echte gegevens",
-    "hint": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
-    "hintWorkers": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
     "open": "Openen in je werkruimte",
     "list": "Stappen in de levenscyclus van werk",
     "workers": {
@@ -20735,7 +20673,6 @@
       "close": "Sluiten",
       "functions": "Acties",
       "professions": "Beroepen",
-      "opensNow": "Geen account nodig",
       "signInWhenOpen": "Inloggen vereist",
       "allSectors": "Alle sectoren",
       "fullList": "Volledige lijst"

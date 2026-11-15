@@ -5256,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Varför företag",
-      "headline": "Utbud du kan agera på",
-      "items": [
-        {
-          "title": "Förklarad matchningsriktning",
-          "desc": "Varje matchningssignal visar skälen bakom den."
-        },
-        {
-          "title": "Arbetskraft över gränserna",
-          "desc": "Utbud från alla marknader där vi verkar, på ett ställe."
-        },
-        {
-          "title": "Inga ogenomskinliga mellanhänder",
-          "desc": "Du ser och äger relationen."
-        },
-        {
-          "title": "Färdighetsposter + matchningssignaler",
-          "desc": "Anställ på belägg, inte på påståenden."
-        },
-        {
-          "title": "Utbudssignaler",
-          "desc": "Se arbetstagarnas angivna tillgänglighet när profilerna uppdateras."
-        },
-        {
-          "title": "Direktkontakt",
-          "desc": "Du äger relationen med arbetstagaren."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "Vanliga frågor för företag",
       "headline": "Raka svar",
@@ -5351,36 +5321,6 @@
         {
           "title": "Väx din pool",
           "desc": "Bygg kapacitet där efterfrågan ökar."
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "Varför bemanningsföretag",
-      "headline": "Hävstång, inte förlorad kontroll",
-      "items": [
-        {
-          "title": "Hantera din pool",
-          "desc": "Arbetstagare, tillgänglighet och status på ett ställe."
-        },
-        {
-          "title": "Lägg upp åt kunder",
-          "desc": "Förmedla behov utan att förlora relationen."
-        },
-        {
-          "title": "Matchningsriktning",
-          "desc": "Placera rätt personer snabbare."
-        },
-        {
-          "title": "Synlighetsinställningar",
-          "desc": "Offentligt, bara bemanningsföretag eller direkt — du bestämmer."
-        },
-        {
-          "title": "Räckvidd över gränserna",
-          "desc": "Kunder och arbetstagare på alla marknader där vi verkar."
-        },
-        {
-          "title": "Väx din verksamhet",
-          "desc": "Insikter om kapacitet när efterfrågan förändras."
         }
       ]
     },
@@ -19444,8 +19384,6 @@
     "title": "Vad som händer med arbetet du utför",
     "titleCompany": "Vad som händer med arbetet du driver",
     "example": "Exempel — inte en riktig person eller riktiga data",
-    "hint": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
-    "hintWorkers": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
     "open": "Öppna i din arbetsyta",
     "list": "Steg i arbetets livscykel",
     "workers": {
@@ -20735,7 +20673,6 @@
       "close": "Stäng",
       "functions": "Åtgärder",
       "professions": "Yrken",
-      "opensNow": "Inget konto krävs",
       "signInWhenOpen": "Inloggning krävs",
       "allSectors": "Alla branscher",
       "fullList": "Hela listan"

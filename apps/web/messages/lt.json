@@ -5256,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Kodėl įmonės",
-      "headline": "Pasiūla, su kuria galima veikti",
-      "items": [
-        {
-          "title": "Paaiškinama atitikimo kryptis",
-          "desc": "Kiekvienas atitikimo signalas pateikia priežastis."
-        },
-        {
-          "title": "Tarpvalstybinis darbuotojų rezervas",
-          "desc": "Pasiūla iš visų rinkų, kuriose veikiame, vienoje vietoje."
-        },
-        {
-          "title": "Be neskaidrių tarpininkų",
-          "desc": "Tu matai ir valdai santykį."
-        },
-        {
-          "title": "Įgūdžių įrašai + atitikimo signalai",
-          "desc": "Samdyk pagal įrašus, ne pažadus."
-        },
-        {
-          "title": "Pasiūlos signalai",
-          "desc": "Matyk deklaruotą darbuotojų prieinamumą, kai profiliai atnaujinami."
-        },
-        {
-          "title": "Tiesioginis kontaktas",
-          "desc": "Santykis su darbuotoju priklauso tau."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "DUK įmonėms",
       "headline": "Aiškūs atsakymai",
@@ -5351,36 +5321,6 @@
         {
           "title": "Augink savo rezervą",
           "desc": "Pridėk pajėgumo, kur auga paklausa."
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "Kodėl agentūros",
-      "headline": "Svertas, ne kontrolės praradimas",
-      "items": [
-        {
-          "title": "Valdyk rezervą",
-          "desc": "Darbuotojai, prieinamumas ir būsena vienoje vietoje."
-        },
-        {
-          "title": "Skelbk klientų vardu",
-          "desc": "Tarpininkauk neprarasdamas santykio."
-        },
-        {
-          "title": "Atitikimo kryptis",
-          "desc": "Greičiau įdarbink tinkamus."
-        },
-        {
-          "title": "Matomumo valdymas",
-          "desc": "Vieša, tik agentūroms ar tiesioginė — tavo sprendimas."
-        },
-        {
-          "title": "Tarpvalstybinis pasiekiamumas",
-          "desc": "Klientai ir darbuotojai visose rinkose, kuriose veikiame."
-        },
-        {
-          "title": "Augink biurą",
-          "desc": "Pajėgumo įžvalgos keičiantis paklausai."
         }
       ]
     },
@@ -19444,8 +19384,6 @@
     "title": "Kas nutinka su tavo darbu",
     "titleCompany": "Kas nutinka su tavo vykdomu darbu",
     "example": "Pavyzdys — ne tikras žmogus ir ne tikri duomenys",
-    "hint": "Pasirink žingsnį. Kiekvienas atveria tikrą vietą tavo darbo erdvėje.",
-    "hintWorkers": "Pasirink žingsnį. Kiekvienas atveria tikrą vietą tavo darbo erdvėje.",
     "open": "Atidaryti darbo erdvėje",
     "list": "Darbo gyvavimo ciklo žingsniai",
     "workers": {
@@ -20735,7 +20673,6 @@
       "close": "Uždaryti",
       "functions": "Veiksmai",
       "professions": "Profesijos",
-      "opensNow": "Paskyros nereikia",
       "signInWhenOpen": "Reikia prisijungti",
       "allSectors": "Visi sektoriai",
       "fullList": "Visas sąrašas"
