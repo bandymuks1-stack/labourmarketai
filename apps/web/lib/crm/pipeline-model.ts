@@ -25,6 +25,7 @@
 
 import type { CompanyNeedIntakeStatus } from "@/lib/admin/company-need-intake-shared";
 import type { IntakeRequestStatus } from "@/lib/sales/lead-intake-model";
+import { isSyntheticCommercialRequest } from "@/lib/staffing/commercial-requests-feed";
 
 // ── Presentation stage-set (closed) ─────────────────────────────────────────
 
@@ -197,6 +198,36 @@ export type PublicIntakeInput = {
   readonly country: string | null;
   readonly createdAt: string;
 };
+
+/** The four texts the one test-row rule reads, as the intake queue names them. */
+export type PublicIntakeTexts = {
+  readonly companyName: string | null;
+  readonly contactName: string | null;
+  readonly contactEmail: string | null;
+  readonly description: string | null;
+};
+
+/**
+ * Public intakes that are REAL requests (owner 2026-11-14): our own test rows (a
+ * production walk, an e2e proof) are left out of the pipeline, so they can never
+ * sit in a real stage or source count. The rule is the commercial feed's ONE
+ * predicate, `isSyntheticCommercialRequest` — not a copy. Left out, not labelled:
+ * the pipeline is the real-demand view and every count on it is computed from its
+ * items, so a labelled row would need its own exception in each count; the admin
+ * intake queue (/dashboard/admin/company-need-intakes) still lists the test rows
+ * for whoever has to clean them up.
+ */
+export function realPublicIntakes<T extends PublicIntakeTexts>(rows: readonly T[]): T[] {
+  return rows.filter(
+    (r) =>
+      !isSyntheticCommercialRequest({
+        company_name: r.companyName,
+        contact_name: r.contactName,
+        contact_email: r.contactEmail,
+        description: r.description,
+      }),
+  );
+}
 
 export type LeadInput = {
   readonly id: string;

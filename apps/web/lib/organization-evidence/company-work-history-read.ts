@@ -73,6 +73,10 @@ export type CompanyWorkHistoryLoad =
        *  imported history, never added to it. Null when it could not be read
        *  — never shown as "no hours". */
       readonly journal: OrganizationJournal | null;
+      /** This organization's own roster rows. A person on a record another
+       *  organization attributes here belongs to THAT roster: their card is
+       *  not this organization's to open. */
+      readonly ownPeople: Readonly<Record<string, true>>;
       /** Records stored in ANOTHER organization's books that name this one as the performing company. */
       readonly attributedCount: number;
       /** A safety ceiling was reached while reading: the totals cover only
@@ -188,7 +192,9 @@ export async function loadCompanyWorkHistory(
     archived: o.status === "archived",
   }));
   const linkedWorkers: Record<string, string> = {};
+  const ownPeople: Record<string, true> = {};
   for (const p of people.rows) {
+    ownPeople[p.id] = true;
     // Identity only by the PERSON's own confirmation (integrity doors v1).
     if (p.link_state === "linked" && p.link_method === "worker_confirmed" && p.linked_worker_id)
       linkedWorkers[p.id] = p.linked_worker_id;
@@ -247,6 +253,7 @@ export async function loadCompanyWorkHistory(
     linkedWorkers,
     projects,
     journal,
+    ownPeople,
     attributedCount: attributed.length,
     truncated: recs.truncated,
   };
