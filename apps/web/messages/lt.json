@@ -5285,34 +5285,6 @@
       },
       "subcopy": "Sukurkite įmonės paskyrą, paskelbkite darbo poreikį ir matykite, kurie prieinami darbuotojai jį atitinka.",
       "button": "Sukurti įmonės paskyrą"
-    },
-    "features": {
-      "items": [
-        {
-          "title": "Paaiškinama atitikimo kryptis",
-          "desc": "Kiekvienas atitikimo signalas pateikia priežastis."
-        },
-        {
-          "title": "Tarpvalstybinis darbuotojų rezervas",
-          "desc": "Pasiūla iš visų rinkų, kuriose veikiame, vienoje vietoje."
-        },
-        {
-          "title": "Be neskaidrių tarpininkų",
-          "desc": "Jūs matote ir valdote santykį."
-        },
-        {
-          "title": "Įgūdžių įrašai + atitikimo signalai",
-          "desc": "Samdykite pagal įrašus, ne pažadus."
-        },
-        {
-          "title": "Pasiūlos signalai",
-          "desc": "Matykite deklaruotą darbuotojų prieinamumą, kai profiliai atnaujinami."
-        },
-        {
-          "title": "Tiesioginis kontaktas",
-          "desc": "Santykis su darbuotoju priklauso jums."
-        }
-      ]
     }
   },
   "agencies": {
@@ -5381,34 +5353,6 @@
       },
       "subcopy": "Sukurkite agentūros paskyrą ir valdykite savo darbuotojų grupę vienoje darbo erdvėje.",
       "button": "Sukurti agentūros paskyrą"
-    },
-    "features": {
-      "items": [
-        {
-          "title": "Valdykite rezervą",
-          "desc": "Darbuotojai, prieinamumas ir būsena vienoje vietoje."
-        },
-        {
-          "title": "Skelbkite klientų vardu",
-          "desc": "Tarpininkaukite neprarandant santykio."
-        },
-        {
-          "title": "Atitikimo kryptis",
-          "desc": "Greičiau įdarbinkite tinkamus."
-        },
-        {
-          "title": "Matomumo valdymas",
-          "desc": "Vieša, tik agentūroms ar tiesioginė — jūsų sprendimas."
-        },
-        {
-          "title": "Tarpvalstybinis pasiekiamumas",
-          "desc": "Klientai ir darbuotojai visose rinkose, kuriose veikiame."
-        },
-        {
-          "title": "Auginkite biurą",
-          "desc": "Pajėgumo įžvalgos keičiantis paklausai."
-        }
-      ]
     }
   },
   "nav": {
@@ -10760,8 +10704,7 @@
     "receivedTitle": "Užklausa gauta",
     "receivedBody": "Gavome jūsų užklausą ir laikome ją tolesniam kontaktui su jumis. Kad ją matytumėte paskyroje, susikurkite įmonės paskyrą arba prisijunkite tuo pačiu el. pašto adresu, kurį čia nurodėte. Kai parodysite, kad adresas jūsų, užklausa atsiras jūsų paskyros užklausose ir ten galėsite ją perimti. Ji nesusiejama automatiškai, o paskyra su kitu adresu jos nemato.",
     "partnerRouteTitle": "Statybų užklausoms — partnerių įmonių kelias",
-    "partnerRouteBody": "Jeigu tinkamo tiesioginio darbuotojo atitikmens dar nėra, statybų užklausoms pirmiausia galime rekomenduoti kreiptis į mūsų partnerę UAB „Nonstop Group“ (LT) — platformos operatorę. Tai padeda greičiau suderinti dokumentus, atsakomybes ir įdarbinimo eigą, kiekvieną žingsnį koordinuojant žmogui.",
-    "contactEmailHelp": "Neprivaloma, bet padeda greičiau susisiekti dėl jūsų užklausos."
+    "partnerRouteBody": "Jeigu tinkamo tiesioginio darbuotojo atitikmens dar nėra, statybų užklausoms pirmiausia galime rekomenduoti kreiptis į mūsų partnerę UAB „Nonstop Group“ (LT) — platformos operatorę. Tai padeda greičiau suderinti dokumentus, atsakomybes ir įdarbinimo eigą, kiekvieną žingsnį koordinuojant žmogui."
   },
   "candidatePool": {
     "title": "Kandidatų telkinys",
@@ -14009,8 +13952,7 @@
         "ctaBody": "Ta pati sąmatos skaičiuoklė veikia LabourMarket.ai poreikio formoje. Su paskyra sąmatą galite pridėti prie struktūruoto darbuotojų poreikio; be paskyros — aprašykite poreikį viešoje formoje.",
         "ctaDashboard": "Sukurti darbo poreikį (su paskyra)",
         "ctaCompanyNeed": "Aprašyti poreikį be paskyros",
-        "ctaCompanyNeedHelp": "Viešoji forma gauna tik darbuotojų skaičių ir šalį — jokios kainos ir aprašymai neperduodami.",
-        "ctaDashboardHelp": "Paskyros kelias atidaro poreikio formą jūsų valdymo skydelyje — skaičiuoklė šių skaičių neperduoda."
+        "ctaCompanyNeedHelp": "Viešoji forma gauna tik darbuotojų skaičių ir šalį — jokios kainos ir aprašymai neperduodami."
       }
     }
   },
@@ -19517,9 +19459,7 @@
         "fact": "Ataskaita iš tikro darbo",
         "detail": "Ataskaitos gaunamos iš patvirtinto darbo — niekas jų nerašo iš naujo."
       }
-    },
-    "hint": "Pasirinkite žingsnį. Kiekvienas atveria tikrą vietą jūsų darbo erdvėje.",
-    "hintWorkers": "Pasirinkite žingsnį. Kiekvienas atveria tikrą vietą jūsų darbo erdvėje."
+    }
   },
   "twoSides": {
     "title": "Įdarbinimas yra pradžia, o ne pabaiga.",

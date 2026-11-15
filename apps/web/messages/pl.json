@@ -19459,9 +19459,7 @@
         "fact": "Raport z prawdziwej pracy",
         "detail": "Raporty powstają z potwierdzonej pracy — nikt ich nie przepisuje."
       }
-    },
-    "hint": "Proszę wybrać krok. Każdy krok otwiera prawdziwe miejsce w Państwa przestrzeni roboczej.",
-    "hintWorkers": "Proszę wybrać krok. Każdy krok otwiera prawdziwe miejsce w Państwa przestrzeni roboczej."
+    }
   },
   "twoSides": {
     "title": "Zatrudnienie to początek, nie koniec.",
