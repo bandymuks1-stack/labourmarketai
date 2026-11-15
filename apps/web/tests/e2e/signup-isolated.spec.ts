@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { FIRST_VISIT_CAMPAIGN, refuseOnFirstVisit, storedAnalytics } from "./first-visit-consent";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * SELF-SERVE SIGN-UP, end to end, on a THROWAWAY LOCAL Supabase stack
@@ -71,7 +72,17 @@ async function signUp(
   await page.locator('input[name="password"]').fill(password);
   await page.locator('input[name="confirm_password"]').fill(password);
   await page.locator('form button[type="submit"]').click();
-  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 }).catch(async (cause: unknown) => {
+    // Say what the page said instead of a bare timeout (synthetic account, local stack).
+    const said = (await page.locator("form").first().innerText({ timeout: 2_000 }).catch(() => "")).replace(/\s+/g, " ");
+    const alerts = (await page.locator('[role="alert"], [role="status"], [aria-live]').allInnerTexts().catch(() => []))
+      .map((t) => t.replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+    throw new Error(
+      `sign-up did not reach onboarding; at ${new URL(page.url()).pathname}; alerts: ${JSON.stringify(alerts).slice(0, 400)}; form ends: ${said.slice(-400)}`,
+      { cause },
+    );
+  });
   await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
 }
 
@@ -315,6 +326,7 @@ test("S-8. a company publishes its first need for free", async ({ page }) => {
   await main.getByTestId("demand-next").click();
   const size = main.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await chooseDemandCountryIfEmpty(page);
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done"), "the first need is accepted on the free plan").toBeVisible({ timeout: 30_000 });
@@ -685,7 +697,9 @@ test("P-2. on a desktop the onboarding buttons stay where they were, in the page
 // ── Student / intern (#3322 item 6): the SAME account and worker record ─────
 
 test("ST-1. a student signs up, keeps one worker record with no company, and the school reaches the profile, the CV and the board", async ({ page }) => {
-  const address = email("student");
+  // Its own address: S-3b already signs up as email("student") in this file, and both
+  // run in one worker (same RUN), so a shared address is "already registered".
+  const address = email("student-intern");
   const school = `Synthetic Vocational School ${RUN}`;
   await signUp(page, address);
   await page.getByTestId("onboarding-intent-student").click();

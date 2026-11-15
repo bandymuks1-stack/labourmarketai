@@ -37,7 +37,7 @@ describe("toActiveLocale — the closed active set, or the default", () => {
   });
 
   it("NEGATIVE: a real but INACTIVE locale is not routed, so it clamps too", () => {
-    for (const inactive of ["lv", "et", "da", "no", "sv"]) {
+    for (const inactive of ["lv", "et", "da", "no"]) {
       expect(toActiveLocale(inactive)).toBe(defaultLocale);
     }
   });

@@ -1109,10 +1109,8 @@ export default async function OpportunitiesPage({
               { dim: "accommodation", values: facets.accommodations },
               { dim: "transport", values: facets.transports },
               { dim: "tool", values: facets.tools },
-              // The kind of opportunity (employment, internship, apprenticeship…).
-              // The filter always worked through the address; without a control
-              // here nobody looking for a placement could reach it.
-              { dim: "opportunityType", values: facets.opportunityTypes },
+              // opportunityType is listed ONCE, above (#3334 and #3338 each added it,
+              // so the type chips rendered twice with duplicate keys and testids).
             ];
             const showFilterControls =
               active.length > 0 || facetGroups.some((g) => g.values.length > 0);

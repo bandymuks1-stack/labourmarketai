@@ -272,7 +272,7 @@
     "legalCheckFood": "Maisto ir savo užaugintos produkcijos pardavimui taikomos maisto prekybos ir higienos taisyklės. Prieš skelbiant patvirtink, kad susipažinai su tau taikomomis taisyklėmis.",
     "legalCheckAck": "Susipažinau su man taikomomis taisyklėmis",
     "serviceNeedHint": "Reikalinga paslauga visada yra skelbimas „ieškoma“.",
-    "moreTypesSoon": "Daugiau skelbimų tipų čia bus netrukus.",
+    "moreTypesSoon": "Kol kas čia prieinami tik šie skelbimų tipai.",
     "pause": "Pristabdyti",
     "expired": "Pasibaigęs",
     "expiresOn": "Iki {date}",
@@ -395,7 +395,7 @@
   },
   "commercial": {
     "pageTitle": "Komercija",
-    "pageIntro": "Tavo pasiūlymai ir sutartys, susieti su poreikiais ir projektais. Sąskaitos ir mokėjimai registruojami Finansuose.",
+    "pageIntro": "Tavo pasiūlymai ir sutartys vienoje vietoje. Sąskaitos ir mokėjimai registruojami Finansuose.",
     "preApply": "Komercijos CRM bus prieinamas, kai bus pritaikytas komercijos atnaujinimas.",
     "proposalsTitle": "Pasiūlymai",
     "honestNote": "Pasiūlymas juda juodraštis → išsiųstas → priimtas/atmestas tik tau nustačius. Niekas nesiunčiama automatiškai.",
@@ -406,6 +406,8 @@
     "noSignatureNote": "Sutartys saugo būseną ir neprivalomą dokumento nuorodą. Elektroninis parašas nekuriamas ir neteigiamas.",
     "contractsEmpty": "Sutarčių dar nėra.",
     "addContract": "Pridėti sutartį",
+    "contractFromProposal": "Sukurti sutartį",
+    "fromProposal": "Iš pasiūlymo: {title}",
     "contractTitlePlaceholder": "Sutarties pavadinimas",
     "docRef": "Dok. nuoroda",
     "docRefLabel": "Dokumento nuoroda",
@@ -910,7 +912,7 @@
     },
     "exports": {
       "title": "Eksportai",
-      "note": "Rodomi tik jau veikiantys eksportai — čia nieko nėra „paruošiamo“.",
+      "note": "Rodomi tik jau veikiantys eksportai.",
       "evidence": "Įrodymų ataskaita (spausdinti / PDF)",
       "cv": "CV (spausdinti / PDF)",
       "journalCsv": "Žurnalo eksportas (CSV)",
@@ -1177,7 +1179,7 @@
     "switchSpace": "Keisti erdvę",
     "addSpace": "Pridėti erdvę",
     "availableSpaces": "Galimos erdvės",
-    "comingLaterToggle": "Vėliau įjungiamos skiltys (rodyti)",
+    "comingLaterToggle": "Dar neprieinamos skiltys (rodyti)",
     "profile": {
       "name": "Asmeninis profilis",
       "purpose": "Tvarkyk avatarą, CV, įgūdžius ir darbo statusą."
@@ -1661,7 +1663,7 @@
         "label": "Darbo įrašai",
         "available": "Žurnalo įrašai: {n}",
         "none": "Dar nesusieta",
-        "preparing": "Darbo įrašų ryšys ruošiamas"
+        "preparing": "Darbo įrašų ryšys dar neprieinamas"
       },
       "availability": {
         "label": "Prieinamumas",
@@ -1808,7 +1810,7 @@
     "reviewCta": "Peržiūrėti įrašus",
     "projectsTitle": "Projektai, objektai ir užsakovai",
     "projectsReadyBadge": "Struktūra paruošta",
-    "projectsBody": "Čia matai projektus, užsakovus, projekto darbuotojus ir darbo elementus. Niekas neužpildoma automatiškai — naujus projektus ir užsakovus kurti kol kas negalima; ši galimybė ruošiama.",
+    "projectsBody": "Čia matai projektus, užsakovus, projekto darbuotojus ir darbo elementus. Niekas neužpildoma automatiškai — naujus projektus ir užsakovus kurti kol kas negalima.",
     "projectsCount": "Projektai",
     "projectsEmpty": "dar nesukurta nė vieno projekto",
     "projectsLinkingNote": "Darbo žurnalo įrašus prie projekto priskiria juos fiksuojantys žmonės. Naujas projekto kontekstas prasideda tuščias — niekas neužpildoma automatiškai.",
@@ -2335,7 +2337,7 @@
         "title": "Nepavyko",
         "subtitle": "Šiuo metu nepasiekiama.",
         "statusLabel": "Nepavyko",
-        "statusBody": "Įmonės darbuotojų valdymas dar ruošiamas ir bus įjungtas vėliau.",
+        "statusBody": "Įmonės darbuotojų valdymas dar neprieinamas.",
         "nextStep": "Savaiminis užsiregistravimas darbuotojams lieka atviras visada."
       },
       "workers": {
@@ -2803,7 +2805,7 @@
         "fieldNeedSummary": "Užklausos aprašymas",
         "fieldNeedSummaryPlaceholder": "Trumpas, ką ieškai.",
         "fieldCountry": "Šalis",
-        "fieldCountryPlaceholder": "pvz. LT",
+        "fieldCountryPlaceholder": "Pasirink šalį",
         "fieldLocation": "Vieta / regionas",
         "fieldLocationPlaceholder": "pvz. Vilnius",
         "fieldRole": "Vaidmuo / darbo tipas",
@@ -3652,7 +3654,7 @@
     "opportunities": "Galimybės: matai tau tinkančius darbus. Matomumas priklauso nuo tinklo dydžio ir tavo pasirengimo.",
     "marketplaceMap": "Rinkos žemėlapis: darbo rinkos signalai pagal šalį ir regioną. Tikslesnė vieta atsiranda, kai ją nustatai.",
     "adminReview": "Sistemos priežiūra: skirta tik administratoriui. Paprastas vartotojas šių ekranų nemato.",
-    "paymentReadiness": "Mokėjimai ruošiami: mokama prieiga dar neaktyvi.",
+    "paymentReadiness": "Mokama prieiga dar neaktyvi.",
     "identityModel": "Dvi bazinės tapatybės: asmuo ir įmonė. Pirkimas, pardavimas, samdymas ir agentūrinė veikla yra veiksmai, ne atskiros tapatybės."
   },
   "profileIdentityNotice": {
@@ -3771,7 +3773,7 @@
     "addLaterHint": "Vėliau galėsi pridėti daugiau vaidmenų — kataloge jie pasirodys, kai bus paruošti.",
     "status": {
       "active": "Aktyvu",
-      "preparing": "Netrukus",
+      "preparing": "Dar neprieinama",
       "start": "Pradėti",
       "partial": "Dalinis"
     },
@@ -3779,9 +3781,9 @@
       "openSetup": "Atidaryti nustatymą"
     },
     "preparingReason": {
-      "default": "Šis vaidmuo dar ruošiamas. Įjungsime jį, kai bus paruoštas saugiai.",
+      "default": "Šis vaidmuo dar neprieinamas.",
       "startAvailable": "Nustatymo kelias jau veikia: vienu lauku įrašai pavadinimą, ir paskyra sukuriama. Pilna darbo erdvė dar pildoma.",
-      "customerPartial": "Pirkėjo erdvė dar ruošiama. Gali pridėti pirkėjo vaidmenį ir pildyti užklausą."
+      "customerPartial": "Visa pirkėjo erdvė dar neprieinama. Gali pridėti pirkėjo vaidmenį ir pildyti užklausą."
     },
     "worker": {
       "description": "Veikla kaip asmuo: text-first profilis, įgūdžiai ir darbo žurnalas. Aktyvu šiandien."
@@ -3796,13 +3798,13 @@
       "description": "Veiksmas — pateikti ir valdyti užklausas dėl paslaugų, specialistų ar komandų. Bus įjungta vėliau."
     },
     "freelancer": {
-      "description": "Laisvai samdomas: tavo paslaugos ir darbo istorija viename profilyje. Ruošiama."
+      "description": "Laisvai samdomas: tavo paslaugos ir darbo istorija viename profilyje. Dar neprieinama."
     },
     "team_lead": {
-      "description": "Komandos vadovas: komandos sudėtis ir bendri pasiūlymai. Ruošiama."
+      "description": "Komandos vadovas: komandos sudėtis ir bendri pasiūlymai. Dar neprieinama."
     },
     "service_provider": {
-      "description": "Paslaugų teikėjas: viešas paslaugų katalogas su patvirtintais įrodymais. Ruošiama."
+      "description": "Paslaugų teikėjas: viešas paslaugų katalogas su patvirtintais įrodymais. Dar neprieinama."
     }
   },
   "activityTypes": {
@@ -3824,10 +3826,10 @@
     "eyebrow": "Darbo rinkos OS",
     "headline": "Parodyk, ką sugebi ir nuveiki. Rask daugiau galimybių tai realizuoti.",
     "lede": "Vienas asmuo. Daug vaidmenų laikui bėgant. CV gimsta iš realių darbų ir įrašų, ne iš savadarbio teksto. Pirmas pasirinkimas yra įėjimo taškas, ne narvas.",
-    "honesty": "Pastaba: žemiau matai visą sistemos žemėlapį. Vieni paviršiai šiandien jau veikia, kiti aiškiai pažymėti kaip „Ruošiama“. Niekada nesakome, kad veikia tai, ko dar nėra.",
+    "honesty": "Pastaba: žemiau matai visą sistemos žemėlapį. Vieni paviršiai šiandien jau veikia, kiti aiškiai pažymėti kaip „Dar neprieinama“. Niekada nesakome, kad veikia tai, ko dar nėra.",
     "sections": {
       "today": "Galima naudoti jau dabar",
-      "preparing": "Netrukus",
+      "preparing": "Dar neprieinama",
       "workflow": "Kaip žmogaus kelias eina per sistemą",
       "roles": "Vaidmenų vystymasis (be užrakto)",
       "activities": "Veiklų landšaftas",
@@ -3844,10 +3846,10 @@
     },
     "controlRoom": {
       "todayLabel": "Šiandien aktyvu",
-      "preparingLabel": "Netrukus",
+      "preparingLabel": "Dar neprieinama",
       "blockedLabel": "Užblokuota",
       "nonWorkerLabel": "Įmonės / agentūros / pirkėjo erdvės",
-      "nonWorkerStatus": "Netrukus",
+      "nonWorkerStatus": "Dar neprieinama",
       "nonWorkerStatusActive": "Veikia",
       "fakeClaimsLabel": "Netikras dirbtinis intelektas / netikras atitikimas / netikra reputacija",
       "fakeClaimsStatus": "Niekada nenaudojama"
@@ -3858,7 +3860,7 @@
       "agent": "AI / agentų orkestras (kai bus paruoštas saugiai)",
       "trust": "Reputacijos / pasitikėjimo sluoksnis"
     },
-    "footer": "Sistemoje paskelbtas vizijos žemėlapis nereiškia, kad visos sritys jau veikia. Ką galima naudoti šiandien — pažymėta „Šiandien veikia“. Visa kita yra arba „Ruošiama“, arba ateities sluoksnis.",
+    "footer": "Sistemoje paskelbtas vizijos žemėlapis nereiškia, kad visos sritys jau veikia. Ką galima naudoti šiandien — pažymėta „Šiandien veikia“. Visa kita yra arba „Dar neprieinama“, arba ateities sluoksnis.",
     "internalPreviewBadge": "Vidinė peržiūra",
     "internalPreviewBanner": "Puslapis dar nepaviešintas. Tai vidinė peržiūra savininkui ir pakviestiems dalyviams. Nepublikuok nuorodos viešai, kol owner production smoke nebus PASSED."
   },
@@ -3873,11 +3875,11 @@
   "dashboard": {
     "comingLater": {
       "eyebrow": "Vėliau",
-      "title": "Vėliau įjungiami moduliai",
-      "body": "Šios sritys ruošiamos ir bus įjungtos atskirais etapais. Kol kas jos nėra aktyvūs veiksmai."
+      "title": "Dar neprieinami moduliai",
+      "body": "Šios sritys dar neprieinamos. Tai nėra aktyvūs veiksmai."
     },
     "featuresHeading": {
-      "eyebrow": "Galimybės ir ruošiama",
+      "eyebrow": "Kas veikia ir kas dar neprieinama",
       "title": "Ką galima daryti šiandien ir kas ateis vėliau",
       "body": "Pradėk nuo to, kas šiandien tikra: ką moki, ką darei arba ką nori pasiūlyti. Vėliau galėsi plėsti vaidmenis ir veiklas, kai jos bus paruoštos.",
       "open": "Atidaryti"
@@ -3885,7 +3887,7 @@
   },
   "features": {
     "preparing_generic_reason": "Ši galimybė bus įjungta vėliau.",
-    "preparing_badge": "Netrukus",
+    "preparing_badge": "Dar neprieinama",
     "overview": {
       "label": "Apžvalga",
       "description": "Pradžios vaizdas atsidaro kiekvienam tavo turimam vaidmeniui.",
@@ -4549,7 +4551,7 @@
         },
         "addMore": {
           "title": "Pridėk dar vieną būdą naudotis labourmarket.ai",
-          "body": "Tavęs neužrakiname viename vaidmenyje. Įmonės, agentūros ir pirkėjo erdvės dar ruošiamos — pridėsime palaipsniui.",
+          "body": "Tavęs neužrakiname viename vaidmenyje. Įmonės, agentūros ir pirkėjo erdvės dar ne visos prieinamos.",
           "cta": "Peržiūrėti vaidmenis"
         },
         "activitySetup": {
@@ -4576,10 +4578,11 @@
             "back": "Atgal",
             "next": "Toliau",
             "descRequired": "Įrašyk aprašymą, kad galėtum tęsti.",
+            "countryRequired": "Pasirink šalį, kurioje bus dirbama.",
             "optionalTag": "(nebūtina)",
             "reviewIntro": "Peržiūrėk ir sukurk. Užklausa lieka privati tavo erdvėje.",
-            "locationLabel": "Vieta ar šalis",
-            "locationPlaceholder": "Pvz., Vilnius, Lietuva",
+            "locationLabel": "Miestas ar darbo vieta",
+            "locationPlaceholder": "Pvz., miestas, rajonas ar objektas",
             "skillsLabel": "Reikalingi įgūdžiai ar kriterijai",
             "skillsPlaceholder": "Pvz., B kategorija, anglų kalba, patirtis",
             "urgencyLabel": "Kada reikia",
@@ -4930,7 +4933,7 @@
         "logout": "Atsijungti",
         "rolesIntro": "Šiandien gali pradėti kaip darbuotojas, bet tai neužrakina tavęs viename vaidmenyje. Vėliau galėsi pridėti įmonės, agentūros, kliento ar kitus darbo rinkos vaidmenis, kai jie bus paruošti.",
         "active_workspace": "Aktyvi erdvė",
-        "preview_workspace": "Ruošiama",
+        "preview_workspace": "Peržiūra",
         "comingLater": "Bus galima vėliau",
         "theme": {
           "appearance": "Išvaizda",
@@ -4952,7 +4955,7 @@
             "active": "Aktyvuota",
             "notActive": "Kol kas neaktyvuota",
             "benefit": "Apsaugok savo profilį, darbo istoriją, dokumentus ir žinutes antru patikrinimu, kurį gali įveikti tik tu.",
-            "setupComing": "Nustatymas čia atsiras netrukus — jis užtrunka apie 30 sekundžių ir bet kada galėsi jį išjungti."
+            "setupComing": "Dviejų žingsnių prisijungimo čia kol kas nustatyti negalima."
           },
           "recovery": {
             "label": "Paskyros atkūrimas",
@@ -4983,8 +4986,8 @@
       },
       "comingSoon": {
         "greeting": "👋 Labas, {name}",
-        "body_main": "Šiuo metu mes baigiame ruošti įmonių/agentūrų funkcionalumą.",
-        "body_notify": "Pranešime iškart, kai bus paruošta.",
+        "body_main": "Įmonių / agentūrų funkcionalumas dar neprieinamas.",
+        "body_notify": "Pranešime, kai jis bus prieinamas.",
         "body_meanwhile": "Tuo tarpu — gali apžiūrėti platformą per „Naršyti\" skiltį (tik peržiūrai)."
       },
       "menuLinks": {
@@ -5644,6 +5647,36 @@
             "Statybų užklausoms mūsų partnerė įmonė gali koordinuoti dokumentus ir įvedimą į darbą — kiekvieną žingsnį veda žmogus."
           ]
         }
+      },
+      "needs": {
+        "subcontracting": {
+          "metaTitle": "Statybų subrangovai ir brigados Europoje",
+          "metaDescription": "Aprašykite darbų paketą, vietą ir terminus. Subrangovai ir agentūros gali pasiūlyti visą brigadą; palyginate pasiūlymus ir susitariate dėl sąlygų. Nemokamai.",
+          "eyebrow": "Rangovams",
+          "title": "Subrangovai ir brigados",
+          "titleAccent": "jūsų projektui.",
+          "subcopy": "Generaliniams rangovams ir įmonėms, kurios perduoda darbų paketą. Parašykite specialybę, apimtį, vietą ir terminus — ir ar reikia vieno subrangovo, ar visos brigados.",
+          "cta": "Aprašykite darbų paketą",
+          "points": [
+            "Darbų paketą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
+            "Su nemokama įmonės paskyra subrangovai ir agentūros gali pasiūlyti jums brigadą kaip vieną vienetą. Palyginate pasiūlymus ir dėl sąlygų susitariate tiesiogiai su jais.",
+            "Kai brigada dirba jūsų projekte, jos nariai ten pažymi valandas, o jūs jas matote. Jei tinkamos brigados dar nėra, taip ir pasakome."
+          ]
+        },
+        "agency": {
+          "metaTitle": "Personalo ar įdarbinimo agentūra partnerė Europoje",
+          "metaDescription": "Aprašykite, kokių žmonių reikia, ir pasirinkite tiekimą per agentūrą. LabourMarket.ai agentūros nurodo, kokius darbuotojus gali pasiūlyti. Nemokamai.",
+          "eyebrow": "Darbdaviams, ieškantiems agentūros",
+          "title": "Personalo partneris",
+          "titleAccent": "jums reikalingiems žmonėms.",
+          "subcopy": "Įmonėms, kurios nori, kad agentūra parūpintų ar atrinktų darbuotojus. Parašykite, kokių žmonių reikia, kiek, kur ir nuo kada, ir pasirinkite tiekimą per agentūrą.",
+          "cta": "Aprašykite, ko reikia",
+          "points": [
+            "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
+            "LabourMarket.ai personalo agentūros nurodo, kokius darbuotojus gali pasiūlyti. Su nemokama įmonės paskyra tą pasiūlą matote.",
+            "Darbuotojai, įmonės ir agentūros naudojasi ta pačia platforma. Jei tinkamo partnerio dar nėra, taip ir pasakome — atitikmens neišgalvojame."
+          ]
+        }
       }
     },
     "agencies": {
@@ -5717,7 +5750,7 @@
     "eyebrow": "Kainos",
     "title": "Aiškūs planai —",
     "titleAccent": "sąžininga kaina.",
-    "subcopyLive": "Kainos patvirtintos savininko ir galioja. Aktyvavimas vyksta organizacijos paskyroje per saugų Stripe mokėjimą; šiame puslapyje niekas nenuskaičiuojama.",
+    "subcopyLive": "Kainos galioja. Aktyvavimas vyksta organizacijos paskyroje per saugų Stripe mokėjimą; šiame puslapyje niekas nenuskaičiuojama.",
     "subcopy": "Kainos dar nėra galutinės ir sąskaitos už jus šiame puslapyje niekada nepradedamos. Žemiau pateikti planai apibūdina apimtį; aktyvavimas vyksta rankiniu būdu — susisiekite ir prieš pradedant suderinsime kainą bei apimtį.",
     "subcopyConfirmed": "Kainos patvirtintos. Aktyvavimas internetu dar neatidarytas — užsirašykite į sąrašą, susisieksime ir organizaciją paleisime rankiniu būdu; šiame puslapyje niekas netraukiama.",
     "trialNote": "Pirmoji organizacijos prenumerata prasideda 14 dienų bandomuoju laikotarpiu. Po jo kortelė apmokestinama mėnesio kaina, o atšaukti galite iki jo pabaigos.",
@@ -5785,8 +5818,9 @@
       }
     ],
     "priceState": {
-      "draft_pricing": "Kainos ruošiamos — nieko įsigyti dar negalima.",
-      "owner_confirmed": "Kainos patvirtintos savininko. Aktyvavimas vyksta organizacijos paskyroje; šiame puslapyje niekas nenuskaičiuojama."
+      "draft_pricing": "Kainos nėra galutinės — nieko įsigyti dar negalima.",
+      "owner_confirmed": "Kainos patvirtintos. Šiame puslapyje niekas neapmokestinama.",
+      "owner_confirmed_closed": "Kainos patvirtintos. Mokėjimas internetu dar neatidarytas; šiame puslapyje niekas neapmokestinama."
     },
     "individual": {
       "name": "Ypatingi poreikiai",
@@ -5798,7 +5832,8 @@
     "priceFree": "0 €",
     "pricePerMonth": "{price} €/mėn.",
     "ctaStartFree": "Pradėti nemokamai organizacijos paskyroje",
-    "ctaSubscribe": "Aktyvuoti organizacijos paskyroje"
+    "ctaSubscribe": "Aktyvuoti organizacijos paskyroje",
+    "faqBillingClosed": "Mokėjimas internetu viešai dar neatidarytas, todėl čia nieko nusipirkti negalima. Registracija ir viena aktyvi pozicija nemokamos. Mokamam darbui pirmieji klientai aptarnaujami tiesiogiai, o kaina su jumis suderinama prieš pradedant."
   },
   "privacySelfService": {
     "title": "Privatumas ir tavo duomenys",
@@ -6824,7 +6859,7 @@
         "title": "Komunikacija",
         "context": "Pokalbis yra dėl šio projekto.",
         "cta": "Pokalbis dėl projekto",
-        "notReadyNote": "Atskira projekto pokalbių gija dar ruošiama. Kol kas pokalbį pradėk bendroje komunikacijoje — kontekstas (projektas) nurodytas viršuje."
+        "notReadyNote": "Atskira projekto pokalbių gija dar neprieinama. Kol kas pokalbį pradėk bendroje komunikacijoje — kontekstas (projektas) nurodytas viršuje."
       },
       "fieldCount": "{n, plural, one {# žmogus aikštėje} few {# žmonės aikštėje} other {# žmonių aikštėje}}",
       "fieldViaTeam": "{n} per komandą",
@@ -6839,7 +6874,7 @@
       "emptyTeam": "Projektas dar be komandos — pradėk draftą ir pakviesk pirmus žmones į aikštę.",
       "emptyTeamCta": "Pradėti draftą",
       "positionsTitle": "Trūkstamos pozicijos",
-      "positionsEmpty": "Pozicijų poreikiai dar ruošiami — kai atsiras, čia matysi, kokių žmonių trūksta.",
+      "positionsEmpty": "Pozicijų poreikiai dar neprieinami. Kai bus, čia matysite, kokių žmonių trūksta.",
       "openOps": "Atidaryti projekto valdymą",
       "gallery": {
         "title": "Darbų galerija",
@@ -7403,7 +7438,7 @@
     "tooManyOpen": "Turi per daug atvirų pagalbos užklausų — palauk, kol bus peržiūrėtos esamos.",
     "noteTooLong": "Aprašymas per ilgas (iki 500 ženklų).",
     "internalNote": "Vidinis įrašas — jokie laiškai ar žinutės niekam nesiunčiami.",
-    "explanationPending": "Paaiškinimas ruošiamas iš lietuviško pagrindinio teksto."
+    "explanationPending": "Paaiškinimas šia kalba dar neprieinamas."
   },
   "crmPipeline": {
     "eyebrow": "Operatoriaus eilė",
@@ -8332,7 +8367,7 @@
       "evidenceNote": "Atidaryk ir spausdink / išsaugok kaip PDF",
       "journal": "Darbo žurnalo eksportas",
       "journalNote": "Atsisiųsk kaip CSV (atsidaro su Excel)",
-      "formatStatus": "PDF: galima · CSV: galima · Excel / Word: ruošiama"
+      "formatStatus": "PDF: galima · CSV: galima · Excel / Word: dar neprieinama"
     },
     "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos arba teisininkas — tai nėra teisinė garantija.",
     "needsMigration": "Šiuo metu nepasiekiama.",
@@ -9106,7 +9141,7 @@
       "title": "Parengtis pagal rinką",
       "empty": "Pool dar nėra nurodytų šalių — parengtis atsiras su pirmomis.",
       "availableNow": "laisvi dabar",
-      "docsNote": "Dokumentų parengtis lieka pas darbuotoją: kategorijų lygio suvestinės čia atsiras tik su darbuotojo sutikimo jungikliu (vartų reikalaujantis pakeitimas, ruošiama). Dokumentų turinio čia niekada nematysi."
+      "docsNote": "Dokumentų parengtis lieka pas darbuotoją: kategorijų lygio suvestinės čia atsiras tik su darbuotojo sutikimo jungikliu. Dokumentų turinio čia niekada nematysi."
     },
     "demand": {
       "title": "Atvira paklausa",
@@ -9159,7 +9194,7 @@
     },
     "title": "Kandidatų atranka",
     "intro": "Pasirink vieną iš savo struktūruotų poreikių, kad matytum tinkamus darbuotojus, kodėl jie tinka, ir įtrauktum juos į trumpąjį sąrašą.",
-    "visibilityNote": "Matomumas remiasi pasirengimu, patikimumu ir leidimais — ne mokėjimu. Mokama platesnė prieiga dar neaktyvi (mokėjimai ruošiami). Rodomos tik saugios, anonimizuotos peržiūros — jokių netikrų skelbimų.",
+    "visibilityNote": "Matomumas remiasi pasirengimu, patikimumu ir leidimais — ne mokėjimu. Mokama platesnė prieiga dar neaktyvi. Rodomos tik saugios, anonimizuotos peržiūros — jokių netikrų skelbimų.",
     "pickDemand": "Pasirink poreikį",
     "noDemands": "Kol kas neturi poreikių. Sukurk poreikį skydelyje — po peržiūros komanda sustruktūruos reikalingus gebėjimus.",
     "noDemandsCta": "Sukurti poreikį",
@@ -9253,6 +9288,7 @@
       "view": "Atverti pokalbį",
       "error": "Pokalbio atverti nepavyko. Bandyk dar kartą.",
       "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandyk rytoj.",
+      "authorOnly": "Pokalbį gali pradėti tik tas, kas paskelbė šį poreikį.",
       "shortlistFirst": "Pirmiausia įtrauk darbuotoją į trumpąjį sąrašą, tada galėsi prašyti pokalbio."
     },
     "how": {
@@ -9292,7 +9328,7 @@
       "unavailable": "Nepavyko atlikti veiksmo. Bandyk dar kartą.",
       "error": "Kažkas nepavyko.",
       "cancel": "Atšaukti",
-      "notEntitled": "Tavo planas neapima rezervacijų — pradėk testinį apmokėjimą arba paprašyk piloto prieigos."
+      "notEntitled": "Rezervacijos neįeina į tavo planą. Savo planą matysi paskyros nustatymuose."
     },
     "recognizedNote": "Žemiau esantys reikalingi įgūdžiai atpažinti iš tavo poreikio teksto neprisijungus prie išorinių sistemų — tai pažymėtas pasiūlymas, ne patvirtinta struktūra. Peržiūrėk atitikmenis; galutinius reikalavimus patvirtina arba pakoreguoja administratorius.",
     "nextAction": {
@@ -9334,7 +9370,8 @@
       "title": "Susiaurinti sąrašą",
       "availableNow": "Laisvas dabar",
       "clear": "Išvalyti filtrus",
-      "noMatches": "Nė vienas kandidatas neatitinka pasirinktų filtrų."
+      "noMatches": "Nė vienas kandidatas neatitinka pasirinktų filtrų.",
+      "noMatchesCountry": "Matomoje pasiūloje dar nėra nė vieno žmogaus šalyje {country}. Rodyk visus arba praplėsk poreikį."
     },
     "pool": {
       "factsUnreadable": "Kai ko iš to, ką šie žmonės yra užfiksavę, dabar nepavyko perskaityti, todėl ši eilė nėra patikima. Niekas čia nėra parodytas turintis mažiau, nei turi — tiesiog trūksta faktų, pagal kuriuos lyginama. Perkrauk po akimirkos.",
@@ -9477,17 +9514,17 @@
       "contact": "Suderinama individualiai"
     },
     "readiness": {
-      "draft_pricing": "Planai parengti, bet jų įsigyti negalima. Nė viena kaina nėra galutinė ir nieko negalima nusipirkti.",
-      "owner_confirmed": "Planai kol kas tik parengti — nieko negalima nusipirkti, kol mokėjimai neįjungti."
+      "draft_pricing": "Nė viena kaina čia nėra galutinė ir nieko dar negalima nusipirkti.",
+      "owner_confirmed": "Nieko negalima nusipirkti, kol mokėjimai neįjungti."
     },
     "featuresLabel": "Ką apima ši riba",
     "limitValue": "iki {count}",
     "freeToday": {
       "freeTitle": "Nemokama šiandien",
       "free": "Viskas, kuo šiuo metu galite naudotis produkte, yra nemokama — pilotas vyksta be mokėjimų ir kortelės niekas neprašo.",
-      "paidTitle": "Paruošti mokami planai",
+      "paidTitle": "Mokami planai",
       "paid": "Šiuo metu nepasiekiama.",
-      "preparedTitle": "Paruošta, bet neįsigyjama",
+      "preparedTitle": "Dar neįsigyjama",
       "prepared": "Mokėjimo puslapio nėra ir nieko negalima nusipirkti. Piloto prieigą prie mokamų planų apimties komanda suteikia rankiniu būdu."
     },
     "features": {
@@ -9515,7 +9552,7 @@
     "enforcement": {
       "free_surface": "Prieinama šiandien",
       "server_gate": "Prieinama šiandien, pagal jūsų teises",
-      "declared_boundary_only": "Paruošta — įsijungs tik su apmokestinimu",
+      "declared_boundary_only": "Įsijungs tik įjungus apmokestinimą",
       "admin_rbac": "Vidinė, tik administratoriui"
     }
   },
@@ -9586,6 +9623,7 @@
       "withdraw": "Atšaukti pasiūlymą",
       "findAnother": "Ieškoti kito darbuotojo",
       "proposeAgain": "Siūlyti iš naujo su naujomis datomis",
+      "needClosed": "Darbdavys šį poreikį uždarė, todėl pasiūlymo priimti nebegali. Vis dar gali jį atmesti.",
       "planning": "Peržiūrėti kalendoriuje"
     },
     "connections": {
@@ -9980,15 +10018,15 @@
   "billingStatus": {
     "badge": {
       "disabled": "MOKĖJIMAI IŠJUNGTI",
-      "stripe_test": "TESTO REŽIMAS",
+      "stripe_test": "BE TIKRŲ MOKĖJIMŲ",
       "stripe_live_blocked": "LIVE BLOKUOJAMAS"
     },
     "body": {
       "disabled": "Mokėjimai neįjungti. Žemiau planai aprašo apimtį; paprašyk piloto prieigos, kad pradėtum.",
-      "stripe_test": "Stripe test mode įjungtas vidiniam testavimui — jokių realių pinigų, jokio realaus nuskaitymo.",
+      "stripe_test": "Tikri pinigai nejuda ir niekas nenuskaičiuojama.",
       "stripe_live_blocked": "Aptiktas live raktas/režimas ir saugumo sumetimais griežtai užblokuotas. Live čia niekada neįjungiamas."
     },
-    "futureLive": "Live mokėjimai paruošti, bet neaktyvūs — jokio live checkout, kol savininkas nepatvirtins."
+    "futureLive": "Mokėjimas internetu dar neprieinamas."
   },
   "workAbroad": {
     "eyebrow": "Darbas užsienyje",
@@ -10219,7 +10257,7 @@
       "missing": "trūksta"
     },
     "ctaProfile": "Papildyti profilį",
-    "needsAccessTitle": "Galimybių sąrašas ruošiamas",
+    "needsAccessTitle": "Darbdavių užklausos čia dar nerodomos",
     "needsAccessBody": "Darbdavių užklausos čia pasirodys, kai bus įjungta jų peržiūra darbuotojams. Kol kas užpildyk profilį — taip jis bus paruoštas, vos atsiradus tinkamoms užklausoms.",
     "emptyTitle": "Šiuo metu atvirų užklausų nėra",
     "emptyBody": "Kai darbdaviai pateiks naujų užklausų, jos pasirodys čia. Tuo tarpu verta papildyti profilį.",
@@ -10594,7 +10632,7 @@
   },
   "workerIntake": {
     "title": "Darbuotojo registracija",
-    "subtitle": "Nurodyk savo amatą ir kada esi laisvas, tada susikurk nemokamą profilį, kad viską išsaugotum — niekas nepublikuojama automatiškai.",
+    "subtitle": "Nurodyk savo amatą ir kada esi laisvas, kad pasitikrintum duomenis. Ši forma nieko neišsaugo — kad tave rastų darbdaviai, susikurk nemokamą profilį ir įrašyk duomenis jame.",
     "fullName": "Vardas ir pavardė",
     "profession": "Sektorius ir darbo tipas",
     "professionPlaceholder": "Pasirink sektorių ir darbo tipą",
@@ -10624,7 +10662,7 @@
     "submit": "Patikrinti duomenis",
     "aiBadge": "AI pasiūlymas",
     "aiNotVerified": "Peržiūrėk prieš išsaugant — niekas neišsaugoma automatiškai.",
-    "aiDisabled": "Iš šios formos niekas neišsaugota, o automatinio pasiūlymo dabar nėra. Kad išsaugotum duomenis, žemiau susikurk nemokamą darbuotojo profilį.",
+    "aiDisabled": "Iš šios formos niekas neišsaugota, o automatinio pasiūlymo dabar nėra. Kad tave rastų darbdaviai, žemiau susikurk nemokamą darbuotojo profilį ir įrašyk duomenis jame.",
     "aiHeadline": "Siūloma antraštė",
     "aiSkills": "Siūlomi įgūdžiai",
     "aiMissing": "Vis dar trūksta",
@@ -10717,14 +10755,14 @@
     "aiNone": "Pasiūlymas nesukurtas — peržiūrėk savo duomenis.",
     "statusInvalid": "Kai kuriuos duomenis reikia pataisyti. Patikrink formą.",
     "statusError": "Kažkas nepavyko. Bandyk dar kartą.",
-    "bridgeNote": "Išsiuntus formą užklausa pateikta — paskyros nereikia. Nemokama paskyra leidžia sekti ir tvarkyti užklausą, skelbti darbus ir išsaugoti kandidatus. Jau turi? Prisijunk.",
+    "bridgeNote": "Išsiuntus formą užklausa pateikta — paskyros nereikia. Nemokama įmonės paskyra tuo pačiu el. pašto adresu, kai parodysi, kad adresas tavo, gali perimti užklausą, o tada skelbti darbus ir išsaugoti kandidatus. Jau turi? Prisijunk.",
     "bridgeSignup": "Susikurti nemokamą paskyrą",
     "bridgeLogin": "Jau turi paskyrą? Prisijungti",
     "autoSuggested": "Pasiūlyta pagal tavo aprašymą — patikrink ir, jei reikia, pataisyk. Nieko nepateikiame automatiškai.",
     "preparedTitle": "Užklausa paruošta",
     "preparedBody": "Tvarkingai sudėliojome tavo užklausą. Kad ją pateiktum tolesniam kontaktui, susikurk nemokamą paskyrą arba prisijunk žemiau — tada užklausa atkeliauja komandai.",
     "receivedTitle": "Užklausa gauta",
-    "receivedBody": "Gavome tavo užklausą ir laikome ją tolesniam kontaktui su tavimi. Kad matytum ir tvarkytum ją, susikurk paskyrą arba prisijunk žemiau.",
+    "receivedBody": "Gavome tavo užklausą ir laikome ją tolesniam kontaktui su tavimi. Kad ją matytum paskyroje, susikurk įmonės paskyrą arba prisijunk tuo pačiu el. pašto adresu, kurį čia nurodei. Kai parodysi, kad adresas tavo, užklausa atsiras tavo paskyros užklausose ir ten galėsi ją perimti. Ji nesusiejama automatiškai, o paskyra su kitu adresu jos nemato.",
     "partnerRouteTitle": "Statybų užklausoms — partnerių įmonių kelias",
     "partnerRouteBody": "Jeigu tinkamo tiesioginio darbuotojo atitikmens dar nėra, statybų užklausoms pirmiausia galime rekomenduoti kreiptis į mūsų partnerę UAB „Nonstop Group“ (LT) — platformos operatorę. Tai padeda greičiau suderinti dokumentus, atsakomybes ir įdarbinimo eigą, kiekvieną žingsnį koordinuojant žmogui."
   },
@@ -11343,15 +11381,15 @@
   },
   "accountBilling": {
     "title": "Mokėjimai ir prenumerata",
-    "testBadge": "Testavimo režimas",
+    "testBadge": "Tikri mokesčiai nenuskaičiuojami",
     "returned": {
-      "success": "Testinis apmokėjimas užbaigtas. Tikri pinigai nejudėjo; prenumeratos būsena žemiau sinchronizuojama per parašu patvirtintą mokėjimų teikėjo webhook ir gali atsirasti ne iš karto.",
+      "success": "Apmokėjimas užbaigtas. Tikri pinigai nejudėjo; prenumeratos būsena žemiau sinchronizuojama per parašu patvirtintą mokėjimų teikėjo webhook ir gali atsirasti ne iš karto.",
       "cancelled": "Apmokėjimas atšauktas. Niekas nenuskaičiuota ir tavo paskyroje niekas nepasikeitė.",
       "portal": "Grįžai iš mokėjimų portalo. Ten atlikti pakeitimai šiame puslapyje susinchronizuojami automatiškai.",
       "successLive": "Apmokėjimas užbaigtas. Prenumeratos būsena žemiau sinchronizuojama iš parašu patvirtinto mokėjimų teikėjo patvirtinimo ir gali atsirasti ne iš karto.",
       "syncing": "Sinchronizuojama su mokėjimų teikėju — prenumerata čia atsiras po akimirkos. Užsakyti dar kartą nereikia."
     },
-    "disabled": "Mokėjimai neįjungti. Mokami planai — paruošti juodraščiai: čia nieko negalima nusipirkti ir mokėjimo priemonės nereikia.",
+    "disabled": "Mokėjimai neįjungti. Čia nieko negalima nusipirkti ir mokėjimo priemonės nereikia.",
     "none": "Šioje paskyroje prenumeratos nėra.",
     "planLabel": "Planas",
     "statusLabel": "Būsena",
@@ -11372,7 +11410,7 @@
       "open": "Tvarkyti prenumeratą",
       "opening": "Atidaroma…",
       "error": "Nepavyko atidaryti mokėjimų portalo",
-      "hint": "Atidaro mokėjimų teikėjo portalą, kuriame galima atšaukti prenumeratą ar pakeisti mokėjimo priemonę. Tik testavimo režimas — jokių tikrų mokesčių."
+      "hint": "Atidaro mokėjimų teikėjo portalą, kuriame galima atšaukti prenumeratą ar pakeisti mokėjimo priemonę."
     },
     "refresh": {
       "cta": "Atnaujinti mokėjimų būseną",
@@ -11393,7 +11431,7 @@
   "accountPlan": {
     "title": "Tavo planas",
     "freePilot": "Nemokamas pilotas — viskas, kas šiuo metu prieinama produkte, tau nemokama.",
-    "prepared": "Mokami planai paruošti, bet neįsigyjami. Mokėjimai neįjungti, mokėjimo būdo pridėti nereikia.",
+    "prepared": "Mokamų planų dar negalima įsigyti. Mokėjimai neįjungti, mokėjimo būdo pridėti nereikia.",
     "pricingLink": "Kas nemokama ir kas bus mokama"
   },
   "privacyConsent": {
@@ -11450,7 +11488,8 @@
       "needsMigration": "Ši funkcija dar neįjungta serveryje. Tavo profilis lieka privatus.",
       "error": "Nepavyko išsaugoti. Bandyk dar kartą.",
       "declinedNote": "Gerai — profilis lieka privatus. Šį pasirinkimą rasi čia bet kada.",
-      "readFailed": "Nepavyko patikrinti, ar darbdaviai mato tavo profilį. Tai nereiškia, kad matomumas išjungtas — pabandyk dar kartą vėliau."
+      "readFailed": "Nepavyko patikrinti, ar darbdaviai mato tavo profilį. Tai nereiškia, kad matomumas išjungtas — pabandyk dar kartą vėliau.",
+      "legalTextInEnglish": "Šis teisinis tekstas rodomas anglų kalba: jo versija jūsų kalba dar nepatvirtinta. Galioja angliškas tekstas."
     },
     "disclosures": {
       "intro": "Kiekvienas CV, kontaktų ar kitų duomenų perdavimas konkrečiai įmonei vyksta tik po atskiro tavo patvirtinimo.",
@@ -12176,7 +12215,7 @@
       "stateLabel": "DI būsena",
       "state": {
         "disabled": "Išjungta",
-        "mock": "Testinė (deterministinė) veiksena",
+        "mock": "Fiksuotos taisyklės (be kalbos modelio)",
         "live": "Aktyvi"
       },
       "reason": {
@@ -12185,12 +12224,12 @@
         "unknown_provider": "Nurodytas DI tiekėjas neatpažintas, todėl DI lieka išjungtas.",
         "missing_api_key": "DI tiekėjo raktas nepridėtas, todėl DI lieka išjungtas."
       },
-      "disabledBody": "Šioje aplinkoje neprijungtas joks išorinis AI tiekėjas. Viskas šiame puslapyje apskaičiuota iš tavo įrašų pagal fiksuotas taisykles — joks tekstas čia nebuvo sukurtas kalbos modelio.",
-      "whenEnabled": "Kai savininkas prijungs tiekėją ir bus pritaikyta pasiūlymų audito saugykla, atsiras peržiūrimi juodraščių pasiūlymai — visada kaip pasiūlymai, kuriuos patvirtina žmogus, niekada kaip automatiniai pakeitimai.",
-      "gates": "Asistentas šioje aplinkoje kol kas neprieinamas. Pasiūlymai lieka išjungti, kol jis bus prijungtas — tuo metu niekas negeneruojama.",
+      "disabledBody": "Neprijungtas joks išorinis AI tiekėjas. Viskas šiame puslapyje apskaičiuota iš tavo įrašų pagal fiksuotas taisykles — joks tekstas čia nebuvo sukurtas kalbos modelio.",
+      "whenEnabled": "Kai asistentas bus įjungtas, jis siūlys peržiūrimus juodraščių pasiūlymus — visada kaip pasiūlymus, kuriuos patvirtina žmogus, niekada kaip automatinius pakeitimus.",
+      "gates": "Asistentas kol kas neprieinamas. Pasiūlymai lieka išjungti, kol jis bus prijungtas — tuo metu niekas negeneruojama.",
       "providerLabel": "Tiekėjas",
       "modelLabel": "Modelis",
-      "notWired": "Generavimas šiame etape sąmoningai neįjungtas — rezultatų dar nebūtų galima atsekti. Ši būsena rodoma tik dėl skaidrumo."
+      "notWired": "Teksto generavimas neįjungtas. Ši būsena rodoma tik dėl skaidrumo."
     }
   },
   "finance": {
@@ -12990,7 +13029,7 @@
   "agencyClients": {
     "title": "Klientai",
     "subtitle": "Kam parūpini darbuotojus — kliento poreikiai susiejami su tavo užklausomis ir kandidatų paieška.",
-    "gatedHeading": "Dar neprieinama — bus įjungta vėliau",
+    "gatedHeading": "Dar neprieinama",
     "gatedBody": "Šiuo metu nepasiekiama.",
     "notLinkable": "Užklausų kol kas negalima susieti su klientais.",
     "clientsEmpty": "Klientų dar nėra. Pridėk pirmą klientą žemiau.",
@@ -13023,7 +13062,7 @@
   "agencyBridge": {
     "title": "Klientų įmonės",
     "subtitle": "Prisijunk prie realios kliento įmonės, matyk tik jos pasidalintus poreikius ir pasiūlyk vieną iš savo aktyvių darbuotojų.",
-    "gatedHeading": "Dar neprieinama — bus įjungta vėliau",
+    "gatedHeading": "Dar neprieinama",
     "gatedBody": "Šiuo metu nepasiekiama.",
     "connectionsHeading": "Ryšiai",
     "inviteEmailLabel": "Kliento el. paštas",
@@ -13077,7 +13116,7 @@
   "clientBridge": {
     "title": "Personalo agentūros",
     "subtitle": "Priimk personalo agentūrą, su kuria nori dirbti, pasidalink konkrečiais poreikiais ir peržiūrėk jos pasiūlytus kandidatus savo žvalgybos puslapyje.",
-    "gatedHeading": "Dar neprieinama — bus įjungta vėliau",
+    "gatedHeading": "Dar neprieinama",
     "gatedBody": "Šiuo metu nepasiekiama.",
     "invitesHeading": "Ryšio kvietimai",
     "noInvites": "Laukiančių kvietimų nėra.",
@@ -13112,7 +13151,11 @@
       "notReady": "Kandidatų priėmimas ir atmetimas dar neveikia — kol kas naudok kontaktą arba rezervacijos pasiūlymą žemiau.",
       "forbidden": "Spręsti gali tik šio poreikio savininkas.",
       "closed": "Šis pasiūlymas nebegalioja.",
-      "error": "Kažkas nepavyko. Bandyk dar kartą."
+      "error": "Kažkas nepavyko. Bandyk dar kartą.",
+      "limitOpen": "Jau turi 10 rezervacijų pasiūlymų, kurie laukia darbuotojų atsakymo — daugiau vienu metu atvirų būti negali. Atšauk nebereikalingus ir tada priimk šį kandidatą. Agentūros pasiūlymas lieka atviras.",
+      "limitDaily": "Per pastarąsias 24 valandas išsiuntei 30 rezervacijų pasiūlymų — tai paros riba. Priimk šį kandidatą vėliau: niekas neišsiųsta, agentūros pasiūlymas lieka atviras.",
+      "limitUnknown": "Pasiekta rezervacijų pasiūlymų riba (10 laukiančių atsakymo, 30 per parą). Atšauk nebereikalingus arba bandyk vėliau; agentūros pasiūlymas lieka atviras.",
+      "openBookings": "Atidaryti rezervacijas"
     },
     "title": "Agentūros pasiūlyti kandidatai",
     "subtitle": "Prijungta personalo agentūra pasiūlė šiuos darbuotojus šiam poreikiui. Peržiūrėk, susisiek arba rezervuok juos tais pačiais valdikliais žemiau.",
@@ -14326,7 +14369,9 @@
         "supplyRole": "Kokios profesijos žmonės",
         "supplyRolePlaceholder": "Pvz., suvirintojas",
         "supplyTeamSize": "Kiek žmonių turi",
-        "supplyLocation": "Kur jie gali dirbti"
+        "supplyLocation": "Kur jie gali dirbti",
+        "demandCountry": "Šalis, kurioje bus dirbama",
+        "demandCountryPlaceholder": "Pvz., Švedija arba SE"
       },
       "availability": {
         "available": "Laisvas",
@@ -15293,7 +15338,7 @@
       "collapseFull": "Sutraukti",
       "fallbackUnverified": "Šio atsakymo čia dar nerodau — jis turi savo puslapį.",
       "fallbackContext": "Šis rezultatas nepasiekiamas dabartiniame kontekste.",
-      "pendingInline": "Ruošiamas rezultatas.",
+      "pendingInline": "Gaunamas rezultatas.",
       "marketEmpty": "Šiuo metu atvirų poreikių su vieta nėra.",
       "marketError": "Nepavyko nuskaityti rinkos duomenų.",
       "selectPlaceHint": "Spustelėk žymeklį žemėlapyje — pamatysi atvirus poreikius toje vietoje.",
@@ -15592,7 +15637,7 @@
       "title": "Vienas pokalbio langas valdo tavo darbą",
       "subcopy": "Vietoje dešimčių formų — tiesiog kalbiesi. Asistentas parengia, tu patvirtini, o kiekvienas veiksmas palieka įrašą, kurį gali peržiūrėti.",
       "liveLabel": "Veikia jau dabar",
-      "comingLabel": "Ruošiama",
+      "comingLabel": "Dar neprieinama",
       "conceptLabel": "Koncepcinis vaizdas — stilizuota iliustracija, ne tikras pokalbis",
       "c1": "Atnaujinti CV ir profilį",
       "c2": "Užfiksuoti darbo dieną",
@@ -16924,7 +16969,7 @@
     "archivedHeading": "Archyvuoti objektai",
     "archivedBadge": "Archyvuota",
     "empty": "Objektų dar nėra. Pridėk vietas, kuriose vyksta tavo darbai.",
-    "gatedHeading": "Dar neprieinama — bus įjungta vėliau",
+    "gatedHeading": "Dar neprieinama",
     "gatedBody": "Šiuo metu nepasiekiama.",
     "errorLabel": "Nepavyko išsaugoti. Bandyk dar kartą.",
     "notAuthorizedLabel": "Objektus keisti gali tik vadovai.",
