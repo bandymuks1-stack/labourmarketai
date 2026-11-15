@@ -298,10 +298,12 @@ test("T-5. the company sees its team with the member who accepted, and both of i
   expect(s.teamId, "T-3 created the team").toBeTruthy();
   const co = as(CO);
   await co.goto(`${BASE}/en/dashboard/company/people`);
-  const card = co.getByTestId(`team-brigade-${s.teamId}`);
+  // Scoped to <main>: while a streamed section swaps in, React can briefly
+  // hold a second, hidden copy of the card outside it (CI 2026-11-15, #3350).
+  const main = co.getByRole("main");
+  const card = main.getByTestId(`team-brigade-${s.teamId}`);
   await expect(card).toBeVisible({ timeout: 30_000 });
   await expect(card, "the member who accepted is on the team").toContainText(W1_NAME);
-  const main = co.getByRole("main");
   await expect(main, "the worker who accepted is one of the company's people").toContainText(W1_NAME);
   await expect(main, "the worker who declined the TEAM is still the company's person").toContainText(W2_NAME);
 });
