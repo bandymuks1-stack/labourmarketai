@@ -5256,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Warum Unternehmen",
-      "headline": "Angebot, mit dem Sie arbeiten können",
-      "items": [
-        {
-          "title": "Erklärbare Passungsrichtung",
-          "desc": "Jedes Passungssignal zeigt die Gründe dahinter."
-        },
-        {
-          "title": "Grenzüberschreitender Arbeitskräftepool",
-          "desc": "Angebot aus jedem Markt, in dem wir tätig sind — an einem Ort."
-        },
-        {
-          "title": "Keine undurchsichtigen Zwischenhändler",
-          "desc": "Sie sehen die Beziehung, und sie gehört Ihnen."
-        },
-        {
-          "title": "Fähigkeitsnachweise + Passungssignale",
-          "desc": "Stellen Sie auf Basis von Nachweisen ein, nicht von Behauptungen."
-        },
-        {
-          "title": "Angebotssignale",
-          "desc": "Sehen Sie die angegebene Verfügbarkeit der Arbeitskräfte, sobald Profile aktualisiert werden."
-        },
-        {
-          "title": "Direkter Kontakt",
-          "desc": "Die Beziehung zur Arbeitskraft gehört Ihnen."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "FAQ für Unternehmen",
       "headline": "Klare Antworten",
@@ -5351,36 +5321,6 @@
         {
           "title": "Pool vergrößern",
           "desc": "Bauen Sie Kapazität dort auf, wo die Nachfrage steigt."
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "Warum Personalagenturen",
-      "headline": "Hebelwirkung statt Kontrollverlust",
-      "items": [
-        {
-          "title": "Ihren Pool verwalten",
-          "desc": "Arbeitskräfte, Verfügbarkeit und Status an einem Ort."
-        },
-        {
-          "title": "Im Auftrag von Kunden veröffentlichen",
-          "desc": "Vermitteln Sie Nachfrage, ohne die Kundenbeziehung zu verlieren."
-        },
-        {
-          "title": "Passgenaue Vermittlung",
-          "desc": "Setzen Sie die richtigen Leute schneller ein."
-        },
-        {
-          "title": "Sichtbarkeitseinstellungen",
-          "desc": "Öffentlich, nur für Personalagenturen oder direkt — Sie entscheiden."
-        },
-        {
-          "title": "Grenzüberschreitende Reichweite",
-          "desc": "Auftraggeber und Arbeitskräfte in jedem Markt, in dem wir tätig sind."
-        },
-        {
-          "title": "Ihren Desk ausbauen",
-          "desc": "Kapazitätseinblicke, wenn sich die Nachfrage verschiebt."
         }
       ]
     },
@@ -10710,7 +10650,6 @@
     "contactPerson": "Ansprechpartner",
     "contactPersonHelp": "Optional. Wer zu dieser Anfrage erreichbar ist.",
     "contactEmail": "Kontakt-E-Mail",
-    "contactEmailHelp": "Optional, hilft uns aber, schneller zu Ihrer Anfrage nachzufassen.",
     "cityRegion": "Stadt oder Region",
     "cityRegionHelp": "Optional. Wo die Arbeit stattfinden wird.",
     "expectedDuration": "Voraussichtliche Dauer",
@@ -14012,7 +13951,6 @@
         "ctaTitle": "Machen Sie aus dieser Schätzung eine echte Personalanfrage",
         "ctaBody": "Derselbe Schätzungs-Baustein steckt im Bedarfsformular von LabourMarket.ai. Mit Konto können Sie eine Schätzung an eine strukturierte Personalanfrage anhängen; ohne Konto beschreiben Sie Ihren Bedarf im öffentlichen Formular.",
         "ctaDashboard": "Personalbedarf anlegen (mit Konto)",
-        "ctaDashboardHelp": "Die Konto-Route öffnet das Bedarfsformular in Ihrem Dashboard — der Rechner überträgt diese Zahlen nicht.",
         "ctaCompanyNeed": "Bedarf ohne Konto beschreiben",
         "ctaCompanyNeedHelp": "Das öffentliche Formular erhält nur Ihre Arbeitskräftezahl und das Land — keine Preise und keine Beschreibungen."
       }
@@ -15588,6 +15526,10 @@
         "title": "Anfrage für ein Einzelprojekt",
         "body": "Für private und gewerbliche Auftraggeber: Beschreiben Sie, welches Projekt oder welche Dienstleistung Sie brauchen."
       },
+      "partner": {
+        "title": "Partnerschaftsanfrage",
+        "body": "Beschreiben Sie die Zusammenarbeit, die Sie vorschlagen."
+      },
       "title": "Bedarf melden",
       "promise": "Beschreiben Sie, welche Arbeitskräfte, Dienstleistungen oder Projektausführung Sie brauchen. Die Anfrage wird dem Team von LabourMarket.ai zur Prüfung übergeben.",
       "name": "Vor- und Nachname oder Firmenname",
@@ -15605,6 +15547,7 @@
       "scope": "Umfang",
       "deadline": "Fristen",
       "need": "Welches Projekt oder welche Dienstleistung Sie brauchen",
+      "proposal": "Vorgeschlagene Zusammenarbeit",
       "customer": "Auftraggeber",
       "customerPrivate": "Privatperson",
       "customerBusiness": "Unternehmen",
@@ -19441,8 +19384,6 @@
     "title": "Was mit Ihrer Arbeit passiert",
     "titleCompany": "Was mit der Arbeit passiert, die Sie leiten",
     "example": "Beispiel — keine echte Person und keine echten Daten",
-    "hint": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
-    "hintWorkers": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
     "open": "In Ihrem Arbeitsbereich öffnen",
     "list": "Schritte im Arbeitsverlauf",
     "workers": {
@@ -20732,7 +20673,6 @@
       "close": "Schließen",
       "functions": "Aktionen",
       "professions": "Berufe",
-      "opensNow": "Kein Konto erforderlich",
       "signInWhenOpen": "Anmeldung erforderlich",
       "allSectors": "Alle Branchen",
       "fullList": "Vollständige Liste"

@@ -49,9 +49,10 @@ const REGION = /baltic|baltics|baltijos|baltikum|baltische|балт|nordic|nordi
  */
 const COVERAGE_KEYS = [
   "map.caption",
-  "companies.features.items.1.desc",
   "trusted.title",
-  "agencies.features.items.4.desc",
+  // `companies.features.items.1.desc` and `agencies.features.items.4.desc`
+  // ("every market we operate in") left the catalog with the duplicate
+  // "Why companies / Why agencies" grids (owner copy cleanup 2026-11-15).
 ] as const;
 
 function at(root: Record<string, unknown>, dotted: string): unknown {

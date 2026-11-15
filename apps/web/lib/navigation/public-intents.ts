@@ -69,7 +69,7 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
     links: [
       { id: "jobs", href: "/jobs", account: false },
       { id: "workOpportunities", href: "/work-opportunities", account: false },
-      { id: "createCv", href: "/create-cv", account: false },
+      { id: "createCv", href: "/dashboard/profile", account: true },
       { id: "workAbroad", href: "/work-abroad", account: false },
       { id: "forWorkers", href: "/for-workers", account: false },
     ],
@@ -116,7 +116,7 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
       // The partner enquiry door — the same destination the landing's
       // PARTNER_DOOR uses (a commercial relationship with the company behind
       // the product, not a workspace).
-      { id: "partnerWithUs", href: "/about", account: false },
+      { id: "partnerWithUs", href: requestDoorHref("partner"), account: false },
     ],
   },
   {

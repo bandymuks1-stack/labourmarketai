@@ -5256,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Waarom bedrijven",
-      "headline": "Aanbod waar u op kunt handelen",
-      "items": [
-        {
-          "title": "Uitlegbare fit-richting",
-          "desc": "Elk fit-signaal toont de redenen erachter."
-        },
-        {
-          "title": "Werknemerspool over de grens",
-          "desc": "Aanbod uit elke markt waarin we actief zijn, op één plek."
-        },
-        {
-          "title": "Geen ondoorzichtige tussenpersonen",
-          "desc": "U ziet en bezit de relatie."
-        },
-        {
-          "title": "Vaardigheidsrecords + fit-signalen",
-          "desc": "Neem aan op basis van records, niet op basis van claims."
-        },
-        {
-          "title": "Aanbodsignalen",
-          "desc": "Zie de opgegeven beschikbaarheid van werknemers terwijl profielen worden bijgewerkt."
-        },
-        {
-          "title": "Direct contact",
-          "desc": "U bezit de relatie met de werknemer."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "FAQ voor bedrijven",
       "headline": "Eerlijke antwoorden",
@@ -5315,6 +5285,35 @@
       },
       "subcopy": "Maak een bedrijfsaccount aan, plaats een personeelsbehoefte en zie welke beschikbare werknemers erbij passen.",
       "button": "Maak een bedrijfsaccount aan"
+    },
+    "features": {
+      "headline": "Aanbod waar u op kunt handelen",
+      "items": [
+        {
+          "title": "Uitlegbare fit-richting",
+          "desc": "Elk fit-signaal toont de redenen erachter."
+        },
+        {
+          "title": "Werknemerspool over de grens",
+          "desc": "Aanbod uit elke markt waarin we actief zijn, op één plek."
+        },
+        {
+          "title": "Geen ondoorzichtige tussenpersonen",
+          "desc": "U ziet en bezit de relatie."
+        },
+        {
+          "title": "Vaardigheidsrecords + fit-signalen",
+          "desc": "Neem aan op basis van records, niet op basis van claims."
+        },
+        {
+          "title": "Aanbodsignalen",
+          "desc": "Zie de opgegeven beschikbaarheid van werknemers terwijl profielen worden bijgewerkt."
+        },
+        {
+          "title": "Direct contact",
+          "desc": "U bezit de relatie met de werknemer."
+        }
+      ]
     }
   },
   "agencies": {
@@ -5354,36 +5353,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Waarom uitzendbureaus",
-      "headline": "Meer slagkracht, geen controleverlies",
-      "items": [
-        {
-          "title": "Beheer uw pool",
-          "desc": "Werknemers, beschikbaarheid en status op één plek."
-        },
-        {
-          "title": "Plaats namens klanten",
-          "desc": "Bemiddel in vraag zonder de relatie te verliezen."
-        },
-        {
-          "title": "Gerichte matching",
-          "desc": "Plaats de juiste mensen sneller."
-        },
-        {
-          "title": "Zichtbaarheidsinstellingen",
-          "desc": "Openbaar, alleen voor uitzendbureaus of direct — u beslist."
-        },
-        {
-          "title": "Grensoverschrijdend bereik",
-          "desc": "Opdrachtgevers en werknemers in elke markt waarin we actief zijn."
-        },
-        {
-          "title": "Laat uw bemiddeling groeien",
-          "desc": "Capaciteitsinzichten wanneer de vraag verschuift."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "FAQ voor uitzendbureaus",
       "headline": "Duidelijke antwoorden",
@@ -5413,6 +5382,34 @@
       },
       "subcopy": "Maak een uitzendbureau-account en beheer uw pool in één werkruimte.",
       "button": "Maak een uitzendbureau-account"
+    },
+    "features": {
+      "items": [
+        {
+          "title": "Beheer uw pool",
+          "desc": "Werknemers, beschikbaarheid en status op één plek."
+        },
+        {
+          "title": "Plaats namens klanten",
+          "desc": "Bemiddel in vraag zonder de relatie te verliezen."
+        },
+        {
+          "title": "Gerichte matching",
+          "desc": "Plaats de juiste mensen sneller."
+        },
+        {
+          "title": "Zichtbaarheidsinstellingen",
+          "desc": "Openbaar, alleen voor uitzendbureaus of direct — u beslist."
+        },
+        {
+          "title": "Grensoverschrijdend bereik",
+          "desc": "Opdrachtgevers en werknemers in elke markt waarin we actief zijn."
+        },
+        {
+          "title": "Laat uw bemiddeling groeien",
+          "desc": "Capaciteitsinzichten wanneer de vraag verschuift."
+        }
+      ]
     }
   },
   "nav": {
@@ -10710,7 +10707,6 @@
     "contactPerson": "Contactpersoon",
     "contactPersonHelp": "Optioneel. Wie we kunnen bereiken over deze aanvraag.",
     "contactEmail": "Contact-e-mailadres",
-    "contactEmailHelp": "Optioneel, maar zo kunnen we sneller opvolgen over uw aanvraag.",
     "cityRegion": "Stad of regio",
     "cityRegionHelp": "Optioneel. Waar het werk zal zijn.",
     "expectedDuration": "Verwachte duur",
@@ -10765,7 +10761,8 @@
     "receivedTitle": "Aanvraag ontvangen",
     "receivedBody": "We hebben uw aanvraag ontvangen en bewaren die voor opvolging met u. Om die in een account te zien, maakt u een bedrijfsaccount aan of logt u in met hetzelfde e-mailadres dat u hier heeft opgegeven. Zodra u heeft laten zien dat het adres van u is, verschijnt de aanvraag bij de aanvragen in uw account en kunt u die daar overnemen. Ze wordt niet automatisch gekoppeld, en een account met een ander adres ziet haar niet.",
     "partnerRouteTitle": "Voor bouwaanvragen — een route via partnerbedrijven",
-    "partnerRouteBody": "Als er nog geen geschikte directe match met een werknemer is, kunnen wij voor bouwaanvragen eerst aanraden contact op te nemen met onze partner UAB “Nonstop Group” (LT) — de exploitant van het platform. Dat helpt documenten, verantwoordelijkheden en onboarding sneller te coördineren, met een mens die elke stap begeleidt."
+    "partnerRouteBody": "Als er nog geen geschikte directe match met een werknemer is, kunnen wij voor bouwaanvragen eerst aanraden contact op te nemen met onze partner UAB “Nonstop Group” (LT) — de exploitant van het platform. Dat helpt documenten, verantwoordelijkheden en onboarding sneller te coördineren, met een mens die elke stap begeleidt.",
+    "contactEmailHelp": "Optioneel, maar zo kunnen we sneller opvolgen over uw aanvraag."
   },
   "candidatePool": {
     "title": "Kandidatenpool",
@@ -14012,9 +14009,9 @@
         "ctaTitle": "Maak van deze raming een echte personeelsaanvraag",
         "ctaBody": "Dezelfde ramingsbouwer zit in het behoefteformulier van LabourMarket.ai. Met een account kunt u een raming aan een gestructureerde personeelsaanvraag koppelen; zonder account beschrijft u uw behoefte via het publieke formulier.",
         "ctaDashboard": "Personeelsbehoefte aanmaken (met account)",
-        "ctaDashboardHelp": "De accountroute opent het behoefteformulier op uw dashboard — de calculator draagt deze cijfers niet over.",
         "ctaCompanyNeed": "Behoefte beschrijven zonder account",
-        "ctaCompanyNeedHelp": "Het publieke formulier ontvangt alleen uw aantal werknemers en land — geen prijzen en geen beschrijvingen."
+        "ctaCompanyNeedHelp": "Het publieke formulier ontvangt alleen uw aantal werknemers en land — geen prijzen en geen beschrijvingen.",
+        "ctaDashboardHelp": "De accountroute opent het behoefteformulier op uw dashboard — de calculator draagt deze cijfers niet over."
       }
     }
   },
@@ -15588,6 +15585,10 @@
         "title": "Aanvraag individueel project",
         "body": "Voor particuliere en zakelijke opdrachtgevers: beschrijf welk project of welke dienst u nodig heeft."
       },
+      "partner": {
+        "title": "Partnerschapsaanvraag",
+        "body": "Beschrijf de samenwerking die u voorstelt."
+      },
       "title": "Behoefte doorgeven",
       "promise": "Beschrijf welke werknemers, diensten of projectuitvoering u nodig heeft. De aanvraag wordt ter beoordeling doorgegeven aan het team van LabourMarket.ai.",
       "name": "Voor- en achternaam of bedrijfsnaam",
@@ -15605,6 +15606,7 @@
       "scope": "Omvang",
       "deadline": "Termijnen",
       "need": "Welk project of welke dienst u nodig heeft",
+      "proposal": "Voorgestelde samenwerking",
       "customer": "Opdrachtgever",
       "customerPrivate": "Particulier",
       "customerBusiness": "Bedrijf",
@@ -19441,8 +19443,6 @@
     "title": "Wat er met uw werk gebeurt",
     "titleCompany": "Wat er met het werk gebeurt dat u aanstuurt",
     "example": "Voorbeeld — geen echt persoon en geen echte gegevens",
-    "hint": "Kies een stap. Elke stap opent de echte plek in uw werkruimte.",
-    "hintWorkers": "Kies een stap. Elke stap opent de echte plek in uw werkruimte.",
     "open": "Openen in uw werkruimte",
     "list": "Stappen in de levenscyclus van werk",
     "workers": {
@@ -19518,7 +19518,9 @@
         "fact": "Rapport uit echt werk",
         "detail": "Rapporten komen uit bevestigd werk — niemand typt ze opnieuw over."
       }
-    }
+    },
+    "hint": "Kies een stap. Elke stap opent de echte plek in uw werkruimte.",
+    "hintWorkers": "Kies een stap. Elke stap opent de echte plek in uw werkruimte."
   },
   "twoSides": {
     "title": "Aannemen is het begin, niet het einde.",
@@ -20732,7 +20734,6 @@
       "close": "Sluiten",
       "functions": "Acties",
       "professions": "Beroepen",
-      "opensNow": "Geen account nodig",
       "signInWhenOpen": "Inloggen vereist",
       "allSectors": "Alle sectoren",
       "fullList": "Volledige lijst"

@@ -35,7 +35,7 @@ export interface CommercialRequestRow {
   readonly description: string | null;
 }
 
-export type CommercialRequestType = "worker-search" | "b2b" | "project" | "company-need" | "other";
+export type CommercialRequestType = "worker-search" | "b2b" | "project" | "partner" | "company-need" | "other";
 
 export interface CommercialRequestItem {
   readonly id: string;
