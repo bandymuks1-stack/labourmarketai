@@ -427,3 +427,29 @@ describe("only a span from the start of the day to its end is the whole day", ()
     expect(intakeMinutes(text)).toBe(15 * 60);
   });
 });
+
+/**
+ * Final sweep of #3355: the inclusion abbreviations were listed but never
+ * read (the phrase was cut at their dot); a few more inclusion words.
+ */
+describe("abbreviated and more inclusion words", () => {
+  it.each([
+    ["English 'incl.'", "Worked 15 h, incl. 2 h coordination."],
+    ["German 'inkl.'", "15 Stunden gearbeitet, inkl. 2 Stunden Koordination."],
+    ["Russian 'в т.ч.'", "Работал 15 ч., в т.ч. 2 ч. координации."],
+    ["Lithuanian 'įskaičiuojant'", "Dirbau 15 val., įskaičiuojant 2 val. koordinavimo."],
+    ["Lithuanian 'tarp jų'", "Dirbau 15 val., tarp jų 2 val. koordinavimas."],
+    ["English 'includes'", "Worked 15 hours. This includes 2 hours of coordination."],
+    ["German 'darunter'", "15 Stunden gearbeitet, darunter 2 Stunden Koordination."],
+    ["Polish 'wliczając'", "Pracowałem 15 godzin, wliczając 2 godziny koordynacji."],
+    ["Polish 'łącznie z'", "Pracowałem 15 godzin łącznie z 2 godzinami koordynacji."],
+  ])("%s", (_name, text) => {
+    expect(minutes(text)).toBe(15 * 60);
+    expect(intakeMinutes(text)).toBe(15 * 60);
+  });
+
+  it("an abbreviation dot before a capital still ends the sentence", () => {
+    // "inkl." closing a sentence: the next one is its own item.
+    expect(minutes("Worked 8 h, all incl. Then 2 h of paperwork.")).toBe(10 * 60);
+  });
+});

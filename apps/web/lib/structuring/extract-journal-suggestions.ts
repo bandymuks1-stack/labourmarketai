@@ -505,6 +505,11 @@ const UNIT_ABBREVIATION_RX =
  *  the sentence after every German hour figure and the hours would lose
  *  their work. Its dot is protected before any letter. */
 const DE_HOUR_ABBREVIATION_RX = /((?:^|[^\p{L}])std\.)(?=[ \t]+\p{L})/giu;
+/** "incl.", "inkl." and "в т.ч." name a part of the figure before them, so
+ *  their dots never end a phrase ("Worked 15 h, incl. 2 h coordination").
+ *  Only before a digit or a lowercase word: "… incl. Then 2 h" still ends one
+ *  (no `i` flag: with it `\p{Ll}` would match capitals too). */
+const INCLUSION_ABBREVIATION_RX = /(?<!\p{L})(?:[Ii]ncl|[Ii]nkl|[Тт]\.\s?ч)\.(?=[ \t]+[\d\p{Ll}])/gu;
 const PROTECTED_DOT = "##DOT##";
 const PROTECTED_COMMA = "##COMMA##";
 
@@ -525,6 +530,7 @@ export function protectNonBoundaryDots(
   },
 ): string {
   return text
+    .replace(INCLUSION_ABBREVIATION_RX, (m) => m.split(".").join(marks.dot))
     .replace(UNIT_ABBREVIATION_RX, (m) => m.replace(".", marks.dot))
     .replace(DE_HOUR_ABBREVIATION_RX, (m) => m.replace(".", marks.dot))
     .replace(/(\d)\.(\d)/g, `$1${marks.dot}$2`)
@@ -838,12 +844,14 @@ function timeInMinutes(t: {
 }
 
 /** Words that say the figure AFTER them is part of the total before:
- *  "iš jų", "iš kurių", "įskaitant", "including", "of which", "в том числе",
- *  "из них", "включая", "waarvan", "inclusief", "davon", "inklusive", "w tym",
- *  "z czego". Read only in front of the part's own figure ("Then 2 hours of
- *  paperwork including invoices" is not a part). */
+ *  "iš jų", "iš kurių", "įskaitant", "įskaičiuojant", "tarp jų", "including",
+ *  "incl.", "includes", "of which", "в том числе", "в т.ч.", "из них",
+ *  "включая", "waarvan", "inclusief", "davon", "darunter", "inkl.",
+ *  "inklusive", "w tym", "z czego", "wliczając", "łącznie z". Read only in
+ *  front of the part's own figure ("Then 2 hours of paperwork including
+ *  invoices" is not a part). */
 const INCLUDED_PART_RX =
-  /(?<!\p{L})(?:iš\s+jų|is\s+ju|iš\s+kurių|is\s+kuriu|įskaitant|iskaitant|tame\s+skaičiuje|tame\s+skaiciuje|including|incl\.?|of\s+which|of\s+these|в\s+том\s+числе|из\s+них|из\s+которых|включая|waarvan|inclusief|davon|inkl\.?|inklusive|einschließlich|einschliesslich|w\s+tym|z\s+czego)(?!\p{L})/iu;
+  /(?<!\p{L})(?:iš\s+jų|is\s+ju|iš\s+kurių|is\s+kuriu|įskaitant|iskaitant|įskaičiuojant|iskaiciuojant|tarp\s+jų|tarp\s+ju|tame\s+skaičiuje|tame\s+skaiciuje|including|includes|incl\.?|of\s+which|of\s+these|в\s+том\s+числе|в\s+т\.\s?ч\.?|из\s+них|из\s+которых|включая|waarvan|inclusief|davon|darunter|inkl\.?|inklusive|einschließlich|einschliesslich|w\s+tym|z\s+czego|wliczając|wliczajac|łącznie\s+z|lacznie\s+z)(?!\p{L})/iu;
 /** The same words OPENING a phrase: "iš jų dvi valandos …" (a figure in
  *  words has no digit to stand in front of). */
 const OPENS_WITH_INCLUDED_PART_RX = new RegExp(`^\\s*(?:${INCLUDED_PART_RX.source.replace(/^\(\?<!\\p\{L\}\)/, "")})`, "iu");
