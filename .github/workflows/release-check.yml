@@ -82,7 +82,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        locale: [lt, en, ru, nl, de, pl]
+        locale: [lt, en, ru, nl, de, pl, sv]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -110,7 +110,7 @@ jobs:
         run: |
           set -euo pipefail
           routed=$(grep -oE 'export const activeLocales = \[[^]]+\]' apps/web/lib/i18n/config.ts | grep -oE '"[a-z]{2}"' | tr -d '"' | sort | tr '\n' ' ')
-          [ "$routed" = "de en lt nl pl ru " ] || { echo "::error::routed locales are '$routed' but the matrix checks 'de en lt nl pl ru'"; exit 1; }
+          [ "$routed" = "de en lt nl pl ru sv " ] || { echo "::error::routed locales are '$routed' but the matrix checks 'de en lt nl pl ru sv'"; exit 1; }
 
       - name: Crawl /${{ matrix.locale }} at 320, 375, 390, 768 and 1440 px
         run: |
