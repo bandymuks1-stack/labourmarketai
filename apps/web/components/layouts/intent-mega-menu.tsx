@@ -5,6 +5,7 @@ import { LogIn, MessageCircle } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { useSignedInHint } from "@/components/layouts/nav-auth-ctas";
 import {
   INTENT_ICONS,
   type NavLeadLink,
@@ -55,8 +56,10 @@ export function IntentMegaMenu({
   navLabel: string;
   /** Short note beside links that live inside the signed-in product. */
   accountLabel: string;
-  /** The "ask the assistant" entry — the existing conversation home. */
-  assistant?: { readonly href: string; readonly label: string };
+  /** The "ask the assistant" entry — the existing conversation home.
+   *  `guestHref` is where a signed-out visitor goes instead: the landing's
+   *  own question box, which needs no account and carries the sentence on. */
+  assistant?: { readonly href: string; readonly guestHref: string; readonly label: string };
   /** The secondary links (jobs, pricing, about …) behind one "More". */
   more?: {
     readonly label: string;
@@ -66,6 +69,7 @@ export function IntentMegaMenu({
 }) {
   const intents = goalsOnPage ? [] : allIntents;
   const [active, setActive] = useState<string | null>(null);
+  const signedIn = useSignedInHint();
   const rootRef = useRef<HTMLElement>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
   const panelId = useId();
@@ -197,7 +201,7 @@ export function IntentMegaMenu({
         </ul>
         {assistant && (
           <Link
-            href={assistant.href}
+            href={signedIn ? assistant.href : assistant.guestHref}
             // The conversation home is behind sign-in: never prefetch it from
             // a public page (a guest would request it on every view).
             prefetch={false}

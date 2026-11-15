@@ -142,6 +142,14 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
 export const ASSISTANT_HREF = "/dashboard";
 
 /**
+ * The same entry for a signed-out visitor (owner P0 2026-11-15, F8): the
+ * landing's question box (`#find`), which needs no account. A sentence typed
+ * there rides through sign-up into the conversation as `?say=`. Without this
+ * the desktop entry dropped a visitor on the sign-in page with no word of why.
+ */
+export const ASSISTANT_GUEST_HREF = "/#find";
+
+/**
  * Goal ids that no longer exist, and the goal that now holds what they held.
  * A link someone saved to `#goal=orders` opens "Offer services", where the
  * order-finding areas moved — never nothing.

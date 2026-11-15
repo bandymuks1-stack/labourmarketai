@@ -6,7 +6,7 @@ import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
 import type { RenderedIntent } from "@/components/layouts/intent-icons";
-import { ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
+import { ASSISTANT_GUEST_HREF, ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
 import { INSTITUTION_DOOR_NEXT } from "@/lib/marketing/public-doors";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
@@ -115,8 +115,9 @@ export async function SiteNav({
     })),
   }));
   // "Ask the assistant" — the existing conversation home (`/dashboard` IS the
-  // chat). A signed-out visitor is sent to login and lands back in it.
-  const assistant = { href: ASSISTANT_HREF, label: tIntent("assistant") };
+  // chat). A signed-out visitor is sent to the landing's question box instead
+  // (`guestHref`, desktop bar); the phone menu marks it as a signed-in entry.
+  const assistant = { href: ASSISTANT_HREF, guestHref: ASSISTANT_GUEST_HREF, label: tIntent("assistant") };
 
   // ONE definition, rendered in exactly one place at any given width: in the
   // header from `sm` up, inside the disclosure below it. Sharing the fragment
