@@ -1110,7 +1110,7 @@
     "ctaStartFree": "Kom i gang gratis i organisasjonskontoen din",
     "ctaSubscribe": "Aktiver i organisasjonskontoen din",
     "priceState": {
-      "owner_confirmed": "Prisene gjelder. Aktivering skjer i organisasjonskontoen din; ingenting belastes på denne siden."
+      "owner_confirmed": "Prisene er bekreftet. Ingenting belastes på denne siden."
     }
   },
   "secondary": {
@@ -2070,7 +2070,7 @@
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
       "positionsTitle": "[EN] Missing positions",
-      "positionsEmpty": "[EN] No position needs yet — once they are added, you will see here which people are missing.",
+      "positionsEmpty": "[EN] Position needs are not available yet. When they are, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena",
       "history": {
         "title": "Tidligere arbeid på dette prosjektet",

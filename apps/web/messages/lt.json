@@ -5818,7 +5818,7 @@
     ],
     "priceState": {
       "draft_pricing": "Kainos nėra galutinės — nieko įsigyti dar negalima.",
-      "owner_confirmed": "Kainos galioja. Aktyvavimas vyksta organizacijos paskyroje; šiame puslapyje niekas nenuskaičiuojama."
+      "owner_confirmed": "Kainos patvirtintos. Šiame puslapyje niekas neapmokestinama."
     },
     "individual": {
       "name": "Ypatingi poreikiai",
@@ -6871,7 +6871,7 @@
       "emptyTeam": "Projektas dar be komandos — pradėk draftą ir pakviesk pirmus žmones į aikštę.",
       "emptyTeamCta": "Pradėti draftą",
       "positionsTitle": "Trūkstamos pozicijos",
-      "positionsEmpty": "Pozicijų poreikių dar nėra — kai atsiras, čia matysi, kokių žmonių trūksta.",
+      "positionsEmpty": "Pozicijų poreikiai dar neprieinami. Kai bus, čia matysite, kokių žmonių trūksta.",
       "openOps": "Atidaryti projekto valdymą",
       "gallery": {
         "title": "Darbų galerija",
@@ -9325,7 +9325,7 @@
       "unavailable": "Nepavyko atlikti veiksmo. Bandyk dar kartą.",
       "error": "Kažkas nepavyko.",
       "cancel": "Atšaukti",
-      "notEntitled": "Tavo planas neapima rezervacijų."
+      "notEntitled": "Rezervacijos neįeina į tavo planą. Savo planą matysi paskyros nustatymuose."
     },
     "recognizedNote": "Žemiau esantys reikalingi įgūdžiai atpažinti iš tavo poreikio teksto neprisijungus prie išorinių sistemų — tai pažymėtas pasiūlymas, ne patvirtinta struktūra. Peržiūrėk atitikmenis; galutinius reikalavimus patvirtina arba pakoreguoja administratorius.",
     "nextAction": {
@@ -10254,7 +10254,7 @@
       "missing": "trūksta"
     },
     "ctaProfile": "Papildyti profilį",
-    "needsAccessTitle": "Darbdavių užklausų čia dar nėra",
+    "needsAccessTitle": "Darbdavių užklausos čia dar nerodomos",
     "needsAccessBody": "Darbdavių užklausos čia pasirodys, kai bus įjungta jų peržiūra darbuotojams. Kol kas užpildyk profilį — taip jis bus paruoštas, vos atsiradus tinkamoms užklausoms.",
     "emptyTitle": "Šiuo metu atvirų užklausų nėra",
     "emptyBody": "Kai darbdaviai pateiks naujų užklausų, jos pasirodys čia. Tuo tarpu verta papildyti profilį.",

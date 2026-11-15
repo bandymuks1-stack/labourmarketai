@@ -5818,7 +5818,7 @@
     ],
     "priceState": {
       "draft_pricing": "De prijzen zijn niet definitief — er kan nog niets worden gekocht.",
-      "owner_confirmed": "De prijzen gelden. Activeren gebeurt in je organisatieaccount; op deze pagina wordt niets afgeschreven."
+      "owner_confirmed": "De prijzen zijn bevestigd. Op deze pagina wordt niets afgeschreven."
     },
     "individual": {
       "name": "Bijzondere wensen",
@@ -6871,7 +6871,7 @@
       "emptyTeam": "Dit project heeft nog geen team — start de draft en breng de eerste mensen het veld op.",
       "emptyTeamCta": "Start de draft",
       "positionsTitle": "Ontbrekende posities",
-      "positionsEmpty": "Nog geen positiebehoeften — zodra ze er zijn, zie je hier welke mensen ontbreken.",
+      "positionsEmpty": "Positiebehoeften zijn nog niet beschikbaar. Zodra ze dat zijn, zie je hier welke mensen ontbreken.",
       "openOps": "Open projectbeheer",
       "gallery": {
         "title": "Werkgalerij",
@@ -9325,7 +9325,7 @@
       "unavailable": "Kon de actie niet voltooien. Probeer het opnieuw.",
       "error": "Er is iets misgegaan.",
       "cancel": "Annuleren",
-      "notEntitled": "Je plan omvat geen boekingen."
+      "notEntitled": "Boekingen zitten niet in je plan. Je plan vind je in de accountinstellingen."
     },
     "recognizedNote": "De vereiste vaardigheden hieronder zijn door het offline systeem herkend uit de tekst van je behoefte — ze zijn een gelabelde suggestie, geen bevestigde structuur. Bekijk de matches; een beheerder bevestigt of corrigeert de definitieve vereisten.",
     "nextAction": {
@@ -10254,7 +10254,7 @@
       "missing": "ontbreekt"
     },
     "ctaProfile": "Maak je profiel compleet",
-    "needsAccessTitle": "Hier staan nog geen aanvragen van werkgevers",
+    "needsAccessTitle": "Aanvragen van werkgevers worden hier nog niet getoond",
     "needsAccessBody": "Personeelsaanvragen van werkgevers verschijnen hier zodra zichtbaarheid voor werknemers is ingeschakeld. Maak intussen je profiel compleet, zodat je klaar bent zodra passende aanvragen verschijnen.",
     "emptyTitle": "Op dit moment geen open aanvragen",
     "emptyBody": "Wanneer werkgevers nieuwe aanvragen plaatsen, verschijnen ze hier. Intussen is het de moeite waard om je profiel compleet te maken.",

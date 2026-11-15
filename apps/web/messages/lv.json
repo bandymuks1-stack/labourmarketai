@@ -1110,7 +1110,7 @@
     "ctaStartFree": "Sākt bez maksas savā organizācijas kontā",
     "ctaSubscribe": "Aktivizēt savā organizācijas kontā",
     "priceState": {
-      "owner_confirmed": "Cenas ir spēkā. Aktivizēšana notiek jūsu organizācijas kontā; šajā lapā nekas netiek iekasēts."
+      "owner_confirmed": "Cenas ir apstiprinātas. Šajā lapā nekas netiek iekasēts."
     }
   },
   "secondary": {
@@ -2070,7 +2070,7 @@
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
       "positionsTitle": "[EN] Missing positions",
-      "positionsEmpty": "[EN] No position needs yet — once they are added, you will see here which people are missing.",
+      "positionsEmpty": "[EN] Position needs are not available yet. When they are, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena",
       "history": {
         "title": "Iepriekšējais darbs šajā projektā",

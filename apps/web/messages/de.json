@@ -5818,7 +5818,7 @@
     ],
     "priceState": {
       "draft_pricing": "Die Preise sind nicht endgültig — es kann noch nichts gekauft werden.",
-      "owner_confirmed": "Die Preise sind gültig. Die Aktivierung erfolgt im Organisationskonto; auf dieser Seite wird nichts belastet."
+      "owner_confirmed": "Die Preise sind bestätigt. Auf dieser Seite wird nichts abgebucht."
     },
     "individual": {
       "name": "Besondere Anforderungen",
@@ -6871,7 +6871,7 @@
       "emptyTeam": "Dieses Projekt hat noch kein Team — starten Sie den Draft und holen Sie die ersten Leute aufs Feld.",
       "emptyTeamCta": "Draft starten",
       "positionsTitle": "Fehlende Positionen",
-      "positionsEmpty": "Noch kein Positionsbedarf — sobald er da ist, sehen Sie hier, welche Leute fehlen.",
+      "positionsEmpty": "Der Positionsbedarf ist noch nicht verfügbar. Sobald er es ist, sehen Sie hier, welche Leute fehlen.",
       "openOps": "Management-Arena öffnen",
       "gallery": {
         "title": "Arbeitsgalerie",
@@ -9325,7 +9325,7 @@
       "unavailable": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
       "error": "Etwas ist schiefgelaufen.",
       "cancel": "Abbrechen",
-      "notEntitled": "Ihr Plan umfasst keine Buchungen."
+      "notEntitled": "Buchungen sind in Ihrem Plan nicht enthalten. Ihren Plan finden Sie in den Kontoeinstellungen."
     },
     "recognizedNote": "Die unten aufgeführten erforderlichen Fähigkeiten wurden vom Offline-System aus dem Text Ihres Bedarfs erkannt — sie sind ein gekennzeichneter Vorschlag, keine bestätigte Struktur. Prüfen Sie die Treffer; ein Administrator bestätigt oder passt die endgültigen Anforderungen an.",
     "nextAction": {
@@ -10254,7 +10254,7 @@
       "missing": "fehlt"
     },
     "ctaProfile": "Profil vervollständigen",
-    "needsAccessTitle": "Hier gibt es noch keine Arbeitgeber-Anfragen",
+    "needsAccessTitle": "Arbeitgeber-Anfragen werden hier noch nicht angezeigt",
     "needsAccessBody": "Arbeitgeber-Anfragen erscheinen hier, sobald die Sichtbarkeit für Arbeitskräfte aktiviert ist. Vervollständigen Sie in der Zwischenzeit Ihr Profil, damit Sie bereit sind, sobald passende Anfragen erscheinen.",
     "emptyTitle": "Derzeit keine offenen Anfragen",
     "emptyBody": "Wenn Arbeitgeber neue Anfragen einstellen, erscheinen sie hier. In der Zwischenzeit lohnt es sich, Ihr Profil zu vervollständigen.",

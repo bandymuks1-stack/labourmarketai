@@ -5818,7 +5818,7 @@
     ],
     "priceState": {
       "draft_pricing": "Priserna är inte slutgiltiga – inget kan köpas ännu.",
-      "owner_confirmed": "Priserna gäller. Aktivering sker i ditt organisationskonto; inget debiteras på den här sidan."
+      "owner_confirmed": "Priserna är bekräftade. Inget debiteras på den här sidan."
     },
     "individual": {
       "name": "Särskilda krav",
@@ -6871,7 +6871,7 @@
       "emptyTeam": "Det här projektet har inget lag än – starta uttagningen och ta in de första personerna på planen.",
       "emptyTeamCta": "Starta uttagningen",
       "positionsTitle": "Saknade positioner",
-      "positionsEmpty": "Inga behov av positioner än – när de finns ser du här vilka personer som saknas.",
+      "positionsEmpty": "Behov av positioner är inte tillgängliga än. När de är det ser du här vilka personer som saknas.",
       "openOps": "Öppna projekthantering",
       "gallery": {
         "title": "Arbetsgalleri",
@@ -9325,7 +9325,7 @@
       "unavailable": "Åtgärden kunde inte slutföras. Försök igen.",
       "error": "Något gick fel.",
       "cancel": "Avbryt",
-      "notEntitled": "Din plan omfattar inte bokning."
+      "notEntitled": "Bokning ingår inte i din plan. Du ser din plan i kontoinställningarna."
     },
     "recognizedNote": "De krävda färdigheterna nedan har känts igen ur ditt behovs text av offlinesystemet – de är ett märkt förslag, inte en bekräftad struktur. Granska matchningarna; en administratör bekräftar eller justerar de slutliga kraven.",
     "nextAction": {
@@ -10254,7 +10254,7 @@
       "missing": "saknas"
     },
     "ctaProfile": "Komplettera din profil",
-    "needsAccessTitle": "Inga förfrågningar från arbetsgivare här än",
+    "needsAccessTitle": "Förfrågningar från arbetsgivare visas inte här än",
     "needsAccessBody": "Förfrågningar från arbetsgivare visas här när synlighet för arbetstagare har aktiverats. Under tiden kan du komplettera din profil så att du är redo i samma stund som passande förfrågningar dyker upp.",
     "emptyTitle": "Inga öppna förfrågningar just nu",
     "emptyBody": "När arbetsgivare publicerar nya förfrågningar visas de här. Under tiden är det värt att komplettera din profil.",

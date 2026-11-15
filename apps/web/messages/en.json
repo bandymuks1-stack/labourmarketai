@@ -5818,7 +5818,7 @@
     ],
     "priceState": {
       "draft_pricing": "Prices are not final — nothing can be bought yet.",
-      "owner_confirmed": "Prices are in force. Activation happens in your organization account; nothing is charged on this page."
+      "owner_confirmed": "Prices are confirmed. Nothing is charged on this page."
     },
     "individual": {
       "name": "Special requirements",
@@ -6871,7 +6871,7 @@
       "emptyTeam": "This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "Start the draft",
       "positionsTitle": "Missing positions",
-      "positionsEmpty": "No position needs yet — once they are added, you will see here which people are missing.",
+      "positionsEmpty": "Position needs are not available yet. When they are, you will see here which people are missing.",
       "openOps": "Open project management",
       "gallery": {
         "title": "Work gallery",
@@ -9325,7 +9325,7 @@
       "unavailable": "Couldn’t complete the action. Please try again.",
       "error": "Something went wrong.",
       "cancel": "Cancel",
-      "notEntitled": "Your plan does not include booking."
+      "notEntitled": "Booking is not included in your plan. See your plan in the account settings."
     },
     "recognizedNote": "The required skills below were recognized from your need's text by the offline system — they are a labeled suggestion, not a confirmed structure. Review the matches; an administrator confirms or adjusts the final requirements.",
     "nextAction": {
@@ -10254,7 +10254,7 @@
       "missing": "missing"
     },
     "ctaProfile": "Complete your profile",
-    "needsAccessTitle": "No employer inquiries here yet",
+    "needsAccessTitle": "Employer inquiries are not shown here yet",
     "needsAccessBody": "Employer inquiries will appear here once worker visibility is enabled. In the meantime, complete your profile so you're ready the moment fitting inquiries appear.",
     "emptyTitle": "No open inquiries right now",
     "emptyBody": "When employers post new inquiries, they'll show up here. In the meantime it's worth completing your profile.",
