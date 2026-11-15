@@ -376,12 +376,10 @@ export async function CompanyPlaceHistory({
                   >
                     {chip}
                   </Link>
+                ) : load.ownPeople[pp.id] ? (
+                  <span data-testid="company-place-person-other-workspace">{chip}</span>
                 ) : (
-                  <span
-                    data-testid={load.ownPeople[pp.id] ? "company-place-person-other-workspace" : "company-place-person-other-roster"}
-                  >
-                    {chip}
-                  </span>
+                  <span data-testid="company-place-person-other-roster">{chip}</span>
                 )}
               </li>
             );
