@@ -936,6 +936,21 @@
           "body": "Med dit udtrykkelige samtykke kan de samme fakta opbygge din arbejdstagerprofil, forbinde dine færdigheder med det fælles europæiske færdighedskatalog og vise relevante offentlige jobopslag."
         }
       ],
+      "stepsTitle": "Sådan fungerer det",
+      "steps": [
+        {
+          "title": "Tilmeld dig gratis",
+          "body": "En konto holder dit CV redigerbart og dine data under din kontrol — du kan slette dem når som helst."
+        },
+        {
+          "title": "Tilføj din erfaring",
+          "body": "Importér dit gamle CV eller skriv det ind — gennemgå derefter hvert faktum og beslut, hvad der bliver, før det bruges."
+        },
+        {
+          "title": "Download og beslut",
+          "body": "Eksportér dit CV som PDF. At blive synlig for arbejdsgivere er et separat, valgfrit valg."
+        }
+      ],
       "privacyNote": "Dit CV forbliver privat som standard. Intet deles med arbejdsgivere, før du udtrykkeligt slår synlighed til — og du kan slå den fra når som helst."
     }
   },

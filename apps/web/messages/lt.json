@@ -5666,6 +5666,21 @@
           "body": "Su aiškiu tavo sutikimu tie patys faktai gali sukurti darbuotojo profilį, susieti įgūdžius su bendru Europos įgūdžių katalogu ir parodyti tinkamus viešus darbo skelbimus. Ilgainiui fiksuojant atliktus darbus tavo profesinė istorija nuolat auga — o galimybių paieška darosi vis tikslesnė."
         }
       ],
+      "stepsTitle": "Kaip tai veikia",
+      "steps": [
+        {
+          "title": "Registruokis nemokamai",
+          "body": "Paskyra leidžia CV redaguoti, o duomenys lieka tavo kontrolėje — bet kada gali juos ištrinti."
+        },
+        {
+          "title": "Pridėk savo patirtį",
+          "body": "Importuok seną CV arba įrašyk pats — tada peržiūrėk kiekvieną faktą ir nuspręsk, ką pasilikti, prieš jį panaudojant."
+        },
+        {
+          "title": "Atsisiųsk ir spręsk",
+          "body": "Eksportuok CV kaip PDF. Tapti matomam darbdaviams — atskiras, neprivalomas pasirinkimas."
+        }
+      ],
       "privacyNote": "Tavo CV pagal nutylėjimą lieka privatus. Niekas nesidalinama su darbdaviais, kol pats neįjungi matomumo, o jį bet kada gali išjungti."
     }
   },

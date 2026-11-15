@@ -68,6 +68,7 @@ export default async function CreateCvPage({
   setRequestLocale(locale);
   const t = await getTranslations("pages.createCv");
   const benefits = t.raw("benefits") as { title: string; body: string }[];
+  const steps = t.raw("steps") as { title: string; body: string }[];
 
   return (
     <>
@@ -83,9 +84,29 @@ export default async function CreateCvPage({
       />
       <BenefitCards items={benefits} />
       <section className="mx-auto max-w-container px-6 pb-12 sm:px-12">
-        {/* The "How it works" steps repeated the benefit cards and the
-            privacy note below (owner copy cleanup 2026-11-15). */}
-        <p className="max-w-2xl text-sm leading-relaxed text-text-muted">
+        <h2 className="font-display text-2xl font-semibold text-text-primary">
+          {t("stepsTitle")}
+        </h2>
+        <ol className="mt-6 grid gap-6 sm:grid-cols-3">
+          {steps.map((step, i) => (
+            <li
+              key={step.title}
+              className="rounded-lg border border-ink-500 p-5"
+              data-testid={`create-cv-step-${i + 1}`}
+            >
+              <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                {i + 1}
+              </p>
+              <h3 className="mt-2 font-semibold text-text-primary">
+                {step.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+                {step.body}
+              </p>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-8 max-w-2xl text-sm leading-relaxed text-text-muted">
           {t("privacyNote")}
         </p>
         <div className="mt-8">

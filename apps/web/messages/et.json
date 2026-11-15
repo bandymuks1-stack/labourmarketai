@@ -936,6 +936,21 @@
           "body": "Sinu selgesõnalisel nõusolekul saavad samad faktid ehitada töötajaprofiili, siduda oskused ühise Euroopa oskuste kataloogiga ja näidata sobivaid avalikke töökuulutusi."
         }
       ],
+      "stepsTitle": "Kuidas see töötab",
+      "steps": [
+        {
+          "title": "Registreeru tasuta",
+          "body": "Konto hoiab CV muudetavana ja andmed sinu kontrolli all — võid need igal ajal kustutada."
+        },
+        {
+          "title": "Lisa oma kogemus",
+          "body": "Impordi vana CV või kirjuta see sisse — seejärel vaata iga fakt üle ja otsusta enne kasutamist, mis jääb."
+        },
+        {
+          "title": "Laadi alla ja otsusta",
+          "body": "Ekspordi CV PDF-ina. Tööandjatele nähtavaks saamine jääb eraldi, vabatahtlikuks valikuks."
+        }
+      ],
       "privacyNote": "Sinu CV jääb vaikimisi privaatseks. Midagi ei jagata tööandjatega enne, kui sa nähtavuse selgesõnaliselt sisse lülitad — ja selle saab igal ajal välja lülitada."
     }
   },

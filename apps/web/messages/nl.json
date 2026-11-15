@@ -5666,6 +5666,21 @@
           "body": "Met jouw uitdrukkelijke toestemming kunnen dezelfde feiten je werknemersprofiel opbouwen, je vaardigheden koppelen aan de gemeenschappelijke Europese vaardighedencatalogus en passende publieke vacatures tonen. Door afgerond werk vast te leggen groeit je professionele geschiedenis — en wordt het zoeken naar kansen steeds beter."
         }
       ],
+      "stepsTitle": "Hoe het werkt",
+      "steps": [
+        {
+          "title": "Meld je gratis aan",
+          "body": "Met een account blijft je cv bewerkbaar en houd jij je gegevens onder controle — je kunt ze op elk moment verwijderen."
+        },
+        {
+          "title": "Voeg je ervaring toe",
+          "body": "Importeer je oude cv of typ het in — bekijk daarna elk feit en bepaal wat je houdt voordat het wordt gebruikt."
+        },
+        {
+          "title": "Download en beslis",
+          "body": "Exporteer je cv als PDF. Vindbaar worden voor werkgevers blijft een aparte, optionele keuze."
+        }
+      ],
       "privacyNote": "Je cv blijft standaard privé. Er wordt niets met werkgevers gedeeld totdat jij vindbaarheid expliciet inschakelt, en je kunt dit op elk moment uitzetten."
     }
   },

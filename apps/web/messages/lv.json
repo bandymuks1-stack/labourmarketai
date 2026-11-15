@@ -936,6 +936,21 @@
           "body": "Ar jūsu skaidru piekrišanu tie paši fakti var izveidot darbinieka profilu, sasaistīt prasmes ar kopīgo Eiropas prasmju katalogu un parādīt atbilstošus publiskus darba sludinājumus."
         }
       ],
+      "stepsTitle": "Kā tas darbojas",
+      "steps": [
+        {
+          "title": "Reģistrējieties bez maksas",
+          "body": "Konts ļauj CV rediģēt, un dati paliek jūsu kontrolē — tos varat izdzēst jebkurā brīdī."
+        },
+        {
+          "title": "Pievienojiet savu pieredzi",
+          "body": "Importējiet veco CV vai ierakstiet to — tad pārskatiet katru faktu un izlemiet, kas paliek, pirms tas tiek izmantots."
+        },
+        {
+          "title": "Lejupielādējiet un izlemiet",
+          "body": "Eksportē CV kā PDF. Kļūt redzamam darba devējiem ir atsevišķa, brīvprātīga izvēle."
+        }
+      ],
       "privacyNote": "Jūsu CV pēc noklusējuma paliek privāts. Nekas netiek kopīgots ar darba devējiem, kamēr jūs skaidri neieslēdzat redzamību — un to jebkurā brīdī varat izslēgt."
     }
   },

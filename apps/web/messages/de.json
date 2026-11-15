@@ -5666,6 +5666,21 @@
           "body": "Mit Ihrer ausdrücklichen Zustimmung können dieselben Fakten Ihr Arbeitskraft-Profil aufbauen, Ihre Fähigkeiten mit dem gemeinsamen europäischen Fähigkeitenkatalog verbinden und passende öffentliche Stellenanzeigen zeigen. Indem Sie erledigte Arbeiten festhalten, wächst Ihre berufliche Historie stetig — und die Suche nach Möglichkeiten wird immer besser."
         }
       ],
+      "stepsTitle": "So funktioniert es",
+      "steps": [
+        {
+          "title": "Kostenlos registrieren",
+          "body": "Ein Konto hält Ihren Lebenslauf bearbeitbar und Ihre Daten unter Ihrer Kontrolle — Sie können sie jederzeit löschen."
+        },
+        {
+          "title": "Erfahrung hinzufügen",
+          "body": "Importieren Sie Ihren alten Lebenslauf oder tragen Sie ihn ein — prüfen Sie dann jeden Fakt und entscheiden Sie vor der Verwendung, was bleibt."
+        },
+        {
+          "title": "Herunterladen und entscheiden",
+          "body": "Exportieren Sie Ihren Lebenslauf als PDF. Für Arbeitgeber sichtbar zu werden bleibt eine separate, optionale Entscheidung."
+        }
+      ],
       "privacyNote": "Ihr Lebenslauf bleibt standardmäßig privat. Nichts wird an Arbeitgeber weitergegeben, bis Sie die Sichtbarkeit ausdrücklich aktivieren — und Sie können sie jederzeit deaktivieren."
     }
   },
