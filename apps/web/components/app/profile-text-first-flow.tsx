@@ -185,9 +185,16 @@ export function ProfileTextFirstFlow({
     const kept = readWorkerIntakeDraft();
     if (kept) {
       setText(kept);
+      setStage("compose");
       setIntakeSeeded(true);
     }
   }, [initialText]);
+  // The composer sits in the profile's closed edit section; their own text
+  // waiting there is the reason to open it.
+  const composeRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (intakeSeeded) composeRef.current?.closest("details")?.setAttribute("open", "");
+  }, [intakeSeeded]);
   const [pasted, setPasted] = useState("");
   const [textSaveState, setTextSaveState] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -459,6 +466,7 @@ export function ProfileTextFirstFlow({
   if (stage === "compose" || !hasExtracted) {
     return (
       <div
+        ref={composeRef}
         className="flex flex-col gap-4"
         data-testid="profile-text-flow-compose"
       >

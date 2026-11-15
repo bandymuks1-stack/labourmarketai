@@ -63,6 +63,8 @@ describe("/worker-intake is the first step, without an account", () => {
     expect(flow).toContain("readWorkerIntakeDraft()");
     expect(flow, "cleared only when the person sends it").toMatch(/if \(raw\.trim\(\)\.length > 0\) clearWorkerIntakeDraft\(\);/);
     expect(flow, "never over the person's own saved text").toContain("if (initialText.trim().length > 0) return;");
+    expect(flow, "shown, not left in the picker stage or a closed section").toContain('setStage("compose");');
+    expect(flow).toContain('composeRef.current?.closest("details")?.setAttribute("open", "");');
   });
 
   it("its title does not call it a registration", () => {
