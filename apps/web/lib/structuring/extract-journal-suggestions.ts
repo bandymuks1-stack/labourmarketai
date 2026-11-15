@@ -777,6 +777,7 @@ function addTimes(
  *  by hand (the v3 unknown-phrase flow). */
 function mergeContinuationFragments(
   fragments: JournalFragmentSuggestion[],
+  apart: ReadonlySet<JournalFragmentSuggestion> = new Set(),
 ): JournalFragmentSuggestion[] {
   const out: JournalFragmentSuggestion[] = [];
   let i = 0;
@@ -789,7 +790,14 @@ function mergeContinuationFragments(
       cur.time !== null && curHasNoActivity && isTimeOnlyFragment(cur.rawPhrase);
     // A phrase that opens with "iš jų" / "including" is a part OF the figure
     // before it, never its continuation: "15 val., iš jų 2 val. …" stays 13 + 2.
-    if (curIsTimeOnly && next && next.time !== null && !opensAsIncludedPart(next.rawPhrase)) {
+    if (
+      curIsTimeOnly &&
+      next &&
+      next.time !== null &&
+      !opensAsIncludedPart(next.rawPhrase) &&
+      !apart.has(cur) &&
+      !apart.has(next)
+    ) {
       const mergedTime = addTimes(cur.time!, next.time);
       const mergedRaw = `${cur.rawPhrase} ir ${next.rawPhrase}`.trim();
       out.push({
@@ -864,12 +872,17 @@ const RESTATED_TOTAL_WORD_RX =
 /** A total word standing RIGHT in front of a figure: "iš viso 15", "kartu:
  *  15", "in total 15", "altogether 15". */
 const RESTATED_TOTAL_LEAD_RX = new RegExp(`(?:${RESTATED_TOTAL_WORD_RX.source})\\s*[:–-]?\\s*$`, "iu");
-/** A restatement cue standing RIGHT in front of a figure, with at most two
- *  short linking words between: "įeina į 15", "dalis 15", "included in the
- *  15", "входят в 15". One further back in the phrase speaks about something
- *  else ("Vakare didžiąją dalį laiko lauke 4 val." is a 4-hour item). */
-const RESTATEMENT_CUE_LEAD_RX = new RegExp(
-  `(?:${RESTATEMENT_CUE_RX.source})\\s*[:–-]?\\s*(?:\\p{L}{1,3}\\s+){0,2}$`,
+/** The cues that, RIGHT in front of a figure, say that figure is the day said
+ *  AGAIN ("įeina į 15", "included in the 15", "входят в 15"), with at most two
+ *  short linking words between. Words that name a part ("dalis", "part of
+ *  the") are not among them: "antroji dalis – 4 val." is the second 4-hour
+ *  block, not the first one said again. A cue further back in the phrase
+ *  speaks about something else ("Vakare didžiąją dalį laiko lauke 4 val." is
+ *  a 4-hour item). */
+const TOTAL_AGAIN_CUE_RX =
+  /(?<!\p{L})(?:įeina|ieina|įeinančios|įskaičiuot\p{L}*|iskaiciuot\p{L}*|ne\s+(?:\p{L}+\s+){0,3}papildom\p{L}*|neprided\p{L}*|ne\s+prided\p{L}*|included|inclusive|is\s+part\s+of|are\s+part\s+of|not\s+(?:\p{L}+\s+){0,2}(?:extra|additional)|not\s+on\s+top|входят|входит|включен\p{L}*|не\s+дополнительно|inbegrepen|niet\s+extra|enthalten|inbegriffen|nicht\s+zusätzlich|wliczon\p{L}*|zawart\p{L}*|nie\s+dodatkow\p{L}*)(?!\p{L})/iu;
+const TOTAL_AGAIN_LEAD_RX = new RegExp(
+  `(?:${TOTAL_AGAIN_CUE_RX.source})\\s*[:–-]?\\s*(?:\\p{L}{1,3}\\s+){0,2}$`,
   "iu",
 );
 
@@ -944,7 +957,11 @@ function numbersIn(text: string): number[] {
 function containedTotal(
   fragments: JournalFragmentSuggestion[],
   where: FragmentSentences,
-): { fragments: JournalFragmentSuggestion[]; statedTotal: JournalSuggestions["statedTotal"] } | null {
+): {
+  fragments: JournalFragmentSuggestion[];
+  statedTotal: JournalSuggestions["statedTotal"];
+  apart: ReadonlySet<JournalFragmentSuggestion>;
+} | null {
   const inHoursOrMinutes = fragments.filter((f) => f.time !== null && f.time.unitSlug !== "days");
   if (inHoursOrMinutes.length < 2) return null;
   const total = inHoursOrMinutes[0];
@@ -973,7 +990,7 @@ function containedTotal(
     const digit = f.rawPhrase.search(/\d/);
     const lead = digit > 0 ? f.rawPhrase.slice(0, digit) : "";
     if (
-      (equalsTotal && (RESTATEMENT_CUE_LEAD_RX.test(lead) || RESTATED_TOTAL_LEAD_RX.test(lead))) ||
+      (equalsTotal && (TOTAL_AGAIN_LEAD_RX.test(lead) || RESTATED_TOTAL_LEAD_RX.test(lead))) ||
       (equalsAnother && RESTATEMENT_CUE_RX.test(sentence) && sentenceNamesTheTotal)
     ) {
       restatements.add(f);
@@ -1029,6 +1046,10 @@ function containedTotal(
   const insideSet = new Set(inside);
   const restNamed = inside.length > 0;
   const out: JournalFragmentSuggestion[] = [];
+  // The rest and the parts are separate items: the continuation merge ("8 val.
+  // | 30 min.") must never glue the rest onto the part after it ("Darbo
+  // laikas: 15 valandų. … (2 valandos …)" stays 13 + 2, not one 15 h item).
+  const apart = new Set<JournalFragmentSuggestion>(parts);
   for (const f of fragments) {
     if (restatements.has(f)) continue;
     if (f !== total) {
@@ -1038,10 +1059,15 @@ function containedTotal(
     // The rest of the day, in the person's own words; nothing when the parts
     // (or the items the person named) already fill it. It still names no work,
     // so it stays `isUnknown` and the composer keeps asking the person to name it.
-    if (restMin > 0 && !restNamed) out.push({ ...f, time: minutesAsTime(restMin) });
+    if (restMin > 0 && !restNamed) {
+      const rest = { ...f, time: minutesAsTime(restMin) };
+      apart.add(rest);
+      out.push(rest);
+    }
   }
   const onTop = others.some((f) => !insideSet.has(f));
   return {
+    apart,
     fragments: out,
     statedTotal: {
       value: total.time!.value,
@@ -1077,6 +1103,9 @@ function separateStatedTotal(
 ): {
   fragments: JournalFragmentSuggestion[];
   statedTotal: JournalSuggestions["statedTotal"];
+  /** Fragments the continuation merge keeps as they are (a contained total's
+   *  rest and parts). */
+  apart?: ReadonlySet<JournalFragmentSuggestion>;
 } {
   const timed = fragments.filter((f) => f.time !== null);
   const contained = containedTotal(fragments, where);
@@ -1338,12 +1367,12 @@ export function extractJournalSuggestions(text: string): JournalSuggestions {
   // The stated total leaves the list BEFORE the continuation merge, so a
   // bare header ("9 val.: 5 val. X, 4 val. Y") can never be glued onto its
   // own first item as "9 val ir 5 val. X".
-  const { fragments: items, statedTotal } = separateStatedTotal(
+  const { fragments: items, statedTotal, apart } = separateStatedTotal(
     initialFragments,
     headerPhrases,
     { sentenceOf, sentences },
   );
-  const fragments = mergeContinuationFragments(items);
+  const fragments = mergeContinuationFragments(items, apart);
 
   // 7) Explicit named capabilities / specializations. Same dictionary as the
   //    profile composer so e.g. "lietuviškos virtuvės gamyba" surfaces BOTH

@@ -278,3 +278,32 @@ describe("the rest of the day, when the person names it", () => {
     expect(extractJournalSuggestions(text).statedTotal).toMatchObject({ value: 15, includesParts: true, matchesFragments: false });
   });
 });
+
+/**
+ * Fourth review of #3355: words that NAME a part ("antroji dalis", "second
+ * part of the day") never say a figure is the day said again; the rest and a
+ * part right after it stay two items.
+ */
+describe("a part of the day is not the day said again", () => {
+  it.each([
+    ["Lithuanian 'antroji dalis'", "Pirmoji dienos dalis – 4 val., antroji dalis – 4 val.", 8 * 60],
+    ["Lithuanian 'antra dalis'", "Pirma dalis 4 val., antra dalis 4 val.", 8 * 60],
+    ["English 'second part of the day'", "First part of the day 4 h, second part of the day 4 h.", 8 * 60],
+  ])("%s", (_name, text, expected) => {
+    expect(minutes(text)).toBe(expected);
+    expect(intakeMinutes(text)).toBe(expected);
+    expect(extractJournalSuggestions(text).statedTotal?.includesParts).not.toBe(true);
+  });
+
+  it("a part said with 'dalis' after the total still reads as inside it", () => {
+    expect(minutes("Dirbau 15 val. 13 val. programavau, 2 val. derinau. Tos 2 valandos yra 15 valandų dalis.")).toBe(15 * 60);
+  });
+
+  it("the short labelled form keeps the rest and the bracketed part as two items: 13 h + 2 h", () => {
+    const s = extractJournalSuggestions("Darbo laikas: 15 valandų. Vakare vyko koordinavimas su komanda (2 valandos per dieną).");
+    const times = s.fragments.filter((f) => f.time).map((f) => f.time!.value).sort((a, b) => a - b);
+    expect(times).toEqual([2, 13]);
+    expect(s.fragments.find((f) => f.time?.value === 13)).toMatchObject({ activitySlug: null, activityLabel: null, isUnknown: true });
+    expect(s.statedTotal).toMatchObject({ value: 15, includesParts: true, matchesFragments: true });
+  });
+});
