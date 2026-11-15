@@ -2052,6 +2052,7 @@
     "addError": "Nie udało się dodać. Spróbuj ponownie.",
     "addExperienceTitle": "Dodaj doświadczenie zawodowe",
     "expTitleLabel": "Stanowisko",
+    "expKindLabel": "Rodzaj zaangażowania",
     "expTitlePlaceholder": "np. spawacz, pielęgniarka, pracownik magazynu, programista",
     "expStartLabel": "Od (miesiąc / rok)",
     "expEndLabel": "Do (miesiąc / rok)",
@@ -4578,10 +4579,11 @@
             "back": "Wstecz",
             "next": "Dalej",
             "descRequired": "Dodaj opis, aby kontynuować.",
+            "countryRequired": "Wybierz kraj, w którym będzie wykonywana praca.",
             "optionalTag": "(opcjonalnie)",
             "reviewIntro": "Sprawdź i utwórz. Zgłoszenie pozostaje prywatne w Twojej przestrzeni.",
-            "locationLabel": "Lokalizacja lub kraj",
-            "locationPlaceholder": "np. Wilno, Litwa",
+            "locationLabel": "Miasto lub miejsce pracy",
+            "locationPlaceholder": "np. miasto, dzielnica lub obiekt",
             "skillsLabel": "Wymagane umiejętności lub kryteria",
             "skillsPlaceholder": "np. prawo jazdy, angielski, doświadczenie",
             "urgencyLabel": "Na kiedy potrzebujesz",
@@ -14368,7 +14370,9 @@
         "supplyRole": "Jaki zawód",
         "supplyRolePlaceholder": "Np. spawacz",
         "supplyTeamSize": "Ilu macie ludzi",
-        "supplyLocation": "Gdzie mogą pracować"
+        "supplyLocation": "Gdzie mogą pracować",
+        "demandCountry": "Kraj, w którym będzie praca",
+        "demandCountryPlaceholder": "np. Szwecja lub SE"
       },
       "availability": {
         "available": "Dostępny/a",

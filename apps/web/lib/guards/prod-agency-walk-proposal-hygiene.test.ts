@@ -33,6 +33,15 @@ describe("the production agency walk cleans up its own booking proposal", () => 
     expect(teardown).toContain('getByTestId("booking-withdraw-confirm")');
   });
 
+  it("a withdrawal counts only when the stored status reads withdrawn", () => {
+    expect(teardown).toContain('.toBe("withdrawn")');
+    expect(teardown).not.toContain('.not.toBe("proposed")');
+    // An unreadable page is its own answer, never a closed proposal.
+    expect(teardown).toContain('status === "unreadable"');
+    expect(spec).toMatch(/return "unreadable";/);
+    expect(spec).toMatch(/return "absent";/);
+  });
+
   it("it never withdraws by a broad match, so earlier runs' proposals stay untouched", () => {
     expect(teardown).not.toMatch(/hasText:\s*["'`]QA-SYNTHETIC/);
     expect(teardown).not.toMatch(/data-status="proposed"\]'\)\.(first|nth|all)\(/);
