@@ -88,8 +88,17 @@ export function toFeedItem(row: CommercialRequestRow): CommercialRequestItem {
  * be reached at `example.invalid` (RFC 2606: it never resolves) nor at the private
  * `e2e-proof.local` domain, and the markers are the documented QA prefixes, so the
  * OR rule drops nothing a real company could have sent.
+ *
+ * THE ONE RULE for every reader of `company_need_public_intakes` that must not count
+ * or forward our test rows: this feed, the CRM pipeline (lib/crm/pipeline.ts), launch
+ * readiness and the Agentai capability readback (lib/staffing/intake-test-rows.ts).
  */
-export function isSyntheticCommercialRequest(row: CommercialRequestRow): boolean {
+export type SyntheticIntakeTexts = Pick<
+  CommercialRequestRow,
+  "company_name" | "contact_name" | "contact_email" | "description"
+>;
+
+export function isSyntheticCommercialRequest(row: SyntheticIntakeTexts): boolean {
   return (
     isSyntheticFixtureLabel(row.company_name, row.contact_name, row.contact_email, row.description) ||
     TEST_MAILBOX.test(row.contact_email ?? "")
