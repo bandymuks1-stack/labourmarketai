@@ -1,77 +1,130 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { WORKER_PROFILE_DOOR_HREF, WORKER_PROFILE_DOOR_NEXT } from "@/lib/marketing/worker-profile-door";
-import { PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
+import {
+  DRAFT_MAX_AGE_DAYS,
+  DRAFT_MAX_CHARS,
+  INTAKE_DRAFT_KEY,
+  clearWorkerIntakeDraft,
+  intakeDraftText,
+  readWorkerIntakeDraft,
+  writeWorkerIntakeDraft,
+} from "@/lib/staffing/worker-intake-draft";
 
 /**
- * ONE DOOR TO "BUILD YOUR PROFILE / CV" (owner P0 2026-11-15, F2 / F6).
+ * WHAT A WORKER TYPES BEFORE SIGN-UP IS KEPT (owner P0 2026-11-15, F2, option b).
  *
- * A production audit found the button "Susikurti profilį / CV" on
- * /work-opportunities (and the same button on /skills and /professions)
- * opening /worker-intake, titled "Darbuotojo registracija": a form of 15+
- * fields that stores nothing, whose sign-up link carried no `next`, so the
- * person typed everything twice or lost it. Meanwhile /create-cv's CTAs went
- * to sign-up with the profile builder as the return path: two doors for one
- * thing, one of them broken.
- *
- * Now every such button opens the same sign-up, carrying the same builder,
- * before anything is typed; the intake page stays (it stores nothing and
- * says so) and its own sign-up and login links carry the builder too.
+ * The audit: "Susikurti profilį / CV" opened /worker-intake, titled
+ * "Darbuotojo registracija", 15+ fields that store nothing, and a sign-up
+ * link with no `next`, so everything typed was lost. Now the intake stays
+ * the first step without an account, its sign-up returns to the profile
+ * builder, and what was typed is placed in the builder's composer for the
+ * person to read and send. Nothing is saved for them.
  */
 
 const web = process.cwd();
 const read = (rel: string) => readFileSync(join(web, rel), "utf8");
 const MARKETING = "app/[locale]/(marketing)";
 
-describe("the door", () => {
-  it("opens sign-up and returns to the profile builder", () => {
+describe("sign-up returns to the profile builder", () => {
+  it("the path and the href", () => {
     expect(WORKER_PROFILE_DOOR_NEXT).toBe("/dashboard/profile");
     expect(WORKER_PROFILE_DOOR_HREF).toBe(`/auth/signup?next=${encodeURIComponent("/dashboard/profile")}`);
-    expect(existsSync(join(web, "app/[locale]/dashboard/profile/page.tsx")), "the builder is a real page").toBe(true);
+    expect(existsSync(join(web, "app/[locale]/dashboard/profile/page.tsx"))).toBe(true);
   });
 
-  it("is the same path the free-CV page's own CTAs carry (one door, not two)", () => {
-    const src = read(`${MARKETING}/create-cv/page.tsx`);
-    const m = /const CREATE_CV_NEXT = "([^"]+)";/.exec(src);
-    expect(m, "create-cv still names its return path").not.toBeNull();
-    expect(m![1]).toBe(WORKER_PROFILE_DOOR_NEXT);
+  it("is the same path the free-CV page's CTAs carry", () => {
+    const m = /const CREATE_CV_NEXT = "([^"]+)";/.exec(read(`${MARKETING}/create-cv/page.tsx`));
+    expect(m?.[1]).toBe(WORKER_PROFILE_DOOR_NEXT);
   });
 });
 
-describe("every public 'build your profile / CV' button is that door", () => {
-  for (const page of ["work-opportunities", "skills", "professions"]) {
-    it(`/${page}`, () => {
-      const src = read(`${MARKETING}/${page}/page.tsx`);
-      expect(src, "no button leads to the intake any more").not.toMatch(/href="\/worker-intake"/);
-      expect(src).toMatch(/<TrackedCta\s+href=\{WORKER_PROFILE_DOOR_HREF\}\s+ctaId="[a-z_]+_profile"/);
-    });
-  }
-});
-
-describe("/worker-intake stays, and its account links carry the builder", () => {
+describe("/worker-intake is the first step, without an account", () => {
   const src = read(`${MARKETING}/worker-intake/page.tsx`);
-  it("sign-up and login both return to the profile builder", () => {
+  it("its sign-up and login both return to the profile builder", () => {
     expect(src).toMatch(/relPath=\{`\/\$\{locale\}\$\{WORKER_PROFILE_DOOR_HREF\}`\}/);
     expect(src).toMatch(/relPath=\{`\/\$\{locale\}\/auth\/login\?next=\$\{encodeURIComponent\(WORKER_PROFILE_DOOR_NEXT\)\}`\}/);
-    expect(src, "no bare sign-up or login link is left").not.toMatch(/relPath=\{`\/\$\{locale\}\/auth\/(signup|login)`\}/);
+    expect(src).not.toMatch(/relPath=\{`\/\$\{locale\}\/auth\/(signup|login)`\}/);
   });
 
-  it("its title does not call it a registration: it registers nobody", () => {
+  it("the public buttons still open it: nobody is sent to sign-up before typing", () => {
+    for (const page of ["work-opportunities", "skills", "professions"]) {
+      expect(read(`${MARKETING}/${page}/page.tsx`), page).toMatch(/href="\/worker-intake"/);
+    }
+  });
+
+  it("the form keeps what is typed, and the builder places it in its composer", () => {
+    const form = read("components/app/worker-intake-form.tsx");
+    expect(form).toMatch(/onInput=\{\(e\) => keepDraft\(e\.currentTarget\)\}/);
+    expect(form).toMatch(/onChange=\{\(e\) => keepDraft\(e\.currentTarget\)\}/);
+    const flow = read("components/app/profile-text-first-flow.tsx");
+    expect(flow).toContain("readWorkerIntakeDraft()");
+    expect(flow, "cleared only when the person sends it").toMatch(/if \(raw\.trim\(\)\.length > 0\) clearWorkerIntakeDraft\(\);/);
+    expect(flow, "never over the person's own saved text").toContain("if (initialText.trim().length > 0) return;");
+  });
+
+  it("its title does not call it a registration", () => {
     for (const loc of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
       const title = (JSON.parse(read(`messages/${loc}.json`)) as { workerIntake?: { title?: string } }).workerIntake?.title;
-      if (title === undefined) continue; // the catalog falls back for this namespace
+      if (title === undefined) continue;
       expect(title, loc).not.toMatch(/regist|регистр|rejestr|anmeld/i);
     }
   });
 });
 
-describe("the menu's Create CV entry says an account comes first (F1)", () => {
-  it("opens the signed-in profile builder, marked as an account destination", () => {
-    // It pointed at /create-cv as a no-account page, so the home's goal card
-    // promised "no account needed" while that page's only action is sign-up.
-    const entry = PUBLIC_INTENTS.find((i) => i.id === "work")?.links.find((l) => l.id === "createCv");
-    expect(entry).toEqual({ id: "createCv", href: WORKER_PROFILE_DOOR_NEXT, account: true });
+describe("the kept draft", () => {
+  const store = new Map<string, string>();
+  beforeEach(() => {
+    store.clear();
+    (globalThis as { window?: unknown }).window = {
+      localStorage: {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => void store.set(k, v),
+        removeItem: (k: string) => void store.delete(k),
+      },
+    };
+  });
+  afterEach(() => {
+    delete (globalThis as { window?: unknown }).window;
+  });
+
+  it("one 'label: value' line per filled field; empty ones left out", () => {
+    expect(
+      intakeDraftText([
+        { label: "Name", value: " Rasa  P. " },
+        { label: "Languages", value: "" },
+        { label: "Comment", value: "Tiles, 6 years" },
+      ]),
+    ).toBe("Name: Rasa P.\nComment: Tiles, 6 years");
+  });
+
+  it("survives a reload, and is gone once sent", () => {
+    writeWorkerIntakeDraft("Name: Rasa", 1_000);
+    expect(readWorkerIntakeDraft(2_000)).toBe("Name: Rasa");
+    clearWorkerIntakeDraft();
+    expect(readWorkerIntakeDraft(3_000)).toBeNull();
+  });
+
+  it("bounded: length capped, an old draft dropped, empty text not kept", () => {
+    writeWorkerIntakeDraft("x".repeat(DRAFT_MAX_CHARS + 50), 0);
+    expect(readWorkerIntakeDraft(1)?.length).toBe(DRAFT_MAX_CHARS);
+    expect(readWorkerIntakeDraft(DRAFT_MAX_AGE_DAYS * 86_400_000 + 1)).toBeNull();
+    expect(store.has(INTAKE_DRAFT_KEY), "the old draft is removed").toBe(false);
+    writeWorkerIntakeDraft("   ", 0);
+    expect(store.has(INTAKE_DRAFT_KEY)).toBe(false);
+  });
+
+  it("a broken or refused store keeps nothing and throws nothing", () => {
+    store.set(INTAKE_DRAFT_KEY, "{not json");
+    expect(readWorkerIntakeDraft()).toBeNull();
+    (globalThis as { window?: unknown }).window = {
+      get localStorage(): Storage {
+        throw new Error("denied");
+      },
+    };
+    expect(() => writeWorkerIntakeDraft("Name: Rasa")).not.toThrow();
+    expect(readWorkerIntakeDraft()).toBeNull();
   });
 });

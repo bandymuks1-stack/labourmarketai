@@ -215,29 +215,34 @@ test("S-3c. an education institution signs up through its own door, and its orga
   await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
 });
 
-test("S-3d. a worker builds a profile from a public page: the account comes first, then the profile builder", async ({ page }) => {
-  // Owner P0 2026-11-15 (F2 / F6): the public "build your profile / CV"
-  // button used to open a form that stored nothing and a sign-up that forgot
-  // where the person was going. Now it opens sign-up carrying the builder.
-  const address = email("profiledoor");
-  await page.goto(`${BASE}/en/work-opportunities`);
-  const door = page.locator('[data-cta-id="work_opportunities_profile"]');
-  await expect(door).toHaveAttribute("href", "/en/auth/signup?next=%2Fdashboard%2Fprofile");
-  await door.click();
+test("S-3d. what a worker types on the intake before having an account is in the profile composer after sign-up", async ({ page }) => {
+  // Owner P0 2026-11-15 (F2): the intake used to store nothing, and its
+  // sign-up forgot both the typed text and where the person was going.
+  const address = email("intake");
+  await page.goto(`${BASE}/en/worker-intake`);
+  const form = page.getByTestId("worker-intake-form");
+  await form.locator('input[name="full_name"]').fill("Synthetic Intake Worker");
+  await form.locator('textarea[name="comment"]').fill(`Tiling and grouting, six years, run ${RUN}`);
+  const signUp = page.locator('[data-testid="intake-bridge"] a').first();
+  await expect(signUp).toHaveAttribute("href", "/en/auth/signup?next=%2Fdashboard%2Fprofile");
+  await signUp.click();
   await page.waitForURL((url) => url.pathname === "/en/auth/signup", { timeout: 60_000 });
-  expect(new URL(page.url()).searchParams.get("next"), "the return path is carried into sign-up").toBe("/dashboard/profile");
   await page.locator('input[type="email"]').fill(address);
   await page.locator('input[name="password"]').fill(PASSWORD);
   await page.locator('input[name="confirm_password"]').fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
   await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
-  await onboard(page, "work", "Synthetic Door Worker");
+  await onboard(page, "work", "Synthetic Intake Worker");
   await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
-  await expect(
-    page.locator('[data-testid="cv-import-upload"]').first(),
-    "the person lands where the profile and CV are made: upload or paste, review, confirm",
-  ).toBeAttached({ timeout: 30_000 });
+  const composer = page.locator('[data-testid="profile-text-flow-compose"] textarea').first();
+  await expect(composer, "the typed text waits in the composer, for the person to send").toHaveValue(
+    new RegExp(`Synthetic Intake Worker[\\s\\S]*Tiling and grouting, six years, run ${RUN}`),
+    { timeout: 30_000 },
+  );
+  const id = await userId(address);
+  const [profile] = await db<Array<{ profile_text: string | null }>>(`profiles?id=eq.${id}&select=profile_text`);
+  expect(profile?.profile_text ?? null, "nothing was saved for them").toBeNull();
 });
 
 test("S-4. an address that already has an account is sent to sign in, not to a mail that never comes", async ({ page }) => {

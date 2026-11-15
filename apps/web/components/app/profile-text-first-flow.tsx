@@ -30,6 +30,7 @@ import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { clearWorkerIntakeDraft, readWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
 
 /** Tiny inline pill — tells the user the *narrative* is persisted. Suggestions
  *  still need per-card confirm; this is decoupled from "skills are verified". */
@@ -175,6 +176,18 @@ export function ProfileTextFirstFlow({
   }, []);
 
   const [text, setText] = useState(initialText);
+  // What the person typed on /worker-intake before they had an account
+  // (owner P0 2026-11-15, F2): placed in the composer, never sent or saved
+  // for them. Only when they have no profile text of their own yet.
+  const [intakeSeeded, setIntakeSeeded] = useState(false);
+  useEffect(() => {
+    if (initialText.trim().length > 0) return;
+    const kept = readWorkerIntakeDraft();
+    if (kept) {
+      setText(kept);
+      setIntakeSeeded(true);
+    }
+  }, [initialText]);
   const [pasted, setPasted] = useState("");
   const [textSaveState, setTextSaveState] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -225,6 +238,8 @@ export function ProfileTextFirstFlow({
     setApplied(false);
     setPromotion(null);
     setText(raw);
+    // Sent by the person: the kept intake text has done its job.
+    if (raw.trim().length > 0) clearWorkerIntakeDraft();
 
     // Persist the user's own words. The text is the *claim* — saved into
     // the owner-only `profiles.profile_text` (migration 0014); reload
@@ -448,6 +463,7 @@ export function ProfileTextFirstFlow({
         data-testid="profile-text-flow-compose"
       >
         <TextFirstComposer
+          key={intakeSeeded ? "intake" : "own"}
           title={t("title")}
           helper={t("helper")}
           placeholder={t("placeholder")}

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { TrackedCta } from "@/components/app/tracked-cta";
-import { WORKER_PROFILE_DOOR_HREF } from "@/lib/marketing/worker-profile-door";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
@@ -217,16 +215,9 @@ export default async function WorkOpportunitiesPage({
       </section>
 
       <section className="mt-12 flex flex-wrap gap-3">
-        {/* The ONE worker profile door: sign-up first, then the profile
-            builder (owner P0 2026-11-15, F2 / F6). */}
-        <TrackedCta
-          href={WORKER_PROFILE_DOOR_HREF}
-          ctaId="work_opportunities_profile"
-          audience="workers"
-          className={buttonLinkClassName()}
-        >
+        <Link href="/worker-intake" className={buttonLinkClassName()}>
           {pick(CTA_PROFILE, l)}
-        </TrackedCta>
+        </Link>
         <Link href="/skills" className={buttonLinkClassName("secondary")}>
           {pick(CTA_SKILLS, l)}
         </Link>

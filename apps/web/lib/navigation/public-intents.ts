@@ -69,14 +69,7 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
     links: [
       { id: "jobs", href: "/jobs", account: false },
       { id: "workOpportunities", href: "/work-opportunities", account: false },
-      // The CV is made in the signed-in profile builder (upload or paste,
-      // review each fact, confirm). The free-CV page explains it, but its
-      // only action is sign-up, so this entry says plainly that an account
-      // comes first (owner P0 2026-11-15, F1). Signed out, the middleware
-      // sends the visitor to sign in with the builder kept in `?next=`, and
-      // the login page's sign-up link keeps it. `/create-cv` stays the
-      // landing an advert opens.
-      { id: "createCv", href: "/dashboard/profile", account: true },
+      { id: "createCv", href: "/create-cv", account: false },
       { id: "workAbroad", href: "/work-abroad", account: false },
       { id: "forWorkers", href: "/for-workers", account: false },
     ],

@@ -126,8 +126,8 @@ jobs:
       # run against a local `next start` with the runner's own Chromium, all
       # five passed in 7.2 s before this floor was raised.
       # translated-page-survives adds 1 (2026-11-06).
-      # worker-profile-door adds 12 (2026-11-15): 6 checks x 2 locales.
-      MIN_EXPECTED: "45"
+      # worker-profile-door adds 10 (2026-11-15): 5 checks x 2 locales.
+      MIN_EXPECTED: "43"
 
     steps:
       - name: Checkout

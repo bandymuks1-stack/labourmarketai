@@ -1,64 +1,54 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * ONE DOOR TO "BUILD YOUR PROFILE / CV" (owner P0 2026-11-15, F2 / F6).
+ * WHAT A WORKER TYPES BEFORE SIGN-UP IS KEPT (owner P0 2026-11-15, F2).
  *
- * Public pages only, no account and no database: what a visitor can do
- * before signing up. Each "build your profile / CV" button opens sign-up
- * carrying the profile builder, so the account comes before any typing and
- * nothing typed is lost. The free-CV page carries the same path, and the
- * intake preview's account links carry it too. The step after sign-up (the
- * builder itself) is walked with a real account in signup-isolated (S-3d).
- * The menu's Create CV entry no longer promises a no-account page (F1).
+ * Public pages only, no account and no database: the steps a visitor takes
+ * before signing up. The "build your profile / CV" buttons open the intake
+ * (no sign-up before typing); what is typed there is kept in the browser; the
+ * intake's sign-up and login return to the profile builder. The step after
+ * sign-up (the builder's composer holding the typed text) is walked with a
+ * real account in signup-isolated (S-3d).
  */
 
-const DOOR = "/auth/signup?next=%2Fdashboard%2Fprofile";
-
-const BUTTONS = [
-  { route: "/work-opportunities", ctaId: "work_opportunities_profile" },
-  { route: "/skills", ctaId: "skills_profile" },
-  { route: "/professions", ctaId: "professions_profile" },
-] as const;
+const BUTTONS = ["/work-opportunities", "/skills", "/professions"] as const;
+const DRAFT_KEY = "lm.workerIntakeDraft.v1";
 
 for (const locale of ["lt", "en"] as const) {
-  test.describe(`${locale}: the profile door`, () => {
-    for (const { route, ctaId } of BUTTONS) {
-      test(`${route}: the button opens sign-up with the profile builder as its return path`, async ({ page }) => {
+  test.describe(`${locale}: the worker intake`, () => {
+    for (const route of BUTTONS) {
+      test(`${route}: "build your profile / CV" opens the intake, not sign-up`, async ({ page }) => {
         await page.goto(`/${locale}${route}`);
-        const button = page.locator(`[data-cta-id="${ctaId}"]`);
+        const button = page.locator(`a[href="/${locale}/worker-intake"]`).first();
         await expect(button).toBeVisible();
-        await expect(button).toHaveAttribute("href", `/${locale}${DOOR}`);
         await button.click();
-        await page.waitForURL((url) => url.pathname === `/${locale}/auth/signup`);
-        expect(new URL(page.url()).searchParams.get("next"), "the return path survives the click").toBe("/dashboard/profile");
-        await expect(page.locator('input[type="email"]'), "the account comes first, before any typing").toBeVisible();
+        await page.waitForURL((url) => url.pathname === `/${locale}/worker-intake`);
+        await expect(page.getByTestId("worker-intake-form")).toBeVisible();
       });
     }
 
-    test("/create-cv: its CTAs carry the same return path (one door, not two)", async ({ page }) => {
-      await page.goto(`/${locale}/create-cv`);
-      const footer = page.locator('[data-cta-id="create_cv_footer"]');
-      await expect(footer).toHaveAttribute("href", `/${locale}${DOOR}`);
+    test("what is typed is kept in the browser, without an account", async ({ page }) => {
+      await page.goto(`/${locale}/worker-intake`);
+      const form = page.getByTestId("worker-intake-form");
+      await form.locator('input[name="full_name"]').fill("Synthetic Intake Person");
+      await form.locator('textarea[name="comment"]').fill("Tiling, six years");
+      const kept = await page.evaluate((k) => localStorage.getItem(k), DRAFT_KEY);
+      const text = (JSON.parse(kept ?? "{}") as { text?: string }).text ?? "";
+      expect(text).toContain("Synthetic Intake Person");
+      expect(text).toContain("Tiling, six years");
+      await page.reload();
+      const again = await page.evaluate((k) => localStorage.getItem(k), DRAFT_KEY);
+      expect(again, "a reload keeps it").toBe(kept);
     });
 
-    test("the menu's Create CV entry opens the builder and is marked as needing an account", async ({ page }) => {
-      await page.setViewportSize({ width: 1280, height: 900 });
-      await page.goto(`/${locale}/pricing`);
-      await page.getByTestId("intent-toggle-work").click();
-      const entry = page.getByTestId("intent-link-work-createCv");
-      await expect(entry).toBeVisible();
-      await expect(entry).toHaveAttribute("href", `/${locale}/dashboard/profile`);
-      await expect(entry.locator("svg"), "the sign-in mark an account destination carries").toHaveCount(1);
-    });
-
-    test("/worker-intake: the preview's sign-up and login both return to the profile builder", async ({ page }) => {
+    test("its sign-up and login return to the profile builder; it is not called a registration", async ({ page }) => {
       await page.goto(`/${locale}/worker-intake`);
       const links = page.locator('[data-testid="intake-bridge"] a');
       await expect(links).toHaveCount(2);
       for (const href of await links.evaluateAll((els) => els.map((el) => el.getAttribute("href") ?? ""))) {
         expect(new URL(href, "https://x.test").searchParams.get("next"), href).toBe("/dashboard/profile");
       }
-      await expect(page.locator("h1").first(), "it registers nobody, so it is not called a registration").not.toContainText(/regist/i);
+      await expect(page.locator("h1").first()).not.toContainText(/regist/i);
     });
   });
 }
