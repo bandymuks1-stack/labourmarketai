@@ -177,9 +177,10 @@ describe("desktop and mobile render ONE list", () => {
     expect(nav).not.toMatch(/<nav className="hidden[^"]*:flex/);
     expect(nav).toMatch(/more=\{\{\s*label: tIntent\("more"\),\s*links: moreLinks,/);
     expect(nav).toMatch(/const moreLinks = \[\s*\.\.\.links\.map\(/);
-    // Education institutions have a door behind More — the existing
-    // institution setup, derived, not a seventh goal.
-    expect(nav).toMatch(/\{ key: "education", href: INSTITUTION_DOOR_NEXT, label: tIntent\("education"\) \}/);
+    // Education institutions have a door behind More — the landing's own
+    // sign-up door into the institution setup, with the account note; not a
+    // seventh goal (lib/guards/institution-nav-door.test.ts).
+    expect(nav).toMatch(/\{ key: "education", href: INSTITUTION_DOOR, label: tIntent\("education"\), account: true \}/);
     expect(PUBLIC_INTENT_IDS).toHaveLength(6);
     expect(mega).toMatch(/data-testid="intent-toggle-more"/);
     expect(mega).toMatch(/data-testid="intent-more-links"/);

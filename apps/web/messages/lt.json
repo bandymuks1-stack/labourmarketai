@@ -10710,7 +10710,6 @@
     "contactPerson": "Kontaktinis asmuo",
     "contactPersonHelp": "Neprivaloma. Su kuo susisiekti dėl šios užklausos.",
     "contactEmail": "El. paštas susisiekimui",
-    "contactEmailHelp": "Neprivaloma, bet padeda greičiau susisiekti dėl tavo užklausos.",
     "cityRegion": "Miestas ar regionas",
     "cityRegionHelp": "Neprivaloma. Kur numatytas darbas.",
     "expectedDuration": "Numatoma trukmė",
@@ -14012,7 +14011,6 @@
         "ctaTitle": "Paversk šią sąmatą tikru darbuotojų poreikiu",
         "ctaBody": "Ta pati sąmatos skaičiuoklė veikia LabourMarket.ai poreikio formoje. Su paskyra sąmatą gali pridėti prie struktūruoto darbuotojų poreikio; be paskyros — aprašyk poreikį viešoje formoje.",
         "ctaDashboard": "Sukurti darbo poreikį (su paskyra)",
-        "ctaDashboardHelp": "Paskyros kelias atidaro poreikio formą tavo valdymo skydelyje — skaičiuoklė šių skaičių neperduoda.",
         "ctaCompanyNeed": "Aprašyti poreikį be paskyros",
         "ctaCompanyNeedHelp": "Viešoji forma gauna tik darbuotojų skaičių ir šalį — jokios kainos ir aprašymai neperduodami."
       }
@@ -15588,6 +15586,10 @@
         "title": "Individualaus projekto užklausa",
         "body": "Privatiems ir verslo užsakovams: aprašykite, kokio projekto ar paslaugos jums reikia."
       },
+      "partner": {
+        "title": "Partnerystės užklausa",
+        "body": "Aprašykite, kokį bendradarbiavimą siūlote."
+      },
       "title": "Pateikti poreikį",
       "promise": "Aprašykite, kokių darbuotojų, paslaugų ar projekto vykdymo jums reikia. Užklausa perduodama LabourMarket.ai komandai peržiūrėti.",
       "name": "Vardas, pavardė arba įmonės pavadinimas",
@@ -15605,6 +15607,7 @@
       "scope": "Apimtis",
       "deadline": "Terminai",
       "need": "Kokio projekto ar paslaugos reikia",
+      "proposal": "Siūlomas bendradarbiavimas",
       "customer": "Užsakovas",
       "customerPrivate": "Privatus asmuo",
       "customerBusiness": "Verslas",

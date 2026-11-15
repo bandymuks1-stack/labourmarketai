@@ -116,7 +116,7 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
       // The partner enquiry door — the same destination the landing's
       // PARTNER_DOOR uses (a commercial relationship with the company behind
       // the product, not a workspace).
-      { id: "partnerWithUs", href: "/about", account: false },
+      { id: "partnerWithUs", href: requestDoorHref("partner"), account: false },
     ],
   },
   {

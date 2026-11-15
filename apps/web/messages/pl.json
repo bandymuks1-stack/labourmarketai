@@ -10710,7 +10710,6 @@
     "contactPerson": "Osoba kontaktowa",
     "contactPersonHelp": "Opcjonalnie. Z kim się skontaktować w sprawie tego zapytania.",
     "contactEmail": "E-mail kontaktowy",
-    "contactEmailHelp": "Opcjonalnie, ale pomaga nam szybciej odpowiedzieć na Twoje zapytanie.",
     "cityRegion": "Miasto lub region",
     "cityRegionHelp": "Opcjonalnie. Gdzie będzie wykonywana praca.",
     "expectedDuration": "Przewidywany czas trwania",
@@ -14012,7 +14011,6 @@
         "ctaTitle": "Zamień to oszacowanie w rzeczywiste zapotrzebowanie na pracowników",
         "ctaBody": "Ten sam kreator oszacowania znajduje się w formularzu zapotrzebowania LabourMarket.ai. Mając konto, możesz dołączyć oszacowanie do ustrukturyzowanego zapotrzebowania na pracowników; bez konta możesz opisać swoją potrzebę na formularzu publicznym.",
         "ctaDashboard": "Utwórz zapotrzebowanie na pracowników (z kontem)",
-        "ctaDashboardHelp": "Ścieżka z kontem otwiera formularz zapotrzebowania na Twoim panelu — kalkulator nie przekazuje tych liczb automatycznie.",
         "ctaCompanyNeed": "Opisz potrzebę bez konta",
         "ctaCompanyNeedHelp": "Formularz publiczny otrzymuje tylko liczbę pracowników i kraj — żadne ceny ani opisy nie są przekazywane."
       }
@@ -15588,6 +15586,10 @@
         "title": "Zapytanie o projekt indywidualny",
         "body": "Dla klientów prywatnych i firm: proszę opisać, jakiego projektu lub usługi Państwo potrzebują."
       },
+      "partner": {
+        "title": "Zapytanie o partnerstwo",
+        "body": "Proszę opisać proponowaną współpracę."
+      },
       "title": "Zgłoszenie zapotrzebowania",
       "promise": "Proszę opisać, jakich pracowników, usług lub realizacji projektu Państwo potrzebują. Zapytanie jest przekazywane zespołowi LabourMarket.ai do rozpatrzenia.",
       "name": "Imię i nazwisko lub nazwa firmy",
@@ -15605,6 +15607,7 @@
       "scope": "Zakres",
       "deadline": "Terminy",
       "need": "Jaki projekt lub usługa są potrzebne",
+      "proposal": "Proponowana współpraca",
       "customer": "Klient",
       "customerPrivate": "Osoba prywatna",
       "customerBusiness": "Firma",

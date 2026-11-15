@@ -119,6 +119,12 @@ export default function Screen() {
           />
           <Button
             variant="quiet"
+            testID="today-open-offers"
+            label={t("today.openOffers")}
+            onPress={() => router.push("/(shell)/offers")}
+          />
+          <Button
+            variant="quiet"
             testID="today-open-opportunities"
             label={t("today.openOpportunities")}
             onPress={() => router.push("/(shell)/opportunities")}

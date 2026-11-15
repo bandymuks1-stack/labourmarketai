@@ -10710,7 +10710,6 @@
     "contactPerson": "Contact person",
     "contactPersonHelp": "Optional. Who to reach about this inquiry.",
     "contactEmail": "Contact email",
-    "contactEmailHelp": "Optional, but it helps us follow up faster about your inquiry.",
     "cityRegion": "City or region",
     "cityRegionHelp": "Optional. Where the work will be.",
     "expectedDuration": "Expected duration",
@@ -14012,7 +14011,6 @@
         "ctaTitle": "Turn this estimate into a real worker request",
         "ctaBody": "The same estimate builder lives inside the LabourMarket.ai demand form. With an account you can attach an estimate to a structured worker request; without one, you can describe your need on the public form.",
         "ctaDashboard": "Create a work need (with account)",
-        "ctaDashboardHelp": "The account route opens the demand form on your dashboard — the calculator does not transfer these numbers.",
         "ctaCompanyNeed": "Describe a need without an account",
         "ctaCompanyNeedHelp": "The public form receives only your worker count and country — no prices and no descriptions are passed."
       }
@@ -15588,6 +15586,10 @@
         "title": "Individual project enquiry",
         "body": "For private and business customers: describe the project or service you need."
       },
+      "partner": {
+        "title": "Partnership enquiry",
+        "body": "Describe the cooperation you propose."
+      },
       "title": "Submit a request",
       "promise": "Tell us what workers, services or project delivery you need. Your enquiry is passed to the LabourMarket.ai team for review.",
       "name": "Name or company name",
@@ -15605,6 +15607,7 @@
       "scope": "Scope",
       "deadline": "Deadlines",
       "need": "Project or service you need",
+      "proposal": "Proposed cooperation",
       "customer": "Customer",
       "customerPrivate": "Private person",
       "customerBusiness": "Business",

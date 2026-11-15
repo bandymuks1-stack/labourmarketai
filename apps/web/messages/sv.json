@@ -10710,7 +10710,6 @@
     "contactPerson": "Kontaktperson",
     "contactPersonHelp": "Valfritt. Vem vi ska kontakta om den här förfrågan.",
     "contactEmail": "Kontaktens e-post",
-    "contactEmailHelp": "Valfritt, men det hjälper oss att följa upp din förfrågan snabbare.",
     "cityRegion": "Stad eller region",
     "cityRegionHelp": "Valfritt. Var arbetet kommer att utföras.",
     "expectedDuration": "Förväntad varaktighet",
@@ -14012,7 +14011,6 @@
         "ctaTitle": "Gör om uppskattningen till en verklig förfrågan om arbetstagare",
         "ctaBody": "Samma uppskattningsverktyg finns i behovsformuläret på LabourMarket.ai. Med ett konto kan du bifoga en uppskattning till en strukturerad förfrågan om arbetstagare; utan konto kan du beskriva ditt behov i det öppna formuläret.",
         "ctaDashboard": "Skapa ett arbetsbehov (med konto)",
-        "ctaDashboardHelp": "Kontovägen öppnar behovsformuläret i din översikt – kalkylatorn överför inte dessa siffror.",
         "ctaCompanyNeed": "Beskriv ett behov utan konto",
         "ctaCompanyNeedHelp": "Det öppna formuläret tar bara emot antal arbetstagare och land – inga priser och inga beskrivningar skickas vidare."
       }
@@ -15588,6 +15586,10 @@
         "title": "Förfrågan om individuellt projekt",
         "body": "För privat- och företagskunder: beskriv projektet eller tjänsten du behöver."
       },
+      "partner": {
+        "title": "Partnerskapsförfrågan",
+        "body": "Beskriv samarbetet du föreslår."
+      },
       "title": "Lämna in en förfrågan",
       "promise": "Berätta vilka arbetstagare, tjänster eller vilket projektgenomförande du behöver. Din förfrågan skickas till LabourMarket.ai-teamet för granskning.",
       "name": "Namn eller företagsnamn",
@@ -15605,6 +15607,7 @@
       "scope": "Omfattning",
       "deadline": "Tidsfrister",
       "need": "Projekt eller tjänst du behöver",
+      "proposal": "Föreslaget samarbete",
       "customer": "Kund",
       "customerPrivate": "Privatperson",
       "customerBusiness": "Företag",

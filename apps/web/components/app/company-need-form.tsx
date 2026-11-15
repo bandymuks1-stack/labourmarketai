@@ -27,7 +27,6 @@ export interface CompanyNeedFormLabels {
   readonly contactPerson: string;
   readonly contactPersonHelp: string;
   readonly contactEmail: string;
-  readonly contactEmailHelp: string;
   readonly profession: string;
   readonly country: string;
   readonly countryHelp: string;
@@ -230,7 +229,6 @@ export function CompanyNeedForm({
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.contactEmail}</span>
             <input type="email" name="contact_email" required maxLength={254} className={FIELD} />
-            <span className={HELP}>{labels.contactEmailHelp}</span>
           </label>
         </div>
 

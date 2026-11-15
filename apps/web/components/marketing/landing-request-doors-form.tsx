@@ -26,6 +26,8 @@ export type RequestDoorLabels = {
   readonly scope: string;
   readonly deadline: string;
   readonly need: string;
+  /** The partner door's one field: what cooperation is proposed. */
+  readonly proposal: string;
   readonly customer: string;
   readonly customerPrivate: string;
   readonly customerBusiness: string;
@@ -180,7 +182,7 @@ export function LandingRequestDoorsForm({
           ))}
         </ul>
       ) : (
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {REQUEST_DOORS.map((d) => (
             <Card key={d} className="wow-card flex flex-col gap-3 p-5">
               <h3 className="font-display text-lg font-bold tracking-tightest text-text-primary">{labels.doors[d].title}</h3>
@@ -237,6 +239,13 @@ export function LandingRequestDoorsForm({
                 <div className="sm:col-span-2">
                   <Field label={labels.work}>
                     <input name="work" required minLength={2} maxLength={200} className={FIELD} />
+                  </Field>
+                </div>
+              ) : null}
+              {door === "partner" ? (
+                <div className="sm:col-span-2">
+                  <Field label={labels.proposal}>
+                    <textarea name="proposal" required minLength={2} maxLength={4000} rows={3} className={FIELD} />
                   </Field>
                 </div>
               ) : null}

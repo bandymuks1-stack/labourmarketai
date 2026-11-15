@@ -10710,7 +10710,6 @@
     "contactPerson": "Contactpersoon",
     "contactPersonHelp": "Optioneel. Wie we kunnen bereiken over deze aanvraag.",
     "contactEmail": "Contact-e-mailadres",
-    "contactEmailHelp": "Optioneel, maar zo kunnen we sneller opvolgen over je aanvraag.",
     "cityRegion": "Stad of regio",
     "cityRegionHelp": "Optioneel. Waar het werk zal zijn.",
     "expectedDuration": "Verwachte duur",
@@ -14012,7 +14011,6 @@
         "ctaTitle": "Maak van deze raming een echte personeelsaanvraag",
         "ctaBody": "Dezelfde ramingsbouwer zit in het behoefteformulier van LabourMarket.ai. Met een account kun je een raming aan een gestructureerde personeelsaanvraag koppelen; zonder account beschrijf je je behoefte via het publieke formulier.",
         "ctaDashboard": "Personeelsbehoefte aanmaken (met account)",
-        "ctaDashboardHelp": "De accountroute opent het behoefteformulier op je dashboard — de calculator draagt deze cijfers niet over.",
         "ctaCompanyNeed": "Behoefte beschrijven zonder account",
         "ctaCompanyNeedHelp": "Het publieke formulier ontvangt alleen je aantal werknemers en land — geen prijzen en geen beschrijvingen."
       }
@@ -15588,6 +15586,10 @@
         "title": "Aanvraag individueel project",
         "body": "Voor particuliere en zakelijke opdrachtgevers: beschrijf welk project of welke dienst u nodig heeft."
       },
+      "partner": {
+        "title": "Partnerschapsaanvraag",
+        "body": "Beschrijf de samenwerking die u voorstelt."
+      },
       "title": "Behoefte doorgeven",
       "promise": "Beschrijf welke werknemers, diensten of projectuitvoering u nodig heeft. De aanvraag wordt ter beoordeling doorgegeven aan het team van LabourMarket.ai.",
       "name": "Voor- en achternaam of bedrijfsnaam",
@@ -15605,6 +15607,7 @@
       "scope": "Omvang",
       "deadline": "Termijnen",
       "need": "Welk project of welke dienst u nodig heeft",
+      "proposal": "Voorgestelde samenwerking",
       "customer": "Opdrachtgever",
       "customerPrivate": "Particulier",
       "customerBusiness": "Bedrijf",
