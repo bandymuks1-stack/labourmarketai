@@ -22,6 +22,8 @@ export interface Contract {
   readonly id: string;
   readonly number: string | null;
   readonly title: string;
+  /** The proposal this contract was made from (contracts.proposal_id), if any. */
+  readonly proposalId: string | null;
   readonly parties: string | null;
   readonly valueCents: number;
   readonly status: ContractStatus;
@@ -32,7 +34,15 @@ export interface Contract {
 
 export type CommercialData =
   | { applied: false }
-  | { applied: true; proposals: Proposal[]; contracts: Contract[] };
+  | {
+      applied: true;
+      proposals: Proposal[];
+      contracts: Contract[];
+      /** Accepted proposals that already have a contract, read independently of
+       *  the contract list's limit. Null = that read failed: no "create
+       *  contract" step is offered rather than one that may duplicate. */
+      contractedProposalIds?: string[] | null;
+    };
 
 export function isProposalStatus(v: unknown): v is ProposalStatus {
   return typeof v === "string" && (PROPOSAL_STATUSES as readonly string[]).includes(v);

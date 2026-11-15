@@ -163,7 +163,21 @@ export function LandingCtaCapture({
   );
 }
 
-export function PublicEntry({ supply }: { readonly supply: EntrySupply | null }) {
+/** The two chips of the short variant: one for each side of the market. */
+export const SHORT_EXAMPLE_KEYS = ["hire", "work"] as const satisfies readonly EntryExampleKey[];
+
+export function PublicEntry({
+  supply,
+  examples: exampleSet = "standard",
+}: {
+  readonly supply: EntrySupply | null;
+  /**
+   * `short` (the landing since 2026-11-13, owner: less noise on the first
+   * screen): two example chips and no "more examples". `standard`: the four
+   * defaults with the rest one tap away.
+   */
+  readonly examples?: "standard" | "short" | "none";
+}) {
   const t = useTranslations("landing.entry");
   const locale = useLocale();
   const inputId = useId();
@@ -287,7 +301,10 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
     </LandingCtaCapture>
   );
 
-  const examples = visibleExampleKeys(showAllExamples);
+  const short = exampleSet === "short";
+  const examples: readonly EntryExampleKey[] = short
+    ? SHORT_EXAMPLE_KEYS
+    : visibleExampleKeys(showAllExamples);
   const firstMoreKey = visibleExampleKeys(true)[DEFAULT_EXAMPLE_KEYS.length];
 
   return (
@@ -322,7 +339,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
           >
             {t("label")}
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               ref={inputRef}
               id={inputId}
@@ -339,7 +356,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
               // viewport (measured 2026-08-09; proven by
               // tests/e2e/landing-mobile-overflow.spec.ts). `flex-1` still
               // grows the field to fill the row.
-              className="min-h-11 w-0 min-w-0 flex-1 rounded-full border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted focus:border-brand-blue"
+              className="min-h-11 w-full min-w-0 rounded-full sm:w-0 sm:flex-1 border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted max-sm:placeholder:text-sm focus:border-brand-blue"
             />
             <button
               type="submit"
@@ -390,6 +407,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
 
                The labels are ordinary speech, never the product's vocabulary:
                no SUPPLY, no DEMAND, no "capacity", no "evidence" (§18). */}
+        {exampleSet === "none" ? null : (
         <div id={examplesId} className="flex flex-wrap items-center gap-1.5">
           <span className="text-meta text-text-muted">{t("examplesLabel")}</span>
           {examples.map((key) => {
@@ -445,7 +463,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
           })}
           {/* The rest of the graph, one tap away. Quieter than a chip on
               purpose: it is a way to see more, not a fifth thing to choose. */}
-          {showAllExamples ? null : (
+          {showAllExamples || short ? null : (
             <button
               type="button"
               data-testid="entry-more-examples"
@@ -458,6 +476,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
             </button>
           )}
         </div>
+        )}
 
         {/* ── What was understood ──────────────────────────────────────── */}
         {understanding ? (

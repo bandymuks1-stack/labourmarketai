@@ -95,7 +95,7 @@ test("every public nav item goes somewhere real", async ({ page }) => {
   // …and the one remaining landing anchor actually lands.
   // The older links sit behind "More" in the one navigation (2026-11-12).
   await page.getByTestId("intent-toggle-more").click();
-  const how = page.getByRole("link", { name: "Kaip veikia" }).first();
+  const how = page.getByRole("link", { name: "Kaip tai veikia" }).first();
   await expect(how).toBeVisible();
   await how.click();
   await expect(page).toHaveURL(/#how-it-works/);
@@ -108,12 +108,14 @@ test("every public nav item goes somewhere real", async ({ page }) => {
 
 test("the two real entries are reachable from the landing", async ({ page }) => {
   await page.goto("/lt");
-  // Scoped to the landing's own CTA band — the header has its own controls.
-  const hrefs = await page.locator('a[href*="/auth/signup"], a[href*="/company-need"]').evaluateAll(
-    (as) => as.map((a) => (a as HTMLAnchorElement).getAttribute("href")),
-  );
-  expect(hrefs.some((h) => h?.includes("/auth/signup"))).toBe(true);
-  expect(hrefs.some((h) => h?.includes("/company-need"))).toBe(true);
+  // Sign-up is in the header. The employer's entry is one choice away since
+  // V3 (2026-11-13): "Find workers" opens it as its first action.
+  await expect(page.locator('a[href*="/auth/signup"]').first()).toBeVisible();
+  await page.goto("/lt#goal=workers");
+  await expect(page.getByTestId("goal-panel")).toHaveAttribute("data-goal", "workers");
+  await expect(
+    page.getByTestId("function-rail").locator('a[href$="/lt/company-need"]'),
+  ).toBeVisible();
 
   // …and they resolve, rather than 404.
   for (const path of ["/lt/auth/signup", "/lt/company-need"]) {
