@@ -13,6 +13,11 @@
  * (non-PII, non-price). The other fields are accepted for completeness but
  * every value is length-bounded and used purely as a form default the user
  * reviews before submitting. PURE — no fs, no net, client-safe.
+ *
+ * `from` (owner P0 2026-11-10, attribution): the id of the public button that
+ * opened the form (e.g. `companies_market_lu`), so an inquiry records which
+ * page it came from. A page's own button id, never a person's identifier or
+ * a campaign tag; a bounded slug or nothing.
  */
 import { ALL_ISO_COUNTRIES } from "@/lib/location/country-model";
 import { isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
@@ -23,9 +28,13 @@ export interface CompanyNeedPrefill {
   readonly profession?: string;
   readonly expectedDuration?: string;
   readonly description?: string;
+  readonly entry?: string;
   /** How the labour is supplied; an intent page (subcontractors, agencies) preselects it. */
   readonly engagement?: PrefillEngagement;
 }
+
+/** A public button id: lower-case slug, bounded. */
+export const COMPANY_NEED_ENTRY = /^[a-z0-9_]{1,40}$/;
 
 /**
  * The form's `engagement_model` values. Kept here, not imported, because
@@ -55,6 +64,7 @@ export function parseCompanyNeedPrefill(
     profession?: string;
     expectedDuration?: string;
     description?: string;
+    entry?: string;
     engagement?: PrefillEngagement;
   } = {};
 
@@ -87,6 +97,8 @@ export function parseCompanyNeedPrefill(
   const description = text(params.get("description"), MAX_DESCRIPTION_CHARS);
   if (description) out.description = description;
 
+  const entry = params.get("from")?.trim();
+  if (entry && COMPANY_NEED_ENTRY.test(entry)) out.entry = entry;
   const engagement = params.get("engagement")?.trim();
   const known = PREFILL_ENGAGEMENTS.find((e) => e === engagement);
   if (known) out.engagement = known;
