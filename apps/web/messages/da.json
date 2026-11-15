@@ -8158,8 +8158,8 @@
   "agencySuggestion": {
     "eyebrow": "Rekrutteringsbureau",
     "title": "{agency} – vil du stå på kandidatlisten?",
-    "body": "Et rekrutteringsbureau foreslår sine kandidater til arbejdsgivere, der søger folk. Hvis du er med, ser {agency} din profil og kan foreslå dig til passende arbejde.",
-    "leave": "Dit valg, intet er afkrydset for dig. Du kan forlade listen når som helst på din profil.",
+    "body": "Hvis du er med, ser {agency} din profil og kan foreslå dig til passende arbejde.",
+    "leave": "Du kan forlade listen når som helst på din profil.",
     "consent": "Jeg giver samtykke til at stå på {agency}s kandidatliste.",
     "join": "Kom på listen",
     "joining": "Tilmelder…",

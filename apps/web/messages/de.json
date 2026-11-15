@@ -20752,8 +20752,8 @@
   "agencySuggestion": {
     "eyebrow": "Personalvermittlung",
     "title": "{agency} – möchten Sie in die Kandidatenliste aufgenommen werden?",
-    "body": "Eine Personalvermittlung schlägt ihre Kandidaten Arbeitgebern vor, die Leute suchen. Wenn Sie beitreten, sieht {agency} Ihr Profil und kann Sie für passende Arbeit vorschlagen.",
-    "leave": "Ihre Entscheidung, nichts ist für Sie angekreuzt. Sie können die Liste jederzeit in Ihrem Profil verlassen.",
+    "body": "Wenn Sie beitreten, sieht {agency} Ihr Profil und kann Sie für passende Arbeit vorschlagen.",
+    "leave": "Sie können die Liste jederzeit in Ihrem Profil verlassen.",
     "consent": "Ich bin einverstanden, auf der Kandidatenliste von {agency} zu stehen.",
     "join": "Der Liste beitreten",
     "joining": "Wird beigetreten…",

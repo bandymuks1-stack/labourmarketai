@@ -20752,8 +20752,8 @@
   "agencySuggestion": {
     "eyebrow": "Įdarbinimo agentūra",
     "title": "{agency} – ar norite prisijungti prie jos kandidatų sąrašo?",
-    "body": "Įdarbinimo agentūra siūlo savo kandidatus darbdaviams, kurie ieško žmonių. Prisijungus {agency} matys jūsų profilį ir galės jus siūlyti tinkamam darbui.",
-    "leave": "Sprendžiate jūs, niekas nepažymėta už jus. Iš sąrašo galite išeiti bet kada savo profilyje.",
+    "body": "Prisijungus {agency} matys jūsų profilį ir galės jus siūlyti tinkamam darbui.",
+    "leave": "Iš sąrašo galite išeiti bet kada savo profilyje.",
     "consent": "Sutinku būti {agency} kandidatų sąraše.",
     "join": "Prisijungti prie sąrašo",
     "joining": "Jungiama…",

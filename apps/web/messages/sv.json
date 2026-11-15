@@ -20752,8 +20752,8 @@
   "agencySuggestion": {
     "eyebrow": "Rekryteringsbyrå",
     "title": "{agency} – vill du stå på dess kandidatlista?",
-    "body": "En rekryteringsbyrå föreslår sina kandidater för arbetsgivare som söker folk. Om du går med ser {agency} din profil och kan föreslå dig för passande arbete.",
-    "leave": "Ditt val, inget är ikryssat åt dig. Du kan lämna listan när som helst i din profil.",
+    "body": "Om du går med ser {agency} din profil och kan föreslå dig för passande arbete.",
+    "leave": "Du kan lämna listan när som helst i din profil.",
     "consent": "Jag samtycker till att stå på {agency}s kandidatlista.",
     "join": "Gå med i listan",
     "joining": "Går med…",

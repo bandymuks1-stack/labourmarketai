@@ -8158,8 +8158,8 @@
   "agencySuggestion": {
     "eyebrow": "Värbamisagentuur",
     "title": "{agency} – kas soovite liituda selle kandidaatide nimekirjaga?",
-    "body": "Värbamisagentuur pakub oma kandidaate tööandjatele, kes otsivad inimesi. Kui liitute, näeb {agency} teie profiili ja saab teid pakkuda sobivale tööle.",
-    "leave": "Otsustate teie, midagi pole teie eest märgitud. Nimekirjast saate igal ajal oma profiilil lahkuda.",
+    "body": "Kui liitute, näeb {agency} teie profiili ja saab teid pakkuda sobivale tööle.",
+    "leave": "Nimekirjast saate igal ajal oma profiilil lahkuda.",
     "consent": "Nõustun olema {agency} kandidaatide nimekirjas.",
     "join": "Liitu nimekirjaga",
     "joining": "Liitumine…",

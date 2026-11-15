@@ -8158,8 +8158,8 @@
   "agencySuggestion": {
     "eyebrow": "Darbā iekārtošanas aģentūra",
     "title": "{agency} – vai vēlaties pievienoties tās kandidātu sarakstam?",
-    "body": "Darbā iekārtošanas aģentūra piedāvā savus kandidātus darba devējiem, kas meklē cilvēkus. Ja pievienosieties, {agency} redzēs jūsu profilu un varēs jūs piedāvāt piemērotam darbam.",
-    "leave": "Izvēle ir jūsu, nekas nav atzīmēts jūsu vietā. Sarakstu varat atstāt jebkurā laikā savā profilā.",
+    "body": "Ja pievienosieties, {agency} redzēs jūsu profilu un varēs jūs piedāvāt piemērotam darbam.",
+    "leave": "Sarakstu varat atstāt jebkurā laikā savā profilā.",
     "consent": "Piekrītu būt {agency} kandidātu sarakstā.",
     "join": "Pievienoties sarakstam",
     "joining": "Pievieno…",

@@ -20752,8 +20752,8 @@
   "agencySuggestion": {
     "eyebrow": "Recruitment agency",
     "title": "{agency} — would you like to join its list of candidates?",
-    "body": "A recruitment agency puts its candidates forward to employers who are looking for people. If you join, {agency} can see your profile and offer you for suitable work.",
-    "leave": "Your choice, nothing is ticked for you. You can leave the list at any time on your profile.",
+    "body": "If you join, {agency} can see your profile and offer you for suitable work.",
+    "leave": "You can leave the list at any time on your profile.",
     "consent": "I agree to be on {agency}'s list of candidates.",
     "join": "Join the list",
     "joining": "Joining…",

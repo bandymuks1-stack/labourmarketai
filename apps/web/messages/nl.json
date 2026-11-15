@@ -20752,8 +20752,8 @@
   "agencySuggestion": {
     "eyebrow": "Uitzend- en wervingsbureau",
     "title": "{agency} — wilt u op de kandidatenlijst?",
-    "body": "Een wervingsbureau stelt zijn kandidaten voor aan werkgevers die mensen zoeken. Als u zich aansluit, ziet {agency} uw profiel en kan het u voorstellen voor passend werk.",
-    "leave": "Uw keuze, niets is voor u aangevinkt. U kunt de lijst altijd verlaten via uw profiel.",
+    "body": "Als u zich aansluit, ziet {agency} uw profiel en kan het u voorstellen voor passend werk.",
+    "leave": "U kunt de lijst altijd verlaten via uw profiel.",
     "consent": "Ik ga akkoord om op de kandidatenlijst van {agency} te staan.",
     "join": "Aansluiten bij de lijst",
     "joining": "Bezig met aansluiten…",

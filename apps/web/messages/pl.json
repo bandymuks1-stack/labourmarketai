@@ -20752,8 +20752,8 @@
   "agencySuggestion": {
     "eyebrow": "Agencja rekrutacyjna",
     "title": "{agency} – czy chcesz dołączyć do jej listy kandydatów?",
-    "body": "Agencja rekrutacyjna przedstawia swoich kandydatów pracodawcom, którzy szukają ludzi. Jeśli dołączysz, {agency} zobaczy Twój profil i będzie mogła proponować Cię do odpowiedniej pracy.",
-    "leave": "To Twój wybór, nic nie jest zaznaczone za Ciebie. Możesz opuścić listę w dowolnym momencie w swoim profilu.",
+    "body": "Jeśli dołączysz, {agency} zobaczy Twój profil i będzie mogła proponować Cię do odpowiedniej pracy.",
+    "leave": "Możesz opuścić listę w dowolnym momencie w swoim profilu.",
     "consent": "Zgadzam się być na liście kandydatów {agency}.",
     "join": "Dołącz do listy",
     "joining": "Dołączanie…",
