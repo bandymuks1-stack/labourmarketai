@@ -9,7 +9,9 @@
  *
  * That happened on 2026-11-14: S-3b (#3334) and ST-1 (#3341) were each green on
  * their own branch, merged 15 s apart, and both registered `email("student")`.
- * Every branch carrying both then failed ST-1 in the `signup-isolated` job.
+ * Every branch carrying both then failed ST-1 in the `signup-isolated` job,
+ * until #3361 gave ST-1 its own address. Nothing stopped the next pair of
+ * parallel PRs from doing the same; this guard does.
  *
  * Tests that deliberately reuse an address to SIGN IN (S-4..S-8) are not
  * registrations through the helper and are not counted here.
