@@ -19390,7 +19390,7 @@
       "confirmed": "Godziny potwierdzone przez organizację",
       "people": "Osoby, które zapisały pracę",
       "period": "Zapisano",
-      "basis": "Z {entries} wpisów w dzienniku, które osoby zapisały w tej organizacji. Potwierdzone godziny to te zatwierdzone przez organizację; reszta to zapis samych osób. Liczone osobno od zaimportowanej historii powyżej i nigdy do niej nie dodawane.",
+      "basis": "Z {entries} wpisów w dzienniku, które osoby zapisały w tej organizacji. Liczone osobno od zaimportowanej historii powyżej i nigdy do niej nie dodawane.",
       "unavailable": "Nie udało się teraz odczytać pracy zapisanej w dzienniku w tej organizacji."
     }
   },

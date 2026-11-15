@@ -7167,7 +7167,7 @@
       "confirmed": "Organizācijas apstiprinātās stundas",
       "people": "Cilvēki, kas ierakstīja darbu",
       "period": "Ierakstīts",
-      "basis": "No {entries} žurnāla ierakstiem, ko cilvēki veica šajā organizācijā. Apstiprinātās stundas ir tās, ko organizācija apstiprināja; pārējais ir pašu cilvēku ieraksts. Skaitīts atsevišķi no augstāk redzamās importētās vēstures un nekad tai nepieskaitīts.",
+      "basis": "No {entries} žurnāla ierakstiem, ko cilvēki veica šajā organizācijā. Skaitīts atsevišķi no augstāk redzamās importētās vēstures un nekad tai nepieskaitīts.",
       "unavailable": "Šobrīd neizdevās nolasīt šajā organizācijā žurnālā ierakstīto darbu."
     }
   },

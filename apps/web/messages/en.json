@@ -19390,7 +19390,7 @@
       "confirmed": "Hours confirmed by the organization",
       "people": "People who recorded work",
       "period": "Recorded",
-      "basis": "From {entries} journal entries people recorded under this organization. Confirmed hours are the ones the organization approved; the rest is the people's own record. Counted apart from the imported history above and never added to it.",
+      "basis": "From {entries} journal entries people recorded under this organization. Counted apart from the imported history above and never added to it.",
       "unavailable": "The journal work recorded under this organization could not be read just now."
     }
   },

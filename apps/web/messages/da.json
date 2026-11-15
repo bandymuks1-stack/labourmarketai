@@ -7167,7 +7167,7 @@
       "confirmed": "Timer bekræftet af organisationen",
       "people": "Personer, der registrerede arbejde",
       "period": "Registreret",
-      "basis": "Fra {entries} journalposter, som personer registrerede under denne organisation. Bekræftede timer er dem, organisationen godkendte; resten er personernes egen registrering. Talt adskilt fra den importerede historik ovenfor og aldrig lagt til den.",
+      "basis": "Fra {entries} journalposter, som personer registrerede under denne organisation. Talt adskilt fra den importerede historik ovenfor og aldrig lagt til den.",
       "unavailable": "Arbejdet registreret i journalen under denne organisation kunne ikke læses lige nu."
     }
   },

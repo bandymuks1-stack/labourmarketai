@@ -19390,7 +19390,7 @@
       "confirmed": "Von der Organisation bestätigte Stunden",
       "people": "Personen, die Arbeit erfasst haben",
       "period": "Erfasst",
-      "basis": "Aus {entries} Journaleinträgen, die Personen unter dieser Organisation erfasst haben. Bestätigte Stunden sind die von der Organisation genehmigten; der Rest ist die eigene Angabe der Personen. Getrennt von der importierten Historie oben gezählt und nie zu ihr addiert.",
+      "basis": "Aus {entries} Journaleinträgen, die Personen unter dieser Organisation erfasst haben. Getrennt von der importierten Historie oben gezählt und nie zu ihr addiert.",
       "unavailable": "Die unter dieser Organisation im Journal erfasste Arbeit konnte gerade nicht gelesen werden."
     }
   },

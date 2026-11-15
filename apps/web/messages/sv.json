@@ -19390,7 +19390,7 @@
       "confirmed": "Timmar bekräftade av organisationen",
       "people": "Personer som registrerade arbete",
       "period": "Registrerat",
-      "basis": "Från {entries} journalposter som personer registrerade under den här organisationen. Bekräftade timmar är de som organisationen godkände; resten är personernas egen registrering. Räknas separat från den importerade historiken ovan och läggs aldrig till den.",
+      "basis": "Från {entries} journalposter som personer registrerade under den här organisationen. Räknas separat från den importerade historiken ovan och läggs aldrig till den.",
       "unavailable": "Arbetet som registrerats i journalen under den här organisationen kunde inte läsas just nu."
     }
   },
