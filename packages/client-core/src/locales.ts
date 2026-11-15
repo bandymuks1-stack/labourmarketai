@@ -54,12 +54,13 @@ export type Locale = (typeof LOCALES)[number];
 
 /**
  * The locales a client may actually route to and offer today. A client that
- * showed the other six would be promising a translation that has not been
+ * showed the other four would be promising a translation that has not been
  * verified — the honesty rule (doctrine §7.4) applies to a phone exactly as
  * it applies to a browser.
  */
-// PL activated 2026-09-20 (owner approval, acquisition loop P0) — mirrors apps/web/lib/i18n/config.ts.
-export const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+// PL activated 2026-09-20 (owner approval, acquisition loop P0); SV 2026-11-12
+// (Sweden, first commercial market) — mirrors apps/web/lib/i18n/config.ts.
+export const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 export type ActiveLocale = (typeof ACTIVE_LOCALES)[number];
 

@@ -15,8 +15,13 @@
 # The label is removed at the end so the next addition triggers again.
 name: ci-rerun-on-label
 
+# pull_request_target, not pull_request: the workflow must come from main.
+# With pull_request GitHub reads it from the PR's test-merge commit, which can
+# be stale and predate this file (seen on #3361: merge ref built on 940b0f97),
+# so the label silently did nothing. This job never checks out or runs PR code;
+# it only calls the REST API, so the target-branch context is safe here.
 on:
-  pull_request:
+  pull_request_target:
     types: [labeled]
 
 permissions:

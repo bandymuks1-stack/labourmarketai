@@ -1,3 +1,5 @@
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
+
 /**
  * PURE — client-safe (the chat imports it): the document TYPE a sentence
  * names. Kept apart from `documents-gap.ts`, whose derivation reaches the
@@ -17,12 +19,38 @@ const DOCUMENT_TYPE_NEEDLES: ReadonlyArray<{ slug: string; needles: readonly str
   { slug: "professional_certificate", needles: ["pažym", "pazym", "sertifik", "certif", "zertifik", "сертиф", "certificaat", "kvalifik", "diplom"] },
 ];
 
+/**
+ * The SWEDISH document words — read only in a sentence `looksSwedish` reads
+ * as Swedish, after the shared needles of the same type. "pass" (passport) is
+ * an English verb and noun, "kontrakt" is Polish and German, "skatt" opens
+ * nothing else but would be the first to: a Swedish needle in the shared list
+ * guessed "Here is my pass" as an identity document (review finding 11).
+ * A needle written "=word" stands alone whatever its length: "pass" is also
+ * inside "passar" and "kompass".
+ */
+const SV_DOCUMENT_TYPE_NEEDLES: Readonly<Record<string, readonly string[]>> = {
+  residence_permit: ["uppehållstillst", "uppehallstillst"],
+  work_permit: ["arbetstillst"],
+  id_document: ["=pass", "=passet", "id-kort", "idkort", "legitimation"],
+  employment_contract: ["avtal", "kontrakt"],
+  posting_notification: ["utstationering"],
+  tax_registration: ["skatt"],
+  cv: ["meritförteckning", "meritforteckning"],
+  professional_certificate: ["yrkesbevis", "examensbevis", "utbildningsbevis", "kursintyg", "yrkesintyg", "gesällbrev", "gesallbrev", "truckkort", "heta arbeten"],
+};
+
 export function guessDocumentType(text: string): string | null {
   const hay = ` ${(text ?? "").toLowerCase()} `;
+  const swedish = looksSwedish(text);
   for (const { slug, needles } of DOCUMENT_TYPE_NEEDLES) {
-    for (const n of needles) {
+    const all = swedish ? [...needles, ...(SV_DOCUMENT_TYPE_NEEDLES[slug] ?? [])] : needles;
+    for (const n of all) {
       // Short codes ("a1", "cv", "vca") must stand alone; longer stems may sit inside a word.
-      const hit = n.length <= 3 ? new RegExp(`[^\\p{L}\\p{N}]${n}[^\\p{L}\\p{N}]`, "u").test(hay) : hay.includes(n);
+      const word = n.startsWith("=") ? n.slice(1) : n;
+      const hit =
+        n.startsWith("=") || n.length <= 3
+          ? new RegExp(`[^\\p{L}\\p{N}]${word}[^\\p{L}\\p{N}]`, "u").test(hay)
+          : hay.includes(n);
       if (hit) return slug;
     }
   }

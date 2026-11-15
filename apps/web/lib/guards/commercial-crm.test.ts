@@ -72,6 +72,38 @@ describe("commercial code: honest degradation, no finance duplication", () => {
   });
 });
 
+describe("an accepted proposal becomes a contract without retyping (B2B chain)", () => {
+  it("the reader carries contracts.proposal_id", () => {
+    expect(read("lib/commercial/commercial.ts")).toMatch(/proposalId:\s*r\.proposal_id/);
+  });
+  it("the panel offers the step only on an accepted proposal that has no contract, and passes its id", () => {
+    const panel = read("components/app/commercial-panel.tsx");
+    expect(panel).toMatch(/p\.status === "accepted" && contractedKnown && !contracted\.has\(p\.id\)/);
+    expect(panel).toMatch(/createContractAction\(\{ title: p\.title, valueCents: p\.amountCents, proposalId: p\.id \}\)/);
+    expect(panel).toMatch(/contract-from-proposal/);
+  });
+  it("whether a proposal has a contract is read for that proposal, not from the capped list", () => {
+    const reader = read("lib/commercial/commercial.ts");
+    expect(reader).toMatch(/\.from\("contracts"\)\s*\.select\("proposal_id"\)\s*\.in\("proposal_id", acceptedIds\)/);
+    // A failed read offers no step rather than one that may duplicate.
+    expect(read("components/app/commercial-panel.tsx")).toMatch(/data\.contractedProposalIds !== null/);
+  });
+  it("uses the existing contract door, no second one", () => {
+    const actions = read("lib/commercial/commercial-actions.ts");
+    expect(actions.match(/rpc\("create_contract_v1"/g)?.length).toBe(1);
+    expect(actions).toMatch(/p_proposal_id: input\.proposalId \|\| null/);
+  });
+  // Every full-UI catalog (doctrine §2.4); the five unrouted ones carry [EN]
+  // placeholders, as the rest of their namespaces do.
+  for (const loc of ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"]) {
+    it(`${loc} names the step and the link`, () => {
+      const msgs = JSON.parse(read(`messages/${loc}.json`));
+      expect(msgs.commercial?.contractFromProposal, loc).toBeTruthy();
+      expect(msgs.commercial?.fromProposal, loc).toContain("{title}");
+    });
+  }
+});
+
 describe("copy promises only what the web UI does (B2B chain)", () => {
   it("the page intro does not claim links to demand and projects the panel cannot make", () => {
     const panel = read("components/app/commercial-panel.tsx");

@@ -133,7 +133,7 @@ describe("mobile 375px — static class assertions on the new markup", () => {
 });
 
 describe("i18n parity for the new keys", () => {
-  const LOCALES = ["en", "lt", "de", "nl", "pl", "ru"];
+  const LOCALES = ["en", "lt", "de", "nl", "pl", "ru", "sv"];
   const flat = (o: unknown, p = ""): string[] =>
     Object.entries(o as Record<string, unknown>).flatMap(([k, v]) =>
       typeof v === "object" && v !== null ? flat(v, `${p}${k}.`) : [`${p}${k}`],

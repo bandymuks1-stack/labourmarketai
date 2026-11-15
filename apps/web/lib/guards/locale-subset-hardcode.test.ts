@@ -121,6 +121,10 @@ const PRODUCT_ALLOWLIST: Readonly<Record<string, { readonly hits: number; readon
     hits: 1,
     why: "FROZEN_LOCALES: the locales active when the landing freeze snapshot was taken; a historical hash baseline, not a served-locale list.",
   },
+  "lib/privacy/consent-definitions.ts": {
+    hits: 1,
+    why: "CONSENT_LOCALES: the locales whose consent LEGAL texts the owner approved (each addition re-pins every purpose hash in a RED migration). sv is active but its texts wait for owner approval (#3232); until then toConsentLocale serves sv readers the labelled English text, never Lithuanian. Remove this entry when #3232 lands.",
+  },
   "lib/public-claims/registry.ts": {
     hits: 1,
     why: "platform.headline.<locale> claim ids are pinned by the external Agentai register (append-only); adding nl/pl claims is an additive registry change for that consumer, not a code fix.",
