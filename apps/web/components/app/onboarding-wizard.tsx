@@ -35,6 +35,12 @@ import {
   nextPathForIntents,
   type FirstRunIntent,
 } from "@/lib/onboarding/first-run-intent";
+import {
+  clearWorkerIntakeCarry,
+  readWorkerIntakeCarry,
+  workerIntakeSaid,
+  type WorkerIntakeCarry,
+} from "@/lib/onboarding/worker-intake-carry";
 
 /** This tab's onboarding draft (step, intents, country) — sessionStorage only,
  *  never the name or any free text. Every access is guarded: storage may be
@@ -329,9 +335,34 @@ export function OnboardingWizard({
   // and cleared when onboarding completes. Storage can be unavailable
   // (private mode): every access is guarded and the wizard works without it.
   const draftRestoredRef = useRef(false);
+  const [carried, setCarried] = useState<WorkerIntakeCarry | null>(null);
+  const [carriedTicked, setCarriedTicked] = useState(false);
+  const shownSaid = saidSentence || (carried ? workerIntakeSaid(carried) : "") || null;
+  const saidPreselected = saidSentence ? defaultIntents.length > 0 : carriedTicked;
   useEffect(() => {
     if (draftRestoredRef.current) return;
     draftRestoredRef.current = true;
+    // THE WORKER INTAKE, carried through sign-up (lib/onboarding/
+    // worker-intake-carry.ts): its name and trade fill these same fields, the
+    // worker card is ticked, and its text is saved as the profile text on
+    // Finish. Defaults the person sees and can change — nothing is saved
+    // before they finish. Never over what the page already knew.
+    const carry = readWorkerIntakeCarry();
+    if (carry) {
+      setCarried(carry);
+      if (carry.fullName) setDisplayName((prev) => (prev.trim() ? prev : carry.fullName));
+      const own = normalizeSelfDeclaredProfession(carry.professionLabel);
+      const entry: ProfessionEntry | null = PROFESSION_SLUGS.includes(carry.professionSlug)
+        ? { slug: carry.professionSlug, label: null }
+        : own
+          ? { slug: null, label: own }
+          : null;
+      if (entry) setProfessions((prev) => (prev.length > 0 ? prev : [entry]));
+      if (defaultIntents.length === 0) {
+        setIntents((prev) => (prev.size > 0 ? prev : new Set<FirstRunIntent>(["work"])));
+        setCarriedTicked(true);
+      }
+    }
     const draft = readOnboardingDraft();
     if (!draft) return;
     const restored = draft.intents.filter((i) => (FIRST_RUN_INTENTS as readonly string[]).includes(i)) as FirstRunIntent[];
@@ -463,6 +494,9 @@ export function OnboardingWizard({
       if (ownWords.length > 0) {
         form.set("profession_labels", serializeSelfDeclaredProfessions(ownWords));
       }
+      // The worker intake's own words (comment + the other fields, labelled)
+      // → the owner-only profile text, the text-first composer's column.
+      if (carried?.about) form.set("profile_text", carried.about);
     }
     // A deep link (invitation) still wins; otherwise a company identity goes
     // straight to the one canonical setup form with the intent's presets.
@@ -510,6 +544,7 @@ export function OnboardingWizard({
         // completeOnboarding on the server, after it settles the role.
         await completeOnboarding(form);
         clearOnboardingDraft();
+        if (carried && roles.has("worker")) clearWorkerIntakeCarry();
         // Reached only if the runtime resolves the action instead of
         // throwing NEXT_REDIRECT — exactly one of these two success
         // paths runs, so the event never double-fires.
@@ -532,6 +567,7 @@ export function OnboardingWizard({
         // fire-and-forget, safe before the rethrow.
         if (e instanceof Error && /NEXT_REDIRECT/.test(e.message)) {
           clearOnboardingDraft();
+          if (carried && roles.has("worker")) clearWorkerIntakeCarry();
           trackFunnel(FUNNEL_EVENTS.onboardingCompleted, {
             ...getFirstTouchAttribution(),
             role_context: primaryRole,
@@ -626,17 +662,18 @@ export function OnboardingWizard({
               2026-09-06): the person is not asked again what they just
               wrote — the matching card is ticked below, and they can change
               it. Nothing is submitted until Continue → Finish. */}
-          {saidSentence && (
+          {/* The worker intake's comment is shown back the same way. */}
+          {shownSaid && (
             <p
               className="text-sm leading-relaxed text-text-secondary"
               data-testid="onboarding-said"
-              data-preselected={defaultIntents.length > 0 ? "1" : "0"}
+              data-preselected={saidPreselected ? "1" : "0"}
             >
               <span className="text-text-muted">{t("rolePicker.saidLabel")}</span>{" "}
               <span className="font-medium text-text-primary">
-                &bdquo;{saidSentence}&ldquo;
+                &bdquo;{shownSaid}&ldquo;
               </span>
-              {defaultIntents.length > 0 && (
+              {saidPreselected && (
                 <>
                   {" "}
                   <span className="text-text-muted">{t("rolePicker.saidHint")}</span>
@@ -649,7 +686,7 @@ export function OnboardingWizard({
               universitetui" is not asked to guess which card is theirs —
               the card that door routes to is ticked below, with the same
               hint, and they can change it. */}
-          {!saidSentence && doorWords && defaultIntents.length > 0 && (
+          {!shownSaid && doorWords && defaultIntents.length > 0 && (
             <p
               className="text-sm leading-relaxed text-text-secondary"
               data-testid="onboarding-door"

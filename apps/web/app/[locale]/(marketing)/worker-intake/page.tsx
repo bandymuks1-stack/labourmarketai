@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
+import { workerIntakeDoorHref } from "@/lib/onboarding/worker-intake-carry";
 
 export async function generateMetadata({
   params,
@@ -105,15 +106,19 @@ export default async function WorkerIntakePage({
         <div className="flex flex-col gap-2 sm:flex-row">
           {/* AuthCtaLink (plain <a>, not the SPA Link): auth is a full-page
               boundary. Single-domain policy: the link stays relative — the
-              whole flow lives on labourmarket.ai. */}
+              whole flow lives on labourmarket.ai.
+              Both doors return to the worker profile through `?next=`, and
+              what the visitor typed rides beside them in this browser
+              (lib/onboarding/worker-intake-carry.ts) — onboarding and the
+              profile save it, so nothing typed here is lost by signing up. */}
           <AuthCtaLink
-            relPath={`/${locale}/auth/signup`}
+            relPath={workerIntakeDoorHref(locale, "signup")}
             className={buttonLinkClassName()}
           >
             {t("bridgeSignup")} →
           </AuthCtaLink>
           <AuthCtaLink
-            relPath={`/${locale}/auth/login`}
+            relPath={workerIntakeDoorHref(locale, "login")}
             className={buttonLinkClassName("secondary")}
           >
             {t("bridgeLogin")}

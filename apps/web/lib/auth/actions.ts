@@ -16,6 +16,7 @@ import {
 import { LIVE_ROLE_IDS, baseIdentityForRole, type LiveRoleId } from "@/lib/config/roles";
 import { setActiveRoleCore } from "@/lib/auth/active-role-core";
 import { clearActiveOrganization } from "@/lib/company/organization-actions";
+import { WORKER_INTAKE_ABOUT_MAX_CHARS } from "@/lib/onboarding/worker-intake-carry";
 
 /**
  * THE PARTICIPATION MODE A PERSON ONBOARDS INTO — one of FOUR concepts this
@@ -243,6 +244,25 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       .update({ locale: onboardedLocale })
       .eq("id", user.id);
     if (localeErr) console.error("[completeOnboarding] account language write failed", { code: localeErr.code });
+  }
+
+  // THE WORKER INTAKE'S OWN WORDS (owner decision 2026-11-15: what a visitor
+  // typed on /worker-intake survives sign-up). Saved into the ONE free-text
+  // home a worker already has — the owner-only `profiles.profile_text` the
+  // text-first composer writes (migration 0014; never `workers.bio`, which
+  // employers read). Only into an EMPTY text: a person's existing words are
+  // never replaced. The person's own row under RLS; a failure is logged, not
+  // fatal — the profile composer offers the same text again.
+  const profileText = String(formData.get("profile_text") ?? "")
+    .trim()
+    .slice(0, WORKER_INTAKE_ABOUT_MAX_CHARS);
+  if (profileText && roles.includes("worker")) {
+    const { error: textErr } = await supabase
+      .from("profiles")
+      .update({ profile_text: profileText })
+      .eq("id", user.id)
+      .or("profile_text.is.null,profile_text.eq.");
+    if (textErr) console.error("[completeOnboarding] profile text write failed", { code: textErr.code });
   }
 
   // THE FURTHER PROFESSIONS the person named. The RPC wrote the primary; these

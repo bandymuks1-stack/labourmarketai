@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, type FormEvent } from "react";
+import {
+  WORKER_INTAKE_COMMENT_MAX_CHARS,
+  buildWorkerIntakeCarry,
+  writeWorkerIntakeCarry,
+  type WorkerIntakeLine,
+} from "@/lib/onboarding/worker-intake-carry";
 import {
   submitWorkerIntakeAction,
   type WorkerIntakeFormState,
@@ -74,6 +80,63 @@ const FIELD =
 const LABEL = "flex flex-col gap-1 text-xs";
 const HELP = "text-meta text-text-muted";
 
+/**
+ * What the visitor typed, carried through sign-up (lib/onboarding/
+ * worker-intake-carry.ts). Every field except the three with their own home
+ * (name, trade, comment) becomes one labelled line of the profile text; a
+ * choice is carried only when the person changed it from the form's default,
+ * so nothing they did not state is written down for them.
+ */
+function carryFromForm(form: HTMLFormElement, labels: WorkerIntakeFormLabels): void {
+  const lineLabel: Record<string, string> = {
+    target_countries: labels.targetCountries,
+    available_from: labels.availableFrom,
+    accommodation: labels.accommodation,
+    transport: labels.transport,
+    engagement_type: labels.engagement,
+    languages: labels.languages,
+    business_name: labels.businessName,
+    vat_number: labels.vatNumber,
+    team_size: labels.teamSize,
+    insurance: labels.insurance,
+    team_professions: labels.teamProfessions,
+    tools: labels.tools,
+    invoice_ready: labels.invoiceReady,
+  };
+  let fullName = "";
+  let professionSlug = "";
+  let professionLabel = "";
+  let comment = "";
+  const lines: WorkerIntakeLine[] = [];
+  for (const el of Array.from(form.elements)) {
+    if (
+      !(el instanceof HTMLInputElement) &&
+      !(el instanceof HTMLSelectElement) &&
+      !(el instanceof HTMLTextAreaElement)
+    ) {
+      continue;
+    }
+    if (el.name === "full_name") fullName = el.value;
+    else if (el.name === "comment") comment = el.value;
+    else if (el.name === "profession" && el instanceof HTMLSelectElement) {
+      professionSlug = el.value;
+      professionLabel = el.value ? (el.selectedOptions[0]?.text ?? "") : "";
+    } else if (el.name in lineLabel) {
+      if (el instanceof HTMLSelectElement) {
+        const chosen = el.selectedOptions[0];
+        if (chosen && !chosen.defaultSelected) {
+          lines.push({ label: lineLabel[el.name], value: chosen.text });
+        }
+      } else {
+        lines.push({ label: lineLabel[el.name], value: el.value });
+      }
+    }
+  }
+  writeWorkerIntakeCarry(
+    buildWorkerIntakeCarry({ fullName, professionSlug, professionLabel, comment, lines, now: Date.now() }),
+  );
+}
+
 export function WorkerIntakeForm({
   labels,
   categories,
@@ -88,7 +151,12 @@ export function WorkerIntakeForm({
 
   return (
     <div className="flex flex-col gap-6">
-      <form action={formAction} className="flex flex-col gap-4" data-testid="worker-intake-form">
+      <form
+        action={formAction}
+        onChange={(e: FormEvent<HTMLFormElement>) => carryFromForm(e.currentTarget, labels)}
+        className="flex flex-col gap-4"
+        data-testid="worker-intake-form"
+      >
         <header className="flex flex-col gap-1">
           {/* The page's one title (2026-10-18 design pass): same scale as every public page title. */}
           <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">
@@ -210,7 +278,12 @@ export function WorkerIntakeForm({
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.comment}</span>
-          <textarea name="comment" rows={4} maxLength={8000} className={FIELD} />
+          <textarea
+            name="comment"
+            rows={4}
+            maxLength={WORKER_INTAKE_COMMENT_MAX_CHARS}
+            className={FIELD}
+          />
           <span className={HELP}>{labels.commentHelp}</span>
         </label>
 

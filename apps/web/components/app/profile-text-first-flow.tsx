@@ -24,6 +24,7 @@ import { useLocale } from "next-intl";
 import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
 import { setPrimaryProfessionBySlug } from "@/lib/worker/actions";
 import { professionsNamedInText } from "@/lib/onboarding/landing-handoff";
+import { clearWorkerIntakeCarry, readWorkerIntakeCarry } from "@/lib/onboarding/worker-intake-carry";
 import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promotion";
 import { withTimeout } from "@/lib/async/with-timeout";
 import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
@@ -179,6 +180,23 @@ export function ProfileTextFirstFlow({
   const [textSaveState, setTextSaveState] = useState<
     "idle" | "saving" | "saved" | "error"
   >(initialText.trim().length > 0 ? "saved" : "idle");
+  // THE WORKER INTAKE, carried through sign-in (lib/onboarding/
+  // worker-intake-carry.ts): a person who was already onboarded when they
+  // signed in from /worker-intake finds what they typed there in this
+  // composer, after their own saved words — theirs to save, never saved for
+  // them. Onboarding has already saved and forgotten it for a new account.
+  const [carriedIntake, setCarriedIntake] = useState(false);
+  useEffect(() => {
+    const carry = readWorkerIntakeCarry();
+    if (!carry?.about || initialText.includes(carry.about)) {
+      if (carry?.about) clearWorkerIntakeCarry();
+      return;
+    }
+    setText(initialText.trim() ? `${initialText.trim()}\n\n${carry.about}` : carry.about);
+    setTextSaveState("idle");
+    setCarriedIntake(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- read once, after hydration
+  }, []);
   const [hasExtracted, setHasExtracted] = useState(false);
   const [selfDeclared, setSelfDeclared] = useState<Item[]>([]);
   const [applying, setApplying] = useState(false);
@@ -236,7 +254,10 @@ export function ProfileTextFirstFlow({
       // Bounded so a hung mobile request can never leave the indicator stuck
       // on "Įrašoma…" — on timeout it flips to the retryable error state.
       void withTimeout(saveWorkerProfileText(raw), undefined, "save-profile-text")
-        .then(() => setTextSaveState("saved"))
+        .then(() => {
+          setTextSaveState("saved");
+          if (carriedIntake) clearWorkerIntakeCarry();
+        })
         .catch((e) => {
           console.error("[profile-text-first] save text failed:", e);
           setTextSaveState("error");
@@ -448,6 +469,7 @@ export function ProfileTextFirstFlow({
         data-testid="profile-text-flow-compose"
       >
         <TextFirstComposer
+          key={carriedIntake ? "carried-intake" : "saved-text"}
           title={t("title")}
           helper={t("helper")}
           placeholder={t("placeholder")}

@@ -60,9 +60,12 @@ async function signUp(
   page: Page,
   address: string,
   password: string = PASSWORD,
-  opts: { refuseConsent?: boolean } = {},
+  opts: { refuseConsent?: boolean; via?: (page: Page) => Promise<void> } = {},
 ): Promise<void> {
-  if (opts.refuseConsent) {
+  if (opts.via) {
+    // Reach the sign-up form the way a visitor does from a public page.
+    await opts.via(page);
+  } else if (opts.refuseConsent) {
     await page.goto(`${BASE}/en/auth/signup?${FIRST_VISIT_CAMPAIGN}`);
     await refuseOnFirstVisit(page);
   } else {
@@ -112,6 +115,82 @@ test("S-1. a worker refuses analytics on the first visit, signs up through the f
   expect(profile?.onboarded, "profile is onboarded").toBe(true);
   expect(profile?.active_role, "the worker identity is recorded").toBe("worker");
   expect(profile?.country).toBe("LT");
+});
+
+test("S-1b. worker intake → bridge → sign up → onboarding: the saved worker profile holds what was typed (375px)", async ({ browser }) => {
+  // Owner decision 2026-11-15: after registration ALL data the visitor typed
+  // on /worker-intake survives. Proven on the stored rows, at phone width.
+  const ctx = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  try {
+    const address = email("workerintake");
+    const NAME = `Synthetic Intake Worker ${RUN}`;
+    const COMMENT = `Eight years of house wiring, own tools, ready from March ${RUN}`;
+    const LANGUAGES = "English, Lithuanian";
+    await signUp(page, address, PASSWORD, {
+      via: async (p) => {
+        await p.goto(`${BASE}/en/worker-intake`);
+        const consent = p.getByTestId("analytics-consent-refuse");
+        if (await consent.isVisible({ timeout: 5_000 }).catch(() => false)) await consent.click();
+        const form = p.getByTestId("worker-intake-form");
+        await form.locator('input[name="full_name"]').fill(NAME);
+        await form.locator('select[name="profession"]').selectOption("electrician");
+        await form.locator('input[name="languages"]').fill(LANGUAGES);
+        await form.locator('textarea[name="comment"]').fill(COMMENT);
+        await p.getByTestId("worker-intake-submit").click();
+        await expect(p.getByTestId("worker-intake-result")).toBeVisible({ timeout: 60_000 });
+        const overflow = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        expect(overflow, "no sideways scroll at 375px").toBeLessThanOrEqual(0);
+        const door = p.getByTestId("intake-bridge").getByTestId("auth-cta-link").first();
+        await expect(door).toHaveAttribute("href", /\/en\/auth\/signup\?next=%2Fdashboard%2Fprofile/);
+        await door.click();
+        await p.waitForURL(/\/en\/auth\/signup\?next=/, { timeout: 30_000 });
+      },
+    });
+    // Onboarding asks nothing the intake already answered: the worker card is
+    // ticked, the comment is shown back, the name and the trade are filled in.
+    await expect(page.getByTestId("onboarding-intent-work")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("onboarding-said")).toContainText(RUN);
+    await page.getByTestId("onboarding-intents-continue").click();
+    await expect(page.getByTestId("onboarding-display-name")).toHaveValue(NAME);
+    await page.getByTestId("onboarding-country").click();
+    await page.getByRole("option", { name: /Lithuania/ }).first().click();
+    await page.getByTestId("onboarding-submit").click();
+    await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+
+    // The proof is the stored rows, not the screen.
+    const id = await userId(address);
+    const [profile] = await db<Array<{ full_name: string | null; profile_text: string | null; onboarded: boolean | null }>>(
+      `profiles?id=eq.${id}&select=full_name,profile_text,onboarded`,
+    );
+    expect(profile?.onboarded).toBe(true);
+    expect(profile?.full_name, "the typed name is the profile name").toBe(NAME);
+    expect(profile?.profile_text ?? "", "the typed comment is the profile text").toContain(COMMENT);
+    expect(profile?.profile_text ?? "", "every other typed field survives, labelled").toContain(LANGUAGES);
+    const [worker] = await db<Array<{ id: string }>>(`workers?profile_id=eq.${id}&select=id`);
+    expect(worker?.id, "a worker record exists").toBeTruthy();
+    const dirs = await db<Array<{ is_primary: boolean | null; professions: { slug: string } | null }>>(
+      `worker_professions?worker_id=eq.${worker!.id}&select=is_primary,professions(slug)`,
+    );
+    expect(
+      dirs.some((d) => d.is_primary && d.professions?.slug === "electrician"),
+      "the typed trade is the worker's primary profession",
+    ).toBe(true);
+    // Saved where it belongs, then forgotten by the browser.
+    expect(await page.evaluate(() => window.localStorage.getItem("lm.workerIntake.carry.v1"))).toBeNull();
+    // The profile shows the saved text in its editor.
+    await expect
+      .poll(
+        () =>
+          page
+            .locator("textarea")
+            .evaluateAll((els, run) => els.some((e) => (e as HTMLTextAreaElement).value.includes(run)), RUN),
+        { timeout: 30_000 },
+      )
+      .toBe(true);
+  } finally {
+    await ctx.close();
+  }
 });
 
 test("S-2. a company signs up through the form and reaches its company setup", async ({ page }) => {
