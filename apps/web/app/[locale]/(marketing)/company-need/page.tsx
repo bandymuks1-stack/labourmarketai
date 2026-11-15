@@ -19,6 +19,7 @@ import {
 import {
   buildWorkCategoryOptions,
 } from "@/lib/taxonomy/work-categories";
+import { Link } from "@/lib/i18n/navigation";
 
 /**
  * Company need / vacancy page (Staffing Operating Model v1, PR4 UI / PR10).
@@ -34,6 +35,18 @@ export default async function CompanyNeedPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("companyNeed");
+  // The landing's worker-search door now opens this form (one canonical worker
+  // need, doctrine §17; employer path P0 2026-11-15, F5). What that door asked
+  // and said comes along in its own words: the phone field and the privacy notice.
+  const tDoor = await getTranslations("landing.requestDoors");
+  // Rendered here, on the server: the client form gets finished markup, not a function.
+  const privacyNotice = tDoor.rich("notice", {
+    privacy: (chunks) => (
+      <Link href="/legal/privacy" className="underline hover:text-text-primary">
+        {chunks}
+      </Link>
+    ),
+  });
 
   const labels: CompanyNeedFormLabels = {
     title: t("title"),
@@ -148,6 +161,8 @@ export default async function CompanyNeedPage({
         labels={labels}
         categories={categories}
         countryOptions={countryOptions}
+        phone={{ label: tDoor("phone"), optional: tDoor("optional") }}
+        notice={privacyNotice}
       />
 
       {/* Funnel bridge: sending the form already stores the inquiry for

@@ -20,6 +20,44 @@ const RUN = Date.now().toString(36);
 const CONTACT = `need.${RUN}@local.test`;
 const COMPANY = `Synthetic Need Co ${RUN}`;
 
+test("N-6. the landing's worker-search door opens the one need form, which keeps everything the door asked", async ({ browser }) => {
+  const contact = `need.door.${RUN}@local.test`;
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } }); // no session
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/en`);
+  await page.getByTestId("request-door-worker-search-open").first().click();
+  await page.waitForURL(/\/en\/company-need\?from=request_worker_search/, { timeout: 30_000 });
+  const form = page.getByTestId("company-need-form");
+  await expect(form.locator('input[name="started"]'), "hydration wrote the fill time").not.toHaveValue("", {
+    timeout: 60_000,
+  });
+  // The door's privacy notice came along.
+  await expect(page.getByTestId("company-need-privacy-notice").locator('a[href$="/legal/privacy"]')).toBeVisible();
+  await form.locator('input[name="company_name"]').fill(`Synthetic Door Co ${RUN}`);
+  await form.locator('input[name="contact_email"]').fill(contact);
+  await form.locator('input[name="contact_phone"]').fill("+37060000000");
+  await form.locator('select[name="profession"]').selectOption("other_general");
+  await form.getByTestId("company-need-country").selectOption("LT");
+  // More than the old 1,000 cap here: the door took up to 100,000.
+  await form.locator('input[name="number_of_workers"]').fill("2000");
+  await form.locator('input[name="start_date"]').fill("2027-03-01");
+  await form.locator('textarea[name="description"]').fill(`Seasonal pickers, own words (${RUN}).`);
+  await page.waitForTimeout(3_500); // the spam guard's minimum fill time
+  await form.getByTestId("company-need-submit").click();
+  await expect(page.getByTestId("company-need-result")).toBeVisible({ timeout: 60_000 });
+
+  const rows = sql<{ contact_phone: string | null; headcount: number | null; start_window: string | null; source_path: string | null }>(
+    `select contact_phone, headcount, start_window, source_path
+       from public.company_need_public_intakes where contact_email = ${lit(contact)}`,
+  );
+  expect(rows.length, "exactly one intake row").toBe(1);
+  expect(rows[0].contact_phone, "the phone the door used to ask for is stored").toBe("+37060000000");
+  expect(rows[0].headcount).toBe(2000);
+  expect(rows[0].start_window).toContain("2027-03-01");
+  expect(rows[0].source_path).toBe("/en/company-need?from=request_worker_search");
+  await ctx.close();
+});
+
 test("N-1. an anonymous visitor submits the public company-need form and the intake is stored", async ({ browser }) => {
   const ctx = await browser.newContext(); // no session, no cookies
   const page = await ctx.newPage();
