@@ -70,7 +70,9 @@ test.describe.configure({ timeout: 180_000 });
 const SURFACES = [
   {
     route: "/create-cv",
-    anchor: "[data-testid='create-cv-step-1']",
+    // The steps section (and its create-cv-step-1 testid) was removed as a
+    // repeat of the benefit cards (owner copy cleanup 2026-11-15).
+    anchor: "h1",
     ctas: ["[data-cta-id='create_cv_hero']", "[data-cta-id='create_cv_footer']"],
   },
   {
