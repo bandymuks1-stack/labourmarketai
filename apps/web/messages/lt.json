@@ -4302,13 +4302,13 @@
       "divider": "arba",
       "email_label": "El. paštas",
       "password_label": "Slaptažodis",
-      "forgot_password": "Pamiršai slaptažodį?",
+      "forgot_password": "Pamiršote slaptažodį?",
       "reset_password_cta": "Atkurti slaptažodį",
       "reset_password_help": "Atsiųsime atkūrimo nuorodą jūsų el. paštu — seno slaptažodžio žinoti nereikia.",
       "reset_success": "Slaptažodis atnaujintas. Prisijunkite su nauju slaptažodžiu.",
       "submit_label": "Prisijungti",
       "signing": "Jungiamasi...",
-      "no_account": "Neturi paskyros?",
+      "no_account": "Neturite paskyros?",
       "signup_link": "Registruotis",
       "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau.",
       "error_email": "Įveskite teisingą el. pašto adresą.",
@@ -4321,7 +4321,7 @@
       "resend_sent": "Nauja patvirtinimo nuoroda išsiųsta adresu {email}."
     },
     "forgotPassword": {
-      "headline": "Pamiršai slaptažodį?",
+      "headline": "Pamiršote slaptažodį?",
       "subcopy": "Įveskite savo el. paštą ir atsiųsime nuorodą slaptažodžiui atkurti.",
       "email_label": "El. paštas",
       "submit_label": "Siųsti nuorodą",
@@ -5093,7 +5093,7 @@
       }
     },
     "carriedIntent": {
-      "label": "Tęsi",
+      "label": "Tęsiate",
       "hint": "Prisijungus iš karto grįšite prie šito — sakinys keliauja kartu su jumis."
     }
   },

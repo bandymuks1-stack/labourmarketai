@@ -58,6 +58,10 @@ const LT_INFORMAL = [
     "pasirink|pridėk|įrašyk|patvirtink|sukurk|atidaryk|spausk|paspausk|užpildyk|pakviesk|peržiūrėk|įkelk|nurodyk|pažymėk|pradėk|grįžk|žiūrėk|susisiek|palik|naudok|patikrink|rašyk|parašyk|išsaugok|pasakyk|papasakok|ieškok|rask|gauk|siųsk|nusiųsk|atšauk|pakeisk|redaguok|ištrink|perkrauk|bandyk|pabandyk|palauk|prisijunk|užsiregistruok|registruokis|rinkis|pasirūpink|įsitikink|prisimink|eik|būk|įjunk|išjunk|aprašyk|atsiųsk|įvesk|tęsk|priskirk|atsakyk|patikslink",
   ),
   new RegExp(`(?<![${LT_LETTER}])[${LT_LETTER}]{3,}tum(?![${LT_LETTER}])`, "i"),
+  // Second-person forms the sign-in screen still used ("Pamiršai slaptažodį?",
+  // "Tęsi"), folded in from #3362. Unambiguous: the third person is "pamiršo",
+  // "tęsia". ("Neturi" is not listed: it is also the third person.)
+  LT_WORD("pamiršai|tęsi"),
 ];
 const NL_INFORMAL = [/(?<![\wÀ-ÿ'])(je|jij|jou|jouw|jouwe|jezelf|jullie)(?![\wÀ-ÿ'])/i];
 const RU_INFORMAL = [/(?<![а-яё])(ты|тебя|тебе|тобой|твой|твоя|твоё|твое|твои|твоего|твоей|твоих|твоим|твоими|твоему|твою)(?![а-яё])/i];
