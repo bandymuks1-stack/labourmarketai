@@ -6576,7 +6576,7 @@
     "myProjectsNext": "Det här kan du göra nu",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Avslutad",
-    "viaTeam": "via team {team}",
+    "viaTeam": "via arbetslaget {team}",
     "untitledProject": "Projekt utan titel",
     "archiveToggle": {
       "label": "Aktiva eller avslutade projekt",
@@ -6686,7 +6686,7 @@
     "countersTitle": "Drift",
     "counters": {
       "totalAssigned": "Tilldelade",
-      "viaTeam": "Via team",
+      "viaTeam": "Via arbetslaget",
       "ready": "Redo",
       "readyBasis": "Bygger bara på de kontrollerade fälten: färdigheter och arbetsbelägg. Dokument sänker aldrig beredskapen.",
       "needsDeclaredSkills": "Inga angivna färdigheter",
@@ -6894,7 +6894,7 @@
       "untitled": "Projekt utan titel",
       "assignmentActive": "Aktiv tilldelning",
       "assignmentEnded": "Tilldelning avslutad",
-      "viaTeam": "via team {team}",
+      "viaTeam": "via arbetslaget {team}",
       "projectRestricted": "Projektdetaljer är inte tillgängliga för dig just nu. Din tilldelning förblir synlig.",
       "journalCta": "Skriv journalinlägg",
       "chatCta": "Skicka meddelande",

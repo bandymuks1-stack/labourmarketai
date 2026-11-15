@@ -115,7 +115,7 @@ export interface CvSectionProposals {
 const MAX_PER_SECTION = 20;
 const MAX_LINE = 300;
 
-// ── Lexicons (lt / en / ru / de / nl — the active locale set) ────────────────
+// ── Lexicons (lt / en / ru / de / nl / pl / sv — the active locale set) ──────
 
 const YEAR = "(?:19|20)\\d{2}";
 const MONTH = "(?:0[1-9]|1[0-2])";
@@ -134,9 +134,9 @@ const MONTH_AFTER = `(?:\\s?[./-]\\s?${MONTH}(?:\\s?[./-]\\s?${DAY})?(?!\\d))?`;
 const DATE_TOKEN = `${MONTH_FIRST}${YEAR}${MONTH_AFTER}`;
 const RANGE_END =
   `(?:${DATE_TOKEN}` +
-  "|dabar|šiuo metu|iki dabar|now|present|current|heute|heden|наст\\.?|настоящее время)";
+  "|dabar|šiuo metu|iki dabar|now|present|current|heute|heden|nuvarande|pågående|nu\\b|наст\\.?|настоящее время)";
 const YEAR_RANGE_RE = new RegExp(
-  `(${DATE_TOKEN})\\s*(?:[–—-]|iki|to|until|bis|tot|по|до)\\s*(${RANGE_END})`,
+  `(${DATE_TOKEN})\\s*(?:[–—-]|iki|to|until|bis|tot|till|по|до)\\s*(${RANGE_END})`,
   "i",
 );
 /** Standalone date tokens left over once the range fragment is removed. */
@@ -145,75 +145,75 @@ const YEAR_MONTH_TOKEN_RE = new RegExp(
   "g",
 );
 const CURRENT_RE =
-  /dabar|šiuo metu|now|present|current|heute|heden|наст|настоящее/i;
+  /dabar|šiuo metu|now|present|current|heute|heden|nuvarande|pågående|^nu$|наст|настоящее/i;
 
 const COMPANY_MARKER_RE =
   /\b(UAB|MB|AB|VšĮ|IĮ|GmbH|B\.?V\.?|Sp\.\s*z\s*o\.?o\.?|Ltd\.?|SIA|OÜ|OOO|ООО|LLC|Inc\.?)\b/;
 
 const EDUCATION_RE =
-  /universit|kolegij|college|hochschule|gimnazij|mokykl|school|schule|школ|университет|колледж|bakalaur|bachelor|magistr|master|мастер|магистр|doktor|doctor|доктор|profesin|vocational|berufsschule|akademij|academy|академ|institut|kursai|course|курс|opleiding|studij|rengimo cent|mokymo cent|training cent|technikum|liceum|лицей|техникум|училищ|szkoł/i;
+  /universit|kolegij|college|hochschule|gimnazij|mokykl|school|schule|школ|университет|колледж|bakalaur|bachelor|magistr|master|мастер|магистр|doktor|doctor|доктор|profesin|vocational|berufsschule|akademij|academy|академ|institut|kursai|course|курс|opleiding|studij|rengimo cent|mokymo cent|training cent|technikum|liceum|лицей|техникум|училищ|szkoł|högskol|gymnasie|grundskol|yrkesutbild|komvux/i;
 
 const CERTIFICATE_RE =
-  /sertifikat|certificate|certificaat|zertifikat|сертификат|pažymėjim|licencij|licentie|licen[cs]e|lizenz|лиценз|atestat|attest|удостоверен/i;
+  /sertifikat|certificate|certificaat|zertifikat|сертификат|pažymėjim|licencij|licentie|licen[cs]e|lizenz|лиценз|atestat|attest|удостоверен|certifikat|intyg|körkort|behörighetsbevis/i;
 
 const ACHIEVEMENT_RE =
-  /apdovanoj|award|auszeichnung|наград|laimėj|winner|prijs gewonnen|pasiekim|achievement|достижен/i;
+  /apdovanoj|award|auszeichnung|наград|laimėj|winner|prijs gewonnen|pasiekim|achievement|достижен|utmärkelse/i;
 
 /** keyword → education_types slug (registry seed set). Order matters — the
  *  first match wins, so more specific degrees precede generic "school". */
 const EDUCATION_TYPE_RULES: ReadonlyArray<[RegExp, string]> = [
   [/doktor|doctor|phd|доктор/i, "doctorate"],
   [/magistr|master|магистр/i, "university_master"],
-  [/bakalaur|bachelor|бакалавр/i, "university_bachelor"],
+  [/bakalaur|bachelor|kandidatexamen|бакалавр/i, "university_bachelor"],
   [/universit|университет/i, "university_bachelor"],
-  [/kolegij|college|hogeschool|колледж/i, "college"],
-  [/profesin|vocational|berufs|профессиональн|rengimo cent|technikum|техникум|училищ/i, "vocational"],
-  [/gimnazij|vidurin|secondary|gymnasium|гимназ|средн/i, "secondary"],
-  [/pradin|primary|grundschule|начальн/i, "primary"],
+  [/kolegij|college|hogeschool|högskol|колледж/i, "college"],
+  [/profesin|vocational|berufs|yrkesutbild|yrkeshögskol|профессиональн|rengimo cent|technikum|техникум|училищ/i, "vocational"],
+  [/gimnazij|vidurin|secondary|gymnasium|gymnasie|гимназ|средн/i, "secondary"],
+  [/pradin|primary|grundschule|grundskol|начальн/i, "primary"],
   [/kursai|course|kurs|курс|training|mokym/i, "course_certificate"],
 ];
 
 /** language-name lexicon → canonical worker_languages code. */
 const LANGUAGE_RULES: ReadonlyArray<[RegExp, string]> = [
-  [/lietuvi|lithuanian|litauisch|litouws|литовск/i, "lt"],
+  [/lietuvi|lithuanian|litauisch|litauisk|litouws|литовск/i, "lt"],
   [/angl[ųuo]|english|englisch|engels|английск/i, "en"],
-  [/rus[ųuo]|russian|russisch|русск/i, "ru"],
-  [/vokie|german|deutsch|duits|немецк/i, "de"],
-  [/oland|nyderland|dutch|nederlands|голландск|нидерланд/i, "nl"],
-  [/lenk|polish|polski|польск/i, "pl"],
-  [/latvi|latvian|латышск/i, "lv"],
-  [/est[ųuo]|estonian|эстонск/i, "et"],
+  [/rus[ųuo]|russian|russisch|\bryska\b|русск/i, "ru"],
+  [/vokie|german|deutsch|duits|\btyska\b|немецк/i, "de"],
+  [/oland|nyderland|dutch|nederlands|nederländsk|holländsk|голландск|нидерланд/i, "nl"],
+  [/lenk|polish|polski|\bpolska\b|польск/i, "pl"],
+  [/latvi|latvian|lettisk|латышск/i, "lv"],
+  [/est[ųuo]|estonian|estnisk|эстонск/i, "et"],
   [/norveg|norwegian|norsk|норвежск/i, "no"],
   [/šved|swedish|svenska|шведск/i, "sv"],
   [/dan[ųuo]|danish|dansk|датск/i, "da"],
 ];
 
 const CEFR_RE = /\b([ABC][12])\b/;
-const NATIVE_RE = /gimtoji|gimtąja|native|moedertaal|muttersprache|родной/i;
-const FLUENT_RE = /laisvai|fluent|fließend|vloeiend|свободно/i;
+const NATIVE_RE = /gimtoji|gimtąja|native|moedertaal|muttersprache|modersmål|родной/i;
+const FLUENT_RE = /laisvai|fluent|fließend|vloeiend|flytande|свободно/i;
 
 const SALARY_LINE_RE =
-  /atlyginim|alga|salary|wage|loon|gehalt|зарплат|lūkest|expectation|€|eur/i;
+  /atlyginim|alga|salary|wage|loon|gehalt|lön|зарплат|lūkest|expectation|€|eur/i;
 const SALARY_RANGE_RE =
   /(\d{3,5})\s*[–—-]\s*(\d{3,5})\s*(?:€|eur)/i;
 const SALARY_SINGLE_RE = /(\d{3,5})\s*(?:€|eur)/i;
-const HOURLY_RE = /val\.|\/\s*val|per hour|hourly|\/\s*h\b|stunde|в час|per uur/i;
+const HOURLY_RE = /val\.|\/\s*val|per hour|hourly|\/\s*h\b|stunde|в час|per uur|per timme|\/\s*tim\b/i;
 
 const AVAILABILITY_RULES: ReadonlyArray<[RegExp, CvAvailabilityHintKey]> = [
   [
-    /galiu persikelti|galiu išvykti|willing to relocate|umzugsbereit|bereid te verhuizen|готов.{0,4}переехать|galiu dirbti užsienyje/i,
+    /galiu persikelti|galiu išvykti|willing to relocate|umzugsbereit|bereid te verhuizen|kan flytta|beredd att flytta|готов.{0,4}переехать|galiu dirbti užsienyje/i,
     "willingToRelocate",
   ],
   [
-    /nuosav\w* automobil|turiu automobil|own car|own vehicle|eigenes auto|eigen auto|своя машина|собственный автомобиль/i,
+    /nuosav\w* automobil|turiu automobil|own car|own vehicle|eigenes auto|eigen auto|egen bil|своя машина|собственный автомобиль/i,
     "hasTransport",
   ],
   [
-    /naktin\w* pamain|night shift|nachtschicht|nachtdienst|ночн\w* смен/i,
+    /naktin\w* pamain|night shift|nachtschicht|nachtdienst|nattskift|ночн\w* смен/i,
     "nightShiftsOk",
   ],
   [
-    /savaitgal|weekend|wochenende|выходны/i,
+    /savaitgal|weekend|wochenende|helgarbete|helger|выходны/i,
     "weekendShiftsOk",
   ],
 ];
@@ -224,25 +224,25 @@ export const TRAINING_TYPE_SLUG = "course_certificate";
 /** Bare section-header lines ("Sertifikatai", "Education", …) are structure,
  *  not content — they must never become proposals themselves. */
 const SECTION_HEADER_RE =
-  /^(sertifikatai|sertifikatas|pažymėjimai|certificates?|zertifikate|certificaten|сертификаты|certyfikaty|išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie|kalbos|languages|sprachen|talen|языки|języki|pasiekimai|achievements|erfolge|prestaties|достижения|osiągnięcia|apdovanojimai|awards|darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?|mokymai|kursai|kvalifikacijos kėlimas|training|trainings|courses|weiterbildung|fortbildung|kurse|cursussen|trainingen|курсы|обучение|szkolenia|kursy)\s*:?$/i;
+  /^(sertifikatai|sertifikatas|pažymėjimai|certificates?|zertifikate|certificaten|сертификаты|certyfikaty|išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie|kalbos|languages|sprachen|talen|языки|języki|pasiekimai|achievements|erfolge|prestaties|достижения|osiągnięcia|apdovanojimai|awards|darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?|mokymai|kursai|kvalifikacijos kėlimas|training|trainings|courses|weiterbildung|fortbildung|kurse|cursussen|trainingen|курсы|обучение|szkolenia|kursy|certifikat|utbildning|språk|meriter|arbetslivserfarenhet|arbetserfarenhet|yrkeserfarenhet|kurser|vidareutbildning)\s*:?$/i;
 const TRAINING_HEADER_RE =
-  /^(mokymai|kursai|kvalifikacijos kėlimas|training|trainings|courses|weiterbildung|fortbildung|kurse|cursussen|trainingen|курсы|обучение|szkolenia|kursy)\s*:?$/i;
+  /^(mokymai|kursai|kvalifikacijos kėlimas|training|trainings|courses|weiterbildung|fortbildung|kurse|cursussen|trainingen|курсы|обучение|szkolenia|kursy|kurser|vidareutbildning)\s*:?$/i;
 const WORK_HEADER_RE =
-  /^(darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?)\s*:?$/i;
+  /^(darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?|arbetslivserfarenhet|arbetserfarenhet|yrkeserfarenhet)\s*:?$/i;
 const EDUCATION_HEADER_RE =
-  /^(išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie)\s*:?$/i;
+  /^(išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie|utbildning)\s*:?$/i;
 
 /** Month names, whole words only and only beside a year: "Kovalenko 2019" is
  *  not March. */
 const MONTH_WORDS: ReadonlyArray<readonly [number, string]> = [
   [1, "sausis|sausio|saus|january|jan|januar|januari|styczeń|stycznia|sty|январь|января|янв"],
   [2, "vasaris|vasario|vas|february|feb|februar|februari|luty|lutego|lut|февраль|февраля|фев"],
-  [3, "kovas|kovo|kov|march|mar|märz|maart|mrt|marzec|marca|март|марта|мар"],
+  [3, "kovas|kovo|kov|march|mar|märz|mars|maart|mrt|marzec|marca|март|марта|мар"],
   [4, "balandis|balandžio|bal|april|apr|kwiecień|kwietnia|kwi|апрель|апреля|апр"],
   [5, "gegužė|gegužės|geg|may|mai|mei|maj|maja|май|мая"],
   [6, "birželis|birželio|bir|june|jun|juni|czerwiec|czerwca|cze|июнь|июня|июн"],
   [7, "liepa|liepos|lie|july|jul|juli|lipiec|lipca|lip|июль|июля|июл"],
-  [8, "rugpjūtis|rugpjūčio|rgp|august|aug|augustus|sierpień|sierpnia|sie|август|августа|авг"],
+  [8, "rugpjūtis|rugpjūčio|rgp|august|aug|augusti|augustus|sierpień|sierpnia|sie|август|августа|авг"],
   [9, "rugsėjis|rugsėjo|rgs|september|sep|sept|wrzesień|września|wrz|сентябрь|сентября|сен"],
   [10, "spalis|spalio|spl|october|oct|okt|oktober|październik|października|paź|октябрь|октября|окт"],
   [11, "lapkritis|lapkričio|lap|november|nov|listopad|listopada|lis|ноябрь|ноября|ноя"],

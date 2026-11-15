@@ -414,3 +414,56 @@ describe("parseCvSections", () => {
     });
   });
 });
+
+describe("a Swedish CV (sv routed locale, owner order 2026-11-15)", () => {
+  const SV_CV = `
+Anna Andersson
+
+Arbetslivserfarenhet
+Bygg AB — snickare 2019 till 2022
+Montage AB, montör 2022 – nu
+
+Utbildning
+Malmö yrkesgymnasium, gymnasieprogram 2015–2018
+
+Språk
+Svenska modersmål
+Engelska B2
+Tyska A2
+
+Certifikat
+Truckkort intyg 2021
+
+Kan flytta för arbete. Har egen bil.
+`;
+
+  it("reads work history with Swedish separators and an open end", () => {
+    const p = parseCvSections(SV_CV);
+    expect(p.workHistory).toHaveLength(2);
+    expect(p.workHistory[0].startYear).toBe(2019);
+    expect(p.workHistory[0].endYear).toBe(2022);
+    expect(p.workHistory[1].isCurrent).toBe(true);
+    expect(p.workHistory[1].endYear).toBeNull();
+  });
+
+  it("reads Swedish language names and levels without inventing one", () => {
+    const p = parseCvSections(SV_CV);
+    const byLang = Object.fromEntries(p.languages.map((l) => [l.lang, l.level]));
+    expect(byLang.sv).toBe("native");
+    expect(byLang.en).toBe("B2");
+    expect(byLang.de).toBe("A2");
+  });
+
+  it("reads education, certificates and availability", () => {
+    const p = parseCvSections(SV_CV);
+    expect(p.education.length).toBeGreaterThanOrEqual(1);
+    expect(p.certificates.length).toBeGreaterThanOrEqual(1);
+    const keys = p.availability.map((a) => a.key);
+    expect(keys).toContain("willingToRelocate");
+    expect(keys).toContain("hasTransport");
+  });
+
+  it("treats an hourly Swedish wage as no monthly expectation", () => {
+    expect(parseCvSections("Lön: 3000 € per timme").salary).toBeNull();
+  });
+});

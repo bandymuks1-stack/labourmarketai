@@ -155,7 +155,7 @@ export async function reprocessOwnJournalHistory(
   const { data: entries } = await sb
     .from("journal_entries")
     .select(
-      "id, original_text, deleted_at, superseded_by, journal_entry_metrics(metric_slug, value_numeric)",
+      "id, original_text, original_language, deleted_at, superseded_by, journal_entry_metrics(metric_slug, value_numeric)",
     )
     .eq("worker_id", worker.id)
     .order("created_at", { ascending: false })
@@ -165,6 +165,7 @@ export async function reprocessOwnJournalHistory(
     (entries ?? []) as {
       id: string;
       original_text: string | null;
+      original_language: string | null;
       deleted_at: string | null;
       superseded_by: string | null;
       journal_entry_metrics:
@@ -184,6 +185,16 @@ export async function reprocessOwnJournalHistory(
     })
     .slice(0, cap);
 
+  // Same rule as the single-entry reprocess above: the caller's UI locale,
+  // else the entry's own recorded language. It used to be a hard-coded "lt",
+  // so a Swedish (or any non-LT) worker's history was re-read as Lithuanian.
+  let uiLocale: string | null = null;
+  try {
+    uiLocale = await getLocale();
+  } catch {
+    uiLocale = null;
+  }
+
   let processed = 0;
   let failed = 0;
   for (const e of stale) {
@@ -191,7 +202,7 @@ export async function reprocessOwnJournalHistory(
       const res = await processJournalEntrySkills({
         entryId: e.id,
         text: e.original_text ?? "",
-        locale: "lt",
+        locale: uiLocale ?? e.original_language ?? "lt",
         revalidate: false,
       });
       if (res.status === "failed") failed += 1;
