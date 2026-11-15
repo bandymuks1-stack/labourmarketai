@@ -4581,11 +4581,12 @@
             "optionalTag": "(valfritt)",
             "reviewIntro": "Granska och skapa. Förfrågan förblir privat i din yta.",
             "locationLabel": "Plats eller land",
-            "locationPlaceholder": "t.ex. Vilnius, Litauen",
+            "locationPlaceholder": "t.ex. stad, stadsdel eller arbetsplats",
             "skillsLabel": "Nödvändiga färdigheter eller krav",
             "skillsPlaceholder": "t.ex. körkort, engelska, erfarenhet",
             "urgencyLabel": "När du behöver det",
             "urgencyFlexible": "Flexibelt",
+            "countryRequired": "Välj landet där arbetet utförs.",
             "urgencyThisWeek": "Den här veckan",
             "urgencyUrgent": "Brådskande",
             "notesLabel": "Övriga anteckningar",
@@ -14379,7 +14380,9 @@
         "supplyRole": "Vilket yrke",
         "supplyRolePlaceholder": "T.ex. svetsare",
         "supplyTeamSize": "Hur många personer ni har",
-        "supplyLocation": "Var de kan arbeta"
+        "supplyLocation": "Var de kan arbeta",
+        "demandCountry": "Land där arbetet utförs",
+        "demandCountryPlaceholder": "t.ex. Sverige eller SE"
       },
       "availability": {
         "available": "Tillgänglig",

@@ -228,7 +228,10 @@
           "errorOpenNeedLimitIndividual": "Šī organizācija ir sasniegusi sava plāna aktīvo pozīciju ierobežojumu. Nekas netika iekasēts vai mainīts. Sazinieties ar mums.",
           "openNeedUsage": "Aktīvās pozīcijas: izmantotas {used} no {limit} · atlikušas {remaining}",
           "openNeedUsageUpgradeCta": "Aktivizēt plānu „Organizācija”",
-          "openNeedUsageIndividual": "Jūs esat sasniedzis sava plāna ierobežojumu. Sazinieties ar mums, lai pārrunātu savas vajadzības."
+          "openNeedUsageIndividual": "Jūs esat sasniedzis sava plāna ierobežojumu. Sazinieties ar mums, lai pārrunātu savas vajadzības.",
+          "form": {
+            "countryRequired": "Izvēlieties valsti, kurā tiks veikts darbs."
+          }
         }
       },
       "account": {
@@ -3930,7 +3933,9 @@
         "supplyRole": "Kāda profesija",
         "supplyRolePlaceholder": "Piem., metinātājs",
         "supplyTeamSize": "Cik cilvēku jums ir",
-        "supplyLocation": "Kur viņi var strādāt"
+        "supplyLocation": "Kur viņi var strādāt",
+        "demandCountry": "Valsts, kurā tiks veikts darbs",
+        "demandCountryPlaceholder": "piem., Zviedrija vai SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -6904,6 +6909,12 @@
     "deliveryAccepted": "[EN] Delivered — the client accepted the invitation and now confirms the connection on their Partners page."
   },
   "scoutingAgencyOffers": {
+    "decision": {
+      "limitOpen": "[EN] You already have 10 booking proposals waiting for workers' answers — the most that can be open at once. Withdraw the ones you no longer need, then accept this candidate. The agency's offer stays open.",
+      "limitDaily": "[EN] You have sent 30 booking proposals in the last 24 hours — the daily limit. Accept this candidate later; nothing was sent and the agency's offer stays open.",
+      "limitUnknown": "[EN] The booking proposal limit is reached (10 waiting for an answer, 30 per day). Withdraw proposals you no longer need or try later; the agency's offer stays open.",
+      "openBookings": "[EN] Open bookings"
+    },
     "placementTerm": {
       "title": "[EN] {agency}'s placement fee",
       "feeLine": "[EN] Placement fee – {fee} per successfully placed worker.",
