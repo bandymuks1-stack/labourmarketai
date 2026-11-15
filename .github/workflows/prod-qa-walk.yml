@@ -373,9 +373,14 @@ jobs:
     permissions:
       contents: read
       actions: read # the gap brake reads the previous walk's end time
+    # NO service-role key at job level (owner decision 2026-11-14, R2 P3-1 on #3303): a job-level
+    # value reaches every step — `pnpm install` and its install scripts, the browser walk and every
+    # Playwright spec — although no spec reads it. It is set on exactly the steps whose script uses
+    # it: the provision + mint, the sign-up precheck and clean-up (prod-qa-signup-form.ts) and the
+    # need read-back (prod-qa-need-intake.ts). The revoke uses the anon key only; the walk and the
+    # CV sweep are Playwright. Guard: lib/guards/prod-walk-service-key-scope.test.ts.
     env:
       PROD_QA_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       PROD_QA_ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
       E2E_NO_SERVER: "1"
       E2E_BASE_URL: https://labourmarket.ai
@@ -411,6 +416,8 @@ jobs:
       - name: Provision + mint the synthetic cast (allowlist only)
         id: mint
         shell: bash
+        env:
+          PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
           if [ -z "${PROD_QA_ANON_KEY}" ]; then
@@ -454,6 +461,8 @@ jobs:
         id: signup_precheck
         if: needs.debounce.outputs.spec == 'signup-form'
         shell: bash
+        env:
+          PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
           cd apps/web
@@ -600,6 +609,7 @@ jobs:
         shell: bash
         env:
           PROD_QA_SIGNUP_NOT_BEFORE: ${{ steps.signup_precheck.outputs.not_before }}
+          PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
           cd apps/web
@@ -613,6 +623,7 @@ jobs:
         shell: bash
         env:
           NEED_WALK_OUTCOME: ${{ steps.walk.outcome }}
+          PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
           cd apps/web

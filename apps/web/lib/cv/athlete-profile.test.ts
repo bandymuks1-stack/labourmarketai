@@ -696,7 +696,7 @@ describe("the route stays apart from the default CV", () => {
   });
 });
 
-describe.each(["lt", "en", "ru", "nl", "de", "pl"])("the view in %s", (locale) => {
+describe.each(["lt", "en", "ru", "nl", "de", "pl", "sv"])("the view in %s", (locale) => {
   const messages = JSON.parse(readFileSync(join(process.cwd(), "messages", `${locale}.json`), "utf8")) as AbstractIntlMessages;
   const tr = (namespace: string): AthleteTranslator => {
     const t = createTranslator({ locale, messages, namespace: namespace as never });

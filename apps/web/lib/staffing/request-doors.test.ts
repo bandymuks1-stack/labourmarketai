@@ -227,7 +227,7 @@ describe("the page", () => {
     expect(`${d.promise} ${d.receivedBody}`).not.toMatch(/susisiek/i);
   });
 
-  it.each(["lt", "en", "ru", "nl", "de", "pl"])("%s has every key, and the notice links the policy", (locale) => {
+  it.each(["lt", "en", "ru", "nl", "de", "pl", "sv"])("%s has every key, and the notice links the policy", (locale) => {
     const d = JSON.parse(read(`messages/${locale}.json`)).landing.requestDoors;
     const en = JSON.parse(read("messages/en.json")).landing.requestDoors;
     expect(Object.keys(d).sort()).toEqual(Object.keys(en).sort());
