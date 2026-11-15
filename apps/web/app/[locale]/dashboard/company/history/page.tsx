@@ -77,6 +77,15 @@ export default async function CompanyHistoryPage({
           before the door for adding more. */}
       <CompanyWorkHistory locale={locale} organizationId={org} />
 
+      {/* ONE PLACE — the detail every place tile links to (`?place=` +
+          #company-place-detail): who worked there, when, what, hours. Without
+          it the tiles reloaded the same page and the people were unreachable. */}
+      {place ? (
+        <section id="company-place-detail" className="scroll-mt-20" data-testid="company-place-detail">
+          <CompanyPlaceHistory locale={locale} placeKey={place} organizationId={org} />
+        </section>
+      ) : null}
+
       {/* DATA QUALITY — what the import produced vs what was recognised,
           every recorded mismatch and its undo (owner 2026-10-14). */}
       <DetailsHashOpener targetId="history-quality" />

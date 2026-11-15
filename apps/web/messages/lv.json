@@ -205,7 +205,7 @@
         },
         "addMore": {
           "title": "[EN] Add another way to use labourmarket.ai",
-          "body": "[EN] You're not locked in. Add a worker, company, agency or customer role whenever you're ready.",
+          "body": "[EN] You're not locked into one role. Company, agency and customer spaces are not all available yet.",
           "cta": "[EN] Review roles"
         },
         "activity": {
@@ -244,9 +244,9 @@
         "employerVisibility": "Redzamība darba devējiem"
       },
       "comingSoon": {
-        "body_main": "[EN] We're finishing the company / agency functionality right now.",
+        "body_main": "[EN] Company / agency functionality is not available yet.",
         "body_meanwhile": "[EN] In the meantime — you can browse the platform via the \"Discover\" tab (read-only).",
-        "body_notify": "[EN] We'll let you know the moment it's ready.",
+        "body_notify": "[EN] We'll let you know when it is available.",
         "greeting": "[EN] 👋 Welcome, {name}"
       },
       "customer": {
@@ -1092,7 +1092,7 @@
         ]
       }
     },
-    "subcopyLive": "Cenas ir apstiprinājis īpašnieks un ir spēkā. Aktivizēšana notiek organizācijas kontā ar drošu Stripe maksājumu; šajā lapā nekas netiek iekasēts.",
+    "subcopyLive": "Cenas ir spēkā. Aktivizēšana notiek organizācijas kontā ar drošu Stripe maksājumu; šajā lapā nekas netiek iekasēts.",
     "subcopy": "Cenas vēl nav galīgas, un norēķini šajā lapā jums nekad netiek uzsākti. Zemāk esošie līmeņi apraksta apjomu; aktivizēšana ir manuāla — sazinieties ar mums, un mēs pirms jebkā uzsākšanas apstiprināsim cenas un apjomu.",
     "subcopyConfirmed": "Cenas ir apstiprinātas. Aktivizēšana tiešsaistē vēl nav atvērta — pierakstieties gaidīšanas sarakstā, un mēs ar jums sazināsimies, lai manuāli uzsāktu jūsu organizāciju; šajā lapā nekas netiek iekasēts.",
     "trialNote": "Organizācijas pirmais abonements sākas ar 14 dienu izmēģinājuma periodu. Pēc tā jūsu karte tiek apmaksāta ar mēneša cenu, un līdz tā beigām varat atcelt abonementu.",
@@ -1110,7 +1110,7 @@
     "ctaStartFree": "Sākt bez maksas savā organizācijas kontā",
     "ctaSubscribe": "Aktivizēt savā organizācijas kontā",
     "priceState": {
-      "owner_confirmed": "Cenas apstiprinājis īpašnieks. Aktivizēšana notiek jūsu organizācijas kontā; šajā lapā nekas netiek iekasēts."
+      "owner_confirmed": "Cenas ir apstiprinātas. Šajā lapā nekas netiek iekasēts."
     }
   },
   "secondary": {
@@ -1196,7 +1196,7 @@
     "loading": "[EN] Loading...",
     "noProfession": "[EN] Pick a profession to see the skills linked to it.",
     "pageTitle": "[EN] Profession & skills",
-    "pickerHelp": "[EN] Select skills you have. They will be confirmed later by a site manager.",
+    "pickerHelp": "[EN] Select skills you have. They will be reviewed later by a site manager.",
     "pickerTitle": "[EN] Your skills",
     "professionLabel": "[EN] Your profession",
     "professionPlaceholder": "[EN] Select a profession",
@@ -1234,7 +1234,7 @@
     "submit": "[EN] Notify me",
     "success_body": "[EN] We'll let you know as soon as it's ready.",
     "success_title": "[EN] Thanks!",
-    "title": "[EN] For companies & agencies — coming soon"
+    "title": "[EN] For companies & agencies"
   },
   "workers": {
     "cta": {
@@ -2070,7 +2070,7 @@
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
       "positionsTitle": "[EN] Missing positions",
-      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "positionsEmpty": "[EN] Position needs are not available yet. When they are, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena",
       "history": {
         "title": "Iepriekšējais darbs šajā projektā",
@@ -2167,7 +2167,7 @@
       "title": "[EN] Readiness by market",
       "empty": "[EN] No declared countries in the pool yet — readiness appears with the first ones.",
       "availableNow": "[EN] available now",
-      "docsNote": "[EN] Document readiness stays with the worker: category-level aggregates will appear here only with the worker-consent switch (a gated change, in preparation). You never see document contents here."
+      "docsNote": "[EN] Document readiness stays with the worker: category-level aggregates will appear here only with the worker-consent switch. You never see document contents here."
     },
     "demand": {
       "title": "[EN] Open demand",
@@ -2183,7 +2183,7 @@
         "not_agency": "[EN] Finish agency setup first.",
         "request_not_found": "[EN] The request no longer exists.",
         "request_not_open": "[EN] The request is no longer open.",
-        "needs_gate": "[EN] This feature is in preparation (gated change pending).",
+        "needs_gate": "[EN] Couldn’t load. Please try again.",
         "error": "[EN] Could not save the mark. Try again."
       }
     },
@@ -2565,6 +2565,9 @@
       "skillCount": "{matched} no {total} nepieciešamajām prasmēm",
       "nameHidden": "Vārds un kontaktinformācija parādās tikai tad, kad persona to atļauj.",
       "appliedToYou": "Iesniedza pieteikumu šai vajadzībai — vārds un foto nāk ar pieteikumu. Tālrunis un e-pasts paliek paslēpti."
+    },
+    "filters": {
+      "noMatchesCountry": "Redzamajā piedāvājumā vēl nav neviena valstī {country}. Rādīt visus vai paplašināt vajadzību."
     }
   },
   "waze": {
@@ -2887,7 +2890,8 @@
     },
     "actions": {
       "planning": "[EN] View in planning",
-      "proposeAgain": "[EN] Propose again with new dates"
+      "proposeAgain": "[EN] Propose again with new dates",
+      "needClosed": "Darba devējs šo vajadzību slēdza, tāpēc piedāvājumu vairs nevar pieņemt. Jūs joprojām varat to noraidīt."
     },
     "propose": {
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
@@ -4610,7 +4614,7 @@
       "title": "Viens čata logs vada jūsu darbu",
       "subcopy": "Desmitiem formu vietā jūs vienkārši runājat. Asistents sagatavo, jūs apstiprināt — un katra darbība atstāj ierakstu, pie kura var atgriezties.",
       "liveLabel": "Darbojas jau šodien",
-      "comingLabel": "Tiek gatavots",
+      "comingLabel": "Vēl nav pieejams",
       "conceptLabel": "Konceptuāls skats — stilizēta ilustrācija, ne īsta saruna",
       "c1": "Atjaunināt CV un profilu",
       "c2": "Reģistrēt darba dienu",
@@ -8075,5 +8079,56 @@
       "fullList": "Pilns saraksts"
     },
     "more": "Vairāk"
+  },
+  "commercial": {
+    "pageTitle": "[EN] Commercial",
+    "pageIntro": "[EN] Your proposals and contracts, linked to demand and projects. Invoices and payments are recorded in Finance.",
+    "preApply": "[EN] Commercial CRM will be available once the commercial update is applied.",
+    "proposalsTitle": "[EN] Proposals",
+    "honestNote": "[EN] A proposal moves draft → sent → accepted/rejected only when you set it. Nothing is sent to anyone automatically.",
+    "proposalsEmpty": "[EN] No proposals yet.",
+    "addProposal": "[EN] Add a proposal",
+    "proposalTitlePlaceholder": "[EN] Proposal title",
+    "contractsTitle": "[EN] Contracts",
+    "noSignatureNote": "[EN] Contracts store a status and an optional document reference. No electronic signature is created or claimed.",
+    "contractsEmpty": "[EN] No contracts yet.",
+    "addContract": "[EN] Add a contract",
+    "contractFromProposal": "[EN] Create contract",
+    "fromProposal": "[EN] From proposal: {title}",
+    "contractTitlePlaceholder": "[EN] Contract title",
+    "docRef": "[EN] Doc ref",
+    "docRefLabel": "[EN] Document reference",
+    "docRefPlaceholder": "[EN] Signed doc reference (optional)",
+    "invoicesTitle": "[EN] Invoices & payments",
+    "invoicesNote": "[EN] Invoices and payment records live in Finance — recorded manually, EUR. This platform moves no money.",
+    "openFinance": "[EN] Open Finance",
+    "statusLabel": "[EN] Status",
+    "titleLabel": "[EN] Title",
+    "amountLabel": "[EN] Amount (EUR)",
+    "valueLabel": "[EN] Value (EUR)",
+    "add": "[EN] Add",
+    "saving": "[EN] Saving…",
+    "delete": "[EN] Remove",
+    "proposalStatus": {
+      "draft": "[EN] Draft",
+      "sent": "[EN] Sent",
+      "accepted": "[EN] Accepted",
+      "rejected": "[EN] Rejected",
+      "withdrawn": "[EN] Withdrawn"
+    },
+    "contractStatus": {
+      "draft": "[EN] Draft",
+      "active": "[EN] Active",
+      "completed": "[EN] Completed",
+      "cancelled": "[EN] Cancelled"
+    },
+    "outcome": {
+      "saved": "[EN] Saved.",
+      "needs_migration": "[EN] Not available right now.",
+      "invalid": "[EN] Please check the details.",
+      "auth": "[EN] Please sign in again.",
+      "not_authorized": "[EN] You can only manage your own records.",
+      "error": "[EN] Something went wrong. Please try again."
+    }
   }
 }

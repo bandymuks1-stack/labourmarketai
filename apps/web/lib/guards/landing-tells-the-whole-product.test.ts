@@ -48,7 +48,7 @@ vi.mock("next-intl/server", () => ({
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 // 2026-09-20: PL is an active UI locale; the Polish catalog reached full parity in the same PR, so pl is covered here like the other five.
-const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const catalog = (loc: string) =>
   JSON.parse(read(`messages/${loc}.json`)) as Record<string, never>;
 const at = (o: unknown, path: string): unknown =>
@@ -206,7 +206,9 @@ describe("§17 the public map is real geography and claims no activity", () => {
     // defined over ASCII `\w`, so `/\bне\b/` never matches Russian at all —
     // it failed on this very catalogue on the first run, on a string that
     // plainly reads "а не сегодняшняя активность".
-    const word = (w: string) => new RegExp(`(?<!\\p{L})${w}(?!\\p{L})`, "iu");
+    // The alternatives are GROUPED: ungrouped, `a|b` bounds only the first on the
+    // left and the last on the right, so `inte|inga?` matched almost anything.
+    const word = (w: string) => new RegExp(`(?<!\\p{L})(?:${w})(?!\\p{L})`, "iu");
     const NEGATION: Readonly<Record<(typeof ACTIVE)[number], RegExp>> = {
       lt: word("ne"),
       en: word("not"),
@@ -214,6 +216,7 @@ describe("§17 the public map is real geography and claims no activity", () => {
       nl: word("niet|geen"),
       de: word("nicht|keine?"),
       pl: word("nie"),
+      sv: word("inte|inga?"),
     };
     for (const loc of ACTIVE) {
       const v = at(catalog(loc), "landing.marketMap.shows") as string;
