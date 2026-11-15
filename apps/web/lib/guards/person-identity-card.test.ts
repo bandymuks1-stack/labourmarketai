@@ -56,7 +56,7 @@ describe("PersonIdentityCard — one identity, different depth", () => {
 
   it("the scouting card prints no match percentage", () => {
     expect(SCOUT).not.toMatch(/pct:\s*fit\.pct/);
-    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const m = JSON.parse(read(`messages/${loc}.json`)) as {
         scouting: { skillFit: string; identity: Record<string, string> };
       };
