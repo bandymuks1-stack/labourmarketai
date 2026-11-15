@@ -17,6 +17,7 @@ import {
   type RetryReport,
 } from "@/lib/invitations/delivery-retry";
 import { buildInvitationBody, buildInvitationSubject } from "@/lib/invitations/email-content";
+import { KNOWN_HISTORICAL_OUTCOMES, withKnownHistorical } from "@/lib/invitations/known-historical-outcomes";
 import { buildInviteLink } from "@/lib/invitations/model";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -24,7 +25,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * The server wiring of `delivery-retry.ts` (owner P0 2026-11-13): the service-role reads and
  * writes — invitation_delivery_retry_candidates_v1, reissue_external_referral_v1,
  * mark_external_referral_delivery_v1, record_invitation_delivery_attempt_v1,
- * dead_letter_invitation_delivery_v1, invitation_delivery_health_v1 — and the ledgered provider
+ * dead_letter_invitation_delivery_v1, invitation_delivery_health_v1,
+ * invitation_known_historical_unknown_v1 — and the ledgered provider
  * path. Every decision lives in the pure module.
  */
 
@@ -43,11 +45,38 @@ export type DeliveryRetryRunResult =
       readonly alerts: readonly DeliveryAlert[];
     };
 
-/** Health snapshot (`invitation_delivery_health_v1`), or null when unreadable. */
+/**
+ * How many owner-registered historical unknown outcomes are still exactly as reviewed (read only;
+ * see known-historical-outcomes.ts). One service_role-only aggregate RPC,
+ * invitation_known_historical_unknown_v1 (migration 20261114150000): service_role holds no SELECT
+ * on `invitations`, so a table read could never work. It applies the same conditions as
+ * countKnownHistorical and returns one integer. null = could not be read (RPC missing, error, or not
+ * a non-negative integer) — the caller then keeps the alert.
+ */
+export async function readKnownHistoricalCount(admin: SupabaseClient): Promise<number | null> {
+  const p_ids = KNOWN_HISTORICAL_OUTCOMES.map((r) => r.invitationId);
+  if (p_ids.length === 0) return 0;
+  const { data, error } = await asAny(admin).rpc("invitation_known_historical_unknown_v1", { p_ids });
+  if (error || typeof data !== "number" || !Number.isSafeInteger(data) || data < 0) return null;
+  return Math.min(data, p_ids.length);
+}
+
+/**
+ * Health snapshot (`invitation_delivery_health_v1`), or null when unreadable. Owner-reviewed
+ * historical unknown outcomes are moved to `known_historical_unknown_outcome` (visible, not alerted).
+ */
 export async function readInvitationDeliveryHealth(admin: SupabaseClient, hours = 24): Promise<DeliveryHealth | null> {
   const { data, error } = await asAny(admin).rpc("invitation_delivery_health_v1", { p_hours: hours });
   if (error || !data || typeof data !== "object") return null;
-  return data as DeliveryHealth;
+  const health = data as DeliveryHealth;
+  if (health.unknown_outcome_open <= 0) return withKnownHistorical(health, 0);
+  let known: number | null;
+  try {
+    known = await readKnownHistoricalCount(admin);
+  } catch {
+    known = null;
+  }
+  return withKnownHistorical(health, known);
 }
 
 /**
