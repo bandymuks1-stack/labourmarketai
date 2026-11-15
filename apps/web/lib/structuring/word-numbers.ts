@@ -14,6 +14,7 @@
  * Dutch article as the number 1 would fabricate quantities.
  */
 import { foldText } from "./normalize";
+import { looksSwedish } from "./looks-swedish";
 
 /** folded token → value. Keys MUST already be folded (lowercase, no marks). */
 const WORD_NUMBERS: Record<string, number> = {
@@ -77,11 +78,27 @@ const WORD_NUMBERS: Record<string, number> = {
   zehn: 10, zwolf: 12, zwanzig: 20,
 };
 
+/**
+ * Swedish (folded: "två" → tva, "åtta" → atta) — read only when the SENTENCE
+ * the token came from is Swedish (`looksSwedish`): "tre" is Italian and
+ * Norwegian, "elva" a town and a company name, "fem" and "tio" other
+ * languages' words.
+ */
+const SV_WORD_NUMBERS: Record<string, number> = {
+  // No `en` / `ett` (the article, and `en` is the Dutch "and"), no `sex` (an
+  // English word) and no `tre` / `sju` / `tio` clash to guard — those three
+  // are unambiguous and stay.
+  tva: 2, tre: 3, fyra: 4, fem: 5, sju: 7, atta: 8, nio: 9, tio: 10,
+  elva: 11, tolv: 12, tretton: 13, fjorton: 14, femton: 15, sexton: 16,
+  sjutton: 17, arton: 18, nitton: 19, tjugo: 20, trettio: 30, fyrtio: 40,
+  femtio: 50, hundra: 100,
+};
+
 /** Parse ONE token as a written number; null when it is not one. */
-export function parseWordNumber(token: string): number | null {
+export function parseWordNumber(token: string, swedish = false): number | null {
   const folded = foldText((token ?? "").trim());
   if (!folded || folded.includes(" ")) return null;
-  return WORD_NUMBERS[folded] ?? null;
+  return WORD_NUMBERS[folded] ?? (swedish ? (SV_WORD_NUMBERS[folded] ?? null) : null);
 }
 
 export interface FoundWordNumber {
@@ -93,11 +110,15 @@ export interface FoundWordNumber {
 }
 
 /** Every written number in the text, in order, with token positions. */
-export function findWordNumbers(text: string): FoundWordNumber[] {
+export function findWordNumbers(
+  text: string,
+  /** Is the SENTENCE Swedish? Pass it when `text` is one token of a sentence. */
+  swedish: boolean = looksSwedish(text),
+): FoundWordNumber[] {
   const tokens = (text ?? "").split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   const out: FoundWordNumber[] = [];
   for (let i = 0; i < tokens.length; i++) {
-    const value = parseWordNumber(tokens[i]);
+    const value = parseWordNumber(tokens[i], swedish);
     if (value !== null) out.push({ value, raw: tokens[i], tokenIndex: i });
   }
   return out;

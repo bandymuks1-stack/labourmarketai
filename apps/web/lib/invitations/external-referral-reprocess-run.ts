@@ -5,7 +5,8 @@ import { getTranslations } from "next-intl/server";
 
 import { hashRecipient } from "@/lib/email/durable-send-guard";
 import { guardedSendTransactionalEmail } from "@/lib/email/send-ledger-store";
-import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
+import { isTransactionalEmailConfigured, type TransactionalSendResult } from "@/lib/email/transactional";
+import { recordDeliveryAttempt } from "@/lib/invitations/delivery-attempts";
 import { activeLocales } from "@/lib/i18n/config";
 import { buildInvitationBody, buildInvitationSubject } from "@/lib/invitations/email-content";
 import {
@@ -46,10 +47,19 @@ export async function runExternalReferralReprocess(input: {
   // v2 adds `address_already_sent`: an older duplicate row of an address that
   // was already mailed must never be mailed again. v3 (20261028070000) adds the
   // send reservation; before it is applied the runner reads v2 as before.
-  let { data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v3");
+  // v4 (20261113190000) adds first_opened_at and the last failure class. Without them a
+  // reissue could break a link the person already opened, or re-mail an unknown outcome, so
+  // only the dry run (counts) and the reservation recovery (sends nothing) run on v3 / v2.
+  let { data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v4");
+  let hasV4 = !error;
   if (error && (error.code === "42883" || error.code === "PGRST202")) {
-    if (input.mode === "resolve_reservations") return { kind: "needs_migration" };
-    ({ data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v2"));
+    if (input.mode === "control" || input.mode === "batch") return { kind: "needs_migration" };
+    hasV4 = false;
+    ({ data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v3"));
+    if (error && (error.code === "42883" || error.code === "PGRST202")) {
+      if (input.mode === "resolve_reservations") return { kind: "needs_migration" };
+      ({ data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v2"));
+    }
   }
   if (error) {
     return error.code === "42883" || error.code === "PGRST202"
@@ -67,6 +77,8 @@ export async function runExternalReferralReprocess(input: {
     deliveryStatus: String(r.delivery_status),
     consentGiven: r.consent_given === true,
     externalSource: (r.external_source_slug as string | null) ?? null,
+    firstOpenedAt: hasV4 ? ((r.first_opened_at as string | null) ?? null) : null,
+    failureClass: hasV4 ? ((r.delivery_failure_class as string | null) ?? null) : null,
   }));
   const existingAccountEmails = new Set(
     raw
@@ -94,6 +106,7 @@ export async function runExternalReferralReprocess(input: {
   // chosen by the same rule the batch would use first.
   const control = selection.eligible[0]?.id;
 
+  let lastResult: TransactionalSendResult | null = null;
   const report = await reprocessExternalReferrals(
     selection,
     input.mode === "dry_run"
@@ -125,6 +138,7 @@ export async function runExternalReferralReprocess(input: {
           },
           { kind: "invitation", requireLedger: true },
         );
+        lastResult = sent;
         return sent.status === "sent";
       },
       mark: async (id, outcome) => {
@@ -133,6 +147,18 @@ export async function runExternalReferralReprocess(input: {
           p_outcome: outcome,
         });
         if (r.error || r.data !== "ok") throw new Error("mark_failed");
+        // The loop is sequential: lastResult is this row's own provider result.
+        if (lastResult) {
+          await recordDeliveryAttempt({
+            invitationId: id,
+            path: "reprocess",
+            result: lastResult,
+            attempts: 1,
+            autoRetry: true,
+            client: admin,
+          });
+          lastResult = null;
+        }
       },
       resolveLocale: (l) => ((activeLocales as readonly string[]).includes(l ?? "") ? (l as string) : "en"),
     },
@@ -172,3 +198,4 @@ async function resolveReservations(admin: SupabaseClient): Promise<ReprocessRunR
   }
   return { kind: "resolved", reserved: reserved.length, outcomes };
 }
+

@@ -8,8 +8,14 @@ import {
 import { readCountryParam } from "@/lib/vacancy-store/public-vacancy-country-param";
 import { activeLocales } from "@/lib/i18n/config";
 import { buttonLinkClassName } from "@/components/ui/Button";
-import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
+import { buildPageMetadata, buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import { jobsCanonicalPath } from "@/lib/seo/jobs-canonical";
+import {
+  browseByProfessionHeading,
+  isProfessionPageIndexable,
+  knownLiveCount,
+  professionPageCopy,
+} from "@/lib/seo/jobs-profession-page";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import {
   searchPublicVacancyPreviews,
@@ -63,7 +69,40 @@ export async function generateMetadata({
   searchParams: Promise<{ q?: string; page?: string; saved?: string; profession?: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildPageMetadataFor("jobs", locale, jobsCanonicalPath(await searchParams));
+  const sp = await searchParams;
+  const profession = readProfessionSlugParam(sp.profession);
+  const path = jobsCanonicalPath({ ...sp, profession });
+  // A free-text search or the saved view is the board; so is an unknown slug.
+  if (!profession || sp.q || sp.saved) return buildPageMetadataFor("jobs", locale, path);
+
+  // THE PROFESSION PAGE (owner P0, 2026-11-12): its own title, description and
+  // canonical, indexable only while it has real demand. This is the SAME read
+  // the page body makes, with the same arguments, so the search's in-process
+  // cache answers one of the two and the database is asked once.
+  const active = resolveActiveLocale(locale);
+  const read = await searchPublicVacancyPreviews({
+    query: "",
+    professionSlug: profession,
+    page: boardPage(sp.page),
+  });
+  const t = await getTranslations({ locale: active, namespace: "professions" });
+  const name = t.has(profession as never) ? t(profession as never) : profession;
+  const copy = professionPageCopy(active, name, knownLiveCount(read));
+  const metadata = buildPageMetadata({
+    locale: active,
+    path,
+    title: copy.heading,
+    description: copy.description,
+  });
+  // Thin or empty: people still reach it, a search engine does not list it.
+  return isProfessionPageIndexable(read)
+    ? metadata
+    : { ...metadata, robots: { index: false, follow: true } };
+}
+
+/** The page number the board reads, from the raw `?page=`. */
+function boardPage(raw: string | undefined): number {
+  return Math.max(1, Number.parseInt(raw ?? "1", 10) || 1);
 }
 
 type L = Record<ActiveLocale, string>;
@@ -75,6 +114,7 @@ const H1: L = {
   nl: "Openstaande vacatures",
   de: "Offene Stellen",
   pl: "Otwarte oferty pracy",
+  sv: "Lediga jobb",
 };
 
 const INTRO: L = {
@@ -84,6 +124,7 @@ const INTRO: L = {
   nl: "Actuele vacatures uit officiële openbare arbeidsbronnen. Log in om de werkgever, de locatie en de sollicitatiewijze te zien.",
   de: "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
   pl: "Aktualne oferty pracy importowane z oficjalnych publicznych źródeł zatrudnienia. Zaloguj się, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
+  sv: "Aktuella lediga jobb från officiella offentliga arbetsmarknadskällor. Logga in för att se arbetsgivaren, platsen och hur du söker.",
 };
 
 /** The intro for someone who is ALREADY signed in. The anonymous intro above
@@ -99,6 +140,7 @@ const GENERIC_TITLE: L = {
   nl: "Vacature",
   de: "Stellenangebot",
   pl: "Oferta pracy",
+  sv: "Ledigt jobb",
 };
 
 const INTRO_MEMBER: L = {
@@ -108,6 +150,7 @@ const INTRO_MEMBER: L = {
   nl: "Actuele vacatures uit officiële openbare arbeidsbronnen. Open een vacature om de werkgever, de locatie en de sollicitatiewijze te zien.",
   de: "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Öffnen Sie eine Stelle, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
   pl: "Aktualne oferty pracy importowane z oficjalnych publicznych źródeł zatrudnienia. Otwórz ofertę, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
+  sv: "Aktuella lediga jobb från officiella offentliga arbetsmarknadskällor. Öppna en annons för att se arbetsgivaren, platsen och hur du söker.",
 };
 
 /** The anonymous search matches the OCCUPATION label (the field the card
@@ -120,6 +163,7 @@ const SEARCH_LABEL: L = {
   nl: "Zoeken op beroep",
   de: "Nach Beruf suchen",
   pl: "Szukaj według zawodu",
+  sv: "Sök efter yrke",
 };
 
 const SEARCH_BUTTON: L = {
@@ -129,6 +173,7 @@ const SEARCH_BUTTON: L = {
   nl: "Zoeken",
   de: "Suchen",
   pl: "Szukaj",
+  sv: "Sök",
 };
 
 const PROFESSION_LABEL: L = {
@@ -138,6 +183,7 @@ const PROFESSION_LABEL: L = {
   nl: "Beroep",
   de: "Beruf",
   pl: "Zawód",
+  sv: "Yrke",
 };
 
 const PROFESSION_ANY: L = {
@@ -147,6 +193,7 @@ const PROFESSION_ANY: L = {
   nl: "Alle beroepen",
   de: "Alle Berufe",
   pl: "Wszystkie zawody",
+  sv: "Alla yrken",
 };
 
 const CLEAR_FILTER: L = {
@@ -156,6 +203,7 @@ const CLEAR_FILTER: L = {
   nl: "Filter wissen",
   de: "Filter zurücksetzen",
   pl: "Wyczyść filtr",
+  sv: "Rensa filtret",
 };
 
 /* `ORIGINAL_LANGUAGE_NOTE` WAS REMOVED HERE (owner rule §1, 2026-09-27).
@@ -184,6 +232,7 @@ const RESULTS: L = {
   nl: "vacatures gevonden",
   de: "Stellen gefunden",
   pl: "znalezionych ofert pracy",
+  sv: "lediga jobb hittades",
 };
 
 /** Named, so a zero result is an answer about THIS filter rather than a
@@ -195,6 +244,7 @@ const EMPTY_FOR_PROFESSION: Record<ActiveLocale, (p: string) => string> = {
   nl: (p) => `Momenteel geen openstaande vacatures voor ${p}.`,
   de: (p) => `Derzeit keine offenen Stellen für ${p}.`,
   pl: (p) => `Obecnie brak otwartych ofert pracy: ${p}.`,
+  sv: (p) => `Det finns inga lediga jobb för ${p} just nu.`,
 };
 
 /**
@@ -217,6 +267,7 @@ const EMPTY_FOR_PROFESSION_AND_QUERY: Record<
   nl: (p, q) => `Momenteel geen openstaande vacatures voor ${p} met “${q}”.`,
   de: (p, q) => `Derzeit keine offenen Stellen für ${p} mit „${q}“.`,
   pl: (p, q) => `Obecnie brak otwartych ofert pracy: ${p} dla „${q}”.`,
+  sv: (p, q) => `Det finns inga lediga jobb för ${p} som matchar ”${q}” just nu.`,
 };
 
 const EMPTY: L = {
@@ -226,6 +277,7 @@ const EMPTY: L = {
   nl: "Geen vacatures voor deze zoekopdracht. Probeer een bredere functietitel.",
   de: "Keine Stellen für diese Suche. Versuchen Sie eine breitere Bezeichnung.",
   pl: "Żadna oferta pracy nie pasuje teraz do tego wyszukiwania. Spróbuj ogólniejszej nazwy stanowiska.",
+  sv: "Inga lediga jobb matchar sökningen just nu. Prova en bredare yrkestitel.",
 };
 
 /** Honest state: the feature is not switched on — NOT "there are no jobs". */
@@ -236,6 +288,7 @@ const NOT_PROVISIONED: L = {
   nl: "Het openbare vacaturebord is nog niet ingeschakeld.",
   de: "Das öffentliche Stellenboard ist noch nicht aktiviert.",
   pl: "Publiczna tablica ofert pracy nie jest jeszcze włączona.",
+  sv: "Den publika jobbtavlan är inte aktiverad än.",
 };
 
 /** Honest state: the read did not answer in time — NOT "0 vacancies found",
@@ -250,6 +303,7 @@ const UNAVAILABLE: L = {
   nl: "Het vacaturebord antwoordde niet op tijd. Probeer het zo opnieuw.",
   de: "Das Stellenboard hat nicht rechtzeitig geantwortet. Bitte gleich noch einmal versuchen.",
   pl: "Tablica ofert pracy nie odpowiedziała na czas. Spróbuj ponownie za chwilę.",
+  sv: "Jobbtavlan svarade inte i tid. Försök igen om en stund.",
 };
 
 /**
@@ -265,6 +319,7 @@ const COUNTRY_NOT_FILTERED: Record<ActiveLocale, (country: string | null) => str
   nl: (c) => `${c ? `Filteren op land (${c})` : "Filteren op land"} is nog niet beschikbaar. Vacatures uit alle landen worden getoond.`,
   de: (c) => `${c ? `Der Länderfilter (${c})` : "Der Länderfilter"} ist noch nicht verfügbar. Angezeigt werden Stellen aus allen Ländern.`,
   pl: (c) => `${c ? `Filtr według kraju (${c})` : "Filtr według kraju"} nie jest jeszcze dostępny. Pokazujemy oferty ze wszystkich krajów.`,
+  sv: (c) => `${c ? `Filtrering efter land (${c})` : "Filtrering efter land"} är inte tillgänglig än. Jobb från alla länder visas.`,
 };
 
 const SAVED_TAB: L = {
@@ -274,6 +329,7 @@ const SAVED_TAB: L = {
   nl: "Bewaard",
   de: "Gemerkt",
   pl: "Zapisane",
+  sv: "Sparade",
 };
 
 const ALL_TAB: L = {
@@ -283,6 +339,7 @@ const ALL_TAB: L = {
   nl: "Alle vacatures",
   de: "Alle Stellen",
   pl: "Wszystkie oferty pracy",
+  sv: "Alla jobb",
 };
 
 /** The saved list is a PRIVATE bookmark list: nobody but this worker ever sees
@@ -295,6 +352,7 @@ const SAVED_NOTE: L = {
   nl: "Je privé-bladwijzers. Alleen jij ziet deze lijst — bewaren laat de werkgever niets weten.",
   de: "Ihre privaten Lesezeichen. Nur Sie sehen diese Liste — das Merken teilt dem Arbeitgeber nichts mit.",
   pl: "Twoje prywatne zakładki. Tylko Ty widzisz tę listę — zapisanie nic nie mówi pracodawcy.",
+  sv: "Dina privata bokmärken. Bara du ser den här listan – att spara säger ingenting till arbetsgivaren.",
 };
 
 const SAVED_EMPTY: L = {
@@ -304,6 +362,7 @@ const SAVED_EMPTY: L = {
   nl: "Je hebt nog niets bewaard. Open een vacature en gebruik Bewaren.",
   de: "Sie haben noch nichts gemerkt. Öffnen Sie eine Stelle und nutzen Sie Merken.",
   pl: "Nie masz jeszcze zapisanej żadnej oferty pracy. Otwórz ofertę i użyj „Zapisz”.",
+  sv: "Du har inte sparat något jobb än. Öppna ett jobb och tryck på ”Spara jobbet” så hamnar det här.",
 };
 
 /** The anonymous card's honest line where the member facts would be (owner
@@ -315,6 +374,7 @@ const LOCKED_FACTS: L = {
   nl: "Werkgever en locatie: na inloggen",
   de: "Arbeitgeber und Ort: nach der Anmeldung",
   pl: "Pracodawca i miejsce: po zalogowaniu",
+  sv: "Arbetsgivare och plats: efter inloggning",
 };
 
 const SAVED_BADGE: L = {
@@ -324,6 +384,7 @@ const SAVED_BADGE: L = {
   nl: "Bewaard",
   de: "Gemerkt",
   pl: "Zapisano",
+  sv: "Sparad",
 };
 
 const PREV: L = {
@@ -333,6 +394,7 @@ const PREV: L = {
   nl: "Vorige",
   de: "Zurück",
   pl: "Poprzednia",
+  sv: "Föregående",
 };
 
 const NEXT: L = {
@@ -342,6 +404,7 @@ const NEXT: L = {
   nl: "Volgende",
   de: "Weiter",
   pl: "Następna",
+  sv: "Nästa",
 };
 
 export default async function JobsPage({
@@ -411,7 +474,7 @@ export default async function JobsPage({
     const mapped = matchProfessionAcrossLocales(query, professionOptions, others);
     if (mapped) redirect({ href: professionRedirectHref(mapped, sp.page), locale: active });
   }
-  const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
+  const page = boardPage(sp.page);
   const wantsSaved = sp.saved === "1";
 
   // ── THE RETURN PATH ────────────────────────────────────────────────────────
@@ -513,6 +576,18 @@ export default async function JobsPage({
     redirect({ href: pageHref(1), locale: active });
   }
 
+  // The profession version of the board: its own heading and scope line, the
+  // same ones its <head> carries. A free-text search inside a profession is a
+  // search result, not that page.
+  const professionCopy =
+    profession && !query && !showSaved
+      ? professionPageCopy(
+          active,
+          professionName(profession),
+          result.status === "ok" ? result.totalCount : null,
+        )
+      : null;
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       {/* Anonymous-safe structured data (owner 2026-10-14 §8; port of #1433):
@@ -528,8 +603,9 @@ export default async function JobsPage({
               buildJobsListJsonLd({
                 origin: MARKETING_ORIGIN,
                 locale: active,
-                name: H1[active],
-                description: INTRO[active],
+                name: professionCopy?.heading ?? H1[active],
+                description: professionCopy?.description ?? INTRO[active],
+                path: professionCopy ? pageHref(1) : undefined,
                 previews: result.vacancies,
                 genericTitle: GENERIC_TITLE[active],
               }),
@@ -552,11 +628,22 @@ export default async function JobsPage({
         }}
       />
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-        {H1[active]}
+        {professionCopy?.heading ?? H1[active]}
       </h1>
       <p className="mt-3 max-w-2xl text-sm text-text-muted sm:text-base">
         {(user ? INTRO_MEMBER : INTRO)[active]}
       </p>
+      {professionCopy && (
+        <p
+          data-testid="public-jobs-profession-scope"
+          className="mt-2 max-w-2xl text-sm text-text-muted"
+        >
+          {professionCopy.scopeNote}{" "}
+          <Link href="/jobs" className="underline underline-offset-4">
+            {professionCopy.allJobsLink}
+          </Link>
+        </p>
+      )}
 
       {/* A PLAIN GET FORM, no client JS. The board is the crawler-facing
           surface and the first thing a worker with a poor connection loads;
@@ -764,6 +851,34 @@ export default async function JobsPage({
             </nav>
           )}
         </>
+      )}
+
+      {/* EVERY PROFESSION IS ONE PLAIN LINK AWAY. The filter above is a select
+          inside a form, which a crawler does not submit, so without these
+          links no profession page could be found from the board. */}
+      {!showSaved && (
+        <nav
+          aria-labelledby="jobs-by-profession"
+          data-testid="public-jobs-by-profession"
+          className="mt-12 border-t border-border-subtle pt-8"
+        >
+          <h2 id="jobs-by-profession" className="text-lg font-semibold tracking-tight">
+            {browseByProfessionHeading(active)}
+          </h2>
+          <ul className="mt-3 flex flex-wrap gap-x-4 text-sm">
+            {professionOptions.map((o) => (
+              <li key={o.slug}>
+                <Link
+                  href={`/jobs?profession=${o.slug}`}
+                  aria-current={o.slug === profession && !query ? "page" : undefined}
+                  className="inline-block py-1.5 text-text-muted underline underline-offset-4 hover:text-text-primary"
+                >
+                  {o.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       )}
     </div>
   );

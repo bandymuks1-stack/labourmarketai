@@ -3,6 +3,10 @@
 import { useActionState } from "react";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
 
 import {
   upsertWorkerDocumentAction,
@@ -44,10 +48,9 @@ export interface WorkerDocumentFormLabels {
   errorMsg: string;
 }
 
-const FIELD =
-  "min-h-11 rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary transition-colors focus:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/60";
-
-const EYEBROW = "font-mono text-meta uppercase tracking-label text-text-muted";
+/** The status group's caption: a <legend> cannot be the shared Label, so it
+ *  carries the same look. */
+const LEGEND = "font-mono text-xs uppercase tracking-label text-text-muted";
 
 /** The SAME tones the inventory rows above the form render (STATUS_TONE). */
 const STATUS_CHIP_TONE: Record<string, string> = {
@@ -67,7 +70,8 @@ export function WorkerDocumentForm({
   typeOptions: readonly (readonly [string, string])[];
   /** [value, localized label] for ready/missing/blocked. */
   statusOptions: readonly (readonly [string, string])[];
-  countryOptions: readonly string[];
+  /** [ISO code, localized country name] — the code is what is submitted. */
+  countryOptions: readonly (readonly [string, string])[];
 }) {
   const locale = useLocale();
   const [state, action, pending] = useActionState<
@@ -94,33 +98,33 @@ export function WorkerDocumentForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5 text-xs">
-          <span className={EYEBROW}>{labels.typeLabel}</span>
-          <select name="document_type_slug" required className={FIELD}>
+          <Label>{labels.typeLabel}</Label>
+          <Select name="document_type_slug" required>
             {typeOptions.map(([slug, label]) => (
               <option key={slug} value={slug}>
                 {label}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
 
         <label className="flex flex-col gap-1.5 text-xs">
-          <span className={EYEBROW}>{labels.countryLabel}</span>
-          <select name="country" className={FIELD} defaultValue="">
+          <Label>{labels.countryLabel}</Label>
+          <Select name="country" defaultValue="">
             <option value="">{labels.countryNone}</option>
-            {countryOptions.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            {countryOptions.map(([code, label]) => (
+              <option key={code} value={code}>
+                {label}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       </div>
 
       {/* Status — chip radios in the SAME tones as the inventory badges the
           save will produce; the input rhymes with its output. */}
       <fieldset className="flex flex-col gap-1.5">
-        <legend className={EYEBROW}>{labels.statusLabel}</legend>
+        <legend className={LEGEND}>{labels.statusLabel}</legend>
         <div className="flex flex-wrap gap-2 pt-1.5">
           {statusOptions.map(([value, label]) => (
             <label key={value} className="cursor-pointer">
@@ -148,35 +152,37 @@ export function WorkerDocumentForm({
           visual pair. */}
       <div className="grid gap-4 rounded-md border border-ink-600/60 bg-ink-800/30 p-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5 text-xs">
-          <span className={EYEBROW}>{labels.validFromLabel}</span>
-          <input type="date" name="valid_from" className={FIELD} />
+          <Label>{labels.validFromLabel}</Label>
+          <Input type="date" name="valid_from" />
         </label>
         <label className="flex flex-col gap-1.5 text-xs">
-          <span className={EYEBROW}>{labels.validUntilLabel}</span>
-          <input type="date" name="valid_until" className={FIELD} />
+          <Label>{labels.validUntilLabel}</Label>
+          <Input type="date" name="valid_until" />
         </label>
       </div>
 
       <label className="flex flex-col gap-1.5 text-xs">
-        <span className={EYEBROW}>{labels.noteLabel}</span>
-        <input
+        <Label>{labels.noteLabel}</Label>
+        <Input
           type="text"
           name="note"
           maxLength={500}
           placeholder={labels.notePlaceholder}
-          className={FIELD}
         />
       </label>
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        <Button
           type="submit"
+          variant="secondary"
+          size="sm"
+          className="min-h-11 w-fit"
+          loading={pending}
           disabled={pending}
-          className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue bg-brand-blue/10 px-5 py-2 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-blue/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/60 disabled:opacity-60"
           data-testid="worker-document-save"
         >
           {pending ? labels.saving : labels.save}
-        </button>
+        </Button>
         {state?.ok === true && (
           <p
             className="text-sm text-state-success"

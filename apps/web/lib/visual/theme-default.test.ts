@@ -19,15 +19,15 @@ function bootstrap(pathname: string, stored: string | null, storageThrows = fals
   return dataset.theme;
 }
 
-describe("the page's default theme (owner decision 2026-10-28)", () => {
+describe("the page's default theme (owner decisions 2026-10-28 and 2026-11-15)", () => {
   it("the public site opens light", () => {
     for (const p of ["/lt", "/lt/", "/en/jobs", "/lt/jobs/123", "/lt/pricing", "/lt/legal/terms", "/lt/auth/signup", "/lt/auth/login", "/lt/invite/abc", "/ru/business/x"]) {
       expect(defaultThemeForPath(p), p).toBe("light");
     }
   });
-  it("the signed-in workspace keeps its dark default", () => {
+  it("a new account starts light in the signed-in workspace too (owner 2026-11-15)", () => {
     for (const p of ["/lt/dashboard", "/lt/dashboard/journal", "/en/onboarding", "/lt/cv", "/lt/cv/print"]) {
-      expect(defaultThemeForPath(p), p).toBe("dark");
+      expect(defaultThemeForPath(p), p).toBe("light");
     }
   });
   it("a look-alike public path is not the workspace", () => {
@@ -38,22 +38,27 @@ describe("the page's default theme (owner decision 2026-10-28)", () => {
     expect(resolveTheme("dark", "/lt")).toBe("dark");
     expect(resolveTheme("light", "/lt/dashboard")).toBe("light");
     expect(resolveTheme("bogus", "/lt")).toBe("light");
-    expect(resolveTheme(null, "/lt/dashboard")).toBe("dark");
+    expect(resolveTheme(null, "/lt/dashboard")).toBe("light");
+    // A person who chose dark keeps dark in the workspace and on onboarding.
+    expect(resolveTheme("dark", "/lt/dashboard")).toBe("dark");
+    expect(resolveTheme("dark", "/en/onboarding")).toBe("dark");
   });
 });
 
 describe("the pre-paint bootstrap runs the same rule", () => {
-  it("no choice: public light, workspace dark", () => {
+  it("no choice: light on the public site and in the workspace", () => {
     expect(bootstrap("/lt", null)).toBe("light");
-    expect(bootstrap("/lt/dashboard", null)).toBe("dark");
+    expect(bootstrap("/lt/dashboard", null)).toBe("light");
+    expect(bootstrap("/lt/onboarding", null)).toBe("light");
   });
   it("a saved choice wins", () => {
     expect(bootstrap("/lt", "dark")).toBe("dark");
+    expect(bootstrap("/lt/dashboard", "dark")).toBe("dark");
     expect(bootstrap("/lt/dashboard", "light")).toBe("light");
   });
   it("storage blocked: the page's default, never undefined", () => {
     expect(bootstrap("/lt/auth/signup", null, true)).toBe("light");
-    expect(bootstrap("/lt/onboarding", null, true)).toBe("dark");
+    expect(bootstrap("/lt/onboarding", null, true)).toBe("light");
   });
 });
 

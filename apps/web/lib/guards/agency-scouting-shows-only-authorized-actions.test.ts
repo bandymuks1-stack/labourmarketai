@@ -29,7 +29,8 @@ describe("an agency on a client's shared need sees only what it may do", () => {
     const comms = PAGE.slice(PAGE.indexOf("{actsForClient ? ("), PAGE.indexOf("data-testid={`scout-comms-"));
     expect(comms).toMatch(/scout-agency-present-/);
     expect(comms).toMatch(/\/dashboard\/company\/partners/);
-    expect(PAGE).toMatch(/\{!actsForClient && result\.interestByWorker\[c\.workerId\] \? \(/);
+    // Also behind an open need: a closed need's people are history (closed-need-history.test.ts).
+    expect(PAGE).toMatch(/\{(needOpen && )?!actsForClient && result\.interestByWorker\[c\.workerId\] \? \(/);
     expect(PAGE).toMatch(/\{actsForClient \? null : \(\s+<>\s+\{needOpen \? \(\s+<ScoutingShortlistButtons/);
     expect(PAGE).toMatch(/\{actsForClient \? null : \(\s+<Link\s+href=\{nextAction\.href\}/);
   });
