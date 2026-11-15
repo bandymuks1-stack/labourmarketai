@@ -395,7 +395,7 @@
   },
   "commercial": {
     "pageTitle": "Komercija",
-    "pageIntro": "Tavo pasiūlymai ir sutartys, susieti su poreikiais ir projektais. Sąskaitos ir mokėjimai registruojami Finansuose.",
+    "pageIntro": "Tavo pasiūlymai ir sutartys vienoje vietoje. Sąskaitos ir mokėjimai registruojami Finansuose.",
     "preApply": "Komercijos CRM bus prieinamas, kai bus pritaikytas komercijos atnaujinimas.",
     "proposalsTitle": "Pasiūlymai",
     "honestNote": "Pasiūlymas juda juodraštis → išsiųstas → priimtas/atmestas tik tau nustačius. Niekas nesiunčiama automatiškai.",
@@ -406,6 +406,8 @@
     "noSignatureNote": "Sutartys saugo būseną ir neprivalomą dokumento nuorodą. Elektroninis parašas nekuriamas ir neteigiamas.",
     "contractsEmpty": "Sutarčių dar nėra.",
     "addContract": "Pridėti sutartį",
+    "contractFromProposal": "Sukurti sutartį",
+    "fromProposal": "Iš pasiūlymo: {title}",
     "contractTitlePlaceholder": "Sutarties pavadinimas",
     "docRef": "Dok. nuoroda",
     "docRefLabel": "Dokumento nuoroda",
@@ -2803,7 +2805,7 @@
         "fieldNeedSummary": "Užklausos aprašymas",
         "fieldNeedSummaryPlaceholder": "Trumpas, ką ieškai.",
         "fieldCountry": "Šalis",
-        "fieldCountryPlaceholder": "pvz. LT",
+        "fieldCountryPlaceholder": "Pasirink šalį",
         "fieldLocation": "Vieta / regionas",
         "fieldLocationPlaceholder": "pvz. Vilnius",
         "fieldRole": "Vaidmuo / darbo tipas",
@@ -9254,6 +9256,7 @@
       "view": "Atverti pokalbį",
       "error": "Pokalbio atverti nepavyko. Bandyk dar kartą.",
       "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandyk rytoj.",
+      "authorOnly": "Pokalbį gali pradėti tik tas, kas paskelbė šį poreikį.",
       "shortlistFirst": "Pirmiausia įtrauk darbuotoją į trumpąjį sąrašą, tada galėsi prašyti pokalbio."
     },
     "how": {
@@ -9335,7 +9338,8 @@
       "title": "Susiaurinti sąrašą",
       "availableNow": "Laisvas dabar",
       "clear": "Išvalyti filtrus",
-      "noMatches": "Nė vienas kandidatas neatitinka pasirinktų filtrų."
+      "noMatches": "Nė vienas kandidatas neatitinka pasirinktų filtrų.",
+      "noMatchesCountry": "Matomoje pasiūloje dar nėra nė vieno žmogaus šalyje {country}. Rodyk visus arba praplėsk poreikį."
     },
     "pool": {
       "factsUnreadable": "Kai ko iš to, ką šie žmonės yra užfiksavę, dabar nepavyko perskaityti, todėl ši eilė nėra patikima. Niekas čia nėra parodytas turintis mažiau, nei turi — tiesiog trūksta faktų, pagal kuriuos lyginama. Perkrauk po akimirkos.",
@@ -10595,7 +10599,7 @@
   },
   "workerIntake": {
     "title": "Darbuotojo registracija",
-    "subtitle": "Nurodyk savo amatą ir kada esi laisvas, tada susikurk nemokamą profilį, kad viską išsaugotum — niekas nepublikuojama automatiškai.",
+    "subtitle": "Nurodyk savo amatą ir kada esi laisvas, kad pasitikrintum duomenis. Ši forma nieko neišsaugo — kad tave rastų darbdaviai, susikurk nemokamą profilį ir įrašyk duomenis jame.",
     "fullName": "Vardas ir pavardė",
     "profession": "Sektorius ir darbo tipas",
     "professionPlaceholder": "Pasirink sektorių ir darbo tipą",
@@ -10625,7 +10629,7 @@
     "submit": "Patikrinti duomenis",
     "aiBadge": "AI pasiūlymas",
     "aiNotVerified": "Peržiūrėk prieš išsaugant — niekas neišsaugoma automatiškai.",
-    "aiDisabled": "Iš šios formos niekas neišsaugota, o automatinio pasiūlymo dabar nėra. Kad išsaugotum duomenis, žemiau susikurk nemokamą darbuotojo profilį.",
+    "aiDisabled": "Iš šios formos niekas neišsaugota, o automatinio pasiūlymo dabar nėra. Kad tave rastų darbdaviai, žemiau susikurk nemokamą darbuotojo profilį ir įrašyk duomenis jame.",
     "aiHeadline": "Siūloma antraštė",
     "aiSkills": "Siūlomi įgūdžiai",
     "aiMissing": "Vis dar trūksta",
@@ -10718,14 +10722,14 @@
     "aiNone": "Pasiūlymas nesukurtas — peržiūrėk savo duomenis.",
     "statusInvalid": "Kai kuriuos duomenis reikia pataisyti. Patikrink formą.",
     "statusError": "Kažkas nepavyko. Bandyk dar kartą.",
-    "bridgeNote": "Išsiuntus formą užklausa pateikta — paskyros nereikia. Nemokama paskyra leidžia sekti ir tvarkyti užklausą, skelbti darbus ir išsaugoti kandidatus. Jau turi? Prisijunk.",
+    "bridgeNote": "Išsiuntus formą užklausa pateikta — paskyros nereikia. Nemokama įmonės paskyra tuo pačiu el. pašto adresu, kai parodysi, kad adresas tavo, gali perimti užklausą, o tada skelbti darbus ir išsaugoti kandidatus. Jau turi? Prisijunk.",
     "bridgeSignup": "Susikurti nemokamą paskyrą",
     "bridgeLogin": "Jau turi paskyrą? Prisijungti",
     "autoSuggested": "Pasiūlyta pagal tavo aprašymą — patikrink ir, jei reikia, pataisyk. Nieko nepateikiame automatiškai.",
     "preparedTitle": "Užklausa paruošta",
     "preparedBody": "Tvarkingai sudėliojome tavo užklausą. Kad ją pateiktum tolesniam kontaktui, susikurk nemokamą paskyrą arba prisijunk žemiau — tada užklausa atkeliauja komandai.",
     "receivedTitle": "Užklausa gauta",
-    "receivedBody": "Gavome tavo užklausą ir laikome ją tolesniam kontaktui su tavimi. Kad matytum ir tvarkytum ją, susikurk paskyrą arba prisijunk žemiau.",
+    "receivedBody": "Gavome tavo užklausą ir laikome ją tolesniam kontaktui su tavimi. Kad ją matytum paskyroje, susikurk įmonės paskyrą arba prisijunk tuo pačiu el. pašto adresu, kurį čia nurodei. Kai parodysi, kad adresas tavo, užklausa atsiras tavo paskyros užklausose ir ten galėsi ją perimti. Ji nesusiejama automatiškai, o paskyra su kitu adresu jos nemato.",
     "partnerRouteTitle": "Statybų užklausoms — partnerių įmonių kelias",
     "partnerRouteBody": "Jeigu tinkamo tiesioginio darbuotojo atitikmens dar nėra, statybų užklausoms pirmiausia galime rekomenduoti kreiptis į mūsų partnerę UAB „Nonstop Group“ (LT) — platformos operatorę. Tai padeda greičiau suderinti dokumentus, atsakomybes ir įdarbinimo eigą, kiekvieną žingsnį koordinuojant žmogui."
   },

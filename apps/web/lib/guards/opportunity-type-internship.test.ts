@@ -86,9 +86,17 @@ describe("the board's discovery filter can see the declared type", () => {
 describe("the board offers the type filter, with a label every catalog has", () => {
   const page = read("apps/web/app/[locale]/dashboard/opportunities/page.tsx");
 
-  it("the type is one of the filter groups on the page", () => {
+  it("the type is one of the filter groups on the page, listed once", () => {
     // It used to work only for someone who typed `?opportunityType=` by hand.
-    expect(page).toContain('{ dim: "opportunityType", values: facets.opportunityTypes }');
+    const groups = page.slice(page.indexOf("const facetGroups"), page.indexOf("const showFilterControls"));
+    expect(groups.match(/dim: "opportunityType"/g) ?? []).toHaveLength(1);
+  });
+
+  it("no filter dimension is listed twice (two merges once each added the type: its chips rendered twice)", () => {
+    const groups = page.slice(page.indexOf("const facetGroups"), page.indexOf("const showFilterControls"));
+    const dims = [...groups.matchAll(/dim: "([A-Za-z]+)"/g)].map((m) => m[1]);
+    expect(dims.length).toBeGreaterThan(0);
+    expect(dims.filter((d, i) => dims.indexOf(d) !== i)).toEqual([]);
   });
 
   it("its heading is read from the catalogue that has it in every locale", () => {
