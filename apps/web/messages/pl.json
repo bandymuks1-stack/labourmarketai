@@ -5256,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Dlaczego firmy",
-      "headline": "Podaż, na której możesz działać",
-      "items": [
-        {
-          "title": "Wyjaśnialny kierunek dopasowania",
-          "desc": "Każdy sygnał dopasowania pokazuje powody, które za nim stoją."
-        },
-        {
-          "title": "Transgraniczna pula pracowników",
-          "desc": "Podaż ze wszystkich rynków, na których działamy, w jednym miejscu."
-        },
-        {
-          "title": "Bez nieprzejrzystych pośredników",
-          "desc": "Widzisz relację i to Ty jesteś jej właścicielem."
-        },
-        {
-          "title": "Zapisy umiejętności i sygnały dopasowania",
-          "desc": "Zatrudniaj na podstawie zapisów, a nie deklaracji."
-        },
-        {
-          "title": "Sygnały podaży",
-          "desc": "Widzisz zadeklarowaną dostępność pracowników w miarę aktualizowania profili."
-        },
-        {
-          "title": "Bezpośredni kontakt",
-          "desc": "Relacja z pracownikiem należy do Ciebie."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "FAQ dla firm",
       "headline": "Konkretne odpowiedzi",
@@ -5351,36 +5321,6 @@
         {
           "title": "Powiększaj swoją pulę",
           "desc": "Dodawaj moce tam, gdzie rośnie popyt."
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "Dlaczego agencje",
-      "headline": "Przewaga, nie utrata kontroli",
-      "items": [
-        {
-          "title": "Zarządzaj swoją pulą",
-          "desc": "Pracownicy, dostępność i status w jednym miejscu."
-        },
-        {
-          "title": "Publikuj w imieniu klientów",
-          "desc": "Pośrednicz w zapotrzebowaniu, nie tracąc relacji."
-        },
-        {
-          "title": "Kierunek dopasowania",
-          "desc": "Szybciej kieruj właściwe osoby do pracy."
-        },
-        {
-          "title": "Kontrola widoczności",
-          "desc": "Publicznie, tylko dla agencji lub bezpośrednio — decydujesz Ty."
-        },
-        {
-          "title": "Zasięg transgraniczny",
-          "desc": "Klienci i pracownicy na wszystkich rynkach, na których działamy."
-        },
-        {
-          "title": "Rozwijaj swój dział",
-          "desc": "Wgląd w dostępne moce w miarę zmian popytu."
         }
       ]
     },
@@ -10710,7 +10650,6 @@
     "contactPerson": "Osoba kontaktowa",
     "contactPersonHelp": "Opcjonalnie. Z kim się skontaktować w sprawie tego zapytania.",
     "contactEmail": "E-mail kontaktowy",
-    "contactEmailHelp": "Opcjonalnie, ale pomaga nam szybciej odpowiedzieć na Twoje zapytanie.",
     "cityRegion": "Miasto lub region",
     "cityRegionHelp": "Opcjonalnie. Gdzie będzie wykonywana praca.",
     "expectedDuration": "Przewidywany czas trwania",
@@ -14012,7 +13951,6 @@
         "ctaTitle": "Zamień to oszacowanie w rzeczywiste zapotrzebowanie na pracowników",
         "ctaBody": "Ten sam kreator oszacowania znajduje się w formularzu zapotrzebowania LabourMarket.ai. Mając konto, możesz dołączyć oszacowanie do ustrukturyzowanego zapotrzebowania na pracowników; bez konta możesz opisać swoją potrzebę na formularzu publicznym.",
         "ctaDashboard": "Utwórz zapotrzebowanie na pracowników (z kontem)",
-        "ctaDashboardHelp": "Ścieżka z kontem otwiera formularz zapotrzebowania na Twoim panelu — kalkulator nie przekazuje tych liczb automatycznie.",
         "ctaCompanyNeed": "Opisz potrzebę bez konta",
         "ctaCompanyNeedHelp": "Formularz publiczny otrzymuje tylko liczbę pracowników i kraj — żadne ceny ani opisy nie są przekazywane."
       }
@@ -15588,6 +15526,10 @@
         "title": "Zapytanie o projekt indywidualny",
         "body": "Dla klientów prywatnych i firm: proszę opisać, jakiego projektu lub usługi Państwo potrzebują."
       },
+      "partner": {
+        "title": "Zapytanie o partnerstwo",
+        "body": "Proszę opisać proponowaną współpracę."
+      },
       "title": "Zgłoszenie zapotrzebowania",
       "promise": "Proszę opisać, jakich pracowników, usług lub realizacji projektu Państwo potrzebują. Zapytanie jest przekazywane zespołowi LabourMarket.ai do rozpatrzenia.",
       "name": "Imię i nazwisko lub nazwa firmy",
@@ -15605,6 +15547,7 @@
       "scope": "Zakres",
       "deadline": "Terminy",
       "need": "Jaki projekt lub usługa są potrzebne",
+      "proposal": "Proponowana współpraca",
       "customer": "Klient",
       "customerPrivate": "Osoba prywatna",
       "customerBusiness": "Firma",
@@ -19441,8 +19384,6 @@
     "title": "Co dzieje się z Twoją pracą",
     "titleCompany": "Co dzieje się z pracą, którą prowadzisz",
     "example": "Przykład — to nie jest prawdziwa osoba ani prawdziwe dane",
-    "hint": "Wybierz krok. Każdy krok otwiera prawdziwe miejsce w Twojej przestrzeni roboczej.",
-    "hintWorkers": "Wybierz krok. Każdy krok otwiera prawdziwe miejsce w Twojej przestrzeni roboczej.",
     "open": "Otwórz w przestrzeni roboczej",
     "list": "Etapy cyklu życia pracy",
     "workers": {
@@ -20732,7 +20673,6 @@
       "close": "Zamknij",
       "functions": "Działania",
       "professions": "Zawody",
-      "opensNow": "Konto nie jest wymagane",
       "signInWhenOpen": "Wymagane logowanie",
       "allSectors": "Wszystkie branże",
       "fullList": "Pełna lista"
