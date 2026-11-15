@@ -347,3 +347,36 @@ describe("a block of the day is never the day said again", () => {
     expect(times).not.toContain("30 minutes");
   });
 });
+
+/**
+ * Sixth review of #3355: the part of the day is read in front of the figure
+ * being said again, never elsewhere in its sentence, so an explicit inclusion
+ * still holds the day at 15 h. Also Codex on the first version: a repeated
+ * figure with no signal stays two items.
+ */
+describe("an explicit inclusion holds even where the sentence names a part of the day", () => {
+  it.each([
+    ["'jos įeina į 15' after an evening item", "Šiandien dirbau 15 valandų. Vakare 2 valandos koordinavimo, jos įeina į 15 valandų."],
+    ["'tai įeina į 15' after an evening item", "Dirbau 15 val. 13 val. programavau, vakare 2 val. koordinavau, tai įeina į 15 val."],
+    ["the same in English", "Worked 15 h, 13 h coding and 2 h coordination in the evening, which is included in the 15 h."],
+    ["'iš viso 15' with 'nuo ryto iki vakaro' after it", "Dirbau 15 val., iš jų 2 val. koordinavimas. Iš viso 15 val. nuo ryto iki vakaro."],
+    ["German 'morgen' is tomorrow", "15 Stunden gearbeitet, davon 2 Stunden Koordination. Insgesamt 15 Stunden, morgen geht es weiter."],
+  ])("%s", (_name, text) => {
+    expect(minutes(text)).toBe(15 * 60);
+    expect(intakeMinutes(text)).toBe(15 * 60);
+  });
+
+  it("an evening block named only before the figure is still a block: 4 + 4", () => {
+    expect(minutes("Ryte 4 val. Vakare vairavau, iš viso 4 val.")).toBe(8 * 60);
+  });
+
+  it.each([
+    ["Lithuanian 'po to dar'", "Dirbau 2 val. Po to dar 2 val."],
+    ["Lithuanian 'po to'", "Dirbau 2 val. Po to 2 val."],
+    ["English 'then another'", "Worked 2 hours. Then another 2 hours."],
+  ])("a repeated figure with no signal stays two items: %s", (_name, text) => {
+    expect(minutes(text)).toBe(4 * 60);
+    expect(intakeMinutes(text)).toBe(4 * 60);
+    expect(extractJournalSuggestions(text).statedTotal).toBeNull();
+  });
+});

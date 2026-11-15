@@ -894,11 +894,12 @@ const TOTAL_AGAIN_LEAD_RX = new RegExp(
 
 /** Words that name a PART OF THE DAY ("ryte", "vakare", "naktį", "po pietų",
  *  "in the morning", "evening", "утром", "вечером", "abends", "rano",
- *  "wieczorem"). A figure in a sentence that names one is a block of the day,
- *  never the day said again: "Ryte 4 val., vakare iš viso 4 val." and "Ryte 4
- *  val. dirbau vienas, vakare kartu 4 val." are 8 h. */
+ *  "wieczorem"). A figure with one in front of it, or in its own phrase, is a
+ *  block of the day, never the day said again: "Ryte 4 val., vakare iš viso 4
+ *  val." and "Ryte 4 val. dirbau vienas, vakare kartu 4 val." are 8 h. German
+ *  bare "morgen" is "tomorrow", so only "morgens" / "am Morgen" count. */
 const PART_OF_DAY_RX =
-  /(?<!\p{L})(?:ryte|rytą|ryta|ryto|vakare|vakarą|vakara|vakaro|pavakare|naktį|nakti|nakčia|naktis|po\s+pietų|po\s+pietu|popiet|prieš\s+pietus|pries\s+pietus|morning|mornings|evening|evenings|afternoon|afternoons|night|nights|tonight|утром|вечером|днём|днем|ночью|после\s+обеда|morgens|vormittags|nachmittags|abends|nachts|morgen|abend|rano|wieczorem|po\s+południu|po\s+poludniu|w\s+nocy|ochtends|middags|avonds)(?!\p{L})/iu;
+  /(?<!\p{L})(?:ryte|rytą|ryta|ryto|vakare|vakarą|vakara|vakaro|pavakare|naktį|nakti|nakčia|naktis|po\s+pietų|po\s+pietu|popiet|prieš\s+pietus|pries\s+pietus|morning|mornings|evening|evenings|afternoon|afternoons|night|nights|tonight|утром|вечером|днём|днем|ночью|после\s+обеда|morgens|am\s+morgen|vormittags|nachmittags|abends|nachts|abend|rano|wieczorem|po\s+południu|po\s+poludniu|w\s+nocy|ochtends|middags|avonds)(?!\p{L})/iu;
 
 /** Minutes back in the unit a person reads best. */
 function minutesAsTime(minutes: number): { value: number; unitSlug: "hours" | "minutes" } {
@@ -989,6 +990,21 @@ function containedTotal(
   const sentenceText = (f: JournalFragmentSuggestion) => where.sentences[sentenceIndex(f)] ?? f.rawPhrase;
   const same = (a: number, b: number) => Math.abs(a - b) < 1;
 
+  // What stands in front of a figure in its own sentence, back to the figure
+  // before it there (or to the sentence start): "Ryte 4 val., vakare iš viso 4
+  // val." → ", vakare iš viso"; "In the evening, in total 4 h." → "In the
+  // evening, in total".
+  const sinceFigureBefore = (f: JournalFragmentSuggestion): string => {
+    const sentence = sentenceText(f);
+    const at = sentence.indexOf(f.rawPhrase);
+    if (at < 0) return "";
+    const i = inHoursOrMinutes.indexOf(f);
+    const prev = i > 0 ? inHoursOrMinutes[i - 1] : undefined;
+    if (!prev || sentenceIndex(prev) !== sentenceIndex(f)) return sentence.slice(0, at);
+    const prevAt = sentence.lastIndexOf(prev.rawPhrase, at);
+    return prevAt < 0 ? "" : sentence.slice(prevAt + prev.rawPhrase.length, at);
+  };
+
   // 1. Repetitions the person explains as being INSIDE the day.
   const restatements = new Set<JournalFragmentSuggestion>();
   for (const f of later) {
@@ -997,20 +1013,27 @@ function containedTotal(
     const equalsTotal = same(m, totalMin);
     const equalsAnother = later.some((g) => g !== f && same(minutesOf(g), m));
     const sentence = sentenceText(f);
-    // A block of the day ("vakare iš viso 4 val.") is never the day said again.
-    if (PART_OF_DAY_RX.test(sentence)) continue;
     const sentenceNamesTheTotal = numbersIn(sentence).some((n) => n === total.time!.value);
     // Said again AS the total: the cue or the total word stands right in front
     // of the figure ("tai įeina į 15 valandų", "kartu 15 valandų", "iš viso
     // 15 val."), not anywhere in the phrase ("4 val. kartu su kolega").
     const digit = f.rawPhrase.search(/\d/);
     const lead = digit > 0 ? f.rawPhrase.slice(0, digit) : "";
-    if (
-      (equalsTotal && (TOTAL_AGAIN_LEAD_RX.test(lead) || RESTATED_TOTAL_LEAD_RX.test(lead))) ||
-      (equalsAnother && RESTATEMENT_CUE_RX.test(sentence) && sentenceNamesTheTotal)
-    ) {
-      restatements.add(f);
-    }
+    // A block of the day is never the day said again: the part of the day is
+    // read in front of THIS figure ("vakare iš viso 4 val.") or in its own
+    // phrase ("4 val. vakare"), never elsewhere in the sentence ("Vakare 2
+    // valandos koordinavimo, jos įeina į 15 valandų" restates the 15).
+    const since = sinceFigureBefore(f);
+    const restatesTotal =
+      equalsTotal &&
+      !PART_OF_DAY_RX.test(since + lead) &&
+      (TOTAL_AGAIN_LEAD_RX.test(lead) || RESTATED_TOTAL_LEAD_RX.test(lead));
+    const restatesAnother =
+      equalsAnother &&
+      !PART_OF_DAY_RX.test(since + f.rawPhrase) &&
+      RESTATEMENT_CUE_RX.test(sentence) &&
+      sentenceNamesTheTotal;
+    if (restatesTotal || restatesAnother) restatements.add(f);
   }
 
   // 2. The parts.
