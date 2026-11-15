@@ -30,8 +30,8 @@ export function ThemeReapply() {
   // workspace to the public site gets that page's default, and back.
   const pathname = usePathname();
   useEffect(() => {
-    // Resolves to the PAGE'S DEFAULT (lib/visual/theme-default.ts: public site
-    // light, workspace dark) rather than null, so a stripped attribute is
+    // Resolves to the PAGE'S DEFAULT (lib/visual/theme-default.ts: light on the
+    // public site and in the workspace) rather than null, so a stripped attribute is
     // always restored to a definite value — the same resolution the pre-paint
     // bootstrap performs. A saved choice always wins.
     const saved = (): "light" | "dark" => {
