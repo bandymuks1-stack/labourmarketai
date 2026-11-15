@@ -41,9 +41,11 @@ import {
  * hours never land on the owner/manager, the personal CV and Living CV
  * (Work in Numbers) say the same totals, confirmed imported history joins the
  * person's own total, the company's own surfaces show roster people with a
- * person-page link only once confirmed, and another organization sees none of
- * it. Screenshots at 375 / 1440 px go to test-results/experience-integration/
- * and are uploaded by the job as the `experience-integration` artifact.
+ * person-page link only once confirmed (a place's detail opens from its tile,
+ * and each person there opens the company's own card), and another
+ * organization sees none of it. Screenshots at 375 / 1440 px (the place detail
+ * in light and dark) go to test-results/experience-integration/ and are
+ * uploaded by the job as the `experience-integration` artifact.
  *
  * Seeding: everything is done through the product's own forms, except the
  * IMPORTED history rows (organization_people + evidence_import_sessions +
@@ -644,6 +646,36 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
     String(R1_RECORDS.length + R2_RECORDS.length),
   );
 
+  // One place's detail, from its tile: the person who worked there opens A's
+  // own card for that roster row (R1's says the person confirmed the link,
+  // R2's does not), and the card opens. Never a chip that leads nowhere.
+  for (const [ref, personId, linked] of [
+    ["r1", s.r1, "confirmed"],
+    ["r2", s.r2, "no"],
+  ] as const) {
+    const label = `QA-SYNTHETIC history ${ref} ${RUN}`;
+    await o.goto(`${BASE}/en/dashboard/company/history?org=${s.orgA}`);
+    const tile = o.getByRole("main").getByTestId("company-work-history-place").filter({ hasText: label });
+    await expect(tile, `${ref}: one tile for the place`).toHaveCount(1, { timeout: 60_000 });
+    await tile.click();
+    const place = o.getByRole("main").locator("#company-place-detail").getByTestId("company-place");
+    await expect(place, `${ref}: the tile opens the place's detail`).toBeVisible({ timeout: 60_000 });
+    await expect(place.getByRole("heading", { level: 2 })).toContainText(label);
+    const chip = place.getByTestId("company-place-person-history-link");
+    await expect(chip, `${ref}: one person, a door to A's own card`).toHaveCount(1);
+    await expect(chip).toHaveAttribute("href", new RegExp(`/dashboard/company/people/${personId}$`));
+    await expect(chip).toHaveAttribute("data-linked", linked);
+    await expect(place.getByTestId("company-place-person-other-workspace")).toHaveCount(0);
+    await expect(place.getByTestId("company-place-person-other-roster")).toHaveCount(0);
+    await chip.click();
+    await o.waitForURL(new RegExp(`/dashboard/company/people/${personId}$`), { timeout: 60_000 });
+    await expect(o.getByRole("main").getByTestId("company-person"), `${ref}: the card opens`).toHaveAttribute(
+      "data-state",
+      "ready",
+      { timeout: 60_000 },
+    );
+  }
+
   // The roster read back: R1 linked, R2 unlinked, each with A's own card.
   await o.goto(`${BASE}/en/dashboard/company/people#people-import-section`);
   await expect(o.getByRole("main").getByTestId(`organization-roster-person-${s.r1}`).locator('[data-link-state="linked"]')).toBeAttached({
@@ -690,39 +722,48 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
 
 // ── EX-5 ────────────────────────────────────────────────────────────────────
 
-test("EX-5. screenshots at 375 and 1440: O's CV, W2's CV, company A's history", async ({ browser }) => {
+test("EX-5. screenshots at 375 and 1440: O's CV, W2's CV, company A's history and one place's detail", async ({ browser }) => {
   mkdirSync(OUT, { recursive: true });
-  const shots: { who: string; key: string; path: string }[] = [
-    { who: O, key: "cv-owner-manager", path: "/en/cv" },
-    { who: W2, key: "cv-worker-two-orgs", path: "/en/cv" },
-    { who: O, key: "company-a-history", path: `/en/dashboard/company/history?org=${s.orgA}` },
+  const place = encodeURIComponent(`l:QA-SYNTHETIC history r1 ${RUN}`);
+  const shots: { who: string; key: string; path: string; themes: readonly ("light" | "dark")[] }[] = [
+    { who: O, key: "cv-owner-manager", path: "/en/cv", themes: ["light"] },
+    { who: W2, key: "cv-worker-two-orgs", path: "/en/cv", themes: ["light"] },
+    { who: O, key: "company-a-history", path: `/en/dashboard/company/history?org=${s.orgA}`, themes: ["light"] },
+    {
+      who: O,
+      key: "company-a-place-detail",
+      path: `/en/dashboard/company/history?place=${place}&org=${s.orgA}#company-place-detail`,
+      themes: ["light", "dark"],
+    },
   ];
   for (const shot of shots) {
     for (const size of [
       { label: "375", viewport: { width: 375, height: 812 } },
       { label: "1440", viewport: { width: 1440, height: 900 } },
     ]) {
-      const ctx = await browser.newContext({ viewport: size.viewport, timezoneId: "UTC" });
-      await ctx.addInitScript(() => {
+      for (const theme of shot.themes) {
+        const ctx = await browser.newContext({ viewport: size.viewport, timezoneId: "UTC" });
+        await ctx.addInitScript((t) => {
+          try {
+            window.localStorage.setItem("theme", t);
+          } catch {
+            /* storage blocked: the page's default theme is captured instead */
+          }
+        }, theme);
+        const page = await ctx.newPage();
         try {
-          window.localStorage.setItem("theme", "light");
-        } catch {
-          /* storage blocked: the page's default theme is captured instead */
+          await signIn(page, BASE, shot.who);
+          await page.goto(`${BASE}${shot.path}`);
+          await expect(page.getByRole("main").first()).toBeVisible({ timeout: 60_000 });
+          await page.waitForLoadState("networkidle").catch(() => {});
+          const over = await page.evaluate(
+            () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          );
+          expect(over, `${shot.key} ${size.label}: no sideways scrolling`).toBeLessThanOrEqual(1);
+          await page.screenshot({ path: join(OUT, `${shot.key}-${size.label}-${theme}.png`), fullPage: true });
+        } finally {
+          await ctx.close();
         }
-      });
-      const page = await ctx.newPage();
-      try {
-        await signIn(page, BASE, shot.who);
-        await page.goto(`${BASE}${shot.path}`);
-        await expect(page.getByRole("main").first()).toBeVisible({ timeout: 60_000 });
-        await page.waitForLoadState("networkidle").catch(() => {});
-        const over = await page.evaluate(
-          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-        );
-        expect(over, `${shot.key} ${size.label}: no sideways scrolling`).toBeLessThanOrEqual(1);
-        await page.screenshot({ path: join(OUT, `${shot.key}-${size.label}-light.png`), fullPage: true });
-      } finally {
-        await ctx.close();
       }
     }
   }
