@@ -13150,7 +13150,11 @@
       "notReady": "Kandidaten accepteren of afwijzen is nog niet beschikbaar — gebruik tot dan contact of een boekingsvoorstel hieronder.",
       "forbidden": "Alleen de eigenaar van deze aanvraag kan beslissen.",
       "closed": "Dit voorstel is niet meer open.",
-      "error": "Er ging iets mis. Probeer het opnieuw."
+      "error": "Er ging iets mis. Probeer het opnieuw.",
+      "limitOpen": "U heeft al 10 boekingsvoorstellen die op het antwoord van werknemers wachten — meer kunnen er niet tegelijk openstaan. Trek de voorstellen in die u niet meer nodig heeft en accepteer daarna deze kandidaat. Het aanbod van het bureau blijft open.",
+      "limitDaily": "U heeft in de afgelopen 24 uur 30 boekingsvoorstellen verstuurd — het daglimiet. Accepteer deze kandidaat later: er is niets verstuurd en het aanbod van het bureau blijft open.",
+      "limitUnknown": "De limiet voor boekingsvoorstellen is bereikt (10 wachten op antwoord, 30 per dag). Trek voorstellen in die u niet meer nodig heeft of probeer het later; het aanbod van het bureau blijft open.",
+      "openBookings": "Boekingen openen"
     },
     "title": "Door bureau voorgestelde kandidaten",
     "subtitle": "Een verbonden uitzendbureau stelde deze werknemers voor deze aanvraag voor. Beoordeel, contacteer of boek ze met dezelfde bedieningselementen hieronder.",

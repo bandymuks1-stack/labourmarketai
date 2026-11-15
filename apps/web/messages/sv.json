@@ -13150,7 +13150,11 @@
       "notReady": "Att acceptera och avböja kandidater är inte tillgängligt än – använd tills vidare kontakt eller föreslå en bokning nedan.",
       "forbidden": "Endast ägaren av den här förfrågan kan bestämma.",
       "closed": "Det här erbjudandet är inte längre öppet.",
-      "error": "Något gick fel. Försök igen."
+      "error": "Något gick fel. Försök igen.",
+      "limitOpen": "Du har redan 10 bokningsförslag som väntar på arbetstagarnas svar – fler kan inte vara öppna samtidigt. Dra tillbaka dem du inte längre behöver och acceptera sedan den här kandidaten. Bemanningsföretagets erbjudande förblir öppet.",
+      "limitDaily": "Du har skickat 30 bokningsförslag de senaste 24 timmarna – dagsgränsen. Acceptera den här kandidaten senare: inget har skickats och bemanningsföretagets erbjudande förblir öppet.",
+      "limitUnknown": "Gränsen för bokningsförslag är nådd (10 väntar på svar, 30 per dag). Dra tillbaka dem du inte längre behöver eller försök senare; bemanningsföretagets erbjudande förblir öppet.",
+      "openBookings": "Öppna bokningar"
     },
     "title": "Kandidater föreslagna av bemanningsföretag",
     "subtitle": "Ett kopplat bemanningsföretag föreslog de här arbetstagarna för den här förfrågan. Granska, kontakta eller boka dem med samma kontroller nedan.",

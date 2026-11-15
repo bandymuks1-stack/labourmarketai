@@ -13150,7 +13150,11 @@
       "notReady": "Akceptowanie i odrzucanie kandydatów nie jest jeszcze dostępne — do tego czasu skorzystaj z kontaktu lub zaproponuj rezerwację poniżej.",
       "forbidden": "Decydować może tylko właściciel tego zapytania.",
       "closed": "Ta propozycja jest już nieaktywna.",
-      "error": "Coś poszło nie tak. Spróbuj ponownie."
+      "error": "Coś poszło nie tak. Spróbuj ponownie.",
+      "limitOpen": "Masz już 10 propozycji rezerwacji czekających na odpowiedź pracowników — więcej nie może być otwartych jednocześnie. Wycofaj niepotrzebne, a potem zaakceptuj tego kandydata. Oferta agencji pozostaje otwarta.",
+      "limitDaily": "Z Twojego konta wysłano 30 propozycji rezerwacji w ciągu ostatnich 24 godzin — to dzienny limit. Zaakceptuj tego kandydata później: nic nie zostało wysłane, oferta agencji pozostaje otwarta.",
+      "limitUnknown": "Osiągnięto limit propozycji rezerwacji (10 czekających na odpowiedź, 30 dziennie). Wycofaj niepotrzebne lub spróbuj później; oferta agencji pozostaje otwarta.",
+      "openBookings": "Otwórz rezerwacje"
     },
     "title": "Kandydaci zaproponowani przez agencję",
     "subtitle": "Połączona agencja pracy zaproponowała tych pracowników do tego zapytania. Przejrzyj, skontaktuj się lub zarezerwuj ich za pomocą tych samych elementów poniżej.",

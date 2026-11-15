@@ -13150,7 +13150,11 @@
       "notReady": "Kandidatų priėmimas ir atmetimas dar neveikia — kol kas naudokite kontaktą arba rezervacijos pasiūlymą žemiau.",
       "forbidden": "Spręsti gali tik šio poreikio savininkas.",
       "closed": "Šis pasiūlymas nebegalioja.",
-      "error": "Kažkas nepavyko. Bandykite dar kartą."
+      "error": "Kažkas nepavyko. Bandykite dar kartą.",
+      "limitOpen": "Jau turite 10 rezervacijų pasiūlymų, kurie laukia darbuotojų atsakymo — daugiau vienu metu atvirų būti negali. Atšaukite nebereikalingus ir tada priimkite šį kandidatą. Agentūros pasiūlymas lieka atviras.",
+      "limitDaily": "Per pastarąsias 24 valandas išsiuntėte 30 rezervacijų pasiūlymų — tai paros riba. Priimkite šį kandidatą vėliau: niekas neišsiųsta, agentūros pasiūlymas lieka atviras.",
+      "limitUnknown": "Pasiekta rezervacijų pasiūlymų riba (10 laukiančių atsakymo, 30 per parą). Atšaukite nebereikalingus arba bandykite vėliau; agentūros pasiūlymas lieka atviras.",
+      "openBookings": "Atidaryti rezervacijas"
     },
     "title": "Agentūros pasiūlyti kandidatai",
     "subtitle": "Prijungta personalo agentūra pasiūlė šiuos darbuotojus šiam poreikiui. Peržiūrėkite, susisiekite arba rezervuokite juos tais pačiais valdikliais žemiau.",
