@@ -99,7 +99,8 @@ describe("nothing renews the pass or charges again", () => {
       .filter((f) => /\.createOneTimeCheckoutSession\(/.test(read(f)))
       .sort();
     expect(callers).toEqual(["app/api/billing/pilot-pass/route.ts"]);
-    expect(read("app/api/billing/pilot-pass/route.ts")).toContain('planActive = ent.source === "subscription" && ent.active');
+    // A permanent VIP organization counts as holding the plan too (owner 2026-11-15).
+    expect(read("app/api/billing/pilot-pass/route.ts")).toContain('planActive = (ent.source === "subscription" || ent.source === "vip") && ent.active');
   });
 
   it("recovery and reconciliation never look a pass up at the provider or move its row", () => {

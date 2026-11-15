@@ -15,6 +15,7 @@ import {
 } from "@/lib/billing/checkout-core";
 import { getPlan } from "@/lib/billing/plans";
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
+import { isVipOrganization } from "@/lib/billing/vip-organizations";
 import { ensureBillingCustomer } from "@/lib/billing/customer-store";
 import {
   checkoutIdempotencyKey,
@@ -106,6 +107,12 @@ export async function POST(req: Request) {
     } else {
       orgBinding = "missing";
     }
+  }
+
+  // A permanent VIP organization already holds the highest plan at no charge
+  // (owner decision 2026-11-15): no checkout, no card, no subscription for it.
+  if (isVipOrganization(workspaceOrganizationId)) {
+    return NextResponse.json({ ok: false, reason: "vip_organization" }, { status: 409 });
   }
 
   const config = getBillingConfigFor(workspaceOrganizationId);

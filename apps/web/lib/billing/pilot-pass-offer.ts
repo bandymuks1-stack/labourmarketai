@@ -61,7 +61,8 @@ export async function readPilotPassOffer(): Promise<PilotPassOffer> {
         organizationId,
         billingAuthority: subject.billingAuthority,
         billingState: mode === "live" ? "stripe_live" : "stripe_test",
-        planActive: ent.source === "subscription" && ent.active,
+        // A VIP organization holds the plan permanently (owner 2026-11-15): no pass offer.
+        planActive: (ent.source === "subscription" || ent.source === "vip") && ent.active,
       });
       return { kind: "here", organizationId, mode, gate };
     }
