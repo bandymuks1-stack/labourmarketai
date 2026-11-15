@@ -215,6 +215,31 @@ test("S-3c. an education institution signs up through its own door, and its orga
   await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
 });
 
+test("S-3d. a worker builds a profile from a public page: the account comes first, then the profile builder", async ({ page }) => {
+  // Owner P0 2026-11-15 (F2 / F6): the public "build your profile / CV"
+  // button used to open a form that stored nothing and a sign-up that forgot
+  // where the person was going. Now it opens sign-up carrying the builder.
+  const address = email("profiledoor");
+  await page.goto(`${BASE}/en/work-opportunities`);
+  const door = page.locator('[data-cta-id="work_opportunities_profile"]');
+  await expect(door).toHaveAttribute("href", "/en/auth/signup?next=%2Fdashboard%2Fprofile");
+  await door.click();
+  await page.waitForURL((url) => url.pathname === "/en/auth/signup", { timeout: 60_000 });
+  expect(new URL(page.url()).searchParams.get("next"), "the return path is carried into sign-up").toBe("/dashboard/profile");
+  await page.locator('input[type="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+  await onboard(page, "work", "Synthetic Door Worker");
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+  await expect(
+    page.locator('[data-testid="cv-import-upload"]').first(),
+    "the person lands where the profile and CV are made: upload or paste, review, confirm",
+  ).toBeAttached({ timeout: 30_000 });
+});
+
 test("S-4. an address that already has an account is sent to sign in, not to a mail that never comes", async ({ page }) => {
   await page.goto(`${BASE}/en/auth/signup`);
   await page.locator('input[type="email"]').fill(email("worker"));

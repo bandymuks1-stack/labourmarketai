@@ -32,6 +32,11 @@ on:
       - "supabase/migrations/20261114100000_booking_refuses_closed_need_v1.sql"
       - "apps/web/lib/booking/**"
       - "apps/web/lib/onboarding/**"
+      # The worker profile door (S-3d): the public buttons and the sign-up
+      # return path they carry.
+      - "apps/web/lib/marketing/worker-profile-door.ts"
+      - "apps/web/app/*/(marketing)/work-opportunities/**"
+      - "apps/web/app/*/(marketing)/worker-intake/**"
       - "apps/web/components/app/onboarding-wizard.tsx"
       - "apps/web/components/app/worker-education-section.tsx"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
@@ -82,6 +87,11 @@ on:
       - "apps/web/app/*/onboarding/**"
       - "apps/web/app/*/dashboard/start/**"
       - "apps/web/lib/onboarding/**"
+      # The worker profile door (S-3d): the public buttons and the sign-up
+      # return path they carry.
+      - "apps/web/lib/marketing/worker-profile-door.ts"
+      - "apps/web/app/*/(marketing)/work-opportunities/**"
+      - "apps/web/app/*/(marketing)/worker-intake/**"
       - "apps/web/lib/invitations/signup-*"
       - "apps/web/components/app/login-form.tsx"
       - "apps/web/components/app/invite-panel.tsx"
