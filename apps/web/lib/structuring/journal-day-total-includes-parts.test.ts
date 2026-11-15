@@ -229,3 +229,52 @@ describe("the signal belongs to the figure it stands next to", () => {
     expect(s.fragments.filter((f) => f.time).map((f) => f.time!.value).sort((a, b) => a - b)).toEqual([2, 13]);
   });
 });
+
+/**
+ * Third review of #3355: when the person names the rest of the day
+ * themselves, those hours ARE the rest (the #1689 sum check reads them so
+ * too); a cue far back in a phrase is not a restatement; an after-work item is
+ * on top of the day.
+ */
+describe("the rest of the day, when the person names it", () => {
+  it.each([
+    ["the rest in the next sentence", "Dirbau 15 val., iš jų 2 val. koordinavimas. 13 val. programavau.", 15 * 60],
+    ["the same in English", "Worked 15 hours, of which 2 hours coordination. The other 13 hours programming.", 15 * 60],
+    ["the rest named with its work first", "Dirbau 8 val., iš jų 2 val. vairavau. Klijavau plyteles 6 val.", 8 * 60],
+    ["a cue far back in the phrase is not a restatement", "Ryte 4 val. Vakare didžiąją dalį laiko lauke 4 val.", 8 * 60],
+    ["an after-work item is on top of the day", "Dirbau 8 val., iš jų 2 val. vairavau, o po darbo 3 val. tvarkiau sandėlį.", 11 * 60],
+    ["after work, in English", "Worked 8 hours, of which 2 hours driving, and after work 3 hours in the warehouse.", 11 * 60],
+  ])("%s", (_name, text, expected) => {
+    expect(minutes(text)).toBe(expected);
+    expect(intakeMinutes(text)).toBe(expected);
+  });
+
+  it("a named rest adds up: the stated total matches and no unnamed rest is left", () => {
+    const s = extractJournalSuggestions("Dirbau 15 val., iš jų 2 val. koordinavimas. 13 val. programavau.");
+    expect(s.statedTotal).toMatchObject({ value: 15, includesParts: true, matchesFragments: true });
+    expect(s.fragments.filter((f) => f.time).map((f) => f.time!.value).sort((a, b) => a - b)).toEqual([2, 13]);
+    const fields = intakeWorkTimeFields("Dirbau 15 val., iš jų 2 val. koordinavimas. 13 val. programavau.", "2026-11-06");
+    expect(fields.quantity).toBeUndefined();
+  });
+
+  it("a later item that does not fill the rest is never folded in by size: the stated total is set aside visibly", () => {
+    const text = "Dirbau 15 val., iš jų 2 val. koordinavimas. 10 val. programavau.";
+    const s = extractJournalSuggestions(text);
+    expect(s.statedTotal).toMatchObject({ value: 15, includesParts: true, matchesFragments: false });
+    expect(s.fragments.some((f) => f.time?.value === 10)).toBe(true);
+    expect(intakeWorkTimeFields(text, "2026-11-06").quantity).toBe(String(15 * 60));
+  });
+
+  it("the person's own sum wins: items that add up to the rest are the rest (unchanged from main)", () => {
+    const text = "Dirbau 15 val., iš jų 2 val. koordinavimas. 12 val. programavau. Vakare dar 1 val. dažiau.";
+    expect(minutes(text)).toBe(15 * 60);
+    expect(extractJournalSuggestions(text).statedTotal).toMatchObject({ value: 15, matchesFragments: true });
+  });
+
+  it("an item said to be on top stays on top while the other items name the rest", () => {
+    const text = "Dirbau 15 val., iš jų 2 val. koordinavimas. 13 val. programavau. Vakare dar 1 val. dažiau.";
+    expect(minutes(text)).toBe(16 * 60);
+    expect(intakeMinutes(text)).toBe(16 * 60);
+    expect(extractJournalSuggestions(text).statedTotal).toMatchObject({ value: 15, includesParts: true, matchesFragments: false });
+  });
+});

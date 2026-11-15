@@ -851,10 +851,11 @@ const BRACKETED_DURATION_RX = new RegExp(
 const RESTATEMENT_CUE_RX =
   /(?<!\p{L})(?:įeina|ieina|įeinančios|įskaičiuot\p{L}*|iskaiciuot\p{L}*|dalis|dalį|dali|ne\s+(?:\p{L}+\s+){0,3}papildom\p{L}*|neprided\p{L}*|ne\s+prided\p{L}*|included|inclusive|is\s+part\s+of|are\s+part\s+of|part\s+of\s+the|not\s+(?:\p{L}+\s+){0,2}(?:extra|additional)|not\s+on\s+top|входят|входит|включен\p{L}*|не\s+дополнительно|inbegrepen|niet\s+extra|enthalten|inbegriffen|nicht\s+zusätzlich|wliczon\p{L}*|zawart\p{L}*|nie\s+dodatkow\p{L}*)(?!\p{L})/iu;
 /** Words that put a figure ON TOP of the day ("vakare dar 2 val.",
- *  "papildomai", "additionally", "дополнительно", "zusätzlich"): such an item
- *  is never read as a part of the stated total. */
+ *  "papildomai", "po darbo", "additionally", "after work", "дополнительно",
+ *  "после работы", "zusätzlich", "po pracy"): such an item is never read as
+ *  a part of the stated total, nor as its rest. */
 const EXTRA_WORK_RX =
-  /(?<!\p{L})(?:dar|papildomai|additionally|also|extra|plus|on\s+top|ещё|еще|дополнительно|nog|zusätzlich|zusaetzlich|dodatkowo)(?!\p{L})/iu;
+  /(?<!\p{L})(?:dar|papildomai|po\s+darbo|additionally|also|extra|plus|on\s+top|after\s+work|ещё|еще|дополнительно|после\s+работы|nog|na\s+het\s+werk|zusätzlich|zusaetzlich|nach\s+der\s+arbeit|nach\s+feierabend|dodatkowo|po\s+pracy)(?!\p{L})/iu;
 /** Words that mark a figure as the WHOLE day when it is said AGAIN: "iš
  *  viso 15", "kartu 15", "in total", "altogether", "всего", "insgesamt". */
 const RESTATED_TOTAL_WORD_RX =
@@ -863,6 +864,14 @@ const RESTATED_TOTAL_WORD_RX =
 /** A total word standing RIGHT in front of a figure: "iš viso 15", "kartu:
  *  15", "in total 15", "altogether 15". */
 const RESTATED_TOTAL_LEAD_RX = new RegExp(`(?:${RESTATED_TOTAL_WORD_RX.source})\\s*[:–-]?\\s*$`, "iu");
+/** A restatement cue standing RIGHT in front of a figure, with at most two
+ *  short linking words between: "įeina į 15", "dalis 15", "included in the
+ *  15", "входят в 15". One further back in the phrase speaks about something
+ *  else ("Vakare didžiąją dalį laiko lauke 4 val." is a 4-hour item). */
+const RESTATEMENT_CUE_LEAD_RX = new RegExp(
+  `(?:${RESTATEMENT_CUE_RX.source})\\s*[:–-]?\\s*(?:\\p{L}{1,3}\\s+){0,2}$`,
+  "iu",
+);
 
 /** Minutes back in the unit a person reads best. */
 function minutesAsTime(minutes: number): { value: number; unitSlug: "hours" | "minutes" } {
@@ -964,7 +973,7 @@ function containedTotal(
     const digit = f.rawPhrase.search(/\d/);
     const lead = digit > 0 ? f.rawPhrase.slice(0, digit) : "";
     if (
-      (equalsTotal && (RESTATEMENT_CUE_RX.test(lead) || RESTATED_TOTAL_LEAD_RX.test(lead))) ||
+      (equalsTotal && (RESTATEMENT_CUE_LEAD_RX.test(lead) || RESTATED_TOTAL_LEAD_RX.test(lead))) ||
       (equalsAnother && RESTATEMENT_CUE_RX.test(sentence) && sentenceNamesTheTotal)
     ) {
       restatements.add(f);
@@ -1001,6 +1010,24 @@ function containedTotal(
   if (parts.length === 0 && restatements.size === 0) return null;
 
   const restMin = totalMin - partsMin;
+  const partSet = new Set(parts);
+  const others = later.filter((f) => !restatements.has(f) && !partSet.has(f));
+  // The person may name the rest of the day themselves: in "Dirbau 15 val.,
+  // iš jų 2 val. koordinavimas. 13 val. programavau." the 13 hours ARE the
+  // rest, not 13 more. Items that add up to the rest exactly fill it — the
+  // person's own sum, read as the #1689 sum check reads it. Otherwise the
+  // items that do not say they are on top ("dar", "po darbo") fill it when
+  // they add up to it, and the ones that do stay on top.
+  const sumOf = (list: JournalFragmentSuggestion[]) => list.reduce((sum, f) => sum + minutesOf(f), 0);
+  const plain = others.filter((f) => !EXTRA_WORK_RX.test(f.rawPhrase));
+  const inside =
+    restMin > 0 && others.length > 0 && same(sumOf(others), restMin)
+      ? others
+      : restMin > 0 && plain.length > 0 && same(sumOf(plain), restMin)
+        ? plain
+        : [];
+  const insideSet = new Set(inside);
+  const restNamed = inside.length > 0;
   const out: JournalFragmentSuggestion[] = [];
   for (const f of fragments) {
     if (restatements.has(f)) continue;
@@ -1009,12 +1036,11 @@ function containedTotal(
       continue;
     }
     // The rest of the day, in the person's own words; nothing when the parts
-    // already fill it. It still names no work, so it stays `isUnknown` and the
-    // composer keeps asking the person to name it.
-    if (restMin > 0) out.push({ ...f, time: minutesAsTime(restMin) });
+    // (or the items the person named) already fill it. It still names no work,
+    // so it stays `isUnknown` and the composer keeps asking the person to name it.
+    if (restMin > 0 && !restNamed) out.push({ ...f, time: minutesAsTime(restMin) });
   }
-  const partSet = new Set(parts);
-  const onTop = later.some((f) => !restatements.has(f) && !partSet.has(f));
+  const onTop = others.some((f) => !insideSet.has(f));
   return {
     fragments: out,
     statedTotal: {
