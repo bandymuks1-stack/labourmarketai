@@ -243,7 +243,7 @@ body {
      `break-word` breaks a word ONLY when it would otherwise overflow, and it
      does not change min-content sizing, so normal text and table layout are
      untouched. Inherited, so it covers every surface; a box that must not
-     break (code, the identity-stage name) opts out explicitly. */
+     break (code) opts out explicitly. */
   overflow-wrap: break-word;
 }
 
@@ -637,10 +637,16 @@ html[data-consent-decided] [data-testid="analytics-consent-banner"] {
   .identity-stage .identity-portrait {
     width: clamp(84px, 24cqi, 120px) !important;
   }
+  /* A PERSON'S NAME IS NEVER CUT (layout walk 2026-11-15). The name used to
+     opt out of breaking; a long surname then ran past the stage's clipped
+     edge on the journal's card at 320-430 px, and the profile cut or
+     shortened it at 320-390 px. Now the name follows the stage's own width,
+     24 px from a 280 px stage down to 20 px on the tightest, and a word
+     breaks only when it alone is wider than the line. */
   .identity-stage h2 {
-    font-size: 1.5rem;
+    font-size: clamp(1.25rem, 8.6cqi, 1.5rem);
     line-height: 1.1;
-    overflow-wrap: normal;
+    overflow-wrap: break-word;
     word-break: normal;
   }
 }
