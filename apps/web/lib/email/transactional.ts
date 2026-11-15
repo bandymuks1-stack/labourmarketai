@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { SendDiagnostics } from "@/lib/email/delivery-failure";
 import { sendSmtp, smtpConfigFromEnv, type SmtpConfig } from "@/lib/email/smtp";
 import { isSyntheticQaPlusAddress } from "@/lib/email/synthetic-address";
 
@@ -29,7 +30,7 @@ export type TransactionalEmail = {
 };
 
 export type TransactionalSendResult =
-  | { status: "sent" }
+  | { status: "sent"; messageId?: string; detail?: SendDiagnostics }
   /** The dev/test LOG provider accepted the message — nothing left the
    *  machine. Distinct from "sent" by design: no caller may ever render a
    *  "logged" outcome as a delivered email. */
@@ -38,7 +39,8 @@ export type TransactionalSendResult =
   /** A synthetic QA plus-address on our own domain (lib/email/synthetic-address.ts):
    *  nothing was sent, by design — neither "sent" nor a retryable failure. */
   | { status: "suppressed_synthetic_address" }
-  | { status: "failed"; reason: string };
+  /** `detail`: codes-only diagnostics (lib/email/delivery-failure.ts) — never an address or reply text. */
+  | { status: "failed"; reason: string; detail?: SendDiagnostics };
 
 const SEND_TIMEOUT_MS = 10_000;
 
@@ -116,9 +118,9 @@ export async function sendTransactionalEmail(
   if (cfg.provider === "smtp") {
     // `sent` only after the mail server answered 250 to the end of DATA.
     const r = await sendSmtp(cfg.smtp, { to: message.to, subject: message.subject, text: message.text });
-    if (r.status === "sent") return { status: "sent" };
+    if (r.status === "sent") return { status: "sent", messageId: r.messageId, detail: r.detail };
     if (r.status === "not_configured") return { status: "not_configured" };
-    return { status: "failed", reason: r.reason };
+    return { status: "failed", reason: r.reason, detail: r.detail };
   }
 
   const controller = new AbortController();
@@ -163,11 +165,22 @@ export async function sendTransactionalEmail(
       body: request.body,
       signal: controller.signal,
     });
-    if (res.ok) return { status: "sent" };
+    const http = (code: number | null): SendDiagnostics => ({
+      provider: cfg.provider,
+      step: "http",
+      replyCode: code === null ? null : String(code),
+      messageTransmitted: true,
+    });
+    if (res.ok) return { status: "sent", detail: http(res.status) };
     // Never log the address or the key — status code only.
-    return { status: "failed", reason: `provider_status_${res.status}` };
+    return { status: "failed", reason: `provider_status_${res.status}`, detail: http(res.status) };
   } catch {
-    return { status: "failed", reason: "transport_error" };
+    // The request may already have reached the provider: the outcome is unknown.
+    return {
+      status: "failed",
+      reason: "transport_error",
+      detail: { provider: cfg.provider, step: "http", messageTransmitted: true },
+    };
   } finally {
     clearTimeout(timer);
   }

@@ -28,7 +28,11 @@ describe("a team offer reaches the receiving company", () => {
 
   it("scouting opens the need with a waiting team offer first, and badges it", () => {
     const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
-    expect(page).toMatch(/request \?\?\s*mostTeamOffered \?\?\s*mostAwaited \?\?/);
+    // A team offer still comes first; an agency's offered candidate now sits
+    // between it and a worker's interest (lib/agency/open-candidate-offers.test.ts).
+    expect(page).toMatch(
+      /request \?\?\s*mostTeamOffered \?\?\s*(mostAgencyOffered \?\?\s*)?mostAwaited \?\?/,
+    );
     expect(page).toContain("scouting-demand-team-offers-");
   });
 });

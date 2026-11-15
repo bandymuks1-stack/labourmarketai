@@ -254,11 +254,14 @@ describe("the band owns no vacancy logic of its own", () => {
     expect("landing-open-jobs-band.tsx").not.toMatch(/-card\.tsx$/);
   });
 
-  it("the page mounts it between the market and the starting contexts", () => {
+  it("the page mounts it inside the market block, compact, from the one snapshot", () => {
+    // Landing V3 (owner, 2026-11-13): two or three real adverts sit directly
+    // under the market sentence; with no live sample the block shows the link
+    // to the search instead — never a placeholder advert.
     const focus = readFileSync(join(WEB, "app/[locale]/focus-landing/focus-landing.tsx"), "utf8");
-    const i = (c: string) => focus.search(new RegExp(`<${c}[\\s/>]`));
-    expect(i("LandingOpenJobsBand")).toBeGreaterThan(focus.indexOf("</PublicMarketMapBand>"));
-    expect(i("LandingOpenJobsBand")).toBeLessThan(i("StartingContextsBand"));
-    expect(focus).toMatch(/<LandingOpenJobsBand sample=\{market\.sample\}/);
+    expect(focus).toMatch(/<LandingMarketFacts[\s\S]*?adverts=\{[\s\S]*?<LandingOpenJobsBand sample=\{market\.sample\} locale=\{activeLocale\} compact \/>/);
+    expect(focus).toMatch(/market\.sample\.basis === "live" && market\.sample\.vacancies\.length > 0/);
+    const band = readFileSync(join(WEB, "components/marketing/landing-open-jobs-band.tsx"), "utf8");
+    expect(band).toMatch(/sample\.vacancies\.slice\(0, 3\)/);
   });
 });

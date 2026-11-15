@@ -110,7 +110,7 @@ export async function loadEmployerVisibilityForChat(): Promise<EmployerVisibilit
       state,
       legal: PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)],
       preview: discoverabilityPreviewFields(preview, tc),
-      labels: discoverabilityConsentLabels(tc),
+      labels: discoverabilityConsentLabels(tc, locale),
     },
   };
 }

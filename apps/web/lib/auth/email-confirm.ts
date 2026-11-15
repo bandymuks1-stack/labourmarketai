@@ -180,6 +180,24 @@ export function classifyExchangeFailure(
   return verifierMissing ? "confirmed_sign_in" : "exchange_failed";
 }
 
+/** What the callback reports when it was reached with nothing to verify. */
+export type MissingCodeOutcome = "missing_code" | "confirm_link_opened";
+
+/**
+ * A callback URL with no `?code=` and no `token_hash` normally means a broken
+ * provider round trip. On the E-MAIL CONFIRMATION return it has an ordinary
+ * cause: a RE-SENT confirmation link. The client library's `resend` carries no
+ * PKCE code challenge, so the auth server confirms the address and returns
+ * with the session in the URL fragment, which no server ever sees. The address
+ * is then confirmed and the person only has to sign in — telling them "the
+ * provider bounced back without a sign-in code" reports a fault that did not
+ * happen. Nothing is granted here: the outcome only chooses the message, and
+ * the copy says "most likely" because the server cannot see the proof.
+ */
+export function classifyMissingCode(emailConfirmFlow: boolean): MissingCodeOutcome {
+  return emailConfirmFlow ? "confirm_link_opened" : "missing_code";
+}
+
 /** Seconds a person must wait before asking for another confirmation mail —
  *  mirrors GoTrue's default per-address e-mail rate limit so the UI never
  *  offers an action the server would refuse. */
