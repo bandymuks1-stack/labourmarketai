@@ -23,7 +23,7 @@ const WORKER: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "tone
 
 const COMPANY: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "tone">> = [
   { key: "need", icon: "need", href: "/company-need" },
-  { key: "people", icon: "people", href: "/dashboard/talent" },
+  { key: "people", icon: "people", href: "/dashboard/company/scouting" },
   { key: "team", icon: "team", href: "/dashboard/company/people" },
   { key: "project", icon: "project", href: "/dashboard/projects" },
   { key: "work", icon: "work", href: "/dashboard/journal" },
@@ -42,7 +42,7 @@ export async function WorkLifecycleSection({ audience }: { audience: "workers" |
   return (
     <WorkLifecycleGraph
       title={audience === "workers" ? t("title") : t("titleCompany")}
-      hint={t("hint")}
+      hint={audience === "workers" ? t("hintWorkers") : t("hint")}
       openLabel={t("open")}
       listLabel={t("list")}
       pendingLabel={t("pending")}

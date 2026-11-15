@@ -5,6 +5,7 @@ import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { CommandFinder } from "@/components/app/command-finder";
+import { usePathname } from "@/lib/i18n/navigation";
 import { OverlayPortal } from "@/components/ui/anchored-overlay";
 
 /**
@@ -47,6 +48,14 @@ export function HeaderSearch({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  // Close once a result has taken the person somewhere — by Enter, a click or
+  // any other navigation. Without this the overlay stayed open over the page
+  // it had just opened (production audit 2026-10-23).
+  const pathname = usePathname();
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   // Focus the finder input as soon as the overlay mounts it.
   useEffect(() => {

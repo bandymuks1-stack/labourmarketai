@@ -196,7 +196,7 @@ auto-merge is inert and Claude Code falls back to waiting for CI then merging.
 
 ## Branch strategy
 
-- `main` — production branch, auto-deployed by Vercel
+- `main` — production branch, deployed to the VPS by `.github/workflows/deploy-vps.yml` after Quality Gates passes on `main`
 - Small fixes (≤3 files OR ≤200 LOC): commit directly to `main` is OK
 - Larger features (>3 files OR new module): use feature branch
   - Claude Code: `feat/cc/<short-name>` or `fix/cc/<short-name>`
@@ -230,6 +230,34 @@ Keep direct AND indirect/potential capability discovery, growth and reskilling p
 sector; keep evidence states apart (recorded / declared / potential / confirmed / certified). Fix a
 wrong label or a false certainty without disabling inference. See
 `docs/DECISIONS/0023-living-cv-direct-indirect-potential-capabilities.md`.
+
+## One person, one continuous professional history (binding, decision 0025)
+
+A person's experience is one history, whoever recorded the work and under whichever role: journal
+entries, organization-supplied history (day and period records) and the person's relationships to
+organizations (employment, ownership, management, with the organization's earlier business periods).
+Every surface reads `lib/journal/professional-experience.ts` — one total, every work hour once, no
+invented days, provenance and confirmation state visible inside it, roles without hours, UNKNOWN never
+zero. Never attribute an organization's records about other people to a leader. See
+`docs/DECISIONS/0025-one-person-one-continuous-professional-history.md`.
+
+## Internal validity rule (binding, owner P0 2026-10-22, all projects)
+
+An INTERNAL approval, owner decision, internal contract or temporary internal permission is valid
+for **12 months** and renews automatically in 12-month terms, without the owner, unless the owner set
+another term for that specific item. No 24 h / 72 h / 7-day / 30-day internal expiry otherwise.
+Renewal is TIME only — never scope, rate, source or authority, and never past a revocation.
+New code takes the term from the ONE central module
+`apps/web/lib/authority/internal-authority-validity.mjs` (`rollingInternalExpiryIso`,
+`INTERNAL_AUTHORITY_TERM_*`; plain ESM so the CI gate on Node 20 can import it, typed by its
+`.d.mts`) — never a new hard-coded date or short TTL, never a second copy. First consumer: the
+product gate's scoped owner waivers (`.github/scripts/owner-waivers.mjs`: `approvedAt` + rolling
+term; only an owner-set `ownerSetExpiresAt` expires by date).
+It NEVER re-dates: fact freshness (advert / vacancy recency, verification age, measured data),
+external legal permits, certificates and credential validity, OAuth / API / session tokens and keys,
+signed URLs, invitation / magic / password-reset links, one-shot security codes, confirmation tokens,
+anti-replay windows, payment / billing items and value grants, or anything user-facing security.
+When unsure whether something is internal authority or security / fact freshness: leave it.
 
 ## Policy overrides
 

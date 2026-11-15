@@ -2,6 +2,10 @@
 
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import {
+  candidateProfileForContact,
+  readDiscoverableWorkers,
+} from "@/lib/visibility/discoverable-workers";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import { canStartCommunicationOrBooking } from "@/lib/visibility/worker-profile-visibility";
@@ -136,11 +140,25 @@ export async function requestWorkerConversationAction(input: {
 
   // 3) Worker contactable — resolve availability + the messaging identity
   //    (profile_id) server-side ONLY. profile_id never leaves this function.
-  const { data: worker } = await asAny(supabase)
+  // The row for a related worker; the anonymous projection for one found through discovery.
+  const { data: related } = await asAny(supabase)
     .from("workers")
     .select("profile_id, availability_status, available_from")
     .eq("id", workerId)
     .maybeSingle();
+  const discovered = related
+    ? null
+    : ((await readDiscoverableWorkers(supabase, [workerId])).get(workerId) ?? null);
+  // A discovered worker's start date may be withheld by the plan; the rule needs only whether one is set.
+  const worker: { availability_status: string | null; available_from: string | null } | null =
+    related ??
+    (discovered
+      ? {
+          availability_status: discovered.availability_status,
+          available_from:
+            discovered.available_from ?? (discovered.has_available_from ? "set" : null),
+        }
+      : null);
   const canContact = canStartCommunicationOrBooking({
     availabilityStatus: worker?.availability_status ?? null,
     availableFrom: worker?.available_from ?? null,
@@ -149,7 +167,10 @@ export async function requestWorkerConversationAction(input: {
   const decision = evaluateCommunicationRequest({ ownsDemand, shortlisted, canContact });
   if (decision !== "allowed") return { ok: false, reason: decision };
 
-  const workerProfileId = worker?.profile_id as string | null;
+  // A found worker's profile id only through the shortlist/interest door of THIS demand.
+  const workerProfileId =
+    (related?.profile_id as string | null | undefined) ??
+    (worker ? await candidateProfileForContact(supabase, workerId, requestId) : null);
   if (!workerProfileId) return { ok: false, reason: "worker_unavailable" };
 
   // Neutral subject from the demand title — no PII, no fabricated content.

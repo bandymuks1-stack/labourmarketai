@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
-import { listProjectAssignments } from "@/lib/projects/projects";
+import { listProjectAssignmentsForProjects } from "@/lib/projects/projects";
 import { listProjectMap } from "@/lib/projects/map";
 import { getProjectsProgress } from "@/lib/projects/progress";
 import { listManagedWorkers, listCompanyRosterWorkers } from "@/lib/instructions/instructions";
@@ -33,7 +35,7 @@ import {
 } from "@/lib/projects/projects";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { listOrganizationMembers } from "@/lib/company/memberships";
-import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
+import { getProjectPhotoCounts } from "@/lib/journal/project-gallery";
 import {
   readCompanyGalleryLabels,
   readWorkObjectsLabels,
@@ -48,12 +50,18 @@ import {
   getAssignableTeams,
   getProjectTeamAssignments,
 } from "@/lib/projects/team-assignment";
-import { MapPin } from "lucide-react";
+import { Archive, FolderKanban, FolderPlus, Images, MapPin, MessagesSquare, UserPlus, UsersRound } from "lucide-react";
+import { PremiumActionDeck } from "@/components/ui/premium-action-card";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { type Role } from "@/lib/auth/actions";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/projects");
+
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +92,9 @@ export default async function ProjectsPage({
   const t = await getTranslations("projects");
   const tRooms = await getTranslations("companyActionRooms");
   const tDisclosure = await getTranslations("common.disclosure");
+  // The deck names a section with the SECTION'S OWN title (one name per thing).
+  const tObjects = await getTranslations("workObjects");
+  const tGallery = await getTranslations("companyGallery");
 
   const supabase = await createClient();
   const {
@@ -91,11 +102,9 @@ export default async function ProjectsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role = (profile?.active_role as Role) ?? "worker";
   // The Work door of the ACTIVE organization opens for its governance
   // members too (capability matrix P1, 2026-09-23): a manager whose acting
@@ -110,10 +119,12 @@ export default async function ProjectsPage({
   // the acting identity is company-family or that workspace opens the company
   // space; a plain worker in an employee workspace is answered without them.
   const workspace = await getWorkspaceContext();
-  const employerCtx =
-    MANAGER_ROLES.has(role) || workspaceOpensCompanySpace(workspace)
-      ? await resolveEmployerCompanyContext()
-      : null;
+  const opensCompanySpace = MANAGER_ROLES.has(role) || workspaceOpensCompanySpace(workspace);
+  // The admin signal is request-cached; on the company path it is read beside
+  // the employer resolver instead of after it (one round trip fewer).
+  const [employerCtx, isPlatformAdmin] = opensCompanySpace
+    ? await Promise.all([resolveEmployerCompanyContext(), getSessionIsAdmin()])
+    : ([null, false] as const);
   if (!MANAGER_ROLES.has(role) && employerCtx?.kind !== "ok") {
     // RC2 role-aware routing (F11): a worker who lands here gets THEIR OWN
     // projects (real assignments under RLS), never a dead "managers only"
@@ -224,7 +235,6 @@ export default async function ProjectsPage({
   // project's organization when the worker is on the ACTIVE roster of the
   // company that owns the project. The form offers exactly that and nothing
   // wider; the database still decides every write.
-  const isPlatformAdmin = await getSessionIsAdmin();
   const assignScope = rosterAssignScope({
     governs:
       employerCtx?.kind === "ok" &&
@@ -236,50 +246,48 @@ export default async function ProjectsPage({
     hasCompanyContext: employerCtx?.kind === "ok",
   });
   const rosterAssignable = assignScope !== "none";
+  // Wave B — every read that needs only the session and the company context.
+  // (2026-10-19 perf: the page ran ~8 sequential waves; now B, C, D.)
   const [
-    allProjects,
-    workers,
-    engagementResult,
-    workObjectsRead,
-    managedProjects,
-    orgMembers,
-    tDoors,
-    workObjectsLabels,
-    companyGalleryLabels,
-    projectTotals,
+    [
+      allProjects,
+      workers,
+      engagementResult,
+      workObjectsRead,
+      managedProjects,
+      orgMembers,
+      tDoors,
+      workObjectsLabels,
+      companyGalleryLabels,
+      projectTotals,
+    ],
+    // The projects card the company hub used to carry (count · structurally
+    // ready · the honest linking note · create) — now beside the projects it
+    // counts. Read-only: `getCompanyProjectContext` performs no writes.
+    projectContext,
+    tOps,
+    assignableTeams,
   ] = await Promise.all([
-    listProjectMap({ finishedPage }),
-    assignScope === "own-company-roster" && ownCompanyId
-      ? listCompanyRosterWorkers(ownCompanyId)
-      : listManagedWorkers(),
-    // Accepted-booking engagement candidates (bridge v1) — a SEPARATE list,
-    // never merged into the roster read; empty + honest until the owner
-    // applies migration 20260723120000.
-    listBookingEngagementWorkers(),
-    getOrgWorkObjects(),
-    ownCompanyId ? listManagedProjects() : Promise.resolve([]),
-    ownCompanyId ? getOrgMembersData("company", ownCompanyId) : Promise.resolve(null),
-    getTranslations("organizationDoors"),
-    readWorkObjectsLabels(),
-    readCompanyGalleryLabels(),
-    countManagedProjects(),
-  ]);
-  // The projects card the company hub used to carry (count · structurally
-  // ready · the honest linking note · create) — now beside the projects it
-  // counts. Read-only: `getCompanyProjectContext` performs no writes.
-  const [projectContext, tOps] = await Promise.all([
+    Promise.all([
+      listProjectMap({ finishedPage }),
+      assignScope === "own-company-roster" && ownCompanyId
+        ? listCompanyRosterWorkers(ownCompanyId)
+        : listManagedWorkers(),
+      // Accepted-booking engagement candidates (bridge v1) — a SEPARATE list,
+      // never merged into the roster read; empty + honest until the owner
+      // applies migration 20260723120000.
+      listBookingEngagementWorkers(),
+      getOrgWorkObjects(),
+      ownCompanyId ? listManagedProjects() : Promise.resolve([]),
+      ownCompanyId ? getOrgMembersData("company", ownCompanyId) : Promise.resolve(null),
+      getTranslations("organizationDoors"),
+      readWorkObjectsLabels(),
+      readCompanyGalleryLabels(),
+      countManagedProjects(),
+    ]),
     getCompanyProjectContext(ownCompanyId),
     getTranslations("companyOps"),
-  ]);
-  const [orgMembersForObjects, companyGalleryProjects] = await Promise.all([
-    orgMembers ? listOrganizationMembers(orgMembers.orgId) : Promise.resolve(null),
-    Promise.all(
-      managedProjects.slice(0, 12).map(async (p) => ({
-        projectId: p.id,
-        title: p.title,
-        photoCount: (await getProjectGallerySummary(p.id)).photoCount,
-      })),
-    ),
+    getAssignableTeams(),
   ]);
 
   // Train D — archived filtering: a COMPLETED project is finished work.
@@ -290,6 +298,35 @@ export default async function ProjectsPage({
   const archivedProjects = allProjects.filter((p) => p.status === "completed");
   const activeProjects = allProjects.filter((p) => p.status !== "completed");
   const projects = showArchived ? archivedProjects : activeProjects;
+  const activeIds = activeProjects.map((p) => p.id);
+  const galleryProjects = managedProjects.slice(0, 12);
+
+  // Wave C — everything keyed by the project list read in wave B, at once:
+  // members for the objects register, gallery photo counts, Train D derived
+  // progress (tasks + stages done/total, computed at read time; no stored
+  // number anywhere), ONE read for every active project's assignments (was
+  // one per project), and WRK-6 teams as ONE assignment per project.
+  const [
+    orgMembersForObjects,
+    photoCounts,
+    progressById,
+    assignmentsByProject,
+    teamAssignmentsRead,
+    assignableTasks,
+  ] = await Promise.all([
+    orgMembers ? listOrganizationMembers(orgMembers.orgId) : Promise.resolve(null),
+    getProjectPhotoCounts(galleryProjects.map((p) => p.id)),
+    getProjectsProgress(projects.map((p) => p.id)),
+    listProjectAssignmentsForProjects(activeProjects.map((p) => p.id)),
+    getProjectTeamAssignments(activeIds),
+    getAssignableTasks(activeIds),
+  ]);
+  const companyGalleryProjects = galleryProjects.map((p) => ({
+    projectId: p.id,
+    title: p.title,
+    photoCount: photoCounts.get(p.id) ?? 0,
+  }));
+
   // The toggle counts are REAL totals (head count, no row cap). The list is
   // read in two capped buckets, so when a bucket holds more than was loaded
   // the page says so; if the count itself is unreadable we fall back to the
@@ -302,32 +339,33 @@ export default async function ProjectsPage({
   const hasPrevPage = showArchived && finishedPage > 0;
   const hasNextPage = showArchived && pageStart + projects.length < shownTotal;
 
-  // Train D — derived progress (tasks + stages done/total, computed at
-  // read time; no stored number anywhere).
-  const progressById = await getProjectsProgress(projects.map((p) => p.id));
-
-  const withAssignments = await Promise.all(
-    activeProjects.map(async (p) => ({
-      ...p,
-      assignments: await Promise.all(
-        (await listProjectAssignments(p.id)).map(async (a) => ({
-          ...a,
-          // THE one photo rule (D1): the database decides; null = initials.
-          avatarUrl: a.workerId ? await getAvatarForVisibleWorker(a.workerId) : null,
-        })),
+  // Wave D — ONE avatar decision per distinct worker (a worker on five
+  // projects was asked five times). Same data, same RLS, same photo rule.
+  const workerIds = [
+    ...new Set(
+      [...assignmentsByProject.values()].flatMap((list) =>
+        list.map((a) => a.workerId).filter((id): id is string => Boolean(id)),
       ),
-    })),
+    ),
+  ];
+  const avatarByWorker = new Map(
+    await Promise.all(
+      // THE one photo rule (D1): the database decides; null = initials.
+      workerIds.map(async (id) => [id, await getAvatarForVisibleWorker(id)] as const),
+    ),
   );
+  const withAssignments = activeProjects.map((p) => ({
+    ...p,
+    assignments: (assignmentsByProject.get(p.id) ?? []).map((a) => ({
+      ...a,
+      avatarUrl: a.workerId ? (avatarByWorker.get(a.workerId) ?? null) : null,
+    })),
+  }));
 
   // WRK-6 — teams as ONE assignment per project, read from the one relation.
   // An unprovisioned or unreadable relation hides the team control; it is never
   // rendered as "no team assigned" (a failed read is not an empty list).
-  const activeIds = activeProjects.map((p) => p.id);
-  const [teamAssignmentsRead, assignableTeams, assignableTasks] = await Promise.all([
-    getProjectTeamAssignments(activeIds),
-    getAssignableTeams(),
-    getAssignableTasks(activeIds),
-  ]);
+  // (Read in waves B and C above.)
   const teamWork =
     teamAssignmentsRead.status === "ok"
       ? {
@@ -373,6 +411,11 @@ export default async function ProjectsPage({
     reservationCollidesTitle: t("assign.reservation.collidesTitle"),
     reservationNotBlocking: t("assign.reservation.notBlocking"),
     reservationUnknown: t("assign.reservation.unknown"),
+    reservationUnknownWhy: {
+      undated_window: t("assign.reservation.unknownWhy.undated_window"),
+      undated_commitment: t("assign.reservation.unknownWhy.undated_commitment"),
+      source_unreadable: t("assign.reservation.unknownWhy.source_unreadable"),
+    },
     reservationAlternativesTitle: t("assign.reservation.alternativesTitle"),
     reservationSwap: t("assign.reservation.swap"),
     reservationUndo: t("assign.reservation.undo"),
@@ -408,13 +451,7 @@ export default async function ProjectsPage({
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       {ownCompanyId ? <OrganizationDoorsServer ariaLabel={tDoors("label")} /> : null}
       <header className="flex flex-col gap-1">
-        <Link
-          href="/dashboard"
-          className="self-start text-xs font-medium text-brand-blue transition-colors hover:underline"
-          data-testid="back-to-action-center"
-        >
-          ← {tRooms("backToActions")}
-        </Link>
+        <PageBack href="/dashboard" data-testid="back-to-action-center">{tRooms("backToActions")}</PageBack>
         <p
           className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="company-context"
@@ -422,7 +459,8 @@ export default async function ProjectsPage({
           {tRooms("projects.context")}
         </p>
         <PageTitle>{t("title")}</PageTitle>
-        <p className="text-sm leading-relaxed text-text-secondary">
+        {/* The intro is for the wider screen; on a phone the cards say it. */}
+        <p className="hidden text-sm leading-relaxed text-text-secondary sm:block">
           {t("intro")}
         </p>
       </header>
@@ -433,9 +471,38 @@ export default async function ProjectsPage({
           error (a platform admin, whom `is_admin()` admits, reads nothing). */}
       {employerCtx?.kind === "ok" ? <ManagerScopeNotice role={employerCtx.role} /> : null}
 
+      {/* WHAT YOU CAN DO HERE (owner design direction + review 2026-10-26).
+          Two tiers, never one flat grid: the three things a person comes here
+          to do as raised FEATURE cards (one primary — a new project), and the
+          secondary tools as low COMPACT cards. The active/finished switch is
+          navigation, so it stays a segmented control by the list below. Every
+          card leads to an existing route or to the section that does the
+          work; nothing was removed. */}
+      {ownCompanyId || employerCtx?.kind === "ok" ? (
+        <div className="flex flex-col gap-2 sm:gap-3">
+          <PremiumActionDeck
+            ariaLabel={t("deck.label")}
+            testId="projects-action-deck"
+            items={[
+              { key: "new", href: "/dashboard/company/projects/new", icon: FolderPlus, label: t("deck.new"), hint: t("deck.newHint"), emphasis: "primary", wide: true, testId: "company-action-primary" },
+              { key: "assign", href: rosterAssignable ? "#assign-worker" : "#project-teams", icon: UserPlus, label: t("deck.assign"), hint: t("deck.assignHint"), testId: "projects-deck-assign" },
+              { key: "teams", href: "#project-teams", icon: UsersRound, label: t("deck.teams"), hint: t("deck.teamsHint"), testId: "projects-deck-teams" },
+            ]}
+          />
+          <PremiumActionDeck
+            ariaLabel={t("deck.toolsLabel")}
+            size="compact"
+            testId="projects-tools-deck"
+            items={[
+              { key: "chat", href: "/dashboard/communication", icon: MessagesSquare, label: t("deck.chat"), testId: "projects-deck-chat" },
+              { key: "places", href: "#company-locations", icon: MapPin, label: tObjects("title"), testId: "projects-deck-places" },
+              { key: "gallery", href: "#company-gallery", icon: Images, label: tGallery("title"), testId: "projects-deck-gallery" },
+            ]}
+          />
+        </div>
+      ) : null}
       <CompanyActionNextActions
         room="projects"
-        primaryHref="/dashboard/company/projects/new"
         extra={
           /* WAGON 6 operating-model line, in the room's ONE disclosure. */
             <p
@@ -473,6 +540,9 @@ export default async function ProjectsPage({
           <p className="text-meta leading-relaxed text-text-muted" data-testid="company-ops-projects-linking">
             {tOps("projectsLinkingNote")}
           </p>
+          {/* Kept on the owner's order 2026-11-03 ("nepašalinant veikiančios
+              projektų kortelės create context funkcijos"): the card's own
+              create-context link stays beside the page's primary tile. */}
           <Link
             href="/dashboard/company/projects/new"
             className="w-fit rounded-md border border-brand-blue/40 px-3 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
@@ -487,30 +557,32 @@ export default async function ProjectsPage({
       <ConfirmPulse />
 
       {/* Train D — active/archived switch: finished work stays reachable,
-          never mixed into the operating map. */}
+          never mixed into the operating map. Navigation, so a segmented
+          control — not an action card. */}
       <nav
-        className="flex flex-wrap items-center gap-3"
+        className="inline-flex w-fit items-center gap-1 rounded-full border border-ink-600 bg-ink-800/60 p-1"
         aria-label={t("archiveToggle.label")}
         data-testid="projects-archive-toggle"
       >
         <Link
           href="/dashboard/projects"
-          aria-current={!showArchived ? "true" : undefined}
-          className={`text-xs font-semibold ${!showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
+          aria-current={!showArchived ? "page" : undefined}
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${!showArchived ? "bg-brand-blue/15 text-text-primary ring-1 ring-brand-blue/50" : "text-text-muted hover:text-text-primary"}`}
           data-testid="projects-view-active"
         >
-          {t("archiveToggle.active")} ({activeTotal})
+          <FolderKanban className="h-4 w-4" aria-hidden />
+          {t("archiveToggle.active")} <span className="tabular-nums text-text-muted">{activeTotal}</span>
         </Link>
         <Link
           href={"/dashboard/projects?archived=1" as "/dashboard"}
-          aria-current={showArchived ? "true" : undefined}
-          className={`text-xs font-semibold ${showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
+          aria-current={showArchived ? "page" : undefined}
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${showArchived ? "bg-brand-blue/15 text-text-primary ring-1 ring-brand-blue/50" : "text-text-muted hover:text-text-primary"}`}
           data-testid="projects-view-archived"
         >
-          {t("archiveToggle.archived")} ({archivedTotal})
+          <Archive className="h-4 w-4" aria-hidden />
+          {t("archiveToggle.archived")} <span className="tabular-nums text-text-muted">{archivedTotal}</span>
         </Link>
       </nav>
-
       {partialView ? (
         <p
           className="text-xs text-text-muted"
@@ -565,7 +637,7 @@ export default async function ProjectsPage({
       />
 
       {/* DRAFT — the gated create/assign flow (human decision, RPC writes). */}
-      <section className="flex flex-col gap-3" data-testid="draft-section">
+      <section id="project-teams" className="flex scroll-mt-20 flex-col gap-3" data-testid="draft-section">
         <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("draft.title")}
         </h2>

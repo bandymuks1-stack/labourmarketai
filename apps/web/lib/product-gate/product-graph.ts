@@ -201,7 +201,7 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
     definition: "Units of current and future work that people and teams are assigned to.",
     worldElement: "projects",
     domains: ["work_execution"],
-    capabilities: ["WRK-1", "WRK-3", "WRK-5", "WRK-7", "WRK-9", "WRK-10"],
+    capabilities: ["WRK-1", "WRK-3", "WRK-5", "WRK-7", "WRK-9", "WRK-10", "WRK-11"],
   },
   {
     id: "sites",

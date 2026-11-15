@@ -117,15 +117,23 @@ the §10 Lego slug-registry rule — no hardcoded enums.
 - **Worker intake → profile draft** (`worker_profile`): turn rough text into a
   structured draft profile + suggested skills + headline + missing fields.
 - **Work journal → structure** (`work_journal`).
-- **Skill evidence → candidate levels** (`skill_evidence`).
-- **Documents/readiness → plain explanation** (`document_assistant`).
+- ~~**Skill evidence → candidate levels** (`skill_evidence`).~~ Retired
+  2026-10-25 (owner decision, row 10.11): `lib/journal/skill-pipeline.ts` +
+  `work_journal`'s possible skills. See docs/ai/INTERNAL_LLM_AGENTS_V1.md §4.1.
+- ~~**Documents/readiness → plain explanation** (`document_assistant`).~~
+  Retired 2026-10-25: `lib/conversation/documents-gap.ts` answers it.
 - **Company need → normalized vacancy draft** (`company_need`): clean the free
   text, surface missing fields + internal matching criteria + readiness blockers.
-- **Country readiness → sourced checklist** (`country_readiness`, evidence-required).
+- **Country readiness → sourced checklist** (`country_readiness`, evidence-required;
+  since 2026-10-25 a cited plain-language reading of the matrix on
+  `/labour-market/[country]`).
 - **Matching → explanation layer** (`matching_explanation`): fit/gaps/blockers.
-- **Booking → risk explanation** (`booking_risk`).
-- **Admin → risk queue + candidate notes** (`admin_risk`).
-- **Support → next action** (`support_onboarding`); **copy** (`translation_copy`).
+- ~~**Booking → risk explanation** (`booking_risk`).~~ Retired 2026-10-25:
+  the booking-conflict RPC + `lib/planning/roster-conflicts.ts`.
+- ~~**Admin → risk queue + candidate notes** (`admin_risk`).~~ Retired
+  2026-10-25: `lib/admin/readiness-overview.ts`; no model ranks people.
+- ~~**Support → next action** (`support_onboarding`).~~ Retired 2026-10-25:
+  `lib/dashboard/next-action.ts`. **Copy** (`translation_copy`) stays.
 
 ## 9. Where AI cannot decide (hard limits)
 

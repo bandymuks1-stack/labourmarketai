@@ -29,13 +29,11 @@ function walk(dir: string, out: string[] = []): string[] {
 describe("a11y basics v1", () => {
   it("only the marketing layout renders a <main> landmark", () => {
     const root = join(web, "app", "[locale]", "(marketing)");
-    // The two /jobs pages are owner-waiver-scoped (product gate
-    // `public-acquisition-route-jobs`), so their <main> -> <div> fix travels
-    // in PR #1433; until that merges they are excluded here, NOT accepted.
-    const JOBS_PAGES_PENDING_1433 = [join("jobs", "page.tsx"), join("jobs", "[id]", "page.tsx")];
+    // The two /jobs pages had their own <main> inside the layout's (two main
+    // landmarks; found by the ai-off-honesty production walk, 2026-10-25).
+    // They are <div>s now and no page is excluded any more.
     const offenders = walk(root)
       .filter((p) => !p.endsWith(join("(marketing)", "layout.tsx")))
-      .filter((p) => !JOBS_PAGES_PENDING_1433.some((j) => p.endsWith(j)))
       .filter((p) => /<main[\s>]/.test(readFileSync(p, "utf8")))
       .map((p) => p.slice(root.length + 1));
     expect(offenders).toEqual([]);
@@ -81,9 +79,13 @@ describe("a11y basics v1", () => {
     expect(src).toMatch(/<input\s+id="journal-photo"\s+type="file"/);
   });
 
-  it("benefit cards use h2 (first heading level after the page h1)", () => {
+  it("benefit cards use h2 at page level and h3 only under a section h2", () => {
     const src = read("components/marketing/benefit-cards.tsx");
-    expect(src).not.toMatch(/<h3/);
-    expect(src).toMatch(/<h2/);
+    // Page level (directly under the page h1): h2. Nested inside a section that
+    // already carries its own h2 (`nested`): h3 — never a skipped level.
+    expect(src).toMatch(/const Title = nested \? "h3" : "h2";/);
+    expect(src).toMatch(/nested = false/);
+    const nestedCalls = read("components/marketing/role-enrichment.tsx");
+    expect(nestedCalls).toMatch(/<BenefitCards\s+nested\s/);
   });
 });

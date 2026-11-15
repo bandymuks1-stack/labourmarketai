@@ -35,16 +35,18 @@
  * by an innocent-looking edit.
  */
 import { join } from "node:path";
-import { writeFileSync } from "node:fs";
+import { chmodSync, writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 
 import { CANONICAL_HOST } from "../lib/domain/canonical";
 import {
+  PROD_QA_FRESH_IDENTITIES,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
   describeProdQaTarget,
 } from "../lib/testing/prod-qa-guard";
+import { findAuthUserByEmail } from "../lib/testing/prod-qa-find-user";
 import {
   STORAGE_TARGET_REFUSAL_CODE,
   UnsafeStorageTargetError,
@@ -128,6 +130,20 @@ async function main(): Promise<void> {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
+  // A FRESH identity is created by the owner only (owner decision 2026-10-26).
+  // A magic link for an address with no account could sign it up, so the mint
+  // checks first and refuses — a walk can never be the thing that creates it.
+  if (PROD_QA_FRESH_IDENTITIES.includes(target.email)) {
+    const existing = await findAuthUserByEmail(admin, target.email);
+    if (!existing) {
+      fail(
+        `${target.email} has not been created. Fresh identities are created by the ` +
+          "owner only (prod-qa-fresh-provision.yml); the walk never creates an account.",
+      );
+      return;
+    }
+  }
+
   const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
     type: "magiclink",
     email: target.email,
@@ -184,7 +200,9 @@ async function main(): Promise<void> {
         }));
 
   // Proven contained and ignored in step 3, before the session existed.
-  writeFileSync(out.path, JSON.stringify({ cookies, origins: [] }, null, 2));
+  // Owner-only (0600): the file holds a live session.
+  writeFileSync(out.path, JSON.stringify({ cookies, origins: [] }, null, 2), { mode: 0o600 });
+  chmodSync(out.path, 0o600);
 
   // Metadata only — never the token.
   const user = sess.session.user;

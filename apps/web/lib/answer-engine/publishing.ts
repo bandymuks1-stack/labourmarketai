@@ -153,10 +153,30 @@ export function getRegistryQuestion(id: string): CanonicalQuestion | undefined {
   return REGISTRY_BY_ID.get(id);
 }
 
+/**
+ * Canonical comparison form of a slug route param. Next 15 hands a page the
+ * PERCENT-ENCODED segment during static prerender ("priv%C3%A9" for "privé"),
+ * so an exact compare against the raw content slug misses and the prerendered
+ * page is cached as a 404. Decode (tolerating malformed escapes) and NFC-normalize
+ * both sides so the encoded, raw and NFD forms of one slug all resolve.
+ */
+export function normalizeSlug(slug: string): string {
+  let s = slug;
+  try {
+    s = decodeURIComponent(slug);
+  } catch {
+    // Malformed percent-escape: compare the raw segment as given.
+  }
+  return s.normalize("NFC");
+}
+
 /** Resolve a localized slug to its indexable answer in a locale (or null). */
 export function resolveSlug(slug: string, locale: ActiveLocale): LocalizedAnswer | null {
-  if (RESERVED_QUESTION_SLUGS.has(slug)) return null;
-  const a = ANSWERS.find((x) => x.locale === locale && x.localizedSlug === slug);
+  const wanted = normalizeSlug(slug);
+  if (RESERVED_QUESTION_SLUGS.has(wanted)) return null;
+  const a = ANSWERS.find(
+    (x) => x.locale === locale && x.localizedSlug.normalize("NFC") === wanted,
+  );
   if (!a || !isIndexable(a.canonicalQuestionId, locale)) return null;
   return a;
 }
@@ -194,6 +214,18 @@ export function publishedCategories(locale: ActiveLocale): AnswerCategoryKey[] {
     if (isIndexable(q.canonicalQuestionId, locale)) set.add(q.category);
   }
   return [...set];
+}
+
+/** Locales in which a category page has content (at least one indexable
+ *  question) — the only locales that may be named as its hreflang alternates. */
+export function localesPublishingCategory(category: AnswerCategoryKey): ActiveLocale[] {
+  return ANSWER_ENGINE_LOCALES.filter((l) => publishedCategories(l).includes(category));
+}
+
+/** Locales in which the questions hub has anything to list. A locale whose
+ *  answers are all still awaiting review (sv on 2026-11-12) is not one. */
+export function localesPublishingAnyAnswer(): ActiveLocale[] {
+  return ANSWER_ENGINE_LOCALES.filter((l) => publishedCategories(l).length > 0);
 }
 
 /**

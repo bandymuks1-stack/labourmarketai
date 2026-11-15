@@ -14,18 +14,21 @@ import { Platform } from "react-native";
  * body text that stays legible in daylight.
  */
 
+// Values restated from apps/web/app/globals.css (dark theme) — the black/gold brand.
+// 2026-10-18: this file still carried the pre-gold navy/blue palette, so the native
+// sign-in rendered a blue primary button on navy while the web is obsidian + gold.
 export const theme = {
   color: {
-    background: "#0B0E14",
-    surface: "#141922",
-    surfaceRaised: "#1C2330",
-    border: "#2A3342",
-    text: "#F2F5F9",
-    textMuted: "#9AA6B8",
-    accent: "#4C8DFF",
-    accentText: "#04070D",
-    warning: "#F2B441",
-    danger: "#FF6B6B",
+    background: "#070706", // --c-ink-900 obsidian, the application ground
+    surface: "#151513", // --c-ink-800 graphite, cards and panels
+    surfaceRaised: "#1D1D1A", // --c-ink-700 nested panel
+    border: "#767065", // --c-ink-500 control boundary (3:1+ for inputs, WCAG 1.4.11)
+    text: "#F5F1E8", // --c-text-primary warm ivory
+    textMuted: "#A39C8D", // --c-text-muted
+    accent: "#D4AF37", // --c-brand-blue (resolves to metallic gold)
+    accentText: "#0A0A0A", // --c-text-on-brand
+    warning: "#FFA552", // --c-state-amber
+    danger: "#FF5C5C", // --c-state-danger
   },
   space: {
     xs: 4,

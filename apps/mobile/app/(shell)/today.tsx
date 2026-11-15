@@ -15,6 +15,7 @@ import { TodayFigures } from "../../src/screens/work-figures";
 import { Body, Button, Divider, Title } from "../../src/ui/primitives";
 import { theme } from "../../src/ui/theme";
 import { useCapability } from "../../src/use-capability";
+import { useReloadOnReturn } from "../../src/use-reload-on-return";
 import { useProfile } from "../../src/profile-provider";
 
 const RECENT_LIMIT = { limit: 5 } as const;
@@ -49,6 +50,10 @@ export default function Screen() {
     WEEK_SCOPE,
   );
   const journal = useCapability<JournalListData>("journal.list", RECENT_LIMIT);
+  // Tabs stay mounted: a journal entry logged or corrected elsewhere must
+  // show here on return, not the figures read before it (Codex on #2916).
+  useReloadOnReturn(figures.reload);
+  useReloadOnReturn(journal.reload);
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
@@ -84,9 +89,51 @@ export default function Screen() {
           />
           <Button
             variant="quiet"
+            testID="today-open-projects"
+            label={t("today.openProjects")}
+            onPress={() => router.push("/(shell)/projects")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-notifications"
+            label={t("today.openNotifications")}
+            onPress={() => router.push("/(shell)/notifications")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-messages"
+            label={t("today.openMessages")}
+            onPress={() => router.push("/(shell)/messages")}
+          />
+          <Button
+            variant="quiet"
             testID="today-open-profile"
             label={t("today.openProfile")}
             onPress={() => router.push("/(shell)/profile")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-jobs"
+            label={t("today.openJobs")}
+            onPress={() => router.push("/(shell)/jobs")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-opportunities"
+            label={t("today.openOpportunities")}
+            onPress={() => router.push("/(shell)/opportunities")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-availability"
+            label={t("today.openAvailability")}
+            onPress={() => router.push("/(shell)/availability")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-need"
+            label={t("today.openNeed")}
+            onPress={() => router.push("/(shell)/need")}
           />
         </View>
         <Divider />

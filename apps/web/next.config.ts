@@ -5,6 +5,7 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 import { activeLocales } from "./lib/i18n/config";
+import { HTML_LIMITED_BOTS } from "./lib/seo/html-limited-bots";
 
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
@@ -168,9 +169,14 @@ const ENTRY_SHORTCUT_REDIRECTS = [
   { source: `/${LOCALE}/signup`, destination: "/:locale/auth/signup", permanent: true },
   { source: `/${LOCALE}/login`, destination: "/:locale/auth/login", permanent: true },
   { source: `/${LOCALE}/register`, destination: "/:locale/auth/signup", permanent: true },
+  // The spellings people type (UX-9).
+  { source: `/${LOCALE}/auth/sign-up`, destination: "/:locale/auth/signup", permanent: true },
+  { source: `/${LOCALE}/auth/sign-in`, destination: "/:locale/auth/login", permanent: true },
   // Commonly guessed legal URLs (and what OAuth app consoles ask for). The
   // canonical pages live under /legal/…; these 404'd before.
   { source: `/${LOCALE}/privacy`, destination: "/:locale/legal/privacy", permanent: true },
+  // The privacy policy URL an OAuth console (e.g. Meta) may hold.
+  { source: `/${LOCALE}/privacy-policy`, destination: "/:locale/legal/privacy", permanent: true },
   { source: `/${LOCALE}/terms`, destination: "/:locale/legal/terms", permanent: true },
 ] as const;
 
@@ -179,11 +185,27 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Never advertise the framework version to attackers scanning for CVEs.
   poweredByHeader: false,
+  // Crawlers that run no script must find canonical and robots in <head>.
+  htmlLimitedBots: HTML_LIMITED_BOTS,
+  // Self-hosting (P0 restore, 2026-10-16): `standalone` emits
+  // `.next/standalone/apps/web/server.js` plus a traced minimal node_modules,
+  // so the app can run with plain `node server.js` on any Node host (Hostinger
+  // Web Apps, a VPS) from an artefact built elsewhere. Vercel ignores this
+  // setting for its own output, so it is harmless there.
+  output: "standalone",
+  // Trace from the monorepo root. Without this Next "infers" the root from the
+  // nearest lockfile it finds walking up — on a developer machine that can be a
+  // stray ~/package-lock.json, which silently breaks standalone tracing.
+  outputFileTracingRoot: path.resolve(process.cwd(), "../.."),
   experimental: {
     // Document uploads (DOCUMENT_FILE_MAX_BYTES = 5 MB) go through server
     // actions; Next's 1 MB default rejected anything larger before the handler
     // ran. Voice (25 MB) does NOT fit here — it needs a non-action upload path.
     serverActions: { bodySizeLimit: "5mb" },
+    // Audit 2026-10-16 (U-9): the two libraries every page imports by named
+    // export are tree-shaken per import instead of pulling their barrels into
+    // the client graph. Build-time only; no runtime behaviour changes.
+    optimizePackageImports: ["lucide-react", "framer-motion"],
   },
   async redirects() {
     return [...LEGACY_HOST_REDIRECTS, ...W1_CANONICAL_REDIRECTS, ...ENTRY_SHORTCUT_REDIRECTS];

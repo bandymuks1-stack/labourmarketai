@@ -93,13 +93,38 @@ const BASE_COLS =
  * accept the already-resolved professionName + counts the dashboard already
  * reads, so we do not double-query.
  */
-export async function getWorkerCard(input: {
-  workerId: string | null;
-  name: string;
-  professionName: string | null;
-  skillsCount: number;
-  evidenceCount: number;
-}): Promise<WorkCardData> {
+/**
+ * The card columns as a caller may already hold them — the request-cached core
+ * row (`getWorkerCoreRow`) selects every one of them. Optional columns mirror
+ * that row's own degraded shape (base column set: no salary, no confirmation).
+ */
+export type WorkerCardSourceRow = {
+  availability_status: string | null;
+  available_from: string | null;
+  current_location_country: string | null;
+  preferred_countries: string[] | null;
+  salary_min_eur?: number | null;
+  salary_max_eur?: number | null;
+  work_card_confirmed_at?: string | null;
+};
+
+export async function getWorkerCard(
+  input: {
+    workerId: string | null;
+    name: string;
+    professionName: string | null;
+    skillsCount: number;
+    evidenceCount: number;
+  },
+  opts: {
+    /** The worker's card columns, ALREADY READ this request (home CLS P0,
+     *  2026-10-26). When given, no `workers` select is issued — the home's
+     *  head used to pay a third sequential round-trip for columns the core
+     *  row already held. `null` = the caller read and found no row. Omitted
+     *  = read here, exactly as before. */
+    row?: WorkerCardSourceRow | null;
+  } = {},
+): Promise<WorkCardData> {
   const { workerId, name, professionName, skillsCount, evidenceCount } = input;
 
   const emptyValues: WorkCardValues = {
@@ -129,12 +154,26 @@ export async function getWorkerCard(input: {
     };
   }
 
-  const supabase = await createClient();
-
   // Read the card columns; degrade if the confirmed_at column isn't migrated.
   let row: WorkerCardRow | null = null;
   let confirmedAtSupported = true;
-  {
+  if (opts.row !== undefined) {
+    // Pre-read row: the core reader already degraded a missing
+    // `work_card_confirmed_at` column to null, which reads as "never
+    // confirmed" below — the same outcome as the fallback select.
+    row = opts.row
+      ? {
+          availability_status: opts.row.availability_status,
+          available_from: opts.row.available_from,
+          current_location_country: opts.row.current_location_country,
+          preferred_countries: opts.row.preferred_countries,
+          salary_min_eur: opts.row.salary_min_eur ?? null,
+          salary_max_eur: opts.row.salary_max_eur ?? null,
+          work_card_confirmed_at: opts.row.work_card_confirmed_at ?? null,
+        }
+      : null;
+  } else {
+    const supabase = await createClient();
     const full = await asAny(supabase)
       .from("workers")
       .select(FULL_COLS)

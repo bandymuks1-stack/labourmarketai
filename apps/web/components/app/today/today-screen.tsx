@@ -2,21 +2,26 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { HomeTrace } from "@/components/app/home/home-trace";
-import { EmployerVisibilityAsk } from "@/components/app/employer-visibility-ask";
+import { HomeEmployerVisibility } from "@/components/app/home/home-employer-visibility";
 import {
   HomeAvailability,
   HomeBecause,
+  HomeLinePending,
   HomeOutside,
   HomeRegionPending,
   HomeRunning,
   HomeWaiting,
 } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
-import { Link } from "@/lib/i18n/navigation";
+import { AreaSwitcher } from "@/components/app/area-switcher";
 import { deriveTodayState } from "@/lib/today/today-model";
-import { TODAY_STATIONS } from "@/lib/today/today-route";
+import { PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
-import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-server";
+import {
+  loadTodayDisplayName,
+  loadTodayProfessions,
+  loadTodayWorkIntelligence,
+} from "@/lib/today/today-server";
 
 /**
  * ŠIANDIEN — the worker's OPENING CONTEXT inside the ONE conversation
@@ -67,23 +72,60 @@ import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-serv
  * the station links and the conversation carry navigation.
  */
 /**
- * What the home shows while the ŠIANDIEN head is still being read. The head
- * waits on the player card; without its own boundary it held the WHOLE home —
- * conversation, composer, nav — behind the route skeleton until that read
- * finished (owner walk 2026-09-28: "login has become slow"). Now the
- * workspace is usable at once and the head streams in; the placeholder keeps
- * the head's footprint so nothing jumps when it arrives.
+ * LAYOUT STABILITY — THE FRAME PAINTS FIRST (home CLS P0, 2026-10-26).
+ *
+ * Measured in production: cumulative layout shift ≈ 0.55 on a phone and
+ * ≈ 0.31 on a desktop, in every locale. The largest single shift (0.154 in
+ * the owner's own Chrome, t≈8.0 s) was THIS component: the head awaited
+ * `loadTodayHead()` — the whole player card plus a second `workers` select —
+ * only to print a name and a profession, so for the full card read the home
+ * showed a three-line placeholder (~90 px) and then swapped in the entire
+ * ŠIANDIEN frame (554 px on a desktop, past 1300 px on a phone), pushing the
+ * greeting and the conversation below it down and out of view.
+ *
+ * Now the head awaits only what it already has: the translations and the
+ * request-cached session name. Everything slow streams INSIDE a frame whose
+ * size is known from the first paint:
+ *   - the profession and today's state are inline text in ONE header line,
+ *     each behind its own boundary with a same-line placeholder;
+ *   - every region keeps its own boundary (#1011: no read holds the surface)
+ *     and every pending state is a region-shaped placeholder that RESERVES
+ *     the region's typical height — none of them is `fallback={null}` above
+ *     the stations, so nothing appears out of nothing and pushes the screen;
+ *   - the stations are rendered at once (their track is a fixed `h-40`).
+ *
+ * The pending component below is what the boundary shows in the rare case
+ * the head has not resolved by the first flush. It draws the SAME footprint
+ * (header · the two region columns · the stations), so even that swap moves
+ * nothing the person can see.
  */
 function TodayScreenPending() {
   return (
     <div
       aria-hidden
       data-testid="today-screen-pending"
-      className="mx-auto flex w-full max-w-6xl flex-col gap-2"
+      className="mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-5 lg:gap-6"
     >
-      <span className="h-3 w-24 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
-      <span className="h-8 w-56 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
-      <span className="h-4 w-40 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+      <div className="flex flex-col gap-1">
+        <span className="h-5 w-24 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+        <span className="h-9 w-56 animate-pulse rounded bg-ink-700 motion-reduce:animate-none sm:h-10" />
+        <span className="h-5 w-40 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+      </div>
+      <div className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
+          <HomeRegionPending size="action" />
+          <HomeLinePending />
+          <HomeRegionPending />
+          <HomeRegionPending />
+        </div>
+        <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-5 lg:gap-6">
+          <HomeRegionPending />
+        </div>
+      </div>
+      <div data-testid="today-stations-pending" className="border-t border-ink-600/70 pt-4 sm:pt-5">
+        <span className="block h-5 w-32 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+        <div className="mt-2 h-40" />
+      </div>
     </div>
   );
 }
@@ -96,36 +138,31 @@ export function TodayScreen({ locale }: { locale: ActiveLocale }) {
   );
 }
 
+/** Awaits NOTHING slow — translations and the request-cached session name
+ *  only (`home-cls-stability.test.ts` pins that no player-card read is
+ *  awaited here). The slow readers stream inside the frame it draws. */
 async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
-  const [t, tCard, tProf, head] = await Promise.all([
+  const [t, tNav, displayName] = await Promise.all([
     getTranslations("todayScreen.home"),
-    getTranslations("auth.dashboard.workCard"),
-    getTranslations("professions"),
-    loadTodayHead(),
+    getTranslations("common.nav"),
+    loadTodayDisplayName(),
   ]);
-  // The first profession this person holds that can be named — a registry one
-  // through the catalogue, or their OWN WORDS exactly as typed. The registry
-  // primary still leads when there is one; nothing here interprets the words.
-  const professionLabel =
-    head.professions
-      .map((entry) =>
-        professionDisplayName(entry, (slug) => (tProf.has(slug) ? tProf(slug) : null)),
-      )
-      .find((name): name is string => !!name) ??
-    (head.professionSlug && tProf.has(head.professionSlug)
-      ? tProf(head.professionSlug)
-      : null);
 
   return (
     <div data-testid="today-screen" className="mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-5 lg:gap-6">
-      {/* 1 · HEADER — who, what they do, where today stands. */}
+      {/* 1 · HEADER — who, what they do, where today stands. The name is in
+          hand at once; the profession and the state each stream into the
+          SAME line behind a same-line placeholder, so the header's height is
+          settled from the first paint. */}
       <header data-testid="today-header" className="flex flex-col gap-1">
         <p className="text-support font-medium text-text-muted">{t("eyebrow")}</p>
         <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg lg:text-title-lg">
-          {head.displayName ?? t("headerNoName")}
+          {displayName ?? t("headerNoName")}
         </h1>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-support text-text-secondary">
-          <span data-testid="today-profession">{professionLabel ?? t("professionUnknown")}</span>
+          <Suspense fallback={<InlinePending />}>
+            <TodayProfession />
+          </Suspense>
           <span aria-hidden className="text-text-muted">
             ·
           </span>
@@ -135,19 +172,40 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
         </p>
       </header>
 
-      {/* PARTIAL vs TOTAL unavailability — one line above the regions, from
-          the same request-cached loaders (no extra reads). */}
-      <Suspense fallback={null}>
-        <HomeAvailability />
-      </Suspense>
-
       {/* THE FOUR REGIONS — two columns from lg (01+02 | 03+04), one column
           on a phone in DOM order 01→04 (the one primary action first). Each
-          streams from its own loader. */}
-      <div className="grid items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
-        <div className="flex flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
-          <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
+          streams from its own loader behind a placeholder that RESERVES the
+          region's typical height (`HomeRegionPending` / `HomeLinePending`),
+          so a region resolving late grows by a few lines at most instead of
+          appearing out of nothing.
+
+          `grid-cols-1` is load-bearing, not decoration: without an explicit
+          template the phone gets ONE IMPLICIT `auto` column, which grows to
+          the min-content of its widest child. A `truncate`d trace title is
+          min-content = the whole unwrapped line, so the column (and every
+          region in it) rendered 816px wide inside a 390px phone and the
+          clipped overflow hid the buttons, counts and "Visa veikla"
+          (UX review 2026-10-24). `grid-cols-1` is `minmax(0, 1fr)`; the
+          columns carry `min-w-0` for the same reason on lg. */}
+      <div data-testid="today-regions" className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
+          <Suspense fallback={<HomeRegionPending label={t("reading")} size="action" />}>
             <HomeWaiting locale={locale} />
+          </Suspense>
+
+          {/* CAN EMPLOYERS FIND ME? — the status line and its ONE action, on
+              every visit, directly under the one primary action (which stays
+              first on a phone — IA 2026-09-13 §5). Owner goal 2026-10-24,
+              "matchability". It replaced the once-only ask, which vanished
+              after any decision: a findable worker never saw on the home that
+              they were findable, and "not now" removed the question for good.
+              The SAME consent component as every other door (compact, source
+              "home"); streams on its own, never blocks the regions. It renders
+              for every worker row, so its pending state reserves the compact
+              line's height — arriving out of nothing, it pushed the trace,
+              the running region and the stations down. */}
+          <Suspense fallback={<HomeLinePending />}>
+            <HomeEmployerVisibility locale={locale} />
           </Suspense>
 
           {/* KAS PASIKEITĖ — the consequence trace (Future Experience A,
@@ -158,58 +216,94 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
             <HomeTrace locale={locale} />
           </Suspense>
 
-          {/* THE EMPLOYER-VISIBILITY ASK — the SAME once-only door the
-              work-card save shows (never a consent of its own: it opens the
-              canonical consent screen; "not now" ends it on this device). On
-              the home too, because the save-only moment never reached the
-              workers who onboarded before the consent step existed (prod
-              2026-10-10: 0 of 18 real workers had ever been asked). Renders
-              nothing once decided. */}
-          <div className="empty:hidden">
-            <EmployerVisibilityAsk
-              labels={{
-                title: tCard("visibilityAsk.title"),
-                body: t("visibilityAskBody"),
-                open: tCard("visibilityAsk.open"),
-                dismiss: tCard("visibilityAsk.dismiss"),
-              }}
-            />
-          </div>
-
           <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
             <HomeRunning locale={locale} />
           </Suspense>
         </div>
 
-        <div className="flex flex-col gap-4 sm:gap-5 lg:col-span-5 lg:gap-6">
-          <Suspense fallback={null}>
+        {/* The right column on lg; under the left column on a phone. A
+            region with nothing to say is still left out once read ("Tuščia =
+            tvarkinga"); while it reads it is a placeholder, never a nothing
+            that then appears above the stations. */}
+        <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-5 lg:gap-6">
+          <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
             <HomeOutside />
           </Suspense>
-          <Suspense fallback={null}>
+          <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
             <HomeBecause locale={locale} plainOnly />
           </Suspense>
         </div>
       </div>
 
-      {/* 6 · STATIONS — the contextual workspaces, one tap each: a compact
-          grid on a phone, one row from sm up. */}
-      <nav aria-label={t("stations.title")} data-testid="today-stations" className="flex flex-col gap-1 border-t border-ink-600/70 pt-4 sm:gap-2 sm:pt-5">
-        <p className="text-support font-medium text-text-muted">{t("stations.title")}</p>
-        <ul className="grid grid-cols-3 gap-x-3 gap-y-0 sm:flex sm:flex-wrap sm:gap-x-6">
-          {TODAY_STATIONS.map((s) => (
-            <li key={s.id}>
-              <Link
-                href={s.href as "/dashboard"}
-                data-testid={`today-station-${s.id}`}
-                className="inline-flex min-h-11 items-center text-support text-text-primary underline-offset-4 hover:underline sm:text-body"
-              >
-                {t(`stations.${s.id}`)}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {/* 6 · STATIONS — the contextual workspaces, one tap each, as the light
+          3D area switcher (owner order 2026-10-25): cards with depth, the
+          chosen one in front, from the ONE area model (`PERSONAL_WORK_AREAS`,
+          derived from TODAY_STATIONS — opportunities first). Rendered at once:
+          no read stands behind it, and its track is a fixed height. */}
+      <div data-testid="today-stations" className="border-t border-ink-600/70 pt-4 sm:pt-5">
+        <AreaSwitcher
+          title={t("stations.title")}
+          prevLabel={tNav("previous")}
+          nextLabel={tNav("next")}
+          hereLabel={tNav("youAreHere")}
+          testId="today-area-switcher"
+          items={PERSONAL_WORK_AREAS.map((s) => ({
+            id: s.id,
+            href: s.href,
+            iconKey: s.iconKey,
+            label: t(`stations.${s.id}`),
+            testId: `today-station-${s.id}`,
+          }))}
+        />
+      </div>
+
+      {/* PARTIAL vs TOTAL unavailability — from the same request-cached
+          loaders (no extra reads). It can only be known once the SLOWEST
+          region has answered, and it renders only when one of them failed —
+          each of which already names its own failure with a retry in place.
+          So it closes the frame, AFTER the stations: a line arriving late
+          there can no longer push the painted home down, as it did from
+          above the regions (it was the one `fallback={null}` boundary that
+          could move everything). */}
+      <Suspense fallback={null}>
+        <HomeAvailability />
+      </Suspense>
     </div>
+  );
+}
+
+/** The person's profession, in the header line — from the ONE cached
+ *  profession read (`loadTodayProfessions`), never the player card. The first
+ *  profession this person holds that can be named — a registry one through
+ *  the catalogue, or their OWN WORDS exactly as typed. The registry primary
+ *  still leads when there is one; nothing here interprets the words. */
+async function TodayProfession() {
+  const [t, tProf, head] = await Promise.all([
+    getTranslations("todayScreen.home"),
+    getTranslations("professions"),
+    loadTodayProfessions(),
+  ]);
+  const professionLabel =
+    head.professions
+      .map((entry) =>
+        professionDisplayName(entry, (slug) => (tProf.has(slug) ? tProf(slug) : null)),
+      )
+      .find((name): name is string => !!name) ??
+    (head.professionSlug && tProf.has(head.professionSlug)
+      ? tProf(head.professionSlug)
+      : null);
+  return <span data-testid="today-profession">{professionLabel ?? t("professionUnknown")}</span>;
+}
+
+/** A same-line placeholder for an inline header fact: it holds the line's
+ *  height and about a word's width, says nothing, and is hidden from
+ *  assistive tech (the state line beside it announces the read). */
+function InlinePending() {
+  return (
+    <span
+      aria-hidden
+      className="inline-block h-[1em] w-24 animate-pulse rounded bg-ink-700 align-middle motion-reduce:animate-none"
+    />
   );
 }
 

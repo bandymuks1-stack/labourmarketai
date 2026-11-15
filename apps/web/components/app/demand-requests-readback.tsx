@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { TrackedLink } from "@/components/app/tracked-link";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+
 import type {
   CustomerRequestRow,
   CustomerRequestStatus,
@@ -11,6 +14,13 @@ import { parseStoredEstimate } from "@/lib/estimate/estimate-payload";
 import { EstimateSummary } from "@/components/app/estimate-summary";
 import { DemandLocationCapture } from "@/components/app/demand-location-capture";
 import { Card } from "@/components/ui/Card";
+import { MarketEntryChip } from "@/components/app/market-entry-lifecycle";
+import { DemandEntryLifecycle } from "@/components/app/demand-entry-lifecycle";
+import { demandAdapter, demandReachesWorkers } from "@/lib/market-lifecycle/adapters";
+
+/** The statuses the owner moves (lifecycle contract); the rest are the admin
+ *  review pipeline and keep their own honest label. */
+const OWNER_LIFECYCLE_STATUSES: ReadonlySet<string> = new Set(["draft", "submitted", "closed"]);
 
 /**
  * Demand read-back (Slice 1 — demand → matching readiness).
@@ -119,11 +129,14 @@ function RequestRow({
   locale,
   pendingInterest,
   scoutable,
+  gateMet,
 }: {
   r: CustomerRequestRow;
   labels: DemandRequestsReadbackLabels;
   locale: string;
   pendingInterest?: ReadonlyMap<string, { count: number; label: string }>;
+  /** Workers see this organisation's inquiries (the demand visibility gate). */
+  gateMet: boolean;
   /** Scouting answers "who could fill this need". That question is meaningless
    *  over an OFFER, so the supply section renders no link rather than sending
    *  the person into a view that cannot describe their row. */
@@ -175,10 +188,37 @@ function RequestRow({
             {labels.created}: {r.createdAt.slice(0, 10)}
           </span>
         </div>
-        <span className="shrink-0 rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
-          {labels.status[r.status] ?? labels.statusOther}
-        </span>
+        {OWNER_LIFECYCLE_STATUSES.has(r.status) ? (
+          <span className="shrink-0">
+            <MarketEntryChip
+              facts={demandAdapter({ closedOutcomeStored: false }).facts({
+                status: r.status,
+                closedOutcome: r.closedOutcome ?? null,
+              })}
+              visibility={{ accessGateMet: r.direction === "demand" ? gateMet : false }}
+              testId={`demand-status-${r.id}`}
+            />
+          </span>
+        ) : (
+          <span className="shrink-0 rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
+            {labels.status[r.status] ?? labels.statusOther}
+          </span>
+        )}
       </div>
+      {/* THE ONE LIFECYCLE CONTRACT on the row itself: whether workers can
+          find it, and complete / remove from market / publish again /
+          discard — the same words as every other own need or offer. */}
+      {OWNER_LIFECYCLE_STATUSES.has(r.status) ? (
+        <DemandEntryLifecycle
+          locale={locale}
+          requestId={r.id}
+          status={r.status}
+          closedOutcome={r.closedOutcome ?? null}
+          showVisibility={r.direction === "demand"}
+          gateMet={gateMet}
+          ownedByCaller={r.ownedByCaller !== false}
+        />
+      ) : null}
       {/* The need as capacity (work-world CapacityBand): how many positions,
           how many have raised their hand. A demand is people × a shape, not a
           headline — and only when the need declares a size, because inventing
@@ -212,14 +252,20 @@ function RequestRow({
           lifecycle controls. Real route, no new page. */}
       {/* NEXT DEMAND (2026-09-19): a past ask as the starting point for a new
           one. Structure only — the old row keeps every execution fact. */}
+      {/* A new need started from a past one is a need door too (activation
+          audit 2026-10-26 §2): the same event and a surface of its own. Its
+          label stays "repeat" — it names a different start, not a second
+          wording of "describe a need". */}
       {scoutable && r.status !== "draft" ? (
-        <Link
+        <TrackedLink
+          event={FUNNEL_EVENTS.companyDemandActionClicked}
+          eventMetadata={{ surface: "company_needs_repeat", role_context: "company" }}
           href={`/${locale}/dashboard/company/needs?repeat=${r.id}#demand-intake`}
           className="inline-flex w-fit items-center gap-1 text-xs font-medium text-text-secondary transition-colors hover:text-brand-blue"
           data-testid="demand-readback-repeat-link"
         >
           ↻ {labels.repeatLink}
-        </Link>
+        </TrackedLink>
       ) : null}
       {scoutable ? (
         <Link
@@ -273,9 +319,14 @@ export function DemandRequestsReadback({
   labels,
   pendingInterest,
   locale,
+  companyVerificationStatus = null,
 }: {
   result: CustomerRequestsListResult;
   labels: DemandRequestsReadbackLabels;
+  /** The company's verification status, read through the demand adapter's
+   *  `demandReachesWorkers`. Absent → a row never claims a
+   *  visibility it cannot prove. Display only — never a gate on the flow. */
+  companyVerificationStatus?: string | null;
   /** requestId → how many people are still waiting, with the localized line.
    *  Absent entry = nobody waiting; the row renders exactly as before. */
   pendingInterest?: ReadonlyMap<string, { count: number; label: string }>;
@@ -284,6 +335,7 @@ export function DemandRequestsReadback({
   // needs-migration / error → render nothing (graceful; on prod the
   // 0028 migration is applied so this resolves to a real list).
   if (result.kind !== "ok") return null;
+  const workersSeeNeeds = demandReachesWorkers(companyVerificationStatus);
 
   // The row's own direction decides its section — nothing here re-derives it
   // from a title or a kind string. A row that is neither direction belongs to
@@ -338,6 +390,7 @@ export function DemandRequestsReadback({
                 locale={locale}
                 pendingInterest={pendingInterest}
                 scoutable
+                gateMet={workersSeeNeeds}
               />
             ))}
           </ul>
@@ -349,13 +402,15 @@ export function DemandRequestsReadback({
           offered capacity — an empty supply section would be noise for every
           employer who never offers any. The note states the honest gap: the
           offer is stored and readable here, and employer-facing discovery of
-          it is not live yet. */}
+          it is not live yet. `#agency-offers` is the address the company
+          home's "what you offer" block links to (COMPANY_OFFERS_HREF). */}
       {offers.length > 0 && (
         <Card compact>
         <section
+          id="agency-offers"
           aria-labelledby="supply-readback-title"
           data-testid="supply-offers-readback"
-          className="flex flex-col gap-3"
+          className="flex scroll-mt-20 flex-col gap-3"
         >
           <div className="flex flex-col gap-1">
             <h2
@@ -379,6 +434,7 @@ export function DemandRequestsReadback({
                 labels={labels}
                 locale={locale}
                 scoutable={false}
+                gateMet={false}
               />
             ))}
           </ul>

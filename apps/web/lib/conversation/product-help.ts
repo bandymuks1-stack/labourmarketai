@@ -1,4 +1,5 @@
 import { UNICODE_WORD_BOUNDARY, fold } from "./intent-router";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 import { HELP_TOPICS, type HelpChip, type HelpTopic, type HelpTopicId } from "./product-help-topics";
 
 /**
@@ -9,15 +10,17 @@ import { HELP_TOPICS, type HelpChip, type HelpTopic, type HelpTopicId } from "./
  * ASCII `\b` -> the Unicode word boundary), so a topic the router recognised is
  * always a topic this reads back.
  */
-let compiled: ReadonlyArray<{ topic: HelpTopic; res: RegExp[] }> | null = null;
+type CompiledTopic = { topic: HelpTopic; res: RegExp[]; svRes: RegExp[] };
+let compiled: ReadonlyArray<CompiledTopic> | null = null;
 
-function compile(): ReadonlyArray<{ topic: HelpTopic; res: RegExp[] }> {
+const toRe = (src: string): RegExp => new RegExp(fold(src).replace(/\\b/g, UNICODE_WORD_BOUNDARY), "u");
+
+function compile(): ReadonlyArray<CompiledTopic> {
   if (!compiled) {
     compiled = HELP_TOPICS.map((topic) => ({
       topic,
-      res: topic.sources.map(
-        (src) => new RegExp(fold(src).replace(/\\b/g, UNICODE_WORD_BOUNDARY), "u"),
-      ),
+      res: topic.sources.map(toRe),
+      svRes: topic.svSources.map(toRe),
     }));
   }
   return compiled;
@@ -25,8 +28,12 @@ function compile(): ReadonlyArray<{ topic: HelpTopic; res: RegExp[] }> {
 
 export function readHelpTopic(sentence: string): HelpTopic | null {
   const folded = fold(sentence);
-  for (const { topic, res } of compile()) {
+  // The Swedish sources count for a Swedish sentence only — the same gate the
+  // router's `sv()` patterns use, so the two still cannot disagree.
+  const swedish = looksSwedish(sentence);
+  for (const { topic, res, svRes } of compile()) {
     if (res.some((re) => re.test(folded))) return topic;
+    if (swedish && svRes.some((re) => re.test(folded))) return topic;
   }
   return null;
 }

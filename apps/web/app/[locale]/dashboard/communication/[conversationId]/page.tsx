@@ -1,6 +1,9 @@
 import { Suspense } from "react";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
 import { Lock } from "lucide-react";
@@ -12,6 +15,7 @@ import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerTexts } from "@/lib/communication/translation-read";
+import { initialWriteLanguage } from "@/lib/communication/initial-write-language";
 import type { ViewerText } from "@/lib/communication/translation";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
@@ -23,6 +27,11 @@ import {
 import { isImageAttachmentMime } from "@/lib/communication/attachment-model";
 import { formatUtcDateTime } from "@/lib/time/display";
 import { PersonPresence, PlaceTimeStamp } from "@/components/app/work-world/primitives";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/communication/[conversationId]");
+
 
 type MessageRow = {
   id: string;
@@ -64,7 +73,20 @@ export default async function ConversationDetailPage({
     .select("id, subject, kind, created_by, updated_at")
     .eq("id", conversationId)
     .maybeSingle();
-  if (!convRes.data) notFound();
+  if (!convRes.data) {
+    // A person REMOVED from the thread (revoked_at set) still sees their own
+    // participant row. Tell them honestly that it is no longer available and
+    // send them to the inbox — no thread shell, subject or participants.
+    // Anyone else gets the plain 404, as before.
+    const { data: ownRow } = await asAny(supabase)
+      .from("conversation_participants")
+      .select("revoked_at")
+      .eq("conversation_id", conversationId)
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    if (ownRow?.revoked_at) redirect(`/${locale}/dashboard/communication?notice=unavailable`);
+    notFound();
+  }
   const conversation = convRes.data;
 
   // Same honest context model as the list — so the thread header tells the
@@ -106,12 +128,16 @@ export default async function ConversationDetailPage({
     // automatically once applied, with no error while it is absent.
     .select("*")
     .eq("conversation_id", conversationId)
-    .order("created_at", { ascending: true })
+    // The NEWEST 500, shown oldest-first (audit 2026-10-20): ordered oldest
+    // first with the limit, a thread past 500 messages never showed its
+    // latest ones — including the message the person had just sent.
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
     .limit(500);
   // A failed read is NOT an empty thread (FAILED ≠ EMPTY): the page says so
   // instead of rendering "no messages yet" over a conversation that exists.
   const messagesFailed = Boolean(messagesRes.error);
-  const messages: MessageRow[] = messagesFailed ? [] : ((messagesRes.data ?? []) as MessageRow[]);
+  const messages: MessageRow[] = messagesFailed ? [] : ([...(messagesRes.data ?? [])].reverse() as MessageRow[]);
   // Per-message offer labels (20261012180000): one thread per pair, so each
   // message names the offer it is about. Details only through the party gate.
   const offerLabels = await readTeamOfferMessageLabels(
@@ -179,17 +205,23 @@ export default async function ConversationDetailPage({
     .maybeSingle();
   const viewerIsParticipant = !!viewerParticipantRow;
 
+  // The language the composer starts in: what this person wrote last here,
+  // else their browser's language, else the page's (chat audit defect 2).
+  const ownLast = [...messages].reverse().find((m) => m.author_id === user.id);
+  const defaultWriteLanguage = initialWriteLanguage({
+    ownLastLanguage: ownLast
+      ? ((ownLast as unknown as { original_language?: string | null }).original_language ?? null)
+      : null,
+    acceptLanguage: (await headers()).get("accept-language"),
+    uiLocale: locale,
+  });
+
   return (
     <div className="flex flex-col gap-5">
       <header className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <Link
-            href="/dashboard/communication"
-            className="font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue"
-          >
-            ← {t("backToList")}
-          </Link>
-          <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+          <PageBack href="/dashboard/communication">{t("backToList")}</PageBack>
+          <PageTitle>
             {/* Real title fallback — never "(be temos)": subject, then the
                 permitted counterpart name, then the live source title, then
                 the support label / a neutral "Pokalbis". */}
@@ -199,7 +231,7 @@ export default async function ConversationDetailPage({
               (conversation.kind === "support"
                 ? t("counterparty.support")
                 : t("conversationFallback"))}
-          </h1>
+          </PageTitle>
           <span
             className="font-mono text-meta uppercase tracking-label text-text-muted"
             data-testid="thread-type"
@@ -423,6 +455,7 @@ export default async function ConversationDetailPage({
       <CommunicationComposer
         conversationId={conversationId}
         locale={locale}
+        defaultWriteLanguage={defaultWriteLanguage}
         teamOfferId={offerContext ? (offerParam ?? null) : null}
       />
     </div>

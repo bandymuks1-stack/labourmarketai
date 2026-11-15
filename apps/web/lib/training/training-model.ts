@@ -132,6 +132,68 @@ export function deriveExpiryState(
   return "valid";
 }
 
+/**
+ * What the caller may DO in the training register — the forms it is offered.
+ *
+ * Read from the database's own authority predicates, the very ones the write
+ * commands enforce (migration 20260817230000_training_certification_v1):
+ *
+ *   * add a course    — `createTrainingProgramAction` resolves the active
+ *                       employer workspace, then `create_training_program_v1`
+ *                       admits `org_owner_admin_v1(org) OR is_admin()`;
+ *   * edit / retire   — `update_training_program_v1`: the same
+ *                       `org_owner_admin_v1(course org) OR is_admin()`;
+ *   * assign, attach a certificate, mark expired — `assign_training_v1`,
+ *                       `attach_training_certificate_v1`,
+ *                       `set_training_assignment_expired_v1`:
+ *                       `has_org_demand_access(org)`.
+ *
+ * NEVER "the organization already has data": an organization with no course
+ * must still be able to add its first one, and an employee who can READ a
+ * course (RLS `belongs_to_organization`) must not be offered a form the
+ * database will refuse. Every predicate that could not be read is false —
+ * fail closed: the read view stays, the forms do not appear.
+ */
+export type TrainingAuthority = {
+  /** The organization the add-a-course form writes to, or null = no form. */
+  readonly createOrganizationId: string | null;
+  /** Organizations whose courses the caller may edit or retire. */
+  readonly editOrganizationIds: ReadonlySet<string>;
+  /** Organizations in which the caller may assign a course, attach a
+   *  certificate and mark a certification expired. */
+  readonly assignOrganizationIds: ReadonlySet<string>;
+};
+
+export const NO_TRAINING_AUTHORITY: TrainingAuthority = {
+  createOrganizationId: null,
+  editOrganizationIds: new Set<string>(),
+  assignOrganizationIds: new Set<string>(),
+};
+
+/** Combine the predicate reads into the register's authority. Pure. */
+export function deriveTrainingAuthority(input: {
+  /** The active employer workspace the create action would resolve, or null. */
+  readonly employerOrganizationId: string | null;
+  /** `is_admin()` for the caller. */
+  readonly platformAdmin: boolean;
+  /** Per organization id: `org_owner_admin_v1(org)`. */
+  readonly ownerAdmin: ReadonlyMap<string, boolean>;
+  /** Per organization id: `has_org_demand_access(org)`. */
+  readonly demandAccess: ReadonlyMap<string, boolean>;
+}): TrainingAuthority {
+  const owns = (org: string) => input.ownerAdmin.get(org) === true || input.platformAdmin;
+  const edit = new Set<string>();
+  for (const org of input.ownerAdmin.keys()) if (owns(org)) edit.add(org);
+  const assign = new Set<string>();
+  for (const [org, ok] of input.demandAccess) if (ok === true) assign.add(org);
+  const employer = input.employerOrganizationId;
+  return {
+    createOrganizationId: employer !== null && owns(employer) ? employer : null,
+    editOrganizationIds: edit,
+    assignOrganizationIds: assign,
+  };
+}
+
 /** The honest `?trn=` outcomes the actions can navigate back with. */
 export const TRAINING_NOTICES = [
   "created",

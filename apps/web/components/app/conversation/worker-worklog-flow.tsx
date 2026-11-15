@@ -2,6 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { mentionsOrganization } from "@/lib/journal/org-mention";
+import {
+  resolveEngagementContext,
+  type EngagementCandidate,
+} from "@/lib/journal/engagement-context-selection";
 import { useTranslations } from "next-intl";
 import {
   PROJECT_FIELD_NONE,
@@ -53,6 +57,7 @@ import { formatUtcDate } from "@/lib/time/display";
 import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import { quoteText } from "@/lib/i18n/quote";
 
 export type WorkLogLabels = {
   understood: string;
@@ -71,7 +76,11 @@ export type WorkLogLabels = {
   contextChoose: string;
   contextAmbiguous: string;
   contextEndedOrg: string;
+  /** The CONFIRM step's button — the only press that writes. */
   save: string;
+  /** The FIRST button: it opens the review step ("Patvirtinti įrašą?") and
+   *  writes nothing, so it never says "Save" (activation audit fix #5). */
+  continue: string;
   cancel: string;
   working: string;
   confirmTitle: string;
@@ -85,6 +94,17 @@ export type WorkLogLabels = {
   strengthenedSkillPrefix: string;
   pendingConfirmPrefix: string;
   cvUpdatedNote: string;
+  /** Shown after EVERY save: the entry now counts in the Living CV as
+   *  recorded work — written by the person, not confirmed by anyone. The
+   *  Living CV prints its recorded-work facts from one entry on
+   *  (`lib/cv-export/professional-summary.ts`), so this is a fact, not a
+   *  promise. Never says "verified" / "confirmed". */
+  livingCvNote: string;
+  /** The one link from the confirmation to the Living CV (`/cv`). */
+  viewLivingCv: string;
+  /** A calm return line ("tomorrow, add that day's work too") — no streak,
+   *  no score, no pressure. */
+  comeBackNote: string;
   matchingNote: string;
   /** Next action after real enrichment: open the board where the updated
    *  skills are recomputed into recommendations (read-time, never pushed). */
@@ -222,6 +242,15 @@ type Phase =
     }
   | { kind: "error"; message: string };
 
+/** The bounded funnel surface labels this flow can report. */
+export type WorkLogSurface = "conversation" | "journal";
+
+/** `journal_rematch_viewed` keeps its historical per-surface label. */
+const REMATCH_SURFACE: Record<WorkLogSurface, string> = {
+  conversation: "worklog_chat",
+  journal: "worklog_journal",
+};
+
 /** Client-side preparation state for the picked photo. */
 type PhotoPrep = "idle" | "preparing" | "ready";
 
@@ -274,7 +303,12 @@ export function WorkerWorkLogFlow({
   initialFile = null,
   onRegisterAttachSink,
   voice,
+  surface = "conversation",
 }: {
+  /** WHERE the flow is mounted — the funnel label on the save events. The
+   *  journal page's quick record mounts this same flow, and its saves were
+   *  reported as "conversation" (activation audit fix #7). Bounded label. */
+  surface?: WorkLogSurface;
   /** Set only when the text came from the voice door (already reviewed by the
    *  person): carried to the save as provenance, nothing more. */
   voice?: { language: string; disclosureVersion: string };
@@ -320,6 +354,18 @@ export function WorkerWorkLogFlow({
   const [mustChooseEngagement, setMustChooseEngagement] = useState(false);
   /** The sentence named an organization whose relationship has ENDED. */
   const [endedOrgNamed, setEndedOrgNamed] = useState<string | null>(null);
+  // Acting for an organization with no recorded work relationship (owner P0
+  // 2026-10-29): the server's localized sentence, shown under the picker.
+  const [activeWorkspaceNotice, setActiveWorkspaceNotice] = useState<string | null>(null);
+  // The facts the server resolved from, so a changed WORK DATE re-resolves
+  // with the same pure resolver (applicability is bounded by the day — Codex
+  // P2 on #2884). Until the person picks, or their sentence named an org.
+  const [contextFacts, setContextFacts] = useState<{
+    candidates: EngagementCandidate[];
+    activeOrganizationId: string | null;
+  } | null>(null);
+  const contextDecidedByPerson = useRef(false);
+  const resolvedForDate = useRef<string | null>(null);
   const [workDate, setWorkDate] = useState(draft.date);
   const [site, setSite] = useState(draft.site ?? "");
   const [notes, setNotes] = useState(draft.notes);
@@ -455,7 +501,7 @@ export function WorkerWorkLogFlow({
 
   useEffect(() => {
     let alive = true;
-    listWorkLogEngagements()
+    listWorkLogEngagements(draft.date)
       .then((res) => {
         if (!alive) return;
         if (res.kind === "ok") {
@@ -478,6 +524,14 @@ export function WorkerWorkLogFlow({
             ? null
             : ((res.endedOrgNames ?? []).find((n) => mentionsOrganization(said, n)) ?? null);
           setEndedOrgNamed(endedNamed);
+          setActiveWorkspaceNotice(res.activeWorkspaceNotice ?? null);
+          contextDecidedByPerson.current = Boolean(named || endedNamed);
+          resolvedForDate.current = draft.date;
+          setContextFacts(
+            res.candidates
+              ? { candidates: res.candidates, activeOrganizationId: res.activeOrganizationId ?? null }
+              : null,
+          );
           setEngagementId(named ? named.id : endedNamed ? "" : (res.resolution.selectedId ?? ""));
           setMustChooseEngagement(!named && (endedNamed !== null || res.resolution.rule === "C"));
           setPhase({ kind: "ready", token: null });
@@ -497,6 +551,29 @@ export function WorkerWorkLogFlow({
       alive = false;
     };
   }, [labels.errorGeneric]);
+
+  // The resolution for the CURRENT work date (null until the facts arrive).
+  const liveResolution = useMemo(
+    () =>
+      contextFacts
+        ? resolveEngagementContext({
+            candidates: contextFacts.candidates,
+            workDay: workDate,
+            activeOrganizationId: contextFacts.activeOrganizationId,
+          })
+        : null,
+    [contextFacts, workDate],
+  );
+  useEffect(() => {
+    if (!liveResolution || contextDecidedByPerson.current) return;
+    if (resolvedForDate.current === workDate) return;
+    resolvedForDate.current = workDate;
+    setEngagementId(liveResolution.selectedId ?? "");
+    setMustChooseEngagement(liveResolution.rule === "C");
+  }, [liveResolution, workDate]);
+  const showActiveWorkspaceNotice = Boolean(
+    activeWorkspaceNotice && liveResolution?.activeWorkspaceWithoutContext,
+  );
 
   const contextProjects: AssignedProject[] =
     engagements.find((e) => e.id === engagementId)?.projects ?? [];
@@ -586,7 +663,7 @@ export function WorkerWorkLogFlow({
         return;
       }
       trackFunnel(FUNNEL_EVENTS.journalEntrySaved, {
-        surface: "conversation",
+        surface,
         role_context: "worker",
         success: true,
       });
@@ -839,6 +916,25 @@ export function WorkerWorkLogFlow({
             {labels.cvUpdatedNote}
           </p>
         )}
+        {/* WHERE THE ENTRY NOW COUNTS (activation audit fix #5). The Living
+            CV prints its recorded-work facts from the first entry on
+            (`deriveProfessionalFacts`), so the line is a fact. It names the
+            entry as RECORDED by the person — never confirmed or verified:
+            only a manager / client review can confirm it. */}
+        <p className="text-text-primary" data-testid="worklog-living-cv-note">
+          {labels.livingCvNote}
+        </p>
+        <Link
+          href="/cv"
+          className="mt-1 inline-flex min-h-11 items-center self-start rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20"
+          data-testid="worklog-living-cv-link"
+        >
+          {labels.viewLivingCv} →
+        </Link>
+        {/* The calm return line — no streak, no count, no pressure. */}
+        <p className="text-text-muted" data-testid="worklog-come-back">
+          {labels.comeBackNote}
+        </p>
         {/* Honest matching phrasing: recommendations are computed from the
             worker's current skills at read time (no persisted score), so new
             skills flow into the next computation — nothing is "pushed". */}
@@ -859,7 +955,7 @@ export function WorkerWorkLogFlow({
               // The retention loop's measurable heartbeat: journal
               // contribution → recomputed board actually inspected.
               trackFunnel(FUNNEL_EVENTS.journalRematchViewed, {
-                surface: "worklog_chat",
+                surface: REMATCH_SURFACE[surface],
               });
             }}
           >
@@ -1067,7 +1163,7 @@ export function WorkerWorkLogFlow({
         )}
       </dl>
 
-      <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} />
+      <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} locale={locale} />
 
       <label className="flex flex-col gap-1 text-support">
         <span className="text-text-muted">{labels.labelSite}</span>
@@ -1106,6 +1202,7 @@ export function WorkerWorkLogFlow({
             value={engagementId}
             disabled={confirming || pending}
             onChange={(e) => {
+              contextDecidedByPerson.current = true;
               setEngagementId(e.target.value);
               clearError();
             }}
@@ -1128,7 +1225,7 @@ export function WorkerWorkLogFlow({
               className="text-meta leading-relaxed text-state-warning"
               data-testid="worklog-context-ended-org"
             >
-              {labels.contextEndedOrg} „{endedOrgNamed}“
+              {labels.contextEndedOrg} {quoteText(locale, endedOrgNamed)}
             </span>
           ) : null}
           {mustChooseEngagement && !engagementId && !endedOrgNamed ? (
@@ -1141,6 +1238,14 @@ export function WorkerWorkLogFlow({
           ) : null}
         </label>
       )}
+      {showActiveWorkspaceNotice ? (
+        <p
+          className="text-meta leading-relaxed text-text-secondary"
+          data-testid="worklog-context-active-workspace-notice"
+        >
+          {activeWorkspaceNotice}
+        </p>
+      ) : null}
 
       {projectPrompt === "ask" ? (
         <label className="flex flex-col gap-1 text-support">
@@ -1223,13 +1328,20 @@ export function WorkerWorkLogFlow({
         </div>
       ) : (
         <ChatActionRow>
+          {/* THE FIRST PRESS WRITES NOTHING. `worker.log-work` is an
+              `important_write`: the server mints a one-time token bound to
+              exactly this input, and only the confirm step below spends it
+              (the consent gate `prod-chat-confirm-once` double-clicks). So
+              this button opens the review and says so — "Toliau / Continue"
+              — and "Save" is said once, on the press that saves
+              (activation audit fix #5). */}
           <ChatAction
             tone="primary"
             disabled={pending}
             testId="worklog-save"
             onClick={beginConfirm}
           >
-            {labels.save}
+            {labels.continue}
           </ChatAction>
           {onClose && (
             <ChatAction
@@ -1274,10 +1386,13 @@ function RecordedTimePreview({
   notes,
   workDate,
   labels,
+  locale,
 }: {
   notes: string;
   workDate: string;
   labels: WorkLogLabels;
+  /** The reader's quote pair around the person's own words (UX review 2026-10-24). */
+  locale: string;
 }) {
   // The SAME derivation the executor runs on save, over the notes as the
   // person has edited them — never a second parser, never a cached figure.
@@ -1313,7 +1428,7 @@ function RecordedTimePreview({
         <ul className="flex flex-col gap-0.5">
           {record.fragments.map((f, i) => (
             <li key={`${i}-${f.rawPhrase}`} className="flex justify-between gap-3">
-              <span className="min-w-0 truncate text-text-primary">„{f.rawPhrase}“</span>
+              <span className="min-w-0 truncate text-text-primary">{quoteText(locale, f.rawPhrase)}</span>
               <span className="shrink-0 text-right font-medium text-text-primary">
                 {fragmentTimeLabel(f.timeValue, f.timeUnit, labels)}
                 {f.activitySlug === null && f.activityLabel === null ? (

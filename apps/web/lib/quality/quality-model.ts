@@ -39,7 +39,13 @@ export interface Defect {
 
 export type ProjectDefectsData =
   | { applied: false }
-  | { applied: true; defects: Defect[] };
+  | {
+      applied: true;
+      defects: Defect[];
+      /** The defect list could not be read: the empty list is UNKNOWN, not
+       *  "no defects", and the panel says so. */
+      readFailed?: true;
+    };
 
 export function isDefectStatus(v: unknown): v is DefectStatus {
   return typeof v === "string" && (DEFECT_STATUSES as readonly string[]).includes(v);

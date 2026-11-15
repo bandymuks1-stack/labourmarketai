@@ -36,9 +36,11 @@ import { buildEstimatePayload } from "@/lib/estimate/estimate-payload";
 import { isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
 import { isIsoCountry } from "@/lib/location/country-model";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { NEED_SKILLS_PAYLOAD_KEY, needSkillsForPayload } from "@/lib/market/need-skills-payload";
 import {
   readStructuredDemandV2,
   sanitizeStructuredDemandV2,
+  teamCompositionFor,
   type StructuredDemandV2,
 } from "@/lib/demand/structured-demand-v2";
 
@@ -151,7 +153,12 @@ export type DemandRequestResult =
         // active open needs are at its plan's ceiling (FREE 1; the
         // ORGANIZATION plan has none since 2026-10-06). `next` names the honest
         // way forward — the €99 plan. Nothing is charged.
-        | "over_open_need_limit";
+        | "over_open_need_limit"
+        // The form was opened for another organization than the one the
+        // server resolves now (the workspace was switched in another tab).
+        // Nothing is written — a need is never posted into a company the
+        // person did not see on screen.
+        | "workspace_changed";
       limit?: number;
       used?: number;
       next?: "upgrade" | "individual_plan";
@@ -207,6 +214,7 @@ type DemandRpc = {
 export async function submitDemandRequest(
   intent: DemandIntent,
   fields?: DemandFields,
+  opts: { readonly expectedOrganizationId?: string | null } = {},
 ): Promise<DemandRequestResult> {
   const supabase = await createClient();
   const {
@@ -220,6 +228,11 @@ export async function submitDemandRequest(
   // can later attribute. Refused, never silently written to the profile.
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { ok: false, code: "no_company_context" };
+  // `expectedOrganizationId` never CHOOSES the target (the server-resolved
+  // workspace does); it can only make the submit REFUSE.
+  if (opts.expectedOrganizationId && opts.expectedOrganizationId !== employer.organizationId) {
+    return { ok: false, code: "workspace_changed" };
+  }
 
   const result = await submitDemandRequestCore(
     { supabase, userId: user.id },
@@ -322,8 +335,31 @@ export async function submitDemandRequestCore(
   // Structured demand v2 (PR 2) — validated into the canonical closed-set
   // shape or dropped entirely. NOT worker-exposed (the worker RPC whitelist
   // does not read structured_v2 until MP-3 is owner-approved and applied).
-  const structuredV2 = sanitizeStructuredDemandV2(fields?.structuredV2);
+  const sanitizedV2 = sanitizeStructuredDemandV2(fields?.structuredV2);
+  // A team composition is kept only while it explains the number of workers
+  // stored in `team_size` (count × per_team) — server-side, whatever the
+  // client sent. Otherwise only the composition is dropped.
+  const structuredV2 =
+    sanitizedV2?.team && !teamCompositionFor(teamSize, sanitizedV2.team.count, sanitizedV2.team.per_team)
+      ? sanitizeStructuredDemandV2({ ...sanitizedV2, team: undefined })
+      : sanitizedV2;
   if (structuredV2) payload.structured_v2 = structuredV2;
+
+  // THE NEED'S REQUIRED SKILLS (owner decision 2026-10-29). The ONE offline
+  // derivation scouting runs, over the same words (title, description, the
+  // skills text, notes), stored as catalogue slugs only — so the worker
+  // board can judge this need by what it asks for without ever seeing the
+  // employer's text. Nothing derivable → nothing stored (honest unassessed).
+  const needSkills = needSkillsForPayload({
+    // The user's own role words only — never the intent fallback label.
+    title: role || null,
+    // The closed-set work type, slug separators as spaces (the same folding
+    // needFromRoleText applies) so it recognises through the same lexicon.
+    roleOrWorkType: workType ? workType.replace(/[_-]+/g, " ") : null,
+    needSummary: description,
+    notes: [payload.skills, payload.notes].filter((s): s is string => typeof s === "string").join("\n") || null,
+  });
+  if (needSkills) payload[NEED_SKILLS_PAYLOAD_KEY] = needSkills;
 
   // Optional preliminary estimate. Only persisted when the user actually filled
   // it in; if engaged but invalid (negatives / impossible %), block — an invalid

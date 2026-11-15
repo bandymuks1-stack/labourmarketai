@@ -4,7 +4,7 @@
  * Parses OPTIONAL query parameters into bounded default values for the public
  * company-need form. Only fields the form's server action ALREADY accepts are
  * supported (number_of_workers, country, profession, expected_duration,
- * description) — the adapter adds no new backend capability, it only saves
+ * description, engagement) — the adapter adds no new backend capability, it only saves
  * retyping. Everything is validated and bounded here AND re-validated by the
  * server action on submit; an invalid or out-of-range parameter is silently
  * dropped (never an error page, never a fabricated value).
@@ -13,8 +13,13 @@
  * (non-PII, non-price). The other fields are accepted for completeness but
  * every value is length-bounded and used purely as a form default the user
  * reviews before submitting. PURE — no fs, no net, client-safe.
+ *
+ * `from` (owner P0 2026-11-10, attribution): the id of the public button that
+ * opened the form (e.g. `companies_market_lu`), so an inquiry records which
+ * page it came from. A page's own button id, never a person's identifier or
+ * a campaign tag; a bounded slug or nothing.
  */
-import { READINESS_COUNTRIES } from "@/lib/country-readiness/types";
+import { ALL_ISO_COUNTRIES } from "@/lib/location/country-model";
 import { isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
 
 export interface CompanyNeedPrefill {
@@ -23,7 +28,21 @@ export interface CompanyNeedPrefill {
   readonly profession?: string;
   readonly expectedDuration?: string;
   readonly description?: string;
+  readonly entry?: string;
+  /** How the labour is supplied; an intent page (subcontractors, agencies) preselects it. */
+  readonly engagement?: PrefillEngagement;
 }
+
+/** A public button id: lower-case slug, bounded. */
+export const COMPANY_NEED_ENTRY = /^[a-z0-9_]{1,40}$/;
+
+/**
+ * The form's `engagement_model` values. Kept here, not imported, because
+ * `company-need.ts` pulls server-only modules into this client-safe file; a
+ * test pins the two lists equal (company-need-prefill.test.ts).
+ */
+export const PREFILL_ENGAGEMENTS = ["employment", "subcontracting", "agency_supply"] as const;
+export type PrefillEngagement = (typeof PREFILL_ENGAGEMENTS)[number];
 
 const MAX_WORKERS = 1000; // mirrors the form input's max
 const MAX_DURATION_CHARS = 120; // mirrors the form input's maxLength
@@ -45,6 +64,8 @@ export function parseCompanyNeedPrefill(
     profession?: string;
     expectedDuration?: string;
     description?: string;
+    entry?: string;
+    engagement?: PrefillEngagement;
   } = {};
 
   const workersRaw = params.get("number_of_workers");
@@ -58,7 +79,9 @@ export function parseCompanyNeedPrefill(
   const countryRaw = params.get("country");
   if (countryRaw) {
     const code = countryRaw.trim().toUpperCase();
-    if ((READINESS_COUNTRIES as readonly string[]).includes(code)) {
+    // Any ISO country the form lists, so a market page can preselect it (LU is
+    // not a readiness country, and the select offers every ISO code).
+    if (ALL_ISO_COUNTRIES.includes(code)) {
       out.country = code;
     }
   }
@@ -73,6 +96,12 @@ export function parseCompanyNeedPrefill(
 
   const description = text(params.get("description"), MAX_DESCRIPTION_CHARS);
   if (description) out.description = description;
+
+  const entry = params.get("from")?.trim();
+  if (entry && COMPANY_NEED_ENTRY.test(entry)) out.entry = entry;
+  const engagement = params.get("engagement")?.trim();
+  const known = PREFILL_ENGAGEMENTS.find((e) => e === engagement);
+  if (known) out.engagement = known;
 
   return out;
 }

@@ -56,9 +56,14 @@ describe("Guard: the company dashboard exposes the canonical demand intake", () 
     expect(page.indexOf("<DemandRequestButton")).toBeLessThan(page.indexOf('!== "verified"'));
   });
 
-  it("keeps the PR #254 demand CTA pointing at the request section", () => {
+  it("keeps the PR #254 demand CTA, now on the real intake route", () => {
+    // Re-pinned 2026-10-26 (activation audit §2): the hash `#company-requests`
+    // pointed at a section only the Needs door holds, so on the Settings page
+    // it was a dead click. The CTA is the shared need door — real route, real
+    // surface (lib/guards/company-need-door.test.ts).
     const next = read(NEXT);
-    expect(next).toContain('href={"#company-requests"');
+    expect(next).not.toContain('href={"#company-requests"');
+    expect(next).toMatch(/<NeedDoorLink\s+surface="company_settings"/);
   });
 });
 

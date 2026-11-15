@@ -15,8 +15,9 @@ import { join } from "node:path";
  *   1. World State from words — "work in Germany" narrows the search, and when
  *      Germany is not on their board the answer says what IS;
  *   2. the skill gap is real, counted from their own visible demands;
- *   3. "approved hours" is answered HONESTLY — the product has no such ledger,
- *      and the assistant says so instead of inventing a number;
+ *   3. "approved hours" is answered HONESTLY — from the real journal hours
+ *      (work in numbers, #1690), or an honest empty/unread line; never an
+ *      invented number;
  *   4. the AI can state the context it claims to understand;
  *   5. nothing navigates: the URL never changes.
  *
@@ -141,21 +142,51 @@ test.describe("W4 — goals in words, executed as workflows", () => {
     expect(answer).toMatch(/poreiki|profil/i);
   });
 
-  test("'approved hours' is answered honestly — there is no such ledger", async ({ page }) => {
+  test("'approved hours' are answered from the real journal — never an invented figure", async ({ page }) => {
     await page.goto("/lt/dashboard");
     await expect(page.getByTestId("composer-input")).toBeEnabled();
 
     await say(page, "Parodyk patvirtintas valandas");
-    const answer = await transcript(page);
-    // THE assertion of this whole phase: the product does not track approved
-    // hours, so the assistant must say so rather than produce a number.
-    const honest =
-      answer.includes(LT.workspace.ai.figuresNoHoursLedger) ||
-      answer.includes(LT.workspace.ai.figuresWorkerEmpty) ||
-      answer.includes(LT.workspace.ai.blockedNoWorker);
-    expect(honest, `not the honest answer: ${answer}`).toBe(true);
-    // Never a fabricated hours figure.
-    expect(answer).not.toMatch(/\d+\s*(val\.|valand)/);
+    // The reply to THIS sentence — not the opening brief before it.
+    const answer = await page.getByTestId("msg-assistant").last().innerText();
+    // Since #1690 (work in numbers) the product DOES keep hours: every entry's
+    // recorded duration, counted once, with the manager-confirmed part told
+    // apart (the old "no hours ledger" line is pinned OUT of the workflow by
+    // lib/guards/journal-work-intelligence.test.ts). So the honest answer is
+    // those real figures — or an honest none / unread / empty / blocked line.
+    // The invariant is unchanged: never a number nobody counted.
+    const ai = LT.workspace.ai;
+    const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const NUM = "(\\d[\\d\\s\\u00a0.,]*?)";
+    const hoursRx = new RegExp(
+      esc(ai.figuresWorkerHours)
+        .replace("\\{total\\}", NUM)
+        .replace("\\{confirmed\\}", NUM)
+        .replace("\\{month\\}", NUM),
+    );
+    const figures = answer.match(hoursRx);
+    if (figures) {
+      const n = (s: string) => Number(s.replace(/[\s ]/g, "").replace(",", "."));
+      const [total, confirmed, month] = [n(figures[1]), n(figures[2]), n(figures[3])];
+      expect(Number.isFinite(total), `total hours is a real number: ${figures[1]}`).toBe(true);
+      // Counted figures obey their own arithmetic: the confirmed part and the
+      // last 30 days are parts of the total, never more than it.
+      expect(confirmed, "confirmed hours never exceed recorded hours").toBeLessThanOrEqual(total);
+      expect(month, "30-day hours never exceed all-time hours").toBeLessThanOrEqual(total);
+    } else {
+      // No figure stated: it must be one of the honest lines, word for word.
+      const noneBranches = [...ai.figuresWorkerHoursNone.matchAll(/\{([^{}]*)\}/g)].map(
+        (m) => new RegExp(esc(m[1]).replace("#", "\\d+")),
+      );
+      const honest =
+        noneBranches.some((rx) => rx.test(answer)) ||
+        answer.includes(ai.figuresWorkerHoursUnread) ||
+        answer.includes(ai.figuresWorkerEmpty) ||
+        answer.includes(ai.blockedNoWorker);
+      expect(honest, `not an honest answer: ${answer}`).toBe(true);
+      // …and no hours figure slipped in beside it.
+      expect(answer).not.toMatch(/\d+\s*(val\.|valand)/);
+    }
   });
 
   test("the AI can state the context it claims to understand", async ({ page }) => {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * W7 P2-1 — open-ended booking honesty.
@@ -45,7 +46,7 @@ const FORM = join(
   "workspace",
   "candidates-result.tsx",
 );
-const LOCALES = ["lt", "en", "de", "nl", "ru"] as const;
+const LOCALES = activeLocales;
 
 describe("W7 P2-1 — the shipped conflict interval is what the copy describes", () => {
   const sql = read(MIGRATION);

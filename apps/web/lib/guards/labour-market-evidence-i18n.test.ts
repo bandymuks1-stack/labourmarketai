@@ -2,12 +2,15 @@
  * Evidence localization guard (Step 2 fix).
  *
  * The public evidence cards must show ONLY the selected locale's language — no
- * English literals on LT/RU pages. Evidence prose lives in
+ * English literals on any non-English page. The locale list is the routing's
+ * own `activeLocales` (it was pinned to en/lt/ru, so when de/nl/pl went live
+ * the DE and NL country pages shipped 33 English strings unnoticed — QA
+ * 2026-10-23). Evidence prose lives in
  * messages/{locale}/labour-market.json under `evidence.<id>.*`. This guard:
- *   1. asserts every active locale (en/lt/ru) has localized title/summary/
+ *   1. asserts every active locale has localized title/summary/
  *      figureDate/region for every evidence id, a unit+methodNote where the item
  *      has a numeric value, a sourceLabel for every used source, and a disclaimer;
- *   2. asserts LT/RU prose is actually translated (≠ EN) and contains none of the
+ *   2. asserts every non-English locale's prose is actually translated (≠ EN) and contains none of the
  *      known English phrases from the EN dataset (official names/acronyms and
  *      quoted English report titles in methodNote are tolerated).
  */
@@ -19,9 +22,11 @@ import {
   EVIDENCE_IDS,
   EVIDENCE_IDS_WITH_VALUE,
 } from "../labour-market/evidence";
+import { activeLocales } from "../i18n/config";
 
 const webRoot = resolve(__dirname, "..", "..");
 type EvidenceCatalog = {
+  [key: string]: unknown;
   evidence: Record<string, Record<string, string>>;
   sourceLabel: Record<string, string>;
   evidenceDisclaimer: string;
@@ -31,7 +36,8 @@ const load = (locale: string) =>
     readFileSync(resolve(webRoot, "messages", locale, "labour-market.json"), "utf-8"),
   ) as EvidenceCatalog;
 
-const ACTIVE = ["en", "lt", "ru"] as const;
+const ACTIVE = activeLocales;
+const NON_ENGLISH = activeLocales.filter((l) => l !== "en");
 const usedSources = [...new Set(LABOUR_MARKET_EVIDENCE.map((e) => e.sourceId))];
 
 describe("evidence i18n — every active locale is fully localized", () => {
@@ -76,7 +82,7 @@ describe("evidence i18n — every active locale is fully localized", () => {
   }
 });
 
-describe("evidence i18n — no English leakage on LT/RU", () => {
+describe("evidence i18n — no English leakage on any non-English locale", () => {
   const en = load("en");
 
   // English function/content words that must NOT appear in localized prose.
@@ -85,7 +91,7 @@ describe("evidence i18n — no English leakage on LT/RU", () => {
   const ENGLISH_LEAK =
     /\b(the|and|with|employment|shortages|workers|population|market|across|countries|cross-border|record|skills|figure date|last checked|source|whole labour|sample)\b/i;
 
-  for (const locale of ["lt", "ru"] as const) {
+  for (const locale of NON_ENGLISH) {
     const cat = load(locale);
 
     it(`${locale}: title/summary/region/figureDate/unit contain no English words`, () => {
@@ -116,6 +122,40 @@ describe("evidence i18n — no English leakage on LT/RU", () => {
 
     it(`${locale}: the disclaimer is translated (≠ English)`, () => {
       expect(cat.evidenceDisclaimer).not.toBe(en.evidenceDisclaimer);
+    });
+  }
+});
+
+/**
+ * The page chrome the /labour-market index and country pages render around the
+ * cards (eyebrows, titles, field labels, claim kinds, country framing, every
+ * country's intro and signals). A string identical to English on a
+ * non-English page is a fallback the visitor reads as a broken translation.
+ */
+describe("labour-market page chrome — translated in every non-English locale", () => {
+  const en = load("en");
+  const flat = (o: unknown, prefix = "", acc: Record<string, string> = {}) => {
+    if (o && typeof o === "object") {
+      for (const [k, v] of Object.entries(o as Record<string, unknown>)) {
+        const key = prefix ? `${prefix}.${k}` : k;
+        if (typeof v === "string") acc[key] = v;
+        else flat(v, key, acc);
+      }
+    }
+    return acc;
+  };
+  const RENDERED = /^(country[A-Z]\w*|countryEvidence\..+|evidence(Eyebrow|Title|Subcopy|Disclaimer)|field[A-Z]\w*|claim[A-Z]\w*)$/;
+  // Words that are the same in the target language (a loanword), not a fallback.
+  const SAME_WORD = new Set(["Trend"]);
+  const enFlat = flat(en);
+
+  for (const locale of NON_ENGLISH) {
+    it(`${locale}: no rendered labour-market string is left in English`, () => {
+      const cat = flat(load(locale));
+      const untranslated = Object.keys(enFlat).filter(
+        (k) => RENDERED.test(k) && cat[k] === enFlat[k] && !SAME_WORD.has(enFlat[k]),
+      );
+      expect(untranslated, `${locale} still English: ${untranslated.join(", ")}`).toEqual([]);
     });
   }
 });

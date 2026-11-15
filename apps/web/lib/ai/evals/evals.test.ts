@@ -34,6 +34,9 @@ describe("Country Readiness evals", () => {
     async (_name, c) => {
       const out = await runAgentEval(countryReadinessEntry, c);
       expect(out.status).toBe(c.expect.status);
+      if (c.expect.status === "needs_review" && out.status === "needs_review" && c.expect.reason) {
+        expect(out.reason).toBe(c.expect.reason);
+      }
       if (out.status === "suggestion") {
         const v = out.value as { evidence_refs: unknown[] };
         // sourced answer invariant: never zero evidence refs.

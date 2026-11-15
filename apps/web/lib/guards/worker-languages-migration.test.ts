@@ -19,6 +19,10 @@ import { join } from "node:path";
 
 const REPO = join(__dirname, "..", "..", "..", "..");
 const MP1 = "20260711250000_worker_languages_v1";
+// 2026-10-19: adds 'uk' to the lang CHECK (strict superset), nothing else.
+const UK = "20261019170000_worker_language_uk_v1";
+// 2026-10-19: the save RPC's own language list gains 'uk' (forward fix of UK).
+const UK_RPC = "20261019180000_worker_language_uk_rpc_v1";
 const RPC_NAMES = ["save_worker_language_v1", "remove_worker_language_v1"];
 
 const up = readFileSync(join(REPO, "supabase", "migrations", `${MP1}.sql`), "utf8");
@@ -54,6 +58,26 @@ describe("worker_languages migration pair", () => {
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(MP1)) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (f.startsWith(UK_RPC)) {
+          // May re-issue save_worker_language_v1 only: outside that one function
+          // body nothing may touch the table.
+          const outside = src.replace(/\$function\$[\s\S]*?\$function\$/g, "");
+          for (const re of DEFINES) {
+            expect(outside, `${dir}/${f} may only re-issue save_worker_language_v1`).not.toMatch(re);
+          }
+          expect(src).not.toContain("remove_worker_language_v1");
+          expect(src).toMatch(/create or replace function public\.save_worker_language_v1/i);
+          continue;
+        }
+        if (f.startsWith(UK)) {
+          // The one later pair that may touch the table: it re-issues ONLY the
+          // lang CHECK (adds 'uk'). Anything else in it still fails below.
+          const rest = src.replace(/alter table public\.worker_languages (drop constraint if exists worker_languages_lang_check|add constraint worker_languages_lang_check)/gi, "");
+          for (const re of DEFINES) {
+            expect(rest, `${dir}/${f} may only re-issue the lang CHECK`).not.toMatch(re);
+          }
+          continue;
+        }
         for (const re of DEFINES) {
           expect(src, `${dir}/${f} must not define worker_languages`).not.toMatch(re);
         }

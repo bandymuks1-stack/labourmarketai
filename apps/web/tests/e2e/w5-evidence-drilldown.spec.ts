@@ -77,6 +77,15 @@ test.afterAll(async () => {
 
 test("desktop: an evidence bar drills into the skill-filtered journal, and clear restores it", async ({ page }) => {
   await page.goto("/lt/dashboard?result=player-card");
+  // The card opens CLOSED on its identity lens since #1976/#2014; the skill
+  // evidence chart lives on the SKILLS lens, one tab away — as a person does it.
+  const skillsTab = page.getByTestId("player-card-mode-skills").first();
+  await expect(skillsTab).toBeVisible({ timeout: 60_000 });
+  // A click before hydration is a silent no-op; retry until the lens is chosen.
+  await expect(async () => {
+    await skillsTab.click();
+    await expect(skillsTab).toHaveAttribute("aria-selected", "true", { timeout: 2_000 });
+  }).toPass({ timeout: 60_000 });
   const drill = page.getByTestId("player-card-skill-drilldown").first();
   await expect(drill).toBeVisible({ timeout: 60_000 });
   await drill.click();

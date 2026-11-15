@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { activeLocales } from "@/lib/i18n/config";
+import { alternatePathFor } from "@/lib/i18n/alternate-path";
 import { persistLocalePreferenceAction } from "@/lib/i18n/locale-actions";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +67,7 @@ export const NATIVE_LOCALE_NAMES: Record<string, string> = {
 export function LocaleSwitcher({
   className,
   compactBelowSm = false,
+  compactUntilWide = false,
   inline = false,
 }: {
   className?: string;
@@ -91,16 +93,30 @@ export function LocaleSwitcher({
    * the full name.
    */
   compactBelowSm?: boolean;
+  /**
+   * Show the locale CODE until the host bar is wide enough for every label
+   * (≥1800px), then the native name. OPT-IN for the ONE authenticated header,
+   * whose row carries the logo, the workspace chip, the nav and four controls
+   * and must never scroll or overlap (owner order 2026-10-25).
+   */
+  compactUntilWide?: boolean;
 }) {
   const pathname = usePathname();
   const active = useLocale();
   const t = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [suffix, setSuffix] = useState("");
+  const [alternates, setAlternates] = useState<{ hreflang: string | null; href: string }[]>([]);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (open) setSuffix(window.location.search + window.location.hash);
+    if (!open) return;
+    setSuffix(window.location.search + window.location.hash);
+    setAlternates(
+      Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="alternate"][hreflang]')).map(
+        (el) => ({ hreflang: el.getAttribute("hreflang"), href: el.href }),
+      ),
+    );
   }, [open]);
 
   // Outside-click + Escape are owned by AnchoredOverlay in the portal case
@@ -137,10 +153,22 @@ export function LocaleSwitcher({
           "text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary",
         )}
       >
-        <Globe aria-hidden className="h-3.5 w-3.5 text-text-muted" />
+        {/* Compact phone header: the code alone ("LT") marks the control;
+            the globe returns from `sm`, where there is room. */}
+        <Globe
+          aria-hidden
+          className={cn("h-3.5 w-3.5 text-text-muted", compactBelowSm && "hidden sm:block")}
+        />
         {/* The button keeps its `localeSwitch` aria-label in both modes, so
             the ACCESSIBLE name never shrinks with the visible text. */}
-        {compactBelowSm ? (
+        {compactUntilWide ? (
+          <>
+            <span className="hidden min-[1800px]:inline">
+              {NATIVE_LOCALE_NAMES[active] ?? active.toUpperCase()}
+            </span>
+            <span className="min-[1800px]:hidden">{active.toUpperCase()}</span>
+          </>
+        ) : compactBelowSm ? (
           <>
             <span className="hidden sm:inline">
               {NATIVE_LOCALE_NAMES[active] ?? active.toUpperCase()}
@@ -154,6 +182,9 @@ export function LocaleSwitcher({
           aria-hidden
           className={cn(
             "h-3 w-3 text-text-muted transition-transform",
+            // Compact phone header: the globe already marks the control, and
+            // the 18px the arrow takes is what keeps the brand name whole.
+            compactBelowSm && "hidden sm:block",
             open && "rotate-180",
           )}
         />
@@ -175,7 +206,7 @@ export function LocaleSwitcher({
             return (
               <Link
                 key={l}
-                href={`${pathname}${suffix}`}
+                href={`${alternatePathFor(l, alternates) ?? pathname}${suffix}`}
                 locale={l}
                 role="menuitem"
                 aria-current={isActive ? "true" : undefined}

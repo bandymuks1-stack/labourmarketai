@@ -61,7 +61,7 @@ describe("Launch Readiness — worker path shows honest empty states", () => {
     // `?intent=log-work` hand-off — which is what makes the CTA actually land
     // in the work-log flow — broke a guard that had nothing to say about it.
     expect(j).toMatch(
-      /cta=\{\{\s*label:\s*t\("listEmptyCta"\),\s*href:\s*"\/dashboard(\?intent=log-work)?"\s*\}\}/,
+      /cta=\{\{\s*label:\s*t\("listEmptyCta"\),\s*href:\s*"\/dashboard(\?intent=log-work)?"(,\s*variant:\s*"secondary")?\s*\}\}/,
     );
   });
 

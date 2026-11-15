@@ -50,19 +50,23 @@ export function buildJobsListJsonLd(input: {
   readonly description: string;
   readonly previews: readonly PublicVacancyPreview[];
   readonly genericTitle: string;
+  /** The listing's own path after the locale when it is not the board itself,
+   *  e.g. `/jobs?profession=welder`. Item URLs never depend on it. */
+  readonly path?: string;
   /** The SAME name the board shows for a row: the catalogue profession in the
    *  reader's language when the ad carries a known slug. Without it the
    *  publisher's occupation label is used (production 2026-10-15: the page
    *  read "Teacher" while the JSON-LD said "Specialistofficer"). */
   readonly localizedName?: (p: PublicVacancyPreview) => string | null;
 }): Record<string, unknown> {
-  const base = `${input.origin.replace(/\/$/, "")}/${input.locale}/jobs`;
+  const root = `${input.origin.replace(/\/$/, "")}/${input.locale}`;
+  const base = `${root}/jobs`;
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: input.name,
     description: input.description,
-    url: base,
+    url: input.path ? `${root}${input.path}` : base,
     inLanguage: input.locale,
     mainEntity: {
       "@type": "ItemList",

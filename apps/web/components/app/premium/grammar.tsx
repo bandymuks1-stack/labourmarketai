@@ -230,3 +230,57 @@ export function EvidenceBar({
     </span>
   );
 }
+
+/**
+ * FIGURE PAIR — two primary figures of DIFFERENT provenance shown side by side
+ * as equals (owner 2026-10-15, #2169: "800 h" was a footnote in a narrow tile).
+ * Each figure carries its own label, its own sub line and its own source line
+ * with its evidence mark; the pair is never summed into one number. Phone:
+ * stacked full-width rows, so the big numbers never wrap; ≥ sm: two columns.
+ */
+export function FigurePair({ children, className, testId }: { readonly children: ReactNode; readonly className?: string; readonly testId?: string }) {
+  return (
+    <div
+      className={cn("grid grid-cols-1 divide-y divide-ink-600/70 sm:grid-cols-2 sm:divide-x sm:divide-y-0", className)}
+      data-testid={testId}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function Figure({
+  label,
+  value,
+  sub,
+  source,
+  level,
+  testId,
+  data,
+}: {
+  /** Already localised: what the figure is ("Darbo žurnalas"). */
+  readonly label: string;
+  /** Already localised value with its unit ("25,6 val."). */
+  readonly value: string;
+  /** Already localised one-liner under the value (counts, span). */
+  readonly sub?: string | null;
+  /** Already localised provenance line — who stands behind the figure. */
+  readonly source: string;
+  readonly level: EvidenceLevel;
+  readonly testId?: string;
+  readonly data?: Readonly<Record<`data-${string}`, string | number>>;
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1.5 py-4 first:pt-0 last:pb-0 sm:px-5 sm:py-0 sm:first:pl-0 sm:last:pr-0" data-testid={testId} {...data}>
+      <Eyebrow>{label}</Eyebrow>
+      <span className="whitespace-nowrap font-display text-[clamp(2rem,8vw,2.6rem)] font-semibold leading-none tracking-[-0.03em] text-text-primary [font-feature-settings:'tnum']">
+        {value}
+      </span>
+      {sub ? <span className="text-support leading-snug text-text-secondary">{sub}</span> : null}
+      <span className="flex items-center gap-2 text-meta leading-snug text-text-muted">
+        <LevelMark level={level} />
+        {source}
+      </span>
+    </div>
+  );
+}

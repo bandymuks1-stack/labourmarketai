@@ -178,7 +178,7 @@ export async function ProjectMap({
               <span className="mt-auto flex items-center gap-2">
                 <Users className="h-4 w-4 text-brand-cyan" aria-hidden />
                 <CountUp
-                  text={String(p.assignedCount)}
+                  text={p.assignedCount === null ? "—" : String(p.assignedCount)}
                   className="font-mono text-2xl font-bold tracking-tightest text-text-primary"
                 />
                 <span className="font-mono text-meta uppercase tracking-label text-text-muted">

@@ -25,6 +25,7 @@
  */
 import { z } from "zod";
 
+import { activeLocales } from "@/lib/i18n/config";
 import { aiEnvelopeSchema } from "../../schemas/envelope";
 import type { PromptRegistryEntry } from "../types";
 
@@ -43,7 +44,7 @@ const catalogueRowSchema = z
 export const conversationIntentInputSchema = z
   .object({
     sentence: z.string().min(1).max(CONVERSATION_INTENT_SENTENCE_MAX),
-    locale: z.enum(["en", "lt", "ru"]),
+    locale: z.enum(activeLocales),
     identity: z.enum(["person", "company"]),
     intents: z.array(catalogueRowSchema).min(1).max(CONVERSATION_INTENT_CATALOGUE_MAX),
   })

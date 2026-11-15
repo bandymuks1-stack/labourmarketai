@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { PageHero } from "@/components/marketing/page-hero";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 export async function generateMetadata({
   params,
@@ -12,8 +14,9 @@ export async function generateMetadata({
   return buildPageMetadataFor("pricing", locale, "/pricing");
 }
 import { PricingTable } from "@/components/marketing/pricing-table";
+import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
 import { isCheckoutCancelledReturn } from "@/lib/billing/checkout-return-core";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
@@ -21,10 +24,15 @@ import {
   ConciergeAccessBanner,
   ConciergeOfferSection,
 } from "@/components/marketing/concierge-offer";
+import { faqPageJsonLd } from "@/lib/seo/faq-json-ld";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 // getPlans() reads the live `plans` table; keep this page request-time so
 // the build never needs Supabase. It degrades gracefully if unreachable.
 export const dynamic = "force-dynamic";
+
+/** Position of "How is billing handled?" in `pricing.faq` (pinned by a guard). */
+const BILLING_FAQ_INDEX = 2;
 
 export default async function PricingPage({
   params,
@@ -45,7 +53,7 @@ export default async function PricingPage({
   const { billing } = await searchParams;
   // LIVE Stripe (owner-armed) changes the page's own words: the hero no longer
   // says prices are not final, and the pre-payment boundary is not shown.
-  const billingLive = isStripeActive(getBillingConfig());
+  const billingLive = isStripeActive(getBillingConfigFor(null));
   // The hero words and the hero CTA follow the REAL readiness state, never a
   // static sentence: (1) prices not confirmed -> "not finalised" + waitlist;
   // (2) prices confirmed but no Stripe adapter armed -> "confirmed, online
@@ -55,10 +63,20 @@ export default async function PricingPage({
   const activationOpen = pricesConfirmed && billingLive;
   setRequestLocale(locale);
   const t = await getTranslations("pricing");
-  const faq = t.raw("faq") as { q: string; a: string }[];
+  // The billing answer ("card payment through Stripe, invoices in your
+  // account") is true only once activation is open; until then the same
+  // question gets the closed-state answer (owner P0 2026-11-10).
+  const faq = (t.raw("faq") as { q: string; a: string }[]).map((item, i) =>
+    i === BILLING_FAQ_INDEX && !activationOpen ? { q: item.q, a: t("faqBillingClosed") } : item,
+  );
+  // The same items the list below renders (AEO, decision 0009) — including
+  // the closed-state billing answer, so search engines read what visitors read.
+  const faqLd = faqPageJsonLd(faq, locale);
 
   return (
     <>
+      {/* Revenue funnel (2026-10-19): who saw the price. Once per tab session. */}
+      <TelemetryView event={FUNNEL_EVENTS.pricingViewed} metadata={{ surface: "pricing" }} />
       <PageHero
         eyebrow={t("eyebrow")}
         title={t("title")}
@@ -86,6 +104,12 @@ export default async function PricingPage({
           </p>
         </div>
       ) : null}
+      {/* The organization pilot pass, for the signed-in owner it is offered
+          to — public billing stays off, so without this the pricing page told
+          that owner payments were not open (2026-10-22). */}
+      <div className="mx-auto max-w-container px-6 sm:px-12">
+        <PilotPassInvite />
+      </div>
       {/* Public commercial surface only: the technical billing state banner
           and the Stripe TEST checkout moved to the superadmin-gated
           /dashboard/admin/billing (launch repair Scope C). */}
@@ -121,6 +145,9 @@ export default async function PricingPage({
             </div>
           ))}
         </dl>
+        {faqLd ? (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(faqLd) }} />
+        ) : null}
       </section>
     </>
   );

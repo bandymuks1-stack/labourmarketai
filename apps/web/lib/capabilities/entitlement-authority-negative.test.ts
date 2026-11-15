@@ -44,6 +44,7 @@ vi.mock("@/lib/auth/superadmin", () => ({
 }));
 vi.mock("@/lib/billing/config", () => ({
   getBillingConfig: () => ({ state: state.billing, reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" }),
+  getBillingConfigFor: () => ({ state: state.billing, reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" }),
 }));
 vi.mock("@/lib/auth/session-profile", () => ({
   readProfileRow: async () => ({ ok: true, value: { active_role: "company" } }),

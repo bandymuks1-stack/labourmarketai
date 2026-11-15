@@ -39,9 +39,11 @@
  * pass labels in; this decides only WHAT is in the document and in what order.
  */
 
+import type { PeriodEdge } from "@/lib/cv/period-dates";
 import type { CvSkillTier } from "./skill-tiers";
 import type { CvOrganizationHistoryEntry } from "./organization-history";
 import type { VerifiedCvData } from "./verified-cv";
+import { experienceStopsOf } from "@/lib/cv-export/experience-stops";
 
 /** The five top-level blocks, in the order a European reader expects them. */
 export type EuSectionId =
@@ -69,6 +71,10 @@ export interface EuDatedEntry {
   readonly relationship: string;
   readonly startedAt: string | null;
   readonly endedAt: string | null;
+  /** Explicitly ongoing. When absent, an entry without an end is ongoing (an
+   *  engagement row); a stop whose end is merely UNKNOWN sets false, so the
+   *  renderer never prints "present" for it. */
+  readonly ongoing?: boolean;
 }
 
 export interface EuEducationEntry {
@@ -98,6 +104,9 @@ export interface EuAdditionalEntry {
   readonly detail: string | null;
   /** ISO date or year when recorded; null when the person never dated it. */
   readonly date: string | null;
+  /** A certificate the person only DECLARED as text (no document). Printed
+   *  with the declared note — never as if a document stood behind it. */
+  readonly declared?: boolean;
 }
 
 export interface EuFormatCv {
@@ -134,8 +143,12 @@ export interface EuFormatResolvers {
   readonly profession: (slug: string) => string;
   readonly language: (code: string) => string;
   readonly certificateType: (slug: string) => string;
+  /** The note a declared certificate carries ("Listed by the worker"). Absent
+   *  in callers that print no certificates. */
+  readonly declaredCertificate?: string;
   /** ISO date → the reader's format, or null when the date is absent. */
   readonly date: (iso: string | null) => string | null;
+  readonly statedDate: (iso: string | null, edge: PeriodEdge) => string | null;
   /** "2019 – 2022", "2019 – present", "2019" — never an invented endpoint. */
   readonly present: string;
   /** One organization-provided history entry -> its printed lines. Absent in
@@ -189,10 +202,11 @@ export function resolveEuFormatDocument(
     heading: e.title ?? r.relationship(e.relationship),
     subheading: e.organization,
     period: period(
-      r.date(e.startedAt),
-      r.date(e.endedAt),
+      // No organization: the person's own statement, at the precision stated.
+      e.organization ? r.date(e.startedAt) : r.statedDate(e.startedAt, "start"),
+      e.organization ? r.date(e.endedAt) : r.statedDate(e.endedAt, "end"),
       r.present,
-      e.endedAt === null,
+      e.ongoing ?? e.endedAt === null,
     ),
     note: e.title ? r.relationship(e.relationship) : null,
   }));
@@ -214,7 +228,7 @@ export function resolveEuFormatDocument(
       heading: r.certificateType(c.title),
       subheading: c.detail,
       period: r.date(c.date),
-      note: null,
+      note: c.declared ? (r.declaredCertificate ?? null) : null,
     })),
     ...cv.projects.map((p) => ({
       heading: p.title,
@@ -263,13 +277,32 @@ const trimOrNull = (v: string | null | undefined): string | null => {
 
 /** Build the EU-format view. Pure projection of the Living CV — no new facts. */
 export function buildEuFormatCv(cv: VerifiedCvData): EuFormatCv {
-  const workExperience: EuDatedEntry[] = cv.workHistory.map((e) => ({
-    title: trimOrNull(e.title),
-    organization: trimOrNull(e.orgName),
-    relationship: e.relationship,
-    startedAt: e.startedAt,
-    endedAt: e.endedAt,
-  }));
+  const workExperience: EuDatedEntry[] = [
+    ...cv.workHistory.map((e) => ({
+      title: trimOrNull(e.title),
+      organization: trimOrNull(e.orgName),
+      relationship: e.relationship,
+      startedAt: e.startedAt,
+      endedAt: e.endedAt,
+    })),
+    // Positions the engagement list cannot carry (decision 0025, 2026-10-20):
+    // an earlier legal entity's stated leadership, a governing membership —
+    // the same stops the Living CV shows. One line per role; unknown dates
+    // stay unknown (no "present" for a merely unknown end).
+    // Each line carries ITS OWN role's dates and state; an earlier entity's
+    // derived role is dated by the stated period (the stop's span).
+    ...experienceStopsOf(cv.professionalExperience).flatMap((s) => {
+      const seen = new Set<string>();
+      return s.roles.flatMap((r) => {
+        const startedAt = r.derived ? s.from : r.startedAt;
+        const endedAt = r.current ? null : r.derived ? s.to : r.endedAt;
+        const key = `${r.relationship}|${startedAt ?? ""}|${endedAt ?? ""}|${r.current}`;
+        if (seen.has(key)) return [];
+        seen.add(key);
+        return [{ title: null, organization: trimOrNull(s.name), relationship: r.relationship, startedAt, endedAt, ongoing: r.current }];
+      });
+    }),
+  ];
 
   const education: EuEducationEntry[] = cv.education.map((e) => ({
     institution: e.institutionName,
@@ -307,6 +340,7 @@ export function buildEuFormatCv(cv: VerifiedCvData): EuFormatCv {
       title: a.title,
       detail: trimOrNull(a.description),
       date: a.achievedAt,
+      declared: true,
     })),
   ];
 

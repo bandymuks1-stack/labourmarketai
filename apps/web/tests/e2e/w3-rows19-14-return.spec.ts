@@ -82,14 +82,9 @@ test.describe("rows 19/14 — the return loop and the surviving doors", () => {
     await page.goto("/lt/dashboard/journal");
     await expect(page).toHaveURL(/\/lt\/dashboard\/journal/);
 
-    // THE one return primitive: the shell's home entry. The journal renders
-    // the simple chrome, whose header carries the "Pokalbis" link; the
-    // advanced chrome's bottom nav carries the same `/dashboard` entry — one
-    // destination either way.
-    const home = page
-      .getByRole("link", { name: /pokalbis/i })
-      .or(page.getByTestId("bottom-nav-overview"))
-      .first();
+    // THE one return primitive: the one header's back-home entry ("Pokalbis"),
+    // rendered on every route by every chrome mode.
+    const home = page.getByTestId("back-to-chat").first();
     await expect(home).toBeVisible({ timeout: 60_000 });
     await home.click();
     await expect(page).toHaveURL(/\/lt\/dashboard(\?|$)/);

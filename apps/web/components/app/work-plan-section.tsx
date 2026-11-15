@@ -4,11 +4,13 @@ import { Card } from "@/components/ui/Card";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { WorkPlanCancelButton, WorkPlanForm } from "@/components/app/work-plan-form";
+import { RevealOnMount } from "@/components/app/hash-scroll-on-load";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { getEmployerWorkerAvailability, unavailabilityOverlaps } from "@/lib/planning/employer-availability";
 import { listPlannableWorkers, listWorkPlanEntries } from "@/lib/planning/work-plan";
 import { isWorkPlanOutcome } from "@/lib/planning/work-plan-model";
+import { expandShiftRuns, type ShiftPattern } from "@/lib/planning/shift-pattern";
 import { createClient } from "@/lib/supabase/server";
 import { formatUtcDate } from "@/lib/time/display";
 
@@ -26,6 +28,21 @@ import { formatUtcDate } from "@/lib/time/display";
  * nothing invented.
  */
 const PLAN_HORIZON_DAYS = 60;
+
+/** CAL-8: the stated pattern in words — weekday names come from the
+ *  platform's own calendar data (Intl), the frame from the locale files. */
+function patternSummary(
+  pattern: ShiftPattern,
+  locale: string,
+  t: (key: string, values?: Record<string, string | number>) => string,
+): string {
+  if (pattern.kind === "weekly") {
+    const fmt = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
+    const names = pattern.days.map((d) => fmt.format(new Date(Date.UTC(2024, 0, d))));
+    return t("repeat.summaryWeekly", { days: names.join(", ") });
+  }
+  return t("repeat.summaryCycle", { on: pattern.on, off: pattern.off });
+}
 
 function isoDayPlus(todayIso: string, days: number): string {
   const d = new Date(`${todayIso}T00:00:00.000Z`);
@@ -97,6 +114,7 @@ export async function WorkPlanSection({
                 ? "status"
                 : "alert"
             }
+            id="work-plan-notice"
             className={`mt-3 rounded-md border px-3 py-2 text-xs ${noticeTone}`}
             data-testid="work-plan-notice"
             data-outcome={notice}
@@ -104,6 +122,11 @@ export async function WorkPlanSection({
             {t(`outcome.${notice}`)}
           </p>
         )}
+        {/* The outcome is brought to the person: a server-action redirect left
+            a phone at the top of a ~3,000px page with this notice far below
+            (UX review 2026-10-24). A per-render key remounts it on EVERY
+            submission, including a repeat that lands on the same URL. */}
+        {notice && <RevealOnMount key={crypto.randomUUID()} targetId="work-plan-notice" />}
 
         {!organizationId || entries === null || !entries.applied ? (
           <p className="mt-4 text-sm text-text-secondary" data-testid="work-plan-unavailable">
@@ -124,6 +147,21 @@ export async function WorkPlanSection({
                 .map((p) => ({ id: p.id, title: p.title as string }))}
               workObjects={workObjects}
               today={today}
+              repeatLabels={
+                entries.shiftPatterns
+                  ? {
+                      legend: t("repeat.legend"),
+                      none: t("repeat.none"),
+                      weekly: t("repeat.weekly"),
+                      cycle: t("repeat.cycle"),
+                      weekdays: t("repeat.weekdays"),
+                      cycleOn: t("repeat.cycleOn"),
+                      cycleOff: t("repeat.cycleOff"),
+                      cycleOffset: t("repeat.cycleOffset"),
+                      hint: t("repeat.hint"),
+                    }
+                  : null
+              }
               labels={{
                 worker: t("worker"),
                 project: t("project"),
@@ -153,12 +191,15 @@ export async function WorkPlanSection({
             ) : (
               <ul className="mt-2 flex flex-col divide-y divide-ink-600" data-testid="work-plan-list">
                 {entries.entries.map((e) => {
+                  // CAL-8: a rota holds only its shift days, so leave is
+                  // flagged only where it meets one (a warning, never a block).
+                  const runs = expandShiftRuns(e.recurrence ?? null, e.startDate, e.endDate);
                   const overlapsLeave =
                     availability?.status === "ok" &&
                     availability.unavailability.some(
                       (u) =>
                         u.workerId === e.workerId &&
-                        unavailabilityOverlaps({ startDate: e.startDate, endDate: e.endDate }, u.item),
+                        runs.some((run) => unavailabilityOverlaps(run, u.item)),
                     );
                   return (
                     <li
@@ -196,6 +237,11 @@ export async function WorkPlanSection({
                           {e.endDate !== e.startDate ? ` – ${formatUtcDate(e.endDate, locale)}` : ""}
                           {e.startTime ? ` · ${e.startTime}${e.endTime ? `–${e.endTime}` : ""}` : ""}
                         </p>
+                        {e.recurrence && (
+                          <p className="text-xs text-text-secondary" data-testid="work-plan-pattern">
+                            {patternSummary(e.recurrence, locale, t)}
+                          </p>
+                        )}
                         {e.note && <p className="text-xs text-text-secondary">{e.note}</p>}
                         {overlapsLeave && (
                           <p

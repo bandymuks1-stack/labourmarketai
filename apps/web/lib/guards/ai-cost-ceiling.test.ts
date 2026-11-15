@@ -156,7 +156,10 @@ describe("an uncheckable ceiling blocks instead of spending", () => {
     // provider model. Aliases live in Anthropic's price table, so an alias
     // always resolves — `cost_unpriced` could never fire for the very
     // providers it exists to stop, and a GPT run got quoted Anthropic rates.
-    for (const provider of ["openai", "gemini", "xai"] as const) {
+    // Gemini left this list on 2026-10-15: since 2026-08-28 its low_cost
+    // model (gemini-3.5-flash-lite) carries a reviewed price, so it is no
+    // longer a FULLY unpriced provider — see the fallback cases below.
+    for (const provider of ["openai", "xai"] as const) {
       const d = resolveTaskRoute(COSTED_TASK, {
         attempt: 1,
         expectedInputTokens: 2_000,
@@ -165,6 +168,47 @@ describe("an uncheckable ceiling blocks instead of spending", () => {
       expect(d.blocked, provider).toBe("cost_unpriced");
       expect(d.reason, provider).toContain(provider);
     }
+  });
+
+  it("an unpriced preferred tier runs on the policy's PRICED fallback tier, surfaced (#2407)", () => {
+    // 2026-10-13..15: extract_cv on Gemini preferred "standard" →
+    // gemini-2.5-flash (disabled, unpriced) and was refused on every run,
+    // while the policy's fallback "low_cost" → gemini-3.5-flash-lite is
+    // enabled and priced.
+    const policy = TASK_POLICIES[COSTED_TASK];
+    const d = resolveTaskRoute(COSTED_TASK, {
+      attempt: 1,
+      expectedInputTokens: 2_000,
+      provider: "gemini",
+    });
+    expect(d.blocked).toBeUndefined();
+    expect(d.tier).toBe(policy.fallbackTier);
+    expect(d.fallbackApplied).toBe(true);
+    expect(d.reason).toContain("no owner-reviewed price");
+    expect(typeof d.estimatedCostUsd).toBe("number");
+    expect(d.estimatedCostUsd!).toBeLessThanOrEqual(policy.maxEstimatedCostUsd);
+  });
+
+  it("the fallback is still judged by the ceiling — an over-budget fallback blocks", () => {
+    const d = resolveTaskRoute(COSTED_TASK, {
+      attempt: 1,
+      expectedInputTokens: 5_000_000,
+      provider: "gemini",
+    });
+    expect(d.blocked).toBe("cost_ceiling");
+  });
+
+  it("an escalation onto an unpriced tier never climbs back down — it blocks", () => {
+    const policy = TASK_POLICIES[COSTED_TASK];
+    const failure = policy.escalationConditions[0]!;
+    const d = resolveTaskRoute(COSTED_TASK, {
+      attempt: 2,
+      expectedInputTokens: 2_000,
+      provider: "gemini",
+      previousFailure: failure,
+    });
+    expect(d.escalated).toBe(true);
+    expect(d.blocked).toBe("cost_unpriced");
   });
 
   it("a self-hosted local run is free, never blocked on someone else's price", () => {

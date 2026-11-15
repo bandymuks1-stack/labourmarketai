@@ -215,3 +215,18 @@ describe("W4 Slice 3 — the description write path", () => {
     });
   }
 });
+
+describe("the public page links only a checked website and shows no personal offerings", () => {
+  const page = read("app/[locale]/business/[slug]/page.tsx");
+  const reader = read("lib/company/public-profile.ts");
+
+  it("the website reaches href only through publicWebsiteHref", () => {
+    expect(page).toContain("publicWebsiteHref(profile.website)");
+    expect(page).not.toContain("href={profile.website}");
+  });
+
+  it("service_offerings has no organization column, so the page does not read it", () => {
+    expect(reader).not.toContain("get_public_business_services_v1");
+    expect(page).not.toContain("services");
+  });
+});

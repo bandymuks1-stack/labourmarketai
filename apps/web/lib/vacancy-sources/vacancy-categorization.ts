@@ -25,6 +25,7 @@
 import {
   deriveNeedSkills,
   detectNeedProfession,
+  namesOccupationOutsideCatalogue,
   type NeedSkillSource,
   type RecognizedNeedSkill,
 } from "@/lib/market/need-skills";
@@ -65,30 +66,6 @@ export interface VacancyCategorizationV1 {
  * identical output, which is what makes the derived slugs reproducible and
  * therefore auditable.
  */
-/**
- * Publisher occupation labels (Arbetsförmedlingen's taxonomy) that name an
- * occupation NO catalogue profession covers, so a title word may not be used
- * to file the ad under one. MEASURED, not imagined: each entry was a
- * production title-fallback collision on 2026-10-15 (active ads where the
- * publisher's label was unrecognised and the title needle picked a different
- * trade). Matched case-insensitively on the WHOLE label, or the label's first
- * "/"-separated part. Extend only with a measured collision.
- */
-export const PUBLISHER_OCCUPATIONS_OUTSIDE_CATALOGUE: readonly string[] = [
-  "specialistofficer", //   "Militär lärare sjösäkerhet" → teacher
-  "affärsutvecklare", //    "Business Developer" → software_developer
-  "doktorand", //           "… elektroteknik" → electrician
-  "bilrekonditionerare", // "Bil vårdare" → caregiver
-  "hundtrimmare", //        "hundfrisör" → hairdresser
-];
-
-export function isPublisherOccupationOutsideCatalogue(label: string): boolean {
-  const l = label.trim().toLocaleLowerCase("sv");
-  if (!l) return false;
-  const head = l.split("/")[0].trim();
-  return PUBLISHER_OCCUPATIONS_OUTSIDE_CATALOGUE.some((o) => l === o || head === o);
-}
-
 export function categorizeVacancy(
   input: VacancyCategorizationInput,
 ): VacancyCategorizationV1 {
@@ -108,18 +85,18 @@ export function categorizeVacancy(
   //    systematic mistags from exactly this — hundreds of nurse/retail ads
   //    tagged cook or driver by their body text. A title is short and, when
   //    it names a profession, names THIS ad's profession.
-  //    EXCEPT when the publisher's label names an occupation that is known to
-  //    lie OUTSIDE the catalogue (see PUBLISHER_OCCUPATIONS_OUTSIDE_CATALOGUE).
-  //    Then the publisher has already said what the job is, and a title word
-  //    must not overrule them: "Militär lärare sjösäkerhet" filed under
-  //    "Specialistofficer" became `teacher`, "Business Developer" filed under
-  //    "Affärsutvecklare" became `software_developer` (production 2026-10-15).
-  //    The honest answer there is "no catalogue profession", not a guess.
-  const publisherOutsideCatalogue =
-    fromOccupation === null && isPublisherOccupationOutsideCatalogue(occupation);
+  //    Not when the publisher's label names an occupation the catalogue
+  //    positively knows it lacks (a lexicon row's `notWhen`). Production
+  //    2026-10-26: "Systemadministratör" ads titled "Administratör" fell
+  //    back to office_administrator, one to receptionist. Production
+  //    2026-10-15: "Militär lärare sjösäkerhet" filed under
+  //    "Specialistofficer" became `teacher`, "Business Developer" under
+  //    "Affärsutvecklare" became `software_developer`. The publisher already
+  //    said what the job is; a title guess would contradict it.
+  const knownOutside =
+    fromOccupation === null && occupation.length > 0 && namesOccupationOutsideCatalogue(occupation);
   const fromTitle =
-    fromOccupation ??
-    (title.length > 0 && !publisherOutsideCatalogue ? detectNeedProfession(title) : null);
+    fromOccupation ?? (!knownOutside && title.length > 0 ? detectNeedProfession(title) : null);
   const professionSlug = fromTitle;
 
   // 3. The shared derivation over the ad's own words — for SKILLS only.

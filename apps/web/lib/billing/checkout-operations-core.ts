@@ -152,7 +152,10 @@ export function decideCheckoutAdmission(input: {
   const local = input.local;
   if (!local) return { admit: true, reason: "no_local_subscription" };
   const isManual =
-    local.providerSubscriptionId === null || local.providerSubscriptionId.startsWith("manual_");
+    local.providerSubscriptionId === null ||
+    local.providerSubscriptionId.startsWith("manual_") ||
+    // A pilot pass is no provider subscription; buying the plan replaces it.
+    local.providerSubscriptionId.startsWith("pilotpass_");
   if (isManual) return { admit: true, reason: "manual_override_only" };
   if (!subscriptionBlocksCheckout(local.status)) {
     return { admit: true, reason: "no_local_subscription" };

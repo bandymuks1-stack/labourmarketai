@@ -3,6 +3,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
+import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";
 import { matchWorkerToNeed } from "@/lib/market/match-v1";
 import {
   INTEREST_UNDELIVERED,
@@ -20,6 +22,7 @@ import {
   buildMatchSnapshot,
   buildSnapshotContext,
   cleanInterestNote,
+  INTEREST_STATUSES,
   type InterestStatus,
 } from "./interest-snapshot";
 
@@ -51,6 +54,8 @@ import {
  */
 
 const RELATION_NOT_FOUND = "42P01";
+/** RLS / guard refusal (20261021095100: off-board insert or re-open). */
+const INSUFFICIENT_PRIVILEGE = "42501";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -253,24 +258,61 @@ export async function expressInterestCore(
   // single event. Keying it on the request id instead would notify the owner
   // about the FIRST worker only, and keying it on nothing would re-notify on
   // every idempotent re-express. The row comes back under the worker's own
-  // RLS policy (`demand_interest_signals_worker_all`) — no widened read.
-  const { data: signalRow, error } = await asAny(supabase)
+  // RLS policies (`demand_interest_signals_worker_select` / `_insert` /
+  // `_update`, 20261021095100) — no widened read. The database repeats this
+  // function's board gate on insert and on a withdrawn → interested re-open,
+  // and never lets a worker write the company's reviewed / contacted answer.
+  // A STANDING interest is not reset by saying it again (audit 2026-10-20):
+  // the chat and MCP paths re-express freely, and the unconditional upsert
+  // wrote status 'interested' and a null note over a row the company had
+  // already marked reviewed / contacted — the worker's label fell back to
+  // "sent", the company's note vanished and the person counted as waiting
+  // again. Only a missing or WITHDRAWN row is (re)opened; a standing one
+  // keeps the company's status and, unless a new note is given, the note.
+  const note = cleanInterestNote(input.note);
+  const { data: existing, error: existingError } = await asAny(supabase)
     .from("demand_interest_signals")
-    .upsert(
-      {
-        request_id: input.requestId,
-        worker_id: ctx.workerId,
-        status: "interested",
-        note: cleanInterestNote(input.note),
-        match_snapshot: snapshot,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "worker_id,request_id" },
-    )
-    .select("id")
+    .select("id, status")
+    .eq("worker_id", ctx.workerId)
+    .eq("request_id", input.requestId)
     .maybeSingle();
+  if (existingError) {
+    if (existingError.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
+    return { kind: "error", message: existingError.message };
+  }
+  const standing =
+    existing && typeof existing.status === "string" && existing.status !== "withdrawn" ? (existing as { id: string }) : null;
+  const { data: signalRow, error } = standing
+    ? await asAny(supabase)
+        .from("demand_interest_signals")
+        .update({
+          match_snapshot: snapshot,
+          ...(note ? { note } : {}),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", standing.id)
+        .select("id, status")
+        .maybeSingle()
+    : await asAny(supabase)
+        .from("demand_interest_signals")
+        .upsert(
+          {
+            request_id: input.requestId,
+            worker_id: ctx.workerId,
+            status: "interested",
+            note,
+            match_snapshot: snapshot,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "worker_id,request_id" },
+        )
+        .select("id, status")
+        .maybeSingle();
   if (error) {
     if (error.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
+    // 42501 here is the database's own board gate: the need left the board
+    // between the visibility read above and this write. Same honest answer.
+    if (error.code === INSUFFICIENT_PRIVILEGE) return { kind: "not-visible" };
     return { kind: "error", message: error.message };
   }
 
@@ -338,7 +380,13 @@ export async function expressInterestCore(
     console.warn(INTEREST_UNDELIVERED, { reason: "no_signal_id" });
   }
 
-  return { kind: "ok", status: "interested" };
+  // The status the row HAS after the write — a standing reviewed / contacted
+  // answer is kept and reported as such, never as "interested" again.
+  const savedStatus = (signalRow as { status?: unknown } | null)?.status;
+  return {
+    kind: "ok",
+    status: INTEREST_STATUSES.includes(savedStatus as InterestStatus) ? (savedStatus as InterestStatus) : "interested",
+  };
 }
 
 /** Withdraw own interest (row stays — honest history, §3-friendly). */
@@ -469,6 +517,46 @@ export type AcknowledgeResult =
   | { kind: "error"; message: string };
 
 /**
+ * May the caller ACT on worker interest in this need — from the ACTIVE
+ * workspace? The database door (acknowledge_demand_interest,
+ * candidate_profile_for_contact_v1) admits the need's creator and any
+ * manager of the need's organization; it cannot know which workspace the
+ * person is acting in. This binds the act to the server-resolved workspace
+ * (decision 0024), exactly like the reads beside it:
+ *   - a need without an organization: its creator only;
+ *   - an organization's need: only while acting in THAT organization, as its
+ *     creator or with a role carrying `manage-demand`.
+ * A failed read is `unavailable`, never "not yours".
+ */
+export async function actingDemandForInterest(
+  supabase: SupabaseClient,
+  userId: string,
+  requestId: string,
+): Promise<
+  | { kind: "ok"; title: string | null }
+  | { kind: "not-owner" }
+  | { kind: "unavailable" }
+> {
+  const { data: req, error } = await asAny(supabase)
+    .from("customer_requests")
+    .select("id, profile_id, organization_id, title")
+    .eq("id", requestId)
+    .maybeSingle();
+  if (error) return { kind: "unavailable" };
+  if (!req) return { kind: "not-owner" };
+  const row = req as { profile_id: string | null; organization_id: string | null; title: string | null };
+  if (!row.organization_id) {
+    return row.profile_id === userId ? { kind: "ok", title: row.title ?? null } : { kind: "not-owner" };
+  }
+  const employer = await requireEmployerCompany();
+  if (!employer.ok || employer.organizationId !== row.organization_id) return { kind: "not-owner" };
+  if (row.profile_id !== userId && !hasOrganizationCapability(employer.role, "manage-demand")) {
+    return { kind: "not-owner" };
+  }
+  return { kind: "ok", title: row.title ?? null };
+}
+
+/**
  * Company acknowledgement of a worker's interest signal (PR7): sets
  * 'reviewed' or 'contacted' through the gated SECURITY DEFINER RPC
  * `acknowledge_demand_interest` (ownership + status whitelist + withdrawn
@@ -489,6 +577,12 @@ export async function acknowledgeInterest(input: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-owner" };
+
+  // Bound to the ACTIVE workspace before the database door is asked (the
+  // door alone admits a manager of the need's organization from any workspace).
+  const acting = await actingDemandForInterest(supabase, user.id, input.requestId);
+  if (acting.kind === "unavailable") return { kind: "error", message: "need unreadable" };
+  if (acting.kind !== "ok") return { kind: "not-owner" };
 
   try {
     const { data, error } = await asAny(supabase).rpc("acknowledge_demand_interest", {
@@ -540,8 +634,11 @@ export async function acknowledgeInterest(input: {
   }
 }
 
-/** Interest signals on the company's OWN demand (RLS also enforces this;
- *  the explicit ownership check gives a clean signal, mirroring setShortlist). */
+/** Interest signals on a demand of the ACTING workspace: the caller's own
+ *  need, or a need of the active organization when the caller's role there
+ *  carries `manage-demand` — the database rule of 20261021095000
+ *  (creator OR has_org_demand_access). RLS also enforces this; the explicit
+ *  check gives a clean signal, mirroring setShortlistCore. */
 export async function listDemandInterestForCompany(
   requestId: string,
 ): Promise<
@@ -564,17 +661,23 @@ export async function listDemandInterestForCompany(
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { kind: "not-owner" };
 
+  // The need: own row OR a row of the acting organization (pinned to the
+  // active workspace, so another organization's deep link resolves to nothing).
   const { data: req, error: reqError } = await asAny(supabase)
     .from("customer_requests")
-    .select("id")
+    .select("id, profile_id")
     .eq("id", requestId)
-    .eq("profile_id", user.id)
+    .or(demandsOfWorkspaceFilter(user.id, employer.organizationId))
     .maybeSingle();
   // A FAILED ownership read is not a negative answer: `not-owner` would
   // tell the owner of the demand that it is not theirs. The caller renders
   // `unavailable` as "could not load" (SEP-7).
   if (reqError) return { kind: "unavailable" };
   if (!req) return { kind: "not-owner" };
+  // A colleague's need: role/capability, not membership, decides.
+  if (req.profile_id !== user.id && !hasOrganizationCapability(employer.role, "manage-demand")) {
+    return { kind: "not-owner" };
+  }
 
   try {
     const { data, error } = await asAny(supabase)
@@ -610,14 +713,21 @@ export async function listDemandInterestForCompany(
  * the same table across the caller's own demands and returns the pending count
  * per demand, so the page can open on the demand that is actually waiting.
  *
- * Own-rows only. `demand_interest_signals` SELECT is already fenced to the
- * demand owner, so an unscoped read returns exactly the caller's rows; the
- * explicit employer-workspace gate mirrors the sibling reader rather than
- * widening anything. Counts `interested` ONLY — a signal the company already
+ * The ACTING workspace's needs only. Since 20261021095000 the SELECT policy
+ * also admits the demand managers of a need's organization, so an unscoped
+ * read would count every organization the caller manages, in every
+ * workspace, plus the caller's own worker-side hands. The read is therefore
+ * pinned to the needs of the active workspace (the one `demandsOfWorkspaceFilter`
+ * rule) and, for a colleague's needs, to a role carrying `manage-demand` —
+ * the same answer the scouting page gives. Counts `interested` ONLY — a signal the company already
  * reviewed or acted on is not somebody still waiting, and `withdrawn` is not a
  * hand at all. An absent (owner-gated) table degrades to an EMPTY map, never
  * to an error: the page keeps its existing selection rule.
  */
+/** The newest needs of a workspace whose waiting hands are counted (bounded
+ *  `.in()` list; the needs/scouting lists show fewer than this). */
+const PENDING_INTEREST_NEEDS_LIMIT = 200;
+
 export async function listPendingInterestCountsForCompany(): Promise<
   ReadonlyMap<string, number>
 > {
@@ -632,10 +742,23 @@ export async function listPendingInterestCountsForCompany(): Promise<
   if (!employer.ok) return empty;
 
   try {
+    const { data: needs, error: needsError } = await asAny(supabase)
+      .from("customer_requests")
+      .select("id, profile_id")
+      .or(demandsOfWorkspaceFilter(user.id, employer.organizationId))
+      .order("created_at", { ascending: false })
+      .limit(PENDING_INTEREST_NEEDS_LIMIT);
+    if (needsError || !Array.isArray(needs)) return empty;
+    const manages = hasOrganizationCapability(employer.role, "manage-demand");
+    const ids = (needs as { id: string; profile_id: string | null }[])
+      .filter((n) => n.profile_id === user.id || manages)
+      .map((n) => n.id);
+    if (ids.length === 0) return empty;
     const { data, error } = await asAny(supabase)
       .from("demand_interest_signals")
       .select("request_id, status")
-      .eq("status", "interested");
+      .eq("status", "interested")
+      .in("request_id", ids);
     if (error || !Array.isArray(data)) return empty;
     const counts = new Map<string, number>();
     for (const r of data as { request_id: string | null }[]) {

@@ -21,6 +21,16 @@ import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
+import lt from "../../messages/lt.json";
+
+/** Real copy from the catalogue, never a literal — both hard-coded strings had
+ *  gone stale: the text-first submit moved to the informal "tu" in #2369
+ *  ("Pasiūlykite struktūrą" → "Pasiūlyk struktūrą", `skills.textFirst.submit`),
+ *  and the suggestion bucket the flow renders was renamed in #494 ("Paties
+ *  nurodyti įgūdžiai" → `structuring.buckets.selfDeclared`). */
+const SUGGEST = lt.skills.textFirst.submit;
+const BUCKET = lt.structuring.buckets.selfDeclared;
+
 const STORAGE_STATE = join(__dirname, ".storage-state.json");
 const SCREENSHOT_DIR = join(
   __dirname,
@@ -116,12 +126,13 @@ test("broad narrative produces many capabilities incl. specializations", async (
   await composer.fill(BROAD_INPUT);
 
   await page
-    .getByRole("button", { name: "Pasiūlykite struktūrą" })
+    .getByRole("button", { name: SUGGEST })
     .first()
     .click();
 
   await page
-    .getByText("Paties nurodyti įgūdžiai", { exact: false })
+    .getByText(BUCKET, { exact: false })
+    .first()
     .waitFor({ state: "visible", timeout: 15_000 });
 
   // All required chips must be visible somewhere on the page (bucket
@@ -167,12 +178,13 @@ test("edit flow — type → suggest → back → edit → re-suggest", async ({
 
   // STEP 2 — click suggest.
   await page
-    .getByRole("button", { name: "Pasiūlykite struktūrą" })
+    .getByRole("button", { name: SUGGEST })
     .first()
     .click();
 
   await page
-    .getByText("Paties nurodyti įgūdžiai", { exact: false })
+    .getByText(BUCKET, { exact: false })
+    .first()
     .waitFor({ state: "visible", timeout: 15_000 });
 
   // The back-to-text button carries the stable testid added by this PR.
@@ -198,12 +210,13 @@ test("edit flow — type → suggest → back → edit → re-suggest", async ({
 
   // STEP 6 — re-suggest. New bucket renders. Pardavimai chip appears.
   await page
-    .getByRole("button", { name: "Pasiūlykite struktūrą" })
+    .getByRole("button", { name: SUGGEST })
     .first()
     .click();
 
   await page
-    .getByText("Paties nurodyti įgūdžiai", { exact: false })
+    .getByText(BUCKET, { exact: false })
+    .first()
     .waitFor({ state: "visible", timeout: 15_000 });
 
   await expect(

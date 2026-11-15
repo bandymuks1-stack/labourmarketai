@@ -19,7 +19,7 @@
  * model id — it gets its own registry model for the routed alias, or an honest
  * skip.
  */
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import {
   MODEL_REGISTRY,
@@ -52,6 +52,12 @@ const MOCK_CFG = resolveAiRuntimeConfig({
   dailyRunBudget: undefined,
 });
 
+// ZERO PAID API BUDGET (paid-budget.ts) is closed by default. These tests study
+// how METERED providers behave behind the egress gate and the chain, so they
+// run with the owner switch open; paid-budget.test.ts covers the closed state.
+beforeEach(() => {
+  vi.stubEnv("AI_PAID_PROVIDERS_ALLOWED", "true");
+});
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.clearAllMocks();

@@ -27,11 +27,31 @@
  * so a context is named once, the same way, everywhere.
  */
 
+/**
+ * WHICH "WITHOUT A NAME" PHRASE AN UNNAMED ORGANIZATION GETS (owner P0
+ * 2026-10-29). An organization created at sign-up can carry neither a display
+ * nor a legal name. Its bare type ("Agentūra · Savininkas") read like a real,
+ * named choice, and work was filed there that belonged elsewhere. Every
+ * surface now says plainly that the organization has no name, through the
+ * `journal.unnamedOrganization.<kind>` keys (all locales). Display only — the
+ * organization's own type decides the phrase, never an authority (ORG-2).
+ */
+export type UnnamedOrganizationKind = "company" | "agency" | "other";
+
+export function unnamedOrganizationKind(
+  organizationType: string | null | undefined,
+): UnnamedOrganizationKind {
+  if (organizationType === "agency") return "agency";
+  if (organizationType === "company") return "company";
+  return "other";
+}
+
 export type EngagementLabelInput = {
   /** The organization's display name (already resolved), or null. */
   readonly orgName: string | null;
-  /** Localized organization TYPE ("Įmonė" / "Agentūra") — the fallback name
-   *  for an organization that has no display name. */
+  /** The fallback name for an organization that has no display/legal name:
+   *  the localized "Agency without a name" / "Company without a name" phrase
+   *  (`journal.unnamedOrganization.*`, see `unnamedOrganizationKind`). */
   readonly orgTypeLabel: string | null;
   /** The person's own title for the context, or null. */
   readonly title: string | null;

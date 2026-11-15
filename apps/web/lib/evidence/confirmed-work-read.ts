@@ -35,9 +35,32 @@ export interface ConfirmedWorkCount {
 /** worker id → skill slug → counts. Only skills with >= 1 confirmed entry. */
 export type ConfirmedWorkByWorker = ReadonlyMap<string, ReadonlyMap<string, ConfirmedWorkCount>>;
 
-/** Upper bound on confirmed entries read for one batch. A truncated batch
- *  under-counts (never over-counts); the cap is far above any real roster. */
-export const CONFIRMED_WORK_ROW_CAP = 5000;
+/** Upper bound on rows read for one batch. The server answers at most 1000
+ *  rows per request, so every read below PAGES to the end (audit 2026-10-20:
+ *  a bare `.limit(5000)` was a silent 1000 — confirmed work under-counted,
+ *  and a corrected original past the first 1000 counted as confirmed). Past
+ *  this ceiling a read is UNKNOWN (null), never a lower count. */
+export const CONFIRMED_WORK_ROW_CAP = 20_000;
+const PAGE = 1000;
+// The embedded-select builder is untyped here (tables postdate the generated types).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyQuery = any;
+
+/** Every page of one ordered read; null on a failed page or past the cap. */
+async function readEveryPage<T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  build: () => any,
+): Promise<T[] | null> {
+  const rows: T[] = [];
+  for (let from = 0; from < CONFIRMED_WORK_ROW_CAP; from += PAGE) {
+    const res = (await build().range(from, from + PAGE - 1)) as { data: T[] | null; error: unknown };
+    if (res.error) return null;
+    const got = res.data ?? [];
+    rows.push(...got);
+    if (got.length < PAGE) return rows;
+  }
+  return null;
+}
 
 export interface ConfirmedEntryRow {
   /** Entry id — needed to drop a corrected original (counted-once). */
@@ -141,28 +164,23 @@ async function readCorrectedOriginalIds(
   workerIds: readonly string[],
 ): Promise<ReadonlySet<string> | null> {
   try {
-    const res = (await (
-      supabase as {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        from: (t: string) => any;
-      }
-    )
-      .from("journal_entries")
-      .select("correction_of")
-      .in("worker_id", [...workerIds])
-      .not("correction_of", "is", null)
-      .is("deleted_at", null)
-      .is("superseded_by", null)
-      .limit(CONFIRMED_WORK_ROW_CAP)) as {
-      data: { correction_of: string | null }[] | null;
-      error: unknown;
-    };
-    if (res.error) return null;
-    return new Set(
-      (res.data ?? [])
-        .map((r) => r.correction_of)
-        .filter((v): v is string => typeof v === "string"),
+    const rows = await readEveryPage<{ correction_of: string | null }>(() =>
+      (
+        supabase as {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          from: (t: string) => any;
+        }
+      )
+        .from("journal_entries")
+        .select("id, correction_of")
+        .in("worker_id", [...workerIds])
+        .not("correction_of", "is", null)
+        .is("deleted_at", null)
+        .is("superseded_by", null)
+        .order("id", { ascending: true }),
     );
+    if (rows === null) return null;
+    return new Set(rows.map((r) => r.correction_of).filter((v): v is string => typeof v === "string"));
   } catch {
     return null;
   }
@@ -179,36 +197,26 @@ export async function readConfirmedWorkBySkill(
 ): Promise<ConfirmedWorkByWorker | null> {
   if (workers.length === 0) return new Map();
   try {
-    const res = await (
-      (supabase as Sb)
-        .from("journal_entries")
-        .select(
-          "id, worker_id, created_at, journal_entry_confirmations!inner(confirmation_scope, created_at, confirmer_id), journal_entry_skills!inner(skills(slug)), journal_entry_metrics(metric_slug, value_text, created_at)",
-        ) as {
-        in: (c: string, v: string[]) => {
-          is: (c: string, v: null) => {
-            is: (c: string, v: null) => {
-              limit: (n: number) => PromiseLike<{ data: unknown; error: unknown }>;
-            };
-          };
-        };
-      }
-    )
-      .in(
-        "worker_id",
-        workers.map((w) => w.id),
-      )
-      .is("deleted_at", null)
-      .is("superseded_by", null)
-      .limit(CONFIRMED_WORK_ROW_CAP);
-    if (res.error) return null;
+    const rows = await readEveryPage<ConfirmedEntryRow>(() =>
+      ((supabase as Sb).from("journal_entries").select(
+        "id, worker_id, created_at, journal_entry_confirmations!inner(confirmation_scope, created_at, confirmer_id), journal_entry_skills!inner(skills(slug)), journal_entry_metrics(metric_slug, value_text, created_at)",
+      ) as AnyQuery)
+        .in(
+          "worker_id",
+          workers.map((w) => w.id),
+        )
+        .is("deleted_at", null)
+        .is("superseded_by", null)
+        .order("id", { ascending: true }),
+    );
+    if (rows === null) return null;
     const corrected = await readCorrectedOriginalIds(
       supabase,
       workers.map((w) => w.id),
     );
     if (corrected === null) return null;
     return aggregateConfirmedWork(
-      (res.data ?? []) as ConfirmedEntryRow[],
+      rows,
       new Map(workers.map((w) => [w.id, w.profileId])),
       corrected,
     );
@@ -256,30 +264,20 @@ export async function readOwnConfirmedWorkTotals(
   profileId: string | null,
 ): Promise<ConfirmedWorkTotals | null> {
   try {
-    const res = await (
-      (supabase as Sb)
-        .from("journal_entries")
-        .select(
-          "id, created_at, journal_entry_confirmations!inner(confirmation_scope, created_at, confirmer_id), journal_entry_metrics(metric_slug, value_text, created_at)",
-        ) as {
-        eq: (c: string, v: string) => {
-          is: (c: string, v: null) => {
-            is: (c: string, v: null) => {
-              limit: (n: number) => PromiseLike<{ data: unknown; error: unknown }>;
-            };
-          };
-        };
-      }
-    )
-      .eq("worker_id", workerId)
-      .is("deleted_at", null)
-      .is("superseded_by", null)
-      .limit(CONFIRMED_WORK_ROW_CAP);
-    if (res.error) return null;
+    const rows = await readEveryPage<ConfirmedEntryRow>(() =>
+      ((supabase as Sb).from("journal_entries").select(
+        "id, created_at, journal_entry_confirmations!inner(confirmation_scope, created_at, confirmer_id), journal_entry_metrics(metric_slug, value_text, created_at)",
+      ) as AnyQuery)
+        .eq("worker_id", workerId)
+        .is("deleted_at", null)
+        .is("superseded_by", null)
+        .order("id", { ascending: true }),
+    );
+    if (rows === null) return null;
     const corrected = await readCorrectedOriginalIds(supabase, [workerId]);
     if (corrected === null) return null;
     return aggregateConfirmedTotals(
-      (res.data ?? []) as ConfirmedEntryRow[],
+      rows,
       profileId,
       corrected,
     );

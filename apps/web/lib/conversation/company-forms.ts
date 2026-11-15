@@ -124,6 +124,10 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
       // set — before this the chat intake stored only the free-text label.
       workType: s(st.workType) || null,
       country: s(st.country) || null,
+      // Teams of a stated size ("3 brigados po 4"), derived the same way and
+      // never typed: they reach `structured_v2.team` beside the total.
+      teamCount: numOrNull(st.teamCount),
+      perTeamSize: numOrNull(st.perTeamSize),
     }),
   },
   {

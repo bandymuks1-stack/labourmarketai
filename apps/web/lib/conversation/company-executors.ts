@@ -22,13 +22,13 @@ import {
   type BridgeActionState,
 } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
-import { respondToTeamOfferAction } from "@/lib/company/team-offer-actions";
+import { answerableTermsVersionAction, respondToTeamOfferAction } from "@/lib/company/team-offer-actions";
 import { renameActiveOrganization } from "@/lib/company/organization-rename";
 import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
 import { updateStageStatusAction } from "@/lib/projects/stages-actions";
 import { seedReadinessItemsAction, upsertReadinessItemAction } from "@/lib/projects/operations-actions";
 import { getProjectOperations } from "@/lib/projects/operations";
-import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
+import { suggestedReadinessItemKeys } from "@/lib/projects/readiness-items";
 import { sendWorkInstructionAction } from "@/lib/instructions/actions";
 import { quickConfirmEntry } from "@/lib/journal/quick-confirm-actions";
 import { setEngagementJournalReview } from "@/lib/operations/org-membership";
@@ -195,6 +195,13 @@ export const COMPANY_EXECUTORS: {
         return { ok: false, code: "save_failed" };
       }
     }
+    // Teams of a stated size ride along; the canonical submit keeps them only
+    // while they still explain the number of workers the person confirmed
+    // (3 × 4 = 12) — an edited count drops them, server-side.
+    const team =
+      input.teamCount != null && input.perTeamSize != null
+        ? { count: input.teamCount, per_team: input.perTeamSize }
+        : null;
     const r = await submitDemandRequestAction(input.intent, {
       description: input.description,
       role: input.role ?? undefined,
@@ -211,9 +218,10 @@ export const COMPANY_EXECUTORS: {
       // and the Learning Compass read (`payload.structured_v2`). Absent when
       // the employer stated none — nothing is inferred.
       structuredV2:
-        input.opportunityType || input.startDate || input.endDate
+        input.opportunityType || input.startDate || input.endDate || team
           ? {
               ...(input.opportunityType ? { opportunity_type: input.opportunityType } : {}),
+              ...(team ? { team } : {}),
               ...(input.startDate || input.endDate
                 ? {
                     time: {
@@ -285,13 +293,15 @@ export const COMPANY_EXECUTORS: {
       role: input.role ?? null,
       note: input.note ?? null,
     });
-    return r.kind === "ok"
-      ? { ok: true, data: { status: r.status ?? null } }
-      : {
-          ok: false,
-          code: mapKind(r.kind),
-          message: r.kind === "error" ? r.message : undefined,
-        };
+    if (r.kind === "ok") return { ok: true, data: { status: r.status ?? null } };
+    // The RPC's refusal (20261021095200) stays a named, honest code in chat:
+    // worker_not_reachable | need_closed | already_answered.
+    if (r.kind === "refused") return { ok: false, code: r.reason.replace(/-/g, "_") };
+    return {
+      ok: false,
+      code: mapKind(r.kind),
+      message: r.kind === "error" ? r.message : undefined,
+    };
   },
 
   "company.assign-worker": async (input) => {
@@ -463,14 +473,16 @@ export const COMPANY_EXECUTORS: {
   },
 
   "company.seed-readiness-checklist": async (input, ctx) => {
-    // Start the standard checklist for EVERY person on the project — the same
-    // seed the operations page runs per person, with the same default labels
+    // Add the SUGGESTED rows to agree for every person on the project — the
+    // same suggestions the operations page offers per person (never a
+    // universal mandatory list, decision 0021 extension 2026-10-24; rows are
+    // "to agree before the agreement", never "missing"), with the same labels
     // (`projectOps.defaults`, in the caller's locale). The people come from the
     // operations centre's own read (RLS: null = not the caller's project).
     const ops = await getProjectOperations(input.projectId);
     if (!ops) return { ok: false, code: "not_authorized" };
     const t = await getTranslations({ locale: ctx.locale, namespace: "projectOps.defaults" });
-    const items = DEFAULT_READINESS_ITEM_KEYS.map((itemKey) => ({ itemKey, label: t(itemKey) }));
+    const items = suggestedReadinessItemKeys({ crossBorder: false }).map((itemKey) => ({ itemKey, label: t(itemKey) }));
     let seeded = 0;
     for (const w of ops.workers) {
       if (w.readinessItems.length > 0) continue;
@@ -537,9 +549,15 @@ export const COMPANY_EXECUTORS: {
     // The receiver's answer to a brigade / company offer — the SAME canonical
     // action the scouting page's buttons call; the RPC re-checks that the
     // caller receives this need and that the offer is still open.
+    // An accept agrees to the terms version the person can see right now
+    // (the same answerable version the offer card shows) — v2 refuses when
+    // another version is proposed by the time it runs.
+    const accepting = input.decision === "accepted";
+    const expectedVersion = accepting ? await answerableTermsVersionAction({ offerId: input.offerId }) : null;
     const r = await respondToTeamOfferAction({
       offerId: input.offerId,
-      decision: input.decision === "accepted" ? "accept" : "decline",
+      decision: accepting ? "accept" : "decline",
+      expectedVersion,
     });
     if (r.status === "ok") return { ok: true, data: { decision: input.decision, outcome: r.outcome } };
     if (r.status === "needs_migration") return { ok: false, code: "needs_migration" };

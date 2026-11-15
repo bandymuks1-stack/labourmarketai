@@ -66,9 +66,8 @@ describe("a new agent is told what this product is, before it can narrow it", ()
   it("the bootstrap reads every register, so it cannot go stale against them", () => {
     const source = read(BOOTSTRAP);
     for (const register of REGISTERS) {
-      const relative = register.replace("apps/web/", "apps/web/");
       expect(
-        source.includes(relative.split("/").pop()!) || source.includes(relative),
+        source.includes(register.split("/").pop()!) || source.includes(register),
         `${BOOTSTRAP} no longer reads ${register}; its briefing would drift from what CI enforces`,
       ).toBe(true);
     }

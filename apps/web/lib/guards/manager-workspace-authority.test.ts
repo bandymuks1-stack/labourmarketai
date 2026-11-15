@@ -75,7 +75,9 @@ describe("READ ≠ EDIT — one implementation, two access modes", () => {
 describe("the company gate's membership arm — layout, page gate, dispatcher", () => {
   it("the dispatcher's held roles carry `company` from the ACTIVE workspace", () => {
     const src = code(read("lib/conversation/dispatch.ts"));
-    expect(src).toMatch(/if \(workspaceOpensCompanySpace\(workspace\)\) set\.add\("company"\)/);
+    expect(src).toMatch(/opensCompanySpace: workspaceOpensCompanySpace\(workspace\)/);
+    const core = code(read("lib/conversation/dispatch-core.ts"));
+    expect(core).toMatch(/if \(params\.opensCompanySpace\) set\.add\("company"\)/);
     // Both entry points resolve the workspace BEFORE authorization.
     const prepare = src.indexOf("export async function prepareConfirmationAction");
     const dispatch = src.indexOf("export async function dispatchWorkerAction");
@@ -89,11 +91,20 @@ describe("the company gate's membership arm — layout, page gate, dispatcher", 
     }
   });
 
+  it("the dispatcher's held roles carry `worker` from the person's OWN worker profile, via the web's workers-row core", () => {
+    const src = code(read("lib/conversation/dispatch.ts"));
+    expect(src).toMatch(/await readWorkerCoreRow\(\{ supabase, userId \}\)/);
+    expect(src).toMatch(/ownsWorkerProfile = worker\.ok && worker\.value !== null/);
+    const core = code(read("lib/conversation/dispatch-core.ts"));
+    expect(core).toMatch(/if \(params\.ownsWorkerProfile\) set\.add\("worker"\)/);
+  });
+
   it("the Work door admits the employer context, not only the acting identity", () => {
     const src = code(read("app/[locale]/dashboard/projects/page.tsx"));
     expect(src).toMatch(/if \(!MANAGER_ROLES\.has\(role\) && employerCtx\?\.kind !== "ok"\)/);
-    // ONE resolver call — the second read is gone.
-    expect(src.match(/await resolveEmployerCompanyContext\(\)/g)).toHaveLength(1);
+    // ONE resolver call — the second read is gone. (2026-10-19: it runs beside
+    // the request-cached admin signal, still once.)
+    expect(src.match(/resolveEmployerCompanyContext\(\)/g)).toHaveLength(1);
   });
 
   it("the Work door decides the branch from the ONE workspace context before any employer read", () => {
@@ -107,12 +118,15 @@ describe("the company gate's membership arm — layout, page gate, dispatcher", 
     const src = code(read("app/[locale]/dashboard/projects/page.tsx"));
     expect(src).toMatch(/const workspace = await getWorkspaceContext\(\);/);
     expect(src).toMatch(
-      /MANAGER_ROLES\.has\(role\) \|\| workspaceOpensCompanySpace\(workspace\)\s*\?\s*await resolveEmployerCompanyContext\(\)\s*:\s*null/,
+      /const opensCompanySpace = MANAGER_ROLES\.has\(role\) \|\| workspaceOpensCompanySpace\(workspace\);/,
+    );
+    expect(src).toMatch(
+      /opensCompanySpace\s*\?\s*await Promise\.all\(\[resolveEmployerCompanyContext\(\), getSessionIsAdmin\(\)\]\)\s*:\s*\(\[null, false\] as const\)/,
     );
     // Order: the workspace decision precedes the employer read, and both
     // precede the worker branch.
     const workspaceAt = src.indexOf("await getWorkspaceContext()");
-    const resolverAt = src.indexOf("await resolveEmployerCompanyContext()");
+    const resolverAt = src.indexOf("resolveEmployerCompanyContext()");
     const branchAt = src.indexOf('employerCtx?.kind !== "ok"');
     expect(workspaceAt).toBeGreaterThan(-1);
     expect(resolverAt).toBeGreaterThan(workspaceAt);

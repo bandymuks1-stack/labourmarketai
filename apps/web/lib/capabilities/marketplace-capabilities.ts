@@ -12,6 +12,7 @@ import {
   type ShortlistWriteResult,
 } from "@/lib/scouting/scouting";
 import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
+import { workerReachable } from "@/lib/visibility/discoverable-workers";
 import type { ExecResult } from "@/lib/conversation/executor-contract";
 
 import {
@@ -20,6 +21,7 @@ import {
 } from "./confirmable";
 import type { CapabilityCaller, CapabilityDescriptor } from "./contract";
 import { demandContextRefusal } from "./employer-context-refusal";
+import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";
 
 /**
  * MARKETPLACE — the meeting of a need and the people who could meet it, for
@@ -214,7 +216,7 @@ async function readNeed(
     .from("customer_requests")
     .select("id, title, status, profile_id")
     .eq("id", requestId)
-    .or(`profile_id.eq.${caller.userId},organization_id.eq.${organizationId}`)
+    .or(demandsOfWorkspaceFilter(caller.userId, organizationId))
     .maybeSingle();
   return (data as { id: string; title: string | null; status: string | null; profile_id: string } | null) ?? null;
 }
@@ -298,14 +300,10 @@ function makeShortlistPair(op: ShortlistOp): [CapabilityDescriptor, CapabilityDe
       return { ok: false, result: shortlistWriteFailure({ kind: "not-owner" }) };
     }
     if (need.status === "closed") return { ok: false, result: shortlistWriteFailure({ kind: "closed" }) };
-    // The person must be someone this caller may SEE (can_view_worker) — a
-    // shortlist is never a way to reach a person discovery does not admit.
-    const { data: worker } = await asAny(caller.supabase)
-      .from("workers")
-      .select("id")
-      .eq("id", d.workerId as string)
-      .maybeSingle();
-    if (!worker) {
+    // The person must be someone this caller may SEE — related (the row) or found through the
+    // employer-visibility consent (the anonymous projection). A shortlist is never a way to reach
+    // a person discovery does not admit.
+    if (!(await workerReachable(caller.supabase, d.workerId as string))) {
       return { ok: false, result: { ok: false, code: "not_found", message: "No such candidate visible to this organization." } };
     }
     const own = await readShortlist(caller, need.id, d.workerId as string);

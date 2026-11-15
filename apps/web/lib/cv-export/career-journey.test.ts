@@ -152,8 +152,20 @@ describe("career journey — lines and horizon", () => {
       todayIso: TODAY,
     });
     expect(j.horizon).toEqual([
-      { professionId: "solar-installer", sharedSkills: ["a", "b"], missingSkills: ["c"], basis: "derived" },
+      { professionId: "solar-installer", sharedSkills: ["a", "b"], missingSkills: ["c"], basis: "derived", confirmedShared: 0 },
     ]);
+  });
+
+  it("the horizon counts as confirmed only what a second party confirmed — a recorded or declared skill never is", () => {
+    const j = deriveCareerJourney({
+      stations: [],
+      skills: [skill("a", "confirmed"), skill("b", "evidence"), skill("c", "declared")],
+      practice: {},
+      horizon: [{ professionId: "solar-installer", sharedSkills: ["a", "b", "c"], missingSkills: ["d"] }],
+      todayIso: TODAY,
+    });
+    expect(j.horizon[0]?.confirmedShared).toBe(1);
+    expect(j.horizon[0]?.sharedSkills).toHaveLength(3);
   });
 });
 

@@ -23,9 +23,9 @@ describe("company ingest — normalization", () => {
   });
 
   it("a free-mail domain is never a company identity", () => {
-    expect(webDomainOf("https://www.Siaures-Statyba.lt/kontaktai")).toBe("siaures-statyba.lt");
-    expect(webDomainOf("info@siaures-statyba.lt")).toBe("siaures-statyba.lt");
-    expect(webDomainOf("jonas@gmail.com")).toBeNull();
+    expect(webDomainOf("https://www.Statybos-Pavyzdys.example/kontaktai")).toBe("statybos-pavyzdys.example");
+    expect(webDomainOf(["info", "statybos-pavyzdys.example"].join("@"))).toBe("statybos-pavyzdys.example");
+    expect(webDomainOf(["vardas.pavyzdys", "gmail.com"].join("@"))).toBeNull();
     expect(webDomainOf("not a domain")).toBeNull();
   });
 

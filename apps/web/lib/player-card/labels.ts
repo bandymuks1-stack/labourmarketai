@@ -2,6 +2,7 @@ import "server-only";
 
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { statedDateLabel } from "@/lib/cv/period-dates";
 import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
 import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
 import type { PlayerCardLabels } from "@/components/app/worker-player-card";
@@ -37,6 +38,10 @@ export async function buildPlayerCardLabels(
      */
     readonly allTime?: WorkPeriodTotals | null;
     readonly allTimeTruncated?: boolean;
+    /** The decision-0025 figures (`experienceFiguresOf`) — the same the
+     *  profile hub passes; absent → the strip shows the journal only. */
+    readonly organizationHistoryHours?: number | null;
+    readonly professionalExperienceHours?: number | null;
   } = {},
 ): Promise<PlayerCardLabels> {
   const locale = await getLocale();
@@ -134,6 +139,8 @@ export async function buildPlayerCardLabels(
     truncated: opts.allTimeTruncated ?? false,
     locale,
     t: (key, values) => tIdentity(key, values),
+    organizationHistoryHours: opts.organizationHistoryHours ?? null,
+    professionalExperienceHours: opts.professionalExperienceHours ?? null,
   });
 
   return {
@@ -336,13 +343,19 @@ export async function buildPlayerCardLabels(
         // readable without a second history list underneath the card.
         laneDetails: history.lanes.map((lane) => {
           const entry = card.workHistory.find((h) => h.id === lane.id);
+          // No organization: only what the person stated, never a padded day.
+          const own = entry !== undefined && entry.organizationName === null;
           const from = entry?.startedAt
-            ? dateFmt.format(new Date(`${entry.startedAt}T00:00:00Z`))
+            ? own
+              ? statedDateLabel(entry.startedAt, "start", locale)
+              : dateFmt.format(new Date(`${entry.startedAt}T00:00:00Z`))
             : null;
           const to = entry?.current
             ? t("workHistoryCurrent")
             : entry?.endedAt
-              ? dateFmt.format(new Date(`${entry.endedAt}T00:00:00Z`))
+              ? own
+                ? statedDateLabel(entry.endedAt, "end", locale)
+                : dateFmt.format(new Date(`${entry.endedAt}T00:00:00Z`))
               : null;
           return from && to ? `${from} — ${to}` : (from ?? "");
         }),
