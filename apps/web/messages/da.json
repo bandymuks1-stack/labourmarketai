@@ -205,7 +205,7 @@
         },
         "addMore": {
           "title": "[EN] Add another way to use labourmarket.ai",
-          "body": "[EN] You're not locked in. Add a worker, company, agency or customer role whenever you're ready.",
+          "body": "[EN] You're not locked into one role. Company, agency and customer spaces are not all available yet.",
           "cta": "[EN] Review roles"
         },
         "activity": {
@@ -244,9 +244,9 @@
         "employerVisibility": "Synlighed for arbejdsgivere"
       },
       "comingSoon": {
-        "body_main": "[EN] We're finishing the company / agency functionality right now.",
+        "body_main": "[EN] Company / agency functionality is not available yet.",
         "body_meanwhile": "[EN] In the meantime — you can browse the platform via the \"Discover\" tab (read-only).",
-        "body_notify": "[EN] We'll let you know the moment it's ready.",
+        "body_notify": "[EN] We'll let you know when it is available.",
         "greeting": "[EN] 👋 Welcome, {name}"
       },
       "customer": {
@@ -1100,7 +1100,7 @@
         ]
       }
     },
-    "subcopyLive": "Priserne er bekræftet af ejeren og gælder. Aktivering sker i organisationskontoen via en sikker Stripe-betaling; intet trækkes på denne side.",
+    "subcopyLive": "Priserne gælder. Aktivering sker i organisationskontoen via en sikker Stripe-betaling; intet trækkes på denne side.",
     "subcopy": "Priserne er endnu ikke endelige, og fakturering startes aldrig for dig på denne side. Niveauerne nedenfor beskriver omfanget; aktivering sker manuelt — kontakt os, så bekræfter vi pris og omfang med dig, før noget starter.",
     "subcopyConfirmed": "Priserne er bekræftet. Onlineaktivering er endnu ikke åben — skriv dig på ventelisten, så kontakter vi dig og starter din organisation manuelt; der trækkes intet på denne side.",
     "trialNote": "En organisations første abonnement starter med en prøveperiode på 14 dage. Derefter trækkes månedsprisen på dit kort; du kan opsige, før prøveperioden slutter.",
@@ -1118,7 +1118,7 @@
     "ctaStartFree": "Start free in your organization account",
     "ctaSubscribe": "Aktivér i din organisationskonto",
     "priceState": {
-      "owner_confirmed": "Priser bekræftet af ejeren. Aktivering sker i din organisationskonto; der trækkes intet på denne side."
+      "owner_confirmed": "Priserne er bekræftet. Der trækkes intet på denne side."
     }
   },
   "secondary": {
@@ -1204,7 +1204,7 @@
     "loading": "[EN] Loading...",
     "noProfession": "[EN] Pick a profession to see the skills linked to it.",
     "pageTitle": "[EN] Profession & skills",
-    "pickerHelp": "[EN] Select skills you have. They will be confirmed later by a site manager.",
+    "pickerHelp": "[EN] Select skills you have. They will be reviewed later by a site manager.",
     "pickerTitle": "[EN] Your skills",
     "professionLabel": "[EN] Your profession",
     "professionPlaceholder": "[EN] Select a profession",
@@ -1242,7 +1242,7 @@
     "submit": "[EN] Notify me",
     "success_body": "[EN] We'll let you know as soon as it's ready.",
     "success_title": "[EN] Thanks!",
-    "title": "[EN] For companies & agencies — coming soon"
+    "title": "[EN] For companies & agencies"
   },
   "workers": {
     "cta": {
@@ -2078,7 +2078,7 @@
       "emptyTeam": "Dette projekt har endnu intet hold — start draften og få de første folk på banen.",
       "emptyTeamCta": "Start draften",
       "positionsTitle": "Manglende positioner",
-      "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
+      "positionsEmpty": "Positionsbehov er ikke tilgængelige endnu. Når de er, kan du her se, hvilke folk der mangler.",
       "openOps": "Åbn management-arenaen",
       "history": {
         "title": "Tidligere arbejde på dette projekt",
@@ -2175,7 +2175,7 @@
       "title": "Parathed pr. marked",
       "empty": "Ingen angivne lande i poolen endnu — paratheden kommer med de første.",
       "availableNow": "ledige nu",
-      "docsNote": "Dokumentparathed bliver hos arbejderen: aggregater på kategoriniveau vises her først med samtykke-kontakten (en ændring der kræver godkendelse, under forberedelse). Du ser aldrig dokumentindhold her."
+      "docsNote": "Dokumentparathed bliver hos arbejderen: aggregater på kategoriniveau vises her først med samtykke-kontakten. Du ser aldrig dokumentindhold her."
     },
     "demand": {
       "title": "Åben efterspørgsel",
@@ -2191,7 +2191,7 @@
         "not_agency": "Fuldfør først bureau-opsætningen.",
         "request_not_found": "Forespørgslen findes ikke længere.",
         "request_not_open": "Forespørgslen er ikke længere åben.",
-        "needs_gate": "Funktionen er under forberedelse (afventer godkendelse).",
+        "needs_gate": "Kunne ikke indlæses. Prøv igen.",
         "error": "Markeringen kunne ikke gemmes. Prøv igen."
       }
     },
@@ -4622,7 +4622,7 @@
       "title": "Ét chatvindue styrer dit arbejde",
       "subcopy": "I stedet for snesevis af formularer taler du bare. Assistenten udarbejder, du bekræfter — og hver handling efterlader en registrering, du kan vende tilbage til.",
       "liveLabel": "Virker i dag",
-      "comingLabel": "Under forberedelse",
+      "comingLabel": "Ikke tilgængelig endnu",
       "conceptLabel": "Konceptvisning — stiliseret illustration, ikke en rigtig samtale",
       "c1": "Opdatér CV og profil",
       "c2": "Registrér en arbejdsdag",
