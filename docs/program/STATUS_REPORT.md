@@ -14,10 +14,10 @@ Kanoninis dokumentas (savininko nurodymas 2026-11-14, P0). Kiekviena ataskaita p
 
 ## Pokyčiai nuo ankstesnės ataskaitos
 
-Lyginama su ataskaita, sugeneruota 2026-11-15 09:40.
+Lyginama su ataskaita, sugeneruota 2026-11-15 21:41.
 
 - Veikia produkcijoje: 198 → 198.
-- Atvirų PR: 141 → 134; sujungta per laikotarpį 18.
+- Atvirų PR: 134 → 134; sujungta per laikotarpį 18.
 - Produkcijos diegimų per laikotarpį: 11 sėkmingi, 0 nepavykę.
 
 Funkcijų būsenų pokyčių registre nėra.
@@ -60,7 +60,7 @@ Funkcijų būsenų pokyčių registre nėra.
   - #3356 uždaryti kaip prieštaraujantį sprendimui 0025 (rekomendacija).
 - **#3354:** G lane perdavimo komentaras (11:13):
   - #3361, #3359, #3355 sujungti;
-  - bandomasis darbuotojų priskyrimas tik skaitymo režimu: 43 įrašai, 0 pakeista; 16 – Vivat Rex PL, 27 neturi asmens lygio įrodymų;
+  - atliktas bandomasis darbuotojų priskyrimas tik skaitymo režimu, nieko nepakeista; dalis įrašų neturi asmens lygio įrodymų;
   - pilietybė nespėjama, pagal darbo šalį nepriskiriama.
 
   Galutinio įrodymo produkcijoje dar nėra.
@@ -146,7 +146,7 @@ Funkcija priskiriama grupei pagal registro stulpelį „Kam“; viena funkcija g
 #3354 (P0). Perdavimo komentaras 2026-11-15 11:13:
 - #3361, #3359 ir #3355 sujungti, #3359 įdiegtas.
 - Vadovavimas neprideda darbuotojų valandų – tai jau padengia esami testai, naujas PR nereikalingas.
-- Bandomasis istorinių darbuotojų priskyrimas, tik skaitymo režimu: 43 įrašai, 0 pakeista. 16 įrašų – Vivat Rex PL, 27 neturi asmens lygio įrodymų. Pilietybė nespėjama, pagal darbo šalį nepriskiriama.
+- Bandomasis istorinių darbuotojų priskyrimas tik skaitymo režimu: nieko nepakeista, dalis įrašų neturi asmens lygio įrodymų. Pilietybė nespėjama, pagal darbo šalį nepriskiriama. Išsami informacija – privačiame Internal Brain.
 - #3375 sujungtas: bandymo eisena `cv-readonly` (tik GET, sintetinės paskyros). Produkcijoje dar nepaleista.
 - #3292 – nesujungti ir netaikyti; #3349 – reikia RED patikrų.
 
