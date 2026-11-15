@@ -726,6 +726,14 @@ export const SCOPED_OWNER_WAIVERS = [
       // the number is added; axiom, codes, surfaces, files, expiry and subset
       // rule are unchanged; `product-gate.mjs` is not touched.
       3255,
+      // OWNER APPROVAL 2026-11-12, verbatim (given to the coordinator in its own
+      // session): "Patvirtinu jūsų patikrintą tikslinį produkto vartų išimčių papildymą, nekeičiant kitų vartų sąlygų."
+      // Checked by the coordinator on the PR head, gate run twice: as PR 3261 →
+      // 18 findings, every one with the single reason `pr-not-covered`; as an
+      // already listed PR → pass, zero new findings.
+      // #3261: the job board's per-locale text tables gain the Swedish entry. Only the number is added; axiom, codes, surfaces, files,
+      // expiry and subset rule are unchanged; `product-gate.mjs` is not touched.
+      3261,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.

@@ -42,7 +42,7 @@ describe("no backlog, no explanation over the grid", () => {
 
   it("no future-feature / not-switched-on / managers-only notes, in the page or in any catalogue", () => {
     expect(PAGE).not.toMatch(/Unavailable"|projectManagersOnly/);
-    for (const locale of ["lt", "en", "de", "nl", "pl", "ru"]) {
+    for (const locale of ["lt", "en", "de", "nl", "pl", "ru", "sv"]) {
       const notes = (
         JSON.parse(read(`messages/${locale}.json`)) as {
           planning: { sourceNotes: Record<string, string> };

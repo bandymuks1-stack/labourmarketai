@@ -89,6 +89,9 @@ export type BookingActionResult =
     }
   | { kind: "needs-migration" }
   | { kind: "conflict" }
+  /** The need this proposal belongs to was closed: the database refuses the
+   *  accept ('demand_closed', 20261114100000). Declining stays possible. */
+  | { kind: "need-closed" }
   /**
    * The worker ACKNOWLEDGED the clash and the database still refused to
    * record the accept (production 2026-10-25, walk orders-bookings O-5).
@@ -132,6 +135,7 @@ function classify(error: { code?: string; message?: string }): BookingActionResu
   if (error.code === CONFLICT || /conflicting accepted booking/i.test(error.message ?? "")) {
     return { kind: "conflict" };
   }
+  if (/\bdemand_closed\b/.test(error.message ?? "")) return { kind: "need-closed" };
   return { kind: "error", message: error.message ?? "unknown" };
 }
 
