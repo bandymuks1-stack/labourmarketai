@@ -237,6 +237,25 @@ describe("the owner's black + gold palette", () => {
     }
   });
 
+  it("light gold text clears AA on its own gold tint (light is every new account's start, owner 2026-11-15)", () => {
+    // ~130 places put `text-brand-blue` on `bg-brand-blue/10` (and a few on
+    // /15, /20). The old light gold #8A6A12 measured 4.12:1 there — an axe
+    // finding on the signed-in workspace once it opened light by default.
+    const gold = tokenIn(LIGHT, "brand-blue");
+    const mix = (bg: number[], a: number) => bg.map((c, i) => a * gold[i] + (1 - a) * c);
+    const surfaces = { page: tokenIn(LIGHT, "ink-900"), card: tokenIn(LIGHT, "ink-800"), nested: tokenIn(LIGHT, "ink-700") };
+    for (const [name, bg] of Object.entries(surfaces)) {
+      for (const a of [0, 0.05, 0.1, 0.15]) {
+        expect(ratio(gold, mix(bg, a)), `gold text on ${a * 100} % gold over ${name}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+    for (const bg of [surfaces.page, surfaces.card]) {
+      expect(ratio(gold, mix(bg, 0.2)), "gold text on 20 % gold over the page or a card").toBeGreaterThanOrEqual(4.5);
+    }
+    // White on a light gold fill stays AA too.
+    expect(ratio([255, 255, 255], gold)).toBeGreaterThanOrEqual(4.5);
+  });
+
   it("the brand accent is GOLD in both palettes", () => {
     // `brand-blue` keeps its token NAME (358 files reference it); what matters
     // is the value it resolves to. Gold = red channel clearly above blue.
