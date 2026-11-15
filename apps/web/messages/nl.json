@@ -4578,10 +4578,11 @@
             "back": "Terug",
             "next": "Volgende",
             "descRequired": "Voeg een beschrijving toe om verder te gaan.",
+            "countryRequired": "Kies het land waar het werk plaatsvindt.",
             "optionalTag": "(optioneel)",
             "reviewIntro": "Controleer en maak aan. De aanvraag blijft privé in uw ruimte.",
-            "locationLabel": "Locatie of land",
-            "locationPlaceholder": "bijv. Vilnius, Litouwen",
+            "locationLabel": "Stad of werklocatie",
+            "locationPlaceholder": "bijv. stad, wijk of locatie",
             "skillsLabel": "Vereiste vaardigheden of criteria",
             "skillsPlaceholder": "bijv. rijbewijs, Engels, ervaring",
             "urgencyLabel": "Wanneer u het nodig heeft",
@@ -14368,7 +14369,9 @@
         "supplyRole": "Welk beroep",
         "supplyRolePlaceholder": "Bijv. lasser",
         "supplyTeamSize": "Hoeveel mensen u heeft",
-        "supplyLocation": "Waar zij kunnen werken"
+        "supplyLocation": "Waar zij kunnen werken",
+        "demandCountry": "Land waar het werk plaatsvindt",
+        "demandCountryPlaceholder": "bijv. Zweden of SE"
       },
       "availability": {
         "available": "Beschikbaar",

@@ -4578,10 +4578,11 @@
             "back": "Atgal",
             "next": "Toliau",
             "descRequired": "Įrašykite aprašymą, kad galėtumėte tęsti.",
+            "countryRequired": "Pasirinkite šalį, kurioje bus dirbama.",
             "optionalTag": "(nebūtina)",
             "reviewIntro": "Peržiūrėkite ir sukurkite. Užklausa lieka privati jūsų erdvėje.",
-            "locationLabel": "Vieta ar šalis",
-            "locationPlaceholder": "Pvz., Vilnius, Lietuva",
+            "locationLabel": "Miestas ar darbo vieta",
+            "locationPlaceholder": "Pvz., miestas, rajonas ar objektas",
             "skillsLabel": "Reikalingi įgūdžiai ar kriterijai",
             "skillsPlaceholder": "Pvz., B kategorija, anglų kalba, patirtis",
             "urgencyLabel": "Kada reikia",
@@ -14368,7 +14369,9 @@
         "supplyRole": "Kokios profesijos žmonės",
         "supplyRolePlaceholder": "Pvz., suvirintojas",
         "supplyTeamSize": "Kiek žmonių turite",
-        "supplyLocation": "Kur jie gali dirbti"
+        "supplyLocation": "Kur jie gali dirbti",
+        "demandCountry": "Šalis, kurioje bus dirbama",
+        "demandCountryPlaceholder": "Pvz., Švedija arba SE"
       },
       "availability": {
         "available": "Laisvas",
