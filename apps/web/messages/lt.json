@@ -5650,29 +5650,29 @@
       "needs": {
         "subcontracting": {
           "metaTitle": "Statybų subrangovai ir brigados Europoje",
-          "metaDescription": "Aprašyk darbų paketą, vietą ir terminus. Subrangovai ir agentūros gali pasiūlyti visą brigadą; palygini pasiūlymus ir susitari dėl sąlygų. Nemokamai.",
+          "metaDescription": "Aprašykite darbų paketą, vietą ir terminus. Subrangovai ir agentūros gali pasiūlyti visą brigadą; palyginate pasiūlymus ir susitariate dėl sąlygų. Nemokamai.",
           "eyebrow": "Rangovams",
           "title": "Subrangovai ir brigados",
-          "titleAccent": "tavo projektui.",
-          "subcopy": "Generaliniams rangovams ir įmonėms, kurios perduoda darbų paketą. Parašyk specialybę, apimtį, vietą ir terminus — ir ar reikia vieno subrangovo, ar visos brigados.",
-          "cta": "Aprašyk darbų paketą",
+          "titleAccent": "jūsų projektui.",
+          "subcopy": "Generaliniams rangovams ir įmonėms, kurios perduoda darbų paketą. Parašykite specialybę, apimtį, vietą ir terminus — ir ar reikia vieno subrangovo, ar visos brigados.",
+          "cta": "Aprašykite darbų paketą",
           "points": [
             "Darbų paketą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
-            "Su nemokama įmonės paskyra subrangovai ir agentūros gali pasiūlyti tau brigadą kaip vieną vienetą. Palygini pasiūlymus ir dėl sąlygų susitari tiesiogiai su jais.",
-            "Kai brigada dirba tavo projekte, jos nariai ten pažymi valandas, o tu jas matai. Jei tinkamos brigados dar nėra, taip ir pasakome."
+            "Su nemokama įmonės paskyra subrangovai ir agentūros gali pasiūlyti jums brigadą kaip vieną vienetą. Palyginate pasiūlymus ir dėl sąlygų susitariate tiesiogiai su jais.",
+            "Kai brigada dirba jūsų projekte, jos nariai ten pažymi valandas, o jūs jas matote. Jei tinkamos brigados dar nėra, taip ir pasakome."
           ]
         },
         "agency": {
           "metaTitle": "Personalo ar įdarbinimo agentūra partnerė Europoje",
-          "metaDescription": "Aprašyk, kokių žmonių reikia, ir pasirink tiekimą per agentūrą. LabourMarket.ai agentūros nurodo, kokius darbuotojus gali pasiūlyti. Nemokamai.",
+          "metaDescription": "Aprašykite, kokių žmonių reikia, ir pasirinkite tiekimą per agentūrą. LabourMarket.ai agentūros nurodo, kokius darbuotojus gali pasiūlyti. Nemokamai.",
           "eyebrow": "Darbdaviams, ieškantiems agentūros",
           "title": "Personalo partneris",
-          "titleAccent": "tau reikalingiems žmonėms.",
-          "subcopy": "Įmonėms, kurios nori, kad agentūra parūpintų ar atrinktų darbuotojus. Parašyk, kokių žmonių reikia, kiek, kur ir nuo kada, ir pasirink tiekimą per agentūrą.",
-          "cta": "Aprašyk, ko reikia",
+          "titleAccent": "jums reikalingiems žmonėms.",
+          "subcopy": "Įmonėms, kurios nori, kad agentūra parūpintų ar atrinktų darbuotojus. Parašykite, kokių žmonių reikia, kiek, kur ir nuo kada, ir pasirinkite tiekimą per agentūrą.",
+          "cta": "Aprašykite, ko reikia",
           "points": [
             "Užklausą išsiųsti nemokama ir paskyros nereikia, tik kontaktinio el. pašto. Niekas neskelbiama automatiškai.",
-            "LabourMarket.ai personalo agentūros nurodo, kokius darbuotojus gali pasiūlyti. Su nemokama įmonės paskyra tą pasiūlą matai.",
+            "LabourMarket.ai personalo agentūros nurodo, kokius darbuotojus gali pasiūlyti. Su nemokama įmonės paskyra tą pasiūlą matote.",
             "Darbuotojai, įmonės ir agentūros naudojasi ta pačia platforma. Jei tinkamo partnerio dar nėra, taip ir pasakome — atitikmens neišgalvojame."
           ]
         }
