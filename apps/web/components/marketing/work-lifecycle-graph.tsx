@@ -14,11 +14,13 @@ import {
   UserRound,
   Users,
   FileText,
+  LogIn,
   type LucideIcon,
 } from "lucide-react";
 
 import { PersonPortrait } from "@/components/app/identity/person-portrait";
 import { TrackedCta } from "@/components/app/tracked-cta";
+import { useSignedInHint } from "@/components/layouts/nav-auth-ctas";
 import { cn } from "@/lib/utils";
 
 /**
@@ -81,6 +83,9 @@ export interface LifecycleStage {
   readonly detail: string;
   /** Real product route this stage opens (locale-aware Link). */
   readonly href: string;
+  /** Where a signed-out visitor goes instead (sign-up that returns to `href`),
+   *  when `href` is inside the signed-in product. */
+  readonly guestHref?: string;
   /** Semantic tone: evidence is cyan, confirmation is green, history is gold. */
   readonly tone?: "evidence" | "confirmed" | "history" | "neutral";
 }
@@ -104,6 +109,7 @@ export function WorkLifecycleGraph({
   hint,
   exampleNote,
   openLabel,
+  accountLabel,
   listLabel,
   pendingLabel,
   subject,
@@ -115,6 +121,8 @@ export function WorkLifecycleGraph({
   readonly hint?: string;
   readonly exampleNote?: string;
   readonly openLabel: string;
+  /** The public menus' "for signed-in users" note, shown beside a guest's link. */
+  readonly accountLabel?: string;
   readonly listLabel: string;
   /** "Not yet" — the dashed state of a row the lifecycle has not reached. */
   readonly pendingLabel: string;
@@ -124,6 +132,7 @@ export function WorkLifecycleGraph({
   readonly testId?: string;
 }) {
   const reduce = useReducedMotion();
+  const signedIn = useSignedInHint();
   const [active, setActive] = useState(0);
   const [auto, setAuto] = useState(true);
   const last = stages.length - 1;
@@ -309,14 +318,25 @@ export function WorkLifecycleGraph({
                   {isCurrent ? (
                     <div className="mt-2 flex flex-col gap-2 pl-7 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-sm text-text-secondary">{current.detail}</p>
-                      <TrackedCta
-                        href={current.href}
-                        ctaId={`lifecycle_${current.key}`}
-                        audience={current.href === "/company-need" ? "companies" : undefined}
-                        className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-brand-blue px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-                      >
-                        {openLabel} →
-                      </TrackedCta>
+                      <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
+                        <TrackedCta
+                          href={!signedIn && current.guestHref ? current.guestHref : current.href}
+                          ctaId={`lifecycle_${current.key}`}
+                          audience={current.href === "/company-need" ? "companies" : undefined}
+                          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-brand-blue px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                        >
+                          {openLabel} →
+                        </TrackedCta>
+                        {!signedIn && current.guestHref && accountLabel ? (
+                          <span
+                            className="inline-flex items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted"
+                            data-testid="lifecycle-account-note"
+                          >
+                            <LogIn aria-hidden className="h-3.5 w-3.5" />
+                            {accountLabel}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   ) : null}
                 </li>
