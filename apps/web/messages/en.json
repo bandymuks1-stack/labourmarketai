@@ -13150,7 +13150,11 @@
       "notReady": "Accepting and declining candidates is not available yet — until then, use contact or propose a booking below.",
       "forbidden": "Only the owner of this request can decide.",
       "closed": "This offer is no longer open.",
-      "error": "Something went wrong. Please try again."
+      "error": "Something went wrong. Please try again.",
+      "limitOpen": "You already have 10 booking proposals waiting for workers' answers — the most that can be open at once. Withdraw the ones you no longer need, then accept this candidate. The agency's offer stays open.",
+      "limitDaily": "You have sent 30 booking proposals in the last 24 hours — the daily limit. Accept this candidate later; nothing was sent and the agency's offer stays open.",
+      "limitUnknown": "The booking proposal limit is reached (10 waiting for an answer, 30 per day). Withdraw proposals you no longer need or try later; the agency's offer stays open.",
+      "openBookings": "Open bookings"
     },
     "title": "Agency-proposed candidates",
     "subtitle": "A connected staffing agency proposed these workers for this request. Review, contact, or book them with the same controls below.",

@@ -13150,7 +13150,11 @@
       "notReady": "Kandidaten annehmen oder ablehnen ist noch nicht verfügbar — nutzen Sie bis dahin Kontakt oder einen Buchungsvorschlag unten.",
       "forbidden": "Nur der Eigentümer dieser Anfrage kann entscheiden.",
       "closed": "Dieses Angebot ist nicht mehr offen.",
-      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+      "limitOpen": "Sie haben bereits 10 Buchungsvorschläge, die auf die Antwort der Arbeitskräfte warten – mehr können nicht gleichzeitig offen sein. Ziehen Sie nicht mehr benötigte zurück und nehmen Sie dann diesen Kandidaten an. Das Angebot der Agentur bleibt offen.",
+      "limitDaily": "Sie haben in den letzten 24 Stunden 30 Buchungsvorschläge gesendet – das Tageslimit. Nehmen Sie diesen Kandidaten später an: Es wurde nichts gesendet, das Angebot der Agentur bleibt offen.",
+      "limitUnknown": "Das Limit für Buchungsvorschläge ist erreicht (10 warten auf Antwort, 30 pro Tag). Ziehen Sie nicht mehr benötigte zurück oder versuchen Sie es später; das Angebot der Agentur bleibt offen.",
+      "openBookings": "Buchungen öffnen"
     },
     "title": "Von der Agentur vorgeschlagene Kandidaten",
     "subtitle": "Eine verbundene Personalagentur hat diese Mitarbeiter für diese Anfrage vorgeschlagen. Prüfen, kontaktieren oder buchen Sie sie mit denselben Steuerelementen unten.",
