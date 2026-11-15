@@ -1,7 +1,7 @@
 name: prod-qa-walk
 # The spec in the run title lets acceptance-campaign.yml attribute a run that reached production
 # even when it left no artifact.
-run-name: prod-qa-walk ${{ github.event_name == 'workflow_dispatch' && inputs.spec || github.event_name }}
+run-name: prod-qa-walk ${{ github.event_name == 'workflow_dispatch' && format('{0} {1}', inputs.spec, inputs.device) || github.event_name }}
 
 # PRODUCTION SIGNED-IN QA, without an agent ever holding a production key
 # (owner programme 2026-10-12 §10). Before this, a signed-in production walk
@@ -78,6 +78,8 @@ on:
           # production in a real browser). Dispatch only, never in the rotation.
           - worker-records-exports
           - company-talent-history
+          # #3354: the CV as a signed-in person sees it, READ ONLY (non-GET requests aborted). Dispatch only.
+          - cv-readonly
           - company-governance
           - public-market-direction
           # AI-dependent rows proven with the AI runtime OFF (deterministic path or the honest off state).
@@ -150,6 +152,14 @@ on:
           # Owner P0 2026-11-09: account-deletion self-cancel on the synthetic worker2 only (files, confirms when the minted sign-in
           # is fresh, reads the 30-day date, cancels; afterAll always cancels) + the public 30-day / 7-day copy. Dispatch only.
           - deletion-cancel
+          # Register 1.1: ONE real sign-up through the form with the synthetic mailbox address, confirmed by the mail that
+          # arrives, onboarded as a worker. The ONLY walk that creates an account: each dispatch is the owner's decision.
+          # A precheck stops it when the account already exists; the clean-up deletes the account and fails if anything is left.
+          - signup-form
+          # Register 4.8: ONE anonymous need through /en/company-need, marked QA-SYNTHETIC, read back and set to rejected.
+          # It raises the REAL internal owner alert (nothing suppresses it) and the row stays until the owner deletes it
+          # (docs/qa/need-intake-walk-cleanup.sql). Dispatch only, never in the rotation.
+          - need-intake
           # Lane F inventory 2026-11-12: "My Space" pin to home (one workspace_pins row on the synthetic worker, removed
           # at the end) and a Swedish visitor (signed out, read-only). Dispatch only, never in the rotation.
           - pin-to-home
@@ -365,9 +375,14 @@ jobs:
     permissions:
       contents: read
       actions: read # the gap brake reads the previous walk's end time
+    # NO service-role key at job level (owner decision 2026-11-14, R2 P3-1 on #3303): a job-level
+    # value reaches every step — `pnpm install` and its install scripts, the browser walk and every
+    # Playwright spec — although no spec reads it. It is set on exactly the steps whose script uses
+    # it: the provision + mint, the sign-up precheck and clean-up (prod-qa-signup-form.ts) and the
+    # need read-back (prod-qa-need-intake.ts). The revoke uses the anon key only; the walk and the
+    # CV sweep are Playwright. Guard: lib/guards/prod-walk-service-key-scope.test.ts.
     env:
       PROD_QA_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       PROD_QA_ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
       E2E_NO_SERVER: "1"
       E2E_BASE_URL: https://labourmarket.ai
@@ -403,6 +418,8 @@ jobs:
       - name: Provision + mint the synthetic cast (allowlist only)
         id: mint
         shell: bash
+        env:
+          PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
           if [ -z "${PROD_QA_ANON_KEY}" ]; then
@@ -440,7 +457,21 @@ jobs:
           # employee-beta-gate.spec.ts reads the original single-worker file.
           install -m 600 tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
 
+      # signup-form only. The walk creates its own account, so it must not start when one with the synthetic
+      # address already exists (an owner-provisioned one belongs to another walk and must never be deleted here).
+      - name: "Sign-up walk: no account with the synthetic address exists (else stop)"
+        id: signup_precheck
+        if: needs.debounce.outputs.spec == 'signup-form'
+        shell: bash
+        env:
+          PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          cd apps/web
+          pnpm exec tsx scripts/prod-qa-signup-form.ts --i-understand-production --precheck
+
       - name: Walk
+        id: walk
         shell: bash
         env:
           # The addressed invitee of staff-review-notice: the second synthetic
@@ -449,10 +480,13 @@ jobs:
           # mail-reset, invited-worker and alert-mail only: the read-only synthetic QA mailbox (owner D-4;
           # D-5 proves the invited address with the mailed one-time link; J-15 reads the job-alert and digest mail). Every other spec gets empty values, so no
           # other walk ever holds the mailbox credentials.
-          PROD_QA_IMAP_HOST: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_HOST || '' }}
-          PROD_QA_IMAP_USER: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_USER || '' }}
-          PROD_QA_IMAP_PASS: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check') && secrets.PROD_QA_IMAP_PASS || '' }}
+          PROD_QA_IMAP_HOST: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check' || needs.debounce.outputs.spec == 'signup-form') && secrets.PROD_QA_IMAP_HOST || '' }}
+          PROD_QA_IMAP_USER: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check' || needs.debounce.outputs.spec == 'signup-form') && secrets.PROD_QA_IMAP_USER || '' }}
+          PROD_QA_IMAP_PASS: ${{ (needs.debounce.outputs.spec == 'mail-reset' || needs.debounce.outputs.spec == 'invited-worker' || needs.debounce.outputs.spec == 'alert-mail' || needs.debounce.outputs.spec == 'digest-setup' || needs.debounce.outputs.spec == 'digest-check' || needs.debounce.outputs.spec == 'signup-form') && secrets.PROD_QA_IMAP_PASS || '' }}
           PROD_QA_MAIL_ADDRESS: qa.invited@labourmarket.ai
+          # Each of the two writing walks runs only under its own name.
+          PROD_QA_SIGNUP_WALK: ${{ needs.debounce.outputs.spec == 'signup-form' && '1' || '0' }}
+          PROD_QA_NEED_WALK: ${{ needs.debounce.outputs.spec == 'need-intake' && '1' || '0' }}
           # desktop unless a person dispatched the walk for a phone (a choice input: no free text).
           PROD_QA_DEVICE: ${{ github.event_name == 'workflow_dispatch' && inputs.device || 'desktop' }}
           SR1_READINGS_FILE: ${{ github.workspace }}/sr1-readings.jsonl
@@ -499,6 +533,7 @@ jobs:
             admin-console) SPEC=tests/e2e/prod-admin-console.spec.ts ;;
             worker-records-exports) SPEC=tests/e2e/prod-worker-records-exports.spec.ts ;;
             company-talent-history) SPEC=tests/e2e/prod-company-talent-history.spec.ts ;;
+            cv-readonly) SPEC=tests/e2e/prod-cv-readonly.spec.ts ;;
             company-governance) SPEC=tests/e2e/prod-company-governance.spec.ts ;;
             public-market-direction) SPEC=tests/e2e/prod-public-market-direction.spec.ts ;;
             ai-off-honesty) SPEC=tests/e2e/prod-ai-off-honesty.spec.ts ;;
@@ -528,6 +563,8 @@ jobs:
             review-scope) SPEC=tests/e2e/prod-review-scope.spec.ts ;;
             search-regression) SPEC=tests/e2e/prod-search-regression.spec.ts ;;
             deletion-cancel) SPEC=tests/e2e/prod-deletion-cancel.spec.ts ;;
+            signup-form) SPEC=tests/e2e/prod-signup-form.spec.ts ;;
+            need-intake) SPEC=tests/e2e/prod-need-intake.spec.ts ;;
             pin-to-home) SPEC=tests/e2e/prod-pin-to-home.spec.ts ;;
             swedish-visitor) SPEC=tests/e2e/prod-swedish-visitor.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
@@ -567,6 +604,34 @@ jobs:
       # assertion message names the testid and the expected text, nothing more.
       # `prod-qa-walk.log` is the list reporter's text — exactly what used to be
       # glued to the front of prod-qa-result.json, now in its own file.
+      # signup-form: the account the walk created is deleted, pass or fail, and the job fails when anything is left.
+      # Only after a precheck that passed — otherwise the account found is not this run's.
+      - name: "Sign-up walk: delete the account it created and check for orphans"
+        if: always() && needs.debounce.outputs.spec == 'signup-form' && steps.signup_precheck.outcome == 'success'
+        timeout-minutes: 3
+        shell: bash
+        env:
+          PROD_QA_SIGNUP_NOT_BEFORE: ${{ steps.signup_precheck.outputs.not_before }}
+          PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          cd apps/web
+          pnpm exec tsx scripts/prod-qa-signup-form.ts --i-understand-production --cleanup
+
+      # need-intake: the stored row is read back with the service key and set to rejected, pass or fail (a walk
+      # that failed after the submit still left a row). The row itself stays: the service role cannot delete it.
+      - name: "Need walk: read the stored need back and set it to rejected"
+        if: always() && needs.debounce.outputs.spec == 'need-intake' && steps.walk.outcome != 'skipped'
+        timeout-minutes: 3
+        shell: bash
+        env:
+          NEED_WALK_OUTCOME: ${{ steps.walk.outcome }}
+          PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          cd apps/web
+          pnpm exec tsx scripts/prod-qa-need-intake.ts --i-understand-production
+
       # The CV walk's rows, whatever stopped the walk: a failed step, a cancel, the test's
       # own timeout. It needs the session, so it stands before the revoke.
       - name: Remove the CV walk's synthetic rows

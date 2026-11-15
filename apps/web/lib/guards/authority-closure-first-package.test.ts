@@ -218,6 +218,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-13 owner P0 invitation delivery reliability: codes-only send diagnostics, retry /
       // dead-letter / bounce fields (RED draft #3318, needs-human-gate, NOT applied).
       "20261113190000_",
+      // 2026-11-14 a closed need refuses a new proposal or a first accept (DB trigger; RED draft, needs-human-gate, NOT applied).
+      "20261114100000_",
       // 2026-11-14 owner decision: NEW/ACTIVE counts for five platform groups, aggregate only
       // (SECURITY DEFINER + GRANT; RED draft, needs-human-gate, NOT applied).
       "20261114120000_",

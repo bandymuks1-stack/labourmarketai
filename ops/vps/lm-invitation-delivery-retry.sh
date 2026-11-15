@@ -85,7 +85,9 @@ ALERTS=$(awk '{ printf "%s%s", (NR > 1 ? "," : ""), $1 }' "$D/now")
 if [ -n "$ALERTS" ]; then
   echo "$(date -u +%FT%TZ) ALERT mode=$1 http=$CODE alerts=[$ALERTS]" >> $R/invitation-delivery-alerts.log
 fi
-CLEARED=$(awk 'NR == FNR { now[$1] = 1; next } !($1 in now) { printf "%s%s", (c++ ? "," : ""), $1 }' "$D/now" "$LEDGER")
+# FILENAME == ARGV[1], not NR == FNR: when every alert clears at once "$D/now" is EMPTY, NR == FNR then also holds
+# for the ledger lines and nothing was ever reported as cleared (measured in production 2026-11-14 19:50 UTC).
+CLEARED=$(awk 'FILENAME == ARGV[1] { now[$1] = 1; next } !($1 in now) { printf "%s%s", (c++ ? "," : ""), $1 }' "$D/now" "$LEDGER")
 [ -n "$CLEARED" ] && echo "$(date -u +%FT%TZ) CLEAR [$CLEARED]" >> $R/invitation-delivery-alerts.log
 
 if [ -s "$D/new" ]; then

@@ -34,7 +34,7 @@ describe("compass data sources are labelled and linked distinctly", () => {
   });
   it("'What fits you now' states it is platform requests; copy exists in every active locale", () => {
     expect(SECTION).toMatch(/compass-fits-source/);
-    for (const l of ["en", "lt", "de", "nl", "pl", "ru"]) {
+    for (const l of ["en", "lt", "de", "nl", "pl", "ru", "sv"]) {
       const lc = JSON.parse(readFileSync(join(ROOT, `messages/${l}.json`), "utf8")).learningCompass;
       for (const k of ["cohortDemand", "cohortDemandOpen", "fitsSource", "openBoard"]) {
         expect(typeof lc[k], `${l}.${k}`).toBe("string");

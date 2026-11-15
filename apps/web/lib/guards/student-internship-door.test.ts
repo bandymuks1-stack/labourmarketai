@@ -14,12 +14,13 @@ import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { activeLocales } from "@/lib/i18n/config";
 import { parseDiscoveryParams } from "@/lib/opportunities/discovery-filters";
 
 const web = resolve(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(resolve(web, rel), "utf8");
 const COMPASS = "components/app/learning-compass-section.tsx";
-const ROUTED = ["lt", "en", "ru", "pl", "de", "nl"] as const;
+const ROUTED = activeLocales;
 
 describe("student internship door", () => {
   it("the learning compass links the board narrowed to internships", () => {

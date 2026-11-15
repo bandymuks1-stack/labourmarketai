@@ -43,7 +43,7 @@ const RESULTS = [
   "result-body.tsx",
 ].map((f) => [f, read(`components/app/workspace/${f}`)] as const);
 
-const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const ALL = [...ACTIVE, "da", "et", "lv", "no", "sv"] as const;
 
 describe("1. full screen is a STATE of the same result, not a route", () => {
