@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { buildCapabilityReadback } from "@/lib/api/capability-readback";
+import { buildCapabilityReadback, withRealIntakeCount } from "@/lib/api/capability-readback";
 import { authorizeSupplyFeedRequest } from "@/lib/api/supply-feed-auth";
+import { readIntakeCountRows } from "@/lib/staffing/intake-test-rows";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -19,6 +20,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * `agentai_capability_readback_counts_v1()` (definer rights, EXECUTE for service_role only — the service role here is
  * not granted SELECT on most of the counted tables, the same reason `ops_product_metrics_v1` exists). No row, name, id
  * or address. A failed or incomplete read is 503 with no counts, never a 200 with zeros.
+ *
+ * ONE EXCEPTION, `company_need_public_intakes` (owner 2026-11-14): the number of REAL requests, the rows the
+ * commercial-requests feed passes. It is counted from one service-role read of the intake rows (status and the four
+ * texts the test-row rule reads; `lib/staffing/intake-test-rows.ts`); no name or address leaves this route. If that
+ * read fails, the whole response is 503, never the unfiltered count.
  */
 
 export const dynamic = "force-dynamic";
@@ -30,8 +36,11 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   const builtAtIso = new Date().toISOString();
   try {
-    const { data, error } = await createAdminClient().rpc("agentai_capability_readback_counts_v1");
-    const body = error ? null : buildCapabilityReadback(data, builtAtIso);
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc("agentai_capability_readback_counts_v1");
+    const counted = error ? null : buildCapabilityReadback(data, builtAtIso);
+    // Real requests only: our own test rows leave the intake count exactly as they leave the feed.
+    const body = counted === null ? null : withRealIntakeCount(counted, await readIntakeCountRows(admin));
     if (body === null) return NextResponse.json({ ok: false, reason: "unavailable" }, { status: 503 });
     return NextResponse.json(body, { status: 200, headers: { "cache-control": "no-store" } });
   } catch {

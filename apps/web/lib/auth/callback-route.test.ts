@@ -355,7 +355,7 @@ describe("auth/callback route", () => {
     it("an inactive profile locale never overrides", async () => {
       exchangeMock.mockResolvedValue({ error: null });
       getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
-      profileWith("sv");
+      profileWith("da");
 
       const res = await GET(buildRequest("code=X"), {
         params: Promise.resolve({ locale: "lt" }),

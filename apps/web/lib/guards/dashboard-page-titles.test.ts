@@ -15,7 +15,7 @@ const { dashboardTitleKey } = await import("@/lib/navigation/dashboard-metadata"
 
 const WEB = resolve(__dirname, "../..");
 const DASH = join(WEB, "app/[locale]/dashboard");
-const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 function pages(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {

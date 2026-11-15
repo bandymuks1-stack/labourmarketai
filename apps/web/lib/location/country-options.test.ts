@@ -127,7 +127,7 @@ describe("the onboarding country select offers the world, markets first", () => 
   });
 
   it("VN / IE / SA / PH are choosable in every active locale, and the markets still lead", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const options = countryOptionsForLocale(locale);
       for (const code of ["VN", "IE", "SA", "PH"]) {
         expect(options.some((o) => o.value === code), `${locale}: ${code}`).toBe(true);
