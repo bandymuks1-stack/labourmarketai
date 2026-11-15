@@ -203,6 +203,19 @@ describe("the form and data primitives requested by the other modules", () => {
     expect(renderToStaticMarkup(createElement(Input, { className: "sm:w-40" }))).toContain("w-full");
   });
 
+  it("hasOwnWidth counts a base width class and nothing else (Lane R, 475dcbcb)", async () => {
+    const { hasOwnWidth } = await import("@/components/ui/own-width");
+    // A base width of any kind replaces the default full width.
+    for (const own of ["w-40", "w-auto", "w-[12rem]", "w-1/2", "mt-2 w-20", "  w-64  ", "w-full"]) {
+      expect(hasOwnWidth(own), own).toBe(true);
+    }
+    // Everything else keeps it: no class, a width behind a variant, and the
+    // min/max width classes, which share the "w-" text but set no width.
+    for (const none of [undefined, "", "mt-2", "sm:w-40", "md:w-auto lg:w-1/2", "hover:w-10", "[&>x]:w-4", "min-w-0", "max-w-sm", "w-"]) {
+      expect(hasOwnWidth(none), String(none)).toBe(false);
+    }
+  });
+
   it("Checkbox is a native checkbox inside its label; RadioGroup is a fieldset with a legend", async () => {
     const { Checkbox, RadioGroup } = await import("@/components/ui/Choice");
     const box = renderToStaticMarkup(
