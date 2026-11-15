@@ -18,6 +18,8 @@
  */
 
 const SKILL_SLUG_RX = /^[a-z0-9][a-z0-9_-]{0,59}$/;
+import { isIsoCountry } from "@/lib/location/country-model";
+
 const COUNTRY_RX = /^[a-zA-Z]{2}$/;
 
 export const SCOUT_FACET_LIMIT = 12;
@@ -97,7 +99,16 @@ export function buildScoutFacets(
   return { skills: top(skillCounts), countries: top(countryCounts) };
 }
 
-/** Clamp filters to the facet allowlist (value not in supply → dropped). */
+/**
+ * Clamp filters to the facet allowlist (a probe value matching nothing is
+ * dropped). A REAL country is the exception: asking for Sweden when nobody in
+ * the visible supply is in Sweden used to drop the filter and return everyone,
+ * so the page looked like a Swedish result while it was not (Swedish employer
+ * audit 2026-11-11, V-3). A valid ISO country is kept and simply narrows the
+ * list, to nobody if nobody is there; the page then says so and offers the
+ * way to widen. It can only narrow the already-visible list, so it reveals
+ * nothing the facets do not.
+ */
 export function allowlistScoutFilters(
   filters: ScoutFilters,
   facets: ScoutFacets,
@@ -108,11 +119,20 @@ export function allowlistScoutFilters(
         ? filters.skill
         : null,
     country:
-      filters.country && facets.countries.includes(filters.country)
+      filters.country &&
+      (facets.countries.includes(filters.country) || isIsoCountry(filters.country))
         ? filters.country
         : null,
     availableNow: filters.availableNow,
   };
+}
+
+/** The need's own country is always offered as a filter, present in the
+ *  visible supply or not: it is the first thing an employer filters by. */
+export function withNeedCountryFacet(facets: ScoutFacets, needCountry: string | null | undefined): ScoutFacets {
+  const cc = (needCountry ?? "").trim().toUpperCase();
+  if (!isIsoCountry(cc) || facets.countries.includes(cc)) return facets;
+  return { ...facets, countries: [...facets.countries, cc] };
 }
 
 /** Apply allowlisted filters. Only ever narrows the input list. */

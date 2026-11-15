@@ -96,18 +96,27 @@ export async function signIn(page: Page, origin: string, address: string): Promi
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
 }
 
-/** A company's setup form after the "hire" onboarding (draft saved). */
+/** A company's setup form after the "hire" onboarding (draft saved). A click
+ *  that lands before the form is interactive is a no-op, so the save is
+ *  retried until the form reports its result; the form updates the same
+ *  draft, so a retry never creates a second company. */
 export async function setUpCompany(page: Page, legalName: string): Promise<void> {
   await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
   await expect(page.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
-  await page.getByTestId("company-setup-legal-name").fill(legalName);
-  await page.getByTestId("company-setup-country").selectOption("LT");
-  await page.getByTestId("company-setup-save-draft").click();
-  await expect(page.getByTestId("company-setup-result")).toBeVisible({ timeout: 30_000 });
+  await page.waitForLoadState("networkidle").catch(() => {});
+  const result = page.getByTestId("company-setup-result");
+  await expect(async () => {
+    if (!(await result.isVisible().catch(() => false))) {
+      await page.getByTestId("company-setup-legal-name").fill(legalName);
+      await page.getByTestId("company-setup-country").selectOption("LT");
+      await page.getByTestId("company-setup-save-draft").click({ timeout: 5_000 });
+    }
+    await expect(result).toBeVisible({ timeout: 10_000 });
+  }).toPass({ timeout: 60_000 });
 }
 
-/** The company's free need, through the needs page's own intake. */
-export async function publishNeed(page: Page, origin: string, role: string, country?: "LT"): Promise<void> {
+/** Fill and send the needs page's own intake; the caller asserts the outcome. */
+export async function submitNeed(page: Page, origin: string, role: string, country?: "LT"): Promise<void> {
   await page.goto(`${origin}/en/dashboard/company/needs?audience=need#demand-intake`);
   const main = page.getByRole("main");
   await main.getByTestId("demand-role").fill(role);
@@ -121,7 +130,12 @@ export async function publishNeed(page: Page, origin: string, role: string, coun
   }
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
-  await expect(main.getByTestId("demand-done"), "the need is accepted").toBeVisible({ timeout: 30_000 });
+}
+
+/** The company's free need, through the needs page's own intake. */
+export async function publishNeed(page: Page, origin: string, role: string, country?: "LT"): Promise<void> {
+  await submitNeed(page, origin, role, country);
+  await expect(page.getByRole("main").getByTestId("demand-done"), "the need is accepted").toBeVisible({ timeout: 30_000 });
 }
 
 /** A worker's Work Journal entry, saved through the journal's own flow. */
