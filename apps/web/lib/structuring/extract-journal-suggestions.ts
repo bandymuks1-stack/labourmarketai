@@ -510,12 +510,19 @@ const DE_HOUR_ABBREVIATION_RX = /((?:^|[^\p{L}])std\.)(?=[ \t]+\p{L})/giu;
  *  Only before a digit or a lowercase word: "… incl. Then 2 h" still ends one
  *  (no `i` flag: with it `\p{Ll}` would match capitals too). German "inkl."
  *  also before a capital, since German nouns are capitalised ("inkl.
- *  Koordination 2 Stunden"). Never before a break word ("incl. break",
- *  "inkl. Pause", "incl. 30 min lunch break" — up to five words, figures or
- *  units ahead): the phrase then splits as it always did, so the break clause
- *  is dropped on its own, not with the day's total. */
+ *  Koordination 2 Stunden").
+ *
+ *  Never when a break word follows anywhere in the same phrase ("incl.
+ *  break", "inkl. Kaffeepause", "incl. 30 min lunch break", "incl. travel
+ *  time … with a short break"): the phrase then splits as it always did, so
+ *  the break clause is dropped on its own, not with the day's total. Break
+ *  words match inside a word, as the intake's break filter reads them. The
+ *  phrase ends where `splitFragments` cuts it: a sentence end (a dot before a
+ *  capital or a digit, "Std." excepted), "!", "?", a line break, ",", ";",
+ *  "|" or a joining "ir" / "bei" / "и" / "and" / "en" / "und". Reading
+ *  further could only leave the dot unprotected, which is the old split. */
 const INCLUSION_ABBREVIATION_RX =
-  /(?<!\p{L})(?:[Ii]nkl\.(?=[ \t]+[\d\p{L}])|(?:[Ii]ncl|[Тт]\.\s?ч)\.(?=[ \t]+[\d\p{Ll}]))(?![ \t]+(?:[\p{L}\d]+\.?[ \t]+){0,5}(?:[Bb]reak|[Ll]unch|[Pp]au[sz]|[Mm]ittag|[Пп]ерерыв|[Оо]бед|[Pp]ertrauk|[Pp]iet|[Pp]rzerw))/gu;
+  /(?<!\p{L})(?:[Ii]nkl\.(?=[ \t]+[\d\p{L}])|(?:[Ii]ncl|[Тт]\.\s?ч)\.(?=[ \t]+[\d\p{Ll}]))(?!(?:(?!(?<![Ss]td)\.(?=[ \t]+[\p{Lu}\d])|[!?\n,;|]|[ \t]+(?:[Ii]r|[Bb]ei|[Ии]|[Aa]nd|[Ee]n|[Uu]nd)[ \t])[\s\S])*?(?:[Bb]reak|[Ll]unch|[Pp]au[sz]|[Mm]ittag|[Пп]ерерыв|[Оо]бед|[Pp]ertrauk|[Pp]iet|[Pp]rzerw))/gu;
 const PROTECTED_DOT = "##DOT##";
 const PROTECTED_COMMA = "##COMMA##";
 

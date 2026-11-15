@@ -496,3 +496,23 @@ describe("an included break never drops the day", () => {
     expect(intakeMinutes(text)).toBe(expected);
   });
 });
+
+/**
+ * Thirteenth review of #3355: a break word anywhere later in the same phrase
+ * keeps the old split; one in the next phrase ("… and a lunch break", ". Lunch
+ * break 30 min.") does not stop "incl." from naming a part.
+ */
+describe("a break later in the same phrase, never one in the next", () => {
+  it.each([
+    ["German 'Kaffeepause'", "8 Stunden gearbeitet inkl. Kaffeepause. Danach 2 Stunden Papierkram.", 10 * 60],
+    ["German 'Raucherpause'", "8 Stunden gearbeitet inkl. Raucherpause. Danach 2 Stunden Papierkram.", 10 * 60],
+    ["English 'coffee-break'", "Worked 8 h incl. a coffee-break. Then 2 h of admin.", 10 * 60],
+    ["a break word nine words on", "Worked 8 h incl. travel time to the client site with a short break. Then 2 h of admin.", 10 * 60],
+    ["travel and a lunch break inside the day", "Worked 8 h incl. 2 h travel and a lunch break.", 8 * 60],
+    ["'and a lunch break' after the part", "Worked 15 h, incl. 2 h coordination and a lunch break.", 15 * 60],
+    ["German 'und eine Mittagspause' after the part", "15 Stunden gearbeitet, inkl. 2 Stunden Koordination und eine Mittagspause.", 15 * 60],
+    ["a lunch break in the next sentence", "Worked 15 h, incl. 2 h coordination. Lunch break 30 min.", 15 * 60],
+  ])("%s", (_name, text, expected) => {
+    expect(intakeMinutes(text)).toBe(expected);
+  });
+});
