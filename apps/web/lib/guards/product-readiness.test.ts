@@ -166,7 +166,7 @@ describe("account page marks roles from a single honest status source", () => {
     expect(txt).not.toMatch(/account\.preview_workspace/);
     const lt = readWeb("messages/lt.json");
     // The label itself still exists (role switcher owns it now).
-    expect(lt).toMatch(/"preview_workspace":\s*"Ruošiama"/);
+    expect(lt).toMatch(/"preview_workspace":\s*"Peržiūra"/);
     expect(lt).toMatch(/"rolesIntro":/);
   });
 });

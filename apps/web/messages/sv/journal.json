@@ -269,7 +269,7 @@
   "projectNone": "Inte projektarbete",
   "projectAmbiguous": "Du är tilldelad flera projekt. Välj innan du sparar vilket projekt dessa timmar hör till (eller markera dem som inte projektarbete).",
   "projectAuto": "Projekt: {name}",
-  "projectViaTeam": "{project} (via team {team})",
+  "projectViaTeam": "{project} (via arbetslaget {team})",
   "projectClient": "{project} (kundprojekt)",
   "unconfirmedTimeBlocked": "{count, plural, one {# registrerad varaktighet väntar fortfarande på din granskning och skulle inte sparas.} other {# registrerade varaktigheter väntar fortfarande på din granskning och skulle inte sparas.}} Behåll eller ta bort dem först.",
   "entry": {

@@ -20,6 +20,11 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * No internal process notes in the UI (owner order P0 2026-11-15): the
+ * "In preparation" roadmap badge `landing.conv.comingLabel` now states the plain
+ * user-facing fact ("Not available yet"). Moved: the `lt`, `en`, `ru` landing
+ * namespace hashes. No source file.
+ *
  * The first screen is the choice (owner instruction 2026-11-12: "Sumažink pagrindinio
  * puslapio sudėtingumą. Pašalink nereikalingus tekstus, abstrakčius šūkius ir
  * pasikartojančius blokus. Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori
