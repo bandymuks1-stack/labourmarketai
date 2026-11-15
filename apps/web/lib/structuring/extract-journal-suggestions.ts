@@ -786,8 +786,15 @@ function mergeContinuationFragments(
     const next = fragments[i + 1];
     const curHasNoActivity =
       cur.activitySlug === null && cur.activityLabel === null;
+    // A part that opens with "iš jų" and is otherwise only a figure takes its
+    // own minutes too: "iš jų 1 val. | 30 min. vairavau" is 1.5 h of driving.
     const curIsTimeOnly =
-      cur.time !== null && curHasNoActivity && isTimeOnlyFragment(cur.rawPhrase);
+      cur.time !== null &&
+      curHasNoActivity &&
+      (isTimeOnlyFragment(cur.rawPhrase) ||
+        (next?.time?.unitSlug === "minutes" &&
+          OPENS_WITH_INCLUDED_PART_RX.test(cur.rawPhrase) &&
+          isTimeOnlyFragment(cur.rawPhrase.replace(OPENS_WITH_INCLUDED_PART_RX, ""))));
     // A phrase that opens with "iš jų" / "including" is a part OF the figure
     // before it, never its continuation: "15 val., iš jų 2 val. …" stays 13 + 2.
     if (
@@ -795,8 +802,7 @@ function mergeContinuationFragments(
       next &&
       next.time !== null &&
       !opensAsIncludedPart(next.rawPhrase) &&
-      !apart.has(cur) &&
-      !apart.has(next)
+      !apart.has(cur)
     ) {
       const mergedTime = addTimes(cur.time!, next.time);
       const mergedRaw = `${cur.rawPhrase} ir ${next.rawPhrase}`.trim();
@@ -885,6 +891,14 @@ const TOTAL_AGAIN_LEAD_RX = new RegExp(
   `(?:${TOTAL_AGAIN_CUE_RX.source})\\s*[:–-]?\\s*(?:\\p{L}{1,3}\\s+){0,2}$`,
   "iu",
 );
+
+/** Words that name a PART OF THE DAY ("ryte", "vakare", "naktį", "po pietų",
+ *  "in the morning", "evening", "утром", "вечером", "abends", "rano",
+ *  "wieczorem"). A figure in a sentence that names one is a block of the day,
+ *  never the day said again: "Ryte 4 val., vakare iš viso 4 val." and "Ryte 4
+ *  val. dirbau vienas, vakare kartu 4 val." are 8 h. */
+const PART_OF_DAY_RX =
+  /(?<!\p{L})(?:ryte|rytą|ryta|ryto|vakare|vakarą|vakara|vakaro|pavakare|naktį|nakti|nakčia|naktis|po\s+pietų|po\s+pietu|popiet|prieš\s+pietus|pries\s+pietus|morning|mornings|evening|evenings|afternoon|afternoons|night|nights|tonight|утром|вечером|днём|днем|ночью|после\s+обеда|morgens|vormittags|nachmittags|abends|nachts|morgen|abend|rano|wieczorem|po\s+południu|po\s+poludniu|w\s+nocy|ochtends|middags|avonds)(?!\p{L})/iu;
 
 /** Minutes back in the unit a person reads best. */
 function minutesAsTime(minutes: number): { value: number; unitSlug: "hours" | "minutes" } {
@@ -983,6 +997,8 @@ function containedTotal(
     const equalsTotal = same(m, totalMin);
     const equalsAnother = later.some((g) => g !== f && same(minutesOf(g), m));
     const sentence = sentenceText(f);
+    // A block of the day ("vakare iš viso 4 val.") is never the day said again.
+    if (PART_OF_DAY_RX.test(sentence)) continue;
     const sentenceNamesTheTotal = numbersIn(sentence).some((n) => n === total.time!.value);
     // Said again AS the total: the cue or the total word stands right in front
     // of the figure ("tai įeina į 15 valandų", "kartu 15 valandų", "iš viso
@@ -1046,10 +1062,11 @@ function containedTotal(
   const insideSet = new Set(inside);
   const restNamed = inside.length > 0;
   const out: JournalFragmentSuggestion[] = [];
-  // The rest and the parts are separate items: the continuation merge ("8 val.
-  // | 30 min.") must never glue the rest onto the part after it ("Darbo
-  // laikas: 15 valandų. … (2 valandos …)" stays 13 + 2, not one 15 h item).
-  const apart = new Set<JournalFragmentSuggestion>(parts);
+  // The rest is a whole figure: the continuation merge ("8 val. | 30 min.")
+  // must never glue it onto the part after it ("Darbo laikas: 15 valandų. …
+  // (2 valandos …)" stays 13 + 2, not one 15 h item). A stray date before it
+  // ("6 d.") may still fold into it, and parts still join their own minutes.
+  const apart = new Set<JournalFragmentSuggestion>();
   for (const f of fragments) {
     if (restatements.has(f)) continue;
     if (f !== total) {
@@ -1103,8 +1120,8 @@ function separateStatedTotal(
 ): {
   fragments: JournalFragmentSuggestion[];
   statedTotal: JournalSuggestions["statedTotal"];
-  /** Fragments the continuation merge keeps as they are (a contained total's
-   *  rest and parts). */
+  /** Fragments the continuation merge never glues onto the fragment after
+   *  them (a contained total's rest). */
   apart?: ReadonlySet<JournalFragmentSuggestion>;
 } {
   const timed = fragments.filter((f) => f.time !== null);

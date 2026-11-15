@@ -307,3 +307,43 @@ describe("a part of the day is not the day said again", () => {
     expect(s.statedTotal).toMatchObject({ value: 15, includesParts: true, matchesFragments: true });
   });
 });
+
+/**
+ * Fifth review of #3355: a total word or a cue inside another block of the
+ * day never makes that block the day said again; the rest of a contained day
+ * still takes a stray date before it, and parts still take their own minutes.
+ */
+describe("a block of the day is never the day said again", () => {
+  it.each([
+    ["'kartu' meaning together", "Ryte 4 val. dirbau vienas, vakare kartu 4 val.", 8 * 60],
+    ["'iš viso' inside the evening block", "Ryte 4 val., vakare iš viso 4 val.", 8 * 60],
+    ["the same in English", "Worked 4 h in the morning. In the evening, in total 4 h.", 8 * 60],
+  ])("%s", (_name, text, expected) => {
+    expect(minutes(text)).toBe(expected);
+    expect(intakeMinutes(text)).toBe(expected);
+    expect(extractJournalSuggestions(text).statedTotal?.includesParts).not.toBe(true);
+  });
+
+  it("two blocks named by the part of the day stay two items", () => {
+    const s = extractJournalSuggestions("Dirbau 8 val. 4 val. ryte ir 4 val. vakare, didžiąją dalį – lauke.");
+    expect(minutes("Dirbau 8 val. 4 val. ryte ir 4 val. vakare, didžiąją dalį – lauke.")).toBe(8 * 60);
+    expect(s.fragments.filter((f) => f.time).map((f) => f.time!.value)).toEqual([4, 4]);
+  });
+
+  it("a stray date before the day folds away as before: no day count in the intake", () => {
+    const s = extractJournalSuggestions("6 d. Dirbau 15 val., iš jų 2 val. koordinavimas.");
+    expect(minutes("6 d. Dirbau 15 val., iš jų 2 val. koordinavimas.")).toBe(15 * 60);
+    expect(s.fragments.some((f) => f.time?.unitSlug === "days")).toBe(false);
+  });
+
+  it.each([
+    ["a part that continues the list", "Dirbau 8 val., iš jų 2 val. vairavau, 1 val. 30 min. klijavau."],
+    ["a part right after 'iš jų'", "Dirbau 8 val., iš jų 1 val. 30 min. vairavau."],
+  ])("hours and minutes of one part stay one item: %s", (_name, text) => {
+    expect(minutes(text)).toBe(8 * 60);
+    const s = extractJournalSuggestions(text);
+    const times = s.fragments.filter((f) => f.time).map((f) => `${f.time!.value} ${f.time!.unitSlug}`);
+    expect(times).toContain("90 minutes");
+    expect(times).not.toContain("30 minutes");
+  });
+});
