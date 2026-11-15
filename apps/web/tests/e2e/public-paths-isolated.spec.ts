@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { PUBLIC_INTENTS, type PublicIntentLink } from "../../lib/navigation/public-intents";
+import { INSTITUTION_DOOR_NEXT } from "../../lib/marketing/public-doors";
 import { BASE, PASSWORD, isolatedStack } from "./isolated-web-a-helpers";
 import { KNOWN_PUBLIC_PATH_FINDINGS, PUBLIC_PATH_CASES } from "./public-paths-cases";
 
@@ -310,12 +311,13 @@ async function education(page: Page): Promise<void> {
   const seen = track(page);
   await page.goto(INNER);
   await openToggle(page, page.getByTestId("intent-toggle-more"));
-  const before = page.url();
-  await page.getByTestId("intent-more-links").getByRole("link", { name: "For education providers" }).click();
-  await page.waitForURL((u) => u.href !== before, { timeout: 60_000 });
-  await page.waitForLoadState("domcontentloaded");
-  expectNoAuth(seen, "the education page");
-  await expect(page.locator("h1").first()).toBeVisible({ timeout: 30_000 });
+  const beforeClick = seen.length;
+  await page.getByTestId("intent-more-link-education").click();
+  // An institution needs an account for its workspace: the link is its own
+  // sign-up door, and sign-up returns it to the institution setup.
+  expectNoAuth(seen.slice(0, beforeClick), "the education link's click");
+  await page.waitForURL(/\/en\/auth\/signup/, { timeout: 60_000 });
+  sameDestination(nextOf(page.url()), INSTITUTION_DOOR_NEXT);
 }
 
 const RUNNERS = new Map<string, (page: Page) => Promise<void>>([

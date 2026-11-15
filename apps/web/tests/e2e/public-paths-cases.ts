@@ -34,7 +34,7 @@ export const PUBLIC_PATH_CASES: readonly PublicPathCase[] = [
   { id: "intake:worker", title: "worker-intake: the typed intake survives sign-up" },
   { id: "calculator:project-cost", title: "calculator result carries its inputs into company-need" },
   { id: "header:assistant", title: "header assistant link → sign-in with next=/dashboard" },
-  { id: "header:education", title: "header More → education link reaches a public page" },
+  { id: "header:education", title: "header More → education link → the institution sign-up door" },
 ];
 
 export const PUBLIC_PATH_CASE_IDS: readonly string[] = PUBLIC_PATH_CASES.map((c) => c.id);
@@ -54,11 +54,6 @@ export type KnownPublicPathFinding = {
  * must remove its entry here. Never `test.skip`.
  */
 export const KNOWN_PUBLIC_PATH_FINDINGS: readonly KnownPublicPathFinding[] = [
-  {
-    id: "header:education",
-    reason: "the More/phone-menu education link opens the signed-in institution setup, so a visitor meets sign-in first",
-    owner: "#3410",
-  },
   {
     id: "intake:worker",
     reason: "the worker-intake sign-up link carries neither a return address nor the typed intake, so what the visitor entered is gone after sign-up",
