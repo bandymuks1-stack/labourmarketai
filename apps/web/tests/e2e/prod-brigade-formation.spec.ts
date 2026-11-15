@@ -6,6 +6,7 @@ import { chooseWorkContextIfAsked } from "./worklog-context";
 import { bearerOf, qaApi } from "./prod-qa-api";
 import { closeOwnNeed, findOwnNeed } from "./prod-need-close";
 import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * PRODUCTION BRIGADE FORMATION — owner programme 2026-10-12, P0 §3.
@@ -282,6 +283,7 @@ test("B2B-1. buyer (Gama) posts a need through the company demand intake", async
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
   // Either the need is created, or the plan's open-need limit answers
