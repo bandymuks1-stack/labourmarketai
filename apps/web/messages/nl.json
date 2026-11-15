@@ -15588,6 +15588,10 @@
         "title": "Aanvraag individueel project",
         "body": "Voor particuliere en zakelijke opdrachtgevers: beschrijf welk project of welke dienst u nodig heeft."
       },
+      "partner": {
+        "title": "Partnerschapsaanvraag",
+        "body": "Beschrijf de samenwerking die u voorstelt."
+      },
       "title": "Behoefte doorgeven",
       "promise": "Beschrijf welke werknemers, diensten of projectuitvoering u nodig heeft. De aanvraag wordt ter beoordeling doorgegeven aan het team van LabourMarket.ai.",
       "name": "Voor- en achternaam of bedrijfsnaam",
@@ -15605,6 +15609,7 @@
       "scope": "Omvang",
       "deadline": "Termijnen",
       "need": "Welk project of welke dienst u nodig heeft",
+      "proposal": "Voorgestelde samenwerking",
       "customer": "Opdrachtgever",
       "customerPrivate": "Particulier",
       "customerBusiness": "Bedrijf",

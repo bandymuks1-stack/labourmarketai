@@ -15588,6 +15588,10 @@
         "title": "Förfrågan om individuellt projekt",
         "body": "För privat- och företagskunder: beskriv projektet eller tjänsten du behöver."
       },
+      "partner": {
+        "title": "Partnerskapsförfrågan",
+        "body": "Beskriv samarbetet du föreslår."
+      },
       "title": "Lämna in en förfrågan",
       "promise": "Berätta vilka arbetstagare, tjänster eller vilket projektgenomförande du behöver. Din förfrågan skickas till LabourMarket.ai-teamet för granskning.",
       "name": "Namn eller företagsnamn",
@@ -15605,6 +15609,7 @@
       "scope": "Omfattning",
       "deadline": "Tidsfrister",
       "need": "Projekt eller tjänst du behöver",
+      "proposal": "Föreslaget samarbete",
       "customer": "Kund",
       "customerPrivate": "Privatperson",
       "customerBusiness": "Företag",
