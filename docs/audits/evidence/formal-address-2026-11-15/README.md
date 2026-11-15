@@ -15,6 +15,8 @@ facts.
 | `messages/lt.json` | 3,198 | 15,729 |
 | `messages/nl.json` | 2,284 | 15,729 |
 | `messages/ru.json` | 64 | 15,729 |
+| `messages/lt/journal.json`, `lt/labour-market.json` (per-namespace catalogs) | 272 | 1,227 |
+| `messages/nl/journal.json` | 156 | 1,089 |
 | `messages/en.json`, `de.json`, `pl.json` and the five non-routed catalogs | 0 | |
 | Hard-coded copy outside the catalogs (SEO titles and descriptions, three public pages, the global error page, the connection notice, the answer-engine links) | 47 replacements in 9 files | |
 | Mobile app catalog (`apps/mobile/src/i18n/messages.ts`) | 121 Lithuanian, 112 Dutch | 344 each |
@@ -49,13 +51,15 @@ in Polish software, and is unchanged.
   stay in the stem form.
 - Russian: ты/твой → вы/ваш, imperatives to the -те form.
 - Greetings follow the register: "Labas" → "Sveiki", "Hoi" → "Hallo".
+- Text the product writes for someone to SEND — a worker's note to a manager, a reviewer's ready
+  message to a worker — is product copy and is formal too ("kunt u die verduidelijken?",
+  "Patikslinkite, kiek valandų skyrėte …").
 
 ## Kept as written — the user's own words
 
 | Where | Why |
 |---|---|
 | LT and RU `conversation.chat.user*` (5 each) | the user's own chat bubbles ("Parodyk mano profilį") |
-| NL `instructions.card.clarifyBody` | the worker's own message to a manager, sent word for word |
 | User-input examples inside the intent router and its tests | what people type; the router must keep matching them |
 
 ## Judgement calls worth a native reader's look
@@ -65,6 +69,12 @@ in Polish software, and is unchanged.
   "Paaiškinti paprastai" (infinitive, the neutral button form).
 - The landing's sample employer message: "Ar galėtumėte pradėti spalio 6 d.?"
 - Dutch "{hours} je" was a mistranslation of the hour unit and is now "{hours} u".
+
+## Kept that way by a guard
+
+`lib/guards/formal-address.test.ts` reads every catalog the web app loads (the main and the
+per-namespace files) and refuses the informal pronouns, imperatives and conditionals in
+Lithuanian, Dutch and Russian. Only the user's own chat bubbles are exempt, by key.
 
 ## Not changed here
 
