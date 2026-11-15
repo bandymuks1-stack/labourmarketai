@@ -2,11 +2,11 @@
 -- The marker above is the human-gate ACKNOWLEDGEMENT, not an approval. NO OWNER APPROVAL OF THIS SQL
 -- EXISTS YET. Draft PR + needs-human-gate. NOT applied. Apply only via Supabase MCP apply_migration.
 -- ============================================================================
--- 20261114120000_agency_placement_terms_v1
+-- 20261114235900_agency_placement_terms_v1
 --
 -- SAFETY CLASS: RED (new tables, SECURITY DEFINER functions, grants, a commercial term recorded
 -- with a hire decision).
--- Rollback: supabase/rollbacks/20261114120000_agency_placement_terms_v1.down.sql
+-- Rollback: supabase/rollbacks/20261114235900_agency_placement_terms_v1.down.sql
 --
 -- AN AGENCY'S PLACEMENT TERM, AND A WORKER'S OWN CHOICE TO JOIN AN AGENCY.
 -- General for every staffing agency; no agency, amount or text is named here.

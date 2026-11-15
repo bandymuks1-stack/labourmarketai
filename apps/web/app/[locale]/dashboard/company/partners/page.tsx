@@ -188,7 +188,7 @@ export default async function CompanyPartnersPage({
       listAgencyDraftedNeeds(),
       listAgencyPlacements(),
       getTranslations("agencyDelegation"),
-      // The agency's own placement term (migration 20261114120000).
+      // The agency's own placement term (migration 20261114235900).
       readOwnPlacementTerm(ownCompany.id),
       getTranslations("agencyPlacementTerm"),
     ]);

@@ -50,7 +50,7 @@ describe("scouting page — the reads after the need is chosen run in stages", (
       "getApplicantIdentity(",
       "readOfferBookingStatuses(",
       "loadDemandPipelineFacts(",
-      // the offering agency's placement term on each open offer (20261114120000)
+      // the offering agency's placement term on each open offer (20261114235900)
       "readPlacementTermsForOffers(",
     ]) {
       expect(s2, read).toContain(read);

@@ -16,7 +16,7 @@ import {
 
 /**
  * AN AGENCY'S PLACEMENT TERM AND A WORKER'S OWN CHOICE TO JOIN AN AGENCY
- * (migration 20261114120000, RED draft). Local stack only, SYNTHETIC people
+ * (migration 20261114235900, RED draft). Local stack only, SYNTHETIC people
  * and companies only. Every amount and text here is a test value.
  *
  *   P-1  the agency states its term on its own partners page

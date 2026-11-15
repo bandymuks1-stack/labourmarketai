@@ -1,4 +1,4 @@
--- Rollback for 20261114120000_agency_placement_terms_v1.
+-- Rollback for 20261114235900_agency_placement_terms_v1.
 --
 -- One transaction. It REFUSES while any agency term, suggestion row or
 -- accepted-term record exists: dropping them would erase which commercial

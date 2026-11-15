@@ -1,3 +1,4 @@
+import { countryDisplayName } from "@/lib/location/country-model";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -321,7 +322,7 @@ export default async function CompanyScoutingPage({
           : null,
       // The offering agency's placement term on each still-open offer: the
       // employer sees it before deciding, and accepts it only by accepting
-      // the candidate (migration 20261114120000; absent -> no term shown).
+      // the candidate (migration 20261114235900; absent -> no term shown).
       readPlacementTermsForOffers(
         offeredCandidates.filter((oc) => oc.offerStatus === "offered").map((oc) => oc.offerId),
       ),
@@ -656,7 +657,7 @@ export default async function CompanyScoutingPage({
                     : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
                 }`}
               >
-                {cc}
+                {countryDisplayName(cc, locale)}
               </Link>
             ))}
             {result.facets.skills.map((s) => (
@@ -846,6 +847,10 @@ export default async function CompanyScoutingPage({
                   <PersonIdentityCard
                     variant="candidate-review"
                     testid={`scout-identity-${h.workerId}`}
+                    // The name opens the person page. That page decides by itself
+                    // what this viewer may see: no name and no private text for
+                    // someone found through the visibility consent.
+                    nameHref={`/dashboard/people/${h.workerId}` as "/dashboard"}
                     name={who?.name ?? `${t("candidate")} ${anonymizedToken(p.anonymizedLabel)}`}
                     initials={
                       who?.name ? personMonogram(who.name) : anonymizedToken(p.anonymizedLabel).slice(0, 2)
@@ -939,34 +944,48 @@ export default async function CompanyScoutingPage({
                             {h.canContact ? (
                               <div className="flex flex-col gap-2">
                                 {isShortlistedForContact(h.shortlistStatus) ? (
-                                  <RequestCommunicationButton
-                                    locale={locale}
-                                    requestId={result.demand.id}
-                                    workerId={h.workerId}
-                                    labels={{
-                                      button: t("request.button"), opening: t("request.opening"),
-                                      opened: t("request.opened"), view: t("request.view"),
-                                      error: t("request.error"), limitReached: t("request.limitReached"),
-                                    }}
-                                  />
+                                  result.demand.ownedByCaller ? (
+                                    <RequestCommunicationButton
+                                      locale={locale}
+                                      requestId={result.demand.id}
+                                      workerId={h.workerId}
+                                      labels={{
+                                        button: t("request.button"), opening: t("request.opening"),
+                                        opened: t("request.opened"), view: t("request.view"),
+                                        error: t("request.error"), limitReached: t("request.limitReached"),
+                                      }}
+                                    />
+                                  ) : (
+                                    // The server starts a conversation only for the need's author
+                                    // (request-worker-conversation.ts). A colleague who may shortlist
+                                    // is told so instead of being given a button that always refuses.
+                                    <p className="text-meta text-text-muted" data-testid="scout-contact-author-only">
+                                      {t("request.authorOnly")}
+                                    </p>
+                                  )
                                 ) : inConversation || interestDoor ? null : (
                                   <p className="text-meta text-text-muted" data-testid={`scout-shortlist-first-${h.workerId}`}>
                                     {t("request.shortlistFirst")}
                                   </p>
                                 )}
-                                <ProposeBookingButton
-                                  locale={locale}
-                                  requestId={result.demand.id}
-                                  workerId={h.workerId}
-                                  countryCode={null}
-                                  labels={{
-                                    open: t("booking.open"), startDate: t("booking.startDate"),
-                                    note: t("booking.note"), send: t("booking.send"),
-                                    sending: t("booking.sending"), sent: t("booking.sent"),
-                                    unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
-                                    error: t("booking.error"), cancel: t("booking.cancel"),
-                                  }}
-                                />
+                                {/* Proposing dates is the need author's act: the database function
+                                    refuses anyone else ("Not your demand"). A colleague is not
+                                    given a button that always fails; the line above says who can. */}
+                                {result.demand.ownedByCaller ? (
+                                  <ProposeBookingButton
+                                    locale={locale}
+                                    requestId={result.demand.id}
+                                    workerId={h.workerId}
+                                    countryCode={null}
+                                    labels={{
+                                      open: t("booking.open"), startDate: t("booking.startDate"),
+                                      note: t("booking.note"), send: t("booking.send"),
+                                      sending: t("booking.sending"), sent: t("booking.sent"),
+                                      unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
+                                      error: t("booking.error"), cancel: t("booking.cancel"),
+                                    }}
+                                  />
+                                ) : null}
                                 <RequestContactDetailsButton
                                   locale={locale}
                                   requestId={result.demand.id}
@@ -1049,9 +1068,11 @@ export default async function CompanyScoutingPage({
           data-testid="scouting-empty"
         >
           <p className="text-sm text-text-secondary">
-            {hasActiveScoutFilters(result.filters)
-              ? t("filters.noMatches")
-              : t("noCandidates")}
+            {result.filters.country && !result.filters.skill && !result.filters.availableNow
+              ? t("filters.noMatchesCountry", { country: countryDisplayName(result.filters.country, locale) })
+              : hasActiveScoutFilters(result.filters)
+                ? t("filters.noMatches")
+                : t("noCandidates")}
           </p>
           {hasActiveScoutFilters(result.filters) ? (
             <Link
@@ -1162,16 +1183,25 @@ export default async function CompanyScoutingPage({
                       ? (result.candidates.find((c) => c.workerId === oc.workerId)?.shortlistStatus ?? null)
                       : null,
                   ) ? (
-                    <RequestCommunicationButton
-                      locale={locale}
-                      requestId={selected}
-                      workerId={oc.workerId}
-                      labels={{
-                        button: t("request.button"), opening: t("request.opening"),
-                        opened: t("request.opened"), view: t("request.view"),
-                        error: t("request.error"), limitReached: t("request.limitReached"),
-                      }}
-                    />
+                    result?.kind === "ok" && result.demand.ownedByCaller ? (
+                      <RequestCommunicationButton
+                        locale={locale}
+                        requestId={selected}
+                        workerId={oc.workerId}
+                        labels={{
+                          button: t("request.button"), opening: t("request.opening"),
+                          opened: t("request.opened"), view: t("request.view"),
+                          error: t("request.error"), limitReached: t("request.limitReached"),
+                        }}
+                      />
+                    ) : (
+                      // The server starts a conversation only for the need's author
+                      // (request-worker-conversation.ts). A colleague who may shortlist
+                      // is told so instead of being given a button that always refuses.
+                      <p className="text-meta text-text-muted" data-testid="scout-contact-author-only">
+                        {t("request.authorOnly")}
+                      </p>
+                    )
                   ) : result?.kind === "ok" && result.candidates.some((c) => c.workerId === oc.workerId) ? (
                     <p
                       className="text-meta text-text-muted"
@@ -1180,19 +1210,24 @@ export default async function CompanyScoutingPage({
                       {t("request.shortlistFirst")}
                     </p>
                   ) : null}
-                  <ProposeBookingButton
-                    locale={locale}
-                    requestId={selected}
-                    workerId={oc.workerId}
-                    countryCode={null}
-                    labels={{
-                      open: t("booking.open"), startDate: t("booking.startDate"),
-                      note: t("booking.note"), send: t("booking.send"),
-                      sending: t("booking.sending"), sent: t("booking.sent"),
-                      unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
-                      error: t("booking.error"), cancel: t("booking.cancel"),
-                    }}
-                  />
+                  {/* Proposing dates is the need author's act: the database function
+                      refuses anyone else ("Not your demand"). A colleague is not
+                      given a button that always fails; the line above says who can. */}
+                  {result?.kind === "ok" && result.demand.ownedByCaller ? (
+                    <ProposeBookingButton
+                      locale={locale}
+                      requestId={selected}
+                      workerId={oc.workerId}
+                      countryCode={null}
+                      labels={{
+                        open: t("booking.open"), startDate: t("booking.startDate"),
+                        note: t("booking.note"), send: t("booking.send"),
+                        sending: t("booking.sending"), sent: t("booking.sent"),
+                        unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
+                        error: t("booking.error"), cancel: t("booking.cancel"),
+                      }}
+                    />
+                  ) : null}
                   <ScoutingShortlistButtons
                     locale={locale}
                     requestId={selected}
@@ -1255,6 +1290,9 @@ export default async function CompanyScoutingPage({
                 <PersonIdentityCard
                   variant="candidate-review"
                   testid={`scout-identity-${c.workerId}`}
+                  // The name opens the person page; what it shows is that
+                  // page's own, database-decided view of this person.
+                  nameHref={`/dashboard/people/${c.workerId}` as "/dashboard"}
                   name={
                     applicantIdentity.get(c.workerId)?.name ??
                     `${t("candidate")} ${anonymizedToken(p.anonymizedLabel)}`
@@ -1430,19 +1468,28 @@ export default async function CompanyScoutingPage({
                           the worker is on the shortlist; until then the page
                           says what to do — the shortlist control is below. */}
                       {isShortlistedForContact(c.shortlistStatus) ? (
-                        <RequestCommunicationButton
-                          locale={locale}
-                          requestId={result.demand.id}
-                          workerId={c.workerId}
-                          labels={{
-                            button: t("request.button"),
-                            opening: t("request.opening"),
-                            opened: t("request.opened"),
-                            view: t("request.view"),
-                            error: t("request.error"),
-                            limitReached: t("request.limitReached"),
-                          }}
-                        />
+                        result.demand.ownedByCaller ? (
+                          <RequestCommunicationButton
+                            locale={locale}
+                            requestId={result.demand.id}
+                            workerId={c.workerId}
+                            labels={{
+                              button: t("request.button"),
+                              opening: t("request.opening"),
+                              opened: t("request.opened"),
+                              view: t("request.view"),
+                              error: t("request.error"),
+                              limitReached: t("request.limitReached"),
+                            }}
+                          />
+                        ) : (
+                          // The server starts a conversation only for the need's author
+                          // (request-worker-conversation.ts). A colleague who may shortlist
+                          // is told so instead of being given a button that always refuses.
+                          <p className="text-meta text-text-muted" data-testid="scout-contact-author-only">
+                            {t("request.authorOnly")}
+                          </p>
+                        )
                       ) : inConversation || interestDoor ? null : (
                         // A conversation that already exists is the fact: no
                         // "shortlist first" under it (scouting walk 2026-10-09);
@@ -1454,24 +1501,29 @@ export default async function CompanyScoutingPage({
                           {t("request.shortlistFirst")}
                         </p>
                       )}
-                      <ProposeBookingButton
-                        locale={locale}
-                        requestId={result.demand.id}
-                        workerId={c.workerId}
-                        countryCode={c.readiness.countryFit === "match" ? p.location : null}
-                        labels={{
-                          open: t("booking.open"),
-                          startDate: t("booking.startDate"),
-                          note: t("booking.note"),
-                          send: t("booking.send"),
-                          sending: t("booking.sending"),
-                          sent: t("booking.sent"),
-                          unavailable: t("booking.unavailable"),
-                          notEntitled: t("booking.notEntitled"),
-                          error: t("booking.error"),
-                          cancel: t("booking.cancel"),
-                        }}
-                      />
+                      {/* Proposing dates is the need author's act: the database function
+                          refuses anyone else ("Not your demand"). A colleague is not
+                          given a button that always fails; the line above says who can. */}
+                      {result.demand.ownedByCaller ? (
+                        <ProposeBookingButton
+                          locale={locale}
+                          requestId={result.demand.id}
+                          workerId={c.workerId}
+                          countryCode={c.readiness.countryFit === "match" ? p.location : null}
+                          labels={{
+                            open: t("booking.open"),
+                            startDate: t("booking.startDate"),
+                            note: t("booking.note"),
+                            send: t("booking.send"),
+                            sending: t("booking.sending"),
+                            sent: t("booking.sent"),
+                            unavailable: t("booking.unavailable"),
+                            notEntitled: t("booking.notEntitled"),
+                            error: t("booking.error"),
+                            cancel: t("booking.cancel"),
+                          }}
+                        />
+                      ) : null}
                       {/* Contact-detail ASK (Wagon 1): the worker alone
                           answers on their privacy screen; a grant never
                           shows contact data here — server-enforced. */}

@@ -14,7 +14,7 @@ set -uo pipefail
 export PGCLIENTENCODING=UTF8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
-NAME=20261114120000_agency_placement_terms_v1
+NAME=20261114235900_agency_placement_terms_v1
 MIG="$REPO/supabase/migrations/$NAME.sql"
 DOWN="$REPO/supabase/rollbacks/$NAME.down.sql"
 V1SRC="$REPO/supabase/migrations/20261008090000_chain_proof_unshare_withdraws_offers_v1.sql"

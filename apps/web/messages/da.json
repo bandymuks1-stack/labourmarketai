@@ -2266,6 +2266,7 @@
         "accommodation": "Indkvartering",
         "transport": "Transport",
         "tool": "Nødvendigt værktøj",
+        "opportunityType": "Mulighedstype",
         "activeCount": "Aktive filtre: {count}",
         "reset": "Nulstil filtre"
       },
@@ -2564,6 +2565,9 @@
       "skillCount": "{matched} af {total} krævede færdigheder",
       "nameHidden": "Navn og kontaktoplysninger vises først, når personen tillader det.",
       "appliedToYou": "Har ansøgt om dette behov — navn og billede følger med ansøgningen. Telefon og e-mail forbliver skjult."
+    },
+    "filters": {
+      "noMatchesCountry": "Ingen i det synlige udbud er i {country} endnu. Vis alle, eller udvid behovet."
     }
   },
   "waze": {
@@ -8074,6 +8078,57 @@
       "fullList": "Fuld liste"
     },
     "more": "Mere"
+  },
+  "commercial": {
+    "pageTitle": "Kommercielt",
+    "pageIntro": "Dine tilbud og kontrakter samlet ét sted. Fakturaer og betalinger registreres under Økonomi.",
+    "preApply": "Det kommercielle overblik bliver tilgængeligt, når den kommercielle opdatering er anvendt.",
+    "proposalsTitle": "Tilbud",
+    "honestNote": "Et tilbud går fra kladde → sendt → accepteret/afvist, kun når du selv ændrer det. Intet sendes automatisk til nogen.",
+    "proposalsEmpty": "Ingen tilbud endnu.",
+    "addProposal": "Tilføj et tilbud",
+    "proposalTitlePlaceholder": "Tilbuddets titel",
+    "contractsTitle": "Kontrakter",
+    "noSignatureNote": "Kontrakter gemmer en status og en valgfri dokumentreference. Der oprettes eller påstås ingen elektronisk signatur.",
+    "contractsEmpty": "Ingen kontrakter endnu.",
+    "addContract": "Tilføj en kontrakt",
+    "contractFromProposal": "Opret kontrakt",
+    "fromProposal": "Fra tilbud: {title}",
+    "contractTitlePlaceholder": "Kontraktens titel",
+    "docRef": "Dok.-ref.",
+    "docRefLabel": "Dokumentreference",
+    "docRefPlaceholder": "Reference til underskrevet dokument (valgfri)",
+    "invoicesTitle": "Fakturaer og betalinger",
+    "invoicesNote": "Fakturaer og betalingsposter findes under Økonomi — registreret manuelt i EUR. Platformen flytter ingen penge.",
+    "openFinance": "Åbn Økonomi",
+    "statusLabel": "Status",
+    "titleLabel": "Titel",
+    "amountLabel": "Beløb (EUR)",
+    "valueLabel": "Værdi (EUR)",
+    "add": "Tilføj",
+    "saving": "Gemmer…",
+    "delete": "Fjern",
+    "proposalStatus": {
+      "draft": "Kladde",
+      "sent": "Sendt",
+      "accepted": "Accepteret",
+      "rejected": "Afvist",
+      "withdrawn": "Trukket tilbage"
+    },
+    "contractStatus": {
+      "draft": "Kladde",
+      "active": "Aktiv",
+      "completed": "Afsluttet",
+      "cancelled": "Annulleret"
+    },
+    "outcome": {
+      "saved": "Gemt.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
+      "invalid": "Kontrollér oplysningerne.",
+      "auth": "Log ind igen.",
+      "not_authorized": "Du kan kun administrere dine egne poster.",
+      "error": "Noget gik galt. Prøv igen."
+    }
   },
   "agencySuggestion": {
     "eyebrow": "Rekrutteringsbureau",

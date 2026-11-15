@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * AN AGENCY THE PRODUCT MAY SUGGEST TO A WORKER (migration 20261114120000).
+ * AN AGENCY THE PRODUCT MAY SUGGEST TO A WORKER (migration 20261114235900).
  *
  * The list is kept by an admin (platform_suggested_agencies); no agency is
  * named in code. The database decides who sees a suggestion: a worker with no

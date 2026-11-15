@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { contextPanel } from "./prod-context-panel";
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { makeDocx, makeUnicodePdf } from "../../lib/cv/__fixtures__/cv-fixtures";
@@ -119,6 +120,8 @@ async function say(page: Page, text: string): Promise<void> {
   await expect(composer).toBeVisible({ timeout: 60_000 });
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   await composer.fill(text);
+  // On a phone an open context sheet lies over the composer; a person closes it to send.
+  await contextPanel(page, "closed");
   await inMain(page).getByTestId("composer-send").click();
 }
 
@@ -755,6 +758,9 @@ test("P-15 (2.24). the experience records about the worker open, with the right 
   // Read-only on purpose: a reply has no withdraw path and goes to moderation.
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard?result=experiences");
+  // A result is shown in the context panel: on a phone that is a sheet, opened here if it is not.
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  await contextPanel(page, "open");
   const result = inMain(page).getByTestId("experiences-result");
   const unavailable = inMain(page).getByTestId("experiences-result-unavailable").first();
   const error = inMain(page).getByTestId("experiences-result-error");

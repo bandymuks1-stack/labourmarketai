@@ -7,7 +7,7 @@ import { placementTermsMissing } from "@/lib/agency/placement-terms";
 
 /**
  * The agency states, replaces or retires its placement term (migration
- * 20261114120000). Every rule is the database's: the caller owns the company
+ * 20261114235900). Every rule is the database's: the caller owns the company
  * and the company acts as an agency; amount, currency, condition and link are
  * checked there. A new term never edits the old one — it retires it, so the
  * term an employer already accepted stays exactly what they accepted.

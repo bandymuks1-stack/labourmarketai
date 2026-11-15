@@ -712,7 +712,7 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // An agency's placement term and the admin list of agencies suggested to
   // workers: `created_by` is who stated the term or added the row; the
-  // subject is an agency (20261114120000).
+  // subject is an agency (20261114235900).
   "agency_placement_terms",
   "platform_suggested_agencies",
   // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no

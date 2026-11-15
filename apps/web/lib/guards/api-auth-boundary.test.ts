@@ -88,7 +88,7 @@ const CLASSIFICATION: Record<
   },
   "cron/invitation-delivery-retry/route.ts": {
     class: "public",
-    why: "Called only by the VPS (ops/vps/lm-invitation-delivery-retry.sh, scheduled solely after the owner installs /etc/cron.d/labourmarket-invitation-delivery); nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; health (default) sends nothing; retry re-sends at most 10 partner referrals whose own send was authorised, whose LAST failure was a confirmed temporary one and whose link was never opened, through the service-role-only reissue under the address lock. Answers counts, reason codes and alert codes only, no ids, no addresses.",
+    why: "Called only by the VPS (ops/vps/lm-invitation-delivery-retry.sh, scheduled solely after the owner installs /etc/cron.d/labourmarket-invitation-delivery); nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; health (default) sends nothing; retry re-sends at most 10 partner referrals whose own send was authorised, whose LAST failure was a confirmed temporary one and whose link was never opened, through the service-role-only reissue under the address lock; bounces reads delivery reports from the sender mailbox READ-ONLY (IMAP EXAMINE + BODY.PEEK) and marks only our own Message-IDs; the app itself never messages the owner (the VPS script hands new alerts to the Agentai OS project-event inbox). Answers counts, reason codes and alert codes only, no ids, no addresses.",
   },
   "cron/referral-reprocess/route.ts": {
     class: "public",
@@ -125,6 +125,10 @@ const CLASSIFICATION: Record<
   "internal/capability-readback/v1/route.ts": {
     class: "public",
     why: "Agentai OS re-verifies its LabourMarket.ai capability contract from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is aggregate integer COUNTS only (lib/api/capability-readback.ts: a fixed key list, everything else refused) — no row, name, id, email or address exists in it to leak.",
+  },
+  "internal/registrations-daily/v1/route.ts": {
+    class: "public",
+    why: "Agentai OS reads one UTC day of NEW and ACTIVE counts for workers, employers, agencies, students and education institutions from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is REAL-population integer COUNTS only, 1–2 withheld (lib/api/registrations-daily.ts) — no row, name, id, email or per-person timestamp exists in it to leak.",
   },
   "public/claims/v1/route.ts": {
     class: "public",

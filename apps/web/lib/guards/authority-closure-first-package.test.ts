@@ -51,7 +51,7 @@ describe("the four migrations ship paired, gated and stated", () => {
     // must sort strictly before these four.
     const SIBLINGS = [
       // 2026-11-14 Lane H: agency placement term + suggested-agency opt-in (RED draft, needs-human-gate, NOT applied).
-      "20261114120000_",
+      "20261114235900_",
       "20261006100400_",
       "20261006100500_",
       // 2026-10-07 RED tiers A2-G release: later-train siblings, applied individually.
@@ -220,6 +220,12 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-13 owner P0 invitation delivery reliability: codes-only send diagnostics, retry /
       // dead-letter / bounce fields (RED draft #3318, needs-human-gate, NOT applied).
       "20261113190000_",
+      // 2026-11-14 owner decision: NEW/ACTIVE counts for five platform groups, aggregate only
+      // (SECURITY DEFINER + GRANT; RED draft, needs-human-gate, NOT applied).
+      "20261114120000_",
+      // 2026-11-14 owner decision (invitation 862a91f4 NO RESEND): one service_role-only aggregate count of
+      // owner-registered historical unknown outcomes (SECURITY DEFINER + GRANT; RED draft, needs-human-gate, NOT applied).
+      "20261114150000_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
       "20261104060000_",
       // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.

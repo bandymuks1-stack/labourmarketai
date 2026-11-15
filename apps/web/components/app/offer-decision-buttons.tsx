@@ -28,7 +28,7 @@ export type OfferDecisionLabels = {
 };
 
 /** The offering agency's placement term, as the employer must see it before
- *  accepting (migration 20261114120000). Absent when the agency states none. */
+ *  accepting (migration 20261114235900). Absent when the agency states none. */
 export type OfferPlacementTerm = {
   readonly id: string;
   /** "Placement fee – 300 € per successfully placed worker", already worded. */

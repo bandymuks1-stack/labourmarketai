@@ -1790,10 +1790,16 @@ describe("the migration set is exactly what this slice declared", () => {
       // retry / dead-letter / bounce fields. RED draft #3318, the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261113190000_invitation_delivery_attempts_v1.sql",
+      // 2026-11-14: owner decision, NEW/ACTIVE counts for five platform groups, aggregate only.
+      // RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
+      "20261114120000_lm_registrations_daily_v1.sql",
+      // 2026-11-14: owner decision, invitation 862a91f4 KNOWN_HISTORICAL_UNKNOWN_OUTCOME — one integer count,
+      // service_role only. RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
+      "20261114150000_invitation_known_historical_unknown_v1.sql",
       // 2026-11-14 Lane H: an agency's placement term accepted at the hire decision, and a
       // worker's opt-in to a suggested agency. RED draft, the marker is the human-gate
       // acknowledgement, NOT applied.
-      "20261114120000_agency_placement_terms_v1.sql",
+      "20261114235900_agency_placement_terms_v1.sql",
 ]);
   });
 

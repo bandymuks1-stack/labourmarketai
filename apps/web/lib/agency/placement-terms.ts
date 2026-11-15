@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * AN AGENCY'S PLACEMENT TERM (migration 20261114120000, RED, owner-gated).
+ * AN AGENCY'S PLACEMENT TERM (migration 20261114235900, RED, owner-gated).
  *
  * The agency's own statement to employers: an amount, a currency, the
  * condition under which it applies and, when the agency has one, a link to
