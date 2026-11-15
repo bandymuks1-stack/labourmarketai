@@ -53,10 +53,4 @@ export type KnownPublicPathFinding = {
  * case still runs, and the job goes red the day it starts passing — so a fix
  * must remove its entry here. Never `test.skip`.
  */
-export const KNOWN_PUBLIC_PATH_FINDINGS: readonly KnownPublicPathFinding[] = [
-  {
-    id: "intake:worker",
-    reason: "the worker-intake sign-up link carries neither a return address nor the typed intake, so what the visitor entered is gone after sign-up",
-    owner: "Lane L (open product fix)",
-  },
-];
+export const KNOWN_PUBLIC_PATH_FINDINGS: readonly KnownPublicPathFinding[] = [];
