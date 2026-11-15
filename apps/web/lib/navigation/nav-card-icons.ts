@@ -22,6 +22,8 @@ export const FUNCTION_ICONS = {
   serviceRequests: "inbox",
   marketListings: "store",
   commercial: "fileSignature",
+  b2bEnquiry: "clipboardList",
+  projectEnquiry: "fileText",
   network: "users",
   partnerWithUs: "handshake",
   forAgencies: "info",
@@ -84,7 +86,7 @@ export const GOAL_ICONS = {
   work: "briefcase",
   workers: "userSearch",
   services: "wrench",
-  orders: "fileSignature",
+  contractors: "fileSignature",
   partners: "handshake",
   agencies: "building",
 } as const satisfies Record<string, string>;

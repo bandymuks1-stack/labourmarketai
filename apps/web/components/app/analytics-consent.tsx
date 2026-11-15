@@ -112,7 +112,7 @@ export function AnalyticsConsentBanner({
           <Button
             variant="secondary"
             size="sm"
-            className="flex-auto whitespace-nowrap px-3 sm:flex-none"
+            className="flex-auto whitespace-nowrap px-3 max-[359px]:!px-2 sm:flex-none"
             data-testid="analytics-consent-refuse"
             onClick={refuseAnalytics}
           >
@@ -121,7 +121,7 @@ export function AnalyticsConsentBanner({
           <Button
             variant="secondary"
             size="sm"
-            className="flex-auto whitespace-nowrap px-3 sm:flex-none"
+            className="flex-auto whitespace-nowrap px-3 max-[359px]:!px-2 sm:flex-none"
             data-testid="analytics-consent-accept"
             onClick={() => setAnalyticsConsent("granted")}
           >
