@@ -5256,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Why companies",
-      "headline": "Supply you can act on",
-      "items": [
-        {
-          "title": "Explainable fit direction",
-          "desc": "Every fit signal shows the reasons behind it."
-        },
-        {
-          "title": "Cross-border worker pool",
-          "desc": "Supply from every market we operate in, in one place."
-        },
-        {
-          "title": "No opaque middlemen",
-          "desc": "You see and own the relationship."
-        },
-        {
-          "title": "Skill records + fit signals",
-          "desc": "Hire on records, not on claims."
-        },
-        {
-          "title": "Supply signals",
-          "desc": "See workers' declared availability as profiles are updated."
-        },
-        {
-          "title": "Direct contact",
-          "desc": "You own the worker relationship."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "Company FAQ",
       "headline": "Straight answers",
@@ -5351,36 +5321,6 @@
         {
           "title": "Grow your pool",
           "desc": "Add capacity where demand is rising."
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "Why agencies",
-      "headline": "Leverage, not loss of control",
-      "items": [
-        {
-          "title": "Manage your pool",
-          "desc": "Workers, availability and status in one place."
-        },
-        {
-          "title": "Post on behalf of clients",
-          "desc": "Broker demand without losing the relationship."
-        },
-        {
-          "title": "Fit direction",
-          "desc": "Place the right people faster."
-        },
-        {
-          "title": "Visibility controls",
-          "desc": "Public, agencies-only or direct — your call."
-        },
-        {
-          "title": "Cross-border reach",
-          "desc": "Clients and workers across every market we operate in."
-        },
-        {
-          "title": "Grow your desk",
-          "desc": "Capacity insights as demand shifts."
         }
       ]
     },
@@ -19441,8 +19381,6 @@
     "title": "What happens to the work you do",
     "titleCompany": "What happens to the work you run",
     "example": "Example — not a real person or real data",
-    "hint": "Select a step. Every step opens the real place in your workspace.",
-    "hintWorkers": "Select a step. Every step opens the real place in your workspace.",
     "open": "Open in your workspace",
     "list": "Work lifecycle steps",
     "workers": {

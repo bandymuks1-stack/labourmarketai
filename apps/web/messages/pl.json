@@ -5256,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Dlaczego firmy",
-      "headline": "Podaż, na której możesz działać",
-      "items": [
-        {
-          "title": "Wyjaśnialny kierunek dopasowania",
-          "desc": "Każdy sygnał dopasowania pokazuje powody, które za nim stoją."
-        },
-        {
-          "title": "Transgraniczna pula pracowników",
-          "desc": "Podaż ze wszystkich rynków, na których działamy, w jednym miejscu."
-        },
-        {
-          "title": "Bez nieprzejrzystych pośredników",
-          "desc": "Widzisz relację i to Ty jesteś jej właścicielem."
-        },
-        {
-          "title": "Zapisy umiejętności i sygnały dopasowania",
-          "desc": "Zatrudniaj na podstawie zapisów, a nie deklaracji."
-        },
-        {
-          "title": "Sygnały podaży",
-          "desc": "Widzisz zadeklarowaną dostępność pracowników w miarę aktualizowania profili."
-        },
-        {
-          "title": "Bezpośredni kontakt",
-          "desc": "Relacja z pracownikiem należy do Ciebie."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "FAQ dla firm",
       "headline": "Konkretne odpowiedzi",
@@ -5351,36 +5321,6 @@
         {
           "title": "Powiększaj swoją pulę",
           "desc": "Dodawaj moce tam, gdzie rośnie popyt."
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "Dlaczego agencje",
-      "headline": "Przewaga, nie utrata kontroli",
-      "items": [
-        {
-          "title": "Zarządzaj swoją pulą",
-          "desc": "Pracownicy, dostępność i status w jednym miejscu."
-        },
-        {
-          "title": "Publikuj w imieniu klientów",
-          "desc": "Pośrednicz w zapotrzebowaniu, nie tracąc relacji."
-        },
-        {
-          "title": "Kierunek dopasowania",
-          "desc": "Szybciej kieruj właściwe osoby do pracy."
-        },
-        {
-          "title": "Kontrola widoczności",
-          "desc": "Publicznie, tylko dla agencji lub bezpośrednio — decydujesz Ty."
-        },
-        {
-          "title": "Zasięg transgraniczny",
-          "desc": "Klienci i pracownicy na wszystkich rynkach, na których działamy."
-        },
-        {
-          "title": "Rozwijaj swój dział",
-          "desc": "Wgląd w dostępne moce w miarę zmian popytu."
         }
       ]
     },
@@ -19441,8 +19381,6 @@
     "title": "Co dzieje się z Twoją pracą",
     "titleCompany": "Co dzieje się z pracą, którą prowadzisz",
     "example": "Przykład — to nie jest prawdziwa osoba ani prawdziwe dane",
-    "hint": "Wybierz krok. Każdy krok otwiera prawdziwe miejsce w Twojej przestrzeni roboczej.",
-    "hintWorkers": "Wybierz krok. Każdy krok otwiera prawdziwe miejsce w Twojej przestrzeni roboczej.",
     "open": "Otwórz w przestrzeni roboczej",
     "list": "Etapy cyklu życia pracy",
     "workers": {
