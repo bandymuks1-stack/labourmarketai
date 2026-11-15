@@ -9,18 +9,48 @@ name: Reachability probe (GitHub runner → production)
 # Reads NO secrets, signs in nowhere, writes nothing: anonymous GETs of the public
 # health endpoint and of public static chunks, every 5 s for 8 minutes. The log
 # and the summary carry only status codes, timings and Cloudflare/cache headers.
+#
+# ENCODED CHUNK PATHS (2026-11-12) — this part is a GATE, not a diagnostic. A
+# browser behind a URL-normalising proxy asks for a route-group chunk as
+# `.../%5Blocale%5D/%28marketing%29/layout-<hash>.js`; production answered 404 to
+# that spelling and the whole home page became the error screen, unseen, because
+# every probe asked for the spelling in the HTML. The `encoded-chunks` job
+# requests every route-group chunk the public pages link under both spellings
+# and FAILS on anything but a 200 JavaScript answer. It runs hourly (a failed
+# scheduled run e-mails the owner), on demand, and on changes to these files.
+# Same rule as above: anonymous GETs of public files, no secret, no write.
 
 on:
+  schedule:
+    - cron: "23 * * * *"
   workflow_dispatch:
   pull_request:
     paths:
       - ".github/workflows/reachability-probe.yml"
+      - ".github/scripts/encoded-chunk-probe.mjs"
 
 permissions:
   contents: read
 
 jobs:
+  encoded-chunks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Every route-group chunk loads as linked AND fully percent-encoded
+        run: |
+          set -euo pipefail
+          node .github/scripts/encoded-chunk-probe.mjs https://labourmarket.ai | tee -a "$GITHUB_STEP_SUMMARY"
+
   probe:
+    # The 8-minute measurement stays on demand; only the gate above is scheduled.
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

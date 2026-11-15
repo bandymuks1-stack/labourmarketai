@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { contextPanel } from "./prod-context-panel";
 import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
@@ -17,6 +18,14 @@ import { test, expect, type Browser, type Page } from "./prod-walk";
  * Every step is idempotent: a rerun finds the org, roster link and active
  * connection from earlier runs and continues from there. A-1b saves one
  * synthetic offer per run (offers are not metered against the open-need limit).
+ *
+ * A-6's accept proposes a booking to the synthetic worker, who never answers
+ * it. The database caps a client's open proposals at 10 (and 30 per 24 h), so
+ * runs that left theirs open made A-6 fail with "Too many open booking
+ * proposals" (run 43724558463). The proposal THIS run created is withdrawn in
+ * `afterAll` through the client's own Withdraw control, and only that one:
+ * earlier runs' leftovers are a production data change for the owner to
+ * decide, never this walk's.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const AGENCY = "QA-SYNTHETIC Agentūra";
@@ -53,6 +62,21 @@ async function workspace(page: Page, orgName: string): Promise<boolean> {
 }
 
 let requestId = "";
+/** Booking proposals this run's accept created (A-6), withdrawn in afterAll. */
+const createdProposals: string[] = [];
+
+/** The client's open outgoing proposals by booking id: the bookings page
+ *  lists every one, newest first. Null when the page could not be read; the
+ *  teardown then withdraws nothing rather than guess which one is this run's. */
+async function openOutgoingProposalIds(page: Page): Promise<Set<string> | null> {
+  await page.goto("/lt/dashboard/bookings");
+  const ready = await page.getByTestId("bookings-page").waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
+  if (!ready || (await page.getByTestId("bookings-read-failed").isVisible().catch(() => false))) return null;
+  const ids = await page
+    .locator('[data-direction="outgoing"][data-status="proposed"]')
+    .evaluateAll((els) => els.map((el) => (el.getAttribute("data-testid") ?? "").replace(/^booking-/, "")).filter(Boolean));
+  return new Set(ids);
+}
 
 test("A-1. the agency has its own organization (set up once, through the product)", async ({ browser }) => {
   const { page, close } = await as(browser, "agency");
@@ -155,6 +179,8 @@ test("A-2. the agency puts a person on its roster; the person accepts", async ({
 
     const worker = await as(browser, "worker");
     await worker.page.goto("/lt/dashboard");
+    // The invitation is in the context panel: a column on a desktop, a sheet to open on a phone.
+    await contextPanel(worker.page, "open");
     const accept = worker.page.locator('[data-testid^="worker-invitation-accept-company-"]').first();
     await expect(accept).toBeVisible({ timeout: 30_000 });
     await accept.click();
@@ -304,6 +330,9 @@ test("A-6. the client answers the offer", async ({ browser }) => {
   const { page, close } = await as(browser, "owner");
   await page.goto("/lt/dashboard");
   await workspace(page, ALFA);
+  // Which proposals were open before this run's accept: the one it adds is
+  // this run's own, the only one the teardown may withdraw.
+  const before = await openOutgoingProposalIds(page);
   await page.goto(`/lt/dashboard/company/scouting${requestId ? `?request=${requestId}` : ""}`);
   const offers = page.getByTestId("scouting-agency-offers");
   await expect(offers).toBeVisible({ timeout: 30_000 });
@@ -316,6 +345,9 @@ test("A-6. the client answers the offer", async ({ browser }) => {
     // The decision re-renders the list; the stored status is the proof.
     await page.reload();
     await expect(page.getByTestId("scouting-agency-offers").locator('[data-testid="scout-offer-status-accepted"]').first()).toBeVisible({ timeout: 30_000 });
+    const after = await openOutgoingProposalIds(page);
+    if (before && after) for (const id of after) if (!before.has(id)) createdProposals.push(id);
+    console.info(`[agency] proposals this run created: ${before && after ? createdProposals.length : "unknown (bookings not readable)"}`);
   } else {
     console.info("[agency] no open offer to answer (decided in an earlier run)");
   }
@@ -338,4 +370,34 @@ test("A-7. the agency sees the decision and talks to the client in one thread", 
   await expect(input).toHaveValue("", { timeout: 20_000 });
   await expect(page.locator("main")).toContainText(MSG, { timeout: 20_000 });
   await close();
+});
+
+test.afterAll(async ({ browser }) => {
+  test.setTimeout(120_000);
+  if (!ENABLED || createdProposals.length === 0) return;
+  const { page, close } = await as(browser, "owner");
+  try {
+    await page.goto("/lt/dashboard");
+    await workspace(page, ALFA);
+    for (const id of createdProposals) {
+      await page.goto("/lt/dashboard/bookings");
+      const row = page.getByTestId(`booking-${id}`);
+      // Answered or gone since: nothing of this run's left open.
+      if ((await row.getAttribute("data-status", { timeout: 30_000 }).catch(() => null)) !== "proposed") continue;
+      await row.getByTestId("booking-withdraw").click();
+      await row.getByTestId("booking-withdraw-confirm").click();
+      // The stored status is the proof: the page re-renders after the action.
+      await expect
+        .poll(async () => {
+          await page.reload();
+          return page.getByTestId(`booking-${id}`).getAttribute("data-status", { timeout: 30_000 }).catch(() => null);
+        }, { timeout: 60_000 })
+        .not.toBe("proposed");
+      console.info(`[cleanup] withdrew this run's booking proposal ${id.slice(0, 8)}`);
+    }
+  } catch (e) {
+    console.info(`[cleanup] proposal withdraw did not complete: ${String((e as Error)?.message ?? e).split("\n")[0]}`);
+  } finally {
+    await close();
+  }
 });

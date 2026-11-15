@@ -748,6 +748,41 @@ export async function markAllNotificationEventsRead(
 }
 
 /**
+ * Mark the caller's unread new-message rows of ONE thread read — opening the
+ * thread is reading what those bell rows point at (chat audit 2026-11-11,
+ * defect 7: the thread's own read marker moved, the bell stayed unread).
+ * Same authority as the two mark-read helpers around it: RLS and the
+ * column-level `update (read_at)` grant mean only the caller's own markers
+ * can change. A non-uuid id matches nothing and changes nothing.
+ */
+export async function markConversationNotificationsRead(
+  client: DbClient,
+  conversationId: string,
+  nowIso: string,
+): Promise<MarkReadOutcome> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(conversationId)) {
+    return { kind: "persisted" };
+  }
+  try {
+    const { error } = await client
+      .from("notification_events")
+      .update({ read_at: nowIso } as never)
+      .eq("event_type", "message_received")
+      .eq("metadata->>conversationId", conversationId)
+      .is("read_at", null);
+    if (error) {
+      if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
+        return { kind: "feature_unavailable" };
+      }
+      return { kind: "unexpected_error", code: error.code ?? "unknown" };
+    }
+    return { kind: "persisted" };
+  } catch {
+    return { kind: "unexpected_error", code: "thrown" };
+  }
+}
+
+/**
  * Mark ONE of the caller's events read — the per-row sibling of the
  * mark-all above (completion v1). Same authority: the applied store's
  * update policy (`notification_events_mark_read_own`) plus the
