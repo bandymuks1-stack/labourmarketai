@@ -64,6 +64,21 @@ const LT_INFORMAL = [
   LT_WORD("pamiršai|tęsi"),
 ];
 const NL_INFORMAL = [/(?<![\wÀ-ÿ'])(je|jij|jou|jouw|jouwe|jezelf|jullie)(?![\wÀ-ÿ'])/i];
+// Polish (owner 2026-11-15: one form per user group, the polite "Państwo" across the
+// public pages, sign-up, onboarding and the signed-in app): the "ty" pronoun and its
+// possessives, the 2nd-person singular forms of być / mieć / móc / chcieć, and the
+// 2nd-person singular past (-łeś / -łaś). Short button commands ("Zapisz") are the
+// standard UI imperative and are not listed.
+const PL_INFORMAL = [
+  /(?<![\p{L}])(ty|ciebie|tobie|cię|twój|twoja|twoje|twojego|twojej|twojemu|twoim|twoich|twoimi|twoją|jesteś|masz|możesz|chcesz)(?![\p{L}])/iu,
+  /(?<![\p{L}])\p{L}{2,}(łeś|łaś)(?![\p{L}])/iu,
+];
+/** Namespaces left as written: hash-pinned or legally fixed texts (consent registry,
+ *  legal pages) and the app-authorisation screen, which states what an app may do
+ *  "as you". They change only through their own owner-approved process. */
+const FIXED_NAMESPACES: Record<string, readonly string[]> = {
+  pl: ["consent", "privacyConsent", "legal", "oauthConsent"],
+};
 const RU_INFORMAL = [/(?<![а-яё])(ты|тебя|тебе|тобой|твой|твоя|твоё|твое|твои|твоего|твоей|твоих|твоим|твоими|твоему|твою)(?![а-яё])/i];
 
 /** The user's own words — listed by key, nothing else is exempt. */
@@ -78,6 +93,14 @@ const USER_VOICE: Record<string, readonly string[]> = {
   // Text the product writes for someone to SEND (a worker's note to a manager,
   // a reviewer's ready message) is product copy and is formal too.
   nl: [],
+  // The person's own label ("Ty" beside their own message, their marker on the map,
+  // themselves as assignee): a name for the reader, not an address to them.
+  pl: [
+    "pl.json::communication.byYou",
+    "pl.json::marketMap.markerYou",
+    "pl.json::tasks.assignee.you",
+    "pl.json::conversation.chat.speakerYou",
+  ],
   ru: [
     "ru.json::conversation.chat.userProfile",
     "ru.json::conversation.chat.userAgenda",
@@ -91,6 +114,7 @@ const CASES = [
   { locale: "lt", rules: LT_INFORMAL },
   { locale: "nl", rules: NL_INFORMAL },
   { locale: "ru", rules: RU_INFORMAL },
+  { locale: "pl", rules: PL_INFORMAL },
 ] as const;
 
 describe("one form of address — formal, in every catalog the web app loads (owner 2026-11-15)", () => {
@@ -100,6 +124,7 @@ describe("one form of address — formal, in every catalog the web app loads (ow
       const exempt = new Set(USER_VOICE[locale]);
       const informal = Object.entries(strings)
         .filter(([k]) => !exempt.has(k))
+        .filter(([k]) => !(FIXED_NAMESPACES[locale] ?? []).some((ns) => k.split("::")[1]?.startsWith(`${ns}.`)))
         .filter(([, v]) => rules.some((rule) => rule.test(v)))
         .map(([k, v]) => `${k}: ${v}`);
       expect(informal, informal.join("\n")).toEqual([]);
@@ -119,10 +144,16 @@ describe("one form of address — formal, in every catalog the web app loads (ow
     expect(LT_INFORMAL.some((r) => r.test("Tavo diena"))).toBe(true);
     expect(NL_INFORMAL.some((r) => r.test("Heb je hulp nodig?"))).toBe(true);
     expect(RU_INFORMAL.some((r) => r.test("Твой запрос подан."))).toBe(true);
+    expect(PL_INFORMAL.some((r) => r.test("Twój profil jest gotowy."))).toBe(true);
+    expect(PL_INFORMAL.some((r) => r.test("Możesz to zmienić w każdej chwili."))).toBe(true);
+    expect(PL_INFORMAL.some((r) => r.test("Co dziś robiłeś?"))).toBe(true);
     // …and leave the formal wording and third person alone.
     expect(LT_INFORMAL.some((r) => r.test("Pasirinkite kalbą ir lygį, tada išsaugokite."))).toBe(false);
     expect(LT_INFORMAL.some((r) => r.test("Administratorius gali prisijungti prie pokalbio."))).toBe(false);
     expect(NL_INFORMAL.some((r) => r.test("Heeft u hulp nodig?"))).toBe(false);
     expect(RU_INFORMAL.some((r) => r.test("Ваш запрос подан."))).toBe(false);
+    expect(PL_INFORMAL.some((r) => r.test("Mogą Państwo to zmienić w każdej chwili."))).toBe(false);
+    expect(PL_INFORMAL.some((r) => r.test("Ci członkowie zespołu pracowali wczoraj."))).toBe(false);
+    expect(PL_INFORMAL.some((r) => r.test("Zapisz"))).toBe(false);
   });
 });

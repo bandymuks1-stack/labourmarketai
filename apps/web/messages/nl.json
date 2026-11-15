@@ -5750,9 +5750,9 @@
     "titleAccent": "eerlijk vastgesteld.",
     "subcopyLive": "De prijzen gelden. Activering gebeurt in het organisatieaccount via een veilige Stripe-betaling; op deze pagina wordt niets afgeschreven.",
     "subcopy": "De prijzen zijn nog niet definitief en facturering wordt op deze pagina nooit voor u gestart. De niveaus hieronder beschrijven de omvang; activering gebeurt handmatig — neem contact op en we bevestigen prijs en omvang met u voordat er iets start.",
-    "subcopyConfirmed": "De prijzen zijn bevestigd. Online activering is nog niet geopend — zet u op de wachtlijst, dan nemen we contact op en starten we uw organisatie handmatig; op deze pagina wordt niets afgeschreven.",
+    "subcopyConfirmed": "De prijzen zijn bevestigd. Online activering is nog niet geopend — zet uzelf op de wachtlijst, dan nemen we contact op en starten we uw organisatie handmatig; op deze pagina wordt niets afgeschreven.",
     "trialNote": "Het eerste abonnement van een organisatie begint met een proefperiode van 14 dagen. Daarna wordt uw kaart belast met de maandprijs; u kunt opzeggen voordat de proefperiode eindigt.",
-    "planCta": "Zet u op de wachtlijst voor dit plan",
+    "planCta": "Zet uzelf op de wachtlijst voor dit plan",
     "featuresLabel": "Inbegrepen",
     "plans": {
       "free": {
