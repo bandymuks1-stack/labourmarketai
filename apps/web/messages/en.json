@@ -10710,7 +10710,6 @@
     "contactPerson": "Contact person",
     "contactPersonHelp": "Optional. Who to reach about this inquiry.",
     "contactEmail": "Contact email",
-    "contactEmailHelp": "Optional, but it helps us follow up faster about your inquiry.",
     "cityRegion": "City or region",
     "cityRegionHelp": "Optional. Where the work will be.",
     "expectedDuration": "Expected duration",

@@ -10710,7 +10710,6 @@
     "contactPerson": "Kontaktperson",
     "contactPersonHelp": "Valfritt. Vem vi ska kontakta om den här förfrågan.",
     "contactEmail": "Kontaktens e-post",
-    "contactEmailHelp": "Valfritt, men det hjälper oss att följa upp din förfrågan snabbare.",
     "cityRegion": "Stad eller region",
     "cityRegionHelp": "Valfritt. Var arbetet kommer att utföras.",
     "expectedDuration": "Förväntad varaktighet",

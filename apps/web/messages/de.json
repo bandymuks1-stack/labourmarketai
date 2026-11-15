@@ -10710,7 +10710,6 @@
     "contactPerson": "Ansprechpartner",
     "contactPersonHelp": "Optional. Wer zu dieser Anfrage erreichbar ist.",
     "contactEmail": "Kontakt-E-Mail",
-    "contactEmailHelp": "Optional, hilft uns aber, schneller zu Ihrer Anfrage nachzufassen.",
     "cityRegion": "Stadt oder Region",
     "cityRegionHelp": "Optional. Wo die Arbeit stattfinden wird.",
     "expectedDuration": "Voraussichtliche Dauer",

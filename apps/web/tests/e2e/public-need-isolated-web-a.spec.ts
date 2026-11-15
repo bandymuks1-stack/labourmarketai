@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { BASE, isolatedStack, lit, sql } from "./isolated-web-a-helpers";
+import { BASE, PASSWORD, isolatedStack, lit, onboard, signUp, sql } from "./isolated-web-a-helpers";
 
 /**
  * ANONYMOUS PUBLIC NEED INTAKE (function register 4.8), end to end on the
@@ -93,4 +93,81 @@ test("N-2. the anonymous path cannot read the intake table back (write-only by d
   } else {
     expect([401, 403, 404]).toContain(r.status);
   }
+});
+
+test("N-3. signing in from the form comes back to it, with what was typed", async ({ browser }) => {
+  // An existing, onboarded account, made through the real sign-up.
+  const account = `need.return.${RUN}@local.test`;
+  const setup = await browser.newContext();
+  const first = await setup.newPage();
+  await signUp(first, BASE, account);
+  await onboard(first, "hire", "Synthetic Need Return");
+  await first.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  await setup.close();
+
+  // Signed out, the person starts the need on the public form.
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/en/company-need?from=landing_entry`);
+  const form = page.getByTestId("company-need-form");
+  await expect(form.locator('input[name="started"]'), "hydration wrote the fill time").not.toHaveValue("", {
+    timeout: 60_000,
+  });
+  const text = `Two welders for a bridge job in Gothenburg (${RUN}).`;
+  await form.getByTestId("company-need-country").selectOption("SE");
+  await form.locator('input[name="number_of_workers"]').fill("2");
+  await form.locator('textarea[name="description"]').fill(text);
+
+  // Then signs in from the form's own link.
+  await page.getByTestId("need-bridge-login").click();
+  await page.waitForURL(/\/en\/auth\/login\?next=/, { timeout: 30_000 });
+  await page.locator('input[name="email"]').fill(account);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').first().click();
+
+  // Back on the form, not the dashboard, with the need as it was typed.
+  await page.waitForURL(/\/en\/company-need\?/, { timeout: 60_000 });
+  const back = page.getByTestId("company-need-form");
+  await expect(back.locator('textarea[name="description"]'), "the typed text survives sign-in").toHaveValue(text, {
+    timeout: 30_000,
+  });
+  await expect(back.getByTestId("company-need-country")).toHaveValue("SE");
+  await expect(back.locator('input[name="number_of_workers"]')).toHaveValue("2");
+  expect(new URL(page.url()).searchParams.get("from"), "the page that opened the form is still named").toBe(
+    "landing_entry",
+  );
+  // No name or address rode along in the URL.
+  expect(page.url()).not.toContain("local.test");
+  await ctx.close();
+});
+
+test("N-4. signing up from the form comes back to it after onboarding, with what was typed", async ({ browser }) => {
+  const account = `need.signup.${RUN}@local.test`;
+  const ctx = await browser.newContext(); // signed out
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/en/company-need`);
+  const form = page.getByTestId("company-need-form");
+  await expect(form.locator('input[name="started"]'), "hydration wrote the fill time").not.toHaveValue("", {
+    timeout: 60_000,
+  });
+  const text = `Five carpenters for a school roof (${RUN}).`;
+  await form.locator('textarea[name="description"]').fill(text);
+
+  // A new account from the form's own sign-up link.
+  await page.getByTestId("need-bridge-signup").click();
+  await page.waitForURL(/\/en\/auth\/signup\?next=/, { timeout: 30_000 });
+  await page.locator('input[type="email"]').fill(account);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await onboard(page, "hire", "Synthetic Need Signup");
+
+  // Onboarding done: back on the form with the need, not on a dashboard.
+  await page.waitForURL(/\/en\/company-need\?/, { timeout: 60_000 });
+  await expect(
+    page.getByTestId("company-need-form").locator('textarea[name="description"]'),
+    "the typed text survives sign-up and onboarding",
+  ).toHaveValue(text, { timeout: 30_000 });
+  await ctx.close();
 });
