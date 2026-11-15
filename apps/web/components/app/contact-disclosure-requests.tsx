@@ -54,6 +54,9 @@ export function ContactDisclosureRequests({
   locale: string;
   requests: readonly ContactRequestCard[];
   labels: {
+    /** Set only when the legal text is NOT in the reader's language (a routed
+     *  locale whose consent texts are not approved yet reads the English ones). */
+    legalLanguageNote?: string | null;
     empty: string;
     requestedFields: string;
     acceptNote: string;
@@ -227,14 +230,28 @@ export function ContactDisclosureRequests({
                 <p className="text-xs leading-relaxed text-text-secondary">
                   {labels.grantIntro}
                 </p>
-                <p className="text-xs leading-relaxed text-text-secondary">
+                {labels.legalLanguageNote ? (
+                  <p
+                    className="text-xs leading-relaxed text-text-secondary"
+                    data-testid="contact-disclosure-legal-language-note"
+                  >
+                    {labels.legalLanguageNote}
+                  </p>
+                ) : null}
+                <p
+                  className="text-xs leading-relaxed text-text-secondary"
+                  lang={labels.legalLanguageNote ? "en" : undefined}
+                >
                   {r.legal.summary}
                 </p>
                 <details className="group rounded-md border border-ink-600 bg-ink-800/40">
                   <summary className="cursor-pointer select-none px-3 py-2 text-xs font-medium text-text-primary marker:text-text-muted">
                     {labels.showDetails}
                   </summary>
-                  <div className="flex flex-col gap-2 px-3 pb-3 text-xs leading-relaxed text-text-secondary">
+                  <div
+                    className="flex flex-col gap-2 px-3 pb-3 text-xs leading-relaxed text-text-secondary"
+                    lang={labels.legalLanguageNote ? "en" : undefined}
+                  >
                     <p>{r.legal.visibleData}</p>
                     <p>{r.legal.invisibleData}</p>
                     <p>{r.legal.freedom}</p>

@@ -28,10 +28,12 @@ import {
 import { freshnessDemotionRank } from "@/lib/scouting/profile-freshness";
 import {
   candidateActionability,
+  isClosedNeedHistory,
   mayOfferEmployerActions,
 } from "@/lib/scouting/candidate-actionability";
 import { readStructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
 import {
+  withNeedCountryFacet,
   allowlistScoutFilters,
   applyScoutFilters,
   buildScoutFacets,
@@ -428,7 +430,7 @@ export async function runScoutingCore(
   // Facet allowlists come from the visible supply itself; the requested
   // filters are clamped to them (a probe value matching nothing is dropped)
   // and can only NARROW the already-bounded, can_view_worker-scoped list.
-  const facets = buildScoutFacets(supply);
+  const facets = withNeedCountryFacet(buildScoutFacets(supply), need.country);
   const filters = allowlistScoutFilters(requestedFilters, facets);
   const filteredSupply = applyScoutFilters(supply, filters);
 
@@ -457,7 +459,22 @@ export async function runScoutingCore(
     }))
     // `actionable_later` SURVIVES: real future supply, kept and labelled by
     // the surface, never silently presented as available now.
-    .filter(({ actionability }) => mayOfferEmployerActions(actionability))
+    //
+    // A CLOSED need has no actionable candidate, and used to list nobody,
+    // while the page says "below is who was compared and what was decided".
+    // Its HISTORY survives: the people this need has a recorded fact about
+    // (they raised a hand, or the employer recorded a decision on them, a
+    // "not a fit" included). Read-only: the surface offers no control on a
+    // closed need and every write refuses it. People who were only ever a
+    // match, with nothing recorded, are not history and are not listed.
+    .filter(
+      ({ c, actionability }) =>
+        mayOfferEmployerActions(actionability) ||
+        isClosedNeedHistory(actionability, {
+          interestStatus: interestByWorker[c.workerId] ?? null,
+          shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
+        }),
+    )
     .map(({ c, actionability }) =>
       toScoutSafeCandidate({
         workerId: c.workerId,

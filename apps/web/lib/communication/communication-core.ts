@@ -376,6 +376,11 @@ export async function sendMessageCore(
    *  Georgian). Must be a communication locale; anything else falls back to
    *  the UI-locale rule below. Never a guessed code. */
   originalLanguage?: string | null;
+  /** What to store when no language was declared. `ui_locale` (the web
+   *  composer, which shows the author the language it will stamp) keeps the
+   *  UI-locale rule below; `unknown` (an assistant door, whose locale is only
+   *  the request's UI hint) stores NULL. Default `ui_locale`. */
+  languageFallback?: "ui_locale" | "unknown";
   /** Already-uploaded attachment descriptors (blobs live in the private
    *  bucket under `<conversationId>/<uid>/…`). Registered via the
    *  SECURITY DEFINER RPC after the message insert. */
@@ -471,7 +476,8 @@ export async function sendMessageCore(
     typeof input.originalLanguage === "string" ? input.originalLanguage.trim().toLowerCase() : "";
   const originalLanguage = (communicationLocales as readonly string[]).includes(declared)
     ? declared
-    : (communicationLocales as readonly string[]).includes(input.locale)
+    : input.languageFallback !== "unknown" &&
+        (communicationLocales as readonly string[]).includes(input.locale)
       ? input.locale
       : null;
   const teamOfferId = typeof input.teamOfferId === "string" && TEAM_OFFER_UUID.test(input.teamOfferId) ? input.teamOfferId : null;

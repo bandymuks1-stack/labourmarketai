@@ -159,7 +159,7 @@ async function walkPublic(
 
 test("U-1 (8.10). the landing and the four marketing pages open in LT/EN/RU at 390 and 1280 px", async ({ browser }) => {
   await walkPublic(browser, "marketing", [
-    { path: "", landmark: "landing-hero-eyebrow" },
+    { path: "", landmark: "landing-how" },
     { path: "/for-workers" },
     { path: "/for-companies" },
     { path: "/for-agencies" },

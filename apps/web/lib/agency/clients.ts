@@ -14,11 +14,12 @@ import {
 /**
  * Agency client read service (canonical journey P5).
  *
- * Backed by the OWNER-GATED draft migration 20260713160000_agency_clients_v1
- * (NOT applied yet). Until the owner applies it, the client read reports
- * `needs-migration` and the demand read reports `linkable: false` — the UI
- * shows the honest "prepared, owner activation pending" state, exactly the
- * established migration-gated pattern (company locations / team brigades).
+ * Backed by migration 20260713160000_agency_clients_v1, applied to production
+ * on 2026-09-14 (docs/APPLIED_LEDGER.md). On a database that does not have it
+ * (a fresh local stack mid-replay) the client read still reports
+ * `needs-migration` and the demand read reports `linkable: false`, so the UI
+ * says so instead of failing — the established migration-gated pattern
+ * (company locations / team brigades).
  *
  * REUSE, not a parallel model: the demand list below reads the CANONICAL
  * public.customer_requests table (the same rows the scouting page and the

@@ -129,7 +129,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "[EN] Continue with LinkedIn",
-      "continueWithFacebook": "[EN] Continue with Facebook"
+      "continueWithFacebook": "[EN] Continue with Facebook",
+      "inAppBrowser": "Du er i en apps indbyggede browser, hvor login med Google ofte ikke virker. Åbn siden i telefonens browser (Safari eller Chrome), eller brug e-mail og adgangskode nedenfor."
     },
     "callback": {
       "error_body": "[EN] This link is invalid or expired. Please try again.",
@@ -204,7 +205,7 @@
         },
         "addMore": {
           "title": "[EN] Add another way to use labourmarket.ai",
-          "body": "[EN] You're not locked in. Add a worker, company, agency or customer role whenever you're ready.",
+          "body": "[EN] You're not locked into one role. Company, agency and customer spaces are not all available yet.",
           "cta": "[EN] Review roles"
         },
         "activity": {
@@ -243,9 +244,9 @@
         "employerVisibility": "Synlighed for arbejdsgivere"
       },
       "comingSoon": {
-        "body_main": "[EN] We're finishing the company / agency functionality right now.",
+        "body_main": "[EN] Company / agency functionality is not available yet.",
         "body_meanwhile": "[EN] In the meantime — you can browse the platform via the \"Discover\" tab (read-only).",
-        "body_notify": "[EN] We'll let you know the moment it's ready.",
+        "body_notify": "[EN] We'll let you know when it is available.",
         "greeting": "[EN] 👋 Welcome, {name}"
       },
       "customer": {
@@ -314,7 +315,9 @@
       "oauth": {
         "cancelled": "[EN] Sign-in was cancelled. Nothing happened to your account.",
         "link_expired": "Dette bekræftelseslink er udløbet eller allerede brugt. Har du allerede bekræftet din e-mail, så log blot ind. Ellers kan du bede om et nyt link nedenfor.",
-        "confirmed_sign_in": "Din e-mail er bekræftet. Registreringen blev startet på en anden enhed, så log ind her for at fortsætte."
+        "confirmed_sign_in": "Din e-mail er bekræftet. Registreringen blev startet på en anden enhed, så log ind her for at fortsætte.",
+        "confirm_link_opened": "Dette bekræftelseslink er åbnet. Din e-mail er højst sandsynligt allerede bekræftet, så prøv at logge ind. Virker det ikke, kan du bede om et nyt link nedenfor.",
+        "provider_error": "Logintjenesten kunne ikke gennemføre dette login, og et nyt forsøg ender sandsynligvis på samme måde. Log ind på den måde, du først tilmeldte dig med, eller med e-mail og adgangskode."
       },
       "emailNotConfirmed": "Din e-mail er endnu ikke bekræftet. Åbn bekræftelseslinket, vi sendte dig, eller bed om et nyt nedenfor."
     },
@@ -417,6 +420,7 @@
       "country_search_empty": "Intet land fundet. Prøv et andet navn.",
       "error_country_required": "Vælg venligst et land.",
       "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
+      "role_step_hint": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Hvad er dit fag eller din erhvervserfaring?",
       "profession_placeholder": "Skriv et fag eller arbejdsområde",
       "profession_add": "Tilføj",
@@ -732,7 +736,6 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Bygget sammen: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -890,7 +893,8 @@
     "themeToLight": "Lyst tema",
     "how": "Sådan fungerer det",
     "menuOpen": "Menu",
-    "menuClose": "Luk menu"
+    "menuClose": "Luk menu",
+    "market": "Arbejdsmarked"
   },
   "pages": {
     "agencies": {
@@ -1088,7 +1092,7 @@
         ]
       }
     },
-    "subcopyLive": "Priserne er bekræftet af ejeren og gælder. Aktivering sker i organisationskontoen via en sikker Stripe-betaling; intet trækkes på denne side.",
+    "subcopyLive": "Priserne gælder. Aktivering sker i organisationskontoen via en sikker Stripe-betaling; intet trækkes på denne side.",
     "subcopy": "Priserne er endnu ikke endelige, og fakturering startes aldrig for dig på denne side. Niveauerne nedenfor beskriver omfanget; aktivering sker manuelt — kontakt os, så bekræfter vi pris og omfang med dig, før noget starter.",
     "subcopyConfirmed": "Priserne er bekræftet. Onlineaktivering er endnu ikke åben — skriv dig på ventelisten, så kontakter vi dig og starter din organisation manuelt; der trækkes intet på denne side.",
     "trialNote": "En organisations første abonnement starter med en prøveperiode på 14 dage. Derefter trækkes månedsprisen på dit kort; du kan opsige, før prøveperioden slutter.",
@@ -1106,7 +1110,7 @@
     "ctaStartFree": "Start free in your organization account",
     "ctaSubscribe": "Aktivér i din organisationskonto",
     "priceState": {
-      "owner_confirmed": "Priser bekræftet af ejeren. Aktivering sker i din organisationskonto; der trækkes intet på denne side."
+      "owner_confirmed": "Priserne er bekræftet. Der trækkes intet på denne side."
     }
   },
   "secondary": {
@@ -1192,7 +1196,7 @@
     "loading": "[EN] Loading...",
     "noProfession": "[EN] Pick a profession to see the skills linked to it.",
     "pageTitle": "[EN] Profession & skills",
-    "pickerHelp": "[EN] Select skills you have. They will be confirmed later by a site manager.",
+    "pickerHelp": "[EN] Select skills you have. They will be reviewed later by a site manager.",
     "pickerTitle": "[EN] Your skills",
     "professionLabel": "[EN] Your profession",
     "professionPlaceholder": "[EN] Select a profession",
@@ -1230,7 +1234,7 @@
     "submit": "[EN] Notify me",
     "success_body": "[EN] We'll let you know as soon as it's ready.",
     "success_title": "[EN] Thanks!",
-    "title": "[EN] For companies & agencies — coming soon"
+    "title": "[EN] For companies & agencies"
   },
   "workers": {
     "cta": {
@@ -2066,7 +2070,7 @@
       "emptyTeam": "Dette projekt har endnu intet hold — start draften og få de første folk på banen.",
       "emptyTeamCta": "Start draften",
       "positionsTitle": "Manglende positioner",
-      "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
+      "positionsEmpty": "Positionsbehov er ikke tilgængelige endnu. Når de er, kan du her se, hvilke folk der mangler.",
       "openOps": "Åbn management-arenaen",
       "history": {
         "title": "Tidligere arbejde på dette projekt",
@@ -2163,7 +2167,7 @@
       "title": "Parathed pr. marked",
       "empty": "Ingen angivne lande i poolen endnu — paratheden kommer med de første.",
       "availableNow": "ledige nu",
-      "docsNote": "Dokumentparathed bliver hos arbejderen: aggregater på kategoriniveau vises her først med samtykke-kontakten (en ændring der kræver godkendelse, under forberedelse). Du ser aldrig dokumentindhold her."
+      "docsNote": "Dokumentparathed bliver hos arbejderen: aggregater på kategoriniveau vises her først med samtykke-kontakten. Du ser aldrig dokumentindhold her."
     },
     "demand": {
       "title": "Åben efterspørgsel",
@@ -2179,7 +2183,7 @@
         "not_agency": "Fuldfør først bureau-opsætningen.",
         "request_not_found": "Forespørgslen findes ikke længere.",
         "request_not_open": "Forespørgslen er ikke længere åben.",
-        "needs_gate": "Funktionen er under forberedelse (afventer godkendelse).",
+        "needs_gate": "Kunne ikke indlæses. Prøv igen.",
         "error": "Markeringen kunne ikke gemmes. Prøv igen."
       }
     },
@@ -2262,6 +2266,7 @@
         "accommodation": "Indkvartering",
         "transport": "Transport",
         "tool": "Nødvendigt værktøj",
+        "opportunityType": "Mulighedstype",
         "activeCount": "Aktive filtre: {count}",
         "reset": "Nulstil filtre"
       },
@@ -2560,6 +2565,9 @@
       "skillCount": "{matched} af {total} krævede færdigheder",
       "nameHidden": "Navn og kontaktoplysninger vises først, når personen tillader det.",
       "appliedToYou": "Har ansøgt om dette behov — navn og billede følger med ansøgningen. Telefon og e-mail forbliver skjult."
+    },
+    "filters": {
+      "noMatchesCountry": "Ingen i det synlige udbud er i {country} endnu. Vis alle, eller udvid behovet."
     }
   },
   "waze": {
@@ -2882,7 +2890,8 @@
     },
     "actions": {
       "planning": "Se i planlægning",
-      "proposeAgain": "Foreslå igen med nye datoer"
+      "proposeAgain": "Foreslå igen med nye datoer",
+      "needClosed": "Arbejdsgiveren har lukket dette behov, så forslaget kan ikke længere accepteres. Du kan stadig afvise det."
     },
     "propose": {
       "modeNote": "Dette er et bookingforslag med datoer — arbejdstageren bekræfter eller afviser det. Intet er booket, før arbejdstageren accepterer.",
@@ -4605,7 +4614,7 @@
       "title": "Ét chatvindue styrer dit arbejde",
       "subcopy": "I stedet for snesevis af formularer taler du bare. Assistenten udarbejder, du bekræfter — og hver handling efterlader en registrering, du kan vende tilbage til.",
       "liveLabel": "Virker i dag",
-      "comingLabel": "Under forberedelse",
+      "comingLabel": "Ikke tilgængelig endnu",
       "conceptLabel": "Konceptvisning — stiliseret illustration, ikke en rigtig samtale",
       "c1": "Opdatér CV og profil",
       "c2": "Registrér en arbejdsdag",
@@ -4842,6 +4851,42 @@
         "goods": "Varer"
       },
       "lasting": "Din erfaring og dine muligheder forbliver tilgængelige — når du skifter job, projekt eller land."
+    },
+    "v3": {
+      "lead": "For medarbejdere, arbejdsgivere og tjenesteudbydere i alle fag og sektorer. Registrering og grundlæggende opslag af et behov er gratis.",
+      "moreChoices": "Flere muligheder",
+      "or": "eller beskriv det med dine egne ord",
+      "needFree": "Du kan sende en forespørgsel uden at registrere dig. Det er gratis at sende den; vilkår og pris for ydelserne aftales særskilt.",
+      "market": {
+        "title": "Jobopslag på markedet",
+        "line": "{adverts} aktive jobopslag fra eksterne kilder. Opslagene nævner {employers} forskellige arbejdsgivernavne.",
+        "source": "Opslagene er indsamlet fra offentlige eksterne jobkilder. Tallet er ikke antallet af arbejdsgivere eller kunder, der er registreret hos LabourMarket.ai. Opslagene er senest opdateret: {date}.",
+        "none": "Markedsdata er ikke tilgængelige i øjeblikket.",
+        "search": "Søg i jobopslag"
+      },
+      "adverts": {
+        "title": "Nogle aktive opslag",
+        "sub": "Du kan se opslagene uden en konto. Log ind for at se arbejdsgiveren, stedet, den fulde beskrivelse og hvordan du søger."
+      },
+      "how": {
+        "title": "Sådan fungerer det",
+        "s1": {
+          "title": "Find og aftal",
+          "body": "Find arbejde, medarbejdere eller ydelser, og administrer tilbud og aftaler på platformen."
+        },
+        "s2": {
+          "title": "Registrer arbejdet",
+          "body": "Du kan registrere udført arbejde i arbejdsjournalen."
+        },
+        "s3": {
+          "title": "Bekræft",
+          "body": "En leder i arbejdsgiverens organisation bekræfter registreringerne. En kunde kan godkende arbejde, der er indsendt til kunden; det registreres særskilt. Bekræftet arbejde bliver dokumentation for din erfaring."
+        },
+        "s4": {
+          "title": "Deres data og privatliv",
+          "body": "Assistenten kommer med forslag; De træffer beslutningerne. De bestemmer, om arbejdsgivere kan finde Dem, og om Deres kontaktoplysninger deles. Arbejdsregistreringer kan ses af den organisation, De arbejder for."
+        }
+      }
     }
   },
   "workspace": {
@@ -5349,7 +5394,7 @@
     },
     "language": {
       "translatedFrom": "[EN] Translated from {language}",
-      "originalIn": "[EN] Advertisement language: {language}",
+      "originalIn": "Opslagets sprog: {language}",
       "showOriginal": "[EN] Show original",
       "hideOriginal": "[EN] Hide original",
       "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
@@ -7943,7 +7988,7 @@
   },
   "consent": {
     "banner": {
-      "text": "Vi måler sidebrug, og hvilken kampagne der bragte dig hertil, kun hvis du tillader det.",
+      "text": "Måledata, der er gemt i Deres browser, og kampagneoplysninger bruger vi kun med Deres samtykke.",
       "accept": "Tillad måling",
       "refuse": "Afvis",
       "more": "Mere om cookies",
@@ -7959,39 +8004,40 @@
     }
   },
   "siteNav": {
+    "education": "For uddannelsesinstitutioner",
     "signUp": "Opret konto",
-    "trigger": "Hovedvalg",
-    "account": "Efter login",
+    "trigger": "Hovedmål",
+    "account": "For brugere, der er logget ind",
     "intents": {
       "work": {
         "title": "Jeg søger arbejde",
-        "description": "Find job og vis, hvad du kan.",
+        "description": "Søg arbejde, og præsenter din erfaring.",
         "short": "Find arbejde"
       },
       "workers": {
         "title": "Jeg søger medarbejdere",
-        "description": "Beskriv, hvilket arbejde du har brug for.",
+        "description": "Angiv, hvilke medarbejdere du har brug for, hvor og hvornår.",
         "short": "Find medarbejdere"
       },
       "services": {
         "title": "Jeg tilbyder ydelser",
-        "description": "Offentliggør dit tilbud og besvar forespørgsler.",
+        "description": "Præsenter dine ydelser, find ordrer, og besvar forespørgsler.",
         "short": "Tilbyd ydelser"
-      },
-      "orders": {
-        "title": "Jeg søger opgaver og kontrakter",
-        "description": "Find arbejdsforespørgsler og hold tilbud samlet.",
-        "short": "Find opgaver"
       },
       "partners": {
         "title": "Jeg søger partnere",
-        "description": "Forbind dig med de mennesker og organisationer, du arbejder med.",
+        "description": "Find partnere, og vedligehold samarbejdet.",
         "short": "Find partnere"
       },
       "agencies": {
         "title": "For bureauer",
-        "description": "Styr bureauets folk, kunder og tilbud.",
+        "description": "Administrer bureauets kunder og kandidattilbud.",
         "short": "For bureauer"
+      },
+      "contractors": {
+        "short": "Jeg søger ydelser eller leverandører",
+        "title": "Jeg søger ydelser eller leverandører",
+        "description": "Beskriv, hvilken ydelse eller leverandør du har brug for."
       }
     },
     "links": {
@@ -8010,11 +8056,13 @@
       "network": "Dit netværk",
       "partnerWithUs": "Bliv partner",
       "forAgencies": "Sådan virker det for bureauer",
-      "setUpAgency": "Opret dit bureau"
+      "setUpAgency": "Registrer dit bureau",
+      "b2bEnquiry": "Forespørgsel om erhvervsydelser (B2B)",
+      "projectEnquiry": "Forespørgsel om individuelt projekt"
     },
     "assistant": "Spørg assistenten",
     "start": {
-      "searchLabel": "Søg job",
+      "searchLabel": "Søg i jobopslag",
       "searchPlaceholder": "Jobtitel eller søgeord",
       "searchSubmit": "Søg",
       "viewAll": "Alle job"
@@ -8023,13 +8071,64 @@
       "heading": "Hvad vil du gøre?",
       "swipe": "Stryg",
       "close": "Luk",
-      "functions": "Funktioner",
+      "functions": "Handlinger",
       "professions": "Fag",
-      "opensNow": "Åbner med det samme",
-      "signInWhenOpen": "Log ind ved åbning",
+      "opensNow": "Kræver ingen konto",
+      "signInWhenOpen": "Kræver login",
       "allSectors": "Alle brancher",
       "fullList": "Fuld liste"
     },
     "more": "Mere"
+  },
+  "commercial": {
+    "pageTitle": "Kommercielt",
+    "pageIntro": "Dine tilbud og kontrakter samlet ét sted. Fakturaer og betalinger registreres under Økonomi.",
+    "preApply": "Det kommercielle overblik bliver tilgængeligt, når den kommercielle opdatering er anvendt.",
+    "proposalsTitle": "Tilbud",
+    "honestNote": "Et tilbud går fra kladde → sendt → accepteret/afvist, kun når du selv ændrer det. Intet sendes automatisk til nogen.",
+    "proposalsEmpty": "Ingen tilbud endnu.",
+    "addProposal": "Tilføj et tilbud",
+    "proposalTitlePlaceholder": "Tilbuddets titel",
+    "contractsTitle": "Kontrakter",
+    "noSignatureNote": "Kontrakter gemmer en status og en valgfri dokumentreference. Der oprettes eller påstås ingen elektronisk signatur.",
+    "contractsEmpty": "Ingen kontrakter endnu.",
+    "addContract": "Tilføj en kontrakt",
+    "contractFromProposal": "Opret kontrakt",
+    "fromProposal": "Fra tilbud: {title}",
+    "contractTitlePlaceholder": "Kontraktens titel",
+    "docRef": "Dok.-ref.",
+    "docRefLabel": "Dokumentreference",
+    "docRefPlaceholder": "Reference til underskrevet dokument (valgfri)",
+    "invoicesTitle": "Fakturaer og betalinger",
+    "invoicesNote": "Fakturaer og betalingsposter findes under Økonomi — registreret manuelt i EUR. Platformen flytter ingen penge.",
+    "openFinance": "Åbn Økonomi",
+    "statusLabel": "Status",
+    "titleLabel": "Titel",
+    "amountLabel": "Beløb (EUR)",
+    "valueLabel": "Værdi (EUR)",
+    "add": "Tilføj",
+    "saving": "Gemmer…",
+    "delete": "Fjern",
+    "proposalStatus": {
+      "draft": "Kladde",
+      "sent": "Sendt",
+      "accepted": "Accepteret",
+      "rejected": "Afvist",
+      "withdrawn": "Trukket tilbage"
+    },
+    "contractStatus": {
+      "draft": "Kladde",
+      "active": "Aktiv",
+      "completed": "Afsluttet",
+      "cancelled": "Annulleret"
+    },
+    "outcome": {
+      "saved": "Gemt.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
+      "invalid": "Kontrollér oplysningerne.",
+      "auth": "Log ind igen.",
+      "not_authorized": "Du kan kun administrere dine egne poster.",
+      "error": "Noget gik galt. Prøv igen."
+    }
   }
 }

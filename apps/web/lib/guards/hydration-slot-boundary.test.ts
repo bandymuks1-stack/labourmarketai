@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * React #418 (2026-10-09): server-authored slots (`children`, `rexora`, the
+ * React #418 (2026-10-09): server-authored slots (`children`, the
  * full-mode header/bottom nav) reach DashboardChrome from the RSC payload and
  * can still be LAZY when hydration reaches `<main>`. Directly under a host
  * element, that suspension replays the host claim with an already-advanced
