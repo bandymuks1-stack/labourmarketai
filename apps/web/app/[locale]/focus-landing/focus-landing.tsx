@@ -57,12 +57,13 @@ export async function FocusLanding({
   const activeLocale = resolveActiveLocale(locale);
   // The ONE canonical market snapshot, through its 300 s `unstable_cache`
   // entry — one market truth, one freshness window (owner command §9/§12).
-  const [market, t, tV3] = await Promise.all([
+  const [market, t, tV3, tDoors] = await Promise.all([
     // The landing renders the supply counts only; it reads `professions`
     // nowhere, so it does not pay for the per-profession reads.
     readLiveMarketLandingSnapshot({ resolveProfessions: false }),
     getTranslations("common"),
     getTranslations("landing.v3"),
+    getTranslations("landing.requestDoors"),
   ]);
 
   // Exact counts or nothing: a count the canonical reader could not return is
@@ -117,7 +118,7 @@ export async function FocusLanding({
                   {/* No example chips and no market counts here: the goals
                       above are the choice, and the counts are printed once,
                       in the market block. */}
-                  <PublicEntry examples="none" supply={null} />
+                  <PublicEntry examples="none" supply={null} requestLabel={tDoors("title")} />
                 </div>
                 <LandingNeedPath locale={locale} />
               </div>
