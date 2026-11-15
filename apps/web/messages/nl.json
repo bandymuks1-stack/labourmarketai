@@ -272,7 +272,7 @@
     "legalCheckFood": "Voor de verkoop van voedsel of zelfgekweekte producten gelden regels voor voedselverkoop en hygiëne. Bevestig vóór publicatie dat je de regels hebt gecontroleerd die voor jou gelden.",
     "legalCheckAck": "Ik heb de regels gecontroleerd die voor mij gelden",
     "serviceNeedHint": "Een gezochte dienst is altijd een advertentie van het type Gezocht.",
-    "moreTypesSoon": "Binnenkort komen hier meer advertentietypes beschikbaar.",
+    "moreTypesSoon": "Voorlopig zijn hier alleen deze advertentietypes beschikbaar.",
     "pause": "Pauzeren",
     "expired": "Verlopen",
     "expiresOn": "Tot {date}",
@@ -912,7 +912,7 @@
     },
     "exports": {
       "title": "Exports",
-      "note": "Alleen de exports die al werken staan hier — niets hiervan is een voorproefje.",
+      "note": "Alleen de exports die al werken staan hier.",
       "evidence": "Bewijsrapport (afdrukken / PDF)",
       "cv": "CV (afdrukken / PDF)",
       "journalCsv": "Journaalexport (CSV)",
@@ -1179,7 +1179,7 @@
     "switchSpace": "Van ruimte wisselen",
     "addSpace": "Ruimte toevoegen",
     "availableSpaces": "Beschikbare ruimtes",
-    "comingLaterToggle": "Onderdelen die later komen (tonen)",
+    "comingLaterToggle": "Nog niet beschikbare onderdelen (tonen)",
     "profile": {
       "name": "Persoonlijk profiel",
       "purpose": "Beheer je avatar, CV, vaardigheden en werkstatus."
@@ -1663,7 +1663,7 @@
         "label": "Werkregistraties",
         "available": "Journaalvermeldingen: {n}",
         "none": "Nog niet gekoppeld",
-        "preparing": "De koppeling met werkregistraties wordt voorbereid"
+        "preparing": "De koppeling met werkregistraties is nog niet beschikbaar"
       },
       "availability": {
         "label": "Beschikbaarheid",
@@ -1810,7 +1810,7 @@
     "reviewCta": "Vermeldingen beoordelen",
     "projectsTitle": "Projecten, objecten en klanten",
     "projectsReadyBadge": "Structuur gereed",
-    "projectsBody": "Hier ziet u projecten, klanten, projectwerknemers en werkitems. Niets wordt automatisch ingevuld — nieuwe projecten en klanten aanmaken kan nog niet; die mogelijkheid wordt voorbereid.",
+    "projectsBody": "Hier ziet u projecten, klanten, projectwerknemers en werkitems. Niets wordt automatisch ingevuld — nieuwe projecten en klanten aanmaken kan nog niet.",
     "projectsCount": "Projecten",
     "projectsEmpty": "nog geen projecten aangemaakt",
     "projectsLinkingNote": "Werkjournaalregels worden door de mensen die ze vastleggen aan een project gekoppeld. Een nieuwe projectcontext begint leeg — er wordt niets automatisch ingevuld.",
@@ -2337,7 +2337,7 @@
         "title": "Er is iets misgegaan",
         "subtitle": "Momenteel niet beschikbaar.",
         "statusLabel": "Er is iets misgegaan",
-        "statusBody": "Beheer van bedrijfswerknemers wordt nog voorbereid en wordt later ingeschakeld.",
+        "statusBody": "Beheer van bedrijfswerknemers is nog niet beschikbaar.",
         "nextStep": "Zelfaanmelding voor werknemers blijft altijd open."
       },
       "workers": {
@@ -3654,7 +3654,7 @@
     "opportunities": "Kansen: zie werk dat bij je past. Zichtbaarheid hangt af van de netwerkgrootte en je gereedheid.",
     "marketplaceMap": "Marktkaart: arbeidsmarktsignalen per land en regio. Een nauwkeuriger punt verschijnt zodra een locatie is ingesteld.",
     "adminReview": "Systeemonderhoud: alleen voor de beheerder. Gewone gebruikers zien deze schermen nooit.",
-    "paymentReadiness": "Betalingen worden voorbereid: betaalde toegang is nog niet actief.",
+    "paymentReadiness": "Betaalde toegang is nog niet actief.",
     "identityModel": "Twee basisidentiteiten: een persoon en een bedrijf. Kopen, verkopen, aannemen en uitzendactiviteit zijn handelingen, geen aparte identiteiten."
   },
   "profileIdentityNotice": {
@@ -3773,7 +3773,7 @@
     "addLaterHint": "Je kunt later meer rollen toevoegen — ze verschijnen in de catalogus zodra ze klaar zijn.",
     "status": {
       "active": "Actief",
-      "preparing": "In voorbereiding",
+      "preparing": "Nog niet beschikbaar",
       "start": "Starten",
       "partial": "Gedeeltelijk"
     },
@@ -3781,9 +3781,9 @@
       "openSetup": "Setup openen"
     },
     "preparingReason": {
-      "default": "Deze rol wordt nog voorbereid. We schakelen hem in zodra hij eerlijk kan worden geleverd.",
+      "default": "Deze rol is nog niet beschikbaar.",
       "startAvailable": "Het setup-pad werkt al: één veld, de juridische naam, en je account wordt aangemaakt. De volledige werkruimte wordt nog ingevuld.",
-      "customerPartial": "De kopersruimte wordt nog voorbereid. Je kunt de kopersrol toevoegen en een aanvraag invullen."
+      "customerPartial": "De volledige kopersruimte is nog niet beschikbaar. Je kunt de kopersrol toevoegen en een aanvraag invullen."
     },
     "worker": {
       "description": "Werken als persoon: tekst-eerst profiel, vaardigheden en werkjournaal. Vandaag actief."
@@ -3798,13 +3798,13 @@
       "description": "Een handeling — dien aanvragen in voor diensten, specialisten of ploegen en beheer ze. Wordt later ingeschakeld."
     },
     "freelancer": {
-      "description": "Freelancer: diensten en werkgeschiedenis in één profiel. In voorbereiding."
+      "description": "Freelancer: diensten en werkgeschiedenis in één profiel. Nog niet beschikbaar."
     },
     "team_lead": {
-      "description": "Ploegleider: ploegsamenstelling en gezamenlijke aanbiedingen. In voorbereiding."
+      "description": "Ploegleider: ploegsamenstelling en gezamenlijke aanbiedingen. Nog niet beschikbaar."
     },
     "service_provider": {
-      "description": "Dienstverlener: publieke dienstencatalogus met bevestigd bewijs. In voorbereiding."
+      "description": "Dienstverlener: publieke dienstencatalogus met bevestigd bewijs. Nog niet beschikbaar."
     }
   },
   "activityTypes": {
@@ -3826,10 +3826,10 @@
     "eyebrow": "Arbeidsmarkt-OS",
     "headline": "Laat zien wat je kunt en doet. Vind meer kansen om het te realiseren.",
     "lede": "Eén persoon. Veel rollen door de tijd heen. Een cv dat ontstaat uit echt werk en echte registraties, niet uit zelfgeschreven claims. De eerste keuze is een startpunt, geen kooi.",
-    "honesty": "Let op: hieronder staat de volledige systeemkaart. Sommige onderdelen zijn vandaag live; de rest is openlijk gelabeld als \"In voorbereiding\". We zeggen nooit dat iets werkt als dat niet zo is.",
+    "honesty": "Let op: hieronder staat de volledige systeemkaart. Sommige onderdelen zijn vandaag live; de rest is openlijk gelabeld als \"Nog niet beschikbaar\". We zeggen nooit dat iets werkt als dat niet zo is.",
     "sections": {
       "today": "Vandaag live",
-      "preparing": "In voorbereiding",
+      "preparing": "Nog niet beschikbaar",
       "workflow": "Hoe iemands pad door het systeem beweegt",
       "roles": "Rolevolutie (zonder lock-in)",
       "activities": "Activiteitenlandschap",
@@ -3846,10 +3846,10 @@
     },
     "controlRoom": {
       "todayLabel": "Vandaag actief",
-      "preparingLabel": "In voorbereiding",
+      "preparingLabel": "Nog niet beschikbaar",
       "blockedLabel": "Geblokkeerd",
       "nonWorkerLabel": "Ruimtes voor bedrijven / uitzendbureaus / klanten",
-      "nonWorkerStatus": "In voorbereiding",
+      "nonWorkerStatus": "Nog niet beschikbaar",
       "nonWorkerStatusActive": "Werkt",
       "fakeClaimsLabel": "Nep-AI / nepmatching / nepreputatie",
       "fakeClaimsStatus": "Nooit gebruikt"
@@ -3860,7 +3860,7 @@
       "agent": "AI- / agent-orkestrator (alleen wanneer dit veilig uitgebracht kan worden)",
       "trust": "Reputatie- / vertrouwenslaag"
     },
-    "footer": "Dat de visiekaart hier gepubliceerd is, betekent niet dat elk onderdeel live is. Wat vandaag bruikbaar is, is gemarkeerd als \"Vandaag live\". Al het andere is \"In voorbereiding\" of een toekomstige laag.",
+    "footer": "Dat de visiekaart hier gepubliceerd is, betekent niet dat elk onderdeel live is. Wat vandaag bruikbaar is, is gemarkeerd als \"Vandaag live\". Al het andere is \"Nog niet beschikbaar\" of een toekomstige laag.",
     "internalPreviewBadge": "Interne preview",
     "internalPreviewBanner": "Deze pagina is nog niet openbaar gepubliceerd. Het is een interne preview voor de eigenaar en uitgenodigde deelnemers. Deel de URL niet openbaar totdat de productie-smoketest van de eigenaar de status PASSED heeft."
   },
@@ -3875,8 +3875,8 @@
   "dashboard": {
     "comingLater": {
       "eyebrow": "Later",
-      "title": "Modules die later komen",
-      "body": "Deze onderdelen worden voorbereid en worden in aparte fases ingeschakeld. Het zijn nog geen actieve acties."
+      "title": "Nog niet beschikbare modules",
+      "body": "Deze onderdelen zijn nog niet beschikbaar. Het zijn geen actieve acties."
     },
     "featuresHeading": {
       "eyebrow": "Wat er is en wat er komt",
@@ -3887,7 +3887,7 @@
   },
   "features": {
     "preparing_generic_reason": "Deze optie wordt later ingeschakeld.",
-    "preparing_badge": "In voorbereiding",
+    "preparing_badge": "Nog niet beschikbaar",
     "overview": {
       "label": "Overzicht",
       "description": "Je startweergave opent voor elke rol die je hebt.",
@@ -4551,7 +4551,7 @@
         },
         "addMore": {
           "title": "Voeg nog een manier toe om labourmarket.ai te gebruiken",
-          "body": "Je zit niet vast aan één rol. Bedrijfs-, uitzendbureau- en klantruimtes worden nog voorbereid — we voegen ze stap voor stap toe.",
+          "body": "Je zit niet vast aan één rol. Bedrijfs-, uitzendbureau- en klantruimtes zijn nog niet volledig beschikbaar.",
           "cta": "Rollen bekijken"
         },
         "activitySetup": {
@@ -4954,7 +4954,7 @@
             "active": "Actief",
             "notActive": "Nog niet actief",
             "benefit": "Bescherm je profiel, werkgeschiedenis, documenten en berichten met een tweede controle die alleen jij kunt doorstaan.",
-            "setupComing": "Het instellen verschijnt hier binnenkort — het duurt ongeveer 30 seconden en je kunt het op elk moment uitzetten."
+            "setupComing": "Inloggen in twee stappen kan hier nog niet worden ingesteld."
           },
           "recovery": {
             "label": "Accountherstel",
@@ -4985,8 +4985,8 @@
       },
       "comingSoon": {
         "greeting": "👋 Welkom, {name}",
-        "body_main": "We leggen op dit moment de laatste hand aan de functionaliteit voor bedrijven / uitzendbureaus.",
-        "body_notify": "We laten het je weten zodra het klaar is.",
+        "body_main": "De functionaliteit voor bedrijven / bureaus is nog niet beschikbaar.",
+        "body_notify": "We laten het je weten zodra die beschikbaar is.",
         "body_meanwhile": "In de tussentijd kun je het platform bekijken via het tabblad \"Ontdekken\" (alleen bekijken)."
       },
       "menuLinks": {
@@ -5749,7 +5749,7 @@
     "eyebrow": "Prijzen",
     "title": "Eenvoudige niveaus,",
     "titleAccent": "eerlijk vastgesteld.",
-    "subcopyLive": "De prijzen zijn door de eigenaar bevestigd en gelden. Activering gebeurt in het organisatieaccount via een veilige Stripe-betaling; op deze pagina wordt niets afgeschreven.",
+    "subcopyLive": "De prijzen gelden. Activering gebeurt in het organisatieaccount via een veilige Stripe-betaling; op deze pagina wordt niets afgeschreven.",
     "subcopy": "De prijzen zijn nog niet definitief en facturering wordt op deze pagina nooit voor je gestart. De niveaus hieronder beschrijven de omvang; activering gebeurt handmatig — neem contact op en we bevestigen prijs en omvang met je voordat er iets start.",
     "subcopyConfirmed": "De prijzen zijn bevestigd. Online activering is nog niet geopend — zet je op de wachtlijst, dan nemen we contact op en starten we je organisatie handmatig; op deze pagina wordt niets afgeschreven.",
     "trialNote": "Het eerste abonnement van een organisatie begint met een proefperiode van 14 dagen. Daarna wordt je kaart belast met de maandprijs; je kunt opzeggen voordat de proefperiode eindigt.",
@@ -5817,8 +5817,9 @@
       }
     ],
     "priceState": {
-      "draft_pricing": "De prijzen worden voorbereid — er kan nog niets worden gekocht.",
-      "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in je organisatieaccount; op deze pagina wordt niets afgeschreven."
+      "draft_pricing": "De prijzen zijn niet definitief — er kan nog niets worden gekocht.",
+      "owner_confirmed": "De prijzen zijn bevestigd. Op deze pagina wordt niets afgeschreven.",
+      "owner_confirmed_closed": "De prijzen zijn bevestigd. Online betalen is nog niet geopend; op deze pagina wordt niets afgeschreven."
     },
     "individual": {
       "name": "Bijzondere wensen",
@@ -5830,7 +5831,8 @@
     "priceFree": "€ 0",
     "pricePerMonth": "€{price}/maand",
     "ctaStartFree": "Gratis starten in uw organisatieaccount",
-    "ctaSubscribe": "Activeren in uw organisatieaccount"
+    "ctaSubscribe": "Activeren in uw organisatieaccount",
+    "faqBillingClosed": "Online betalen is nog niet open voor het publiek, dus hier kan niets worden gekocht. Registratie en één actieve positie zijn gratis. Voor betaald werk helpen we eerste klanten rechtstreeks en bevestigen we de prijs met je voordat er iets begint."
   },
   "privacySelfService": {
     "title": "Privacy en je gegevens",
@@ -6856,7 +6858,7 @@
         "title": "Communicatie",
         "context": "Dit gesprek gaat over dit project.",
         "cta": "Bericht over dit project",
-        "notReadyNote": "Een aparte projectthread wordt voorbereid. Start het gesprek voorlopig in je algemene inbox — de projectcontext staat hierboven."
+        "notReadyNote": "Een aparte projectthread is nog niet beschikbaar. Start het gesprek voorlopig in je algemene inbox — de projectcontext staat hierboven."
       },
       "fieldCount": "{n, plural, one {# persoon op het veld} other {# personen op het veld}}",
       "fieldViaTeam": "{n} via ploeg",
@@ -6871,7 +6873,7 @@
       "emptyTeam": "Dit project heeft nog geen team — start de draft en breng de eerste mensen het veld op.",
       "emptyTeamCta": "Start de draft",
       "positionsTitle": "Ontbrekende posities",
-      "positionsEmpty": "Positiebehoeften zijn er nog niet — zodra ze er zijn, zie je hier welke mensen ontbreken.",
+      "positionsEmpty": "Positiebehoeften zijn nog niet beschikbaar. Zodra ze dat zijn, zie je hier welke mensen ontbreken.",
       "openOps": "Open projectbeheer",
       "gallery": {
         "title": "Werkgalerij",
@@ -7435,7 +7437,7 @@
     "tooManyOpen": "Je hebt te veel openstaande hulpverzoeken — wacht tot de bestaande verzoeken zijn beoordeeld.",
     "noteTooLong": "De beschrijving is te lang (max. 500 tekens).",
     "internalNote": "Interne registratie — er worden geen e-mails of berichten naar wie dan ook verzonden.",
-    "explanationPending": "De uitleg wordt voorbereid op basis van de Litouwse masterversie."
+    "explanationPending": "De uitleg is nog niet beschikbaar in deze taal."
   },
   "crmPipeline": {
     "eyebrow": "Operatorwachtrij",
@@ -8364,7 +8366,7 @@
       "evidenceNote": "Openen en printen / opslaan als PDF",
       "journal": "Werkjournaal-export",
       "journalNote": "Downloaden als CSV (opent in Excel)",
-      "formatStatus": "PDF: beschikbaar · CSV: beschikbaar · Excel / Word: in voorbereiding"
+      "formatStatus": "PDF: beschikbaar · CSV: beschikbaar · Excel / Word: nog niet beschikbaar"
     },
     "disclaimer": "Statussen zijn gebaseerd op openbaar vermelde vereisten en je eigen invoer. De uiteindelijke conformiteit wordt gecontroleerd door de autoriteiten of een advocaat — dit is geen juridische garantie.",
     "needsMigration": "Momenteel niet beschikbaar.",
@@ -9138,7 +9140,7 @@
       "title": "Gereedheid per markt",
       "empty": "Nog geen opgegeven landen in de pool — gereedheid verschijnt bij de eerste.",
       "availableNow": "nu beschikbaar",
-      "docsNote": "Documentgereedheid blijft bij de werknemer: aggregaten per categorie verschijnen hier alleen met de toestemmingsschakelaar van de werknemer (een wijziging met eigenaarsgoedkeuring, in voorbereiding). Je ziet hier nooit documentinhoud."
+      "docsNote": "Documentgereedheid blijft bij de werknemer: aggregaten per categorie verschijnen hier alleen met de toestemmingsschakelaar van de werknemer. Je ziet hier nooit documentinhoud."
     },
     "demand": {
       "title": "Open vraag",
@@ -9191,7 +9193,7 @@
     },
     "title": "Scouting",
     "intro": "Kies een van je gestructureerde personeelsbehoeften om passende werknemers te zien, waarom ze passen, en ze te shortlisten.",
-    "visibilityNote": "Zichtbaarheid is gebaseerd op gereedheid, vertrouwen en permissies — niet op betaling. Betaalde bredere toegang is nog niet actief (betalingen worden voorbereid). Alleen veilige, geanonimiseerde previews worden getoond — geen neplistings.",
+    "visibilityNote": "Zichtbaarheid is gebaseerd op gereedheid, vertrouwen en permissies — niet op betaling. Betaalde bredere toegang is nog niet actief. Alleen veilige, geanonimiseerde previews worden getoond — geen neplistings.",
     "pickDemand": "Kies een personeelsbehoefte",
     "noDemands": "Je hebt nog geen personeelsbehoeften. Maak een personeelsbehoefte aan vanaf je dashboard — na beoordeling structureert het team de vereiste vaardigheden.",
     "noDemandsCta": "Personeelsbehoefte aanmaken",
@@ -9325,7 +9327,7 @@
       "unavailable": "Kon de actie niet voltooien. Probeer het opnieuw.",
       "error": "Er is iets misgegaan.",
       "cancel": "Annuleren",
-      "notEntitled": "Je plan omvat geen boekingen — start een test-checkout of vraag pilottoegang aan."
+      "notEntitled": "Boekingen zitten niet in je plan. Je plan vind je in de accountinstellingen."
     },
     "recognizedNote": "De vereiste vaardigheden hieronder zijn door het offline systeem herkend uit de tekst van je behoefte — ze zijn een gelabelde suggestie, geen bevestigde structuur. Bekijk de matches; een beheerder bevestigt of corrigeert de definitieve vereisten.",
     "nextAction": {
@@ -9511,17 +9513,17 @@
       "contact": "Individueel geregeld"
     },
     "readiness": {
-      "draft_pricing": "Plannen zijn voorbereid, niet koopbaar. Geen enkele prijs hier is definitief en er kan niets worden gekocht.",
-      "owner_confirmed": "De plannen zijn alleen voorbereid — er kan niets worden gekocht totdat betalingen zijn ingeschakeld."
+      "draft_pricing": "Geen enkele prijs hier is definitief en er kan nog niets worden gekocht.",
+      "owner_confirmed": "Er kan niets worden gekocht totdat betalingen zijn ingeschakeld."
     },
     "featuresLabel": "Inbegrepen in dit plan",
     "limitValue": "tot {count}",
     "freeToday": {
       "freeTitle": "Vandaag gratis",
       "free": "Alles wat je op dit moment in het product kunt gebruiken is gratis — de pilot draait zonder betalingen en niets vraagt om een kaart.",
-      "paidTitle": "Voorbereide betaalde plannen",
+      "paidTitle": "Betaalde plannen",
       "paid": "Momenteel niet beschikbaar.",
-      "preparedTitle": "Voorbereid, niet koopbaar",
+      "preparedTitle": "Nog niet koopbaar",
       "prepared": "Er is geen betaalpagina en er kan niets worden gekocht. Pilottoegang tot de omvang van betaalde plannen wordt handmatig door het team verleend."
     },
     "features": {
@@ -9549,7 +9551,7 @@
     "enforcement": {
       "free_surface": "Vandaag in het product",
       "server_gate": "Vandaag beschikbaar, afhankelijk van je rechten",
-      "declared_boundary_only": "Voorbereid — start pas met facturering",
+      "declared_boundary_only": "Start pas met facturering",
       "admin_rbac": "Intern, alleen admin"
     }
   },
@@ -10015,15 +10017,15 @@
   "billingStatus": {
     "badge": {
       "disabled": "BETALINGEN UIT",
-      "stripe_test": "TESTMODUS",
+      "stripe_test": "GEEN ECHTE AFSCHRIJVINGEN",
       "stripe_live_blocked": "LIVE GEBLOKKEERD"
     },
     "body": {
       "disabled": "Betalingen zijn niet ingeschakeld. De plannen hieronder beschrijven de omvang; vraag pilottoegang aan om te starten.",
-      "stripe_test": "De Stripe-testmodus staat aan voor interne tests — geen echt geld, geen echte afschrijving.",
+      "stripe_test": "Er wordt geen echt geld afgeschreven.",
       "stripe_live_blocked": "Er is een live sleutel/modus gedetecteerd en hard geblokkeerd door de beveiliging. Live wordt hier nooit ingeschakeld."
     },
-    "futureLive": "Live betalingen zijn voorbereid maar inactief — geen live checkout totdat de eigenaar akkoord geeft."
+    "futureLive": "Online betalen is nog niet beschikbaar."
   },
   "workAbroad": {
     "eyebrow": "Werken in het buitenland",
@@ -10254,7 +10256,7 @@
       "missing": "ontbreekt"
     },
     "ctaProfile": "Maak je profiel compleet",
-    "needsAccessTitle": "Kansen worden voorbereid",
+    "needsAccessTitle": "Aanvragen van werkgevers worden hier nog niet getoond",
     "needsAccessBody": "Personeelsaanvragen van werkgevers verschijnen hier zodra zichtbaarheid voor werknemers is ingeschakeld. Maak intussen je profiel compleet, zodat je klaar bent zodra passende aanvragen verschijnen.",
     "emptyTitle": "Op dit moment geen open aanvragen",
     "emptyBody": "Wanneer werkgevers nieuwe aanvragen plaatsen, verschijnen ze hier. Intussen is het de moeite waard om je profiel compleet te maken.",
@@ -11378,15 +11380,15 @@
   },
   "accountBilling": {
     "title": "Facturering & abonnement",
-    "testBadge": "Testmodus",
+    "testBadge": "Geen echte afschrijvingen",
     "returned": {
-      "success": "Test-checkout afgerond. Er is geen echt geld bewogen; de abonnementsstatus hieronder synchroniseert via de handtekening-geverifieerde webhook van de betaalprovider en kan even op zich laten wachten.",
+      "success": "Checkout afgerond. Er is geen echt geld bewogen; de abonnementsstatus hieronder synchroniseert via de handtekening-geverifieerde webhook van de betaalprovider en kan even op zich laten wachten.",
       "cancelled": "De checkout is geannuleerd. Er is niets afgeschreven en er is niets veranderd aan je account.",
       "portal": "Je bent terug uit het factureringsportaal. Wijzigingen die je daar maakte, synchroniseren hier automatisch.",
       "successLive": "Checkout afgerond. De abonnementsstatus hieronder synchroniseert vanuit de door handtekening geverifieerde bevestiging van de betaalprovider en kan even duren.",
       "syncing": "Synchroniseren met de betaalprovider — je abonnement verschijnt hier zo meteen. Opnieuw bestellen is niet nodig."
     },
-    "disabled": "Betalingen zijn niet ingeschakeld. Betaalde abonnementen zijn voorbereide concepten — hier is niets te koop en er is geen betaalmethode nodig.",
+    "disabled": "Betalingen zijn niet ingeschakeld. Hier is niets te koop en er is geen betaalmethode nodig.",
     "none": "Geen abonnement op dit account.",
     "planLabel": "Abonnement",
     "statusLabel": "Huidige status",
@@ -11407,7 +11409,7 @@
       "open": "Abonnement beheren",
       "opening": "Openen…",
       "error": "Het factureringsportaal kon niet worden geopend",
-      "hint": "Opent het portaal van de betaalprovider om op te zeggen of de betaalmethode te wijzigen. Alleen testmodus — geen echte afschrijvingen."
+      "hint": "Opent het portaal van de betaalprovider om op te zeggen of de betaalmethode te wijzigen."
     },
     "refresh": {
       "cta": "Factureringsstatus vernieuwen",
@@ -11428,7 +11430,7 @@
   "accountPlan": {
     "title": "Jouw abonnement",
     "freePilot": "Gratis pilot — alles wat momenteel in het product beschikbaar is, is gratis voor jou.",
-    "prepared": "Betaalde abonnementen zijn voorbereid, niet te koop. Betalingen zijn niet ingeschakeld en er is geen betaalmethode nodig.",
+    "prepared": "Betaalde abonnementen zijn nog niet te koop. Betalingen zijn niet ingeschakeld en er is geen betaalmethode nodig.",
     "pricingLink": "Bekijk wat gratis is en wat betaald zal worden"
   },
   "privacyConsent": {
@@ -12212,7 +12214,7 @@
       "stateLabel": "AI-status",
       "state": {
         "disabled": "Uit",
-        "mock": "Mock (deterministische testmodus)",
+        "mock": "Vaste regels (geen taalmodel)",
         "live": "Actief"
       },
       "reason": {
@@ -12221,12 +12223,12 @@
         "unknown_provider": "De gekozen AI-aanbieder wordt niet herkend, dus AI blijft uit.",
         "missing_api_key": "Er is geen AI-sleutel toegevoegd, dus AI blijft uit."
       },
-      "disabledBody": "In deze omgeving is geen externe AI-provider gekoppeld. Alles op deze pagina is volgens vaste regels berekend uit je eigen gegevens — geen enkele tekst hier is door een taalmodel gemaakt.",
-      "whenEnabled": "Zodra de eigenaar een provider koppelt en de auditopslag voor suggesties is toegepast, komen controleerbare conceptsuggesties beschikbaar — altijd als suggesties die een persoon bevestigt, nooit als automatische wijzigingen.",
-      "gates": "De assistent is in deze omgeving nog niet beschikbaar. Suggesties blijven uit totdat hij is aangesloten — intussen wordt er niets gegenereerd.",
+      "disabledBody": "Er is geen externe AI-provider gekoppeld. Alles op deze pagina is volgens vaste regels berekend uit je eigen gegevens — geen enkele tekst hier is door een taalmodel gemaakt.",
+      "whenEnabled": "Zodra de assistent is ingeschakeld, doet hij controleerbare conceptsuggesties — altijd als suggesties die een persoon bevestigt, nooit als automatische wijzigingen.",
+      "gates": "De assistent is nog niet beschikbaar. Suggesties blijven uit totdat hij is aangesloten — intussen wordt er niets gegenereerd.",
       "providerLabel": "Provider",
       "modelLabel": "Model",
-      "notWired": "Genereren staat in deze fase bewust uit — resultaten zouden nog niet traceerbaar zijn. De status hierboven wordt alleen voor transparantie getoond."
+      "notWired": "Tekstgeneratie staat niet aan. De status hierboven wordt alleen voor transparantie getoond."
     }
   },
   "finance": {
@@ -13026,7 +13028,7 @@
   "agencyClients": {
     "title": "Klanten",
     "subtitle": "Voor wie u personeel levert — klantbehoeften worden gekoppeld aan uw aanvragen en kandidaat-scouting.",
-    "gatedHeading": "Voorbereid — wacht op activering door de eigenaar",
+    "gatedHeading": "Nog niet beschikbaar",
     "gatedBody": "Momenteel niet beschikbaar.",
     "notLinkable": "Aanvragen kunnen nog niet aan klanten worden gekoppeld.",
     "clientsEmpty": "Nog geen klanten. Voeg hieronder de eerste toe.",
@@ -13059,7 +13061,7 @@
   "agencyBridge": {
     "title": "Klantbedrijven",
     "subtitle": "Verbind met een echt klantbedrijf, zie alleen de gedeelde aanvragen en bied een van uw actieve rosterwerknemers aan.",
-    "gatedHeading": "Voorbereid — activering door eigenaar in afwachting",
+    "gatedHeading": "Nog niet beschikbaar",
     "gatedBody": "Momenteel niet beschikbaar.",
     "connectionsHeading": "Verbindingen",
     "inviteEmailLabel": "E-mail van klant",
@@ -13113,7 +13115,7 @@
   "clientBridge": {
     "title": "Uitzendbureaus",
     "subtitle": "Accepteer een uitzendbureau waarmee u wilt werken, deel specifieke aanvragen en beoordeel de voorgestelde kandidaten op uw eigen scoutingpagina.",
-    "gatedHeading": "Voorbereid — activering door eigenaar in afwachting",
+    "gatedHeading": "Nog niet beschikbaar",
     "gatedBody": "Momenteel niet beschikbaar.",
     "invitesHeading": "Verbindingsuitnodigingen",
     "noInvites": "Geen openstaande uitnodigingen.",
@@ -13148,7 +13150,11 @@
       "notReady": "Kandidaten accepteren of afwijzen is nog niet beschikbaar — gebruik tot dan contact of een boekingsvoorstel hieronder.",
       "forbidden": "Alleen de eigenaar van deze aanvraag kan beslissen.",
       "closed": "Dit voorstel is niet meer open.",
-      "error": "Er ging iets mis. Probeer het opnieuw."
+      "error": "Er ging iets mis. Probeer het opnieuw.",
+      "limitOpen": "Je hebt al 10 boekingsvoorstellen die op het antwoord van werknemers wachten — meer kunnen er niet tegelijk openstaan. Trek de voorstellen in die je niet meer nodig hebt en accepteer daarna deze kandidaat. Het aanbod van het bureau blijft open.",
+      "limitDaily": "Je hebt in de afgelopen 24 uur 30 boekingsvoorstellen verstuurd — het daglimiet. Accepteer deze kandidaat later: er is niets verstuurd en het aanbod van het bureau blijft open.",
+      "limitUnknown": "De limiet voor boekingsvoorstellen is bereikt (10 wachten op antwoord, 30 per dag). Trek voorstellen in die je niet meer nodig hebt of probeer het later; het aanbod van het bureau blijft open.",
+      "openBookings": "Boekingen openen"
     },
     "title": "Door bureau voorgestelde kandidaten",
     "subtitle": "Een verbonden uitzendbureau stelde deze werknemers voor deze aanvraag voor. Beoordeel, contacteer of boek ze met dezelfde bedieningselementen hieronder.",
@@ -13312,7 +13318,7 @@
     },
     "imageOcr": {
       "label": "Cv-foto / afbeelding (JPG, PNG)",
-      "note": "In voorbereiding — beeldherkenning werkt nog niet. Upload een PDF/DOCX of plak de tekst."
+      "note": "Beeldherkenning werkt nog niet. Upload een PDF/DOCX of plak de tekst."
     }
   },
   "companySwitcher": {
@@ -15639,7 +15645,7 @@
       "title": "Eén chatvenster bestuurt je werk",
       "subcopy": "In plaats van tientallen formulieren praat je gewoon. De assistent stelt op, jij bevestigt — en elke actie laat een record achter dat je kunt terugzien.",
       "liveLabel": "Werkt vandaag al",
-      "comingLabel": "In voorbereiding",
+      "comingLabel": "Nog niet beschikbaar",
       "conceptLabel": "Conceptweergave — gestileerde illustratie, geen echt gesprek",
       "c1": "CV en profiel bijwerken",
       "c2": "Een werkdag registreren",
@@ -16971,7 +16977,7 @@
     "archivedHeading": "Gearchiveerde objecten",
     "archivedBadge": "Gearchiveerd",
     "empty": "Nog geen objecten. Voeg de plekken toe waar jullie werk gebeurt.",
-    "gatedHeading": "Voorbereid — wacht op activering",
+    "gatedHeading": "Nog niet beschikbaar",
     "gatedBody": "Momenteel niet beschikbaar.",
     "errorLabel": "Opslaan is niet gelukt. Probeer het opnieuw.",
     "notAuthorizedLabel": "Alleen managers kunnen objecten wijzigen.",

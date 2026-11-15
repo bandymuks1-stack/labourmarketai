@@ -272,7 +272,7 @@
     "legalCheckFood": "Selling food or home-grown produce is subject to food-sale and hygiene rules. Before publishing, confirm you have checked the rules that apply to you.",
     "legalCheckAck": "I have checked the rules that apply to me",
     "serviceNeedHint": "A service need is always a wanted listing.",
-    "moreTypesSoon": "More listing types will be available here soon.",
+    "moreTypesSoon": "For now, these are the listing types available here.",
     "pause": "Pause",
     "expired": "Expired",
     "expiresOn": "Until {date}",
@@ -912,7 +912,7 @@
     },
     "exports": {
       "title": "Exports",
-      "note": "Only the exports that already work are listed — nothing here is a preview.",
+      "note": "Only the exports that already work are listed.",
       "evidence": "Evidence report (print / PDF)",
       "cv": "CV (print / PDF)",
       "journalCsv": "Journal export (CSV)",
@@ -1179,7 +1179,7 @@
     "switchSpace": "Switch space",
     "addSpace": "Add space",
     "availableSpaces": "Available spaces",
-    "comingLaterToggle": "Sections coming later (show)",
+    "comingLaterToggle": "Sections not available yet (show)",
     "profile": {
       "name": "Personal profile",
       "purpose": "Manage your avatar, CV, skills, and work status."
@@ -1663,7 +1663,7 @@
         "label": "Work records",
         "available": "Journal entries: {n}",
         "none": "Not yet linked",
-        "preparing": "Work-records connection is being prepared"
+        "preparing": "Work-records connection is not available yet"
       },
       "availability": {
         "label": "Availability",
@@ -1810,7 +1810,7 @@
     "reviewCta": "Review entries",
     "projectsTitle": "Projects, objects and clients",
     "projectsReadyBadge": "Structure ready",
-    "projectsBody": "Here you see projects, clients, project workers and work items. Nothing is filled automatically — creating new projects and clients is not possible yet; that ability is being prepared.",
+    "projectsBody": "Here you see projects, clients, project workers and work items. Nothing is filled automatically — creating new projects and clients is not possible yet.",
     "projectsCount": "Projects",
     "projectsEmpty": "no projects created yet",
     "projectsLinkingNote": "Work journal entries can be attributed to a project by the people who record them. A new project context starts empty — nothing is filled in automatically.",
@@ -2337,7 +2337,7 @@
         "title": "Something went wrong",
         "subtitle": "Not available right now.",
         "statusLabel": "Something went wrong",
-        "statusBody": "Company worker management is still being prepared and will be enabled later.",
+        "statusBody": "Company worker management is not available yet.",
         "nextStep": "Self-entry for workers stays open at all times."
       },
       "workers": {
@@ -3654,7 +3654,7 @@
     "opportunities": "Opportunities: see work that fits you. Visibility depends on network size and your readiness.",
     "marketplaceMap": "Market map: labour-market signals by country and region. A more precise point appears once a location is set.",
     "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
-    "paymentReadiness": "Payments are being prepared: paid access is not active yet.",
+    "paymentReadiness": "Paid access is not active yet.",
     "identityModel": "Two base identities: a person and a company. Buying, selling, hiring and agency activity are actions, not separate identities."
   },
   "profileIdentityNotice": {
@@ -3773,7 +3773,7 @@
     "addLaterHint": "You'll be able to add more roles later — they appear in the catalogue once they're ready.",
     "status": {
       "active": "Active",
-      "preparing": "Coming soon",
+      "preparing": "Not available yet",
       "start": "Start",
       "partial": "Partial"
     },
@@ -3781,9 +3781,9 @@
       "openSetup": "Open setup"
     },
     "preparingReason": {
-      "default": "This role is still being prepared. We'll enable it once it can ship honestly.",
+      "default": "This role is not available yet.",
       "startAvailable": "The setup path already works: one field, the legal name, and your account is created. The full workspace is still being filled out.",
-      "customerPartial": "The buyer space is still being prepared. You can add the buyer role and fill in a request."
+      "customerPartial": "The full buyer space is not available yet. You can add the buyer role and fill in a request."
     },
     "worker": {
       "description": "Working as a person: text-first profile, skills, and work journal. Active today."
@@ -3798,13 +3798,13 @@
       "description": "An action — submit and manage requests for services, specialists or teams. Will be enabled later."
     },
     "freelancer": {
-      "description": "Freelancer: services and work history in one profile. Preparing."
+      "description": "Freelancer: services and work history in one profile. Not available yet."
     },
     "team_lead": {
-      "description": "Team lead: team composition and joint offers. Preparing."
+      "description": "Team lead: team composition and joint offers. Not available yet."
     },
     "service_provider": {
-      "description": "Service provider: public service catalogue with confirmed evidence. Preparing."
+      "description": "Service provider: public service catalogue with confirmed evidence. Not available yet."
     }
   },
   "activityTypes": {
@@ -3826,10 +3826,10 @@
     "eyebrow": "Labour-market OS",
     "headline": "Show what you can do. Find more opportunities to realize it.",
     "lede": "One person. Many roles over time. A CV born from real work and real records, not self-written claims. The first choice is an entry point, not a cage.",
-    "honesty": "Note: below is the whole system map. Some surfaces are live today; the rest are openly labelled \"Preparing\". We never say something works when it doesn't.",
+    "honesty": "Note: below is the whole system map. Some surfaces are live today; the rest are openly labelled \"Not available yet\". We never say something works when it doesn't.",
     "sections": {
       "today": "Available now",
-      "preparing": "Coming soon",
+      "preparing": "Not available yet",
       "workflow": "How a person's path moves through the system",
       "roles": "Role evolution (without lock-in)",
       "activities": "Activity landscape",
@@ -3846,10 +3846,10 @@
     },
     "controlRoom": {
       "todayLabel": "Active today",
-      "preparingLabel": "Coming soon",
+      "preparingLabel": "Not available yet",
       "blockedLabel": "Blocked",
       "nonWorkerLabel": "Company / agency / customer spaces",
-      "nonWorkerStatus": "Coming soon",
+      "nonWorkerStatus": "Not available yet",
       "nonWorkerStatusActive": "Working",
       "fakeClaimsLabel": "Fake AI / fake matching / fake reputation",
       "fakeClaimsStatus": "Never used"
@@ -3860,7 +3860,7 @@
       "agent": "AI / agent orchestrator (only when it can ship safely)",
       "trust": "Reputation / trust layer"
     },
-    "footer": "Publishing the vision map here does not mean every area is live. What is usable today is tagged \"Live today\". Everything else is either \"Preparing\" or a future layer.",
+    "footer": "Publishing the vision map here does not mean every area is live. What is usable today is tagged \"Live today\". Everything else is either \"Not available yet\" or a future layer.",
     "internalPreviewBadge": "Internal preview",
     "internalPreviewBanner": "This page is not publicly published yet. It is an internal preview for the owner and invited participants. Do not share the URL publicly until the owner production smoke is PASSED."
   },
@@ -3875,8 +3875,8 @@
   "dashboard": {
     "comingLater": {
       "eyebrow": "Later",
-      "title": "Modules coming later",
-      "body": "These areas are being prepared and will be enabled in separate stages. They are not active actions yet."
+      "title": "Modules not available yet",
+      "body": "These areas are not available yet. They are not active actions."
     },
     "featuresHeading": {
       "eyebrow": "What's here and what's coming",
@@ -3887,7 +3887,7 @@
   },
   "features": {
     "preparing_generic_reason": "This option will be enabled later.",
-    "preparing_badge": "Coming soon",
+    "preparing_badge": "Not available yet",
     "overview": {
       "label": "Overview",
       "description": "Your starting view opens for every role you hold.",
@@ -4551,7 +4551,7 @@
         },
         "addMore": {
           "title": "Add another way to use labourmarket.ai",
-          "body": "You're not locked into one role. Company, agency and customer spaces are still being prepared — we'll add them step by step.",
+          "body": "You're not locked into one role. Company, agency and customer spaces are not all available yet.",
           "cta": "Review roles"
         },
         "activitySetup": {
@@ -4954,7 +4954,7 @@
             "active": "Active",
             "notActive": "Not yet active",
             "benefit": "Protect your profile, work history, documents and messages with a second check only you can pass.",
-            "setupComing": "Setup will appear here soon — it takes about 30 seconds and you can turn it off anytime."
+            "setupComing": "Two-step sign-in cannot be set up here yet."
           },
           "recovery": {
             "label": "Account recovery",
@@ -4985,8 +4985,8 @@
       },
       "comingSoon": {
         "greeting": "👋 Welcome, {name}",
-        "body_main": "We're finishing the company / agency functionality right now.",
-        "body_notify": "We'll let you know the moment it's ready.",
+        "body_main": "Company / agency functionality is not available yet.",
+        "body_notify": "We'll let you know when it is available.",
         "body_meanwhile": "In the meantime — you can browse the platform via the \"Discover\" tab (view only)."
       },
       "menuLinks": {
@@ -5749,7 +5749,7 @@
     "eyebrow": "Pricing",
     "title": "Simple tiers,",
     "titleAccent": "set fairly.",
-    "subcopyLive": "Prices are confirmed by the owner and in force. Activation happens in the organization account through a secure Stripe payment; nothing is charged on this page.",
+    "subcopyLive": "Prices are in force. Activation happens in the organization account through a secure Stripe payment; nothing is charged on this page.",
     "subcopy": "Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
     "subcopyConfirmed": "Prices are confirmed. Online activation is not open yet — join the waitlist and we will contact you to start your organization manually; nothing is charged on this page.",
     "trialNote": "An organization's first subscription starts with a 14-day trial. Your card is charged the monthly price after the trial, and you can cancel before it ends.",
@@ -5817,8 +5817,9 @@
       }
     ],
     "priceState": {
-      "draft_pricing": "Prices are being prepared — nothing can be bought yet.",
-      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
+      "draft_pricing": "Prices are not final — nothing can be bought yet.",
+      "owner_confirmed": "Prices are confirmed. Nothing is charged on this page.",
+      "owner_confirmed_closed": "Prices are confirmed. Online payment is not open yet; nothing is charged on this page."
     },
     "individual": {
       "name": "Special requirements",
@@ -5830,7 +5831,8 @@
     "priceFree": "€0",
     "pricePerMonth": "€{price}/month",
     "ctaStartFree": "Start free in your organization account",
-    "ctaSubscribe": "Activate in your organization account"
+    "ctaSubscribe": "Activate in your organization account",
+    "faqBillingClosed": "Online payment is not open to the public yet, so nothing can be bought here. Registration and one active position are free. For paid work, first clients are served directly and the price is confirmed with you before anything starts."
   },
   "privacySelfService": {
     "title": "Privacy and your data",
@@ -6856,7 +6858,7 @@
         "title": "Communication",
         "context": "This conversation is about this project.",
         "cta": "Message about this project",
-        "notReadyNote": "A dedicated project thread is being prepared. For now start the conversation in your general inbox — the project context is shown above."
+        "notReadyNote": "A dedicated project thread is not available yet. For now start the conversation in your general inbox — the project context is shown above."
       },
       "fieldCount": "{n, plural, one {# person on the field} other {# people on the field}}",
       "fieldViaTeam": "{n} via team",
@@ -6871,7 +6873,7 @@
       "emptyTeam": "This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "Start the draft",
       "positionsTitle": "Missing positions",
-      "positionsEmpty": "Position needs are still on the way — once ready, you will see here which people are missing.",
+      "positionsEmpty": "Position needs are not available yet. When they are, you will see here which people are missing.",
       "openOps": "Open project management",
       "gallery": {
         "title": "Work gallery",
@@ -7435,7 +7437,7 @@
     "tooManyOpen": "You have too many open help requests — please wait until the existing ones are reviewed.",
     "noteTooLong": "The description is too long (max 500 characters).",
     "internalNote": "Internal record — no emails or messages are sent to anyone.",
-    "explanationPending": "The explanation is being prepared from the Lithuanian master version."
+    "explanationPending": "The explanation is not available in this language yet."
   },
   "crmPipeline": {
     "eyebrow": "Operator queue",
@@ -8364,7 +8366,7 @@
       "evidenceNote": "Open and print / save as PDF",
       "journal": "Work journal export",
       "journalNote": "Download as CSV (opens in Excel)",
-      "formatStatus": "PDF: available · CSV: available · Excel / Word: preparing"
+      "formatStatus": "PDF: available · CSV: available · Excel / Word: not available yet"
     },
     "disclaimer": "Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "Not available right now.",
@@ -9138,7 +9140,7 @@
       "title": "Readiness by market",
       "empty": "No declared countries in the pool yet — readiness appears with the first ones.",
       "availableNow": "available now",
-      "docsNote": "Document readiness stays with the worker: category-level aggregates will appear here only with the worker-consent switch (a gated change, in preparation). You never see document contents here."
+      "docsNote": "Document readiness stays with the worker: category-level aggregates will appear here only with the worker-consent switch. You never see document contents here."
     },
     "demand": {
       "title": "Open demand",
@@ -9191,7 +9193,7 @@
     },
     "title": "Scouting",
     "intro": "Pick one of your structured needs to see matching workers, why they fit, and shortlist them.",
-    "visibilityNote": "Visibility is based on readiness, trust and permissions — not payment. Paid wider access is not active yet (payments are being prepared). Only safe, anonymized previews are shown — no fake listings.",
+    "visibilityNote": "Visibility is based on readiness, trust and permissions — not payment. Paid wider access is not active yet. Only safe, anonymized previews are shown — no fake listings.",
     "pickDemand": "Pick a need",
     "noDemands": "You have no needs yet. Create a need from your dashboard — after review, the team structures its required skills.",
     "noDemandsCta": "Create a need",
@@ -9325,7 +9327,7 @@
       "unavailable": "Couldn’t complete the action. Please try again.",
       "error": "Something went wrong.",
       "cancel": "Cancel",
-      "notEntitled": "Your plan does not include booking — start a test checkout or request pilot access."
+      "notEntitled": "Booking is not included in your plan. See your plan in the account settings."
     },
     "recognizedNote": "The required skills below were recognized from your need's text by the offline system — they are a labeled suggestion, not a confirmed structure. Review the matches; an administrator confirms or adjusts the final requirements.",
     "nextAction": {
@@ -9511,17 +9513,17 @@
       "contact": "Arranged individually"
     },
     "readiness": {
-      "draft_pricing": "Plans are prepared, not purchasable. No price here is final and nothing can be bought.",
-      "owner_confirmed": "Plans are prepared only — nothing can be bought until payments are enabled."
+      "draft_pricing": "No price here is final and nothing can be bought yet.",
+      "owner_confirmed": "Nothing can be bought until payments are enabled."
     },
     "featuresLabel": "Included in this boundary",
     "limitValue": "up to {count}",
     "freeToday": {
       "freeTitle": "Free today",
       "free": "Everything you can currently use in the product is free — the pilot runs without payments and nothing asks for a card.",
-      "paidTitle": "Prepared paid plans",
+      "paidTitle": "Paid plans",
       "paid": "Not available right now.",
-      "preparedTitle": "Prepared, not purchasable",
+      "preparedTitle": "Not purchasable yet",
       "prepared": "There is no payment page and nothing can be bought. Pilot access to paid-plan scope is granted manually by the team."
     },
     "features": {
@@ -9549,7 +9551,7 @@
     "enforcement": {
       "free_surface": "Available today",
       "server_gate": "Available today, depending on your permissions",
-      "declared_boundary_only": "Prepared — starts only with billing",
+      "declared_boundary_only": "Starts only when billing is enabled",
       "admin_rbac": "Internal, admin only"
     }
   },
@@ -10015,15 +10017,15 @@
   "billingStatus": {
     "badge": {
       "disabled": "PAYMENTS OFF",
-      "stripe_test": "TEST MODE",
+      "stripe_test": "NO REAL CHARGES",
       "stripe_live_blocked": "LIVE BLOCKED"
     },
     "body": {
       "disabled": "Payments are not enabled. Plans below describe scope; request pilot access to start.",
-      "stripe_test": "Stripe test mode is on for internal testing — no real money, no live charge.",
+      "stripe_test": "No real money is moved and nothing is charged.",
       "stripe_live_blocked": "A live key/mode was detected and hard-blocked by safety. Live is never enabled here."
     },
-    "futureLive": "Live payments are prepared but inactive — no live checkout until the owner signs off."
+    "futureLive": "Online payment is not available yet."
   },
   "workAbroad": {
     "eyebrow": "Work abroad",
@@ -10254,7 +10256,7 @@
       "missing": "missing"
     },
     "ctaProfile": "Complete your profile",
-    "needsAccessTitle": "Opportunities are being prepared",
+    "needsAccessTitle": "Employer inquiries are not shown here yet",
     "needsAccessBody": "Employer inquiries will appear here once worker visibility is enabled. In the meantime, complete your profile so you're ready the moment fitting inquiries appear.",
     "emptyTitle": "No open inquiries right now",
     "emptyBody": "When employers post new inquiries, they'll show up here. In the meantime it's worth completing your profile.",
@@ -11378,15 +11380,15 @@
   },
   "accountBilling": {
     "title": "Billing & subscription",
-    "testBadge": "Test mode",
+    "testBadge": "No real charges",
     "returned": {
-      "success": "Test-mode checkout completed. No real money moved; the subscription state below syncs from the payment provider's signature-verified webhook and can take a moment to appear.",
+      "success": "Checkout completed. No real money moved; the subscription state below syncs from the payment provider's signature-verified webhook and can take a moment to appear.",
       "cancelled": "Checkout was cancelled. Nothing was charged and nothing changed on your account.",
       "portal": "You are back from the billing portal. Any change you made there syncs to this page automatically.",
       "successLive": "Checkout completed. The subscription state below syncs from the payment provider's signature-verified confirmation and can take a moment to appear.",
       "syncing": "Syncing with the payment provider — your subscription will appear here in a moment. Nothing needs to be ordered again."
     },
-    "disabled": "Payments are not enabled. Paid plans are prepared drafts — nothing is purchasable here and no payment method is needed.",
+    "disabled": "Payments are not enabled. Nothing is purchasable here and no payment method is needed.",
     "none": "No subscription on this account.",
     "planLabel": "Plan",
     "statusLabel": "Status",
@@ -11407,7 +11409,7 @@
       "open": "Manage subscription",
       "opening": "Opening…",
       "error": "Could not open the billing portal",
-      "hint": "Opens the payment provider's portal to cancel or update the payment method. Test mode only — no real charges."
+      "hint": "Opens the payment provider's portal to cancel or update the payment method."
     },
     "refresh": {
       "cta": "Refresh billing status",
@@ -11428,7 +11430,7 @@
   "accountPlan": {
     "title": "Your plan",
     "freePilot": "Free pilot — everything currently available in the product is free for you.",
-    "prepared": "Paid plans are prepared, not purchasable. Payments are not enabled and no payment method is needed.",
+    "prepared": "Paid plans cannot be bought yet. Payments are not enabled and no payment method is needed.",
     "pricingLink": "See what is free and what will be paid"
   },
   "privacyConsent": {
@@ -12212,7 +12214,7 @@
       "stateLabel": "AI status",
       "state": {
         "disabled": "Off",
-        "mock": "Mock (deterministic test mode)",
+        "mock": "Fixed rules (no language model)",
         "live": "Live"
       },
       "reason": {
@@ -12221,12 +12223,12 @@
         "unknown_provider": "The chosen AI provider is not recognised, so AI stays off.",
         "missing_api_key": "No AI provider key is added, so AI stays off."
       },
-      "disabledBody": "No external AI provider is connected in this environment. Everything on this page is computed from your own records by fixed rules — no text here was produced by a language model.",
-      "whenEnabled": "Once the owner connects a provider and the suggestion audit storage is applied, reviewable drafting suggestions become available — always as suggestions a person confirms, never as automatic changes.",
-      "gates": "The assistant is not available in this environment yet. Suggestions stay off until it is connected — nothing is generated in the meantime.",
+      "disabledBody": "No external AI provider is connected. Everything on this page is computed from your own records by fixed rules — no text here was produced by a language model.",
+      "whenEnabled": "When the assistant is switched on, it offers drafting suggestions you can review — always as suggestions a person confirms, never as automatic changes.",
+      "gates": "The assistant is not available yet. Suggestions stay off until it is connected — nothing is generated in the meantime.",
       "providerLabel": "Provider",
       "modelLabel": "Model",
-      "notWired": "Generation is deliberately not switched on at this stage — outputs could not be traced yet. The status above is shown for transparency only."
+      "notWired": "Text generation is not switched on. The status above is shown for transparency only."
     }
   },
   "finance": {
@@ -13026,7 +13028,7 @@
   "agencyClients": {
     "title": "Clients",
     "subtitle": "Who you staff for — each client's needs link to your demands and candidate scouting.",
-    "gatedHeading": "Not available yet — coming later",
+    "gatedHeading": "Not available yet",
     "gatedBody": "Not available right now.",
     "notLinkable": "Demands cannot be linked to clients yet.",
     "clientsEmpty": "No clients yet. Add your first client below.",
@@ -13059,7 +13061,7 @@
   "agencyBridge": {
     "title": "Client companies",
     "subtitle": "Connect with a real client company, see only the requests they share, and offer one of your active roster workers.",
-    "gatedHeading": "Not available yet — coming later",
+    "gatedHeading": "Not available yet",
     "gatedBody": "Not available right now.",
     "connectionsHeading": "Connections",
     "inviteEmailLabel": "Client email",
@@ -13113,7 +13115,7 @@
   "clientBridge": {
     "title": "Staffing agencies",
     "subtitle": "Accept a staffing agency you want to work with, share specific requests, and review the candidates they propose on your own scouting page.",
-    "gatedHeading": "Not available yet — coming later",
+    "gatedHeading": "Not available yet",
     "gatedBody": "Not available right now.",
     "invitesHeading": "Connection invites",
     "noInvites": "No pending invites.",
@@ -13148,7 +13150,11 @@
       "notReady": "Accepting and declining candidates is not available yet — until then, use contact or propose a booking below.",
       "forbidden": "Only the owner of this request can decide.",
       "closed": "This offer is no longer open.",
-      "error": "Something went wrong. Please try again."
+      "error": "Something went wrong. Please try again.",
+      "limitOpen": "You already have 10 booking proposals waiting for workers' answers — the most that can be open at once. Withdraw the ones you no longer need, then accept this candidate. The agency's offer stays open.",
+      "limitDaily": "You have sent 30 booking proposals in the last 24 hours — the daily limit. Accept this candidate later; nothing was sent and the agency's offer stays open.",
+      "limitUnknown": "The booking proposal limit is reached (10 waiting for an answer, 30 per day). Withdraw proposals you no longer need or try later; the agency's offer stays open.",
+      "openBookings": "Open bookings"
     },
     "title": "Agency-proposed candidates",
     "subtitle": "A connected staffing agency proposed these workers for this request. Review, contact, or book them with the same controls below.",
@@ -15639,7 +15645,7 @@
       "title": "One chat window runs your work",
       "subcopy": "Instead of dozens of forms you simply talk. The assistant drafts, you confirm — and every action leaves a record you can revisit.",
       "liveLabel": "Works today",
-      "comingLabel": "In preparation",
+      "comingLabel": "Not available yet",
       "conceptLabel": "Concept view — styled illustration, not a live conversation",
       "c1": "Update your CV and profile",
       "c2": "Log a work day",
@@ -16971,7 +16977,7 @@
     "archivedHeading": "Archived objects",
     "archivedBadge": "Archived",
     "empty": "No objects yet. Add the sites where your work happens.",
-    "gatedHeading": "Not available yet — coming later",
+    "gatedHeading": "Not available yet",
     "gatedBody": "Not available right now.",
     "errorLabel": "Could not save. Try again.",
     "notAuthorizedLabel": "Only managers can change objects.",

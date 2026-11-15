@@ -1155,6 +1155,8 @@ export default async function CompanyScoutingPage({
                       accepted: tOffered("decision.accepted"), declined: tOffered("decision.declined"),
                       notReady: tOffered("decision.notReady"), forbidden: tOffered("decision.forbidden"),
                       closed: tOffered("decision.closed"), error: tOffered("decision.error"),
+                      limitOpen: tOffered("decision.limitOpen"), limitDaily: tOffered("decision.limitDaily"),
+                      limitUnknown: tOffered("decision.limitUnknown"), openBookings: tOffered("decision.openBookings"),
                     }}
                     placementTerm={offerTermView.get(oc.offerId) ?? null}
                     termLabels={{
