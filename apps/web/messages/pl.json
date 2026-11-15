@@ -14011,7 +14011,6 @@
         "ctaTitle": "Zamień to oszacowanie w rzeczywiste zapotrzebowanie na pracowników",
         "ctaBody": "Ten sam kreator oszacowania znajduje się w formularzu zapotrzebowania LabourMarket.ai. Mając konto, możesz dołączyć oszacowanie do ustrukturyzowanego zapotrzebowania na pracowników; bez konta możesz opisać swoją potrzebę na formularzu publicznym.",
         "ctaDashboard": "Utwórz zapotrzebowanie na pracowników (z kontem)",
-        "ctaDashboardHelp": "Ścieżka z kontem otwiera formularz zapotrzebowania na Twoim panelu — kalkulator nie przekazuje tych liczb automatycznie.",
         "ctaCompanyNeed": "Opisz potrzebę bez konta",
         "ctaCompanyNeedHelp": "Formularz publiczny otrzymuje tylko liczbę pracowników i kraj — żadne ceny ani opisy nie są przekazywane."
       }

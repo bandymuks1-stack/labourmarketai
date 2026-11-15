@@ -14011,7 +14011,6 @@
         "ctaTitle": "Gör om uppskattningen till en verklig förfrågan om arbetstagare",
         "ctaBody": "Samma uppskattningsverktyg finns i behovsformuläret på LabourMarket.ai. Med ett konto kan du bifoga en uppskattning till en strukturerad förfrågan om arbetstagare; utan konto kan du beskriva ditt behov i det öppna formuläret.",
         "ctaDashboard": "Skapa ett arbetsbehov (med konto)",
-        "ctaDashboardHelp": "Kontovägen öppnar behovsformuläret i din översikt – kalkylatorn överför inte dessa siffror.",
         "ctaCompanyNeed": "Beskriv ett behov utan konto",
         "ctaCompanyNeedHelp": "Det öppna formuläret tar bara emot antal arbetstagare och land – inga priser och inga beskrivningar skickas vidare."
       }

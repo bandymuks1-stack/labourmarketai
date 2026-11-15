@@ -14011,7 +14011,6 @@
         "ctaTitle": "Turn this estimate into a real worker request",
         "ctaBody": "The same estimate builder lives inside the LabourMarket.ai demand form. With an account you can attach an estimate to a structured worker request; without one, you can describe your need on the public form.",
         "ctaDashboard": "Create a work need (with account)",
-        "ctaDashboardHelp": "The account route opens the demand form on your dashboard — the calculator does not transfer these numbers.",
         "ctaCompanyNeed": "Describe a need without an account",
         "ctaCompanyNeedHelp": "The public form receives only your worker count and country — no prices and no descriptions are passed."
       }

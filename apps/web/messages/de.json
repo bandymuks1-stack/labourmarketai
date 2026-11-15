@@ -14011,7 +14011,6 @@
         "ctaTitle": "Machen Sie aus dieser Schätzung eine echte Personalanfrage",
         "ctaBody": "Derselbe Schätzungs-Baustein steckt im Bedarfsformular von LabourMarket.ai. Mit Konto können Sie eine Schätzung an eine strukturierte Personalanfrage anhängen; ohne Konto beschreiben Sie Ihren Bedarf im öffentlichen Formular.",
         "ctaDashboard": "Personalbedarf anlegen (mit Konto)",
-        "ctaDashboardHelp": "Die Konto-Route öffnet das Bedarfsformular in Ihrem Dashboard — der Rechner überträgt diese Zahlen nicht.",
         "ctaCompanyNeed": "Bedarf ohne Konto beschreiben",
         "ctaCompanyNeedHelp": "Das öffentliche Formular erhält nur Ihre Arbeitskräftezahl und das Land — keine Preise und keine Beschreibungen."
       }

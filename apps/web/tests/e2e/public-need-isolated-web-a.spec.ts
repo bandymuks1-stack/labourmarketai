@@ -80,6 +80,50 @@ test("N-1. an anonymous visitor submits the public company-need form and the int
   await ctx.close();
 });
 
+test("N-5. the cost calculator's account route brings its worker count and country into the need form", async ({ browser }) => {
+  // Imported here so this walk adds nothing to the shared import line above.
+  const { PASSWORD, onboard, setUpCompany, signUp } = await import("./isolated-web-a-helpers");
+  // A company account (setup, not under test).
+  const account = `need.calc.${RUN}@local.test`;
+  const setup = await browser.newContext();
+  const first = await setup.newPage();
+  await signUp(first, BASE, account);
+  await onboard(first, "hire", "Synthetic Calc Employer");
+  await setUpCompany(first, `Synthetic Calc Co ${RUN}`);
+  await setup.close();
+
+  // Signed out, the person estimates a job: Sweden, 3 workers x 8 h at 20.
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/en/calculators/project-cost`);
+  await expect(page.getByTestId("project-cost-calculator")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("pcc-country").selectOption("SE");
+  await page.getByTestId("pcc-next").click();
+  await page.getByTestId("pcc-workerCount").fill("3");
+  await page.getByTestId("pcc-hoursPerWorker").fill("8");
+  await page.getByTestId("pcc-next").click();
+  await page.getByTestId("pcc-rate").fill("20");
+  await page.getByTestId("pcc-next").click();
+  await expect(page.getByTestId("estimate-total")).toBeVisible({ timeout: 15_000 });
+
+  // The account route: sign in on the way, then the need form.
+  await page.getByTestId("pcc-bridge").getByTestId("auth-cta-link").click();
+  await page.waitForURL(/\/en\/auth\/login\?next=/, { timeout: 30_000 });
+  await page.locator('input[name="email"]').fill(account);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').first().click();
+  await page.waitForURL(/\/en\/dashboard\/company\/needs\?/, { timeout: 60_000 });
+
+  // The estimate's numbers are already in the form; nothing is retyped.
+  const main = page.getByRole("main");
+  await main.getByTestId("demand-role").fill("Welders");
+  await main.getByTestId("demand-description").fill(`Three welders for a two-week job (${RUN}).`);
+  await main.getByTestId("demand-next").click();
+  await expect(main.getByTestId("demand-team-size"), "the worker count arrived").toHaveValue("3", { timeout: 30_000 });
+  await expect(main.getByTestId("demand-country-select"), "the country arrived").toContainText(/Sweden/);
+  await ctx.close();
+});
+
 test("N-2. the anonymous path cannot read the intake table back (write-only by design)", async () => {
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
   test.skip(!anon, "anon key not exported");
