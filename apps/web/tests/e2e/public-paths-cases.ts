@@ -59,4 +59,9 @@ export const KNOWN_PUBLIC_PATH_FINDINGS: readonly KnownPublicPathFinding[] = [
     reason: "the More/phone-menu education link opens the signed-in institution setup, so a visitor meets sign-in first",
     owner: "#3410",
   },
+  {
+    id: "intake:worker",
+    reason: "the worker-intake sign-up link carries neither a return address nor the typed intake, so what the visitor entered is gone after sign-up",
+    owner: "Lane L (open product fix)",
+  },
 ];

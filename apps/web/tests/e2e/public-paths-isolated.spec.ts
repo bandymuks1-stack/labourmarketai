@@ -333,12 +333,16 @@ const RUNNERS = new Map<string, (page: Page) => Promise<void>>([
   ["header:education", education],
 ]);
 
-for (const c of PUBLIC_PATH_CASES) {
+PUBLIC_PATH_CASES.forEach((c, index) => {
   test(`${c.id} — ${c.title}`, async ({ page }) => {
+    // One client address per case. The public intake's per-IP brake (3 sends per
+    // 15 min, lib/security/public-form-guard.ts) would otherwise count every
+    // isolated spec in this job as one visitor; the brake itself is unit-tested.
+    await page.setExtraHTTPHeaders({ "x-real-ip": `198.51.100.${index + 1}` });
     const known = KNOWN.get(c.id);
     test.fail(known !== undefined, known ? `known finding (${known.owner}): ${known.reason}` : "");
     const run = RUNNERS.get(c.id);
     expect(run, `a runner for ${c.id}`).toBeDefined();
     await run!(page);
   });
-}
+});
