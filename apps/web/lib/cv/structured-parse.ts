@@ -134,10 +134,10 @@ const MONTH_AFTER = `(?:\\s?[./-]\\s?${MONTH}(?:\\s?[./-]\\s?${DAY})?(?!\\d))?`;
 const DATE_TOKEN = `${MONTH_FIRST}${YEAR}${MONTH_AFTER}`;
 const RANGE_END =
   `(?:${DATE_TOKEN}` +
-  "|dabar|šiuo metu|iki dabar|now|present|current|heute|heden|nuvarande|pågående|nu\\b|наст\\.?|настоящее время)";
+  "|dabar|šiuo metu|iki dabar|now|present|current|heute|heden|nuvarande|pågående|nu(?!\\p{L})|наст\\.?|настоящее время)";
 const YEAR_RANGE_RE = new RegExp(
   `(${DATE_TOKEN})\\s*(?:[–—-]|iki|to|until|bis|tot|till|по|до)\\s*(${RANGE_END})`,
-  "i",
+  "iu",
 );
 /** Standalone date tokens left over once the range fragment is removed. */
 const YEAR_MONTH_TOKEN_RE = new RegExp(
@@ -166,8 +166,10 @@ const EDUCATION_TYPE_RULES: ReadonlyArray<[RegExp, string]> = [
   [/magistr|master|магистр/i, "university_master"],
   [/bakalaur|bachelor|kandidatexamen|бакалавр/i, "university_bachelor"],
   [/universit|университет/i, "university_bachelor"],
+  // Before "college": "Yrkeshögskolan" contains "högskol" but is vocational.
+  [/yrkeshögskol/i, "vocational"],
   [/kolegij|college|hogeschool|högskol|колледж/i, "college"],
-  [/profesin|vocational|berufs|yrkesutbild|yrkeshögskol|профессиональн|rengimo cent|technikum|техникум|училищ/i, "vocational"],
+  [/profesin|vocational|berufs|yrkesutbild|профессиональн|rengimo cent|technikum|техникум|училищ/i, "vocational"],
   [/gimnazij|vidurin|secondary|gymnasium|gymnasie|гимназ|средн/i, "secondary"],
   [/pradin|primary|grundschule|grundskol|начальн/i, "primary"],
   [/kursai|course|kurs|курс|training|mokym/i, "course_certificate"],
@@ -175,18 +177,35 @@ const EDUCATION_TYPE_RULES: ReadonlyArray<[RegExp, string]> = [
 
 /** language-name lexicon → canonical worker_languages code. */
 const LANGUAGE_RULES: ReadonlyArray<[RegExp, string]> = [
-  [/lietuvi|lithuanian|litauisch|litauisk|litouws|литовск/i, "lt"],
+  [/lietuvi|lithuanian|litauisch|litouws|литовск/i, "lt"],
   [/angl[ųuo]|english|englisch|engels|английск/i, "en"],
-  [/rus[ųuo]|russian|russisch|\bryska\b|русск/i, "ru"],
-  [/vokie|german|deutsch|duits|\btyska\b|немецк/i, "de"],
-  [/oland|nyderland|dutch|nederlands|nederländsk|holländsk|голландск|нидерланд/i, "nl"],
-  [/lenk|polish|polski|\bpolska\b|польск/i, "pl"],
-  [/latvi|latvian|lettisk|латышск/i, "lv"],
-  [/est[ųuo]|estonian|estnisk|эстонск/i, "et"],
+  [/rus[ųuo]|russian|russisch|русск/i, "ru"],
+  [/vokie|german|deutsch|duits|немецк/i, "de"],
+  [/oland|nyderland|dutch|nederlands|голландск|нидерланд/i, "nl"],
+  [/lenk|polish|polski|польск/i, "pl"],
+  [/latvi|latvian|латышск/i, "lv"],
+  [/est[ųuo]|estonian|эстонск/i, "et"],
   [/norveg|norwegian|norsk|норвежск/i, "no"],
   [/šved|swedish|svenska|шведск/i, "sv"],
   [/dan[ųuo]|danish|dansk|датск/i, "da"],
 ];
+
+/** The SWEDISH names of the same languages ("engelska", "svenska", "norska"
+ *  and "danska" are already read above). Kept apart and read only AFTER the
+ *  rules above, and only on a line that also states a level: several of them
+ *  are words in other languages too — "Polska" is the country in every Polish
+ *  address — so a Swedish needle must never change how another language's CV
+ *  is read (review #3389 P2-1). */
+const SV_LANGUAGE_RULES: ReadonlyArray<[RegExp, string]> = [
+  [/litauisk/i, "lt"],
+  [/\bryska\b/i, "ru"],
+  [/\btyska\b/i, "de"],
+  [/nederländsk|holländsk/i, "nl"],
+  [/\bpolska\b/i, "pl"],
+  [/lettisk/i, "lv"],
+  [/estnisk/i, "et"],
+];
+const ALL_LANGUAGE_RULES: ReadonlyArray<[RegExp, string]> = [...LANGUAGE_RULES, ...SV_LANGUAGE_RULES];
 
 const CEFR_RE = /\b([ABC][12])\b/;
 const NATIVE_RE = /gimtoji|gimtąja|native|moedertaal|muttersprache|modersmål|родной/i;
@@ -213,7 +232,7 @@ const AVAILABILITY_RULES: ReadonlyArray<[RegExp, CvAvailabilityHintKey]> = [
     "nightShiftsOk",
   ],
   [
-    /savaitgal|weekend|wochenende|helgarbete|helger|выходны/i,
+    /savaitgal|weekend|wochenende|helgarbete|helgpass|\b(?:arbeta|jobba|på|under)\s+helger(?:na)?\b|выходны/i,
     "weekendShiftsOk",
   ],
 ];
@@ -383,9 +402,15 @@ function languageLevelFor(line: string): {
 
 /** The part of a list line that belongs to the language `re` matches: the
  *  comma/semicolon/slash/pipe segment that names it, when the line names more
- *  than one language. Otherwise the whole line. */
-function languageSegment(line: string, re: RegExp): string {
-  const named = LANGUAGE_RULES.filter(([r]) => r.test(line)).length;
+ *  than one language. Otherwise the whole line. `rules` is the lexicon that
+ *  counts as "naming a language" — the base rules for a base match, base plus
+ *  Swedish for a Swedish match (so a base reading never depends on Swedish). */
+function languageSegment(
+  line: string,
+  re: RegExp,
+  rules: ReadonlyArray<[RegExp, string]> = LANGUAGE_RULES,
+): string {
+  const named = rules.filter(([r]) => r.test(line)).length;
   if (named < 2) return line;
   return line.split(/[,;/|]/).find((seg) => re.test(seg)) ?? line;
 }
@@ -562,6 +587,17 @@ export function parseCvSections(text: string): CvSectionProposals {
       // language keeps the whole line ("Anglų kalba – B2").
       const { level, confidence } = languageLevelFor(languageSegment(line, re));
       if (level === null && line.length > 80) continue;
+      seenLang.add(code);
+      if (out.languages.length < MAX_PER_SECTION) {
+        out.languages.push({ lang: code, level, confidence, sourceLine });
+      }
+    }
+    // Swedish language names: after the base rules, and only with a stated
+    // level on the line — never a bare "Polska" in an address.
+    for (const [re, code] of SV_LANGUAGE_RULES) {
+      if (!re.test(line) || seenLang.has(code)) continue;
+      const { level, confidence } = languageLevelFor(languageSegment(line, re, ALL_LANGUAGE_RULES));
+      if (level === null) continue;
       seenLang.add(code);
       if (out.languages.length < MAX_PER_SECTION) {
         out.languages.push({ lang: code, level, confidence, sourceLine });

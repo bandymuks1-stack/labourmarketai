@@ -186,8 +186,10 @@ export async function reprocessOwnJournalHistory(
     .slice(0, cap);
 
   // Same rule as the single-entry reprocess above: the caller's UI locale,
-  // else the entry's own recorded language. It used to be a hard-coded "lt",
-  // so a Swedish (or any non-LT) worker's history was re-read as Lithuanian.
+  // else the entry's own recorded language, instead of a hard-coded "lt".
+  // Consistency only: in processJournalEntrySkills the locale builds the
+  // revalidatePath paths, and this batch passes `revalidate: false`, so the
+  // value has no runtime effect here today. Recognition itself never read it.
   let uiLocale: string | null = null;
   try {
     uiLocale = await getLocale();
