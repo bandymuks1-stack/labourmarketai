@@ -71,7 +71,7 @@ describe("the marketplace is reachable and does not dead-end", () => {
     expect(
       existsSync(join(WEB, "app", "[locale]", "dashboard", "service-requests", "page.tsx")),
     ).toBe(true);
-    for (const loc of ["lt", "en", "de", "nl", "pl", "ru"]) {
+    for (const loc of ["lt", "en", "de", "nl", "pl", "ru", "sv"]) {
       const m = JSON.parse(read(`messages/${loc}.json`)) as {
         organizationDoors: { market?: string };
       };

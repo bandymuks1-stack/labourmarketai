@@ -1,3 +1,5 @@
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
+
 /**
  * IS THIS NAME ONE OF THE CALLER'S OWN WORKSPACES? Pure: no server-only
  * import, no IO, no env.
@@ -33,6 +35,40 @@ export interface WorkspaceLike {
  * caller must ask about; none is an unknown name. The caller decides — this
  * never picks for them.
  */
+/**
+ * Does the sentence ask for the PERSONAL space ("grįžk į asmeninį", "switch
+ * to personal", "växla till privat")? Stems, matched on the folded sentence.
+ * Lived inline in the chat component; sv ("personlig", "privat") joined
+ * 2026-11-12 — "Byt till mitt personliga konto" routed to `switch-context`
+ * and then asked which space, having just been told.
+ */
+const PERSONAL_SPACE_HINTS = ["asmenin", "personal", "личн", "persoonlijk", "personlich"] as const;
+/** sv "personlig", "privat" — counted in a Swedish sentence only: "Privat Bau"
+ *  is a German company name, not a request (review finding 11). */
+const SV_PERSONAL_SPACE_HINTS = ["personlig", "privat"] as const;
+
+export function asksForPersonalWorkspace(
+  text: string,
+  fold: (s: string) => string,
+  /**
+   * The person's organization names. A hint INSIDE a named organization is
+   * that organization's name, not a request: Swedish "personal" means staff,
+   * so "Byt till Nordisk Personal AB" must never land in the personal space.
+   */
+  organizationNames: readonly string[] = [],
+): boolean {
+  let folded = fold(text ?? "");
+  // The Swedish reading — the organization-name rule and the Swedish hints —
+  // applies to a Swedish sentence only; every other sentence is read exactly
+  // as the chat read it before Swedish was activated.
+  if (!looksSwedish(text)) return PERSONAL_SPACE_HINTS.some((hint) => folded.includes(hint));
+  for (const name of organizationNames) {
+    const n = fold(name).trim();
+    if (n.length >= 3) folded = folded.split(n).join(" ");
+  }
+  return [...PERSONAL_SPACE_HINTS, ...SV_PERSONAL_SPACE_HINTS].some((hint) => folded.includes(hint));
+}
+
 export function matchWorkspacesByName<T extends WorkspaceLike>(
   workspaces: readonly T[],
   text: string,
