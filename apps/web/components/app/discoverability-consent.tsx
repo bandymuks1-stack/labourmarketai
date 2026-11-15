@@ -69,6 +69,9 @@ export interface PreviewField {
 }
 
 export interface DiscoverabilityConsentLabels {
+  /** Set only when the legal text below is NOT in the reader's language (a
+   *  locale whose consent texts are not approved yet reads the English ones). */
+  legalLanguageNote?: string | null;
   /** "Visible to employers" — the status line's subject. */
   headline: string;
   /** "On" / "Off" — the status word. */
@@ -175,7 +178,19 @@ export function DiscoverabilityConsent({
   }
 
   const legalBlock = (
-    <div className="mt-3 flex flex-col gap-2 text-sm leading-relaxed text-text-primary">
+    <div
+      className="mt-3 flex flex-col gap-2 text-sm leading-relaxed text-text-primary"
+      lang={labels.legalLanguageNote ? "en" : undefined}
+    >
+      {labels.legalLanguageNote ? (
+        <p
+          lang={locale}
+          className="text-xs text-text-secondary"
+          data-testid="consent-legal-language-note"
+        >
+          {labels.legalLanguageNote}
+        </p>
+      ) : null}
       <p>{legal.summary}</p>
       <p>{legal.visibleData}</p>
       <p>{legal.invisibleData}</p>
