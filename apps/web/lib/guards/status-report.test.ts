@@ -9,9 +9,14 @@ import {
   collect,
   completeness,
   createGithubClient,
+  mergeWalkLedger,
+  narrativeDiscrepancies,
   parseGhInclude,
+  parseWalkTitle,
   prBlocker,
+  privacyFindings,
   reviewVerdict,
+  staleOverwriteReason,
   type CheckRun,
   type IssueComment,
   type TransportResponse,
@@ -364,5 +369,92 @@ describe("Rendered report — PARTIAL is shown, and the named register is the ba
     expect(rows.length).toBeGreaterThanOrEqual(288);
     expect(md).toContain("trūksta privalomų patikrų: quality");
     expect(md).not.toMatch(/\[#1\][^\n]*kandidatas jungti/);
+  });
+});
+
+describe("Report synchronisation — one latest confirmed state, never overwritten by older facts (owner order 2026-11-15)", () => {
+  const walk = (id: number, title: string, conclusion: string, at: string) => ({ id, title, sha: "abcdef12", conclusion, status: "completed", at });
+
+  it("reads the walk and screen from the run name; automatic walks are desktop; an old dispatch title has no screen", () => {
+    expect(parseWalkTitle("prod-qa-walk agency-chain phone-375")).toEqual({ spec: "agency-chain", device: "phone-375" });
+    expect(parseWalkTitle("prod-qa-walk company-chain desktop")).toEqual({ spec: "company-chain", device: "desktop" });
+    expect(parseWalkTitle("prod-qa-walk push")).toEqual({ spec: "push", device: "desktop" });
+    expect(parseWalkTitle("prod-qa-walk agency-chain")).toEqual({ spec: "agency-chain", device: null });
+    expect(parseWalkTitle("something else")).toEqual({ spec: null, device: null });
+  });
+
+  it("keeps the newest run per walk and screen; an older run never replaces a newer one", () => {
+    const ledger = { schema: 1, walks: { "agency-chain|phone-375": { spec: "agency-chain", device: "phone-375", run: 2, result: "success", build: "d225f58a", at: "2026-11-15T17:55:58Z" } } };
+    const r = mergeWalkLedger(ledger, [walk(1, "prod-qa-walk agency-chain phone-375", "failure", "2026-11-15T14:32:00Z")]);
+    expect(r.ledger.walks["agency-chain|phone-375"]).toMatchObject({ run: 2, result: "success" });
+    const r2 = mergeWalkLedger(ledger, [walk(3, "prod-qa-walk agency-chain phone-375", "failure", "2026-11-16T08:00:00Z")]);
+    expect(r2.ledger.walks["agency-chain|phone-375"]).toMatchObject({ run: 3, result: "failure" });
+  });
+
+  it("does not guess a screen, skips unfinished or cancelled runs, and flags the same run with a different result", () => {
+    const r = mergeWalkLedger({ schema: 1, walks: {} }, [
+      walk(1, "prod-qa-walk agency-chain", "success", "2026-11-15T10:00:00Z"),
+      { ...walk(2, "prod-qa-walk company-chain phone", "success", "2026-11-15T10:00:00Z"), status: "in_progress", conclusion: null },
+      walk(3, "prod-qa-walk company-chain phone", "cancelled", "2026-11-15T10:00:00Z"),
+    ]);
+    expect(r.ledger.walks).toEqual({});
+    expect(r.unknownDevice.map((w: { id: number }) => w.id)).toEqual([1]);
+    const ledger = { schema: 1, walks: { "x|phone": { spec: "x", device: "phone", run: 9, result: "success", build: "a", at: "2026-11-15T10:00:00Z" } } };
+    const c = mergeWalkLedger(ledger, [walk(9, "prod-qa-walk x phone", "failure", "2026-11-15T10:00:00Z")]);
+    expect(c.conflicts).toHaveLength(1);
+    // A run already recorded with its screen is not reported again as "screen unknown".
+    expect(mergeWalkLedger(ledger, [walk(9, "prod-qa-walk x", "success", "2026-11-15T10:00:00Z")]).unknownDevice).toEqual([]);
+    expect(c.ledger.walks["x|phone"].result).toBe("success");
+  });
+
+  it("refuses to overwrite a report generated after the data being rendered", () => {
+    expect(staleOverwriteReason("2026-11-15T21:41:00Z", "2026-11-15T09:40:00Z")).toMatch(/after this data was fetched/);
+    expect(staleOverwriteReason("2026-11-15T09:40:00Z", "2026-11-15T21:41:00Z")).toBeNull();
+    expect(staleOverwriteReason(null, "2026-11-15T21:41:00Z")).toBeNull();
+  });
+
+  it("flags a merged PR named as blocking and phone walks called 'not run' when the ledger has them", () => {
+    const ledger = { schema: 1, walks: { "agency-chain|phone-375": { spec: "agency-chain", device: "phone-375", run: 2, result: "success", build: "d", at: "2026-11-15T17:55:58Z" } } };
+    const d = narrativeDiscrepancies(
+      "- **Blokuoja:** #3349 – reikia RED patikrų; #3302 laukia sprendimo; #3354 laukia įrodymo\n- prisijungusių naudotojų bandymai telefonu produkcijoje – duomenyse paleidimo nėra",
+      { openPrNumbers: [3302], closedPrNumbers: [3349], ledger },
+    );
+    expect(d.some((x: string) => x.startsWith("#3349"))).toBe(true);
+    // #3354 is an issue, not a closed PR: never flagged.
+    expect(d.some((x: string) => x.startsWith("#3354"))).toBe(false);
+    expect(d.some((x: string) => x.startsWith("#3302"))).toBe(false);
+    expect(d.some((x: string) => /telefono bandymų/.test(x))).toBe(true);
+  });
+
+  it("keeps contact data and money amounts out of the public report", () => {
+    expect(privacyFindings("contact jonas@company.lt")).toHaveLength(1);
+    expect(privacyFindings("walk user qa@example.invalid")).toHaveLength(0);
+    expect(privacyFindings("turnover €60 000")).toHaveLength(1);
+    expect(privacyFindings("run 43743349514 on build d225f58a")).toHaveLength(0);
+  });
+
+  it("the rendered report shows the confirmed state, the coverage meaning, and refuses an older overwrite", () => {
+    const dir = mkdtempSync(join(tmpdir(), "status-sync-"));
+    const out = join(dir, "STATUS_REPORT.md");
+    const dataPath = join(dir, "data.json");
+    writeFileSync(
+      join(dir, "STATUS_EVIDENCE.json"),
+      JSON.stringify({ schema: 1, walks: { "agency-chain|phone-375": { spec: "agency-chain", device: "phone-375", run: 43743349514, result: "success", build: "d225f58a", at: "2026-11-15T17:55:58Z" } } }),
+    );
+    const base = { schema: 2, sinceIso: "2026-11-15T09:40:00Z", errors: [], requiredChecks: { names: [], source: "policy" }, health: { ok: true, build: "f461497e" }, deploys: [], merged: [], prs: [] };
+    const run = (fetchedAt: string, walks: object[]) => {
+      writeFileSync(dataPath, JSON.stringify({ ...base, fetchedAt, walks }));
+      return spawnSync(process.execPath, [join(REPO, ".github", "scripts", "status-report.mjs"), "--data", dataPath, "--out", out], { encoding: "utf8" });
+    };
+    const first = run("2026-11-15T21:41:00Z", [walk(43724558463, "prod-qa-walk agency-chain phone-375", "failure", "2026-11-15T14:32:00Z")]);
+    expect(first.status, first.stderr).toBe(0);
+    const md = readFileSync(out, "utf8");
+    expect(md).toContain("## Patvirtinta naujausia būsena");
+    expect(md).toMatch(/\| agency-chain \| telefonas 375 px \| sėkmingas \| `d225f58a`/);
+    expect(md).toContain("nereiškia, kad likusios");
+    expect(JSON.parse(readFileSync(join(dir, "STATUS_EVIDENCE.json"), "utf8")).walks["agency-chain|phone-375"].run).toBe(43743349514);
+    const older = run("2026-11-15T09:40:00Z", []);
+    expect(older.status).toBe(4);
+    expect(readFileSync(out, "utf8")).toBe(md);
   });
 });
