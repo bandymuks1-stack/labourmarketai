@@ -13,6 +13,7 @@
  */
 import { foldText } from "./normalize";
 import { parseWordNumber } from "./word-numbers";
+import { looksSwedish } from "./looks-swedish";
 
 export type TimeWindowKind =
   | "next_week"
@@ -95,6 +96,46 @@ const KIND_NEEDLES: ReadonlyArray<{ kind: TimeWindowKind; res: RegExp[] }> = [
     ],
   },
 ];
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_KIND_NEEDLES: ReadonlyArray<{ kind: TimeWindowKind; res: RegExp[] }> = [
+  {
+    kind: "next_week",
+    res: [
+      /kita\s+savait/u, // kitą savaitę (folded)
+      /ateinancia\s+savait/u,
+      /next\s+week/u,
+      /следующ[\p{L}]*\s+недел/u,
+      /volgende\s+week/u,
+      /nachste\s+woche/u,
+      /nasta\s+vecka/u, // sv "nästa vecka" (folded)
+    ],
+  },
+  {
+    kind: "this_week",
+    res: [
+      /sia\s+savait/u, // šią savaitę (folded)
+      /this\s+week/u,
+      /этой\s+недел/u,
+      /эту\s+недел/u,
+      /deze\s+week/u,
+      /diese\s+woche/u,
+      /den\s+har\s+veckan|denna\s+vecka/u, // sv "den här veckan"
+    ],
+  },
+  {
+    kind: "next_month",
+    res: [
+      /kita\s+men/u, // kitą mėnesį (folded "kita menesi")
+      /kito\s+men/u, // "nuo kito mėnesio" — from next month
+      /ateinanti\s+men/u,
+      /next\s+month/u,
+      /следующ[\p{L}]*\s+месяц/u,
+      /volgende\s+maand/u,
+      /nachsten?\s+monat/u,
+      /nasta\s+manad/u, // sv "nästa månad"
+    ],
+  },
+];
 
 /**
  * Month WORDS, folded, one row per month — LT (every case people write: the
@@ -123,15 +164,37 @@ const MONTH_WORDS: ReadonlyArray<RegExp> = [
   /^(?:lapkri(?:tis|cio|ti|tyje)|nov(?:ember)?|ноябр\p{L}*|listopad(?:a|zie)?)$/u,
   /^(?:gruod(?:is|zio|i|yje)|dec(?:ember)?|dezember|декабр\p{L}*|grud(?:zien|nia|niu))$/u,
 ];
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_MONTH_WORDS: ReadonlyArray<RegExp> = [
+  /^(?:saus(?:is|io|i|yje)|jan(?:uary)?|январ\p{L}*|januari?|stycz(?:en|nia|niu))$/u,
+  /^(?:vasar(?:is|io|i|yje)|feb(?:ruary)?|феврал\p{L}*|februari?|lut(?:y|ego|ym)?)$/u,
+  /^(?:kov(?:as|o|a|e)|mar(?:ch)?|март\p{L}*|maart|marz|marzec|marc(?:a|u)|mars)$/u,
+  /^(?:baland(?:is|zio|i|yje)|apr(?:il)?|апрел\p{L}*|kwie(?:cien|tnia|tniu))$/u,
+  /^(?:geguz(?:e|es|eje)|may|ма[йяе]|mei|mai|maj(?:a|u)?)$/u,
+  /^(?:birzel(?:is|io|i|yje)|june?|июн\p{L}*|juni|czerw(?:iec|ca|cu))$/u,
+  /^(?:liep(?:a|os|oje)|july?|июл\p{L}*|juli|lip(?:iec|ca|cu))$/u,
+  /^(?:rugpj(?:utis|ucio|uti|utyje)|aug(?:ust|ustus)?|август\p{L}*|sierp(?:ien|nia|niu)|augusti)$/u,
+  /^(?:rugsej(?:is|o|i|yje)|sep(?:t|tember)?|сентябр\p{L}*|wrze(?:sien|snia|sniu))$/u,
+  /^(?:spal(?:is|io|i|yje)|oct(?:ober)?|октябр\p{L}*|oktober|pazdziernik(?:a|u)?)$/u,
+  /^(?:lapkri(?:tis|cio|ti|tyje)|nov(?:ember)?|ноябр\p{L}*|listopad(?:a|zie)?)$/u,
+  /^(?:gruod(?:is|zio|i|yje)|dec(?:ember)?|dezember|декабр\p{L}*|grud(?:zien|nia|niu))$/u,
+];
 
 /** "from" across the locales — the word that turns a date into a START. */
+// sv: "från 1 december", "från den 1 december", "från och med den 1 december",
+// "fr.o.m. 1 december" — the article and "och med" belong to the from-word.
 const FROM_WORD = "(?:nuo|from|starting|с|со|vanaf|ab|od)";
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_FROM_WORD =
+  "(?:nuo|from|starting|с|со|vanaf|ab|od|(?:fran(?:\\s+och\\s+med)?|fr\\.o\\.m\\.?)(?:\\s+den)?)";
 
 /** The month (1–12) one FOLDED word names, or `null`. Whole word only — see
  *  MONTH_WORDS for why a prefix is not enough. */
-export function monthOf(word: string): number | null {
-  for (let m = 0; m < MONTH_WORDS.length; m++) {
-    if (MONTH_WORDS[m].test(word)) return m + 1;
+export function monthOf(word: string, swedish = false): number | null {
+  // `swedish` — whether the SENTENCE the word came from is Swedish.
+  const words = swedish ? SV_MONTH_WORDS : MONTH_WORDS;
+  for (let m = 0; m < words.length; m++) {
+    if (words[m].test(word)) return m + 1;
   }
   return null;
 }
@@ -159,6 +222,7 @@ function nextOccurrence(todayIso: string, month: number, day: number): string | 
  * question.
  */
 export function parseStartDate(text: string, todayIso: string): string | null {
+  const swedish = looksSwedish(text);
   const folded = foldText(text ?? "");
   const iso = folded.match(/\b(\d{4})-(\d{2})-(\d{2})\b/u);
   if (iso) {
@@ -169,18 +233,18 @@ export function parseStartDate(text: string, todayIso: string): string | null {
   // NB: `\b` is ASCII-only in JS, so a Cyrillic from-word ("с") gets an
   // explicit non-letter left edge instead.
   const dayFirst = folded.match(
-    new RegExp(`(?:^|[^\\p{L}])${FROM_WORD}\\s+(\\d{1,2})\\.?\\s+([\\p{L}]+)`, "u"),
+    new RegExp(`(?:^|[^\\p{L}])${swedish ? SV_FROM_WORD : FROM_WORD}\\s+(\\d{1,2})\\.?\\s+([\\p{L}]+)`, "u"),
   );
   if (dayFirst) {
-    const month = monthOf(dayFirst[2]);
+    const month = monthOf(dayFirst[2], swedish);
     if (month) return nextOccurrence(todayIso, month, Number.parseInt(dayFirst[1], 10));
   }
   // month-first: "nuo spalio 5" / "from October 5"
   const monthFirst = folded.match(
-    new RegExp(`(?:^|[^\\p{L}])${FROM_WORD}\\s+([\\p{L}]+)\\s+(\\d{1,2})(?!\\d)`, "u"),
+    new RegExp(`(?:^|[^\\p{L}])${swedish ? SV_FROM_WORD : FROM_WORD}\\s+([\\p{L}]+)\\s+(\\d{1,2})(?!\\d)`, "u"),
   );
   if (monthFirst) {
-    const month = monthOf(monthFirst[1]);
+    const month = monthOf(monthFirst[1], swedish);
     if (month) return nextOccurrence(todayIso, month, Number.parseInt(monthFirst[2], 10));
   }
   // A bare month after the from-word — "nuo spalio", "from October", "с
@@ -189,17 +253,20 @@ export function parseStartDate(text: string, todayIso: string): string | null {
   // empty). The FIRST of that month is the coarsest honest day; the month
   // already running means "from now". Never a guess at a later day.
   const bareMonth = folded.match(
-    new RegExp(`(?:^|[^\\p{L}])${FROM_WORD}\\s+([\\p{L}]+)(?![\\p{L}])`, "u"),
+    new RegExp(`(?:^|[^\\p{L}])${swedish ? SV_FROM_WORD : FROM_WORD}\\s+([\\p{L}]+)(?![\\p{L}])`, "u"),
   );
   if (bareMonth) {
-    const month = monthOf(bareMonth[1]);
+    const month = monthOf(bareMonth[1], swedish);
     if (month) {
       if (utc(todayIso).getUTCMonth() + 1 === month) return todayIso;
       return nextOccurrence(todayIso, month, 1);
     }
   }
   // "rytoj" / "nuo rytojaus" / "tomorrow" / "завтра" / "morgen" / "jutro".
-  if (/(?:^|[^\p{L}])(?:rytoj|tomorrow|завтра|morgen|jutro)/u.test(folded)) {
+  if (
+    /(?:^|[^\p{L}])(?:rytoj|tomorrow|завтра|morgen|jutro)/u.test(folded) ||
+    (swedish && /(?:^|[^\p{L}])i\s?morgon/u.test(folded))
+  ) {
     return plusDays(todayIso, 1);
   }
   return null;
@@ -221,15 +288,16 @@ const PRESENCE_ANCHOR = "2026-01-01";
  *     resolve it — but it IS a stated start). Hours ("nuo 08-17 val.") are not.
  */
 export function mentionsStartTime(text: string): boolean {
+  const swedish = looksSwedish(text);
   if (parseStartDate(text ?? "", PRESENCE_ANCHOR) !== null) return true;
   const folded = foldText(text ?? "");
-  if (KIND_NEEDLES.some(({ res }) => res.some((re) => re.test(folded)))) return true;
+  if ((swedish ? SV_KIND_NEEDLES : KIND_NEEDLES).some(({ res }) => res.some((re) => re.test(folded)))) return true;
   for (const m of folded.matchAll(/(?:^|[^\p{L}])([\p{L}]+)\s+men(?![\p{L}])/gu)) {
-    if (monthOf(m[1])) return true;
+    if (monthOf(m[1], swedish)) return true;
   }
   const numeric = folded.match(
     new RegExp(
-      `(?:^|[^\\p{L}])${FROM_WORD}\\s+(\\d{2})-(\\d{2})(?![\\d-])(?!\\s*(?:val|h(?![\\p{L}])|час|uhr|godz|uur))`,
+      `(?:^|[^\\p{L}])${swedish ? SV_FROM_WORD : FROM_WORD}\\s+(\\d{2})-(\\d{2})(?![\\d-])(?!\\s*(?:val|h(?![\\p{L}])|час|uhr|godz|uur))`,
       "u",
     ),
   );
@@ -243,7 +311,14 @@ export function mentionsStartTime(text: string): boolean {
 }
 
 /** "until" across the locales — the word that turns a date into an END. */
+// sv: "till den 20 december", "till och med 20 december", "t.o.m. 20
+// december", "fram till …", "senast den 20 december" (a deadline). The longer
+// Swedish forms come first so the bare English/Swedish "till" cannot stop short
+// of the article.
 const UNTIL_WORD = "(?:iki|until|till|to|до|tot|t/m|bis|do)";
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_UNTIL_WORD =
+  "(?:(?:fram\\s+till|till\\s+och\\s+med|t\\.o\\.m\\.?|senast|till)\\s+den|fram\\s+till|till\\s+och\\s+med|t\\.o\\.m\\.?|senast|iki|until|till|to|до|tot|t/m|bis|do)";
 
 /**
  * An absolute END date ("iki spalio 20", "until 20 October", "до 20 октября",
@@ -253,31 +328,32 @@ const UNTIL_WORD = "(?:iki|until|till|to|до|tot|t/m|bis|do)";
  * none is stated.
  */
 export function parseEndDate(text: string, todayIso: string, startIso: string | null): string | null {
+  const swedish = looksSwedish(text);
   const folded = foldText(text ?? "");
   const anchor = startIso ?? todayIso;
   // A written date — "iki 2027-03-31", "until 31.03.2027", "bis 31.3.2027" —
   // the way a person copies it off a certificate. Prod walk 2026-09-04:
   // "turiu naują A1 pažymą iki 2027-03-31" left the valid-until field empty.
   const iso = folded.match(
-    new RegExp(`(?:^|[^\\p{L}])${UNTIL_WORD}\\s+(\\d{4})-(\\d{2})-(\\d{2})(?!\\d)`, "u"),
+    new RegExp(`(?:^|[^\\p{L}])${swedish ? SV_UNTIL_WORD : UNTIL_WORD}\\s+(\\d{4})-(\\d{2})-(\\d{2})(?!\\d)`, "u"),
   );
   if (iso) return validIsoDate(iso[1], iso[2], iso[3]);
   const dmy = folded.match(
-    new RegExp(`(?:^|[^\\p{L}])${UNTIL_WORD}\\s+(\\d{1,2})[./](\\d{1,2})[./](\\d{4})(?!\\d)`, "u"),
+    new RegExp(`(?:^|[^\\p{L}])${swedish ? SV_UNTIL_WORD : UNTIL_WORD}\\s+(\\d{1,2})[./](\\d{1,2})[./](\\d{4})(?!\\d)`, "u"),
   );
   if (dmy) return validIsoDate(dmy[3], dmy[2], dmy[1]);
   const dayFirst = folded.match(
-    new RegExp(`(?:^|[^\\p{L}])${UNTIL_WORD}\\s+(\\d{1,2})\\.?\\s+([\\p{L}]+)`, "u"),
+    new RegExp(`(?:^|[^\\p{L}])${swedish ? SV_UNTIL_WORD : UNTIL_WORD}\\s+(\\d{1,2})\\.?\\s+([\\p{L}]+)`, "u"),
   );
   if (dayFirst) {
-    const month = monthOf(dayFirst[2]);
+    const month = monthOf(dayFirst[2], swedish);
     if (month) return nextOccurrence(anchor, month, Number.parseInt(dayFirst[1], 10));
   }
   const monthFirst = folded.match(
-    new RegExp(`(?:^|[^\\p{L}])${UNTIL_WORD}\\s+([\\p{L}]+)\\s+(\\d{1,2})(?!\\d)`, "u"),
+    new RegExp(`(?:^|[^\\p{L}])${swedish ? SV_UNTIL_WORD : UNTIL_WORD}\\s+([\\p{L}]+)\\s+(\\d{1,2})(?!\\d)`, "u"),
   );
   if (monthFirst) {
-    const month = monthOf(monthFirst[1]);
+    const month = monthOf(monthFirst[1], swedish);
     if (month) return nextOccurrence(anchor, month, Number.parseInt(monthFirst[2], 10));
   }
   return null;
@@ -292,12 +368,14 @@ export function parseEndDate(text: string, todayIso: string, startIso: string | 
  * removed — a month word must be a real month; anything else stays.
  */
 export function stripEndDatePhrase(text: string): string {
+  const swedish = looksSwedish(text);
+  const until = swedish ? SV_UNTIL_WORD : UNTIL_WORD;
   const src = text ?? "";
   const forms = [
-    `${UNTIL_WORD}\\s+\\d{4}-\\d{2}-\\d{2}(?!\\d)`,
-    `${UNTIL_WORD}\\s+\\d{1,2}[./]\\d{1,2}[./]\\d{4}(?!\\d)`,
-    `${UNTIL_WORD}\\s+\\d{1,2}\\.?\\s+[\\p{L}]+`,
-    `${UNTIL_WORD}\\s+[\\p{L}]+\\s+\\d{1,2}(?!\\d)`,
+    `${until}\\s+\\d{4}-\\d{2}-\\d{2}(?!\\d)`,
+    `${until}\\s+\\d{1,2}[./]\\d{1,2}[./]\\d{4}(?!\\d)`,
+    `${until}\\s+\\d{1,2}\\.?\\s+[\\p{L}]+`,
+    `${until}\\s+[\\p{L}]+\\s+\\d{1,2}(?!\\d)`,
   ];
   for (const form of forms) {
     const rx = new RegExp(`(^|[^\\p{L}])(${form})`, "iu");
@@ -307,7 +385,7 @@ export function stripEndDatePhrase(text: string): string {
     // month-word forms: the word must be a month this module knows
     const word = phrase.match(/[\p{L}]+\s*$/u)?.[0] ?? phrase.match(/\s([\p{L}]+)\s+\d{1,2}$/u)?.[1];
     const numeric = /\d{4}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}[./]\d{4}/.test(phrase);
-    if (!numeric && (!word || !monthOf(foldText(word)))) continue;
+    if (!numeric && (!word || !monthOf(foldText(word), swedish))) continue;
     const start = m.index + m[1].length;
     return (src.slice(0, start) + src.slice(start + phrase.length)).replace(/\s{2,}/g, " ").replace(/\s+([,.;:])/g, "$1").trim();
   }
@@ -329,9 +407,13 @@ function validIsoDate(y: string, m: string, d: string): string | null {
 /** Duration units, folded stems: weeks / months across the locales. */
 // `\w` is ASCII-only in JS — Cyrillic and Lithuanian endings need `\p{L}`.
 const WEEK_WORD = /^(savait[\p{L}]*|weeks?|недел[\p{L}]*|weken|week|wochen?|tygodn[\p{L}]*)$/u;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_WEEK_WORD = /^(savait[\p{L}]*|weeks?|недел[\p{L}]*|weken|week|wochen?|tygodn[\p{L}]*|vecka|veckor|veckors)$/u;
 // LT month forms only — "mėn.", "mėnuo", "mėnesį", "mėnesiams" (folded) —
 // never a bare "men…" stem: Dutch "4 mensen" (people) read as four months.
 const MONTH_WORD = /^(men|menuo|menes[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat[\p{L}]*|miesi[\p{L}]*)$/u;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_MONTH_WORD = /^(men|menuo|menes[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat[\p{L}]*|miesi[\p{L}]*|manad|manader|manaders)$/u;
 /** Years: ONLY the Lithuanian dative "metams" ("for a year", "2 metams").
  *  Every other year word ("3 metų", "3 years", "3 года") is far more often
  *  EXPERIENCE than a duration, and must not turn into an end date. */
@@ -349,13 +431,13 @@ const DATIVE_PLURAL_WORD = /^\p{L}+(?:iems|ioms|ems|oms)$/u;
 
 /** Days in a "metams" duration whose preceding token is `prev`; `null` when
  *  that token is a count this module cannot read. */
-function yearDativeDays(prev: string | undefined): number | null {
+function yearDativeDays(prev: string | undefined, swedish: boolean): number | null {
   if (prev === undefined) return 365; // a bare "metams" opens the text: one year
   if (/^\d+$/.test(prev)) {
     const n = Number.parseInt(prev, 10);
     return n >= 1 && n <= 10 ? n * 365 : null;
   }
-  const word = parseWordNumber(prev);
+  const word = parseWordNumber(prev, swedish);
   if (word !== null) return word >= 1 && word <= 10 ? word * 365 : null;
   const folded = foldText(prev);
   if (YEAR_DETERMINERS.has(folded)) return 365;
@@ -370,29 +452,33 @@ function yearDativeDays(prev: string | undefined): number | null {
  * Word-numbers count too.
  */
 export function parseDurationDays(text: string): number | null {
+  const swedish = looksSwedish(text);
   const tokens = (text ?? "").split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   const folded = tokens.map(foldText);
   for (let i = 0; i < folded.length; i++) {
     if (!YEAR_DATIVE.test(folded[i])) continue;
-    return yearDativeDays(i > 0 ? tokens[i - 1] : undefined);
+    return yearDativeDays(i > 0 ? tokens[i - 1] : undefined, swedish);
   }
   // Years in the other locales only with the duration preposition right
   // before the count — "for 2 years", "на 2 года", "für 2 Jahre", "na 2
   // lata", "voor 2 jaar". Without it ("3 years experience", "опыт 3 года")
   // a year count is experience, never an end date.
   for (let i = 2; i < folded.length; i++) {
-    if (!YEAR_WORD.test(folded[i]) || !DURATION_PREPOSITION.test(folded[i - 2])) continue;
+    // sv "i 2 år" / "under 2 år": read off the RAW token — folded, "år" is
+    // "ar", the Lithuanian "or" ("į 2 ar 3 objektus").
+    const svYear = swedish && /^år$/iu.test(tokens[i]) && /^(i|under)$/u.test(folded[i - 2]);
+    if (!svYear && (!YEAR_WORD.test(folded[i]) || !DURATION_PREPOSITION.test(folded[i - 2]))) continue;
     const candidate = tokens[i - 1];
     const digits = /^\d{1,2}$/.test(candidate) ? Number.parseInt(candidate, 10) : null;
-    const value = digits ?? parseWordNumber(candidate);
+    const value = digits ?? parseWordNumber(candidate, swedish);
     if (value !== null && value >= 1 && value <= 10) return value * 365;
   }
   for (let i = 1; i < folded.length; i++) {
-    const unit = WEEK_WORD.test(folded[i]) ? 7 : MONTH_WORD.test(folded[i]) ? 30 : 0;
+    const unit = (swedish ? SV_WEEK_WORD : WEEK_WORD).test(folded[i]) ? 7 : (swedish ? SV_MONTH_WORD : MONTH_WORD).test(folded[i]) ? 30 : 0;
     if (!unit) continue;
     const candidate = tokens[i - 1];
     const digits = /^\d{1,2}$/.test(candidate) ? Number.parseInt(candidate, 10) : null;
-    const value = digits ?? parseWordNumber(candidate);
+    const value = digits ?? parseWordNumber(candidate, swedish);
     if (value !== null && value >= 1 && value <= 52) return value * unit;
   }
   return null;
@@ -400,19 +486,22 @@ export function parseDurationDays(text: string): number | null {
 
 /** Day-count words across the locales (folded stems). */
 const DAY_WORD = /^(dien\w*|days?|день|дня|дней|дни|dagen|dag|tage?n?)$/u;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_DAY_WORD = /^(dien\w*|days?|день|дня|дней|дни|dagen|dag|tage?n?|dagar|dagars)$/u;
 
 /** "N days" — digits or word-numbers within two tokens before a day word. */
 function findDayCount(text: string): number | null {
+  const swedish = looksSwedish(text);
   const tokens = (text ?? "").split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   const folded = tokens.map(foldText);
   for (let i = 0; i < folded.length; i++) {
-    if (!DAY_WORD.test(folded[i])) continue;
+    if (!(swedish ? SV_DAY_WORD : DAY_WORD).test(folded[i])) continue;
     for (let back = 1; back <= 2 && i - back >= 0; back++) {
       const candidate = tokens[i - back];
       const digits = /^\d{1,3}$/.test(candidate)
         ? Number.parseInt(candidate, 10)
         : null;
-      const value = digits ?? parseWordNumber(candidate);
+      const value = digits ?? parseWordNumber(candidate, swedish);
       if (value !== null && value >= 1 && value <= 366) return value;
     }
   }
@@ -427,6 +516,7 @@ function findDayCount(text: string): number | null {
  * becomes `days_count` anchored at today — the coarsest honest reading.
  */
 export function parseTimeWindow(text: string, todayIso: string): TimeWindow {
+  const swedish = looksSwedish(text);
   const folded = foldText(text ?? "");
   const days = findDayCount(text ?? "") ?? undefined;
 
@@ -444,7 +534,7 @@ export function parseTimeWindow(text: string, todayIso: string): TimeWindow {
     return { kind: "from_date", startIso, ...(endIso ? { endIso } : {}), days };
   }
 
-  for (const { kind, res } of KIND_NEEDLES) {
+  for (const { kind, res } of swedish ? SV_KIND_NEEDLES : KIND_NEEDLES) {
     if (!res.some((re) => re.test(folded))) continue;
     if (kind === "next_week") {
       const start = plusDays(mondayOf(todayIso), 7);

@@ -1792,6 +1792,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // retry / dead-letter / bounce fields. RED draft #3318, the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261113190000_invitation_delivery_attempts_v1.sql",
+      // 2026-11-14 owner-chosen RED: a closed need refuses a new proposal or a first accept (draft, needs-human-gate, NOT applied).
+      "20261114100000_booking_refuses_closed_need_v1.sql",
       // 2026-11-14: owner decision, NEW/ACTIVE counts for five platform groups, aggregate only.
       // RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
       "20261114120000_lm_registrations_daily_v1.sql",

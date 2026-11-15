@@ -35,6 +35,7 @@
  */
 import { fold } from "@/lib/conversation/intent-router";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 /** Whose the file is. `unstated` is a question, never an assumption. */
 export type FileSubject =
@@ -81,6 +82,25 @@ const DEPOSIT = [
   // de
   "hier ist", "hier sind", "anbei", "ich lade", "beigefugt", "das ist mein",
 ] as const;
+
+// ── SWEDISH (folded) ────────────────────────────────────────────────────────
+// Every Swedish list below is read ONLY for a sentence `looksSwedish` reads as
+// Swedish. They sat inside the shared lists, where " min " — Swedish "my" —
+// made "Hierbij het cv van Jan, min of meer compleet" and "Here is John's
+// certificate, a 5 min scan" the SPEAKER's own file, and "elever" read the
+// Dutch "opgeleverd" as a cohort (review finding 9). A sentence about another
+// person must never reach `self`; a Swedish possessive cannot decide that for
+// a sentence that is not Swedish.
+/** "här är", "jag laddar upp", "bifogar", "det här är mitt". */
+const SV_DEPOSIT = ["har ar ", "har kommer ", "laddar upp", "ladda upp", "bifogar", "bifogat ", "skickar over", "det har ar mi"] as const;
+const SV_SELF = [" mitt ", " mina "] as const;
+/** Swedish "min" (my) — but never the minutes of "en 5 min scan". */
+const SV_SELF_MIN_RE = /(?<![0-9]) min (?![0-9])/u;
+const SV_ANOTHER_PERSON = ["kandidatens ", "medarbetarens ", "anstalldes ", "personens "] as const;
+const SV_MANY_PEOPLE = ["kandidater", "medarbetarnas", "anstallda", "arbetssokande"] as const;
+const SV_ORGANIZATION = ["foretagets ", "vart foretag", "bolagets ", "organisationens "] as const;
+const SV_COHORT = ["studenter", "elever", "klasslista", "deltagarlista", "kursdeltagare"] as const;
+const SV_TABLE = ["kalkylblad"] as const;
 
 /** First-person possessive — the ONLY thing that makes a file the speaker's. */
 const SELF = [
@@ -152,10 +172,12 @@ const hasAny = (hay: string, needles: readonly string[]): boolean =>
 // "įkeltą" → "ikelta", "geüpload" → "geupload".
 const READBACK_FORMS =
   /(?<!\p{L})(ikelt\p{L}*|uploaded|загружен\p{L}*|hochgeladen\p{L}*|geupload\p{L}*)(?!\p{L})/giu;
+const SV_READBACK_FORMS = /(?<!\p{L})uppladdad\p{L}*(?!\p{L})/giu;
 
 /** The sentence with its past upload forms removed — what the deposit test sees. */
-export function withoutReadbackForms(folded: string): string {
-  return folded.replace(READBACK_FORMS, " ");
+export function withoutReadbackForms(folded: string, swedish = false): string {
+  const out = folded.replace(READBACK_FORMS, " ");
+  return swedish ? out.replace(SV_READBACK_FORMS, " ") : out;
 }
 
 /**
@@ -174,12 +196,15 @@ export function readFileIntent(text: string): FileIntent | null {
   // "Ką ČIA galiu padaryti?" asks WHERE/WHAT, it hands nothing over: a question
   // word directly before "čia" is not the deposit "čia mano CV" (production
   // 2026-10-01: the capabilities question was answered with "Kieno šis dokumentas?").
-  const asked = withoutReadbackForms(q).replace(/(?<!\p{L})(ka|kas|kur|kaip|kodel|kam|ko|kuo|koks|kokia|kokie)\s+cia(?!\p{L})/gu, " ");
-  if (!hasAny(asked, DEPOSIT)) return null;
+  const swedish = looksSwedish(raw);
+  const has = (hay: string, shared: readonly string[], sv: readonly string[]): boolean =>
+    hasAny(hay, shared) || (swedish && hasAny(hay, sv));
+  const asked = withoutReadbackForms(q, swedish).replace(/(?<!\p{L})(ka|kas|kur|kaip|kodel|kam|ko|kuo|koks|kokia|kokie)\s+cia(?!\p{L})/gu, " ");
+  if (!has(asked, DEPOSIT, SV_DEPOSIT)) return null;
 
   const documentTypeSlug = guessDocumentType(raw);
   const evidence = hasAny(q, WORK_EVIDENCE);
-  const table = hasAny(q, TABLE);
+  const table = has(q, TABLE, SV_TABLE);
 
   // ── SUBJECT ─────────────────────────────────────────────────────────────
   //
@@ -194,12 +219,15 @@ export function readFileIntent(text: string): FileIntent | null {
   // pins that no subject except `self` can reach the self CV importer.
   const numbered = /\d/.test(q);
   let subject: FileSubject;
-  if (hasAny(q, COHORT)) subject = "cohort";
-  else if (hasAny(q, ORGANIZATION)) subject = "organization";
-  else if (hasAny(q, MANY_PEOPLE) || (numbered && hasAny(q, ANOTHER_PERSON)))
+  if (has(q, COHORT, SV_COHORT)) subject = "cohort";
+  else if (has(q, ORGANIZATION, SV_ORGANIZATION)) subject = "organization";
+  // sv "kandidatens CV" is ONE candidate's — the genitive holds the Dutch /
+  // German plural "kandidaten" of the shared list, and is not several people.
+  else if (swedish && !numbered && hasAny(q, SV_ANOTHER_PERSON) && !hasAny(q, SV_MANY_PEOPLE)) subject = "another_person";
+  else if (has(q, MANY_PEOPLE, SV_MANY_PEOPLE) || (numbered && has(q, ANOTHER_PERSON, SV_ANOTHER_PERSON)))
     subject = "many_people";
-  else if (hasAny(q, ANOTHER_PERSON)) subject = "another_person";
-  else if (hasAny(q, SELF)) subject = "self";
+  else if (has(q, ANOTHER_PERSON, SV_ANOTHER_PERSON)) subject = "another_person";
+  else if (has(q, SELF, SV_SELF) || (swedish && SV_SELF_MIN_RE.test(q))) subject = "self";
   else subject = "unstated";
 
   // ── KIND ────────────────────────────────────────────────────────────────

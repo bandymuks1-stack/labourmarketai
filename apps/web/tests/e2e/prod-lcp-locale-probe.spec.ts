@@ -28,7 +28,7 @@ const ENABLED = process.env.PROD_QA_WALK === "1" && existsSync(state);
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 900_000, retries: 0 });
 
-const LOCALES = ["lt", "en", "ru", "de", "nl", "pl"] as const;
+const LOCALES = ["lt", "en", "ru", "de", "nl", "pl", "sv"] as const;
 const PAGES = ["/dashboard", "/dashboard/journal", "/dashboard/opportunities", "/dashboard/profile"] as const;
 
 async function healthMs(page: Page): Promise<number> {

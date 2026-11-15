@@ -28,7 +28,7 @@ const PAGE = read("app/[locale]/dashboard/company/scouting/page.tsx");
 const ADAPTER = read("lib/conversation/employer-workspace.ts");
 const PANEL = read("components/app/workspace/candidates-result.tsx");
 
-const LOCALES = ["en", "lt", "ru", "pl", "de", "nl"] as const;
+const LOCALES = ["en", "lt", "ru", "pl", "de", "nl", "sv"] as const;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const msgs = (loc: string): any => JSON.parse(read(`messages/${loc}.json`));
 
@@ -164,7 +164,7 @@ describe("the chat candidates panel shows them, labelled, server-side", () => {
 });
 
 describe("copy: 6 locales, says 'not assessed', claims no qualification", () => {
-  const CERT_STEM = /verif|confirm|certif|tvirtin|sertifik|подтверж|верифиц|zertifi|bestätig|geverifieerd|bevestig|potwierdz|zweryfik/i;
+  const CERT_STEM = /verif|confirm|certif|tvirtin|sertifik|подтверж|верифиц|zertifi|bestätig|geverifieerd|bevestig|potwierdz|zweryfik|bekräft|certifi/i;
   const NOT_ASSESSED: Record<(typeof LOCALES)[number], RegExp> = {
     en: /not assessed/i,
     lt: /nevertinta/i,
@@ -172,6 +172,7 @@ describe("copy: 6 locales, says 'not assessed', claims no qualification", () => 
     pl: /nie zostało ocenione|nieocenione/i,
     de: /nicht bewertet/i,
     nl: /niet beoordeeld/i,
+    sv: /inte bedömd/i,
   };
 
   for (const loc of LOCALES) {

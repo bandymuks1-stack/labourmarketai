@@ -406,6 +406,8 @@
     "noSignatureNote": "Sutartys saugo būseną ir neprivalomą dokumento nuorodą. Elektroninis parašas nekuriamas ir neteigiamas.",
     "contractsEmpty": "Sutarčių dar nėra.",
     "addContract": "Pridėti sutartį",
+    "contractFromProposal": "Sukurti sutartį",
+    "fromProposal": "Iš pasiūlymo: {title}",
     "contractTitlePlaceholder": "Sutarties pavadinimas",
     "docRef": "Dok. nuoroda",
     "docRefLabel": "Dokumento nuoroda",
@@ -9588,6 +9590,7 @@
       "withdraw": "Atšaukti pasiūlymą",
       "findAnother": "Ieškoti kito darbuotojo",
       "proposeAgain": "Siūlyti iš naujo su naujomis datomis",
+      "needClosed": "Darbdavys šį poreikį uždarė, todėl pasiūlymo priimti nebegali. Vis dar gali jį atmesti.",
       "planning": "Peržiūrėti kalendoriuje"
     },
     "connections": {
@@ -11452,7 +11455,8 @@
       "needsMigration": "Ši funkcija dar neįjungta serveryje. Tavo profilis lieka privatus.",
       "error": "Nepavyko išsaugoti. Bandyk dar kartą.",
       "declinedNote": "Gerai — profilis lieka privatus. Šį pasirinkimą rasi čia bet kada.",
-      "readFailed": "Nepavyko patikrinti, ar darbdaviai mato tavo profilį. Tai nereiškia, kad matomumas išjungtas — pabandyk dar kartą vėliau."
+      "readFailed": "Nepavyko patikrinti, ar darbdaviai mato tavo profilį. Tai nereiškia, kad matomumas išjungtas — pabandyk dar kartą vėliau.",
+      "legalTextInEnglish": "Šis teisinis tekstas rodomas anglų kalba: jo versija jūsų kalba dar nepatvirtinta. Galioja angliškas tekstas."
     },
     "disclosures": {
       "intro": "Kiekvienas CV, kontaktų ar kitų duomenų perdavimas konkrečiai įmonei vyksta tik po atskiro tavo patvirtinimo.",

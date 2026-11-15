@@ -364,7 +364,7 @@ describe("Unit: the refusal reason becomes a sentence, never a token", () => {
     const refusable = ROLE_GATED_PREFIXES.flatMap((r) =>
       r.requirement.kind === "role" ? [r.requirement.role] : [],
     );
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const messages = JSON.parse(
         read(join(APP_ROOT, "messages", `${locale}.json`)),
       ) as { workspace: { accessNotice?: Record<string, string> } };
