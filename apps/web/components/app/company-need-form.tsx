@@ -143,6 +143,7 @@ export function CompanyNeedForm({
     setIf("description", prefill.description, [""]);
     entryRef.current = prefill.entry ?? "";
     if (entryInputRef.current) entryInputRef.current.value = entryRef.current;
+    setIf("engagement_model", prefill.engagement, ["employment"]); // employment is the untouched default
   }, []);
 
   // Spam guard: when the form appeared, sent in a hidden field. Taken after

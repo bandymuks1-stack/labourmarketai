@@ -273,6 +273,12 @@ describe("the registry itself", () => {
       // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
       "company.ingest.preview",
       "company.ingest.confirm",
+      // Partner registration Slice 1 (2026-11-10): a discovered company's representative takes it over.
+      "company.claims.list",
+      "company.claim.invite.preview",
+      "company.claim.invite.confirm",
+      "company.claim.decide.preview",
+      "company.claim.decide.confirm",
       // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
@@ -544,6 +550,12 @@ describe("the registry itself", () => {
       // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
       "company.ingest.preview",
       "company.ingest.confirm",
+      // Partner registration Slice 1 (2026-11-10): a discovered company's representative takes it over.
+      "company.claims.list",
+      "company.claim.invite.preview",
+      "company.claim.invite.confirm",
+      "company.claim.decide.preview",
+      "company.claim.decide.confirm",
       // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
@@ -785,9 +797,11 @@ describe("the registry itself", () => {
       // Nothing in the registry reaches outside the product's own domain —
       // except a bridged web action that sends an e-mail invitation, which
       // says so (reviewed list `SENDS_EMAIL`).
+      // The one non-bridged sender, reviewed 2026-11-10: the company takeover invitation e-mails the
+      // representative from the operator tool itself (company-claim-capabilities.ts).
       const action = c.conversationActionId;
-      expect(c.annotations.openWorldHint).toBe(
-        Boolean(action && SENDS_EMAIL.has(action) && c.kind !== "draft"),
+      expect(c.annotations.openWorldHint, c.id).toBe(
+        Boolean(action && SENDS_EMAIL.has(action) && c.kind !== "draft") || c.id === "company.claim.invite.confirm",
       );
       // Nothing in the registry destroys data (journal writes are append-only)
       // — except a bridged web action that overwrites a stored value or ends a

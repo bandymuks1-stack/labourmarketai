@@ -43,6 +43,8 @@ export interface CommercialRequestItem {
   readonly createdAt: string;
   readonly status: string;
   readonly internalLink: string;
+  /** Kept in the v1 shape for consumers that read it. `feedPage` drops every row
+   *  for which this would be true, so the feed itself only ever sends `false`. */
   readonly synthetic: boolean;
 }
 
@@ -74,10 +76,34 @@ export function toFeedItem(row: CommercialRequestRow): CommercialRequestItem {
     createdAt: row.created_at,
     status: (COMPANY_NEED_INTAKE_STATUSES as readonly string[]).includes(status) ? status : "unknown",
     internalLink: `/${defaultLocale}/dashboard/admin/company-need-intakes#${row.id}`,
-    synthetic:
-      isSyntheticFixtureLabel(row.company_name, row.contact_name, row.contact_email, row.description) ||
-      TEST_MAILBOX.test(row.contact_email ?? ""),
+    synthetic: isSyntheticCommercialRequest(row),
   };
+}
+
+/**
+ * Is this row one of OUR test requests (a production walk, an e2e proof), never a
+ * real employer's? Owner decision 2026-11-14 (the `need-intake` walk, PR #3303):
+ * EITHER signal is enough — a QA-SYNTHETIC / E2E marker in any text the sender
+ * typed (`isSyntheticFixtureLabel`, the one product-wide marker rule) OR a contact
+ * e-mail at a mailbox only our walks use (`TEST_MAILBOX`). A real employer cannot
+ * be reached at `example.invalid` (RFC 2606: it never resolves) nor at the private
+ * `e2e-proof.local` domain, and the markers are the documented QA prefixes, so the
+ * OR rule drops nothing a real company could have sent.
+ *
+ * THE ONE RULE for every reader of `company_need_public_intakes` that must not count
+ * or forward our test rows: this feed, the CRM pipeline (lib/crm/pipeline.ts), launch
+ * readiness and the Agentai capability readback (lib/staffing/intake-test-rows.ts).
+ */
+export type SyntheticIntakeTexts = Pick<
+  CommercialRequestRow,
+  "company_name" | "contact_name" | "contact_email" | "description"
+>;
+
+export function isSyntheticCommercialRequest(row: SyntheticIntakeTexts): boolean {
+  return (
+    isSyntheticFixtureLabel(row.company_name, row.contact_name, row.contact_email, row.description) ||
+    TEST_MAILBOX.test(row.contact_email ?? "")
+  );
 }
 
 export function encodeFeedCursor(cursor: FeedCursor): string {
@@ -117,7 +143,15 @@ export const CLOSED_REQUEST_STATUSES = ["converted", "rejected"] as const;
 export const CLOSED_REQUEST_STATUS_FILTER = `(${CLOSED_REQUEST_STATUSES.join(",")})`;
 
 /** Rows read with one extra past `limit`: that extra row is how the feed knows more
- *  exist, and only then is there a next cursor. */
+ *  exist, and only then is there a next cursor.
+ *
+ *  OUR TEST REQUESTS NEVER LEAVE (`isSyntheticCommercialRequest`): they are dropped
+ *  here, server-side, before any item is built, in both reads (the cursor read and
+ *  `?status=open`), so no consumer can take one for a real commercial request
+ *  whatever it does with the `synthetic` flag. The cursor is still taken from the
+ *  last row READ, dropped or not: it moves past the dropped rows, so a real row
+ *  after them is neither skipped nor repeated, and a page that held only test rows
+ *  comes back with no items and a cursor to the next page. */
 export function feedPage(
   rows: readonly CommercialRequestRow[],
   limit: number,
@@ -125,7 +159,7 @@ export function feedPage(
   const page = rows.slice(0, limit);
   const last = page[page.length - 1];
   return {
-    items: page.map(toFeedItem),
+    items: page.filter((row) => !isSyntheticCommercialRequest(row)).map(toFeedItem),
     nextCursor:
       rows.length > limit && last ? encodeFeedCursor({ createdAt: last.created_at, id: last.id }) : null,
   };

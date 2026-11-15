@@ -9,6 +9,8 @@ import {
   declineInviteFormAction,
 } from "@/lib/invitations/invite-page-actions";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
+import { readClaimInvitationPreview } from "@/lib/organization-claims/claim-invitation";
+import { ClaimInvitationPanel } from "@/components/app/claim-invitation-panel";
 import { findExternalReferralSource } from "@/lib/invitations/external-sources";
 import {
   AGENCY_CLIENT_PROPOSED_ROLE,
@@ -141,10 +143,10 @@ export default async function InvitePage({
   searchParams,
 }: {
   params: Promise<{ locale: string; token: string }>;
-  searchParams: Promise<{ notice?: string }>;
+  searchParams: Promise<{ notice?: string; claim?: string }>;
 }) {
   const { locale, token } = await params;
-  const { notice } = await searchParams;
+  const { notice, claim: claimResult } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("network.invitePage");
   // The ONE localized relationship vocabulary — the words the CV also prints.
@@ -293,6 +295,14 @@ export default async function InvitePage({
           </p>
         )}
       </>,
+    );
+  }
+
+  // A "take over this company" invitation has its own panel (partner registration Slice 1).
+  const claim = await readClaimInvitationPreview(token);
+  if (claim.kind !== "not_claim") {
+    return shell(
+      <ClaimInvitationPanel locale={locale} token={token} preview={claim} result={claimResult ?? null} />,
     );
   }
 

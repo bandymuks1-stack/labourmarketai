@@ -202,3 +202,32 @@ describe("spam guard: one generic answer, nothing stored, no AI, no alert (owner
     info.mockRestore();
   });
 });
+
+describe("our test requests never reach the AI layer (owner order 2026-11-14)", () => {
+  beforeEach(() => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+  });
+
+  const walkForm = (over: Record<string, string>): FormData => {
+    const f = syntheticForm();
+    for (const [k, v] of Object.entries(over)) f.set(k, v);
+    return f;
+  };
+
+  it.each([
+    ["the walk (marker + example.invalid)", { company_name: "QA-SYNTHETIC need walk 1.1 (not a real company)", contact_email: "qa.synthetic.need.1.1@example.invalid", description: "QA-SYNTHETIC need-intake walk" }],
+    ["marker only", { company_name: "QA-SYNTHETIC probe" }],
+    ["example.invalid only", { contact_email: "someone@example.invalid" }],
+  ])("%s: stored and alerted as agreed, no model call, honest 'no draft'", async (_label, over) => {
+    const state = await submitCompanyNeedAction(null, walkForm(over));
+    expect(state).toMatchObject({ ok: true, persisted: true, draftStatus: "disabled" });
+    expect(persistPublicCompanyNeed).toHaveBeenCalledTimes(1);
+    expect(sendCompanyNeedOwnerAlert).toHaveBeenCalledTimes(1);
+    expect(draftVacancyFromNeed).not.toHaveBeenCalled();
+  });
+
+  it("a real employer's need still gets the AI draft call, unchanged", async () => {
+    await submitCompanyNeedAction(null, walkForm({ company_name: "Test Building Ltd", contact_email: "jonas@testas.lt" }));
+    expect(draftVacancyFromNeed).toHaveBeenCalledTimes(1);
+  });
+});

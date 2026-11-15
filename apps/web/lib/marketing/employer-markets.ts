@@ -5,9 +5,12 @@
  *
  * A market version is the same page with `?market=<code>`: its own headline,
  * three plain points and ONE call to action, the canonical company-need entry
- * with the country already chosen. It is not a second route, so the canonical
- * URL and the hreflang set stay those of `/for-companies` and search engines
- * see one page, not three near-copies.
+ * with the country already chosen. It is not a second route, but it IS its own
+ * indexable page (owner P0 2026-11-10, SEO): `employerMarketPath` is its
+ * self-canonical address, it carries its own hreflang set and sitemap entry,
+ * and an advert's `utm_*` parameters canonicalise back to it. Before, every
+ * market version declared `/for-companies` as canonical, so Luxembourg, the
+ * Netherlands and Denmark had no page a search engine would index.
  *
  * `locales` are the languages a market's adverts are written in. Another
  * active locale still renders the market copy (every active catalogue carries
@@ -33,9 +36,68 @@ export function readEmployerMarket(raw: unknown): EmployerMarket | null {
   return Object.hasOwn(EMPLOYER_MARKETS, code) ? (code as EmployerMarket) : null;
 }
 
+/** A market version's own indexable address (canonical, hreflang, sitemap). */
+export function employerMarketPath(market: EmployerMarket): string {
+  return `/for-companies?market=${market}`;
+}
+
+/** Every market version's address, for the sitemap. */
+export const EMPLOYER_MARKET_PATHS: readonly string[] = (
+  Object.keys(EMPLOYER_MARKETS) as EmployerMarket[]
+).map(employerMarketPath);
+
 /** The company-need query a market page's one call to action carries. */
 export function employerMarketNeedQuery(market: EmployerMarket): string {
   return `country=${EMPLOYER_MARKETS[market].country}`;
+}
+
+/**
+ * EMPLOYER INTENTS (owner P1 2026-11-11, SEO/AEO positioning): the B2B
+ * searches that had no page, as versions of `/for-companies` in the same way as
+ * the markets: `?need=<intent>`, self-canonical, in the sitemap, ONE call to
+ * action. That action is the existing inquiry with its existing engagement
+ * model preselected (`engagement_model` in company-need-form), so no second
+ * intake exists.
+ *
+ *   subcontracting  "find construction subcontractors" and "find a crew": one
+ *                   page, not two thin twins. A crew can be offered as one unit
+ *                   and its hours reach the buyer (DEM-6, production walks), but
+ *                   production holds 0 real teams, so the copy never says a crew
+ *                   IS available.
+ *   agency          "find a recruitment / staffing partner": the employer side.
+ *                   `/for-agencies` speaks to the agency itself. An employer
+ *                   sees the supply agencies declared (DEM-9).
+ *
+ * A market takes precedence over an intent when a URL carries both.
+ */
+export const EMPLOYER_INTENTS = {
+  subcontracting: { engagement: "subcontracting" },
+  agency: { engagement: "agency_supply" },
+} as const;
+
+export type EmployerIntent = keyof typeof EMPLOYER_INTENTS;
+
+/** The intent a `?need=` value names, or null. Case-insensitive; the first value of a repeated parameter. */
+export function readEmployerIntent(raw: unknown): EmployerIntent | null {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof value !== "string") return null;
+  const code = value.trim().toLowerCase();
+  return Object.hasOwn(EMPLOYER_INTENTS, code) ? (code as EmployerIntent) : null;
+}
+
+/** An intent version's own indexable address (canonical, hreflang, sitemap). */
+export function employerIntentPath(intent: EmployerIntent): string {
+  return `/for-companies?need=${intent}`;
+}
+
+/** Every intent version's address, for the sitemap. */
+export const EMPLOYER_INTENT_PATHS: readonly string[] = (
+  Object.keys(EMPLOYER_INTENTS) as EmployerIntent[]
+).map(employerIntentPath);
+
+/** The company-need query an intent page's one call to action carries. */
+export function employerIntentNeedQuery(intent: EmployerIntent): string {
+  return `engagement=${EMPLOYER_INTENTS[intent].engagement}`;
 }
 
 /** UTM convention for employer adverts: one source/medium pair per channel. */

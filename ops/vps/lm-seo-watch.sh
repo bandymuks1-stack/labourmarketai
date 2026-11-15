@@ -83,8 +83,9 @@ fetch "$BASE/jobs-sitemap.xml"
 if [ "$CODE" != "200" ]; then
   problem "jobs_index:$CODE"
 else
-  sed -n 's#.*<loc>\([^<]*jobs-sitemap/[0-9]*\.xml\)</loc>.*#\1#p' "$T/b" > "$T/shards"
-  [ -s "$T/shards" ] || tr '>' '>\n' < "$T/b" | sed -n 's#^\(.*jobs-sitemap/[0-9]*\.xml\)</loc$#\1#p' > "$T/shards"
+  # One shard per line whatever the layout: production serves the index on ONE line, which a per-line sed
+  # read as at most one shard (and `tr '>' '>\n'` splits nothing), so every run alerted jobs_shards falsely.
+  tr '>' '\n' < "$T/b" | sed -n 's#^\(.*jobs-sitemap/[0-9]*\.xml\)</loc$#\1#p' > "$T/shards"
   n=$(wc -l < "$T/shards" | tr -d ' ')
   [ "$n" -ge "$MIN_JOB_SHARDS" ] || problem "jobs_shards:$n"
   last=$(tail -n 1 "$T/shards")
@@ -100,7 +101,9 @@ else
   fi
 fi
 
-for p in /lt /en /en/jobs /en/about /en/labour-market/lt; do check_page "$BASE$p" "$p"; done
+# /en/labour-market, not a country page: country pages are noindex until they carry
+# text of their own (IDX-20, country-evidence.ts INDEXABLE_COUNTRY_PAGES).
+for p in /lt /en /en/jobs /en/about /en/labour-market; do check_page "$BASE$p" "$p"; done
 [ -z "$JOB1" ] || check_page "$JOB1" job_first
 [ -z "$JOB2" ] || [ "$JOB2" = "$JOB1" ] || check_page "$JOB2" job_last
 

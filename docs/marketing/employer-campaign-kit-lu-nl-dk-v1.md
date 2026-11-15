@@ -18,9 +18,10 @@ headline, three plain points and **one** call to action, which opens the company
 | NL | NL, EN | `/nl/for-companies?market=nl`, `/en/for-companies?market=nl` | — |
 | DK | EN | `/en/for-companies?market=dk` | DA: the Danish UI is about 29% done and is not active. Do not link `/da`. |
 
-The canonical URL and hreflang set stay those of `/for-companies`. That is deliberate: search engines
-see one page, not three near-copies. Each advert version still has its own `<title>` and meta
-description, in its language.
+Each market version is its own indexable page: its canonical URL is `/<locale>/for-companies?market=<m>`
+(the advert's `utm_*` parameters fall away), it has its own hreflang set and sitemap entry, and its own
+`<title>`, H1 and meta description in its language. Until the 2026-11-10 SEO fix the canonical was
+`/for-companies`, so no market had a page a search engine would index.
 
 Code: `apps/web/lib/marketing/employer-markets.ts` (markets, the UTM convention, `employerAdLink`)
 and its test.
