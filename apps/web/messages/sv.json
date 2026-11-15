@@ -272,7 +272,7 @@
     "legalCheckFood": "Försäljning av livsmedel eller egenodlade produkter omfattas av regler för livsmedelsförsäljning och hygien. Bekräfta innan du publicerar att du har kontrollerat de regler som gäller för dig.",
     "legalCheckAck": "Jag har kontrollerat de regler som gäller för mig",
     "serviceNeedHint": "Ett tjänstebehov är alltid en önskeannons.",
-    "moreTypesSoon": "Fler annonstyper blir snart tillgängliga här.",
+    "moreTypesSoon": "Just nu finns bara dessa annonstyper här.",
     "pause": "Pausa",
     "expired": "Utgången",
     "expiresOn": "Till {date}",
@@ -912,7 +912,7 @@
     },
     "exports": {
       "title": "Exporter",
-      "note": "Endast exporter som redan fungerar listas – inget här är en förhandsvisning.",
+      "note": "Endast exporter som redan fungerar listas.",
       "evidence": "Beläggrapport (utskrift / PDF)",
       "cv": "CV (utskrift / PDF)",
       "journalCsv": "Journalexport (CSV)",
@@ -1179,7 +1179,7 @@
     "switchSpace": "Byt yta",
     "addSpace": "Lägg till yta",
     "availableSpaces": "Tillgängliga ytor",
-    "comingLaterToggle": "Avsnitt som kommer senare (visa)",
+    "comingLaterToggle": "Avsnitt som inte är tillgängliga än (visa)",
     "profile": {
       "name": "Personlig profil",
       "purpose": "Hantera din avatar, ditt CV, dina färdigheter och din arbetsstatus."
@@ -1663,7 +1663,7 @@
         "label": "Arbetsposter",
         "available": "Journalposter: {n}",
         "none": "Inte kopplat ännu",
-        "preparing": "Kopplingen till arbetsposter förbereds"
+        "preparing": "Kopplingen till arbetsposter är inte tillgänglig än"
       },
       "availability": {
         "label": "Tillgänglighet",
@@ -1810,7 +1810,7 @@
     "reviewCta": "Granska poster",
     "projectsTitle": "Projekt, objekt och kunder",
     "projectsReadyBadge": "Strukturen klar",
-    "projectsBody": "Här ser du projekt, kunder, projektets arbetstagare och arbetsmoment. Inget fylls i automatiskt – det går ännu inte att skapa nya projekt och kunder; den möjligheten förbereds.",
+    "projectsBody": "Här ser du projekt, kunder, projektets arbetstagare och arbetsmoment. Inget fylls i automatiskt – det går ännu inte att skapa nya projekt och kunder.",
     "projectsCount": "Projekt",
     "projectsEmpty": "inga projekt skapade ännu",
     "projectsLinkingNote": "Poster i arbetsjournalen kan kopplas till ett projekt av de personer som registrerar dem. En ny projektkontext börjar tom – inget fylls i automatiskt.",
@@ -2337,7 +2337,7 @@
         "title": "Något gick fel",
         "subtitle": "Inte tillgängligt just nu.",
         "statusLabel": "Något gick fel",
-        "statusBody": "Hantering av företagets arbetstagare förbereds fortfarande och aktiveras senare.",
+        "statusBody": "Hantering av företagets arbetstagare är inte tillgänglig än.",
         "nextStep": "Arbetstagarnas egen registrering är alltid öppen."
       },
       "workers": {
@@ -3654,7 +3654,7 @@
     "opportunities": "Möjligheter: se arbete som passar dig. Synligheten beror på nätverkets storlek och din beredskap.",
     "marketplaceMap": "Marknadskarta: arbetsmarknadssignaler per land och region. En mer exakt punkt visas när en plats har angetts.",
     "adminReview": "Systemunderhåll: endast för administratören. Vanliga användare ser aldrig de här skärmarna.",
-    "paymentReadiness": "Betalningar förbereds: betald åtkomst är inte aktiv ännu.",
+    "paymentReadiness": "Betald åtkomst är inte aktiv ännu.",
     "identityModel": "Två grundidentiteter: en person och ett företag. Att köpa, sälja, anställa och bemanningsverksamhet är handlingar, inte separata identiteter."
   },
   "profileIdentityNotice": {
@@ -3773,7 +3773,7 @@
     "addLaterHint": "Du kan lägga till fler roller senare – de visas i katalogen när de är klara.",
     "status": {
       "active": "Aktiv",
-      "preparing": "Kommer snart",
+      "preparing": "Inte tillgängligt än",
       "start": "Starta",
       "partial": "Delvis"
     },
@@ -3781,9 +3781,9 @@
       "openSetup": "Öppna inställningen"
     },
     "preparingReason": {
-      "default": "Den här rollen förbereds fortfarande. Vi aktiverar den när den kan lanseras på ett ärligt sätt.",
+      "default": "Den här rollen är inte tillgänglig än.",
       "startAvailable": "Inställningsvägen fungerar redan: ett fält, det juridiska namnet, och ditt konto skapas. Hela arbetsytan håller fortfarande på att fyllas i.",
-      "customerPartial": "Köparutrymmet förbereds fortfarande. Du kan lägga till köparrollen och fylla i en förfrågan."
+      "customerPartial": "Hela köparutrymmet är inte tillgängligt än. Du kan lägga till köparrollen och fylla i en förfrågan."
     },
     "worker": {
       "description": "Arbeta som person: textbaserad profil, färdigheter och arbetsjournal. Aktivt i dag."
@@ -3798,13 +3798,13 @@
       "description": "En handling – skicka in och hantera förfrågningar om tjänster, specialister eller team. Aktiveras senare."
     },
     "freelancer": {
-      "description": "Frilansare: tjänster och arbetshistorik i en profil. Förbereds."
+      "description": "Frilansare: tjänster och arbetshistorik i en profil. Inte tillgängligt än."
     },
     "team_lead": {
-      "description": "Teamledare: teamsammansättning och gemensamma erbjudanden. Förbereds."
+      "description": "Teamledare: teamsammansättning och gemensamma erbjudanden. Inte tillgängligt än."
     },
     "service_provider": {
-      "description": "Tjänsteleverantör: offentlig tjänstekatalog med bekräftade belägg. Förbereds."
+      "description": "Tjänsteleverantör: offentlig tjänstekatalog med bekräftade belägg. Inte tillgängligt än."
     }
   },
   "activityTypes": {
@@ -3826,10 +3826,10 @@
     "eyebrow": "Arbetsmarknadens OS",
     "headline": "Visa vad du kan. Hitta fler möjligheter att förverkliga det.",
     "lede": "En person. Många roller över tid. Ett CV som föds ur verkligt arbete och verkliga uppgifter, inte egenskrivna påståenden. Det första valet är en ingång, inte en bur.",
-    "honesty": "Obs: nedan visas hela systemkartan. Vissa ytor är i drift i dag; resten är öppet märkta \"Förbereds\". Vi säger aldrig att något fungerar när det inte gör det.",
+    "honesty": "Obs: nedan visas hela systemkartan. Vissa ytor är i drift i dag; resten är öppet märkta \"Inte tillgängligt än\". Vi säger aldrig att något fungerar när det inte gör det.",
     "sections": {
       "today": "Tillgängligt nu",
-      "preparing": "Kommer snart",
+      "preparing": "Inte tillgängligt än",
       "workflow": "Hur en persons väg går genom systemet",
       "roles": "Rollutveckling (utan inlåsning)",
       "activities": "Aktivitetslandskap",
@@ -3846,10 +3846,10 @@
     },
     "controlRoom": {
       "todayLabel": "Aktivt i dag",
-      "preparingLabel": "Kommer snart",
+      "preparingLabel": "Inte tillgängligt än",
       "blockedLabel": "Blockerat",
       "nonWorkerLabel": "Utrymmen för företag/bemanningsföretag/kunder",
-      "nonWorkerStatus": "Kommer snart",
+      "nonWorkerStatus": "Inte tillgängligt än",
       "nonWorkerStatusActive": "Fungerar",
       "fakeClaimsLabel": "Falsk AI/falsk matchning/falskt rykte",
       "fakeClaimsStatus": "Används aldrig"
@@ -3860,7 +3860,7 @@
       "agent": "AI-/agentorkestrerare (endast när den kan lanseras säkert)",
       "trust": "Rykte-/förtroendelager"
     },
-    "footer": "Att visionskartan publiceras här betyder inte att alla områden är i drift. Det som går att använda i dag är märkt ”I drift i dag”. Allt annat är antingen ”Förbereds” eller ett framtida lager.",
+    "footer": "Att visionskartan publiceras här betyder inte att alla områden är i drift. Det som går att använda i dag är märkt ”I drift i dag”. Allt annat är antingen ”Inte tillgängligt än” eller ett framtida lager.",
     "internalPreviewBadge": "Intern förhandsvisning",
     "internalPreviewBanner": "Den här sidan är inte publicerad offentligt ännu. Det är en intern förhandsvisning för ägaren och inbjudna deltagare. Dela inte webbadressen offentligt förrän ägarens produktionskontroll är GODKÄND."
   },
@@ -3875,8 +3875,8 @@
   "dashboard": {
     "comingLater": {
       "eyebrow": "Senare",
-      "title": "Moduler som kommer senare",
-      "body": "Dessa områden förbereds och aktiveras i separata steg. De är inte aktiva funktioner ännu."
+      "title": "Moduler som inte är tillgängliga än",
+      "body": "Dessa områden är inte tillgängliga än. De är inte aktiva funktioner."
     },
     "featuresHeading": {
       "eyebrow": "Vad som finns och vad som kommer",
@@ -3887,7 +3887,7 @@
   },
   "features": {
     "preparing_generic_reason": "Det här alternativet aktiveras senare.",
-    "preparing_badge": "Kommer snart",
+    "preparing_badge": "Inte tillgängligt än",
     "overview": {
       "label": "Översikt",
       "description": "Din startvy öppnas för varje roll du har.",
@@ -4551,7 +4551,7 @@
         },
         "addMore": {
           "title": "Lägg till ett annat sätt att använda labourmarket.ai",
-          "body": "Du är inte låst till en roll. Ytorna för företag, bemanningsföretag och kunder förbereds fortfarande – vi lägger till dem steg för steg.",
+          "body": "Du är inte låst till en roll. Ytorna för företag, bemanningsföretag och kunder är inte fullt tillgängliga än.",
           "cta": "Granska roller"
         },
         "activitySetup": {
@@ -4954,7 +4954,7 @@
             "active": "Aktivt",
             "notActive": "Inte aktivt ännu",
             "benefit": "Skydda din profil, arbetshistorik, dina dokument och meddelanden med en andra kontroll som bara du kan klara.",
-            "setupComing": "Inställningen dyker snart upp här – den tar ungefär 30 sekunder och du kan stänga av den när som helst."
+            "setupComing": "Inloggning i två steg kan inte ställas in här än."
           },
           "recovery": {
             "label": "Kontoåterställning",
@@ -4985,8 +4985,8 @@
       },
       "comingSoon": {
         "greeting": "👋 Välkommen, {name}",
-        "body_main": "Vi håller just nu på att slutföra funktionerna för företag och bemanningsföretag.",
-        "body_notify": "Vi meddelar dig så snart det är klart.",
+        "body_main": "Funktionerna för företag / bemanningsföretag är inte tillgängliga än.",
+        "body_notify": "Vi meddelar dig när de är tillgängliga.",
         "body_meanwhile": "Under tiden kan du bläddra på plattformen via fliken ”Upptäck” (endast visning)."
       },
       "menuLinks": {
@@ -5749,7 +5749,7 @@
     "eyebrow": "Priser",
     "title": "Enkla nivåer,",
     "titleAccent": "satta rättvist.",
-    "subcopyLive": "Priserna är bekräftade av ägaren och gäller. Aktivering sker i organisationskontot genom en säker Stripe-betalning; inget debiteras på den här sidan.",
+    "subcopyLive": "Priserna gäller. Aktivering sker i organisationskontot genom en säker Stripe-betalning; inget debiteras på den här sidan.",
     "subcopy": "Priserna är inte slutgiltiga, och fakturering startas aldrig åt dig på den här sidan. Nivåerna nedan beskriver omfattning; aktiveringen är manuell – hör av dig så bekräftar vi pris och omfattning med dig innan något startar.",
     "subcopyConfirmed": "Priserna är bekräftade. Aktivering online är inte öppen ännu – gå med i väntelistan så kontaktar vi dig för att starta din organisation manuellt; inget debiteras på den här sidan.",
     "trialNote": "En organisations första prenumeration börjar med en 14 dagars provperiod. Därefter debiteras kortet månadspriset, och du kan avsluta innan provperioden tar slut.",
@@ -5817,8 +5817,8 @@
       }
     ],
     "priceState": {
-      "draft_pricing": "Priserna förbereds – inget kan köpas ännu.",
-      "owner_confirmed": "Priserna är bekräftade av ägaren. Aktivering sker i ditt organisationskonto; inget debiteras på den här sidan."
+      "draft_pricing": "Priserna är inte slutgiltiga – inget kan köpas ännu.",
+      "owner_confirmed": "Priserna gäller. Aktivering sker i ditt organisationskonto; inget debiteras på den här sidan."
     },
     "individual": {
       "name": "Särskilda krav",
@@ -6856,7 +6856,7 @@
         "title": "Kommunikation",
         "context": "Den här konversationen handlar om det här projektet.",
         "cta": "Skicka meddelande om projektet",
-        "notReadyNote": "En egen projekttråd håller på att förberedas. Starta tills vidare konversationen i din allmänna inkorg – projektsammanhanget visas ovan."
+        "notReadyNote": "En egen projekttråd är inte tillgänglig än. Starta tills vidare konversationen i din allmänna inkorg – projektsammanhanget visas ovan."
       },
       "fieldCount": "{n, plural, one {# person på planen} other {# personer på planen}}",
       "fieldViaTeam": "{n} via team",
@@ -6871,7 +6871,7 @@
       "emptyTeam": "Det här projektet har inget lag än – starta uttagningen och ta in de första personerna på planen.",
       "emptyTeamCta": "Starta uttagningen",
       "positionsTitle": "Saknade positioner",
-      "positionsEmpty": "Behoven av positioner är på väg – när de är klara ser du här vilka personer som saknas.",
+      "positionsEmpty": "Inga behov av positioner än – när de finns ser du här vilka personer som saknas.",
       "openOps": "Öppna projekthantering",
       "gallery": {
         "title": "Arbetsgalleri",
@@ -7435,7 +7435,7 @@
     "tooManyOpen": "Du har för många öppna hjälpförfrågningar – vänta tills de befintliga har granskats.",
     "noteTooLong": "Beskrivningen är för lång (högst 500 tecken).",
     "internalNote": "Intern registrering – inga e-postmeddelanden eller meddelanden skickas till någon.",
-    "explanationPending": "Förklaringen förbereds utifrån den litauiska originalversionen."
+    "explanationPending": "Förklaringen finns inte på det här språket än."
   },
   "crmPipeline": {
     "eyebrow": "Operatörskö",
@@ -8364,7 +8364,7 @@
       "evidenceNote": "Öppna och skriv ut / spara som PDF",
       "journal": "Export av arbetsjournal",
       "journalNote": "Ladda ner som CSV (öppnas i Excel)",
-      "formatStatus": "PDF: tillgänglig · CSV: tillgänglig · Excel / Word: förbereds"
+      "formatStatus": "PDF: tillgänglig · CSV: tillgänglig · Excel / Word: inte tillgänglig än"
     },
     "disclaimer": "Statusarna bygger på offentligt angivna krav och dina egna uppgifter. Slutlig överensstämmelse kontrolleras av myndigheterna eller en jurist – det här är ingen juridisk garanti.",
     "needsMigration": "Inte tillgängligt just nu.",
@@ -9138,7 +9138,7 @@
       "title": "Beredskap per marknad",
       "empty": "Inga angivna länder i poolen ännu – beredskapen visas med de första.",
       "availableNow": "tillgängliga nu",
-      "docsNote": "Dokumentberedskapen stannar hos arbetstagaren: sammanställningar på kategorinivå visas här först med arbetstagarens samtyckesreglage (en spärrad ändring som förbereds). Du ser aldrig dokumentens innehåll här."
+      "docsNote": "Dokumentberedskapen stannar hos arbetstagaren: sammanställningar på kategorinivå visas här först med arbetstagarens samtyckesreglage. Du ser aldrig dokumentens innehåll här."
     },
     "demand": {
       "title": "Öppna behov",
@@ -9191,7 +9191,7 @@
     },
     "title": "Rekrytering",
     "intro": "Välj ett av dina strukturerade behov för att se matchande arbetstagare, varför de passar, och sätta upp dem på kortlistan.",
-    "visibilityNote": "Synligheten baseras på beredskap, förtroende och behörigheter – inte på betalning. Betald bredare åtkomst är inte aktiv ännu (betalningar förbereds). Bara säkra, anonymiserade förhandsvisningar visas – inga falska annonser.",
+    "visibilityNote": "Synligheten baseras på beredskap, förtroende och behörigheter – inte på betalning. Betald bredare åtkomst är inte aktiv ännu. Bara säkra, anonymiserade förhandsvisningar visas – inga falska annonser.",
     "pickDemand": "Välj ett behov",
     "noDemands": "Du har inga behov ännu. Skapa ett behov från din översikt – efter granskning strukturerar teamet de färdigheter som krävs.",
     "noDemandsCta": "Skapa ett behov",
@@ -9325,7 +9325,7 @@
       "unavailable": "Åtgärden kunde inte slutföras. Försök igen.",
       "error": "Något gick fel.",
       "cancel": "Avbryt",
-      "notEntitled": "Din plan omfattar inte bokning – starta ett testköp eller begär pilotåtkomst."
+      "notEntitled": "Din plan omfattar inte bokning."
     },
     "recognizedNote": "De krävda färdigheterna nedan har känts igen ur ditt behovs text av offlinesystemet – de är ett märkt förslag, inte en bekräftad struktur. Granska matchningarna; en administratör bekräftar eller justerar de slutliga kraven.",
     "nextAction": {
@@ -9511,17 +9511,17 @@
       "contact": "Ordnas individuellt"
     },
     "readiness": {
-      "draft_pricing": "Planerna är förberedda, inte köpbara. Inget pris här är slutgiltigt och inget kan köpas.",
-      "owner_confirmed": "Planerna är bara förberedda – inget kan köpas förrän betalningar är aktiverade."
+      "draft_pricing": "Inget pris här är slutgiltigt och inget kan köpas ännu.",
+      "owner_confirmed": "Inget kan köpas förrän betalningar är aktiverade."
     },
     "featuresLabel": "Ingår i denna gräns",
     "limitValue": "upp till {count}",
     "freeToday": {
       "freeTitle": "Gratis idag",
       "free": "Allt du för närvarande kan använda i produkten är gratis – piloten körs utan betalningar och inget ber om ett kort.",
-      "paidTitle": "Förberedda betalplaner",
+      "paidTitle": "Betalplaner",
       "paid": "Inte tillgängligt just nu.",
-      "preparedTitle": "Förberett, inte köpbart",
+      "preparedTitle": "Inte köpbart än",
       "prepared": "Det finns ingen betalsida och inget kan köpas. Pilotåtkomst till betalplanernas omfattning beviljas manuellt av teamet."
     },
     "features": {
@@ -9549,7 +9549,7 @@
     "enforcement": {
       "free_surface": "Tillgängligt idag",
       "server_gate": "Tillgängligt idag, beroende på dina behörigheter",
-      "declared_boundary_only": "Förberett – startar först med debitering",
+      "declared_boundary_only": "Startar först med debitering",
       "admin_rbac": "Internt, endast admin"
     }
   },
@@ -10015,15 +10015,15 @@
   "billingStatus": {
     "badge": {
       "disabled": "BETALNINGAR AV",
-      "stripe_test": "TESTLÄGE",
+      "stripe_test": "INGA RIKTIGA DEBITERINGAR",
       "stripe_live_blocked": "SKARPT BLOCKERAT"
     },
     "body": {
       "disabled": "Betalningar är inte aktiverade. Planerna nedan beskriver omfattningen; begär pilotåtkomst för att komma igång.",
-      "stripe_test": "Stripes testläge är på för intern testning – inga riktiga pengar, ingen verklig debitering.",
+      "stripe_test": "Inga riktiga pengar dras.",
       "stripe_live_blocked": "En skarp nyckel/ett skarpt läge upptäcktes och blockerades hårt av säkerhetsskäl. Skarpt läge aktiveras aldrig här."
     },
-    "futureLive": "Skarpa betalningar är förberedda men inaktiva – inget skarpt köp förrän ägaren godkänner."
+    "futureLive": "Betalning online är inte tillgänglig än."
   },
   "workAbroad": {
     "eyebrow": "Arbeta utomlands",
@@ -10254,7 +10254,7 @@
       "missing": "saknas"
     },
     "ctaProfile": "Komplettera din profil",
-    "needsAccessTitle": "Möjligheterna förbereds",
+    "needsAccessTitle": "Inga förfrågningar från arbetsgivare här än",
     "needsAccessBody": "Förfrågningar från arbetsgivare visas här när synlighet för arbetstagare har aktiverats. Under tiden kan du komplettera din profil så att du är redo i samma stund som passande förfrågningar dyker upp.",
     "emptyTitle": "Inga öppna förfrågningar just nu",
     "emptyBody": "När arbetsgivare publicerar nya förfrågningar visas de här. Under tiden är det värt att komplettera din profil.",
@@ -11378,15 +11378,15 @@
   },
   "accountBilling": {
     "title": "Fakturering och abonnemang",
-    "testBadge": "Testläge",
+    "testBadge": "Inga riktiga debiteringar",
     "returned": {
-      "success": "Kassan i testläge slutfördes. Inga riktiga pengar har flyttats; abonnemangsstatusen nedan synkas från betalleverantörens signaturverifierade webhook och kan dröja en stund innan den visas.",
+      "success": "Kassan slutfördes. Inga riktiga pengar har flyttats; abonnemangsstatusen nedan synkas från betalleverantörens signaturverifierade webhook och kan dröja en stund innan den visas.",
       "cancelled": "Kassan avbröts. Inget debiterades och inget ändrades på ditt konto.",
       "portal": "Du är tillbaka från faktureringsportalen. Alla ändringar du gjorde där synkas automatiskt till den här sidan.",
       "successLive": "Kassan slutfördes. Abonnemangsstatusen nedan synkas från betalleverantörens signaturverifierade bekräftelse och kan dröja en stund innan den visas.",
       "syncing": "Synkar med betalleverantören – ditt abonnemang visas här om en stund. Du behöver inte beställa något igen."
     },
-    "disabled": "Betalningar är inte aktiverade. Betalplanerna är förberedda utkast – inget går att köpa här och ingen betalningsmetod behövs.",
+    "disabled": "Betalningar är inte aktiverade. Inget går att köpa här och ingen betalningsmetod behövs.",
     "none": "Inget abonnemang på det här kontot.",
     "planLabel": "Plan",
     "statusLabel": "Status",
@@ -11407,7 +11407,7 @@
       "open": "Hantera abonnemang",
       "opening": "Öppnar…",
       "error": "Det gick inte att öppna faktureringsportalen",
-      "hint": "Öppnar betalleverantörens portal för att avsluta eller uppdatera betalningsmetoden. Endast testläge – inga riktiga debiteringar."
+      "hint": "Öppnar betalleverantörens portal för att avsluta eller uppdatera betalningsmetoden."
     },
     "refresh": {
       "cta": "Uppdatera faktureringsstatus",
@@ -11428,7 +11428,7 @@
   "accountPlan": {
     "title": "Din plan",
     "freePilot": "Gratis pilot – allt som för närvarande finns i produkten är gratis för dig.",
-    "prepared": "Betalplanerna är förberedda men går inte att köpa. Betalningar är inte aktiverade och ingen betalningsmetod behövs.",
+    "prepared": "Betalplanerna går inte att köpa än. Betalningar är inte aktiverade och ingen betalningsmetod behövs.",
     "pricingLink": "Se vad som är gratis och vad som kommer att kosta"
   },
   "privacyConsent": {
@@ -12212,7 +12212,7 @@
       "stateLabel": "AI-status",
       "state": {
         "disabled": "Av",
-        "mock": "Simulerad (deterministiskt testläge)",
+        "mock": "Fasta regler (ingen språkmodell)",
         "live": "Aktiv"
       },
       "reason": {
@@ -12221,12 +12221,12 @@
         "unknown_provider": "Den valda AI-leverantören känns inte igen, så AI förblir avstängd.",
         "missing_api_key": "Ingen nyckel för AI-leverantören har lagts till, så AI förblir avstängd."
       },
-      "disabledBody": "Ingen extern AI-leverantör är ansluten i den här miljön. Allt på den här sidan beräknas från dina egna poster enligt fasta regler – ingen text här har producerats av en språkmodell.",
-      "whenEnabled": "När ägaren ansluter en leverantör och lagringen för granskning av förslag har tillämpats blir granskningsbara formuleringsförslag tillgängliga – alltid som förslag som en person bekräftar, aldrig som automatiska ändringar.",
-      "gates": "Assistenten är ännu inte tillgänglig i den här miljön. Förslag är avstängda tills den är ansluten – inget genereras under tiden.",
+      "disabledBody": "Ingen extern AI-leverantör är ansluten. Allt på den här sidan beräknas från dina egna poster enligt fasta regler – ingen text här har producerats av en språkmodell.",
+      "whenEnabled": "När assistenten är påslagen ger den formuleringsförslag som du kan granska – alltid som förslag som en person bekräftar, aldrig som automatiska ändringar.",
+      "gates": "Assistenten är inte tillgänglig än. Förslag är avstängda tills den är ansluten – inget genereras under tiden.",
       "providerLabel": "Leverantör",
       "modelLabel": "Modell",
-      "notWired": "Generering är medvetet inte aktiverad i det här skedet – resultaten kunde ännu inte spåras. Statusen ovan visas endast för transparens."
+      "notWired": "Textgenerering är inte påslagen. Statusen ovan visas endast för transparens."
     }
   },
   "finance": {
@@ -13026,7 +13026,7 @@
   "agencyClients": {
     "title": "Kunder",
     "subtitle": "Vilka du bemannar åt – varje kunds behov kopplas till dina behov och din kandidatsökning.",
-    "gatedHeading": "Inte tillgängligt än – kommer senare",
+    "gatedHeading": "Inte tillgängligt än",
     "gatedBody": "Inte tillgängligt just nu.",
     "notLinkable": "Behov kan inte kopplas till kunder än.",
     "clientsEmpty": "Inga kunder än. Lägg till din första kund nedan.",
@@ -13059,7 +13059,7 @@
   "agencyBridge": {
     "title": "Kundföretag",
     "subtitle": "Koppla ihop dig med ett verkligt kundföretag, se bara de förfrågningar de delar och erbjud en av de aktiva arbetstagarna i din personalstyrka.",
-    "gatedHeading": "Inte tillgängligt än – kommer senare",
+    "gatedHeading": "Inte tillgängligt än",
     "gatedBody": "Inte tillgängligt just nu.",
     "connectionsHeading": "Kopplingar",
     "inviteEmailLabel": "Kundens e-post",
@@ -13113,7 +13113,7 @@
   "clientBridge": {
     "title": "Bemanningsföretag",
     "subtitle": "Acceptera ett bemanningsföretag som du vill samarbeta med, dela specifika förfrågningar och granska kandidaterna de föreslår på din egen sida för kandidatsökning.",
-    "gatedHeading": "Inte tillgängligt än – kommer senare",
+    "gatedHeading": "Inte tillgängligt än",
     "gatedBody": "Inte tillgängligt just nu.",
     "invitesHeading": "Kopplingsinbjudningar",
     "noInvites": "Inga väntande inbjudningar.",
@@ -15628,7 +15628,7 @@
       "title": "Ett chattfönster styr ditt arbete",
       "subcopy": "I stället för dussintals formulär pratar du bara. Assistenten skriver utkastet, du bekräftar — och varje åtgärd lämnar en post som du kan gå tillbaka till.",
       "liveLabel": "Fungerar i dag",
-      "comingLabel": "Under förberedelse",
+      "comingLabel": "Inte tillgängligt än",
       "conceptLabel": "Konceptvy — stiliserad illustration, inte ett riktigt samtal",
       "c1": "Uppdatera CV och profil",
       "c2": "Registrera en arbetsdag",
@@ -16960,7 +16960,7 @@
     "archivedHeading": "Arkiverade objekt",
     "archivedBadge": "Arkiverat",
     "empty": "Inga objekt ännu. Lägg till platserna där ditt arbete utförs.",
-    "gatedHeading": "Inte tillgängligt ännu — kommer senare",
+    "gatedHeading": "Inte tillgängligt än",
     "gatedBody": "Inte tillgängligt just nu.",
     "errorLabel": "Kunde inte spara. Försök igen.",
     "notAuthorizedLabel": "Endast chefer kan ändra objekt.",
