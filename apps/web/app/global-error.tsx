@@ -40,7 +40,7 @@ const COPY: Record<ActiveLocale, { readonly body: string; readonly retry: string
     retry: "Попробовать ещё раз",
   },
   nl: {
-    body: "Er is iets misgegaan. Je gegevens zijn veilig — probeer het opnieuw.",
+    body: "Er is iets misgegaan. Uw gegevens zijn veilig — probeer het opnieuw.",
     retry: "Opnieuw proberen",
   },
   de: {

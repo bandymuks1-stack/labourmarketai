@@ -100,9 +100,9 @@ export const CATEGORY_LABELS: Readonly<Record<AnswerCategoryKey, L>> = {
 export const CTA_FOR_CAPABILITY: Readonly<Record<string, { href: string; label: L } | null>> = {
   "opportunity-board": { href: "/work-opportunities", label: { en: "See work opportunities", lt: "Žiūrėti darbo galimybes", ru: "Смотреть возможности работы", nl: "Bekijk werkkansen", de: "Arbeitsmöglichkeiten ansehen", pl: "Zobacz możliwości pracy" } },
   "adjacent-directions": { href: "/professions", label: { en: "Explore professions", lt: "Naršyti profesijas", ru: "Изучить профессии", nl: "Verken beroepen", de: "Berufe entdecken", pl: "Poznaj zawody" } },
-  profile: { href: "/for-workers", label: { en: "Build your profile", lt: "Susikurti profilį", ru: "Создать профиль", nl: "Bouw je profiel", de: "Profil erstellen", pl: "Zbuduj swój profil" } },
-  cv: { href: "/for-workers", label: { en: "Build your profile", lt: "Susikurti profilį", ru: "Создать профиль", nl: "Bouw je profiel", de: "Profil erstellen", pl: "Zbuduj swój profil" } },
-  "work-journal": { href: "/for-workers", label: { en: "Build your profile", lt: "Susikurti profilį", ru: "Создать профиль", nl: "Bouw je profiel", de: "Profil erstellen", pl: "Zbuduj swój profil" } },
+  profile: { href: "/for-workers", label: { en: "Build your profile", lt: "Susikurti profilį", ru: "Создать профиль", nl: "Bouw uw profiel", de: "Profil erstellen", pl: "Zbuduj swój profil" } },
+  cv: { href: "/for-workers", label: { en: "Build your profile", lt: "Susikurti profilį", ru: "Создать профиль", nl: "Bouw uw profiel", de: "Profil erstellen", pl: "Zbuduj swój profil" } },
+  "work-journal": { href: "/for-workers", label: { en: "Build your profile", lt: "Susikurti profilį", ru: "Создать профиль", nl: "Bouw uw profiel", de: "Profil erstellen", pl: "Zbuduj swój profil" } },
   skills: { href: "/skills", label: { en: "See how skills work", lt: "Kaip veikia įgūdžiai", ru: "Как работают навыки", nl: "Hoe vaardigheden werken", de: "Wie Fähigkeiten funktionieren", pl: "Jak działają umiejętności" } },
   matching: { href: "/for-companies", label: { en: "For employers", lt: "Darbdaviams", ru: "Работодателям", nl: "Voor werkgevers", de: "Für Arbeitgeber", pl: "Dla pracodawców" } },
   scouting: { href: "/for-companies", label: { en: "For employers", lt: "Darbdaviams", ru: "Работодателям", nl: "Voor werkgevers", de: "Für Arbeitgeber", pl: "Dla pracodawców" } },

@@ -80,7 +80,7 @@ export const SEO_ACTORS: readonly ActorEntry[] = [
     label: { en: "Teams / brigades", lt: "Brigados / komandos", ru: "Бригады / команды", nl: "Teams / ploegen", de: "Teams / Kolonnen", pl: "Zespoły / brygady" },
     blurb: {
       en: "Find or present a ready team, not just one worker.",
-      lt: "Rask arba pristatyk paruoštą brigadą, ne tik vieną darbuotoją.",
+      lt: "Raskite arba pristatykite paruoštą brigadą, ne tik vieną darbuotoją.",
       ru: "Найдите или представьте готовую бригаду, а не одного работника.",
       nl: "Vind of presenteer een compleet team, niet slechts één werknemer.",
       de: "Finden oder präsentieren Sie ein einsatzbereites Team, nicht nur eine einzelne Arbeitskraft.",
@@ -116,7 +116,7 @@ export const SEO_ACTORS: readonly ActorEntry[] = [
     label: { en: "Companies hiring workers", lt: "Įmonės, ieškančios darbuotojų", ru: "Компании, ищущие работников", nl: "Bedrijven die werknemers zoeken", de: "Unternehmen, die Arbeitskräfte suchen", pl: "Firmy zatrudniające pracowników" },
     blurb: {
       en: "Describe a real workforce need and structure the next steps.",
-      lt: "Aprašyk realų darbo jėgos poreikį ir struktūruok tolimesnius veiksmus.",
+      lt: "Aprašykite realų darbo jėgos poreikį ir struktūruokite tolimesnius veiksmus.",
       ru: "Опишите реальную кадровую потребность и структурируйте дальнейшие шаги.",
       nl: "Beschrijf een reële personeelsbehoefte en structureer de volgende stappen.",
       de: "Beschreiben Sie einen realen Personalbedarf und strukturieren Sie die nächsten Schritte.",
@@ -174,7 +174,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
     },
     help: {
       en: "Describe the profession and skills precisely; matching works on real skills, not job titles only.",
-      lt: "Tiksliai aprašyk profesiją ir įgūdžius; atitikimas remiasi realiais įgūdžiais, ne vien pareigybėmis.",
+      lt: "Tiksliai aprašykite profesiją ir įgūdžius; atitikimas remiasi realiais įgūdžiais, ne vien pareigybėmis.",
       ru: "Опишите профессию и навыки точно; подбор работает на реальных навыках, а не только на названиях должностей.",
       nl: "Beschrijf het beroep en de vaardigheden precies; matching werkt op echte vaardigheden, niet alleen op functietitels.",
       de: "Beschreiben Sie Beruf und Fähigkeiten präzise; der Abgleich basiert auf echten Fähigkeiten, nicht nur auf Berufsbezeichnungen.",
@@ -226,7 +226,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
   },
   {
     key: "verify-skills",
-    question: { en: "How to verify a worker's skills", lt: "Kaip patikrinti darbuotojo įgūdžius", ru: "Как проверить навыки работника", nl: "Hoe controleer je de vaardigheden van een werknemer", de: "Wie Sie die Fähigkeiten einer Arbeitskraft überprüfen", pl: "Jak zweryfikować umiejętności pracownika" },
+    question: { en: "How to verify a worker's skills", lt: "Kaip patikrinti darbuotojo įgūdžius", ru: "Как проверить навыки работника", nl: "Hoe controleert u de vaardigheden van een werknemer", de: "Wie Sie die Fähigkeiten einer Arbeitskraft überprüfen", pl: "Jak zweryfikować umiejętności pracownika" },
     pain: {
       en: "Employers can't tell self-claimed skills from proven experience.",
       lt: "Darbdaviai negali atskirti deklaruotų įgūdžių nuo įrodytos patirties.",
@@ -289,7 +289,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
   },
   {
     key: "find-team",
-    question: { en: "How to find a reliable team / brigade", lt: "Kaip rasti patikimą brigadą", ru: "Как найти надёжную бригаду", nl: "Hoe vind je een betrouwbaar team / betrouwbare ploeg", de: "Wie Sie ein zuverlässiges Team / eine zuverlässige Kolonne finden", pl: "Jak znaleźć rzetelny zespół / brygadę" },
+    question: { en: "How to find a reliable team / brigade", lt: "Kaip rasti patikimą brigadą", ru: "Как найти надёжную бригаду", nl: "Hoe vindt u een betrouwbaar team / betrouwbare ploeg", de: "Wie Sie ein zuverlässiges Team / eine zuverlässige Kolonne finden", pl: "Jak znaleźć rzetelny zespół / brygadę" },
     pain: {
       en: "A whole team is harder to assess than a single worker.",
       lt: "Visą brigadą įvertinti sunkiau nei vieną darbuotoją.",
@@ -310,7 +310,7 @@ export const SEO_PROBLEMS: readonly ProblemEntry[] = [
   },
   {
     key: "show-skills",
-    question: { en: "How a worker can show what they can do", lt: "Kaip darbuotojui parodyti, ką moka", ru: "Как работнику показать, что он умеет", nl: "Hoe je als werknemer laat zien wat je kunt", de: "Wie eine Arbeitskraft zeigen kann, was sie kann", pl: "Jak pracownik może pokazać, co potrafi" },
+    question: { en: "How a worker can show what they can do", lt: "Kaip darbuotojui parodyti, ką moka", ru: "Как работнику показать, что он умеет", nl: "Hoe u als werknemer laat zien wat u kunt", de: "Wie eine Arbeitskraft zeigen kann, was sie kann", pl: "Jak pracownik może pokazać, co potrafi" },
     pain: {
       en: "Skills stay invisible without a structured way to present them.",
       lt: "Įgūdžiai lieka nematomi be struktūruoto būdo juos pristatyti.",

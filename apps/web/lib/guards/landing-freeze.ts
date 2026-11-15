@@ -655,6 +655,19 @@ import { join } from "node:path";
  * exactly when same facts) and by reading the card's own table keys from
  * its source and pinning the declared key sets to them.
  *
+ * Formal address (owner decision 2026-11-15: "Jūs" in Lithuanian and "u" in
+ * Dutch are the default professional address; every language keeps a
+ * natural, respectful tone). It supersedes the informal "tu" order of
+ * 2026-10-28 below: Lithuanian moved back to jūs/jūsų, galite, pasirinkite …;
+ * Dutch to u/uw; the few Russian "ты" strings to "вы". The user's own words
+ * (chat bubbles, first-person example prompts) stay as written. Every key and
+ * every ICU placeholder / plural skeleton is unchanged; only wording moved.
+ * The regeneration moved EXACTLY SIX namespace hashes — `lt.landing`,
+ * `lt.hero`, `lt.livingMarketReview`, `lt.workEntryReview`,
+ * `lt.landingJourney`, `ru.landing` — and ZERO file hashes; `en.*` is
+ * byte-identical, which is the proof that no component, layout or English
+ * copy changed.
+ *
  * LT informal "tu" register (owner order 2026-10-28) — the Lithuanian UI is
  * unified to the informal singular address (tu/tavo/tau; gali, pasirink,
  * prisijunk …) instead of the formal plural (jūs/jūsų; galite, pasirinkite,

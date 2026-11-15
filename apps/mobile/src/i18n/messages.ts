@@ -538,7 +538,7 @@ const lt: Catalogue = {
   "nav.profile": "Profilis",
   "nav.settings": "Nustatymai",
 
-  "auth.checking": "Tikriname tavo seansą…",
+  "auth.checking": "Tikriname jūsų seansą…",
   "auth.signIn.title": "Prisijungti",
   "auth.signIn.email": "El. paštas",
   "auth.signIn.password": "Slaptažodis",
@@ -547,14 +547,14 @@ const lt: Catalogue = {
   "auth.register.title": "Sukurti paskyrą",
   "auth.register.submit": "Sukurti paskyrą",
   "auth.register.toSignIn": "Jau turiu paskyrą",
-  "auth.signIn.forgot": "Pamiršai slaptažodį?",
+  "auth.signIn.forgot": "Pamiršote slaptažodį?",
   "auth.register.legal":
     "Sukurti paskyrą reiškia sutikti su naudojimo sąlygomis ir privatumo politika.",
   "auth.error.rejected": "Toks el. paštas ir slaptažodis nesutampa.",
   "auth.error.unreachable":
-    "Nepavyko pasiekti serverio, todėl nežinome, ar duomenys teisingi. Patikrink ryšį ir bandyk dar kartą.",
+    "Nepavyko pasiekti serverio, todėl nežinome, ar duomenys teisingi. Patikrinkite ryšį ir bandykite dar kartą.",
   "auth.error.confirmationRequired":
-    "Paskyra sukurta. Patvirtink nuorodą el. laiške ir tada prisijunk.",
+    "Paskyra sukurta. Patvirtinkite nuorodą el. laiške ir tada prisijunkite.",
   "auth.error.notConfigured":
     "Ši versija neturi serverio konfigūracijos, todėl prijungti negali.",
   "auth.signOut": "Atsijungti",
@@ -562,7 +562,7 @@ const lt: Catalogue = {
   "account.title": "Privatumas ir paskyra",
   "account.body":
     "Šios nuorodos atidaromos naršyklėje, svetainėje. Savo duomenų arba paskyros ištrynimo prašymas pateikiamas ten, skiltyje „Privatumas“.",
-  "account.privacy": "Privatumas, tavo duomenys ir paskyros ištrynimas",
+  "account.privacy": "Privatumas, jūsų duomenys ir paskyros ištrynimas",
   "account.terms": "Naudojimo sąlygos",
   "account.privacyPolicy": "Privatumo politika",
   "account.deletionInfo": "Kaip ištrinama paskyra (prisijungti nereikia)",
@@ -570,41 +570,41 @@ const lt: Catalogue = {
   "account.external": "Naršyklė",
   "account.openFailed": "Nuorodos šiame telefone atidaryti nepavyko. Niekas nepakeista.",
 
-  "session.unavailable.title": "Nepavyko patikrinti tavo seanso",
+  "session.unavailable.title": "Nepavyko patikrinti jūsų seanso",
   "session.unavailable.body":
-    "Tai nereiškia, kad atsijungei — telefono saugykla neatsakė. Bandyk dar kartą.",
+    "Tai nereiškia, kad atsijungėte — telefono saugykla neatsakė. Bandykite dar kartą.",
   "session.unavailable.retry": "Bandyti dar kartą",
 
   "route.notFound.title": "Tokio ekrano šioje programėlėje nėra",
   "route.notFound.body":
-    "Nuoroda, kuria atėjai, čia niekur neveda. Ji gali būti skirta svetainei arba būti pasenusi. Niekas niekur nebuvo išsiųsta.",
+    "Nuoroda, kuria atėjote, čia niekur neveda. Ji gali būti skirta svetainei arba būti pasenusi. Niekas niekur nebuvo išsiųsta.",
   "route.notFound.action": "Grįžti į programėlę",
 
   "crash.title": "Programėlėje įvyko klaida",
   "crash.body":
-    "Tai pačios programėlės klaida, ne tavo veiksmas, ir niekas niekur nebuvo išsiųsta. Bandyk dar kartą — jei kartojasi, uždaryk programėlę ir atidaryk iš naujo.",
+    "Tai pačios programėlės klaida, ne jūsų veiksmas, ir niekas niekur nebuvo išsiųsta. Bandykite dar kartą — jei kartojasi, uždarykite programėlę ir atidarykite iš naujo.",
 
   "config.problem.title": "Ši versija nesukonfigūruota",
   "config.problem.body":
     "Programa negali pasileisti, kol nenustatytos šios reikšmės. Jokie duomenys niekur nebuvo išsiųsti.",
 
-  "workspace.title": "Veiki kaip",
-  "workspace.loading": "Skaitome tavo darbo erdves…",
+  "workspace.title": "Veikiate kaip",
+  "workspace.loading": "Skaitome jūsų darbo erdves…",
   "workspace.active": "Aktyvi",
   "workspace.switching": "Keičiama…",
-  "workspace.failed.title": "Nepavyko perskaityti tavo darbo erdvių",
+  "workspace.failed.title": "Nepavyko perskaityti jūsų darbo erdvių",
   "workspace.failed.body":
-    "Tai nepavykęs skaitymas, o ne atsakymas: tai nereiškia, kad nepriklausai jokiai organizacijai. Pabandyk po akimirkos.",
+    "Tai nepavykęs skaitymas, o ne atsakymas: tai nereiškia, kad nepriklausote jokiai organizacijai. Pabandykite po akimirkos.",
   "workspace.pointerUnavailable":
-    "Tai apskaičiuota iš to, kam priklausai, o ne tavo išsaugotas pasirinkimas, ir kol kas čia to pakeisti negalima.",
+    "Tai apskaičiuota iš to, kam priklausote, o ne jūsų išsaugotas pasirinkimas, ir kol kas čia to pakeisti negalima.",
   "workspace.switchFailed": "Darbo erdvė nepakeista. Niekas neperkelta.",
-  "context.loading": "Skaitome tavo roles…",
+  "context.loading": "Skaitome jūsų roles…",
   "context.active": "Aktyvi",
   "context.none": "Šioje paskyroje kol kas neįrašyta nė viena dalyvavimo rolė. Tai perskaitėme — ne programėlės klaida.",
-  "context.title": "Dirbi kaip",
-  "context.unavailable.title": "Kol kas negalime parodyti tavo kontekstų",
+  "context.title": "Dirbate kaip",
+  "context.unavailable.title": "Kol kas negalime parodyti jūsų kontekstų",
   "context.unavailable.body":
-    "Programa gali tave prijungti, bet dar negali nuskaityti, kurioms organizacijoms priklausai. Tavo paskyroje nieko netrūksta — tiesiog ši programa dar negali to paklausti.",
+    "Programa gali jus prijungti, bet dar negali nuskaityti, kurioms organizacijoms priklausote. Jūsų paskyroje nieko netrūksta — tiesiog ši programa dar negali to paklausti.",
   "context.mode.worker": "Aš pats",
   "context.mode.company": "Įmonė",
   "context.mode.agency": "Agentūra",
@@ -617,20 +617,20 @@ const lt: Catalogue = {
   "domain.retry": "Bandyti dar kartą",
   "domain.failedTitle": "Nepavyko įkelti",
   "domain.unavailable.notConnectedYet": "Dar neprijungta",
-  "domain.unavailable.signInAgain": "Prisijunk iš naujo.",
+  "domain.unavailable.signInAgain": "Prisijunkite iš naujo.",
   "domain.unavailable.offline": "Nėra ryšio. Niekas nebuvo išsiųsta.",
   "domain.unavailable.unexpectedAnswer":
     "Serveris atsakė tuo, ko ši programa nesuprato.",
-  "domain.refused.no_credentials": "Prisijunk iš naujo.",
-  "domain.refused.invalid_token": "Tavo seansas baigėsi. Prisijunk iš naujo.",
+  "domain.refused.no_credentials": "Prisijunkite iš naujo.",
+  "domain.refused.invalid_token": "Jūsų seansas baigėsi. Prisijunkite iš naujo.",
   "domain.refused.no_profile": "Ši paskyra dar neturi profilio.",
   "domain.refused.not_authorized":
     "Serveris atmetė šią užklausą šiai paskyrai.",
   "domain.refused.rate_limited":
-    "Serveris paprašė programos sulėtėti. Bandyk po akimirkos.",
+    "Serveris paprašė programos sulėtėti. Bandykite po akimirkos.",
   "domain.refused.capability": "Serveris atmetė šią užklausą.",
   "domain.refused.identity_unavailable":
-    "Nepavyko patvirtinti, kas esi. Tai nėra atsisakymas — bandyk dar kartą.",
+    "Nepavyko patvirtinti, kas esate. Tai nėra atsisakymas — bandykite dar kartą.",
 
   "today.signedInAs": "Prisijungta kaip",
   "today.recentWork": "Naujausi darbai",
@@ -638,50 +638,50 @@ const lt: Catalogue = {
   "journal.logWork": "Įrašyti darbą",
   "journal.compose.title": "Įrašyti darbą",
   "journal.compose.intro":
-    "Aprašyk savais žodžiais, ką nuveikei. Darbo dienoraštis užfiksuos būtent tai, ką parašysi.",
+    "Aprašykite savais žodžiais, ką nuveikėte. Darbo dienoraštis užfiksuos būtent tai, ką parašysite.",
   "journal.compose.date": "Darbo data",
   "journal.compose.dateHint": "Metai-mėnuo-diena, pavyzdžiui 2026-09-01",
   "journal.compose.today": "Šiandien",
   "journal.compose.yesterday": "Vakar",
-  "journal.compose.notes": "Ką nuveikei",
+  "journal.compose.notes": "Ką nuveikėte",
   "journal.compose.notesHint":
     "Savais žodžiais. Laikas ir vietos rašomi taip pat čia.",
   "journal.compose.site": "Objektas arba vieta (nebūtina)",
   "journal.compose.context": "Darbo kontekstas",
   "journal.compose.contextUnnamed": "Nenurodyta",
   "journal.compose.review": "Peržiūrėti prieš įrašant",
-  "journal.compose.previewTitle": "Patikrink prieš įrašant",
+  "journal.compose.previewTitle": "Patikrinkite prieš įrašant",
   "journal.compose.previewNothingSaved":
     "Kol kas niekas neįrašyta. Bus užfiksuota būtent tai.",
   "journal.compose.save": "Įrašyti į darbo dienoraštį",
   "journal.compose.edit": "Pakeisti",
   "journal.compose.chooseContext": "Kuriam darbui tai priklauso?",
   "journal.compose.chooseContextBody":
-    "Šis įrašas gali priklausyti daugiau nei vienam tavo darbo kontekstui, todėl niekas neparuošta ir niekas neįrašyta. Pasirink vieną.",
+    "Šis įrašas gali priklausyti daugiau nei vienam jūsų darbo kontekstui, todėl niekas neparuošta ir niekas neįrašyta. Pasirinkite vieną.",
   "journal.compose.savedTitle": "Įrašyta į darbo dienoraštį",
   "journal.compose.savedBody":
     "Tai jau užfiksuotas įrašas. Serveris išsaugojo būtent tai.",
   "journal.compose.another": "Įrašyti dar vieną",
   "journal.compose.backToJournal": "Grįžti į dienoraštį",
-  "journal.compose.checkThis": "Pirmiausia patikrink",
+  "journal.compose.checkThis": "Pirmiausia patikrinkite",
   "journal.compose.invalidDate":
-    "Datą rašyk metai-mėnuo-diena, pavyzdžiui 2026-09-01. Niekas nebuvo išsiųsta.",
+    "Datą rašykite metai-mėnuo-diena, pavyzdžiui 2026-09-01. Niekas nebuvo išsiųsta.",
   "journal.compose.futureDate":
     "Darbo data negali būti ateityje — žurnalo įrašas fiksuoja darbą, kuris jau įvyko. Niekas nebuvo išsiųsta.",
   "journal.compose.notesRequired":
-    "Prieš įrašant aprašyk, ką nuveikei. Niekas nebuvo išsiųsta.",
+    "Prieš įrašant aprašykite, ką nuveikėte. Niekas nebuvo išsiųsta.",
   "journal.compose.draftFailedTitle": "Nepavyko paruošti šio įrašo",
   "journal.compose.saveFailedTitle": "Nepavyko įrašyti šio įrašo",
   "journal.compose.staleDraft":
-    "Neįrašyta: po paruošimo tavo dienoraštis pasikeitė, todėl patikra nebegalioja. Peržiūrėk dar kartą.",
+    "Neįrašyta: po paruošimo jūsų dienoraštis pasikeitė, todėl patikra nebegalioja. Peržiūrėkite dar kartą.",
   "journal.compose.noContext":
-    "Ši paskyra neturi aktyvaus darbo konteksto, todėl įrašui nėra kur atsidurti. Pirmiausia svetainėje nurodyk, kur dirbi, o tada įrašyk darbą čia.",
+    "Ši paskyra neturi aktyvaus darbo konteksto, todėl įrašui nėra kur atsidurti. Pirmiausia svetainėje nurodykite, kur dirbate, o tada įrašykite darbą čia.",
   "journal.compose.unsureSaved":
-    "Ryšys nutrūko jau išsiuntus, todėl nežinome, ar įrašas pasiekė serverį. Prieš rašant iš naujo atsidaryk darbo dienoraštį ir patikrink. Bandymas dar kartą dublikato nesukurs.",
+    "Ryšys nutrūko jau išsiuntus, todėl nežinome, ar įrašas pasiekė serverį. Prieš rašant iš naujo atsidarykite darbo dienoraštį ir patikrinkite. Bandymas dar kartą dublikato nesukurs.",
   "journal.compose.skillsAdded": "Nauji užfiksuoti įgūdžiai",
   "journal.compose.skillsStrengthened": "Įgūdžiai su naujais įrodymais",
-  "journal.compose.skillsClaims": "Iš tavo žodžių pastebėti gebėjimai",
-  "journal.compose.skillsReview": "Laukia tavo peržiūros",
+  "journal.compose.skillsClaims": "Iš jūsų žodžių pastebėti gebėjimai",
+  "journal.compose.skillsReview": "Laukia jūsų peržiūros",
   "journal.compose.noCvChange":
     "Iš šio įrašo į gyvąjį CV nieko naujo nepridėta.",
   "journal.compose.skillsPartial":
@@ -696,11 +696,11 @@ const lt: Catalogue = {
   "journal.correct.title":
     "Taisyti įrašą",
   "journal.correct.intro":
-    "Pakeisk tai, kas neteisinga – žodžius, dieną ar vietą. Ankstesnė versija lieka tavo istorijoje; sumos skaičiuoja pataisytą.",
+    "Pakeiskite tai, kas neteisinga – žodžius, dieną ar vietą. Ankstesnė versija lieka jūsų istorijoje; sumos skaičiuoja pataisytą.",
   "journal.correct.nothingChanged":
-    "Kol kas niekas nepakeista. Pirmiausia pataisyk žodžius, dieną ar vietą.",
+    "Kol kas niekas nepakeista. Pirmiausia pataisykite žodžius, dieną ar vietą.",
   "journal.correct.previewTitle":
-    "Patikrink pataisymą prieš įrašant",
+    "Patikrinkite pataisymą prieš įrašant",
   "journal.correct.before":
     "Dabar",
   "journal.correct.after":
@@ -716,9 +716,9 @@ const lt: Catalogue = {
   "journal.correct.savedTitle":
     "Pataisymas įrašytas",
   "journal.correct.savedBody":
-    "Tavo dienoraštis ir sumos dabar rodo pataisytą versiją.",
+    "Jūsų dienoraštis ir sumos dabar rodo pataisytą versiją.",
   "journal.correct.savedConfirmedBody":
-    "Pataisyta versija įrašyta ir laukia vadovo patvirtinimo; ankstesnė patvirtinta versija lieka tavo istorijoje.",
+    "Pataisyta versija įrašyta ir laukia vadovo patvirtinimo; ankstesnė patvirtinta versija lieka jūsų istorijoje.",
   "journal.correct.draftFailedTitle":
     "Nepavyko paruošti pataisymo",
   "journal.correct.saveFailedTitle":
@@ -726,13 +726,13 @@ const lt: Catalogue = {
   "journal.correct.unsureSaved":
     "Pataisymas išsiųstas, bet atsakymas negrįžo, todėl nežinome, ar jis įrašytas. Bandyti dar kartą saugu: jau įrašytas pataisymas atmetamas, dvigubai neįrašomas.",
   "journal.correct.staleDraft":
-    "Neįrašyta: po pataisymo paruošimo tavo dienoraštis pasikeitė. Peržiūrėk dar kartą.",
+    "Neįrašyta: po pataisymo paruošimo jūsų dienoraštis pasikeitė. Peržiūrėkite dar kartą.",
   "journal.correct.superseded":
-    "Šis įrašas jau pataisytas arba pašalintas. Atidaryk dienoraštį iš naujo ir taisyk dabartinę versiją.",
+    "Šis įrašas jau pataisytas arba pašalintas. Atidarykite dienoraštį iš naujo ir taisykite dabartinę versiją.",
   "journal.correct.notFound":
-    "Šio įrašo nėra tarp naujausių tavo dienoraščio įrašų. Galbūt jis jau pataisytas.",
+    "Šio įrašo nėra tarp naujausių jūsų dienoraščio įrašų. Galbūt jis jau pataisytas.",
   "journal.correct.conflict":
-    "Nauji žodžiai nurodo vieną trukmę visam įrašui, bet įraše dar yra atliktas kiekis, o abiem reikia to paties lauko. Nurodyk laiką kiekvienai veiklai arba pataisyk įrašą svetainėje.",
+    "Nauji žodžiai nurodo vieną trukmę visam įrašui, bet įraše dar yra atliktas kiekis, o abiem reikia to paties lauko. Nurodykite laiką kiekvienai veiklai arba pataisykite įrašą svetainėje.",
   "journal.correct.missingTitle":
     "Šio įrašo čia pataisyti negalima",
   "today.openMessages":
@@ -742,25 +742,25 @@ const lt: Catalogue = {
   "messages.conversation":
     "Pokalbis",
   "messages.intro":
-    "Tavo pokalbiai LabourMarket.ai viduje. Žinutės lieka programėlėje – nieko nesiunčiame el. paštu ar SMS. Naujos žinutės matomos atidarius šį ekraną.",
+    "Jūsų pokalbiai LabourMarket.ai viduje. Žinutės lieka programėlėje – nieko nesiunčiame el. paštu ar SMS. Naujos žinutės matomos atidarius šį ekraną.",
   "messages.none":
-    "Kol kas neturi pokalbių.",
+    "Kol kas neturite pokalbių.",
   "messages.untitled":
     "Pokalbis",
   "messages.threadEmpty":
     "Šiame pokalbyje dar nėra žinučių.",
   "messages.fromMe":
-    "Tu",
+    "Jūs",
   "messages.fromThem":
     "Pašnekovas",
   "messages.replyLabel":
-    "Tavo atsakymas",
+    "Jūsų atsakymas",
   "messages.review":
     "Peržiūrėti prieš siunčiant",
   "messages.emptyBody":
-    "Pirmiausia parašyk žinutę.",
+    "Pirmiausia parašykite žinutę.",
   "messages.previewTitle":
-    "Patikrink prieš siunčiant",
+    "Patikrinkite prieš siunčiant",
   "messages.previewNothingSent":
     "Kol kas niekas neišsiųsta. Būtent šį tekstą matys kitas žmogus.",
   "messages.send":
@@ -768,9 +768,9 @@ const lt: Catalogue = {
   "messages.sentTitle":
     "Išsiųsta",
   "messages.sentBody":
-    "Tavo žinutė yra pokalbyje.",
+    "Jūsų žinutė yra pokalbyje.",
   "messages.sentUnverified":
-    "Serveris žinutę priėmė, bet nuskaityta ji nesutapo. Atidaryk pokalbį iš naujo ir patikrink.",
+    "Serveris žinutę priėmė, bet nuskaityta ji nesutapo. Atidarykite pokalbį iš naujo ir patikrinkite.",
   "messages.writeAnother":
     "Rašyti kitą žinutę",
   "messages.draftFailedTitle":
@@ -778,21 +778,21 @@ const lt: Catalogue = {
   "messages.sendFailedTitle":
     "Nepavyko išsiųsti žinutės",
   "messages.unsureSent":
-    "Žinutė išsiųsta, bet atsakymas negrįžo, todėl nežinome, ar ji pasiekė. Prieš siųsdamas antrą kartą, atidaryk pokalbį iš naujo.",
+    "Žinutė išsiųsta, bet atsakymas negrįžo, todėl nežinome, ar ji pasiekė. Prieš siunčiant antrą kartą, atidarykite pokalbį iš naujo.",
   "messages.staleDraft":
-    "Neišsiųsta: tau ruošiant atsakymą, pokalbyje atsirado nauja žinutė. Perskaityk ją ir peržiūrėk atsakymą dar kartą.",
+    "Neišsiųsta: jums ruošiant atsakymą, pokalbyje atsirado nauja žinutė. Perskaitykite ją ir peržiūrėkite atsakymą dar kartą.",
   "messages.notFound":
-    "Šis pokalbis nėra tavo arba jo nebėra.",
+    "Šis pokalbis nėra jūsų arba jo nebėra.",
   "messages.noPermission":
-    "Šiame pokalbyje rašyti negali.",
+    "Šiame pokalbyje rašyti negalite.",
   "today.openNotifications":
     "Pranešimai",
   "notifications.title":
     "Pranešimai",
   "notifications.intro":
-    "Kas nutiko tavo darbe – naujausi viršuje. Atidarius pranešimas pažymimas kaip perskaitytas. Pranešimai į telefoną nesiunčiami – jie matomi čia, atidarius šį ekraną.",
+    "Kas nutiko jūsų darbe – naujausi viršuje. Atidarius pranešimas pažymimas kaip perskaitytas. Pranešimai į telefoną nesiunčiami – jie matomi čia, atidarius šį ekraną.",
   "notifications.none":
-    "Pranešimų neturi.",
+    "Pranešimų neturite.",
   "notifications.unread":
     "Nauja",
   "notifications.markAll":
@@ -802,27 +802,27 @@ const lt: Catalogue = {
   "notifications.type.unknown":
     "Pranešimas",
   "notifications.type.event_absence_approved":
-    "Tavo neatvykimas patvirtintas",
+    "Jūsų neatvykimas patvirtintas",
   "notifications.type.event_absence_rejected":
-    "Tavo neatvykimas atmestas",
+    "Jūsų neatvykimas atmestas",
   "notifications.type.event_absence_requested":
-    "Tau užregistruotas neatvykimas",
+    "Jums užregistruotas neatvykimas",
   "notifications.type.event_booking_accepted":
-    "Tavo rezervacijos pasiūlymas priimtas",
+    "Jūsų rezervacijos pasiūlymas priimtas",
   "notifications.type.event_booking_declined":
-    "Tavo rezervacijos pasiūlymas atmestas",
+    "Jūsų rezervacijos pasiūlymas atmestas",
   "notifications.type.event_booking_proposed":
-    "Gavai rezervacijos pasiūlymą",
+    "Gavote rezervacijos pasiūlymą",
   "notifications.type.event_booking_withdrawn":
     "Rezervacijos pasiūlymas atšauktas",
   "notifications.type.event_demand_interest_expressed":
-    "Darbuotojas pareiškė susidomėjimą tavo poreikiu",
+    "Darbuotojas pareiškė susidomėjimą jūsų poreikiu",
   "notifications.type.event_demand_interest_reviewed":
-    "Įmonė pažymėjo tavo susidomėjimą kaip peržiūrėtą",
+    "Įmonė pažymėjo jūsų susidomėjimą kaip peržiūrėtą",
   "notifications.type.event_document_ack_assigned":
-    "Tavęs paprašyta patvirtinti, kad perskaitei dokumentą.",
+    "Jūsų paprašyta patvirtinti, kad perskaitėte dokumentą.",
   "notifications.type.event_document_ack_completed":
-    "Dokumentas, kurį siuntei patvirtinti, buvo patvirtintas.",
+    "Dokumentas, kurį siuntėte patvirtinti, buvo patvirtintas.",
   "notifications.type.event_document_expiring":
     "Netrukus baigsis dokumento galiojimas.",
   "notifications.type.event_engagement_created":
@@ -830,39 +830,39 @@ const lt: Catalogue = {
   "notifications.type.event_engagement_ended":
     "Darbo santykis baigtas",
   "notifications.type.event_history_link_offered":
-    "Organizacija pasiūlė susieti tavo užfiksuotą darbo istoriją su tavo paskyra",
+    "Organizacija pasiūlė susieti jūsų užfiksuotą darbo istoriją su jūsų paskyra",
   "notifications.type.event_invitation_accepted":
-    "Kažkas priėmė tavo kvietimą",
+    "Kažkas priėmė jūsų kvietimą",
   "notifications.type.event_job_alert":
-    "Atsirado naujas darbas pagal tavo paieškos kriterijus",
+    "Atsirado naujas darbas pagal jūsų paieškos kriterijus",
   "notifications.type.event_journal_review_decided":
-    "Tavo darbo žurnalo įrašas peržiūrėtas",
+    "Jūsų darbo žurnalo įrašas peržiūrėtas",
   "notifications.type.event_journal_review_decided_approved":
-    "Tavo darbo žurnalo įrašas patvirtintas",
+    "Jūsų darbo žurnalo įrašas patvirtintas",
   "notifications.type.event_journal_review_decided_changes_requested":
-    "Paprašyta pakeisti tavo darbo žurnalo įrašą",
+    "Paprašyta pakeisti jūsų darbo žurnalo įrašą",
   "notifications.type.event_journal_review_decided_rejected":
-    "Tavo darbo žurnalo įrašas atmestas",
+    "Jūsų darbo žurnalo įrašas atmestas",
   "notifications.type.event_message_received":
-    "Gavai naują žinutę",
+    "Gavote naują žinutę",
   "notifications.type.event_saved_search_match":
-    "Tavo išsaugotoje paieškoje yra naujų rezultatų",
+    "Jūsų išsaugotoje paieškoje yra naujų rezultatų",
   "notifications.type.event_weekly_digest":
-    "Paruošta tavo savaitės darbo ir galimybių apžvalga",
+    "Paruošta jūsų savaitės darbo ir galimybių apžvalga",
   "notifications.type.event_weekly_digest_journal":
-    "Paruošta tavo savaitės darbo žurnalo apžvalga",
+    "Paruošta jūsų savaitės darbo žurnalo apžvalga",
   "notifications.type.event_weekly_digest_profile_completion":
-    "Norint pamatyti tau tinkamus darbus, patvirtink, kokį darbą dirbi",
+    "Norint pamatyti jums tinkamus darbus, patvirtinkite, kokį darbą dirbate",
   "notifications.type.event_work_task_assigned":
-    "Tau priskirta užduotis",
+    "Jums priskirta užduotis",
   "notifications.type.event_workflow_decided":
-    "Dėl tavo tvirtinimo prašymo priimtas sprendimas",
+    "Dėl jūsų tvirtinimo prašymo priimtas sprendimas",
   "notifications.type.event_workflow_delegated":
-    "Tau perduotas tvirtinimo etapas",
+    "Jums perduotas tvirtinimo etapas",
   "notifications.type.event_workflow_escalated":
     "Tvirtinimo etapas viršijo terminą",
   "notifications.type.event_workflow_step_pending":
-    "Tvirtinimo prašymas laukia tavo sprendimo",
+    "Tvirtinimo prašymas laukia jūsų sprendimo",
   "today.openProjects":
     "Mano projektai",
   "projects.title":
@@ -870,29 +870,29 @@ const lt: Catalogue = {
   "projects.detailTitle":
     "Projektas",
   "projects.none":
-    "Tau nepriskirtas joks projektas.",
+    "Jums nepriskirtas joks projektas.",
   "projects.active":
     "Aktyvus",
   "projects.ended":
     "Baigtas",
   "projects.asksCount":
-    "Dar reikia iš tavęs",
+    "Dar reikia iš jūsų",
   "projects.moreOnWeb":
-    "Čia rodomi tik pirmieji tavo projektai. Svetainėje matysi visus.",
+    "Čia rodomi tik pirmieji jūsų projektai. Svetainėje matysite visus.",
   "projects.notFound":
-    "Šis projektas nėra tavo arba jo nėra tarp čia rodomų projektų.",
+    "Šis projektas nėra jūsų arba jo nėra tarp čia rodomų projektų.",
   "projects.asksTitle":
-    "Dar reikia iš tavęs",
+    "Dar reikia iš jūsų",
   "projects.asksShownOf":
     "Rodoma čia / iš viso dar atvira – visas sąrašas svetainėje",
   "projects.asksUnavailable":
-    "Šiuo metu nepavyko nuskaityti, ko dar reikia iš tavęs. Bandyk dar kartą arba atidaryk projektą svetainėje.",
+    "Šiuo metu nepavyko nuskaityti, ko dar reikia iš jūsų. Bandykite dar kartą arba atidarykite projektą svetainėje.",
   "projects.asksNotRead":
-    "Šis priskyrimas baigtas. Kas jame buvo prašyta iš tavęs, matysi projekto puslapyje svetainėje.",
+    "Šis priskyrimas baigtas. Kas jame buvo prašyta iš jūsų, matysite projekto puslapyje svetainėje.",
   "projects.asksIncomplete":
-    "Tavo projektuose atvira daugiau, nei programėlė gali išvardyti, todėl šio projekto dalis gali būti neparodyta. Visas sąrašas – projekto puslapyje svetainėje.",
+    "Jūsų projektuose atvira daugiau, nei programėlė gali išvardyti, todėl šio projekto dalis gali būti neparodyta. Visas sąrašas – projekto puslapyje svetainėje.",
   "projects.asksNone":
-    "Šiame projekte tau nieko neliko atlikti.",
+    "Šiame projekte jums nieko neliko atlikti.",
   "projects.ask.needed":
     "Reikia",
   "projects.ask.missing":
@@ -908,16 +908,16 @@ const lt: Catalogue = {
   "projects.webDetail":
     "Visas projekto puslapis – etapai, dokumentai ir komanda – yra svetainėje.",
   "messages.threadNotShown":
-    "Pokalbis dar neparodytas. Palauk, kol jis įsikels, perskaityk jį ir tada peržiūrėk savo atsakymą.",
+    "Pokalbis dar neparodytas. Palaukite, kol jis įsikels, perskaitykite jį ir tada peržiūrėkite savo atsakymą.",
   "messages.newBeforeReview":
-    "Šiame pokalbyje atėjo nauja žinutė. Ji jau rodoma aukščiau – perskaityk ją ir dar kartą peržiūrėk savo atsakymą.",
+    "Šiame pokalbyje atėjo nauja žinutė. Ji jau rodoma aukščiau – perskaitykite ją ir dar kartą peržiūrėkite savo atsakymą.",
   "profile.noWorkerProfile": "Ši paskyra dar neturi darbuotojo profilio.",
-  "profile.figuresTitle": "Įgūdžiai su tavo užrašytomis valandomis",
+  "profile.figuresTitle": "Įgūdžiai su jūsų užrašytomis valandomis",
   "profile.groupManagerConfirmed": "Vadovo patvirtinta",
-  "profile.groupJournalBacked": "Paremta tavo darbo dienoraščiu",
-  "profile.groupDeclared": "Tavo nurodyta",
+  "profile.groupJournalBacked": "Paremta jūsų darbo dienoraščiu",
+  "profile.groupDeclared": "Jūsų nurodyta",
   "profile.figuresUnavailable":
-    "Valandų, dalies ir įrašų šį kartą perskaityti nepavyko. Įgūdžiai žemiau vis tiek yra tavo užfiksuoti įgūdžiai — niekas nerodoma kaip 0.",
+    "Valandų, dalies ir įrašų šį kartą perskaityti nepavyko. Įgūdžiai žemiau vis tiek yra jūsų užfiksuoti įgūdžiai — niekas nerodoma kaip 0.",
   "profile.figuresLegend":
     "Valandos · dalis iš įgūdžiams priskirtų valandų · įrašai, per visą laiką. Tie patys skaičiai kaip svetainėje.",
   "profile.figuresNotRead": "skaičių perskaityti nepavyko",
@@ -926,11 +926,11 @@ const lt: Catalogue = {
   "profile.hoursShort": "val.",
   "profile.entriesLabel": "įr.",
   "profile.selfStatedMissing":
-    "Gebėjimai, kuriuos užrašei savais žodžiais, į šį ekraną dar neperkeliami; svetainė juos rodo prie tavo įgūdžių.",
+    "Gebėjimai, kuriuos užrašėte savais žodžiais, į šį ekraną dar neperkeliami; svetainė juos rodo prie jūsų įgūdžių.",
   "profile.openJournal": "Atidaryti darbo dienoraštį",
-  "journal.openProfile": "Kiek šie įrašai sudaro — tavo profilyje",
+  "journal.openProfile": "Kiek šie įrašai sudaro — jūsų profilyje",
 
-  "today.figuresTitle": "Tavo veikla skaičiais",
+  "today.figuresTitle": "Jūsų veikla skaičiais",
   "today.periodToday": "Šiandien",
   "today.periodWeek": "Paskutinės 7 dienos",
   "today.hoursLabel": "Valandos",
@@ -940,19 +940,19 @@ const lt: Catalogue = {
   "today.confirmedLabel": "Vadovo patvirtinta, val.",
   "today.periodEmpty": "Šiame lange nieko neužrašyta.",
   "today.periodMissing": "Serveris šiam langui skaičiaus neatsiuntė.",
-  "today.dominantTitle": "Didžiausia tavo valandų dalis per 7 dienas",
+  "today.dominantTitle": "Didžiausia jūsų valandų dalis per 7 dienas",
   "today.dominantShare": "iš įgūdžiams priskirtų valandų",
   "today.dominantNone":
     "Per paskutines 7 dienas nė vienam įgūdžiui valandos nepriskirtos.",
   "today.coverageTruncated":
     "Šie skaičiai remiasi paskutiniais perskaitytais įrašais — senesni įrašai neįtraukti.",
   "today.figuresScope":
-    "Iš tavo darbo dienoraščio įrašų, pagal tą pačią taisyklę kaip svetainėje. Kalendorinės dienos baigiasi šiandien (UTC).",
+    "Iš jūsų darbo dienoraščio įrašų, pagal tą pačią taisyklę kaip svetainėje. Kalendorinės dienos baigiasi šiandien (UTC).",
   "today.openJournal": "Atidaryti darbo dienoraštį",
   "today.openProfile": "Atidaryti profilį ir įgūdžius",
   "today.openNeed": "Paskelbti poreikį žmonėms",
   "need.title": "Paskelbti poreikį",
-  "need.intro": "Darbuotojų poreikis organizacijai, už kurią veiki. Prieš sukuriant peržiūri; darbuotojai, kurie gali jį matyti, randa jį savo lentoje.",
+  "need.intro": "Darbuotojų poreikis organizacijai, už kurią veikiate. Prieš sukuriant peržiūrite; darbuotojai, kurie gali jį matyti, randa jį savo lentoje.",
   "need.descriptionLabel": "Ko reikia?",
   "need.descriptionHint": "Savais žodžiais — koks darbas, kada, kiek žmonių.",
   "need.roleLabel": "Vaidmuo",
@@ -963,24 +963,24 @@ const lt: Catalogue = {
   "need.urgency.flexible": "Lanksčiai",
   "need.urgency.this_week": "Šią savaitę",
   "need.urgency.urgent": "Skubu",
-  "need.descriptionRequired": "Parašyk bent kelis žodžius apie tai, ko reikia. Niekas neišsiųsta.",
+  "need.descriptionRequired": "Parašykite bent kelis žodžius apie tai, ko reikia. Niekas neišsiųsta.",
   "need.teamSizeInvalid": "Žmonių skaičius turi būti sveikas skaičius nuo 1. Niekas neišsiųsta.",
   "need.review": "Peržiūrėti prieš kuriant",
   "need.cancel": "Atgal",
-  "need.previewTitle": "Patikrink prieš sukurdamas",
+  "need.previewTitle": "Patikrinkite prieš sukuriant",
   "need.previewBody": "Dar niekas nesukurta.",
   "need.actingFor": "Kam",
   "need.confirm": "Sukurti poreikį",
   "need.edit": "Taisyti",
   "need.sentTitle": "Sukurta",
-  "need.sentBody": "Poreikis dabar atviras organizacijai. Sekti gali svetainėje.",
+  "need.sentBody": "Poreikis dabar atviras organizacijai. Sekti galite svetainėje.",
   "need.done": "Grįžti į Šiandien",
-  "need.overLimit": "Ši organizacija pasiekė savo plano aktyvių pozicijų ribą. Niekas nesukurta — uždaryk poreikį arba pakeisk planą svetainėje.",
+  "need.overLimit": "Ši organizacija pasiekė savo plano aktyvių pozicijų ribą. Niekas nesukurta — uždarykite poreikį arba pakeiskite planą svetainėje.",
   "need.draftFailedTitle": "Nepavyko paruošti šio poreikio",
   "need.sendFailedTitle": "Nepavyko sukurti šio poreikio",
   "today.openJobs": "Naršyti atvirus darbus",
   "jobs.title": "Darbai",
-  "jobs.intro": "Viešas darbo skelbimų sąrašas — tie patys skelbimai kaip svetainėje. Darbdavys ir kaip kandidatuoti atsidaro svetainėje tavo vardu.",
+  "jobs.intro": "Viešas darbo skelbimų sąrašas — tie patys skelbimai kaip svetainėje. Darbdavys ir kaip kandidatuoti atsidaro svetainėje jūsų vardu.",
   "jobs.queryLabel": "Paieška",
   "jobs.queryHint": "Profesija arba žodis iš pavadinimo, bet kuria kalba",
   "jobs.search": "Ieškoti darbų",
@@ -995,31 +995,31 @@ const lt: Catalogue = {
   "jobs.published": "Paskelbta",
   "jobs.untitled": "Darbas",
   "jobs.notProvisioned": "Darbo skelbimų sąrašas šioje aplinkoje neįjungtas.",
-  "jobs.unavailable": "Darbo skelbimų sąrašas neatsakė laiku. Tai nereiškia, kad darbų nėra — pabandyk dar kartą.",
+  "jobs.unavailable": "Darbo skelbimų sąrašas neatsakė laiku. Tai nereiškia, kad darbų nėra — pabandykite dar kartą.",
   "jobs.linkedNotFound": "Šio skelbimo sąraše nebėra (galbūt jis uždarytas).",
-  "today.openOpportunities": "Tau atviri poreikiai",
-  "today.openAvailability": "Kas iš tavo komandos laisvas",
+  "today.openOpportunities": "Jums atviri poreikiai",
+  "today.openAvailability": "Kas iš jūsų komandos laisvas",
   "opportunities.title": "Galimybės",
-  "opportunities.intro": "Poreikiai, kuriuos matai dabar. Susidomėjimas parodomas poreikio savininkui jo paties rodinyje — niekas neišeina už platformos ribų.",
-  "opportunities.noneVisible": "Šiuo metu tau nematomas joks poreikis. Kai organizacija, su kuria esi susietas, atvers poreikį, jis atsiras čia.",
+  "opportunities.intro": "Poreikiai, kuriuos matote dabar. Susidomėjimas parodomas poreikio savininkui jo paties rodinyje — niekas neišeina už platformos ribų.",
+  "opportunities.noneVisible": "Šiuo metu jums nematomas joks poreikis. Kai su jumis susieta organizacija atvers poreikį, jis atsiras čia.",
   "opportunities.express": "Man įdomu",
   "opportunities.noteLabel": "Žinutė jiems (nebūtina)",
   "opportunities.noteHint": "Sakinys apie tai, kodėl arba kada — jie skaito taip, kaip parašyta.",
   "opportunities.draft": "Peržiūrėti prieš siunčiant",
-  "opportunities.previewTitle": "Patikrink prieš siųsdamas",
+  "opportunities.previewTitle": "Patikrinkite prieš siunčiant",
   "opportunities.previewBody": "Dar niekas neišsiųsta.",
-  "opportunities.alreadyExpressed": "Susidomėjimą šiuo poreikiu jau išreiškei; siunčiant dar kartą jis atnaujinamas.",
+  "opportunities.alreadyExpressed": "Susidomėjimą šiuo poreikiu jau išreiškėte; siunčiant dar kartą jis atnaujinamas.",
   "opportunities.confirm": "Siųsti",
   "opportunities.cancel": "Atgal",
   "opportunities.sentTitle": "Išsiųsta",
-  "opportunities.sentBody": "Šio poreikio savininkas dabar mato tavo susidomėjimą savo rodinyje.",
+  "opportunities.sentBody": "Šio poreikio savininkas dabar mato jūsų susidomėjimą savo rodinyje.",
   "opportunities.sentStatus": "Būsena",
   "opportunities.another": "Grįžti į sąrašą",
-  "opportunities.notVisible": "Šio poreikio nebematai (galbūt jis uždarytas).",
+  "opportunities.notVisible": "Šio poreikio nebematote (galbūt jis uždarytas).",
   "opportunities.draftFailedTitle": "Nepavyko paruošti",
   "opportunities.sendFailedTitle": "Nepavyko išsiųsti",
   "availability.title": "Kas laisvas",
-  "availability.intro": "Tavo aktyvi komanda artimiausias 7 dienas. Įsipareigojęs nereiškia neprieinamas: persidengimas yra įspėjimas, ne atsisakymas.",
+  "availability.intro": "Jūsų aktyvi komanda artimiausias 7 dienas. Įsipareigojęs nereiškia neprieinamas: persidengimas yra įspėjimas, ne atsisakymas.",
   "availability.actingFor": "Veikiama už",
   "availability.window": "Langas",
   "availability.rosterTotal": "Komandos nariai",
@@ -1030,7 +1030,7 @@ const lt: Catalogue = {
   "availability.committedTo": "įsipareigojęs",
   "availability.overridable": "įgaliotas asmuo gali nuspręsti kitaip",
   "availability.sourcesPartial": "Atsakė ne visi šaltiniai: nepavyko perskaityti nebuvimų arba įsipareigojimų, todėl niekas čia nerodomas kaip tikrai laisvas.",
-  "availability.personalWorkspace": "Esi savo asmeninėje erdvėje. Nustatymuose perjunk į organizacijos erdvę, kad matytum jos komandą.",
+  "availability.personalWorkspace": "Esate savo asmeninėje erdvėje. Nustatymuose perjunkite į organizacijos erdvę, kad matytumėte jos komandą.",
   "availability.noOrganization": "Ši paskyra nepriklauso jokiai organizacijai, todėl nėra komandos, apie kurią pranešti.",
   "availability.noRoster": "Ši organizacija neturi aktyvių komandos narių, todėl nėra apie ką pranešti.",
   "availability.noCompanyContext": "Ši erdvė negali veikti kaip darbdavys, todėl nėra komandos, apie kurią pranešti.",
@@ -1550,7 +1550,7 @@ const nl: Catalogue = {
   "nav.profile": "Profiel",
   "nav.settings": "Instellingen",
 
-  "auth.checking": "We controleren je sessie…",
+  "auth.checking": "We controleren uw sessie…",
   "auth.signIn.title": "Inloggen",
   "auth.signIn.email": "E-mailadres",
   "auth.signIn.password": "Wachtwoord",
@@ -1561,20 +1561,20 @@ const nl: Catalogue = {
   "auth.register.toSignIn": "Ik heb al een account",
   "auth.signIn.forgot": "Wachtwoord vergeten?",
   "auth.register.legal":
-    "Door een account aan te maken, ga je akkoord met de gebruiksvoorwaarden en het privacybeleid.",
+    "Door een account aan te maken, gaat u akkoord met de gebruiksvoorwaarden en het privacybeleid.",
   "auth.error.rejected": "Dit e-mailadres en wachtwoord komen niet overeen.",
   "auth.error.unreachable":
-    "We konden de server niet bereiken, dus we weten niet of deze gegevens kloppen. Controleer je verbinding en probeer het opnieuw.",
+    "We konden de server niet bereiken, dus we weten niet of deze gegevens kloppen. Controleer uw verbinding en probeer het opnieuw.",
   "auth.error.confirmationRequired":
-    "Je account is aangemaakt. Bevestig de link in je e-mail en log daarna in.",
+    "Uw account is aangemaakt. Bevestig de link in uw e-mail en log daarna in.",
   "auth.error.notConfigured":
     "Deze versie heeft geen serverconfiguratie en kan daarom niemand inloggen.",
   "auth.signOut": "Uitloggen",
 
   "account.title": "Privacy en account",
   "account.body":
-    "Deze links openen in je browser, op de website. Je gegevens opvragen of je account laten verwijderen doe je daar, onder Privacy.",
-  "account.privacy": "Privacy, je gegevens en je account verwijderen",
+    "Deze links openen in uw browser, op de website. Uw gegevens opvragen of uw account laten verwijderen doet u daar, onder Privacy.",
+  "account.privacy": "Privacy, uw gegevens en uw account verwijderen",
   "account.terms": "Gebruiksvoorwaarden",
   "account.privacyPolicy": "Privacybeleid",
   "account.deletionInfo": "Hoe het verwijderen van een account werkt (inloggen niet nodig)",
@@ -1582,41 +1582,41 @@ const nl: Catalogue = {
   "account.external": "Browser",
   "account.openFailed": "De link kon op deze telefoon niet worden geopend. Er is niets gewijzigd.",
 
-  "session.unavailable.title": "We konden je sessie niet controleren",
+  "session.unavailable.title": "We konden uw sessie niet controleren",
   "session.unavailable.body":
-    "Dit betekent niet dat je bent uitgelogd — de beveiligde opslag van je telefoon gaf geen antwoord. Probeer het opnieuw.",
+    "Dit betekent niet dat u bent uitgelogd — de beveiligde opslag van uw telefoon gaf geen antwoord. Probeer het opnieuw.",
   "session.unavailable.retry": "Opnieuw proberen",
 
   "route.notFound.title": "Dat scherm bestaat niet in deze app",
   "route.notFound.body":
-    "De link die je volgde leidt hier nergens heen. Misschien is hij voor de website bedoeld, of is hij verouderd. Er is niets verstuurd.",
+    "De link die u volgde leidt hier nergens heen. Misschien is hij voor de website bedoeld, of is hij verouderd. Er is niets verstuurd.",
   "route.notFound.action": "Terug naar de app",
 
   "crash.title": "De app liep vast",
   "crash.body":
-    "Dit is een fout in de app zelf, niet iets wat jij deed, en er is niets verstuurd. Probeer het opnieuw — als het blijft gebeuren, sluit de app en open hem opnieuw.",
+    "Dit is een fout in de app zelf, niet iets wat u deed, en er is niets verstuurd. Probeer het opnieuw — als het blijft gebeuren, sluit de app en open hem opnieuw.",
 
   "config.problem.title": "Deze versie is niet geconfigureerd",
   "config.problem.body":
     "De app kan niet starten totdat deze waarden zijn ingesteld. Er zijn geen gegevens verstuurd.",
 
   "workspace.title": "Handelt namens",
-  "workspace.loading": "Je werkruimtes worden gelezen…",
+  "workspace.loading": "Uw werkruimtes worden gelezen…",
   "workspace.active": "Actief",
   "workspace.switching": "Wisselen…",
-  "workspace.failed.title": "We konden je werkruimtes niet lezen",
+  "workspace.failed.title": "We konden uw werkruimtes niet lezen",
   "workspace.failed.body":
-    "Dit is een mislukte leesactie, geen antwoord: het betekent niet dat je bij geen enkele organisatie hoort. Probeer het zo opnieuw.",
+    "Dit is een mislukte leesactie, geen antwoord: het betekent niet dat u bij geen enkele organisatie hoort. Probeer het zo opnieuw.",
   "workspace.pointerUnavailable":
-    "Dit is afgeleid uit waar je bij hoort, niet een keuze die voor jou is bewaard, en het kan hier nog niet gewijzigd worden.",
+    "Dit is afgeleid uit waar u bij hoort, niet een keuze die voor u is bewaard, en het kan hier nog niet gewijzigd worden.",
   "workspace.switchFailed": "De werkruimte is niet gewijzigd. Er is niets verplaatst.",
-  "context.loading": "Je rollen worden gelezen…",
+  "context.loading": "Uw rollen worden gelezen…",
   "context.active": "Actief",
   "context.none": "Voor dit account is nog geen deelnamerol vastgelegd. Dat is wat we gelezen hebben — geen fout in de app.",
-  "context.title": "Je werkt als",
-  "context.unavailable.title": "We kunnen je contexten nog niet tonen",
+  "context.title": "U werkt als",
+  "context.unavailable.title": "We kunnen uw contexten nog niet tonen",
   "context.unavailable.body":
-    "De app kan je inloggen, maar kan nog niet lezen bij welke organisaties je hoort. Er ontbreekt niets in je account — deze client kan het alleen nog niet opvragen.",
+    "De app kan u inloggen, maar kan nog niet lezen bij welke organisaties u hoort. Er ontbreekt niets in uw account — deze client kan het alleen nog niet opvragen.",
   "context.mode.worker": "Mijzelf",
   "context.mode.company": "Bedrijf",
   "context.mode.agency": "Bureau",
@@ -1634,7 +1634,7 @@ const nl: Catalogue = {
   "domain.unavailable.unexpectedAnswer":
     "De server gaf een antwoord dat deze app niet begreep.",
   "domain.refused.no_credentials": "Log opnieuw in.",
-  "domain.refused.invalid_token": "Je sessie is verlopen. Log opnieuw in.",
+  "domain.refused.invalid_token": "Uw sessie is verlopen. Log opnieuw in.",
   "domain.refused.no_profile": "Dit account heeft nog geen profiel.",
   "domain.refused.not_authorized":
     "De server weigerde dit verzoek voor dit account.",
@@ -1642,7 +1642,7 @@ const nl: Catalogue = {
     "De server vroeg deze app om te vertragen. Probeer het zo opnieuw.",
   "domain.refused.capability": "De server weigerde dit verzoek.",
   "domain.refused.identity_unavailable":
-    "We konden niet bevestigen wie je bent. Dit is geen weigering — probeer het opnieuw.",
+    "We konden niet bevestigen wie u bent. Dit is geen weigering — probeer het opnieuw.",
 
   "today.signedInAs": "Ingelogd als",
   "today.recentWork": "Recent werk",
@@ -1650,14 +1650,14 @@ const nl: Catalogue = {
   "journal.logWork": "Werk vastleggen",
   "journal.compose.title": "Werk vastleggen",
   "journal.compose.intro":
-    "Schrijf in je eigen woorden op wat je hebt gedaan. Je werkdagboek legt precies dat vast.",
+    "Schrijf in uw eigen woorden op wat u heeft gedaan. Uw werkdagboek legt precies dat vast.",
   "journal.compose.date": "Datum van het werk",
   "journal.compose.dateHint": "Jaar-maand-dag, bijvoorbeeld 2026-09-01",
   "journal.compose.today": "Vandaag",
   "journal.compose.yesterday": "Gisteren",
-  "journal.compose.notes": "Wat je hebt gedaan",
+  "journal.compose.notes": "Wat u heeft gedaan",
   "journal.compose.notesHint":
-    "In je eigen woorden. Tijden en plaatsen horen hier ook.",
+    "In uw eigen woorden. Tijden en plaatsen horen hier ook.",
   "journal.compose.site": "Locatie of plek (optioneel)",
   "journal.compose.context": "Werkcontext",
   "journal.compose.contextUnnamed": "Niet benoemd",
@@ -1669,8 +1669,8 @@ const nl: Catalogue = {
   "journal.compose.edit": "Iets wijzigen",
   "journal.compose.chooseContext": "Bij welk werk hoort dit?",
   "journal.compose.chooseContextBody":
-    "Dit item kan bij meer dan één van je werkcontexten horen, dus er is niets voorbereid en niets opgeslagen. Kies er één.",
-  "journal.compose.savedTitle": "Opgeslagen in je werkdagboek",
+    "Dit item kan bij meer dan één van uw werkcontexten horen, dus er is niets voorbereid en niets opgeslagen. Kies er één.",
+  "journal.compose.savedTitle": "Opgeslagen in uw werkdagboek",
   "journal.compose.savedBody":
     "Dit is nu een vastgelegd item. Dit is wat de server heeft opgeslagen.",
   "journal.compose.another": "Nog een vastleggen",
@@ -1681,34 +1681,34 @@ const nl: Catalogue = {
   "journal.compose.futureDate":
     "De werkdatum kan niet in de toekomst liggen — een journaalpost legt werk vast dat al is gebeurd. Er is niets verstuurd.",
   "journal.compose.notesRequired":
-    "Schrijf op wat je hebt gedaan voordat je opslaat. Er is niets verstuurd.",
+    "Schrijf op wat u heeft gedaan voordat u opslaat. Er is niets verstuurd.",
   "journal.compose.draftFailedTitle": "We konden dit item niet voorbereiden",
   "journal.compose.saveFailedTitle": "We konden dit item niet opslaan",
   "journal.compose.staleDraft":
-    "Niet opgeslagen: je dagboek is veranderd nadat dit was voorbereid, dus de controle is verouderd. Controleer het opnieuw.",
+    "Niet opgeslagen: uw dagboek is veranderd nadat dit was voorbereid, dus de controle is verouderd. Controleer het opnieuw.",
   "journal.compose.noContext":
-    "Dit account heeft geen actieve werkcontext, dus een item kan nergens worden vastgelegd. Geef eerst op de website aan waar je werkt en leg hier daarna werk vast.",
+    "Dit account heeft geen actieve werkcontext, dus een item kan nergens worden vastgelegd. Geef eerst op de website aan waar u werkt en leg hier daarna werk vast.",
   "journal.compose.unsureSaved":
-    "De verbinding viel weg nadat dit was verstuurd, dus we weten niet of het is aangekomen. Open je werkdagboek om te controleren voordat je het opnieuw schrijft. Opnieuw proberen kan geen dubbel item maken.",
+    "De verbinding viel weg nadat dit was verstuurd, dus we weten niet of het is aangekomen. Open uw werkdagboek om te controleren voordat u het opnieuw schrijft. Opnieuw proberen kan geen dubbel item maken.",
   "journal.compose.skillsAdded": "Nieuw vastgelegde vaardigheden",
   "journal.compose.skillsStrengthened": "Vaardigheden met nieuw bewijs",
-  "journal.compose.skillsClaims": "Capaciteiten opgemerkt uit je woorden",
-  "journal.compose.skillsReview": "Wacht op jouw beoordeling",
+  "journal.compose.skillsClaims": "Capaciteiten opgemerkt uit uw woorden",
+  "journal.compose.skillsReview": "Wacht op uw beoordeling",
   "journal.compose.noCvChange":
-    "Uit dit item is niets nieuws aan je Living CV toegevoegd.",
+    "Uit dit item is niets nieuws aan uw Living CV toegevoegd.",
   "journal.compose.skillsPartial":
     "Een deel van de Living CV-update is niet afgerond. Het item zelf is opgeslagen.",
   "journal.compose.skillsFailed":
     "De Living CV-update is deze keer niet uitgevoerd. Het item zelf is opgeslagen.",
   "journal.compose.reviewOnWeb":
-    "Wat op beoordeling wacht, bevestig je op de website.",
+    "Wat op beoordeling wacht, bevestigt u op de website.",
   "profile.skillsEmpty": "Nog geen vaardigheden vastgelegd.",
   "journal.correct.action":
     "Deze invoer corrigeren",
   "journal.correct.title":
     "Invoer corrigeren",
   "journal.correct.intro":
-    "Wijzig wat niet klopt: de tekst, de dag of de locatie. De vorige versie blijft in je geschiedenis; je totalen tellen de gecorrigeerde.",
+    "Wijzig wat niet klopt: de tekst, de dag of de locatie. De vorige versie blijft in uw geschiedenis; uw totalen tellen de gecorrigeerde.",
   "journal.correct.nothingChanged":
     "Er is nog niets gewijzigd. Pas eerst de tekst, de dag of de locatie aan.",
   "journal.correct.previewTitle":
@@ -1728,9 +1728,9 @@ const nl: Catalogue = {
   "journal.correct.savedTitle":
     "Correctie opgeslagen",
   "journal.correct.savedBody":
-    "Je logboek en je totalen tonen nu de gecorrigeerde versie.",
+    "Uw logboek en uw totalen tonen nu de gecorrigeerde versie.",
   "journal.correct.savedConfirmedBody":
-    "De gecorrigeerde versie is opgeslagen en wacht op bevestiging door een leidinggevende; de eerder bevestigde versie blijft in je geschiedenis.",
+    "De gecorrigeerde versie is opgeslagen en wacht op bevestiging door een leidinggevende; de eerder bevestigde versie blijft in uw geschiedenis.",
   "journal.correct.draftFailedTitle":
     "We konden deze correctie niet voorbereiden",
   "journal.correct.saveFailedTitle":
@@ -1738,11 +1738,11 @@ const nl: Catalogue = {
   "journal.correct.unsureSaved":
     "De correctie is verstuurd maar er kwam geen antwoord, dus we weten niet of ze is opgeslagen. Opnieuw proberen is veilig: een correctie die al is opgeslagen wordt geweigerd, nooit dubbel opgeslagen.",
   "journal.correct.staleDraft":
-    "Niet opgeslagen: je logboek is gewijzigd nadat de correctie was voorbereid. Bekijk het opnieuw.",
+    "Niet opgeslagen: uw logboek is gewijzigd nadat de correctie was voorbereid. Bekijk het opnieuw.",
   "journal.correct.superseded":
     "Deze invoer is al gecorrigeerd of verwijderd. Open het logboek opnieuw en corrigeer de huidige versie.",
   "journal.correct.notFound":
-    "Deze invoer staat niet bij je laatste logboekinvoer. Misschien is ze al gecorrigeerd.",
+    "Deze invoer staat niet bij uw laatste logboekinvoer. Misschien is ze al gecorrigeerd.",
   "journal.correct.conflict":
     "De nieuwe tekst noemt één duur voor de hele invoer, maar de invoer bevat ook een productie, en beide hebben hetzelfde veld nodig. Geef de tijd per activiteit op, of corrigeer deze invoer op de website.",
   "journal.correct.missingTitle":
@@ -1754,19 +1754,19 @@ const nl: Catalogue = {
   "messages.conversation":
     "Gesprek",
   "messages.intro":
-    "Je gesprekken binnen LabourMarket.ai. Berichten blijven in de app — er wordt niets per e-mail of sms verstuurd. Nieuwe berichten zie je als je dit scherm opent.",
+    "Uw gesprekken binnen LabourMarket.ai. Berichten blijven in de app — er wordt niets per e-mail of sms verstuurd. Nieuwe berichten ziet u als u dit scherm opent.",
   "messages.none":
-    "Je hebt nog geen gesprekken.",
+    "U heeft nog geen gesprekken.",
   "messages.untitled":
     "Gesprek",
   "messages.threadEmpty":
     "Nog geen berichten in dit gesprek.",
   "messages.fromMe":
-    "Jij",
+    "U",
   "messages.fromThem":
     "De ander",
   "messages.replyLabel":
-    "Je antwoord",
+    "Uw antwoord",
   "messages.review":
     "Bekijken voor verzenden",
   "messages.emptyBody":
@@ -1780,9 +1780,9 @@ const nl: Catalogue = {
   "messages.sentTitle":
     "Verstuurd",
   "messages.sentBody":
-    "Je bericht staat in het gesprek.",
+    "Uw bericht staat in het gesprek.",
   "messages.sentUnverified":
-    "De server heeft je bericht aangenomen, maar bij het teruglezen kwam het niet overeen. Open het gesprek opnieuw om het te controleren.",
+    "De server heeft uw bericht aangenomen, maar bij het teruglezen kwam het niet overeen. Open het gesprek opnieuw om het te controleren.",
   "messages.writeAnother":
     "Nog een bericht schrijven",
   "messages.draftFailedTitle":
@@ -1790,21 +1790,21 @@ const nl: Catalogue = {
   "messages.sendFailedTitle":
     "We konden dit bericht niet versturen",
   "messages.unsureSent":
-    "Het bericht is verstuurd maar er kwam geen antwoord, dus we weten niet of het is aangekomen. Open het gesprek opnieuw voordat je het nog eens verstuurt.",
+    "Het bericht is verstuurd maar er kwam geen antwoord, dus we weten niet of het is aangekomen. Open het gesprek opnieuw voordat u het nog eens verstuurt.",
   "messages.staleDraft":
-    "Niet verstuurd: er kwam een nieuw bericht in dit gesprek nadat je het jouwe had voorbereid. Lees het en bekijk je antwoord opnieuw.",
+    "Niet verstuurd: er kwam een nieuw bericht in dit gesprek nadat u het uwe had voorbereid. Lees het en bekijk uw antwoord opnieuw.",
   "messages.notFound":
-    "Dit gesprek is niet van jou of bestaat niet meer.",
+    "Dit gesprek is niet van u of bestaat niet meer.",
   "messages.noPermission":
-    "Je mag niet in dit gesprek schrijven.",
+    "U mag niet in dit gesprek schrijven.",
   "today.openNotifications":
     "Meldingen",
   "notifications.title":
     "Meldingen",
   "notifications.intro":
-    "Wat er in je werk is gebeurd, nieuwste eerst. Openen markeert een melding als gelezen. Meldingen worden niet naar je telefoon gepusht — ze staan hier wanneer je dit scherm opent.",
+    "Wat er in uw werk is gebeurd, nieuwste eerst. Openen markeert een melding als gelezen. Meldingen worden niet naar uw telefoon gepusht — ze staan hier wanneer u dit scherm opent.",
   "notifications.none":
-    "Je hebt geen meldingen.",
+    "U heeft geen meldingen.",
   "notifications.unread":
     "Nieuw",
   "notifications.markAll":
@@ -1814,27 +1814,27 @@ const nl: Catalogue = {
   "notifications.type.unknown":
     "Een melding",
   "notifications.type.event_absence_approved":
-    "Je afwezigheid is goedgekeurd",
+    "Uw afwezigheid is goedgekeurd",
   "notifications.type.event_absence_rejected":
-    "Je afwezigheid is afgewezen",
+    "Uw afwezigheid is afgewezen",
   "notifications.type.event_absence_requested":
-    "Er is een afwezigheid voor je geregistreerd",
+    "Er is een afwezigheid voor u geregistreerd",
   "notifications.type.event_booking_accepted":
-    "Je boekingsvoorstel is geaccepteerd",
+    "Uw boekingsvoorstel is geaccepteerd",
   "notifications.type.event_booking_declined":
-    "Je boekingsvoorstel is afgewezen",
+    "Uw boekingsvoorstel is afgewezen",
   "notifications.type.event_booking_proposed":
-    "Je hebt een boekingsvoorstel ontvangen",
+    "U heeft een boekingsvoorstel ontvangen",
   "notifications.type.event_booking_withdrawn":
     "Het boekingsvoorstel is ingetrokken",
   "notifications.type.event_demand_interest_expressed":
-    "Een werknemer heeft interesse getoond in je aanvraag",
+    "Een werknemer heeft interesse getoond in uw aanvraag",
   "notifications.type.event_demand_interest_reviewed":
-    "Een bedrijf heeft je interesse als bekeken gemarkeerd",
+    "Een bedrijf heeft uw interesse als bekeken gemarkeerd",
   "notifications.type.event_document_ack_assigned":
-    "Je bent gevraagd te bevestigen dat je een document hebt gelezen.",
+    "U bent gevraagd te bevestigen dat u een document heeft gelezen.",
   "notifications.type.event_document_ack_completed":
-    "Een document dat je ter bevestiging stuurde, is bevestigd.",
+    "Een document dat u ter bevestiging stuurde, is bevestigd.",
   "notifications.type.event_document_expiring":
     "De geldigheid van een document loopt binnenkort af.",
   "notifications.type.event_engagement_created":
@@ -1842,39 +1842,39 @@ const nl: Catalogue = {
   "notifications.type.event_engagement_ended":
     "De samenwerking is beëindigd",
   "notifications.type.event_history_link_offered":
-    "Een organisatie biedt aan je geregistreerde werkgeschiedenis aan je account te koppelen",
+    "Een organisatie biedt aan uw geregistreerde werkgeschiedenis aan uw account te koppelen",
   "notifications.type.event_invitation_accepted":
-    "Iemand heeft je uitnodiging aangenomen",
+    "Iemand heeft uw uitnodiging aangenomen",
   "notifications.type.event_job_alert":
-    "Er is een nieuwe baan die bij je zoekopdracht past",
+    "Er is een nieuwe baan die bij uw zoekopdracht past",
   "notifications.type.event_journal_review_decided":
-    "Je journaalitem is beoordeeld",
+    "Uw journaalitem is beoordeeld",
   "notifications.type.event_journal_review_decided_approved":
-    "Je journaalitem is bevestigd",
+    "Uw journaalitem is bevestigd",
   "notifications.type.event_journal_review_decided_changes_requested":
-    "Er zijn wijzigingen gevraagd voor je journaalitem",
+    "Er zijn wijzigingen gevraagd voor uw journaalitem",
   "notifications.type.event_journal_review_decided_rejected":
-    "Je journaalitem is afgewezen",
+    "Uw journaalitem is afgewezen",
   "notifications.type.event_message_received":
-    "Je hebt een nieuw bericht",
+    "U heeft een nieuw bericht",
   "notifications.type.event_saved_search_match":
     "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
   "notifications.type.event_weekly_digest":
-    "Je wekelijkse samenvatting van werk en kansen staat klaar",
+    "Uw wekelijkse samenvatting van werk en kansen staat klaar",
   "notifications.type.event_weekly_digest_journal":
-    "Het weekoverzicht van je werkjournaal is klaar",
+    "Het weekoverzicht van uw werkjournaal is klaar",
   "notifications.type.event_weekly_digest_profile_completion":
-    "Om je passende banen te tonen, bevestig welk werk je doet",
+    "Om u passende banen te tonen, bevestig welk werk u doet",
   "notifications.type.event_work_task_assigned":
-    "Er is een taak aan je toegewezen",
+    "Er is een taak aan u toegewezen",
   "notifications.type.event_workflow_decided":
-    "Over je goedkeuringsverzoek is beslist",
+    "Over uw goedkeuringsverzoek is beslist",
   "notifications.type.event_workflow_delegated":
-    "Een goedkeuringsronde is aan jou overgedragen",
+    "Een goedkeuringsronde is aan u overgedragen",
   "notifications.type.event_workflow_escalated":
     "Een goedkeuringsronde heeft haar termijn overschreden",
   "notifications.type.event_workflow_step_pending":
-    "Een goedkeuringsverzoek wacht op je beslissing",
+    "Een goedkeuringsverzoek wacht op uw beslissing",
   "today.openProjects":
     "Mijn projecten",
   "projects.title":
@@ -1882,29 +1882,29 @@ const nl: Catalogue = {
   "projects.detailTitle":
     "Project",
   "projects.none":
-    "Je bent aan geen enkel project toegewezen.",
+    "U bent aan geen enkel project toegewezen.",
   "projects.active":
     "Actief",
   "projects.ended":
     "Beëindigd",
   "projects.asksCount":
-    "Nog nodig van jou",
+    "Nog nodig van u",
   "projects.moreOnWeb":
-    "Hier staan alleen je eerste projecten. De website toont ze allemaal.",
+    "Hier staan alleen uw eerste projecten. De website toont ze allemaal.",
   "projects.notFound":
-    "Dit project is niet van jou, of het staat niet bij de projecten die hier worden getoond.",
+    "Dit project is niet van u, of het staat niet bij de projecten die hier worden getoond.",
   "projects.asksTitle":
-    "Nog nodig van jou",
+    "Nog nodig van u",
   "projects.asksShownOf":
     "Hier getoond / in totaal nog open — de volledige lijst staat op de website",
   "projects.asksUnavailable":
-    "Wat er nog van je nodig is, kon nu niet worden gelezen. Probeer het opnieuw of open het project op de website.",
+    "Wat er nog van u nodig is, kon nu niet worden gelezen. Probeer het opnieuw of open het project op de website.",
   "projects.asksNotRead":
-    "Deze toewijzing is beëindigd. Wat er daarbij van je werd gevraagd, staat op de projectpagina op de website.",
+    "Deze toewijzing is beëindigd. Wat er daarbij van u werd gevraagd, staat op de projectpagina op de website.",
   "projects.asksIncomplete":
-    "Er staat in je projecten meer open dan de app kan tonen, dus het deel van dit project wordt mogelijk niet getoond. De projectpagina op de website heeft de volledige lijst.",
+    "Er staat in uw projecten meer open dan de app kan tonen, dus het deel van dit project wordt mogelijk niet getoond. De projectpagina op de website heeft de volledige lijst.",
   "projects.asksNone":
-    "Voor jou staat er op dit project niets open.",
+    "Voor u staat er op dit project niets open.",
   "projects.ask.needed":
     "Nodig",
   "projects.ask.missing":
@@ -1920,16 +1920,16 @@ const nl: Catalogue = {
   "projects.webDetail":
     "De volledige projectpagina — fasen, documenten en het team — staat op de website.",
   "messages.threadNotShown":
-    "Het gesprek staat nog niet op het scherm. Wacht tot het geladen is, lees het en bekijk dan je antwoord.",
+    "Het gesprek staat nog niet op het scherm. Wacht tot het geladen is, lees het en bekijk dan uw antwoord.",
   "messages.newBeforeReview":
-    "Er is een nieuw bericht in dit gesprek binnengekomen. Het staat nu hierboven — lees het en bekijk je antwoord opnieuw.",
+    "Er is een nieuw bericht in dit gesprek binnengekomen. Het staat nu hierboven — lees het en bekijk uw antwoord opnieuw.",
   "profile.noWorkerProfile": "Dit account heeft nog geen werkersprofiel.",
-  "profile.figuresTitle": "Vaardigheden, met je vastgelegde uren",
+  "profile.figuresTitle": "Vaardigheden, met uw vastgelegde uren",
   "profile.groupManagerConfirmed": "Bevestigd door een leidinggevende",
-  "profile.groupJournalBacked": "Onderbouwd door je werkdagboek",
-  "profile.groupDeclared": "Door jou opgegeven",
+  "profile.groupJournalBacked": "Onderbouwd door uw werkdagboek",
+  "profile.groupDeclared": "Door u opgegeven",
   "profile.figuresUnavailable":
-    "Uren, aandeel en items konden deze keer niet worden gelezen. De vaardigheden hieronder zijn nog steeds je vastgelegde vaardigheden — niets wordt als 0 getoond.",
+    "Uren, aandeel en items konden deze keer niet worden gelezen. De vaardigheden hieronder zijn nog steeds uw vastgelegde vaardigheden — niets wordt als 0 getoond.",
   "profile.figuresLegend":
     "Uren · aandeel van de aan een vaardigheid toegekende uren · items, alle tijd. Dezelfde cijfers als op de website.",
   "profile.figuresNotRead": "cijfers konden niet worden gelezen",
@@ -1938,11 +1938,11 @@ const nl: Catalogue = {
   "profile.hoursShort": "u",
   "profile.entriesLabel": "items",
   "profile.selfStatedMissing":
-    "Vaardigheden die je in je eigen woorden noteerde, komen nog niet op dit scherm; de website toont ze bij je vaardigheden.",
+    "Vaardigheden die u in uw eigen woorden noteerde, komen nog niet op dit scherm; de website toont ze bij uw vaardigheden.",
   "profile.openJournal": "Werkdagboek openen",
-  "journal.openProfile": "Wat deze items samen opleveren — op je profiel",
+  "journal.openProfile": "Wat deze items samen opleveren — op uw profiel",
 
-  "today.figuresTitle": "Je werk in cijfers",
+  "today.figuresTitle": "Uw werk in cijfers",
   "today.periodToday": "Vandaag",
   "today.periodWeek": "Laatste 7 dagen",
   "today.hoursLabel": "Uren",
@@ -1952,21 +1952,21 @@ const nl: Catalogue = {
   "today.confirmedLabel": "Bevestigd door een leidinggevende, u",
   "today.periodEmpty": "Niets vastgelegd in dit venster.",
   "today.periodMissing": "De server stuurde geen cijfer voor dit venster.",
-  "today.dominantTitle": "Grootste aandeel van je uren, laatste 7 dagen",
+  "today.dominantTitle": "Grootste aandeel van uw uren, laatste 7 dagen",
   "today.dominantShare": "van de aan een vaardigheid toegekende uren",
   "today.dominantNone":
     "In de laatste 7 dagen zijn geen uren aan één vaardigheid toegekend.",
   "today.coverageTruncated":
     "Deze cijfers berusten op de laatst gelezen items — oudere items zijn niet meegenomen.",
   "today.figuresScope":
-    "Uit je eigen werkdagboek-items, volgens dezelfde regel als de website. Kalenderdagen eindigen vandaag (UTC).",
+    "Uit uw eigen werkdagboek-items, volgens dezelfde regel als de website. Kalenderdagen eindigen vandaag (UTC).",
   "today.openJournal": "Werkdagboek openen",
   "today.openProfile": "Profiel en vaardigheden openen",
   "today.openNeed": "Een behoefte aan mensen plaatsen",
   "need.title": "Behoefte plaatsen",
-  "need.intro": "Een behoefte aan werkkrachten voor de organisatie namens welke je handelt. Je controleert die voordat hij wordt aangemaakt; werkers die hem mogen zien, vinden hem op hun bord.",
-  "need.descriptionLabel": "Wat heb je nodig?",
-  "need.descriptionHint": "In je eigen woorden — het werk, wanneer, hoeveel mensen.",
+  "need.intro": "Een behoefte aan werkkrachten voor de organisatie namens welke u handelt. U controleert die voordat hij wordt aangemaakt; werkers die hem mogen zien, vinden hem op hun bord.",
+  "need.descriptionLabel": "Wat heeft u nodig?",
+  "need.descriptionHint": "In uw eigen woorden — het werk, wanneer, hoeveel mensen.",
   "need.roleLabel": "Rol",
   "need.locationLabel": "Plaats",
   "need.teamSizeLabel": "Hoeveel mensen",
@@ -1975,24 +1975,24 @@ const nl: Catalogue = {
   "need.urgency.flexible": "Flexibel",
   "need.urgency.this_week": "Deze week",
   "need.urgency.urgent": "Dringend",
-  "need.descriptionRequired": "Schrijf minstens een paar woorden over wat je nodig hebt. Er is niets verstuurd.",
+  "need.descriptionRequired": "Schrijf minstens een paar woorden over wat u nodig heeft. Er is niets verstuurd.",
   "need.teamSizeInvalid": "Het aantal mensen moet een heel getal vanaf 1 zijn. Er is niets verstuurd.",
   "need.review": "Controleren voor aanmaken",
   "need.cancel": "Terug",
-  "need.previewTitle": "Controleer voordat je het aanmaakt",
+  "need.previewTitle": "Controleer voordat u het aanmaakt",
   "need.previewBody": "Er is nog niets aangemaakt.",
   "need.actingFor": "Voor",
   "need.confirm": "Behoefte aanmaken",
   "need.edit": "Bewerken",
   "need.sentTitle": "Aangemaakt",
-  "need.sentBody": "De behoefte staat nu open voor de organisatie. Je kunt hem volgen op de website.",
+  "need.sentBody": "De behoefte staat nu open voor de organisatie. U kunt hem volgen op de website.",
   "need.done": "Terug naar Vandaag",
   "need.overLimit": "Deze organisatie heeft de limiet van actieve posities van haar plan bereikt. Er is niets aangemaakt — sluit een behoefte of wijzig het plan op de website.",
   "need.draftFailedTitle": "We konden deze behoefte niet voorbereiden",
   "need.sendFailedTitle": "We konden deze behoefte niet aanmaken",
   "today.openJobs": "Open vacatures bekijken",
   "jobs.title": "Vacatures",
-  "jobs.intro": "Het openbare vacaturebord — dezelfde vacatures als op de website. De werkgever en hoe je reageert openen op de webpagina als jijzelf.",
+  "jobs.intro": "Het openbare vacaturebord — dezelfde vacatures als op de website. De werkgever en hoe u reageert openen op de webpagina als uzelf.",
   "jobs.queryLabel": "Zoeken",
   "jobs.queryHint": "Een beroep of een woord uit de titel, in elke taal",
   "jobs.search": "Vacatures zoeken",
@@ -2009,29 +2009,29 @@ const nl: Catalogue = {
   "jobs.notProvisioned": "Het vacaturebord is in deze omgeving niet ingeschakeld.",
   "jobs.unavailable": "Het vacaturebord antwoordde niet op tijd. Dat is niet hetzelfde als geen vacatures — probeer het opnieuw.",
   "jobs.linkedNotFound": "Die vacature staat niet meer op het bord (mogelijk gesloten).",
-  "today.openOpportunities": "Behoeften die voor je openstaan",
-  "today.openAvailability": "Wie van je team is vrij",
+  "today.openOpportunities": "Behoeften die voor u openstaan",
+  "today.openAvailability": "Wie van uw team is vrij",
   "opportunities.title": "Kansen",
-  "opportunities.intro": "Behoeften die je nu kunt zien. Interesse tonen laat het de eigenaar van de behoefte in zijn eigen weergave zien — er verlaat niets het platform.",
-  "opportunities.noneVisible": "Er is nu geen behoefte voor je zichtbaar. Zodra een organisatie waarmee je verbonden bent er een opent, verschijnt die hier.",
+  "opportunities.intro": "Behoeften die u nu kunt zien. Interesse tonen laat het de eigenaar van de behoefte in zijn eigen weergave zien — er verlaat niets het platform.",
+  "opportunities.noneVisible": "Er is nu geen behoefte voor u zichtbaar. Zodra een organisatie waarmee u verbonden bent er een opent, verschijnt die hier.",
   "opportunities.express": "Ik heb interesse",
   "opportunities.noteLabel": "Een bericht voor hen (optioneel)",
   "opportunities.noteHint": "Eén zin over waarom of wanneer — zij lezen het zoals geschreven.",
   "opportunities.draft": "Controleren voor verzenden",
-  "opportunities.previewTitle": "Controleer voor je verzendt",
+  "opportunities.previewTitle": "Controleer voor u verzendt",
   "opportunities.previewBody": "Er is nog niets verzonden.",
-  "opportunities.alreadyExpressed": "Je hebt al interesse getoond in deze behoefte; opnieuw verzenden vernieuwt die.",
+  "opportunities.alreadyExpressed": "U heeft al interesse getoond in deze behoefte; opnieuw verzenden vernieuwt die.",
   "opportunities.confirm": "Verzenden",
   "opportunities.cancel": "Terug",
   "opportunities.sentTitle": "Verzonden",
-  "opportunities.sentBody": "De eigenaar van deze behoefte ziet je interesse nu in zijn eigen weergave.",
+  "opportunities.sentBody": "De eigenaar van deze behoefte ziet uw interesse nu in zijn eigen weergave.",
   "opportunities.sentStatus": "Status",
   "opportunities.another": "Terug naar de lijst",
-  "opportunities.notVisible": "Die behoefte is niet meer zichtbaar voor je (mogelijk gesloten).",
+  "opportunities.notVisible": "Die behoefte is niet meer zichtbaar voor u (mogelijk gesloten).",
   "opportunities.draftFailedTitle": "We konden dit niet voorbereiden",
   "opportunities.sendFailedTitle": "We konden dit niet verzenden",
   "availability.title": "Wie is vrij",
-  "availability.intro": "Je actieve team voor de komende 7 dagen. Toegezegd is niet onbeschikbaar: een overlap is een waarschuwing, geen weigering.",
+  "availability.intro": "Uw actieve team voor de komende 7 dagen. Toegezegd is niet onbeschikbaar: een overlap is een waarschuwing, geen weigering.",
   "availability.actingFor": "Namens",
   "availability.window": "Periode",
   "availability.rosterTotal": "Teamleden",
@@ -2042,7 +2042,7 @@ const nl: Catalogue = {
   "availability.committedTo": "toegezegd aan",
   "availability.overridable": "een bevoegd persoon kan anders beslissen",
   "availability.sourcesPartial": "Niet elke bron antwoordde: afwezigheden of toezeggingen konden niet worden gelezen, dus niemand hier wordt met zekerheid als vrij gemeld.",
-  "availability.personalWorkspace": "Je bent in je persoonlijke ruimte. Schakel in Instellingen over naar een organisatieruimte om het team te zien.",
+  "availability.personalWorkspace": "U bent in uw persoonlijke ruimte. Schakel in Instellingen over naar een organisatieruimte om het team te zien.",
   "availability.noOrganization": "Dit account hoort bij geen enkele organisatie, dus er is geen team om over te rapporteren.",
   "availability.noRoster": "Deze organisatie heeft geen actieve teamleden, dus er is niemand om over te rapporteren.",
   "availability.noCompanyContext": "Deze ruimte kan niet als werkgever optreden, dus er is geen team om over te rapporteren.",

@@ -29,7 +29,7 @@ const CTA_PROFILE: L = {
   en: "Build your profile / CV →",
   lt: "Susikurti profilį / CV →",
   ru: "Создать профиль / CV →",
-  nl: "Maak je profiel / CV →",
+  nl: "Maak uw profiel / CV →",
   de: "Profil / Lebenslauf erstellen →",
   pl: "Zbuduj swój profil / CV →",
 };
@@ -54,7 +54,7 @@ const INTRO: Record<string, L> = {
   },
   title: {
     en: "Prove and check real skills",
-    lt: "Įrodyk ir patikrink realius įgūdžius",
+    lt: "Įrodykite ir patikrinkite realius įgūdžius",
     ru: "Докажите и проверьте реальные навыки",
     nl: "Bewijs en controleer echte vaardigheden",
     de: "Echte Fähigkeiten nachweisen und prüfen",
