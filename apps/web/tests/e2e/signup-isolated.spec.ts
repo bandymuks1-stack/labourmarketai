@@ -753,9 +753,11 @@ test("ST-1. a student signs up, keeps one worker record with no company, and the
 // ── Education: institution ↔ student acceptance (owner direction 2026-11-14, Lane L) ──
 //
 // One institution and one student, both created here and gone with the job.
-// Order is deliberate: E-1 links them, E-3 turns the student into a worker and
-// E-4 ends the student link. The block sits LAST in this serial file, after
-// ST-1, so a failure here can never stop a test that was already on main.
+// Order is deliberate: E-1 links them, E-3 turns the student into a worker.
+// The block sits LAST in this serial file, after ST-1, so a failure here can
+// never stop a test that was already on main. Ending the link, and what the
+// institution may still read afterwards, is proven with its access fix (RED
+// class, owner-gated), which appends E-4 here.
 //
 // Not covered here, on purpose: a learner writing FIRST to their institution.
 // The product has no door for it yet — the learner's relationship row on
@@ -776,7 +778,7 @@ const EDU = {
 };
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
-/** A REST read AS a signed-in person (their own JWT, their own RLS). */
+/** A REST read AS a signed-in person (their own JWT, their own RLS). E-4 reads with it, in the access fix. */
 async function asPerson<T>(address: string, path: string): Promise<T> {
   const tok = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
     method: "POST",
@@ -938,70 +940,4 @@ test("E-3. the student becomes a worker: studies end, work is recorded, and noth
     .locator('[data-testid="cv-practice-history"], [data-testid="cv-organizations-roles"], [data-testid="cv-work-history"]')
     .filter({ hasText: EDU.orgName });
   await expect(periods.first(), "the student period at the institution stays in the one history").toBeVisible({ timeout: 30_000 });
-});
-
-test("E-4. the institution ends the student link: it loses access, the learner keeps their history", async ({ browser }) => {
-  const a = await browser.newContext();
-  const inst = await a.newPage();
-  await signIn(inst, EDU.institution, PASSWORD);
-  await inst.goto(`${BASE}/en/dashboard/company/people`);
-  await inst.waitForLoadState("networkidle").catch(() => undefined);
-  const member = inst.getByRole("main").getByTestId("lifecycle-member").filter({ hasText: "Student" });
-  await expect(member, "the institution's learner is in its people lifecycle").toHaveCount(1, { timeout: 30_000 });
-  // Each member's controls sit in that member's own fold, and the list itself
-  // may sit in folded sections. Open exactly the folds that hold this learner's
-  // controls (its ancestors and its own), by setting `open`: a click on a
-  // summary toggles, so it can close a fold the page has already opened.
-  await member.evaluate((li) => {
-    for (let el: Element | null = li; el; el = el.parentElement) {
-      if (el instanceof HTMLDetailsElement) el.open = true;
-    }
-    li.querySelectorAll("details").forEach((d) => {
-      (d as HTMLDetailsElement).open = true;
-    });
-  });
-  const end = member.getByRole("button", { name: "End employment" });
-  await expect(end, "the institution is offered an end control for its learner").toBeVisible({ timeout: 30_000 });
-  await end.click();
-
-  // Ending runs as a server action on this same page (no navigation to wait
-  // for): read its outcome back with a fresh load until it shows.
-  await expect
-    .poll(
-      async () => {
-        await inst.goto(`${BASE}/en/dashboard/company/education`);
-        return (await inst.getByTestId("institution-learners-counts").innerText().catch(() => "")).trim();
-      },
-      { message: "no connected learner remains", timeout: 60_000, intervals: [1_000, 2_000, 5_000] },
-    )
-    .toContain("0 connected");
-
-  const sid = await userId(EDU.student);
-  const links = await dbOrNull<Array<{ relationship_slug: string; status: string }>>(
-    `engagement_contexts?profile_id=eq.${sid}&relationship_slug=eq.student&select=relationship_slug,status`,
-  );
-  if (links) expect(links, "the link is ended, not deleted").toEqual([{ relationship_slug: "student", status: "ended" }]);
-  await a.close();
-
-  // Access, read under the institution's own RLS: no active link, none of the learner's journal.
-  const activeLinks = await asPerson<Array<{ id: string }>>(
-    EDU.institution,
-    `engagement_contexts?profile_id=eq.${sid}&status=eq.active&select=id`,
-  );
-  expect(activeLinks, "the institution sees no active link to the learner").toEqual([]);
-  const journal = await asPerson<Array<{ id: string }>>(
-    EDU.institution,
-    `journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`,
-  );
-  expect(journal, "the institution reads none of the learner's journal").toEqual([]);
-
-  // The learner keeps their own history.
-  const own = await asPerson<Array<{ id: string }>>(EDU.student, `journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`);
-  expect(own.length, "the learner still reads their own work").toBeGreaterThan(0);
-  const b = await browser.newContext();
-  const stu = await b.newPage();
-  await signIn(stu, EDU.student, PASSWORD);
-  await stu.goto(`${BASE}/en/cv`);
-  await expect(stu.getByTestId("cv-education-row").filter({ hasText: EDU.studiesAt })).toHaveCount(1, { timeout: 30_000 });
-  await b.close();
 });
