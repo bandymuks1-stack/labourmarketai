@@ -22,6 +22,8 @@ import {
 } from "@/lib/invitations/signup-accept-action";
 import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { StaffReviewNotice } from "@/components/app/staff-review-notice";
+import { bindWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
+import { isWorkerProfileDoorNext } from "@/lib/marketing/worker-profile-door";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import {
   RESEND_COOLDOWN_SECONDS,
@@ -226,6 +228,9 @@ export function SignupForm({
       fieldError("confirm", t("error_password_mismatch"));
       return;
     }
+    // The intake draft, if this tab has one, is bound to this email only
+    // (decision 0024; lib/staffing/worker-intake-draft.ts).
+    if (!invitation && nextParam && isWorkerProfileDoorNext(nextPath)) bindWorkerIntakeDraft(email);
     setStatus("signing");
     // Registration-started conversion signal (Pre-Advertising Launch
     // Readiness v1) with first-touch campaign attribution. Fires only after
