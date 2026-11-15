@@ -10,6 +10,8 @@ export type MobileNavItem = {
   key: string;
   href: string;
   label: string;
+  /** Needs an account: shows the same note as a goal link that does. */
+  account?: boolean;
 };
 
 /**
@@ -226,10 +228,18 @@ export function MobileNavMenu({
             <Link
               key={item.key}
               href={item.href}
+              prefetch={item.account ? false : undefined}
               onClick={() => setOpen(false)}
-              className="flex min-h-11 items-center rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary"
+              data-testid={`mobile-nav-item-${item.key}`}
+              className="flex min-h-11 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary"
             >
               {item.label}
+              {item.account && (
+                <span className="inline-flex shrink-0 items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
+                  <LogIn aria-hidden className="h-3.5 w-3.5" />
+                  {accountLabel}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
