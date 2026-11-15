@@ -186,7 +186,6 @@ export default async function ProjectCostCalculatorPage({
       ctaTitle: t("result.ctaTitle"),
       ctaBody: t("result.ctaBody"),
       ctaDashboard: t("result.ctaDashboard"),
-      ctaDashboardHelp: t("result.ctaDashboardHelp"),
       ctaCompanyNeed: t("result.ctaCompanyNeed"),
       ctaCompanyNeedHelp: t("result.ctaCompanyNeedHelp"),
     },
