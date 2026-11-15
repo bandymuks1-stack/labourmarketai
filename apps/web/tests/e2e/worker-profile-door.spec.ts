@@ -5,14 +5,14 @@ import { expect, test } from "@playwright/test";
  *
  * Public pages only, no account and no database: the steps a visitor takes
  * before signing up. The "build your profile / CV" buttons open the intake
- * (no sign-up before typing); what is typed there is kept in the browser; the
+ * (no sign-up before typing); what is typed there is kept in this tab only; the
  * intake's sign-up and login return to the profile builder. The step after
  * sign-up (the builder's composer holding the typed text) is walked with a
  * real account in signup-isolated (S-3d).
  */
 
 const BUTTONS = ["/work-opportunities", "/skills", "/professions"] as const;
-const DRAFT_KEY = "lm.workerIntakeDraft.v1";
+const DRAFT_KEY = "lm.workerIntakeDraft.v2";
 
 for (const locale of ["lt", "en"] as const) {
   test.describe(`${locale}: the worker intake`, () => {
@@ -27,17 +27,18 @@ for (const locale of ["lt", "en"] as const) {
       });
     }
 
-    test("what is typed is kept in the browser, without an account", async ({ page }) => {
+    test("what is typed is kept in this tab only, without an account", async ({ page }) => {
       await page.goto(`/${locale}/worker-intake`);
       const form = page.getByTestId("worker-intake-form");
       await form.locator('input[name="full_name"]').fill("Synthetic Intake Person");
       await form.locator('textarea[name="comment"]').fill("Tiling, six years");
-      const kept = await page.evaluate((k) => localStorage.getItem(k), DRAFT_KEY);
+      const kept = await page.evaluate((k) => sessionStorage.getItem(k), DRAFT_KEY);
+      expect(await page.evaluate((k) => localStorage.getItem(k), DRAFT_KEY), "never in shared storage before sign-up").toBeNull();
       const text = (JSON.parse(kept ?? "{}") as { text?: string }).text ?? "";
       expect(text).toContain("Synthetic Intake Person");
       expect(text).toContain("Tiling, six years");
       await page.reload();
-      const again = await page.evaluate((k) => localStorage.getItem(k), DRAFT_KEY);
+      const again = await page.evaluate((k) => sessionStorage.getItem(k), DRAFT_KEY);
       expect(again, "a reload keeps it").toBe(kept);
     });
 

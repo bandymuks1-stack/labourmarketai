@@ -30,7 +30,7 @@ import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { clearWorkerIntakeDraft, readWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
+import { clearWorkerIntakeDraft, readWorkerIntakeDraftFor } from "@/lib/staffing/worker-intake-draft";
 
 /** Tiny inline pill — tells the user the *narrative* is persisted. Suggestions
  *  still need per-card confirm; this is decoupled from "skills are verified". */
@@ -109,7 +109,11 @@ export function ProfileTextFirstFlow({
   savedClaimNormalizedLabels = [],
   manualSlot,
   hasPrimaryProfession = true,
+  viewerEmail = null,
 }: {
+  /** The signed-in account's email: the intake draft is placed only when it
+   *  was bound to this email (decision 0024). */
+  viewerEmail?: string | null;
   /**
    * FAST PATH TO MATCHABILITY (2026-09-17). The board's gate needs a work
    * type AND skill evidence, and confirmed claims become catalogued skills
@@ -182,13 +186,13 @@ export function ProfileTextFirstFlow({
   const [intakeSeeded, setIntakeSeeded] = useState(false);
   useEffect(() => {
     if (initialText.trim().length > 0) return;
-    const kept = readWorkerIntakeDraft();
+    const kept = readWorkerIntakeDraftFor(viewerEmail);
     if (kept) {
       setText(kept);
       setStage("compose");
       setIntakeSeeded(true);
     }
-  }, [initialText]);
+  }, [initialText, viewerEmail]);
   // The composer sits in the profile's closed edit section; their own text
   // waiting there is the reason to open it.
   const composeRef = useRef<HTMLDivElement>(null);

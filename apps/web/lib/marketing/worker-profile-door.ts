@@ -20,3 +20,14 @@ export const WORKER_PROFILE_DOOR_NEXT = "/dashboard/profile";
 
 /** Locale-less sign-up href that returns to the profile builder. */
 export const WORKER_PROFILE_DOOR_HREF = `/auth/signup?next=${encodeURIComponent(WORKER_PROFILE_DOOR_NEXT)}`;
+
+/**
+ * True when a sanitised return path (`getSafeReturnPath`: `/<locale>/…`) is
+ * the profile builder: the sign-up / sign-in the intake's own links open.
+ * Only then is the intake draft bound to the email used (decision 0024).
+ */
+export function isWorkerProfileDoorNext(path: string | null | undefined): boolean {
+  if (!path) return false;
+  const bare = path.split(/[?#]/)[0];
+  return /^\/[a-z]{2}(?:-[A-Za-z]{2,4})?\/dashboard\/profile\/?$/.test(bare) || bare === WORKER_PROFILE_DOOR_NEXT;
+}
