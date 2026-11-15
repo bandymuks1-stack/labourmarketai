@@ -5824,8 +5824,8 @@
       }
     ],
     "priceState": {
-      "draft_pricing": "De prijzen worden voorbereid — er kan nog niets worden gekocht.",
-      "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in uw organisatieaccount; op deze pagina wordt niets afgeschreven. Prijzen zijn exclusief btw.",
+      "draft_pricing": "De prijzen zijn niet definitief — er kan nog niets worden gekocht.",
+      "owner_confirmed": "De prijzen zijn bevestigd. Op deze pagina wordt niets afgeschreven. Prijzen zijn exclusief btw.",
       "owner_confirmed_closed": "Online betalen is nog niet geopend; op deze pagina wordt niets afgeschreven. Prijzen zijn exclusief btw."
     },
     "individual": {
@@ -9525,7 +9525,7 @@
       "contact": "Individueel geregeld"
     },
     "readiness": {
-      "draft_pricing": "Plannen zijn voorbereid, niet koopbaar. Geen enkele prijs hier is definitief en er kan niets worden gekocht.",
+      "draft_pricing": "Geen enkele prijs hier is definitief en er kan nog niets worden gekocht.",
       "owner_confirmed": "Het betaalde plan kan niet worden gekocht totdat online betalen is geopend."
     },
     "featuresLabel": "Omvat",

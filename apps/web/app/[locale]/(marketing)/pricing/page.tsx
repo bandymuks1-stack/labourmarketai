@@ -31,9 +31,6 @@ import { jsonLdScript } from "@/lib/seo/json-ld";
 // the build never needs Supabase. It degrades gracefully if unreachable.
 export const dynamic = "force-dynamic";
 
-/** Position of "How is billing handled?" in `pricing.faq` (pinned by a guard). */
-const BILLING_FAQ_INDEX = 2;
-
 export default async function PricingPage({
   params,
   searchParams,

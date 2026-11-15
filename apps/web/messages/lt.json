@@ -5824,8 +5824,8 @@
       }
     ],
     "priceState": {
-      "draft_pricing": "Kainos ruošiamos — nieko įsigyti dar negalima.",
-      "owner_confirmed": "Kainos patvirtintos savininko. Aktyvavimas vyksta organizacijos paskyroje; šiame puslapyje niekas nenuskaičiuojama. Kainos nurodytos be PVM.",
+      "draft_pricing": "Kainos nėra galutinės — nieko įsigyti dar negalima.",
+      "owner_confirmed": "Kainos patvirtintos. Šiame puslapyje niekas neapmokestinama. Kainos nurodytos be PVM.",
       "owner_confirmed_closed": "Mokėjimas internetu dar neatidarytas; šiame puslapyje niekas nenuskaičiuojama. Kainos nurodytos be PVM."
     },
     "individual": {
@@ -9525,7 +9525,7 @@
       "contact": "Suderinama individualiai"
     },
     "readiness": {
-      "draft_pricing": "Planai parengti, bet jų įsigyti negalima. Nė viena kaina nėra galutinė ir nieko negalima nusipirkti.",
+      "draft_pricing": "Nė viena kaina čia nėra galutinė ir nieko dar negalima nusipirkti.",
       "owner_confirmed": "Mokamo plano įsigyti negalima, kol neatidarytas mokėjimas internetu."
     },
     "featuresLabel": "Apima",

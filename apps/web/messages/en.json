@@ -5824,8 +5824,8 @@
       }
     ],
     "priceState": {
-      "draft_pricing": "Prices are being prepared — nothing can be bought yet.",
-      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page. Prices are shown without VAT.",
+      "draft_pricing": "Prices are not final — nothing can be bought yet.",
+      "owner_confirmed": "Prices are confirmed. Nothing is charged on this page. Prices are shown without VAT.",
       "owner_confirmed_closed": "Online payment is not open yet; nothing is charged on this page. Prices are shown without VAT."
     },
     "individual": {
@@ -9525,7 +9525,7 @@
       "contact": "Arranged individually"
     },
     "readiness": {
-      "draft_pricing": "Plans are prepared, not purchasable. No price here is final and nothing can be bought.",
+      "draft_pricing": "No price here is final and nothing can be bought yet.",
       "owner_confirmed": "The paid plan cannot be bought until online payment opens."
     },
     "featuresLabel": "Includes",

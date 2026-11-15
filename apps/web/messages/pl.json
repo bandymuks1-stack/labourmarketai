@@ -5824,8 +5824,8 @@
       }
     ],
     "priceState": {
-      "draft_pricing": "Ceny są przygotowywane — nic nie można jeszcze kupić.",
-      "owner_confirmed": "Ceny potwierdzone przez właściciela. Aktywacja odbywa się na koncie organizacji; na tej stronie nic nie jest pobierane. Ceny podano bez VAT.",
+      "draft_pricing": "Ceny nie są ostateczne — nic nie można jeszcze kupić.",
+      "owner_confirmed": "Ceny są potwierdzone. Na tej stronie nic nie jest pobierane. Ceny podano bez VAT.",
       "owner_confirmed_closed": "Płatność online nie jest jeszcze otwarta; na tej stronie nic nie jest pobierane. Ceny podano bez VAT."
     },
     "individual": {
@@ -9525,7 +9525,7 @@
       "contact": "Ustalane indywidualnie"
     },
     "readiness": {
-      "draft_pricing": "Plany są przygotowane, ale niedostępne do zakupu. Żadna cena tutaj nie jest ostateczna i niczego nie można kupić.",
+      "draft_pricing": "Żadna cena tutaj nie jest ostateczna i nic nie można jeszcze kupić.",
       "owner_confirmed": "Płatnego planu nie można kupić, dopóki płatność online nie zostanie otwarta."
     },
     "featuresLabel": "Obejmuje",

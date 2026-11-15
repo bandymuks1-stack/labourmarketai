@@ -5295,7 +5295,7 @@
         },
         {
           "q": "Vad kostar det?",
-          "a": "Priserna publiceras på prissidan: en aktiv tjänst per organisation är gratis; fler tjänster kräver organisationsplanen, som aktiveras i ditt konto. Att skicka in ett behov av arbetskraft är gratis."
+          "a": "Att registrera sig och skicka in ett behov av arbetskraft är gratis. Den betalda organisationsplanen, dess pris och om den kan aktiveras i dag visas på prissidan."
         },
         {
           "q": "Kan vi filtrera på plats?",
@@ -5393,7 +5393,7 @@
         },
         {
           "q": "Vad kostar det för bemanningsföretag?",
-          "a": "Ett bemanningsföretag är en organisation och använder samma planer: en aktiv tjänst är gratis, fler kräver organisationsplanen från prissidan. Det finns ingen separat taxa för bemanningsföretag."
+          "a": "Ett bemanningsföretag är en organisation och använder samma planer. Att registrera sig och ange den arbetskraft ni kan erbjuda är gratis; den betalda organisationsplanen, dess pris och om den kan aktiveras i dag finns på prissidan. Det finns ingen separat taxa för bemanningsföretag."
         },
         {
           "q": "Kan vi styra arbetstagarnas synlighet?",
@@ -5752,7 +5752,7 @@
     "titleAccent": "satta rättvist.",
     "subcopyLive": "Priserna gäller. Aktivering sker i organisationskontot genom en säker Stripe-betalning; inget debiteras på den här sidan.",
     "subcopy": "Priserna är inte slutgiltiga, och fakturering startas aldrig åt dig på den här sidan. Nivåerna nedan beskriver omfattning; aktiveringen är manuell – hör av dig så bekräftar vi pris och omfattning med dig innan något startar.",
-    "subcopyConfirmed": "Priserna är bekräftade. Aktivering online är inte öppen ännu – gå med i väntelistan så kontaktar vi dig för att starta din organisation manuellt; inget debiteras på den här sidan.",
+    "subcopyConfirmed": "Registrering är gratis för personer och för organisationer, och det är gratis att publicera personalbehov. Det finns en betald plan, den visas nedan. Den kan ännu inte köpas online, och inget debiteras på den här sidan.",
     "trialNote": "En organisations första prenumeration börjar med en 14 dagars provperiod. Därefter debiteras kortet månadspriset, och du kan avsluta innan provperioden tar slut.",
     "planCta": "Gå med i väntelistan för den här planen",
     "featuresLabel": "Ingår",
@@ -5762,6 +5762,12 @@
         "tagline": "För att komma igång",
         "features": [
           "1 aktiv position",
+          "Matchningslista och kontakt med kandidater",
+          "Bokningar, projekt, instruktioner",
+          "Arbetsbekräftelse från arbetsgivaren"
+        ],
+        "featuresClosed": [
+          "Publicera personalbehov",
           "Matchningslista och kontakt med kandidater",
           "Bokningar, projekt, instruktioner",
           "Arbetsbekräftelse från arbetsgivaren"
@@ -5817,63 +5823,11 @@
         "a": "Gratisplanen omfattar 1 aktiv position. Organisationsplanen har ingen fast gräns för aktiva positioner. Vanligt skydd mot missbruk, till exempel begränsning av antalet förfrågningar, gäller fortfarande."
       }
     ],
-    "faqTitle": "Vanliga frågor om priser",
-    "featuresLabel": "Ingår",
-    "planCta": "Gå med i väntelistan för den här planen",
-    "plans": {
-      "agency": {
-        "features": [
-          "Obegränsat antal hanterade arbetare",
-          "Förmedlingsverktyg",
-          "Arbetarsökning",
-          "Prioriterad support"
-        ],
-        "name": "Agentur",
-        "tagline": "För bemanningspartner."
-      },
-      "business": {
-        "name": "Organisation",
-        "tagline": "För organisationer som aktivt rekryterar och bygger team",
-        "features": [
-          "Ingen fast gräns för aktiva positioner",
-          "Allt i Gratis, i driftskala",
-          "En plan för alla typer av organisationer",
-          "Projektdrift, rapporter och CSV-export"
-        ]
-      },
-      "enterprise": {
-        "features": [
-          "Obegränsat antal projekt",
-          "SSO",
-          "SLA",
-          "Dedikerad support"
-        ],
-        "name": "Enterprise",
-        "tagline": "För skala och kontroll."
-      },
-      "free": {
-        "name": "Gratis",
-        "tagline": "För att komma igång",
-        "features": [
-          "1 aktiv position",
-          "Matchningslista och kontakt med kandidater",
-          "Bokningar, projekt, instruktioner",
-          "Arbetsbekräftelse från arbetsgivaren"
-        ],
-        "featuresClosed": [
-          "Publicera personalbehov",
-          "Matchningslista och kontakt med kandidater",
-          "Bokningar, projekt, instruktioner",
-          "Arbetsbekräftelse från arbetsgivaren"
-        ]
-      }
+    "priceState": {
+      "draft_pricing": "Priserna är inte slutgiltiga – inget kan köpas ännu.",
+      "owner_confirmed": "Priserna är bekräftade. Inget debiteras på den här sidan. Priserna anges exklusive moms.",
+      "owner_confirmed_closed": "Onlinebetalning är inte öppen ännu; inget debiteras på den här sidan. Priserna anges exklusive moms."
     },
-    "subcopyLive": "Priserna är bekräftade av ägaren och gäller. Aktivering sker i organisationskontot genom en säker Stripe-betalning; inget debiteras på den här sidan.",
-    "subcopy": "Priserna är inte slutgiltiga, och fakturering startas aldrig åt dig på den här sidan. Nivåerna nedan beskriver omfattning; aktiveringen är manuell – hör av dig så bekräftar vi pris och omfattning med dig innan något startar.",
-    "subcopyConfirmed": "Registrering är gratis för personer och för organisationer, och det är gratis att publicera personalbehov. Det finns en betald plan, den visas nedan. Den kan ännu inte köpas online, och inget debiteras på den här sidan.",
-    "trialNote": "En organisations första prenumeration börjar med en 14 dagars provperiod. Därefter debiteras kortet månadspriset, och du kan avsluta innan provperioden tar slut.",
-    "title": "Enkla nivåer,",
-    "titleAccent": "satta rättvist.",
     "individual": {
       "name": "Särskilda krav",
       "tagline": "För behov utöver standardplanerna",
@@ -5885,10 +5839,6 @@
     "pricePerMonth": "€{price}/månad",
     "ctaStartFree": "Kom igång gratis i ditt organisationskonto",
     "ctaSubscribe": "Aktivera i ditt organisationskonto",
-    "priceState": {
-      "owner_confirmed": "Priserna är bekräftade av ägaren. Aktivering sker i ditt organisationskonto; inget debiteras på den här sidan. Priserna anges exklusive moms.",
-      "owner_confirmed_closed": "Onlinebetalning är inte öppen ännu; inget debiteras på den här sidan. Priserna anges exklusive moms."
-    },
     "faqClosed": [
       "Varje organisation – arbetsgivare, bemanningsföretag, entreprenör eller utbildningsanordnare – får samma produkt och samma enda betalda plan. Onlinebetalning är inte öppen ännu, så inget debiteras i dag.",
       "Ja. Personer förblir kostnadsfria, och det är gratis att registrera en organisation och publicera dess personalbehov.",
@@ -9547,20 +9497,20 @@
     }
   },
   "planBoundary": {
-    "title": "Vad betalplanerna omfattar",
-    "subcopy": "Betalningar är inte aktiverade ännu – ingen betalsida och inget kort. Betalplanerna visas så att du vet omfattningen; pilotåtkomst beviljas manuellt.",
+    "title": "Vad varje plan omfattar",
+    "subcopy": "Inget på den här sidan kan köpas och inget kort efterfrågas. Den betalda planen visas så att du vet vad den omfattar.",
     "note": "Planerna beskriver omfattning, inte aktiv debitering. Inget debiteras på den här sidan.",
     "plans": {
       "free_worker": "Arbetstagare gratis",
-      "worker_plus": "Person plus (erbjuds inte)",
+      "worker_plus": "Extra funktioner för personer (erbjuds inte)",
       "company_pilot": "Organisation",
-      "agency_pilot": "Nivå för bemanningsföretag (erbjuds inte)",
+      "agency_pilot": "Separat plan för bemanningsföretag (erbjuds inte)",
       "admin_internal": "Admin / Intern",
       "free_organization": "Organisation gratis"
     },
     "access": {
       "free": "Gratis",
-      "payment_not_enabled": "Betalning inte aktiverad",
+      "payment_not_enabled": "Kan inte köpas än",
       "internal": "Intern"
     },
     "audience": {
@@ -9571,22 +9521,22 @@
     },
     "cta": {
       "use": "Tillgänglig nu",
-      "request_pilot_access": "Pilotåtkomst – beviljas manuellt",
+      "request_pilot_access": "De första kunderna sätts upp av teamet",
       "contact": "Ordnas individuellt"
     },
     "readiness": {
       "draft_pricing": "Inget pris här är slutgiltigt och inget kan köpas ännu.",
-      "owner_confirmed": "Inget kan köpas förrän betalningar är aktiverade."
+      "owner_confirmed": "Den betalda planen kan inte köpas förrän onlinebetalning öppnar."
     },
-    "featuresLabel": "Ingår i denna gräns",
-    "limitValue": "upp till {count}",
+    "featuresLabel": "Ingår",
+    "limitValue": "upp till {count} när betalda planer startar",
     "freeToday": {
       "freeTitle": "Gratis idag",
-      "free": "Allt du för närvarande kan använda i produkten är gratis – piloten körs utan betalningar och inget ber om ett kort.",
-      "paidTitle": "Betalplaner",
-      "paid": "Inte tillgängligt just nu.",
-      "preparedTitle": "Inte köpbart än",
-      "prepared": "Det finns ingen betalsida och inget kan köpas. Pilotåtkomst till betalplanernas omfattning beviljas manuellt av teamet."
+      "free": "Allt du kan använda i produkten i dag är gratis, och inget ber om ett kort.",
+      "paidTitle": "Betald plan",
+      "paid": "Går inte att köpa än.",
+      "preparedTitle": "Betald, kan inte köpas än",
+      "prepared": "Det finns ingen betalsida och inget kan köpas. De första kunderna får den betalda planens funktioner direkt från teamet."
     },
     "features": {
       "worker_profile": "Arbetstagarprofil",
@@ -9613,7 +9563,7 @@
     "enforcement": {
       "free_surface": "Tillgängligt idag",
       "server_gate": "Tillgängligt idag, beroende på dina behörigheter",
-      "declared_boundary_only": "Startar först med debitering",
+      "declared_boundary_only": "Inte tillgängligt än",
       "admin_rbac": "Internt, endast admin"
     }
   },
@@ -9956,11 +9906,12 @@
       "body": "Offentliga betalningar är inte aktiverade ännu. De första kunderna betjänas direkt: att skicka en förfrågan om arbetskraft är gratis, och det slutliga priset bekräftas alltid med dig innan något betalt arbete börjar.",
       "cta": "Skicka en förfrågan om arbetskraft"
     },
-    "title": "Så fungerar den första betalda tjänsten",
+    "title": "Rekryteringstjänst från UAB ”Nonstop Group”",
+    "separate": "Det här är en separat tjänst, inte en LabourMarket.ai-plan. Plattformsplanerna ovan omfattar den inte, och du behöver den inte för att använda plattformen.",
     "steps": [
       {
         "title": "Skicka din förfrågan gratis",
-        "body": "Beskriv de arbetstagare eller det arbetslag du behöver i förfrågningsformuläret. Ingen avgift, inget kort, ingenting publiceras automatiskt."
+        "body": "Beskriv de personer eller det team du behöver i förfrågningsformuläret. Ingen avgift, inget kort, ingenting publiceras automatiskt."
       },
       {
         "title": "En person granskar den",
@@ -9968,14 +9919,14 @@
       },
       {
         "title": "Du får en manuellt kontrollerad kortlista",
-        "body": "Verkliga kandidater eller arbetslag, kontrollerade av en person mot din förfrågan. Om vi inte kan sätta ihop en lämplig kortlista utgår ingen avgift — och vi lovar aldrig att en kandidat alltid hittas."
+        "body": "Verkliga kandidater eller team, kontrollerade av en person mot din förfrågan. Om vi inte kan sätta ihop en lämplig kortlista utgår ingen avgift — och vi lovar aldrig att en kandidat alltid hittas."
       },
       {
         "title": "Du betalar bara för levererad tjänst",
-        "body": "En fast framgångsavgift gäller per anställd arbetstagare, arbetslag eller företagsplacering. En separat samordningsavgift gäller endast när samordning av dokument eller introduktion faktiskt har levererats. Det slutliga priset bekräftas innan betalt arbete påbörjas."
+        "body": "En framgångsavgift per anställning gäller endast om den har avtalats med dig i förväg. Dess belopp och villkor bekräftas skriftligt med dig innan något betalt arbete påbörjas. En separat samordningsavgift gäller endast när samordning av dokument eller introduktion faktiskt har levererats."
       }
     ],
-    "note": "Två saker löper parallellt, och den här sidan beskriver den andra. Själva plattformen är automatisk: jobbtavlan är offentlig, förhandsvisningen av matchningar är öppen utan konto, och en angiven förfrågan ger en rangordnad kortlista som förklarar varför varje person passar – en aktiv tjänst utan kostnad. Den betalda tjänsten ovan är den mänskliga: en operatör läser din förfrågan, kontaktar dig och kontrollerar kortlistan manuellt innan någon föreslås för dig. Ett helt arbetslag kan redan erbjuda sig mot din förfrågan som en enhet och, när båda parter är överens, ansluta till ditt projekt som ett team; den automatiska kortlistan föreslår ännu inte hela arbetslag – den rangordnar personer en och en.",
+    "note": "Två saker löper parallellt, och den här sidan beskriver den andra. Själva plattformen är automatisk: jobbtavlan är offentlig, förhandsvisningen av matchningar är öppen utan konto, och en angiven förfrågan ger en rangordnad kortlista som förklarar varför varje person passar – och den delen är gratis. Den betalda tjänsten ovan är den mänskliga: en operatör läser din förfrågan, kontaktar dig och kontrollerar kortlistan manuellt innan någon föreslås för dig. Ett helt team kan redan erbjuda sig mot din förfrågan som en enhet och, när båda parter är överens, ansluta till ditt projekt som ett team; den automatiska kortlistan föreslår ännu inte hela team – den rangordnar personer en och en.",
     "ctaLabel": "Skicka en förfrågan om arbetskraft →"
   },
   "adminLaunchReadiness": {

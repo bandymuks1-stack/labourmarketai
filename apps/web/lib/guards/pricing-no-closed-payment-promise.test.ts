@@ -27,9 +27,9 @@ const read = (p: string) => readFileSync(join(WEB, p), "utf8");
 const table = read("components/marketing/pricing-table.tsx");
 const page = read("app/[locale]/(marketing)/pricing/page.tsx");
 
-/** A stated active-position count ("1 active position", "one …", "viena …"). */
+/** A stated active-position count ("1 active position", "one …", "viena …", "en aktiv …"). */
 const POSITION_COUNT =
-  /\b(1|one|eine|één|jedno|одна|viena)\s+(aktyvi|active|aktive|actieve|aktywne|активная)/i;
+  /\b(1|one|eine|één|jedno|одна|viena|en)\s+(aktyvi|active|aktive|actieve|aktywne|активная|aktiv)/i;
 
 describe("closed online payment is said as closed", () => {
   it("the plan card uses the closed sentence when billing is not armed", () => {
@@ -93,8 +93,8 @@ describe("closed online payment is said as closed", () => {
       const m = JSON.parse(read(`messages/${locale}.json`));
       // One sentence per fact, in every routed language.
       expect(m.pricing.subcopyConfirmed.split(". ").length, "free / one paid plan / not purchasable").toBeGreaterThanOrEqual(3);
-      expect(m.pricing.priceState.owner_confirmed_closed).toMatch(/VAT|PVM|НДС|MwSt|btw/);
-      expect(m.pricing.priceState.owner_confirmed).toMatch(/VAT|PVM|НДС|MwSt|btw/);
+      expect(m.pricing.priceState.owner_confirmed_closed).toMatch(/VAT|PVM|НДС|MwSt|btw|moms/);
+      expect(m.pricing.priceState.owner_confirmed).toMatch(/VAT|PVM|НДС|MwSt|btw|moms/);
       // A hiring fee is never stated without "agreed in advance"; no figure is published.
       const fee = m.conciergeOffer.steps[3].body;
       expect(fee, `${locale}: no fee figure`).not.toMatch(/\d/);

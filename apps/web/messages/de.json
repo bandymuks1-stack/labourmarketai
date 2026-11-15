@@ -5824,8 +5824,8 @@
       }
     ],
     "priceState": {
-      "draft_pricing": "Die Preise werden vorbereitet — es kann noch nichts gekauft werden.",
-      "owner_confirmed": "Preise vom Eigentümer bestätigt. Die Aktivierung erfolgt im Organisationskonto; auf dieser Seite wird nichts belastet. Preise verstehen sich zuzüglich MwSt.",
+      "draft_pricing": "Die Preise sind nicht endgültig — es kann noch nichts gekauft werden.",
+      "owner_confirmed": "Die Preise sind bestätigt. Auf dieser Seite wird nichts abgebucht. Preise verstehen sich zuzüglich MwSt.",
       "owner_confirmed_closed": "Die Online-Zahlung ist noch nicht geöffnet; auf dieser Seite wird nichts belastet. Preise verstehen sich zuzüglich MwSt."
     },
     "individual": {
@@ -9525,7 +9525,7 @@
       "contact": "Individuell vereinbart"
     },
     "readiness": {
-      "draft_pricing": "Die Pläne sind vorbereitet, nicht kaufbar. Kein Preis hier ist endgültig, und es kann nichts gekauft werden.",
+      "draft_pricing": "Kein Preis hier ist endgültig, und es kann noch nichts gekauft werden.",
       "owner_confirmed": "Der bezahlte Plan kann nicht gekauft werden, bis die Online-Zahlung geöffnet ist."
     },
     "featuresLabel": "Enthält",
