@@ -901,6 +901,14 @@ const TOTAL_AGAIN_LEAD_RX = new RegExp(
 const PART_OF_DAY_RX =
   /(?<!\p{L})(?:ryte|rytą|ryta|ryto|vakare|vakarą|vakara|vakaro|pavakare|naktį|nakti|nakčia|naktis|po\s+pietų|po\s+pietu|popiet|prieš\s+pietus|pries\s+pietus|morning|mornings|evening|evenings|afternoon|afternoons|night|nights|tonight|утром|вечером|днём|днем|ночью|после\s+обеда|morgens|am\s+morgen|vormittags|nachmittags|abends|nachts|abend|rano|wieczorem|po\s+południu|po\s+poludniu|w\s+nocy|ochtends|middags|avonds)(?!\p{L})/iu;
 
+/** A span of the WHOLE day, not a block of it: "nuo ryto iki vakaro", "from
+ *  morning till evening", "с утра до вечера", "von morgens bis abends", "od
+ *  rana do wieczora", "van 's ochtends tot 's avonds". Removed before the
+ *  part-of-day test, so "Iš viso 15 val. nuo ryto iki vakaro" still restates. */
+const WHOLE_DAY_SPAN_RX =
+  /(?<!\p{L})(?:nuo\s+\p{L}+\s+iki\s+\p{L}+|from\s+(?:the\s+)?\p{L}+\s+(?:till|until|to)\s+(?:the\s+)?\p{L}+|с\s+\p{L}+\s+до\s+\p{L}+|von\s+\p{L}+\s+bis\s+\p{L}+|od\s+\p{L}+\s+do\s+\p{L}+|van\s+(?:'s\s+)?\p{L}+\s+tot\s+(?:'s\s+)?\p{L}+)(?!\p{L})/giu;
+const namesPartOfDay = (text: string): boolean => PART_OF_DAY_RX.test(text.replace(WHOLE_DAY_SPAN_RX, " "));
+
 /** Minutes back in the unit a person reads best. */
 function minutesAsTime(minutes: number): { value: number; unitSlug: "hours" | "minutes" } {
   return minutes % 15 === 0
@@ -1020,19 +1028,16 @@ function containedTotal(
     const digit = f.rawPhrase.search(/\d/);
     const lead = digit > 0 ? f.rawPhrase.slice(0, digit) : "";
     // A block of the day is never the day said again: the part of the day is
-    // read in front of THIS figure ("vakare iš viso 4 val.") or in its own
-    // phrase ("4 val. vakare"), never elsewhere in the sentence ("Vakare 2
-    // valandos koordinavimo, jos įeina į 15 valandų" restates the 15).
-    const since = sinceFigureBefore(f);
+    // read in front of THIS figure or in its own phrase ("vakare iš viso 4
+    // val.", "iš viso 4 val. vakare"), never elsewhere in the sentence
+    // ("Vakare 2 valandos koordinavimo, jos įeina į 15 valandų" restates the
+    // 15), and a span of the whole day is not a block ("Iš viso 15 val. nuo
+    // ryto iki vakaro" restates the 15).
+    const blockOfTheDay = namesPartOfDay(sinceFigureBefore(f) + f.rawPhrase);
     const restatesTotal =
-      equalsTotal &&
-      !PART_OF_DAY_RX.test(since + lead) &&
-      (TOTAL_AGAIN_LEAD_RX.test(lead) || RESTATED_TOTAL_LEAD_RX.test(lead));
+      equalsTotal && !blockOfTheDay && (TOTAL_AGAIN_LEAD_RX.test(lead) || RESTATED_TOTAL_LEAD_RX.test(lead));
     const restatesAnother =
-      equalsAnother &&
-      !PART_OF_DAY_RX.test(since + f.rawPhrase) &&
-      RESTATEMENT_CUE_RX.test(sentence) &&
-      sentenceNamesTheTotal;
+      equalsAnother && !blockOfTheDay && RESTATEMENT_CUE_RX.test(sentence) && sentenceNamesTheTotal;
     if (restatesTotal || restatesAnother) restatements.add(f);
   }
 

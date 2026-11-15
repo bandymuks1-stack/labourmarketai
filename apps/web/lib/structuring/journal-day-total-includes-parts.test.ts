@@ -380,3 +380,26 @@ describe("an explicit inclusion holds even where the sentence names a part of th
     expect(extractJournalSuggestions(text).statedTotal).toBeNull();
   });
 });
+
+/**
+ * Seventh review of #3355: a part of the day said AFTER the figure marks a
+ * block too; a span of the whole day does not.
+ */
+describe("a part of the day after the figure still marks a block", () => {
+  it.each([
+    ["'iš viso 4 val. vakare'", "Ryte 4 val., iš viso 4 val. vakare.", 8 * 60],
+    ["'kartu 4 val. vakare su kolega'", "Ryte 4 val., kartu 4 val. vakare su kolega.", 8 * 60],
+    ["English 'in total 4 h in the evening'", "Worked 4 h in the morning, and in total 4 h in the evening.", 8 * 60],
+  ])("%s", (_name, text, expected) => {
+    expect(minutes(text)).toBe(expected);
+    expect(intakeMinutes(text)).toBe(expected);
+  });
+
+  it.each([
+    ["English 'from morning till evening'", "Worked 15 hours, of which 2 hours coordination. In total 15 hours from morning till evening."],
+    ["Russian 'с утра до вечера'", "Работал 15 часов, включая 2 часа координации. Всего 15 часов с утра до вечера."],
+  ])("a span of the whole day is not a block: %s stays 15 h", (_name, text) => {
+    expect(minutes(text)).toBe(15 * 60);
+    expect(intakeMinutes(text)).toBe(15 * 60);
+  });
+});
