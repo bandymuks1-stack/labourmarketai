@@ -27,12 +27,13 @@
  */
 
 import { AGENCY_DOOR_NEXT } from "@/lib/marketing/public-doors";
+import { requestDoorHref } from "@/lib/staffing/request-door-link";
 
 export const PUBLIC_INTENT_IDS = [
   "work",
   "workers",
   "services",
-  "orders",
+  "contractors",
   "partners",
   "agencies",
 ] as const;
@@ -84,19 +85,27 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
     ],
   },
   {
+    // The PROVIDER's goal. Since V3 (owner decision D1, variant A, 2026-11-13)
+    // it also carries the two order-finding areas that used to be the goal
+    // "orders": both belong to the same person, the one who offers services.
     id: "services",
     iconKey: "wrench",
     links: [
       { id: "myServices", href: "/dashboard/services", account: true },
       { id: "serviceRequests", href: "/dashboard/service-requests", account: true },
+      { id: "marketListings", href: "/dashboard/listings", account: true },
+      { id: "commercial", href: "/dashboard/commercial", account: true },
     ],
   },
   {
-    id: "orders",
+    // The BUYER's goal (D1, variant A): someone who needs a service or a
+    // contractor. Its two actions open the matching form of the landing's
+    // "Submit a request" block — no account, no new form, no new route.
+    id: "contractors",
     iconKey: "fileSignature",
     links: [
-      { id: "marketListings", href: "/dashboard/listings", account: true },
-      { id: "commercial", href: "/dashboard/commercial", account: true },
+      { id: "b2bEnquiry", href: requestDoorHref("b2b"), account: false },
+      { id: "projectEnquiry", href: requestDoorHref("project"), account: false },
     ],
   },
   {
@@ -133,6 +142,18 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
 export const ASSISTANT_HREF = "/dashboard";
 
 /**
+ * Goal ids that no longer exist, and the goal that now holds what they held.
+ * A link someone saved to `#goal=orders` opens "Offer services", where the
+ * order-finding areas moved — never nothing.
+ */
+export const GOAL_ID_ALIASES: Readonly<Record<string, PublicIntentId>> = { orders: "services" };
+
+/** The current id for a goal id that may be an old one. */
+export function canonicalGoalId(id: string | null): string | null {
+  return id === null ? null : (GOAL_ID_ALIASES[id] ?? id);
+}
+
+/**
  * THE ADDRESS OF A GOAL — a fragment of the page the navigator is on
  * (`#goal=work`), never a page of its own. A fragment keeps everything a URL
  * state needs (browser Back closes the panel, a shared link opens it, the
@@ -148,7 +169,7 @@ export function goalHref(id: PublicIntentId | typeof MORE_GOAL_ID): string {
 /** `#goal=work` → `work`; anything else → null. */
 export function goalFromFragment(hash: string): PublicIntentId | null {
   if (!hash.startsWith(GOAL_FRAGMENT_PREFIX)) return null;
-  const id = hash.slice(GOAL_FRAGMENT_PREFIX.length);
+  const id = canonicalGoalId(hash.slice(GOAL_FRAGMENT_PREFIX.length)) ?? "";
   return isPublicIntentId(id) ? id : null;
 }
 

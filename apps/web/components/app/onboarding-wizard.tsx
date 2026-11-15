@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
+import { type CSSProperties, type FocusEvent, type ReactNode, useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
@@ -548,9 +548,43 @@ export function OnboardingWizard({
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
+  // THE PHONE ACTION BAR TAKES THE ROOM IT ACTUALLY NEEDS. The bar is fixed to the
+  // bottom of the screen on a phone, and the step reserves space under its content so
+  // nothing ends there. A fixed guess (128 / 144 px) was too small once the bar held a
+  // multi-line refusal above two stacked buttons at 360 px. The step now reserves the
+  // bar's measured height, kept current as the bar grows and shrinks; the guess is only
+  // the value before the first measurement.
+  const [actionBar, setActionBar] = useState<HTMLDivElement | null>(null);
+  const [barHeight, setBarHeight] = useState<number | null>(null);
+  useEffect(() => {
+    if (!actionBar || typeof ResizeObserver === "undefined") return;
+    const measure = () => setBarHeight(Math.ceil(actionBar.getBoundingClientRect().height));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(actionBar);
+    return () => observer.disconnect();
+  }, [actionBar]);
+  const barReserve = barHeight === null ? undefined : ({ "--onboarding-bar": `${barHeight + 16}px` } as CSSProperties);
+
+  // A FIELD THAT TAKES FOCUS IS NOT LEFT UNDER THE BAR. A browser scrolls a focused
+  // field to the edge of the screen, not above something drawn over it, so tabbing
+  // down the profile on a phone could put the caret behind the bar. When focus lands
+  // on something the fixed bar covers, the page moves it to the middle of the screen.
+  const keepFocusClearOfBar = (event: FocusEvent<HTMLElement>) => {
+    if (!actionBar || getComputedStyle(actionBar).position !== "fixed") return;
+    const target = event.target as HTMLElement;
+    if (actionBar.contains(target)) return;
+    // Keyboard focus only. A tap or a click focuses what it lands on as well, and moving the
+    // page between the press and the release makes the browser drop the click: the card a
+    // person tapped would not be chosen (isolated walk P-1, 2026-11-14).
+    if (!target.matches(":focus-visible")) return;
+    const barTop = actionBar.getBoundingClientRect().top;
+    if (target.getBoundingClientRect().bottom > barTop - 8) target.scrollIntoView({ block: "center" });
+  };
+
   if (step === 1) {
     return (
-      <div className="flex flex-col gap-6 pb-32 sm:pb-0">
+      <div className="flex flex-col gap-6 pb-[var(--onboarding-bar,8rem)] sm:pb-0" style={barReserve} onFocus={keepFocusClearOfBar} data-testid="onboarding-step-role">
         <header className="flex flex-col gap-3">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("rolePicker.intentHeading")}
@@ -696,19 +730,20 @@ export function OnboardingWizard({
             page). The step reserves the bar's height below its content, so
             nothing ends up underneath it. From `sm` up it is the ordinary
             in-flow button it always was. Solid background, no blur. */}
-        <div className="fixed inset-x-0 bottom-0 z-10 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar">
+        <div className="fixed inset-x-0 bottom-0 z-10 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar" ref={setActionBar}>
           {error && (
             <p className="text-xs text-state-danger" role="alert">
               {error}
             </p>
           )}
           {/* The disabled button explains itself: until something is chosen
-              the bar says what to do first (the sentence the step already
-              used when a person got here without a choice). It goes away
+              the bar says what to do first (its own sentence, `role_step_hint`: it says the same
+              as the refusal `error_role_required` today, and rewording that
+              refusal no longer rewords this hint). It goes away
               with the first pick, when the button becomes active. */}
           {!error && intents.size === 0 && (
             <p className="text-xs leading-relaxed text-text-muted" data-testid="onboarding-continue-hint">
-              {t("error_role_required")}
+              {t("role_step_hint")}
             </p>
           )}
           <Button
@@ -747,7 +782,9 @@ export function OnboardingWizard({
         e.preventDefault();
         submit();
       }}
-      className={cn("flex flex-col gap-5", !reviewNoticeShown && "pb-36 sm:pb-0")}
+      className={cn("flex flex-col gap-5", !reviewNoticeShown && "pb-[var(--onboarding-bar,9rem)] sm:pb-0")}
+      style={reviewNoticeShown ? undefined : barReserve}
+      onFocus={keepFocusClearOfBar}
       noValidate
     >
       <header>
@@ -1050,6 +1087,7 @@ export function OnboardingWizard({
           except for an invited staff member, who keeps the in-flow button
           directly under the review notice (see reviewNoticeShown). */}
       <div
+        ref={setActionBar}
         className={cn(
           "flex flex-col gap-2",
           !reviewNoticeShown &&
