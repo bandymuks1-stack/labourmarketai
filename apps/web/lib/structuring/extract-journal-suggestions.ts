@@ -899,14 +899,17 @@ const TOTAL_AGAIN_LEAD_RX = new RegExp(
  *  val." and "Ryte 4 val. dirbau vienas, vakare kartu 4 val." are 8 h. German
  *  bare "morgen" is "tomorrow", so only "morgens" / "am Morgen" count. */
 const PART_OF_DAY_RX =
-  /(?<!\p{L})(?:ryte|rytą|ryta|ryto|vakare|vakarą|vakara|vakaro|pavakare|naktį|nakti|nakčia|naktis|po\s+pietų|po\s+pietu|popiet|prieš\s+pietus|pries\s+pietus|morning|mornings|evening|evenings|afternoon|afternoons|night|nights|tonight|утром|вечером|днём|днем|ночью|после\s+обеда|morgens|am\s+morgen|vormittags|nachmittags|abends|nachts|abend|rano|wieczorem|po\s+południu|po\s+poludniu|w\s+nocy|ochtends|middags|avonds)(?!\p{L})/iu;
+  /(?<!\p{L})(?:ryte|rytą|ryta|ryto|vakare|vakarą|vakara|vakaro|pavakare|naktį|nakti|nakčia|naktis|po\s+pietų|po\s+pietu|popiet|prieš\s+pietus|pries\s+pietus|morning|mornings|evening|evenings|afternoon|afternoons|night|nights|tonight|утром|вечером|днём|днем|ночью|утра|вечера|ночи|после\s+обеда|morgens|am\s+morgen|vormittags|nachmittags|abends|nachts|abend|rano|wieczorem|po\s+południu|po\s+poludniu|w\s+nocy|ochtends|middags|avonds)(?!\p{L})/iu;
 
-/** A span of the WHOLE day, not a block of it: "nuo ryto iki vakaro", "from
- *  morning till evening", "с утра до вечера", "von morgens bis abends", "od
- *  rana do wieczora", "van 's ochtends tot 's avonds". Removed before the
- *  part-of-day test, so "Iš viso 15 val. nuo ryto iki vakaro" still restates. */
+/** A span of the WHOLE day, from its start to its end, with at most one word
+ *  on each side ("nuo (ankstyvo) ryto iki (vėlaus) vakaro", "from (early)
+ *  morning till (late) evening", "с утра до вечера", "von morgens bis abends",
+ *  "od rana do wieczora", "van 's ochtends tot 's avonds"). Removed before the
+ *  part-of-day test, so "Iš viso 15 val. nuo ryto iki vėlaus vakaro" still
+ *  says the 15 again. A span that starts or ends inside the day ("nuo
+ *  trečios iki vakaro", "from noon to evening") is a block and is kept. */
 const WHOLE_DAY_SPAN_RX =
-  /(?<!\p{L})(?:nuo\s+\p{L}+\s+iki\s+\p{L}+|from\s+(?:the\s+)?\p{L}+\s+(?:till|until|to)\s+(?:the\s+)?\p{L}+|с\s+\p{L}+\s+до\s+\p{L}+|von\s+\p{L}+\s+bis\s+\p{L}+|od\s+\p{L}+\s+do\s+\p{L}+|van\s+(?:'s\s+)?\p{L}+\s+tot\s+(?:'s\s+)?\p{L}+)(?!\p{L})/giu;
+  /(?<!\p{L})(?:nuo\s+(?:\p{L}+\s+)?ryto\s+iki\s+(?:\p{L}+\s+)?(?:vakaro|nakties)|from\s+(?:the\s+)?(?:\p{L}+\s+)?morning\s+(?:till|until|to)\s+(?:the\s+)?(?:\p{L}+\s+)?(?:evening|night)|с\s+(?:\p{L}+\s+)?утра\s+до\s+(?:\p{L}+\s+)?(?:вечера|ночи)|von\s+(?:\p{L}+\s+)?morgens\s+bis\s+(?:\p{L}+\s+)?(?:abends|nachts)|od\s+(?:\p{L}+\s+)?rana\s+do\s+(?:\p{L}+\s+)?(?:wieczora|nocy)|van\s+(?:'s\s+)?(?:\p{L}+\s+)?ochtends\s+tot\s+(?:'s\s+)?(?:\p{L}+\s+)?(?:avonds|nachts))(?!\p{L})/giu;
 const namesPartOfDay = (text: string): boolean => PART_OF_DAY_RX.test(text.replace(WHOLE_DAY_SPAN_RX, " "));
 
 /** Minutes back in the unit a person reads best. */

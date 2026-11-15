@@ -403,3 +403,27 @@ describe("a part of the day after the figure still marks a block", () => {
     expect(intakeMinutes(text)).toBe(15 * 60);
   });
 });
+
+/**
+ * Eighth review of #3355: only a span from the start of the day to its end is
+ * the whole day; a span that starts inside the day is a block.
+ */
+describe("only a span from the start of the day to its end is the whole day", () => {
+  it.each([
+    ["'nuo trečios iki vakaro' is a block", "Ryte 4 val. Nuo trečios iki vakaro iš viso 4 val.", 8 * 60],
+    ["'from noon to evening' is a block", "Worked 4 h in the morning. From noon to evening, in total 4 h.", 8 * 60],
+    ["'с трёх до вечера' is a block", "Утром 4 часа, с трёх до вечера всего 4 часа.", 8 * 60],
+  ])("%s", (_name, text, expected) => {
+    expect(minutes(text)).toBe(expected);
+    expect(intakeMinutes(text)).toBe(expected);
+  });
+
+  it.each([
+    ["'nuo ryto iki vėlaus vakaro'", "Dirbau 15 val., iš jų 2 val. koordinavimas. Iš viso 15 val. nuo ryto iki vėlaus vakaro."],
+    ["'nuo ankstyvo ryto iki vakaro'", "Dirbau 15 val., iš jų 2 val. koordinavimas. Iš viso 15 val. nuo ankstyvo ryto iki vakaro."],
+    ["'from early morning till late evening'", "Worked 15 hours, of which 2 hours coordination. In total 15 hours from early morning till late evening."],
+  ])("a whole day with one word on each side stays 15 h: %s", (_name, text) => {
+    expect(minutes(text)).toBe(15 * 60);
+    expect(intakeMinutes(text)).toBe(15 * 60);
+  });
+});
