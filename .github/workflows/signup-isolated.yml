@@ -2,7 +2,7 @@ name: Signup Isolated (local Supabase)
 
 # SELF-SERVE SIGN-UP, end to end, against a throwaway LOCAL Supabase stack that
 # lives and dies inside this job (apps/web/tests/e2e/signup-isolated.spec.ts):
-# a worker, a company and an agency each fill the real sign-up form, onboard,
+# a worker, a student, a company and an agency each fill the real sign-up form, onboard,
 # and reach their first surface; the stored rows are checked. The same stack
 # then walks agency roles and permissions (agency-roles-isolated.spec.ts):
 # invite by link, a limited governance seat, refusals, cross-org isolation.
@@ -15,7 +15,11 @@ name: Signup Isolated (local Supabase)
 #     is built or started; no project is linked, no access token is used;
 #   - the app runs with LM_ACCEPTANCE_MODE=1 and refuses a non-local target;
 #   - payments, AI providers and outbound alerts stay off;
-#   - only Playwright's list output is kept (no traces, no screenshots).
+#   - only Playwright's list output is kept (no traces), with ONE exception:
+#     experience-integration-isolated.spec.ts uploads its own screenshots and
+#     failure notes as the `experience-integration` artifact (synthetic
+#     accounts on this stack only; owner decision 2026-11-14, CV screenshots
+#     from synthetic accounts as CI artifacts). No other walk's output is kept.
 
 on:
   workflow_dispatch:
@@ -23,9 +27,31 @@ on:
     paths:
       - ".github/workflows/signup-isolated.yml"
       - "apps/web/tests/e2e/signup-isolated.spec.ts"
+      - "apps/web/tests/e2e/sv-journey-isolated.spec.ts"
+      - "supabase/tests/20261114100000_booking_refuses_closed_need_*"
+      - "supabase/migrations/20261114100000_booking_refuses_closed_need_v1.sql"
+      - "apps/web/lib/booking/**"
+      - "apps/web/lib/onboarding/**"
+      - "apps/web/components/app/onboarding-wizard.tsx"
+      - "apps/web/components/app/worker-education-section.tsx"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
+      - "apps/web/tests/e2e/experience-integration-isolated.spec.ts"
+      # The code experience-integration-isolated.spec.ts guards (#3354, decision 0025).
+      - "apps/web/app/*/cv/**"
+      - "apps/web/app/*/dashboard/work-in-numbers/**"
+      - "apps/web/app/*/dashboard/company/history/**"
+      - "apps/web/app/*/dashboard/company/people/**"
+      - "apps/web/lib/journal/professional-experience*.ts"
+      - "apps/web/components/app/work-in-numbers/**"
+      - "apps/web/components/app/organization/company-work-history.tsx"
+      - "apps/web/components/app/organization/organizations-leadership.tsx"
+      - "apps/web/components/app/organization-roster-section.tsx"
+      - "apps/web/components/app/roster-link-offer-form.tsx"
+      - "apps/web/lib/organization-evidence/**"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
+      - "apps/web/tests/e2e/recognition-chain-isolated.spec.ts"
+      - "apps/web/tests/e2e/phone-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/teams-projects-isolated.spec.ts"
       - "apps/web/app/*/dashboard/projects/**"
       - "apps/web/components/app/team-*.tsx"
@@ -98,9 +124,10 @@ jobs:
       # The walks share this one throwaway stack: self-serve sign-up, the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts), the
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
-      # -> matching -> dispute chain (skills-chain-isolated.spec.ts), and job fit from evidence
+      # -> matching -> dispute chain (skills-chain-isolated.spec.ts), the practice -> sign-off -> recognition
+      # chain that production no longer writes (recognition-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -216,7 +243,26 @@ jobs:
           echo "migration files=$files ledger rows=$rows"
           [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
 
+      # A CLOSED NEED REFUSES A NEW PROPOSAL OR A FIRST ACCEPT
+      # (20261114100000_booking_refuses_closed_need_v1). Database-level cases in
+      # one rolled-back transaction, then two real sessions racing a close
+      # against an accept in both orders. Synthetic rows only, this stack only.
+      - name: Closed need refuses an accept — database cases
+        run: |
+          set -euo pipefail
+          docker exec -i supabase_db_labourmarketai psql -U postgres -X -q -v ON_ERROR_STOP=1 \
+            < supabase/tests/20261114100000_booking_refuses_closed_need_regression.sql
+
+      - name: Closed need refuses an accept — concurrent close and accept
+        run: bash supabase/tests/20261114100000_booking_refuses_closed_need_race.sh
+
+      # The same heap the other build jobs give `next build` (quality.yml, e2e-smoke.yml,
+      # deploy-vps.yml). Its type-check worker passes 2 GB on this code base; without the
+      # setting the build depends on Node's default for the runner's memory, next to a
+      # running Supabase stack.
       - name: Build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Guard — the build inlined the local Supabase URL
@@ -276,6 +322,20 @@ jobs:
           APP_MAIL_API: http://127.0.0.1:54334
         run: pnpm exec playwright test $SPEC --reporter=list --trace=off
 
+      # One continuous professional history across organizations
+      # (experience-integration-isolated.spec.ts, issue #3354): synthetic
+      # accounts on this stack only, 375 / 1440 px. Kept as a CI artifact.
+      - name: Upload the experience-integration screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: experience-integration
+          path: |
+            apps/web/test-results/experience-integration/
+            apps/web/test-results/experience-integration-iso*/error-context.md
+          if-no-files-found: warn
+          retention-days: 14
+
       # APP-ROLLBACK COMPATIBILITY (owner gate for 20261029190000, deploy order
       # migration -> app): the LAST app build before the job-fit code (#2887)
       # is built and run against this stack, whose database carries the
@@ -294,7 +354,7 @@ jobs:
           git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/main"
           cd "$RUNNER_TEMP/main"
           pnpm install --frozen-lockfile --filter=!mobile > "$RUNNER_TEMP/main-install.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/main-install.log"; exit 1; }
-          pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
+          NODE_OPTIONS=--max-old-space-size=6144 pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
           grep -rqF "127.0.0.1:54321" apps/web/.next/static apps/web/.next/server || { echo "::error::main build lacks the local Supabase URL"; exit 1; }
           pnpm -F web exec next start -H 127.0.0.1 -p 3002 > "$RUNNER_TEMP/next-main.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/next-main.pid"

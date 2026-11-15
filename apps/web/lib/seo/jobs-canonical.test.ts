@@ -25,10 +25,21 @@ describe("jobsCanonicalPath", () => {
     expect(jobsCanonicalPath({ page: "2", country: "NO" } as never)).toBe("/jobs?page=2");
   });
 
-  it("filtered and saved views canonicalize to the board", () => {
+  it("free-text and saved views canonicalize to the board", () => {
     expect(jobsCanonicalPath({ page: "2", q: "welder" })).toBe("/jobs");
-    expect(jobsCanonicalPath({ page: "3", profession: "cook" })).toBe("/jobs");
     expect(jobsCanonicalPath({ page: "2", saved: "1" })).toBe("/jobs");
+    expect(jobsCanonicalPath({ q: "night", profession: "cook" })).toBe("/jobs");
+    expect(jobsCanonicalPath({ saved: "1", profession: "cook" })).toBe("/jobs");
+  });
+
+  it("a profession page is its own canonical, and so are its pages 2+", () => {
+    expect(jobsCanonicalPath({ profession: "cook" })).toBe("/jobs?profession=cook");
+    expect(jobsCanonicalPath({ page: "1", profession: "cook" })).toBe("/jobs?profession=cook");
+    expect(jobsCanonicalPath({ page: "3", profession: "cook" })).toBe(
+      "/jobs?profession=cook&page=3",
+    );
+    expect(jobsCanonicalPath({ page: "2500", profession: "cook" })).toBe("/jobs?profession=cook");
+    expect(jobsCanonicalPath({ profession: null })).toBe("/jobs");
   });
 
   it("malformed page values fall back to the board", () => {

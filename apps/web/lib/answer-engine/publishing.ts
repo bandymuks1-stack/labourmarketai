@@ -216,6 +216,18 @@ export function publishedCategories(locale: ActiveLocale): AnswerCategoryKey[] {
   return [...set];
 }
 
+/** Locales in which a category page has content (at least one indexable
+ *  question) — the only locales that may be named as its hreflang alternates. */
+export function localesPublishingCategory(category: AnswerCategoryKey): ActiveLocale[] {
+  return ANSWER_ENGINE_LOCALES.filter((l) => publishedCategories(l).includes(category));
+}
+
+/** Locales in which the questions hub has anything to list. A locale whose
+ *  answers are all still awaiting review (sv on 2026-11-12) is not one. */
+export function localesPublishingAnyAnswer(): ActiveLocale[] {
+  return ANSWER_ENGINE_LOCALES.filter((l) => publishedCategories(l).length > 0);
+}
+
 /**
  * Related questions to show on a page: registry relatedQuestionIds, filtered to
  * ones INDEXABLE in the same locale (never self, never 404), capped 3..8.

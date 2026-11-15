@@ -22,7 +22,7 @@
  */
 import { foldText } from "./normalize";
 import {
-  WORK_TYPE_RULES,
+  workTypeRulesFor,
   countPeopleInNeed,
   isCountUnitWord,
   maskServiceNoun,
@@ -30,6 +30,7 @@ import {
   type TeamClarification,
 } from "./structure-need";
 import { withUnicodeBoundaries } from "./unicode-word-boundary";
+import { looksSwedish } from "./looks-swedish";
 
 export type HeadcountBasis = "teams" | "count" | "singular_occupation";
 
@@ -56,8 +57,11 @@ export interface NeedHeadcount {
  */
 const PLURAL_QUANTIFIER =
   /^(?:few|couple|dozen|dozens|several|some|many|multiple|various|keli|kelis|kelios|keletas|keleta|keliu|keleto|keleriems|daug|nemazai|несколько|нескольких|пару|пара|много|einige|einigen|mehrere|mehreren|paar|viele|kilka|kilku|kilkoro|kilkunastu|paru|wielu|enkele|aantal|meerdere|verschillende|veel)$/u;
+/** sv "några / flera / många / diverse" — a Swedish sentence only: "diverse"
+ *  is German, Dutch and English, "manga" an English noun. */
+const SV_PLURAL_QUANTIFIER = /^(?:nagra|flera|manga|diverse)$/u;
 
-type DemandLanguage = "lt" | "en" | "ru" | "de" | "pl" | "nl";
+type DemandLanguage = "lt" | "en" | "ru" | "de" | "pl" | "nl" | "sv";
 
 /** Demand verbs per locale, folded. The verb names the language whose
  *  grammar decides whether the occupation is singular. */
@@ -69,6 +73,8 @@ const DEMAND_VERBS: ReadonlyArray<{ lang: DemandLanguage; re: RegExp }> = (
   { lang: "de", re: /\b(suchen|brauchen|gesucht|benotigen|benotigt|stellen ein)\b/ },
   { lang: "pl", re: /\b(szukamy|potrzebujemy|poszukujemy|potrzebny|potrzebna|zatrudnimy|zatrudni)\b/ },
   { lang: "nl", re: /\b(zoeken|gezocht|nodig|gevraagd|zoekt)\b/ },
+  // Folded: söker → soker, behöver → behover.
+  { lang: "sv", re: /\b(soker|sokes|behover|behovs|anstaller|rekryterar)\b/ },
   ] as const satisfies ReadonlyArray<{ lang: DemandLanguage; re: RegExp }>
 ).map(({ lang, re }) => ({ lang, re: withUnicodeBoundaries(re) }));
 
@@ -83,6 +89,7 @@ const ONE_BEFORE: Record<DemandLanguage, RegExp> = {
   de: /^(ein|eine|einen|einem|einer)$/u,
   pl: /^(jeden|jedna|jednego)$/u,
   nl: /^een$/u,
+  sv: /^(en|ett)$/u,
 };
 
 /** Is this occupation token singular in that language? (folded token) */
@@ -113,6 +120,10 @@ function isSingularToken(lang: DemandLanguage, token: string, before: readonly s
     // Dutch agent nouns form the plural with -s (lassers, metselaars).
     case "nl":
       return !/s$/u.test(token);
+    // Swedish agent nouns are the same in the plural ("två svetsare"): only
+    // the article says one, as in German.
+    case "sv":
+      return false;
   }
 }
 
@@ -136,15 +147,17 @@ export function readsVagueHeadcount(text: string | null | undefined): boolean {
 function readOccupationNumber(text: string | null | undefined): "singular" | "vague" | "other" | null {
   const folded = foldText(text ?? "");
   if (!folded) return null;
-  const verb = DEMAND_VERBS.find(({ re }) => re.test(folded));
+  // The Swedish verbs, nouns and quantifiers count in a Swedish sentence only.
+  const swedish = looksSwedish(text);
+  const verb = DEMAND_VERBS.find(({ lang, re }) => (lang !== "sv" || swedish) && re.test(folded));
   if (!verb) return null;
   const tokens = folded.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   // A stated number keeps its own reading — this rule is only for none. A
   // number that MEASURES something ("2 metams", "15 eur", "40 val.", "3 metų
   // patirties") is not a count and does not stand in the way.
-  if (tokens.some((t, i) => /^\d+$/.test(t) && !isCountUnitWord(tokens[i + 1]))) return null;
+  if (tokens.some((t, i) => /^\d+$/.test(t) && !isCountUnitWord(tokens[i + 1], swedish))) return null;
   const masked = maskServiceNoun(folded);
-  for (const rule of WORK_TYPE_RULES) {
+  for (const rule of workTypeRulesFor(swedish)) {
     for (const needle of rule.needles) {
       const n = foldText(needle);
       if (n.includes(" ") || !masked.includes(n)) continue;
@@ -152,7 +165,7 @@ function readOccupationNumber(text: string | null | undefined): "singular" | "va
       if (index === -1) continue;
       // "a few / a couple of / a dozen / several …" before the occupation:
       // more than one, not how many — and never the article's "one".
-      if (tokens.slice(Math.max(0, index - 3), index).some((w) => PLURAL_QUANTIFIER.test(w))) return "vague";
+      if (tokens.slice(Math.max(0, index - 3), index).some((w) => PLURAL_QUANTIFIER.test(w) || (swedish && SV_PLURAL_QUANTIFIER.test(w)))) return "vague";
       if (PLURAL_VERB.test(folded)) return "other";
       return isSingularToken(verb.lang, tokens[index], tokens.slice(Math.max(0, index - 2), index))
         ? "singular"

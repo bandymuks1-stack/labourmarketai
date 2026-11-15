@@ -1,4 +1,6 @@
 import { expect as baseExpect, test, type Page } from "@playwright/test";
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
 
 /**
  * PREMIUM NAVIGATION — the six public intents, proven in a real browser
@@ -15,7 +17,7 @@ import { expect as baseExpect, test, type Page } from "@playwright/test";
 
 const expect = baseExpect.configure({ timeout: 15_000 });
 const MIN_TOUCH_PX = 43.5;
-const INTENTS = ["work", "workers", "services", "orders", "partners", "agencies"] as const;
+const INTENTS = ["work", "workers", "services", "contractors", "partners", "agencies"] as const;
 
 async function headerOverflow(page: Page): Promise<string[]> {
   return page.evaluate(() => {
@@ -100,6 +102,17 @@ for (const width of [1024, 1280, 1440] as const) {
     test("More holds the older links: pricing and about are two actions away", async ({ page }) => {
       await page.goto("/en");
       const more = page.getByTestId("intent-toggle-more");
+      // The key is pressed once the menu's script is attached: a key pressed
+      // in the moment between the page loading and that is not taken (seen
+      // on a production build, about one run in nine).
+      await more.evaluate(
+        (el) =>
+          new Promise<void>((done) => {
+            const alive = () => Object.keys(el).some((k) => k.startsWith("__reactProps$"));
+            const wait = () => (alive() ? done() : requestAnimationFrame(wait));
+            wait();
+          }),
+      );
       await more.focus();
       await page.keyboard.press("Enter");
       const links = page.getByTestId("intent-more-links");
@@ -208,9 +221,11 @@ test.describe("phone header", () => {
         await expect(page.getByTestId("header-auth").locator("a[href*='/auth/login']")).toBeVisible();
         await expect(page.getByTestId("header-auth").locator("a[href*='/auth/signup']")).toBeHidden();
         await expect(page.getByTestId("mobile-nav-toggle")).toBeVisible();
-        // The goals start within the first ~300px of the screen.
+        // The goals start in the upper half of the screen. Since V3
+        // (2026-11-13) the approved lead sits between the question and the
+        // goals, under the first-visit cookie notice.
         const rail = (await page.getByTestId("goal-rail").boundingBox())!;
-        expect(rail.y, "goal rail top").toBeLessThan(300);
+        expect(rail.y, "goal rail top").toBeLessThan(340);
         // Sign up and the theme toggle are the first row of the menu.
         await page.getByTestId("mobile-nav-toggle").tap();
         const auth = page.getByTestId("mobile-nav-auth");
@@ -221,3 +236,39 @@ test.describe("phone header", () => {
     }
   }
 });
+
+// Evidence: an inner page's header at every checked width, light and dark.
+const INNER_SHOTS = join(process.cwd(), "..", "..", "docs", "audits", "evidence", "premium-nav");
+for (const vp of [
+  { name: "320", width: 320, height: 640 },
+  { name: "375", width: 375, height: 812 },
+  { name: "390", width: 390, height: 844 },
+  { name: "768", width: 768, height: 1024 },
+  { name: "1440", width: 1440, height: 900 },
+] as const) {
+  for (const theme of ["light", "dark"] as const) {
+    test(`evidence: inner page header @${vp.name}px, ${theme}`, async ({ browser }) => {
+      mkdirSync(INNER_SHOTS, { recursive: true });
+      const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+      await context.addInitScript((t) => {
+        try {
+          localStorage.setItem("theme", t);
+        } catch {
+          /* storage blocked: the page keeps its default theme */
+        }
+      }, theme);
+      const page = await context.newPage();
+      await page.goto("/en/pricing");
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+      expect(await headerOverflow(page), `header overflow @${vp.name} ${theme}`).toEqual([]);
+      if (vp.width >= 1024) await expect(page.getByTestId("intent-bar")).toBeVisible();
+      else await expect(page.getByTestId("mobile-nav-toggle")).toBeVisible();
+      // The Next.js development indicator exists only under `next dev`.
+      await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
+      await page.screenshot({
+        path: join(INNER_SHOTS, `inner-${vp.name}${theme === "dark" ? "-dark" : ""}.png`),
+      });
+      await context.close();
+    });
+  }
+}
