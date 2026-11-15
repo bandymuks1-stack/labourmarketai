@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { COMPOSER_ERROR_KEY_SET } from "@/lib/communication/composer-error-key";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * A failed send showed the server's Lithuanian developer message verbatim to
@@ -15,7 +16,7 @@ import { COMPOSER_ERROR_KEY_SET } from "@/lib/communication/composer-error-key";
  */
 const WEB = join(__dirname, "..", "..");
 const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8").replace(/\r\n/g, "\n");
-const ACTIVE = ["de", "en", "lt", "nl", "pl", "ru"];
+const ACTIVE = activeLocales;
 const COMPOSERS = [
   ["components", "app", "communication-composer.tsx"],
   ["components", "app", "conversation-quick-reply.tsx"],

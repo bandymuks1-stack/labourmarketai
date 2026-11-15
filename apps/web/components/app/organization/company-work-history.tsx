@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
@@ -14,6 +15,11 @@ import { isPeriodRecord, type PlaceGroup } from "@/lib/organization-evidence/com
 import { BusinessHistoryOverview } from "@/components/app/organization/business-history-overview";
 import { OpenWorkspaceButton } from "@/components/app/organization/open-workspace-button";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+
+/** One read per request: the overview and one place's detail render on the
+ *  same page from the same history (React `cache`, keyed by locale and the
+ *  named organization). */
+const loadHistory = cache(loadCompanyWorkHistory);
 
 /**
  * THE COMPANY'S IMPORTED WORK HISTORY — seen from the place (2026-10-01).
@@ -68,7 +74,7 @@ export async function CompanyWorkHistory({
   /** `?org=` — an organization the caller belongs to, opened by name. */
   organizationId?: string | null;
 }) {
-  const load = await loadCompanyWorkHistory(locale, organizationId);
+  const load = await loadHistory(locale, organizationId);
   if (load.kind === "hidden") return null;
   const t = await getTranslations("companyWorkHistory");
 
@@ -156,7 +162,7 @@ export async function CompanyWorkHistory({
       <ul id="company-work-history-places" className="grid scroll-mt-20 gap-3 md:grid-cols-2" data-testid="company-work-history-places">
         {placed.map((p) => (
           <li key={p.key}>
-            <PlaceTile p={p} t={t} locale={locale} maxHours={maxHours} />
+            <PlaceTile p={p} t={t} locale={locale} maxHours={maxHours} organizationId={organizationId} />
           </li>
         ))}
       </ul>
@@ -183,8 +189,11 @@ export async function CompanyWorkHistory({
   );
 }
 
-export function placeHref(key: string): string {
-  return `/dashboard/company/history?place=${encodeURIComponent(key)}#company-place-detail`;
+/** One place's detail on the same page. A named organization (`?org=`) is
+ *  kept, so the detail reads the organization whose history was opened. */
+export function placeHref(key: string, organizationId: string | null = null): string {
+  const org = organizationId ? `&org=${encodeURIComponent(organizationId)}` : "";
+  return `/dashboard/company/history?place=${encodeURIComponent(key)}${org}#company-place-detail`;
 }
 
 function PlaceTile({
@@ -192,18 +201,20 @@ function PlaceTile({
   t,
   locale,
   maxHours,
+  organizationId,
 }: {
   p: PlaceGroup;
   t: Awaited<ReturnType<typeof getTranslations>>;
   locale: string;
   maxHours: number;
+  organizationId: string | null;
 }) {
   const hours = p.dayHours;
   const when = span(p.firstDate, p.lastDate, locale);
   const latest = p.records.find((r) => r.text);
   return (
     <Link
-      href={placeHref(p.key) as "/dashboard"}
+      href={placeHref(p.key, organizationId) as "/dashboard"}
       data-testid="company-work-history-place"
       data-place={p.key}
       className="group flex h-full flex-col gap-3 rounded-card border border-ink-600 bg-ink-800/40 p-4 transition-colors hover:border-brand-blue"
@@ -248,13 +259,16 @@ function PlaceTile({
 export async function CompanyPlaceHistory({
   locale,
   placeKey,
+  organizationId = null,
   load: preloaded,
 }: {
   locale: string;
   placeKey: string;
+  /** Same rule as the overview: a named organization, else the active one. */
+  organizationId?: string | null;
   load?: CompanyWorkHistoryLoad;
 }) {
-  const load = preloaded ?? (await loadCompanyWorkHistory(locale));
+  const load = preloaded ?? (await loadHistory(locale, organizationId));
   if (load.kind === "hidden") return null;
   const t = await getTranslations("companyWorkHistory");
   if (load.kind === "unavailable") {
@@ -269,6 +283,16 @@ export async function CompanyPlaceHistory({
     );
   }
 
+  // The company card reads the ACTIVE organization's roster, so a person
+  // opens there only when the history shown IS the active organization's.
+  let activeId: string | null = null;
+  try {
+    activeId = (await getWorkspaceContext()).activeWorkspaceId;
+  } catch {
+    activeId = null;
+  }
+  const cardsOpen = activeId !== null && activeId === load.organizationId;
+
   const byMonth = new Map<string, typeof place.records>();
   for (const r of place.records) {
     const m = (r.activityDate ?? r.periodStart ?? "").slice(0, 7) || "—";
@@ -280,9 +304,9 @@ export async function CompanyPlaceHistory({
     <div className="flex flex-col gap-5" data-testid="company-place" data-place={place.key}>
       <header className="flex flex-col gap-2">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("place")}</p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+        <h2 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {place.name ?? t("noPlaceName")}
-        </h1>
+        </h2>
         <Provenance t={t} name={load.organizationName} />
         {load.truncated ? (
           <p className="text-meta leading-relaxed text-text-muted" data-testid="company-place-truncated">
@@ -320,10 +344,9 @@ export async function CompanyPlaceHistory({
       </Card>
 
       <section className="flex flex-col gap-2" aria-label={t("whoWorked")} data-testid="company-place-people">
-        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("whoWorked")}</h2>
+        <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("whoWorked")}</h3>
         <ul className="flex flex-wrap gap-2">
           {place.people.map((pp) => {
-            const wid = load.linkedWorkers[pp.id];
             const chip = (
               <span className="inline-flex items-center gap-2 rounded-full border border-ink-600 bg-ink-800/40 px-3 py-1 text-sm text-text-primary">
                 <SemanticIcon concept="person" label={t("stats.people")} className="h-3.5 w-3.5 text-brand-cyan" />
@@ -336,20 +359,27 @@ export async function CompanyPlaceHistory({
             );
             return (
               <li key={pp.id}>
-                {/* A linked person opens their own page; an UNLINKED one opens the
-                    company's historical card for that roster row — their history
-                    is already recorded here before any account claim. */}
-                {wid ? (
-                  <Link href={`/dashboard/people/${wid}` as "/dashboard"} data-testid="company-place-person-link">
-                    {chip}
-                  </Link>
-                ) : (
+                {/* A person on THIS organization's roster opens the company's
+                    card for that roster row — the history it recorded, and,
+                    only when the person confirmed the link themselves, the
+                    way on to their own page. The card reads the ACTIVE
+                    organization, so it is offered only when the history shown
+                    is the active one. A person from ANOTHER organization's
+                    roster (a record that organization attributes here), or a
+                    card that would not open, is shown by name: never a link
+                    that cannot open. */}
+                {load.ownPeople[pp.id] && cardsOpen ? (
                   <Link
                     href={`/dashboard/company/people/${pp.id}` as "/dashboard"}
                     data-testid="company-place-person-history-link"
+                    data-linked={load.linkedWorkers[pp.id] ? "confirmed" : "no"}
                   >
                     {chip}
                   </Link>
+                ) : load.ownPeople[pp.id] ? (
+                  <span data-testid="company-place-person-other-workspace">{chip}</span>
+                ) : (
+                  <span data-testid="company-place-person-other-roster">{chip}</span>
                 )}
               </li>
             );
@@ -358,15 +388,15 @@ export async function CompanyPlaceHistory({
       </section>
 
       <section className="flex flex-col gap-4" aria-label={t("timeline")} data-testid="company-place-timeline">
-        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("timeline")}</h2>
+        <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("timeline")}</h3>
         {[...byMonth.entries()].map(([month, recs]) => (
           <div key={month} className="flex flex-col gap-2">
-            <h3 className="font-display text-lg font-semibold text-text-primary">
+            <h4 className="font-display text-lg font-semibold text-text-primary">
               {formatUtcDate(`${month}-01`, locale, { month: "long", year: "numeric" }) ?? month}
               <span className="ml-3 font-mono text-meta font-normal text-text-muted">
                 {nf(recs.filter((r) => !isPeriodRecord(r)).reduce((s, r) => s + (r.hours ?? 0), 0))} h
               </span>
-            </h3>
+            </h4>
             <ul className="flex flex-col gap-2">
               {recs.map((r) => (
                 <li
