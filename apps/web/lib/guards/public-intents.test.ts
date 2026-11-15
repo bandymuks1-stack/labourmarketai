@@ -5,6 +5,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 import {
+  ASSISTANT_GUEST_HREF,
   ASSISTANT_HREF,
   PUBLIC_INTENTS,
   PUBLIC_INTENT_IDS,
@@ -186,10 +187,21 @@ describe("desktop and mobile render ONE list", () => {
   });
 
   it("the assistant entry is the existing conversation home, on both menus", () => {
-    expect(nav).toMatch(/href: ASSISTANT_HREF, label: tIntent\("assistant"\)/);
+    expect(nav).toMatch(/const assistant = \{ href: ASSISTANT_HREF,/);
     expect(ASSISTANT_HREF).toBe(CANONICAL_HOME);
     expect(routeRequirement(ASSISTANT_HREF)).toBeNull();
     expect(nav.match(/assistant=\{assistant\}/g)).toHaveLength(2);
+ 
+  });
+
+  it("a signed-out visitor's desktop assistant entry opens the landing's question box, not sign-in (F8)", () => {
+    expect(nav).toMatch(/href: ASSISTANT_HREF, guestHref: ASSISTANT_GUEST_HREF, label: tIntent\("assistant"\)/);
+    // The box needs no account and is a real anchor on the landing.
+    expect(ASSISTANT_GUEST_HREF).toBe("/#find");
+    expect(read("app/[locale]/focus-landing/focus-landing.tsx")).toMatch(/id="find"[^>]*>\s*(\{[^}]*\}\s*)*<PublicEntry/);
+    // The bar picks the destination from the same signed-in hint as the header's auth slot.
+    expect(mega).toMatch(/useSignedInHint\(\)/);
+    expect(mega).toMatch(/href=\{signedIn \? assistant\.href : assistant\.guestHref\}/);
   });
 
   it("the landing shows the goals once: its bar drops them, inner pages keep them", () => {
