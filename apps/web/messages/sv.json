@@ -5818,7 +5818,8 @@
     ],
     "priceState": {
       "draft_pricing": "Priserna är inte slutgiltiga – inget kan köpas ännu.",
-      "owner_confirmed": "Priserna är bekräftade. Inget debiteras på den här sidan."
+      "owner_confirmed": "Priserna är bekräftade. Inget debiteras på den här sidan.",
+      "owner_confirmed_closed": "Priserna är bekräftade. Onlinebetalning är inte öppen ännu; inget debiteras på den här sidan."
     },
     "individual": {
       "name": "Särskilda krav",
@@ -5830,7 +5831,8 @@
     "priceFree": "€0",
     "pricePerMonth": "€{price}/månad",
     "ctaStartFree": "Kom igång gratis i ditt organisationskonto",
-    "ctaSubscribe": "Aktivera i ditt organisationskonto"
+    "ctaSubscribe": "Aktivera i ditt organisationskonto",
+    "faqBillingClosed": "Onlinebetalning är inte öppen för allmänheten ännu, så inget kan köpas här. Registrering och en aktiv tjänst är gratis. För betalt arbete betjänas de första kunderna direkt och priset bekräftas med dig innan något börjar."
   },
   "privacySelfService": {
     "title": "Integritet och dina uppgifter",

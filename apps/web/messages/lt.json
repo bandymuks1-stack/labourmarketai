@@ -5818,7 +5818,8 @@
     ],
     "priceState": {
       "draft_pricing": "Kainos nėra galutinės — nieko įsigyti dar negalima.",
-      "owner_confirmed": "Kainos patvirtintos. Šiame puslapyje niekas neapmokestinama."
+      "owner_confirmed": "Kainos patvirtintos. Šiame puslapyje niekas neapmokestinama.",
+      "owner_confirmed_closed": "Kainos patvirtintos. Mokėjimas internetu dar neatidarytas; šiame puslapyje niekas neapmokestinama."
     },
     "individual": {
       "name": "Ypatingi poreikiai",
@@ -5830,7 +5831,8 @@
     "priceFree": "0 €",
     "pricePerMonth": "{price} €/mėn.",
     "ctaStartFree": "Pradėti nemokamai organizacijos paskyroje",
-    "ctaSubscribe": "Aktyvuoti organizacijos paskyroje"
+    "ctaSubscribe": "Aktyvuoti organizacijos paskyroje",
+    "faqBillingClosed": "Mokėjimas internetu viešai dar neatidarytas, todėl čia nieko nusipirkti negalima. Registracija ir viena aktyvi pozicija nemokamos. Mokamam darbui pirmieji klientai aptarnaujami tiesiogiai, o kaina su tavimi suderinama prieš pradedant."
   },
   "privacySelfService": {
     "title": "Privatumas ir tavo duomenys",
