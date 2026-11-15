@@ -4,7 +4,7 @@
  * Parses OPTIONAL query parameters into bounded default values for the public
  * company-need form. Only fields the form's server action ALREADY accepts are
  * supported (number_of_workers, country, profession, expected_duration,
- * description) — the adapter adds no new backend capability, it only saves
+ * description, engagement) — the adapter adds no new backend capability, it only saves
  * retyping. Everything is validated and bounded here AND re-validated by the
  * server action on submit; an invalid or out-of-range parameter is silently
  * dropped (never an error page, never a fabricated value).
@@ -23,7 +23,17 @@ export interface CompanyNeedPrefill {
   readonly profession?: string;
   readonly expectedDuration?: string;
   readonly description?: string;
+  /** How the labour is supplied; an intent page (subcontractors, agencies) preselects it. */
+  readonly engagement?: PrefillEngagement;
 }
+
+/**
+ * The form's `engagement_model` values. Kept here, not imported, because
+ * `company-need.ts` pulls server-only modules into this client-safe file; a
+ * test pins the two lists equal (company-need-prefill.test.ts).
+ */
+export const PREFILL_ENGAGEMENTS = ["employment", "subcontracting", "agency_supply"] as const;
+export type PrefillEngagement = (typeof PREFILL_ENGAGEMENTS)[number];
 
 const MAX_WORKERS = 1000; // mirrors the form input's max
 const MAX_DURATION_CHARS = 120; // mirrors the form input's maxLength
@@ -45,6 +55,7 @@ export function parseCompanyNeedPrefill(
     profession?: string;
     expectedDuration?: string;
     description?: string;
+    engagement?: PrefillEngagement;
   } = {};
 
   const workersRaw = params.get("number_of_workers");
@@ -75,6 +86,10 @@ export function parseCompanyNeedPrefill(
 
   const description = text(params.get("description"), MAX_DESCRIPTION_CHARS);
   if (description) out.description = description;
+
+  const engagement = params.get("engagement")?.trim();
+  const known = PREFILL_ENGAGEMENTS.find((e) => e === engagement);
+  if (known) out.engagement = known;
 
   return out;
 }

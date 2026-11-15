@@ -316,13 +316,23 @@ test("L-12. the institution on a phone: its education home, programme and learne
     await expect(page.getByTestId("company-education"), `education home @${vp.width}`).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText(PROGRAM).first()).toBeVisible({ timeout: 30_000 });
     await fitsPhone(page, `/dashboard/company/education @${vp.width}`);
-    for (const id of ["institution-learners-invite", "program-create"]) {
+    // The "add programme" form sits in a disclosure that is open only while
+    // the institution has no programme yet (by design, phone and desktop
+    // alike). This institution already has one, so open it the way a person
+    // does — by its summary — before checking the form fits the phone.
+    const form = page.getByTestId("create-program-form").first();
+    const disclosure = page.locator("details").filter({ has: form }).first();
+    if ((await disclosure.getAttribute("open")) === null) await disclosure.locator("summary").first().click();
+    await expect(form, `add-programme form opens @${vp.width}`).toBeVisible({ timeout: 30_000 });
+    for (const id of ["institution-learners-invite", "program-name", "program-profession", "program-create"]) {
       const el = page.getByTestId(id).first();
       await el.scrollIntoViewIfNeeded();
       await expect(el, `${id} @${vp.width}`).toBeVisible();
       const box = await el.boundingBox();
       expect(box && box.x >= 0 && box.x + box.width <= vp.width, `${id} is inside the phone @${vp.width}`).toBe(true);
     }
+    // With the form open the page is still never wider than the phone.
+    await fitsPhone(page, `/dashboard/company/education, add-programme form open @${vp.width}`);
     await close();
   }
 });

@@ -2,8 +2,10 @@ import { expect as baseExpect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
+import { activeLocales } from "../../lib/i18n/config";
+
 /**
- * LANDING V3 — the approved structure, walked in all six languages
+ * LANDING V3 — the approved structure, walked in every active language
  * (owner-approved 2026-11-13).
  *
  * For every routed locale, at a phone and a desktop width, in both themes:
@@ -16,7 +18,7 @@ import { join } from "node:path";
  */
 const expect = baseExpect.configure({ timeout: 20_000 });
 const SHOTS = join(process.cwd(), "..", "..", "docs", "audits", "evidence", "landing-v3", "final");
-const LOCALES = ["lt", "en", "ru", "pl", "de", "nl"] as const;
+const LOCALES = activeLocales;
 const SIZES = [
   { name: "375", width: 375, height: 740, phone: true },
   { name: "1440", width: 1440, height: 900, phone: false },
