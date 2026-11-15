@@ -15587,6 +15587,10 @@
         "title": "Individual project enquiry",
         "body": "For private and business customers: describe the project or service you need."
       },
+      "partner": {
+        "title": "Partnership enquiry",
+        "body": "Describe the cooperation you propose."
+      },
       "title": "Submit a request",
       "promise": "Tell us what workers, services or project delivery you need. Your enquiry is passed to the LabourMarket.ai team for review.",
       "name": "Name or company name",
@@ -15604,6 +15608,7 @@
       "scope": "Scope",
       "deadline": "Deadlines",
       "need": "Project or service you need",
+      "proposal": "Proposed cooperation",
       "customer": "Customer",
       "customerPrivate": "Private person",
       "customerBusiness": "Business",

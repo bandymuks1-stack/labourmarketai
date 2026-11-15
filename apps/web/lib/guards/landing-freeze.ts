@@ -20,6 +20,13 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * The partner door is a real request form (owner P0 2026-11-15, production
+ * audit F3: "Become a partner" opened /about, which holds no partner form or
+ * contact): `PARTNER_DOOR` and the partners goal open `/#request=partner`, a
+ * fourth request door, and `landing.requestDoors` gains its title, line and one
+ * field label. Moved: public-doors.ts, starting-contexts-band.tsx (its `/about`
+ * cast and comment) and the `lt`, `en`, `ru` landing namespaces.
+ *
  * No internal process notes in the UI (owner order P0 2026-11-15): the
  * "In preparation" roadmap badge `landing.conv.comingLabel` now states the plain
  * user-facing fact ("Not available yet"). Moved: the `lt`, `en`, `ru` landing

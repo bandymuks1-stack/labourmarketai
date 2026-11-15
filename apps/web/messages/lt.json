@@ -15587,6 +15587,10 @@
         "title": "Individualaus projekto užklausa",
         "body": "Privatiems ir verslo užsakovams: aprašykite, kokio projekto ar paslaugos jums reikia."
       },
+      "partner": {
+        "title": "Partnerystės užklausa",
+        "body": "Aprašykite, kokį bendradarbiavimą siūlote."
+      },
       "title": "Pateikti poreikį",
       "promise": "Aprašykite, kokių darbuotojų, paslaugų ar projekto vykdymo jums reikia. Užklausa perduodama LabourMarket.ai komandai peržiūrėti.",
       "name": "Vardas, pavardė arba įmonės pavadinimas",
@@ -15604,6 +15608,7 @@
       "scope": "Apimtis",
       "deadline": "Terminai",
       "need": "Kokio projekto ar paslaugos reikia",
+      "proposal": "Siūlomas bendradarbiavimas",
       "customer": "Užsakovas",
       "customerPrivate": "Privatus asmuo",
       "customerBusiness": "Verslas",

@@ -15587,6 +15587,10 @@
         "title": "Zapytanie o projekt indywidualny",
         "body": "Dla klientów prywatnych i firm: proszę opisać, jakiego projektu lub usługi Państwo potrzebują."
       },
+      "partner": {
+        "title": "Zapytanie o partnerstwo",
+        "body": "Proszę opisać proponowaną współpracę."
+      },
       "title": "Zgłoszenie zapotrzebowania",
       "promise": "Proszę opisać, jakich pracowników, usług lub realizacji projektu Państwo potrzebują. Zapytanie jest przekazywane zespołowi LabourMarket.ai do rozpatrzenia.",
       "name": "Imię i nazwisko lub nazwa firmy",
@@ -15604,6 +15608,7 @@
       "scope": "Zakres",
       "deadline": "Terminy",
       "need": "Jaki projekt lub usługa są potrzebne",
+      "proposal": "Proponowana współpraca",
       "customer": "Klient",
       "customerPrivate": "Osoba prywatna",
       "customerBusiness": "Firma",
