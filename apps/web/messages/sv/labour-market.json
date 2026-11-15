@@ -1,162 +1,195 @@
 {
-  "audienceEyebrow": "For the whole labour market",
+  "audienceEyebrow": "För hela arbetsmarknaden",
   "audienceTitle": "One work profile — whoever you are in the market",
   "audienceSubcopy": "Workers and job seekers, freelancers and the self-employed, students and new entrants, career changers, employers, agencies and project owners. Construction is one of many sectors here — not the limit.",
-  "aWorkers": "Workers",
-  "aJobseekers": "Job seekers",
-  "aFreelancers": "Freelancers & self-employed",
-  "aStudents": "Students & new entrants",
-  "aChangers": "Career changers",
-  "aEmployers": "Employers",
-  "aAgencies": "Agencies & recruiters",
-  "aClients": "Clients & project owners",
-  "pillarsEyebrow": "Why it matters now",
+  "aWorkers": "Arbetstagare",
+  "aJobseekers": "Arbetssökande",
+  "aFreelancers": "Frilansare och egenföretagare",
+  "aStudents": "Studenter och nya på arbetsmarknaden",
+  "aChangers": "Karriärbytare",
+  "aEmployers": "Arbetsgivare",
+  "aAgencies": "Bemanningsföretag och rekryterare",
+  "aClients": "Kunder och projektägare",
+  "pillarsEyebrow": "Varför det spelar roll nu",
   "pillarsTitle": "Your future depends on what the market can actually see",
-  "p1Title": "Don't let your skills stay invisible",
-  "p1Body": "A static CV hides most of what you can do. Build a real, evolving profile from your real daily work instead.",
-  "p2Title": "Evidence, not guesswork",
-  "p2Body": "Show ability across clear levels — self-declared, journal-supported, document-supported, and confirmed — so it reads as proof, not a claim.",
-  "p3Title": "Built for a market that changes fast",
-  "p3Body": "The skills employers need keep shifting. A profile that grows with your work keeps you visible as the market moves.",
-  "p4Title": "Employers shouldn't guess from a weak CV",
-  "p4Body": "Companies and agencies describe a real need and compare people by evidence, availability, language and country — not a one-page guess.",
+  "p1Title": "Låt inte dina färdigheter förbli osynliga",
+  "p1Body": "Ett statiskt CV döljer det mesta av vad du kan. Bygg i stället en verklig profil som utvecklas utifrån ditt verkliga dagliga arbete.",
+  "p2Title": "Belägg, inte gissningar",
+  "p2Body": "Visa förmåga på tydliga nivåer – egen uppgift, stödd av journal, stödd av dokument och bekräftad – så att det läses som bevis, inte som ett påstående.",
+  "p3Title": "Byggt för en marknad som förändras snabbt",
+  "p3Body": "De färdigheter som arbetsgivare behöver förändras hela tiden. En profil som växer med ditt arbete håller dig synlig när marknaden rör sig.",
+  "p4Title": "Arbetsgivare ska inte behöva gissa utifrån ett svagt CV",
+  "p4Body": "Företag och bemanningsföretag beskriver ett verkligt behov och jämför personer utifrån belägg, tillgänglighet, språk och land – inte en gissning på en sida.",
   "workerPathTitle": "Start your work profile",
   "workerPathBody": "Describe your skills, add a Work Journal entry, and see which skills your own words support. Grow it into a CV and professional profile over time.",
   "workerPathCta": "Start your profile",
   "employerPathTitle": "Describe a real need — stop guessing",
   "employerPathBody": "Tell us the work you need done and compare candidates by declared skills, evidence level, availability, language and country before you reach out.",
   "employerPathCta": "For companies & agencies",
-  "evidenceEyebrow": "Grounded in real labour-market evidence",
-  "evidenceTitle": "The market is changing faster than a CV",
-  "evidenceSubcopy": "Public statistics from official EU sources on why visible skills, proof and mobility matter. Every card links to its source with a figure date and region.",
-  "fieldSource": "Source",
-  "fieldFigureDate": "Figure date",
-  "fieldLastChecked": "Last checked",
-  "claimStatistic": "Statistic",
+  "evidenceEyebrow": "Förankrat i verkliga belägg om arbetsmarknaden",
+  "evidenceTitle": "Marknaden förändras snabbare än ett CV",
+  "evidenceSubcopy": "Offentlig statistik från officiella EU-källor om varför synliga färdigheter, bevis och rörlighet spelar roll. Varje kort länkar till sin källa med uppgiftsdatum och region.",
+  "fieldSource": "Källa",
+  "fieldFigureDate": "Uppgiftsdatum",
+  "fieldLastChecked": "Senast kontrollerad",
+  "claimStatistic": "Statistik",
   "claimTrend": "Trend",
-  "claimForecast": "Forecast",
-  "claimShortage": "Shortage signal",
-  "claimSkills": "Skills signal",
+  "claimForecast": "Prognos",
+  "claimShortage": "Bristsignal",
+  "claimSkills": "Kompetenssignal",
   "illustrativeSample": "Illustrative sample — concept data, not live platform figures yet.",
-  "evidenceDisclaimer": "[EN] Each claim links to its official public source with the figure date and region. Figures are transcribed from published reports (last verified on the date shown on each card), not a live data feed — always verify against the linked source for the authoritative, latest number.",
+  "evidenceDisclaimer": "Varje påstående länkar till sin officiella offentliga källa med siffrans datum och region. Siffrorna är överförda från publicerade rapporter (senast kontrollerade det datum som visas på varje kort), inte ett direktflöde av data — kontrollera alltid mot den länkade källan för den auktoritativa, senaste siffran.",
   "sourceLabel": {
-    "eurostat": "[EN] Eurostat source",
-    "eures": "[EN] EURES / European Labour Authority source",
-    "cedefop": "[EN] Cedefop source",
-    "eurofound": "[EN] Eurofound source",
-    "oecd": "[EN] OECD source",
-    "ilo": "[EN] ILO source",
-    "ec": "[EN] European Commission source"
+    "eurostat": "Källa: Eurostat",
+    "eures": "Källa: EURES / Europeiska arbetsmyndigheten",
+    "cedefop": "Källa: Cedefop",
+    "eurofound": "Källa: Eurofound",
+    "oecd": "Källa: OECD",
+    "ilo": "Källa: ILO",
+    "ec": "Källa: Europeiska kommissionen"
   },
   "evidence": {
     "employment-participation": {
-      "title": "[EN] Employment is at a record high — competition for skills is tight",
-      "summary": "[EN] Eurostat reports the EU employment rate for people aged 20–64 reached 75.8% in 2024 — the highest since the series began in 2009 (and rising above 76% in 2025). A tight market makes visible, evidenced skills more valuable, not less.",
-      "figureDate": "[EN] 2024 annual",
-      "region": "[EN] EU",
-      "unit": "[EN] % employed (age 20–64), 2024",
-      "methodNote": "[EN] Eurostat Labour Force Survey, EU employment rate age 20–64, 2024 annual (published Apr 2025); highest since the 2009 series start."
+      "title": "Sysselsättningen är rekordhög — konkurrensen om kompetens är hård",
+      "summary": "Enligt Eurostat nådde EU:s sysselsättningsgrad för personer i åldern 20–64 år 75,8 % under 2024 — den högsta sedan serien började 2009 (och över 76 % under 2025). En stram marknad gör synliga, styrkta färdigheter mer värdefulla, inte mindre.",
+      "figureDate": "Helår 2024",
+      "region": "EU",
+      "unit": "% sysselsatta (20–64 år), 2024",
+      "methodNote": "Eurostats arbetskraftsundersökning, EU:s sysselsättningsgrad 20–64 år, helår 2024 (publicerad apr. 2025); den högsta sedan seriens start 2009."
     },
     "shortage-occupations": {
-      "title": "[EN] Shortages span the whole labour market",
-      "summary": "[EN] The EURES / European Labour Authority report on labour shortages & surpluses lists long-standing shortages in healthcare, construction and hospitality, plus highly-skilled gaps in engineering and IT, and — in the 2024 edition — transport and storage (drivers, mobile-plant operators). The gap is economy-wide, not one sector.",
-      "figureDate": "[EN] 2024 report (published Jun 2025)",
-      "region": "[EN] EU / EEA + Norway, Iceland, Switzerland",
-      "methodNote": "[EN] EURES Report on labour shortages and surpluses 2024; shortage occupations are listed per country at the source."
+      "title": "Bristen omfattar hela arbetsmarknaden",
+      "summary": "Rapporten från EURES / Europeiska arbetsmyndigheten om arbetskraftsbrist och arbetskraftsöverskott anger långvarig brist inom vård, bygg och hotell- och restaurang, samt luckor bland högkvalificerade inom teknik och IT, och — i 2024 års utgåva — transport och lagring (förare, maskinförare). Bristen gäller hela ekonomin, inte en sektor.",
+      "figureDate": "Rapport 2024 (publicerad juni 2025)",
+      "region": "EU / EES + Norge, Island, Schweiz",
+      "methodNote": "EURES rapport om arbetskraftsbrist och arbetskraftsöverskott 2024; bristyrken redovisas per land i källan."
     },
     "skills-mismatch": {
-      "title": "[EN] Almost half of employers can't find the right skills",
-      "summary": "[EN] A European Commission Eurobarometer survey found 46% of EU SMEs found it difficult or very difficult to find staff with the right skills over the past two years — rising to about 70% among SMEs that actually hired. It is a matching problem, not only a supply problem.",
-      "figureDate": "[EN] 2024 Eurobarometer (SME skills)",
-      "region": "[EN] EU",
-      "unit": "[EN] % of SMEs (≈70% of those hiring)",
-      "methodNote": "[EN] European Commission Eurobarometer on SMEs and skill shortages, 2024: 46% of SMEs found it (very) difficult to find rightly-skilled staff in the prior 24 months; ~70% among SMEs that hired."
+      "title": "Nästan hälften av arbetsgivarna hittar inte rätt kompetens",
+      "summary": "En Eurobarometerundersökning från Europeiska kommissionen visade att 46 % av EU:s små och medelstora företag tyckte att det var svårt eller mycket svårt att hitta personal med rätt kompetens under de senaste två åren — omkring 70 % bland de små och medelstora företag som faktiskt anställde. Det är ett matchningsproblem, inte bara ett utbudsproblem.",
+      "figureDate": "Eurobarometer 2024 (kompetens i små och medelstora företag)",
+      "region": "EU",
+      "unit": "% av små och medelstora företag (≈70 % av dem som anställde)",
+      "methodNote": "Europeiska kommissionens Eurobarometer om små och medelstora företag och kompetensbrist, 2024: 46 % av de små och medelstora företagen tyckte att det var (mycket) svårt att hitta personal med rätt kompetens under de föregående 24 månaderna; ~70 % bland dem som anställde."
     },
     "digital-skills-demand": {
-      "title": "[EN] The skills jobs need are shifting to digital",
-      "summary": "[EN] Cedefop's analysis points to nearly 9 in 10 jobs requiring digital skills, while only about 55.6% of EU adults have at least basic digital skills. The skills profile of many jobs is changing faster than a static CV can show.",
-      "figureDate": "[EN] Cedefop Skills Forecast / digital-skills analysis (2024)",
-      "region": "[EN] EU",
-      "unit": "[EN] % of EU adults with basic digital skills",
-      "methodNote": "[EN] Cedefop, 'Digital skills ambitions in action' / Skills Forecast (2024): ~9/10 jobs will require digital skills; ~55.6% of EU adults have at least basic digital skills."
+      "title": "Kompetensen som jobben kräver blir alltmer digital",
+      "summary": "Cedefops analys visar att nästan 9 av 10 jobb kräver digitala färdigheter, medan bara omkring 55,6 % av vuxna i EU har minst grundläggande digitala färdigheter. Kompetensprofilen för många jobb förändras snabbare än ett statiskt CV kan visa.",
+      "figureDate": "Cedefops kompetensprognos / analys av digitala färdigheter (2024)",
+      "region": "EU",
+      "unit": "% av vuxna i EU med grundläggande digitala färdigheter",
+      "methodNote": "Cedefop, 'Digital skills ambitions in action' / Skills Forecast (2024): ~9/10 jobb kommer att kräva digitala färdigheter; ~55,6 % av vuxna i EU har minst grundläggande digitala färdigheter."
     },
     "demographic-pressure": {
-      "title": "[EN] The working-age population is shrinking",
-      "summary": "[EN] Eurostat population projections show 22 of the 27 EU countries are expected to see their working-age (20–64) population decline by 2050, with the old-age dependency ratio rising substantially. Retaining, re-skilling and matching workers to need becomes structurally more important.",
-      "figureDate": "[EN] Eurostat population projections (2024 base)",
-      "region": "[EN] EU",
-      "unit": "[EN] EU countries with working-age decline by 2050",
-      "methodNote": "[EN] Eurostat population projections / 'Old-age dependency growing across EU regions' (Oct 2025): 22 of 27 EU countries projected to see working-age (20–64) population decline by 2050."
+      "title": "Befolkningen i arbetsför ålder krymper",
+      "summary": "Eurostats befolkningsprognoser visar att 22 av EU:s 27 länder väntas få en minskande befolkning i arbetsför ålder (20–64 år) till 2050, samtidigt som försörjningskvoten för äldre ökar avsevärt. Att behålla, omskola och matcha arbetstagare mot behov blir strukturellt viktigare.",
+      "figureDate": "Eurostats befolkningsprognoser (basår 2024)",
+      "region": "EU",
+      "unit": "EU-länder med minskande befolkning i arbetsför ålder till 2050",
+      "methodNote": "Eurostats befolkningsprognoser / 'Old-age dependency growing across EU regions' (okt. 2025): 22 av 27 EU-länder förväntas få en minskande befolkning i arbetsför ålder (20–64 år) till 2050."
     },
     "labour-mobility": {
-      "title": "[EN] Cross-border mobility helps balance shortages",
-      "summary": "[EN] The European Commission's Annual Report on Intra-EU Labour Mobility shows about 10.1 million EU citizens of working age work in another member state and roughly 1.83 million are cross-border workers — and movers' employment rate (78%) exceeds nationals' (76%). Relevant for a Baltic & Northern European market where people work across borders.",
-      "figureDate": "[EN] 2024 edition (published Feb 2025)",
-      "region": "[EN] EU / EEA",
-      "unit": "[EN] cross-border workers (10.1M work abroad)",
-      "methodNote": "[EN] EC Annual Report on Intra-EU Labour Mobility 2024 (data 2022–2023): ~10.1M working-age EU citizens work abroad; ~1.83M cross-border workers; movers' employment rate 78% vs 76% for nationals."
+      "title": "Rörlighet över gränserna hjälper till att jämna ut bristen",
+      "summary": "Europeiska kommissionens årsrapport om arbetskraftens rörlighet inom EU visar att omkring 10,1 miljoner EU-medborgare i arbetsför ålder arbetar i en annan medlemsstat och att ungefär 1,83 miljoner är gränsarbetare — och att sysselsättningsgraden bland de som flyttat (78 %) är högre än bland landets egna medborgare (76 %). Relevant för en baltisk och nordeuropeisk marknad där människor arbetar över gränserna.",
+      "figureDate": "Utgåva 2024 (publicerad feb. 2025)",
+      "region": "EU / EES",
+      "unit": "gränsarbetare (10,1 milj. arbetar utomlands)",
+      "methodNote": "EU-kommissionens årsrapport om arbetskraftens rörlighet inom EU 2024 (data 2022–2023): ~10,1 milj. EU-medborgare i arbetsför ålder arbetar utomlands; ~1,83 milj. gränsarbetare; sysselsättningsgrad bland de som flyttat 78 % mot 76 % för landets egna medborgare."
     }
   },
   "countryNames": {
-    "LT": "Lithuania",
-    "LV": "Latvia",
-    "EE": "Estonia",
-    "PL": "Poland",
-    "DE": "Germany",
-    "NL": "Netherlands",
-    "DK": "Denmark",
-    "NO": "Norway",
-    "SE": "Sweden",
+    "LT": "Litauen",
+    "LV": "Lettland",
+    "EE": "Estland",
+    "PL": "Polen",
+    "DE": "Tyskland",
+    "NL": "Nederländerna",
+    "DK": "Danmark",
+    "NO": "Norge",
+    "SE": "Sverige",
     "FI": "Finland",
-    "GE": "Georgia",
-    "BE": "Belgium",
-    "FR": "France",
-    "ES": "Spain",
-    "AT": "Austria",
-    "CH": "Switzerland",
+    "GE": "Georgien",
+    "BE": "Belgien",
+    "FR": "Frankrike",
+    "ES": "Spanien",
+    "AT": "Österrike",
+    "CH": "Schweiz",
     "US": "USA"
   },
-  "countryIndexEyebrow": "Labour markets by country",
-  "countryIndexTitle": "Source-backed evidence for the markets we serve",
-  "countryIndexSubcopy": "Baltic & Northern European labour markets. Live pages start with the Baltic core; each figure links to its official source. Open markets now also include Georgia, Belgium, France, Spain, Austria and Switzerland. Their market pages are coming soon.",
-  "countryComingSoon": "Coming soon",
-  "countryView": "View",
+  "countryIndexEyebrow": "Arbetsmarknader per land",
+  "countryIndexTitle": "Källbelagda uppgifter om de marknader vi betjänar",
+  "countryIndexSubcopy": "Arbetsmarknader i Baltikum och Nordeuropa. Livesidorna börjar med den baltiska kärnan; varje uppgift länkar till sin officiella källa. Öppna marknader omfattar nu även Georgien, Belgien, Frankrike, Spanien, Österrike och Schweiz. Deras marknadssidor kommer snart.",
+  "countryComingSoon": "Kommer snart",
+  "countryView": "Visa",
   "countryJobAds": "Platsannonser",
-  "countryBackToIndex": "All countries",
-  "countryWorkerFraming": "For workers: visible, evidenced skills and mobility matter more where demand is tight.",
-  "countryEmployerFraming": "For employers: describe the real need and compare people by evidence — not a weak CV.",
+  "countryBackToIndex": "Alla länder",
+  "countryWorkerFraming": "För arbetstagare: synliga, belagda färdigheter och rörlighet spelar större roll där efterfrågan är hög.",
+  "countryEmployerFraming": "För arbetsgivare: beskriv det verkliga behovet och jämför personer utifrån belägg – inte ett svagt CV.",
   "countryEvidence": {
     "LT": {
-      "intro": "Lithuania — the home market. Source-backed signals for workers and employers.",
+      "intro": "Litauen – hemmamarknaden. Källbelagda signaler för arbetstagare och arbetsgivare.",
       "shortages": {
-        "title": "Shortages concentrated in trades and operators",
-        "summary": "EURES reporting places Lithuania's shortage occupations in stationary plant & machine operators, building and related trades, and food-processing, woodworking and craft trades — alongside the EU-wide gaps in healthcare, IT and transport."
+        "title": "Bristen är koncentrerad till hantverksyrken och operatörer",
+        "summary": "Enligt EURES-rapporteringen finns Litauens bristyrken bland operatörer av stationära anläggningar och maskiner, byggnads- och närliggande hantverksyrken samt livsmedels-, trä- och hantverksyrken – vid sidan av de EU-gemensamma luckorna inom vård, IT och transport."
       },
       "digital-skills": {
-        "title": "Digital skills demand is rising",
-        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Lithuania."
+        "title": "Efterfrågan på digitala färdigheter ökar",
+        "summary": "Cedefops Skills Forecast pekar på ökande efterfrågan på digitala och mer avancerade färdigheter inom olika yrken, även i Litauen."
       }
     },
     "LV": {
-      "intro": "Latvia — source-backed signals for workers and employers.",
+      "intro": "Lettland – källbelagda signaler för arbetstagare och arbetsgivare.",
       "surplus": {
-        "title": "A more surplus-leaning market",
-        "summary": "In the EURES 2024 reporting Latvia stands out among the Baltics with notable worker surpluses in several occupations — a different dynamic from Lithuania and Estonia."
+        "title": "En marknad med större överskott",
+        "summary": "I EURES-rapporteringen för 2024 sticker Lettland ut bland de baltiska länderna med märkbara överskott av arbetstagare inom flera yrken – en annan dynamik än i Litauen och Estland."
       },
       "digital-skills": {
-        "title": "Digital skills demand is rising",
-        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Latvia."
+        "title": "Efterfrågan på digitala färdigheter ökar",
+        "summary": "Cedefops Skills Forecast pekar på ökande efterfrågan på digitala och mer avancerade färdigheter inom olika yrken, även i Lettland."
       }
     },
     "EE": {
-      "intro": "Estonia — source-backed signals for workers and employers.",
+      "intro": "Estland – källbelagda signaler för arbetstagare och arbetsgivare.",
       "balanced": {
-        "title": "A relatively balanced market",
-        "summary": "EURES 2024 reporting describes Estonia's labour market as relatively more balanced than many EURES countries, with the EU-wide pressures in healthcare, IT and transport still present."
+        "title": "En relativt balanserad marknad",
+        "summary": "EURES-rapporteringen för 2024 beskriver Estlands arbetsmarknad som mer balanserad än i många EURES-länder, även om de EU-gemensamma trycken inom vård, IT och transport fortfarande finns."
       },
       "digital-skills": {
-        "title": "Digital skills demand is rising",
-        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Estonia."
+        "title": "Efterfrågan på digitala färdigheter ökar",
+        "summary": "Cedefops Skills Forecast pekar på ökande efterfrågan på digitala och mer avancerade färdigheter inom olika yrken, även i Estland."
+      }
+    },
+    "PL": {
+      "intro": "Polen — en prioriterad marknad. Källbelagda signaler för arbetstagare och arbetsgivare.",
+      "shortages": {
+        "title": "Brist inom byggyrken, förare och kvalificerad tillverkning",
+        "summary": "Enligt EURES rapportering finns Polens bristyrken inom bygg och närliggande yrken, tunga fordon och transport samt kvalificerad tillverkning och svetsning — utöver de EU-gemensamma luckorna inom vård och IT."
+      },
+      "digital-skills": {
+        "title": "Efterfrågan på digitala färdigheter ökar",
+        "summary": "Cedefops Skills Forecast pekar på en växande efterfrågan på digitala och mer avancerade färdigheter inom alla yrken, även i Polen."
+      }
+    },
+    "DE": {
+      "intro": "Tyskland — en prioriterad marknad. Källbelagda signaler för arbetstagare och arbetsgivare.",
+      "shortages": {
+        "title": "Bred brist inom vård och omsorg, hantverksyrken, IT och teknik",
+        "summary": "Enligt EURES rapportering har Tyskland en av EU:s bredaste bristprofiler — vård- och omsorgsyrken, kvalificerat byggarbete, el- och mekatronikyrken, IT och teknik."
+      },
+      "digital-skills": {
+        "title": "Efterfrågan på digitala färdigheter ökar",
+        "summary": "Cedefops Skills Forecast pekar på en växande efterfrågan på digitala och mer avancerade färdigheter inom alla yrken, även i Tyskland."
+      }
+    },
+    "NL": {
+      "intro": "Nederländerna — en prioriterad marknad. Källbelagda signaler för arbetstagare och arbetsgivare.",
+      "shortages": {
+        "title": "En stram marknad med brist inom teknik, vård och IT",
+        "summary": "Enligt EURES rapportering har Nederländerna en av EU:s stramaste arbetsmarknader, med brist inom tekniska yrken och ingenjörsyrken, vård och omsorg, utbildning och IT."
+      },
+      "digital-skills": {
+        "title": "Efterfrågan på digitala färdigheter ökar",
+        "summary": "Cedefops Skills Forecast pekar på en växande efterfrågan på digitala och mer avancerade färdigheter inom alla yrken, även i Nederländerna."
       }
     }
   }
