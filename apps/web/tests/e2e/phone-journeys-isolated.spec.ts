@@ -11,6 +11,7 @@ import {
   signIn,
   signUp,
   sql,
+  sqlExec,
   userId,
   verifyCompanyAsLocalAdmin,
 } from "./isolated-web-a-helpers";
@@ -40,7 +41,7 @@ import {
  *   E EMPLOYER     the area sheet to needs; the need form sent on the phone; candidate search for it;
  *                  the people page and a join-by-link invitation; messages.
  *   A AGENCY       the area sheet to clients; the roster invite on the people page; a need posted on
- *                  the phone; messages.
+ *                  the phone; messages; the Lithuanian clients page with a connected client.
  *   S STUDENT      signs up ON THE PHONE (study fields), the learning compass, the internship board,
  *                  applies to an open need, the study on the Living CV; messages.
  *   T INSTITUTION  signs up ON THE PHONE through its door and sets up its organisation; the education
@@ -513,6 +514,31 @@ for (const phone of PHONES) {
       await expect
         .poll(() => facts()?.via_legacy ?? null, { message: `an agency, not a hiring company; rows: ${JSON.stringify(facts())}`, timeout: 15_000 })
         .toBe("staffing_agency");
+    });
+    test(`A-7 (${phone.name}). with a connected client, the Lithuanian clients page still fits the phone`, async ({ browser }) => {
+      // Production ux-metrics walk (run 43691077388, build b5795ab7): /lt partners as an agency
+      // ran 25 px past a 390 px screen. The draft-a-need form only renders for an ACTIVE client
+      // connection, and its country <select> was as wide as its longest Lithuanian option
+      // ("Ypatingasis Administracinis Kinijos Regionas Honkongas"). A-2 has no client, so it
+      // never drew that form. Setup (not the walk): a client company at a desktop, and the
+      // connection recorded active on the local database.
+      const client = email(`agencyclient${phone.name}`);
+      const c = await newOrganisation(browser, client, "hire", `Synthetic Client Owner ${phone.name} ${RUN}`, `Synthetic Client Co ${phone.name} ${RUN}`);
+      sqlExec(
+        `insert into public.agency_client_connections (agency_company_id, client_company_id, invited_email, status, invited_by, accepted_by, accepted_at)
+         select ag.legacy_company_id, cl.legacy_company_id, ${lit(client)}, 'active', ${lit(a.profileId)}, ${lit(c.profileId)}, now()
+           from public.organizations ag, public.organizations cl
+          where ag.id = ${lit(a.orgId)} and cl.id = ${lit(c.orgId)}`,
+      );
+      expect(
+        sql<{ id: string }>(`select x.id from public.agency_client_connections x join public.organizations o on o.legacy_company_id = x.agency_company_id where o.id = ${lit(a.orgId)} and x.status = 'active'`),
+        "one active client connection is stored",
+      ).toHaveLength(1);
+      const { page, done } = await signedInOnPhone(browser, phone, AGENCY);
+      await page.goto(`${BASE}/lt/dashboard/company/partners`);
+      await expect(page.getByRole("main").getByTestId("agency-draft-need-form"), "the draft-a-need form is drawn for the client").toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the agency's clients in Lithuanian, with a client");
+      await done();
     });
   });
 
