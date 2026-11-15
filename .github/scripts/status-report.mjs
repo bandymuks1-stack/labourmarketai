@@ -18,7 +18,7 @@
  * is LIVE_VERIFIED; existing code or a green CI is never counted as working.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -319,10 +319,20 @@ if (privacy.length) {
 }
 
 // ---------------------------------------------------------------- never overwrite a newer report
+/** Read a file, or null when it does not exist (one call: no check-then-read race). */
+function readIfPresent(path) {
+  try {
+    return readFileSync(path, "utf8");
+  } catch (e) {
+    if (e?.code === "ENOENT") return null;
+    throw e;
+  }
+}
 const GENERATED_RE = /^<!-- generated-at: (\S+) -->$/m;
 const generatedAtOf = (txt) => (txt.match(GENERATED_RE) ?? [])[1] ?? null;
-if (existsSync(OUT)) {
-  const reason = staleOverwriteReason(generatedAtOf(readFileSync(OUT, "utf8")), data.fetchedAt);
+const reportOnFile = readIfPresent(OUT);
+if (reportOnFile !== null) {
+  const reason = staleOverwriteReason(generatedAtOf(reportOnFile), data.fetchedAt);
   if (reason) {
     console.error(`REFUSED: ${reason}. Fetch fresh data and generate again.`);
     process.exit(4);
@@ -352,8 +362,9 @@ const asRuns = (l) =>
     at: e.at,
   }));
 let ledgerIn = { schema: 1, walks: {} };
-if (existsSync(LEDGER)) ledgerIn = JSON.parse(readFileSync(LEDGER, "utf8"));
-for (const src of [existsSync(OUT) ? readFileSync(OUT, "utf8") : null, previousReportTextSafe()]) {
+const ledgerOnFile = readIfPresent(LEDGER);
+if (ledgerOnFile !== null) ledgerIn = JSON.parse(ledgerOnFile);
+for (const src of [reportOnFile, previousReportTextSafe()]) {
   const l = embeddedLedger(src);
   if (l) ledgerIn = mergeWalkLedger(ledgerIn, asRuns(l)).ledger;
 }
