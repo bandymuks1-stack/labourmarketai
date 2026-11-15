@@ -320,7 +320,8 @@ describe("§19 the visitor reaches a way to start without a long scroll", () => 
     expect(i("PublicEntry")).toBeLessThan(i("LandingMarketFacts"));
     expect(i("LandingMarketFacts")).toBeLessThan(i("LandingHow"));
     // The sentence box no longer prints the counts a second time.
-    expect(focus).toMatch(/<PublicEntry examples="none" supply=\{null\} \/>/);
+    // (It also receives the request block's title, employer path P0 2026-11-15.)
+    expect(focus).toMatch(/<PublicEntry examples="none" supply=\{null\}( requestLabel=\{tDoors\("title"\)\})? \/>/);
     // And the withdrawn band must not quietly return without a decision.
     expect(i("PublicMarketMapBand")).toBe(-1);
   });
