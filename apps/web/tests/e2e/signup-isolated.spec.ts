@@ -780,8 +780,8 @@ const EDU = {
 };
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
-/** A REST read AS a signed-in person (their own JWT, their own RLS). E-4 reads with it, in the access fix. */
-async function asPerson<T>(address: string, path: string): Promise<T> {
+/** The synthetic person's own access token (password sign-in on the local stack). */
+async function personToken(address: string): Promise<string> {
   const tok = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
     method: "POST",
     headers: { apikey: ANON, "Content-Type": "application/json" },
@@ -789,10 +789,30 @@ async function asPerson<T>(address: string, path: string): Promise<T> {
   });
   const { access_token } = (await tok.json()) as { access_token?: string };
   if (!access_token) throw new Error(`no session for the synthetic person (${tok.status})`);
+  return access_token;
+}
+
+/** A REST read AS a signed-in person (their own JWT, their own RLS). */
+async function asPerson<T>(address: string, path: string): Promise<T> {
   const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
-    headers: { apikey: ANON, Authorization: `Bearer ${access_token}` },
+    headers: { apikey: ANON, Authorization: `Bearer ${await personToken(address)}` },
   });
   if (!r.ok) throw new Error(`person read ${path.split("?")[0]} → ${r.status}`);
+  return (await r.json()) as T;
+}
+
+/** A database function called AS a signed-in person: the same door the app calls. */
+async function rpcAsPerson<T>(address: string, fn: string, args: Record<string, unknown>): Promise<T> {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: {
+      apikey: ANON,
+      Authorization: `Bearer ${await personToken(address)}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(args),
+  });
+  if (!r.ok) throw new Error(`person call ${fn} → ${r.status} ${await r.text()}`);
   return (await r.json()) as T;
 }
 
@@ -942,4 +962,109 @@ test("E-3. the student becomes a worker: studies end, work is recorded, and noth
     .locator('[data-testid="cv-practice-history"], [data-testid="cv-organizations-roles"], [data-testid="cv-work-history"]')
     .filter({ hasText: EDU.orgName });
   await expect(periods.first(), "the student period at the institution stays in the one history").toBeVisible({ timeout: 30_000 });
+});
+
+// E-4 travels with its access fix (owner decision 2026-11-15,
+// 20261115120000_journal_learning_access_follows_link_v1): an organization
+// reads a learner's journal entry only while the learning link is active and
+// review is on for it. Every read below runs under the person's OWN RLS.
+test("E-4. the institution ends the student link: it loses access, the learner keeps their history", async ({ browser }) => {
+  const sid = await userId(EDU.student);
+  const [ctx] = await db<Array<{ id: string }>>(
+    `engagement_contexts?profile_id=eq.${sid}&relationship_slug=eq.student&status=eq.active&select=id`,
+  );
+  expect(ctx?.id, "the learner has one active student link").toBeTruthy();
+
+  // The learner records a practice day IN that learning relationship, through the app's own write.
+  const practiceId = await rpcAsPerson<string>(EDU.student, "create_journal_entry_full", {
+    p_worker_id: eduStudentWorkerId,
+    p_engagement_context_id: ctx!.id,
+    p_entry_type_slug: "freeform",
+    p_profession_id: null,
+    p_original_text: `Practice day at the training centre, 4 hours (edu ${RUN})`,
+    p_original_language: "en",
+    p_hash_prev: null,
+    p_hash_self: "set-by-the-database",
+    p_visibility_scope: "closed",
+    p_metrics: [],
+    p_project_id: null,
+    p_project_explicit: false,
+  });
+  expect(practiceId, "the practice day is stored").toBeTruthy();
+  const practice = `journal_entries?id=eq.${practiceId}&select=id`;
+
+  // While review is off the institution sees participation, not the journal.
+  expect(await asPerson<Array<{ id: string }>>(EDU.institution, practice), "review off: no journal read").toEqual([]);
+  // The audited review door opens it while the link is active.
+  expect(
+    await rpcAsPerson<string>(EDU.institution, "set_engagement_journal_review", { p_engagement_id: ctx!.id, p_enabled: true }),
+  ).toBe("enabled");
+  expect(
+    (await asPerson<Array<{ id: string }>>(EDU.institution, practice)).length,
+    "control: active link + review on, the institution reads the practice day",
+  ).toBe(1);
+
+  const a = await browser.newContext();
+  const inst = await a.newPage();
+  await signIn(inst, EDU.institution, PASSWORD);
+  await inst.goto(`${BASE}/en/dashboard/company/people`);
+  await inst.waitForLoadState("networkidle").catch(() => undefined);
+  const member = inst.getByRole("main").getByTestId("lifecycle-member").filter({ hasText: "Student" });
+  await expect(member, "the institution's learner is in its people lifecycle").toHaveCount(1, { timeout: 30_000 });
+  // Each member's controls sit in that member's own fold, and the list itself
+  // may sit in folded sections. Open exactly the folds that hold this learner's
+  // controls (its ancestors and its own), by setting `open`: a click on a
+  // summary toggles, so it can close a fold the page has already opened.
+  await member.evaluate((li) => {
+    for (let el: Element | null = li; el; el = el.parentElement) {
+      if (el instanceof HTMLDetailsElement) el.open = true;
+    }
+    li.querySelectorAll("details").forEach((d) => {
+      (d as HTMLDetailsElement).open = true;
+    });
+  });
+  const end = member.getByRole("button", { name: "End employment" });
+  await expect(end, "the institution is offered an end control for its learner").toBeVisible({ timeout: 30_000 });
+  await end.click();
+
+  // Ending runs as a server action on this same page (no navigation to wait
+  // for): read its outcome back with a fresh load until it shows.
+  await expect
+    .poll(
+      async () => {
+        await inst.goto(`${BASE}/en/dashboard/company/education`);
+        return (await inst.getByTestId("institution-learners-counts").innerText().catch(() => "")).trim();
+      },
+      { message: "no connected learner remains", timeout: 60_000, intervals: [1_000, 2_000, 5_000] },
+    )
+    .toContain("0 connected");
+
+  const links = await dbOrNull<Array<{ relationship_slug: string; status: string }>>(
+    `engagement_contexts?profile_id=eq.${sid}&relationship_slug=eq.student&select=relationship_slug,status`,
+  );
+  if (links) expect(links, "the link is ended, not deleted").toEqual([{ relationship_slug: "student", status: "ended" }]);
+  await a.close();
+
+  // Access, read under the institution's own RLS: no active link, none of the learner's journal.
+  const activeLinks = await asPerson<Array<{ id: string }>>(
+    EDU.institution,
+    `engagement_contexts?profile_id=eq.${sid}&status=eq.active&select=id`,
+  );
+  expect(activeLinks, "the institution sees no active link to the learner").toEqual([]);
+  const journal = await asPerson<Array<{ id: string }>>(
+    EDU.institution,
+    `journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`,
+  );
+  expect(journal, "the institution reads none of the learner's journal").toEqual([]);
+  expect(await asPerson<Array<{ id: string }>>(EDU.institution, practice), "not even the reviewed practice day").toEqual([]);
+
+  // The learner keeps their own history.
+  const own = await asPerson<Array<{ id: string }>>(EDU.student, `journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`);
+  expect(own.map((e) => e.id), "the learner still reads their own work").toContain(practiceId);
+  const b = await browser.newContext();
+  const stu = await b.newPage();
+  await signIn(stu, EDU.student, PASSWORD);
+  await stu.goto(`${BASE}/en/cv`);
+  await expect(stu.getByTestId("cv-education-row").filter({ hasText: EDU.studiesAt })).toHaveCount(1, { timeout: 30_000 });
+  await b.close();
 });

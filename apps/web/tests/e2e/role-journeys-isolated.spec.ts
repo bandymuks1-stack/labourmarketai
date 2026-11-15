@@ -735,6 +735,17 @@ test("J-WRK. the placed worker records work on the company's project; the compan
     `journal_entry_confirmations?entry_id=eq.${s.entryId}&select=confirmer_id`,
   );
   expect(confirmations.map((c) => c.confirmer_id), "confirmed once, by the company owner").toEqual([s.coId]);
+  // Under the company's OWN row-level security, while the relationship is
+  // active: the employer still reads the entry it confirmed and its
+  // confirmation (20261115120000 narrows only learning relationships).
+  expect(
+    (await readAs(CO, `journal_entries?id=eq.${s.entryId}&select=id`)).length,
+    "the employer still reads the entry it confirmed",
+  ).toBe(1);
+  expect(
+    (await readAs(CO, `journal_entry_confirmations?entry_id=eq.${s.entryId}&select=id`)).length,
+    "and its confirmation",
+  ).toBe(1);
 
   // The worker sees it confirmed; the Living CV door counts confirmed work.
   await pw.goto(`${BASE}/en/dashboard/journal`);

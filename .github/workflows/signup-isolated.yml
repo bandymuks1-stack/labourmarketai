@@ -30,6 +30,7 @@ on:
       - "apps/web/tests/e2e/sv-journey-isolated.spec.ts"
       - "supabase/tests/20261114100000_booking_refuses_closed_need_*"
       - "supabase/migrations/20261114100000_booking_refuses_closed_need_v1.sql"
+      - "supabase/migrations/20261115120000_journal_learning_access_follows_link_v1.sql"
       - "apps/web/lib/booking/**"
       - "apps/web/lib/onboarding/**"
       - "apps/web/components/app/onboarding-wizard.tsx"
