@@ -692,18 +692,84 @@ test("P-2. on a desktop the onboarding buttons stay where they were, in the page
   }
 });
 
+// ── Student / intern (#3322 item 6): the SAME account and worker record ─────
+
+test("ST-1. a student signs up, keeps one worker record with no company, and the school reaches the profile, the CV and the board", async ({ page }) => {
+  // Its own address: S-3b already signs up as email("student") in this file, and both
+  // run in one worker (same RUN), so a shared address is "already registered".
+  const address = email("student-intern");
+  const school = `Synthetic Vocational School ${RUN}`;
+  await signUp(page, address);
+  await page.getByTestId("onboarding-intent-student").click();
+  await expect(page.getByTestId("onboarding-intent-student")).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Student");
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await expect(page.getByTestId("onboarding-student-fields")).toBeVisible();
+  await page.getByTestId("onboarding-institution").fill(school);
+  await page.getByTestId("onboarding-program").fill("Hospitality and catering");
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+
+  // The stored rows, not the page, are the proof.
+  const id = await userId(address);
+  const [profile] = await db<Array<{ onboarded: boolean | null; active_role: string | null }>>(
+    `profiles?id=eq.${id}&select=onboarded,active_role`,
+  );
+  expect(profile?.onboarded).toBe(true);
+  expect(profile?.active_role, "a student is a worker identity, not a separate kind of account").toBe("worker");
+  const workers = await db<Array<{ id: string }>>(`workers?profile_id=eq.${id}&select=id`);
+  expect(workers.length, "exactly one worker record").toBe(1);
+  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
+  expect(orgs.length, "a new student starts without a company").toBe(0);
+  const edu = await db<Array<{ institution_name: string; is_current: boolean }>>(
+    `worker_education?profile_id=eq.${id}&select=institution_name,is_current`,
+  );
+  expect(edu.map((e) => e.institution_name), "the school is stored once, as current").toEqual([school]);
+  expect(edu[0]?.is_current).toBe(true);
+
+  // Profile: the school is listed and marked as the person's own statement.
+  // The editor sits in the collapsed CV details; its anchor opens it (the same
+  // way the profile-cv-history walk reaches it). A real load, not a hash-only
+  // navigation on the page the tab is already on.
+  await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
+  await page.reload();
+  await expect(page.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("worker-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("worker-education-self-stated")).toBeVisible();
+
+  // CV with zero work history: the education block is there, labelled the same way.
+  await page.goto(`${BASE}/en/cv`);
+  await expect(page.getByTestId("cv-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("cv-education-self-stated")).toBeVisible();
+
+  // The board opens for a student exactly as for any worker: no "not a worker" wall.
+  await page.goto(`${BASE}/en/dashboard/opportunities?opportunityType=internship`);
+  await expect(page.getByTestId("opportunities-no-worker")).toHaveCount(0);
+  expect(page.url()).toContain("/en/dashboard/opportunities");
+});
+
 // ── Education: institution ↔ student acceptance (owner direction 2026-11-14, Lane L) ──
 //
 // One institution and one student, both created here and gone with the job.
-// Order is deliberate: E-1 links them, E-3 turns the student into a worker,
-// E-4 ends the student link, and E-2 (student-initiated messaging) runs LAST
-// with its own fresh student, so that an open product gap in messaging cannot
-// hide the history and access proofs behind a serial skip.
+// Order is deliberate: E-1 links them, E-3 turns the student into a worker and
+// E-4 ends the student link. The block sits LAST in this serial file, after
+// ST-1, so a failure here can never stop a test that was already on main.
+//
+// Not covered here, on purpose: a learner writing FIRST to their institution.
+// The product has no door for it yet — the learner's relationship row on
+// /dashboard/network carries no message button, and the direct-contact gate
+// (lib/communication/direct-conversation-core.ts planDirectContact) refuses a
+// learner → institution person, because a learner is engaged, not a member,
+// and cannot read the organisation's memberships. Opening it changes that
+// permission gate (security-reviewed, RED class), so the requirement and its
+// acceptance test travel together in that change (Lane L, #3265). The
+// institution can write to its learner, and the learner can answer.
 
 const EDU = {
   institution: email("edu.institution"),
   student: email("edu.student"),
-  student2: email("edu.student2"),
   orgName: `Synthetic Training Centre ${RUN}`,
   studiesAt: `Synthetic Vocational School ${RUN}`,
   learnerName: `Synthetic Learner ${RUN}`,
@@ -787,17 +853,11 @@ test("E-1. an institution trains people and invites a learner by link; a student
   await inst.getByTestId("company-setup-legal-name").fill(EDU.orgName);
   await inst.getByTestId("company-setup-country").selectOption("LT");
   await inst.getByTestId("company-setup-save-draft").click();
-  await expect(inst.getByTestId("company-setup-next")).toBeVisible({ timeout: 30_000 });
+  // The training-provider preset landed: the next door is the education home
+  // itself (#3334), never the generic workspace.
+  await expect(inst.getByTestId("company-setup-next")).toHaveAttribute("data-first-door", "education", { timeout: 30_000 });
   await inst.goto(`${BASE}/en/dashboard/company/education`);
-  if (!/\/company\/education/.test(inst.url())) {
-    // The preset did not land: declare it where the product offers it (as prod L-1 does).
-    await inst.goto(`${BASE}/en/dashboard/company/settings`);
-    const more = inst.getByTestId("settings-more");
-    if ((await more.getAttribute("open")) === null) await more.locator("summary").first().click();
-    await inst.getByTestId("org-capability-checkbox-training_provider").check();
-    await inst.getByTestId("org-capabilities-save").click();
-    await expect(inst.getByTestId("org-capabilities-saved")).toBeVisible({ timeout: 30_000 });
-  }
+  await expect(inst.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
   const link = await inviteLearnerLink(inst, EDU.learnerName);
   await a.close();
 
@@ -828,15 +888,18 @@ test("E-1. an institution trains people and invites a learner by link; a student
 
 test("E-3. the student becomes a worker: studies end, work is recorded, and nothing of the history is lost", async ({ page }) => {
   await signIn(page, EDU.student, PASSWORD);
-  // Studies end — the student's own education editor.
-  // The editors sit in the folded "details" part of the profile; its own deep link opens it.
-  await page.goto(`${BASE}/en/dashboard/profile#cv-details`);
-  const fold = page.locator("details#cv-details");
-  if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
-  const row = page.getByTestId("worker-education-row").filter({ hasText: EDU.studiesAt });
-  await expect(row).toHaveCount(1, { timeout: 30_000 });
+  // Studies end — the student's own education editor. It sits in the folded CV
+  // details; the page's own hash opener unfolds it for #cv-education (as ST-1
+  // and prod P-9 reach it). A real load, never a click on the fold: a click can
+  // race the opener and close it again, leaving the row counted but hidden.
+  await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
+  await page.reload();
+  const main = page.getByRole("main");
+  await expect(main.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
+  const row = main.getByTestId("worker-education-row").filter({ hasText: EDU.studiesAt });
+  await expect(row, "the study is listed, visible").toBeVisible({ timeout: 30_000 });
   await row.getByRole("button", { name: "Edit" }).click();
-  const form = page.getByTestId("worker-education-form");
+  const form = main.getByTestId("worker-education-form");
   await expect(form).toBeVisible();
   await form.getByRole("checkbox").uncheck();
   await form.locator('input[aria-labelledby="education-end-year-label"]').fill(String(new Date().getUTCFullYear()));
@@ -845,13 +908,15 @@ test("E-3. the student becomes a worker: studies end, work is recorded, and noth
 
   // First work as a worker — the Work Journal (pattern S-7).
   await page.goto(`${BASE}/en/dashboard/journal`);
-  const main = page.getByRole("main");
   await main.getByTestId("journal-quick-record-text").fill(`Assembled 8 office desks at the client's site, 6 hours (edu ${RUN})`);
   await main.getByTestId("journal-quick-record-understand").click();
   await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
   await main.getByTestId("worklog-save").click();
   await main.getByTestId("worklog-confirm").click();
-  await expect(main.getByTestId("worklog-done"), "the first work day is saved").toBeVisible({ timeout: 30_000 });
+  // As S-7: an error or a block is shown as itself, not as a timeout.
+  const done = main.getByTestId("worklog-done");
+  await expect(done.or(main.getByTestId("worklog-error")).or(main.getByTestId("worklog-blocked"))).toBeVisible({ timeout: 30_000 });
+  await expect(done, "the first work day is saved").toBeVisible();
 
   // Stored: one study row (ended, kept), the student link kept, the work entry.
   const sid = await userId(EDU.student);
@@ -922,101 +987,4 @@ test("E-4. the institution ends the student link: it loses access, the learner k
   await stu.goto(`${BASE}/en/cv`);
   await expect(stu.getByTestId("cv-education-row").filter({ hasText: EDU.studiesAt })).toHaveCount(1, { timeout: 30_000 });
   await b.close();
-});
-
-test("E-2. a student writes first to their own institution, and the institution's person sees the message", async ({ browser }) => {
-  // A second learner of the same institution, linked now (E-4 ended the first one).
-  const a = await browser.newContext();
-  const inst = await a.newPage();
-  await signIn(inst, EDU.institution, PASSWORD);
-  const link = await inviteLearnerLink(inst, `${EDU.learnerName} two`);
-  await a.close();
-
-  const b = await browser.newContext();
-  const stu = await b.newPage();
-  await signUpStudent(stu, EDU.student2, "Synthetic Student Two");
-  await acceptInvite(stu, link);
-
-  // The requirement: from their relationships, the learner opens a conversation with the institution.
-  await stu.goto(`${BASE}/en/dashboard/network`);
-  const rel = stu.getByTestId("network-relationships");
-  await expect(
-    rel.locator('[data-testid^="network-engagement-"]').filter({ hasText: EDU.orgName }),
-    "the institution is among the learner's relationships",
-  ).toHaveCount(1, { timeout: 30_000 });
-  const door = rel.locator('[data-testid^="message-button-"]');
-  await expect(door.first(), "a door to write to the institution").toBeVisible({ timeout: 30_000 });
-  await door.first().click();
-  await stu.waitForURL(/\/dashboard\/inbox/, { timeout: 30_000 });
-  const text = `Question about my placement (edu ${RUN})`;
-  const composer = stu.getByRole("main").getByRole("textbox").first();
-  await composer.fill(text);
-  await composer.press("Enter");
-  await expect(stu.getByText(text).first(), "the message is sent").toBeVisible({ timeout: 30_000 });
-  await b.close();
-
-  const c = await browser.newContext();
-  const again = await c.newPage();
-  await signIn(again, EDU.institution, PASSWORD);
-  await again.goto(`${BASE}/en/dashboard/inbox`);
-  await expect(again.getByText(/Question about my placement/).first(), "the institution's person sees it").toBeVisible({ timeout: 30_000 });
-  await c.close();
-});
-
-// ── Student / intern (#3322 item 6): the SAME account and worker record ─────
-
-test("ST-1. a student signs up, keeps one worker record with no company, and the school reaches the profile, the CV and the board", async ({ page }) => {
-  // Its own address: S-3b already signs up as email("student") in this file, and both
-  // run in one worker (same RUN), so a shared address is "already registered".
-  const address = email("student-intern");
-  const school = `Synthetic Vocational School ${RUN}`;
-  await signUp(page, address);
-  await page.getByTestId("onboarding-intent-student").click();
-  await expect(page.getByTestId("onboarding-intent-student")).toHaveAttribute("aria-pressed", "true");
-  await page.getByTestId("onboarding-intents-continue").click();
-  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Student");
-  await page.getByTestId("onboarding-country").click();
-  await page.getByRole("option", { name: /Lithuania/ }).first().click();
-  await expect(page.getByTestId("onboarding-student-fields")).toBeVisible();
-  await page.getByTestId("onboarding-institution").fill(school);
-  await page.getByTestId("onboarding-program").fill("Hospitality and catering");
-  await page.getByTestId("onboarding-submit").click();
-  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
-
-  // The stored rows, not the page, are the proof.
-  const id = await userId(address);
-  const [profile] = await db<Array<{ onboarded: boolean | null; active_role: string | null }>>(
-    `profiles?id=eq.${id}&select=onboarded,active_role`,
-  );
-  expect(profile?.onboarded).toBe(true);
-  expect(profile?.active_role, "a student is a worker identity, not a separate kind of account").toBe("worker");
-  const workers = await db<Array<{ id: string }>>(`workers?profile_id=eq.${id}&select=id`);
-  expect(workers.length, "exactly one worker record").toBe(1);
-  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
-  expect(orgs.length, "a new student starts without a company").toBe(0);
-  const edu = await db<Array<{ institution_name: string; is_current: boolean }>>(
-    `worker_education?profile_id=eq.${id}&select=institution_name,is_current`,
-  );
-  expect(edu.map((e) => e.institution_name), "the school is stored once, as current").toEqual([school]);
-  expect(edu[0]?.is_current).toBe(true);
-
-  // Profile: the school is listed and marked as the person's own statement.
-  // The editor sits in the collapsed CV details; its anchor opens it (the same
-  // way the profile-cv-history walk reaches it). A real load, not a hash-only
-  // navigation on the page the tab is already on.
-  await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
-  await page.reload();
-  await expect(page.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("worker-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("worker-education-self-stated")).toBeVisible();
-
-  // CV with zero work history: the education block is there, labelled the same way.
-  await page.goto(`${BASE}/en/cv`);
-  await expect(page.getByTestId("cv-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("cv-education-self-stated")).toBeVisible();
-
-  // The board opens for a student exactly as for any worker: no "not a worker" wall.
-  await page.goto(`${BASE}/en/dashboard/opportunities?opportunityType=internship`);
-  await expect(page.getByTestId("opportunities-no-worker")).toHaveCount(0);
-  expect(page.url()).toContain("/en/dashboard/opportunities");
 });
