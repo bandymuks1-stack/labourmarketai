@@ -66,17 +66,36 @@ let requestId = "";
 /** Booking proposals this run's accept created (A-6), withdrawn in afterAll. */
 const createdProposals: string[] = [];
 
+/** The bookings page as the client reads it now: readable, or not (a load
+ *  that did not finish, or its own read-failed state). Retried, never guessed. */
+async function bookingsReadable(page: Page): Promise<boolean> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.goto("/lt/dashboard/bookings");
+    const shown = await page.getByTestId("bookings-page").waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
+    if (shown && !(await page.getByTestId("bookings-read-failed").isVisible().catch(() => false))) return true;
+  }
+  return false;
+}
+
 /** The client's open outgoing proposals by booking id: the bookings page
  *  lists every one, newest first. Null when the page could not be read; the
  *  teardown then withdraws nothing rather than guess which one is this run's. */
 async function openOutgoingProposalIds(page: Page): Promise<Set<string> | null> {
-  await page.goto("/lt/dashboard/bookings");
-  const ready = await page.getByTestId("bookings-page").waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
-  if (!ready || (await page.getByTestId("bookings-read-failed").isVisible().catch(() => false))) return null;
+  if (!(await bookingsReadable(page))) return null;
   const ids = await page
     .locator('[data-direction="outgoing"][data-status="proposed"]')
     .evaluateAll((els) => els.map((el) => (el.getAttribute("data-testid") ?? "").replace(/^booking-/, "")).filter(Boolean));
   return new Set(ids);
+}
+
+/** One proposal's stored status as the page shows it. "unreadable" and
+ *  "absent" (a readable page that does not list it) are told apart from every
+ *  real status, so an unread row is never taken for a closed one. */
+async function proposalStatus(page: Page, id: string): Promise<string> {
+  if (!(await bookingsReadable(page))) return "unreadable";
+  const row = page.getByTestId(`booking-${id}`);
+  if ((await row.count()) === 0) return "absent";
+  return (await row.getAttribute("data-status")) ?? "unreadable";
 }
 
 test("A-1. the agency has its own organization (set up once, through the product)", async ({ browser }) => {
@@ -376,27 +395,33 @@ test("A-7. the agency sees the decision and talks to the client in one thread", 
 });
 
 test.afterAll(async ({ browser }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   if (!ENABLED || createdProposals.length === 0) return;
   const { page, close } = await as(browser, "owner");
   try {
     await page.goto("/lt/dashboard");
     await workspace(page, ALFA);
     for (const id of createdProposals) {
-      await page.goto("/lt/dashboard/bookings");
+      const short = id.slice(0, 8);
+      const status = await proposalStatus(page, id);
+      if (status === "unreadable") {
+        console.info(`[cleanup] bookings could not be read: this run's proposal ${short} may still be open`);
+        continue;
+      }
+      if (status !== "proposed") {
+        // Answered or not listed since: nothing of this run's is left open.
+        console.info(`[cleanup] this run's proposal ${short} is ${status}: nothing to withdraw`);
+        continue;
+      }
       const row = page.getByTestId(`booking-${id}`);
-      // Answered or gone since: nothing of this run's left open.
-      if ((await row.getAttribute("data-status", { timeout: 30_000 }).catch(() => null)) !== "proposed") continue;
       await row.getByTestId("booking-withdraw").click();
       await row.getByTestId("booking-withdraw-confirm").click();
-      // The stored status is the proof: the page re-renders after the action.
+      // Proof is the stored status, read back explicitly: an unreadable page
+      // or a missing row never counts as withdrawn.
       await expect
-        .poll(async () => {
-          await page.reload();
-          return page.getByTestId(`booking-${id}`).getAttribute("data-status", { timeout: 30_000 }).catch(() => null);
-        }, { timeout: 60_000 })
-        .not.toBe("proposed");
-      console.info(`[cleanup] withdrew this run's booking proposal ${id.slice(0, 8)}`);
+        .poll(() => proposalStatus(page, id), { timeout: 120_000, intervals: [2_000, 5_000, 10_000] })
+        .toBe("withdrawn");
+      console.info(`[cleanup] withdrew this run's booking proposal ${short}`);
     }
   } catch (e) {
     console.info(`[cleanup] proposal withdraw did not complete: ${String((e as Error)?.message ?? e).split("\n")[0]}`);
