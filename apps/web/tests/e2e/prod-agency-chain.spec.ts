@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import { contextPanel } from "./prod-context-panel";
 import { test, expect, type Browser, type Page } from "./prod-walk";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * PRODUCTION AGENCY CHAIN — owner programme 2026-10-12 §3B: an agency sets up
@@ -121,6 +122,7 @@ test("A-1b. the agency saves an offer and finds it on its home, one click from t
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
   await expect(page.getByTestId("demand-done")).toBeVisible({ timeout: 30_000 });
@@ -250,6 +252,7 @@ test("A-4. the client posts a need and shares it with the agency", async ({ brow
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
   const done = page.getByTestId("demand-done");

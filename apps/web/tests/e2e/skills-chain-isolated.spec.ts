@@ -1,6 +1,7 @@
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 
 import { verifyCompanyAsLocalAdmin } from "./isolated-web-a-helpers";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * WORK JOURNAL → SKILLS → LIVING CV → TWO-WAY MATCHING → DISPUTE, end to end,
@@ -284,6 +285,7 @@ async function postNeed(page: Page, role: string, description: string): Promise<
   await main.getByTestId("demand-next").click();
   const size = main.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done")).toBeVisible({ timeout: 30_000 });
