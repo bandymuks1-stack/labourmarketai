@@ -1,3 +1,5 @@
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
+
 /**
  * THE INSTITUTION'S QUESTIONS ABOUT ITS STUDENTS (window 6, lane C) — PURE.
  *
@@ -48,14 +50,48 @@ const OUTCOMES = /(rezultat|outcome|result|ergebnis|resultat|uitkomst|резул
 const PRACTICE = /(praktik|stažuot|stazuot|internship|apprentice|trainee|praktikum|\bstage\b|stagiair|стажир|практик)/;
 const SKILLS = /(įgūd|igud|gebėjim|gebejim|skill|kompeten|fähigkeit|faehigkeit|vaardighe|навык|умени|trūksta|truksta|missing|lack|fehl|ontbre|не\s*хват)/;
 const FIT = /(tinka|tinkam|suit|fit|match|passen|passt|geschikt|подход|darbdav|employer|arbeitgeber|werkgever|работодат)/;
+// sv — read in a Swedish sentence only (`looksSwedish`): `elev…` opens the
+// English "eleven" and sits inside the Dutch "geleverd" (review finding 11).
+const SV_STUDENTS = /((?<![\p{L}])elev(er|en|erna)?(?![\p{L}])|studerande|deltagare|lärling)/u;
+const SV_SKILLS = /(färdighet|fardighet|saknar|saknas)/;
+const SV_FIT = /(passar|lämplig|lamplig|arbetsgivar)/;
+const SV_ASSIGN = /tilldela/;
+const SV_CREATES = /skapa|registrera|l[äa]gg\s+(upp|till)|(?:^|[^\p{L}])ny(?:tt|a)?(?![\p{L}])/u;
+
+/**
+ * Which of the institution's commands a "programmes" sentence asks for —
+ * create / cohort / assign, else a plain list. Lived inside the chat component
+ * (untestable there) with five locales; sv joined 2026-11-12, when "Skapa ett
+ * utbildningsprogram" routed to `programmes` and then only LISTED them.
+ */
+export function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" | EducationQuestionKind {
+  const q = (text ?? "").toLowerCase();
+  // Window 6 (lane C): a lecturer's QUESTION about students (outcomes, who
+  // fits, what skills are missing, where to do practice) is answered from the
+  // institution's real reads — never routed to the owner's own worker answer.
+  // Read from the sentence AS TYPED: a capital keeps "NY" a place, not "new".
+  const swedish = looksSwedish(text);
+  const question = questionKind(q, swedish);
+  if (question) return question;
+  if (/priskir|assign|zuweis|toewijz|назнач|zapisz/.test(q) || (swedish && SV_ASSIGN.test(q))) return "assign";
+  const creates =
+    /sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов/.test(q) ||
+    (swedish && SV_CREATES.test(q));
+  if (creates && /grup|kohort|cohort|groep|gruppe|групп|поток|когорт/.test(q)) return "cohort";
+  if (creates) return "create";
+  return "list";
+}
 
 /** Which question about students the sentence asks, else `null`. */
 export function educationQuestionKind(text: string): EducationQuestionKind | null {
-  const q = (text ?? "").toLowerCase();
+  return questionKind((text ?? "").toLowerCase(), looksSwedish(text));
+}
+
+function questionKind(q: string, swedish: boolean): EducationQuestionKind | null {
   if (OUTCOMES.test(q)) return "outcomes";
-  if (!STUDENTS.test(q)) return null;
+  if (!STUDENTS.test(q) && !(swedish && SV_STUDENTS.test(q))) return null;
   if (PRACTICE.test(q)) return "students-practice";
-  if (SKILLS.test(q)) return "students-skills";
-  if (FIT.test(q)) return "students-fit";
+  if (SKILLS.test(q) || (swedish && SV_SKILLS.test(q))) return "students-skills";
+  if (FIT.test(q) || (swedish && SV_FIT.test(q))) return "students-fit";
   return null;
 }

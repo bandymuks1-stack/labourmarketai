@@ -121,7 +121,7 @@ describe("5. the new domains are in the normal discovery UI", () => {
 });
 
 describe("6. i18n: every locale that carries the namespace has the keys", () => {
-  const LOCALES = ["de", "en", "lt", "nl", "pl", "ru"] as const;
+  const LOCALES = ["de", "en", "lt", "nl", "pl", "ru", "sv"] as const;
   const FLAT = ["federationPartial", "allJobsLink", "titleNotStated", "openInSource"] as const;
   const VIS = ["public", "signed_in", "organizations", "workers", "own"] as const;
   const PROV = ["platform", "external_vacancy"] as const;
@@ -147,7 +147,7 @@ describe("6. i18n: every locale that carries the namespace has the keys", () => 
 
 describe("7. banned product words", () => {
   it("new strings avoid demo / player / game", () => {
-    for (const loc of ["de", "en", "lt", "nl", "pl", "ru"]) {
+    for (const loc of ["de", "en", "lt", "nl", "pl", "ru", "sv"]) {
       const m = JSON.parse(read(join(WEB, "messages", `${loc}.json`))).marketplaceListings;
       const blob = JSON.stringify([m.visibility, m.provenance, m.federationPartial, m.allJobsLink, m.domains]);
       expect(blob).not.toMatch(/\b(demo|player|game)\b/i);

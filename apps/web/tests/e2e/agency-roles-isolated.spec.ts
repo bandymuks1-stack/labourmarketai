@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * AGENCY ROLES AND PERMISSIONS, end to end, on a THROWAWAY LOCAL Supabase
@@ -424,6 +425,7 @@ test("A-4. another organization sees none of the agency's people or needs", asyn
   await main.getByTestId("demand-next").click();
   const size = main.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("3");
+  await chooseDemandCountryIfEmpty(owner.page);
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done")).toBeVisible({ timeout: 30_000 });

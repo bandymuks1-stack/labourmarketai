@@ -171,7 +171,7 @@ describe("one source of commitments", () => {
 });
 
 describe("i18n — every active locale carries the same keys, in the product's own words", () => {
-  const locales = ["en", "lt", "de", "nl", "pl", "ru"];
+  const locales = ["en", "lt", "de", "nl", "pl", "ru", "sv"];
   const paths = (o: Record<string, unknown>, p = ""): string[] =>
     Object.entries(o).flatMap(([k, v]) =>
       v && typeof v === "object" ? paths(v as Record<string, unknown>, `${p}${k}.`) : [`${p}${k}`],

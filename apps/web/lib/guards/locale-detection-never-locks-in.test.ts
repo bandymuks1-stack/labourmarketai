@@ -54,15 +54,15 @@ describe("the router negotiates over EVERY active locale, and detection can be o
 describe("a manual choice is never overridden by detection", () => {
   for (const chosen of activeLocales) {
     it(`cookie ${chosen} wins over any browser language`, () => {
-      for (const browser of ["sv-SE", "fi", "uk", "ka", ...activeLocales]) {
+      for (const browser of ["da-DK", "fi", "uk", "ka", ...activeLocales]) {
         expect(entryLocaleForUnmatchedLanguage(browser, chosen)).toBeNull();
       }
     });
   }
 
   it("an unrouted browser lands on English and is NOT redirected again once a choice exists", () => {
-    expect(entryLocaleForUnmatchedLanguage("sv-SE,sv;q=0.9,fi;q=0.8", null)).toBe("en");
-    expect(entryLocaleForUnmatchedLanguage("sv-SE,sv;q=0.9", "nl")).toBeNull();
+    expect(entryLocaleForUnmatchedLanguage("da-DK,da;q=0.9,fi;q=0.8", null)).toBe("en");
+    expect(entryLocaleForUnmatchedLanguage("da-DK,da;q=0.9", "nl")).toBeNull();
   });
 
   it("the account preference never overrides a device choice, for every active locale", () => {
