@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { TwoSidesLifecycle } from "./two-sides-lifecycle";
+import { TwoSidesLifecycle } from "./lazy-motion";
 
 /** Server wrapper: resolves the `twoSides` copy (no named persona). */
 export async function TwoSidesSection() {

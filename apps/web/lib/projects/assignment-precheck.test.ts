@@ -176,7 +176,7 @@ describe("pre-check wiring (structural pins)", () => {
   });
 
   it("the new strings exist in all six locale files", () => {
-    for (const loc of ["en", "lt", "de", "nl", "pl", "ru"]) {
+    for (const loc of ["en", "lt", "de", "nl", "pl", "ru", "sv"]) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       for (const k of ["precheckChecking", "precheckCollidesTitle", "precheckChoose", "precheckAssignAnyway", "precheckAdvisory"]) {
         const v = m.projects.assign.reservation[k];

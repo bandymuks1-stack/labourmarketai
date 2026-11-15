@@ -3,6 +3,7 @@ import { PageTitle } from "@/components/app/premium/page-title";
 import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
 import { Lock } from "lucide-react";
@@ -14,6 +15,7 @@ import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerTexts } from "@/lib/communication/translation-read";
+import { initialWriteLanguage } from "@/lib/communication/initial-write-language";
 import type { ViewerText } from "@/lib/communication/translation";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
@@ -71,7 +73,20 @@ export default async function ConversationDetailPage({
     .select("id, subject, kind, created_by, updated_at")
     .eq("id", conversationId)
     .maybeSingle();
-  if (!convRes.data) notFound();
+  if (!convRes.data) {
+    // A person REMOVED from the thread (revoked_at set) still sees their own
+    // participant row. Tell them honestly that it is no longer available and
+    // send them to the inbox — no thread shell, subject or participants.
+    // Anyone else gets the plain 404, as before.
+    const { data: ownRow } = await asAny(supabase)
+      .from("conversation_participants")
+      .select("revoked_at")
+      .eq("conversation_id", conversationId)
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    if (ownRow?.revoked_at) redirect(`/${locale}/dashboard/communication?notice=unavailable`);
+    notFound();
+  }
   const conversation = convRes.data;
 
   // Same honest context model as the list — so the thread header tells the
@@ -189,6 +204,17 @@ export default async function ConversationDetailPage({
     .eq("profile_id", user.id)
     .maybeSingle();
   const viewerIsParticipant = !!viewerParticipantRow;
+
+  // The language the composer starts in: what this person wrote last here,
+  // else their browser's language, else the page's (chat audit defect 2).
+  const ownLast = [...messages].reverse().find((m) => m.author_id === user.id);
+  const defaultWriteLanguage = initialWriteLanguage({
+    ownLastLanguage: ownLast
+      ? ((ownLast as unknown as { original_language?: string | null }).original_language ?? null)
+      : null,
+    acceptLanguage: (await headers()).get("accept-language"),
+    uiLocale: locale,
+  });
 
   return (
     <div className="flex flex-col gap-5">
@@ -429,6 +455,7 @@ export default async function ConversationDetailPage({
       <CommunicationComposer
         conversationId={conversationId}
         locale={locale}
+        defaultWriteLanguage={defaultWriteLanguage}
         teamOfferId={offerContext ? (offerParam ?? null) : null}
       />
     </div>

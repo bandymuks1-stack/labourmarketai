@@ -139,7 +139,11 @@ describe("the company-need form still posts without JavaScript", () => {
     expect(src).toMatch(/action=\{formAction\}/);
   });
 
-  it("carries the fill time in a hidden field written after hydration", () => {
-    expect(src).toMatch(/<input type="hidden" name="started" ref=\{stampRef\} defaultValue="" \/>/);
+  it("carries the fill time in a hidden field React never writes, filled again at submit", () => {
+    // signup-isolated 42632210972: with defaultValue="" React re-applied it on a
+    // re-render and blanked the hidden value, so a JS send arrived as no-JS.
+    expect(src).toMatch(/<input type="hidden" name="started" ref=\{stampRef\} \/>/);
+    expect(src).not.toMatch(/name="started"[^>]*(defaultValue|value=)/);
+    expect(src).toMatch(/onSubmitCapture=\{stampOnSubmit\}/);
   });
 });

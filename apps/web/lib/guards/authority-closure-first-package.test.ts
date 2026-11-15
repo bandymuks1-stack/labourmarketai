@@ -206,9 +206,26 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261103171100_",
       "20261103171300_",
       "20261104160000_",
+      "20261105100000_",
+      "20261105100100_",
       "20261104160100_",
       // 2026-11-09 holder-cancelled account deletion (holder cancels own account-deletion request + 30-day grace + row lock; RED draft #3172, needs-human-gate, NOT applied).
       "20261109120000_",
+      // 2026-11-10 company-need intake keeps the visitor's locale (one-line RPC re-create; RED draft #3195, needs-human-gate, NOT applied).
+      "20261110140000_",
+      // 2026-11-10 partner registration Slice 1: company takeover invitation, two-operator decision, link (RED draft #3211, needs-human-gate, NOT applied).
+      "20261110190000_",
+      // 2026-11-13 owner P0 invitation delivery reliability: codes-only send diagnostics, retry /
+      // dead-letter / bounce fields (RED draft #3318, needs-human-gate, NOT applied).
+      "20261113190000_",
+      // 2026-11-14 a closed need refuses a new proposal or a first accept (DB trigger; RED draft, needs-human-gate, NOT applied).
+      "20261114100000_",
+      // 2026-11-14 owner decision: NEW/ACTIVE counts for five platform groups, aggregate only
+      // (SECURITY DEFINER + GRANT; RED draft, needs-human-gate, NOT applied).
+      "20261114120000_",
+      // 2026-11-14 owner decision (invitation 862a91f4 NO RESEND): one service_role-only aggregate count of
+      // owner-registered historical unknown outcomes (SECURITY DEFINER + GRANT; RED draft, needs-human-gate, NOT applied).
+      "20261114150000_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
       "20261104060000_",
       // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.

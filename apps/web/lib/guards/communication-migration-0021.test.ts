@@ -172,8 +172,12 @@ describe("communication v1 — no service_role, no file upload, no fake indicato
     expect(all).not.toMatch(/\btyping\.\.\./i);
   });
 
-  it("composer surfaces the precise server-side error message (no generic blob)", () => {
-    expect(composer).toMatch(/setError\(result\.message\)/);
+  it("composer surfaces the precise error for the failure (no generic blob)", () => {
+    // Precise per failure CODE, in the reader's language (chat audit
+    // 2026-11-11, defect 6) — the server's message text is Lithuanian-only
+    // and must never reach a reader as-is.
+    expect(composer).toMatch(/setError\(t\(`composer\.errors\.\$\{composerErrorKey\(result\.code\)\}`\)\)/);
+    expect(composer).not.toMatch(/setError\(result\.message\)/);
   });
 });
 

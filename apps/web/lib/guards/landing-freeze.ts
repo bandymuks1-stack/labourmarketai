@@ -20,6 +20,36 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * No internal process notes in the UI (owner order P0 2026-11-15): the
+ * "In preparation" roadmap badge `landing.conv.comingLabel` now states the plain
+ * user-facing fact ("Not available yet"). Moved: the `lt`, `en`, `ru` landing
+ * namespace hashes. No source file.
+ *
+ * The first screen is the choice (owner instruction 2026-11-12: "Sumažink pagrindinio
+ * puslapio sudėtingumą. Pašalink nereikalingus tekstus, abstrakčius šūkius ir
+ * pasikartojančius blokus. Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori
+ * atlikti."): the goal navigator is first and carries the page's h1 (the question);
+ * the owner's headline is the one supporting line under it; the brand eyebrow, the
+ * second paragraph, the hero's "Start now" pair, the link down to the request doors
+ * and the three abstract cards left the first screen. EXACTLY ONE hash moved:
+ * focus-landing.tsx. No copy changed and no namespace moved (the labels are `siteNav`).
+ *
+ * No reply-time promise (owner decision 2026-11-10): the request doors no longer
+ * promise contact "within 24 hours" — the request is received and the team gets
+ * in touch after reviewing it. `requestDoors.promise` and `receivedBody` only.
+ * Moved: the `lt`, `en`, `ru` landing namespaces. No source file.
+ *
+ * Hero layout repair (owner order 2026-11-10, design completion): with the story
+ * column withdrawn the desktop first screen was half empty and the `order-1`
+ * wrapper put the entry above the h1 on phones. Source order is now promise →
+ * entry → doors, the entry beside the promise from `xl`. EXACTLY ONE hash moved:
+ * focus-landing.tsx. No copy, no namespace.
+ *
+ * No fictional people (owner order 2026-11-09): the living worker hero — sample
+ * personas with names, professions and careers under a "Sample" label — is
+ * withdrawn from the landing; the entry hero is the first screen. EXACTLY ONE
+ * hash moved: focus-landing.tsx. No namespace, no other frozen file.
+ *
  * Request door wording (owner order 2026-11-07): the promise and the B2B door's title
  * only. Moved: the `lt`, `en`, `ru` landing namespaces.
  *

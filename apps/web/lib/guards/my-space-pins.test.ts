@@ -61,7 +61,7 @@ describe("the pinned row is a reference row over the ONE chip handler", () => {
     );
     // The first pin gets no "move first" chip; every other pin does.
     expect(CHAT).toContain("...(i > 0 ? [{ id: `pin-first:${p.ref}`");
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       expect((JSON.parse(read(`messages/${locale}.json`)).conversation.chat as Record<string, string>).reorderDone).toContain("{label}");
     }
   });

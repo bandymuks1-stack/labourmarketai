@@ -162,6 +162,14 @@ describe("work-abroad journey describes the live interest loop", () => {
   });
 });
 
+describe("the public plan boundary lists only plans a visitor can choose", () => {
+  it("the internal administrator plan is filtered out before rendering", () => {
+    const src = read("components/marketing/pre-payment-plan-boundary.tsx");
+    expect(src).toMatch(/PRE_PAYMENT_PLANS\.filter\(\(plan\) => plan\.audience !== "admin"\)\.map\(/);
+    expect(src).not.toMatch(/\{PRE_PAYMENT_PLANS\.map\(/);
+  });
+});
+
 describe("plan boundary carries no dead pseudo-buttons", () => {
   it("the component renders no interactive elements for plan CTAs", () => {
     const src = read("components/marketing/pre-payment-plan-boundary.tsx");

@@ -3,6 +3,9 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { proposalLimitOf, type ProposalLimit } from "@/lib/booking/proposal-limit";
+import { resolveCountryCode } from "@/lib/location/country-model";
+import { notifyBooking } from "@/lib/booking/booking-notify";
 import {
   isBridgeUuid,
   isMissingRpcCode,
@@ -88,6 +91,10 @@ export type BridgeActionState =
   | { status: "invalid" }
   | { status: "forbidden" }
   | { status: "not-found" }
+  /** Accepting proposes a booking, and the database caps an owner's proposals
+   *  (10 waiting for an answer, 30 per 24 h). Which cap it was, so the
+   *  employer is told the way out instead of a generic failure. */
+  | { status: "proposal-limit"; limit: ProposalLimit }
   | { status: "error"; reason?: string };
 
 function mapErr(code: string | undefined, message: string | undefined): BridgeActionState {
@@ -325,7 +332,7 @@ export async function respondCandidateOfferAction(
   if (!isBridgeUuid(offerId)) return { status: "invalid" };
   if (decision !== "accepted" && decision !== "declined") return { status: "invalid" };
   const supabase = await createClient();
-  const { error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v1", {
+  const { data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v1", {
     p_offer_id: offerId,
     p_decision: decision,
     p_note: note,
@@ -333,7 +340,20 @@ export async function respondCandidateOfferAction(
   if (error) {
     const m = (error.message ?? "").toLowerCase();
     if (m.includes("offer_not_open") || m.includes("offer_not_found")) return { status: "not-found" };
+    const limit = proposalLimitOf(error.code, error.message);
+    if (limit) return { status: "proposal-limit", limit };
     return mapErr(error.code, error.message);
+  }
+  // ACCEPT proposes dates to the worker (the function calls the canonical
+  // booking proposal and returns the new booking's id). The direct proposal
+  // path tells the worker; this one told them nothing, so a worker offered
+  // through an agency learned of it only by opening their bookings. Same
+  // bell, same facts read under the caller's own session (the caller owns
+  // the booking). The function answers the OFFER's id when it proposed
+  // nothing, so that id is never treated as a booking. Never throws: the
+  // decision is already recorded.
+  if (decision === "accepted" && typeof decided === "string" && isBridgeUuid(decided) && decided !== offerId) {
+    await notifyBooking(supabase, decided, "booking_proposed");
   }
   emitFirstRealAction("company", "offer_" + decision, "agency_candidate_offer");
   revalidatePath("/[locale]/dashboard/company/scouting", "page");
@@ -370,7 +390,11 @@ export async function draftClientNeedAction(
   await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const connectionId = String(formData.get("connectionId") ?? "");
   const title = String(formData.get("title") ?? "").trim();
-  if (!isBridgeUuid(connectionId) || title.length === 0 || title.length > 200) {
+  // The client's need is found by country, so it must carry one: an ISO code
+  // (or a name resolved to one). The free two-letter field stored "se" or
+  // nothing (Swedish employer audit CL-4).
+  const country = resolveCountryCode(String(formData.get("country") ?? ""));
+  if (!isBridgeUuid(connectionId) || title.length === 0 || title.length > 200 || !country) {
     return { status: "invalid" };
   }
   const size = Number.parseInt(String(formData.get("teamSize") ?? ""), 10);
@@ -379,7 +403,7 @@ export async function draftClientNeedAction(
     p_connection_id: connectionId,
     p_title: title,
     p_role: String(formData.get("role") ?? "").trim() || null,
-    p_country: String(formData.get("country") ?? "").trim() || null,
+    p_country: country,
     p_location: String(formData.get("location") ?? "").trim() || null,
     p_summary: String(formData.get("summary") ?? "").trim() || null,
     p_team_size: Number.isFinite(size) && size > 0 ? size : null,

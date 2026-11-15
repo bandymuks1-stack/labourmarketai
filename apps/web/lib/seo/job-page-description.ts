@@ -25,15 +25,17 @@ const PUBLISHED: L = {
   nl: "Gepubliceerd",
   de: "Veröffentlicht",
   pl: "Opublikowano",
+  sv: "Publicerad",
 };
 
 const TAIL: L = {
   en: "Sign in to see the employer, place and how to apply.",
-  lt: "Prisijunk ir matysi darbdavį, vietą ir kaip kandidatuoti.",
+  lt: "Prisijunkite ir matysite darbdavį, vietą ir kaip kandidatuoti.",
   ru: "Войдите, чтобы увидеть работодателя, место и как откликнуться.",
   nl: "Log in voor werkgever, locatie en hoe te solliciteren.",
   de: "Anmelden für Arbeitgeber, Ort und Bewerbungsweg.",
   pl: "Zaloguj się, by zobaczyć pracodawcę, miejsce i jak aplikować.",
+  sv: "Logga in för att se arbetsgivaren, platsen och hur du söker.",
 };
 
 export function jobPageDescription(input: {

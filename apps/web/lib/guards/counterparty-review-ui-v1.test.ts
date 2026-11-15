@@ -161,7 +161,7 @@ describe("the second migration", () => {
 });
 
 describe("i18n: every active locale carries the same counterparty tree", () => {
-  const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+  const LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
   const flat = (o: unknown, p = ""): string[] =>
     o && typeof o === "object"
       ? Object.entries(o as Record<string, unknown>).flatMap(([k, v]) => flat(v, p ? `${p}.${k}` : k))

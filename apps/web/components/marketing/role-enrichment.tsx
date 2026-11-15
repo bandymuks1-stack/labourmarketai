@@ -1,9 +1,11 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ConstellationBg } from "@/components/decor/constellation-bg";
 import { BenefitCards } from "@/components/marketing/benefit-cards";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { FAQAccordion } from "@/components/app/faq-accordion";
 import { JourneyTimeline } from "@/components/app/journey-timeline";
+import { faqPageJsonLd } from "@/lib/seo/faq-json-ld";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -53,6 +55,8 @@ export async function RoleEnrichment({
     desc: string;
   }[];
   const faq = t.raw("faq.items") as { q: string; a: string }[];
+  // The same items the accordion below renders (AEO, decision 0009).
+  const faqLd = faqPageJsonLd(faq, await getLocale());
 
   return (
     <div className="relative overflow-hidden">
@@ -110,6 +114,7 @@ export async function RoleEnrichment({
         </h2>
         <div className="mt-8">
           <BenefitCards
+            nested
             items={features.map((f) => ({ title: f.title, body: f.desc }))}
           />
         </div>
@@ -124,6 +129,9 @@ export async function RoleEnrichment({
         <div className="mt-8">
           <FAQAccordion items={faq} expandAria={sh("faq.expand_aria")} />
         </div>
+        {faqLd ? (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(faqLd) }} />
+        ) : null}
       </section>
 
       {/* (e) strong CTA */}

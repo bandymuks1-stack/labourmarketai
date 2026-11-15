@@ -115,12 +115,14 @@ describe("the recompute pass", () => {
     expect(await runRecomputePass(broken.store, { nowIso: NOW })).toMatchObject({ computed: 0, failed: 1 });
   });
 
-  it("the DEFAULT clock really advances: a 1 ms budget stops a pass whose reads take 20 ms", async () => {
+  // Two candidates whose fact read takes `readMs` — on the wall clock, or on an
+  // injected one that `advance` moves.
+  function slowStore(read: () => Promise<void>) {
     const records: ForecastRecord[] = [];
-    const slow: ForecastStore = {
+    const store: ForecastStore = {
       dueCandidates: async () => [candidate({ projectId: "a" }), candidate({ projectId: "b" })],
       factRows: async () => {
-        await new Promise((r) => setTimeout(r, 20));
+        await read();
         return ROWS;
       },
       record: async (r) => {
@@ -128,9 +130,30 @@ describe("the recompute pass", () => {
         return 1;
       },
     };
-    const r = await runRecomputePass(slow, { nowIso: NOW, timeBudgetMs: 1 });
+    return { store, records };
+  }
+
+  it("the DEFAULT clock really advances: a 1 ms budget stops a pass whose reads take 20 ms", async () => {
+    const { store, records } = slowStore(() => new Promise((r) => setTimeout(r, 20)));
+    const r = await runRecomputePass(store, { nowIso: NOW, timeBudgetMs: 1 });
+    // A frozen clock would never stop the pass: both projects would be recorded.
     expect(r?.stoppedEarly).toBe(true);
-    expect(records).toHaveLength(1);
+    // The wall clock decides WHERE it stops: normally after the first project,
+    // but a loaded machine can spend the 1 ms before the first one starts. The
+    // second is never reached either way — its predecessor's read alone is 20 ms.
+    // The exact count is pinned below, on an injected clock.
+    expect(records.length).toBeLessThanOrEqual(1);
+    expect(records.map((x) => x.projectId)).not.toContain("b");
+  });
+
+  it("the same pass on an injected clock: exactly the first project is recorded, then the budget stops it", async () => {
+    let t = 0;
+    const { store, records } = slowStore(async () => {
+      t += 20;
+    });
+    const r = await runRecomputePass(store, { nowIso: NOW, timeBudgetMs: 1, clockMs: () => t });
+    expect(r).toMatchObject({ candidates: 2, computed: 1, stoppedEarly: true });
+    expect(records.map((x) => x.projectId)).toEqual(["a"]);
   });
 
   it("a project completed since its last forecast gets one final run that keeps the actual", async () => {

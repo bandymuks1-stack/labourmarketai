@@ -5,7 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { ANSWER_CATEGORY_KEYS, type AnswerCategoryKey } from "@/lib/answer-engine/contract";
-import { publishedInCategory, publishedCategories } from "@/lib/answer-engine/publishing";
+import { localesPublishingCategory, publishedInCategory, publishedCategories } from "@/lib/answer-engine/publishing";
 import { buildStaticQuestionsMetadata, breadcrumbJsonLd } from "@/lib/answer-engine/answer-seo";
 import { CHROME, CATEGORY_LABELS, pickL } from "@/lib/answer-engine/chrome";
 import { activeLocales } from "@/lib/i18n/config";
@@ -34,6 +34,7 @@ export async function generateMetadata({
     `/questions/category/${category}`,
     label,
     `${label} — ${pickL(CHROME.hubIntro, l)}`,
+    localesPublishingCategory(category),
   );
 }
 

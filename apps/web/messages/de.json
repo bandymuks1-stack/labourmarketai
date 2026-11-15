@@ -12,8 +12,8 @@
       "unclear": "Stunden unklar: {n}",
       "noHours": "Ohne Stunden: {n}",
       "noFigure": "Keine Stunden angegeben",
-      "elsewhere": "Anderswo warten noch {n} auf deine Freigabe.",
-      "notReviewer": "In dieser Organisation gibst du keine Stunden frei: Dafür braucht es eine Beziehung als Führungskraft oder Inhaber.",
+      "elsewhere": "Anderswo warten noch {n} auf Ihre Freigabe.",
+      "notReviewer": "In dieser Organisation geben Sie keine Stunden frei: Dafür braucht es eine Beziehung als Führungskraft oder Inhaber.",
       "decisionsClear": "Gerade warten keine weiteren Entscheidungen.",
       "doors": "Personen und Projekte"
     },
@@ -36,17 +36,17 @@
     "approvals": {
       "title": "Warten auf Freigabe: {n}",
       "titleUnknown": "Warten auf Freigabe",
-      "what": "Von deinen Beschäftigten erfasste Stunden und Arbeiten. Gib sie direkt hier frei oder lehne sie ab.",
+      "what": "Von Ihren Beschäftigten erfasste Stunden und Arbeiten. Geben Sie sie direkt hier frei oder lehnen Sie sie ab.",
       "seeAll": "Alle wartenden ({n})",
       "emptyTitle": "Im Moment warten keine Stunden von Beschäftigten auf Freigabe.",
       "emptyNext": "Sobald jemand Arbeit erfasst, erscheint sie hier.",
-      "noEmployees": "Diese Organisation hat noch keine Beschäftigten, deren Stunden du freigeben könntest.",
+      "noEmployees": "Diese Organisation hat noch keine Beschäftigten, deren Stunden Sie freigeben könnten.",
       "people": "Personen und Team",
-      "reviewOff": "Die Freigabe ist für {off} von {total} Beschäftigten ausgeschaltet. Ihre Stunden erscheinen hier erst, wenn du sie einschaltest.",
+      "reviewOff": "Die Freigabe ist für {off} von {total} Beschäftigten ausgeschaltet. Ihre Stunden erscheinen hier erst, wenn Sie sie einschalten.",
       "enable": "Unter Personen und Team einschalten",
-      "own": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben: Das kann eine andere Führungskraft dieser Organisation.",
-      "ownAlone": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben, und diese Organisation hat keine andere Führungskraft. Sie bleiben daher als deine eigene Arbeit erfasst.",
-      "ownUnknown": "Deine eigenen unbestätigten Einträge: {n}. Deine eigene Arbeit kannst du nicht freigeben: Sie bleiben als deine eigene Arbeit erfasst, bis eine andere Führungskraft sie bestätigt."
+      "own": "Ihre eigenen unbestätigten Einträge: {n}. Ihre eigene Arbeit können Sie nicht freigeben: Das kann eine andere Führungskraft dieser Organisation.",
+      "ownAlone": "Ihre eigenen unbestätigten Einträge: {n}. Ihre eigene Arbeit können Sie nicht freigeben, und diese Organisation hat keine andere Führungskraft. Sie bleiben daher als Ihre eigene Arbeit erfasst.",
+      "ownUnknown": "Ihre eigenen unbestätigten Einträge: {n}. Ihre eigene Arbeit können Sie nicht freigeben: Sie bleiben als Ihre eigene Arbeit erfasst, bis eine andere Führungskraft sie bestätigt."
     }
   },
   "publicDemand": {
@@ -79,6 +79,7 @@
     "fitStrong": "starke Übereinstimmung",
     "fitPossible": "mögliche Übereinstimmung",
     "openBoard": "Plattform-Anfragen öffnen",
+    "openInternships": "Praktika und Ausbildungsplätze",
     "missing": "Was Ihnen fehlt",
     "missingFromOpportunities": "Von den Chancen oben verlangt, noch nicht in Ihren Aufzeichnungen:",
     "missingFromProfession": "Üblich für Ihre Richtung, noch nicht in Ihren Aufzeichnungen:",
@@ -271,7 +272,7 @@
     "legalCheckFood": "Für den Verkauf von Lebensmitteln oder selbst angebauten Erzeugnissen gelten Vorschriften zum Lebensmittelverkauf und zur Hygiene. Bestätigen Sie vor der Veröffentlichung, dass Sie die für Sie geltenden Vorschriften geprüft haben.",
     "legalCheckAck": "Ich habe die für mich geltenden Vorschriften geprüft",
     "serviceNeedHint": "Ein Dienstleistungsbedarf ist immer eine Gesuchs-Anzeige.",
-    "moreTypesSoon": "Weitere Anzeigentypen werden hier bald verfügbar sein.",
+    "moreTypesSoon": "Derzeit sind hier nur diese Anzeigentypen verfügbar.",
     "pause": "Pausieren",
     "expired": "Abgelaufen",
     "expiresOn": "Bis {date}",
@@ -322,14 +323,14 @@
     "publishedAsOrganization": "Als Organisation",
     "republish": "Erneut veröffentlichen",
     "removeForever": "Endgültig löschen",
-    "removeQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um das Inserat nur aus der Suche zu nehmen, pausiere es oder schließe es ab.",
+    "removeQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um das Inserat nur aus der Suche zu nehmen, pausieren Sie es oder schließen Sie es ab.",
     "removeYes": "Ja, löschen",
     "searchState": {
-      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentliche das Inserat, wenn es fertig ist.",
-      "active": "In der Suche sichtbar — andere können es finden und dir schreiben.",
-      "paused": "Pausiert — aus der Suche ausgeblendet. Veröffentliche es erneut, wenn es wieder aktuell ist.",
+      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentlichen Sie das Inserat, wenn es fertig ist.",
+      "active": "In der Suche sichtbar — andere können es finden und Ihnen schreiben.",
+      "paused": "Pausiert — aus der Suche ausgeblendet. Veröffentlichen Sie es erneut, wenn es wieder aktuell ist.",
       "closed": "Abgeschlossen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
-      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändere das Ablaufdatum und veröffentliche es erneut."
+      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändern Sie das Ablaufdatum und veröffentlichen Sie es erneut."
     }
   },
   "quality": {
@@ -394,7 +395,7 @@
   },
   "commercial": {
     "pageTitle": "Kommerziell",
-    "pageIntro": "Ihre Angebote und Verträge, verknüpft mit Bedarf und Projekten. Rechnungen und Zahlungen werden in Finanzen erfasst.",
+    "pageIntro": "Ihre Angebote und Verträge an einem Ort. Rechnungen und Zahlungen werden in Finanzen erfasst.",
     "preApply": "Kommerzielles CRM ist verfügbar, sobald das kommerzielle Update angewendet ist.",
     "proposalsTitle": "Angebote",
     "honestNote": "Ein Angebot geht Entwurf → gesendet → angenommen/abgelehnt nur, wenn Sie es setzen. Es wird nichts automatisch gesendet.",
@@ -405,6 +406,8 @@
     "noSignatureNote": "Verträge speichern einen Status und eine optionale Dokumentreferenz. Es wird keine elektronische Signatur erstellt oder behauptet.",
     "contractsEmpty": "Noch keine Verträge.",
     "addContract": "Vertrag hinzufügen",
+    "contractFromProposal": "Vertrag erstellen",
+    "fromProposal": "Aus Angebot: {title}",
     "contractTitlePlaceholder": "Vertragstitel",
     "docRef": "Dok.-Ref.",
     "docRefLabel": "Dokumentreferenz",
@@ -510,7 +513,7 @@
       "not_found": "Dieser Eintrag existiert nicht mehr. Bitte neu laden.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
     },
-    "myEmpty": "Dir sind derzeit keine Werkzeuge oder Geräte zugewiesen.",
+    "myEmpty": "Ihnen sind derzeit keine Werkzeuge oder Geräte zugewiesen.",
     "unnamedOrganization": "Organisation ohne Namen",
     "unnamedWorker": "Mitarbeiter ohne Namen"
   },
@@ -909,7 +912,7 @@
     },
     "exports": {
       "title": "Exporte",
-      "note": "Aufgeführt sind nur die Exporte, die bereits funktionieren — nichts hier ist eine Vorschau.",
+      "note": "Aufgeführt sind nur die Exporte, die bereits funktionieren.",
       "evidence": "Nachweisbericht (Drucken / PDF)",
       "cv": "Lebenslauf (Drucken / PDF)",
       "journalCsv": "Journal-Export (CSV)",
@@ -1176,7 +1179,7 @@
     "switchSpace": "Bereich wechseln",
     "addSpace": "Bereich hinzufügen",
     "availableSpaces": "Verfügbare Bereiche",
-    "comingLaterToggle": "Bereiche, die später kommen (anzeigen)",
+    "comingLaterToggle": "Noch nicht verfügbare Bereiche (anzeigen)",
     "profile": {
       "name": "Persönliches Profil",
       "purpose": "Verwalten Sie Ihren Avatar, Ihren Lebenslauf, Ihre Fähigkeiten und Ihren Arbeitsstatus."
@@ -1660,7 +1663,7 @@
         "label": "Arbeitsnachweise",
         "available": "Journaleinträge: {n}",
         "none": "Noch nicht verknüpft",
-        "preparing": "Die Verbindung zu den Arbeitsnachweisen wird vorbereitet"
+        "preparing": "Die Verbindung zu den Arbeitsnachweisen ist noch nicht verfügbar"
       },
       "availability": {
         "label": "Verfügbarkeit",
@@ -1669,7 +1672,7 @@
       }
     },
     "opportunitiesLink": "Passende Möglichkeiten ansehen",
-    "unrecordedHours": "{count, plural, one {# Eintrag nennt Stunden, die nie erfasst wurden} other {# Einträge nennen Stunden, die nie erfasst wurden}} — sie sind nicht in der Summe oben. Öffne den frühesten und trage die Stunden ein."
+    "unrecordedHours": "{count, plural, one {# Eintrag nennt Stunden, die nie erfasst wurden} other {# Einträge nennen Stunden, die nie erfasst wurden}} — sie sind nicht in der Summe oben. Öffnen Sie den frühesten und tragen Sie die Stunden ein."
   },
   "profileState": {
     "readiness": {
@@ -1807,7 +1810,7 @@
     "reviewCta": "Einträge prüfen",
     "projectsTitle": "Projekte, Objekte und Kunden",
     "projectsReadyBadge": "Struktur bereit",
-    "projectsBody": "Hier sehen Sie Projekte, Kunden, Projekt-Arbeitskräfte und Arbeitspositionen. Nichts wird automatisch befüllt — neue Projekte und Kunden können noch nicht angelegt werden; diese Möglichkeit wird vorbereitet.",
+    "projectsBody": "Hier sehen Sie Projekte, Kunden, Projekt-Arbeitskräfte und Arbeitspositionen. Nichts wird automatisch befüllt — neue Projekte und Kunden können noch nicht angelegt werden.",
     "projectsCount": "Projekte",
     "projectsEmpty": "noch keine Projekte angelegt",
     "projectsLinkingNote": "Arbeitsjournal-Einträge werden von den Personen, die sie erfassen, einem Projekt zugeordnet. Ein neuer Projektkontext beginnt leer — nichts wird automatisch ausgefüllt.",
@@ -1976,7 +1979,7 @@
     "workerVisibilityNote": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften auf ihrem Chancen-Board angezeigt. Die Verifizierung ist eine manuelle Prüfung — bis Ihr Unternehmen verifiziert ist, bleiben Ihre Anfragen privat für Sie und das Prüfteam.",
     "empty": "Noch keine Anfragen eingereicht. Reichen Sie Ihre Anfrage oben ein — sie erscheint hier mit ihrem Status.",
     "created": "Erstellt",
-    "manageHelp": "Schließe eine Anfrage ab, nimm sie vom Markt oder veröffentliche sie erneut direkt in dieser Liste; einen Entwurf kannst du fortsetzen oder verwerfen. Das Bestätigen der erkannten Fähigkeiten erfolgt über die Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
+    "manageHelp": "Schließen Sie eine Anfrage ab, nehmen Sie sie vom Markt oder veröffentlichen Sie sie erneut direkt in dieser Liste; einen Entwurf können Sie fortsetzen oder verwerfen. Das Bestätigen der erkannten Fähigkeiten erfolgt über die Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
     "detailsLabel": "Eingereichte Angaben",
     "fields": {
       "description": "Beschreibung",
@@ -2148,7 +2151,7 @@
         },
         "requestFrom": "Bittet um Aufnahme: {name}",
         "requestUnverified": "Vom Lernenden selbst eingegebener Name — nicht überprüft.",
-        "membersNotForRole": "Gruppenmitglieder sind für deine Rolle nicht verfügbar. Nur Inhaber, Admin oder Leitung der Einrichtung selbst sehen und ändern die Mitgliedschaft."
+        "membersNotForRole": "Gruppenmitglieder sind für Ihre Rolle nicht verfügbar. Nur Inhaber, Admin oder Leitung der Einrichtung selbst sehen und ändern die Mitgliedschaft."
       },
       "learners": {
         "title": "Lernende",
@@ -2334,7 +2337,7 @@
         "title": "Etwas ist schiefgelaufen",
         "subtitle": "Derzeit nicht verfügbar.",
         "statusLabel": "Etwas ist schiefgelaufen",
-        "statusBody": "Die Verwaltung der Unternehmens-Arbeitskräfte wird noch vorbereitet und später aktiviert.",
+        "statusBody": "Die Verwaltung der Unternehmens-Arbeitskräfte ist noch nicht verfügbar.",
         "nextStep": "Die Selbstregistrierung für Arbeitskräfte bleibt jederzeit offen."
       },
       "workers": {
@@ -2503,10 +2506,10 @@
         "cta": "Scouting öffnen"
       },
       "decisions": {
-        "title": "Wartet auf deine Entscheidung",
+        "title": "Wartet auf Ihre Entscheidung",
         "review": "Journaleinträge zur Prüfung",
         "invitations": "Ausstehende Einladungen an Arbeitskräfte",
-        "claims": "Öffentliche Anfragen, die du übernehmen kannst",
+        "claims": "Öffentliche Anfragen, die Sie übernehmen können",
         "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist",
         "conflicts": "Personen mit Planungskonflikt (Einsätze oder Urlaub überschneiden sich)",
         "unreadable": "konnte nicht gelesen werden",
@@ -2802,7 +2805,7 @@
         "fieldNeedSummary": "Zusammenfassung der Anfrage",
         "fieldNeedSummaryPlaceholder": "Kurz, was Sie suchen.",
         "fieldCountry": "Land",
-        "fieldCountryPlaceholder": "z. B. LT",
+        "fieldCountryPlaceholder": "Land wählen",
         "fieldLocation": "Standort / Region",
         "fieldLocationPlaceholder": "z. B. Vilnius",
         "fieldRole": "Rolle / Arbeitsart",
@@ -3409,7 +3412,7 @@
       },
       "structure": {
         "title": "Bedarf strukturieren (ESCO)",
-        "hint": "Wähle die geforderten Fähigkeiten (und optional den Beruf). Deine Auswahl IST die Struktur — aus dem Freitext wird nichts geraten.",
+        "hint": "Wählen Sie die geforderten Fähigkeiten (und optional den Beruf). Ihre Auswahl IST die Struktur — aus dem Freitext wird nichts geraten.",
         "skillPlaceholder": "Geforderte Fähigkeit hinzufügen…",
         "occupationPlaceholder": "Beruf (optional)…",
         "occupationPicked": "Beruf",
@@ -3418,10 +3421,10 @@
         "saving": "Wird gespeichert…",
         "done": "Strukturiert: {n} geforderte Fähigkeiten gespeichert. Die Passung erscheint beim nächsten Laden.",
         "error": {
-          "invalid": "Wähle mindestens eine Fähigkeit.",
+          "invalid": "Wählen Sie mindestens eine Fähigkeit.",
           "not_found": "Die Anfrage existiert nicht mehr.",
           "not_admin": "Nur für Admins.",
-          "error": "Speichern fehlgeschlagen. Versuche es erneut."
+          "error": "Speichern fehlgeschlagen. Versuchen Sie es erneut."
         }
       },
       "agencyOffers": {
@@ -3651,7 +3654,7 @@
     "opportunities": "Chancen: Sehen Sie Arbeit, die zu Ihnen passt. Die Sichtbarkeit hängt von der Netzwerkgröße und Ihrer Bereitschaft ab.",
     "marketplaceMap": "Marktkarte: Arbeitsmarktsignale nach Land und Region. Ein genauerer Punkt erscheint, sobald ein Standort festgelegt ist.",
     "adminReview": "Systemwartung: nur für den Administrator. Normale Benutzer sehen diese Ansichten nie.",
-    "paymentReadiness": "Zahlungen werden vorbereitet: Der kostenpflichtige Zugang ist noch nicht aktiv.",
+    "paymentReadiness": "Der kostenpflichtige Zugang ist noch nicht aktiv.",
     "identityModel": "Zwei Basisidentitäten: eine Person und ein Unternehmen. Kaufen, Verkaufen, Einstellen und Agenturtätigkeit sind Aktionen, keine separaten Identitäten."
   },
   "profileIdentityNotice": {
@@ -3770,7 +3773,7 @@
     "addLaterHint": "Sie können später weitere Rollen hinzufügen — sie erscheinen im Katalog, sobald sie bereit sind.",
     "status": {
       "active": "Aktiv",
-      "preparing": "In Vorbereitung",
+      "preparing": "Noch nicht verfügbar",
       "start": "Starten",
       "partial": "Teilweise"
     },
@@ -3778,9 +3781,9 @@
       "openSetup": "Einrichtung öffnen"
     },
     "preparingReason": {
-      "default": "Diese Rolle wird noch vorbereitet. Wir schalten sie frei, sobald sie ehrlich ausgeliefert werden kann.",
+      "default": "Diese Rolle ist noch nicht verfügbar.",
       "startAvailable": "Der Einrichtungspfad funktioniert bereits: ein Feld, der rechtliche Name, und Ihr Konto wird angelegt. Der vollständige Arbeitsbereich wird noch ausgebaut.",
-      "customerPartial": "Der Käuferbereich wird noch vorbereitet. Sie können die Käuferrolle hinzufügen und eine Anfrage ausfüllen."
+      "customerPartial": "Der vollständige Käuferbereich ist noch nicht verfügbar. Sie können die Käuferrolle hinzufügen und eine Anfrage ausfüllen."
     },
     "worker": {
       "description": "Arbeiten als Person: Text-first-Profil, Fähigkeiten und Arbeitsjournal. Heute aktiv."
@@ -3795,13 +3798,13 @@
       "description": "Eine Aktion — Anfragen für Dienstleistungen, Fachkräfte oder Teams einreichen und verwalten. Wird später freigeschaltet."
     },
     "freelancer": {
-      "description": "Freelancer: Dienstleistungen und Arbeitshistorie in einem Profil. In Vorbereitung."
+      "description": "Freelancer: Dienstleistungen und Arbeitshistorie in einem Profil. Noch nicht verfügbar."
     },
     "team_lead": {
-      "description": "Teamleiter: Teamzusammensetzung und gemeinsame Angebote. In Vorbereitung."
+      "description": "Teamleiter: Teamzusammensetzung und gemeinsame Angebote. Noch nicht verfügbar."
     },
     "service_provider": {
-      "description": "Dienstleister: öffentlicher Dienstleistungskatalog mit bestätigten Nachweisen. In Vorbereitung."
+      "description": "Dienstleister: öffentlicher Dienstleistungskatalog mit bestätigten Nachweisen. Noch nicht verfügbar."
     }
   },
   "activityTypes": {
@@ -3823,10 +3826,10 @@
     "eyebrow": "Arbeitsmarkt-OS",
     "headline": "Zeigen Sie, was Sie können und leisten. Finden Sie mehr Möglichkeiten, es zu verwirklichen.",
     "lede": "Eine Person. Viele Rollen im Laufe der Zeit. Ein Lebenslauf, der aus echter Arbeit und echten Aufzeichnungen entsteht, nicht aus selbst geschriebenen Behauptungen. Die erste Wahl ist ein Einstiegspunkt, kein Käfig.",
-    "honesty": "Hinweis: Unten sehen Sie die gesamte Systemkarte. Einige Oberflächen sind heute live; der Rest ist offen als \"In Vorbereitung\" gekennzeichnet. Wir behaupten nie, dass etwas funktioniert, wenn es das nicht tut.",
+    "honesty": "Hinweis: Unten sehen Sie die gesamte Systemkarte. Einige Oberflächen sind heute live; der Rest ist offen als \"Noch nicht verfügbar\" gekennzeichnet. Wir behaupten nie, dass etwas funktioniert, wenn es das nicht tut.",
     "sections": {
       "today": "Heute live",
-      "preparing": "In Vorbereitung",
+      "preparing": "Noch nicht verfügbar",
       "workflow": "Wie sich der Weg einer Person durch das System bewegt",
       "roles": "Rollenentwicklung (ohne Lock-in)",
       "activities": "Tätigkeitslandschaft",
@@ -3843,10 +3846,11 @@
     },
     "controlRoom": {
       "todayLabel": "Heute aktiv",
-      "preparingLabel": "In Vorbereitung",
+      "preparingLabel": "Noch nicht verfügbar",
       "blockedLabel": "Blockiert",
       "nonWorkerLabel": "Unternehmens- / Agentur- / Kundenbereiche",
-      "nonWorkerStatus": "In Vorbereitung",
+      "nonWorkerStatus": "Noch nicht verfügbar",
+      "nonWorkerStatusActive": "In Betrieb",
       "fakeClaimsLabel": "Gefälschte KI / gefälschtes Matching / gefälschte Reputation",
       "fakeClaimsStatus": "Nie verwendet"
     },
@@ -3856,7 +3860,7 @@
       "agent": "KI- / Agenten-Orchestrator (nur wenn er sicher ausgeliefert werden kann)",
       "trust": "Reputations- / Vertrauensebene"
     },
-    "footer": "Die Veröffentlichung der Visionskarte hier bedeutet nicht, dass jeder Bereich live ist. Was heute nutzbar ist, trägt die Kennzeichnung \"Heute live\". Alles andere ist entweder \"In Vorbereitung\" oder eine zukünftige Ebene.",
+    "footer": "Die Veröffentlichung der Visionskarte hier bedeutet nicht, dass jeder Bereich live ist. Was heute nutzbar ist, trägt die Kennzeichnung \"Heute live\". Alles andere ist entweder \"Noch nicht verfügbar\" oder eine zukünftige Ebene.",
     "internalPreviewBadge": "Interne Vorschau",
     "internalPreviewBanner": "Diese Seite ist noch nicht öffentlich veröffentlicht. Sie ist eine interne Vorschau für den Owner und eingeladene Teilnehmer. Teilen Sie die URL nicht öffentlich, bis der Owner-Produktions-Smoke BESTANDEN ist."
   },
@@ -3871,8 +3875,8 @@
   "dashboard": {
     "comingLater": {
       "eyebrow": "Später",
-      "title": "Module, die später kommen",
-      "body": "Diese Bereiche werden vorbereitet und in separaten Phasen freigeschaltet. Sie sind noch keine aktiven Aktionen."
+      "title": "Noch nicht verfügbare Module",
+      "body": "Diese Bereiche sind noch nicht verfügbar. Sie sind keine aktiven Aktionen."
     },
     "featuresHeading": {
       "eyebrow": "Was schon da ist und was kommt",
@@ -3883,70 +3887,119 @@
   },
   "features": {
     "preparing_generic_reason": "Diese Option wird später freigeschaltet.",
-    "preparing_badge": "In Vorbereitung",
+    "preparing_badge": "Noch nicht verfügbar",
     "overview": {
       "label": "Übersicht",
-      "description": "Hauptansicht mit den ersten Schritten, Vorschlägen und Chancen."
+      "description": "Ihre Startansicht öffnet sich für jede Rolle, die Sie haben.",
+      "claims": {
+        "home_per_role": "Ihre Startansicht öffnet sich für jede Rolle, die Sie haben."
+      }
     },
     "market_map": {
       "label": "Marktkarte",
-      "description": "Eine einheitliche Arbeitsmarktkarte — Ihr eigenes Signal, Personalbedarfe von Unternehmen und echte Daten nach Land / Region."
+      "description": "Eine Karte markiert, wo es Arbeit und Menschen gibt.",
+      "claims": {
+        "map": "Eine Karte markiert, wo es Arbeit und Menschen gibt."
+      }
     },
     "profile_text_first": {
       "label": "Profil",
-      "description": "Beschreiben Sie sich in eigenen Worten oder fügen Sie einen Lebenslauf ein. Das System schlägt Fähigkeiten vor, aber Sie wählen sie aus."
+      "description": "Beschreiben Sie Ihre Arbeit in eigenen Worten und erstellen Sie Ihr berufliches Profil.",
+      "claims": {
+        "profile": "Beschreiben Sie Ihre Arbeit in eigenen Worten und erstellen Sie Ihr berufliches Profil."
+      }
     },
     "journal_text_first": {
       "label": "Arbeits- oder Tätigkeitseintrag",
-      "description": "Erfassen Sie die heutige Arbeit oder Tätigkeit. Das System hilft Ihnen bei der Strukturierung, aber Sie entscheiden über die Fakten."
+      "description": "Halten Sie fest, was Sie heute gearbeitet haben — der Eintrag fließt in Ihren Living CV.",
+      "claims": {
+        "entry_to_cv": "Halten Sie fest, was Sie heute gearbeitet haben — der Eintrag fließt in Ihren Living CV."
+      }
     },
     "communication": {
       "label": "Nachrichten",
-      "description": "Unterhaltungen und Anfragen, die Sie erhalten. Wenn Ihnen jemand schreibt oder eine Anfrage sendet, finden Sie sie hier."
+      "description": "Schreiben Sie Personen und Unternehmen — das Gespräch bleibt in einem Verlauf.",
+      "claims": {
+        "threads": "Schreiben Sie Personen und Unternehmen — das Gespräch bleibt in einem Verlauf."
+      }
     },
     "account_roles": {
       "label": "Rollen",
-      "description": "Überprüfen Sie Ihre Rollen. Das Arbeiten als Person ist heute aktiv; weitere Aktionen werden Schritt für Schritt hinzugefügt."
+      "description": "Ein Konto enthält mehrere Rollen, zwischen denen Sie wechseln.",
+      "claims": {
+        "several_roles": "Ein Konto enthält mehrere Rollen, zwischen denen Sie wechseln."
+      }
     },
     "role_expansion": {
       "label": "Weitere Rollen",
-      "description": "Später können Sie Aktionen für Unternehmen, Personalagenturen und Einkauf hinzufügen, sobald sie bereit sind."
+      "description": "Sie können vom selben Konto aus ein Unternehmen anlegen. Sie können vom selben Konto aus Leistungen einkaufen.",
+      "claims": {
+        "add_company": "Sie können vom selben Konto aus ein Unternehmen anlegen.",
+        "add_buying": "Sie können vom selben Konto aus Leistungen einkaufen."
+      }
     },
     "external_confirmation": {
       "label": "Arbeitseinträge von anderen",
-      "description": "Ein Vorgesetzter, Kunde oder Partner kann später Ihre Arbeitseinträge ergänzen."
+      "description": "Eine berechtigte Führungskraft Ihrer Organisation bestätigt die Arbeit, die Sie erfasst haben.",
+      "claims": {
+        "manager_confirms": "Eine berechtigte Führungskraft Ihrer Organisation bestätigt die Arbeit, die Sie erfasst haben."
+      }
     },
     "company_workspace": {
       "label": "Unternehmensbereich",
-      "description": "Team-, Projekt- und Bedarfsverwaltung für Unternehmen."
+      "description": "Legen Sie Ihre Organisation an und veröffentlichen Sie ihren ersten Bedarf. Die Unternehmensstartseite öffnet sich für die Leute der Organisation.",
+      "claims": {
+        "setup_and_need": "Legen Sie Ihre Organisation an und veröffentlichen Sie ihren ersten Bedarf.",
+        "company_home": "Die Unternehmensstartseite öffnet sich für die Leute der Organisation."
+      }
     },
     "agency_workspace": {
       "label": "Agenturbereich",
-      "description": "Kandidatenpool- und Serviceangebotsverwaltung für Personalagenturen."
+      "description": "Eine Agentur führt ihre Leute, verbindet sich mit Kunden und bietet Leute für den Bedarf eines Kunden an.",
+      "claims": {
+        "roster_clients_offers": "Eine Agentur führt ihre Leute, verbindet sich mit Kunden und bietet Leute für den Bedarf eines Kunden an."
+      }
     },
     "customer_workspace": {
       "label": "Kundenbereich",
-      "description": "Serviceanfragen und Berichte für Kunden."
+      "description": "Speichern Sie Ihre Angaben als Auftraggeber und führen Sie Ihre Anfragen in Ihrer eigenen Liste.",
+      "claims": {
+        "record_and_requests": "Speichern Sie Ihre Angaben als Auftraggeber und führen Sie Ihre Anfragen in Ihrer eigenen Liste."
+      }
     },
     "document_records": {
       "label": "Dokumenteneinträge",
-      "description": "Ein Ort für Zertifikate und Dokumente."
+      "description": "Bewahren Sie Ihre Dokumente auf und sehen Sie, wann jedes abläuft. Ein Unternehmen führt ein Register seiner Dokumente.",
+      "claims": {
+        "own_documents": "Bewahren Sie Ihre Dokumente auf und sehen Sie, wann jedes abläuft.",
+        "company_register": "Ein Unternehmen führt ein Register seiner Dokumente."
+      }
     },
     "team_offers": {
       "label": "Teamangebote",
-      "description": "Ein Ort, um Teams zu bilden und gemeinsame Angebote zu veröffentlichen."
+      "description": "Ein Team wird für einen Bedarf angeboten und als eine Einheit übernommen.",
+      "claims": {
+        "team_as_unit": "Ein Team wird für einen Bedarf angeboten und als eine Einheit übernommen."
+      }
     },
     "work_needs": {
       "label": "Arbeitsbedarf",
-      "description": "Ein Ort, um festzuhalten, welche Arbeit oder Hilfe Sie benötigen."
+      "description": "Ein Unternehmen beschreibt an einer Stelle, welche Leute es braucht. Interessierte Personen melden sich auf den Bedarf.",
+      "claims": {
+        "one_form": "Ein Unternehmen beschreibt an einer Stelle, welche Leute es braucht.",
+        "people_answer": "Interessierte Personen melden sich auf den Bedarf."
+      }
     },
     "service_offers": {
       "label": "Serviceangebote",
-      "description": "Ein Ort, um die von Ihnen angebotenen Dienstleistungen zu veröffentlichen."
+      "description": "Veröffentlichen Sie Ihre Leistungen und erhalten Sie Anfragen dazu.",
+      "claims": {
+        "offer_and_requests": "Veröffentlichen Sie Ihre Leistungen und erhalten Sie Anfragen dazu."
+      }
     },
     "matching": {
-      "label": "Matching",
-      "description": "Dieses Produkt hat keine Matching-/Ranking-Engine und wird keine haben, bis eine ehrlich ausgeliefert werden kann."
+      "label": "KI-Matching",
+      "description": "KI-gestütztes Matching von Menschen und Bedarf."
     },
     "marketplace": {
       "label": "Marktplatz",
@@ -3954,16 +4007,35 @@
     },
     "marketplace_hub": {
       "label": "Marktplatz",
-      "description": "Ein kompakter Hub, der die Karte, Chancen und Ihre Unternehmen verbindet."
+      "description": "Führt Sie zur Karte, die Arbeit und Menschen zeigt.",
+      "claims": {
+        "map": "Führt Sie zur Karte, die Arbeit und Menschen zeigt."
+      }
     },
     "planning": {
       "label": "Kalender",
-      "description": "Ein Kalender: Buchungen, Projekte, Aufgaben, Journaleinträge, Einladungen und Zahlungsfristen."
+      "description": "Ein Unternehmen plant die Arbeit seiner Leute im Kalender. Sie sehen Ihre eigene Arbeit im Kalender.",
+      "claims": {
+        "company_calendar": "Ein Unternehmen plant die Arbeit seiner Leute im Kalender.",
+        "own_calendar": "Sie sehen Ihre eigene Arbeit im Kalender."
+      }
     },
     "network": {
       "label": "Netzwerk",
-      "description": "Personen und Unternehmen: Suche, Einladungen und Ihre Beziehungen."
-    }
+      "description": "Einladungen in das Team eines Unternehmens kommen hier an, und hier nehmen Sie sie an.",
+      "claims": {
+        "invitations": "Einladungen in das Team eines Unternehmens kommen hier an, und hier nehmen Sie sie an."
+      }
+    },
+    "rule_matching": {
+      "label": "Kandidaten-Shortlist",
+      "description": "Ein beschriebener Bedarf erhält eine Kurzliste passender Personen, mit dem Grund für jede.",
+      "claims": {
+        "shortlist_with_reason": "Ein beschriebener Bedarf erhält eine Kurzliste passender Personen, mit dem Grund für jede."
+      }
+    },
+    "matching_reason": "Ausgeschaltet: Es ist kein KI-Dienst angebunden. Die Kandidaten-Shortlist funktioniert bereits.",
+    "notCheckedYet": "Dieser Teil ist im Live-Betrieb noch nicht geprüft."
   },
   "structuring": {
     "groupEyebrow": "Vorgeschlagene Fähigkeiten",
@@ -4092,7 +4164,7 @@
     },
     "subcopy": "Passende Richtung, mit Begründung. Sie sehen immer das Warum — kein undurchsichtiger Algorithmus, kein Black-Box-Score.",
     "column": {
-      "onDeck": "In Vorbereitung",
+      "onDeck": "Als Nächstes",
       "live": "In Bearbeitung",
       "drafted": "Ausgewählt"
     },
@@ -4142,7 +4214,7 @@
       "line2": "desto mehr Chancen eröffnen sich."
     },
     "subcopy": "Labourmarket.ai verwandelt Ihre Fähigkeiten, Erfahrungen, Dokumente und beschriebene Arbeit in klare Profilsignale. Je präziser Ihr Profil ausgefüllt ist, desto leichter lassen sich Einsatzbereitschaft, Zuverlässigkeit und die passenden Chancen einschätzen.",
-    "conceptNote": "Eine Beispielkarte mit illustrativen Daten — keine reale Person. Deine Karte entsteht aus deinen echten Arbeitseinträgen.",
+    "conceptNote": "Eine Beispielkarte mit illustrativen Daten — keine reale Person. Ihre Karte entsteht aus Ihren echten Arbeitseinträgen.",
     "sample": {
       "name": "Rasa J.",
       "organization": "Restaurant Ąžuolas"
@@ -4151,7 +4223,8 @@
   "auth": {
     "social": {
       "continueWithLinkedIn": "Mit LinkedIn fortfahren",
-      "continueWithFacebook": "Mit Facebook fortfahren"
+      "continueWithFacebook": "Mit Facebook fortfahren",
+      "inAppBrowser": "Sie befinden sich im eingebauten Browser einer App, in dem die Anmeldung mit Google oft nicht funktioniert. Öffnen Sie diese Seite im Browser Ihres Telefons (Safari oder Chrome) oder verwenden Sie unten E-Mail-Adresse und Passwort."
     },
     "legalNotice": {
       "signup": "Mit der Erstellung eines Kontos bestätigen Sie, dass Sie die <terms>Nutzungsbedingungen</terms> und die <privacy>Datenschutzerklärung</privacy> gelesen haben.",
@@ -4173,7 +4246,9 @@
         "cancelled": "Die Anmeldung wurde abgebrochen. An Ihrem Konto hat sich nichts geändert.",
         "unknown": "Anmeldung nicht möglich. Bitte versuchen Sie es erneut.",
         "link_expired": "Dieser Bestätigungslink ist abgelaufen oder wurde bereits verwendet. Wenn Sie Ihre E-Mail-Adresse schon bestätigt haben, melden Sie sich einfach an. Andernfalls fordern Sie unten einen neuen Link an.",
-        "confirmed_sign_in": "Ihre E-Mail-Adresse ist bestätigt. Die Registrierung wurde auf einem anderen Gerät begonnen. Melden Sie sich hier an, um fortzufahren."
+        "confirmed_sign_in": "Ihre E-Mail-Adresse ist bestätigt. Die Registrierung wurde auf einem anderen Gerät begonnen. Melden Sie sich hier an, um fortzufahren.",
+        "confirm_link_opened": "Dieser Bestätigungslink wurde geöffnet. Ihre E-Mail-Adresse ist höchstwahrscheinlich bereits bestätigt – versuchen Sie, sich anzumelden. Falls das nicht klappt, fordern Sie unten einen neuen Link an.",
+        "provider_error": "Der Anmeldedienst konnte diese Anmeldung nicht abschließen, und ein erneuter Versuch endet wahrscheinlich genauso. Melden Sie sich auf dem Weg an, mit dem Sie sich zuerst registriert haben, oder mit E-Mail-Adresse und Passwort."
       },
       "emailNotConfirmed": "Ihre E-Mail-Adresse ist noch nicht bestätigt. Öffnen Sie den zugesandten Bestätigungslink oder fordern Sie unten einen neuen an."
     },
@@ -4194,7 +4269,7 @@
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
       "email_label": "E-Mail-Adresse",
-      "email_placeholder": "name@beispiel.de",
+      "email_placeholder": "ihr.name@example.com",
       "password_label": "Passwort",
       "password_help": "Min. 8 Zeichen, 1 Großbuchstabe, 1 Zahl, 1 Sonderzeichen (!@#$%).",
       "confirm_password_label": "Passwort bestätigen",
@@ -4213,7 +4288,7 @@
       "check_email_title": "E-Mail bestätigen",
       "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffnen Sie ihn, um die Registrierung abzuschließen. Keine E-Mail? Prüfen Sie den Spam-Ordner — einen neuen Link können Sie hier anfordern.",
       "resend_label": "Link erneut senden",
-      "resend_sent": "Erneut gesendet. Prüfe Posteingang und Spam-Ordner.",
+      "resend_sent": "Erneut gesendet. Prüfen Sie Posteingang und Spam-Ordner.",
       "resend_wait": "In {seconds} s können Sie einen neuen Link anfordern.",
       "invited_email_note": "Das ist die Adresse, an die Ihre Einladung gesendet wurde.",
       "show_password": "Passwort anzeigen"
@@ -4347,14 +4422,14 @@
         "s1": "Importieren Sie Ihren Lebenslauf (optional), um Ihr Profil schneller zu füllen",
         "s2": "Fügen Sie Ihre echten Fähigkeiten hinzu",
         "s3": "Legen Sie Ihre Verfügbarkeit fest",
-        "s4": "Füge Arbeitserfahrung und Nachweise hinzu",
+        "s4": "Fügen Sie Arbeitserfahrung und Nachweise hinzu",
         "note": "Fähigkeiten sind zunächst selbst angegeben. Dokumente, Ihr Arbeitsjournal und Bestätigungen von Personen machen sie mit der Zeit stärker."
       },
       "nextStepsOrganization": {
         "eyebrow": "Danach — Ihre Organisation",
         "s1": "Benennen Sie Ihre Organisation und was sie tut (beschäftigt, stellt Personal, rekrutiert, bildet aus, führt Projekte)",
         "s2": "Fügen Sie Ihre Leute, Teams oder das Personal hinzu, das Sie stellen",
-        "s3": "Veröffentliche einen Bedarf, biete Kapazität an — oder beides",
+        "s3": "Veröffentlichen Sie einen Bedarf, bieten Sie Kapazität an — oder beides",
         "s4": "Sprich mit passenden Personen und Organisationen und erledigt die Arbeit gemeinsam",
         "note": "Ihre Organisation ist sofort nutzbar. Die Verifizierung ist ein separater, stärkerer Vertrauensschritt."
       },
@@ -4365,6 +4440,7 @@
       "country_search_empty": "Kein Land gefunden. Versuchen Sie einen anderen Namen.",
       "error_country_required": "Bitte wählen Sie ein Land.",
       "error_role_required": "Wählen Sie zuerst, wofür Sie LabourMarket.ai nutzen möchten — dann füllen Sie Ihr Profil aus.",
+      "role_step_hint": "Wählen Sie zuerst, wofür Sie LabourMarket.ai nutzen möchten — dann füllen Sie Ihr Profil aus.",
       "profession_label": "Was ist Ihr Beruf oder Ihre Berufserfahrung?",
       "profession_placeholder": "Beruf oder Arbeitsbereich eingeben",
       "profession_add": "Hinzufügen",
@@ -4475,7 +4551,7 @@
         },
         "addMore": {
           "title": "Fügen Sie eine weitere Art hinzu, labourmarket.ai zu nutzen",
-          "body": "Sie sind nicht auf eine Rolle festgelegt. Unternehmens-, Personalagentur- und Kundenbereiche werden noch vorbereitet — wir fügen sie Schritt für Schritt hinzu.",
+          "body": "Sie sind nicht auf eine Rolle festgelegt. Unternehmens-, Personalagentur- und Kundenbereiche sind noch nicht vollständig verfügbar.",
           "cta": "Rollen überprüfen"
         },
         "activitySetup": {
@@ -4516,7 +4592,7 @@
             "notesPlaceholder": "Alles Weitere, das wissenswert ist",
             "submittedHeading": "Was Sie übermittelt haben:",
             "doneScoutingLink": "Anfrage und zugehörige Matches ansehen",
-            "doneOffersLink": "Deine Angebote ansehen"
+            "doneOffersLink": "Ihre Angebote ansehen"
           },
           "hire": {
             "title": "Arbeitskraft oder Team finden",
@@ -4767,7 +4843,7 @@
           "keep": "So lassen",
           "correct": "Korrigieren",
           "salary_below_monthly_floor": "{min}–{max} € wird als MONATLICHE Vorstellung gespeichert und angezeigt. Als Monat liegt das unter jedem Mindestlohn — wenn Sie einen Stunden- oder Tagessatz meinten, tragen Sie den Monatsbetrag ein. Ist es ein Monatsbetrag, lassen Sie es so.",
-          "salary_reads_annual": "{min} € pro Monat liest sich wie ein Jahresbetrag. Wenn ja, trage den Monatsbetrag ein; wenn nicht, lass es so.",
+          "salary_reads_annual": "{min} € pro Monat liest sich wie ein Jahresbetrag. Wenn ja, tragen Sie den Monatsbetrag ein; wenn nicht, lassen Sie es so.",
           "available_from_past": "Ihr Datum „kann beginnen ab“ ({date}) ist vorbei — es wird als „jetzt“ gelesen. Stimmt das nicht mehr, setzen Sie ein neues Datum.",
           "available_from_far": "Ihr Startdatum ({date}) liegt mehr als ein Jahr voraus. Ist das Jahr ein Tippfehler, korrigieren Sie es; sonst lassen Sie es so.",
           "unavailable_with_start_date": "Status sagt „kann derzeit nicht arbeiten“, aber ein Startdatum ({date}) ist gesetzt. Können Sie ab diesem Datum — gut; wenn nicht, korrigieren Sie es."
@@ -4878,7 +4954,7 @@
             "active": "Aktiv",
             "notActive": "Noch nicht aktiv",
             "benefit": "Schützen Sie Ihr Profil, Ihre Arbeitshistorie, Dokumente und Nachrichten mit einer zweiten Prüfung, die nur Sie bestehen können.",
-            "setupComing": "Die Einrichtung erscheint hier bald — sie dauert etwa 30 Sekunden und Sie können sie jederzeit deaktivieren."
+            "setupComing": "Die Anmeldung in zwei Schritten kann hier noch nicht eingerichtet werden."
           },
           "recovery": {
             "label": "Kontowiederherstellung",
@@ -4890,7 +4966,7 @@
           "title": "Verbundene Apps",
           "intro": "Externe Anwendungen und Assistenten, denen Sie erlaubt haben, auf LabourMarket.ai in Ihrem Namen zu handeln. Jede sieht nur, was Sie sehen, und Sie können sie jederzeit trennen.",
           "empty": "Mit Ihrem Konto ist keine Anwendung verbunden.",
-          "unavailable": "Die Liste der verbundenen Apps konnte gerade nicht geladen werden. Versuch es gleich noch einmal.",
+          "unavailable": "Die Liste der verbundenen Apps konnte gerade nicht geladen werden. Versuchen Sie es gleich noch einmal.",
           "unnamed": "Unbenannte Anwendung",
           "grantedAt": "Verbunden am {date}",
           "grantedUnknown": "Verbindungsdatum nicht erfasst",
@@ -4901,7 +4977,7 @@
           "confirmYes": "Ja, trennen",
           "cancel": "Verbunden lassen",
           "feedbackRevoked": "Getrennt. Die Anwendung hat keinen Zugriff mehr auf Ihr Konto.",
-          "feedbackError": "Die Anwendung konnte nicht getrennt werden. Lade die Seite neu und versuch es erneut.",
+          "feedbackError": "Die Anwendung konnte nicht getrennt werden. Laden Sie die Seite neu und versuchen Sie es erneut.",
           "note": "Das Abmelden von LabourMarket.ai trennt keine Apps. Das Trennen hier ist der einzige Weg, den Zugriff einer Anwendung zu beenden.",
           "pending": "Wird getrennt…"
         },
@@ -4909,8 +4985,8 @@
       },
       "comingSoon": {
         "greeting": "👋 Willkommen, {name}",
-        "body_main": "Wir stellen die Unternehmens-/Personalagentur-Funktionen gerade fertig.",
-        "body_notify": "Wir informieren Sie, sobald es bereit ist.",
+        "body_main": "Die Funktionen für Unternehmen / Agenturen sind noch nicht verfügbar.",
+        "body_notify": "Wir benachrichtigen Sie, sobald sie verfügbar sind.",
         "body_meanwhile": "In der Zwischenzeit — Sie können die Plattform über den Tab „Entdecken“ durchstöbern (nur Ansicht)."
       },
       "menuLinks": {
@@ -5249,7 +5325,7 @@
       "subcopy": "Verwalten Sie Ihre Arbeitskräfte, verbinden Sie sie mit Kundenbedarfen und vermitteln Sie Kontakte — ohne Übersicht oder Kontrolle zu verlieren.",
       "bullets": [
         "Poolgröße — jede verwaltete Arbeitskraft auf einen Blick.",
-        "Gewerke-Aufschlüsselung — Kapazität nach Fähigkeit, live.",
+        "Aufschlüsselung nach Beruf — Kapazität nach Fähigkeit, wie in den Profilen angegeben.",
         "Einsatzstatus — Aktiv, Ausstehend, Verfügbar.",
         "Mehrere Kunden — setzen Sie die richtigen Leute bei verschiedenen Kunden ein."
       ]
@@ -5338,7 +5414,7 @@
     }
   },
   "nav": {
-    "jobs": "Stellenangebote",
+    "jobs": "Stellenanzeigen",
     "workers": "Für Arbeitskräfte",
     "companies": "Für Unternehmen",
     "agencies": "Für Agenturen",
@@ -5352,7 +5428,7 @@
     "how": "So funktioniert es",
     "menuOpen": "Menü",
     "menuClose": "Menü schließen",
-    "market": "Der Markt"
+    "market": "Arbeitsmarkt"
   },
   "livingMarketReview": {
     "tagline": "Europas lebendiger Arbeitsmarkt",
@@ -5376,7 +5452,7 @@
     "chip": "Allgemeine Arbeitsmarktplattform",
     "headline": "Nicht nur ein Lebenslauf.",
     "headlineAccent": "Echte Fähigkeiten passend zu echtem Arbeitsbedarf.",
-    "subcopy": "Erstelle dein Labourmarket.ai-Profil, importiere deinen Lebenslauf, füge echte Fähigkeiten, Verfügbarkeit und Arbeitserfahrung hinzu — damit Menschen, Teams und Unternehmen klarer sehen, wo deine Möglichkeiten zu echtem Arbeitsbedarf passen, lokal und international.",
+    "subcopy": "Erstellen Sie Ihr Labourmarket.ai-Profil, importieren Sie Ihren Lebenslauf, fügen Sie echte Fähigkeiten, Verfügbarkeit und Arbeitserfahrung hinzu — damit Menschen, Teams und Unternehmen klarer sehen, wo Ihre Möglichkeiten zu echtem Arbeitsbedarf passen, lokal und international.",
     "ctaPrimary": "Profil erstellen",
     "businessNote": "Für Unternehmen und Arbeitgeber ·",
     "businessLink": "Arbeitsbedarf starten",
@@ -5473,17 +5549,16 @@
     "about": "Über uns",
     "contact": "Kontakt",
     "rights": "Alle Rechte vorbehalten.",
-    "rexora": "Gemeinsam entwickelt: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
-    "operatedBy": "LabourMarket.ai wird von der UAB „Nonstop Group“ betrieben und kommerziell angeboten. Die LabourMarket.ai-Software und die zugehörige geistige Eigentumsrechte gehören der Labour Market AI Sp. z o.o. und werden von der UAB „Nonstop Group“ in Lizenz genutzt.",
+    "operatedBy": "LabourMarket.ai wird von der UAB „Nonstop Group“ betrieben und kommerziell angeboten. Die LabourMarket.ai-Software und die zugehörigen geistigen Eigentumsrechte gehören der Labour Market AI Sp. z o.o. und werden von der UAB „Nonstop Group“ in Lizenz genutzt.",
     "ipNotice": "Rechte des geistigen Eigentums. Die Plattform wird in Lizenz von der UAB „Nonstop Group“ betrieben.",
     "legalNotice": "Impressum"
   },
   "pages": {
     "workers": {
       "eyebrow": "Für Arbeitskräfte",
-      "title": "Ihre Fähigkeiten,",
-      "titleAccent": "auffindbar.",
-      "subcopy": "Erstellen Sie ein Profil, legen Sie Ihre Verfügbarkeit fest und lassen Sie sich von echter Nachfrage über Grenzen hinweg finden — ohne Recruiter dazwischen.",
+      "title": "Arbeit finden",
+      "titleAccent": "mit einem kostenlosen Profil.",
+      "subcopy": "Erstellen Sie ein Profil, legen Sie Ihre Verfügbarkeit fest und lassen Sie sich von echter Nachfrage über Grenzen hinweg finden.",
       "benefits": [
         {
           "title": "Ein Profil, jeder Markt",
@@ -5507,9 +5582,9 @@
     },
     "companies": {
       "eyebrow": "Für Unternehmen",
-      "title": "Chancenfluss,",
-      "titleAccent": "im Kontext.",
-      "subcopy": "Veröffentlichen Sie, was Sie in jedem Projekt brauchen, und sehen Sie, welche verfügbaren Arbeitskräfte und Personalagenturen dazu passen.",
+      "title": "Arbeitskräfte finden,",
+      "titleAccent": "die Ihre Projekte brauchen.",
+      "subcopy": "Sagen Sie uns, welche Fachkräfte jedes Projekt braucht, wie viele und ab wann. Die Anfrage ist kostenlos und braucht kein Konto; mit einem kostenlosen Konto sehen Sie außerdem, welche verfügbaren Arbeitskräfte und Personalagenturen passen.",
       "benefits": [
         {
           "title": "Bedarf pro Projekt veröffentlichen",
@@ -5525,9 +5600,83 @@
         }
       ],
       "screenshot": "Bedarfsablauf für Unternehmen",
-      "cta": "Personalanfrage starten",
+      "cta": "Benötigte Arbeitskräfte beschreiben",
       "calculatorBody": "Bevor Sie Arbeit anfragen, schätzen Sie sie ein: Arbeitsstunden, Material, Geräte und Reisen — mit Ihren eigenen Zahlen.",
-      "calculatorLink": "Projektkosten berechnen"
+      "calculatorLink": "Projektkosten schätzen",
+      "markets": {
+        "lu": {
+          "metaTitle": "Fachkräfte für Baustellen in Luxemburg",
+          "metaDescription": "Bauunternehmen in Luxemburg: Beschreiben Sie, welche Schweißer, Elektriker, Zimmerer oder Gerüstbauer Sie brauchen. Kostenlos; ein Mensch meldet sich.",
+          "eyebrow": "Für Arbeitgeber in Luxemburg",
+          "title": "Fachkräfte für Ihre Baustellen",
+          "titleAccent": "in Luxemburg.",
+          "subcopy": "Für Bauunternehmen und Subunternehmer. Sagen Sie uns, welche Fachkräfte Sie brauchen — Schweißer, Elektriker, Zimmerer, Gerüstbauer —, wie viele, wo und ab wann.",
+          "cta": "Benötigte Arbeitskräfte beschreiben",
+          "points": [
+            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
+            "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
+          ]
+        },
+        "nl": {
+          "metaTitle": "Fachkräfte für Baustellen in den Niederlanden",
+          "metaDescription": "Bauunternehmen in den Niederlanden: Beschreiben Sie, welche Schweißer, Elektriker, Zimmerer oder Gerüstbauer Sie brauchen. Kostenlos; ein Mensch meldet sich.",
+          "eyebrow": "Für Arbeitgeber in den Niederlanden",
+          "title": "Fachkräfte für Ihre Baustellen",
+          "titleAccent": "in den Niederlanden.",
+          "subcopy": "Für Bauunternehmen und Subunternehmer. Sagen Sie uns, welche Fachkräfte Sie brauchen — Schweißer, Elektriker, Zimmerer, Gerüstbauer —, wie viele, wo und ab wann.",
+          "cta": "Benötigte Arbeitskräfte beschreiben",
+          "points": [
+            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
+            "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
+          ]
+        },
+        "dk": {
+          "metaTitle": "Fachkräfte für Baustellen in Dänemark",
+          "metaDescription": "Bauunternehmen in Dänemark: Beschreiben Sie, welche Schweißer, Elektriker, Zimmerer oder Gerüstbauer Sie brauchen. Kostenlos; ein Mensch meldet sich.",
+          "eyebrow": "Für Arbeitgeber in Dänemark",
+          "title": "Fachkräfte für Ihre Baustellen",
+          "titleAccent": "in Dänemark.",
+          "subcopy": "Für Bauunternehmen und Subunternehmer. Sagen Sie uns, welche Fachkräfte Sie brauchen — Schweißer, Elektriker, Zimmerer, Gerüstbauer —, wie viele, wo und ab wann.",
+          "cta": "Benötigte Arbeitskräfte beschreiben",
+          "points": [
+            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "Wir suchen Menschen, deren erfasste Arbeit zu Ihrem Bedarf passt. Gibt es noch keine passende Person, sagen wir es Ihnen.",
+            "Bei Bauanfragen kann unser Partnerunternehmen Unterlagen und Einarbeitung koordinieren — jeden Schritt begleitet ein Mensch."
+          ]
+        }
+      },
+      "needs": {
+        "subcontracting": {
+          "metaTitle": "Subunternehmer und Bautrupps in Europa",
+          "metaDescription": "Beschreiben Sie Gewerk, Ort und Termine. Subunternehmer und Agenturen können einen ganzen Trupp anbieten; Sie vergleichen und vereinbaren die Bedingungen.",
+          "eyebrow": "Für Bauunternehmen",
+          "title": "Subunternehmer und Trupps",
+          "titleAccent": "für Ihr Projekt.",
+          "subcopy": "Für Generalunternehmer und Firmen, die ein Gewerk vergeben. Nennen Sie Gewerk, Umfang, Ort und Termine — und ob Sie einen Subunternehmer oder einen ganzen Trupp brauchen.",
+          "cta": "Gewerk beschreiben",
+          "points": [
+            "Das Gewerk zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "Mit einem kostenlosen Firmenkonto können Subunternehmer und Agenturen Ihnen einen Trupp als eine Einheit anbieten. Sie vergleichen die Angebote und vereinbaren die Bedingungen direkt mit ihnen.",
+            "Arbeitet ein Trupp in Ihrem Projekt, erfassen seine Mitglieder dort ihre Stunden, und Sie sehen sie. Gibt es noch keinen passenden Trupp, sagen wir es Ihnen."
+          ]
+        },
+        "agency": {
+          "metaTitle": "Personaldienstleister als Partner in Europa finden",
+          "metaDescription": "Beschreiben Sie, wen Sie brauchen, und wählen Sie die Überlassung durch eine Agentur. Agenturen geben hier an, wen sie stellen können. Kostenlos.",
+          "eyebrow": "Für Arbeitgeber, die eine Agentur suchen",
+          "title": "Ein Personalpartner",
+          "titleAccent": "für die Menschen, die Sie brauchen.",
+          "subcopy": "Für Firmen, die Arbeitskräfte über eine Agentur überlassen oder vermitteln lassen möchten. Sagen Sie uns, wen Sie brauchen, wie viele, wo und ab wann, und wählen Sie die Überlassung durch eine Personalagentur.",
+          "cta": "Benötigte Arbeitskräfte beschreiben",
+          "points": [
+            "Eine Anfrage zu senden ist kostenlos und braucht kein Konto, nur eine Kontakt-E-Mail. Nichts wird automatisch veröffentlicht.",
+            "Personalagenturen auf LabourMarket.ai geben an, welche Arbeitskräfte sie stellen können. Mit einem kostenlosen Firmenkonto sehen Sie dieses Angebot.",
+            "Arbeitskräfte, Firmen und Agenturen nutzen dieselbe Plattform. Gibt es noch keinen passenden Partner, sagen wir es Ihnen — wir erfinden keinen Treffer."
+          ]
+        }
+      }
     },
     "agencies": {
       "eyebrow": "Für Personalagenturen",
@@ -5600,7 +5749,7 @@
     "eyebrow": "Preise",
     "title": "Einfache Stufen,",
     "titleAccent": "fair angesetzt.",
-    "subcopyLive": "Die Preise sind vom Inhaber bestätigt und gültig. Die Aktivierung erfolgt im Organisationskonto über eine sichere Stripe-Zahlung; auf dieser Seite wird nichts abgebucht.",
+    "subcopyLive": "Die Preise sind gültig. Die Aktivierung erfolgt im Organisationskonto über eine sichere Stripe-Zahlung; auf dieser Seite wird nichts abgebucht.",
     "subcopy": "Die Preise sind noch nicht endgültig, und die Abrechnung wird auf dieser Seite niemals für Sie gestartet. Die Stufen unten beschreiben den Umfang; die Aktivierung erfolgt manuell — melden Sie sich, und wir bestätigen Preis und Umfang mit Ihnen, bevor irgendetwas startet.",
     "subcopyConfirmed": "Die Preise sind bestätigt. Die Online-Aktivierung ist noch nicht geöffnet — tragen Sie sich in die Warteliste ein, wir melden uns und starten Ihre Organisation manuell; auf dieser Seite wird nichts abgebucht.",
     "trialNote": "Das erste Abonnement einer Organisation beginnt mit einer 14-tägigen Testphase. Danach wird Ihre Karte mit dem Monatspreis belastet; vor Ablauf können Sie kündigen.",
@@ -5628,7 +5777,7 @@
         ]
       },
       "agency": {
-        "name": "Agency",
+        "name": "Agentur",
         "tagline": "Für Personalpartner.",
         "features": [
           "Unbegrenzt betreute Arbeitskräfte",
@@ -5664,12 +5813,13 @@
       },
       {
         "q": "Gibt es eine Obergrenze für aktive Positionen?",
-        "a": "Kostenlos ist 1 aktive Position enthalten. Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Übliche Schutzmaßnahmen gegen Missbrauch, etwa Anfragelimits, gelten weiterhin."
+        "a": "Kostenlos ist 1 aktive Position enthalten. Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Übliche Schutzmaßnahmen gegen Missbrauch, etwa technische Begrenzungen der Zugriffshäufigkeit, gelten weiterhin."
       }
     ],
     "priceState": {
-      "draft_pricing": "Die Preise werden vorbereitet — es kann noch nichts gekauft werden.",
-      "owner_confirmed": "Preise vom Eigentümer bestätigt. Die Aktivierung erfolgt im Organisationskonto; auf dieser Seite wird nichts belastet."
+      "draft_pricing": "Die Preise sind nicht endgültig — es kann noch nichts gekauft werden.",
+      "owner_confirmed": "Die Preise sind bestätigt. Auf dieser Seite wird nichts abgebucht.",
+      "owner_confirmed_closed": "Die Preise sind bestätigt. Die Online-Zahlung ist noch nicht geöffnet; auf dieser Seite wird nichts abgebucht."
     },
     "individual": {
       "name": "Besondere Anforderungen",
@@ -5681,7 +5831,8 @@
     "priceFree": "0 €",
     "pricePerMonth": "{price} €/Monat",
     "ctaStartFree": "Kostenlos im Organisationskonto starten",
-    "ctaSubscribe": "Im Organisationskonto aktivieren"
+    "ctaSubscribe": "Im Organisationskonto aktivieren",
+    "faqBillingClosed": "Die Online-Zahlung ist für die Öffentlichkeit noch nicht geöffnet, hier kann also nichts gekauft werden. Registrierung und eine aktive Stelle sind kostenlos. Für bezahlte Leistungen betreuen wir erste Kunden direkt und bestätigen den Preis mit Ihnen, bevor etwas beginnt."
   },
   "privacySelfService": {
     "title": "Datenschutz und Ihre Daten",
@@ -6418,7 +6569,7 @@
     },
     "map": {
       "eyebrow": "Manager-Karte",
-      "title": "Deine Projekte",
+      "title": "Ihre Projekte",
       "untitled": "Projekt ohne Namen",
       "teamLabel": "Im Team",
       "openArena": "Arena öffnen",
@@ -6439,7 +6590,7 @@
       }
     },
     "pulse": {
-      "pendingTitle": "{n, plural, one {# Eintrag wartet auf deine Bestätigung} other {# Einträge warten auf deine Bestätigung}}",
+      "pendingTitle": "{n, plural, one {# Eintrag wartet auf Ihre Bestätigung} other {# Einträge warten auf Ihre Bestätigung}}",
       "clientTitle": "{n, plural, one {# Eintrag wartet auf Ihre Entscheidung als Auftraggeber} other {# Einträge warten auf Ihre Entscheidung als Auftraggeber}}",
       "pendingBody": "Ein Tippen — und die Arbeit eines Menschen wird zum bestätigten Nachweis.",
       "clientCta": "Prüfung als Auftraggeber öffnen",
@@ -6488,7 +6639,7 @@
       "failed": "Nicht zusammengeführt. Für nicht verarbeitete Zeilen wurde nichts geändert — neu laden und erneut versuchen."
     },
     "deck": {
-      "label": "Was du tun kannst",
+      "label": "Was Sie tun können",
       "new": "Neues Projekt",
       "newHint": "Anlegen und loslegen",
       "assign": "Arbeitskraft zuweisen",
@@ -6707,7 +6858,7 @@
         "title": "Kommunikation",
         "context": "Diese Unterhaltung bezieht sich auf dieses Projekt.",
         "cta": "Nachricht zu diesem Projekt",
-        "notReadyNote": "Ein eigener Projekt-Thread wird vorbereitet. Starten Sie die Unterhaltung vorerst in Ihrem allgemeinen Posteingang — der Projektkontext wird oben angezeigt."
+        "notReadyNote": "Ein eigener Projekt-Thread ist noch nicht verfügbar. Starten Sie die Unterhaltung vorerst in Ihrem allgemeinen Posteingang — der Projektkontext wird oben angezeigt."
       },
       "fieldCount": "{n, plural, one {# Person auf dem Feld} other {# Personen auf dem Feld}}",
       "fieldViaTeam": "{n} über Team",
@@ -6719,10 +6870,10 @@
       "docsCheckedChip": "Dok. geprüft: {n}",
       "lastActivity": "Letzter Eintrag: {date}",
       "noActivity": "Noch keine Einträge.",
-      "emptyTeam": "Dieses Projekt hat noch kein Team — starte den Draft und hole die ersten Leute aufs Feld.",
+      "emptyTeam": "Dieses Projekt hat noch kein Team — starten Sie den Draft und holen Sie die ersten Leute aufs Feld.",
       "emptyTeamCta": "Draft starten",
       "positionsTitle": "Fehlende Positionen",
-      "positionsEmpty": "Der Positionsbedarf ist noch nicht bereit — sobald er da ist, siehst du hier, welche Leute fehlen.",
+      "positionsEmpty": "Der Positionsbedarf ist noch nicht verfügbar. Sobald er es ist, sehen Sie hier, welche Leute fehlen.",
       "openOps": "Management-Arena öffnen",
       "gallery": {
         "title": "Arbeitsgalerie",
@@ -6758,6 +6909,16 @@
         "into": "Diese Zeile wurde zusammengeführt in",
         "canonical": "das beibehaltene Projekt",
         "includes": "{count, plural, one {Enthält # zusammengeführte Projektzeile — ihre Nachweise stehen hier.} other {Enthält # zusammengeführte Projektzeilen — ihre Nachweise stehen hier.}}"
+      },
+      "teams": {
+        "title": "Teams in diesem Projekt",
+        "members": "{n, plural, one {# Person} other {# Personen}}",
+        "personTeam": "Team: {team}",
+        "unnamed": "Team ohne Namen",
+        "unnamedMember": "Mitglied",
+        "noMembers": "Derzeit keine Mitglieder.",
+        "unavailable": "Die Teams konnten nicht geladen werden. Bitte erneut versuchen.",
+        "manage": "Teams ändern"
       }
     },
     "workerView": {
@@ -7067,7 +7228,7 @@
     },
     "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen",
     "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren.",
-    "removeQuestion": "Diese Leistung endgültig löschen? Das lässt sich nicht rückgängig machen. Um sie nur aus der Suche zu nehmen, pausiere sie.",
+    "removeQuestion": "Diese Leistung endgültig löschen? Das lässt sich nicht rückgängig machen. Um sie nur aus der Suche zu nehmen, pausieren Sie sie.",
     "removeYes": "Ja, löschen"
   },
   "communication": {
@@ -7088,6 +7249,10 @@
     "cannotOpen": {
       "title": "Unterhaltung konnte nicht geöffnet werden",
       "body": "Möglicherweise haben Sie keine Berechtigung, dieser Person zu schreiben, oder sie ist nicht mehr verfügbar. Es wurde nichts gesendet."
+    },
+    "noLongerAvailable": {
+      "title": "Diese Unterhaltung ist nicht mehr verfügbar",
+      "body": "Sie nehmen nicht mehr daran teil, daher werden ihre Nachrichten nicht angezeigt."
     },
     "scope": {
       "support": "Support-Kanal",
@@ -7128,7 +7293,16 @@
         "blockedFailed": "Entfernen Sie den fehlgeschlagenen Anhang oder laden Sie ihn erneut hoch.",
         "partialFailure": "Die Nachricht wurde gesendet, aber einige Anhänge konnten nicht angehängt werden. Versuchen Sie, sie erneut zu senden."
       },
-      "languageLabel": "Ich schreibe auf"
+      "languageLabel": "Ich schreibe auf",
+      "errors": {
+        "notAuthenticated": "Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an und senden Sie die Nachricht.",
+        "invalidInput": "Diese Nachricht kann nicht gesendet werden: Sie ist möglicherweise zu lang, oder ein Anhang wird nicht unterstützt.",
+        "notParticipant": "Sie können in dieser Unterhaltung nicht schreiben — Sie haben keinen Zugriff darauf.",
+        "rateLimited": "Sie haben in der letzten Stunde viele Nachrichten gesendet. Warten Sie kurz und versuchen Sie es erneut.",
+        "rateCheckUnavailable": "Die Sicherheitsprüfung konnte nicht ausgeführt werden, daher wurde nichts gesendet. Versuchen Sie es erneut.",
+        "attachmentsUnavailable": "Das Senden von Anhängen ist hier noch nicht aktiviert — fügen Sie der Nachricht Text hinzu.",
+        "sendFailed": "Die Nachricht konnte nicht gesendet werden. Ihr Text ist noch da — versuchen Sie es erneut."
+      }
     },
     "launcher": {
       "openLabel": "Support kontaktieren",
@@ -7263,7 +7437,7 @@
     "tooManyOpen": "Sie haben zu viele offene Hilfeanfragen — bitte warten Sie, bis die bestehenden geprüft wurden.",
     "noteTooLong": "Die Beschreibung ist zu lang (max. 500 Zeichen).",
     "internalNote": "Interner Eintrag — es werden keine E-Mails oder Nachrichten an irgendjemanden gesendet.",
-    "explanationPending": "Die Erläuterung wird aus der litauischen Originalversion vorbereitet."
+    "explanationPending": "Die Erläuterung ist in dieser Sprache noch nicht verfügbar."
   },
   "crmPipeline": {
     "eyebrow": "Operator-Warteschlange",
@@ -7843,7 +8017,7 @@
       "menu": "Menü",
       "areas": "Arbeitsbereiche",
       "close": "Schließen",
-      "youAreHere": "Du bist hier",
+      "youAreHere": "Sie sind hier",
       "previous": "Vorheriger Bereich",
       "next": "Nächster Bereich"
     }
@@ -8192,7 +8366,7 @@
       "evidenceNote": "Öffnen und drucken / als PDF speichern",
       "journal": "Arbeitsjournal-Export",
       "journalNote": "Als CSV herunterladen (öffnet sich in Excel)",
-      "formatStatus": "PDF: verfügbar · CSV: verfügbar · Excel / Word: in Vorbereitung"
+      "formatStatus": "PDF: verfügbar · CSV: verfügbar · Excel / Word: noch nicht verfügbar"
     },
     "disclaimer": "Die Status basieren auf öffentlich aufgeführten Anforderungen und Ihren eigenen Angaben. Die endgültige Konformität wird von den Behörden oder einem Anwalt geprüft — dies ist keine rechtliche Garantie.",
     "needsMigration": "Derzeit nicht verfügbar.",
@@ -8263,10 +8437,10 @@
       "onLabel": "Aggregate werden geteilt: AN",
       "offLabel": "Aggregate werden geteilt: AUS",
       "onHint": "Ihre Agentur sieht nur Zahlen. Tippen Sie zum Ausschalten.",
-      "offHint": "Nichts wird geteilt. Tippe, um Zählwerte auf Kategorienebene zu teilen.",
+      "offHint": "Nichts wird geteilt. Tippen Sie, um Zählwerte auf Kategorienebene zu teilen.",
       "saving": "Wird gespeichert…",
       "error": {
-        "error": "Speichern fehlgeschlagen. Versuche es erneut.",
+        "error": "Speichern fehlgeschlagen. Versuchen Sie es erneut.",
         "no_worker": "Legen Sie zuerst Ihr Arbeitskraft-Profil an."
       }
     },
@@ -8660,7 +8834,7 @@
       "correct": "Auf der Arbeitskarte korrigieren",
       "salary_below_monthly_floor": "Die Gehaltsvorstellung {min}–{max} € wird als MONATSBETRAG gedruckt (EUR/Monat). Als Monat liegt das unter jedem Mindestlohn — wenn Sie einen Stunden- oder Tagessatz meinten, korrigieren Sie auf einen Monatsbetrag. Dieser Hinweis wird nicht gedruckt.",
       "salary_reads_annual": "Die Gehaltsvorstellung {min} € pro Monat liest sich wie ein Jahresbetrag. Wenn ja, korrigiere auf einen Monatsbetrag. Dieser Hinweis wird nicht gedruckt.",
-      "available_from_past": "Das Datum „kann beginnen ab“ ({date}) ist vorbei — ein Leser versteht es als „jetzt“. Stimmt das nicht mehr, aktualisiere es.",
+      "available_from_past": "Das Datum „kann beginnen ab“ ({date}) ist vorbei — ein Leser versteht es als „jetzt“. Stimmt das nicht mehr, aktualisieren Sie es.",
       "available_from_far": "Das Startdatum ({date}) liegt mehr als ein Jahr voraus. Ist das Jahr ein Tippfehler, korrigiere es.",
       "unavailable_with_start_date": "Status sagt „kann nicht arbeiten“, aber ein Startdatum ({date}) ist gesetzt. Können Sie ab diesem Datum — gut; wenn nicht, korrigieren Sie es."
     },
@@ -8732,13 +8906,13 @@
       "untitled": "Arbeit ohne Namen in der Quelle"
     },
     "athlete": {
-      "earlyNote": "Früher Entwurf deines Living CV. Die Zahlen sind deine echten Einträge; das Aussehen ist noch nicht endgültig.",
+      "earlyNote": "Früher Entwurf Ihres Living CV. Die Zahlen sind Ihre echten Einträge; das Aussehen ist noch nicht endgültig.",
       "fullCv": "Vollständigen Lebenslauf öffnen",
       "hero": {
         "portraitAlt": "Foto von {name}",
         "noRole": "Noch kein Beruf hinzugefügt",
         "availableFrom": "ab {date}",
-        "onlyYou": "Nur du siehst das hier."
+        "onlyYou": "Nur Sie sehen das hier."
       },
       "stats": {
         "aria": "Zahlen und wer dahintersteht",
@@ -8746,20 +8920,20 @@
         "organizationCount": "{count, plural, one {# Organisation} other {# Organisationen}}",
         "confirmedBy": "Bestätigt im Eintrag von {who}",
         "confirmedBySomeone": "Ein Eintrag einer Führungskraft oder Organisation liegt vor",
-        "confirmedSelfOnly": "Bisher nur deine eigene Bestätigung; keine andere Führungskraft oder Organisation hat das bestätigt",
+        "confirmedSelfOnly": "Bisher nur Ihre eigene Bestätigung; keine andere Führungskraft oder Organisation hat das bestätigt",
         "someSelfConfirmed": "Teilweise: {qualifier}",
-        "truncated": "Dein Journal ist lang, ältere Einträge können außerhalb dieser Zahlen liegen.",
+        "truncated": "Ihr Journal ist lang, ältere Einträge können außerhalb dieser Zahlen liegen.",
         "confirmed": {
           "label": "Stunden im Eintrag einer Führungskraft oder Organisation",
-          "none": "Noch bestätigt kein Eintrag einer Führungskraft oder Organisation deine Arbeit"
+          "none": "Noch bestätigt kein Eintrag einer Führungskraft oder Organisation Ihre Arbeit"
         },
         "total": {
           "label": "Stunden Erfahrung",
-          "behind": "Dein Journal und Einträge von Organisationen, jede Stunde einmal"
+          "behind": "Ihr Journal und Einträge von Organisationen, jede Stunde einmal"
         },
         "journal": {
           "label": "erfasste Stunden",
-          "behind": "Dein eigenes Arbeitsjournal",
+          "behind": "Ihr eigenes Arbeitsjournal",
           "none": "Noch nichts erfasst"
         },
         "organization": {
@@ -8768,13 +8942,13 @@
         },
         "projects": {
           "label": "Projekte",
-          "behind": "Aus deinen Einträgen"
+          "behind": "Aus Ihren Einträgen"
         }
       },
       "seasons": {
         "eyebrow": "Laufbahn",
         "title": "Laufbahn nach Saisons",
-        "empty": "Noch keine Saisons. Halte einen Arbeitstag fest, und er wird die erste Zeile deiner Geschichte.",
+        "empty": "Noch keine Saisons. Halten Sie einen Arbeitstag fest, und er wird die erste Zeile Ihrer Geschichte.",
         "emptyAction": "Arbeit erfassen",
         "undated": "Keine Daten angegeben",
         "hoursNotStated": "Keine Stunden angegeben",
@@ -8791,38 +8965,39 @@
           "confirmed": "Bestätigt im Eintrag einer Führungskraft oder Organisation",
           "client_accepted": "Vom Kunden abgenommen",
           "organization_record": "Eintrag der Organisation",
-          "own_record": "Dein eigener Eintrag",
-          "stated": "Das hast du selbst angegeben; noch zeigt es nichts"
+          "own_record": "Ihr eigener Eintrag",
+          "stated": "Das haben Sie selbst angegeben; noch zeigt es nichts"
         }
       },
       "skills": {
         "eyebrow": "Fähigkeiten",
-        "title": "Was du kannst und was das zeigt",
-        "empty": "Noch keine Fähigkeiten. Füge hinzu, was du kannst; den Rest zeigen deine Einträge.",
+        "title": "Was Sie können und was das zeigt",
+        "empty": "Noch keine Fähigkeiten. Fügen Sie hinzu, was Sie können; den Rest zeigen Ihre Einträge.",
         "emptyAction": "Fähigkeiten hinzufügen",
-        "potentialFrom": "Deine Arbeit an {skills} deutet darauf hin; noch zeigt es kein Eintrag",
-        "documentUnverified": "Das Dokument hast du selbst hinzugefügt; niemand hat es geprüft",
+        "potentialFrom": "Ihre Arbeit an {skills} deutet darauf hin; noch zeigt es kein Eintrag",
+        "documentUnverified": "Das Dokument haben Sie selbst hinzugefügt; niemand hat es geprüft",
         "involved": "Beteiligt an {hours}, nicht allein dieser Fähigkeit zugerechnet",
-        "timeUnknown": "Dein Journal konnte gerade nicht gelesen werden, darum zeigen Fähigkeiten keine Stunden.",
-        "noScore": "Nichts hier fasst einen Menschen in einer einzigen Zahl zusammen. Du siehst, was die Einträge zeigen und wer dahintersteht.",
+        "timeUnknown": "Ihr Journal konnte gerade nicht gelesen werden, darum zeigen Fähigkeiten keine Stunden.",
+        "noScore": "Nichts hier fasst einen Menschen in einer einzigen Zahl zusammen. Sie sehen, was die Einträge zeigen und wer dahintersteht.",
         "state": {
           "confirmed": "Von einer Führungskraft bestätigte Arbeit",
           "certified": "Zertifiziert",
-          "recorded": "In deinen Einträgen",
+          "recorded": "In Ihren Einträgen",
           "declared": "Selbst angegeben",
           "potential": "Möglich"
         }
       },
       "next": {
         "eyebrow": "Nächster Schritt",
-        "title": "Wohin deine Arbeit führen kann",
+        "title": "Wohin Ihre Arbeit führen kann",
         "confirmed": "Von einer Führungskraft bestätigt: {list}",
-        "inRecords": "In deinen Einträgen: {list}",
+        "inRecords": "In Ihren Einträgen: {list}",
         "missing": "Fehlt: {list}",
         "none": "Noch kein nächster Schritt zu zeigen. Mehr erfasste Arbeit gibt mehr Grundlage.",
         "unknown": "Konnte gerade nicht gelesen werden."
       }
-    }
+    },
+    "educationSelfStated": "Ausbildung laut Angabe der Arbeitskraft."
   },
   "todayScreen": {
     "eyebrow": "Heute",
@@ -8853,13 +9028,13 @@
     },
     "queue": {
       "renewDocument": "Dokument „{doc}“ braucht Aufmerksamkeit (gültig bis {date}) — erneuere es",
-      "weekGaps": "{n, plural, one {# Tag dieser Woche hat noch keinen Eintrag — trage ihn nach} other {# Tage dieser Woche haben noch keine Einträge — trage sie nach}}"
+      "weekGaps": "{n, plural, one {# Tag dieser Woche hat noch keinen Eintrag — tragen Sie ihn nach} other {# Tage dieser Woche haben noch keine Einträge — tragen Sie sie nach}}"
     },
     "layout": {
       "editButton": "Layout",
       "doneButton": "Fertig",
       "deviceNote": "Das Layout wird NUR auf diesem Gerät gespeichert.",
-      "hiddenNote": "„{section}“ ist ausgeblendet — tippe auf das Auge, um es zurückzuholen.",
+      "hiddenNote": "„{section}“ ist ausgeblendet — tippen Sie auf das Auge, um es zurückzuholen.",
       "sections": {
         "action": "Heutige Aktion",
         "overview": "Woche & Wachstum",
@@ -8942,14 +9117,14 @@
   "agencyPool": {
     "eyebrow": "Agentur-Pool",
     "title": "Mein Arbeitskräfte-Pool",
-    "intro": "Deine Leute, ihre reale Bereitschaft und offene Nachfrage — alles durch die Vertrauensschicht, nichts daran vorbei.",
+    "intro": "Ihre Leute, ihre reale Bereitschaft und offene Nachfrage — alles durch die Vertrauensschicht, nichts daran vorbei.",
     "manageLink": "Einladungen und Koordination",
     "backToAgency": "Zurück zum Agenturbereich",
-    "noAgency": "Schließe zuerst die Agentur-Einrichtung ab — der Pool gehört zu einer realen Agentur.",
+    "noAgency": "Schließen Sie zuerst die Agentur-Einrichtung ab — der Pool gehört zu einer realen Agentur.",
     "needsMigration": "Die Agentur-Verknüpfungsschicht ist in dieser Umgebung noch nicht aktiv.",
-    "loadError": "Pool konnte nicht geladen werden. Versuche es erneut.",
-    "poolTitle": "Der Pool — deine Leute",
-    "empty": "Dein Pool ist noch leer — lade die erste Person ein, und die Karten erscheinen von selbst.",
+    "loadError": "Pool konnte nicht geladen werden. Versuchen Sie es erneut.",
+    "poolTitle": "Der Pool — Ihre Leute",
+    "empty": "Ihr Pool ist noch leer — laden Sie die erste Person ein, und die Karten erscheinen von selbst.",
     "emptyCta": "Arbeitskraft einladen",
     "unnamed": "Ohne Namen",
     "noProfession": "Beruf nicht angegeben",
@@ -8960,16 +9135,16 @@
       "unknown": "Verfügbarkeit nicht angegeben"
     },
     "reviewOff": "Journalprüfung aus",
-    "evidenceLocked": "Arbeitsnachweise öffnen sich, sobald du die Kooperationsverknüpfung und die Journalprüfung der Person aktivierst — das verwaltest du im Agenturbereich.",
+    "evidenceLocked": "Arbeitsnachweise öffnen sich, sobald Sie die Kooperationsverknüpfung und die Journalprüfung der Person aktivieren — das verwalten Sie im Agenturbereich.",
     "readiness": {
       "title": "Bereitschaft nach Markt",
       "empty": "Noch keine angegebenen Länder im Pool — die Bereitschaft erscheint mit den ersten.",
       "availableNow": "jetzt verfügbar",
-      "docsNote": "Die Dokumentenbereitschaft bleibt bei der Arbeitskraft: Aggregate auf Kategorienebene erscheinen hier erst mit dem Zustimmungsschalter (eine freigabepflichtige Änderung, in Vorbereitung). Dokumenteninhalte siehst du hier nie."
+      "docsNote": "Die Dokumentenbereitschaft bleibt bei der Arbeitskraft: Aggregate auf Kategorienebene erscheinen hier erst mit dem Zustimmungsschalter. Dokumenteninhalte sehen Sie hier nie."
     },
     "demand": {
       "title": "Offene Nachfrage",
-      "humanNote": "„Wir können anbieten“ ist dein Vorschlag zu einer Anfrage — den endgültigen Match hält immer ein Mensch auf der Plattformseite fest.",
+      "humanNote": "„Wir können anbieten“ ist Ihr Vorschlag zu einer Anfrage — den endgültigen Match hält immer ein Mensch auf der Plattformseite fest.",
       "needsGate": "Derzeit nicht verfügbar.",
       "empty": "Derzeit keine offenen Anfragen.",
       "noRole": "Rolle nicht angegeben",
@@ -8978,11 +9153,11 @@
       "markButton": "Wir können anbieten",
       "marking": "Wird markiert…",
       "outcome": {
-        "not_agency": "Schließe zuerst die Agentur-Einrichtung ab.",
+        "not_agency": "Schließen Sie zuerst die Agentur-Einrichtung ab.",
         "request_not_found": "Die Anfrage existiert nicht mehr.",
         "request_not_open": "Die Anfrage ist nicht mehr offen.",
-        "needs_gate": "Diese Funktion ist in Vorbereitung (Freigabe ausstehend).",
-        "error": "Markierung konnte nicht gespeichert werden. Versuche es erneut."
+        "needs_gate": "Laden fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "error": "Markierung konnte nicht gespeichert werden. Versuchen Sie es erneut."
       }
     },
     "docs": {
@@ -9017,14 +9192,14 @@
       "disclaimer": "Dies bedeutet weder eine Anstellung noch einen bestätigten Match."
     },
     "title": "Scouting",
-    "intro": "Wähle einen deiner strukturierten Bedarfe, um passende Arbeitskräfte, ihre Eignungsgründe und eine Shortlist zu sehen.",
-    "visibilityNote": "Die Sichtbarkeit basiert auf Bereitschaft, Vertrauen und Berechtigungen — nicht auf Zahlungen. Bezahlter erweiterter Zugriff ist noch nicht aktiv (Zahlungen werden vorbereitet). Es werden nur sichere, anonymisierte Vorschauen angezeigt — keine gefälschten Einträge.",
+    "intro": "Wählen Sie einen Ihrer strukturierten Bedarfe, um passende Arbeitskräfte, ihre Eignungsgründe und eine Shortlist zu sehen.",
+    "visibilityNote": "Die Sichtbarkeit basiert auf Bereitschaft, Vertrauen und Berechtigungen — nicht auf Zahlungen. Bezahlter erweiterter Zugriff ist noch nicht aktiv. Es werden nur sichere, anonymisierte Vorschauen angezeigt — keine gefälschten Einträge.",
     "pickDemand": "Bedarf wählen",
-    "noDemands": "Du hast noch keine Bedarfe. Erstelle zuerst einen Bedarf und strukturiere dann die benötigten Fähigkeiten.",
+    "noDemands": "Sie haben noch keine Bedarfe. Erstellen Sie zuerst einen Bedarf und strukturieren Sie dann die benötigten Fähigkeiten.",
     "noDemandsCta": "Bedarf erstellen",
     "teamOffersWaiting": "{count, plural, one {# Teamangebot wartet auf Ihre Antwort} other {# Teamangebote warten auf Ihre Antwort}}",
     "unstructuredTag": "Anforderungen nicht bestätigt",
-    "notStructured": "Dieser Bedarf hat noch keine strukturierten Fähigkeiten, daher kann kein Match berechnet werden. Strukturiere zuerst die benötigten Fähigkeiten.",
+    "notStructured": "Dieser Bedarf hat noch keine strukturierten Fähigkeiten, daher kann kein Match berechnet werden. Strukturieren Sie zuerst die benötigten Fähigkeiten.",
     "handRaisers": {
       "title": "Personen, die sich für diesen Bedarf gemeldet haben",
       "notAssessed": "Berufliche Passung nicht bewertet. Dieser Bedarf nennt keinen Beruf, daher wurde niemand damit verglichen. Diese Personen werden angezeigt, weil sie selbst um Kontakt gebeten haben, nicht weil sie passen; Fähigkeiten, Qualifikationen oder Eignung werden damit nicht behauptet.",
@@ -9112,6 +9287,7 @@
       "view": "Unterhaltung öffnen",
       "error": "Die Unterhaltung konnte nicht geöffnet werden. Bitte versuchen Sie es erneut.",
       "limitReached": "Tageslimit für neue Unterhaltungen erreicht. Versuchen Sie es morgen erneut.",
+      "authorOnly": "Nur wer diesen Bedarf eingestellt hat, kann das Gespräch beginnen.",
       "shortlistFirst": "Setzen Sie die Person zuerst auf Ihre Shortlist, dann können Sie ein Gespräch anfragen."
     },
     "how": {
@@ -9151,7 +9327,7 @@
       "unavailable": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
       "error": "Etwas ist schiefgelaufen.",
       "cancel": "Abbrechen",
-      "notEntitled": "Ihr Plan umfasst keine Buchungen — starten Sie einen Test-Checkout oder fordern Sie Pilotzugang an."
+      "notEntitled": "Buchungen sind in Ihrem Plan nicht enthalten. Ihren Plan finden Sie in den Kontoeinstellungen."
     },
     "recognizedNote": "Die unten aufgeführten erforderlichen Fähigkeiten wurden vom Offline-System aus dem Text Ihres Bedarfs erkannt — sie sind ein gekennzeichneter Vorschlag, keine bestätigte Struktur. Prüfen Sie die Treffer; ein Administrator bestätigt oder passt die endgültigen Anforderungen an.",
     "nextAction": {
@@ -9193,7 +9369,8 @@
       "title": "Liste eingrenzen",
       "availableNow": "Jetzt verfügbar",
       "clear": "Filter zurücksetzen",
-      "noMatches": "Keine Kandidaten entsprechen den gewählten Filtern."
+      "noMatches": "Keine Kandidaten entsprechen den gewählten Filtern.",
+      "noMatchesCountry": "Im sichtbaren Angebot ist noch niemand in {country}. Alle anzeigen oder den Bedarf erweitern."
     },
     "pool": {
       "factsUnreadable": "Ein Teil dessen, was diese Personen erfasst haben, konnte gerade nicht gelesen werden, daher ist diese Reihenfolge nicht verlässlich. Niemand wird hier mit weniger dargestellt, als er hat — es fehlen schlicht die Fakten für den Vergleich. Laden Sie gleich neu.",
@@ -9312,7 +9489,7 @@
     "subcopy": "Zahlungen sind noch nicht aktiviert — keine Zahlungsseite und keine Karte. Bezahlte Pläne werden angezeigt, damit Sie den Umfang kennen; Pilotzugang wird manuell gewährt.",
     "note": "Die Pläne beschreiben den Umfang, keine aktive Abrechnung. Auf dieser Seite wird nichts berechnet.",
     "plans": {
-      "free_worker": "Free Worker",
+      "free_worker": "Arbeitskraft (kostenlos)",
       "worker_plus": "Person Plus (nicht angeboten)",
       "company_pilot": "Organisation",
       "agency_pilot": "Agentur-Stufe (nicht angeboten)",
@@ -9336,17 +9513,17 @@
       "contact": "Individuell vereinbart"
     },
     "readiness": {
-      "draft_pricing": "Die Pläne sind vorbereitet, nicht kaufbar. Kein Preis hier ist endgültig, und es kann nichts gekauft werden.",
-      "owner_confirmed": "Die Pläne sind nur vorbereitet — es kann nichts gekauft werden, bis Zahlungen aktiviert sind."
+      "draft_pricing": "Kein Preis hier ist endgültig, und es kann noch nichts gekauft werden.",
+      "owner_confirmed": "Es kann nichts gekauft werden, bis Zahlungen aktiviert sind."
     },
-    "featuresLabel": "In dieser Plangrenze enthalten",
+    "featuresLabel": "In diesem Plan enthalten",
     "limitValue": "bis zu {count}",
     "freeToday": {
       "freeTitle": "Heute kostenlos",
       "free": "Alles, was Sie im Produkt derzeit nutzen können, ist kostenlos — der Pilot läuft ohne Zahlungen, und nichts fragt nach einer Karte.",
-      "paidTitle": "Vorbereitete bezahlte Pläne",
+      "paidTitle": "Bezahlte Pläne",
       "paid": "Derzeit nicht verfügbar.",
-      "preparedTitle": "Vorbereitet, nicht kaufbar",
+      "preparedTitle": "Noch nicht kaufbar",
       "prepared": "Es gibt keine Zahlungsseite, und es kann nichts gekauft werden. Pilotzugang zum Umfang der bezahlten Pläne wird manuell vom Team gewährt."
     },
     "features": {
@@ -9373,8 +9550,8 @@
     },
     "enforcement": {
       "free_surface": "Heute im Produkt",
-      "server_gate": "Heute im Produkt, mit Berechtigungsprüfung",
-      "declared_boundary_only": "Vorbereitet — startet erst mit der Abrechnung",
+      "server_gate": "Heute verfügbar, je nach Ihren Berechtigungen",
+      "declared_boundary_only": "Startet erst mit der Abrechnung",
       "admin_rbac": "Intern, nur für Admins"
     }
   },
@@ -9445,6 +9622,7 @@
       "withdraw": "Vorschlag zurückziehen",
       "findAnother": "Andere Arbeitskraft finden",
       "proposeAgain": "Erneut mit neuen Terminen vorschlagen",
+      "needClosed": "Der Arbeitgeber hat diesen Bedarf geschlossen, daher kann der Vorschlag nicht mehr angenommen werden. Ablehnen ist weiterhin möglich.",
       "planning": "Im Kalender ansehen"
     },
     "connections": {
@@ -9723,7 +9901,7 @@
         "body": "Beschreiben Sie, welche Arbeitskräfte oder welche Kolonne Sie brauchen. Keine Gebühr, keine Karte, nichts wird automatisch veröffentlicht."
       },
       {
-        "title": "Ein Mensch prüft ihn",
+        "title": "Ein Mensch prüft sie",
         "body": "Ein Operator liest jede Anfrage, kontaktiert Sie und klärt Umfang, Zeitplan und Bedingungen, bevor irgendetwas weitergeht."
       },
       {
@@ -9839,15 +10017,15 @@
   "billingStatus": {
     "badge": {
       "disabled": "ZAHLUNGEN AUS",
-      "stripe_test": "TESTMODUS",
+      "stripe_test": "KEINE ECHTEN ABBUCHUNGEN",
       "stripe_live_blocked": "LIVE BLOCKIERT"
     },
     "body": {
       "disabled": "Zahlungen sind nicht aktiviert. Die Pläne unten beschreiben den Umfang; fordern Sie Pilotzugang an, um zu starten.",
-      "stripe_test": "Der Stripe-Testmodus ist für interne Tests aktiv — kein echtes Geld, keine echte Abbuchung.",
+      "stripe_test": "Es fließt kein echtes Geld und nichts wird abgebucht.",
       "stripe_live_blocked": "Ein Live-Schlüssel/-Modus wurde erkannt und aus Sicherheitsgründen hart blockiert. Live wird hier niemals aktiviert."
     },
-    "futureLive": "Live-Zahlungen sind vorbereitet, aber inaktiv — kein Live-Checkout, bis der Inhaber freigibt."
+    "futureLive": "Online-Zahlung ist noch nicht verfügbar."
   },
   "workAbroad": {
     "eyebrow": "Arbeiten im Ausland",
@@ -9957,7 +10135,7 @@
       "title": "Chancen vergleichen",
       "close": "Schließen",
       "clear": "Auswahl löschen",
-      "limitNote": "Wähle 2–3 Chancen zum Vergleichen.",
+      "limitNote": "Wählen Sie 2–3 Chancen zum Vergleichen.",
       "notStated": "Nicht angegeben",
       "fact": {
         "pay": "Lohn",
@@ -9981,6 +10159,7 @@
         "accommodation": "Unterkunft",
         "transport": "Transport",
         "tool": "Benötigte Werkzeuge",
+        "opportunityType": "Art der Chance",
         "activeCount": "Aktive Filter: {count}",
         "reset": "Filter zurücksetzen"
       },
@@ -10077,7 +10256,7 @@
       "missing": "fehlt"
     },
     "ctaProfile": "Profil vervollständigen",
-    "needsAccessTitle": "Chancen werden vorbereitet",
+    "needsAccessTitle": "Arbeitgeber-Anfragen werden hier noch nicht angezeigt",
     "needsAccessBody": "Arbeitgeber-Anfragen erscheinen hier, sobald die Sichtbarkeit für Arbeitskräfte aktiviert ist. Vervollständigen Sie in der Zwischenzeit Ihr Profil, damit Sie bereit sind, sobald passende Anfragen erscheinen.",
     "emptyTitle": "Derzeit keine offenen Anfragen",
     "emptyBody": "Wenn Arbeitgeber neue Anfragen einstellen, erscheinen sie hier. In der Zwischenzeit lohnt es sich, Ihr Profil zu vervollständigen.",
@@ -10153,7 +10332,7 @@
       "missingPrefix": "fehlend:",
       "formalTitle": "Formale Anforderungen",
       "formalLicence": "Führerschein {categories}: eine formale Anforderung. Erfasste Arbeit ersetzt ihn nicht.",
-      "formalLicenceHeld": "Führerschein {categories}: du hast angegeben, ihn zu besitzen (nicht geprüft).",
+      "formalLicenceHeld": "Führerschein {categories}: Sie haben angegeben, ihn zu besitzen (nicht geprüft).",
       "formalQualification": "Für diese Arbeit kann eine berufliche Qualifikation oder Lizenz gesetzlich vorgeschrieben sein. Erfasste Arbeit ersetzt sie nicht."
     },
     "recommendations": {
@@ -10346,7 +10525,7 @@
     "savedSearches": {
       "title": "Gespeicherte Suchen",
       "intro": "Eine Frage, die Sie behalten — die Antwort wird bei jedem Öffnen neu berechnet.",
-      "empty": "Noch keine gespeicherten Suchen. Grenze die Liste ein und speichere die Frage.",
+      "empty": "Noch keine gespeicherten Suchen. Grenzen Sie die Liste ein und speichern Sie die Frage.",
       "matches": "{count} Treffer",
       "new": "{count} neu",
       "delete": "Entfernen",
@@ -10452,10 +10631,10 @@
   },
   "workerIntake": {
     "title": "Arbeitskraft-Aufnahme",
-    "subtitle": "Nennen Sie uns Ihr Gewerk und Ihre Verfügbarkeit. Wir machen daraus einen Profilentwurf, den Sie prüfen — nichts wird automatisch veröffentlicht.",
+    "subtitle": "Nennen Sie uns Ihr Gewerk und Ihre Verfügbarkeit, um Ihre Angaben zu prüfen. Dieses Formular speichert nichts — damit Arbeitgeber Sie finden, erstellen Sie Ihr kostenloses Profil und tragen Sie Ihre Angaben dort ein.",
     "fullName": "Vollständiger Name",
     "profession": "Branche & Arbeitsart",
-    "professionPlaceholder": "Wähle Branche und Arbeitsart",
+    "professionPlaceholder": "Wählen Sie Branche und Arbeitsart",
     "targetCountries": "Länder, in denen Sie arbeiten möchten",
     "targetCountriesHelp": "Zwei-Buchstaben-Codes, durch Kommas getrennt (z. B. NL, DE).",
     "availableFrom": "Verfügbar ab",
@@ -10478,11 +10657,11 @@
     "languages": "Sprachen",
     "languagesHelp": "Durch Kommas getrennt (z. B. en, lt).",
     "comment": "Sonstiges",
-    "commentHelp": "Ein paar Sätze über Ihre Erfahrung — der Assistent nutzt dies für Ihren Profilentwurf.",
-    "submit": "Profilentwurf erstellen",
+    "commentHelp": "Ein paar Sätze über Ihre Erfahrung.",
+    "submit": "Angaben prüfen",
     "aiBadge": "KI-Vorschlag",
     "aiNotVerified": "Vor dem Speichern prüfen — nichts wird automatisch gespeichert.",
-    "aiDisabled": "KI-Entwurf noch nicht erstellt — der Assistent ist nicht aktiviert. Ihre Angaben werden nicht gespeichert.",
+    "aiDisabled": "Aus diesem Formular wurde nichts gespeichert, und ein automatischer Vorschlag ist derzeit nicht verfügbar. Damit Arbeitgeber Sie finden, erstellen Sie unten Ihr kostenloses Arbeitskraft-Profil und tragen Sie Ihre Angaben dort ein.",
     "aiHeadline": "Vorgeschlagene Überschrift",
     "aiSkills": "Vorgeschlagene Fähigkeiten",
     "aiMissing": "Fehlt noch",
@@ -10508,7 +10687,7 @@
   },
   "companyNeed": {
     "title": "Eine Personalanfrage starten",
-    "subtitle": "Beschreiben Sie die Menschen, die Sie brauchen. Wir machen daraus einen sauberen Stellenentwurf, den Sie prüfen — wir erfinden niemals Löhne und veröffentlichen niemals automatisch.",
+    "subtitle": "Beschreiben Sie die Menschen, die Sie brauchen. Wir bewahren Ihre Anfrage auf und melden uns bei Ihnen — wir erfinden niemals Löhne und veröffentlichen niemals automatisch.",
     "companyName": "Unternehmensname",
     "profession": "Benötigte Branche & Arbeitsart",
     "country": "Land",
@@ -10562,11 +10741,11 @@
     "engSubcontracting": "Subunternehmervergabe",
     "engAgency": "Überlassung durch Personalagentur",
     "description": "Beschreiben Sie Ihre Anfrage",
-    "descriptionHelp": "Was die Arbeit ist, wo sie stattfindet und welche Anforderungen es gibt — der Assistent nutzt dies, um einen sauberen Stellenentwurf zu erstellen.",
-    "submit": "Stellenentwurf erstellen",
+    "descriptionHelp": "Was die Arbeit ist, wo sie stattfindet und welche Anforderungen es gibt.",
+    "submit": "Anfrage senden",
     "aiBadge": "KI-Vorschlag",
     "aiNotVerified": "Vor der Veröffentlichung prüfen — nichts wird automatisch veröffentlicht.",
-    "aiDisabled": "KI-Entwurf noch nicht erstellt — der Assistent ist nicht aktiviert. Ihre Angaben werden nicht gespeichert.",
+    "aiDisabled": "Ein automatischer Vorschlag wird derzeit nicht erstellt. Ihre Anfrage wird wie gewohnt bearbeitet.",
     "aiRole": "Normalisierte Rolle",
     "aiSkills": "Erforderliche Fähigkeiten",
     "aiDocs": "Erforderliche Dokumente",
@@ -10575,14 +10754,14 @@
     "aiNone": "Es wurde kein Vorschlag erstellt — bitte prüfen Sie Ihre Angaben.",
     "statusInvalid": "Einige Angaben müssen korrigiert werden. Bitte prüfen Sie das Formular.",
     "statusError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
-    "bridgeNote": "Um diese Anfrage zur Nachverfolgung einzureichen, erstellen Sie ein kostenloses Konto. Sie haben bereits eines? Melden Sie sich an.",
-    "bridgeSignup": "Konto erstellen und Anfrage einreichen",
+    "bridgeNote": "Mit dem Absenden des Formulars ist Ihre Anfrage eingereicht — ein Konto ist nicht nötig. Ein kostenloses Unternehmenskonto mit derselben E-Mail-Adresse kann die Anfrage übernehmen, sobald Sie gezeigt haben, dass die Adresse Ihnen gehört, und dann Stellen veröffentlichen und Kandidaten vormerken. Sie haben bereits eines? Melden Sie sich an.",
+    "bridgeSignup": "Kostenloses Konto erstellen",
     "bridgeLogin": "Sie haben bereits ein Konto? Anmelden",
     "autoSuggested": "Aus Ihrer Beschreibung vorgeschlagen — bitte prüfen und bei Bedarf anpassen. Nichts wird automatisch eingereicht.",
     "preparedTitle": "Ihre Anfrage ist vorbereitet",
     "preparedBody": "Wir haben Ihre Anfrage strukturiert. Um sie zur Nachverfolgung einzureichen, erstellen Sie unten ein kostenloses Konto oder melden Sie sich an — dann erreicht sie das Team.",
     "receivedTitle": "Anfrage erhalten",
-    "receivedBody": "Wir haben Ihre Anfrage erhalten und bewahren sie für die Nachverfolgung mit Ihnen auf. Um sie anzusehen und zu verwalten, erstellen Sie unten ein Konto oder melden Sie sich an.",
+    "receivedBody": "Wir haben Ihre Anfrage erhalten und bewahren sie für die Nachverfolgung mit Ihnen auf. Um sie in einem Konto zu sehen, erstellen Sie ein Unternehmenskonto oder melden Sie sich mit derselben E-Mail-Adresse an, die Sie hier angegeben haben. Sobald Sie gezeigt haben, dass die Adresse Ihnen gehört, erscheint die Anfrage unter den Anfragen in Ihrem Konto, und Sie können sie dort übernehmen. Sie wird nicht automatisch verknüpft, und ein Konto mit einer anderen Adresse sieht sie nicht.",
     "partnerRouteTitle": "Für Bauanfragen — ein Weg über Partnerunternehmen",
     "partnerRouteBody": "Wenn noch keine passende direkte Arbeitskraft verfügbar ist, können wir für Bauanfragen zunächst empfehlen, unsere Partnerin UAB „Nonstop Group“ (LT) — die Betreiberin der Plattform — zu kontaktieren. Das hilft, Dokumente, Zuständigkeiten und Onboarding schneller abzustimmen, wobei ein Mensch jeden Schritt koordiniert."
   },
@@ -11070,7 +11249,7 @@
           "Anbieter von Arbeitsmarktdiensten",
           "Weitere legitime Arbeitsmarktteilnehmer"
         ],
-        "pointsLabel": "Ihr Platz im selben Netzwerk",
+        "pointsLabel": "Der Platz dieser Teilnehmer im selben Netzwerk",
         "points": [
           "sie arbeiten mit denselben echten Arbeitsaufzeichnungen, nicht mit getrennten Dateien;",
           "Rollen und Verantwortung bleiben klar getrennt: wer veröffentlicht hat, wer gearbeitet hat, wer bestätigt hat."
@@ -11194,22 +11373,22 @@
       "body": "Der Zugriff auf Daten ist standardmäßig geschlossen und wird auf den Seiten unten in einfachen Worten erklärt."
     },
     "links": {
-      "workers": "Für Beschäftigte",
+      "workers": "Für Arbeitskräfte",
       "companies": "Für Unternehmen",
       "agencies": "Für Agenturen"
     }
   },
   "accountBilling": {
     "title": "Abrechnung & Abonnement",
-    "testBadge": "Testmodus",
+    "testBadge": "Keine echten Abbuchungen",
     "returned": {
-      "success": "Test-Checkout abgeschlossen. Es ist kein echtes Geld geflossen; der Abonnementstatus unten wird über den signaturgeprüften Webhook des Zahlungsanbieters synchronisiert und kann einen Moment brauchen.",
+      "success": "Checkout abgeschlossen. Es ist kein echtes Geld geflossen; der Abonnementstatus unten wird über den signaturgeprüften Webhook des Zahlungsanbieters synchronisiert und kann einen Moment brauchen.",
       "cancelled": "Der Checkout wurde abgebrochen. Es wurde nichts abgebucht und an Ihrem Konto hat sich nichts geändert.",
       "portal": "Sie sind zurück aus dem Abrechnungsportal. Dort vorgenommene Änderungen werden hier automatisch synchronisiert.",
       "successLive": "Checkout abgeschlossen. Der Abonnementstatus unten wird aus der signaturgeprüften Bestätigung des Zahlungsanbieters übernommen und kann einen Moment dauern.",
       "syncing": "Abgleich mit dem Zahlungsanbieter läuft — Ihr Abonnement erscheint hier in Kürze. Eine erneute Bestellung ist nicht nötig."
     },
-    "disabled": "Zahlungen sind nicht aktiviert. Bezahlpläne sind vorbereitete Entwürfe — hier ist nichts kaufbar und keine Zahlungsmethode nötig.",
+    "disabled": "Zahlungen sind nicht aktiviert. Hier ist nichts kaufbar und keine Zahlungsmethode nötig.",
     "none": "Kein Abonnement auf diesem Konto.",
     "planLabel": "Tarif",
     "statusLabel": "Abostatus",
@@ -11230,15 +11409,15 @@
       "open": "Abonnement verwalten",
       "opening": "Wird geöffnet…",
       "error": "Das Abrechnungsportal konnte nicht geöffnet werden",
-      "hint": "Öffnet das Portal des Zahlungsanbieters zum Kündigen oder Ändern der Zahlungsmethode. Nur Testmodus — keine echten Abbuchungen."
+      "hint": "Öffnet das Portal des Zahlungsanbieters zum Kündigen oder Ändern der Zahlungsmethode."
     },
     "refresh": {
       "cta": "Abrechnungsstatus aktualisieren",
       "working": "Wird geprüft…",
-      "updated": "Dein Abrechnungsstatus wurde beim Zahlungsanbieter aktualisiert.",
-      "alreadyCurrent": "Dein Abrechnungsstatus ist bereits aktuell.",
-      "notFound": "Der Zahlungsanbieter hat für diesen Arbeitsbereich noch kein Abonnement. Wenn du gerade bezahlt hast, warte eine Minute und versuche es erneut.",
-      "tryLater": "Im Moment nicht prüfbar. Es wurde nichts geändert - bitte versuche es in ein paar Minuten erneut.",
+      "updated": "Ihr Abrechnungsstatus wurde beim Zahlungsanbieter aktualisiert.",
+      "alreadyCurrent": "Ihr Abrechnungsstatus ist bereits aktuell.",
+      "notFound": "Der Zahlungsanbieter hat für diesen Arbeitsbereich noch kein Abonnement. Wenn Sie gerade bezahlt haben, warten Sie eine Minute und versuchen Sie es erneut.",
+      "tryLater": "Im Moment nicht prüfbar. Es wurde nichts geändert - bitte versuchen Sie es in ein paar Minuten erneut.",
       "hint": "Fragt den Zahlungsanbieter einmal für diesen Arbeitsbereich ab. Nur lesend - nichts wird abgebucht oder geändert."
     },
     "subscribe": {
@@ -11251,7 +11430,7 @@
   "accountPlan": {
     "title": "Ihr Plan",
     "freePilot": "Kostenloses Pilotprogramm — alles, was derzeit im Produkt verfügbar ist, ist für Sie kostenlos.",
-    "prepared": "Bezahlte Pläne sind vorbereitet, aber nicht kaufbar. Zahlungen sind nicht aktiviert und es wird keine Zahlungsmethode benötigt.",
+    "prepared": "Bezahlte Pläne sind noch nicht kaufbar. Zahlungen sind nicht aktiviert und es wird keine Zahlungsmethode benötigt.",
     "pricingLink": "Sehen Sie, was kostenlos ist und was kostenpflichtig sein wird"
   },
   "privacyConsent": {
@@ -11308,7 +11487,8 @@
       "needsMigration": "Diese Funktion ist auf dem Server noch nicht aktiviert. Ihr Profil bleibt privat.",
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
       "declinedNote": "In Ordnung — Ihr Profil bleibt privat. Diese Wahl finden Sie hier jederzeit.",
-      "readFailed": "Es konnte nicht geprüft werden, ob Arbeitgeber Ihr Profil sehen können. Das heißt nicht, dass die Sichtbarkeit ausgeschaltet ist — bitte versuchen Sie es später erneut."
+      "readFailed": "Es konnte nicht geprüft werden, ob Arbeitgeber Ihr Profil sehen können. Das heißt nicht, dass die Sichtbarkeit ausgeschaltet ist — bitte versuchen Sie es später erneut.",
+      "legalTextInEnglish": "Dieser Rechtstext wird auf Englisch angezeigt: Die Fassung in Ihrer Sprache ist noch nicht freigegeben. Es gilt der englische Text."
     },
     "disclosures": {
       "intro": "Jede Übermittlung Ihres Lebenslaufs, Ihrer Kontaktdaten oder anderer Daten an ein bestimmtes Unternehmen erfolgt erst nach Ihrer gesonderten Bestätigung.",
@@ -12034,7 +12214,7 @@
       "stateLabel": "KI-Status",
       "state": {
         "disabled": "Aus",
-        "mock": "Mock (deterministischer Testmodus)",
+        "mock": "Feste Regeln (kein Sprachmodell)",
         "live": "Aktiv"
       },
       "reason": {
@@ -12043,12 +12223,12 @@
         "unknown_provider": "Der gewählte KI-Anbieter wird nicht erkannt, daher bleibt die KI aus.",
         "missing_api_key": "Kein KI-Schlüssel hinterlegt, daher bleibt die KI aus."
       },
-      "disabledBody": "In dieser Umgebung ist kein externer KI-Anbieter angebunden. Alles auf dieser Seite wird nach festen Regeln aus Ihren eigenen Daten berechnet — kein Text hier wurde von einem Sprachmodell erzeugt.",
-      "whenEnabled": "Sobald der Eigentümer einen Anbieter anbindet und der Audit-Speicher für Vorschläge angewendet ist, werden prüfbare Entwurfsvorschläge verfügbar — immer als Vorschläge, die ein Mensch bestätigt, nie als automatische Änderungen.",
-      "gates": "Der Assistent ist in dieser Umgebung noch nicht verfügbar. Vorschläge bleiben aus, bis er angebunden ist — in der Zwischenzeit wird nichts generiert.",
+      "disabledBody": "Es ist kein externer KI-Anbieter angebunden. Alles auf dieser Seite wird nach festen Regeln aus Ihren eigenen Daten berechnet — kein Text hier wurde von einem Sprachmodell erzeugt.",
+      "whenEnabled": "Sobald der Assistent eingeschaltet ist, macht er prüfbare Entwurfsvorschläge — immer als Vorschläge, die ein Mensch bestätigt, nie als automatische Änderungen.",
+      "gates": "Der Assistent ist noch nicht verfügbar. Vorschläge bleiben aus, bis er angebunden ist — in der Zwischenzeit wird nichts generiert.",
       "providerLabel": "Anbieter",
       "modelLabel": "Modell",
-      "notWired": "Die Generierung ist in dieser Phase bewusst aus — Ergebnisse wären noch nicht nachvollziehbar. Der Status oben dient nur der Transparenz."
+      "notWired": "Die Textgenerierung ist nicht eingeschaltet. Der Status oben dient nur der Transparenz."
     }
   },
   "finance": {
@@ -12507,7 +12687,7 @@
         "other": "Organisation"
       },
       "visibilityReason": "Angezeigt werden nur Personen, die auffindbar sein möchten oder eine echte Arbeitsbeziehung zu Ihnen haben.",
-      "noContactYet": "Nachrichten sind erst nach einer Einladung oder gemeinsamer Arbeit möglich. Lade ein — oder frage eine Dienstleistung an."
+      "noContactYet": "Nachrichten sind erst nach einer Einladung oder gemeinsamer Arbeit möglich. Laden Sie ein — oder fragen Sie eine Dienstleistung an."
     },
     "sent": {
       "title": "Meine gesendeten Einladungen",
@@ -12792,6 +12972,7 @@
     "servicesTitle": "Was diese Person kann",
     "servicesEmpty": "Noch nichts angeboten",
     "servicesUnavailable": "Angebotene Leistungen konnten nicht geladen werden",
+    "sharedAfterWork": "Leistungen, Arbeitsfotos und erfasste Arbeit werden angezeigt, sobald Sie zusammenarbeiten.",
     "serviceRemote": "Ortsunabhängig",
     "photoAlt": "Foto abgeschlossener Arbeit",
     "historyTitle": "Importierter Verlauf",
@@ -12847,7 +13028,7 @@
   "agencyClients": {
     "title": "Kunden",
     "subtitle": "Für wen Sie Personal stellen — Kundenbedarfe werden mit Ihren Anfragen und dem Kandidaten-Scouting verknüpft.",
-    "gatedHeading": "Vorbereitet — wartet auf Aktivierung durch den Inhaber",
+    "gatedHeading": "Noch nicht verfügbar",
     "gatedBody": "Derzeit nicht verfügbar.",
     "notLinkable": "Anfragen können noch nicht mit Kunden verknüpft werden.",
     "clientsEmpty": "Noch keine Kunden. Fügen Sie unten den ersten hinzu.",
@@ -12880,7 +13061,7 @@
   "agencyBridge": {
     "title": "Kundenunternehmen",
     "subtitle": "Verbinden Sie sich mit einem echten Kundenunternehmen, sehen Sie nur die geteilten Anfragen und bieten Sie einen Ihrer aktiven Roster-Mitarbeiter an.",
-    "gatedHeading": "Vorbereitet — Aktivierung durch Eigentümer ausstehend",
+    "gatedHeading": "Noch nicht verfügbar",
     "gatedBody": "Derzeit nicht verfügbar.",
     "connectionsHeading": "Verbindungen",
     "inviteEmailLabel": "Kunden-E-Mail",
@@ -12934,7 +13115,7 @@
   "clientBridge": {
     "title": "Personalagenturen",
     "subtitle": "Akzeptieren Sie eine Personalagentur, mit der Sie arbeiten möchten, teilen Sie bestimmte Anfragen und prüfen Sie die vorgeschlagenen Kandidaten auf Ihrer eigenen Scouting-Seite.",
-    "gatedHeading": "Vorbereitet — Aktivierung durch Eigentümer ausstehend",
+    "gatedHeading": "Noch nicht verfügbar",
     "gatedBody": "Derzeit nicht verfügbar.",
     "invitesHeading": "Verbindungseinladungen",
     "noInvites": "Keine ausstehenden Einladungen.",
@@ -12969,7 +13150,11 @@
       "notReady": "Kandidaten annehmen oder ablehnen ist noch nicht verfügbar — nutzen Sie bis dahin Kontakt oder einen Buchungsvorschlag unten.",
       "forbidden": "Nur der Eigentümer dieser Anfrage kann entscheiden.",
       "closed": "Dieses Angebot ist nicht mehr offen.",
-      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+      "limitOpen": "Sie haben bereits 10 Buchungsvorschläge, die auf die Antwort der Arbeitskräfte warten – mehr können nicht gleichzeitig offen sein. Ziehen Sie nicht mehr benötigte zurück und nehmen Sie dann diesen Kandidaten an. Das Angebot der Agentur bleibt offen.",
+      "limitDaily": "Sie haben in den letzten 24 Stunden 30 Buchungsvorschläge gesendet – das Tageslimit. Nehmen Sie diesen Kandidaten später an: Es wurde nichts gesendet, das Angebot der Agentur bleibt offen.",
+      "limitUnknown": "Das Limit für Buchungsvorschläge ist erreicht (10 warten auf Antwort, 30 pro Tag). Ziehen Sie nicht mehr benötigte zurück oder versuchen Sie es später; das Angebot der Agentur bleibt offen.",
+      "openBookings": "Buchungen öffnen"
     },
     "title": "Von der Agentur vorgeschlagene Kandidaten",
     "subtitle": "Eine verbundene Personalagentur hat diese Mitarbeiter für diese Anfrage vorgeschlagen. Prüfen, kontaktieren oder buchen Sie sie mit denselben Steuerelementen unten.",
@@ -13122,12 +13307,12 @@
     },
     "imageOcr": {
       "label": "Lebenslauf-Foto / Bild (JPG, PNG)",
-      "note": "In Vorbereitung — Bilderkennung ist noch nicht verfügbar. Laden Sie PDF/DOCX hoch oder fügen Sie den Text ein."
+      "note": "Bilderkennung ist noch nicht verfügbar. Laden Sie PDF/DOCX hoch oder fügen Sie den Text ein."
     }
   },
   "companySwitcher": {
     "heading": "Aktives Unternehmen",
-    "note": "Der Wechsel legt fest, für welche Organisation dein Unternehmensbereich arbeitet."
+    "note": "Der Wechsel legt fest, für welche Organisation Ihr Unternehmensbereich arbeitet."
   },
   "intelligence": {
     "module": {
@@ -13946,7 +14131,7 @@
         },
         "assignWorker": {
           "label": "Arbeitskraft zuweisen",
-          "description": "Verknüpfe eine akzeptierte Person mit einem Projekt — wichtig."
+          "description": "Verknüpfen Sie eine akzeptierte Person mit einem Projekt — wichtig."
         },
         "whoWaits": {
           "label": "Wer wartet auf mich?",
@@ -14061,7 +14246,7 @@
         },
         "proposeCandidate": {
           "label": "Kandidat vorschlagen",
-          "description": "Biete eine Arbeitskraft für einen geteilten Bedarf an."
+          "description": "Bieten Sie eine Arbeitskraft für einen geteilten Bedarf an."
         },
         "offerStatus": {
           "label": "Angebotsstatus",
@@ -14315,7 +14500,7 @@
       "agendaUndated": "{count, plural, one {# weiterer Eintrag ohne Datum.} other {# weitere Einträge ohne Datum.}}",
       "agendaMore": "(+{count})",
       "agendaMoreDays": "{count, plural, one {… und # weiterer Tag mit Einträgen.} other {… und # weitere Tage mit Einträgen.}}",
-      "agendaConflicts": "⚠ {count, plural, one {# überlappende Verpflichtung gefunden} other {# überlappende Verpflichtungen gefunden}} — dieser Plan ist physisch unmöglich; prüfe den Kalender.",
+      "agendaConflicts": "⚠ {count, plural, one {# überlappende Verpflichtung gefunden} other {# überlappende Verpflichtungen gefunden}} — dieser Plan ist physisch unmöglich; prüfen Sie den Kalender.",
       "chipAgenda": "Mein Plan",
       "userAgenda": "Zeig meinen Plan",
       "chipNeedWorkers": "Bedarf beschreiben",
@@ -14449,7 +14634,7 @@
         "understood": "Verstanden: {label}.",
         "inCatalogue": "Ich kann das als Ihren Beruf im Profil eintragen — dann zeigt die Liste Ihren Markt.",
         "notInCatalogue": "Diesen Beruf gibt es in der Auswahlliste noch nicht — tragen Sie ihn mit Ihren eigenen Worten in den Werdegang ein: Er erscheint auf Ihrer Karte und im CV.",
-        "pastJob": "Verstanden: {label}. Tragen wir das in den Werdegang ein — der Titel ist schon ausgefüllt, ergänze den Rest.",
+        "pastJob": "Verstanden: {label}. Tragen wir das in den Werdegang ein — der Titel ist schon ausgefüllt, ergänzen Sie den Rest.",
         "readBesideSearch": "Verstanden: {label}. Sobald der Beruf im Profil steht, zeigt die Liste Ihren Markt statt aller Anzeigen.",
         "chipSetProfession": "Beruf festlegen",
         "chipRecordExperience": "Werdegang eintragen"
@@ -14495,7 +14680,7 @@
         "saved": "Im Profil gespeichert.",
         "noWorker": "Ein Beruf kann nur in einem Arbeitnehmerprofil gespeichert werden — Sie haben noch keins.",
         "unreadable": "Ich konnte Ihre Berufe nicht lesen — nichts wurde geändert. Versuchen Sie es erneut.",
-        "invalid": "Dieser Beruf ist nicht in der Liste — speichere ihn in eigenen Worten.",
+        "invalid": "Dieser Beruf ist nicht in der Liste — speichern Sie ihn in eigenen Worten.",
         "failed": "Speichern fehlgeschlagen — nichts wurde geändert. Versuchen Sie es erneut."
       },
       "languageStatement": {
@@ -14515,7 +14700,7 @@
       },
       "savedOpportunities": {
         "intro": "Ihre gespeicherten Möglichkeiten ({count}):",
-        "none": "Noch nichts gespeichert — tippe auf der Möglichkeiten-Seite bei einem Job auf „Speichern“.",
+        "none": "Noch nichts gespeichert — tippen Sie auf der Möglichkeiten-Seite bei einem Job auf „Speichern“.",
         "unavailable": "Ich konnte Ihre gespeicherten Möglichkeiten nicht lesen — ich rate nicht.",
         "chipOpen": "Gespeicherte öffnen"
       },
@@ -14546,7 +14731,7 @@
       "newJobsNeedProfession": "Um neue Jobs zu zeigen, sagen Sie mir, welchen Beruf Sie suchen.",
       "newJobsNeedCountry": "Um neue Jobs zu zeigen, sagen Sie mir, in welchen Ländern Sie arbeiten möchten.",
       "newJobsNoProfile": "Um neue Jobs zu zeigen, brauche ich zuerst Ihr Profil.",
-      "newJobsUnavailable": "Neue Jobs konnten gerade nicht geprüft werden. Bitte versuche es später erneut.",
+      "newJobsUnavailable": "Neue Jobs konnten gerade nicht geprüft werden. Bitte versuchen Sie es später erneut.",
       "openConversationOpening": "Ich öffne das Gespräch mit {name}.",
       "openConversationNone": "Diese Person habe ich unter Ihren Gesprächspartnern und in Ihrem Team nicht gefunden. Ihre Nachrichten finden Sie im Nachrichtenbereich.",
       "openConversationWhich": "Welche Person meinen Sie?",
@@ -14656,7 +14841,7 @@
       "eduCohortCreated": "Gruppe angelegt. Sie können Lernende zuweisen.",
       "eduAssignNoCohort": "Noch keine Gruppen — legen Sie zuerst eine Gruppe an.",
       "eduAssignNoLearners": "Noch keine angenommenen Lernenden. Laden Sie einen Lernenden ein — zuweisen können Sie ihn nach der Annahme.",
-      "eduMembersNotForRole": "Gruppenmitgliedschaft ist für deine Rolle nicht verfügbar. Nur Inhaber, Admin oder Leitung der Einrichtung selbst können Lernende zuordnen.",
+      "eduMembersNotForRole": "Gruppenmitgliedschaft ist für Ihre Rolle nicht verfügbar. Nur Inhaber, Admin oder Leitung der Einrichtung selbst können Lernende zuordnen.",
       "eduAssignDone": "Lernender der Gruppe zugewiesen.",
       "eduNotInstitution": "Diese Organisation ist noch nicht als Bildungseinrichtung markiert. Markieren Sie das im Unternehmensbereich.",
       "eduUnavailable": "Programme können gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
@@ -14971,7 +15156,7 @@
       "loading": "Wird geladen…",
       "noContext": "Um Arbeitszeit zu erfassen, brauchen Sie zuerst einen Arbeitskontext (Organisation oder Projekt). Richten Sie einen ein und kommen Sie zurück.",
       "noContextCta": "Arbeitskontext einrichten",
-      "noWorker": "Kein Arbeitnehmerprofil gefunden. Aktiviere die Arbeitnehmerrolle in den Kontoeinstellungen.",
+      "noWorker": "Kein Arbeitnehmerprofil gefunden. Aktivieren Sie die Arbeitnehmerrolle in den Kontoeinstellungen.",
       "notAuthed": "Sitzung beendet. Bitte melden Sie sich erneut an.",
       "labelDate": "Datum",
       "labelTime": "Zeit",
@@ -14989,7 +15174,7 @@
       "working": "Wird gespeichert…",
       "confirmTitle": "Eintrag bestätigen?",
       "saved": "Eintrag im Arbeitsjournal gespeichert.",
-      "errorGeneric": "Speichern fehlgeschlagen. Bitte versuche es erneut.",
+      "errorGeneric": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "minutesUnit": "Min",
       "errorNoWorkContent": "Ein Eintrag braucht die Arbeit: was Sie getan haben, wo oder wie lange. Schreiben Sie es in Ihren Worten, z. B. „Fenster von 8 bis 17 montiert“.",
       "errorNotesTooLong": "Der Eintrag ist zu lang — kürze ihn auf 4000 Zeichen.",
@@ -15022,7 +15207,7 @@
     },
     "findWork": {
       "emptyState": "Momentan habe ich keine aktiven Angebote gefunden, die zu Ihren Kriterien passen. Es gibt noch keine Benachrichtigungen, deshalb verspreche ich keine — fragen Sie später noch einmal oder ergänzen Sie Ihr Profil, damit mehr Bedarfe passen.",
-      "blockedNoWorker": "Um Arbeit zu suchen, aktiviere die Arbeitnehmerrolle in den Kontoeinstellungen.",
+      "blockedNoWorker": "Um Arbeit zu suchen, aktivieren Sie die Arbeitnehmerrolle in den Kontoeinstellungen.",
       "blockedNoAccess": "Derzeit nicht verfügbar.",
       "fitStrong": "Starke Übereinstimmung",
       "fitPossible": "Mögliche Übereinstimmung",
@@ -15388,26 +15573,26 @@
   "landing": {
     "requestDoors": {
       "workerSearch": {
-        "title": "Personalsuche beauftragen",
-        "body": "Nennen Sie den Beruf, die benötigte Personenzahl, das Land und den Arbeitsbeginn."
+        "title": "Anfrage zur Personalsuche",
+        "body": "Nennen Sie Beruf, Anzahl der Arbeitskräfte, Land und Arbeitsbeginn."
       },
       "b2b": {
-        "title": "B2B-Anfrage senden",
+        "title": "Dienstleistungsanfrage für Unternehmen (B2B)",
         "body": "Beschreiben Sie Art der Arbeiten, Ort, Umfang und Fristen."
       },
       "project": {
-        "title": "Einzelprojekt beauftragen",
-        "body": "Für Privat- und Geschäftskunden: Beschreiben Sie das benötigte Projekt oder die Dienstleistung."
+        "title": "Anfrage für ein Einzelprojekt",
+        "body": "Für private und gewerbliche Auftraggeber: Beschreiben Sie, welches Projekt oder welche Dienstleistung Sie brauchen."
       },
-      "title": "Anfrage senden",
-      "promise": "Senden Sie Ihre Anfrage – wir melden uns innerhalb von 24 Stunden bei Ihnen.",
-      "name": "Name oder Firma",
+      "title": "Bedarf melden",
+      "promise": "Beschreiben Sie, welche Arbeitskräfte, Dienstleistungen oder Projektausführung Sie brauchen. Die Anfrage wird dem Team von LabourMarket.ai zur Prüfung übergeben.",
+      "name": "Vor- und Nachname oder Firmenname",
       "email": "E-Mail",
       "phone": "Telefon",
       "country": "Land",
       "countryChoose": "Land wählen",
       "city": "Ort",
-      "profession": "Beruf",
+      "profession": "Beruf oder Fachrichtung",
       "workers": "Anzahl der Arbeitskräfte",
       "start": "Arbeitsbeginn",
       "details": "Weitere Anforderungen",
@@ -15415,7 +15600,7 @@
       "place": "Einsatzort",
       "scope": "Umfang",
       "deadline": "Fristen",
-      "need": "Benötigtes Projekt oder benötigte Dienstleistung",
+      "need": "Welches Projekt oder welche Dienstleistung Sie brauchen",
       "customer": "Auftraggeber",
       "customerPrivate": "Privatperson",
       "customerBusiness": "Unternehmen",
@@ -15423,11 +15608,11 @@
       "send": "Anfrage senden",
       "sending": "Wird gesendet…",
       "receivedTitle": "Ihre Anfrage ist bei uns eingegangen",
-      "receivedBody": "Wir melden uns innerhalb von 24 Stunden über die angegebenen Kontaktdaten.",
-      "invalid": "Bitte prüfen Sie die Felder und versuchen Sie es erneut. Ihre Eingaben bleiben im Formular.",
-      "limited": "Gerade gehen zu viele Anfragen ein. Bitte versuchen Sie es später: Ihre Eingaben bleiben im Formular.",
-      "unavailable": "Ihre Anfrage konnte nicht gesendet werden und ist nicht eingegangen. Ihre Eingaben bleiben im Formular, bitte versuchen Sie es erneut.",
-      "notice": "Mit dem Senden bestätigen Sie, dass Sie die <privacy>Datenschutzerklärung</privacy> gelesen haben."
+      "receivedBody": "Ihre Anfrage ist eingegangen und wurde dem Team von LabourMarket.ai zur Prüfung übergeben.",
+      "invalid": "Bitte prüfen Sie die Felder und versuchen Sie es erneut. Ihre Eingaben sind im Formular erhalten geblieben.",
+      "limited": "Derzeit gehen zu viele Anfragen ein. Bitte versuchen Sie es später erneut – Ihre Eingaben sind im Formular erhalten geblieben.",
+      "unavailable": "Die Anfrage konnte nicht gesendet werden und ist bei uns nicht eingegangen. Ihre Eingaben sind im Formular erhalten geblieben – bitte versuchen Sie es erneut.",
+      "notice": "Mit dem Senden der Anfrage bestätigen Sie, dass Sie die <privacy>Datenschutzerklärung</privacy> gelesen haben."
     },
     "audienceValueEyebrow": "Wert für jede Seite der Arbeit",
     "audienceValueTitle": "Was jede Zielgruppe bekommt",
@@ -15449,7 +15634,7 @@
       "title": "Ein Chatfenster steuert Ihre Arbeit",
       "subcopy": "Statt Dutzender Formulare reden Sie einfach. Der Assistent entwirft, Sie bestätigen — und jede Aktion hinterlässt einen nachvollziehbaren Eintrag.",
       "liveLabel": "Funktioniert heute",
-      "comingLabel": "In Vorbereitung",
+      "comingLabel": "Noch nicht verfügbar",
       "conceptLabel": "Konzeptansicht — stilisierte Illustration, kein echtes Gespräch",
       "c1": "Lebenslauf und Profil aktualisieren",
       "c2": "Einen Arbeitstag erfassen",
@@ -15549,38 +15734,38 @@
       "scenario": {
         "construction": {
           "userSays": "Heute 8 Stunden Wände auf der Baustelle in Vilnius gemauert.",
-          "entryLine": "Mauern · Baustelle Vilnius · 8 Std. · zu deiner Arbeitshistorie hinzugefügt.",
+          "entryLine": "Mauern · Baustelle Vilnius · 8 Std. · zu Ihrer Arbeitshistorie hinzugefügt.",
           "skillLine": "Mauern — jetzt durch 12 Journaleinträge gestützt.",
           "matchLine": "Ein verifiziertes Unternehmen in Kaunas braucht 3 Maurer.",
-          "matchWhy": "Warum du: 4 von 5 geforderten Fähigkeiten, 3 durch dein Journal gestützt."
+          "matchWhy": "Warum Sie: 4 von 5 geforderten Fähigkeiten, 3 durch Ihr Journal gestützt."
         },
         "horeca": {
           "userSays": "Heute 60 Mittagsportionen zubereitet und die Lieferungen angenommen.",
           "entryLine": "Zubereitung · Restaurant · 8 Std. · zur Historie hinzugefügt.",
           "skillLine": "Zubereitung — jetzt durch 9 Einträge gestützt.",
           "matchLine": "Ein Hotelrestaurant in Vilnius braucht einen Koch für die Schicht.",
-          "matchWhy": "Warum du: 3 von 4 geforderten Fähigkeiten, Verfügbarkeit passt."
+          "matchWhy": "Warum Sie: 3 von 4 geforderten Fähigkeiten, Verfügbarkeit passt."
         },
         "logistics": {
           "userSays": "Heute 14 Bestellungen auf der Route Kaunas ausgeliefert, 9 Stunden.",
           "entryLine": "Zustellung · Route Kaunas · 9 Std. · zur Historie hinzugefügt.",
           "skillLine": "Fahren — jetzt durch 21 Einträge gestützt.",
           "matchLine": "Ein Logistikunternehmen braucht einen Fahrer für eine feste Route.",
-          "matchWhy": "Warum du: Führerschein B/C und Routenerfahrung durch dein Journal gestützt."
+          "matchWhy": "Warum Sie: Führerschein B/C und Routenerfahrung durch Ihr Journal gestützt."
         },
         "it": {
           "userSays": "Heute die Fehler im Kundenportal behoben und das Update ausgeliefert.",
           "entryLine": "Programmierung · Kundenportal · 7 Std. · zur Historie hinzugefügt.",
           "skillLine": "Programmierung — jetzt durch 15 Einträge gestützt.",
           "matchLine": "Ein Produktteam braucht einen Entwickler für drei Monate.",
-          "matchWhy": "Warum du: 5 von 6 geforderten Fähigkeiten, 4 durch dein Journal gestützt."
+          "matchWhy": "Warum Sie: 5 von 6 geforderten Fähigkeiten, 4 durch Ihr Journal gestützt."
         }
       }
     },
     "chain": {
       "eyebrow": "Die Produktkette",
-      "title": "Arbeit wird Beleg. Beleg wird deine nächste Chance.",
-      "journalNote": "Das Arbeitsjournal ist der Unterschied: jeder erfasste Tag wird überprüfbare Berufsgeschichte — deine nächste Chance wird mit dem begründet, was du wirklich getan hast, nicht mit dem, was ein Lebenslauf behauptet.",
+      "title": "Arbeit wird Beleg. Beleg wird Ihre nächste Chance.",
+      "journalNote": "Das Arbeitsjournal ist der Unterschied: jeder erfasste Tag wird überprüfbare Berufsgeschichte — Ihre nächste Chance wird mit dem begründet, was Sie wirklich getan haben, nicht mit dem, was ein Lebenslauf behauptet.",
       "steps": {
         "need": {
           "title": "Ein Arbeitsbedarf",
@@ -15592,11 +15777,11 @@
         },
         "work": {
           "title": "Echte Arbeit",
-          "body": "Du arbeitest. Die Plattform steht nicht im Weg."
+          "body": "Sie arbeiten. Die Plattform steht nicht im Weg."
         },
         "journal": {
           "title": "Das Arbeitsjournal",
-          "body": "Du erfasst, was geschah — das wird deine Geschichte."
+          "body": "Sie erfassen, was geschah — das wird Ihre Geschichte."
         },
         "skills": {
           "title": "Belegte Fähigkeiten",
@@ -15604,7 +15789,7 @@
         },
         "next": {
           "title": "Eine bessere nächste Chance",
-          "body": "Der nächste Match wird mit deinen Belegen begründet."
+          "body": "Der nächste Match wird mit Ihren Belegen begründet."
         }
       }
     },
@@ -15633,7 +15818,7 @@
       "skill": {
         "label": "Belegte Fähigkeit",
         "title": "Was die Einträge stützen",
-        "body": "Eine Fähigkeit gilt als belegt, wenn deine eigenen Journaleinträge — und, wo vorhanden, der Eintrag einer Führungskraft — dahinterstehen."
+        "body": "Eine Fähigkeit gilt als belegt, wenn Ihre eigenen Journaleinträge — und, wo vorhanden, der Eintrag einer Führungskraft — dahinterstehen."
       },
       "opinion": {
         "label": "Meinung",
@@ -15647,12 +15832,12 @@
       "sub": "Suchen Sie Arbeit, Fachkräfte, Mitarbeitende, Kunden oder Projektpartner – vor Ort und weltweit. Erstellen Sie Ihr berufliches Profil, stellen Sie Ihre Erfahrung vor, bieten Sie Dienstleistungen an und entdecken Sie neue Möglichkeiten."
     },
     "entry": {
-      "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
-      "placeholder": "Z. B.: Wir brauchen 12 Gerüstbauer in Rotterdam",
-      "submit": "Verstehen",
+      "label": "Was brauchen Sie?",
+      "placeholder": "Z. B. Wir brauchen 5 Lagerkräfte",
+      "submit": "Weiter",
       "examplesLabel": "Zum Beispiel:",
       "examples": {
-        "hire": "Wir brauchen 12 Gerüstbauer in Rotterdam",
+        "hire": "Wir brauchen 5 Lagerkräfte in Vilnius",
         "work": "Ich suche Arbeit in Norwegen",
         "internship": "Wo kann ich ein Praktikum machen?",
         "professional": "Ich bin Buchhalterin und suche Arbeit in Vilnius",
@@ -15660,52 +15845,52 @@
         "offerService": "Ich biete Buchhaltungsdienstleistungen an",
         "offerCapacity": "Wir haben 7 Elektriker ab Montag frei",
         "brigade": "Ich suche eine Kolonne für die Baustelle",
-        "logWork": "Heute habe ich 8 Stunden an der Green Tower gearbeitet",
+        "logWork": "Heute habe ich 8 Stunden auf der Baustelle Green Tower gearbeitet",
         "verifyWork": "Wer könnte meine Erfahrung bestätigen?"
       },
-      "understoodLabel": "Verstanden",
+      "understoodLabel": "Das haben wir verstanden",
       "understood": {
-        "need-workers": "Sie brauchen Arbeitskräfte. Wir halten den Bedarf fest — welche Leute, wie viele, wo und ab wann — und suchen die passenden.",
-        "find-workers": "Sie suchen Leute für Arbeit. Wir zeigen, wer nach Beruf und Ort passt.",
-        "candidates": "Sie möchten die Kandidaten für Ihren Bedarf sehen.",
-        "find-work": "Sie suchen Arbeit. Nach Ihrem Beruf und Ort zeigen wir passende Möglichkeiten.",
-        "opportunities": "Sie suchen Möglichkeiten — Arbeit, ein Praktikum oder einen anderen Weg. Wir zeigen, was zu Ihnen passt.",
-        "need-service": "Sie brauchen jemanden, der eine Arbeit erledigt. Wir halten fest, was genau nötig ist, und suchen, wer helfen kann.",
-        "offer-value": "Sie haben etwas anzubieten. Wir halten das Angebot fest, damit es die finden, die es brauchen.",
-        "create-project": "Sie möchten ein Projekt oder eine Baustelle anlegen — mit Ort, Terminen und Leuten.",
+        "need-workers": "Sie suchen Arbeitskräfte. Geben Sie Beruf, Anzahl, Ort und geplanten Beginn an.",
+        "find-workers": "Sie suchen Arbeitskräfte. Melden Sie sich an und beschreiben Sie Ihren Bedarf – Kandidaten werden beim jeweiligen Bedarf angezeigt, sofern es welche gibt.",
+        "candidates": "Sie möchten die Kandidaten für Ihren Bedarf ansehen.",
+        "find-work": "Sie suchen Arbeit. Wir zeigen Ihnen Möglichkeiten, die zu Ihrem Beruf und Ort passen.",
+        "opportunities": "Sie suchen Arbeit, ein Praktikum oder andere berufliche Möglichkeiten.",
+        "need-service": "Sie brauchen jemanden, der eine Arbeit ausführt. Nach der Anmeldung sehen Sie, wer diese Dienstleistung anbietet.",
+        "offer-value": "Sie möchten Dienstleistungen oder Ihre Kompetenz anbieten. Sie können auf der Plattform ein Angebot einreichen.",
+        "create-project": "Sie möchten ein Projekt oder Objekt mit Ort, Terminen und Personen anlegen.",
         "projects": "Sie möchten die Projekte Ihres Unternehmens sehen.",
-        "company-overview": "Sie möchten sehen, was in Ihrem Unternehmen passiert — Leute, Projekte, Bedarf.",
+        "company-overview": "Sie möchten sehen, was in Ihrem Unternehmen geschieht: Personen, Projekte, Bedarf.",
         "create-organization": "Sie möchten ein Unternehmen oder eine Organisation registrieren.",
-        "cv": "Sie möchten eine Lebenslauf-Datei hochladen. Wir lesen sie und zeigen den Fund vor dem Speichern.",
-        "log-work": "Sie möchten erledigte Arbeit im Arbeitstagebuch festhalten.",
+        "cv": "Sie möchten einen Lebenslauf hochladen. Bevor wir die daraus gewonnenen Daten speichern, zeigen wir sie Ihnen zur Prüfung.",
+        "log-work": "Sie möchten erledigte Arbeit im Arbeitsjournal festhalten.",
         "skill-gap": "Sie möchten wissen, welche Fähigkeiten Ihnen fehlen.",
-        "documents": "Sie sprechen über Dokumente und Zertifikate — was gültig ist, was abläuft, was fehlt.",
+        "documents": "Sie sprechen über Dokumente und Zertifikate: was gültig ist, was abläuft, was fehlt.",
         "add-document": "Sie haben ein Dokument oder Zertifikat, das Sie festhalten möchten.",
         "learning-compass": "Sie möchten wissen, was Sie als Nächstes lernen sollten.",
-        "profile": "Sie möchten Ihr Profil ergänzen — eine Sprache, eine Fähigkeit, Erfahrung.",
-        "who-available": "Sie möchten wissen, wer in Ihrem Team frei ist.",
+        "profile": "Sie möchten Ihr Profil ergänzen: eine Sprache, eine Fähigkeit, Erfahrung.",
+        "who-available": "Sie möchten wissen, wer in Ihrem Team verfügbar ist.",
         "invite-candidate": "Sie möchten jemanden in Ihr Team einladen.",
-        "invite-client": "Sie möchten einen Kunden einladen — Sie arbeiten als Agentur.",
-        "propose-candidate": "Sie möchten einem Kunden einen Kandidaten vorschlagen — Sie arbeiten als Agentur.",
+        "invite-client": "Sie möchten einen Kunden einladen (Sie arbeiten als Agentur).",
+        "propose-candidate": "Sie möchten einem Kunden einen Kandidaten vorschlagen (Sie arbeiten als Agentur).",
         "client-demand": "Sie möchten sehen, was Ihre Kunden brauchen.",
-        "invite-student": "Sie vertreten eine Bildungseinrichtung und möchten einen Lernenden einladen.",
-        "programmes": "Sie vertreten eine Bildungseinrichtung — Programme, Gruppen, Lernende.",
-        "offer-capacity": "Sie haben Leute oder Kapazität frei. Wir halten das Angebot fest, damit es gefunden wird.",
-        "who-verifies-work": "Sie fragen, wer bereits geleistete Arbeit bestätigen kann. Wir zeigen, wem Sie sie vorlegen.",
-        "cv-view": "Sie möchten Ihren Lebenslauf ansehen — den, den das System schon hat. Nichts wird geändert.",
-        "cv-choose": "Sie erwähnen Ihren Lebenslauf. Wir fragen: zeigen, neu hochladen oder Ihr Profil ergänzen?"
+        "invite-student": "Sie vertreten eine Bildungseinrichtung und möchten einen Lernenden oder Studierenden einladen.",
+        "programmes": "Sie vertreten eine Bildungseinrichtung: Programme, Gruppen, Lernende.",
+        "offer-capacity": "Sie haben freie Arbeitskräfte oder Kapazitäten. Sie können Ihr Angebot einreichen.",
+        "who-verifies-work": "Sie fragen, wer Ihre geleistete Arbeit bestätigen kann. Wir zeigen Ihnen, wem Sie sie vorlegen können.",
+        "cv-view": "Sie möchten Ihren Lebenslauf ansehen – den, der im System bereits vorliegt. Wir laden nichts hoch und ändern nichts.",
+        "cv-choose": "Sie sprechen über Ihren Lebenslauf. Wir fragen, ob Sie ihn ansehen, einen neuen hochladen oder Ihr Profil ergänzen möchten."
       },
       "family": {
         "work": "Sie sprechen über Ihre Arbeit und Ihren beruflichen Weg.",
-        "hire": "Sie sprechen als Arbeitgeber oder Unternehmen — über Leute, Projekte oder Bedarf.",
-        "agency": "Sie sprechen als Agentur — über Kunden und Kandidaten.",
-        "student": "Sie sprechen über das Lernen und den Weg in die Arbeit.",
+        "hire": "Sie sprechen als Arbeitgeber oder Unternehmen: über Personen, Projekte oder Bedarf.",
+        "agency": "Sie sprechen als Agentur: über Kunden und Kandidaten.",
+        "student": "Sie sprechen über das Lernen und den Weg in den Beruf.",
         "education": "Sie vertreten eine Bildungseinrichtung."
       },
-      "nextHint": "Um den Bedarf zu speichern und darauf antworten zu können, ist ein Konto nötig. Ihr Satz kommt mit.",
+      "nextHint": "Um Ihren Bedarf zu speichern, melden Sie sich an oder erstellen Sie ein Konto. Der eingegebene Satz bleibt auch nach der Anmeldung erhalten.",
       "signup": "Konto erstellen",
-      "login": "Ich habe ein Konto — anmelden",
-      "unrecognised": "Das habe ich nicht auf Anhieb verstanden. Was suchen Sie?",
+      "login": "Ich habe bereits ein Konto",
+      "unrecognised": "Wir konnten Ihren Bedarf nicht genau bestimmen. Bitte wählen Sie eine Option:",
       "chips": {
         "work": "Ich suche Arbeit",
         "hire": "Ich brauche Arbeitskräfte"
@@ -15713,7 +15898,7 @@
       "numbers": "Jetzt auf der Plattform: {vacancies} aktive Stellenanzeigen · {employers} Arbeitgeber",
       "refreshed": "aktualisiert {date}",
       "moreExamples": "Weitere Beispiele",
-      "browseJobs": "Stellenangebote ansehen",
+      "browseJobs": "Stellenanzeigen ansehen",
       "exampleLabels": {
         "hire": "Wir brauchen Leute",
         "work": "Ich suche Arbeit",
@@ -15728,10 +15913,10 @@
       }
     },
     "openJobs": {
-      "eyebrow": "Stellenangebote",
+      "eyebrow": "Stellenanzeigen",
       "title": "Echte Stellen, jetzt offen.",
-      "sub": "Ansehen geht ohne Konto; melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
-      "all": "Alle Stellenangebote"
+      "sub": "Ansehen ist ohne Konto möglich; melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+      "all": "Alle Stellenanzeigen"
     },
     "marketProof": {
       "eyebrow": "Aktuell auf der Plattform",
@@ -15788,6 +15973,42 @@
         "goods": "Waren"
       },
       "lasting": "Ihre Erfahrung und Möglichkeiten bleiben erreichbar — beim Wechsel von Job, Projekt oder Land."
+    },
+    "v3": {
+      "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
+      "moreChoices": "Weitere Optionen",
+      "or": "oder beschreiben Sie es in eigenen Worten",
+      "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",
+      "market": {
+        "title": "Stellenanzeigen auf dem Markt",
+        "line": "{adverts} aktive Stellenanzeigen aus externen Quellen. In den Anzeigen werden {employers} verschiedene Arbeitgebernamen genannt.",
+        "source": "Die Anzeigen stammen aus öffentlichen externen Quellen für Stellenanzeigen. Das ist nicht die Zahl der bei LabourMarket.ai registrierten Arbeitgeber oder Kunden. Letzte Aktualisierung der Anzeigen: {date}.",
+        "none": "Marktdaten sind derzeit nicht verfügbar.",
+        "search": "Stellenanzeigen suchen"
+      },
+      "adverts": {
+        "title": "Einige aktive Stellenanzeigen",
+        "sub": "Sie können die Anzeigen ohne Konto ansehen. Nach der Anmeldung sehen Sie den Arbeitgeber, den Ort, die vollständige Beschreibung und wie Sie sich bewerben können."
+      },
+      "how": {
+        "title": "So funktioniert es",
+        "s1": {
+          "title": "Finden und vereinbaren",
+          "body": "Suchen Sie Arbeit, Arbeitskräfte oder Dienstleistungen und verwalten Sie Angebote und Vereinbarungen auf der Plattform."
+        },
+        "s2": {
+          "title": "Arbeit festhalten",
+          "body": "Erledigte Arbeit können Sie im Arbeitsjournal festhalten."
+        },
+        "s3": {
+          "title": "Bestätigen",
+          "body": "Die Einträge bestätigt eine Führungskraft der Arbeitgeberorganisation. Ein Auftraggeber kann die ihm vorgelegte Arbeit abnehmen – das wird gesondert vermerkt. Bestätigte Arbeit wird zum Nachweis Ihrer Erfahrung."
+        },
+        "s4": {
+          "title": "Ihre Daten und Privatsphäre",
+          "body": "Der Assistent macht Vorschläge, die Entscheidungen treffen Sie. Sie entscheiden, ob Arbeitgeber Sie finden können und ob Ihre Kontaktdaten weitergegeben werden. Arbeitseinträge sieht die Organisation, für die Sie arbeiten."
+        }
+      }
     }
   },
   "workspace": {
@@ -15845,7 +16066,7 @@
       "recNextAction": {
         "add_work_evidence": "Tragen Sie Arbeit ein, die Sie wirklich gemacht haben. Daraus entstehen Ihre Fähigkeiten.",
         "complete_profile": "Ihr Profil ist noch zu dünn für einen richtigen Vergleich.",
-        "review_opportunity": "Diese Anfrage nennt keine strukturierten Anforderungen — lies sie und entscheide selbst."
+        "review_opportunity": "Diese Anfrage nennt keine strukturierten Anforderungen — lesen Sie sie und entscheiden Sie selbst."
       },
       "recNextActionBasis": "Aus dem Zustand Ihres eigenen Profils.",
       "factToday": "Heute",
@@ -16094,7 +16315,7 @@
       "homeLabel": "Ihr Markt",
       "approx": "ungefährer Ort",
       "unmapped": "{count, plural, one {noch # Chance ohne angegebenen Ort — sie erscheint in der Chat-Suche} other {noch # Chancen ohne angegebenen Ort — sie erscheinen in der Chat-Suche}}",
-      "unmappedOnly": "{count, plural, one {# echte Chance hat keinen angegebenen Ort und kann nicht gezeichnet werden — finde sie in der Chat-Suche} other {# echte Chancen haben keinen angegebenen Ort und können nicht gezeichnet werden — finde sie in der Chat-Suche}}."
+      "unmappedOnly": "{count, plural, one {# echte Chance hat keinen angegebenen Ort und kann nicht gezeichnet werden — finden Sie sie in der Chat-Suche} other {# echte Chancen haben keinen angegebenen Ort und können nicht gezeichnet werden — finden Sie sie in der Chat-Suche}}."
     }
   },
   "provenance": {
@@ -16190,7 +16411,7 @@
         "not_eligible": "Sie können nur eine Interaktion beschreiben, an der Sie wirklich beteiligt waren und die abgeschlossen ist.",
         "duplicate_for_interaction": "Für diese Interaktion haben Sie bereits eine Erfahrung eingereicht.",
         "self_review": "Sie können keine Erfahrung über sich selbst einreichen.",
-        "invalid": "Bitte prüfe das Formular und versuche es erneut.",
+        "invalid": "Bitte prüfen Sie das Formular und versuchen Sie es erneut.",
         "not_authorized": "Ihnen fehlt die Berechtigung für diese Aktion.",
         "not_subject": "Das kann nur die Person oder Organisation tun, um die es geht.",
         "not_published": "Das ist erst nach der Veröffentlichung möglich.",
@@ -16220,7 +16441,7 @@
         "not_eligible": "Sie können nur eine Interaktion beschreiben, an der Sie wirklich beteiligt waren und die abgeschlossen ist.",
         "duplicate_for_interaction": "Für diese Interaktion haben Sie bereits eine Erfahrung eingereicht.",
         "self_review": "Sie können keine Erfahrung über sich selbst einreichen.",
-        "invalid": "Bitte prüfe das Formular und versuche es erneut.",
+        "invalid": "Bitte prüfen Sie das Formular und versuchen Sie es erneut.",
         "not_authorized": "Ihnen fehlt die Berechtigung für diese Aktion.",
         "not_subject": "Das kann nur die Person oder Organisation tun, um die es geht.",
         "not_published": "Das ist erst nach der Veröffentlichung möglich.",
@@ -16244,7 +16465,7 @@
         "not_eligible": "Sie können nur eine Interaktion beschreiben, an der Sie wirklich beteiligt waren und die abgeschlossen ist.",
         "duplicate_for_interaction": "Für diese Interaktion haben Sie bereits eine Erfahrung eingereicht.",
         "self_review": "Sie können keine Erfahrung über sich selbst einreichen.",
-        "invalid": "Bitte prüfe das Formular und versuche es erneut.",
+        "invalid": "Bitte prüfen Sie das Formular und versuchen Sie es erneut.",
         "not_authorized": "Ihnen fehlt die Berechtigung für diese Aktion.",
         "not_subject": "Das kann nur die Person oder Organisation tun, um die es geht.",
         "not_published": "Das ist erst nach der Veröffentlichung möglich.",
@@ -16278,7 +16499,7 @@
         "not_eligible": "Sie können nur eine Interaktion beschreiben, an der Sie wirklich beteiligt waren und die abgeschlossen ist.",
         "duplicate_for_interaction": "Für diese Interaktion haben Sie bereits eine Erfahrung eingereicht.",
         "self_review": "Sie können keine Erfahrung über sich selbst einreichen.",
-        "invalid": "Bitte prüfe das Formular und versuche es erneut.",
+        "invalid": "Bitte prüfen Sie das Formular und versuchen Sie es erneut.",
         "not_authorized": "Ihnen fehlt die Berechtigung für diese Aktion.",
         "not_subject": "Das kann nur die Person oder Organisation tun, um die es geht.",
         "not_published": "Das ist erst nach der Veröffentlichung möglich.",
@@ -16313,9 +16534,9 @@
   },
   "personalWorkspace": {
     "title": "Mein Bereich",
-    "intro": "Hier baust du dein Arbeitsprofil auf, siehst, was bereits über dich bekannt ist, und was als Nächstes sinnvoll ist. Die Arbeit selbst beginnt im Gespräch unten.",
+    "intro": "Hier bauen Sie Ihr Arbeitsprofil auf, sehen, was bereits über Sie bekannt ist, und was als Nächstes sinnvoll ist. Die Arbeit selbst beginnt im Gespräch unten.",
     "workProfile": "Mein Arbeitsprofil",
-    "unverifiedNote": "Das sind deine eigenen Angaben. Noch nicht von einem Menschen geprüft — und das ist in Ordnung.",
+    "unverifiedNote": "Das sind Ihre eigenen Angaben. Noch nicht von einem Menschen geprüft — und das ist in Ordnung.",
     "dimension": {
       "whatICanDo": "Was ich kann",
       "whatIAmLookingFor": "Was ich suche",
@@ -16329,10 +16550,10 @@
       "known": "Bereits angegeben:",
       "next": "Jetzt am wichtigsten:",
       "complete": "Alle {count} Bereiche Ihrer Arbeitskarte sind angegeben. Dokumente und offene Anfragen zählen getrennt.",
-      "unavailable": "Der Status deines Arbeitsprofils konnte gerade nicht angezeigt werden. Das Gespräch funktioniert wie immer."
+      "unavailable": "Der Status Ihres Arbeitsprofils konnte gerade nicht angezeigt werden. Das Gespräch funktioniert wie immer."
     },
     "action": {
-      "startWithYourself": "Bei dir selbst beginnen",
+      "startWithYourself": "Bei sich selbst beginnen",
       "whenICanWork": "Angeben, wann ich arbeiten kann",
       "whereICanWork": "Angeben, wo ich arbeiten kann",
       "addSkills": "Fähigkeiten hinzufügen",
@@ -16745,7 +16966,7 @@
     "archivedHeading": "Archivierte Objekte",
     "archivedBadge": "Archiviert",
     "empty": "Noch keine Objekte. Fügen Sie die Orte hinzu, an denen Ihre Arbeit stattfindet.",
-    "gatedHeading": "Vorbereitet — wartet auf Aktivierung",
+    "gatedHeading": "Noch nicht verfügbar",
     "gatedBody": "Derzeit nicht verfügbar.",
     "errorLabel": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
     "notAuthorizedLabel": "Nur Führungskräfte können Objekte ändern.",
@@ -17263,8 +17484,8 @@
   },
   "training": {
     "title": "Schulungen und Zertifikate",
-    "intro": "Kurse, die deine Organisation abschließen lässt, und die Zertifikate danach.",
-    "evidenceNote": "Ein Zertifikat zeigt, dass ein Kurs abgeschlossen wurde. Es sagt nicht, wie gut jemand arbeitet — das bleibt bei deinen Arbeitseinträgen und den Bestätigungen deiner Führungskraft.",
+    "intro": "Kurse, die Ihre Organisation abschließen lässt, und die Zertifikate danach.",
+    "evidenceNote": "Ein Zertifikat zeigt, dass ein Kurs abgeschlossen wurde. Es sagt nicht, wie gut jemand arbeitet — das bleibt bei Ihren Arbeitseinträgen und den Bestätigungen Ihrer Führungskraft.",
     "notAvailable": "Derzeit nicht verfügbar.",
     "status": {
       "assigned": "Zu erledigen",
@@ -17279,7 +17500,7 @@
       "completedNote": "Sie haben das als erledigt markiert."
     },
     "org": {
-      "heading": "Schulungen deiner Organisation",
+      "heading": "Schulungen Ihrer Organisation",
       "programTitle": "Kursname",
       "programDescription": "Was der Kurs behandelt",
       "materialNote": "Das Kursmaterial ist ein Dokument aus dem Verzeichnis oben. Die Bestätigung, dass jemand es gelesen hat, bleibt in der Bestätigungsliste — sie wird hier nicht wiederholt.",
@@ -17321,14 +17542,14 @@
       "linked": "Fähigkeit verknüpft.",
       "already_linked": "Diese Fähigkeit ist bereits verknüpft.",
       "inactive_program": "Dieser Kurs ist ausgeschaltet.",
-      "invalid": "Bitte prüfe deine Eingabe.",
-      "invalid_material": "Dieses Material gehört nicht zu deiner Organisation.",
-      "invalid_assignee": "Diese Person gehört nicht zu deiner Organisation.",
-      "invalid_file": "Diese Datei gehört nicht zu deiner Organisation.",
+      "invalid": "Bitte prüfen Sie Ihre Eingabe.",
+      "invalid_material": "Dieses Material gehört nicht zu Ihrer Organisation.",
+      "invalid_assignee": "Diese Person gehört nicht zu Ihrer Organisation.",
+      "invalid_file": "Diese Datei gehört nicht zu Ihrer Organisation.",
       "invalid_skill": "Diese Fähigkeit wurde nicht gefunden.",
       "invalid_state": "Das ist in diesem Schritt nicht möglich.",
       "needs_migration": "Derzeit nicht verfügbar.",
-      "not_authorized": "Dafür fehlen dir die Rechte.",
+      "not_authorized": "Dafür fehlen Ihnen die Rechte.",
       "not_found": "Nicht gefunden.",
       "limit_reached": "Hier steht bereits zu viel.",
       "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
@@ -17339,7 +17560,7 @@
     "intro": "Ein festgehaltenes Gespräch zwischen zwei namentlich genannten Personen über die Arbeit und darüber, was als Nächstes kommt.",
     "noScoreNote": "Hier gibt es keine Note, keinen Punktwert und keine Rangliste — mit Absicht. Alles unten ist entweder ein festgehaltener Fakt, ein Verweis auf echte Arbeit oder die eigenen Worte einer Person, klar als solche gekennzeichnet.",
     "notAvailable": "Derzeit nicht verfügbar.",
-    "empty": "Es gibt noch kein Gespräch, das dich betrifft.",
+    "empty": "Es gibt noch kein Gespräch, das Sie betrifft.",
     "cycles": {
       "heading": "Zeiträume",
       "name": "Name des Zeitraums",
@@ -17399,13 +17620,13 @@
       "already_closed": "Es war bereits geschlossen.",
       "already_exists": "Das gibt es bereits.",
       "inputs_missing": "Zuerst müssen beide Personen ihre eigenen Worte schreiben.",
-      "invalid": "Bitte prüfe deine Eingabe.",
+      "invalid": "Bitte prüfen Sie Ihre Eingabe.",
       "invalid_state": "Das ist in diesem Schritt nicht möglich.",
-      "invalid_subject": "Diese Person gehört nicht zu deiner Organisation.",
+      "invalid_subject": "Diese Person gehört nicht zu Ihrer Organisation.",
       "invalid_reviewer": "Diese Person kann das Gespräch nicht führen.",
       "invalid_reference": "Dieser Verweis zeigt nicht auf echte Arbeit dieser Person.",
       "needs_migration": "Derzeit nicht verfügbar.",
-      "not_authorized": "Dafür fehlen dir die Rechte.",
+      "not_authorized": "Dafür fehlen Ihnen die Rechte.",
       "not_found": "Nicht gefunden.",
       "limit_reached": "Hier steht bereits zu viel.",
       "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
@@ -17436,7 +17657,7 @@
     "submit": {
       "template": "Freigabevorlage",
       "action": "Der Geschäftsleitung vorlegen",
-      "noTemplate": "Für Managemententscheidungen gibt es noch keine Freigabevorlage. Lege sie zuerst im Freigabebereich an."
+      "noTemplate": "Für Managemententscheidungen gibt es noch keine Freigabevorlage. Legen Sie sie zuerst im Freigabebereich an."
     },
     "resultLabel": "Entscheidung",
     "resultPlaceholder": "Was entschieden wurde",
@@ -17463,13 +17684,13 @@
       "linked": "Verknüpft.",
       "already_linked": "Das ist bereits verknüpft.",
       "no_instance": "Es wurde keine Freigabe gestartet, also wurde nichts gesendet.",
-      "invalid": "Bitte prüfe deine Eingabe.",
+      "invalid": "Bitte prüfen Sie Ihre Eingabe.",
       "invalid_state": "Das ist in diesem Schritt nicht möglich.",
-      "invalid_document": "Dieses Dokument gehört nicht zu deiner Organisation.",
-      "invalid_task": "Diese Aufgabe gehört nicht dir.",
-      "invalid_responsible": "Diese Person gehört nicht zu deiner Organisation.",
+      "invalid_document": "Dieses Dokument gehört nicht zu Ihrer Organisation.",
+      "invalid_task": "Diese Aufgabe gehört nicht Ihnen.",
+      "invalid_responsible": "Diese Person gehört nicht zu Ihrer Organisation.",
       "needs_migration": "Derzeit nicht verfügbar.",
-      "not_authorized": "Dafür fehlen dir die Rechte.",
+      "not_authorized": "Dafür fehlen Ihnen die Rechte.",
       "not_found": "Nicht gefunden.",
       "limit_reached": "Hier steht bereits zu viel.",
       "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
@@ -19162,7 +19383,7 @@
   },
   "workPlan": {
     "title": "Geplante Arbeit",
-    "intro": "Plane, wer wo und wann arbeitet. Der Kalender zeigt es als Plan; was tatsächlich geschah, bleibt im Arbeitsjournal.",
+    "intro": "Planen Sie, wer wo und wann arbeitet. Der Kalender zeigt es als Plan; was tatsächlich geschah, bleibt im Arbeitsjournal.",
     "worker": "Mitarbeiter",
     "project": "Projekt (optional)",
     "workObject": "Objekt / Standort (optional)",
@@ -19177,20 +19398,20 @@
     "cancel": "Plan stornieren",
     "cancelPending": "Wird storniert…",
     "empty": "Für diesen Zeitraum ist noch nichts geplant.",
-    "noWorkers": "Noch keine Mitarbeiter auf deiner Liste. Lade zuerst Personen ein und plane dann ihre Arbeit.",
+    "noWorkers": "Noch keine Mitarbeiter auf Ihrer Liste. Laden Sie zuerst Personen ein und planen Sie dann ihre Arbeit.",
     "unavailable": "Planung ist hier noch nicht verfügbar.",
     "listTitle": "Geplante Zeiträume",
     "overlap": "Überschneidet sich mit genehmigtem Urlaub",
     "outcome": {
       "planned": "Arbeit geplant.",
       "cancelled": "Plan storniert.",
-      "invalid": "Prüfe Daten und Felder und versuch es erneut.",
-      "not_allowed": "Du kannst für diese Organisation nicht planen.",
+      "invalid": "Prüfen Sie Daten und Felder und versuchen Sie es erneut.",
+      "not_allowed": "Sie können für diese Organisation nicht planen.",
       "worker_not_in_scope": "Diese Person steht nicht auf der Liste dieser Organisation.",
       "project_not_in_organization": "Dieses Projekt gehört zu einer anderen Organisation.",
       "work_object_not_in_organization": "Dieses Objekt gehört zu einer anderen Organisation.",
       "unavailable": "Planung ist hier noch nicht verfügbar.",
-      "error": "Etwas ist schiefgelaufen. Versuch es erneut.",
+      "error": "Etwas ist schiefgelaufen. Versuchen Sie es erneut.",
       "planned_collides": "Geplant, aber diese Person ist an einigen dieser Tage bereits eingeplant. Sie entscheiden; stornieren Sie den Plan unten, falls er nicht passt.",
       "planned_unknown": "Geplant, aber wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
       "recurrence_invalid": "Prüfen Sie die Wiederholung: Wählen Sie mindestens einen Wochentag oder eine Rotation mit 1–28 Arbeits- und 1–28 Ruhetagen.",
@@ -19302,7 +19523,7 @@
     "steps": {
       "find": {
         "label": "Finden",
-        "worker": "Findet Arbeit, die zu dem passt, was sie wirklich geleistet haben",
+        "worker": "Findet Arbeit, die zu dem passt, was sie wirklich geleistet hat",
         "company": "Findet Menschen, deren tatsächliche Arbeit zum Bedarf passt"
       },
       "connect": {
@@ -19810,7 +20031,7 @@
     "agency": "Agentur",
     "started": "✓ Begonnen",
     "agencyStarted": "Agenturprofil begonnen.",
-    "agencyIsCompanyType": "Eine Agentur ist ab jetzt ein Unternehmenstyp — lege eine neue Agentur als Unternehmen mit dem Typ „Personalagentur“ an.",
+    "agencyIsCompanyType": "Eine Agentur ist ab jetzt ein Unternehmenstyp — legen Sie eine neue Agentur als Unternehmen mit dem Typ „Personalagentur“ an.",
     "legalName": "Firmenname",
     "country": "Land",
     "company": "Unternehmen",
@@ -20090,7 +20311,7 @@
     },
     "focusHint": "Tippen Sie auf eine Linie, um eine Fähigkeit über den ganzen Weg zu verfolgen.",
     "showAll": "Alle zeigen",
-    "horizonDetail": "{shared} von {total} in deiner Arbeit · {confirmed} bestätigt"
+    "horizonDetail": "{shared} von {total} in Ihrer Arbeit · {confirmed} bestätigt"
   },
   "projectCourse": {
     "title": "Projektverlauf",
@@ -20194,7 +20415,7 @@
     "window": "Letzte 14 Tage",
     "unknown": "Konnte nicht lesen, was sich im Projekt geändert hat.",
     "emptyManager": "Seit 14 Tagen nichts Neues im Projekt: keine neuen Arbeitseinträge, abgeschlossenen Etappen oder erledigten Aufgaben.",
-    "emptyMember": "Seit 14 Tagen keine neuen Einträge von dir in diesem Projekt. Erfasse Arbeit im Journal – hier siehst du, was sie bewirkt hat.",
+    "emptyMember": "Seit 14 Tagen keine neuen Einträge von Ihnen in diesem Projekt. Erfassen Sie Arbeit im Journal – hier sehen Sie, was sie bewirkt hat.",
     "teamLabel": "Arbeitskette des Teams",
     "team": {
       "recorded": "Erfasst: {count}",
@@ -20214,9 +20435,9 @@
   },
   "projectFirstStep": {
     "title": "Erster Schritt",
-    "both": "Das Projekt hat noch keine Etappen und keine Aufgaben für diese Woche. Lege Etappen an – das Team sieht eine gemeinsame Strecke und wo ihr steht.",
-    "stages": "Das Projekt hat noch keine Etappen. Lege sie an – das Team sieht eine gemeinsame Strecke und wo ihr steht.",
-    "tasks": "Diese Woche ist keine Aufgabe fällig. Lege eine Aufgabe an – sie wird zum Wochenziel.",
+    "both": "Das Projekt hat noch keine Etappen und keine Aufgaben für diese Woche. Legen Sie Etappen an – das Team sieht eine gemeinsame Strecke und wo Sie stehen.",
+    "stages": "Das Projekt hat noch keine Etappen. Legen Sie sie an – das Team sieht eine gemeinsame Strecke und wo Sie stehen.",
+    "tasks": "Diese Woche ist keine Aufgabe fällig. Legen Sie eine Aufgabe an – sie wird zum Wochenziel.",
     "addStages": "Etappen anlegen",
     "addTask": "Aufgabe anlegen"
   },
@@ -20264,25 +20485,25 @@
   },
   "pilotPass": {
     "title": "Organisationsplan — {days}-Tage-Pilot für 1 €",
-    "intro": "Zahle einmal 1 €, und deine Organisation erhält {days} Tage lang den kostenpflichtigen Organisationsplan. Was er gegenüber dem kostenlosen Plan hinzufügt: kein Limit für gleichzeitig offene Stellen und Personalbedarfe (im kostenlosen Plan eine). Nachrichten, Kandidatenübersichten, Teamauswahl und Buchungen bleiben wie im kostenlosen Plan verfügbar.",
+    "intro": "Zahlen Sie einmal 1 €, und Ihre Organisation erhält {days} Tage lang den kostenpflichtigen Organisationsplan. Was er gegenüber dem kostenlosen Plan hinzufügt: kein Limit für gleichzeitig offene Stellen und Personalbedarfe (im kostenlosen Plan eine). Nachrichten, Kandidatenübersichten, Teamauswahl und Buchungen bleiben wie im kostenlosen Plan verfügbar.",
     "terms": "Einmalzahlung. Nichts verlängert sich und nichts wird erneut belastet: Nach {days} Tagen endet der Plan von selbst, und die Organisation kehrt zum kostenlosen Plan zurück. Der Plan erscheint unten, sobald Stripe die Zahlung bestätigt.",
     "pay": "1 € bezahlen — {days}-Tage-Pilot",
     "status": {
       "pilot_pass_disabled": "Der Pilot wird derzeit nicht angeboten.",
-      "unauthenticated": "Melde dich an, um den Pilot zu starten.",
-      "no_organization": "Wähle zuerst den Arbeitsbereich deiner Organisation.",
+      "unauthenticated": "Melden Sie sich an, um den Pilot zu starten.",
+      "no_organization": "Wählen Sie zuerst den Arbeitsbereich Ihrer Organisation.",
       "not_billing_authority": "Nur wer die Zahlungen dieser Organisation verwaltet, kann den Pilot starten.",
       "billing_not_active": "Für diese Organisation sind keine Zahlungen verfügbar.",
-      "plan_active": "Deine Organisation hat bereits einen aktiven Plan.",
-      "checkout_failed": "Stripe hat keine Zahlungsseite erstellt. Es wurde nichts belastet; versuche es später erneut."
+      "plan_active": "Ihre Organisation hat bereits einen aktiven Plan.",
+      "checkout_failed": "Stripe hat keine Zahlungsseite erstellt. Es wurde nichts belastet; versuchen Sie es später erneut."
     },
     "result": {
-      "paid": "Stripe hat die Zahlung erhalten. Der Plan wird aktiv, sobald die Bestätigung eintrifft — lade die Seite gleich neu, falls er noch nicht angezeigt wird.",
+      "paid": "Stripe hat die Zahlung erhalten. Der Plan wird aktiv, sobald die Bestätigung eintrifft — laden Sie die Seite gleich neu, falls er noch nicht angezeigt wird.",
       "cancelled": "Zahlung abgebrochen — es wurde nichts belastet."
     },
-    "elsewhere": "Wähle {organization} in der Arbeitsbereichsauswahl oben auf der Seite — der Pilot wird im Arbeitsbereich dieser Organisation gestartet.",
+    "elsewhere": "Wählen Sie {organization} in der Arbeitsbereichsauswahl oben auf der Seite — der Pilot wird im Arbeitsbereich dieser Organisation gestartet.",
     "invite": {
-      "line": "Zahle einmal 1 € für {days} Tage des kostenpflichtigen Organisationsplans. Nichts verlängert sich.",
+      "line": "Zahlen Sie einmal 1 € für {days} Tage des kostenpflichtigen Organisationsplans. Nichts verlängert sich.",
       "cta": "Pilot öffnen"
     }
   },
@@ -20308,22 +20529,22 @@
       "locked": "In Prüfung"
     },
     "visibility": {
-      "visible": "In der Suche sichtbar — andere können es finden und dir schreiben.",
-      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentliche es, wenn es fertig ist.",
-      "paused": "Pausiert — aus der Suche ausgeblendet, keine neuen Anfragen. Setze es fort, wenn es wieder aktuell ist.",
+      "visible": "In der Suche sichtbar — andere können es finden und Ihnen schreiben.",
+      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentlichen Sie es, wenn es fertig ist.",
+      "paused": "Pausiert — aus der Suche ausgeblendet, keine neuen Anfragen. Setzen Sie es fort, wenn es wieder aktuell ist.",
       "completed": "Abgeschlossen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
       "withdrawn": "Vom Markt genommen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
       "discarded": "Verworfener Entwurf — er wurde nie veröffentlicht.",
       "closed": "Geschlossen — aus der Suche ausgeblendet; der Verlauf bleibt erhalten.",
-      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändere das Ablaufdatum und veröffentliche es erneut.",
+      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändern Sie das Ablaufdatum und veröffentlichen Sie es erneut.",
       "gated": "Noch nicht sichtbar — es erscheint in der Suche, sobald die Organisation bestätigt ist.",
       "locked": "In Prüfung — während der Prüfung lässt es sich nicht ändern."
     },
     "deleteForever": "Endgültig löschen",
-    "deleteQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um es nur aus der Suche zu nehmen, pausiere es, schließe es ab oder nimm es vom Markt.",
+    "deleteQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um es nur aus der Suche zu nehmen, pausieren Sie es, schließen Sie es ab oder nehmen Sie es vom Markt.",
     "deleteYes": "Ja, löschen",
     "cancel": "Abbrechen",
-    "error": "Das hat nicht geklappt. Versuche es erneut.",
+    "error": "Das hat nicht geklappt. Versuchen Sie es erneut.",
     "notAllowed": "In diesem Zustand ist diese Aktion nicht möglich."
   },
   "collaborationChecks": {
@@ -20352,37 +20573,37 @@
   },
   "learnerCohortJoin": {
     "title": "Lerngruppe",
-    "declaredNote": "Du kannst deine Praxis und deine Arbeit jederzeit eintragen, auch bevor eine Einrichtung dich aufnimmt. Bis die befugte Person der Einrichtung sie bestätigt, gilt sie als von dir angegeben, nicht als bestätigt.",
+    "declaredNote": "Sie können Ihre Praxis und Ihre Arbeit jederzeit eintragen, auch bevor eine Einrichtung Sie aufnimmt. Bis die befugte Person der Einrichtung sie bestätigt, gilt sie als von Ihnen angegeben, nicht als bestätigt.",
     "journalLink": "Journal öffnen",
     "find": "{count, plural, one {# offene Gruppe} other {# offene Gruppen}}",
     "empty": "Derzeit nimmt keine Einrichtung Aufnahmeanfragen an.",
-    "unavailable": "Die Lerngruppen konnten gerade nicht geladen werden. Versuche es später erneut.",
+    "unavailable": "Die Lerngruppen konnten gerade nicht geladen werden. Versuchen Sie es später erneut.",
     "status": {
       "requested": "Anfrage gesendet, wartet auf die Entscheidung der Einrichtung.",
       "declined": "Die Einrichtung hat diese Anfrage nicht angenommen."
     },
     "form": {
-      "nameLabel": "Dein Name, wie die Einrichtung dich kennt",
-      "nameHint": "Die Einrichtung sieht nur diesen Namen und deine Nachricht, nicht dein Profil oder Journal.",
+      "nameLabel": "Ihr Name, wie die Einrichtung Sie kennt",
+      "nameHint": "Die Einrichtung sieht nur diesen Namen und Ihre Nachricht, nicht Ihr Profil oder Journal.",
       "noteLabel": "Nachricht an die Einrichtung (optional)",
       "send": "Um Aufnahme bitten",
       "withdraw": "Anfrage zurückziehen",
       "saving": "Wird gesendet…",
       "requested": "Anfrage gesendet.",
-      "alreadyMember": "Du bist bereits Mitglied dieser Gruppe.",
+      "alreadyMember": "Sie sind bereits Mitglied dieser Gruppe.",
       "withdrawn": "Anfrage zurückgezogen.",
       "closed": "Diese Gruppe nimmt keine neuen Anfragen mehr an.",
-      "invalid": "Prüfe Name und Nachricht.",
-      "error": "Etwas ist schiefgelaufen. Versuche es erneut.",
-      "cooldown": "Deine Anfrage wurde kürzlich abgelehnt. Du kannst diese Gruppe 30 Tage nach der Entscheidung erneut anfragen."
+      "invalid": "Prüfen Sie Name und Nachricht.",
+      "error": "Etwas ist schiefgelaufen. Versuchen Sie es erneut.",
+      "cooldown": "Ihre Anfrage wurde kürzlich abgelehnt. Sie können diese Gruppe 30 Tage nach der Entscheidung erneut anfragen."
     }
   },
   "consent": {
     "banner": {
-      "text": "Seitennutzung und die Kampagne, über die Sie kamen, messen wir nur mit Ihrer Erlaubnis.",
+      "text": "Im Browser gespeicherte Messdaten und Kampagneninformationen verwenden wir nur mit Ihrer Einwilligung.",
       "accept": "Messung erlauben",
       "refuse": "Ablehnen",
-      "more": "Mehr",
+      "more": "Mehr über Cookies",
       "label": "Auswahl zur Nutzungsmessung"
     },
     "control": {
@@ -20393,5 +20614,125 @@
       "allow": "Erlauben",
       "refuse": "Ablehnen"
     }
+  },
+  "companyClaim": {
+    "email": {
+      "subject": "Übernehmen Sie das Profil von {company} auf LabourMarket.ai",
+      "intro": "Sie sind eingeladen, das Profil von {company} auf LabourMarket.ai zu verwalten. Das ist kostenlos.",
+      "open": "Öffnen Sie diesen einmaligen Link:",
+      "validity": "Der Link gilt 14 Tage und funktioniert nur mit dieser E-Mail-Adresse.",
+      "notYou": "Wenn Sie dieses Unternehmen nicht vertreten, tun Sie nichts: Ohne Sie ändert sich nichts."
+    },
+    "invite": {
+      "eyebrow": "Unternehmensprofil",
+      "title": "Profil von {company} übernehmen",
+      "body": "Bestätigen Sie, dass Sie dieses Unternehmen vertreten. Das ist eine Anfrage: Ein anderer LabourMarket.ai-Operator prüft sie, erst dann werden Sie Inhaber des Profils.",
+      "verifyFirst": "Bestätigen Sie zuerst, dass diese E-Mail-Adresse Ihnen gehört.",
+      "roleLabel": "Ihre Funktion im Unternehmen",
+      "rolePlaceholder": "Zum Beispiel Geschäftsführer",
+      "authorityLabel": "Ich bestätige, dass ich {company} vertreten darf.",
+      "submit": "Anfrage senden",
+      "decidedBy": "Es entscheidet ein anderer Operator, nicht der, der Sie eingeladen hat.",
+      "expires": "Die Einladung gilt bis {date}.",
+      "requestedTitle": "Anfrage gesendet",
+      "requestedBody": "Ein Operator prüft Ihre Anfrage. Nach der Bestätigung verwalten Sie das Profil. Bis dahin ändert sich nichts.",
+      "closedTitle": "Diese Einladung kann nicht mehr verwendet werden",
+      "verifySend": "Bestätigungslink senden",
+      "pending": "Wird gesendet…",
+      "outcome": {
+        "claim_requested": "Anfrage gesendet.",
+        "already_requested": "Sie haben bereits eine Anfrage gesendet.",
+        "already_used": "Diese Einladung wurde bereits verwendet.",
+        "expired": "Die Einladung ist abgelaufen. Bitten Sie um eine neue.",
+        "revoked": "Die Einladung wurde zurückgezogen.",
+        "email_mismatch": "Diese Einladung gilt für eine andere E-Mail-Adresse. Melden Sie sich mit der Adresse an, an die die E-Mail ging.",
+        "email_not_verified": "Bestätigen Sie zuerst Ihre E-Mail-Adresse.",
+        "authority_not_confirmed": "Bestätigen Sie, dass Sie das Unternehmen vertreten dürfen.",
+        "invalid_role": "Geben Sie Ihre Funktion an (2–80 Zeichen).",
+        "not_claimable": "Dieses Unternehmensprofil kann nicht mehr übernommen werden.",
+        "inviter_cannot_claim": "Der Operator, der die Einladung gesendet hat, kann sie nicht selbst verwenden.",
+        "operator_cannot_claim": "Eine Person mit Operator-Rechten kann kein Unternehmen übernehmen.",
+        "verify_sent": "Wir haben Ihnen einen Link geschickt. Öffnen Sie ihn, dann kommen Sie hierher zurück.",
+        "verify_rate_limited": "Wir haben gerade erst einen Link gesendet. Prüfen Sie Ihre E-Mails oder versuchen Sie es später.",
+        "error": "Das hat nicht geklappt. Versuchen Sie es später erneut."
+      }
+    }
+  },
+  "siteNav": {
+    "education": "Für Bildungseinrichtungen",
+    "signUp": "Registrieren",
+    "trigger": "Hauptziele",
+    "account": "Für angemeldete Nutzer",
+    "intents": {
+      "work": {
+        "title": "Ich suche Arbeit",
+        "description": "Suchen Sie Arbeit und stellen Sie Ihre Erfahrung vor.",
+        "short": "Arbeit finden"
+      },
+      "workers": {
+        "title": "Ich suche Arbeitskräfte",
+        "description": "Geben Sie an, welche Arbeitskräfte Sie wo und wann brauchen.",
+        "short": "Arbeitskräfte finden"
+      },
+      "services": {
+        "title": "Ich biete Leistungen an",
+        "description": "Leistungen vorstellen, Aufträge finden, Anfragen beantworten.",
+        "short": "Leistungen anbieten"
+      },
+      "partners": {
+        "title": "Ich suche Partner",
+        "description": "Finden Sie Partner und pflegen Sie die Zusammenarbeit.",
+        "short": "Partner finden"
+      },
+      "agencies": {
+        "title": "Für Agenturen",
+        "description": "Verwalten Sie die Kunden Ihrer Agentur und Kandidatenvorschläge.",
+        "short": "Für Agenturen"
+      },
+      "contractors": {
+        "short": "Dienstleister finden",
+        "title": "Ich suche Dienstleistungen oder Auftragnehmer",
+        "description": "Beschreiben Sie, welche Dienstleistung oder welchen Auftragnehmer Sie brauchen."
+      }
+    },
+    "links": {
+      "jobs": "Stellenanzeigen",
+      "workOpportunities": "Arbeitsmöglichkeiten",
+      "createCv": "Lebenslauf kostenlos erstellen",
+      "workAbroad": "Arbeiten im Ausland",
+      "forWorkers": "So funktioniert es für Arbeitskräfte",
+      "companyNeed": "Bedarf beschreiben",
+      "forCompanies": "So funktioniert es für Unternehmen",
+      "labourMarket": "Arbeitsmarkt nach Land",
+      "myServices": "Ihre Leistungen",
+      "serviceRequests": "Dienstleistungsanfragen",
+      "marketListings": "Marktangebote",
+      "commercial": "Angebote und Verträge",
+      "network": "Ihr Netzwerk",
+      "partnerWithUs": "Partner werden",
+      "forAgencies": "So funktioniert es für Agenturen",
+      "setUpAgency": "Agentur registrieren",
+      "b2bEnquiry": "B2B-Dienstleistungsanfrage",
+      "projectEnquiry": "Anfrage für ein Einzelprojekt"
+    },
+    "assistant": "Assistenten fragen",
+    "start": {
+      "searchLabel": "Stellenanzeigen suchen",
+      "searchPlaceholder": "Jobtitel oder Stichwort",
+      "searchSubmit": "Suchen",
+      "viewAll": "Alle Stellenanzeigen"
+    },
+    "nav": {
+      "heading": "Was möchten Sie tun?",
+      "swipe": "Wischen",
+      "close": "Schließen",
+      "functions": "Aktionen",
+      "professions": "Berufe",
+      "opensNow": "Kein Konto erforderlich",
+      "signInWhenOpen": "Anmeldung erforderlich",
+      "allSectors": "Alle Branchen",
+      "fullList": "Vollständige Liste"
+    },
+    "more": "Mehr"
   }
 }

@@ -525,6 +525,13 @@ export default async function OpportunitiesPage({
         ? "border-brand-blue bg-brand-blue/10 text-text-primary"
         : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
     }`;
+  // The opportunity-type heading lives with its values in the need form's
+  // catalogue (structuredDemand), present in every locale; the discovery
+  // namespace never had that key, so reading it there printed a raw key.
+  const filterDimLabel = (dim: keyof DiscoveryFilterState): string =>
+    dim === "opportunityType"
+      ? sd("opportunityTypeLabel")
+      : t(`discovery.filters.${dim}` as never);
   const filterValueLabel = (dim: keyof DiscoveryFilterState, value: string): string => {
     switch (dim) {
       case "profession":
@@ -1088,10 +1095,22 @@ export default async function OpportunitiesPage({
                   filters.country,
                 ),
               },
+              // Internship / apprenticeship / employment … — the type the
+              // employer stated on the need. The filter was already parsed
+              // and applied from the URL but had no control and no heading,
+              // so a student could narrow the board to internships only by
+              // typing the address. The active value stays listed so it can
+              // always be switched off.
+              {
+                dim: "opportunityType",
+                values: withValues(facets.opportunityTypes, [], filters.opportunityType),
+              },
               { dim: "start", values: facets.starts },
               { dim: "accommodation", values: facets.accommodations },
               { dim: "transport", values: facets.transports },
               { dim: "tool", values: facets.tools },
+              // opportunityType is listed ONCE, above (#3334 and #3338 each added it,
+              // so the type chips rendered twice with duplicate keys and testids).
             ];
             const showFilterControls =
               active.length > 0 || facetGroups.some((g) => g.values.length > 0);
@@ -1159,7 +1178,7 @@ export default async function OpportunitiesPage({
                           .map((g) => (
                             <div key={g.dim} className="flex flex-wrap items-center gap-1.5">
                               <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
-                                {t(`discovery.filters.${g.dim}` as never)}
+                                {filterDimLabel(g.dim)}
                               </span>
                               {g.values.map((v) => {
                                 const isActive = filters[g.dim] === v;
@@ -1228,7 +1247,7 @@ export default async function OpportunitiesPage({
                         filters: active
                           .map(
                             ([dim, v]) =>
-                              `${t(`discovery.filters.${dim}` as never)}: ${filterValueLabel(dim, v)}`,
+                              `${filterDimLabel(dim)}: ${filterValueLabel(dim, v)}`,
                           )
                           .join(" · "),
                       })}

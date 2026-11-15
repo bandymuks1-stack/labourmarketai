@@ -19,9 +19,15 @@ describe("jobPageDescription", () => {
     }
   });
 
+  it("speaks Swedish on the Swedish page (routed since #3261)", () => {
+    expect(jobPageDescription({ locale: "sv", title: "Svetsare", chips: ["Tillsvidare"], published: "3 nov. 2026" })).toBe(
+      "Svetsare — Tillsvidare. Publicerad 3 nov. 2026. Logga in för att se arbetsgivaren, platsen och hur du söker.",
+    );
+  });
+
   it("works with no chips and no date", () => {
     expect(jobPageDescription({ locale: "lt", title: "Virėjas", chips: [], published: null })).toBe(
-      "Virėjas. Prisijunk ir matysi darbdavį, vietą ir kaip kandidatuoti.",
+      "Virėjas. Prisijunkite ir matysite darbdavį, vietą ir kaip kandidatuoti.",
     );
   });
 });
