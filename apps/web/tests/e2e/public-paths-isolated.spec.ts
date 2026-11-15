@@ -111,6 +111,8 @@ async function sendRequestDoor(page: Page, door: string, key: string): Promise<v
   await expect(form).toBeVisible();
   if (door === "b2b") {
     await form.locator('input[name="work"]').fill("Facade cladding subcontract");
+  } else if (door === "partner") {
+    await form.locator('textarea[name="proposal"]').fill(`Training partnership for site crews (${RUN}).`);
   } else {
     await form.locator('textarea[name="need"]').fill(`Bathroom renovation, two weeks (${RUN}).`);
   }
