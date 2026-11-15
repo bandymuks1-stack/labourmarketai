@@ -51,13 +51,14 @@ import type {
   DeductionRow,
   LanguageRow,
 } from "@/lib/demand/structured-demand-form";
+import { DEMAND_CURRENCY_OPTIONS } from "@/lib/demand/structured-demand-form";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 
 /** Language display names: the ONE native-name map (worker-languages-model). */
 const LANGUAGE_NATIVE_NAMES: Record<string, string> = WORKER_LANGUAGE_NATIVE_NAMES;
 
-const CURRENCY_OPTIONS = ["EUR", "PLN", "SEK", "NOK", "DKK"] as const;
+const CURRENCY_OPTIONS = DEMAND_CURRENCY_OPTIONS;
 
 /**
  * THE CLUSTERS THAT OPEN ALREADY EXPANDED — the demand-first launch path.

@@ -36,7 +36,7 @@ describe("closed online payment is said as closed", () => {
       // The FAQ entry the index points at is the billing question in every language.
       expect(p.faq[2].a, `${locale} faq[2]`).toMatch(/Stripe/);
       // Registration and one active position stay free, in every language.
-      expect(p.faqBillingClosed).toMatch(/1|one|eine|één|jedno|одна|viena/i);
+      expect(p.faqBillingClosed).toMatch(/1|one|eine|één|jedno|одна|viena|en aktiv/i);
     });
   }
 });
