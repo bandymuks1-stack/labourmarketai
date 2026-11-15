@@ -9598,7 +9598,8 @@
       "withdraw": "Dra tillbaka förslaget",
       "findAnother": "Hitta en annan arbetstagare",
       "proposeAgain": "Föreslå igen med nya datum",
-      "planning": "Visa i kalendern"
+      "planning": "Visa i kalendern",
+      "needClosed": "Arbetsgivaren har stängt detta behov, så förslaget kan inte längre accepteras. Du kan fortfarande tacka nej."
     },
     "connections": {
       "title": "Kalenderkopplingar",
