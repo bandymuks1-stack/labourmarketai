@@ -488,6 +488,10 @@ describe("an included break never drops the day", () => {
     ["English 'incl. a short break'", "Worked 8 h incl. a short break.", 8 * 60],
     ["German 'inkl. Pause' then paperwork", "8 Stunden gearbeitet inkl. Pause. Danach 2 Stunden Papierkram.", 10 * 60],
     ["German 'inkl. einer kurzen Pause'", "8 Stunden gearbeitet inkl. einer kurzen Pause.", 8 * 60],
+    ["a figure before the break word", "Worked 8 h incl. 30 min lunch break.", 8 * 60],
+    ["German figure before 'Pause'", "8 Stunden gearbeitet inkl. 30 Minuten Pause. Danach 2 Stunden Papierkram.", 10 * 60],
+    ["'incl. 30 min break' then admin", "Worked 8 h incl. 30 min break. Then 2 h of admin.", 10 * 60],
+    ["five words before the break word", "Worked 8 h incl. travel time with a short break.", 8 * 60],
   ])("%s", (_name, text, expected) => {
     expect(intakeMinutes(text)).toBe(expected);
   });
