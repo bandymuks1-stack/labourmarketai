@@ -665,6 +665,17 @@ import { join } from "node:path";
  * `lt.landingJourney` — and ZERO file hashes; `en.*` and `ru.*` are
  * byte-identical, which is the proof that no component, layout or other
  * locale changed.
+ *
+ * Adverts in the visitor's language first (owner decision 2026-11-15: "the
+ * visitor's language first, then other suitable offers" — a sort priority,
+ * never a filter). `live-market-landing.ts` keeps the board's whole first page
+ * in the shared cached snapshot (key `live-market-landing-v3`) and exports the
+ * language test; `pickLandingVacancySample` takes the visitor's language and
+ * orders own-language rows first, every other rule unchanged; `focus-landing.tsx`
+ * makes that pick per visitor at render time. The band and the card are
+ * byte-identical. The regeneration moved EXACTLY TWO file hashes —
+ * `lib/market/live-market-landing.ts` and `app/[locale]/focus-landing/focus-landing.tsx`
+ * — and ZERO namespace hashes: no copy moved.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
