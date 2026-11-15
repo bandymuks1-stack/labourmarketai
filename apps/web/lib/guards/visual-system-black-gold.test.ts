@@ -26,6 +26,11 @@ import { activeLocales } from "@/lib/i18n/config";
  * below are re-anchored to that rule (lib/visual/theme-default.ts) — the same
  * three failure modes are still guarded, per page instead of product-wide.
  *
+ * 2026-11-15 (owner): a new account starts LIGHT in the workspace too; dark
+ * stays selectable and a saved choice still wins. The rule keeps its per-area
+ * shape (lib/visual/theme-default.ts), so the checks below are unchanged: a
+ * definite theme per page, and a saved choice never overwritten.
+ *
  * Added by this file:
  *   • the ink ladder is the owner's tonal depth, not "some dark";
  *   • the brand accent is GOLD in both palettes;
@@ -84,7 +89,7 @@ describe("black + gold is the product default", () => {
     expect(relLum(page), "light page background must be light").toBeGreaterThan(0.5);
   });
 
-  it("the pre-paint bootstrap resolves a definite theme per page (public light, workspace dark)", () => {
+  it("the pre-paint bootstrap resolves a definite theme per page (light by default, owner 2026-11-15)", () => {
     const rule = read("lib/visual/theme-default.ts");
     // ONE rule: the bootstrap string is BUILT from the workspace pattern, so the
     // inline script and <ThemeReapply/> can never disagree.
