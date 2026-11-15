@@ -2052,6 +2052,7 @@
     "addError": "Nepavyko pridėti. Pabandykite dar kartą.",
     "addExperienceTitle": "Pridėti darbo patirtį",
     "expTitleLabel": "Pareigos",
+    "expKindLabel": "Kokia tai buvo veikla",
     "expTitlePlaceholder": "Pvz., suvirintojas, slaugytoja, sandėlio darbuotojas, programuotojas",
     "expStartLabel": "Nuo (mėnuo / metai)",
     "expEndLabel": "Iki (mėnuo / metai)",

@@ -2,8 +2,8 @@
   "files": {
     "app/[locale]/page.tsx": "29818d172da3311417844a7ac066c8dfd3e72aa873829c4ec1e2e0da8067ecfb",
     "lib/market/live-market-landing.ts": "174ae68fccdf771e7be8c056e0ef2ebfee0dbc721f49a64ca145fff5b3face9a",
-    "app/[locale]/focus-landing/focus-landing.tsx": "cbd039abba6a0358bacd35568d3790dde1b8e3164a895c8889a627368ff441de",
-    "components/marketing/public-entry.tsx": "18a490604b62b98e562fd3f1a4576c10cf1abb5ecdb76016a985037761ac71c8",
+    "app/[locale]/focus-landing/focus-landing.tsx": "1e7629575d176840d95a8e915a922f55d99e61153a250ed64532dfa64bb0c847",
+    "components/marketing/public-entry.tsx": "7ee2e82f1315d15a5e70d0d3f507d825acfaa17043e4db87bec3f89bb2bf8acd",
     "components/marketing/landing-three-ways.tsx": "dfe1107da2a56a4d8a57a628dfbabaafd90c0e16653aa11c5a47addca9a06677",
     "lib/marketing/public-entry.ts": "408a5eb68b394ac7f981c67aea94c3c6bc8348f4490c490011f2b7a529f0d1d1",
     "components/marketing/product-chain-band.tsx": "502f3970ecd1df37c87e9fde17e7cd131df566274cc6213f9941077eae6f5c6f",

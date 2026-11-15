@@ -694,6 +694,19 @@ import { join } from "node:path";
  * byte-identical. The regeneration moved EXACTLY TWO file hashes —
  * `lib/market/live-market-landing.ts` and `app/[locale]/focus-landing/focus-landing.tsx`
  * — and ZERO namespace hashes: no copy moved.
+ *
+ * A worker or contractor sentence can be sent without an account (owner P0
+ * 2026-11-15, misleading public paths, F4). The entry's reading now offers, FIRST,
+ * the request the page already takes signed out: a sentence about needing workers
+ * opens the public need form with the sentence as its description
+ * (`?description=…&from=landing_entry`), and a job for someone to do opens the
+ * project request on this page (`#request=project`). Sign-up stays, second, with
+ * `?say=`; "sign in to save your request" is said only when it is true. The
+ * button reuses the request block's own title (`landing.requestDoors.title`),
+ * handed to the entry by the server landing so the client still receives
+ * `landing.entry` only; no copy moved. The regeneration moved EXACTLY TWO file
+ * hashes — `components/marketing/public-entry.tsx` and
+ * `app/[locale]/focus-landing/focus-landing.tsx` — and ZERO namespace hashes.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.

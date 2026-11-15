@@ -261,7 +261,8 @@
   "unnamedOrganization": {
     "company": "Įmonė be pavadinimo",
     "agency": "Agentūra be pavadinimo",
-    "other": "Organizacija be pavadinimo"
+    "other": "Organizacija be pavadinimo",
+    "ended": "Ankstesnė organizacija be pavadinimo"
   },
   "activeWorkspaceNoRelationship": "Veikiate „{org}“ vardu, bet darbo santykis su „{org}“ neužregistruotas, todėl jo čia nėra. Pasirinkite kontekstą, kuriam šis darbas iš tikrųjų priklauso.",
   "project": "Projektas",

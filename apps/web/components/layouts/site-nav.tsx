@@ -7,11 +7,17 @@ import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
 import type { RenderedIntent } from "@/components/layouts/intent-icons";
 import { ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
-import { INSTITUTION_DOOR_NEXT } from "@/lib/marketing/public-doors";
+import { STARTING_CONTEXTS } from "@/lib/marketing/public-doors";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { LmLogo } from "@/components/ui/lm-logo";
 import { isVisionPublic } from "@/lib/config/vision-publication";
+
+/** The landing's own institution door — sign-up, with the institution setup
+ *  as its return path (lib/marketing/public-doors.ts). Read, never retyped, so
+ *  the header can never point a visitor at the signed-in setup itself. */
+const INSTITUTION_DOOR: string =
+  STARTING_CONTEXTS.find((c) => c.key === "institution")?.href ?? "/auth/signup";
 
 // `/vision` is gated by `lib/config/vision-publication.ts`. While the
 // flag is `false`, the route stays reachable by direct URL (so the
@@ -154,12 +160,14 @@ export async function SiteNav({
   );
   // Behind "More" and in the phone menu: the older links, then the one door
   // for schools, colleges and universities (owner P0 2026-11-13: they can
-  // register but had no entry). It opens the existing institution setup —
-  // sign-in first for a visitor — until the audience page exists; it is not
+  // register but had no entry). It is the landing's own institution door —
+  // sign-UP, then the existing institution setup — and carries the same
+  // account note as every goal link that needs an account (owner P0
+  // 2026-11-15, F9: it used to send a new institution to sign-in). It is not
   // a seventh goal.
   const moreLinks = [
     ...links.map((l) => ({ key: l.key as string, href: l.href, label: t(l.key) })),
-    { key: "education", href: INSTITUTION_DOOR_NEXT, label: tIntent("education") },
+    { key: "education", href: INSTITUTION_DOOR, label: tIntent("education"), account: true },
   ];
   // ONE goal bar element, placed by the page: the header's second row on
   // inner pages; on the landing (no goals in it) it sits in the first row.

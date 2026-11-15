@@ -261,7 +261,8 @@
   "unnamedOrganization": {
     "company": "Bedrijf zonder naam",
     "agency": "Bureau zonder naam",
-    "other": "Organisatie zonder naam"
+    "other": "Organisatie zonder naam",
+    "ended": "Eerdere organisatie zonder naam"
   },
   "activeWorkspaceNoRelationship": "U handelt namens {org}, maar er is geen werkrelatie met {org} vastgelegd, dus die staat hier niet. Kies de context waar dit werk echt bij hoort.",
   "project": "Project",
