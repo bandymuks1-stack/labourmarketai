@@ -82,7 +82,7 @@ describe("W-J1 — the button that runs the search says what it does", () => {
 
   it("the label key exists in every ACTIVE locale (no [EN] placeholder)", async () => {
     const fs = await import("node:fs");
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const m = JSON.parse(fs.readFileSync(`messages/${locale}.json`, "utf8"));
       const v = m.conversation?.chat?.userFindWork;
       expect(v, `${locale}.conversation.chat.userFindWork`).toBeTruthy();

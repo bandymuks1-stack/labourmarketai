@@ -4,6 +4,10 @@ import { buttonLinkClassName } from "@/components/ui/Button";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
+import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
+import type { RenderedIntent } from "@/components/layouts/intent-icons";
+import { ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
+import { INSTITUTION_DOOR_NEXT } from "@/lib/marketing/public-doors";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { LmLogo } from "@/components/ui/lm-logo";
@@ -77,48 +81,110 @@ function visibleLinks(): readonly NavLink[] {
   );
 }
 
-export async function SiteNav() {
+/**
+ * `goalsOnPage` — the landing shows the six goals as cards on its first
+ * screen, so its header bar does not repeat them (owner gate 2026-11-12: no
+ * duplicated main menu on one screen). The bar keeps "More" and the assistant
+ * there; on every inner page it carries the six goals.
+ */
+export async function SiteNav({
+  goalsOnPage = false,
+}: { goalsOnPage?: boolean } = {}) {
   const t = await getTranslations("nav");
   // "My space" already exists as the dashboard's own tab label; reusing it keeps
   // the frozen `nav` namespace untouched.
   const tSpace = await getTranslations("auth.dashboard.tabs");
   const locale = await getLocale();
   const links = visibleLinks();
+  // Premium navigation (owner P0 2026-11-12): the six intents, labels resolved
+  // HERE so the desktop mega-menu and the mobile menu render ONE list. The
+  // strings live in their own `siteNav` namespace — `nav` is frozen with the
+  // landing (lib/guards/landing-freeze.ts).
+  const tIntent = await getTranslations("siteNav");
+  const intents: RenderedIntent[] = PUBLIC_INTENTS.map((intent) => ({
+    id: intent.id,
+    iconKey: intent.iconKey,
+    title: tIntent(`intents.${intent.id}.title`),
+    short: tIntent(`intents.${intent.id}.short`),
+    description: tIntent(`intents.${intent.id}.description`),
+    links: intent.links.map((link) => ({
+      id: link.id,
+      href: link.href,
+      label: tIntent(`links.${link.id}`),
+      account: link.account,
+    })),
+  }));
+  // "Ask the assistant" — the existing conversation home (`/dashboard` IS the
+  // chat). A signed-out visitor is sent to login and lands back in it.
+  const assistant = { href: ASSISTANT_HREF, label: tIntent("assistant") };
 
   // ONE definition, rendered in exactly one place at any given width: in the
   // header from `sm` up, inside the disclosure below it. Sharing the fragment
   // is what keeps the two mounts from drifting into different destinations.
-  const authCtas = (
-    <NavAuthCtas
-      guest={
-        <>
-          <AuthCtaLink
-            relPath={`/${locale}/auth/login`}
-            className="flex min-h-11 items-center text-sm text-text-secondary transition-colors hover:text-text-primary sm:min-h-0"
-          >
-            {t("login")}
-          </AuthCtaLink>
-          <AuthCtaLink
-            relPath={`/${locale}/auth/signup`}
-            className={buttonLinkClassName("primary", "sm")}
-          >
-            {t("startNow")}
-          </AuthCtaLink>
-        </>
-      }
-      member={
-        <AuthCtaLink
-          relPath={`/${locale}/dashboard`}
-          className={buttonLinkClassName("primary", "sm")}
-        >
-          {tSpace("overview")}
-        </AuthCtaLink>
-      }
+  // Each destination is defined ONCE and placed where the width allows:
+  //   every width  — Sign in (or, signed in, "My space") in the header row;
+  //   from `sm`    — Sign up beside it;
+  //   below `sm`   — Sign up is the first thing in the menu.
+  // Owner fix list 2026-11-12: on a phone neither was visible in the header.
+  const loginCta = (
+    <AuthCtaLink
+      relPath={`/${locale}/auth/login`}
+      className="flex min-h-11 items-center whitespace-nowrap rounded-control px-1 text-sm font-medium text-text-primary transition-colors hover:text-brand-blue sm:px-0 sm:font-normal sm:text-text-secondary sm:hover:text-text-primary"
+    >
+      {t("login")}
+    </AuthCtaLink>
+  );
+  const signupCta = (
+    <AuthCtaLink
+      relPath={`/${locale}/auth/signup`}
+      className={buttonLinkClassName("primary", "sm")}
+    >
+      {/* Named for what it does (owner 2026-11-12): "Start now" did not say
+          that it creates an account. */}
+      {tIntent("signUp")}
+    </AuthCtaLink>
+  );
+  const memberCta = (
+    <AuthCtaLink
+      relPath={`/${locale}/dashboard`}
+      className={buttonLinkClassName("primary", "sm")}
+    >
+      {tSpace("overview")}
+    </AuthCtaLink>
+  );
+  // Behind "More" and in the phone menu: the older links, then the one door
+  // for schools, colleges and universities (owner P0 2026-11-13: they can
+  // register but had no entry). It opens the existing institution setup —
+  // sign-in first for a visitor — until the audience page exists; it is not
+  // a seventh goal.
+  const moreLinks = [
+    ...links.map((l) => ({ key: l.key as string, href: l.href, label: t(l.key) })),
+    { key: "education", href: INSTITUTION_DOOR_NEXT, label: tIntent("education") },
+  ];
+  // ONE goal bar element, placed by the page: the header's second row on
+  // inner pages; on the landing (no goals in it) it sits in the first row.
+  const megaMenu = (
+    <IntentMegaMenu
+      className="hidden lg:block"
+      intents={intents}
+      goalsOnPage={goalsOnPage}
+      navLabel={tIntent("trigger")}
+      accountLabel={tIntent("account")}
+      assistant={assistant}
+      more={{
+        label: tIntent("more"),
+        links: moreLinks,
+      }}
     />
   );
+  const themeLabels = { toDark: t("themeToDark"), toLight: t("themeToLight") };
 
   return (
     <header className="relative z-20 border-b border-ink-600/60">
+      {/* ONE NAVIGATION (owner fix list 2026-11-12): the row below carries the
+          brand and the account controls only; the six goals are the one
+          navigation bar, and the older links (jobs, market, how it works,
+          pricing, about) sit behind its "More" and in the footer. */}
       {/* Beta foundation audit M1 (measured 2026-08-08): at 320px this row's
           contents were 545px wide, and `html { overflow-x: hidden }` CLIPPED
           the excess rather than scrolling it — so the theme toggle and the
@@ -126,10 +192,10 @@ export async function SiteNav() {
           added anything. The mobile gap/padding are tightened here (same
           pattern the dashboard header already uses) and the auth CTAs move
           into the disclosure below `sm`, which is what buys the room. */}
-      <div className="mx-auto flex max-w-container items-center gap-2 px-4 py-4 sm:gap-6 sm:px-12">
+      <div className="mx-auto flex max-w-container items-center gap-2 px-3 py-3 sm:gap-6 sm:px-12 sm:py-4">
         <Link
           href="/"
-          className="flex min-w-0 shrink items-center gap-1.5 font-display text-base font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
+          className="flex shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
         >
           {/* The mark is decorative here — the wordmark beside it already
               names the product, so announcing both would read it twice. */}
@@ -140,42 +206,40 @@ export async function SiteNav() {
               room from 360px up (124/124px measured); under 360px there is no
               room beside the three header controls, so only the mark shows and
               the name stays for screen readers. */}
-          <span className="truncate max-[359px]:sr-only">
+          {/* THE NAME IS NEVER CUT (owner fix list 2026-11-12): the wordmark
+              is whole at every width from 360px — it does not shrink or
+              truncate; the controls beside it were made to fit instead (theme
+              toggle in the menu below `sm`, a compact language chip). Under
+              360px only the mark shows and the name stays for screen readers. */}
+          <span className="whitespace-nowrap max-[359px]:sr-only">
             LabourMarket<span className="text-gradient-accent">.ai</span>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex">
-          {links.map((l) => (
-            <Link
-              key={l.key}
-              href={l.href}
-              className="text-sm text-text-secondary transition-colors hover:text-text-primary"
-            >
-              {t(l.key)}
-            </Link>
-          ))}
-        </nav>
+        {goalsOnPage && megaMenu}
 
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4">
           {/* Auth CTAs pin to the app origin on marketing hosts so OAuth's
-              PKCE round-trip stays same-origin (see AuthCtaLink).
-
-              Below `sm` they render inside the disclosure instead (same two
-              links, one tap away) — see `authCtas` and the measurement note
-              on the row above. Keeping them here at every width is what made
-              the header 545px wide on a 320px screen. */}
-          <div className="hidden items-center gap-3 sm:flex sm:gap-4">{authCtas}</div>
-          {/* F1: the public header must always offer the theme toggle —
-              visible on every viewport, never folded into the mobile menu. */}
-          <ThemeToggleIcon
-            labels={{ toDark: t("themeToDark"), toLight: t("themeToLight") }}
-          />
-          {/* Pre-Advertising Launch Readiness v1: the language switcher must
-              be reachable on mobile too. A LT/PL/RU worker arriving from a paid
-              ad on the wrong locale had no way to change language below 640px.
-              Stays visible on every viewport, never folded into the mobile
-              menu. */}
+              PKCE round-trip stays same-origin (see AuthCtaLink). Sign in is
+              in this row at every width; Sign up joins it from `sm` and is the
+              first thing in the menu below that. */}
+          <div className="flex items-center gap-2 sm:gap-4" data-testid="header-auth">
+            <NavAuthCtas
+              guest={
+                <>
+                  {loginCta}
+                  <span className="hidden sm:inline-flex">{signupCta}</span>
+                </>
+              }
+              member={memberCta}
+            />
+          </div>
+          {/* The theme toggle is in the header from `sm` up and inside the
+              menu below it (owner fix list 2026-11-12: on a 360px phone it
+              took the slot Sign in needs). Still one tap away at every width. */}
+          <span className="hidden sm:inline-flex">
+            <ThemeToggleIcon labels={themeLabels} />
+          </span>
           <LocaleSwitcher className="flex" compactBelowSm />
           {/* Beta foundation audit M1: below lg the primary links above are
               display:none, which used to leave a phone visitor with NO path to
@@ -184,9 +248,12 @@ export async function SiteNav() {
               here so this server component stays the single source of truth. */}
           <MobileNavMenu
             className="lg:hidden"
-            items={links.map((l) => ({ key: l.key, href: l.href, label: t(l.key) }))}
+            items={moreLinks}
             openLabel={t("menuOpen")}
             closeLabel={t("menuClose")}
+            intents={intents}
+            accountLabel={tIntent("account")}
+            assistant={assistant}
             // Below `sm` the panel also carries the auth CTAs the header row
             // cannot fit; from `sm` up the whole section is display:none and
             // the header renders them instead. `sm:hidden` sits on the
@@ -204,14 +271,21 @@ export async function SiteNav() {
               <div
                 key="mobile-nav-auth"
                 data-testid="mobile-nav-auth"
-                className="mt-1.5 flex flex-col items-start gap-2 border-t border-ink-600 px-3 pb-1 pt-3 sm:hidden"
+                className="mb-1.5 flex flex-wrap items-center justify-between gap-2 border-b border-ink-600 px-3 pb-3 pt-1.5 sm:hidden"
               >
-                {authCtas}
+                <NavAuthCtas guest={signupCta} member={null} />
+                <ThemeToggleIcon labels={themeLabels} testId="menu-theme-toggle" />
               </div>
             }
           />
         </div>
       </div>
+      {/* THE INTENT BAR (owner P0 2026-11-12): the six intents are the first
+          level of the header from `lg` up — six plainly named choices, always
+          visible, each two actions from the start of its function. Below `lg`
+          the same six open the menu above. The panel anchors to the <header>
+          (the nearest positioned box), so it spans the full width. */}
+      {!goalsOnPage && megaMenu}
     </header>
   );
 }

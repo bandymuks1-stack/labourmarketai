@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { AuthCarriedIntent } from "@/components/app/auth-carried-intent";
 import { Button } from "@/components/ui/Button";
 import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
+import { InAppBrowserNotice } from "@/components/app/in-app-browser-notice";
 import {
   FacebookButton,
   GoogleButton,
@@ -419,6 +420,7 @@ export function SignupForm({
             second copy above the submit used to render — a real person read the
             same paragraph twice on one short form (window 6 walk, 2026-09-06). */}
         <AuthLegalNotice variant="signup" />
+        <InAppBrowserNotice text={tSocial("inAppBrowser")} />
 
         {/* ONE provider row on a phone (P0-1b, 360×740): Google keeps its
             words and the room; LinkedIn and Facebook are 48 px logo squares

@@ -449,6 +449,7 @@ function seasonsOf(cv: AthleteCvInput, names: AthleteNames): AthleteSeason[] {
       orgName: e.orgName,
       title: e.title,
       relationshipLabel: names.relationship(e.relationship),
+      practice: e.kind === "practice",
     });
     const proof = e.id ? cv.proof.filter((p) => p.engagementId === e.id) : [];
     const others = proof.filter((p) => !p.selfConfirmed);
