@@ -111,7 +111,8 @@ export function WorkLifecycleGraph({
   testId = "work-lifecycle-graph",
 }: {
   readonly title: string;
-  readonly hint: string;
+  /** Optional line under the graph. Public pages pass none (owner copy cleanup 2026-11-15). */
+  readonly hint?: string;
   readonly exampleNote?: string;
   readonly openLabel: string;
   readonly listLabel: string;
@@ -323,7 +324,7 @@ export function WorkLifecycleGraph({
             })}
           </ul>
         </div>
-        <p className="mt-3 text-meta text-text-secondary">{hint}</p>
+        {hint ? <p className="mt-3 text-meta text-text-secondary">{hint}</p> : null}
       </div>
     </section>
   );

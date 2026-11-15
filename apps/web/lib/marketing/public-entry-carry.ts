@@ -1,4 +1,5 @@
 import { buildReturnValue } from "@/lib/auth/redirect";
+import { requestDoorHref } from "@/lib/staffing/request-door-link";
 
 /**
  * THE CARRY HALF of the public entry — how a visitor's sentence travels to
@@ -87,4 +88,48 @@ export function entryDoorHref(
   const base = `/${locale}/auth/${door}`;
   const next = entryReturnPath(sentence);
   return next ? `${base}?next=${encodeURIComponent(next)}` : base;
+}
+
+/** The page id the public need form records for an inquiry started here. */
+export const PUBLIC_ENTRY_FORM_SOURCE = "landing_entry";
+
+/**
+ * The public need form with the visitor's sentence as its description
+ * (employer path P0 2026-11-15). A sentence about needing workers is a need the
+ * form already takes without an account; this opens it pre-written instead of
+ * sending the person through a sign-up first. Locale-less, for the localized
+ * `Link`; the form reads it through its own bounded prefill
+ * (`parseCompanyNeedPrefill`: `description`, `from`).
+ */
+export function companyNeedEntryHref(sentence: string | null | undefined): {
+  readonly pathname: "/company-need";
+  readonly query: Readonly<Record<string, string>>;
+} {
+  const clean = normaliseEntrySentence(sentence);
+  return {
+    pathname: "/company-need",
+    query: clean
+      ? { description: clean, from: PUBLIC_ENTRY_FORM_SOURCE }
+      : { from: PUBLIC_ENTRY_FORM_SOURCE },
+  };
+}
+
+/** What the entry offers FIRST for a reading, when it is a request this page
+ *  takes without an account: a worker need goes to the need form, a job for
+ *  someone to do goes to the project request on the landing. Null otherwise
+ *  (then the auth doors lead, as before). */
+export type EntryRequestRoute =
+  | { readonly kind: "need-form"; readonly href: ReturnType<typeof companyNeedEntryHref> }
+  | { readonly kind: "project"; readonly href: string };
+
+export function entryRequestRoute(
+  intent: string | null,
+  chosenFamily: string | null,
+  sentence: string | null | undefined,
+): EntryRequestRoute | null {
+  if (intent === "need-workers" || intent === "find-workers" || (intent === null && chosenFamily === "hire")) {
+    return { kind: "need-form", href: companyNeedEntryHref(sentence) };
+  }
+  if (intent === "need-service") return { kind: "project", href: requestDoorHref("project") };
+  return null;
 }
