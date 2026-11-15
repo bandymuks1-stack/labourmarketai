@@ -1,6 +1,7 @@
 import { expect as baseExpect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * W3 rows 7/8/25 — EMPLOYER DEMAND CONSOLIDATION: browser proof.
@@ -193,6 +194,7 @@ test.describe("W3 7/8/25 — the company page is the ONE demand home (company se
     await page.getByTestId("demand-team-size").fill("4");
 
     // Step 3 — review echoes the entered values.
+    await chooseDemandCountryIfEmpty(page);
     await page.getByTestId("demand-next").click();
     await expect(page.getByTestId("demand-review")).toBeVisible();
     await expect(page.getByTestId("demand-summary-description")).toHaveText(MARKER);

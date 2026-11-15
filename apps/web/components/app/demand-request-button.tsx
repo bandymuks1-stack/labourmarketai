@@ -21,6 +21,7 @@ import {
 import type { DemandPrefill, DemandUrgency } from "@/lib/demand/demand-request";
 import { DemandAdvancedSections } from "@/components/app/demand-advanced-sections";
 import {
+  defaultCurrencyForCountry,
   buildStructuredV2Input,
   storedV2ToFormState,
   EMPTY_ADVANCED_DEMAND_STATE,
@@ -179,6 +180,9 @@ export function DemandRequestButton({
   const countryOptions: { value: string; label: string }[] = countryOptionsForLocale(locale);
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
+  // A need with no country is invisible to every country filter (workers,
+  // agencies, search). The market is never guessed, so it is asked for.
+  const [showCountryError, setShowCountryError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
   const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual" | "workspaceChanged">(
     "idle",
@@ -191,6 +195,22 @@ export function DemandRequestButton({
   });
   const patchAdv = (patch: Partial<AdvancedDemandFormState>) =>
     setAdv((prev) => ({ ...prev, ...patch }));
+  // The pay currency follows the chosen country (SE → SEK) while no amount is
+  // typed yet: a default the person sees in the picker and can change, never
+  // a conversion of numbers already written (Swedish employer audit M-1).
+  useEffect(() => {
+    const currency = defaultCurrencyForCountry(country);
+    if (!currency) return;
+    // EVERY amount the currency applies to (buildStructuredV2Input prices the
+    // pay range, the guaranteed base and the per diem in `adv.currency`): any
+    // of them typed means the currency is the person's, and stays.
+    setAdv((prev) =>
+      [prev.compMin, prev.compMax, prev.guaranteedBase, prev.perDiem].every((v) => v.trim() === "") &&
+      prev.currency !== currency
+        ? { ...prev, currency }
+        : prev,
+    );
+  }, [country]);
   // Duplicate-and-edit: prefill the whole wizard from the owner's OWN last
   // request (repeat action, Capability E/G). Own data only; nothing invented.
   const [prefillState, setPrefillState] = useState<
@@ -330,6 +350,7 @@ export function DemandRequestButton({
   const talentPoolDisclosure = requiresTalentPoolDisclosure(advV2);
 
   const descOk = description.trim().length > 0;
+  const countryOk = country !== "";
   // The estimate is OPTIONAL. It only blocks submit when the user actually
   // engaged it AND it is invalid (negatives / impossible %). An untouched
   // estimate never blocks and is never persisted.
@@ -347,6 +368,13 @@ export function DemandRequestButton({
       return;
     }
     setShowDescError(false);
+    // Step 2 gate: the country is what puts the need in front of workers and
+    // agencies in that market. Without it the need is saved but never found.
+    if (step === 2 && !countryOk) {
+      setShowCountryError(true);
+      return;
+    }
+    setShowCountryError(false);
     // Deterministic auto-suggest: when entering the criteria step, pre-fill the
     // structured selects from the free text (only empty ones, never overriding
     // the user). Closed-set values only; the user reviews and can correct.
@@ -375,6 +403,11 @@ export function DemandRequestButton({
       setShowDescError(true);
       return;
     }
+    if (!countryOk) {
+      setStep(2);
+      setShowCountryError(true);
+      return;
+    }
     setState("sending");
     try {
       const res = await submitDemandRequestAction(intent, {
@@ -393,6 +426,14 @@ export function DemandRequestButton({
         estimate: estimateEngaged ? estimate : undefined,
         structuredV2: withTeam(advWire),
       }, { expectedOrganizationId: organizationId });
+      // The server is the rule (web, chat and MCP share it): a refused country
+      // sends the person back to the picker with the reason beside it.
+      if (!res.ok && res.code === "country_required") {
+        setState("idle");
+        setStep(2);
+        setShowCountryError(true);
+        return;
+      }
       setState(
         res.ok
           ? "done"
@@ -723,12 +764,24 @@ export function DemandRequestButton({
               <Label>{tc("country")}</Label>
               <DarkListbox
                 value={country}
-                onChange={setCountry}
+                onChange={(v) => {
+                  setCountry(v);
+                  if (v) setShowCountryError(false);
+                }}
                 options={countryOptions}
                 ariaLabel={tc("country")}
                 placeholder="—"
                 testId="demand-country-select"
               />
+              {showCountryError && (
+                <span
+                  className="text-xs text-state-danger"
+                  role="alert"
+                  data-testid="demand-country-error"
+                >
+                  {t("form.countryRequired")}
+                </span>
+              )}
             </label>
             <label className="flex flex-col gap-1.5">
               <Label>{tc("numberOfWorkers")}</Label>
@@ -999,7 +1052,7 @@ export function DemandRequestButton({
             type="button"
             size="sm"
             onClick={create}
-            disabled={state === "sending" || !descOk || !estimateOk}
+            disabled={state === "sending" || !descOk || !estimateOk || !countryOk}
             // Mobile-first: the room's primary action is a full-width tap target
             // on phones, compact on larger screens.
             className="w-full sm:w-auto sm:self-start"

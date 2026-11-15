@@ -115,7 +115,7 @@ export interface CvSectionProposals {
 const MAX_PER_SECTION = 20;
 const MAX_LINE = 300;
 
-// ── Lexicons (lt / en / ru / de / nl — the active locale set) ────────────────
+// ── Lexicons (lt / en / ru / de / nl / pl / sv — the active locale set) ──────
 
 const YEAR = "(?:19|20)\\d{2}";
 const MONTH = "(?:0[1-9]|1[0-2])";
@@ -134,10 +134,10 @@ const MONTH_AFTER = `(?:\\s?[./-]\\s?${MONTH}(?:\\s?[./-]\\s?${DAY})?(?!\\d))?`;
 const DATE_TOKEN = `${MONTH_FIRST}${YEAR}${MONTH_AFTER}`;
 const RANGE_END =
   `(?:${DATE_TOKEN}` +
-  "|dabar|šiuo metu|iki dabar|now|present|current|heute|heden|наст\\.?|настоящее время)";
+  "|dabar|šiuo metu|iki dabar|now|present|current|heute|heden|nuvarande|pågående|nu(?!\\p{L})|наст\\.?|настоящее время)";
 const YEAR_RANGE_RE = new RegExp(
-  `(${DATE_TOKEN})\\s*(?:[–—-]|iki|to|until|bis|tot|по|до)\\s*(${RANGE_END})`,
-  "i",
+  `(${DATE_TOKEN})\\s*(?:[–—-]|iki|to|until|bis|tot|till|по|до)\\s*(${RANGE_END})`,
+  "iu",
 );
 /** Standalone date tokens left over once the range fragment is removed. */
 const YEAR_MONTH_TOKEN_RE = new RegExp(
@@ -145,31 +145,33 @@ const YEAR_MONTH_TOKEN_RE = new RegExp(
   "g",
 );
 const CURRENT_RE =
-  /dabar|šiuo metu|now|present|current|heute|heden|наст|настоящее/i;
+  /dabar|šiuo metu|now|present|current|heute|heden|nuvarande|pågående|^nu$|наст|настоящее/i;
 
 const COMPANY_MARKER_RE =
   /\b(UAB|MB|AB|VšĮ|IĮ|GmbH|B\.?V\.?|Sp\.\s*z\s*o\.?o\.?|Ltd\.?|SIA|OÜ|OOO|ООО|LLC|Inc\.?)\b/;
 
 const EDUCATION_RE =
-  /universit|kolegij|college|hochschule|gimnazij|mokykl|school|schule|школ|университет|колледж|bakalaur|bachelor|magistr|master|мастер|магистр|doktor|doctor|доктор|profesin|vocational|berufsschule|akademij|academy|академ|institut|kursai|course|курс|opleiding|studij|rengimo cent|mokymo cent|training cent|technikum|liceum|лицей|техникум|училищ|szkoł/i;
+  /universit|kolegij|college|hochschule|gimnazij|mokykl|school|schule|школ|университет|колледж|bakalaur|bachelor|magistr|master|мастер|магистр|doktor|doctor|доктор|profesin|vocational|berufsschule|akademij|academy|академ|institut|kursai|course|курс|opleiding|studij|rengimo cent|mokymo cent|training cent|technikum|liceum|лицей|техникум|училищ|szkoł|högskol|gymnasie|grundskol|yrkesutbild|komvux/i;
 
 const CERTIFICATE_RE =
-  /sertifikat|certificate|certificaat|zertifikat|сертификат|pažymėjim|licencij|licentie|licen[cs]e|lizenz|лиценз|atestat|attest|удостоверен/i;
+  /sertifikat|certificate|certificaat|zertifikat|сертификат|pažymėjim|licencij|licentie|licen[cs]e|lizenz|лиценз|atestat|attest|удостоверен|certifikat|intyg|körkort|behörighetsbevis/i;
 
 const ACHIEVEMENT_RE =
-  /apdovanoj|award|auszeichnung|наград|laimėj|winner|prijs gewonnen|pasiekim|achievement|достижен/i;
+  /apdovanoj|award|auszeichnung|наград|laimėj|winner|prijs gewonnen|pasiekim|achievement|достижен|utmärkelse/i;
 
 /** keyword → education_types slug (registry seed set). Order matters — the
  *  first match wins, so more specific degrees precede generic "school". */
 const EDUCATION_TYPE_RULES: ReadonlyArray<[RegExp, string]> = [
   [/doktor|doctor|phd|доктор/i, "doctorate"],
   [/magistr|master|магистр/i, "university_master"],
-  [/bakalaur|bachelor|бакалавр/i, "university_bachelor"],
+  [/bakalaur|bachelor|kandidatexamen|бакалавр/i, "university_bachelor"],
   [/universit|университет/i, "university_bachelor"],
-  [/kolegij|college|hogeschool|колледж/i, "college"],
-  [/profesin|vocational|berufs|профессиональн|rengimo cent|technikum|техникум|училищ/i, "vocational"],
-  [/gimnazij|vidurin|secondary|gymnasium|гимназ|средн/i, "secondary"],
-  [/pradin|primary|grundschule|начальн/i, "primary"],
+  // Before "college": "Yrkeshögskolan" contains "högskol" but is vocational.
+  [/yrkeshögskol/i, "vocational"],
+  [/kolegij|college|hogeschool|högskol|колледж/i, "college"],
+  [/profesin|vocational|berufs|yrkesutbild|профессиональн|rengimo cent|technikum|техникум|училищ/i, "vocational"],
+  [/gimnazij|vidurin|secondary|gymnasium|gymnasie|гимназ|средн/i, "secondary"],
+  [/pradin|primary|grundschule|grundskol|начальн/i, "primary"],
   [/kursai|course|kurs|курс|training|mokym/i, "course_certificate"],
 ];
 
@@ -188,32 +190,49 @@ const LANGUAGE_RULES: ReadonlyArray<[RegExp, string]> = [
   [/dan[ųuo]|danish|dansk|датск/i, "da"],
 ];
 
+/** The SWEDISH names of the same languages ("engelska", "svenska", "norska"
+ *  and "danska" are already read above). Kept apart and read only AFTER the
+ *  rules above, and only on a line that also states a level: several of them
+ *  are words in other languages too — "Polska" is the country in every Polish
+ *  address — so a Swedish needle must never change how another language's CV
+ *  is read (review #3389 P2-1). */
+const SV_LANGUAGE_RULES: ReadonlyArray<[RegExp, string]> = [
+  [/litauisk/i, "lt"],
+  [/\bryska\b/i, "ru"],
+  [/\btyska\b/i, "de"],
+  [/nederländsk|holländsk/i, "nl"],
+  [/\bpolska\b/i, "pl"],
+  [/lettisk/i, "lv"],
+  [/estnisk/i, "et"],
+];
+const ALL_LANGUAGE_RULES: ReadonlyArray<[RegExp, string]> = [...LANGUAGE_RULES, ...SV_LANGUAGE_RULES];
+
 const CEFR_RE = /\b([ABC][12])\b/;
-const NATIVE_RE = /gimtoji|gimtąja|native|moedertaal|muttersprache|родной/i;
-const FLUENT_RE = /laisvai|fluent|fließend|vloeiend|свободно/i;
+const NATIVE_RE = /gimtoji|gimtąja|native|moedertaal|muttersprache|modersmål|родной/i;
+const FLUENT_RE = /laisvai|fluent|fließend|vloeiend|flytande|свободно/i;
 
 const SALARY_LINE_RE =
-  /atlyginim|alga|salary|wage|loon|gehalt|зарплат|lūkest|expectation|€|eur/i;
+  /atlyginim|alga|salary|wage|loon|gehalt|lön|зарплат|lūkest|expectation|€|eur/i;
 const SALARY_RANGE_RE =
   /(\d{3,5})\s*[–—-]\s*(\d{3,5})\s*(?:€|eur)/i;
 const SALARY_SINGLE_RE = /(\d{3,5})\s*(?:€|eur)/i;
-const HOURLY_RE = /val\.|\/\s*val|per hour|hourly|\/\s*h\b|stunde|в час|per uur/i;
+const HOURLY_RE = /val\.|\/\s*val|per hour|hourly|\/\s*h\b|stunde|в час|per uur|per timme|\/\s*tim\b/i;
 
 const AVAILABILITY_RULES: ReadonlyArray<[RegExp, CvAvailabilityHintKey]> = [
   [
-    /galiu persikelti|galiu išvykti|willing to relocate|umzugsbereit|bereid te verhuizen|готов.{0,4}переехать|galiu dirbti užsienyje/i,
+    /galiu persikelti|galiu išvykti|willing to relocate|umzugsbereit|bereid te verhuizen|kan flytta|beredd att flytta|готов.{0,4}переехать|galiu dirbti užsienyje/i,
     "willingToRelocate",
   ],
   [
-    /nuosav\w* automobil|turiu automobil|own car|own vehicle|eigenes auto|eigen auto|своя машина|собственный автомобиль/i,
+    /nuosav\w* automobil|turiu automobil|own car|own vehicle|eigenes auto|eigen auto|egen bil|своя машина|собственный автомобиль/i,
     "hasTransport",
   ],
   [
-    /naktin\w* pamain|night shift|nachtschicht|nachtdienst|ночн\w* смен/i,
+    /naktin\w* pamain|night shift|nachtschicht|nachtdienst|nattskift|ночн\w* смен/i,
     "nightShiftsOk",
   ],
   [
-    /savaitgal|weekend|wochenende|выходны/i,
+    /savaitgal|weekend|wochenende|helgarbete|helgpass|\b(?:arbeta|jobba|på|under)\s+helger(?:na)?\b|выходны/i,
     "weekendShiftsOk",
   ],
 ];
@@ -224,25 +243,25 @@ export const TRAINING_TYPE_SLUG = "course_certificate";
 /** Bare section-header lines ("Sertifikatai", "Education", …) are structure,
  *  not content — they must never become proposals themselves. */
 const SECTION_HEADER_RE =
-  /^(sertifikatai|sertifikatas|pažymėjimai|certificates?|zertifikate|certificaten|сертификаты|certyfikaty|išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie|kalbos|languages|sprachen|talen|языки|języki|pasiekimai|achievements|erfolge|prestaties|достижения|osiągnięcia|apdovanojimai|awards|darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?|mokymai|kursai|kvalifikacijos kėlimas|training|trainings|courses|weiterbildung|fortbildung|kurse|cursussen|trainingen|курсы|обучение|szkolenia|kursy)\s*:?$/i;
+  /^(sertifikatai|sertifikatas|pažymėjimai|certificates?|zertifikate|certificaten|сертификаты|certyfikaty|išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie|kalbos|languages|sprachen|talen|языки|języki|pasiekimai|achievements|erfolge|prestaties|достижения|osiągnięcia|apdovanojimai|awards|darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?|mokymai|kursai|kvalifikacijos kėlimas|training|trainings|courses|weiterbildung|fortbildung|kurse|cursussen|trainingen|курсы|обучение|szkolenia|kursy|certifikat|utbildning|språk|meriter|arbetslivserfarenhet|arbetserfarenhet|yrkeserfarenhet|kurser|vidareutbildning)\s*:?$/i;
 const TRAINING_HEADER_RE =
-  /^(mokymai|kursai|kvalifikacijos kėlimas|training|trainings|courses|weiterbildung|fortbildung|kurse|cursussen|trainingen|курсы|обучение|szkolenia|kursy)\s*:?$/i;
+  /^(mokymai|kursai|kvalifikacijos kėlimas|training|trainings|courses|weiterbildung|fortbildung|kurse|cursussen|trainingen|курсы|обучение|szkolenia|kursy|kurser|vidareutbildning)\s*:?$/i;
 const WORK_HEADER_RE =
-  /^(darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?)\s*:?$/i;
+  /^(darbo patirtis|work (history|experience)|berufserfahrung|werkervaring|опыт работы|doświadczenie( zawodowe)?|arbetslivserfarenhet|arbetserfarenhet|yrkeserfarenhet)\s*:?$/i;
 const EDUCATION_HEADER_RE =
-  /^(išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie)\s*:?$/i;
+  /^(išsilavinimas|education|ausbildung|opleiding|образование|wykształcenie|utbildning)\s*:?$/i;
 
 /** Month names, whole words only and only beside a year: "Kovalenko 2019" is
  *  not March. */
 const MONTH_WORDS: ReadonlyArray<readonly [number, string]> = [
   [1, "sausis|sausio|saus|january|jan|januar|januari|styczeń|stycznia|sty|январь|января|янв"],
   [2, "vasaris|vasario|vas|february|feb|februar|februari|luty|lutego|lut|февраль|февраля|фев"],
-  [3, "kovas|kovo|kov|march|mar|märz|maart|mrt|marzec|marca|март|марта|мар"],
+  [3, "kovas|kovo|kov|march|mar|märz|mars|maart|mrt|marzec|marca|март|марта|мар"],
   [4, "balandis|balandžio|bal|april|apr|kwiecień|kwietnia|kwi|апрель|апреля|апр"],
   [5, "gegužė|gegužės|geg|may|mai|mei|maj|maja|май|мая"],
   [6, "birželis|birželio|bir|june|jun|juni|czerwiec|czerwca|cze|июнь|июня|июн"],
   [7, "liepa|liepos|lie|july|jul|juli|lipiec|lipca|lip|июль|июля|июл"],
-  [8, "rugpjūtis|rugpjūčio|rgp|august|aug|augustus|sierpień|sierpnia|sie|август|августа|авг"],
+  [8, "rugpjūtis|rugpjūčio|rgp|august|aug|augusti|augustus|sierpień|sierpnia|sie|август|августа|авг"],
   [9, "rugsėjis|rugsėjo|rgs|september|sep|sept|wrzesień|września|wrz|сентябрь|сентября|сен"],
   [10, "spalis|spalio|spl|october|oct|okt|oktober|październik|października|paź|октябрь|октября|окт"],
   [11, "lapkritis|lapkričio|lap|november|nov|listopad|listopada|lis|ноябрь|ноября|ноя"],
@@ -383,9 +402,15 @@ function languageLevelFor(line: string): {
 
 /** The part of a list line that belongs to the language `re` matches: the
  *  comma/semicolon/slash/pipe segment that names it, when the line names more
- *  than one language. Otherwise the whole line. */
-function languageSegment(line: string, re: RegExp): string {
-  const named = LANGUAGE_RULES.filter(([r]) => r.test(line)).length;
+ *  than one language. Otherwise the whole line. `rules` is the lexicon that
+ *  counts as "naming a language" — the base rules for a base match, base plus
+ *  Swedish for a Swedish match (so a base reading never depends on Swedish). */
+function languageSegment(
+  line: string,
+  re: RegExp,
+  rules: ReadonlyArray<[RegExp, string]> = LANGUAGE_RULES,
+): string {
+  const named = rules.filter(([r]) => r.test(line)).length;
   if (named < 2) return line;
   return line.split(/[,;/|]/).find((seg) => re.test(seg)) ?? line;
 }
@@ -562,6 +587,17 @@ export function parseCvSections(text: string): CvSectionProposals {
       // language keeps the whole line ("Anglų kalba – B2").
       const { level, confidence } = languageLevelFor(languageSegment(line, re));
       if (level === null && line.length > 80) continue;
+      seenLang.add(code);
+      if (out.languages.length < MAX_PER_SECTION) {
+        out.languages.push({ lang: code, level, confidence, sourceLine });
+      }
+    }
+    // Swedish language names: after the base rules, and only with a stated
+    // level on the line — never a bare "Polska" in an address.
+    for (const [re, code] of SV_LANGUAGE_RULES) {
+      if (!re.test(line) || seenLang.has(code)) continue;
+      const { level, confidence } = languageLevelFor(languageSegment(line, re, ALL_LANGUAGE_RULES));
+      if (level === null) continue;
       seenLang.add(code);
       if (out.languages.length < MAX_PER_SECTION) {
         out.languages.push({ lang: code, level, confidence, sourceLine });

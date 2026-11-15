@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { activeLocales } from "@/lib/i18n/config";
+
 import { readdirSync } from "node:fs";
 
 import {
@@ -69,6 +71,9 @@ describe("all seven consent locales have complete consent texts (test 23)", () =
       // SV drafted 2026-11-12 for owner review (owner decision 2026-11-11, option A); RED re-pin
       // 20261112210000 is NOT applied, so this registry change ships only together with it.
       expect(CONSENT_LOCALES).toEqual(["lt", "en", "ru", "nl", "de", "pl", "sv"]);
+      // sv is now also an active UI locale on main, so the consent locales match every
+      // active UI locale again (no labelled English fallback for sv once this ships).
+      expect(CONSENT_LOCALES).toEqual(activeLocales);
       for (const locale of CONSENT_LOCALES) {
         const t = def.texts[locale];
         expect(t, `${def.purpose}/${locale}`).toBeTruthy();

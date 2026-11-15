@@ -25,6 +25,10 @@ import {
  * status, so a caller tracking handling can see a change. Same shape and paging; start
  * it with no cursor each time and follow `nextCursor` to the end.
  *
+ * OUR TEST REQUESTS ARE NEVER SENT (owner 2026-11-14): a row with a QA-SYNTHETIC / E2E
+ * marker or a test-mailbox contact is dropped in `feedPage` in both reads, before the
+ * response is built; the cursor still moves past it. Agentai OS never sees one.
+ *
  * 503 IS NOT AN EMPTY FEED: a failed read must never look like "no requests".
  */
 export const dynamic = "force-dynamic";
