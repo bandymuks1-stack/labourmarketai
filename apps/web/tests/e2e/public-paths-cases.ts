@@ -29,7 +29,7 @@ export const PUBLIC_PATH_CASES: readonly PublicPathCase[] = [
   ),
   { id: "entry:work", title: "home free-text box, a work sentence, survives sign-up" },
   { id: "entry:hire", title: "home free-text box, a hiring sentence, survives sign-up" },
-  { id: "door:worker-search", title: "request door worker-search is sent without an account" },
+  { id: "door:worker-search", title: "worker-search door opens the need form, sent without an account" },
   { id: "door:company-need", title: "the company-need form is sent without an account" },
   { id: "intake:worker", title: "worker-intake: the typed intake survives sign-up" },
   { id: "calculator:project-cost", title: "calculator result carries its inputs into company-need" },

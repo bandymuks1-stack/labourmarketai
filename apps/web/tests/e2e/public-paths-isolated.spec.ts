@@ -109,10 +109,7 @@ async function sendRequestDoor(page: Page, door: string, key: string): Promise<v
   await expect(panel, `the ${door} door is open`).toHaveAttribute("data-door", door, { timeout: 30_000 });
   const form = page.getByTestId("request-door-form");
   await expect(form).toBeVisible();
-  if (door === "worker-search") {
-    await form.locator('input[name="profession"]').fill("Electrician");
-    await form.locator('input[name="workers"]').fill("3");
-  } else if (door === "b2b") {
+  if (door === "b2b") {
     await form.locator('input[name="work"]').fill("Facade cladding subcontract");
   } else {
     await form.locator('textarea[name="need"]').fill(`Bathroom renovation, two weeks (${RUN}).`);
@@ -220,18 +217,30 @@ async function entry(page: Page, kind: "work" | "hire"): Promise<void> {
 
 async function workerSearchDoor(page: Page): Promise<void> {
   const seen = track(page);
+  // The worker-search door is the one need form (#3419): its link, old ones
+  // included, opens /company-need, which is sent without an account.
   await page.goto(`${BASE}/en#request=worker-search`);
-  await sendRequestDoor(page, "worker-search", "door-worker-search");
-  expectNoAuth(seen, "the request is received");
+  await page.waitForURL(/\/en\/company-need/, { timeout: 60_000 });
+  expect(new URL(page.url()).searchParams.get("from"), "the need form knows it came from the door").toBe(
+    "request_worker_search",
+  );
+  await sendCompanyNeed(page, "door-worker-search");
+  expectNoAuth(seen, "the need is sent");
 }
 
 async function companyNeed(page: Page): Promise<void> {
   const seen = track(page);
   await page.goto(`${BASE}/en/company-need`);
+  await sendCompanyNeed(page, "company-need");
+  expectNoAuth(seen, "the need is sent");
+}
+
+/** Fill the public company-need form, send it, see the answer. */
+async function sendCompanyNeed(page: Page, key: string): Promise<void> {
   const form = await companyNeedForm(page);
   await form.locator('input[name="company_name"]').fill(`Synthetic Path Co ${RUN}`);
   await form.locator('input[name="contact_person"]').fill("Synthetic Contact");
-  await form.locator('input[name="contact_email"]').fill(address("company-need"));
+  await form.locator('input[name="contact_email"]').fill(address(key));
   const profession = form.locator('select[name="profession"]');
   await profession.selectOption(await firstOption(profession));
   await form.getByTestId("company-need-country").selectOption("LT");
@@ -240,7 +249,6 @@ async function companyNeed(page: Page): Promise<void> {
   await page.waitForTimeout(3_500);
   await form.getByTestId("company-need-submit").click();
   await expect(page.getByTestId("company-need-result"), "the form answers the visitor").toBeVisible({ timeout: 60_000 });
-  expectNoAuth(seen, "the need is sent");
 }
 
 async function workerIntake(page: Page): Promise<void> {
