@@ -16,6 +16,7 @@ import { useCapability } from "../use-capability";
 import { useReloadOnReturn } from "../use-reload-on-return";
 import { CapabilityFailureNotice } from "./capability-failure";
 import { CapabilityGate } from "./capability-gate";
+import { ProposeBooking } from "./propose-booking";
 
 const LIMIT = { limit: 20 } as const;
 
@@ -140,6 +141,7 @@ function CandidateCard({
   const { t, locale } = useLocale();
   const { accessToken } = useAuth();
   const [flow, setFlow] = useState<RowFlow>({ kind: "idle" });
+  const [booking, setBooking] = useState(false);
   const live = useRef(true);
   useEffect(() => {
     live.current = true;
@@ -218,6 +220,18 @@ function CandidateCard({
           testID="candidate-shortlist-failure"
         />
       ) : null}
+      {!candidate.canContact ? (
+        <Body muted>{t("booking.cannotContact")}</Body>
+      ) : booking ? (
+        <ProposeBooking needId={needId} workerId={candidate.workerId} onClose={() => setBooking(false)} />
+      ) : (
+        <Button
+          variant="quiet"
+          testID={`candidate-book-${candidate.workerId}`}
+          label={t("booking.propose")}
+          onPress={() => setBooking(true)}
+        />
+      )}
     </View>
   );
 }

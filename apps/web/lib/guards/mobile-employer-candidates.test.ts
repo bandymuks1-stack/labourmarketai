@@ -25,6 +25,17 @@ describe("mobile employer candidates", () => {
     expect(screen).not.toMatch(/supabase\s*\.\s*from\(/);
   });
 
+  it("proposes a booking through the web's own prepare / confirm pair", () => {
+    const booking = read("apps/mobile/src/screens/propose-booking.tsx");
+    expect(booking).toContain('name: "company.propose-booking.prepare"');
+    expect(booking).toContain('name: "company.propose-booking.confirm"');
+    // The prepare's own input, byte for byte, with its token.
+    expect(booking).toContain("args: { input: prepared.input, confirmationToken: prepared.confirmationToken }");
+    expect(booking).not.toMatch(/supabase\s*\.\s*from\(/);
+    // Only for a candidate the scouting search says may be contacted.
+    expect(screen).toMatch(/!candidate\.canContact \?/);
+  });
+
   it("confirms with the draft's own fields and token", () => {
     expect(screen).toMatch(/args: \{ \.\.\.fields, confirmationToken: token \}/);
   });
