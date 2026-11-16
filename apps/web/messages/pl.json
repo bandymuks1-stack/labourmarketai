@@ -20553,7 +20553,7 @@
     },
     "control": {
       "title": "Pomiar korzystania i przypisanie kampanii",
-      "granted": "Zgoda została wyrażona. Można ją w każdej chwili wycofać — wtedy wpisy zostaną usunięte z tego urządzenia.",
+      "granted": "Zgoda została wyrażona. Możesz ją w każdej chwili wycofać — wtedy wpisy zostaną usunięte z tego urządzenia.",
       "refused": "Odmówiono zgody. Na tym urządzeniu nic nie jest zapisywane na potrzeby pomiaru.",
       "undecided": "Wybór nie został jeszcze dokonany, więc nic nie jest zapisywane na potrzeby pomiaru.",
       "allow": "Zezwól",

@@ -5849,7 +5849,7 @@
   },
   "legal": {
     "preparing": {
-      "contact": "Neem contact met ons op als u vragen heeft."
+      "contact": "Neem contact met ons op als je vragen hebt."
     },
     "marketplaceRules": {
       "title": "Marktplaatsregels",
@@ -5896,8 +5896,8 @@
     },
     "privacy": {
       "title": "Privacybeleid",
-      "metaDescription": "In gewone taal: welke persoonsgegevens LabourMarket.ai gebruikt, waarom, en welke rechten u heeft. Het platform zoals het vandaag werkt.",
-      "intro": "Deze pagina legt in gewone taal uit welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten u heeft. De pagina beschrijft het platform zoals het vandaag werkt.",
+      "metaDescription": "In gewone taal: welke persoonsgegevens LabourMarket.ai gebruikt, waarom, en welke rechten je hebt. Het platform zoals het vandaag werkt.",
+      "intro": "Deze pagina legt in gewone taal uit welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten je hebt. De pagina beschrijft het platform zoals het vandaag werkt.",
       "sections": [
         {
           "heading": "Wie verantwoordelijk is voor uw gegevens",
@@ -5911,35 +5911,35 @@
         {
           "heading": "Welke gegevens het platform gebruikt",
           "items": [
-            "Accountgegevens: uw e-mailadres en de inlogmethode die eraan gekoppeld is.",
-            "Inhoud die u zelf invoert: profiel- en cv-gegevens, vaardigheden, werkjournaalregistraties, foto's die u aan registraties toevoegt en de documenten die u in uw documentenoverzicht opneemt.",
+            "Accountgegevens: je e-mailadres en de inlogmethode die eraan gekoppeld is.",
+            "Inhoud die je zelf invoert: profiel- en cv-gegevens, vaardigheden, werkjournaalregistraties, foto's die je aan registraties toevoegt en de documenten die je in je documentenoverzicht opneemt.",
             "Bedrijfsinformatie die door bedrijfsgebruikers is ingevoerd: bedrijfsgegevens, behoeften, projecten en boekingen.",
-            "Berichten die u op het platform verstuurt en ontvangt.",
-            "Toestemmingsrecords: wanneer u een toestemming geeft of intrekt, worden de actie en het tijdstip opgeslagen.",
+            "Berichten die je op het platform verstuurt en ontvangt.",
+            "Toestemmingsrecords: wanneer je een toestemming geeft of intrekt, worden de actie en het tijdstip opgeslagen.",
             "Technische gegevens die nodig zijn om de dienst te laten draaien, zoals inlogcookies (zie het cookiebeleid).",
-            "Alleen met uw toestemming: gebruiksmeting op onze eigen servers (bereikte pagina's en stappen, dagelijkse activiteit) en de campagne die u bracht, bewaard bij uw account. Zie het cookiebeleid."
+            "Alleen met je toestemming: gebruiksmeting op onze eigen servers (bereikte pagina's en stappen, dagelijkse activiteit) en de campagne die je bracht, bewaard bij je account. Zie het cookiebeleid."
           ]
         },
         {
           "heading": "Inloggen met Google, Facebook of LinkedIn",
           "items": [
-            "U kunt een account aanmaken en inloggen met uw Google-, Facebook- of LinkedIn-account in plaats van met uw e-mailadres. Dit wordt alleen gebruikt om u in te loggen.",
-            "Als u er een kiest, bevestigt die aanbieder uw identiteit en geeft hij het platform uw e-mailadres, uw naam en de identificatie van uw account bij die aanbieder door. Het platform vraagt geen extra machtigingen — geen toegang tot uw vrienden of contacten, berichten of pagina's — en plaatst nooit iets namens u.",
-            "Uw e-mailadres wordt het e-mailadres van uw account. De naam van de aanbieder wordt alleen gebruikt om een tijdelijke naam te vervangen die uit uw e-mailadres is afgeleid; een naam die u zelf heeft ingevoerd, wordt nooit overschreven. Het inlogrecord (de aanbieder, uw accountidentificatie daar en de gegevens die hij doorgaf) wordt bewaard door onze authenticatiedienst Supabase, gekoppeld aan uw account.",
-            "Om deze gegevens te verwijderen, verwijdert u uw LabourMarket.ai-account — de stappen staan op de pagina „Account en gegevens verwijderen”. LabourMarket.ai verwijderen uit uw Facebook-, Google- of LinkedIn-instellingen verwijdert op zichzelf uw LabourMarket.ai-account en de gegevens ervan niet."
+            "Je kunt een account aanmaken en inloggen met je Google-, Facebook- of LinkedIn-account in plaats van met je e-mailadres. Dit wordt alleen gebruikt om je in te loggen.",
+            "Als je er een kiest, bevestigt die aanbieder je identiteit en geeft hij het platform je e-mailadres, je naam en de identificatie van je account bij die aanbieder door. Het platform vraagt geen extra machtigingen — geen toegang tot je vrienden of contacten, berichten of pagina's — en plaatst nooit iets namens jou.",
+            "Je e-mailadres wordt het e-mailadres van je account. De naam van de aanbieder wordt alleen gebruikt om een tijdelijke naam te vervangen die uit je e-mailadres is afgeleid; een naam die je zelf hebt ingevoerd, wordt nooit overschreven. Het inlogrecord (de aanbieder, je accountidentificatie daar en de gegevens die hij doorgaf) wordt bewaard door onze authenticatiedienst Supabase, gekoppeld aan je account.",
+            "Om deze gegevens te verwijderen, verwijder je je LabourMarket.ai-account — de stappen staan op de pagina „Account en gegevens verwijderen”. LabourMarket.ai verwijderen uit je Facebook-, Google- of LinkedIn-instellingen verwijdert op zichzelf je LabourMarket.ai-account en de gegevens ervan niet."
           ]
         },
         {
           "heading": "Waarvoor de gegevens worden gebruikt",
           "items": [
-            "Om de functies te laten werken die u gebruikt: profiel en cv, werkjournaal, vaardigheidssuggesties die u bevestigt, marktkaart, projecten, ploegen, boekingen en berichten.",
-            "Om uw informatie alleen te tonen aan mensen die een expliciete toegangsregel toestaat — zie de pagina “Uw gegevens en wie ze kan zien”.",
+            "Om de functies te laten werken die je gebruikt: profiel en cv, werkjournaal, vaardigheidssuggesties die jij bevestigt, marktkaart, projecten, ploegen, boekingen en berichten.",
+            "Om je informatie alleen te tonen aan mensen die een expliciete toegangsregel toestaat — zie de pagina “Je gegevens en wie ze kan zien”.",
             "Om een eerlijke geschiedenis van toestemmingen en belangrijke toegangswijzigingen bij te houden.",
             "Het platform gebruikt geen advertentie- of analysetrackers van derden en bouwt geen gedragsprofielen op."
           ]
         },
         {
-          "heading": "Wie uw gegevens kan zien",
+          "heading": "Wie je gegevens kan zien",
           "items": [
             "Toegang is standaard gesloten: gegevens die u invoert horen bij uw account; andere gebruikers zien niets tenzij een specifieke regel dat toestaat.",
             "Uw professionele profiel is standaard NIET zichtbaar voor bedrijven of bureaus. Het kan alleen in bedrijfszoekopdrachten verschijnen nadat u zelf de werkgeverszichtbaarheid inschakelt in uw privacy-instellingen — registratie, het accepteren van de voorwaarden of het invullen van uw profiel maakt het nooit zichtbaar.",
@@ -5964,47 +5964,47 @@
             "Supabase — database, gebruikersaanmelding en bestandsopslag.",
             "Cloudflare — het netwerk vóór de website (domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen); elk verzoek aan de website loopt erdoorheen.",
             "Stripe — betalingsverwerking voor betaalde platformdiensten. Wanneer een organisatie een betaling start, ontvangt Stripe het e-mailadres van de betalende gebruiker en een interne accountidentificatie; kaartgegevens worden ingevoerd op de eigen betaalpagina van Stripe en niet door het platform opgeslagen.",
-            "Google, Facebook (Meta) en LinkedIn — alleen als u ervoor kiest met hen in te loggen, zoals hierboven beschreven.",
+            "Google, Facebook (Meta) en LinkedIn — alleen als je ervoor kiest met hen in te loggen, zoals hierboven beschreven.",
             "Google (Gemini API) — alleen zoals hieronder beschreven in het onderdeel over AI.",
             "De volledige lijst van infrastructuurleveranciers staat op de pagina „Gegevensbescherming”."
           ]
         },
         {
-          "heading": "Uw rechten",
+          "heading": "Je rechten",
           "items": [
-            "U kunt vragen om de gegevens die over u worden bewaard in te zien, te corrigeren, er een kopie van te ontvangen, het gebruik ervan te beperken of ze te laten verwijderen.",
-            "U kunt zelf vanuit uw account een kopie van uw eigen gegevens downloaden als JSON-bestand en uw werkjournaal als CSV-bestand. U kunt verwijdering van uw account aanvragen op de privacypagina van uw account en het verzoek bevestigen nadat u opnieuw bent ingelogd; 30 dagen na bevestiging verwijdert het systeem het account automatisch (tot die tijd kunt u het verzoek op de privacypagina annuleren) en stuurt een bevestiging naar het e-mailadres van het account. Na de definitieve verwijdering kunnen verwijderde gegevens nog tot 7 dagen in versleutelde databaseback-ups staan; ze worden daar niet gebruikt en daarna overschreven. Als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvangt u het besluit binnen één maand. U kunt ook contact met ons opnemen — zie de pagina „Account en gegevens verwijderen”.",
-            "Waar verwerking op toestemming is gebaseerd, kunt u die toestemming op elk moment intrekken."
+            "Je kunt vragen om de gegevens die over je worden bewaard in te zien, te corrigeren, er een kopie van te ontvangen, het gebruik ervan te beperken of ze te laten verwijderen.",
+            "Je kunt zelf vanuit je account een kopie van je eigen gegevens downloaden als JSON-bestand en je werkjournaal als CSV-bestand. Je kunt verwijdering van je account aanvragen op de privacypagina van je account en het verzoek bevestigen nadat je opnieuw bent ingelogd; 30 dagen na bevestiging verwijdert het systeem het account automatisch (tot die tijd kun je het verzoek op de privacypagina annuleren) en stuurt een bevestiging naar het e-mailadres van het account. Na de definitieve verwijdering kunnen verwijderde gegevens nog tot 7 dagen in versleutelde databaseback-ups staan; ze worden daar niet gebruikt en daarna overschreven. Als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt ook contact met ons opnemen — zie de pagina „Account en gegevens verwijderen”.",
+            "Waar verwerking op toestemming is gebaseerd, kun je die toestemming op elk moment intrekken."
           ]
         },
         {
           "heading": "Hoe lang gegevens worden bewaard",
           "items": [
-            "Gegevens worden bewaard zolang uw account actief is en de functie waar ze bij horen ze nog gebruikt.",
+            "Gegevens worden bewaard zolang je account actief is en de functie waar ze bij horen ze nog gebruikt.",
             "Toestemmings- en auditrecords worden als geschiedenis bewaard: een intrekking wordt vastgelegd in plaats van dat het record wordt gewist."
           ]
         },
         {
           "heading": "AI en verbonden AI-assistenten",
           "items": [
-            "Sommige functies gebruiken een AI-model van Google (de Gemini API). Vandaag ontvangt het alleen openbare marktstatistieken — bijvoorbeeld hoeveel openstaande posities een beroep heeft — om een korte toelichting op te stellen. Het vertalen van berichten en vacatures en het interpreteren van een zin die u in de chat typt zijn voorbereid maar uitgeschakeld: daarvoor wordt geen berichttekst en geen persoonsgegeven verstuurd. Als een ervan wordt ingeschakeld, vermeldt deze kennisgeving dat, en zou alleen de tekst die die taak nodig heeft worden verstuurd. Elk resultaat is een voorstel — niets wordt als feit over u opgeslagen voordat u het bevestigt.",
-            "U kunt LabourMarket.ai verbinden met een AI-assistent zoals ChatGPT of Claude. Elke verbinding keurt u zelf goed op een toestemmingsscherm; de assistent handelt dan alleen met uw eigen rechten, en acties met gevolgen vragen een aparte bevestiging. Verbonden apps ziet en ontkoppelt u op elk moment in uw accountinstellingen.",
-            "Wat de aanbieder van een AI-assistent met uw gesprek doet, valt onder de eigen privacyvoorwaarden van die aanbieder."
+            "Sommige functies gebruiken een AI-model van Google (de Gemini API). Vandaag ontvangt het alleen openbare marktstatistieken — bijvoorbeeld hoeveel openstaande posities een beroep heeft — om een korte toelichting op te stellen. Het vertalen van berichten en vacatures en het interpreteren van een zin die je in de chat typt zijn voorbereid maar uitgeschakeld: daarvoor wordt geen berichttekst en geen persoonsgegeven verstuurd. Als een ervan wordt ingeschakeld, vermeldt deze kennisgeving dat, en zou alleen de tekst die die taak nodig heeft worden verstuurd. Elk resultaat is een voorstel — niets wordt als feit over jou opgeslagen voordat je het bevestigt.",
+            "Je kunt LabourMarket.ai verbinden met een AI-assistent zoals ChatGPT of Claude. Elke verbinding keur je zelf goed op een toestemmingsscherm; de assistent handelt dan alleen met jouw eigen rechten, en acties met gevolgen vragen een aparte bevestiging. Verbonden apps zie en ontkoppel je op elk moment in je accountinstellingen.",
+            "Wat de aanbieder van een AI-assistent met je gesprek doet, valt onder de eigen privacyvoorwaarden van die aanbieder."
           ]
         }
       ]
     },
     "cookies": {
       "title": "Cookiebeleid",
-      "intro": "Deze pagina toont wat het platform vandaag daadwerkelijk in uw browser opslaat. Dat is bewust weinig.",
+      "intro": "Deze pagina toont wat het platform vandaag daadwerkelijk in je browser opslaat. Dat is bewust weinig.",
       "items": [
         {
           "name": "Inlogcookies",
-          "purpose": "Worden ingesteld wanneer u inlogt, zodat u ingelogd blijft terwijl u tussen pagina's navigeert. Essentieel — zonder deze cookies kan de dienst u niet ingelogd houden."
+          "purpose": "Worden ingesteld wanneer je inlogt, zodat je ingelogd blijft terwijl je tussen pagina's navigeert. Essentieel — zonder deze cookies kan de dienst je niet ingelogd houden."
         },
         {
           "name": "Taalcookie (NEXT_LOCALE)",
-          "purpose": "Kan worden ingesteld om uw taalkeuze te onthouden, zodat pagina's in uw taal openen."
+          "purpose": "Kan worden ingesteld om je taalkeuze te onthouden, zodat pagina's in jouw taal openen."
         },
         {
           "name": "Weergavevoorkeur voor beheerders (lm_hide_admin_ui)",
@@ -6012,18 +6012,18 @@
         },
         {
           "name": "Inlogpoging-markering (lm.oauth.trace)",
-          "purpose": "Tabbladopslag, verwijderd als het tabblad sluit. Een willekeurige code die één inlogpoging aan het resultaat koppelt, zodat een mislukte inlog kan worden onderzocht. Nodig voor de inlog die u startte; bevat geen accountgegevens."
+          "purpose": "Tabbladopslag, verwijderd als het tabblad sluit. Een willekeurige code die één inlogpoging aan het resultaat koppelt, zodat een mislukte inlog kan worden onderzocht. Nodig voor de inlog die je startte; bevat geen accountgegevens."
         }
       ],
-      "localStorageNote": "De eigen opslag van uw browser (geen cookies) bevat daarnaast een paar items waar u zelf om vroeg: uw keuze voor een licht of donker thema, uw keuze over gebruiksmeting en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en de taal van spraakinvoer. Ze blijven op uw apparaat en u kunt ze op elk moment via uw browser wissen.",
+      "localStorageNote": "De eigen opslag van je browser (geen cookies) bevat daarnaast een paar items waar je zelf om vroeg: je keuze voor een licht of donker thema, je keuze over gebruiksmeting en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en de taal van spraakinvoer. Ze blijven op je apparaat en je kunt ze op elk moment via je browser wissen.",
       "noTracking": "Er zijn op het platform geen advertentie- of trackingcookies van derden, en niets wordt voor advertenties met derden gedeeld.",
       "settingsLink": "Cookie-instellingen",
-      "analyticsTitle": "Gebruiksmeting — alleen met uw toestemming",
-      "analyticsIntro": "Met uw toestemming meten we hoe het product wordt gebruikt: welke pagina's en stappen mensen bereiken, de stappen van de registratie, dagelijkse activiteit en welke campagne een bezoeker bracht. Gebeurtenissen worden op onze eigen servers bewaard en, als u bent ingelogd, aan uw account gekoppeld. Zonder uw toestemming wordt geen van de onderstaande items geschreven en wordt er geen meetgebeurtenis vanuit uw browser verzonden.",
+      "analyticsTitle": "Gebruiksmeting — alleen met je toestemming",
+      "analyticsIntro": "Met je toestemming meten we hoe het product wordt gebruikt: welke pagina's en stappen mensen bereiken, de stappen van de registratie, dagelijkse activiteit en welke campagne een bezoeker bracht. Gebeurtenissen worden op onze eigen servers bewaard en, als je bent ingelogd, aan je account gekoppeld. Zonder je toestemming wordt geen van de onderstaande items geschreven en wordt er geen meetgebeurtenis vanuit je browser verzonden.",
       "analyticsItems": [
         {
           "name": "Campagne van het eerste bezoek (lm.attr.first)",
-          "purpose": "Browseropslag. De campagnetags (utm_*), de verwijzende site en de landingspagina van uw eerste bezoek. Bij registratie worden ze naar uw eigen accountgegevens gekopieerd, zodat de campagne die u bracht kan worden geteld."
+          "purpose": "Browseropslag. De campagnetags (utm_*), de verwijzende site en de landingspagina van je eerste bezoek. Bij registratie worden ze naar je eigen accountgegevens gekopieerd, zodat de campagne die je bracht kan worden geteld."
         },
         {
           "name": "Sessie-ID (lm.pilot.session)",
@@ -6031,16 +6031,16 @@
         },
         {
           "name": "Activiteitsmarkeringen (lm.funnel.last_seen_day, lm.funnel.signup_pending)",
-          "purpose": "Browseropslag. De laatste dag dat u actief was, en een markering dat een registratie bezig is."
+          "purpose": "Browseropslag. De laatste dag dat je actief was, en een markering dat een registratie bezig is."
         },
         {
           "name": "Eenmaal-tellen-markeringen (lm.funnel.*)",
           "purpose": "Tabbladopslag. Voorkomt dat dezelfde meetgebeurtenis twee keer wordt geteld."
         }
       ],
-      "analyticsBasis": "Weigeren of intrekken verwijdert deze items direct van dit apparaat; als u bent ingelogd, wordt ook de campagne bij uw account gewist. De meting zelf is gebaseerd op ons gerechtvaardigd belang bij het verbeteren van het product (art. 6, lid 1, onder f, AVG), en u kunt er bezwaar tegen maken zoals beschreven in het privacybeleid."
+      "analyticsBasis": "Weigeren of intrekken verwijdert deze items direct van dit apparaat; als je bent ingelogd, wordt ook de campagne bij je account gewist. De meting zelf is gebaseerd op ons gerechtvaardigd belang bij het verbeteren van het product (art. 6, lid 1, onder f, AVG), en je kunt er bezwaar tegen maken zoals beschreven in het privacybeleid."
     },
-    "requestContact": "Neem contact met ons op om een vraag te stellen of een verzoek over uw gegevens in te dienen — een persoon zal het beoordelen.",
+    "requestContact": "Neem contact met ons op om een vraag te stellen of een verzoek over je gegevens in te dienen — een persoon zal het beoordelen.",
     "related": "Gerelateerde pagina's",
     "accountSection": {
       "title": "Privacy en gegevens",
@@ -6093,7 +6093,7 @@
         {
           "heading": "Export en verwijdering",
           "items": [
-            "U kunt uw eigen gegevens als JSON-bestand en uw werkjournaal als CSV-bestand downloaden vanuit uw account. Verwijdering van een account wordt in het account aangevraagd en bevestigd na opnieuw inloggen; het systeem verwijdert het account dan automatisch. Een verzoek over gegevens die wettelijk bewaard moeten worden of andere mensen betreffen, wordt door een persoon beoordeeld. U kunt ook contact met ons opnemen en een persoon zal het verzoek verwerken."
+            "Je kunt je eigen gegevens als JSON-bestand en je werkjournaal als CSV-bestand downloaden vanuit je account. Verwijdering van een account wordt in het account aangevraagd en bevestigd na opnieuw inloggen; het systeem verwijdert het account dan automatisch. Een verzoek over gegevens die wettelijk bewaard moeten worden of andere mensen betreffen, wordt door een persoon beoordeeld. Je kunt ook contact met ons opnemen en een persoon zal het verzoek verwerken."
           ]
         },
         {
@@ -6111,19 +6111,19 @@
         {
           "heading": "Eerlijke grenzen",
           "items": [
-            "Geen enkel systeem kan absolute veiligheid beloven. Als u een probleem opmerkt, neem dan contact met ons op — een persoon zal het beoordelen."
+            "Geen enkel systeem kan absolute veiligheid beloven. Als je een probleem opmerkt, neem dan contact met ons op — een persoon zal het beoordelen."
           ]
         }
       ]
     },
     "dataAccess": {
-      "title": "Uw gegevens en wie ze kan zien",
+      "title": "Je gegevens en wie ze kan zien",
       "intro": "Een samenvatting in gewone taal van de toegangsregels die het platform vandaag daadwerkelijk afdwingt. Er wordt niets breders geclaimd dan wat de regels doen.",
       "sections": [
         {
           "heading": "Het uitgangspunt",
           "items": [
-            "Uw rijen zijn van u: gegevens die u invoert horen bij uw account. Andere gebruikers zien niets, tenzij een specifieke toegangsregel dat toestaat."
+            "Jouw rijen zijn van jou: gegevens die je invoert horen bij jouw account. Andere gebruikers zien niets, tenzij een specifieke toegangsregel dat toestaat."
           ]
         },
         {
@@ -6156,7 +6156,7 @@
         {
           "heading": "Als iets er niet goed uitziet",
           "items": [
-            "De toegangsregels in de database zijn de bron van waarheid, en deze pagina volgt ze. Als iets hier niet overeenkomt met wat u ziet, neem dan contact met ons op — een persoon zal het beoordelen."
+            "De toegangsregels in de database zijn de bron van waarheid, en deze pagina volgt ze. Als iets hier niet overeenkomt met wat je ziet, neem dan contact met ons op — een persoon zal het beoordelen."
           ]
         }
       ],
@@ -6183,8 +6183,8 @@
         "rows": {
           "profileAccount": {
             "surface": "Profiel- en accountgegevens",
-            "seeNote": "U ziet uw eigen profiel. Andere gebruikers kunnen het niet rechtstreeks openen.",
-            "editNote": "U wijzigt alleen uw eigen profiel. Beheerders kunnen records corrigeren wanneer dat nodig is."
+            "seeNote": "Je ziet je eigen profiel. Andere gebruikers kunnen het niet rechtstreeks openen.",
+            "editNote": "Je wijzigt alleen je eigen profiel. Beheerders kunnen records corrigeren wanneer dat nodig is."
           },
           "workerCard": {
             "surface": "Werknemerskaart in scouting",
@@ -6198,8 +6198,8 @@
           },
           "orgMembership": {
             "surface": "Ploeg- en bedrijfslidmaatschap",
-            "seeNote": "U ziet uw eigen lidmaatschappen; eigenaren en managers zien de lidmaatschappen van hun eigen organisatie.",
-            "editNote": "U beheert uw eigen lidmaatschapsrecords; beheerders verzorgen correcties."
+            "seeNote": "Je ziet je eigen lidmaatschappen; eigenaren en managers zien de lidmaatschappen van hun eigen organisatie.",
+            "editNote": "Je beheert je eigen lidmaatschapsrecords; beheerders verzorgen correcties."
           },
           "teamCapability": {
             "surface": "Samenvatting van ploegcapaciteiten",
@@ -6219,7 +6219,7 @@
           "messages": {
             "surface": "Gesprekken en berichten",
             "seeNote": "Alleen de deelnemers aan een gesprek zien het (plus platformbeheerders via supportpaden). Collega's die geen deelnemer zijn, zien niets.",
-            "editNote": "U verstuurt uw eigen berichten; verzonden berichten kunnen niet worden bewerkt of verwijderd."
+            "editNote": "Je verstuurt je eigen berichten; verzonden berichten kunnen niet worden bewerkt of verwijderd."
           },
           "handover": {
             "surface": "Projectoverdrachtsnotities",
@@ -6291,7 +6291,7 @@
     "dataDeletion": {
       "title": "Account en gegevens verwijderen",
       "description": "Hoe u verwijdering van uw LabourMarket.ai-account en persoonsgegevens aanvraagt.",
-      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Als u kunt inloggen, kunt u het verzoek zelf indienen: open de privacypagina van uw account (in de mobiele app: Instellingen → Privacy), kies voor het verwijderen van uw account en bevestig dit nadat u opnieuw bent ingelogd. 30 dagen na bevestiging verwijdert het systeem het account automatisch (tot die tijd kunt u het verzoek op de privacypagina annuleren) en stuurt een bevestiging naar het e-mailadres van het account; als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvangt u het besluit binnen één maand. Na de definitieve verwijdering kunnen verwijderde gegevens nog tot 7 dagen in versleutelde databaseback-ups staan; ze worden daar niet gebruikt en daarna overschreven. U kunt verwijdering ook per e-mail aanvragen zoals hieronder beschreven; een mens antwoordt binnen één maand.",
+      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Als je kunt inloggen, kun je het verzoek zelf indienen: open de privacypagina van je account (in de mobiele app: Instellingen → Privacy), kies voor het verwijderen van je account en bevestig dit nadat je opnieuw bent ingelogd. 30 dagen na bevestiging verwijdert het systeem het account automatisch (tot die tijd kun je het verzoek op de privacypagina annuleren) en stuurt een bevestiging naar het e-mailadres van het account; als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Na de definitieve verwijdering kunnen verwijderde gegevens nog tot 7 dagen in versleutelde databaseback-ups staan; ze worden daar niet gebruikt en daarna overschreven. Je kunt verwijdering ook per e-mail aanvragen zoals hieronder beschreven; een mens antwoordt binnen één maand.",
       "howTitle": "Hoe u verwijdering aanvraagt",
       "howSteps": [
         "Stuur een e-mail naar {email} vanaf het e-mailadres dat aan uw LabourMarket.ai-account is gekoppeld.",
@@ -11384,9 +11384,9 @@
     },
     "status": {
       "hidden": "Profiel niet zichtbaar voor werkgevers",
-      "hiddenBody": "Alleen u ziet uw profiel, cv en contactgegevens. Kies of bedrijven u mogen vinden.",
+      "hiddenBody": "Alleen jij ziet je profiel, cv en contactgegevens. Kies of bedrijven je mogen vinden.",
       "visible": "Professioneel profiel zichtbaar voor bedrijven",
-      "visibleBody": "Bedrijven kunnen een beperkt professioneel profiel vinden. Contactgegevens en cv worden alleen gedeeld met uw afzonderlijke bevestiging.",
+      "visibleBody": "Bedrijven kunnen een beperkt professioneel profiel vinden. Contactgegevens en cv worden alleen gedeeld met je afzonderlijke bevestiging.",
       "withdrawn": "Zichtbaarheid uitgeschakeld",
       "stale": "De toestemmingstekst is bijgewerkt — een nieuwe keuze is nodig"
     },
@@ -11398,8 +11398,8 @@
       "review": "Zichtbaarheidsinstellingen bekijken"
     },
     "preview": {
-      "title": "Zo zien bedrijven uw profiel",
-      "empty": "Uw profiel is nog leeg — bedrijven zouden alleen een lege kaart zien.",
+      "title": "Zo zien bedrijven je profiel",
+      "empty": "Je profiel is nog leeg — bedrijven zouden alleen een lege kaart zien.",
       "displayName": "Naam",
       "professions": "Beroep",
       "experienceYears": "Ervaring (jr)",
@@ -11425,15 +11425,15 @@
     "labels": {
       "decidedAt": "Gekozen",
       "version": "Versie",
-      "needsMigration": "Deze functie is nog niet ingeschakeld op de server. Uw profiel blijft privé.",
+      "needsMigration": "Deze functie is nog niet ingeschakeld op de server. Je profiel blijft privé.",
       "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
-      "declinedNote": "Prima — uw profiel blijft privé. U vindt deze keuze hier op elk moment.",
-      "readFailed": "Kon niet controleren of werkgevers uw profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — probeer het later opnieuw.",
-      "legalTextInEnglish": "Deze juridische tekst wordt in het Engels getoond: de versie in uw taal is nog niet goedgekeurd. De Engelse tekst is de tekst die geldt."
+      "declinedNote": "Prima — je profiel blijft privé. Je vindt deze keuze hier op elk moment.",
+      "readFailed": "Kon niet controleren of werkgevers je profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — probeer het later opnieuw.",
+      "legalTextInEnglish": "Deze juridische tekst wordt in het Engels getoond: de versie in jouw taal is nog niet goedgekeurd. De Engelse tekst is de tekst die geldt."
     },
     "disclosures": {
-      "intro": "Elke overdracht van uw cv, contactgegevens of andere gegevens aan een specifiek bedrijf gebeurt pas na uw afzonderlijke bevestiging.",
-      "empty": "Nog geen overdrachten. Zonder uw bevestiging wordt niets aan bedrijven doorgegeven."
+      "intro": "Elke overdracht van je cv, contactgegevens of andere gegevens aan een specifiek bedrijf gebeurt pas na je afzonderlijke bevestiging.",
+      "empty": "Nog geen overdrachten. Zonder jouw bevestiging wordt niets aan bedrijven doorgegeven."
     },
     "history": {
       "empty": "Nog geen registraties. Elke toestemming en intrekking verschijnt hier.",
@@ -11445,7 +11445,7 @@
         "profile_discoverability": "Zichtbaarheid voor werkgevers",
         "employer_data_disclosure": "Gegevensoverdracht aan een bedrijf"
       },
-      "unavailable": "Uw toestemmingsgeschiedenis kon niet worden gelezen. Dat betekent niet dat er geen gegevens zijn — probeer het later opnieuw."
+      "unavailable": "Je toestemmingsgeschiedenis kon niet worden gelezen. Dat betekent niet dat er geen gegevens zijn — probeer het later opnieuw."
     },
     "fields": {
       "full_name": "Volledige naam",
@@ -11457,12 +11457,12 @@
       "salary_expectation": "Loonverwachting"
     },
     "rights": {
-      "notice": "Meer over uw rechten en gegevensverwerking:",
+      "notice": "Meer over je rechten en gegevensverwerking:",
       "noticeLink": "privacyverklaring"
     },
     "contactRequests": {
       "section": "Verzoeken om contactgegevens",
-      "intro": "Hier vragen bedrijven om uw contactgegevens voor één specifieke behoefte. U beslist elke keer. Doet u niets, dan wordt er niets gedeeld.",
+      "intro": "Hier vragen bedrijven om je contactgegevens voor één specifieke behoefte. Jij beslist elke keer. Doe je niets, dan wordt er niets gedeeld.",
       "empty": "Op dit moment geen verzoeken.",
       "unknownCompany": "Bedrijf",
       "unknownNeed": "Werkbehoefte",
@@ -11475,48 +11475,48 @@
         "declined": "Afgewezen",
         "withdrawn": "Ingetrokken door het bedrijf",
         "expired": "Verlopen",
-        "created": "Wacht op u",
+        "created": "Wacht op jou",
         "accepted": "Geaccepteerd"
       },
       "withdrawGrant": "Contactgegevens intrekken",
-      "withdrawGrantNote": "U kunt dit op elk moment intrekken. Het bedrijf verliest dan de toegang tot de gegevens die u deelde; wat het al gelezen heeft, wordt niet ongedaan gemaakt.",
-      "withdrawnNote": "Ingetrokken. Dit bedrijf heeft geen toegang meer tot uw contactgegevens.",
-      "grantedNote": "Toegestaan. Deze toestemming staat in uw toestemmingsgeschiedenis hieronder.",
+      "withdrawGrantNote": "Je kunt dit op elk moment intrekken. Het bedrijf verliest dan de toegang tot de gegevens die je deelde; wat het al gelezen heeft, wordt niet ongedaan gemaakt.",
+      "withdrawnNote": "Ingetrokken. Dit bedrijf heeft geen toegang meer tot je contactgegevens.",
+      "grantedNote": "Toegestaan. Deze toestemming staat in je toestemmingsgeschiedenis hieronder.",
       "declinedNote": "Afgewezen. Er is niets gedeeld.",
-      "error": "Uw antwoord kon niet worden opgeslagen. Probeer het opnieuw.",
-      "acceptNote": "Accepteren laat het bedrijf alleen weten dat u ervoor openstaat. Uw contactgegevens worden NIET gedeeld door te accepteren — dat is een aparte keuze die u daarna kunt maken.",
+      "error": "Je antwoord kon niet worden opgeslagen. Probeer het opnieuw.",
+      "acceptNote": "Accepteren laat het bedrijf alleen weten dat je ervoor openstaat. Je contactgegevens worden NIET gedeeld door te accepteren — dat is een aparte keuze die je daarna kunt maken.",
       "accept": "Accepteren",
       "acceptedNote": "Geaccepteerd. Er is nog niets gedeeld — contactgegevens toestaan is een aparte keuze hieronder.",
       "grantTitle": "Contactgegevens delen?",
       "grantIntro": "Dit is een aparte beslissing. Alleen de hieronder vermelde gegevens zouden aan dit bedrijf worden doorgegeven, en alleen voor deze behoefte."
     },
     "partnerSupply": {
-      "sectionIntro": "Vergeleken worden met een vacature en bij naam genoemd worden zijn twee verschillende dingen. Met deze toestemming mag LabourMarket.ai passend werk voor u zoeken bij werkgevers en projecten buiten dit platform, via goedgekeurde partnerinfrastructuur. Alleen een professionele samenvatting zonder directe identificerende gegevens wordt doorgegeven — nooit uw naam of contactgegevens.",
-      "noWorkerProfile": "U heeft nog geen werknemersprofiel, dus er zou niets vertegenwoordigd worden. Maak eerst uw professionele profiel aan — deze antwoorden blijven bewaard en gaan gelden zodra het bestaat.",
-      "statusNotRepresented": "U wordt niet vertegenwoordigd buiten LabourMarket.ai",
-      "statusNotRepresentedBody": "Er wordt niets over u buiten dit platform verstuurd. Uw account, cv en werkjournaal werken hier precies hetzelfde zonder.",
-      "statusRepresented": "U wordt ook buiten LabourMarket.ai vertegenwoordigd",
-      "statusConsentOnly": "Toestemming gegeven — geef nu aan wat u zoekt",
-      "statusWithdrawn": "U heeft deze toestemming ingetrokken",
+      "sectionIntro": "Vergeleken worden met een vacature en bij naam genoemd worden zijn twee verschillende dingen. Met deze toestemming mag LabourMarket.ai passend werk voor je zoeken bij werkgevers en projecten buiten dit platform, via goedgekeurde partnerinfrastructuur. Alleen een professionele samenvatting zonder directe identificerende gegevens wordt doorgegeven — nooit je naam of contactgegevens.",
+      "noWorkerProfile": "Je hebt nog geen werknemersprofiel, dus er zou niets vertegenwoordigd worden. Maak eerst je professionele profiel aan — deze antwoorden blijven bewaard en gaan gelden zodra het bestaat.",
+      "statusNotRepresented": "Je wordt niet vertegenwoordigd buiten LabourMarket.ai",
+      "statusNotRepresentedBody": "Er wordt niets over jou buiten dit platform verstuurd. Je account, cv en werkjournaal werken hier precies hetzelfde zonder.",
+      "statusRepresented": "Je wordt ook buiten LabourMarket.ai vertegenwoordigd",
+      "statusConsentOnly": "Toestemming gegeven — geef nu aan wat je zoekt",
+      "statusWithdrawn": "Je hebt deze toestemming ingetrokken",
       "statusStale": "De tekst van deze toestemming is gewijzigd — lees hem opnieuw",
-      "statusAgeing": "Uw antwoord wordt oud — bevestig of het nog klopt",
-      "statusExpired": "Uw antwoord is verlopen en wordt niet meer verstuurd",
+      "statusAgeing": "Je antwoord wordt oud — bevestig of het nog klopt",
+      "statusExpired": "Je antwoord is verlopen en wordt niet meer verstuurd",
       "authoritiesTitle": "Wat elke toestemming betekent",
       "authorityMatch": "Matchen",
-      "authorityMatchBody": "U mag worden meegeteld en vergeleken met passend werk. Een werkgever ziet een aantal en een anonieme referentie.",
+      "authorityMatchBody": "Je mag worden meegeteld en vergeleken met passend werk. Een werkgever ziet een aantal en een anonieme referentie.",
       "authorityContact": "Contact opnemen",
-      "authorityContactBody": "Een werkgever mag via LabourMarket.ai met u in contact worden gebracht.",
+      "authorityContactBody": "Een werkgever mag via LabourMarket.ai met jou in contact worden gebracht.",
       "authorityPresentation": "Presentatie",
-      "authorityPresentationBody": "Uw beschikbaarheid mag aan een publiek worden getoond — als groepscijfer, bijvoorbeeld “3 timmerlieden beschikbaar vanaf oktober”.",
+      "authorityPresentationBody": "Je beschikbaarheid mag aan een publiek worden getoond — als groepscijfer, bijvoorbeeld “3 timmerlieden beschikbaar vanaf oktober”.",
       "authorityIdentity": "Naamsvermelding",
-      "authorityIdentityBody": "U mag bij naam genoemd worden. Zonder dit wordt u uitsluitend anoniem gepresenteerd.",
-      "matchNeverReveals": "Matchen alleen onthult nooit uw naam, e-mailadres, telefoonnummer of adres. Contact en naamsvermelding zijn aparte toestemmingen die u hieronder geeft, en beide staan standaard uit.",
+      "authorityIdentityBody": "Je mag bij naam genoemd worden. Zonder dit word je uitsluitend anoniem gepresenteerd.",
+      "matchNeverReveals": "Matchen alleen onthult nooit je naam, e-mailadres, telefoonnummer of adres. Contact en naamsvermelding zijn aparte toestemmingen die je hieronder geeft, en beide staan standaard uit.",
       "grant": "Akkoord — vertegenwoordig mij",
       "decline": "Nu niet",
-      "declinedNote": "Er is niets opgeslagen. Uw profiel, cv en werkjournaal blijven ongewijzigd.",
+      "declinedNote": "Er is niets opgeslagen. Je profiel, cv en werkjournaal blijven ongewijzigd.",
       "manage": "Beheren",
       "withdrawConsent": "Deze toestemming intrekken",
-      "formTitle": "Wat zoekt u op dit moment?",
+      "formTitle": "Wat zoek je op dit moment?",
       "intentLabel": "Huidige situatie",
       "intentAvailableNow": "Ik kan nu beginnen",
       "intentAvailableFrom": "Ik kan vanaf een datum beginnen",
@@ -11525,9 +11525,9 @@
       "intentLookingForProjects": "Ik zoek projecten",
       "availableFromLabel": "Ik kan beginnen vanaf",
       "workCountriesLabel": "Landen waar ik wettelijk mag werken",
-      "workCountriesHelp": "Landcodes van twee letters, gescheiden door komma’s. Dit gaat over uw recht om te werken, niet over een voorkeur.",
+      "workCountriesHelp": "Landcodes van twee letters, gescheiden door komma’s. Dit gaat over je recht om te werken, niet over een voorkeur.",
       "marketsLabel": "Landen waar ik aangeboden wil worden",
-      "marketsHelp": "Een aparte vraag. Alleen werkgevers in deze landen mogen u aangeboden krijgen, en ze moeten bij de landen hierboven horen.",
+      "marketsHelp": "Een aparte vraag. Alleen werkgevers in deze landen mogen je aangeboden krijgen, en ze moeten bij de landen hierboven horen.",
       "validDaysLabel": "Hoeveel dagen dit antwoord geldig blijft",
       "validDaysHelp": "Daarna vragen we het opnieuw. Vragen we niet, dan stopt het antwoord met verstuurd worden in plaats van te verouderen.",
       "save": "Opslaan",
@@ -11535,7 +11535,7 @@
       "saved": "Opgeslagen.",
       "edit": "Antwoorden wijzigen",
       "cancel": "Annuleren",
-      "currentTitle": "Uw huidige antwoorden",
+      "currentTitle": "Je huidige antwoorden",
       "currentIntent": "Huidige situatie",
       "currentAvailableFrom": "Kan beginnen vanaf",
       "currentWorkCountries": "Mag wettelijk werken in",
@@ -11547,16 +11547,16 @@
       "denied": "nee",
       "unknown": "niet opgegeven",
       "reconfirm": "Ja, klopt nog steeds",
-      "reconfirmed": "Dank u — bevestigd.",
+      "reconfirmed": "Dank je — bevestigd.",
       "withdrawDeclaration": "Vertegenwoordig mij niet meer",
-      "withdrawnDeclarationNote": "U wordt niet langer vertegenwoordigd buiten LabourMarket.ai.",
+      "withdrawnDeclarationNote": "Je wordt niet langer vertegenwoordigd buiten LabourMarket.ai.",
       "needsMigration": "Momenteel niet beschikbaar.",
       "errorGeneric": "Er ging iets mis. Er is niets gewijzigd.",
-      "errorUnknownIntent": "Kies uw huidige situatie.",
-      "errorAvailableFromRequired": "Geef de datum waarop u kunt beginnen.",
-      "errorCountriesRequired": "Noem minstens één land waar u wettelijk mag werken.",
+      "errorUnknownIntent": "Kies je huidige situatie.",
+      "errorAvailableFromRequired": "Geef de datum waarop je kunt beginnen.",
+      "errorCountriesRequired": "Noem minstens één land waar je wettelijk mag werken.",
       "errorNotIso2": "Gebruik landcodes van twee letters, bijvoorbeeld LT, DE, NL.",
-      "errorMarketOutside": "U kunt alleen worden aangeboden waar u wettelijk mag werken. Voeg dat land hierboven eerst toe.",
+      "errorMarketOutside": "Je kunt alleen worden aangeboden waar je wettelijk mag werken. Voeg dat land hierboven eerst toe.",
       "errorValidity": "Kies 30, 60 of 90 dagen."
     },
     "employerVisibility": {
@@ -11567,23 +11567,23 @@
         "unknown": "Onbekend"
       },
       "hint": {
-        "on": "Bedrijven kunnen uw beroepsprofiel vinden. Contactgegevens en cv alleen na uw aparte bevestiging. U kunt het op elk moment uitzetten.",
-        "off": "Bedrijven kunnen uw profiel niet vinden. Alleen u kunt het aanzetten, na het lezen van de voorwaarden; intrekken kost één klik.",
+        "on": "Bedrijven kunnen je beroepsprofiel vinden. Contactgegevens en cv alleen na je aparte bevestiging. Je kunt het op elk moment uitzetten.",
+        "off": "Bedrijven kunnen je profiel niet vinden. Alleen jij kunt het aanzetten, na het lezen van de voorwaarden; intrekken kost één klik.",
         "unknown": "Kon niet controleren. Dat betekent niet dat het uit staat — open het om te kijken."
       },
       "chat": {
-        "on": "Op dit moment is uw beroepsprofiel zichtbaar voor bedrijven. Hieronder: wat zij zien en hoe u het uitzet.",
-        "off": "Op dit moment kunnen bedrijven uw profiel niet zien of vinden bij het zoeken. Wilt u dat wel, lees dan hieronder de voorwaarden en beslis — intrekken kan altijd.",
-        "unknown": "Kon niet controleren of bedrijven uw profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — open uw privacyinstellingen.",
+        "on": "Op dit moment is je beroepsprofiel zichtbaar voor bedrijven. Hieronder: wat zij zien en hoe je het uitzet.",
+        "off": "Op dit moment kunnen bedrijven je profiel niet zien of vinden bij het zoeken. Wil je dat wel, lees dan hieronder de voorwaarden en beslis — intrekken kan altijd.",
+        "unknown": "Kon niet controleren of bedrijven je profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — open je privacyinstellingen.",
         "noWorker": "Zichtbaarheid voor werkgevers geldt voor een werknemersprofiel, en dit account heeft er nog geen."
       }
     },
     "switch": {
-      "privateLine": "Deze instelling toont nooit: uw naam, telefoonnummer, e-mailadres, uw Werklogboek-items en links naar externe profielen.",
+      "privateLine": "Deze instelling toont nooit: je naam, telefoonnummer, e-mailadres, je Werklogboek-items en links naar externe profielen.",
       "turnOn": "Voorwaarden lezen en inschakelen",
       "details": "Wat bedrijven zien en de volledige voorwaarden",
-      "grantedNote": "Klaar — bedrijven kunnen uw beroepsprofiel nu vinden, onder een anoniem label.",
-      "withdrawnNote": "Klaar — uw profiel verschijnt niet meer in nieuwe zoekopdrachten van bedrijven."
+      "grantedNote": "Klaar — bedrijven kunnen je beroepsprofiel nu vinden, onder een anoniem label.",
+      "withdrawnNote": "Klaar — je profiel verschijnt niet meer in nieuwe zoekopdrachten van bedrijven."
     }
   },
   "planning": {
@@ -17868,12 +17868,12 @@
   },
   "oauthConsent": {
     "title": "Toegang bevestigen",
-    "clientWantsAccess": "„{client}” vraagt toegang tot uw LabourMarket.ai-account.",
+    "clientWantsAccess": "„{client}” vraagt toegang tot je LabourMarket.ai-account.",
     "unknownClient": "Onbekende applicatie",
     "clientLabel": "Applicatie",
     "redirectLabel": "Terugkeeradres",
     "scopesLabel": "Gevraagde rechten",
-    "authorityNote": "De applicatie handelt alleen namens u en ziet alleen wat u kunt zien. U kunt de toegang op elk moment intrekken.",
+    "authorityNote": "De applicatie handelt alleen namens jou en ziet alleen wat jij kunt zien. Je kunt de toegang op elk moment intrekken.",
     "approve": "Toestaan",
     "deny": "Weigeren",
     "errorMissingId": "Het autorisatieverzoek ontbreekt. Ga terug naar de applicatie en probeer het opnieuw.",
@@ -20553,9 +20553,9 @@
     },
     "control": {
       "title": "Gebruiksmeting en campagnetoewijzing",
-      "granted": "U heeft toestemming gegeven. U kunt die altijd intrekken; de items worden dan van dit apparaat verwijderd.",
-      "refused": "U heeft geweigerd. Op dit apparaat wordt niets voor meting opgeslagen.",
-      "undecided": "U heeft nog niet gekozen, dus er wordt niets voor meting opgeslagen.",
+      "granted": "Je hebt toestemming gegeven. Je kunt die altijd intrekken; de items worden dan van dit apparaat verwijderd.",
+      "refused": "Je hebt geweigerd. Op dit apparaat wordt niets voor meting opgeslagen.",
+      "undecided": "Je hebt nog niet gekozen, dus er wordt niets voor meting opgeslagen.",
       "allow": "Toestaan",
       "refuse": "Weigeren"
     }

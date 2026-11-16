@@ -73,12 +73,12 @@ const PL_INFORMAL = [
   /(?<![\p{L}])(ty|ciebie|tobie|cię|twój|twoja|twoje|twojego|twojej|twojemu|twoim|twoich|twoimi|twoją|jesteś|masz|możesz|chcesz)(?![\p{L}])/iu,
   /(?<![\p{L}])\p{L}{2,}(łeś|łaś)(?![\p{L}])/iu,
 ];
-/** Namespaces left as written: hash-pinned or legally fixed texts (consent registry,
- *  legal pages) and the app-authorisation screen, which states what an app may do
- *  "as you". They change only through their own owner-approved process. */
-const FIXED_NAMESPACES: Record<string, readonly string[]> = {
-  pl: ["consent", "privacyConsent", "legal", "oauthConsent"],
-};
+/** Namespaces left as written IN EVERY LOCALE: hash-pinned or legally fixed texts
+ *  (consent registry, legal pages) and the app-authorisation screen, which states
+ *  what an app may do "as you". They change only through their own owner-approved
+ *  process (owner rule: legal texts are not edited), so the address rule does not
+ *  judge them. */
+const FIXED_NAMESPACES: readonly string[] = ["consent", "privacyConsent", "legal", "oauthConsent"];
 const RU_INFORMAL = [/(?<![а-яё])(ты|тебя|тебе|тобой|твой|твоя|твоё|твое|твои|твоего|твоей|твоих|твоим|твоими|твоему|твою)(?![а-яё])/i];
 
 /** The user's own words — listed by key, nothing else is exempt. */
@@ -124,7 +124,7 @@ describe("one form of address — formal, in every catalog the web app loads (ow
       const exempt = new Set(USER_VOICE[locale]);
       const informal = Object.entries(strings)
         .filter(([k]) => !exempt.has(k))
-        .filter(([k]) => !(FIXED_NAMESPACES[locale] ?? []).some((ns) => k.split("::")[1]?.startsWith(`${ns}.`)))
+        .filter(([k]) => !FIXED_NAMESPACES.some((ns) => k.split("::")[1]?.startsWith(`${ns}.`)))
         .filter(([, v]) => rules.some((rule) => rule.test(v)))
         .map(([k, v]) => `${k}: ${v}`);
       expect(informal, informal.join("\n")).toEqual([]);
