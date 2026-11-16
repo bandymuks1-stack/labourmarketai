@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
+import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import type { ProfileSkillClaimRow } from "@/lib/profile/profile-skill-claims";
 import type { SkillPresentation } from "@/lib/cv-export/skill-presentation";
 import {
@@ -183,6 +185,10 @@ export function CapabilityProfileSection({
   const [expEndYear, setExpEndYear] = useState("");
   const [expEndMonth, setExpEndMonth] = useState("");
   const [expCurrent, setExpCurrent] = useState(false);
+  // What the engagement WAS. The form used to send nothing, so a study
+  // placement or volunteering typed here was stored as employment. Same
+  // closed list the chat form and the save function use.
+  const [expKind, setExpKind] = useState<string>("employee");
   const [expError, setExpError] = useState<string | null>(null);
   const [isSavingExp, startSaveExp] = useTransition();
 
@@ -264,6 +270,7 @@ export function CapabilityProfileSection({
         start: startPart,
         end: endPart,
         isCurrent: expCurrent,
+        relationship: expKind,
       })
         .then((res) => {
           if (res.ok) {
@@ -272,7 +279,7 @@ export function CapabilityProfileSection({
               showSaved({
                 id: res.id,
                 orgName: title,
-                relationship: "employee",
+                relationship: expKind,
                 startedAt: res.startedAt ?? null,
                 endedAt: res.endedAt ?? null,
                 title,
@@ -286,6 +293,7 @@ export function CapabilityProfileSection({
             setExpEndYear("");
             setExpEndMonth("");
             setExpCurrent(false);
+            setExpKind("employee");
           } else if (res.code === "needs_migration") {
             setExpError(t("expNeedsMigration"));
           } else if (res.code === "invalid") {
@@ -647,6 +655,21 @@ export function CapabilityProfileSection({
               placeholder={t("expTitlePlaceholder")}
               data-testid="add-experience-title"
             />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="add-experience-kind">{t("expKindLabel")}</Label>
+            <Select
+              id="add-experience-kind"
+              value={expKind}
+              onChange={(e) => setExpKind(e.target.value)}
+              data-testid="add-experience-kind"
+            >
+              {SELF_DECLARED_RELATIONSHIPS.map((slug) => (
+                <option key={slug} value={slug}>
+                  {tRel(slug)}
+                </option>
+              ))}
+            </Select>
           </div>
           {/* One column on a phone, so a year field is never squeezed to a
               letter; two from the small breakpoint up. */}

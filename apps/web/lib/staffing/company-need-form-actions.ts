@@ -147,6 +147,9 @@ export async function submitCompanyNeedAction(
     companyName: raw.companyName,
     contactName: raw.contactPerson,
     contactEmail,
+    // Optional; the landing's worker-search door asked for it before it opened
+    // this form (F5), so the one form keeps it. Bounded like the door's field.
+    contactPhone: str(formData.get("contact_phone"))?.slice(0, 40) || undefined,
     country: raw.country,
     cityRegion: raw.cityRegion,
     sector: raw.profession,

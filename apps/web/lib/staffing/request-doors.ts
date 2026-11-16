@@ -1,7 +1,8 @@
 import type { PublicIntakeInput } from "./company-need-public-intake";
 
 /**
- * THE THREE COMMERCIAL REQUEST DOORS (owner P0 2026-11-07). PURE.
+ * THE COMMERCIAL REQUEST DOORS (owner P0 2026-11-07; `partner` owner P0 2026-11-15,
+ * F3: "Become a partner" opened /about, which holds no partner form or contact). PURE.
  *
  * Not a second intake: every door lands in `company_need_public_intakes` through the
  * existing RPC, with its rate limits and its 24 h duplicate rule, and reaches the
@@ -13,13 +14,14 @@ import type { PublicIntakeInput } from "./company-need-public-intake";
  * project is none of them. The operator's first line of the description names the door
  * too, because the queue's engagement label is only near for a project.
  */
-export const REQUEST_DOORS = ["worker-search", "b2b", "project"] as const;
+export const REQUEST_DOORS = ["worker-search", "b2b", "project", "partner"] as const;
 export type RequestDoor = (typeof REQUEST_DOORS)[number];
 
 const OPERATOR_TITLE: Record<RequestDoor, string> = {
   "worker-search": "Darbuotojų paieškos užklausa",
   b2b: "B2B bendradarbiavimo užklausa",
   project: "Individualaus projekto užklausa",
+  partner: "Partnerystės užklausa",
 };
 
 export function requestDoorSourcePath(locale: string, door: RequestDoor): string {
@@ -112,6 +114,18 @@ export function requestDoorIntake(door: RequestDoor, locale: string, read: Read)
       startWindow: deadline || undefined,
       engagementType: "subcontracting",
       description: describe([`Darbų pobūdis: ${work}`, !!scope && `Apimtis: ${scope}`, !!deadline && `Terminai: ${deadline}`]),
+    };
+  }
+
+  if (door === "partner") {
+    const proposal = read("proposal");
+    if (proposal.length < 2 || !within(proposal, 4000)) return null;
+    return {
+      ...base,
+      sector: "partnership",
+      headcount: 1,
+      engagementType: "employment",
+      description: describe([proposal]),
     };
   }
 
