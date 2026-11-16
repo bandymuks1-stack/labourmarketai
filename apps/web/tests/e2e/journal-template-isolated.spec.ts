@@ -25,7 +25,9 @@ test.setTimeout(180_000);
 
 const RUN = Date.now().toString(36);
 const W = `template-worker-${RUN}@example.test`;
-const OWN = `QA-SYNTHETIC template ${RUN}: tiled the bathroom floor, 7 hours`;
+// No stated duration: the full form refuses to save an unconfirmed duration and
+// opens its review step first (doctrine §7), which is not what this walk is about.
+const OWN = `QA-SYNTHETIC template ${RUN}: tiled the bathroom floor`;
 const SCAFFOLD_EN = ["Site / object:", "Work performed:", "Hours:"];
 
 test("T-1..T-3. the full composer offers an active template, it prefills the entry, and the person saves it as their own", async ({ page }) => {
