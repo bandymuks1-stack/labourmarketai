@@ -51,6 +51,23 @@ describe("Create a free CV in the menu", () => {
     expect(readFileSync(join(web, "components/layouts/site-nav.tsx"), "utf8")).toContain("guestHref: link.guestHref");
   });
 
+  it("a signed-out guest door is labelled with the existing sign-up note, never a sign-in one", () => {
+    const read = (f: string) => readFileSync(join(web, f), "utf8");
+    // Both menus: the goal link's note follows the same signed-in hint as its href.
+    const note = "{(!signedIn && link.guestHref && signUpLabel) || accountLabel}";
+    expect(read("components/layouts/intent-mega-menu.tsx")).toContain(note);
+    expect(read("components/layouts/mobile-nav-menu.tsx")).toContain(note);
+    // The label is the existing siteNav.signUp string, handed to both menus.
+    expect(read("components/layouts/site-nav.tsx").match(/signUpLabel=\{tIntent\("signUp"\)\}/g)).toHaveLength(2);
+    // The goal panel card: "Sign-in required" only when it really opens sign-in.
+    expect(read("components/navigation/goal-navigation.tsx")).toContain(
+      'guestNote: link.account && link.guestHref ? t("signUp") : undefined',
+    );
+    expect(read("components/navigation/card-rail.tsx")).toContain(
+      "!signedIn && card.guestHref && card.guestNote ? card.guestNote : card.note",
+    );
+  });
+
   it("goes where /create-cv's own sign-up goes", () => {
     const m = /const CREATE_CV_NEXT = "([^"]+)";/.exec(readFileSync(join(web, CREATE_CV_PAGE), "utf8"));
     expect(m?.[1]).toBe(entry?.href);

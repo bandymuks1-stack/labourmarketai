@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { collectPageErrors, expectRenderedOnce } from "./render-once";
 
 import {
   BASE,
@@ -91,7 +92,10 @@ test("M-1. a worker opts in to e-mail for three notification kinds; the consent 
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
   state.workerId = await userId(WORKER);
 
+  const errors = collectPageErrors(page);
   await page.goto(`${APP}/en/dashboard/account`);
+  // Exactly once, with evidence on a duplicate (the intermittent fault seen here).
+  await expectRenderedOnce(page, "account-notification-preferences", errors, "M-1");
   const section = page.getByTestId("account-notification-preferences");
   await expect(section).toBeVisible({ timeout: 30_000 });
   await section.locator("summary").click();

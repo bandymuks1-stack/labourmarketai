@@ -69,6 +69,9 @@ export async function GoalNavigation({
           // required" badge on every other card was removed as interface noise
           // (owner decision 0032, 2026-11-15).
           note: link.account ? t("nav.signInWhenOpen") : undefined,
+          // Signed out, a card with a guest door opens SIGN-UP: the existing
+          // "Sign up", not "Sign-in required".
+          guestNote: link.account && link.guestHref ? t("signUp") : undefined,
           iconKey: FUNCTION_ICONS[link.id as keyof typeof FUNCTION_ICONS],
         })),
       }))}
