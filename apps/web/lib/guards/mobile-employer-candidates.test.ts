@@ -20,8 +20,10 @@ describe("mobile employer candidates", () => {
   it("reads and writes through the canonical capabilities only", () => {
     expect(screen).toContain('useCapability<DemandListData>("demand.list", WITH_CLOSED)');
     expect(screen).toContain('useCapability<CandidateSearchData>("candidate.search", args)');
-    expect(screen).toContain('name: "shortlist.add_draft"');
-    expect(screen).toContain('name: "shortlist.add_confirm"');
+    // add / remove — the web's own shortlist.{add,remove}_{draft,confirm} pairs.
+    expect(screen).toContain('type ShortlistOp = "add" | "remove";');
+    expect(screen).toContain("name: `shortlist.${op}_draft`");
+    expect(screen).toContain("name: `shortlist.${op}_confirm`");
     expect(screen).not.toMatch(/supabase\s*\.\s*from\(/);
   });
 
@@ -46,7 +48,28 @@ describe("mobile employer candidates", () => {
   });
 
   it("confirms with the draft's own fields and token", () => {
-    expect(screen).toMatch(/args: \{ \.\.\.fields, confirmationToken: token \}/);
+    expect(screen).toMatch(/args: \{ \.\.\.fieldsFor\(op\), confirmationToken: token \}/);
+  });
+
+  it("takes someone off only with the reason the web requires (min 3 characters)", () => {
+    expect(screen).toContain("reason: reason.trim()");
+    expect(screen).toContain('op === "remove" && reason.trim().length < 3');
+  });
+
+  it("words 'not a fit' exactly as the web scouting page", () => {
+    const messages = read("apps/mobile/src/i18n/messages.ts");
+    for (const locale of LOCALES) {
+      const web = JSON.parse(read(`apps/web/messages/${locale}.json`)).scouting;
+      const start = messages.indexOf(locale === "en" ? "const en = {" : `const ${locale}: Catalogue = {`);
+      const block = messages.slice(start, messages.indexOf(locale === "en" ? "\n} as const;" : "\n};", start));
+      const pairs: [string, string][] = [
+        ["candidates.notFit", web.shortlist.not_fit],
+        ["candidates.notFitReasonTitle", web.shortlistNote.reasonTitle],
+        ["candidates.notFitReasonPlaceholder", web.shortlistNote.reasonPlaceholder],
+        ["candidates.notFitReasonRequired", web.shortlistNote.reasonRequired],
+      ];
+      for (const [k, v] of pairs) expect(block, `${locale} ${k}`).toContain(`"${k}": ${JSON.stringify(v)}`);
+    }
   });
 
   it("shows the anonymized label only — never a name or contact", () => {

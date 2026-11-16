@@ -686,6 +686,10 @@ const en = {
   "education.invalid": "Check the name, the e-mail and the dates (YYYY-MM-DD).",
   "education.notInstitution": "Programmes and cohorts are for training providers.",
   "education.review": "Review",
+  "candidates.notFit": "Not a fit",
+  "candidates.notFitReasonTitle": "Why not a fit?",
+  "candidates.notFitReasonPlaceholder": "Write a short reason, e.g.: lacks experience with this kind of work.",
+  "candidates.notFitReasonRequired": "Marking “Not a fit” needs a short reason.",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -1358,6 +1362,10 @@ const lt: Catalogue = {
   "education.invalid": "Patikrinkite pavadinimą, el. paštą ir datas (MMMM-MM-DD).",
   "education.notInstitution": "Programos ir grupės skirtos mokymo įstaigoms.",
   "education.review": "Peržiūrėti",
+  "candidates.notFit": "Netinka",
+  "candidates.notFitReasonTitle": "Kodėl netinka?",
+  "candidates.notFitReasonPlaceholder": "Trumpai įrašykite priežastį, pvz.: trūksta patirties su šiuo darbu.",
+  "candidates.notFitReasonRequired": "Žymint „Netinka“ reikia trumpos priežasties.",
 };
 
 const ru: Catalogue = {
@@ -2026,6 +2034,10 @@ const ru: Catalogue = {
   "education.invalid": "Проверьте название, e-mail и даты (ГГГГ-ММ-ДД).",
   "education.notInstitution": "Программы и группы доступны учебным организациям.",
   "education.review": "Проверить",
+  "candidates.notFit": "Не подходит",
+  "candidates.notFitReasonTitle": "Почему не подходит?",
+  "candidates.notFitReasonPlaceholder": "Коротко укажите причину, например: не хватает опыта в этой работе.",
+  "candidates.notFitReasonRequired": "Для отметки «Не подходит» нужна короткая причина.",
 };
 
 const nl: Catalogue = {
@@ -2694,6 +2706,10 @@ const nl: Catalogue = {
   "education.invalid": "Controleer de naam, het e-mailadres en de datums (JJJJ-MM-DD).",
   "education.notInstitution": "Opleidingen en groepen zijn voor opleidingsinstellingen.",
   "education.review": "Bekijken",
+  "candidates.notFit": "Geen fit",
+  "candidates.notFitReasonTitle": "Waarom geen fit?",
+  "candidates.notFitReasonPlaceholder": "Schrijf een korte reden, bijv.: mist ervaring met dit soort werk.",
+  "candidates.notFitReasonRequired": "Voor “Geen fit” is een korte reden nodig.",
 };
 
 const de: Catalogue = {
@@ -3365,6 +3381,10 @@ const de: Catalogue = {
   "education.invalid": "Bitte prüfen Sie Namen, E-Mail und Daten (JJJJ-MM-TT).",
   "education.notInstitution": "Programme und Gruppen sind für Bildungsanbieter.",
   "education.review": "Prüfen",
+  "candidates.notFit": "Passt nicht",
+  "candidates.notFitReasonTitle": "Warum passt es nicht?",
+  "candidates.notFitReasonPlaceholder": "Kurze Begründung, z. B.: fehlende Erfahrung mit dieser Arbeit.",
+  "candidates.notFitReasonRequired": "Für „Passt nicht“ ist eine kurze Begründung nötig.",
 };
 
 const pl: Catalogue = {
@@ -4033,6 +4053,10 @@ const pl: Catalogue = {
   "education.invalid": "Proszę sprawdzić nazwę, e-mail i daty (RRRR-MM-DD).",
   "education.notInstitution": "Programy i grupy są dla placówek szkoleniowych.",
   "education.review": "Sprawdź",
+  "candidates.notFit": "Niedopasowany",
+  "candidates.notFitReasonTitle": "Dlaczego nie pasuje?",
+  "candidates.notFitReasonPlaceholder": "Proszę napisać krótki powód, np.: brak doświadczenia w tego rodzaju pracy.",
+  "candidates.notFitReasonRequired": "Oznaczenie „Niedopasowany” wymaga krótkiego powodu.",
 };
 
 const sv: Catalogue = {
@@ -4702,6 +4726,10 @@ const sv: Catalogue = {
   "education.invalid": "Kontrollera namnet, e-postadressen och datumen (ÅÅÅÅ-MM-DD).",
   "education.notInstitution": "Program och grupper är till för utbildningsanordnare.",
   "education.review": "Granska",
+  "candidates.notFit": "Passar inte",
+  "candidates.notFitReasonTitle": "Varför passar hen inte?",
+  "candidates.notFitReasonPlaceholder": "Skriv en kort anledning, t.ex.: saknar erfarenhet av den här typen av arbete.",
+  "candidates.notFitReasonRequired": "Att markera ”Passar inte” kräver en kort anledning.",
 };
 
 export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de, pl, sv };

@@ -10,7 +10,7 @@ import type {
 } from "../capability-shapes";
 import { capability, type DomainFailure } from "../domain";
 import { useLocale } from "../i18n/locale-context";
-import { Body, Button, Divider, NotAvailable, Title } from "../ui/primitives";
+import { Body, Button, Divider, Field, NotAvailable, Title } from "../ui/primitives";
 import { theme } from "../ui/theme";
 import { useCapability } from "../use-capability";
 import { useReloadOnReturn } from "../use-reload-on-return";
@@ -130,12 +130,17 @@ function CandidateList({ needId, onBack }: { needId: string; onBack: () => void 
   );
 }
 
+/** `add` puts the person on the shortlist; `remove` takes them off as
+ *  "not a fit" with a reason the web keeps as history (`shortlist.remove_*`). */
+type ShortlistOp = "add" | "remove";
+
 type RowFlow =
   | { readonly kind: "idle" }
-  | { readonly kind: "drafting" }
-  | { readonly kind: "ready"; readonly token: string }
-  | { readonly kind: "confirming"; readonly token: string }
-  | { readonly kind: "failed"; readonly failure: DomainFailure };
+  | { readonly kind: "reason"; readonly invalid: boolean }
+  | { readonly kind: "drafting"; readonly op: ShortlistOp }
+  | { readonly kind: "ready"; readonly op: ShortlistOp; readonly token: string }
+  | { readonly kind: "confirming"; readonly op: ShortlistOp; readonly token: string }
+  | { readonly kind: "failed"; readonly op: ShortlistOp; readonly failure: DomainFailure };
 
 function CandidateCard({
   candidate,
@@ -158,28 +163,42 @@ function CandidateCard({
     };
   }, []);
 
-  const fields = { requestId: needId, workerId: candidate.workerId };
-  const draft = async () => {
-    setFlow({ kind: "drafting" });
-    const r = await capability<ShortlistDraftData>({ name: "shortlist.add_draft", args: fields, accessToken, locale });
+  const [reason, setReason] = useState("");
+  /** The draft's own fields, byte for byte — the confirm token is bound to them. */
+  const fieldsFor = (op: ShortlistOp) =>
+    op === "add"
+      ? { requestId: needId, workerId: candidate.workerId }
+      : { requestId: needId, workerId: candidate.workerId, reason: reason.trim() };
+  const draft = async (op: ShortlistOp) => {
+    if (op === "remove" && reason.trim().length < 3) {
+      setFlow({ kind: "reason", invalid: true });
+      return;
+    }
+    setFlow({ kind: "drafting", op });
+    const r = await capability<ShortlistDraftData>({
+      name: `shortlist.${op}_draft`,
+      args: fieldsFor(op),
+      accessToken,
+      locale,
+    });
     if (!live.current) return;
-    setFlow(r.ok ? { kind: "ready", token: r.data.confirmationToken } : { kind: "failed", failure: r.failure });
+    setFlow(r.ok ? { kind: "ready", op, token: r.data.confirmationToken } : { kind: "failed", op, failure: r.failure });
   };
-  const confirm = async (token: string) => {
-    setFlow({ kind: "confirming", token });
-    // The DRAFT's own fields, byte for byte — the token is bound to them.
+  const confirm = async (op: ShortlistOp, token: string) => {
+    setFlow({ kind: "confirming", op, token });
     const r = await capability<unknown>({
-      name: "shortlist.add_confirm",
-      args: { ...fields, confirmationToken: token },
+      name: `shortlist.${op}_confirm`,
+      args: { ...fieldsFor(op), confirmationToken: token },
       accessToken,
       locale,
     });
     if (!live.current) return;
     if (!r.ok) {
-      setFlow({ kind: "failed", failure: r.failure });
+      setFlow({ kind: "failed", op, failure: r.failure });
       return;
     }
     setFlow({ kind: "idle" });
+    setReason("");
     onShortlisted();
   };
 
@@ -194,15 +213,17 @@ function CandidateCard({
         {t("profile.groupManagerConfirmed")}: {e.matchedManagerConfirmed} · {t("profile.groupJournalBacked")}:{" "}
         {e.matchedJournalSupported} · {t("profile.groupDeclared")}: {e.matchedSelfDeclared}
       </Body>
-      {onList ? (
-        <Body muted>{t("candidates.onShortlist")}</Body>
-      ) : flow.kind === "ready" || flow.kind === "confirming" ? (
-        <NotAvailable title={t("candidates.confirmTitle")} body={t("candidates.confirmBody")}>
+      {onList ? <Body muted>{t("candidates.onShortlist")}</Body> : null}
+      {flow.kind === "ready" || flow.kind === "confirming" ? (
+        <NotAvailable
+          title={t(flow.op === "add" ? "candidates.confirmTitle" : "candidates.notFit")}
+          body={flow.op === "add" ? t("candidates.confirmBody") : reason.trim()}
+        >
           <Button
             testID={`candidate-confirm-${candidate.workerId}`}
-            label={t("candidates.confirm")}
+            label={t(flow.op === "add" ? "candidates.confirm" : "candidates.notFit")}
             busy={flow.kind === "confirming"}
-            onPress={() => void confirm(flow.token)}
+            onPress={() => void confirm(flow.op, flow.token)}
           />
           <Button
             variant="quiet"
@@ -211,20 +232,53 @@ function CandidateCard({
             onPress={() => setFlow({ kind: "idle" })}
           />
         </NotAvailable>
+      ) : flow.kind === "reason" || (flow.kind === "drafting" && flow.op === "remove") ? (
+        <View style={styles.card} testID={`candidate-reason-${candidate.workerId}`}>
+          <Field
+            testID="candidate-reason"
+            label={t("candidates.notFitReasonTitle")}
+            placeholder={t("candidates.notFitReasonPlaceholder")}
+            value={reason}
+            onChangeText={setReason}
+            maxLength={500}
+            multiline
+            editable={flow.kind === "reason"}
+          />
+          {flow.kind === "reason" && flow.invalid ? <Body>{t("candidates.notFitReasonRequired")}</Body> : null}
+          <Button
+            testID={`candidate-not-fit-review-${candidate.workerId}`}
+            label={t("booking.review")}
+            busy={flow.kind === "drafting"}
+            onPress={() => void draft("remove")}
+          />
+          <Button
+            variant="quiet"
+            label={t("cv.cancel")}
+            disabled={flow.kind === "drafting"}
+            onPress={() => setFlow({ kind: "idle" })}
+          />
+        </View>
+      ) : onList ? (
+        <Button
+          variant="quiet"
+          testID={`candidate-not-fit-${candidate.workerId}`}
+          label={t("candidates.notFit")}
+          onPress={() => setFlow({ kind: "reason", invalid: false })}
+        />
       ) : (
         <Button
           variant="quiet"
           testID={`candidate-shortlist-${candidate.workerId}`}
           label={t("candidates.shortlist")}
           busy={flow.kind === "drafting"}
-          onPress={() => void draft()}
+          onPress={() => void draft("add")}
         />
       )}
       {flow.kind === "failed" ? (
         <CapabilityFailureNotice
           failure={flow.failure}
           title="cv.saveFailedTitle"
-          retry={() => void draft()}
+          retry={() => void draft(flow.op)}
           testID="candidate-shortlist-failure"
         />
       ) : null}
