@@ -59,36 +59,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "[EN] Why agencies",
-      "headline": "[EN] Leverage, not loss of control",
-      "items": [
-        {
-          "desc": "[EN] Workers, availability and status in one place.",
-          "title": "[EN] Manage your pool"
-        },
-        {
-          "desc": "[EN] Broker demand without losing the relationship.",
-          "title": "[EN] Post on behalf of clients"
-        },
-        {
-          "desc": "[EN] Place the right people faster.",
-          "title": "[EN] Fit direction"
-        },
-        {
-          "desc": "[EN] Public, agencies-only or direct — your call.",
-          "title": "[EN] Visibility controls"
-        },
-        {
-          "desc": "[EN] Baltic + Nordic clients and workers.",
-          "title": "[EN] Cross-border reach"
-        },
-        {
-          "desc": "[EN] Capacity insights as demand shifts.",
-          "title": "[EN] Grow your desk"
-        }
-      ]
-    },
     "journey": {
       "eyebrow": "[EN] Agency workflow",
       "headline": "[EN] Run your pool like a desk",
@@ -633,36 +603,6 @@
         {
           "a": "[EN] Through confirmed skills, employer-confirmed history and contextual fit signals — not self-reported CVs.",
           "q": "[EN] How is worker experience guaranteed?"
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "[EN] Why companies",
-      "headline": "[EN] Supply you can act on",
-      "items": [
-        {
-          "desc": "[EN] Every fit signal shows the reasons behind it.",
-          "title": "[EN] Explainable fit direction"
-        },
-        {
-          "desc": "[EN] Baltic + Nordic supply in one place.",
-          "title": "[EN] Cross-border worker pool"
-        },
-        {
-          "desc": "[EN] You see and own the relationship.",
-          "title": "[EN] No opaque middlemen"
-        },
-        {
-          "desc": "[EN] Hire on evidence, not on claims.",
-          "title": "[EN] Confirmed skills + fit signals"
-        },
-        {
-          "desc": "[EN] See availability shift as it happens.",
-          "title": "[EN] Real-time supply signals"
-        },
-        {
-          "desc": "[EN] You own the worker relationship.",
-          "title": "[EN] Direct contact"
         }
       ]
     },
@@ -7170,8 +7110,6 @@
     "title": "Kas notiek ar jūsu paveikto darbu",
     "titleCompany": "Kas notiek ar jūsu vadīto darbu",
     "example": "Piemērs — nav īsts cilvēks un nav īsti dati",
-    "hint": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
-    "hintWorkers": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
     "open": "Atvērt darba telpā",
     "list": "Darba dzīves cikla soļi",
     "workers": {
@@ -8086,7 +8024,6 @@
       "close": "Aizvērt",
       "functions": "Darbības",
       "professions": "Profesijas",
-      "opensNow": "Konts nav nepieciešams",
       "signInWhenOpen": "Jāpiesakās",
       "allSectors": "Visas nozares",
       "fullList": "Pilns saraksts"

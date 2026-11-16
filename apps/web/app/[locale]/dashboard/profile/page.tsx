@@ -1358,6 +1358,7 @@ export default async function ProfilePage({
         </summary>
         <div className="px-4 pb-4">
         <ProfileTextFirstFlow
+        viewerEmail={user.email ?? null}
         hasPrimaryProfession={currentProfessionId !== null}
         initialText={savedProfileText}
         savedClaimNormalizedLabels={savedSkillClaims.map(

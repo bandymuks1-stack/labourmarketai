@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, LogIn, Menu, MessageCircle, X } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
+import { useSignedInHint } from "@/components/layouts/nav-auth-ctas";
 import { cn } from "@/lib/utils";
 import { INTENT_ICONS, type NavLeadLink, type RenderedIntent } from "@/components/layouts/intent-icons";
 
@@ -10,6 +11,11 @@ export type MobileNavItem = {
   key: string;
   href: string;
   label: string;
+  /** Needs an account: shows the same note as a goal link that does. */
+  account?: boolean;
+  /** The note for this link when it differs from `accountLabel` (a sign-UP
+   *  door says so, not "for signed-in users"). */
+  accountNote?: string;
 };
 
 /**
@@ -61,9 +67,12 @@ export function MobileNavMenu({
   lead?: readonly NavLeadLink[];
   /** Short note beside links that live inside the signed-in product. */
   accountLabel?: string;
-  /** The "ask the assistant" entry — the existing conversation home. */
-  assistant?: { readonly href: string; readonly label: string };
+  /** The "ask the assistant" entry — the existing conversation home;
+   *  `guestHref` is where a signed-out visitor goes instead (the landing's own
+   *  question box, which needs no account), as on the desktop bar. */
+  assistant?: { readonly href: string; readonly guestHref: string; readonly label: string };
 }) {
+  const signedIn = useSignedInHint();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -184,7 +193,7 @@ export function MobileNavMenu({
                         {intent.links.map((link) => (
                           <Link
                             key={link.id}
-                            href={link.href}
+                            href={!signedIn && link.guestHref ? link.guestHref : link.href}
                             prefetch={link.account ? false : undefined}
                             onClick={() => setOpen(false)}
                             data-testid={`mobile-intent-link-${intent.id}-${link.id}`}
@@ -208,7 +217,7 @@ export function MobileNavMenu({
           )}
           {assistant && (
             <Link
-              href={assistant.href}
+              href={signedIn ? assistant.href : assistant.guestHref}
               prefetch={false}
               onClick={() => setOpen(false)}
               data-testid="mobile-nav-assistant"
@@ -216,20 +225,24 @@ export function MobileNavMenu({
             >
               <MessageCircle aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
               <span className="min-w-0 flex-1">{assistant.label}</span>
-              <span className="inline-flex shrink-0 items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
-                <LogIn aria-hidden className="h-3.5 w-3.5" />
-                {accountLabel}
-              </span>
             </Link>
           )}
           {items.map((item) => (
             <Link
               key={item.key}
               href={item.href}
+              prefetch={item.account ? false : undefined}
               onClick={() => setOpen(false)}
-              className="flex min-h-11 items-center rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary"
+              data-testid={`mobile-nav-item-${item.key}`}
+              className="flex min-h-11 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary"
             >
               {item.label}
+              {item.account && (
+                <span className="inline-flex shrink-0 items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
+                  <LogIn aria-hidden className="h-3.5 w-3.5" />
+                  {item.accountNote ?? accountLabel}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
