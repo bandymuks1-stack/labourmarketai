@@ -242,7 +242,10 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     status: "LIVE",
     structural: null,
     pages: [
-      { path: P.companies, locales: ALL, fragments: [k("companies.features.items[3].desc")] },
+      // The "Why companies" grid that carried this line was removed as a
+      // duplicate (owner copy cleanup 2026-11-15); the FAQ answer makes the
+      // same claim on the same page.
+      { path: P.companies, locales: ALL, fragments: [k("companies.faq.items[3].a")] },
     ],
   },
   {

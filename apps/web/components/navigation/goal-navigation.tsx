@@ -63,8 +63,12 @@ export async function GoalNavigation({
           // A link to a fragment of the landing is a fragment of THIS page
           // here: a plain in-page link, announced by the browser.
           href: link.href.startsWith("/#") ? link.href.slice(1) : link.href,
+          guestHref: link.guestHref,
           label: t(`links.${link.id}`),
-          note: link.account ? t("nav.signInWhenOpen") : t("nav.opensNow"),
+          // Only a card that asks for sign-in carries a note. The "No account
+          // required" badge on every other card was removed as interface noise
+          // (owner decision 0032, 2026-11-15).
+          note: link.account ? t("nav.signInWhenOpen") : undefined,
           iconKey: FUNCTION_ICONS[link.id as keyof typeof FUNCTION_ICONS],
         })),
       }))}

@@ -5,6 +5,7 @@ import { LogIn, MessageCircle } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { useSignedInHint } from "@/components/layouts/nav-auth-ctas";
 import {
   INTENT_ICONS,
   type NavLeadLink,
@@ -55,17 +56,28 @@ export function IntentMegaMenu({
   navLabel: string;
   /** Short note beside links that live inside the signed-in product. */
   accountLabel: string;
-  /** The "ask the assistant" entry — the existing conversation home. */
-  assistant?: { readonly href: string; readonly label: string };
+  /** The "ask the assistant" entry — the existing conversation home.
+   *  `guestHref` is where a signed-out visitor goes instead: the landing's
+   *  own question box, which needs no account and carries the sentence on. */
+  assistant?: { readonly href: string; readonly guestHref: string; readonly label: string };
   /** The secondary links (jobs, pricing, about …) behind one "More". */
   more?: {
     readonly label: string;
-    readonly links: ReadonlyArray<{ readonly key: string; readonly href: string; readonly label: string }>;
+    readonly links: ReadonlyArray<{
+      readonly key: string;
+      readonly href: string;
+      readonly label: string;
+      /** Needs an account: shows the same note as a goal link that does. */
+      readonly account?: boolean;
+      /** The note when it differs from `accountLabel` (a sign-UP door). */
+      readonly accountNote?: string;
+    }>;
   };
   className?: string;
 }) {
   const intents = goalsOnPage ? [] : allIntents;
   const [active, setActive] = useState<string | null>(null);
+  const signedIn = useSignedInHint();
   const rootRef = useRef<HTMLElement>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
   const panelId = useId();
@@ -197,7 +209,7 @@ export function IntentMegaMenu({
         </ul>
         {assistant && (
           <Link
-            href={assistant.href}
+            href={signedIn ? assistant.href : assistant.guestHref}
             // The conversation home is behind sign-in: never prefetch it from
             // a public page (a guest would request it on every view).
             prefetch={false}
@@ -259,7 +271,7 @@ export function IntentMegaMenu({
                     {intent.links.map((link) => (
                       <li key={link.id}>
                         <Link
-                          href={link.href}
+                          href={!signedIn && link.guestHref ? link.guestHref : link.href}
                           prefetch={link.account ? false : undefined}
                           onClick={() => setActive(null)}
                           data-testid={`intent-link-${intent.id}-${link.id}`}
@@ -290,10 +302,18 @@ export function IntentMegaMenu({
                 <li key={link.key}>
                   <Link
                     href={link.href}
+                    prefetch={link.account ? false : undefined}
                     onClick={() => setActive(null)}
-                    className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary motion-reduce:transition-none"
+                    data-testid={`intent-more-link-${link.key}`}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm text-text-secondary transition-colors hover:bg-ink-800 hover:text-text-primary motion-reduce:transition-none"
                   >
                     {link.label}
+                    {link.account && (
+                      <span className="inline-flex shrink-0 items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
+                        <LogIn aria-hidden className="h-3.5 w-3.5" />
+                        {link.accountNote ?? accountLabel}
+                      </span>
+                    )}
                   </Link>
                 </li>
               ))}

@@ -5256,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Why companies",
-      "headline": "Supply you can act on",
-      "items": [
-        {
-          "title": "Explainable fit direction",
-          "desc": "Every fit signal shows the reasons behind it."
-        },
-        {
-          "title": "Cross-border worker pool",
-          "desc": "Supply from every market we operate in, in one place."
-        },
-        {
-          "title": "No opaque middlemen",
-          "desc": "You see and own the relationship."
-        },
-        {
-          "title": "Skill records + fit signals",
-          "desc": "Hire on records, not on claims."
-        },
-        {
-          "title": "Supply signals",
-          "desc": "See workers' declared availability as profiles are updated."
-        },
-        {
-          "title": "Direct contact",
-          "desc": "You own the worker relationship."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "Company FAQ",
       "headline": "Straight answers",
@@ -5351,36 +5321,6 @@
         {
           "title": "Grow your pool",
           "desc": "Add capacity where demand is rising."
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "Why agencies",
-      "headline": "Leverage, not loss of control",
-      "items": [
-        {
-          "title": "Manage your pool",
-          "desc": "Workers, availability and status in one place."
-        },
-        {
-          "title": "Post on behalf of clients",
-          "desc": "Broker demand without losing the relationship."
-        },
-        {
-          "title": "Fit direction",
-          "desc": "Place the right people faster."
-        },
-        {
-          "title": "Visibility controls",
-          "desc": "Public, agencies-only or direct — your call."
-        },
-        {
-          "title": "Cross-border reach",
-          "desc": "Clients and workers across every market we operate in."
-        },
-        {
-          "title": "Grow your desk",
-          "desc": "Capacity insights as demand shifts."
         }
       ]
     },
@@ -10633,7 +10573,7 @@
   },
   "workerIntake": {
     "title": "Worker intake",
-    "subtitle": "Tell us your trade and availability to check your details. This form saves nothing — to be found by employers, create your free profile and add them there.",
+    "subtitle": "Nothing here is published. Employers find you through a free profile, and what you type here is carried into it after sign-up.",
     "fullName": "Full name",
     "profession": "Sector & work type",
     "professionPlaceholder": "Choose your sector and work type",
@@ -10710,7 +10650,6 @@
     "contactPerson": "Contact person",
     "contactPersonHelp": "Optional. Who to reach about this inquiry.",
     "contactEmail": "Contact email",
-    "contactEmailHelp": "Optional, but it helps us follow up faster about your inquiry.",
     "cityRegion": "City or region",
     "cityRegionHelp": "Optional. Where the work will be.",
     "expectedDuration": "Expected duration",
@@ -14010,9 +13949,8 @@
         "csv": "Download CSV",
         "print": "Print / save as PDF",
         "ctaTitle": "Turn this estimate into a real worker request",
-        "ctaBody": "The same estimate builder lives inside the LabourMarket.ai demand form. With an account you can attach an estimate to a structured worker request; without one, you can describe your need on the public form.",
+        "ctaBody": "With an account, your worker count and country carry over to the worker request; you can add the rest of the estimate there. Without an account, use the public form.",
         "ctaDashboard": "Create a work need (with account)",
-        "ctaDashboardHelp": "The account route opens the demand form on your dashboard — the calculator does not transfer these numbers.",
         "ctaCompanyNeed": "Describe a need without an account",
         "ctaCompanyNeedHelp": "The public form receives only your worker count and country — no prices and no descriptions are passed."
       }
@@ -15588,6 +15526,10 @@
         "title": "Individual project enquiry",
         "body": "For private and business customers: describe the project or service you need."
       },
+      "partner": {
+        "title": "Partnership enquiry",
+        "body": "Describe the cooperation you propose."
+      },
       "title": "Submit a request",
       "promise": "Tell us what workers, services or project delivery you need. Your enquiry is passed to the LabourMarket.ai team for review.",
       "name": "Name or company name",
@@ -15605,6 +15547,7 @@
       "scope": "Scope",
       "deadline": "Deadlines",
       "need": "Project or service you need",
+      "proposal": "Proposed cooperation",
       "customer": "Customer",
       "customerPrivate": "Private person",
       "customerBusiness": "Business",
@@ -19441,8 +19384,6 @@
     "title": "What happens to the work you do",
     "titleCompany": "What happens to the work you run",
     "example": "Example — not a real person or real data",
-    "hint": "Select a step. Every step opens the real place in your workspace.",
-    "hintWorkers": "Select a step. Every step opens the real place in your workspace.",
     "open": "Open in your workspace",
     "list": "Work lifecycle steps",
     "workers": {
@@ -20732,7 +20673,6 @@
       "close": "Close",
       "functions": "Actions",
       "professions": "Professions",
-      "opensNow": "No account required",
       "signInWhenOpen": "Sign-in required",
       "allSectors": "All sectors",
       "fullList": "Full list"
