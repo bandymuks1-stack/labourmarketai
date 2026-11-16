@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { contextPanel } from "./prod-context-panel";
 import { test, expect, type Browser, type Page } from "./prod-walk";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { collectPageErrors, expectRenderedOnce } from "./render-once";
 
 /**
  * PRODUCTION AGENCY CHAIN — owner programme 2026-10-12 §3B: an agency sets up
@@ -221,7 +222,10 @@ test("A-2b. the agency reads its people's document readiness (counts only, conse
   const agency = await as(browser, "agency");
   await agency.page.goto("/lt/dashboard");
   await workspace(agency.page, AGENCY);
+  const errors = collectPageErrors(agency.page);
   await agency.page.goto("/lt/dashboard/documents");
+  // Exactly once, with evidence on a duplicate (seen here on 2cab333b).
+  await expectRenderedOnce(agency.page, "doc-centre-org", errors, "A-2b");
   const org = agency.page.getByTestId("doc-centre-org");
   await expect(org, "the agency sees its people's readiness block").toBeVisible({ timeout: 30_000 });
   await expect(agency.page.getByTestId("doc-centre-org-unavailable"), "the readiness read works").toHaveCount(0);
