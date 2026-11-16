@@ -5,7 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { ANSWER_CATEGORY_KEYS, type AnswerCategoryKey } from "@/lib/answer-engine/contract";
-import { localesPublishingCategory, publishedInCategory, publishedCategories } from "@/lib/answer-engine/publishing";
+import { localesPublishingCategory, publishedInCategory, staticCategoryParams } from "@/lib/answer-engine/publishing";
 import { buildStaticQuestionsMetadata, breadcrumbJsonLd } from "@/lib/answer-engine/answer-seo";
 import { CHROME, CATEGORY_LABELS, pickL } from "@/lib/answer-engine/chrome";
 import { activeLocales } from "@/lib/i18n/config";
@@ -16,8 +16,8 @@ function isCategory(x: string): x is AnswerCategoryKey {
 }
 
 export function generateStaticParams({ params }: { params: { locale: string } }) {
-  const l = resolveActiveLocale(params?.locale ?? "lt");
-  return publishedCategories(l).map((category) => ({ category }));
+  // Never empty, or Next pre-renders no category page in any locale.
+  return staticCategoryParams(resolveActiveLocale(params?.locale ?? "lt"));
 }
 
 export async function generateMetadata({
