@@ -788,7 +788,15 @@ test("EX-6. W1 contests one of R1's imported records on their own profile, the r
   );
   expect(before.length).toBe(R1_RECORDS.length);
 
-  const record = list.locator("li").filter({ has: w1.getByTestId("evidence-dispute-open") }).first();
+  // Pin the record by its place in the list: once its dispute button is pressed
+  // the button becomes a form, so a filter on the button would move to the next record.
+  const items = list.locator(":scope > li");
+  const hasOpen = await items.evaluateAll((els) =>
+    els.map((el) => el.querySelector('[data-testid="evidence-dispute-open"]') !== null),
+  );
+  const at = hasOpen.indexOf(true);
+  expect(at, "one of R1's records offers a contest").toBeGreaterThanOrEqual(0);
+  const record = items.nth(at);
   await record.getByTestId("evidence-dispute-open").click();
   await record.getByTestId("evidence-dispute-note").fill(`QA-SYNTHETIC contest ${RUN}: I was not on site that day`);
   await record.getByTestId("evidence-dispute-submit").click();
