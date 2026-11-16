@@ -23,6 +23,7 @@ import {
 } from "@/lib/training/training-model";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { listOrganizationMembers } from "@/lib/company/memberships";
 
 /**
  * Training & Certification section (v1) — one section, two audiences,
@@ -72,6 +73,7 @@ export async function TrainingRegister({
   notice?: string;
 }) {
   const t = await getTranslations("training");
+  const tDoc = await getTranslations("documents");
   const overview = await getTrainingOverview();
   if (overview.kind === "not-authed" || overview.kind === "error") return null;
 
@@ -97,7 +99,6 @@ export async function TrainingRegister({
     );
   }
 
-  const certs = await getCertificationRegister();
   const today = new Date();
   // One organization's register in one workspace (decision 0024): RLS lets a
   // person who belongs to several organizations read all of their courses,
@@ -106,6 +107,7 @@ export async function TrainingRegister({
   const workspace = await getWorkspaceContext();
   const activeOrganizationId =
     workspace.workspaces.find((w) => w.kind === "organization" && w.id === workspace.activeWorkspaceId)?.id ?? null;
+  const certs = await getCertificationRegister(activeOrganizationId);
   const programs = overview.programs.filter((p) => p.organizationId === activeOrganizationId);
   const managed = overview.assignments.filter(
     (a) => a.assigneeProfileId !== overview.viewerProfileId && a.organizationId === activeOrganizationId,
@@ -120,6 +122,17 @@ export async function TrainingRegister({
   // already read courses or managed assignments (the read view).
   const showOrganization =
     canCreate || programs.length > 0 || managed.length > 0;
+  // Who each managed assignment is for — the organization's own member list,
+  // labelled the way the document register labels its assignees.
+  const members =
+    managed.length > 0 && activeOrganizationId
+      ? await listOrganizationMembers(activeOrganizationId)
+      : null;
+  const assigneeLabel = new Map(
+    members?.kind === "ok"
+      ? members.members.map((m) => [m.profileId, m.fullName || m.email || ""] as const)
+      : [],
+  );
 
   return (
     <section
@@ -369,6 +382,11 @@ export async function TrainingRegister({
                   data-testid="training-managed-row"
                 >
                   <span className="text-sm text-text-primary">{a.programTitle}</span>
+                  {assigneeLabel.get(a.assigneeProfileId) ? (
+                    <span className="text-xs text-text-secondary" data-testid="training-managed-assignee">
+                      {assigneeLabel.get(a.assigneeProfileId)}
+                    </span>
+                  ) : null}
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(`status.${a.status}`)}
                   </span>
@@ -448,7 +466,11 @@ export async function TrainingRegister({
                     className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
                     data-testid="training-certificate-row"
                   >
-                    <span className="text-sm text-text-primary">{c.label}</span>
+                    <span className="text-sm text-text-primary">
+                      {c.documentTypeSlug
+                        ? tDoc(`types.${c.documentTypeSlug}` as never)
+                        : c.label}
+                    </span>
                     <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {c.expiresOn
                         ? `${t(`certificates.${state}`)} · ${c.expiresOn}`
