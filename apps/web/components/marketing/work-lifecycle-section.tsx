@@ -44,7 +44,8 @@ function guestHref(href: string): string | undefined {
 
 export async function WorkLifecycleSection({ audience }: { audience: "workers" | "companies" }) {
   const t = await getTranslations("workLifecycle");
-  // The note the public menus already print beside signed-in destinations.
+  // A signed-out visitor's stage link opens SIGN-UP (guestHref), so its note
+  // is the menus' existing "Sign up", not "For signed-in users".
   const tNav = await getTranslations("siteNav");
   const defs = audience === "workers" ? WORKER : COMPANY;
   const stages: LifecycleStage[] = defs.map((d) => ({
@@ -57,7 +58,7 @@ export async function WorkLifecycleSection({ audience }: { audience: "workers" |
     <WorkLifecycleGraph
       title={audience === "workers" ? t("title") : t("titleCompany")}
       openLabel={t("open")}
-      accountLabel={tNav("account")}
+      accountLabel={tNav("signUp")}
       listLabel={t("list")}
       pendingLabel={t("pending")}
       stages={stages}
