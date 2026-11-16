@@ -21,13 +21,21 @@ import { collectPageErrors, expectRenderedOnce } from "./render-once";
  * connection from earlier runs and continues from there. A-1b saves one
  * synthetic offer per run (offers are not metered against the open-need limit).
  *
- * A-6's accept proposes a booking to the synthetic worker, who never answers
- * it. The database caps a client's open proposals at 10 (and 30 per 24 h), so
+ * A-6's accept proposes a booking to the synthetic worker. A-6b (owner
+ * approval 2026-11-16) has the worker accept THIS run's proposal on the
+ * phone, and the client read it back as accepted: the placement's last step.
+ * The accepted booking stays history, like every accepted booking (the
+ * orders-bookings walk keeps its own the same way). The worker already holds
+ * an active engagement with the client from earlier runs, so the accept
+ * reuses it and mints no new one; this walk never ends that shared
+ * engagement (owner choice 2026-11-16: ending it is not isolated).
+ *
+ * The database caps a client's open proposals at 10 (and 30 per 24 h), so
  * runs that left theirs open made A-6 fail with "Too many open booking
- * proposals" (run 43724558463). The proposal THIS run created is withdrawn in
- * `afterAll` through the client's own Withdraw control, and only that one:
- * earlier runs' leftovers are a production data change for the owner to
- * decide, never this walk's.
+ * proposals" (run 43724558463). When A-6b did not complete, the proposal THIS
+ * run created is withdrawn in `afterAll` through the client's own Withdraw
+ * control, and only that one: earlier runs' leftovers are a production data
+ * change for the owner to decide, never this walk's.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const AGENCY = "QA-SYNTHETIC Agentūra";
@@ -425,6 +433,48 @@ test("A-6. the client answers the offer", async ({ browser }) => {
     console.info("[agency] no open offer to answer (decided in an earlier run)");
   }
   await close();
+});
+
+test("A-6b. the worker accepts this run's proposal, and the client sees it accepted", async ({ browser }) => {
+  expect(createdProposals.length, "A-6 created exactly one proposal this run").toBe(1);
+  const id = createdProposals[0];
+  const worker = await as(browser, "worker");
+  try {
+    await worker.page.goto("/lt/dashboard/bookings");
+    // A hidden streamed holder can carry a second copy outside <main> (run
+    // 40200190351); the visible row is the one inside it.
+    const row = worker.page.getByRole("main").getByTestId(`booking-${id}`);
+    await expect(row, "the proposal reached the worker").toBeVisible({ timeout: 30_000 });
+    await expect(row).toHaveAttribute("data-direction", "incoming");
+    await expect(row).toHaveAttribute("data-status", "proposed");
+    await row.getByTestId("booking-accept-open").click();
+    await expect(row.getByTestId("booking-accept-disclosure")).toBeVisible();
+    await row.getByTestId("booking-accept-confirm").click();
+    const responded = row.getByTestId("booking-responded");
+    const conflict = row.getByTestId("booking-conflict");
+    await expect(responded.or(conflict)).toBeVisible({ timeout: 30_000 });
+    if (await conflict.isVisible()) {
+      // An earlier accepted booking overlaps these dates: the product's own
+      // answer is one deliberate second action, recorded as such.
+      console.info("[agency] accept met a date clash; the worker accepts knowingly");
+      await row.getByTestId("booking-accept-anyway").click();
+      const notRecordable = row.getByTestId("booking-overlap-not-recordable");
+      await expect(responded.or(notRecordable)).toBeVisible({ timeout: 30_000 });
+      if (await notRecordable.isVisible()) throw new Error("the acknowledged overlap could not be recorded");
+    }
+  } finally {
+    await worker.close();
+  }
+  // The stored status, read back by the client on a fresh load.
+  const owner = await as(browser, "owner");
+  try {
+    await owner.page.goto("/lt/dashboard");
+    await workspace(owner.page, ALFA);
+    await expect.poll(() => proposalStatus(owner.page, id), { timeout: 60_000, intervals: [2_000, 5_000] }).toBe("accepted");
+    console.info(`[agency] the worker accepted this run's proposal ${id.slice(0, 8)}; the client reads it accepted`);
+  } finally {
+    await owner.close();
+  }
 });
 
 test("A-7. the agency sees the decision and talks to the client in one thread", async ({ browser }) => {
