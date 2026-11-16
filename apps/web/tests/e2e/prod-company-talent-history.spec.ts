@@ -636,7 +636,7 @@ test("T-2 (6.19). Gama finds the team in the network directory and sends a struc
 /** Open the team card's folded enquiry inbox and return it. */
 async function teamInbox(page: Page): Promise<Locator> {
   await page.goto("/lt/dashboard/company/people");
-  const card = page.getByTestId(`team-brigade-${teamId}`);
+  const card = page.getByRole("main").getByTestId(`team-brigade-${teamId}`);
   await expect(card).toBeVisible({ timeout: 30_000 });
   await settle(page);
   const fold = card.locator("details").filter({ has: page.locator('[data-testid^="team-enquir"]') }).first();
@@ -708,7 +708,7 @@ async function disbandSyntheticTeams(page: Page): Promise<number> {
     }
     if (!id) break;
     tried.add(id);
-    const card = page.getByTestId(`team-brigade-${id}`);
+    const card = page.getByRole("main").getByTestId(`team-brigade-${id}`);
     await card.getByTestId(`team-disband-${id}`).click();
     await card.getByTestId(`team-disband-confirm-${id}`).click();
     await expect(page.getByTestId("team-brigades-msg")).toBeVisible({ timeout: 30_000 });
