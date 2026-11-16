@@ -127,10 +127,10 @@ describe("the sentence, in every locale that carries the clash copy", () => {
     expect(en.match(/[.!?](\s|$)/g)).toHaveLength(1);
   });
 
-  it("Lithuanian speaks to the person as \"tu\"", () => {
+  it("Lithuanian speaks to the person as \"jūs\" (owner decision 2026-11-15)", () => {
     const lt = JSON.parse(read("messages/lt.json")).bookings.clash.notRecordable as string;
-    expect(lt).toMatch(/\bpriėmei\b/);
-    expect(lt).toMatch(/\bgali\b/);
-    expect(lt).not.toMatch(/\b(jūs|galite|priėmėte)\b/i);
+    expect(lt).toMatch(/\bpriėmėte\b/);
+    expect(lt).toMatch(/\bgalite\b/);
+    expect(lt).not.toMatch(/\b(tu|tavo|gali|priėmei)\b/i);
   });
 });

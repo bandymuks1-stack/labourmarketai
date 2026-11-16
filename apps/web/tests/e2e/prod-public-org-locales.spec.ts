@@ -510,7 +510,7 @@ test.describe("signed in as the synthetic owner of Alfa", () => {
     await expect(page.getByTestId("composer-input")).toBeVisible({ timeout: 30_000 });
     const text = "Pagaminome 500 medinių palečių ir norime jas parduoti.";
     // The product's own channel readback (conversation.chat.valueIntent.*).
-    const channel = /Tavo teigimu:|skelbimų lentoje|Atidaryti skelbimus|paslaugos pasiūlymą|Šito per platformą pasiūlyti negalima/g;
+    const channel = /Jūsų teigimu:|skelbimų lentoje|Atidaryti skelbimus|paslaugos pasiūlymą|Šito per platformą pasiūlyti negalima/g;
     const hits = async () => ((await page.locator("body").innerText()).match(channel) ?? []).length;
     // Count, not offset: starting a conversation folds the home intro, so the
     // page text SHRINKS and an offset into it cut the answer to its last word
@@ -527,7 +527,7 @@ test.describe("signed in as the synthetic owner of Alfa", () => {
     const shown = (await tail()).slice(-400).replace(/\s+/g, " ");
     console.info(`[value-channels] → ${shown}`);
     expect(answered, `the chat named a channel for the offer: ${shown}`).toBe(true);
-    expect(shown, "the offer was understood, not 'unclear'").not.toMatch(/Nesu tikras, ar kažką siūlai/);
+    expect(shown, "the offer was understood, not 'unclear'").not.toMatch(/Nesu tikras, ar kažką siūlote/);
     await ctx.close();
   });
 
