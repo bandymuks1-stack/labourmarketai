@@ -609,12 +609,22 @@ export type VerifiedCvWorkRow = {
 
 export type VerifiedCvLanguageRow = { readonly lang: string; readonly level: string };
 
+export type VerifiedCvEducationRow = {
+  readonly institutionName: string;
+  readonly programOrField: string | null;
+  readonly educationTypeSlug: string;
+  readonly startYear: number | null;
+  readonly endYear: number | null;
+  readonly isCurrent: boolean;
+};
+
 export type VerifiedCvGetData =
   | {
       readonly ok: true;
       readonly cv: {
         readonly workHistory: readonly VerifiedCvWorkRow[];
         readonly languages: readonly VerifiedCvLanguageRow[];
+        readonly education: readonly VerifiedCvEducationRow[];
       };
     }
   | { readonly ok: false; readonly code: "not_authenticated" | "no_worker" };
