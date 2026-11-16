@@ -64,6 +64,8 @@ async function workspace(page: Page, orgName: string): Promise<boolean> {
 }
 
 let requestId = "";
+/** The offer A-6 answered: A-7 reads the agency's placement line for exactly this one. */
+let offerId = "";
 /** Booking proposals this run's accept created (A-6), withdrawn in afterAll. */
 const createdProposals: string[] = [];
 
@@ -358,7 +360,11 @@ test("A-5. the agency sees the shared need and offers its person", async ({ brow
   await page.goto("/lt/dashboard");
   await workspace(page, AGENCY);
   await page.goto("/lt/dashboard/company/partners");
-  const row = page.getByTestId("agency-bridge-shared-row").first();
+  // This run's own shared need when A-4 shared one (its title carries RUN);
+  // only otherwise the earlier share, so an old row cannot stand in for it.
+  const mine = page.getByTestId("agency-bridge-shared-row").filter({ hasText: RUN });
+  const ownShare = requestId !== "" && (await mine.count()) > 0;
+  const row = ownShare ? mine.first() : page.getByTestId("agency-bridge-shared-row").first();
   await expect(row).toBeVisible({ timeout: 30_000 });
   const form = row.getByTestId("agency-bridge-offer-form");
   await expect(form, "the roster person can be offered").toBeVisible({ timeout: 20_000 });
@@ -370,7 +376,13 @@ test("A-5. the agency sees the shared need and offers its person", async ({ brow
   await form.getByTestId("agency-bridge-offer-submit").click();
   await page.waitForTimeout(5_000);
   const error = page.getByTestId("agency-bridge-error");
-  if (await error.isVisible().catch(() => false)) console.info(`[agency] offer answer: ${await error.innerText()}`);
+  if (await error.isVisible().catch(() => false)) {
+    const said = await error.innerText();
+    // On this run's own need the offer is new, so a refusal is a failure.
+    // On an earlier share the person may already be offered: logged only.
+    if (ownShare) throw new Error(`the agency's offer on this run's need was refused: ${said}`);
+    console.info(`[agency] offer answer (earlier share): ${said}`);
+  }
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message.slice(0, 160)));
   page.on("console", (m) => {
@@ -431,13 +443,23 @@ test("A-6. the client answers the offer", async ({ browser }) => {
   await expect(offers).toBeVisible({ timeout: 30_000 });
   const accept = offers.locator('[data-testid^="offer-accept-"]').first();
   if (await accept.isVisible().catch(() => false)) {
+    offerId = ((await accept.getAttribute("data-testid")) ?? "").replace(/^offer-accept-/, "");
+    expect(offerId, "the offer being answered has an id").not.toBe("");
     await accept.click();
     await page.waitForTimeout(5_000);
-    const said = offers.locator('p[role="alert"], [data-testid="offer-decision-not-ready"]').filter({ hasText: /\S/ }).first();
+    // The booking-proposal cap (#3397) answers in its own alert block.
+    const said = offers
+      .locator('[data-testid="offer-decision-limit"], p[role="alert"], [data-testid="offer-decision-not-ready"]')
+      .filter({ hasText: /\S/ })
+      .first();
     if (await said.isVisible().catch(() => false)) throw new Error(`the client's answer was refused: ${await said.innerText()}`);
-    // The decision re-renders the list; the stored status is the proof.
+    // The decision re-renders the list; the stored status of THIS offer is
+    // the proof, not any accepted offer left by an earlier run.
     await page.reload();
-    await expect(page.getByTestId("scouting-agency-offers").locator('[data-testid="scout-offer-status-accepted"]').first()).toBeVisible({ timeout: 30_000 });
+    await expect(
+      page.getByTestId("scouting-agency-offers").locator(`[data-offer-id="${offerId}"]`).getByTestId("scout-offer-status-accepted"),
+    ).toBeVisible({ timeout: 30_000 });
+    console.info(`[agency] accepted offer ${offerId.slice(0, 8)}`);
     const after = await openOutgoingProposalIds(page);
     if (before && after) for (const id of after) if (!before.has(id)) createdProposals.push(id);
     console.info(`[agency] proposals this run created: ${before && after ? createdProposals.length : "unknown (bookings not readable)"}`);
@@ -454,6 +476,14 @@ test("A-7. the agency sees the decision and talks to the client in one thread", 
   await page.goto("/lt/dashboard/company/partners");
   await expect(page.locator('[data-testid^="agency-bridge-decision-"]').first()).toBeVisible({ timeout: 30_000 });
   console.info(`[agency] decision: ${await page.locator('[data-testid^="agency-bridge-decision-"]').first().getAttribute("data-testid")}`);
+  if (offerId) {
+    // The placement this run's accept started, on the agency's own panel:
+    // the client accepted and the booking was proposed to the worker.
+    const placement = page.getByTestId(`agency-placement-${offerId}`);
+    await expect(placement, "the agency sees this run's placement").toBeVisible({ timeout: 30_000 });
+    await expect(placement.getByTestId("agency-placement-step-clientAccepted")).toBeVisible();
+    await expect(placement.getByTestId("agency-placement-step-workerProposed")).toBeVisible();
+  }
   if (OFFER_NOTIFICATIONS) {
     await page.getByTestId("notification-bell").first().click();
     await expect(
