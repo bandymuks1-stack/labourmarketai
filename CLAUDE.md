@@ -241,6 +241,16 @@ invented days, provenance and confirmation state visible inside it, roles withou
 zero. Never attribute an organization's records about other people to a leader. See
 `docs/DECISIONS/0025-one-person-one-continuous-professional-history.md`.
 
+## No interface noise (binding, decision 0032)
+
+Never add primitive, redundant or patronising interface text. That includes „Paskyros nereikia" /
+"No account needed" badges, instructions for obvious actions, repeated explanations, demonstration
+captions and other noise. Aim for professional, minimal, Apple/macOS-level design: short, clear
+function names, only information the user needs, and no new helper text without a real need. Keep
+legal, consent, security and essential action-consequence texts. The rule applies to every agent,
+every PR and every locale, and it never changes functionality. See
+`docs/DECISIONS/0032-no-interface-noise.md`.
+
 ## Internal validity rule (binding, owner P0 2026-10-22, all projects)
 
 An INTERNAL approval, owner decision, internal contract or temporary internal permission is valid

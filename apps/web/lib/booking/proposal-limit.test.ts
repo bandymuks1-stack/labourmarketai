@@ -3,6 +3,8 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { activeLocales, locales } from "@/lib/i18n/config";
+
 import { proposalLimitOf } from "./proposal-limit";
 
 const repo = path.resolve(__dirname, "../../../..");
@@ -58,4 +60,30 @@ describe("the employer's offer decision says which limit stopped it", () => {
     expect(buttons).toContain('href="/dashboard/bookings"');
     expect(buttons).toContain('data-testid="offer-decision-limit"');
   });
+});
+
+describe("the limit lines exist in every catalog (doctrine §2.4)", () => {
+  const keys = ["limitOpen", "limitDaily", "limitUnknown", "openBookings"] as const;
+  const decision = (locale: string): Record<string, string> => {
+    const catalog = JSON.parse(readFileSync(path.join(web, "messages", `${locale}.json`), "utf8"));
+    return catalog?.scoutingAgencyOffers?.decision ?? {};
+  };
+  const english = decision("en");
+
+  for (const locale of locales) {
+    it(`${locale} carries all four keys`, () => {
+      const lines = decision(locale);
+      for (const k of keys) expect(typeof lines[k], `${locale}.${k}`).toBe("string");
+    });
+  }
+
+  for (const locale of activeLocales.filter((l) => l !== "en")) {
+    it(`${locale} (active) says them in its own language`, () => {
+      const lines = decision(locale);
+      for (const k of keys) {
+        expect(lines[k]!.startsWith("[EN]"), `${locale}.${k}`).toBe(false);
+        expect(lines[k], `${locale}.${k}`).not.toBe(english[k]);
+      }
+    });
+  }
 });

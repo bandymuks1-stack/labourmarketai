@@ -20,6 +20,13 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * The partner door is a real request form (owner P0 2026-11-15, production
+ * audit F3: "Become a partner" opened /about, which holds no partner form or
+ * contact): `PARTNER_DOOR` and the partners goal open `/#request=partner`, a
+ * fourth request door, and `landing.requestDoors` gains its title, line and one
+ * field label. Moved: public-doors.ts, starting-contexts-band.tsx (its `/about`
+ * cast and comment) and the `lt`, `en`, `ru` landing namespaces.
+ *
  * No internal process notes in the UI (owner order P0 2026-11-15): the
  * "In preparation" roadmap badge `landing.conv.comingLabel` now states the plain
  * user-facing fact ("Not available yet"). Moved: the `lt`, `en`, `ru` landing
@@ -660,6 +667,19 @@ import { join } from "node:path";
  * exactly when same facts) and by reading the card's own table keys from
  * its source and pinning the declared key sets to them.
  *
+ * Formal address (owner decision 2026-11-15: "Jūs" in Lithuanian and "u" in
+ * Dutch are the default professional address; every language keeps a
+ * natural, respectful tone). It supersedes the informal "tu" order of
+ * 2026-10-28 below: Lithuanian moved back to jūs/jūsų, galite, pasirinkite …;
+ * Dutch to u/uw; the few Russian "ты" strings to "вы". The user's own words
+ * (chat bubbles, first-person example prompts) stay as written. Every key and
+ * every ICU placeholder / plural skeleton is unchanged; only wording moved.
+ * The regeneration moved EXACTLY SIX namespace hashes — `lt.landing`,
+ * `lt.hero`, `lt.livingMarketReview`, `lt.workEntryReview`,
+ * `lt.landingJourney`, `ru.landing` — and ZERO file hashes; `en.*` is
+ * byte-identical, which is the proof that no component, layout or English
+ * copy changed.
+ *
  * LT informal "tu" register (owner order 2026-10-28) — the Lithuanian UI is
  * unified to the informal singular address (tu/tavo/tau; gali, pasirink,
  * prisijunk …) instead of the formal plural (jūs/jūsų; galite, pasirinkite,
@@ -670,6 +690,30 @@ import { join } from "node:path";
  * `lt.landingJourney` — and ZERO file hashes; `en.*` and `ru.*` are
  * byte-identical, which is the proof that no component, layout or other
  * locale changed.
+ *
+ * Adverts in the visitor's language first (owner decision 2026-11-15: "the
+ * visitor's language first, then other suitable offers" — a sort priority,
+ * never a filter). `live-market-landing.ts` keeps the board's whole first page
+ * in the shared cached snapshot (key `live-market-landing-v3`) and exports the
+ * language test; `pickLandingVacancySample` takes the visitor's language and
+ * orders own-language rows first, every other rule unchanged; `focus-landing.tsx`
+ * makes that pick per visitor at render time. The band and the card are
+ * byte-identical. The regeneration moved EXACTLY TWO file hashes —
+ * `lib/market/live-market-landing.ts` and `app/[locale]/focus-landing/focus-landing.tsx`
+ * — and ZERO namespace hashes: no copy moved.
+ *
+ * A worker or contractor sentence can be sent without an account (owner P0
+ * 2026-11-15, misleading public paths, F4). The entry's reading now offers, FIRST,
+ * the request the page already takes signed out: a sentence about needing workers
+ * opens the public need form with the sentence as its description
+ * (`?description=…&from=landing_entry`), and a job for someone to do opens the
+ * project request on this page (`#request=project`). Sign-up stays, second, with
+ * `?say=`; "sign in to save your request" is said only when it is true. The
+ * button reuses the request block's own title (`landing.requestDoors.title`),
+ * handed to the entry by the server landing so the client still receives
+ * `landing.entry` only; no copy moved. The regeneration moved EXACTLY TWO file
+ * hashes — `components/marketing/public-entry.tsx` and
+ * `app/[locale]/focus-landing/focus-landing.tsx` — and ZERO namespace hashes.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.

@@ -278,6 +278,16 @@ into a fact.
 
 ---
 
+## No interface noise (binding, decision 0032, owner rule 2026-11-15)
+
+No primitive, redundant, self-evident or patronising text in the user interface, in any locale. That
+includes „Paskyros nereikia" / "No account needed", instructions for obvious actions, repeated
+explanations, demonstration captions and other informational noise. The bar is professional,
+minimal, Apple/macOS-level design: short clear function names, only what the user needs, no new
+helper text without a real need. Legal, consent, security and essential action-consequence texts
+stay. Reviews apply this as a criterion (`.claude/skills/code-review/SKILL.md`). Full text:
+`docs/DECISIONS/0032-no-interface-noise.md`.
+
 ## Auto-commit policy
 
 After completing any work session, agents MUST automatically commit and push 

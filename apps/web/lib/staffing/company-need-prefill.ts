@@ -105,3 +105,53 @@ export function parseCompanyNeedPrefill(
 
   return out;
 }
+
+/**
+ * The sign-in return value cannot be longer than this (lib/auth/redirect.ts drops
+ * a longer `next` and sends the person to the dashboard instead).
+ */
+export const COMPANY_NEED_RETURN_MAX_CHARS = 1000;
+
+/**
+ * Where to come back to after signing in or signing up from the public form,
+ * with the person's typed answers as the form's own prefill (employer path P0
+ * 2026-11-15). Only the fields `parseCompanyNeedPrefill` reads come along, and the
+ * page's own `from`; never a name, an e-mail address or a phone number. The
+ * description is shortened until the whole value fits the sign-in limit, so a
+ * long text never costs the person the return.
+ */
+export function companyNeedReturnPath(
+  locale: string,
+  read: (name: string) => string,
+  currentSearch = "",
+): string {
+  const base = `/${locale}/company-need`;
+  const p = new URLSearchParams();
+  const set = (key: string, value: string) => {
+    const v = value.trim();
+    if (v) p.set(key, v);
+  };
+  set("country", read("country"));
+  const workers = read("number_of_workers").trim();
+  if (workers && workers !== "1") set("number_of_workers", workers);
+  set("profession", read("profession"));
+  set("expected_duration", read("expected_duration").slice(0, MAX_DURATION_CHARS));
+  const engagement = read("engagement_model").trim();
+  if (engagement && engagement !== "employment") set("engagement", engagement);
+  const entry = new URLSearchParams(currentSearch).get("from")?.trim();
+  if (entry && COMPANY_NEED_ENTRY.test(entry)) p.set("from", entry);
+
+  const build = (description: string) => {
+    const q = new URLSearchParams(p);
+    if (description) q.set("description", description);
+    const query = q.toString();
+    return query ? `${base}?${query}` : base;
+  };
+  let description = read("description").trim().slice(0, MAX_DESCRIPTION_CHARS);
+  let value = build(description);
+  while (value.length > COMPANY_NEED_RETURN_MAX_CHARS && description.length > 0) {
+    description = description.slice(0, Math.floor(description.length * 0.8)).trim();
+    value = build(description);
+  }
+  return value;
+}

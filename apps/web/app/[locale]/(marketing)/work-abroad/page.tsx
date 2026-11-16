@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { Link } from "@/lib/i18n/navigation";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
+import { WORKER_PROFILE_DOOR_HREF } from "@/lib/marketing/worker-profile-door";
 
 export async function generateMetadata({
   params,
@@ -117,10 +118,11 @@ export default async function WorkAbroadPage({
 
       <div className="mt-8 flex flex-wrap gap-3">
         {/* Public visitors go to signup (a real entry), not straight into the
-            auth-walled /onboarding redirect bounce. AuthCtaLink so the CTA
+            auth-walled /onboarding redirect bounce; sign-up returns to the one
+            profile builder (the worker profile door, F6). AuthCtaLink so the CTA
             crosses to the app host from apex (PKCE-safe OAuth origin). */}
         <AuthCtaLink
-          relPath={`/${locale}/auth/signup`}
+          relPath={`/${locale}${WORKER_PROFILE_DOOR_HREF}`}
           className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-text-on-brand hover:opacity-90"
         >
           {t("ctaProfile")}

@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { collectPageErrors, expectRenderedOnce } from "./render-once";
 
 import {
   BASE,
@@ -297,7 +298,10 @@ test("T-4. one invited person accepts and is in the team; the other declines and
 test("T-5. the company sees its team with the member who accepted, and both of its workers", async () => {
   expect(s.teamId, "T-3 created the team").toBeTruthy();
   const co = as(CO);
+  const errors = collectPageErrors(co);
   await co.goto(`${BASE}/en/dashboard/company/people`);
+  // Exactly once, with evidence on a duplicate (the intermittent fault seen here).
+  await expectRenderedOnce(co, `team-brigade-${s.teamId}`, errors, "T-5");
   const card = co.getByTestId(`team-brigade-${s.teamId}`);
   await expect(card).toBeVisible({ timeout: 30_000 });
   await expect(card, "the member who accepted is on the team").toContainText(W1_NAME);
