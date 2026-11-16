@@ -1,4 +1,5 @@
-import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
+import { clickUntilVisible } from "./click-until-visible";
 
 import { verifyCompanyAsLocalAdmin } from "./isolated-web-a-helpers";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
@@ -198,13 +199,6 @@ async function as(browser: Browser, address: string): Promise<{ page: Page; clos
 
 /** Click until the expected result shows: a click that lands before the page
  *  hydrated is a silent no-op, so the click is retried, never assumed. */
-async function clickUntil(target: Locator, result: Locator, timeout = 60_000): Promise<void> {
-  await expect(async () => {
-    if (!(await result.isVisible().catch(() => false))) await target.click({ timeout: 5_000 });
-    await expect(result).toBeVisible({ timeout: 5_000 });
-  }).toPass({ timeout });
-}
-
 /** Everything the main region renders, once the page's own content streamed in. */
 async function mainText(page: Page): Promise<string> {
   const main = page.getByRole("main");
@@ -235,7 +229,7 @@ async function newDiscoverableWorker(browser: Browser, address: string, name: st
   await page.goto(`${BASE}/en/dashboard/privacy#visibility`);
   const section = page.getByTestId("privacy-visibility");
   await expect(section).toBeVisible({ timeout: 30_000 });
-  await clickUntil(section.getByTestId("discoverability-open"), section.getByTestId("discoverability-grant"));
+  await clickUntilVisible(section.getByTestId("discoverability-open"), section.getByTestId("discoverability-grant"));
   await section.getByTestId("discoverability-grant").click();
   await expect(section.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
   return page;
@@ -249,7 +243,7 @@ async function recordWork(page: Page, text: string): Promise<void> {
   const box = main.getByTestId("journal-quick-record-text");
   await expect(box).toBeVisible({ timeout: 60_000 });
   await box.fill(text);
-  await clickUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  await clickUntilVisible(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
   await main.getByTestId("worklog-save").click();
   await main.getByTestId("worklog-confirm").click();
   const done = main.getByTestId("worklog-done");
@@ -569,16 +563,17 @@ test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
   // The button sits in the entry's native <details>; a re-render of the row
   // (its `open` is not React state) closes it again, so every attempt opens
   // it first. Opening it once before the retries raced with that re-render.
-  await expect(async () => {
-    if (!(await rerunResult.isVisible().catch(() => false))) {
-      await page
+  await clickUntilVisible(rerun, rerunResult, {
+    timeout: 60_000,
+    what: "the re-run result",
+    prepare: () =>
+      page
         .getByTestId(`journal-entry-more-${state.tilerEntry}`)
         .first()
-        .evaluate((d) => ((d as HTMLDetailsElement).open = true));
-      await rerun.click({ timeout: 5_000 });
-    }
-    await expect(rerunResult).toBeVisible({ timeout: 5_000 });
-  }).toPass({ timeout: 60_000 });
+        .evaluate((d) => {
+          (d as HTMLDetailsElement).open = true;
+        }),
+  });
   await expect(page.getByTestId(`journal-entry-reprocess-failed-${state.tilerEntry}`)).toHaveCount(0);
   await expect(page.getByTestId(`journal-entry-reprocess-error-${state.tilerEntry}`)).toHaveCount(0);
   links = await entryLinks(state.tilerEntry);
