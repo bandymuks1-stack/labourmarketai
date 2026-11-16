@@ -9941,6 +9941,9 @@
       "invites": "Einladungs- und Benachrichtigungs-E-Mails",
       "invitesOn": "an",
       "invitesOff": "AUS – wird separat eingeschaltet: INVITE_EMAIL_PROVIDER=smtp und ein Testversand"
+    },
+    "alerts": {
+      "title": "Inhaber-Benachrichtigungen und Push-Mitteilungen"
     }
   },
   "adminMetrics": {

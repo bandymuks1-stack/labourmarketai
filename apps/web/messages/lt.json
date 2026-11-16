@@ -9941,6 +9941,9 @@
       "invites": "Kvietimų ir pranešimų laiškai",
       "invitesOn": "įjungti",
       "invitesOff": "IŠJUNGTI – įjungiami atskirai: INVITE_EMAIL_PROVIDER=smtp ir vienas bandomasis siuntimas"
+    },
+    "alerts": {
+      "title": "Savininko įspėjimai ir pranešimai įrenginyje"
     }
   },
   "adminMetrics": {

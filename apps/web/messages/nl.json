@@ -9941,6 +9941,9 @@
       "invites": "Uitnodigings- en meldingsmails",
       "invitesOn": "aan",
       "invitesOff": "UIT – wordt apart ingeschakeld: INVITE_EMAIL_PROVIDER=smtp en één testverzending"
+    },
+    "alerts": {
+      "title": "Eigenaarsmeldingen en pushmeldingen"
     }
   },
   "adminMetrics": {

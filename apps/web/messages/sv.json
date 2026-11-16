@@ -9941,6 +9941,9 @@
       "invites": "Inbjudnings- och aviseringsmejl",
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp och ett testutskick"
+    },
+    "alerts": {
+      "title": "Ägarvarningar och pushnotiser"
     }
   },
   "adminMetrics": {

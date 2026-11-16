@@ -9941,6 +9941,9 @@
       "invites": "E-maile z zaproszeniami i powiadomieniami",
       "invitesOn": "włączone",
       "invitesOff": "WYŁĄCZONE – włączane osobno: INVITE_EMAIL_PROVIDER=smtp i jedna wysyłka testowa"
+    },
+    "alerts": {
+      "title": "Alerty dla właściciela i powiadomienia push"
     }
   },
   "adminMetrics": {

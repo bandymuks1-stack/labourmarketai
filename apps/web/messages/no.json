@@ -7882,6 +7882,9 @@
       "invites": "Invitasjons- og varslings-e-post",
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp og én testsending"
+    },
+    "alerts": {
+      "title": "Eiervarsler og pushvarsler"
     }
   },
   "historyDuplicates": {
