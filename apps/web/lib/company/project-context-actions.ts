@@ -46,7 +46,7 @@ export type CreateProjectContextState =
        *  capability matrix (a member) or by the row-level policy (a manager,
        *  42501: `projects_insert` is still `owns_company`, owner/admin only).
        *  Named, so the form can say who can grant it (SEP-7). */
-      code: "no_company" | "not_authorized" | "invalid_name" | "error";
+      code: "no_company" | "not_authorized" | "invalid_name" | "country_required" | "error";
       message?: string;
     };
 
@@ -62,6 +62,7 @@ export async function createProjectContextAction(
   const locale = String(formData.get("locale") ?? "lt");
   const name = String(formData.get("name") ?? "").trim();
   const location = String(formData.get("location") ?? "").trim().slice(0, FIELD_MAX) || null;
+  const country = String(formData.get("country") ?? "").trim() || null;
   const clientName =
     String(formData.get("client_name") ?? "").trim().slice(0, FIELD_MAX) || null;
 
@@ -95,9 +96,11 @@ export async function createProjectContextAction(
   const created = await insertProjectForCompany(supabase, company.companyId, {
     title: name,
     city: location,
+    country,
   });
   if (!created.ok) {
     if (created.reason === "invalid_title") return { ok: false, code: "invalid_name" };
+    if (created.reason === "country_required") return { ok: false, code: "country_required" };
     // 42501: the row-level policy refused the insert. `projects_insert` is
     // `owns_company(company_id)` — the creator or an active owner/admin
     // membership — so a MANAGER the matrix lets create projects is refused

@@ -1995,6 +1995,10 @@
           "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
+    },
+    "create": {
+      "countryLabel": "Land",
+      "errorCountry": "Velg landet der prosjektets sted ligger."
     }
   },
   "projectOps": {
@@ -3875,7 +3879,9 @@
         "supplyTeamSize": "Hvor mange folk dere har",
         "supplyLocation": "Hvor de kan arbeide",
         "demandCountry": "Land der arbeidet utføres",
-        "demandCountryPlaceholder": "f.eks. Sverige eller SE"
+        "demandCountryPlaceholder": "f.eks. Sverige eller SE",
+        "projectCountry": "Land",
+        "projectCountryPlaceholder": "f.eks. Sverige eller SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3905,7 +3911,8 @@
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
         "errorOpenNeedLimitUpgrade": "Gratisplanen til denne organisasjonen tillater 1 aktiv stilling. Lukk én, eller aktiver Organisasjon-planen (99 €/måned) i organisasjonskontoen.",
-        "errorOpenNeedLimitIndividual": "Denne organisasjonen har nådd grensen for aktive stillinger i planen sin. Ingenting ble belastet eller endret. Kontakt oss."
+        "errorOpenNeedLimitIndividual": "Denne organisasjonen har nådd grensen for aktive stillinger i planen sin. Ingenting ble belastet eller endret. Kontakt oss.",
+        "errorCountryRequired": "Oppgi stedets land (navn eller kode, f.eks. Sverige eller SE)."
       },
       "urgency": {
         "flexible": "Fleksibel",
@@ -8079,6 +8086,12 @@
       "auth": "[EN] Please sign in again.",
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
+    }
+  },
+  "companyOps": {
+    "createProject": {
+      "countryLabel": "Land",
+      "errorCountry": "Velg landet der prosjektets sted ligger."
     }
   }
 }

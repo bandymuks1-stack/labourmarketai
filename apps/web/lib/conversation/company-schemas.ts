@@ -221,6 +221,10 @@ export const educationAssignLearnerSchema = z.object({
 export const companyCreateProjectSchema = z.object({
   title: z.string().trim().min(2).max(120),
   city: z.string().trim().max(120).nullable().optional(),
+  /** ISO-3166 alpha-2 (or a name the core resolves); the canonical core
+   *  requires it when a city is given and refuses a value that is not a
+   *  country, so it is not narrowed here. */
+  country: z.string().trim().min(1).max(80).nullable().optional(),
 });
 
 /** CLIENT: the decision on an agency's candidate offer (canonical:

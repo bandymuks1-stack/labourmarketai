@@ -1,4 +1,5 @@
 import { runAutoMatchForDemand } from "@/lib/scouting/auto-match";
+import { resolveCountryCode } from "@/lib/location/country-model";
 import "server-only";
 
 import { countedOnce } from "@/lib/journal/counted-once";
@@ -539,11 +540,29 @@ const projectCreateFields = z
   .object({
     title: z.string().trim().min(PROJECT_TITLE_MIN).max(PROJECT_TITLE_MAX),
     city: z.string().trim().min(1).max(200).nullish(),
+    /** ISO-3166 alpha-2 (or a country name) of the project's place. Required
+     *  when `city` is given; the draft names it as missing otherwise. */
+    country: z.string().trim().min(2).max(80).nullish(),
   })
   .strict();
 
 function normalizedProject(d: z.infer<typeof projectCreateFields>): Record<string, unknown> {
-  return { title: d.title.trim(), city: d.city?.trim() || null };
+  return { title: d.title.trim(), city: d.city?.trim() || null, country: resolveCountryCode(d.country ?? null) };
+}
+
+/** A place without a country: the canonical core refuses it, so the draft says
+ *  what to ask before minting a token (owner decision 2026-11-12, J-1). */
+function projectCountryMissing(d: z.infer<typeof projectCreateFields>): ExecResult | null {
+  const resolved = resolveCountryCode(d.country ?? null);
+  if ((d.country?.trim() && !resolved) || (d.city?.trim() && !resolved)) {
+    return {
+      ok: false,
+      code: "country_required",
+      missing: ["country"],
+      message: "A project with a place needs the country it is in (ISO-3166 alpha-2 `country`). Ask the person; nothing was drafted.",
+    };
+  }
+  return null;
 }
 
 const projectFingerprint = (organizationId: string) => `project-create:${organizationId}`;
@@ -562,7 +581,8 @@ const projectCreateDraft: CapabilityDescriptor = {
   kind: "draft",
   title: "Draft a new project",
   description:
-    "Validates a new project (title, optional city) for the organization the " +
+    "Validates a new project (title, optional city, and `country`: ISO-3166 " +
+    "alpha-2, REQUIRED when a city is given; ask, never guess) for the organization the " +
     "caller is acting for and returns a preview naming that organization plus " +
     "a one-time confirmation token. NOTHING is created. The project starts as " +
     "a draft; confirming requires project.create_confirm with this exact input " +
@@ -575,6 +595,8 @@ const projectCreateDraft: CapabilityDescriptor = {
     const employer = await employerOrRefusal(caller);
     if (!employer.ok) return demandContextRefusal(employer.reason);
     if (!hasOrganizationCapability(employer.role, "manage-projects")) return manageProjectsRefusal();
+    const missing = projectCountryMissing(draft);
+    if (missing) return missing;
     const token = mintCapabilityConfirmation({
       actionId: "project.create_confirm",
       input: normalizedProject(draft),
@@ -632,8 +654,10 @@ const projectCreateConfirm: CapabilityDescriptor = {
     const created = await insertProjectForCompany(caller.supabase, employer.companyId, {
       title: n.title as string,
       city: (n.city as string | null) ?? null,
+      country: (n.country as string | null) ?? null,
     });
     if (!created.ok) {
+      if (created.reason === "country_required") return projectCountryMissing(draft) ?? { ok: false, code: "country_required" };
       if (created.code && PG_UNDEFINED.has(created.code)) {
         return { ok: false, code: "needs_migration", message: "Projects are not enabled on this environment." };
       }
