@@ -562,11 +562,23 @@ test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
 
   // It STAYS withdrawn: a re-run of recognition over the same text.
   await page.goto(`${BASE}/en/dashboard/journal`);
-  await page.getByTestId(`journal-entry-more-${state.tilerEntry}`).first().evaluate((d) => ((d as HTMLDetailsElement).open = true));
   // The re-run must really HAPPEN: only the success result counts (a failed
   // run would only re-check the earlier unlink, proving nothing).
   const rerun = page.getByTestId(`journal-entry-reprocess-${state.tilerEntry}`).first();
-  await clickUntil(rerun, page.getByTestId(`journal-entry-reprocess-result-${state.tilerEntry}`).first());
+  const rerunResult = page.getByTestId(`journal-entry-reprocess-result-${state.tilerEntry}`).first();
+  // The button sits in the entry's native <details>; a re-render of the row
+  // (its `open` is not React state) closes it again, so every attempt opens
+  // it first. Opening it once before the retries raced with that re-render.
+  await expect(async () => {
+    if (!(await rerunResult.isVisible().catch(() => false))) {
+      await page
+        .getByTestId(`journal-entry-more-${state.tilerEntry}`)
+        .first()
+        .evaluate((d) => ((d as HTMLDetailsElement).open = true));
+      await rerun.click({ timeout: 5_000 });
+    }
+    await expect(rerunResult).toBeVisible({ timeout: 5_000 });
+  }).toPass({ timeout: 60_000 });
   await expect(page.getByTestId(`journal-entry-reprocess-failed-${state.tilerEntry}`)).toHaveCount(0);
   await expect(page.getByTestId(`journal-entry-reprocess-error-${state.tilerEntry}`)).toHaveCount(0);
   links = await entryLinks(state.tilerEntry);
