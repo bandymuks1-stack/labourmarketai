@@ -800,7 +800,10 @@ test("EX-6. W1 contests one of R1's imported records on their own profile, the r
   await record.getByTestId("evidence-dispute-open").click();
   await record.getByTestId("evidence-dispute-note").fill(`QA-SYNTHETIC contest ${RUN}: I was not on site that day`);
   await record.getByTestId("evidence-dispute-submit").click();
-  await expect(record.getByTestId("evidence-dispute-recorded")).toBeVisible({ timeout: 60_000 });
+  // The action revalidates the profile: on success the record re-renders as
+  // "disputed by you" and the form (with its confirmation) is gone, so the
+  // stored event below is the proof; a refusal would stay on screen.
+  await expect(record.getByTestId("evidence-dispute-error")).toHaveCount(0);
 
   const events = () =>
     sql<{ record_id: string; event_type: string; actor_profile_id: string; actor_role: string | null }>(
@@ -842,7 +845,7 @@ test("EX-6. W1 contests one of R1's imported records on their own profile, the r
   expect(asOwner.ok, `the owner's write is refused (${asOwner.status})`).toBe(false);
 
   await marked.getByTestId("evidence-dispute-withdraw").click();
-  await expect(marked.getByTestId("evidence-dispute-withdrawn")).toBeVisible({ timeout: 60_000 });
+  // Revalidated the same way: the stored event is the proof.
   await expect.poll(() => events().map((e) => e.event_type), { timeout: 30_000 }).toEqual(["disputed", "dispute_withdrawn"]);
   await w1.reload();
   const list2 = w1.getByRole("main").getByTestId("organization-evidence-records");
