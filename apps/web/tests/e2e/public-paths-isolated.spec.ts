@@ -168,7 +168,9 @@ async function panelLink(page: Page, intentId: string, link: PublicIntentLink): 
 
   if (link.account) {
     expectNoAuth(seen.slice(0, beforeClick), "the workspace link's click");
-    await page.waitForURL(/\/en\/auth\/login/, { timeout: 60_000 });
+    // A newcomer's first step for some workspace links is an account: those
+    // carry a guest door, sign-up with the same `next` (N3, "Create a free CV").
+    await page.waitForURL(link.guestHref ? /\/en\/auth\/signup/ : /\/en\/auth\/login/, { timeout: 60_000 });
     sameDestination(nextOf(page.url()), link.href);
     return;
   }
@@ -272,12 +274,22 @@ async function workerIntake(page: Page): Promise<void> {
   await page.getByTestId("intake-bridge").locator("a").first().click();
   await page.waitForURL(/\/en\/auth\/signup/, { timeout: 60_000 });
   await signUpHere(page, "intake");
-  await expect
-    .poll(async () => {
-      const held = await pageHolds(page);
-      return held.includes(name) || held.includes(note);
-    }, { message: "the typed intake survives sign-up", timeout: 30_000 })
-    .toBe(true);
+  // The intake's sign-up returns to the profile builder (#3415): onboarding
+  // first, then the builder, where the typed intake waits in the composer for
+  // the person to send. It is not shown on the onboarding step itself.
+  await expect(page).toHaveURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await page.getByTestId("onboarding-intent-work").click();
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill(name);
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+  const composer = page.locator('[data-testid="profile-text-flow-compose"] textarea').first();
+  await expect(composer, "the typed intake survives sign-up, in the profile composer").toHaveValue(
+    new RegExp(`${name}[\\s\\S]*${note}`),
+    { timeout: 30_000 },
+  );
 }
 
 async function calculator(page: Page): Promise<void> {
@@ -313,8 +325,11 @@ async function assistant(page: Page): Promise<void> {
   await expect(link).toBeVisible({ timeout: 30_000 });
   expectNoAuth(seen, "the assistant link's click");
   await link.click();
-  await page.waitForURL(/\/en\/auth\/login/, { timeout: 60_000 });
-  sameDestination(nextOf(page.url()), "/dashboard");
+  // Signed out, the assistant link opens the home page's question box (#3409,
+  // ASSISTANT_GUEST_HREF); only a signed-in visitor goes to the conversation home.
+  await page.waitForURL((u) => u.hash === "#find" && /^\/en\/?$/.test(u.pathname), { timeout: 60_000 });
+  await expect(page.locator("#find"), "the question box is on the page").toBeVisible({ timeout: 30_000 });
+  expectNoAuth(seen, "the question box");
 }
 
 async function education(page: Page): Promise<void> {

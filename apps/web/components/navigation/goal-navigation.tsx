@@ -63,6 +63,7 @@ export async function GoalNavigation({
           // A link to a fragment of the landing is a fragment of THIS page
           // here: a plain in-page link, announced by the browser.
           href: link.href.startsWith("/#") ? link.href.slice(1) : link.href,
+          guestHref: link.guestHref,
           label: t(`links.${link.id}`),
           // Only a card that asks for sign-in carries a note. The "No account
           // required" badge on every other card was removed as interface noise

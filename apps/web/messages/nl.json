@@ -10573,7 +10573,7 @@
   },
   "workerIntake": {
     "title": "Werknemersintake",
-    "subtitle": "Vertel ons je vak en beschikbaarheid om je gegevens te controleren. Dit formulier slaat niets op — maak je gratis profiel aan en vul je gegevens daar in, zodat werkgevers je vinden.",
+    "subtitle": "Hier wordt niets gepubliceerd. Werkgevers vinden je via een gratis profiel; wat je hier invult, gaat na het aanmelden mee naar dat profiel.",
     "fullName": "Volledige naam",
     "profession": "Sector & type werk",
     "professionPlaceholder": "Kies je sector en type werk",
@@ -13960,7 +13960,7 @@
         "csv": "CSV downloaden",
         "print": "Afdrukken / opslaan als pdf",
         "ctaTitle": "Maak van deze raming een echte personeelsaanvraag",
-        "ctaBody": "Dezelfde ramingsbouwer zit in het behoefteformulier van LabourMarket.ai. Met een account kun je een raming aan een gestructureerde personeelsaanvraag koppelen; zonder account beschrijf je je behoefte via het publieke formulier.",
+        "ctaBody": "Met een account gaan het aantal werknemers en het land mee naar de personeelsaanvraag; de rest van de raming kunt u daar aanvullen. Zonder account gebruikt u het publieke formulier.",
         "ctaDashboard": "Personeelsbehoefte aanmaken (met account)",
         "ctaCompanyNeed": "Behoefte beschrijven zonder account",
         "ctaCompanyNeedHelp": "Het publieke formulier ontvangt alleen je aantal werknemers en land — geen prijzen en geen beschrijvingen."

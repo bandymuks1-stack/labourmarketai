@@ -6,7 +6,9 @@ import { expect, test } from "@playwright/test";
  *
  * The audit: the menu marked "Create a free CV" (`/create-cv`) "no account
  * needed", yet that page's only action is sign-up. The entry now goes where
- * that sign-up leads, the profile builder, and is marked as needing sign-in.
+ * that sign-up leads, the profile builder, and is marked as needing an
+ * account. A signed-out visitor is offered sign-up first (N3, 2026-11-16),
+ * with the builder kept as `next`; a signed-in person goes straight there.
  * Public pages only, no account and no database. A signed-out visitor who
  * follows the entry is sent to sign in with `?next=` kept by the middleware
  * (guarded in `lib/guards/auth-middleware-session.test.ts`); here the sign-in
@@ -17,15 +19,15 @@ const BUILDER = "/dashboard/profile";
 
 for (const locale of ["lt", "en"] as const) {
   test.describe(`${locale}: the menu's Create a free CV entry`, () => {
-    test("links into the profile builder, not to a page that only offers sign-up", async ({ page }) => {
+    test("signed out, it opens sign-up that returns to the profile builder (N3)", async ({ page }) => {
       await page.setViewportSize({ width: 1440, height: 900 });
       await page.goto(`/${locale}/work-opportunities`);
       await page.getByTestId("intent-toggle-work").click();
       const panel = page.getByTestId("intent-column-work");
       await expect(panel).toBeVisible();
-      const entry = panel.locator(`a[href="/${locale}${BUILDER}"]`);
-      await expect(entry).toHaveCount(1);
-      await expect(entry.locator("svg"), "carries the sign-in mark").toHaveCount(1);
+      const entry = page.getByTestId("intent-link-work-createCv");
+      await expect(entry).toHaveAttribute("href", `/${locale}/auth/signup?next=${encodeURIComponent(BUILDER)}`);
+      await expect(entry.locator("svg"), "carries the account mark").toHaveCount(1);
       await expect(panel.locator(`a[href="/${locale}/create-cv"]`)).toHaveCount(0);
     });
 

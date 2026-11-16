@@ -10573,7 +10573,7 @@
   },
   "workerIntake": {
     "title": "Darbuotojo anketa",
-    "subtitle": "Nurodyk savo amatą ir kada esi laisvas, kad pasitikrintum duomenis. Ši forma nieko neišsaugo — kad tave rastų darbdaviai, susikurk nemokamą profilį ir įrašyk duomenis jame.",
+    "subtitle": "Čia niekas neskelbiama. Darbdaviai tave randa per nemokamą profilį, o tai, ką čia įrašysi, po registracijos bus perkelta į jį.",
     "fullName": "Vardas ir pavardė",
     "profession": "Sektorius ir darbo tipas",
     "professionPlaceholder": "Pasirink sektorių ir darbo tipą",
@@ -13960,7 +13960,7 @@
         "csv": "Atsisiųsti CSV",
         "print": "Spausdinti / išsaugoti PDF",
         "ctaTitle": "Paversk šią sąmatą tikru darbuotojų poreikiu",
-        "ctaBody": "Ta pati sąmatos skaičiuoklė veikia LabourMarket.ai poreikio formoje. Su paskyra sąmatą gali pridėti prie struktūruoto darbuotojų poreikio; be paskyros — aprašyk poreikį viešoje formoje.",
+        "ctaBody": "Su paskyra darbuotojų skaičius ir šalis perkeliami į darbuotojų poreikį; likusią sąmatos dalį galite įvesti ten. Be paskyros — naudokite viešąją formą.",
         "ctaDashboard": "Sukurti darbo poreikį (su paskyra)",
         "ctaCompanyNeed": "Aprašyti poreikį be paskyros",
         "ctaCompanyNeedHelp": "Viešoji forma gauna tik darbuotojų skaičių ir šalį — jokios kainos ir aprašymai neperduodami."

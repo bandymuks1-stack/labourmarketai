@@ -10573,7 +10573,7 @@
   },
   "workerIntake": {
     "title": "Arbeitskraft-Aufnahme",
-    "subtitle": "Nennen Sie uns Ihr Gewerk und Ihre Verfügbarkeit, um Ihre Angaben zu prüfen. Dieses Formular speichert nichts — damit Arbeitgeber Sie finden, erstellen Sie Ihr kostenloses Profil und tragen Sie Ihre Angaben dort ein.",
+    "subtitle": "Hier wird nichts veröffentlicht. Arbeitgeber finden Sie über ein kostenloses Profil; was Sie hier eingeben, wird nach der Registrierung dorthin übernommen.",
     "fullName": "Vollständiger Name",
     "profession": "Branche & Arbeitsart",
     "professionPlaceholder": "Wählen Sie Branche und Arbeitsart",
@@ -13960,7 +13960,7 @@
         "csv": "CSV herunterladen",
         "print": "Drucken / als PDF speichern",
         "ctaTitle": "Machen Sie aus dieser Schätzung eine echte Personalanfrage",
-        "ctaBody": "Derselbe Schätzungs-Baustein steckt im Bedarfsformular von LabourMarket.ai. Mit Konto können Sie eine Schätzung an eine strukturierte Personalanfrage anhängen; ohne Konto beschreiben Sie Ihren Bedarf im öffentlichen Formular.",
+        "ctaBody": "Mit Konto werden Arbeitskräftezahl und Land in die Personalanfrage übernommen; den Rest der Schätzung können Sie dort ergänzen. Ohne Konto nutzen Sie das öffentliche Formular.",
         "ctaDashboard": "Personalbedarf anlegen (mit Konto)",
         "ctaCompanyNeed": "Bedarf ohne Konto beschreiben",
         "ctaCompanyNeedHelp": "Das öffentliche Formular erhält nur Ihre Arbeitskräftezahl und das Land — keine Preise und keine Beschreibungen."

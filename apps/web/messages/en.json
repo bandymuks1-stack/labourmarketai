@@ -10573,7 +10573,7 @@
   },
   "workerIntake": {
     "title": "Worker intake",
-    "subtitle": "Tell us your trade and availability to check your details. This form saves nothing — to be found by employers, create your free profile and add them there.",
+    "subtitle": "Nothing here is published. Employers find you through a free profile, and what you type here is carried into it after sign-up.",
     "fullName": "Full name",
     "profession": "Sector & work type",
     "professionPlaceholder": "Choose your sector and work type",
@@ -13960,7 +13960,7 @@
         "csv": "Download CSV",
         "print": "Print / save as PDF",
         "ctaTitle": "Turn this estimate into a real worker request",
-        "ctaBody": "The same estimate builder lives inside the LabourMarket.ai demand form. With an account you can attach an estimate to a structured worker request; without one, you can describe your need on the public form.",
+        "ctaBody": "With an account, your worker count and country carry over to the worker request; you can add the rest of the estimate there. Without an account, use the public form.",
         "ctaDashboard": "Create a work need (with account)",
         "ctaCompanyNeed": "Describe a need without an account",
         "ctaCompanyNeedHelp": "The public form receives only your worker count and country — no prices and no descriptions are passed."

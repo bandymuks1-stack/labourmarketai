@@ -129,7 +129,8 @@ jobs:
       # translated-page-survives adds 1 (2026-11-06).
       # worker-profile-door adds 10 (2026-11-15): 5 checks x 2 locales.
       # create-cv-menu-entry adds 4 (lt + en, 2026-11-15).
-      MIN_EXPECTED: "47"
+      # worker-profile-door gains 4 (F6: /for-workers, /work-abroad x 2 locales).
+      MIN_EXPECTED: "51"
 
     steps:
       - name: Checkout

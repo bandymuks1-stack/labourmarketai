@@ -35,6 +35,8 @@ export type RenderedIntent = {
     readonly href: string;
     readonly label: string;
     readonly account: boolean;
+    /** Where a signed-out visitor goes instead (PublicIntentLink.guestHref). */
+    readonly guestHref?: string;
   }>;
 };
 

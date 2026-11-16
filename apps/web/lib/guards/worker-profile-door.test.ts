@@ -105,6 +105,14 @@ describe("/worker-intake is the first step, without an account", () => {
     expect(read("app/[locale]/auth/logout/route.ts")).not.toMatch(/IntakeDraft|workerIntake/);
   });
 
+  it("its subtitle no longer says the form saves nothing: what is typed is carried into the profile", () => {
+    const sub = (loc: string) =>
+      (JSON.parse(read(`messages/${loc}.json`)) as { workerIntake?: { subtitle?: string } }).workerIntake?.subtitle ?? "";
+    expect(sub("en")).not.toMatch(/saves nothing|add them there/i);
+    expect(sub("lt")).not.toMatch(/nieko neišsaugo|įrašyk duomenis jame/i);
+    expect(sub("en")).toMatch(/after sign-up/);
+  });
+
   it("its title does not call it a registration", () => {
     for (const loc of ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"]) {
       const title = (JSON.parse(read(`messages/${loc}.json`)) as { workerIntake?: { title?: string } }).workerIntake?.title;

@@ -10573,7 +10573,7 @@
   },
   "workerIntake": {
     "title": "Formulär för arbetstagare",
-    "subtitle": "Berätta om ditt yrke och din tillgänglighet för att kontrollera dina uppgifter. Det här formuläret sparar ingenting – för att arbetsgivare ska kunna hitta dig, skapa din kostnadsfria profil och lägg in uppgifterna där.",
+    "subtitle": "Inget här publiceras. Arbetsgivare hittar dig via en kostnadsfri profil, och det du skriver här följer med till den när du har registrerat dig.",
     "fullName": "Fullständigt namn",
     "profession": "Bransch och typ av arbete",
     "professionPlaceholder": "Välj din bransch och typ av arbete",
@@ -13960,7 +13960,7 @@
         "csv": "Ladda ner CSV",
         "print": "Skriv ut / spara som PDF",
         "ctaTitle": "Gör om uppskattningen till en verklig förfrågan om arbetstagare",
-        "ctaBody": "Samma uppskattningsverktyg finns i behovsformuläret på LabourMarket.ai. Med ett konto kan du bifoga en uppskattning till en strukturerad förfrågan om arbetstagare; utan konto kan du beskriva ditt behov i det öppna formuläret.",
+        "ctaBody": "Med ett konto följer antal arbetstagare och land med till förfrågan; resten av uppskattningen kan du fylla i där. Utan konto använder du det öppna formuläret.",
         "ctaDashboard": "Skapa ett arbetsbehov (med konto)",
         "ctaCompanyNeed": "Beskriv ett behov utan konto",
         "ctaCompanyNeedHelp": "Det öppna formuläret tar bara emot antal arbetstagare och land – inga priser och inga beskrivningar skickas vidare."

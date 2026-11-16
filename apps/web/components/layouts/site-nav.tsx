@@ -118,6 +118,7 @@ export async function SiteNav({
       href: link.href,
       label: tIntent(`links.${link.id}`),
       account: link.account,
+      guestHref: link.guestHref,
     })),
   }));
   // "Ask the assistant" — the existing conversation home (`/dashboard` IS the
@@ -168,7 +169,9 @@ export async function SiteNav({
   // a seventh goal.
   const moreLinks = [
     ...links.map((l) => ({ key: l.key as string, href: l.href, label: t(l.key) })),
-    { key: "education", href: INSTITUTION_DOOR, label: tIntent("education"), account: true },
+    // It opens SIGN-UP, so its note is the existing "Sign up", not "For
+    // signed-in users".
+    { key: "education", href: INSTITUTION_DOOR, label: tIntent("education"), account: true, accountNote: tIntent("signUp") },
   ];
   // ONE goal bar element, placed by the page: the header's second row on
   // inner pages; on the landing (no goals in it) it sits in the first row.

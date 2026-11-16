@@ -69,6 +69,8 @@ export function IntentMegaMenu({
       readonly label: string;
       /** Needs an account: shows the same note as a goal link that does. */
       readonly account?: boolean;
+      /** The note when it differs from `accountLabel` (a sign-UP door). */
+      readonly accountNote?: string;
     }>;
   };
   className?: string;
@@ -269,7 +271,7 @@ export function IntentMegaMenu({
                     {intent.links.map((link) => (
                       <li key={link.id}>
                         <Link
-                          href={link.href}
+                          href={!signedIn && link.guestHref ? link.guestHref : link.href}
                           prefetch={link.account ? false : undefined}
                           onClick={() => setActive(null)}
                           data-testid={`intent-link-${intent.id}-${link.id}`}
@@ -309,7 +311,7 @@ export function IntentMegaMenu({
                     {link.account && (
                       <span className="inline-flex shrink-0 items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
                         <LogIn aria-hidden className="h-3.5 w-3.5" />
-                        {accountLabel}
+                        {link.accountNote ?? accountLabel}
                       </span>
                     )}
                   </Link>
