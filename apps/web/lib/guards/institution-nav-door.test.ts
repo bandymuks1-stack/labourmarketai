@@ -36,7 +36,7 @@ describe("institution door in the header and phone menu", () => {
 
   it("the header hands the sign-up door to both menus, marked as needing an account", () => {
     const nav = read("components/layouts/site-nav.tsx");
-    expect(nav).toMatch(/\{ key: "education", href: INSTITUTION_DOOR, label: tIntent\("education"\), account: true \}/);
+    expect(nav).toMatch(/\{ key: "education", href: INSTITUTION_DOOR, label: tIntent\("education"\), account: true, accountNote: tIntent\("signUp"\) \}/);
     // Never the signed-in setup path as a visitor's link.
     expect(nav).not.toMatch(/href: INSTITUTION_DOOR_NEXT/);
     expect(nav).toMatch(/<MobileNavMenu[\s\S]*?items=\{moreLinks\}/);
@@ -46,9 +46,14 @@ describe("institution door in the header and phone menu", () => {
   it("both menus show the existing account note on such a link", () => {
     const mega = read("components/layouts/intent-mega-menu.tsx");
     const more = mega.slice(mega.indexOf('data-testid="intent-more-links"'));
-    expect(more).toMatch(/\{link\.account && \([\s\S]*?\{accountLabel\}/);
+    expect(more).toMatch(/\{link\.account && \([\s\S]*?\{link\.accountNote \?\? accountLabel\}/);
     const mobile = read("components/layouts/mobile-nav-menu.tsx");
     const items = mobile.slice(mobile.indexOf("{items.map((item) =>"));
-    expect(items).toMatch(/\{item\.account && \([\s\S]*?\{accountLabel\}/);
+    expect(items).toMatch(/\{item\.account && \([\s\S]*?\{item\.accountNote \?\? accountLabel\}/);
+  });
+
+  it("the institution door, a sign-UP link, carries the existing sign-up note", () => {
+    const nav = read("components/layouts/site-nav.tsx");
+    expect(nav).toMatch(/key: "education", href: INSTITUTION_DOOR,[^\n]*accountNote: tIntent\("signUp"\)/);
   });
 });

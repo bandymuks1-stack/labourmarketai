@@ -226,6 +226,30 @@ describe("company-need prefill bridge — bounded and validated", () => {
     // The help line that said the numbers do not travel is gone with the fact.
     expect(component).not.toMatch(/ctaDashboardHelp/);
   });
+  it("the account route's text says what carries over, and promises no attached estimate (N4, 2026-11-16)", () => {
+    // Only the worker count and country travel (asserted above); the rest of
+    // the estimate is entered again in the request's own estimate builder.
+    const attachVerb: Record<string, RegExp> = {
+      en: /attach/i,
+      lt: /pridėti prie/i,
+      de: /anhängen/i,
+      nl: /koppelen/i,
+      pl: /dołącz/i,
+      ru: /прилож/i,
+      sv: /bifoga/i,
+    };
+    for (const locale of activeLocales) {
+      const body = (JSON.parse(read(`messages/${locale}.json`)) as {
+        calculators: { projectCost: { result: { ctaBody: string } } };
+      }).calculators.projectCost.result.ctaBody;
+      expect(body, locale).not.toMatch(attachVerb[locale]);
+    }
+    const en = (JSON.parse(read("messages/en.json")) as {
+      calculators: { projectCost: { result: { ctaBody: string } } };
+    }).calculators.projectCost.result.ctaBody;
+    expect(en).toMatch(/worker count and country carry over/);
+    expect(read("components/app/demand-request-button.tsx")).toMatch(/<EstimateBuilder\b/);
+  });
 });
 
 describe("company-need prefill: the button that opened the form", () => {
