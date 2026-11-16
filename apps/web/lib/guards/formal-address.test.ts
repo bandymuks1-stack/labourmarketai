@@ -84,6 +84,16 @@ const PL_INFORMAL = [
  *  process (owner rule: legal texts are not edited), so the address rule does not
  *  judge them. */
 const FIXED_NAMESPACES: readonly string[] = ["consent", "privacyConsent", "legal", "oauthConsent"];
+/** The pricing copy of #3302 (owner-approved, merged 2026-11-16) is kept exactly as
+ *  it landed on main; it is outside this register pass and changes only with the
+ *  owner's approval of that copy. */
+const OWNER_APPROVED_COPY: readonly string[] = [
+  "pricing",
+  "planBoundary",
+  "conciergeOffer",
+  "agencies.faq",
+  "companies.faq",
+];
 const RU_INFORMAL = [/(?<![а-яё])(ты|тебя|тебе|тобой|твой|твоя|твоё|твое|твои|твоего|твоей|твоих|твоим|твоими|твоему|твою)(?![а-яё])/i];
 
 /** The user's own words — listed by key, nothing else is exempt. */
@@ -130,6 +140,7 @@ describe("one form of address — formal, in every catalog the web app loads (ow
       const informal = Object.entries(strings)
         .filter(([k]) => !exempt.has(k))
         .filter(([k]) => !FIXED_NAMESPACES.some((ns) => k.split("::")[1]?.startsWith(`${ns}.`)))
+        .filter(([k]) => !OWNER_APPROVED_COPY.some((ns) => k.split("::")[1]?.startsWith(`${ns}.`)))
         // Legal texts keep their exact wording in every language (owner, #3388, 2026-11-16).
         .filter(([k]) => !isLegalTextKey(k.split("::")[1] ?? ""))
         .filter(([, v]) => rules.some((rule) => rule.test(v)))
