@@ -76,6 +76,8 @@ let requestId = "";
 let offerId = "";
 /** Booking proposals this run's accept created (A-6), withdrawn in afterAll. */
 const createdProposals: string[] = [];
+/** A-6b: the worker accepted this run's proposal (read back by the client). */
+let workerAccepted = false;
 
 /** The bookings page as the client reads it now: readable, or not (a load
  *  that did not finish, or its own read-failed state). Retried, never guessed. */
@@ -494,6 +496,7 @@ test("A-6b. the worker accepts this run's proposal, and the client sees it accep
     await workspace(owner.page, ALFA);
     await expect.poll(() => proposalStatus(owner.page, id), { timeout: 60_000, intervals: [2_000, 5_000] }).toBe("accepted");
     console.info(`[agency] the worker accepted this run's proposal ${id.slice(0, 8)}; the client reads it accepted`);
+    workerAccepted = true;
   } finally {
     await owner.close();
   }
@@ -513,6 +516,10 @@ test("A-7. the agency sees the decision and talks to the client in one thread", 
     await expect(placement, "the agency sees this run's placement").toBeVisible({ timeout: 30_000 });
     await expect(placement.getByTestId("agency-placement-step-clientAccepted")).toBeVisible();
     await expect(placement.getByTestId("agency-placement-step-workerProposed")).toBeVisible();
+    if (workerAccepted) {
+      // A-6b's accept reaches the agency too: the placement's last step.
+      await expect(placement.getByTestId("agency-placement-step-workerAccepted")).toBeVisible();
+    }
   }
   const conn = page.getByTestId("agency-bridge-connection-row").filter({ hasText: /Alfa|qa\.owner/ }).first();
   await conn.locator('[data-testid^="agency-bridge-message-"]').click();
