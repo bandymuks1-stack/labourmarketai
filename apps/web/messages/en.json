@@ -9435,6 +9435,27 @@
       "notStructured": "Automatic search {when}: the need has too little detail to match yet. Add skills or a profession to search.",
       "failed": "Automatic search {when} could not finish. The list below is still computed live.",
       "capped": "The candidate pool was capped."
+    },
+    "history": {
+      "title": "History",
+      "decision": "Hired: {names}",
+      "created": "Need created",
+      "closed": "Need closed",
+      "closedFilled": "Need closed: filled",
+      "closedWithdrawn": "Need closed: withdrawn",
+      "event": {
+        "proposed": "Booking proposed to {name}",
+        "accepted": "{name} accepted the booking",
+        "declined": "{name} declined the booking",
+        "withdrawn": "Booking to {name} withdrawn",
+        "expired": "Booking to {name} expired"
+      },
+      "actor": {
+        "you": "you",
+        "candidate": "candidate",
+        "automatic": "automatic",
+        "other": "colleague or administrator"
+      }
     }
   },
   "planBoundary": {

@@ -747,6 +747,43 @@ test("J-WRK. the placed worker records work on the company's project; the compan
   expect(Number(await confirmed.getAttribute("data-entries"))).toBeGreaterThan(0);
 });
 
+// ── J-DEC ───────────────────────────────────────────────────────────────────
+
+test("J-DEC. the company sees the need's history, closes it as filled, and the hire decision shows (4.30)", async () => {
+  expect(s.needId && s.pwWorkerId && s.bookingId, "J-AGY placed the worker on this need").toBeTruthy();
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
+  const history = co.getByTestId("demand-history");
+  await expect(history, "the need's history is on its page").toBeVisible({ timeout: 30_000 });
+  await expect(history.getByTestId("demand-history-created")).toHaveCount(1);
+  // The company proposed the booking (by accepting the agency's offer); the worker answered it.
+  await expect(history.getByTestId(`demand-history-proposed-${s.pwWorkerId}`)).toHaveAttribute("data-actor", "you");
+  await expect(history.getByTestId(`demand-history-accepted-${s.pwWorkerId}`)).toHaveAttribute("data-actor", "candidate");
+  await expect(history.getByTestId(`demand-history-accepted-${s.pwWorkerId}`).locator("time")).toHaveAttribute(
+    "datetime",
+    /^\d{4}-\d{2}-\d{2}T/,
+  );
+  await expect(history).toHaveAttribute("data-decided", "false");
+
+  // The decision: the company closes the need as filled.
+  await co.getByTestId("demand-close").click();
+  await expect
+    .poll(
+      async () =>
+        (await db<Array<{ status: string; closed_outcome: string | null }>>(
+          `customer_requests?id=eq.${s.needId}&select=status,closed_outcome`,
+        )).map((r) => `${r.status}:${r.closed_outcome}`),
+      { message: "the need is closed as filled", timeout: 30_000 },
+    )
+    .toEqual(["closed:completed"]);
+
+  await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
+  const after = co.getByTestId("demand-history");
+  await expect(after).toHaveAttribute("data-decided", "true", { timeout: 30_000 });
+  await expect(after.getByTestId("demand-history-closed")).toHaveAttribute("data-outcome", "completed");
+  await expect(after.getByTestId("demand-history-decision"), "the hire decision names the accepted candidate").toBeVisible();
+});
+
 // ── J-ISO ───────────────────────────────────────────────────────────────────
 
 test("J-ISO. an unrelated company sees nothing of it; ending the employee's membership ends their access", async ({
