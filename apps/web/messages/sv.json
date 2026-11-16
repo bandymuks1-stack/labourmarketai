@@ -174,6 +174,12 @@
       "actionWebsite": "Öppna företagets webbplats",
       "heroContact": "Så kommer du i kontakt",
       "provenance": "Företaget har själv fyllt i den här sidan."
+    },
+    "cv": {
+      "title": "Meriter",
+      "historyHours": "Timmar på enskilda dagar",
+      "historyPeople": "Personer i underlagen",
+      "enableHint": "När det är på visas även summor av arbetet som registrerats under er organisation: timmar, personer och månader, bara där minst 5 personer står bakom. Aldrig namn."
     }
   },
   "marketplaceListings": {

@@ -267,7 +267,7 @@ export async function loadCompanyWorkHistory(
  * here. Ids, timestamps, review rows and metric rows only: never the entry
  * text. RLS's org-manager branch decides what comes back; nothing widens it.
  */
-async function readOrganizationJournal(
+export async function readOrganizationJournal(
   supabase: Awaited<ReturnType<typeof createClient>>,
   organizationId: string,
 ): Promise<OrganizationJournal | null> {

@@ -136,6 +136,7 @@ export function BusinessPublicProfilePanel({
             {t("enableLabel")}
           </label>
           <p className="text-xs text-text-muted">{t("enableHint")}</p>
+          <p className="text-xs text-text-muted" data-testid="business-public-cv-hint">{t("cv.enableHint")}</p>
 
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-text-secondary">{t("slugLabel")}</span>
