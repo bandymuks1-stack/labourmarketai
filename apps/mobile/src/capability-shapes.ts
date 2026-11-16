@@ -632,3 +632,60 @@ export type VerifiedCvGetData =
 /** A one-step worker action (`worker.add-work-history`, `worker.add-language`):
  *  the bridge answers with the action id and whatever the action returned. */
 export type WorkerActionData = { readonly action: string };
+
+/** `demand.list` — the needs of the organization the person acts for. */
+export type DemandListNeed = {
+  readonly id: string;
+  readonly title: string | null;
+  readonly status: string | null;
+  readonly role: string | null;
+  readonly location: string | null;
+  readonly headcount: number | null;
+  /** UNKNOWN ≠ ZERO: null when the count could not be read. */
+  readonly interestedPeople: number | null;
+  readonly shortlisted: number | null;
+};
+
+export type DemandListData = {
+  readonly actingFor: string;
+  readonly needs: readonly DemandListNeed[];
+};
+
+export type MatchStatus = "strong" | "possible" | "weak" | "insufficient_data";
+
+export type ShortlistStatus = "saved" | "interested" | "not_fit" | "reviewed";
+
+/** `candidate.search` — anonymized candidates for ONE need (no name, no
+ *  contact), ranked by the web scouting page's own match. */
+export type CandidateRow = {
+  readonly workerId: string;
+  readonly preview: { readonly anonymizedLabel: string };
+  readonly match: {
+    readonly status: MatchStatus;
+    readonly evidence: {
+      readonly matchedManagerConfirmed: number;
+      readonly matchedJournalSupported: number;
+      readonly matchedSelfDeclared: number;
+    };
+  };
+  readonly canContact: boolean;
+  readonly shortlistStatus: ShortlistStatus | null;
+};
+
+export type CandidateSearchData = {
+  readonly actingFor: string;
+  readonly need: { readonly id: string; readonly title: string | null; readonly status: string | null };
+  readonly totalCandidates: number;
+  readonly candidates: readonly CandidateRow[];
+};
+
+/** `shortlist.add_draft` — the preview of the decision and its one-time token. */
+export type ShortlistDraftData = {
+  readonly preview: {
+    readonly actingFor: string;
+    readonly need: { readonly id: string; readonly title: string | null };
+    readonly workerId: string;
+    readonly decision: ShortlistStatus;
+  };
+  readonly confirmationToken: string;
+};

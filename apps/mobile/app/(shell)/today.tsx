@@ -141,6 +141,12 @@ export default function Screen() {
             label={t("today.openNeed")}
             onPress={() => router.push("/(shell)/need")}
           />
+          <Button
+            variant="quiet"
+            testID="today-open-candidates"
+            label={t("today.openCandidates")}
+            onPress={() => router.push("/(shell)/candidates")}
+          />
         </View>
         <Divider />
         <Title>{t("today.recentWork")}</Title>
