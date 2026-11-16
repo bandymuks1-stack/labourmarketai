@@ -60,7 +60,8 @@ function mobileLegal(): Record<string, Record<string, string>> {
     const body = source.slice(m.index, starts[i + 1]?.index ?? source.length);
     const texts: Record<string, string> = {};
     for (const key of MOBILE_LEGAL_TEXT_KEYS) {
-      const found = body.match(new RegExp(`"${key.replace(/\./g, "\\.")}":\\s*("(?:[^"\\\\]|\\\\.)*")`));
+      const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const found = body.match(new RegExp(`"${escaped}":\\s*("(?:[^"\\\\]|\\\\.)*")`));
       if (found) texts[key] = sha(JSON.parse(found[1]) as string);
     }
     out[m[1]] = texts;
