@@ -4228,9 +4228,9 @@
       "inAppBrowser": "U zit in de ingebouwde browser van een app, waar inloggen met Google vaak niet werkt. Open deze pagina in de browser van uw telefoon (Safari of Chrome), of gebruik hieronder uw e-mailadres en wachtwoord."
     },
     "legalNotice": {
-      "signup": "Door een account aan te maken bevestigt u dat u de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> heeft gelezen.",
-      "googleLogin": "Heeft u nog geen account, dan wordt er een aangemaakt wanneer u inlogt met een sociaal account (zoals Google). Door een account aan te maken bevestigt u dat u de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> heeft gelezen.",
-      "controller": "De verwerkingsverantwoordelijke voor uw accountgegevens is UAB “Nonstop Group”. Uw gegevens worden verwerkt om uw account aan te maken en de dienst te leveren; ze worden niet voor marketing gebruikt zonder uw afzonderlijke, optionele toestemming."
+      "signup": "Door een account aan te maken bevestig je dat je de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
+      "googleLogin": "Heb je nog geen account, dan wordt er een aangemaakt wanneer je inlogt met een sociaal account (zoals Google). Door een account aan te maken bevestig je dat je de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
+      "controller": "De verwerkingsverantwoordelijke voor je accountgegevens is UAB “Nonstop Group”. Je gegevens worden verwerkt om je account aan te maken en de dienst te leveren; ze worden niet voor marketing gebruikt zonder je afzonderlijke, optionele toestemming."
     },
     "errors": {
       "userAlreadyRegistered": "Dit e-mailadres is al geregistreerd. Log in plaats daarvan in.",
