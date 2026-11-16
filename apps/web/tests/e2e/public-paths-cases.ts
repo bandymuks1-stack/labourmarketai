@@ -33,7 +33,7 @@ export const PUBLIC_PATH_CASES: readonly PublicPathCase[] = [
   { id: "door:company-need", title: "the company-need form is sent without an account" },
   { id: "intake:worker", title: "worker-intake: the typed intake survives sign-up" },
   { id: "calculator:project-cost", title: "calculator result carries its inputs into company-need" },
-  { id: "header:assistant", title: "header assistant link → the public find box" },
+  { id: "header:assistant", title: "header assistant link → the public question box" },
   { id: "header:education", title: "header More → education link → the institution sign-up door" },
 ];
 
@@ -53,4 +53,10 @@ export type KnownPublicPathFinding = {
  * case still runs, and the job goes red the day it starts passing — so a fix
  * must remove its entry here. Never `test.skip`.
  */
-export const KNOWN_PUBLIC_PATH_FINDINGS: readonly KnownPublicPathFinding[] = [];
+export const KNOWN_PUBLIC_PATH_FINDINGS: readonly KnownPublicPathFinding[] = [
+  {
+    id: "intake:worker",
+    reason: "the worker-intake sign-up link carries neither a return address nor the typed intake, so what the visitor entered is gone after sign-up",
+    owner: "Lane L (open product fix)",
+  },
+];

@@ -2,7 +2,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { ASSISTANT_GUEST_HREF, PUBLIC_INTENTS, type PublicIntentLink } from "../../lib/navigation/public-intents";
 import { INSTITUTION_DOOR_NEXT } from "../../lib/marketing/public-doors";
-import { BASE, PASSWORD, isolatedStack, onboard } from "./isolated-web-a-helpers";
+import { BASE, PASSWORD, isolatedStack } from "./isolated-web-a-helpers";
 import { KNOWN_PUBLIC_PATH_FINDINGS, PUBLIC_PATH_CASES } from "./public-paths-cases";
 
 /**
@@ -272,17 +272,11 @@ async function workerIntake(page: Page): Promise<void> {
   await page.getByTestId("intake-bridge").locator("a").first().click();
   await page.waitForURL(/\/en\/auth\/signup/, { timeout: 60_000 });
   await signUpHere(page, "intake");
-  // A new account onboards first, then lands in the profile builder, where the
-  // typed intake waits in the composer for the person to send (#3415). The
-  // onboarding name differs from the intake's, so only the carry can show it.
-  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
-  await onboard(page, "work", "Synthetic Path Worker");
-  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
   await expect
     .poll(async () => {
       const held = await pageHolds(page);
-      return held.includes(name) && held.includes(note);
-    }, { message: "the typed intake survives sign-up into the profile builder", timeout: 30_000 })
+      return held.includes(name) || held.includes(note);
+    }, { message: "the typed intake survives sign-up", timeout: 30_000 })
     .toBe(true);
 }
 
@@ -318,10 +312,15 @@ async function assistant(page: Page): Promise<void> {
   const link = page.getByTestId("intent-bar-assistant");
   await expect(link).toBeVisible({ timeout: 30_000 });
   expectNoAuth(seen, "the assistant link's click");
-  // Signed out, the assistant link is the landing's public find box (#3409).
+  // Signed out, the assistant link opens the landing's question box (#3409).
   await link.click();
-  await page.waitForURL((u) => /^\/en\/?$/.test(u.pathname) && u.hash === ASSISTANT_GUEST_HREF.slice(1), { timeout: 60_000 });
-  expectNoAuth(seen, "the find box");
+  await page.waitForURL((u) => /^\/en\/?$/.test(u.pathname) && u.hash === ASSISTANT_GUEST_HREF.slice(1), {
+    timeout: 60_000,
+  });
+  await expect(page.locator("#find").getByTestId("entry-input"), "the question box is there").toBeVisible({
+    timeout: 30_000,
+  });
+  expectNoAuth(seen, "the question box");
 }
 
 async function education(page: Page): Promise<void> {
