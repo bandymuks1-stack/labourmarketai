@@ -109,7 +109,7 @@ test("0. owner disbands earlier synthetic brigades, keeping their history", asyn
     }
     if (!teamId) break;
     // Addressed by its id, not by its place in a list the panel re-renders.
-    const card = page.getByTestId(`team-brigade-${teamId}`);
+    const card = page.getByRole("main").getByTestId(`team-brigade-${teamId}`);
     await card.getByTestId(`team-disband-${teamId}`).click();
     await expect(card.getByTestId(`team-disband-explain-${teamId}`)).toBeVisible();
     await card.getByTestId(`team-disband-confirm-${teamId}`).click();

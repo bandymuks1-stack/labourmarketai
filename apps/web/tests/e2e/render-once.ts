@@ -55,14 +55,38 @@ async function copies(page: Page, testId: string): Promise<Copy[]> {
   );
 }
 
+/** A copy inside React's hidden streamed segment (`<div hidden id="S:n">`, or a
+ *  `P:` placeholder): the HTML of a Suspense boundary that has arrived but is
+ *  not yet moved into place. It is invisible and React removes it on the swap,
+ *  so it is in-flight markup, not a second render (seen on CI job 133249460893:
+ *  `div#S:2[hidden]`, gone once settled, no console error). */
+function inStreamedSegment(c: Copy): boolean {
+  return c.visible !== true && !c.inMain && /#[SP]:/.test(c.hiddenAncestor ?? "");
+}
+
 export async function expectRenderedOnce(page: Page, testId: string, errors: readonly string[], where: string): Promise<void> {
   await expect(page.getByRole("main").getByTestId(testId).first(), `${where}: ${testId} is on the page`).toBeVisible({
     timeout: 30_000,
   });
   const early = await copies(page, testId);
   await page.waitForLoadState("networkidle").catch(() => {});
-  const settled = await copies(page, testId);
-  const evidence = JSON.stringify({ early, settled, consoleErrors: errors.slice(-10) });
-  expect(early.length, `${where}: ${testId} rendered ${early.length}× as it appeared — ${evidence}`).toBe(1);
-  expect(settled.length, `${where}: ${testId} rendered ${settled.length}× once settled — ${evidence}`).toBe(1);
+  let settled = await copies(page, testId);
+  const evidence = () => JSON.stringify({ early, settled, consoleErrors: errors.slice(-10) });
+  // As it appears: exactly one RENDERED copy. A copy still inside the hidden
+  // streamed segment is recorded in the evidence, not counted.
+  const rendered = early.filter((c) => !inStreamedSegment(c));
+  expect(rendered.length, `${where}: ${testId} rendered ${rendered.length}× as it appeared — ${evidence()}`).toBe(1);
+  // Settled: exactly one copy IN TOTAL, the in-flight segment included, so a
+  // real double render (or a segment React never swapped in) still fails. The
+  // swap can land just after network idle, hence a short poll.
+  await expect
+    .poll(
+      async () => {
+        settled = await copies(page, testId);
+        return settled.length;
+      },
+      { message: `${where}: ${testId} once settled — ${evidence()}`, timeout: 10_000 },
+    )
+    .toBe(1);
+  expect(settled[0]?.inMain, `${where}: the one settled copy is in <main> — ${evidence()}`).toBe(true);
 }

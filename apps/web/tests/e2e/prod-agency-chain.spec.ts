@@ -226,11 +226,13 @@ test("A-2b. the agency reads its people's document readiness (counts only, conse
   await agency.page.goto("/lt/dashboard/documents");
   // Exactly once, with evidence on a duplicate (seen here on 2cab333b).
   await expectRenderedOnce(agency.page, "doc-centre-org", errors, "A-2b");
-  const org = agency.page.getByTestId("doc-centre-org");
+  // Scoped to <main>: a strict whole-page locator can also count React's hidden
+  // streamed segment (div#S:n[hidden]) before the swap (tests/e2e/render-once.ts).
+  const org = agency.page.getByRole("main").getByTestId("doc-centre-org");
   await expect(org, "the agency sees its people's readiness block").toBeVisible({ timeout: 30_000 });
-  await expect(agency.page.getByTestId("doc-centre-org-unavailable"), "the readiness read works").toHaveCount(0);
-  const summary = agency.page.getByTestId("doc-centre-org-summary");
-  const empty = agency.page.getByTestId("doc-centre-org-empty");
+  await expect(org.getByTestId("doc-centre-org-unavailable"), "the readiness read works").toHaveCount(0);
+  const summary = org.getByTestId("doc-centre-org-summary");
+  const empty = org.getByTestId("doc-centre-org-empty");
   await expect(summary.or(empty), "either counts or the honest none-consented note").toBeVisible({ timeout: 30_000 });
   console.info(
     `[agency] document readiness: ${(await summary.isVisible()) ? await summary.innerText() : "no consented people"}`,
