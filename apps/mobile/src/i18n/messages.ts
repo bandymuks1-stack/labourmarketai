@@ -3375,7 +3375,7 @@ const pl: Catalogue = {
   "nav.profile": "Profil",
   "nav.settings": "Ustawienia",
 
-  "auth.checking": "Sprawdzamy Twoją sesję…",
+  "auth.checking": "Sprawdzamy sesję…",
   "auth.signIn.title": "Zaloguj się",
   "auth.signIn.email": "E-mail",
   "auth.signIn.password": "Hasło",
@@ -3384,21 +3384,21 @@ const pl: Catalogue = {
   "auth.register.title": "Załóż konto",
   "auth.register.submit": "Załóż konto",
   "auth.register.toSignIn": "Mam już konto",
-  "auth.signIn.forgot": "Nie pamiętasz hasła?",
+  "auth.signIn.forgot": "Nie pamiętają Państwo hasła?",
   "auth.register.legal":
     "Tworząc konto, akceptujesz warunki korzystania z usługi i politykę prywatności.",
   "auth.error.rejected": "Ten e-mail i hasło do siebie nie pasują.",
   "auth.error.unreachable":
-    "Nie udało się połączyć z serwerem, więc nie wiemy, czy te dane są poprawne. Sprawdź połączenie i spróbuj ponownie.",
+    "Nie udało się połączyć z serwerem, więc nie wiemy, czy te dane są poprawne. Proszę sprawdzić połączenie i spróbować ponownie.",
   "auth.error.confirmationRequired":
-    "Twoje konto zostało utworzone. Potwierdź link w e-mailu, a potem zaloguj się.",
+    "Konto zostało utworzone. Proszę potwierdzić link w e-mailu, a potem się zalogować.",
   "auth.error.notConfigured":
     "Ta wersja nie ma konfiguracji serwera, więc nie może nikogo zalogować.",
   "auth.signOut": "Wyloguj się",
 
-  "session.unavailable.title": "Nie udało się sprawdzić Twojej sesji",
+  "session.unavailable.title": "Nie udało się sprawdzić sesji",
   "session.unavailable.body":
-    "To nie to samo co wylogowanie — bezpieczna pamięć Twojego telefonu nie odpowiedziała. Spróbuj ponownie.",
+    "To nie to samo co wylogowanie — bezpieczna pamięć telefonu nie odpowiedziała. Proszę spróbować ponownie.",
   "session.unavailable.retry": "Spróbuj ponownie",
 
   "route.notFound.title": "Tego ekranu nie ma w tej aplikacji",
@@ -3408,29 +3408,29 @@ const pl: Catalogue = {
 
   "crash.title": "W aplikacji wystąpił błąd",
   "crash.body":
-    "To błąd samej aplikacji, a nie Twoje działanie, i nic nigdzie nie zostało wysłane. Spróbuj ponownie — jeśli powtarza się dalej, zamknij aplikację i otwórz ją od nowa.",
+    "To błąd samej aplikacji, a nie Państwa działanie, i nic nigdzie nie zostało wysłane. Proszę spróbować ponownie — jeśli to się powtarza, proszę zamknąć aplikację i otworzyć ją od nowa.",
 
   "config.problem.title": "Ta wersja nie jest skonfigurowana",
   "config.problem.body":
     "Aplikacja nie uruchomi się, dopóki te wartości nie zostaną ustawione. Żadne dane nigdzie nie zostały wysłane.",
 
-  "workspace.title": "Działasz w imieniu",
-  "workspace.loading": "Wczytujemy Twoje przestrzenie robocze…",
+  "workspace.title": "Działają Państwo w imieniu",
+  "workspace.loading": "Wczytujemy przestrzenie robocze…",
   "workspace.active": "Aktywna",
   "workspace.switching": "Przełączanie…",
-  "workspace.failed.title": "Nie udało się odczytać Twoich przestrzeni roboczych",
+  "workspace.failed.title": "Nie udało się odczytać przestrzeni roboczych",
   "workspace.failed.body":
-    "To nieudany odczyt, a nie odpowiedź: nie oznacza, że nie należysz do żadnej organizacji. Spróbuj za chwilę.",
+    "To nieudany odczyt, a nie odpowiedź: nie oznacza, że nie należą Państwo do żadnej organizacji. Proszę spróbować za chwilę.",
   "workspace.pointerUnavailable":
-    "To jest wyliczane z tego, do czego należysz, a nie zapisany dla Ciebie wybór, i nie da się tego tutaj jeszcze zmienić.",
+    "To jest wyliczane z tego, do czego Państwo należą, a nie zapisany wybór, i nie da się tego tutaj jeszcze zmienić.",
   "workspace.switchFailed": "Przestrzeń robocza nie została zmieniona. Nic nie zostało przeniesione.",
-  "context.loading": "Wczytujemy Twoje role…",
+  "context.loading": "Wczytujemy role…",
   "context.active": "Aktywna",
   "context.none": "Na tym koncie nie zapisano jeszcze żadnej roli uczestnictwa. Tyle odczytaliśmy — to nie błąd aplikacji.",
-  "context.title": "Pracujesz jako",
-  "context.unavailable.title": "Nie możemy jeszcze pokazać Twoich kontekstów",
+  "context.title": "Pracują Państwo jako",
+  "context.unavailable.title": "Nie możemy jeszcze pokazać kontekstów pracy",
   "context.unavailable.body":
-    "Aplikacja potrafi Cię zalogować, ale nie potrafi jeszcze odczytać, do których organizacji należysz. W Twoim koncie niczego nie brakuje — ten klient po prostu nie umie jeszcze o to zapytać.",
+    "Aplikacja potrafi Państwa zalogować, ale nie potrafi jeszcze odczytać, do których organizacji Państwo należą. W koncie niczego nie brakuje — ten klient po prostu nie umie jeszcze o to zapytać.",
   "context.mode.worker": "Ja",
   "context.mode.company": "Firma",
   "context.mode.agency": "Agencja",
@@ -3449,15 +3449,15 @@ const pl: Catalogue = {
     "Serwer odpowiedział czymś, czego ta aplikacja nie zrozumiała.",
   "domain.refused.no_credentials": "Zaloguj się ponownie.",
   "domain.refused.invalid_token":
-    "Twoja sesja wygasła. Zaloguj się ponownie.",
+    "Sesja wygasła. Proszę zalogować się ponownie.",
   "domain.refused.no_profile": "To konto nie ma jeszcze profilu.",
   "domain.refused.not_authorized":
     "Serwer odrzucił to żądanie dla tego konta.",
   "domain.refused.rate_limited":
-    "Serwer poprosił aplikację o zwolnienie tempa. Spróbuj za chwilę.",
+    "Serwer poprosił aplikację o zwolnienie tempa. Proszę spróbować za chwilę.",
   "domain.refused.capability": "Serwer odrzucił to żądanie.",
   "domain.refused.identity_unavailable":
-    "Nie udało się potwierdzić, kim jesteś. To nie jest odmowa — spróbuj ponownie.",
+    "Nie udało się potwierdzić tożsamości. To nie jest odmowa — proszę spróbować ponownie.",
 
   "today.signedInAs": "Zalogowano jako",
   "today.recentWork": "Ostatnie prace",
@@ -3465,7 +3465,7 @@ const pl: Catalogue = {
   "journal.logWork": "Zapisz pracę",
   "journal.compose.title": "Zapisz pracę",
   "journal.compose.intro":
-    "Opisz własnymi słowami swoją pracę. Twój Dziennik pracy zapisuje dokładnie to, co napiszesz.",
+    "Proszę opisać swoją pracę własnymi słowami. Dziennik pracy zapisuje dokładnie to, co Państwo napiszą.",
   "journal.compose.date": "Data pracy",
   "journal.compose.dateHint": "Rok-miesiąc-dzień, na przykład 2026-09-01",
   "journal.compose.today": "Dziś",
@@ -3484,15 +3484,15 @@ const pl: Catalogue = {
   "journal.compose.edit": "Zmień coś",
   "journal.compose.chooseContext": "Do której pracy to należy?",
   "journal.compose.chooseContextBody":
-    "Ten wpis mógłby należeć do więcej niż jednego z Twoich kontekstów pracy, więc nic nie zostało przygotowane ani zapisane. Wybierz jeden.",
-  "journal.compose.savedTitle": "Zapisano w Twoim Dzienniku pracy",
+    "Ten wpis mógłby należeć do więcej niż jednego kontekstu pracy, więc nic nie zostało przygotowane ani zapisane. Proszę wybrać jeden.",
+  "journal.compose.savedTitle": "Zapisano w Dzienniku pracy",
   "journal.compose.savedBody":
     "To jest już zarejestrowany wpis. Dokładnie to zapisał serwer.",
   "journal.compose.another": "Zapisz kolejny wpis",
   "journal.compose.backToJournal": "Wróć do dziennika",
   "journal.compose.checkThis": "Najpierw to sprawdź",
   "journal.compose.invalidDate":
-    "Datę zapisz jako rok-miesiąc-dzień, na przykład 2026-09-01. Nic nie zostało wysłane.",
+    "Proszę zapisać datę jako rok-miesiąc-dzień, na przykład 2026-09-01. Nic nie zostało wysłane.",
   "journal.compose.futureDate":
     "Data pracy nie może być w przyszłości — wpis w dzienniku zapisuje pracę, która już się odbyła. Nic nie zostało wysłane.",
   "journal.compose.notesRequired":
@@ -3500,17 +3500,17 @@ const pl: Catalogue = {
   "journal.compose.draftFailedTitle": "Nie udało się przygotować tego wpisu",
   "journal.compose.saveFailedTitle": "Nie udało się zapisać tego wpisu",
   "journal.compose.staleDraft":
-    "Nie zapisano: Twój dziennik zmienił się po przygotowaniu tego wpisu, więc sprawdzenie, na którym się opierał, jest nieaktualne. Przejrzyj go jeszcze raz.",
+    "Nie zapisano: dziennik zmienił się po przygotowaniu tego wpisu, więc sprawdzenie, na którym się opierał, jest nieaktualne. Proszę przejrzeć go jeszcze raz.",
   "journal.compose.noContext":
-    "To konto nie ma aktywnego kontekstu pracy, więc wpis nie ma gdzie zostać zarejestrowany. Najpierw wskaż na stronie internetowej, gdzie pracujesz, a potem zapisuj pracę tutaj.",
+    "To konto nie ma aktywnego kontekstu pracy, więc wpis nie ma gdzie zostać zarejestrowany. Proszę najpierw wskazać na stronie internetowej, gdzie Państwo pracują, a potem zapisywać pracę tutaj.",
   "journal.compose.unsureSaved":
-    "Połączenie zerwało się już po wysłaniu, więc nie wiemy, czy wpis dotarł. Zanim napiszesz go ponownie, otwórz Dziennik pracy i sprawdź. Ponowna próba nie utworzy duplikatu.",
+    "Połączenie zerwało się już po wysłaniu, więc nie wiemy, czy wpis dotarł. Zanim napiszą go Państwo ponownie, proszę otworzyć Dziennik pracy i sprawdzić. Ponowna próba nie utworzy duplikatu.",
   "journal.compose.skillsAdded": "Nowo zapisane umiejętności",
   "journal.compose.skillsStrengthened": "Umiejętności z nowym dowodem",
-  "journal.compose.skillsClaims": "Kompetencje zauważone w Twoich słowach",
-  "journal.compose.skillsReview": "Czeka na Twoje sprawdzenie",
+  "journal.compose.skillsClaims": "Kompetencje zauważone w Państwa słowach",
+  "journal.compose.skillsReview": "Czeka na Państwa sprawdzenie",
   "journal.compose.noCvChange":
-    "Z tego wpisu nie dodano nic nowego do Twojego Living CV.",
+    "Z tego wpisu nie dodano nic nowego do Living CV.",
   "journal.compose.skillsPartial":
     "Część aktualizacji Living CV nie została ukończona. Sam wpis jest zapisany.",
   "journal.compose.skillsFailed":
@@ -3553,13 +3553,13 @@ const pl: Catalogue = {
   "journal.correct.unsureSaved":
     "Poprawka została wysłana, ale nie wróciła odpowiedź, więc nie wiemy, czy została zapisana. Ponowna próba jest bezpieczna: poprawka, która już została zapisana, zostanie odrzucona, a nie zapisana dwa razy.",
   "journal.correct.staleDraft":
-    "Nie zapisano: dziennik zmienił się po przygotowaniu poprawki. Sprawdź ją ponownie.",
+    "Nie zapisano: dziennik zmienił się po przygotowaniu poprawki. Proszę sprawdzić ją ponownie.",
   "journal.correct.superseded":
-    "Ten wpis został już poprawiony lub usunięty. Otwórz dziennik ponownie i popraw bieżącą wersję.",
+    "Ten wpis został już poprawiony lub usunięty. Proszę otworzyć dziennik ponownie i poprawić bieżącą wersję.",
   "journal.correct.notFound":
-    "Tego wpisu nie ma wśród Twoich najnowszych wpisów w dzienniku. Możliwe, że został już poprawiony.",
+    "Tego wpisu nie ma wśród najnowszych wpisów w dzienniku. Możliwe, że został już poprawiony.",
   "journal.correct.conflict":
-    "Nowa treść podaje jeden czas dla całego wpisu, ale wpis zawiera też ilość wykonanej pracy, a oba wymagają tego samego pola. Podaj czas dla każdej czynności albo popraw wpis na stronie.",
+    "Nowa treść podaje jeden czas dla całego wpisu, ale wpis zawiera też ilość wykonanej pracy, a oba wymagają tego samego pola. Proszę podać czas dla każdej czynności albo poprawić wpis na stronie.",
   "journal.correct.missingTitle":
     "Tego wpisu nie można tu poprawić",
   "today.openMessages":
@@ -3569,9 +3569,9 @@ const pl: Catalogue = {
   "messages.conversation":
     "Rozmowa",
   "messages.intro":
-    "Twoje rozmowy w LabourMarket.ai. Wiadomości zostają w aplikacji — nic nie jest wysyłane e-mailem ani SMS-em. Nowe wiadomości widać po otwarciu tego ekranu.",
+    "Rozmowy w LabourMarket.ai. Wiadomości zostają w aplikacji — nic nie jest wysyłane e-mailem ani SMS-em. Nowe wiadomości widać po otwarciu tego ekranu.",
   "messages.none":
-    "Nie masz jeszcze żadnych rozmów.",
+    "Nie ma jeszcze żadnych rozmów.",
   "messages.untitled":
     "Rozmowa",
   "messages.threadEmpty":
@@ -3581,11 +3581,11 @@ const pl: Catalogue = {
   "messages.fromThem":
     "Rozmówca",
   "messages.replyLabel":
-    "Twoja odpowiedź",
+    "Odpowiedź",
   "messages.review":
     "Sprawdź przed wysłaniem",
   "messages.emptyBody":
-    "Najpierw napisz wiadomość.",
+    "Proszę najpierw napisać wiadomość.",
   "messages.previewTitle":
     "Sprawdź przed wysłaniem",
   "messages.previewNothingSent":
@@ -3595,9 +3595,9 @@ const pl: Catalogue = {
   "messages.sentTitle":
     "Wysłano",
   "messages.sentBody":
-    "Twoja wiadomość jest w rozmowie.",
+    "Wiadomość jest w rozmowie.",
   "messages.sentUnverified":
-    "Serwer przyjął wiadomość, ale po odczytaniu nie zgadzała się. Otwórz rozmowę ponownie, aby ją sprawdzić.",
+    "Serwer przyjął wiadomość, ale po odczytaniu nie zgadzała się. Proszę otworzyć rozmowę ponownie, aby ją sprawdzić.",
   "messages.writeAnother":
     "Napisz kolejną wiadomość",
   "messages.draftFailedTitle":
@@ -3605,21 +3605,21 @@ const pl: Catalogue = {
   "messages.sendFailedTitle":
     "Nie udało się wysłać wiadomości",
   "messages.unsureSent":
-    "Wiadomość została wysłana, ale nie wróciła odpowiedź, więc nie wiemy, czy dotarła. Zanim wyślesz ją ponownie, otwórz rozmowę jeszcze raz.",
+    "Wiadomość została wysłana, ale nie wróciła odpowiedź, więc nie wiemy, czy dotarła. Zanim wyślą ją Państwo ponownie, proszę otworzyć rozmowę jeszcze raz.",
   "messages.staleDraft":
-    "Nie wysłano: po przygotowaniu Twojej odpowiedzi w rozmowie pojawiła się nowa wiadomość. Przeczytaj ją i sprawdź odpowiedź ponownie.",
+    "Nie wysłano: po przygotowaniu odpowiedzi w rozmowie pojawiła się nowa wiadomość. Proszę ją przeczytać i sprawdzić odpowiedź ponownie.",
   "messages.notFound":
-    "Ta rozmowa nie jest Twoja albo już nie istnieje.",
+    "Ta rozmowa nie należy do Państwa albo już nie istnieje.",
   "messages.noPermission":
-    "Nie możesz pisać w tej rozmowie.",
+    "Nie mogą Państwo pisać w tej rozmowie.",
   "today.openNotifications":
     "Powiadomienia",
   "notifications.title":
     "Powiadomienia",
   "notifications.intro":
-    "Co wydarzyło się w Twojej pracy, najnowsze na górze. Otwarcie oznacza powiadomienie jako przeczytane. Powiadomienia nie są wysyłane na telefon — widać je tutaj po otwarciu tego ekranu.",
+    "Co wydarzyło się w Państwa pracy, najnowsze na górze. Otwarcie oznacza powiadomienie jako przeczytane. Powiadomienia nie są wysyłane na telefon — widać je tutaj po otwarciu tego ekranu.",
   "notifications.none":
-    "Nie masz powiadomień.",
+    "Brak powiadomień.",
   "notifications.unread":
     "Nowe",
   "notifications.markAll":
@@ -3629,27 +3629,27 @@ const pl: Catalogue = {
   "notifications.type.unknown":
     "Powiadomienie",
   "notifications.type.event_absence_approved":
-    "Twoja nieobecność została zatwierdzona",
+    "Nieobecność została zatwierdzona",
   "notifications.type.event_absence_rejected":
-    "Twoja nieobecność została odrzucona",
+    "Nieobecność została odrzucona",
   "notifications.type.event_absence_requested":
-    "Zgłoszono dla Ciebie nieobecność",
+    "Zgłoszono nieobecność dla Państwa",
   "notifications.type.event_booking_accepted":
-    "Twoja propozycja rezerwacji została przyjęta",
+    "Propozycja rezerwacji została przyjęta",
   "notifications.type.event_booking_declined":
-    "Twoja propozycja rezerwacji została odrzucona",
+    "Propozycja rezerwacji została odrzucona",
   "notifications.type.event_booking_proposed":
-    "Otrzymałeś propozycję rezerwacji",
+    "Otrzymali Państwo propozycję rezerwacji",
   "notifications.type.event_booking_withdrawn":
     "Propozycja rezerwacji została wycofana",
   "notifications.type.event_demand_interest_expressed":
-    "Pracownik wyraził zainteresowanie Twoim zapotrzebowaniem",
+    "Pracownik wyraził zainteresowanie Państwa zapotrzebowaniem",
   "notifications.type.event_demand_interest_reviewed":
-    "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone",
+    "Firma oznaczyła Państwa zainteresowanie jako rozpatrzone",
   "notifications.type.event_document_ack_assigned":
-    "Poproszono Cię o potwierdzenie, że zapoznano się z dokumentem.",
+    "Poproszono Państwa o potwierdzenie, że zapoznano się z dokumentem.",
   "notifications.type.event_document_ack_completed":
-    "Dokument wysłany przez Ciebie do potwierdzenia został potwierdzony.",
+    "Dokument wysłany przez Państwa do potwierdzenia został potwierdzony.",
   "notifications.type.event_document_expiring":
     "Ważność dokumentu wkrótce się kończy.",
   "notifications.type.event_engagement_created":
@@ -3657,39 +3657,39 @@ const pl: Catalogue = {
   "notifications.type.event_engagement_ended":
     "Współpraca została zakończona",
   "notifications.type.event_history_link_offered":
-    "Organizacja zaproponowała powiązanie zarejestrowanej historii Twojej pracy z Twoim kontem",
+    "Organizacja zaproponowała powiązanie zarejestrowanej historii Państwa pracy z kontem",
   "notifications.type.event_invitation_accepted":
-    "Ktoś przyjął Twoje zaproszenie",
+    "Ktoś przyjął Państwa zaproszenie",
   "notifications.type.event_job_alert":
-    "Pojawiła się nowa oferta pasująca do Twoich kryteriów",
+    "Pojawiła się nowa oferta pasująca do Państwa kryteriów",
   "notifications.type.event_journal_review_decided":
-    "Twój wpis w dzienniku został sprawdzony",
+    "Wpis w dzienniku został sprawdzony",
   "notifications.type.event_journal_review_decided_approved":
-    "Twój wpis w dzienniku został potwierdzony",
+    "Wpis w dzienniku został potwierdzony",
   "notifications.type.event_journal_review_decided_changes_requested":
-    "Poproszono o zmiany w Twoim wpisie w dzienniku",
+    "Poproszono o zmiany we wpisie w dzienniku",
   "notifications.type.event_journal_review_decided_rejected":
-    "Twój wpis w dzienniku został odrzucony",
+    "Wpis w dzienniku został odrzucony",
   "notifications.type.event_message_received":
-    "Masz nową wiadomość",
+    "Nowa wiadomość",
   "notifications.type.event_saved_search_match":
     "Zapisane wyszukiwanie ma nowe wyniki",
   "notifications.type.event_weekly_digest":
-    "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe",
+    "Tygodniowe podsumowanie pracy i możliwości jest gotowe",
   "notifications.type.event_weekly_digest_journal":
-    "Podsumowanie Twojego dziennika pracy z tego tygodnia jest gotowe",
+    "Podsumowanie dziennika pracy z tego tygodnia jest gotowe",
   "notifications.type.event_weekly_digest_profile_completion":
-    "Aby pokazać pasujące oferty, potwierdź, jaką pracę wykonujesz",
+    "Aby pokazać pasujące oferty, proszę potwierdzić, jaką pracę Państwo wykonują",
   "notifications.type.event_work_task_assigned":
     "Przypisano ci zadanie",
   "notifications.type.event_workflow_decided":
-    "Podjęto decyzję w sprawie Twojego wniosku o zatwierdzenie",
+    "Podjęto decyzję w sprawie Państwa wniosku o zatwierdzenie",
   "notifications.type.event_workflow_delegated":
     "Przekazano Ci etap zatwierdzania",
   "notifications.type.event_workflow_escalated":
     "Etap zatwierdzania przekroczył termin",
   "notifications.type.event_workflow_step_pending":
-    "Wniosek o zatwierdzenie czeka na Twoją decyzję",
+    "Wniosek o zatwierdzenie czeka na Państwa decyzję",
   "today.openProjects":
     "Moje projekty",
   "projects.title":
@@ -3697,29 +3697,29 @@ const pl: Catalogue = {
   "projects.detailTitle":
     "Projekt",
   "projects.none":
-    "Nie masz przypisanego żadnego projektu.",
+    "Brak przypisanych projektów.",
   "projects.active":
     "Aktywny",
   "projects.ended":
     "Zakończony",
   "projects.asksCount":
-    "Jeszcze potrzebne od Ciebie",
+    "Jeszcze potrzebne od Państwa",
   "projects.moreOnWeb":
-    "Tutaj widać tylko Twoje pierwsze projekty. Na stronie widać wszystkie.",
+    "Tutaj widać tylko pierwsze projekty. Na stronie widać wszystkie.",
   "projects.notFound":
-    "Ten projekt nie jest Twój albo nie ma go wśród pokazanych tutaj.",
+    "Ten projekt nie należy do Państwa albo nie ma go wśród pokazanych tutaj.",
   "projects.asksTitle":
-    "Jeszcze potrzebne od Ciebie",
+    "Jeszcze potrzebne od Państwa",
   "projects.asksShownOf":
     "Pokazane tutaj / łącznie otwarte — pełna lista jest na stronie internetowej",
   "projects.asksUnavailable":
-    "Nie udało się teraz odczytać, co jeszcze jest potrzebne od Ciebie. Spróbuj ponownie albo otwórz projekt na stronie internetowej.",
+    "Nie udało się teraz odczytać, co jeszcze jest potrzebne od Państwa. Proszę spróbować ponownie albo otworzyć projekt na stronie internetowej.",
   "projects.asksNotRead":
-    "To przypisanie się zakończyło. Co było w nim od Ciebie wymagane, zobaczysz na stronie projektu.",
+    "To przypisanie się zakończyło. Co było w nim od Państwa wymagane, widać na stronie projektu.",
   "projects.asksIncomplete":
-    "W Twoich projektach otwartych jest więcej, niż aplikacja może pokazać, więc część tego projektu może nie być widoczna. Pełna lista jest na stronie projektu.",
+    "W Państwa projektach otwartych jest więcej, niż aplikacja może pokazać, więc część tego projektu może nie być widoczna. Pełna lista jest na stronie projektu.",
   "projects.asksNone":
-    "W tym projekcie nic nie czeka na Ciebie.",
+    "W tym projekcie nic nie czeka na Państwa.",
   "projects.ask.needed":
     "Potrzebne",
   "projects.ask.missing":
@@ -3735,16 +3735,16 @@ const pl: Catalogue = {
   "projects.webDetail":
     "Pełna strona projektu — etapy, dokumenty i zespół — jest na stronie internetowej.",
   "messages.threadNotShown":
-    "Rozmowa nie jest jeszcze widoczna. Poczekaj, aż się wczyta, przeczytaj ją, a potem sprawdź swoją odpowiedź.",
+    "Rozmowa nie jest jeszcze widoczna. Proszę poczekać, aż się wczyta, przeczytać ją, a potem sprawdzić odpowiedź.",
   "messages.newBeforeReview":
     "W tej rozmowie pojawiła się nowa wiadomość. Jest teraz widoczna powyżej — przeczytaj ją i sprawdź swoją odpowiedź jeszcze raz.",
   "profile.noWorkerProfile": "To konto nie ma jeszcze profilu pracownika.",
-  "profile.figuresTitle": "Umiejętności wraz z Twoimi zapisanymi godzinami",
+  "profile.figuresTitle": "Umiejętności wraz z zapisanymi godzinami",
   "profile.groupManagerConfirmed": "Potwierdzone przez kierownika",
-  "profile.groupJournalBacked": "Poparte Twoim Dziennikiem pracy",
-  "profile.groupDeclared": "Zadeklarowane przez Ciebie",
+  "profile.groupJournalBacked": "Poparte Dziennikiem pracy",
+  "profile.groupDeclared": "Zadeklarowane przez Państwa",
   "profile.figuresUnavailable":
-    "Godzin, udziału i wpisów nie udało się tym razem odczytać. Umiejętności poniżej nadal są Twoimi zapisanymi umiejętnościami — nic nie jest pokazywane jako 0.",
+    "Godzin, udziału i wpisów nie udało się tym razem odczytać. Umiejętności poniżej nadal są Państwa zapisanymi umiejętnościami — nic nie jest pokazywane jako 0.",
   "profile.figuresLegend":
     "Godziny · udział w godzinach przypisanych do umiejętności · wpisy, od początku. Te same liczby co na stronie internetowej.",
   "profile.figuresNotRead": "nie udało się odczytać liczb",
@@ -3753,7 +3753,7 @@ const pl: Catalogue = {
   "profile.hoursShort": "godz.",
   "profile.entriesLabel": "wpisy",
   "profile.selfStatedMissing":
-    "Kompetencje zapisane przez Ciebie własnymi słowami nie trafiają jeszcze na ten ekran; strona internetowa pokazuje je przy Twoich umiejętnościach.",
+    "Kompetencje zapisane przez Państwa własnymi słowami nie trafiają jeszcze na ten ekran; strona internetowa pokazuje je przy umiejętnościach.",
   "profile.openJournal": "Otwórz Dziennik pracy",
   "cv.workTitle": "Doświadczenie zawodowe",
   "cv.workEmpty": "Brak doświadczenia zawodowego.",
@@ -3840,7 +3840,7 @@ const pl: Catalogue = {
   "cv.educationType.other": "Inne",
   "journal.openProfile": "Zobacz w profilu, co dają te wpisy",
 
-  "today.figuresTitle": "Twoja praca w liczbach",
+  "today.figuresTitle": "Praca w liczbach",
   "today.periodToday": "Dziś",
   "today.periodWeek": "Ostatnie 7 dni",
   "today.hoursLabel": "Godziny",
@@ -3850,20 +3850,20 @@ const pl: Catalogue = {
   "today.confirmedLabel": "Potwierdzone przez kierownika, godz.",
   "today.periodEmpty": "W tym okresie nic nie zapisano.",
   "today.periodMissing": "Serwer nie przysłał liczby dla tego okresu.",
-  "today.dominantTitle": "Największy udział Twoich godzin, ostatnie 7 dni",
+  "today.dominantTitle": "Największy udział godzin, ostatnie 7 dni",
   "today.dominantShare": "godzin przypisanych do umiejętności",
   "today.dominantNone":
     "W ostatnich 7 dniach żadnej pojedynczej umiejętności nie przypisano godzin.",
   "today.coverageTruncated":
     "Te liczby opierają się na ostatnio odczytanych wpisach — starsze wpisy nie są uwzględnione.",
   "today.figuresScope":
-    "Z Twoich własnych wpisów w Dzienniku pracy, według tej samej zasady co strona internetowa. Dni kalendarzowe kończą się dzisiaj (UTC).",
+    "Z Państwa własnych wpisów w Dzienniku pracy, według tej samej zasady co strona internetowa. Dni kalendarzowe kończą się dzisiaj (UTC).",
   "today.openJournal": "Otwórz Dziennik pracy",
   "today.openProfile": "Otwórz profil i umiejętności",
   "today.openNeed": "Zgłoś zapotrzebowanie na ludzi",
   "need.title": "Zgłoś zapotrzebowanie",
-  "need.intro": "Zapotrzebowanie na pracowników dla organizacji, w imieniu której działasz. Sprawdzasz je przed utworzeniem; pracownicy, którzy mogą je zobaczyć, znajdą je na swojej tablicy.",
-  "need.descriptionLabel": "Czego potrzebujesz?",
+  "need.intro": "Zapotrzebowanie na pracowników dla organizacji, w imieniu której Państwo działają. Sprawdzają je Państwo przed utworzeniem; pracownicy, którzy mogą je zobaczyć, znajdą je na swojej tablicy.",
+  "need.descriptionLabel": "Czego Państwo potrzebują?",
   "need.descriptionHint": "Własnymi słowami — jaka praca, kiedy, ile osób.",
   "need.roleLabel": "Rola",
   "need.locationLabel": "Miejsce",
@@ -3873,24 +3873,24 @@ const pl: Catalogue = {
   "need.urgency.flexible": "Elastycznie",
   "need.urgency.this_week": "W tym tygodniu",
   "need.urgency.urgent": "Pilne",
-  "need.descriptionRequired": "Napisz przynajmniej kilka słów o tym, czego potrzebujesz. Nic nie zostało wysłane.",
+  "need.descriptionRequired": "Proszę napisać przynajmniej kilka słów o tym, czego Państwo potrzebują. Nic nie zostało wysłane.",
   "need.teamSizeInvalid": "Liczba osób musi być liczbą całkowitą od 1. Nic nie zostało wysłane.",
   "need.review": "Sprawdź przed utworzeniem",
   "need.cancel": "Wstecz",
-  "need.previewTitle": "Sprawdź, zanim utworzysz",
+  "need.previewTitle": "Proszę sprawdzić przed utworzeniem",
   "need.previewBody": "Nic jeszcze nie zostało utworzone.",
   "need.actingFor": "Dla",
   "need.confirm": "Utwórz zapotrzebowanie",
   "need.edit": "Edytuj",
   "need.sentTitle": "Utworzono",
-  "need.sentBody": "Zapotrzebowanie jest teraz otwarte dla organizacji. Możesz je śledzić na stronie.",
+  "need.sentBody": "Zapotrzebowanie jest teraz otwarte dla organizacji. Można je śledzić na stronie.",
   "need.done": "Wróć do Dziś",
   "need.overLimit": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie zostało utworzone — zamknij zapotrzebowanie lub zmień plan na stronie.",
   "need.draftFailedTitle": "Nie udało się przygotować tego zapotrzebowania",
   "need.sendFailedTitle": "Nie udało się utworzyć tego zapotrzebowania",
   "today.openJobs": "Przeglądaj otwarte oferty",
   "jobs.title": "Oferty pracy",
-  "jobs.intro": "Publiczna tablica ofert — te same ogłoszenia co na stronie. Pracodawca i sposób aplikowania otwierają się na stronie w Twoim imieniu.",
+  "jobs.intro": "Publiczna tablica ofert — te same ogłoszenia co na stronie. Pracodawca i sposób aplikowania otwierają się na stronie w Państwa imieniu.",
   "jobs.queryLabel": "Szukaj",
   "jobs.queryHint": "Zawód lub słowo z tytułu, w dowolnym języku",
   "jobs.search": "Szukaj ofert",
@@ -3907,21 +3907,21 @@ const pl: Catalogue = {
   "jobs.notProvisioned": "Tablica ofert nie jest włączona w tym środowisku.",
   "jobs.unavailable": "Tablica ofert nie odpowiedziała na czas. To nie znaczy, że nie ma ofert — spróbuj ponownie.",
   "jobs.linkedNotFound": "Tej oferty nie ma już na tablicy (mogła zostać zamknięta).",
-  "today.openOpportunities": "Potrzeby otwarte dla Ciebie",
-  "today.openAvailability": "Kto z Twojego zespołu jest wolny",
+  "today.openOpportunities": "Potrzeby otwarte dla Państwa",
+  "today.openAvailability": "Kto z zespołu jest wolny",
   "opportunities.title": "Możliwości",
-  "opportunities.intro": "Potrzeby, które widzisz teraz. Wyrażenie zainteresowania pokazuje je właścicielowi potrzeby w jego własnym widoku — nic nie opuszcza platformy.",
-  "opportunities.noneVisible": "Obecnie nie widzisz żadnej potrzeby. Gdy powiązana z Tobą organizacja ją otworzy, pojawi się tutaj.",
+  "opportunities.intro": "Potrzeby, które Państwo teraz widzą. Wyrażenie zainteresowania pokazuje je właścicielowi potrzeby w jego własnym widoku — nic nie opuszcza platformy.",
+  "opportunities.noneVisible": "Obecnie nie widzą Państwo żadnej potrzeby. Gdy powiązana z Państwem organizacja ją otworzy, pojawi się tutaj.",
   "opportunities.express": "Jestem zainteresowany",
   "opportunities.noteLabel": "Wiadomość dla nich (opcjonalnie)",
   "opportunities.noteHint": "Jedno zdanie o tym, dlaczego lub kiedy — przeczytają je tak, jak zostało napisane.",
   "opportunities.draft": "Sprawdź przed wysłaniem",
-  "opportunities.previewTitle": "Sprawdź, zanim wyślesz",
+  "opportunities.previewTitle": "Proszę sprawdzić przed wysłaniem",
   "opportunities.previewBody": "Nic jeszcze nie zostało wysłane.",
   "opportunities.alreadyExpressed": "Zainteresowanie tą potrzebą zostało już wyrażone; ponowne wysłanie je odświeży.",
-  "today.openOffers": "Oferty i zaproszenia dla Ciebie",
+  "today.openOffers": "Oferty i zaproszenia dla Państwa",
   "offers.title": "Oferty",
-  "offers.reviewNotice": "Jeśli zaakceptujesz, przełożony w {organization} będzie mógł czytać pracę, którą dla niego zapisujesz, i ją zatwierdzić. Do tego czasu pozostaje to Twój własny wpis.",
+  "offers.reviewNotice": "Jeśli Państwo zaakceptują, przełożony w {organization} będzie mógł czytać pracę, którą Państwo dla niego zapisują, i ją zatwierdzić. Do tego czasu pozostaje to Państwa własny wpis.",
   "offers.as": "Jako",
   "offers.relationship.collaborator": "współpracownik",
   "offers.relationship.consultant": "konsultant",
@@ -3935,11 +3935,11 @@ const pl: Catalogue = {
   "offers.relationship.intern": "Praktykant",
   "offers.relationship.external_manager": "Kierownik zewnętrzny (zleceniodawca)",
   "offers.relationship.other": "Inny związek",
-  "offers.intro": "Propozycje pracy i zaproszenia skierowane do Ciebie. Nic się nie zmienia, dopóki nie potwierdzisz odpowiedzi.",
+  "offers.intro": "Propozycje pracy i zaproszenia skierowane do Państwa. Nic się nie zmienia, dopóki nie potwierdzą Państwo odpowiedzi.",
   "offers.bookingsHeading": "Propozycje pracy",
   "offers.invitationsHeading": "Zaproszenia",
-  "offers.noBookings": "Żadna propozycja pracy nie czeka na Twoją odpowiedź.",
-  "offers.noInvitations": "Żadne zaproszenie nie czeka na Twoją odpowiedź.",
+  "offers.noBookings": "Żadna propozycja pracy nie czeka na Państwa odpowiedź.",
+  "offers.noInvitations": "Żadne zaproszenie nie czeka na Państwa odpowiedź.",
   "offers.untitledBooking": "Propozycja pracy",
   "offers.untitledInvitation": "Zaproszenie",
   "offers.from": "Od",
@@ -3953,24 +3953,24 @@ const pl: Catalogue = {
   "offers.previewBody": "To prawdziwa odpowiedź: druga strona ją zobaczy. Nic jeszcze nie zostało wysłane.",
   "offers.confirm": "Potwierdź odpowiedź",
   "offers.cancel": "Wstecz",
-  "offers.doneTitle": "Twoja odpowiedź została zapisana",
+  "offers.doneTitle": "Odpowiedź została zapisana",
   "offers.doneBody": "Druga strona już ją widzi.",
   "offers.backToList": "Wróć do ofert",
   "offers.prepareFailedTitle": "Nie udało się przygotować odpowiedzi",
-  "offers.confirmFailedTitle": "Twoja odpowiedź nie została zapisana",
-  "offers.clash": "Te daty pokrywają się z już przyjętą pracą. Otwórz propozycję na stronie, aby zobaczyć kolizję i tam zdecydować.",
-  "offers.changed": "Ta oferta się zmieniła lub została już rozpatrzona. Wróć, aby zobaczyć aktualną listę.",
+  "offers.confirmFailedTitle": "Odpowiedź nie została zapisana",
+  "offers.clash": "Te daty pokrywają się z już przyjętą pracą. Proszę otworzyć propozycję na stronie, aby zobaczyć kolizję i tam zdecydować.",
+  "offers.changed": "Ta oferta się zmieniła lub została już rozpatrzona. Proszę wrócić, aby zobaczyć aktualną listę.",
   "opportunities.confirm": "Wyślij",
   "opportunities.cancel": "Wstecz",
   "opportunities.sentTitle": "Wysłano",
-  "opportunities.sentBody": "Właściciel tej potrzeby widzi teraz Twoje zainteresowanie w swoim widoku.",
+  "opportunities.sentBody": "Właściciel tej potrzeby widzi teraz Państwa zainteresowanie w swoim widoku.",
   "opportunities.sentStatus": "Status",
   "opportunities.another": "Wróć do listy",
-  "opportunities.notVisible": "Ta potrzeba nie jest już dla Ciebie widoczna (mogła zostać zamknięta).",
+  "opportunities.notVisible": "Ta potrzeba nie jest już dla Państwa widoczna (mogła zostać zamknięta).",
   "opportunities.draftFailedTitle": "Nie udało się przygotować",
   "opportunities.sendFailedTitle": "Nie udało się wysłać",
   "availability.title": "Kto jest wolny",
-  "availability.intro": "Twój aktywny zespół na najbliższe 7 dni. Zajęty nie znaczy niedostępny: nakładanie się to ostrzeżenie, nie odmowa.",
+  "availability.intro": "Aktywny zespół na najbliższe 7 dni. Zajęty nie znaczy niedostępny: nakładanie się to ostrzeżenie, nie odmowa.",
   "availability.actingFor": "W imieniu",
   "availability.window": "Okres",
   "availability.rosterTotal": "Członkowie zespołu",
@@ -3981,14 +3981,14 @@ const pl: Catalogue = {
   "availability.committedTo": "zajęty przy",
   "availability.overridable": "upoważniona osoba może zdecydować inaczej",
   "availability.sourcesPartial": "Nie wszystkie źródła odpowiedziały: nie udało się odczytać nieobecności lub zobowiązań, więc nikt tutaj nie jest z pewnością pokazany jako wolny.",
-  "availability.personalWorkspace": "Jesteś w swojej przestrzeni osobistej. Przełącz się w Ustawieniach na przestrzeń organizacji, aby zobaczyć jej zespół.",
+  "availability.personalWorkspace": "Są Państwo w przestrzeni osobistej. Aby zobaczyć zespół, proszę przełączyć się w Ustawieniach na przestrzeń organizacji.",
   "availability.noOrganization": "To konto nie należy do żadnej organizacji, więc nie ma zespołu, o którym można raportować.",
   "availability.noRoster": "Ta organizacja nie ma aktywnych członków zespołu, więc nie ma o kim raportować.",
   "availability.noCompanyContext": "Ta przestrzeń nie może działać jako pracodawca, więc nie ma zespołu, o którym można raportować.",
   "account.title": "Prywatność i konto",
   "account.body":
-    "Te strony otwierają się w przeglądarce, na stronie internetowej. Prośbę o Twoje dane lub o usunięcie konta składasz tam, w sekcji Prywatność.",
-  "account.privacy": "Prywatność, Twoje dane i usunięcie konta",
+    "Te strony otwierają się w przeglądarce, na stronie internetowej. Prośbę o dostęp do danych lub o usunięcie konta składa się tam, w sekcji Prywatność.",
+  "account.privacy": "Prywatność, dane i usunięcie konta",
   "account.terms": "Warunki korzystania z usługi",
   "account.privacyPolicy": "Polityka prywatności",
   "account.deletionInfo": "Jak działa usuwanie konta (bez logowania)",
