@@ -1684,7 +1684,7 @@ const nl: Catalogue = {
   "auth.register.toSignIn": "Ik heb al een account",
   "auth.signIn.forgot": "Wachtwoord vergeten?",
   "auth.register.legal":
-    "Door een account aan te maken, gaat u akkoord met de gebruiksvoorwaarden en het privacybeleid.",
+    "Door een account aan te maken, ga je akkoord met de gebruiksvoorwaarden en het privacybeleid.",
   "auth.error.rejected": "Dit e-mailadres en wachtwoord komen niet overeen.",
   "auth.error.unreachable":
     "We konden de server niet bereiken, dus we weten niet of deze gegevens kloppen. Controleer uw verbinding en probeer het opnieuw.",

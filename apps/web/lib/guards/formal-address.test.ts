@@ -3,6 +3,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { isLegalTextKey } from "./legal-text-keys";
+
 /**
  * ONE FORM OF ADDRESS — FORMAL (owner decision 2026-11-15).
  *
@@ -17,6 +19,9 @@ import { describe, expect, it } from "vitest";
  * `messages/<locale>.json` and the per-namespace `messages/<locale>/*.json` —
  * and refuses the unambiguous informal markers: the pronouns, the 2nd-person
  * singular imperatives and conditionals.
+ *
+ * NOT covered: LEGAL TEXTS (`legal-text-keys.ts`), which keep their exact
+ * wording in every language and are pinned by `legal-texts-unchanged.test.ts`.
  *
  * NOT covered, on purpose: the USER'S OWN WORDS. A chat bubble the user sends
  * ("Parodyk mano profilį") or a message a worker sends to a manager word for
@@ -125,6 +130,8 @@ describe("one form of address — formal, in every catalog the web app loads (ow
       const informal = Object.entries(strings)
         .filter(([k]) => !exempt.has(k))
         .filter(([k]) => !(FIXED_NAMESPACES[locale] ?? []).some((ns) => k.split("::")[1]?.startsWith(`${ns}.`)))
+        // Legal texts keep their exact wording in every language (owner, #3388, 2026-11-16).
+        .filter(([k]) => !isLegalTextKey(k.split("::")[1] ?? ""))
         .filter(([, v]) => rules.some((rule) => rule.test(v)))
         .map(([k, v]) => `${k}: ${v}`);
       expect(informal, informal.join("\n")).toEqual([]);
