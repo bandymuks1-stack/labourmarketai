@@ -25,12 +25,11 @@ import { expect, test, type Browser, type BrowserContext, type Locator, type Pag
  * cannot stop the steps above:
  *   I-8  the institution runs a programme, opens a cohort and places the learner in it;
  *   I-9  a separate employer signs up and invites the same person as an intern; they accept;
- *   I-10 the employer switches review on for the intern (the same audited manual door) —
- *        KNOWN BREAK, test.fail (see INTERN_REVIEW_DOOR_MISSING);
+ *   I-10 the employer switches review on for the intern (the same audited manual door);
  *   I-11 the learner records a practice day in that intern relationship;
- *   I-12 the employer confirms it — blocked by the same break, test.fail;
+ *   I-12 the employer confirms it;
  *   I-13 the learner's Living CV (/cv) shows the practice period and the recognition;
- *        I-13b the period stands as employer-confirmed — blocked by the same break, test.fail;
+ *        I-13b the period stands as employer-confirmed;
  *   I-14 least privilege: the institution's evidence list does not offer the employer's day;
  *   I-15 EDU-5: a skill the learner accepted reaches the reviewer's learning queue through the
  *        brief's door, and a human decision is recorded.
@@ -561,18 +560,7 @@ test("I-9. a separate employer signs up and invites the same person as an intern
   expect(school.map((r) => r.status), "the person stays the institution's learner").toEqual(["active"]);
 });
 
-/**
- * KNOWN PRODUCT BREAK (found by this walk, CI 2026-11-16): the employer cannot switch review on for
- * an intern. `intern` is journal_reviewable (migration 20261012170000: "the host opens it through
- * the existing audited manual door"), but that door, the members panel on /dashboard/company/people,
- * lists only `MEMBERSHIP_SLUGS` (lib/operations/org-members.ts), which omits `intern`. The intern
- * row, and so its review toggle, never renders. I-10 and I-12 and I-13b fail until it is fixed.
- * Then they pass unexpectedly and fail the job, so remove these `test.fail` marks.
- */
-const INTERN_REVIEW_DOOR_MISSING = "intern engagement absent from the members panel (MEMBERSHIP_SLUGS omits 'intern')";
-
 test("I-10. the employer switches review on for the intern through the audited manual door", async ({ browser }) => {
-  test.fail(true, INTERN_REVIEW_DOOR_MISSING);
   const { page, close } = await as(browser, EMPLOYER);
   await page.goto(`${BASE}/en/dashboard/company/people#org-members`);
   const fold = page.getByTestId("people-more");
@@ -642,8 +630,6 @@ test("I-11. the learner records a practice day in the intern relationship", asyn
 });
 
 test("I-12. the employer confirms the intern's practice day", async ({ browser }) => {
-  // Blocked by the same break: with review off (I-10) the day never reaches the employer's queue.
-  test.fail(true, INTERN_REVIEW_DOOR_MISSING);
   const { page, close } = await as(browser, EMPLOYER);
   await page.goto(`${BASE}/en/dashboard/inbox`);
   const main = page.getByRole("main");
@@ -694,8 +680,6 @@ test("I-13. the learner's Living CV shows the practice period and the recognitio
 });
 
 test("I-13b. the practice period on the CV stands as confirmed by the employer", async ({ browser }) => {
-  // Blocked by the same break: without review the employer cannot confirm the day (I-12).
-  test.fail(true, INTERN_REVIEW_DOOR_MISSING);
   const { page, close } = await as(browser, LEARNER);
   const main = await openCv(page);
   const internship = main.getByTestId("cv-practice-history").getByTestId("cv-history-node").filter({ hasText: EMPLOYER_ORG });
