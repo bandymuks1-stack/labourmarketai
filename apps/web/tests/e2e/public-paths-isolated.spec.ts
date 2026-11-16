@@ -168,7 +168,9 @@ async function panelLink(page: Page, intentId: string, link: PublicIntentLink): 
 
   if (link.account) {
     expectNoAuth(seen.slice(0, beforeClick), "the workspace link's click");
-    await page.waitForURL(/\/en\/auth\/login/, { timeout: 60_000 });
+    // A newcomer's first step for some workspace links is an account: those
+    // carry a guest door, sign-up with the same `next` (N3, "Create a free CV").
+    await page.waitForURL(link.guestHref ? /\/en\/auth\/signup/ : /\/en\/auth\/login/, { timeout: 60_000 });
     sameDestination(nextOf(page.url()), link.href);
     return;
   }
@@ -323,8 +325,10 @@ async function assistant(page: Page): Promise<void> {
   await expect(link).toBeVisible({ timeout: 30_000 });
   expectNoAuth(seen, "the assistant link's click");
   await link.click();
-  await page.waitForURL(/\/en\/auth\/login/, { timeout: 60_000 });
-  sameDestination(nextOf(page.url()), "/dashboard");
+  // #3409 (F8): signed out, the assistant entry opens the landing's question
+  // box, which needs no account; a sentence typed there rides through sign-up.
+  await page.waitForURL((u) => /^\/en\/?$/.test(u.pathname) && u.hash === "#find", { timeout: 60_000 });
+  expectNoAuth(seen, "the assistant link's destination");
 }
 
 async function education(page: Page): Promise<void> {

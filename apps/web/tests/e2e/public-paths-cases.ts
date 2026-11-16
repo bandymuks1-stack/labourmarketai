@@ -10,7 +10,8 @@ import { PUBLIC_INTENTS, PUBLIC_INTENT_IDS } from "../../lib/navigation/public-i
  * link added to the navigation is a new case without anyone editing this file.
  * The `account: true` panel links are the signed-in "workspace links": for
  * them the genuine step IS the auth page, reached directly with a correct
- * `next`.
+ * `next`; one that carries a `guestHref` (a newcomer's first step is an
+ * account, e.g. "Create a free CV") is sign-up with that `next`.
  */
 export type PublicPathCase = {
   readonly id: string;
@@ -23,7 +24,9 @@ export const PUBLIC_PATH_CASES: readonly PublicPathCase[] = [
     intent.links.map((link) => ({
       id: `link:${intent.id}.${link.id}`,
       title: link.account
-        ? `workspace link ${intent.id}.${link.id} → sign-in with next=${link.href}`
+        ? link.guestHref
+          ? `workspace link ${intent.id}.${link.id} → sign-up with next=${link.href}`
+          : `workspace link ${intent.id}.${link.id} → sign-in with next=${link.href}`
         : `panel link ${intent.id}.${link.id} → ${link.href}`,
     })),
   ),
@@ -33,7 +36,7 @@ export const PUBLIC_PATH_CASES: readonly PublicPathCase[] = [
   { id: "door:company-need", title: "the company-need form is sent without an account" },
   { id: "intake:worker", title: "worker-intake: the typed intake survives sign-up" },
   { id: "calculator:project-cost", title: "calculator result carries its inputs into company-need" },
-  { id: "header:assistant", title: "header assistant link → sign-in with next=/dashboard" },
+  { id: "header:assistant", title: "header assistant link → the landing question box, no account (#3409)" },
   { id: "header:education", title: "header More → education link → the institution sign-up door" },
 ];
 
