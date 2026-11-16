@@ -14,13 +14,14 @@ import type { Metadata, MetadataRoute } from "next";
 import { MARKETING_ORIGIN, MARKETING_HOST } from "@/lib/domain/canonical";
 import {
   BRAND_NAME,
-  BRAND_ORGANIZATION_DESCRIPTION,
   BRAND_SEO,
+  brandedTitle,
+  hreflangAlternates,
   OG_IMAGE_SIZE,
   localizedUrl,
   resolveActiveLocale,
 } from "@/lib/seo/metadata";
-import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/config";
+import { defaultLocale, type ActiveLocale } from "@/lib/i18n/config";
 import {
   getAnswer,
   isIndexable,
@@ -30,7 +31,7 @@ import {
 } from "@/lib/answer-engine/publishing";
 
 const OG_LOCALE: Record<ActiveLocale, string> = {
-  en: "en_GB", lt: "lt_LT", ru: "ru_RU", nl: "nl_NL", de: "de_DE", pl: "pl_PL",
+  en: "en_GB", lt: "lt_LT", ru: "ru_RU", nl: "nl_NL", de: "de_DE", pl: "pl_PL", sv: "sv_SE",
 };
 
 const url = (locale: ActiveLocale, path: string) => `${MARKETING_ORIGIN}/${locale}${path}`;
@@ -59,9 +60,12 @@ function questionHreflang(id: string): Record<string, string> | undefined {
     const a = getAnswer(id, l);
     if (a) langs[l] = url(l, questionPath(a.localizedSlug));
   }
-  // x-default → LT only when the LT version is actually published.
-  const ltAnswer = published.includes(defaultLocale) ? getAnswer(id, defaultLocale) : null;
-  if (ltAnswer) langs["x-default"] = url(defaultLocale, questionPath(ltAnswer.localizedSlug));
+  // x-default → the English version, as on every other public page (U-2:
+  // a searcher whose language we do not route gets English, not Lithuanian).
+  // Only a published version can be x-default, so an answer without English
+  // keeps the default-locale one; one with neither declares none (never a 404).
+  const xDefault = (["en", defaultLocale] as const).find((l) => langs[l]);
+  if (xDefault) langs["x-default"] = langs[xDefault]!;
   return Object.keys(langs).length > 0 ? langs : undefined;
 }
 
@@ -69,7 +73,7 @@ export function buildQuestionMetadata(answer: LocalizedAnswer): Metadata {
   const indexable = isIndexable(answer.canonicalQuestionId, answer.locale);
   const canonical = url(answer.locale, questionPath(answer.localizedSlug));
   return {
-    title: `${answer.title} · ${BRAND_NAME}`,
+    title: brandedTitle(answer.title),
     description: answer.description,
     alternates: { canonical, languages: questionHreflang(answer.canonicalQuestionId) },
     robots: indexable ? { index: true, follow: true } : { index: false, follow: false },
@@ -97,16 +101,31 @@ export function buildStaticQuestionsMetadata(
   path: string,
   title: string,
   description: string,
+  /** Locales in which THIS page has content. Omitted → every active locale.
+   *  A hub or category page exists in a locale only once that locale has a
+   *  published answer; naming the others as alternates points search engines
+   *  at a 404 (category) or at an empty page (hub). */
+  publishedIn?: readonly ActiveLocale[],
 ): Metadata {
+  // The ONE public-page hreflang set (all active locales + x-default = English),
+  // narrowed to the locales where the page really has content.
+  const all = hreflangAlternates(path);
   const langs: Record<string, string> = {};
-  for (const l of activeLocales) langs[l] = url(l, path);
-  langs["x-default"] = url(defaultLocale, path);
+  if (publishedIn) {
+    for (const l of publishedIn) langs[l] = all[l]!;
+    const fallback = publishedIn.includes("en") ? "en" : publishedIn[0];
+    if (fallback) langs["x-default"] = all[fallback]!;
+  } else {
+    Object.assign(langs, all);
+  }
+  const hasContent = !publishedIn || publishedIn.includes(locale);
   const canonical = url(locale, path);
   return {
-    title: `${title} · ${BRAND_NAME}`,
+    title: brandedTitle(title),
     description,
-    alternates: { canonical, languages: langs },
-    robots: { index: true, follow: true },
+    alternates: { canonical, languages: hasContent ? langs : {} },
+    // Nothing to read here yet in this locale: reachable, not indexable.
+    robots: { index: hasContent, follow: true },
     openGraph: {
       type: "website",
       siteName: BRAND_NAME,
@@ -131,17 +150,22 @@ export interface BreadcrumbItem {
   readonly url: string;
 }
 
+/** One identity for the publisher wherever it is named, so a reader of several
+ *  pages sees one organization. */
+const ORGANIZATION_ID = `${MARKETING_ORIGIN}/#organization`;
+
 /** The publisher, emitted ONCE per page by app/[locale]/layout.tsx. No sameAs:
  *  no social profile URLs exist and none are invented. */
-export function organizationJsonLd() {
+export function organizationJsonLd(locale: string) {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": ORGANIZATION_ID,
     name: BRAND_NAME,
     url: MARKETING_ORIGIN,
     logo: `${MARKETING_ORIGIN}/icon-512.png`,
-    // Same owner-approved sentence as app/manifest.ts — one source.
-    description: BRAND_ORGANIZATION_DESCRIPTION,
+    // The owner's definition in the page's language, as on the home <meta>.
+    description: BRAND_SEO[resolveActiveLocale(locale)].description,
   };
 }
 
@@ -156,7 +180,7 @@ export function webSiteJsonLd(locale: string) {
     // The per-locale brand description the homepage <meta> already carries.
     description: BRAND_SEO[resolveActiveLocale(locale)].description,
     inLanguage: locale,
-    publisher: { "@type": "Organization", name: BRAND_NAME, url: MARKETING_ORIGIN },
+    publisher: { "@type": "Organization", "@id": ORGANIZATION_ID, name: BRAND_NAME, url: MARKETING_ORIGIN },
   };
 }
 

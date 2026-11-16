@@ -77,6 +77,17 @@ export const NATIVE_APP_PATHS: readonly string[] = [
   "/log-work",
   "/profile",
   "/settings",
+  "/opportunities",
+  "/offers",
+  "/availability",
+  "/jobs",
+  "/need",
+  "/project",
+  "/projects",
+  "/notifications",
+  "/conversation",
+  "/messages",
+  "/correct-entry",
 ];
 
 /** An Apple Team ID is 10 uppercase alphanumerics. */

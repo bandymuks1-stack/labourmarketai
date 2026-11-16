@@ -80,6 +80,11 @@ describe("one campaign variant reads as one row of the real handoff", () => {
     row(FUNNEL_EVENTS.jobReturnedAfterAuth, campaign("welder-w1", "pl")),
     ...many(2, () => row(FUNNEL_EVENTS.jobCompared, campaign("welder-w1", "pl"))),
     row(FUNNEL_EVENTS.vacancyInterestExpressed, campaign("welder-w1", "pl")),
+    // Worker steps after sign-up (owner decision 2026-11-03).
+    row(FUNNEL_EVENTS.profileSaved, campaign("welder-w1", "pl")),
+    row(FUNNEL_EVENTS.profileMatchable, campaign("welder-w1", "pl")),
+    ...many(3, () => row(FUNNEL_EVENTS.journalEntrySaved, campaign("welder-w1", "pl"))),
+    row(FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed, campaign("welder-w1", "pl")),
   ];
 
   it("counts every step of the handoff on the variant that produced it", () => {
@@ -95,6 +100,10 @@ describe("one campaign variant reads as one row of the real handoff", () => {
       returnedToJob: 1,
       compared: 2,
       interest: 1,
+      profileSaved: 1,
+      profileMatchable: 1,
+      journalEntrySaved: 3,
+      jobSearch: 1,
     });
   });
 

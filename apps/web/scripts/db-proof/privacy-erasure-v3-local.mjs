@@ -39,6 +39,24 @@ const forwardFix = join(repo, "supabase/migrations/20261019190000_erasure_sentin
 const forwardFixRollback = join(repo, "supabase/rollbacks/20261019190000_erasure_sentinel_finite_ban_v1.down.sql");
 const pgBin = process.env.PG16_BIN || "C:\\Program Files\\PostgreSQL\\16\\bin";
 const port = Number(process.env.PG_PROOF_PORT || 5499);
+// WITH_CANCEL_MIGRATION=1 chains 20261109120000 (holder cancel + row lock + grace)
+// on top of the executor, so every case below also runs on the MIGRATED schema.
+// Its executor needs a confirmation row and its runner a 30-day-old confirmation:
+// the chained run records both (owner_written_approval, backdated) — nothing else changes.
+const WITH_CANCEL = process.env.WITH_CANCEL_MIGRATION === "1";
+const cancelMigration = join(repo, "supabase/migrations/20261109120000_privacy_cancel_account_deletion.sql");
+// what 20261109120000 reads that this mirror lacks: closed_outcome (20261024090000) and 0024 is_admin
+const CANCEL_PRELUDE = String.raw`
+alter table public.customer_requests add column if not exists closed_outcome text
+  check (closed_outcome is null or closed_outcome in ('completed', 'withdrawn', 'discarded'));
+create table if not exists public.profile_roles (profile_id uuid references public.profiles(id) on delete cascade, role text not null);
+create or replace function public.is_admin() returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.profiles where id = auth.uid() and active_role = 'admin')
+      or exists (select 1 from public.profile_roles where profile_id = auth.uid() and role = 'admin') $$;
+insert into public.privacy_erasure_registry_v3 (table_name, column_name, parent, fk_rule_expected, treatment, decided_by, note)
+values ('profile_roles', 'profile_id', 'profiles', 'cascade', 'allow_cascade', 'engineering', 'proof stand-in for 0024 profile_roles')
+on conflict do nothing;
+`;
 const tmp = join(repo, ".tmp", `pg-erasure-v3-${process.pid}`);
 const dataDir = join(tmp, "data");
 const logFile = join(tmp, "pg.log");
@@ -286,7 +304,8 @@ const containsIdentifier = (text) => [SUBJECT, EMAIL_A, NAME_A, PHONE_A.replace(
 
 function main() {
   mkdirSync(tmp, { recursive: true });
-  console.log(`cluster: ${tmp} (port ${port})`);
+  console.log(`privacy-erasure-v3-local — ${new Date().toISOString()}${WITH_CANCEL ? " — WITH_CANCEL_MIGRATION=1" : ""}`);
+  console.log(`cluster: <repo>/.tmp/pg-erasure-v3-${process.pid} (port ${port})`);
   run(bin("initdb"), ["-D", dataDir, "-U", "postgres", "-A", "trust", "-E", "UTF8", "--locale=C", "--no-sync"]);
   // stdio "ignore": the postmaster inherits pg_ctl's pipes on Windows and spawnSync would never return
   run(bin("pg_ctl"), ["-D", dataDir, "-l", logFile, "-w", "-o", `-p ${port} -c listen_addresses=127.0.0.1 -c fsync=off -c synchronous_commit=off`, "start"], { stdio: "ignore" });
@@ -321,7 +340,23 @@ function main() {
     ok(psqlFile("proof", migration).status === 0 && one("proof", "select count(*) from public.workers where profile_id = public.privacy_erasure_sentinel_profile_id()") === "1",
       "migration re-applies on the same database (idempotent) without a second sentinel worker");
 
+    if (WITH_CANCEL) {
+      console.log("\n[chain] 20261109120000 applied on top of the executor (WITH_CANCEL_MIGRATION=1)");
+      const pre = join(tmp, "cancel-prelude.sql");
+      writeFileSync(pre, CANCEL_PRELUDE);
+      if (psqlFile("proof", pre).status !== 0) throw new Error("cancel prelude failed");
+      const cm = psqlFile("proof", cancelMigration);
+      if (cm.status !== 0) throw new Error(`20261109120000 failed: ${cm.err}`);
+      ok(one("proof", "select count(*) from pg_proc where proname in ('privacy_cancel_account_deletion_v1','privacy_account_deletion_status_v1','privacy_account_deletion_grace')") === "3"
+        && one("proof", "select count(*) from pg_trigger where tgname = 'customer_requests_privacy_row_guard'") === "1", "chain: 20261109120000 applied (cancel, status, grace, privacy-row trigger)");
+    }
     seed("proof");
+    if (WITH_CANCEL) {
+      // the owner's written approval for the two requests this proof executes, older than the grace
+      psql("proof", `insert into public.privacy_erasure_confirmations_v1 (request_id, profile_id, method, confirmed_at) values
+        ('${REQ_A}', '${SUBJECT}', 'owner_written_approval', now() - interval '31 days'),
+        ('${REQ_C}', '${THIRD}', 'owner_written_approval', now() - interval '31 days')`);
+    }
     const before = json("proof", `select jsonb_build_object('je', (select count(*) from public.journal_entries), 'uce', (select count(*) from public.usage_cost_events), 'pce', (select count(*) from public.privacy_consent_events), 'users', (select count(*) from auth.users))`);
 
     // ── T1 ───────────────────────────────────────────────────────────────
@@ -419,6 +454,43 @@ function main() {
     ok(json("proof", `select public.privacy_erasure_notice_result_v1('${due[0].id}', true, '<msg-2>')`).ok === false, "T1e a second 'sent' result is a no-op (idempotent)");
     ok(one("proof", `select count(*) from public.privacy_erasure_notices_v1 where recipient_email ilike '%${EMAIL_A}%'`) === "0", "T1e no table keeps the person's address after the notice");
 
+    console.log("\n[T1f] residual data after the erasure: nothing still references the person");
+    const fkLeft = json("proof", String.raw`
+      with fk as (
+        select c.conrelid::regclass::text as tbl, a.attname::text as col,
+               case c.confrelid when 'public.profiles'::regclass then '${SUBJECT}' else 'aaaa0000-0000-4000-8000-000000000001' end as key
+          from pg_constraint c join pg_attribute a on a.attrelid = c.conrelid and a.attnum = c.conkey[1]
+         where c.contype = 'f' and c.confrelid in ('public.profiles'::regclass, 'public.workers'::regclass))
+      select jsonb_build_object('fks', count(*), 'left', coalesce(sum((xpath('/row/n/text()',
+               query_to_xml(format('select count(*) as n from %s where %I = %L', tbl, col, key), false, true, '')))[1]::text::int), 0))
+        from fk`);
+    ok(fkLeft.fks > 10 && fkLeft.left === 0, `T1f FK catalog post-check: 0 rows in ${fkLeft.fks} person FK columns (profiles + workers) still point at the person or their worker`);
+    const valueLeft = json("proof", String.raw`
+      select coalesce(jsonb_agg(jsonb_build_object('t', v.schema_name || '.' || v.table_name || '.' || v.column_name, 'match', v.match, 'treatment', v.treatment,
+               'n', (xpath('/row/n/text()', query_to_xml(
+                 case v.match
+                   when 'email_exact' then format('select count(*) as n from %I.%I where lower(%I::text) = %L', v.schema_name, v.table_name, v.column_name, '${EMAIL_A}')
+                   when 'phone_exact' then format('select count(*) as n from %I.%I where regexp_replace(coalesce(%I::text, %L), %L, %L, %L) = %L', v.schema_name, v.table_name, v.column_name, '', '\D', '', 'g', '${PHONE_A.replace(/\D/g, "")}')
+                   else format('select count(*) as n from %I.%I where %I::text ilike %L or %I::text ilike %L', v.schema_name, v.table_name, v.column_name, '%${SUBJECT}%', v.column_name, '%${EMAIL_A}%')
+                 end, false, true, '')))[1]::text::int)), '[]'::jsonb)
+        from public.privacy_erasure_value_rules_v3 v
+       where to_regclass(format('%I.%I', v.schema_name, v.table_name)) is not null
+         and exists (select 1 from pg_attribute where attrelid = to_regclass(format('%I.%I', v.schema_name, v.table_name)) and attname = v.column_name and not attisdropped)`);
+    const leftOver = valueLeft.filter((v) => v.n > 0);
+    ok(valueLeft.length > 0 && leftOver.every((v) => v.treatment === "report_only"),
+      `T1f value rules (e-mail / phone / mention) on ${valueLeft.length} live columns: no erasable rule still matches the person${leftOver.length ? " (report_only kept: " + leftOver.map((v) => v.t + "=" + v.n).join(", ") + ")" : ""}`);
+    ok(leftOver.length === 1 && leftOver[0].t === "auth.audit_log_entries.payload", "T1f the ONLY remaining mention is auth.audit_log_entries.payload (report_only: security evidence, M41 6 years)");
+    console.log("\n[T1g] what is retained, by decision");
+    const rc = json("proof", `select to_jsonb(r) from public.privacy_erasure_receipts_v3 r where request_id = '${REQ_A}'`);
+    ok(rc && /^[0-9a-f-]{36}$/.test(rc.erased_subject_id) && rc.requested_at && rc.executed_at && Array.isArray(rc.actions) && rc.actions.length > 0 && Array.isArray(rc.retained),
+      `T1g retained: receipt (erased_subject_id tombstone, requested_at, executed_at, ${rc?.actions?.length} actions, ${rc?.retained?.length} retained classes)`);
+    ok(rc && !containsIdentifier(JSON.stringify(rc)) && rc.executed_by !== SUBJECT, "T1g retained: the receipt holds no identifier of the person (id / e-mail / name / phone); executed_by is the operator, not the person");
+    ok(one("proof", `select (profile_id = ${S})::text || '|' || status || '|' || coalesce(payload->>'privacy_erasure', '') || '|' || (payload->>'erased_subject_id' = '${rc?.erased_subject_id}')::text
+                      || '|' || (need_summary is null and notes is null and manual_review_note is null)::text from public.customer_requests where id = '${REQ_A}'`) === "true|closed|executed|true|true",
+      "T1g retained: the request row (Art. 5(2), M40 3 years) severed to the sentinel, closed as executed, tombstone = receipt's, free text scrubbed");
+    ok(one("proof", `select count(*) || '|' || count(*) filter (where recipient_email is null and status = 'sent' and provider_message_id is not null) from public.privacy_erasure_notices_v1 where request_id = '${REQ_A}'`) === "1|1",
+      "T1g retained: the completion notice as proof of delivery (message id) — recipient_email scrubbed after sending");
+
     // ── T2 ───────────────────────────────────────────────────────────────
     console.log("\n[T2] forged / expired / reused / cross-request tokens");
     const forged = "f".repeat(64);
@@ -478,6 +550,10 @@ function main() {
 
     // ── T6 ───────────────────────────────────────────────────────────────
     console.log("\n[T6] runner path: employer-linked journal -> human review, no deletion");
+    if (WITH_CANCEL) {
+      ok(json("proof", "select coalesce(jsonb_agg(d), '[]') from public.privacy_erasure_due_v1(10) d").length === 0, "chain T6 a request confirmed just now is NOT due (30-day grace)");
+      psql("proof", `update public.privacy_erasure_confirmations_v1 set confirmed_at = now() - interval '31 days' where request_id = '${REQ_E}'`);
+    }
     const dueReq = json("proof", "select coalesce(jsonb_agg(d), '[]') from public.privacy_erasure_due_v1(10) d");
     ok(dueReq.length === 1 && dueReq[0].request_id === REQ_E, `T6 only the confirmed request is due (${dueReq.length})`);
     ok(json("proof", `select public.privacy_erasure_mark_v1('${REQ_D}', 'approved')`).error === "not_confirmed", "T6 an unconfirmed request cannot be moved by the runner");
@@ -501,7 +577,7 @@ function main() {
 
     // ── T7 ───────────────────────────────────────────────────────────────
     console.log("\n[T7] an erased request is never due again");
-    psql("proof", `insert into public.privacy_erasure_confirmations_v1 (request_id, profile_id, method) values ('${REQ_A}', '${SUBJECT}', 'owner_written_approval')`);
+    psql("proof", `insert into public.privacy_erasure_confirmations_v1 (request_id, profile_id, method) values ('${REQ_A}', '${SUBJECT}', 'owner_written_approval') on conflict (request_id) do nothing`);
     ok(json("proof", "select coalesce(jsonb_agg(d), '[]') from public.privacy_erasure_due_v1(10) d").length === 0, "T7 the erased (closed, no auth user) request is not due even with a confirmation");
 
     // ── T4 ───────────────────────────────────────────────────────────────

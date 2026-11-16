@@ -2,8 +2,10 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { proveActionTiles } from "./action-tile-proof";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * PRODUCTION ORDERS, BOOKINGS, EXECUTION — owner area 12 (registry rows 5.13,
@@ -190,6 +192,7 @@ async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
   const done = page.getByTestId("demand-done");
@@ -235,7 +238,7 @@ test("O-1 (5.13). Gama posts this run's need through the demand intake", async (
 test("O-2 (5.13). the worker raises a hand on that need", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("main").getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const card = page.locator(`li[id="opp-${requestId}"]`);
   await expect(card, "the new need is on the worker's board").toBeVisible({ timeout: 60_000 });
   await card.getByTestId("interest-express").click();
@@ -275,6 +278,12 @@ test("O-3 (5.13). Gama proposes dates to the hand-raiser from its candidate list
   await ctx.close();
 });
 
+/** The booking's row in the page's main region. While a reloaded page is
+ *  still streaming, React briefly holds a second, hidden copy of the list
+ *  outside <main>; a page-wide locator then matches both. A copy that never
+ *  goes away is a hydration failure, which mobile-surfaces M-5 measures. */
+const bookingById = (page: Page, id: string) => page.getByRole("main").getByTestId(`booking-${id}`);
+
 test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
@@ -289,7 +298,7 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
   await row.getByTestId("booking-withdraw-form").getByTestId("booking-withdraw-confirm").click();
   await expect(row.getByTestId("booking-withdrawn")).toBeVisible({ timeout: 30_000 });
   await page.reload();
-  const withdrawn = page.getByTestId(`booking-${bookingId}`);
+  const withdrawn = bookingById(page, bookingId);
   await expect(withdrawn).toHaveAttribute("data-status", "withdrawn", { timeout: 30_000 });
 
   // The company's own withdrawal may be undone with new dates (repeat actions).
@@ -298,7 +307,7 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
   const outcome = await propose(withdrawn, await firstFreeDay(28));
   expect(outcome, "the second proposal was sent").toBe("sent");
   await page.reload();
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "proposed", {
+  await expect(bookingById(page, bookingId)).toHaveAttribute("data-status", "proposed", {
     timeout: 30_000,
   });
   await ctx.close();
@@ -307,7 +316,7 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
 test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker", true);
   await page.goto("/lt/dashboard/bookings");
-  const row = page.getByTestId(`booking-${bookingId}`);
+  const row = bookingById(page, bookingId);
   await expect(row, "the proposal reached the worker").toBeVisible({ timeout: 30_000 });
   await expect(row).toHaveAttribute("data-direction", "incoming");
   await expect(row).toHaveAttribute("data-status", "proposed");
@@ -362,7 +371,7 @@ test("O-6 (5.13). Gama sees the acceptance and opens the conversation with the w
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto("/lt/dashboard/bookings");
-  const row = page.getByTestId(`booking-${bookingId}`);
+  const row = bookingById(page, bookingId);
   await expect(row).toHaveAttribute("data-status", "accepted", { timeout: 30_000 });
   await expect(row.getByTestId("booking-accepted-planning-link")).toBeVisible();
   await row.getByTestId("booking-outgoing-message-cta").click();
@@ -384,7 +393,7 @@ test("O-8 (5.13). Gama closes this run's need (cleanup, the booking stays histor
   await useWorkspace(page, GAMA);
   expect(await closeNeed(page, requestId)).toBe("closed");
   await page.goto("/lt/dashboard/bookings");
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "accepted", {
+  await expect(bookingById(page, bookingId)).toHaveAttribute("data-status", "accepted", {
     timeout: 30_000,
   });
   await ctx.close();
@@ -600,4 +609,18 @@ test("B-1 (6.4). a customer saves a request draft on the buyer workspace", async
     timeout: 30_000,
   });
   await ctx.close();
+});
+
+// ── T (#2828, owner A-09 ruling 2026-11-03): the bookings page's related-door
+// grid is the ONE action tile. Read-only: real links, no gold primary (these
+// are related doors), no destination twice, at 1280 and 390.
+test("T-1 (#2828). the bookings related-door grid renders as action tiles", async ({ browser }) => {
+  await proveActionTiles(
+    async (mobile) => {
+      const { ctx, page } = await as(browser, "manager", mobile);
+      return { page, close: () => ctx.close() };
+    },
+    "/lt/dashboard/bookings",
+    { scopeTestId: "bookings-connections", primaries: 0, prepare: (page) => useWorkspace(page, GAMA) },
+  );
 });

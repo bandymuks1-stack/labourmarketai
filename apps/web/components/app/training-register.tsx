@@ -22,6 +22,7 @@ import {
   isTrainingNotice,
 } from "@/lib/training/training-model";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 
 /**
  * Training & Certification section (v1) — one section, two audiences,
@@ -98,11 +99,19 @@ export async function TrainingRegister({
 
   const certs = await getCertificationRegister();
   const today = new Date();
+  // One organization's register in one workspace (decision 0024): RLS lets a
+  // person who belongs to several organizations read all of their courses,
+  // but the organization half shows only the ACTIVE workspace's. A person's
+  // own assignments ("mine") stay visible in every workspace.
+  const workspace = await getWorkspaceContext();
+  const activeOrganizationId =
+    workspace.workspaces.find((w) => w.kind === "organization" && w.id === workspace.activeWorkspaceId)?.id ?? null;
+  const programs = overview.programs.filter((p) => p.organizationId === activeOrganizationId);
   const managed = overview.assignments.filter(
-    (a) => a.assigneeProfileId !== overview.viewerProfileId,
+    (a) => a.assigneeProfileId !== overview.viewerProfileId && a.organizationId === activeOrganizationId,
   );
   const authority = await getTrainingAuthority([
-    ...overview.programs.map((p) => p.organizationId),
+    ...programs.map((p) => p.organizationId),
     ...managed.map((a) => a.organizationId),
   ]);
   const canCreate = authority.createOrganizationId !== null;
@@ -110,7 +119,7 @@ export async function TrainingRegister({
   // an empty register — the add form plus an honest empty state), or who can
   // already read courses or managed assignments (the read view).
   const showOrganization =
-    canCreate || overview.programs.length > 0 || managed.length > 0;
+    canCreate || programs.length > 0 || managed.length > 0;
 
   return (
     <section
@@ -233,7 +242,7 @@ export async function TrainingRegister({
           </form>
           ) : null}
 
-          {overview.programs.length === 0 ? (
+          {programs.length === 0 ? (
             <p
               className="rounded-md border border-dashed border-ink-500 p-3 text-sm text-text-muted"
               data-testid="training-programs-empty"
@@ -242,7 +251,7 @@ export async function TrainingRegister({
             </p>
           ) : (
             <ul className="flex flex-col gap-2">
-              {overview.programs.map((p) => (
+              {programs.map((p) => (
                 <li
                   key={p.id}
                   className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"

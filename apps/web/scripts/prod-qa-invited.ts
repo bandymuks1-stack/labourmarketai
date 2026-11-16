@@ -4,9 +4,9 @@
  * (owner decision 2026-10-28).
  *
  *   --provision  1. stores ONE synthetic partner referral for
- *                   `qa.invited+act1@labourmarket.ai` through the SAME database
+ *                   `qa.invited@labourmarket.ai` through the SAME database
  *                   function the partner door calls (`receive_external_referral_v1`,
- *                   service_role only). Reference `QA-SYNTHETIC-invited-act1`,
+ *                   service_role only). Reference `QA-SYNTHETIC-invited-mbx1`,
  *                   consent text marked QA-SYNTHETIC, empty declared context.
  *                   That function writes the invitation and an audit row and
  *                   calls nobody — the partner is not contacted.
@@ -37,7 +37,7 @@ import {
 import { findAuthUserByEmail } from "../lib/testing/prod-qa-find-user";
 
 const ACK = "--i-understand-production";
-export const QA_INVITED_REFERENCE = "QA-SYNTHETIC-invited-act1";
+export const QA_INVITED_REFERENCE = "QA-SYNTHETIC-invited-mbx1";
 
 function fail(message: string): void {
   console.error(`[prod-qa-invited] ${message}`);

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildBusinessHistory,
+  innerPeriodBound,
   livePeriods,
   type BusinessHistoryRecord,
   type HistoryPeriodStatement,
@@ -60,6 +61,27 @@ describe("one continuous business history, read in periods", () => {
       [{ ...VIVAT, periodStart: "2024-01-01", periodEnd: "2024-12-31" }],
     );
     expect(documented.periods[0]).toMatchObject({ placedByDate: 1, totals: { records: 1 } });
+  });
+
+  it("a bound known only to the month places only work CERTAINLY inside it (the inner span)", () => {
+    const monthEnd: HistoryPeriodStatement = {
+      ...VIVAT,
+      periodStart: "2022-01-11",
+      periodEnd: "2026-01-31",
+      periodEndPrecision: "month",
+    };
+    const h = buildBusinessHistory(
+      [
+        rec({ id: "dec", activityDate: "2025-12-15" }),
+        rec({ id: "jan-week", activityDate: null, periodStart: "2026-01-19", periodEnd: "2026-01-25" }),
+      ],
+      [monthEnd],
+    );
+    expect(h.periods[0]).toMatchObject({ placedByDate: 1, totals: { records: 1 } });
+    expect(h.notPlaced.records).toBe(1);
+    expect(innerPeriodBound("2026-01-31", "month", "end")).toBe("2026-01-01");
+    expect(innerPeriodBound("2024-02-10", "month", "start")).toBe("2024-02-29");
+    expect(innerPeriodBound("2022-01-11", null, "start")).toBe("2022-01-11");
   });
 
   it("a period aggregate is never split: one year (its start), whole hours", () => {

@@ -130,7 +130,9 @@ describe("6. sessions are revoked and deleted after every walk", () => {
     expect(workflow.slice(workflow.indexOf("- name: Walk"), revokeAt)).not.toMatch(/rm -f \S*storage-state/);
     // A cleanup that did not do its job fails the run (no quiet 0/0 pass).
     expect(workflow).toMatch(/PROD_QA_REVOKE_EXPECT_FILES: \$\{\{ steps\.mint\.outcome == 'success' && '1' \|\| '0' \}\}/);
-    expect(revoke).toMatch(/if \(revoked < seen\.size\) problems\.push/);
+    expect(revoke).toMatch(/if \(revoked \+ endedByOwnSignOut < seen\.size\) \{\s*problems\.push/);
+    // Only a 403/404 for a slot the walk itself signed out (its marker file) counts as done.
+    expect(revoke).toMatch(/\(res\.status === 403 \|\| res\.status === 404\) && signedOutSlots\.has\(slotOf\(name, FILE_RX\)\)/);
     expect(revoke).toMatch(/PROD_QA_REVOKE_EXPECT_FILES === "1" && files\.length === 0/);
     expect(revoke).toMatch(/process\.exitCode = 1;/);
     expect(revoke).not.toMatch(/Never fail the run on cleanup/);

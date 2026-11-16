@@ -59,7 +59,7 @@ describe("actor UI + i18n", () => {
     expect(SECTION).toContain("market-actor-filter");
   });
 
-  for (const loc of ["de", "en", "lt", "nl", "pl", "ru"]) {
+  for (const loc of ["de", "en", "lt", "nl", "pl", "ru", "sv"]) {
     it(`${loc}: actor keys present, non-empty, no banned words`, () => {
       const m = JSON.parse(read(join(WEB, "messages", `${loc}.json`))).marketplaceListings;
       expect(String(m.actorFilterLabel ?? "").trim().length).toBeGreaterThan(0);

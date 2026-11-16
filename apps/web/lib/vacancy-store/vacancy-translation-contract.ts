@@ -6,6 +6,11 @@
  * locally and fails the CI webpack build.
  */
 
+/** Whether a translation can run now; the note is the off state, in words. */
+export type TranslationAvailabilityV1 =
+  | { readonly on: true }
+  | { readonly on: false; readonly note: string };
+
 /** Why no rendering — never a technical enum on screen; the surface maps it. */
 export type TranslateVacancyUnavailableReason =
   /** The owner has not set a translation quantity yet — nothing was spent,

@@ -17,7 +17,7 @@
  * component edits.
  */
 
-import type { FeatureKey } from "./feature-availability";
+import type { CatalogEvidence, FeatureKey } from "./feature-availability";
 
 export type RoleAvailability =
   | "active"
@@ -102,6 +102,11 @@ export type LabourMarketRole = {
    *  surfaces today. Hidden rows are never safe; preparing rows are
    *  safe (rendered as preparing); active rows are always safe. */
   safeToShowInRoleSurfaces: boolean;
+  /** Production proof of the role's workspace (see CatalogEvidence). Required
+   *  for `active`; also kept for a hidden LIVE role whose holders use it. */
+  evidence?: readonly CatalogEvidence[];
+  /** Concrete reason a role is not `active` (internal). */
+  reason?: string;
   /** Render order for catalogue-driven surfaces. Lower is earlier. */
   sortOrder: number;
   /** Optional explicit setup route used by `start-available` / `partial`
@@ -118,6 +123,7 @@ export type LabourMarketRole = {
 export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
   {
     id: "worker",
+    evidence: [{ register: "1.5", proof: "41280157502" }, { register: "2.19", proof: "41279196446" }],
     labelKey: "auth.signup.role.worker",
     descriptionKey: "roles.worker.description",
     availability: "active",
@@ -130,6 +136,8 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
   },
   {
     id: "company",
+    evidence: [{ register: "E-1", proof: "41279196446" }],
+    reason: "Not an entry point: a company is added from the person account through /dashboard/start/company (start-available).",
     labelKey: "auth.signup.role.company",
     descriptionKey: "roles.company.description",
     availability: "start-available",
@@ -151,6 +159,8 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
     // renders held roles from profile_roles regardless of availability, and
     // /dashboard/agency + its tools stay live for them (legacy continuity).
     id: "agency",
+    evidence: [{ register: "A-1", proof: "41787046374" }],
+    reason: "Owner directive company-role-simplicity-v1: an agency is a company type, not a root role. Hidden from add-role surfaces; holders keep a working workspace (A-1).",
     labelKey: "auth.signup.role.agency",
     descriptionKey: "roles.agency.description",
     availability: "hidden",
@@ -174,6 +184,8 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
     // "Pirkėjas" as a peer space. setupRoute is kept so the legacy
     // /dashboard/start/buyer form still resolves.
     id: "customer",
+    evidence: [{ register: "C-1", proof: "41785749357" }],
+    reason: "Owner directive systemic-ux-roles-v1: buying is an action, not an identity. Hidden from add-role surfaces; holders keep a working workspace (C-1).",
     labelKey: "auth.signup.role.customer",
     descriptionKey: "roles.customer.description",
     availability: "hidden",
@@ -191,6 +203,7 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
   // text exists in LT + EN; that's a one-row flip.
   {
     id: "freelancer",
+    reason: "No production proof of a separate freelancer role path; service offers work from any person account (6.1).",
     labelKey: "auth.signup.role.freelancer",
     descriptionKey: "roles.freelancer.description",
     availability: "hidden",
@@ -203,6 +216,7 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
   },
   {
     id: "team_lead",
+    reason: "No team-lead role path: brigades are formed and offered inside the company and worker spaces (J-10, brigade-formation 41350506578).",
     labelKey: "auth.signup.role.team_lead",
     descriptionKey: "roles.team_lead.description",
     availability: "hidden",
@@ -215,6 +229,7 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
   },
   {
     id: "service_provider",
+    reason: "No separate role path: any person publishes service offers (6.1, marketplace 41729310761); public discovery is BLOCKED on an owner RED decision (SC-4, 6.21).",
     labelKey: "auth.signup.role.service_provider",
     descriptionKey: "roles.service_provider.description",
     availability: "hidden",

@@ -10,6 +10,7 @@ import {
   telemetryAppVersion,
   telemetryOriginFromEnv,
 } from "./production-host";
+import { firstTouchFromUserMetadata } from "./first-touch-user-metadata";
 
 /**
  * Pilot telemetry server action — single entry point for any client-side
@@ -89,6 +90,11 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "fragment_count", // # of journal fragments parsed
   "unresolved_unknown_count", // # of unknown-phrase cards left unlabelled
   "skill_count", // # of skills the user accepted/dismissed in one action
+  // ── Real-visitor page speed (`web_vitals`, 2026-11-12). Three numbers and
+  //    nothing else; the Largest Contentful Paint rides `duration_ms`.
+  "cls", // cumulative layout shift up to the sample, unitless, 3 decimals
+  "fcp_ms", // first contentful paint, ms
+  "ttfb_ms", // time to the first byte of the document, ms
   "preview_host", // bool — was the tester on a vercel.app preview?
   "had_selection", // bool — language-feedback widget: was text highlighted?
   "comment_length", // language-feedback widget: chars typed (number only)
@@ -224,7 +230,28 @@ export async function recordTelemetryEvent(
   };
   const stampedAppVersion = telemetryAppVersion();
 
-  const sanitizedMetadata = sanitizeMetadata(input.metadata ?? {}, originStamp);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const profileId = user?.id ?? null;
+
+  // The signed-in person's own first-touch campaign, read back from their
+  // account record (lib/telemetry/first-touch-user-metadata.ts), rides UNDER
+  // the client's keys so every step after sign-up is attributable without any
+  // device storage. The record holds it only when the person allowed
+  // analytics at sign-up (lib/consent/analytics-consent.ts), and a client
+  // event exists only after that same yes. If the extra keys would push the
+  // row over the byte cap, the event is kept without them.
+  const accountFirstTouch = user ? firstTouchFromUserMetadata(user.user_metadata) : {};
+  const withAccountFirstTouch =
+    Object.keys(accountFirstTouch).length > 0
+      ? sanitizeMetadata({ ...accountFirstTouch, ...(input.metadata ?? {}) }, originStamp)
+      : "too_large";
+  const sanitizedMetadata =
+    withAccountFirstTouch === "too_large" || withAccountFirstTouch === "invalid"
+      ? sanitizeMetadata(input.metadata ?? {}, originStamp)
+      : withAccountFirstTouch;
   if (sanitizedMetadata === "too_large") {
     return {
       ok: false,
@@ -239,12 +266,6 @@ export async function recordTelemetryEvent(
       message: "metadata must be a flat object of allowlisted keys.",
     };
   }
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const profileId = user?.id ?? null;
 
   // The generated `Database` type doesn't include `pilot_events` until
   // `pnpm db:types` is re-run after 0020 is applied. Cast supabase.from

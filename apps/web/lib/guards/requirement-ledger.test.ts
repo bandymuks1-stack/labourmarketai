@@ -62,7 +62,11 @@ describe("no second readiness model — the ledger derives from the existing der
   it("the existing checklist read is EXTENDED (optional statuses), its default stays the open rows only, and its anchors for the privacy guard are intact", () => {
     expect(ACCESS).toContain('const OPEN_READINESS_STATUSES = ["needed", "missing", "rejected", "expired"] as const;');
     expect(ACCESS).toContain('export const LEDGER_READINESS_STATUSES = ["needed", "missing", "received", "checked", "rejected", "expired"] as const;');
-    expect(ACCESS).toContain(".in(\"status\", [...(options?.statuses ?? OPEN_READINESS_STATUSES)])");
+    // The query moved into queryOwnReadinessItems (#2941: a failed read is
+    // null there, so the asks can say "unknown"); the public read still
+    // takes the optional statuses and still answers [] on failure.
+    expect(ACCESS).toContain("return (await queryOwnReadinessItems(workerId, projectIds, options?.statuses)) ?? [];");
+    expect(ACCESS).toContain(".in(\"status\", [...(statuses ?? OPEN_READINESS_STATUSES)])");
     expect(ACCESS).toMatch(/\.eq\("worker_id", workerId\)/);
     expect(ACCESS).not.toContain('"not_required"');
   });
@@ -188,7 +192,7 @@ describe("one visual consumer — the instructions page, ordinary words, honest 
       "rejected",
     ];
     const get = (obj: unknown, path: string): unknown => path.split(".").reduce<unknown>((o, k) => (o && typeof o === "object" ? (o as Record<string, unknown>)[k] : undefined), obj);
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const ledger = get(JSON.parse(read(`messages/${locale}.json`)), "instructions.card.ledger");
       expect(ledger, locale).toBeDefined();
       for (const key of REQUIRED_KEYS) {

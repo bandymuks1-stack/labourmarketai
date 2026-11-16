@@ -1,7 +1,10 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { contextPanel } from "./prod-context-panel";
 import { test, expect, type Browser, type Page } from "./prod-walk";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { collectPageErrors, expectRenderedOnce } from "./render-once";
 
 /**
  * PRODUCTION AGENCY CHAIN — owner programme 2026-10-12 §3B: an agency sets up
@@ -17,6 +20,14 @@ import { test, expect, type Browser, type Page } from "./prod-walk";
  * Every step is idempotent: a rerun finds the org, roster link and active
  * connection from earlier runs and continues from there. A-1b saves one
  * synthetic offer per run (offers are not metered against the open-need limit).
+ *
+ * A-6's accept proposes a booking to the synthetic worker, who never answers
+ * it. The database caps a client's open proposals at 10 (and 30 per 24 h), so
+ * runs that left theirs open made A-6 fail with "Too many open booking
+ * proposals" (run 43724558463). The proposal THIS run created is withdrawn in
+ * `afterAll` through the client's own Withdraw control, and only that one:
+ * earlier runs' leftovers are a production data change for the owner to
+ * decide, never this walk's.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const AGENCY = "QA-SYNTHETIC Agentūra";
@@ -53,6 +64,40 @@ async function workspace(page: Page, orgName: string): Promise<boolean> {
 }
 
 let requestId = "";
+/** Booking proposals this run's accept created (A-6), withdrawn in afterAll. */
+const createdProposals: string[] = [];
+
+/** The bookings page as the client reads it now: readable, or not (a load
+ *  that did not finish, or its own read-failed state). Retried, never guessed. */
+async function bookingsReadable(page: Page): Promise<boolean> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.goto("/lt/dashboard/bookings");
+    const shown = await page.getByTestId("bookings-page").waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
+    if (shown && !(await page.getByTestId("bookings-read-failed").isVisible().catch(() => false))) return true;
+  }
+  return false;
+}
+
+/** The client's open outgoing proposals by booking id: the bookings page
+ *  lists every one, newest first. Null when the page could not be read; the
+ *  teardown then withdraws nothing rather than guess which one is this run's. */
+async function openOutgoingProposalIds(page: Page): Promise<Set<string> | null> {
+  if (!(await bookingsReadable(page))) return null;
+  const ids = await page
+    .locator('[data-direction="outgoing"][data-status="proposed"]')
+    .evaluateAll((els) => els.map((el) => (el.getAttribute("data-testid") ?? "").replace(/^booking-/, "")).filter(Boolean));
+  return new Set(ids);
+}
+
+/** One proposal's stored status as the page shows it. "unreadable" and
+ *  "absent" (a readable page that does not list it) are told apart from every
+ *  real status, so an unread row is never taken for a closed one. */
+async function proposalStatus(page: Page, id: string): Promise<string> {
+  if (!(await bookingsReadable(page))) return "unreadable";
+  const row = page.getByTestId(`booking-${id}`);
+  if ((await row.count()) === 0) return "absent";
+  return (await row.getAttribute("data-status")) ?? "unreadable";
+}
 
 test("A-1. the agency has its own organization (set up once, through the product)", async ({ browser }) => {
   const { page, close } = await as(browser, "agency");
@@ -97,6 +142,7 @@ test("A-1b. the agency saves an offer and finds it on its home, one click from t
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
   await expect(page.getByTestId("demand-done")).toBeVisible({ timeout: 30_000 });
@@ -155,6 +201,8 @@ test("A-2. the agency puts a person on its roster; the person accepts", async ({
 
     const worker = await as(browser, "worker");
     await worker.page.goto("/lt/dashboard");
+    // The invitation is in the context panel: a column on a desktop, a sheet to open on a phone.
+    await contextPanel(worker.page, "open");
     const accept = worker.page.locator('[data-testid^="worker-invitation-accept-company-"]').first();
     await expect(accept).toBeVisible({ timeout: 30_000 });
     await accept.click();
@@ -163,6 +211,56 @@ test("A-2. the agency puts a person on its roster; the person accepts", async ({
     await agency.page.reload();
   }
   await expect(linked.first()).toBeVisible({ timeout: 30_000 });
+  await agency.close();
+});
+
+test("A-2b. the agency reads its people's document readiness (counts only, consent-gated)", async ({ browser }) => {
+  // Register A-2 (#3004): the readiness read counts the documents of the
+  // agency's LIVE roster people who consented to share them. It names nobody
+  // and shows no document. An honest "none consented" is a pass; only the
+  // "could not be read" state is a failure.
+  const agency = await as(browser, "agency");
+  await agency.page.goto("/lt/dashboard");
+  await workspace(agency.page, AGENCY);
+  const errors = collectPageErrors(agency.page);
+  await agency.page.goto("/lt/dashboard/documents");
+  // Exactly once, with evidence on a duplicate (seen here on 2cab333b).
+  await expectRenderedOnce(agency.page, "doc-centre-org", errors, "A-2b");
+  // Scoped to <main>: a strict whole-page locator can also count React's hidden
+  // streamed segment (div#S:n[hidden]) before the swap (tests/e2e/render-once.ts).
+  const org = agency.page.getByRole("main").getByTestId("doc-centre-org");
+  await expect(org, "the agency sees its people's readiness block").toBeVisible({ timeout: 30_000 });
+  await expect(org.getByTestId("doc-centre-org-unavailable"), "the readiness read works").toHaveCount(0);
+  const summary = org.getByTestId("doc-centre-org-summary");
+  const empty = org.getByTestId("doc-centre-org-empty");
+  await expect(summary.or(empty), "either counts or the honest none-consented note").toBeVisible({ timeout: 30_000 });
+  console.info(
+    `[agency] document readiness: ${(await summary.isVisible()) ? await summary.innerText() : "no consented people"}`,
+  );
+  await expect(org, "no person is named in the readiness block").not.toContainText(/Vytas/);
+  await agency.close();
+});
+
+test("A-2c. the agency keeps a client record, sees it, and removes it", async ({ browser }) => {
+  // Register A-2 (#3004): client records are the agency's own notes, under
+  // company authority. The walk leaves nothing behind: the record it adds is
+  // removed in the same step.
+  const CLIENT = `QA-SYNTHETIC Klientas ${RUN}`;
+  const agency = await as(browser, "agency");
+  await agency.page.goto("/lt/dashboard");
+  await workspace(agency.page, AGENCY);
+  await agency.page.goto("/lt/dashboard/company/partners");
+  const section = agency.page.getByTestId("agency-clients-section");
+  await expect(section).toBeVisible({ timeout: 30_000 });
+  await expect(section.getByTestId("agency-clients-gated"), "an agency is not gated out of its clients").toHaveCount(0);
+  const form = section.getByTestId("agency-client-add-form");
+  await form.locator('[name="name"]').fill(CLIENT);
+  await form.locator('[name="note"]').fill("QA-SYNTHETIC walk record, removed in the same step");
+  await form.getByTestId("agency-client-add-submit").click();
+  const row = section.getByTestId("agency-client-row").filter({ hasText: CLIENT });
+  await expect(row, "the saved record is read back").toHaveCount(1, { timeout: 30_000 });
+  await row.locator('[data-testid^="agency-client-remove-"]').click();
+  await expect(row, "the record is removed").toHaveCount(0, { timeout: 30_000 });
   await agency.close();
 });
 
@@ -224,6 +322,7 @@ test("A-4. the client posts a need and shares it with the agency", async ({ brow
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
   const done = page.getByTestId("demand-done");
@@ -267,7 +366,7 @@ test("A-5. the agency sees the shared need and offers its person", async ({ brow
   const value = await select.locator("option", { hasText: /Vytas/ }).first().getAttribute("value");
   expect(value).toBeTruthy();
   await select.selectOption(value!);
-  await form.locator('input[name="note"]').fill(`QA-SYNTHETIC ${RUN}: gali pradėti nuo pirmadienio`);
+  await form.locator('[name="note"]').fill(`QA-SYNTHETIC ${RUN}: gali pradėti nuo pirmadienio`);
   await form.getByTestId("agency-bridge-offer-submit").click();
   await page.waitForTimeout(5_000);
   const error = page.getByTestId("agency-bridge-error");
@@ -304,6 +403,9 @@ test("A-6. the client answers the offer", async ({ browser }) => {
   const { page, close } = await as(browser, "owner");
   await page.goto("/lt/dashboard");
   await workspace(page, ALFA);
+  // Which proposals were open before this run's accept: the one it adds is
+  // this run's own, the only one the teardown may withdraw.
+  const before = await openOutgoingProposalIds(page);
   await page.goto(`/lt/dashboard/company/scouting${requestId ? `?request=${requestId}` : ""}`);
   const offers = page.getByTestId("scouting-agency-offers");
   await expect(offers).toBeVisible({ timeout: 30_000 });
@@ -316,6 +418,9 @@ test("A-6. the client answers the offer", async ({ browser }) => {
     // The decision re-renders the list; the stored status is the proof.
     await page.reload();
     await expect(page.getByTestId("scouting-agency-offers").locator('[data-testid="scout-offer-status-accepted"]').first()).toBeVisible({ timeout: 30_000 });
+    const after = await openOutgoingProposalIds(page);
+    if (before && after) for (const id of after) if (!before.has(id)) createdProposals.push(id);
+    console.info(`[agency] proposals this run created: ${before && after ? createdProposals.length : "unknown (bookings not readable)"}`);
   } else {
     console.info("[agency] no open offer to answer (decided in an earlier run)");
   }
@@ -338,4 +443,40 @@ test("A-7. the agency sees the decision and talks to the client in one thread", 
   await expect(input).toHaveValue("", { timeout: 20_000 });
   await expect(page.locator("main")).toContainText(MSG, { timeout: 20_000 });
   await close();
+});
+
+test.afterAll(async ({ browser }) => {
+  test.setTimeout(180_000);
+  if (!ENABLED || createdProposals.length === 0) return;
+  const { page, close } = await as(browser, "owner");
+  try {
+    await page.goto("/lt/dashboard");
+    await workspace(page, ALFA);
+    for (const id of createdProposals) {
+      const short = id.slice(0, 8);
+      const status = await proposalStatus(page, id);
+      if (status === "unreadable") {
+        console.info(`[cleanup] bookings could not be read: this run's proposal ${short} may still be open`);
+        continue;
+      }
+      if (status !== "proposed") {
+        // Answered or not listed since: nothing of this run's is left open.
+        console.info(`[cleanup] this run's proposal ${short} is ${status}: nothing to withdraw`);
+        continue;
+      }
+      const row = page.getByTestId(`booking-${id}`);
+      await row.getByTestId("booking-withdraw").click();
+      await row.getByTestId("booking-withdraw-confirm").click();
+      // Proof is the stored status, read back explicitly: an unreadable page
+      // or a missing row never counts as withdrawn.
+      await expect
+        .poll(() => proposalStatus(page, id), { timeout: 120_000, intervals: [2_000, 5_000, 10_000] })
+        .toBe("withdrawn");
+      console.info(`[cleanup] withdrew this run's booking proposal ${short}`);
+    }
+  } catch (e) {
+    console.info(`[cleanup] proposal withdraw did not complete: ${String((e as Error)?.message ?? e).split("\n")[0]}`);
+  } finally {
+    await close();
+  }
 });

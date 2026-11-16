@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { markConversationNotificationsRead } from "@/lib/notifications/events";
 import {
   createConversationCore,
   sendMessageCore,
@@ -197,6 +198,16 @@ export async function markConversationRead(input: {
       code: "update_failed",
       message: `Nepavyko atnaujinti perskaitymo žymos: ${result.error?.message ?? "nežinoma klaida"}`,
     };
+  }
+  // The thread is read, so are the bell rows that point at it. Best-effort:
+  // a failure leaves the bell unread, never the thread.
+  const bell = await markConversationNotificationsRead(
+    supabase,
+    input.conversationId,
+    new Date().toISOString(),
+  );
+  if (bell.kind === "unexpected_error") {
+    console.warn("[communication] mark bell read failed:", bell.code);
   }
   revalidatePath(`/${input.locale}/dashboard/communication`);
   return { ok: true };

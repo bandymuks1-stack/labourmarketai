@@ -28,7 +28,7 @@ export const UNTRANSLATED_MARKER = "[EN]";
  *  so any future `[EN]` marker in ru.json fails the gate immediately.
  *  NL added 2026-07-11 together with the NL/DE activation: both went to
  *  ZERO baselines — an active locale may never carry an `[EN]` marker). */
-export const TRACKED_LOCALES = ["da", "de", "nl", "pl", "ru"] as const;
+export const TRACKED_LOCALES = ["da", "de", "nl", "pl", "ru", "sv"] as const;
 
 /** Locales that must stay fully translated (0 markers) — regression guard. */
 export const PRIMARY_LOCALES = ["en", "lt"] as const;
@@ -175,6 +175,9 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
   // review) — the ratchet starts and stays at zero.
   ru: 0,
+  // SV activated by owner decision 2026-11-11 (option A, a Swedish company
+  // testing production): full catalog parity first, zero [EN] from day one.
+  sv: 0,
 };
 
 export interface LocaleDebt {

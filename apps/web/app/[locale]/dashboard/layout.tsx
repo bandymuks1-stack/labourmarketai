@@ -252,7 +252,6 @@ export default async function DashboardLayout({
   // Simple-mode nav labels + the Rexora footer credit, resolved once and passed
   // to the client chrome selector (which needs no data fetch of its own).
   const tChat = await getTranslations("conversation.chat");
-  const tFooter = await getTranslations("footer");
   const nav: ConversationNavLabels = {
     chat: tChat("navChat"),
     journal: tChat("navJournal"),
@@ -260,42 +259,6 @@ export default async function DashboardLayout({
     calendar: tChat("navCalendar"),
     profile: tChat("navProfile"),
   };
-
-  const rexora = (
-    // WHO BUILDS THIS — quiet product credit (owner directive 2026-07-14;
-    // meaning corrected 2026-09-27). Pinned by legal-entity-truth.test.ts.
-    //
-    // It used to read "Sukurta Rexora" / "Created by Rexora", which stated the
-    // relationship wrongly: Rexora is the technology and automation
-    // collaborator and a co-advertised brand, not the sole author of the
-    // product. Nonstop Group is the real labour-market / hiring operating
-    // partner, and LabourMarket.ai is the product itself. The line now names
-    // all three as collaborators.
-    //
-    // Only REXORA is the link, because the approved external attribution URL is
-    // Rexora's; wrapping the whole sentence in it would have pointed the other
-    // two partners' names at Rexora's site. Hence `t.rich` and the `<rexora>`
-    // tag in the message rather than a plain `t()` inside an anchor.
-    //
-    // It stays deliberately quiet — one small muted line, never competing with
-    // the person's actual next action.
-    <div className="mt-10 text-center">
-      <p className="text-xs text-text-muted">
-        {tFooter.rich("rexora", {
-          rexora: (chunks) => (
-            <a
-              href="https://aiprocessautomation.eu"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline-offset-4 transition-colors hover:text-text-secondary hover:underline"
-            >
-              {chunks}
-            </a>
-          ),
-        })}
-      </p>
-    </div>
-  );
 
   return (
     <NextIntlClientProvider messages={pickClientMessages(await getMessages())}>
@@ -338,7 +301,6 @@ export default async function DashboardLayout({
         <DashboardChrome
           nav={nav}
           headerTitle={tChat("headerTitle")}
-          rexora={rexora}
         >
           {/* Same reason: after a switch the shell and the chip commit as soon
               as the layout's own reads finish; the page streams in under the

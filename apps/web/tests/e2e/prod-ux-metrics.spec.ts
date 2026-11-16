@@ -54,11 +54,11 @@ const VIEWPORTS: Record<Viewport, { viewport: { width: number; height: number };
   phone: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, tapMin: 44 },
 };
 
-/** `activeLocales` in lib/i18n/config.ts (6 of the 11 UI locales are routed). Mirrored, not imported:
+/** `activeLocales` in lib/i18n/config.ts (7 of the 11 UI locales are routed). Mirrored, not imported:
  *  a Playwright spec cannot resolve the app's `@/` alias. Context `locale` is the browser's language. */
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 type Locale = (typeof ACTIVE_LOCALES)[number];
-const BROWSER_LOCALE: Record<Locale, string> = { lt: "lt-LT", en: "en-GB", ru: "ru-RU", nl: "nl-NL", de: "de-DE", pl: "pl-PL" };
+const BROWSER_LOCALE: Record<Locale, string> = { lt: "lt-LT", en: "en-GB", ru: "ru-RU", nl: "nl-NL", de: "de-DE", pl: "pl-PL", sv: "sv-SE" };
 
 const EMPLOYER_SET = ["/lt/dashboard", ...EMPLOYER_ROUTES];
 const ACTORS: readonly { slot: string; routes: readonly string[] }[] = [

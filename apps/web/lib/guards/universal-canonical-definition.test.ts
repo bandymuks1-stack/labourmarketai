@@ -72,6 +72,7 @@ const UNIVERSAL_MARKER: Readonly<Record<string, RegExp>> = {
   nl: /sector/i,
   de: /branche/i,
   pl: /sektor|branż/i,
+  sv: /bransch|sektor/i,
 };
 
 /** Extract the positive canonical-definition blockquote from §7.1. */

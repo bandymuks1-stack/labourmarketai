@@ -10,6 +10,7 @@ import "server-only";
  * (reserve, then send) and `reserveEmailSend` (reserve only).
  */
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isSyntheticQaPlusAddress } from "@/lib/email/synthetic-address";
 import {
   isTransactionalEmailConfigured,
   sendTransactionalEmail,
@@ -93,9 +94,18 @@ export async function guardedSendTransactionalEmail(
     kind: EmailSendKind;
     organizationId?: string | null;
     recipientProfileId?: string | null;
+    /** Partner referral sends (migration 20261028070000): never send when the
+     *  ledger row could not be written. Their stuck-reservation recovery reads
+     *  "no ledger row" as "no provider call happened"; the default fail-open
+     *  degraded path would break that. */
+    requireLedger?: boolean;
   },
 ): Promise<TransactionalSendResult> {
-  const decision = await reserveEmailSend({ recipientEmail: message.to, ...ctx });
+  const { requireLedger, ...reserveCtx } = ctx;
+  // Before the reservation: a suppressed synthetic address leaves no ledger row.
+  if (isSyntheticQaPlusAddress(message.to)) return { status: "suppressed_synthetic_address" };
+  const decision = await reserveEmailSend({ recipientEmail: message.to, ...reserveCtx });
   if (!decision.allowed) return { status: "failed", reason: "rate_limited" };
+  if (requireLedger && decision.degraded) return { status: "failed", reason: "ledger_unavailable" };
   return sendTransactionalEmail(message);
 }

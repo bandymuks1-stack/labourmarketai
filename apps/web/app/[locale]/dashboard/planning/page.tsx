@@ -903,10 +903,11 @@ export default async function PlanningPage({
 
       {/* ---------------- YEAR ---------------- */}
       {yearCells ? (
-        <section
-          className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4"
-          data-testid="planning-year-view"
-        >
+        <section className="flex flex-col gap-2" data-testid="planning-year-view">
+          <p className="text-xs leading-relaxed text-text-secondary" data-testid="planning-year-hint">
+            {t("year.hint")}
+          </p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
           {yearCells.map((m) => (
             <Link
               key={m.month}
@@ -933,6 +934,7 @@ export default async function PlanningPage({
               </span>
             </Link>
           ))}
+          </div>
         </section>
       ) : null}
 

@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/visual/theme-default";
 import { Link } from "@/lib/i18n/navigation";
+import { LmLogo } from "@/components/ui/lm-logo";
 import { ThemeReapply } from "@/components/app/theme-reapply";
 
 /**
@@ -12,6 +14,12 @@ import { ThemeReapply } from "@/components/app/theme-reapply";
  * prefixes (e.g. /lv/… before that locale is promoted) arrive after the
  * middleware's default-locale redirect.
  */
+/** A 404 reads its metadata here, not from the page that rendered it (UX-9). */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("notFound");
+  return { title: t("title"), robots: { index: false, follow: false } };
+}
+
 export default async function NotFound() {
   const t = await getTranslations("notFound");
   return (
@@ -31,6 +39,7 @@ export default async function NotFound() {
         }}
       />
       <ThemeReapply />
+      <LmLogo className="h-12 w-auto" />
       <p className="font-mono text-xs uppercase tracking-label text-text-muted">
         {t("code")}
       </p>

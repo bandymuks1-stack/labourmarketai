@@ -208,6 +208,23 @@ export type WorkIntelligenceOrganizationRecord = {
   readonly context?: HistoryContext;
 };
 
+/** One record the organization holds about the person whose DURATION IS NOT
+ *  STATED (`hours` null at the source). The work happened and was recorded;
+ *  its length is unknown. UNKNOWN is never zero (SEP-7): carried beside the
+ *  other ledgers so the Living CV can show the day or span with "duration to
+ *  be confirmed" — never an hour in any period, total, skill or activity. */
+export type WorkIntelligenceOrganizationPendingRecord = {
+  readonly id: string;
+  readonly organizationId: string;
+  /** ISO day of a day record, or null. */
+  readonly workDate: string | null;
+  /** ISO span of a period record, or null. */
+  readonly periodStart: string | null;
+  readonly periodEnd: string | null;
+  readonly source: string;
+  readonly context?: HistoryContext;
+};
+
 /** One PERIOD record the organization holds about the person: a total over
  *  a span with NO source days ("800 h, 2025-06-01 → 2025-11-30", from an
  *  imported document). Carried BESIDE the day records (IA §2), never summed
@@ -290,6 +307,9 @@ export type WorkIntelligenceInput = {
    *  read. Ignored when `organizationRecords` is null — a half-read ledger
    *  would pose as a smaller one. */
   readonly organizationPeriodRecords?: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's records with NO stated duration. Passed through,
+   *  summed into nothing; ignored when `organizationRecords` is null. */
+  readonly organizationPendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[] | null;
 };
 
 /** Inclusive UTC calendar-day windows ending today (W12 doctrine: dates are
@@ -516,6 +536,11 @@ export type WorkIntelligence = {
    *  their own beside `organizationRecords`, in no period's `hours`, on no
    *  day. `null` exactly when `organizationRecords` is null (UNKNOWN). */
   readonly organizationPeriodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's records with NO stated duration (SEP-7: unknown,
+   *  never zero) — shown as "duration to be confirmed", in no sum. `null`
+   *  exactly when `organizationRecords` is null (UNKNOWN). Optional so
+   *  hand-built models in callers stay valid; absent = none. */
+  readonly organizationPendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[] | null;
   /** The organization's DAY records that carry a professional-history context
    *  (imported evidence), as read - handed through untouched so the Living CV can
    *  name the work behind the hours. A pass-through, never a sum: no figure in
@@ -1341,6 +1366,7 @@ export function deriveWorkIntelligence(
     periods,
     organizationRecords,
     organizationPeriodRecords,
+    organizationPendingRecords: orgRows === null ? null : [...(input.organizationPendingRecords ?? [])],
     organizationContextRecords:
       orgRows === null
         ? null
