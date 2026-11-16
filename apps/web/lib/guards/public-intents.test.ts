@@ -180,7 +180,7 @@ describe("desktop and mobile render ONE list", () => {
     // Education institutions have a door behind More — the landing's own
     // sign-up door into the institution setup, with the account note; not a
     // seventh goal (lib/guards/institution-nav-door.test.ts).
-    expect(nav).toMatch(/\{ key: "education", href: INSTITUTION_DOOR, label: tIntent\("education"\), account: true \}/);
+    expect(nav).toMatch(/\{ key: "education", href: INSTITUTION_DOOR, label: tIntent\("education"\), account: true, accountNote: tIntent\("signUp"\) \}/);
     expect(PUBLIC_INTENT_IDS).toHaveLength(6);
     expect(mega).toMatch(/data-testid="intent-toggle-more"/);
     expect(mega).toMatch(/data-testid="intent-more-links"/);
@@ -202,6 +202,15 @@ describe("desktop and mobile render ONE list", () => {
     // The bar picks the destination from the same signed-in hint as the header's auth slot.
     expect(mega).toMatch(/useSignedInHint\(\)/);
     expect(mega).toMatch(/href=\{signedIn \? assistant\.href : assistant\.guestHref\}/);
+  });
+
+  it("the phone menu's assistant entry does the same, with no sign-in note (N1)", () => {
+    const mobile = read("components/layouts/mobile-nav-menu.tsx");
+    expect(mobile).toMatch(/useSignedInHint\(\)/);
+    const entry = mobile.slice(mobile.indexOf("{assistant && ("), mobile.indexOf('data-testid="mobile-nav-assistant"') + 400);
+    expect(entry).toMatch(/href=\{signedIn \? assistant\.href : assistant\.guestHref\}/);
+    const link = mobile.slice(mobile.indexOf('data-testid="mobile-nav-assistant"'), mobile.indexOf("</Link>", mobile.indexOf('data-testid="mobile-nav-assistant"')));
+    expect(link).not.toMatch(/accountLabel/);
   });
 
   it("the landing shows the goals once: its bar drops them, inner pages keep them", () => {

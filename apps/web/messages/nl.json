@@ -13949,7 +13949,7 @@
         "csv": "CSV downloaden",
         "print": "Afdrukken / opslaan als pdf",
         "ctaTitle": "Maak van deze raming een echte personeelsaanvraag",
-        "ctaBody": "Dezelfde ramingsbouwer zit in het behoefteformulier van LabourMarket.ai. Met een account kunt u een raming aan een gestructureerde personeelsaanvraag koppelen; zonder account beschrijft u uw behoefte via het publieke formulier.",
+        "ctaBody": "Met een account gaan het aantal werknemers en het land mee naar de personeelsaanvraag; de rest van de raming kunt u daar aanvullen. Zonder account gebruikt u het publieke formulier.",
         "ctaDashboard": "Personeelsbehoefte aanmaken (met account)",
         "ctaCompanyNeed": "Behoefte beschrijven zonder account",
         "ctaCompanyNeedHelp": "Het publieke formulier ontvangt alleen uw aantal werknemers en land — geen prijzen en geen beschrijvingen."
