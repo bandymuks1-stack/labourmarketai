@@ -182,6 +182,7 @@ export async function SiteNav({
       goalsOnPage={goalsOnPage}
       navLabel={tIntent("trigger")}
       accountLabel={tIntent("account")}
+      signUpLabel={tIntent("signUp")}
       assistant={assistant}
       more={{
         label: tIntent("more"),
@@ -265,6 +266,7 @@ export async function SiteNav({
             closeLabel={t("menuClose")}
             intents={intents}
             accountLabel={tIntent("account")}
+            signUpLabel={tIntent("signUp")}
             assistant={assistant}
             // Below `sm` the panel also carries the auth CTAs the header row
             // cannot fit; from `sm` up the whole section is display:none and
