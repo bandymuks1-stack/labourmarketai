@@ -2052,6 +2052,7 @@
     "addError": "Toevoegen is niet gelukt. Probeer het opnieuw.",
     "addExperienceTitle": "Werkervaring toevoegen",
     "expTitleLabel": "Functie",
+    "expKindLabel": "Soort dienstverband",
     "expTitlePlaceholder": "Bijv. lasser, verpleegkundige, magazijnmedewerker, ontwikkelaar",
     "expStartLabel": "Van (maand / jaar)",
     "expEndLabel": "Tot (maand / jaar)",
@@ -5255,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Waarom bedrijven",
-      "headline": "Aanbod waar je op kunt handelen",
-      "items": [
-        {
-          "title": "Uitlegbare fit-richting",
-          "desc": "Elk fit-signaal toont de redenen erachter."
-        },
-        {
-          "title": "Werknemerspool over de grens",
-          "desc": "Aanbod uit elke markt waarin we actief zijn, op één plek."
-        },
-        {
-          "title": "Geen ondoorzichtige tussenpersonen",
-          "desc": "Jij ziet en bezit de relatie."
-        },
-        {
-          "title": "Vaardigheidsrecords + fit-signalen",
-          "desc": "Neem aan op basis van records, niet op basis van claims."
-        },
-        {
-          "title": "Aanbodsignalen",
-          "desc": "Zie de opgegeven beschikbaarheid van werknemers terwijl profielen worden bijgewerkt."
-        },
-        {
-          "title": "Direct contact",
-          "desc": "Jij bezit de relatie met de werknemer."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "FAQ voor bedrijven",
       "headline": "Eerlijke antwoorden",
@@ -5350,36 +5321,6 @@
         {
           "title": "Laat je pool groeien",
           "desc": "Voeg capaciteit toe waar de vraag stijgt."
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "Waarom uitzendbureaus",
-      "headline": "Meer slagkracht, geen controleverlies",
-      "items": [
-        {
-          "title": "Beheer je pool",
-          "desc": "Werknemers, beschikbaarheid en status op één plek."
-        },
-        {
-          "title": "Plaats namens klanten",
-          "desc": "Bemiddel in vraag zonder de relatie te verliezen."
-        },
-        {
-          "title": "Gerichte matching",
-          "desc": "Plaats de juiste mensen sneller."
-        },
-        {
-          "title": "Zichtbaarheidsinstellingen",
-          "desc": "Openbaar, alleen voor uitzendbureaus of direct — jij beslist."
-        },
-        {
-          "title": "Grensoverschrijdend bereik",
-          "desc": "Opdrachtgevers en werknemers in elke markt waarin we actief zijn."
-        },
-        {
-          "title": "Laat je bemiddeling groeien",
-          "desc": "Capaciteitsinzichten wanneer de vraag verschuift."
         }
       ]
     },
@@ -10709,7 +10650,6 @@
     "contactPerson": "Contactpersoon",
     "contactPersonHelp": "Optioneel. Wie we kunnen bereiken over deze aanvraag.",
     "contactEmail": "Contact-e-mailadres",
-    "contactEmailHelp": "Optioneel, maar zo kunnen we sneller opvolgen over je aanvraag.",
     "cityRegion": "Stad of regio",
     "cityRegionHelp": "Optioneel. Waar het werk zal zijn.",
     "expectedDuration": "Verwachte duur",
@@ -14022,7 +13962,6 @@
         "ctaTitle": "Maak van deze raming een echte personeelsaanvraag",
         "ctaBody": "Dezelfde ramingsbouwer zit in het behoefteformulier van LabourMarket.ai. Met een account kun je een raming aan een gestructureerde personeelsaanvraag koppelen; zonder account beschrijf je je behoefte via het publieke formulier.",
         "ctaDashboard": "Personeelsbehoefte aanmaken (met account)",
-        "ctaDashboardHelp": "De accountroute opent het behoefteformulier op je dashboard — de calculator draagt deze cijfers niet over.",
         "ctaCompanyNeed": "Behoefte beschrijven zonder account",
         "ctaCompanyNeedHelp": "Het publieke formulier ontvangt alleen je aantal werknemers en land — geen prijzen en geen beschrijvingen."
       }
@@ -15598,6 +15537,10 @@
         "title": "Aanvraag individueel project",
         "body": "Voor particuliere en zakelijke opdrachtgevers: beschrijf welk project of welke dienst u nodig heeft."
       },
+      "partner": {
+        "title": "Partnerschapsaanvraag",
+        "body": "Beschrijf de samenwerking die u voorstelt."
+      },
       "title": "Behoefte doorgeven",
       "promise": "Beschrijf welke werknemers, diensten of projectuitvoering u nodig heeft. De aanvraag wordt ter beoordeling doorgegeven aan het team van LabourMarket.ai.",
       "name": "Voor- en achternaam of bedrijfsnaam",
@@ -15615,6 +15558,7 @@
       "scope": "Omvang",
       "deadline": "Termijnen",
       "need": "Welk project of welke dienst u nodig heeft",
+      "proposal": "Voorgestelde samenwerking",
       "customer": "Opdrachtgever",
       "customerPrivate": "Particulier",
       "customerBusiness": "Bedrijf",
@@ -19451,8 +19395,6 @@
     "title": "Wat er met jouw werk gebeurt",
     "titleCompany": "Wat er met het werk gebeurt dat je aanstuurt",
     "example": "Voorbeeld — geen echt persoon en geen echte gegevens",
-    "hint": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
-    "hintWorkers": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
     "open": "Openen in je werkruimte",
     "list": "Stappen in de levenscyclus van werk",
     "workers": {
@@ -20742,7 +20684,6 @@
       "close": "Sluiten",
       "functions": "Acties",
       "professions": "Beroepen",
-      "opensNow": "Geen account nodig",
       "signInWhenOpen": "Inloggen vereist",
       "allSectors": "Alle sectoren",
       "fullList": "Volledige lijst"

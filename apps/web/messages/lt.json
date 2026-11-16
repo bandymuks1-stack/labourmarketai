@@ -2052,6 +2052,7 @@
     "addError": "Nepavyko pridėti. Pabandyk dar kartą.",
     "addExperienceTitle": "Pridėti darbo patirtį",
     "expTitleLabel": "Pareigos",
+    "expKindLabel": "Kokia tai buvo veikla",
     "expTitlePlaceholder": "Pvz., suvirintojas, slaugytoja, sandėlio darbuotojas, programuotojas",
     "expStartLabel": "Nuo (mėnuo / metai)",
     "expEndLabel": "Iki (mėnuo / metai)",
@@ -5255,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Kodėl įmonės",
-      "headline": "Pasiūla, su kuria galima veikti",
-      "items": [
-        {
-          "title": "Paaiškinama atitikimo kryptis",
-          "desc": "Kiekvienas atitikimo signalas pateikia priežastis."
-        },
-        {
-          "title": "Tarpvalstybinis darbuotojų rezervas",
-          "desc": "Pasiūla iš visų rinkų, kuriose veikiame, vienoje vietoje."
-        },
-        {
-          "title": "Be neskaidrių tarpininkų",
-          "desc": "Tu matai ir valdai santykį."
-        },
-        {
-          "title": "Įgūdžių įrašai + atitikimo signalai",
-          "desc": "Samdyk pagal įrašus, ne pažadus."
-        },
-        {
-          "title": "Pasiūlos signalai",
-          "desc": "Matyk deklaruotą darbuotojų prieinamumą, kai profiliai atnaujinami."
-        },
-        {
-          "title": "Tiesioginis kontaktas",
-          "desc": "Santykis su darbuotoju priklauso tau."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "DUK įmonėms",
       "headline": "Aiškūs atsakymai",
@@ -5350,36 +5321,6 @@
         {
           "title": "Augink savo rezervą",
           "desc": "Pridėk pajėgumo, kur auga paklausa."
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "Kodėl agentūros",
-      "headline": "Svertas, ne kontrolės praradimas",
-      "items": [
-        {
-          "title": "Valdyk rezervą",
-          "desc": "Darbuotojai, prieinamumas ir būsena vienoje vietoje."
-        },
-        {
-          "title": "Skelbk klientų vardu",
-          "desc": "Tarpininkauk neprarasdamas santykio."
-        },
-        {
-          "title": "Atitikimo kryptis",
-          "desc": "Greičiau įdarbink tinkamus."
-        },
-        {
-          "title": "Matomumo valdymas",
-          "desc": "Vieša, tik agentūroms ar tiesioginė — tavo sprendimas."
-        },
-        {
-          "title": "Tarpvalstybinis pasiekiamumas",
-          "desc": "Klientai ir darbuotojai visose rinkose, kuriose veikiame."
-        },
-        {
-          "title": "Augink biurą",
-          "desc": "Pajėgumo įžvalgos keičiantis paklausai."
         }
       ]
     },
@@ -10631,7 +10572,7 @@
     }
   },
   "workerIntake": {
-    "title": "Darbuotojo registracija",
+    "title": "Darbuotojo anketa",
     "subtitle": "Nurodyk savo amatą ir kada esi laisvas, kad pasitikrintum duomenis. Ši forma nieko neišsaugo — kad tave rastų darbdaviai, susikurk nemokamą profilį ir įrašyk duomenis jame.",
     "fullName": "Vardas ir pavardė",
     "profession": "Sektorius ir darbo tipas",
@@ -10709,7 +10650,6 @@
     "contactPerson": "Kontaktinis asmuo",
     "contactPersonHelp": "Neprivaloma. Su kuo susisiekti dėl šios užklausos.",
     "contactEmail": "El. paštas susisiekimui",
-    "contactEmailHelp": "Neprivaloma, bet padeda greičiau susisiekti dėl tavo užklausos.",
     "cityRegion": "Miestas ar regionas",
     "cityRegionHelp": "Neprivaloma. Kur numatytas darbas.",
     "expectedDuration": "Numatoma trukmė",
@@ -14022,7 +13962,6 @@
         "ctaTitle": "Paversk šią sąmatą tikru darbuotojų poreikiu",
         "ctaBody": "Ta pati sąmatos skaičiuoklė veikia LabourMarket.ai poreikio formoje. Su paskyra sąmatą gali pridėti prie struktūruoto darbuotojų poreikio; be paskyros — aprašyk poreikį viešoje formoje.",
         "ctaDashboard": "Sukurti darbo poreikį (su paskyra)",
-        "ctaDashboardHelp": "Paskyros kelias atidaro poreikio formą tavo valdymo skydelyje — skaičiuoklė šių skaičių neperduoda.",
         "ctaCompanyNeed": "Aprašyti poreikį be paskyros",
         "ctaCompanyNeedHelp": "Viešoji forma gauna tik darbuotojų skaičių ir šalį — jokios kainos ir aprašymai neperduodami."
       }
@@ -15598,6 +15537,10 @@
         "title": "Individualaus projekto užklausa",
         "body": "Privatiems ir verslo užsakovams: aprašykite, kokio projekto ar paslaugos jums reikia."
       },
+      "partner": {
+        "title": "Partnerystės užklausa",
+        "body": "Aprašykite, kokį bendradarbiavimą siūlote."
+      },
       "title": "Pateikti poreikį",
       "promise": "Aprašykite, kokių darbuotojų, paslaugų ar projekto vykdymo jums reikia. Užklausa perduodama LabourMarket.ai komandai peržiūrėti.",
       "name": "Vardas, pavardė arba įmonės pavadinimas",
@@ -15615,6 +15558,7 @@
       "scope": "Apimtis",
       "deadline": "Terminai",
       "need": "Kokio projekto ar paslaugos reikia",
+      "proposal": "Siūlomas bendradarbiavimas",
       "customer": "Užsakovas",
       "customerPrivate": "Privatus asmuo",
       "customerBusiness": "Verslas",
@@ -19451,8 +19395,6 @@
     "title": "Kas nutinka su tavo darbu",
     "titleCompany": "Kas nutinka su tavo vykdomu darbu",
     "example": "Pavyzdys — ne tikras žmogus ir ne tikri duomenys",
-    "hint": "Pasirink žingsnį. Kiekvienas atveria tikrą vietą tavo darbo erdvėje.",
-    "hintWorkers": "Pasirink žingsnį. Kiekvienas atveria tikrą vietą tavo darbo erdvėje.",
     "open": "Atidaryti darbo erdvėje",
     "list": "Darbo gyvavimo ciklo žingsniai",
     "workers": {
@@ -20742,7 +20684,6 @@
       "close": "Uždaryti",
       "functions": "Veiksmai",
       "professions": "Profesijos",
-      "opensNow": "Paskyros nereikia",
       "signInWhenOpen": "Reikia prisijungti",
       "allSectors": "Visi sektoriai",
       "fullList": "Visas sąrašas"

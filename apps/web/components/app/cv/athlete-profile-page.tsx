@@ -25,7 +25,7 @@ export async function AthleteProfilePage({
   readonly locale: string;
   readonly profileId: string | null;
 }) {
-  const [a, tCv, premium, orgHistory, tier, journey, tDisclosure, tProf, tSkill, tRel, tDocTypes, facts, today] =
+  const [a, tCv, premium, orgHistory, tier, journey, tDisclosure, tProf, tSkill, tRel, tDocTypes, tJournal, facts, today] =
     await Promise.all([
       getTranslations("cvExport.athlete"),
       getTranslations("cvExport"),
@@ -38,6 +38,7 @@ export async function AthleteProfilePage({
       getTranslations("skillNames"),
       getTranslations("relationshipTypes"),
       getTranslations("documents.types"),
+      getTranslations("journal"),
       readAthleteProfileFacts(profileId),
       viewerWorkToday(),
     ]);
@@ -51,6 +52,7 @@ export async function AthleteProfilePage({
       documentType: (slug) => (tDocTypes.has(slug as never) ? tDocTypes(slug as never) : slug),
       language: (code) =>
         WORKER_LANGUAGE_NATIVE_NAMES[code as keyof typeof WORKER_LANGUAGE_NATIVE_NAMES] ?? code.toUpperCase(),
+      endedUnnamedOrganization: tJournal("unnamedOrganization.ended"),
     },
     place: facts.countryCode ? countryDisplayName(facts.countryCode, locale) : null,
     portraitUrl: facts.portraitUrl,

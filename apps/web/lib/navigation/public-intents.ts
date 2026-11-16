@@ -69,7 +69,7 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
     links: [
       { id: "jobs", href: "/jobs", account: false },
       { id: "workOpportunities", href: "/work-opportunities", account: false },
-      { id: "createCv", href: "/create-cv", account: false },
+      { id: "createCv", href: "/dashboard/profile", account: true },
       { id: "workAbroad", href: "/work-abroad", account: false },
       { id: "forWorkers", href: "/for-workers", account: false },
     ],
@@ -116,7 +116,7 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
       // The partner enquiry door — the same destination the landing's
       // PARTNER_DOOR uses (a commercial relationship with the company behind
       // the product, not a workspace).
-      { id: "partnerWithUs", href: "/about", account: false },
+      { id: "partnerWithUs", href: requestDoorHref("partner"), account: false },
     ],
   },
   {
@@ -140,6 +140,14 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
  * it equals `CANONICAL_HOME`, so the two cannot drift.
  */
 export const ASSISTANT_HREF = "/dashboard";
+
+/**
+ * The same entry for a signed-out visitor (owner P0 2026-11-15, F8): the
+ * landing's question box (`#find`), which needs no account. A sentence typed
+ * there rides through sign-up into the conversation as `?say=`. Without this
+ * the desktop entry dropped a visitor on the sign-in page with no word of why.
+ */
+export const ASSISTANT_GUEST_HREF = "/#find";
 
 /**
  * Goal ids that no longer exist, and the goal that now holds what they held.
