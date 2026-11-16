@@ -16360,8 +16360,8 @@
       "replyToLabel": "Reactie op deze ervaring",
       "disputeOpenedLabel": "Geschil geopend",
       "disputeReviewStartedLabel": "Behandeling gestart",
-      "conflictNotice": "Je bent partij bij deze ervaring en kunt hier niet beslissen. Een andere moderator moet dit overnemen.",
-      "conflictUnknown": "Er kon niet worden nagegaan of je partij bent bij deze ervaring. Beslissen is nu niet mogelijk.",
+      "conflictNotice": "U bent partij bij deze ervaring en kunt hier niet beslissen. Een andere moderator moet dit overnemen.",
+      "conflictUnknown": "Er kon niet worden nagegaan of u partij bent bij deze ervaring. Beslissen is nu niet mogelijk.",
       "disputeReasonShared": "De reden wordt aan beide partijen getoond en vastgelegd in het auditspoor.",
       "take": "In moderatie nemen",
       "publish": "Publiceren",
@@ -16388,7 +16388,7 @@
         "dispute_exists": "Er loopt al een geschil.",
         "reason_required": "Een reden is verplicht.",
         "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
-        "conflict_of_interest": "Je bent partij bij deze ervaring. Een andere moderator moet beslissen.",
+        "conflict_of_interest": "U bent partij bij deze ervaring. Een andere moderator moet beslissen.",
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
       }
@@ -16420,7 +16420,7 @@
         "dispute_exists": "Er loopt al een geschil.",
         "reason_required": "Een reden is verplicht.",
         "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
-        "conflict_of_interest": "Je bent partij bij deze ervaring. Een andere moderator moet beslissen.",
+        "conflict_of_interest": "U bent partij bij deze ervaring. Een andere moderator moet beslissen.",
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
       }
@@ -16445,7 +16445,7 @@
         "dispute_exists": "Er loopt al een geschil.",
         "reason_required": "Een reden is verplicht.",
         "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
-        "conflict_of_interest": "Je bent partij bij deze ervaring. Een andere moderator moet beslissen.",
+        "conflict_of_interest": "U bent partij bij deze ervaring. Een andere moderator moet beslissen.",
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
       },
@@ -16480,7 +16480,7 @@
         "dispute_exists": "Er loopt al een geschil.",
         "reason_required": "Een reden is verplicht.",
         "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
-        "conflict_of_interest": "Je bent partij bij deze ervaring. Een andere moderator moet beslissen.",
+        "conflict_of_interest": "U bent partij bij deze ervaring. Een andere moderator moet beslissen.",
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
       }
