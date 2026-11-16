@@ -13949,7 +13949,7 @@
         "csv": "Atsisiųsti CSV",
         "print": "Spausdinti / išsaugoti PDF",
         "ctaTitle": "Paversk šią sąmatą tikru darbuotojų poreikiu",
-        "ctaBody": "Ta pati sąmatos skaičiuoklė veikia LabourMarket.ai poreikio formoje. Su paskyra sąmatą gali pridėti prie struktūruoto darbuotojų poreikio; be paskyros — aprašyk poreikį viešoje formoje.",
+        "ctaBody": "Su paskyra darbuotojų skaičius ir šalis perkeliami į darbuotojų poreikį; likusią sąmatos dalį galite įvesti ten. Be paskyros — naudokite viešąją formą.",
         "ctaDashboard": "Sukurti darbo poreikį (su paskyra)",
         "ctaCompanyNeed": "Aprašyti poreikį be paskyros",
         "ctaCompanyNeedHelp": "Viešoji forma gauna tik darbuotojų skaičių ir šalį — jokios kainos ir aprašymai neperduodami."

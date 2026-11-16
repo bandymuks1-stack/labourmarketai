@@ -325,10 +325,11 @@ async function assistant(page: Page): Promise<void> {
   await expect(link).toBeVisible({ timeout: 30_000 });
   expectNoAuth(seen, "the assistant link's click");
   await link.click();
-  // #3409 (F8): signed out, the assistant entry opens the landing's question
-  // box, which needs no account; a sentence typed there rides through sign-up.
-  await page.waitForURL((u) => /^\/en\/?$/.test(u.pathname) && u.hash === "#find", { timeout: 60_000 });
-  expectNoAuth(seen, "the assistant link's destination");
+  // Signed out, the assistant link opens the home page's question box (#3409,
+  // ASSISTANT_GUEST_HREF); only a signed-in visitor goes to the conversation home.
+  await page.waitForURL((u) => u.hash === "#find" && /^\/en\/?$/.test(u.pathname), { timeout: 60_000 });
+  await expect(page.locator("#find"), "the question box is on the page").toBeVisible({ timeout: 30_000 });
+  expectNoAuth(seen, "the question box");
 }
 
 async function education(page: Page): Promise<void> {

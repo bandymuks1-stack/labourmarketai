@@ -42,6 +42,17 @@ for (const locale of ["lt", "en"] as const) {
       expect(again, "a reload keeps it").toBe(kept);
     });
 
+    for (const route of ["/for-workers", "/work-abroad"] as const) {
+      test(`${route}: its sign-up returns to the profile builder (F6, one door)`, async ({ page }) => {
+        await page.goto(`/${locale}${route}`);
+        const links = page.locator('main a[href*="/auth/signup"]');
+        await expect(links.first()).toBeAttached();
+        for (const href of await links.evaluateAll((els) => els.map((el) => el.getAttribute("href") ?? ""))) {
+          expect(new URL(href, "https://x.test").searchParams.get("next"), href).toBe("/dashboard/profile");
+        }
+      });
+    }
+
     test("its sign-up and login return to the profile builder; it is not called a registration", async ({ page }) => {
       await page.goto(`/${locale}/worker-intake`);
       const links = page.locator('[data-testid="intake-bridge"] a');

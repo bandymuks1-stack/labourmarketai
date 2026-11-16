@@ -13949,7 +13949,7 @@
         "csv": "Pobierz CSV",
         "print": "Drukuj / zapisz jako PDF",
         "ctaTitle": "Zamień to oszacowanie w rzeczywiste zapotrzebowanie na pracowników",
-        "ctaBody": "Ten sam kreator oszacowania znajduje się w formularzu zapotrzebowania LabourMarket.ai. Mając konto, możesz dołączyć oszacowanie do ustrukturyzowanego zapotrzebowania na pracowników; bez konta możesz opisać swoją potrzebę na formularzu publicznym.",
+        "ctaBody": "Z kontem liczba pracowników i kraj trafiają do zapotrzebowania; resztę oszacowania mogą Państwo uzupełnić w formularzu. Bez konta mogą Państwo skorzystać z formularza publicznego.",
         "ctaDashboard": "Utwórz zapotrzebowanie na pracowników (z kontem)",
         "ctaCompanyNeed": "Opisz potrzebę bez konta",
         "ctaCompanyNeedHelp": "Formularz publiczny otrzymuje tylko liczbę pracowników i kraj — żadne ceny ani opisy nie są przekazywane."

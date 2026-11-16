@@ -36,7 +36,7 @@ export const PUBLIC_PATH_CASES: readonly PublicPathCase[] = [
   { id: "door:company-need", title: "the company-need form is sent without an account" },
   { id: "intake:worker", title: "worker-intake: the typed intake survives sign-up" },
   { id: "calculator:project-cost", title: "calculator result carries its inputs into company-need" },
-  { id: "header:assistant", title: "header assistant link → the landing question box, no account (#3409)" },
+  { id: "header:assistant", title: "header assistant link, signed out → the home question box (/#find)" },
   { id: "header:education", title: "header More → education link → the institution sign-up door" },
 ];
 
