@@ -2,9 +2,6 @@ import { expect, test, type Browser, type BrowserContext, type Locator, type Pag
 
 import {
   BASE,
-  SB_ANON,
-  SB_URL,
-  accessToken,
   isolatedStack,
   lit,
   onboard,
@@ -384,26 +381,18 @@ for (const phone of PHONES) {
       // The schedule gate (canStartCommunicationOrBooking): a booking is offered only for a worker
       // who is available or has a start date, or a need with a start date. The need form asks for
       // urgency, not a date, so the worker states their availability on the work card first.
-      // Scouting lists, for a need with a recognised trade, the workers the matcher selected;
-      // an applicant appears there only when they also match (the separate hand-raiser list is
-      // for needs that name no trade). The board showed this need as "Tiler", so the worker
-      // states that trade as their primary profession, with their own session, as
-      // skills-chain and job-fit do.
-      const [tiler] = sql<{ id: string }>(`select id from public.professions where slug = 'tiler'`);
-      expect(tiler, "the catalogue has the need's trade").toBeTruthy();
-      const own = await fetch(`${SB_URL}/rest/v1/worker_professions`, {
-        method: "POST",
-        headers: {
-          apikey: SB_ANON,
-          Authorization: `Bearer ${await accessToken(worker)}`,
-          "Content-Type": "application/json",
-          Prefer: "return=minimal",
-        },
-        body: JSON.stringify({ worker_id: s.workerId, profession_id: tiler!.id, is_primary: true }),
-      });
-      expect(own.ok, `the worker states their trade (${own.status})`).toBe(true);
-
+      // Employers find a person only with that person's own consent (owner rule 2026-10-18:
+      // interest and messaging are never consent): without it the hand-raiser is a count, not a
+      // candidate. A structured need pins every hand-raiser into its candidates whatever the
+      // match, so the worker turns on employer visibility, on their privacy page, as
+      // skills-chain's newDiscoverableWorker does.
       const w = await signedInOnPhone(browser, phone, worker);
+      await w.page.goto(`${BASE}/en/dashboard/privacy#visibility`);
+      const vis = w.page.getByRole("main").getByTestId("privacy-visibility");
+      await expect(vis, "the visibility choice is on the privacy page").toBeVisible({ timeout: 60_000 });
+      await tapUntil(vis.getByTestId("discoverability-open"), vis.getByTestId("discoverability-grant"));
+      await vis.getByTestId("discoverability-grant").tap();
+      await expect(vis.getByTestId("discoverability-granted"), "employers may now find them").toBeVisible({ timeout: 30_000 });
       await w.page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
       const toggle = w.page.getByRole("main").getByTestId("work-card-editor-toggle");
       await expect(toggle, "the work card editor is offered on the worker's profile").toBeVisible({ timeout: 60_000 });
