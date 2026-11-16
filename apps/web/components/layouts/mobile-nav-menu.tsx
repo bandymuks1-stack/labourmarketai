@@ -193,7 +193,7 @@ export function MobileNavMenu({
                         {intent.links.map((link) => (
                           <Link
                             key={link.id}
-                            href={link.href}
+                            href={!signedIn && link.guestHref ? link.guestHref : link.href}
                             prefetch={link.account ? false : undefined}
                             onClick={() => setOpen(false)}
                             data-testid={`mobile-intent-link-${intent.id}-${link.id}`}

@@ -10573,7 +10573,7 @@
   },
   "workerIntake": {
     "title": "Zgłoszenie pracownika",
-    "subtitle": "Proszę podać swój zawód i dostępność, aby sprawdzić swoje dane. Ten formularz niczego nie zapisuje — aby pracodawcy mogli Państwa znaleźć, proszę założyć bezpłatny profil i wpisać tam swoje dane.",
+    "subtitle": "Nic tutaj nie jest publikowane. Pracodawcy znajdują Państwa przez bezpłatny profil, a to, co Państwo tu wpiszą, zostanie do niego przeniesione po rejestracji.",
     "fullName": "Imię i nazwisko",
     "profession": "Branża i rodzaj pracy",
     "professionPlaceholder": "Wybierz branżę i rodzaj pracy",
