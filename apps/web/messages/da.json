@@ -6416,7 +6416,7 @@
       "assigneePlaceholder": "Personens e-mail",
       "requiredByLabel": "Færdig inden",
       "assign": "Bed denne person",
-      "certificateFilePlaceholder": "Id på beviset",
+      "certificateFileLabel": "Bevisfil",
       "issuedOnLabel": "Udstedt",
       "expiresOnLabel": "Gyldigt til",
       "attachCertificate": "Gem bevis",

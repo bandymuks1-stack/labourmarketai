@@ -17468,7 +17468,7 @@
       "assigneePlaceholder": "E-Mail der Person",
       "requiredByLabel": "Abschließen bis",
       "assign": "Diese Person bitten",
-      "certificateFilePlaceholder": "Id der Zertifikatsdatei",
+      "certificateFileLabel": "Zertifikatsdatei",
       "issuedOnLabel": "Ausgestellt am",
       "expiresOnLabel": "Gültig bis",
       "attachCertificate": "Zertifikat speichern",

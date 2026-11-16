@@ -17468,7 +17468,7 @@
       "assigneePlaceholder": "Person's email",
       "requiredByLabel": "Complete by",
       "assign": "Ask this person",
-      "certificateFilePlaceholder": "Certificate file id",
+      "certificateFileLabel": "Certificate file",
       "issuedOnLabel": "Issued on",
       "expiresOnLabel": "Valid until",
       "attachCertificate": "Save certificate",
