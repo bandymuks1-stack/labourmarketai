@@ -1,4 +1,6 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { collectPageErrors, expectRenderedOnce } from "./render-once";
 
 /**
  * AGENCY ROLES AND PERMISSIONS, end to end, on a THROWAWAY LOCAL Supabase
@@ -424,6 +426,7 @@ test("A-4. another organization sees none of the agency's people or needs", asyn
   await main.getByTestId("demand-next").click();
   const size = main.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("3");
+  await chooseDemandCountryIfEmpty(owner.page);
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done")).toBeVisible({ timeout: 30_000 });
@@ -504,4 +507,32 @@ test("A-5. the agency sees the person linked to it and never an unlinked worker"
     `engagement_contexts?profile_id=eq.${state.memberId}&organization_id=eq.${state.orgId}&select=id`,
   );
   expect(linked.length, "the control: it reads its own person's engagement").toBeGreaterThan(0);
+});
+
+// ── A-6 ─────────────────────────────────────────────────────────────────────
+
+test("A-6. each dashboard section renders exactly once, on repeated full loads at phone and desktop width", async ({ browser }) => {
+  // The intermittent duplicate (a section found twice, once outside <main>)
+  // has hit these walks since 2026-11-01 on several pages; this repeats the
+  // full loads that produced it and, on a duplicate, reports where the second
+  // copy lives and what the console said (tests/e2e/render-once.ts).
+  test.setTimeout(20 * 60_000);
+  const PAGES: ReadonlyArray<readonly [string, string]> = [
+    ["/en/dashboard/documents", "documents-page"],
+    ["/en/dashboard/company/people", "company-people"],
+    ["/en/dashboard/account", "account-notification-preferences"],
+  ];
+  for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
+    const ctx = await browser.newContext({ viewport });
+    const page = await ctx.newPage();
+    const errors = collectPageErrors(page);
+    await signIn(page, OWNER);
+    for (let round = 1; round <= 20; round++) {
+      for (const [path, testId] of PAGES) {
+        await page.goto(`${BASE}${path}`);
+        await expectRenderedOnce(page, testId, errors, `${viewport.width}px round ${round} ${path}`);
+      }
+    }
+    await ctx.close();
+  }
 });

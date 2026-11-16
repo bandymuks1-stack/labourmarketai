@@ -223,8 +223,8 @@ describe("the offers copy in every active locale", () => {
       // The intake label the block borrows exists too.
       expect(typeof m.auth?.dashboard?.wow?.demand?.partner?.cta).toBe("string");
       if (loc === "lt") {
-        // LT is informal: "tu", never the formal "Jūs".
-        expect(JSON.stringify(o)).not.toMatch(/\b(Jūs|jūs|Jūsų|jūsų|Jums|jums)\b/);
+        // LT is formal: "jūs", never the informal "tu" (owner decision 2026-11-15).
+        expect(JSON.stringify(o)).not.toMatch(/(?<![a-ząčęėįšųūž])(tu|tavo|tau|tave|tavęs)(?![a-ząčęėįšųūž])/i);
       }
     });
   }
