@@ -377,6 +377,57 @@ for (const phone of PHONES) {
       await fitsTheScreen(w2.page, "the worker's thread with the answer");
       await w2.done();
     });
+    test(`M-6 (${phone.name}). booking: the worker says they are available, the company proposes a start from its need's hand-raisers, the worker accepts`, async ({ browser }) => {
+      // The schedule gate (canStartCommunicationOrBooking): a booking is offered only for a worker
+      // who is available or has a start date, or a need with a start date. The need form asks for
+      // urgency, not a date, so the worker states their availability on the work card first.
+      const w = await signedInOnPhone(browser, phone, worker);
+      await w.page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+      const toggle = w.page.getByRole("main").getByTestId("work-card-editor-toggle");
+      await expect(toggle, "the work card editor is offered on the worker's profile").toBeVisible({ timeout: 60_000 });
+      const editor = w.page.getByRole("main").getByTestId("work-card-editor");
+      await tapUntil(toggle, editor);
+      await editor.locator('select[name="availability_status"]').selectOption("available");
+      await editor.getByTestId("work-card-save").tap();
+      await expect(w.page.getByTestId("work-card-saved"), "availability is saved").toBeVisible({ timeout: 30_000 });
+      expect(
+        sql<{ a: string | null }>(`select availability_status as a from public.workers where id = ${lit(s.workerId)}`)[0]?.a,
+      ).toBe("available");
+      await w.done();
+
+      // The company opens its need's candidates and proposes a start date to the hand-raiser.
+      const c = await signedInOnPhone(browser, phone, COMPANY);
+      await c.page.goto(`${BASE}/en/dashboard/company/scouting?request=${shared.needId}`);
+      const cand = c.page.getByRole("main").getByTestId(`scout-candidate-${s.workerId}`);
+      await expect(cand, "the worker who raised a hand is among the need's candidates").toBeVisible({ timeout: 60_000 });
+      await expect(cand.getByTestId(`scout-interest-${s.workerId}`), "marked as interested").toBeVisible();
+      const open = cand.getByTestId("propose-booking-open");
+      await expect(open, "the company can propose a booking to them").toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(c.page, "the need's candidates");
+      await tapUntil(open, cand.getByTestId("propose-booking-form"));
+      const start = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
+      await cand.getByTestId("propose-booking-start-date").fill(start);
+      await cand.getByTestId("propose-booking-send").tap();
+      await expect(cand.getByTestId("propose-booking-sent"), "the proposal is sent").toBeVisible({ timeout: 30_000 });
+      await c.done();
+      const rows = () =>
+        sql<{ id: string; status: string }>(
+          `select id, status from public.booking_requests where request_id = ${lit(shared.needId)} and worker_id = ${lit(s.workerId)}`,
+        );
+      await expect.poll(() => rows().map((r) => r.status), { message: "one booking, proposed", timeout: 30_000 }).toEqual(["proposed"]);
+      const bookingId = rows()[0]!.id;
+
+      // The worker accepts it from their bookings.
+      const w2 = await signedInOnPhone(browser, phone, worker);
+      await w2.page.goto(`${BASE}/en/dashboard/bookings`);
+      const card = w2.page.getByRole("main").getByTestId(`booking-${bookingId}`);
+      await expect(card, "the proposal reaches the worker").toBeVisible({ timeout: 60_000 });
+      await fitsTheScreen(w2.page, "the worker's bookings");
+      await tapUntil(card.getByTestId("booking-accept-open"), card.getByTestId("booking-accept-confirm"));
+      await card.getByTestId("booking-accept-confirm").tap();
+      await expect.poll(() => rows().map((r) => r.status), { message: "the booking is accepted", timeout: 30_000 }).toEqual(["accepted"]);
+      await w2.done();
+    });
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await accountMenu(page, "account-menu-cv-link");
