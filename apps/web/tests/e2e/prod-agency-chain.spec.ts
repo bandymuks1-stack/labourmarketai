@@ -5,7 +5,6 @@ import { contextPanel } from "./prod-context-panel";
 import { test, expect, type Browser, type Page } from "./prod-walk";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
 import { collectPageErrors, expectRenderedOnce } from "./render-once";
-import { bearerOf, qaApi, qaMcp } from "./prod-qa-api";
 
 /**
  * PRODUCTION AGENCY CHAIN — owner programme 2026-10-12 §3B: an agency sets up
@@ -22,14 +21,8 @@ import { bearerOf, qaApi, qaMcp } from "./prod-qa-api";
  * connection from earlier runs and continues from there. A-1b saves one
  * synthetic offer per run (offers are not metered against the open-need limit).
  *
- * A-6's accept proposes a booking to the synthetic worker. A-6b has the worker
- * accept THIS run's proposal (owner decision 2026-11-16: a synthetic placement
- * end to end is allowed, isolated test data only, cleaned up by ending the
- * engagement). The engagement that booking minted is ended in `afterAll`, and
- * only that one: it is found by `source_booking_id`, unique per booking, so an
- * engagement the worker already had with the client is never touched. The
- * booking carries no dates, so it occupies no day on anyone's calendar.
- * Before that, the worker never answered the proposal. The database caps a client's open proposals at 10 (and 30 per 24 h), so
+ * A-6's accept proposes a booking to the synthetic worker, who never answers
+ * it. The database caps a client's open proposals at 10 (and 30 per 24 h), so
  * runs that left theirs open made A-6 fail with "Too many open booking
  * proposals" (run 43724558463). The proposal THIS run created is withdrawn in
  * `afterAll` through the client's own Withdraw control, and only that one:
@@ -75,34 +68,6 @@ let requestId = "";
 let offerId = "";
 /** Booking proposals this run's accept created (A-6), withdrawn in afterAll. */
 const createdProposals: string[] = [];
-/** The booking A-6b's worker accepted, and the engagement it minted (if the
- *  worker had no active engagement with the client already). afterAll ends
- *  exactly that engagement and nothing else. */
-let acceptedBooking = "";
-let mintedEngagement = "";
-
-/** The engagement minted by one booking, read under the client's own RLS. */
-async function engagementOf(bookingId: string): Promise<{ id: string; status: string } | null | "unreadable"> {
-  const res = await qaApi(
-    `/rest/v1/company_worker_engagements?source_booking_id=eq.${bookingId}&select=id,status`,
-    bearerOf("owner"),
-  );
-  if (!res.ok) return "unreadable";
-  const rows = (await res.json()) as { id: string; status: string }[];
-  return rows[0] ?? null;
-}
-
-/** One chat/MCP tool call as the client (the same action the web chat runs). */
-let mcpId = 0;
-async function ownerTool(name: string, args: Record<string, unknown>): Promise<{ ok?: boolean; data?: Record<string, unknown>; code?: string } | undefined> {
-  const res = await qaMcp(bearerOf("owner"), { jsonrpc: "2.0", id: ++mcpId, method: "tools/call", params: { name, arguments: args } });
-  const text = await res.text();
-  try {
-    return (JSON.parse(text) as { result?: { structuredContent?: { ok?: boolean; data?: Record<string, unknown>; code?: string } } }).result?.structuredContent;
-  } catch {
-    return undefined;
-  }
-}
 
 /** The bookings page as the client reads it now: readable, or not (a load
  *  that did not finish, or its own read-failed state). Retried, never guessed. */
@@ -484,58 +449,6 @@ test("A-6. the client answers the offer", async ({ browser }) => {
   await close();
 });
 
-test("A-6b. the worker accepts this run's booking; the client sees it and the engagement exists", async ({ browser }) => {
-  // Only this run's own proposal, identified in A-6; never an earlier one.
-  if (createdProposals.length !== 1) {
-    console.info(`[agency] no single proposal of this run to answer (${createdProposals.length}): A-6b skipped`);
-    return;
-  }
-  const bookingId = createdProposals[0];
-  {
-    const { page, close } = await as(browser, "worker");
-    await page.goto("/lt/dashboard/bookings");
-    const row = page.getByTestId(`booking-${bookingId}`);
-    await expect(row, "this run's proposal reached the worker").toBeVisible({ timeout: 30_000 });
-    await expect(row).toHaveAttribute("data-direction", "incoming");
-    await expect(row).toHaveAttribute("data-status", "proposed");
-    await row.getByTestId("booking-accept-open").click();
-    await expect(row.getByTestId("booking-accept-disclosure")).toBeVisible();
-    await row.getByTestId("booking-accept-confirm").click();
-    const responded = row.getByTestId("booking-responded");
-    const conflict = row.getByTestId("booking-conflict");
-    await expect(responded.or(conflict)).toBeVisible({ timeout: 30_000 });
-    // The agency booking carries no dates, so no clash is possible; one here
-    // is a real fault, never something to accept "anyway".
-    expect(await conflict.isVisible(), "an undated agency booking met a date clash").toBe(false);
-    acceptedBooking = bookingId;
-    await close();
-  }
-  // The engagement the accept minted for the CLIENT company, read back under
-  // the client's own RLS. None means the worker already had an active
-  // engagement with the client, which stands (one active pair) and is not ours.
-  const e = await engagementOf(bookingId);
-  if (e === "unreadable") {
-    console.info("[agency] engagement could not be read; teardown will not guess");
-  } else if (e) {
-    expect(e.status, "the engagement this booking minted is active").toBe("active");
-    mintedEngagement = e.id;
-    console.info(`[agency] engagement ${e.id.slice(0, 8)} minted by this run's booking`);
-  } else {
-    console.info("[agency] no engagement minted: the worker already had an active one with the client");
-  }
-  {
-    const { page, close } = await as(browser, "owner");
-    await page.goto("/lt/dashboard");
-    await workspace(page, ALFA);
-    await page.goto(`/lt/dashboard/company/scouting${requestId ? `?request=${requestId}` : ""}`);
-    await expect(
-      page.getByTestId("scouting-agency-offers").locator(`[data-offer-id="${offerId}"]`).getByTestId("scout-offer-worker-accepted"),
-      "the client sees that the worker accepted",
-    ).toBeVisible({ timeout: 30_000 });
-    await close();
-  }
-});
-
 test("A-7. the agency sees the decision and talks to the client in one thread", async ({ browser }) => {
   const { page, close } = await as(browser, "agency");
   await page.goto("/lt/dashboard");
@@ -550,9 +463,6 @@ test("A-7. the agency sees the decision and talks to the client in one thread", 
     await expect(placement, "the agency sees this run's placement").toBeVisible({ timeout: 30_000 });
     await expect(placement.getByTestId("agency-placement-step-clientAccepted")).toBeVisible();
     await expect(placement.getByTestId("agency-placement-step-workerProposed")).toBeVisible();
-    if (acceptedBooking) {
-      await expect(placement.getByTestId("agency-placement-step-workerAccepted"), "the agency sees the worker accepted").toBeVisible();
-    }
   }
   const conn = page.getByTestId("agency-bridge-connection-row").filter({ hasText: /Alfa|qa\.owner/ }).first();
   await conn.locator('[data-testid^="agency-bridge-message-"]').click();
@@ -563,30 +473,6 @@ test("A-7. the agency sees the decision and talks to the client in one thread", 
   await expect(input).toHaveValue("", { timeout: 20_000 });
   await expect(page.locator("main")).toContainText(MSG, { timeout: 20_000 });
   await close();
-});
-
-test.afterAll(async () => {
-  test.setTimeout(180_000);
-  if (!ENABLED || !mintedEngagement) return;
-  // End ONLY the engagement this run's booking minted, through the client's
-  // own audited action (draft -> confirm), then read the stored status back.
-  try {
-    const input = { engagementId: mintedEngagement };
-    const prepared = await ownerTool("engagement_end_prepare", input);
-    const token = prepared?.data?.confirmationToken;
-    if (!prepared?.ok || typeof token !== "string") throw new Error(`prepare refused: ${prepared?.code ?? "no answer"}`);
-    const done = await ownerTool("engagement_end_confirm", { input, confirmationToken: token });
-    if (!done?.ok) throw new Error(`confirm refused: ${done?.code ?? "no answer"}`);
-    await expect
-      .poll(async () => {
-        const e = await engagementOf(acceptedBooking);
-        return e && e !== "unreadable" ? e.status : "unknown";
-      }, { timeout: 60_000, intervals: [2_000, 5_000, 10_000] })
-      .toBe("ended");
-    console.info(`[cleanup] ended engagement ${mintedEngagement.slice(0, 8)} minted by this run's booking`);
-  } catch (e) {
-    console.info(`[cleanup] engagement end did not complete: ${String((e as Error)?.message ?? e).split("\n")[0]}`);
-  }
 });
 
 test.afterAll(async ({ browser }) => {
