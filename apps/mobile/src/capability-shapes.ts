@@ -719,3 +719,32 @@ export type ClientOffersData = {
   readonly teamOffers: readonly ClientTeamOffer[];
   readonly openDemands: number;
 };
+
+/**
+ * `education.workspace.get` — an education organization's programmes, cohorts
+ * and the learners it may assign (`lib/conversation/education-workspace-contract.ts`).
+ * `not-institution` arrives as data; an unreadable workspace arrives as a failure.
+ */
+export type EducationCohort = {
+  readonly id: string;
+  readonly name: string;
+  /** null: membership is not visible to this role — unknown, never 0. */
+  readonly memberCount: number | null;
+};
+
+export type EducationProgramme = {
+  readonly id: string;
+  readonly name: string;
+  readonly demandCount: number | null;
+  readonly cohorts: readonly EducationCohort[];
+};
+
+export type EducationWorkspaceData =
+  | {
+      readonly kind: "ok";
+      readonly organizationId: string;
+      readonly programmes: readonly EducationProgramme[];
+      readonly assignable: readonly { readonly profileId: string; readonly label: string }[];
+      readonly membersVisible: boolean;
+    }
+  | { readonly kind: "not-institution" };
