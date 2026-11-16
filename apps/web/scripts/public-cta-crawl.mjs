@@ -446,7 +446,11 @@ async function crawlPage(context, path, width, discovered, firstFailure = null) 
           // radio): pressing it again rightly changes nothing. Only inside a group — a lone toggle
           // that is "on" must still switch off when pressed, so it is still pressed and judged.
           chosen:
-            (el.getAttribute("aria-pressed") === "true" && !!el.parentElement && el.parentElement.querySelectorAll(":scope > [aria-pressed]").length > 1) ||
+            // The group is the buttons' shared parent, or the list / group they sit in when each
+            // has its own item (a stepper: <li><button aria-pressed>…</li> per stage).
+            (el.getAttribute("aria-pressed") === "true" &&
+              ((!!el.parentElement && el.parentElement.querySelectorAll(":scope > [aria-pressed]").length > 1) ||
+                (el.closest("ul, ol, [role=group], [role=radiogroup], [role=toolbar]")?.querySelectorAll("[aria-pressed]").length ?? 0) > 1)) ||
             (el.getAttribute("role") === "radio" && el.getAttribute("aria-checked") === "true"),
           testid: el.getAttribute("data-testid") ?? "",
           // Site furniture (header, footer, navigation, a dialog such as the cookie bar) is the
