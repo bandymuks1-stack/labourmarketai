@@ -516,7 +516,7 @@ test("A-6. each dashboard section renders exactly once, on repeated full loads a
   // has hit these walks since 2026-11-01 on several pages; this repeats the
   // full loads that produced it and, on a duplicate, reports where the second
   // copy lives and what the console said (tests/e2e/render-once.ts).
-  test.setTimeout(10 * 60_000);
+  test.setTimeout(20 * 60_000);
   const PAGES: ReadonlyArray<readonly [string, string]> = [
     ["/en/dashboard/documents", "documents-page"],
     ["/en/dashboard/company/people", "company-people"],
@@ -527,7 +527,7 @@ test("A-6. each dashboard section renders exactly once, on repeated full loads a
     const page = await ctx.newPage();
     const errors = collectPageErrors(page);
     await signIn(page, OWNER);
-    for (let round = 1; round <= 5; round++) {
+    for (let round = 1; round <= 20; round++) {
       for (const [path, testId] of PAGES) {
         await page.goto(`${BASE}${path}`);
         await expectRenderedOnce(page, testId, errors, `${viewport.width}px round ${round} ${path}`);
