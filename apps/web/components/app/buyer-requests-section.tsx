@@ -179,10 +179,13 @@ export function BuyerRequestsSection({
   listResult,
   attachmentsResult,
   labels,
+  countryOptions,
 }: {
   readonly listResult: ListState;
   readonly attachmentsResult: AttachmentsState;
   readonly labels: BuyerRequestsSectionLabels;
+  /** Every ISO country, active markets first, named in the page's locale. */
+  readonly countryOptions: ReadonlyArray<{ readonly value: string; readonly label: string }>;
 }) {
   const [state, formAction, isPending] = useActionState<
     BuyerRequestFormState | null,
@@ -564,14 +567,26 @@ export function BuyerRequestsSection({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-text-secondary">{labels.fieldCountry}</span>
-            <input
-              type="text"
+            {/* An ISO country, chosen: free text ("Sweden", "Švedija") stored
+                a name no country filter could match, and an empty field
+                stored none at all (Swedish employer audit CL-3). */}
+            <select
               name="country"
-              maxLength={100}
-              placeholder={labels.fieldCountryPlaceholder}
+              required
+              defaultValue=""
+              aria-label={labels.fieldCountry}
               className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
               data-testid="buyer-requests-field-country"
-            />
+            >
+              <option value="" disabled>
+                {labels.fieldCountryPlaceholder}
+              </option>
+              {countryOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-text-secondary">{labels.fieldLocation}</span>

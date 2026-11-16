@@ -14,12 +14,13 @@ import type { ActiveLocale } from "@/lib/i18n/config";
  * `app/global-error.tsx`: nothing here may depend on a catalog that has to be loaded.
  */
 const COPY: Record<ActiveLocale, string> = {
-  lt: "Nėra interneto ryšio. Kas dabar išsaugoma, neišsisaugos. Palauk, kol ryšys grįš, ir bandyk dar kartą.",
+  lt: "Nėra interneto ryšio. Kas dabar išsaugoma, neišsisaugos. Palaukite, kol ryšys grįš, ir bandykite dar kartą.",
   en: "No internet connection. Nothing you save now will be stored. Wait for the connection and try again.",
   ru: "Нет подключения к интернету. Сейчас ничего не сохранится. Дождитесь подключения и попробуйте ещё раз.",
-  nl: "Geen internetverbinding. Wat je nu opslaat, wordt niet bewaard. Wacht op de verbinding en probeer het opnieuw.",
+  nl: "Geen internetverbinding. Wat u nu opslaat, wordt niet bewaard. Wacht op de verbinding en probeer het opnieuw.",
   de: "Keine Internetverbindung. Was Sie jetzt speichern, wird nicht übernommen. Warten Sie auf die Verbindung und versuchen Sie es erneut.",
   pl: "Brak połączenia z internetem. To, co teraz zapiszesz, nie zostanie zachowane. Poczekaj na połączenie i spróbuj ponownie.",
+  sv: "Ingen internetanslutning. Det du sparar nu kommer inte att lagras. Vänta tills anslutningen är tillbaka och försök igen.",
 };
 
 export function ConnectionNotice({ locale }: { readonly locale: ActiveLocale }) {

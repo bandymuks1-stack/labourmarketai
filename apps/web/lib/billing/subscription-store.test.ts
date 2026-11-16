@@ -225,6 +225,35 @@ describe("upsertSubscription — (owner, plan, provider) collision fallback", ()
     expect(patch.plan_key).toBeUndefined();
   });
 
+  it("23505 when a paid one-time pass replaces an older row → the known payment outcome replaces the old one", async () => {
+    const calls = installFakeAdmin((call) => {
+      if (call.op === "upsert") return { error: { code: "23505" } };
+      if (isHeldRowSelect(call))
+        return { data: { provider_subscription_id: "pilotpass_cs_old", status: "active" } };
+      return {};
+    });
+    expect(
+      await upsertSubscription({
+        ...SUB, providerSubscriptionId: "pilotpass_cs_new", unitAmountCents: 100, currency: "eur", lastPaymentStatus: "succeeded",
+      }),
+    ).toBe("ok");
+    const patch = calls.find((c) => c.op === "update")!.args[0] as Record<string, unknown>;
+    expect(patch.provider_subscription_id).toBe("pilotpass_cs_new");
+    expect(patch.last_payment_status).toBe("succeeded");
+    expect(patch.unit_amount_cents).toBe(100);
+  });
+
+  it("23505 for a subscription leaves the payment outcome to its invoice events", async () => {
+    const calls = installFakeAdmin((call) => {
+      if (call.op === "upsert") return { error: { code: "23505" } };
+      if (isHeldRowSelect(call))
+        return { data: { provider_subscription_id: "sub_old", status: "cancelled" } };
+      return {};
+    });
+    expect(await upsertSubscription(SUB)).toBe("ok");
+    expect(calls.find((c) => c.op === "update")!.args[0]).not.toHaveProperty("last_payment_status");
+  });
+
   it("23505 while a manual_<uuid> pilot-override row holds owner+plan → the override row becomes the real subscription", async () => {
     // The override row (provider_subscription_id = manual_…) owns the
     // (owner_id, plan_key, provider) key, so the checkout upsert collides;

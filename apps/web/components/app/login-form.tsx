@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { AuthCarriedIntent } from "@/components/app/auth-carried-intent";
 import { Button } from "@/components/ui/Button";
 import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
+import { InAppBrowserNotice } from "@/components/app/in-app-browser-notice";
 import {
   FacebookButton,
   GoogleButton,
@@ -15,6 +16,8 @@ import {
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
+import { bindWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
+import { isWorkerProfileDoorNext } from "@/lib/marketing/worker-profile-door";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { buildEmailConfirmRedirectTo } from "@/lib/auth/email-confirm";
 import {
@@ -44,11 +47,18 @@ const OAUTH_ERROR_KEYS: Record<string, string> = {
   // confirmed — sign in here).
   link_expired: "oauth.link_expired",
   confirmed_sign_in: "oauth.confirmed_sign_in",
+  // A confirmation link that came back with nothing the server can read: a
+  // re-sent link does that. The address is most likely confirmed — sign in,
+  // or ask for a new link right here.
+  confirm_link_opened: "oauth.confirm_link_opened",
+  // The provider (or the auth server behind it) refused or failed: a retry
+  // rarely changes that, so the copy names the ways that do work.
+  provider_error: "oauth.provider_error",
 };
 
 /** Outcomes that are a person's own choice or a normal cross-device return,
  *  rendered as a neutral status line — never as a red system-fault alert. */
-const NEUTRAL_OAUTH_OUTCOMES = new Set(["cancelled", "confirmed_sign_in"]);
+const NEUTRAL_OAUTH_OUTCOMES = new Set(["cancelled", "confirmed_sign_in", "confirm_link_opened"]);
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -126,7 +136,8 @@ export function LoginForm({
   // failure: neutral styling, `role="status"` (below).
   const oauthNeutral =
     oauthErrorCode !== null && NEUTRAL_OAUTH_OUTCOMES.has(oauthErrorCode);
-  const offerResend = needsConfirmation || oauthErrorCode === "link_expired";
+  const offerResend =
+    needsConfirmation || oauthErrorCode === "link_expired" || oauthErrorCode === "confirm_link_opened";
 
   async function resendConfirmation() {
     if (!isValidEmail(email)) {
@@ -183,6 +194,9 @@ export function LoginForm({
       setError(t("error_password_required"));
       return;
     }
+    // The intake draft, if this tab has one, is bound to this email only
+    // (decision 0024; lib/staffing/worker-intake-draft.ts).
+    if (nextParam && isWorkerProfileDoorNext(nextPath)) bindWorkerIntakeDraft(email);
     setStatus("signing");
     trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "password" });
     try {
@@ -322,6 +336,7 @@ export function LoginForm({
             OAuth path may not bypass it. Email/password login below creates no
             account and needs no notice. */}
         <AuthLegalNotice variant="googleLogin" />
+        <InAppBrowserNotice text={tSocial("inAppBrowser")} />
 
         {/* `context="signup"` because this button is ACCOUNT-CREATING for a new
             Google identity (see the notice above) — the press mirrors the signup

@@ -7,6 +7,8 @@
  * closed (null → 503) on anything else — a missing count is an outage, never a zero.
  */
 
+import { countSyntheticIntakes, type IntakeCountRow } from "@/lib/staffing/intake-test-rows";
+
 export const CAPABILITY_READBACK_SCHEMA = "lm-capability-readback/v1" as const;
 
 export const CAPABILITY_READBACK_KEYS = [
@@ -34,4 +36,21 @@ export function buildCapabilityReadback(raw: unknown, builtAtIso: string): Capab
     counts[key] = v;
   }
   return { schema: CAPABILITY_READBACK_SCHEMA, builtAtIso, counts: counts as CapabilityReadbackBody["counts"] };
+}
+
+/**
+ * OUR TEST REQUESTS ARE NOT CAPABILITY (owner 2026-11-14). The `company_need_public_intakes` count Agentai OS sees is
+ * the number of REAL requests — exactly what the commercial-requests feed passes: every intake row read, minus the
+ * rows the feed's one predicate (`isSyntheticCommercialRequest`) drops. Both numbers come from the SAME read of the
+ * rows, so the difference is never off by a row inserted between two reads, and never negative.
+ *
+ * `rows` null (a failed or oversized read) → null → 503, never the unfiltered database count and never a zero.
+ */
+export function withRealIntakeCount(
+  body: CapabilityReadbackBody | null,
+  rows: readonly IntakeCountRow[] | null,
+): CapabilityReadbackBody | null {
+  if (body === null || rows === null) return null;
+  const real = rows.length - countSyntheticIntakes(rows);
+  return { ...body, counts: { ...body.counts, company_need_public_intakes: real } };
 }

@@ -84,6 +84,14 @@ export default async function CompanyPersonHistoryPage({
   }
 
   const { person, organizationName } = load;
+  // What the card may SAY about the account link: "linked" only on the person's
+  // own confirmation (the open-profile link has the same rule). An older row
+  // marked linked without it reads as a link that still awaits the person.
+  const claimState = person.linkedWorkerId
+    ? "linked"
+    : person.linkState === "linked"
+      ? "link_proposed"
+      : person.linkState;
   const relationship = person.relationshipKind
     ? tRel.has(person.relationshipKind)
       ? tRel(person.relationshipKind)
@@ -114,8 +122,8 @@ export default async function CompanyPersonHistoryPage({
           <span>{t("provenance", { name: organizationName })}</span>
         </p>
         {/* THE CLAIM STATUS — information, never a gate on the history. */}
-        <p className="text-sm text-text-secondary" data-testid="company-person-claim" data-link-state={person.linkState}>
-          {t(`claim.${person.linkState}` as never)}
+        <p className="text-sm text-text-secondary" data-testid="company-person-claim" data-link-state={claimState}>
+          {t(`claim.${claimState}` as never)}
           {person.linkedWorkerId ? (
             <>
               {" "}

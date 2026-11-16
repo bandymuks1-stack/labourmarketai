@@ -2,6 +2,7 @@
 
 import { JourneyStrip } from "@/components/app/journey-strip";
 import { useActionState } from "react";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 
 import {
   draftClientNeedAction,
@@ -63,8 +64,12 @@ export function AgencyDelegationPanel({
   locale: string;
 }) {
   const [state, action, pending] = useActionState(draftClientNeedAction, IDLE);
+  // `w-full min-w-0`: a <select> is as wide as its longest option, and the
+  // country list carries 54-character names in Lithuanian ("Ypatingasis
+  // Administracinis Kinijos Regionas Honkongas"), which pushed a 390 px phone
+  // sideways (production ux-metrics walk, /lt partners as an agency).
   const input =
-    "min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary";
+    "min-h-11 w-full min-w-0 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary";
 
   return (
     <Card>
@@ -79,7 +84,7 @@ export function AgencyDelegationPanel({
         {connections.length > 0 ? (
           <form
             action={action}
-            className="grid gap-2 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-2 sm:grid-cols-2"
             data-testid="agency-draft-need-form"
           >
             <DisplayedWorkspaceField />
@@ -138,12 +143,22 @@ export function AgencyDelegationPanel({
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {labels.country}
-              <input
+              <select
                 name="country"
-                maxLength={2}
+                required
+                defaultValue=""
                 className={input}
                 data-testid="agency-draft-country"
-              />
+              >
+                <option value="" disabled>
+                  —
+                </option>
+                {countryOptionsForLocale(locale).map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2">
               {labels.summary}

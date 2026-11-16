@@ -108,6 +108,8 @@ jobs:
         tests/e2e/social-auth-matrix.spec.ts
         tests/e2e/country-readiness-public.spec.ts
         tests/e2e/translated-page-survives.spec.ts
+        tests/e2e/worker-profile-door.spec.ts
+        tests/e2e/create-cv-menu-entry.spec.ts
       # Excludes the env-dependent describe block named above. If that title
       # ever changes, the block comes BACK IN and this job goes red — it can
       # never silently drop coverage, which is the safe direction. And if the
@@ -125,7 +127,10 @@ jobs:
       # run against a local `next start` with the runner's own Chromium, all
       # five passed in 7.2 s before this floor was raised.
       # translated-page-survives adds 1 (2026-11-06).
-      MIN_EXPECTED: "33"
+      # worker-profile-door adds 10 (2026-11-15): 5 checks x 2 locales.
+      # create-cv-menu-entry adds 4 (lt + en, 2026-11-15).
+      # worker-profile-door gains 4 (F6: /for-workers, /work-abroad x 2 locales).
+      MIN_EXPECTED: "51"
 
     steps:
       - name: Checkout
@@ -178,6 +183,14 @@ jobs:
           pnpm -F web exec next start -p 3000 &
           echo $! > /tmp/next.pid
           npx --yes wait-on -t 120000 http://127.0.0.1:3000/lt
+
+      # 2026-11-12: production answered 404 to a route-group chunk requested with
+      # percent-encoded parentheses (what a URL-normalising proxy sends), and the
+      # home page became the error screen. This is the pre-deploy proof that the
+      # server built from this commit serves both spellings; the hourly
+      # reachability-probe is the same check against production.
+      - name: Route-group chunks load as linked and fully percent-encoded
+        run: node .github/scripts/encoded-chunk-probe.mjs http://127.0.0.1:3000
 
       - name: Run E2E subset
         env:

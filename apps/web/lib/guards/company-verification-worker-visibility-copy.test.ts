@@ -28,14 +28,14 @@ describe("setup copy names the condition for worker visibility", () => {
         verificationExplainer: { pending_verification: string };
       };
       for (const s of [setup.submitRequest, setup.verificationExplainer.pending_verification]) {
-        expect(s, l).not.toMatch(/optional|neprivalom|необязательн|optioneel|opcjonaln/i);
+        expect(s, l).not.toMatch(/optional|neprivalom|необязательн|optioneel|opcjonaln|valfri/i);
       }
     });
 
     it(`${l}: the first-run lines say both facts: usable now, and when workers see the needs`, () => {
       const c = catalog(l).roleDashboards.company;
       for (const s of [c.nextActions.noCompany.body, c.setup.formSubtitle as string]) {
-        expect(s, l).not.toMatch(/no waiting for approval|nereikia laukti patvirtinimo|ждать одобрения не нужно|zonder te wachten|ohne Warten|bez czekania/i);
+        expect(s, l).not.toMatch(/no waiting for approval|nereikia laukti patvirtinimo|ждать одобрения не нужно|zonder te wachten|ohne Warten|bez czekania|utan att vänta/i);
         expect(s, l).toMatch(/verif|weryfik|patvirtin|подтвержд/i);
       }
     });

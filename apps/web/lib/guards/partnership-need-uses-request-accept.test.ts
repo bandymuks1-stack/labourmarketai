@@ -29,7 +29,7 @@ describe("partnership need = a service offering in the partnership category", ()
     expect(m).toMatch(/requestServiceOffering\(o\.id/);
   });
   it("copy exists in every routed locale", () => {
-    for (const loc of ["lt", "en", "de", "nl", "pl", "ru"]) {
+    for (const loc of ["lt", "en", "de", "nl", "pl", "ru", "sv"]) {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         marketplace: { partnershipBadge?: string; partnershipRequest?: string };
         serviceOfferings: { addPartnership?: string };
