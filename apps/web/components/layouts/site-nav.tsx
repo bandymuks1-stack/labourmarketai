@@ -118,6 +118,7 @@ export async function SiteNav({
       href: link.href,
       label: tIntent(`links.${link.id}`),
       account: link.account,
+      guestHref: link.guestHref,
     })),
   }));
   // "Ask the assistant" — the existing conversation home (`/dashboard` IS the

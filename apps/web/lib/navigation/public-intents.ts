@@ -27,6 +27,7 @@
  */
 
 import { AGENCY_DOOR_NEXT } from "@/lib/marketing/public-doors";
+import { WORKER_PROFILE_DOOR_HREF, WORKER_PROFILE_DOOR_NEXT } from "@/lib/marketing/worker-profile-door";
 import { requestDoorHref } from "@/lib/staffing/request-door-link";
 
 export const PUBLIC_INTENT_IDS = [
@@ -54,6 +55,12 @@ export type PublicIntentLink = {
   readonly href: string;
   /** True when the page is inside the signed-in product. */
   readonly account: boolean;
+  /**
+   * An account link's door for a signed-out visitor, when sign-in is the
+   * wrong first step for them: the sign-up that returns to `href`. Signed in,
+   * the link is `href` itself (owner P0 2026-11-16, N3).
+   */
+  readonly guestHref?: string;
 };
 
 export type PublicIntent = {
@@ -69,7 +76,7 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
     links: [
       { id: "jobs", href: "/jobs", account: false },
       { id: "workOpportunities", href: "/work-opportunities", account: false },
-      { id: "createCv", href: "/dashboard/profile", account: true },
+      { id: "createCv", href: WORKER_PROFILE_DOOR_NEXT, account: true, guestHref: WORKER_PROFILE_DOOR_HREF },
       { id: "workAbroad", href: "/work-abroad", account: false },
       { id: "forWorkers", href: "/for-workers", account: false },
     ],

@@ -269,7 +269,7 @@ export function IntentMegaMenu({
                     {intent.links.map((link) => (
                       <li key={link.id}>
                         <Link
-                          href={link.href}
+                          href={!signedIn && link.guestHref ? link.guestHref : link.href}
                           prefetch={link.account ? false : undefined}
                           onClick={() => setActive(null)}
                           data-testid={`intent-link-${intent.id}-${link.id}`}

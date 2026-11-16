@@ -5,6 +5,7 @@ import { ChevronDown, LogIn, Menu, MessageCircle, X } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { INTENT_ICONS, type NavLeadLink, type RenderedIntent } from "@/components/layouts/intent-icons";
+import { useSignedInHint } from "@/components/layouts/nav-auth-ctas";
 
 export type MobileNavItem = {
   key: string;
@@ -67,6 +68,7 @@ export function MobileNavMenu({
   assistant?: { readonly href: string; readonly label: string };
 }) {
   const [open, setOpen] = useState(false);
+  const signedIn = useSignedInHint();
   const [expanded, setExpanded] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -186,7 +188,7 @@ export function MobileNavMenu({
                         {intent.links.map((link) => (
                           <Link
                             key={link.id}
-                            href={link.href}
+                            href={!signedIn && link.guestHref ? link.guestHref : link.href}
                             prefetch={link.account ? false : undefined}
                             onClick={() => setOpen(false)}
                             data-testid={`mobile-intent-link-${intent.id}-${link.id}`}
