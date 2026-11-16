@@ -689,3 +689,33 @@ export type ShortlistDraftData = {
   };
   readonly confirmationToken: string;
 };
+
+/**
+ * `client.agency_offers.get` — the employer's open agency candidate offers and
+ * the brigades / companies offered for its needs (`lib/conversation/
+ * client-offers-contract.ts`). No worker name: the read never returns one.
+ */
+export type ClientAgencyOffer = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+  readonly agencyName: string;
+  readonly note: string | null;
+  readonly createdAt: string;
+};
+
+export type ClientTeamOffer = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+  readonly teamName: string;
+  readonly status: "offered" | "accepted" | "assigned";
+  readonly memberCount: number;
+  readonly offeredAt: string;
+};
+
+export type ClientOffersData = {
+  readonly offers: readonly ClientAgencyOffer[];
+  readonly teamOffers: readonly ClientTeamOffer[];
+  readonly openDemands: number;
+};

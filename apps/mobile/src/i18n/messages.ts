@@ -648,6 +648,19 @@ const en = {
   "availability.noOrganization": "This account belongs to no organization, so there is no roster to report on.",
   "availability.noRoster": "This organization has no active roster members, so there is nobody to report on.",
   "availability.noCompanyContext": "This workspace cannot act as an employer, so there is no roster to report on.",
+  "agencyOffers.title": "Agency offers",
+  "agencyOffers.none": "Nobody has offered candidates, a brigade or a company for your open needs yet.",
+  "agencyOffers.candidatesIntro": "Candidates agencies offered for your needs:",
+  "agencyOffers.teamsIntro": "Brigades and companies offered for your needs:",
+  "agencyOffers.teamStatusAgreed": "agreed in principle",
+  "agencyOffers.accept": "Accept",
+  "agencyOffers.decline": "Decline",
+  "agencyOffers.agree": "Agree in principle",
+  "agencyOffers.accepted": "Accepted. A booking proposal was sent to the candidate — you will see their answer here.",
+  "agencyOffers.declined": "Declined. The agency will see your decision.",
+  "agencyOffers.failed": "The decision could not be saved — the offer may already be closed. Check the candidates list.",
+  "agencyOffers.teamAgreed": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
+  "agencyOffers.teamDeclined": "Declined. The offering company will see your answer.",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -1282,6 +1295,19 @@ const lt: Catalogue = {
   "availability.noOrganization": "Ši paskyra nepriklauso jokiai organizacijai, todėl nėra komandos, apie kurią pranešti.",
   "availability.noRoster": "Ši organizacija neturi aktyvių komandos narių, todėl nėra apie ką pranešti.",
   "availability.noCompanyContext": "Ši erdvė negali veikti kaip darbdavys, todėl nėra komandos, apie kurią pranešti.",
+  "agencyOffers.title": "Agentūrų pasiūlymai",
+  "agencyOffers.none": "Jūsų atviriems poreikiams dar niekas nepasiūlė kandidatų, brigados ar įmonės.",
+  "agencyOffers.candidatesIntro": "Agentūrų pasiūlyti kandidatai jūsų poreikiams:",
+  "agencyOffers.teamsIntro": "Brigados ir įmonės, pasiūliusios save jūsų poreikiams:",
+  "agencyOffers.teamStatusAgreed": "sutarta iš esmės",
+  "agencyOffers.accept": "Priimti",
+  "agencyOffers.decline": "Atmesti",
+  "agencyOffers.agree": "Sutarti iš esmės",
+  "agencyOffers.accepted": "Priimta. Kandidatui išsiųstas rezervacijos pasiūlymas — kai jis atsakys, pamatysite čia.",
+  "agencyOffers.declined": "Atmesta. Agentūra matys jūsų sprendimą.",
+  "agencyOffers.failed": "Sprendimo išsaugoti nepavyko — pasiūlymas gal jau uždarytas. Patikrinkite kandidatų sąraše.",
+  "agencyOffers.teamAgreed": "Sutarta iš esmės — tai dar ne pasirašyta sutartis. Sąlygas suderinkite pokalbyje, tada priskirkite komandą projektui.",
+  "agencyOffers.teamDeclined": "Atmesta. Pasiūliusi įmonė matys jūsų atsakymą.",
 };
 
 const ru: Catalogue = {
@@ -1912,6 +1938,19 @@ const ru: Catalogue = {
   "availability.noOrganization": "Эта учётная запись не принадлежит ни одной организации, поэтому команды нет.",
   "availability.noRoster": "В этой организации нет активных участников команды, поэтому отчитываться не о ком.",
   "availability.noCompanyContext": "Это пространство не может выступать работодателем, поэтому команды нет.",
+  "agencyOffers.title": "Предложения агентств",
+  "agencyOffers.none": "Для ваших открытых потребностей ещё никто не предложил кандидатов, бригаду или компанию.",
+  "agencyOffers.candidatesIntro": "Кандидаты, предложенные агентствами по вашим потребностям:",
+  "agencyOffers.teamsIntro": "Бригады и компании, предложившие себя для ваших потребностей:",
+  "agencyOffers.teamStatusAgreed": "согласовано в принципе",
+  "agencyOffers.accept": "Принять",
+  "agencyOffers.decline": "Отклонить",
+  "agencyOffers.agree": "Согласовать в принципе",
+  "agencyOffers.accepted": "Принято. Кандидату отправлено предложение бронирования — его ответ появится здесь.",
+  "agencyOffers.declined": "Отклонено. Агентство увидит ваше решение.",
+  "agencyOffers.failed": "Не удалось сохранить решение — возможно, предложение уже закрыто. Проверьте список кандидатов.",
+  "agencyOffers.teamAgreed": "Согласовано в принципе — это ещё не подписанный договор. Обсудите условия в переписке, затем назначьте бригаду на проект.",
+  "agencyOffers.teamDeclined": "Отклонено. Предложившая компания увидит ваш ответ.",
 };
 
 const nl: Catalogue = {
@@ -2542,6 +2581,19 @@ const nl: Catalogue = {
   "availability.noOrganization": "Dit account hoort bij geen enkele organisatie, dus er is geen team om over te rapporteren.",
   "availability.noRoster": "Deze organisatie heeft geen actieve teamleden, dus er is niemand om over te rapporteren.",
   "availability.noCompanyContext": "Deze ruimte kan niet als werkgever optreden, dus er is geen team om over te rapporteren.",
+  "agencyOffers.title": "Aanbiedingen van bureaus",
+  "agencyOffers.none": "Nog niemand heeft kandidaten, een ploeg of een bedrijf aangeboden voor uw open behoeften.",
+  "agencyOffers.candidatesIntro": "Kandidaten die bureaus voor uw behoeften hebben aangeboden:",
+  "agencyOffers.teamsIntro": "Ploegen en bedrijven die zich voor uw behoeften hebben aangeboden:",
+  "agencyOffers.teamStatusAgreed": "in principe akkoord",
+  "agencyOffers.accept": "Accepteren",
+  "agencyOffers.decline": "Afwijzen",
+  "agencyOffers.agree": "In principe akkoord",
+  "agencyOffers.accepted": "Geaccepteerd. De kandidaat kreeg een boekingsvoorstel — zijn antwoord ziet u hier.",
+  "agencyOffers.declined": "Afgewezen. Het bureau ziet uw beslissing.",
+  "agencyOffers.failed": "De beslissing kon niet worden opgeslagen — het aanbod is misschien al gesloten. Controleer de kandidatenlijst.",
+  "agencyOffers.teamAgreed": "In principe akkoord — nog geen getekend contract. Spreek de voorwaarden af in het gesprek en wijs het team daarna toe aan een project.",
+  "agencyOffers.teamDeclined": "Afgewezen. Het aanbiedende bedrijf ziet uw antwoord.",
 };
 
 const de: Catalogue = {
@@ -3175,6 +3227,19 @@ const de: Catalogue = {
   "availability.noOrganization": "Dieses Konto gehört zu keiner Organisation, daher gibt es kein Team, über das berichtet werden kann.",
   "availability.noRoster": "Diese Organisation hat keine aktiven Teammitglieder, daher gibt es niemanden, über den berichtet werden kann.",
   "availability.noCompanyContext": "Dieser Bereich kann nicht als Arbeitgeber handeln, daher gibt es kein Team, über das berichtet werden kann.",
+  "agencyOffers.title": "Agenturangebote",
+  "agencyOffers.none": "Für Ihren offenen Bedarf hat noch niemand Kandidaten, ein Team oder ein Unternehmen angeboten.",
+  "agencyOffers.candidatesIntro": "Von Agenturen vorgeschlagene Kandidaten für Ihre Bedarfe:",
+  "agencyOffers.teamsIntro": "Teams und Unternehmen, die sich für Ihren Bedarf angeboten haben:",
+  "agencyOffers.teamStatusAgreed": "grundsätzlich vereinbart",
+  "agencyOffers.accept": "Annehmen",
+  "agencyOffers.decline": "Ablehnen",
+  "agencyOffers.agree": "Grundsätzlich zustimmen",
+  "agencyOffers.accepted": "Angenommen. Dem Kandidaten wurde ein Buchungsvorschlag gesendet — seine Antwort sehen Sie hier.",
+  "agencyOffers.declined": "Abgelehnt. Die Agentur sieht Ihre Entscheidung.",
+  "agencyOffers.failed": "Die Entscheidung konnte nicht gespeichert werden — das Angebot ist vielleicht schon geschlossen. Prüfen Sie die Kandidatenliste.",
+  "agencyOffers.teamAgreed": "Grundsätzlich vereinbart — noch kein unterschriebener Vertrag. Klären Sie die Bedingungen im Gespräch und weisen Sie das Team dann einem Projekt zu.",
+  "agencyOffers.teamDeclined": "Abgelehnt. Das anbietende Unternehmen sieht Ihre Antwort.",
 };
 
 const pl: Catalogue = {
@@ -3805,6 +3870,19 @@ const pl: Catalogue = {
   "account.support": "Skontaktuj się z pomocą (info@labourmarket.ai)",
   "account.external": "Przeglądarka",
   "account.openFailed": "Nie udało się otworzyć linku na tym telefonie. Nic nie zostało zmienione.",
+  "agencyOffers.title": "Oferty agencji",
+  "agencyOffers.none": "Nikt jeszcze nie zaoferował kandydatów, brygady ani firmy do Państwa otwartych potrzeb.",
+  "agencyOffers.candidatesIntro": "Kandydaci zaproponowani przez agencje do Państwa potrzeb:",
+  "agencyOffers.teamsIntro": "Brygady i firmy, które zaoferowały się do Państwa potrzeb:",
+  "agencyOffers.teamStatusAgreed": "uzgodnione wstępnie",
+  "agencyOffers.accept": "Przyjmij",
+  "agencyOffers.decline": "Odrzuć",
+  "agencyOffers.agree": "Uzgodnij wstępnie",
+  "agencyOffers.accepted": "Przyjęto. Kandydat otrzymał propozycję rezerwacji — jego odpowiedź zobaczą Państwo tutaj.",
+  "agencyOffers.declined": "Odrzucono. Agencja zobaczy Państwa decyzję.",
+  "agencyOffers.failed": "Nie udało się zapisać decyzji — oferta mogła już zostać zamknięta. Proszę sprawdzić listę kandydatów.",
+  "agencyOffers.teamAgreed": "Uzgodnione wstępnie — to jeszcze nie podpisana umowa. Proszę ustalić warunki w rozmowie, a potem przypisać zespół do projektu.",
+  "agencyOffers.teamDeclined": "Odrzucono. Oferująca firma zobaczy Państwa odpowiedź.",
 };
 
 const sv: Catalogue = {
@@ -4436,6 +4514,19 @@ const sv: Catalogue = {
   "offers.confirmFailedTitle": "Ditt svar registrerades inte",
   "offers.clash": "Den här perioden krockar med arbete som du redan har tackat ja till. Öppna erbjudandet på webbplatsen för att se krocken och bestäm där.",
   "offers.changed": "Det här erbjudandet har ändrats eller har redan besvarats. Gå tillbaka för att se den aktuella listan.",
+  "agencyOffers.title": "Erbjudanden från bemanningsföretag",
+  "agencyOffers.none": "Ingen har ännu erbjudit kandidater, ett arbetslag eller ett företag för dina öppna förfrågningar.",
+  "agencyOffers.candidatesIntro": "Kandidater som bemanningsföretag erbjudit för era behov:",
+  "agencyOffers.teamsIntro": "Arbetslag och företag som erbjudits för dina förfrågningar:",
+  "agencyOffers.teamStatusAgreed": "överenskommet i princip",
+  "agencyOffers.accept": "Acceptera",
+  "agencyOffers.decline": "Avböj",
+  "agencyOffers.agree": "Kom överens i princip",
+  "agencyOffers.accepted": "Accepterat. Kandidaten fick ett bokningsförslag — svaret ser du här.",
+  "agencyOffers.declined": "Avböjt. Bemanningsföretaget ser ditt beslut.",
+  "agencyOffers.failed": "Beslutet kunde inte sparas — erbjudandet kan redan vara stängt. Kontrollera kandidatlistan.",
+  "agencyOffers.teamAgreed": "Överenskommet i princip — inte ett undertecknat avtal. Gör upp om villkoren i samtalet och tilldela sedan teamet ett projekt.",
+  "agencyOffers.teamDeclined": "Avböjt. Det erbjudande företaget ser ditt svar.",
 };
 
 export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de, pl, sv };
