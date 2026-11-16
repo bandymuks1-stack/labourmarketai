@@ -16,9 +16,12 @@ import { useCapability } from "../use-capability";
 import { useReloadOnReturn } from "../use-reload-on-return";
 import { CapabilityFailureNotice } from "./capability-failure";
 import { CapabilityGate } from "./capability-gate";
+import { NeedLifecycle } from "./need-lifecycle";
 import { ProposeBooking } from "./propose-booking";
 
 const LIMIT = { limit: 20 } as const;
+/** Closed needs too, so a closed one can be reopened here. */
+const WITH_CLOSED = { includeClosed: true } as const;
 
 /** The same refusals the need form names, for the same employer gate. */
 function useEmployerRefusal() {
@@ -59,7 +62,7 @@ export function CandidatesScreen({
 
 function NeedPicker({ onPick }: { onPick: (id: string) => void }) {
   const { t } = useLocale();
-  const needs = useCapability<DemandListData>("demand.list");
+  const needs = useCapability<DemandListData>("demand.list", WITH_CLOSED);
   const refusal = useEmployerRefusal();
   useReloadOnReturn(needs.reload);
   return (
@@ -78,12 +81,17 @@ function NeedPicker({ onPick }: { onPick: (id: string) => void }) {
                   {t("candidates.interested")}: {need.interestedPeople ?? "—"} · {t("candidates.shortlisted")}:{" "}
                   {need.shortlisted ?? "—"}
                 </Body>
-                <Button
-                  variant="quiet"
-                  testID={`candidates-need-${need.id}`}
-                  label={t("candidates.open")}
-                  onPress={() => onPick(need.id)}
-                />
+                {need.status === "closed" ? (
+                  <Body muted>{t("needs.closedLabel")}</Body>
+                ) : (
+                  <Button
+                    variant="quiet"
+                    testID={`candidates-need-${need.id}`}
+                    label={t("candidates.open")}
+                    onPress={() => onPick(need.id)}
+                  />
+                )}
+                <NeedLifecycle needId={need.id} closed={need.status === "closed"} onChanged={needs.reload} />
               </View>
             ))
           )}

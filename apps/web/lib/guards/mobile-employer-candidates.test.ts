@@ -18,7 +18,7 @@ describe("mobile employer candidates", () => {
   const screen = read("apps/mobile/src/screens/candidates.tsx");
 
   it("reads and writes through the canonical capabilities only", () => {
-    expect(screen).toContain('useCapability<DemandListData>("demand.list")');
+    expect(screen).toContain('useCapability<DemandListData>("demand.list", WITH_CLOSED)');
     expect(screen).toContain('useCapability<CandidateSearchData>("candidate.search", args)');
     expect(screen).toContain('name: "shortlist.add_draft"');
     expect(screen).toContain('name: "shortlist.add_confirm"');
@@ -34,6 +34,15 @@ describe("mobile employer candidates", () => {
     expect(booking).not.toMatch(/supabase\s*\.\s*from\(/);
     // Only for a candidate the scouting search says may be contacted.
     expect(screen).toMatch(/!candidate\.canContact \?/);
+  });
+
+  it("closes and reopens a need through demand.close_* / demand.reopen_*", () => {
+    const lifecycle = read("apps/mobile/src/screens/need-lifecycle.tsx");
+    expect(lifecycle).toContain("name: `demand.${op}_draft`");
+    expect(lifecycle).toContain("name: `demand.${op}_confirm`");
+    expect(lifecycle).toContain('const op = closed ? "reopen" : "close";');
+    expect(lifecycle).toContain("args: { requestId: needId, confirmationToken: token }");
+    expect(lifecycle).not.toMatch(/supabase\s*\.\s*from\(/);
   });
 
   it("confirms with the draft's own fields and token", () => {
