@@ -54,9 +54,6 @@ export type KnownPublicPathFinding = {
  * must remove its entry here. Never `test.skip`.
  */
 export const KNOWN_PUBLIC_PATH_FINDINGS: readonly KnownPublicPathFinding[] = [
-  {
-    id: "intake:worker",
-    reason: "the worker-intake sign-up link carries neither a return address nor the typed intake, so what the visitor entered is gone after sign-up",
-    owner: "Lane L (open product fix)",
-  },
+  // intake:worker fixed by #3415 (F2): the typed intake reaches the profile
+  // composer after sign-up and onboarding; the case is strict again.
 ];
