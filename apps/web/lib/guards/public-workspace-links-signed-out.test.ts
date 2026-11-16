@@ -30,7 +30,9 @@ describe("public workspace links for a signed-out visitor (F10)", () => {
     expect(graph).toMatch(/useSignedInHint\(\)/);
     expect(graph).toMatch(/href=\{!signedIn && current\.guestHref \? current\.guestHref : current\.href\}/);
     expect(graph).toMatch(/\{!signedIn && current\.guestHref && accountLabel \?/);
-    // The note is the menus' own string, not new copy.
-    expect(section).toMatch(/accountLabel=\{tNav\("account"\)\}/);
+    // The note is the menus' own string, not new copy; the link opens
+    // sign-UP, so it is "Sign up", never "For signed-in users".
+    expect(section).toMatch(/accountLabel=\{tNav\("signUp"\)\}/);
+    expect(section).not.toMatch(/tNav\("account"\)/);
   });
 });
