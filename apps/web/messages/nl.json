@@ -9443,6 +9443,27 @@
       "notStructured": "Automatische zoektocht {when}: de behoefte is nog te weinig beschreven om te matchen. Voeg vaardigheden of een beroep toe.",
       "failed": "Automatische zoektocht {when} kon niet worden afgerond. De lijst hieronder wordt nog steeds live berekend.",
       "capped": "Het aantal kandidaten is begrensd."
+    },
+    "history": {
+      "title": "Geschiedenis",
+      "decision": "Aangenomen: {names}",
+      "created": "Vraag aangemaakt",
+      "closed": "Vraag gesloten",
+      "closedFilled": "Vraag gesloten: ingevuld",
+      "closedWithdrawn": "Vraag gesloten: ingetrokken",
+      "event": {
+        "proposed": "Boeking voorgesteld aan {name}",
+        "accepted": "{name} heeft de boeking geaccepteerd",
+        "declined": "{name} heeft de boeking afgewezen",
+        "withdrawn": "Boeking aan {name} ingetrokken",
+        "expired": "Boeking aan {name} verlopen"
+      },
+      "actor": {
+        "you": "u",
+        "candidate": "kandidaat",
+        "automatic": "automatisch",
+        "other": "collega of beheerder"
+      }
     }
   },
   "planBoundary": {
@@ -9949,6 +9970,9 @@
       "invites": "Uitnodigings- en meldingsmails",
       "invitesOn": "aan",
       "invitesOff": "UIT – wordt apart ingeschakeld: INVITE_EMAIL_PROVIDER=smtp en één testverzending"
+    },
+    "alerts": {
+      "title": "Eigenaarsmeldingen en pushmeldingen"
     }
   },
   "adminMetrics": {
@@ -17476,7 +17500,7 @@
       "assigneePlaceholder": "E-mail van de persoon",
       "requiredByLabel": "Afronden vóór",
       "assign": "Vraag deze persoon",
-      "certificateFilePlaceholder": "Id van het certificaatbestand",
+      "certificateFileLabel": "Certificaatbestand",
       "issuedOnLabel": "Afgegeven op",
       "expiresOnLabel": "Geldig tot",
       "attachCertificate": "Certificaat opslaan",

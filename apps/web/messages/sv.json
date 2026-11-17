@@ -9443,6 +9443,27 @@
       "notStructured": "Automatisk sökning {when}: behovet har för få detaljer för att matcha ännu. Lägg till färdigheter eller ett yrke för att söka.",
       "failed": "Automatisk sökning {when} kunde inte slutföras. Listan nedan beräknas fortfarande direkt.",
       "capped": "Kandidatpoolen begränsades."
+    },
+    "history": {
+      "title": "Historik",
+      "decision": "Anställda: {names}",
+      "created": "Behov skapat",
+      "closed": "Behov stängt",
+      "closedFilled": "Behov stängt: tillsatt",
+      "closedWithdrawn": "Behov stängt: återkallat",
+      "event": {
+        "proposed": "Bokning föreslagen till {name}",
+        "accepted": "{name} accepterade bokningen",
+        "declined": "{name} avböjde bokningen",
+        "withdrawn": "Bokning till {name} återkallad",
+        "expired": "Bokning till {name} har gått ut"
+      },
+      "actor": {
+        "you": "du",
+        "candidate": "kandidat",
+        "automatic": "automatiskt",
+        "other": "kollega eller administratör"
+      }
     }
   },
   "planBoundary": {
@@ -9949,6 +9970,9 @@
       "invites": "Inbjudnings- och aviseringsmejl",
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp och ett testutskick"
+    },
+    "alerts": {
+      "title": "Ägarvarningar och pushnotiser"
     }
   },
   "adminMetrics": {
@@ -17476,7 +17500,7 @@
       "assigneePlaceholder": "Personens e-postadress",
       "requiredByLabel": "Slutför senast",
       "assign": "Be denna person",
-      "certificateFilePlaceholder": "Certifikatfilens id",
+      "certificateFileLabel": "Certifikatfil",
       "issuedOnLabel": "Utfärdat den",
       "expiresOnLabel": "Giltigt till",
       "attachCertificate": "Spara certifikat",

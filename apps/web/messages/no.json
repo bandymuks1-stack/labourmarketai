@@ -6424,7 +6424,7 @@
       "assigneePlaceholder": "[EN] Person's email",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -7890,6 +7890,9 @@
       "invites": "Invitasjons- og varslings-e-post",
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp og én testsending"
+    },
+    "alerts": {
+      "title": "Eiervarsler og pushvarsler"
     }
   },
   "historyDuplicates": {

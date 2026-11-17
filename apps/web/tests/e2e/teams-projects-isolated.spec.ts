@@ -397,7 +397,9 @@ test("T-14. another organization sees neither the team, its people nor the proje
   await setUpCompany(out, OUT_ORG);
 
   await out.goto(`${BASE}/en/dashboard/company/people`);
-  await expect(out.getByTestId("team-brigades-panel")).toBeVisible({ timeout: 30_000 });
+  // Scoped to <main>: while a section streams in, React can briefly hold a
+  // second, hidden copy outside it (CI 2026-11-16, strict-mode match of two).
+  await expect(out.getByRole("main").getByTestId("team-brigades-panel")).toBeVisible({ timeout: 30_000 });
   const people = (await out.getByRole("main").textContent()) ?? "";
   for (const secret of [TEAM, W1_NAME, W2_NAME, CO_ORG]) expect(people).not.toContain(secret);
 

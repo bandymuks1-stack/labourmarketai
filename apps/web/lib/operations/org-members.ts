@@ -35,6 +35,10 @@ export const MEMBERSHIP_SLUGS = [
   // is applied; until then the RPC answers `not_a_member_engagement`, which
   // the panel already renders honestly.
   "student",
+  // Practice in a company (migration 20261012170000): an `intern` engagement is
+  // journal_reviewable — the host signs off the practice through this same
+  // audited review toggle, so the host's panel must list it.
+  "intern",
 ] as const;
 
 /** The engagement slugs `review_journal_entry` accepts as a reviewer. */

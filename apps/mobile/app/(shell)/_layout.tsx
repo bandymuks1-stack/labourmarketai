@@ -85,6 +85,9 @@ export default function ShellLayout() {
         name="correct-entry"
         options={{ href: null, title: t("journal.correct.title") }}
       />
+      <Tabs.Screen name="add-work" options={{ href: null, title: t("cv.work.title") }} />
+      <Tabs.Screen name="add-language" options={{ href: null, title: t("cv.language.title") }} />
+      <Tabs.Screen name="add-education" options={{ href: null, title: t("cv.education.title") }} />
       {/* Two more STATIONS reached from Today, for the same reason: */}
       <Tabs.Screen
         name="opportunities"
