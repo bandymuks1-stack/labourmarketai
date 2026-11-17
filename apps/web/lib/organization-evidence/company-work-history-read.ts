@@ -267,13 +267,9 @@ export async function loadCompanyWorkHistory(
  * here. Ids, timestamps, review rows and metric rows only: never the entry
  * text. RLS's org-manager branch decides what comes back; nothing widens it.
  */
-export async function readOrganizationJournal(
+async function readOrganizationJournal(
   supabase: Awaited<ReturnType<typeof createClient>>,
   organizationId: string,
-  /** The day the figure is counted up to. The member view passes nothing and
-   *  gets the viewer's own day (a cookie); the cached public path passes a
-   *  fixed day, because a cached function may not read the request. */
-  today?: { readonly todayIso: string; readonly horizonIso: string },
 ): Promise<OrganizationJournal | null> {
   try {
     const contexts = await readAllPages<{ id: string }>((from, to) =>
@@ -307,7 +303,7 @@ export async function readOrganizationJournal(
       if (!page || page.truncated) return null;
       rows.push(...page.rows);
     }
-    const { todayIso, horizonIso } = today ?? (await viewerWorkToday());
+    const { todayIso, horizonIso } = await viewerWorkToday();
     return summarizeOrganizationJournal(rows, todayIso, horizonIso);
   } catch {
     return null;

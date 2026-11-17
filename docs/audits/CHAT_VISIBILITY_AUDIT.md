@@ -447,32 +447,6 @@ audit.
   still-usable addressed invitation, and grants nothing: acceptance still needs
   the session e-mail to equal the invited address (`20261003151100`).
 
-- **2026-11-16 — `lib/organization-evidence/public-organization-cv.ts`** (public company
-  Living CV, register 3.36; owner decision 2026-11-16: aggregated data only, a minimum
-  group of 5 people, only while the public profile is on, no personal data).
-  - **Why service role:** an anonymous `/business/<slug>` visitor has no session that
-    could read an organization's journal or imported records.
-  - **Authorization check, first:** the module reads the organization's own
-    `public_profile_enabled` and stops unless it is exactly `true`. The page reaches it
-    only after `get_public_business_profile_v1` has already resolved an opted-in
-    organization.
-  - **What it then reads,** with the same summarizers as the member view (one counting
-    model): `projects` (id, status, created_at), the journal through
-    `readOrganizationJournal` (ids, timestamps, confirmations, metrics; never entry
-    text), and the organization's own `organization_evidence_records` through
-    `queryEvidenceRecords`.
-  - **What it returns:** ONLY `buildPublicOrganizationCv`'s output — counts, hour totals
-    and months, each block only with 5 or more people behind it. No id, name, place,
-    title or text exists in that type. Pinned by `lib/guards/public-organization-cv.test.ts`
-    (k boundaries, opt-in off, a field allow-list, the only return path, and
-    `queryEvidenceRecords` used by this module alone).
-  - **Difference from the RPC-only callers above:** it reads tables directly rather than
-    one service-role-only function. Named for review: the alternative is a
-    service-role-only SECURITY DEFINER aggregate, which would re-implement the journal
-    and record counting rules in SQL.
-  - Reads no chat table and writes nothing. Pinned in the `chat-visibility-rls.test.ts`
-    caller inventory.
-
 - **2026-11-13 — `lib/invitations/delivery-attempts.ts` and
   `lib/invitations/delivery-retry-run.ts`** (invitation delivery reliability, owner
   P0). The first records WHY a send failed through one service_role-only function,

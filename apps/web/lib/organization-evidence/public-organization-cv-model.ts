@@ -1,36 +1,29 @@
-import type { CompanyWorkHistory } from "./company-work-history";
-import type { OrganizationJournal } from "./organization-journal";
-import type { OrganizationProjects } from "./organization-projects";
-
 /**
- * The public company Living CV as pure data (register 3.36). Owner decision
- * 2026-11-16: aggregated data only, a minimum group of 5 people, shown only
- * while the public profile is on, no personal data.
+ * The public company Living CV as pure data (register 3.36). Owner rulings
+ * 2026-11-16 / 2026-11-17: aggregated data only, a minimum group of 5 people,
+ * shown only while the public profile is on, no personal data.
  *
- * Every figure here is a count, an hour total or a month. There is no field
- * for an id, a name, a place, a title or a text, so none can leak through it.
+ * The figures are computed inside the database (`get_public_organization_cv_v1`,
+ * migration 20261117060000), which applies every gate. This module re-checks
+ * the row it returns — defence in depth, so a widened or mis-shaped function
+ * cannot widen the page — and has no field for an id, a name, a place, a
+ * title or a text, so none can leak through it.
  */
 export const PUBLIC_CV_MIN_PEOPLE = 5;
-
-/** Published hours are rounded to this step (R2 P3-2 on #3464): two
- *  snapshots taken around one person's change cannot be subtracted to recover
- *  that person's hours to the hour. */
+/** Published hours are multiples of this (the database rounds; this re-checks). */
 export const PUBLIC_CV_HOURS_STEP = 10;
-const coarse = (h: number): number => Math.round(h / PUBLIC_CV_HOURS_STEP) * PUBLIC_CV_HOURS_STEP;
 
 export type PublicOrganizationCv = {
-  /** Shown only beside at least one people-backed block that passed the gate. */
+  /** Shown only beside at least one people-backed block. */
   readonly projects: { readonly running: number; readonly completed: number } | null;
   /** Work its people recorded in the journal under this organization. */
   readonly journal: {
     readonly people: number;
     readonly hours: number;
-    readonly confirmedHours: number;
     readonly firstMonth: string | null;
     readonly lastMonth: string | null;
   } | null;
-  /** Its own imported records: single-day hours only (period totals are a
-   *  separate figure and never added in, the member view's rule). */
+  /** Its own imported records: single-day hours only. */
   readonly history: {
     readonly people: number;
     readonly dayHours: number;
@@ -39,67 +32,44 @@ export type PublicOrganizationCv = {
   } | null;
 };
 
-/** A people-backed block passes the gate: k >= 5 and something to show. */
-export const journalPasses = (j: OrganizationJournal | null): boolean =>
-  !!j && j.people >= PUBLIC_CV_MIN_PEOPLE && j.entries > 0;
-export const historyPasses = (h: CompanyWorkHistory | null): boolean =>
-  !!h && h.peopleCount >= PUBLIC_CV_MIN_PEOPLE && h.totalRecords > 0;
+const MONTH_RX = /^\d{4}-\d{2}$/;
+const count = (v: unknown): number | null =>
+  typeof v === "number" && Number.isInteger(v) && v >= 0 ? v : null;
+const hours = (v: unknown): number | null => {
+  const n = typeof v === "number" ? v : typeof v === "string" && v.trim() !== "" ? Number(v) : NaN;
+  if (!Number.isFinite(n) || n < 0) return null;
+  return Math.round(n / PUBLIC_CV_HOURS_STEP) * PUBLIC_CV_HOURS_STEP;
+};
+const month = (v: unknown): string | null => (typeof v === "string" && MONTH_RX.test(v) ? v : null);
 
 /**
- * The projects the public count may include (R2 P3-3 on #3464): only those a
- * block that PASSED the gate points at — the journal's engagement contexts,
- * the imported records' projects. An internal project with no such work is
- * not counted publicly.
+ * The database row → the public CV, or null. A block whose people count is
+ * missing or below PUBLIC_CV_MIN_PEOPLE is dropped whole; no passing block →
+ * null (nothing on the page); project counts never stand alone.
  */
-export function publicProjectIds(input: {
-  readonly journal: OrganizationJournal | null;
-  readonly history: CompanyWorkHistory | null;
-  readonly journalProjectIds: Iterable<string>;
-  readonly historyProjectIds: Iterable<string>;
-}): Set<string> {
-  const ids = new Set<string>();
-  if (journalPasses(input.journal)) for (const id of input.journalProjectIds) ids.add(id);
-  if (historyPasses(input.history)) for (const id of input.historyProjectIds) ids.add(id);
-  return ids;
-}
+export function publicCvFromRow(row: Record<string, unknown> | null | undefined): PublicOrganizationCv | null {
+  if (!row) return null;
 
-const month = (iso: string | null): string | null => (iso && /^\d{4}-\d{2}/.test(iso) ? iso.slice(0, 7) : null);
-
-/**
- * The gate. Null — nothing at all on the public page — when the profile is
- * off, or when no block has at least PUBLIC_CV_MIN_PEOPLE people behind it.
- * A block below the minimum is dropped whole: never shown, never rounded.
- */
-export function buildPublicOrganizationCv(input: {
-  readonly enabled: boolean;
-  readonly projects: OrganizationProjects | null;
-  readonly journal: OrganizationJournal | null;
-  readonly history: CompanyWorkHistory | null;
-}): PublicOrganizationCv | null {
-  if (input.enabled !== true) return null;
-
-  const j = input.journal;
+  const jp = count(row.journal_people);
+  const jh = hours(row.journal_hours);
   const journal =
-    j && journalPasses(j)
-      ? {
-          people: j.people,
-          hours: coarse(j.hours),
-          confirmedHours: coarse(j.confirmedHours),
-          firstMonth: j.firstMonth,
-          lastMonth: j.lastMonth,
-        }
+    jp !== null && jp >= PUBLIC_CV_MIN_PEOPLE && jh !== null
+      ? { people: jp, hours: jh, firstMonth: month(row.journal_first_month), lastMonth: month(row.journal_last_month) }
       : null;
 
-  const h = input.history;
+  const hp = count(row.history_people);
+  const hh = hours(row.history_day_hours);
   const history =
-    h && historyPasses(h)
-      ? { people: h.peopleCount, dayHours: coarse(h.dayHours), firstMonth: month(h.firstDate), lastMonth: month(h.lastDate) }
+    hp !== null && hp >= PUBLIC_CV_MIN_PEOPLE && hh !== null
+      ? { people: hp, dayHours: hh, firstMonth: month(row.history_first_month), lastMonth: month(row.history_last_month) }
       : null;
 
   if (!journal && !history) return null;
 
-  const p = input.projects;
-  const projects = p && p.total > 0 ? { running: p.running, completed: p.completed } : null;
+  const running = count(row.projects_running);
+  const completed = count(row.projects_completed);
+  const projects =
+    running !== null && completed !== null && running + completed > 0 ? { running, completed } : null;
 
   return { projects, journal, history };
 }

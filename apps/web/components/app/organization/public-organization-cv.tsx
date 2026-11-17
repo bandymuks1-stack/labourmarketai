@@ -42,9 +42,8 @@ export async function PublicOrganizationCv({ organizationId, locale }: { organiz
       {cv.journal ? (
         <div className="flex flex-col gap-2" data-testid="public-organization-cv-journal">
           <h3 className="text-sm font-semibold text-text-secondary">{tw("journal.title")}</h3>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Stat concept="time" value={`${nf(cv.journal.hours)} h`} label={tw("journal.hours")} />
-            <Stat concept="time" value={`${nf(cv.journal.confirmedHours)} h`} label={tw("journal.confirmed")} />
             <Stat concept="person" value={String(cv.journal.people)} label={tw("journal.people")} />
             <Stat
               concept="calendar"

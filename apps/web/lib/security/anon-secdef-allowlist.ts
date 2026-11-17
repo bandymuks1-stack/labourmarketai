@@ -201,6 +201,26 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "None identified beyond scraping of services the organization deliberately published.",
   },
   {
+    // ADDED 2026-11-17 (register 3.36, owner rulings 2026-11-16 / 2026-11-17).
+    // RED: lands only with the owner's written approval of migration
+    // 20261117060000 (draft PR #3464, needs-human-gate).
+    name: "get_public_organization_cv_v1",
+    identityArgs: "p_organization_id uuid",
+    mutates: false,
+    publicCaller:
+      "Track-record section of the public business profile page (app/[locale]/business/[slug]), read through a cookieless anon client in lib/organization-evidence/public-organization-cv.ts and cached for 300 s per organization.",
+    authorization:
+      "Returns NO row unless `organizations.public_profile_enabled` is exactly true for that id. Every block needs >= 5 distinct people behind it (k-anonymity inside the function); a block below that is NULL, and no passing block means no row at all.",
+    inputValidation:
+      "`p_organization_id` is uuid-typed, so malformed input is rejected by the type system; a NULL id returns no row. No text input, no dynamic SQL.",
+    abuseControls:
+      "No DB-level rate limit. Read-only, STABLE and idempotent; the app caches one call per organization per 300 s. The ceiling is scraping aggregates an organization chose to publish, and each call reveals only counts, hours rounded to 10 and months.",
+    definerJustification:
+      "The aggregates are computed over journal_entries, journal_entry_metrics, engagement_contexts and organization_evidence_records, none of which anon can or should read. DEFINER lets the database compute the numbers without loading any record, name or text into the application (owner ruling 2026-11-17: no service-role reads).",
+    residualRisk:
+      "Aggregates of 5+ people can still shift by one person's contribution between two snapshots; hours are rounded to 10 h to blunt differencing, and people counts and months stay exact. The journal's confirmed hours are deliberately not published.",
+  },
+  {
     name: "submit_company_need_public_v1",
     identityArgs:
       "p_locale text, p_company_name text, p_contact_name text, p_contact_email text, p_contact_phone text, p_country text, p_city_region text, p_sector text, p_headcount integer, p_start_window text, p_expected_duration text, p_urgency text, p_accommodation text, p_transport_needed boolean, p_languages text, p_engagement_type text, p_description text, p_source_path text",

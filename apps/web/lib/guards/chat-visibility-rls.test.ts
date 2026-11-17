@@ -573,14 +573,6 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/lmc/compensation.ts",
       "lib/lmc/wallet.ts",
       "lib/notifications/event-emitters.ts",
-      // 2026-11-16: the PUBLIC company Living CV (register 3.36, owner
-      // decision 2026-11-16). Anonymous /business/<slug> visitors have no
-      // session. Reads ONLY after the organization's own
-      // public_profile_enabled = true, and returns ONLY k>=5 aggregates
-      // (counts, hours, months) through buildPublicOrganizationCv; pinned by
-      // lib/guards/public-organization-cv.test.ts. Reads no chat table,
-      // writes nothing.
-      "lib/organization-evidence/public-organization-cv.ts",
       "lib/profile/avatar.ts",
       "lib/sales/lead-intake.ts",
       "lib/supply-bridge/feed-source.ts",

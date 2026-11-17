@@ -3507,7 +3507,9 @@ export interface EvidenceRecordView {
  * organization's managers. A worker who merely appeared in the same file sees
  * nothing.
  */
-export type EvidenceRecordFilter = {
+export async function listEvidenceRecords(
+  caller: DomainCaller,
+  filter: {
     readonly sessionId?: string | null;
     readonly organizationPersonId?: string | null;
     /** Several subjects at once — the subject-side read passes the roster rows
@@ -3540,25 +3542,7 @@ export type EvidenceRecordFilter = {
      *  request, so a reader that needs more pages with `offset` (see
      *  `listAllEvidenceRecords`); it never raises `limit` and hopes. */
     readonly offset?: number;
-};
-
-export async function listEvidenceRecords(
-  caller: DomainCaller,
-  filter: EvidenceRecordFilter = {},
-): Promise<EvidenceImportResult<{ records: readonly EvidenceRecordView[] }>> {
-  return queryEvidenceRecords(caller.supabase, filter);
-}
-
-/**
- * The same read with an explicit client. Callers pass their own RLS-scoped
- * session (`listEvidenceRecords`). The ONE other caller is the public
- * organization CV (`public-organization-cv.ts`), which reads with the
- * service role AFTER the organization's own public-profile opt-in, and lets
- * only k>=5 aggregates leave the server.
- */
-export async function queryEvidenceRecords(
-  client: Parameters<typeof db>[0],
-  filter: EvidenceRecordFilter = {},
+  } = {},
 ): Promise<EvidenceImportResult<{ records: readonly EvidenceRecordView[] }>> {
   // THE EMBED NAMES ITS RELATIONSHIP. `organization_evidence_events` holds
   // TWO foreign keys to this table — `..._record_fk (record_id, organization_id)`
@@ -3571,7 +3555,7 @@ export async function queryEvidenceRecords(
   // a different relationship. Regression-pinned in organization-evidence-core.test.ts.
   const pageSize = Math.min(Math.max(filter.limit ?? 200, 1), 1000);
   const pageFrom = Math.max(Math.floor(filter.offset ?? 0), 0);
-  let q = db(client)
+  let q = db(caller.supabase)
     .from("organization_evidence_records")
     .select(
       "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, project_id, supplied_by_organization_id, row_origin, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, correction_of, source_fact, derived, organization_id, organization_people(display_name, linked_profile_id, relationship_kind), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
