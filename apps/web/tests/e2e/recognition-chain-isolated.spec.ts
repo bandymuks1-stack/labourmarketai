@@ -788,7 +788,9 @@ test("I-15. EDU-5: the learner's accepted skill reaches the reviewer's learning 
   // the review page appears only while something waits there. No menu link (owner-parked).
   const { page, close } = await as(browser, SCHOOL);
   await page.goto(`${BASE}/en/dashboard/company`);
-  const attention = page.getByTestId("company-home-attention");
+  // The visible section: while the brief streams in, React can briefly hold a second copy
+  // (CI 2026-11-17, strict-mode match of two), as I-7 met with the recognitions list.
+  const attention = page.locator('[data-testid="company-home-attention"]:visible').first();
   await expect(attention, "the manager's home states what needs them").toBeVisible({ timeout: 60_000 });
   const door = attention.locator('a[href*="/dashboard/learning"]');
   await expect(door, "the brief offers the learning review").toHaveCount(1, { timeout: 30_000 });
