@@ -17492,7 +17492,7 @@
       "assigneePlaceholder": "E-mail osoby",
       "requiredByLabel": "Ukończ do",
       "assign": "Poproś tę osobę",
-      "certificateFilePlaceholder": "ID pliku certyfikatu",
+      "certificateFileLabel": "Plik certyfikatu",
       "issuedOnLabel": "Wydano dnia",
       "expiresOnLabel": "Ważne do",
       "attachCertificate": "Zapisz certyfikat",

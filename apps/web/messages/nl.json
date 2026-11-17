@@ -17492,7 +17492,7 @@
       "assigneePlaceholder": "E-mail van de persoon",
       "requiredByLabel": "Afronden vóór",
       "assign": "Vraag deze persoon",
-      "certificateFilePlaceholder": "Id van het certificaatbestand",
+      "certificateFileLabel": "Certificaatbestand",
       "issuedOnLabel": "Afgegeven op",
       "expiresOnLabel": "Geldig tot",
       "attachCertificate": "Certificaat opslaan",

@@ -17492,7 +17492,7 @@
       "assigneePlaceholder": "Personens e-postadress",
       "requiredByLabel": "Slutför senast",
       "assign": "Be denna person",
-      "certificateFilePlaceholder": "Certifikatfilens id",
+      "certificateFileLabel": "Certifikatfil",
       "issuedOnLabel": "Utfärdat den",
       "expiresOnLabel": "Giltigt till",
       "attachCertificate": "Spara certifikat",

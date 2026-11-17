@@ -17492,7 +17492,7 @@
       "assigneePlaceholder": "Эл. почта человека",
       "requiredByLabel": "Выполнить до",
       "assign": "Попросить этого человека",
-      "certificateFilePlaceholder": "Id файла сертификата",
+      "certificateFileLabel": "Файл сертификата",
       "issuedOnLabel": "Выдан",
       "expiresOnLabel": "Действует до",
       "attachCertificate": "Сохранить сертификат",

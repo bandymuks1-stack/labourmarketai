@@ -17492,7 +17492,7 @@
       "assigneePlaceholder": "Žmogaus el. paštas",
       "requiredByLabel": "Atlikti iki",
       "assign": "Paprašyti šio žmogaus",
-      "certificateFilePlaceholder": "Pažymėjimo failo id",
+      "certificateFileLabel": "Pažymėjimo failas",
       "issuedOnLabel": "Išduota",
       "expiresOnLabel": "Galioja iki",
       "attachCertificate": "Įrašyti pažymėjimą",
