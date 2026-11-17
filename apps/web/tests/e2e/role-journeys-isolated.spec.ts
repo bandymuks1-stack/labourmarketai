@@ -887,3 +887,28 @@ test("J-DUP. a double-submitted need and a double-clicked confirmation each stor
   const confirmations = await db<Array<{ id: string }>>(`journal_entry_confirmations?entry_id=eq.${second}&select=id`);
   expect(confirmations.length, "a double-clicked confirmation is stored once").toBe(1);
 });
+
+// ── J-RPT ───────────────────────────────────────────────────────────────────
+
+test("J-RPT. the employer's report counts the work it confirmed; its hours sheet opens", async () => {
+  expect(s.entryId, "J-WRK recorded and confirmed work").toBeTruthy();
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/reports`);
+  const journal = co.getByTestId("reports-org-journal");
+  await expect(journal, "the organization's journal report is on the reports page").toBeVisible({ timeout: 30_000 });
+  const tile = (label: string) =>
+    journal.locator("div").filter({ has: co.locator("dt", { hasText: label }) }).locator("dd").first();
+  // J-WRK's work was recorded today and confirmed by this company: inside the seven-day window.
+  await expect
+    .poll(async () => Number((await tile("Entries recorded").textContent())?.trim()), {
+      message: "the recorded work is counted",
+      timeout: 30_000,
+    })
+    .toBeGreaterThanOrEqual(1);
+  expect(Number((await tile("Confirmed").textContent())?.trim()), "the confirmed work is counted").toBeGreaterThanOrEqual(1);
+
+  // The employer's hours sheet opens in its working state, not a setup or error panel.
+  await co.goto(`${BASE}/en/dashboard/hours`);
+  await expect(co.getByRole("main")).toBeVisible({ timeout: 30_000 });
+  await expect(co.locator('[data-testid^="hours-state-"]'), "the hours sheet is usable for the company").toHaveCount(0);
+});
