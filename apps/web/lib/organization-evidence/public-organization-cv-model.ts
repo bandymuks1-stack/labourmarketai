@@ -12,6 +12,12 @@ import type { OrganizationProjects } from "./organization-projects";
  */
 export const PUBLIC_CV_MIN_PEOPLE = 5;
 
+/** Published hours are rounded to this step (R2 P3-2 on #3464): two
+ *  snapshots taken around one person's change cannot be subtracted to recover
+ *  that person's hours to the hour. */
+export const PUBLIC_CV_HOURS_STEP = 10;
+const coarse = (h: number): number => Math.round(h / PUBLIC_CV_HOURS_STEP) * PUBLIC_CV_HOURS_STEP;
+
 export type PublicOrganizationCv = {
   /** Shown only beside at least one people-backed block that passed the gate. */
   readonly projects: { readonly running: number; readonly completed: number } | null;
@@ -53,8 +59,8 @@ export function buildPublicOrganizationCv(input: {
     j && j.people >= PUBLIC_CV_MIN_PEOPLE && j.entries > 0
       ? {
           people: j.people,
-          hours: j.hours,
-          confirmedHours: j.confirmedHours,
+          hours: coarse(j.hours),
+          confirmedHours: coarse(j.confirmedHours),
           firstMonth: j.firstMonth,
           lastMonth: j.lastMonth,
         }
@@ -63,7 +69,7 @@ export function buildPublicOrganizationCv(input: {
   const h = input.history;
   const history =
     h && h.peopleCount >= PUBLIC_CV_MIN_PEOPLE && h.totalRecords > 0
-      ? { people: h.peopleCount, dayHours: h.dayHours, firstMonth: month(h.firstDate), lastMonth: month(h.lastDate) }
+      ? { people: h.peopleCount, dayHours: coarse(h.dayHours), firstMonth: month(h.firstDate), lastMonth: month(h.lastDate) }
       : null;
 
   if (!journal && !history) return null;

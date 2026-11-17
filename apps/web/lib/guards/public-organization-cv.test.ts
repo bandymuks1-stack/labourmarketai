@@ -4,6 +4,7 @@ import { execSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 
 import {
+  PUBLIC_CV_HOURS_STEP,
   PUBLIC_CV_MIN_PEOPLE,
   buildPublicOrganizationCv,
 } from "@/lib/organization-evidence/public-organization-cv-model";
@@ -93,6 +94,17 @@ describe("public company Living CV — the k>=5 and opt-in gate", () => {
     expect(cv?.history).toBeNull();
   });
 
+  it("published hours are coarse: multiples of 10, so two snapshots cannot recover one person's hours", () => {
+    expect(PUBLIC_CV_HOURS_STEP).toBe(10);
+    const cv = buildPublicOrganizationCv({ enabled: true, projects, journal: journal(6), history: history(6) });
+    expect(cv?.journal?.hours).toBe(310); // 312.5 recorded
+    expect(cv?.journal?.confirmedHours).toBe(120);
+    expect(cv?.history?.dayHours).toBe(960);
+    for (const h of [cv?.journal?.hours, cv?.journal?.confirmedHours, cv?.history?.dayHours]) {
+      expect((h ?? 0) % PUBLIC_CV_HOURS_STEP).toBe(0);
+    }
+  });
+
   it("only aggregates leave: every field is a count, an hour total or a month", () => {
     const cv = buildPublicOrganizationCv({ enabled: true, projects, journal: journal(9), history: history(9) });
     expect(cv).not.toBeNull();
@@ -140,6 +152,20 @@ describe("public company Living CV — the server path", () => {
     const returns = [...reader.matchAll(/^\s*return\s+([^;]+);/gm)].map((m) => m[1].trim());
     const top = returns.filter((r) => r !== "null" && !r.startsWith("buildCompanyWorkHistory("));
     expect(top.every((r) => r.startsWith("buildPublicOrganizationCv("))).toBe(true);
+  });
+
+  it("one service-role read per organization per few minutes: the page gets only the cached export", () => {
+    // R2 P2 on #3464: the uncached read ran the whole evidence + journal read per anonymous hit.
+    expect(reader).toMatch(/export const readPublicOrganizationCv = unstable_cache\(\s*readPublicOrganizationCvUncached,/);
+    expect(reader).not.toMatch(/export\s+(async\s+)?function\s+readPublicOrganizationCvUncached/);
+    const seconds = Number(/PUBLIC_CV_REVALIDATE_SECONDS = (\d+)/.exec(reader)?.[1]);
+    expect(seconds).toBeGreaterThan(0);
+    expect(seconds).toBeLessThanOrEqual(600);
+    expect(reader).toMatch(/revalidate: PUBLIC_CV_REVALIDATE_SECONDS/);
+    // A cached function may not read the request: the journal day is passed in.
+    expect(reader).toMatch(/readOrganizationJournal\(admin as never, organizationId, resolveWorkToday\(\{ timeZone: null \}\)\)/);
+    const component = src("components/app/organization/public-organization-cv.tsx");
+    expect(component).toContain('import { readPublicOrganizationCv } from "@/lib/organization-evidence/public-organization-cv";');
   });
 
   it("the service-role read path is used by this module alone", () => {

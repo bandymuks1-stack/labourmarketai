@@ -270,6 +270,10 @@ export async function loadCompanyWorkHistory(
 export async function readOrganizationJournal(
   supabase: Awaited<ReturnType<typeof createClient>>,
   organizationId: string,
+  /** The day the figure is counted up to. The member view passes nothing and
+   *  gets the viewer's own day (a cookie); the cached public path passes a
+   *  fixed day, because a cached function may not read the request. */
+  today?: { readonly todayIso: string; readonly horizonIso: string },
 ): Promise<OrganizationJournal | null> {
   try {
     const contexts = await readAllPages<{ id: string }>((from, to) =>
@@ -303,7 +307,7 @@ export async function readOrganizationJournal(
       if (!page || page.truncated) return null;
       rows.push(...page.rows);
     }
-    const { todayIso, horizonIso } = await viewerWorkToday();
+    const { todayIso, horizonIso } = today ?? (await viewerWorkToday());
     return summarizeOrganizationJournal(rows, todayIso, horizonIso);
   } catch {
     return null;

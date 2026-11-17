@@ -1,6 +1,9 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveWorkToday } from "@/lib/time/local-day";
 import { buildCompanyWorkHistory } from "./company-work-history";
 import { readOrganizationJournal } from "./company-work-history-read";
 import { EVIDENCE_PAGE_SIZE, EVIDENCE_READ_CEILING, readAllPages } from "./evidence-pagination";
@@ -33,7 +36,7 @@ import { summarizeOrganizationProjects } from "./organization-projects";
  * aggregates past the k >= 5 gate — is returned. Any failed read hides the
  * block it feeds: UNKNOWN is never shown as a figure.
  */
-export async function readPublicOrganizationCv(organizationId: string): Promise<PublicOrganizationCv | null> {
+async function readPublicOrganizationCvUncached(organizationId: string): Promise<PublicOrganizationCv | null> {
   let admin: ReturnType<typeof createAdminClient>;
   try {
     admin = createAdminClient();
@@ -62,7 +65,12 @@ export async function readPublicOrganizationCv(organizationId: string): Promise<
         .order("id", { ascending: true })
         .range(from, to),
     ),
-    readOrganizationJournal(admin as never, organizationId),
+    // P3-1 (R2, 2026-11-17): once #3421 lands, a manager reads a learning
+    // relationship's journal (relationship_types.category = 'education') only
+    // while the engagement is active and journal review is on. This service-
+    // role path must then apply the same condition to the engagement contexts
+    // it counts; follow-up tracked in the issue linked from #3464.
+    readOrganizationJournal(admin as never, organizationId, resolveWorkToday({ timeZone: null })),
     readOwnHistory(admin, organizationId),
   ]);
 
@@ -97,3 +105,20 @@ async function readOwnHistory(admin: ReturnType<typeof createAdminClient>, organ
   }
   return buildCompanyWorkHistory(all.filter((r) => !r.superseded), []);
 }
+
+/** How long one public read is reused. A visitor's view is at most this old;
+ *  switching the public profile off still hides the whole page at once,
+ *  because the page's own opt-in read is not cached. */
+export const PUBLIC_CV_REVALIDATE_SECONDS = 300;
+
+/**
+ * THE ONLY EXPORT THE PAGE USES. One service-role read per organization per
+ * PUBLIC_CV_REVALIDATE_SECONDS, however many anonymous views there are (R2 P2
+ * on #3464: the uncached read ran up to 20,000 records and every journal
+ * entry per hit). Keyed by the organization id; the result is plain data.
+ */
+export const readPublicOrganizationCv = unstable_cache(
+  readPublicOrganizationCvUncached,
+  ["public-organization-cv-v1"],
+  { revalidate: PUBLIC_CV_REVALIDATE_SECONDS },
+);
