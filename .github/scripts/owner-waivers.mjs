@@ -737,11 +737,10 @@ export const SCOPED_OWNER_WAIVERS = [
       // OWNER APPROVAL 2026-11-16, verbatim (given in this PR's session): "I approve adding ONLY PRs 3181 and 3448 to the existing public-acquisition-route-jobs waiver pullRequests list."
       // Checked before the change: on #3448's head 4ef7e25d1 the CI gate reported every finding with the
       // single reason `pr-not-covered` and no new finding code; #3181 stopped at the same reason.
-      // #3181: each /jobs/[id] page gets its own meta description from the anonymous preview.
+      // #3181 adds its own number in its own PR.
       // #3448: a signed-out visitor on /jobs/[id] gets one tracked link to the worker-need form.
-      // Only the numbers are added; axiom, codes, surfaces, files, expiry and subset rule are unchanged;
+      // Only the number is added; axiom, codes, surfaces, files, expiry and subset rule are unchanged;
       // `product-gate.mjs` is not touched.
-      3181,
       3448,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
