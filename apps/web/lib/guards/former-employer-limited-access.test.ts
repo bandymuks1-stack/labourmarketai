@@ -95,7 +95,7 @@ describe("the read rule: retained history up to the end date, nothing new", () =
   it("an ended relationship shows only entries created on or before its end date; no end date shows nothing", () => {
     const p = statement(sql, OBJECTS[0]);
     expect(p).toContain(WINDOW);
-    expect(p).toContain("(journal_entries.created_at at time zone 'utc')::date <= ec.ended_at");
+    expect(p).toContain("journal_entries.created_at < ((ec.ended_at + 1)::timestamp at time zone 'utc')");
   });
 
   it("carries #3421's learning rule unchanged (active and reviewed)", () => {
@@ -117,7 +117,7 @@ describe("the read rule: retained history up to the end date, nothing new", () =
     expect(f).toContain("join public.relationship_types rt on rt.slug = ec.relationship_slug");
     expect(f).toContain("where ec.id = je.engagement_context_id and public.manages_organization(ec.organization_id) and (");
     expect(f).toContain(WINDOW);
-    expect(f).toContain("(je.created_at at time zone 'utc')::date <= ec.ended_at");
+    expect(f).toContain("je.created_at < ((ec.ended_at + 1)::timestamp at time zone 'utc')");
     expect(f).toContain("(rt.category = 'education' and ec.status = 'active' and ec.journal_review_enabled is true)");
   });
 });

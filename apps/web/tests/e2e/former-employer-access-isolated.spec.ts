@@ -259,9 +259,23 @@ test("FE-0. two organizations; W joins both and records work for each and in the
   s.workItem = ((await item.json()) as Array<{ id: string }>)[0]!.id;
 });
 
-test("FE-1. while W works for A, A reads W's entry for A only", async () => {
+test("FE-1. while W works for A, A reads W's entry for A only, and can still decide on it", async () => {
   expect(await readable(O, [s.entryDuring, s.entryOther, s.entryPersonal]), "A reads its own entry, nothing else").toEqual([s.entryDuring]);
   expect(await readable(P, [s.entryDuring, s.entryOther, s.entryPersonal]), "B reads its own entry, nothing else").toEqual([s.entryOther]);
+
+  // Positive controls for FE-2's refusals: while the employment runs, the
+  // employer's reviewer may set a work item's decision and add a metric.
+  const patch = await rest(O, `journal_entry_work_items?id=eq.${s.workItem}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({ status: "confirmed", source: "reviewer_confirmed" }),
+  });
+  expect(patch.ok ? ((await patch.json()) as unknown[]).length : 0, "an active employer may decide on the work item").toBe(1);
+  const metric = await rest(O, "journal_entry_metrics", {
+    method: "POST",
+    body: JSON.stringify({ entry_id: s.entryDuring, metric_slug: "qa_synthetic_note", value_text: "x", source: "manager_corrected" }),
+  });
+  expect(metric.status, "an active employer may add a metric").toBe(201);
 });
 
 test("FE-2. A ends the employment: retained history stays readable; new records, other employers' and personal records do not; nothing historical can be changed", async () => {
@@ -277,8 +291,9 @@ test("FE-2. A ends the employment: retained history stays readable; new records,
   // W files a NEW entry under the ended relationship (allowed for the person),
   // stamped after the end date (the seeded clock step above).
   const late = await file(s.ecA, TEXT.after);
-  if (late.id) {
-    s.entryAfter = late.id;
+  expect(late.id, `W can still file into their own ended context (${late.status}); the walk needs that new record`).toBeTruthy();
+  s.entryAfter = late.id!;
+  {
     sqlExec(
       `begin;
        alter table public.journal_entries disable trigger user;
@@ -288,7 +303,7 @@ test("FE-2. A ends the employment: retained history stays readable; new records,
     );
   }
 
-  const all = [s.entryDuring, s.entryOther, s.entryPersonal, ...(s.entryAfter ? [s.entryAfter] : [])];
+  const all = [s.entryDuring, s.entryOther, s.entryPersonal, s.entryAfter];
   expect(await readable(O, all), "A keeps only the entry recorded during the employment").toEqual([s.entryDuring]);
   expect((await readable(W, all)).length, "W still reads every one of their entries").toBe(all.length);
 
@@ -334,6 +349,8 @@ test("FE-2. A ends the employment: retained history stays readable; new records,
       confirmation_scope: { decision: "confirmed" },
     }),
   });
+  // Pinned, not new: the guard trigger already refuses (review is off after
+  // the end); this migration adds the same refusal to the insert policy.
   expect(confirm.ok, `A cannot confirm an entry of the ended employment (${confirm.status})`).toBe(false);
 
   const editEntry = await rest(O, `journal_entries?id=eq.${s.entryDuring}`, {

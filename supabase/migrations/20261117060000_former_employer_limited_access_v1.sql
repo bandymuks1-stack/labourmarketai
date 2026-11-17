@@ -45,8 +45,9 @@
 --   · a relationship outside the `education` category, while `active` or
 --     `paused`: every entry, as before;
 --   · the same relationship once `ended`: only entries CREATED on or before
---     its end date (engagement_contexts.ended_at, compared as the UTC date of
---     journal_entries.created_at). A correction or a late entry the person
+--     its end date: created before the end of that day, UTC
+--     (created_at < (ended_at + 1) at UTC). The end day counts as part of the
+--     employment, because ended_at is a date. A correction or a late entry the person
 --     files after the end is a new record and is not shown. An ended row with
 --     no end date shows nothing (fail-closed; every end door sets ended_at);
 --   · a learning relationship (category `education`): only while it is
@@ -96,7 +97,7 @@ create policy journal_entries_select on public.journal_entries for select
                and (ec.status in ('active', 'paused')
                     or (ec.status = 'ended'
                         and ec.ended_at is not null
-                        and (journal_entries.created_at at time zone 'UTC')::date <= ec.ended_at)))
+                        and journal_entries.created_at < ((ec.ended_at + 1)::timestamp at time zone 'UTC'))))
          )
     )
   );
@@ -131,7 +132,7 @@ as $$
                     and (ec.status in ('active', 'paused')
                          or (ec.status = 'ended'
                              and ec.ended_at is not null
-                             and (je.created_at at time zone 'UTC')::date <= ec.ended_at)))
+                             and je.created_at < ((ec.ended_at + 1)::timestamp at time zone 'UTC'))))
               )
          )
        )
@@ -186,7 +187,8 @@ create policy journal_entry_metrics_write on public.journal_entry_metrics for al
 
 -- 5. Writes: confirmations (W3) -------------------------------------------------
 -- Defense in depth beside the guard trigger (journal_entry_review_authority_v1
--- needs review switched on, which every end door switches off).
+-- needs review switched on; the end doors switch it off, though the 2026-09-23
+-- consolidation ended engagements without doing so).
 drop policy if exists journal_entry_confirmations_insert
   on public.journal_entry_confirmations;
 create policy journal_entry_confirmations_insert on public.journal_entry_confirmations for insert
