@@ -9435,6 +9435,27 @@
       "notStructured": "Automatyczne wyszukiwanie {when}: zapotrzebowanie jest opisane zbyt ogólnie. Proszę dodać umiejętności lub zawód.",
       "failed": "Automatyczne wyszukiwanie {when} nie zostało ukończone. Lista poniżej jest nadal liczona na bieżąco.",
       "capped": "Liczba kandydatów została ograniczona."
+    },
+    "history": {
+      "title": "Historia",
+      "decision": "Zatrudnieni: {names}",
+      "created": "Zapotrzebowanie utworzone",
+      "closed": "Zapotrzebowanie zamknięte",
+      "closedFilled": "Zapotrzebowanie zamknięte: obsadzone",
+      "closedWithdrawn": "Zapotrzebowanie zamknięte: wycofane",
+      "event": {
+        "proposed": "Rezerwacja zaproponowana: {name}",
+        "accepted": "{name}: rezerwacja przyjęta",
+        "declined": "{name}: rezerwacja odrzucona",
+        "withdrawn": "Rezerwacja wycofana: {name}",
+        "expired": "Rezerwacja wygasła: {name}"
+      },
+      "actor": {
+        "you": "Państwo",
+        "candidate": "kandydat",
+        "automatic": "automatycznie",
+        "other": "współpracownik lub administrator"
+      }
     }
   },
   "planBoundary": {
@@ -9941,6 +9962,9 @@
       "invites": "E-maile z zaproszeniami i powiadomieniami",
       "invitesOn": "włączone",
       "invitesOff": "WYŁĄCZONE – włączane osobno: INVITE_EMAIL_PROVIDER=smtp i jedna wysyłka testowa"
+    },
+    "alerts": {
+      "title": "Alerty dla właściciela i powiadomienia push"
     }
   },
   "adminMetrics": {
@@ -17468,7 +17492,7 @@
       "assigneePlaceholder": "E-mail osoby",
       "requiredByLabel": "Ukończ do",
       "assign": "Poproś tę osobę",
-      "certificateFilePlaceholder": "ID pliku certyfikatu",
+      "certificateFileLabel": "Plik certyfikatu",
       "issuedOnLabel": "Wydano dnia",
       "expiresOnLabel": "Ważne do",
       "attachCertificate": "Zapisz certyfikat",
