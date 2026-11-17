@@ -226,6 +226,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-14 owner decision (invitation 862a91f4 NO RESEND): one service_role-only aggregate count of
       // owner-registered historical unknown outcomes (SECURITY DEFINER + GRANT; RED draft, needs-human-gate, NOT applied).
       "20261114150000_",
+      // 2026-11-17 owner decision: a former employer keeps the journal recorded during the employment and
+      // nothing new, and can no longer change it (RLS + three SECURITY DEFINER bodies; RED draft, needs-human-gate, NOT applied).
+      "20261117060000_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
       "20261104060000_",
       // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.
