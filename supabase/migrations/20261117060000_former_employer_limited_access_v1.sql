@@ -7,8 +7,9 @@
 -- replaced in place (an RLS / authority change).
 --
 -- APPLY ORDER (R2, 2026-11-17): AFTER 20261115120000_journal_learning_access_
--- follows_link_v1 (#3421), never before it. This migration is written on
--- #3421's definitions and carries BOTH rules in every object they share
+-- follows_link_v1 (#3421), never before it. #3421 is APPLIED in production
+-- (ledger 20261117193441) and merged; this migration is written on its live
+-- definitions and carries BOTH rules in every object they share
 -- (journal_entries_select, can_read_journal_entry_v1,
 -- journal_entry_review_authority_v1): #3421's learning condition word for
 -- word, plus the end-date rule for every other relationship. Applying #3421
@@ -19,15 +20,19 @@
 -- PREPARED. The PR stays a draft with needs-human-gate and is applied only
 -- after the owner approves this exact SQL and R2's security review passes.
 --
--- OWNER DECISION (2026-11-17): a former employer keeps limited access.
---   · It keeps the time and work records created DURING the employment that
---     belong to the company, as lawful accounting and retention require.
---   · It loses the person's personal journal, other employers' records and
---     every NEW record.
---   · Historical records are never changed or deleted arbitrarily; every
---     correction stays traceable.
+-- OWNER DECISION (2026-11-17, final): a former employer keeps limited access.
+--   · KEEP: the organization's own time and accounting records from the
+--     employment period, and its own confirmations, as lawful retention
+--     requires.
+--   · LOSE: the person's personal journal, new entries, and other
+--     organizations' data.
+--   · History stays; every correction is traceable. Historical records are
+--     never changed or deleted arbitrarily.
 --   · An ended relationship removes current access automatically and never
 --     removes the organization's lawfully retained history.
+--   · A PAUSE IS NOT AN END: a `paused` relationship (outside `education`)
+--     keeps the access, the writes and the review basis of an `active` one;
+--     entries filed during the pause belong to the employment.
 --
 -- WHAT A FORMER EMPLOYER COULD DO BEFORE (repo state, latest definitions):
 --   R1 read every entry ever written under its engagement context, including
@@ -68,9 +73,8 @@
 --     files after the end is a new record and is not shown. An ended row with
 --     no end date shows nothing (fail-closed; every end door sets ended_at);
 --   · a learning relationship (category `education`): only while it is
---     `active` and journal review is on, the rule of #3421 (owner decision
---     2026-11-15), carried here unchanged so either order of applying keeps
---     it;
+--     `active` and journal review is on, the live rule of #3421, carried here
+--     word for word (a paused learning link gives no access, as in #3421);
 --   · a relationship type that cannot be found: nothing (fail-closed).
 -- WRITES by a manager (W1, W2, W3) need the engagement to be `active` or
 -- `paused`: an ended relationship can no longer change, add to or decide on

@@ -210,6 +210,8 @@ describe("the local-stack proof travels with the SQL", () => {
       "the historical entry is intact and nothing was removed",
       "B still reads its own entry",
       "an ended employment with review left on decides nothing",
+      "a paused relationship keeps A's reads, including the entry filed during the pause",
+      "a paused relationship keeps A's review basis",
     ]) {
       expect(spec, phrase).toContain(phrase);
     }

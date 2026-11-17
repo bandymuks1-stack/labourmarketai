@@ -611,7 +611,9 @@ test("J-AGY. an agency sees the shared need, proposes its worker; the company ac
 
   // The company sees the proposal on the need's scouting page and accepts it.
   await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
-  const offers = co.getByTestId("scouting-agency-offers");
+  // Scoped to <main>: while a section streams in, React can briefly hold a
+  // second, hidden copy outside it (CI 2026-11-16, strict-mode match of two).
+  const offers = co.getByRole("main").getByTestId("scouting-agency-offers");
   await expect(offers, "the company sees the agency's proposal").toBeVisible({ timeout: 30_000 });
   await expect(offers.getByTestId("scout-offer-status-offered")).toBeVisible();
   await offers.getByTestId(`offer-accept-${s.offerId}`).click();

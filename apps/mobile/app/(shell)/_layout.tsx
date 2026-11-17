@@ -87,6 +87,7 @@ export default function ShellLayout() {
       />
       <Tabs.Screen name="add-work" options={{ href: null, title: t("cv.work.title") }} />
       <Tabs.Screen name="add-language" options={{ href: null, title: t("cv.language.title") }} />
+      <Tabs.Screen name="add-education" options={{ href: null, title: t("cv.education.title") }} />
       {/* Two more STATIONS reached from Today, for the same reason: */}
       <Tabs.Screen
         name="opportunities"
@@ -102,6 +103,9 @@ export default function ShellLayout() {
       />
       <Tabs.Screen name="jobs" options={{ href: null, title: t("jobs.title") }} />
       <Tabs.Screen name="need" options={{ href: null, title: t("need.title") }} />
+      <Tabs.Screen name="candidates" options={{ href: null, title: t("candidates.title") }} />
+      <Tabs.Screen name="agency-offers" options={{ href: null, title: t("agencyOffers.title") }} />
+      <Tabs.Screen name="education" options={{ href: null, title: t("education.title") }} />
       <Tabs.Screen
         name="messages"
         options={{ href: null, title: t("messages.title") }}

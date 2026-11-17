@@ -609,12 +609,22 @@ export type VerifiedCvWorkRow = {
 
 export type VerifiedCvLanguageRow = { readonly lang: string; readonly level: string };
 
+export type VerifiedCvEducationRow = {
+  readonly institutionName: string;
+  readonly programOrField: string | null;
+  readonly educationTypeSlug: string;
+  readonly startYear: number | null;
+  readonly endYear: number | null;
+  readonly isCurrent: boolean;
+};
+
 export type VerifiedCvGetData =
   | {
       readonly ok: true;
       readonly cv: {
         readonly workHistory: readonly VerifiedCvWorkRow[];
         readonly languages: readonly VerifiedCvLanguageRow[];
+        readonly education: readonly VerifiedCvEducationRow[];
       };
     }
   | { readonly ok: false; readonly code: "not_authenticated" | "no_worker" };
@@ -622,3 +632,119 @@ export type VerifiedCvGetData =
 /** A one-step worker action (`worker.add-work-history`, `worker.add-language`):
  *  the bridge answers with the action id and whatever the action returned. */
 export type WorkerActionData = { readonly action: string };
+
+/** `demand.list` — the needs of the organization the person acts for. */
+export type DemandListNeed = {
+  readonly id: string;
+  readonly title: string | null;
+  readonly status: string | null;
+  readonly role: string | null;
+  readonly location: string | null;
+  readonly headcount: number | null;
+  /** UNKNOWN ≠ ZERO: null when the count could not be read. */
+  readonly interestedPeople: number | null;
+  readonly shortlisted: number | null;
+};
+
+export type DemandListData = {
+  readonly actingFor: string;
+  readonly needs: readonly DemandListNeed[];
+};
+
+export type MatchStatus = "strong" | "possible" | "weak" | "insufficient_data";
+
+export type ShortlistStatus = "saved" | "interested" | "not_fit" | "reviewed";
+
+/** `candidate.search` — anonymized candidates for ONE need (no name, no
+ *  contact), ranked by the web scouting page's own match. */
+export type CandidateRow = {
+  readonly workerId: string;
+  readonly preview: { readonly anonymizedLabel: string };
+  readonly match: {
+    readonly status: MatchStatus;
+    readonly evidence: {
+      readonly matchedManagerConfirmed: number;
+      readonly matchedJournalSupported: number;
+      readonly matchedSelfDeclared: number;
+    };
+  };
+  readonly canContact: boolean;
+  readonly shortlistStatus: ShortlistStatus | null;
+};
+
+export type CandidateSearchData = {
+  readonly actingFor: string;
+  readonly need: { readonly id: string; readonly title: string | null; readonly status: string | null };
+  readonly totalCandidates: number;
+  readonly candidates: readonly CandidateRow[];
+};
+
+/** `shortlist.add_draft` — the preview of the decision and its one-time token. */
+export type ShortlistDraftData = {
+  readonly preview: {
+    readonly actingFor: string;
+    readonly need: { readonly id: string; readonly title: string | null };
+    readonly workerId: string;
+    readonly decision: ShortlistStatus;
+  };
+  readonly confirmationToken: string;
+};
+
+/**
+ * `client.agency_offers.get` — the employer's open agency candidate offers and
+ * the brigades / companies offered for its needs (`lib/conversation/
+ * client-offers-contract.ts`). No worker name: the read never returns one.
+ */
+export type ClientAgencyOffer = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+  readonly agencyName: string;
+  readonly note: string | null;
+  readonly createdAt: string;
+};
+
+export type ClientTeamOffer = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+  readonly teamName: string;
+  readonly status: "offered" | "accepted" | "assigned";
+  readonly memberCount: number;
+  readonly offeredAt: string;
+};
+
+export type ClientOffersData = {
+  readonly offers: readonly ClientAgencyOffer[];
+  readonly teamOffers: readonly ClientTeamOffer[];
+  readonly openDemands: number;
+};
+
+/**
+ * `education.workspace.get` — an education organization's programmes, cohorts
+ * and the learners it may assign (`lib/conversation/education-workspace-contract.ts`).
+ * `not-institution` arrives as data; an unreadable workspace arrives as a failure.
+ */
+export type EducationCohort = {
+  readonly id: string;
+  readonly name: string;
+  /** null: membership is not visible to this role — unknown, never 0. */
+  readonly memberCount: number | null;
+};
+
+export type EducationProgramme = {
+  readonly id: string;
+  readonly name: string;
+  readonly demandCount: number | null;
+  readonly cohorts: readonly EducationCohort[];
+};
+
+export type EducationWorkspaceData =
+  | {
+      readonly kind: "ok";
+      readonly organizationId: string;
+      readonly programmes: readonly EducationProgramme[];
+      readonly assignable: readonly { readonly profileId: string; readonly label: string }[];
+      readonly membersVisible: boolean;
+    }
+  | { readonly kind: "not-institution" };

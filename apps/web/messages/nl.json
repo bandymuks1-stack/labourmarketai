@@ -6872,7 +6872,8 @@
         "noMembers": "Nu geen leden.",
         "unavailable": "De ploegen konden niet worden geladen. Probeer het opnieuw.",
         "manage": "Ploegen wijzigen"
-      }
+      },
+      "organizationLink": "Geschiedenis en projecten van de organisatie"
     },
     "workerView": {
       "eyebrow": "Mijn project",
@@ -19281,7 +19282,8 @@
       "address": "Adres",
       "project": "Project (opdracht)",
       "notInSource": "Niet in de bron",
-      "linked": "Gekoppeld"
+      "linked": "Gekoppeld",
+      "openProject": "Project openen"
     },
     "whoWorked": "Wie hier werkte",
     "timeline": "Wat er is gedaan",
@@ -19362,6 +19364,23 @@
         "opening": "Bezig met openen…",
         "error": "De werkomgeving kon niet worden geopend."
       }
+    },
+    "projects": {
+      "title": "Projecten op het platform",
+      "counts": "{running} lopend · {completed} afgerond",
+      "untitled": "Project zonder titel",
+      "running": "Lopend",
+      "completed": "Afgerond",
+      "all": "Alle {count} projecten"
+    },
+    "journal": {
+      "title": "Werk vastgelegd in het logboek",
+      "hours": "Vastgelegde uren",
+      "confirmed": "Door de organisatie bevestigde uren",
+      "people": "Mensen die werk vastlegden",
+      "period": "Vastgelegd",
+      "basis": "Uit {entries} logboekregels die mensen onder deze organisatie vastlegden. Apart geteld van de geïmporteerde geschiedenis hierboven en daar nooit bij opgeteld.",
+      "unavailable": "Het werk dat onder deze organisatie in het logboek is vastgelegd, kon nu niet worden gelezen."
     }
   },
   "workPlan": {

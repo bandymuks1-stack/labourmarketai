@@ -8,6 +8,7 @@ import { Body, Button, Divider, Title } from "../ui/primitives";
 import { theme } from "../ui/theme";
 import { useCapability } from "../use-capability";
 import { useReloadOnReturn } from "../use-reload-on-return";
+import { isEducationType } from "../education-types";
 import { languageName } from "../worker-languages";
 import { CapabilityGate } from "./capability-gate";
 
@@ -61,6 +62,32 @@ export function CvEntries() {
               testID="cv-add-work"
               label={t("cv.addWork")}
               onPress={() => router.push("/(shell)/add-work")}
+            />
+            <Divider />
+            <Title>{t("cv.educationTitle")}</Title>
+            {data.cv.education.length === 0 ? (
+              <Body muted>{t("cv.educationEmpty")}</Body>
+            ) : (
+              data.cv.education.map((row, i) => (
+                <View key={`edu-${i}`} style={styles.row} testID="cv-education-row">
+                  <Body>{row.institutionName}</Body>
+                  {row.programOrField !== null ? <Body muted>{row.programOrField}</Body> : null}
+                  <Body muted>
+                    {isEducationType(row.educationTypeSlug)
+                      ? t(`cv.educationType.${row.educationTypeSlug}`)
+                      : row.educationTypeSlug}
+                    {row.startYear !== null
+                      ? ` · ${row.startYear}${row.isCurrent ? `–${t("cv.now")}` : row.endYear !== null && row.endYear !== row.startYear ? `–${row.endYear}` : ""}`
+                      : ""}
+                  </Body>
+                </View>
+              ))
+            )}
+            <Button
+              variant="quiet"
+              testID="cv-add-education"
+              label={t("cv.addEducation")}
+              onPress={() => router.push("/(shell)/add-education")}
             />
             <Divider />
             <Title>{t("cv.languagesTitle")}</Title>

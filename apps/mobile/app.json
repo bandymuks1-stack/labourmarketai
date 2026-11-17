@@ -133,6 +133,10 @@
             { "scheme": "https", "host": "labourmarket.ai", "path": "/correct-entry" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/add-work" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/add-language" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/add-education" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/candidates" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/agency-offers" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/education" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/sign-in" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/register" },
@@ -153,7 +157,11 @@
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/messages" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/correct-entry" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/add-work" },
-            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/add-language" }
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/add-language" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/add-education" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/candidates" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/agency-offers" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/education" }
           ],
           "category": [
             "BROWSABLE",

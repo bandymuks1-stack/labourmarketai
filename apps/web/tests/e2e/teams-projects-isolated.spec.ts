@@ -387,6 +387,95 @@ test("T-6/T-7. the company assigns the team to a project; the project page names
   await expect(co.locator("#project-teams")).toBeAttached({ timeout: 30_000 });
 });
 
+// ── T-8 ─────────────────────────────────────────────────────────────────────
+
+test("T-8. the organization's CV lists its project, and the project leads back to the organization", async () => {
+  expect(s.projectId, "T-6 created the project").toBeTruthy();
+  const co = as(CO);
+
+  // The project page names its organization, one door away.
+  await co.goto(`${BASE}/en/dashboard/projects/${s.projectId}`);
+  const back = co.getByTestId("project-organization-link");
+  await expect(back).toBeVisible({ timeout: 30_000 });
+  await back.click();
+  await co.waitForURL(/\/en\/dashboard\/company\/history/, { timeout: 30_000 });
+
+  // The organization's history carries its projects even with no imported
+  // history at all — a company's track record is what it ran.
+  const projects = co.getByTestId("company-work-history-projects");
+  await expect(projects).toBeVisible({ timeout: 30_000 });
+  const row = projects.locator(`[data-testid="company-work-history-project"][data-project="${s.projectId}"]`);
+  await expect(row).toContainText(PROJECT);
+  // No person and no hours ride on the organization's project list.
+  for (const name of [W1_NAME, W2_NAME]) await expect(projects).not.toContainText(name);
+  await row.click();
+  await co.waitForURL(new RegExp(`/en/dashboard/projects/${s.projectId}`), { timeout: 30_000 });
+});
+
+test("T-8b. the organization's CV carries its people's journal work as one figure, with no name", async () => {
+  expect(s.coOrgId && s.w1Id, "the company and its worker exist").toBeTruthy();
+  // The worker's engagement with THE COMPANY (they are also in its team, a
+  // second organization): the contract files an entry under an organization
+  // only through its engagement.
+  const engagement = sql<{ id: string }>(
+    `select id from public.engagement_contexts
+      where profile_id = ${lit(s.w1Id)} and organization_id = ${lit(s.coOrgId)}
+        and relationship_slug = 'employee' and status = 'active'`,
+  )[0]?.id;
+  expect(engagement, "the worker is the company's employee").toBeTruthy();
+
+  // A synthetic worker records one day of work. With two organizations the
+  // form does not guess (Rule C): the person chooses the company.
+  const w = as(W1);
+  await w.goto(`${BASE}/en/dashboard/journal`);
+  const main = w.getByRole("main");
+  await main.getByTestId("journal-quick-record-text").fill(`Prepared the banquet cold kitchen, 6 hours (${RUN})`);
+  await main.getByTestId("journal-quick-record-understand").click();
+  await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  const context = main.getByTestId("worklog-context");
+  await expect(context, "two organizations: the form asks which one").toBeVisible({ timeout: 30_000 });
+  await context.selectOption(engagement!);
+  // The company's project, if the form asks (one project is filed on its own).
+  const project = main.getByTestId("worklog-project");
+  if (await project.isVisible()) {
+    const values = await project.locator("option").evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+    await project.selectOption(values.includes(s.projectId) ? s.projectId : "none");
+  }
+  await main.getByTestId("worklog-save").click();
+  await main.getByTestId("worklog-confirm").click({ timeout: 30_000 });
+  const done = main.getByTestId("worklog-done");
+  await expect(done.or(main.getByTestId("worklog-error")).or(main.getByTestId("worklog-blocked"))).toBeVisible({
+    timeout: 30_000,
+  });
+  await expect(done, "the journal entry is saved").toBeVisible();
+
+  // The entry is the company's through the worker's engagement, and nobody
+  // has approved it yet.
+  const held =
+    sql<{ n: number }>(
+      `select count(*)::int as n from public.journal_entries j
+         join public.engagement_contexts e on e.id = j.engagement_context_id
+        where e.organization_id = ${lit(s.coOrgId)}
+          and j.deleted_at is null and j.superseded_by is null`,
+    )[0]?.n ?? 0;
+  expect(held, "the entry is filed under the company").toBeGreaterThanOrEqual(1);
+
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/company/history`);
+  await expect(co.getByTestId("company-work-history")).toBeVisible({ timeout: 30_000 });
+  // The read works under the company's own session: never "could not be read".
+  await expect(co.getByTestId("company-work-history-journal-unavailable")).toHaveCount(0);
+  const journal = co.getByTestId("company-work-history-journal");
+  await expect(journal).toBeVisible();
+  await expect(journal).toHaveAttribute("data-people", "1");
+  // Recorded, not confirmed: the organization has not approved it.
+  await expect(journal).toHaveAttribute("data-confirmed-hours", "0");
+  expect(Number(await journal.getAttribute("data-hours")), "the recorded hours reach the figure").toBeGreaterThan(0);
+  await expect(co.getByTestId("company-work-history-journal-basis")).toContainText(String(held));
+  // One aggregate: no person is named on the organization's figure.
+  for (const name of [W1_NAME, W2_NAME]) await expect(journal).not.toContainText(name);
+});
+
 // ── T-14 ────────────────────────────────────────────────────────────────────
 
 test("T-14. another organization sees neither the team, its people nor the project", async ({ browser }) => {
@@ -397,7 +486,9 @@ test("T-14. another organization sees neither the team, its people nor the proje
   await setUpCompany(out, OUT_ORG);
 
   await out.goto(`${BASE}/en/dashboard/company/people`);
-  await expect(out.getByTestId("team-brigades-panel")).toBeVisible({ timeout: 30_000 });
+  // Scoped to <main>: while a section streams in, React can briefly hold a
+  // second, hidden copy outside it (CI 2026-11-16, strict-mode match of two).
+  await expect(out.getByRole("main").getByTestId("team-brigades-panel")).toBeVisible({ timeout: 30_000 });
   const people = (await out.getByRole("main").textContent()) ?? "";
   for (const secret of [TEAM, W1_NAME, W2_NAME, CO_ORG]) expect(people).not.toContain(secret);
 

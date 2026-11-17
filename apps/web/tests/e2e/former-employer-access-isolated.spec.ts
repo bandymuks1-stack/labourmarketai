@@ -27,6 +27,9 @@ import {
  *        their personal journal.
  *   FE-1 While W works for A: O reads W's entry for A (positive control), and
  *        never W's personal entry or W's entry for B.
+ *   FE-1b A PAUSE IS NOT AN END: while the relationship is paused, A keeps
+ *        reading, adding to and deciding on W's records, and the entry W files
+ *        during the pause belongs to the employment (retained after the end).
  *   FE-2 O ends W's employment through the product's end door. W then files a
  *        new entry under the ended relationship (the database allows a person
  *        to file into their own ended context). Then:
@@ -60,6 +63,7 @@ const TEXT = {
   other: `QA-SYNTHETIC ${RUN}: painted the stairwell for B`,
   personal: `QA-SYNTHETIC ${RUN}: studied for the electrical licence`,
   after: `QA-SYNTHETIC ${RUN}: filed after A ended the employment`,
+  paused: `QA-SYNTHETIC ${RUN}: inventory count during the pause, for A`,
 };
 
 const s = {
@@ -77,6 +81,7 @@ const s = {
   entryOther: "",
   entryPersonal: "",
   entryAfter: "",
+  entryPaused: "",
   workItem: "",
 };
 
@@ -289,6 +294,29 @@ test("FE-1. while W works for A, A reads W's entry for A only, and can still dec
   expect(metric.status, "an active employer may add a metric").toBe(201);
 });
 
+test("FE-1b. a PAUSE is not an end: while paused, A keeps reading, adding to and deciding on W's records, and an entry filed during the pause belongs to the employment", async () => {
+  // No product door sets `paused` today, so this seeded step puts the
+  // relationship on pause in the throwaway database (and takes it off below).
+  sqlExec(`update public.engagement_contexts set status = 'paused' where id = ${lit(s.ecA)}`);
+  const during = await file(s.ecA, TEXT.paused);
+  expect(during.id, `W can file into the paused relationship (${during.status})`).toBeTruthy();
+  s.entryPaused = during.id!;
+
+  expect(
+    await readable(O, [s.entryDuring, s.entryDuring2, s.entryPaused, s.entryOther, s.entryPersonal]),
+    "a paused relationship keeps A's reads, including the entry filed during the pause",
+  ).toEqual([s.entryDuring, s.entryDuring2, s.entryPaused].sort());
+  const metric = await rest(O, "journal_entry_metrics", {
+    method: "POST",
+    body: JSON.stringify({ entry_id: s.entryPaused, metric_slug: "qa_synthetic_note", value_text: "paused", source: "manager_corrected" }),
+  });
+  expect(metric.status, "a paused relationship keeps A's writes").toBe(201);
+  const decided = await rpc<string>(O, "review_journal_entry", { p_entry_id: s.entryPaused, p_decision: "approved", p_note: null });
+  expect(decided.body, "a paused relationship keeps A's review basis").toBe("approved");
+
+  sqlExec(`update public.engagement_contexts set status = 'active' where id = ${lit(s.ecA)}`);
+});
+
 test("FE-2. A ends the employment: retained history stays readable; new records, other employers' and personal records do not; nothing historical can be changed", async () => {
   // The product's end door, under O's own session.
   const ended = await rpc<{ outcome?: string }>(O, "end_org_membership_v1", { p_engagement_id: s.ecA, p_reason: "QA-SYNTHETIC end" });
@@ -314,8 +342,10 @@ test("FE-2. A ends the employment: retained history stays readable; new records,
     );
   }
 
-  const all = [s.entryDuring, s.entryDuring2, s.entryOther, s.entryPersonal, s.entryAfter];
-  expect(await readable(O, all), "A keeps only the entries recorded during the employment").toEqual([s.entryDuring, s.entryDuring2].sort());
+  const all = [s.entryDuring, s.entryDuring2, s.entryPaused, s.entryOther, s.entryPersonal, s.entryAfter];
+  expect(await readable(O, all), "A keeps only the entries recorded during the employment").toEqual(
+    [s.entryDuring, s.entryDuring2, s.entryPaused].sort(),
+  );
   expect((await readable(W, all)).length, "W still reads every one of their entries").toBe(all.length);
 
   // Writes: nothing historical changes through A any more.
