@@ -1802,6 +1802,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // worker's opt-in to a suggested agency. RED draft, the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261114235900_agency_placement_terms_v1.sql",
+      // 2026-11-15: owner decision, an organization reads a learner's journal only while the learning link
+      // is active and review is on (one RLS policy replaced). RED draft, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261115120000_journal_learning_access_follows_link_v1.sql",
 ]);
   });
 
