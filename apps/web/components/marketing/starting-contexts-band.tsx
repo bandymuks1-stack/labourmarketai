@@ -24,7 +24,8 @@ import { Card } from "@/components/ui/Card";
  *    does not impose (IDENTITY ≠ ROLE, SEP-5).
  *
  * 2. PARTNER LEFT THE GRID. It answers a different question — a commercial
- *    relationship with the company — and opens `/about`, not a workspace. It
+ *    relationship with the company — and opens the partner request form
+ *    (`/#request=partner`), not a workspace. It
  *    is still here, as one line with its own framing. Nothing was removed.
  *
  * 3. THE AUDIENCE PAGES ARE RE-OFFERED BY NAME. `/for-workers`,
@@ -105,7 +106,7 @@ export async function StartingContextsBand() {
           >
             {t("partnerLead")}{" "}
             <Link
-              href={PARTNER_DOOR.href as "/about"}
+              href={PARTNER_DOOR.href}
               data-testid="final-door-partner"
               className="text-text-secondary underline-offset-4 hover:text-brand-blue hover:underline"
             >

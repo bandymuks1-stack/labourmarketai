@@ -64,10 +64,10 @@ test("P-1. the third use is answered with one question, and yes puts it on the h
   await main.getByTestId("composer-send").click();
   const yes = main.getByTestId(`chat-chip-pin:${REF}`).last();
   await expect(yes, "the chat asks whether to keep the often-used thing").toBeVisible({ timeout: 45_000 });
-  await expect(main.getByText("Šį veiksmą naudoji dažnai. Pridėti į Mano erdvę?").last()).toBeVisible();
+  await expect(main.getByText("Šį veiksmą naudojate dažnai. Pridėti į Mano erdvę?").last()).toBeVisible();
   await expect(row(page), "nothing is pinned before the person says yes").toHaveCount(0);
   await yes.click();
-  await expect(main.getByText("Pridėta į Mano erdvę — rasi viršuje.").last()).toBeVisible({ timeout: 30_000 });
+  await expect(main.getByText("Pridėta į Mano erdvę — rasite viršuje.").last()).toBeVisible({ timeout: 30_000 });
   await expect(row(page).getByTestId("my-space-pin")).toHaveCount(1);
   await ctx.close();
 });
