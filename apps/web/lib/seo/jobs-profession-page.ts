@@ -62,7 +62,7 @@ const DESCRIPTION_WITH_COUNT: L<(name: string, count: string) => string> = {
   en: (n, c) =>
     `${n}: ${c} open vacancies from official public job sources. Sign in free to see the employer, the place and how to apply.`,
   lt: (n, c) =>
-    `${n}: laisvų darbo vietų iš oficialių viešų šaltinių – ${c}. Prisijunk nemokamai: darbdavys, vieta ir kaip kandidatuoti.`,
+    `${n}: laisvų darbo vietų iš oficialių viešų šaltinių – ${c}. Prisijunkite nemokamai: darbdavys, vieta ir kaip kandidatuoti.`,
   ru: (n, c) =>
     `${n}: открытых вакансий из официальных источников – ${c}. Войдите бесплатно: работодатель, место и как откликнуться.`,
   nl: (n, c) =>
@@ -79,7 +79,7 @@ const DESCRIPTION_NO_COUNT: L<(name: string) => string> = {
   en: (n) =>
     `${n}: open vacancies from official public job sources. Sign in free to see the employer, the place and how to apply.`,
   lt: (n) =>
-    `${n}: laisvos darbo vietos iš oficialių viešų šaltinių. Prisijunk nemokamai: darbdavys, vieta ir kaip kandidatuoti.`,
+    `${n}: laisvos darbo vietos iš oficialių viešų šaltinių. Prisijunkite nemokamai: darbdavys, vieta ir kaip kandidatuoti.`,
   ru: (n) =>
     `${n}: открытые вакансии из официальных источников. Войдите бесплатно: работодатель, место и как откликнуться.`,
   nl: (n) =>

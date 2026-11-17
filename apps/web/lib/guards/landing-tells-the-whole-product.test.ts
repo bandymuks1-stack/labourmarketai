@@ -5,6 +5,7 @@ import { createElement, type ComponentProps, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 
+import { requestDoorFromFragment, requestDoorHref } from "@/lib/staffing/request-door-link";
 import { readPublicEntry } from "@/lib/marketing/public-entry";
 import { INTENT_REGISTRY, type RoutedIntent } from "@/lib/conversation/intent-registry";
 import {
@@ -274,7 +275,10 @@ describe("§17 the public map is real geography and claims no activity", () => {
 describe("§20 starting contexts are contexts, not identities", () => {
   it("partner is not one of them, and is still a real door", () => {
     expect(STARTING_CONTEXTS.map((c) => c.key)).not.toContain("partner");
-    expect(PARTNER_DOOR.href).toBe("/about");
+    // Since 2026-11-15 (owner P0, F3) the landing's partner request form:
+    // /about held no partner form or contact, so the door led nowhere real.
+    expect(PARTNER_DOOR.href).toBe(requestDoorHref("partner"));
+    expect(requestDoorFromFragment(PARTNER_DOOR.href.slice(1))).toBe("partner");
     // The full five-door list is unchanged, so every existing route check and
     // production walk still asserts the same destinations.
     expect(FINAL_CTA_LINKS.map((d) => d.key).sort()).toEqual([
@@ -320,7 +324,8 @@ describe("§19 the visitor reaches a way to start without a long scroll", () => 
     expect(i("PublicEntry")).toBeLessThan(i("LandingMarketFacts"));
     expect(i("LandingMarketFacts")).toBeLessThan(i("LandingHow"));
     // The sentence box no longer prints the counts a second time.
-    expect(focus).toMatch(/<PublicEntry examples="none" supply=\{null\} \/>/);
+    // (It also receives the request block's title, employer path P0 2026-11-15.)
+    expect(focus).toMatch(/<PublicEntry examples="none" supply=\{null\}( requestLabel=\{tDoors\("title"\)\})? \/>/);
     // And the withdrawn band must not quietly return without a decision.
     expect(i("PublicMarketMapBand")).toBe(-1);
   });

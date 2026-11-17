@@ -59,36 +59,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "[EN] Why agencies",
-      "headline": "[EN] Leverage, not loss of control",
-      "items": [
-        {
-          "desc": "[EN] Workers, availability and status in one place.",
-          "title": "[EN] Manage your pool"
-        },
-        {
-          "desc": "[EN] Broker demand without losing the relationship.",
-          "title": "[EN] Post on behalf of clients"
-        },
-        {
-          "desc": "[EN] Place the right people faster.",
-          "title": "[EN] Fit direction"
-        },
-        {
-          "desc": "[EN] Public, agencies-only or direct — your call.",
-          "title": "[EN] Visibility controls"
-        },
-        {
-          "desc": "[EN] Baltic + Nordic clients and workers.",
-          "title": "[EN] Cross-border reach"
-        },
-        {
-          "desc": "[EN] Capacity insights as demand shifts.",
-          "title": "[EN] Grow your desk"
-        }
-      ]
-    },
     "journey": {
       "eyebrow": "[EN] Agency workflow",
       "headline": "[EN] Run your pool like a desk",
@@ -205,7 +175,7 @@
         },
         "addMore": {
           "title": "[EN] Add another way to use labourmarket.ai",
-          "body": "[EN] You're not locked in. Add a worker, company, agency or customer role whenever you're ready.",
+          "body": "[EN] You're not locked into one role. Company, agency and customer spaces are not all available yet.",
           "cta": "[EN] Review roles"
         },
         "activity": {
@@ -228,7 +198,10 @@
           "errorOpenNeedLimitIndividual": "Denne organisasjonen har nådd grensen for aktive stillinger i planen sin. Ingenting ble belastet eller endret. Kontakt oss.",
           "openNeedUsage": "Aktive stillinger: {used} av {limit} brukt · {remaining} igjen",
           "openNeedUsageUpgradeCta": "Aktiver Organisasjon-planen",
-          "openNeedUsageIndividual": "Du har nådd grensen for planen din. Kontakt oss for å diskutere behovene dine."
+          "openNeedUsageIndividual": "Du har nådd grensen for planen din. Kontakt oss for å diskutere behovene dine.",
+          "form": {
+            "countryRequired": "Velg landet der arbeidet utføres."
+          }
         }
       },
       "account": {
@@ -244,9 +217,9 @@
         "employerVisibility": "Synlighet for arbeidsgivere"
       },
       "comingSoon": {
-        "body_main": "[EN] We're finishing the company / agency functionality right now.",
+        "body_main": "[EN] Company / agency functionality is not available yet.",
         "body_meanwhile": "[EN] In the meantime — you can browse the platform via the \"Discover\" tab (read-only).",
-        "body_notify": "[EN] We'll let you know the moment it's ready.",
+        "body_notify": "[EN] We'll let you know when it is available.",
         "greeting": "[EN] 👋 Welcome, {name}"
       },
       "customer": {
@@ -630,36 +603,6 @@
         {
           "a": "[EN] Through confirmed skills, employer-confirmed history and contextual fit signals — not self-reported CVs.",
           "q": "[EN] How is worker experience guaranteed?"
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "[EN] Why companies",
-      "headline": "[EN] Supply you can act on",
-      "items": [
-        {
-          "desc": "[EN] Every fit signal shows the reasons behind it.",
-          "title": "[EN] Explainable fit direction"
-        },
-        {
-          "desc": "[EN] Baltic + Nordic supply in one place.",
-          "title": "[EN] Cross-border worker pool"
-        },
-        {
-          "desc": "[EN] You see and own the relationship.",
-          "title": "[EN] No opaque middlemen"
-        },
-        {
-          "desc": "[EN] Hire on evidence, not on claims.",
-          "title": "[EN] Confirmed skills + fit signals"
-        },
-        {
-          "desc": "[EN] See availability shift as it happens.",
-          "title": "[EN] Real-time supply signals"
-        },
-        {
-          "desc": "[EN] You own the worker relationship.",
-          "title": "[EN] Direct contact"
         }
       ]
     },
@@ -1092,7 +1035,7 @@
         ]
       }
     },
-    "subcopyLive": "Prisene er bekreftet av eieren og gjelder. Aktivering skjer i organisasjonskontoen via en sikker Stripe-betaling; ingenting belastes på denne siden.",
+    "subcopyLive": "Prisene gjelder. Aktivering skjer i organisasjonskontoen via en sikker Stripe-betaling; ingenting belastes på denne siden.",
     "subcopy": "Prisene er ikke endelige, og fakturering startes aldri for deg på denne siden. Nivåene nedenfor beskriver omfang; aktiveringen er manuell – ta kontakt, så bekrefter vi pris og omfang med deg før noe starter.",
     "subcopyConfirmed": "Prisene er bekreftet. Aktivering på nett er ikke åpnet ennå – meld deg på ventelisten, så kontakter vi deg for å starte organisasjonen din manuelt; ingenting belastes på denne siden.",
     "trialNote": "En organisasjons første abonnement starter med en 14 dagers prøveperiode. Etter prøveperioden belastes kortet med månedsprisen, og du kan si opp før den utløper.",
@@ -1110,7 +1053,7 @@
     "ctaStartFree": "Kom i gang gratis i organisasjonskontoen din",
     "ctaSubscribe": "Aktiver i organisasjonskontoen din",
     "priceState": {
-      "owner_confirmed": "Prisene er bekreftet av eieren. Aktivering skjer i organisasjonskontoen din; ingenting belastes på denne siden."
+      "owner_confirmed": "Prisene er bekreftet. Ingenting belastes på denne siden."
     }
   },
   "secondary": {
@@ -1196,7 +1139,7 @@
     "loading": "[EN] Loading...",
     "noProfession": "[EN] Pick a profession to see the skills linked to it.",
     "pageTitle": "[EN] Profession & skills",
-    "pickerHelp": "[EN] Select skills you have. They will be confirmed later by a site manager.",
+    "pickerHelp": "[EN] Select skills you have. They will be reviewed later by a site manager.",
     "pickerTitle": "[EN] Your skills",
     "professionLabel": "[EN] Your profession",
     "professionPlaceholder": "[EN] Select a profession",
@@ -1234,7 +1177,7 @@
     "submit": "[EN] Notify me",
     "success_body": "[EN] We'll let you know as soon as it's ready.",
     "success_title": "[EN] Thanks!",
-    "title": "[EN] For companies & agencies — coming soon"
+    "title": "[EN] For companies & agencies"
   },
   "workers": {
     "cta": {
@@ -2070,7 +2013,7 @@
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
       "positionsTitle": "[EN] Missing positions",
-      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "positionsEmpty": "[EN] Position needs are not available yet. When they are, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena",
       "history": {
         "title": "Tidligere arbeid på dette prosjektet",
@@ -2100,7 +2043,8 @@
         "noMembers": "Ingen medlemmer akkurat nå.",
         "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
         "manage": "Endre team"
-      }
+      },
+      "organizationLink": "Organisasjonens historikk og prosjekter"
     },
     "workerView": {
       "eyebrow": "Mitt prosjekt",
@@ -2167,7 +2111,7 @@
       "title": "[EN] Readiness by market",
       "empty": "[EN] No declared countries in the pool yet — readiness appears with the first ones.",
       "availableNow": "[EN] available now",
-      "docsNote": "[EN] Document readiness stays with the worker: category-level aggregates will appear here only with the worker-consent switch (a gated change, in preparation). You never see document contents here."
+      "docsNote": "[EN] Document readiness stays with the worker: category-level aggregates will appear here only with the worker-consent switch. You never see document contents here."
     },
     "demand": {
       "title": "[EN] Open demand",
@@ -2183,7 +2127,7 @@
         "not_agency": "[EN] Finish agency setup first.",
         "request_not_found": "[EN] The request no longer exists.",
         "request_not_open": "[EN] The request is no longer open.",
-        "needs_gate": "[EN] This feature is in preparation (gated change pending).",
+        "needs_gate": "[EN] Couldn’t load. Please try again.",
         "error": "[EN] Could not save the mark. Try again."
       }
     },
@@ -3930,7 +3874,9 @@
         "supplyRole": "Hvilket yrke",
         "supplyRolePlaceholder": "F.eks. sveiser",
         "supplyTeamSize": "Hvor mange folk dere har",
-        "supplyLocation": "Hvor de kan arbeide"
+        "supplyLocation": "Hvor de kan arbeide",
+        "demandCountry": "Land der arbeidet utføres",
+        "demandCountryPlaceholder": "f.eks. Sverige eller SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -4614,7 +4560,7 @@
       "title": "Ett chatvindu styrer arbeidet ditt",
       "subcopy": "I stedet for titalls skjemaer snakker du bare. Assistenten utarbeider, du bekrefter — og hver handling etterlater en registrering du kan gå tilbake til.",
       "liveLabel": "Virker i dag",
-      "comingLabel": "Under forberedelse",
+      "comingLabel": "Ikke tilgjengelig ennå",
       "conceptLabel": "Konseptvisning — stilisert illustrasjon, ikke en ekte samtale",
       "c1": "Oppdatere CV og profil",
       "c2": "Registrere en arbeidsdag",
@@ -6471,7 +6417,7 @@
       "assigneePlaceholder": "[EN] Person's email",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -6903,6 +6849,14 @@
   "agencyBridge": {
     "deliveryAccepted": "[EN] Delivered — the client accepted the invitation and now confirms the connection on their Partners page."
   },
+  "scoutingAgencyOffers": {
+    "decision": {
+      "limitOpen": "[EN] You already have 10 booking proposals waiting for workers' answers — the most that can be open at once. Withdraw the ones you no longer need, then accept this candidate. The agency's offer stays open.",
+      "limitDaily": "[EN] You have sent 30 booking proposals in the last 24 hours — the daily limit. Accept this candidate later; nothing was sent and the agency's offer stays open.",
+      "limitUnknown": "[EN] The booking proposal limit is reached (10 waiting for an answer, 30 per day). Withdraw proposals you no longer need or try later; the agency's offer stays open.",
+      "openBookings": "[EN] Open bookings"
+    }
+  },
   "roleDashboards": {
     "company": {
       "programs": {
@@ -7132,7 +7086,8 @@
       "address": "Adresse",
       "project": "Prosjekt",
       "notInSource": "Ikke i kilden",
-      "linked": "Koblet"
+      "linked": "Koblet",
+      "openProject": "Åpne prosjektet"
     },
     "whoWorked": "Hvem som jobbet her",
     "timeline": "Hva som ble gjort",
@@ -7150,15 +7105,30 @@
       "refused": "Dette kunne ikke lagres. Ingenting er endret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
     },
-    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem."
+    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem.",
+    "projects": {
+      "title": "Prosjekter på plattformen",
+      "counts": "{running} pågående · {completed} fullført",
+      "untitled": "Prosjekt uten navn",
+      "running": "Pågående",
+      "completed": "Fullført",
+      "all": "Alle {count} prosjekter"
+    },
+    "journal": {
+      "title": "Arbeid registrert i journalen",
+      "hours": "Registrerte timer",
+      "confirmed": "Timer bekreftet av organisasjonen",
+      "people": "Personer som registrerte arbeid",
+      "period": "Registrert",
+      "basis": "Fra {entries} journalinnføringer som personer registrerte under denne organisasjonen. Telt atskilt fra den importerte historikken ovenfor og aldri lagt til den.",
+      "unavailable": "Arbeidet registrert i journalen under denne organisasjonen kunne ikke leses akkurat nå."
+    }
   },
   "workLifecycle": {
     "pending": "Ikke ennå",
     "title": "Hva som skjer med arbeidet du gjør",
     "titleCompany": "Hva som skjer med arbeidet du driver",
     "example": "Eksempel — ikke en ekte person eller ekte data",
-    "hint": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
-    "hintWorkers": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
     "open": "Åpne i arbeidsområdet ditt",
     "list": "Trinn i arbeidets livssyklus",
     "workers": {
@@ -7931,6 +7901,9 @@
       "invites": "Invitasjons- og varslings-e-post",
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp og én testsending"
+    },
+    "alerts": {
+      "title": "Eiervarsler og pushvarsler"
     }
   },
   "historyDuplicates": {
@@ -8073,7 +8046,6 @@
       "close": "Lukk",
       "functions": "Handlinger",
       "professions": "Yrker",
-      "opensNow": "Krever ingen konto",
       "signInWhenOpen": "Krever innlogging",
       "allSectors": "Alle bransjer",
       "fullList": "Full liste"

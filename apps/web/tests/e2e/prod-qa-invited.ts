@@ -139,7 +139,7 @@ export async function myWorkerId(): Promise<string> {
 export async function switchEmailOn(page: Page, kinds: readonly string[], tag: string): Promise<void> {
   await page.goto("/lt/dashboard/account");
   await settle(page);
-  const section = page.getByTestId("account-notification-preferences");
+  const section = page.getByRole("main").getByTestId("account-notification-preferences");
   await expect(section).toBeVisible({ timeout: 30_000 });
   if ((await section.getAttribute("open")) === null) await section.locator("summary").first().click();
   await expect(page.getByTestId("notification-prefs-email-inactive"), "production has a configured mailbox").toHaveCount(0);

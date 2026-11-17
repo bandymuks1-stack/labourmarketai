@@ -67,6 +67,10 @@ export async function ConciergeOfferSection() {
       <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
         {t("title")}
       </h2>
+      {/* Not a LabourMarket.ai plan: said in words, directly under the title. */}
+      <p className="mt-2 max-w-3xl text-sm leading-relaxed text-text-secondary" data-testid="concierge-offer-separate">
+        {t("separate")}
+      </p>
       <ol className="mt-6 grid gap-6 md:grid-cols-2">
         {steps.map((step, i) => (
           <li key={step.title} className="card-border p-6">

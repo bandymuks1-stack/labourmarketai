@@ -1,6 +1,8 @@
-import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
+import { clickUntilVisible } from "./click-until-visible";
 
 import { verifyCompanyAsLocalAdmin } from "./isolated-web-a-helpers";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * WORK JOURNAL → SKILLS → LIVING CV → TWO-WAY MATCHING → DISPUTE, end to end,
@@ -197,13 +199,6 @@ async function as(browser: Browser, address: string): Promise<{ page: Page; clos
 
 /** Click until the expected result shows: a click that lands before the page
  *  hydrated is a silent no-op, so the click is retried, never assumed. */
-async function clickUntil(target: Locator, result: Locator, timeout = 60_000): Promise<void> {
-  await expect(async () => {
-    if (!(await result.isVisible().catch(() => false))) await target.click({ timeout: 5_000 });
-    await expect(result).toBeVisible({ timeout: 5_000 });
-  }).toPass({ timeout });
-}
-
 /** Everything the main region renders, once the page's own content streamed in. */
 async function mainText(page: Page): Promise<string> {
   const main = page.getByRole("main");
@@ -234,7 +229,7 @@ async function newDiscoverableWorker(browser: Browser, address: string, name: st
   await page.goto(`${BASE}/en/dashboard/privacy#visibility`);
   const section = page.getByTestId("privacy-visibility");
   await expect(section).toBeVisible({ timeout: 30_000 });
-  await clickUntil(section.getByTestId("discoverability-open"), section.getByTestId("discoverability-grant"));
+  await clickUntilVisible(section.getByTestId("discoverability-open"), section.getByTestId("discoverability-grant"));
   await section.getByTestId("discoverability-grant").click();
   await expect(section.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
   return page;
@@ -248,7 +243,7 @@ async function recordWork(page: Page, text: string): Promise<void> {
   const box = main.getByTestId("journal-quick-record-text");
   await expect(box).toBeVisible({ timeout: 60_000 });
   await box.fill(text);
-  await clickUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  await clickUntilVisible(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
   await main.getByTestId("worklog-save").click();
   await main.getByTestId("worklog-confirm").click();
   const done = main.getByTestId("worklog-done");
@@ -284,6 +279,7 @@ async function postNeed(page: Page, role: string, description: string): Promise<
   await main.getByTestId("demand-next").click();
   const size = main.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done")).toBeVisible({ timeout: 30_000 });
@@ -530,12 +526,18 @@ test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
   // Withdrawn: the link is gone, the other readings stay, the tier falls.
   // (The dispute is recorded FIRST and the link removed after it, so the
   // withdrawal is awaited on its own rather than read in the same instant.)
+  // The save replaces the entry's link set (delete, then insert the kept
+  // ones), so a read can fall between the two and see NO links at all. Wait
+  // for the settled state — flooring gone AND tiling back — in one poll.
   await expect
-    .poll(async () => (await entryLinks(state.tilerEntry)).has("flooring"), {
-      message: "the disputed evidence link is withdrawn",
-      timeout: 60_000,
-    })
-    .toBe(false);
+    .poll(
+      async () => {
+        const now = await entryLinks(state.tilerEntry);
+        return { flooring: now.has("flooring"), tiling: now.has("tiling") };
+      },
+      { message: "the disputed link is withdrawn and the undisputed readings stay", timeout: 60_000 },
+    )
+    .toEqual({ flooring: false, tiling: true });
   let links = await entryLinks(state.tilerEntry);
   expect(links.has("tiling"), "the undisputed readings stay").toBe(true);
   await expect
@@ -554,11 +556,24 @@ test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
 
   // It STAYS withdrawn: a re-run of recognition over the same text.
   await page.goto(`${BASE}/en/dashboard/journal`);
-  await page.getByTestId(`journal-entry-more-${state.tilerEntry}`).first().evaluate((d) => ((d as HTMLDetailsElement).open = true));
   // The re-run must really HAPPEN: only the success result counts (a failed
   // run would only re-check the earlier unlink, proving nothing).
   const rerun = page.getByTestId(`journal-entry-reprocess-${state.tilerEntry}`).first();
-  await clickUntil(rerun, page.getByTestId(`journal-entry-reprocess-result-${state.tilerEntry}`).first());
+  const rerunResult = page.getByTestId(`journal-entry-reprocess-result-${state.tilerEntry}`).first();
+  // The button sits in the entry's native <details>; a re-render of the row
+  // (its `open` is not React state) closes it again, so every attempt opens
+  // it first. Opening it once before the retries raced with that re-render.
+  await clickUntilVisible(rerun, rerunResult, {
+    timeout: 60_000,
+    what: "the re-run result",
+    prepare: () =>
+      page
+        .getByTestId(`journal-entry-more-${state.tilerEntry}`)
+        .first()
+        .evaluate((d) => {
+          (d as HTMLDetailsElement).open = true;
+        }),
+  });
   await expect(page.getByTestId(`journal-entry-reprocess-failed-${state.tilerEntry}`)).toHaveCount(0);
   await expect(page.getByTestId(`journal-entry-reprocess-error-${state.tilerEntry}`)).toHaveCount(0);
   links = await entryLinks(state.tilerEntry);
