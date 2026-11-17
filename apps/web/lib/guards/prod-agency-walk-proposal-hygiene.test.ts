@@ -42,6 +42,19 @@ describe("the production agency walk cleans up its own booking proposal", () => 
     expect(spec).toMatch(/return "absent";/);
   });
 
+  it("A-6b accepts only this run's own proposal and never ends the shared engagement", () => {
+    const a6b = spec.slice(spec.indexOf('test("A-6b.'), spec.indexOf('test("A-7.'));
+    expect(a6b.length, "an A-6b step exists").toBeGreaterThan(0);
+    expect(a6b).toContain("createdProposals.length");
+    expect(a6b).toContain("const id = createdProposals[0]");
+    expect(a6b).toContain("getByTestId(`booking-${id}`)");
+    // The read-back is the stored status, not the button's own echo.
+    expect(a6b).toContain('.toBe("accepted")');
+    // The worker's engagement with the client is shared by earlier runs:
+    // ending it is not this walk's (owner choice 2026-11-16).
+    expect(spec).not.toMatch(/engagement-end|endEngagement|end_company_worker_engagement/);
+  });
+
   it("it never withdraws by a broad match, so earlier runs' proposals stay untouched", () => {
     expect(teardown).not.toMatch(/hasText:\s*["'`]QA-SYNTHETIC/);
     expect(teardown).not.toMatch(/data-status="proposed"\]'\)\.(first|nth|all)\(/);
