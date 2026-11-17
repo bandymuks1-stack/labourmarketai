@@ -78,6 +78,8 @@ let offerId = "";
 const createdProposals: string[] = [];
 /** A-6b: the worker accepted this run's proposal (read back by the client). */
 let workerAccepted = false;
+/** A-4 shared THIS run's own need (its title carries RUN), not an earlier one. */
+let ownNeed = false;
 
 /** The bookings page as the client reads it now: readable, or not (a load
  *  that did not finish, or its own read-failed state). Retried, never guessed. */
@@ -355,6 +357,7 @@ test("A-4. the client posts a need and shares it with the agency", async ({ brow
     const pick = options.find((o) => o.t.includes(RUN)) ?? options[0];
     if (pick) {
       requestId = pick.v;
+      ownNeed = pick.t.includes(RUN);
       await select.selectOption(pick.v);
       await form.getByTestId("client-bridge-share-submit").click();
       await expect(shared.first()).toBeVisible({ timeout: 30_000 });
@@ -530,6 +533,39 @@ test("A-7. the agency sees the decision and talks to the client in one thread", 
   await expect(input).toHaveValue("", { timeout: 20_000 });
   await expect(page.locator("main")).toContainText(MSG, { timeout: 20_000 });
   await close();
+});
+
+test("A-8 (4.30). the client closes this run's need as filled, and its history shows the hire decision", async ({ browser }) => {
+  // Only this run's own need, and only once its own proposal was accepted
+  // (A-6b): an earlier run's need is never closed here.
+  expect(ownNeed && requestId !== "", "A-4 shared this run's own need").toBe(true);
+  expect(workerAccepted, "A-6b: the worker accepted this run's proposal").toBe(true);
+  const { page, close } = await as(browser, "owner");
+  try {
+    await page.goto("/lt/dashboard");
+    await workspace(page, ALFA);
+    const url = `/lt/dashboard/company/scouting?request=${requestId}`;
+    await page.goto(url);
+    const main = page.getByRole("main");
+    const history = main.getByTestId("demand-history");
+    await expect(history, "the need's history is on the scouting page").toBeVisible({ timeout: 30_000 });
+    await expect(history.getByTestId("demand-history-created")).toHaveCount(1);
+    const accepted = history.locator('[data-testid^="demand-history-accepted-"]');
+    await expect(accepted.first(), "the worker's accept is in the history").toBeVisible();
+    await expect(accepted.first()).toHaveAttribute("data-actor", "candidate");
+    await expect(history).toHaveAttribute("data-decided", "false");
+    // The decision: the client closes the need as filled (outcome "completed").
+    await main.getByTestId("demand-close").click();
+    await expect(main.getByTestId("demand-lifecycle-controls")).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
+    await page.goto(url);
+    const after = page.getByRole("main").getByTestId("demand-history");
+    await expect(after).toHaveAttribute("data-decided", "true", { timeout: 30_000 });
+    await expect(after.getByTestId("demand-history-closed")).toHaveAttribute("data-outcome", "completed");
+    await expect(after.getByTestId("demand-history-decision")).toBeVisible();
+    console.info(`[agency] 4.30: need ${requestId.slice(0, 8)} closed as filled; the history shows the hire decision`);
+  } finally {
+    await close();
+  }
 });
 
 test.afterAll(async ({ browser }) => {

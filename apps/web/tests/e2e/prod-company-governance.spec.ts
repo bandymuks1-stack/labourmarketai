@@ -53,6 +53,20 @@ const DECISION_EDITED = `${TAG} sprendimas dėl įrankių nuomos`;
 const RESULT = `${TAG}: nuomojamės, ne perkame`;
 const COURSE_PREFIX = "QA-SYNTHETIC kursas";
 const COURSE = `${COURSE_PREFIX} ${RUN}`;
+const BETA = "QA-SYNTHETIC Beta";
+/** T-4b: the synthetic register document whose file becomes the certificate (archived in afterAll). */
+const CERT_DOC = `${TAG} kurso pažymėjimas`;
+/** A minimal one-page PDF: the certificate file, synthetic. */
+const CERT_PDF = Buffer.from(
+  "%PDF-1.4
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
+" +
+    "3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>endobj
+trailer<</Root 1 0 R>>
+%%EOF
+",
+);
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["owner", "worker", "worker2", "manager"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
@@ -304,6 +318,8 @@ const programRow = (reg: Locator, title: string) => reg.getByTestId("training-pr
 let courseCreated = false;
 let courseAssigned = false;
 let courseCompleted = false;
+let certDocCreated = false;
+let certificateAttached = false;
 
 test("T-1 (11.8). Alfa's owner adds a course to the organization's register", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
@@ -364,6 +380,63 @@ test("T-4 (11.8). the owner sees the course completed", async ({ browser }) => {
   await useWorkspace(page, ALFA);
   const managed = (await register(page)).getByTestId("training-managed-row").filter({ hasText: COURSE });
   await expect(managed).toContainText("Atlikta", { timeout: 30_000 });
+  await ctx.close();
+});
+
+test("T-4b (11.8). the owner attaches the certificate by picking a file from Alfa's own register, never typing an id", async ({ browser }) => {
+  test.skip(!courseCompleted, "T-3 did not complete the course");
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  // A synthetic register document with a file: the only kind the picker offers.
+  await page.goto("/lt/dashboard/documents#org-register");
+  const create = inMain(page).getByTestId("org-documents-create");
+  await expect(create).toBeVisible({ timeout: 30_000 });
+  await create.locator("summary").click();
+  await create.locator('select[name="typeSlug"]').selectOption("org_instruction");
+  await create.locator('[name="title"]').fill(CERT_DOC);
+  await act(page, inMain(page).getByTestId("org-documents-create-submit"), "docNotice", ["created"]);
+  certDocCreated = true;
+  await page.goto(`/lt/dashboard/documents?regQ=${encodeURIComponent(RUN)}#org-register`);
+  const doc = inMain(page).getByTestId("org-document-row").filter({ hasText: CERT_DOC });
+  await expect(doc, "this run's document, once").toHaveCount(1, { timeout: 30_000 });
+  await doc.locator('input[type="file"][name="file"]').setInputFiles({ name: "QA-SYNTHETIC-pazymejimas.pdf", mimeType: "application/pdf", buffer: CERT_PDF });
+  await act(page, doc.getByTestId("org-document-upload-submit"), "docNotice", ["uploaded"]);
+
+  // #3442: the completed row's attach form offers a SELECT of register files.
+  const managed = (await register(page)).getByTestId("training-managed-row").filter({ hasText: COURSE });
+  const form = managed.getByTestId("training-attach-form");
+  await expect(form, "a completed course without a certificate offers the attach form").toBeVisible({ timeout: 30_000 });
+  await expect(form.locator('input[name="documentFileId"]'), "no free-text id field").toHaveCount(0);
+  const picker = form.getByTestId("training-certificate-file");
+  await expect(picker).toHaveAttribute("name", "documentFileId");
+  expect(await picker.evaluate((el) => el.tagName), "the certificate file is picked from a list").toBe("SELECT");
+  await expect(picker).toBeEnabled();
+  const options = await picker.locator("option").evaluateAll((os) =>
+    (os as HTMLOptionElement[]).filter((o) => o.value).map((o) => ({ v: o.value, t: o.textContent ?? "" })),
+  );
+  const mine = options.find((o) => o.t.includes(CERT_DOC));
+  expect(mine, "the register's file is offered, labelled by its document").toBeTruthy();
+  await picker.selectOption(mine!.v);
+  await form.locator('input[name="issuedOn"]').fill(dayFromToday(0));
+  await act(page, form.getByRole("button"), "trn", ["attached"]);
+  certificateAttached = true;
+  const certs = (await register(page)).getByTestId("training-certificates");
+  await expect(certs.getByTestId("training-certificate-row").filter({ hasText: COURSE }), "the certificate is in Alfa's register").toHaveCount(1, { timeout: 30_000 });
+  console.info(`[training] 11.8: certificate attached from the register (${options.length} file option(s))`);
+  await ctx.close();
+});
+
+test("T-4c (11.8). the certificate list follows the active workspace: Alfa's certificate never shows in Beta", async ({ browser }) => {
+  test.skip(!certificateAttached, "T-4b did not attach the certificate");
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await expect((await register(page)).getByTestId("training-certificate-row").filter({ hasText: COURSE }), "in Alfa: listed").toHaveCount(1, { timeout: 30_000 });
+  await useWorkspace(page, BETA);
+  await page.goto("/lt/dashboard/documents#training");
+  await rendered(page, "documents (Beta)");
+  await expect(page.getByTestId("training-certificate-row").filter({ hasText: COURSE }), "in Beta: Alfa's certificate is not listed").toHaveCount(0);
+  await expect(page.getByTestId("training-managed-row").filter({ hasText: COURSE })).toHaveCount(0);
+  console.info("[training] 11.8: certificate scoped to the active workspace (Alfa 1, Beta 0)");
   await ctx.close();
 });
 
@@ -439,6 +512,19 @@ test.afterAll(async ({ browser }) => {
         }
       } catch (e) {
         console.info(`[cleanup] decision withdraw did not complete: ${firstLine(e)}`);
+      }
+    }
+    // T-4b's synthetic register document: archived, never deleted.
+    if (certDocCreated) {
+      try {
+        await page.goto(`/lt/dashboard/documents?regQ=${encodeURIComponent(RUN)}#org-register`);
+        const doc = inMain(page).getByTestId("org-document-row").filter({ hasText: CERT_DOC });
+        if ((await doc.getAttribute("data-status").catch(() => null)) === "active") {
+          await act(page, doc.getByTestId("org-document-archive"), "docNotice", ["archived"]);
+          console.info("[cleanup] certificate document archived");
+        }
+      } catch (e) {
+        console.info(`[cleanup] certificate document archive did not complete: ${firstLine(e)}`);
       }
     }
     // Swept by tag: every still-active synthetic course a run of this walk added.
