@@ -19384,11 +19384,11 @@
     },
     "projects": {
       "title": "Projektai platformoje",
-      "counts": "{running} vykdomi · {completed} užbaigti",
+      "counts": "{running, plural, one {# vykdomas} few {# vykdomi} other {# vykdomų}} · {completed, plural, one {# užbaigtas} few {# užbaigti} other {# užbaigtų}}",
       "untitled": "Projektas be pavadinimo",
       "running": "Vykdomas",
       "completed": "Užbaigtas",
-      "all": "Visi {count} projektai"
+      "all": "{count, plural, one {Visi # projektas} few {Visi # projektai} other {Visi # projektų}}"
     },
     "journal": {
       "title": "Žurnale įrašytas darbas",

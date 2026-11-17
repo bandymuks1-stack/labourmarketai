@@ -19384,7 +19384,7 @@
     },
     "projects": {
       "title": "Projekty na platformie",
-      "counts": "{running} w toku · {completed} zakończone",
+      "counts": "{running} w toku · {completed, plural, one {# zakończony} few {# zakończone} many {# zakończonych} other {# zakończonego}}",
       "untitled": "Projekt bez nazwy",
       "running": "W toku",
       "completed": "Zakończony",
