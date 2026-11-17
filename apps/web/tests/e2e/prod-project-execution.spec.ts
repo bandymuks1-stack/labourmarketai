@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 import { proveActionTiles } from "./action-tile-proof";
 
-import { bearerOf, qaApi } from "./prod-qa-api";
+import { bearerOf, qaApi, qaMcp } from "./prod-qa-api";
 
 /**
  * PRODUCTION PROJECT EXECUTION — owner areas 5 (projects, objects, tasks) and
@@ -503,6 +503,41 @@ test("E-12b (3.34). the owner reads project A's forecast beside the course; the 
     expect(["ok", "insufficient_data", "not_applicable"], `forecast read in production (got ${state})`).toContain(state);
     await expect(panel.getByTestId("project-forecast-note"), "labelled a forecast, not a fact").toBeVisible();
     await ctx.close();
+  }
+  {
+    // The STORED forecast (3.34 storage + recompute schedule): the page above
+    // computes on read, so only the recompute pass writes project_forecasts.
+    // Read through the app's own MCP door as the owner. Until the VPS cron
+    // runs the pass there is no stored row: that is logged, not failed, so
+    // this step reports the gap instead of hiding it or going red over an
+    // ops step. Once a row exists it must be well-formed and fresh.
+    const res = await qaMcp(bearerOf("owner"), {
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: { name: "project_forecast_get", arguments: { projectId: projectA } },
+    });
+    const text = await res.text();
+    let out: { ok?: boolean; data?: { latest?: { version?: number; computedAt?: string; mode?: string } | null; cadence?: { mode?: string } | null } } | undefined;
+    try {
+      out = (JSON.parse(text) as { result?: { structuredContent?: typeof out } }).result?.structuredContent;
+    } catch {
+      out = undefined;
+    }
+    expect(out?.ok, `the stored-forecast read answers (HTTP ${res.status}) ${text.slice(0, 200)}`).toBe(true);
+    const latest = out?.data?.latest ?? null;
+    if (!latest) {
+      console.log("[forecast] project A has no stored forecast yet: the recompute pass has not run (VPS cron not installed, or not yet due)");
+      test.info().annotations.push({ type: "3.34", description: "stored forecast: none yet" });
+    } else {
+      const ageDays = (Date.now() - Date.parse(latest.computedAt ?? "")) / 86_400_000;
+      console.log(`[forecast] stored v${latest.version} (${latest.mode}), ${ageDays.toFixed(1)} days old; cadence ${out?.data?.cadence?.mode ?? "?"}`);
+      expect(latest.version ?? 0, "a stored forecast has a version").toBeGreaterThanOrEqual(1);
+      expect(["weekly", "daily", "hourly", "live"], "stored under a known cadence").toContain(latest.mode);
+      // Weekly is the slowest cadence: older than 8 days means the pass stopped.
+      expect(ageDays, "recomputed within its weekly cadence").toBeLessThan(8);
+      test.info().annotations.push({ type: "3.34", description: `stored forecast v${latest.version}, ${latest.mode}` });
+    }
   }
   {
     const { ctx, page } = await as(browser, "worker");
