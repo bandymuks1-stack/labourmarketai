@@ -36,10 +36,10 @@
   "agency-chain|phone": {
    "spec": "agency-chain",
    "device": "phone",
-   "run": 43872353532,
+   "run": 43965333204,
    "result": "success",
-   "build": "bdfff68f",
-   "at": "2026-11-16T13:09:01Z"
+   "build": "b4fd6fb2",
+   "at": "2026-11-16T22:03:43Z"
   },
   "agency-chain|phone-375": {
    "spec": "agency-chain",
