@@ -738,11 +738,10 @@ export const SCOPED_OWNER_WAIVERS = [
       // Checked before the change: on #3448's head 4ef7e25d1 the CI gate reported every finding with the
       // single reason `pr-not-covered` and no new finding code; #3181 stopped at the same reason.
       // #3181: each /jobs/[id] page gets its own meta description from the anonymous preview.
-      // #3448: a signed-out visitor on /jobs/[id] gets one tracked link to the worker-need form.
-      // Only the numbers are added; axiom, codes, surfaces, files, expiry and subset rule are unchanged;
+      // #3448 adds its own number in its own PR.
+      // Only the number is added; axiom, codes, surfaces, files, expiry and subset rule are unchanged;
       // `product-gate.mjs` is not touched.
       3181,
-      3448,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
