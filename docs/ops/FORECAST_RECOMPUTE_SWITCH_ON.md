@@ -53,6 +53,14 @@ instead. An older `lm-cron.sh` on the VPS answers `unknown cron` for `forecast-r
    It must end `dry-run OK` with `forecast-recompute: unauthenticated=401 OK`. Any `STOP:` line
    names the missing piece: env permissions, `CRON_SECRET`, container health, or a route that
    is not fail-closed.
+> **⚠️ Warning — this install also switches on e-mail sending jobs.** `lm-cron-install.sh` installs
+> the whole cron bundle, not only the forecast: `weekly-digest` and `job-alerts` send e-mails and
+> notifications to real users, and `commercial-handoffs` delivers consented hand-offs. They start on
+> their next scheduled time once installed (and the install makes one authenticated run per route at
+> once). Nothing is installed or switched on automatically by this plan or by any deploy: run step 3
+> only with the owner's explicit go for the whole bundle. If only the forecast should start, use a
+> forecast-only cron file instead (Lane H prepares it on request).
+
 3. **Install.** This makes one authenticated run per route straight away:
    ```sh
    sh /root/lm-prod/bin/lm-cron-install.sh
