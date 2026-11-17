@@ -9941,6 +9941,9 @@
       "invites": "Invitation and notification e-mail",
       "invitesOn": "on",
       "invitesOff": "OFF – enabled separately: INVITE_EMAIL_PROVIDER=smtp and one test send"
+    },
+    "alerts": {
+      "title": "Owner alerts and push notifications"
     }
   },
   "adminMetrics": {

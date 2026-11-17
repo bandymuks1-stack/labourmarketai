@@ -7882,6 +7882,9 @@
       "invites": "Invitations- og notifikationsmails",
       "invitesOn": "til",
       "invitesOff": "FRA – slås til separat: INVITE_EMAIL_PROVIDER=smtp og én testafsendelse"
+    },
+    "alerts": {
+      "title": "Ejeradvarsler og pushnotifikationer"
     }
   },
   "historyDuplicates": {
