@@ -1,0 +1,359 @@
+import { expect, test, type Browser, type Page } from "@playwright/test";
+
+import {
+  BASE,
+  PASSWORD,
+  SB_ANON,
+  SB_URL,
+  accessToken,
+  isolatedStack,
+  lit,
+  setUpCompany,
+  signUp,
+  sql,
+  sqlExec,
+  userId,
+} from "./isolated-web-a-helpers";
+
+/**
+ * Former employer: limited access (owner decision 2026-11-17;
+ * supabase/migrations/20261117060000_former_employer_limited_access_v1.sql),
+ * on the THROWAWAY local stack of .github/workflows/signup-isolated.yml.
+ * Synthetic people only. Every read and write below runs under the person's
+ * OWN session (their JWT, their RLS), through the doors the app calls.
+ *
+ *   FE-0 O owns organization A, P owns organization B. W joins both through
+ *        their join links, and records one entry for A, one for B and one in
+ *        their personal journal.
+ *   FE-1 While W works for A: O reads W's entry for A (positive control), and
+ *        never W's personal entry or W's entry for B.
+ *   FE-2 O ends W's employment through the product's end door. W then files a
+ *        new entry under the ended relationship (the database allows a person
+ *        to file into their own ended context). Then:
+ *        · O still reads the entry recorded DURING the employment (retained);
+ *        · O does not read the new entry, W's personal entry or W's entry
+ *          for B;
+ *        · O can no longer change W's work items, add metrics, confirm an
+ *          entry, or switch review back on; the historical rows are unchanged;
+ *        · nothing was deleted, and W still reads every one of their entries.
+ *
+ * One seeded clock step: an entry W files after the end is stamped today, the
+ * same date as the end. A real late entry is stamped a later day, so the walk
+ * moves that one row's created_at two days forward in the throwaway database
+ * (the table's own triggers off for that one UPDATE, inside one transaction). Nothing else is seeded.
+ */
+
+test.skip(!isolatedStack() || !SB_ANON, "local stack only (SIGNUP_ISOLATED=1, app and Supabase on 127.0.0.1)");
+test.describe.configure({ mode: "serial" });
+test.setTimeout(300_000);
+
+const RUN = Date.now().toString(36);
+const O = `fe-owner-a-${RUN}@example.test`;
+const P = `fe-owner-b-${RUN}@example.test`;
+const W = `fe-worker-${RUN}@example.test`;
+const ORG_A = `Synthetic Former Employer A ${RUN}`;
+const ORG_B = `Synthetic Other Employer B ${RUN}`;
+const W_NAME = `Synthetic Former Employee ${RUN}`;
+const TEXT = {
+  during: `QA-SYNTHETIC ${RUN}: tiled the entrance hall for A`,
+  other: `QA-SYNTHETIC ${RUN}: painted the stairwell for B`,
+  personal: `QA-SYNTHETIC ${RUN}: studied for the electrical licence`,
+  after: `QA-SYNTHETIC ${RUN}: filed after A ended the employment`,
+};
+
+const s = {
+  oId: "",
+  pId: "",
+  wId: "",
+  workerId: "",
+  orgA: "",
+  orgB: "",
+  ecA: "",
+  ecB: "",
+  ecPersonal: "",
+  entryDuring: "",
+  entryOther: "",
+  entryPersonal: "",
+  entryAfter: "",
+  workItem: "",
+};
+
+const pages = new Map<string, Page>();
+async function fresh(browser: Browser, address: string): Promise<Page> {
+  const ctx = await browser.newContext({ timezoneId: "UTC" });
+  const page = await ctx.newPage();
+  pages.set(address, page);
+  return page;
+}
+test.afterAll(async () => {
+  for (const p of pages.values()) await p.context().close().catch(() => {});
+});
+
+function local(link: string): string {
+  const u = new URL(link);
+  return `${BASE}${u.pathname}${u.search}`;
+}
+
+async function signUpOwner(page: Page, address: string, name: string, org: string): Promise<void> {
+  await signUp(page, BASE, address);
+  await page.getByTestId("onboarding-intent-hire").click();
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill(name);
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await page.getByTestId("onboarding-submit").click();
+  await setUpCompany(page, org);
+}
+
+function ownedOrg(profileId: string): string {
+  const orgs = sql<{ id: string }>(
+    `select id from public.organizations where owner_profile_id = ${lit(profileId)} and organization_type <> 'team'`,
+  );
+  if (orgs.length !== 1) throw new Error(`expected one owned organization, found ${orgs.length}`);
+  return orgs[0]!.id;
+}
+
+/** The organization's owner mints a single-use "join my organization" link. */
+async function joinLink(owner: Page, orgId: string, name: string): Promise<string> {
+  await owner.goto(`${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${orgId}#network-invite`);
+  const panel = owner.getByRole("main").getByTestId("invite-panel");
+  await expect(panel).toBeVisible({ timeout: 30_000 });
+  await expect(panel.getByTestId("invite-organization")).toHaveValue(orgId);
+  await panel.getByTestId("invite-mode-link").click();
+  await panel.getByTestId("invite-name").fill(name);
+  await panel.getByTestId("invite-submit").click();
+  const copy = panel.getByTestId("invite-copy-link").first();
+  await expect(copy, "the invitation link is handed to the owner").toBeVisible({ timeout: 30_000 });
+  const raw = await copy.getAttribute("data-invite-link");
+  expect(raw, "an invitation link").toBeTruthy();
+  return local(raw!);
+}
+
+function activeEmployee(profileId: string, orgId: string): string[] {
+  return sql<{ id: string }>(
+    `select id from public.engagement_contexts
+      where profile_id = ${lit(profileId)} and organization_id = ${lit(orgId)}
+        and relationship_slug = 'employee' and status = 'active'`,
+  ).map((r) => r.id);
+}
+
+async function rest(address: string, path: string, init: RequestInit = {}): Promise<Response> {
+  return fetch(`${SB_URL}/rest/v1/${path}`, {
+    ...init,
+    headers: {
+      apikey: SB_ANON,
+      Authorization: `Bearer ${await accessToken(address)}`,
+      "Content-Type": "application/json",
+      ...(init.headers ?? {}),
+    },
+  });
+}
+
+async function rpc<T>(address: string, fn: string, args: Record<string, unknown>): Promise<{ status: number; body: T }> {
+  const r = await rest(address, `rpc/${fn}`, { method: "POST", body: JSON.stringify(args) });
+  const text = await r.text();
+  return { status: r.status, body: (text ? JSON.parse(text) : null) as T };
+}
+
+/** Entry ids the person reads, out of the given ones, under their own RLS. */
+async function readable(address: string, ids: string[]): Promise<string[]> {
+  const r = await rest(address, `journal_entries?id=in.(${ids.join(",")})&select=id`);
+  expect(r.ok, `journal read → ${r.status}`).toBe(true);
+  return ((await r.json()) as Array<{ id: string }>).map((x) => x.id).sort();
+}
+
+/** One entry through the journal's own create door, as the worker. */
+async function file(engagementId: string, text: string): Promise<{ status: number; id: string | null }> {
+  const r = await rpc<string | { message?: string }>(W, "create_journal_entry_full", {
+    p_worker_id: s.workerId,
+    p_engagement_context_id: engagementId,
+    p_entry_type_slug: "freeform",
+    p_profession_id: null,
+    p_original_text: text,
+    p_original_language: "en",
+    p_hash_prev: null,
+    p_hash_self: "client",
+    p_visibility_scope: "closed",
+    p_metrics: [],
+    p_project_id: null,
+    p_project_explicit: false,
+  });
+  return { status: r.status, id: typeof r.body === "string" ? r.body : null };
+}
+
+test("FE-0. two organizations; W joins both and records work for each and in their own journal", async ({ browser }) => {
+  const o = await fresh(browser, O);
+  await signUpOwner(o, O, "Synthetic Owner A", ORG_A);
+  s.oId = await userId(O);
+  s.orgA = ownedOrg(s.oId);
+  const p = await fresh(browser, P);
+  await signUpOwner(p, P, "Synthetic Owner B", ORG_B);
+  s.pId = await userId(P);
+  s.orgB = ownedOrg(s.pId);
+
+  // W registers through A's link, then accepts B's link signed in.
+  const w = await fresh(browser, W);
+  await w.goto(await joinLink(o, s.orgA, W_NAME));
+  await w.getByTestId("invite-register").click();
+  await w.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
+  await w.locator('input[type="email"]').fill(W);
+  await w.locator('input[name="password"]').fill(PASSWORD);
+  const confirm = w.locator('input[name="confirm_password"]');
+  if (await confirm.count()) await confirm.fill(PASSWORD);
+  await w.locator('form button[type="submit"]').click();
+  await w.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
+  if (/\/onboarding/.test(w.url())) {
+    await w.getByTestId("onboarding-intent-work").click();
+    await w.getByTestId("onboarding-intents-continue").click();
+    await w.getByTestId("onboarding-display-name").fill(W_NAME);
+    await w.getByTestId("onboarding-country").click();
+    await w.getByRole("option", { name: /Lithuania/ }).first().click();
+    await w.getByTestId("onboarding-submit").click();
+  }
+  await w.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
+  if (/\/invite\//.test(w.url())) {
+    const accept = w.getByTestId("invite-accept");
+    if (await accept.isVisible().catch(() => false)) await accept.click();
+  }
+  s.wId = await userId(W);
+  await expect.poll(() => activeEmployee(s.wId, s.orgA).length, { message: "W is A's employee", timeout: 30_000 }).toBe(1);
+  await w.goto(await joinLink(p, s.orgB, W_NAME));
+  await expect(w.getByTestId("invite-page")).toBeVisible({ timeout: 30_000 });
+  await w.getByTestId("invite-accept").click();
+  await expect.poll(() => activeEmployee(s.wId, s.orgB).length, { message: "W is B's employee too", timeout: 30_000 }).toBe(1);
+
+  s.ecA = activeEmployee(s.wId, s.orgA)[0]!;
+  s.ecB = activeEmployee(s.wId, s.orgB)[0]!;
+  const personal = sql<{ id: string }>(
+    `select id from public.engagement_contexts
+      where profile_id = ${lit(s.wId)} and organization_id is null and relationship_slug = 'employee' and status = 'active'`,
+  );
+  expect(personal.length, "W keeps one personal (organization-less) journal context").toBe(1);
+  s.ecPersonal = personal[0]!.id;
+  s.workerId = sql<{ id: string }>(`select id from public.workers where profile_id = ${lit(s.wId)}`)[0]!.id;
+
+  for (const [key, ec, text] of [
+    ["entryDuring", s.ecA, TEXT.during],
+    ["entryOther", s.ecB, TEXT.other],
+    ["entryPersonal", s.ecPersonal, TEXT.personal],
+  ] as const) {
+    const r = await file(ec, text);
+    expect(r.id, `W records "${text}" (${r.status})`).toBeTruthy();
+    s[key] = r.id!;
+  }
+
+  // One work item on the entry for A, written by W the way the journal does.
+  const item = await rest(W, "journal_entry_work_items", {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({
+      journal_entry_id: s.entryDuring,
+      worker_id: s.workerId,
+      organization_id: s.orgA,
+      title: "Entrance hall tiling",
+      hours_numeric: 6,
+      unit: "hours",
+    }),
+  });
+  expect(item.status, "W adds a work item to their entry").toBe(201);
+  s.workItem = ((await item.json()) as Array<{ id: string }>)[0]!.id;
+});
+
+test("FE-1. while W works for A, A reads W's entry for A only", async () => {
+  expect(await readable(O, [s.entryDuring, s.entryOther, s.entryPersonal]), "A reads its own entry, nothing else").toEqual([s.entryDuring]);
+  expect(await readable(P, [s.entryDuring, s.entryOther, s.entryPersonal]), "B reads its own entry, nothing else").toEqual([s.entryOther]);
+});
+
+test("FE-2. A ends the employment: retained history stays readable; new records, other employers' and personal records do not; nothing historical can be changed", async () => {
+  // The product's end door, under O's own session.
+  const ended = await rpc<{ outcome?: string }>(O, "end_org_membership_v1", { p_engagement_id: s.ecA, p_reason: "QA-SYNTHETIC end" });
+  expect(ended.status, `end_org_membership_v1 → ${JSON.stringify(ended.body)}`).toBe(200);
+  const [ec] = sql<{ status: string; ended_at: string | null; review: boolean | null }>(
+    `select status, ended_at::text, journal_review_enabled as review from public.engagement_contexts where id = ${lit(s.ecA)}`,
+  );
+  expect(ec?.status, "the employment is ended").toBe("ended");
+  expect(ec?.ended_at, "with an end date").toBeTruthy();
+
+  // W files a NEW entry under the ended relationship (allowed for the person),
+  // stamped after the end date (the seeded clock step above).
+  const late = await file(s.ecA, TEXT.after);
+  if (late.id) {
+    s.entryAfter = late.id;
+    sqlExec(
+      `begin;
+       alter table public.journal_entries disable trigger user;
+       update public.journal_entries set created_at = created_at + interval '2 days' where id = ${lit(s.entryAfter)};
+       alter table public.journal_entries enable trigger user;
+       commit;`,
+    );
+  }
+
+  const all = [s.entryDuring, s.entryOther, s.entryPersonal, ...(s.entryAfter ? [s.entryAfter] : [])];
+  expect(await readable(O, all), "A keeps only the entry recorded during the employment").toEqual([s.entryDuring]);
+  expect((await readable(W, all)).length, "W still reads every one of their entries").toBe(all.length);
+
+  // Writes: nothing historical changes through A any more.
+  const before = sql<{ title: string; hours: string; status: string }>(
+    `select title, hours_numeric::text as hours, status from public.journal_entry_work_items where id = ${lit(s.workItem)}`,
+  )[0];
+  const patch = await rest(O, `journal_entry_work_items?id=eq.${s.workItem}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({ title: "rewritten by the former employer", hours_numeric: 1, status: "rejected" }),
+  });
+  expect(patch.ok ? ((await patch.json()) as unknown[]).length : 0, "A's update reaches no work item").toBe(0);
+  expect(
+    sql<{ title: string; hours: string; status: string }>(
+      `select title, hours_numeric::text as hours, status from public.journal_entry_work_items where id = ${lit(s.workItem)}`,
+    )[0],
+    "the work item is unchanged",
+  ).toEqual(before);
+
+  const metric = await rest(O, "journal_entry_metrics", {
+    method: "POST",
+    body: JSON.stringify({ entry_id: s.entryDuring, metric_slug: "skill_rejected", value_text: "x", source: "manager_corrected" }),
+  });
+  expect(metric.status, "A cannot add a metric to the historical entry (row-level security)").toBe(403);
+
+  const review = await rpc<string>(O, "set_engagement_journal_review", { p_engagement_id: s.ecA, p_enabled: true });
+  expect(review.body, "review cannot be switched back on for an ended employment").toBe("engagement_not_active");
+  expect(
+    sql<{ review: boolean | null }>(`select journal_review_enabled as review from public.engagement_contexts where id = ${lit(s.ecA)}`)[0]?.review,
+  ).not.toBe(true);
+
+  const ownerCtx = sql<{ id: string }>(
+    `select id from public.engagement_contexts where profile_id = ${lit(s.oId)} and organization_id = ${lit(s.orgA)} and status = 'active' limit 1`,
+  )[0]?.id;
+  const confirm = await rest(O, "journal_entry_confirmations", {
+    method: "POST",
+    body: JSON.stringify({
+      entry_id: s.entryDuring,
+      confirmer_id: s.oId,
+      confirmer_engagement_context_id: ownerCtx,
+      confirmer_role: "manager",
+      confirmation_scope: { decision: "confirmed" },
+    }),
+  });
+  expect(confirm.ok, `A cannot confirm an entry of the ended employment (${confirm.status})`).toBe(false);
+
+  const editEntry = await rest(O, `journal_entries?id=eq.${s.entryDuring}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({ original_text: "rewritten" }),
+  });
+  expect(editEntry.ok ? ((await editEntry.json()) as unknown[]).length : 0, "A cannot rewrite the entry").toBe(0);
+  const drop = await rest(O, `journal_entries?id=eq.${s.entryDuring}`, { method: "DELETE", headers: { Prefer: "return=representation" } });
+  expect(drop.ok ? ((await drop.json()) as unknown[]).length : 0, "A cannot delete the entry").toBe(0);
+
+  // Nothing was deleted: the entry and its text are as W recorded them.
+  expect(
+    sql<{ text: string; n: number }>(
+      `select original_text as text, (select count(*)::int from public.journal_entries where worker_id = ${lit(s.workerId)}) as n
+         from public.journal_entries where id = ${lit(s.entryDuring)}`,
+    )[0],
+    "the historical entry is intact and nothing was removed",
+  ).toEqual({ text: TEXT.during, n: all.length });
+
+  // B, still W's employer, is unaffected.
+  expect(await readable(P, all), "B still reads its own entry").toEqual([s.entryOther]);
+});
