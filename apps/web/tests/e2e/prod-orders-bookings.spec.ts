@@ -238,7 +238,7 @@ test("O-1 (5.13). Gama posts this run's need through the demand intake", async (
 test("O-2 (5.13). the worker raises a hand on that need", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("main").getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const card = page.locator(`li[id="opp-${requestId}"]`);
   await expect(card, "the new need is on the worker's board").toBeVisible({ timeout: 60_000 });
   await card.getByTestId("interest-express").click();

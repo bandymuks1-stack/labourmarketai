@@ -116,6 +116,9 @@ describe("PageHero opts in — no other hero's CTA changed", () => {
    * bare signup, so an agency had to re-answer on the next screen what it had
    * already said — and the nearest wrong answer there produces a plain
    * employer rather than a `staffing_agency`.
+   *
+   * `/for-workers` joined it on 2026-11-15 (F6): every worker profile / CV
+   * door ends in the profile builder.
    */
   const CTA_NEXT_PAGES: ReadonlyArray<{ page: string; guardedBy: string }> = [
     { page: "create-cv/page.tsx", guardedBy: "this file" },
@@ -126,6 +129,12 @@ describe("PageHero opts in — no other hero's CTA changed", () => {
     {
       page: "pricing/page.tsx",
       guardedBy: "lib/billing/launch-pricing.test.ts",
+    },
+    {
+      // F6 (owner P0 2026-11-15): "Create free profile" ended at a bare
+      // dashboard; it now returns to the one profile builder.
+      page: "for-workers/page.tsx",
+      guardedBy: "lib/guards/one-worker-profile-door.test.ts",
     },
   ];
 

@@ -19,6 +19,7 @@ import {
   saveDemandDraftAction,
 } from "@/lib/demand/demand-drafts-actions";
 import type { DemandPrefill, DemandUrgency } from "@/lib/demand/demand-request";
+import { parseCompanyNeedPrefill, type CompanyNeedPrefill } from "@/lib/staffing/company-need-prefill";
 import { DemandAdvancedSections } from "@/components/app/demand-advanced-sections";
 import {
   defaultCurrencyForCountry,
@@ -187,6 +188,10 @@ export function DemandRequestButton({
   const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual" | "workspaceChanged">(
     "idle",
   );
+  // The need this form just saved, so its next step opens THAT need's
+  // candidates. Without it the scouting room picks a need by its own rule (most
+  // offers or hands raised first), which can be an older need.
+  const [savedRequestId, setSavedRequestId] = useState<string | null>(null);
   // Advanced structured clusters (structured_v2, PR 2) — optional; empty
   // stays an honest "not stated" and the request submits exactly as before.
   const tsd = useTranslations("structuredDemand");
@@ -307,6 +312,17 @@ export function DemandRequestButton({
   useEffect(() => {
     if (autoPrefillRan.current) return;
     autoPrefillRan.current = true;
+    // The estimate's worker count and country can arrive in the address (the
+    // project calculator's account route, the company-need adapter's bounded
+    // prefill; employer path P0 2026-11-15). Applied at once, and again after a
+    // saved draft, so the numbers the person just entered stay.
+    const fromAddress: CompanyNeedPrefill =
+      intent === "hire_workers" ? parseCompanyNeedPrefill(new URLSearchParams(window.location.search)) : {};
+    const applyAddress = () => {
+      if (fromAddress.country) setCountry(fromAddress.country);
+      if (fromAddress.numberOfWorkers != null) setTeamSize(String(fromAddress.numberOfWorkers));
+    };
+    applyAddress();
     void (async () => {
       try {
         if (repeatRequestId) {
@@ -315,6 +331,7 @@ export function DemandRequestButton({
           const rep = await getDemandPrefillByIdAction(intent, repeatRequestId);
           if (rep.found && !descRef.current.trim()) {
             applyPrefill(rep);
+            applyAddress();
             setDraftSource(false);
             setPrefillState("done");
             return;
@@ -324,6 +341,7 @@ export function DemandRequestButton({
         if (!res.found || res.source !== "draft") return;
         if (descRef.current.trim()) return; // untouched check at apply time
         applyPrefill(res);
+        applyAddress();
         setDraftSource(true);
         setPrefillState("draft");
       } catch {
@@ -434,6 +452,7 @@ export function DemandRequestButton({
         setShowCountryError(true);
         return;
       }
+      setSavedRequestId(res.ok ? res.requestId : null);
       setState(
         res.ok
           ? "done"
@@ -580,7 +599,11 @@ export function DemandRequestButton({
             organisation's own offers list, where the saved offer now stands. */}
         {intent === "hire_workers" ? (
           <Link
-            href={"/dashboard/company/scouting" as "/dashboard"}
+            href={
+              (savedRequestId
+                ? `/dashboard/company/scouting?request=${encodeURIComponent(savedRequestId)}`
+                : "/dashboard/company/scouting") as "/dashboard"
+            }
             className="w-fit text-sm font-medium text-brand-blue hover:underline"
             data-testid="demand-done-scouting-link"
           >

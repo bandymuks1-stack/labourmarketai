@@ -23,6 +23,7 @@ import {
 } from "@/lib/training/training-model";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { getOrgDocumentRegister } from "@/lib/documents/document-files";
 
 /**
  * Training & Certification section (v1) — one section, two audiences,
@@ -120,6 +121,27 @@ export async function TrainingRegister({
   // already read courses or managed assignments (the read view).
   const showOrganization =
     canCreate || programs.length > 0 || managed.length > 0;
+  // A certificate is a file version from the organization's OWN document
+  // register (the attach command refuses anything else) — picked from that
+  // register, never typed as an id. Read only when a row can take one.
+  const needsCertificateFiles = managed.some(
+    (a) =>
+      authority.assignOrganizationIds.has(a.organizationId) &&
+      a.status === "completed" &&
+      !a.certificateDocumentFileId,
+  );
+  const documentRegister =
+    needsCertificateFiles && activeOrganizationId
+      ? await getOrgDocumentRegister(activeOrganizationId)
+      : null;
+  const certificateFiles =
+    documentRegister?.kind === "ok"
+      ? documentRegister.entries.flatMap((e) =>
+          e.currentFile
+            ? [{ id: e.currentFile.id, label: `${e.document.title} · ${e.currentFile.originalFilename}` }]
+            : [],
+        )
+      : [];
 
   return (
     <section
@@ -283,6 +305,7 @@ export async function TrainingRegister({
                       action={updateTrainingProgramAction}
                       className="mt-2 flex flex-col gap-2"
                     >
+                      <DisplayedWorkspaceField />
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="programId" value={p.id} />
                       <input
@@ -330,6 +353,7 @@ export async function TrainingRegister({
                     className="flex flex-col gap-2 sm:flex-row"
                     data-testid="training-assign-form"
                   >
+                    <DisplayedWorkspaceField />
                     <input type="hidden" name="locale" value={locale} />
                     <input type="hidden" name="programId" value={p.id} />
                     <input
@@ -378,17 +402,29 @@ export async function TrainingRegister({
                     <form
                       action={attachTrainingCertificateAction}
                       className="flex flex-col gap-2 sm:flex-row"
+                      data-testid="training-attach-form"
                     >
+                      <DisplayedWorkspaceField />
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="assignmentId" value={a.id} />
-                      <input
-                        type="text"
+                      <select
                         name="documentFileId"
                         required
-                        placeholder={t("org.certificateFilePlaceholder")}
-                        aria-label={t("org.certificateFilePlaceholder")}
+                        defaultValue=""
+                        disabled={certificateFiles.length === 0}
+                        aria-label={t("org.certificateFileLabel")}
+                        data-testid="training-certificate-file"
                         className="min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
-                      />
+                      >
+                        <option value="" disabled>
+                          {t("org.certificateFileLabel")}
+                        </option>
+                        {certificateFiles.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
                       <input
                         type="date"
                         name="issuedOn"
@@ -404,7 +440,8 @@ export async function TrainingRegister({
                       />
                       <button
                         type="submit"
-                        className="rounded-md border border-brand-blue px-3 py-1 text-sm font-semibold text-brand-blue"
+                        disabled={certificateFiles.length === 0}
+                        className="rounded-md border border-brand-blue px-3 py-1 text-sm font-semibold text-brand-blue disabled:opacity-50"
                       >
                         {t("org.attachCertificate")}
                       </button>

@@ -57,7 +57,11 @@ describe("the scouting core looks at hand-raisers before giving up on structure"
     // Every hand-raiser, batched by the pool budget (Codex review #2680): each
     // batch goes through the same supply read with the same fixture rule.
     expect(fn).toMatch(/i \+= SUPPLY_POOL_BUDGET/);
-    expect(fn).toMatch(/buildSupplyCandidates\(supabase, \{ workerIds, excludeFixtures: input\.excludeFixtures \}\)/);
+    // ...and the same viewer rule: the person searching is not their own
+    // hand-raiser either (employer-flow audit 2026-11-15).
+    expect(fn).toMatch(
+      /buildSupplyCandidates\(supabase, \{\s*workerIds,\s*excludeFixtures: input\.excludeFixtures,\s*viewerProfileId: input\.userId,\s*\}\)/,
+    );
     // Same live-proposal verdict; withdrawn hands are not even fetched.
     expect(fn).toMatch(/candidateActionability\(/);
     expect(fn).toMatch(/mayOfferEmployerActions\(actionability\)/);

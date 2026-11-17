@@ -215,6 +215,59 @@ test("S-3c. an education institution signs up through its own door, and its orga
   await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
 });
 
+test("S-3d. what a worker types on the intake before having an account is in their own profile composer after sign-up, never in another account's", async ({ page }) => {
+  // Owner P0 2026-11-15 (F2): the intake used to store nothing, and its
+  // sign-up forgot both the typed text and where the person was going.
+  const address = email("intake");
+  await page.goto(`${BASE}/en/worker-intake`);
+  const form = page.getByTestId("worker-intake-form");
+  await form.locator('input[name="full_name"]').fill("Synthetic Intake Worker");
+  await form.locator('textarea[name="comment"]').fill(`Tiling and grouting, six years, run ${RUN}`);
+  const signUp = page.locator('[data-testid="intake-bridge"] a').first();
+  await expect(signUp).toHaveAttribute("href", "/en/auth/signup?next=%2Fdashboard%2Fprofile");
+  await signUp.click();
+  await page.waitForURL((url) => url.pathname === "/en/auth/signup", { timeout: 60_000 });
+  await page.locator('input[type="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+  await onboard(page, "work", "Synthetic Intake Worker");
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+  const composer = page.locator('[data-testid="profile-text-flow-compose"] textarea').first();
+  await expect(composer, "the typed text waits in the composer, for the person to send").toHaveValue(
+    new RegExp(`Synthetic Intake Worker[\\s\\S]*Tiling and grouting, six years, run ${RUN}`),
+    { timeout: 30_000 },
+  );
+  const id = await userId(address);
+  const [profile] = await db<Array<{ profile_text: string | null }>>(`profiles?id=eq.${id}&select=profile_text`);
+  expect(profile?.profile_text ?? null, "nothing was saved for them").toBeNull();
+
+  // Decision 0024: a draft bound to ANOTHER email in this browser is never
+  // shown to this account, and is removed when it is met.
+  const other = "Synthetic Other Person, never to be shown";
+  await page.evaluate(
+    ([key, text]) => localStorage.setItem(key, JSON.stringify({ v: 2, at: Date.now(), text, email: "someone-else@example.invalid" })),
+    ["lm.workerIntakeDraft.v2", other] as const,
+  );
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+  await expect(page.locator("main")).not.toContainText(other);
+  for (const t of await page.locator("textarea").all()) expect(await t.inputValue()).not.toContain(other);
+  expect(await page.evaluate((k) => localStorage.getItem(k), "lm.workerIntakeDraft.v2"), "removed once met").toBeNull();
+
+  // Sign-out removes this account's own draft too.
+  await page.evaluate(
+    ([key, mail]) => localStorage.setItem(key, JSON.stringify({ v: 2, at: Date.now(), text: "own draft", email: mail })),
+    ["lm.workerIntakeDraft.v2", address] as const,
+  );
+  await page.getByTestId("account-menu-trigger").click();
+  await page.getByTestId("account-menu-signout").click();
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(await page.evaluate((k) => localStorage.getItem(k), "lm.workerIntakeDraft.v2"), "removed on sign-out").toBeNull();
+});
+
 test("S-4. an address that already has an account is sent to sign in, not to a mail that never comes", async ({ page }) => {
   await page.goto(`${BASE}/en/auth/signup`);
   await page.locator('input[type="email"]').fill(email("worker"));
