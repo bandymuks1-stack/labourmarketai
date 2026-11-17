@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { getSessionProfile } from "@/lib/auth/session-profile";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { getProjectStadium } from "@/lib/projects/stadium";
@@ -243,9 +244,15 @@ export default async function ProjectStadiumPage({
             </Link>
           </p>
         ) : null}
-        {ops.project.organizationId ? (
+        {ops.project.organizationId &&
+        (await getWorkspaceContext()).workspaces.some(
+          (w) => w.kind === "organization" && w.id === ops.project.organizationId,
+        ) ? (
           /* The project's organization, one door away (#3354): its history
-             and projects. Members only, the same rule that door applies. */
+             and projects. Shown only to the organization's members, the same
+             rule that door applies — an assigned person from outside would
+             reach an empty page. The workspace list is request-cached (the
+             layout already read it), so this adds no round trip. */
           <Link
             href={`/${locale}/dashboard/company/history?org=${ops.project.organizationId}`}
             className="w-fit text-sm font-medium text-brand-blue hover:underline"
