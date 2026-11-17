@@ -39,6 +39,30 @@ export type PublicOrganizationCv = {
   } | null;
 };
 
+/** A people-backed block passes the gate: k >= 5 and something to show. */
+export const journalPasses = (j: OrganizationJournal | null): boolean =>
+  !!j && j.people >= PUBLIC_CV_MIN_PEOPLE && j.entries > 0;
+export const historyPasses = (h: CompanyWorkHistory | null): boolean =>
+  !!h && h.peopleCount >= PUBLIC_CV_MIN_PEOPLE && h.totalRecords > 0;
+
+/**
+ * The projects the public count may include (R2 P3-3 on #3464): only those a
+ * block that PASSED the gate points at — the journal's engagement contexts,
+ * the imported records' projects. An internal project with no such work is
+ * not counted publicly.
+ */
+export function publicProjectIds(input: {
+  readonly journal: OrganizationJournal | null;
+  readonly history: CompanyWorkHistory | null;
+  readonly journalProjectIds: Iterable<string>;
+  readonly historyProjectIds: Iterable<string>;
+}): Set<string> {
+  const ids = new Set<string>();
+  if (journalPasses(input.journal)) for (const id of input.journalProjectIds) ids.add(id);
+  if (historyPasses(input.history)) for (const id of input.historyProjectIds) ids.add(id);
+  return ids;
+}
+
 const month = (iso: string | null): string | null => (iso && /^\d{4}-\d{2}/.test(iso) ? iso.slice(0, 7) : null);
 
 /**
@@ -56,7 +80,7 @@ export function buildPublicOrganizationCv(input: {
 
   const j = input.journal;
   const journal =
-    j && j.people >= PUBLIC_CV_MIN_PEOPLE && j.entries > 0
+    j && journalPasses(j)
       ? {
           people: j.people,
           hours: coarse(j.hours),
@@ -68,7 +92,7 @@ export function buildPublicOrganizationCv(input: {
 
   const h = input.history;
   const history =
-    h && h.peopleCount >= PUBLIC_CV_MIN_PEOPLE && h.totalRecords > 0
+    h && historyPasses(h)
       ? { people: h.peopleCount, dayHours: coarse(h.dayHours), firstMonth: month(h.firstDate), lastMonth: month(h.lastDate) }
       : null;
 

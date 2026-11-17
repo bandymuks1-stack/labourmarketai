@@ -7,6 +7,7 @@ import {
   PUBLIC_CV_HOURS_STEP,
   PUBLIC_CV_MIN_PEOPLE,
   buildPublicOrganizationCv,
+  publicProjectIds,
 } from "@/lib/organization-evidence/public-organization-cv-model";
 import type { CompanyWorkHistory } from "@/lib/organization-evidence/company-work-history";
 import type { OrganizationJournal } from "@/lib/organization-evidence/organization-journal";
@@ -87,6 +88,15 @@ describe("public company Living CV — the k>=5 and opt-in gate", () => {
     expect(buildPublicOrganizationCv({ enabled: true, projects, journal: journal(4), history: null })).toBeNull();
   });
 
+  it("only projects a passing block points at are counted publicly (internal projects are not)", () => {
+    const ids = (j: number, h: number) =>
+      [...publicProjectIds({ journal: journal(j), history: history(h), journalProjectIds: ["p-journal"], historyProjectIds: ["p-records"] })].sort();
+    expect(ids(5, 5)).toEqual(["p-journal", "p-records"]);
+    expect(ids(5, 4)).toEqual(["p-journal"]);
+    expect(ids(4, 5)).toEqual(["p-records"]);
+    expect(ids(4, 4)).toEqual([]);
+  });
+
   it("an unreadable source (null) is hidden, never shown as zero", () => {
     expect(buildPublicOrganizationCv({ enabled: true, projects: null, journal: null, history: null })).toBeNull();
     const cv = buildPublicOrganizationCv({ enabled: true, projects: null, journal: journal(6), history: null });
@@ -150,7 +160,7 @@ describe("public company Living CV — the server path", () => {
 
   it("returns only the gated model's output", () => {
     const returns = [...reader.matchAll(/^\s*return\s+([^;]+);/gm)].map((m) => m[1].trim());
-    const top = returns.filter((r) => r !== "null" && !r.startsWith("buildCompanyWorkHistory("));
+    const top = returns.filter((r) => r !== "null" && !r.startsWith("{") && !r.startsWith("buildCompanyWorkHistory("));
     expect(top.every((r) => r.startsWith("buildPublicOrganizationCv("))).toBe(true);
   });
 

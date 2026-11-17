@@ -11,6 +11,7 @@ import { untypedClient } from "./evidence-store";
 import { queryEvidenceRecords, type EvidenceRecordView } from "./import-core";
 import {
   buildPublicOrganizationCv,
+  publicProjectIds,
   type PublicOrganizationCv,
 } from "./public-organization-cv-model";
 import { summarizeOrganizationProjects } from "./organization-projects";
@@ -55,13 +56,23 @@ async function readPublicOrganizationCvUncached(organizationId: string): Promise
     return null;
   }
 
-  const [projectRows, journal, history] = await Promise.all([
+  const [projectRows, contextRows, journal, own] = await Promise.all([
     readAllPages<{ id: string; status: string | null; created_at: string }>((from, to) =>
       db(admin)
         .from("projects")
         .select("id, status, created_at")
         .eq("organization_id", organizationId)
         .neq("record_state", "duplicate")
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    // The projects the journal's engagement contexts name (for P3-3 below).
+    readAllPages<{ project_id: string | null }>((from, to) =>
+      db(admin)
+        .from("engagement_contexts")
+        .select("project_id")
+        .eq("organization_id", organizationId)
+        .not("project_id", "is", null)
         .order("id", { ascending: true })
         .range(from, to),
     ),
@@ -74,13 +85,27 @@ async function readPublicOrganizationCvUncached(organizationId: string): Promise
     readOwnHistory(admin, organizationId),
   ]);
 
+  const history = own?.history ?? null;
+  // P3-3 (R2, 2026-11-17): only projects a block that passed the gate points
+  // at are counted; an unreadable context list hides the projects count.
+  const linked = contextRows
+    ? publicProjectIds({
+        journal,
+        history,
+        journalProjectIds: contextRows.rows.map((r) => r.project_id).filter((id): id is string => !!id),
+        historyProjectIds: own?.projectIds ?? [],
+      })
+    : null;
   return buildPublicOrganizationCv({
     enabled: true,
-    projects: projectRows
-      ? summarizeOrganizationProjects(
-          projectRows.rows.map((r) => ({ id: r.id, title: null, city: null, status: r.status, createdAt: r.created_at })),
-        )
-      : null,
+    projects:
+      projectRows && linked
+        ? summarizeOrganizationProjects(
+            projectRows.rows
+              .filter((r) => linked.has(r.id))
+              .map((r) => ({ id: r.id, title: null, city: null, status: r.status, createdAt: r.created_at })),
+          )
+        : null,
     journal,
     history,
   });
@@ -103,7 +128,11 @@ async function readOwnHistory(admin: ReturnType<typeof createAdminClient>, organ
     if (page.records.length < EVIDENCE_PAGE_SIZE) break;
     if (all.length >= EVIDENCE_READ_CEILING) return null;
   }
-  return buildCompanyWorkHistory(all.filter((r) => !r.superseded), []);
+  const live = all.filter((r) => !r.superseded);
+  return {
+    history: buildCompanyWorkHistory(live, []),
+    projectIds: live.filter((r) => !r.withdrawn && r.projectId).map((r) => r.projectId as string),
+  };
 }
 
 /** How long one public read is reused. A visitor's view is at most this old;
