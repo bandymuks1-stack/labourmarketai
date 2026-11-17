@@ -2043,7 +2043,8 @@
         "noMembers": "Ingen medlemmer akkurat nå.",
         "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
         "manage": "Endre team"
-      }
+      },
+      "organizationLink": "Organisasjonens historikk og prosjekter"
     },
     "workerView": {
       "eyebrow": "Mitt prosjekt",
@@ -6416,7 +6417,7 @@
       "assigneePlaceholder": "[EN] Person's email",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -7085,7 +7086,8 @@
       "address": "Adresse",
       "project": "Prosjekt",
       "notInSource": "Ikke i kilden",
-      "linked": "Koblet"
+      "linked": "Koblet",
+      "openProject": "Åpne prosjektet"
     },
     "whoWorked": "Hvem som jobbet her",
     "timeline": "Hva som ble gjort",
@@ -7103,7 +7105,24 @@
       "refused": "Dette kunne ikke lagres. Ingenting er endret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
     },
-    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem."
+    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem.",
+    "projects": {
+      "title": "Prosjekter på plattformen",
+      "counts": "{running} pågående · {completed} fullført",
+      "untitled": "Prosjekt uten navn",
+      "running": "Pågående",
+      "completed": "Fullført",
+      "all": "Alle {count} prosjekter"
+    },
+    "journal": {
+      "title": "Arbeid registrert i journalen",
+      "hours": "Registrerte timer",
+      "confirmed": "Timer bekreftet av organisasjonen",
+      "people": "Personer som registrerte arbeid",
+      "period": "Registrert",
+      "basis": "Fra {entries} journalinnføringer som personer registrerte under denne organisasjonen. Telt atskilt fra den importerte historikken ovenfor og aldri lagt til den.",
+      "unavailable": "Arbeidet registrert i journalen under denne organisasjonen kunne ikke leses akkurat nå."
+    }
   },
   "workLifecycle": {
     "pending": "Ikke ennå",
@@ -7882,6 +7901,9 @@
       "invites": "Invitasjons- og varslings-e-post",
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp og én testsending"
+    },
+    "alerts": {
+      "title": "Eiervarsler og pushvarsler"
     }
   },
   "historyDuplicates": {

@@ -144,6 +144,25 @@ async function readAs<T>(address: string, path: string): Promise<T[]> {
   return (await r.json()) as T[];
 }
 
+/** A database function called AS a signed-in person (their own token): the same door the app calls. */
+async function rpcAs<T>(address: string, fn: string, args: Record<string, unknown>): Promise<T> {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${await tokenOf(address)}`, "Content-Type": "application/json" },
+    body: JSON.stringify(args),
+  });
+  if (!r.ok) throw new Error(`rpc ${fn} as a person → ${r.status}`);
+  const body = await r.text();
+  return (body ? JSON.parse(body) : null) as T;
+}
+
+/** The entry ids a set-returning uuid function answered with, whichever row shape PostgREST used. */
+function entryIds(rows: unknown): string[] {
+  return ((rows as unknown[] | null) ?? []).map((r) =>
+    typeof r === "string" ? r : String(Object.values(r as Record<string, unknown>)[0] ?? ""),
+  );
+}
+
 const MAIL = "http://127.0.0.1:54324"; // the local stack's mail catcher (Mailpit)
 
 /** The newest link in the newest local mail to `address` (nothing leaves the runner). */
@@ -592,7 +611,9 @@ test("J-AGY. an agency sees the shared need, proposes its worker; the company ac
 
   // The company sees the proposal on the need's scouting page and accepts it.
   await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
-  const offers = co.getByTestId("scouting-agency-offers");
+  // Scoped to <main>: while a section streams in, React can briefly hold a
+  // second, hidden copy outside it (CI 2026-11-16, strict-mode match of two).
+  const offers = co.getByRole("main").getByTestId("scouting-agency-offers");
   await expect(offers, "the company sees the agency's proposal").toBeVisible({ timeout: 30_000 });
   await expect(offers.getByTestId("scout-offer-status-offered")).toBeVisible();
   await offers.getByTestId(`offer-accept-${s.offerId}`).click();
@@ -729,12 +750,33 @@ test("J-WRK. the placed worker records work on the company's project; the compan
     worker_id: s.pwWorkerId,
   });
 
+  // An active work relationship outside the education category keeps the
+  // employer review basis (20261115120000 narrows only learning links): the
+  // entry is in the company's review queue and readable through the definer
+  // mirror, called with the company's own token.
+  expect(
+    entryIds(await rpcAs<unknown>(CO, "reviewable_journal_entry_ids", {})),
+    "active work relationship: the entry is in the employer's review queue",
+  ).toContain(s.entryId);
+  expect(await rpcAs<boolean>(CO, "can_read_journal_entry_v1", { p_entry_id: s.entryId }), "and can_read_journal_entry_v1 is true").toBe(true);
+
   // The company confirms it from its review queue.
   await approveEntry(co, s.entryId);
   const confirmations = await db<Array<{ confirmer_id: string }>>(
     `journal_entry_confirmations?entry_id=eq.${s.entryId}&select=confirmer_id`,
   );
   expect(confirmations.map((c) => c.confirmer_id), "confirmed once, by the company owner").toEqual([s.coId]);
+  // Under the company's OWN row-level security, while the relationship is
+  // active: the employer still reads the entry it confirmed and its
+  // confirmation (20261115120000 narrows only learning relationships).
+  expect(
+    (await readAs(CO, `journal_entries?id=eq.${s.entryId}&select=id`)).length,
+    "the employer still reads the entry it confirmed",
+  ).toBe(1);
+  expect(
+    (await readAs(CO, `journal_entry_confirmations?entry_id=eq.${s.entryId}&select=id`)).length,
+    "and its confirmation",
+  ).toBe(1);
 
   // The worker sees it confirmed; the Living CV door counts confirmed work.
   await pw.goto(`${BASE}/en/dashboard/journal`);
@@ -745,6 +787,44 @@ test("J-WRK. the placed worker records work on the company's project; the compan
   const confirmed = pw.getByTestId("cv-confirmed-work").filter({ visible: true });
   await expect(confirmed, "the Living CV shows confirmed work").toBeVisible({ timeout: 30_000 });
   expect(Number(await confirmed.getAttribute("data-entries"))).toBeGreaterThan(0);
+});
+
+// ── J-DEC ───────────────────────────────────────────────────────────────────
+
+test("J-DEC. the company sees the need's history, closes it as filled, and the hire decision shows (4.30)", async () => {
+  expect(s.needId && s.pwWorkerId && s.bookingId, "J-AGY placed the worker on this need").toBeTruthy();
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
+  const history = co.getByTestId("demand-history");
+  await expect(history, "the need's history is on its page").toBeVisible({ timeout: 30_000 });
+  await expect(history.getByTestId("demand-history-created")).toHaveCount(1);
+  // The company proposed the booking (by accepting the agency's offer); the worker answered it.
+  await expect(history.getByTestId(`demand-history-proposed-${s.pwWorkerId}`)).toHaveAttribute("data-actor", "you");
+  await expect(history.getByTestId(`demand-history-accepted-${s.pwWorkerId}`)).toHaveAttribute("data-actor", "candidate");
+  await expect(history.getByTestId(`demand-history-accepted-${s.pwWorkerId}`).locator("time")).toHaveAttribute(
+    "datetime",
+    /^\d{4}-\d{2}-\d{2}T/,
+  );
+  await expect(history).toHaveAttribute("data-decided", "false");
+
+  // The decision: the company closes the need as filled.
+  await co.getByTestId("demand-close").click();
+  await expect
+    .poll(
+      async () =>
+        (await db<Array<{ status: string; closed_outcome: string | null }>>(
+          `customer_requests?id=eq.${s.needId}&select=status,closed_outcome`,
+        )).map((r) => `${r.status}:${r.closed_outcome}`),
+      { message: "the need is closed as filled", timeout: 30_000 },
+    )
+    .toEqual(["closed:completed"]);
+
+  await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
+  // Scoped to <main>: while the page streams in, React can briefly hold a second copy outside it.
+  const after = co.getByRole("main").getByTestId("demand-history");
+  await expect(after).toHaveAttribute("data-decided", "true", { timeout: 30_000 });
+  await expect(after.getByTestId("demand-history-closed")).toHaveAttribute("data-outcome", "completed");
+  await expect(after.getByTestId("demand-history-decision"), "the hire decision names the accepted candidate").toBeVisible();
 });
 
 // ── J-ISO ───────────────────────────────────────────────────────────────────
@@ -886,4 +966,29 @@ test("J-DUP. a double-submitted need and a double-clicked confirmation each stor
   await co.waitForTimeout(3_000); // let a second decision, if any, land
   const confirmations = await db<Array<{ id: string }>>(`journal_entry_confirmations?entry_id=eq.${second}&select=id`);
   expect(confirmations.length, "a double-clicked confirmation is stored once").toBe(1);
+});
+
+// ── J-RPT ───────────────────────────────────────────────────────────────────
+
+test("J-RPT. the employer's report counts the work it confirmed; its hours sheet opens", async () => {
+  expect(s.entryId, "J-WRK recorded and confirmed work").toBeTruthy();
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/reports`);
+  const journal = co.getByTestId("reports-org-journal");
+  await expect(journal, "the organization's journal report is on the reports page").toBeVisible({ timeout: 30_000 });
+  const tile = (label: string) =>
+    journal.locator("div").filter({ has: co.locator("dt", { hasText: label }) }).locator("dd").first();
+  // J-WRK's work was recorded today and confirmed by this company: inside the seven-day window.
+  await expect
+    .poll(async () => Number((await tile("Entries recorded").textContent())?.trim()), {
+      message: "the recorded work is counted",
+      timeout: 30_000,
+    })
+    .toBeGreaterThanOrEqual(1);
+  expect(Number((await tile("Confirmed").textContent())?.trim()), "the confirmed work is counted").toBeGreaterThanOrEqual(1);
+
+  // The employer's hours sheet opens in its working state, not a setup or error panel.
+  await co.goto(`${BASE}/en/dashboard/hours`);
+  await expect(co.getByRole("main")).toBeVisible({ timeout: 30_000 });
+  await expect(co.locator('[data-testid^="hours-state-"]'), "the hours sheet is usable for the company").toHaveCount(0);
 });

@@ -6872,7 +6872,8 @@
         "noMembers": "Šiuo metu narių nėra.",
         "unavailable": "Komandų įkelti nepavyko. Bandykite dar kartą.",
         "manage": "Keisti komandas"
-      }
+      },
+      "organizationLink": "Organizacijos istorija ir projektai"
     },
     "workerView": {
       "eyebrow": "Mano projektas",
@@ -9435,6 +9436,27 @@
       "notStructured": "Automatinė paieška {when}: poreikis dar per menkai aprašytas. Pridėkite įgūdžių ar profesiją.",
       "failed": "Automatinė paieška {when} nebaigta. Žemiau esantis sąrašas vis tiek skaičiuojamas gyvai.",
       "capped": "Kandidatų kiekis buvo apribotas."
+    },
+    "history": {
+      "title": "Istorija",
+      "decision": "Priimti: {names}",
+      "created": "Poreikis sukurtas",
+      "closed": "Poreikis uždarytas",
+      "closedFilled": "Poreikis uždarytas: užpildytas",
+      "closedWithdrawn": "Poreikis uždarytas: atšauktas",
+      "event": {
+        "proposed": "Pasiūlytas užsakymas: {name}",
+        "accepted": "{name} priėmė užsakymą",
+        "declined": "{name} atsisakė užsakymo",
+        "withdrawn": "Užsakymas atšauktas: {name}",
+        "expired": "Užsakymo terminas baigėsi: {name}"
+      },
+      "actor": {
+        "you": "jūs",
+        "candidate": "kandidatas",
+        "automatic": "automatiškai",
+        "other": "kolega arba administratorius"
+      }
     }
   },
   "planBoundary": {
@@ -9941,6 +9963,9 @@
       "invites": "Kvietimų ir pranešimų laiškai",
       "invitesOn": "įjungti",
       "invitesOff": "IŠJUNGTI – įjungiami atskirai: INVITE_EMAIL_PROVIDER=smtp ir vienas bandomasis siuntimas"
+    },
+    "alerts": {
+      "title": "Savininko įspėjimai ir pranešimai įrenginyje"
     }
   },
   "adminMetrics": {
@@ -17468,7 +17493,7 @@
       "assigneePlaceholder": "Žmogaus el. paštas",
       "requiredByLabel": "Atlikti iki",
       "assign": "Paprašyti šio žmogaus",
-      "certificateFilePlaceholder": "Pažymėjimo failo id",
+      "certificateFileLabel": "Pažymėjimo failas",
       "issuedOnLabel": "Išduota",
       "expiresOnLabel": "Galioja iki",
       "attachCertificate": "Įrašyti pažymėjimą",
@@ -19257,7 +19282,8 @@
       "address": "Adresas",
       "project": "Projektas",
       "notInSource": "Šaltinyje nėra",
-      "linked": "Susieta"
+      "linked": "Susieta",
+      "openProject": "Atverti projektą"
     },
     "whoWorked": "Kas čia dirbo",
     "timeline": "Kas daryta",
@@ -19338,6 +19364,23 @@
         "opening": "Atveriama…",
         "error": "Darbo erdvės atverti nepavyko."
       }
+    },
+    "projects": {
+      "title": "Projektai platformoje",
+      "counts": "{running, plural, one {# vykdomas} few {# vykdomi} other {# vykdomų}} · {completed, plural, one {# užbaigtas} few {# užbaigti} other {# užbaigtų}}",
+      "untitled": "Projektas be pavadinimo",
+      "running": "Vykdomas",
+      "completed": "Užbaigtas",
+      "all": "{count, plural, one {Visi # projektas} few {Visi # projektai} other {Visi # projektų}}"
+    },
+    "journal": {
+      "title": "Žurnale įrašytas darbas",
+      "hours": "Įrašyta valandų",
+      "confirmed": "Organizacijos patvirtinta valandų",
+      "people": "Žmonės, įrašę darbą",
+      "period": "Įrašyta",
+      "basis": "Iš {entries} žurnalo įrašų, kuriuos žmonės įrašė šioje organizacijoje. Skaičiuojama atskirai nuo aukščiau esančios importuotos istorijos ir niekada su ja nesumuojama.",
+      "unavailable": "Šiuo metu nepavyko perskaityti šioje organizacijoje žurnale įrašyto darbo."
     }
   },
   "workPlan": {

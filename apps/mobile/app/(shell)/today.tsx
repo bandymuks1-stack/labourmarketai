@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import type {
+  ContextListData,
   JournalListData,
   ProfileGetData,
   WorkIntelligenceData,
@@ -50,6 +51,14 @@ export default function Screen() {
     WEEK_SCOPE,
   );
   const journal = useCapability<JournalListData>("journal.list", RECENT_LIMIT);
+  // The workspace axis (`context.list`), never a guessed role: finding
+  // candidates, agency offers and programmes act for an ORGANIZATION, so they
+  // leave Today only when the server says the active workspace is personal.
+  // Loading or a failed read keeps them — their screens report a refusal.
+  const workspaces = useCapability<ContextListData>("context.list");
+  const personal =
+    workspaces.state.status === "loaded" &&
+    workspaces.state.data.workspaces.some((w) => w.active && w.kind === "personal");
   // Tabs stay mounted: a journal entry logged or corrected elsewhere must
   // show here on return, not the figures read before it (Codex on #2916).
   useReloadOnReturn(figures.reload);
@@ -141,6 +150,28 @@ export default function Screen() {
             label={t("today.openNeed")}
             onPress={() => router.push("/(shell)/need")}
           />
+          {personal ? null : (
+            <>
+              <Button
+                variant="quiet"
+                testID="today-open-candidates"
+                label={t("today.openCandidates")}
+                onPress={() => router.push("/(shell)/candidates")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-agency-offers"
+                label={t("agencyOffers.title")}
+                onPress={() => router.push("/(shell)/agency-offers")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-education"
+                label={t("education.title")}
+                onPress={() => router.push("/(shell)/education")}
+              />
+            </>
+          )}
         </View>
         <Divider />
         <Title>{t("today.recentWork")}</Title>
