@@ -73,10 +73,11 @@ describe("#4 — the first work entry is the new worker's one next action", () =
       expect(line as string, loc).not.toMatch(LATER);
       expect(line as string, loc).not.toMatch(/\bdemo\b|verified|patvirtint|garantuo|guarantee/i);
     }
-    // LT speaks to the person informally ("tu"), as the rest of the card does.
+    // LT speaks to the person formally ("jūs"), as the rest of the card does
+    // (owner decision 2026-11-15).
     const lt = at(mono("lt"), "auth.dashboard.workCard.why.evidenceFirst") as string;
-    expect(lt).toMatch(/\btavo\b|\bdirbai\b/);
-    expect(lt).not.toMatch(/\bjūs|\bjūsų/i);
+    expect(lt).toMatch(/(?<![a-ząčęėįšųūž])jūsų(?![a-ząčęėįšųūž])|\bdirbote\b/);
+    expect(lt).not.toMatch(/\btavo\b|\bdirbai\b/i);
   });
 });
 

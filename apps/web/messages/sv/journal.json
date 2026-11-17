@@ -261,7 +261,8 @@
   "unnamedOrganization": {
     "company": "Företag utan namn",
     "agency": "Bemanningsföretag utan namn",
-    "other": "Organisation utan namn"
+    "other": "Organisation utan namn",
+    "ended": "Tidigare organisation utan namn"
   },
   "activeWorkspaceNoRelationship": "Du agerar för {org}, men inget arbetsförhållande med {org} är registrerat, så det erbjuds inte här. Välj det sammanhang som arbetet verkligen hör till.",
   "project": "Projekt",
@@ -269,7 +270,7 @@
   "projectNone": "Inte projektarbete",
   "projectAmbiguous": "Du är tilldelad flera projekt. Välj innan du sparar vilket projekt dessa timmar hör till (eller markera dem som inte projektarbete).",
   "projectAuto": "Projekt: {name}",
-  "projectViaTeam": "{project} (via team {team})",
+  "projectViaTeam": "{project} (via arbetslaget {team})",
   "projectClient": "{project} (kundprojekt)",
   "unconfirmedTimeBlocked": "{count, plural, one {# registrerad varaktighet väntar fortfarande på din granskning och skulle inte sparas.} other {# registrerade varaktigheter väntar fortfarande på din granskning och skulle inte sparas.}} Behåll eller ta bort dem först.",
   "entry": {

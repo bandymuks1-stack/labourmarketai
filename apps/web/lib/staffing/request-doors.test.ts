@@ -30,6 +30,7 @@ const VALID: Record<RequestDoor, Record<string, string>> = {
   "worker-search": { ...contact, profession: "Mūrininkas", workers: "4", start: "2026-12-01", details: "Su A1" },
   b2b: { ...contact, work: "Fasadai", scope: "2000 m2", deadline: "kovas", city: "Vilnius" },
   project: { ...contact, need: "Vonios remontas", customer: "private" },
+  partner: { ...contact, proposal: "Mokymų centras siūlo praktikos vietas" },
 };
 
 describe("the type is stored and comes back", () => {
@@ -90,6 +91,13 @@ describe("each door asks only for what it needs", () => {
     expect(requestDoorIntake("project", "lt", reader({ ...VALID.project, customer: "business" }))?.description).toContain("Užsakovas: verslo");
   });
 
+  it("a partner enquiry carries the proposed cooperation (owner P0 2026-11-15, F3)", () => {
+    const i = requestDoorIntake("partner", "lt", reader(VALID.partner));
+    expect(i).toMatchObject({ sector: "partnership", headcount: 1, companyName: "UAB Testas" });
+    expect(i?.description.split("\n")[0]).toBe("Partnerystės užklausa");
+    expect(i?.description).toContain("Mokymų centras siūlo praktikos vietas");
+  });
+
   it("a phone is optional and kept when given", () => {
     expect(requestDoorIntake("b2b", "lt", reader(VALID.b2b))?.contactPhone).toBeUndefined();
     expect(requestDoorIntake("b2b", "lt", reader({ ...VALID.b2b, phone: "+370" }))?.contactPhone).toBe("+370");
@@ -110,6 +118,7 @@ describe("each door asks only for what it needs", () => {
     expect(requestDoorIntake("worker-search", "lt", reader({ ...VALID["worker-search"], workers: "0" }))).toBeNull();
     expect(requestDoorIntake("b2b", "lt", reader({ ...VALID.b2b, work: "" }))).toBeNull();
     expect(requestDoorIntake("project", "lt", reader({ ...VALID.project, need: "" }))).toBeNull();
+    expect(requestDoorIntake("partner", "lt", reader({ ...VALID.partner, proposal: "" }))).toBeNull();
   });
 });
 

@@ -181,6 +181,16 @@ describe("spam guard: one generic answer, nothing stored, no AI, no alert (owner
     expect(persistPublicCompanyNeed.mock.calls[0][0].sourcePath).toBe("/en/company-need");
   });
 
+  it("the button that opened the form rides on source_path; anything else is dropped", async () => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+    await submitCompanyNeedAction(null, formWith({ from: "companies_market_lu" }));
+    expect(persistPublicCompanyNeed.mock.calls[0][0].sourcePath).toBe("/en/company-need?from=companies_market_lu");
+    await submitCompanyNeedAction(null, formWith({ started: "", from: "companies_hero" }));
+    expect(persistPublicCompanyNeed.mock.calls[1][0].sourcePath).toBe("/en/company-need?review=no-js&from=companies_hero");
+    await submitCompanyNeedAction(null, formWith({ from: "x?utm_source=evil&y" }));
+    expect(persistPublicCompanyNeed.mock.calls[2][0].sourcePath).toBe("/en/company-need");
+  });
+
   it("the refusal log carries the surface and reason only, never what was typed", async () => {
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
     await submitCompanyNeedAction(null, formWith({ website: "https://spam.example" }));

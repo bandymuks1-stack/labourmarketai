@@ -13,6 +13,7 @@ export async function generateMetadata({
   return buildPageMetadataFor("workers", locale, "/for-workers");
 }
 import { PageHero } from "@/components/marketing/page-hero";
+import { WORKER_PROFILE_DOOR_NEXT } from "@/lib/marketing/worker-profile-door";
 
 export default async function ForWorkersPage({
   params,
@@ -32,6 +33,7 @@ export default async function ForWorkersPage({
         accent={t("titleAccent")}
         subcopy={t("subcopy")}
         ctaKind="signup"
+        ctaNext={WORKER_PROFILE_DOOR_NEXT}
         ctaLabel={t("cta")}
         ctaSource="workers_hero"
       />

@@ -11,6 +11,7 @@ import {
   signIn,
   signUp,
   sql,
+  sqlExec,
   userId,
   verifyCompanyAsLocalAdmin,
 } from "./isolated-web-a-helpers";
@@ -40,7 +41,7 @@ import {
  *   E EMPLOYER     the area sheet to needs; the need form sent on the phone; candidate search for it;
  *                  the people page and a join-by-link invitation; messages.
  *   A AGENCY       the area sheet to clients; the roster invite on the people page; a need posted on
- *                  the phone; messages.
+ *                  the phone; messages; the Lithuanian clients page with a connected client.
  *   S STUDENT      signs up ON THE PHONE (study fields), the learning compass, the internship board,
  *                  applies to an open need, the study on the Living CV; messages.
  *   T INSTITUTION  signs up ON THE PHONE through its door and sets up its organisation; the education
@@ -376,6 +377,68 @@ for (const phone of PHONES) {
       await fitsTheScreen(w2.page, "the worker's thread with the answer");
       await w2.done();
     });
+    test(`M-6 (${phone.name}). booking: the worker says they are available, the company proposes a start from its need's hand-raisers, the worker accepts`, async ({ browser }) => {
+      // The schedule gate (canStartCommunicationOrBooking): a booking is offered only for a worker
+      // who is available or has a start date, or a need with a start date. The need form asks for
+      // urgency, not a date, so the worker states their availability on the work card first.
+      // Employers find a person only with that person's own consent (owner rule 2026-10-18:
+      // interest and messaging are never consent): without it the hand-raiser is a count, not a
+      // candidate. A structured need pins every hand-raiser into its candidates whatever the
+      // match, so the worker turns on employer visibility, on their privacy page, as
+      // skills-chain's newDiscoverableWorker does.
+      const w = await signedInOnPhone(browser, phone, worker);
+      await w.page.goto(`${BASE}/en/dashboard/privacy#visibility`);
+      const vis = w.page.getByRole("main").getByTestId("privacy-visibility");
+      await expect(vis, "the visibility choice is on the privacy page").toBeVisible({ timeout: 60_000 });
+      await tapUntil(vis.getByTestId("discoverability-open"), vis.getByTestId("discoverability-grant"));
+      await vis.getByTestId("discoverability-grant").tap();
+      await expect(vis.getByTestId("discoverability-granted"), "employers may now find them").toBeVisible({ timeout: 30_000 });
+      await w.page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+      const toggle = w.page.getByRole("main").getByTestId("work-card-editor-toggle");
+      await expect(toggle, "the work card editor is offered on the worker's profile").toBeVisible({ timeout: 60_000 });
+      const editor = w.page.getByRole("main").getByTestId("work-card-editor");
+      await tapUntil(toggle, editor);
+      await editor.locator('select[name="availability_status"]').selectOption("available");
+      await editor.getByTestId("work-card-save").tap();
+      await expect(w.page.getByTestId("work-card-saved"), "availability is saved").toBeVisible({ timeout: 30_000 });
+      expect(
+        sql<{ a: string | null }>(`select availability_status as a from public.workers where id = ${lit(s.workerId)}`)[0]?.a,
+      ).toBe("available");
+      await w.done();
+
+      // The company opens its need's candidates and proposes a start date to the hand-raiser.
+      const c = await signedInOnPhone(browser, phone, COMPANY);
+      await c.page.goto(`${BASE}/en/dashboard/company/scouting?request=${shared.needId}`);
+      const cand = c.page.getByRole("main").getByTestId(`scout-candidate-${s.workerId}`);
+      await expect(cand, "the worker who raised a hand is among the need's candidates").toBeVisible({ timeout: 60_000 });
+      await expect(cand.getByTestId(`scout-interest-${s.workerId}`), "marked as interested").toBeVisible();
+      const open = cand.getByTestId("propose-booking-open");
+      await expect(open, "the company can propose a booking to them").toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(c.page, "the need's candidates");
+      await tapUntil(open, cand.getByTestId("propose-booking-form"));
+      const start = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
+      await cand.getByTestId("propose-booking-start-date").fill(start);
+      await cand.getByTestId("propose-booking-send").tap();
+      await expect(cand.getByTestId("propose-booking-sent"), "the proposal is sent").toBeVisible({ timeout: 30_000 });
+      await c.done();
+      const rows = () =>
+        sql<{ id: string; status: string }>(
+          `select id, status from public.booking_requests where request_id = ${lit(shared.needId)} and worker_id = ${lit(s.workerId)}`,
+        );
+      await expect.poll(() => rows().map((r) => r.status), { message: "one booking, proposed", timeout: 30_000 }).toEqual(["proposed"]);
+      const bookingId = rows()[0]!.id;
+
+      // The worker accepts it from their bookings.
+      const w2 = await signedInOnPhone(browser, phone, worker);
+      await w2.page.goto(`${BASE}/en/dashboard/bookings`);
+      const card = w2.page.getByRole("main").getByTestId(`booking-${bookingId}`);
+      await expect(card, "the proposal reaches the worker").toBeVisible({ timeout: 60_000 });
+      await fitsTheScreen(w2.page, "the worker's bookings");
+      await tapUntil(card.getByTestId("booking-accept-open"), card.getByTestId("booking-accept-confirm"));
+      await card.getByTestId("booking-accept-confirm").tap();
+      await expect.poll(() => rows().map((r) => r.status), { message: "the booking is accepted", timeout: 30_000 }).toEqual(["accepted"]);
+      await w2.done();
+    });
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await accountMenu(page, "account-menu-cv-link");
@@ -513,6 +576,31 @@ for (const phone of PHONES) {
       await expect
         .poll(() => facts()?.via_legacy ?? null, { message: `an agency, not a hiring company; rows: ${JSON.stringify(facts())}`, timeout: 15_000 })
         .toBe("staffing_agency");
+    });
+    test(`A-7 (${phone.name}). with a connected client, the Lithuanian clients page still fits the phone`, async ({ browser }) => {
+      // Production ux-metrics walk (run 43691077388, build b5795ab7): /lt partners as an agency
+      // ran 25 px past a 390 px screen. The draft-a-need form only renders for an ACTIVE client
+      // connection, and its country <select> was as wide as its longest Lithuanian option
+      // ("Ypatingasis Administracinis Kinijos Regionas Honkongas"). A-2 has no client, so it
+      // never drew that form. Setup (not the walk): a client company at a desktop, and the
+      // connection recorded active on the local database.
+      const client = email(`agencyclient${phone.name}`);
+      const c = await newOrganisation(browser, client, "hire", `Synthetic Client Owner ${phone.name} ${RUN}`, `Synthetic Client Co ${phone.name} ${RUN}`);
+      sqlExec(
+        `insert into public.agency_client_connections (agency_company_id, client_company_id, invited_email, status, invited_by, accepted_by, accepted_at)
+         select ag.legacy_company_id, cl.legacy_company_id, ${lit(client)}, 'active', ${lit(a.profileId)}, ${lit(c.profileId)}, now()
+           from public.organizations ag, public.organizations cl
+          where ag.id = ${lit(a.orgId)} and cl.id = ${lit(c.orgId)}`,
+      );
+      expect(
+        sql<{ id: string }>(`select x.id from public.agency_client_connections x join public.organizations o on o.legacy_company_id = x.agency_company_id where o.id = ${lit(a.orgId)} and x.status = 'active'`),
+        "one active client connection is stored",
+      ).toHaveLength(1);
+      const { page, done } = await signedInOnPhone(browser, phone, AGENCY);
+      await page.goto(`${BASE}/lt/dashboard/company/partners`);
+      await expect(page.getByRole("main").getByTestId("agency-draft-need-form"), "the draft-a-need form is drawn for the client").toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the agency's clients in Lithuanian, with a client");
+      await done();
     });
   });
 
