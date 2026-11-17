@@ -6880,7 +6880,8 @@
         "noMembers": "Inga medlemmar just nu.",
         "unavailable": "Teamen kunde inte läsas in. Försök igen.",
         "manage": "Ändra team"
-      }
+      },
+      "organizationLink": "Organisationens historik och projekt"
     },
     "workerView": {
       "eyebrow": "Mitt projekt",
@@ -19289,7 +19290,8 @@
       "address": "Adress",
       "project": "Projekt",
       "notInSource": "Finns inte i källan",
-      "linked": "Länkad"
+      "linked": "Länkad",
+      "openProject": "Öppna projektet"
     },
     "whoWorked": "Vem som arbetade här",
     "timeline": "Vad som gjordes",
@@ -19370,6 +19372,23 @@
         "opening": "Öppnar …",
         "error": "Arbetsytan kunde inte öppnas."
       }
+    },
+    "projects": {
+      "title": "Projekt på plattformen",
+      "counts": "{running} pågående · {completed} avslutade",
+      "untitled": "Projekt utan namn",
+      "running": "Pågående",
+      "completed": "Avslutat",
+      "all": "Alla {count} projekt"
+    },
+    "journal": {
+      "title": "Arbete registrerat i journalen",
+      "hours": "Registrerade timmar",
+      "confirmed": "Timmar bekräftade av organisationen",
+      "people": "Personer som registrerade arbete",
+      "period": "Registrerat",
+      "basis": "Från {entries} journalposter som personer registrerade under den här organisationen. Räknas separat från den importerade historiken ovan och läggs aldrig till den.",
+      "unavailable": "Arbetet som registrerats i journalen under den här organisationen kunde inte läsas just nu."
     }
   },
   "workPlan": {

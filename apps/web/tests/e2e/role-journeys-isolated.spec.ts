@@ -144,6 +144,25 @@ async function readAs<T>(address: string, path: string): Promise<T[]> {
   return (await r.json()) as T[];
 }
 
+/** A database function called AS a signed-in person (their own token): the same door the app calls. */
+async function rpcAs<T>(address: string, fn: string, args: Record<string, unknown>): Promise<T> {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${await tokenOf(address)}`, "Content-Type": "application/json" },
+    body: JSON.stringify(args),
+  });
+  if (!r.ok) throw new Error(`rpc ${fn} as a person → ${r.status}`);
+  const body = await r.text();
+  return (body ? JSON.parse(body) : null) as T;
+}
+
+/** The entry ids a set-returning uuid function answered with, whichever row shape PostgREST used. */
+function entryIds(rows: unknown): string[] {
+  return ((rows as unknown[] | null) ?? []).map((r) =>
+    typeof r === "string" ? r : String(Object.values(r as Record<string, unknown>)[0] ?? ""),
+  );
+}
+
 const MAIL = "http://127.0.0.1:54324"; // the local stack's mail catcher (Mailpit)
 
 /** The newest link in the newest local mail to `address` (nothing leaves the runner). */
@@ -779,12 +798,33 @@ test("J-WRK. the placed worker records work on the company's project; the compan
     worker_id: s.pwWorkerId,
   });
 
+  // An active work relationship outside the education category keeps the
+  // employer review basis (20261115120000 narrows only learning links): the
+  // entry is in the company's review queue and readable through the definer
+  // mirror, called with the company's own token.
+  expect(
+    entryIds(await rpcAs<unknown>(CO, "reviewable_journal_entry_ids", {})),
+    "active work relationship: the entry is in the employer's review queue",
+  ).toContain(s.entryId);
+  expect(await rpcAs<boolean>(CO, "can_read_journal_entry_v1", { p_entry_id: s.entryId }), "and can_read_journal_entry_v1 is true").toBe(true);
+
   // The company confirms it from its review queue.
   await approveEntry(co, s.entryId);
   const confirmations = await db<Array<{ confirmer_id: string }>>(
     `journal_entry_confirmations?entry_id=eq.${s.entryId}&select=confirmer_id`,
   );
   expect(confirmations.map((c) => c.confirmer_id), "confirmed once, by the company owner").toEqual([s.coId]);
+  // Under the company's OWN row-level security, while the relationship is
+  // active: the employer still reads the entry it confirmed and its
+  // confirmation (20261115120000 narrows only learning relationships).
+  expect(
+    (await readAs(CO, `journal_entries?id=eq.${s.entryId}&select=id`)).length,
+    "the employer still reads the entry it confirmed",
+  ).toBe(1);
+  expect(
+    (await readAs(CO, `journal_entry_confirmations?entry_id=eq.${s.entryId}&select=id`)).length,
+    "and its confirmation",
+  ).toBe(1);
 
   // The worker sees it confirmed; the Living CV door counts confirmed work.
   await pw.goto(`${BASE}/en/dashboard/journal`);
@@ -828,7 +868,8 @@ test("J-DEC. the company sees the need's history, closes it as filled, and the h
     .toEqual(["closed:completed"]);
 
   await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
-  const after = co.getByTestId("demand-history");
+  // Scoped to <main>: while the page streams in, React can briefly hold a second copy outside it.
+  const after = co.getByRole("main").getByTestId("demand-history");
   await expect(after).toHaveAttribute("data-decided", "true", { timeout: 30_000 });
   await expect(after.getByTestId("demand-history-closed")).toHaveAttribute("data-outcome", "completed");
   await expect(after.getByTestId("demand-history-decision"), "the hire decision names the accepted candidate").toBeVisible();

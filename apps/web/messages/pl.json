@@ -6880,7 +6880,8 @@
         "noMembers": "Obecnie brak członków.",
         "unavailable": "Nie udało się wczytać zespołów. Proszę spróbować ponownie.",
         "manage": "Zmień zespoły"
-      }
+      },
+      "organizationLink": "Historia i projekty organizacji"
     },
     "workerView": {
       "eyebrow": "Mój projekt",
@@ -19289,7 +19290,8 @@
       "address": "Adres",
       "project": "Projekt",
       "notInSource": "Brak w źródle",
-      "linked": "Powiązano"
+      "linked": "Powiązano",
+      "openProject": "Otwórz projekt"
     },
     "whoWorked": "Kto tu pracował",
     "timeline": "Co zrobiono",
@@ -19370,6 +19372,23 @@
         "opening": "Otwieranie…",
         "error": "Nie udało się otworzyć przestrzeni roboczej."
       }
+    },
+    "projects": {
+      "title": "Projekty na platformie",
+      "counts": "{running} w toku · {completed, plural, one {# zakończony} few {# zakończone} many {# zakończonych} other {# zakończonego}}",
+      "untitled": "Projekt bez nazwy",
+      "running": "W toku",
+      "completed": "Zakończony",
+      "all": "Wszystkie projekty: {count}"
+    },
+    "journal": {
+      "title": "Praca zapisana w dzienniku",
+      "hours": "Zapisane godziny",
+      "confirmed": "Godziny potwierdzone przez organizację",
+      "people": "Osoby, które zapisały pracę",
+      "period": "Zapisano",
+      "basis": "Z {entries} wpisów w dzienniku, które osoby zapisały w tej organizacji. Liczone osobno od zaimportowanej historii powyżej i nigdy do niej nie dodawane.",
+      "unavailable": "Nie udało się teraz odczytać pracy zapisanej w dzienniku w tej organizacji."
     }
   },
   "workPlan": {

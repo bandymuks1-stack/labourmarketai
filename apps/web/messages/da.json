@@ -2051,7 +2051,8 @@
         "noMembers": "Ingen medlemmer lige nu.",
         "unavailable": "Holdene kunne ikke indlæses. Prøv igen.",
         "manage": "Skift hold"
-      }
+      },
+      "organizationLink": "Organisationens historik og projekter"
     },
     "workerView": {
       "eyebrow": "Mit projekt",
@@ -7093,7 +7094,8 @@
       "address": "Adresse",
       "project": "Projekt",
       "notInSource": "Ikke i kilden",
-      "linked": "Knyttet"
+      "linked": "Knyttet",
+      "openProject": "Åbn projektet"
     },
     "whoWorked": "Hvem der arbejdede her",
     "timeline": "Hvad der blev gjort",
@@ -7111,7 +7113,24 @@
       "refused": "Dette kunne ikke gemmes. Intet er ændret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
     },
-    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
+    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem.",
+    "projects": {
+      "title": "Projekter på platformen",
+      "counts": "{running} igangværende · {completed} afsluttede",
+      "untitled": "Projekt uden navn",
+      "running": "Igangværende",
+      "completed": "Afsluttet",
+      "all": "Alle {count} projekter"
+    },
+    "journal": {
+      "title": "Arbejde registreret i journalen",
+      "hours": "Registrerede timer",
+      "confirmed": "Timer bekræftet af organisationen",
+      "people": "Personer, der registrerede arbejde",
+      "period": "Registreret",
+      "basis": "Fra {entries} journalposter, som personer registrerede under denne organisation. Talt adskilt fra den importerede historik ovenfor og aldrig lagt til den.",
+      "unavailable": "Arbejdet registreret i journalen under denne organisation kunne ikke læses lige nu."
+    }
   },
   "workLifecycle": {
     "pending": "Endnu ikke",

@@ -6880,7 +6880,8 @@
         "noMembers": "Derzeit keine Mitglieder.",
         "unavailable": "Die Teams konnten nicht geladen werden. Bitte erneut versuchen.",
         "manage": "Teams ändern"
-      }
+      },
+      "organizationLink": "Geschichte und Projekte der Organisation"
     },
     "workerView": {
       "eyebrow": "Mein Projekt",
@@ -19289,7 +19290,8 @@
       "address": "Adresse",
       "project": "Projekt",
       "notInSource": "Nicht in der Quelle",
-      "linked": "Verknüpft"
+      "linked": "Verknüpft",
+      "openProject": "Projekt öffnen"
     },
     "whoWorked": "Wer hier gearbeitet hat",
     "timeline": "Was getan wurde",
@@ -19370,6 +19372,23 @@
         "opening": "Wird geöffnet…",
         "error": "Der Arbeitsbereich konnte nicht geöffnet werden."
       }
+    },
+    "projects": {
+      "title": "Projekte auf der Plattform",
+      "counts": "{running} laufend · {completed} abgeschlossen",
+      "untitled": "Projekt ohne Titel",
+      "running": "Laufend",
+      "completed": "Abgeschlossen",
+      "all": "Alle {count} Projekte"
+    },
+    "journal": {
+      "title": "Im Arbeitsjournal erfasste Arbeit",
+      "hours": "Erfasste Stunden",
+      "confirmed": "Von der Organisation bestätigte Stunden",
+      "people": "Personen, die Arbeit erfasst haben",
+      "period": "Erfasst",
+      "basis": "Aus {entries} Journaleinträgen, die Personen unter dieser Organisation erfasst haben. Getrennt von der importierten Historie oben gezählt und nie zu ihr addiert.",
+      "unavailable": "Die unter dieser Organisation im Journal erfasste Arbeit konnte gerade nicht gelesen werden."
     }
   },
   "workPlan": {
