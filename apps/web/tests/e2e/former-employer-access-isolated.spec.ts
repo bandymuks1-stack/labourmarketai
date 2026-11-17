@@ -56,6 +56,7 @@ const ORG_B = `Synthetic Other Employer B ${RUN}`;
 const W_NAME = `Synthetic Former Employee ${RUN}`;
 const TEXT = {
   during: `QA-SYNTHETIC ${RUN}: tiled the entrance hall for A`,
+  during2: `QA-SYNTHETIC ${RUN}: grouted the corridor for A`,
   other: `QA-SYNTHETIC ${RUN}: painted the stairwell for B`,
   personal: `QA-SYNTHETIC ${RUN}: studied for the electrical licence`,
   after: `QA-SYNTHETIC ${RUN}: filed after A ended the employment`,
@@ -72,6 +73,7 @@ const s = {
   ecB: "",
   ecPersonal: "",
   entryDuring: "",
+  entryDuring2: "",
   entryOther: "",
   entryPersonal: "",
   entryAfter: "",
@@ -234,6 +236,7 @@ test("FE-0. two organizations; W joins both and records work for each and in the
 
   for (const [key, ec, text] of [
     ["entryDuring", s.ecA, TEXT.during],
+    ["entryDuring2", s.ecA, TEXT.during2],
     ["entryOther", s.ecB, TEXT.other],
     ["entryPersonal", s.ecPersonal, TEXT.personal],
   ] as const) {
@@ -260,8 +263,16 @@ test("FE-0. two organizations; W joins both and records work for each and in the
 });
 
 test("FE-1. while W works for A, A reads W's entry for A only, and can still decide on it", async () => {
-  expect(await readable(O, [s.entryDuring, s.entryOther, s.entryPersonal]), "A reads its own entry, nothing else").toEqual([s.entryDuring]);
-  expect(await readable(P, [s.entryDuring, s.entryOther, s.entryPersonal]), "B reads its own entry, nothing else").toEqual([s.entryOther]);
+  const ids = [s.entryDuring, s.entryDuring2, s.entryOther, s.entryPersonal];
+  expect(await readable(O, ids), "A reads its own entries, nothing else").toEqual([s.entryDuring, s.entryDuring2].sort());
+  expect(await readable(P, ids), "B reads its own entry, nothing else").toEqual([s.entryOther]);
+
+  // Positive control for FE-2's review refusal: while the employment runs, A
+  // switches review on and decides on one entry through the product's door.
+  const on = await rpc<string>(O, "set_engagement_journal_review", { p_engagement_id: s.ecA, p_enabled: true });
+  expect(on.body, "an active employer may switch review on").toBe("enabled");
+  const decided = await rpc<string>(O, "review_journal_entry", { p_entry_id: s.entryDuring, p_decision: "approved", p_note: null });
+  expect(decided.body, "an active employer may confirm W's entry").toBe("approved");
 
   // Positive controls for FE-2's refusals: while the employment runs, the
   // employer's reviewer may set a work item's decision and add a metric.
@@ -303,8 +314,8 @@ test("FE-2. A ends the employment: retained history stays readable; new records,
     );
   }
 
-  const all = [s.entryDuring, s.entryOther, s.entryPersonal, s.entryAfter];
-  expect(await readable(O, all), "A keeps only the entry recorded during the employment").toEqual([s.entryDuring]);
+  const all = [s.entryDuring, s.entryDuring2, s.entryOther, s.entryPersonal, s.entryAfter];
+  expect(await readable(O, all), "A keeps only the entries recorded during the employment").toEqual([s.entryDuring, s.entryDuring2].sort());
   expect((await readable(W, all)).length, "W still reads every one of their entries").toBe(all.length);
 
   // Writes: nothing historical changes through A any more.
@@ -370,6 +381,27 @@ test("FE-2. A ends the employment: retained history stays readable; new records,
     )[0],
     "the historical entry is intact and nothing was removed",
   ).toEqual({ text: TEXT.during, n: all.length });
+
+  // R2 P2-1: an ended employment whose review switch was left ON (the
+  // 2026-09-23 consolidation ended engagements that way) decides nothing. The
+  // end door switches review off, so the walk sets it back on in the
+  // throwaway database (a second seeded step) and calls the review door.
+  sqlExec(`update public.engagement_contexts set journal_review_enabled = true where id = ${lit(s.ecA)}`);
+  const late2 = await rpc<string>(O, "review_journal_entry", { p_entry_id: s.entryDuring2, p_decision: "approved", p_note: null });
+  expect(late2.body, "an ended employment with review left on decides nothing").not.toBe("approved");
+  expect(
+    sql<{ n: number }>(
+      `select count(*)::int as n from public.journal_entry_confirmations where entry_id = ${lit(s.entryDuring2)}`,
+    )[0]?.n,
+    "no confirmation is recorded on the historical entry",
+  ).toBe(0);
+  const queue = await rpc<string[]>(O, "reviewable_journal_entry_ids", {});
+  expect(queue.body ?? [], "the ended employment's entries are not in A's review queue").not.toContain(s.entryDuring2);
+  // The entry A confirmed while employed keeps its confirmation (retained history).
+  expect(
+    sql<{ n: number }>(`select count(*)::int as n from public.journal_entry_confirmations where entry_id = ${lit(s.entryDuring)}`)[0]?.n,
+    "the confirmation made during the employment is kept",
+  ).toBe(1);
 
   // B, still W's employer, is unaffected.
   expect(await readable(P, all), "B still reads its own entry").toEqual([s.entryOther]);

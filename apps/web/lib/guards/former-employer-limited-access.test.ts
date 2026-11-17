@@ -51,7 +51,8 @@ function previous(opening: string): string {
   const files = migrations().filter((f) => f < `${NAME}.sql` && code(read(`supabase/migrations/${f}`)).includes(opening.toLowerCase()));
   expect(files.length, `an earlier definition of: ${opening}`).toBeGreaterThan(0);
   const sql = read(`supabase/migrations/${files[files.length - 1]!}`);
-  // #3421's 20261115120000 is a draft not on main; the rollback restores main.
+  // This migration is applied after #3421's 20261115120000 (R2): for the three
+  // objects both define, the previous definition is #3421's.
   return statement(sql, opening);
 }
 
@@ -63,6 +64,7 @@ const OBJECTS = [
   "create policy journal_entry_confirmations_insert on public.journal_entry_confirmations",
   "create or replace function public.set_engagement_journal_review",
   "create or replace function public.reviewable_journal_entry_ids()",
+  "create or replace function public.journal_entry_review_authority_v1",
 ] as const;
 
 const WINDOW =
@@ -143,6 +145,19 @@ describe("writes: an ended relationship can no longer change or decide on the pe
     expect(f.indexOf("'engagement_not_active'")).toBeLessThan(f.indexOf("update public.engagement_contexts"));
   });
 
+  it("the employer review basis needs a running relationship (R2 P2-1): learning while active, any other while active or paused", () => {
+    const f = statement(sql, OBJECTS[7]);
+    expect(f).toContain("security definer");
+    expect(f).toContain(
+      "and (ec2.status = 'active' or (ec2.status = 'paused' and exists (select 1 from public.relationship_types rt where rt.slug = ec2.relationship_slug and rt.category <> 'education')))",
+    );
+    // The condition sits inside the employer branch, after the review switch and the management checks.
+    expect(f.indexOf("if v_org is not null and v_enabled")).toBeLessThan(f.indexOf("(ec2.status = 'active' or"));
+    expect(f.indexOf("(ec2.status = 'active' or")).toBeLessThan(f.indexOf("'basis', 'employer'"));
+    // #3421's escape for every non-learning relationship, whatever its status, is gone.
+    expect(f).not.toMatch(/rt\.category <> 'education'\) or ec2\.status = 'active'/);
+  });
+
   it("the employer's review queue lists only running relationships", () => {
     expect(statement(sql, OBJECTS[6])).toContain("and ec.status in ('active', 'paused')");
   });
@@ -176,10 +191,17 @@ describe("the rollback restores main's definitions exactly", () => {
 });
 
 describe("the local-stack proof travels with the SQL", () => {
+  it("it is applied after #3421 and says so", () => {
+    const head = read(MIG).slice(0, 2500);
+    expect(head).toContain("APPLY ORDER");
+    expect(head).toContain("AFTER 20261115120000_journal_learning_access_");
+    expect(NAME > "20261115120000_journal_learning_access_follows_link_v1").toBe(true);
+  });
+
   it("the walk covers every part of the rule", () => {
     const spec = read("apps/web/tests/e2e/former-employer-access-isolated.spec.ts");
     for (const phrase of [
-      "A keeps only the entry recorded during the employment",
+      "A keeps only the entries recorded during the employment",
       "W still reads every one of their entries",
       "the work item is unchanged",
       "A cannot add a metric to the historical entry",
@@ -187,6 +209,7 @@ describe("the local-stack proof travels with the SQL", () => {
       "A cannot confirm an entry of the ended employment",
       "the historical entry is intact and nothing was removed",
       "B still reads its own entry",
+      "an ended employment with review left on decides nothing",
     ]) {
       expect(spec, phrase).toContain(phrase);
     }

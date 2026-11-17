@@ -226,6 +226,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-14 owner decision (invitation 862a91f4 NO RESEND): one service_role-only aggregate count of
       // owner-registered historical unknown outcomes (SECURITY DEFINER + GRANT; RED draft, needs-human-gate, NOT applied).
       "20261114150000_",
+      // 2026-11-15 owner decision: a learner's journal is read by the organization only while the learning
+      // link is active and review is on (one RLS policy replaced; RED draft, needs-human-gate, NOT applied).
+      "20261115120000_",
       // 2026-11-17 owner decision: a former employer keeps the journal recorded during the employment and
       // nothing new, and can no longer change it (RLS + three SECURITY DEFINER bodies; RED draft, needs-human-gate, NOT applied).
       "20261117060000_",

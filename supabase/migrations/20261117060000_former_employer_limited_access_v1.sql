@@ -3,8 +3,16 @@
 --
 -- RED by rule: DROP POLICY + CREATE POLICY on public.journal_entries,
 -- public.journal_entry_work_items, public.journal_entry_metrics and
--- public.journal_entry_confirmations, plus three SECURITY DEFINER functions
--- replaced in place (an RLS / authority change). Needs the human gate (draft
+-- public.journal_entry_confirmations, plus four SECURITY DEFINER functions
+-- replaced in place (an RLS / authority change).
+--
+-- APPLY ORDER (R2, 2026-11-17): AFTER 20261115120000_journal_learning_access_
+-- follows_link_v1 (#3421), never before it. This migration is written on
+-- #3421's definitions and carries BOTH rules in every object they share
+-- (journal_entries_select, can_read_journal_entry_v1,
+-- journal_entry_review_authority_v1): #3421's learning condition word for
+-- word, plus the end-date rule for every other relationship. Applying #3421
+-- after this one would overwrite the end-date rule. Needs the human gate (draft
 -- PR + needs-human-gate); never auto-applied.
 -- @human-gate-approved — acknowledgement only: the owner decided the rule
 -- (2026-11-17, relayed by the coordinator) and asked for this RED change to be
@@ -39,6 +47,15 @@
 -- DELETE grant; supersede / correction_of keep every correction traceable;
 -- ending a relationship deletes nothing.
 --
+-- REVIEW AUTHORITY (R2 P2-1): journal_entry_review_authority_v1 grants the
+-- employer basis to a manager of the entry's organization while review is on.
+-- #3421 limits a learning relationship to `active`; here every other
+-- relationship is limited to `active` or `paused`, so an ended employment
+-- with review left on (the 2026-09-23 consolidation ended engagements without
+-- switching it off) no longer resolves to `employer`. review_journal_entry,
+-- the batch review, confirm_entry_and_verify_skills, reviewable_journal_entry_ids
+-- and the confirmation guard trigger all resolve authority through it.
+--
 -- THE RULE AFTER, one predicate in two places (the policy and its SECURITY
 -- DEFINER mirror can_read_journal_entry_v1), for a MANAGER of the entry's
 -- engagement organization (the person, admins and confirmers are unchanged):
@@ -66,9 +83,10 @@
 -- sub-selects; the SECURITY DEFINER readers are replaced here explicitly.
 --
 -- ROLLBACK: supabase/rollbacks/20261117060000_former_employer_limited_access_v1.down.sql
--- restores every policy and function body exactly as it was on main before
--- this migration (journal_entries_select as 0013 defined it; if #3421's
--- 20261115120000 had been applied, apply it again after the rollback).
+-- restores every policy and function body exactly as it was before this
+-- migration, i.e. after #3421: journal_entries_select, can_read_journal_entry_v1
+-- and journal_entry_review_authority_v1 as 20261115120000 defines them, the
+-- others as main defines them.
 -- =====================================================================
 
 begin;
@@ -142,6 +160,82 @@ $$;
 revoke all on function public.can_read_journal_entry_v1(uuid) from public;
 revoke all on function public.can_read_journal_entry_v1(uuid) from anon;
 grant execute on function public.can_read_journal_entry_v1(uuid) to authenticated;
+
+-- 2b. The employer review basis (SECURITY DEFINER) — R2 P2-1 ---------------------
+-- Body of 20261115120000 (#3421) verbatim; the one condition on the
+-- engagement's status now covers every relationship: a learning one while
+-- `active` (#3421), any other while `active` or `paused` (this migration).
+create or replace function public.journal_entry_review_authority_v1(p_entry_id uuid, p_actor uuid)
+ returns jsonb
+ language plpgsql
+ stable security definer
+ set search_path to 'public'
+as $$
+declare
+  v_worker uuid; v_subject uuid; v_org uuid; v_enabled boolean; v_project uuid;
+  v_sub uuid; v_link uuid; v_party uuid; v_role text;
+begin
+  if p_actor is null then return null; end if;
+  select je.worker_id, w.profile_id, ec.organization_id,
+         coalesce(ec.journal_review_enabled, false), je.project_id
+    into v_worker, v_subject, v_org, v_enabled, v_project
+    from public.journal_entries je
+    join public.engagement_contexts ec on ec.id = je.engagement_context_id
+    left join public.workers w on w.id = je.worker_id
+   where je.id = p_entry_id;
+  if not found then return null; end if;
+  -- The subject can never be the party that accepts their own work.
+  if v_subject is not null and v_subject = p_actor then return null; end if;
+
+  -- EMPLOYER: the organization of the entry's own (review-enabled) engagement.
+  -- The actor must manage it and must NOT be a co-manager of any organization
+  -- the subject manages: the manager of the subject's own sole-trader / own
+  -- organization is the subject's side, not an employer.
+  if v_org is not null and v_enabled
+     and public.profile_manages_organization_v1(p_actor, v_org)
+     and not public.profiles_co_manage_organization_v1(v_subject, p_actor)
+     -- The relationship must still run: a LEARNING relationship
+     -- (relationship_types.category = 'education') only while `active`
+     -- (#3421); any other relationship while `active` or `paused`. An ended
+     -- relationship carries no employer basis, whatever its review switch
+     -- says. Fail-closed: a relationship type that cannot be found counts as
+     -- learning.
+     and exists (
+       select 1 from public.journal_entries je2
+         join public.engagement_contexts ec2 on ec2.id = je2.engagement_context_id
+        where je2.id = p_entry_id
+          and (ec2.status = 'active'
+               or (ec2.status = 'paused'
+                   and exists (select 1 from public.relationship_types rt
+                                where rt.slug = ec2.relationship_slug
+                                  and rt.category <> 'education')))
+     ) then
+    return jsonb_build_object('basis', 'employer', 'party_organization_id', v_org);
+  end if;
+
+  -- COUNTERPARTY: an explicitly SUBMITTED entry whose resolved counterparty
+  -- link is still valid, reviewed by an authorized representative of that
+  -- party who shares no organization with the subject.
+  if v_project is not null and v_worker is not null then
+    select s.id, l.id, l.counterparty_organization_id, l.party_role
+      into v_sub, v_link, v_party, v_role
+      from public.journal_entry_review_submissions s
+      join public.work_counterparty_links l on l.id = s.link_id
+     where s.entry_id = p_entry_id
+       and l.worker_id = v_worker and l.project_id = v_project
+       and public.work_counterparty_link_valid_v1(l.id)
+       and l.counterparty_organization_id is distinct from v_org
+       and public.profile_manages_organization_v1(p_actor, l.counterparty_organization_id)
+       and not public.profiles_share_organization_v1(v_subject, p_actor);
+    if found then
+      return jsonb_build_object('basis', 'counterparty', 'party_organization_id', v_party,
+                                'link_id', v_link, 'submission_id', v_sub, 'party_role', v_role);
+    end if;
+  end if;
+  return null;
+end $$;
+
+revoke all on function public.journal_entry_review_authority_v1(uuid, uuid) from public, anon, authenticated;
 
 -- 3. Writes: work items (W1) ---------------------------------------------------
 drop policy if exists journal_entry_work_items_update on public.journal_entry_work_items;
