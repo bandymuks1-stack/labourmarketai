@@ -144,6 +144,25 @@ async function readAs<T>(address: string, path: string): Promise<T[]> {
   return (await r.json()) as T[];
 }
 
+/** A database function called AS a signed-in person (their own token): the same door the app calls. */
+async function rpcAs<T>(address: string, fn: string, args: Record<string, unknown>): Promise<T> {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${await tokenOf(address)}`, "Content-Type": "application/json" },
+    body: JSON.stringify(args),
+  });
+  if (!r.ok) throw new Error(`rpc ${fn} as a person → ${r.status}`);
+  const body = await r.text();
+  return (body ? JSON.parse(body) : null) as T;
+}
+
+/** The entry ids a set-returning uuid function answered with, whichever row shape PostgREST used. */
+function entryIds(rows: unknown): string[] {
+  return ((rows as unknown[] | null) ?? []).map((r) =>
+    typeof r === "string" ? r : String(Object.values(r as Record<string, unknown>)[0] ?? ""),
+  );
+}
+
 const MAIL = "http://127.0.0.1:54324"; // the local stack's mail catcher (Mailpit)
 
 /** The newest link in the newest local mail to `address` (nothing leaves the runner). */
@@ -728,6 +747,16 @@ test("J-WRK. the placed worker records work on the company's project; the compan
     project_id: s.projectId,
     worker_id: s.pwWorkerId,
   });
+
+  // An active work relationship outside the education category keeps the
+  // employer review basis (20261115120000 narrows only learning links): the
+  // entry is in the company's review queue and readable through the definer
+  // mirror, called with the company's own token.
+  expect(
+    entryIds(await rpcAs<unknown>(CO, "reviewable_journal_entry_ids", {})),
+    "active work relationship: the entry is in the employer's review queue",
+  ).toContain(s.entryId);
+  expect(await rpcAs<boolean>(CO, "can_read_journal_entry_v1", { p_entry_id: s.entryId }), "and can_read_journal_entry_v1 is true").toBe(true);
 
   // The company confirms it from its review queue.
   await approveEntry(co, s.entryId);

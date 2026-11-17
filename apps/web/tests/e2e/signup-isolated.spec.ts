@@ -833,8 +833,14 @@ const EDU = {
 };
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
-/** The synthetic person's own access token (password sign-in on the local stack). */
+/**
+ * The synthetic person's own access token (password sign-in on the local stack).
+ * One sign-in per person per run: the local auth server limits sign-ins per address.
+ */
+const personTokens = new Map<string, string>();
 async function personToken(address: string): Promise<string> {
+  const known = personTokens.get(address);
+  if (known) return known;
   const tok = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
     method: "POST",
     headers: { apikey: ANON, "Content-Type": "application/json" },
@@ -842,6 +848,7 @@ async function personToken(address: string): Promise<string> {
   });
   const { access_token } = (await tok.json()) as { access_token?: string };
   if (!access_token) throw new Error(`no session for the synthetic person (${tok.status})`);
+  personTokens.set(address, access_token);
   return access_token;
 }
 
@@ -866,7 +873,15 @@ async function rpcAsPerson<T>(address: string, fn: string, args: Record<string, 
     body: JSON.stringify(args),
   });
   if (!r.ok) throw new Error(`person call ${fn} → ${r.status} ${await r.text()}`);
-  return (await r.json()) as T;
+  const body = await r.text();
+  return (body ? JSON.parse(body) : null) as T;
+}
+
+/** The entry ids a set-returning uuid function answered with, whichever row shape PostgREST used. */
+function entryIds(rows: unknown): string[] {
+  return ((rows as unknown[] | null) ?? []).map((r) =>
+    typeof r === "string" ? r : String(Object.values(r as Record<string, unknown>)[0] ?? ""),
+  );
 }
 
 /** A service read that some tables refuse even to the service key: null = not readable here. */
@@ -1017,10 +1032,13 @@ test("E-3. the student becomes a worker: studies end, work is recorded, and noth
   await expect(periods.first(), "the student period at the institution stays in the one history").toBeVisible({ timeout: 30_000 });
 });
 
-// E-4 travels with its access fix (owner decision 2026-11-15,
-// 20261115120000_journal_learning_access_follows_link_v1): an organization
-// reads a learner's journal entry only while the learning link is active and
-// review is on for it. Every read below runs under the person's OWN RLS.
+// E-4 travels with its access fix (owner decision, binding, 2026-11-17;
+// 20261115120000_journal_learning_access_follows_link_v1): an ended
+// relationship removes current access, never the organization's lawfully
+// retained records. An organization reaches a learner's journal entry — by RLS
+// read, review queue, review decision or can_read_journal_entry_v1 — only
+// while the learning link is active and review is on for it. Every read and
+// call below runs as the person, with their OWN JWT.
 test("E-4. the institution ends the student link: it loses access, the learner keeps their history", async ({ browser }) => {
   const sid = await userId(EDU.student);
   const [ctx] = await db<Array<{ id: string }>>(
@@ -1028,23 +1046,28 @@ test("E-4. the institution ends the student link: it loses access, the learner k
   );
   expect(ctx?.id, "the learner has one active student link").toBeTruthy();
 
-  // The learner records a practice day IN that learning relationship, through the app's own write.
-  const practiceId = await rpcAsPerson<string>(EDU.student, "create_journal_entry_full", {
-    p_worker_id: eduStudentWorkerId,
-    p_engagement_context_id: ctx!.id,
-    p_entry_type_slug: "freeform",
-    p_profession_id: null,
-    p_original_text: `Practice day at the training centre, 4 hours (edu ${RUN})`,
-    p_original_language: "en",
-    p_hash_prev: null,
-    p_hash_self: "set-by-the-database",
-    p_visibility_scope: "closed",
-    p_metrics: [],
-    p_project_id: null,
-    p_project_explicit: false,
-  });
+  // The learner records practice days IN that learning relationship, through the app's own write.
+  const recordPractice = (text: string) =>
+    rpcAsPerson<string>(EDU.student, "create_journal_entry_full", {
+      p_worker_id: eduStudentWorkerId,
+      p_engagement_context_id: ctx!.id,
+      p_entry_type_slug: "freeform",
+      p_profession_id: null,
+      p_original_text: text,
+      p_original_language: "en",
+      p_hash_prev: null,
+      p_hash_self: "set-by-the-database",
+      p_visibility_scope: "closed",
+      p_metrics: [],
+      p_project_id: null,
+      p_project_explicit: false,
+    });
+  const practiceId = await recordPractice(`Practice day at the training centre, 4 hours (edu ${RUN})`);
   expect(practiceId, "the practice day is stored").toBeTruthy();
   const practice = `journal_entries?id=eq.${practiceId}&select=id`;
+  // A second day that the institution has not decided on when the link ends.
+  const pendingId = await recordPractice(`Second practice day at the training centre, 3 hours (edu ${RUN})`);
+  expect(pendingId, "the second practice day is stored").toBeTruthy();
 
   // While review is off the institution sees participation, not the journal.
   expect(await asPerson<Array<{ id: string }>>(EDU.institution, practice), "review off: no journal read").toEqual([]);
@@ -1056,6 +1079,51 @@ test("E-4. the institution ends the student link: it loses access, the learner k
     (await asPerson<Array<{ id: string }>>(EDU.institution, practice)).length,
     "control: active link + review on, the institution reads the practice day",
   ).toBe(1);
+  expect(
+    entryIds(await rpcAsPerson<unknown>(EDU.institution, "reviewable_journal_entry_ids", {})),
+    "control: active link + review on, both days wait in the institution's review queue",
+  ).toEqual(expect.arrayContaining([practiceId, pendingId]));
+  expect(
+    await rpcAsPerson<boolean>(EDU.institution, "can_read_journal_entry_v1", { p_entry_id: practiceId }),
+    "control: active link + review on, can_read_journal_entry_v1 is true",
+  ).toBe(true);
+
+  // While the link is active the institution creates its OWN records about the
+  // learner, through the same doors the app calls: a sign-off, a recognition
+  // citing it, and a programme with a cohort the learner is placed in.
+  expect(
+    await rpcAsPerson<string>(EDU.institution, "review_journal_entry", { p_entry_id: practiceId, p_decision: "approved", p_note: null }),
+    "the institution signs the practice day off",
+  ).toBe("approved");
+  const [link] = await db<Array<{ organization_id: string }>>(`engagement_contexts?id=eq.${ctx!.id}&select=organization_id`);
+  const orgId = link!.organization_id;
+  const recognitionId = await rpcAsPerson<string>(EDU.institution, "record_competency_recognition_v1", {
+    p_subject_profile_id: sid,
+    p_requirement_kind: "skill",
+    p_requirement_key: `edu-practice-${RUN}`,
+    p_requirement_country: "LT",
+    p_evidence_entry_ids: [practiceId],
+    p_assessor_organization_id: orgId,
+    p_decision: "recognised",
+    p_valid_from: null,
+    p_valid_until: null,
+    p_note: null,
+    p_supersedes_id: null,
+  });
+  expect(recognitionId, "the institution records a recognition citing the signed-off day").toBeTruthy();
+  const programId = await rpcAsPerson<string>(EDU.institution, "create_education_program_v1", {
+    p_organization_id: orgId,
+    p_name: `Synthetic Programme ${RUN}`,
+  });
+  const cohortId = await rpcAsPerson<string>(EDU.institution, "create_education_cohort_v1", {
+    p_program_id: programId,
+    p_name: `Synthetic Cohort ${RUN}`,
+  });
+  await rpcAsPerson<null>(EDU.institution, "set_education_cohort_member_v1", {
+    p_cohort_id: cohortId,
+    p_profile_id: sid,
+    p_status: "active",
+  });
 
   const a = await browser.newContext();
   const inst = await a.newPage();
@@ -1110,6 +1178,57 @@ test("E-4. the institution ends the student link: it loses access, the learner k
   );
   expect(journal, "the institution reads none of the learner's journal").toEqual([]);
   expect(await asPerson<Array<{ id: string }>>(EDU.institution, practice), "not even the reviewed practice day").toEqual([]);
+
+  // The SECURITY DEFINER doors follow the same rule (RLS does not apply inside them).
+  expect(
+    entryIds(await rpcAsPerson<unknown>(EDU.institution, "reviewable_journal_entry_ids", {})),
+    "ended link: nothing in the institution's review queue",
+  ).toEqual([]);
+  const refused = await rpcAsPerson<string>(EDU.institution, "review_journal_entry", {
+    p_entry_id: pendingId,
+    p_decision: "approved",
+    p_note: null,
+  });
+  expect(refused, "ended link: a review decision is refused").not.toBe("approved");
+  expect(["review_authority_not_established", "review_not_enabled", "not_authorized"]).toContain(refused);
+  expect(
+    await db<Array<{ id: string }>>(`journal_entry_confirmations?entry_id=eq.${pendingId}&select=id`),
+    "and nothing is stored for it",
+  ).toEqual([]);
+  for (const id of [practiceId, pendingId]) {
+    expect(
+      await rpcAsPerson<boolean>(EDU.institution, "can_read_journal_entry_v1", { p_entry_id: id }),
+      "ended link: can_read_journal_entry_v1 is false",
+    ).toBe(false);
+  }
+
+  // The institution's OWN historical records stay readable to it, under its own RLS.
+  const recognitions = await asPerson<Array<{ id: string; assessor_organization_id: string; evidence_entry_ids: string[] }>>(
+    EDU.institution,
+    `competency_recognitions?id=eq.${recognitionId}&select=id,assessor_organization_id,evidence_entry_ids`,
+  );
+  expect(recognitions, "the institution still reads its own recognition").toEqual([
+    { id: recognitionId, assessor_organization_id: orgId, evidence_entry_ids: [practiceId] },
+  ]);
+  const signOff = await asPerson<Array<{ entry_id: string }>>(
+    EDU.institution,
+    `journal_entry_confirmations?entry_id=eq.${practiceId}&select=entry_id`,
+  );
+  expect(signOff, "its own sign-off of the practice day").toEqual([{ entry_id: practiceId }]);
+  expect(
+    await asPerson<Array<{ id: string }>>(EDU.institution, `education_programs?id=eq.${programId}&select=id`),
+    "its programme",
+  ).toEqual([{ id: programId }]);
+  expect(
+    await asPerson<Array<{ id: string }>>(EDU.institution, `education_cohorts?id=eq.${cohortId}&select=id`),
+    "its cohort",
+  ).toEqual([{ id: cohortId }]);
+  const membership = await asPerson<Array<{ status: string }>>(
+    EDU.institution,
+    `education_cohort_members?cohort_id=eq.${cohortId}&profile_id=eq.${sid}&select=status`,
+  );
+  expect(membership.length, "the learner's cohort membership record").toBe(1);
+  expect(["active", "left"]).toContain(membership[0]!.status);
 
   // The learner keeps their own history.
   const own = await asPerson<Array<{ id: string }>>(EDU.student, `journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`);
