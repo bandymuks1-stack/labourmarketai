@@ -90,6 +90,27 @@ describe("the stage", () => {
     expect(LABELS).toMatch(/professionDisplayName\(/);
   });
 
+  it("a person's name is never cut by the stage's clipped edge (layout walk 2026-11-15)", () => {
+    // 1. The name column never outgrows its cell. At 320 px the cell is
+    //    ~112 px; a fixed 9rem (144 px) minimum pushed the column past it and
+    //    the stage's overflow-hidden cut the name's end. 9rem still holds
+    //    wherever the cell is wider, so the ring keeps wrapping below.
+    const src = code(STAGE);
+    expect(src).toContain("min-w-[min(9rem,100%)] flex-1 flex-col");
+    expect(src).not.toMatch(/\bmin-w-\[\d+(?:\.\d+)?(?:rem|px)\]/);
+    expect(STAGE).toMatch(/overflow-hidden rounded-2xl/);
+    // 2. In the narrow composition the name may break inside a word, but only
+    //    when that word alone is wider than the line (`break-word`), and its
+    //    size follows the stage's own width. Opting out of breaking let a long
+    //    surname run under the clipped edge on the journal's card.
+    const CSS = read("app/globals.css");
+    const narrow = CSS.slice(CSS.indexOf("@container (max-width: 560px)"));
+    const name = narrow.slice(narrow.indexOf(".identity-stage h2 {"), narrow.indexOf("}", narrow.indexOf(".identity-stage h2 {")));
+    expect(name).toContain("overflow-wrap: break-word;");
+    expect(name).not.toMatch(/overflow-wrap:\s*normal|word-break:\s*keep-all|white-space:\s*nowrap/);
+    expect(name).toMatch(/font-size: clamp\(1\.25rem, [\d.]+cqi, 1\.5rem\);/);
+  });
+
   it("carries no score, no rating, no percentage", () => {
     for (const src of [code(STAGE), code(read("lib/player-card/identity-facts.ts"))]) {
       expect(src).not.toMatch(/\/100|stars?\b.*rating|%\s*\}|score/i);

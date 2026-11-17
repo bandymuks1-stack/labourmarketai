@@ -13,6 +13,11 @@
  * (non-PII, non-price). The other fields are accepted for completeness but
  * every value is length-bounded and used purely as a form default the user
  * reviews before submitting. PURE — no fs, no net, client-safe.
+ *
+ * `from` (owner P0 2026-11-10, attribution): the id of the public button that
+ * opened the form (e.g. `companies_market_lu`), so an inquiry records which
+ * page it came from. A page's own button id, never a person's identifier or
+ * a campaign tag; a bounded slug or nothing.
  */
 import { ALL_ISO_COUNTRIES } from "@/lib/location/country-model";
 import { isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
@@ -23,9 +28,13 @@ export interface CompanyNeedPrefill {
   readonly profession?: string;
   readonly expectedDuration?: string;
   readonly description?: string;
+  readonly entry?: string;
   /** How the labour is supplied; an intent page (subcontractors, agencies) preselects it. */
   readonly engagement?: PrefillEngagement;
 }
+
+/** A public button id: lower-case slug, bounded. */
+export const COMPANY_NEED_ENTRY = /^[a-z0-9_]{1,40}$/;
 
 /**
  * The form's `engagement_model` values. Kept here, not imported, because
@@ -55,6 +64,7 @@ export function parseCompanyNeedPrefill(
     profession?: string;
     expectedDuration?: string;
     description?: string;
+    entry?: string;
     engagement?: PrefillEngagement;
   } = {};
 
@@ -87,9 +97,61 @@ export function parseCompanyNeedPrefill(
   const description = text(params.get("description"), MAX_DESCRIPTION_CHARS);
   if (description) out.description = description;
 
+  const entry = params.get("from")?.trim();
+  if (entry && COMPANY_NEED_ENTRY.test(entry)) out.entry = entry;
   const engagement = params.get("engagement")?.trim();
   const known = PREFILL_ENGAGEMENTS.find((e) => e === engagement);
   if (known) out.engagement = known;
 
   return out;
+}
+
+/**
+ * The sign-in return value cannot be longer than this (lib/auth/redirect.ts drops
+ * a longer `next` and sends the person to the dashboard instead).
+ */
+export const COMPANY_NEED_RETURN_MAX_CHARS = 1000;
+
+/**
+ * Where to come back to after signing in or signing up from the public form,
+ * with the person's typed answers as the form's own prefill (employer path P0
+ * 2026-11-15). Only the fields `parseCompanyNeedPrefill` reads come along, and the
+ * page's own `from`; never a name, an e-mail address or a phone number. The
+ * description is shortened until the whole value fits the sign-in limit, so a
+ * long text never costs the person the return.
+ */
+export function companyNeedReturnPath(
+  locale: string,
+  read: (name: string) => string,
+  currentSearch = "",
+): string {
+  const base = `/${locale}/company-need`;
+  const p = new URLSearchParams();
+  const set = (key: string, value: string) => {
+    const v = value.trim();
+    if (v) p.set(key, v);
+  };
+  set("country", read("country"));
+  const workers = read("number_of_workers").trim();
+  if (workers && workers !== "1") set("number_of_workers", workers);
+  set("profession", read("profession"));
+  set("expected_duration", read("expected_duration").slice(0, MAX_DURATION_CHARS));
+  const engagement = read("engagement_model").trim();
+  if (engagement && engagement !== "employment") set("engagement", engagement);
+  const entry = new URLSearchParams(currentSearch).get("from")?.trim();
+  if (entry && COMPANY_NEED_ENTRY.test(entry)) p.set("from", entry);
+
+  const build = (description: string) => {
+    const q = new URLSearchParams(p);
+    if (description) q.set("description", description);
+    const query = q.toString();
+    return query ? `${base}?${query}` : base;
+  };
+  let description = read("description").trim().slice(0, MAX_DESCRIPTION_CHARS);
+  let value = build(description);
+  while (value.length > COMPANY_NEED_RETURN_MAX_CHARS && description.length > 0) {
+    description = description.slice(0, Math.floor(description.length * 0.8)).trim();
+    value = build(description);
+  }
+  return value;
 }

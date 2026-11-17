@@ -195,13 +195,11 @@ describe.each(ROUTED_LOCALES)("%s — one surface, one name", (locale) => {
 
     /*
      * THE HINT IS PINNED BY MEANING, NOT BY STRING EQUALITY — and that is a
-     * finding, not a softening. Copying onboarding's hint verbatim into the hub
-     * broke `profile-summary-first.test.ts`: the hub is deliberately in the
-     * INFORMAL register ("tu") and onboarding's hint is formal ("Galite …
-     * galėsite"). Two true constraints, so the hub says the same thing in its
-     * own register instead of quoting a sentence written for another surface.
-     * (The TITLE needs no such treatment — "Kokia tavo profesija …" is already
-     * informal, which is why it is pinned exactly above.)
+     * finding, not a softening. The hub once spoke the informal "tu" while
+     * onboarding was formal, so the hub said the same thing in its own
+     * register. Since the owner decision of 2026-11-15 the whole Lithuanian
+     * product speaks formal "jūs", so the hint must carry no informal form;
+     * the title is pinned exactly above.
      */
     const hint = str(m, "setupJourney.steps.goal.hint");
     expect(hint?.trim().length, `${locale} goal.hint`).toBeGreaterThan(0);
@@ -209,9 +207,8 @@ describe.each(ROUTED_LOCALES)("%s — one surface, one name", (locale) => {
       // It must keep saying SEVERAL ARE ALLOWED — the half of §5 that stops
       // this step becoming "pick your one true profession" again.
       expect(hint!.toLowerCase()).toMatch(/vien[ąa] ar kelias/);
-      // And it must stay in the hub's register, so the fix cannot be undone by
-      // re-copying the formal sentence back over it.
-      expect(hint!).not.toMatch(/\b(galite|nurodykite|pasirinkite|jūs|jums)\b/i);
+      // And it must stay in the product's one register (formal "jūs").
+      expect(hint!).not.toMatch(/(?<![a-ząčęėįšųūž])(gali|nurodyk|pasirink|tu|tau|tavo|galėsi)(?![a-ząčęėįšųūž])/i);
     }
   });
 

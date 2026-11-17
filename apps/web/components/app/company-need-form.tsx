@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, type ReactNode } from "react";
 import { parseCompanyNeedPrefill } from "@/lib/staffing/company-need-prefill";
 import {
   submitCompanyNeedAction,
@@ -27,7 +27,6 @@ export interface CompanyNeedFormLabels {
   readonly contactPerson: string;
   readonly contactPersonHelp: string;
   readonly contactEmail: string;
-  readonly contactEmailHelp: string;
   readonly profession: string;
   readonly country: string;
   readonly countryHelp: string;
@@ -86,8 +85,15 @@ export function CompanyNeedForm({
   labels,
   categories,
   countryOptions,
+  phone,
+  notice,
 }: {
   readonly labels: CompanyNeedFormLabels;
+  /** The phone field's label and its "optional" mark: the landing request
+   *  door's own words, now that this form is the one worker-need entry. */
+  readonly phone: { readonly label: string; readonly optional: string };
+  /** The privacy notice shown before sending (the request door's, unchanged). */
+  readonly notice: ReactNode;
   readonly categories: readonly WorkCategoryOptionGroup[];
   /** Constrained target-market list (code + localized name) — no free-text codes. */
   readonly countryOptions: ReadonlyArray<{ code: string; label: string }>;
@@ -105,6 +111,10 @@ export function CompanyNeedForm({
   const startedRef = useRef(false);
   const submittedRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
+  // Which public button opened the form (`?from=`), sent with the inquiry.
+  // Kept in a ref and written at submit time, like the fill-time stamp below.
+  const entryRef = useRef("");
+  const entryInputRef = useRef<HTMLInputElement>(null);
 
   // Optional bounded prefill from query params (calculator bridge v1) — only
   // fields the server action already accepts, validated by the adapter and
@@ -137,6 +147,8 @@ export function CompanyNeedForm({
     setIf("profession", prefill.profession, [""]);
     setIf("expected_duration", prefill.expectedDuration, [""]);
     setIf("description", prefill.description, [""]);
+    entryRef.current = prefill.entry ?? "";
+    if (entryInputRef.current) entryInputRef.current.value = entryRef.current;
     setIf("engagement_model", prefill.engagement, ["employment"]); // employment is the untouched default
   }, []);
 
@@ -158,6 +170,7 @@ export function CompanyNeedForm({
   }, [state]);
   function stampOnSubmit() {
     if (stampRef.current && shownAt.current > 0) stampRef.current.value = String(shownAt.current);
+    if (entryInputRef.current) entryInputRef.current.value = entryRef.current;
   }
 
   function handleFirstInteraction() {
@@ -207,6 +220,7 @@ export function CompanyNeedForm({
         {/* Left empty by a person: out of sight, out of the tab order, not autofilled. */}
         <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
         <input type="hidden" name="started" ref={stampRef} />
+        <input type="hidden" name="from" ref={entryInputRef} />
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.companyName}</span>
@@ -222,9 +236,15 @@ export function CompanyNeedForm({
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.contactEmail}</span>
             <input type="email" name="contact_email" required maxLength={254} className={FIELD} />
-            <span className={HELP}>{labels.contactEmailHelp}</span>
           </label>
         </div>
+
+        <label className={LABEL}>
+          <span className="text-text-secondary">
+            {phone.label} <span className="text-text-muted">({phone.optional})</span>
+          </span>
+          <input type="tel" name="contact_phone" maxLength={40} autoComplete="tel" className={FIELD} />
+        </label>
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.profession}</span>
@@ -253,7 +273,7 @@ export function CompanyNeedForm({
           </label>
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.numberOfWorkers}</span>
-            <input type="number" name="number_of_workers" min={1} max={1000} defaultValue={1} className={FIELD} />
+            <input type="number" name="number_of_workers" min={1} max={100000} defaultValue={1} className={FIELD} />
           </label>
         </div>
 
@@ -322,6 +342,8 @@ export function CompanyNeedForm({
           <textarea name="description" required rows={4} maxLength={8000} className={FIELD} />
           <span className={HELP}>{labels.descriptionHelp}</span>
         </label>
+
+        <p className="text-xs leading-relaxed text-text-muted" data-testid="company-need-privacy-notice">{notice}</p>
 
         <button
           type="submit"

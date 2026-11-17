@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * CROSS-ROLE INTEGRATION JOURNEYS, end to end, on a THROWAWAY LOCAL Supabase
@@ -257,6 +258,7 @@ async function postNeed(page: Page, role: string, opts: { doubleSubmit?: boolean
   await main.getByTestId("demand-next").click();
   const size = main.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await chooseDemandCountryIfEmpty(page);
   await main.getByTestId("demand-next").click();
   if (opts.doubleSubmit) await main.getByTestId("demand-create").dblclick();
   else await main.getByTestId("demand-create").click();
@@ -590,7 +592,9 @@ test("J-AGY. an agency sees the shared need, proposes its worker; the company ac
 
   // The company sees the proposal on the need's scouting page and accepts it.
   await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
-  const offers = co.getByTestId("scouting-agency-offers");
+  // Scoped to <main>: while a section streams in, React can briefly hold a
+  // second, hidden copy outside it (CI 2026-11-16, strict-mode match of two).
+  const offers = co.getByRole("main").getByTestId("scouting-agency-offers");
   await expect(offers, "the company sees the agency's proposal").toBeVisible({ timeout: 30_000 });
   await expect(offers.getByTestId("scout-offer-status-offered")).toBeVisible();
   await offers.getByTestId(`offer-accept-${s.offerId}`).click();
@@ -745,6 +749,43 @@ test("J-WRK. the placed worker records work on the company's project; the compan
   expect(Number(await confirmed.getAttribute("data-entries"))).toBeGreaterThan(0);
 });
 
+// ── J-DEC ───────────────────────────────────────────────────────────────────
+
+test("J-DEC. the company sees the need's history, closes it as filled, and the hire decision shows (4.30)", async () => {
+  expect(s.needId && s.pwWorkerId && s.bookingId, "J-AGY placed the worker on this need").toBeTruthy();
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
+  const history = co.getByTestId("demand-history");
+  await expect(history, "the need's history is on its page").toBeVisible({ timeout: 30_000 });
+  await expect(history.getByTestId("demand-history-created")).toHaveCount(1);
+  // The company proposed the booking (by accepting the agency's offer); the worker answered it.
+  await expect(history.getByTestId(`demand-history-proposed-${s.pwWorkerId}`)).toHaveAttribute("data-actor", "you");
+  await expect(history.getByTestId(`demand-history-accepted-${s.pwWorkerId}`)).toHaveAttribute("data-actor", "candidate");
+  await expect(history.getByTestId(`demand-history-accepted-${s.pwWorkerId}`).locator("time")).toHaveAttribute(
+    "datetime",
+    /^\d{4}-\d{2}-\d{2}T/,
+  );
+  await expect(history).toHaveAttribute("data-decided", "false");
+
+  // The decision: the company closes the need as filled.
+  await co.getByTestId("demand-close").click();
+  await expect
+    .poll(
+      async () =>
+        (await db<Array<{ status: string; closed_outcome: string | null }>>(
+          `customer_requests?id=eq.${s.needId}&select=status,closed_outcome`,
+        )).map((r) => `${r.status}:${r.closed_outcome}`),
+      { message: "the need is closed as filled", timeout: 30_000 },
+    )
+    .toEqual(["closed:completed"]);
+
+  await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
+  const after = co.getByTestId("demand-history");
+  await expect(after).toHaveAttribute("data-decided", "true", { timeout: 30_000 });
+  await expect(after.getByTestId("demand-history-closed")).toHaveAttribute("data-outcome", "completed");
+  await expect(after.getByTestId("demand-history-decision"), "the hire decision names the accepted candidate").toBeVisible();
+});
+
 // ── J-ISO ───────────────────────────────────────────────────────────────────
 
 test("J-ISO. an unrelated company sees nothing of it; ending the employee's membership ends their access", async ({
@@ -884,4 +925,29 @@ test("J-DUP. a double-submitted need and a double-clicked confirmation each stor
   await co.waitForTimeout(3_000); // let a second decision, if any, land
   const confirmations = await db<Array<{ id: string }>>(`journal_entry_confirmations?entry_id=eq.${second}&select=id`);
   expect(confirmations.length, "a double-clicked confirmation is stored once").toBe(1);
+});
+
+// ── J-RPT ───────────────────────────────────────────────────────────────────
+
+test("J-RPT. the employer's report counts the work it confirmed; its hours sheet opens", async () => {
+  expect(s.entryId, "J-WRK recorded and confirmed work").toBeTruthy();
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/reports`);
+  const journal = co.getByTestId("reports-org-journal");
+  await expect(journal, "the organization's journal report is on the reports page").toBeVisible({ timeout: 30_000 });
+  const tile = (label: string) =>
+    journal.locator("div").filter({ has: co.locator("dt", { hasText: label }) }).locator("dd").first();
+  // J-WRK's work was recorded today and confirmed by this company: inside the seven-day window.
+  await expect
+    .poll(async () => Number((await tile("Entries recorded").textContent())?.trim()), {
+      message: "the recorded work is counted",
+      timeout: 30_000,
+    })
+    .toBeGreaterThanOrEqual(1);
+  expect(Number((await tile("Confirmed").textContent())?.trim()), "the confirmed work is counted").toBeGreaterThanOrEqual(1);
+
+  // The employer's hours sheet opens in its working state, not a setup or error panel.
+  await co.goto(`${BASE}/en/dashboard/hours`);
+  await expect(co.getByRole("main")).toBeVisible({ timeout: 30_000 });
+  await expect(co.locator('[data-testid^="hours-state-"]'), "the hours sheet is usable for the company").toHaveCount(0);
 });

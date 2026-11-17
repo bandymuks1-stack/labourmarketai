@@ -92,7 +92,7 @@ test("R-1 (3.21 / 5.12). Alfa's roster lists its worker with a team state", asyn
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await rendered(page, "people");
-  await expect(page.getByTestId("company-people")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("main").getByTestId("company-people")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("company-workers-migration-blocker")).toHaveCount(0);
   const row = page.getByTestId(`company-worker-row-${id}`);
   await expect(row, "the worker is on the roster").toBeVisible({ timeout: 30_000 });

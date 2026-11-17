@@ -68,6 +68,8 @@ import {
   type CandidatePipelineStage,
 } from "@/lib/pipeline/candidate-pipeline";
 import { loadDemandPipelineFacts } from "@/lib/pipeline/candidate-pipeline-facts";
+import { loadDemandHistory } from "@/lib/demand/demand-history-facts";
+import { DemandHistoryList } from "@/components/app/demand-history-list";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Card } from "@/components/ui/Card";
 import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
@@ -279,7 +281,7 @@ export default async function CompanyScoutingPage({
           )
         : [];
   // Stage 2 — needs the scouting result (or the stage-1 offers).
-  const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts] =
+  const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts, demandHistory] =
     await Promise.all([
       selected && result?.kind === "ok"
         ? createSupabaseServerClient().then((client) => readLastAutoMatchReceipt(client, selected))
@@ -315,6 +317,9 @@ export default async function CompanyScoutingPage({
               handRaisers.map((h) => h.workerId),
             )
           : null,
+      // The need's history (4.30): its creation, the owner's proposals and their
+      // answers with actor and time, and how it ended. Owner only.
+      result?.kind === "ok" && !actsForClient ? loadDemandHistory(result.demand.id) : null,
     ]);
   const applicantIdentity = new Map<string, ApplicantIdentity>();
   for (const [id, who] of appliedIdentities) if (who) applicantIdentity.set(id, who);
@@ -748,6 +753,18 @@ export default async function CompanyScoutingPage({
         />
       ) : null}
 
+      {/* THE NEED'S HISTORY (4.30): what was proposed, who answered and when,
+          and how the need ended. Owner only, from facts the owner can read. */}
+      {result?.kind === "ok" && demandHistory ? (
+        <DemandHistoryList
+          history={demandHistory}
+          nameFor={(workerId) =>
+            applicantIdentity.get(workerId)?.name ??
+            `${t("candidate")} ${anonymizedToken(anonymizedWorkerLabel(workerId))}`
+          }
+        />
+      ) : null}
+
       {/* LIFECYCLE (owner P0 2026-09-22 §12): on a CLOSED need the candidate
           list is HISTORY — who was compared and what was decided — never an
           actionable shortlist. The controls below are gated on `needOpen`
@@ -1086,7 +1103,7 @@ export default async function CompanyScoutingPage({
           </header>
           <ul className="flex flex-col gap-3">
             {offeredCandidates.map((oc) => (
-              <li key={oc.offerId} className="card-border flex flex-col gap-3 p-3" data-testid={`scout-offered-${oc.workerId}`}>
+              <li key={oc.offerId} className="card-border flex flex-col gap-3 p-3" data-testid={`scout-offered-${oc.workerId}`} data-offer-id={oc.offerId}>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                     {anonymizedToken(anonymizedWorkerLabel(oc.workerId))}
@@ -1129,6 +1146,8 @@ export default async function CompanyScoutingPage({
                       accepted: tOffered("decision.accepted"), declined: tOffered("decision.declined"),
                       notReady: tOffered("decision.notReady"), forbidden: tOffered("decision.forbidden"),
                       closed: tOffered("decision.closed"), error: tOffered("decision.error"),
+                      limitOpen: tOffered("decision.limitOpen"), limitDaily: tOffered("decision.limitDaily"),
+                      limitUnknown: tOffered("decision.limitUnknown"), openBookings: tOffered("decision.openBookings"),
                     }}
                   />
                 ) : null}

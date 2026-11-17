@@ -60,7 +60,7 @@ DL=1
 check "a falling count is not an event, ledger keeps the high-water mark" '[ "$(run retry)" = 0 ] && [ "$(events)" = 4 ] && grep -q "^dead_letter_present 2$" "$R/.invitation-delivery-events"'
 
 ALERTS=''; DL=0
-check "all clear: ledger empty, CLEAR logged" '[ "$(run retry)" = 0 ] && [ ! -s "$R/.invitation-delivery-events" ]'
+check "all clear: ledger empty, CLEAR logged" '[ "$(run retry)" = 0 ] && [ ! -s "$R/.invitation-delivery-events" ] && [ "$(tail -1 "$R/invitation-delivery-alerts.log" | sed "s/^[^ ]* //")" = "CLEAR [dead_letter_present]" ]'
 ALERTS='"repeated_failures"'
 check "recurrence after clearing is notified again" '[ "$(run retry)" = 0 ] && [ "$(events)" = 5 ]'
 

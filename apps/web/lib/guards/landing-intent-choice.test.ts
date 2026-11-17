@@ -239,8 +239,9 @@ describe("two actions to a function", () => {
     expect(server + navigator).not.toMatch(/href[=:]\s*["'`]\/(?!jobs["'`]|["'`])/);
   });
 
-  it("each card says whether it opens now or asks for sign-in when opened", () => {
-    expect(server).toMatch(/link\.account \? t\("nav\.signInWhenOpen"\) : t\("nav\.opensNow"\)/);
+  it("a card that asks for sign-in says so; an open card carries no badge (decision 0032)", () => {
+    expect(server).toMatch(/link\.account \? t\("nav\.signInWhenOpen"\) : undefined/);
+    expect(server).not.toContain("nav.opensNow");
   });
 
   it("a profession card opens the filtered board directly; search and the full list sit beside it", () => {
