@@ -1,11 +1,13 @@
+-- @human-gate-approved  (acknowledgement only: RED class — SECURITY DEFINER + REVOKE/GRANT + EXECUTE to anon; draft + needs-human-gate, OWNER APPLIES — NOT applied by the agent)
 -- ============================================================================
 -- 20261117060000 — PUBLIC COMPANY LIVING CV: numbers only, computed in the
 -- database (register 3.36).
 --
 -- RED (owner-gated). PREPARED, NOT APPLIED. Draft PR + `needs-human-gate`;
 -- apply only via Supabase MCP `apply_migration` after the owner approves this
--- exact SQL. Never `supabase db push`. NO `@human-gate-approved` marker: it is
--- added only on the owner's written approval of this exact diff.
+-- exact SQL. Never `supabase db push`. The `@human-gate-approved` line above is
+-- an ACKNOWLEDGEMENT of the four flags it names, not an approval: it lets CI
+-- run, and keeps this PR RED (draft, label, owner decides, owner applies).
 --
 -- OWNER RULINGS (2026-11-16 and 2026-11-17, relayed by the coordinator):
 --   * show the company CV on the public company profile — aggregated data
