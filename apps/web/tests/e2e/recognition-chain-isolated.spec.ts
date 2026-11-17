@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import { clickUntilVisible } from "./click-until-visible";
 
 /**
  * A POSITIVE RECOGNITION FROM REAL EVIDENCE — THE WRITE PATH, on a THROWAWAY LOCAL Supabase stack
@@ -179,14 +180,6 @@ async function submitUntil(button: Locator, stored: () => Promise<boolean>, time
   }).toPass({ timeout });
 }
 
-/** Click until the expected result shows: a click before hydration is a silent no-op. */
-async function clickUntil(target: Locator, result: Locator, timeout = 60_000): Promise<void> {
-  await expect(async () => {
-    if (!(await result.isVisible().catch(() => false))) await target.click({ timeout: 5_000 });
-    await expect(result).toBeVisible({ timeout: 5_000 });
-  }).toPass({ timeout });
-}
-
 /** The institution's recognition form with the learner chosen, so the evidence list is theirs. */
 async function recognitionForm(page: Page): Promise<Locator> {
   await page.goto(`${BASE}/en/dashboard/company/education`);
@@ -325,7 +318,7 @@ test("I-4. the learner records a practice day in that learning relationship", as
   const box = main.getByTestId("journal-quick-record-text");
   await expect(box).toBeVisible({ timeout: 60_000 });
   await box.fill(PRACTICE);
-  await clickUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  await clickUntilVisible(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
   const context = main.getByTestId("worklog-context");
   if ((await context.count()) > 0) {
     const opts = await context.locator("option").evaluateAll((os) =>
@@ -596,7 +589,7 @@ test("I-11. the learner records a practice day in the intern relationship", asyn
   const box = main.getByTestId("journal-quick-record-text");
   await expect(box).toBeVisible({ timeout: 60_000 });
   await box.fill(INTERN_PRACTICE);
-  await clickUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  await clickUntilVisible(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
   // Two relationships now (learner, intern): the record names the one it belongs to.
   const context = main.getByTestId("worklog-context");
   await expect(context, "the person chooses where the day was worked").toBeVisible({ timeout: 30_000 });
@@ -734,7 +727,7 @@ test("I-15. EDU-5: the learner's accepted skill reaches the reviewer's learning 
   const box = main.getByTestId("journal-quick-record-text");
   await expect(box).toBeVisible({ timeout: 60_000 });
   await box.fill(EDU5_PRACTICE);
-  await clickUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  await clickUntilVisible(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
   const context = main.getByTestId("worklog-context");
   await expect(context).toBeVisible({ timeout: 30_000 });
   const opts = await context.locator("option").evaluateAll((os) =>
@@ -752,7 +745,7 @@ test("I-15. EDU-5: the learner's accepted skill reaches the reviewer's learning 
   await expect(main.getByTestId("worklog-done"), "the practice day is saved").toBeVisible({ timeout: 60_000 });
   const offer = main.locator(`[data-testid="worklog-pending-candidate"][data-candidate-slug="${EDU5_SKILL}"]`);
   await expect(offer, "the recogniser offers the skill on this day").toBeVisible({ timeout: 30_000 });
-  await clickUntil(offer.getByTestId("worklog-candidate-confirm"), offer.getByTestId("worklog-candidate-confirmed"));
+  await clickUntilVisible(offer.getByTestId("worklog-candidate-confirm"), offer.getByTestId("worklog-candidate-confirmed"));
   await learner.close();
 
   let entryId = "";

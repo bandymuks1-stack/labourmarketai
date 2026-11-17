@@ -25,8 +25,8 @@ const E2E = resolve(__dirname, "..", "..", "tests", "e2e");
 const specs = readdirSync(E2E).filter((f) => f.endsWith(".spec.ts"));
 const read = (f: string) => readFileSync(resolve(E2E, f), "utf8");
 
-/** Local copies still to move onto the shared helper (it touches an open PR). */
-const LOCAL_COPY_PENDING: ReadonlySet<string> = new Set(["recognition-chain-isolated.spec.ts"]);
+/** Local copies still to move onto the shared helper (empty: every spec imports it). */
+const LOCAL_COPY_PENDING: ReadonlySet<string> = new Set<string>();
 
 /** `if (await x.isVisible()…) await x.click(` — a click that happens only when visible. */
 const ONCE_IF_VISIBLE = /if \(await ([\w.]+)\.isVisible\(\)(?:\.catch\(\(\) => false\))?\) await \1\.click\(/g;
