@@ -103,7 +103,12 @@ export type TrainingAssignmentRow = {
 export type CertificationRow = {
   readonly source: "training" | "worker_document";
   readonly id: string;
+  /** The course title (training rows); empty for a worker document, which is
+   *  named by its type through the documents' own translated labels. */
   readonly label: string;
+  /** The document type slug of a worker-document row — rendered through
+   *  `documents.types.<slug>`, never as the raw slug. Null for training. */
+  readonly documentTypeSlug: string | null;
   readonly holderProfileId: string | null;
   readonly issuedOn: string | null;
   readonly expiresOn: string | null;

@@ -291,10 +291,11 @@ describe("one form of address on the profile hub (LT)", () => {
     } else if (typeof node === "string") out[prefix.slice(0, -1)] = node;
     return out;
   };
-  // Formal second-person forms the informal player card does not use.
-  const FORMAL = /\b(jūs|jus|jūsų|jums|galite|tinkate|pasirinkite|papasakokite|nurodykite|pažymėkite|patikrinkite|patvirtinkite|įkelkite|ieškote|norite|neįrašėte|papildykite)\b/i;
+  // Informal second-person forms. Since the owner decision of 2026-11-15 the
+  // hub and the player card rendered inside it both speak formal "jūs".
+  const INFORMAL = /(?<![a-ząčęėįšųūž])(tu|tave|tavo|tau|tinki|pasirink|papasakok|nurodyk|pažymėk|patikrink|patvirtink|įkelk|ieškai|nori|neįrašei|papildyk)(?![a-ząčęėįšųūž])/i;
 
-  it("the hub's namespaces read 'tu' like the player card rendered inside it", () => {
+  it("the hub's namespaces read 'jūs' like the player card rendered inside it", () => {
     const hub = {
       ...flat(lt.profileHub, "profileHub."),
       ...flat((lt.setupJourney as Record<string, unknown>).steps, "setupJourney.steps."),
@@ -302,9 +303,9 @@ describe("one form of address on the profile hub (LT)", () => {
       ...flat((lt.skills as Record<string, unknown>).reviewBanner, "skills.reviewBanner."),
       ...flat((lt.playerCard as Record<string, unknown>).live, "playerCard.live."),
     };
-    const formal = Object.entries(hub).filter(([, v]) => FORMAL.test(v));
-    expect(formal, formal.map(([k, v]) => `${k}: ${v}`).join("\n")).toEqual([]);
+    const informal = Object.entries(hub).filter(([, v]) => INFORMAL.test(v));
+    expect(informal, informal.map(([k, v]) => `${k}: ${v}`).join("\n")).toEqual([]);
     // Positive control: the regex does catch the old wording.
-    expect(FORMAL.test("Štai ką apie jus jau žinome.")).toBe(true);
+    expect(INFORMAL.test("Štai ką apie tave jau žinome.")).toBe(true);
   });
 });

@@ -2043,7 +2043,8 @@
         "noMembers": "Pašlaik dalībnieku nav.",
         "unavailable": "Komandas neizdevās ielādēt. Mēģiniet vēlreiz.",
         "manage": "Mainīt komandas"
-      }
+      },
+      "organizationLink": "Organizācijas vēsture un projekti"
     },
     "workerView": {
       "eyebrow": "Mans projekts",
@@ -6416,7 +6417,7 @@
       "assigneePlaceholder": "[EN] Person's email",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -7096,7 +7097,8 @@
       "address": "Adrese",
       "project": "Projekts",
       "notInSource": "Avotā nav",
-      "linked": "Saistīts"
+      "linked": "Saistīts",
+      "openProject": "Atvērt projektu"
     },
     "whoWorked": "Kas šeit strādāja",
     "timeline": "Kas darīts",
@@ -7114,7 +7116,24 @@
       "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
       "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
     },
-    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
+    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos.",
+    "projects": {
+      "title": "Projekti platformā",
+      "counts": "{running} notiek · {completed} pabeigti",
+      "untitled": "Projekts bez nosaukuma",
+      "running": "Notiek",
+      "completed": "Pabeigts",
+      "all": "Visi {count} projekti"
+    },
+    "journal": {
+      "title": "Žurnālā ierakstītais darbs",
+      "hours": "Ierakstītās stundas",
+      "confirmed": "Organizācijas apstiprinātās stundas",
+      "people": "Cilvēki, kas ierakstīja darbu",
+      "period": "Ierakstīts",
+      "basis": "No {entries} žurnāla ierakstiem, ko cilvēki veica šajā organizācijā. Skaitīts atsevišķi no augstāk redzamās importētās vēstures un nekad tai nepieskaitīts.",
+      "unavailable": "Šobrīd neizdevās nolasīt šajā organizācijā žurnālā ierakstīto darbu."
+    }
   },
   "workLifecycle": {
     "pending": "Vēl nav",
@@ -7893,6 +7912,9 @@
       "invites": "Ielūgumu un paziņojumu e-pasti",
       "invitesOn": "ieslēgti",
       "invitesOff": "IZSLĒGTI – ieslēdz atsevišķi: INVITE_EMAIL_PROVIDER=smtp un viena testa nosūtīšana"
+    },
+    "alerts": {
+      "title": "Īpašnieka brīdinājumi un push paziņojumi"
     }
   },
   "historyDuplicates": {

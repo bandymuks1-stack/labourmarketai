@@ -213,7 +213,7 @@ test("R-1 (2.11). the worker names Germany and the Netherlands; the profile then
   for (const c of ["DE", "NL"] as const) {
     const ledger = section.getByTestId("profile-role-ledger").filter({ hasText: COUNTRY[c].lt });
     await expect(ledger, `the ${c} ledger`).toHaveCount(1, { timeout: 30_000 });
-    await expect(ledger).toContainText("ką jau turi ir ko trūksta");
+    await expect(ledger).toContainText("ką jau turite ir ko trūksta");
     const r = await readsAndExplains(ledger, "lt");
     console.info(`[ledger] ${c}: rows=${r.rows} ratio_total>0=${r.total > 0}`);
   }
@@ -267,7 +267,7 @@ async function matrix(page: Page, cc: "DE" | "NL", locale: "lt" | "en"): Promise
   await rendered(page, `labour-market ${cc} (${locale})`);
   const block = page.getByTestId(`country-readiness-${cc}`);
   await expect(block, `the ${cc} requirement matrix`).toBeVisible({ timeout: 30_000 });
-  await expect(block).toContainText(locale === "lt" ? "Ko ši šalis iš tavęs reikalauja" : "What this country requires of you");
+  await expect(block).toContainText(locale === "lt" ? "Ko ši šalis iš jūsų reikalauja" : "What this country requires of you");
   for (const scope of ["worker_solo", "worker_posted"]) {
     await expect(block.getByTestId(`country-readiness-scope-${scope}`), `${cc} ${scope}`).toBeVisible();
   }

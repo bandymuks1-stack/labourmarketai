@@ -50,6 +50,7 @@ export function MobileNavMenu({
   intents = [],
   lead = [],
   accountLabel = "",
+  signUpLabel,
   assistant,
 }: {
   items: readonly MobileNavItem[];
@@ -67,6 +68,9 @@ export function MobileNavMenu({
   lead?: readonly NavLeadLink[];
   /** Short note beside links that live inside the signed-in product. */
   accountLabel?: string;
+  /** The note on an account link that opens SIGN-UP for a signed-out visitor
+   *  (`guestHref`), e.g. "Create a free CV": the existing "Sign up". */
+  signUpLabel?: string;
   /** The "ask the assistant" entry — the existing conversation home;
    *  `guestHref` is where a signed-out visitor goes instead (the landing's own
    *  question box, which needs no account), as on the desktop bar. */
@@ -203,7 +207,7 @@ export function MobileNavMenu({
                             {link.account && (
                               <span className="inline-flex shrink-0 items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
                                 <LogIn aria-hidden className="h-3.5 w-3.5" />
-                                {accountLabel}
+                                {(!signedIn && link.guestHref && signUpLabel) || accountLabel}
                               </span>
                             )}
                           </Link>
