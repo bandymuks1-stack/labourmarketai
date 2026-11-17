@@ -215,6 +215,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261110140000_",
       // 2026-11-10 partner registration Slice 1: company takeover invitation, two-operator decision, link (RED draft #3211, needs-human-gate, NOT applied).
       "20261110190000_",
+      // 2026-11-12 Swedish consent texts: hash re-pin + grant RPC locale allowlist (RED draft, needs-human-gate, NOT applied).
+      "20261112210000_",
       // 2026-11-13 owner P0 invitation delivery reliability: codes-only send diagnostics, retry /
       // dead-letter / bounce fields (RED draft #3318, needs-human-gate, NOT applied).
       "20261113190000_",
