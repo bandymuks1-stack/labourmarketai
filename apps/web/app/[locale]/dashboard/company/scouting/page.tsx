@@ -1086,7 +1086,7 @@ export default async function CompanyScoutingPage({
           </header>
           <ul className="flex flex-col gap-3">
             {offeredCandidates.map((oc) => (
-              <li key={oc.offerId} className="card-border flex flex-col gap-3 p-3" data-testid={`scout-offered-${oc.workerId}`}>
+              <li key={oc.offerId} className="card-border flex flex-col gap-3 p-3" data-testid={`scout-offered-${oc.workerId}`} data-offer-id={oc.offerId}>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                     {anonymizedToken(anonymizedWorkerLabel(oc.workerId))}
