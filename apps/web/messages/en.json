@@ -6872,7 +6872,8 @@
         "noMembers": "No members right now.",
         "unavailable": "The teams could not be loaded. Try again.",
         "manage": "Change teams"
-      }
+      },
+      "organizationLink": "Organization's history and projects"
     },
     "workerView": {
       "eyebrow": "My project",
@@ -19281,7 +19282,8 @@
       "address": "Address",
       "project": "Project",
       "notInSource": "Not in the source",
-      "linked": "Linked"
+      "linked": "Linked",
+      "openProject": "Open the project"
     },
     "whoWorked": "Who worked here",
     "timeline": "What was done",
@@ -19362,6 +19364,23 @@
         "opening": "Opening…",
         "error": "The workspace could not be opened."
       }
+    },
+    "projects": {
+      "title": "Projects on the platform",
+      "counts": "{running} running · {completed} completed",
+      "untitled": "Untitled project",
+      "running": "Running",
+      "completed": "Completed",
+      "all": "All {count} projects"
+    },
+    "journal": {
+      "title": "Work recorded in the journal",
+      "hours": "Hours recorded",
+      "confirmed": "Hours confirmed by the organization",
+      "people": "People who recorded work",
+      "period": "Recorded",
+      "basis": "From {entries} journal entries people recorded under this organization. Counted apart from the imported history above and never added to it.",
+      "unavailable": "The journal work recorded under this organization could not be read just now."
     }
   },
   "workPlan": {
