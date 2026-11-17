@@ -118,8 +118,12 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 ## 7. Changes that need separate owner approval (none done)
 
 1. **Cron:** `sh /root/lm-prod/bin/lm-cron-install.sh --dry-run`, then without the flag (installs
-   `cron.d/labourmarket`: weekly-digest, commercial-handoffs, job-alerts; billing-recovery stays out
-   while payments are off). Rollback: `--remove`.
+   `cron.d/labourmarket`: weekly-digest, commercial-handoffs, job-alerts, privacy-erasure,
+   forecast-recompute; billing-recovery stays out while payments are off). Rollback: `--remove`.
+   First copy the current `ops/vps/labourmarket.cron` and `ops/vps/lm-cron.sh` into
+   `/root/lm-prod/bin`. The forecast switch-on plan and its proof are in
+   [`FORECAST_RECOMPUTE_SWITCH_ON.md`](FORECAST_RECOMPUTE_SWITCH_ON.md) (register 3.34 stays
+   unverified until it has run in production).
 2. **Deploy + backup channel:** owner creates the `lmdeploy` user + sudoers + forced-command
    `authorized_keys` line (receiver header) and the three GitHub secrets; then one proof dispatch of
    `deploy-vps.yml` (current main sha) and one of `db-backup.yml` with `restore_drill_only=true`.
