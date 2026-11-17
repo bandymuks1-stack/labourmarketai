@@ -1798,6 +1798,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-14: owner decision, invitation 862a91f4 KNOWN_HISTORICAL_UNKNOWN_OUTCOME — one integer count,
       // service_role only. RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
       "20261114150000_invitation_known_historical_unknown_v1.sql",
+      // 2026-11-15: owner decision, an organization reads a learner's journal only while the learning link
+      // is active and review is on (one RLS policy replaced). RED draft, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261115120000_journal_learning_access_follows_link_v1.sql",
       // 2026-11-17: owner ruling on #3464, public company CV aggregates only (k>=5, opt-in gated),
       // numbers only. RED draft (SECURITY DEFINER + GRANT to anon), the marker is the human-gate
       // acknowledgement, NOT applied.

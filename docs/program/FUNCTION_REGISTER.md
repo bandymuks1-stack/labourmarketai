@@ -455,7 +455,7 @@ No other FAIL or BLOCKED row stops a core web action today. The earlier list of 
 | 2.27 | Org historical evidence import | BLOCKED | `OWNER_GATED` | owner decision ARCH-5 (organization history import) | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
 | 2.28 | Historical consolidation | BLOCKED | `OWNER_GATED` | 165 historical dates wait for the owner OK on RED #2362 | RED draft #2362 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
 | 2.30 | Voice Work Journal | BLOCKED | `OWNER_GATED` | voice journal needs a speech-to-text host; the typed journal works | typed journal: prod walk fresh-activation 41279196446 (J-1) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
-| 2.37 | Subject refuses an imported record | BLOCKED | `OWNER_GATED` | owner decision ARCH-5; exists only as the blocker of 2.27 | register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
+| 2.37 | Subject refuses an imported record | BLOCKED | `OWNER_GATED` | a LINKED person contests (and withdraws the contest of) an organization's imported record about them: built and CI-proven; a person WITHOUT an account waits on owner decision ARCH-5 | isolated walk EX-6 (#3440); register row | Owner: the decision in the Reason column. Then the coordinator applies or walks |
 | 4.18 | Employer data disclosure grant | BLOCKED | `OWNER_GATED` | employer disclosure grant, RED #2471 | RED draft #2471 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
 | 4.22 | 3 free profile views + VIP | BLOCKED | `OWNER_GATED` | 3 free profile views + VIP: billing figures, RED #2474 | RED draft #2474 | Owner: the decision in the Reason column. Then the coordinator applies or walks |
 | 5.5 | Message translation | BLOCKED | `OWNER_GATED` | message translation is AI; the original text is shown and labelled | AI help stays off until security, legal and functional tests pass; the honest off state is proven by prod walk ai-off-honesty 40301607964 (2026-10-26, 13/13) | Owner: the decision in the Reason column. Then the coordinator applies or walks |
@@ -590,7 +590,7 @@ The SEO, GEO, internal search and UX/UI tables and the 288 function rows are cou
 | W-3 | Worker: records work, employer confirms | PASS | prod walk journal-confirm 41478434884 (2026-11-02) | Coordinator: re-walk on risk |
 | W-4 | Worker: Living CV grows from real work | PASS | prod walks living-cv-growth 41281984217, profile-cv-history 41282258795 (2026-11-01) | Coordinator: re-walk on risk |
 | W-5 | Worker: takes records out (CSV, hours, gallery) | PASS | prod walk worker-records-exports 41312948857 (2026-11-01) | Coordinator: re-walk on risk |
-| W-6 | Worker: disputes or refuses a record | BLOCKED | 2.37 waits on owner decision ARCH-5; 2.24 open item EVID-6 (private record) | Owner: ARCH-5. Then a GREEN executor builds and the coordinator walks |
+| W-6 | Worker: disputes or refuses a record | BLOCKED | 2.37: a linked person's contest is built and CI-proven (EX-6, #3440), a person without an account waits on owner decision ARCH-5; 2.24 open item EVID-6 (private record) | Owner: ARCH-5. Then a GREEN executor builds and the coordinator walks |
 | W-7 | Worker: native phone app | BLOCKED | 8.17 and 8.18 ran against production on 2026-11-02 (runs 41451882387, 41451829006); 8.15 not in the stores | Owner: store accounts (Google Play, Apple, EAS) |
 | L-1 | Learner: joins by the institution's link | PASS | prod walk learning-practice 41668191663 (2026-11-03) L-2..L-5 | Coordinator: re-walk on risk |
 | L-2 | Learner: finds a group and asks to join | PASS | prod walk cohort-join-request 41611766407 (2026-11-03) | Coordinator: re-walk on risk |
@@ -978,7 +978,7 @@ Evaluate in this order: Poland, Lithuania, Forem, Latvia, then Finland and VDAB;
 | 2.34 | Journal + hours export | LIVE_VERIFIED | 2026-11-01 | prod walk worker-records-exports 41312948857 2026-11-01 on 7f8bfaa2a (8/8) E-1/E-2; earlier: worker-records-exports run 40186822215 10-25 (8/8 green): E-1/E-2 journal + hours CSV export downloads; another worker's export never carries this day; anonymous refused | yes |  |
 | 2.35 | Discoverability consent | LIVE_VERIFIED | 2026-11-01 | prod walk search-support-privacy 41283989921 2026-11-01 on 38bfb9d93 (20 green, 2 planned skips) P-8; earlier: search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): P-8 discoverability consent off/on persists | yes |  |
 | 2.36 | Profession-specific journal templates | NOT_VERIFIED | 2026-11-01 | templates + migration exist (decision 0006; lib/journal/journal-templates.ts); no production proof yet | unproven | no production walk |
-| 2.37 | Subject refuses an imported record | NOT_IMPLEMENTED | 2026-11-01 | architecture §1.6/§10 (ARCH-5); appears only as the blocker of 2.27 | no | owner decision ARCH-5, then build |
+| 2.37 | Subject refuses an imported record | BLOCKED | 2026-11-17 | linked person (account linked to the roster person by their own confirmation): contest from their profile and withdraw it — INSERT policy `subject_contest_and_clash_receipt`, `withdraw_organization_evidence_dispute_v1`, `organization-evidence-section.tsx`; isolated walk EX-6 (`experience-integration-isolated.spec.ts`, #3440): one `disputed` event by the person with no role, the record row unchanged, the organization's own insert refused, withdrawn → `dispute_withdrawn`; signup-isolated run 44016475607 on a0095846f (183 passed). 2026-11-01 entry: architecture §1.6/§10 (ARCH-5), the blocker of 2.27 | unproven (CI only) | a person WITHOUT an account: owner decision ARCH-5; production walk step for the linked person |
 
 ## Company operations & projects
 
@@ -2116,7 +2116,7 @@ How it's tested:
 | 22 | 4.18 | Duomenų atskleidimas darbdaviui | D | walk once unblocked |  |  | Waits; see its row |
 | 23 | 2.27 | Įmonės istorinių įrašų įkėlimas | D | walk once unblocked |  |  | Waits; see its row |
 | 24 | 2.28 | Senų įrašų sujungimas | D | walk once unblocked |  |  | Waits; see its row |
-| 25 | 2.37 | Įrašo atsisakymas | D | new walk once it exists |  |  | Not built |
+| 25 | 2.37 | Įrašo atsisakymas | D | walk, new step (linked person; CI walk EX-6, #3440) |  |  | Linked person built; no account: ARCH-5 |
 | 26 | 6.21 | Viešas verslo puslapis | D | walk once unblocked |  | SC-4 | Waits; see its row |
 | 27 | 4.22 | Trys nemokami profilių peržiūrėjimai | D | new walk once it exists |  |  | Not built |
 | 28 | 2.17 | Europos profesijų klasifikatorius | D | walk once unblocked |  |  | Waits; see its row |
