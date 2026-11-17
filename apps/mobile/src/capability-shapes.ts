@@ -591,3 +591,44 @@ export type RespondPrepareData = {
   readonly input: unknown;
   readonly confirmationToken: string;
 };
+
+/**
+ * `cv.verified.get` — the person's Living CV as the printable CV page renders
+ * it (`lib/cv-export/verified-cv.ts`, `buildVerifiedCv`). Only the parts the
+ * phone shows are typed; the rest is ignored, never re-derived.
+ */
+export type VerifiedCvWorkRow = {
+  readonly id: string | null;
+  readonly title: string | null;
+  readonly orgName: string | null;
+  /** Paid work vs a placement or volunteering — decided by the relationship. */
+  readonly kind: string;
+  readonly startedAt: string | null;
+  readonly endedAt: string | null;
+};
+
+export type VerifiedCvLanguageRow = { readonly lang: string; readonly level: string };
+
+export type VerifiedCvEducationRow = {
+  readonly institutionName: string;
+  readonly programOrField: string | null;
+  readonly educationTypeSlug: string;
+  readonly startYear: number | null;
+  readonly endYear: number | null;
+  readonly isCurrent: boolean;
+};
+
+export type VerifiedCvGetData =
+  | {
+      readonly ok: true;
+      readonly cv: {
+        readonly workHistory: readonly VerifiedCvWorkRow[];
+        readonly languages: readonly VerifiedCvLanguageRow[];
+        readonly education: readonly VerifiedCvEducationRow[];
+      };
+    }
+  | { readonly ok: false; readonly code: "not_authenticated" | "no_worker" };
+
+/** A one-step worker action (`worker.add-work-history`, `worker.add-language`):
+ *  the bridge answers with the action id and whatever the action returned. */
+export type WorkerActionData = { readonly action: string };

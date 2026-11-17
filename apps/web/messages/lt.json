@@ -9435,6 +9435,27 @@
       "notStructured": "Automatinė paieška {when}: poreikis dar per menkai aprašytas. Pridėkite įgūdžių ar profesiją.",
       "failed": "Automatinė paieška {when} nebaigta. Žemiau esantis sąrašas vis tiek skaičiuojamas gyvai.",
       "capped": "Kandidatų kiekis buvo apribotas."
+    },
+    "history": {
+      "title": "Istorija",
+      "decision": "Priimti: {names}",
+      "created": "Poreikis sukurtas",
+      "closed": "Poreikis uždarytas",
+      "closedFilled": "Poreikis uždarytas: užpildytas",
+      "closedWithdrawn": "Poreikis uždarytas: atšauktas",
+      "event": {
+        "proposed": "Pasiūlytas užsakymas: {name}",
+        "accepted": "{name} priėmė užsakymą",
+        "declined": "{name} atsisakė užsakymo",
+        "withdrawn": "Užsakymas atšauktas: {name}",
+        "expired": "Užsakymo terminas baigėsi: {name}"
+      },
+      "actor": {
+        "you": "jūs",
+        "candidate": "kandidatas",
+        "automatic": "automatiškai",
+        "other": "kolega arba administratorius"
+      }
     }
   },
   "planBoundary": {
@@ -9941,6 +9962,9 @@
       "invites": "Kvietimų ir pranešimų laiškai",
       "invitesOn": "įjungti",
       "invitesOff": "IŠJUNGTI – įjungiami atskirai: INVITE_EMAIL_PROVIDER=smtp ir vienas bandomasis siuntimas"
+    },
+    "alerts": {
+      "title": "Savininko įspėjimai ir pranešimai įrenginyje"
     }
   },
   "adminMetrics": {
@@ -17468,7 +17492,7 @@
       "assigneePlaceholder": "Žmogaus el. paštas",
       "requiredByLabel": "Atlikti iki",
       "assign": "Paprašyti šio žmogaus",
-      "certificateFilePlaceholder": "Pažymėjimo failo id",
+      "certificateFileLabel": "Pažymėjimo failas",
       "issuedOnLabel": "Išduota",
       "expiresOnLabel": "Galioja iki",
       "attachCertificate": "Įrašyti pažymėjimą",

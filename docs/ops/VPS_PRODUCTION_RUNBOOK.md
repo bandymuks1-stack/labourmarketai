@@ -110,7 +110,7 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 | Supabase auth e-mails | Supabase built-in SMTP (rate-limited) | custom SMTP = owner decision |
 | AI (free-first provider chain: Cloudflare Workers AI → Mistral → Groq; Gemini only on a billed key) | **OFF** (`AI_PROVIDER_MODE=disabled`; every `ai_runs` row since 10-19 has `provider = 'disabled'`, monitor signal `ai-runtime-disabled`) | owner creates free keys + GO (§9.3) |
 | Stripe payments | OFF (`PAYMENTS_ENABLED=false`) — pricing shows the honest off state | owner supplies live secret + new webhook secret + price id; publishable key needs a rebuild |
-| Telegram owner alerts | OFF | bot token + chat id, or the Agentai OS alert bridge |
+| Telegram owner alerts | OFF | owner re-enters the bot token + chat id (§9.6); the Agentai OS bridge has no endpoint |
 | Nonstop handoff + referral | OFF (no tokens on either side) | new token pair, both sides (separate approval) |
 | Supply feed bearer | OFF (401) | new bearer, handed to the consumer |
 | Voice transcription | OFF (needs ≥ 2 vCPU) | keyboard dictation is the 0 € path |
@@ -118,8 +118,12 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 ## 7. Changes that need separate owner approval (none done)
 
 1. **Cron:** `sh /root/lm-prod/bin/lm-cron-install.sh --dry-run`, then without the flag (installs
-   `cron.d/labourmarket`: weekly-digest, commercial-handoffs, job-alerts; billing-recovery stays out
-   while payments are off). Rollback: `--remove`.
+   `cron.d/labourmarket`: weekly-digest, commercial-handoffs, job-alerts, privacy-erasure,
+   forecast-recompute; billing-recovery stays out while payments are off). Rollback: `--remove`.
+   First copy the current `ops/vps/labourmarket.cron` and `ops/vps/lm-cron.sh` into
+   `/root/lm-prod/bin`. The forecast switch-on plan and its proof are in
+   [`FORECAST_RECOMPUTE_SWITCH_ON.md`](FORECAST_RECOMPUTE_SWITCH_ON.md) (register 3.34 stays
+   unverified until it has run in production).
 2. **Deploy + backup channel:** owner creates the `lmdeploy` user + sudoers + forced-command
    `authorized_keys` line (receiver header) and the three GitHub secrets; then one proof dispatch of
    `deploy-vps.yml` (current main sha) and one of `db-backup.yml` with `restore_drill_only=true`.
@@ -729,3 +733,46 @@ turn push off or a push service reports them gone.
 
 **Rotating the keys** invalidates every existing subscription; people must turn
 push on again. Do it only if the private key may have leaked.
+
+### 9.6 Owner Telegram alerts (5.16, OFF since the migration)
+
+**The exact blocker.** The alert code is complete and tested
+(`lib/notifications/telegram-owner-alerts.ts`; it fires once per persisted
+`/company-need` intake and never blocks it). On Vercel it was live from
+2026-07-11 (`docs/launch/company-need-owner-alert-activation-v1.md`). The bot
+token and chat id were stored there as *Sensitive*, which Vercel never returns,
+so they could not be copied to the VPS (§3). Production therefore runs with
+`OWNER_TELEGRAM_ALERTS_ENABLED=false` and no token. Only the owner holds the
+values, so only the owner can restore the channel.
+
+| Setting | Kind |
+|---|---|
+| `OWNER_TELEGRAM_BOT_TOKEN` | **secret**: the existing owner bot's token (or a new one from @BotFather) |
+| `OWNER_TELEGRAM_CHAT_ID` | plain: the owner's chat id with that bot |
+| `OWNER_TELEGRAM_ALERTS_ENABLED=true` | owner switch; any other value = OFF |
+
+```sh
+S=/root/lm-prod/bin/lm-env-set.sh
+read -rs V; printf '%s' "$V" | sh $S OWNER_TELEGRAM_BOT_TOKEN; unset V
+read -r V;  printf '%s' "$V" | sh $S OWNER_TELEGRAM_CHAT_ID; unset V
+printf true | sh $S OWNER_TELEGRAM_ALERTS_ENABLED --restart
+```
+
+**Delivery test without a fake intake** (the same call the app makes; values
+are read from the env file and never printed):
+
+```sh
+E=/root/lm-prod/env
+T=$(sed -n 's/^OWNER_TELEGRAM_BOT_TOKEN=//p' $E); C=$(sed -n 's/^OWNER_TELEGRAM_CHAT_ID=//p' $E)
+curl -sS -o /dev/null -w '%{http_code}\n' -H 'Content-Type: application/json' \
+  -d "{\"chat_id\":\"$C\",\"text\":\"[SISTEMINIS TESTAS] LabourMarket.ai owner alert\"}" \
+  "https://api.telegram.org/bot$T/sendMessage"; unset T C
+```
+
+`200` and the message in the owner's chat prove delivery. **Observe** without a
+value: `/dashboard/admin/launch-readiness` → *Owner alerts and push
+notifications* (superadmin only) shows each setting as set or missing, for
+Telegram and for web push (§9.5).
+
+The Agentai OS bridge (`AGENTAI_OS_ALERT_*`) stays the preferred path in code,
+but it has no public endpoint; leave it unset.

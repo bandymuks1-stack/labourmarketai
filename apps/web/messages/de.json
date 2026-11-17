@@ -9435,6 +9435,27 @@
       "notStructured": "Automatische Suche {when}: Der Bedarf ist noch zu knapp beschrieben. Fügen Sie Fähigkeiten oder einen Beruf hinzu.",
       "failed": "Automatische Suche {when} konnte nicht abgeschlossen werden. Die Liste unten wird weiterhin live berechnet.",
       "capped": "Die Zahl der Kandidaten wurde begrenzt."
+    },
+    "history": {
+      "title": "Verlauf",
+      "decision": "Eingestellt: {names}",
+      "created": "Bedarf erstellt",
+      "closed": "Bedarf geschlossen",
+      "closedFilled": "Bedarf geschlossen: besetzt",
+      "closedWithdrawn": "Bedarf geschlossen: zurückgezogen",
+      "event": {
+        "proposed": "Buchung vorgeschlagen an {name}",
+        "accepted": "{name} hat die Buchung angenommen",
+        "declined": "{name} hat die Buchung abgelehnt",
+        "withdrawn": "Buchung an {name} zurückgezogen",
+        "expired": "Buchung an {name} abgelaufen"
+      },
+      "actor": {
+        "you": "Sie",
+        "candidate": "Kandidat",
+        "automatic": "automatisch",
+        "other": "Kollege oder Administrator"
+      }
     }
   },
   "planBoundary": {
@@ -9941,6 +9962,9 @@
       "invites": "Einladungs- und Benachrichtigungs-E-Mails",
       "invitesOn": "an",
       "invitesOff": "AUS – wird separat eingeschaltet: INVITE_EMAIL_PROVIDER=smtp und ein Testversand"
+    },
+    "alerts": {
+      "title": "Inhaber-Benachrichtigungen und Push-Mitteilungen"
     }
   },
   "adminMetrics": {
@@ -17468,7 +17492,7 @@
       "assigneePlaceholder": "E-Mail der Person",
       "requiredByLabel": "Abschließen bis",
       "assign": "Diese Person bitten",
-      "certificateFilePlaceholder": "Id der Zertifikatsdatei",
+      "certificateFileLabel": "Zertifikatsdatei",
       "issuedOnLabel": "Ausgestellt am",
       "expiresOnLabel": "Gültig bis",
       "attachCertificate": "Zertifikat speichern",

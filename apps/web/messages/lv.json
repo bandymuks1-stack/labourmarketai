@@ -6416,7 +6416,7 @@
       "assigneePlaceholder": "[EN] Person's email",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -7882,6 +7882,9 @@
       "invites": "Ielūgumu un paziņojumu e-pasti",
       "invitesOn": "ieslēgti",
       "invitesOff": "IZSLĒGTI – ieslēdz atsevišķi: INVITE_EMAIL_PROVIDER=smtp un viena testa nosūtīšana"
+    },
+    "alerts": {
+      "title": "Īpašnieka brīdinājumi un push paziņojumi"
     }
   },
   "historyDuplicates": {

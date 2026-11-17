@@ -654,6 +654,11 @@ export default async function JobDetailPage({
   const published = formatUtcDate(preview.publishedAt, active);
 
   const t = await getTranslations({ locale: active });
+  const tNeed = await getTranslations({ locale: active, namespace: "companyNeed" });
+  const employerNeedHref = `/company-need?${new URLSearchParams({
+    ...(preview.professionSlug ? { profession: preview.professionSlug } : {}),
+    from: "public_job",
+  }).toString()}`;
   // The comparison speaks the board's OWN vocabulary — criterion names, tier
   // titles, band chips, the ad-side gap words and the interest control's
   // copy all come from the `opportunities` namespace the destination already
@@ -1205,6 +1210,24 @@ export default async function JobDetailPage({
             </TrackedCta>
           </div>
         </section>
+      )}
+
+      {/* THE EMPLOYER'S DOOR from a public job (completion phase 2026-11-16):
+          a signed-out visitor hiring for this kind of work goes to the ONE
+          worker-need form (doctrine §17), with the job's profession filled in
+          through the form's own bounded prefill. The label is that form's own
+          title — no new copy (decision 0032). */}
+      {!member && (
+        <p className="mt-8">
+          <TrackedCta
+            ctaId="public_job_employer_need"
+            audience="companies"
+            href={employerNeedHref}
+            className="text-sm font-semibold text-brand-blue hover:underline"
+          >
+            {tNeed("title")} →
+          </TrackedCta>
+        </p>
       )}
 
       {attribution && (

@@ -48,6 +48,10 @@ on:
       - "apps/web/components/app/worker-education-section.tsx"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
       - "apps/web/tests/e2e/experience-integration-isolated.spec.ts"
+      # Register 2.36, a profession journal template prefills an entry.
+      - "apps/web/tests/e2e/journal-template-isolated.spec.ts"
+      - "apps/web/lib/journal/journal-templates*.ts"
+      - "apps/web/components/app/journal-entry-composer.tsx"
       # The code experience-integration-isolated.spec.ts guards (#3354, decision 0025).
       - "apps/web/app/*/cv/**"
       - "apps/web/app/*/dashboard/work-in-numbers/**"
@@ -146,7 +150,7 @@ jobs:
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), the practice -> sign-off -> recognition
       # chain that production no longer writes (recognition-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -222,8 +226,24 @@ jobs:
           # The runner shell is `bash -e`: without +e a failed start exits before
           # its log is printed and the cause (e.g. a migration error) is lost.
           set +e -uo pipefail
-          supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
-          rc=$?
+          # The stack publishes 54321-54334 (the tests read the mail catcher on
+          # 54324). Those ports sit inside the runner's ephemeral range
+          # (32768-60999), so an outgoing connection can hold one at start
+          # ("failed to bind host port ... address already in use"). New outgoing
+          # connections are kept below 54000, and a start that still meets a held
+          # port is stopped cleanly and tried once more. Any other failure exits.
+          sudo sysctl -w net.ipv4.ip_local_port_range="32768 54000" >/dev/null || true
+          start() {
+            supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
+          }
+          start; rc=$?
+          if [ $rc -ne 0 ] && grep -q "address already in use" "$RUNNER_TEMP/sb-start.log"; then
+            grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | grep -i "already in use"
+            echo "::warning::a stack port was held at start; stopping and starting once more"
+            supabase stop --no-backup >/dev/null 2>&1
+            sleep 5
+            start; rc=$?
+          fi
           grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60
           exit $rc
 
