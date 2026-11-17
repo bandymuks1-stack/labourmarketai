@@ -818,7 +818,8 @@ test("J-DEC. the company sees the need's history, closes it as filled, and the h
     .toEqual(["closed:completed"]);
 
   await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
-  const after = co.getByTestId("demand-history");
+  // Scoped to <main>: while the page streams in, React can briefly hold a second copy outside it.
+  const after = co.getByRole("main").getByTestId("demand-history");
   await expect(after).toHaveAttribute("data-decided", "true", { timeout: 30_000 });
   await expect(after.getByTestId("demand-history-closed")).toHaveAttribute("data-outcome", "completed");
   await expect(after.getByTestId("demand-history-decision"), "the hire decision names the accepted candidate").toBeVisible();
