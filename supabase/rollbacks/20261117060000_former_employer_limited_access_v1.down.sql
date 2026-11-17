@@ -250,4 +250,9 @@ end $function$;
 revoke all on function public.reviewable_journal_entry_ids() from public, anon;
 grant execute on function public.reviewable_journal_entry_ids() to authenticated;
 
+-- Added by 20261117060000 (nothing references them once the blocks above
+-- are restored).
+drop function if exists public.org_retains_journal_entry_v1(uuid);
+drop function if exists public.journal_entry_chain_root_at_v1(uuid);
+
 commit;

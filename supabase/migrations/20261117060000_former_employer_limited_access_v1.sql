@@ -66,12 +66,15 @@
 -- engagement organization (the person, admins and confirmers are unchanged):
 --   · a relationship outside the `education` category, while `active` or
 --     `paused`: every entry, as before;
---   · the same relationship once `ended`: only entries CREATED on or before
---     its end date: created before the end of that day, UTC
---     (created_at < (ended_at + 1) at UTC). The end day counts as part of the
---     employment, because ended_at is a date. A correction or a late entry the person
---     files after the end is a new record and is not shown. An ended row with
---     no end date shows nothing (fail-closed; every end door sets ended_at);
+--   · the same relationship once `ended`: only entries whose ORIGINAL record
+--     (the root of the entry's edit chain) was created before the end of the
+--     end day, UTC (org_retains_journal_entry_v1; owner option A). A worker's
+--     correction of a retained record, made after the end, stays with the
+--     organization, and the corrected original stays readable beside it (the
+--     correction is traceable: original data, history, author and time). A
+--     new entry unrelated to the employment is not shown. The end day counts as
+--     part of the employment, because ended_at is a date. An ended row with no
+--     end date shows nothing (fail-closed; every end door sets ended_at);
 --   · a learning relationship (category `education`): only while it is
 --     `active` and journal review is on, the live rule of #3421, carried here
 --     word for word (a paused learning link gives no access, as in #3421);
@@ -94,6 +97,65 @@
 -- =====================================================================
 
 begin;
+
+-- 0. Retained history, decided by the ORIGINAL record (owner option A) -------
+-- The original of an entry: walk back through its edit chain (the row it
+-- superseded, else the confirmed row it corrects) to the root, as
+-- project_team_journal_hour_rows_v1 v3 (20261021091000) does. Internal: only
+-- the definer function below calls it.
+create or replace function public.journal_entry_chain_root_at_v1(p_entry_id uuid)
+returns timestamptz
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  with recursive up as (
+    select e.id as node_id, e.correction_of as node_correction_of, e.created_at as at, 0 as depth
+      from public.journal_entries e
+     where e.id = p_entry_id
+    union all
+    select o.id, o.correction_of, o.created_at, up.depth + 1
+      from up
+      left join public.journal_entries pred on pred.superseded_by = up.node_id
+      join public.journal_entries o on o.id = coalesce(pred.id, up.node_correction_of)
+     where up.depth < 32
+  )
+  select up.at from up order by up.depth desc limit 1;
+$$;
+
+revoke all on function public.journal_entry_chain_root_at_v1(uuid) from public, anon, authenticated;
+
+-- Does the CALLER's organization retain this entry after the relationship
+-- ended? True only when the caller manages the entry's organization, the
+-- relationship (outside `education`) is `ended` with an end date, and the
+-- entry's ORIGINAL record was created before the end of that day (UTC). A
+-- correction of a retained record, made after the end, stays with the
+-- organization; a new, unrelated entry does not. It answers only what the
+-- caller may read anyway: false for everyone else.
+create or replace function public.org_retains_journal_entry_v1(p_entry_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce((
+    select public.journal_entry_chain_root_at_v1(je.id) < ((ec.ended_at + 1)::timestamp at time zone 'UTC')
+      from public.journal_entries je
+      join public.engagement_contexts ec on ec.id = je.engagement_context_id
+      join public.relationship_types rt on rt.slug = ec.relationship_slug
+     where je.id = p_entry_id
+       and ec.status = 'ended'
+       and ec.ended_at is not null
+       and rt.category <> 'education'
+       and public.manages_organization(ec.organization_id)
+  ), false);
+$$;
+
+revoke all on function public.org_retains_journal_entry_v1(uuid) from public;
+revoke all on function public.org_retains_journal_entry_v1(uuid) from anon;
+grant execute on function public.org_retains_journal_entry_v1(uuid) to authenticated;
 
 -- 1. Reads: the journal entry itself ------------------------------------------
 drop policy if exists journal_entries_select on public.journal_entries;
@@ -118,8 +180,7 @@ create policy journal_entries_select on public.journal_entries for select
            or (rt.category <> 'education'
                and (ec.status in ('active', 'paused')
                     or (ec.status = 'ended'
-                        and ec.ended_at is not null
-                        and journal_entries.created_at < ((ec.ended_at + 1)::timestamp at time zone 'UTC'))))
+                        and public.org_retains_journal_entry_v1(journal_entries.id))))
          )
     )
   );
@@ -153,8 +214,7 @@ as $$
                 or (rt.category <> 'education'
                     and (ec.status in ('active', 'paused')
                          or (ec.status = 'ended'
-                             and ec.ended_at is not null
-                             and je.created_at < ((ec.ended_at + 1)::timestamp at time zone 'UTC'))))
+                             and public.org_retains_journal_entry_v1(je.id))))
               )
          )
        )

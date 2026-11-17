@@ -27,6 +27,11 @@ import {
  *        their personal journal.
  *   FE-1 While W works for A: O reads W's entry for A (positive control), and
  *        never W's personal entry or W's entry for B.
+ *   FE-3 (owner option A) W corrects two retained records AFTER the end: an
+ *        unconfirmed one (a superseding edit) and a confirmed one (a
+ *        correction). Both corrections stay with A beside their originals,
+ *        decided by the ORIGINAL record; the unrelated late entry does not.
+ *        Each correction keeps its original, its author and its time.
  *   FE-1b A PAUSE IS NOT AN END: while the relationship is paused, A keeps
  *        reading, adding to and deciding on W's records, and the entry W files
  *        during the pause belongs to the employment (retained after the end).
@@ -435,4 +440,83 @@ test("FE-2. A ends the employment: retained history stays readable; new records,
 
   // B, still W's employer, is unaffected.
   expect(await readable(P, all), "B still reads its own entry").toEqual([s.entryOther]);
+});
+
+/** W edits or corrects one of their entries through the journal's own door. */
+async function correct(oldId: string, text: string): Promise<{ status: number; id: string | null }> {
+  const r = await rpc<string | { message?: string }>(W, "journal_entry_supersede_v2", {
+    p_old_entry_id: oldId,
+    p_engagement_context_id: s.ecA,
+    p_entry_type_slug: "freeform",
+    p_profession_id: null,
+    p_original_text: text,
+    p_original_language: "en",
+    p_hash_self: "client",
+    p_visibility_scope: "closed",
+    p_metrics: [],
+    p_selected_slugs: [],
+    p_rejected_slugs: [],
+  });
+  return { status: r.status, id: typeof r.body === "string" ? r.body : null };
+}
+
+/** The one seeded clock step: a row W writes today is moved two days on, past the end date. */
+function afterTheEnd(id: string): void {
+  sqlExec(
+    `begin;
+     alter table public.journal_entries disable trigger user;
+     update public.journal_entries set created_at = created_at + interval '2 days' where id = ${lit(id)};
+     alter table public.journal_entries enable trigger user;
+     commit;`,
+  );
+}
+
+test("FE-3. after the end, W corrects two retained records: the corrections stay with A beside their originals, traceable; the unrelated late entry does not", async () => {
+  // An unconfirmed retained entry: a superseding edit.
+  const edited = await correct(s.entryDuring2, `${TEXT.during2} (corrected after the end)`);
+  expect(edited.id, `W edits a retained entry (${edited.status})`).toBeTruthy();
+  afterTheEnd(edited.id!);
+  // A confirmed retained entry: a correction that keeps the confirmed original.
+  const corrected = await correct(s.entryDuring, `${TEXT.during} (corrected after the end)`);
+  expect(corrected.id, `W corrects a confirmed retained entry (${corrected.status})`).toBeTruthy();
+  afterTheEnd(corrected.id!);
+
+  const ids = [s.entryDuring, s.entryDuring2, s.entryPaused, edited.id!, corrected.id!, s.entryAfter, s.entryOther, s.entryPersonal];
+  expect(await readable(O, ids), "W's corrections of retained records stay with A, beside their originals").toEqual(
+    [s.entryDuring, s.entryDuring2, s.entryPaused, edited.id!, corrected.id!].sort(),
+  );
+
+  const rows = sql<{ id: string; superseded_by: string | null; correction_of: string | null; worker_id: string; late: boolean }>(
+    `select id, superseded_by, correction_of, worker_id,
+            created_at > (select (ended_at + 1)::timestamp at time zone 'UTC' from public.engagement_contexts where id = ${lit(s.ecA)}) as late
+       from public.journal_entries where id in (${[s.entryDuring, s.entryDuring2, edited.id!, corrected.id!].map(lit).join(",")})`,
+  );
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  expect(
+    {
+      editPointsBack: byId.get(s.entryDuring2)?.superseded_by,
+      correctionPointsBack: byId.get(corrected.id!)?.correction_of,
+      confirmedOriginalStaysCurrent: byId.get(s.entryDuring)?.superseded_by,
+      authors: [...new Set(rows.map((r) => r.worker_id))],
+      correctionsAfterTheEnd: [byId.get(edited.id!)?.late, byId.get(corrected.id!)?.late],
+    },
+    "each correction is traceable to its original, its author and its time",
+  ).toEqual({
+    editPointsBack: edited.id,
+    correctionPointsBack: s.entryDuring,
+    confirmedOriginalStaysCurrent: null,
+    authors: [s.workerId],
+    correctionsAfterTheEnd: [true, true],
+  });
+  expect(
+    sql<{ n: number }>(`select count(*)::int as n from public.journal_entry_confirmations where entry_id = ${lit(s.entryDuring)}`)[0]?.n,
+    "the original's confirmation is kept",
+  ).toBe(1);
+
+  // Still no change and no re-confirmation by A after the end, on the corrections too.
+  const reconfirm = await rpc<string>(O, "review_journal_entry", { p_entry_id: corrected.id!, p_decision: "approved", p_note: null });
+  expect(reconfirm.body, "A cannot re-confirm a correction after the end").not.toBe("approved");
+  expect(
+    sql<{ n: number }>(`select count(*)::int as n from public.journal_entry_confirmations where entry_id = ${lit(corrected.id!)}`)[0]?.n,
+  ).toBe(0);
 });

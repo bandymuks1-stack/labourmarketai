@@ -68,7 +68,7 @@ const OBJECTS = [
 ] as const;
 
 const WINDOW =
-  "(rt.category <> 'education' and (ec.status in ('active', 'paused') or (ec.status = 'ended' and ec.ended_at is not null and";
+  "(rt.category <> 'education' and (ec.status in ('active', 'paused') or (ec.status = 'ended' and public.org_retains_journal_entry_v1(";
 
 describe("the read rule: retained history up to the end date, nothing new", () => {
   const sql = read(MIG);
@@ -94,10 +94,10 @@ describe("the read rule: retained history up to the end date, nothing new", () =
     expect(p).toContain("where ec.id = journal_entries.engagement_context_id and manages_organization(ec.organization_id) and (");
   });
 
-  it("an ended relationship shows only entries created on or before its end date; no end date shows nothing", () => {
+  it("an ended relationship shows only entries whose original record is retained; no end date shows nothing", () => {
     const p = statement(sql, OBJECTS[0]);
     expect(p).toContain(WINDOW);
-    expect(p).toContain("journal_entries.created_at < ((ec.ended_at + 1)::timestamp at time zone 'utc')");
+    expect(p).toContain("public.org_retains_journal_entry_v1(journal_entries.id))))");
   });
 
   it("carries #3421's learning rule unchanged (active and reviewed)", () => {
@@ -119,8 +119,53 @@ describe("the read rule: retained history up to the end date, nothing new", () =
     expect(f).toContain("join public.relationship_types rt on rt.slug = ec.relationship_slug");
     expect(f).toContain("where ec.id = je.engagement_context_id and public.manages_organization(ec.organization_id) and (");
     expect(f).toContain(WINDOW);
-    expect(f).toContain("je.created_at < ((ec.ended_at + 1)::timestamp at time zone 'utc')");
+    expect(f).toContain("public.org_retains_journal_entry_v1(je.id))))");
     expect(f).toContain("(rt.category = 'education' and ec.status = 'active' and ec.journal_review_enabled is true)");
+  });
+});
+
+describe("retained history is decided by the ORIGINAL record (owner option A)", () => {
+  const sql = read(MIG);
+  const ROOT = "create or replace function public.journal_entry_chain_root_at_v1";
+  const RETAINS = "create or replace function public.org_retains_journal_entry_v1";
+
+  it("the chain root walks back through supersede and correction_of, bounded, and is internal", () => {
+    const f = statement(sql, ROOT);
+    expect(f).toContain("security definer");
+    expect(f).toContain("left join public.journal_entries pred on pred.superseded_by = up.node_id");
+    expect(f).toContain("join public.journal_entries o on o.id = coalesce(pred.id, up.node_correction_of)");
+    expect(f).toContain("where up.depth < 32");
+    expect(f).toContain("order by up.depth desc limit 1");
+    expect(code(sql)).toContain(
+      "revoke all on function public.journal_entry_chain_root_at_v1(uuid) from public, anon, authenticated;",
+    );
+    expect(code(sql)).not.toMatch(/grant execute on function public\.journal_entry_chain_root_at_v1/);
+  });
+
+  it("the organization retains an entry only when it manages it, the relationship ended outside education with an end date, and the ORIGINAL was created before the end of that day", () => {
+    const f = statement(sql, RETAINS);
+    expect(f).toContain("security definer");
+    expect(f).toContain(
+      "select public.journal_entry_chain_root_at_v1(je.id) < ((ec.ended_at + 1)::timestamp at time zone 'utc')",
+    );
+    for (const cond of [
+      "and ec.status = 'ended'",
+      "and ec.ended_at is not null",
+      "and rt.category <> 'education'",
+      "and public.manages_organization(ec.organization_id)",
+    ]) {
+      expect(f, cond).toContain(cond);
+    }
+    expect(f).toContain("), false);");
+  });
+
+  it("the rollback drops both added functions after restoring what referenced them", () => {
+    const c = code(read(DOWN));
+    const dropRetains = c.indexOf("drop function if exists public.org_retains_journal_entry_v1(uuid);");
+    const dropRoot = c.indexOf("drop function if exists public.journal_entry_chain_root_at_v1(uuid);");
+    expect(dropRetains).toBeGreaterThan(c.indexOf("create policy journal_entries_select"));
+    expect(dropRetains).toBeGreaterThan(c.indexOf("create or replace function public.can_read_journal_entry_v1"));
+    expect(dropRoot).toBeGreaterThan(dropRetains);
   });
 });
 
@@ -212,6 +257,8 @@ describe("the local-stack proof travels with the SQL", () => {
       "an ended employment with review left on decides nothing",
       "a paused relationship keeps A's reads, including the entry filed during the pause",
       "a paused relationship keeps A's review basis",
+      "W's corrections of retained records stay with A, beside their originals",
+      "each correction is traceable to its original, its author and its time",
     ]) {
       expect(spec, phrase).toContain(phrase);
     }
