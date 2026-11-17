@@ -360,7 +360,9 @@ test("I-6. the institution records a recognition citing THAT signed-off practice
 test("I-7. the learner sees the recognition among their own", async ({ browser }) => {
   const { page, close } = await as(browser, LEARNER);
   await page.goto(`${BASE}/en/dashboard/documents`);
-  const list = page.getByTestId("own-recognitions-list");
+  // Scoped to <main>: while a section streams in, React can briefly hold a
+  // second, hidden copy outside it (CI 2026-11-16, strict-mode match of two).
+  const list = page.getByRole("main").getByTestId("own-recognitions-list");
   await expect(list).toBeVisible({ timeout: 30_000 });
   await expect(list).toContainText(RECOGNITION_KEY, { timeout: 30_000 });
   await close();
