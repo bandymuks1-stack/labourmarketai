@@ -3,8 +3,9 @@ import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { clickUntilVisible } from "./click-until-visible";
 
 /**
  * JOB FIT FROM EVIDENCE, end to end, on a THROWAWAY LOCAL Supabase stack
@@ -234,13 +235,6 @@ async function signIn(page: Page, address: string): Promise<void> {
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
 }
 
-async function clickUntil(target: Locator, result: Locator, timeout = 60_000): Promise<void> {
-  await expect(async () => {
-    if (!(await result.isVisible().catch(() => false))) await target.click({ timeout: 5_000 });
-    await expect(result).toBeVisible({ timeout: 5_000 });
-  }).toPass({ timeout });
-}
-
 async function newCompany(browser: Browser, address: string, legalName: string): Promise<Page> {
   const ctx = await browser.newContext({ timezoneId: "UTC" });
   const page = await ctx.newPage();
@@ -303,7 +297,7 @@ test("F-1. a 'warehouse worker' records a day of tiling; the work is linked to t
   const box = main.getByTestId("journal-quick-record-text");
   await expect(box).toBeVisible({ timeout: 60_000 });
   await box.fill(WORK_TEXT);
-  await clickUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  await clickUntilVisible(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
   await main.getByTestId("worklog-save").click();
   await main.getByTestId("worklog-confirm").click();
   const done = main.getByTestId("worklog-done");

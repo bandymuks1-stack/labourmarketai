@@ -253,7 +253,11 @@ describe("an offer-first organisation is never shown a need door that opens the 
 describe("a saved offer's next step is the offers list, not scouting", () => {
   it("the form's success link follows the intent", () => {
     const form = strip(read("components/app/demand-request-button.tsx"));
-    expect(form).toMatch(/intent === "hire_workers" \? \(\s*<Link\s+href=\{"\/dashboard\/company\/scouting" as "\/dashboard"\}/);
+    // A need goes to the scouting room, and to THAT need when the save returned
+    // its id (employer-flow audit 2026-11-15); either way never the offers list.
+    expect(form).toMatch(
+      /intent === "hire_workers" \? \(\s*<Link\s+href=\{\s*\(savedRequestId\s*\?\s*`\/dashboard\/company\/scouting\?request=\$\{encodeURIComponent\(savedRequestId\)\}`\s*:\s*"\/dashboard\/company\/scouting"\) as "\/dashboard"\s*\}/,
+    );
     expect(form).toMatch(/href=\{"\/dashboard\/company\/needs#agency-offers" as "\/dashboard"\}[\s\S]{0,200}data-testid="demand-done-offers-link"/);
     expect(strip(read(READBACK))).toMatch(/id="agency-offers"/);
   });

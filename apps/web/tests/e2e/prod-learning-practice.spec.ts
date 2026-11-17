@@ -1,8 +1,9 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { clickUntilVisible } from "./click-until-visible";
 import { inviteCapGate } from "./invite-cap";
-import { test, expect, type Browser, type Locator, type Page } from "./prod-walk";
+import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
  * PRODUCTION LEARNING & PRACTICE — owner programme 2026-10-12 §3C: an
@@ -47,20 +48,6 @@ async function workspace(page: Page, orgName: string): Promise<void> {
 let link = "";
 
 
-/**
- * Open the network page's invite panel until `field` shows. The open button
- * only sets the panel open, so a click that lands before hydration does
- * nothing: click again (never toggles shut) until the field is there.
- */
-async function openInvitePanel(page: Page, field: Locator): Promise<void> {
-  const open = page.getByTestId("invite-panel-open");
-  await expect(async () => {
-    if (!(await field.isVisible().catch(() => false)) && (await open.isVisible().catch(() => false))) {
-      await open.click({ timeout: 5_000 });
-    }
-    await expect(field).toBeVisible({ timeout: 2_000 });
-  }).toPass({ timeout: 30_000 });
-}
 test("L-1. the organization declares it trains people, and runs a programme", async ({ browser }) => {
   const { page, close } = await as(browser, "owner");
   await page.goto("/lt/dashboard");
@@ -106,7 +93,7 @@ test("L-2. the institution invites a learner with a link (no e-mail needed)", as
   await page.getByTestId("institution-learners-invite").click();
   await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
   const capacity = page.getByTestId("invite-capacity");
-  await openInvitePanel(page, capacity);
+  await clickUntilVisible(page.getByTestId("invite-panel-open"), capacity, { timeout: 30_000, what: "the invite panel" });
   await expect(capacity).toHaveValue("student");
   const linkMode = page.getByTestId("invite-mode-link");
   if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
@@ -224,7 +211,7 @@ test("L-8. a company can offer practice without being a school: the intern capac
   await workspace(page, ALFA);
   await page.goto("/lt/dashboard/network");
   const type = page.getByTestId("invite-type");
-  await openInvitePanel(page, type);
+  await clickUntilVisible(page.getByTestId("invite-panel-open"), type, { timeout: 30_000, what: "the invite panel" });
   await type.selectOption("join_organization").catch(() => undefined);
   const capacity = page.getByTestId("invite-capacity");
   await expect(capacity).toBeVisible({ timeout: 30_000 });
