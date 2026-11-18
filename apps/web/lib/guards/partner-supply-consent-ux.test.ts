@@ -97,9 +97,17 @@ describe("granting and refusing cost the same", () => {
   it("grant and decline are EQUAL buttons (identical class string)", () => {
     expect(component).toMatch(/data-testid="partner-supply-grant"/);
     expect(component).toMatch(/data-testid="partner-supply-decline"/);
-    const cls =
-      "inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60";
-    expect(component.split(cls).length).toBeGreaterThanOrEqual(3);
+    // Both are the shared Button with the identical look (variant, size,
+    // classes) — neither choice is styled to be the easier one.
+    const look = (testId: string) => {
+      const at = component.indexOf(`data-testid="${testId}"`);
+      const tag = component.slice(component.lastIndexOf("<Button", at), at);
+      return ["variant", "size", "className"].map((k) => new RegExp(`${k}="([^"]*)"`).exec(tag)?.[1] ?? null);
+    };
+    const grant = look("partner-supply-grant");
+    expect(grant).not.toContain(null);
+    expect(grant[2]).toMatch(/min-h-11/);
+    expect(look("partner-supply-decline")).toEqual(grant);
   });
 
   it("declining is local-only — it calls no server action", () => {
