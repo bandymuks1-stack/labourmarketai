@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { PlaceTimeStamp } from "@/components/app/work-world/primitives";
+import { learnerInviteHref } from "@/lib/navigation/work-areas";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
 import { readInstitutionPrograms } from "@/lib/education/programs";
@@ -232,7 +233,7 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                         <p className="text-meta text-text-muted">
                           {t("noLearnersYet")}{" "}
                           <Link
-                            href={`/dashboard/network?type=join_organization&org=${organizationId}&relationship=student` as "/dashboard/network"}
+                            href={learnerInviteHref(organizationId) as "/dashboard/network"}
                             className="text-brand-blue hover:underline"
                             data-testid="program-invite-learners"
                           >

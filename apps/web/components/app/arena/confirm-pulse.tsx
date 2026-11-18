@@ -193,7 +193,7 @@ export async function OrganizationApprovalsCard() {
         </>
       )}
       {view.noEmployees && view.state === "empty" ? (
-        <Link href={"/dashboard/company/people" as "/dashboard"} className={lineLink} data-testid="organization-approvals-people">
+        <Link href={"/dashboard/company/people" as "/dashboard"} className={`${lineLink} inline-flex min-h-11 items-center`} data-testid="organization-approvals-people">
           {t("people")} →
         </Link>
       ) : null}

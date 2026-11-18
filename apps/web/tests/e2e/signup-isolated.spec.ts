@@ -1029,6 +1029,20 @@ test("E-1. an institution trains people and invites a learner by link; a student
   await expect(inst.getByTestId("company-setup-next")).toHaveAttribute("data-first-door", "education", { timeout: 30_000 });
   await inst.goto(`${BASE}/en/dashboard/company/education`);
   await expect(inst.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
+  // UX_GAPS I-1: the learning home is one of the institution's own header doors.
+  const more = inst.getByTestId("header-nav-more");
+  const phoneNav = !(await more.isVisible().catch(() => false));
+  await (phoneNav ? inst.getByTestId("header-nav-sheet-trigger") : more).click();
+  await expect(
+    inst.getByTestId(phoneNav ? "header-nav-sheet-area:education" : "header-nav-more-area:education"),
+  ).toHaveAttribute("href", "/en/dashboard/company/education", { timeout: 30_000 });
+  // UX_GAPS I-2: the institution's home leads with the learner invite, not "Describe a need".
+  await inst.goto(`${BASE}/en/dashboard`);
+  await expect(inst.getByTestId("company-model-primary")).toHaveAttribute(
+    "href",
+    /\/en\/dashboard\/network\?type=join_organization&org=[0-9a-f-]+&relationship=student$/,
+    { timeout: 30_000 },
+  );
   const link = await inviteLearnerLink(inst, EDU.learnerName);
   await a.close();
 
