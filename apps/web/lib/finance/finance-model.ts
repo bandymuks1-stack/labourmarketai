@@ -23,6 +23,8 @@ import { csvCell } from "@/lib/projects/operations-report";
  * no parseFloat, no toFixed (guard-pinned).
  */
 
+import { minorToDecimalString } from "@/lib/finance/invoice-currency";
+
 export const FINANCE_RECORD_TYPES = [
   "invoice_issued",
   "invoice_received",
@@ -284,12 +286,18 @@ export const ZERO_FINANCE_SUMMARY: FinanceSummary = {
 /** Derive every summary total from a bounded record list (pure, cents-only).
  *  Sums are REAL — computed from the caller's own RLS rows, never estimated. */
 export function deriveFinanceSummary(
-  records: readonly Pick<
+  records: readonly (Pick<
     FinanceRecord,
     "recordType" | "status" | "amountCents" | "dueDate" | "projectId"
-  >[],
+  > & { readonly currency?: string })[],
   now: Date,
 ): FinanceSummary {
+  // A summary adds amounts. Amounts in different currencies are NEVER added: the legacy register is
+  // single-currency (EUR) by construction, and anything else is a programming error, not a total.
+  const currencies = new Set(records.map((r) => r.currency).filter((c): c is string => typeof c === "string"));
+  if (currencies.size > 1) {
+    throw new Error("deriveFinanceSummary: refusing to sum across currencies (" + [...currencies].sort().join(",") + ")");
+  }
   let issuedInvoiceCents = 0;
   let receivedInvoiceCents = 0;
   let expenseCents = 0;
@@ -384,10 +392,10 @@ export function buildFinanceCsvRow(record: FinanceRecord, now: Date): string[] {
     isOverdueRecord(record, now) ? "yes" : "no",
     record.title,
     record.counterpartyName,
-    formatCentsAsEur(record.amountCents),
+    minorToDecimalString(record.amountCents, record.currency),
     record.currency,
     record.invoiceNumber ?? "",
-    record.vatAmountCents === null ? "" : formatCentsAsEur(record.vatAmountCents),
+    record.vatAmountCents === null ? "" : minorToDecimalString(record.vatAmountCents, record.currency),
     record.approvalStatus ?? "",
     record.orgDocumentId ? "yes" : "",
     record.tripId ?? "",
