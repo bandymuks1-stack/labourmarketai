@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { BASE, isolatedStack, lit, onboard, signUp, sql, sqlExec, userId } from "./isolated-web-a-helpers";
+import { BASE, isolatedStack, lit, onboard, signIn, signUp, sql, sqlExec, userId } from "./isolated-web-a-helpers";
 
 /**
  * Register 2.36: a profession journal template prefills a worker's entry,
@@ -16,7 +16,17 @@ import { BASE, isolatedStack, lit, onboard, signUp, sql, sqlExec, userId } from 
  *   T-2 choosing it puts the template's lines in the entry text, in the
  *       person's language, without saving anything;
  *   T-3 the person adds their own words and saves; the stored entry is theirs,
- *       with the template's structure in it.
+ *       with the template's structure in it;
+ *   T-4 the entry reaches the person's Living CV (/cv, under their own
+ *       session): the CV's "Journal entries" figure counts it, and the CV
+ *       does NOT present it as confirmed — no manager-confirmed entry, no
+ *       confirmed-work line, no confirmation proof row. That is the product's
+ *       honest shape, not a gap: an entry with no organization and no
+ *       confirmation is the person's own declaration (decision 0023 evidence
+ *       states; lib/profile/trust-signals.ts counts own live entries once per
+ *       correction chain). It states no duration, so it adds no hours either
+ *       (SEP-7: never an invented hour), which is why the walk reads the
+ *       entry count and not the recorded-hours line.
  */
 
 test.skip(!isolatedStack(), "local stack only (SIGNUP_ISOLATED=1, app and Supabase on 127.0.0.1)");
@@ -73,4 +83,30 @@ test("T-1..T-3. the full composer offers an active template, it prefills the ent
       { message: "T-3: the entry is stored", timeout: 60_000 },
     )
     .toEqual([expect.stringContaining("Work performed:")]);
+});
+
+test("T-4. the saved entry reaches the person's Living CV as their own recorded work, not as confirmed work", async ({ page }) => {
+  await signIn(page, BASE, W);
+  await page.goto(`${BASE}/en/cv`);
+  // Scoped to <main>: streaming can leave a hidden duplicate outside it.
+  const main = page.getByRole("main");
+  await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 60_000 });
+  // A brand-new CV draws no figures at all (three zeros would read as a
+  // result); the tiles appear only because the entry now counts.
+  const summary = main.getByTestId("cv-summary");
+  await expect(summary, "T-4: the CV shows figures once the entry exists").toBeVisible({ timeout: 30_000 });
+  const tile = (label: string) => summary.locator("div").filter({ has: page.locator("dt", { hasText: new RegExp(`^${label}$`) }) });
+  await expect(tile("Journal entries").locator("dd"), "T-4: the CV counts the template entry").toHaveText("1");
+  // The same figure the database holds: one live entry of this person.
+  expect(
+    sql<{ n: number }>(
+      `select count(*)::int as n from public.journal_entries e join public.workers w on w.id = e.worker_id
+        where w.profile_id = ${lit(await userId(W))} and e.superseded_by is null`,
+    )[0]?.n,
+    "T-4: the CV figure is the stored entry",
+  ).toBe(1);
+  // Declared, never promoted: nobody confirmed it, and the CV says so.
+  await expect(tile("Manager-confirmed entries").locator("dd"), "T-4: not counted as confirmed").toHaveText("0");
+  await expect(main.getByTestId("cv-confirmed-work"), "T-4: no confirmed-work line").toHaveCount(0);
+  await expect(main.getByTestId("cv-proof").locator("table"), "T-4: no confirmation proof row").toHaveCount(0);
 });
