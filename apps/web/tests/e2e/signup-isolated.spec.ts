@@ -548,6 +548,96 @@ async function grantEmployerVisibility(page: Page): Promise<void> {
   });
 }
 
+// ── M-3: an EMPLOYEE whose work the company reviews from the phone ─────────
+// Runs only from android-need-isolated.yml (MOBILE_WORKER3_SEED_EMAIL set).
+// Real UI only: the worker signs up; the company (M-0) hands over a "join my
+// organization" link, which the worker accepts (employee); the company turns
+// on journal review for that relationship; the worker records one day. That
+// entry is what the phone's work review shows the company.
+test("M-3. seed: an employee with one journal entry waiting for the company's review", async ({ browser }) => {
+  const owner = process.env.MOBILE_NEED_SEED_EMAIL ?? "";
+  const ownerPw = process.env.MOBILE_NEED_SEED_PASSWORD ?? "";
+  const address = process.env.MOBILE_WORKER3_SEED_EMAIL ?? "";
+  const password = process.env.MOBILE_WORKER3_SEED_PASSWORD ?? "";
+  test.skip(!owner || !ownerPw || !address || !password, "android-need-isolated.yml only");
+
+  const w = await (await browser.newContext()).newPage();
+  await signUp(w, address, password);
+  await onboard(w, "work", "QA-SYNTHETIC Mobile Review Worker");
+  await w.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  const workerId = await userId(address);
+  const marker = await fetch(`${SB_URL}/auth/v1/admin/users/${workerId}`, {
+    method: "PUT",
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "content-type": "application/json" },
+    body: JSON.stringify({ app_metadata: { qa_synthetic: true } }),
+  });
+  expect(marker.ok, "the seed carries the server-set qa_synthetic marker").toBe(true);
+
+  // The company hands over a single-use "join my organization" link.
+  const ownerId = await userId(owner);
+  const [org] = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${ownerId}&select=id`);
+  expect(org?.id, "the seed company has its organization").toBeTruthy();
+  const co = await (await browser.newContext()).newPage();
+  await signIn(co, owner, ownerPw);
+  await co.goto(`${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${org!.id}#network-invite`);
+  const panel = co.getByTestId("invite-panel");
+  await expect(panel).toBeVisible({ timeout: 30_000 });
+  await expect(panel.getByTestId("invite-type")).toHaveValue("join_organization");
+  await panel.getByTestId("invite-mode-link").click();
+  await panel.getByTestId("invite-name").fill("QA-SYNTHETIC Mobile Review Worker");
+  await panel.getByTestId("invite-submit").click();
+  const copy = panel.getByTestId("invite-copy-link").first();
+  await expect(copy, "the invitation link is handed to the company").toBeVisible({ timeout: 30_000 });
+  const u = new URL((await copy.getAttribute("data-invite-link")) ?? "");
+  await acceptInvite(w, `${BASE}${u.pathname}${u.search}`);
+  const engagementOf = async () =>
+    (
+      await db<Array<{ id: string }>>(
+        `engagement_contexts?profile_id=eq.${workerId}&organization_id=eq.${org!.id}&relationship_slug=eq.employee&status=eq.active&select=id`,
+      )
+    )[0]?.id ?? null;
+  await expect.poll(engagementOf, { message: "the worker is now the company's employee", timeout: 30_000 }).not.toBeNull();
+  const engagementId = (await engagementOf())!;
+
+  // The company opens that relationship's journal for review.
+  await co.goto(`${BASE}/en/dashboard/company/people#org-members`);
+  const main = co.getByRole("main");
+  const fold = main.getByTestId("people-more").first();
+  await expect(fold).toBeAttached({ timeout: 30_000 });
+  if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
+  const toggle = main.getByTestId(`toggle-review-${engagementId}`);
+  await expect(toggle, "journal review is offered for the employee").toBeVisible({ timeout: 30_000 });
+  await toggle.click();
+  await expect
+    .poll(
+      async () =>
+        (
+          await db<Array<{ journal_review_enabled: boolean | null }>>(
+            `engagement_contexts?id=eq.${engagementId}&select=journal_review_enabled`,
+          )
+        )[0]?.journal_review_enabled ?? null,
+      { message: "review is on for that relationship", timeout: 30_000 },
+    )
+    .toBe(true);
+
+  // The worker records one day for the company.
+  await w.goto(`${BASE}/en/dashboard/journal`);
+  const wm = w.getByRole("main");
+  await wm.getByTestId("journal-quick-record-text").fill("QA-SYNTHETIC mobile review: laid 12 m2 of floor tiles today, 8 hours");
+  await wm.getByTestId("journal-quick-record-understand").click();
+  await expect(wm.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  const context = wm.getByTestId("worklog-context");
+  if (await context.isVisible().catch(() => false)) await context.selectOption(engagementId);
+  await wm.getByTestId("worklog-save").click();
+  await wm.getByTestId("worklog-confirm").click();
+  await expect(wm.getByTestId("worklog-done"), "the journal entry is saved").toBeVisible({ timeout: 30_000 });
+  const entries = await db<Array<{ id: string; engagement_context_id: string | null }>>(
+    `journal_entries?original_text=ilike.*QA-SYNTHETIC%20mobile%20review*&select=id,engagement_context_id`,
+  );
+  expect(entries.length, "exactly one marked entry").toBe(1);
+  expect(entries[0]?.engagement_context_id, "recorded for the company").toBe(engagementId);
+});
+
 /**
  * A-1..A-4. THE THREE SIGN-UP FAULTS OF THE 2026-11-13 TRUST AUDIT, each as the
  * person meets it. None needs an account: they are what the sign-in page says

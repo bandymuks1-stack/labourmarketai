@@ -707,6 +707,16 @@ const en = {
   "agency.noteLabel": "Note (optional)",
   "agency.notePlaceholder": "E.g. 5 years' experience, can start Monday",
   "agency.confirm": "Confirm",
+  "review.title": "Entries to confirm",
+  "review.approve": "Approve",
+  "review.requestChanges": "Request changes",
+  "review.reject": "Reject",
+  "review.noteApprove": "Note (optional)",
+  "review.noteChanges": "What needs changing?",
+  "review.noteReject": "Reason for rejection",
+  "review.empty": "Nothing to review right now",
+  "review.confirm": "Confirm",
+  "review.cancel": "Cancel",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -1400,6 +1410,16 @@ const lt: Catalogue = {
   "agency.noteLabel": "Pastaba (nebūtina)",
   "agency.notePlaceholder": "Pvz., 5 m. patirtis, gali pradėti pirmadienį",
   "agency.confirm": "Patvirtinti",
+  "review.title": "Įrašai, laukiantys patvirtinimo",
+  "review.approve": "Patvirtinti",
+  "review.requestChanges": "Prašyti pataisymų",
+  "review.reject": "Atmesti",
+  "review.noteApprove": "Pastaba (nebūtina)",
+  "review.noteChanges": "Ką reikia pataisyti?",
+  "review.noteReject": "Atmetimo priežastis",
+  "review.empty": "Šiuo metu nėra ko peržiūrėti",
+  "review.confirm": "Patvirtinti",
+  "review.cancel": "Atšaukti",
 };
 
 const ru: Catalogue = {
@@ -2089,6 +2109,16 @@ const ru: Catalogue = {
   "agency.noteLabel": "Заметка (необязательно)",
   "agency.notePlaceholder": "Напр., опыт 5 лет, может начать в понедельник",
   "agency.confirm": "Подтвердить",
+  "review.title": "Записи на подтверждение",
+  "review.approve": "Одобрить",
+  "review.requestChanges": "Запросить изменения",
+  "review.reject": "Отклонить",
+  "review.noteApprove": "Заметка (необязательно)",
+  "review.noteChanges": "Что нужно изменить?",
+  "review.noteReject": "Причина отклонения",
+  "review.empty": "Сейчас нечего проверять",
+  "review.confirm": "Подтвердить",
+  "review.cancel": "Отмена",
 };
 
 const nl: Catalogue = {
@@ -2778,6 +2808,16 @@ const nl: Catalogue = {
   "agency.noteLabel": "Notitie (optioneel)",
   "agency.notePlaceholder": "Bijv. 5 jaar ervaring, kan maandag beginnen",
   "agency.confirm": "Bevestigen",
+  "review.title": "Items om te bevestigen",
+  "review.approve": "Goedkeuren",
+  "review.requestChanges": "Wijzigingen vragen",
+  "review.reject": "Afwijzen",
+  "review.noteApprove": "Notitie (optioneel)",
+  "review.noteChanges": "Wat moet er worden gewijzigd?",
+  "review.noteReject": "Reden voor afwijzing",
+  "review.empty": "Momenteel niets te beoordelen",
+  "review.confirm": "Bevestigen",
+  "review.cancel": "Annuleren",
 };
 
 const de: Catalogue = {
@@ -3470,6 +3510,16 @@ const de: Catalogue = {
   "agency.noteLabel": "Notiz (optional)",
   "agency.notePlaceholder": "Z. B. 5 Jahre Erfahrung, kann am Montag anfangen",
   "agency.confirm": "Bestätigen",
+  "review.title": "Zu bestätigende Einträge",
+  "review.approve": "Genehmigen",
+  "review.requestChanges": "Änderungen anfordern",
+  "review.reject": "Ablehnen",
+  "review.noteApprove": "Notiz (optional)",
+  "review.noteChanges": "Was muss geändert werden?",
+  "review.noteReject": "Grund für die Ablehnung",
+  "review.empty": "Derzeit nichts zu überprüfen",
+  "review.confirm": "Bestätigen",
+  "review.cancel": "Abbrechen",
 };
 
 const pl: Catalogue = {
@@ -4159,6 +4209,16 @@ const pl: Catalogue = {
   "agency.noteLabel": "Uwaga (opcjonalnie)",
   "agency.notePlaceholder": "Np. 5 lat doświadczenia, może zacząć w poniedziałek",
   "agency.confirm": "Potwierdź",
+  "review.title": "Wpisy do potwierdzenia",
+  "review.approve": "Zatwierdź",
+  "review.requestChanges": "Poproś o zmiany",
+  "review.reject": "Odrzuć",
+  "review.noteApprove": "Notatka (opcjonalnie)",
+  "review.noteChanges": "Co wymaga zmiany?",
+  "review.noteReject": "Powód odrzucenia",
+  "review.empty": "Obecnie nie ma nic do przejrzenia",
+  "review.confirm": "Potwierdź",
+  "review.cancel": "Anuluj",
 };
 
 const sv: Catalogue = {
@@ -4849,6 +4909,16 @@ const sv: Catalogue = {
   "agency.noteLabel": "Anteckning (valfritt)",
   "agency.notePlaceholder": "T.ex. 5 års erfarenhet, kan börja på måndag",
   "agency.confirm": "Bekräfta",
+  "review.title": "Poster att bekräfta",
+  "review.approve": "Godkänn",
+  "review.requestChanges": "Begär ändringar",
+  "review.reject": "Avvisa",
+  "review.noteApprove": "Kommentar (valfritt)",
+  "review.noteChanges": "Vad behöver ändras?",
+  "review.noteReject": "Anledning till avvisning",
+  "review.empty": "Inget att granska just nu",
+  "review.confirm": "Bekräfta",
+  "review.cancel": "Avbryt",
 };
 
 export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de, pl, sv };

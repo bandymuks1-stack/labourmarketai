@@ -36,6 +36,8 @@ on:
       - "apps/mobile/.maestro/employer-screens-journey.yaml"
       - "apps/mobile/.maestro/cv-forms-journey.yaml"
       - "apps/mobile/.maestro/booking-journey.yaml"
+      - "apps/mobile/.maestro/review-journey.yaml"
+      - "apps/mobile/src/screens/journal-review.tsx"
       - "apps/mobile/src/screens/propose-booking.tsx"
       - "apps/mobile/src/screens/offers.tsx"
       - "apps/mobile/src/screens/work-history-form.tsx"
@@ -168,6 +170,7 @@ jobs:
           SEED_PW="Qa-$(openssl rand -hex 16)-1a!"; echo "::add-mask::$SEED_PW"
           WORKER_PW="Qa-$(openssl rand -hex 16)-2b!"; echo "::add-mask::$WORKER_PW"
           WORKER2_PW="Qa-$(openssl rand -hex 16)-3c!"; echo "::add-mask::$WORKER2_PW"
+          WORKER3_PW="Qa-$(openssl rand -hex 16)-4d!"; echo "::add-mask::$WORKER3_PW"
           {
             echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
             echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON"
@@ -187,6 +190,8 @@ jobs:
             echo "MOBILE_WORKER_SEED_PASSWORD=$WORKER_PW"
             echo "MOBILE_WORKER2_SEED_EMAIL=qa.mobile.worker2.${GITHUB_RUN_ID}@local.test"
             echo "MOBILE_WORKER2_SEED_PASSWORD=$WORKER2_PW"
+            echo "MOBILE_WORKER3_SEED_EMAIL=qa.mobile.worker3.${GITHUB_RUN_ID}@local.test"
+            echo "MOBILE_WORKER3_SEED_PASSWORD=$WORKER3_PW"
           } >> "$GITHUB_ENV"
 
       - name: Prove the replay — ledger rows equal migration files
@@ -215,7 +220,7 @@ jobs:
           E2E_BASE_URL: http://127.0.0.1:3000
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
-        run: pnpm exec playwright test tests/e2e/signup-isolated.spec.ts -g "M-[012]\." --reporter=list --trace=off
+        run: pnpm exec playwright test tests/e2e/signup-isolated.spec.ts -g "M-[0-3]\." --reporter=list --trace=off
 
       - name: Read the two worker seeds' ids for the booking journey (local stack)
         run: |
@@ -224,7 +229,9 @@ jobs:
           B="$(q "select w.id from public.workers w join auth.users u on u.id = w.profile_id where u.email = '$MOBILE_WORKER_SEED_EMAIL'")"
           N="$(q "select w.id from public.workers w join auth.users u on u.id = w.profile_id where u.email = '$MOBILE_WORKER2_SEED_EMAIL'")"
           [ -n "$B" ] && [ -n "$N" ] || { echo "::error::a worker seed has no workers row"; exit 1; }
-          { echo "BOOK_WORKER_ID=$B"; echo "NOT_FIT_WORKER_ID=$N"; } >> "$GITHUB_ENV"
+          R="$(q "select je.id from public.journal_entries je join public.workers w on w.id = je.worker_id join auth.users u on u.id = w.profile_id where u.email = '$MOBILE_WORKER3_SEED_EMAIL' and je.original_text like 'QA-SYNTHETIC mobile review%'")"
+          [ -n "$R" ] || { echo "::error::the review seed has no marked journal entry"; exit 1; }
+          { echo "BOOK_WORKER_ID=$B"; echo "NOT_FIT_WORKER_ID=$N"; echo "REVIEW_ENTRY_ID=$R"; } >> "$GITHUB_ENV"
 
       - name: Expo prebuild (Android)
         working-directory: apps/mobile
@@ -279,6 +286,7 @@ jobs:
           MOBILE_WORKER_PASSWORD: ${{ env.MOBILE_WORKER_SEED_PASSWORD }}
           BOOK_WORKER_ID: ${{ env.BOOK_WORKER_ID }}
           NOT_FIT_WORKER_ID: ${{ env.NOT_FIT_WORKER_ID }}
+          REVIEW_ENTRY_ID: ${{ env.REVIEW_ENTRY_ID }}
         with:
           api-level: 34
           arch: x86_64
@@ -356,6 +364,20 @@ jobs:
           [ "$NF" = "1" ] && [ "$SL" = "1" ] && [ "$BK" = "1" ] && [ "$OTHER" = "0" ] || { echo "::error::expected one not-a-fit, one shortlisted, one accepted booking and none to the not-a-fit worker"; exit 1; }
           echo "ANDROID_BOOKING_ISOLATED_PROVEN: on-device shortlist → not a fit (with reason) for one worker, shortlist → proposed start for the other, accepted by that worker on their phone; stored once each (local stack, production untouched)"
           echo "- ANDROID_BOOKING_ISOLATED_PROVEN: company finds two discoverable workers → not a fit for one → proposes a start to the other → that worker accepts under Offers" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the work review's write — one employer approval of the employee's entry, with its note
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          C="$(q "select id from auth.users where email = '$MOBILE_NEED_SEED_EMAIL'")"
+          [ -n "$C" ] || { echo "::error::company seed missing"; exit 1; }
+          A="$(q "select count(*) from public.journal_entry_confirmations where entry_id = '$REVIEW_ENTRY_ID' and confirmer_id = '$C' and confirmation_scope->>'decision' = 'approved' and confirmation_scope->>'note' = 'QA-SYNTHETIC approved from the phone' and confirmation_scope->'authority'->>'basis' = 'employer'")"
+          ALL="$(q "select count(*) from public.journal_entry_confirmations where entry_id = '$REVIEW_ENTRY_ID'")"
+          AUD="$(q "select count(*) from public.audit_logs where action = 'review_journal_entry' and entity_id = '$REVIEW_ENTRY_ID'")"
+          echo "employer_approvals=$A confirmations=$ALL audit_rows=$AUD"
+          [ "$A" = "1" ] && [ "$ALL" = "1" ] && [ "$AUD" = "1" ] || { echo "::error::expected exactly one employer approval (with the note) and one audit row"; exit 1; }
+          echo "ANDROID_REVIEW_ISOLATED_PROVEN: on-device work review — the company approved its employee's journal entry with a note (draft + confirm), stored once with employer authority (local stack, production untouched)"
+          echo "- ANDROID_REVIEW_ISOLATED_PROVEN: company → Work review → approve the employee's entry with a note → one employer confirmation + one audit row" >> "$GITHUB_STEP_SUMMARY"
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()

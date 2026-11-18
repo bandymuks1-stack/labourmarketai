@@ -107,6 +107,7 @@ export default function ShellLayout() {
       <Tabs.Screen name="agency-offers" options={{ href: null, title: t("agencyOffers.title") }} />
       <Tabs.Screen name="education" options={{ href: null, title: t("education.title") }} />
       <Tabs.Screen name="agency" options={{ href: null, title: t("agency.title") }} />
+      <Tabs.Screen name="review" options={{ href: null, title: t("review.title") }} />
       <Tabs.Screen
         name="messages"
         options={{ href: null, title: t("messages.title") }}
