@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { OrganizationsLeadership } from "@/components/app/organization/organizations-leadership";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Check } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { PrintButton } from "@/components/app/print-button";
+import { chipLinkClassName } from "@/components/ui/Chip";
+import { Notice } from "@/components/ui/Notice";
 import { CvPrivateDetails } from "@/components/app/cv-private-details";
 import { WorkCardPlausibilityNote } from "@/components/app/work-card-plausibility-note";
 import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
@@ -517,7 +520,7 @@ export default async function VerifiedCvPage({
             {range ? ` · ${range}` : ""}
           </span>
           <span
-            className="mt-0.5 font-mono text-[0.625rem] uppercase tracking-label text-text-muted"
+            className="mt-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
             data-testid="cv-history-standing"
           >
             {t(`history.chain.${standing}`)}
@@ -945,13 +948,13 @@ export default async function VerifiedCvPage({
   // The page's one <main> landmark (WCAG 2.4.1 bypass blocks): /cv renders
   // outside the dashboard chrome, which is what supplies <main> elsewhere.
   return (
-    <main className="cv-doc min-h-screen bg-ink-900 px-6 py-8 text-text-primary print:p-0">
+    <main className="cv-doc min-h-screen bg-ink-900 px-4 py-6 text-text-primary sm:px-6 sm:py-8 print:p-0">
       <div className={`mx-auto flex max-w-3xl flex-col ${pageGap}`}>
         {/* Screen-only toolbar — never printed. */}
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <Link
             href="/dashboard/profile"
-            className="text-sm font-medium text-brand-blue hover:underline"
+            className="-my-2 inline-flex min-h-11 items-center text-sm font-medium text-brand-blue hover:underline"
             data-testid="cv-back-link"
           >
             {t("back")}
@@ -963,37 +966,29 @@ export default async function VerifiedCvPage({
               <a
                 key={tpl.id}
                 href={templateHref(tpl.id)}
-                className={`rounded-md border px-2.5 py-1 text-xs ${
-                  template === tpl.id
-                    ? "border-brand-blue bg-brand-blue text-text-on-brand"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
-                }`}
+                className={chipLinkClassName(template === tpl.id)}
+                aria-current={template === tpl.id ? "page" : undefined}
                 data-testid={`cv-template-${tpl.id}`}
               >
+                {template === tpl.id ? <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" /> : null}
                 {t(`templates.${tpl.id}`)}
               </a>
             ))}
-            <PrintButton label={t("print")} tone="primary" />
+            <PrintButton label={t("print")} tone="primary" className="min-h-11" />
           </div>
         </div>
 
         {/* Tailored-mode honest fallback notes — screen-only (the printed CV
             in fallback IS the standard CV; no note needed on paper). */}
         {tailored && tailored.kind === "not-visible" ? (
-          <p
-            className="rounded-md border border-state-amber/40 bg-state-amber/10 px-3 py-2 text-xs text-state-amber print:hidden"
-            data-testid="cv-tailored-not-visible"
-          >
+          <Notice tone="warning" className="print:hidden" testId="cv-tailored-not-visible">
             {t("tailored.notVisible")}
-          </p>
+          </Notice>
         ) : null}
         {tailored && tailored.kind === "no-structure" ? (
-          <p
-            className="rounded-md border border-state-amber/40 bg-state-amber/10 px-3 py-2 text-xs text-state-amber print:hidden"
-            data-testid="cv-tailored-no-structure"
-          >
+          <Notice tone="warning" className="print:hidden" testId="cv-tailored-no-structure">
             {t("tailored.noStructure")}
-          </p>
+          </Notice>
         ) : null}
 
         {/* The EU-format export is a VIEW over the SAME `cv` object — a
@@ -1223,7 +1218,7 @@ export default async function VerifiedCvPage({
             {/* Reference, not content: collapsed by default so the CV itself
                 comes first; one tap opens how it is built. */}
             <details className="group">
-              <summary className="cursor-pointer list-none text-sm text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+              <summary className="-my-1.5 flex min-h-11 cursor-pointer list-none items-center text-sm text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
                 <span aria-hidden className="mr-1.5 inline-block transition-transform group-open:rotate-90">›</span>
                 {t("builtFrom.lead")}
               </summary>

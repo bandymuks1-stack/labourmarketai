@@ -24,15 +24,21 @@ import { CapabilityFailureNotice } from "./capability-failure";
  * token. Outside an employer workspace the refusal says what to switch.
  *
  * The phone offers the fields a person actually has on site: what is needed
- * (required), a role word, a place, how many people, and how urgent. The
- * structured facts (work-type slug, country, accommodation, transport,
- * opportunity type) stay on the web form, which has the catalogues for them.
+ * (required), the country where the work is (required since #3225: a need
+ * without one is invisible to every country filter — a name in any language
+ * or a code, resolved to ISO by the server, as the web chat's form does), a
+ * role word, a place, how many people, and how urgent. The other structured
+ * facts (work-type slug, accommodation, transport, opportunity type) stay on
+ * the web form, which has the catalogues for them.
  */
 const MIN_DESCRIPTION = 3;
 const URGENCIES: readonly DemandUrgency[] = ["flexible", "this_week", "urgent"];
 
 type FlowState =
-  | { readonly kind: "writing"; readonly localError: "need.descriptionRequired" | "need.teamSizeInvalid" | null }
+  | {
+      readonly kind: "writing";
+      readonly localError: "need.descriptionRequired" | "need.countryRequired" | "need.teamSizeInvalid" | null;
+    }
   | { readonly kind: "drafting"; readonly fields: DemandDraftFields }
   | { readonly kind: "draft_failed"; readonly fields: DemandDraftFields; readonly failure: DomainFailure }
   | { readonly kind: "ready"; readonly fields: DemandDraftFields; readonly preview: DemandDraftPreview; readonly token: string }
@@ -52,6 +58,7 @@ export function NeedIntakeScreen({ onDone }: { onDone: () => void }) {
   const [description, setDescription] = useState("");
   const [role, setRole] = useState("");
   const [location, setLocation] = useState("");
+  const [country, setCountry] = useState("");
   const [teamSize, setTeamSize] = useState("");
   const [urgency, setUrgency] = useState<DemandUrgency | null>(null);
   const [flow, setFlow] = useState<FlowState>({ kind: "writing", localError: null });
@@ -74,7 +81,9 @@ export function NeedIntakeScreen({ onDone }: { onDone: () => void }) {
             ? t("availability.noCompanyContext")
             : code === "over_open_need_limit"
               ? t("need.overLimit")
-              : null,
+              : code === "country_required"
+                ? t("need.countryRequired")
+                : null,
     [t],
   );
 
@@ -82,6 +91,11 @@ export function NeedIntakeScreen({ onDone }: { onDone: () => void }) {
     const d = description.trim();
     if (d.length < MIN_DESCRIPTION) {
       setFlow({ kind: "writing", localError: "need.descriptionRequired" });
+      return;
+    }
+    const c = country.trim();
+    if (c === "") {
+      setFlow({ kind: "writing", localError: "need.countryRequired" });
       return;
     }
     const sizeText = teamSize.trim();
@@ -96,6 +110,7 @@ export function NeedIntakeScreen({ onDone }: { onDone: () => void }) {
     }
     const fields: DemandDraftFields = {
       description: d,
+      country: c,
       ...(role.trim() === "" ? {} : { role: role.trim() }),
       ...(location.trim() === "" ? {} : { location: location.trim() }),
       ...(urgency === null ? {} : { urgency }),
@@ -114,7 +129,7 @@ export function NeedIntakeScreen({ onDone }: { onDone: () => void }) {
       return;
     }
     setFlow({ kind: "ready", fields, preview: result.data.preview, token: result.data.confirmationToken });
-  }, [accessToken, description, locale, location, role, teamSize, urgency]);
+  }, [accessToken, country, description, locale, location, role, teamSize, urgency]);
 
   const send = useCallback(
     async (fields: DemandDraftFields, preview: DemandDraftPreview, token: string) => {
@@ -213,6 +228,15 @@ export function NeedIntakeScreen({ onDone }: { onDone: () => void }) {
         value={role}
         onChangeText={setRole}
         maxLength={120}
+        editable={!busy}
+      />
+      <Field
+        testID="need-country"
+        label={t("need.countryLabel")}
+        placeholder={t("need.countryPlaceholder")}
+        value={country}
+        onChangeText={setCountry}
+        maxLength={80}
         editable={!busy}
       />
       <Field
