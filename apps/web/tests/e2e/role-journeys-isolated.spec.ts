@@ -811,7 +811,7 @@ test("J-DEC. the company sees the need's history, closes it as filled, and the h
   await expect(history).toHaveAttribute("data-decided", "false");
 
   // The decision: the company closes the need as filled.
-  await co.getByTestId("demand-close").click();
+  await co.getByRole("main").getByTestId("demand-close").click();
   await expect
     .poll(
       async () =>
