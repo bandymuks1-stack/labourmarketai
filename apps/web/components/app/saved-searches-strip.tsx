@@ -164,7 +164,7 @@ export function SavedSearchesStrip({
             maxLength={SAVED_SEARCH_LABEL_MAX}
             onChange={(e) => setLabel(e.target.value)}
             placeholder={t("labelPlaceholder")}
-            className="min-w-40 flex-1"
+            className="min-w-40 w-full sm:w-auto sm:flex-1"
             data-testid="saved-search-label"
           />
           <Button
