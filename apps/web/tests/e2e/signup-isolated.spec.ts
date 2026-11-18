@@ -469,6 +469,28 @@ test("M-0. seed: a synthetic company for the isolated mobile need journey", asyn
   expect(needs.length, "the seed company starts with no need").toBe(0);
 });
 
+// ── M-1: the worker the ISOLATED Android journey signs in as for the CV forms ──
+// Runs only from android-need-isolated.yml (MOBILE_WORKER_SEED_EMAIL set): the
+// same real sign-up form and onboarding as S-1, with the server-set
+// qa_synthetic marker; the app then adds work history, a language and a school.
+test("M-1. seed: a synthetic worker for the isolated mobile CV forms journey", async ({ page }) => {
+  const address = process.env.MOBILE_WORKER_SEED_EMAIL ?? "";
+  const password = process.env.MOBILE_WORKER_SEED_PASSWORD ?? "";
+  test.skip(!address || !password, "android-need-isolated.yml only");
+  await signUp(page, address, password);
+  await onboard(page, "work", "QA-SYNTHETIC Mobile CV Worker");
+  await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  const id = await userId(address);
+  const r = await fetch(`${SB_URL}/auth/v1/admin/users/${id}`, {
+    method: "PUT",
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "content-type": "application/json" },
+    body: JSON.stringify({ app_metadata: { qa_synthetic: true } }),
+  });
+  expect(r.ok, "the seed carries the server-set qa_synthetic marker").toBe(true);
+  const workers = await db<Array<{ id: string }>>(`workers?profile_id=eq.${id}&select=id`);
+  expect(workers.length, "the worker seed has its workers row (the CV forms need it)").toBe(1);
+});
+
 /**
  * A-1..A-4. THE THREE SIGN-UP FAULTS OF THE 2026-11-13 TRUST AUDIT, each as the
  * person meets it. None needs an account: they are what the sign-in page says
