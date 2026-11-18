@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, Upload } from "lucide-react";
 import {
   extractCvFile,
   type CvExtractClientResult,
 } from "@/lib/cv/cv-import-client";
-import { trackFunnel } from "@/lib/telemetry/task";
+import { trackFunnel, trackFunnelFailure } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
@@ -27,10 +27,16 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 export function CvImportUpload({
   onExtracted,
   disabled,
+  file,
 }: {
   /** Called with the extracted raw CV text once a file is read successfully. */
   onExtracted: (text: string) => void;
   disabled?: boolean;
+  /** A file handed over by the conversation (the composer paperclip, after
+   *  the person said it is their CV). Read exactly like a pick in this
+   *  control — the same `/api/cv/extract`, which stores nothing — once per
+   *  File object. */
+  file?: File | null;
 }) {
   const t = useTranslations("structuring.cv");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -71,6 +77,9 @@ export function CvImportUpload({
         });
         onExtracted(result.text);
       } else {
+        // The closed failure code only — so a failed read is no longer
+        // indistinguishable from someone who never tried.
+        trackFunnelFailure(FUNNEL_EVENTS.cvUploadFailed, result.code, { surface: "cv_import" });
         setError(messageFor(result.code));
       }
     } finally {
@@ -79,6 +88,17 @@ export function CvImportUpload({
       if (inputRef.current) inputRef.current.value = "";
     }
   }
+
+  // A handed-over file takes the pick path above, once per File object, so a
+  // development double-mount or a re-render cannot read it twice.
+  const handledRef = useRef<File | null>(null);
+  const handleFileRef = useRef(handleFile);
+  handleFileRef.current = handleFile;
+  useEffect(() => {
+    if (!file || handledRef.current === file) return;
+    handledRef.current = file;
+    void handleFileRef.current(file);
+  }, [file]);
 
   return (
     <div className="flex flex-col gap-2" data-testid="cv-import-upload">

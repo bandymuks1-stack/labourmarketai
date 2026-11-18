@@ -54,8 +54,16 @@ import type { ResultContext } from "@/lib/conversation/result-registry";
  * to the ended row it produced. There is a targeted test for exactly this.
  *
  * ─── NO ROUTING ─────────────────────────────────────────────────────────────
- * Like every result body: no `<Link>`, no router. The full screen is reached
+ * Like every result body: no `<Link>`, no router. The station is reached
  * through `onOpenFull`, which the workspace layer wires.
+ *
+ * ─── A DIFFERENT OBJECT, NAMED AS SUCH (2026-09-23) ─────────────────────────
+ * The projects list is not this result made bigger — an engagement has no
+ * project (see the registry note) — so the button that goes there says
+ * "Open projects", the projects STATION. It used to say "open full screen",
+ * which promised an expansion of these rows and delivered another object.
+ * The in-place expansion of the engagements themselves is the panel's own
+ * control.
  */
 
 const FULL_ROUTE = "/dashboard/projects";
@@ -185,7 +193,7 @@ export function EngagementsResult({
       <div className="flex flex-col gap-3" data-testid={`engagements-${view.kind}`}>
         {message}
         <p className="text-basis text-text-secondary">{text}</p>
-        <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+        <OpenFull label={t("station.projects")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
       </div>
     );
   }
@@ -205,7 +213,7 @@ export function EngagementsResult({
           </li>
         ))}
       </ul>
-      <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+      <OpenFull label={t("station.projects")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
     </div>
   );
 }

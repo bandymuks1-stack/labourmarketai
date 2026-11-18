@@ -52,7 +52,10 @@ function validObservation(overrides: Record<string, unknown> = {}) {
     transformVersion: base.transformVersion as string,
   });
   // An explicit contentHash override WINS (for tamper tests).
-  return { ...base, contentHash: (overrides.contentHash as string) ?? contentHash };
+  return {
+    ...base,
+    contentHash: (overrides.contentHash as string) ?? contentHash,
+  };
 }
 
 const CONTEXT: ObservationValidationContextV1 = {
@@ -127,7 +130,7 @@ describe("validateObservationCandidate — deterministic gate", () => {
       });
       const result = validateObservationCandidate(candidate(obs), CONTEXT);
       expect(result.ok, profile.key).toBe(false);
-      if (profile.key === "arbetsformedlingen") {
+      if (profile.key === "arbetsformedlingen" || profile.key === "nav") {
         // Owner-activated for VACANCIES (2026-08-09) — the source gate
         // passes, but with importPolicy null the metric_policy check still
         // refuses every metric observation. This is the fail-closed line the
@@ -154,7 +157,10 @@ describe("validateObservationCandidate — deterministic gate", () => {
       sourceUrl: "test://claimed-external",
       derivationIds: [],
     });
-    const result = validateObservationCandidate(candidate(mislabelled), CONTEXT);
+    const result = validateObservationCandidate(
+      candidate(mislabelled),
+      CONTEXT,
+    );
     expect(result.ok).toBe(false);
     expect(failuresOf(result)).toContainEqual({
       checkId: "source_approved",
@@ -238,7 +244,10 @@ describe("validateObservationCandidate — deterministic gate", () => {
       sourceUrl: "test://claimed-external",
       derivationIds: [],
     });
-    const result = validateObservationCandidate(candidate(mislabelled), CONTEXT);
+    const result = validateObservationCandidate(
+      candidate(mislabelled),
+      CONTEXT,
+    );
     expect(result.ok).toBe(false);
     const failures = failuresOf(result);
     expect(failures).toContainEqual({
@@ -310,7 +319,12 @@ describe("validateObservationCandidate — deterministic gate", () => {
 
   it("date validity: future capture, window after capture, bad validity range", () => {
     const future = validateObservationCandidate(
-      candidate(validObservation({ capturedAt: "2027-01-01T00:00:00Z", validFrom: "2027-01-01T00:00:00Z" })),
+      candidate(
+        validObservation({
+          capturedAt: "2027-01-01T00:00:00Z",
+          validFrom: "2027-01-01T00:00:00Z",
+        }),
+      ),
       CONTEXT,
     );
     expect(failuresOf(future)).toContainEqual({
@@ -347,7 +361,9 @@ describe("validateObservationCandidate — deterministic gate", () => {
 
   it("country allowlist is fail-closed (empty policy rejects geo-tagged rows)", () => {
     const wrongCountry = validateObservationCandidate(
-      candidate(validObservation({ geo: { country: "PL", region: null, city: null } })),
+      candidate(
+        validObservation({ geo: { country: "PL", region: null, city: null } }),
+      ),
       CONTEXT,
     );
     expect(failuresOf(wrongCountry)).toContainEqual({
@@ -367,12 +383,21 @@ describe("validateObservationCandidate — deterministic gate", () => {
   it("language: undeclared or out-of-policy language is rejected", () => {
     expect(
       failuresOf(
-        validateObservationCandidate(candidate(validObservation(), null), CONTEXT),
+        validateObservationCandidate(
+          candidate(validObservation(), null),
+          CONTEXT,
+        ),
       ),
-    ).toContainEqual({ checkId: "language", reasonCode: "language_undeclared" });
+    ).toContainEqual({
+      checkId: "language",
+      reasonCode: "language_undeclared",
+    });
     expect(
       failuresOf(
-        validateObservationCandidate(candidate(validObservation(), "en"), CONTEXT),
+        validateObservationCandidate(
+          candidate(validObservation(), "en"),
+          CONTEXT,
+        ),
       ),
     ).toContainEqual({
       checkId: "language",
@@ -406,7 +431,11 @@ describe("validateObservationCandidate — deterministic gate", () => {
     // Non-salary metrics skip the salary checks.
     const count = validateObservationCandidate(
       candidate(
-        validObservation({ metricKey: "demand.role.count", unit: "count", valueNumeric: 0 }),
+        validObservation({
+          metricKey: "demand.role.count",
+          unit: "count",
+          valueNumeric: 0,
+        }),
       ),
       CONTEXT,
     );

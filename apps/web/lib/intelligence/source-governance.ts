@@ -202,6 +202,43 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       importPolicy: null,
     },
     {
+      // NAV / Arbeidsplassen.no — the Norwegian Labour and Welfare
+      // Administration's job vacancy feed (`pam-stilling-feed`). Governance
+      // row for the VACANCY pipeline provider `nav`
+      // (lib/vacancy-sources/vacancy-provider-registry.ts), registered as a
+      // SCAFFOLD on 2026-09-22.
+      //
+      // LEGAL STATUS: "confirmed" (2026-09-30). NAV's Arbeidsplassen team
+      // granted production API access after the company details were sent and
+      // the API terms (arbeidsplassen.nav.no/vilkar-api) were accepted in
+      // writing by return e-mail (August-September 2026). The ONGOING duties
+      // come with that acceptance and are enforced in code: withdrawn ads
+      // leave the result lists at once (INACTIVE/404/410 = removal), updates
+      // are polled continuously, the apply link deep-links to the original
+      // supplier, and contact data is never read (`contactList`). The earlier
+      // "unconfirmed" value was governance drift, not a missing approval; the
+      // sanitized receipt is docs/human-gates/nav-activation-gate.md.
+      //
+      // ACTIVATION: "on" is HALF the gate, exactly as for arbetsformedlingen:
+      // nothing is fetched until VACANCY_SOURCE_NAV_ENABLED is set and the
+      // bearer token VACANCY_SOURCE_NAV_API_TOKEN is provisioned, and
+      // VACANCY_IMPORT_KILL_SWITCH remains the instant global stop.
+      key: "nav",
+      displayNameCode: "intelligence.sources.nav",
+      sourceKind: "public_official",
+      legalStatus: "confirmed",
+      activation: "on",
+      termsNoteCode: "intelligence.sources.terms.nav",
+      // Not stated by NAV's terms; required by our own product policy for
+      // every external ad, exactly as for arbetsformedlingen.
+      attributionRequired: true,
+      homepage: "arbeidsplassen.nav.no",
+      proposedOnly: false,
+      // Vacancies are never metric observations — fail-closed null, as the
+      // boundary guard requires of every non-eurostat external source.
+      importPolicy: null,
+    },
+    {
       // CVbankas may only ever be a PROPOSED external benchmark until access
       // and usage permission are confirmed by the owner. Even then, an
       // external figure must NEVER be labelled a LabourMarket.ai average —

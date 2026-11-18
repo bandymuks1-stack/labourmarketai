@@ -4,8 +4,14 @@ import {
   getDurableNotifications,
   getSpineCounts,
 } from "@/lib/notifications/spine";
-import { buildSpineNotifications } from "@/lib/notifications/spine-signals";
-import { maybeEmitWeeklyDigestInBackground } from "@/lib/notifications/event-emitters";
+import {
+  buildSpineNotifications,
+  durableNotificationRole,
+} from "@/lib/notifications/spine-signals";
+import {
+  maybeEmitJobAlertsInBackground,
+  maybeEmitWeeklyDigestInBackground,
+} from "@/lib/notifications/event-emitters";
 import { SpineHydrator } from "@/components/app/spine-hydrator";
 import type { Notification } from "@/lib/auth/context";
 
@@ -28,12 +34,23 @@ import type { Notification } from "@/lib/auth/context";
  * lib/guards/notification-spine.test.ts.
  */
 export async function SpineStream({ activeRole }: { activeRole: Role | null }) {
-  const [spineCounts, durable] = await Promise.all([
-    getSpineCounts(),
+  // [perf] the streamed spine holds the HTML document open until it resolves
+  // (every dashboard page carries it). Production 2026-10-15: right after a
+  // deploy, documents arrived in 0.4–0.7 s TTFB but finished only after
+  // 25–44 s. These two numbers say whether this boundary is where that time
+  // goes. Durations only — no identity, no counts.
+  const spineStart = Date.now();
+  const timed = <T,>(p: Promise<T>): Promise<{ v: T; ms: number }> =>
+    p.then((v) => ({ v, ms: Date.now() - spineStart }));
+  const [counts, durableRead] = await Promise.all([
+    timed(getSpineCounts()),
     // Durable events (owner-gated store; [] until applied). Stored facts with
     // real timestamps and a persisted read state — NOT derived counts.
-    getDurableNotifications(),
+    timed(getDurableNotifications()),
   ]);
+  const spineCounts = counts.v;
+  const durable = durableRead.v;
+  console.info("[perf] spine-stream", { ms: Date.now() - spineStart, counts_ms: counts.ms, durable_ms: durableRead.ms });
   const navBadges = buildNavBadges(spineCounts);
   const derived = buildSpineNotifications(spineCounts, activeRole ?? "worker");
   // Weekly personal digest — materialized read-time, at most once per ISO
@@ -45,19 +62,21 @@ export async function SpineStream({ activeRole }: { activeRole: Role | null }) {
   // exactly-once. Write-path emitters are awaited instead; see the
   // READ-TIME DETACHED notes in lib/notifications/event-emitters.ts.
   maybeEmitWeeklyDigestInBackground(durable);
+  // Job alerts (stream N): real active jobs that fit the worker's own stated
+  // profession + countries + salary, exactly-once per job revision. Detached
+  // for the same reason as the digest above.
+  maybeEmitJobAlertsInBackground();
   // Durable rows render under the SAME bell — one attention surface, two
   // honest row kinds. They clear by marking read (`durable: true`), and they
   // ALSO carry the surface their entity lives on (`href`), so "your absence
   // was rejected" is something you can act on rather than only read. Those two
   // facts are independent; the panel keys mark-all-read off `durable`, never
-  // off a missing href. The employer-outcome events get the company icon; the
-  // rest are worker-facing.
+  // off a missing href. The role comes from `durableNotificationRole`: an
+  // organization-side event never asks an employer to switch to worker, and
+  // an event that can reach either side follows the active role.
   const durableRows: Notification[] = durable.map((d) => ({
     id: d.id,
-    role:
-      d.type === "event_booking_accepted" || d.type === "event_booking_declined"
-        ? "company"
-        : "worker",
+    role: durableNotificationRole(d.type, activeRole),
     type: d.type,
     // The stored row's own safe render hints travel to the bell (owner
     // window 11 §28). Two events of the same type were indistinguishable

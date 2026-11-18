@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerTexts } from "@/lib/communication/translation-read";
 import { readCommunicationLocale, viewerLocaleFor } from "@/lib/i18n/communication-locale";
@@ -27,6 +28,12 @@ import {
   type ComposerLabels,
 } from "@/components/app/manager-instruction-composer";
 import { type Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/instructions");
+
 
 export const dynamic = "force-dynamic";
 
@@ -62,19 +69,15 @@ export default async function InstructionsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role = (profile?.active_role as Role) ?? "worker";
   const isManager = MANAGER_ROLES.has(role);
 
   const Header = (
     <header className="flex flex-col gap-1">
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {isManager ? t("managerTitle") : t("workerTitle")}
-      </h1>
+      <PageTitle>{isManager ? t("managerTitle") : t("workerTitle")}</PageTitle>
       <p className="text-sm leading-relaxed text-text-secondary">
         {isManager ? t("managerIntro") : t("workerIntro")}
       </p>
@@ -168,6 +171,7 @@ export default async function InstructionsPage({
     capabilityDemonstrated: t("card.capabilityDemonstrated"),
     capabilitySelfReported: t("card.capabilitySelfReported"),
     capabilityStillRequired: t("card.capabilityStillRequired"),
+    capabilityRecognised: t("card.capabilityRecognised"),
   };
 
   // P3 — the contextual requirement ledger per instruction project (frozen

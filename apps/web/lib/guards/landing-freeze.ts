@@ -20,6 +20,56 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * The partner door is a real request form (owner P0 2026-11-15, production
+ * audit F3: "Become a partner" opened /about, which holds no partner form or
+ * contact): `PARTNER_DOOR` and the partners goal open `/#request=partner`, a
+ * fourth request door, and `landing.requestDoors` gains its title, line and one
+ * field label. Moved: public-doors.ts, starting-contexts-band.tsx (its `/about`
+ * cast and comment) and the `lt`, `en`, `ru` landing namespaces.
+ *
+ * No internal process notes in the UI (owner order P0 2026-11-15): the
+ * "In preparation" roadmap badge `landing.conv.comingLabel` now states the plain
+ * user-facing fact ("Not available yet"). Moved: the `lt`, `en`, `ru` landing
+ * namespace hashes. No source file.
+ *
+ * The first screen is the choice (owner instruction 2026-11-12: "Sumažink pagrindinio
+ * puslapio sudėtingumą. Pašalink nereikalingus tekstus, abstrakčius šūkius ir
+ * pasikartojančius blokus. Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori
+ * atlikti."): the goal navigator is first and carries the page's h1 (the question);
+ * the owner's headline is the one supporting line under it; the brand eyebrow, the
+ * second paragraph, the hero's "Start now" pair, the link down to the request doors
+ * and the three abstract cards left the first screen. EXACTLY ONE hash moved:
+ * focus-landing.tsx. No copy changed and no namespace moved (the labels are `siteNav`).
+ *
+ * No reply-time promise (owner decision 2026-11-10): the request doors no longer
+ * promise contact "within 24 hours" — the request is received and the team gets
+ * in touch after reviewing it. `requestDoors.promise` and `receivedBody` only.
+ * Moved: the `lt`, `en`, `ru` landing namespaces. No source file.
+ *
+ * Hero layout repair (owner order 2026-11-10, design completion): with the story
+ * column withdrawn the desktop first screen was half empty and the `order-1`
+ * wrapper put the entry above the h1 on phones. Source order is now promise →
+ * entry → doors, the entry beside the promise from `xl`. EXACTLY ONE hash moved:
+ * focus-landing.tsx. No copy, no namespace.
+ *
+ * No fictional people (owner order 2026-11-09): the living worker hero — sample
+ * personas with names, professions and careers under a "Sample" label — is
+ * withdrawn from the landing; the entry hero is the first screen. EXACTLY ONE
+ * hash moved: focus-landing.tsx. No namespace, no other frozen file.
+ *
+ * Request door wording (owner order 2026-11-07): the promise and the B2B door's title
+ * only. Moved: the `lt`, `en`, `ru` landing namespaces.
+ *
+ * Three commercial request doors (owner P0 2026-11-07): `LandingRequestDoors` under the
+ * hero and the new `landing.requestDoors` copy. Moved: focus-landing.tsx and the frozen
+ * `lt`, `en`, `ru` landing namespaces. No other frozen artefact.
+ *
+ * Owner-approved hero text (owner decision 2026-11-05): `landing.hero.headline`
+ * and `.sub` in the six active locales. Lithuanian is the owner's own words; the
+ * other five are machine-drafted, with no native review yet. EXACTLY THREE namespace
+ * hashes moved (lt, en, ru; nl, de and pl are outside the frozen set) and no file: the
+ * page, its layout and every test rule are untouched.
+ *
  * W14 Slice 1 (owner directive 2026-08-02) — "Remove fabricated AI
  * confidence". The hero rendered "Confidence 86%" from a literal in
  * `landing-scenario.ts` (W14 audit P0-1). Removing it necessarily changed a
@@ -98,6 +148,84 @@ import { join } from "node:path";
  * frozen set), and the three `*.landing` namespace hashes
  * (`landing.marketProof` added in all 11 catalogs; lt/en/ru are the frozen
  * three). No other frozen artefact moved.
+ *
+ * Map band withdrawn + internal copy removed from the human UI (owner
+ * directive 2026-09-27, §1 human-copy ban + §4) — production `/lt` was showing
+ * the visitor "Darbo rinka egzistuoja tikrose vietose", "Žmonės, darbai ir
+ * poreikiai yra kažkur", "Žemėlapis yra produkto dalis, o ne paveikslėlis prie
+ * teksto" and "Tai rinkos, ne šios dienos veikla". Each is the product
+ * explaining one of its own components to a person, in the product's own
+ * architectural terms, and the owner banned that class of copy across the whole
+ * product — explicitly NOT to be rewritten into nicer prose.
+ *
+ * The copy was inseparable from the band it explained: `PublicMarketMapBand`
+ * could only ever draw `MARKET_COUNTRIES` centroids, never activity, because the
+ * anon boundary publishes no country, region, city or coordinate. A map that
+ * cannot show work geography is what those three sentences were compensating
+ * for. So the BAND IS WITHDRAWN from the landing rather than re-worded.
+ *
+ * NOTHING WAS DELETED. `public-market-map-band.tsx`, `<MarketMap>`,
+ * `publicCoverageView()` and `/dashboard/market-map` are all untouched, and the
+ * `landing.marketMap` copy stays on disk — deleting it would make that component
+ * render raw key paths, which `i18n-key-resolution-static` exists to prevent
+ * (the first attempt at this change did exactly that and was reverted).
+ *
+ * NOTHING OF VALUE LEFT THE PAGE EITHER. The market PROOF — the real vacancy and
+ * employer counts — had been rendering as `children` INSIDE the map band; it was
+ * already a self-contained `<section>` with its own heading, so it simply stands
+ * on its own again. It also takes over `id="market"`, because `site-nav.tsx`
+ * carries an always-visible `/#market` link that would otherwise scroll nowhere.
+ *
+ * The regeneration touched EXACTLY TWO file hashes — `focus-landing.tsx` (band
+ * no longer rendered, import removed) and `market-proof-band.tsx` (gained the
+ * `#market` anchor) — and ZERO namespace hashes, which is the proof that no copy
+ * changed anywhere: the i18n drift assertion passed untouched. Guarded
+ * permanently by `no-internal-copy-in-human-ui.test.ts`, which fails if any of
+ * those sentences reaches rendered copy again and pins that the withdrawn
+ * namespace keeps exactly one, unrendered consumer — so the freeze is not the
+ * only thing standing between the landing and the product explaining itself.
+ *
+ * Public vacancy localization (owner approval 2026-09-27, §6 + the waiver
+ * extension) — production `/lt` showed Swedish where Lithuanian existed. ONE
+ * cause in `public-vacancy-card.tsx`, two manifestations: an ad WITH a mapped
+ * profession got the localized heading and then the publisher's Swedish
+ * occupation as a BARE second line under it (nothing saying what that word was
+ * — "Sandėlio darbininkas" over "Lagerarbetare"); an ad with NO mapped
+ * profession (30 049 of 53 392 active rows, 56.3 %) was headed with the
+ * publisher's own words and nothing said they were Swedish.
+ *
+ * The band now passes the SAME `vacancySources.language.originalIn` label
+ * `/jobs` and `/jobs/[id]` use, so the three public vacancy surfaces say one
+ * thing in ONE compact muted line ("Skelbimo kalba: švedų · Lagerarbetare").
+ * NOTHING is translated and nothing leaves the platform — `translate_vacancy`
+ * still has no egress grant and this change does not add one. The publisher's
+ * words are preserved in every case and keep their own `lang` (WCAG 3.1.2);
+ * what changed is that they are attributed instead of competing with the
+ * localized title. NO new copy was written in any locale.
+ *
+ * The regeneration touched EXACTLY ONE file hash —
+ * `landing-open-jobs-band.tsx` — and ZERO namespace hashes. Guarded permanently
+ * by `public-vacancy-localization.test.ts`, which pins the heading precedence,
+ * that the occupation is never a bare unattributed line, that all three
+ * surfaces read the one shared key only when the ad is foreign to the reader,
+ * and that none of them calls the translation runtime.
+ *
+ * Mechanics and disclaimers dropped from three landing strings (owner
+ * production-walk command 2026-09-28 §5: "Remove internal explanations,
+ * technical source mechanics, redundant descriptions, compensating
+ * disclaimers. Do not replace them with another paragraph.") — in EVERY
+ * locale, by removing a sentence, never by writing new copy:
+ *   `landing.marketProof.topNote` keeps its first sentence (the ranking basis)
+ *     and loses "Dalis skelbimų dar nepriskirta profesijai";
+ *   `landing.openJobs.sub` keeps "Žiūrėti galima be paskyros; prisijungę
+ *     matysite darbdavį, vietą ir kaip kandidatuoti" and loses the source
+ *     mechanics sentence (the band's attribution line stays);
+ *   `landing.contexts.subcopy` keeps "Tas pats žmogus gali … paskyra viena,
+ *     kontekstus galima pridėti bet kada" and loses "Tai tik atspirties
+ *     taškas, o ne nuolatinis vaidmuo" — the kept sentence carries the same
+ *     meaning, which `landing-tells-the-whole-product` still pins.
+ * The regeneration touched EXACTLY the three `*.landing` namespace hashes and
+ * ZERO file hashes: no component, layout or number changed.
  *
  * Market-proof honest browsable basis (OWNER APPROVAL 2026-08-19, numbers-only
  * correction; finding in docs/audits/landing-coverage-claim-basis-2026-08-18.md)
@@ -392,6 +520,200 @@ import { join } from "node:path";
  * record. NO copy, NO data, NO layout and NO namespace changed. The
  * regeneration touched exactly the product-chain-band.tsx hash, and the
  * primitives file joined the frozen set (its hash is new, not moved).
+ *
+ * VALUE FIRST + REAL JOBS + GREEN MEANS CONFIRMED (OWNER DIRECTIVES
+ * 2026-09-23, recorded in substance; they EXPLICITLY authorise editing the
+ * frozen landing and regenerating this baseline):
+ *
+ *   A. Landing §22 — "fix the story, not CSS". The landing over-emphasised
+ *      controls and the map before it said what the product is, and offered
+ *      about ten equal choices before any value; a visitor must be able to
+ *      answer WHAT it is, WHO it is for, WHAT they accomplish, WHY it is
+ *      different and WHAT to do next within 3–5 seconds. The owner
+ *      EXPLICITLY SUPERSEDES two window-11 (#1609) readings — §16's
+ *      instruction-style h1 ("say what you need…", which the entry's own
+ *      label already repeated) and the §18 reading that all ten example
+ *      chips must be visible by default — and KEEPS §17 map honesty and §20
+ *      contexts-not-identities.
+ *
+ *   B. PUBLIC_LANDING_REAL_JOB_DISCOVERY — expose a bounded section of REAL,
+ *      CURRENT vacancies on the landing; reuse the canonical public jobs
+ *      query, card and presentation; do not create a second jobs
+ *      implementation; do not accidentally expose gated fields.
+ *
+ *   C. Design rule #4 (owner-ratified 2026-09-22) — employer-confirmed =
+ *      trust-accent GREEN; gold never means confirmation — and the 12px type
+ *      floor ratified the same day.
+ *
+ * What changed, and nothing else: (1) `landing.hero.headline/sub` rewritten
+ * in the six active catalogs to state what/who/why (the hero keeps exactly
+ * those two keys); (2) one next step — `landing-primary-actions.tsx`
+ * (create an account + the public job board, the header's own labels) under
+ * the hero sub and again as a closing band after the trust band, reported
+ * as `cta_clicked` surface `landing_hero` / `landing_close` through the
+ * entry's own capture wrapper; (3) the entry MOUNTS four example chips and
+ * mounts the other six on demand (`landing.entry.moreExamples`), and a
+ * reading of looking-for-work offers the public board beside sign-up
+ * (`landing.entry.browseJobs`); (4) `landing-open-jobs-band.tsx` renders up
+ * to four vacancies from ONE extra unfiltered page-1 read in this same
+ * snapshot reader, through the unmodified `<PublicVacancyCard>`
+ * (`landing.openJobs`); (5) the market band's profession list lost its rank
+ * numbers, which presented a one-off read-back as a current ranking; (6) the
+ * sample Player Card withholds its /dashboard links; (7) the FOCUS switcher
+ * lost its load-time attention pulse and its label went from 7px to 12px;
+ * (8) the work-world `attested` variant — chip, diamond, spine node — moved
+ * from champagne to the trust-accent green, which is how the product chain's
+ * "proven skills" diamond reaches the landing.
+ *
+ * The frozen set was also CORRECTED: #1609 rendered `starting-contexts-band`
+ * and `public-market-map-band` without freezing them, so two of the sections
+ * a visitor sees could change without tripping this guard. Both joined,
+ * with the two new bands. `final-cta-band.tsx` stays frozen although nothing
+ * renders it any more, because `cta-not-nested-interactive.test.ts` still
+ * renders it; retiring it is a separate decision.
+ *
+ * The regeneration moved EXACTLY: nine file hashes — live-market-landing.ts,
+ * focus-landing.tsx, landing-mode-switcher.tsx, landing-mode-switcher.module
+ * .css, public-entry.tsx, product-chain-band.tsx (comment: the diamond's new
+ * colour), market-proof-band.tsx, player-card-showcase.tsx, primitives.tsx;
+ * four file hashes are NEW (the bands above); and the three frozen
+ * `*.landing` namespaces (hero, entry, openJobs). `app/[locale]/page.tsx`,
+ * the LIVE arm, public-doors.ts, trust-band.tsx and every other frozen
+ * namespace are byte-identical. Permanently guarded, so the freeze is not
+ * the only thing standing between the landing and a regression:
+ * `landing-tells-the-whole-product.test.ts` §22 (hero keys, one primary
+ * action, at most four mounted chips with all ten reachable),
+ * `landing-open-jobs-band.test.ts` (the band is the canonical card's markup,
+ * no gated value renders), `landing-fanout-is-sequential.test.ts` (FOCUS
+ * pays for the count and exactly one unfiltered page, sequentially, and no
+ * profession read), `landing-experience-modes.test.ts` (the order, no
+ * attention pulse, the 12px floor), `landing-market-proof.test.ts` (no rank
+ * ordinal), `public-sample-card-inert.test.ts` and the design-rule-#4 pins in
+ * `work-world-primitives.test.ts` and `work-verification-standing.test.ts`.
+ *
+ * THREE 375px DEFECTS ON THE PUBLIC LANDING (OWNER DIRECTIVE 2026-09-24,
+ * "landing verified at 375px" — the owner's landing directives of 2026-09-23
+ * are still live and PROVEN; this is additive polish under them, not a
+ * redesign, and they authorise editing the frozen landing and regenerating
+ * this baseline). Measured anonymously on production at 375×812 before the
+ * change, in all six active locales (probe + screenshots in the PR):
+ *
+ *   1. CHIPS. The half-row cap on the example chips was paired with
+ *      `truncate`, so three of the four default chips rendered as "Reikia
+ *      darbuo…", "Turime laisvų …", "Užrašyti atlikt…" (`scrollWidth >
+ *      clientWidth` on 3–4 chips in every locale). The label now WRAPS to a
+ *      second line inside the same cap: same two-up density, every word
+ *      visible. Measured with the chip's own glyph widths on the built app,
+ *      three labels still needed a THIRD line at 375px, so exactly three
+ *      were shortened to a two-line topic that keeps its meaning:
+ *      ru `entry.exampleLabels.verifyWork` "Кто подтвердит опыт" → "Кто
+ *      подтвердит", de `internship` "Wo ein Praktikum machen" → "Praktikum
+ *      finden", pl `logWork` "Zapisz wykonaną pracę" → "Zapisz swoją
+ *      pracę". The routed SENTENCES are untouched in every locale.
+ *   2. SWITCHER. The fixed 144×54px LIVE/FOCUS control covered the end of
+ *      the counter line at the fold (lt, de), a "10 vietos" chip of the
+ *      lower sample card in every locale, and the footer at page end.
+ *      Below `sm` (640px) it now leaves the corner and sits in the flow
+ *      after the closing band; from 641px up it is docked exactly as before,
+ *      with the bottom offset now honouring `env(safe-area-inset-bottom)`.
+ *      The mount moved from after the footer to the end of the landing body
+ *      so the in-flow position is the page's end.
+ *   3. SAMPLE. Two sample cards read identically ("Sandėlio darbuotojas /
+ *      Terminalarbetare / Ne visa darbo diena / 10 vietos / 2026-09-23") —
+ *      different vacancies, one look. The anonymous projection withholds
+ *      employer and place by owner directive (2026-08-24), so there is no
+ *      fact to ADD; `pickLandingVacancySample` now skips a row whose card
+ *      would paint identically to one already chosen (the fingerprint is
+ *      exactly what `<PublicVacancyCard>` renders) and returns a SHORTER
+ *      sample rather than a look-alike. The card, the reader, the RPC and
+ *      the privacy boundary are untouched.
+ *   4. The blank area above the cards in the jobs screenshot was measured
+ *      as the band title's `Reveal` at opacity 0 immediately after a
+ *      programmatic jump and 1 once its 0.5 s fade settled — a screenshot
+ *      artefact, not layout. Nothing changed for it.
+ *
+ * The regeneration moved EXACTLY FOUR file hashes — public-entry.tsx,
+ * landing-mode-switcher.module.css, focus-landing.tsx and
+ * live-market-landing.ts — and EXACTLY ONE namespace hash, `ru.landing`,
+ * for the one shortened Russian label; `lt.landing` and `en.landing` are
+ * byte-identical (de and pl are not frozen locales), which is the proof no
+ * other copy moved. Permanently guarded by `landing-375-polish.test.ts` (no
+ * truncation class on the chip, every label breaks into at most two lines
+ * of the measured 375px chip with no word wider than a line, the in-flow
+ * rule under `sm`, the mount before the footer — each with a negative
+ * control) and `lib/market/live-market-landing.test.ts` (the production
+ * look-alike pair as fixtures; the old selection fails it), so the freeze is
+ * not the only thing standing between the landing and these three coming
+ * back.
+ *
+ * Review round 2 of the same PR — `lib/market/live-market-landing.ts` only,
+ * ONE hash, zero namespaces. The first fingerprint hashed the RAW
+ * `employmentForm` / `workingTime`, while `<PublicVacancyCard>` paints a
+ * chip only for the keys of its own label tables, so two rows differing only
+ * in `unknown` vs `assignment` (which the card paints identically — no chip)
+ * were still two fingerprints and one look. The fingerprint now hashes
+ * `publicVacancyCardFacts` — a pure module beside the card
+ * (`public-vacancy-card-facts.ts`) declaring the key sets the card's chips
+ * exist for, `null` where it paints nothing — so the server-only reader
+ * does not pull the card's `Link` into its graph, and the card itself is
+ * BYTE-IDENTICAL (it is a waived product-gate surface bound to other PRs;
+ * modifying it here would be rejected as `pr-not-covered`). No rendered
+ * markup changed: the band and the card paint exactly as before; only which
+ * rows the selector declines can change, and only when a page holds such a
+ * pair. Pinned by the `unknown`/`assignment` fixture pair in
+ * `lib/market/live-market-landing.test.ts` (with the raw fingerprint as the
+ * negative control) and, in `landing-open-jobs-band.test.ts`, by rendering
+ * the real card over every combination of the varying facts (same markup
+ * exactly when same facts) and by reading the card's own table keys from
+ * its source and pinning the declared key sets to them.
+ *
+ * Formal address (owner decision 2026-11-15: "Jūs" in Lithuanian and "u" in
+ * Dutch are the default professional address; every language keeps a
+ * natural, respectful tone). It supersedes the informal "tu" order of
+ * 2026-10-28 below: Lithuanian moved back to jūs/jūsų, galite, pasirinkite …;
+ * Dutch to u/uw; the few Russian "ты" strings to "вы". The user's own words
+ * (chat bubbles, first-person example prompts) stay as written. Every key and
+ * every ICU placeholder / plural skeleton is unchanged; only wording moved.
+ * The regeneration moved EXACTLY SIX namespace hashes — `lt.landing`,
+ * `lt.hero`, `lt.livingMarketReview`, `lt.workEntryReview`,
+ * `lt.landingJourney`, `ru.landing` — and ZERO file hashes; `en.*` is
+ * byte-identical, which is the proof that no component, layout or English
+ * copy changed.
+ *
+ * LT informal "tu" register (owner order 2026-10-28) — the Lithuanian UI is
+ * unified to the informal singular address (tu/tavo/tau; gali, pasirink,
+ * prisijunk …) instead of the formal plural (jūs/jūsų; galite, pasirinkite,
+ * prisijunkite …). Legal texts (`legal.*`) were explicitly excluded. Every key
+ * and every ICU placeholder / plural skeleton is unchanged; only LT wording
+ * moved. The regeneration moved EXACTLY FIVE namespace hashes — `lt.landing`,
+ * `lt.hero`, `lt.livingMarketReview`, `lt.workEntryReview`,
+ * `lt.landingJourney` — and ZERO file hashes; `en.*` and `ru.*` are
+ * byte-identical, which is the proof that no component, layout or other
+ * locale changed.
+ *
+ * Adverts in the visitor's language first (owner decision 2026-11-15: "the
+ * visitor's language first, then other suitable offers" — a sort priority,
+ * never a filter). `live-market-landing.ts` keeps the board's whole first page
+ * in the shared cached snapshot (key `live-market-landing-v3`) and exports the
+ * language test; `pickLandingVacancySample` takes the visitor's language and
+ * orders own-language rows first, every other rule unchanged; `focus-landing.tsx`
+ * makes that pick per visitor at render time. The band and the card are
+ * byte-identical. The regeneration moved EXACTLY TWO file hashes —
+ * `lib/market/live-market-landing.ts` and `app/[locale]/focus-landing/focus-landing.tsx`
+ * — and ZERO namespace hashes: no copy moved.
+ *
+ * A worker or contractor sentence can be sent without an account (owner P0
+ * 2026-11-15, misleading public paths, F4). The entry's reading now offers, FIRST,
+ * the request the page already takes signed out: a sentence about needing workers
+ * opens the public need form with the sentence as its description
+ * (`?description=…&from=landing_entry`), and a job for someone to do opens the
+ * project request on this page (`#request=project`). Sign-up stays, second, with
+ * `?say=`; "sign in to save your request" is said only when it is true. The
+ * button reuses the request block's own title (`landing.requestDoors.title`),
+ * handed to the entry by the server landing so the client still receives
+ * `landing.entry` only; no copy moved. The regeneration moved EXACTLY TWO file
+ * hashes — `components/marketing/public-entry.tsx` and
+ * `app/[locale]/focus-landing/focus-landing.tsx` — and ZERO namespace hashes.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -402,26 +724,32 @@ export const FROZEN_LANDING_FILES = [
   // Owner decision 2026-08-20: the living European labour-market command is
   // the production V1. Freeze the actual root composition, its shared server
   // assembler, cinematic client, styling and governed public-data reader.
+  // Owner decision 2026-09-30: the LIVE arm — its route (live-market-page,
+  // live-market-command + its stylesheet), the mode contract
+  // (landing-experience.ts) and the FOCUS switcher (+ its stylesheet) — was
+  // REMOVED from the landing, so those files left this frozen set with it.
+  // The shared market reader stays frozen: the landing bands still read it.
+  // The regeneration dropped exactly those six file hashes and moved one —
+  // focus-landing.tsx (the switcher's import and mount removed) — and ZERO
+  // namespace hashes: no copy moved. (page.tsx and the "/" surface-registry
+  // entry still describe two arms in prose; they are covered by the
+  // public-acquisition-route-landing-v1 owner waiver and are updated only
+  // when that waiver is extended by the owner.)
   "app/[locale]/page.tsx",
-  "app/[locale]/live-market-review/live-market-page.tsx",
-  "app/[locale]/live-market-review/live-market-command.tsx",
-  "app/[locale]/live-market-review/live-market-command.module.css",
   "lib/market/live-market-landing.ts",
-  "lib/telemetry/landing-experience.ts",
   // Owner approval 2026-08-22: FOCUS is the RESTORED previous production
-  // landing, so its composition, its switcher and the original components
-  // it renders are part of the landing render tree again.
+  // landing, so its composition and the original components it renders are
+  // part of the landing render tree again.
   "app/[locale]/focus-landing/focus-landing.tsx",
-  "app/[locale]/focus-landing/landing-mode-switcher.tsx",
-  "app/[locale]/focus-landing/landing-mode-switcher.module.css",
   // Frozen design contract 2026-09-05, P1: the public entry (component + the
   // pure read-only hook into the conversation router) replaces the scripted
   // hero scenario at the top of the render tree.
   "components/marketing/public-entry.tsx",
+  // Owner positioning 2026-10-21: the three ways under the promise.
+  "components/marketing/landing-three-ways.tsx",
   "lib/marketing/public-entry.ts",
   "components/marketing/product-chain-band.tsx",
   "components/marketing/market-proof-band.tsx",
-  "components/marketing/player-card-showcase.tsx",
   "components/marketing/trust-band.tsx",
   "components/marketing/final-cta-band.tsx",
   // Window 6, 2026-09-06: the pure door registry the band renders from.
@@ -431,6 +759,63 @@ export const FROZEN_LANDING_FILES = [
   // is frozen with it — a later change to the primitives is a landing change
   // and must regenerate this baseline with its own note.
   "components/app/work-world/primitives.tsx",
+  // 2026-09-23 (landing §22 + PUBLIC_LANDING_REAL_JOB_DISCOVERY): the two
+  // bands #1609 added to the render tree WITHOUT freezing them, and the two
+  // new ones — so every section the FOCUS landing actually renders is frozen.
+  "components/marketing/starting-contexts-band.tsx",
+  "components/marketing/public-market-map-band.tsx",
+  "components/marketing/landing-primary-actions.tsx",
+  "components/marketing/landing-open-jobs-band.tsx",
+  // Owner decision 2026-09-29: the freeze was lifted for the ENTRY HERO
+  // only; the new entry story is frozen with it as the new floor.
+  // Owner directive 2026-09-29 ("realistic living worker hero"): the same
+  // lifted scope — the entry hero only. The living worker hero and its data
+  // builder are frozen with it as the new floor; the photographs themselves
+  // and their manifest are media, regenerated by their script.
+  // 2026-09-30, same lifted scope: the first real photographs showed the
+  // person under the headline on a wide screen, so the photograph now starts
+  // right of the words (md:left-[18%]) and the Player Card sits at the right
+  // edge. The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
+  // 2026-09-30 (owner review of #1995: "direction approved, not accepted —
+  // the card is too plain, the motion is a slideshow"): the photographs
+  // became keyframes of a person-centred motion system and the card became
+  // the Player Card with the person's own portrait. The regeneration touched
+  // EXACTLY the two hero files and the three frozen `livingWorkerHero`
+  // namespaces (one added line, `cardNote`); no other landing copy moved.
+  // 2026-09-30 (owner review 2: "transitions still read as a slideshow; the
+  // hero must react; the card must be a living professional identity"): one
+  // clock and one face-anchored camera, pose bridges for the pairs whose pose
+  // changes, pointer/hover/tap reactions, and the card's identity layers. The
+  // regeneration touched EXACTLY the two hero files and the three frozen
+  // `livingWorkerHero` namespaces (the card's `identity` and `cardSections`
+  // copy); no other landing copy, navigation or structure moved.
+  // 2026-09-30 (owner review 3, final polish): a pose change is a motion cut
+  // (one body on screen, never a dissolve), and the Player Card became one
+  // identity object — the person closed, the identity unfolding when open.
+  // The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
+  // 2026-09-30 (owner visual direction: heads were cut): tight source frames
+  // recomposed with safe space above the head (media), and a head-safety
+  // rule in the camera so holding the face never pushes a head out of frame.
+  // The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
+  // 2026-10-10 (owner directive, verbatim: "Pradinio puslapio mobilųjį CTA
+  // sutvarkyk pagal jau patvirtintą vizualinę kryptį. Užšaldymo apsauga turi
+  // saugoti patvirtintą dizainą, o ne amžinai blokuoti jo funkcionalumo
+  // pataisymus. Keisk tik pagrįstai būtiną dalį."): on a phone the promise and
+  // the primary doors now come BEFORE the photograph (flex order; desktop
+  // untouched — the promise stays absolute over the picture). The first CTA
+  // had been at ~1,035 px on 375x812. The regeneration touched EXACTLY ONE
+  // hash — living-worker-hero.tsx; no copy, photograph or motion moved.
+  // 2026-10-18 (owner directive, final product completion: "Išsaugok esamą
+  // dizaino sistemą, bet pašalink nenuoseklumus"; the 2026-10-10 rule that the
+  // freeze protects the approved design, not its defects): three defects seen
+  // on production — a 56px two-tone seam between the header and the hero
+  // (-mt-14 pt-14 on the section), the subline running past the 28% left
+  // gradient onto bright frames (gradient 46%), and carousel controls with no
+  // backdrop (the hero chips' own translucent pill). The regeneration touched
+  // EXACTLY ONE hash — living-worker-hero.tsx; no copy, photograph, motion or
+  // structure moved.
+  "components/marketing/living-worker-hero.tsx",
+  "lib/marketing/living-worker-hero.ts",
 ] as const;
 
 /**
@@ -446,6 +831,8 @@ export const FROZEN_LANDING_NAMESPACES = [
   "professions",
   "workEntryReview",
   "live",
+  "landingJourney",
+  "livingWorkerHero",
 ] as const;
 
 export const FROZEN_LOCALES = ["lt", "en", "ru"] as const;

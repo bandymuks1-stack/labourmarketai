@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * ZERO DATA LEADS TO THE NEXT CANONICAL ACTION (2026-09-19 completion queue).
@@ -15,7 +16,7 @@ import { describe, expect, it } from "vitest";
  */
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
-const LOCALES = ["en", "lt", "ru", "nl", "de"] as const;
+const LOCALES = activeLocales;
 const msgs = Object.fromEntries(
   LOCALES.map((l) => [l, JSON.parse(read(`messages/${l}.json`)) as Record<string, unknown>]),
 ) as Record<(typeof LOCALES)[number], Record<string, unknown>>;
@@ -30,10 +31,17 @@ describe("empty states lead somewhere", () => {
     for (const l of LOCALES) expect(at(msgs[l], "communication.emptyCta"), l).toBeTruthy();
   });
 
-  it("an empty pool on the map offers to change the work looked for", () => {
+  it("an empty vacancy pool is no longer a zero-block on the map — it simply offers no layer", () => {
+    // One-canonical-map: "N open positions: none" with a profile CTA was a
+    // zero-diagnostic block under the map. The vacancy layer now exists only
+    // when the viewer's occupation has advertisements (UNKNOWN is not zero);
+    // the opportunities door stays one chip away. The profile anchor the old
+    // CTA pointed at must still exist for the other surfaces that use it.
     const src = read("app/[locale]/dashboard/market-map/page.tsx");
-    expect(src).toMatch(/data-testid="market-map-vacancy-volume-none-cta"/);
-    expect(src).toMatch(/href="\/dashboard\/profile#work-directions"/);
+    expect(src).not.toMatch(/market-map-vacancy-volume-none/);
+    expect(src).toMatch(/vacancyVolume\.kind === "ok"/);
+    expect(src).toMatch(/connection-?|market-map-connection/);
+    expect(read("app/[locale]/dashboard/profile/page.tsx")).toMatch(/<details\s+id="profile-edit"/);
     for (const l of LOCALES) expect(at(msgs[l], "marketExplanation.noneOpenCta"), l).toBeTruthy();
   });
 

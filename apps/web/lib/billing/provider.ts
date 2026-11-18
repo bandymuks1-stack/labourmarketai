@@ -32,6 +32,32 @@ export interface CheckoutSessionInput {
    * moment the operation closes. Stripe accepts 30 min … 24 h from creation.
    */
   readonly expiresAt?: number;
+  /**
+   * Trial days for the subscription (server-decided by trial-core.decideTrial;
+   * never client-supplied). Omitted = no trial. The adapter states the
+   * post-trial charge on the hosted page and fails closed if it cannot read
+   * the price it is about to describe.
+   */
+  readonly trialPeriodDays?: number;
+  readonly successUrl: string;
+  readonly cancelUrl: string;
+}
+
+/**
+ * A ONE-TIME Checkout Session (payment mode) for a server-fixed amount — the
+ * organization pilot pass (lib/billing/pilot-pass-core.ts). Never a
+ * subscription; the client supplies none of these fields.
+ */
+export interface OneTimeCheckoutInput {
+  readonly amountCents: number;
+  readonly currency: string;
+  readonly productName: string;
+  readonly clientReferenceId: string;
+  readonly customerEmail?: string | null;
+  /** The payer's stored customer (cus_…): the payment joins their history and portal. */
+  readonly providerCustomerId?: string | null;
+  readonly metadata: Readonly<Record<string, string>>;
+  readonly idempotencyKey: string;
   readonly successUrl: string;
   readonly cancelUrl: string;
 }
@@ -54,6 +80,17 @@ export type RetrieveSubscriptionResult =
   /** The provider has no such subscription (resource_missing). */
   | { ok: true; subscription: null }
   | { ok: false; reason: string };
+
+/**
+ * RAW read of one provider subscription — the Stripe object as plain data, for
+ * the canonical normalizer (webhook-core parseSubscriptionObject) to parse.
+ * Recovery uses this so there is NO second parser. `retryable` marks transient
+ * failures (429 / 5xx / connection) the caller may retry with backoff.
+ */
+export type RetrieveRawSubscriptionResult =
+  | { ok: true; object: Record<string, unknown>; livemode: boolean }
+  | { ok: true; object: null }
+  | { ok: false; reason: string; retryable: boolean };
 
 export type ListSubscriptionsResult =
   | { ok: true; subscriptions: readonly ProviderSubscriptionView[] }
@@ -99,6 +136,10 @@ export interface BillingProvider {
   createCheckoutSession(
     input: CheckoutSessionInput,
   ): Promise<CheckoutSessionResult>;
+  /** One-time payment session (the organization pilot pass). */
+  createOneTimeCheckoutSession?(
+    input: OneTimeCheckoutInput,
+  ): Promise<CheckoutSessionResult>;
   /** Create a provider TEST customer for a profile (canonical metadata). */
   createCustomer(input: CreateCustomerInput): Promise<CreateCustomerResult>;
   /** Create a Customer Portal session for the caller's OWN customer. */
@@ -114,6 +155,8 @@ export interface BillingProvider {
    * consult. Never creates, updates or charges anything.
    */
   retrieveSubscription(providerSubscriptionId: string): Promise<RetrieveSubscriptionResult>;
+  /** READ-ONLY: the raw provider subscription object (recovery / refresh). */
+  retrieveSubscriptionRaw(providerSubscriptionId: string): Promise<RetrieveRawSubscriptionResult>;
   /** READ-ONLY: every subscription (any status) of one provider customer. */
   listCustomerSubscriptions(providerCustomerId: string): Promise<ListSubscriptionsResult>;
 }

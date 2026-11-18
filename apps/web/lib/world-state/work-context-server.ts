@@ -14,6 +14,7 @@ import {
 } from "@/lib/worker/invitations";
 import type { WorkerInvitationsLabels } from "@/components/app/worker-invitations";
 import type { ContextFact, ContextRecommendation } from "./entity-context";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * The Context Panel with NOTHING selected — "what is going on with my work
@@ -88,7 +89,7 @@ export async function resolveWorkContext(locale: string): Promise<WorkContextRes
     getTranslations({ locale }),
   ]);
 
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = (await viewerWorkToday()).todayIso;
   const range = visibleRange("agenda", todayIso);
   // Independent reads — the Time Engine window and "who is waiting on me" have
   // nothing to say to each other, so they run together.
@@ -204,6 +205,7 @@ async function resolveInvitations(
       outcomeLinked: t("outcomeLinked"),
       outcomeAlreadyLinked: t("outcomeAlreadyLinked"),
       outcomeNoInvitation: t("outcomeNoInvitation"),
+      outcomeEmailUnverified: t("outcomeEmailUnverified"),
       outcomeNoWorker: t("outcomeNoWorker"),
       outcomeError: t("outcomeError"),
       outcomeNeedsMigration: t("outcomeNeedsMigration"),

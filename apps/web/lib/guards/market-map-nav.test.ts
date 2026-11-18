@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { WORKER_TABS } from "../today/today-route";
+import { TODAY_STATIONS } from "../today/today-route";
 
 /**
  * Market Map first-class navigation guard.
@@ -24,26 +24,50 @@ describe("market map is exposed in the primary nav + opportunities", () => {
   it("the PASAULIS tab destination embeds the geographic map and links the full map before any disclosure", () => {
     // Honest door (R-11 reclassification, 2026-09-19). The catalogue's
     // primary nav tabs (VISIBLE_PRIMARY_NAV_ITEMS) render only in the admin
-    // `full` chrome (dashboard-chrome.tsx: modeFor → "full" = /dashboard/admin
+    // `full` chrome (lib/config/navigation.ts: dashboardChromeMode → "full" = /dashboard/admin
     // only), so "market_map is a primary nav tab" proved nothing for a real
     // user — the earlier version of this test was a reachability proof that
     // could not fail while the tab was invisible to everyone but an admin.
-    // What a worker really walks: PASAULIS (WORKER_TABS.world →
-    // /dashboard/opportunities) embeds WorldDiscovery — THE WORLD layer — in
-    // a top-level section, and the map header links the full
-    // /dashboard/market-map page. Both sit BEFORE the first collapsed
-    // <details>, i.e. one tap from the tab bar at every width.
-    const world = WORKER_TABS.find((t) => t.id === "world");
+    // What a worker really walks: the opportunities station (TODAY_STATIONS
+    // `world` → /dashboard/opportunities, one tap from ŠIANDIEN inside the
+    // conversation; also the find-work intent and a search command) embeds
+    // WorldDiscovery — THE WORLD layer — in a top-level section, and the map
+    // header links the full /dashboard/market-map page. Both sit BEFORE the
+    // first collapsed <details>.
+    const world = TODAY_STATIONS.find((t) => t.id === "world");
     expect(world?.href).toBe("/dashboard/opportunities");
-    const mapSection = opportunities.indexOf('data-testid="opportunities-map"');
+    // ── THE EMBEDDED VIEWPORT IS WITHHELD (owner decision 2026-09-27)
+    //
+    // This test used to require `<WorldDiscovery mapMode="result">` and a
+    // `data-testid="opportunities-map"` section on this page. Walked on
+    // production, that embedded map was not an honest door — it was a
+    // misleading one:
+    //
+    //   · it opened on `EUROPE_CENTER = [52.2, 6.0]`, a coordinate inside the
+    //     NETHERLANDS (NL centroid 52.13/5.29; DE 51.16/10.45), so a person who
+    //     had told us they are in Germany was shown NL as their work geography;
+    //   · it had nothing true to draw anyway: all 111 187 `public_vacancies`
+    //     rows were `country = 'SE'` and NONE carried lat/lng, so the demand
+    //     layer had zero mappable opportunities.
+    //
+    // A viewport constant is not a fact about where work is (SEP-1), so the
+    // viewport is withheld until the demand layer has real coordinates. The
+    // CAPABILITY is untouched: `WorldDiscovery`, `loadWorldView`, the world
+    // model and /dashboard/market-map all still exist, and the door below is
+    // what this test now proves.
+    expect(opportunities).not.toMatch(/<WorldDiscovery/);
+    // THE DOOR MUST SURVIVE THE VIEWPORT. This is the whole point of the
+    // R-11 reclassification recorded above: the primary nav tabs are invisible
+    // to non-admins, so this link is the worker's real way to the full map and
+    // it has to stay ABOVE the first collapsed disclosure.
     const fullMapLink = opportunities.indexOf('data-testid="opportunities-map-full-link"');
-    const firstDetails = opportunities.indexOf("<details");
-    expect(mapSection, "embedded map section").toBeGreaterThan(-1);
+    // The Filters disclosure now sits INSIDE the compact controls bar beside the
+    // map door (owner order 2026-10-01); the map door must precede the first
+    // disclosure of secondary content.
+    const firstDetails = opportunities.indexOf('data-testid="opportunities-market-situation"');
     expect(fullMapLink, "top-level full-map link").toBeGreaterThan(-1);
     expect(firstDetails, "a collapsed disclosure exists further down").toBeGreaterThan(-1);
-    expect(mapSection).toBeLessThan(firstDetails);
     expect(fullMapLink).toBeLessThan(firstDetails);
-    expect(opportunities).toMatch(/<WorldDiscovery[\s\S]*?mapMode="result"/);
   });
 
   it("the universal command search offers the map before any typing, at every width", () => {

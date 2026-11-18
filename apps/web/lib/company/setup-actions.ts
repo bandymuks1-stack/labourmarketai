@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 
 import { saveCompanySetup } from "./company-setup";
 import { getActiveOrganizationContext } from "./active-organization";
+import { switchActiveWorkspaceCore } from "./workspace-switch-core";
+import { followWorkspaceRoleCore } from "@/lib/auth/active-role-core";
+import { createClient } from "@/lib/supabase/server";
 import { declareOrganizationCapabilities } from "@/lib/organizations/capability-actions";
 
 /**
@@ -93,14 +96,59 @@ export async function saveCompanySetupAction(
         ctx.organizations.find((o) => o.legacyCompanyId === r.companyId)?.id ??
         null;
       if (orgId) {
-        await declareOrganizationCapabilities(orgId, [capability]);
-        capabilityDeclared = true;
+        // The declaration REPORTS a refusal ({ ok: false }) instead of
+        // throwing, so "declared" is its answer, never an assumption — an
+        // institution whose capability was refused must see the hint, not a
+        // workspace without its education home and no explanation.
+        const declared = await declareOrganizationCapabilities(orgId, [capability]);
+        capabilityDeclared = declared.ok;
       }
     } catch (e) {
       console.error("[saveCompanySetupAction] capability preset failed", {
         message: e instanceof Error ? e.message : String(e),
       });
     }
+  }
+
+  // THE NEW COMPANY IS WHERE THE PERSON NOW WORKS (memory/context 2026-10-11).
+  // With no stored pointer, the workspace resolver only defaults to an
+  // organization when there is exactly ONE; a worker employed elsewhere who
+  // sets up their own company already has two, so they landed in the personal
+  // space and the company pages said "no company profile yet" about the
+  // company they had just created. Pin it through the switcher's own
+  // membership-validated core. Best-effort: setup never fails on this.
+  //
+  // AND THEY ACT FOR IT (employer-flow audit 2026-11-15). The header switch
+  // also makes the acting role follow the workspace (decision d3); setup only
+  // pinned, and pinned nothing when the company was already the default. A
+  // person who chose "work" and "hire" at onboarding has `worker` as the
+  // primary role, so they stayed a worker in their own company: the employer
+  // reads answered nothing and a booking proposal was refused as unreachable.
+  // The switch's own role core now follows here too. It activates only a role
+  // the person holds, from the membership row the switch core just validated.
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const ctx = await getActiveOrganizationContext();
+    const orgId = ctx.organizations.find((o) => o.legacyCompanyId === r.companyId)?.id ?? null;
+    if (user && orgId) {
+      const pinned = await switchActiveWorkspaceCore({ supabase, userId: user.id }, orgId);
+      const workspace = pinned.workspace ?? null;
+      if (workspace) {
+        const followed = await followWorkspaceRoleCore({ supabase, userId: user.id }, workspace);
+        if (!followed.ok) {
+          console.error("[saveCompanySetupAction] acting role did not follow the company", {
+            code: followed.code,
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.error("[saveCompanySetupAction] workspace pin failed", {
+      message: e instanceof Error ? e.message : String(e),
+    });
   }
 
   revalidatePath("/", "layout");

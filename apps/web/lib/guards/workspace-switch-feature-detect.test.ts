@@ -50,16 +50,34 @@ describe("workspace switch tolerates the absent durable-pointer column", () => {
 
   it("the not-member DB veto (42501) can never leave a stale pointer", () => {
     expect(SRC).toContain('const NOT_MEMBER_CODE = "42501"');
-    // The core refuses BEFORE the action writes the cookie: in the org-switch
-    // arm the cookie is set only after the core answered ok/needs-migration,
-    // so there is nothing to roll back on a DB veto.
+    // The core refuses BEFORE the action writes the cookie: in the org-pointer
+    // commit the cookie is set only after the core answered ok/needs-migration,
+    // so there is nothing to roll back on a DB veto. RE-ANCHORED (2026-09-23)
+    // onto `commitOrganizationPointer`, the ONE org commit that both
+    // `switchActiveOrganization` and the single `switchWorkspaceAction` call.
     const switchArm = ACTIONS.slice(
-      ACTIONS.indexOf("export async function switchActiveOrganization"),
-      ACTIONS.indexOf("export async function clearActiveOrganization"),
+      ACTIONS.indexOf("async function commitOrganizationPointer"),
+      ACTIONS.indexOf("async function commitPersonalPointer"),
     );
+    const cookieAt = switchArm.search(/jar\.set\(\s*ACTIVE_WORKSPACE_COOKIE/);
+    expect(cookieAt).toBeGreaterThan(-1);
     expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeGreaterThan(-1);
-    expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeLessThan(
-      switchArm.indexOf("jar.set(ACTIVE_WORKSPACE_COOKIE"),
-    );
+    expect(switchArm.indexOf("switchActiveWorkspaceCore")).toBeLessThan(cookieAt);
+    // A refusal returns before the cookie line — never after it.
+    expect(switchArm.indexOf('code: "not-member"')).toBeLessThan(cookieAt);
+    // Both org switches go through it — neither keeps a private copy.
+    for (const fn of ["switchActiveOrganization", "switchWorkspaceAction"]) {
+      const body = ACTIONS.slice(ACTIONS.indexOf(`export async function ${fn}`));
+      expect(body, fn).toMatch(/commitOrganizationPointer\(/);
+    }
+  });
+
+  it("the identity follow never writes profiles from the actions module", () => {
+    // `switchWorkspaceAction` follows the acting identity through the SHARED
+    // role core (lib/auth/active-role-core.ts) — the same core
+    // `switchActiveRole` and the MCP `context.switch` run.
+    expect(ACTIONS).toMatch(/followWorkspaceRoleCore\(caller, committed\.workspace\)/);
+    expect(ACTIONS).not.toMatch(/from\("profiles"\)/);
+    expect(ACTIONS).not.toMatch(/active_role/);
   });
 });

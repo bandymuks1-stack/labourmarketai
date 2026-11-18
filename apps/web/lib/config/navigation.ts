@@ -19,10 +19,10 @@ import {
   type FeatureConfig,
   type FeatureKey,
 } from "./feature-availability";
+import type { WorkAreaIconKey } from "@/lib/navigation/work-areas";
 
-/** Icon ids — concrete icon imports live in the nav components
- *  (`BottomNav`, `DashboardTabs`), so this config stays
- *  framework-agnostic. */
+/** Icon ids — concrete icon imports live in `components/app/nav-icons.ts`
+ *  (read by the one header), so this config stays framework-agnostic. */
 export type NavIconKey =
   | "home"
   | "store"
@@ -33,7 +33,10 @@ export type NavIconKey =
   | "calendar"
   | "network"
   | "user"
-  | "shield";
+  | "shield"
+  // An organization work area listed under the header's "More" keeps the
+  // icon its area switcher shows (`lib/navigation/work-areas.ts`).
+  | WorkAreaIconKey;
 
 type TabMeta = {
   /** i18n key for the SHORT tab label (e.g. "Apžvalga" vs the feature's
@@ -91,7 +94,8 @@ export type NavItem = {
   /** The feature key the tab is sourced from, or "admin" for the
    *  permission-gated admin item (not a catalogue feature). Useful for
    *  tests + telemetry + React keys. */
-  id: FeatureKey | "admin";
+  /** …or `area:<id>` for an organization work area (`work-areas.ts`). */
+  id: FeatureKey | "admin" | `area:${string}`;
   /** Locale-prefixed app route. */
   href: string;
   tabLabelKey: string;
@@ -168,6 +172,25 @@ export function getAdvancedNavItems(): readonly NavItem[] {
 }
 
 /**
+ * THE ONE HEADER'S "More" (owner order 2026-10-25: priority + overflow, never
+ * a sideways-scrolling tab row). The header shows the core loop by priority
+ * and puts every OTHER destination the person may open here: the catalogue's
+ * module extras (map, network) in catalogue order, then the permission-gated
+ * admin console for an admin. Same lists on every route and every width —
+ * the phone sheet renders core + these, so nothing is reachable on one screen
+ * size and missing on another.
+ */
+export function getHeaderOverflowNavItems({
+  isAdmin,
+}: {
+  isAdmin: boolean;
+}): readonly NavItem[] {
+  const coreIds = new Set<string>(CORE_NAV_IDS);
+  const extras = getAdvancedNavItems().filter((i) => !coreIds.has(i.id));
+  return isAdmin ? [...extras, ADMIN_NAV_ITEM] : extras;
+}
+
+/**
  * Admin nav item. NOT sourced from the feature catalogue — admin is a
  * permission dimension, not a product feature (see dashboard layout's
  * `deriveIsAdmin`). The nav components append it ONLY when the auth context
@@ -180,6 +203,32 @@ export const ADMIN_NAV_ITEM: NavItem = {
   tabLabelKey: "auth.dashboard.tabs.admin",
   iconKey: "shield",
 };
+
+/** The canonical authenticated home — the ONE route the logo, the back
+ *  affordance and every "go home" lead to, for every identity and context
+ *  (owner decision 0017, 2026-09-22). */
+export const CANONICAL_HOME = "/dashboard";
+
+export type DashboardChromeMode = "conversation" | "panel" | "full";
+
+/**
+ * WHICH chrome a dashboard route renders (pure; the client
+ * `<DashboardChrome>` and the guards read the same rule):
+ *   · `conversation` — the home itself, bare (the chat carries the one top bar);
+ *   · `full`         — the internal operator console only (`ADMIN_NAV_ITEM.href`);
+ *   · `panel`        — every other product route: the one top bar over a
+ *                      contextual workspace.
+ */
+export function dashboardChromeMode(pathname: string): DashboardChromeMode {
+  if (pathname === CANONICAL_HOME) return "conversation";
+  if (
+    pathname === ADMIN_NAV_ITEM.href ||
+    pathname.startsWith(`${ADMIN_NAV_ITEM.href}/`)
+  ) {
+    return "full";
+  }
+  return "panel";
+}
 
 /** Plain feature list backing the nav — used by audit / route-check docs. */
 export const PRIMARY_NAV_SOURCE_FEATURES: readonly FeatureConfig[] =

@@ -1,9 +1,10 @@
 import "server-only";
 
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { actsAsAgency } from "@/lib/company/agency-capability";
 import { createClient } from "@/lib/supabase/server";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { organizationCapabilities } from "@/lib/organizations/capabilities";
@@ -109,8 +110,20 @@ export async function loadPersonStarterFacts(): Promise<PersonStarterFacts> {
     }
   };
 
+  // The person's OWN skills, joined to their worker row in the same request
+  // (`workers!inner`, filtered by profile). Unfiltered, this count evaluated
+  // the `can_view_worker` policy on every row of the table — 82 ms in the
+  // database against ~5 ms by index for the same answer (production,
+  // 2026-09-28), growing with every skill anyone adds — and for someone who
+  // may view other workers it counted theirs too. One request, no prior
+  // `workers` read to wait for; no worker row → 0; a failed read → null.
   const [skills, workHistory, journalEntries] = await Promise.all([
-    count((c) => c.from("worker_skills").select("id", { count: "exact", head: true })),
+    count((c) =>
+      c
+        .from("worker_skills")
+        .select("id, workers!inner(profile_id)", { count: "exact", head: true })
+        .eq("workers.profile_id", uid),
+    ),
     count((c) =>
       c
         .from("engagement_contexts")
@@ -155,7 +168,9 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
 
   const [staffingAgency, capabilities, legacyType] = await Promise.all([
     safe(async () => {
-      const company = await getOwnedCompanyById(companyId!);
+      // A read of the company TYPE for the greeting — any governance member
+      // the resolver accepted may know whether their organization is an agency.
+      const company = await getAccessibleCompanyById(companyId!);
       return company.kind === "ok" && company.row?.companyType === "staffing_agency";
     }, false),
     safe(() => readOrganizationCapabilities(organizationId!), [] as readonly string[]),
@@ -167,6 +182,13 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
   const held = organizationCapabilities({ roleSlugs: capabilities, legacyType });
   const educationFirst = isEducationFirstWorkspace({ roleSlugs: capabilities, legacyType });
   const hasEducation = held.includes("training_provider");
+  // THE ONE AGENCY RULE (lib/company/agency-capability, owner decision
+  // 2026-09-28): company type OR a declared workforce role. The bridge reads
+  // below were gated on the TYPE alone, so an organization that is an agency
+  // by its declared roles (production: QA-SYNTHETIC Gama, type
+  // "construction") had no agency facts and its Home brief never ran the
+  // agency rung — a worker's declined placement stayed invisible there.
+  const agencyWorkspace = actsAsAgency(staffingAgency ? "staffing_agency" : null, held);
 
   const supabase = await createClient();
   const count = async (build: (c: ReturnType<typeof asAny>) => Promise<{ count: number | null; error: unknown }>): Promise<Fact> => {
@@ -195,7 +217,8 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
           .in("status", [...ROLLUP_OPEN_DEMAND_STATUSES]),
       ),
       count((c) =>
-        c.from("projects").select("id", { count: "exact", head: true }).eq("organization_id", organizationId),
+        // Real projects: a DUPLICATE row is a fragment of its canonical one.
+        c.from("projects").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).neq("record_state", "duplicate"),
       ),
       count((c) =>
         c
@@ -204,7 +227,7 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
           .eq("company_id", companyId)
           .eq("status", "active"),
       ),
-      staffingAgency
+      agencyWorkspace
         ? count((c) =>
             c
               .from("agency_client_connections")
@@ -213,7 +236,7 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
               .eq("status", "active"),
           )
         : Promise.resolve<Fact>(null),
-      staffingAgency
+      agencyWorkspace
         ? count((c) =>
             c
               .from("agency_client_connections")
@@ -222,13 +245,13 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
               .eq("status", "pending"),
           )
         : Promise.resolve<Fact>(null),
-      staffingAgency
+      agencyWorkspace
         ? safe(async () => {
             const res = await listSharedRequestsForAgency();
             return res.kind === "ok" ? res.rows.length : null;
           }, null as Fact)
         : Promise.resolve<Fact>(null),
-      staffingAgency
+      agencyWorkspace
         ? safe(async () => {
             const res = await listAgencyOfferProgress();
             return res.kind === "ok" ? res.rows.length : null;
@@ -276,7 +299,9 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
       facts,
       learnerLinked: false,
     },
-    agencyWorkspace: staffingAgency,
+    // The SAME rule Home's agency track uses (lib/company/agency-capability):
+    // a declared workforce role opens the agency workspace too.
+    agencyWorkspace,
     educationWorkspace: educationFirst,
     organizationName,
     organizationId,

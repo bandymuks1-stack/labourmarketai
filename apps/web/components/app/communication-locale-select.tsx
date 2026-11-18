@@ -8,6 +8,7 @@ import {
   isCommunicationLocale,
 } from "@/lib/i18n/config";
 import { persistCommunicationLocaleAction } from "@/lib/i18n/locale-actions";
+import { Card } from "@/components/ui/Card";
 
 /**
  * COMM-1 — "I read messages in …": ONE control on the account settings page
@@ -49,7 +50,9 @@ export function CommunicationLocaleSection({
   const [current, setCurrent] = useState<string>(
     value && isCommunicationLocale(value) ? value : "",
   );
-  const [status, setStatus] = useState<Status>(available ? "idle" : "unavailable");
+  const [status, setStatus] = useState<Status>(
+    available ? "idle" : "unavailable",
+  );
   const [pending, startTransition] = useTransition();
 
   const onChange = (next: string) => {
@@ -68,48 +71,51 @@ export function CommunicationLocaleSection({
   };
 
   return (
-    <section
-      className="card-border p-5"
-      data-testid="account-communication-locale"
-      data-state={status}
-    >
-      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-        {labels.title}
-      </p>
-      <p className="mt-2 text-xs leading-relaxed text-text-secondary">{labels.intro}</p>
-      <label className="mt-4 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-        <span className="text-sm text-text-primary">{labels.label}</span>
-        <select
-          value={current}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={status === "unavailable" || pending}
-          aria-label={labels.label}
-          className="min-h-11 rounded-md border border-ink-500 bg-ink-700 px-3 text-sm text-text-primary outline-none focus:border-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
-          data-testid="account-communication-locale-select"
-        >
-          <option value="">{labels.sameAsInterface}</option>
-          {communicationLocales.map((code) => (
-            <option key={code} value={code}>
-              {communicationLanguageNames[code]}
-            </option>
-          ))}
-        </select>
-      </label>
-      {status === "saved" ? (
-        <p className="mt-2 text-meta text-state-success" role="status">
-          {labels.saved}
+    <Card compact>
+      <section data-testid="account-communication-locale" data-state={status}>
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {labels.title}
         </p>
-      ) : null}
-      {status === "error" ? (
-        <p className="mt-2 text-meta text-state-danger" role="alert">
-          {labels.error}
+        <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+          {labels.intro}
         </p>
-      ) : null}
-      {status === "unavailable" ? (
-        <p className="mt-2 text-meta text-text-muted" data-testid="account-communication-locale-unavailable">
-          {labels.unavailable}
-        </p>
-      ) : null}
-    </section>
+        <label className="mt-4 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <span className="text-sm text-text-primary">{labels.label}</span>
+          <select
+            value={current}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={status === "unavailable" || pending}
+            aria-label={labels.label}
+            className="min-h-11 rounded-md border border-ink-500 bg-ink-700 px-3 text-sm text-text-primary outline-none focus:border-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
+            data-testid="account-communication-locale-select"
+          >
+            <option value="">{labels.sameAsInterface}</option>
+            {communicationLocales.map((code) => (
+              <option key={code} value={code}>
+                {communicationLanguageNames[code]}
+              </option>
+            ))}
+          </select>
+        </label>
+        {status === "saved" ? (
+          <p className="mt-2 text-meta text-state-success" role="status">
+            {labels.saved}
+          </p>
+        ) : null}
+        {status === "error" ? (
+          <p className="mt-2 text-meta text-state-danger" role="alert">
+            {labels.error}
+          </p>
+        ) : null}
+        {status === "unavailable" ? (
+          <p
+            className="mt-2 text-meta text-text-muted"
+            data-testid="account-communication-locale-unavailable"
+          >
+            {labels.unavailable}
+          </p>
+        ) : null}
+      </section>
+    </Card>
   );
 }

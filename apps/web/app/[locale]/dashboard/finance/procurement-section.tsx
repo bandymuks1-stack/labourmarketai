@@ -79,12 +79,17 @@ export async function ProcurementSection({
   locale,
   notice,
   financeRecords,
+  activeOrganizationId = null,
 }: {
   locale: string;
   notice: ProcurementNotice | null;
   /** The caller's own finance records (for the invoice-link select) —
    *  passed in so the page reads them exactly once. */
   financeRecords: readonly FinanceRecord[];
+  /** The ACTIVE workspace's organization (server-resolved) — the default
+   *  choice in the organization picker, so an inquiry is filed for the
+   *  workspace the person is in, not for whichever membership sorts first. */
+  activeOrganizationId?: string | null;
 }) {
   const t = await getTranslations("procurement");
   const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
@@ -180,7 +185,13 @@ export async function ProcurementSection({
             {hidden()}
             <label className="flex flex-col gap-1">
               <Label>{t("form.orgLabel")}</Label>
-              <Select name="organizationId" defaultValue={orgOptions[0]!.organizationId}>
+              <Select
+                name="organizationId"
+                defaultValue={
+                  orgOptions.find((o) => o.organizationId === activeOrganizationId)?.organizationId ??
+                  orgOptions[0]!.organizationId
+                }
+              >
                 {orgOptions.map((o) => (
                   <option key={o.organizationId} value={o.organizationId}>
                     {o.name ?? o.organizationId.slice(0, 8)}
@@ -243,6 +254,7 @@ export async function ProcurementSection({
                 key={inquiry.id}
                 className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/30 p-3"
                 data-testid={`procurement-inquiry-${inquiry.id}`}
+                data-status={inquiry.status}
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <p className="min-w-0 break-words text-sm font-semibold text-text-primary">
@@ -362,7 +374,12 @@ export async function ProcurementSection({
                         <Input name="note" maxLength={PROCUREMENT_OFFER_NOTE_MAX} />
                       </label>
                       <div>
-                        <Button type="submit" variant="secondary" size="sm">
+                        <Button
+                          type="submit"
+                          variant="secondary"
+                          size="sm"
+                          data-testid={`procurement-save-offer-${inquiry.id}`}
+                        >
                           {t("actions.saveOffer")}
                         </Button>
                       </div>
@@ -468,7 +485,12 @@ export async function ProcurementSection({
                         placeholder={t("form.orderRefPlaceholder")}
                         className="max-w-48"
                       />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        size="sm"
+                        data-testid={`procurement-mark-ordered-${inquiry.id}`}
+                      >
                         {t("actions.markOrdered")}
                       </Button>
                     </form>
@@ -477,7 +499,12 @@ export async function ProcurementSection({
                     <form action={setProcurementStatusAction}>
                       {hidden(inquiry.id)}
                       <input type="hidden" name="status" value="closed" />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        size="sm"
+                        data-testid={`procurement-close-${inquiry.id}`}
+                      >
                         {t("actions.close")}
                       </Button>
                     </form>
@@ -486,7 +513,12 @@ export async function ProcurementSection({
                     <form action={setProcurementStatusAction}>
                       {hidden(inquiry.id)}
                       <input type="hidden" name="status" value="cancelled" />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        size="sm"
+                        data-testid={`procurement-cancel-${inquiry.id}`}
+                      >
                         {t("actions.cancel")}
                       </Button>
                     </form>

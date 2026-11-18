@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_READINESS_ITEM_KEYS, READINESS_ITEM_DOCUMENT_TYPES, documentTypesForReadinessItem } from "@/lib/projects/readiness-items";
 
 import { deriveWorkerProjectAsks, firstRecordableAsk, WORKER_PROJECT_ASK_LIMIT } from "@/lib/projects/worker-project-asks";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * The checklist ↔ document bridge, on the PERSON's side (owner contract §11
@@ -136,7 +137,8 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     const fn = ACCESS.slice(ACCESS.indexOf("export async function loadOwnProjectAsks"));
     expect(ACCESS).toContain('import { listMyDocuments } from "@/lib/documents/readiness";');
     expect(ACCESS).toContain('import { listWorkerInstructions } from "@/lib/instructions/instructions";');
-    expect(fn).toContain("listOwnReadinessItems(workerId, ids)");
+    // The same checklist query, through its failure-keeping form (#2941).
+    expect(fn).toContain("queryOwnReadinessItems(workerId, ids)");
     // An unanswered documents read is UNKNOWN (null), never "no documents".
     // Pinned as the INTENT rather than one line's exact spelling: the call
     // gained a fourth argument (the person's recorded work evidence) when
@@ -151,7 +153,10 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     expect(fn).toMatch(/if \(ins\.projectId && !instructions\.has\(ins\.projectId\)\)/);
     expect(fn).toMatch(/\.slice\(0, 10\)/);
     // The chat read composes it and a failed read leaves the asks empty.
-    expect(READ).toContain("const own = await loadOwnProjectAsks(activeIds).catch(() => new Map());");
+    // Failure-keeping form of the same read (#2941): a thrown read is null,
+    // and the checklist then answers "unavailable", never "nothing open".
+    expect(READ).toContain("const ownRead = await loadOwnProjectAsksResult(activeIds).catch(() => null);");
+    expect(ACCESS).toContain("return (await loadOwnProjectAsksResult(projectIds)).byProject;");
     expect(READ).toMatch(/asks: own\.get\(r\.projectId\)\?\.asks \?\? \[\]/);
     expect(READ).toMatch(/instruction: own\.get\(r\.projectId\)\?\.instruction \?\? null/);
     expect(READ).not.toMatch(/listMyDocuments|listOwnReadinessItems|listWorkerInstructions/);
@@ -165,7 +170,7 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     const COMP = read("components/app/instruction-project-asks.tsx");
     expect(COMP).toMatch(/href="\/dashboard\/documents"/);
     expect(COMP).not.toMatch(/\.from\(|\.rpc\(|"use server"|Action\(/);
-    for (const locale of ["lt", "en", "de", "nl", "ru"]) {
+    for (const locale of activeLocales) {
       const card = JSON.parse(read(`messages/${locale}.json`)).instructions.card as Record<string, string>;
       for (const k of ["asksTitle", "ownReady", "ownExpiring", "ownNone", "blocked", "record"]) expect(card[k], `${locale}.${k}`).toBeTypeOf("string");
     }
@@ -272,6 +277,50 @@ describe("paper meets a FORMAL requirement only when a reviewer verified it (202
       EVIDENCE,
     );
     expect(asks.get("p1")![0].capability?.formalRequirementMet).toBe(false);
+  });
+
+  it("SKL-9: an assessor's current recognition makes the equivalence true; recorded work and an empty list never do", () => {
+    const row = {
+      id: "r1",
+      decision: "recognised" as const,
+      validFrom: null,
+      validUntil: null,
+      assessorOrganizationId: "inst",
+      requirementKind: "document_type" as const,
+      requirementKey: slug,
+      revokedAt: null,
+    };
+    const run = (recs: Parameters<typeof deriveWorkerProjectAsks>[4]) =>
+      deriveWorkerProjectAsks([item("p1", "qualification_or_skill_evidence")], [], NOW, EVIDENCE, recs).get("p1")![0]
+        .capability;
+    // Today's production: the relation is unapplied, the list is empty.
+    expect(run([])?.standing).toBe("demonstrated_capability");
+    expect(run(null)?.formalRequirementMet).toBe(false);
+    expect(run([{ ...row, revokedAt: "2026-09-01" }])?.formalRequirementMet).toBe(false);
+    expect(run([row])).toMatchObject({ standing: "recognized_equivalence", formalRequirementMet: true });
+  });
+
+  it("SKL-9 downstream: a recognised requirement is not offered as 'record a document' and the surface says it is recognised", () => {
+    const row = {
+      id: "r1",
+      decision: "recognised" as const,
+      validFrom: null,
+      validUntil: null,
+      assessorOrganizationId: "inst",
+      requirementKind: "document_type" as const,
+      requirementKey: slug,
+      revokedAt: null,
+    };
+    const asks = (recs: Parameters<typeof deriveWorkerProjectAsks>[4]) =>
+      deriveWorkerProjectAsks([item("p1", "qualification_or_skill_evidence")], [], NOW, EVIDENCE, recs);
+    // Not recognised: the paper is still the open ask.
+    expect(firstRecordableAsk(asks([]).values())).not.toBeNull();
+    // Recognised: the requirement is answered, so no 'record a document' nudge.
+    expect(firstRecordableAsk(asks([row]).values())).toBeNull();
+    const ui = read("components/app/instruction-project-asks.tsx");
+    expect(ui).toContain('data-testid="instruction-project-ask-recognised"');
+    expect(ui).toContain("labels.capabilityRecognised");
+    expect(read("app/[locale]/dashboard/instructions/page.tsx")).toContain('t("card.capabilityRecognised")');
   });
 
   it("the derivation reads the verification axis, not the worker's own status", () => {

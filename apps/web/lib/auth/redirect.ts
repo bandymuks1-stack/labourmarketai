@@ -217,3 +217,27 @@ export function buildReturnValue(
   const value = query ? `${pathname}?${query}` : pathname;
   return value.length > MAX_RETURN_PATH_LENGTH ? pathname : value;
 }
+
+/**
+ * The already-onboarded person's destination, as the middleware hands it to
+ * `app/[locale]/onboarding/layout.tsx`.
+ *
+ * A Next.js layout is never told the query string, and the onboarding gate
+ * needs exactly one fact the layout cannot derive: WHERE an already-onboarded
+ * visitor was trying to go. That value is `?next=`, which the auth callback
+ * forwards so an invite link (or a landing door) survives first-time
+ * registration — deciding the gate without it would silently collapse every
+ * deep link to the bare dashboard.
+ *
+ * The middleware carries NO authorization here: it runs the SAME pure
+ * `getSafeReturnPath` the page has always called and copies the result onto
+ * the request. It answers "where would this go", never "who may go there".
+ *
+ * Passing the RESOLVED value rather than the raw parameter is also what makes
+ * it safe to put in a header at all: `getSafeReturnPath` rejects external,
+ * protocol-relative, auth-looping and control-character paths, and rebuilds
+ * the query through `URLSearchParams`, which percent-encodes anything that
+ * could break a header line. An inbound header of this name is REPLACED,
+ * never trusted.
+ */
+export const ONBOARDING_RETURN_HEADER = "x-lm-onboarding-return";

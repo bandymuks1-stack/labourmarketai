@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import {
   getJournalWindowReport,
@@ -18,6 +19,13 @@ import {
 import { OPEN_WORK_TASK_STATUSES } from "@/lib/tasks/task-model";
 import { createUtcFormatter } from "@/lib/time/display";
 import type { Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { ExplainMore } from "@/components/app/premium/disclosure";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/reports", "reports.title");
+
 
 /**
  * Reports hub (control room PR K, capability gap map §12) — the role-specific
@@ -87,16 +95,12 @@ function MetricTile({
 
 /** The per-figure calculation-basis label — every section renders one. */
 function BasisNote({ t, basisKey }: { t: Translate; basisKey: string }) {
+  // The basis is always one tap away, never a wall above the figures
+  // (owner 2026-10-10); the summary names it ("Calculation basis").
   return (
-    <p
-      className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-meta leading-relaxed text-text-muted"
-      data-testid={`reports-basis-${basisKey}`}
-    >
-      <span className="font-mono uppercase tracking-label">
-        {t("basis.label")}:
-      </span>{" "}
-      {t(`basis.${basisKey}`)}
-    </p>
+    <ExplainMore summary={t("basis.label")}>
+      <p data-testid={`reports-basis-${basisKey}`}>{t(`basis.${basisKey}`)}</p>
+    </ExplainMore>
   );
 }
 
@@ -132,11 +136,9 @@ export default async function ReportsHubPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role: Role = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : "worker";
@@ -167,12 +169,10 @@ export default async function ReportsHubPage({
   return (
     <div className="flex flex-col gap-6" data-testid="reports-hub">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
         <p className="text-xs text-text-muted">{t("honestyNote")}</p>
       </header>
@@ -454,6 +454,9 @@ function OrgSections({
                   value={projects.byStatus[s]}
                 />
               ))}
+              {projects.other > 0 ? (
+                <MetricTile label={t("org.projects.other")} value={projects.other} />
+              ) : null}
               <MetricTile label={t("org.projects.total")} value={projects.total} />
             </dl>
           )
@@ -969,6 +972,16 @@ function JournalWindowDetail({
                   </tr>
                 </tfoot>
               </table>
+              {report.totals.reviewNotEnabled > 0 ? (
+                <p
+                  className="mt-2 text-meta text-text-muted"
+                  data-testid="journal-window-review-not-enabled"
+                >
+                  {t("journalWindow.reviewNotEnabled", {
+                    count: report.totals.reviewNotEnabled,
+                  })}
+                </p>
+              ) : null}
             </div>
           )}
 

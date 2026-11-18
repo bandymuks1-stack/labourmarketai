@@ -133,7 +133,7 @@ export function ExperienceModerationItem({
               value="published"
               disabled={decidePending}
               data-testid="experience-moderation-publish"
-              className="inline-flex min-h-[2.75rem] items-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="inline-flex min-h-[2.75rem] items-center rounded-md bg-gradient-cta px-4 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {t("moderation.publish")}
             </button>

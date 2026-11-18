@@ -610,6 +610,32 @@ describe("an item that says only WHERE describes the header's work (#1689, measu
     ]);
   });
 
+  it("a trailing WHERE after the work is context on every lane — no capability claim from the place either (walked 2026-09-29)", () => {
+    // Production entry 2026-09-29 "…4 valandas klijavau plyteles virtuvėje":
+    // lane 1 read the work part (tiling) but lane 3 read the whole phrase, so
+    // the place noun raised a "Maisto gamyba" claim beside tiling — the
+    // worker's tiling day offered as food-preparation evidence.
+    for (const text of [
+      "4 valandas klijavau plyteles virtuvėje",
+      "Klijavau plyteles virtuvėje",
+      "5 hours tiling in the kitchen",
+    ]) {
+      const r = derive(text);
+      expect(r.recognizedSkills.map((s) => s.slug), text).toEqual(["tiling"]);
+      expect(r.claims, text).toEqual([]);
+      expect(r.candidates, text).toEqual([]);
+    }
+  });
+
+  it("NEGATIVE CONTROL: food actually prepared in a kitchen stays food-preparation evidence", () => {
+    const r = derive("Šiandien 5 valandas virtuvėje ruošiau maistą klientams");
+    const read = [
+      ...r.recognizedSkills.map((s) => s.slug),
+      ...r.claims.map((c) => c.label),
+    ].join(" | ");
+    expect(read).toMatch(/cooking|maisto/i);
+  });
+
   it("NEGATIVE CONTROL: without a header a bare place item reads as it always did", () => {
     expect(derive("Dirbau virtuvėje 5 val.").recognizedSkills.map((s) => s.slug)).toEqual([
       "cooking",

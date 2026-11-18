@@ -10,7 +10,9 @@ import type { Database } from "@/lib/supabase/types";
 import {
   readPublicVacancySupplyCounts,
   searchPublicVacancyPreviews,
+  type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
+import { publicVacancyCardFacts } from "@/components/marketing/public-vacancy-card-facts";
 
 export type LiveMarketJob = {
   readonly id: string;
@@ -41,6 +43,47 @@ export type LiveMarketLandingSnapshot = {
   readonly lastRefreshedAt: string | null;
   readonly basis: "live" | "unavailable";
   readonly professions: readonly LiveMarketProfession[];
+  /** A few REAL, CURRENT vacancies for the public landing (owner directive
+   *  PUBLIC_LANDING_REAL_JOB_DISCOVERY) — see `readVacancySample` below. */
+  readonly sample: LiveMarketVacancySample;
+};
+
+/**
+ * THE LANDING'S REAL-JOB SAMPLE — the same rows `/jobs` page 1 shows.
+ *
+ * Owner directive (PUBLIC_LANDING_REAL_JOB_DISCOVERY): expose a bounded
+ * section of real, current vacancies by REUSING the canonical public jobs
+ * query and card — never a second jobs implementation, and never a gated
+ * field. So this is exactly one call to the ONE anonymous reader,
+ * `searchPublicVacancyPreviews({ page: 1 })` — unfiltered, the same parameter
+ * tuple the board's first page asks, so the two share that reader's
+ * coalescing and result cache — and the rows are its `PublicVacancyPreview`
+ * projection untouched: no employer, no place, no raw title, no named
+ * source, because the database function never returns them and `toPreview`
+ * drops the last two again before any component sees a row.
+ *
+ * `unavailable` covers "the read did not answer" AND "not switched on"; the
+ * landing omits the band for both, and for an empty `live` page too. Unknown
+ * is never rendered as "no jobs".
+ *
+ * The cached snapshot holds that page AS THE BOARD RETURNED IT; the few rows a
+ * visitor sees are picked at render time by `pickLandingVacancySample`, for
+ * the visitor's language (the owner's language-first decision, dated in
+ * `lib/guards/landing-freeze.ts`). The snapshot itself is
+ * shared by every locale, so it stays language-neutral.
+ */
+export type LiveMarketVacancySample = {
+  readonly basis: "live" | "unavailable";
+  readonly vacancies: readonly PublicVacancyPreview[];
+};
+
+/** How many real vacancies the landing shows. A glimpse, not a board: the
+ *  whole board is one link away. */
+export const LANDING_VACANCY_SAMPLE_SIZE = 4;
+
+const UNAVAILABLE_SAMPLE: LiveMarketVacancySample = {
+  basis: "unavailable",
+  vacancies: [],
 };
 
 /**
@@ -123,6 +166,132 @@ function unavailableSnapshot(): LiveMarketLandingSnapshot {
       jobs: [],
       basis: "unavailable",
     })),
+    sample: UNAVAILABLE_SAMPLE,
+  };
+}
+
+/**
+ * WHAT AN ANONYMOUS CARD CAN SHOW OF A ROW — the facts two sample cards must
+ * differ on (owner directive of 24 Sep, "landing verified at 375px"; the
+ * dated production evidence lives in `live-market-landing.test.ts`, because
+ * this file may carry no bare four-digit literal — see the hard-coded-total
+ * guard in `verified-market-data-live.test.ts`).
+ *
+ * Measured anonymously on production: the sample rendered two cards reading
+ * "Sandėlio darbuotojas / Terminalarbetare / Ne visa darbo diena / 10 vietos
+ * / <the same date>" — two DIFFERENT vacancies (different ids, different
+ * detail pages) that a visitor could not tell apart, which reads as a
+ * duplicate bug rather than as two jobs. The anonymous projection
+ * deliberately carries no employer, place or raw title (the owner's
+ * anonymous-boundary directive, see `public-vacancy-preview.ts`), so there
+ * is no distinguishing fact to ADD to the card; the honest move is to not
+ * pick two rows the card would paint identically.
+ *
+ * The fingerprint is exactly what `<PublicVacancyCard>` renders from a row:
+ * the heading (profession, else occupation), the occupation subline, and the
+ * projection of the rest — `publicVacancyCardFacts`, the pure module beside
+ * the card that declares the key sets its chips exist for, and is pinned to
+ * the card by rendering it (`landing-open-jobs-band.test.ts`). That
+ * projection is `null` wherever the card paints nothing: an employment form
+ * or working time the card has no label for (`unknown`, which is about half
+ * of production, or `assignment`) paints no chip, exactly as `null` does, so
+ * two rows that differ only there still look alike and only one is picked.
+ * The positions chip exists only above one, and the date is the UTC day the
+ * card prints, without the time. Compensation is in the row but the card
+ * does not render it, so it is not here: two rows that differ only in a fact
+ * nobody sees still look identical.
+ */
+export function landingVacancyFingerprint(v: PublicVacancyPreview): string {
+  const facts = publicVacancyCardFacts(v);
+  return JSON.stringify([
+    v.professionSlug ?? v.occupation ?? null,
+    v.occupation ?? null,
+    facts.employmentForm,
+    facts.workingTime,
+    facts.positions,
+    facts.publishedDay,
+  ]);
+}
+
+/**
+ * The same language test the band and `/jobs` use to say "original in …":
+ * the advert's language is the visitor's when its code starts with the
+ * visitor's two-letter locale ("sv", "sv-SE" → Swedish).
+ */
+export function isVisitorLanguage(code: string | null, locale: string): boolean {
+  return !!code && code.slice(0, 2).toLowerCase() === locale.slice(0, 2).toLowerCase();
+}
+
+/**
+ * The first few rows of the board's own first page, in the board's own
+ * order — SELECTED, never re-ranked by a score and never filtered by a
+ * profession.
+ *
+ * Owner decision (dated in `lib/guards/landing-freeze.ts`): adverts in the
+ * VISITOR'S LANGUAGE come first,
+ * then the other suitable adverts. It is an ORDER, never a filter: an advert
+ * in another language (another EU country's, today almost all Swedish) is
+ * never left out for its language; it simply follows the visitor's own. The
+ * landing applies no profession, skill or place filter, so there is nothing
+ * for the language to outweigh here.
+ *
+ * Inside each language group, three preferences, all about the reader
+ * rather than the market:
+ *   · a row with a canonical `professionSlug` heads the card in the
+ *     VISITOR'S language (the anonymous title is withheld, so the heading is
+ *     the profession name), while a row without one can only head with the
+ *     publisher's occupation words — so slugged rows come first;
+ *   · a row with neither a slug nor an occupation has nothing honest to head
+ *     with (the card would print a dash), so it is not chosen at all;
+ *   · a row whose card would look IDENTICAL to one already chosen (see
+ *     `landingVacancyFingerprint`) is skipped in favour of the next row that
+ *     looks different — and when the page holds fewer distinct-looking rows
+ *     than the sample size, the sample is SHORTER, never padded with a
+ *     look-alike.
+ * The relative order inside each group is the RPC's, unchanged. Without a
+ * `visitorLanguage` every row is in one group, as before.
+ */
+export function pickLandingVacancySample(
+  vacancies: readonly PublicVacancyPreview[],
+  visitorLanguage?: string,
+): PublicVacancyPreview[] {
+  const own = (v: PublicVacancyPreview) =>
+    visitorLanguage !== undefined && isVisitorLanguage(v.sourceLanguage, visitorLanguage);
+  const groups = [
+    vacancies.filter((v) => own(v) && v.professionSlug),
+    vacancies.filter((v) => own(v) && !v.professionSlug && v.occupation),
+    vacancies.filter((v) => !own(v) && v.professionSlug),
+    vacancies.filter((v) => !own(v) && !v.professionSlug && v.occupation),
+  ];
+  const seen = new Set<string>();
+  const picked: PublicVacancyPreview[] = [];
+  for (const candidate of groups.flat()) {
+    if (picked.length >= LANDING_VACANCY_SAMPLE_SIZE) break;
+    const look = landingVacancyFingerprint(candidate);
+    if (seen.has(look)) continue;
+    seen.add(look);
+    picked.push(candidate);
+  }
+  return picked;
+}
+
+async function readVacancySample(
+  publicClient: SupabaseClient,
+): Promise<LiveMarketVacancySample> {
+  // ONE unfiltered read — never `professionSlug`: a filtered read of a
+  // profession with few live ads scans to the end of the table cold, which
+  // is the timeout class documented above. `page: 1` with no filter is the
+  // cheapest statement the public contract has.
+  const result = await readOrNull(() =>
+    searchPublicVacancyPreviews({ page: 1 }, publicClient),
+  );
+  if (result?.status !== "ok") return UNAVAILABLE_SAMPLE;
+  // The board's page as it came back: the cached snapshot is shared by every
+  // locale, so the visitor's pick (`pickLandingVacancySample`) is made at
+  // render time, where the visitor's language is known.
+  return {
+    basis: "live",
+    vacancies: result.vacancies,
   };
 }
 
@@ -132,7 +301,8 @@ function unavailableSnapshot(): LiveMarketLandingSnapshot {
  * It intentionally carries no vacancy coordinates, employer identities or
  * worker rows. The current public SQL contract does not expose those values,
  * so the map may truthfully resolve supply to Sweden but not invent a city or
- * region distribution inside Sweden.
+ * region distribution inside Sweden. The vacancy `sample` is that same public
+ * contract's preview rows, so it carries none of them either.
  */
 export async function readFreshLiveMarketLandingSnapshot(
   /** Injected only by the concurrency guard, which has to observe how many
@@ -168,6 +338,13 @@ export async function readFreshLiveMarketLandingSnapshot(
   const supplyResult = await readOrNull(() =>
     readPublicVacancySupplyCounts(publicClient),
   );
+
+  // Sequential, like every read here: the counts, then the one unfiltered
+  // sample page, then (LIVE only) the professions. It runs BEFORE the
+  // profession budget starts, so it can never cost LIVE a profession read.
+  // LIVE does not render it today; it is one cached statement per freshness
+  // window, and a second mode flag would only fork the snapshot's shape.
+  const sample = await readVacancySample(publicClient);
 
   const startedAt = Date.now();
   const professionResults: (Awaited<
@@ -227,6 +404,7 @@ export async function readFreshLiveMarketLandingSnapshot(
         basis: result?.status === "ok" ? "live" : "unavailable",
       } satisfies LiveMarketProfession;
     }).sort((a, b) => (b.totalCount ?? -1) - (a.totalCount ?? -1)),
+    sample,
   };
 }
 
@@ -238,21 +416,33 @@ export async function readFreshLiveMarketLandingSnapshot(
  *
  * `unstable_cache` keys on the arguments as well as the key parts, so the two
  * modes below occupy two entries and never serve each other's result.
+ *
+ * The key part is VERSIONED BY SHAPE. Next derives the entry key from this
+ * callback's source text plus the key parts, and the callback did not change
+ * when the snapshot gained `sample` — so under the old key a data-cache entry
+ * written before a deploy would be served to code that reads `sample` and
+ * finds nothing. A new shape gets a new key.
+ *
+ * v3 (the language-first owner decision): `sample.vacancies` is now the board's whole
+ * first page, not the four rows picked from it — the pick moved to render
+ * time, per visitor language. An old v2 entry would hand the new code only
+ * four language-blind rows, so v2 is not read.
  */
 const readCachedSnapshot = unstable_cache(
   (resolveProfessions: boolean) =>
     readFreshLiveMarketLandingSnapshot(undefined, resolveProfessions),
-  ["live-market-landing-v1"],
+  ["live-market-landing-v3"],
   { revalidate: 300 },
 );
 
 /**
  * ── WHY THE DEFAULT LANDING ASKS FOR LESS ─────────────────────────────────
  *
- * Every consumer of this snapshot was enumerated. `/` (FOCUS) reads exactly
- * three fields — `activeVacancies`, `distinctEmployers`, `lastRefreshedAt` —
- * through `focus-landing.tsx` and `market-proof-band.tsx`, and reads
- * `professions` NOWHERE. The profession chips that band renders come from its
+ * Every consumer of this snapshot was enumerated. `/` (FOCUS) reads the three
+ * supply fields — `activeVacancies`, `distinctEmployers`, `lastRefreshedAt` —
+ * through `focus-landing.tsx` and `market-proof-band.tsx`, plus the unfiltered
+ * `sample` through `landing-open-jobs-band.tsx`, and reads `professions`
+ * NOWHERE. The profession chips that band renders come from its
  * own static `TOP_PROFESSION_FAMILY_SLUGS` list, which is a different set from
  * `PROFESSION_FILTER_SLUGS` above and is not derived from live data at all.
  *

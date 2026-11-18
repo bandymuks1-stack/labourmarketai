@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * CV import path visibility from the profile (launch audit §7.4, PR #541).
@@ -40,7 +41,7 @@ describe("the existing CV import path is reused, not rebuilt", () => {
 });
 
 describe("CV-import link copy exists across active locales", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: profileHub.cvImportLink present + non-empty`, () => {
       const h = (JSON.parse(read(`messages/${loc}.json`)) as { profileHub?: Record<string, unknown> }).profileHub ?? {};
       expect(typeof h.cvImportLink, `${loc}.cvImportLink`).toBe("string");

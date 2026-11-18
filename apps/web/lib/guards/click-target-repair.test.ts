@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Click-target repair guard (root-cause audit PR4, 2026-07-06).
@@ -20,7 +21,7 @@ import { join } from "node:path";
 
 const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 const catalog = (loc: string) =>
   JSON.parse(read(`messages/${loc}.json`)) as Record<string, never>;
 

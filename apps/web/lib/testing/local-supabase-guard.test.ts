@@ -1,9 +1,13 @@
 import { describe, it, expect } from "vitest";
 import {
   ALLOWED_LOCAL_ORIGINS,
+  DEFAULT_LOCAL_DB_URL,
+  LOCAL_DB_URL_ENV,
   NonLocalTargetError,
   PRODUCTION_PROJECT_REF,
   REFUSAL_CODE,
+  RETIRED_DB_URL_ENV,
+  assertLocalDbUrl,
   assertLocalSupabaseTarget,
   decodeJwtClaims,
   isCloudKey,
@@ -174,5 +178,58 @@ describe("fixture assertions gate the success message", () => {
     const r = assertFixtureCounts(() => null, expected);
     expect(r.ok).toBe(false);
     expect(r.failures[0]).toMatch(/could not be read/);
+  });
+});
+
+describe("the psql target must be loopback (db:fixtures:local host fallback, 2026-09-23)", () => {
+  // `SUPABASE_DB_URL` is a real production secret name (the read-only string
+  // that arms the live CI catalogue gates). The host-psql fallback trusted it.
+  it("the override is LOCAL_DB_URL and the retired name is the production secret's", () => {
+    expect(LOCAL_DB_URL_ENV).toBe("LOCAL_DB_URL");
+    expect(RETIRED_DB_URL_ENV).toBe("SUPABASE_DB_URL");
+    expect(assertLocalDbUrl(DEFAULT_LOCAL_DB_URL)).toEqual({ host: "127.0.0.1" });
+  });
+
+  it("accepts every loopback spelling", () => {
+    for (const url of [
+      "postgresql://postgres:postgres@127.0.0.1:54322/postgres",
+      "postgresql://postgres:postgres@127.0.0.2:54322/postgres",
+      "postgresql://postgres:postgres@localhost:54322/postgres",
+      "postgres://postgres@[::1]:54322/postgres",
+    ]) {
+      expect(() => assertLocalDbUrl(url), url).not.toThrow();
+    }
+  });
+
+  it("REFUSES a Supabase Cloud database, the pooler, a LAN host, a tunnel and garbage", () => {
+    for (const url of [
+      `postgresql://postgres:pw@db.${PRODUCTION_PROJECT_REF}.supabase.co:5432/postgres`,
+      "postgresql://postgres.abc:pw@aws-0-eu-central-1.pooler.supabase.com:6543/postgres",
+      "postgresql://postgres:postgres@192.168.1.20:54322/postgres",
+      "postgresql://postgres:postgres@10.0.0.5:54322/postgres",
+      "postgresql://postgres:postgres@db.internal.example:5432/postgres",
+      "postgresql://postgres:postgres@abc.ngrok-free.app:5432/postgres",
+      "https://127.0.0.1:54322/postgres", // right host, wrong scheme
+      "not a url",
+      "",
+      undefined,
+    ]) {
+      let err: unknown = null;
+      try {
+        assertLocalDbUrl(url as string);
+      } catch (e) {
+        err = e;
+      }
+      expect(err, `must refuse: ${String(url)}`).toBeInstanceOf(NonLocalTargetError);
+      expect((err as Error).message).toContain(REFUSAL_CODE);
+    }
+  });
+
+  it("names a cloud host as such, so the operator sees what they nearly did", () => {
+    expect(() =>
+      assertLocalDbUrl(
+        `postgresql://postgres:pw@db.${PRODUCTION_PROJECT_REF}.supabase.co:5432/postgres`,
+      ),
+    ).toThrow(/Supabase Cloud database/);
   });
 });

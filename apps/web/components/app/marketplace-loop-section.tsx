@@ -22,9 +22,11 @@ import {
   PLAYER_IDENTITY_FALLBACK_SURFACE,
 } from "@/lib/identity/player-identity";
 import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
+import { PARTNERSHIP_CATEGORY } from "@/lib/services/service-offerings-shared";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { EmptyState } from "./empty-state";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
 
 /**
  * P0 Marketplace loop (Phase 1) — one compact surface: discover active offerings
@@ -42,6 +44,11 @@ export type MarketplaceLabels = {
   discoverEmpty: string;
   request: string;
   requested: string;
+  /** Badge + request label for a "looking for partners" offering. */
+  partnershipBadge: string;
+  partnershipRequest: string;
+  /** Placeholder of the optional first message sent WITH a request. */
+  requestMessagePlaceholder: string;
   remoteBadge: string;
   outgoingHeading: string;
   outgoingEmpty: string;
@@ -109,19 +116,16 @@ function isoDay(ts: string | null): string | null {
   return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
 }
 
-const STATUS_RING: Record<RequestStatus, string> = {
-  sent: "border-ink-500 bg-ink-800/40 text-text-muted",
-  accepted: "border-state-success/40 bg-state-success/5 text-state-success",
-  declined: "border-state-warning/40 bg-state-warning/5 text-state-warning",
-  withdrawn: "border-ink-500 bg-ink-800/40 text-text-muted",
+/** Request status -> the one StatusChip pattern (word + shape). */
+const STATUS_VARIANT: Record<RequestStatus, StatusChipVariant> = {
+  sent: "neutral",
+  accepted: "success",
+  declined: "attention",
+  withdrawn: "neutral",
 };
 
-function StatusChip({ status, label }: { status: RequestStatus; label: string }) {
-  return (
-    <span className={`inline-block rounded-full border px-2 py-0.5 text-xs ${STATUS_RING[status]}`}>
-      {label}
-    </span>
-  );
+function RequestStatusChip({ status, label }: { status: RequestStatus; label: string }) {
+  return <StatusChip variant={STATUS_VARIANT[status]}>{label}</StatusChip>;
 }
 
 /**
@@ -272,16 +276,19 @@ export function MarketplaceLoopSection({
   const [error, setError] = useState<string | null>(null);
   // Optional provider note per incoming request (sent with accept/decline).
   const [noteById, setNoteById] = useState<Record<string, string>>({});
+  // Optional first message per discovered offering, sent WITH the request —
+  // the existing request/accept model carries it; the provider sees it first.
+  const [draftById, setDraftById] = useState<Record<string, string>>({});
 
   // Next step for an ACCEPTED request — opens (or reopens) the buyer↔provider
   // conversation; the granting fact is re-verified server-side by the action.
-  const MessageCta = ({ requestId, testid }: { requestId: string; testid: string }) => (
+  const MessageCta = ({ requestId, testId }: { requestId: string; testId: string }) => (
     <form action={openServiceRequestConversationAction}>
       <input type="hidden" name="requestId" value={requestId} />
       <input type="hidden" name="locale" value={locale} />
       <button
         type="submit"
-        data-testid={testid}
+        data-testid={testId}
         className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-50"
       >
         <MessageSquare className="h-3 w-3" /> {labels.messageCta}
@@ -422,8 +429,9 @@ export function MarketplaceLoopSection({
             {discoverable.map((o) => (
               <li
                 key={o.id}
+                id={`offering-${o.id}`}
                 data-testid="marketplace-offer-row"
-                className="flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+                className="scroll-mt-20 flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-text-primary">{o.title}</p>
@@ -431,10 +439,24 @@ export function MarketplaceLoopSection({
                     <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">{o.description}</p>
                   )}
                   <p className="mt-1 text-xs text-text-muted">
-                    {[o.categorySlug, o.locationCountry, o.remote ? labels.remoteBadge : null, o.rateText]
+                    {[o.categorySlug === PARTNERSHIP_CATEGORY ? labels.partnershipBadge : o.categorySlug, o.locationCountry, o.remote ? labels.remoteBadge : null, o.rateText]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
+                  {!openRequestOfferingIds.has(o.id) && (
+                    <textarea
+                      rows={2}
+                      maxLength={2000}
+                      value={draftById[o.id] ?? ""}
+                      onChange={(e) =>
+                        setDraftById((d) => ({ ...d, [o.id]: e.target.value }))
+                      }
+                      placeholder={labels.requestMessagePlaceholder}
+                      aria-label={labels.requestMessagePlaceholder}
+                      data-testid="marketplace-offer-message"
+                      className="mt-2 w-full rounded-md border border-ink-500 bg-ink-900/40 px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted"
+                    />
+                  )}
                 </div>
                 {openRequestOfferingIds.has(o.id) ? (
                   <span
@@ -447,12 +469,13 @@ export function MarketplaceLoopSection({
                   <button
                     type="button"
                     disabled={pending}
+                    data-testid="marketplace-offer-request"
                     onClick={() => {
                       trackFunnel(FUNNEL_EVENTS.serviceRequestStarted, {
                         surface: "marketplace",
                       });
                       run(
-                        () => requestServiceOffering(o.id),
+                        () => requestServiceOffering(o.id, draftById[o.id] ?? null),
                         () =>
                           trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
                             surface: "marketplace",
@@ -467,7 +490,7 @@ export function MarketplaceLoopSection({
                     }}
                     className="inline-flex shrink-0 items-center gap-1 rounded-md border border-brand-blue/40 px-2 py-1 text-xs text-brand-blue disabled:opacity-50"
                   >
-                    <Send className="h-3 w-3" /> {labels.request}
+                    <Send className="h-3 w-3" /> {o.categorySlug === PARTNERSHIP_CATEGORY ? labels.partnershipRequest : labels.request}
                   </button>
                 )}
               </li>
@@ -498,7 +521,7 @@ export function MarketplaceLoopSection({
                 <div className="min-w-0 space-y-1">
                   <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <StatusChip status={r.status} label={labels.status[r.status]} />
+                    <RequestStatusChip status={r.status} label={labels.status[r.status]} />
                     {isoDay(r.respondedAt) && (
                       <span
                         data-testid="marketplace-outgoing-responded"
@@ -523,13 +546,14 @@ export function MarketplaceLoopSection({
                     type="button"
                     disabled={pending}
                     onClick={() => run(() => withdrawRequest(r.id))}
+                    data-testid="marketplace-outgoing-withdraw"
                     className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-muted disabled:opacity-50"
                   >
                     <Undo2 className="h-3 w-3" /> {labels.withdraw}
                   </button>
                 )}
                 {r.status === "accepted" && (
-                  <MessageCta requestId={r.id} testid="marketplace-outgoing-message-cta" />
+                  <MessageCta requestId={r.id} testId="marketplace-outgoing-message-cta" />
                 )}
                 {/* Repeat action (PR 6b): a concluded request is not a dead
                     end — send a NEW request for the same offering (previous
@@ -610,7 +634,7 @@ export function MarketplaceLoopSection({
                     </span>
                   </div>
                   <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
-                  <StatusChip status={r.status} label={labels.status[r.status]} />
+                  <RequestStatusChip status={r.status} label={labels.status[r.status]} />
                   {r.message && (
                     <p
                       data-testid="marketplace-incoming-message"
@@ -645,6 +669,7 @@ export function MarketplaceLoopSection({
                       <button
                         type="button"
                         disabled={pending}
+                        data-testid="marketplace-incoming-accept"
                         onClick={() =>
                           run(() => respondToRequest(r.id, "accepted", noteById[r.id] ?? null))
                         }
@@ -655,6 +680,7 @@ export function MarketplaceLoopSection({
                       <button
                         type="button"
                         disabled={pending}
+                        data-testid="marketplace-incoming-decline"
                         onClick={() =>
                           run(() => respondToRequest(r.id, "declined", noteById[r.id] ?? null))
                         }
@@ -666,7 +692,7 @@ export function MarketplaceLoopSection({
                   </div>
                 )}
                 {r.status === "accepted" && (
-                  <MessageCta requestId={r.id} testid="marketplace-incoming-message-cta" />
+                  <MessageCta requestId={r.id} testId="marketplace-incoming-message-cta" />
                 )}
               </li>
               );
@@ -676,7 +702,7 @@ export function MarketplaceLoopSection({
       </section>
 
       {error && (
-        <p role="alert" className="text-sm text-state-warning">
+        <p role="alert" className="text-sm text-state-warning" data-testid="marketplace-loop-error">
           {error}
         </p>
       )}

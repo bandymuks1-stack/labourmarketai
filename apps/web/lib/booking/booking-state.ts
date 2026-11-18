@@ -111,10 +111,11 @@ export function deriveBookingDisplayState(
 
 /**
  * Repeat action (Capability G, PR 6b): whether the PROPOSING company may
- * re-open this booking with new dates ("propose again"). Pure and
- * default-closed: ONLY the two closed-by-the-other-side-or-self terminal
- * statuses the UI actually reaches — `declined` (worker said no) and
- * `withdrawn` (company took it back). Never `proposed` (still open — withdraw
+ * propose this booking again with new dates. Pure and default-closed: ONLY
+ * `withdrawn` (the company took back its OWN proposal). Never `declined`
+ * (the worker said no — not re-opened without the worker's new consent,
+ * owner decision 2026-10-21, enforced by propose_booking_request
+ * 20261021095200). Never `proposed` (still open — withdraw
  * instead), never `accepted` (a real engagement — message/plan instead), and
  * never `expired` (unreachable, no scheduler writes it — see the lifecycle
  * guard). The applied propose RPC upserts on (owner_id, request_id,
@@ -123,7 +124,7 @@ export function deriveBookingDisplayState(
  * request + worker; the worker decides again.
  */
 export function canProposeAgain(status: BookingStatus): boolean {
-  return status === "declined" || status === "withdrawn";
+  return status === "withdrawn";
 }
 
 /**
@@ -175,14 +176,37 @@ export function normalizeBookingReason(
 }
 
 /**
- * Reschedule affordance (P2-PR6): ONLY an open `proposed` row may have its
- * dates changed by the proposing company. Default-closed for every other
- * status — an ACCEPTED booking is never mutated in place (changing an
- * accepted engagement = withdraw + new proposal, visible in events), and a
- * closed row has nothing to reschedule.
+ * Did the TABLE refuse an overlapping accept — not the RPC's own clash check?
+ *
+ * Both carry SQLSTATE 23P01. The RPC's hand-rolled check (v3, and v4 without
+ * an acknowledgement) says "Conflicting accepted booking for these dates";
+ * the exclusion constraint `booking_requests_no_overlapping_accepted` says
+ * "conflicting key value violates exclusion constraint …". Only the second
+ * can follow an ACKNOWLEDGED accept, and it means the overlap cannot be
+ * recorded yet (production 2026-10-25, walk orders-bookings O-5) — a
+ * different answer from "these dates clash", which the person already gave.
+ */
+export function isOverlapExclusionViolation(error: { code?: string; message?: string }): boolean {
+  const m = error.message ?? "";
+  if (/booking_requests_no_overlapping_accepted|exclusion constraint/i.test(m)) return true;
+  return error.code === "23P01" && !/conflicting accepted booking/i.test(m);
+}
+
+/**
+ * Reschedule affordance (P2-PR6): the proposing company may change the dates
+ * of an open `proposed` row, and of an `accepted` one — but an acceptance
+ * covers only the terms the worker saw (owner decision 2026-09-28): changing
+ * an accepted booking's dates REOPENS it (`reschedulingReopensDecision`), the
+ * previous accepted terms kept in the event log, and the worker decides
+ * again. Closed rows (declined / withdrawn / expired) have nothing to change.
  */
 export function canRescheduleProposal(status: BookingStatus): boolean {
-  return status === "proposed";
+  return status === "proposed" || status === "accepted";
+}
+
+/** Changing this booking's terms asks the worker to decide again. */
+export function reschedulingReopensDecision(status: BookingStatus): boolean {
+  return status === "accepted";
 }
 
 /**

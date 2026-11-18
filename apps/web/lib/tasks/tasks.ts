@@ -3,6 +3,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
+import type { WorkTaskAssignedNotificationFacts } from "@/lib/notifications/event-emitters";
 
 /**
  * Work-task read service (control room PR D, capability gap map §3).
@@ -50,6 +52,10 @@ export type {
  *  unapplied the column is missing (42703) and the reads FALL BACK to the v1
  *  column set so the live surface never regresses (booking version-fallback
  *  precedent). */
+/** v3 adds the stage / parent pointers (20261002150000). Absent → 42703 →
+ *  the reads fall back to v2, then v1, and the structure UI is simply hidden. */
+const SELECT_COLUMNS_V3 =
+  "id, project_id, object_id, stage_id, parent_task_id, title, description, status, priority, assignee_profile_id, created_by, due_at, created_at, resolved_at";
 const SELECT_COLUMNS_V2 =
   "id, project_id, object_id, title, description, status, priority, assignee_profile_id, created_by, due_at, created_at, resolved_at";
 const SELECT_COLUMNS_V1 =
@@ -64,6 +70,8 @@ type Row = {
   id: string;
   project_id: string | null;
   object_id?: string | null;
+  stage_id?: string | null;
+  parent_task_id?: string | null;
   title: string;
   description: string | null;
   status: string;
@@ -82,6 +90,8 @@ function toTask(r: Row): WorkTask | null {
     id: r.id,
     projectId: r.project_id ?? null,
     objectId: r.object_id ?? null,
+    stageId: r.stage_id ?? null,
+    parentTaskId: r.parent_task_id ?? null,
     title: r.title,
     description: r.description ?? null,
     status: r.status,
@@ -101,8 +111,23 @@ const UNDEFINED_COLUMN = "42703";
 
 /** Bounded, deterministically ordered base query: nearest due date first
  *  (nulls last), then newest created. Never more than the read limit. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function orderedTaskQuery(supabase: SupabaseClient, columns: string): any {
+function orderedTaskQuery(
+  supabase: SupabaseClient,
+  columns: string,
+  batch?: { readonly rowCap: number },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any {
+  if (batch) {
+    // A MANY-project read (the company home's project scan): the same order,
+    // an exact count so the caller can prove the batch is complete, and the
+    // API's row cap instead of the one-project limit.
+    return asAny(supabase)
+      .from("work_tasks")
+      .select(columns, { count: "exact" })
+      .order("due_at", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(batch.rowCap);
+  }
   return asAny(supabase)
     .from("work_tasks")
     .select(columns)
@@ -117,28 +142,108 @@ async function runTaskQuery(
   supabase: SupabaseClient,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   refine: (q: any) => any,
-): Promise<{ error: { code?: string; message: string } | null; data: unknown }> {
-  const v2 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V2));
+  batch?: { readonly rowCap: number },
+): Promise<{
+  error: { code?: string; message: string } | null;
+  data: unknown;
+  structure: boolean;
+  count?: number | null;
+}> {
+  const v3 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V3, batch));
+  if (!v3.error) return { ...v3, structure: true };
+  if (v3.error.code !== UNDEFINED_COLUMN) return { ...v3, structure: false };
+  const v2 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V2, batch));
   if (v2.error && v2.error.code === UNDEFINED_COLUMN) {
-    return refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V1));
+    const v1 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V1, batch));
+    return { ...v1, structure: false };
   }
-  return v2;
+  return { ...v2, structure: false };
 }
 
 function mapResult(res: {
   error: { code?: string; message: string } | null;
   data: unknown;
+  structure: boolean;
 }): MyTasksResult {
   if (res.error) {
     if (isMigrationMissingCode(res.error.code)) {
       return { status: "needs-migration" };
     }
-    return { status: "ok", tasks: [], error: res.error.message };
+    return { status: "ok", tasks: [], error: res.error.message, structure: false };
   }
   const tasks = ((res.data ?? []) as Row[])
     .map(toTask)
     .filter((t): t is WorkTask => t !== null);
-  return { status: "ok", tasks, error: null };
+  return { status: "ok", tasks, error: null, structure: res.structure };
+}
+
+/**
+ * The facts the assignment bell rides on (2026-09-23): the task's STORED
+ * assignee and due date, read under the ACTOR's own session right after
+ * `assign_work_task_v1` / `create_work_task_v2` returned. `wt_select` admits
+ * the creator and any manager of the linked project — exactly who may
+ * assign. The emitter used to read this row with the admin client, which
+ * holds no grant on `work_tasks` in production, so no assignee was ever
+ * told a task landed on them (event-emitters.ts, SERVICE_ROLE GRANT TRUTH).
+ * Read-only, one row by primary key; never throws (null facts → the emitter
+ * reports `recipient_unresolved`). Lives here because this module is the
+ * ONE RLS-scoped work_tasks reader; the two write paths share it.
+ */
+export async function readWorkTaskAssignmentFacts(
+  supabase: SupabaseClient,
+  taskId: string,
+  actorProfileId: string,
+): Promise<WorkTaskAssignedNotificationFacts> {
+  try {
+    const { data } = await asAny(supabase)
+      .from("work_tasks")
+      .select("assignee_profile_id, due_at")
+      .eq("id", taskId)
+      .maybeSingle();
+    const row = (data ?? null) as {
+      assignee_profile_id?: string | null;
+      due_at?: string | null;
+    } | null;
+    return {
+      taskId,
+      assigneeProfileId: row?.assignee_profile_id ?? null,
+      actorProfileId,
+      dueAt: row?.due_at ?? null,
+    };
+  } catch {
+    return { taskId, assigneeProfileId: null, actorProfileId, dueAt: null };
+  }
+}
+
+/**
+ * The three facts the assignment reservation check needs — assignee, due
+ * timestamp, owning project — read under the caller's own session. Lives here
+ * because this module is the ONE RLS-scoped work_tasks reader. Null on any
+ * failure (the caller then reports "not applicable", never "clear").
+ */
+export async function readWorkTaskReservationFacts(
+  supabase: SupabaseClient,
+  taskId: string,
+): Promise<{
+  assigneeProfileId: string | null;
+  dueAt: string | null;
+  projectId: string | null;
+} | null> {
+  try {
+    const { data } = await asAny(supabase)
+      .from("work_tasks")
+      .select("assignee_profile_id, due_at, project_id")
+      .eq("id", taskId)
+      .maybeSingle();
+    if (!data) return null;
+    return {
+      assigneeProfileId: (data.assignee_profile_id as string | null) ?? null,
+      dueAt: (data.due_at as string | null) ?? null,
+      projectId: (data.project_id as string | null) ?? null,
+    };
+  } catch {
+    return null;
+  }
 }
 
 /** Tasks where I am the assignee OR the creator — the "my tasks" view. */
@@ -153,6 +258,60 @@ export async function listMyTasks(): Promise<MyTasksResult> {
     q.or(`assignee_profile_id.eq.${user.id},created_by.eq.${user.id}`),
   );
   return mapResult(res);
+}
+
+/**
+ * Tasks the caller can work on because a team they belong to is ACTIVELY
+ * assigned to the TASK, or to the WORK OBJECT the task sits in (20261003150700).
+ * A project-wide team assignment does not list every task of the project - the
+ * same as a person on the project roster, who is not the assignee of every
+ * task. Runs under the caller's own RLS (`wt_select` admits exactly these
+ * rows), so a member who left or an ended assignment simply reads nothing.
+ * `viaTeamByTask` carries the team name(s) for the visible "via team ..." label.
+ */
+export async function listMyTeamTasks(): Promise<{
+  tasks: readonly WorkTask[];
+  viaTeamByTask: Map<string, string>;
+}> {
+  const none = { tasks: [] as WorkTask[], viaTeamByTask: new Map<string, string>() };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return none;
+
+  const contexts = await readMyTeamWorkContexts(supabase);
+  const taskIds = [
+    ...new Set(contexts.map((c) => c.task_id).filter((x): x is string => !!x)),
+  ].filter((x) => UUID_RX.test(x));
+  const objectIds = [
+    ...new Set(contexts.map((c) => c.work_object_id).filter((x): x is string => !!x)),
+  ].filter((x) => UUID_RX.test(x));
+  const parts = [
+    ...(taskIds.length ? [`id.in.(${taskIds.join(",")})`] : []),
+    ...(objectIds.length ? [`object_id.in.(${objectIds.join(",")})`] : []),
+  ];
+  if (parts.length === 0) return none;
+
+  const res = mapResult(await runTaskQuery(supabase, (q) => q.or(parts.join(","))));
+  if (res.status !== "ok") return none;
+
+  const namesFor = (taskId: string, objectId: string | null): string | null => {
+    const names = new Set<string>();
+    for (const c of contexts) {
+      if (c.task_id === taskId || (objectId && c.work_object_id === objectId)) {
+        const n = c.team_name?.trim();
+        if (n) names.add(n);
+      }
+    }
+    return names.size ? [...names].sort((a, b) => a.localeCompare(b)).join(", ") : null;
+  };
+  const viaTeamByTask = new Map<string, string>();
+  for (const task of res.tasks) {
+    const v = namesFor(task.id, task.objectId);
+    if (v) viaTeamByTask.set(task.id, v);
+  }
+  return { tasks: res.tasks, viaTeamByTask };
 }
 
 /** Tasks linked to one project. RLS scopes rows to the project's managers
@@ -171,6 +330,65 @@ export async function listProjectTasks(
 
   const res = await runTaskQuery(supabase, (q) => q.eq("project_id", projectId));
   return mapResult(res);
+}
+
+/** The API's row cap for one batched read (`max_rows`). */
+const TASK_BATCH_ROW_CAP = 1000;
+
+/**
+ * `listProjectTasks` for MANY projects in one read (the company home's
+ * project scan — perf 2026-10-22: one task read per scanned project). Each
+ * project's answer is exactly what `listProjectTasks` returns for it:
+ *   - the same columns (with the same v3 → v2 → v1 fallback), RLS and order,
+ *     and at most WORK_TASK_READ_LIMIT tasks per project — the per-project
+ *     order is the global order restricted to that project;
+ *   - a failed read is every project's failed read (mapped by the same
+ *     `mapResult`: needs-migration stays needs-migration);
+ *   - the batch is used only when it is provably COMPLETE (rows read = exact
+ *     count, under the row cap); otherwise each project is read on its own.
+ */
+export async function listProjectTasksForProjects(
+  projectIds: readonly string[],
+): Promise<Map<string, MyTasksResult>> {
+  const out = new Map<string, MyTasksResult>();
+  const valid = [...new Set(projectIds)].filter((id) => UUID_RX.test(id));
+  for (const id of projectIds) {
+    if (!UUID_RX.test(id)) out.set(id, { status: "ok", tasks: [], error: null });
+  }
+  if (valid.length === 0) return out;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    for (const id of valid) out.set(id, { status: "not-authed" });
+    return out;
+  }
+
+  const res = await runTaskQuery(supabase, (q) => q.in("project_id", valid), {
+    rowCap: TASK_BATCH_ROW_CAP,
+  });
+  if (res.error) {
+    const mapped = mapResult(res);
+    for (const id of valid) out.set(id, mapped);
+    return out;
+  }
+  const rows = Array.isArray(res.data) ? (res.data as Row[]) : null;
+  if (rows && typeof res.count === "number" && rows.length === res.count) {
+    const byProject = new Map<string, Row[]>(valid.map((id) => [id, []]));
+    for (const r of rows) {
+      const list = r.project_id ? byProject.get(r.project_id) : undefined;
+      if (list && list.length < WORK_TASK_READ_LIMIT) list.push(r);
+    }
+    for (const id of valid) {
+      out.set(id, mapResult({ error: null, data: byProject.get(id) ?? [], structure: res.structure }));
+    }
+    return out;
+  }
+  // Incomplete batch: each project its own bounded read, as before.
+  const single = await Promise.all(valid.map((id) => listProjectTasks(id)));
+  valid.forEach((id, i) => out.set(id, single[i]));
+  return out;
 }
 
 /**
@@ -274,18 +492,30 @@ export async function getTaskCollaboration(
     0,
     WORK_TASK_READ_LIMIT,
   );
-  const blockerMeta = new Map<string, { title: string; status: WorkTask["status"] }>();
+  const blockerMeta = new Map<
+    string,
+    { title: string; status: WorkTask["status"]; dueAt: string | null }
+  >();
   if (blockerIds.length > 0) {
     const blockersRes = await asAny(supabase)
       .from("work_tasks")
-      .select("id, title, status")
+      .select("id, title, status, due_at")
       .in("id", blockerIds)
       .limit(WORK_TASK_READ_LIMIT);
     if (!blockersRes.error) {
-      type SlimRow = { id: string; title: string; status: string };
+      type SlimRow = {
+        id: string;
+        title: string;
+        status: string;
+        due_at: string | null;
+      };
       for (const r of (blockersRes.data ?? []) as SlimRow[]) {
         if (isValidWorkTaskStatus(r.status)) {
-          blockerMeta.set(r.id, { title: r.title, status: r.status });
+          blockerMeta.set(r.id, {
+            title: r.title,
+            status: r.status,
+            dueAt: r.due_at ?? null,
+          });
         }
       }
     }
@@ -298,6 +528,7 @@ export async function getTaskCollaboration(
       blockerTaskId: d.blocker_task_id,
       title: meta?.title ?? null,
       status: meta?.status ?? null,
+      dueAt: meta?.dueAt ?? null,
     });
   }
 

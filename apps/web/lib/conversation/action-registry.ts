@@ -573,6 +573,27 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
   },
   {
     /**
+     * J-TIME-FREEDOM — the manager KEEPS an assignment knowing a calendar
+     * clash: the chat door of the decision the project page offers right after
+     * `company.assign-worker` / `company.move-worker` report a clash. ONE keep
+     * core (lib/projects/override-keep-core.ts) behind the page action, this
+     * action and the MCP `assignment.keep_*` tools: server-recomputed
+     * collisions, closed reason code, immutable receipt, fail-loud.
+     */
+    id: "company.keep-assignment",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.company.keepAssignment.label",
+    descriptionKey: "conversation.actions.company.keepAssignment.description",
+    confirmation: "important_write", // records an immutable receipt; assigns nothing
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "keepAssignmentAction" },
+  },
+  {
+    /**
      * §11 (owner contract 2026-09-04) — the WHAT-IF move: a person leaves
      * project X for project Y. The chat shows the consequences on both sides
      * from canonical reads first; this action is the confirmed commit — two
@@ -646,6 +667,41 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
 
   {
     /**
+     * RENAME THE ACTIVE ORGANIZATION BY SENTENCE (owner program 2026-09-23,
+     * CASE 3/4). "Pervadink šią agentūrą į Nonstop Group UAB." — the ONE
+     * confirm form, prefilled with the name the sentence carried, over the
+     * domain core `renameActiveOrganization` (lib/company/organization-rename),
+     * which composes the canonical name writer the settings form already uses
+     * (`saveCompanySetup` → `save_company_setup_v3`). Identity write, so the
+     * important tier: an explicit review + a one-time token bound to the
+     * active workspace (dispatch.ts `stateFingerprint`) — a card shown for
+     * organization A can never rename B after a switch.
+     *
+     * The organization is NEVER input: the schema carries the name only and
+     * the core resolves the organization from the server-side workspace.
+     * Refused honestly, never retargeted: a personal workspace, a person
+     * without `manage-company-profile`, an organization with no company
+     * profile, and a VERIFIED company (its legal name is admin-only).
+     */
+    id: "company.rename-organization",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.renameOrganization.label",
+    descriptionKey: "conversation.actions.company.renameOrganization.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    // Emitted by the confirm form on a confirmed save (InlineActionForm,
+    // role_context from the action namespace) — the company profile saved.
+    telemetryEvent: E.profileSaved,
+    // The organization's own record: name, verification status, the typed
+    // help request an administrator answers for a verified legal name.
+    advancedRoute: "/dashboard/company/settings",
+    handler: { kind: "server_action", ref: "renameActiveOrganization" },
+  },
+
+  {
+    /**
      * F2 (owner contract 2026-09-04 §9/§11 seed): "sukurk projektą Roterdame"
      * — the SITE as a project object, created by sentence through the ONE
      * dispatcher over the canonical `createProjectAction` (the same core the
@@ -685,6 +741,25 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     telemetryEvent: E.companyDemandActionClicked,
     advancedRoute: "/dashboard/company/scouting",
     handler: { kind: "server_action", ref: "respondCandidateOfferAction" },
+  },
+  {
+    /**
+     * The receiver's answer to a BRIGADE or COMPANY offered against its need
+     * (owner P0 2026-10-11: Chat First does what the scouting page does).
+     * Same canonical action, token-confirmed; agreeing is agreed in
+     * principle, never a contract.
+     */
+    id: "company.respond-team-offer",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.company.respondTeamOffer.label",
+    descriptionKey: "conversation.actions.company.respondTeamOffer.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company/scouting",
+    handler: { kind: "server_action", ref: "respondToTeamOfferAction" },
   },
   // The CLIENT's other two bridge edges (2026-09-19). Same canonical actions
   // the partners page posts; same RPC authority (owns_company of the client
@@ -954,8 +1029,9 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
   // these on the legacy `agency` role alone made every agency act
   // `not_authorized` for exactly the accounts that are agencies (found with
   // the first real recruiter, 2026-09-04). Both roles are accepted here; the
-  // real authority is re-derived in SQL (`owns_company` + the staffing_agency
-  // check inside each bridge RPC), where it always was.
+  // real authority is re-derived in SQL (`owns_company` +
+  // `company_acts_as_agency` inside each bridge RPC: company type OR a declared
+  // workforce role, migration 20260928180000), where it always was.
   {
     id: "agency.review-clients",
     subject: "agency",
@@ -966,7 +1042,8 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     precondition: "has_agency",
     migrationSensitive: false,
     telemetryEvent: E.companyDashboardViewed,
-    advancedRoute: "/dashboard/company",
+    // The relationship door (owner IA 2026-09-16), where the bridge lives.
+    advancedRoute: "/dashboard/company/partners",
     handler: { kind: "deep_link" },
   },
   {
@@ -979,7 +1056,7 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     precondition: "has_agency",
     migrationSensitive: true,
     telemetryEvent: E.companyDemandActionClicked,
-    advancedRoute: "/dashboard/company",
+    advancedRoute: "/dashboard/company/partners",
     handler: { kind: "server_action", ref: "inviteClientAction" },
   },
   {
@@ -992,7 +1069,7 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     precondition: "has_agency_connection",
     migrationSensitive: true,
     telemetryEvent: E.companyDemandActionClicked,
-    advancedRoute: "/dashboard/company",
+    advancedRoute: "/dashboard/company/partners",
     handler: { kind: "server_action", ref: "submitOfferAction" },
   },
   {

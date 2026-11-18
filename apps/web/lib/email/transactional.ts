@@ -1,5 +1,9 @@
 import "server-only";
 
+import type { SendDiagnostics } from "@/lib/email/delivery-failure";
+import { sendSmtp, smtpConfigFromEnv, type SmtpConfig } from "@/lib/email/smtp";
+import { isSyntheticQaPlusAddress } from "@/lib/email/synthetic-address";
+
 /**
  * Provider-neutral transactional email adapter (core-network area B).
  *
@@ -26,20 +30,34 @@ export type TransactionalEmail = {
 };
 
 export type TransactionalSendResult =
-  | { status: "sent" }
+  | { status: "sent"; messageId?: string; detail?: SendDiagnostics }
   /** The dev/test LOG provider accepted the message — nothing left the
    *  machine. Distinct from "sent" by design: no caller may ever render a
    *  "logged" outcome as a delivered email. */
   | { status: "logged" }
   | { status: "not_configured" }
-  | { status: "failed"; reason: string };
+  /** A synthetic QA plus-address on our own domain (lib/email/synthetic-address.ts):
+   *  nothing was sent, by design — neither "sent" nor a retryable failure. */
+  | { status: "suppressed_synthetic_address" }
+  /** `detail`: codes-only diagnostics (lib/email/delivery-failure.ts) — never an address or reply text. */
+  | { status: "failed"; reason: string; detail?: SendDiagnostics };
 
 const SEND_TIMEOUT_MS = 10_000;
 
 function config():
   | { provider: "resend" | "postmark"; apiKey: string; from: string }
+  | { provider: "smtp"; smtp: SmtpConfig }
   | null {
   const provider = (process.env.INVITE_EMAIL_PROVIDER ?? "").trim().toLowerCase();
+  // 'smtp' = the platform's own mailbox (owner decision 2026-10-19: Hostinger,
+  // info@labourmarket.ai) — the same LM_SMTP_* channel the GDPR notices use,
+  // not a second integration. INVITE_EMAIL_FROM may override the sender.
+  if (provider === "smtp") {
+    const smtp = smtpConfigFromEnv();
+    if (!smtp) return null;
+    const from = (process.env.INVITE_EMAIL_FROM ?? "").trim();
+    return { provider: "smtp", smtp: from ? { ...smtp, from } : smtp };
+  }
   const apiKey = (process.env.INVITE_EMAIL_API_KEY ?? "").trim();
   const from = (process.env.INVITE_EMAIL_FROM ?? "").trim();
   if ((provider !== "resend" && provider !== "postmark") || !apiKey || !from) {
@@ -86,6 +104,8 @@ export function isTransactionalEmailPathActive(): boolean {
 export async function sendTransactionalEmail(
   message: TransactionalEmail,
 ): Promise<TransactionalSendResult> {
+  // Never deliver to a synthetic QA plus-address: it would only bounce (550).
+  if (isSyntheticQaPlusAddress(message.to)) return { status: "suppressed_synthetic_address" };
   const cfg = config();
   if (!cfg) {
     // Log provider (dev/test only): accept without sending. No console use
@@ -93,6 +113,14 @@ export async function sendTransactionalEmail(
     // address or key can never leak; the caller logs what it needs.
     if (logProviderActive()) return { status: "logged" };
     return { status: "not_configured" };
+  }
+
+  if (cfg.provider === "smtp") {
+    // `sent` only after the mail server answered 250 to the end of DATA.
+    const r = await sendSmtp(cfg.smtp, { to: message.to, subject: message.subject, text: message.text });
+    if (r.status === "sent") return { status: "sent", messageId: r.messageId, detail: r.detail };
+    if (r.status === "not_configured") return { status: "not_configured" };
+    return { status: "failed", reason: r.reason, detail: r.detail };
   }
 
   const controller = new AbortController();
@@ -137,11 +165,22 @@ export async function sendTransactionalEmail(
       body: request.body,
       signal: controller.signal,
     });
-    if (res.ok) return { status: "sent" };
+    const http = (code: number | null): SendDiagnostics => ({
+      provider: cfg.provider,
+      step: "http",
+      replyCode: code === null ? null : String(code),
+      messageTransmitted: true,
+    });
+    if (res.ok) return { status: "sent", detail: http(res.status) };
     // Never log the address or the key — status code only.
-    return { status: "failed", reason: `provider_status_${res.status}` };
+    return { status: "failed", reason: `provider_status_${res.status}`, detail: http(res.status) };
   } catch {
-    return { status: "failed", reason: "transport_error" };
+    // The request may already have reached the provider: the outcome is unknown.
+    return {
+      status: "failed",
+      reason: "transport_error",
+      detail: { provider: cfg.provider, step: "http", messageTransmitted: true },
+    };
   } finally {
     clearTimeout(timer);
   }

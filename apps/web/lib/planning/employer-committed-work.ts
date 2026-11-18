@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { PLANNED_TRIP_STATUSES } from "@/lib/planning/planning-model";
+import { expandShiftRuns, parseShiftPattern } from "@/lib/planning/shift-pattern";
 
 /**
  * WHAT THE ROSTER IS ALREADY COMMITTED TO — the other half of "who is free?".
@@ -52,7 +53,7 @@ export interface WorkerCommitment {
    *  an APPROVED business trip is a person working somewhere else, which is a
    *  commitment by any reading, and it was the one dated commitment nothing
    *  on the employer side counted. */
-  readonly kind: "project" | "booking" | "trip";
+  readonly kind: "project" | "booking" | "trip" | "plan";
   /** The source row, so a caller can link to the real object. */
   readonly sourceId: string;
   /** Real title from the source; null renders an i18n noun, never invented
@@ -94,6 +95,17 @@ function asAny(c: SupabaseClient): any {
   return c;
 }
 
+/** Start a (lazy) PostgREST query NOW and hand back its promise. A read whose
+ *  result is never awaited — because an earlier read's failure returned first
+ *  — must not surface as an unhandled rejection, so a no-op handler is
+ *  attached; awaiting the returned promise still sees the real outcome. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function started(query: PromiseLike<any>): Promise<any> {
+  const p = Promise.resolve(query);
+  p.catch(() => undefined);
+  return p;
+}
+
 /** Bounded like every other planning read — a roster this large is a data
  *  problem, not a page to render. */
 const READ_LIMIT = 500;
@@ -114,31 +126,68 @@ export async function getEmployerWorkerCommitments(
   const supabase = caller?.supabase ?? (await createClient());
   const ids = workerIds.slice(0, READ_LIMIT);
 
-  // ACCEPTED BOOKINGS. `accepted` is the canonical committed status — the same
-  // one `indicatesExpectedWork` requires before a booking counts as expected
-  // work on the calendar, so the two surfaces cannot disagree about what a
-  // commitment is.
-  const bookingsRes = await asAny(supabase)
-    .from("booking_requests")
-    .select("id, worker_id, start_date, expected_end_date, status")
-    .in("worker_id", ids)
-    .eq("status", "accepted")
-    .limit(READ_LIMIT);
+  // ONE WAVE (perf 2026-10-22). The bookings, assignments, team assignments,
+  // worker-identity and planned-window reads depend on nothing but `ids`, so
+  // they start together instead of one after another (this read sat on the
+  // critical path of both the who-is-free answer and the planning-conflicts
+  // count, eight sequential round trips deep). Each result is still checked
+  // below in the ORIGINAL order with the ORIGINAL rule, so the answer —
+  // including which failure wins when several reads fail — is unchanged; a
+  // read that used to be skipped after an earlier failure is simply ignored.
+  const bookingsRead = started(
+    // ACCEPTED BOOKINGS. `accepted` is the canonical committed status — the same
+    // one `indicatesExpectedWork` requires before a booking counts as expected
+    // work on the calendar, so the two surfaces cannot disagree about what a
+    // commitment is.
+    asAny(supabase)
+      .from("booking_requests")
+      .select("id, worker_id, start_date, expected_end_date, status")
+      .in("worker_id", ids)
+      .eq("status", "accepted")
+      .limit(READ_LIMIT),
+  );
+  const assignRead = started(
+    // ACTIVE PROJECT ASSIGNMENTS. The dates live on the project, not the
+    // assignment row, so the project band is the commitment window — the same
+    // band the worker's own calendar draws.
+    asAny(supabase)
+      .from("project_worker_assignments")
+      .select("id, worker_id, project_id, status")
+      .in("worker_id", ids)
+      .eq("status", "active")
+      .limit(READ_LIMIT),
+  );
+  const teamRead = started(
+    asAny(supabase)
+      .from("team_assignments")
+      .select("id, project_id, work_object_id, task_id")
+      .is("ended_at", null)
+      .limit(READ_LIMIT),
+  );
+  const workerRead = started(
+    asAny(supabase)
+      .from("workers")
+      .select("id, profile_id")
+      .in("id", ids)
+      .limit(READ_LIMIT),
+  );
+  const planQuery = (select: string) =>
+    asAny(supabase)
+      .from("work_plan_entries")
+      .select(select)
+      .in("worker_id", ids)
+      .eq("status", "planned")
+      .limit(READ_LIMIT);
+  const planRead = started(planQuery("id, worker_id, start_date, end_date, recurrence"));
+
+  const bookingsRes = await bookingsRead;
   if (bookingsRes.error) {
     return MISSING_OBJECT_CODES.has(bookingsRes.error.code ?? "")
       ? { status: "needs-migration" }
       : { status: "unavailable" };
   }
 
-  // ACTIVE PROJECT ASSIGNMENTS. The dates live on the project, not the
-  // assignment row, so the project band is the commitment window — the same
-  // band the worker's own calendar draws.
-  const assignRes = await asAny(supabase)
-    .from("project_worker_assignments")
-    .select("id, worker_id, project_id, status")
-    .in("worker_id", ids)
-    .eq("status", "active")
-    .limit(READ_LIMIT);
+  const assignRes = await assignRead;
   if (assignRes.error) {
     return MISSING_OBJECT_CODES.has(assignRes.error.code ?? "")
       ? { status: "needs-migration" }
@@ -146,7 +195,103 @@ export async function getEmployerWorkerCommitments(
   }
 
   const assignments = (assignRes.data ?? []) as Record<string, unknown>[];
-  const projectIds = [...new Set(assignments.map((a) => a.project_id as string))];
+
+  // The worker identities (started in the first wave) map worker → profile for
+  // the trips read, which depends on nothing else — so the trips read starts
+  // now, beside the team-member read, instead of after the projects read. The
+  // identity read's FAILURE is still reported at its original place below.
+  const profileByWorker = new Map<string, string>();
+  const workerByProfile = new Map<string, string>();
+  const workerRes = await workerRead;
+  if (!workerRes.error) {
+    for (const w of (workerRes.data ?? []) as Record<string, unknown>[]) {
+      const workerId = w.id as string;
+      const profileId = (w.profile_id as string | null) ?? null;
+      if (!profileId) continue;
+      profileByWorker.set(workerId, profileId);
+      workerByProfile.set(profileId, workerId);
+    }
+  }
+  const profileIds = [...workerByProfile.keys()];
+  const tripsRead =
+    !workerRes.error && profileIds.length > 0
+      ? started(
+          asAny(supabase)
+            .from("business_trips")
+            .select("id, profile_id, destination, date_from, date_to")
+            .in("profile_id", profileIds)
+            .in("status", [...PLANNED_TRIP_STATUSES])
+            .limit(READ_LIMIT),
+        )
+      : null;
+
+  // ACTIVE TEAM ASSIGNMENTS (WRK-6, 20261003150600). A team assignment is ONE
+  // relationship and writes NO per-person row above, so the members it
+  // resolves to are read HERE, from the one source, and join the very same
+  // lists: a project-level team assignment commits each member over the
+  // project band exactly like a person assignment (kind "project", the same
+  // source id, so every consumer — capacity, the reservation verdict, the
+  // `exclude` of a just-made assignment — treats the two identically); a task-
+  // or object-level one holds the member for a window nobody dated, so it is
+  // reported as an UNDATED commitment, never invented into a band.
+  //
+  // Before the migration is applied the relation does not exist: that is "no
+  // team assignments", not a failure of the whole read. Any OTHER failure is
+  // unavailable — an unread source must never look like an empty one.
+  const wanted = new Set(ids);
+  const teamPairs: { workerId: string; projectId: string; scope: "project" | "narrow" }[] = [];
+  const teamRes = await teamRead;
+  if (teamRes.error) {
+    if (!MISSING_OBJECT_CODES.has(teamRes.error.code ?? "")) return { status: "unavailable" };
+  } else {
+    const teamRows = (teamRes.data ?? []) as {
+      id: string;
+      project_id: string;
+      work_object_id: string | null;
+      task_id: string | null;
+    }[];
+    if (teamRows.length > 0) {
+      const memRes = await asAny(supabase).rpc("list_team_assignment_members_v1", {
+        p_assignment_ids: teamRows.map((r) => r.id),
+      });
+      if (memRes.error) {
+        if (!MISSING_OBJECT_CODES.has(memRes.error.code ?? "")) return { status: "unavailable" };
+      } else {
+        const rowById = new Map(teamRows.map((r) => [r.id, r]));
+        for (const m of (memRes.data ?? []) as { assignment_id: string; worker_id: string | null }[]) {
+          const row = rowById.get(m.assignment_id);
+          if (!row || !m.worker_id || !wanted.has(m.worker_id)) continue;
+          teamPairs.push({
+            workerId: m.worker_id,
+            projectId: row.project_id,
+            scope: row.work_object_id || row.task_id ? "narrow" : "project",
+          });
+        }
+      }
+    }
+  }
+  // A person who is ALSO assigned directly is one commitment, not two.
+  const directKey = new Set(assignments.map((a) => `${a.worker_id as string}:${a.project_id as string}`));
+  const seenTeamKey = new Set<string>();
+  const teamProjectLevel: Record<string, unknown>[] = [];
+  const teamNarrow: { workerId: string; projectId: string }[] = [];
+  for (const t of teamPairs) {
+    const key = `${t.workerId}:${t.projectId}`;
+    if (t.scope === "project") {
+      if (directKey.has(key) || seenTeamKey.has(key)) continue;
+      seenTeamKey.add(key);
+      teamProjectLevel.push({ worker_id: t.workerId, project_id: t.projectId });
+    } else {
+      teamNarrow.push({ workerId: t.workerId, projectId: t.projectId });
+    }
+  }
+  assignments.push(...teamProjectLevel);
+  const projectIds = [
+    ...new Set([
+      ...assignments.map((a) => a.project_id as string),
+      ...teamNarrow.map((t) => t.projectId),
+    ]),
+  ];
   const projectById = new Map<
     string,
     { title: string | null; startDate: string | null; endDate: string | null }
@@ -199,25 +344,13 @@ export async function getEmployerWorkerCommitments(
   // process cannot leak from a later refactor.
   //
   // Trips are keyed by PROFILE, not by worker, so the ids are mapped through
-  // one bounded read rather than by assuming the two are interchangeable.
-  const profileByWorker = new Map<string, string>();
-  const workerByProfile = new Map<string, string>();
-  const workerRes = await asAny(supabase)
-    .from("workers")
-    .select("id, profile_id")
-    .in("id", ids)
-    .limit(READ_LIMIT);
+  // one bounded read rather than by assuming the two are interchangeable. (The
+  // identity read and the trips read were started above, as early as their
+  // inputs allow; their failures are reported here, in the original order.)
   if (workerRes.error) {
     return MISSING_OBJECT_CODES.has(workerRes.error.code ?? "")
       ? { status: "needs-migration" }
       : { status: "unavailable" };
-  }
-  for (const w of (workerRes.data ?? []) as Record<string, unknown>[]) {
-    const workerId = w.id as string;
-    const profileId = (w.profile_id as string | null) ?? null;
-    if (!profileId) continue;
-    profileByWorker.set(workerId, profileId);
-    workerByProfile.set(profileId, workerId);
   }
 
   type TripRow = {
@@ -228,14 +361,8 @@ export async function getEmployerWorkerCommitments(
     date_to: string | null;
   };
   let tripRows: TripRow[] = [];
-  const profileIds = [...workerByProfile.keys()];
-  if (profileIds.length > 0) {
-    const tripsRes = await asAny(supabase)
-      .from("business_trips")
-      .select("id, profile_id, destination, date_from, date_to")
-      .in("profile_id", profileIds)
-      .in("status", [...PLANNED_TRIP_STATUSES])
-      .limit(READ_LIMIT);
+  if (tripsRead) {
+    const tripsRes = await tripsRead;
     if (tripsRes.error) {
       return MISSING_OBJECT_CODES.has(tripsRes.error.code ?? "")
         ? { status: "needs-migration" }
@@ -244,8 +371,65 @@ export async function getEmployerWorkerCommitments(
     tripRows = (tripsRes.data ?? []) as TripRow[];
   }
 
+  // PLANNED WORK WINDOWS (CAL-8, `work_plan_entries`). The organization's own
+  // one-off plan for its own people: a commitment somebody with authority made,
+  // so it holds the person's days exactly like an accepted booking does.
+  //
+  // NO NEW AUTHORITY: `work_plan_entries_select` admits the planning
+  // organization's managers and the planned worker — a manager reads the
+  // windows of the organizations they manage and nobody else's.
+  //
+  // WHEN THE STORE IS NOT PROVISIONED the table simply does not exist, so no
+  // window can exist either: that is a true "nothing planned", not an unread
+  // source, and it must not turn every capacity answer into "needs-migration".
+  // Any OTHER failure is a real failed read and is reported as `unavailable` —
+  // UNKNOWN is never read as zero.
+  // (Started in the first wave above.)
+  let planRes = await planRead;
+  // CAL-8: before the shift-pattern column is provisioned (42703, undefined
+  // column) the read is repeated without it — every window is then one-off,
+  // which is exactly what every stored row is until that migration runs.
+  if (planRes.error?.code === "42703") {
+    planRes = await planQuery("id, worker_id, start_date, end_date");
+  }
+  let planRows: Record<string, unknown>[] = [];
+  if (planRes.error) {
+    if (!MISSING_OBJECT_CODES.has(planRes.error.code ?? "")) {
+      return { status: "unavailable" };
+    }
+  } else {
+    planRows = (planRes.data ?? []) as Record<string, unknown>[];
+  }
+
   const commitments: WorkerCommitment[] = [];
   const undatedProjects: UndatedProjectCommitment[] = [];
+  for (const p of planRows) {
+    const startDate = (p.start_date as string | null) ?? null;
+    const endDate = (p.end_date as string | null) ?? null;
+    // CAL-8: a shift pattern holds only its shift days. Each run of
+    // consecutive shift days is its own commitment under the SAME source id,
+    // so `reserveCapacity` intersects the asked window with the run — the
+    // overlap the database validator (commitment_override_validate_
+    // collisions_v1, redefined with the pattern) recomputes for a receipt.
+    // A pattern the parser cannot read holds the whole window (over-warning
+    // is honest; dropping planned days is not).
+    const pattern = p.recurrence == null ? null : parseShiftPattern(p.recurrence);
+    const runs =
+      startDate && endDate && pattern
+        ? expandShiftRuns(pattern, startDate, endDate)
+        : [{ startDate, endDate }];
+    for (const run of runs) {
+      commitments.push({
+        workerId: p.worker_id as string,
+        kind: "plan",
+        sourceId: p.id as string,
+        // The window is the fact; a note is free text and is not read.
+        label: null,
+        startDate: run.startDate,
+        endDate: run.endDate,
+      });
+    }
+  }
   for (const t of tripRows) {
     const workerId = workerByProfile.get(t.profile_id);
     if (!workerId) continue;
@@ -293,6 +477,23 @@ export async function getEmployerWorkerCommitments(
       label: project.title,
       startDate: project.startDate,
       endDate: project.endDate,
+    });
+  }
+  // Task- / object-level team assignments: a real commitment, window unknown.
+  // One entry per (member, project) — and none when the member already holds
+  // that project through a dated commitment or an undated one above.
+  const heldKey = new Set([
+    ...commitments.filter((c) => c.kind === "project").map((c) => `${c.workerId}:${c.sourceId}`),
+    ...undatedProjects.map((u) => `${u.workerId}:${u.projectId}`),
+  ]);
+  for (const t of teamNarrow) {
+    const key = `${t.workerId}:${t.projectId}`;
+    if (heldKey.has(key)) continue;
+    heldKey.add(key);
+    undatedProjects.push({
+      workerId: t.workerId,
+      projectId: t.projectId,
+      label: projectById.get(t.projectId)?.title ?? null,
     });
   }
   return { status: "ok", commitments, undatedProjects };

@@ -165,7 +165,12 @@ describe("historical import: the plan prepares what the source names; commit sta
     const commit = importCore.slice(importCore.indexOf("export async function commitImport("));
     expect(commit).toMatch(/await applyPlan\(/);
     expect(importCore).toMatch(/createRosterPerson\(caller, \{/);
-    expect(importCore).toMatch(/rpc\("create_work_object_v1"/);
+    // The object writer is the ONE existing RPC, reached through the
+    // EvidenceStore port (historical timesheet import v3, PR-2): the plan
+    // calls `store.createWorkObject(` and only the port names the RPC.
+    expect(importCore).toMatch(/store\.createWorkObject\(/);
+    expect(importCore).not.toMatch(/rpc\("create_work_object_v1"/);
+    expect(read("lib/organization-evidence/evidence-store.ts")).toMatch(/rpc\("create_work_object_v1"/);
   });
   it("the plan never invents a person from an ambiguous name", () => {
     const plan = importCore.slice(importCore.indexOf("async function applyPlan("));
@@ -201,13 +206,35 @@ describe("synthetic fixtures stay out of normal surfaces", () => {
     "lib/demand/canonical-demand.ts",
     "lib/opportunities/load-worker-opportunities.ts",
     "lib/supply/employer-supply-discovery.ts",
+    "lib/scouting/scouting.ts",
   ]) {
     it(`${file} applies the predicate`, () => {
       expect(read(file)).toMatch(/isSyntheticFixtureLabel|excludeSyntheticFixtures/);
     });
   }
+  it("scouting hides fixture workers from a real organization, not from a synthetic one", () => {
+    // Production walk 2026-09-28: every scoutable worker was a test account.
+    // Scouting decides WHO may see fixtures (never touching names — see
+    // company-scouting-visibility); the pool builder, where names live, drops
+    // them and counts only what remains ("compared with all N").
+    expect(read("lib/scouting/scouting.ts")).toMatch(
+      /excludeFixtures:\s*!isSyntheticFixtureLabel\(employer\.organizationName\)/,
+    );
+    const pool = read("lib/market/match-subject.ts");
+    // 2026-10-18 (identity split, 20261018160000): a discovered worker arrives without a name, so
+    // the fixture decision is a flag — from the name for a related row, from the projection's
+    // SQL-computed `is_synthetic_fixture` for a discovered one.
+    expect(pool).toMatch(/candidates\.filter\(\(c\) => !c\.syntheticFixture\)/);
+    expect(pool).toMatch(/w\.is_synthetic_fixture === true \|\|\s*isSyntheticFixtureLabel\(/);
+    expect(pool).toMatch(/poolSize: shown\.length/);
+  });
+  it("the renamed fixture workers carry a documented marker", () => {
+    expect(isSyntheticFixtureLabel("QA-SYNTHETIC Vytas Darbininkas (test)")).toBe(true);
+    expect(isSyntheticFixtureLabel("[E2E] Proof Worker")).toBe(true);
+    expect(isSyntheticFixtureLabel("E2E Proof Worker")).toBe(false);
+  });
   it("no active-locale product copy carries a fixture marker or QA instruction", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const text = read(`messages/${locale}.json`);
       expect(text, `${locale}: QA-SYNTHETIC`).not.toMatch(/QA[-_ ]SYNTHETIC/i);
       expect(text, `${locale}: E2E fixture`).not.toMatch(/E2E[-_ ]FIXTURE/i);
@@ -343,8 +370,17 @@ describe("historical import — the first real production import failed on a rea
       importActions.indexOf("export async function startEvidenceImportAction"),
       importActions.indexOf("export async function commitEvidenceImportAction"),
     );
-    expect(start).toMatch(/createImportSession\(/);
-    expect(start).toMatch(/submitRows\(/);
+    // The session and the staging are ONE core intake, `stageImportSource`
+    // (historical timesheet import v3, PR-2): it opens or finds the session
+    // and stages the rows at their source positions. The action names the
+    // intake; the core composes the two primitives.
+    expect(start).toMatch(/stageImportSource\(/);
+    const intake = importCore.slice(
+      importCore.indexOf("export async function stageImportSource("),
+      importCore.indexOf("export type DuplicateState"),
+    );
+    expect(intake).toMatch(/createImportSession\(/);
+    expect(intake).toMatch(/submitRows\(/);
     expect(start).not.toMatch(/commitImport\(/);
     expect(start).not.toMatch(/organization_evidence_records/);
   });

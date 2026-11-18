@@ -1,5 +1,9 @@
 "use client";
 
+import { asksAboutAWeek } from "@/lib/planning/week-question";
+import { projectTitleFromSentence } from "@/lib/conversation/project-title-from-sentence";
+import { cardModeFromText } from "@/lib/player-card/card-mode-from-text";
+import type { PlayerCardMode } from "@/lib/player-card/card-modes";
 import {
   Suspense,
   use,
@@ -10,7 +14,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
+import { SkeletonText } from "@/components/app/skeleton";
 import { useAuthOptional } from "@/lib/auth/context";
 import { ConversationHeader } from "./conversation-header";
 import { MySpaceRow } from "./my-space-row";
@@ -35,10 +41,7 @@ import {
   type BookingActionLabels,
   type BookingOffer,
 } from "@/components/app/conversation/worker-booking-action";
-import {
-  WorkerWorkLogFlow,
-  type WorkLogLabels,
-} from "@/components/app/conversation/worker-worklog-flow";
+import type { WorkLogLabels } from "@/components/app/conversation/worker-worklog-flow";
 import { getWorkerForm, type WorkerFormSpec } from "@/lib/conversation/worker-forms";
 import {
   agencyProposeCandidateForm,
@@ -50,24 +53,31 @@ import {
 import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
 import { loadEducationAnswerForChat } from "@/lib/conversation/education-answers";
 import {
-  educationQuestionKind,
+  educationModeFromText,
   isEducationQuestionKind,
   type EducationQuestionKind,
 } from "@/lib/conversation/education-question";
+import { readStatedProgress } from "@/lib/conversation/progress-status-phrase";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
+import { openTeamOfferThreadForChat } from "@/lib/company/team-offer-conversation";
 import { loadClientBridgeForChat } from "@/lib/conversation/client-bridge";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { readMyCvState } from "@/lib/conversation/cv-state-server";
 import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-server";
-import { understand } from "@/lib/conversation/utterance-understanding";
-import { matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
+import { aiStateMessageKey, understand } from "@/lib/conversation/utterance-understanding";
+import { asksForPersonalWorkspace, matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
+import { readRenameTarget } from "@/lib/conversation/organization-rename-phrase";
+import { readRenameTargetForChat } from "@/lib/conversation/organization-rename-chat";
 import {
+  attachAnswersForFile,
   readFileIntent,
   routeFileIntent,
+  type AttachAnswer,
   type FileIntent,
 } from "@/lib/conversation/file-subject";
+import { createAttachSinkStack } from "@/components/app/conversation/attach-sink";
 import {
   introMessageKey,
   outcomeMessageKey,
@@ -97,6 +107,10 @@ import { evidenceFromSuggestions } from "@/lib/conversation/evidence-goal";
 import { worklogDraftFromEvidence } from "@/lib/conversation/evidence-to-worklog";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
+import { helpChipsFor, readHelpTopic } from "@/lib/conversation/product-help";
+import { loadNewJobsForChat } from "@/lib/conversation/new-jobs";
+import { readAvailabilityDay } from "@/lib/conversation/availability-day";
+import { findConversationPeople, openConversationWith } from "@/lib/communication/chat-open-conversation";
 import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
 import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
 import type { WorkTaskStatus } from "@/lib/tasks/task-model";
@@ -105,25 +119,50 @@ import type { WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
 import { loadCompanyStagesForChat } from "@/lib/conversation/company-stages";
 import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/lib/conversation/project-move";
 import type { StageStatus } from "@/lib/projects/stages-model";
+import { OVERRIDE_REASON_CODES, type OverrideReasonCode } from "@/lib/projects/override-receipt-model";
 import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
+import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
+import { readStatedLanguages } from "@/lib/conversation/language-statement";
+import { readSkillStatement } from "@/lib/conversation/skill-statement";
+import { projectNamedInSentence } from "@/lib/conversation/project-mention";
+import { loadSavedOpportunitiesForChat } from "@/lib/conversation/saved-opportunities";
+import { saveStatedSkillAction } from "@/lib/profile/stated-skill-actions";
+import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
+import { pastWorkOwnWords, readPastWorkPeriod } from "@/lib/conversation/past-work-period";
+import { correctionHref, readCorrectionAsk } from "@/lib/conversation/correct-work-model";
+import { loadLatestOwnEntryForCorrection } from "@/lib/conversation/correct-work";
+import { listWorkLogEngagements } from "@/lib/conversation/worklog-engagements";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { baseIdentityForRole } from "@/lib/config/roles";
+import { NEED_DOOR_HREF } from "@/lib/company/need-door";
+import type { BaseIdentity } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
 import {
   classifyIntent,
   fold,
+  isAvailabilityChangeRequest,
   isExplicitJournalRequest,
+  prewarmIntentRouter,
 } from "@/lib/conversation/intent-router";
 import {
   dispatchIntent,
   type IntentHandlers,
+  type RoutedIntent,
 } from "@/lib/conversation/intent-registry";
-import type { WorkspaceInfo } from "@/lib/company/organization-switch";
+import type { PlanStep } from "@/lib/conversation/intent-plan";
+import { workspaceDisplayLabels, type WorkspaceInfo } from "@/lib/company/organization-switch";
 import { extractWorkLog, journalDraftReadiness } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
+import { decodeVoiceHandoff } from "@/lib/voice/capture-model";
+import { isVoiceTranscriptionConfigured } from "@/lib/voice/transcribe-action";
+import { VoiceCapturePanel, type VoiceCaptureResult } from "@/components/app/voice/voice-capture-panel";
+import {
+  preRouteDisposition,
+  singleMatchNeedsChip,
+  type TurnOrigin,
+} from "@/lib/conversation/voice-turn-policy";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadMessagesForChat, type ChatInboxThread } from "@/lib/conversation/messages-chat";
@@ -144,18 +183,22 @@ import {
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
 import { ChatPhotoStrip } from "@/components/app/conversation/chat-photo-strip";
 import { readRecentPhotosForChat } from "@/lib/conversation/evidence-photos";
+import { readWhatChangedForChat } from "@/lib/conversation/what-changed";
+import { ChatTraceStrip } from "@/components/app/conversation/chat-trace-strip";
+import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
+import { loadEmployerVisibilityForChat } from "@/lib/conversation/employer-visibility-chat";
+import { EMPLOYER_VISIBILITY_HREF } from "@/lib/privacy/employer-visibility";
 import { WorkerInvitationAction } from "@/components/app/conversation/worker-invitation-action";
+import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { loadCriteriaSummaryForChat, loadWorkCardPrefillForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
-import {
-  appendAssistantTurn,
-  loadAssistantThread,
-} from "@/lib/assistant/transcript";
+import { loadAssistantThread } from "@/lib/assistant/transcript";
+import { postTranscriptTurn } from "@/lib/assistant/transcript-client";
 import { WorldStateProvider } from "@/components/app/world-state/world-state-provider";
 import { ContextPanel } from "@/components/app/world-state/context-panel";
 import { useResultParam } from "@/components/app/workspace/use-result-param";
 import { loadExperienceInvitationsAction } from "@/lib/trust/experience-entry-actions";
-import type { ResultContext, ResultKind } from "@/lib/conversation/result-registry";
+import { canRenderInline, type ResultContext, type ResultKind } from "@/lib/conversation/result-registry";
 import {
   AiWorkspaceBridge,
   type AiWorldStateHandle,
@@ -167,6 +210,7 @@ import {
   runFindWorkers,
   runOpenProject,
   runRecentJournal,
+  runOrganizationJournal,
   runWorkIntelligenceQuestion,
   runSkillGap,
   runDocumentsReadiness,
@@ -182,6 +226,14 @@ import {
   type ValueStatement,
 } from "@/lib/structuring/value-statement";
 import { readProfessionStatement } from "@/lib/structuring/role-label";
+import { readCompoundStatement } from "@/lib/conversation/compound-statement";
+import { secondaryWorkStatement } from "@/lib/conversation/secondary-work-statement";
+import { readStatedProfessions } from "@/lib/conversation/stated-professions";
+import {
+  readMyProfessions,
+  saveStatedProfessionAction,
+  type MyProfessionState,
+} from "@/lib/worker/stated-profession-actions";
 import { applyCorrection } from "@/lib/structuring/apply-correction";
 import { discoverChannels } from "@/lib/value-channels/discovery";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
@@ -189,10 +241,20 @@ import {
   loadEmployerOpeningBrief,
   loadOpeningBrief,
 } from "@/lib/conversation/opening-brief";
+import { TODAY_COVERED_BRIEF_RUNGS } from "@/lib/today/today-route";
 import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceIntro as PersonalWorkspaceIntroModel } from "@/lib/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
+
+/* The work-log card opens only after a log-work sentence. It is the one path
+ * on Home into the browser Supabase client (photo upload) and its zod schemas
+ * — ~270 KB of script the first screen never ran (production, 2026-09-28) —
+ * so it loads when first rendered. Same component, same props. */
+const WorkerWorkLogFlow = dynamic(
+  () => import("@/components/app/conversation/worker-worklog-flow").then((m) => m.WorkerWorkLogFlow),
+  { loading: () => <SkeletonText lines={3} /> },
+);
 
 /** The S2 payload the page streams to the chat without awaiting (#1011):
  *  the intro model plus its server-resolved label bag, as one promise. */
@@ -216,28 +278,31 @@ function PersonalWorkspaceIntroStream({
   return <PersonalWorkspaceIntro intro={intro} labels={labels} onAction={onAction} />;
 }
 
+/** The S2 block's place while its slow readiness read streams (home CLS P0,
+ *  2026-10-26). It used to be `fallback={null}`: the block (a compact card,
+ *  ~250–300 px) then appeared out of nothing above the greeting and pushed
+ *  the greeting and the centred composer down. The page hands a payload ONLY
+ *  when the block can render at all (`personalIntroMayShow`, decided from
+ *  facts it already holds), so this reservation is drawn only where a block
+ *  is genuinely coming — never a placeholder for something that cannot. */
+function PersonalWorkspaceIntroPending() {
+  return (
+    <div
+      aria-hidden
+      data-testid="personal-workspace-intro-pending"
+      className="min-h-64 rounded-card border border-ink-600/70 bg-ink-800/40 p-4"
+    >
+      <SkeletonText lines={4} />
+    </div>
+  );
+}
+
 /**
  * An e-mail address the person already typed in the sentence ("pakviesk
  * klientą jonas@imone.lt"). Chat-first rule: never ask for a fact the sentence
  * already carries — it pre-fills the ONE field and the person only confirms.
  * Shape gate only; the canonical validators stay authoritative server-side.
  */
-/** Which of the institution's commands a "programmes" sentence asks for —
- *  create / cohort / assign, else a plain list. Folded, five locales. */
-function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" | EducationQuestionKind {
-  const q = (text ?? "").toLowerCase();
-  // Window 6 (lane C): a lecturer's QUESTION about students (outcomes, who
-  // fits, what skills are missing, where to do practice) is answered from the
-  // institution's real reads — never routed to the owner's own worker answer.
-  const question = educationQuestionKind(q);
-  if (question) return question;
-  if (/priskir|assign|zuweis|toewijz|назнач|zapisz/.test(q)) return "assign";
-  const creates = /sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов/.test(q);
-  if (creates && /grup|kohort|cohort|groep|gruppe|групп|поток|когорт/.test(q)) return "cohort";
-  if (creates) return "create";
-  return "list";
-}
-
 function extractEmail(sentence: string): string | null {
   const m = sentence.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
   return m ? m[0].toLowerCase() : null;
@@ -434,6 +499,20 @@ export type ChatLabels = {
   assignCommitmentUnknown: string;
   /** The assignment was refused by the server. The reason is the server's. */
   assignFailed: string;
+  /** J-TIME-FREEDOM: after an assignment over a known clash the chat offers the
+   *  SAME knowing-keep decision the project page offers. */
+  keepPrompt: string;
+  /** Said ONLY when the server answered ok = the receipt exists. */
+  keepRecorded: string;
+  /** The receipt could not be recorded: nothing was saved, the decision is NOT made. */
+  keepFailed: string;
+  keepReasonNone: string;
+  /** Closed reason codes (the same five the page offers); no free text exists. */
+  keepReason_agreed_with_worker: string;
+  keepReason_agreed_with_client: string;
+  keepReason_partial_overlap: string;
+  keepReason_urgent_need: string;
+  keepReason_other: string;
 
   // ── §7.1 — work relationships in the conversation ─────────────────────────
   /** The contextual chip. NOT a starter: the greeting is capped at three
@@ -492,6 +571,14 @@ export type ChatLabels = {
   offerAccepted: string;
   offerDeclined: string;
   offerDecisionFailed: string;
+  teamOffersIntro: string;
+  teamOfferStatusAgreed: string;
+  chipTeamOfferAgree: string;
+  chipTeamOfferThread: string;
+  chipOfferOurs: string;
+  teamOfferAgreed: string;
+  teamOfferDeclined: string;
+  teamOfferThreadFailed: string;
   documentAddIntro: string;
   documentAddDone: string;
   documentAddUnavailable: string;
@@ -517,6 +604,7 @@ export type ChatLabels = {
   capacityBusyUntil: string;
   capacityCommittedUntil: string;
   capacityCommittedToUntil: string;
+  capacityCommittedUndated: string;
   capacityAbsencesUnknown: string;
   capacityCommitmentsUnknown: string;
   capacityEmpty: string;
@@ -617,6 +705,7 @@ export type ChatLabels = {
   eduCohortCreated: string;
   eduAssignNoCohort: string;
   eduAssignNoLearners: string;
+  eduMembersNotForRole: string;
   eduAssignDone: string;
   eduNotInstitution: string;
   eduUnavailable: string;
@@ -628,6 +717,9 @@ export type ChatLabels = {
   agencyNotAgencyWorkspace: string;
   agencySwitchHint: string;
   agencyClientDemandIntro: string;
+  agencyClientsLine: string;
+  agencyClientActive: string;
+  agencyClientPending: string;
   agencyClientDemandNone: string;
   agencyProposalsIntro: string;
   agencyProposalsNone: string;
@@ -690,6 +782,30 @@ function reservationNote(
   return labels.assignAlreadyCommitted.replace("{count}", String(count));
 }
 
+/**
+ * J-TIME-FREEDOM — the keep-knowingly chips, offered ONLY when the server's
+ * verdict on the assignment just made collides. The chip carries ids and a
+ * CLOSED reason code (or "none") and NOTHING else: the collisions are never
+ * a chip payload — the server recomputes them at the decision.
+ */
+function keepClashChips(
+  projectId: string,
+  workerProfileId: string,
+  data: Record<string, unknown> | undefined,
+  labels: Pick<ChatLabels, "keepReasonNone" | `keepReason_${OverrideReasonCode}`>,
+): { id: string; label: string }[] | null {
+  const verdict = data?.reservation as { state?: string; collisions?: unknown[] } | undefined;
+  if (!verdict || verdict.state !== "collides") return null;
+  if (!Array.isArray(verdict.collisions) || verdict.collisions.length === 0) return null;
+  return [
+    ...OVERRIDE_REASON_CODES.map((code) => ({
+      id: `keep:${projectId}:${workerProfileId}:${code}`,
+      label: labels[`keepReason_${code}`],
+    })),
+    { id: `keep:${projectId}:${workerProfileId}:none`, label: labels.keepReasonNone },
+  ];
+}
+
 function formatDay(iso: string, locale: string): string {
   try {
     return new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", timeZone: "UTC" }).format(
@@ -734,6 +850,9 @@ function daysUntil(iso: string): number {
  * landing hand-off itself and needs the person's own credentials; recorded,
  * not closed here.
  */
+/** Session-storage slot carrying the sentence that needed another workspace. */
+const CONTINUE_AFTER_SWITCH_KEY = "lm.chat.continueAfterSwitch";
+
 function referrerIsOurOwnDoor(): boolean {
   try {
     const ref = document.referrer;
@@ -765,6 +884,9 @@ export function ConversationChat({
   script,
   mobile = false,
   personalIntroPayload = null,
+  openingContext = null,
+  openingContextWide = false,
+  accessNotice = null,
   countryLabels,
   agencyWorkspace = false,
   // Declared in the props type since the education slice but never read here
@@ -777,7 +899,18 @@ export function ConversationChat({
   contextFallback = null,
   workspaceContextLine = null,
   pins = null,
+  actingIdentity = "person",
 }: {
+  /**
+   * WHO the person acts as in the ACTIVE workspace — resolved on the server
+   * from the workspace and the person's relationship to it (owner program
+   * 2026-09-23, d3), the same resolution the chip and this conversation's
+   * `key` come from. It replaced `baseIdentityForRole(auth.activeRole)`: the
+   * stored role could say "company" inside someone else's company where the
+   * person is an employee, and the chat then spoke as its employer. Absent
+   * (design preview) = the person.
+   */
+  actingIdentity?: BaseIdentity;
   labels: ChatLabels;
   workLogLabels: WorkLogLabels;
   locale: string;
@@ -794,6 +927,21 @@ export function ConversationChat({
    *  (the design preview) renders nothing at all; a resolved `hidden`
    *  model renders nothing either — exactly as before. */
   personalIntroPayload?: Promise<PersonalIntroPayload> | null;
+  /** ŠIANDIEN — the worker's opening context (owner decision 0017): a
+   *  server-rendered block the page composes for a worker in their personal
+   *  space. It takes the SAME intro slot the S2 block uses (above the
+   *  greeting, above the composer, gone after the first real turn), so the
+   *  home stays ONE conversation for every identity. When present it wins
+   *  over the S2 payload — the page hands only one of the two. */
+  openingContext?: ReactNode;
+  /** The opening context is a full working home that uses the desktop width
+   *  (the worker's four regions) rather than a chat-width block. */
+  openingContextWide?: boolean;
+  /** One line explaining why this home is the screen the person got, when a
+   *  role gate sent them here. Server-resolved and already localized, so the
+   *  internal `needs_<role>_role` token never crosses into the client bundle.
+   *  `null` on every ordinary visit — which is almost all of them. */
+  accessNotice?: ReactNode;
   /** Localized country names, resolved server-side. The demand prefill needs a
    *  WORD for the location field — the ISO code is an internal value (§23). */
   countryLabels?: Record<string, string>;
@@ -851,12 +999,12 @@ export function ConversationChat({
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
-  /** The active base identity decides which WORK the greeting offers
-   *  (rebuild W4): an employer gets employer starters, a worker gets worker
-   *  starters — same window, same dispatcher, no second entry point. */
-  const identity = auth0?.activeRole
-    ? (baseIdentityForRole(auth0.activeRole) ?? "person")
-    : "person";
+  /** The acting identity decides which WORK the greeting offers (rebuild W4):
+   *  an employer gets employer starters, a worker gets worker starters — same
+   *  window, same dispatcher, no second entry point. It FOLLOWS the active
+   *  workspace (server-resolved, see `actingIdentity`), and the page keys this
+   *  component on both, so a switch mounts a fresh conversation for it. */
+  const identity: BaseIdentity = actingIdentity;
 
   /**
    * §2 — THE PERSON IS ONE. `identity` above is the ACTIVE workspace, not who
@@ -933,6 +1081,7 @@ export function ConversationChat({
   /** AI-workspace copy (W4) — explanations, workflow answers, chip labels. */
   const tAi = useTranslations("workspace.ai");
   const tRelationships = useTranslations("relationshipTypes");
+  const tInvitePage = useTranslations("network.invitePage");
   /** The AI's hand on World State, published by the bridge inside the provider. */
   const worldRef = useRef<AiWorldStateHandle | null>(null);
   const auth = useAuthOptional();
@@ -982,10 +1131,13 @@ export function ConversationChat({
       });
     }
     // ACTIVE CONTEXT = "on whose behalf am I acting?" (owner contract
-    // 2026-09-04 §5; CF-4). A company workspace opens by naming the real
-    // organization and what the product can do for it here — stated in the
-    // column the person reads, with the same starter row moved under it.
-    if (workspaceContextLine && identity === "company") {
+    // 2026-09-04 §5; CF-4). EVERY organization workspace opens by naming it —
+    // the chip's own label and the person's relationship to it, plus what the
+    // product can do there for a company workspace — stated in the column the
+    // person reads, with the same starter row moved under it. The server
+    // composes the line only for an organization workspace, so it is shown for
+    // whichever identity the person acts as there (an employee included).
+    if (workspaceContextLine) {
       opening.push({
         id: nid(),
         message: {
@@ -1000,11 +1152,55 @@ export function ConversationChat({
     return opening;
   }, [script, greetingText, labels.assistantName, starterChips, learnerContextLine, workspaceContextLine, identity]);
 
+  /**
+   * The workspace labels a person actually reads, from the chip's own builder
+   * (`workspaceDisplayLabels`). Every chip the chat offers to switch context
+   * uses them: a bare `w.name` rendered an EMPTY chip for an organization
+   * with no stored name, and a different text than the chip for two that
+   * collide.
+   */
+  const workspaceLabelById = useMemo(
+    () =>
+      workspaceDisplayLabels(auth0?.workspaces ?? [], {
+        personal: t("workspacePersonal"),
+        unnamedOrganization: {
+          company: t("workspaceUnnamedCompany"),
+          agency: t("workspaceUnnamedAgency"),
+          team: t("workspaceUnnamedTeam"),
+          other: t("workspaceUnnamed"),
+        },
+      }),
+    [auth0?.workspaces, t],
+  );
+  const workspaceLabelOf = useCallback(
+    (w: WorkspaceInfo) => workspaceLabelById.get(w.id) ?? w.name,
+    [workspaceLabelById],
+  );
+
   const [items, setItems] = useState<ThreadItem[]>(initial);
   const [typing, setTyping] = useState(false);
   /** QA Q-4: a `?say=` sentence that did NOT arrive through our own door is
    *  handed to the composer for the person to send — see `referrerIsOurOwnDoor`. */
   const [sayPrefill, setSayPrefill] = useState("");
+  // VOICE DOOR (owner U-26): a second way to INPUT the same typed turn. The
+  // origin only changes two guards (lib/conversation/voice-turn-policy.ts);
+  // routing, authority and confirmation are the typed path's, unchanged.
+  const turnOriginRef = useRef<TurnOrigin>("typed");
+  const voiceProvenanceRef = useRef<{ language: string; disclosureVersion: string } | null>(null);
+  const [voiceAvailable, setVoiceAvailable] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    isVoiceTranscriptionConfigured()
+      .then((ok) => {
+        if (alive) setVoiceAvailable(ok);
+      })
+      .catch(() => {
+        /* honest absence: no microphone button when the service is not there */
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   /**
    * Transcript persistence (owner-gated schema). While the RED migration is
@@ -1014,17 +1210,47 @@ export function ConversationChat({
    * through the hash-chaining RPC. Fire-and-forget: a failed append never
    * blocks the visible conversation and never fabricates a success.
    */
-  const transcriptRef = useRef<{ conversationId: string | null; enabled: boolean }>({
+  // ONE ordered chain for every transcript write (production walk 2026-10-12):
+  // turns typed before the thread finished loading used to be dropped, and a
+  // question and its answer appended concurrently before the first
+  // conversation existed could open TWO threads. The chain starts with the
+  // load, so early turns wait for it, and each append waits for the previous
+  // one, so the first append creates the thread and the rest reuse it.
+  const transcriptRef = useRef<{ conversationId: string | null; enabled: boolean; chain: Promise<void> }>({
     conversationId: null,
     enabled: false,
+    chain: Promise.resolve(),
   });
+  // MULTI-STEP PLAN (owner 2026-10-14 §4): the steps still to run, in order,
+  // with the handlers of the sentence that produced them. Each next step runs
+  // only when the person taps it — a human in the loop for every step.
+  const planRef = useRef<{
+    steps: readonly PlanStep[];
+    total: number;
+    run: (intent: RoutedIntent) => void;
+  } | null>(null);
+  // The router compiles its patterns on first use; build them in idle slices
+  // once the conversation is on screen so the first sentence finds them ready.
+  useEffect(() => prewarmIntentRouter(), []);
   useEffect(() => {
     if (script) return; // design preview: never touches real persistence
     let cancelled = false;
-    loadAssistantThread()
+    const loading = loadAssistantThread();
+    // The load only supplies a conversation-id HINT now; appends no longer
+    // wait for it (the server resolves the thread itself — see persistTurn).
+    loading.then(
+      (res) => {
+        if (!res.available) return;
+        if (transcriptRef.current.conversationId === null) {
+          transcriptRef.current.conversationId = res.conversationId;
+        }
+        transcriptRef.current.enabled = true;
+      },
+      () => undefined,
+    );
+    loading
       .then((res) => {
         if (cancelled || !res.available) return;
-        transcriptRef.current = { conversationId: res.conversationId, enabled: true };
         if (res.messages.length > 0) {
           // ChatGPT-style history model: earlier turns arrive as ONE collapsed
           // block above the active conversation — never an unbounded dump.
@@ -1033,6 +1259,7 @@ export function ConversationChat({
           setItems((prev) => [
             {
               id: nid(),
+              history: true,
               embed: (
                 <HistoryBlock
                   messages={restored}
@@ -1063,22 +1290,25 @@ export function ConversationChat({
 
   const persistTurn = useCallback(
     (role: "user" | "assistant", text: string) => {
-      const t = transcriptRef.current;
-      if (!t.enabled || !text.trim()) return;
-      appendAssistantTurn({
-        conversationId: t.conversationId,
-        role,
-        text,
-        language: locale,
-      })
-        .then((res) => {
-          if (res.available) transcriptRef.current.conversationId = res.conversationId;
+      if (script || !text.trim()) return;
+      const tr = transcriptRef.current;
+      // P0 2026-10-14: the append used to be a server action, and Next.js runs
+      // a page's server actions one at a time — it queued behind every other
+      // action the chat fires, so a message sent just before the person
+      // closed or left the page was never written. A keepalive fetch to the
+      // transcript route runs beside that queue and is finished by the
+      // browser even after unload. The chain still orders the appends, so a
+      // question is always written before its answer.
+      tr.chain = tr.chain
+        .then(async () => {
+          const saved = await postTranscriptTurn({ conversationId: tr.conversationId, role, text, language: locale });
+          if (saved) tr.conversationId = saved;
         })
         .catch(() => {
           /* degraded — nothing claimed */
         });
     },
-    [locale],
+    [locale, script],
   );
 
   const pushMessage = useCallback((message: ChatMessage) => {
@@ -1092,6 +1322,12 @@ export function ConversationChat({
    *  thing — prod walk 2026-09-04: "Kas turėtų jame dirbti?" and its chips
    *  sat under the open project sheet and could not be tapped. */
   const [chipsPostedAt, setChipsPostedAt] = useState<number | null>(null);
+  /** The moment the OPENING BRIEF posted its chips. Kept apart from
+   *  `chipsPostedAt`: the brief is not an answer about what the sheet shows,
+   *  so it may close a sheet that opened on its own (a pending invitation) but
+   *  never a result or selection the person asked for — sharing the stamp
+   *  collapsed every `?result=` deep link on a phone (QA 2026-10-16). */
+  const [briefChipsPostedAt, setBriefChipsPostedAt] = useState<number | null>(null);
 
   /**
    * THE ACTIVE CONVERSATION GOAL (owner P0 §1/§5, 2026-09-06).
@@ -1112,7 +1348,8 @@ export function ConversationChat({
       // This is deliberately not a CV-specific guard: the ledger is keyed on
       // the action id, so it covers every offer the product makes.
       const shown = withoutDeclined(goalRef.current, chips) as ChoiceChip[] | undefined;
-      pushMessage({ id: nid(), role: "assistant", kind: "text", text, chips: shown });
+      const id = nid();
+      pushMessage({ id, role: "assistant", kind: "text", text, chips: shown });
       persistTurn("assistant", text);
       if (shown && shown.length > 0) {
         setChipsPostedAt(Date.now());
@@ -1120,6 +1357,9 @@ export function ConversationChat({
         // the person is refusing it.
         goalRef.current = noteOffered(goalRef.current, shown.map((c) => c.id));
       }
+      // The id lets a caller that must keep ONE copy of a question (the
+      // attach question) retire it later.
+      return id;
     },
     [pushMessage, persistTurn],
   );
@@ -1143,6 +1383,29 @@ export function ConversationChat({
     }, 350);
   }, []);
 
+  /**
+   * THE WORKSPACE THIS CONVERSATION WAS OPENED FOR, sent with every write
+   * (owner program 2026-09-23). The server re-resolves the organization at
+   * execution time, so a screen opened for organization A could write into B
+   * after a switch in another tab, on another device or through the MCP door.
+   * The dispatcher compares this with the workspace IT resolves and answers
+   * `stale_context` on a mismatch — a staleness check only: the server-resolved
+   * workspace stays the authority, and this id grants nothing.
+   */
+  const expectedWorkspaceId = auth0?.activeWorkspaceId ?? undefined;
+  /** A write refused as `stale_context` says so and offers the refresh that
+   *  re-reads the context — never the action's generic failure line. Returns
+   *  whether it handled the result. */
+  const answeredStaleContext = useCallback(
+    (res: { ok: boolean; code?: string }): boolean => {
+      if (res.ok || res.code !== "stale_context") return false;
+      setTyping(false);
+      assistant(t("staleContext"), [{ id: "ctx:refresh", label: t("staleContextRefresh") }]);
+      return true;
+    },
+    [assistant, t],
+  );
+
   /** Contextual follow-up after the employer demand form.
    *
    *  W8 puts the JOURNEY'S OWN next step first: a need has just been described,
@@ -1163,6 +1426,33 @@ export function ConversationChat({
     labels.chipCompanyHub,
     labels.chipNeedWorkers,
   ]);
+
+  /**
+   * NOT UNDERSTOOD IS A QUESTION, NEVER THE GREETING ROW (owner program
+   * 2026-09-23, P0 §10 / CASE 3, 4, 12).
+   *
+   * The owner asked an agency workspace to rename itself and was answered
+   * with "Įkelti CV · Mano profilis · Ieškau darbo" — the GREETING's starter
+   * row, attached to every sentence the product did not understand. Those
+   * chips describe what a person might want on arrival; offered in reply to a
+   * specific request they are unrelated doors, and they read as the product
+   * pretending it understood.
+   *
+   * So a not-understood answer — the fallback, a model `clarification`, a
+   * bare name that resolves to nothing, an unanswerable question — is ONE
+   * concise question tied to what was said, plus at most ONE door: "Ką galiu
+   * čia daryti?", which runs `startCapabilities` and is therefore derived
+   * from the ACTIVE context at the moment it is tapped, not from the identity
+   * the page was rendered with. The greeting keeps its starter row.
+   */
+  const clarifyDoor: ChoiceChip[] = useMemo(
+    () => [{ id: "capabilities", label: t("chipWhatCanIDo") }],
+    [t],
+  );
+  const askToClarify = useCallback(
+    (line: string) => assistant(line, clarifyDoor),
+    [assistant, clarifyDoor],
+  );
 
   const openForm = useCallback(
     (
@@ -1185,6 +1475,15 @@ export function ConversationChat({
         const actionId = spec.actionId;
         const isEmployer =
           actionId.startsWith("company.") || actionId.startsWith("agency.");
+        // The chat's demand intake rendered (activation audit 2026-10-26 §2):
+        // the same `demand_form_viewed` the Needs door's intake sends, with
+        // the chat as its surface — whichever chip or sentence opened it.
+        if (actionId === "company.create-demand") {
+          trackFunnel(FUNNEL_EVENTS.demandFormViewed, {
+            surface: "chat",
+            role_context: "company",
+          });
+        }
         const render = (values?: Record<string, string | boolean>) => pushEmbed(
           <InlineActionForm
             spec={spec}
@@ -1317,6 +1616,10 @@ export function ConversationChat({
    * `startProfileSummaryRef` — a ref, not a second copy of the hook.
    */
   const openResultRef = useRef<(kind: ResultKind) => void>(() => {});
+  /** Opens the Player Card result in a mode (bound with `openResultRef`). */
+  const openPlayerCardRef = useRef<(mode: PlayerCardMode) => void>(() => {});
+  /** The sentence the router just routed — read once by the card opener. */
+  const routedTextRef = useRef<string | null>(null);
   /** Late-bound for the same reason as `openResultRef`: the chip handler is
    *  declared above `useResultParam()`, and the experience handoff needs the
    *  ONE writer that sets result + interaction in a single push. */
@@ -1514,6 +1817,7 @@ export function ConversationChat({
    * Signed-out visitors and the design preview keep the plain greeting.
    */
   const openedWithStateRef = useRef(false);
+  const todayOnScreen = Boolean(openingContext);
   useEffect(() => {
     if (script || openedWithStateRef.current) return;
     if (!auth?.profile) return; // signed-out: nothing real to show
@@ -1523,7 +1827,11 @@ export function ConversationChat({
     // unread) for an organization. Same caps, same honesty: a failed read
     // contributes nothing and `none` leaves the greeting standing alone.
     openedWithStateRef.current = true;
-    (identity === "person" ? loadOpeningBrief() : loadEmployerOpeningBrief())
+    // ŠIANDIEN owns the attention it already renders (owner §20): with it on
+    // screen, the brief leaves out the rungs ŠIANDIEN states and keeps the
+    // ones only the brief carries (lib/today/today-route.ts).
+    const briefOptions = todayOnScreen ? { omit: TODAY_COVERED_BRIEF_RUNGS } : undefined;
+    (identity === "person" ? loadOpeningBrief(briefOptions) : loadEmployerOpeningBrief())
       .then((brief) => {
         if (brief.kind !== "brief") return; // honest: nothing to report
         // The brief is a slow read. On production (2026-09-06) it landed
@@ -1539,11 +1847,15 @@ export function ConversationChat({
           text: brief.lines.join("\n"),
           chips: brief.chips,
         });
+        // The brief asks with chips like any assistant() turn, so the phone
+        // sheet (auto-opened for a pending invitation) yields to it the same
+        // way instead of staying over the home.
+        if (brief.chips.length > 0) setBriefChipsPostedAt(Date.now());
       })
       .catch(() => {
         /* the greeting stands on its own — never a fabricated brief */
       });
-  }, [script, auth?.profile, identity, pushMessage]);
+  }, [script, auth?.profile, identity, pushMessage, todayOnScreen]);
 
   /**
    * "Kokie kriterijai pas mane nurodyti?" — a REAL readback of the worker's
@@ -1738,12 +2050,122 @@ export function ConversationChat({
   const startPlayerCard = useCallback(
     (opts?: { intro?: string }) => {
       assistant(opts?.intro ?? labels.playerCardOpened);
-      openResultRef.current("player-card");
+      // THE LENS THE SENTENCE ASKED FOR (owner 2026-09-29 §21): "kokie mano
+      // įgūdžiai patvirtinti?" opens the SAME card on its skills; a sentence
+      // that names no lens opens the whole card. Chips and flows that call
+      // this without a routed sentence open the whole card as before.
+      openPlayerCardRef.current(cardModeFromText(routedTextRef.current));
+      routedTextRef.current = null;
     },
     [assistant, labels.playerCardOpened],
   );
   /** Late-bound so earlier flows (work-log onClose) can show the card. */
   const startPlayerCardRef = useRef(startPlayerCard);
+
+  /**
+   * A PROFESSION SAID IN CHAT — REVIEWED, THEN SAVED (owner continuation
+   * 2026-09-29). "Esu pastolininkas" used to get a link to the profile page.
+   * Now the person's current professions are read, and for each stated one
+   * (0/1/N) the chat offers the explicit choice the profile offers: make it
+   * the primary, add it as another direction, or keep it in their own words
+   * when the catalogue has no entry. A chip is the confirmation; the write is
+   * the existing profile action; the answer is the read-back.
+   */
+  const professionLabelOf = useCallback(
+    (slug: string | null, label: string) =>
+      slug && tProfessions.has(slug as never) ? tProfessions(slug as never) : label,
+    [tProfessions],
+  );
+  const professionSummary = useCallback(
+    (state: MyProfessionState) => {
+      if (state.kind !== "ok") return "";
+      const names = [
+        ...state.slugs.map((s) => (tProfessions.has(s as never) ? tProfessions(s as never) : s)),
+        ...state.ownLabels,
+      ];
+      const primary = state.primarySlug ? professionLabelOf(state.primarySlug, state.primarySlug) : null;
+      return t("professionSave.nowHeld", {
+        list: names.join(", ") || "—",
+        primary: primary ?? "—",
+      });
+    },
+    [t, tProfessions, professionLabelOf],
+  );
+  const offerProfessionSave = useCallback(
+    (text: string) => {
+      const items = readStatedProfessions(text).filter((r) => r.tense === "present");
+      if (items.length === 0) return false;
+      setTyping(true);
+      readMyProfessions()
+        .then((state) => {
+          setTyping(false);
+          if (state.kind !== "ok") {
+            assistant(t(state.kind === "no-worker" ? "professionSave.noWorker" : "professionSave.unreadable"));
+            return;
+          }
+          const lines: string[] = [];
+          const chips: ChoiceChip[] = [];
+          for (const it of items) {
+            const name = professionLabelOf(it.professionSlug, it.label);
+            if (it.professionSlug && tProfessions.has(it.professionSlug as never)) {
+              if (state.slugs.includes(it.professionSlug)) {
+                lines.push(t("professionSave.alreadyHeld", { name }));
+                if (state.primarySlug !== it.professionSlug) {
+                  chips.push({ id: `prof:primary:${it.professionSlug}`, label: t("professionSave.chipMakePrimary", { name }) });
+                }
+              } else if (!state.primarySlug) {
+                chips.push({ id: `prof:primary:${it.professionSlug}`, label: t("professionSave.chipSavePrimary", { name }) });
+              } else {
+                chips.push({ id: `prof:direction:${it.professionSlug}`, label: t("professionSave.chipAddDirection", { name }) });
+                chips.push({ id: `prof:primary:${it.professionSlug}`, label: t("professionSave.chipMakePrimary", { name }) });
+              }
+            } else if (state.ownLabels.some((l) => l.toLowerCase() === it.label.toLowerCase())) {
+              lines.push(t("professionSave.alreadyHeld", { name }));
+            } else {
+              chips.push({ id: `prof:own:${encodeURIComponent(it.label)}`, label: t("professionSave.chipSaveOwn", { name }) });
+            }
+          }
+          lines.push(professionSummary(state));
+          if (chips.length > 0) lines.push(t("professionSave.ask"));
+          assistant(lines.join("\n"), chips.length > 0 ? chips : undefined);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("professionSave.unreadable"));
+        });
+      return true;
+    },
+    [assistant, t, tProfessions, professionLabelOf, professionSummary],
+  );
+  const offerProfessionSaveRef = useRef(offerProfessionSave);
+  offerProfessionSaveRef.current = offerProfessionSave;
+  const runProfessionSave = useCallback(
+    (chipId: string) => {
+      const [, mode, raw] = chipId.split(":");
+      const value = decodeURIComponent(raw ?? "");
+      if (!value || (mode !== "primary" && mode !== "direction" && mode !== "own")) return;
+      setTyping(true);
+      saveStatedProfessionAction(
+        mode === "own" ? { mode, label: value, locale } : { mode, slug: value },
+      )
+        .then((res) => {
+          setTyping(false);
+          if (!res.ok) {
+            assistant(t(res.reason === "invalid" ? "professionSave.invalid" : "professionSave.failed"));
+            return;
+          }
+          assistant([t("professionSave.saved"), professionSummary(res.state)].join("\n"), [
+            { id: "jobs", label: labels.chipJobs },
+            { id: "profile", label: labels.chipProfile },
+          ]);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("professionSave.failed"));
+        });
+    },
+    [assistant, t, locale, professionSummary, labels.chipJobs, labels.chipProfile],
+  );
   startPlayerCardRef.current = startPlayerCard;
 
   /**
@@ -1963,12 +2385,30 @@ export function ConversationChat({
    * re-validates.
    */
   const performContextSwitch = useCallback(
-    (workspace: WorkspaceInfo) => {
+    (workspace: WorkspaceInfo, continueSentence?: string) => {
+      // The chip's own label: an unnamed organization says so, never "".
       const displayName =
-        workspace.kind === "personal" ? t("switchContextPersonal") : workspace.name;
+        workspace.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(workspace);
       if (auth?.activeWorkspaceId === workspace.id) {
         assistant(t("switchContextAlready", { name: displayName }));
         return;
+      }
+      // THE SAME TASK CONTINUES ACROSS THE SWITCH (owner 2026-10-01). The
+      // dashboard keys this chat on the active workspace, so a switch REMOUNTS
+      // it: anything said after `switchWorkspace` resolves would be printed
+      // into an instance that is about to disappear. The sentence that needed
+      // the other context is therefore handed to the NEW instance through
+      // session storage (one-shot, short-lived, bound to the target workspace)
+      // and re-run there through the one router.
+      if (continueSentence) {
+        try {
+          window.sessionStorage.setItem(
+            CONTINUE_AFTER_SWITCH_KEY,
+            JSON.stringify({ ws: workspace.id, say: continueSentence.slice(0, 500), at: Date.now() }),
+          );
+        } catch {
+          /* storage unavailable: the switch still happens, only the resume is lost */
+        }
       }
       setTyping(true);
       (auth
@@ -1982,13 +2422,151 @@ export function ConversationChat({
               ? t("switchContextDone", { name: displayName })
               : t("switchContextFailed"),
           );
+          if (!accepted && continueSentence) {
+            try {
+              window.sessionStorage.removeItem(CONTINUE_AFTER_SWITCH_KEY);
+            } catch {
+              /* nothing to clean */
+            }
+          }
         })
         .catch(() => {
           setTyping(false);
           assistant(t("switchContextFailed"));
         });
     },
-    [assistant, auth, t],
+    [assistant, auth, t, workspaceLabelOf],
+  );
+
+  /**
+   * FIND BUSINESS PARTNERS (owner 2026-10-01) — what the company context
+   * offers. The marketplace is ONE existing capability: service offerings
+   * and requests, work-resource listings, and the relationship door. This
+   * hands over those doors and builds nothing of its own.
+   */
+  const pendingPartnersSentenceRef = useRef("");
+  const showPartnerDoors = useCallback(() => {
+    assistant(t("findPartnersDoors"), [
+      { id: "link:/dashboard/service-requests", label: t("chipPartnersServices") },
+      { id: "link:/dashboard/listings", label: t("chipPartnersListings") },
+      { id: "link:/dashboard/company/partners", label: t("chipPartnersRelations") },
+    ]);
+  }, [assistant, t]);
+
+  /**
+   * "Noriu rasti partnerių savo verslui" — a BUSINESS request, never a job
+   * search. In a company context the marketplace doors open; from the
+   * personal space the chat asks WHICH company (membership-validated `wsp:`
+   * chips, the same switch the `ws:` chips run) and then continues the same
+   * request there. The meaning of the sentence is never changed.
+   */
+  const startFindPartners = useCallback((sentence: string) => {
+    pendingPartnersSentenceRef.current = sentence;
+    const workspaces = auth?.workspaces ?? [];
+    const active = workspaces.find((w) => w.id === auth?.activeWorkspaceId);
+    if (identity === "company" || active?.kind === "organization") {
+      showPartnerDoors();
+      return;
+    }
+    const organizations = workspaces.filter(
+      (w) => w.kind === "organization" && w.name.trim() !== "",
+    );
+    if (organizations.length === 0) {
+      assistant(t("findPartnersNoCompany"), [
+        { id: "link:/dashboard/start/company", label: labels.chipCreateOrganization },
+        { id: "link:/dashboard/service-requests", label: t("chipPartnersServices") },
+      ]);
+      return;
+    }
+    assistant(
+      t("findPartnersPickCompany"),
+      organizations.map((w) => ({ id: `wsp:${w.id}`, label: workspaceLabelOf(w) })),
+    );
+  }, [assistant, auth?.activeWorkspaceId, auth?.workspaces, identity, labels.chipCreateOrganization, showPartnerDoors, t, workspaceLabelOf]);
+
+  /**
+   * "PARAŠYK JONUI" / "ATIDARYK POKALBĮ SU JONU" (owner 2026-10-01). The chat
+   * owns NO message logic: it asks the conversation system WHO the person
+   * means (their existing counterparts and their own team, nobody else), and
+   * once exactly one is chosen it opens the ONE conversation — the same
+   * thread the Messages page shows — and navigates there. Nothing is sent from
+   * here; the person writes in the conversation's own composer.
+   */
+  const openConversationTarget = useCallback(
+    (target: { conversationId?: string; profileId?: string; label: string }) => {
+      setTyping(true);
+      openConversationWith({
+        locale,
+        conversationId: target.conversationId ?? null,
+        profileId: target.profileId ?? null,
+      })
+        .then((res) => {
+          setTyping(false);
+          if (res.ok) {
+            assistant(t("openConversationOpening", { name: target.label }));
+            // `href` carries the locale; the localized router adds its own.
+            router.push(res.href.replace(/^\/[a-z]{2}(?=\/)/, "") as "/dashboard");
+            return;
+          }
+          assistant(
+            res.reason === "no_permission"
+              ? t("openConversationNoPermission", { name: target.label })
+              : t("openConversationFailed"),
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("openConversationFailed"));
+        });
+    },
+    [assistant, locale, router, t],
+  );
+
+  const startOpenConversation = useCallback(
+    (sentence: string) => {
+      setTyping(true);
+      findConversationPeople(sentence)
+        .then((res) => {
+          setTyping(false);
+          if (res.status === "none") {
+            assistant(t("openConversationNone"), [
+              { id: "link:/dashboard/communication", label: t("navMessages") },
+            ]);
+            return;
+          }
+          if (res.status === "one") {
+            const p = res.person;
+            // Voice: the single phonetic match is a chip the person presses.
+            if (singleMatchNeedsChip(turnOriginRef.current, "openConversation")) {
+              assistant(t("openConversationWhich"), [
+                {
+                  id: p.kind === "conversation" ? `oc:c:${p.conversationId}` : `oc:p:${p.profileId}`,
+                  label: p.label,
+                },
+              ]);
+              return;
+            }
+            openConversationTarget(
+              p.kind === "conversation"
+                ? { conversationId: p.conversationId, label: p.label }
+                : { profileId: p.profileId, label: p.label },
+            );
+            return;
+          }
+          assistant(
+            t("openConversationWhich"),
+            res.people.map((p) => ({
+              id: p.kind === "conversation" ? `oc:c:${p.conversationId}` : `oc:p:${p.profileId}`,
+              label: p.label,
+            })),
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("openConversationFailed"));
+        });
+    },
+    [assistant, openConversationTarget, t],
   );
 
   const startSwitchContext = useCallback(
@@ -2000,14 +2578,17 @@ export function ConversationChat({
         withTyping(() => assistant(t("switchContextUnavailable")));
         return;
       }
-      const folded = fold(text);
-      // "asmenin…" / "personal" / "личн…" / "persoonlijk…" / "persönlich…"
-      // (folded: persönlich → personlich) — the personal space by name.
-      const wantsPersonal = ["asmenin", "personal", "личн", "persoonlijk", "personlich"].some(
-        (hint) => folded.includes(hint),
-      );
       const organizations = workspaces.filter(
         (w) => w.kind === "organization" && w.name.trim() !== "",
+      );
+      // "asmenin…" / "personal" / "личн…" / "persoonlijk…" / "persönlich…" /
+      // "personlig" / "privat" — the personal space by name. One reader
+      // (`asksForPersonalWorkspace`); a hint inside one of the person's own
+      // organization names is that organization, never the personal space.
+      const wantsPersonal = asksForPersonalWorkspace(
+        text,
+        fold,
+        organizations.map((w) => w.name),
       );
       let target: WorkspaceInfo | undefined = wantsPersonal
         ? workspaces.find((w) => w.kind === "personal")
@@ -2029,14 +2610,142 @@ export function ConversationChat({
           t("switchContextPick"),
           workspaces.map((w) => ({
             id: `ws:${w.id}`,
-            label: w.kind === "personal" ? t("switchContextPersonal") : w.name,
+            label: w.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(w),
           })),
         );
         return;
       }
+      // Voice: one fuzzy name match is offered as a chip, not acted on - a
+      // misheard organisation would silently re-attribute everything after it.
+      if (singleMatchNeedsChip(turnOriginRef.current, "switchContext")) {
+        assistant(t("switchContextPick"), [
+          {
+            id: `ws:${target.id}`,
+            label: target.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(target),
+          },
+        ]);
+        return;
+      }
       performContextSwitch(target);
     },
-    [assistant, auth, performContextSwitch, t, withTyping],
+    [assistant, auth, performContextSwitch, t, withTyping, workspaceLabelOf],
+  );
+
+  /**
+   * "PERVADINK ŠIĄ AGENTŪRĄ Į NONSTOP GROUP UAB." (owner program 2026-09-23,
+   * CASE 3/4) — rename the ACTIVE organization by sentence.
+   *
+   * ASK THE SERVER FIRST, THEN OFFER THE ONE FORM. Whether this workspace can
+   * be renamed by this person is decided by the same gate chain the write
+   * runs (lib/company/organization-rename.ts), read here before any form is
+   * shown — so a refusal is one honest sentence now, not an error after the
+   * person has reviewed and confirmed a form that could never save.
+   *
+   *   · ready               → the confirm form, PREFILLED with the name the
+   *                           sentence carried (`readRenameTarget`, casing as
+   *                           typed); nothing is saved until they confirm.
+   *   · personal workspace  → ask WHICH organization, one membership-validated
+   *                           `ws:` chip each (unnamed ones labelled by their
+   *                           real type — `workspaceDisplayLabels`, the chip's
+   *                           own labeller). The switch is theirs to make.
+   *   · no company profile  → said as that, with the one canonical door
+   *                           (create a company profile). Never retargeted to
+   *                           another organization the person owns.
+   *   · not allowed / verified legal name / unreadable → said as such.
+   *
+   * The receipt after the save names old → new from the server's READBACK.
+   */
+  const startRenameOrganization = useCallback(
+    (text: string) => {
+      const proposed = readRenameTarget(text);
+      setTyping(true);
+      readRenameTargetForChat()
+        .then((target) => {
+          setTyping(false);
+          switch (target.kind) {
+            case "ready":
+              assistant(
+                target.currentName
+                  ? t("renameAsk", { current: target.currentName })
+                  : t("renameAskUnnamed"),
+              );
+              openForm(
+                "company.rename-organization",
+                // Closing continues with the COMPANY's own next step — never
+                // the demand follow-up the employer forms default to.
+                startCompanyNextStep,
+                labels.chipCompanyHub,
+                // `expectedOrganizationId` is not a field and not a target:
+                // it makes the save refuse if the workspace changes while
+                // the form is open (switched in another tab).
+                {
+                  ...(proposed ? { name: proposed } : {}),
+                  expectedOrganizationId: target.organizationId,
+                },
+                (res) => {
+                  const name = typeof res.data?.name === "string" ? res.data.name : "";
+                  const previous =
+                    typeof res.data?.previousName === "string" ? res.data.previousName : null;
+                  assistant(
+                    res.data?.unchanged === true
+                      ? t("renameUnchanged", { name })
+                      : previous
+                        ? t("renameDone", { previous, name })
+                        : t("renameDoneUnnamed", { name }),
+                  );
+                },
+              );
+              return;
+            case "personal": {
+              const workspaces = auth?.workspaces ?? [];
+              const organizations = workspaces.filter((w) => w.kind === "organization");
+              if (organizations.length === 0) {
+                assistant(t("renameNoOrganization"));
+                return;
+              }
+              const labelById = workspaceDisplayLabels(workspaces, {
+                personal: t("workspacePersonal"),
+                unnamedOrganization: {
+                  company: t("workspaceUnnamedCompany"),
+                  agency: t("workspaceUnnamedAgency"),
+                  team: t("workspaceUnnamedTeam"),
+                  other: t("workspaceUnnamed"),
+                },
+              });
+              assistant(
+                t("renameAskWhich"),
+                organizations.map((w) => ({ id: `ws:${w.id}`, label: labelById.get(w.id) ?? w.name })),
+              );
+              return;
+            }
+            case "no-company-profile":
+              // Said as the fact and its reason, with NO door. "Create a
+              // company profile" would make a SEPARATE organization — a
+              // duplicate of the one the person meant, while the owner decision
+              // for such organizations (a RED rename RPC, or archive/merge into
+              // the canonical one) is open. Never offered as the way forward.
+              assistant(t("renameNoCompanyProfile"));
+              return;
+            case "not-authorized":
+              assistant(t("renameNotAllowed"));
+              return;
+            case "legal-name-verified":
+              // The organization's own record, where a typed help request
+              // reaches the administrator who may change a verified name.
+              assistant(t("renameLegalNameVerified"), [
+                { id: "link:/dashboard/company/settings", label: t("chipOrganizationSettings") },
+              ]);
+              return;
+            default:
+              assistant(t("renameUnavailable"));
+          }
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("renameUnavailable"));
+        });
+    },
+    [assistant, auth?.workspaces, openForm, startCompanyNextStep, labels.chipCompanyHub, t],
   );
 
   /**
@@ -2055,8 +2764,10 @@ export function ConversationChat({
    *      every later answer means, so it stays the person's decision.
    *   2. Several matches → ask which.
    *   3. Otherwise → say plainly that it reads like a name, that nothing was
-   *      done, and ask what they want. The suggestion row is already derived
-   *      from their real context, so the question is not a dead end.
+   *      done, and ask what they want — with the ONE context-derived door
+   *      ("what can I do here", read at tap time), never the greeting's
+   *      starter row (owner program 2026-09-23: a not-understood answer
+   *      never carries unrelated chips).
    *
    * WHY THE MODEL PROPOSER IS NOT ASKED HERE. `proposeConversationIntentAction`
    * can only return an id that already exists in `INTENT_REGISTRY`, and every
@@ -2078,21 +2789,21 @@ export function ConversationChat({
       );
       if (candidates.length === 1) {
         const only = candidates[0];
-        assistant(t("refWorkspaceAsk", { name: only.name }), [
-          { id: `ws:${only.id}`, label: only.name },
+        assistant(t("refWorkspaceAsk", { name: workspaceLabelOf(only) }), [
+          { id: `ws:${only.id}`, label: workspaceLabelOf(only) },
         ]);
         return;
       }
       if (candidates.length > 1) {
         assistant(
           t("refWorkspaceMany"),
-          candidates.map((w) => ({ id: `ws:${w.id}`, label: w.name })),
+          candidates.map((w) => ({ id: `ws:${w.id}`, label: workspaceLabelOf(w) })),
         );
         return;
       }
-      assistant(t("refLooksLikeName"), starterChips);
+      askToClarify(t("refLooksLikeName"));
     },
-    [assistant, auth?.workspaces, starterChips, t],
+    [assistant, askToClarify, auth?.workspaces, t, workspaceLabelOf],
   );
 
   /**
@@ -2144,6 +2855,14 @@ export function ConversationChat({
             ]);
             return;
           }
+          // Own work photos: the photo-led work log, where the photo belongs
+          // to an entry the person saves first (never a loose drop).
+          if (route.capability === "self_work_evidence") {
+            assistant(t("fileSelfWorkEvidence"), [
+              { id: "attach:photo", label: labels.chipAttachPhoto },
+            ]);
+            return;
+          }
           // The organization's PEOPLE go to the roster importer, which is
           // where a file of names can actually complete: parse → preview →
           // resolve → confirm → commit → receipt. Work EVIDENCE about those
@@ -2188,7 +2907,7 @@ export function ConversationChat({
         }
       }
     },
-    [assistant, educationWorkspace, identity, labels.chipCv, labels.documentsChip, labels.chipPeopleImport, starterChips, t],
+    [assistant, educationWorkspace, identity, labels.chipCv, labels.documentsChip, labels.chipPeopleImport, labels.chipAttachPhoto, starterChips, t],
   );
 
   /**
@@ -2216,18 +2935,18 @@ export function ConversationChat({
         );
         if (candidates.length === 1) {
           const only = candidates[0];
-          assistant(t("questionWorkspaceKnown", { name: only.name }), [
-            { id: `ws:${only.id}`, label: only.name },
+          assistant(t("questionWorkspaceKnown", { name: workspaceLabelOf(only) }), [
+            { id: `ws:${only.id}`, label: workspaceLabelOf(only) },
           ]);
           return;
         }
-        assistant(t("questionUnansweredAbout", { name: reference }), starterChips);
+        askToClarify(t("questionUnansweredAbout", { name: reference }));
         return;
       }
       void text;
-      assistant(t("questionUnanswered"), starterChips);
+      askToClarify(t("questionUnanswered"));
     },
-    [assistant, auth?.workspaces, starterChips, t],
+    [assistant, askToClarify, auth?.workspaces, t, workspaceLabelOf],
   );
 
   /**
@@ -2420,6 +3139,46 @@ export function ConversationChat({
    * up as a success, and the panel is re-opened on the project so the person
    * sees the roster that actually resulted.
    */
+  const offerKeep = useCallback(
+    (projectId: string, workerProfileId: string, data: Record<string, unknown> | undefined) => {
+      const chips = keepClashChips(projectId, workerProfileId, data, labels);
+      if (chips) assistant(labels.keepPrompt, chips);
+    },
+    [assistant, labels],
+  );
+
+  /** The decision itself: a fresh token, then the ONE dispatcher runs
+   *  `company.keep-assignment` (the page's keepAssignmentAction -> the one keep
+   *  core). FAIL-LOUD: "recorded" is said only when the server answered ok. */
+  const runKeepAssignment = useCallback(
+    (projectId: string, workerProfileId: string, reasonCode: OverrideReasonCode | null) => {
+      setTyping(true);
+      const input = reasonCode ? { projectId, workerProfileId, reasonCode } : { projectId, workerProfileId };
+      prepareConfirmationAction("company.keep-assignment", input)
+        .then((prep) => {
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
+            setTyping(false);
+            assistant(labels.keepFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.keep-assignment", input, {
+            locale,
+            confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
+          }).then((res) => {
+            if (answeredStaleContext(res)) return;
+            setTyping(false);
+            assistant(res.ok ? labels.keepRecorded : labels.keepFailed);
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.keepFailed);
+        });
+    },
+    [assistant, locale, labels.keepFailed, labels.keepRecorded, expectedWorkspaceId, answeredStaleContext],
+  );
+
   const runAssignWorker = useCallback(
     (projectId: string, workerProfileId: string) => {
       setTyping(true);
@@ -2434,7 +3193,9 @@ export function ConversationChat({
           return dispatchWorkerAction("company.assign-worker", input, {
             locale,
             confirmationToken: prep.token,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             assistant(
               res.ok
@@ -2443,6 +3204,8 @@ export function ConversationChat({
                     .join(" ")
                 : labels.assignFailed,
             );
+            // The clash was reported above; offer the knowing-keep decision.
+            if (res.ok) offerKeep(projectId, workerProfileId, res.data);
             // Re-open the project either way: after a success it shows the new
             // roster, and after a refusal it shows the state that refused.
             selectProjectRef.current(projectId);
@@ -2460,6 +3223,9 @@ export function ConversationChat({
       labels.assignFailed,
       labels.assignAlreadyCommitted,
       labels.assignCommitmentUnknown,
+      expectedWorkspaceId,
+      answeredStaleContext,
+      offerKeep,
     ],
   );
 
@@ -2481,7 +3247,9 @@ export function ConversationChat({
           return dispatchWorkerAction("company.respond-offer", input, {
             locale,
             confirmationToken: prep.token,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             assistant(
               res.ok ? (decision === "accepted" ? labels.offerAccepted : labels.offerDeclined) : labels.offerDecisionFailed,
@@ -2494,7 +3262,43 @@ export function ConversationChat({
           assistant(labels.offerDecisionFailed);
         });
     },
-    [assistant, locale, labels.offerAccepted, labels.offerDeclined, labels.offerDecisionFailed, labels.chipCandidates],
+    [assistant, locale, labels.offerAccepted, labels.offerDeclined, labels.offerDecisionFailed, labels.chipCandidates, expectedWorkspaceId, answeredStaleContext],
+  );
+
+  /** The receiver's answer to a brigade / company offer — the same confirmed
+   *  canonical action as the scouting page's buttons (2026-10-11). */
+  const runTeamOfferDecision = useCallback(
+    (offerId: string, decision: "accepted" | "declined") => {
+      setTyping(true);
+      const input = { offerId, decision };
+      prepareConfirmationAction("company.respond-team-offer", input)
+        .then((prep) => {
+          if (!prep.ok) {
+            setTyping(false);
+            assistant(labels.offerDecisionFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.respond-team-offer", input, {
+            locale,
+            confirmationToken: prep.token,
+            expectedWorkspaceId,
+          }).then((res) => {
+            if (answeredStaleContext(res)) return;
+            setTyping(false);
+            assistant(
+              res.ok ? (decision === "accepted" ? labels.teamOfferAgreed : labels.teamOfferDeclined) : labels.offerDecisionFailed,
+              res.ok && decision === "accepted"
+                ? [{ id: `team-offer-thread:${offerId}`, label: labels.chipTeamOfferThread }]
+                : [{ id: "candidates", label: labels.chipCandidates }],
+            );
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.offerDecisionFailed);
+        });
+    },
+    [assistant, locale, labels.teamOfferAgreed, labels.teamOfferDeclined, labels.offerDecisionFailed, labels.chipTeamOfferThread, labels.chipCandidates, expectedWorkspaceId, answeredStaleContext],
   );
 
   /**
@@ -2531,6 +3335,9 @@ export function ConversationChat({
           locale={locale}
           title={role ? `${who} · ${role}` : who}
           subtitle={[inv.projectTitle, inv.personalMessage].filter(Boolean).join(" · ") || null}
+          reviewNoticeText={
+            showsStaffReviewNotice(inv) ? tInvitePage("reviewNotice", { organization: inv.organizationName ?? "" }) : null
+          }
           labels={{
             accept: labels.invAccept,
             later: labels.invLater,
@@ -2547,7 +3354,7 @@ export function ConversationChat({
         />,
       );
     },
-    [pushEmbed, locale, labels, tRelationships],
+    [pushEmbed, locale, labels, tRelationships, tInvitePage],
   );
 
   /**
@@ -2565,6 +3372,8 @@ export function ConversationChat({
             locale={locale}
             title={o.title || bookingLabels.offerFrom}
             subtitle={o.subtitle}
+            proposerLine={o.proposerLine}
+            changedLine={o.changedLine}
             labels={bookingLabels}
           />,
         ),
@@ -2682,6 +3491,58 @@ export function ConversationChat({
         assistant(t("photosUnavailable"), chips);
       });
   }, [assistant, pushEmbed, locale, labels.navJournal, t]);
+  /**
+   * "KAS PASIKEITĖ?" (Future Experience A, owner 2026-10-14) — the ONE
+   * consequence trace read back in the thread: what the person did → what
+   * changed → what it opened, worded by the same function the home uses.
+   * Honest states: `none` = the reads answered and nothing changed in the
+   * window; `unknown` / a thrown read = could not check (never "nothing").
+   */
+  const startWhatChanged = useCallback(() => {
+    setTyping(true);
+    const chips = [{ id: "link:/dashboard/journal#journal-entries", label: labels.navJournal }];
+    readWhatChangedForChat({ locale })
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "unknown") {
+          assistant(t("whatChangedUnavailable"), chips);
+          return;
+        }
+        if (res.kind === "none") {
+          assistant(res.partial ? `${t("whatChangedNone")} ${res.partial}` : t("whatChangedNone"), chips);
+          return;
+        }
+        assistant(t("whatChangedIntro", { count: res.items.length }), chips);
+        pushEmbed(<ChatTraceStrip items={res.items} partial={res.partial} />);
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(t("whatChangedUnavailable"), chips);
+      });
+  }, [assistant, pushEmbed, locale, labels.navJournal, t]);
+  /**
+   * "KAS MATO MANO PROFILĮ?" (capability matrix P0, 2026-09-23) — the state,
+   * read and said first (on / off / unknown), then the EXISTING consent
+   * inline. The sentence writes nothing; the consent's own equal buttons do.
+   * Unknown embeds nothing (its choice screen would claim "not visible").
+   */
+  const startEmployerVisibility = useCallback(() => {
+    setTyping(true);
+    loadEmployerVisibilityForChat()
+      .then((res) => {
+        setTyping(false);
+        assistant(res.line, [{ id: `link:${EMPLOYER_VISIBILITY_HREF}`, label: res.chipLabel }]);
+        if (res.kind === "state" && res.consent) {
+          pushEmbed(<DiscoverabilityConsent locale={locale} source="conversation" {...res.consent} />);
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(t("visibilityUnavailable"), [
+          { id: `link:${EMPLOYER_VISIBILITY_HREF}`, label: t("chipVisibility") },
+        ]);
+      });
+  }, [assistant, pushEmbed, locale, t]);
   const startMessages = useCallback(() => {
     setTyping(true);
     loadMessagesForChat()
@@ -2705,17 +3566,40 @@ export function ConversationChat({
   }, [assistant, pushEmbed, locale, labels.navMessages, labels.messagesHint]);
 
   /**
-   * What a file the person attaches would be FOR, based on what the
-   * conversation is currently doing. Set when a flow that owns files opens —
-   * never guessed from a file name (a photo called `cv.jpg` is still a photo).
-   * `null` = we genuinely do not know, and the paperclip asks instead of
-   * choosing for them.
+   * THE OPEN ATTACH TARGETS (owner P0 2026-09-23, CASE 6). This used to be a
+   * STICKY `"worklog" | "cv" | null`, set whenever such a flow opened and
+   * never reset — so after any work-log form, even a cancelled or saved one,
+   * every paperclip click pushed another independently savable form. A
+   * target now lives exactly as long as the flow that registered it (see
+   * `attach-sink.ts`); the file's purpose is still never guessed from its
+   * name (a photo called `cv.jpg` is a photo).
    */
-  const attachContextRef = useRef<"worklog" | "cv" | null>(null);
+  const attachSinksRef = useRef(createAttachSinkStack());
+  /** THE ONE PENDING ATTACHMENT: picked, shown in the composer, not yet
+   *  routed. It exists only in this tab until a flow's own confirm. */
+  const [pendingAttachment, setPendingAttachment] = useState<File | null>(null);
+  const pendingAttachmentRef = useRef<File | null>(null);
+  /** The message id of the ONE open "what is this file for?" question. */
+  const attachQuestionRef = useRef<string | null>(null);
+  /** The answers that question offered, indexed by its chips. */
+  const attachAnswersRef = useRef<readonly AttachAnswer[]>([]);
+  /** Bumped per question: a chip from an older question answers nothing. */
+  const attachSeqRef = useRef(0);
+  /** Late-bound, like handleChipRef: the chip handler is defined above the
+   *  attach resolver it calls. */
+  const attachChoiceRef = useRef<(chip: ChoiceChip) => void>(() => {});
 
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
-    (text: string, opts?: { photoFirst?: boolean; explicit?: boolean }) => {
+    (
+      text: string,
+      opts?: {
+        photoFirst?: boolean;
+        explicit?: boolean;
+        file?: File;
+        voice?: { language: string; disclosureVersion: string };
+      },
+    ) => {
       // ASK -> PREFILL -> THE EXISTING SAVE FLOW.
       //
       // When a work-evidence conversation is in flight, the form opens filled
@@ -2762,28 +3646,43 @@ export function ConversationChat({
       // THE REQUEST IS NOT THE WORK (production 2026-09-06): "Užpildyk darbo
       // žurnalą" opened the flow with the request sentence as the entry's
       // evidence, and two taps later it was persisted as `original_text`.
-      // A sentence with no work content (no time span, no place, no
-      // recognised activity — `journalDraftReadiness`, the same rule the
-      // flow and the schema apply) opens the flow with the evidence field
-      // EMPTY and asks what was done. The flow's own guard and the server
-      // schema refuse to save such a sentence even if it is typed back in.
-      const readiness = journalDraftReadiness(text);
-      const carriesWork = readiness === "ok";
-      if (opts?.explicit && text.trim() !== "" && !carriesWork) {
+      // Such a META REQUEST opens the flow with the evidence field EMPTY and
+      // asks what was done; the server schema refuses it even if typed back.
+      //
+      // Judged on the DRAFT, and blanked ONLY for a meta request (owner P0
+      // 2026-09-23). It used to be judged on the raw `text` and blanked for
+      // anything short of "ok": a chip or paperclip open (text "") threw away
+      // the notes the evidence goal had composed from everything the person
+      // said, and "Šiandien buvau objekte" arrived as an empty field — text
+      // the server would have taken, gone before the person saw it.
+      const readiness = journalDraftReadiness(draft.notes);
+      const isRequest = readiness === "meta-request";
+      if (isRequest) {
         assistant(t("journalAskWhatYouDid"));
       }
-      attachContextRef.current = "worklog";
       pushEmbed(
         <WorkerWorkLogFlow
-          draft={carriesWork ? draft : { ...draft, notes: "" }}
+          draft={isRequest ? { ...draft, notes: "" } : draft}
           locale={locale}
           labels={workLogLabels}
           photoFirst={opts?.photoFirst ?? false}
+          initialFile={opts?.file ?? null}
+          voice={
+            opts?.voice ??
+            (turnOriginRef.current === "voice" ? (voiceProvenanceRef.current ?? undefined) : undefined)
+          }
+          onRegisterAttachSink={attachSinksRef.current.register}
           // After a work log lands, the person SEES their card change
           // (owner audit §5.1 "matoma po darbo įrašo atnaujinimo"): the
           // canonical Player Card re-renders with the just-strengthened
           // record — the real payoff of logging work, not a generic menu.
           onClose={() => startPlayerCardRef.current({ intro: labels.playerCardAfterLog })}
+          // The entry exists now: the work-log goal is finished. A later
+          // "ne 5, o 6" is a correction of THIS entry (correct-work), not a
+          // continuation that would open a second one (2026-09-29).
+          onSaved={() => {
+            if (goalRef.current?.intent === "log-work") goalRef.current = null;
+          }}
         />,
       );
     },
@@ -2848,11 +3747,15 @@ export function ConversationChat({
     } catch {
       draft = null;
     }
-    const text = (draft ?? "").trim();
-    if (!text) return;
+    const handoff = decodeVoiceHandoff(draft);
+    const text = handoff?.text ?? "";
+    if (!handoff || !text) return;
     voiceDraftConsumedRef.current = true;
     user(text);
-    startWorkLog(text);
+    // The provenance rides with the work-log flow's ONE save; it is a label on
+    // the record, not a second path (the dispatcher, confirmation and
+    // createJournalEntry are unchanged).
+    startWorkLog(text, { voice: { language: handoff.language, disclosureVersion: handoff.disclosureVersion } });
   }, [auth?.profile, identity, user, startWorkLog]);
 
   /**
@@ -2937,8 +3840,8 @@ export function ConversationChat({
       (auth?.workspaces ?? [])
         .filter((w) => w.kind === "organization")
         .slice(0, 3)
-        .map((w) => ({ id: `ws:${w.id}`, label: w.name })),
-    [auth?.workspaces],
+        .map((w) => ({ id: `ws:${w.id}`, label: workspaceLabelOf(w) })),
+    [auth?.workspaces, workspaceLabelOf],
   );
 
   const openProposeForm = useCallback(
@@ -3003,8 +3906,20 @@ export function ConversationChat({
             ]);
             return;
           }
+          // THE CLIENTS THEMSELVES first (AGENCY loop walk 2026-09-29): the
+          // partners page lists each connection by its invited address and
+          // status; the chat says the same before the needs.
+          const clientsLine =
+            res.connections.length > 0
+              ? labels.agencyClientsLine.replace(
+                  "{list}",
+                  res.connections
+                    .map((c) => `${c.invitedEmail} (${c.status === "active" ? labels.agencyClientActive : labels.agencyClientPending})`)
+                    .join(", "),
+                )
+              : null;
           if (res.shared.length === 0) {
-            assistant(labels.agencyClientDemandNone, [
+            assistant([clientsLine, labels.agencyClientDemandNone].filter(Boolean).join("\n"), [
               { id: "f:agency.invite-client", label: labels.chipInviteClient },
               { id: "agency:progress", label: labels.chipProposalStatus },
             ]);
@@ -3016,7 +3931,7 @@ export function ConversationChat({
           }
           const lines = res.shared.map((r) => `• ${r.title}`);
           assistant(
-            [mode === "propose" ? labels.agencyProposeAsk : labels.agencyClientDemandIntro, ...lines].join("\n"),
+            [...(mode === "propose" || !clientsLine ? [] : [clientsLine]), mode === "propose" ? labels.agencyProposeAsk : labels.agencyClientDemandIntro, ...lines].join("\n"),
             res.shared.slice(0, 3).map((r) => ({
               id: `agency-propose:${r.shareId}`,
               label: `${labels.chipProposeFor}: ${r.title}`,
@@ -3068,12 +3983,14 @@ export function ConversationChat({
         return;
       }
       const city = structureValueStatement(sentence).city ?? "";
+      const title = projectTitleFromSentence(sentence) ?? "";
+      const prefill = { ...(title ? { title } : {}), ...(city ? { city } : {}) };
       assistant(labels.projectCreateIntro);
       openForm(
         "company.create-project",
         undefined,
         undefined,
-        city ? { city } : undefined,
+        title || city ? prefill : undefined,
         // PROJECT AFTER CREATION (owner contract §11 seed): the new project
         // opens in the panel — its real (empty) roster and the assignment
         // controls — so people are assigned right where the project was
@@ -3110,7 +4027,9 @@ export function ConversationChat({
           return dispatchWorkerAction("company.update-stage-status", input, {
             locale,
             confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             assistant(
               res.ok
@@ -3129,7 +4048,7 @@ export function ConversationChat({
           assistant(labels.stageFailed);
         });
     },
-    [assistant, locale, labels.stageDone, labels.stageBlocked, labels.stageStarted, labels.stageFailed],
+    [assistant, locale, labels.stageDone, labels.stageBlocked, labels.stageStarted, labels.stageFailed, expectedWorkspaceId, answeredStaleContext],
   );
 
   /** §11 WHAT-IF (owner contract 2026-09-04): the consequences of moving ONE
@@ -3188,7 +4107,9 @@ export function ConversationChat({
           return dispatchWorkerAction("company.move-worker", input, {
             locale,
             confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             if (!res.ok) {
               assistant(labels.moveFailed);
@@ -3196,6 +4117,7 @@ export function ConversationChat({
             }
             const ended = (res.data as { ended?: boolean } | undefined)?.ended === true;
             assistant(ended ? t("moveDone") : t("moveDonePartial"));
+            offerKeep(toProjectId, workerProfileId, res.data);
             selectProjectRef.current(toProjectId);
           });
         })
@@ -3204,7 +4126,7 @@ export function ConversationChat({
           assistant(labels.moveFailed);
         });
     },
-    [assistant, locale, t, labels.moveFailed],
+    [assistant, locale, t, labels.moveFailed, expectedWorkspaceId, answeredStaleContext, offerKeep],
   );
 
   /** "perkelk Joną į projektą Y": the person and the destination are
@@ -3287,7 +4209,8 @@ export function ConversationChat({
             assistant(labels.bridgeActionFailed);
             return;
           }
-          return dispatchWorkerAction(actionId, input, { locale, confirmationToken: prep.token }).then((res) => {
+          return dispatchWorkerAction(actionId, input, { locale, confirmationToken: prep.token, expectedWorkspaceId }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             assistant(res.ok ? done : labels.bridgeActionFailed, [
               { id: "link:/dashboard/company/partners", label: labels.chipCompanyHub },
@@ -3299,7 +4222,7 @@ export function ConversationChat({
           assistant(labels.bridgeActionFailed);
         });
     },
-    [assistant, locale, labels.bridgeActionFailed, labels.chipCompanyHub],
+    [assistant, locale, labels.bridgeActionFailed, labels.chipCompanyHub, expectedWorkspaceId, answeredStaleContext],
   );
 
   const startClientBridge = useCallback(() => {
@@ -3367,18 +4290,40 @@ export function ConversationChat({
           assistant(labels.agencyUnavailable, [{ id: "candidates", label: labels.chipCandidates }]);
           return;
         }
-        if (res.offers.length === 0) {
-          assistant(labels.clientOffersNone, [{ id: "candidates", label: labels.chipCandidates }]);
+        if (res.offers.length === 0 && res.teamOffers.length === 0) {
+          assistant(labels.clientOffersNone, [
+            { id: "candidates", label: labels.chipCandidates },
+            { id: "team-offer-mine", label: labels.chipOfferOurs },
+          ]);
           return;
         }
         const lines = res.offers.map((o) => `• ${o.demandTitle} — ${o.agencyName}${o.note ? ` · ${o.note}` : ""}`);
-        assistant(
-          [labels.clientOffersIntro, ...lines].join("\n"),
-          res.offers.slice(0, 3).flatMap((o) => [
+        // Brigades / companies offered against the same needs (2026-10-11):
+        // team-level only. Agreeing is agreed in principle; "write" opens the
+        // negotiation thread with the person who made the offer.
+        const teamLines = res.teamOffers.map(
+          (o) =>
+            `• ${o.demandTitle} — ${o.teamName}${o.status === "offered" ? "" : ` · ${labels.teamOfferStatusAgreed}`}`,
+        );
+        const text = [
+          ...(lines.length > 0 ? [labels.clientOffersIntro, ...lines] : []),
+          ...(teamLines.length > 0 ? [labels.teamOffersIntro, ...teamLines] : []),
+        ].join("\n");
+        assistant(text, [
+          ...res.offers.slice(0, 3).flatMap((o) => [
             { id: `offer-accept:${o.offerId}`, label: `${labels.chipOfferAccept}: ${o.demandTitle}` },
             { id: `offer-decline:${o.offerId}`, label: `${labels.chipOfferDecline}: ${o.demandTitle}` },
           ]),
-        );
+          ...res.teamOffers.slice(0, 3).flatMap((o) => [
+            ...(o.status === "offered"
+              ? [
+                  { id: `team-offer-agree:${o.offerId}`, label: `${labels.chipTeamOfferAgree}: ${o.teamName}` },
+                  { id: `team-offer-decline:${o.offerId}`, label: `${labels.chipOfferDecline}: ${o.teamName}` },
+                ]
+              : []),
+            { id: `team-offer-thread:${o.offerId}:${o.requestId}`, label: `${labels.chipTeamOfferThread}: ${o.teamName}` },
+          ]),
+        ]);
       })
       .catch(() => {
         setTyping(false);
@@ -3391,8 +4336,86 @@ export function ConversationChat({
    *  turn; what the sentence said (type, valid-until) pre-fills it — visible,
    *  editable, confirmed. After the save the readiness answer re-runs, so the
    *  person sees the gap close (or not). Person identity only. */
+  /**
+   * ONE GROUPED CONFIRMATION, not four forms (owner P0 2026-09-22 §1).
+   *
+   * Every row shows the person's OWN words — `statedAs` — rather than a
+   * catalogue label they did not use. That is provenance, it is locale-neutral,
+   * and it cannot put a word in their mouth. The canonical slug rides along for
+   * the write; it is never what the sentence claims to have understood.
+   *
+   * NOTHING IS PERSISTED HERE. The chips open the EXISTING canonical surfaces
+   * — the profile (where `profile_skill_claims` are confirmed and saved as
+   * `self_declared`), the work-history form, and the SAME `add-document:<type>`
+   * chip the projects answer already uses. No second store, no second write.
+   *
+   * THE CREDENTIAL IS A CLAIM. Its line says so in words: until the document
+   * is added it stays self-declared, not a verified qualification. The owner's
+   * rule, on the one screen where a person might otherwise believe otherwise.
+   */
+  const presentCompoundStatement = useCallback(
+    (reading: ReturnType<typeof readCompoundStatement>) => {
+      const lines: string[] = [t("compoundStatement.intro")];
+      const chips: ChoiceChip[] = [];
+      let credentialSlug: string | null = null;
+
+      for (const fact of reading.facts) {
+        if (fact.kind === "experience") {
+          lines.push(
+            t("compoundStatement.lineExperience", {
+              value: fact.statedAs,
+              years: fact.years ?? 0,
+            }),
+          );
+          continue;
+        }
+        if (fact.kind === "credential") {
+          credentialSlug = fact.canonicalSlug;
+          lines.push(t("compoundStatement.lineCredential"));
+          continue;
+        }
+        lines.push(
+          t(
+            fact.kind === "profession"
+              ? "compoundStatement.lineProfession"
+              : "compoundStatement.lineSkill",
+            { value: fact.statedAs },
+          ),
+        );
+      }
+
+      // The honesty footer applies to EVERY row, not only the credential.
+      lines.push(t("compoundStatement.selfDeclared"));
+
+      const kinds = new Set(reading.facts.map((f) => f.kind));
+      if (kinds.has("profession") || kinds.has("skill")) {
+        chips.push({ id: "link:/dashboard/profile", label: t("compoundStatement.chipProfile") });
+      }
+      if (kinds.has("experience")) {
+        chips.push({ id: "f:worker.add-work-history", label: t("compoundStatement.chipExperience") });
+      }
+      if (credentialSlug) {
+        // The EXISTING chip format: `add-document:<type>` opens the one
+        // document flow with the type already chosen.
+        chips.push({
+          id: `add-document:${credentialSlug}`,
+          label: t("compoundStatement.chipDocument"),
+        });
+      }
+
+      assistant(lines.join("\n"), chips.length > 0 ? chips : undefined);
+    },
+    [assistant, t],
+  );
+
   const startAddDocument = useCallback(
-    (sentence: string, explicit?: { typeSlug?: string; thenReply?: ChatInboxThread }) => {
+    (
+      sentence: string,
+      // `file`: the paperclip file the person said is this document. It goes
+      // into the file embed of the record this form creates — never uploaded
+      // before that record exists and the person presses the embed's submit.
+      explicit?: { typeSlug?: string; thenReply?: ChatInboxThread; file?: File },
+    ) => {
       if (identity !== "person") {
         assistant(labels.adminRouteHint, [{ id: "link:/dashboard/documents", label: labels.documentsChip }]);
         return;
@@ -3440,13 +4463,20 @@ export function ConversationChat({
                 runWorkflow(() => runDocumentsReadiness());
                 offerInstructionReply();
               };
+              // A handed-over file with no file layer to take it is said out
+              // loud — never silently dropped behind "document recorded".
+              const sayFileNotAttached = () => {
+                if (explicit?.file) assistant(labels.documentFileFailed);
+              };
               if (savedSlug === "") {
+                sayFileNotAttached();
                 finishWithReadiness();
                 return;
               }
               loadDocumentFileTargetForChat({ typeSlug: savedSlug, country: savedCountry })
                 .then((target) => {
                   if (target.kind !== "ready") {
+                    sayFileNotAttached();
                     finishWithReadiness();
                     return;
                   }
@@ -3469,10 +4499,15 @@ export function ConversationChat({
                         offerInstructionReply();
                       }}
                       onSkip={finishWithReadiness}
+                      initialFile={explicit?.file ?? null}
+                      onRegisterAttachSink={attachSinksRef.current.register}
                     />,
                   );
                 })
-                .catch(() => finishWithReadiness());
+                .catch(() => {
+                  sayFileNotAttached();
+                  finishWithReadiness();
+                });
             },
           );
         })
@@ -3506,8 +4541,9 @@ export function ConversationChat({
           // the deadline the sentence stated is its own field — not a title tail
           const rawTitle = colon >= 0 ? sentence.slice(colon + 1).trim() : "";
           const title = dueDate ? stripEndDatePhrase(rawTitle) : rawTitle;
-          const lower = sentence.toLowerCase();
-          const named = projects.find((p) => p.label.length >= 4 && lower.includes(p.label.toLowerCase()));
+          // The project the sentence NAMES — by its core words, only when
+          // exactly one matches (2026-09-29: the whole stored title was required).
+          const named = projectNamedInSentence(sentence, projects);
           const prefill: Record<string, string> = {};
           if (title) prefill.title = title.slice(0, 160);
           if (dueDate) prefill.dueDate = dueDate;
@@ -3626,7 +4662,9 @@ export function ConversationChat({
           return dispatchWorkerAction(actionId, input, {
             locale,
             confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             if (!res.ok) {
               assistant(labels.confirmFailed);
@@ -3642,7 +4680,7 @@ export function ConversationChat({
           assistant(labels.confirmFailed);
         });
     },
-    [assistant, locale, labels.confirmFailed, startConfirmWork],
+    [assistant, locale, labels.confirmFailed, startConfirmWork, expectedWorkspaceId, answeredStaleContext],
   );
 
   const lastReadinessRef = useRef<Extract<ProjectReadinessChatResult, { kind: "ok" }> | null>(null);
@@ -3755,7 +4793,9 @@ export function ConversationChat({
           return dispatchWorkerAction(actionId, input, {
             locale,
             confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             if (!res.ok) {
               assistant(labels.readinessWriteFailed);
@@ -3772,7 +4812,7 @@ export function ConversationChat({
           assistant(labels.readinessWriteFailed);
         });
     },
-    [assistant, locale, labels.readinessWriteFailed, runProjectReadiness],
+    [assistant, locale, labels.readinessWriteFailed, runProjectReadiness, expectedWorkspaceId, answeredStaleContext],
   );
 
   const startProjectReadiness = useCallback(
@@ -3810,7 +4850,9 @@ export function ConversationChat({
           return dispatchWorkerAction("company.update-task-status", input, {
             locale,
             confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
           }).then((res) => {
+            if (answeredStaleContext(res)) return;
             setTyping(false);
             if (!res.ok) {
               assistant(labels.taskFailed);
@@ -3830,7 +4872,7 @@ export function ConversationChat({
           assistant(labels.taskFailed);
         });
     },
-    [assistant, identity, locale, labels.taskDone, labels.taskBlocked, labels.taskStarted, labels.taskFailed, labels.chipLogWork],
+    [assistant, identity, locale, labels.taskDone, labels.taskBlocked, labels.taskStarted, labels.taskFailed, labels.chipLogWork, expectedWorkspaceId, answeredStaleContext],
   );
 
   /** "Užduotis sumontuoti pastolius atlikta" — the status the sentence names,
@@ -3840,11 +4882,14 @@ export function ConversationChat({
   const startTaskStatus = useCallback(
     (sentence: string) => {
       const lower = sentence.toLowerCase();
-      const status: WorkTaskStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял|zablok/.test(lower)
-        ? "blocked"
-        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|rozpocz/.test(lower)
-          ? "in_progress"
-          : "done";
+      // The state the sentence SAYS — never a default. A sentence that names a
+      // task and states no state ("Was ist mit der Aufgabe Malen?") writes
+      // nothing: it used to be recorded as done.
+      const status: WorkTaskStatus | null = readStatedProgress(sentence, "task");
+      if (status === null) {
+        assistant(fallbackText, starterChips);
+        return;
+      }
       setTyping(true);
       loadOpenTasksForChat()
         .then((res) => {
@@ -3873,7 +4918,7 @@ export function ConversationChat({
           assistant(labels.taskUnavailable);
         });
     },
-    [identity, assistant, labels, runTaskStatus],
+    [identity, assistant, labels, runTaskStatus, fallbackText, starterChips],
   );
 
   /** "Kuris projektas rizikoje?" (§11 / §16): every live project with the SAME
@@ -3931,14 +4976,17 @@ export function ConversationChat({
       });
   }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
 
-  const startWhoAvailable = useCallback(() => {
+  const startWhoAvailable = useCallback((sentence = "") => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
       else assistant(fallbackText, starterChips);
       return;
     }
     setTyping(true);
-    loadWhoIsAvailableForChat()
+    // The day the sentence named ("pirmadienį", "rytoj", an ISO date) narrows the
+    // ONE availability read to that day; no day named keeps the default window.
+    const day = readAvailabilityDay(sentence, todayIso());
+    loadWhoIsAvailableForChat(undefined, day)
       .then((res) => {
         setTyping(false);
         if (res.kind === "empty") {
@@ -3959,13 +5007,26 @@ export function ConversationChat({
           if (r.state === "unavailable") {
             return `• ${r.label} — ${labels.capacityBusyUntil.replace("{date}", until)}`;
           }
+          // An assignment nobody dated: the work is named, the END is not
+          // invented (SEP-7) — `until` would otherwise fall back to the
+          // window's last day and read as a fact.
+          if (r.undated) {
+            const undatedText = r.committedTo
+              ? labels.capacityCommittedUndated.replace("{what}", r.committedTo)
+              : labels.capacityCommittedUndated.replace(/^[^,]*,\s*/, "");
+            return `• ${r.label} — ${undatedText}`;
+          }
           // A real title when the source carries one, the plain phrasing when
           // it does not — never an invented name for the work.
           return r.committedTo
             ? `• ${r.label} — ${labels.capacityCommittedToUntil.replace("{what}", r.committedTo).replace("{date}", until)}`
             : `• ${r.label} — ${labels.capacityCommittedUntil.replace("{date}", until)}`;
         });
-        const head = labels.capacityIntro.replace("{from}", res.from).replace("{to}", res.to).replace("{count}", String(res.rosterTotal));
+        const head = labels.capacityIntro
+          .replace("{from} – {to}", res.from === res.to ? res.from : "{from} – {to}")
+          .replace("{from}", res.from)
+          .replace("{to}", res.to)
+          .replace("{count}", String(res.rosterTotal));
         // An input that did not answer is named. Production carried ZERO
         // absence rows and three real commitments, so "everybody is free" was
         // once produced entirely from signals nobody had checked.
@@ -3995,11 +5056,13 @@ export function ConversationChat({
         return;
       }
       const lower = sentence.toLowerCase();
-      const status: StageStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял/.test(lower)
-        ? "blocked"
-        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал/.test(lower)
-          ? "in_progress"
-          : "done";
+      // The state the sentence SAYS — never a default. "Erkläre die Etappe
+      // Fundament" is a question; a stage is not marked done by one.
+      const status: StageStatus | null = readStatedProgress(sentence, "stage");
+      if (status === null) {
+        assistant(fallbackText, [{ id: "projects", label: labels.chipProjects }]);
+        return;
+      }
       setTyping(true);
       loadCompanyStagesForChat()
         .then((res) => {
@@ -4245,6 +5308,14 @@ export function ConversationChat({
               assistant(labels.eduAssignNoCohort, [{ id: "edu:cohort", label: labels.chipCreateCohort }]);
               return;
             }
+            // J-12: only the institution's own owner/admin/manager changes
+            // membership — say so instead of "no learners yet".
+            if (!res.membersVisible) {
+              assistant(labels.eduMembersNotForRole, [
+                { id: "link:/dashboard/company/education#institution-programs-title", label: labels.chipProgrammes },
+              ]);
+              return;
+            }
             if (res.assignable.length === 0) {
               assistant(labels.eduAssignNoLearners, [
                 { id: "f:company.invite-learner", label: labels.chipInviteStudent },
@@ -4373,7 +5444,7 @@ export function ConversationChat({
       if (id.startsWith("pin:")) {
         const ref = id.slice(4);
         const label = pinLabelFor(ref);
-        void pinAction({ ref, label }).then((r) => {
+        void pinAction({ ref, label, expectedWorkspaceId }).then((r) => {
           if (r.ok) {
             setPinned((prev) =>
               prev.some((p) => p.ref === ref) ? prev : [...prev, { ref, kind: "action", label, position: prev.length }],
@@ -4395,7 +5466,7 @@ export function ConversationChat({
         const ref = id.slice(10);
         const next = [...pinned.filter((p) => p.ref === ref), ...pinned.filter((p) => p.ref !== ref)];
         if (next.length === 0 || next[0]?.ref !== ref) return true;
-        void reorderPinsAction({ refs: next.map((p) => p.ref) }).then((r) => {
+        void reorderPinsAction({ refs: next.map((p) => p.ref), expectedWorkspaceId }).then((r) => {
           if (r.ok) {
             setPinned(next.map((p, i) => ({ ...p, position: i })));
             assistant(labels.reorderDone.replace("{label}", next[0]?.label ?? pinLabelFor(ref)));
@@ -4407,7 +5478,7 @@ export function ConversationChat({
       }
       if (id.startsWith("unpin:")) {
         const ref = id.slice(6);
-        void unpinAction({ ref }).then((r) => {
+        void unpinAction({ ref, expectedWorkspaceId }).then((r) => {
           if (r.ok) {
             setPinned((prev) => prev.filter((p) => p.ref !== ref));
             assistant(labels.unpinDone);
@@ -4431,7 +5502,7 @@ export function ConversationChat({
       }
       return false;
     },
-    [pinned, pinLabelFor, assistant, labels],
+    [pinned, pinLabelFor, assistant, labels, expectedWorkspaceId],
   );
 
   const handleChipRef = useRef<(chip: ChoiceChip) => void>(() => {});
@@ -4440,7 +5511,64 @@ export function ConversationChat({
     (chip: ChoiceChip) => {
       if (runPinChip(chip.id)) return;
       noteUsage(chip.id, chip.label);
+      // A "describe a need" door was tapped — the starter chip, the follow-up
+      // after a saved need, or the employer bridge's link to the Needs door.
+      // Same event and the same bounded surface as every other need door
+      // (`lib/company/need-door.ts`); the form's own view is counted in
+      // `openForm`.
+      if (chip.id.split("?")[0] === "f:company.create-demand" || chip.id === `link:${NEED_DOOR_HREF}`) {
+        trackFunnel(FUNNEL_EVENTS.companyDemandActionClicked, {
+          surface: "chat",
+          role_context: "company",
+        });
+      }
+      // PERSONAL ACTS ARE NOT COMPANY ACTS (owner 2026-10-01). The CV, the
+      // personal profile and the person's own work log belong to the PERSON;
+      // in a company workspace the chip says so and offers the personal space
+      // (the same membership-validated `ws:` switch) instead of running the
+      // person's flow on the company's behalf. Same rule the job search has.
+      if (identity === "company" && (chip.id === "logwork" || chip.id === "cv" || chip.id === "profile")) {
+        const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+        user(chip.label);
+        assistant(
+          t("personalOnlyInCompany"),
+          personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+        );
+        return;
+      }
+      // An answer to "what is this file for?" (per-question ids, never a
+      // pinnable ref, so noteUsage above records nothing for it).
+      if (chip.id.startsWith("attach-file:")) {
+        attachChoiceRef.current(chip);
+        return;
+      }
+      // The next step of a plan the person's own sentence asked for. Runs the
+      // SAME handler that sentence would have run; a write step only opens
+      // its confirm card.
+      if (chip.id.startsWith("plan-step:")) {
+        const plan = planRef.current;
+        const next = plan?.steps[0];
+        if (!plan || !next || `plan-step:${next.intent}` !== chip.id) return;
+        user(chip.label);
+        const rest = plan.steps.slice(1);
+        planRef.current = rest.length > 0 ? { ...plan, steps: rest } : null;
+        plan.run(next.intent);
+        if (rest.length > 0) {
+          const n = plan.total - rest.length + 1;
+          assistant(t("planNextOffer"), [
+            { id: `plan-step:${rest[0].intent}`, label: rest[0].label ?? t("planStep", { n, count: plan.total }) },
+          ]);
+        }
+        return;
+      }
       switch (chip.id) {
+        case "capabilities":
+          // The ONE door a not-understood answer offers ("Ką galiu čia
+          // daryti?") — the SAME answer the sentence reaches, read from the
+          // active context at the moment it is tapped.
+          user(chip.label);
+          startCapabilities();
+          return;
         case "agency-offers":
           // The attention chip ("N agentūros pasiūlymai laukia…") — the SAME
           // in-chat offers answer the sentence runs.
@@ -4501,20 +5629,23 @@ export function ConversationChat({
           break;
         case "cv":
           user(labels.userCv);
-          attachContextRef.current = "cv";
           // CV import ends with the refreshed REAL profile state, so the user
-          // sees what the import actually changed.
-          withTyping(() => pushEmbed(<WorkerCvFlow onClose={() => startProfileSummaryRef.current("profile")} />));
+          // sees what the import actually changed. While open, it is where a
+          // paperclip CV goes — this flow, not a second one.
+          withTyping(() =>
+            pushEmbed(
+              <WorkerCvFlow
+                onClose={() => startProfileSummaryRef.current("profile")}
+                onRegisterAttachSink={attachSinksRef.current.register}
+              />,
+            ),
+          );
           break;
-        // The two answers to "what is this file for?" — reached only from the
-        // attach choice below, so they are a one-off pair, not a standing CTA
-        // row under every message.
+        // The typed "čia mano darbo nuotrauka" door (fileSelfWorkEvidence):
+        // the photo-led work log, whose own photo field takes the file.
         case "attach:photo":
           user(labels.userAttachPhoto);
           withTyping(() => startWorkLog("", { photoFirst: true }));
-          break;
-        case "attach:cv":
-          handleChipRef.current({ id: "cv", label: "" });
           break;
         case "profile":
           user(labels.userProfile);
@@ -4578,6 +5709,45 @@ export function ConversationChat({
           runAgencyRead("progress");
           break;
         default:
+          if (chip.id.startsWith("skill:save:")) {
+            user(chip.label);
+            const phrase = decodeURIComponent(chip.id.slice("skill:save:".length));
+            setTyping(true);
+            saveStatedSkillAction(phrase)
+              .then((res) => {
+                setTyping(false);
+                if (!res.ok || !res.saved) {
+                  assistant(t("skillStatement.failed"));
+                  return;
+                }
+                assistant(
+                  [
+                    t("skillStatement.saved", { phrase }),
+                    res.promoted > 0 || res.alreadySaved > 0
+                      ? t("skillStatement.linked")
+                      : res.outsideDirections > 0
+                        ? t("skillStatement.outsideDirections")
+                        : t("skillStatement.wordsOnly"),
+                  ].join("\n"),
+                  [{ id: "profile", label: labels.chipProfile }],
+                );
+              })
+              .catch(() => {
+                setTyping(false);
+                assistant(t("skillStatement.failed"));
+              });
+            break;
+          }
+          if (chip.id.startsWith("prof:")) {
+            user(chip.label);
+            runProfessionSave(chip.id);
+            break;
+          }
+          if (chip.id.startsWith("profask:")) {
+            user(chip.label);
+            offerProfessionSaveRef.current(decodeURIComponent(chip.id.slice("profask:".length)));
+            break;
+          }
           if (chip.id === "edu:create" || chip.id === "edu:cohort" || chip.id === "edu:assign") {
             runEducationProgrammes(chip.id.slice(4) as "create" | "cohort" | "assign");
             break;
@@ -4591,6 +5761,15 @@ export function ConversationChat({
             // real rows the server re-verifies; the chip grants nothing.
             const [pid, wid] = chip.id.slice(7).split(":");
             if (pid && wid) runAssignWorker(pid, wid);
+          } else if (chip.id.startsWith("keep:")) {
+            // J-TIME-FREEDOM — `keep:<projectId>:<workerProfileId>:<reason|none>`.
+            // The reason must be one of the CLOSED codes; the server recomputes
+            // the collisions and re-checks authority. A chip grants nothing.
+            const [pid, wid, reason] = chip.id.slice(5).split(":");
+            const code = (OVERRIDE_REASON_CODES as readonly string[]).includes(reason ?? "")
+              ? (reason as OverrideReasonCode)
+              : null;
+            if (pid && wid && (code || reason === "none")) runKeepAssignment(pid, wid, code);
           } else if (chip.id.startsWith("project:")) {
             // W11 — the project-bound handoff, same shape as `demand:`.
             selectProjectRef.current(chip.id.slice(8));
@@ -4607,6 +5786,13 @@ export function ConversationChat({
             // completion, the subject and duplicate state before any form
             // exists. A chip is a request to look, never a permission.
             selectInteractionRef.current(chip.id.slice(3));
+          } else if (chip.id === "ctx:refresh") {
+            // A write was refused as `stale_context`: the workspace changed
+            // elsewhere. Re-reading the server state re-renders the page for
+            // the workspace that is REALLY active, and the page's key on it
+            // mounts a fresh conversation there — nothing is retried blindly.
+            user(chip.label);
+            router.refresh();
           } else if (chip.id.startsWith("ws:")) {
             // Context-switch chip (gap G1) — carries ONLY the workspace id;
             // membership is re-validated server-side, the chip grants nothing.
@@ -4616,6 +5802,23 @@ export function ConversationChat({
             if (target) {
               user(chip.label);
               performContextSwitch(target);
+            }
+          } else if (chip.id.startsWith("oc:")) {
+            // "Which Jonas?" — the chip carries an id and nothing else; the
+            // conversation system re-checks access before anything opens.
+            const [, kind, id] = chip.id.split(":");
+            user(chip.label);
+            if (id && kind === "c") openConversationTarget({ conversationId: id, label: chip.label });
+            else if (id && kind === "p") openConversationTarget({ profileId: id, label: chip.label });
+          } else if (chip.id.startsWith("wsp:")) {
+            // Business-partner request from the personal space: switch to the
+            // company the person picked, then continue the SAME request.
+            const target = (auth?.workspaces ?? []).find(
+              (w) => w.id === chip.id.slice(4),
+            );
+            if (target) {
+              user(chip.label);
+              performContextSwitch(target, pendingPartnersSentenceRef.current || undefined);
             }
           } else if (chip.id.startsWith("stage:")) {
             // `stage:<projectId>:<stageId>:<status>` — the person picked which
@@ -4717,6 +5920,39 @@ export function ConversationChat({
             const [, workerProfileId, fromProjectId, toProjectId] = chip.id.split(":");
             user(chip.label);
             runMoveCommit(workerProfileId, fromProjectId, toProjectId);
+          } else if (chip.id.startsWith("team-offer-agree:") || chip.id.startsWith("team-offer-decline:")) {
+            // A brigade / company offer: the chip carries the offer id only;
+            // the RPC re-checks that the caller receives the need.
+            user(chip.label);
+            runTeamOfferDecision(
+              chip.id.slice(chip.id.indexOf(":") + 1),
+              chip.id.startsWith("team-offer-agree:") ? "accepted" : "declined",
+            );
+          } else if (chip.id.startsWith("team-offer-thread:")) {
+            // The negotiation thread of one offer — the same server gate as
+            // the scouting page's "Message" button; null = nothing opens.
+            const [, offerId, requestId] = chip.id.split(":");
+            user(chip.label);
+            setTyping(true);
+            openTeamOfferThreadForChat({ offerId, requestId: requestId ?? null, locale })
+              .then(({ route }) => {
+                setTyping(false);
+                if (!route) {
+                  assistant(labels.teamOfferThreadFailed);
+                  return;
+                }
+                // `route` carries the locale; the localized router adds its own.
+                router.push(route.replace(/^\/[a-z]{2}(?=\/)/, "") as "/dashboard");
+              })
+              .catch(() => {
+                setTyping(false);
+                assistant(labels.teamOfferThreadFailed);
+              });
+          } else if (chip.id === "team-offer-mine") {
+            // Offering OUR brigade / company is done on the people page, where
+            // the offer form lives (the chat never grows a duplicate of it).
+            user(chip.label);
+            router.push("/dashboard/company/people" as "/dashboard");
           } else if (chip.id.startsWith("offer-accept:") || chip.id.startsWith("offer-decline:")) {
             // The client's decision: the chip carries the offer id and nothing
             // else; the RPC re-checks the demand is theirs and the offer open.
@@ -4794,50 +6030,162 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm],
+    [identity, t, labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runKeepAssignment, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, openConversationTarget, runAgencyRead, openProposeForm, startCapabilities],
   );
   handleChipRef.current = handleChip;
 
   /**
-   * THE PAPERCLIP, INTENT-AWARE (W7 slice 2).
+   * THE PAPERCLIP ATTACHES A FILE (owner P0 2026-09-23, CASE 5/6/7).
    *
-   * It used to send every file into the CV importer, whatever the conversation
-   * was about — so a worker mid-work-log who tapped it to attach a site photo
-   * got a CV parser. The context now decides, and the context is the ACTIVE
-   * FLOW, never the file's name:
+   * It used to be a flow launcher routed by a sticky ref: no file picker ever
+   * opened, a click in "work-log context" pushed ANOTHER savable form, and a
+   * click with no context posted ANOTHER "Kam skirtas šis failas?" — so
+   * several clicks stacked several questions and several forms. Now:
    *
-   *   work-log open  → the work photo path (evidence for that entry)
-   *   CV open        → CV import, exactly as before
-   *   neither        → ask, once, with the two real answers
+   *   1. an OPEN flow that takes this file gets it, in its own field — the
+   *      open form, never a second one;
+   *   2. otherwise the conversation holds ONE pending file (the composer shows
+   *      it) and asks ONCE what it is for. A new pick replaces the file and
+   *      re-asks in place of the old question — never beside it;
+   *   3. the answers come from `lib/conversation/file-subject` — the SAME
+   *      router a typed "čia mano CV" reaches, with its subject rules: each
+   *      door is a self-STATED intent, and "someone else's file" is refused
+   *      out loud, never written into the uploader's record.
    *
-   * The unknown case is a single message with two chips — not a permanent CTA
-   * row, which is the button wall the owner ruling removed.
+   * Nothing is uploaded here. Until the chosen flow's own confirm, the file
+   * exists only in this browser tab.
    */
-  const handleAttach = useCallback(() => {
-    const context = attachContextRef.current;
-    if (context === "worklog") {
-      user(labels.userAttachPhoto);
-      withTyping(() => startWorkLog("", { photoFirst: true }));
-      return;
-    }
-    if (context === "cv") {
-      handleChipRef.current({ id: "cv", label: "" });
-      return;
-    }
-    assistant(labels.attachChoice, [
-      { id: "attach:photo", label: labels.chipAttachPhoto },
-      { id: "attach:cv", label: labels.chipAttachCv },
-    ]);
-  }, [
-    user,
-    assistant,
-    withTyping,
-    startWorkLog,
-    labels.userAttachPhoto,
-    labels.attachChoice,
-    labels.chipAttachPhoto,
-    labels.chipAttachCv,
-  ]);
+  const discardPendingAttachment = useCallback(() => {
+    const openId = attachQuestionRef.current;
+    attachQuestionRef.current = null;
+    attachAnswersRef.current = [];
+    // Any chip still on screen now belongs to a question that is gone.
+    attachSeqRef.current += 1;
+    pendingAttachmentRef.current = null;
+    setPendingAttachment(null);
+    if (openId) setItems((prev) => prev.filter((it) => it.id !== openId));
+  }, []);
+
+  const handleAttachFile = useCallback(
+    (file: File) => {
+      const open = attachSinksRef.current.current(file);
+      if (open) {
+        open.attach(file);
+        return;
+      }
+      const answers = attachAnswersForFile(file, {
+        identity,
+        educationWorkspace: Boolean(educationWorkspace),
+      });
+      if (answers.length === 0) {
+        assistant(t("attachUnsupported"));
+        return;
+      }
+      // ONE question per pending file: a new pick retires the old question
+      // (wherever it scrolled to) before the current one is asked.
+      const openId = attachQuestionRef.current;
+      if (openId) setItems((prev) => prev.filter((it) => it.id !== openId));
+      const seq = attachSeqRef.current + 1;
+      attachSeqRef.current = seq;
+      attachAnswersRef.current = answers;
+      pendingAttachmentRef.current = file;
+      setPendingAttachment(file);
+      const chips: ChoiceChip[] = answers.map((a, i): ChoiceChip => {
+        if (a.kind === "surface") {
+          if (a.surface === "work_report") {
+            return { id: "link:/dashboard/documents", label: t("chipAttachWorkReport") };
+          }
+          if (a.surface === "organization_document") {
+            return { id: "link:/dashboard/documents", label: t("chipAttachOrgDocument") };
+          }
+          return {
+            id: "link:/dashboard/company/people#people-import-section",
+            label: labels.chipPeopleImport,
+          };
+        }
+        const label =
+          a.kind === "not_yet"
+            ? t("chipAttachOther")
+            : a.capability === "self_work_evidence"
+              ? labels.chipAttachPhoto
+              : a.capability === "self_cv_import"
+                ? labels.chipAttachCv
+                : t("chipAttachDocument");
+        return { id: `attach-file:${seq}:${i}`, label };
+      });
+      chips.push({ id: `attach-file:${seq}:cancel`, label: labels.invCancel });
+      // A page link cannot carry the file — say so before it is chosen.
+      const text = answers.some((a) => a.kind === "surface")
+        ? `${labels.attachChoice}\n${t("attachLinkNote")}`
+        : labels.attachChoice;
+      attachQuestionRef.current = assistant(text, chips);
+    },
+    [assistant, educationWorkspace, identity, labels.attachChoice, labels.chipAttachCv, labels.chipAttachPhoto, labels.chipPeopleImport, labels.invCancel, t],
+  );
+
+  /** The person answered "what is this file for?". */
+  const resolveAttachChoice = useCallback(
+    (chip: ChoiceChip) => {
+      const [, seqRaw, choice] = chip.id.split(":");
+      const file = pendingAttachmentRef.current;
+      // A chip of a question that was replaced or cancelled answers nothing.
+      if (!file || Number(seqRaw) !== attachSeqRef.current) return;
+      if (choice === "cancel") {
+        discardPendingAttachment();
+        return;
+      }
+      const answer = attachAnswersRef.current[Number(choice)];
+      if (!answer || answer.kind === "surface") return;
+      // Answered: the file leaves the composer for where the answer says.
+      attachQuestionRef.current = null;
+      attachAnswersRef.current = [];
+      pendingAttachmentRef.current = null;
+      setPendingAttachment(null);
+      user(chip.label);
+      if (answer.kind === "not_yet") {
+        // Understood and honestly refused, through the typed path's own
+        // answer — nothing is attached to anyone.
+        handleFileIntent(answer.intent);
+        return;
+      }
+      const sinks = attachSinksRef.current;
+      switch (answer.capability) {
+        case "self_work_evidence": {
+          // The form already open takes it; only otherwise does one open.
+          const open = sinks.openOf("worklog", file);
+          if (open) open.attach(file);
+          else withTyping(() => startWorkLog("", { photoFirst: true, file }));
+          return;
+        }
+        case "self_cv_import": {
+          const open = sinks.openOf("cv", file);
+          if (open) {
+            open.attach(file);
+            return;
+          }
+          withTyping(() =>
+            pushEmbed(
+              <WorkerCvFlow
+                initialFile={file}
+                onClose={() => startProfileSummaryRef.current("profile")}
+                onRegisterAttachSink={sinks.register}
+              />,
+            ),
+          );
+          return;
+        }
+        case "self_document":
+          // The document is RECORDED first (type, country, validity) — the
+          // file then goes into that record's own file embed.
+          startAddDocument("", { file });
+          return;
+        default:
+          handleFileIntent(answer.intent);
+      }
+    },
+    [discardPendingAttachment, handleFileIntent, pushEmbed, startAddDocument, startWorkLog, user, withTyping],
+  );
+  attachChoiceRef.current = resolveAttachChoice;
 
   /** V9 value-intent: the honest one-line readback of what was understood —
    *  only facts the structurer actually read, joined plainly. */
@@ -4848,7 +6196,13 @@ export function ConversationChat({
       else if (v.workType) parts.push(workTypeLabels[v.workType] ?? v.workType);
       if (v.subject === "goods" && v.quantity) parts.push(v.quantity.raw);
       if (v.headcount !== null) {
-        parts.push(t("valueIntent.people", { count: v.headcount }));
+        // Teams of a stated size read back as both: "12 žmonių (3 brigados po 4)".
+        const people = t("valueIntent.people", { count: v.headcount });
+        parts.push(
+          v.teamCount != null && v.perTeamSize != null
+            ? `${people} (${t("valueIntent.teams", { teams: v.teamCount, perTeam: v.perTeamSize })})`
+            : people,
+        );
       }
       if (v.window) {
         if (v.window.kind === "days_count") {
@@ -4911,6 +6265,13 @@ export function ConversationChat({
       if (v.workType) out.workType = v.workType;
       if (v.country) out.country = v.country;
       if (v.headcount !== null) out.teamSize = String(v.headcount);
+      // Teams of a stated size ride the form state unrendered, like the work
+      // type: the executor stores them in `structured_v2.team` only while the
+      // number of workers still equals teams × size.
+      if (v.teamCount != null && v.perTeamSize != null) {
+        out.teamCount = String(v.teamCount);
+        out.perTeamSize = String(v.perTeamSize);
+      }
       if (v.window) {
         if (v.window.kind === "from_date" && v.window.startIso) {
           out.startDate = v.window.startIso;
@@ -4952,11 +6313,13 @@ export function ConversationChat({
         : null;
       const questions = v.missing
         .filter(
-          (m): m is "location" | "window" | "quantity" | "headcount" =>
+          (m): m is "location" | "window" | "quantity" | "headcount" | "team_size" =>
             m === "location" ||
             m === "window" ||
             m === "quantity" ||
-            m === "headcount",
+            m === "headcount" ||
+            // Teams named without a size or as a range: ask about the teams.
+            m === "team_size",
         )
         .map((m) => t(`valueIntent.ask.${m}` as Parameters<typeof t>[0]));
 
@@ -4987,9 +6350,14 @@ export function ConversationChat({
           assistant(
             [
               understood,
-              verdict.listingKind === "rental"
-                ? t("valueIntent.goodsListableRental")
-                : t("valueIntent.goodsListable"),
+              // review of #2434: a goods subject (produce, handmade, household,
+              // other) is not a "work-related resource" — say Goods.
+              typeof verdict.listingCategory === "string" &&
+              verdict.listingCategory.startsWith("goods_")
+                ? t("valueIntent.goodsListableGoods")
+                : verdict.listingKind === "rental"
+                  ? t("valueIntent.goodsListableRental")
+                  : t("valueIntent.goodsListable"),
               ...questions,
             ]
               .filter((l): l is string => Boolean(l))
@@ -5004,8 +6372,10 @@ export function ConversationChat({
           return;
         }
         if (verdict?.kind === "LEGAL_CHECK_REQUIRED") {
-          // Food/produce: name plainly WHAT would have to be checked, then
-          // the channel truth — no approved produce channel, nothing saved.
+          // Food/produce: name plainly WHAT has to be checked, then the
+          // channel truth — the goods board accepts a draft and asks for the
+          // legal acknowledgement on publish (audit 2026-10-16, M-1). Nothing
+          // is saved here; the chip opens the board.
           assistant(
             [
               understood,
@@ -5014,20 +6384,17 @@ export function ConversationChat({
             ]
               .filter((l): l is string => Boolean(l))
               .join("\n"),
+            [
+              {
+                id: "link:/dashboard/listings",
+                label: t("valueIntent.chipListings"),
+              },
+            ],
           );
           return;
         }
-        if (
-          verdict?.kind === "CHANNEL_RESTRICTED" &&
-          verdict.reasonKey === "category_not_supported"
-        ) {
-          assistant(
-            [understood, t("valueIntent.goodsCategoryUnsupported")]
-              .filter((l): l is string => Boolean(l))
-              .join("\n"),
-          );
-          return;
-        }
+        // (The former category_not_supported branch is gone: since M-1 the
+        // marketplace channel never emits it for a lawful goods statement.)
         // NEEDS_MORE_INFORMATION → the unclear branch below asks for it.
       }
 
@@ -5136,11 +6503,23 @@ export function ConversationChat({
      * same thing for a new goal, and the whole goal so far for a
      * continuation (see the comment where it is derived).
      */
-    (sent: string) => {
+    (sent: string, originArg?: unknown) => {
       user(sent);
       // QA Q-4: whatever is sent, a pending hand-off is consumed — the composer
       // that mounts after the first turn must not offer the sentence again.
       setSayPrefill("");
+      // Anything that is not exactly "voice" is a typed turn (callbacks may
+      // hand this function a second, unrelated argument).
+      const origin: TurnOrigin = originArg === "voice" ? "voice" : "typed";
+      turnOriginRef.current = origin;
+      if (origin === "typed") voiceProvenanceRef.current = null;
+      // A bare "yes" from speech is noise, never an acceptance: the person is
+      // pointed at the button on the card (a spoken "yes" is NOT the
+      // confirmation) and nothing is routed, continued or executed.
+      if (preRouteDisposition({ origin, text: sent }) === "refuse-bare-affirmation") {
+        assistant(t("voiceBareYes"));
+        return;
+      }
 
       // V10 §36: an explicit correction ("Ne 30, o 300 kg") of the LAST
       // interpretation replaces exactly the corrected fact and re-renders
@@ -5376,7 +6755,13 @@ export function ConversationChat({
           // door to the personal space (the same membership-validated `ws:`
           // switch the context chips run) — rendered through the workflow
           // contract, so the WHY is stated like every other answer.
-          if (identity === "company") {
+          // THE ACTIVE WORKSPACE decides, not only the acting role (production
+          // walk 2026-10-01): a worker standing in an ORGANIZATION workspace has
+          // the person identity but an organization result context, and the
+          // search ran and drew a card beside "Šis rezultatas nepasiekiamas
+          // dabartiniame kontekste" — the result registry offers the job matches
+          // in the personal context only. Same one-line answer + door instead.
+          if (identity === "company" || Boolean(auth?.activeOrganizationId || auth?.activeOrgName)) {
             const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
             return {
               kind: "answer" as const,
@@ -5420,9 +6805,7 @@ export function ConversationChat({
                 ? tProfessions(stated.professionSlug as never)
                 : stated.label;
             assistant(t("professionStatement.readBesideSearch", { label }), [
-              stated.professionSlug
-                ? { id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") }
-                : { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
+              { id: `profask:${encodeURIComponent(text)}`, label: t("professionStatement.chipSetProfession") },
             ]);
           }
           // The world earlier turns of THIS goal already narrowed travels
@@ -5433,13 +6816,53 @@ export function ConversationChat({
          * "esu buhalteris" / "dirbu inžinieriumi" / "dirbau projektų vadovu
          * 5 metus" (window 6). The sentence is READ (`readProfessionStatement`,
          * the same reader the router's pattern is built from) and answered
-         * with the doors that already exist: the profile screen sets a
-         * catalogue profession; work history takes any title in the person's
+         * with the doors that already exist: the profile's `#profile-edit`
+         * section sets a catalogue profession (the chip names that anchor, so
+         * it lands on the opened section — in the profession picker when the
+         * person has none — not at the top of the page two interactions
+         * away from it); work history takes any title in the person's
          * own words (the honest carry for a profession the catalogue lacks);
          * the board searches. A past-tense job opens the work-history form
          * with the title already in it. Nothing is persisted here.
          */
         professionStatement: () => {
+          /**
+           * A PAST JOB WITH ITS YEARS (2026-09-29): "2019–2022 dirbau įmonėje
+           * X Vokietijoje" used to open TODAY's journal card with the current
+           * employer preselected. It is the person's own work history: the
+           * self-declared history form opens with the years and their words,
+           * said plainly to be a claim of theirs — not employer-confirmed.
+           * The store has no organization / country field yet, so those stay
+           * in their words in the title, and the answer says so.
+           */
+          const period = readPastWorkPeriod(text, Number(todayIso().slice(0, 4)));
+          if (period) {
+            if (identity === "company") {
+              const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+              assistant(
+                t("pastWork.notInCompany"),
+                personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+              );
+              return;
+            }
+            const role = readProfessionStatement(text);
+            const words = pastWorkOwnWords(text);
+            const rest = role ? words.replace(role.raw, "").replace(/\s+/g, " ").trim() : words;
+            const title = role ? (rest ? `${role.label}, ${rest}` : role.label) : words;
+            const years = period.isCurrent
+              ? t("pastWork.yearsCurrent", { from: period.startYear })
+              : period.startYear === period.endYear
+                ? String(period.startYear)
+                : `${period.startYear}–${period.endYear}`;
+            assistant(t("pastWork.understood", { years, title: title || "…" }));
+            openForm("worker.add-work-history", undefined, undefined, {
+              ...(title.length >= 3 ? { title } : {}),
+              startYear: String(period.startYear),
+              ...(period.endYear !== null ? { endYear: String(period.endYear) } : {}),
+              isCurrent: period.isCurrent,
+            });
+            return;
+          }
           const stated = readProfessionStatement(text);
           if (!stated) {
             assistant(fallbackText, starterChips);
@@ -5449,7 +6872,7 @@ export function ConversationChat({
           const label = inCatalogue ? tProfessions(stated.professionSlug as never) : stated.label;
           if (identity === "company") {
             assistant(t("professionStatement.understood", { label }), [
-              { id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") },
+              { id: "link:/dashboard/profile#profile-edit", label: t("professionStatement.chipSetProfession") },
             ]);
             return;
           }
@@ -5458,19 +6881,11 @@ export function ConversationChat({
             openForm("worker.add-work-history", undefined, undefined, { title: stated.label });
             return;
           }
-          assistant(
-            [
-              t("professionStatement.understood", { label }),
-              inCatalogue ? t("professionStatement.inCatalogue") : t("professionStatement.notInCatalogue"),
-            ].join("\n"),
-            [
-              ...(inCatalogue
-                ? [{ id: "link:/dashboard/profile", label: t("professionStatement.chipSetProfession") }]
-                : []),
-              { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
-              { id: "jobs", label: labels.chipJobs },
-            ],
-          );
+          // Understood, then the REVIEW: the person's current professions are
+          // read and the save choices offered (0/1/N stated professions) —
+          // the profile's own write path, confirmed by a chip.
+          assistant(t("professionStatement.understood", { label }));
+          offerProfessionSave(text);
         },
         /**
          * "galiu dirbti nuo spalio 1 d." (production 2026-09-06: answered as a
@@ -5494,14 +6909,307 @@ export function ConversationChat({
             return;
           }
           const from = parseStartDate(text, todayIso());
-          assistant(from ? t("availability.understoodFrom", { date: from }) : t("availability.understood"));
-          openForm("worker.save-work-card", undefined, undefined, {
-            availabilityStatus: "available",
-            ...(from ? { availableFrom: from } : {}),
-          });
+          // A CHANGE REQUEST STATES NOTHING (owner P0 2026-09-22, section A).
+          // "Pakeisk mano prieinamumą" asks to edit the fact; it does not
+          // claim availability. Pre-filling `available` there would record a
+          // fact the person never gave — the same card, but words in their
+          // mouth. A STATEMENT ("galiu dirbti nuo pirmadienio") still
+          // pre-fills, because they did say it.
+          const changeRequest = isAvailabilityChangeRequest(text);
+          assistant(
+            changeRequest
+              ? t("availability.changeRequested")
+              : from
+                ? t("availability.understoodFrom", { date: from })
+                : t("availability.understood"),
+          );
+          openForm(
+            "worker.save-work-card",
+            undefined,
+            undefined,
+            changeRequest
+              ? {}
+              : {
+                  availabilityStatus: "available",
+                  ...(from ? { availableFrom: from } : {}),
+                },
+          );
         },
-        skillGap: () => runWorkflow(() => runSkillGap()),
-        recentJournal: () => runWorkflow(() => runRecentJournal(text)),
+        /**
+         * "Mano atlyginimo lūkestis nuo 2500 iki 3500 eurų" (2026-09-29): the
+         * person states a PAY EXPECTATION. Its one home is the work card's
+         * monthly range, so the SAME `worker.save-work-card` form opens with
+         * the figures laid over what the card holds; nothing is written until
+         * the person saves it. An hourly rate or an unreadable figure is
+         * asked about, never stored as a monthly one.
+         */
+        /**
+         * "Kalbu angliškai ir rusiškai" (2026-09-29): the languages the person
+         * named, one language form each (worker.add-language — the profile's
+         * own write), prefilled; a level only when they said one. The
+         * sentence writes nothing.
+         */
+        /**
+         * "Išmokau skaityti techninius brėžinius" (2026-09-29): the person's
+         * words, offered as their own skill claim; the chip saves it through
+         * the profile's path. Never marked verified.
+         */
+        /**
+         * "Parodyk išsaugotus darbus" (Chat ↔ visual loop walk, 2026-09-29):
+         * the private saved list the opportunities page renders — the SAME
+         * board read — with doors back into the real page and the saved ads.
+         */
+        /**
+         * "Kokios užduotys projekte …?" (COMPANY loop walk, 2026-09-29): the
+         * open tasks from the SAME read task-status resolves against — one
+         * project when the sentence names it — with the door to the tasks page.
+         */
+        openTasks: () => {
+          setTyping(true);
+          loadOpenTasksForChat()
+            .then((res) => {
+              setTyping(false);
+              if (res.kind !== "ok") {
+                assistant(t("openTasks.unavailable"));
+                return;
+              }
+              const projectsSeen = [
+                ...new Map(
+                  res.tasks
+                    .filter((x) => x.projectId && x.projectTitle)
+                    .map((x) => [x.projectId as string, { value: x.projectId as string, label: x.projectTitle as string }]),
+                ).values(),
+              ];
+              const named = projectNamedInSentence(text, projectsSeen);
+              const tasks = named ? res.tasks.filter((x) => x.projectId === named.value) : res.tasks;
+              if (tasks.length === 0) {
+                assistant(named ? t("openTasks.noneInProject", { project: named.label }) : t("openTasks.none"), [
+                  { id: "link:/dashboard/tasks", label: labels.chipTasks },
+                ]);
+                return;
+              }
+              const statusLabel = (st: string) =>
+                t.has(`openTasks.status_${st}` as never) ? t(`openTasks.status_${st}` as never) : st;
+              assistant(
+                [
+                  named
+                    ? t("openTasks.introProject", { count: tasks.length, project: named.label })
+                    : t("openTasks.intro", { count: tasks.length }),
+                  ...tasks.map(
+                    (x) => `• ${x.title}${!named && x.projectTitle ? ` — ${x.projectTitle}` : ""} (${statusLabel(x.status)})`,
+                  ),
+                ].join("\n"),
+                [{ id: "link:/dashboard/tasks", label: labels.chipTasks }],
+              );
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("openTasks.unavailable"));
+            });
+        },
+        savedOpportunities: () => {
+          if (identity === "company") {
+            assistant(fallbackText, starterChips);
+            return;
+          }
+          setTyping(true);
+          loadSavedOpportunitiesForChat()
+            .then((res) => {
+              setTyping(false);
+              if (res.kind !== "ok") {
+                assistant(t("savedOpportunities.unavailable"));
+                return;
+              }
+              if (res.items.length === 0) {
+                assistant(t("savedOpportunities.none"), [{ id: "jobs", label: labels.chipJobs }]);
+                return;
+              }
+              assistant(
+                [
+                  t("savedOpportunities.intro", { count: res.items.length }),
+                  ...res.items.slice(0, 8).map((it) => `• ${it.label}`),
+                ].join("\n"),
+                [
+                  { id: "link:/dashboard/opportunities#opportunities-saved", label: t("savedOpportunities.chipOpen") },
+                  ...res.items
+                    .filter((it) => it.kind === "vacancy")
+                    .slice(0, 2)
+                    .map((it) => ({ id: `link:/jobs/${it.id}`, label: it.label.slice(0, 40) })),
+                ],
+              );
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("savedOpportunities.unavailable"));
+            });
+        },
+        skillStatement: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("skillStatement.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          const stated = readSkillStatement(text);
+          if (!stated) {
+            startProfileSummary("profile");
+            return;
+          }
+          assistant(t("skillStatement.understood", { phrase: stated.phrase }), [
+            { id: `skill:save:${encodeURIComponent(stated.phrase)}`, label: t("skillStatement.chipSave") },
+          ]);
+        },
+        languageStatement: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("languageStatement.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          const langs = readStatedLanguages(text);
+          if (langs.length === 0) {
+            assistant(t("languageStatement.askWhich"));
+            openForm("worker.add-language");
+            return;
+          }
+          assistant(
+            t("languageStatement.understood", {
+              list: langs.map((l) => WORKER_LANGUAGE_NATIVE_NAMES[l.lang]).join(", "),
+            }),
+          );
+          for (const l of langs) {
+            openForm("worker.add-language", undefined, undefined, {
+              lang: l.lang,
+              ...(l.level ? { level: l.level } : {}),
+            });
+          }
+        },
+        payStatement: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("pay.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          const pay = readPayStatement(text);
+          assistant(
+            pay.kind === "range"
+              ? t("pay.understoodRange", { min: pay.min, max: pay.max })
+              : pay.kind === "min"
+                ? t("pay.understoodMin", { min: pay.min })
+                : pay.kind === "max"
+                  ? t("pay.understoodMax", { max: pay.max })
+                  : pay.kind === "not-monthly"
+                    ? t("pay.notMonthly")
+                    : t("pay.askFigure"),
+          );
+          openForm("worker.save-work-card", undefined, undefined, payPrefill(pay));
+        },
+        /**
+         * "Ne 5, o 6 valandas" / "Tai buvo vakar" (2026-09-29): a correction of
+         * the entry that EXISTS, never a new one — walked on production, the
+         * sentence opened a second 6 h entry that would have counted on top
+         * of the first. The newest live entry is named and the canonical
+         * supersede editor opens for it (the old entry stays in history as
+         * corrected). A confirmed entry is said to be closed to edits. The
+         * sentence writes nothing.
+         */
+        correctWork: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("correctWork.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          const ask = readCorrectionAsk(text);
+          setTyping(true);
+          loadLatestOwnEntryForCorrection()
+            .then((entry) => {
+              setTyping(false);
+              if (entry.kind === "none" || entry.kind === "no-worker") {
+                assistant(t("correctWork.none"), [{ id: "logwork", label: t("chipLogWork") }]);
+                return;
+              }
+              if (entry.kind !== "entry") {
+                assistant(t("correctWork.unreadable"));
+                return;
+              }
+              const excerpt = entry.text.length > 80 ? `${entry.text.slice(0, 77)}…` : entry.text;
+              if (entry.confirmed) {
+                assistant(t("correctWork.confirmed", { date: entry.workDate, text: excerpt }));
+                return;
+              }
+              const change =
+                ask.kind === "hours"
+                  ? t("correctWork.changeHours", { to: ask.to })
+                  : ask.kind === "day"
+                    ? t(ask.day === "yesterday" ? "correctWork.changeYesterday" : "correctWork.changeDayBefore")
+                    : t("correctWork.changeUnspecified");
+              assistant(t("correctWork.found", { date: entry.workDate, text: excerpt, change }), [
+                { id: `link:${correctionHref(entry.id)}`, label: t("correctWork.chipEdit") },
+              ]);
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("correctWork.unreadable"));
+            });
+        },
+        /**
+         * "Kur dabar dirbu?" (2026-09-29): answered from the person's canonical
+         * work contexts — the SAME read the work-log card files under — never
+         * from the booking-engagements panel alone, which listed only an ended
+         * placement while the active organization was missing. Ended
+         * relationships are named as ended. Read-only.
+         */
+        currentWork: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("currentWork.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          setTyping(true);
+          listWorkLogEngagements()
+            .then((res) => {
+              setTyping(false);
+              const active = res.kind === "ok" ? res.engagements.filter((e) => e.orgName) : [];
+              const ended =
+                res.kind === "ok" ? (res.endedOrgNames ?? []) : [];
+              const lines = [
+                active.length > 0
+                  ? t("currentWork.now", { list: active.map((e) => e.label).join("; ") })
+                  : t("currentWork.none"),
+                ...(ended.length > 0 ? [t("currentWork.ended", { list: ended.join(", ") })] : []),
+              ];
+              assistant(lines.join("\n"), [
+                { id: "logwork", label: t("chipLogWork") },
+                { id: "engagements", label: labels.chipEngagements },
+              ]);
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("currentWork.unreadable"));
+            });
+        },
+        skillGap: () => runWorkflow(() => runSkillGap(text)),
+        // A company space asks about the TEAM's work — the organization's
+        // journal report, never the person's own (2026-09-29).
+        recentJournal: () => runWorkflow(() => {
+          // A person asking about A WEEK also sees it (owner §21): the reply
+          // is unchanged, and the calendar panel opens on this week's rhythm.
+          if (identity !== "company" && asksAboutAWeek(text)) openResultRef.current("calendar");
+          return identity === "company" ? runOrganizationJournal(text) : runRecentJournal(text);
+        }),
         // Work intelligence by sentence (issue #1689, owner lines 2–7): the
         // intent names the facet, ONE workflow reads the ONE model.
         workIntelligence: () => runWorkflow(() => runWorkIntelligenceQuestion(text, routedIntent)),
@@ -5544,8 +7252,30 @@ export function ConversationChat({
         // ONE ACTIVE CONTEXT by sentence (gap G1) — resolves the target
         // against the caller's real workspace list, asks when ambiguous.
         switchContext: () => startSwitchContext(text),
+        // RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23): the
+        // server says whether it can be renamed here, then the ONE confirm
+        // form opens prefilled — see `startRenameOrganization`.
+        renameOrganization: () => startRenameOrganization(text),
         // These run a real async server read with their own typing cue.
-        profileSummary: () => startProfileSummary("profile"),
+        //
+        // THE ACTING IDENTITY DECIDES WHOSE PROFILE (owner program
+        // 2026-09-23). Acting for a company or agency, `profile` — whether the
+        // router or the model proposed it — answers with the COMPANY's next
+        // step (the manager's own ladder, else the company hub), never the
+        // person's ladder of language / work history / work card chips, which
+        // is the wrong actor's answer (prod 2026-09-06: the proposer picked
+        // `profile` for a company sentence). The person's own profile stays
+        // one tap away through the explicit "Mano profilis" chip.
+        //
+        // NOT A FIX FOR THE DESYNCED STATE (map RC3, OPEN — owner decision:
+        // does the acting identity follow the workspace?). `identity` is
+        // `profiles.active_role`, while the workspace comes from the stored
+        // pointer. With active_role `worker` inside an agency workspace — the
+        // owner's own state on 2026-09-23 — `identity` is "person" and this
+        // gate does not fire. The rename does not depend on it (the server
+        // resolves the workspace); this gate does.
+        profileSummary: () =>
+          identity === "company" ? startCompanyNextStep() : startProfileSummary("profile"),
         // The COMPANY workspace asks about the company, never about the
         // person behind it (see `startCompanyNextStep`).
         nextActionSummary: () =>
@@ -5672,6 +7402,81 @@ export function ConversationChat({
         // correction path so both render identically).
         offerValue: () =>
           renderValueStatement(structureValueStatement(text), text),
+        // "Noriu rasti partnerių savo verslui" — a business-side request:
+        // company context → the marketplace doors; personal context → which
+        // company, then the same doors. Never the job search.
+        findPartners: () => startFindPartners(text),
+        // "Kaip pridėti žmogų?" / "Kur mano valandos?" - HOW to use the product,
+        // in plain words WITH the way to do it (chips to the existing surfaces).
+        // The topic is read from the same sources the router rule is built from.
+        openConversation: () => startOpenConversation(text),
+        // "Kokių naujų darbų man atsirado?" - the person's own preferences over
+        // the ONE job-alert matching (same as the notification bell). A company
+        // workspace has no such act; a failed read is never "no new jobs".
+        newJobs: () => {
+          if (identity === "company" || Boolean(auth?.activeOrganizationId || auth?.activeOrgName)) {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("findWorkInCompanyContext"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          setTyping(true);
+          loadNewJobsForChat()
+            .then((res) => {
+              setTyping(false);
+              if (res.kind === "ok") {
+                assistant(
+                  [
+                    t("newJobsIntro", { count: String(res.jobs.length) }),
+                    ...res.jobs.map(
+                      (j) => `• ${[j.title, j.country, j.salary].filter(Boolean).join(" · ")}`,
+                    ),
+                  ].join("\n"),
+                  [
+                    ...res.jobs.map((j) => ({ id: `link:/jobs/${j.id}`, label: j.title.slice(0, 40) })),
+                    { id: "link:/dashboard/opportunities", label: t("newJobsAll") },
+                  ],
+                );
+              } else if (res.kind === "empty") {
+                assistant(t("newJobsNone"), [{ id: "link:/dashboard/opportunities", label: t("newJobsAll") }]);
+              } else if (res.kind === "incomplete") {
+                assistant(
+                  t(res.missing.includes("profession") ? "newJobsNeedProfession" : "newJobsNeedCountry"),
+                  [{ id: "f:worker.save-preferences", label: labels.chipPrefs }],
+                );
+              } else if (res.kind === "no-worker") {
+                assistant(t("newJobsNoProfile"), [{ id: "profile", label: labels.chipProfile }]);
+              } else {
+                assistant(t("newJobsUnavailable"));
+              }
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("newJobsUnavailable"));
+            });
+        },
+        productHelp: () => {
+          const topic = readHelpTopic(text);
+          if (!topic) {
+            startCapabilities();
+            return;
+          }
+          const labelOf = (key: string): string =>
+            key === "workHoursChip"
+              ? labels.workHoursChip
+              : key === "activityChip"
+                ? labels.activityChip
+                : t(`productHelp.chips.${key}` as never);
+          assistant(
+            t(`productHelp.${topic.id}` as never),
+            helpChipsFor(topic, identity === "company" ? "company" : "person").map((c) => ({
+              id: `link:${c.target}`,
+              label: labelOf(c.label),
+            })),
+          );
+        },
         // Honest blocked/hint answers explain themselves; repeating the same
         // four-item menu under every one of them taught users to ignore the
         // chips entirely. The menu stays where it is a menu: the greeting
@@ -5813,10 +7618,13 @@ export function ConversationChat({
                   label: labels.historyImportChip,
                 },
               ]),
-        workHours: () =>
+        workHours: () => {
+          // Same rule: "kiek valandų dirbau šią savaitę?" also shows the week.
+          if (identity !== "company" && asksAboutAWeek(text)) openResultRef.current("calendar");
           assistant(labels.adminRouteHint, [
             { id: "link:/dashboard/hours", label: labels.workHoursChip },
-          ]),
+          ]);
+        },
         absences: () =>
           assistant(labels.adminRouteHint, [
             { id: "link:/dashboard/absences", label: labels.absencesChip },
@@ -5838,6 +7646,13 @@ export function ConversationChat({
         activityCentre: () =>
           assistant(labels.adminRouteHint, [
             { id: "link:/dashboard/activity", label: labels.activityChip },
+          ]),
+        // "Parodyk mano komandą" — the people surface both identities
+        // already have (a worker's relationships, an organization's
+        // members). Same chip the invitation answers use.
+        networkPeople: () =>
+          assistant(labels.adminRouteHint, [
+            { id: "link:/dashboard/network", label: labels.chipNetwork },
           ]),
         // No scheduler exists — never a fake reminder (honest degradation).
         // ── AGENCY (real recruiter pilot, 2026-09-04) ─────────────────────
@@ -5890,12 +7705,21 @@ export function ConversationChat({
         clientBridge: () => startClientBridge(),
         addDocument: () => startAddDocument(text),
         addTask: () => startCreateTask(text),
-        whoAvailable: () => startWhoAvailable(),
+        whoAvailable: () => startWhoAvailable(text),
         stageStatus: () => startStageStatus(text),
         taskStatus: () => startTaskStatus(text),
         projectRisk: () => startProjectRisk(),
         projectReadiness: () => startProjectReadiness(text),
-        confirmWork: () => startConfirmWork(text),
+        // "Kas laukia vadovo patvirtinimo?" said by a WORKER in their own space
+        // (owner continuation 2026-09-29) fell to the fallback: confirm-work is
+        // the manager's queue. In the person space it is answered from the
+        // person's own entries — the SAME confirmed-vs-recorded read as "kiek
+        // patvirtinta?" — and someone who can also manage is offered the switch.
+        confirmWork: () => {
+          if (identity === "company") return startConfirmWork(text);
+          runWorkflow(() => runWorkIntelligenceQuestion(text, "journal-confirmed"));
+          if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+        },
         moveWorker: () => startMoveWorker(text),
         // "Atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF), not the
         // import flow the bare "cv" chip starts. One chip to the one canonical
@@ -5911,7 +7735,14 @@ export function ConversationChat({
         //
         // It now READS the record before saying anything about it, for the
         // person whatever workspace they are sitting in — see `startCvState`.
-        cvView: () => startCvState(),
+        cvView: () => {
+          // "Parodyk mano darbo istoriją" (owner §20–§21): the CV reply is
+          // unchanged; a sentence that asks for a HISTORY also opens the SAME
+          // Player Card on its History lens beside it. Not gated on the
+          // workspace — the history belongs to the human (SEP-5).
+          if (cardModeFromText(text) === "history") openPlayerCardRef.current("history");
+          startCvState();
+        },
         // Derived at ask time from the active context — see `startCapabilities`.
         capabilities: () => startCapabilities(),
         // The sentence named the CV and stopped. Three real doors, no guess
@@ -5935,6 +7766,9 @@ export function ConversationChat({
         invitations: () => startInvitations(),
         // The stored work photos, shown back (issue #1689, defect G).
         evidencePhotos: () => startEvidencePhotos(),
+        whatChanged: () => startWhatChanged(),
+        // "Kas mato mano profilį?" — state first, then the existing consent.
+        employerVisibility: () => startEmployerVisibility(),
         // ACCEPT BY SENTENCE (launch completion 2026-09-20): the one waiting
         // card — never the accept itself.
         acceptOffer: () => startAcceptOffer(),
@@ -5958,7 +7792,10 @@ export function ConversationChat({
           setTyping(true);
           resolveWriteEmployerTarget()
             .then(async (res) => {
-              if (res.kind === "one") {
+              // Voice: never open a counterparty-visible thread from one
+              // recognised sentence - take the "several" path (the card with
+              // its own button).
+              if (res.kind === "one" && !singleMatchNeedsChip(turnOriginRef.current, "writeEmployer")) {
                 const r = await contactEmployerAction({ locale, requestId: res.requestId });
                 setTyping(false);
                 if (r.ok) {
@@ -5973,7 +7810,7 @@ export function ConversationChat({
                 failed();
                 return;
               }
-              if (res.kind === "many") {
+              if (res.kind === "many" || res.kind === "one") {
                 assistant(labels.writeEmployerMany);
               } else {
                 // none / no-worker: the door is "show interest first".
@@ -5987,9 +7824,53 @@ export function ConversationChat({
             });
         },
       };
-      const fallback = () => assistant(fallbackText, starterChips);
+      // NOT UNDERSTOOD → one clarifying question + the ONE context-derived
+      // door, never the greeting's starter row (see `askToClarify`).
+      const fallback = () => askToClarify(t("notUnderstood"));
+      // The model half could not answer because of ITS state (not switched
+      // on, allowance spent, a vendor fault, too many requests) — said as
+      // that state, never as "I did not understand you" (owner 2026-09-23).
+      const aiState = (key: string) => withTyping(() => askToClarify(t(key)));
+
+      // ── ONE SENTENCE, SEVERAL FACTS (owner P0 2026-09-22 §1) ─────────────
+      //
+      // "Esu suvirintojas, 8 metus dirbu MIG/MAG, turiu VCA." routed ENTIRELY
+      // to add-document, because "turiu VCA" outscored everything else: the
+      // person stated four things and the product answered one. The check sits
+      // BEFORE the single-route dispatch because that is the defect — not a
+      // wrong route, but a whole sentence forced through one.
+      //
+      // It is deliberately NARROW. `isCompound` demands two DISTINCT kinds, so
+      // every single-fact sentence stays on the route that already answers it
+      // correctly. And it is person-only: a profession/credential claim is a
+      // personal fact, so in a company or agency space the existing routes
+      // keep the sentence (the same rule `availabilityStatement` follows).
+      // A dated past job ("2018–2020 dirbau stogdengiu Norvegijoje") is ONE
+      // fact with its period — the work-history door, not a list of facts
+      // that loses the years (production walk 2026-09-29).
+      if (identity === "person" && !readPastWorkPeriod(text, Number(todayIso().slice(0, 4)))) {
+        const compound = readCompoundStatement(text);
+        if (compound.isCompound) {
+          presentCompoundStatement(compound);
+          return;
+        }
+      }
+
       if (intent !== "unknown") {
+        routedTextRef.current = text;
         dispatchIntent(intent, handlers, withTyping, fallback);
+        // THE DAY'S WORK INSIDE A LONGER MESSAGE (2026-09-29): "Esu
+        // pastolininkas. … Šiandien 7 valandas montavau pastolius. Ieškau …"
+        // answered the search and dropped the seven hours. A sentence that is
+        // itself a clear work statement also opens the SAME work-log card —
+        // reviewed and saved by the person, nothing written from here.
+        if (identity === "person" && intent !== "log-work" && !continuing) {
+          const work = secondaryWorkStatement(text, todayIso());
+          if (work) {
+            assistant(t("alsoWorkLog"));
+            startWorkLog(work);
+          }
+        }
         return;
       }
       // THE MODEL HALF OF UNDERSTANDING (owner approval 2026-09-05, contract
@@ -6011,40 +7892,96 @@ export function ConversationChat({
       // pins that this file contains no runtime AI import at all.
       setTyping(true);
       proposeUnderstandingAction({ sentence: text, locale, identity })
-        .then((res) => {
-          setTyping(false);
-          switch (res.kind) {
-            case "intent":
-              trackResolution(res.intent, "llm");
-              dispatchIntent(res.intent, handlers, withTyping, fallback);
-              return;
-            case "reference":
-              // Resolve against the caller's own world — never an operation.
-              trackResolution("unknown", "llm");
-              handleReference(res.text);
-              return;
-            case "question":
-              trackResolution("unknown", "llm");
-              handleQuestion(res.text, res.reference);
-              return;
-            case "clarification":
-              // A correction or a fragment. Ask; do not guess an operation.
-              trackResolution("unknown", "llm");
-              assistant(t("understandClarify"), starterChips);
-              return;
-            default:
-              trackResolution("unknown", "deterministic");
-              dispatchIntent("unknown", handlers, withTyping, fallback);
-          }
-        })
+        .then(
+          (res) => {
+            setTyping(false);
+            switch (res.kind) {
+              case "intent":
+                trackResolution(res.intent, "llm");
+                dispatchIntent(res.intent, handlers, withTyping, fallback);
+                return;
+              case "plan": {
+                // ONE SENTENCE, SEVERAL STEPS, IN ORDER (owner 2026-10-14 §4).
+                // The first step runs now; each next one is offered and runs
+                // when tapped. Every step is an existing handler; a write is
+                // only ever the last step and only opens its confirm card.
+                trackResolution(res.steps[0].intent, "llm");
+                const total = res.steps.length;
+                const rest = res.steps.slice(1);
+                planRef.current = {
+                  steps: rest,
+                  total,
+                  run: (step) => dispatchIntent(step, handlers, withTyping, fallback),
+                };
+                assistant(t("planIntro", { count: total }), [
+                  { id: `plan-step:${rest[0].intent}`, label: rest[0].label ?? t("planStep", { n: 2, count: total }) },
+                ]);
+                dispatchIntent(res.steps[0].intent, handlers, withTyping, fallback);
+                return;
+              }
+              case "reference":
+                // Resolve against the caller's own world — never an operation.
+                trackResolution("unknown", "llm");
+                handleReference(res.text);
+                return;
+              case "question":
+                trackResolution("unknown", "llm");
+                handleQuestion(res.text, res.reference);
+                return;
+              case "clarification":
+                // A correction or a fragment. Ask; do not guess an operation.
+                trackResolution("unknown", "llm");
+                askToClarify(t("understandClarify"));
+                return;
+              default: {
+                trackResolution("unknown", "deterministic");
+                const stateKey = res.kind === "unsupported" ? aiStateMessageKey(res.reason) : null;
+                if (stateKey) aiState(stateKey);
+                else dispatchIntent("unknown", handlers, withTyping, fallback);
+              }
+            }
+          },
+          // THE PROPOSER ITSELF REJECTED (the server action threw, the network
+          // dropped): the model half is unavailable — OUR fault, said as the
+          // assistant being unavailable, never as "I did not understand you".
+          // This is the rejection handler of `.then`, so it sees ONLY the
+          // proposer's own failure (adversarial review of #1848).
+          () => {
+            setTyping(false);
+            trackResolution("unknown", "deterministic");
+            aiState("aiTemporarilyUnavailable");
+          },
+        )
+        // A HANDLER threw while answering a result the proposer DID return.
+        // That is not an AI failure and is not said as one: the model answered,
+        // and the fault is in answering it. The resolution was already tracked
+        // by the branch that threw, so it is not counted twice.
         .catch(() => {
           setTyping(false);
-          trackResolution("unknown", "deterministic");
-          dispatchIntent("unknown", handlers, withTyping, fallback);
+          askToClarify(t("answerFailed"));
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos,startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
+
+  /**
+   * THE VOICE DOOR. One reusable capture panel enters the thread as a card
+   * (like every other flow); the REVIEWED text is sent through the same
+   * `handleSend` a typed sentence takes, tagged "voice". The panel imports no
+   * action module (guard: voice-door-adapter-boundary).
+   */
+  const openVoiceDoor = useCallback(() => {
+    pushEmbed(
+      <VoiceCapturePanel
+        serviceConfigured
+        onUse={(r: VoiceCaptureResult) => {
+          voiceProvenanceRef.current = { language: r.language, disclosureVersion: r.disclosureVersion };
+          handleSend(r.text, "voice");
+          return true;
+        }}
+      />,
+    );
+  }, [pushEmbed, handleSend]);
 
   /**
    * Public entry hand-off (frozen design contract §5 P1, #1528): the landing
@@ -6064,6 +8001,39 @@ export function ConversationChat({
    * proposer call; then the sentence is PREFILLED in the composer for the
    * person to send — never silently dropped.
    */
+  const resumeConsumedRef = useRef(false);
+  // The workspace THIS instance was mounted for: only a chat born in the target
+  // workspace may resume the hand-off — the outgoing instance can observe the
+  // new id for a moment before it unmounts and must not answer into itself.
+  const mountedWorkspaceRef = useRef<string | null>(auth?.activeWorkspaceId ?? null);
+  useEffect(() => {
+    if (resumeConsumedRef.current) return;
+    if (!auth?.profile || !auth.activeWorkspaceId) return;
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem(CONTINUE_AFTER_SWITCH_KEY);
+    } catch {
+      raw = null;
+    }
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw) as { ws?: unknown; say?: unknown; at?: unknown };
+      if (parsed.ws !== mountedWorkspaceRef.current || parsed.ws !== auth.activeWorkspaceId) return;
+      resumeConsumedRef.current = true;
+      window.sessionStorage.removeItem(CONTINUE_AFTER_SWITCH_KEY);
+      if (
+        typeof parsed.say === "string" &&
+        parsed.say &&
+        typeof parsed.at === "number" &&
+        Date.now() - parsed.at < 120_000
+      ) {
+        handleSend(parsed.say);
+      }
+    } catch {
+      /* a malformed or stale hand-off is dropped, never replayed */
+    }
+  }, [auth?.profile, auth?.activeWorkspaceId, handleSend]);
+
   const sayConsumedRef = useRef(false);
   useEffect(() => {
     if (sayConsumedRef.current) return;
@@ -6123,9 +8093,10 @@ export function ConversationChat({
    * string only — the conversation is never remounted and no page transition
    * happens, so this is emphatically not the navigation the panel forbids.
    *
-   * `openFullScreen` is the honest fallback for a result that cannot yet render
-   * inline. It keeps every existing route reachable, which is what makes this
-   * work purely additive (NO REGRESSION).
+   * `openStation` is the honest way on for a result that cannot yet render
+   * inline, and each inline result's own NAMED door to its station. It keeps
+   * every existing route reachable, which is what makes this work purely
+   * additive (NO REGRESSION).
    */
   const {
     result,
@@ -6134,7 +8105,11 @@ export function ConversationChat({
     projectId,
     interactionToken,
     demandId,
+    expanded: resultExpanded,
+    expandResult,
+    collapseResult,
     openResult,
+    openPlayerCard,
     closeResult,
     selectGeography,
     selectProject,
@@ -6149,6 +8124,7 @@ export function ConversationChat({
   // Bind the late-bound opener: the find-work flow above calls this to put its
   // answer in the panel instead of drawing a second card list in the thread.
   openResultRef.current = openResult;
+  openPlayerCardRef.current = openPlayerCard;
   selectInteractionRef.current = selectInteraction;
   selectDemandRef.current = selectDemand;
   selectProjectRef.current = openProjectResult;
@@ -6160,12 +8136,36 @@ export function ConversationChat({
   // 2026-09-05). The name stays a label for the header only.
   const resultContext: ResultContext =
     auth0?.activeOrganizationId || auth0?.activeOrgName ? "organization" : "personal";
-  const openFullScreen = useCallback(
-    // The locale-aware router already in this component — the fallback route
-    // is a REAL screen the person keeps, not a dead end.
+  /**
+   * "OPEN FULL SCREEN" EXPANDS — IT NEVER ESCAPES (owner P0/P1 §17,
+   * 2026-09-23: "Open full screen may expand a contextual result when more
+   * space is useful. It must not be an escape hatch into a second legacy
+   * application").
+   *
+   * It used to be `router.push(route)`: "full screen" of a compact card meant
+   * unmounting the conversation for the result's pre-chat page (the player
+   * card's pointed at a 1,463-line profile). Now it is the `?full=` state of
+   * the SAME result — same depth, same conversation, one control to come
+   * back — and only for a result with a real inline renderer (the panel asks
+   * the registry). Nothing is navigated.
+   */
+  const openFullScreen = expandResult;
+  /**
+   * A NAMED STATION DOOR. The result's own button to its station
+   * (`/dashboard/profile`, `/dashboard/planning`, …) and the fallback's way on
+   * — every one labelled with the station's name, never "full screen". This
+   * one does navigate, through the locale-aware router already in this
+   * component: the station is a REAL screen the person keeps, not a dead end.
+   */
+  const openStation = useCallback(
     (route: string) => router.push(route),
     [router],
   );
+  /** The expanded state as the workspace applies it: honoured only for a
+   *  result that renders inline — the same registry rule the panel uses, so
+   *  the two halves can never disagree about whether the result is "full". */
+  const resultFull =
+    resultExpanded && result !== null && canRenderInline(result, resultContext);
 
   /**
    * GOAL 3 — the depth inside the market result, assembled here because this is
@@ -6258,6 +8258,10 @@ export function ConversationChat({
         data-testid="conversation-chat"
       >
         <ConversationHeader title={labels.headerTitle} nav={nav} mobile={mobile} />
+        {/* Directly under the one top bar, above everything the person came
+            here to do: the answer to "why am I on this screen?" has to arrive
+            before they start reading the conversation, not after. */}
+        {accessNotice}
         <MySpaceRow
           pins={pinned.map((p) => ({ ref: p.ref, label: p.label ?? pinLabelFor(p.ref) }))}
           title={labels.mySpaceTitle}
@@ -6269,10 +8273,21 @@ export function ConversationChat({
             something is selected), row from `lg` (panel is the right column
             and is always visible). Same component, one mount. */}
         <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-          <div className="flex min-h-0 flex-1 flex-col">
+          {/* When a result is EXPANDED the conversation docks to a narrow
+              column on desktop and the panel takes the rest — the person
+              keeps the thread and the composer on screen, nothing unmounts.
+              On a phone the expanded sheet covers the screen and its own
+              header carries the way back. */}
+          <div
+            className={`flex min-h-0 flex-1 flex-col ${
+              resultFull ? "lg:w-[22rem] lg:flex-none xl:w-[26rem]" : ""
+            }`}
+            data-docked={resultFull ? "true" : undefined}
+          >
             <ConversationThread
               items={items}
               typing={typing}
+              introWide={Boolean(openingContext) && openingContextWide && !script}
               /* "Mano erdvė" (S2). It sits INSIDE the opening composition, so
                  the workspace still opens as a conversation: the block, the
                  greeting and the composer are one centred first screen, and
@@ -6280,12 +8295,16 @@ export function ConversationChat({
                  through the SAME dispatcher every chip uses — one set of
                  flows, no second action system. */
               intro={
-                personalIntroPayload && !script ? (
-                  /* Invisible boundary (#1011): the intro's slow readiness
-                     reads stream in AFTER the shell — the opening composition
-                     renders immediately and the block appears when known,
-                     exactly like the layout's SpineStream. */
-                  <Suspense fallback={null}>
+                openingContext && !script ? (
+                  openingContext
+                ) : personalIntroPayload && !script ? (
+                  /* Own boundary (#1011): the intro's slow readiness reads
+                     stream in AFTER the shell — the opening composition
+                     renders immediately, exactly like the layout's
+                     SpineStream. The pending state RESERVES the block's
+                     space (home CLS P0): a payload only exists when the
+                     block can render, so nothing is reserved in vain. */
+                  <Suspense fallback={<PersonalWorkspaceIntroPending />}>
                     <PersonalWorkspaceIntroStream
                       payload={personalIntroPayload}
                       onAction={handlePanelChip}
@@ -6302,26 +8321,50 @@ export function ConversationChat({
               // While the conversation is opening the composer renders inside
               // the centred composition (owner audit §4.1); afterwards the
               // thread ignores this prop and the sticky bar below takes over.
+              //
+              // NOT when an OPENING CONTEXT is on screen (owner constraint
+              // 2026-09-22: "removing the separate ask door is correct only if
+              // the composer remains immediately available from the canonical
+              // root"). Measured at 375x812 on the first walk of this change:
+              // with ŠIANDIEN above it, the inline composer sat below the fold
+              // and the person had to scroll past their whole day to type —
+              // the `?ask=1` door removed and nothing put in its place. The
+              // sticky bar below takes over instead, so the composer is on
+              // screen at every width from the first frame.
               composer={
-                <Composer
-                  variant="inline"
-                  placeholder={labels.composerPlaceholder}
-                  attachLabel={labels.attach}
-                  sendLabel={labels.send}
-                  onSend={handleSend}
-                  onAttach={handleAttach}
-                  prefill={sayPrefill}
-                />
+                openingContext ? undefined : (
+                  <Composer
+                    variant="inline"
+                    placeholder={labels.composerPlaceholder}
+                    attachLabel={labels.attach}
+                    sendLabel={labels.send}
+                    onSend={handleSend}
+                    onAttachFile={handleAttachFile}
+                    pendingAttachment={pendingAttachment}
+                    onRemoveAttachment={discardPendingAttachment}
+                    attachRemoveLabel={t("attachRemove")}
+                    attachSelectedLabel={t("attachSelected")}
+                    prefill={sayPrefill}
+                    onVoice={voiceAvailable ? openVoiceDoor : undefined}
+                    voiceLabel={t("voiceOpen")}
+                  />
+                )
               }
             />
-            {opening ? null : (
+            {opening && !openingContext ? null : (
               <Composer
                 placeholder={labels.composerPlaceholder}
                 attachLabel={labels.attach}
                 sendLabel={labels.send}
                 onSend={handleSend}
-                onAttach={handleAttach}
+                onAttachFile={handleAttachFile}
+                pendingAttachment={pendingAttachment}
+                onRemoveAttachment={discardPendingAttachment}
+                attachRemoveLabel={t("attachRemove")}
+                attachSelectedLabel={t("attachSelected")}
                 prefill={sayPrefill}
+                onVoice={voiceAvailable ? openVoiceDoor : undefined}
+                voiceLabel={t("voiceOpen")}
               />
             )}
           </div>
@@ -6335,9 +8378,15 @@ export function ConversationChat({
             resultContext={resultContext}
             resultNavigation={resultNavigation}
             wide={panelWide}
+            full={resultFull}
             chipsPostedAt={chipsPostedAt}
+            briefChipsPostedAt={briefChipsPostedAt}
             onCloseResult={closeResult}
-            onOpenFull={openFullScreen}
+            // Two different verbs, two different callbacks: the station door
+            // navigates and says where; "full screen" expands in place.
+            onOpenFull={openStation}
+            onExpand={openFullScreen}
+            onCollapse={collapseResult}
           />
         </div>
       </div>

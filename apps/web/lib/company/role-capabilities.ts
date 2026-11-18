@@ -33,9 +33,21 @@ export type OrganizationCapability =
   | "manage-company-profile"
   /** Membership administration UI (the RPCs re-derive authority anyway). */
   | "administer-members"
-  /** Roster operations: worker invites, operations roles, engagement
-   *  provisioning, journal review toggles. */
+  /** Roster operations: operations roles, engagement provisioning, journal
+   *  review toggles. Inviting people is NOT here — see `manage-invitations`. */
   | "manage-roster"
+  /**
+   * Invite people into the organization and see its pending invitations.
+   *
+   * Owner direction 2026-09-24: this is NOT a job-title capability. A
+   * manager or recruiter does not receive it by role; the owner (admin as the
+   * owner's governance delegate) holds it and may delegate it to a person.
+   * Until that per-person delegation exists (RED, owner approval pending),
+   * the holders are exactly the ones the database admits for company worker
+   * invitations: the creator and active owner/admin members (`owns_company`).
+   * A person without it sees a neutral explanation, never an empty list.
+   */
+  | "manage-invitations"
   /** Project creation and project workspace administration. */
   | "manage-projects"
   /** Demand / shortlist / scouting employer surface. */
@@ -64,6 +76,7 @@ const ALL: readonly OrganizationCapability[] = [
   "manage-company-profile",
   "administer-members",
   "manage-roster",
+  "manage-invitations",
   "manage-projects",
   "manage-demand",
   "manage-billing",
@@ -83,7 +96,8 @@ const CAPABILITIES: Record<GovernanceRole, ReadonlySet<OrganizationCapability>> 
   owner: new Set(ALL),
   admin: new Set(ALL),
   // Managers are OPERATIONAL governance (0013 doctrine: roster, journal
-  // review) — never company identity, never membership administration.
+  // review) — never company identity, never membership administration, and
+  // never invitations by title (only by the owner's delegation).
   manager: new Set(OPERATIONAL),
   external_manager: new Set(OPERATIONAL),
   member: new Set<OrganizationCapability>(["view-directory"]),

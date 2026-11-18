@@ -28,7 +28,7 @@ const read = (rel: string): string => readFileSync(join(APP_ROOT, rel), "utf-8")
 const msg = (loc: string): Record<string, unknown> =>
   JSON.parse(read(join("messages", `${loc}.json`)));
 
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 function deep(obj: unknown, path: string): unknown {
   return path.split(".").reduce<unknown>((acc, k) => {
@@ -46,10 +46,21 @@ describe("worker launch — manual work-experience entry (no CV required)", () =
     // Supports an ongoing/current role (no forced end date).
     expect(src).toContain("expCurrent");
   });
+  it("the form says what the engagement was, so a placement is not stored as employment", () => {
+    // The save function defaults a missing kind to `employee`; the form sent
+    // none, so study practice or volunteering typed here became a job claim.
+    expect(src).toMatch(/isCurrent: expCurrent,\s+relationship: expKind,/);
+    expect(src).toContain('data-testid="add-experience-kind"');
+    expect(src).toContain("SELF_DECLARED_RELATIONSHIPS.map((slug) => (");
+    // The row shown before the page reloads carries the chosen kind too.
+    expect(src).not.toMatch(/orgName: title,\s+relationship: "employee",/);
+  });
+
   it("every active locale defines the add-experience keys with parity", () => {
     const keys = [
       "addExperienceTitle",
       "expTitleLabel",
+      "expKindLabel",
       "expTitlePlaceholder",
       "expStartLabel",
       "expEndLabel",
@@ -102,6 +113,21 @@ describe("worker launch — email signup is never a silent dead-end", () => {
     expect(src).toContain("check_email");
     expect(src).toContain("data.session");
     expect(src).toContain('data-testid="signup-check-email"');
+  });
+  it("a LIVE session goes straight to onboarding with no email step (registration friction removal)", () => {
+    const afterSignUp = src.slice(src.indexOf("await supabase.auth.signUp"));
+    const noSessionBlock = afterSignUp.indexOf("if (!data.session)");
+    const liveBranch = afterSignUp.indexOf('markSignupPending("email")');
+    const toOnboarding = afterSignUp.indexOf("router.replace(onboardingPath)");
+    // The defensive no-session block comes first and RETURNS; the live-session
+    // branch then marks the signup and lands on /onboarding.
+    expect(noSessionBlock).toBeGreaterThan(0);
+    expect(liveBranch).toBeGreaterThan(noSessionBlock);
+    expect(toOnboarding).toBeGreaterThan(liveBranch);
+    expect(afterSignUp.slice(noSessionBlock, liveBranch)).toMatch(/return;/);
+    // Nothing between the session check and the redirect asks for a mailbox.
+    expect(afterSignUp.slice(liveBranch, toOnboarding)).not.toMatch(/resend|check_email|verify/i);
+    expect(src).toContain('"/onboarding"');
   });
   it("marks the signup pending so signup_completed fires on the next authed surface", () => {
     expect(src).toContain('markSignupPending("email")');

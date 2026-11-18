@@ -48,20 +48,100 @@ export class ProdQaGuardError extends Error {
 }
 
 /**
- * THE ONE ALLOWLISTED SYNTHETIC IDENTITY.
+ * THE ALLOWLISTED SYNTHETIC IDENTITIES.
  *
  * Hard-coded on purpose. If this were an environment variable, the allowlist
  * would be whatever the caller's shell happened to say, which is not an
  * allowlist. Widening it is a code change, in a diff, in a PR — which is
  * exactly the review surface an identity with production access deserves.
  *
- * `+` addressing keeps it unmistakably synthetic and routable to a real
+ * `+` addressing keeps each unmistakably synthetic and routable to a real
  * mailbox the owner controls, without inventing a domain.
+ *
+ * 2026-09-28 (owner decision: production-walk the COMPANY and AGENCY chains
+ * and two-person messaging): the three `+multiw` identities are added back
+ * BESIDE the worker. They were provisioned 2026-08-06 for the closed #1042
+ * and already exist in production marked `app_metadata.qa_synthetic`, named
+ * "(test)", owning only the "QA-SYNTHETIC … (testinis subjektas)"
+ * organizations. A minted session is the account's own ordinary session —
+ * nothing here grants a permission the account does not already have.
  */
 export const PROD_QA_WORKER_EMAIL = "qa.worker+goal3@labourmarket.ai" as const;
+export const PROD_QA_OWNER_EMAIL = "qa.owner+multiw@labourmarket.ai" as const;
+export const PROD_QA_MANAGER_EMAIL = "qa.manager+multiw@labourmarket.ai" as const;
+export const PROD_QA_SECOND_WORKER_EMAIL = "qa.worker+multiw@labourmarket.ai" as const;
+/** Owner decision 2026-09-30: the synthetic AGENCY identity, to walk
+ *  Agency → Calendar. Synthetic QA only; it changes no real user's rights. */
+export const PROD_QA_AGENCY_EMAIL = "qa.agency+multiw@labourmarket.ai" as const;
 
-/** Every allowlisted synthetic identity. Exactly one, today and by intent. */
-export const PROD_QA_IDENTITIES: readonly string[] = [PROD_QA_WORKER_EMAIL];
+/**
+ * Owner decision 2026-10-26 ("AKTYVAVIMO KLIŪČIŲ ŠALINIMAS"): ONE fresh
+ * synthetic worker and ONE fresh synthetic company, to prove the real path
+ * from a brand-new account through onboarding to the first useful action
+ * (journal entry / saved need). Every other identity above is already
+ * onboarded, so none of them can walk that path.
+ *
+ * These two are created ONLY by the owner (`prod-qa-fresh-provision.yml`,
+ * dispatched by the owner, or `scripts/prod-qa-provision.ts` run by hand).
+ * The walk never creates them: `prod-qa-mint-session.ts` refuses a fresh
+ * identity whose account does not exist yet, and `prod-qa-walk.yml` mints
+ * them without the provision step.
+ */
+export const PROD_QA_FRESH_WORKER_EMAIL = "qa.freshworker+act2@labourmarket.ai" as const;
+export const PROD_QA_FRESH_COMPANY_EMAIL = "qa.freshcompany+act2@labourmarket.ai" as const;
+
+/**
+ * The first fresh pair (act1, created 2026-10-26) is onboarded now, so it can no
+ * longer walk a new account's path; owner decision 2026-11-10 approved the act2
+ * pair above for that. act1 stays allowlisted: the buyer-workspace walk uses the
+ * act1 worker as its non-buyer, and revoke must still reach both accounts.
+ */
+export const PROD_QA_FRESH_WORKER_ACT1_EMAIL = "qa.freshworker+act1@labourmarket.ai" as const;
+export const PROD_QA_FRESH_COMPANY_ACT1_EMAIL = "qa.freshcompany+act1@labourmarket.ai" as const;
+
+/**
+ * Owner decision 2026-10-26 ("6.4 PIRKĖJO TESTO LEIDIMAS"): ONE synthetic
+ * buyer (customer role) for the buyer-workspace test — no existing synthetic
+ * identity holds the customer role, and adding it to one would change that
+ * account's active role for every other walk. Created by the owner only, with
+ * the customer role in its sign-up metadata (the ordinary profile trigger
+ * writes it; no privileged grant).
+ */
+export const PROD_QA_BUYER_EMAIL = "qa.buyer+act1@labourmarket.ai" as const;
+
+/**
+ * Owner decision 2026-10-28 ("P0 E2E, ONBOARDING IR UX/UI"): ONE synthetic
+ * INVITED worker. The owner's `prod-qa-invited-provision.yml` first stores a
+ * synthetic partner referral addressed to it (marked `QA-SYNTHETIC-…`), then
+ * creates the account — confirmed, passwordless, no role — so the walk proves
+ * the path a real referred person takes when they register WITHOUT the link.
+ *
+ * The address is the owner's real QA mailbox itself, without a plus tag: the
+ * mailbox host refuses plus addresses (owner D-4 result 2026-11-02, 550 user
+ * unknown), and the walk must read the verification mail there.
+ */
+export const PROD_QA_INVITED_EMAIL = "qa.invited@labourmarket.ai" as const;
+
+/** The owner-created identities — minted only if the owner has created them. */
+export const PROD_QA_FRESH_IDENTITIES: readonly string[] = [
+  PROD_QA_FRESH_WORKER_EMAIL,
+  PROD_QA_FRESH_COMPANY_EMAIL,
+  PROD_QA_FRESH_WORKER_ACT1_EMAIL,
+  PROD_QA_FRESH_COMPANY_ACT1_EMAIL,
+  PROD_QA_BUYER_EMAIL,
+  PROD_QA_INVITED_EMAIL,
+];
+
+/** Every allowlisted synthetic identity — equality-matched, never by prefix
+ *  or pattern. */
+export const PROD_QA_IDENTITIES: readonly string[] = [
+  PROD_QA_WORKER_EMAIL,
+  PROD_QA_OWNER_EMAIL,
+  PROD_QA_MANAGER_EMAIL,
+  PROD_QA_SECOND_WORKER_EMAIL,
+  PROD_QA_AGENCY_EMAIL,
+  ...PROD_QA_FRESH_IDENTITIES,
+];
 
 export const PRODUCTION_ORIGIN = `https://${PRODUCTION_PROJECT_REF}.supabase.co`;
 
@@ -77,6 +157,22 @@ export interface ProdQaTarget {
   readonly origin: string;
   readonly projectRef: string;
   readonly email: string;
+}
+
+/**
+ * Supabase's CURRENT opaque key formats: `sb_secret_…` (service) and
+ * `sb_publishable_…` (anon). Unlike the legacy JWTs they carry no `ref`
+ * claim, so the key itself cannot be bound to a project here. That binding is
+ * already enforced where it matters: the target origin must be EXACTLY the
+ * production project (check 1 above), and the key is only ever sent to that
+ * origin — a key for another project simply fails to authenticate. The shape
+ * is matched strictly and by role, so a service key cannot stand in for the
+ * anon key (or the reverse), and nothing else is widened.
+ */
+function isCurrentFormatKey(label: "service" | "anon", key: string): boolean {
+  const pattern =
+    label === "service" ? /^sb_secret_[A-Za-z0-9_-]{16,}$/ : /^sb_publishable_[A-Za-z0-9_-]{16,}$/;
+  return pattern.test(key);
 }
 
 /**
@@ -137,7 +233,7 @@ export function assertProdQaTarget(input: ProdQaTargetInput): ProdQaTarget {
           `"${PRODUCTION_PROJECT_REF}" (${redactKey(key)}).`,
       );
     }
-    if (!decodeJwtClaims(key)) {
+    if (!decodeJwtClaims(key) && !isCurrentFormatKey(label, key)) {
       throw new ProdQaGuardError(
         `the ${label} key is not a decodable Supabase key (${redactKey(key)}).`,
       );

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Production reality / trust guards (production-reality-trust-p0).
@@ -20,7 +21,7 @@ import { join } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 
 describe("issue 2 — stale journal skill chips stay collapsed (no unrelated chips shown)", () => {
   const src = read("components/app/journal-entry-skill-links.tsx");
@@ -87,7 +88,7 @@ describe("issue 3 — no approve/reject buttons when the reviewer is not permitt
 });
 
 describe("issue 4 — the map own-marker is a real player card (real data only)", () => {
-  const live = read("components/app/market-map/location-map.tsx");
+  const live = read("components/app/market-map/own-location-layer.ts");
   const page = read("app/[locale]/dashboard/market-map/page.tsx");
 
   it("MapIdentity carries the real player-card signals", () => {
@@ -113,7 +114,9 @@ describe("issue 4 — the map own-marker is a real player card (real data only)"
   it("the marker / map is enlarged for mobile (player-card scale)", () => {
     // Avatar bumped from 40px → 52px; map taller on mobile.
     expect(live).toMatch(/width:52px;height:52px/);
-    expect(live).toMatch(/min-h-\[24rem\]/);
+    // The own marker now lives on the one canonical map, whose dashboard-mode
+    // container is tall on mobile (clamp(24rem,60vh,40rem)).
+    expect(read("components/app/market-map/market-map-model.ts")).toMatch(/clamp\(24rem,60vh,40rem\)/);
   });
 
   it("the active locales carry the availability marker labels", () => {

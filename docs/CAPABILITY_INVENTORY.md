@@ -447,7 +447,9 @@ Three rules, each learned from a measured failure in this reconciliation:
    `organization_type='team'`; "roster" means the active `company_workers`
    list, never a schedule.
 
-### 6.1 PRODUCTION SNAPSHOT — 2026-09-07T03:46Z (current)
+### 6.1 PRODUCTION SNAPSHOT — 2026-09-07T03:46Z (HISTORICAL — superseded by the 2026-10-03 line below; the register in `capability-register.ts` is the live truth)
+
+**Re-measured 2026-10-03 (read-only, max ledger `20261003144407`):** `profiles` / `workers` 71 / 71 · `projects` 10 · `journal_entries` 97 · `ai_runs` 355 · `notification_events` 65 · `work_tasks` 3 · `education_cohort_members` 1 · `evidence_import_rows` 158 · `lmc_*` 5 base tables + 2 views · `team_details` 0. The table below is the 2026-09-07 snapshot and is kept for history, not as current counts.
 
 266 applied migrations (max `20260906202628`) · 190 tables · **RLS enabled on
 all 190**.
@@ -518,7 +520,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | SKL-6 | ESCO taxonomy | 4 tables, 1,045,186 labels | IMPL | — | 2 | 0 of 161 platform skills carry an `esco_uri` — the bridge is inert |
 | SKL-7 | Documents / credential validity | `worker_documents`, `document_files` | IMPL | W (add only) | 1 | one download door, versioned, ack-bound |
 | SKL-8 | Country requirement matrix | `lib/country-readiness` (code), `country_document_requirements` (empty) | PARTIAL | — | 2 | no route of its own |
-| SKL-9 | **Qualification recognition / RPL / equivalence** | — | **MISSING** | — | 2 | nothing at any layer; keep in the architecture |
+| SKL-9 | **Qualification recognition / RPL / equivalence** | `lib/qualification/capability-standing`, `lib/skills/recognition-model` (pure); `competency_recognitions` (unapplied RED packet P-3, PR #1741) | **PARTIAL** (EXISTS pure + READ wired; **DISCONNECTED** at the write: no assessor act, 0 training providers) | — | 2 | corrected 2026-10-01 from MISSING; `hasRecognizedEquivalence` stays false until P-3 is applied and an assessor records one |
 | SKL-10 | Training & certification register | `training_programs`, `training_assignments` | IMPL (0 rows) | — | 2 | applied; writes nothing into the skill ladder, by decision |
 
 #### C. ORGANIZATION · WORKSPACE · AUTHORITY
@@ -529,7 +531,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | ORG-2 | **Multi-capability organization** | `organization_roles`, `organization_role_types` | PROD_DATA | — | 0 | **OWNER?** `companies.company_type='staffing_agency'` still hard-gates 7 agency features |
 | ORG-3 | Memberships + invitations + roles | `company_memberships`, `invitations` | PROD_DATA | — | 1 | — |
 | ORG-4 | Workspace context + switching | cookie + `profiles.active_organization_id` | PROD_DATA | W | 1 | `getActiveOrganizationContext` is owner-only while `getWorkspaceContext` is not |
-| ORG-5 | Cross-org isolation | 7 authority helpers | PARTIAL | — | 0 | an org **manager** cannot read `company_workers` (`owns_company` excludes managers) |
+| ORG-5 | Cross-org isolation | 7 authority helpers | PARTIAL | — | 0 | manager reads/creates/updates projects and reads the roster via `manages_organization` (owner RED approval 2026-09-24, ledger `20260924092836`); roster **management** (provision/role RPCs) and project DELETE stay owner/admin; invitations are a per-person owner/admin grant, never a title (`manages_invitations`, ledger `20260924120147`); open: the manager's and a delegate's real-session walks |
 | ORG-6 | Roster (employees, historical, agency) | `engagement_contexts` + 4 legacy link tables | DUPLICATED | — | 1 | 4 parallel roster truths |
 | ORG-7 | Candidates / talent pool / scouting | `candidate_drafts`, `demand_shortlist` | PROD_DATA | — | 1 | `/dashboard/talent` is a superadmin sample preview |
 | ORG-8 | Agency ↔ client bridge | `agency_client_connections`, `agency_candidate_offers`, `agency_clients` | PROD_DATA | — | 1 | `agency_clients` APPLIED 2026-09-14 (ledger `20260914202322`) under canonical Model B — a private client record, not a rival to the bridge |
@@ -541,16 +543,17 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 
 | ID | Capability | Canonical objects | Status | AI | P | Next action |
 |---|---|---|---|---|---|---|
-| WRK-1 | Projects | `projects` | IMPL | W | 1 | `start_date`/`end_date` have no writer |
+| WRK-1 | Projects | `projects` | IMPL | W | 1 | corrected 2026-10-03: dates DO have a writer (`project-facts-form` -> `project-admin-actions` -> `update_project_facts_v1`); 2 of 10 projects carry a start_date |
 | WRK-2 | Objects / sites | `work_objects` | IMPL (1 row) | — | 1 | no route; a section of `/dashboard/company` |
 | WRK-3 | Stages | `project_stages` | IMPL | W | 2 | — |
-| WRK-4 | Tasks | `work_tasks` (+ `follow_up_tasks` duplicate) | IMPL (0 rows) | W | 2 | "reachable, functional and pointless" — its own migration says so |
+| WRK-4 | Tasks | `work_tasks` (+ `follow_up_tasks` duplicate) | IMPL (3 rows) | W | 2 | 2026-10-03: 3 rows; stage + subtask structure APPLIED (#2123, ledger 20261003144407), RPC-proven, UI not browser-proven |
 | WRK-5 | Worker→project assignment | `project_worker_assignments` | PROD_DATA (1 row) | W (strong) | 1 | no overlap constraint of any kind |
-| WRK-6 | **Team→project assignment** | — | **MISSING** | — | 1 | no FK exists anywhere |
+| WRK-6 | **Team→project assignment** | `project_worker_assignments` (fan-out), `team_details` (0 rows) | **PARTIAL** (corrected 2026-10-03, #2084) | — | 1 | whole team fans out through the per-person write; no unit-level assignment, no team FK; 0 teams in production |
 | WRK-7 | Readiness / operational status | `project_worker_readiness_items` | IMPL | W | 2 | — |
 | WRK-8 | Defects / corrections | `defects`, `defect_corrections` | IMPL (0 rows) | — | 3 | assignee read APPLIED 2026-09-14 (ledger `20260914195053`), proven per-row on prod; `defect_corrections` stays manager-only (owner 2b DEFER) |
 | WRK-9 | Handover passport | `project_handover_entries` (1 row) | IMPL | — | 3 | reachable on `/dashboard/projects/[id]/operations`; written once in prod — no nav tile of its own |
 | WRK-10 | Project economics | `project_budgets` (0 rows) | IMPL | — | 3 | `ProjectEconomicsPanel` renders on project operations; 0 rows is adoption, not disconnection |
+| WRK-11 | Project forecast | `project_forecasts` (no writer yet; computed on read) | IMPL | — | 3 | Forecast panel on the manager project page beside the course, computed on read from `forecast_project_facts_v1` after `can_manage_project`; storage, scheduler and cadence modes not wired (#2738) |
 
 #### E. EVIDENCE · JOURNAL
 
@@ -558,7 +561,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 |---|---|---|---|---|---|---|
 | EVID-0 | **Work Journal** (4 transports, 1 core) | `journal_entries` + 7 satellites | **PROD_HUMAN** | R + PC | — | the product's strongest chain |
 | EVID-1 | **Organization historical evidence import** | `organization_people`, `evidence_import_*`, `organization_evidence_*` | **PARTIAL** | production data path | 0 | owner-approved 2026-09-08; recursion fix APPLIED (ledger `20260908080950`); read + write proven under real auth, rolled back, zero residue; **no human import yet** |
-| EVID-2 | Manager review / receive loop | `journal_entry_confirmations`, `review_journal_entry` | PROD_HUMAN | — | 0 | **OWNER?** self-confirmation: block in the RPC, or keep the weaker classification? |
+| EVID-2 | Manager review / receive loop | `journal_entry_confirmations`, `review_journal_entry` | PROD_HUMAN | — | 0 | RESOLVED 2026-11-02 (decision 0028): self-declaration allowed and labelled as such; only self-as-independent-confirmer is refused |
 | EVID-3 | Work verification state (8 states) | `lib/journal/work-verification-state` | IMPL | — | 1 | never walked by a human |
 | EVID-4 | Photos / task evidence | `journal_entry_photos`, `journal_entry_tasks` | PROD_DATA (8 photos) | — | 2 | — |
 | EVID-5 | Hours: journal metrics · allocations · timesheets | 3 stores + 1 dead | PARTIAL | — | 1 | reconciled inside ONE SQL function; no TS reader unions them |
@@ -590,7 +593,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | CAL-5 | Absences / leave | `worker_absences` | IMPL (0 rows) | — | 2 | privacy-narrowed view is correct |
 | CAL-6 | Booking request → accept → engagement | `booking_requests` + 3-layer concurrency | PROD_DATA (1) | — | 1 | nothing past `accepted`; expiry RPC has no scheduler |
 | CAL-7 | **Capacity reservation** | — | **MISSING** | — | 1 | nothing decrements anything |
-| CAL-8 | **Shifts / rotas / rosters** | — | **MISSING** | — | 2 | keep in the architecture |
+| CAL-8 | **Shifts / rotas / rosters** | `work_plan_entries.recurrence` (RED draft 20261023160000, NOT applied) + `lib/planning/shift-pattern.ts` | PARTIAL (TEST_PROVEN, 2026-10-23) | — | 2 | the rule is stored, shift days are projected; overlap warns, never refuses |
 | CAL-9 | Utilisation / FTE | — | **MISSING** | — | 3 | — |
 | CAL-10 | **Planned vs actual → learned duration/capacity** | — | **MISSING** | — | 1 | the flywheel's learning loop; a forecast may never be stored where a fact is read (SEP-1) |
 
@@ -613,15 +616,18 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 |---|---|---|---|---|---|---|
 | COM-1 | Conversations + attachments + unread | `conversations`, `conversation_*` | PROD_DATA (5/18) | — | 1 | no organization participant type; `team` threads always RESTRICTED |
 | COM-2 | Contact disclosure | `contact_disclosure_requests` | IMPL (0 rows) | — | 2 | expiry RPC has no caller — requests never expire |
-| COM-3 | Notifications (20 types) | `notification_events` | PARTIAL | — | 1 | all 20 emitted; **email inert** (provider unset) |
+| COM-3 | Notifications (20 types) | `notification_events` | PARTIAL | — | 1 | all types emit in code; booking/engagement/task/absence emitters read ungranted domain tables via service_role and delivered nothing until 2026-09-23 (facts now travel from the write path, no grant added); **email inert** (provider unset) |
 | COM-4 | Weekly digest | cron + read-time emitter | IMPL | — | 2 | the only cron in the product |
 | COM-5 | Attention / activity centre | spine signals | PARTIAL | — | 2 | fragmented across 4 surfaces |
+| COM-6 | Voice Work Journal (record or upload, transcript, work journal) | `services/transcribe`, `lib/voice`, `voice-journal-recorder` (no table; `voice_journal_jobs` is an unapplied draft #740) | PARTIAL | — | 2 | ACCEPTED PLAN, built 2026-07-12. **Header corrected (verified live 2026-10-07):** the site sends `Permissions-Policy: microphone=(self)` (U-26 accepted), so browser recording may be permitted by the person; the 2026-10-06 `microphone=()` regression no longer holds. Production transcription config (`VOICE_TRANSCRIBE_URL`) is unverified; real mic + STT is human-proof only. 25 MB / 10 min are unreachable behind the 5 MB server-action cap; recognition language = UI locale; no voice provenance stored; transcribe service production deployment UNVERIFIED. See `apps/.evidence/audit/VOICE_FIRST_RECOVERY_AUDIT.md` |
+| COM-7 | Voice dictation in the command finder | browser Web Speech API (no table) | PARTIAL | — | 3 | search box only, never an action (#796); probably denied by the same header (live UNKNOWN), silent on denial; audio goes to the browser vendor with no disclosure |
+| COM-8 | Voice as an equal door to the canonical action spine | none | MISSING | — | 3 | frozen design doctrine section A.2 ("two equal doors ... no capability exists in only one path"), mobile "Ask (Conversation, voice)" tab, voice into composer/journal: a design target, **not implemented at any layer**. The label "voice-first" appears nowhere in the repository history. Must reuse the one intent-authorization-action spine, never a second architecture |
 
 #### J. MAP · MOBILITY · INTELLIGENCE
 
 | ID | Capability | Canonical objects | Status | AI | P | Next action |
 |---|---|---|---|---|---|---|
-| GEO-1 | Market map / world view | `lib/market-map` | PARTIAL | — | 1 | owner-scoped only; cross-user aggregate deliberately absent |
+| GEO-1 | Market map / world view | `lib/market-map` | PARTIAL | — | 1 | owner-scoped only; cross-user aggregate deliberately absent. ONE canonical map (2026-10-01); prior human proof not re-earned until production screenshots at 390/1280/1440 exist |
 | GEO-2 | Personal location privacy | `preferred_locations`, `consented_login_location_signals` | PROD_DATA | — | — | **no coordinates for people, by schema construction** |
 | GEO-3 | Mobility / cross-border requirements | `lib/country-readiness` | PARTIAL | — | 2 | checklist only; no permit/posting workflow |
 | GEO-4 | Labour-market intelligence | `market_intelligence_observations` (76) | PARTIAL | — | 2 | exactly one path into an operational action |
@@ -635,7 +641,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | EDU-2 | Programmes / cohorts / members | `education_*` | PROD_DATA (1/1/0) | W | 1 | correction path applied 2026-09-08; zero cohort members in production |
 | EDU-3 | Learner outcomes | `institution_learner_outcomes` | IMPL | — | 2 | — |
 | EDU-4 | Learning compass (student path) | `lib/learning/learning-compass` | IMPL | — | 2 | — |
-| EDU-5 | Human-in-loop learning review | `learning_review_queue` | **ORPHAN** | — | 3 | `/dashboard/learning` has zero inbound links — VERIFIED, verdict unchanged; parked on F-N1 (owner). Claim now names its module + route so it is checkable |
+| EDU-5 | Human-in-loop learning review | `learning_review_queue` | **ORPHAN** | — | 3 | `/dashboard/learning` has zero inbound links — VERIFIED, verdict unchanged; parked on F-N1 (owner). Claim now names its module + route so it is checkable. 2026-10-01: signal→queue producer connected code-only (org derived from the entry, pending items only, manager brief count when >0); route still unlinked, policy OFF, 0 prod rows, TEST_PROVEN only |
 | EDU-6 | Institution reporting | `education_programs` + public vacancy counts | IMPL | — | 2 | CSV export built 2026-09-13; never downloaded by a human |
 
 #### L. PLATFORM · AI · GOVERNANCE
@@ -660,9 +666,10 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 
 Each is independent; none blocks a code train.
 
-1. **Self-confirmation, authorization side** (EVID-2) — block in
-   `review_journal_entry`, or rely on the weaker classification now shipping?
-   A sole trader legitimately has nobody above them. RED.
+1. ~~**Self-confirmation, authorization side** (EVID-2)~~ — **RESOLVED by the owner
+   2026-11-02, decision 0028**: a person's own confirmation is a lawful personal
+   declaration and stays labelled as such; only presenting oneself as the
+   independent confirmer is refused.
 2. **Nine unapplied migrations** — apply the four with live UI behind them
    (agency clients, journal templates, external profiles, opportunity-seen), or
    retire them?

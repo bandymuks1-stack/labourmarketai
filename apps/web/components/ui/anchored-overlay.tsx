@@ -24,9 +24,10 @@ import { createPortal } from "react-dom";
  * context is the architectural fix, and a portal to `document.body` is the
  * one escape hatch the platform gives us.
  *
- * Z SCALE (portal children compete only at the root):
- *   60 — anchored dropdown menus (account, workspace, notifications)
- *   70 — modal dialogs (command search)
+ * Z TIERS (portal children compete only at the root; named in
+ * tokens/zindex.ts — never a raw z-[n]):
+ *   z-modal (60) — anchored dropdown menus (account, workspace, notifications)
+ *   z-toast (70) — the command search dialog, above everything
  *
  * The overlay anchors to its trigger with fixed positioning recomputed on
  * resize and scroll; Escape and outside-pointerdown close it (clicks inside
@@ -115,7 +116,7 @@ export function AnchoredOverlay({
     <div
       ref={panelRef}
       style={{ position: "fixed", top: pos.top, left: pos.left, right: pos.right }}
-      className={`z-[60] ${className}`}
+      className={`z-modal ${className}`}
       data-overlay-root="anchored"
     >
       {children}
@@ -127,7 +128,7 @@ export function AnchoredOverlay({
 /**
  * Plain body portal for FULL-SCREEN overlays (the command search dialog) —
  * same escape from ancestor stacking contexts, no anchor math. The child
- * keeps its own `fixed inset-0 z-[70]` classes.
+ * keeps its own `fixed inset-0 z-toast` classes.
  */
 export function OverlayPortal({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);

@@ -1,5 +1,7 @@
 import "server-only";
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { readConfirmedWorkBySkill } from "@/lib/evidence/confirmed-work-read";
+import { deriveConfirmedWorkTier } from "@/lib/evidence/evidence-tier";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -153,8 +155,10 @@ export async function readLearningCompass(): Promise<LearningCompassRead> {
         .select("id", { count: "exact", head: true })
         .eq("worker_id", ctx.workerId),
     )
-      .then((r: { count: number | null; error: unknown }) => (r.error ? 0 : (r.count ?? 0)))
-      .catch(() => 0),
+      // A failed count is UNKNOWN, never 0 (SEP-7) — 0 would advise "log your
+      // first entry" to a person with a full journal.
+      .then((r: { count: number | null; error: unknown }) => (r.error ? null : (r.count ?? 0)))
+      .catch(() => null),
   ]);
 
   const education: CompassEducation[] =
@@ -203,9 +207,20 @@ export async function readLearningCompass(): Promise<LearningCompassRead> {
     engagements.find((e) => e.relationshipSlug === "student" && e.organizationName?.trim())
       ?.organizationName ?? null;
 
+  // Confirmed REAL WORK per skill, as the person's own caller (RLS). It only
+  // weakens a "weak evidence" recommendation; unknown (null) changes nothing.
+  const confirmedWork = await readConfirmedWorkBySkill(supabase, [
+    { id: ctx.workerId, profileId: user.id },
+  ]);
+  const ownConfirmedWork = confirmedWork?.get(ctx.workerId);
+
   const compass = buildLearningCompass({
     professionSlug: ctx.subject.professionSlug ?? null,
-    skills: ctx.subject.skills.map((s) => ({ slug: s.uri, evidence: s.evidence })),
+    skills: ctx.subject.skills.map((s) => ({
+      slug: s.uri,
+      evidence: s.evidence,
+      confirmedWork: deriveConfirmedWorkTier(ownConfirmedWork?.get(s.uri)),
+    })),
     journalEntryCount: journalCount,
     education,
     opportunities,

@@ -61,6 +61,27 @@ describe("the save path refuses to drop reviewed-pending durations", () => {
     expect(submitBody).not.toMatch(/setTimeStatus\(\s*"confirmed"/);
   });
 
+  it("a quick save that states a duration opens the review step first (full form = chat = quick-record)", () => {
+    const submitAt = COMPOSER.indexOf("async function submit() {");
+    const body = COMPOSER.slice(submitAt, COMPOSER.indexOf("\n  function ", submitAt));
+    const at = body.indexOf('stage === "compose" && !editingEntry');
+    expect(at).toBeGreaterThan(-1);
+    const block = body.slice(at, at + 420);
+    // the ONE recognizer (read through reviewTimeSuggestion, so a stated span
+    // counts and a break does not — P0-A 2026-10-30), the existing review
+    // step, and an early return
+    expect(block).toContain("statedDurationCount(reviewedSuggestions(text))");
+    const helperAt = COMPOSER.indexOf("function reviewedSuggestions(raw: string)");
+    expect(helperAt).toBeGreaterThan(-1);
+    const helper = COMPOSER.slice(helperAt, helperAt + 300);
+    expect(helper).toContain("extractJournalSuggestions(raw)");
+    expect(helper).toContain("reviewTimeSuggestion(raw,");
+    expect(block).toContain("analyse(text);");
+    expect(block).toContain("return;");
+    // …and it sits before the request is built
+    expect(at).toBeLessThan(body.indexOf('fd.set("fragments_json"'));
+  });
+
   it("only CONFIRMED work still ships — the fix did not loosen the filter", () => {
     expect(COMPOSER).toMatch(/fragments\s*\n?\s*\.filter\(\(f\) => f\.status === "confirmed"\)/);
     expect(COMPOSER).toMatch(/timeStatus === "confirmed" && timeValue/);

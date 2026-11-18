@@ -20,6 +20,8 @@ import {
   deriveTodayOpportunity,
   deriveTodayState,
   deriveTodayWork,
+  isTodayGrowthShown,
+  isTodayOpportunityShown,
   unknownTodayDoors,
   type TodayAttention,
 } from "./today-model";
@@ -112,7 +114,7 @@ describe("UNKNOWN ≠ ZERO — a reader that answered null is never a figure", (
     expect(deriveTodayState(wi)).toEqual({ kind: "nothing" });
     const work = deriveTodayWork(wi);
     expect(work.kind).toBe("known");
-    if (work.kind === "known") expect(work.today).toEqual({ hours: 0, entries: 0, untimed: 0 });
+    if (work.kind === "known") expect(work.today).toEqual({ hours: 0, entries: 0, untimed: 0, confirmedHours: 0 });
   });
 });
 
@@ -139,8 +141,8 @@ describe("today and this week are the model's own period figures", () => {
     const work = deriveTodayWork(wi);
     expect(work).toEqual({
       kind: "known",
-      today: { hours: today.hours, entries: today.entries, untimed: today.entriesWithoutDuration },
-      week: { hours: week.hours, entries: week.entries, untimed: week.entriesWithoutDuration },
+      today: { hours: today.hours, entries: today.entries, untimed: today.entriesWithoutDuration, confirmedHours: today.confirmedHours },
+      week: { hours: week.hours, entries: week.entries, untimed: week.entriesWithoutDuration, confirmedHours: week.confirmedHours },
       truncated: false,
     });
     expect(week.entries).toBe(3);
@@ -314,7 +316,7 @@ describe("the one next action is the work-card engine's, with a real route", () 
   it("a routed dimension keeps the engine's own route and why", () => {
     const card = deriveWorkCardState({ ...SIGNALS, hasProfession: false }, 0);
     const next = deriveTodayNext(card);
-    expect(next.kind === "action" && next.href).toBe("/dashboard/profile");
+    expect(next.kind === "action" && next.href).toBe("/dashboard/profile#profile-edit");
     expect(next.kind === "action" && next.whyKey).toBe("why.work");
   });
 
@@ -423,6 +425,38 @@ describe("one opportunity sentence — band counts over the reader's own rows", 
     const o = deriveTodayOpportunity(view);
     expect(o.kind === "bands" && o.discoveryOnly).toBe(true);
     expect(o.kind === "bands" && o.counts.strong + o.counts.possible).toBe(0);
+  });
+
+  it("'Tuščia = tvarkinga': an empty line is left out, a failed read is still named", () => {
+    // Shown: the reading, and the two ways the source could not answer.
+    expect(isTodayOpportunityShown(deriveTodayOpportunity(ready({ external: [external("possible", "x1")], totalExternal: 1 })))).toBe(true);
+    expect(isTodayOpportunityShown(deriveTodayOpportunity({ kind: "unavailable" }))).toBe(true);
+    expect(isTodayOpportunityShown(deriveTodayOpportunity(null))).toBe(true);
+    // Left out: nothing to say (no postings; no worker row — the next action leads there).
+    expect(isTodayOpportunityShown(deriveTodayOpportunity(ready({})))).toBe(false);
+    expect(isTodayOpportunityShown(deriveTodayOpportunity({ kind: "no-worker" }))).toBe(false);
+  });
+});
+
+describe("'Tuščia = tvarkinga' for the growth line — owner §20", () => {
+  it("the reading and a failed read are shown; an empty reading is not stated", () => {
+    const wi = deriveWorkIntelligence({
+      entries: [
+        entry("e1", TODAY, 4, ["s-tile"]),
+        entry("e2", "2026-09-12", 4, ["s-tile"]),
+        entry("e3", "2026-09-11", 4, ["s-tile"]),
+        entry("e4", "2026-09-10", 1, ["s-screed"]),
+      ],
+      skills: SKILLS,
+      todayIso: TODAY,
+    });
+    expect(isTodayGrowthShown(deriveTodayGrowth(deriveGrowthReading(wi, { primaryProfessionSlug: null })))).toBe(true);
+    // SEP-7: a failed read is UNKNOWN, and UNKNOWN is named — never silently dropped.
+    expect(isTodayGrowthShown(deriveTodayGrowth(null))).toBe(true);
+    // A new worker's reading is EMPTY, not a fact about them: left out.
+    const thin = deriveWorkIntelligence({ entries: [entry("e1", TODAY, 4)], skills: SKILLS, todayIso: TODAY });
+    expect(isTodayGrowthShown(deriveTodayGrowth(deriveGrowthReading(thin, { primaryProfessionSlug: null })))).toBe(false);
+    expect(isTodayGrowthShown({ kind: "none" })).toBe(false);
   });
 });
 

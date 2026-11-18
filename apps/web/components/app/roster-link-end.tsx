@@ -53,7 +53,11 @@ export function RosterLinkEndControl({
         type="button"
         onClick={() => setOpen(true)}
         data-testid="roster-link-end-open"
-        className="min-h-11 w-fit rounded-md border border-ink-500 bg-ink-800 px-3 text-xs font-semibold text-text-secondary hover:border-state-warning/60"
+        className={
+          side === "owner"
+            ? "min-h-11 w-fit rounded-control px-2.5 text-meta font-medium text-text-muted underline-offset-4 hover:text-state-warning hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+            : "min-h-11 w-fit rounded-md border border-ink-500 bg-ink-800 px-3 text-xs font-semibold text-text-secondary hover:border-state-warning/60"
+        }
       >
         {side === "self" ? t("openSelf") : t("openOwner")}
       </button>

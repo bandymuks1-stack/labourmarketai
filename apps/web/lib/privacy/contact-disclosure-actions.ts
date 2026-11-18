@@ -8,11 +8,10 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
-  CONSENT_LOCALES,
   EMPLOYER_DATA_DISCLOSURE_V1,
   consentTextHash,
-  type ConsentLocale,
 } from "@/lib/privacy/consent-definitions";
+import { toConsentLocale } from "@/lib/privacy/discoverability-view";
 import {
   DEFAULT_CONTACT_REQUEST_FIELDS,
   isContactDisclosureStatus,
@@ -25,6 +24,8 @@ import {
   evaluateRequestBudget,
   rollingDayFloorIso,
 } from "@/lib/limits/request-rate-limits";
+import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
+import { readWorkerProfileIds } from "@/lib/visibility/discoverable-workers";
 
 /**
  * Contact-disclosure request lifecycle — server actions (Wagon 1, SHARED
@@ -67,11 +68,9 @@ function asAny(c: SupabaseClient): any {
   return c;
 }
 
-function toConsentLocale(locale: string): ConsentLocale {
-  return (CONSENT_LOCALES as readonly string[]).includes(locale)
-    ? (locale as ConsentLocale)
-    : "lt";
-}
+// The consent locale is the ONE `toConsentLocale` in discoverability-view.ts
+// (a locale without its own consent texts reads AND records English, never
+// Lithuanian) — shared with the screen that shows the text.
 
 // ─── Employer side ───────────────────────────────────────────────────────────
 
@@ -107,8 +106,13 @@ async function countOwnContactAsks(
     }
   };
   const [open, day] = await Promise.all([
+    // OPEN = created AND not yet past its 14-day expiry — the propose RPC's
+    // own rule (`status = 'created' and expires_at > now()`). The sweep that
+    // flips rows to `expired` is admin-run, so counting status alone kept an
+    // employer whose asks simply lapsed refused as `rate-limited` forever,
+    // while the database would have accepted the next ask.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    head((q) => (q as any).eq("status", "created")),
+    head((q) => (q as any).eq("status", "created").gt("expires_at", new Date().toISOString())),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     head((q) => (q as any).gt("created_at", rollingDayFloorIso())),
   ]);
@@ -120,7 +124,10 @@ export async function requestContactDisclosureAction(input: {
   requestId: string;
   workerId: string;
   fields?: readonly string[];
+  /** The workspace the screen displayed (`refuseStaleWorkspace`). */
+  readonly expectedWorkspaceId?: string;
 }): Promise<RequestContactDisclosureResult> {
+  await refuseStaleWorkspace(input?.expectedWorkspaceId);
   if (!input.requestId || !input.workerId) return { kind: "error" };
   const fields = validateRequestedFields(
     input.fields ? [...input.fields] : [...DEFAULT_CONTACT_REQUEST_FIELDS],
@@ -261,22 +268,28 @@ export async function getScoutingContactRequestStates(
   await Promise.all(
     acceptedRows.map(async ({ workerId, organizationId }) => {
       try {
-        const { data: worker } = await asAny(supabase)
-          .from("workers")
-          .select("profile_id")
-          .eq("id", workerId)
-          .maybeSingle();
-        const profileId = worker?.profile_id as string | null;
-        if (!profileId) return;
-        const { data: granted } = await asAny(supabase).rpc(
-          "has_employer_data_disclosure",
-          {
+        // By worker id first (20261018160000): a found worker's profile id never leaves the
+        // database. Before that migration the door is absent and the related-row path answers.
+        let granted: unknown = null;
+        const door = await asAny(supabase).rpc("employer_disclosure_granted_v1", {
+          p_worker_id: workerId,
+          p_organization_id: organizationId,
+          p_context_type: "company_need",
+          p_context_id: requestId,
+        });
+        if (!door.error) {
+          granted = door.data;
+        } else {
+          const profileId = (await readWorkerProfileIds(supabase, [workerId])).get(workerId) ?? null;
+          if (!profileId) return;
+          const legacy = await asAny(supabase).rpc("has_employer_data_disclosure", {
             p_worker_profile: profileId,
             p_recipient_organization_id: organizationId,
             p_context_type: "company_need",
             p_context_id: requestId,
-          },
-        );
+          });
+          granted = legacy.data;
+        }
         if (granted === true) {
           const prev = byWorker[workerId];
           if (prev) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -6,31 +7,27 @@ import { Suspense } from "react";
 
 import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
-import { BottomNav } from "@/components/app/bottom-nav";
-import { DashboardTabs } from "@/components/app/dashboard-tabs";
-import { HeaderSearch } from "@/components/app/header-search";
 import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widget";
-import { NotificationPanel } from "@/components/app/notification-panel";
-import { RoleSwitcher } from "@/components/app/role-switcher";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { SpineStream } from "@/components/app/spine-stream";
-import { AccountMenu } from "@/components/app/account-menu";
-import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { DashboardChrome } from "@/components/app/dashboard-chrome";
-import type { WorkerNavLabels } from "@/components/app/today/worker-bottom-nav";
-import { isWorkerPersonalSpace } from "@/lib/today/today-route";
-import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
 import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
-import { Link } from "@/lib/i18n/navigation";
 import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
-import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
+import { readActiveRoleRows } from "@/lib/auth/profile-roles";
+import {
+  DASHBOARD_PATHNAME_HEADER,
+  refusalDestination,
+  routeRequirement,
+} from "@/lib/auth/role-gated-routes";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
-import { baseIdentityForRole } from "@/lib/config/roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getSessionProfile } from "@/lib/auth/session-profile";
+import { StaleBuildRecovery } from "@/components/app/stale-build-recovery";
+import DashboardSectionLoading from "./loading";
 import { createClient } from "@/lib/supabase/server";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
@@ -39,22 +36,26 @@ const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
  * Authenticated shell for the whole `/dashboard` tree.
  *
  * Resolves user + profile + roles ONCE, server-side, and hands them to the
- * client `AuthProvider` so every downstream widget (RoleSwitcher,
- * NotificationPanel, DashboardTabs, the simple-mode header) stays in sync. The
+ * client `AuthProvider` so every downstream widget (the one header's
+ * workspace chip, nav and NotificationPanel, the pages) stays in sync. The
  * chrome itself is chosen per-route by the client `<DashboardChrome>`:
- *   - `/dashboard` (worker, personal space)     → ŠIANDIEN (one top bar, the
- *                                                  page, the worker's 3-tab bar)
- *   - `/dashboard` (everyone else; `?ask=1`)    → conversation (bare; the chat
- *                                                  supplies its own simple nav)
- *   - `/dashboard/communication|planning|profile` → simple-mode shell (5-item nav)
- *   - every other module route (detail/admin surfaces) → the full module chrome
- *     (`/dashboard/advanced` itself was deleted by W3 Package 4)
+ *   - `/dashboard` (EVERY identity)              → the conversation — the ONE
+ *                                                  authenticated home (bare; the
+ *                                                  chat supplies the one top bar)
+ *   - every other product route                  → panel: the same one top bar
+ *                                                  over a contextual workspace
+ *   - `/dashboard/admin/*`                       → the internal operator console
+ *                                                  — the SAME one top bar since
+ *                                                  2026-10-25 (one navigation
+ *                                                  system; `/dashboard/advanced`
+ *                                                  was deleted by W3 Package 4)
  *
- * This is the real replacement for the previous `fixed inset-0` overlay: the
- * wide navbar is not painted over in simple mode — it is simply never rendered
- * there (its DOM is absent), while Advanced mode keeps the full chrome verbatim.
- * No route files move, so the dashboard file-path contract the guard suite pins
- * stays intact. Doctrine §18 (real, not overlay illusions).
+ * No header markup lives here any more: the operator console's private header
+ * (sideways-scrolling tabs, a second workspace selector in the role switcher)
+ * and its phone bottom bar were retired for the ONE header
+ * (`components/app/conversation/chat/conversation-header.tsx`). No route files
+ * move, so the dashboard file-path contract the guard suite pins stays intact.
+ * Doctrine §18 (real, not overlay illusions).
  */
 
 /**
@@ -93,17 +94,13 @@ export default async function DashboardLayout({
   // fact "this user holds no roles". `readActiveProfileRoles` retries once and
   // then throws, so an unanswered read reaches the route error boundary
   // instead of being rendered as a confident, wrong role state.
+  //
+  // ONE `profile_roles` read per request (perf 2026-10-23): this is the
+  // request-cached reader the page gate under this layout
+  // (`requireRoleOrRedirect`) and the held-roles reads share, so the page no
+  // longer repeats the shell's query. Same throw-on-unanswered semantics.
   const rolesPromise: Promise<{ role: string }[] | null> = userPromise.then(
-    async ({ data: { user } }) =>
-      user
-        ? await readActiveProfileRoles(() =>
-            supabase
-              .from("profile_roles")
-              .select("role")
-              .eq("profile_id", user.id)
-              .eq("is_active", true),
-          )
-        : null,
+    async ({ data: { user } }) => (user ? await readActiveRoleRows(supabase, user.id) : null),
   );
   const [userRes, session, rolesRows] = await Promise.all([
     userPromise,
@@ -135,17 +132,89 @@ export default async function DashboardLayout({
     activeRole: profile?.active_role ?? null,
     profileRoles: rolesRows ?? [],
   });
-  const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
-  const activeRole = ROLES.has(profile?.active_role as Role)
-    ? (profile?.active_role as Role)
-    : (roles[0] ?? null);
+
+  // ── THE ROLE GATE, WHERE IT CAN STILL BE AN HTTP REDIRECT ─────────────────
+  //
+  // Measured 2026-09-22 on the local production build: a worker opening
+  // `/lt/dashboard/company` got `HTTP 200`, 600 627 bytes of this very shell,
+  // and then ~600 ms of Next's "Application error: a client-side exception has
+  // occurred" before the browser performed the redirect itself. The gate was
+  // correct — the system WAS refusing — but it announced the refusal as a
+  // crash, and it shipped the whole authenticated shell to someone being
+  // turned away. The page-level `requireRoleOrRedirect` (and the admin
+  // subtree's `requireSuperadmin`) both sit under
+  // `app/[locale]/dashboard/loading.tsx`, and a `redirect()` thrown inside a
+  // Suspense boundary can no longer become an HTTP redirect — the response is
+  // already committed. Isolated with two same-shaped page redirects:
+  // `/lt/onboarding` (has a `loading.tsx` above it) answers 200 and redirects
+  // on the client; `/lt/live-market-review` (has none) answers a real 307.
+  //
+  // This layout is the last frame ABOVE that boundary, and it is ALSO where
+  // both signals already exist: `rolesRows` (one `profile_roles` read, honest
+  // about a failed read because `readActiveProfileRoles` throws rather than
+  // answering) and `isAdmin` (the dual signal). So the refusal is decided from
+  // the reads the shell performs anyway — no second permission model, no extra
+  // round-trip, and one fewer duplicate read on every gated navigation.
+  //
+  // The page-level gates STAY. They are the authority on a soft navigation
+  // (React reuses this layout, so it does not re-run) and on any request where
+  // the middleware header never arrived. Nothing here can grant access that
+  // they would refuse: this gate only ever refuses EARLIER.
+  const gatedPath = (await headers()).get(DASHBOARD_PATHNAME_HEADER);
+  const requirement = gatedPath ? routeRequirement(gatedPath) : null;
+  // MEMBERSHIP IS THE COMPANY GATE TOO (capability matrix P1, 2026-09-23):
+  // a governance membership in the ACTIVE workspace opens the employer
+  // space — `membership_accept_v1` never grants `profile_roles.company`,
+  // so a manager invited into an organization was refused at this frame.
+  // That arm is the ONE refusal this block does not settle: it needs the
+  // workspace, and the shell reads the workspace exactly once (W9), right
+  // below — so the arm is decided there, from the SAME binding the chip
+  // renders, never from a second call. Every other refusal (admin, worker,
+  // agency, buyer; a company route the roles DO hold is not a refusal) is
+  // final here, before anything expensive runs. The same rule runs in
+  // `requireRoleOrRedirect`, so this frame can only ever refuse earlier,
+  // never admit someone the page gate would turn away.
+  let companyMembershipArm = false;
+  if (requirement) {
+    const refused =
+      requirement.kind === "admin"
+        ? // A FAILED profile read is not "not an admin". `deriveIsAdmin` reads
+          // `profiles.active_role`, and when that row did not answer the
+          // dual signal is only half known — refusing on it would be the same
+          // false claim the honesty work removed elsewhere. Hand those to
+          // `requireSuperadmin`, which throws onto the honest error surface.
+          session.profileRead !== "failed" && !isAdmin
+        : !roles.includes(requirement.role);
+    if (refused && requirement.kind === "role" && requirement.role === "company") {
+      companyMembershipArm = true;
+    } else if (refused) {
+      redirect(refusalDestination(locale, requirement));
+    }
+  }
 
   // Workspace context (real-user workflow rebuild W1): the ACTIVE WORK CONTEXT
   // for EVERY identity — personal space + every org membership from the
   // canonical engagement_contexts spine. The reads are request-cached, so the
   // company-identity block below reuses the same underlying queries.
-  const identity = activeRole ? baseIdentityForRole(activeRole) : null;
-  const workspace = await getWorkspaceContext(identity);
+  //
+  // No identity argument (owner program 2026-09-23): the resolver reads the
+  // identity that decides its single-org default from the session profile
+  // itself, so the page, the employer chain, the dispatcher and this shell
+  // get ONE answer per request instead of one per argument.
+  //
+  // THE ONE READ (W9): this is the only `getWorkspaceContext()` call in the
+  // shell. The company gate's membership arm above and the chip, the role
+  // switcher and the auth context below all read THIS binding.
+  const workspace = await getWorkspaceContext();
+
+  if (companyMembershipArm && requirement && !workspaceOpensCompanySpace(workspace)) {
+    redirect(refusalDestination(locale, requirement));
+  }
+
+  const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
+  const activeRole = ROLES.has(profile?.active_role as Role)
+    ? (profile?.active_role as Role)
+    : (roles[0] ?? null);
 
   // WHICH organization is active — derived from the ONE workspace context
   // resolved above, never from a second reader.
@@ -175,117 +244,21 @@ export default async function DashboardLayout({
     null;
   const activeOrgName: string | null = activeWorkspace?.name ?? null;
   const activeOrganizationId: string | null = activeWorkspace?.id ?? null;
-  // The full list is passed; `<RoleSwitcher>` applies the SAME
+  // The full list is passed to the auth context; consumers apply the SAME
   // `shouldOfferOrganizationSwitch` rule (>1) the layout used to duplicate.
   const organizations: SwitchableOrganization[] = organizationWorkspaces.map(
     (w) => ({ id: w.id, name: w.name }),
   );
-
   // Simple-mode nav labels + the Rexora footer credit, resolved once and passed
   // to the client chrome selector (which needs no data fetch of its own).
   const tChat = await getTranslations("conversation.chat");
-  const tFooter = await getTranslations("footer");
-  // THE WORKER'S THREE TABS (IA 2026-09-13 §2; frozen contract §2.3). Only a
-  // worker standing in their PERSONAL space gets the bar — the same predicate
-  // the dashboard root uses to decide ŠIANDIEN vs the conversation
-  // (`lib/today/today-route.ts`). Labels are resolved here, server-side, so
-  // no client message namespace is added. For that worker the "back to
-  // chat" affordance on projection routes leads to ŠIANDIEN, so it is
-  // named as such.
-  const workerPersonal = isWorkerPersonalSpace({
-    activeRole,
-    activeWorkspaceId: workspace.activeWorkspaceId,
-  });
-  const tToday = await getTranslations("todayScreen.nav");
-  const workerNav: WorkerNavLabels | null = workerPersonal
-    ? {
-        today: tToday("today"),
-        world: tToday("world"),
-        ask: tToday("ask"),
-        aria: tToday("aria"),
-      }
-    : null;
   const nav: ConversationNavLabels = {
-    chat: workerPersonal ? tToday("today") : tChat("navChat"),
+    chat: tChat("navChat"),
     journal: tChat("navJournal"),
     messages: tChat("navMessages"),
     calendar: tChat("navCalendar"),
     profile: tChat("navProfile"),
   };
-
-  // Full (Advanced-mode) chrome, authored here so the shell contract the guard
-  // suite pins (logo → /dashboard, DashboardTabs, AccountMenu, BottomNav, the
-  // Rexora credit) stays in the layout source. `<DashboardChrome>` renders these
-  // slots only on module routes; simple mode never mounts them.
-  const fullHeader = (
-    <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
-      <div className="mx-auto flex h-14 max-w-container items-center gap-3 px-3 md:h-auto md:py-3 md:gap-6 sm:px-12">
-        {/* App-shell logo links to the dashboard, NOT the public home. */}
-        <Link
-          href="/dashboard"
-          className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
-        >
-          LabourMarket<span className="text-gradient-accent">.ai</span>
-        </Link>
-        {/* W8 slice 1 — THE ACTIVE WORKSPACE, in the FULL chrome too.
-            Every employer surface (/dashboard/company, …/scouting,
-            /dashboard/bookings, /dashboard/projects) renders here, and until
-            now the chip existed only in the conversation header — so the
-            employer had no organization indicator on exactly the screens where
-            they work, while the data behind those screens ignored the
-            workspace entirely (audit P0-1). This is the SAME component reading
-            the SAME auth-context workspace state; it is not a second switcher,
-            and `min-w-0` lets it truncate on a phone instead of pushing the
-            right-hand controls off screen. */}
-        <span className="flex min-w-0">
-          <WorkspaceChip />
-        </span>
-        {/* `min-w-0` is LOAD-BEARING, and `overflow-x-auto` is what makes it
-            safe. A flex item's default `min-width: auto` floors this nav at
-            its max-content width, so from the md breakpoint — where the tabs
-            first appear — it claimed 492px and refused to give any back. The
-            row then measured 999px inside a 768px viewport, and because
-            `html`/`body` are `overflow-x: hidden` the page could NOT be
-            scrolled sideways to reach the rest.
-            What that cost, measured at 768px:
-              brand              0px wide  (squeezed out of existence)
-              account menu   955..999px    entirely off-screen, so LOGOUT and
-                                           the report-a-problem entry point
-                                           were unreachable
-              notifications / role switcher / search / locale — same
-            `document.documentElement.scrollWidth` still read exactly 768,
-            which is why nothing ever reported it; `document.body.scrollWidth`
-            read 999.
-            With `min-w-0` the nav shrinks to 141px and the account menu comes
-            back to 676..720. `overflow-x-auto` then keeps the tabs themselves
-            reachable by scrolling instead of letting them spill over the
-            controls — the same treatment the company page's chip strip uses.
-            Broken range was 768px up to ~999px: tablets and small laptops. */}
-        <DashboardTabs className="hidden min-w-0 overflow-x-auto md:flex [-webkit-overflow-scrolling:touch]" />
-        <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
-          <HeaderSearch />
-          <LocaleSwitcher className="hidden md:flex" />
-          <NotificationPanel />
-          <RoleSwitcher />
-          <AccountMenu />
-        </div>
-      </div>
-    </header>
-  );
-  const rexora = (
-    // Created by Rexora — quiet product credit (owner directive, 2026-07-14).
-    // Pinned by legal-entity-truth.test.ts.
-    <div className="mt-10 text-center">
-      <a
-        href="https://aiprocessautomation.eu"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-xs text-text-muted transition-colors hover:text-text-secondary"
-      >
-        {tFooter("rexora")}
-      </a>
-    </div>
-  );
 
   return (
     <NextIntlClientProvider messages={pickClientMessages(await getMessages())}>
@@ -311,20 +284,30 @@ export default async function DashboardLayout({
         {/* Streamed notification spine: same single source, off the TTFB
           critical path. Hydrates the bell + nav badges via the auth context as
           soon as the derived signals resolve. Shared by every chrome mode. */}
-        <Suspense fallback={null}>
+        {/* KEYED BY THE WORKSPACE (audit 2026-10-21): a workspace switch runs
+            in a transition, and React keeps an already-shown boundary's old
+            content until the new one resolves — so the switch (chip, page)
+            waited for the slowest badge read, up to tens of seconds on a
+            cache miss, showing "Switching…". A NEW boundary may show its
+            fallback, so the switch commits at once and the bell fills in. */}
+        <Suspense key={workspace.activeWorkspaceId} fallback={null}>
           <SpineStream activeRole={activeRole} />
         </Suspense>
         <SessionTelemetry />
+        {/* A page from the build before a deploy reloads once instead of
+            failing its next action ("Failed to find Server Action"). */}
+        <StaleBuildRecovery />
         <AmbientGlow />
         <DashboardChrome
           nav={nav}
           headerTitle={tChat("headerTitle")}
-          workerNav={workerNav}
-          fullHeader={fullHeader}
-          fullBottomNav={<BottomNav />}
-          rexora={rexora}
         >
-          {children}
+          {/* Same reason: after a switch the shell and the chip commit as soon
+              as the layout's own reads finish; the page streams in under the
+              section skeleton. Same workspace = same key = navigation as before. */}
+          <Suspense key={workspace.activeWorkspaceId} fallback={<DashboardSectionLoading />}>
+            {children}
+          </Suspense>
         </DashboardChrome>
         {/* v1 tester language-feedback widget — authenticated sessions only. */}
         <LanguageFeedbackWidget />

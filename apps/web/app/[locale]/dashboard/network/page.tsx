@@ -1,11 +1,15 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { workspaceDisplayLabels } from "@/lib/company/organization-switch";
 import { redirect } from "next/navigation";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
-import { getGovernedOrganizations } from "@/lib/company/managed-organizations";
+import {
+  getGovernedOrganizations,
+  getInvitationOrganizations,
+} from "@/lib/company/managed-organizations";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listManagedProjects } from "@/lib/projects/projects";
 import {
@@ -23,6 +27,9 @@ import {
   SentInvitationList,
 } from "@/components/app/invitation-list";
 import { MessageButton } from "@/components/app/message-button";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
+import { resolveContactPermission } from "@/lib/communication/contact-permission";
+import { isContactPermitted } from "@/lib/communication/communication-eligibility";
 import {
   MyTeamEnquiriesList,
   TeamEnquiryButton,
@@ -37,6 +44,12 @@ import { DevelopmentReviewsSection } from "@/components/app/development-reviews-
 import { ManagementDecisionsSection } from "@/components/app/management-decisions-section";
 import { ApprovalsSection } from "./approvals-section";
 import { RequestsSection } from "./requests-section";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/network", "network.title");
+
 
 /**
  * "Mano tinklas" (core-network area B) — a SUB-SURFACE of the person /
@@ -79,11 +92,15 @@ export default async function NetworkPage({
     /** Which administration area the reader explicitly opened. Absent on the
      *  default screen, which is the whole point — see ADMIN_AREAS below. */
     area?: string;
+    /** Result of the progressive email proof the auth callback appended
+     *  (`ok` | `failed`); only ever used to word the prompt, never to claim
+     *  a verified state (the database alone establishes that). */
+    email_verify?: string;
   }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { q, type, org, project, relationship, invite, wf, req, reqStatus, reqType, rev, dec, area } =
+  const { q, type, org, project, relationship, invite, wf, req, reqStatus, reqType, rev, dec, area, email_verify } =
     await searchParams;
   // The invitation door, for the two empty states below. The search text is
   // kept so the reader lands back on the same screen with the panel open.
@@ -264,6 +281,27 @@ export default async function NetworkPage({
     capabilities: organizationCapabilities[i] ?? [],
   }));
 
+  /**
+   * The invite panel's organizations: the owned ones above, plus every other
+   * organization whose invitations this person may manage — an owner/admin
+   * membership, or a member the owner delegated invitation management to
+   * (owner direction 2026-09-24; never a job title). The mirror of
+   * `invitation_org_authority_v1`; `create_invitation_v2` re-checks it.
+   */
+  const invitationOrganizations = (await getInvitationOrganizations())
+    .filter((g) => !organizations.some((o) => o.id === g.id))
+    .map((g) => ({ id: g.id, name: g.name || t("organizations.unnamed") }));
+  const invitationCapabilities = await Promise.all(
+    invitationOrganizations.map((o) => readOrganizationCapabilities(o.id)),
+  );
+  const inviteOrganizations = [
+    ...organizationsWithCapabilities,
+    ...invitationOrganizations.map((o, i) => ({
+      ...o,
+      capabilities: invitationCapabilities[i] ?? [],
+    })),
+  ];
+
   // The strip reads each area its OWN title, from the namespace that section
   // already owns — so a link can never drift from the heading it opens, and
   // no fifth copy of these four names enters the catalogue.
@@ -284,13 +322,7 @@ export default async function NetworkPage({
     return (
       <div className="flex flex-col gap-6" data-testid="network-page">
         <header className="flex flex-col gap-1">
-          <Link
-            href={"/dashboard/network" as "/dashboard"}
-            className="inline-flex min-h-11 items-center gap-1 self-start font-mono text-meta uppercase tracking-label text-brand-orange transition-colors hover:text-text-primary"
-            data-testid="network-admin-back"
-          >
-            ← {t("admin.back")}
-          </Link>
+          <PageBack href={"/dashboard/network" as "/dashboard"} data-testid="network-admin-back">{t("admin.back")}</PageBack>
         </header>
         {openArea === "approvals" && (
           <ApprovalsSection
@@ -352,20 +384,48 @@ export default async function NetworkPage({
           }))
       : [];
   const search = q ? await searchPeopleAndCompanies(q) : null;
+  // WHICH discovered people may actually be messaged (§8.1, default-closed):
+  // the same resolver the open-conversation action uses, so the button is
+  // drawn only where pressing it can succeed.
+  const contactable = new Set<string>();
+  if (search) {
+    await Promise.all(
+      search.people.map(async (p) => {
+        if (!p.profileId) return;
+        try {
+          if (isContactPermitted(await resolveContactPermission(p.profileId))) {
+            contactable.add(p.profileId);
+          }
+        } catch {
+          /* unknown → not contactable (default-closed) */
+        }
+      }),
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6" data-testid="network-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 
       {/* Invitations addressed to ME — the most actionable thing first. */}
+      {/* An invitation addressed to an EMAIL is only shown to that mailbox's
+          proven owner. An unverified person is not blocked from anything else
+          — they are offered the one-tap proof, here, where it is needed. */}
+      {incoming.status === "email_unverified" && (
+        <section className="flex flex-col gap-2" data-testid="network-email-unverified">
+          <VerifyEmailPrompt
+            locale={locale}
+            next="/dashboard/network"
+            result={email_verify ?? null}
+          />
+        </section>
+      )}
       {incoming.status === "ok" && incoming.items.length > 0 && (
         <section className="flex flex-col gap-2" data-testid="network-incoming">
           <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
@@ -453,10 +513,26 @@ export default async function NetworkPage({
                         <span className="ml-auto">
                           {/* Contact goes through the existing permission-
                               gated message flow — never a raw channel. */}
-                          <MessageButton
-                            profileId={p.profileId}
-                            labelKey="messageWorker"
-                          />
+                          {p.profileId && contactable.has(p.profileId) ? (
+                            <MessageButton
+                              profileId={p.profileId}
+                              labelKey="messageWorker"
+                            />
+                          ) : (
+                            // WAS A DEAD END (walked 2026-10-01): the button
+                            // was drawn for every discovered person, but
+                            // opening a thread needs a recorded relationship
+                            // (§8.1) — so for anyone without one it bounced
+                            // to the inbox with "cannot open". Say so, and
+                            // point at the two real ways in.
+                            <Link
+                              href={inviteHref}
+                              className="max-w-xs text-meta leading-snug text-text-muted underline-offset-2 hover:text-brand-blue hover:underline"
+                              data-testid={`network-person-no-contact-${p.workerId}`}
+                            >
+                              {t("search.noContactYet")}
+                            </Link>
+                          )}
                         </span>
                       </li>
                     ))}
@@ -473,7 +549,7 @@ export default async function NetworkPage({
                         <span className="text-sm font-medium text-text-primary">
                           {c.displayName}
                         </span>
-                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        <span className="text-meta text-text-muted">
                           {t(`search.orgType.${c.organizationType}`)}
                         </span>
                         {c.country && (
@@ -502,7 +578,7 @@ export default async function NetworkPage({
       <div id="network-invite">
         <InvitePanel
           locale={locale}
-          organizations={organizationsWithCapabilities}
+          organizations={inviteOrganizations}
           projects={projects.map((p) => ({ id: p.id, title: p.title }))}
           demands={myDemands}
           defaultType={type}
@@ -687,7 +763,7 @@ export default async function NetworkPage({
                 <span className="text-sm text-text-primary">
                   {e.organizationName ?? t("relationships.noOrg")}
                 </span>
-                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <span className="text-meta text-text-muted">
                   {t(`relationships.slug.${e.relationshipSlug}`)}
                 </span>
                 {e.title && (

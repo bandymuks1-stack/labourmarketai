@@ -189,3 +189,162 @@ describe("the deterministic fast path is unchanged", () => {
     expect(Object.keys(INTENT_REGISTRY).length).toBeGreaterThan(60);
   });
 });
+
+/**
+ * A NOT-UNDERSTOOD ANSWER IS A QUESTION, NEVER THE GREETING ROW
+ * (owner program 2026-09-23, P0 §10 / CASE 3, 4, 12).
+ *
+ * The owner asked an agency workspace to rename itself and read "Įkelti CV ·
+ * Mano profilis · Ieškau darbo" — the greeting's starter row, attached to
+ * every answer the product gave to a sentence it did not understand. The
+ * contract now: ONE clarifying question tied to what was said, plus at most
+ * ONE door — "what can I do here", derived from the active context when it is
+ * tapped. This pins the SHAPE at all five not-understood sites, and the
+ * negative control proves the check fails the moment `starterChips` returns
+ * to any of them.
+ */
+function notUnderstoodViolations(src: string): string[] {
+  const code = codeOf(src);
+  const out: string[] = [];
+  const between = (start: string, end: string): string => {
+    const i = code.indexOf(start);
+    const j = code.indexOf(end, i + 1);
+    if (i < 0 || j < 0) {
+      out.push(`anchor missing: ${start} … ${end}`);
+      return "";
+    }
+    return code.slice(i, j);
+  };
+
+  // 1. The generic fallback (every `unknown` routed through dispatchIntent).
+  const fallback = between("const fallback = () =>", "\n");
+  if (/starterChips/.test(fallback)) out.push("fallback carries the greeting row");
+  if (!/askToClarify\(t\("notUnderstood"\)\)/.test(fallback)) out.push("fallback is not the clarifying question");
+
+  // 2. A bare name that resolves to nothing.
+  const reference = between("const handleReference = useCallback", "const handleFileIntent");
+  if (/starterChips/.test(reference)) out.push("handleReference carries the greeting row");
+  if (!/askToClarify\(t\("refLooksLikeName"\)\)/.test(reference)) out.push("handleReference does not ask");
+
+  // 3 + 4. A question with no answer, with and without a named subject.
+  const question = between("const handleQuestion = useCallback", "const startProjects");
+  if (/starterChips/.test(question)) out.push("handleQuestion carries the greeting row");
+  if (!/askToClarify\(t\("questionUnansweredAbout"/.test(question)) out.push("questionUnansweredAbout does not ask");
+  if (!/askToClarify\(t\("questionUnanswered"\)\)/.test(question)) out.push("questionUnanswered does not ask");
+
+  // 5. The model's `clarification`.
+  const proposer = code.slice(code.indexOf("proposeUnderstandingAction("));
+  const clarification = proposer.slice(proposer.indexOf('case "clarification":'), proposer.indexOf("default:"));
+  if (/starterChips/.test(clarification)) out.push("clarification carries the greeting row");
+  if (!/askToClarify\(t\("understandClarify"\)\)/.test(clarification)) out.push("clarification does not ask");
+
+  // The ONE door: exactly one chip, the capabilities answer.
+  const door = between("const clarifyDoor", "const askToClarify");
+  const chipIds = [...door.matchAll(/id: "([^"]+)"/g)].map((m) => m[1]);
+  if (chipIds.join(",") !== "capabilities") out.push(`the door is not exactly [capabilities]: ${chipIds.join(",")}`);
+  const ask = between("const askToClarify = useCallback", "\n  );");
+  if (!/assistant\(line, clarifyDoor\)/.test(ask)) out.push("askToClarify does not attach the one door");
+  return out;
+}
+
+describe("a not-understood answer is a clarifying question, never the greeting row", () => {
+  it("all five not-understood sites ask ONE question and offer at most ONE context-derived door", () => {
+    expect(notUnderstoodViolations(CHAT)).toEqual([]);
+  });
+
+  it("the door runs the capabilities answer, which is read from the ACTIVE context at tap time", () => {
+    const code = codeOf(CHAT);
+    const chip = code.slice(code.indexOf('case "capabilities":'), code.indexOf('case "agency-offers":'));
+    expect(chip).toContain("startCapabilities()");
+    expect(code).toContain("capabilities: () => startCapabilities()");
+  });
+
+  it("NEGATIVE CONTROL — the check fails when the greeting row returns to ANY site", () => {
+    const mutations: Array<[string, string]> = [
+      ['askToClarify(t("notUnderstood"))', "assistant(fallbackText, starterChips)"],
+      ['askToClarify(t("refLooksLikeName"))', 'assistant(t("refLooksLikeName"), starterChips)'],
+      ['askToClarify(t("questionUnanswered"))', 'assistant(t("questionUnanswered"), starterChips)'],
+      ['askToClarify(t("understandClarify"))', 'assistant(t("understandClarify"), starterChips)'],
+      ['[{ id: "capabilities", label: t("chipWhatCanIDo") }]', "starterChips"],
+    ];
+    for (const [from, to] of mutations) {
+      expect(CHAT.includes(from), `mutation anchor present: ${from}`).toBe(true);
+      const mutated = CHAT.replace(from, to);
+      expect(notUnderstoodViolations(mutated).length, `undetected: ${to}`).toBeGreaterThan(0);
+    }
+  });
+
+  it("the greeting keeps its starter row — only the NOT-UNDERSTOOD answers lost it", () => {
+    expect(CHAT).toMatch(/chips: starterChips,?\s*\}\s*as ChatMessage/);
+  });
+});
+
+/**
+ * THE AI STATE IS SAID AS ITSELF (owner program 2026-09-23, P1). "Not switched
+ * on", "allowance spent", "a vendor fault" and "too many requests" each have
+ * their own line; none of them reaches the generic not-understood fallback.
+ */
+describe("the model half's own state is never rendered as 'I did not understand'", () => {
+  it("the unsupported branch renders the honest AI-state line when there is one", () => {
+    const code = codeOf(CHAT);
+    const proposer = code.slice(code.indexOf("proposeUnderstandingAction("));
+    const unsupported = proposer.slice(proposer.indexOf("default:"), proposer.indexOf(".catch("));
+    expect(unsupported).toMatch(/aiStateMessageKey\(res\.reason\)/);
+    expect(unsupported).toMatch(/if \(stateKey\) aiState\(stateKey\)/);
+  });
+
+  it("the proposer's OWN rejection is said as the AI state; a handler's throw is not blamed on the AI", () => {
+    expect(proposerFailureViolations(CHAT)).toEqual([]);
+  });
+
+  it("NEGATIVE CONTROL — one catch for both, or a not-understood rejection, is caught (adversarial review, #1848)", () => {
+    // The shape #1848 first shipped: `.then(ok).catch(() => aiState(...))`,
+    // which answered a HANDLER's throw with "the assistant is unavailable".
+    const blamesAi = CHAT.replace('askToClarify(t("answerFailed"))', 'aiState("aiTemporarilyUnavailable")');
+    expect(blamesAi).not.toBe(CHAT);
+    expect(proposerFailureViolations(blamesAi).length).toBeGreaterThan(0);
+    // …and a proposer failure said as "not understood" again.
+    const notUnderstood = CHAT.replace(
+      /\(\) => \{\s*setTyping\(false\);\s*trackResolution\("unknown", "deterministic"\);\s*aiState\("aiTemporarilyUnavailable"\);/,
+      '() => {\n            setTyping(false);\n            trackResolution("unknown", "deterministic");\n            dispatchIntent("unknown", handlers, withTyping, fallback);',
+    );
+    expect(notUnderstood).not.toBe(CHAT);
+    expect(proposerFailureViolations(notUnderstood).length).toBeGreaterThan(0);
+  });
+
+  it("the server action names the state instead of collapsing it", () => {
+    const code = codeOf(ACTION);
+    expect(code).toContain("unsupportedReasonForAiOutcome(outcome)");
+    expect(code).not.toMatch(/reason: "ai_unavailable"/);
+    const union = codeOf(UNION);
+    for (const reason of ["ai_not_configured", "allowance_exhausted", "ai_temporarily_unavailable", "rate_limited"]) {
+      expect(union, reason).toContain(`"${reason}"`);
+    }
+  });
+});
+
+/**
+ * The proposer's two failure paths, kept apart: the REJECTION handler of
+ * `.then` (the server action itself failed — OUR fault, said as the assistant
+ * being unavailable) and the trailing `.catch` (a handler threw while
+ * answering a result the model DID return — not an AI failure).
+ */
+function proposerFailureViolations(src: string): string[] {
+  const code = codeOf(src);
+  const proposer = code.slice(code.indexOf("proposeUnderstandingAction("));
+  const out: string[] = [];
+  if (
+    !/\(\) => \{\s*setTyping\(false\);\s*trackResolution\("unknown", "deterministic"\);\s*aiState\("aiTemporarilyUnavailable"\);\s*\},?\s*\)\s*\.catch\(/.test(
+      proposer,
+    )
+  ) {
+    out.push("the proposer's rejection is not its own `.then` handler saying aiTemporarilyUnavailable");
+  }
+  const at = proposer.indexOf(".catch(");
+  const caught = at >= 0 ? proposer.slice(at, at + 300) : "";
+  if (!caught) out.push("no trailing catch for a handler's throw");
+  if (caught.includes("aiTemporarilyUnavailable")) out.push("a handler's throw is blamed on the AI");
+  if (caught.includes('dispatchIntent("unknown"')) out.push("a handler's throw is said as not understood");
+  if (!caught.includes('t("answerFailed")')) out.push("a handler's throw is not said as a fault in answering");
+  return out;
+}

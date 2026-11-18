@@ -36,6 +36,52 @@ export class NonLocalTargetError extends Error {
 }
 
 /**
+ * AVAILABILITY, NOT SECURITY. Printed when there is no local stack to talk to
+ * at all — Docker Desktop is off, `npx supabase start` was never run, or the
+ * local GoTrue does not answer.
+ *
+ * WHY IT IS SEPARATE. Until 2026-09-23 a stopped stack surfaced as
+ * REFUSED_NON_LOCAL_E2E_SESSION_MINT, because "nothing resolved" was routed
+ * through `assertLocalSupabaseTarget({ url: undefined })`. A developer with
+ * Docker off was told the tooling had refused a production target — a
+ * security alarm for what was a missing dependency. The two failures need
+ * different actions, so they get different codes.
+ *
+ * It is NEVER raised for a resolved target. Any URL that resolves still goes
+ * through `assertLocalSupabaseTarget` and refuses with REFUSAL_CODE exactly as
+ * before; this code only ever means "nothing was resolved to check".
+ */
+export const LOCAL_STACK_UNAVAILABLE_CODE =
+  "LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER";
+
+/** Distinct from the refusal's exit 1, so a wrapper can tell the two apart. */
+export const LOCAL_STACK_UNAVAILABLE_EXIT_CODE = 3;
+
+/** What to do instead — the part of the message that does not vary. */
+export const LOCAL_STACK_UNAVAILABLE_HELP =
+  "This is a LOCAL INTEGRATION test: it needs Docker Desktop running and the " +
+  "local stack started (`npx supabase start`, repo root). UNIT / STATIC / " +
+  "GUARD tests do not need Docker — run `pnpm -F web test`. Production is " +
+  "verified through the prod-qa chain (`pnpm -C apps/web prod-qa:gate`), " +
+  "never by pointing local tooling at production.";
+
+export class LocalStackUnavailableError extends Error {
+  readonly code = LOCAL_STACK_UNAVAILABLE_CODE;
+
+  constructor(detail: string) {
+    super(`${detail}\n${LOCAL_STACK_UNAVAILABLE_HELP}`);
+    this.name = "LocalStackUnavailableError";
+  }
+}
+
+/** The one line every caller prints: `<CODE> — <message>`. */
+export function formatLocalStackUnavailable(
+  err: LocalStackUnavailableError,
+): string {
+  return `${err.code} — ${err.message}`;
+}
+
+/**
  * Never print a key. Shows only enough to correlate two values in a log.
  * A short or empty key degrades to a constant so length is not leaked either.
  */
@@ -196,4 +242,77 @@ export function assertLocalSupabaseTarget(
     host,
     projectRef: urlRef === host ? "local" : urlRef,
   };
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * THE DIRECT DATABASE URL (2026-09-23).
+ *
+ * `db:fixtures:local` applies SQL through psql, and its host-psql fallback
+ * took the connection string from `SUPABASE_DB_URL`. That name is a REAL
+ * production secret name — the read-only connection string CI uses for the
+ * live catalogue gates — so a developer who had it exported for that reason
+ * would have applied `dev-fixtures.sql` to production `auth.users` the moment
+ * the container client was unavailable. The API-URL guard above never saw it:
+ * it checks the Supabase API target, not the psql target.
+ *
+ * Two rules now: the override is `LOCAL_DB_URL` (a name no production secret
+ * carries), and WHATEVER string reaches psql must name a loopback host.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/** The env name the fixture script honours for the psql target. */
+export const LOCAL_DB_URL_ENV = "LOCAL_DB_URL";
+
+/** The production-secret name the fixture script used to honour — and now
+ *  refuses outright rather than silently ignoring. */
+export const RETIRED_DB_URL_ENV = "SUPABASE_DB_URL";
+
+/** The local stack's documented Postgres port (`npx supabase status`). */
+export const DEFAULT_LOCAL_DB_URL =
+  "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+
+/**
+ * Assert a Postgres connection string points at the loopback interface, or
+ * throw NonLocalTargetError. Checked BEFORE any psql client is spawned.
+ *
+ * A Supabase Cloud database host (`*.supabase.co`, `*.supabase.com`,
+ * `*.pooler.supabase.com`) is named explicitly in the refusal so the operator
+ * sees what they nearly did; every other non-loopback host is refused as well.
+ */
+export function assertLocalDbUrl(raw: string | undefined): { host: string } {
+  if (!raw || raw.trim() === "") {
+    throw new NonLocalTargetError("no database URL was resolved for psql.");
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(raw.trim());
+  } catch {
+    throw new NonLocalTargetError("the database URL is not a valid URL.");
+  }
+  if (parsed.protocol !== "postgresql:" && parsed.protocol !== "postgres:") {
+    throw new NonLocalTargetError(
+      `the database URL scheme "${parsed.protocol}" is not postgresql://.`,
+    );
+  }
+  const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (!host) {
+    throw new NonLocalTargetError("the database URL has no host.");
+  }
+  if (/\.supabase\.(co|com|in|net)$/.test(host)) {
+    throw new NonLocalTargetError(
+      `database host "${host}" is a Supabase Cloud database. dev-fixtures.sql ` +
+        "must never reach a cloud project.",
+    );
+  }
+  const loopback =
+    host === "localhost" ||
+    host === "::1" ||
+    /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host);
+  if (!loopback) {
+    throw new NonLocalTargetError(
+      `database host "${host}" is not loopback (localhost / 127.0.0.0/8 / ::1). ` +
+        `Set ${LOCAL_DB_URL_ENV} to a loopback Postgres URL, or leave it unset ` +
+        "for the local stack default.",
+    );
+  }
+  return { host };
 }

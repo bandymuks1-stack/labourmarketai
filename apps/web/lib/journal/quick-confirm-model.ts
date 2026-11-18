@@ -11,10 +11,10 @@
  *                        linked skills already verified → nothing to
  *                        confirm; the tap approves the entry itself.
  *   worker_declared    — the entry has ZERO links (historic entries, or the
- *                        link read failed → links unknown) → the previous
- *                        behaviour: every declared-unverified skill of the
- *                        worker. Still listed in full on the card, so the
- *                        manager sees exactly what the tap does.
+ *                        link read failed → links unknown) → NO skill is
+ *                        confirmed; the tap approves the entry only. (It used
+ *                        to offer every declared-unverified skill of the
+ *                        worker — verifying what this entry never showed.)
  *   skills_unavailable — the worker_skills read itself failed → NOTHING can
  *                        be listed, so nothing is confirmed; the card names
  *                        the failure and the tap approves the entry only.
@@ -54,7 +54,10 @@ export function scopeSkillsToConfirm({
       skills: workerUnverified.filter((s) => linkedSkillIds.has(s.id)),
     };
   }
-  return { scope: "worker_declared", skills: [...workerUnverified] };
+  // No (readable) link: the entry proves no particular skill, so the tap
+  // approves the entry only. Offering the worker's other unverified skills
+  // here verified what this entry never showed (walk 2026-10-11).
+  return { scope: "worker_declared", skills: [] };
 }
 
 /** The receipt line's entry title: the entry's own first non-empty line,
@@ -70,4 +73,31 @@ export function receiptTitle(originalText: string): string {
       .find((l) => l !== "") ?? "";
   if (first.length <= RECEIPT_TITLE_MAX) return first;
   return `${first.slice(0, RECEIPT_TITLE_MAX - 1).trimEnd()}…`;
+}
+
+/** A queue row as a card's view, its slugs named by the caller's translators. */
+export function quickConfirmEntryView<
+  E extends {
+    id: string;
+    workerName: string;
+    createdAt: string;
+    workDay: string;
+    hours: { value: number; unit: string; certain: boolean } | null;
+    originalText: string;
+    recognizedSlugs: string[];
+    skillsToConfirm: QuickQueueSkill[];
+    confirmScope: QuickConfirmScope;
+  },
+>(e: E, skillName: (slug: string) => string, unitName: (slug: string) => string) {
+  return {
+    id: e.id,
+    workerName: e.workerName,
+    createdAt: e.createdAt,
+    workDay: e.workDay,
+    hours: e.hours ? { value: e.hours.value, unit: unitName(e.hours.unit), certain: e.hours.certain } : null,
+    originalText: e.originalText,
+    recognizedNames: e.recognizedSlugs.map(skillName),
+    skills: e.skillsToConfirm.map((s) => ({ id: s.id, name: skillName(s.slug) })),
+    confirmScope: e.confirmScope,
+  };
 }

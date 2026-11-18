@@ -12,6 +12,12 @@
   "noContextCta": "Siirry hallintapaneeliin",
   "noContextProfileCta": "Vahvista profiiliasi sillä välin",
   "personalEntry": "Henkilökohtainen työntekijäkirjaus",
+  "unnamedOrganization": {
+    "company": "Nimetön yritys",
+    "agency": "Nimetön toimisto",
+    "other": "Nimetön organisaatio"
+  },
+  "activeWorkspaceNoRelationship": "Toimit organisaation {org} puolesta, mutta työsuhdetta organisaatioon {org} ei ole kirjattu, joten sitä ei tarjota tässä. Valitse konteksti, johon tämä työ todella kuuluu.",
   "reviewNotEnabledNote": "Tarkastusta ei ole vielä otettu käyttöön. Voit kirjata työsi nyt — mutta jotta kirjaukset voidaan tarkastaa, organisaation omistajan täytyy ottaa työpäiväkirjan tarkastus käyttöön sinulle.",
   "chooseWorkType": "Valitse työn tyyppi",
   "whatDidYouDo": "Mitä teit tänään töissä?",
@@ -100,6 +106,7 @@
     "delete": "Poista kirjaus",
     "deleting": "Poistetaan...",
     "deleteConfirm": "Poistetaanko tämä kirjaus päiväkirjasta? Se ei enää näy listallasi. Voit palauttaa sen heti poistamisen jälkeen.",
+    "more": "Lisää tästä merkinnästä",
     "deleteBlocked": "Kirjaus on jo tarkastettu — lähetä korjauspyyntö poistamisen sijaan.",
     "deletedNotice": "Kirjaus poistettu päiväkirjastasi.",
     "restore": "Palauta",
@@ -151,7 +158,7 @@
       "pending": "Odottaa tarkastusta",
       "confirmed": "Vahvistettu"
     },
-    "projectNote": "Kirjaukset voidaan linkittää projektiin — tietomalli on valmis, mutta yhtään kirjausta ei ole vielä linkitetty eikä mitään täytetä automaattisesti. Projektien / kohteiden / asiakkaiden kerros täytetään erillisessä vaiheessa.",
+    "projectNote": "Kirjaukset voi linkittää projektiin. Mitään ei täytetä automaattisesti.",
     "reviewClarity": {
       "lead": "Tarkastuksesi muuttaa työntekijän itse ilmoittaman kirjauksen vahvistetuksi näytöksi. Vain esihenkilö, omistaja tai asiakkaan esihenkilö voi tehdä sen — jokainen vahvistus on aito ihmisen päätös.",
       "actionsTitle": "Mitä kukin toiminto tekee",
@@ -226,6 +233,9 @@
   },
   "listEmpty": "Sinulla ei ole vielä työtietoja — kirjauksesi näkyvät täällä.",
   "listEmptyTitle": "Aloita työtietojen kartuttaminen",
+  "listUnavailableTitle": "Työmerkintöjäsi ei juuri nyt voitu lukea",
+  "listUnavailable": "Tämä on epäonnistunut luku, ei tyhjä päiväkirja. Mitään kirjaamaasi ei ole kadonnut — lataa sivu hetken päästä uudelleen.",
+  "cvBridgeUnavailable": "Merkintöjä ei juuri nyt voitu lukea, joten niiden määrä on tuntematon.",
   "listEmptyNext": "Luo ensimmäinen kirjauksesi alla — se pysyy yksityisenä, kunnes lähetät sen.",
   "listEmptyCta": "Luo ensimmäinen kirjauksesi",
   "logViaChatBody": "[EN] Work is logged in the conversation — say what you did and the record appears here.",
@@ -236,6 +246,8 @@
   "listTitle": "Työkirjaukset",
   "navTitle": "Työtiedot",
   "navSubtitle": "Näytä mitä teit — se vahvistaa työkorttiasi.",
+  "orgContextNotice": "Tämä on henkilökohtainen työpäiväkirjasi, ei yrityksen „{org}“. Toimit yrityksen puolesta — sen työt ja ihmiset ovat muualla.",
+  "orgContextCta": "Yrityksen työt →",
   "composerBenefit": "Tämä kirjaus vahvistaa työkorttiasi.",
   "newEntry": "Uusi kirjaus",
   "noEngagement": "Sinulla ei ole vielä aktiivista työkontekstia. Liity organisaatioon tai projektiin kartuttaaksesi CV:täsi.",
@@ -275,6 +287,7 @@
     "invalidFile": "Kuvan on oltava JPG, PNG tai WebP, kooltaan enintään 5 MB.",
     "uploaded": "Kuva liitetty kirjaukseen.",
     "limitReached": "Tässä kirjauksessa on jo kuva — ilmaisversio sallii 1 kuvan kirjausta kohden.",
+    "quotaReached": "Organisaatiosi tallennustilaraja on täynnä, joten kuvaa ei tallennettu. Itse merkintä on tallennettu.",
     "notReady": "Kuvatallennusta ei ole vielä otettu käyttöön tässä ympäristössä — kirjaus tallennettiin ilman kuvaa.",
     "preparing": "Valmistellaan kuvaa…",
     "prepared": "Kuvan koko on muutettu, ja se on valmis ladattavaksi.",
@@ -286,7 +299,7 @@
     "pageTitle": "Puhesyöttö",
     "pageIntro": "Kerro työpäivästäsi — tarkistat ja korjaat tekstin ennen kuin mitään tallennetaan.",
     "backToJournal": "Takaisin päiväkirjaan",
-    "unavailable": "Puheen transkriptiota ei ole vielä määritetty. Alustan omistaja ei ole vielä yhdistänyt transkriptiopalvelinta — tallennus on siihen asti pois käytöstä. Voit aina kirjoittaa merkinnän tekstinä.",
+    "unavailable": "Puheen transkriptio ei ole vielä käytettävissä — tallennus on toistaiseksi pois käytöstä. Voit aina kirjoittaa merkinnän tekstinä.",
     "disclosureTitle": "Ennen tallennusta",
     "disclosureProcessing": "Äänitteesi lähetetään LabourMarket.ai:n hallinnoimalle käsittelypalvelimelle tekstiksi muuntamista varten. Kolmannen osapuolen puhepalveluja ei käytetä.",
     "disclosureWhy": "Sitä käytetään vain alla olevan tekstin luomiseen — ei mihinkään muuhun.",
@@ -320,9 +333,35 @@
       "too_large": "Tallenne on liian suuri (enint. 25 Mt).",
       "too_long": "Tallenne on liian pitkä (enint. 10 minuuttia).",
       "unavailable": "Litterointipalvelin ei ole juuri nyt käytettävissä.",
-      "undecodable": "Ääntä ei voitu lukea — yritä uudelleen."
+      "undecodable": "Ääntä ei voitu lukea — yritä uudelleen.",
+      "rate_limited": "Liian monta tallennetta lyhyessä ajassa - odota hetki ja yritä uudelleen.",
+      "token_expired": "Latausistunto vanheni - yritä uudelleen.",
+      "unauthorized": "Istuntosi ei ole oikeutettu puheeseen - kirjaudu uudelleen.",
+      "service_unreachable": "Litterointipalvelinta ei tavoitettu. Tarkista yhteys ja yritä uudelleen; tallenne säilyy tällä sivulla."
     },
-    "permissionDenied": "Mikrofonin käyttö estettiin. Salli mikrofoni selaimen asetuksista ja yritä uudelleen."
+    "permissionDenied": "Mikrofonin käyttö estettiin. Salli mikrofoni selaimen asetuksista ja yritä uudelleen.",
+    "disclosureProvenance": "Tallennettu merkintä merkitään puheella sanelluksi ja sinun tarkistamaksesi.",
+    "state": {
+      "ready": "Valmis. Valitse puhekieli ja aloita tallennus.",
+      "permissionRequired": "Selain pyytää mikrofonin käyttölupaa, kun aloitat. Mitään ei tallenneta ennen lupaasi.",
+      "policyBlocked": "Sivuston tietoturvakäytäntö estää mikrofonin täällä. Äänitys ei ole käytettävissä tällä sivulla - voit kirjoittaa merkinnän tekstinä.",
+      "unsupported": "Tämä selain ei voi tallentaa ääntä täällä (vaatii suojatun sivun ja mikrofonin tallennustuen). Voit ladata äänitiedoston tai kirjoittaa tekstin.",
+      "noDevice": "Tältä laitteelta ei löytynyt mikrofonia.",
+      "deviceBusy": "Toinen sovellus käyttää mikrofonia. Sulje se ja yritä uudelleen.",
+      "cancelled": "Tallennus peruutettu. Mitään ei ladattu tai tallennettu.",
+      "requesting": "Odotetaan lupaasi mikrofonin käyttöön...",
+      "interrupted": "Tallennus keskeytettiin, koska sivu oli piilossa. Jatka, kun palaat.",
+      "interruptedKept": "Mikrofoni pysähtyi, joten tallennus päättyi etuajassa. Tallennettu on litteroitu alle - tarkista se.",
+      "uploading": "Ladataan tallennetta..."
+    },
+    "language": {
+      "label": "Puhekieli",
+      "auto": "Tunnista automaattisesti",
+      "hint": "Valitse kieli, jota puhut - sen ei tarvitse vastata sivuston kieltä."
+    },
+    "recordAgain": "Tallenna uudelleen",
+    "announceStarted": "Tallennus alkoi",
+    "announceMinutes": "{minutes} min tallennettu"
   },
   "savedOpenCv": "Näytä CV",
   "statusExplainer": "Miten merkintöjäsi käytetään?",
@@ -386,5 +425,6 @@
     "topicLabel": "[EN] Topic",
     "conflictNote": "Tätä merkintää on jo muutettu toisessa välilehdessä tai istunnossa. Jos haluat säilyttää tähän kirjoitetut muutokset, kopioi teksti ensin — sivun uudelleenlataus hävittää ne, ja muokkaat sen jälkeen uusinta versiota.",
     "conflictReload": "Lataa sivu uudelleen"
-  }
+  },
+  "contextEnded": "päättynyt"
 }

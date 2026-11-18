@@ -160,7 +160,8 @@ describe("P3 — webhook idempotency by Stripe event id", () => {
     const route = read("app/api/billing/webhook/route.ts");
     const recordAt = route.indexOf("recordWebhookEvent(");
     expect(recordAt).toBeGreaterThan(-1);
-    expect(recordAt).toBeLessThan(route.indexOf("upsertSubscription("));
+    expect(recordAt).toBeLessThan(route.indexOf("applyRawSubscriptionObject("));
+    expect(recordAt).toBeLessThan(route.indexOf("applyCheckoutLink("));
     expect(recordAt).toBeLessThan(route.indexOf("applyInvoicePayment("));
     expect(recordAt).toBeLessThan(route.indexOf("completeCheckoutOperationBySession("));
     expect(route).toMatch(/recorded === "duplicate-processed"[\s\S]*?duplicate: true/);
@@ -174,6 +175,23 @@ describe("P3 — webhook idempotency by Stripe event id", () => {
   it("financial events are record-only — no entitlement, credit or ledger side effect", () => {
     const core = read("lib/billing/webhook-core.ts");
     expect(core).toMatch(/RECORD_ONLY = new Set\(\[\s*"charge\.refunded",\s*"charge\.dispute\.created",\s*"charge\.dispute\.closed",\s*\]\)/);
+  });
+});
+
+// ─── ONE subscription-apply primitive ───────────────────────────────────────
+
+describe("ONE canonical subscription-apply primitive", () => {
+  it("the webhook route and the recovery adapter never call upsertSubscription directly", () => {
+    for (const f of ["app/api/billing/webhook/route.ts", "lib/billing/reconcile-subscription.ts", "lib/billing/billing-recovery.ts"]) {
+      let src = "";
+      try {
+        src = read(f);
+      } catch {
+        continue; // recovery files land in the next stage
+      }
+      expect(src, f).not.toMatch(/\bupsertSubscription\b/);
+    }
+    expect(read("lib/billing/apply-subscription-snapshot.ts")).toMatch(/upsertSubscription/);
   });
 });
 
@@ -201,7 +219,9 @@ describe("P4 — out-of-order events never regress state", () => {
     expect(store).toMatch(/return "stale-event"/);
     const route = read("app/api/billing/webhook/route.ts");
     expect(route).toMatch(/result === "ok" \|\| result === "stale-event"/);
-    expect(route).toMatch(/transitionKind: "link"/);
+    // The LINK transition (never regresses a real status) lives in the ONE apply
+    // primitive the route calls; the route no longer builds upserts inline.
+    expect(read("lib/billing/apply-subscription-snapshot.ts")).toMatch(/transitionKind: "link"/);
   });
   it("the adapter surfaces Stripe's `created` and the record stores it", () => {
     expect(read("lib/billing/providers/stripe-test.ts")).toMatch(/created: event\.created/);
@@ -358,7 +378,7 @@ describe("P9 — every financial object carries attributable, immutable identifi
       expect(sql, col).toMatch(new RegExp(`\\b${col}\\b`));
     }
     expect(read("lib/billing/checkout-operations-store.ts")).toMatch(/attachProviderSession/);
-    expect(read("app/api/billing/webhook/route.ts")).toMatch(/completeCheckoutOperationBySession\(\{\s*sessionId,\s*providerSubscriptionId: link\.providerSubscriptionId/);
+    expect(read("app/api/billing/webhook/route.ts")).toMatch(/completeCheckoutOperationBySession\(\{\s*sessionId,\s*providerSubscriptionId: linked\.providerSubscriptionId/);
   });
   it("the subscription row keeps the last event id/created and the billed price; the event record keeps Stripe's created", () => {
     const store = read("lib/billing/subscription-store.ts");

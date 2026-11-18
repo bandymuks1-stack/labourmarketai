@@ -25,7 +25,7 @@ const migration = readFileSync(join(REPO, MIG_REL), "utf8");
 const sqlNoComments = migration.replace(/^\s*--.*$/gm, "");
 
 const composer = readApp("components/app/communication-composer.tsx");
-const actions = readApp("lib/communication/actions.ts");
+const actions = readApp("lib/communication/communication-core.ts");
 const service = readApp("lib/communication/attachments.ts");
 const threadPage = readApp("app/[locale]/dashboard/communication/[conversationId]/page.tsx");
 
@@ -123,7 +123,7 @@ describe("app flow — composer honesty", () => {
   const code = stripComments(composer);
   it("failure paths keep the typed text (setBody('') only after a successful send)", () => {
     // Every early-return error branch precedes the single setBody("") reset.
-    const errorReturn = code.indexOf("setError(result.message)");
+    const errorReturn = code.indexOf("setError(t(`composer.errors.${composerErrorKey(result.code)}`))");
     const bodyReset = code.indexOf('setBody("")');
     expect(errorReturn).toBeGreaterThan(-1);
     expect(bodyReset).toBeGreaterThan(errorReturn);

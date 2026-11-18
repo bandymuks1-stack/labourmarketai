@@ -18,7 +18,13 @@ export type MarketMapMode =
   | "fullscreen";
 
 /** Which signal the map is currently showing. */
-export type MarketMapLayer = "demand" | "people" | "projects" | "jobs";
+export type MarketMapLayer =
+  | "demand"
+  | "people"
+  | "projects"
+  | "jobs"
+  /** The owner company's own operating territory (country/city level). */
+  | "territory";
 
 /**
  * A point on the map. Coordinates are REAL WGS84 — never invented, never

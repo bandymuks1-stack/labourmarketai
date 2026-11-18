@@ -1,7 +1,5 @@
 import "server-only";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
-
 import type { DomainCaller } from "@/lib/domain/caller";
 import {
   normalizeLabel,
@@ -9,11 +7,30 @@ import {
 } from "@/lib/timesheet-import/resolve-entities";
 import { orgDisplayName } from "@/lib/company/org-display";
 import {
+  anyStandingDispute,
+  contestWithdrawnBy,
   deriveEvidenceStanding,
   type ReportedEvidenceState,
   type RecordLifecycleEvent,
 } from "./evidence-state";
+import {
+  SESSION_RECORD_PAGE,
+  isEvidenceStore,
+  supabaseEvidenceStore,
+  untypedClient,
+  type EvidenceCaller,
+  type EvidenceStore,
+  type SessionRecordWithEvents,
+  type StoreRow,
+} from "./evidence-store";
 import { chainHash, recordFingerprint } from "./fingerprint";
+import { splitAddress } from "./address-split";
+import {
+  buildCorrection,
+  correctionInputSchema,
+  reconstructedDatePatch,
+  type CorrectionInput,
+} from "./record-correction";
 import {
   deriveImportSessionStatus,
   type ImportSessionEvent,
@@ -31,14 +48,21 @@ import {
   tidy,
   type SourceWorkRow,
 } from "./source-rows";
-import { HOURS_EXCEED_DAY_METHOD } from "./parse-tabular";
+import { HOURS_EXCEED_DAY_METHOD, mapHeaderRow } from "./parse-tabular";
 import {
   classifyTimeSemantics,
   countsAsDailyHours,
+  extractSourceTimeCues,
+  periodFromHumanInput,
+  sourceTimeConflicts,
   timeSemanticsOpen,
+  withSourceCues,
   type TimeSemantics,
   type TimeSemanticsKind,
 } from "./time-semantics";
+import { committedFactFields } from "./record-fact-fields";
+import { readRecordHistoryContexts } from "./history-context-read";
+import type { HistoryContext } from "./professional-history-context";
 import {
   resolveEvidenceOrganization,
   type EvidenceOrgReason,
@@ -147,11 +171,27 @@ function classify(
   return { kind: "error" };
 }
 
-// The evidence-import tables postdate the generated Database types until the
-// migration is applied — the same `asAny` pattern every gated store uses.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function db(c: SupabaseClient): any {
-  return c;
+// The reads not yet behind the store port use the caller's client directly,
+// through the same untyped view the port uses.
+const db = untypedClient;
+
+/**
+ * THE DATA PLANE for one call. A transport hands in its `DomainCaller` (the
+ * caller's own RLS-scoped client) and gets the production store over it; the
+ * synthetic fixture hands in a store directly. Either way the orchestration
+ * below is the SAME code — there is no test-only path through it.
+ */
+function storeOf(caller: EvidenceCaller): EvidenceStore {
+  return isEvidenceStore(caller) ? caller : supabaseEvidenceStore(caller);
+}
+
+function refuseOrg(org: {
+  readonly reason: EvidenceOrgReason;
+  readonly options?: readonly { readonly id: string; readonly name: string }[];
+}): EvidenceImportFailure {
+  return org.reason === "choice-required" || org.reason === "not-a-member"
+    ? { kind: "choice-required", options: org.options ?? [] }
+    : { kind: "not-authorized", reason: org.reason };
 }
 
 // ── session ─────────────────────────────────────────────────────────────────
@@ -206,6 +246,31 @@ export interface CreateSessionInput {
    *  authority came from the human OAuth identity behind the caller. */
   readonly actorKind?: "human" | "agent";
   readonly agentLabel?: string | null;
+  /**
+   * `sha256(bytes)` of an UPLOADED file, plain hex — the same form as
+   * `document_files.content_sha256` (design v3 §9.1). Computed at intake for
+   * every file, CSV included. It never replaces `sourceFingerprint` (a file
+   * already imported keeps its session); until the session column exists
+   * (M1e) it is recorded on the session's `created` event, append-only.
+   */
+  readonly sourceBytesSha256?: string | null;
+}
+
+const SHA256_HEX = /^[0-9a-f]{64}$/;
+
+/**
+ * THE DEFAULT CAPACITY an organization speaks in when nobody stated one
+ * (design v3 N1). `employer` first: an organization that declared it employs
+ * people speaks as the employer of its own timesheets, even when it ALSO
+ * supplies workforce — the old order read such an organization as an agency.
+ * `other` stays the answer when the organization declared nothing: it claims
+ * no capacity, and the organization is not asked to invent one.
+ */
+export function defaultSupplierRole(capabilities: readonly string[]): SupplierRole {
+  if (capabilities.includes("employer") || capabilities.includes("project_operator")) return "employer";
+  if (capabilities.includes("training_provider")) return "training_provider";
+  if (capabilities.includes("workforce_provider") || capabilities.includes("recruitment_partner")) return "agency";
+  return "other";
 }
 
 export interface SessionSummary {
@@ -232,27 +297,15 @@ export interface SessionSummary {
  * human "you already imported this" rather than silently doing nothing.
  */
 export async function createImportSession(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   input: CreateSessionInput,
 ): Promise<EvidenceImportResult<{ session: SessionSummary }>> {
-  const org = await resolveEvidenceOrganization(caller, input.organizationId);
-  if (!org.ok) {
-    return org.reason === "choice-required" || org.reason === "not-a-member"
-      ? { kind: "choice-required", options: org.options ?? [] }
-      : { kind: "not-authorized", reason: org.reason };
-  }
+  const store = storeOf(caller);
+  const org = await store.resolveOrganization(input.organizationId);
+  if (!org.ok) return refuseOrg(org);
 
-  const existing = await db(caller.supabase)
-    .from("evidence_import_sessions")
-    .select(
-      "id, source_kind, source_filename, source_language, supplier_role, created_at",
-    )
-    .eq("organization_id", org.organizationId)
-    .eq("source_fingerprint", input.sourceFingerprint)
-    .maybeSingle();
-  if (existing.error && existing.error.code !== "PGRST116") {
-    return classify(existing.error);
-  }
+  const existing = await store.findSessionByFingerprint(org.organizationId, input.sourceFingerprint);
+  if (existing.error) return classify(existing.error);
   if (existing.data) {
     return {
       kind: "ok",
@@ -271,81 +324,96 @@ export async function createImportSession(
     };
   }
 
-  const inserted = await db(caller.supabase)
-    .from("evidence_import_sessions")
-    .insert({
-      organization_id: org.organizationId,
-      source_kind: input.sourceKind,
-      source_filename: input.sourceFilename ?? null,
-      source_reference: input.sourceReference ?? null,
-      source_fingerprint: input.sourceFingerprint,
-      source_language: input.sourceLanguage,
-      supplied_by_organization_id: org.organizationId,
-      supplier_role: input.supplierRole,
-      actor_kind: input.actorKind ?? "human",
-      agent_label: input.agentLabel ?? null,
-      created_by: caller.userId,
-      notes: input.notes ?? null,
-    })
-    .select("id, created_at")
-    .single();
+  const inserted = await store.insertSession({
+    organization_id: org.organizationId,
+    source_kind: input.sourceKind,
+    source_filename: input.sourceFilename ?? null,
+    source_reference: input.sourceReference ?? null,
+    source_fingerprint: input.sourceFingerprint,
+    source_language: input.sourceLanguage,
+    supplied_by_organization_id: org.organizationId,
+    supplier_role: input.supplierRole,
+    actor_kind: input.actorKind ?? store.actorKind ?? "human",
+    agent_label: input.agentLabel ?? null,
+    created_by: store.userId,
+    notes: input.notes ?? null,
+  });
   if (inserted.error) return classify(inserted.error);
 
-  await recordImportEvent(caller, {
+  const bytesSha256 =
+    input.sourceBytesSha256 && SHA256_HEX.test(input.sourceBytesSha256) ? input.sourceBytesSha256 : null;
+  await recordImportEvent(store, {
     organizationId: org.organizationId,
-    sessionId: inserted.data.id as string,
+    sessionId: inserted.data.id,
     eventType: "created",
-    actorKind: input.actorKind ?? "human",
-    payload: { sourceKind: input.sourceKind, supplierRole: input.supplierRole },
+    actorKind: input.actorKind ?? store.actorKind ?? "human",
+    payload: {
+      sourceKind: input.sourceKind,
+      supplierRole: input.supplierRole,
+      ...(bytesSha256 ? { sourceBytesSha256: bytesSha256 } : {}),
+    },
   });
 
   return {
     kind: "ok",
     session: {
-      id: inserted.data.id as string,
+      id: inserted.data.id,
       organizationId: org.organizationId,
       organizationName: org.organizationName,
       sourceKind: input.sourceKind,
       sourceFilename: input.sourceFilename ?? null,
       sourceLanguage: input.sourceLanguage,
       supplierRole: input.supplierRole,
-      createdAt: inserted.data.created_at as string,
+      createdAt: inserted.data.created_at,
       reused: false,
     },
   };
 }
 
-/** Append one audit row. Best-effort BY DESIGN: the audit trail must never be
- *  the reason a legitimate import fails, and a missing event is visible as a
- *  gap in an append-only log rather than as corrupted evidence. */
-async function recordImportEvent(
-  caller: DomainCaller,
+type ImportEventType =
+  | "created"
+  | "rows_submitted"
+  | "previewed"
+  | "committed"
+  | "rolled_back"
+  | "reinstated"
+  | "failed";
+
+function importEventRow(
+  store: EvidenceStore,
   e: {
     organizationId: string;
     sessionId: string;
-    eventType:
-      | "created"
-      | "rows_submitted"
-      | "previewed"
-      | "committed"
-      | "rolled_back"
-      | "reinstated"
-      | "failed";
+    eventType: ImportEventType;
     actorKind?: "human" | "agent";
     payload?: Record<string, unknown>;
   },
+): StoreRow {
+  return {
+    organization_id: e.organizationId,
+    session_id: e.sessionId,
+    event_type: e.eventType,
+    actor_profile_id: store.userId,
+    // The step's own performer: an explicit kind, else the caller's (an
+    // assistant driving the import through MCP stays `agent` on EVERY event —
+    // production audit 2026-09-29 found the `committed` event recorded as
+    // `human` after an agent-created session).
+    actor_kind: e.actorKind ?? store.actorKind ?? "human",
+    payload: e.payload ?? {},
+  };
+}
+
+/** Append one audit row. Best-effort BY DESIGN: the audit trail must never be
+ *  the reason a legitimate import fails, and a missing event is visible as a
+ *  gap in an append-only log rather than as corrupted evidence. The rollback
+ *  path is the exception — its session event IS the outcome, so it is written
+ *  checked (see `lifecycleSweep`). */
+async function recordImportEvent(
+  store: EvidenceStore,
+  e: Parameters<typeof importEventRow>[1],
 ): Promise<void> {
   try {
-    await db(caller.supabase)
-      .from("evidence_import_events")
-      .insert({
-        organization_id: e.organizationId,
-        session_id: e.sessionId,
-        event_type: e.eventType,
-        actor_profile_id: caller.userId,
-        actor_kind: e.actorKind ?? "human",
-        payload: e.payload ?? {},
-      });
+    await store.insertImportEvent(importEventRow(store, e));
   } catch {
     // Deliberately swallowed — see the doc comment.
   }
@@ -353,12 +421,15 @@ async function recordImportEvent(
 
 /** Read a session the caller may see, and the organization it belongs to. */
 async function loadSession(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   sessionId: string,
 ): Promise<
   | {
       ok: true;
       organizationId: string;
+      /** The session row's own `supplied_by_organization_id`; null only when
+       *  the row carries none (a store that predates the column). */
+      suppliedByOrganizationId: string | null;
       sourceKind: string;
       sourceLanguage: string;
       sourceFilename: string | null;
@@ -367,18 +438,13 @@ async function loadSession(
     }
   | { ok: false; failure: EvidenceImportFailure }
 > {
-  const res = await db(caller.supabase)
-    .from("evidence_import_sessions")
-    .select(
-      "organization_id, source_kind, source_language, source_filename, source_reference, supplier_role",
-    )
-    .eq("id", sessionId)
-    .maybeSingle();
+  const res = await storeOf(caller).readSession(sessionId);
   if (res.error) return { ok: false, failure: classify(res.error) };
   if (!res.data) return { ok: false, failure: { kind: "not-found" } };
   return {
     ok: true,
     organizationId: res.data.organization_id as string,
+    suppliedByOrganizationId: (res.data.supplied_by_organization_id as string | null) ?? null,
     sourceKind: res.data.source_kind as string,
     sourceLanguage: res.data.source_language as string,
     sourceFilename: (res.data.source_filename as string | null) ?? null,
@@ -391,30 +457,71 @@ async function loadSession(
 
 export interface SubmitRowsResult {
   readonly inserted: number;
+  /** Rows whose source position was already staged — ignored, never duplicated. */
   readonly skipped: number;
   readonly totalInSession: number;
 }
 
 /**
+ * WHERE each row sits IN ITS SOURCE — the staging key (design v3 §10, the
+ * fix of N3). A parsed file states it per row (`rowIndexes`, the parser's own
+ * source positions, gaps included where a line could not become a row); an
+ * agent states where its batch starts (`startIndex`) and the batch's rows
+ * follow on. Either way the same source row always lands on the same
+ * `row_index`, so a resumed or repeated upload fills gaps and never
+ * duplicates.
+ */
+export type RowPositions =
+  | { readonly startIndex: number }
+  | { readonly rowIndexes: readonly number[] };
+
+function positionsOf(
+  at: RowPositions,
+  count: number,
+): { ok: true; indexes: number[] } | { ok: false; problem: string } {
+  const indexes =
+    "rowIndexes" in at ? [...at.rowIndexes] : Array.from({ length: count }, (_, i) => at.startIndex + i);
+  if (indexes.length !== count) return { ok: false, problem: "one source position per row" };
+  const seen = new Set<number>();
+  for (const i of indexes) {
+    if (!Number.isInteger(i) || i < 0) return { ok: false, problem: `source position ${i} is not a row index` };
+    if (i >= MAX_ROWS_PER_SESSION) return { ok: false, problem: "too-many-rows" };
+    if (seen.has(i)) return { ok: false, problem: `source position ${i} appears twice` };
+    seen.add(i);
+  }
+  return { ok: true, indexes };
+}
+
+/**
  * Stage a bounded batch of canonical rows.
  *
- * BOUNDED AND RESUMABLE. A batch is capped at `MAX_ROWS_PER_SUBMIT` and a
- * session at `MAX_ROWS_PER_SESSION`; `row_index` is assigned by continuing from
- * what the session already holds, and `(session_id, row_index)` is unique — so
- * a retried batch after a timeout cannot duplicate rows, and thousands of rows
- * arrive as many small calls rather than one unbounded request.
+ * BOUNDED, RESUMABLE AND IDEMPOTENT. A batch is capped at
+ * `MAX_ROWS_PER_SUBMIT` and a session at `MAX_ROWS_PER_SESSION` source
+ * positions. `row_index` is the row's position IN THE SOURCE (never "what
+ * the session already holds + i", which duplicated every row of a partial
+ * retry), and `(session_id, row_index)` is unique with conflicts ignored — so
+ * a retried batch, a resumed upload and a full repeat all converge on ONE
+ * staged row per source row.
  */
 export async function submitRows(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   sessionId: string,
   rows: readonly unknown[],
+  at: RowPositions,
 ): Promise<EvidenceImportResult<SubmitRowsResult>> {
   if (rows.length === 0) return { kind: "invalid", problems: ["no rows"] };
   if (rows.length > MAX_ROWS_PER_SUBMIT) {
     return { kind: "too-many-rows", limit: MAX_ROWS_PER_SUBMIT };
   }
+  const positions = positionsOf(at, rows.length);
+  if (!positions.ok) {
+    return positions.problem === "too-many-rows"
+      ? { kind: "too-many-rows", limit: MAX_ROWS_PER_SESSION }
+      : { kind: "invalid", problems: [positions.problem] };
+  }
 
-  const session = await loadSession(caller, sessionId);
+  const store = storeOf(caller);
+  const session = await loadSession(store, sessionId);
   if (!session.ok) return session.failure;
 
   const parsed: SourceWorkRow[] = [];
@@ -429,20 +536,10 @@ export async function submitRows(
   });
   if (problems.length > 0) return { kind: "invalid", problems };
 
-  const countRes = await db(caller.supabase)
-    .from("evidence_import_rows")
-    .select("row_index", { count: "exact", head: true })
-    .eq("session_id", sessionId);
-  if (countRes.error) return classify(countRes.error);
-  const already = countRes.count ?? 0;
-  if (already + parsed.length > MAX_ROWS_PER_SESSION) {
-    return { kind: "too-many-rows", limit: MAX_ROWS_PER_SESSION };
-  }
-
   const payload = parsed.map((row, i) => ({
     session_id: sessionId,
     organization_id: session.organizationId,
-    row_index: already + i,
+    row_index: positions.indexes[i],
     source_fact: row.raw,
     fact_fields: row.factFields,
     derived: row.derived,
@@ -469,17 +566,14 @@ export async function submitRows(
 
   // ON CONFLICT DO NOTHING on (session_id, row_index): a retried batch is a
   // no-op rather than a duplicate.
-  const ins = await db(caller.supabase)
-    .from("evidence_import_rows")
-    .upsert(payload, {
-      onConflict: "session_id,row_index",
-      ignoreDuplicates: true,
-    })
-    .select("id");
+  const ins = await store.insertStagedRows(payload);
   if (ins.error) return classify(ins.error);
+  const inserted = ins.data.length;
 
-  const inserted = Array.isArray(ins.data) ? ins.data.length : 0;
-  await recordImportEvent(caller, {
+  const total = await store.countStagedRows(sessionId);
+  if (total.error) return classify(total.error);
+
+  await recordImportEvent(store, {
     organizationId: session.organizationId,
     sessionId,
     eventType: "rows_submitted",
@@ -490,7 +584,99 @@ export async function submitRows(
     kind: "ok",
     inserted,
     skipped: parsed.length - inserted,
-    totalInSession: already + inserted,
+    totalInSession: total.data,
+  };
+}
+
+/** A source line the parser could not turn into a row, at its position. */
+export interface NotStagedSourceRow {
+  readonly position: number;
+  /** The parser's own reason slug (`no_date`, `no_person`). */
+  readonly reason: string;
+}
+
+/** The payload stage of the `rows_submitted` event that names the source
+ *  lines no row was staged for. The events CHECK admits seven types and
+ *  "not staged" is none of them, so the stage is named in the payload. */
+export const NOT_STAGED_STAGE = "source_rows_not_staged";
+
+export interface StageSourceResult {
+  readonly session: SessionSummary;
+  /** Rows written by THIS upload. */
+  readonly staged: number;
+  /** Rows whose source position was already staged — a resumed or repeated
+   *  upload, never a duplicate. */
+  readonly alreadyStaged: number;
+  readonly totalInSession: number;
+  /** Source lines that could not become a row — said, never dropped. */
+  readonly notStaged: number;
+}
+
+/**
+ * ONE SOURCE, STAGED — the intake every file-carrying transport shares.
+ *
+ * Opens (or finds) the session for the source, then stages its rows in
+ * bounded batches AT THEIR SOURCE POSITIONS. Re-uploading the same bytes
+ * resolves to the same session and stages only the positions that are still
+ * missing — so an upload that died after its first batch resumes, and a full
+ * repeat writes no row at all. The source lines that could not become a row
+ * are recorded on the session's trail and counted in the preview (FAILED is
+ * not EMPTY).
+ */
+export async function stageImportSource(
+  caller: EvidenceCaller,
+  input: {
+    readonly session: CreateSessionInput;
+    readonly rows: readonly SourceWorkRow[];
+    /** The parser's source position of every row, same order as `rows`. */
+    readonly positions: readonly number[];
+    readonly notStaged?: readonly NotStagedSourceRow[];
+    /** Rows per submit; the core's bound unless a caller needs smaller. */
+    readonly batchSize?: number;
+  },
+): Promise<EvidenceImportResult<StageSourceResult>> {
+  if (input.positions.length !== input.rows.length) {
+    return { kind: "invalid", problems: ["one source position per row"] };
+  }
+  const store = storeOf(caller);
+  const session = await createImportSession(store, input.session);
+  if (session.kind !== "ok") return session;
+
+  const size = Math.min(Math.max(Math.trunc(input.batchSize ?? MAX_ROWS_PER_SUBMIT), 1), MAX_ROWS_PER_SUBMIT);
+  let staged = 0;
+  let alreadyStaged = 0;
+  let totalInSession = 0;
+  for (let i = 0; i < input.rows.length; i += size) {
+    const res = await submitRows(store, session.session.id, input.rows.slice(i, i + size), {
+      rowIndexes: input.positions.slice(i, i + size),
+    });
+    if (res.kind !== "ok") return res;
+    staged += res.inserted;
+    alreadyStaged += res.skipped;
+    totalInSession = res.totalInSession;
+  }
+
+  const notStaged = input.notStaged ?? [];
+  if (notStaged.length > 0) {
+    await recordImportEvent(store, {
+      organizationId: session.session.organizationId,
+      sessionId: session.session.id,
+      eventType: "rows_submitted",
+      payload: {
+        stage: NOT_STAGED_STAGE,
+        count: notStaged.length,
+        rows: notStaged.slice(0, 200).map((r) => ({ position: r.position, reason: r.reason })),
+      },
+    });
+  }
+
+  return {
+    kind: "ok",
+    session: session.session,
+    staged,
+    alreadyStaged,
+    totalInSession,
+    notStaged: notStaged.length,
   };
 }
 
@@ -511,8 +697,13 @@ export type DuplicateState =
 
 export interface PreviewRow {
   readonly id: string;
+  /** The row's position IN ITS SOURCE (0-based data line), not an upload
+   *  counter — a resumed upload lands on the same index. */
   readonly rowIndex: number;
   readonly personLabel: string | null;
+  /** The employee number the source states beside the name, re-read from
+   *  the verbatim source line; `null` when it states none. */
+  readonly externalRef?: string | null;
   readonly personState: PersonState;
   readonly personId: string | null;
   readonly personName: string | null;
@@ -783,7 +974,9 @@ export function resolveRowContexts(input: {
  * `create_work_object_v1` RPC). No new write path, no policy change.
  */
 export interface ImportPlan {
-  readonly people: readonly { readonly label: string; readonly rows: number }[];
+  /** One entry per person to create; `externalRef` is the employee number
+   *  the source states, carried onto the roster person the plan creates. */
+  readonly people: readonly { readonly label: string; readonly rows: number; readonly externalRef?: string | null }[];
   /** One entry per canonical place the commit would create. `spellings`
    *  are the source's other ways of writing it, folded by the resolver
    *  (same house number, typo distance) — shown, never hidden. */
@@ -811,6 +1004,10 @@ export interface ImportPreview {
     readonly filename: string | null;
     readonly supplierRole: string;
     readonly language: string;
+    /** Source lines the parser could not turn into a row (no date, no
+     *  person), as the upload recorded them. `null` = this session recorded
+     *  no count (an older upload): unknown, never zero. */
+    readonly notStagedSourceRows?: number | null;
   };
   readonly counts: {
     readonly total: number;
@@ -855,33 +1052,172 @@ export function committableRows(preview: ImportPreview): readonly PreviewRow[] {
  *   `conflict`            same person, same day, same place, same text —
  *                         DIFFERENT hours. Never silently discarded.
  *   `new`                 nothing like it is recorded.
+ *
+ * THE SHELL AROUND A PURE SEAM. This function reads (through the store),
+ * hands everything to `computePreview` — which decides, and touches nothing —
+ * and then persists the staging patches the seam returned. The synthetic
+ * fixture runs the same shell on the in-memory store.
  */
 export async function buildPreview(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   sessionId: string,
 ): Promise<EvidenceImportResult<{ preview: ImportPreview }>> {
-  const session = await loadSession(caller, sessionId);
+  const store = storeOf(caller);
+  const session = await loadSession(store, sessionId);
   if (!session.ok) return session.failure;
 
-  const rowsRes = await db(caller.supabase)
-    .from("evidence_import_rows")
-    .select(
-      "id, row_index, person_label, context_label, activity_date, period_start, period_end, hours, activity_text, fact_fields, derived, organization_person_id, work_object_id, person_state, context_state, record_fingerprint, status, problem",
-    )
-    .eq("session_id", sessionId)
-    .order("row_index", { ascending: true })
-    .limit(MAX_ROWS_PER_SESSION);
+  const rowsRes = await store.listStagedRows(sessionId, PREVIEW_COLUMNS);
   if (rowsRes.error) return classify(rowsRes.error);
-  const staged = (rowsRes.data ?? []) as Record<string, unknown>[];
 
-  const [roster, objects, existing] = await Promise.all([
-    readRoster(caller, session.organizationId),
-    readWorkObjects(caller, session.organizationId),
-    readExistingFingerprints(caller, session.organizationId),
+  const [roster, objects, existing, trail] = await Promise.all([
+    readRoster(store, session.organizationId),
+    readWorkObjects(store, session.organizationId),
+    readExistingFingerprints(store, session.organizationId),
+    store.listImportEvents(sessionId),
   ]);
   if (!roster.ok) return roster.failure;
   if (!objects.ok) return objects.failure;
   if (!existing.ok) return existing.failure;
+
+  const computed = computePreview({
+    sessionId,
+    session,
+    staged: rowsRes.data,
+    roster: roster.value,
+    objects: objects.value,
+    existing: existing.value,
+    // An unreadable trail is UNKNOWN, never "nothing was skipped".
+    notStagedSourceRows: trail.error ? null : notStagedCount(trail.data),
+    now: new Date().toISOString(),
+  });
+
+  // Persist the interpretation back onto STAGING only. Failure here degrades
+  // the preview to non-sticky; it never blocks the human from seeing it. A
+  // committed row is never in `patches` except to HEAL it (its own record
+  // exists) — and the store refuses to write a row that is already committed.
+  for (const u of computed.patches) {
+    if (u.commit) await store.commitStagedRow(u.id, u.patch);
+    else await store.updateStagedRow(u.id, u.patch);
+  }
+
+  await recordImportEvent(store, {
+    organizationId: session.organizationId,
+    sessionId,
+    eventType: "previewed",
+    payload: { rows: computed.preview.rows.length },
+  });
+
+  return { kind: "ok", preview: computed.preview };
+}
+
+/** The staging columns the preview reads — `source_fact` included, because
+ *  the employee number the source stated lives only there (see
+ *  `sourceExternalRef`). */
+const PREVIEW_COLUMNS = [
+  "id",
+  "row_index",
+  "person_label",
+  "context_label",
+  "activity_date",
+  "period_start",
+  "period_end",
+  "hours",
+  "activity_text",
+  "source_fact",
+  "fact_fields",
+  "derived",
+  "organization_person_id",
+  "work_object_id",
+  "person_state",
+  "context_state",
+  "record_fingerprint",
+  "status",
+  "problem",
+] as const;
+
+/** The latest count of source lines the upload could not stage. */
+function notStagedCount(trail: readonly StoreRow[]): number | null {
+  for (const e of trail) {
+    const payload = (e.payload as Record<string, unknown> | null) ?? {};
+    if (e.event_type === "rows_submitted" && payload.stage === NOT_STAGED_STAGE) {
+      const n = Number(payload.count);
+      return Number.isFinite(n) ? n : null;
+    }
+  }
+  return null;
+}
+
+/**
+ * THE EMPLOYEE NUMBER THE SOURCE STATED for one staged row. Staging keeps no
+ * column for it — the verbatim source line does. It is re-read from that
+ * line with the parser's OWN header vocabulary (`mapHeaderRow`), never a
+ * second one, and only when the parser recorded it as a source fact. A line
+ * whose headers carry no recognisable reference column answers `null`, and
+ * the person ladder falls back to the name exactly as before.
+ */
+export function sourceExternalRef(
+  sourceFact: Record<string, unknown> | null | undefined,
+  factFields: readonly string[] | null | undefined,
+): string | null {
+  if (!sourceFact || typeof sourceFact !== "object") return null;
+  if (!(factFields ?? []).includes("externalRef")) return null;
+  const headers = Object.keys(sourceFact);
+  const column = mapHeaderRow(headers).externalRef;
+  if (column === undefined) return null;
+  const cell = sourceFact[headers[column]];
+  const value = typeof cell === "number" ? String(cell) : typeof cell === "string" ? tidy(cell) : "";
+  return value === "" ? null : value;
+}
+
+/**
+ * EVERY EVIDENCE IMPORT SESSION IS HISTORICAL — it records work that already
+ * happened. So a partial name (initials, a missing middle name) is a QUESTION
+ * even when exactly one roster person fits it (design v3 §7 condition 6): a
+ * record whose person was guessed from half a name can never be verified
+ * historical work, and it must never be committed as if it were known.
+ */
+const HISTORICAL_PERSON_MATCH = { partialName: "ask" } as const;
+
+export interface PreviewInput {
+  readonly sessionId: string;
+  readonly session: {
+    readonly organizationId: string;
+    readonly sourceKind: string;
+    readonly sourceFilename: string | null;
+    readonly supplierRole: string;
+    readonly sourceLanguage: string;
+  };
+  readonly staged: readonly Record<string, unknown>[];
+  readonly roster: readonly RosterPerson[];
+  readonly objects: readonly ResolveEntity[];
+  readonly existing: readonly ExistingRecordKey[];
+  readonly notStagedSourceRows: number | null;
+  /** The one clock reading the patches carry. */
+  readonly now: string;
+}
+
+export interface PreviewComputation {
+  readonly preview: ImportPreview;
+  /** Staging writes the shell persists. `commit: true` marks a HEAL: the row's
+   *  own record already exists, so its final state and `committed` land in
+   *  one write. */
+  readonly patches: readonly {
+    readonly id: string;
+    readonly patch: Record<string, unknown>;
+    readonly commit?: true;
+  }[];
+}
+
+/**
+ * THE PREVIEW SEAM — pure. Staged rows, the roster, the objects and the
+ * existing record keys in; every row's reading, the plan, the counts and the
+ * staging patches out. No IO, no clock (`now` is an input), no store.
+ */
+export function computePreview(input: PreviewInput): PreviewComputation {
+  const { sessionId, session, staged } = input;
+  const roster = { value: input.roster };
+  const objects = { value: input.objects };
+  const existing = { value: input.existing };
 
   const personCache = new Map<string, ReturnType<typeof matchPerson>>();
 
@@ -896,10 +1232,17 @@ export async function buildPreview(
 
   const preview: PreviewRow[] = [];
   const updates: { id: string; patch: Record<string, unknown> }[] = [];
+  const heals: { id: string; patch: Record<string, unknown> }[] = [];
 
   for (const s of staged) {
     const personLabel = (s.person_label as string | null) ?? null;
     const contextLabel = (s.context_label as string | null) ?? null;
+    // The employee number the source stated beside the name — an identifier
+    // outranks a name on the person ladder (`matchPerson`).
+    const externalRef = sourceExternalRef(
+      s.source_fact as Record<string, unknown> | null,
+      s.fact_fields as string[] | null,
+    );
 
     // A resolution already recorded on the row WINS — a human or an agent
     // settled this ambiguity and re-matching must not undo their decision.
@@ -918,10 +1261,10 @@ export async function buildPreview(
         roster.value.find((p) => p.id === chosenPersonId)?.displayName ?? null;
       personConfidence = 1;
     } else if (personLabel) {
-      const key = personLabel.toLowerCase();
+      const key = `${personLabel.toLowerCase()}|${externalRef ?? ""}`;
       let m = personCache.get(key);
       if (!m) {
-        m = matchPerson({ name: personLabel }, roster.value);
+        m = matchPerson({ name: personLabel, externalRef }, roster.value, HISTORICAL_PERSON_MATCH);
         personCache.set(key, m);
       }
       if (m.kind === "matched") {
@@ -967,7 +1310,7 @@ export async function buildPreview(
     // words, so the production session needs no re-upload. A human choice
     // already recorded always wins.
     const rowHours = s.hours === null || s.hours === undefined ? null : Number(s.hours);
-    const timeSemantics: TimeSemantics | null =
+    const classified: TimeSemantics | null =
       readTimeSemantics(priorDerived) ??
       classifyTimeSemantics({
         hours: rowHours,
@@ -975,6 +1318,10 @@ export async function buildPreview(
         workText: (s.activity_text as string | null) ?? null,
         contextLabel,
       });
+    // A classification staged before 2026-09-23 carries no source cues; they
+    // are read now from the same words, so the human decides with "at least
+    // 16 month" / "each month only 50 hours" in front of them.
+    const timeSemantics = withSourceCues(classified, (s.activity_text as string | null) ?? contextLabel);
     const timeOpen = timeSemanticsOpen(timeSemantics);
 
     // The fingerprint is recomputed with whatever is now resolved, so a row
@@ -1031,17 +1378,39 @@ export async function buildPreview(
                 ? "person_not_on_roster"
                 : null;
 
+    // A row whose OWN record already exists — a commit wrote the record, then
+    // could not mark the row — IS committed. It must never read as a
+    // duplicate of itself and be demoted to `skipped`; it is healed with ONE
+    // write that carries its final state and `committed` together.
+    const ownRecord =
+      dup.state === "duplicate" && dup.importRowId !== null && dup.importRowId === (s.id as string);
+
     // A COMMITTED row is a record. Re-opening the session after the commit
     // used to re-run this loop over it, find its own record's fingerprint,
     // call it a duplicate and WRITE `status: skipped` over `committed` —
     // so the door reported "147 already imported" and the ledger lost the
     // fact that the human had committed them (found on the local proof of
     // the post-commit path, 2026-09-17). It is carried through untouched.
-    if (s.status === "committed") {
+    if (s.status === "committed" || ownRecord) {
+      if (s.status !== "committed") {
+        heals.push({
+          id: s.id as string,
+          patch: {
+            organization_person_id: personId,
+            work_object_id: workObjectId,
+            record_fingerprint: fingerprint,
+            duplicate_state: "new",
+            duplicate_of_record_id: null,
+            problem: null,
+            updated_at: input.now,
+          },
+        });
+      }
       preview.push({
         id: s.id as string,
         rowIndex: s.row_index as number,
         personLabel,
+        externalRef,
         personState,
         personId,
         personName,
@@ -1077,6 +1446,7 @@ export async function buildPreview(
       id: s.id as string,
       rowIndex: s.row_index as number,
       personLabel,
+      externalRef,
       personState,
       personId,
       personName,
@@ -1132,38 +1502,24 @@ export async function buildPreview(
             ? "skipped"
             : "needs_review",
         problem,
-        updated_at: new Date().toISOString(),
+        updated_at: input.now,
       },
     });
   }
 
-  // Persist the interpretation back onto STAGING only. Failure here degrades
-  // the preview to non-sticky; it never blocks the human from seeing it.
-  for (const u of updates) {
-    await db(caller.supabase)
-      .from("evidence_import_rows")
-      .update(u.patch)
-      .eq("id", u.id);
-  }
-
-  await recordImportEvent(caller, {
-    organizationId: session.organizationId,
-    sessionId,
-    eventType: "previewed",
-    payload: { rows: preview.length },
-  });
-
-  // The plan: one entry per DISTINCT label (the same normalisation the
-  // matcher uses), so "Jonas Petraitis" on forty rows is one person to create.
-  const planPeople = new Map<string, { label: string; rows: number }>();
+  // The plan: one entry per DISTINCT person the source names — its employee
+  // number when it states one, else the same name normalisation the matcher
+  // uses — so "Jonas Petraitis" on forty rows is one person to create, and
+  // two people who share a name but not a number are never folded into one.
+  const planPeople = new Map<string, { label: string; rows: number; externalRef: string | null }>();
   const planObjects = new Map<
     string,
     { label: string; rows: number; spellings: Set<string>; origin: "cell" | "text" }
   >();
   for (const r of preview) {
     if (r.readyWithPlan && r.personLabel) {
-      const key = personKey(r.personLabel);
-      const entry = planPeople.get(key) ?? { label: r.personLabel, rows: 0 };
+      const key = planPersonKey(r.personLabel, r.externalRef ?? null);
+      const entry = planPeople.get(key) ?? { label: r.personLabel, rows: 0, externalRef: r.externalRef ?? null };
       entry.rows += 1;
       planPeople.set(key, entry);
     }
@@ -1192,7 +1548,7 @@ export async function buildPreview(
   };
 
   return {
-    kind: "ok",
+    patches: [...updates, ...heals.map((h) => ({ ...h, commit: true as const }))],
     preview: {
       sessionId,
       organizationId: session.organizationId,
@@ -1204,6 +1560,7 @@ export async function buildPreview(
         filename: session.sourceFilename,
         supplierRole: session.supplierRole,
         language: session.sourceLanguage,
+        notStagedSourceRows: input.notStagedSourceRows,
       },
       counts: {
         total: preview.length,
@@ -1249,7 +1606,13 @@ export async function buildPreview(
   };
 }
 
-interface ExistingRecordKey {
+/** The plan's identity of a person to create: the employee number the
+ *  source states, else the normalised name. */
+function planPersonKey(label: string, externalRef: string | null): string {
+  return externalRef ? `ref:${externalRef}` : `name:${personKey(label)}`;
+}
+
+export interface ExistingRecordKey {
   readonly id: string;
   readonly fingerprint: string;
   readonly personId: string | null;
@@ -1257,6 +1620,8 @@ interface ExistingRecordKey {
   readonly workObjectId: string | null;
   readonly hours: number | null;
   readonly textKey: string;
+  /** The staging row the record was committed from. */
+  readonly importRowId?: string | null;
 }
 
 function classifyDuplicate(
@@ -1269,10 +1634,10 @@ function classifyDuplicate(
     hours: number | null;
     text: string;
   },
-): { state: DuplicateState; recordId: string | null } {
+): { state: DuplicateState; recordId: string | null; importRowId: string | null } {
   const exact = existing.find((e) => e.fingerprint === row.fingerprint);
-  if (exact) return { state: "duplicate", recordId: exact.id };
-  if (!row.personId || !row.date) return { state: "new", recordId: null };
+  if (exact) return { state: "duplicate", recordId: exact.id, importRowId: exact.importRowId ?? null };
+  if (!row.personId || !row.date) return { state: "new", recordId: null, importRowId: null };
 
   const sameSlot = existing.filter(
     (e) =>
@@ -1280,16 +1645,16 @@ function classifyDuplicate(
       e.date === row.date &&
       e.workObjectId === row.workObjectId,
   );
-  if (sameSlot.length === 0) return { state: "new", recordId: null };
+  if (sameSlot.length === 0) return { state: "new", recordId: null, importRowId: null };
 
   const textKey = normalizeLabel(row.text);
   const sameText = sameSlot.find((e) => e.textKey === textKey);
   if (sameText) {
     // Same person, day, place and words — but the hours disagree. That is a
     // real contradiction between two sources and must be shown, never merged.
-    return { state: "conflict", recordId: sameText.id };
+    return { state: "conflict", recordId: sameText.id, importRowId: null };
   }
-  return { state: "probable_duplicate", recordId: sameSlot[0].id };
+  return { state: "probable_duplicate", recordId: sameSlot[0].id, importRowId: null };
 }
 
 /**
@@ -1352,18 +1717,14 @@ type CoreOk<T> =
   | { ok: false; failure: EvidenceImportFailure };
 
 async function readRoster(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   organizationId: string,
 ): Promise<CoreOk<RosterPerson[]>> {
-  const res = await db(caller.supabase)
-    .from("organization_people")
-    .select("id, display_name, normalized_name, external_ref")
-    .eq("organization_id", organizationId)
-    .limit(5000);
+  const res = await storeOf(caller).readRoster(organizationId);
   if (res.error) return { ok: false, failure: classify(res.error) };
   return {
     ok: true,
-    value: ((res.data ?? []) as Record<string, unknown>[]).map((r) => ({
+    value: res.data.map((r) => ({
       id: r.id as string,
       displayName: r.display_name as string,
       normalizedName: r.normalized_name as string,
@@ -1373,40 +1734,30 @@ async function readRoster(
 }
 
 async function readWorkObjects(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   organizationId: string,
 ): Promise<CoreOk<ResolveEntity[]>> {
-  const res = await db(caller.supabase)
-    .from("work_objects")
-    .select("id, name, status")
-    .eq("organization_id", organizationId)
-    .limit(2000);
+  const res = await storeOf(caller).readWorkObjects(organizationId);
   // work_objects predates this feature and IS applied; a missing-object code
   // here would be a real environment problem, so it is not special-cased.
   if (res.error) return { ok: false, failure: classify(res.error) };
   return {
     ok: true,
-    value: ((res.data ?? []) as Record<string, unknown>[])
+    value: res.data
       .filter((r) => r.status === "active" || r.status === undefined)
       .map((r) => ({ id: r.id as string, name: r.name as string })),
   };
 }
 
 async function readExistingFingerprints(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   organizationId: string,
 ): Promise<CoreOk<ExistingRecordKey[]>> {
-  const res = await db(caller.supabase)
-    .from("organization_evidence_records")
-    .select(
-      "id, record_fingerprint, organization_person_id, activity_date, work_object_id, hours, original_text",
-    )
-    .eq("organization_id", organizationId)
-    .limit(MAX_ROWS_PER_SESSION);
+  const res = await storeOf(caller).readRecordKeys(organizationId);
   if (res.error) return { ok: false, failure: classify(res.error) };
   return {
     ok: true,
-    value: ((res.data ?? []) as Record<string, unknown>[]).map((r) => ({
+    value: res.data.map((r) => ({
       id: r.id as string,
       fingerprint: r.record_fingerprint as string,
       personId: (r.organization_person_id as string | null) ?? null,
@@ -1414,6 +1765,7 @@ async function readExistingFingerprints(
       workObjectId: (r.work_object_id as string | null) ?? null,
       hours: r.hours === null || r.hours === undefined ? null : Number(r.hours),
       textKey: normalizeLabel((r.original_text as string | null) ?? ""),
+      importRowId: (r.import_row_id as string | null) ?? null,
     })),
   };
 }
@@ -1487,7 +1839,7 @@ export async function listRosterPeople(
  * the real person may later claim it (they propose, a manager confirms).
  */
 export async function createRosterPerson(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   input: {
     readonly organizationId?: string | null;
     readonly displayName: string;
@@ -1503,35 +1855,29 @@ export async function createRosterPerson(
       problems: ["display name must be 1..200 characters"],
     };
   }
-  const org = await resolveEvidenceOrganization(caller, input.organizationId);
-  if (!org.ok) {
-    return org.reason === "choice-required" || org.reason === "not-a-member"
-      ? { kind: "choice-required", options: org.options ?? [] }
-      : { kind: "not-authorized", reason: org.reason };
-  }
+  const store = storeOf(caller);
+  const org = await store.resolveOrganization(input.organizationId);
+  if (!org.ok) return refuseOrg(org);
 
-  const res = await db(caller.supabase)
-    .from("organization_people")
-    .insert({
-      organization_id: org.organizationId,
-      display_name: name,
-      normalized_name: personKey(name),
-      external_ref: input.externalRef?.trim() || null,
-      relationship_kind: input.relationshipKind ?? "other",
-      source_note: input.sourceNote ?? null,
-      created_by: caller.userId,
-      link_state: "unlinked",
-    })
-    .select("id")
-    .single();
+  const res = await store.insertRosterPerson({
+    organization_id: org.organizationId,
+    display_name: name,
+    normalized_name: personKey(name),
+    external_ref: input.externalRef?.trim() || null,
+    relationship_kind: input.relationshipKind ?? "other",
+    source_note: input.sourceNote ?? null,
+    created_by: store.userId,
+    link_state: "unlinked",
+  });
   if (res.error) return classify(res.error);
-  return { kind: "ok", personId: res.data.id as string, displayName: name };
+  return { kind: "ok", personId: res.data.id, displayName: name };
 }
 
 /** Settle one staged row's ambiguity. Both ids are validated against the
- *  session's own organization by the composite foreign keys and by RLS. */
+ *  session's own organization by the composite foreign keys and by RLS. A
+ *  COMMITTED row is a record and is never re-settled (design v3 §8 P3u). */
 export async function resolveRow(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   input: {
     readonly rowId: string;
     readonly organizationPersonId?: string | null;
@@ -1553,14 +1899,9 @@ export async function resolveRow(
     patch.work_object_id = input.workObjectId;
     patch.context_state = input.workObjectId ? "matched" : "unmatched";
   }
-  const res = await db(caller.supabase)
-    .from("evidence_import_rows")
-    .update(patch)
-    .eq("id", input.rowId)
-    .select("id");
+  const res = await storeOf(caller).updateStagedRow(input.rowId, patch);
   if (res.error) return classify(res.error);
-  if (!Array.isArray(res.data) || res.data.length === 0)
-    return { kind: "not-found" };
+  if (res.data === 0) return { kind: "not-found" };
   return { kind: "ok", updated: true };
 }
 
@@ -1572,7 +1913,7 @@ export async function resolveRow(
  * of re-matching. Writes STAGING only.
  */
 export async function resolveContextLabel(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   input: {
     readonly sessionId: string;
     /** The segment key (`normalizeLabel` of the source spelling). */
@@ -1586,7 +1927,8 @@ export async function resolveContextLabel(
       | { readonly kind: "ignore" };
   },
 ): Promise<EvidenceImportResult<{ readonly updated: number }>> {
-  const session = await loadSession(caller, input.sessionId);
+  const store = storeOf(caller);
+  const session = await loadSession(store, input.sessionId);
   if (!session.ok) return session.failure;
   const key = input.key.trim();
   if (key === "") return { kind: "invalid", problems: ["key"] };
@@ -1615,16 +1957,14 @@ export async function resolveContextLabel(
     }
   }
 
-  const rowsRes = await db(caller.supabase)
-    .from("evidence_import_rows")
-    .select("id, derived")
-    .eq("session_id", input.sessionId)
-    .neq("status", "committed")
-    .limit(MAX_ROWS_PER_SESSION);
+  // A committed row is a record: no decision reaches it (design v3 §8 P3u).
+  const rowsRes = await store.listStagedRows(input.sessionId, ["id", "derived"], {
+    excludeStatuses: ["committed"],
+  });
   if (rowsRes.error) return classify(rowsRes.error);
 
   let updated = 0;
-  for (const s of (rowsRes.data ?? []) as Record<string, unknown>[]) {
+  for (const s of rowsRes.data) {
     const derived = (s.derived as Record<string, unknown> | null) ?? {};
     const contexts = readPriorContexts(derived);
     if (!contexts || !contexts.segments.some((seg) => seg.key === key)) continue;
@@ -1644,17 +1984,14 @@ export async function resolveContextLabel(
       return { ...seg, state: "ignored", workObjectId: null, confidence: 1, method: HUMAN_CHOICE, candidates: [] };
     });
     const next: WorkContexts = { ...contexts, segments };
-    const upd = await db(caller.supabase)
-      .from("evidence_import_rows")
-      .update({
-        work_object_id: singleObjectId(next),
-        context_state: rowContextState(next),
-        derived: { ...derived, workContexts: next },
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", s.id as string);
+    const upd = await store.updateStagedRow(s.id as string, {
+      work_object_id: singleObjectId(next),
+      context_state: rowContextState(next),
+      derived: { ...derived, workContexts: next },
+      updated_at: new Date().toISOString(),
+    });
     if (upd.error) return classify(upd.error);
-    updated += 1;
+    updated += upd.data;
   }
   return { kind: "ok", updated };
 }
@@ -1663,12 +2000,12 @@ export interface TimeSemanticsDecision {
   readonly kind: TimeSemanticsKind;
   /** Remote / work-from-home, as the human states it; null = not stated. */
   readonly remote?: boolean | null;
-  /** The period the aggregate covers, ONLY when the human knows it. */
+  /** The period the aggregate covers, ONLY when the human knows it — two
+   *  months (`YYYY-MM`, recorded at month precision) or two days
+   *  (`YYYY-MM-DD`). A start alone is refused. */
   readonly periodStart?: string | null;
   readonly periodEnd?: string | null;
 }
-
-const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * A human says what a figure MEANS (owner correction 2026-09-16: 800 h on a
@@ -1678,9 +2015,20 @@ const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
  * with the period the human knows) / unknown. Writes STAGING only; the
  * commit then represents the row accordingly and NEVER as a day's duration
  * unless the human said "daily".
+ *
+ * DECISION-TIME HONESTY (owner rule 2026-09-23). The period is recorded at
+ * the precision the human gave it (`periodPrecision`), and it is set against
+ * what the source's own words state — a duration ("at least 16 month") and
+ * a rate ("each month only 50 hours"). A span shorter than a stated minimum,
+ * or a total whose per-month figure differs from a stated rate, is recorded
+ * as `conflictsWithSource` beside the decision: a WARNING, never a refusal —
+ * the human knows the work. A START ALONE is refused: it used to be stored
+ * as a one-day period (`periodEnd ?? periodStart`), a precision nobody
+ * stated. Both writers — the form action and the MCP capability — reach
+ * this one rule.
  */
 export async function resolveTimeSemantics(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   input: {
     readonly sessionId: string;
     /** Either specific rows, or every row whose semantics are still open. */
@@ -1688,38 +2036,48 @@ export async function resolveTimeSemantics(
     readonly allOpen?: boolean;
     readonly decision: TimeSemanticsDecision;
   },
-): Promise<EvidenceImportResult<{ readonly updated: number }>> {
-  const session = await loadSession(caller, input.sessionId);
+): Promise<EvidenceImportResult<{ readonly updated: number; readonly conflictsWithSource: number }>> {
+  const store = storeOf(caller);
+  const session = await loadSession(store, input.sessionId);
   if (!session.ok) return session.failure;
   const d = input.decision;
-  const periodStart = d.periodStart?.trim() || null;
-  const periodEnd = d.periodEnd?.trim() || null;
-  if ((periodStart && !ISO_DAY.test(periodStart)) || (periodEnd && !ISO_DAY.test(periodEnd)))
-    return { kind: "invalid", problems: ["period must be YYYY-MM-DD"] };
-  if (periodStart && periodEnd && periodEnd < periodStart)
-    return { kind: "invalid", problems: ["periodEnd is before periodStart"] };
-  if (periodEnd && !periodStart) return { kind: "invalid", problems: ["periodStart required with periodEnd"] };
+  const human = periodFromHumanInput(d.periodStart, d.periodEnd);
+  if (!human.ok) return { kind: "invalid", problems: [human.problem] };
+  const { periodStart, periodEnd, precision: periodPrecision } = human;
   if (d.kind !== "period_aggregate" && (periodStart || periodEnd))
     return { kind: "invalid", problems: ["a period belongs to a period aggregate"] };
 
-  let q = db(caller.supabase)
-    .from("evidence_import_rows")
-    .select("id, hours, derived")
-    .eq("session_id", input.sessionId)
-    .neq("status", "committed")
-    .limit(MAX_ROWS_PER_SESSION);
-  if (input.rowIds && input.rowIds.length > 0) q = q.in("id", input.rowIds);
-  else if (input.allOpen) q = q.eq("problem", "time_semantics_open");
-  else return { kind: "invalid", problems: ["rowIds or allOpen"] };
-  const rowsRes = await q;
+  const named = input.rowIds && input.rowIds.length > 0;
+  if (!named && !input.allOpen) return { kind: "invalid", problems: ["rowIds or allOpen"] };
+  // A committed row is a record: no decision reaches it (design v3 §8 P3u).
+  const rowsRes = await store.listStagedRows(
+    input.sessionId,
+    ["id", "hours", "derived", "activity_text", "context_label"],
+    named
+      ? { excludeStatuses: ["committed"], ids: input.rowIds }
+      : { excludeStatuses: ["committed"], problem: "time_semantics_open" },
+  );
   if (rowsRes.error) return classify(rowsRes.error);
 
   let updated = 0;
+  let conflictsWithSource = 0;
   const at = new Date().toISOString();
-  for (const s of (rowsRes.data ?? []) as Record<string, unknown>[]) {
+  for (const s of rowsRes.data) {
     const derived = (s.derived as Record<string, unknown> | null) ?? {};
     const prior = readTimeSemantics(derived);
     const sourceHours = prior?.sourceHours ?? (s.hours === null || s.hours === undefined ? 0 : Number(s.hours));
+    // What the source's words state — recorded at classification, or read
+    // now from the same words for a row classified before the cues existed.
+    const sourceCues =
+      prior && prior.sourceCues !== undefined
+        ? prior.sourceCues
+        : (extractSourceTimeCues((s.activity_text as string | null) ?? null) ??
+          extractSourceTimeCues((s.context_label as string | null) ?? null));
+    const conflicts =
+      d.kind === "period_aggregate"
+        ? sourceTimeConflicts({ hours: sourceHours, periodStart, periodEnd, cues: sourceCues })
+        : [];
+    if (conflicts.length > 0) conflictsWithSource += 1;
     const next: TimeSemantics = {
       value: d.kind,
       method: HUMAN_CHOICE,
@@ -1728,19 +2086,21 @@ export async function resolveTimeSemantics(
       note: prior?.note ?? null,
       remote: d.remote ?? prior?.remote ?? null,
       periodStart,
-      periodEnd: periodEnd ?? periodStart,
+      // Both bounds, or neither: a start alone never becomes a one-day period.
+      periodEnd,
+      periodPrecision,
+      sourceCues: sourceCues ?? null,
+      conflictsWithSource: conflicts.length > 0,
+      conflicts,
     };
-    const upd = await db(caller.supabase)
-      .from("evidence_import_rows")
-      .update({
-        derived: { ...derived, timeSemantics: next, timeSemanticsDecidedBy: { value: caller.userId, method: HUMAN_CHOICE, confidence: 1, note: at } },
-        updated_at: at,
-      })
-      .eq("id", s.id as string);
+    const upd = await store.updateStagedRow(s.id as string, {
+      derived: { ...derived, timeSemantics: next, timeSemanticsDecidedBy: { value: store.userId, method: HUMAN_CHOICE, confidence: 1, note: at } },
+      updated_at: at,
+    });
     if (upd.error) return classify(upd.error);
-    updated += 1;
+    updated += upd.data;
   }
-  return { kind: "ok", updated };
+  return { kind: "ok", updated, conflictsWithSource };
 }
 
 // ── commit ──────────────────────────────────────────────────────────────────
@@ -1763,6 +2123,15 @@ export interface CommitPlanOptions {
   readonly createObjects: boolean;
   /** `relationship_kind` for people the plan creates (`other` when absent). */
   readonly relationshipKind?: string | null;
+  /**
+   * The human declared that the source does not establish WHICH company
+   * performed this work (two companies billed the same customer, no per-person
+   * contract or payroll). Every record this commit writes then carries
+   * `derived.performingCompany = { state: "not_established" }`, so no surface
+   * has to infer a performer from where the record happens to be stored. It
+   * changes no authority, role or evidence state; it is a stated absence.
+   */
+  readonly performerNotEstablished?: boolean;
 }
 
 /**
@@ -1775,7 +2144,7 @@ export interface CommitPlanOptions {
  * chosen them. Returns how many of each were created.
  */
 async function applyPlan(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   session: { readonly organizationId: string },
   sessionId: string,
   plan: CommitPlanOptions,
@@ -1783,37 +2152,42 @@ async function applyPlan(
   let createdPeople = 0;
   let createdObjects = 0;
   if (!plan.createPeople && !plan.createObjects) return { createdPeople, createdObjects };
+  const store = storeOf(caller);
 
-  const rowsRes = await db(caller.supabase)
-    .from("evidence_import_rows")
-    .select("id, person_label, context_label, person_state, context_state, status, problem, derived")
-    .eq("session_id", sessionId)
-    .neq("status", "skipped")
-    .limit(MAX_ROWS_PER_SESSION);
+  // A committed row is a record — the plan never touches it (design v3 §8 P3u).
+  const rowsRes = await store.listStagedRows(
+    sessionId,
+    ["id", "person_label", "context_label", "person_state", "context_state", "status", "problem", "derived", "source_fact", "fact_fields"],
+    { excludeStatuses: ["skipped", "committed"] },
+  );
   if (rowsRes.error) return classify(rowsRes.error);
-  const staged = (rowsRes.data ?? []) as Record<string, unknown>[];
+  const staged = rowsRes.data;
 
   if (plan.createPeople) {
-    const roster = await readRoster(caller, session.organizationId);
+    const roster = await readRoster(store, session.organizationId);
     if (!roster.ok) return roster.failure;
     const current = [...roster.value];
-    const byKey = new Map<string, string>(); // personKey → id
+    const byKey = new Map<string, string>(); // plan person key → id
     for (const s of staged) {
       if (s.person_state !== "unmatched") continue;
       const label = (s.person_label as string | null) ?? "";
       if (label.trim() === "") continue;
-      const key = personKey(label);
+      // The employee number the source states travels with the name: it
+      // matches first, and a person the plan creates carries it.
+      const externalRef = sourceExternalRef(s.source_fact as Record<string, unknown> | null, s.fact_fields as string[] | null);
+      const key = planPersonKey(label, externalRef);
       let personId = byKey.get(key) ?? null;
       if (!personId) {
         // Fresh match against the CURRENT roster: an ambiguous name is still
         // the human's, an exact one is reused, only a true absence is created.
-        const m = matchPerson({ name: label }, current);
+        const m = matchPerson({ name: label, externalRef }, current, HISTORICAL_PERSON_MATCH);
         if (m.kind === "matched") personId = m.personId;
         else if (m.kind === "ambiguous") continue;
         else {
           const created = await createRosterPerson(caller, {
             organizationId: session.organizationId,
             displayName: label,
+            externalRef,
             relationshipKind: plan.relationshipKind ?? "other",
             sourceNote: `evidence import ${sessionId}`,
           });
@@ -1823,28 +2197,25 @@ async function applyPlan(
           current.push({
             id: personId,
             displayName: created.displayName,
-            normalizedName: key,
-            externalRef: null,
+            normalizedName: personKey(label),
+            externalRef,
           });
         }
         byKey.set(key, personId);
       }
-      const upd = await db(caller.supabase)
-        .from("evidence_import_rows")
-        .update({
-          organization_person_id: personId,
-          person_state: "created",
-          person_match_method: "plan_created",
-          person_match_confidence: 1,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", s.id as string);
+      const upd = await store.updateStagedRow(s.id as string, {
+        organization_person_id: personId,
+        person_state: "created",
+        person_match_method: "plan_created",
+        person_match_confidence: 1,
+        updated_at: new Date().toISOString(),
+      });
       if (upd.error) return classify(upd.error);
     }
   }
 
   if (plan.createObjects) {
-    const objects = await readWorkObjects(caller, session.organizationId);
+    const objects = await readWorkObjects(store, session.organizationId);
     if (!objects.ok) return objects.failure;
     const current = [...objects.value];
     const byKey = new Map<string, string>(); // normalizeLabel(canonical name) → id
@@ -1874,24 +2245,28 @@ async function applyPlan(
             else if (m.kind === "ambiguous") return seg;
             else {
               // THE existing insert path for objects (membership-based authority
-              // inside the RPC). It answers a status, not an id, so the register
-              // is re-read and matched — the same way a human's "add" is read back.
-              const rpc = await db(caller.supabase).rpc("create_work_object_v1", {
+              // inside the RPC `create_work_object_v1`, behind the store). It
+              // answers a status, not an id, so the register is re-read and
+              // matched — the same way a human's "add" is read back.
+              // The label is an ADDRESS only when it is unmistakably one
+              // (`<street> <number>[, <city>]`); otherwise the columns stay null.
+              const addr = splitAddress(seg.name);
+              const rpc = await store.createWorkObject({
                 p_organization_id: session.organizationId,
                 p_name: tidy(seg.name).slice(0, 160),
                 p_project_id: null,
                 p_country: null,
                 p_region: null,
-                p_city: null,
-                p_address_line: null,
+                p_city: addr?.city ?? null,
+                p_address_line: addr?.addressLine ?? null,
                 p_latitude: null,
                 p_longitude: null,
               });
               if (rpc.error) throw classify(rpc.error);
-              const status = String(rpc.data ?? "");
+              const status = rpc.data;
               if (status === "not_allowed") throw { kind: "not-authorized", reason: "not-authorized" } as EvidenceImportFailure;
               if (status !== "created") return seg; // invalid / limit_reached: the row keeps its label
-              const again = await readWorkObjects(caller, session.organizationId);
+              const again = await readWorkObjects(store, session.organizationId);
               if (!again.ok) throw again.failure;
               current.splice(0, current.length, ...again.value);
               const found = resolvePlace(toSegment(seg.name), current.map((o) => ({ id: o.id, name: o.name })));
@@ -1913,15 +2288,12 @@ async function applyPlan(
       if (!Array.isArray(segments)) return segments;
       if (!changed) continue;
       const next: WorkContexts = { ...contexts, segments };
-      const upd = await db(caller.supabase)
-        .from("evidence_import_rows")
-        .update({
-          work_object_id: singleObjectId(next),
-          context_state: rowContextState(next),
-          derived: { ...derived, workContexts: next },
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", s.id as string);
+      const upd = await store.updateStagedRow(s.id as string, {
+        work_object_id: singleObjectId(next),
+        context_state: rowContextState(next),
+        derived: { ...derived, workContexts: next },
+        updated_at: new Date().toISOString(),
+      });
       if (upd.error) return classify(upd.error);
     }
   }
@@ -1930,7 +2302,7 @@ async function applyPlan(
   // not one of them; widening it is a schema change (RED). The plan is the
   // commit's own preparation, so it is recorded as the `previewed` stage it
   // re-materialises, with the stage named in the payload — never dropped.
-  await recordImportEvent(caller, {
+  await recordImportEvent(store, {
     organizationId: session.organizationId,
     sessionId,
     eventType: "previewed",
@@ -1954,7 +2326,7 @@ async function applyPlan(
  * producing attested or verified evidence.
  */
 export async function commitImport(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   sessionId: string,
   opts?: {
     readonly evidenceState?: ReportedEvidenceState;
@@ -1962,7 +2334,8 @@ export async function commitImport(
     readonly plan?: CommitPlanOptions;
   },
 ): Promise<EvidenceImportResult<CommitResult>> {
-  const session = await loadSession(caller, sessionId);
+  const store = storeOf(caller);
+  const session = await loadSession(store, sessionId);
   if (!session.ok) return session.failure;
 
   // FIRST the plan, THEN the rows: what the source named and the preview
@@ -1973,31 +2346,40 @@ export async function commitImport(
     createPeople: true,
     createObjects: true,
   };
-  const applied = await applyPlan(caller, session, sessionId, planOpts);
+  const applied = await applyPlan(store, session, sessionId, planOpts);
   if ("kind" in applied) return applied;
   if (planOpts.createPeople || planOpts.createObjects) {
-    const re = await buildPreview(caller, sessionId);
+    const re = await buildPreview(store, sessionId);
     if (re.kind !== "ok") return re;
   }
 
-  const rowsRes = await db(caller.supabase)
-    .from("evidence_import_rows")
-    .select(
-      "id, row_index, organization_person_id, work_object_id, context_label, activity_date, period_start, period_end, hours, activity_text, source_fact, fact_fields, derived, record_fingerprint, status, person_match_confidence",
-    )
-    .eq("session_id", sessionId)
-    .eq("status", "ready")
-    .order("row_index", { ascending: true })
-    .limit(MAX_ROWS_PER_SESSION);
+  const rowsRes = await store.listStagedRows(
+    sessionId,
+    [
+      "id",
+      "row_index",
+      "organization_person_id",
+      "work_object_id",
+      "context_label",
+      "activity_date",
+      "period_start",
+      "period_end",
+      "hours",
+      "activity_text",
+      "source_fact",
+      "fact_fields",
+      "derived",
+      "record_fingerprint",
+      "status",
+      "person_match_confidence",
+    ],
+    { status: "ready" },
+  );
   if (rowsRes.error) return classify(rowsRes.error);
-  const ready = (rowsRes.data ?? []) as Record<string, unknown>[];
+  const ready = rowsRes.data;
 
-  const notReadyRes = await db(caller.supabase)
-    .from("evidence_import_rows")
-    .select("id", { count: "exact", head: true })
-    .eq("session_id", sessionId)
-    .neq("status", "ready");
-  const notReady = notReadyRes.error ? 0 : (notReadyRes.count ?? 0);
+  const notReadyRes = await store.countStagedRows(sessionId, { excludeStatuses: ["ready"] });
+  const notReady = notReadyRes.error ? 0 : notReadyRes.data;
 
   if (ready.length === 0) {
     return {
@@ -2011,83 +2393,21 @@ export async function commitImport(
     };
   }
 
-  const importedAt = new Date().toISOString();
-  const state: ReportedEvidenceState =
-    opts?.evidenceState ?? "ORGANIZATION_REPORTED";
-
-  // The per-session tamper-evidence chain, in row order (doctrine 3.3).
-  let prev: string | null = null;
-  const payload = ready.map((r) => {
-    const fingerprint = r.record_fingerprint as string;
-    const self = chainHash(prev, fingerprint, importedAt);
-    // WHAT THE FIGURE MEANS decides how the record is written (owner
-    // correction 2026-09-16). A DAILY figure is the day's hours. A PERIOD
-    // AGGREGATE (800 h of work from home over months) is a period record
-    // when the human stated the period — `period_start/end` + `hours`, the
-    // shape the schema already has — and otherwise a dated source fact
-    // whose canonical duration is UNKNOWN (`hours = null`). UNKNOWN
-    // semantics are likewise a dated fact with no duration. The source
-    // figure is always verbatim in `source_fact` and in
-    // `derived.timeSemantics.sourceHours`; nothing operational can sum it
-    // as a day (SEP-1, SEP-7).
-    const derived = { ...((r.derived as Record<string, unknown> | null) ?? {}) };
-    const ts = readTimeSemantics(derived);
-    const daily = countsAsDailyHours(ts);
-    const period = ts && ts.value === "period_aggregate" && ts.periodStart ? ts : null;
-    const legacyExceeds =
-      !ts && (derived.hoursPlausibility as { method?: string } | undefined)?.method === HOURS_EXCEED_DAY_METHOD;
-    const row = {
-      organization_id: session.organizationId,
-      organization_person_id: r.organization_person_id as string,
-      activity_kind: "work",
-      // The source's own words for WHERE, verbatim — the column exists for
-      // exactly this and was being written null. A multi-place day keeps
-      // its places in `derived.workContexts`; the single object goes here.
-      context_label: (r.context_label as string | null) ?? null,
-      work_object_id: (r.work_object_id as string | null) ?? null,
-      activity_date: period ? null : ((r.activity_date as string | null) ?? null),
-      period_start: period ? period.periodStart : ((r.period_start as string | null) ?? null),
-      period_end: period ? (period.periodEnd ?? period.periodStart) : ((r.period_end as string | null) ?? null),
-      hours: period ? period.sourceHours : daily && !legacyExceeds ? (r.hours ?? null) : null,
-      original_text: (r.activity_text as string | null) ?? "",
-      original_language: session.sourceLanguage,
-      evidence_state: state,
-      supplied_by_organization_id: session.organizationId,
-      supplier_role: session.supplierRole,
-      supplied_by_profile_id: caller.userId,
-      imported_by_profile_id: caller.userId,
-      imported_at: importedAt,
-      session_id: sessionId,
-      import_row_id: r.id as string,
-      source_kind: session.sourceKind,
-      source_filename: session.sourceFilename,
-      source_reference: session.sourceReference,
-      source_fact: r.source_fact ?? {},
-      derived,
-      confidence: r.person_match_confidence ?? null,
-      record_fingerprint: fingerprint,
-      hash_prev: prev,
-      hash_self: self,
-    };
-    prev = self;
-    return row;
+  const { records: payload, finalState } = buildCommitRows({
+    sessionId,
+    session,
+    ready,
+    importedAt: new Date().toISOString(),
+    userId: store.userId,
+    evidenceState: opts?.evidenceState ?? "ORGANIZATION_REPORTED",
+    performerNotEstablished: planOpts.performerNotEstablished === true,
   });
 
-  const ins = await db(caller.supabase)
-    .from("organization_evidence_records")
-    .upsert(payload, {
-      onConflict: "organization_id,record_fingerprint",
-      ignoreDuplicates: true,
-    })
-    .select("id, import_row_id");
+  const ins = await store.insertRecords(payload);
   if (ins.error) return classify(ins.error);
 
-  const written = Array.isArray(ins.data) ? ins.data.length : 0;
-  const writtenRowIds = new Set(
-    ((ins.data ?? []) as Record<string, unknown>[]).map(
-      (r) => r.import_row_id as string,
-    ),
-  );
+  const written = ins.data.length;
+  const writtenRowIds = new Set(ins.data.map((r) => r.import_row_id));
 
   // ── EVIDENCE → COMPETENCY ────────────────────────────────────────────────
   //
@@ -2108,22 +2428,17 @@ export async function commitImport(
   const textByRowId = new Map(
     ready.map((r) => [r.id as string, (r.activity_text as string | null) ?? ""]),
   );
-  const signalRows = ((ins.data ?? []) as Record<string, unknown>[])
-    .filter((r) => writtenRowIds.has(r.import_row_id as string))
+  const signalRows = ins.data
+    .filter((r) => writtenRowIds.has(r.import_row_id))
     .flatMap((r) =>
       competencySignalRows(
         session.organizationId,
-        r.id as string,
-        deriveCompetencySignals(textByRowId.get(r.import_row_id as string)),
+        r.id,
+        deriveCompetencySignals(textByRowId.get(r.import_row_id)),
       ),
     );
   if (signalRows.length > 0) {
-    const sig = await db(caller.supabase)
-      .from("organization_evidence_competency_signals")
-      .upsert(signalRows, {
-        onConflict: "record_id,term",
-        ignoreDuplicates: true,
-      });
+    const sig = await store.insertCompetencySignals(signalRows);
     if (sig.error) {
       // Named, not swallowed: a read that fails must never look like "this
       // person demonstrated nothing" (SEP-7).
@@ -2135,17 +2450,25 @@ export async function commitImport(
     }
   }
 
-  // Mark the staged rows. Re-running this is harmless, which is what makes the
-  // whole commit safely re-runnable after a partial failure.
-  await db(caller.supabase)
-    .from("evidence_import_rows")
-    .update({ status: "committed", updated_at: new Date().toISOString() })
-    .in(
-      "id",
-      ready.map((r) => r.id as string),
+  // MARK THE STAGED ROWS — each in ONE write that carries its final state
+  // and `committed` together (design v3 §8 P3u, §12): a committed staging
+  // row is immutable, so nothing may need to write it afterwards, and the
+  // row keeps exactly what its record was built from. Only rows whose record
+  // THIS call wrote are marked; a row whose fact was already recorded stays
+  // `ready`, and the next preview reads it (its own record → healed as
+  // committed; another row's → a duplicate). CHECKED: a mark that fails is
+  // said, never swallowed — re-running the commit converges, because the
+  // records are idempotent and the preview heals the row.
+  const toMark = finalState.filter((f) => writtenRowIds.has(f.id));
+  for (let i = 0; i < toMark.length; i += COMMIT_MARK_CONCURRENCY) {
+    const marks = await Promise.all(
+      toMark.slice(i, i + COMMIT_MARK_CONCURRENCY).map((f) => store.commitStagedRow(f.id, f.state)),
     );
+    const failed = marks.find((m) => m.error);
+    if (failed?.error) return classify(failed.error);
+  }
 
-  await recordImportEvent(caller, {
+  await recordImportEvent(store, {
     organizationId: session.organizationId,
     sessionId,
     eventType: "committed",
@@ -2157,12 +2480,143 @@ export async function commitImport(
     written,
     skippedDuplicates: ready.length - written,
     notReady,
-    recordIds: ((ins.data ?? []) as Record<string, unknown>[])
-      .filter((r) => writtenRowIds.has(r.import_row_id as string))
-      .map((r) => r.id as string),
+    recordIds: ins.data.filter((r) => writtenRowIds.has(r.import_row_id)).map((r) => r.id),
     createdPeople: applied.createdPeople,
     createdObjects: applied.createdObjects,
   };
+}
+
+/** Committing marks in flight at once — bounded, like every batch here. */
+const COMMIT_MARK_CONCURRENCY = 20;
+
+/** The stated absence (see `CommitPlanOptions.performerNotEstablished`). */
+export const PERFORMER_NOT_ESTABLISHED = {
+  state: "not_established",
+  method: "declared-at-import:v1",
+} as const;
+
+export interface CommitRowsInput {
+  readonly sessionId: string;
+  readonly session: {
+    readonly organizationId: string;
+    /** The session row's `supplied_by_organization_id` — WHO supplied the
+     *  hours, which is not always the organization whose roster they are on
+     *  (an agency on a client's site). Null = the row carries none. */
+    readonly suppliedByOrganizationId: string | null;
+    readonly sourceKind: string;
+    readonly sourceLanguage: string;
+    readonly sourceFilename: string | null;
+    readonly sourceReference: string | null;
+    readonly supplierRole: string;
+  };
+  /** The staged rows in `ready`, in source order. */
+  readonly ready: readonly Record<string, unknown>[];
+  readonly importedAt: string;
+  /** The human the records name as supplier and importer. */
+  readonly userId: string;
+  readonly evidenceState: ReportedEvidenceState;
+  /** See `CommitPlanOptions.performerNotEstablished`. */
+  readonly performerNotEstablished?: boolean;
+}
+
+/**
+ * THE COMMIT SEAM — pure. Ready staged rows in; the record rows the ONE
+ * insert writes, and each staging row's final state, out. No IO; the clock
+ * reading and the acting human are inputs.
+ */
+export function buildCommitRows(input: CommitRowsInput): {
+  readonly records: readonly StoreRow[];
+  readonly finalState: readonly { readonly id: string; readonly state: StoreRow }[];
+} {
+  const { session, sessionId, ready, importedAt } = input;
+  const state: ReportedEvidenceState = input.evidenceState;
+
+  // The per-session tamper-evidence chain, in row order (doctrine 3.3).
+  let prev: string | null = null;
+  const payload = ready.map((r) => {
+    const fingerprint = r.record_fingerprint as string;
+    const self = chainHash(prev, fingerprint, importedAt);
+    // WHAT THE FIGURE MEANS decides how the record is written (owner
+    // correction 2026-09-16). A DAILY figure is the day's hours. A PERIOD
+    // AGGREGATE (800 h of work from home over months) is a period record
+    // when the human stated the period — `period_start/end` + `hours`, the
+    // shape the schema already has — and otherwise a dated source fact
+    // whose canonical duration is UNKNOWN (`hours = null`). UNKNOWN
+    // semantics are likewise a dated fact with no duration. The source
+    // figure is always verbatim in `source_fact` and in
+    // `derived.timeSemantics.sourceHours`; nothing operational can sum it
+    // as a day (SEP-1, SEP-7). A period needs BOTH bounds (owner rule
+    // 2026-09-23): a start alone is not a period, and is never written as a
+    // one-day span — such a row stays a dated fact with unknown duration.
+    const derived = { ...((r.derived as Record<string, unknown> | null) ?? {}) };
+    if (input.performerNotEstablished) derived.performingCompany = PERFORMER_NOT_ESTABLISHED;
+    const ts = readTimeSemantics(derived);
+    const daily = countsAsDailyHours(ts);
+    const period = ts && ts.value === "period_aggregate" && ts.periodStart && ts.periodEnd ? ts : null;
+    const legacyExceeds =
+      !ts && (derived.hoursPlausibility as { method?: string } | undefined)?.method === HOURS_EXCEED_DAY_METHOD;
+    const row = {
+      organization_id: session.organizationId,
+      organization_person_id: r.organization_person_id as string,
+      activity_kind: "work",
+      // The source's own words for WHERE, verbatim — the column exists for
+      // exactly this and was being written null. A multi-place day keeps
+      // its places in `derived.workContexts`; the single object goes here.
+      context_label: (r.context_label as string | null) ?? null,
+      work_object_id: (r.work_object_id as string | null) ?? null,
+      activity_date: period ? null : ((r.activity_date as string | null) ?? null),
+      period_start: period ? period.periodStart : ((r.period_start as string | null) ?? null),
+      period_end: period ? period.periodEnd : ((r.period_end as string | null) ?? null),
+      hours: period ? period.sourceHours : daily && !legacyExceeds ? (r.hours ?? null) : null,
+      original_text: (r.activity_text as string | null) ?? "",
+      original_language: session.sourceLanguage,
+      evidence_state: state,
+      // The SESSION's supplier, copied — not the roster organization. M1's P1
+      // admits a record only when its supplied_by_organization_id EQUALS the
+      // session's supplied_by column; writing organization_id here would have
+      // every commit of the first cross-org session (an agency on a client's
+      // site) refused with 42501. The fallback is for a session row that
+      // carries no supplier column, and only then.
+      supplied_by_organization_id: session.suppliedByOrganizationId ?? session.organizationId,
+      supplier_role: session.supplierRole,
+      supplied_by_profile_id: input.userId,
+      imported_by_profile_id: input.userId,
+      imported_at: importedAt,
+      session_id: sessionId,
+      import_row_id: r.id as string,
+      source_kind: session.sourceKind,
+      source_filename: session.sourceFilename,
+      source_reference: session.sourceReference,
+      source_fact: r.source_fact ?? {},
+      derived,
+      confidence: r.person_match_confidence ?? null,
+      record_fingerprint: fingerprint,
+      hash_prev: prev,
+      hash_self: self,
+    };
+    prev = self;
+    return row;
+  });
+
+  // Each staging row's final state is exactly what its record was built
+  // from; the committing write sets it together with `committed`.
+  const finalState = ready.map((r) => ({
+    id: r.id as string,
+    state: {
+      organization_person_id: (r.organization_person_id as string | null) ?? null,
+      work_object_id: (r.work_object_id as string | null) ?? null,
+      record_fingerprint: r.record_fingerprint as string,
+      derived: input.performerNotEstablished
+        ? { ...((r.derived as Record<string, unknown> | null) ?? {}), performingCompany: PERFORMER_NOT_ESTABLISHED }
+        : ((r.derived as Record<string, unknown> | null) ?? {}),
+      duplicate_state: "new",
+      duplicate_of_record_id: null,
+      problem: null,
+      updated_at: importedAt,
+    } satisfies StoreRow,
+  }));
+
+  return { records: payload, finalState };
 }
 
 // ── the rollback path ───────────────────────────────────────────────────────
@@ -2178,66 +2632,202 @@ export async function commitImport(
  * policy: undoing an import must not be able to rewrite history.
  */
 export async function withdrawImport(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   sessionId: string,
   note?: string | null,
-): Promise<EvidenceImportResult<{ affected: number }>> {
-  return lifecycleSweep(caller, sessionId, "withdrawn", "rolled_back", note);
+): Promise<EvidenceImportResult<LifecycleResult>> {
+  return lifecycleSweep(caller, sessionId, "withdrawn", note);
 }
 
 export async function reinstateImport(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   sessionId: string,
   note?: string | null,
-): Promise<EvidenceImportResult<{ affected: number }>> {
-  return lifecycleSweep(caller, sessionId, "reinstated", "reinstated", note);
+): Promise<EvidenceImportResult<LifecycleResult>> {
+  return lifecycleSweep(caller, sessionId, "reinstated", note);
+}
+
+export interface LifecycleResult {
+  /** Record events THIS call wrote. */
+  readonly affected: number;
+  /** `already_*` when the session was already in the requested state and
+   *  nothing was written at all. */
+  readonly outcome: "withdrawn" | "reinstated" | "already_withdrawn" | "already_reinstated";
+}
+
+/** Every record of one session with its standing, page by page — never
+ *  capped at the size of one page. */
+async function readSessionRecords(
+  store: EvidenceStore,
+  sessionId: string,
+): Promise<CoreOk<SessionRecordWithEvents[]>> {
+  const out: SessionRecordWithEvents[] = [];
+  for (let offset = 0; offset < MAX_ROWS_PER_SESSION; offset += SESSION_RECORD_PAGE) {
+    const page = await store.listSessionRecords(sessionId, { offset, limit: SESSION_RECORD_PAGE });
+    if (page.error) return { ok: false, failure: classify(page.error) };
+    out.push(...page.data);
+    if (page.data.length < SESSION_RECORD_PAGE) break;
+  }
+  return { ok: true, value: out };
+}
+
+function standingOf(r: SessionRecordWithEvents) {
+  return deriveEvidenceStanding(
+    r.evidence_state as ReportedEvidenceState,
+    r.events.map(
+      (e): RecordLifecycleEvent => ({
+        eventType: e.event_type as RecordLifecycleEvent["eventType"],
+        actorRole: e.actor_role,
+        createdAt: e.created_at,
+        actorProfileId: e.actor_profile_id,
+      }),
+    ),
+    r.subject_profile_id,
+  );
+}
+
+/**
+ * THE BATCH ROLLBACK (design v3 §10) — checked, idempotent, zero-record safe.
+ *
+ *   1. ONE insert writes the event for every record of the session that is
+ *      not already in the requested state. Errors are returned, never
+ *      swallowed.
+ *   2. THEN the session's `rolled_back` / `reinstated` event is appended —
+ *      CHECKED: it is the outcome the batch audit shows, not a courtesy.
+ *   3. A session that committed nothing still gets its session event: a
+ *      withdrawal of an empty import is an act, not a silent no-op.
+ *   4. When the session is already in the requested state and every record
+ *      agrees, nothing at all is written and the answer is `already_*`. A
+ *      retry after a failure between 1 and 2 finds nothing to do in 1 and
+ *      completes 2 — so the sweep converges.
+ *
+ * It deletes and updates nothing: every write is an append.
+ */
+interface SweepPlan {
+  readonly organizationId: string;
+  /** The records that would gain the event, in stable (id) order. */
+  readonly pending: readonly SessionRecordWithEvents[];
+  /** True when the session's own latest lifecycle event is `rolled_back`. */
+  readonly sessionWithdrawn: boolean;
+  /** The session is already in the requested state AND no record needs the event. */
+  readonly nothingToDo: boolean;
+}
+
+/** THE pending computation of the batch lifecycle - shared by the sweep that
+ *  writes and by the read-only preview an agent confirms against, so what is
+ *  shown and what is written can never be computed two ways. Reads only. */
+async function planLifecycleSweep(
+  store: EvidenceStore,
+  sessionId: string,
+  eventType: "withdrawn" | "reinstated",
+): Promise<EvidenceImportResult<{ plan: SweepPlan }>> {
+  const session = await loadSession(store, sessionId);
+  if (!session.ok) return session.failure;
+  const records = await readSessionRecords(store, sessionId);
+  if (!records.ok) return records.failure;
+  const pending = records.value.filter((r) =>
+    eventType === "withdrawn" ? !standingOf(r).withdrawn : standingOf(r).withdrawn,
+  );
+
+  // The session's own lifecycle, newest first: withdrawn means the latest
+  // lifecycle event on its trail is `rolled_back`.
+  const trail = await store.listImportEvents(sessionId);
+  if (trail.error) return classify(trail.error);
+  const latest = trail.data.find((e) => e.event_type === "rolled_back" || e.event_type === "reinstated");
+  const sessionWithdrawn = latest?.event_type === "rolled_back";
+  const alreadyThere = eventType === "withdrawn" ? sessionWithdrawn : !sessionWithdrawn;
+  return {
+    kind: "ok",
+    plan: {
+      organizationId: session.organizationId,
+      pending,
+      sessionWithdrawn,
+      nothingToDo: pending.length === 0 && alreadyThere,
+    },
+  };
+}
+
+/**
+ * READ-ONLY preview of withdrawing one import session: exactly the records the
+ * sweep would write a `withdrawn` event for. Writes nothing. The fingerprint
+ * parts (`pendingRecordIds`, `sessionWithdrawn`) are what a draft binds its
+ * one-time token to, so a change between preview and confirm voids the token.
+ */
+export async function previewWithdrawal(
+  caller: EvidenceCaller,
+  sessionId: string,
+): Promise<
+  EvidenceImportResult<{
+    organizationId: string;
+    pendingRecordIds: readonly string[];
+    peopleAffected: number;
+    sessionWithdrawn: boolean;
+    nothingToDo: boolean;
+  }>
+> {
+  const planned = await planLifecycleSweep(storeOf(caller), sessionId, "withdrawn");
+  if (planned.kind !== "ok") return planned;
+  const { plan } = planned;
+  const people = new Set(plan.pending.map((r) => r.organization_person_id).filter((x): x is string => !!x));
+  return {
+    kind: "ok",
+    organizationId: plan.organizationId,
+    pendingRecordIds: plan.pending.map((r) => r.id).sort(),
+    peopleAffected: people.size,
+    sessionWithdrawn: plan.sessionWithdrawn,
+    nothingToDo: plan.nothingToDo,
+  };
 }
 
 async function lifecycleSweep(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   sessionId: string,
   eventType: "withdrawn" | "reinstated",
-  importEvent: "rolled_back" | "reinstated",
   note?: string | null,
-): Promise<EvidenceImportResult<{ affected: number }>> {
-  const session = await loadSession(caller, sessionId);
-  if (!session.ok) return session.failure;
+): Promise<EvidenceImportResult<LifecycleResult>> {
+  const store = storeOf(caller);
+  const importEvent = eventType === "withdrawn" ? "rolled_back" : "reinstated";
+  const planned = await planLifecycleSweep(store, sessionId, eventType);
+  if (planned.kind !== "ok") return planned;
+  const { organizationId, pending, nothingToDo } = planned.plan;
+  if (nothingToDo) {
+    return {
+      kind: "ok",
+      affected: 0,
+      outcome: eventType === "withdrawn" ? "already_withdrawn" : "already_reinstated",
+    };
+  }
+  const session = { organizationId };
 
-  const recs = await db(caller.supabase)
-    .from("organization_evidence_records")
-    .select("id")
-    .eq("session_id", sessionId)
-    .limit(MAX_ROWS_PER_SESSION);
-  if (recs.error) return classify(recs.error);
-  const ids = ((recs.data ?? []) as Record<string, unknown>[]).map(
-    (r) => r.id as string,
-  );
-  if (ids.length === 0) return { kind: "ok", affected: 0 };
-
-  const ins = await db(caller.supabase)
-    .from("organization_evidence_events")
-    .insert(
-      ids.map((id) => ({
+  let affected = 0;
+  if (pending.length > 0) {
+    const ins = await store.insertRecordEvents(
+      pending.map((r) => ({
         organization_id: session.organizationId,
-        record_id: id,
+        record_id: r.id,
         event_type: eventType,
-        actor_profile_id: caller.userId,
+        // The supplying organization acts on its own records (design v3 §8
+        // P4: an organization never names another as the actor).
+        actor_organization_id: session.organizationId,
+        actor_profile_id: store.userId,
         note: note ?? null,
       })),
-    )
-    .select("id");
-  if (ins.error) return classify(ins.error);
+    );
+    if (ins.error) return classify(ins.error);
+    affected = ins.data.length;
+  }
 
-  await recordImportEvent(caller, {
-    organizationId: session.organizationId,
-    sessionId,
-    eventType: importEvent,
-    payload: { records: ids.length },
-  });
-  return {
-    kind: "ok",
-    affected: Array.isArray(ins.data) ? ins.data.length : 0,
-  };
+  const sessionEvent = await store.insertImportEvent(
+    importEventRow(store, {
+      organizationId: session.organizationId,
+      sessionId,
+      eventType: importEvent,
+      payload: { records: pending.length },
+    }),
+  );
+  if (sessionEvent.error) return classify(sessionEvent.error);
+
+  return { kind: "ok", affected, outcome: eventType };
 }
 
 // ── attestation ─────────────────────────────────────────────────────────────
@@ -2260,6 +2850,55 @@ export const ATTESTATION_ROLES = [
 ] as const;
 
 /**
+ * READ-ONLY preview of an attestation: validates the role against the
+ * record's supplier role (the same rule `attestRecord` enforces) and reports
+ * the record's CURRENT attestation trail so a draft can bind its one-time
+ * token to it. Writes nothing.
+ */
+export async function previewAttestation(
+  caller: EvidenceCaller,
+  input: {
+    readonly recordId: string;
+    readonly actorRole?: (typeof ATTESTATION_ROLES)[number] | null;
+  },
+): Promise<
+  EvidenceImportResult<{
+    organizationId: string;
+    supplierRole: string;
+    /** Count of `attested` events on the record, from any actor. */
+    attestedEventCount: number;
+    /** Id of the newest `attested` event, or null. */
+    latestAttestedEventId: string | null;
+    /** The caller already attested this record. */
+    attestedByCaller: boolean;
+    /** The record's latest lifecycle event is a withdrawal. */
+    withdrawn: boolean;
+  }>
+> {
+  const store = storeOf(caller);
+  const rec = await store.readRecord(input.recordId);
+  if (rec.error) return classify(rec.error);
+  if (!rec.data) return { kind: "not-found" };
+  const supplierRole = (rec.data.supplier_role as string | null) ?? "other";
+  if (input.actorRole && input.actorRole !== supplierRole) {
+    return { kind: "invalid", problems: [`attestation role must be the record's supplier role (${supplierRole})`] };
+  }
+  const events = await store.listRecordEvents(input.recordId);
+  if (events.error) return classify(events.error);
+  const attested = events.data.filter((e) => e.event_type === "attested");
+  const lifecycle = events.data.find((e) => e.event_type === "withdrawn" || e.event_type === "reinstated");
+  return {
+    kind: "ok",
+    organizationId: rec.data.organization_id as string,
+    supplierRole,
+    attestedEventCount: attested.length,
+    latestAttestedEventId: (attested[0]?.id as string | undefined) ?? null,
+    attestedByCaller: attested.some((e) => e.actor_profile_id === store.userId),
+    withdrawn: lifecycle?.event_type === "withdrawn",
+  };
+}
+
+/**
  * The organization attesting a record it supplied.
  *
  * Attesting one's OWN work is ALLOWED (owner decision 3): a sole trader
@@ -2277,36 +2916,42 @@ export const ATTESTATION_ROLES = [
  *
  * So a sole trader can say "my organization stands behind this record" and can
  * never, by any path, make it independently verified.
+ *
+ * IN THE CAPACITY THE RECORD WAS SUPPLIED IN, AND NO OTHER (design v3 §8 P4).
+ * The organization attests as the record's own `supplier_role` — an employer
+ * cannot stand behind its timesheet "as the client", and a role that is not
+ * the record's is refused BY NAME here rather than as a bare 42501 later.
+ * Omitting the role means exactly that role.
  */
 export async function attestRecord(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   input: {
     readonly recordId: string;
-    readonly actorRole: (typeof ATTESTATION_ROLES)[number];
+    readonly actorRole?: (typeof ATTESTATION_ROLES)[number] | null;
     readonly note?: string | null;
   },
 ): Promise<EvidenceImportResult<{ eventId: string }>> {
-  const rec = await db(caller.supabase)
-    .from("organization_evidence_records")
-    .select("organization_id")
-    .eq("id", input.recordId)
-    .maybeSingle();
-  if (rec.error) return classify(rec.error);
-  if (!rec.data) return { kind: "not-found" };
-
-  const res = await db(caller.supabase)
-    .from("organization_evidence_events")
-    .insert({
-      organization_id: rec.data.organization_id as string,
+  const store = storeOf(caller);
+  const prior = await previewAttestation(caller, input);
+  if (prior.kind !== "ok") return prior;
+  const supplierRole = prior.supplierRole;
+  // One actor stands behind a record ONCE. A repeat adds no standing, only
+  // noise in an append-only ledger (and a replayed confirm must never mint a
+  // second event) - refused by name, not written.
+  if (prior.attestedByCaller) {
+    return { kind: "invalid", problems: ["this record is already attested by this actor"] };
+  }
+  const res = await store.insertRecordEvents([
+    {
+      organization_id: prior.organizationId,
       record_id: input.recordId,
       event_type: "attested",
-      actor_role: input.actorRole,
-      actor_organization_id: rec.data.organization_id as string,
-      actor_profile_id: caller.userId,
+      actor_role: supplierRole,
+      actor_organization_id: prior.organizationId,
+      actor_profile_id: store.userId,
       note: input.note ?? null,
-    })
-    .select("id")
-    .single();
+    },
+  ]);
   if (res.error) {
     // 42501 here means the caller does not manage this organization — a real
     // authorization refusal, reported as such rather than as a generic failure.
@@ -2315,7 +2960,9 @@ export async function attestRecord(
     }
     return classify(res.error);
   }
-  return { kind: "ok", eventId: res.data.id as string };
+  const eventId = res.data[0]?.id;
+  if (!eventId) return { kind: "error" };
+  return { kind: "ok", eventId };
 }
 
 /**
@@ -2332,49 +2979,459 @@ export async function attestRecord(
  * withdrawn records are skipped, so a repeat is idempotent. Authority is the
  * INSERT policy on `organization_evidence_events` (manages the organization,
  * actor is the caller) — RLS refuses every row for anyone else.
+ *
+ * PAGED, NOT CAPPED: every record of the session is read page by page (the
+ * old single read stopped at 1,000 and left the rest silently unattested),
+ * and each record is attested in its own supplier role (see `attestRecord`).
  */
 export async function attestSessionRecords(
-  caller: DomainCaller,
+  caller: EvidenceCaller,
   input: {
     readonly sessionId: string;
-    readonly actorRole: (typeof ATTESTATION_ROLES)[number];
+    readonly actorRole?: (typeof ATTESTATION_ROLES)[number] | null;
     readonly note?: string | null;
   },
 ): Promise<EvidenceImportResult<{ attested: number; skipped: number }>> {
-  const session = await loadSession(caller, input.sessionId);
+  const store = storeOf(caller);
+  const session = await loadSession(store, input.sessionId);
   if (!session.ok) return session.failure;
-  const listed = await listEvidenceRecords(caller, { sessionId: input.sessionId, limit: 1000 });
-  if (listed.kind !== "ok") return listed;
-  const pending = listed.records.filter((r) => !r.withdrawn && r.attestation === null);
-  const skipped = listed.records.length - pending.length;
+  if (input.actorRole && input.actorRole !== session.supplierRole) {
+    return {
+      kind: "invalid",
+      problems: [`attestation role must be the session's supplier role (${session.supplierRole})`],
+    };
+  }
+  const read = await readSessionRecords(store, input.sessionId);
+  if (!read.ok) return read.failure;
+  const records = read.value.map((r) => ({ id: r.id, supplierRole: r.supplier_role, ...standingOf(r) }));
+  // A superseded record is never attested: its replacement is the record that stands.
+  const pending = records.filter((r) => !r.withdrawn && !r.superseded && r.attestation === null);
+  const skipped = records.length - pending.length;
   if (pending.length === 0) return { kind: "ok", attested: 0, skipped };
 
   const rows = pending.map((r) => ({
     organization_id: session.organizationId,
     record_id: r.id,
     event_type: "attested",
-    actor_role: input.actorRole,
+    actor_role: r.supplierRole,
     actor_organization_id: session.organizationId,
-    actor_profile_id: caller.userId,
+    actor_profile_id: store.userId,
     note: input.note ?? null,
   }));
-  const res = await db(caller.supabase)
-    .from("organization_evidence_events")
-    .insert(rows)
-    .select("id");
+  const res = await store.insertRecordEvents(rows);
   if (res.error) {
     if (res.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
     return classify(res.error);
   }
   // The attestation events ARE the audit trail (actor, role, note, time on
   // every record); no session event is borrowed for it.
-  return { kind: "ok", attested: Array.isArray(res.data) ? res.data.length : rows.length, skipped };
+  return { kind: "ok", attested: res.data.length, skipped };
+}
+
+// ── correction (non-destructive) ────────────────────────────────────────────
+
+export interface CorrectRecordResult {
+  /** The record that now stands (the replacement, or the earlier one on a repeat). */
+  readonly recordId: string;
+  readonly correctionOf: string;
+  readonly eventId: string | null;
+  readonly attestationCarried: boolean;
+  /** True when this exact correction already existed: nothing new was written. */
+  readonly idempotent: boolean;
+  readonly changed: { readonly derived: readonly string[]; readonly columns: readonly string[] };
+}
+
+/** The current record of a chain: follow `correction_of` pointers forward. */
+async function chainLeafOf(store: EvidenceStore, recordId: string): Promise<string> {
+  let current = recordId;
+  for (let hops = 0; hops < 50; hops += 1) {
+    const next = await store.readCorrectionOf(current);
+    if (next.error || !next.data) return current;
+    current = next.data.id as string;
+  }
+  return current;
+}
+
+function lifecycleOf(rows: readonly StoreRow[]): RecordLifecycleEvent[] {
+  return rows.map(
+    (e): RecordLifecycleEvent => ({
+      eventType: e.event_type as RecordLifecycleEvent["eventType"],
+      actorRole: (e.actor_role as string | null) ?? null,
+      createdAt: (e.created_at as string | null) ?? null,
+      actorProfileId: (e.actor_profile_id as string | null) ?? null,
+    }),
+  );
+}
+
+/**
+ * CORRECT one committed record — INSERT-only. The original is never edited or
+ * deleted: a replacement record is written (`correction_of` = the original) and
+ * a `corrected` event (actor, reason, time, `replacement_record_id`) is appended
+ * to the original. Authority is the existing INSERT policies (manages the
+ * organization; the actor is the caller) — RLS refuses everyone else.
+ *
+ *   · only the CURRENT record of a chain can be corrected (A -> B -> C);
+ *   · a withdrawn record is reinstated first, never corrected around;
+ *   · IDEMPOTENT: the same correction of the same record resolves to the record
+ *     it already wrote, and completes a missing `corrected` event if a previous
+ *     attempt stopped between its two appends;
+ *   · `carryAttestation` re-attests the replacement as the ACTING organization
+ *     only when the original's attestation stands and nothing but a derived
+ *     classification changed.
+ */
+export async function correctRecord(
+  caller: EvidenceCaller,
+  rawInput: CorrectionInput,
+  opts: { readonly dryRun?: boolean } = {},
+): Promise<EvidenceImportResult<CorrectRecordResult>> {
+  const parsed = correctionInputSchema.safeParse(rawInput);
+  if (!parsed.success) {
+    return { kind: "invalid", problems: parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`) };
+  }
+  const input = parsed.data;
+  const store = storeOf(caller);
+
+  const rec = await store.readRecordFull(input.recordId);
+  if (rec.error) return classify(rec.error);
+  if (!rec.data) return { kind: "not-found" };
+  const original = rec.data;
+
+  const atIso = new Date().toISOString();
+  const built = buildCorrection(original, input, { actorProfileId: store.userId, atIso });
+  if (!built.ok) return { kind: "invalid", problems: built.problems };
+
+  const existing = await store.readCorrectionOf(input.recordId);
+  if (existing.error) return classify(existing.error);
+  const events = await store.readRecordEvents(input.recordId);
+  if (events.error) return classify(events.error);
+  const standing = deriveEvidenceStanding(original.evidence_state as ReportedEvidenceState, lifecycleOf(events.data));
+
+  if (existing.data) {
+    if ((existing.data.record_fingerprint as string) === built.fingerprint) {
+      // The same correction, already written. Complete the audit event if an
+      // earlier attempt stopped before appending it; write nothing else.
+      const replacementId = existing.data.id as string;
+      const hasEvent = events.data.some(
+        (e) => e.event_type === "corrected" && e.replacement_record_id === replacementId,
+      );
+      let eventId: string | null = null;
+      if (!hasEvent && !opts.dryRun) {
+        const ev = await appendCorrectedEvent(store, original, replacementId, input.reason);
+        if (ev.kind !== "ok") return ev;
+        eventId = ev.eventId;
+      }
+      return {
+        kind: "ok",
+        recordId: replacementId,
+        correctionOf: input.recordId,
+        eventId,
+        attestationCarried: false,
+        idempotent: true,
+        changed: built.changed,
+      };
+    }
+    const leaf = await chainLeafOf(store, input.recordId);
+    return {
+      kind: "invalid",
+      problems: [`this record was already corrected; correct the current record of the chain instead (${leaf})`],
+    };
+  }
+  if (standing.superseded) {
+    return { kind: "invalid", problems: ["this record is marked corrected but its replacement cannot be found; nothing was written"] };
+  }
+  if (standing.withdrawn) {
+    return { kind: "invalid", problems: ["this record is withdrawn; reinstate it before correcting it"] };
+  }
+
+  const carry = input.carryAttestation === true;
+  if (carry) {
+    if (built.changed.columns.length > 0) {
+      return { kind: "invalid", problems: ["an attestation cannot be carried across a change to the record's content"] };
+    }
+    if (!standing.attestation) {
+      return { kind: "invalid", problems: ["there is no standing attestation to carry"] };
+    }
+  }
+
+  // A DRY RUN stops here: every refusal above has been evaluated, nothing is
+  // written. This is what the draft step of the draft -> confirm pair previews.
+  if (opts.dryRun) {
+    return {
+      kind: "ok",
+      recordId: input.recordId,
+      correctionOf: input.recordId,
+      eventId: null,
+      attestationCarried: false,
+      idempotent: false,
+      changed: built.changed,
+    };
+  }
+
+  const ins = await store.insertRecords([built.row]);
+  if (ins.error) {
+    if (ins.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
+    return classify(ins.error);
+  }
+  const replacementId = ins.data[0]?.id;
+  if (!replacementId) return { kind: "error" };
+
+  const ev = await appendCorrectedEvent(store, original, replacementId, input.reason);
+  if (ev.kind !== "ok") return ev;
+
+  let attestationCarried = false;
+  if (carry) {
+    const attest = await store.insertRecordEvents([
+      {
+        organization_id: original.organization_id as string,
+        record_id: replacementId,
+        event_type: "attested",
+        actor_role: original.supplier_role as string,
+        actor_organization_id: original.organization_id as string,
+        actor_profile_id: store.userId,
+        note: `Carried across a correction of ${input.recordId} that changed only the derived classification (${built.changed.derived.join(", ")}). Reason: ${input.reason}`.slice(0, 1000),
+      },
+    ]);
+    if (attest.error) {
+      if (attest.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
+      return classify(attest.error);
+    }
+    attestationCarried = true;
+  }
+
+  return {
+    kind: "ok",
+    recordId: replacementId,
+    correctionOf: input.recordId,
+    eventId: ev.eventId,
+    attestationCarried,
+    idempotent: false,
+    changed: built.changed,
+  };
+}
+
+async function appendCorrectedEvent(
+  store: EvidenceStore,
+  original: StoreRow,
+  replacementId: string,
+  reason: string,
+): Promise<{ kind: "ok"; eventId: string } | EvidenceImportFailure> {
+  const res = await store.insertRecordEvents([
+    {
+      organization_id: original.organization_id as string,
+      record_id: original.id as string,
+      event_type: "corrected",
+      actor_role: null,
+      actor_organization_id: null,
+      actor_profile_id: store.userId,
+      replacement_record_id: replacementId,
+      note: reason,
+    },
+  ]);
+  if (res.error) {
+    if (res.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
+    return classify(res.error);
+  }
+  const id = res.data[0]?.id;
+  return id ? { kind: "ok", eventId: id } : { kind: "error" };
+}
+
+export interface CorrectSessionDatesResult {
+  readonly examined: number;
+  /** Records whose own source line declares the date reconstructed. */
+  readonly candidates: number;
+  /** Corrections written by THIS call (0 in a dry run). */
+  readonly corrected: number;
+  /** Records already carrying the derived classification. */
+  readonly alreadyClassified: number;
+  readonly failed: readonly { readonly recordId: string; readonly problem: string }[];
+  readonly applied: boolean;
+}
+
+/**
+ * Reclassify, for one import session, every record whose OWN source line says
+ * its calendar date was reconstructed (year + week + weekday) as a DERIVED
+ * date — by the correction writer, one replacement per record, never by editing
+ * a record. A dry run (the default) only counts. Idempotent: a record already
+ * carrying `derived.workDate` is not a candidate again.
+ */
+export async function correctSessionDateProvenance(
+  caller: EvidenceCaller,
+  input: {
+    readonly sessionId: string;
+    readonly reason: string;
+    readonly carryAttestation?: boolean;
+    readonly apply?: boolean;
+  },
+): Promise<EvidenceImportResult<CorrectSessionDatesResult>> {
+  const store = storeOf(caller);
+  const session = await loadSession(store, input.sessionId);
+  if (!session.ok) return session.failure;
+  const read = await readSessionRecords(store, input.sessionId);
+  if (!read.ok) return read.failure;
+
+  let examined = 0;
+  let alreadyClassified = 0;
+  let corrected = 0;
+  const failed: { recordId: string; problem: string }[] = [];
+  const candidates: { id: string; patch: NonNullable<ReturnType<typeof reconstructedDatePatch>> }[] = [];
+
+  for (const r of read.value) {
+    const standing = standingOf(r);
+    if (standing.superseded || standing.withdrawn) continue;
+    examined += 1;
+    const full = await store.readRecordFull(r.id);
+    if (full.error) return classify(full.error);
+    if (!full.data) continue;
+    const derived = (full.data.derived as Record<string, unknown> | null) ?? {};
+    const patch = reconstructedDatePatch({
+      activityDate: (full.data.activity_date as string | null) ?? null,
+      sourceFact: (full.data.source_fact as Record<string, unknown> | null) ?? null,
+      derived,
+    });
+    if (patch) candidates.push({ id: r.id, patch });
+    else if ((derived.workDate as { method?: string } | undefined)?.method === "iso_week_weekday_reconstruction") {
+      alreadyClassified += 1;
+    }
+  }
+
+  if (input.apply === true) {
+    for (const c of candidates) {
+      const res = await correctRecord(store, {
+        recordId: c.id,
+        reason: input.reason,
+        derivedPatch: c.patch,
+        carryAttestation: input.carryAttestation === true,
+      });
+      if (res.kind === "ok") corrected += res.idempotent ? 0 : 1;
+      else if (res.kind === "not-authorized") return res;
+      else failed.push({ recordId: c.id, problem: res.kind === "invalid" ? res.problems.join("; ") : res.kind });
+    }
+  }
+
+  return {
+    kind: "ok",
+    examined,
+    candidates: candidates.length,
+    corrected,
+    alreadyClassified,
+    failed,
+    applied: input.apply === true,
+  };
+}
+
+// ── performing-company attribution ──────────────────────────────────────────
+
+/** Roles a performing company can be named in (the party role vocabulary). */
+export const PERFORMING_PARTY_ROLES = ["employer", "subcontractor", "agency", "other"] as const;
+export type PerformingPartyRole = (typeof PERFORMING_PARTY_ROLES)[number];
+
+/**
+ * NAME THE COMPANY THAT PERFORMED RECORDS THAT ARE STORED IN ANOTHER
+ * ORGANIZATION'S BOOKS — additively, never by moving or copying them.
+ *
+ * Evidence records are append-only and hash-chained, and their organization
+ * is part of their identity: a record imported while the caller acted in
+ * organization A stays in A. When the work was really performed by company B,
+ * the existing party table already says so: one `organization_evidence_parties`
+ * row per record, `party_organization_id = B`, in a role such as `employer`.
+ * The existing read policies then do the rest: B's managers can READ those
+ * records (the records SELECT policy admits a managed party organization), and
+ * nothing else changes. The record, its fingerprint and hash, its events and
+ * its attestations are untouched, and `employer` is not a role that may
+ * independently verify, so no verification authority is granted.
+ *
+ * Authority is the caller's own RLS session: the insert policy admits only a
+ * manager of the RECORD's organization, and a party organization may not be
+ * named on a record whose project has a keyed customer (restrictive P6). The
+ * rows are append-only (no UPDATE, no DELETE grant): the product cannot undo
+ * this; a database administrator can delete exactly the rows this wrote
+ * (identified by `created_by` and the party organization).
+ *
+ * IDEMPOTENT: a record that already names this organization in this role is
+ * skipped, so a re-run writes nothing. A record that already lives in the
+ * performing organization is skipped (a company is not its own party).
+ */
+export async function attributeRecordsToPerformingOrganization(
+  caller: EvidenceCaller,
+  input: {
+    readonly recordIds: readonly string[];
+    readonly performingOrganizationId: string;
+    readonly role?: PerformingPartyRole;
+    /** Free text kept on the party row (at most 200 characters), e.g. the stated share. */
+    readonly label?: string | null;
+  },
+): Promise<EvidenceImportResult<{ attributed: number; skipped: number }>> {
+  const store = storeOf(caller);
+  const role: PerformingPartyRole = input.role ?? "employer";
+  if (!(PERFORMING_PARTY_ROLES as readonly string[]).includes(role)) {
+    return { kind: "invalid", problems: [`party role must be one of ${PERFORMING_PARTY_ROLES.join(", ")}`] };
+  }
+  const label = input.label?.trim() ? input.label.trim() : null;
+  if (label && label.length > 200) return { kind: "invalid", problems: ["label is at most 200 characters"] };
+  const ids = [...new Set(input.recordIds)];
+  if (ids.length === 0) return { kind: "ok", attributed: 0, skipped: 0 };
+
+  const orgs = await store.readRecordOrganizations(ids);
+  if (orgs.error) return classify(orgs.error);
+  const visible = new Map(orgs.data.map((r) => [r.id, r.organization_id]));
+  if (visible.size === 0) return { kind: "invalid", problems: ["none of the records is visible to the caller"] };
+
+  const existing = await store.readParties([...visible.keys()]);
+  if (existing.error) return classify(existing.error);
+  const already = new Set(
+    existing.data
+      .filter((p) => p.party_organization_id === input.performingOrganizationId && p.party_role === role)
+      .map((p) => p.record_id as string),
+  );
+
+  const rows: StoreRow[] = [];
+  for (const [id, orgId] of visible) {
+    if (orgId === input.performingOrganizationId || already.has(id)) continue;
+    rows.push({
+      organization_id: orgId,
+      record_id: id,
+      party_role: role,
+      party_organization_id: input.performingOrganizationId,
+      party_label: label,
+      created_by: store.userId,
+    });
+  }
+  const skipped = ids.length - rows.length;
+  if (rows.length === 0) return { kind: "ok", attributed: 0, skipped };
+  const res = await store.insertParties(rows);
+  if (res.error) {
+    if (res.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
+    return classify(res.error);
+  }
+  return { kind: "ok", attributed: res.data.length, skipped };
+}
+
+/** The records (any organization's books) that name this organization as a party. */
+export async function listRecordIdsAttributedTo(
+  caller: EvidenceCaller,
+  organizationId: string,
+): Promise<EvidenceImportResult<{ recordIds: readonly string[] }>> {
+  const store = storeOf(caller);
+  const res = await store.readRecordIdsNamingOrganization(organizationId);
+  if (res.error) return classify(res.error);
+  return { kind: "ok", recordIds: res.data };
 }
 
 // ── read-back ───────────────────────────────────────────────────────────────
 
+export interface EvidenceRecordPartyView {
+  readonly role: string;
+  /** The organization named (a performing company, a customer), when linked. */
+  readonly organizationId: string | null;
+  readonly label: string | null;
+}
+
 export interface EvidenceRecordView {
   readonly id: string;
+  /** The organization whose books hold the record. */
+  readonly organizationId: string;
+  /** Parties recorded on it (performing company, customer label, and so on). */
+  readonly parties: readonly EvidenceRecordPartyView[];
   readonly personId: string;
   readonly personName: string | null;
   readonly activityKind: string;
@@ -2386,6 +3443,16 @@ export interface EvidenceRecordView {
   readonly language: string;
   readonly contextLabel: string | null;
   readonly workObjectId: string | null;
+  /** The ordered work (project) the record belongs to; NULL = not identified. */
+  readonly projectId: string | null;
+  /** The roster relationship (employee, subcontractor, ...) of the person to
+   *  the supplying organisation. */
+  readonly relationshipKind: string | null;
+  /** The record's REPORTED (base) state, before any lifecycle event. */
+  readonly reportedState: string;
+  readonly supplierOrganizationId: string | null;
+  /** `parsed_file` / `agent_rows` / `typed` for historical timesheet rows. */
+  readonly rowOrigin: string | null;
   readonly supplierRole: string;
   readonly sourceKind: string;
   readonly sourceFilename: string | null;
@@ -2396,6 +3463,10 @@ export interface EvidenceRecordView {
   /** The DERIVED standing — base state composed with the append-only events. */
   readonly state: string;
   readonly withdrawn: boolean;
+  /** A correcting record replaced this one; effective readings skip it. */
+  readonly superseded: boolean;
+  /** The record this one corrects, when it is a correction. */
+  readonly correctionOf: string | null;
   readonly attestation: {
     readonly role: string | null;
     readonly at: string | null;
@@ -2407,7 +3478,8 @@ export interface EvidenceRecordView {
    *  separate event with its own policy and is never implied by an import. */
   readonly independentlyVerified: boolean;
   /**
-   * THIS VIEWER has already contested this record.
+   * THIS VIEWER's own contest of this record STANDS right now (their latest
+   * dispute-family event is `disputed`; a later `dispute_withdrawn` ends it).
    *
    * Distinct from `state === "DISPUTED"`, which says only that SOMEBODY with
    * standing contested it — an organisation manager can dispute too. A surface
@@ -2419,6 +3491,12 @@ export interface EvidenceRecordView {
    * organisation-side read is to claim no authorship at all.
    */
   readonly disputedByViewer: boolean;
+  /**
+   * THIS VIEWER contested this record and then withdrew the contest. The
+   * contest existed and is no longer standing - the history stays visible, the
+   * surface offers a fresh contest, and the earlier event is never erased.
+   */
+  readonly contestWithdrawnByViewer: boolean;
 }
 
 /**
@@ -2444,7 +3522,26 @@ export async function listEvidenceRecords(
      * passing it can never widen that.
      */
     readonly viewerProfileId?: string | null;
+    /** ONE organization's records. A caller who belongs to several organizations
+     *  is shown every organization's rows by RLS; a surface that speaks for the
+     *  ACTIVE workspace passes it so another organization's work never lands in
+     *  it. A narrowing only — RLS still decides what is visible. */
+    readonly organizationId?: string | null;
+    /** Records tied to these work objects (a place / project). A narrowing only. */
+    readonly workObjectIds?: readonly string[] | null;
+    /** Exactly these records (e.g. the ones attributed to an organization). */
+    readonly recordIds?: readonly string[] | null;
     readonly limit?: number;
+    /**
+     * EFFECTIVE reading is the default: a record replaced by a correction is
+     * left out, so the same work is never counted twice. Pass true to read the
+     * whole chain (audit views, the correction writer's own read-back).
+     */
+    readonly includeSuperseded?: boolean;
+    /** Rows to skip — PAGINATION. The server answers at most 1000 rows per
+     *  request, so a reader that needs more pages with `offset` (see
+     *  `listAllEvidenceRecords`); it never raises `limit` and hopes. */
+    readonly offset?: number;
   } = {},
 ): Promise<EvidenceImportResult<{ records: readonly EvidenceRecordView[] }>> {
   // THE EMBED NAMES ITS RELATIONSHIP. `organization_evidence_events` holds
@@ -2456,14 +3553,27 @@ export async function listEvidenceRecords(
   // "evidence store unreadable". The events a record carries are the ones
   // that point AT it (`record_fk`); a record named as somebody's replacement is
   // a different relationship. Regression-pinned in organization-evidence-core.test.ts.
+  const pageSize = Math.min(Math.max(filter.limit ?? 200, 1), 1000);
+  const pageFrom = Math.max(Math.floor(filter.offset ?? 0), 0);
   let q = db(caller.supabase)
     .from("organization_evidence_records")
     .select(
-      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, derived, organization_people(display_name, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
+      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, project_id, supplied_by_organization_id, row_origin, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, correction_of, source_fact, derived, organization_id, organization_people(display_name, linked_profile_id, relationship_kind), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
     )
     .order("activity_date", { ascending: false })
-    .limit(Math.min(Math.max(filter.limit ?? 200, 1), 1000));
+    // A TOTAL order: pages over a non-unique sort key repeat or skip rows.
+    .order("id", { ascending: true })
+    .range(pageFrom, pageFrom + pageSize - 1);
   if (filter.sessionId) q = q.eq("session_id", filter.sessionId);
+  if (filter.organizationId) q = q.eq("organization_id", filter.organizationId);
+  if (filter.recordIds) {
+    if (filter.recordIds.length === 0) return { kind: "ok", records: [] };
+    q = q.in("id", filter.recordIds as string[]);
+  }
+  if (filter.workObjectIds) {
+    if (filter.workObjectIds.length === 0) return { kind: "ok", records: [] };
+    q = q.in("work_object_id", filter.workObjectIds as string[]);
+  }
   if (filter.organizationPersonId) {
     q = q.eq("organization_person_id", filter.organizationPersonId);
   }
@@ -2490,6 +3600,7 @@ export async function listEvidenceRecords(
     const person = r.organization_people as {
       display_name?: string;
       linked_profile_id?: string | null;
+      relationship_kind?: string | null;
     } | null;
     // The subject's linked profile is what lets the derivation tell a
     // self-attestation from an independent one. Unlinked → no subject profile
@@ -2501,6 +3612,12 @@ export async function listEvidenceRecords(
     );
     return {
       id: r.id as string,
+      organizationId: (r.organization_id as string) ?? "",
+      parties: ((r.organization_evidence_parties as Record<string, unknown>[] | null) ?? []).map((p) => ({
+        role: p.party_role as string,
+        organizationId: (p.party_organization_id as string | null) ?? null,
+        label: (p.party_label as string | null) ?? null,
+      })),
       personId: r.organization_person_id as string,
       personName: person?.display_name ?? null,
       activityKind: (r.activity_kind as string) ?? "work",
@@ -2512,15 +3629,34 @@ export async function listEvidenceRecords(
       language: (r.original_language as string) ?? "",
       contextLabel: (r.context_label as string | null) ?? null,
       workObjectId: (r.work_object_id as string | null) ?? null,
+      projectId: (r.project_id as string | null) ?? null,
+      relationshipKind: person?.relationship_kind ?? null,
+      reportedState: (r.evidence_state as string) ?? "",
+      supplierOrganizationId: (r.supplied_by_organization_id as string | null) ?? null,
+      rowOrigin: (r.row_origin as string | null) ?? null,
       supplierRole: (r.supplier_role as string) ?? "other",
       sourceKind: (r.source_kind as string) ?? "",
       sourceFilename: (r.source_filename as string | null) ?? null,
       importedAt: (r.imported_at as string) ?? "",
       importedBy: (r.imported_by_profile_id as string | null) ?? null,
-      factFields: [],
+      // FACT vs DERIVED from the record's own source line and derivations
+      // (was a hard-coded []). The source line itself is not handed out —
+      // only which canonical fields it states.
+      factFields: committedFactFields({
+        sourceFact: (r.source_fact as Record<string, unknown> | null) ?? null,
+        activityDate: (r.activity_date as string | null) ?? null,
+        periodStart: (r.period_start as string | null) ?? null,
+        periodEnd: (r.period_end as string | null) ?? null,
+        hours: r.hours === null || r.hours === undefined ? null : Number(r.hours),
+        text: (r.original_text as string) ?? "",
+        contextLabel: (r.context_label as string | null) ?? null,
+        derived: (r.derived as Record<string, unknown> | null) ?? {},
+      }),
       derived: (r.derived as Record<string, unknown> | null) ?? {},
       state: standing.state,
       withdrawn: standing.withdrawn,
+      superseded: standing.superseded,
+      correctionOf: (r.correction_of as string | null) ?? null,
       attestation: standing.attestation
         ? {
             role: standing.attestation.role,
@@ -2529,17 +3665,23 @@ export async function listEvidenceRecords(
           }
         : null,
       independentlyVerified: standing.independentlyVerified,
+      // Per-viewer, latest-wins: a withdrawn contest no longer stands, and
+      // someone else's contest is never the viewer's to withdraw.
       disputedByViewer:
         filter.viewerProfileId != null &&
-        events.some(
-          (e) =>
-            e.eventType === "disputed" &&
-            e.actorProfileId === filter.viewerProfileId,
+        anyStandingDispute(
+          events.filter((e) => e.actorProfileId === filter.viewerProfileId),
         ),
+      contestWithdrawnByViewer:
+        filter.viewerProfileId != null &&
+        contestWithdrawnBy(events, filter.viewerProfileId),
     } satisfies EvidenceRecordView;
   });
 
-  return { kind: "ok", records };
+  return {
+    kind: "ok",
+    records: filter.includeSuperseded ? records : records.filter((r) => !r.superseded),
+  };
 }
 
 // ── the organization's own imports ──────────────────────────────────────────
@@ -2657,6 +3799,10 @@ export interface MyOrganizationEvidence {
   readonly links: readonly SubjectRosterLink[];
   /** The offers still awaiting this person's answer. */
   readonly pendingOffers: readonly SubjectRosterLink[];
+  /** The work behind each record (project, client, capacity, source, proof
+   *  facts), keyed by record id. Composed inside this one read so no caller
+   *  needs a further serial stage. Absent entries = nothing to show. */
+  readonly contexts: Readonly<Record<string, HistoryContext>>;
 }
 
 /**
@@ -2705,8 +3851,10 @@ export async function listMyOrganizationEvidence(
 
   // Only a CONFIRMED link makes the history this person's. An offer they have
   // not answered must not quietly start showing their name on someone's work.
+  // `linked` alone is not consent: a manager-made link ('manager_link') is never
+  // the person's own history (integrity doors v1).
   const confirmed = links
-    .filter((l) => l.linkState === "linked")
+    .filter((l) => l.linkState === "linked" && l.linkMethod === "worker_confirmed")
     .map((l) => l.id);
   const recordsRes = await listEvidenceRecords(caller, {
     organizationPersonIds: confirmed,
@@ -2723,6 +3871,9 @@ export async function listMyOrganizationEvidence(
     records: recordsRes.records,
     links,
     pendingOffers: links.filter((l) => l.linkState === "link_proposed"),
+    contexts: Object.fromEntries(
+      await readRecordHistoryContexts(caller.supabase, recordsRes.records),
+    ),
   };
 }
 
@@ -2784,39 +3935,80 @@ export async function respondToRosterLink(
 ): Promise<
   EvidenceImportResult<{ readonly linkState: "linked" | "unlinked" }>
 > {
-  const patch =
-    input.decision === "accept"
-      ? {
-          link_state: "linked",
-          link_method: "worker_confirmed",
-          linked_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-      : {
-          link_state: "unlinked",
-          link_method: null,
-          linked_profile_id: null,
-          linked_worker_id: null,
-          linked_at: null,
-          updated_at: new Date().toISOString(),
-        };
-  let query = db(caller.supabase)
+  // REFUSE / WITHDRAW go through ONE narrow database door
+  // (`respond_to_roster_link_v1`, 20261005100000). Writing them as a plain UPDATE
+  // never worked: the row stops naming the caller (linked_profile_id -> NULL), and
+  // PostgreSQL applies the SELECT policy to the NEW row of an UPDATE, so the
+  // person's own refusal failed with 42501 (found by the integrated local QA,
+  // 2026-10-05). The door re-derives the caller, acts on `link_proposed` for a
+  // refusal and on `linked` for a withdrawal only, and can never link anyone.
+  if (input.decision !== "accept") {
+    const answered = await db(caller.supabase).rpc("respond_to_roster_link_v1", {
+      p_person_id: input.personId,
+      p_decision: input.decision,
+    });
+    if (answered.error) return classify(answered.error);
+    if (answered.data !== "unlinked") return { kind: "not-found" };
+    return { kind: "ok", linkState: "unlinked" };
+  }
+  // ACCEPT stays the subject-policy UPDATE: the new row still names the caller,
+  // so the SELECT policy admits it.
+  const res = await db(caller.supabase)
     .from("organization_people")
-    .update(patch)
+    .update({
+      link_state: "linked",
+      link_method: "worker_confirmed",
+      linked_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", input.personId)
-    .eq("linked_profile_id", caller.userId);
-  // An answer to an offer acts on an offer; a withdrawal acts on a confirmed
-  // link. Neither may silently do the other's job.
-  query =
-    input.decision === "withdraw"
-      ? query.eq("link_state", "linked")
-      : query.eq("link_state", "link_proposed");
-  const res = await query.select("id");
+    .eq("linked_profile_id", caller.userId)
+    .eq("link_state", "link_proposed")
+    .select("id");
   if (res.error) return classify(res.error);
   if (!Array.isArray(res.data) || res.data.length === 0)
     return { kind: "not-found" };
+  return { kind: "ok", linkState: "linked" };
+}
+
+// ── the subject WITHDRAWS their contest ─────────────────────────────────────
+
+/**
+ * Take back the caller's own standing contest of a record.
+ *
+ * Appends a `dispute_withdrawn` event through
+ * `withdraw_organization_evidence_dispute_v1`; the earlier `disputed` event
+ * is never altered, so the fact that the contest existed stays on record. The
+ * RPC is the only door (no policy admits a subject to write this event type),
+ * it authorises exactly as the dispute policy does, and it is IDEMPOTENT:
+ * withdrawing with nothing standing appends nothing and answers
+ * `withdrawn: false`. SQLSTATE 42501 is the one refusal for "no such record",
+ * "not the subject", "not linked" and "not signed in" - a caller must not learn
+ * that a record exists from a different error.
+ */
+export async function withdrawEvidenceRecordDispute(
+  caller: DomainCaller,
+  input: { readonly recordId: string; readonly note?: string | null },
+): Promise<
+  EvidenceImportResult<{ readonly withdrawn: boolean; readonly standing: boolean }>
+> {
+  const note = (input.note ?? "").trim();
+  if (note.length > 1000) return { kind: "invalid", problems: ["note_too_long"] };
+  const res = await db(caller.supabase).rpc(
+    "withdraw_organization_evidence_dispute_v1",
+    { p_record_id: input.recordId, p_note: note === "" ? null : note },
+  );
+  if (res.error) {
+    if (res.error.code === "42501")
+      return { kind: "invalid", problems: ["not_subject"] };
+    if (res.error.code === "22001")
+      return { kind: "invalid", problems: ["note_too_long"] };
+    return classify(res.error);
+  }
+  const data = (res.data ?? {}) as { withdrawn?: boolean; standing?: boolean };
   return {
     kind: "ok",
-    linkState: input.decision === "accept" ? "linked" : "unlinked",
+    withdrawn: data.withdrawn === true,
+    standing: data.standing === true,
   };
 }

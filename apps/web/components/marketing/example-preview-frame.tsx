@@ -19,7 +19,9 @@ export async function ExamplePreviewFrame({
 
   return (
     <figure
-      className="flex flex-col items-center gap-3"
+      // w-full min-w-0: the frame takes its column's width instead of its
+      // content's, so a preview never outgrows a phone screen.
+      className="flex w-full min-w-0 flex-col items-center gap-3"
       data-testid="example-preview-frame"
     >
       <figcaption className="flex max-w-sm flex-col items-center gap-1 text-center">

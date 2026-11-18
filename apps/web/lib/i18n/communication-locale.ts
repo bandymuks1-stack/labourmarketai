@@ -9,7 +9,7 @@ import { isCommunicationLocale, type CommunicationLocale } from "@/lib/i18n/conf
  * UI_LANGUAGE ≠ COMMUNICATION_LANGUAGE (owner contract RED-1, 2026-09-17).
  * `profiles.locale` is the UI locale (active routes only); this reads the
  * separate `profiles.communication_locale` column (owner-gated migration
- * 20260920122000), which may be any of the 13 communication languages —
+ * 20261118100100), which may be any of the 13 communication languages —
  * including uk / ka, which have no UI route at all.
  *
  * Own row only: the caller reads their own profile under `profiles_select`.

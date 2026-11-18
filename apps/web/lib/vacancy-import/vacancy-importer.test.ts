@@ -355,9 +355,11 @@ describe("channel cadence and the stream checkpoint", () => {
     expect(result.nextCursor).toBe("2026-08-04T07:59:59.000Z");
     expect(result.caughtUp).toBe(false);
     // The real classification survives for the operator to read.
+    // ... and an HTTP failure names its status, so 401 / 403 / 429 / 5xx are
+    // distinguishable in the run accounting.
     expect(
       result.logs.find((l) => l.code === "page_fetch_failed")?.detail,
-    ).toBe("http_error");
+    ).toMatch(/^http_error:\d{3}$/);
   });
 
   it("a snapshot is a ONE-SHOT — a single page, never a paged sweep", async () => {

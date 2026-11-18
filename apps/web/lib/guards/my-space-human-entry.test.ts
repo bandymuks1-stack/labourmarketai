@@ -38,15 +38,15 @@ const PROFILE_PAGE = "app/[locale]/dashboard/profile/page.tsx";
 
 describe("worker entry is ŠIANDIEN — a page, not the chat and not a card stack (IA 2026-09-13)", () => {
   // RETIRED: "the worker's calm entry is the workspace (the chat) with the
-  // intro card". The worker in their personal space lands on ŠIANDIEN:
-  // header · ONE next action · today's work · open items · one growth line ·
-  // one opportunity line · a quiet door to the conversation · stations.
+  // intro card". The worker in their personal space opens the conversation
+  // with ŠIANDIEN as its opening context (owner decision 0017): header · ONE
+  // next action · today's work · open items · one growth line · one
+  // opportunity line · stations — and the composer right under it.
   const SCREEN = "components/app/today/today-screen.tsx";
 
-  it("the dashboard root renders ŠIANDIEN for the worker and keeps the chat on demand", () => {
+  it("the dashboard root composes ŠIANDIEN into the worker's conversation and hides the intro card", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
-    expect(page).toMatch(/rootSurface === "today"/);
-    expect(page).toMatch(/<TodayScreen\b/);
+    expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
     expect(page).toMatch(/reason: "replaced-by-today"/);
   });
 
@@ -58,10 +58,12 @@ describe("worker entry is ŠIANDIEN — a page, not the chat and not a card stac
     const model = read("lib/today/today-model.ts");
     expect(model).toMatch(/dim: card\.next\.dim/);
     expect(model).toMatch(/whyKey: card\.next\.whyKey/);
-    const screen = read(SCREEN);
-    expect(screen).toMatch(/deriveTodayNext\(/);
+    // The next action is derived by the pure model's `deriveTodayNext` in the
+    // WAITING loader (four-region home, D1), lifted from the same card.
+    expect(read("lib/home/home-server.ts")).toMatch(/deriveTodayNext\(/);
     // Exactly one primary CTA on the screen; everything else is a text link.
-    expect(screen.match(/buttonLinkClassName\("primary"\)/g)).toHaveLength(1);
+    const screenAll = read(SCREEN) + read("components/app/home/home-regions.tsx");
+    expect(screenAll.match(/buttonLinkClassName\("primary"\)/g)).toHaveLength(1);
   });
 
   it("no intro card, no quick-nav strip, no chat inside ŠIANDIEN", () => {
@@ -170,7 +172,7 @@ describe("'Mano erdvė' copy is human, calm, present in LT + EN", () => {
       snapshot: Record<string, string>;
     };
     expect(m.eyebrow).toBe("Aš dabar");
-    expect(m.intro).toMatch(/jūsų erdvė/i);
+    expect(m.intro).toMatch(/jūsų erdvė/i); // formal since the owner decision of 2026-11-15
     // First-person human framing for the snapshot ("ką dirbu / moku / įrodau").
     expect(m.snapshot.work).toMatch(/^Ką /);
   });
@@ -227,6 +229,7 @@ describe("'Mano darbo kortelė' (work card) copy is complete + honest in LT + EN
 
   it("LT why-copy matches the mandated benefit sentences", () => {
     const w = card(lt) as { why: Record<string, string> };
+    // The mandated sentences, in the formal register since the owner decision of 2026-11-15.
     expect(w.why.work).toMatch(/kokiam darbui jus galima siūlyti/);
     expect(w.why.pay).toMatch(/pagrįsti jūsų pageidaujamą tarifą/);
     expect(w.why.evidence).toMatch(/galite juos pridėti vėliau/);

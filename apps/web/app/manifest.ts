@@ -5,10 +5,11 @@ import { BRAND_ORGANIZATION_DESCRIPTION } from "@/lib/seo/metadata";
  * PWA web app manifest (audit PR9 — mobile app readiness baseline).
  * Served by Next at /manifest.webmanifest and auto-linked from every page.
  *
- * Honest baseline only: install metadata + icons. There is NO service
- * worker / offline mode yet (decision + notification spine pending — see
- * docs/mobile/mobile-app-readiness-v1.md), so nothing here promises
- * offline capability.
+ * Honest baseline only: install metadata + icons. There is NO offline mode.
+ * The only service worker (`public/sw.js`) is PUSH-ONLY — no fetch handler,
+ * no cache — and is registered solely when a person turns push
+ * notifications on (COM-3, flag-gated, OFF by default), so nothing here
+ * promises offline capability.
  *
  * start_url is "/" — the locale middleware redirects to the visitor's
  * locale, and an authenticated user continues to their dashboard exactly
@@ -23,6 +24,11 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "LabourMarket",
     // Single source shared with the Organization JSON-LD (lib/seo/metadata.ts).
     description: BRAND_ORGANIZATION_DESCRIPTION,
+    // The name, short_name and description above are English, so the
+    // manifest's own language is English. This labels those strings only;
+    // the app itself still follows the visitor's locale route.
+    lang: "en",
+    dir: "ltr",
     id: "/",
     start_url: "/",
     scope: "/",

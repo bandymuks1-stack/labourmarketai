@@ -14,24 +14,33 @@
  * Next.js 15 strips thrown Error messages in prod), so the client renders an
  * honest done / error state.
  */
+import { runAutoMatchForDemand } from "@/lib/scouting/auto-match";
+import type { ScoutingEmployer } from "@/lib/scouting/scouting";
 import "server-only";
+import { demandWrittenLanguage } from "@/lib/demand/demand-written-language";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { gateOpenNeeds } from "@/lib/billing/open-needs-gate";
 import { recordTelemetryEvent } from "@/lib/telemetry/actions";
 import { serverEventLocale } from "@/lib/telemetry/server-locale";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { requirementFunnelEvents } from "@/lib/telemetry/requirement-funnel";
+import type { RequirementStatus } from "@/lib/telemetry/funnel-events";
 import {
   hasMeaningfulEstimate,
   validateEstimateInputs,
   type EstimateInputs,
 } from "@/lib/estimate/estimate";
 import { buildEstimatePayload } from "@/lib/estimate/estimate-payload";
-import { isWorkTypeSlug, isMarketCountry } from "@/lib/taxonomy/work-categories";
+import { isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
+import { isIsoCountry } from "@/lib/location/country-model";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { NEED_SKILLS_PAYLOAD_KEY, needSkillsForPayload } from "@/lib/market/need-skills-payload";
 import {
   readStructuredDemandV2,
   sanitizeStructuredDemandV2,
+  teamCompositionFor,
   type StructuredDemandV2,
 } from "@/lib/demand/structured-demand-v2";
 
@@ -141,10 +150,19 @@ export type DemandRequestResult =
         | "no_company_context"
         | "invalid_estimate"
         // Owner launch pricing 2026-09-05: the organization's concurrent
-        // active open needs are at its plan's ceiling (FREE 1 / ORGANIZATION
-        // 10). `next` names the honest way forward — the €99 plan, or the
-        // individual plan (contact) above the paid ceiling. Nothing is charged.
-        | "over_open_need_limit";
+        // active open needs are at its plan's ceiling (FREE 1; the
+        // ORGANIZATION plan has none since 2026-10-06). `next` names the honest
+        // way forward — the €99 plan. Nothing is charged.
+        | "over_open_need_limit"
+        // The form was opened for another organization than the one the
+        // server resolves now (the workspace was switched in another tab).
+        // Nothing is written — a need is never posted into a company the
+        // person did not see on screen.
+        | "workspace_changed"
+        // No resolvable ISO country. A need without one is invisible to every
+        // country filter (worker board, agency offers, search), so no surface
+        // (web, chat, MCP) may create one; the market is never guessed.
+        | "country_required";
       limit?: number;
       used?: number;
       next?: "upgrade" | "individual_plan";
@@ -200,6 +218,7 @@ type DemandRpc = {
 export async function submitDemandRequest(
   intent: DemandIntent,
   fields?: DemandFields,
+  opts: { readonly expectedOrganizationId?: string | null } = {},
 ): Promise<DemandRequestResult> {
   const supabase = await createClient();
   const {
@@ -213,10 +232,15 @@ export async function submitDemandRequest(
   // can later attribute. Refused, never silently written to the profile.
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { ok: false, code: "no_company_context" };
+  // `expectedOrganizationId` never CHOOSES the target (the server-resolved
+  // workspace does); it can only make the submit REFUSE.
+  if (opts.expectedOrganizationId && opts.expectedOrganizationId !== employer.organizationId) {
+    return { ok: false, code: "workspace_changed" };
+  }
 
   const result = await submitDemandRequestCore(
     { supabase, userId: user.id },
-    { organizationId: employer.organizationId },
+    employer,
     intent,
     fields,
   );
@@ -234,7 +258,7 @@ export async function submitDemandRequest(
  */
 export async function submitDemandRequestCore(
   caller: DomainCaller,
-  employer: { organizationId: string },
+  employer: { organizationId: string } & Partial<ScoutingEmployer>,
   intent: DemandIntent,
   fields?: DemandFields,
 ): Promise<DemandRequestResult> {
@@ -260,9 +284,12 @@ export async function submitDemandRequestCore(
       ? fields.workType
       : null;
   const country =
-    typeof fields?.country === "string" && isMarketCountry(fields.country.toUpperCase())
+    typeof fields?.country === "string" && isIsoCountry(fields.country.toUpperCase())
       ? fields.country.toUpperCase()
       : null;
+  // Before any write: every surface reaches this core, so this is the one
+  // place the rule holds for the web wizard, the chat form and the MCP tools.
+  if (!country) return { ok: false, code: "country_required" };
   const teamSize =
     typeof fields?.teamSize === "number" &&
     Number.isInteger(fields.teamSize) &&
@@ -315,8 +342,31 @@ export async function submitDemandRequestCore(
   // Structured demand v2 (PR 2) — validated into the canonical closed-set
   // shape or dropped entirely. NOT worker-exposed (the worker RPC whitelist
   // does not read structured_v2 until MP-3 is owner-approved and applied).
-  const structuredV2 = sanitizeStructuredDemandV2(fields?.structuredV2);
+  const sanitizedV2 = sanitizeStructuredDemandV2(fields?.structuredV2);
+  // A team composition is kept only while it explains the number of workers
+  // stored in `team_size` (count × per_team) — server-side, whatever the
+  // client sent. Otherwise only the composition is dropped.
+  const structuredV2 =
+    sanitizedV2?.team && !teamCompositionFor(teamSize, sanitizedV2.team.count, sanitizedV2.team.per_team)
+      ? sanitizeStructuredDemandV2({ ...sanitizedV2, team: undefined })
+      : sanitizedV2;
   if (structuredV2) payload.structured_v2 = structuredV2;
+
+  // THE NEED'S REQUIRED SKILLS (owner decision 2026-10-29). The ONE offline
+  // derivation scouting runs, over the same words (title, description, the
+  // skills text, notes), stored as catalogue slugs only — so the worker
+  // board can judge this need by what it asks for without ever seeing the
+  // employer's text. Nothing derivable → nothing stored (honest unassessed).
+  const needSkills = needSkillsForPayload({
+    // The user's own role words only — never the intent fallback label.
+    title: role || null,
+    // The closed-set work type, slug separators as spaces (the same folding
+    // needFromRoleText applies) so it recognises through the same lexicon.
+    roleOrWorkType: workType ? workType.replace(/[_-]+/g, " ") : null,
+    needSummary: description,
+    notes: [payload.skills, payload.notes].filter((s): s is string => typeof s === "string").join("\n") || null,
+  });
+  if (needSkills) payload[NEED_SKILLS_PAYLOAD_KEY] = needSkills;
 
   // Optional preliminary estimate. Only persisted when the user actually filled
   // it in; if engaged but invalid (negatives / impossible %), block — an invalid
@@ -338,15 +388,14 @@ export async function submitDemandRequestCore(
     p_kind: kind,
     p_title: title.slice(0, MAX_TITLE),
     // The real user-entered description is the need summary (no fabricated
-    // placeholder text). p_original_language stays "lt" — the saved request
-    // surfaces on the LT-first owner UI.
+    // placeholder text), recorded in the language it was written in.
     p_need_summary: description,
     p_payload: payload,
-    p_original_language: "lt",
+    p_original_language: await demandWrittenLanguage(),
   };
   // OPEN-NEEDS ENTITLEMENT SEAM (owner launch pricing 2026-09-05): FREE
-  // organization = 1 concurrent active need, ORGANIZATION €99 = up to 10,
-  // above → the individual-plan path. `hasFeature("company_create_needs")`
+  // organization = 1 concurrent active need, ORGANIZATION €99 = no fixed
+  // limit (owner decision 2026-10-06). `hasFeature("company_create_needs")`
   // is the plan boundary; the numeric ceiling is decided by the ONE gate over
   // the organization's real count. Permissive while billing is disabled
   // (pilot preserved — the same rule the booking gate follows); enforced the
@@ -374,6 +423,37 @@ export async function submitDemandRequestCore(
   }
 
   const requestId = typeof data === "string" ? data : null;
+
+  // EMPLOYER FUNNEL CLOSURE (owner §23 canonical chain, 2026-09-22). This is
+  // the canonical logged-in requirement write, and until now it emitted NO
+  // pilot_event — the chain went dark exactly where a company states a real
+  // need. Both RPCs (`submit_demand_request`, and `_v2` which delegates to
+  // it) hardcode status='submitted' on the row they return the id of
+  // (migration 20260530150000), so the status carried here is the RPC's
+  // contract for THIS row, not a guess and not a second read. The events
+  // (`demand_saved` with `status`, then `requirement_activated` because
+  // `submitted` is worker-visible) are decided by the ONE pure mapping in
+  // lib/telemetry/requirement-funnel.ts. Entity ids only — never the title,
+  // the need summary or the payload. Fire-and-forget through the shared
+  // server emitter: a lost telemetry row never fails a saved requirement.
+  if (requestId) {
+    const status: RequirementStatus = "submitted";
+    for (const event of requirementFunnelEvents(status)) {
+      emitServerFunnelEvent(event, {
+        source: "demand-request",
+        route: "/dashboard/company/needs",
+        metadata: {
+          entity_type: "customer_request",
+          ref_type: "customer_request",
+          ref_id: requestId,
+          status,
+          role_context: intent === "partner" ? "agency" : "company",
+          surface: "dashboard_demand",
+          success: true,
+        },
+      });
+    }
+  }
 
   // Populate the structured, worker-board-safe COLUMNS on the row just created
   // — an owner-scoped UPDATE under the existing customer_requests RLS
@@ -412,6 +492,18 @@ export async function submitDemandRequestCore(
           }),
         )
         .catch(() => {});
+    }
+  }
+
+  // AUTOMATIC INTERNAL MATCHING (best-effort, after the row is saved and its
+  // structured columns are set). Deterministic match-v1 over existing
+  // LabourMarket.ai candidates only; a failure or throw can never fail the
+  // submit (runAutoMatchForDemand does not throw; the catch is belt-and-braces).
+  if (requestId && intent === "hire_workers") {
+    try {
+      await runAutoMatchForDemand(caller, employer, requestId, "submit");
+    } catch {
+      /* publish result is unaffected */
     }
   }
 
@@ -640,7 +732,7 @@ function toDemandPrefill(data: any): DemandPrefill {
           ? data.role_or_work_type
           : null,
       country:
-        typeof data.country === "string" && isMarketCountry(data.country)
+        typeof data.country === "string" && isIsoCountry(data.country)
           ? data.country
           : null,
       teamSize: typeof data.team_size === "number" ? data.team_size : null,

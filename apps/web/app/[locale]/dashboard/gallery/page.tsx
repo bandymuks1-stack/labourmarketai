@@ -1,10 +1,16 @@
 import { redirect } from "next/navigation";
+import { PageTitle } from "@/components/app/premium/page-title";
 import Link from "next/link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Images, NotebookPen } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getPersonalGallery } from "@/lib/journal/personal-gallery";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/gallery", "personalGallery.title");
+
 
 export const dynamic = "force-dynamic";
 
@@ -42,14 +48,14 @@ export default async function PersonalGalleryPage({
           <Images className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+        <PageTitle>
           {t("title")}
           {photos.length > 0 ? (
             <span className="ml-2 align-middle font-mono text-sm font-normal text-text-secondary">
               · {photos.length}
             </span>
           ) : null}
-        </h1>
+        </PageTitle>
       </header>
 
       {photos.length === 0 ? (
@@ -63,7 +69,7 @@ export default async function PersonalGalleryPage({
           <Link
             href={`/${locale}/dashboard/journal`}
             data-testid="personal-gallery-journal-cta"
-            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-3 text-sm font-semibold text-ink-900 transition-transform duration-fast ease-out hover:-translate-y-0.5"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-cta px-5 py-3 text-sm font-semibold text-text-on-brand transition-transform duration-fast ease-out hover:-translate-y-0.5"
           >
             <NotebookPen className="h-4 w-4" aria-hidden />
             {t("emptyCta")}

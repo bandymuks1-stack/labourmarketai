@@ -16,6 +16,9 @@ services:
       MAX_DURATION_SECONDS: ${MAX_DURATION_SECONDS:-600}
       WHISPER_THREADS: ${WHISPER_THREADS:-4}
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-10}
+      # Exact browser origin(s) allowed to upload with a signed token.
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
+      IDEMPOTENCY_CACHE_TTL_SECONDS: ${IDEMPOTENCY_CACHE_TTL_SECONDS:-600}
     deploy:
       resources:
         limits:

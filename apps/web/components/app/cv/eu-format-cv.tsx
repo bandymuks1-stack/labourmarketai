@@ -28,6 +28,9 @@ export interface EuFormatLabels {
   readonly nameNotProvided: string;
   readonly personal: string;
   readonly workExperience: string;
+  /** Sub-heading + provenance note of the organization-provided group. */
+  readonly organizationHistory: string;
+  readonly organizationHistoryNote: string;
   readonly educationAndTraining: string;
   readonly personalSkills: string;
   readonly languages: string;
@@ -133,6 +136,17 @@ export function EuFormatCv({
           {doc.workExperience.map((e, i) => (
             <Entry key={`w-${i}`} entry={e} />
           ))}
+          {doc.organizationHistory.length > 0 ? (
+            <div className="flex flex-col gap-3" data-testid="cv-eu-organization-history">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                {labels.organizationHistory}
+              </p>
+              <p className="text-xs text-text-muted">{labels.organizationHistoryNote}</p>
+              {doc.organizationHistory.map((e, i) => (
+                <Entry key={`o-${i}`} entry={e} />
+              ))}
+            </div>
+          ) : null}
         </Row>
       ) : null}
 

@@ -1,14 +1,28 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/lib/i18n/navigation";
+import { Link, redirect } from "@/lib/i18n/navigation";
+import {
+  matchProfessionAcrossLocales,
+  professionRedirectHref,
+} from "@/lib/vacancy-store/public-vacancy-profession-match";
+import { readCountryParam } from "@/lib/vacancy-store/public-vacancy-country-param";
+import { activeLocales } from "@/lib/i18n/config";
 import { buttonLinkClassName } from "@/components/ui/Button";
-import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
+import { buildPageMetadata, buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
+import { jobsCanonicalPath } from "@/lib/seo/jobs-canonical";
+import {
+  browseByProfessionHeading,
+  isProfessionPageIndexable,
+  knownLiveCount,
+  professionPageCopy,
+} from "@/lib/seo/jobs-profession-page";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import {
   searchPublicVacancyPreviews,
   type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
 import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
+import { displayLanguageName } from "@/lib/i18n/language-name";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { createClient } from "@/lib/supabase/server";
@@ -17,7 +31,13 @@ import {
   listSavedPublicVacancyIds,
   resolveOwnWorkerId,
 } from "@/lib/opportunities/saved-opportunities";
-import { listPublicVacancyPreviewsByIds } from "@/lib/vacancy-store/vacancy-read";
+import {
+  listMemberVacancyFactsByIds,
+  listPublicVacancyPreviewsByIds,
+} from "@/lib/vacancy-store/vacancy-read";
+import { jsonLdScript } from "@/lib/seo/json-ld";
+import { buildJobsListJsonLd } from "@/lib/seo/public-job-json-ld";
+import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import {
   PUBLIC_VACANCY_PROFESSION_SLUGS,
   readProfessionSlugParam,
@@ -43,11 +63,46 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ q?: string; page?: string; saved?: string; profession?: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildPageMetadataFor("jobs", locale, "/jobs");
+  const sp = await searchParams;
+  const profession = readProfessionSlugParam(sp.profession);
+  const path = jobsCanonicalPath({ ...sp, profession });
+  // A free-text search or the saved view is the board; so is an unknown slug.
+  if (!profession || sp.q || sp.saved) return buildPageMetadataFor("jobs", locale, path);
+
+  // THE PROFESSION PAGE (owner P0, 2026-11-12): its own title, description and
+  // canonical, indexable only while it has real demand. This is the SAME read
+  // the page body makes, with the same arguments, so the search's in-process
+  // cache answers one of the two and the database is asked once.
+  const active = resolveActiveLocale(locale);
+  const read = await searchPublicVacancyPreviews({
+    query: "",
+    professionSlug: profession,
+    page: boardPage(sp.page),
+  });
+  const t = await getTranslations({ locale: active, namespace: "professions" });
+  const name = t.has(profession as never) ? t(profession as never) : profession;
+  const copy = professionPageCopy(active, name, knownLiveCount(read));
+  const metadata = buildPageMetadata({
+    locale: active,
+    path,
+    title: copy.heading,
+    description: copy.description,
+  });
+  // Thin or empty: people still reach it, a search engine does not list it.
+  return isProfessionPageIndexable(read)
+    ? metadata
+    : { ...metadata, robots: { index: false, follow: true } };
+}
+
+/** The page number the board reads, from the raw `?page=`. */
+function boardPage(raw: string | undefined): number {
+  return Math.max(1, Number.parseInt(raw ?? "1", 10) || 1);
 }
 
 type L = Record<ActiveLocale, string>;
@@ -58,6 +113,8 @@ const H1: L = {
   ru: "Открытые вакансии",
   nl: "Openstaande vacatures",
   de: "Offene Stellen",
+  pl: "Otwarte oferty pracy",
+  sv: "Lediga jobb",
 };
 
 const INTRO: L = {
@@ -66,6 +123,34 @@ const INTRO: L = {
   ru: "Актуальные вакансии из официальных публичных источников занятости. Войдите, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
   nl: "Actuele vacatures uit officiële openbare arbeidsbronnen. Log in om de werkgever, de locatie en de sollicitatiewijze te zien.",
   de: "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+  pl: "Aktualne oferty pracy importowane z oficjalnych publicznych źródeł zatrudnienia. Zaloguj się, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
+  sv: "Aktuella lediga jobb från officiella offentliga arbetsmarknadskällor. Logga in för att se arbetsgivaren, platsen och hur du söker.",
+};
+
+/** The intro for someone who is ALREADY signed in. The anonymous intro above
+ *  promises the employer, location and apply route "after you sign in" — said to
+ *  a signed-in worker it is a false instruction (the board never reads it as
+ *  such, but the sentence did). They get the same facts, one tap away. */
+/** Position name when the preview carries no occupation label (structured
+ *  data only); the same generic noun the detail page uses for its heading. */
+const GENERIC_TITLE: L = {
+  en: "Job opening",
+  lt: "Darbo pasiūlymas",
+  ru: "Вакансия",
+  nl: "Vacature",
+  de: "Stellenangebot",
+  pl: "Oferta pracy",
+  sv: "Ledigt jobb",
+};
+
+const INTRO_MEMBER: L = {
+  en: "Live vacancies imported from official public employment sources. Open a vacancy to see the employer, the location and how to apply.",
+  lt: "Gyvos darbo vietos iš oficialių viešų užimtumo šaltinių. Atidaryk skelbimą — pamatysi darbdavį, vietovę ir kaip kandidatuoti.",
+  ru: "Актуальные вакансии из официальных публичных источников занятости. Откройте вакансию, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
+  nl: "Actuele vacatures uit officiële openbare arbeidsbronnen. Open een vacature om de werkgever, de locatie en de sollicitatiewijze te zien.",
+  de: "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Öffnen Sie eine Stelle, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+  pl: "Aktualne oferty pracy importowane z oficjalnych publicznych źródeł zatrudnienia. Otwórz ofertę, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
+  sv: "Aktuella lediga jobb från officiella offentliga arbetsmarknadskällor. Öppna en annons för att se arbetsgivaren, platsen och hur du söker.",
 };
 
 /** The anonymous search matches the OCCUPATION label (the field the card
@@ -77,6 +162,8 @@ const SEARCH_LABEL: L = {
   ru: "Поиск по профессии",
   nl: "Zoeken op beroep",
   de: "Nach Beruf suchen",
+  pl: "Szukaj według zawodu",
+  sv: "Sök efter yrke",
 };
 
 const SEARCH_BUTTON: L = {
@@ -85,6 +172,8 @@ const SEARCH_BUTTON: L = {
   ru: "Искать",
   nl: "Zoeken",
   de: "Suchen",
+  pl: "Szukaj",
+  sv: "Sök",
 };
 
 const PROFESSION_LABEL: L = {
@@ -93,6 +182,8 @@ const PROFESSION_LABEL: L = {
   ru: "Профессия",
   nl: "Beroep",
   de: "Beruf",
+  pl: "Zawód",
+  sv: "Yrke",
 };
 
 const PROFESSION_ANY: L = {
@@ -101,6 +192,8 @@ const PROFESSION_ANY: L = {
   ru: "Все профессии",
   nl: "Alle beroepen",
   de: "Alle Berufe",
+  pl: "Wszystkie zawody",
+  sv: "Alla yrken",
 };
 
 const CLEAR_FILTER: L = {
@@ -109,18 +202,28 @@ const CLEAR_FILTER: L = {
   ru: "Сбросить фильтр",
   nl: "Filter wissen",
   de: "Filter zurücksetzen",
+  pl: "Wyczyść filtr",
+  sv: "Rensa filtret",
 };
 
-/** The supply is published in the employer's own language. Say so once, rather
- *  than letting a visitor wonder why a Lithuanian page lists Swedish
- *  occupation labels. */
-const ORIGINAL_LANGUAGE_NOTE: L = {
-  en: "Occupation labels are shown in the language the employer published them in. Filter by profession to search in your own language.",
-  lt: "Profesijų pavadinimai rodomi ta kalba, kuria juos paskelbė darbdavys. Filtruok pagal profesiją, kad ieškotum sava kalba.",
-  ru: "Названия профессий показаны на языке, на котором их опубликовал работодатель. Фильтруйте по профессии, чтобы искать на своём языке.",
-  nl: "Beroepslabels staan in de taal waarin de werkgever ze publiceerde. Filter op beroep om in je eigen taal te zoeken.",
-  de: "Berufsbezeichnungen erscheinen in der Sprache, in der der Arbeitgeber sie veröffentlicht hat. Filtern Sie nach Beruf, um in Ihrer Sprache zu suchen.",
-};
+/* `ORIGINAL_LANGUAGE_NOTE` WAS REMOVED HERE (owner rule §1, 2026-09-27).
+ *
+ * It read "Profesijų pavadinimai rodomi ta kalba, kuria juos paskelbė
+ * darbdavys. Filtruok pagal profesiją, kad ieškotum sava kalba." and its own
+ * comment said why it existed: "rather than letting a visitor wonder why a
+ * Lithuanian page lists Swedish occupation labels."
+ *
+ * That is a DISCLAIMER COMPENSATING FOR A CONFUSING COMPONENT, which the owner
+ * banned outright — and it is now also FALSE. Since the card fix, a mapped ad
+ * heads with the localized catalogue name ("Sandėlio darbuotojas") and each card
+ * names its own source language on one compact line ("Skelbimo kalba: švedų ·
+ * Lagerarbetare"). Verified on deployed production /lt/jobs and /lt.
+ *
+ * So the page-level sentence was saying something untrue about the page, to
+ * excuse a confusion that no longer exists, in a paragraph nobody needed to act
+ * on. Removing it loses nothing: the language is still named, per ad, where the
+ * reader is actually looking.
+ */
 
 const RESULTS: L = {
   en: "vacancies found",
@@ -128,6 +231,8 @@ const RESULTS: L = {
   ru: "найдено вакансий",
   nl: "vacatures gevonden",
   de: "Stellen gefunden",
+  pl: "znalezionych ofert pracy",
+  sv: "lediga jobb hittades",
 };
 
 /** Named, so a zero result is an answer about THIS filter rather than a
@@ -138,6 +243,8 @@ const EMPTY_FOR_PROFESSION: Record<ActiveLocale, (p: string) => string> = {
   ru: (p) => `Сейчас нет открытых вакансий: ${p}.`,
   nl: (p) => `Momenteel geen openstaande vacatures voor ${p}.`,
   de: (p) => `Derzeit keine offenen Stellen für ${p}.`,
+  pl: (p) => `Obecnie brak otwartych ofert pracy: ${p}.`,
+  sv: (p) => `Det finns inga lediga jobb för ${p} just nu.`,
 };
 
 /**
@@ -159,6 +266,8 @@ const EMPTY_FOR_PROFESSION_AND_QUERY: Record<
   ru: (p, q) => `Сейчас нет открытых вакансий: ${p} по запросу «${q}».`,
   nl: (p, q) => `Momenteel geen openstaande vacatures voor ${p} met “${q}”.`,
   de: (p, q) => `Derzeit keine offenen Stellen für ${p} mit „${q}“.`,
+  pl: (p, q) => `Obecnie brak otwartych ofert pracy: ${p} dla „${q}”.`,
+  sv: (p, q) => `Det finns inga lediga jobb för ${p} som matchar ”${q}” just nu.`,
 };
 
 const EMPTY: L = {
@@ -167,6 +276,8 @@ const EMPTY: L = {
   ru: "По этому запросу вакансий не найдено. Попробуйте более общее название.",
   nl: "Geen vacatures voor deze zoekopdracht. Probeer een bredere functietitel.",
   de: "Keine Stellen für diese Suche. Versuchen Sie eine breitere Bezeichnung.",
+  pl: "Żadna oferta pracy nie pasuje teraz do tego wyszukiwania. Spróbuj ogólniejszej nazwy stanowiska.",
+  sv: "Inga lediga jobb matchar sökningen just nu. Prova en bredare yrkestitel.",
 };
 
 /** Honest state: the feature is not switched on — NOT "there are no jobs". */
@@ -176,6 +287,8 @@ const NOT_PROVISIONED: L = {
   ru: "Публичная доска вакансий ещё не включена.",
   nl: "Het openbare vacaturebord is nog niet ingeschakeld.",
   de: "Das öffentliche Stellenboard ist noch nicht aktiviert.",
+  pl: "Publiczna tablica ofert pracy nie jest jeszcze włączona.",
+  sv: "Den publika jobbtavlan är inte aktiverad än.",
 };
 
 /** Honest state: the read did not answer in time — NOT "0 vacancies found",
@@ -189,6 +302,24 @@ const UNAVAILABLE: L = {
   ru: "Доска вакансий не ответила вовремя. Попробуйте ещё раз через минуту.",
   nl: "Het vacaturebord antwoordde niet op tijd. Probeer het zo opnieuw.",
   de: "Das Stellenboard hat nicht rechtzeitig geantwortet. Bitte gleich noch einmal versuchen.",
+  pl: "Tablica ofert pracy nie odpowiedziała na czas. Spróbuj ponownie za chwilę.",
+  sv: "Jobbtavlan svarade inte i tid. Försök igen om en stund.",
+};
+
+/**
+ * `?country=` IS NOT A FILTER YET (owner 2026-11-09). The search has no country
+ * argument until the RED country filter is applied, so a link to
+ * `/jobs?country=NO` must not look like the Norwegian jobs: the page says it is
+ * showing every country. See lib/vacancy-store/public-vacancy-country-param.ts.
+ */
+const COUNTRY_NOT_FILTERED: Record<ActiveLocale, (country: string | null) => string> = {
+  en: (c) => `${c ? `Filtering by country (${c}) is` : "Filtering by country is"} not available yet. Showing jobs from all countries.`,
+  lt: (c) => `${c ? `Filtras pagal šalį (${c})` : "Filtras pagal šalį"} dar neveikia. Rodomi visų šalių darbo skelbimai.`,
+  ru: (c) => `${c ? `Фильтр по стране (${c})` : "Фильтр по стране"} пока недоступен. Показаны вакансии из всех стран.`,
+  nl: (c) => `${c ? `Filteren op land (${c})` : "Filteren op land"} is nog niet beschikbaar. Vacatures uit alle landen worden getoond.`,
+  de: (c) => `${c ? `Der Länderfilter (${c})` : "Der Länderfilter"} ist noch nicht verfügbar. Angezeigt werden Stellen aus allen Ländern.`,
+  pl: (c) => `${c ? `Filtr według kraju (${c})` : "Filtr według kraju"} nie jest jeszcze dostępny. Pokazujemy oferty ze wszystkich krajów.`,
+  sv: (c) => `${c ? `Filtrering efter land (${c})` : "Filtrering efter land"} är inte tillgänglig än. Jobb från alla länder visas.`,
 };
 
 const SAVED_TAB: L = {
@@ -197,6 +328,8 @@ const SAVED_TAB: L = {
   ru: "Сохранённые",
   nl: "Bewaard",
   de: "Gemerkt",
+  pl: "Zapisane",
+  sv: "Sparade",
 };
 
 const ALL_TAB: L = {
@@ -205,6 +338,8 @@ const ALL_TAB: L = {
   ru: "Все вакансии",
   nl: "Alle vacatures",
   de: "Alle Stellen",
+  pl: "Wszystkie oferty pracy",
+  sv: "Alla jobb",
 };
 
 /** The saved list is a PRIVATE bookmark list: nobody but this worker ever sees
@@ -216,6 +351,8 @@ const SAVED_NOTE: L = {
   ru: "Ваши личные закладки. Этот список видите только вы — сохранение ничего не сообщает работодателю.",
   nl: "Je privé-bladwijzers. Alleen jij ziet deze lijst — bewaren laat de werkgever niets weten.",
   de: "Ihre privaten Lesezeichen. Nur Sie sehen diese Liste — das Merken teilt dem Arbeitgeber nichts mit.",
+  pl: "Twoje prywatne zakładki. Tylko Ty widzisz tę listę — zapisanie nic nie mówi pracodawcy.",
+  sv: "Dina privata bokmärken. Bara du ser den här listan – att spara säger ingenting till arbetsgivaren.",
 };
 
 const SAVED_EMPTY: L = {
@@ -224,6 +361,20 @@ const SAVED_EMPTY: L = {
   ru: "Вы ещё ничего не сохранили. Откройте вакансию и нажмите «Сохранить».",
   nl: "Je hebt nog niets bewaard. Open een vacature en gebruik Bewaren.",
   de: "Sie haben noch nichts gemerkt. Öffnen Sie eine Stelle und nutzen Sie Merken.",
+  pl: "Nie masz jeszcze zapisanej żadnej oferty pracy. Otwórz ofertę i użyj „Zapisz”.",
+  sv: "Du har inte sparat något jobb än. Öppna ett jobb och tryck på ”Spara jobbet” så hamnar det här.",
+};
+
+/** The anonymous card's honest line where the member facts would be (owner
+ *  P0-3, 2026-11-03): they exist, they open after sign-in (directive 2026-08-24). */
+const LOCKED_FACTS: L = {
+  en: "Employer and location: after sign-in",
+  lt: "Darbdavys ir vieta: prisijungus",
+  ru: "Работодатель и место: после входа",
+  nl: "Werkgever en locatie: na inloggen",
+  de: "Arbeitgeber und Ort: nach der Anmeldung",
+  pl: "Pracodawca i miejsce: po zalogowaniu",
+  sv: "Arbetsgivare och plats: efter inloggning",
 };
 
 const SAVED_BADGE: L = {
@@ -232,6 +383,8 @@ const SAVED_BADGE: L = {
   ru: "Сохранено",
   nl: "Bewaard",
   de: "Gemerkt",
+  pl: "Zapisano",
+  sv: "Sparad",
 };
 
 const PREV: L = {
@@ -240,6 +393,8 @@ const PREV: L = {
   ru: "Назад",
   nl: "Vorige",
   de: "Zurück",
+  pl: "Poprzednia",
+  sv: "Föregående",
 };
 
 const NEXT: L = {
@@ -248,6 +403,8 @@ const NEXT: L = {
   ru: "Далее",
   nl: "Volgende",
   de: "Weiter",
+  pl: "Następna",
+  sv: "Nästa",
 };
 
 export default async function JobsPage({
@@ -260,6 +417,7 @@ export default async function JobsPage({
     page?: string;
     saved?: string;
     profession?: string;
+    country?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -271,17 +429,52 @@ export default async function JobsPage({
   // Closed set: an unknown slug becomes "no filter" rather than reaching the
   // SQL function as free text.
   const profession = readProfessionSlugParam(sp.profession);
+  // Read only to SAY it is not applied: the search takes no country yet.
+  const countryParam = readCountryParam(sp.country);
   // The ONE registry — slug → name in the reader's language. 17,145 browsable
   // ads carry a slug the categorizer derived, so this is how a worker searches
   // Swedish supply in Lithuanian without knowing a word of Swedish.
   const tProfession = await getTranslations("professions");
   const professionName = (slug: string): string =>
     tProfession.has(slug as never) ? tProfession(slug as never) : slug;
+  // THE AD'S OWN LANGUAGE, named only when it is not the reader's — the SAME
+  // condition and the SAME copy `/jobs/[id]` already uses, so the board and the
+  // detail page say one thing (owner §6, 2026-09-27). Nothing is translated and
+  // nothing leaves the platform; this is the honest fallback that stops a
+  // Swedish occupation standing on the card as an unexplained second title.
+  const tRoot = await getTranslations();
+  const sourceLanguageLabel = (code: string | null): string | undefined =>
+    code && code.slice(0, 2) !== active
+      ? tRoot("vacancySources.language.originalIn", {
+          language: displayLanguageName(code, active),
+        })
+      : undefined;
   const professionOptions = PUBLIC_VACANCY_PROFESSION_SLUGS.map((slug) => ({
     slug,
     label: professionName(slug),
   })).sort((a, b) => a.label.localeCompare(b.label, active));
-  const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
+  // A typed word that IS a catalogue profession in the reader's language
+  // ("valytojas") would otherwise search Swedish publisher labels and report a
+  // false zero. Resolve it through the same slug filter, in the URL, so reload,
+  // share and "clear filter" all behave as for a picked profession.
+  // The other active catalogues are tried only when the reader's own finds
+  // nothing ("welder" on the Lithuanian board) — see matchProfessionAcrossLocales.
+  if (!profession && query && sp.saved !== "1") {
+    const others = await Promise.all(
+      activeLocales
+        .filter((l) => l !== active)
+        .map(async (locale) => {
+          const t = await getTranslations({ locale, namespace: "professions" });
+          return PUBLIC_VACANCY_PROFESSION_SLUGS.map((slug) => ({
+            slug,
+            label: t.has(slug as never) ? t(slug as never) : slug,
+          }));
+        }),
+    );
+    const mapped = matchProfessionAcrossLocales(query, professionOptions, others);
+    if (mapped) redirect({ href: professionRedirectHref(mapped, sp.page), locale: active });
+  }
+  const page = boardPage(sp.page);
   const wantsSaved = sp.saved === "1";
 
   // ── THE RETURN PATH ────────────────────────────────────────────────────────
@@ -294,13 +487,29 @@ export default async function JobsPage({
   // never touches the auth server.
   const signedIn = await hasSessionCookie();
   const supabase = signedIn ? await createClient() : null;
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
-  const workerId =
-    supabase && user ? await resolveOwnWorkerId(supabase, user.id) : null;
-  const mySaved =
-    supabase && workerId
-      ? await listSavedPublicVacancyIds(supabase, workerId)
-      : { vacancyIds: new Set<string>(), available: false };
+  const runBoardSearch = () =>
+    searchPublicVacancyPreviews({
+      query,
+      professionSlug: profession,
+      page,
+    });
+  // The board's read needs nothing from the session, so a signed-in person does
+  // not wait for their bookmarks before it starts (2026-11-04: on a first search
+  // the two together took 1.1 s in sequence before the search's own 1.1 s). The
+  // saved view reads no board unless its bookmarks turn out to be unavailable.
+  const [member, earlyBoardSearch] = await Promise.all([
+    (async () => {
+      const u = supabase ? (await supabase.auth.getUser()).data.user : null;
+      const id = supabase && u ? await resolveOwnWorkerId(supabase, u.id) : null;
+      const saved =
+        supabase && id
+          ? await listSavedPublicVacancyIds(supabase, id)
+          : { vacancyIds: new Set<string>(), available: false };
+      return { user: u, mySaved: saved };
+    })(),
+    wantsSaved ? null : runBoardSearch(),
+  ]);
+  const { user, mySaved } = member;
 
   // Saved view: the worker's own ids, resolved to previews through the member
   // read path under their OWN client. Expired/withdrawn bookmarks drop out
@@ -318,11 +527,7 @@ export default async function JobsPage({
 
   const result = showSaved
     ? { status: "ok" as const, vacancies: [], totalCount: 0, hasMore: false }
-    : await searchPublicVacancyPreviews({
-        query,
-        professionSlug: profession,
-        page,
-      });
+    : (earlyBoardSearch ?? (await runBoardSearch()));
 
   const pageHref = (p: number) => {
     const qs = new URLSearchParams();
@@ -335,8 +540,79 @@ export default async function JobsPage({
     return s ? `/jobs?${s}` : "/jobs";
   };
 
+  // MEMBER FACTS (owner P0-3, 2026-11-03): a signed-in person's card shows who
+  // publishes the ad and where the work is. Read under their OWN client for
+  // exactly the rows this page shows; an anonymous visitor costs no extra read.
+  const shownIds = [
+    ...savedPreviews.map((v) => v.id),
+    ...(result.status === "ok" ? result.vacancies.map((v) => v.id) : []),
+  ];
+  const memberFacts =
+    supabase && user && shownIds.length > 0
+      ? await listMemberVacancyFactsByIds(supabase, shownIds)
+      : null;
+  const regionName = (() => {
+    try {
+      return new Intl.DisplayNames([active], { type: "region" });
+    } catch {
+      return null;
+    }
+  })();
+  const cardFacts = (id: string) => {
+    if (!memberFacts) return undefined;
+    const f = memberFacts.get(id);
+    if (!f) return null;
+    const country = f.country ? (regionName?.of(f.country.toUpperCase()) ?? f.country) : null;
+    const place = [f.city ?? f.region, country].filter(Boolean).join(", ") || null;
+    return { employer: f.employerName, place };
+  };
+  const lockedFactsLabel = user ? undefined : LOCKED_FACTS[active];
+
+  // A PAGE PAST THE END IS NOT AN EMPTY BOARD (2026-10-08 walk). The count
+  // rides on the page's own rows, so `?page=9999` read "0 vacancies found"
+  // over 50,000 live ads. An empty page beyond the first goes back to the
+  // first page of the SAME search, which tells the truth about the count.
+  if (!showSaved && result.status === "ok" && result.vacancies.length === 0 && page > 1) {
+    redirect({ href: pageHref(1), locale: active });
+  }
+
+  // The profession version of the board: its own heading and scope line, the
+  // same ones its <head> carries. A free-text search inside a profession is a
+  // search result, not that page.
+  const professionCopy =
+    profession && !query && !showSaved
+      ? professionPageCopy(
+          active,
+          professionName(profession),
+          result.status === "ok" ? result.totalCount : null,
+        )
+      : null;
+
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+      {/* Anonymous-safe structured data (owner 2026-10-14 §8; port of #1433):
+          a CollectionPage/ItemList of positions by occupation label, built
+          ONLY from the anonymous preview shape — employer, location, title,
+          source and links cannot appear (guard: lib/seo/public-job-json-ld.test.ts).
+          Never on the personal "saved" view. No JobPosting by design. */}
+      {!showSaved && result.status === "ok" && result.vacancies.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: jsonLdScript(
+              buildJobsListJsonLd({
+                origin: MARKETING_ORIGIN,
+                locale: active,
+                name: professionCopy?.heading ?? H1[active],
+                description: professionCopy?.description ?? INTRO[active],
+                path: professionCopy ? pageHref(1) : undefined,
+                previews: result.vacancies,
+                genericTitle: GENERIC_TITLE[active],
+              }),
+            ),
+          }}
+        />
+      )}
       {/* FUNNEL (acquisition loop P0): JOB_IMPRESSION — one board render per
           tab session, with how many ads it showed. An `unavailable` read
           (the search did not answer in time) is `success:false` with a zero
@@ -352,11 +628,22 @@ export default async function JobsPage({
         }}
       />
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-        {H1[active]}
+        {professionCopy?.heading ?? H1[active]}
       </h1>
       <p className="mt-3 max-w-2xl text-sm text-text-muted sm:text-base">
-        {INTRO[active]}
+        {(user ? INTRO_MEMBER : INTRO)[active]}
       </p>
+      {professionCopy && (
+        <p
+          data-testid="public-jobs-profession-scope"
+          className="mt-2 max-w-2xl text-sm text-text-muted"
+        >
+          {professionCopy.scopeNote}{" "}
+          <Link href="/jobs" className="underline underline-offset-4">
+            {professionCopy.allJobsLink}
+          </Link>
+        </p>
+      )}
 
       {/* A PLAIN GET FORM, no client JS. The board is the crawler-facing
           surface and the first thing a worker with a poor connection loads;
@@ -373,7 +660,7 @@ export default async function JobsPage({
           defaultValue={query}
           placeholder={SEARCH_LABEL[active]}
           maxLength={120}
-          className="min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm"
+          className="min-w-0 basis-full rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm sm:flex-1 sm:basis-0"
         />
         {/* THE FILTER THAT LETS A WORKER SEARCH IN THEIR OWN LANGUAGE. The
             free-text box matches the publisher's own words, so on a supply
@@ -386,7 +673,7 @@ export default async function JobsPage({
           id="profession"
           name="profession"
           defaultValue={profession ?? ""}
-          className="min-w-0 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm"
+          className="min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm sm:flex-none"
         >
           <option value="">{PROFESSION_ANY[active]}</option>
           {professionOptions.map((o) => (
@@ -399,10 +686,6 @@ export default async function JobsPage({
           {SEARCH_BUTTON[active]}
         </button>
       </form>
-
-      <p className="mt-2 text-xs text-text-muted">
-        {ORIGINAL_LANGUAGE_NOTE[active]}
-      </p>
 
       {/* The saved view exists only for a signed-in worker whose bookmark read
           succeeded. Anonymous visitors and non-workers see no tab at all —
@@ -434,6 +717,18 @@ export default async function JobsPage({
         </nav>
       )}
 
+      {countryParam.requested && !showSaved && (
+        <p
+          role="note"
+          data-testid="public-jobs-country-not-filtered"
+          className="mt-6 rounded-md border border-dashed p-4 text-sm text-text-muted"
+        >
+          {COUNTRY_NOT_FILTERED[active](
+            countryParam.code ? (regionName?.of(countryParam.code) ?? countryParam.code) : null,
+          )}
+        </p>
+      )}
+
       {showSaved ? (
         <>
           <p className="mt-6 text-sm text-text-muted">
@@ -453,6 +748,10 @@ export default async function JobsPage({
                     headingFallback={
                       v.professionSlug ? professionName(v.professionSlug) : undefined
                     }
+                    genericTitle={GENERIC_TITLE[active]}
+                    sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
+                    memberFacts={cardFacts(v.id)}
+                    lockedFactsLabel={lockedFactsLabel}
                     savedLabel={SAVED_BADGE[active]}
                   />
                 </li>
@@ -477,7 +776,7 @@ export default async function JobsPage({
           {/* role="status": a search is a full navigation, so the result count
               is the one thing a screen reader must hear after it lands. */}
           <p role="status" className="mt-6 text-sm text-text-muted">
-            {result.totalCount.toLocaleString()} {RESULTS[active]}
+            {new Intl.NumberFormat(active).format(result.totalCount)} {RESULTS[active]}
           </p>
 
           {result.vacancies.length === 0 ? (
@@ -514,6 +813,10 @@ export default async function JobsPage({
                     headingFallback={
                       v.professionSlug ? professionName(v.professionSlug) : undefined
                     }
+                    genericTitle={GENERIC_TITLE[active]}
+                    sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
+                    memberFacts={cardFacts(v.id)}
+                    lockedFactsLabel={lockedFactsLabel}
                     savedLabel={
                       mySaved.vacancyIds.has(v.id)
                         ? SAVED_BADGE[active]
@@ -549,7 +852,35 @@ export default async function JobsPage({
           )}
         </>
       )}
-    </main>
+
+      {/* EVERY PROFESSION IS ONE PLAIN LINK AWAY. The filter above is a select
+          inside a form, which a crawler does not submit, so without these
+          links no profession page could be found from the board. */}
+      {!showSaved && (
+        <nav
+          aria-labelledby="jobs-by-profession"
+          data-testid="public-jobs-by-profession"
+          className="mt-12 border-t border-border-subtle pt-8"
+        >
+          <h2 id="jobs-by-profession" className="text-lg font-semibold tracking-tight">
+            {browseByProfessionHeading(active)}
+          </h2>
+          <ul className="mt-3 flex flex-wrap gap-x-4 text-sm">
+            {professionOptions.map((o) => (
+              <li key={o.slug}>
+                <Link
+                  href={`/jobs?profession=${o.slug}`}
+                  aria-current={o.slug === profession && !query ? "page" : undefined}
+                  className="inline-block py-1.5 text-text-muted underline underline-offset-4 hover:text-text-primary"
+                >
+                  {o.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+    </div>
   );
 }
 

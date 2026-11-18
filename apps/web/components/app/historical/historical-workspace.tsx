@@ -342,7 +342,12 @@ export function HistoricalWorkspace({
     weekShort: t("weekShort"),
     apart: t("aggregatesTitle"),
     periodUnknown: t("card.aggregatePeriodUnknown"),
+    periodHuman: tRecords("periodDerivedHuman"),
+    periodDerived: tRecords("periodDerived"),
     monthlyShare: tRecords("monthlyShare"),
+    noMonthlyFigure: tRecords("noMonthlyFigure"),
+    sourceStates: (words: string) => tRecords("sourceStates", { words }),
+    sourceDiffers: tRecords("sourceDiffers"),
     remote: t("timeRemote"),
     open: t("aggregateOpen"),
     weekConflict: t("field.weekConflict"),
@@ -397,6 +402,7 @@ export function HistoricalWorkspace({
     whyLabel: t("attention.why"),
     person: t("icon.person"),
     sum: t("calendar.sum"),
+    sourceStates: (words: string) => tRecords("sourceStates", { words }),
     time: {
       question: t("timeQuestion"),
       kindLabel: t("timeKind"),
@@ -413,6 +419,7 @@ export function HistoricalWorkspace({
       },
       periodLabel: t("timePeriod"),
       periodHint: t("timePeriodHint"),
+      periodBoth: t("timePeriodBoth"),
       from: t("from"),
       to: t("to"),
       save: t("timeSave"),
@@ -572,7 +579,7 @@ export function HistoricalWorkspace({
         <div
           role="tablist"
           aria-label={t("modesLabel")}
-          className="-mx-1 flex gap-1 overflow-x-auto border-b border-ink-600 px-1"
+          className="flex flex-wrap gap-x-1 border-b border-ink-600"
           data-testid="historical-modes"
           onKeyDown={(e) => {
             if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;

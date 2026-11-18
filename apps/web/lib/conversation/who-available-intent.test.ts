@@ -43,7 +43,7 @@ describe("who is available, by sentence", () => {
     expect(ACTION.startsWith('"use server";')).toBe(true);
     expect(READ.startsWith('"use server";')).toBe(false);
     expect(ACTION).toContain("requireEmployerCompany()");
-    expect(ACTION).toContain("whoIsAvailableCore(company.companyId, null, preRead)");
+    expect(ACTION).toContain("whoIsAvailableCore(company.companyId, null, preRead, validDay(onDay))");
     expect(READ).toContain("listActiveCompanyWorkers(companyId, caller ?? undefined)");
     expect(READ).toContain("getEmployerWorkerAvailability(caller ?? undefined)");
     // Committed work is the OTHER half of "who is free" — capacity read only
@@ -61,8 +61,8 @@ describe("who is available, by sentence", () => {
 
   it("the chat answers in place with the projects and add-task chips; an empty roster offers the invite", () => {
     const CHAT = readFileSync(join(__dirname, "..", "..", "components", "app", "conversation", "chat", "conversation-chat.tsx"), "utf8");
-    expect(CHAT).toContain("whoAvailable: () => startWhoAvailable()");
-    expect(CHAT).toContain("loadWhoIsAvailableForChat()");
+    expect(CHAT).toContain("whoAvailable: () => startWhoAvailable(text)");
+    expect(CHAT).toContain("loadWhoIsAvailableForChat(undefined, day)");
     expect(CHAT).toContain('{ id: "f:company.create-task", label: labels.chipAddTask }');
     expect(CHAT).toContain('{ id: "f:company.invite-worker", label: labels.chipInviteCandidate }');
     const fn = CHAT.slice(CHAT.indexOf("const startWhoAvailable = useCallback"), CHAT.indexOf("const startAgencyInvite = useCallback"));

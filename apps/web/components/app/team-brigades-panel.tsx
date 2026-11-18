@@ -3,15 +3,20 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Check, Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import {
   createTeamAction,
+  disbandTeamAction,
   inviteWorkerToTeamAction,
 } from "@/lib/company/team-brigade-actions";
-import type { TeamBrigade } from "@/lib/company/team-brigades";
+import type { DisbandedTeam, TeamBrigade } from "@/lib/company/team-brigades";
 import { TeamDetailsForm } from "@/components/app/team-details-form";
 import { TeamEnquiryInbox } from "@/components/app/team-enquiry-inbox";
+import { TeamAssignForm } from "@/components/app/team-assign-form";
+import { TeamDemandOfferForm } from "@/components/app/team-demand-offer-form";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Teams / brigades surface on the EXISTING company room (§8.3 + Trust
@@ -38,20 +43,44 @@ export function TeamBrigadesPanel({
   invitationsApplied,
   detailsApplied,
   enquiriesApplied,
+  projects = [],
+  disbanded = [],
 }: {
   teams: readonly TeamBrigade[];
+  /** Brigades the owner disbanded — history, read-only. */
+  disbanded?: readonly DisbandedTeam[];
   locale: string;
   invitationsApplied: boolean;
   detailsApplied: boolean;
   enquiriesApplied: boolean;
+  /** WRK-6 — the projects the caller manages, for assigning a whole team. */
+  projects?: readonly { id: string; title: string | null }[];
 }) {
   const router = useRouter();
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
   const t = useTranslations("teamBrigades");
+  const tAssign = useTranslations("teamAssignment");
   const tSkill = useTranslations("skillNames");
   const [pending, startTransition] = useTransition();
   const [name, setName] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [selected, setSelected] = useState<Record<string, string>>({});
+  // The worker's address, typed by the owner when it cannot be read (profiles
+  // are own-row-only). Asked for only after the server said so.
+  const [askEmail, setAskEmail] = useState<Record<string, boolean>>({});
+  const [emails, setEmails] = useState<Record<string, string>>({});
+  // The invitation link of the last invite — the delivery while e-mail is off.
+  const [link, setLink] = useState<{ teamId: string; url: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [confirmDisband, setConfirmDisband] = useState<string | null>(null);
+  // The list the create action answered with, kept only while the page's own
+  // list is the one it replaced: the next server render (router.refresh)
+  // brings new props and takes over again.
+  const [answered, setAnswered] = useState<{
+    replaces: readonly TeamBrigade[];
+    teams: readonly TeamBrigade[];
+  } | null>(null);
+  const shownTeams = answered && answered.replaces === teams ? answered.teams : teams;
 
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
@@ -60,10 +89,11 @@ export function TeamBrigadesPanel({
     if (!trimmed) return;
     setMsg(null);
     startTransition(async () => {
-      const res = await createTeamAction(trimmed);
+      const res = await createTeamAction(trimmed, expectedWorkspaceId);
       if (res.outcome === "created") {
         setName("");
         setMsg(t("outcome.created"));
+        if (res.teams) setAnswered({ replaces: teams, teams: res.teams });
       } else if (res.outcome === "invalid_team_name") {
         setMsg(t("outcome.invalidName"));
       } else if (res.outcome === "not_allowed") {
@@ -79,23 +109,45 @@ export function TeamBrigadesPanel({
     });
   }
 
+  function disband(teamId: string) {
+    setMsg(null);
+    startTransition(async () => {
+      const res = await disbandTeamAction(teamId, expectedWorkspaceId);
+      setConfirmDisband(null);
+      if (res.outcome === "disbanded" || res.outcome === "already_disbanded") setMsg(t("disband.done"));
+      else if (res.outcome === "has_open_work") setMsg(t("disband.openWork"));
+      else if (res.outcome === "needs_migration") setMsg(t("outcome.needsMigration"));
+      else if (res.outcome === "not_found") setMsg(t("disband.notFound"));
+      else setMsg(t("disband.failed"));
+      router.refresh();
+    });
+  }
+
   function invite(teamId: string) {
     const workerId = selected[teamId] ?? "";
     if (!workerId) return;
     setMsg(null);
     startTransition(async () => {
-      const res = await inviteWorkerToTeamAction({ teamId, workerId, locale });
+      const res = await inviteWorkerToTeamAction({
+        teamId,
+        workerId,
+        locale,
+        email: askEmail[teamId] ? (emails[teamId] ?? "") : null,
+      });
+      setAskEmail((a) => ({ ...a, [teamId]: res.outcome === "no_email" }));
+      setLink(res.inviteLink ? { teamId, url: res.inviteLink } : null);
+      setCopied(false);
       if (res.outcome === "sent") setMsg(t("inviteOutcome.sent"));
       else if (res.outcome === "created") setMsg(t("inviteOutcome.created"));
       else if (res.outcome === "delivery_failed")
         setMsg(t("inviteOutcome.deliveryFailed"));
       else if (res.outcome === "already_invited")
-        setMsg(t("inviteOutcome.alreadyInvited"));
+        setMsg(t(res.linkRenewed ? "inviteOutcome.alreadyInvitedNewLink" : "inviteOutcome.alreadyInvited"));
       else if (res.outcome === "rate_limited" || res.outcome === "limit_reached")
         setMsg(t("inviteOutcome.rateLimited"));
       else if (res.outcome === "not_authorized")
         setMsg(t("inviteOutcome.notAuthorized"));
-      else if (res.outcome === "no_email") setMsg(t("inviteOutcome.noEmail"));
+      else if (res.outcome === "no_email") setMsg(t("inviteOutcome.askEmail"));
       else if (res.outcome === "needs_migration")
         setMsg(t("inviteOutcome.needsMigration"));
       else setMsg(t("inviteOutcome.error"));
@@ -118,13 +170,13 @@ export function TeamBrigadesPanel({
         </p>
       </header>
 
-      {teams.length === 0 ? (
+      {shownTeams.length === 0 ? (
         <p className="text-sm text-text-muted" data-testid="team-brigades-empty">
           {t("noTeams")}
         </p>
       ) : (
         <ul className="flex flex-col gap-3">
-          {teams.map((team) => (
+          {shownTeams.map((team) => (
             <li
               key={team.id}
               className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/40 p-4"
@@ -286,6 +338,23 @@ export function TeamBrigadesPanel({
                 </div>
               </div>
 
+              {/* WRK-6 — assign the whole team to a project the caller manages:
+                  ONE relationship (a single stored row); its members
+                  resolve from the team itself. */}
+              <details className="rounded-md border border-ink-600 bg-ink-800/30 p-3" data-testid="team-assign-section">
+                <summary className="cursor-pointer text-xs font-medium text-text-secondary">
+                  {tAssign("form.heading")}
+                </summary>
+                <div className="pt-3">
+                  <TeamAssignForm teamId={team.id} memberCount={team.members.length} projects={projects} />
+                </div>
+              </details>
+
+              {/* E6 — offer the whole team as ONE unit against ONE open demand.
+                  The receiving company sees team-level aggregates only; no
+                  member is disclosed by the offer itself. */}
+              <TeamDemandOfferForm teamId={team.id} memberCount={team.members.length} />
+
               {/* Folded: edit team details (gap 2). */}
               {detailsApplied && (
                 <details className="rounded-md border border-ink-600 bg-ink-800/30 p-3">
@@ -365,6 +434,18 @@ export function TeamBrigadesPanel({
                         </option>
                       ))}
                     </select>
+                    {askEmail[team.id] ? (
+                      <input
+                        type="email"
+                        autoComplete="off"
+                        className="rounded-md border border-ink-500 bg-surface-1 px-2 py-1.5 text-sm text-text-primary"
+                        placeholder={t("emailPlaceholder")}
+                        aria-label={t("emailPlaceholder")}
+                        value={emails[team.id] ?? ""}
+                        onChange={(e) => setEmails((m) => ({ ...m, [team.id]: e.target.value }))}
+                        data-testid={`team-invite-email-${team.id}`}
+                      />
+                    ) : null}
                     <Button
                       type="button"
                       size="sm"
@@ -381,9 +462,75 @@ export function TeamBrigadesPanel({
                   </p>
                 </div>
               )}
+
+              {/* DISBAND (owner 2026-10-14 §3.3). Two steps: the first press
+                  only explains what happens; the second does it. Nothing is
+                  deleted — the brigade and its members' history stay. */}
+              <div className="flex flex-col gap-1.5 border-t border-ink-600 pt-3">
+                {confirmDisband === team.id ? (
+                  <>
+                    <p className="text-xs text-text-secondary" data-testid={`team-disband-explain-${team.id}`}>
+                      {t("disband.explain", { count: team.members.length })}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        disabled={pending}
+                        onClick={() => disband(team.id)}
+                        data-testid={`team-disband-confirm-${team.id}`}
+                      >
+                        {t("disband.confirm")}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        disabled={pending}
+                        onClick={() => setConfirmDisband(null)}
+                        data-testid={`team-disband-cancel-${team.id}`}
+                      >
+                        {t("disband.cancel")}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      disabled={pending}
+                      onClick={() => setConfirmDisband(team.id)}
+                      data-testid={`team-disband-${team.id}`}
+                    >
+                      {t("disband.start")}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </li>
           ))}
         </ul>
+      )}
+
+      {disbanded.length > 0 && (
+        <details className="text-xs text-text-secondary" data-testid="team-brigades-disbanded">
+          <summary className="cursor-pointer text-text-muted">
+            {t("disband.historyTitle", { count: disbanded.length })}
+          </summary>
+          <ul className="mt-2 flex flex-col gap-0.5">
+            {disbanded.map((d) => (
+              <li key={d.id} data-testid={`team-disbanded-${d.id}`}>
+                {d.name}
+                <span className="ml-1.5 text-meta text-text-muted">
+                  {t("disband.historyLine", { date: d.disbandedAt.slice(0, 10) })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
 
       <div className="flex flex-wrap items-end gap-2 border-t border-ink-600 pt-3">
@@ -421,6 +568,28 @@ export function TeamBrigadesPanel({
         >
           {msg}
         </p>
+      )}
+      {link && (
+        <div className="flex flex-col gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 p-2" data-testid="team-invite-link">
+          <p className="text-xs text-text-secondary">{t("inviteLinkNote")}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <code className="max-w-full truncate rounded bg-ink-800 px-2 py-1 text-meta text-text-primary">{link.url}</code>
+            <button
+              type="button"
+              data-testid="team-invite-copy-link"
+              onClick={() => {
+                void navigator.clipboard?.writeText(link.url).then(
+                  () => setCopied(true),
+                  () => setCopied(false),
+                );
+              }}
+              className="inline-flex min-h-11 sm:min-h-9 items-center gap-1 rounded border border-ink-500 px-2 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            >
+              {copied ? <Check className="h-3 w-3" aria-hidden /> : <Copy className="h-3 w-3" aria-hidden />}
+              {copied ? t("inviteLinkCopied") : t("inviteLinkCopy")}
+            </button>
+          </div>
+        </div>
       )}
     </section>
   );

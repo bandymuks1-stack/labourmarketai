@@ -4,16 +4,25 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getAiRuntimeConfig } from "@/lib/ai/runtime/config";
 import type { Role } from "@/lib/auth/actions";
+import { readRequestHost } from "@/lib/config/request-host";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import { getWorkerDocumentCentre } from "@/lib/documents/document-centre";
 import { getFinanceSummary } from "@/lib/finance/finance";
+import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
+import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { getSpineCounts } from "@/lib/notifications/spine";
+import {
+  assignedCountsByProject,
+  mergeAssignedPeople,
+  readTeamAssignedPeople,
+} from "@/lib/projects/assigned-people";
 import { callerCompanyId } from "@/lib/projects/projects";
 import { buildEvidenceReport } from "@/lib/reports/evidence-report";
 import { createClient } from "@/lib/supabase/server";
 import {
   ASSIST_PROJECT_READ_LIMIT,
   ASSIST_PROJECT_STATUSES,
+  attentionPartlyUnreadable,
   buildAiProviderView,
   buildAttentionItems,
   buildProjectStatusRow,
@@ -33,8 +42,12 @@ import {
  *  - attention  → getSpineCounts() (request-cached — shared with the bell),
  *                 getWorkerDocumentCentre() derived attention (PR H, worker
  *                 role only) and getFinanceSummary() derived overdue counts
- *                 (PR I, roles that carry the finance module). Each source
- *                 degrades independently to "absent" — never a fake row.
+ *                 (PR I, roles that carry the finance module), plus the
+ *                 journal review queues (countReviewablePendingEntries /
+ *                 countCounterpartyToDecide — the projects pulse's own
+ *                 reads). Each source degrades independently to "absent" —
+ *                 never a fake row; an unreadable review queue is flagged so
+ *                 the page never says "nothing waits" over it.
  *  - worker     → buildVerifiedCv() + buildEvidenceReport() — the EXACT
  *                 derivation the evidence-report page performs, condensed.
  *  - org        → the caller's own company's projects (owns_company RLS —
@@ -64,6 +77,9 @@ export type AssistProjectsState = "ok" | "not-applicable" | "error";
 
 export interface AssistView {
   readonly attention: readonly AttentionItem[];
+  /** A queue the attention answer depends on could not be read — the page
+   *  says so instead of "nothing waits" (UNKNOWN IS NOT ZERO). */
+  readonly attentionPartlyUnreadable: boolean;
   /** Worker deterministic summary; null = caller has no worker evidence. */
   readonly workerSummary: WorkerEvidenceSummary | null;
   /** Org deterministic summary rows (empty array = honestly no projects). */
@@ -172,14 +188,34 @@ async function readProjectRows(): Promise<{
     try {
       const assignRes = await asAny(supabase)
         .from("project_worker_assignments")
-        .select("project_id")
+        .select("project_id, worker_id, workers(profile_id)")
         .in(
           "project_id",
           projects.map((p) => p.id),
         )
         .eq("status", "active");
-      for (const row of (assignRes.data ?? []) as { project_id: string }[]) {
-        counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
+      // ONE meaning of "assigned" (lib/projects/assigned-people.ts): distinct
+      // people = active person assignments + members of actively assigned teams,
+      // a person assigned both ways counted once.
+      const personRows = (
+        (assignRes.data ?? []) as {
+          project_id: string;
+          worker_id: string | null;
+          workers?: { profile_id: string | null } | null;
+        }[]
+      ).map((row) => ({
+        projectId: row.project_id,
+        profileId: row.workers?.profile_id ?? null,
+        workerId: row.worker_id ?? null,
+      }));
+      const teamRows = await readTeamAssignedPeople(
+        supabase,
+        projects.map((p) => p.id),
+      );
+      for (const [projectId, c] of assignedCountsByProject(
+        mergeAssignedPeople(personRows, teamRows),
+      )) {
+        counts.set(projectId, c.total);
       }
     } catch {
       // keep zeros — honest degradation, never a fabricated team size
@@ -210,9 +246,15 @@ async function readProjectRows(): Promise<{
  * avoids pointless queries).
  */
 export async function getAssistView(role: Role): Promise<AssistView> {
-  const [counts, documents, finance, workerSummary, projects] =
+  const [counts, pendingReviews, clientToDecide, documents, finance, workerSummary, projects] =
     await Promise.all([
       getSpineCounts(),
+      // The journal review queues are read for EVERY role: a manager may act
+      // under any active role, and the gated RPC answers only what the caller
+      // may review (0 when nothing — never widened). Same reads, same
+      // request cache, as the projects pulse and the opening brief.
+      countReviewablePendingEntries(),
+      countCounterpartyToDecide(),
       role === "worker" ? readDocumentAttention() : Promise.resolve(null),
       FINANCE_ROLES.includes(role)
         ? readFinanceAttention()
@@ -226,10 +268,14 @@ export async function getAssistView(role: Role): Promise<AssistView> {
           }),
     ]);
 
+  const journalReviews = { pending: pendingReviews, clientToDecide };
   return {
-    attention: buildAttentionItems({ counts, documents, finance }),
+    attention: buildAttentionItems({ counts, journalReviews, documents, finance }),
+    attentionPartlyUnreadable: attentionPartlyUnreadable({ journalReviews }),
     workerSummary,
     projects,
-    provider: buildAiProviderView(getAiRuntimeConfig()),
+    provider: buildAiProviderView(
+      getAiRuntimeConfig({ requestHost: await readRequestHost() }),
+    ),
   };
 }

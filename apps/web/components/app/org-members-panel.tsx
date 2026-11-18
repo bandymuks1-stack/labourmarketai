@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { MessageButton } from "@/components/app/message-button";
 import {
   addOrgMember,
   endOrgMembership,
@@ -143,6 +144,8 @@ export function OrgMembersPanel({
               key={m.engagementId}
               className="flex flex-col gap-2 rounded-md border border-ink-600 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
               data-testid={`org-member-${m.engagementId}`}
+              data-role={m.role}
+              data-review={m.reviewEnabled ? "on" : "off"}
             >
               <span className="flex flex-wrap items-center gap-2 text-sm text-text-primary">
                 <span
@@ -163,9 +166,16 @@ export function OrgMembersPanel({
                 {m.name}
               </span>
               <span className="flex flex-wrap items-center gap-2">
-                {/* Journal review is an employee-engagement flag — the RPC
-                    rejects any other slug, so the control is not offered. */}
-                {m.role === "employee" && (
+                {/* WRITE — a team member opens the ONE conversation with a
+                    colleague (the §8.1 gate verifies the shared team under
+                    the caller's own RLS; nothing is sent from here). */}
+                {m.profileId && !(viewerIsRegisteredOwner && m.isRegisteredOwner) && (
+                  <MessageButton profileId={m.profileId} labelKey="messageWorker" />
+                )}
+                {/* Journal review is offered exactly where the RPC accepts it
+                    (relationship_types.journal_reviewable): an employee, and
+                    since 2026-09-28 a collaborator placed by an agency. */}
+                {m.reviewable && (
                   <Button
                     type="button"
                     size="sm"

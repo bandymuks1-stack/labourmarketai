@@ -189,7 +189,7 @@ describe("command finder — the train doc's term list resolves", () => {
   const ALL = new Set<CommandAudience>(["public", "worker", "company"]);
   const TERMS: ReadonlyArray<readonly [string, (typeof ACTIVE)[number]]> = [
     ["cv", "lt"],
-    ["player card", "en"],
+    ["work card", "en"],
     ["kortelė", "lt"],
     ["profile", "en"],
     ["profilis", "lt"],
@@ -247,7 +247,7 @@ describe("command finder — matching + audience behaviour", () => {
   const ALL = new Set<CommandAudience>(["public", "worker", "company", "admin"]);
   const PUBLIC_ONLY = new Set<CommandAudience>(["public"]);
 
-  it("diacritics-insensitive: 'kortele' finds the Player Card, 'zurnalas' the journal", () => {
+  it("diacritics-insensitive: 'kortele' finds the professional card, 'zurnalas' the journal", () => {
     const cards = matchCommands("kortele", "lt", ALL).map((e) => e.id);
     expect(cards).toContain("player_card");
     const journal = matchCommands("zurnalas", "lt", ALL).map((e) => e.id);
@@ -350,4 +350,26 @@ describe("W10 help terms are REAL request actions (owner lock flipped)", () => {
       }
     });
   }
+});
+
+describe("quick search: Enter opens the selected result (production audit 2026-10-22)", () => {
+  const src = readFileSync(join(__dirname, "..", "..", "components", "app", "command-finder.tsx"), "utf8");
+  it("the input handles ArrowUp/ArrowDown/Enter over the rendered order (commands, then objects)", () => {
+    expect(src).toContain("onKeyDown={onInputKeyDown}");
+    expect(src).toMatch(/e\.key === "ArrowDown" \|\| e\.key === "ArrowUp"/);
+    expect(src).toMatch(/e\.key === "Enter" && selected[\s\S]*router\.push\(selected\.href/);
+    expect(src).toContain("useEffect(() => setActiveIndex(0), [query]);");
+  });
+  it("the highlight is announced (aria-activedescendant) and visible (data-active)", () => {
+    expect(src).toContain("aria-activedescendant={selected ? optionId(selected.key) : undefined}");
+    expect(src).toContain('data-active={selected?.key === `result-${entry.id}` ? "true" : undefined}');
+  });
+});
+
+describe("the header search overlay closes once a result navigates (production audit 2026-10-23)", () => {
+  const src = readFileSync(join(__dirname, "..", "..", "components", "app", "header-search.tsx"), "utf8");
+  it("a pathname change closes it — Enter, click or any other navigation", () => {
+    expect(src).toContain("const pathname = usePathname();");
+    expect(src).toMatch(/useEffect\(\(\) => \{\s*setOpen\(false\);\s*\}, \[pathname\]\);/);
+  });
 });

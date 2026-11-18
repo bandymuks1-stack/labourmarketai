@@ -197,6 +197,41 @@ describe("profile-directed candidate pool", () => {
     expect(result.cards.length).toBeLessThanOrEqual(20);
   });
 
+  it("a second declared profession adds its ads; each ad shows once", async () => {
+    // Owner decision 2026-09-28: a cook who is also an electrician gets the
+    // electrician ad the newest page (all cooks) never reaches — without
+    // re-declaring electrics as skills.
+    const filters: (string | null)[] = [];
+    const cookElectrician: MatchSubject = {
+      ...BARE_SUBJECT,
+      professionSlug: "cook",
+      professionSlugs: ["cook", "electrician"],
+    };
+    const result = await loadExternalVacancyCards(
+      queryAwareClient((f) => filters.push(f)),
+      cookElectrician,
+      { nowIso: NOW },
+    );
+    // One bounded read per declared profession (primary first), then the
+    // newest page.
+    expect(filters).toEqual(["cook", "electrician", null]);
+    const keys = result.cards.map((c) => c.key);
+    expect(keys).toContain("arbetsformedlingen:el-1");
+    expect(new Set(keys).size).toBe(keys.length);
+    expect(result.cards.length).toBeLessThanOrEqual(20);
+  });
+
+  it("removing the second profession removes its contribution", async () => {
+    const filters: (string | null)[] = [];
+    const result = await loadExternalVacancyCards(
+      queryAwareClient((f) => filters.push(f)),
+      { ...BARE_SUBJECT, professionSlug: "cook", professionSlugs: ["cook"] },
+      { nowIso: NOW },
+    );
+    expect(filters).toEqual(["cook", null]);
+    expect(result.cards.map((c) => c.key)).not.toContain("arbetsformedlingen:el-1");
+  });
+
   it("no declared profession → no speculative extra read", async () => {
     const filters: (string | null)[] = [];
     const result = await loadExternalVacancyCards(

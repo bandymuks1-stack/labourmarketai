@@ -17,7 +17,9 @@ import { join } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
-const base = read("components/app/market-map-base.tsx");
+// The controls of the one map (formerly market-map-base.tsx).
+const base = read("components/app/market-map/map-location-controls.tsx");
+const world = read("components/app/market-map/world-discovery.tsx");
 
 describe("capability-based failure handling in the location picker", () => {
   it("classifies failures via the shared capability module (not ad-hoc booleans)", () => {
@@ -31,27 +33,28 @@ describe("capability-based failure handling in the location picker", () => {
     }
   });
   it("retry renders ONLY when a retry can succeed", () => {
-    expect(base).toMatch(/canRetrySucceed\(geoHint\) && \(/);
+    expect(base).toMatch(/canRetrySucceed\(s\.geoHint\) && \(/);
   });
   it("in-app browsers get contextual open-in-browser guidance", () => {
-    expect(base).toMatch(/needsOpenInBrowserGuidance\(geoHint, geoEnvironment\(\)\)/);
+    expect(base).toMatch(/needsOpenInBrowserGuidance\(s\.geoHint, geoEnvironment\(\)\)/);
     expect(base).toMatch(/map-locator-open-in-browser/);
   });
   it("failure always opens the manual fallback (no dead end)", () => {
     const failures = base.match(/setGeoHint\(classifyGeoFailure[\s\S]{0,120}?setManualOpen\(true\)/g) ?? [];
     expect(failures.length).toBeGreaterThanOrEqual(2);
   });
-  it("recovery controls render ABOVE the map panel (no scroll-past-map dead end)", () => {
+  it("recovery controls render ABOVE the map (no scroll-past-map dead end)", () => {
     const autoButton = base.indexOf('data-testid="map-locator-auto"');
     const geoHint = base.indexOf('data-testid="map-locator-geo-hint"');
     const manual = base.indexOf('data-testid="map-locator-manual-toggle"');
-    const mapPanel = base.indexOf('data-testid="location-panel"');
     expect(autoButton).toBeGreaterThan(-1);
     expect(geoHint).toBeGreaterThan(-1);
-    expect(mapPanel).toBeGreaterThan(-1);
-    expect(autoButton).toBeLessThan(mapPanel);
-    expect(geoHint).toBeLessThan(mapPanel);
-    expect(manual).toBeLessThan(mapPanel);
+    expect(manual).toBeGreaterThan(-1);
+    // The controls are one block, mounted before <MarketMap> in the one map.
+    const controls = world.indexOf("<MapLocationControls");
+    const map = world.search(/<MarketMap\s/);
+    expect(controls).toBeGreaterThan(-1);
+    expect(map).toBeGreaterThan(controls);
   });
 });
 

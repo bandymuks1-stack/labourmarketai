@@ -9,6 +9,7 @@ import {
   createProjectContextAction,
   type CreateProjectContextState,
 } from "@/lib/company/project-context-actions";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Minimal company-side project/client context create form. Required: project
@@ -31,6 +32,15 @@ export function ProjectContextCreateForm() {
         role="status"
       >
         <p className="text-sm font-medium text-state-success">{t("success")}</p>
+        {state.warning === "client_not_saved" && (
+          <p
+            className="text-xs text-state-warning"
+            role="alert"
+            data-testid="project-create-client-warning"
+          >
+            {t("clientNotSaved")}
+          </p>
+        )}
         <p className="text-xs text-text-secondary">{t("journalLinkingDisabled")}</p>
         <Link
           href="/dashboard/company"
@@ -42,17 +52,23 @@ export function ProjectContextCreateForm() {
     );
   }
 
+  // `not_authorized` names WHO can grant the right (owner / admin) — the
+  // refused write of a manager or member is a fact about their role in a
+  // real organization, never "could not create" (SEP-7).
   const errorText =
     state && !state.ok
       ? state.code === "invalid_name"
         ? t("errorName")
         : state.code === "no_company"
           ? t("errorNoCompany")
-          : t("error")
+          : state.code === "not_authorized"
+            ? t("errorNotAuthorized")
+            : t("error")
       : null;
 
   return (
     <form action={action} className="card-border flex flex-col gap-3 p-4">
+      <DisplayedWorkspaceField />
       <input type="hidden" name="locale" value={locale} />
 
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
@@ -82,7 +98,12 @@ export function ProjectContextCreateForm() {
       </p>
 
       {errorText && (
-        <p className="text-xs text-state-warning" role="alert" data-testid="project-create-error">
+        <p
+          className="text-xs text-state-warning"
+          role="alert"
+          data-testid="project-create-error"
+          data-code={state && !state.ok ? state.code : undefined}
+        >
           {errorText}
         </p>
       )}

@@ -212,7 +212,10 @@ describe("candidate pipeline — one next action per stage", () => {
       "/lt/dashboard/communication",
     );
     expect(nextActionForStage("offer", ctx).href).toBe("/lt/dashboard/bookings");
-    expect(nextActionForStage("accepted", ctx).href).toBe("/lt/dashboard/bookings");
+    // After the worker agreed to the dates the next real step is the project
+    // assign picker (projects page), not the bookings list: acceptance is not
+    // terminal and booking != assignment.
+    expect(nextActionForStage("accepted", ctx).href).toBe("/lt/dashboard/projects");
     expect(nextActionForStage("rejected", ctx).href).toContain(
       "/dashboard/company/scouting?request=req-1",
     );

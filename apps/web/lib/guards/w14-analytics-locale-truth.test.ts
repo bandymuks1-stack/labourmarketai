@@ -121,7 +121,7 @@ describe("the fallback is honest, not the default locale", () => {
 
   it("never falls back to a real locale code", () => {
     // A `?? "lt"` here would be the original defect wearing a helper's clothes.
-    expect(src).not.toMatch(/["'](lt|en|ru|nl|de)["']/);
+    expect(src).not.toMatch(/["'](lt|en|ru|nl|de|pl)["']/);
     expect(src).not.toMatch(/defaultLocale/);
   });
 

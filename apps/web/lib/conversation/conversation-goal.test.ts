@@ -18,6 +18,7 @@ import { describe, expect, it } from "vitest";
 import { classifyIntent } from "@/lib/conversation/intent-router";
 import {
   advanceGoal,
+  isSecondWorkAccount,
   classifyTurn,
   declineOutstandingOffers,
   goalSentence,
@@ -332,5 +333,24 @@ describe("the goal is a memory, not a lock", () => {
       goal = turn(goal, "parodyk mano dokumentus").goal;
     }
     expect(goal).toBeNull();
+  });
+});
+
+describe("a second complete work account is its own entry (walk 2026-10-11)", () => {
+  it("two sentences, each with its own hours, open two log-work goals", () => {
+    const t1 = turn(null, "Vakar dažiau sienas sandėlyje 6 valandas.");
+    expect(t1.goal?.intent).toBe("log-work");
+    const t2 = turn(t1.goal, "Šiandien suvirinau 8 valandas.");
+    expect(t2.kind).toBe("new-goal");
+    expect(t2.goal?.said).toEqual(["Šiandien suvirinau 8 valandas."]);
+  });
+
+  it("a different stated day opens a new entry; an answer without hours still refines", () => {
+    const t1 = turn(null, "Vakar dirbau sandėlyje.");
+    expect(t1.goal?.intent).toBe("log-work");
+    expect(isSecondWorkAccount(t1.goal!.said, "Šiandien dirbau sandėlyje.")).toBe(true);
+    expect(isSecondWorkAccount(t1.goal!.said, "8 valandas.")).toBe(false);
+    expect(isSecondWorkAccount(["Dirbau sandėlyje."], "Vakar.")).toBe(false);
+    expect(isSecondWorkAccount(["Vakar dirbau 6 valandas."], "Dažiau sienas.")).toBe(false);
   });
 });

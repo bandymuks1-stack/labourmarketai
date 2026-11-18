@@ -63,7 +63,10 @@ describe("a work package by sentence", () => {
     expect(chat).toContain("createWorkTaskCore(supabase, user.id, input)");
     expect(core).toContain('.rpc("create_work_task_v2"');
     expect(core).toContain('.rpc("create_work_task_v1"');
-    expect(core).toContain("await emitWorkTaskAssignedNotification(outcome, userId);");
+    // 2026-09-23: the emitter takes FACTS read back under the actor's own
+    // session (the admin client holds no grant on work_tasks in production).
+    expect(core).toContain("await emitWorkTaskAssignedNotification(");
+    expect(core).toContain("await readWorkTaskAssignmentFacts(supabase, outcome, userId)");
     const exec = readFileSync(join(__dirname, "company-executors.ts"), "utf8");
     expect(exec).toContain("createWorkTaskForChatAction({");
     expect(exec).not.toMatch(/\.rpc\(|\.from\(/);
@@ -84,7 +87,7 @@ describe("a work package by sentence", () => {
       for (const key of ["taskTitle", "taskTitlePlaceholder", "taskProject", "taskDue", "taskPriority"]) expect(cat.conversation.forms.fields[key], `${locale}.${key}`).toBeTypeOf("string");
       for (const key of ["taskCreateIntro", "taskCreatedNext"]) expect(cat.conversation.chat[key], `${locale}.${key}`).toBeTypeOf("string");
       // The priority labels live in the routed catalogs' `tasks` namespace (fallback covers the rest).
-      if (["lt", "en", "ru", "nl", "de"].includes(locale)) expect(cat.tasks.priority.normal).toBeTypeOf("string");
+      if (["lt", "en", "ru", "nl", "de", "pl", "sv"].includes(locale)) expect(cat.tasks.priority.normal).toBeTypeOf("string");
     }
   });
 });

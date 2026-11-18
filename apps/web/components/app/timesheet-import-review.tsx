@@ -15,6 +15,7 @@ import type {
   HoursPageObject,
   HoursPageWorker,
 } from "@/lib/work-hours/hours-page-data";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * TIMESHEET IMPORT REVIEW — upload, interpretation preview, human correction,
@@ -503,6 +504,7 @@ export function TimesheetImportReview({
           ) : null}
 
           <form action={confirmAction} className="flex flex-col gap-3">
+            <DisplayedWorkspaceField />
             <input type="hidden" name="rows" value={confirmPayload()} />
             {duplicateCount > 0 ? (
               <label className="flex items-center gap-2 text-sm">

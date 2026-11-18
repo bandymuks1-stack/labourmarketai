@@ -195,6 +195,8 @@ export async function getOrgDocumentRegister(
     const applyFilters = (q: any, delta: boolean) => {
       let out = q.eq("organization_id", organizationId);
       if (filters.status) out = out.eq("status", filters.status);
+      if (filters.projectId) out = out.eq("project_id", filters.projectId);
+      if (filters.workerId) out = out.eq("worker_id", filters.workerId);
       if (delta) {
         if (filters.direction) {
           out = out.eq(

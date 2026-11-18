@@ -1,65 +1,51 @@
 import { NextIntlClientProvider } from "next-intl";
-import {
-  getMessages,
-  getTranslations,
-  setRequestLocale,
-} from "next-intl/server";
-import { AmbientGlow } from "@/components/decor/ambient-glow";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+
 import { MarketingFunnelBeacon } from "@/components/app/marketing-funnel-beacon";
+import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { SiteFooter } from "@/components/layouts/site-footer";
 import { SiteNav } from "@/components/layouts/site-nav";
+import { LandingIntentChoice } from "@/components/marketing/landing-intent-choice";
+import { LandingOpenJobsBand } from "@/components/marketing/landing-open-jobs-band";
+import { LandingHow, LandingMarketFacts, LandingNeedPath } from "@/components/marketing/landing-v3";
 import { PublicEntry } from "@/components/marketing/public-entry";
-import { MarketProofBand } from "@/components/marketing/market-proof-band";
-import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
-import { ProductChainBand } from "@/components/marketing/product-chain-band";
-import { TrustBand } from "@/components/marketing/trust-band";
-import { StartingContextsBand } from "@/components/marketing/starting-contexts-band";
-import { PublicMarketMapBand } from "@/components/marketing/public-market-map-band";
-import {
-  MARKETING_CLIENT_MESSAGE_ROOTS,
-  pickMessages,
-} from "@/lib/i18n/client-messages";
-import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
-import { LandingModeSwitcher } from "./landing-mode-switcher";
+import { pickLandingMessages } from "@/lib/i18n/client-messages";
+import { pickLandingVacancySample, readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
+import { resolveActiveLocale } from "@/lib/seo/metadata";
 
 /**
- * FOCUS — the previous production landing, RESTORED.
+ * THE LANDING — V3 (owner-approved structure and copy, 2026-11-13).
  *
- * This is not a calmer restyling of LIVE and not a new "focused" design. It
- * is the landing labourmarket.ai actually served in production immediately
- * before the living-market surface replaced it, recovered from git rather
- * than rebuilt from a screenshot:
+ * The owner looked at the live V2 page on a phone: eleven screens long, four
+ * places asking "who are you", two chains explaining the product, numbers
+ * printed twice with two wordings. The instruction: a short, clear,
+ * professional start page that first helps the visitor ACT; within five
+ * seconds a new visitor understands who it is for, what they can do and how
+ * to start, and meets each choice once. So the page is now:
  *
- *   source: apps/web/app/[locale]/(marketing)/page.tsx
- *   provenance: 7179882 — the state of `main` immediately before #1221
- *           (5c78ac5) deleted that file; content last shaped by #1176.
+ *   1. THE GOAL CENTRE — the question (the page's h1), one line saying who it
+ *      is for and what is free, the six goals (phone: four first, the other
+ *      two under "More options"; never a carousel), and, as ALTERNATIVE ways
+ *      to say the same need, the sentence field and ONE "Submit a request"
+ *      entry that holds the three request services.
+ *   2. THE MARKET — the canonical snapshot's two counts in one sentence that
+ *      says they are external adverts, not registered clients; then a few
+ *      real adverts from the same reader, or the link to the search.
+ *   3. HOW IT WORKS — four short steps and three links to the detail.
+ *   4. A FOOTER with only the necessary legal links and the unchanged legal
+ *      sentence and copyright line.
  *
- * `(marketing)/page.tsx` is the only file that has ever served `/{locale}`,
- * and `git log --diff-filter=D` shows 5c78ac5 deleted it, so 7179882 is its
- * final production state by definition rather than by judgement.
+ * What left the page (the second and third role choices, the two chains, the
+ * trust section, the example chips, the numbers inside the sentence box, the
+ * decorative strip) and where each destination is still reachable is recorded
+ * in `docs/audits/evidence/landing-v3/OUTLINE.md`.
  *
- * The composition below is that file's, node for node, with ONE section
- * replaced under the owner's frozen design contract (2026-09-05, package P1):
- * hero copy + <PublicEntry> — the visitor's own sentence read by the ONE
- * deterministic router — where the scripted <HeroLiveDemo> scenario used to
- * play; then the product chain carrying the #how-it-works anchor, the market
- * proof band, the Player Card showcase, the trust band and the final CTA
- * band — same order, same wrapper classes, same anchor. The five other
- * components are the ORIGINALS: they survived #1221 untouched and P1 does
- * not modify any of them.
+ * Anchors other pages and the header link to are kept: `#goals`, `#find`,
+ * `#request`, `#market`, `#how-it-works`.
  *
- * ── COMPATIBILITY ONLY — NO MODERNISATION ─────────────────────────────────
- * The original rendered inside the (marketing) route group, whose layout
- * supplied the chrome. `/{locale}` sits outside that group, so this component
- * reproduces that layout directly — same skip link, same <AmbientGlow>, same
- * <MarketingFunnelBeacon>, same <SiteNav>, same <main id="main-content">,
- * same <SiteFooter>, same marketing message pick — rather than visually
- * approximating it. Nothing here is a redesign of the restored landing.
- *
- * The one genuinely new element is <LandingModeSwitcher>: the control that
- * lets a visitor return to LIVE. Without it FOCUS would be a one-way door.
- * It is deliberately floating and self-contained so the historical layout
- * does not have to be edited to make room for it.
+ * `/{locale}` sits outside the (marketing) route group, so this component
+ * carries that layout's chrome itself: the skip link, <AmbientGlow>,
+ * <MarketingFunnelBeacon>, <SiteNav>, <main id="main-content"> and the footer.
  */
 export async function FocusLanding({
   params,
@@ -68,25 +54,37 @@ export async function FocusLanding({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  // The SAME canonical snapshot LIVE reads, through the SAME 300 s
-  // `unstable_cache` entry — one market truth, one freshness window, no
-  // FOCUS-only reader (owner command §9/§12).
-  const [market, t, tHero] = await Promise.all([
-    // FOCUS renders the supply counts only; it reads `professions`
-    // nowhere, so it does not pay for the per-profession reads. Same
-    // reader, same freshness window, same market numbers as LIVE.
+  const activeLocale = resolveActiveLocale(locale);
+  // The ONE canonical market snapshot, through its 300 s `unstable_cache`
+  // entry — one market truth, one freshness window (owner command §9/§12).
+  const [market, t, tV3, tDoors] = await Promise.all([
+    // The landing renders the supply counts only; it reads `professions`
+    // nowhere, so it does not pay for the per-profession reads.
     readLiveMarketLandingSnapshot({ resolveProfessions: false }),
     getTranslations("common"),
-    getTranslations("landing.hero"),
+    getTranslations("landing.v3"),
+    getTranslations("landing.requestDoors"),
   ]);
 
+  // Exact counts or nothing: a count the canonical reader could not return is
+  // omitted, never filled with a constant (owner command §16).
+  const marketFacts =
+    market.activeVacancies !== null && market.distinctEmployers !== null
+      ? {
+          adverts: market.activeVacancies,
+          employers: market.distinctEmployers,
+          refreshedAt: market.lastRefreshedAt,
+        }
+      : null;
+  // Owner decision 2026-11-15: adverts in the visitor's language first, then
+  // the other suitable adverts — an order, never a filter. The cached snapshot
+  // is shared by every locale, so the pick is made here, per visitor.
+  const adverts =
+    market.sample.basis === "live" ? pickLandingVacancySample(market.sample.vacancies, activeLocale) : [];
+  const hasAdverts = adverts.length > 0;
+
   return (
-    <NextIntlClientProvider
-      messages={pickMessages(
-        await getMessages(),
-        MARKETING_CLIENT_MESSAGE_ROOTS,
-      )}
-    >
+    <NextIntlClientProvider messages={pickLandingMessages(await getMessages())}>
       <div className="relative min-h-screen" data-landing-mode="focus">
         <a
           href="#main-content"
@@ -96,89 +94,52 @@ export async function FocusLanding({
         </a>
         <AmbientGlow />
         <MarketingFunnelBeacon />
-        <SiteNav />
+        <SiteNav goalsOnPage />
         <main id="main-content" className="relative">
-          {/* ── The restored landing body, verbatim from 7179882 ────────── */}
-          <div className="mx-auto max-w-container px-6 py-14 sm:px-12">
-            {/* ── Entry: the first screen understands a REAL sentence
-                   (frozen design contract 2026-09-05, package P1). The
-                   scripted hero scenario is gone: the visitor's own words go
-                   through the ONE deterministic router, the page says what it
-                   understood, and the auth doors carry the sentence. The
-                   public numbers are the SAME canonical snapshot the market
-                   proof band prints, omitted when the reader cannot answer. */}
-            <section className="flex flex-col gap-5">
-              <div className="max-w-3xl">
-                <h1 className="font-display text-hero font-bold tracking-tightest text-text-primary">
-                  {tHero("headline")}
-                </h1>
-                <p className="mt-3 text-lead text-text-secondary">
-                  {tHero("sub")}
-                </p>
-              </div>
-              <PublicEntry
-                supply={
-                  market.activeVacancies !== null && market.distinctEmployers !== null
-                    ? {
-                        vacancies: market.activeVacancies,
-                        employers: market.distinctEmployers,
-                        refreshedAt: market.lastRefreshedAt,
-                      }
-                    : null
-                }
+          <div className="mx-auto max-w-container px-4 pb-10 pt-5 sm:px-12 sm:pt-10">
+            {/* 1. THE GOAL CENTRE */}
+            <section className="flex min-w-0 flex-col gap-4">
+              <LandingIntentChoice
+                lead={tV3("lead")}
+                phoneMore={{ ids: ["partners", "agencies"], label: tV3("moreChoices") }}
               />
+              <p
+                className="flex items-center gap-3 text-xs font-medium uppercase tracking-label text-text-muted"
+                data-testid="landing-or"
+              >
+                <span aria-hidden className="h-px flex-1 bg-ink-600" />
+                {tV3("or")}
+                <span aria-hidden className="h-px flex-1 bg-ink-600" />
+              </p>
+              {/* The two ways to SAY a need sit side by side on a wide screen:
+                  in your own words, or through the short form. */}
+              <div className="grid min-w-0 gap-4 lg:grid-cols-2 lg:items-start">
+                <div className="min-w-0 scroll-mt-24" id="find">
+                  {/* No example chips and no market counts here: the goals
+                      above are the choice, and the counts are printed once,
+                      in the market block. */}
+                  <PublicEntry examples="none" supply={null} requestLabel={tDoors("title")} />
+                </div>
+                <LandingNeedPath locale={locale} />
+              </div>
             </section>
 
-            {/* ── §17 THE MARKET, IN PLACES ─────────────────────────────
-                   Second, directly under the entry, because it answers the
-                   question a visitor has immediately after "what is this?" —
-                   *does it work where I am?* The canonical <MarketMap> draws
-                   the markets this product operates in, at real centroids,
-                   and says in words what it is NOT showing.
+            {/* 2. THE MARKET — figures once, then real adverts or the search. */}
+            <LandingMarketFacts
+              locale={locale}
+              market={marketFacts}
+              adverts={
+                hasAdverts ? (
+                  <LandingOpenJobsBand sample={{ basis: "live", vacancies: adverts }} locale={activeLocale} compact />
+                ) : undefined
+              }
+            />
 
-                   The market PROOF renders INSIDE it. That is the §16 move:
-                   46k vacancies and 8k employers used to be a section of their
-                   own, which made the counts read as the product's definition.
-                   As evidence under the map they support the story instead of
-                   being it. Nothing was removed — same band, same canonical
-                   snapshot, same figures. ─────────────────────────────── */}
-            <PublicMarketMapBand>
-              <MarketProofBand market={market} locale={locale} />
-            </PublicMarketMapBand>
-
-            {/* ── §20 STARTING CONTEXTS ─────────────────────────────────
-                   Moved UP, from the very bottom of a 4,967px page to the
-                   third screen. A visitor who does not want to type a sentence
-                   had to scroll past everything to find a door; §19 asks how
-                   long it takes before someone understands how to start, and
-                   the honest answer was "too long". Same five real
-                   destinations, reframed as contexts (§20). ────────────── */}
-            <StartingContextsBand />
-
-            {/* ── The product chain — six links, journal as pivot. Carries
-                   the #how-it-works nav anchor.
-
-                   Now BELOW the map and the doors (§19). All six steps and all
-                   six bodies are intact — this is a change of order, not of
-                   content: the chain explains the product to someone who has
-                   decided to care, and it was standing between the entry and
-                   the reason to use it. ─────────────────────────────────── */}
-            <div id="how-it-works" className="scroll-mt-24">
-              <ProductChainBand />
-            </div>
-
-            {/* ── Player Card: the real card, the real component (§19 — kept
-                   in full, moved down). It is the densest thing on the page and
-                   it belongs after the explanation it illustrates, not before
-                   it. ─────────────────────────────────────────────────── */}
-            <PlayerCardShowcase />
-
-            {/* ── Trust & security — verifiable claims only ─────────────── */}
-            <TrustBand />
+            {/* 3. HOW IT WORKS */}
+            <LandingHow />
           </div>
         </main>
-        <SiteFooter />
-        <LandingModeSwitcher />
+        <SiteFooter compact />
       </div>
     </NextIntlClientProvider>
   );

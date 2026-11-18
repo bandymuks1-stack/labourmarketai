@@ -10,6 +10,7 @@ import {
 } from "@/lib/training/training-actions";
 import {
   getCertificationRegister,
+  getTrainingAuthority,
   getTrainingOverview,
 } from "@/lib/training/training";
 import {
@@ -20,6 +21,10 @@ import {
   deriveExpiryState,
   isTrainingNotice,
 } from "@/lib/training/training-model";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { listOrganizationMembers } from "@/lib/company/memberships";
+import { getOrgDocumentRegister } from "@/lib/documents/document-files";
 
 /**
  * Training & Certification section (v1) — one section, two audiences,
@@ -50,6 +55,14 @@ import {
  * brought back. Nothing is deleted: retiring is a flag, and the assignments
  * already made against a course are untouched by it.
  *
+ * THE FORMS FOLLOW AUTHORITY, NOT DATA. The register used to open its
+ * organization half only when the reader could already read a course or an
+ * assignment, so an organization with no course could never add its first
+ * one — and every employee of an organization that had one was offered the
+ * add and assign forms the database then refused. Each form now renders from
+ * `getTrainingAuthority()`, which asks the database the same predicates the
+ * write commands enforce. A reader without authority keeps the read view.
+ *
  * Pure server component, NATIVE-NAV forms: every submit is a server action
  * that redirects back with an honest `?trn=` outcome.
  */
@@ -61,6 +74,7 @@ export async function TrainingRegister({
   notice?: string;
 }) {
   const t = await getTranslations("training");
+  const tDoc = await getTranslations("documents");
   const overview = await getTrainingOverview();
   if (overview.kind === "not-authed" || overview.kind === "error") return null;
 
@@ -86,12 +100,62 @@ export async function TrainingRegister({
     );
   }
 
-  const certs = await getCertificationRegister();
   const today = new Date();
+  // One organization's register in one workspace (decision 0024): RLS lets a
+  // person who belongs to several organizations read all of their courses,
+  // but the organization half shows only the ACTIVE workspace's. A person's
+  // own assignments ("mine") stay visible in every workspace.
+  const workspace = await getWorkspaceContext();
+  const activeOrganizationId =
+    workspace.workspaces.find((w) => w.kind === "organization" && w.id === workspace.activeWorkspaceId)?.id ?? null;
+  const certs = await getCertificationRegister(activeOrganizationId);
+  const programs = overview.programs.filter((p) => p.organizationId === activeOrganizationId);
   const managed = overview.assignments.filter(
-    (a) => a.assigneeProfileId !== overview.viewerProfileId,
+    (a) => a.assigneeProfileId !== overview.viewerProfileId && a.organizationId === activeOrganizationId,
   );
-  const canManage = overview.programs.length > 0 || managed.length > 0;
+  const authority = await getTrainingAuthority([
+    ...programs.map((p) => p.organizationId),
+    ...managed.map((a) => a.organizationId),
+  ]);
+  const canCreate = authority.createOrganizationId !== null;
+  // The organization half opens for a reader who may add a course (even to
+  // an empty register — the add form plus an honest empty state), or who can
+  // already read courses or managed assignments (the read view).
+  const showOrganization =
+    canCreate || programs.length > 0 || managed.length > 0;
+  // Who each managed assignment is for — the organization's own member list,
+  // labelled the way the document register labels its assignees.
+  const members =
+    managed.length > 0 && activeOrganizationId
+      ? await listOrganizationMembers(activeOrganizationId)
+      : null;
+  const assigneeLabel = new Map(
+    members?.kind === "ok"
+      ? members.members.map((m) => [m.profileId, m.fullName || m.email || ""] as const)
+      : [],
+  );
+
+  // A certificate is a file version from the organization's OWN document
+  // register (the attach command refuses anything else) — picked from that
+  // register, never typed as an id. Read only when a row can take one.
+  const needsCertificateFiles = managed.some(
+    (a) =>
+      authority.assignOrganizationIds.has(a.organizationId) &&
+      a.status === "completed" &&
+      !a.certificateDocumentFileId,
+  );
+  const documentRegister =
+    needsCertificateFiles && activeOrganizationId
+      ? await getOrgDocumentRegister(activeOrganizationId)
+      : null;
+  const certificateFiles =
+    documentRegister?.kind === "ok"
+      ? documentRegister.entries.flatMap((e) =>
+          e.currentFile
+            ? [{ id: e.currentFile.id, label: `${e.document.title} · ${e.currentFile.originalFilename}` }]
+            : [],
+        )
+      : [];
 
   return (
     <section
@@ -170,16 +234,19 @@ export async function TrainingRegister({
       ) : null}
 
       {/* ── The organization's own register ────────────────────────────── */}
-      {canManage ? (
+      {showOrganization ? (
         <div className="flex flex-col gap-3" data-testid="training-org">
           <h3 className="text-sm font-semibold text-text-primary">
             {t("org.heading")}
           </h3>
 
+          {canCreate ? (
           <form
             action={createTrainingProgramAction}
             className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
+            data-testid="training-create-form"
           >
+            <DisplayedWorkspaceField />
             <input type="hidden" name="locale" value={locale} />
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {t("org.programTitle")}
@@ -209,8 +276,9 @@ export async function TrainingRegister({
               {t("org.createProgram")}
             </button>
           </form>
+          ) : null}
 
-          {overview.programs.length === 0 ? (
+          {programs.length === 0 ? (
             <p
               className="rounded-md border border-dashed border-ink-500 p-3 text-sm text-text-muted"
               data-testid="training-programs-empty"
@@ -219,7 +287,7 @@ export async function TrainingRegister({
             </p>
           ) : (
             <ul className="flex flex-col gap-2">
-              {overview.programs.map((p) => (
+              {programs.map((p) => (
                 <li
                   key={p.id}
                   className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
@@ -242,6 +310,7 @@ export async function TrainingRegister({
                     <span className="text-xs text-text-secondary">{p.description}</span>
                   ) : null}
 
+                  {authority.editOrganizationIds.has(p.organizationId) ? (
                   <details data-testid="training-program-edit">
                     <summary className="cursor-pointer text-meta text-text-muted">
                       {t("org.editProgram")}
@@ -250,6 +319,7 @@ export async function TrainingRegister({
                       action={updateTrainingProgramAction}
                       className="mt-2 flex flex-col gap-2"
                     >
+                      <DisplayedWorkspaceField />
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="programId" value={p.id} />
                       <input
@@ -289,8 +359,15 @@ export async function TrainingRegister({
                       </button>
                     </form>
                   </details>
+                  ) : null}
 
-                  <form action={assignTrainingAction} className="flex flex-col gap-2 sm:flex-row">
+                  {authority.assignOrganizationIds.has(p.organizationId) ? (
+                  <form
+                    action={assignTrainingAction}
+                    className="flex flex-col gap-2 sm:flex-row"
+                    data-testid="training-assign-form"
+                  >
+                    <DisplayedWorkspaceField />
                     <input type="hidden" name="locale" value={locale} />
                     <input type="hidden" name="programId" value={p.id} />
                     <input
@@ -315,6 +392,7 @@ export async function TrainingRegister({
                       {t("org.assign")}
                     </button>
                   </form>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -329,24 +407,43 @@ export async function TrainingRegister({
                   data-testid="training-managed-row"
                 >
                   <span className="text-sm text-text-primary">{a.programTitle}</span>
+                  {assigneeLabel.get(a.assigneeProfileId) ? (
+                    <span className="text-xs text-text-secondary" data-testid="training-managed-assignee">
+                      {assigneeLabel.get(a.assigneeProfileId)}
+                    </span>
+                  ) : null}
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(`status.${a.status}`)}
                   </span>
-                  {a.status === "completed" && !a.certificateDocumentFileId ? (
+                  {authority.assignOrganizationIds.has(a.organizationId) &&
+                  a.status === "completed" &&
+                  !a.certificateDocumentFileId ? (
                     <form
                       action={attachTrainingCertificateAction}
                       className="flex flex-col gap-2 sm:flex-row"
+                      data-testid="training-attach-form"
                     >
+                      <DisplayedWorkspaceField />
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="assignmentId" value={a.id} />
-                      <input
-                        type="text"
+                      <select
                         name="documentFileId"
                         required
-                        placeholder={t("org.certificateFilePlaceholder")}
-                        aria-label={t("org.certificateFilePlaceholder")}
+                        defaultValue=""
+                        disabled={certificateFiles.length === 0}
+                        aria-label={t("org.certificateFileLabel")}
+                        data-testid="training-certificate-file"
                         className="min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
-                      />
+                      >
+                        <option value="" disabled>
+                          {t("org.certificateFileLabel")}
+                        </option>
+                        {certificateFiles.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
                       <input
                         type="date"
                         name="issuedOn"
@@ -362,13 +459,16 @@ export async function TrainingRegister({
                       />
                       <button
                         type="submit"
-                        className="rounded-md border border-brand-blue px-3 py-1 text-sm font-semibold text-brand-blue"
+                        disabled={certificateFiles.length === 0}
+                        className="rounded-md border border-brand-blue px-3 py-1 text-sm font-semibold text-brand-blue disabled:opacity-50"
                       >
                         {t("org.attachCertificate")}
                       </button>
                     </form>
                   ) : null}
-                  {a.expiresOn && a.status !== "expired" ? (
+                  {authority.assignOrganizationIds.has(a.organizationId) &&
+                  a.expiresOn &&
+                  a.status !== "expired" ? (
                     <form action={markTrainingExpiredAction}>
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="assignmentId" value={a.id} />
@@ -404,7 +504,11 @@ export async function TrainingRegister({
                     className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
                     data-testid="training-certificate-row"
                   >
-                    <span className="text-sm text-text-primary">{c.label}</span>
+                    <span className="text-sm text-text-primary">
+                      {c.documentTypeSlug
+                        ? tDoc(`types.${c.documentTypeSlug}` as never)
+                        : c.label}
+                    </span>
                     <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {c.expiresOn
                         ? `${t(`certificates.${state}`)} · ${c.expiresOn}`

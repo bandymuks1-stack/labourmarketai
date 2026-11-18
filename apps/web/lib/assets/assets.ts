@@ -121,17 +121,20 @@ export async function getAssetsOverview(): Promise<AssetsOverview> {
   // Orgs the caller manages (for the create form).
   const orgRes = await asAny(supabase)
     .from("engagement_contexts")
-    .select("organization_id, organizations(display_name)")
+    .select("organization_id, organizations(display_name, legal_name)")
     .eq("profile_id", user.id)
     .eq("status", "active")
     .in("relationship_slug", ["manager", "owner", "external_manager"]);
   const orgs: OrgOption[] = [];
   const seenOrg = new Set<string>();
   if (!orgRes.error) {
-    for (const r of (orgRes.data ?? []) as { organization_id: string; organizations?: { display_name: string | null } | null }[]) {
+    for (const r of (orgRes.data ?? []) as { organization_id: string; organizations?: { display_name: string | null; legal_name: string | null } | null }[]) {
       if (r.organization_id && !seenOrg.has(r.organization_id)) {
         seenOrg.add(r.organization_id);
-        orgs.push({ id: r.organization_id, name: r.organizations?.display_name ?? r.organization_id });
+        // Never the raw id as a label (production 2026-09-21: a nameless
+        // organization rendered its uuid in the "add asset" selector).
+        const name = r.organizations?.display_name?.trim() || r.organizations?.legal_name?.trim() || null;
+        orgs.push({ id: r.organization_id, name });
       }
     }
   }
@@ -150,7 +153,7 @@ export async function getAssetsOverview(): Promise<AssetsOverview> {
     for (const r of (workerRes.data ?? []) as { worker_id: string; workers?: { id: string; display_name: string | null } | null }[]) {
       if (r.worker_id && !seenW.has(r.worker_id)) {
         seenW.add(r.worker_id);
-        workers.push({ id: r.worker_id, name: r.workers?.display_name ?? r.worker_id });
+        workers.push({ id: r.worker_id, name: r.workers?.display_name?.trim() || null });
       }
     }
   }

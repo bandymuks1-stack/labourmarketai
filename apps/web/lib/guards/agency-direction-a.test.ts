@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Agency Direction A guard (owner decision, 2026-07-05).
@@ -40,11 +41,11 @@ const STUBS = [
 ] as const;
 
 describe("staffing-agency mode is a typed view on the company room", () => {
-  it("renders only behind companyType === 'staffing_agency'", () => {
-    // The section testid appears exactly once, inside the typed conditional.
-    expect(companyPage).toMatch(
-      /const isStaffingAgency = companyRow\.companyType === "staffing_agency"/,
-    );
+  it("renders only behind the ONE agency rule (type OR declared workforce role)", () => {
+    // Owner decision 2026-09-28: a construction company that declared
+    // workforce_provider / recruitment_partner is an agency too. The section
+    // testid appears exactly once, inside that conditional.
+    expect(companyPage).toMatch(/const isStaffingAgency = await readActsAsAgency\(/);
     expect(
       companyPage.match(/data-testid="company-agency-mode"/g) ?? [],
     ).toHaveLength(1);
@@ -87,6 +88,8 @@ describe("staffing-agency mode is a typed view on the company room", () => {
         "@/lib/agency/clients-actions",
         // real two-subject bridge (issue #859) — read service imported by the page
         "@/lib/agency/bridge-read",
+        // the agency's delegated demand + placement lifecycle (owner 2026-09-28)
+        "@/lib/agency/delegation-read",
       ]).toContain(imp);
     }
     // The components the company room mounts stay clean too.
@@ -135,7 +138,7 @@ describe("route-truth-map ratchet honoured", () => {
 });
 
 describe("agency-mode copy: present (en/lt/ru), honest, no old terminology", () => {
-  for (const locale of ["en", "lt", "ru"] as const) {
+  for (const locale of activeLocales) {
     const json = JSON.parse(read(`messages/${locale}.json`)) as {
       roleDashboards?: { company?: { agencyMode?: Record<string, unknown> } };
     };

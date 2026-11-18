@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import { isJournalMetaRequest } from "./worklog-extract";
 
@@ -74,8 +75,12 @@ export const workerSaveWorkCardFields = z.object({
   availableFrom: z.string().trim().max(10).nullable().optional(), // YYYY-MM-DD
   salaryMin: z.number().int().min(0).max(100000).nullable().optional(),
   salaryMax: z.number().int().min(0).max(100000).nullable().optional(),
-  locationCountry: z.string().trim().length(2).nullable().optional(),
-  preferredCountries: z.array(z.string().trim().length(2)).max(12).optional(),
+  // A country is a CODE or a NAME (global-access rule 2026-09-22): the text
+  // travels as typed and `lib/worker/work-card-core` resolves it through the
+  // canonical `resolveCountryCode`, refusing what does not resolve. The old
+  // `.length(2)` rejected "Vietnam" before the resolver could see it.
+  locationCountry: z.string().trim().min(1).max(80).nullable().optional(),
+  preferredCountries: z.array(z.string().trim().min(1).max(80)).max(12).optional(),
 });
 
 export const workerSaveWorkCardSchema = workerSaveWorkCardFields
@@ -104,7 +109,15 @@ export const workerSavePreferencesSchema = z.object({
  *  (`decline_invitation_v1`) and not at all for the roster — so the schema
  *  says so rather than inventing one. */
 export const workerRespondInvitationSchema = z.discriminatedUnion("source", [
-  z.object({ source: z.literal("invitation"), invitationId: uuid, decision: z.literal("accepted") }),
+  z.object({
+    source: z.literal("invitation"),
+    invitationId: uuid,
+    decision: z.literal("accepted"),
+    // Owner decision 1: present ONLY when the chat card showed the review
+    // sentence. Optional, so every existing caller and stored token keeps its
+    // meaning; the token binds the parsed input, so it cannot be added later.
+    reviewNotice: z.literal(REVIEW_NOTICE_VERSION).optional(),
+  }),
   z.object({ source: z.literal("company_roster"), orgId: uuid, decision: z.literal("accepted") }),
   z.object({ source: z.literal("agency_roster"), orgId: uuid, decision: z.literal("accepted") }),
 ]);
@@ -159,7 +172,41 @@ export const workerLogWorkSchema = z.object({
     .refine((v) => !isJournalMetaRequest(v), { message: "journal_meta_request" }),
   workDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
   siteName: z.string().trim().max(200).nullable().optional(),
+  /** Which project the hours belong to: a project uuid, or "none" for work
+   *  that is not project work. Absent → the database's own rule (one active
+   *  project auto-attributes; two or more are refused, see journal-write-core). */
+  projectId: z.union([uuid, z.literal("none")]).optional(),
+  /** Provenance of the TEXT when it was dictated by voice and then reviewed and
+   *  edited by the person. It labels the entry's input origin only - it grants
+   *  no authority and changes no rule (the same schema, same confirmation). */
+  voice: z
+    .object({
+      language: z.string().trim().max(8),
+      disclosureVersion: z.string().trim().max(40),
+    })
+    .optional(),
 });
+
+/** Why the log-work write would refuse this evidence text, or `null`. */
+export type LogWorkNotesRefusal = "too-short" | "too-long" | "meta-request";
+
+/**
+ * THE ONE NOTES RULE, readable before the round-trip (owner P0 2026-09-23).
+ *
+ * The work-log form used to run its OWN, stricter rule — a keyword
+ * recogniser — and refused "Buvau pas klientą" with a red line while this
+ * schema accepted it. The verdict below is not a copy of the rule: it runs
+ * `workerLogWorkSchema.shape.notes` itself and only names which part refused,
+ * so the form and the write cannot disagree about a sentence again.
+ */
+export function logWorkNotesRefusal(notes: string): LogWorkNotesRefusal | null {
+  const parsed = workerLogWorkSchema.shape.notes.safeParse(notes);
+  if (parsed.success) return null;
+  const issue = parsed.error.issues[0];
+  if (issue?.code === "too_small") return "too-short";
+  if (issue?.code === "too_big") return "too-long";
+  return "meta-request";
+}
 
 /** Map of action id → schema for the executable worker actions. */
 export const WORKER_ACTION_SCHEMAS = {

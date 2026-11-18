@@ -17,7 +17,8 @@ const FN = SRC.slice(SRC.indexOf("export async function loadEmployerOpeningBrief
 describe("the employer brief carries agency and institution attention", () => {
   it("reads the capability flags from the ONE starter-context read, then the canonical bridge / learner reads", () => {
     expect(FN).toMatch(/loadCompanyStarterContext\(\)/);
-    expect(FN).toMatch(/ws\.signals\.staffingAgency/);
+    // the agency rung follows the ONE agency rule (type OR declared role)
+    expect(FN).toMatch(/if \(ws\.agencyWorkspace\) \{/);
     expect(FN).toMatch(/listAgencyOfferProgress\(\), listSharedRequestsForAgency\(\)/);
     expect(FN).toMatch(/ws\.signals\.capabilities\.includes\("training_provider"\)/);
     expect(FN).toMatch(/readInstitutionLearners\(ws\.organizationId\)/);
@@ -27,7 +28,11 @@ describe("the employer brief carries agency and institution attention", () => {
     expect(FN).toMatch(/r\.offerStatus === "offered"/);
     expect(FN).toMatch(/briefAgencyOffersAwaiting/);
     expect(FN).toMatch(/addChip\("agency:progress"/);
-    expect(FN).toMatch(/!offeredFor\.has\(s\.requestId\)/);
+    // ONE rule for "still needs a worker" (bridge-model), shared with the bell
+    expect(FN).toMatch(/sharedNeedsAwaitingWorker\(shared, progress, placements\)/);
+    expect(FN).toMatch(/listAgencyPlacements\(\)/);
+    expect(FN).toMatch(/briefAgencyNeedReopened/);
+    expect(FN).toMatch(/addChip\("agency:demand", t\("chipProposeReplacement"\)\)/);
     expect(FN).toMatch(/briefAgencySharedWithoutOffer/);
     expect(FN).toMatch(/addChip\("agency:demand"/);
     expect(FN).toMatch(/clientConnectionsPending/);
@@ -111,7 +116,7 @@ describe("the employer brief carries agency and institution attention", () => {
   });
 
   it("the brief copy exists in the five routed locales (same parity as the existing brief keys)", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const chat = JSON.parse(readFileSync(join(APP, "messages", `${locale}.json`), "utf8")).conversation.chat as Record<string, string>;
       for (const key of ["briefAgencyOffersAwaiting", "briefAgencySharedWithoutOffer", "briefAgencyClientsPending", "briefEduLearnerInvitesPending", "briefDocumentsExpiring", "briefDocumentsMissing", "briefEmployerInterestWaiting", "briefEmployerAgencyOffersWaiting", "briefInterestContacted"]) {
         expect(chat[key], `${locale}.${key}`).toMatch(/\{count, plural/);

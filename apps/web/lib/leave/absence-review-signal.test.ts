@@ -45,6 +45,7 @@ const absence = (
 
 const zeroCounts: SpineCounts = {
   pendingInvitations: 0,
+  pendingMembershipInvitations: 0,
   unreadConversations: 0,
   pendingIncomingServiceRequests: 0,
   serviceRequestResponsesNew: 0,
@@ -53,6 +54,10 @@ const zeroCounts: SpineCounts = {
   openTaskAttention: 0,
   newJobMatches: 0,
   pendingAbsenceReviews: 0,
+  pendingConnectionInvites: 0,
+  sharedRequestsAwaitingOffer: 0,
+  openCandidateOffers: 0,
+  openTeamOffers: 0,
 };
 
 describe("who is asked to review an absence", () => {

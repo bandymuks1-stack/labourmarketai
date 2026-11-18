@@ -2,7 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { consumeSignupPending, trackFunnel } from "@/lib/telemetry/task";
+import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { hasAnalyticsConsent, readAnalyticsConsent } from "@/lib/consent/analytics-consent";
+import { clearAccountCampaign } from "@/lib/consent/account-campaign";
 
 /**
  * Session-level activation beacon (P0-A). Mounted once in the dashboard
@@ -38,6 +41,12 @@ export function SessionTelemetry({
     if (ran.current) return;
     ran.current = true;
     if (typeof window === "undefined") return;
+    // A refusal made on this device (perhaps before signing in) also covers
+    // the account: its stored campaign is cleared, so the server stops
+    // stamping it (lib/consent/account-campaign.ts). No-op without one.
+    if (readAnalyticsConsent()?.choice === "refused") void clearAccountCampaign();
+    // No analytics item (markers or events) without an explicit yes.
+    if (!hasAnalyticsConsent()) return;
 
     // login_succeeded — once per tab session.
     try {
@@ -57,9 +66,17 @@ export function SessionTelemetry({
     // the dashboard read clears a stale marker (a returning Google login)
     // WITHOUT emitting. signupSurface = 'email' | 'google' (bounded label,
     // no PII).
+    // First-touch campaign attribution rides UNDER the explicit `surface`
+    // (2026-09-20): `registration_started` already carried the campaign, but
+    // the COMPLETION of that same signup did not — so no campaign could ever
+    // be credited with an account. Allowlisted utm_*/referrer_host/
+    // landing_path only; the helper returns {} when storage is unavailable.
     const signupSurface = consumeSignupPending();
     if (signupSurface && surface === "onboarding") {
-      trackFunnel(FUNNEL_EVENTS.signupCompleted, { surface: signupSurface });
+      trackFunnel(FUNNEL_EVENTS.signupCompleted, {
+        ...getFirstTouchAttribution(),
+        surface: signupSurface,
+      });
     }
 
     // return_visit_detected — last-seen day differs from today.

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { communicationLocales, locales } from "@/lib/i18n/config";
+import { activeLocales, communicationLocales, locales } from "@/lib/i18n/config";
 
 /**
  * COMM-1 (2026-09-20 launch-completion audit): the READ side of the owner
@@ -17,7 +17,7 @@ import { communicationLocales, locales } from "@/lib/i18n/config";
  *
  * THE FIX IS RED by owner classification (a column on profiles + the code
  * behind it) and lives in
- * supabase/migrations/20260920122000_profiles_communication_locale_v1.sql,
+ * supabase/migrations/20261118100100_profiles_communication_locale_v1.sql,
  * applied only after the owner's approval. This guard pins what is true
  * regardless of apply state:
  *   1. the migration is the minimum: ONE nullable column, CHECK-bound to the
@@ -29,11 +29,11 @@ import { communicationLocales, locales } from "@/lib/i18n/config";
  *   4. the read path selects the column, tolerates 42703, and the thread +
  *      instructions pages pass `communication_locale ?? locale` as the
  *      viewer locale; the account page renders the ONE control;
- *   5. the i18n keys exist in all 11 catalogs, real in the active five.
+ *   5. the i18n keys exist in all 11 catalogs, real in every active locale.
  */
 const REPO = join(__dirname, "..", "..", "..", "..");
 const WEB = join(REPO, "apps", "web");
-const MIG_NAME = "20260920122000_profiles_communication_locale_v1";
+const MIG_NAME = "20261118100100_profiles_communication_locale_v1";
 const MIGRATION = join(REPO, "supabase", "migrations", `${MIG_NAME}.sql`);
 const ROLLBACK = join(REPO, "supabase", "rollbacks", `${MIG_NAME}.down.sql`);
 
@@ -137,7 +137,9 @@ describe("COMM-1 read path — tolerant select, viewer locale = preference ?? UI
       const calls = page.match(/resolveViewerTexts\(([\s\S]*?)\);/g) ?? [];
       expect(calls.length).toBe(1);
       const call = ws(calls[0] ?? "");
-      expect(call).toMatch(/viewerLocale, user\.id, ?\);$/);
+      // main streams the thread's renderings (not awaited, `.catch` → originals);
+      // either form is fine as long as the locale argument is viewerLocale.
+      expect(call).toMatch(/viewerLocale, user\.id, ?\)(?:\.catch\(.*\))?;$/);
       expect(call).not.toMatch(/\blocale, user\.id/);
     });
   }
@@ -164,9 +166,10 @@ describe("COMM-1 read path — tolerant select, viewer locale = preference ?? UI
   });
 });
 
-describe("COMM-1 i18n — keys in all 11 catalogs, real copy in the active five", () => {
+describe("COMM-1 i18n — keys in all 11 catalogs, real copy in every active locale", () => {
   const KEYS = ["title", "intro", "label", "sameAsInterface", "saved", "error", "unavailable"];
-  const ACTIVE = ["lt", "en", "ru", "nl", "de"];
+  // The routed UI locales (pl + sv joined after this PR was drafted).
+  const ACTIVE: readonly string[] = activeLocales;
   for (const loc of locales) {
     it(`${loc}.json carries communicationLocale.{${KEYS.join(",")}}`, () => {
       const cat = JSON.parse(readFileSync(join(WEB, "messages", `${loc}.json`), "utf8")) as Record<string, unknown>;

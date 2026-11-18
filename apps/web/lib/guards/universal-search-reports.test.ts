@@ -344,7 +344,10 @@ describe("3. CommandFinder stays registry-first and accessible", () => {
   it("recent commands store command IDS only — never query text or labels", () => {
     expect(FINDER).toMatch(/RECENT_COMMANDS_STORAGE_KEY/);
     // The single write stores the ids array built from entry ids.
-    const writes = [...FINDER.matchAll(/localStorage\.setItem\(/g)];
+    // (the one-time vendor-speech disclosure flag is a consent marker, not a command or text)
+    const writes = [...FINDER.matchAll(/localStorage\.setItem\(/g)].filter(
+      (m) => !FINDER.slice(m.index, m.index + 60).includes("SPEECH_CONSENT_KEY"),
+    );
     expect(writes.length).toBe(1);
     expect(FINDER).toMatch(
       /localStorage\.setItem\(\s*RECENT_COMMANDS_STORAGE_KEY,\s*JSON\.stringify\(next\),?\s*\)/,
@@ -360,12 +363,15 @@ describe("3. CommandFinder stays registry-first and accessible", () => {
 
   it("every dashboard page reaches the ONE finder (one search truth; no separate search page)", () => {
     // W3 Package 4 deleted the second dashboard's inline mount; the finder's
-    // surviving presentation is the header-search overlay the layout mounts
-    // on every dashboard page.
+    // surviving presentation is the header-search overlay THE ONE header
+    // mounts, and every dashboard chrome mode renders that header (2026-10-25:
+    // the operator console's private header, which mounted its own copy, is
+    // gone).
     const headerSearch = read("components/app/header-search.tsx");
     expect(headerSearch).toContain('from "@/components/app/command-finder"');
     expect(headerSearch).toMatch(/<CommandFinder \/>/);
-    expect(read("app/[locale]/dashboard/layout.tsx")).toMatch(/<HeaderSearch/);
+    expect(read("components/app/conversation/chat/conversation-header.tsx")).toMatch(/<HeaderSearch/);
+    expect(read("components/app/dashboard-chrome.tsx")).toMatch(/<ConversationHeader/);
     // The removed /dashboard/search router page must not come back.
     expect(
       existsSync(join(ROOT, "app", "[locale]", "dashboard", "search", "page.tsx")),

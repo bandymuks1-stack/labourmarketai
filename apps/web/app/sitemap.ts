@@ -1,14 +1,15 @@
 import type { MetadataRoute } from "next";
 import { activeLocales } from "@/lib/i18n/config";
 import { localizedUrl, hreflangAlternates } from "@/lib/seo/metadata";
-import { SUPPORTED_COUNTRIES } from "@/lib/labour-market/country-evidence";
+import { SUPPORTED_COUNTRIES, isCountryPageIndexable } from "@/lib/labour-market/country-evidence";
 import { isVisionPublic } from "@/lib/config/vision-publication";
-import { publishedCategories } from "@/lib/answer-engine/publishing";
+import { localesPublishingAnyAnswer, publishedCategories } from "@/lib/answer-engine/publishing";
+import { EMPLOYER_INTENT_PATHS, EMPLOYER_MARKET_PATHS } from "@/lib/marketing/employer-markets";
 
 /**
  * /sitemap.xml — only public, indexable marketing pages, on the apex
  * (https://labourmarket.ai). Every entry is emitted per active locale
- * (lt / en / ru) and carries hreflang alternates so Google maps the
+ * (every code in `activeLocales`) and carries hreflang alternates so Google maps the
  * localized versions to each other. No app / dashboard / auth / preview
  * URLs, no localhost, no app subdomain (enforced by the SEO guard).
  */
@@ -52,8 +53,8 @@ const STATIC_PATHS: readonly string[] = [
   "/legal/legal-notice",
   // Answer-engine hub. llms.txt advertised it and every answer page
   // breadcrumbs to it, but no sitemap listed it (SEO/GEO gap, 2026-09-20).
-  // Individual answers ride /questions-sitemap.xml.
-  "/questions",
+  // Individual answers ride /questions-sitemap.xml. The hub itself is emitted
+  // by answerHubEntries(): only where a language has a published answer.
 ];
 
 /** `/vision` follows its publication flag: while the page emits
@@ -95,8 +96,25 @@ function answerCategoryEntries(): MetadataRoute.Sitemap {
   return entries;
 }
 
-/** Per-country labour-market evidence pages, e.g. /labour-market/lt. */
-const COUNTRY_PATHS: readonly string[] = SUPPORTED_COUNTRIES.map(
+/** The questions hub, in each language where it lists at least one answer. A
+ *  locale whose answers all await review shows an empty hub, which is marked
+ *  noindex and must not be advertised here either. */
+function answerHubEntries(): MetadataRoute.Sitemap {
+  const publishedIn = localesPublishingAnyAnswer();
+  const languages: Record<string, string> = {};
+  for (const locale of publishedIn) languages[locale] = localizedUrl(locale, "/questions");
+  if (publishedIn.includes("en")) languages["x-default"] = localizedUrl("en", "/questions");
+  return publishedIn.map((locale) => ({
+    url: localizedUrl(locale, "/questions"),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+    alternates: { languages },
+  }));
+}
+
+/** Per-country labour-market evidence pages, e.g. /labour-market/lt — only the
+ *  ones with enough text of their own to be indexed (IDX-20). */
+const COUNTRY_PATHS: readonly string[] = SUPPORTED_COUNTRIES.filter(isCountryPageIndexable).map(
   (c) => `/labour-market/${c.toLowerCase()}`,
 );
 
@@ -124,7 +142,16 @@ function priorityFor(path: string): number {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const paths = [...STATIC_PATHS, ...FLAGGED_PATHS, ...COUNTRY_PATHS];
+  // EMPLOYER_MARKET_PATHS / EMPLOYER_INTENT_PATHS: the LU/NL/DK and the B2B
+  // intent versions of /for-companies, each its own self-canonical page
+  // (lib/marketing/employer-markets.ts).
+  const paths = [
+    ...STATIC_PATHS,
+    ...FLAGGED_PATHS,
+    ...COUNTRY_PATHS,
+    ...EMPLOYER_MARKET_PATHS,
+    ...EMPLOYER_INTENT_PATHS,
+  ];
   const entries: MetadataRoute.Sitemap = [];
 
   for (const path of paths) {
@@ -140,6 +167,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
+  entries.push(...answerHubEntries());
   entries.push(...answerCategoryEntries());
 
   return entries;

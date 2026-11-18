@@ -45,7 +45,22 @@ import { sensitivityForTask, type AiDataSensitivity } from "./data-sensitivity";
 import { openaiCompletionProvider } from "./providers/openai";
 import { geminiCompletionProvider } from "./providers/gemini";
 import { deeplCompletionProvider } from "./providers/deepl";
+import {
+  libretranslateCompletionProvider,
+  libretranslateEgressProfile,
+} from "./providers/libretranslate";
+import {
+  cloudflareCompletionProvider,
+  cloudflareEgressProfile,
+} from "./providers/cloudflare";
 import { localCompletionProvider } from "./providers/local";
+import {
+  cloudflareLlmCompletionProvider,
+  groqCompletionProvider,
+  mistralCompletionProvider,
+} from "./providers/free-tier";
+import type { ProviderCooldown } from "./provider-cooldown";
+import type { ProviderCounters } from "./provider-counters";
 import {
   advancePolicyFor,
   classifyCompletionFailure,
@@ -60,6 +75,7 @@ import { taskTypeForAgent, type TaskRouteDecision, type AiTaskType } from "./tas
 import { AI_MODEL_CANDIDATES } from "./model-candidates";
 import { registryEntryForModel } from "./model-registry";
 import type { AiAgentKey } from "../registry/types";
+import { blockedByZeroPaidBudget, paidProvidersAllowed, ZERO_PAID_BUDGET_REASON } from "./paid-budget";
 
 export function selectCompletionProvider(
   kind: ReturnType<typeof providerKindFor>,
@@ -77,6 +93,12 @@ export function selectCompletionProvider(
       return geminiCompletionProvider;
     case "xai":
       return xaiCompletionProvider;
+    case "cloudflare":
+      return cloudflareLlmCompletionProvider;
+    case "mistral":
+      return mistralCompletionProvider;
+    case "groq":
+      return groqCompletionProvider;
     case "disabled":
     default:
       return disabledCompletionProvider;
@@ -118,6 +140,11 @@ const ADAPTER_BY_PROVIDER: Readonly<Record<string, AiCompletionProvider>> = {
   openai: openaiCompletionProvider,
   gemini: geminiCompletionProvider,
   xai: xaiCompletionProvider,
+  // Free API tiers (2026-10-25): each its OWN binding on the shared
+  // OpenAI-compatible wire — own endpoint, own key, own model table.
+  cloudflare: cloudflareLlmCompletionProvider,
+  mistral: mistralCompletionProvider,
+  groq: groqCompletionProvider,
 };
 
 function adapterForChainId(id: AiChainProviderId): AiCompletionProvider | null {
@@ -146,28 +173,105 @@ export interface ChainDispatchContext {
    * Injecting a grant here is the counterpart of injecting a profile above.
    */
   readonly grants?: readonly AiEgressGrant[];
+  /**
+   * Secondary translation provider override. Production always uses
+   * `SECONDARY_TRANSLATION_PROVIDERS`; a test injects failing/succeeding
+   * adapters to prove the fallback order (a controlled hook, never an env flag).
+   */
+  readonly secondaries?: readonly SecondaryTranslationProvider[];
+  /**
+   * Runtime health from REAL failures (provider-cooldown.ts). The server
+   * boundary passes the process-wide instance; absent (tests, evals) = no
+   * cooldown, so the chain behaves exactly as before. A cooling provider is
+   * tried LAST, never removed — a cooldown reorders, it cannot empty a chain.
+   */
+  readonly cooldown?: ProviderCooldown;
+  /**
+   * Per-provider attempt counters (provider-counters.ts): requests, latency,
+   * rate limits and errors by class. The server boundary passes the
+   * process-wide instance; absent (tests, evals) = nothing counted. Counting
+   * never changes routing.
+   */
+  readonly counters?: ProviderCounters;
+  /** Clock seam for the cooldown and the counters; defaults to Date.now. */
+  readonly now?: () => number;
 }
 
 /**
- * Try the DeepL translation preference first, when the policy asked for it.
- * Unchanged behaviour, lifted into a helper so both paths share it: a
- * not-configured or failing secondary provider falls through honestly to the
- * LLM tier, and nothing is faked.
+ * A machine-translation provider that sits AHEAD of the LLM chain for the
+ * tasks whose policy prefers a dedicated engine (`languageRouting`).
+ *
+ * `profile()` is evaluated per call because it can depend on operator
+ * configuration (a self-hosted engine is `local`, a public one is external) and
+ * the egress gate must see the truth, not a build-time guess.
+ */
+export interface SecondaryTranslationProvider {
+  readonly id: string;
+  readonly adapter: AiCompletionProvider;
+  readonly profile: () => {
+    readonly id: string;
+    readonly locality: "local" | "cloud";
+    readonly costClass: string;
+  };
+}
+
+/**
+ * THE ORDER, free-and-self-hosted first: a self-hosted engine (no egress, no
+ * bill) → DeepL (when the owner enabled it) → Cloudflare Workers AI free
+ * allocation. Each is env-gated and egress-gated independently; an unconfigured
+ * or refused provider is skipped silently, a failing one (429, timeout, 5xx,
+ * unsupported language) advances to the next. The LLM chain (Gemini, …) follows,
+ * and the ORIGINAL text is the final answer — the caller never sees an error.
+ */
+export const SECONDARY_TRANSLATION_PROVIDERS: readonly SecondaryTranslationProvider[] = [
+  { id: "libretranslate", adapter: libretranslateCompletionProvider, profile: libretranslateEgressProfile },
+  { id: "cloudflare", adapter: cloudflareCompletionProvider, profile: cloudflareEgressProfile },
+  { id: "deepl", adapter: deeplCompletionProvider, profile: () => deeplEgressProfile() },
+];
+
+/**
+ * Walk the secondary translation providers in order, when the policy asked for
+ * a dedicated engine. Lifted into a helper so both paths share it: a
+ * not-configured, refused or failing provider falls through honestly to the
+ * next one and finally to the LLM tier, and nothing is faked.
+ *
+ * DeepL was the only member until the multi-provider order (2026-10-01).
  */
 async function tryPreferredSecondary(
   request: AiCompletionRequest,
   cfg: AiRuntimeConfig,
   grants?: readonly AiEgressGrant[],
+  secondaries: readonly SecondaryTranslationProvider[] = SECONDARY_TRANSLATION_PROVIDERS,
 ): Promise<AiCompletionResult | null> {
-  if (request.preferredProvider !== "deepl") return null;
-  // DeepL is an EXTERNAL provider and this call sits ahead of the chain's
-  // candidate loop, so the chain's veto never saw it. Without this check the
-  // one task that prefers DeepL — `translate_message`, the only
-  // SENSITIVE_FREE_TEXT task there is — had a direct route off the platform.
-  const verdict = egressPermitted(DEEPL_PROFILE, sensitivityForRequest(request), grants, taskForRequest(request));
-  if (!verdict.permitted) return null;
-  const preferred = await deeplCompletionProvider.complete(request, cfg);
-  return preferred.status === "ok" ? preferred : null;
+  // The policy marker names a dedicated engine class, not one vendor.
+  if (!request.preferredProvider) return null;
+  const allowPaid = paidProvidersAllowed();
+  for (const secondary of secondaries) {
+    // ZERO PAID API BUDGET: a metered engine (DeepL Pro) is skipped, a free
+    // one (`deepl_free`, LibreTranslate, Cloudflare m2m100) may still serve.
+    if (blockedByZeroPaidBudget(secondary.profile().costClass, allowPaid)) continue;
+    // Each secondary is an EXTERNAL provider (unless it declares itself local)
+    // and this call sits ahead of the chain's candidate loop, so the chain's
+    // veto never saw it. Without this check the one task that prefers a
+    // dedicated engine — `translate_message`, the only SENSITIVE_FREE_TEXT task
+    // there is — would have a direct route off the platform.
+    const verdict = egressPermitted(
+      secondary.profile(),
+      sensitivityForRequest(request),
+      grants,
+      taskForRequest(request),
+    );
+    if (!verdict.permitted) continue;
+    let result: AiCompletionResult;
+    try {
+      result = await secondary.adapter.complete(request, cfg);
+    } catch {
+      // One provider's failure must never break the thread.
+      continue;
+    }
+    if (result.status === "ok") return result;
+  }
+  return null;
 }
 
 /** DeepL has no `AI_PROVIDER_PROFILES` row — it is a secondary, not a chain
@@ -178,6 +282,21 @@ const DEEPL_PROFILE = {
   locality: "cloud",
   costClass: "paid",
 } as const;
+
+/**
+ * DeepL's egress identity, by PLAN. A Free / Developer key (suffix ":fx") is a
+ * different contract: DeepL "reserves the right to perpetually store any
+ * Content" and forbids personal data on it (pro-license §3.3.2, §8.3.11). It is
+ * therefore its own catalogue id, `deepl_free`, capped at PUBLIC by its terms —
+ * a grant written for DeepL Pro can never be stretched over a free key.
+ */
+export function deeplEgressProfile(
+  key: string | undefined = process.env.DEEPL_API_KEY,
+): { readonly id: string; readonly locality: "cloud"; readonly costClass: string } {
+  return key?.trim().endsWith(":fx")
+    ? { id: "deepl_free", locality: "cloud", costClass: "free_tier" }
+    : DEEPL_PROFILE;
+}
 
 /**
  * What this request's payload carries, for the egress gate.
@@ -241,6 +360,13 @@ export async function dispatchAiCompletion(
      * check moved onto the PATH: it now runs whether or not a chain was
      * supplied, and the grant table is consulted either way.
      */
+    // ZERO PAID API BUDGET: the single configured provider is refused before
+    // any payload is built for it when it is metered and the owner has not
+    // opened the paid budget.
+    const legacyCost = AI_PROVIDER_PROFILES.find((p) => p.id === kind)?.costClass ?? (kind === "local" ? "free_local" : "paid");
+    if (blockedByZeroPaidBudget(legacyCost, paidProvidersAllowed())) {
+      return { status: "error", code: "unsupported", message: ZERO_PAID_BUDGET_REASON, provider: kind };
+    }
     const verdict = legacyEgressVerdict(request, kind);
     if (!verdict.permitted) {
       return { status: "error", code: "unsupported", message: verdict.reason, provider: kind };
@@ -256,6 +382,7 @@ export async function dispatchAiCompletion(
     chain.states,
     chain.profiles ?? AI_PROVIDER_PROFILES,
     chain.grants,
+    paidProvidersAllowed(),
   );
 
   if (outcome.kind === "deterministic") {
@@ -281,10 +408,14 @@ export async function dispatchAiCompletion(
     };
   }
 
-  const preferred = await tryPreferredSecondary(request, cfg, chain.grants);
+  const preferred = await tryPreferredSecondary(request, cfg, chain.grants, chain.secondaries);
   if (preferred) return preferred;
 
-  const candidates: ChainCandidate[] = [outcome.selected, ...outcome.remaining];
+  const clock = chain.now ?? Date.now;
+  const ordered: ChainCandidate[] = [outcome.selected, ...outcome.remaining];
+  const candidates: ChainCandidate[] = chain.cooldown
+    ? chain.cooldown.order(ordered, clock())
+    : ordered;
   let invalidOutputRetries = 0;
   let last: AiCompletionResult = {
     status: "error",
@@ -342,8 +473,14 @@ export async function dispatchAiCompletion(
       };
       continue;
     }
+    const startedAt = clock();
     const result = await adapter.complete(candidateRequest, cfg);
-    if (result.status === "ok") return result;
+    const finishedAt = clock();
+    if (result.status === "ok") {
+      chain.counters?.noteAttempt(candidate.id, "ok", finishedAt - startedAt, finishedAt);
+      chain.cooldown?.noteSuccess(candidate.id);
+      return result;
+    }
 
     // Attribute the failure to the provider that produced it, so an audit
     // record cannot claim the primary provider failed when a different
@@ -351,7 +488,19 @@ export async function dispatchAiCompletion(
     last = { ...result, provider: candidate.id };
 
     const failure = classifyCompletionFailure(result);
+    chain.counters?.noteAttempt(
+      candidate.id,
+      failure ?? "PROVIDER_ERROR",
+      finishedAt - startedAt,
+      finishedAt,
+    );
     if (failure === null) return result;
+    chain.cooldown?.noteFailure(
+      candidate.id,
+      failure,
+      result.status === "error" ? result.message : undefined,
+      clock(),
+    );
     const policy = advancePolicyFor(failure);
     if (policy === "stop") break;
     if (policy === "advance_once") {

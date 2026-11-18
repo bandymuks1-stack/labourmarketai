@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 
 import { useRouter } from "@/lib/i18n/navigation";
 import type { EvidenceImportActionState } from "@/lib/organization-evidence/import-actions";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * The interactive shells of the evidence-import workspace.
@@ -153,6 +154,7 @@ export function EvidenceSourceForm({
       className="flex flex-col gap-4"
       data-testid="evidence-source-form"
     >
+      <DisplayedWorkspaceField />
       {/* THE PRIMARY ACTION: one drop zone, one button, nothing to fill in. */}
       <label
         htmlFor="evidence-source-file"
@@ -815,6 +817,8 @@ export interface TimeSemanticsLabels {
   readonly remote: { readonly yes: string; readonly no: string; readonly unknown: string };
   readonly periodLabel: string;
   readonly periodHint: string;
+  /** "First and last month — both, or neither." */
+  readonly periodBoth: string;
   readonly from: string;
   readonly to: string;
   readonly save: string;
@@ -826,8 +830,15 @@ export interface TimeSemanticsLabels {
  * A human says what a figure a day cannot hold MEANS (owner correction
  * 2026-09-16): a period aggregate — optionally remote, with the period only
  * if they know it — a day's hours after all, or unknown. The source figure
- * is never edited, and a period is never invented: the date fields are
- * optional and empty by default. Staging only.
+ * is never edited, and a period is never invented: the fields are optional
+ * and empty by default. Staging only.
+ *
+ * MONTH PRECISION (owner rule 2026-09-23). A person who knows "six months"
+ * knows months, not days: the fields take a MONTH (`YYYY-MM`), the core
+ * records the first and the last day of those months with
+ * `periodPrecision: "month"`, and no surface shows the span more precisely
+ * than that. A start alone is not a period — once one bound is filled, the
+ * other is required (and the core refuses a start alone, too).
  */
 export function EvidenceTimeSemanticsForm({
   action,
@@ -852,6 +863,8 @@ export function EvidenceTimeSemanticsForm({
     FormData
   >(action, { kind: "idle" });
   const [kind, setKind] = useState<string>(suggestedKind);
+  const [periodStart, setPeriodStart] = useState("");
+  const [periodEnd, setPeriodEnd] = useState("");
   return (
     <form
       action={submit}
@@ -886,14 +899,35 @@ export function EvidenceTimeSemanticsForm({
         <fieldset className="flex flex-col gap-1">
           <legend className={labelText}>{labels.periodLabel}</legend>
           <p className="text-xs text-text-muted">{labels.periodHint}</p>
+          <p className="text-xs text-text-muted" data-testid="evidence-time-period-both">{labels.periodBoth}</p>
           <div className="flex flex-wrap gap-2">
             <label className="flex flex-col gap-1 text-xs text-text-secondary">
               {labels.from}
-              <input type="date" name="period_start" className={field} data-testid="evidence-time-period-start" />
+              <input
+                type="month"
+                name="period_start"
+                pattern="[0-9]{4}-[0-9]{2}"
+                value={periodStart}
+                onChange={(e) => setPeriodStart(e.target.value)}
+                max={periodEnd || undefined}
+                required={periodEnd !== ""}
+                className={field}
+                data-testid="evidence-time-period-start"
+              />
             </label>
             <label className="flex flex-col gap-1 text-xs text-text-secondary">
               {labels.to}
-              <input type="date" name="period_end" className={field} data-testid="evidence-time-period-end" />
+              <input
+                type="month"
+                name="period_end"
+                pattern="[0-9]{4}-[0-9]{2}"
+                value={periodEnd}
+                onChange={(e) => setPeriodEnd(e.target.value)}
+                min={periodStart || undefined}
+                required={periodStart !== ""}
+                className={field}
+                data-testid="evidence-time-period-end"
+              />
             </label>
           </div>
         </fieldset>

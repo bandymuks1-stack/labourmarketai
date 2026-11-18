@@ -167,9 +167,10 @@ export function QuickConfirmBatch({
                     <div className="flex items-baseline justify-between gap-2">
                       <span className="font-medium text-text-primary">
                         {e.workerName}
+                        {e.organization ? ` · ${e.organization}` : null}
                       </span>
                       <span className="text-meta text-text-muted">
-                        {formatUtcDate(e.createdAt, locale)}
+                        {formatUtcDate(e.workDay ?? e.createdAt, locale)}
                       </span>
                     </div>
                     <p className="mt-0.5 text-meta text-text-secondary">

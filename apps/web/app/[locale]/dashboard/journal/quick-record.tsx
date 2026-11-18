@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { extractWorkLog, type WorkLogParse } from "@/lib/conversation/worklog-extract";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { trackFunnel } from "@/lib/telemetry/task";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
 
 /**
@@ -34,10 +36,19 @@ import { personCalendarDay } from "@/lib/time/person-calendar-day";
 export function JournalQuickRecord({
   locale,
   labels,
+  selectedDay = null,
+  selectedDayLabel = null,
   otherDoors,
 }: {
   locale: string;
   labels: WorkLogLabels;
+  /** The day the person picked on the journal calendar (`?date=`). The
+   *  readback carries it unless the sentence names its own day — the person
+   *  never re-picks a day they already chose. */
+  selectedDay?: string | null;
+  /** The same day, formatted by the page for display — passed only when it
+   *  is not today, so the question can name it. */
+  selectedDayLabel?: string | null;
   /** The other ways to record (conversation, voice, the full form) — text
    *  links the page composes, rendered under the recorder so every existing
    *  door stays one tap away without competing with the one primary action. */
@@ -48,16 +59,35 @@ export function JournalQuickRecord({
   const id = useId();
   const [text, setText] = useState("");
   const [draft, setDraft] = useState<WorkLogParse | null>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
+  /** `journal_entry_started` fires ONCE per recorder, like the composer's. */
+  const startedRef = useRef(false);
+  // A sentence typed while the page was still loading lives only in the
+  // field: the page's state starts empty, so the button stayed disabled and
+  // the next re-render dropped the words (production walk 2026-10-21). Take
+  // whatever the field already holds once the recorder is live.
+  useEffect(() => {
+    const early = textRef.current?.value ?? "";
+    if (early) setText((current) => current || early);
+  }, []);
   const canUnderstand = text.trim().length >= 3;
+  // A picked PAST day is named in the question itself ("Ką dirbai rugsėjo
+  // 27 d.?") — "Ką šiandien dirbai?" over a readback for the 27th was the
+  // screen contradicting itself (owner walk 2026-09-28).
+  const heading = selectedDayLabel
+    ? t("whatOnDay", { day: selectedDayLabel })
+    : tJournal("whatDidYouDo");
 
   return (
     <Card compact className="flex flex-col gap-3" data-testid="journal-quick-record">
       <div className="flex flex-col gap-0.5">
         <h2
           id={`${id}-title`}
+          data-testid="journal-quick-record-day"
+          data-day={selectedDayLabel ? (selectedDay ?? undefined) : undefined}
           className="font-display text-card-title font-semibold text-text-primary"
         >
-          {tJournal("whatDidYouDo")}
+          {heading}
         </h2>
         <p className="text-support leading-relaxed text-text-secondary">{t("hint")}</p>
       </div>
@@ -65,9 +95,10 @@ export function JournalQuickRecord({
       {draft === null ? (
         <>
           <label className="sr-only" htmlFor={`${id}-text`}>
-            {tJournal("whatDidYouDo")}
+            {heading}
           </label>
           <textarea
+            ref={textRef}
             id={`${id}-text`}
             rows={3}
             value={text}
@@ -82,7 +113,16 @@ export function JournalQuickRecord({
               variant="primary"
               disabled={!canUnderstand}
               data-testid="journal-quick-record-understand"
-              onClick={() => setDraft(extractWorkLog(text, personCalendarDay()))}
+              onClick={() => {
+                const today = personCalendarDay();
+                // The journal funnel's middle step (activation audit fix #7):
+                // viewed → STARTED → saved, all labelled "journal".
+                if (!startedRef.current) {
+                  startedRef.current = true;
+                  trackFunnel(FUNNEL_EVENTS.journalEntryStarted, { surface: "journal" });
+                }
+                setDraft(extractWorkLog(text, today, selectedDay ?? today));
+              }}
             >
               {t("understand")}
             </Button>
@@ -95,6 +135,9 @@ export function JournalQuickRecord({
             draft={draft}
             locale={locale}
             labels={labels}
+            // Saves made here are JOURNAL-page saves, not conversation ones
+            // (activation audit fix #7) — same flow, honest funnel label.
+            surface="journal"
             onClose={() => setDraft(null)}
           />
           <button

@@ -26,6 +26,8 @@ import {
 import { HoursRemainder } from "@/components/app/work-in-numbers/hours-remainder";
 import { OrgLedger } from "@/components/app/work-in-numbers/org-ledger";
 import { PeriodNav } from "@/components/app/work-in-numbers/period-nav";
+import { ExperienceScale } from "@/components/app/work-in-numbers/experience-scale";
+import type { ExperienceRelationship } from "@/lib/journal/professional-experience";
 import { SkillShareList } from "@/components/app/work-in-numbers/skill-share-list";
 
 /**
@@ -155,11 +157,17 @@ export async function JournalWorkIntelligence({
   locale,
   labels,
   audience = "self",
+  relationships,
 }: {
   wi: WorkIntelligence;
   locale: string;
   labels: WorkIntelligenceLabels;
   audience?: WorkIntelligenceAudience;
+  /** The person's relationships to organizations as the surface could read
+   *  them (decision 0025) — joins the journal's contexts to organizations in
+   *  the experience scale. Omitted = this surface does not read them (the
+   *  organization views); `null` = the read failed (said on the block). */
+  relationships?: readonly ExperienceRelationship[] | null;
 }) {
   const t = await getTranslations("journal.intelligence");
   const tTier = await getTranslations("evidenceTier");
@@ -230,6 +238,13 @@ export async function JournalWorkIntelligence({
     }))
     .filter((d): d is typeof d & { name: string } => d.name !== null)
     .slice(0, MAX_DIRECTIONS);
+  const potential = (growth?.potential ?? [])
+    .map((p) => ({
+      slug: p.slug,
+      name: labels.skillName(p.slug),
+      fromNames: p.fromSlugs.map((f) => labels.skillName(f)).filter((n): n is string => n !== null),
+    }))
+    .filter((p): p is typeof p & { name: string } => p.name !== null);
 
   // Every list below is CAPPED for the page; the totals above them are not.
   // Where a cap cuts, the surface says so ("Rodoma 8 iš 12") — a silent cut
@@ -295,7 +310,29 @@ export async function JournalWorkIntelligence({
           </p>
         </header>
 
-        {noEntriesAtAll ? (
+        {noEntriesAtAll && ledger.kind === "rows" ? (
+          /* NO JOURNAL ENTRIES, BUT THE ORGANIZATION HOLDS RECORDED WORK
+             (decision 0020). Imported history is real work: it must not be
+             hidden behind "no recorded work yet" just because the person has
+             not written a diary entry (or has no account at all). Only the
+             organization's own ledger is shown - the journal-derived
+             sections have nothing to derive from and are not invented. */
+          <>
+            <p
+              className="text-sm leading-relaxed text-text-secondary"
+              data-testid="wi-ledger-only"
+            >
+              {tk("emptyNoEntriesLedger")}
+            </p>
+            <OrgLedger
+              view={ledger}
+              periodWord={t(`period.${wi.focus}`)}
+              locale={locale}
+              t={t}
+              tk={tk}
+            />
+          </>
+        ) : noEntriesAtAll ? (
           <p
             className="text-sm leading-relaxed text-text-secondary"
             data-testid="wi-empty"
@@ -306,6 +343,7 @@ export async function JournalWorkIntelligence({
           <>
             {/* 1 · at a glance — every period real and visible; the chosen one
               scopes the detail below (owner §4, §12) */}
+            <ExperienceScale wi={wi} locale={locale} t={t} relationships={relationships} />
             <PeriodNav wi={wi} locale={locale} t={t} href={periodHref} />
 
             {/* 1a · plausibility checks (owner §13) — warn, never corrupt:
@@ -797,6 +835,7 @@ export async function JournalWorkIntelligence({
                     dayLabel={day}
                     kindsCap={capLine("kinds", kinds.length, kindsAll.length)}
                     directionsCap={capLine("directions", directions.length, directionsTotal)}
+                    potential={potential}
                   />
                 </div>
               </div>

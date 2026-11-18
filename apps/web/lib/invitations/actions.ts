@@ -11,8 +11,9 @@ import { outboundLinkOrigin } from "@/lib/domain/canonical";
 import { createClient } from "@/lib/supabase/server";
 import {
   isTransactionalEmailConfigured,
-  sendTransactionalEmail,
 } from "@/lib/email/transactional";
+import { guardedSendTransactionalEmail } from "@/lib/email/send-ledger-store";
+import { recordDeliveryAttempt } from "@/lib/invitations/delivery-attempts";
 import {
   buildInvitationBody,
   buildInvitationSubject,
@@ -36,6 +37,8 @@ import {
 } from "@/lib/notifications/event-emitters";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { recordStaffReviewNotice } from "@/lib/operations/auto-review";
+import { acceptedReviewNotice, type ReviewNoticeSurface } from "@/lib/operations/auto-review-model";
 
 /**
  * Canonical invitation server actions (core-network area B).
@@ -75,6 +78,13 @@ function isMissingSchema(error: { code?: string; message?: string } | null): boo
  * the v1 function that IS applied, so the flow that works today keeps
  * working until the owner applies the migration — never a fake "not
  * enabled" for an invitation v1 can serve.
+ *
+ * THE FALLBACK FIRES ON FUNCTION-ABSENT ERRORS ONLY. A permission error
+ * (42501: the v1 accept / decline doors are revoked from the API roles by
+ * 20261003151500, because v1 has no multi-use ledger and one caller could
+ * exhaust a shareable link for everyone) or any other failure must never be
+ * retried through the weaker v1 door. Pinned by
+ * lib/guards/staff-invitation-email-binding-v1.test.ts.
  */
 function isMissingV2(error: { code?: string; message?: string } | null): boolean {
   if (!error) return false;
@@ -249,21 +259,40 @@ export async function createAndSendInvitations(input: {
       continue;
     }
 
-    const sendResult = await sendTransactionalEmail({
+    const sendResult = await guardedSendTransactionalEmail({
       to: email,
       subject: buildInvitationSubject(tEmail, type),
       text: buildInvitationBody(tEmail, {
         link: inviteLink,
         personalMessage: input.personalMessage ?? null,
       }),
-    });
+    }, { kind: "invitation", organizationId: input.organizationId ?? null });
+    if (sendResult.status === "suppressed_synthetic_address") {
+      // Never mailed by design (synthetic QA plus-address): the link is the result.
+      results.push({ email, outcome: "created", invitationId, inviteLink });
+      continue;
+    }
     const deliveryOutcome =
       sendResult.status === "sent" ? "sent" : "delivery_failed";
     // Record the TRUTHFUL provider result (never 'sent' without an ack).
-    await asAny(supabase).rpc("mark_invitation_delivery_v1", {
+    // The mail has already left (or failed) at the provider, so a bookkeeping
+    // failure here must not turn the send result into a lie in either
+    // direction — but it must not vanish either (G-12b): log it, never throw.
+    const markRes = (await asAny(supabase).rpc("mark_invitation_delivery_v1", {
       p_invitation_id: invitationId,
       p_outcome: deliveryOutcome,
-    });
+    })) as { error?: { message?: string } | null } | null;
+    if (markRes?.error) {
+      console.error(
+        "[invitations] mark_invitation_delivery_v1 failed:",
+        invitationId,
+        deliveryOutcome,
+        markRes.error.message,
+      );
+    }
+    // WHY it failed (reason code + class), never the address. No automatic
+    // retry here: the inviter sees `delivery_failed` and can resend.
+    await recordDeliveryAttempt({ invitationId, path: "create", result: sendResult, attempts: 1, autoRetry: false });
     results.push({
       email,
       outcome: sendResult.status === "sent" ? "sent" : "delivery_failed",
@@ -354,17 +383,29 @@ export async function resendInvitationAction(input: {
       locale: recipientLocale,
       namespace: "invitations.email",
     });
-    const sendResult = await sendTransactionalEmail({
+    const sendResult = await guardedSendTransactionalEmail({
       to: addressee,
       subject: buildInvitationSubject(tEmail, input.invitationType),
       text: buildInvitationBody(tEmail, {
         link: inviteLink,
         personalMessage: input.personalMessage ?? null,
       }),
-    });
+    }, { kind: "invitation" });
+    if (sendResult.status === "suppressed_synthetic_address") {
+      // Never mailed by design (synthetic QA plus-address): the new link is the result.
+      revalidatePath(`/${input.locale}/dashboard/network`);
+      return { status: "ok", outcome: "created", inviteLink };
+    }
     await asAny(supabase).rpc("mark_invitation_delivery_v1", {
       p_invitation_id: input.invitationId,
       p_outcome: sendResult.status === "sent" ? "sent" : "delivery_failed",
+    });
+    await recordDeliveryAttempt({
+      invitationId: input.invitationId,
+      path: "resend",
+      result: sendResult,
+      attempts: 1,
+      autoRetry: false,
     });
     revalidatePath(`/${input.locale}/dashboard/network`);
     return {
@@ -393,8 +434,78 @@ export type AcceptInvitationResult =
       hasDeclaredContext?: boolean;
     };
 
+/**
+ * What EVERY real acceptance does afterwards, whichever door it came through
+ * (the invite page's token door, the network page / chat by-id door): the
+ * inviter learns somebody accepted (AWAITED: a serverless runtime may freeze
+ * the instant the action returns), an employer-targeted invitation reaches
+ * the demand owner through the SAME emitter a worker's own click uses, the
+ * funnel event is recorded, and the network page is revalidated. One helper,
+ * so the two doors cannot drift apart again (convergence audit F5).
+ *
+ * The recipients come from the RPC's own return; nothing is read through the
+ * admin client.
+ */
+async function afterInvitationAccepted(args: {
+  userId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
+  invitationId: string | null;
+  surface: "invite_page" | "network";
+  locale?: string | null;
+  /** Where the person accepted and which review sentence that surface showed
+   *  (null = it showed none; review then stays on the manual door). */
+  noticeSurface: ReviewNoticeSurface;
+  reviewNotice: unknown;
+}): Promise<void> {
+  const { userId, data, invitationId, surface, locale } = args;
+  // FIRST, in the person's own session: the auditable acceptance fact for a
+  // staff invitation accepted under the review sentence (owner decision 1).
+  // Never blocks the accept; the RPC re-checks every condition in SQL.
+  await recordStaffReviewNotice({
+    invitationId,
+    surface: args.noticeSurface,
+    notice: acceptedReviewNotice(args.reviewNotice),
+  });
+  if (invitationId) {
+    await emitInvitationAcceptedNotification({
+      inviterProfileId: (data?.inviter_profile_id ?? null) as string | null,
+      acceptedByProfileId: userId,
+      invitationId,
+    });
+  }
+  // EMPLOYER_INVITED_TO_TARGET: the recipient is the INVITER (for an
+  // employer-to-worker targeted invitation the inviter is the demand owner,
+  // and the accept RPC returns that id itself; service_role holds no grant on
+  // customer_requests, 2026-09-17 root cause in the emitter).
+  if (data?.relationship === "interest_recorded" && data?.relationship_id) {
+    await emitDemandInterestNotification({
+      signalId: String(data.relationship_id),
+      ownerProfileId: (data?.inviter_profile_id ?? null) as string | null,
+      actorProfileId: userId,
+      country: null,
+    });
+  }
+  emitServerFunnelEvent(FUNNEL_EVENTS.invitationAccepted, {
+    source: "invitations",
+    route: "/invite",
+    metadata: {
+      surface,
+      entity_type: String(data?.invitation_type ?? "unknown"),
+      success: true,
+    },
+  });
+  if (locale) revalidatePath(`/${locale}/dashboard/network`);
+}
+
 export async function acceptInvitationAction(input: {
   token: string;
+  /** Lets the network page refresh after an accept (same as the by-id door). */
+  locale?: string | null;
+  /** The surface that accepted (invite page, addressed signup, onboarding). */
+  noticeSurface?: ReviewNoticeSurface;
+  /** `REVIEW_NOTICE_VERSION` only when that surface showed the review sentence. */
+  reviewNotice?: string | null;
 }): Promise<AcceptInvitationResult> {
   const supabase = await createClient();
   const {
@@ -420,38 +531,14 @@ export async function acceptInvitationAction(input: {
   const invitationId = (data?.invitation_id ?? null) as string | null;
   const relationship = (data?.relationship ?? null) as string | null;
   if (outcome === "accepted") {
-    // The inviter learns somebody accepted — AWAITED, a serverless runtime
-    // may freeze the instant the action returns. The recipient comes from
-    // the RPC's own return; nothing is read through the admin client.
-    if (invitationId) {
-      await emitInvitationAcceptedNotification({
-        inviterProfileId: (data?.inviter_profile_id ?? null) as string | null,
-        acceptedByProfileId: user.id,
-        invitationId,
-      });
-    }
-    // EMPLOYER_INVITED_TO_TARGET: the interest row the RPC wrote reaches the
-    // demand owner through the SAME emitter a worker's own click uses.
-    if (relationship === "interest_recorded" && data?.relationship_id) {
-      // The recipient is the INVITER: for an employer-to-worker targeted
-      // invitation the inviter is the demand owner, and the accept RPC
-      // returns that id itself — no admin lookup (service_role holds no
-      // grant on customer_requests; 2026-09-17 root cause in the emitter).
-      await emitDemandInterestNotification({
-        signalId: String(data.relationship_id),
-        ownerProfileId: (data?.inviter_profile_id ?? null) as string | null,
-        actorProfileId: user.id,
-        country: null,
-      });
-    }
-    emitServerFunnelEvent(FUNNEL_EVENTS.invitationAccepted, {
-      source: "invitations",
-      route: "/invite",
-      metadata: {
-        surface: "invite_page",
-        entity_type: String(data?.invitation_type ?? "unknown"),
-        success: true,
-      },
+    await afterInvitationAccepted({
+      userId: user.id,
+      data,
+      invitationId,
+      surface: "invite_page",
+      locale: input.locale,
+      noticeSurface: input.noticeSurface ?? "invite_page",
+      reviewNotice: input.reviewNotice ?? null,
     });
   }
   return {
@@ -509,6 +596,10 @@ export async function declineInvitationAction(input: {
 export async function acceptInvitationByIdAction(input: {
   invitationId: string;
   locale: string;
+  /** The network list or the chat card. */
+  noticeSurface?: ReviewNoticeSurface;
+  /** `REVIEW_NOTICE_VERSION` only when that surface showed the review sentence. */
+  reviewNotice?: string | null;
 }): Promise<SimpleInvitationResult> {
   const supabase = await createClient();
   const {
@@ -532,19 +623,14 @@ export async function acceptInvitationByIdAction(input: {
   }
   const outcome = (data?.outcome ?? "error") as string;
   if (outcome === "accepted") {
-    await emitInvitationAcceptedNotification({
-      inviterProfileId: (data?.inviter_profile_id ?? null) as string | null,
-      acceptedByProfileId: user.id,
+    await afterInvitationAccepted({
+      userId: user.id,
+      data,
       invitationId: input.invitationId,
+      surface: "network",
+      noticeSurface: input.noticeSurface ?? "network",
+      reviewNotice: input.reviewNotice ?? null,
     });
-    if (data?.relationship === "interest_recorded" && data?.relationship_id) {
-      await emitDemandInterestNotification({
-        signalId: String(data.relationship_id),
-        ownerProfileId: (data?.inviter_profile_id ?? null) as string | null,
-        actorProfileId: user.id,
-        country: null,
-      });
-    }
   }
   revalidatePath(`/${input.locale}/dashboard/network`);
   return { status: "ok", outcome };
@@ -698,19 +784,24 @@ export async function createShareableInvitationAction(input: {
     locale: recipientLocale,
     namespace: "invitations.email",
   });
-  const sendResult = await sendTransactionalEmail({
+  const sendResult = await guardedSendTransactionalEmail({
     to: email,
     subject: buildInvitationSubject(tEmail, type),
     text: buildInvitationBody(tEmail, {
       link: inviteLink,
       personalMessage: input.personalMessage ?? null,
     }),
-  });
+  }, { kind: "invitation", organizationId: input.organizationId ?? null });
+  if (sendResult.status === "suppressed_synthetic_address") {
+    // Never mailed by design (synthetic QA plus-address): the link is the result.
+    return { status: "ok", outcome: "created", invitationId, inviteLink, maxUses };
+  }
   const deliveryOutcome = sendResult.status === "sent" ? "sent" : "delivery_failed";
   await asAny(supabase).rpc("mark_invitation_delivery_v1", {
     p_invitation_id: invitationId,
     p_outcome: deliveryOutcome,
   });
+  await recordDeliveryAttempt({ invitationId, path: "create", result: sendResult, attempts: 1, autoRetry: false });
   return { status: "ok", outcome: deliveryOutcome, invitationId, inviteLink, maxUses };
 }
 

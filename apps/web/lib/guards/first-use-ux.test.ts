@@ -47,18 +47,21 @@ describe("theme toggle is discoverable from the always-visible avatar menu", () 
   });
 });
 
-describe("location radius is explained in plain words (25 km must mean something)", () => {
-  it("the picker renders the radius explanation", () => {
-    const base = read("components/app/market-map-base.tsx");
-    expect(base).toMatch(/data-testid="map-locator-radius-help"/);
-    expect(base).toMatch(/t\("radiusHelp"/);
+describe("location radius is a plain control of the one map (25 km must mean something)", () => {
+  it("the radius is a labelled select whose circle is drawn on the map itself", () => {
+    // The prose radius explanation (`radiusHelp`) was deliberately removed with
+    // the other explanatory blocks of the map page (one-canonical-map): the
+    // meaning of the radius is now the circle drawn around the saved location.
+    const controls = read("components/app/market-map/map-location-controls.tsx");
+    expect(controls).toMatch(/data-testid="map-locator-radius"/);
+    expect(controls).toMatch(/aria-label=\{t\("radiusLabel"\)\}/);
+    expect(read("components/app/market-map/own-location-layer.ts")).toMatch(/radius: overlay\.radiusKm \* 1000/);
   });
 
   for (const loc of DASHBOARD_LOCALES) {
-    it(`${loc}: radiusHelp copy exists and names the km value`, () => {
+    it(`${loc}: the radius option copy names the km value`, () => {
       const map = readJson(`messages/${loc}.json`).marketMapBase as Record<string, string>;
-      expect(map.radiusHelp, `${loc} radiusHelp`).toBeTruthy();
-      expect(map.radiusHelp).toContain("{km}");
+      expect(map.radiusValue, `${loc} radiusValue`).toContain("{km}");
     });
 
     it(`${loc}: geoDenied explains how to re-allow location (Android first-use)`, () => {

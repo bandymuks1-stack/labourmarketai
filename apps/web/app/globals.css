@@ -80,10 +80,10 @@
      and the bright point of the metallic ramp. NOT a second brand colour: it is
      the light ON the gold. 12.76:1 on graphite. */
   --c-brand-champagne: 242 214 117;
-  --c-brand-cyan: 0 194 255; /* EVIDENCE_SUPPORTED in the provenance ladder */
+  --c-brand-cyan: 138 170 200; /* #8AAAC8 muted steel blue — informational / EVIDENCE_SUPPORTED only (owner 2026-10-09: no neon cyan). Was 0 194 255. */
   --c-brand-violet: 123 92 255;
   --c-brand-purple: 181 123 255;
-  --c-brand-orange: 255 107 26;
+  --c-brand-orange: 224 150 70; /* AMBER, attention only (owner 2026-10-09: no decorative orange). Was 255 107 26. */
   /* state — semantic, NOT rebranded (owner §18: gold does not replace meaning) */
   --c-state-live: 0 230 118;
   --c-state-success: 52 211 153;
@@ -104,6 +104,10 @@
      only measures text on the PAGE. Near-black is 9.42:1 on the flat gold and
      5.66:1 on the darkest stop of the CTA gradient. */
   --c-text-on-brand: 10 10 10;
+  /* FOREGROUND ON A DANGER FILL. Same polarity rule as on-brand: state-danger
+     is a LIGHT red in dark (#ff5c5c — white on it is 3.03:1), so the label is
+     near-black (6.54:1); light's deep red takes white (5.45:1). */
+  --c-text-on-danger: 10 10 10;
   /* BRAND GRADIENTS ARE THEME-AWARE TOO. They used to be fixed hex ramps, which
      is fine while only one theme exists and a silent AA failure the moment two
      do: a LIGHT gold ramp under the light theme's WHITE on-brand text measured
@@ -141,7 +145,9 @@
      primary button would read as a confirmation. So confirmation moves to the
      verification green, which stays distinct from the evidence cyan above and
      from the gold brand. The DISTINCTION is what the doctrine protects — not
-     the specific hue. Flagged for owner review. */
+     the specific hue. OWNER-RATIFIED 2026-09-22: employer-confirmed =
+     trust-accent green; gold = brand / action / waiting / informative, never
+     verification or confirmation. */
   --c-trust-accent: 52 211 153;
 
   color-scheme: dark;
@@ -162,30 +168,38 @@
                                composer's own outline was effectively invisible.
                                Now 3.00:1 on card / 3.25:1 on page. */
   /* brand — the same gold identity, darkened for a light ground. #D4AF37 on
-     white is 1.9:1, so light uses the DEEP end of the owner's metallic ramp
-     (#8A6A12): 4.68:1 on the page, 5.06:1 on a card. Same brand, legible. */
-  --c-brand-blue: 138 106 18;
+     white is 1.9:1, so light uses a DEEP gold. It was the deep end of the
+     owner's metallic ramp (#8A6A12: 4.68:1 on the page, 5.06:1 on a card), but
+     gold text sits on its own gold tint in ~130 places (`bg-brand-blue/10`),
+     where #8A6A12 measured 4.12:1 — below AA. Since light became the starting
+     theme of every new account (owner decision 2026-11-15), #74590F, between
+     the ramp's deep end and the champagne below: 6.11:1 on the page, 6.61:1 on
+     a card; on its own 10 % tint 5.31:1 (page) / 5.72:1 (card) / 5.04:1
+     (nested), on 15 % ≥ 4.69:1, on 20 % ≥ 4.58:1 over the page and a card.
+     Same brand, legible. */
+  --c-brand-blue: 116 89 15;
   /* Champagne is "the light on the gold". On a light ground more light means
      LESS contrast, so the highlight role inverts: it goes deeper than the brand
      (#6B5210, 6.84:1 on the page) instead of brighter. */
   --c-brand-champagne: 107 82 16;
-  --c-brand-cyan: 0 150 198;
+  --c-brand-cyan: 0 117 156; /* #00759c — was 0 150 198 (3.40:1 on a card). 5.22:1 card / 4.83:1 page / 4.57:1 nested (owner ratified 2026-09-22: AA over the exact legacy light hue) */
   --c-brand-violet: 106 69 240;
   --c-brand-purple: 140 86 224;
-  --c-brand-orange: 224 84 8;
+  --c-brand-orange: 150 88 8; /* amber, attention only; #965808 — 5.9:1 on white */
   /* state */
-  --c-state-live: 0 168 86;
-  --c-state-success: 17 132 90;
-  --c-state-warning: 168 104 0;
-  --c-state-amber: 190 100 16;
+  --c-state-live: 0 126 73; /* #007e49 — was 0 168 86 (3.12:1). 5.15:1 card / 4.76:1 page / 4.51:1 nested */
+  --c-state-success: 16 122 83; /* #107a53 — was 17 132 90 (4.34:1 on the page). 5.34:1 card / 4.94:1 page / 4.68:1 nested */
+  --c-state-warning: 156 96 0; /* #9c6000 — was 168 104 0 (4.18:1 on the page). 5.14:1 card / 4.75:1 page / 4.50:1 nested */
+  --c-state-amber: 165 89 16; /* #a55910 — was 190 100 16 (4.18:1). 5.20:1 card / 4.81:1 page / 4.56:1 nested */
   --c-state-danger: 200 44 44;
   /* text */
   --c-text-primary: 11 13 23; /* near-black on light */
   --c-text-secondary: 74 82 104;
   --c-text-muted: 84 93 116; /* darkened (was 99 108 130) to clear AA 4.5:1 on the light page bg (ink-900) too, mirroring the dark-theme lift (audit PR-A) */
-  /* On light the brand is the DEEP gold #8A6A12, so the polarity flips back:
-     white is 5.06:1 on it, near-black only 3.91:1. */
+  /* On light the brand is the DEEP gold #74590F, so the polarity flips back:
+     white is 6.61:1 on it, near-black only 3.0:1. */
   --c-text-on-brand: 255 255 255;
+  --c-text-on-danger: 255 255 255;
   /* Deep end of the metallic ramp (see the dark block): white text clears AA on
      every stop here, and the accent word clears it against the white page. */
   --gradient-cta: linear-gradient(135deg, #8c6a16 0%, #6b5210 52%, #57420d 100%);
@@ -193,7 +207,14 @@
   /* tier — rank ladder; the light-ground gold rank */
   --c-tier-gold: 150 104 0;
   /* trust — the verification green, mirroring dark (see the note above) */
-  --c-trust-accent: 17 132 90;
+  --c-trust-accent: 16 122 83;
+  /* tier — RANK marks. The shared bright values (#5be0ff / #c6cdd8 / #c7895a)
+     are 1.55 / 1.60 / 2.94:1 on white, so light gets deepened rank hues:
+     5.22 / 5.80 / 6.53:1 on a card, all >= 4.5:1 on the nested ink-700 too. Rank is a rank axis, never a trust or
+     quality score (owner decision 2026-09-22). */
+  --c-tier-diamond: 0 118 149;
+  --c-tier-silver: 93 102 117;
+  --c-tier-bronze: 138 79 29;
 
   color-scheme: light;
 }
@@ -222,6 +243,15 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* ONE LONG WORD MUST NEVER WIDEN A PHONE. Six locales put compound words
+     and unbroken tokens into narrow boxes ("Dagboekregistraties" in a third
+     of a 390px screen, an e-mail address, a pasted reference) and each one
+     overflowed its box until someone met it (UX review 2026-10-24).
+     `break-word` breaks a word ONLY when it would otherwise overflow, and it
+     does not change min-content sizing, so normal text and table layout are
+     untouched. Inherited, so it covers every surface; a box that must not
+     break (code) opts out explicitly. */
+  overflow-wrap: break-word;
 }
 
 * {
@@ -296,6 +326,11 @@ a {
   to {
     transform: scale(1);
   }
+}
+
+/* A choice already made: the server-rendered banner never paints (UX-3). */
+html[data-consent-decided] [data-testid="analytics-consent-banner"] {
+  display: none;
 }
 
 @layer components {
@@ -591,6 +626,65 @@ a {
   animation: rise-in var(--motion-base) var(--motion-ease-out) both;
 }
 
+/* THE IDENTITY STAGE SIZES TO ITS CONTAINER, not the viewport (2026-09-29).
+   In the chat side panel the stage is ~550 px wide on a 1440 px screen: the
+   viewport breakpoints gave it the wide layout and the name broke mid-word.
+   Below 560 px of its OWN width it takes the phone composition: a small
+   portrait beside the name, the details full width. */
+.identity-stage {
+  container-type: inline-size;
+}
+@container (max-width: 560px) {
+  .identity-stage-person {
+    grid-row: auto !important;
+  }
+  .identity-stage-details {
+    grid-column: 1 / -1 !important;
+  }
+  .identity-stage .identity-portrait {
+    width: clamp(84px, 24cqi, 120px) !important;
+  }
+  /* A PERSON'S NAME IS NEVER CUT (layout walk 2026-11-15). The name used to
+     opt out of breaking; a long surname then ran past the stage's clipped
+     edge on the journal's card at 320-430 px, and the profile cut or
+     shortened it at 320-390 px. Now the name follows the stage's own width,
+     24 px from a 280 px stage down to 20 px on the tightest, and a word
+     breaks only when it alone is wider than the line. */
+  .identity-stage h2 {
+    font-size: clamp(1.25rem, 8.6cqi, 1.5rem);
+    line-height: 1.1;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+}
+
+/* The work rhythm (calendar week): a day's bar and a block's duration line
+   GROW to their recorded length — the motion says "this much time", once. */
+@keyframes rhythm-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes rhythm-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.rhythm-grow {
+  transform-origin: bottom;
+  animation: rhythm-grow var(--motion-slow) var(--motion-ease-out) both;
+}
+.rhythm-grow-x {
+  transform-origin: left;
+  animation: rhythm-grow-x var(--motion-slow) var(--motion-ease-out) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   [data-decor],
@@ -603,6 +697,8 @@ a {
   .signal-dot,
   .verified-pop,
   .rise-in,
+  .rhythm-grow,
+  .rhythm-grow-x,
   /* UX 2.0 conversation motion — folded into the ONE reduced-motion block so
      there is a single place to verify that every animation is covered. */
   .ua-msg-in,
@@ -613,11 +709,107 @@ a {
   .glow-hover,
   .glow-hover:hover,
   .ua-press,
-  .ua-press:active {
+  .ua-press:active,
+  .lm-card3d,
+  .lm-card3d:hover,
+  .lm-card3d:active {
     transition: none !important;
     transform: none !important;
   }
 }
+
+/* ── PREMIUM ACTION CARD (components/ui/premium-action-card.tsx) ──────────────
+ * Owner design direction + reviews 2026-10-26: a calm PHYSICAL object, not a
+ * glow. A clear surface (a soft light falling from the top onto graphite), a
+ * soft edge (a bright top bevel, a darker bottom bevel), depth (layered,
+ * soft shadows: contact + near + far) — no halo. NO lean (owner decision
+ * 2026-11-03, direction A: "pašalinti tilt efektą"): a 1 px lift
+ * on hover-capable pointers only; a press settles it. Only `transform` and
+ * `box-shadow` move — compositor work, no 3D library, no WebGL, no filters.
+ * Reduced motion is in the canonical block above. Light theme: white
+ * surface, a visible hairline and a grey shadow that separates the card from
+ * the page instead of melting into it. */
+.lm-card3d {
+  background:
+    radial-gradient(130% 80% at 50% 0%, rgb(var(--c-brand-champagne) / 0.05) 0%, transparent 55%),
+    linear-gradient(180deg, rgb(var(--c-ink-700)) 0%, rgb(var(--c-ink-800)) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.07),
+    inset 0 -1px 0 rgb(0 0 0 / 0.45),
+    0 1px 1px rgb(0 0 0 / 0.5),
+    0 6px 12px -6px rgb(0 0 0 / 0.55),
+    0 16px 28px -18px rgb(0 0 0 / 0.75);
+  transform: translateY(0);
+  transition:
+    transform var(--motion-fast) var(--motion-ease-out),
+    box-shadow var(--motion-fast) var(--motion-ease-out),
+    border-color var(--motion-fast) var(--motion-ease-out);
+}
+:root[data-theme="light"] .lm-card3d {
+  background: linear-gradient(180deg, rgb(255 255 255) 0%, rgb(var(--c-ink-700) / 0.55) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255),
+    inset 0 -1px 0 rgb(17 24 39 / 0.06),
+    0 1px 2px rgb(17 24 39 / 0.10),
+    0 6px 12px -6px rgb(17 24 39 / 0.16),
+    0 16px 28px -18px rgb(17 24 39 / 0.30);
+}
+@media (hover: hover) {
+  .lm-card3d:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.09),
+      inset 0 -1px 0 rgb(0 0 0 / 0.45),
+      0 2px 2px rgb(0 0 0 / 0.45),
+      0 10px 18px -8px rgb(0 0 0 / 0.6),
+      0 24px 36px -22px rgb(0 0 0 / 0.8);
+  }
+  :root[data-theme="light"] .lm-card3d:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255),
+      inset 0 -1px 0 rgb(17 24 39 / 0.06),
+      0 2px 3px rgb(17 24 39 / 0.10),
+      0 10px 18px -8px rgb(17 24 39 / 0.18),
+      0 24px 36px -22px rgb(17 24 39 / 0.34);
+  }
+}
+.lm-card3d:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: var(--motion-instant);
+}
+/* The screen's ONE primary: the same object, a little more lit and raised —
+   a warmer surface and a deeper shadow, never a halo. */
+.lm-card3d--primary {
+  background:
+    radial-gradient(130% 90% at 50% 0%, rgb(var(--c-brand-champagne) / 0.10) 0%, transparent 60%),
+    linear-gradient(180deg, rgb(var(--c-ink-700)) 0%, rgb(var(--c-ink-800)) 100%);
+}
+:root[data-theme="light"] .lm-card3d--primary {
+  background: linear-gradient(180deg, rgb(255 255 255) 0%, rgb(var(--c-brand-champagne) / 0.06) 100%);
+}
+/* Secondary tools: lower and flatter — a 1 px lift, no lean. */
+.lm-card3d--flat {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    inset 0 -1px 0 rgb(0 0 0 / 0.35),
+    0 4px 10px -6px rgb(0 0 0 / 0.6);
+}
+:root[data-theme="light"] .lm-card3d--flat {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255),
+    0 1px 2px rgb(17 24 39 / 0.08),
+    0 4px 10px -6px rgb(17 24 39 / 0.18);
+}
+@media (hover: hover) {
+  .lm-card3d--flat:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      inset 0 -1px 0 rgb(0 0 0 / 0.35),
+      0 8px 14px -8px rgb(0 0 0 / 0.65);
+  }
+}
+
 
 /* ── A DISABLED BRAND CONTROL IS GRAPHITE, NEVER DIMMED GOLD ────────────────
  *
@@ -920,5 +1112,89 @@ a {
     label:has(> input[type="checkbox"], > input[type="radio"]) {
     min-height: 2.5rem;
     align-content: center;
+  }
+  /* A FLOOR, NOT A CEILING (2026-10-16). The rules above out-specify any
+     single utility, so they also LOWERED every control that asked for more:
+     `min-h-11` (44 px, ~530 call sites) rendered at 40 px on phones. These
+     rules are as specific and come later, so a declared minimum above the
+     floor wins again. The list is derived and enforced by the guard. */
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-h-11, .min-h-\[2\.75rem\]) {
+    min-height: 2.75rem;
+  }
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-h-12) {
+    min-height: 3rem;
+  }
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-h-\[3\.25rem\]) {
+    min-height: 3.25rem;
+  }
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-h-14, .min-h-\[3\.5rem\]) {
+    min-height: 3.5rem;
+  }
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-h-16) {
+    min-height: 4rem;
+  }
+}
+
+/* ── living worker hero (landing) ─────────────────────────────────────────
+   The camera, the depth and the person-centred reveal between moments run
+   in the component (Web Animations, geometry from the photographs); these
+   are the pieces that do not depend on where the person stands. Reduced
+   motion: none of them moves. */
+@property --lwh-r {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 200%;
+}
+@keyframes living-hero-rise {
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.living-hero-rise { animation: living-hero-rise 800ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+/* a warm pass of light carries each change */
+@keyframes lwh-sweep {
+  from { transform: translateX(-80%) skewX(-14deg); opacity: 0; }
+  35% { opacity: 1; }
+  to { transform: translateX(260%) skewX(-14deg); opacity: 0; }
+}
+.lwh-sweep { animation: lwh-sweep 1800ms cubic-bezier(0.4, 0, 0.2, 1) both; }
+/* one story ends in obsidian before the next person's begins */
+@keyframes lwh-dip {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.lwh-dip { animation: lwh-dip 1100ms cubic-bezier(0.4, 0, 0.6, 1) both; }
+/* the identity gathers around the person before it becomes the card */
+@keyframes lwh-frag {
+  from { opacity: 0; transform: translateY(12px) scale(0.94); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.lwh-frag { animation: lwh-frag 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+/* one pass of light over the card as it forms */
+@keyframes lwh-sheen {
+  from { transform: translateX(0) skewX(-14deg); }
+  to { transform: translateX(460%) skewX(-14deg); }
+}
+.lwh-sheen { animation: lwh-sheen 1500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms both; }
+@media (prefers-reduced-motion: reduce) {
+  .living-hero-rise, .lwh-sweep, .lwh-frag, .lwh-sheen, .lwh-dip { animation: none; }
+}
+
+/*
+ * NO ZOOM ON FOCUS (DS-1, DS-2). iOS Safari zooms the page when a focused field's
+ * text is under 16 px, and most fields here are `text-sm` (14 px). One rule at
+ * phone width, so a field added tomorrow is covered too. Each selector carries a
+ * `:not()` on purpose: a bare `select` is weaker than `.text-sm` and would lose to it.
+ * From `sm` up the design's own size stands.
+ */
+@media (max-width: 639.98px) {
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"], [type="hidden"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
+  textarea:not([hidden]),
+  select:not([hidden]) {
+    font-size: 16px;
   }
 }

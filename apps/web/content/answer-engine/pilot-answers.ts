@@ -8,7 +8,8 @@
  * fallback under another locale). Kept outside messages/*.json (no i18n-debt).
  */
 import type { LocalizedAnswer } from "@/lib/answer-engine/publishing";
-import type { ActiveLocale } from "@/lib/i18n/config";
+import { answerReviewStatusFor } from "@/lib/answer-engine/contract";
+import { activeLocales, type ActiveLocale } from "@/lib/i18n/config";
 
 type Loc = ActiveLocale;
 type Body = {
@@ -112,6 +113,38 @@ const DRAFTS: readonly Draft[] = [
         title: "Arbeitssuche auf LabourMarket.ai beginnen",
         desc: "Wie Sie Ihre Arbeitssuche auf LabourMarket.ai starten: Profil aufbauen, Präferenzen setzen und passende Möglichkeiten sehen.",
       },
+      pl: {
+        slug: "jak-zaczac-szukac-pracy",
+        h1: "Jak zacząć szukać pracy na LabourMarket.ai?",
+        short: "Załóż bezpłatny profil zawodowy, wskaż kraje i rodzaj pracy, które Cię interesują, a możliwości pasujące do Twoich umiejętności pojawią się na Twojej tablicy — to Ty decydujesz, kiedy zgłosić zainteresowanie.",
+        full: [
+          "Zacznij od profilu zawodowego: dodaj swój zawód, prawdziwe umiejętności, języki i termin, od którego możesz zacząć. Możesz zaimportować istniejące CV i sprawdzić każdą podpowiedź — nic nie zostanie dodane bez Twojego potwierdzenia.",
+          "Gdy profil odzwierciedla Twoje umiejętności, LabourMarket.ai pokazuje pasujące możliwości pracy wraz z uczciwym wyjaśnieniem, dlaczego pasują. Nie ma gwarantowanej pracy ani rankingu porównującego Cię z innymi osobami — to Ty masz kontrolę i zgłaszasz zainteresowanie tylko tym, co Ci odpowiada.",
+        ],
+        steps: [
+          "Załóż bezpłatny profil i dodaj swój zawód oraz umiejętności.",
+          "Wskaż datę dostępności, języki i preferowane kraje.",
+          "Otwórz tablicę możliwości i zgłoś zainteresowanie pasującą rolą.",
+        ],
+        title: "Zacznij szukać pracy na LabourMarket.ai",
+        desc: "Jak rozpocząć poszukiwanie pracy na LabourMarket.ai: zbuduj profil, ustaw preferencje i zobacz możliwości pasujące do Twoich umiejętności.",
+      },
+      sv: {
+        slug: "hur-borjar-jag-soka-arbete",
+        h1: "Hur börjar jag söka arbete på LabourMarket.ai?",
+        short: "Skapa en kostnadsfri arbetsprofil, ange vilka länder och vilken typ av arbete du är öppen för, så visas möjligheter som passar dina färdigheter på din möjlighetstavla — du bestämmer själv när du visar intresse.",
+        full: [
+          "Börja med att bygga en arbetsprofil: lägg till ditt yrke, dina verkliga färdigheter, dina språk och när du kan börja. Du kan importera ett befintligt CV och granska varje förslag — ingenting läggs till som du inte har bekräftat.",
+          "När profilen speglar dina färdigheter visar LabourMarket.ai arbetsmöjligheter som passar, med en ärlig förklaring av varför. Det finns inget garanterat jobb och ingen rangordning av dig mot andra — du behåller kontrollen och visar bara intresse för det som passar dig.",
+        ],
+        steps: [
+          "Skapa en kostnadsfri profil och lägg till ditt yrke och dina färdigheter.",
+          "Ange när du kan börja, dina språk och vilka länder du föredrar.",
+          "Öppna din möjlighetstavla och visa intresse för en roll som passar.",
+        ],
+        title: "Börja söka arbete på LabourMarket.ai",
+        desc: "Så kommer du igång med jobbsökandet på LabourMarket.ai: bygg en profil, ange dina önskemål och se möjligheter som passar dina färdigheter.",
+      },
     },
   },
   {
@@ -171,6 +204,28 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Was ist ein Arbeitsprofil auf LabourMarket.ai",
         desc: "Ein LabourMarket.ai-Arbeitsprofil ist eine lebendige, belegbasierte berufliche Identität — mehr als ein statischer Lebenslauf.",
+      },
+      pl: {
+        slug: "czym-jest-profil-zawodowy",
+        h1: "Czym jest profil zawodowy na LabourMarket.ai?",
+        short: "Profil zawodowy to żywy zapis Twojej tożsamości zawodowej — umiejętności, doświadczenie, języki, dostępność i dowody — który rośnie z czasem, inaczej niż statyczne CV na papierze.",
+        full: [
+          "Zamiast jednorazowego CV profil zawodowy zbiera to, co potrafisz, i pokazuje to jako dowód: umiejętności, które deklarujesz, pracę, którą zapisujesz, i potwierdzenia od przełożonych. To Ty decydujesz, co jest widoczne, a prywatne zapisy domyślnie pozostają zamknięte.",
+          "Ponieważ profil jest żywy, nadąża za Twoją prawdziwą pracą — nowe umiejętności i doświadczenie pojawiają się, gdy je dodajesz, więc pracodawcy widzą uczciwy, aktualny obraz, a nie dokument, który starzeje się w chwili napisania.",
+        ],
+        title: "Czym jest profil zawodowy na LabourMarket.ai",
+        desc: "Profil zawodowy na LabourMarket.ai to żywa tożsamość zawodowa oparta na dowodach — więcej niż statyczne CV.",
+      },
+      sv: {
+        slug: "vad-ar-en-arbetsprofil",
+        h1: "Vad är en arbetsprofil på LabourMarket.ai?",
+        short: "En arbetsprofil är en levande bild av din yrkesidentitet — färdigheter, erfarenhet, språk, tillgänglighet och belägg — som växer med tiden, till skillnad från ett statiskt CV på papper.",
+        full: [
+          "I stället för ett engångs-CV samlar arbetsprofilen det du kan och visar det som belägg: färdigheter du anger, arbete du registrerar och bekräftelser från chefer. Du bestämmer vad som syns, och privata uppgifter är stängda som standard.",
+          "Eftersom profilen är levande hänger den med i ditt verkliga arbete — nya färdigheter och ny erfarenhet syns så fort du lägger till dem, så att arbetsgivare ser en ärlig och aktuell bild i stället för ett dokument som blir inaktuellt i samma stund som det skrivs.",
+        ],
+        title: "Vad är en arbetsprofil på LabourMarket.ai",
+        desc: "En arbetsprofil på LabourMarket.ai är en levande yrkesidentitet byggd på belägg — mer än ett statiskt CV.",
       },
     },
   },
@@ -232,6 +287,28 @@ const DRAFTS: readonly Draft[] = [
         title: "Angegebene vs. bestätigte Fähigkeit auf LabourMarket.ai",
         desc: "Der Unterschied zwischen einer selbst angegebenen und einer von einer Führungskraft bestätigten Fähigkeit auf LabourMarket.ai — und warum sie stets getrennt bleiben.",
       },
+      pl: {
+        slug: "umiejetnosc-zadeklarowana-a-potwierdzona",
+        h1: "Czym różni się umiejętność zadeklarowana od potwierdzonej?",
+        short: "Umiejętność zadeklarowana to ta, którą podajesz sam; potwierdzona to ta, którą przełożony zweryfikował na podstawie prawdziwej pracy. Obie są pokazywane osobno i nigdy nie są mieszane.",
+        full: [
+          "Gdy dodajesz umiejętność, ma ona najpierw status zadeklarowanej — to Twoje własne, uczciwe stwierdzenie. Umiejętność potwierdzona opiera się na dowodzie: przełożony weryfikuje ją na podstawie faktycznie wykonanej przez Ciebie pracy, więc niesie mocniejszy sygnał.",
+          "Platforma zawsze trzyma te dwa stany osobno. W każdym dopasowaniu widzisz, jaka część zgodności wynika z umiejętności potwierdzonych, a jaka z zadeklarowanych, więc i pracodawcy, i pracownicy wiedzą, co jest udowodnione, a co jest samodzielną deklaracją.",
+        ],
+        title: "Umiejętność zadeklarowana a potwierdzona na LabourMarket.ai",
+        desc: "Różnica między umiejętnością zadeklarowaną przez Ciebie a potwierdzoną przez przełożonego na LabourMarket.ai i dlaczego zawsze są rozdzielone.",
+      },
+      sv: {
+        slug: "sjalvdeklarerad-och-bekraftad-fardighet",
+        h1: "Vad är skillnaden mellan en självdeklarerad och en bekräftad färdighet?",
+        short: "En självdeklarerad färdighet anger du själv; en bekräftad färdighet har en chef verifierat utifrån verkligt arbete. Båda visas separat och blandas aldrig ihop.",
+        full: [
+          "När du lägger till en färdighet är den först självdeklarerad — ditt eget ärliga påstående. En bekräftad färdighet backas upp av belägg: en chef verifierar den utifrån arbete du faktiskt har utfört, och därför ger den en starkare signal.",
+          "Plattformen håller alltid isär de två. I varje matchning ser du hur stor del av passformen som bygger på bekräftade respektive självdeklarerade färdigheter, så att både arbetsgivare och arbetstagare vet vad som är belagt och vad som är eget påstående.",
+        ],
+        title: "Självdeklarerad och bekräftad färdighet på LabourMarket.ai",
+        desc: "Skillnaden mellan en självdeklarerad färdighet och en färdighet som en chef har bekräftat på LabourMarket.ai — och varför de alltid hålls isär.",
+      },
     },
   },
   {
@@ -291,6 +368,28 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Benachbarte Berufsrichtungen auf LabourMarket.ai",
         desc: "Was eine benachbarte Berufsrichtung auf LabourMarket.ai ist und wie Ihre vorhandenen Fähigkeiten realistische nächste Schritte aufzeigen.",
+      },
+      pl: {
+        slug: "czym-jest-pokrewny-kierunek-zawodowy",
+        h1: "Czym jest pokrewny kierunek zawodowy?",
+        short: "Pokrewny kierunek to zawód, do którego Twoje obecne umiejętności już częściowo pasują — realny następny krok, do którego możesz przejść, korzystając z tego, co masz, plus kilku nowych umiejętności.",
+        full: [
+          "Twoje umiejętności rzadko pasują tylko do jednej nazwy stanowiska. Pokrewny kierunek to zawód, który dzieli wiele umiejętności, które już masz, więc przejście jest realne, a nie skokiem w nieznane. LabourMarket.ai znajduje takie kierunki na podstawie Twoich prawdziwych umiejętności, a nie ze stałej listy.",
+          "Przy każdym kierunku widzisz umiejętności, które Cię z nim łączą, oraz — uczciwie — te, których może Ci jeszcze brakować. To sposób, by odkryć, gdzie możesz się rozwijać, a nie tylko jaką pracę podjąć dziś.",
+        ],
+        title: "Pokrewne kierunki zawodowe na LabourMarket.ai",
+        desc: "Czym jest pokrewny kierunek zawodowy na LabourMarket.ai i jak Twoje obecne umiejętności pokazują realne następne kroki.",
+      },
+      sv: {
+        slug: "vad-ar-en-narliggande-yrkesinriktning",
+        h1: "Vad är en närliggande yrkesinriktning?",
+        short: "En närliggande inriktning är ett yrke som dina nuvarande färdigheter redan delvis passar — ett realistiskt nästa steg som du kan ta med det du har plus några nya färdigheter.",
+        full: [
+          "Dina färdigheter passar sällan bara en enda yrkestitel. En närliggande inriktning är ett yrke som delar många av de färdigheter du redan har, så att steget blir realistiskt i stället för ett språng. LabourMarket.ai hittar dem utifrån dina verkliga färdigheter, inte från en fast lista.",
+          "För varje inriktning ser du vilka färdigheter som kopplar dig till den och, ärligt, vad du kanske fortfarande behöver. Det är ett sätt att upptäcka var du kan växa — inte bara vilket jobb du ska ta i dag.",
+        ],
+        title: "Närliggande yrkesinriktningar på LabourMarket.ai",
+        desc: "Vad en närliggande yrkesinriktning är på LabourMarket.ai och hur dina befintliga färdigheter visar realistiska nästa steg.",
       },
     },
   },
@@ -377,6 +476,38 @@ const DRAFTS: readonly Draft[] = [
         title: "Personalbedarf auf LabourMarket.ai einstellen",
         desc: "Wie ein Arbeitgeber einen Personalbedarf auf LabourMarket.ai einstellt: Rolle, Teamgröße, Ort, Zeit und Sprache — als Entwurf oder zum Abgleich eingereicht.",
       },
+      pl: {
+        slug: "jak-zglosic-zapotrzebowanie-na-prace",
+        h1: "Jak zgłosić zapotrzebowanie na pracę na LabourMarket.ai?",
+        short: "Opisz rolę lub rodzaj pracy, wielkość zespołu, kraj i lokalizację, termin rozpoczęcia, czas trwania oraz ewentualne wymagania językowe — zapisz to jako wersję roboczą albo prześlij do dopasowania.",
+        full: [
+          "Zapotrzebowanie zapisuje dokładnie to, czego szukasz: rolę lub rodzaj pracy, ile osób, gdzie i kiedy oraz ewentualne wymagania językowe. Pozostaje prywatne i widoczne tylko dla Twojej strony.",
+          "Możesz zapisać je jako wersję roboczą i dopracować albo przesłać, by trafiło do dopasowania. Następnie przeglądasz kandydatów, których umiejętności pasują, wraz z uczciwym wyjaśnieniem — nigdy z jedną ogólną oceną osoby.",
+        ],
+        steps: [
+          "Opisz rolę lub rodzaj pracy oraz wielkość zespołu.",
+          "Wskaż kraj, lokalizację, termin rozpoczęcia i czas trwania.",
+          "Dodaj ewentualne wymagania językowe, a potem zapisz wersję roboczą lub prześlij do dopasowania.",
+        ],
+        title: "Zgłoś zapotrzebowanie na pracę na LabourMarket.ai",
+        desc: "Jak pracodawca zgłasza zapotrzebowanie na pracę na LabourMarket.ai: rola, wielkość zespołu, lokalizacja, terminy i język — jako wersja robocza lub przesłane do dopasowania.",
+      },
+      sv: {
+        slug: "hur-lagger-jag-upp-ett-behov",
+        h1: "Hur lägger jag upp ett behov på LabourMarket.ai?",
+        short: "Beskriv rollen eller typen av arbete, hur stort team som behövs, land och ort, startperiod, varaktighet och eventuella språkkrav — spara som utkast eller skicka in för matchning.",
+        full: [
+          "Ett behov fångar exakt vad du söker: rollen eller typen av arbete, hur många personer, var och när, samt eventuella språkkrav. Det förblir privat och syns bara för din sida.",
+          "Du kan spara det som utkast och finslipa det, eller skicka in det så att matchningen börjar. Därefter granskar du kandidater vars färdigheter passar, med en ärlig förklaring — aldrig med ett enda samlat betyg på en person.",
+        ],
+        steps: [
+          "Beskriv rollen eller typen av arbete och teamets storlek.",
+          "Ange land, ort, startperiod och varaktighet.",
+          "Lägg till eventuella språkkrav och spara ett utkast eller skicka in för matchning.",
+        ],
+        title: "Lägg upp ett behov på LabourMarket.ai",
+        desc: "Så lägger en arbetsgivare upp ett behov på LabourMarket.ai: roll, teamstorlek, ort, tidpunkt och språk — som utkast eller inskickat för matchning.",
+      },
     },
   },
   {
@@ -437,11 +568,33 @@ const DRAFTS: readonly Draft[] = [
         title: "Was ist LabourMarket.ai",
         desc: "LabourMarket.ai ist ein universeller europäischer Arbeitsmarkt- und Chancenraum für alle Berufe, Bildungsniveaus, Arbeitskräfte und Arbeitgeber.",
       },
+      pl: {
+        slug: "czym-jest-labourmarket-ai",
+        h1: "Czym jest LabourMarket.ai?",
+        short: "LabourMarket.ai to uniwersalna europejska przestrzeń pracy i możliwości zawodowych — dla ludzi każdego zawodu i poziomu wykształcenia oraz dla pracodawców, firm, zespołów i agencji.",
+        full: [
+          "Pomaga każdemu znaleźć pracę, pracowników, zespoły, projekty i partnerów, pokazać prawdziwe umiejętności jako dowód, odkryć, gdzie te umiejętności mogą rosnąć, i zrozumieć rynek pracy — w różnych zawodach i w całej Europie.",
+          "To prawdziwy produkt, uczciwy z założenia: żadnych fałszywych danych, żadnej gwarantowanej pracy i żadnej jednej ogólnej oceny człowieka. To, co widzisz, odzwierciedla prawdziwe zapisy i prawdziwą aktywność, a Twoje prywatne informacje domyślnie pozostają zamknięte.",
+        ],
+        title: "Czym jest LabourMarket.ai",
+        desc: "LabourMarket.ai to uniwersalna europejska przestrzeń rynku pracy i możliwości zawodowych dla wszystkich zawodów, poziomów wykształcenia, pracowników i pracodawców.",
+      },
+      sv: {
+        slug: "vad-ar-labourmarket-ai",
+        h1: "Vad är LabourMarket.ai?",
+        short: "LabourMarket.ai är ett universellt europeiskt utrymme för arbete och yrkesmöjligheter — för människor inom alla yrken och på alla utbildningsnivåer, och för arbetsgivare, företag, team och bemanningsföretag.",
+        full: [
+          "Det hjälper alla att hitta arbete, personal, team, projekt och partner, att visa verkliga färdigheter med belägg, att upptäcka var färdigheterna kan växa och att förstå arbetsmarknaden — över yrkesgränser och i hela Europa.",
+          "Det är en riktig produkt, ärlig i grunden: inga påhittade uppgifter, inga garanterade jobb och inget samlat betyg på en person. Det du ser speglar verkliga uppgifter och verklig aktivitet, och din privata information är stängd som standard.",
+        ],
+        title: "Vad är LabourMarket.ai",
+        desc: "LabourMarket.ai är ett universellt europeiskt utrymme för arbetsmarknad och yrkesmöjligheter för alla yrken, utbildningsnivåer, arbetstagare och arbetsgivare.",
+      },
     },
   },
 ];
 
-const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de"];
+const LOCALES: readonly Loc[] = activeLocales;
 
 export const PILOT_ANSWERS: readonly LocalizedAnswer[] = DRAFTS.flatMap((d) =>
   LOCALES.map((locale): LocalizedAnswer => {
@@ -456,7 +609,7 @@ export const PILOT_ANSWERS: readonly LocalizedAnswer[] = DRAFTS.flatMap((d) =>
       practicalActions: b.steps,
       title: b.title,
       description: b.desc,
-      reviewStatus: "HUMAN_APPROVED",
+      reviewStatus: answerReviewStatusFor(locale),
       reviewDate: REVIEWED,
       editorialResponsibility: EDITORIAL,
     };

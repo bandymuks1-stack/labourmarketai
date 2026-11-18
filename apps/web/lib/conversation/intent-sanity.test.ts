@@ -1,6 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import { classifyIntent } from "@/lib/conversation/intent-router";
+
+// Patterns compile on first use (intent-router `p()`); pay that once here,
+// outside the first case's 5 s budget, so a loaded runner times nothing out.
+beforeAll(() => {
+  classifyIntent("labas");
+}, 30_000);
 
 /**
  * CIE goal-phrase sanity (rebuild phase 3): the exact sentences the owner

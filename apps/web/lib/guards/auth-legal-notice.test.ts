@@ -32,7 +32,7 @@ import { join } from "node:path";
  *     [locale] segment pages).
  */
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const web = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(web, rel), "utf8");
 
@@ -99,10 +99,20 @@ const renderNotice = (locale: string, variant: "signup" | "googleLogin") => {
   );
 };
 
+/** Tags removed until none is left (one pass can expose a new one: "<<a>b>"). */
+const stripTags = (s: string): string => {
+  let prev: string;
+  do {
+    prev = s;
+    s = s.replace(/<[^>]*>/g, "");
+  } while (s !== prev);
+  return s;
+};
+
 const anchorsOf = (html: string): Array<{ href: string; text: string }> =>
   [...html.matchAll(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g)].map((m) => ({
     href: m[1],
-    text: m[2].replace(/<[^>]+>/g, "").trim(),
+    text: stripTags(m[2]).trim(),
   }));
 
 // ---------------------------------------------------------------------------
@@ -140,6 +150,8 @@ describe("auth.legalNotice copy exists in every active locale", () => {
       ru: /соглаша\S* с политикой конфиденциальности/i,
       nl: /akkoord met het privacybeleid/i,
       de: /stimme der datenschutzerkl/i,
+      pl: /zgadzam się z polityką prywatności|wyrażam zgodę na politykę prywatności/i,
+      sv: /(godkänner|samtycker till|accepterar) integritetspolicy/i,
     };
     for (const loc of ACTIVE_LOCALES) {
       const n = noticeOf(loc);
@@ -207,7 +219,7 @@ describe("notice placement in the real forms", () => {
     expect(src).toContain('href="/legal/terms"');
     expect(src).toContain('href="/legal/privacy"');
     // A hardcoded locale in the href would double-prefix once Link adds its own.
-    expect(src).not.toMatch(/href="\/(lt|en|ru|nl|de)\//);
+    expect(src).not.toMatch(/href="\/(lt|en|ru|nl|de|pl)\//);
   });
 });
 

@@ -147,6 +147,15 @@ describe("2. app layer: RPC-only writes, RLS-scoped bounded reads, honest degrad
     expect(SECTION).toMatch(/work-objects-gated/);
   });
 
+  it("a row's edit form renders only once its panel is opened (page weight, 2026-10-19)", () => {
+    // 200 closed panels × ~120 picker options were ~2.9 MB of the projects page HTML.
+    expect(SECTION).toContain("<LazyEditDetails summary={labels.editButton}>");
+    expect(SECTION).toContain("{open ? children : null}");
+    // Latched: collapsing an opened panel never unmounts the form (unsaved edits survive).
+    expect(SECTION).toContain("if ((e.currentTarget as HTMLDetailsElement).open) setOpen(true);");
+    expect(SECTION).not.toMatch(/setOpen\(\(e\.currentTarget as HTMLDetailsElement\)\.open\)/);
+  });
+
   it("statuses are exactly active/archived; place summary is pure", () => {
     expect([...WORK_OBJECT_STATUSES]).toEqual(["active", "archived"]);
     expect(
@@ -216,6 +225,7 @@ describe("4. progress is DERIVED, never stored", () => {
       stageDone: 0,
       stageTotal: 0,
       percent: null, // NOT 0% and NOT 100% — nothing measurable exists
+      basis: "none",
     });
     expect(
       deriveProjectProgress(["done", "todo", "cancelled"], ["done", "planned"]),
@@ -224,13 +234,17 @@ describe("4. progress is DERIVED, never stored", () => {
       taskTotal: 2, // cancelled excluded from BOTH sides
       stageDone: 1,
       stageTotal: 2,
-      percent: 50,
+      percent: 50, // leaf tasks only: 1 of 2; stages are not in the percent
+      basis: "tasks",
     });
   });
 
   it("the read is status-only (no task/stage bodies flow into progress)", () => {
     expect(PROGRESS).toMatch(/select\("project_id, status"\)/);
     expect(PROGRESS).not.toMatch(/title|description|note/);
+    // a read that hit the limit or failed is unknown, never a percent
+    expect(PROGRESS).toMatch(/taskRows\.length < READ_LIMIT/);
+    expect(PROGRESS).toMatch(/tasksComplete/);
   });
 });
 

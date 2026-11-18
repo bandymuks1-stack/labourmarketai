@@ -2,9 +2,11 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { CheckCircle2, Circle } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { statedIsoText } from "@/lib/cv/period-dates";
 import { deriveProfileNextAction } from "@/lib/dashboard/next-action";
 import { skillEvidenceStatus } from "@/lib/profile/skill-evidence";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
+import { WorkContextSection } from "@/components/app/work-world/work-context-section";
 import { getProfileOpportunitySignal } from "@/lib/player-card/opportunity-signal";
 import { countTodayJournalEntries } from "@/lib/player-card/today-activity";
 import {
@@ -20,7 +22,21 @@ import {
   buildPlayerCardMinimum,
   type PlayerCardMinimumSource,
 } from "@/lib/identity/player-card-minimum";
-import { AvatarDisplay } from "@/components/app/avatar-display";
+import { IdentityStage } from "@/components/app/player-card/identity-stage";
+import { buildIdentityFacts } from "@/lib/player-card/identity-facts";
+import { playerInitials } from "@/lib/identity/player-identity";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
+import type { WorkPeriodTotals } from "@/lib/journal/work-intelligence";
+import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
+import { getMyDiscoverabilityState } from "@/lib/privacy/discoverability-actions";
+import { PROFILE_DISCOVERABILITY_V1 } from "@/lib/privacy/consent-definitions";
+import { buildOwnDiscoverabilityPreview } from "@/lib/privacy/discoverability-preview";
+import {
+  discoverabilityConsentLabels,
+  discoverabilityPreviewFields,
+  toConsentLocale,
+} from "@/lib/privacy/discoverability-view";
+import { employerVisibilityOf } from "@/lib/privacy/employer-visibility";
 import {
   CvCompletenessGrid,
   type CvSectionCard,
@@ -89,11 +105,20 @@ type StepKey = "goal" | "experience" | "review" | "location" | "availability";
  *  `LiveProfileSection` missing-list. */
 const STEPLESS_PILLARS: readonly ReadinessPillarKey[] = ["journal", "evidence"];
 
+/**
+ * `workCard` is an IN-PAGE anchor (2026-09-23). It used to send the person
+ * from this page to the conversation's player-card result, whose own "open"
+ * control sent them straight back here — a ping-pong between two homes for
+ * one editor. Since 2026-09-19 the profile renders the SAME `WorkCardEditor`
+ * (same loader, same save RPCs) at `#cv-availability`, which the page's
+ * `DetailsHashOpener` opens on arrival. The player-card RESULT stays reachable
+ * from the chat, ŠIANDIEN and the account menu.
+ */
 const PILLAR_HREF: Readonly<Record<ReadinessPillarKey, string>> = {
   profession: "#profile-edit",
   skills: "#profile-edit",
   availability: "#cv-availability",
-  workCard: "/dashboard?result=player-card",
+  workCard: "#cv-availability",
   journal: "/dashboard/journal",
   evidence: "/dashboard/journal",
 };
@@ -109,6 +134,10 @@ export async function ProfileHubOverview({
   cvSections,
   workerId,
   workContexts = null,
+  workAllTime = null,
+  organizationHistoryHours = null,
+  professionalExperienceHours = null,
+  unrecordedHours = null,
 }: {
   cvProvided: boolean;
   selfDeclaredCount: number;
@@ -137,6 +166,17 @@ export async function ProfileHubOverview({
    *  page already loaded — joined on engagement id so each history row can
    *  say "recorded h / confirmed h". Null = not loaded → no hours line. */
   workContexts?: readonly ContextWorkTime[] | null;
+  /** The journal's ALL-TIME period row the page already loaded (and whether
+   *  that read was truncated) — the identity stage's fact strip. Null → no
+   *  strip (the journal was not read), never zeros. */
+  workAllTime?: { readonly totals: WorkPeriodTotals; readonly truncated: boolean } | null;
+  /** All-time hours organizations recorded (day + period records), #2169. */
+  organizationHistoryHours?: number | null;
+  /** The one continuous professional history's total (decision 0025). */
+  professionalExperienceHours?: number | null;
+  /** Entries whose written hours were never recorded as time, and the
+   *  earliest such work day (lib/journal/unrecorded-hours.ts). */
+  unrecordedHours?: { readonly entries: number; readonly earliestDay: string } | null;
 }) {
   /**
    * W7-S3: seven namespaces and the locale in ONE stage. They were eight
@@ -145,7 +185,7 @@ export async function ProfileHubOverview({
    * even be started. `tReview` is the absorbed SkillsReviewBanner's own copy,
    * reused verbatim — the message and destination the worker already knows.
    */
-  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, locale] =
+  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, tConsent, tProf, tIdentity, locale] =
     await Promise.all([
       getTranslations("profileHub"),
       getTranslations("setupJourney"),
@@ -157,6 +197,12 @@ export async function ProfileHubOverview({
       // The card's own "recorded h / confirmed h" sentence — ONE key, shared
       // with the player card's history band.
       getTranslations("playerCard.visuals"),
+      // "Matomas darbdaviams" — the ONE consent component's labels, the same
+      // map the privacy screen, onboarding and the conversation use.
+      getTranslations("privacyConsent"),
+      // The identity stage: every profession's name + the fact strip's words.
+      getTranslations("professions"),
+      getTranslations("playerCard.identity"),
       getLocale(),
     ]);
 
@@ -187,11 +233,21 @@ export async function ProfileHubOverview({
    * start together — measured as a real TTFB regression before this batch was
    * introduced, which is exactly the trap this slice exists to avoid.
    */
-  const [playerCard, signalOrNull, todayCount] = await Promise.all([
+  const [playerCard, signalOrNull, todayCount, discoverability, visibilityPreview] = await Promise.all([
     getWorkerPlayerCard(),
     getProfileOpportunitySignal(),
     workerId ? countTodayJournalEntries(workerId) : Promise.resolve(0),
+    // The profile-discoverability consent (capability matrix P0: 57 of 59
+    // workers were invisible to all supply matching, the switch reachable
+    // only behind "More"). Same stage — no new serial await. Workers only:
+    // it is the worker profile an employer could find.
+    hasWorker ? getMyDiscoverabilityState() : Promise.resolve(null),
+    // "This is how companies would see your profile" — the own-row preview the
+    // consent text points at. Same stage, workers only.
+    hasWorker ? buildOwnDiscoverabilityPreview() : Promise.resolve([]),
   ]);
+  // SEP-7: a failed read is `unknown`, never `off`.
+  const visibility = hasWorker ? employerVisibilityOf(discoverability) : null;
   const readiness = playerCard ? deriveWorkerReadiness(playerCard) : null;
   // Hours per engagement — the journal's own per-context figures, joined on
   // engagement id (no second ledger; nothing summed across engagements).
@@ -204,6 +260,12 @@ export async function ProfileHubOverview({
 
   const steps: Array<{ key: StepKey; done: boolean; href: string }> = playerCard
     ? [
+        // The key is LEGACY and narrower than the fact: this step is completed
+        // by the PROFESSION pillar, not by anything about a job being sought
+        // (§5, 2026-09-27). Its copy therefore asks onboarding's own profession
+        // question; `lib/guards/one-surface-one-name.test.ts` pins that they stay
+        // the same question, so the key cannot drag the copy back to "Kokio
+        // darbo ieškai?" — a different fact this step does not record.
         { key: "goal", done: pillarMet("profession"), href: "#profile-edit" },
         {
           key: "experience",
@@ -219,12 +281,15 @@ export async function ProfileHubOverview({
         // minimum Player Card contract (launch audit §7.3) so this list and
         // the player card can never disagree about what is still missing.
         { key: "review", done: skillsOk, href: "#profile-edit" },
-        // The work card carries location + preferred countries; its editor
-        // lives inside the player-card result since W3.
+        // The work card carries location + preferred countries. Its ONE
+        // editor (`WorkCardEditor`) is on this very page at
+        // `#cv-availability` since 2026-09-19 — the player-card result
+        // renders the same component. Linking out to the result and back
+        // was a ping-pong; the anchor opens the editor in place.
         {
           key: "location",
           done: pillarMet("workCard"),
-          href: "/dashboard?result=player-card",
+          href: "#cv-availability",
         },
         {
           key: "availability",
@@ -233,7 +298,9 @@ export async function ProfileHubOverview({
         },
       ]
     : [];
-  const doneCount = steps.filter((s) => s.done).length;
+  // `doneCount` (steps done, out of 5) was removed with the step-subset
+  // fraction it fed — the progress line now counts the canonical readiness.
+  // `doneSteps` stays: the "what is already done" list is per-STEP by design.
   const missingSteps = steps.filter((s) => !s.done);
   const doneSteps = steps.filter((s) => s.done);
   // Completeness is a NAMED list, never a percentage (§19). The canonical
@@ -361,43 +428,132 @@ export async function ProfileHubOverview({
       data-testid="profile-hub-overview"
     >
       {/* ── WHO AM I ─────────────────────────────────────────────────────── */}
-      <header className="flex items-start gap-3">
-        <AvatarDisplay
-          signedUrl={avatarUrl}
-          displayName={personName}
-          alt={personName}
-        />
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <h2 className="truncate font-display text-lg font-semibold text-text-primary">
+      {/* ── WHO AM I — the identity stage (premium Player Card, 2026-09-29):
+          the person at portrait scale, EVERY profession, where they work now
+          and the journal's own figures. The status line below is unchanged. */}
+      <IdentityStage
+        name={personName}
+        avatarUrl={avatarUrl}
+        initials={playerInitials(personName)}
+        heading={
+          <h2 className="truncate font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary max-sm:whitespace-normal max-sm:break-words sm:text-4xl">
             {personName}
           </h2>
-          {/* STATUS — one honest state word from the ONE readiness model,
-              plus "N of M" so the word is never the only information. */}
-          {readiness ? (
-            <p
-              className="text-sm text-text-secondary"
-              data-testid="profile-hub-status"
-            >
-              <span
-                data-status={readiness.level}
-                className={
-                  readiness.level === "ready"
-                    ? "font-medium text-state-success"
-                    : "font-medium text-text-primary"
-                }
+        }
+        professions={[
+          ...new Set(
+            (playerCard?.professions ?? [])
+              .map((e) =>
+                professionDisplayName(e, (slug) =>
+                  tProf.has(slug as never) ? tProf(slug as never) : null,
+                ),
+              )
+              .filter((n): n is string => Boolean(n)),
+          ),
+        ]}
+        location={null}
+        availability={null}
+        currentWork={[
+          ...new Set(
+            (playerCard?.workHistory ?? [])
+              .filter((h) => h.current)
+              .map((h) => (h.organizationName ?? "").trim())
+              .filter((n) => n.length > 0),
+          ),
+        ]}
+        currentWorkLabel={tIdentity("currentWork")}
+        facts={buildIdentityFacts({
+          allTime: workAllTime?.totals,
+          truncated: workAllTime?.truncated ?? false,
+          organizationHistoryHours,
+          professionalExperienceHours,
+          locale,
+          t: (key, values) => tIdentity(key, values),
+        })}
+      >
+        <div className="flex min-w-0 flex-col gap-0.5">
+            {/* The hours above are what was RECORDED. Older entries whose
+                written hours were dropped before 2026-08-20 are named here,
+                with the way to their day — never added to the total. */}
+            {unrecordedHours ? (
+              <Link
+                href={`/dashboard/journal?date=${unrecordedHours.earliestDay}`}
+                className="text-meta leading-relaxed text-state-warning underline underline-offset-2"
+                data-testid="profile-hub-unrecorded-hours"
+                data-entries={unrecordedHours.entries}
               >
-                {tState(`readiness.${readiness.level}`)}
-              </span>
-              {" · "}
-              {tStep("progress", { done: doneCount, total: steps.length })}
-              {" · "}
-              <span data-testid="profile-hub-freshness">{freshness}</span>
-            </p>
-          ) : (
-            <p className="text-sm text-text-secondary">{t("explainer")}</p>
-          )}
+                {t("unrecordedHours", { count: unrecordedHours.entries })}
+              </Link>
+            ) : null}
+            {readiness ? (
+              <p
+                className="text-sm text-text-secondary"
+                data-testid="profile-hub-status"
+              >
+                <span
+                  data-status={readiness.level}
+                  className={
+                    readiness.level === "ready"
+                      ? "font-medium text-state-success"
+                      : "font-medium text-text-primary"
+                  }
+                >
+                  {tState(`readiness.${readiness.level}`)}
+                </span>
+                {" · "}
+                {/* ONE READINESS, ONE DENOMINATOR (§8, 2026-09-27).
+                    This read `{ done: doneCount, total: steps.length }` — a
+                    fraction over the 5 actionable STEPS — and it was wrong twice.
+                    Against ITSELF: this component separately lists the two
+                    `STEPLESS_PILLARS` (journal, evidence) as missing, so the
+                    progress number excluded two things the same screen was
+                    telling the person they still had to do. And against the REST
+                    OF THE PRODUCT: the player card renders `readiness.met`/
+                    `readiness.total` over all 6 pillars, so a person moving
+                    between the hub and their card met two different
+                    denominators — "0 iš 5" here and "0/6" there — for one
+                    underlying fact, with nothing explaining the difference.
+                    The canonical readiness is `deriveWorkerReadiness`, so it is
+                    the denominator everywhere. The 5 steps are unchanged and
+                    still the ACTIONABLE list; only the count is canonical now. */}
+                {tStep("progress", {
+                  done: readiness.met,
+                  total: readiness.total,
+                })}
+                {" · "}
+                <span data-testid="profile-hub-freshness">{freshness}</span>
+              </p>
+            ) : (
+              <p className="text-sm text-text-secondary">{t("explainer")}</p>
+            )}
         </div>
-      </header>
+      </IdentityStage>
+
+      {/* ── CAN EMPLOYERS FIND ME? ─────────────────────────────────────────
+          Owner goal 2026-10-24 ("matchability"): the most important worker
+          question is answered right under the identity — the status line and
+          the ONE action in place (the SAME consent component as the privacy
+          screen, source "profile"), not a door to another page below the
+          fold. A choice, not a missing step: it sits beside the checklist,
+          never inside it (consent must be freely given). SEP-7: an unknown
+          read renders the component's "could not check", never "off". */}
+      {visibility && discoverability && (
+        <div
+          id="visibility"
+          className="scroll-mt-20 rounded-md border border-border-subtle p-4"
+          data-testid="profile-hub-employer-visibility"
+          data-visibility={visibility}
+        >
+          <DiscoverabilityConsent
+            locale={locale}
+            source="profile"
+            state={discoverability}
+            legal={PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)]}
+            preview={discoverabilityPreviewFields(visibilityPreview, tConsent)}
+            labels={discoverabilityConsentLabels(tConsent, locale)}
+          />
+        </div>
+      )}
 
       {/* ── WHAT IS MISSING ──────────────────────────────────────────────── */}
       {steps.length > 0 && (
@@ -453,13 +609,17 @@ export async function ProfileHubOverview({
               className="text-xs leading-relaxed text-text-secondary"
               data-testid="profile-hub-review-note"
             >
+              {/* The count is of SKILLS not yet backed by work entries — say
+                  so in the same sentence (production 2026-10-25 read
+                  "24 — Kai kurie įrašai dar neaiškūs", a count of skills
+                  glued to a sentence about entries). */}
               <span data-testid="profile-hub-review-count">
                 {skillEvidence.unsupported}
               </span>{" "}
-              — {tReview("body")}{" "}
+              {tReview("noteLead", { count: skillEvidence.unsupported })}{" "}
               <a
                 href="#profile-edit"
-                className="font-medium text-brand-blue hover:underline"
+                className="font-medium text-text-primary underline underline-offset-4 hover:no-underline"
                 data-testid="profile-hub-review-cta"
               >
                 {tReview("cta")} ↓
@@ -483,7 +643,7 @@ export async function ProfileHubOverview({
         {journalIsPrimary ? (
           <Link
             href="/dashboard/journal"
-            className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3.5 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
             data-testid="profile-hub-primary-action"
           >
             {t(nextAction.labelKey)} →
@@ -491,7 +651,7 @@ export async function ProfileHubOverview({
         ) : (
           <a
             href="#profile-edit"
-            className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3.5 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
             data-testid="profile-hub-primary-action"
           >
             {t(nextAction.labelKey)} ↓
@@ -507,7 +667,7 @@ export async function ProfileHubOverview({
             assistant, no parallel workflow. */}
         <Link
           href="/dashboard"
-          className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
+          className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
           data-testid="profile-hub-ask-workspace"
         >
           {t("askWorkspace")} →
@@ -517,7 +677,7 @@ export async function ProfileHubOverview({
         {hasWorker && !journalIsPrimary && (
           <Link
             href="/dashboard/journal"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
+            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
             data-testid="profile-hub-journal-link"
           >
             {t("journalLink")} →
@@ -527,7 +687,7 @@ export async function ProfileHubOverview({
         {!aboutOk && (
           <a
             href="#profile-edit"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
+            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
             data-testid="profile-hub-cv-import-link"
           >
             {t("cvImportLink")} ↓
@@ -536,7 +696,7 @@ export async function ProfileHubOverview({
         {hasWorker && (
           <Link
             href="/dashboard/opportunities"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
+            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
             data-testid="profile-hub-opportunities-link"
           >
             {t("opportunitiesLink")} →
@@ -558,6 +718,11 @@ export async function ProfileHubOverview({
           className="flex flex-col gap-5 rounded-md border border-border-subtle px-3 py-4"
           data-testid="profile-hub-work-world"
         >
+            {/* LIVE WORK GRAPH, LEVEL 2 — the person at the centre; the same card
+                data (no second source) as one path from working now to what is
+                next. Every node opens the surface that owns its facts. */}
+            <WorkContextSection card={playerCard} name={personName} avatarUrl={avatarUrl} />
+
             {/* today's activity — absorbed from ProfileStateStrip */}
             <p
               className="text-sm text-text-secondary"
@@ -607,21 +772,30 @@ export async function ProfileHubOverview({
                               {/* An unknown employer or date renders as an
                                   honest gap, not a guess — the model already
                                   nulled them. */}
-                              <span>{e.organizationName ?? tLive("orgUnknown")}</span>
+                              {/* A self-declared job with no organization record
+                                  (chat history entry, 2026-09-29) is its own
+                                  title — "(organizacija nerodoma)" read as if an
+                                  employer were being hidden. */}
+                              {e.organizationName ? (
+                                <span>{e.organizationName}</span>
+                              ) : e.title ? null : (
+                                <span>{tLive("orgUnknown")}</span>
+                              )}
                               {e.title ? (
-                                <span className="text-text-secondary">
-                                  {" "}
-                                  — {e.title}
+                                <span className={e.organizationName ? "text-text-secondary" : undefined}>
+                                  {e.organizationName ? " — " : ""}
+                                  {e.title}
                                 </span>
                               ) : null}
                             </span>
                             <span className="flex flex-wrap items-center gap-2">
                               <PlaceTimeStamp>
-                                {e.startedAt ?? tLive("dateUnknown")}
+                                {(e.organizationName ? e.startedAt : statedIsoText(e.startedAt, "start")) ??
+                                  tLive("dateUnknown")}
                                 {e.current
                                   ? ` · ${tLive("current")}`
                                   : e.endedAt
-                                    ? ` — ${e.endedAt}`
+                                    ? ` — ${e.organizationName ? e.endedAt : statedIsoText(e.endedAt, "end")}`
                                     : ""}
                               </PlaceTimeStamp>
                               {/* The journal's hours in THIS engagement —

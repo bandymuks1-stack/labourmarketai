@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * DEM-8 — a recurring query that notifies.
@@ -142,7 +143,8 @@ describe("one notification path, not a second one", () => {
 
   it("the emitter uses the ONE audited deliver path and the shared exactly-once id", () => {
     const emitters = read("lib/notifications/event-emitters.ts");
-    const block = emitters.slice(emitters.indexOf("export async function emitSavedSearchMatchNotification"));
+    const start = emitters.indexOf("export async function emitSavedSearchMatchNotification");
+    const block = emitters.slice(start, emitters.indexOf("/**", start + 10));
     expect(block).toMatch(/await deliver\(admin, \{/);
     expect(block).toMatch(/deterministicEntityId\(/);
     // POINTER-ONLY, like the digest: no count is persisted.
@@ -212,6 +214,13 @@ describe("honest invisibility before the owner applies it", () => {
     expect(c).toMatch(/42P01|PGRST205/);
   });
 
+  it("the reader names the owner: an admin never reads other workers' searches", () => {
+    // The select policy also admits is_admin(); the filter is the privacy line.
+    const c = code(read(READER));
+    expect(c).toMatch(/resolveOwnWorkerId\(supabase, user\.id\)/);
+    expect(c).toMatch(/\.from\("worker_saved_searches"\)[\s\S]{0,120}\.eq\("worker_id", workerId\)/);
+  });
+
   it("the board renders no control at all while it is unavailable", () => {
     const page = code(read("app/[locale]/dashboard/opportunities/page.tsx"));
     expect(page).toMatch(/savedSearches\.available \? \(/);
@@ -221,7 +230,7 @@ describe("honest invisibility before the owner applies it", () => {
     expect(code(read(ACTIONS))).toMatch(/"feature-absent"/);
   });
 
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} carries the strip copy and every outcome`, () => {
       const s = JSON.parse(read(`messages/${loc}.json`)).opportunities?.savedSearches;
       expect(s, `${loc}.opportunities.savedSearches`).toBeTruthy();

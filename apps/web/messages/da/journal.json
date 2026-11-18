@@ -30,6 +30,20 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Vælg tilknytning…",
   "engagementAmbiguous": "Dette arbejde kan høre til mere end én tilknytning. Vælg hvilken, før du gemmer.",
+  "unnamedOrganization": {
+    "company": "Virksomhed uden navn",
+    "agency": "Bureau uden navn",
+    "other": "Organisation uden navn",
+    "ended": "Tidligere organisation uden navn"
+  },
+  "activeWorkspaceNoRelationship": "Du handler på vegne af {org}, men der er ikke registreret noget arbejdsforhold med {org}, så det tilbydes ikke her. Vælg den kontekst, arbejdet reelt hører til.",
+  "project": "Projekt",
+  "projectChoose": "Vælg projekt…",
+  "projectNone": "Ikke projektarbejde",
+  "projectAmbiguous": "Du er tilknyttet flere projekter. Vælg før du gemmer, hvilket projekt disse timer hører til (eller marker dem som ikke projektarbejde).",
+  "projectAuto": "Projekt: {name}",
+  "projectViaTeam": "{project} (via hold {team})",
+  "projectClient": "{project} (kundeprojekt)",
   "unconfirmedTimeBlocked": "{count} registrerede varigheder afventer stadig gennemgang og ville ikke blive gemt. Behold eller fjern dem først.",
   "entry": {
     "status": {
@@ -123,23 +137,25 @@
     "noActivity": "[EN] Work direction not detected"
   },
   "photo": {
-    "label": "Work photo (optional)",
+    "label": "Tilføj et foto / lav det til en fotorapport (valgfrit)",
     "freeTierNote": "You can attach 1 photo per entry for free. More photos and extended records will be a VIP feature.",
     "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
     "uploaded": "Photo attached to the entry.",
     "limitReached": "This entry already has a photo — the free tier allows 1 photo per entry.",
+    "quotaReached": "Din organisations lagergrænse er nået, så fotoet blev ikke gemt. Selve indlægget er gemt.",
     "notReady": "Photo storage is not provisioned in this environment yet — the entry was saved without the photo.",
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
     "uploading": "Uploader foto…",
     "remove": "Fjern foto",
-    "previewAlt": "Valgt foto"
+    "previewAlt": "Valgt foto",
+    "takePhoto": "Tag et billede"
   },
   "voice": {
     "entryCta": "Optag med stemme",
     "pageTitle": "Stemmeindtastning",
     "pageIntro": "Fortæl om din arbejdsdag — du gennemgår og retter teksten, før noget gemmes.",
     "backToJournal": "Tilbage til dagbogen",
-    "unavailable": "Stemmetranskription er ikke konfigureret endnu. Transkriptionsserveren er endnu ikke tilsluttet af platformens ejer — optagelse er deaktiveret indtil da. Du kan altid skrive dit indlæg som tekst.",
+    "unavailable": "Stemmetranskription er ikke tilgængelig endnu — optagelse er slået fra indtil videre. Du kan altid skrive dit indlæg som tekst.",
     "disclosureTitle": "Før du optager",
     "disclosureProcessing": "Din optagelse sendes til en behandlingsserver kontrolleret af LabourMarket.ai for at blive omdannet til tekst. Der bruges ingen tredjeparts taletjeneste.",
     "disclosureWhy": "Den bruges kun til at lave teksten nedenfor — intet andet.",
@@ -173,9 +189,35 @@
       "too_large": "Optagelsen er for stor (maks. 25 MB).",
       "too_long": "Optagelsen er for lang (maks. 10 minutter).",
       "unavailable": "Transskriptionsserveren er ikke tilgængelig lige nu.",
-      "undecodable": "Lyden kunne ikke læses — prøv igen."
+      "undecodable": "Lyden kunne ikke læses — prøv igen.",
+      "rate_limited": "For mange optagelser på kort tid - vent lidt, og prøv igen.",
+      "token_expired": "Upload-sessionen er udløbet - prøv igen.",
+      "unauthorized": "Din session har ikke tilladelse til tale - log ind igen.",
+      "service_unreachable": "Transskriptionsserveren kunne ikke nås. Tjek forbindelsen og prøv igen; optagelsen bevares på denne side."
     },
-    "permissionDenied": "Mikrofonadgang blev blokeret. Tillad mikrofonen i browserindstillingerne, og prøv igen."
+    "permissionDenied": "Mikrofonadgang blev blokeret. Tillad mikrofonen i browserindstillingerne, og prøv igen.",
+    "disclosureProvenance": "Den gemte post markeres som indtalt og gennemgået af dig.",
+    "state": {
+      "ready": "Klar. Vælg talesprog, og start optagelsen.",
+      "permissionRequired": "Din browser beder om mikrofontilladelse, når du starter. Intet optages, før du tillader det.",
+      "policyBlocked": "Webstedets sikkerhedspolitik blokerer mikrofonen her. Stemmeoptagelse er ikke tilgængelig på denne side - du kan skrive posten som tekst.",
+      "unsupported": "Denne browser kan ikke optage lyd her (kræver en sikker side og understøttelse af mikrofonoptagelse). Du kan uploade en lydfil eller skrive tekst.",
+      "noDevice": "Der blev ikke fundet nogen mikrofon på denne enhed.",
+      "deviceBusy": "Mikrofonen bruges af en anden app. Luk den, og prøv igen.",
+      "cancelled": "Optagelsen er annulleret. Intet blev uploadet eller gemt.",
+      "requesting": "Venter på din tilladelse til mikrofonen...",
+      "interrupted": "Optagelsen er sat på pause, fordi siden var skjult. Fortsæt, når du er tilbage.",
+      "interruptedKept": "Mikrofonen stoppede, så optagelsen sluttede tidligt. Det optagne er transskriberet nedenfor - tjek det.",
+      "uploading": "Uploader din optagelse..."
+    },
+    "language": {
+      "label": "Talesprog",
+      "auto": "Registrer automatisk",
+      "hint": "Vælg det sprog, du taler - det behøver ikke matche sidens sprog."
+    },
+    "recordAgain": "Optag igen",
+    "announceStarted": "Optagelsen er startet",
+    "announceMinutes": "{minutes} min. optaget"
   },
   "statusExplainer": "Hvordan bruges dine poster?",
   "exampleLine": "For eksempel: jeg monterede gipsvægge, læste tegninger og arbejdede med et laserniveau.",
@@ -243,7 +285,11 @@
     "sessionExpired": "Din session er udløbet. Log ind igen.",
     "noWorkerProfile": "Medarbejderprofil ikke fundet. Åbn kontoindstillingerne og aktivér medarbejderrollen.",
     "engagementRequired": "Vælg den arbejdskontekst (organisation eller projekt), som denne post hører til.",
+    "projectNotAssignable": "Det valgte projekt er ikke tildelt dig eller hører til en anden organisation. Vælg et projekt fra listen.",
     "notesRequired": "Beskriv hvad du arbejdede med — friteksten er kernen i posten.",
+    "workDateRequired": "Vælg den dag, arbejdet blev udført.",
+    "workDateInvalid": "Arbejdsdatoen er ikke en gyldig dato.",
+    "workDateFuture": "Arbejdsdatoen må ikke ligge i fremtiden.",
     "quantityInvalid": "Mængden skal være et ikke-negativt tal.",
     "unitSlugUnknown": "Denne enhed genkendes endnu ikke: {units}. Vælg en anden enhed, eller prøv igen senere.",
     "sourceDocumentInvalid": "Det angivne kildedokument blev ikke fundet blandt dine dokumenter.",
@@ -266,5 +312,6 @@
     "cannotRestoreCorrectionConflict": "Denne post kan ikke gendannes — der findes allerede en anden aktuel rettet version for det samme arbejde.",
     "metricsInsertFailed": "Posten blev ikke gemt fuldstændigt: {reason}. Posten blev afvist — prøv igen.",
     "moduleFieldInvalid": "Disse oplysninger hører ikke til denne type engagement: {fields}. Intet blev gemt — fjern dem, og prøv igen."
-  }
+  },
+  "contextEnded": "afsluttet"
 }

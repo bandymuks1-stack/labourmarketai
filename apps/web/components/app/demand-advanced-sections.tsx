@@ -19,7 +19,7 @@
  * buttons with aria-expanded; chips use aria-pressed.
  */
 import { useState, type ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { DarkListbox } from "@/components/ui/DarkListbox";
@@ -51,25 +51,14 @@ import type {
   DeductionRow,
   LanguageRow,
 } from "@/lib/demand/structured-demand-form";
-import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import { DEMAND_CURRENCY_OPTIONS } from "@/lib/demand/structured-demand-form";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
+import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 
-/** Language display names in their own language — locale-independent by
- *  design (the standard picker convention), so no 11-locale key set. */
-const LANGUAGE_NATIVE_NAMES: Record<string, string> = {
-  en: "English",
-  lt: "Lietuvių",
-  lv: "Latviešu",
-  et: "Eesti",
-  nl: "Nederlands",
-  de: "Deutsch",
-  da: "Dansk",
-  no: "Norsk",
-  sv: "Svenska",
-  pl: "Polski",
-  ru: "Русский",
-};
+/** Language display names: the ONE native-name map (worker-languages-model). */
+const LANGUAGE_NATIVE_NAMES: Record<string, string> = WORKER_LANGUAGE_NATIVE_NAMES;
 
-const CURRENCY_OPTIONS = ["EUR", "PLN", "SEK", "NOK", "DKK"] as const;
+const CURRENCY_OPTIONS = DEMAND_CURRENCY_OPTIONS;
 
 /**
  * THE CLUSTERS THAT OPEN ALREADY EXPANDED — the demand-first launch path.
@@ -417,7 +406,7 @@ export function DemandAdvancedSections({
             label={t("contractCountryLabel")}
             value={state.contractCountry}
             onValue={(v) => onChange({ contractCountry: v })}
-            options={MARKET_COUNTRIES.map((c) => ({ value: c, label: c }))}
+            options={countryOptionsForLocale(useLocale())}
             testId="sdv2-contract-country"
           />
         </div>

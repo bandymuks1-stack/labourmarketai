@@ -29,15 +29,17 @@ Faktinė būsena kontrakto užšaldymo metu (nespėliota): `main` = `e7964b8` (#
 
 1.10 **Mastelis.** World/Field statiniai mockup'ai nėra mastelio įrodymas. Prototipo/apkrovos/elgsenos validacija pažymėta §7 kaip privaloma prieš PUBLIC COMMERCIAL V1.
 
+1.11 **Patvirtinimo semantika — kanoninė (savininko sprendimas 2026-09-22).** Darbdavio patvirtinimas = `trust-accent` (verifikacijos ŽALIA); trečiosios šalies patvirtinimas — ta pati žalia su tekstiniu ekvivalentu. Auksas = prekės ženklas / veiksmas / „laukiama“ / informacinis ženklas — auksas NIEKADA nereiškia verifikacijos ar patvirtinimo. Tai pataiso Draft 2 formuluotę „auksas tik EMPLOYER/THIRD“ (P6 ACCEPTANCE) ir dokumento B A.5 „darbdavio patvirtinta — auksas“. `trust-ring` rodomas tik kai išsaugota būsena tikrai patvirtinta (`journal_entry_confirmations`), niekada išvedama iš išvaizdos, atitikimo ar išvestų duomenų. Rangas (`tier-*`) nėra pasitikėjimas ir niekada netampa darbuotojo kokybės balu. Prieinamumas viršesnis už tikslų šviesios temos atspalvį: šeši šviesios temos kanalai patamsinti iki AA (kodas: `apps/web/app/globals.css`).
+
 ---
 
 ## 2. Patvirtinti sprendimai (nekeičiami be naujo savininko teksto)
 
 | # | Sprendimas |
 |---|---|
-| 2.1 | Conversation = pagal poreikį iškviečiamas pirmos klasės valdymo paviršius, ne nuolatinis dominuojantis stulpelis |
+| 2.1 | ~~Conversation = pagal poreikį iškviečiamas pirmos klasės valdymo paviršius, ne nuolatinis dominuojantis stulpelis~~ — **PAKEISTA savininko sprendimu 0017 (2026-09-22):** pokalbis YRA kanoniniai namai ir valdymo plokštuma (`/dashboard`); vizualūs paviršiai — kontekstinės darbo erdvės aplink jį. Žr. `docs/DECISIONS/0017-one-product-chat-first.md`. |
 | 2.2 | Erdvinis modelis: WORLD → FIELD → CONTEXT/OBJECT |
-| 2.3 | Mobile V1 prototipas: ŠIANDIEN · PASAULIS · PAKLAUSK; Field/Context — kontekstiniai; tikslūs skirtukų pavadinimai — hipotezė, ne negrįžtama architektūra |
+| 2.3 | ~~Mobile V1 prototipas: ŠIANDIEN · PASAULIS · PAKLAUSK; Field/Context — kontekstiniai; tikslūs skirtukų pavadinimai — hipotezė, ne negrįžtama architektūra~~ — **hipotezė UŽDARYTA sprendimu 0017 (2026-09-22):** ŠIANDIEN = darbuotojo pokalbio atidarymo kontekstas (ne atskiri namai); PASAULIS = kontekstinė galimybių erdvė (`/dashboard/opportunities`, ne šaknis); PAKLAUSK — sąvoka panaikinta (rašymo laukas visada matomas namuose). Trijų skirtukų juostos nebėra. |
 | 2.4 | Player: K1 „Pasas su kraštu" šeima (compact / standard / expanded / project / opportunity / team / mobile) |
 | 2.5 | Field: F1 laikas/zonos operacinis laukas — pagrindinis; F2 tik kur yra reali geometrija |
 | 2.6 | Company: C1 projektai laike × pajėgumas |
@@ -121,7 +123,7 @@ PRIORITETAS: **P1**; SAFE PILOT reikia tik `EMPLOYER_CONFIRMED` etiketės (jau y
 READS: `journal_entries`, `journal_entry_confirmations`, `review_evidence_links`, `worker_documents`, `worker_skills`. ACTIONS: esami `confirm-work`, `quick-confirm`.
 STATUS: PARTIAL (patvirtinimai PRESENT; kode tik `SELF_DECLARED`; EVIDENCE/EMPLOYER/THIRD/SYSTEM žymėjimas ir tapatybės rodinys — TARGET). WRITE DOMAIN: `IDENTITY` (+ galimai 1 aditinė migracija provenance stulpeliui — GREEN klasė). DEPENDENCIES: P2. PARALLEL: **TAIP**.
 DO-NOT-DUPLICATE: viena provenance funkcija naudojama Player, Context, tapatybėje, Attention; lygis kyla tik iš patvirtintų įrašų (nekurti antros lygio logikos).
-ACCEPTANCE: kraštas + tekstas pagal klasę; auksas tik EMPLOYER/THIRD; „Tampu" ir „AI darbe" rodomi tik su įrodymais arba kaip sąžininga tuščia būsena (§1.9); §1.7 privatumas.
+ACCEPTANCE: kraštas + tekstas pagal klasę; EMPLOYER/THIRD = `trust-accent` žalia (žr. §1.11; ne auksas); „Tampu" ir „AI darbe" rodomi tik su įrodymais arba kaip sąžininga tuščia būsena (§1.9); §1.7 privatumas.
 PROD PROOF: walk `confirm-work` → kortelė rodo aukso kraštą + „patvirtino <vardas> <laikas>".
 
 ### P7 · Mobile V1 (PWA) — Šiandien · Pasaulis · Paklausk + žurnalas objekte

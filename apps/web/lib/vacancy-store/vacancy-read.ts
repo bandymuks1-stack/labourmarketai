@@ -39,6 +39,7 @@ import type {
   VacancyProviderKey,
   VacancyWorkingTime,
 } from "@/lib/vacancy-sources/vacancy-contract";
+import { vacancyDescriptionText } from "@/lib/vacancy-sources/vacancy-description-text";
 
 type VacancyDbClient = Pick<SupabaseClient, "from">;
 
@@ -247,9 +248,15 @@ export async function getPublicVacancyById(
   }
   if (!data) return { status: "not_found" };
 
+  // THE READING COPY of the publisher's words: an HTML feed's tags become plain
+  // paragraphs for the two uses of this read, the member's job page and the
+  // translation input (first real user's feedback 2026-11-04). The STORED value
+  // stays verbatim: nothing here writes, `contentHash` is the stored one, and
+  // categorization and matching do not read the description through this path.
+  const vacancy = fromPublicVacancyRow(data as Record<string, unknown>);
   return {
     status: "ok",
-    vacancy: fromPublicVacancyRow(data as Record<string, unknown>),
+    vacancy: { ...vacancy, descriptionRaw: vacancyDescriptionText(vacancy.descriptionRaw) },
   };
 }
 
@@ -301,6 +308,49 @@ export async function listPublicVacancyPreviewsByIds(
 
   const rows = (data ?? []) as readonly Record<string, unknown>[];
   return { status: "ok", previews: rows.map(toPreviewRow) };
+}
+
+/** What a MEMBER's board card adds to the anonymous projection: who
+ *  publishes the ad and where the work is (owner P0-3, 2026-11-03). */
+export interface MemberVacancyFactsV1 {
+  readonly employerName: string | null;
+  readonly city: string | null;
+  readonly region: string | null;
+  /** ISO 3166-1 alpha-2 as stored. */
+  readonly country: string | null;
+}
+
+/**
+ * The member-only facts for the ads ONE board page already shows, read under
+ * the signed-in person's OWN client: `public_vacancies` grants SELECT to
+ * `authenticated` only, so an anonymous client gets nothing here by
+ * construction (owner directive 2026-08-24 stands). The ids come from the
+ * board's own anonymous read, so this never widens what the page lists, and
+ * a failed read degrades to the anonymous card instead of failing the page.
+ */
+export async function listMemberVacancyFactsByIds(
+  client: VacancyDbClient,
+  ids: readonly string[],
+): Promise<ReadonlyMap<string, MemberVacancyFactsV1>> {
+  const wanted = [...new Set(ids)].slice(0, PREVIEW_BY_ID_MAX);
+  if (wanted.length === 0) return new Map();
+  const { data, error } = await client
+    .from(VACANCY_TABLE)
+    .select("id,employer_name,city,region,country")
+    .in("id", wanted);
+  if (error) return new Map();
+  const str = (v: unknown): string | null =>
+    typeof v === "string" && v.trim().length > 0 ? v.trim() : null;
+  const out = new Map<string, MemberVacancyFactsV1>();
+  for (const row of (data ?? []) as readonly Record<string, unknown>[]) {
+    out.set(String(row.id ?? ""), {
+      employerName: str(row.employer_name),
+      city: str(row.city),
+      region: str(row.region),
+      country: str(row.country),
+    });
+  }
+  return out;
 }
 
 /** Hard cap: the save RPC allows 200 bookmarks across both sources, so this
@@ -377,9 +427,56 @@ function sanitizeSearchTerm(raw: string): string {
  * at the type level only because the same mapper serves rows that were
  * selected without `id`; every `select("*")` read carries it.
  */
+/**
+ * ONE per-locale rendering of the original (`public_vacancies.translations`,
+ * migration 20260922150000). DERIVED, never the fact: it is valid only while
+ * `sourceHash` equals the row's `contentHash` — a re-imported revision makes
+ * it stale and the reader treats stale as absent.
+ */
+export interface VacancyLocaleTranslationV1 {
+  readonly status: "available" | "needs_review" | "failed";
+  /** Non-null ONLY when status === "available". Never the original echoed. */
+  readonly title: string | null;
+  /** Null until a reader asked for the body of THIS ad in THIS locale. */
+  readonly description: string | null;
+  readonly sourceLanguage: string;
+  readonly sourceHash: string;
+  readonly provider: string | null;
+  readonly model: string | null;
+  readonly generatedAt: string;
+}
+
 export type StoredPublicVacancyV1 = PublicVacancyV1 & {
   readonly storeId: string | null;
+  /** Per-locale renderings keyed by target locale (`{}` when none). */
+  readonly translations: Readonly<Record<string, VacancyLocaleTranslationV1>>;
 };
+
+function readTranslations(
+  raw: unknown,
+): Readonly<Record<string, VacancyLocaleTranslationV1>> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: Record<string, VacancyLocaleTranslationV1> = {};
+  for (const [locale, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (!v || typeof v !== "object") continue;
+    const e = v as Record<string, unknown>;
+    const status = e.status;
+    if (status !== "available" && status !== "needs_review" && status !== "failed") continue;
+    if (typeof e.sourceHash !== "string" || typeof e.sourceLanguage !== "string") continue;
+    out[locale] = {
+      status,
+      title: typeof e.title === "string" && e.title.trim() ? e.title : null,
+      description:
+        typeof e.description === "string" && e.description.trim() ? e.description : null,
+      sourceLanguage: e.sourceLanguage,
+      sourceHash: e.sourceHash,
+      provider: typeof e.provider === "string" ? e.provider : null,
+      model: typeof e.model === "string" ? e.model : null,
+      generatedAt: typeof e.generatedAt === "string" ? e.generatedAt : "",
+    };
+  }
+  return out;
+}
 
 export function fromPublicVacancyRow(
   row: Record<string, unknown>,
@@ -472,6 +569,10 @@ export function fromPublicVacancyRow(
 
     transformVersion: str("transform_version") ?? "",
     requestRef: str("request_ref") ?? "",
+
+    // A row read before migration 20260922150000 (or through a column list
+    // that omits it) simply has no renderings — never a fabricated one.
+    translations: readTranslations(row.translations),
   };
 }
 

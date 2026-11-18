@@ -184,6 +184,16 @@ export async function expressVacancyInterestCore(
   }
   const signalId = (signalRow as { id?: string } | null)?.id ?? null;
 
+  // NO client-supplied first-touch attribution here, deliberately: this is a
+  // SERVER emission and the visitor's localStorage record
+  // (`lib/telemetry/attribution.ts`) is not readable from here. Shipping it
+  // up from the client on a product action would be a new trusted-input
+  // surface for one column. Since 2026-09-22 the shared server emitter
+  // instead reads the SAME bounded keys back from the authenticated user's
+  // own auth user_metadata — the record the signup form stored at account
+  // creation (`lib/telemetry/first-touch-user-metadata.ts`) — so this row
+  // carries the campaign that brought the person, by a reviewed route, with
+  // nothing passed from this call site.
   emitServerFunnelEvent(FUNNEL_EVENTS.vacancyInterestExpressed, {
     source: "opportunities",
     route: "/dashboard/opportunities",

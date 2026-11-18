@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * CAL-7 — a person cannot really be in two places at once, and the product
@@ -92,7 +93,7 @@ describe("no new data path, no new authority — the reuse proof", () => {
     expect(read("lib/planning/planning-model.ts")).toMatch(
       /export const PLANNED_TRIP_STATUSES = \["approved", "completed"\] as const;/,
     );
-    expect(read(MODEL)).toMatch(/"project", "booking", "trip", "absence"/);
+    expect(read(MODEL)).toMatch(/"project", "booking", "trip", "plan", "absence"/);
   });
 
   it("a trip's PURPOSE is never read, only its destination", () => {
@@ -111,7 +112,7 @@ describe("no new data path, no new authority — the reuse proof", () => {
     // absence of trips (SEP-7).
     for (const rel of [READER, "lib/planning/roster-utilisation.ts"]) {
       expect(code(read(rel)), rel).toMatch(
-        /COMMITMENT_SOURCES: readonly ReservationSource\[\] = \["project", "booking", "trip"\]/,
+        /COMMITMENT_SOURCES: readonly ReservationSource\[\] = \["project", "booking", "trip", "plan"\]/,
       );
     }
   });
@@ -229,7 +230,7 @@ describe("the chat and the page state the SAME verdict", () => {
     expect(c).toMatch(/res\.ok\s*\?\s*\[labels\.assignDone, reservationNote\(res\.data, labels\)\]/);
   });
 
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} says it in the chat too, with the count`, () => {
       const chatCopy = JSON.parse(read(`messages/${loc}.json`)).conversation?.chat;
       expect(chatCopy?.assignAlreadyCommitted, `${loc}.assignAlreadyCommitted`).toBeTruthy();
@@ -240,7 +241,7 @@ describe("the chat and the page state the SAME verdict", () => {
 });
 
 describe("the manager can read the warning in their own language", () => {
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} carries the reservation copy, including all three sources`, () => {
       const r = JSON.parse(read(`messages/${loc}.json`)).projects?.assign?.reservation;
       expect(r, `${loc}.projects.assign.reservation`).toBeTruthy();

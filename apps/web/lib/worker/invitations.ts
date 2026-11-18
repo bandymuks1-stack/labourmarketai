@@ -35,7 +35,12 @@ export type AcceptInvitationOutcome =
   | "linked"
   | "already_linked"
   | "no_invitation"
-  | "no_worker_profile";
+  | "no_worker_profile"
+  // The caller's address is not VERIFIED (migration 20261003151000): an
+  // invitation addressed to an email is claimable only by that mailbox's proven
+  // owner. Returned BEFORE any lookup, so it says nothing about whether an
+  // invitation exists.
+  | "email_unverified";
 
 export type AcceptInvitationResult =
   | { kind: "ok"; outcome: AcceptInvitationOutcome }

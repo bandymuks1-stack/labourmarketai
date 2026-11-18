@@ -171,7 +171,7 @@ function ProjectPicker({
       <Explained
         testId="project-no-company"
         text={t("projectNoCompany")}
-        openLabel={t("openFull")}
+        openLabel={t("station.projects")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -181,7 +181,7 @@ function ProjectPicker({
       <Explained
         testId="project-blocked"
         text={t("projectBlocked")}
-        openLabel={t("openFull")}
+        openLabel={t("station.projects")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -191,7 +191,7 @@ function ProjectPicker({
       <Explained
         testId="project-empty"
         text={t("projectEmpty")}
-        openLabel={t("openFull")}
+        openLabel={t("station.projects")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -219,7 +219,7 @@ function ProjectPicker({
           </li>
         ))}
       </ul>
-      <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+      <OpenFull label={t("station.projects")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
     </div>
   );
 }
@@ -336,7 +336,7 @@ function ProjectDetailView({
         <Explained
           testId={`project-${view.kind}`}
           text={text}
-          openLabel={t("openFull")}
+          openLabel={t("station.projects")}
           onOpenFull={() => onOpenFull(FULL_ROUTE)}
         />
       </div>
@@ -621,7 +621,7 @@ function Pulse({ pulse, assignmentTotal }: { pulse: ProjectDetail["pulse"]; assi
     <div className="flex flex-col gap-1" data-testid="project-pulse">
       <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("pulseTitle")}</h3>
       <dl className="flex flex-col gap-1 text-support">
-        <Row label={t("pulseToday")} value={String(pulse.entriesToday)} />
+        <Row label={t("pulseToday")} value={pulse.entriesToday === null ? "—" : String(pulse.entriesToday)} />
         <Row label={t("pulseEvidence")} value={t("pulseEvidenceValue", { entries: pulse.evidenceEntries, photos: pulse.evidencePhotos })} />
         <Row label={t("pulseTasks")} value={t("pulseTasksValue", { open: pulse.tasksOpen, overdue: pulse.tasksOverdue })} />
         {pulse.readinessTotal > 0 && (

@@ -20,6 +20,7 @@
  */
 import { isExplicitJournalRequest } from "./intent-router";
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 export type WorkLogParse = {
   /** ISO date (YYYY-MM-DD) — parsed or defaulted to `today`. */
@@ -84,17 +85,200 @@ function durationLabel(mins: number): string {
 // "A-7-12" are none of them spans).
 const SPAN_RE =
   /(?<![\p{L}\p{N}_\-–—/.:])(?:nuo|from|с|von|van)?\s*(\d{1,2})(?:[:.](\d{2}))?\s*(?:iki|to|до|bis|tot|[-–—])\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_SPAN_RE =
+  /(?<![\p{L}\p{N}_\-–—/.:])(?:nuo|from|с|von|van|från)?\s*(\d{1,2})(?:[:.](\d{2}))?\s*(?:iki|to|до|bis|tot|till|[-–—])\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
+// Polish "od 7 do 16" — read ONLY as the od…do PAIR: a bare "2 do 3 godzin"
+// is a range of hours (2–3 h), never the clock span 02:00–03:00. Measured
+// 2026-10-11: without it a Polish welder's "od 7 do 16, 30 min przerwy"
+// saved the 30-minute break as the day's work.
+const PL_SPAN_RE =
+  /(?<![\p{L}\p{N}_])od\s*(\d{1,2})(?:[:.](\d{2}))?\s*do\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
+
+const DAY_MINUTES = 24 * 60;
+/** A span may run past midnight only when it STARTS in the afternoon or
+ *  evening: "nuo 22 iki 6" is a night shift, while "8-5" could as well be a
+ *  12-hour clock day (8 am–5 pm) — that reading is left unparsed, never
+ *  guessed (the person states the time instead). */
+const OVERNIGHT_EARLIEST_START = 12 * 60;
+/** What may stand between two spans for the second to be part of the SAME
+ *  working day: a comma/semicolon/plus or one "and" word, nothing else.
+ *  "8-12 ir 13-17" is a split shift; "8-17, sumontavau 3-4 langus" is one
+ *  span followed by a count. */
+const SPAN_JOINER_RE = /^\s*(?:[,;+&/]\s*)?(?:(?:ir|and|и|und|en|i|oraz|a|bei)\s+)?$/iu;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_SPAN_JOINER_RE = /^\s*(?:[,;+&/]\s*)?(?:(?:ir|and|и|und|en|i|oraz|a|bei|och)\s+)?$/iu;
+
+type ResolvedSpans = {
+  /** Minutes since midnight of the first span's start. */
+  readonly start: number;
+  /** Minutes since the first span's day midnight — may exceed 24 h - 1 when
+   *  the work ran past midnight; read `% DAY_MINUTES` for the clock time. */
+  readonly end: number;
+  /** Sum of the spans' own minutes (the gaps between them are not in it). */
+  readonly worked: number;
+  /** Sum of the gaps between joined spans. */
+  readonly gap: number;
+  readonly count: number;
+};
+
+/**
+ * Every clock span the sentence states for ONE working day, resolved on one
+ * time line: a night shift ends on the next day ("nuo 22 iki 6" = 8 h, was
+ * 0 h), and joined spans add up ("8-12 ir 13-17" = 8 h, was the first 4 h).
+ * The second and later spans count only while they are joined to the
+ * previous one (SPAN_JOINER_RE) and follow it in time; the first span that
+ * does not ends the chain, so a later stray range is never added. `null` when
+ * no span resolves.
+ */
+function resolveClockSpans(raw: string, swedish: boolean): ResolvedSpans | null {
+  const pick = (re: RegExp) => [...raw.matchAll(new RegExp(re.source, "giu"))];
+  let matches = pick(swedish ? SV_SPAN_RE : SPAN_RE);
+  if (matches.length === 0) matches = pick(PL_SPAN_RE);
+  if (matches.length === 0) return null;
+
+  let first = 0;
+  let prevEnd = 0;
+  let prevIndexEnd = 0;
+  let worked = 0;
+  let gap = 0;
+  let count = 0;
+  for (const m of matches) {
+    const s = toMinutes(m[1]!, m[2]);
+    const e = toMinutes(m[3]!, m[4]);
+    if (s == null || e == null || s === e) break;
+    // Past midnight only from the afternoon on, and only when the span reads
+    // as clock time — written with minutes ("22:00-06:00") or with words
+    // ("nuo 22 iki 6") — so a bare descending pair ("20-5 cm") stays a range.
+    if (e < s && (s < OVERNIGHT_EARLIEST_START || (m[2] == null && m[4] == null && /[-–—]/u.test(m[0])))) break;
+    if (count > 0 && !(swedish ? SV_SPAN_JOINER_RE : SPAN_JOINER_RE).test(raw.slice(prevIndexEnd, m.index))) break;
+    // Place the span on the time line of the day the previous one ended on
+    // (the first span on its own day); it may itself cross midnight.
+    const ls = Math.floor(prevEnd / DAY_MINUTES) * DAY_MINUTES + s;
+    const le = ls + (e > s ? e - s : e + DAY_MINUTES - s);
+    if (count > 0 && (ls < prevEnd || le - first > DAY_MINUTES)) break;
+    if (count === 0) first = ls;
+    else gap += ls - prevEnd;
+    worked += le - ls;
+    prevEnd = le;
+    prevIndexEnd = m.index + m[0].length;
+    count += 1;
+  }
+  if (count === 0) return null;
+  return { start: first, end: prevEnd, worked, gap, count };
+}
+
 // "45 min", "45 minučių", "45 мин", optionally near a break word.
 const BREAK_RE =
   /(\d{1,3})\s*(?:min|минут|мин)\w*/iu;
-const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|break|lunch|обед|перерыв|pauze|pause)/iu;
+// `\b` bounds the ASCII "break" only — "breakdown" is work, not a pause.
+const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|\bbreaks?\b|lunch|обед|перерыв|pauze|pause|przerw|mittag)/iu;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|\bbreaks?\b|lunch|обед|перерыв|pauze|pause|przerw|mittag|(?<!\p{L})paus(?!\p{L})|(?<!\p{L})rast(?:en)?(?!\p{L}))/iu;
+// A break stated in HOURS — "1 h break", "1 val. pertrauka", "перерыв 1 час".
+// Read only when the hour figure stands BESIDE the break word, so the day's
+// own "9 valandas" is never taken for the break.
+const BREAK_HOUR_UNIT = String.raw`(\d{1,2})(?:[.,](\d))?\s*(?:h(?!\p{L})|hrs?(?!\p{L})|hour\w*|val\.?|valand\w*|ч(?!\p{L})|час\w*)`;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_BREAK_HOUR_UNIT = String.raw`(\d{1,2})(?:[.,](\d))?\s*(?:h(?!\p{L})|hrs?(?!\p{L})|hour\w*|val\.?|valand\w*|ч(?!\p{L})|час\w*|timm(?:e|es|ar|ars)|tim\.?(?!\p{L}))`;
+const BREAK_WORD = String.raw`(?:pertrauk\w*|piet\w*|\bbreaks?\b|lunch|обед\w*|перерыв\w*|pauze|pause|przerw\w*|mittag\w*)`;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_BREAK_WORD = String.raw`(?:pertrauk\w*|piet\w*|\bbreaks?\b|lunch|обед\w*|перерыв\w*|pauze|pause|przerw\w*|mittag\w*|(?<!\p{L})paus(?!\p{L})|(?<!\p{L})rast(?:en)?(?!\p{L}))`;
+const BREAK_HOURS_RE = new RegExp(
+  `${BREAK_HOUR_UNIT}\\s*${BREAK_WORD}|${BREAK_WORD}\\s*(?:of\\s+|for\\s+|[:–—-]\\s*)?${BREAK_HOUR_UNIT}`,
+  "iu",
+);
+const SV_BREAK_HOURS_RE = new RegExp(
+  `${SV_BREAK_HOUR_UNIT}\\s*${SV_BREAK_WORD}|${SV_BREAK_WORD}\\s*(?:of\\s+|for\\s+|[:–—-]\\s*)?${SV_BREAK_HOUR_UNIT}`,
+  "iu",
+);
 // explicit "8 valandas / hours / часов"
-const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?)/iu;
+// pl "8,5 godziny" / "8 godz." and de "8 Std." were not read (walk 2026-10-11:
+// a Polish entry saved with no duration). sv "8 timmar" / "8 tim" are read by
+// the Swedish twin below (2026-11-12).
+const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?|godz\w*|std\.?(?!\p{L}))/iu;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?|godz\w*|std\.?(?!\p{L})|timm(?:e|es|ar|ars)(?!\p{L})|tim\.?(?!\p{L}))/iu;
 // site after "objekte X" / "statyboje X" / "site X" / "на объекте в X" —
 // the locative forms only: "Statyba" inside a company name is a NAME, not
 // a place word (the context rules below read it)
+//
+// THE WORD AFTER A PLACE WORD IS NOT ALWAYS A PLACE (local UX review
+// 2026-10-24, row 8.2): "on site for 6 hours" filled the site with "for",
+// "… auf der Baustelle gemauert" with "gemauert" — a function word and a
+// verb, saved unless the person noticed. So the place word may be followed
+// by one preposition ("auf der Baustelle in Berlin", "на объекте в Kaunas",
+// "na budowie w Gdańsku"), and the captured word must pass `isSiteWord`: not
+// a function word, not a time word, not a number, not a verb form.
+// `(?<!\p{L})` keeps "website" from reading as "site".
 const SITE_RE =
-  /(?:objekt\w*|statybo(?:je|se)|site|на\s+объекте(?:\s+в)?|op\s+de\s+locatie|auf\s+der\s+baustelle)\s+([A-Za-zÀ-ÿА-Яа-яĀ-ž][\wÀ-ÿА-Яа-яĀ-ž-]{1,40})/iu;
+  /(?<!\p{L})(?:objekt\p{L}*|statybo(?:je|se)|site|на\s+объекте|op\s+de\s+locatie|op\s+de\s+bouwplaats|auf\s+der\s+baustelle|na\s+budowie|na\s+obiekcie)(?:\s+(?:in|at|в|w|we|im|in\s+der|bei|op|te|ant|prie))?\s+(\p{L}[\p{L}\p{N}'’-]{1,40})/giu;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_SITE_RE =
+  /(?<!\p{L})(?:objekt\p{L}*|statybo(?:je|se)|site|на\s+объекте|op\s+de\s+locatie|op\s+de\s+bouwplaats|auf\s+der\s+baustelle|na\s+budowie|na\s+obiekcie|på\s+bygget|på\s+byggarbetsplatsen|på\s+arbetsplatsen)(?:\s+(?:in|at|в|w|we|im|in\s+der|bei|op|te|ant|prie|i|vid))?\s+(\p{L}[\p{L}\p{N}'’-]{1,40})/giu;
+/** Words that follow a place word in ordinary work sentences and are never
+ *  the place itself: prepositions, articles, conjunctions, day words, the
+ *  hours units and generic quantifiers, in the six active languages. */
+const SITE_STOP_WORDS: ReadonlySet<string> = new Set([
+  // en
+  "for", "at", "in", "on", "the", "a", "an", "with", "from", "to", "until", "till", "and", "or",
+  "today", "yesterday", "all", "whole", "day", "morning", "afternoon", "evening", "hours", "hour",
+  "doing", "working", "again", "too", "also",
+  // lt
+  "ir", "su", "nuo", "iki", "per", "visą", "visa", "šiandien", "vakar", "valandas", "valandų",
+  "val", "dieną", "rytą", "vakare", "dar", "taip", "pat",
+  // ru
+  "и", "с", "до", "для", "весь", "всю", "сегодня", "вчера", "часов", "часа", "час", "день",
+  "утром", "вечером", "тоже", "ещё", "еще",
+  // nl
+  "en", "met", "van", "tot", "voor", "de", "het", "een", "vandaag", "gisteren", "uur", "uren",
+  "hele", "dag", "ook",
+  // de
+  "und", "mit", "von", "bis", "für", "den", "die", "das", "der", "ein", "eine", "heute",
+  "gestern", "stunden", "stunde", "ganzen", "tag", "auch",
+  // pl
+  "i", "z", "od", "do", "przez", "dla", "dzisiaj", "dziś", "wczoraj", "godzin", "godziny",
+  "cały", "dzień", "też", "także",
+]);
+/** Swedish words that are never the place itself — a Swedish sentence only. */
+const SV_SITE_STOP_WORDS: ReadonlySet<string> = new Set([
+  "och", "med", "från", "till", "för", "på", "vid", "en", "ett", "hela", "dagen", "idag",
+  "igår", "timmar", "timme", "tim", "också", "även",
+]);
+/** A past-tense / participle shape (LT -au, EN -ed/-ing, DE/NL ge…t/en,
+ *  RU -л/-ла/-ли, PL -łem/-łam/-ł…) — a verb, never a place. A lower-case
+ *  LT word ending in -au is a first-person verb ("mūrijau", "dirbau"), not a
+ *  locative place (-e, -oje, -uose, -yje). */
+const SITE_VERB_SHAPE_RE =
+  /^(?:\p{L}{2,}(?:au|ome|ėme)|[a-z]{2,}(?:ed|ing)|ge\p{L}{3,}(?:t|en)|\p{L}{2,}(?:ал|ала|али|ил|ила|или|ял|яла|яли|ел|ела|ели)|\p{L}{2,}(?:łem|łam|łeś|łaś|ł|ła|li|ły))$/iu;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_SITE_VERB_SHAPE_RE =
+  /^(?:\p{L}{2,}(?:au|ome|ėme)|[a-z]{2,}(?:ed|ing)|ge\p{L}{3,}(?:t|en)|\p{L}{2,}(?:ал|ала|али|ил|ила|или|ял|яла|яли|ел|ела|ели)|\p{L}{2,}(?:łem|łam|łeś|łaś|ł|ła|li|ły)|\p{L}{3,}ade)$/iu;
+
+/** True when the word after a place word can be a site name. A capitalised
+ *  word ("Berlin", "Roterdame", "Kaunas") always can; a lower-case one only
+ *  when it is no function word, time word or verb form. */
+function isSiteWord(word: string, swedish: boolean): boolean {
+  const w = word.toLowerCase();
+  if (SITE_STOP_WORDS.has(w) || (swedish && SV_SITE_STOP_WORDS.has(w))) return false;
+  // A word that NAMES WORK is the work, not the place — German capitalises
+  // every noun, so "auf der Baustelle Fliesen verlegt" must not read
+  // "Fliesen" as the site. Exact / synonym tiers only: a fuzzy guess never
+  // takes a real place name away.
+  if (recognizeSkills(word, 1).some((s) => s.via !== "fuzzy")) return false;
+  if (/^\p{Lu}/u.test(word)) return true;
+  if ((swedish ? SV_SITE_VERB_SHAPE_RE : SITE_VERB_SHAPE_RE).test(word)) return false;
+  return w.length >= 3;
+}
+
+/** The first place-word reading whose word passes `isSiteWord`. */
+function siteAfterPlaceWord(raw: string, swedish: boolean): string | null {
+  for (const m of raw.matchAll(swedish ? SV_SITE_RE : SITE_RE)) {
+    const word = trimName(m[1] ?? "");
+    if (word && isSiteWord(word, swedish)) return word;
+  }
+  return null;
+}
 // ── the CONTEXT slot (issue #1689, re-audit line 0) ────────────────────────
 // The entry carries ONE free context — `site_name`, "Objektas / vieta": the
 // object, place, project or client the work was for. The owner's own
@@ -127,8 +311,20 @@ function trimName(name: string): string {
   return name.replace(/[.,:;!?]+$/u, "").trim();
 }
 // "šiandien" today, "vakar" yesterday, explicit ISO, "liepos 24"/"24 d."
-const TODAY_RE = /(šiandien|today|сегодня|vandaag|heute)/iu;
-const YESTERDAY_RE = /(vakar|yesterday|вчера|gisteren|gestern)/iu;
+const TODAY_RE = /(šiandien|today|сегодня|vandaag|heute|dzisiaj|dziś)/iu;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_TODAY_RE = /(šiandien|today|сегодня|vandaag|heute|dzisiaj|dziś|(?<!\p{L})i\s?dag(?!\p{L}))/iu;
+const YESTERDAY_RE = /(vakar|yesterday|вчера|gisteren|gestern|wczoraj)/iu;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_YESTERDAY_RE = /(vakar|yesterday|вчера|gisteren|gestern|wczoraj|(?<!\p{L})i\s?går(?!\p{L}))/iu;
+// Checked FIRST: every one of these CONTAINS its language's "yesterday"
+// (už-VAKAR, поза-ВЧЕРА, vor-GESTERN, eer-GISTEREN, przed-WCZORAJ), so a
+// day-before-yesterday sentence used to be filed one day late.
+const DAY_BEFORE_YESTERDAY_RE =
+  /(užvakar|uzvakar|day\s+before\s+yesterday|позавчера|vorgestern|eergisteren|przedwczoraj)/iu;
+// sv twin — used only for a sentence `looksSwedish` reads as Swedish.
+const SV_DAY_BEFORE_YESTERDAY_RE =
+  /(užvakar|uzvakar|day\s+before\s+yesterday|позавчера|vorgestern|eergisteren|przedwczoraj|(?<!\p{L})(?:i\s+)?förrgår(?!\p{L}))/iu;
 const ISO_RE = /\b(\d{4})-(\d{2})-(\d{2})\b/;
 
 /** Add `deltaDays` to an ISO date string, staying pure (no Date.now). */
@@ -139,21 +335,39 @@ function shiftIso(iso: string, deltaDays: number): string {
   return `${dt.getUTCFullYear()}-${pad2(dt.getUTCMonth() + 1)}-${pad2(dt.getUTCDate())}`;
 }
 
-export function extractWorkLog(text: string, today: string): WorkLogParse {
+/**
+ * `defaultDay` is the day the person already chose (the journal calendar's
+ * selected day). It is used ONLY when the sentence names no day of its own;
+ * "vakar"/"šiandien" stay relative to the real `today`. Omitted → `today`.
+ */
+export function extractWorkLog(
+  text: string,
+  today: string,
+  defaultDay: string = today,
+): WorkLogParse {
   const raw = (text ?? "").trim();
   const q = raw.toLowerCase();
+  // Swedish words are read in a Swedish sentence only. They sat inside the
+  // shared patterns, where `i` after a place word swallowed the English "I"
+  // and the Polish "i": "Today on site I built a wall" got the site "built",
+  // "Byłem na budowie i Marek mi pomagał" the site "Marek" — a colleague's
+  // name in the journal draft (review finding 8).
+  const swedish = looksSwedish(raw);
 
   // ── date ────────────────────────────────────────────────────────────────
-  let date = today;
+  let date = defaultDay;
   let dateSignal = false;
   const iso = raw.match(ISO_RE);
   if (iso) {
     date = `${iso[1]}-${iso[2]}-${iso[3]}`;
     dateSignal = true;
-  } else if (YESTERDAY_RE.test(q)) {
+  } else if ((swedish ? SV_DAY_BEFORE_YESTERDAY_RE : DAY_BEFORE_YESTERDAY_RE).test(q)) {
+    date = shiftIso(today, -2);
+    dateSignal = true;
+  } else if ((swedish ? SV_YESTERDAY_RE : YESTERDAY_RE).test(q)) {
     date = shiftIso(today, -1);
     dateSignal = true;
-  } else if (TODAY_RE.test(q)) {
+  } else if ((swedish ? SV_TODAY_RE : TODAY_RE).test(q)) {
     date = today;
     dateSignal = true;
   }
@@ -162,35 +376,59 @@ export function extractWorkLog(text: string, today: string): WorkLogParse {
   let start: string | null = null;
   let end: string | null = null;
   let spanMinutes: number | null = null;
-  const span = raw.match(SPAN_RE);
-  if (span) {
-    const s = toMinutes(span[1], span[2]);
-    const e = toMinutes(span[3], span[4]);
-    if (s != null && e != null && e > s) {
-      start = hhmm(s);
-      end = hhmm(e);
-      spanMinutes = e - s;
-    }
+  // Gap between joined spans ("8-12 ir 13-17" → 60), read as the break.
+  let spanGapMinutes: number | null = null;
+  const spans = resolveClockSpans(raw, swedish);
+  if (spans) {
+    start = hhmm(spans.start);
+    end = hhmm(spans.end % DAY_MINUTES);
+    spanMinutes = spans.worked;
+    if (spans.count > 1) spanGapMinutes = spans.gap;
   }
 
   // ── break ─────────────────────────────────────────────────────────────────
   let breakMinutes = 0;
   // Only treat a "NN min" as a break when a break word is present anywhere in
   // the sentence — otherwise a stray "45 min" (e.g. travel) is left alone.
-  if (BREAK_CONTEXT_RE.test(q)) {
+  if ((swedish ? SV_BREAK_CONTEXT_RE : BREAK_CONTEXT_RE).test(q)) {
     const br = raw.match(BREAK_RE);
     if (br) {
       const n = Number(br[1]);
       if (Number.isFinite(n) && n >= 0 && n <= 600) breakMinutes = n;
+    } else {
+      const bh = raw.match(swedish ? SV_BREAK_HOURS_RE : BREAK_HOURS_RE);
+      if (bh) {
+        const h = Number(bh[1] ?? bh[3]);
+        const tenth = Number(bh[2] ?? bh[4] ?? 0);
+        const n = Math.round((h + tenth / 10) * 60);
+        if (Number.isFinite(n) && n >= 0 && n <= 600) breakMinutes = n;
+      }
+    }
+  }
+
+  // Joined spans already leave the pause OUT ("8-12 ir 13-17": the hour
+  // between them is the break). A break stated on top of them may be that
+  // same pause or another one — the sentence does not say, so no span figure
+  // is recorded at all (never a guess; the person states the time instead).
+  if (spanGapMinutes != null) {
+    if (breakMinutes > 0) {
+      start = null;
+      end = null;
+      spanMinutes = null;
+    } else {
+      breakMinutes = spanGapMinutes;
     }
   }
 
   // ── worked minutes ────────────────────────────────────────────────────────
   let workedMinutes: number | null = null;
-  if (spanMinutes != null) {
+  if (spanMinutes != null && spanGapMinutes != null) {
+    // the spans' own sum — the gap between them is already not in it
+    workedMinutes = spanMinutes;
+  } else if (spanMinutes != null) {
     workedMinutes = Math.max(0, spanMinutes - breakMinutes);
   } else {
-    const eh = raw.match(EXPLICIT_HOURS_RE);
+    const eh = raw.match(swedish ? SV_EXPLICIT_HOURS_RE : EXPLICIT_HOURS_RE);
     if (eh) {
       const h = Number(eh[1]);
       const frac = eh[2] != null ? Number(`0.${eh[2]}`) : 0;
@@ -204,8 +442,11 @@ export function extractWorkLog(text: string, today: string): WorkLogParse {
 
   // ── site ──────────────────────────────────────────────────────────────────
   let site: string | null = null;
-  const siteM = raw.match(SITE_RE) ?? raw.match(SITE_PLACE_NOUN_RE) ?? raw.match(SITE_AFTER_WORK_VERB_RE);
-  if (siteM) site = trimName(siteM[1]!) || null;
+  site = siteAfterPlaceWord(raw, swedish);
+  if (site === null) {
+    const siteM = raw.match(SITE_PLACE_NOUN_RE) ?? raw.match(SITE_AFTER_WORK_VERB_RE);
+    if (siteM) site = trimName(siteM[1]!) || null;
+  }
 
   // ── task (best effort, display only) ──────────────────────────────────────
   // Trailing clause after the last comma, when it looks like an activity
@@ -217,8 +458,10 @@ export function extractWorkLog(text: string, today: string): WorkLogParse {
     last &&
     parts.length > 1 &&
     /[A-Za-zÀ-ÿА-Яа-яĀ-ž]/.test(last) &&
-    !SPAN_RE.test(last) &&
+    !(swedish ? SV_SPAN_RE : SPAN_RE).test(last) &&
+    !PL_SPAN_RE.test(last) &&
     !BREAK_RE.test(last) &&
+    !(swedish ? SV_BREAK_HOURS_RE : BREAK_HOURS_RE).test(last) &&
     last.length <= 80
   ) {
     task = last;

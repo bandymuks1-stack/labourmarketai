@@ -16,7 +16,11 @@ const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 
 describe("direct conversation helper — dedupe via existing backend", () => {
-  const src = read("lib/communication/direct-conversation.ts");
+  // The dedupe rule lives in the shared core since 2026-09-30; both files
+  // together are the helper.
+  const src =
+    read("lib/communication/direct-conversation.ts") +
+    read("lib/communication/direct-conversation-core.ts");
   it("dedupes against existing direct conversations before creating", () => {
     expect(src).toMatch(/conversation_participants/);
     expect(src).toMatch(/kind", "direct"|kind",\s*"direct"/);

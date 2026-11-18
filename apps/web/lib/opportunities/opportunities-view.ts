@@ -47,6 +47,12 @@ export interface AssessedAgainstFacts {
   readonly salaryMinEur: number | null;
   /** The city the worker is in / prefers, when stated. */
   readonly city: string | null;
+  /**
+   * The countries the person PREFERS to work in (workers column +
+   * preferred_locations) — already part of the match subject, now said back
+   * on the board (premium opportunities, 2026-09-29). Empty = not stated.
+   */
+  readonly preferredCountries: readonly string[];
 }
 
 export interface BandedRow {

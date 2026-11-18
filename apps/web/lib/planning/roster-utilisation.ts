@@ -34,7 +34,7 @@ export const ROSTER_UTILISATION_WINDOW_DAYS = 28;
 
 /** Project assignments, accepted bookings and approved trips all come from
  *  ONE read, so a failure makes all three unknown. */
-const COMMITMENT_SOURCES: readonly ReservationSource[] = ["project", "booking", "trip"];
+const COMMITMENT_SOURCES: readonly ReservationSource[] = ["project", "booking", "trip", "plan"];
 
 export interface RosterUtilisationWindow {
   readonly startDate: string;

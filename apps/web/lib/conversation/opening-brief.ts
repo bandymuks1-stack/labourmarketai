@@ -19,6 +19,8 @@ import {
   groupMissingDocumentsByType,
 } from "@/lib/conversation/documents-gap";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
+import { getUnreadConversationIdsForOrganization } from "@/lib/communication/organization-scope";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import { loadOwnRecentConfirmations } from "@/lib/journal/own-recent-confirmations";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
@@ -52,11 +54,43 @@ export type OpeningBrief =
   | { kind: "brief"; lines: string[]; chips: OpeningChip[] }
   | { kind: "none" };
 
+/**
+ * The worker-brief rungs a caller may ask to leave out because the SAME
+ * screen already states them. The one caller today is the worker's home:
+ * ŠIANDIEN renders the booking offers, invitations and unread messages as
+ * doors, the matches as its opportunity line and the next step from the
+ * work-card engine (`TODAY_COVERED_BRIEF_RUNGS`, lib/today/today-route.ts),
+ * so the brief under it says only what ŠIANDIEN does not.
+ */
+export type OpeningBriefRung = "bookings" | "invitations" | "matches" | "unread" | "profile-gap";
+
+export type OpeningBriefOptions = {
+  readonly omit?: readonly OpeningBriefRung[];
+};
+
+const OMITTABLE_RUNGS: ReadonlySet<string> = new Set<OpeningBriefRung>([
+  "bookings",
+  "invitations",
+  "matches",
+  "unread",
+  "profile-gap",
+]);
+
+/** The caller's omit list, from a client — only known rung names count. */
+function omittedRungs(options: OpeningBriefOptions | undefined): ReadonlySet<string> {
+  const omit = options?.omit;
+  if (!Array.isArray(omit)) return new Set();
+  return new Set(omit.filter((r): r is OpeningBriefRung => OMITTABLE_RUNGS.has(r)));
+}
+
 const MAX_LINES = 3;
 const MAX_CHIPS = 3;
 
-export async function loadOpeningBrief(): Promise<OpeningBrief> {
+export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<OpeningBrief> {
   const t = await getTranslations("conversation.chat");
+  // Omitting only ever REMOVES a line from the caller's own brief: every read
+  // below is still the caller's own, so the list is never an authority.
+  const omitted = omittedRungs(options);
 
   const lines: string[] = [];
   const chips: OpeningChip[] = [];
@@ -80,7 +114,7 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
   // lib/guards/booking-visibility-honest.test.ts) — which is exactly why the
   // conversation has to carry the signal.
   try {
-    const pending = await getPendingIncomingBookingCount();
+    const pending = omitted.has("bookings") ? 0 : await getPendingIncomingBookingCount();
     if (pending > 0) {
       const tBookings = await getTranslations("bookings");
       lines.push(`${tBookings("pendingLink")} — ${tBookings("pendingNote")}`);
@@ -99,7 +133,7 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
   // e-mail); the chip opens the in-chat decision over the SAME accept those
   // pages call. Names the inviter when known, never invents one.
   try {
-    if (lines.length < MAX_LINES) {
+    if (lines.length < MAX_LINES && !omitted.has("invitations")) {
       const inv = await listInvitationsAddressedToMe();
       if (inv.status === "ok" && inv.total > 0) {
         const first = inv.items[0];
@@ -145,8 +179,11 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
         lines.push(t("briefInterestContacted", { count: contacted }));
         addChip("jobs", t("chipMyOwnInterest"));
       }
-      const fresh = view.newCount > 0 ? view.newCount : 0;
-      const total = view.totalRecommendable;
+      // The match COUNT is a rung a screen may already state (ŠIANDIEN's
+      // opportunity line reads the same projection); the "contacted" line
+      // above is not, and stays.
+      const fresh = view.newCount > 0 && !omitted.has("matches") ? view.newCount : 0;
+      const total = omitted.has("matches") ? 0 : view.totalRecommendable;
       if (fresh > 0) {
         lines.push(t("briefNewMatches", { count: fresh }));
         addChip("jobs", t("chipJobs"));
@@ -225,7 +262,7 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
   // Messages is a conversation-driven projection — the brief is where a real
   // unread thread announces itself, with the one chip that opens it).
   try {
-    if (lines.length < MAX_LINES) {
+    if (lines.length < MAX_LINES && !omitted.has("unread")) {
       const unread = await getUnreadConversationCount();
       if (unread > 0) {
         lines.push(t("briefUnreadMessages", { count: unread }));
@@ -297,7 +334,7 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
   }
 
   try {
-    if (lines.length < MAX_LINES) {
+    if (lines.length < MAX_LINES && !omitted.has("profile-gap")) {
       const summary = await loadProfileSummaryForChat("resume");
       if (summary.kind === "summary" && summary.missing.length > 0) {
         lines.push(t("briefProfileGap", { step: summary.missing[0] }));
@@ -358,18 +395,38 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
   try {
     const { loadCompanyStarterContext } = await import("@/lib/conversation/starter-signals");
     const ws = await loadCompanyStarterContext();
-    if (ws.signals.staffingAgency) {
+    // The ONE agency rule (type OR declared workforce role), as computed by
+    // the starter context — never the company type alone.
+    if (ws.agencyWorkspace) {
       const { listAgencyOfferProgress, listSharedRequestsForAgency } = await import("@/lib/agency/bridge-read");
-      const [progress, shared] = await Promise.all([listAgencyOfferProgress(), listSharedRequestsForAgency()]);
+      const { listAgencyPlacements } = await import("@/lib/agency/delegation-read");
+      const { sharedNeedsAwaitingWorker } = await import("@/lib/agency/bridge-model");
+      const [[progress, shared], placements] = await Promise.all([
+        Promise.all([listAgencyOfferProgress(), listSharedRequestsForAgency()]),
+        listAgencyPlacements(),
+      ]);
       if (progress.kind === "ok") {
+        // A client's shared need whose accepted person did not start (the
+        // worker declined) or whose placement ended is OPEN AGAIN: the client
+        // still needs someone and this agency may propose another roster
+        // worker. First, because it is the one thing that stops the client's
+        // work (production walk 2026-09-29: the need stayed open and shared
+        // while this Home said nothing).
+        const awaitingWorker = sharedNeedsAwaitingWorker(shared, progress, placements);
+        const reopened = awaitingWorker.filter((n) => n.reason === "placement_did_not_proceed");
+        if (reopened.length > 0 && lines.length < MAX_LINES) {
+          lines.push(t("briefAgencyNeedReopened", { count: reopened.length }));
+          // The in-chat shared-needs read, where each need carries its own
+          // "propose someone" action — the existing presentation path.
+          addChip("agency:demand", t("chipProposeReplacement"));
+        }
         const awaiting = progress.rows.filter((r) => r.offerStatus === "offered").length;
         if (awaiting > 0 && lines.length < MAX_LINES) {
           lines.push(t("briefAgencyOffersAwaiting", { count: awaiting }));
           addChip("agency:progress", t("chipProposalStatus"));
         }
         if (shared.kind === "ok") {
-          const offeredFor = new Set(progress.rows.map((r) => r.requestId));
-          const withoutOffer = shared.rows.filter((s) => s.status !== "closed" && !offeredFor.has(s.requestId)).length;
+          const withoutOffer = awaitingWorker.filter((n) => n.reason === "no_offer").length;
           if (withoutOffer > 0 && lines.length < MAX_LINES) {
             lines.push(t("briefAgencySharedWithoutOffer", { count: withoutOffer }));
             addChip("agency:demand", t("chipClientDemand"));
@@ -443,6 +500,32 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
     /* no line — a failed read never invents a queue */
   }
 
+  // 1a ── learning suggestions awaiting review (EDU-5) ─────────────────────
+  // A worker accepted a recognised skill on an entry of THIS organisation
+  // (review enabled). The one producer turns that observation into a pending
+  // suggestion under the manager's own RLS; the line states only the count of
+  // pending ones and appears only when there is one, with the one door to
+  // the review page (owner: no count without a door, no door without a count).
+  try {
+    if (lines.length < MAX_LINES) {
+      const { createClient } = await import("@/lib/supabase/server");
+      const { produceReviewQueueFromSignals, countPendingReviewQueue } = await import(
+        "@/lib/learning/signal-queue-producer"
+      );
+      const sb = await createClient();
+      await produceReviewQueueFromSignals(sb);
+      const waiting = await countPendingReviewQueue(sb);
+      if (waiting > 0) {
+        lines.push(t("briefEmployerLearningReview", { count: waiting }));
+        // The door exists ONLY in this N>0 state, so it is never empty
+        // navigation: the review page then has real items to show.
+        addChip("link:/dashboard/learning", t("chipEmployerLearningReview"));
+      }
+    }
+  } catch {
+    /* no line — a failed read never invents a queue */
+  }
+
   // 2 ── absence requests awaiting decision ────────────────────────────────
   try {
     const { getManagerPendingAbsences } = await import("@/lib/leave/absences");
@@ -474,9 +557,17 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
   }
 
   // 4 ── unread human messages ─────────────────────────────────────────────
+  // SCOPED TO THE COMPANY (owner 2026-10-01): a person's private threads are
+  // not their company's inbox. Only the unread conversations that belong to
+  // the organization acted for are counted; with no resolvable company there
+  // is nothing to count, never the person's whole inbox.
   try {
     if (lines.length < MAX_LINES) {
-      const unread = await getUnreadConversationCount();
+      const ctx = await resolveEmployerCompanyContext();
+      const unread =
+        ctx.kind === "ok"
+          ? (await getUnreadConversationIdsForOrganization(ctx.organizationId)).size
+          : 0;
       if (unread > 0) {
         lines.push(t("briefUnreadMessages", { count: unread }));
         addChip("link:/dashboard/communication", t("navMessages"));

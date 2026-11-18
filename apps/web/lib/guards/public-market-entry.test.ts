@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { landingTreeSource } from "./landing-composition";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * PUBLIC MARKET ENTRY / SALES FUNNEL — LAUNCH GUARDS (PR13).
@@ -79,9 +80,12 @@ describe("no dead public links — every marketing CTA target route exists", () 
     expect(page).not.toContain('href="/onboarding"');
     // Signup CTA rides AuthCtaLink (app-host aware on apex; PKCE-safe OAuth
     // origin) instead of the bare locale Link — see auth-cta-app-host guard.
+    // F6 (2026-11-15): that sign-up returns to the one profile builder
+    // (WORKER_PROFILE_DOOR_HREF = /auth/signup?next=/dashboard/profile).
     expect(page).toMatch(
-      /AuthCtaLink[\s\S]*?relPath=\{`\/\$\{locale\}\/auth\/signup`\}/,
+      /AuthCtaLink[\s\S]*?relPath=\{`\/\$\{locale\}\$\{WORKER_PROFILE_DOOR_HREF\}`\}/,
     );
+    expect(page).toContain('from "@/lib/marketing/worker-profile-door"');
   });
 });
 
@@ -161,6 +165,14 @@ describe("work-abroad journey describes the live interest loop", () => {
   });
 });
 
+describe("the public plan boundary lists only plans a visitor can choose", () => {
+  it("the internal administrator plan is filtered out before rendering", () => {
+    const src = read("components/marketing/pre-payment-plan-boundary.tsx");
+    expect(src).toMatch(/PRE_PAYMENT_PLANS\.filter\(\(plan\) => plan\.audience !== "admin"\)\.map\(/);
+    expect(src).not.toMatch(/\{PRE_PAYMENT_PLANS\.map\(/);
+  });
+});
+
 describe("plan boundary carries no dead pseudo-buttons", () => {
   it("the component renders no interactive elements for plan CTAs", () => {
     const src = read("components/marketing/pre-payment-plan-boundary.tsx");
@@ -170,7 +182,7 @@ describe("plan boundary carries no dead pseudo-buttons", () => {
   });
 
   it("inert plan labels are statements, not imperative dead CTAs", () => {
-    for (const loc of ["en", "lt", "ru"]) {
+    for (const loc of activeLocales) {
       const cta = get(catalog(loc), ["planBoundary", "cta"]) as Record<
         string,
         string

@@ -155,9 +155,50 @@ export async function readAgencyClientsLabels() {
   };
 }
 
+/** The invitation primitive's own outcome vocabulary (network.invite.outcomes)
+ *  — the bridge section states a delivery result in the SAME words the
+ *  network page uses, never a second copy. */
+const INVITE_OUTCOME_KEYS = [
+  "created",
+  "sent",
+  "delivery_failed",
+  "duplicate_pending",
+  "invalid_email",
+  "limit_reached",
+  "rate_limited",
+  "not_authorized",
+  "error",
+] as const;
+
 export async function readAgencyBridgeLabels() {
-  const tAB = await getTranslations("agencyBridge");
+  const [tAB, tInvite, tSent] = await Promise.all([
+    getTranslations("agencyBridge"),
+    getTranslations("network.invite"),
+    getTranslations("network.sent"),
+  ]);
   return {
+    // Delivery of the client invitation through the invitation primitive
+    // (2026-09-24): the link, its honest state, a fresh link, a message.
+    deliveryHeading: tAB("deliveryHeading"),
+    deliveryCreated: tAB("deliveryCreated"),
+    deliverySent: tAB("deliverySent"),
+    deliveryFailed: tAB("deliveryFailed"),
+    deliveryDuplicate: tAB("deliveryDuplicate"),
+    deliveryRefused: tAB("deliveryRefused"),
+    deliveryUnavailable: tAB("deliveryUnavailable"),
+    // Accepted by the client (single-use, consumed) — the primitive's own
+    // status word for the badge, the bridge's sentence for what is awaited.
+    deliveryAccepted: tAB("deliveryAccepted"),
+    statusAccepted: tSent("status.accepted"),
+    noInvitationYet: tAB("noInvitationYet"),
+    getLink: tAB("getLink"),
+    newLink: tAB("newLink"),
+    messageButton: tAB("messageButton"),
+    copyLink: tInvite("copyLink"),
+    copied: tInvite("copied"),
+    outcomeLabels: Object.fromEntries(
+      INVITE_OUTCOME_KEYS.map((k) => [k, tInvite(`outcomes.${k}`)]),
+    ) as Record<string, string>,
     title: tAB("title"),
     subtitle: tAB("subtitle"),
     gatedHeading: tAB("gatedHeading"),
@@ -171,6 +212,8 @@ export async function readAgencyBridgeLabels() {
     noShared: tAB("noShared"),
     workerLabel: tAB("workerLabel"),
     workerPlaceholder: tAB("workerPlaceholder"),
+    noteLabel: tAB("noteLabel"),
+    inviteLinkLabel: tAB("inviteLinkLabel"),
     offerButton: tAB("offerButton"),
     noRoster: tAB("noRoster"),
     goToRoster: tAB("goToRoster"),
@@ -223,6 +266,7 @@ export async function readClientBridgeLabels() {
     sharedHeading: tCB("sharedHeading"),
     noShared: tCB("noShared"),
     unshareButton: tCB("unshareButton"),
+    messageButton: tCB("messageButton"),
   };
 }
 
@@ -286,9 +330,20 @@ export async function readWorkersLabels() {
     inviteSubmit: tWorkers("inviteSubmit"),
     invitationsHeading: tWorkers("invitationsHeading"),
     invitationsEmpty: tWorkers("invitationsEmpty"),
+    invitationsManagedElsewhere: tWorkers("invitationsManagedElsewhere"),
     statusInvited: tWorkers("statusInvited"),
+    inviteShareLinkLabel: tWorkers("inviteShareLinkLabel"),
+    inviteShareLinkHint: tWorkers("inviteShareLinkHint"),
+    inviteShareCopy: tWorkers("inviteShareCopy"),
+    inviteShareCopied: tWorkers("inviteShareCopied"),
     statusAlreadyPending: tWorkers("statusAlreadyPending"),
     statusAlreadyLinked: tWorkers("statusAlreadyLinked"),
+    statusWordActive: tWorkers("statusWordActive"),
+    statusWordPending: tWorkers("statusWordPending"),
+    statusWordAccepted: tWorkers("statusWordAccepted"),
+    statusWordCancelled: tWorkers("statusWordCancelled"),
+    statusWordExpired: tWorkers("statusWordExpired"),
+    statusWordEnded: tWorkers("statusWordEnded"),
     statusNotOwner: tWorkers("statusNotOwner"),
     statusInvalidEmail: tWorkers("statusInvalidEmail"),
     statusError: tWorkers("statusError"),
@@ -301,6 +356,20 @@ export async function readWorkersLabels() {
     coordinationHeading: tWorkers("coordinationHeading"),
     coordinationBody: tWorkers("coordinationBody"),
     coordinationNextAction: tWorkers("coordinationNextAction"),
+    identity: {
+      availability: {
+        available: tWorkers("identity.availability.available"),
+        busy: tWorkers("identity.availability.busy"),
+        unavailable: tWorkers("identity.availability.unavailable"),
+      },
+    },
+    team: {
+      free: tWorkers("team.countFree"),
+      working: tWorkers("team.countWorking"),
+      away: tWorkers("team.countAway"),
+      assign: tWorkers("team.assign"),
+      openCalendar: tWorkers("team.openCalendar"),
+    },
     operations: {
       columnHeading: tWorkers("operations.columnHeading"),
       setupNote: tWorkers("operations.setupNote"),

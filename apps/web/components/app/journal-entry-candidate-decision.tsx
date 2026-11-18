@@ -144,7 +144,7 @@ export function JournalEntryCandidateDecision({
             aria-busy={state === "working" || undefined}
             onClick={() => void decide("confirmed")}
             data-testid={`entry-candidate-confirm-${entryId}-${candidate.slug}`}
-            className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+            className="rounded-md border border-ink-500 px-2.5 py-1 text-meta font-semibold text-text-primary transition-colors hover:border-text-secondary disabled:opacity-50"
           >
             {state === "working" ? t("candidateConfirming") : t("candidateConfirm")}
           </button>

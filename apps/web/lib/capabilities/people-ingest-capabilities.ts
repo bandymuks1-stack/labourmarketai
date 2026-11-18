@@ -465,7 +465,7 @@ const ingestCommit: CapabilityDescriptor = {
     });
     if (preview.kind !== "ok") return fail(preview);
 
-    const verdict = verifyPeopleCommitToken({
+    const verdict = await verifyPeopleCommitToken({
       token: parsed.confirmationToken,
       organizationId: preview.organizationId,
       relationship: parsed.relationship,

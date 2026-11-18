@@ -91,3 +91,93 @@ describe("the request timeout bounds the TRANSFER, not just the headers", () => 
     expect(Date.now() - started).toBeLessThan(10_000);
   });
 });
+
+describe("retries are reported to the caller (onRetry)", () => {
+  it("calls onRetry once per attempt after the first, and not at all on first-try success", async () => {
+    enable();
+    // The shared retry backoff (1 s, 2 s) is not overridable by design; the
+    // test simply lives with ~3 s of real waiting.
+    const provider = PROVIDER;
+
+    // Two transient network failures, then a good page: exactly 2 retries.
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("socket hang up"))
+      .mockRejectedValueOnce(new Error("socket hang up"))
+      .mockResolvedValueOnce(
+        new Response("[]", { status: 200, headers: { "content-type": "application/json" } }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    let retries = 0;
+    const result = await fetchVacancyPage({
+      provider,
+      channel: "stream",
+      query: { date: "2026-08-04T00:00:00.000Z" },
+      onRetry: () => {
+        retries += 1;
+      },
+    });
+    expect(result.ok).toBe(true);
+    expect(retries).toBe(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+
+    // First-try success: zero retries reported.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response("[]", { status: 200, headers: { "content-type": "application/json" } }),
+      ),
+    );
+    let none = 0;
+    await fetchVacancyPage({
+      provider,
+      channel: "stream",
+      query: { date: "2026-08-04T00:00:00.000Z" },
+      onRetry: () => {
+        none += 1;
+      },
+    });
+    expect(none).toBe(0);
+  });
+}, 15_000);
+
+describe("an unparseable 200 body is retried like a transient failure (Sweden invalid_json, 2026-10-09)", () => {
+  const json = { "content-type": "application/json" };
+
+  it("recovers when a later attempt returns a parseable page, reporting one retry", async () => {
+    enable();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('{"hits":[{"id":1', { status: 200, headers: json }))
+      .mockResolvedValueOnce(new Response("[]", { status: 200, headers: json }));
+    vi.stubGlobal("fetch", fetchMock);
+    let retries = 0;
+    const result = await fetchVacancyPage({
+      provider: PROVIDER,
+      channel: "stream",
+      query: { date: "2026-08-04T00:00:00.000Z" },
+      onRetry: () => {
+        retries += 1;
+      },
+    });
+    expect(result.ok).toBe(true);
+    expect(retries).toBe(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("still fails as invalid_json, bounded by maxRetries, when the body never parses", async () => {
+    enable();
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(async () => new Response("<html>", { status: 200, headers: json }));
+    vi.stubGlobal("fetch", fetchMock);
+    const result = await fetchVacancyPage({
+      provider: PROVIDER,
+      channel: "stream",
+      query: { date: "2026-08-04T00:00:00.000Z" },
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errorCode).toBe("invalid_json");
+    expect(fetchMock).toHaveBeenCalledTimes(3); // 1 + maxRetries (2): never unbounded
+  });
+}, 20_000);

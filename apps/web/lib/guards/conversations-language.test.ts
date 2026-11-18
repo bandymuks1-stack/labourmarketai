@@ -21,7 +21,7 @@ const readRepo = (rel: string): string => readFileSync(join(REPO, rel), "utf8");
 
 const MIGRATION =
   "supabase/migrations/20260610190000_conversation_message_language.sql";
-const ACTIONS = "lib/communication/actions.ts";
+const ACTIONS = "lib/communication/communication-core.ts";
 const STUB = "lib/communication/translation.ts";
 const THREAD = "app/[locale]/dashboard/communication/[conversationId]/page.tsx";
 const WORKBENCH = "app/[locale]/dashboard/admin/matching/page.tsx";

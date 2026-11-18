@@ -3,6 +3,8 @@
  * server actions, the UI and the guard tests. No IO.
  */
 
+import { findExternalReferralSource } from "@/lib/invitations/external-sources";
+
 export const INVITATION_TYPES = [
   "join_platform",
   "join_organization",
@@ -129,13 +131,105 @@ export function buildInviteLink(
   return `${origin.replace(/\/+$/, "")}/${locale}/invite/${token}`;
 }
 
+/* ────────────────────────────────────────────────────────────────────────────
+ * AGENCY → CLIENT CONNECTION INVITATION (2026-09-24)
+ *
+ * `create_agency_client_connection_v1` only INSERTS a connection row keyed on
+ * the client's e-mail; nothing ever reached that e-mail. Delivery now rides
+ * on THIS primitive: beside the connection the agency creates an
+ * `invite_company` invitation to the same address, and the token link the
+ * primitive already mints is what the agency copies or shares.
+ *
+ * WHY `invite_company` AND WHY `proposed_role` MARKS IT. `invite_company` is
+ * the one type whose acceptance creates NO relationship (no engagement row
+ * on the client's CV, no project seat, no interest signal) — the consent
+ * that matters stays `accept_agency_client_connection_v1`, the bridge's own
+ * RPC. The create RPC exposes no free foreign-id field (`declared_context`
+ * is written only by the external-referral door, `target_request_id` is a
+ * demand FK), so the invitation carries no connection id: the connection is
+ * DERIVED on the landing — same inviter, same addressee — and the kind is
+ * marked on `proposed_role`, the role the agency proposes for the invited
+ * company. The marker is a closed slug, localized on the invite page, never
+ * rendered raw.
+ * ──────────────────────────────────────────────────────────────────────── */
+export const AGENCY_CLIENT_PROPOSED_ROLE = "agency_client";
+
+/** True for the invitation the agency bridge creates beside a connection. */
+export function isAgencyClientInvitation(input: {
+  readonly invitationType: string | null | undefined;
+  readonly proposedRole: string | null | undefined;
+}): boolean {
+  return (
+    input.invitationType === "invite_company" &&
+    (input.proposedRole ?? "").trim() === AGENCY_CLIENT_PROPOSED_ROLE
+  );
+}
+
+/**
+ * The addressee, shown to a signed-in token holder whose own e-mail differs:
+ * first character of the local part, the domain, nothing else
+ * (`j***@example.com`). Null for anything that is not an address, so a
+ * malformed stored value never renders as one. Pure.
+ */
+export function maskEmail(email: string | null | undefined): string | null {
+  const value = (email ?? "").trim().toLowerCase();
+  const at = value.indexOf("@");
+  if (at < 1 || at === value.length - 1) return null;
+  const local = value.slice(0, at);
+  const domain = value.slice(at + 1);
+  return `${local[0]}***@${domain}`;
+}
+
+/** The company-setup entry — the Activity Setup Hub's company door, open to
+ *  every signed-in person (`/dashboard/company/*` is role-gated; this is not). */
+export const COMPANY_SETUP_ENTRY = "/dashboard/start/company";
+
+/** The closed `?notice=` token the setup entry reads after an agency-client
+ *  acceptance by a person who holds no company role yet. Internal: localized
+ *  on the page, never rendered raw. */
+export const AGENCY_CONNECTION_PENDING_NOTICE = "agency_connection_pending";
+
+/**
+ * Where an ACCEPTED agency-client invitation lands the person (review round
+ * 2, 2026-09-24). The partners door is gated on the `company` role
+ * (`requireRoleOrRedirect(locale, "company")`): a person who accepted with no
+ * company workspace used to be sent there and bounced to
+ * `/dashboard?notice=needs_company_role` — a refusal, with the pending
+ * connection never named. Such a person lands on the company-setup entry
+ * with a notice that names it instead. `null` = the role read never answered:
+ * an unknown is NEVER narrowed into "no role", so the door keeps deciding
+ * (its own gate retries and answers honestly). Pure.
+ */
+export function agencyClientLanding(
+  holdsCompanyRole: boolean | null,
+): { readonly path: string; readonly notice: string } {
+  if (holdsCompanyRole === false) {
+    return { path: COMPANY_SETUP_ENTRY, notice: AGENCY_CONNECTION_PENDING_NOTICE };
+  }
+  return { path: "/dashboard/company/partners", notice: "invitation_accepted" };
+}
+
 /** Where acceptance lands the person — the exact real context. */
 export function acceptedDestination(input: {
   invitationType: InvitationType | string;
   projectId?: string | null;
+  /** The invitation's stored `proposed_role`; only the agency-client marker
+   *  changes the destination (the partners door, where the connection is
+   *  confirmed with the person's own company). */
+  proposedRole?: string | null;
 }): string {
   if (input.invitationType === "join_project" && input.projectId) {
     return `/dashboard/projects/${input.projectId}`;
+  }
+  // The agency's connection request waits on the partners door — the ONE
+  // consent path (`accept_agency_client_connection_v1`) lives there.
+  if (
+    isAgencyClientInvitation({
+      invitationType: input.invitationType,
+      proposedRole: input.proposedRole,
+    })
+  ) {
+    return "/dashboard/company/partners";
   }
   // The person said "interested" to a specific need — the board's own
   // interest list is where that answer already lives.
@@ -213,6 +307,7 @@ export const RELATIONSHIP_INVITE_CHOICES: readonly RelationshipInviteChoice[] = 
   { slug: "employee", requiresOrganizationRole: null },
   { slug: "student", requiresOrganizationRole: "training_provider" },
   { slug: "volunteer", requiresOrganizationRole: null },
+  { slug: "intern", requiresOrganizationRole: null },
   { slug: "collaborator", requiresOrganizationRole: null },
   { slug: "freelancer", requiresOrganizationRole: null },
   { slug: "consultant", requiresOrganizationRole: null },
@@ -273,7 +368,14 @@ export type DeclaredContextV1 = {
   readonly yearsClaimed?: number;
   readonly languages: readonly string[];
   readonly residenceCountry?: string;
+  /** The town or city — a separate fact from the country (2026-10-13). */
+  readonly city?: string;
+  /** READINESS to work, as the source declared it (e.g. AVAILABLE_NOW). */
   readonly availability?: string;
+  /** The person's declared work situation — never a verified right to work anywhere. */
+  readonly workStatus?: string;
+  /** Whether accommodation must be arranged. */
+  readonly accommodationNeed?: string;
   readonly destinations: readonly string[];
   readonly mobilityScope?: "LISTED" | "EU_WIDE";
   readonly freeText?: string;
@@ -328,4 +430,82 @@ export function declaredContextItems(raw: unknown): DeclaredContextItem[] {
   list("languages", ctx.languages, str);
   list("destinations", ctx.destinations, str);
   return out;
+}
+
+/**
+ * THE INVITE TOKEN OUT OF A SAFE RETURN PATH (frictionless addressed invite,
+ * owner decision 2026-10-06). The signup / onboarding pages receive the invite
+ * landing as `?next=/{locale}/invite/{token}`; this reads the token back out of
+ * exactly that shape and nothing else (url-safe, bounded, final path segment).
+ * Anything else - a query string, a nested path, another route - is null, so a
+ * crafted `next` can never name an arbitrary token source.
+ */
+export function inviteTokenFromNextPath(next: string | null | undefined): string | null {
+  if (!next) return null;
+  const m = /^\/(?:[a-z]{2}\/)?invite\/([A-Za-z0-9_-]{16,128})\/?$/.exec(next.trim());
+  return m ? m[1] : null;
+}
+
+/**
+ * Whether an addressed invitation CANONICALLY implies worker (person)
+ * onboarding, so the first-run role picker is redundant. Deliberately narrow:
+ * only an external-source referral of a person (the source's own consent notice
+ * is about a worker's search - see external-sources.ts) and an explicit
+ * employee invitation. Every other kind (organisation, team, partner, agency
+ * client, project, demand) names an actor that is genuinely ambiguous for the
+ * person arriving, so they still choose.
+ */
+export function invitationImpliesWorkerContext(input: {
+  invitationType: string | null | undefined;
+  externalSourceSlug: string | null | undefined;
+}): boolean {
+  if (input.invitationType === "join_as_employee") return true;
+  return input.invitationType === "join_platform" && Boolean(input.externalSourceSlug);
+}
+
+/**
+ * May onboarding skip the role question for an invitation found WITHOUT its
+ * link? Stricter than `invitationImpliesWorkerContext` (the token path, which
+ * stays as it is): only a `join_platform` referral from a REGISTERED partner
+ * whose consent notice is about the person's own job search
+ * (`referredPersonIsWorker`, today Nonstop Group). A missing, unknown or other
+ * partner's source keeps the question.
+ */
+export function addressedReferralImpliesWorker(item: {
+  invitationType: string;
+  externalSourceSlug?: string | null;
+}): boolean {
+  if (item.invitationType !== "join_platform") return false;
+  return findExternalReferralSource(item.externalSourceSlug ?? null)?.referredPersonIsWorker === true;
+}
+
+/**
+ * THE PARTNER REFERRAL ADDRESSED TO ME, found WITHOUT its link (2026-10-27).
+ *
+ * The first real invited person registered through Google and finished
+ * onboarding, yet the invitation stayed pending: onboarding only knew about it
+ * when the token travelled the whole way in `?next=/invite/<token>`, and a
+ * person who opens the mail in one browser and registers in another — or comes
+ * back to the site later — arrives without it.
+ *
+ * `listInvitationsForMe` (the caller's pending invitations for their VERIFIED
+ * e-mail) already returns these rows. Only `join_platform` is picked: its
+ * acceptance creates no employment, staff or project relationship — the person
+ * registering IS what it asked for — so finishing onboarding may accept it.
+ * Every other kind names an actor (a company, a team, a project) the person
+ * must see on its own page first, so it is never accepted from here.
+ *
+ * Whether it also lets onboarding skip the role question is a separate,
+ * stricter fact: only a PARTNER referral of a worker implies one
+ * (`invitationImpliesWorkerContext`), and that needs the source slug — a
+ * missing inviter name proves nothing (an inviter may simply have no name).
+ */
+export function pickAddressedJoinPlatform<
+  T extends { id: string; invitationType: string; externalSourceSlug?: string | null },
+>(items: readonly T[]): T | null {
+  // EXACTLY ONE. Two or more pending join_platform invitations for the same
+  // person are ambiguous (which inviter? which partner?) — the platform does
+  // not pick one on the person's behalf; each stays on its own page.
+  const candidates = items.filter((i) => i.invitationType === "join_platform");
+  return candidates.length === 1 ? candidates[0] : null;
 }

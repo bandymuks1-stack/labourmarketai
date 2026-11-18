@@ -9,6 +9,7 @@ import {
   JOURNAL_ENTRY_METRICS_EMBED,
   liveJournalEntriesOnly,
 } from "@/lib/journal/journal-list-core";
+import { teamHourRowsToWindowRows, type TeamHourRow } from "@/lib/projects/project-team-hours-model";
 import {
   deriveWindowWorkTime,
   type JournalWindowEntryRow,
@@ -16,6 +17,7 @@ import {
 import { listWorkObjectIdsForProject } from "@/lib/objects/objects";
 import { getAllocationsForObjects } from "@/lib/work-hours/allocations";
 import { sumHours } from "@/lib/work-hours/allocations-model";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * ONE PROJECT, TWO LEDGERS, SIDE BY SIDE — allocated vs journaled hours.
@@ -95,15 +97,38 @@ async function readAllocated(projectId: string): Promise<ProjectAllocatedHours> 
   };
 }
 
+/**
+ * Entries recorded on this project in a TEAM's context while the team held an
+ * assignment on it (`project_team_journal_hour_rows_v1`, 20261019210000), in
+ * the shape the ONE work-time rule reads. `[]` when there are none or the
+ * door is not installed yet (42883 — the page then shows what it showed
+ * before); `null` when the read failed, so the figure is UNKNOWN, not short.
+ */
+async function readTeamHourRows(
+  supabase: SupabaseClient,
+  projectId: string,
+): Promise<JournalWindowEntryRow[] | null> {
+  const { data, error } = await asAny(supabase).rpc("project_team_journal_hour_rows_v1", {
+    p_project_id: projectId,
+  });
+  if (error) {
+    if (error.code === "42883" || error.code === "PGRST202") return [];
+    console.error("[project-hours] team hours read failed:", error.code);
+    return null;
+  }
+  return teamHourRowsToWindowRows((data ?? []) as TeamHourRow[]);
+}
+
 async function readJournaled(
   supabase: SupabaseClient,
   projectId: string,
   todayIso: string,
+  horizonIso: string,
 ): Promise<ProjectJournaledHours> {
   // The report's own minimised projection — ids, timestamps, the review
   // rows and the metric rows. Never the entry text.
   const select = [
-    "id, worker_id, created_at, correction_of, engagement_context_id",
+    "id, worker_id, created_at, correction_of, engagement_context_id, subject:workers(profile_id)",
     JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
     JOURNAL_ENTRY_METRICS_EMBED,
   ].join(", ");
@@ -119,10 +144,16 @@ async function readJournaled(
     console.error("[project-hours] journal read failed:", res.error.code);
     return { state: "unknown" };
   }
-  const rows = res.data ?? [];
+  // Work a BRIGADE did on this project through a team assignment lives in the
+  // brigade's own context, which this caller's RLS does not read (B2B-9). The
+  // hours-only door returns those entries — disjoint from the read above,
+  // opaque keys, time metrics only, never the brigade's journal text.
+  const team = await readTeamHourRows(supabase, projectId);
+  if (team === null) return { state: "unknown" };
+  const rows = [...(res.data ?? []), ...team];
   // A confirmed entry the member corrected is one day of work, not two.
   const counted = countedOnce(rows);
-  const work = deriveWindowWorkTime(counted, todayIso);
+  const work = deriveWindowWorkTime(counted, todayIso, horizonIso);
   return {
     state: "measured",
     hours: work.hours,
@@ -138,12 +169,15 @@ async function readJournaled(
  */
 export async function getProjectHoursSideBySide(
   projectId: string,
-  todayIso: string = new Date().toISOString().slice(0, 10),
+  todayIsoArg?: string,
 ): Promise<ProjectHoursSideBySide> {
   const supabase = await createClient();
+  const viewer = await viewerWorkToday();
+  const todayIso = todayIsoArg ?? viewer.todayIso;
+  const horizonIso = todayIsoArg ? todayIsoArg : viewer.horizonIso;
   const [allocated, journaled] = await Promise.all([
     readAllocated(projectId),
-    readJournaled(supabase, projectId, todayIso),
+    readJournaled(supabase, projectId, todayIso, horizonIso),
   ]);
   return { allocated, journaled };
 }

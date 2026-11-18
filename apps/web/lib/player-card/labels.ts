@@ -2,6 +2,7 @@ import "server-only";
 
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { statedDateLabel } from "@/lib/cv/period-dates";
 import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
 import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
 import type { PlayerCardLabels } from "@/components/app/worker-player-card";
@@ -9,7 +10,10 @@ import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
 import { contextHoursById } from "@/lib/player-card/context-hours";
 import { EVIDENCE_SCALE_MAX } from "@/components/app/player-card/skill-evidence-chart";
 import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenance";
-import type { ContextWorkTime } from "@/lib/journal/work-intelligence";
+import type { ContextWorkTime, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
+import { buildIdentityFacts } from "@/lib/player-card/identity-facts";
+import { mobilityLabels } from "@/lib/people/person-page-labels";
 
 /**
  * One place that turns the player-card's REAL data into resolved viewer-locale
@@ -24,7 +28,21 @@ import type { ContextWorkTime } from "@/lib/journal/work-intelligence";
  */
 export async function buildPlayerCardLabels(
   card: WorkerPlayerCard,
-  opts: { readonly contexts?: readonly ContextWorkTime[] | null } = {},
+  opts: {
+    readonly contexts?: readonly ContextWorkTime[] | null;
+    /**
+     * The journal's ALL-TIME period row (`WorkIntelligence.periods` key
+     * "all") when the mount loaded it, and whether that read was truncated.
+     * Drives the identity stage's fact strip; absent → no strip (the journal
+     * was not read here — never "0 h").
+     */
+    readonly allTime?: WorkPeriodTotals | null;
+    readonly allTimeTruncated?: boolean;
+    /** The decision-0025 figures (`experienceFiguresOf`) — the same the
+     *  profile hub passes; absent → the strip shows the journal only. */
+    readonly organizationHistoryHours?: number | null;
+    readonly professionalExperienceHours?: number | null;
+  } = {},
 ): Promise<PlayerCardLabels> {
   const locale = await getLocale();
   const t = await getTranslations("playerCard");
@@ -37,6 +55,10 @@ export async function buildPlayerCardLabels(
   // P6 — the provenance line's words: ONE namespace, one key per fact shape
   // (`provenanceTextKey`), so every mount of the card says the same thing.
   const tProv = await getTranslations("provenance");
+  // Mobility words already exist where the same facts are shown elsewhere
+  // (the person page, the CV export) — one wording, no new copy.
+  const tPeople = await getTranslations("people");
+  const tCvPrivate = await getTranslations("cvExport.privateDetails");
 
   const availabilityKey = card.availabilityStatus
     ? `editor.availabilityOption.${card.availabilityStatus}`
@@ -85,7 +107,60 @@ export async function buildPlayerCardLabels(
   }
   const historyUnavailable = card.unavailable.includes("workHistory");
 
+  // ── THE IDENTITY STAGE (premium Player Card, 2026-09-29) ─────────────────
+  // EVERY profession (0 / 1 / N), each through the ONE display rule: the
+  // localized registry name, else the person's own words. Deduped by the
+  // shown name so a registry row and its own-words twin never read twice.
+  const professionNames = [
+    ...new Set(
+      card.professions
+        .map((e) =>
+          professionDisplayName(e, (slug) =>
+            tProf.has(slug as never) ? tProf(slug as never) : null,
+          ),
+        )
+        .filter((n): n is string => Boolean(n)),
+    ),
+  ];
+  // WORKING NOW — only engagements the model marks current (active AND no
+  // end date); an ended organization stays in the history, never here.
+  const currentWork = [
+    ...new Set(
+      card.workHistory
+        .filter((h) => h.current)
+        .map((h) => (h.organizationName ?? "").trim())
+        .filter((n) => n.length > 0),
+    ),
+  ];
+  // THE FACT STRIP — the ONE rule (identity-facts.ts) the profile hub uses too.
+  const tIdentity = await getTranslations("playerCard.identity");
+  const identityFacts = buildIdentityFacts({
+    allTime: opts.allTime,
+    truncated: opts.allTimeTruncated ?? false,
+    locale,
+    t: (key, values) => tIdentity(key, values),
+    organizationHistoryHours: opts.organizationHistoryHours ?? null,
+    professionalExperienceHours: opts.professionalExperienceHours ?? null,
+  });
+
   return {
+    professionNames,
+    currentWork,
+    currentWorkLabel: t("identity.currentWork"),
+    identityFacts,
+    modes: {
+      label: t("identity.modes.label"),
+      identity: t("identity.modes.identity"),
+      next: t("identity.modes.next"),
+      nextOpportunities: t("identity.modes.nextOpportunities"),
+      doorCalendar: t("identity.modes.doorCalendar"),
+      doorJournal: t("identity.modes.doorJournal"),
+      doorCv: t("identity.modes.doorCv"),
+      work: t("identity.modes.work"),
+      skills: t("identity.modes.skills"),
+      evidence: t("identity.modes.evidence"),
+      history: t("identity.modes.history"),
+    },
     title: t("title"),
     subtitle: t("subtitle"),
     // P6 — the text equivalent of the provenance edge (the edge is never the
@@ -135,6 +210,15 @@ export async function buildPlayerCardLabels(
         ? (tlm(`countryNames.${card.locationCountry}`) as string)
         : card.locationCountry
       : null,
+    // MOBILITY — where the worker says they would work, and whether they
+    // would relocate. Country NAMES from the one catalogue (an unknown code
+    // stays the code, never a guess); nothing is shown for facts not given.
+    mobilityLabel: tPeople("mobility"),
+    mobilityCountries: mobilityLabels(card.preferredCountries ?? [], {
+      has: (key: string) => tlm.has(`countryNames.${key}`),
+      get: (key: string) => tlm(`countryNames.${key}`) as string,
+    }),
+    relocateLabel: card.willingToRelocate === true ? tCvPrivate("relocate") : null,
     // §5.2 DOCUMENTS — real counts only; absent when the surface is not
     // available for this account (the card then shows no documents block).
     documentsLabel: card.documents ? t("documentsLabel") : null,
@@ -259,13 +343,19 @@ export async function buildPlayerCardLabels(
         // readable without a second history list underneath the card.
         laneDetails: history.lanes.map((lane) => {
           const entry = card.workHistory.find((h) => h.id === lane.id);
+          // No organization: only what the person stated, never a padded day.
+          const own = entry !== undefined && entry.organizationName === null;
           const from = entry?.startedAt
-            ? dateFmt.format(new Date(`${entry.startedAt}T00:00:00Z`))
+            ? own
+              ? statedDateLabel(entry.startedAt, "start", locale)
+              : dateFmt.format(new Date(`${entry.startedAt}T00:00:00Z`))
             : null;
           const to = entry?.current
             ? t("workHistoryCurrent")
             : entry?.endedAt
-              ? dateFmt.format(new Date(`${entry.endedAt}T00:00:00Z`))
+              ? own
+                ? statedDateLabel(entry.endedAt, "end", locale)
+                : dateFmt.format(new Date(`${entry.endedAt}T00:00:00Z`))
               : null;
           return from && to ? `${from} — ${to}` : (from ?? "");
         }),

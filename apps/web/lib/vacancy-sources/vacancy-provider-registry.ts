@@ -68,11 +68,37 @@ export interface VacancyChannelEndpointV1 {
    */
   readonly window?: VacancyChannelWindowV1;
   /**
+   * Continuation-token configuration for a `cursor` endpoint. Required for
+   * that mode and meaningless otherwise. The importer refuses to walk a
+   * `cursor` endpoint that omits it (fail closed), exactly as a
+   * `record_offset` endpoint without `json_lines` is refused.
+   */
+  readonly cursor?: VacancyChannelCursorV1;
+  /**
+   * A TWO-LEVEL feed: the page lists entries (uuid, status, title…) and each
+   * ACTIVE entry's full ad lives at its own URL. NAV publishes exactly this.
+   * The adapter resolves the entries into full ads BEFORE the pure parser sees
+   * the page, so the parser and the importer stay provider-agnostic. An
+   * INACTIVE entry is never fetched: it is handed on as a withdrawal.
+   */
+  readonly detailFanOut?: VacancyDetailFanOutV1;
+  /**
    * True when the endpoint requires an API key. The adapter refuses to run a
    * key-requiring endpoint unless the owner has provisioned the secret — it
    * never falls back to an unauthenticated call, and never logs the key.
    */
   readonly requiresApiKey: boolean;
+  /**
+   * HOW the provisioned secret travels, when `requiresApiKey` is true:
+   *   - `api-key`  an `api-key: <secret>` request header (the shape every
+   *                JobTech-style endpoint documents);
+   *   - `bearer`   an `Authorization: Bearer <secret>` header — the shape a
+   *                signed-JWT feed such as NAV's requires.
+   * Absent means `api-key`, so no existing endpoint changes behaviour. In
+   * both cases the secret is a HEADER: never a query parameter, never part of
+   * `requestRef`, never logged. Added 2026-09-22 for the NAV scaffold.
+   */
+  readonly authScheme?: "api-key" | "bearer";
   /**
    * How often this channel should run, and whether it repeats at all. This is
    * the PROVIDER'S OWN recommendation, recorded here so an operator schedule
@@ -133,6 +159,104 @@ export interface VacancyChannelWindowV1 {
    * a record landing just after a window closed would be skipped forever.
    */
   readonly safetyLagSeconds: number;
+}
+
+/**
+ * How a two-level feed's entries become full ads. Every fact is the
+ * publisher's, so it lives on the descriptor, not in the adapter.
+ */
+export interface VacancyDetailFanOutV1 {
+  /** Key of the entries array in the page body. */
+  readonly itemsKey: string;
+  /** Key, on each entry, of the URL that returns the full ad (path or absolute
+   *  on the SAME host — anything else is refused). */
+  readonly entryUrlKey: string;
+  /** Path, root first, to the entry's own status. */
+  readonly statusPath: readonly string[];
+  /** The status value that means "live: fetch the ad". Anything else is a
+   *  withdrawal and is never fetched. */
+  readonly activeValue: string;
+  /** Keys to copy from an INACTIVE entry into the withdrawal record. */
+  readonly withdrawalKeys: readonly string[];
+  /** Path, root first, to the entry's own last-changed timestamp (SOURCE
+   *  time). Reported as the session's feed position; never used to decide. */
+  readonly changedAtPath?: readonly string[];
+  /** Most detail requests one page may cost. Entries beyond it are not
+   *  consumed: the page fails closed instead of silently dropping ads. */
+  readonly maxDetailFetchesPerPage: number;
+  /** Detail requests in flight at once. */
+  readonly concurrency: number;
+  /**
+   * Most detail requests ONE import session may spend, across all its pages.
+   * When it runs out mid-page the session stops cleanly and its checkpoint
+   * records exactly how many of that page's entries were consumed, so the next
+   * session resumes there: nothing is skipped, nothing is silently dropped.
+   * Absent = no per-session cap (every other provider).
+   */
+  readonly maxDetailFetchesPerSession?: number;
+  /**
+   * Minimum gap, in ms, between the STARTS of two requests to this host
+   * (listing pages and details alike, process-wide). Absent = no spacing
+   * (every other provider). For a shared grant whose publisher states no
+   * numeric rate limit.
+   */
+  readonly minRequestSpacingMs?: number;
+  /**
+   * Per-request timeout, in ms, for THIS endpoint's listing and detail
+   * requests, when the publisher's real latency needs more than the shared
+   * `requestTimeoutMs`. It changes how long ONE request may take, never how
+   * many are made (retries, spacing, concurrency and budgets are untouched),
+   * so a slow publisher yields fewer false failures and no extra load. Absent
+   * = the shared bound (every other provider, including Sweden).
+   */
+  readonly requestTimeoutMs?: number;
+  /**
+   * Wall-clock budget, in ms, for the DETAIL phase of one session. When it
+   * passes, no further detail request STARTS; requests already in flight
+   * finish, and the page stops at an entry boundary exactly as the request
+   * budget does (every earlier entry resolved, every later one untouched, the
+   * checkpoint says where). Lets a slow publisher make steady partial progress
+   * instead of failing the whole session. Absent = no wall-clock cap.
+   */
+  readonly sessionDeadlineMs?: number;
+}
+
+/**
+ * How a `cursor` channel continues. A continuation-token feed hands back, in
+ * each response, the token that names the NEXT page; the importer sends it
+ * on the next request and stores it as the channel checkpoint (through the
+ * existing `vacancy_import_cursors` row — `cursor_value` is already an opaque
+ * publisher token by the schema's own definition, so no new column or table
+ * is needed). The publisher's parameter NAME and the body path of the token
+ * live here for the same reason the time-window query keys do: a shared
+ * stage must never learn one publisher's vocabulary.
+ */
+export interface VacancyChannelCursorV1 {
+  /** Query key carrying the continuation token on the NEXT request. Absent
+   *  when the publisher names the next page by PATH (`pathTemplate`). */
+  readonly queryKey?: string;
+  /**
+   * The publisher names the next page by PATH, not by query — NAV's feed
+   * answers `next_url: /api/v1/feed/<id>`. The template carries a single
+   * `{token}` placeholder; the adapter substitutes the continuation token
+   * after checking it is a plain identifier, so the token can never widen the
+   * path (no `/`, no `..`, no query). Verified against a real page 2026-09-30.
+   */
+  readonly pathTemplate?: string;
+  /**
+   * Where a COLD START begins when the feed's head is years old. NAV's feed
+   * starts in 2019 and lists every change since; walking it from the head
+   * would read years of long-expired ads. The first request instead carries an
+   * `If-Modified-Since` header this many seconds before the capture instant
+   * (the publisher documents that header as the way to start at a time).
+   */
+  readonly coldStart?: { readonly ifModifiedSinceLookbackSeconds: number };
+  /**
+   * Path of keys, root first, to where the response body carries the next
+   * token. A missing, empty or non-string value at that path means the walk
+   * has reached the head of the feed (drained) — never an error.
+   */
+  readonly nextTokenPath: readonly string[];
 }
 
 export interface VacancyProviderDescriptorV1 {
@@ -295,8 +419,140 @@ const ARBETSFORMEDLINGEN: VacancyProviderDescriptorV1 = {
   transformVersion: "vacancy-arbetsformedlingen-v2",
 };
 
+/**
+ * NAV — Arbeids- og velferdsetaten, Norway, publishing through
+ * Arbeidsplassen.no's `pam-stilling-feed`. SCAFFOLD, registered 2026-09-22.
+ *
+ * WHAT IS RECORDED (docs/research/eu-vacancy-source-matrix-2026-08-18.md
+ * §3 and the reuse table at line 462 — research facts, NOT provider answers):
+ *   - type: documented, versioned, OpenAPI feed; base host
+ *     `pam-stilling-feed.nav.no`, API prefix `/api/v1/`;
+ *   - auth: signed JWT BEARER token. A public token exists (rotates
+ *     irregularly, no registration); a private token requires e-mailing the
+ *     NAV team with company + contact details and written acceptance of the
+ *     terms at `arbeidsplassen.nav.no/vilkar-api`;
+ *   - cost: free; rate limits: not specified — UNCONFIRMED;
+ *   - licence: republication IS permitted, including statistical/analytical
+ *     use, WITH ONGOING DUTIES: (a) an ad removed from NAV must be removed
+ *     from our result lists IMMEDIATELY; (b) an ad updated in the API must
+ *     be updated immediately; (c) the "apply" function must deep-link back
+ *     to the original system supplier's application function; (d) contact
+ *     information must not be exposed for inactive vacancies;
+ *   - attribution: not stated in the terms text fetched — required by OUR
+ *     product policy regardless;
+ *   - yield: NAV states the majority of publicly advertised Norwegian
+ *     vacancies since ~2019 (Finn.no excluded); absolute count UNCONFIRMED.
+ *
+ * WHAT IS NOT RECORDED, and therefore why this imports nothing:
+ *   - the governance row (source-governance.ts) is `legalStatus:
+ *     "unconfirmed"`, `activation: "off"`, `proposedOnly: true` — the
+ *     vilkar-api acceptance is an OWNER + NAV action, not a code fact;
+ *   - the env switch VACANCY_SOURCE_NAV_ENABLED is absent (fail-closed), and
+ *     the token env VACANCY_SOURCE_NAV_API_TOKEN is unprovisioned — the
+ *     adapter refuses a key-requiring endpoint without one;
+ *   - the exact feed path, the continuation-token parameter name and the
+ *     response path of the next token are ASSUMED from the docs matrix
+ *     (the docs site was fetched by the research pass, the feed itself was
+ *     never called). Every ASSUMED value is marked below and re-verified as
+ *     the first step of the activation gate
+ *     (docs/human-gates/nav-activation-gate.md).
+ *
+ * Nothing here can reach a nav.no host on its own: the adapter asserts the
+ * kill switch before the first request, and an empty environment blocks it.
+ */
+const NAV: VacancyProviderDescriptorV1 = {
+  key: "nav",
+  governanceSourceKey: "nav",
+  countryIso: "NO",
+  displayNameCode: "intelligence.sources.nav",
+  attributionCode: "vacancySources.attribution.nav",
+  // Norwegian Bokmål — the language Arbeidsplassen.no publishes in. Declared
+  // from the matrix, never sniffed from the text.
+  sourceLanguage: "nb",
+  defaultTargetLanguage: "en",
+  endpoints: [
+    {
+      // The feed is a CHANGE feed walked forward by continuation token: the
+      // same body serves the cold start (walk from the head) and the ongoing
+      // poll (resume from the stored token), so it is modelled as the one
+      // `stream` channel. There is no separate snapshot endpoint recorded.
+      channel: "stream",
+      host: "pam-stilling-feed.nav.no",
+      // VERIFIED against a real page 2026-09-30 (public token, read-only).
+      path: "/api/v1/feed",
+      pagination: "cursor",
+      cursor: {
+        // VERIFIED: a page names its successor as `next_url`
+        // (`/api/v1/feed/<id>`) and `next_id`; the next page is a PATH.
+        pathTemplate: "/api/v1/feed/{token}",
+        nextTokenPath: ["next_id"],
+        // VERIFIED: the head of the feed is 2019; the docs' way to start at a
+        // time is `If-Modified-Since`. Sixty days back reaches the ads a job
+        // seeker can still act on without reading years of expired entries.
+        coldStart: { ifModifiedSinceLookbackSeconds: 60 * 24 * 60 * 60 },
+      },
+      // VERIFIED: feed entries carry `_feed_entry {uuid,status,title,
+      // businessName,municipal,sistEndret}` and a relative `url` to the full ad
+      // (`/api/v1/feedentry/<uuid>` → `{uuid, ad_content, sistEndret, status}`).
+      detailFanOut: {
+        itemsKey: "items",
+        entryUrlKey: "url",
+        statusPath: ["_feed_entry", "status"],
+        activeValue: "ACTIVE",
+        withdrawalKeys: ["uuid", "status", "title"],
+        changedAtPath: ["_feed_entry", "sistEndret"],
+        // Anomaly guard only: one page may never cost more than this. The
+        // real cost control is the per-session budget below.
+        maxDetailFetchesPerPage: 1000,
+        // REQUEST BUDGET (2026-10-08, shared NAV grant; NAV states no numeric
+        // limit but may revoke for abuse). Pinned, with the worst-case
+        // arithmetic, by lib/vacancy-sources/nav-request-budget.test.ts.
+        // Before: 5 pages x (1 + 1000 details), concurrency 8, no spacing =
+        // 5,005 requests/session, ~720k/day on the */10 cron. Now: 100 details
+        // + 2 listing pages per session, 2 in flight, >= 500 ms between request
+        // starts. A cold start resumes across sessions (mid-page checkpoint).
+        concurrency: 2,
+        maxDetailFetchesPerSession: 100,
+        minRequestSpacingMs: 500,
+        // SLOW-PUBLISHER TOLERANCE (2026-10-09). Healthy NAV answers a detail
+        // in well under a second (a 100-detail session ran in ~55 s). On
+        // 2026-10-09 every request slowed to 8-21+ s (dry-run accounting: the
+        // listing 8.3 s, details 16.8-21.1 s with one at the 20 s cap), so the
+        // shared 20 s timeout failed whole pages. A longer per-request wait
+        // makes no extra request; the deadline makes a slow session stop at an
+        // entry boundary and resume, instead of failing. Pinned by
+        // nav-request-budget.test.ts.
+        requestTimeoutMs: 45_000,
+        sessionDeadlineMs: 150_000,
+      },
+      // RECORDED: a signed JWT, sent as `Authorization: Bearer <token>`.
+      requiresApiKey: true,
+      authScheme: "bearer",
+      cadence: {
+        // NAV's documentation suggests sleeping about two minutes after
+        // reaching the end of the feed before checking again, and its terms
+        // require immediate removal and update. Five minutes is the shortest
+        // interval a scheduled runner can honour honestly.
+        intervalSeconds: 5 * 60,
+        runOnce: false,
+        // Resumes from the stored continuation token. A missing token is a
+        // cold start from the head of the feed — by the publisher's own
+        // design the feed IS the snapshot — and is bounded by
+        // maxPagesPerSession like every other paged walk.
+        checkpointed: true,
+      },
+    },
+  ],
+  // At most two listing pages per session (was five); the detail requests they
+  // cost are capped separately by detailFanOut.maxDetailFetchesPerSession.
+  // Bounds may only ever be TIGHTENED.
+  boundOverrides: { maxPagesPerSession: 2, requestTimeoutMs: 20_000 },
+  transformVersion: "vacancy-nav-v1",
+};
+
 export const VACANCY_PROVIDERS: readonly VacancyProviderDescriptorV1[] = [
   ARBETSFORMEDLINGEN,
+  NAV,
 ];
 
 export function getVacancyProvider(

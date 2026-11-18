@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -23,7 +23,8 @@ import { describe, expect, it } from "vitest";
 const web = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(web, p), "utf8");
 
-const LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+// 2026-09-20: PL is an active UI locale; the Polish catalog reached full parity in the same PR, so pl is covered here like the other five.
+const LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const catalogs = Object.fromEntries(
   LOCALES.map((l) => [l, read(`messages/${l}.json`)]),
 ) as Record<(typeof LOCALES)[number], string>;
@@ -68,19 +69,42 @@ describe("footer discloses operator + IP owner and owns the © correctly", () =>
     expect(f.ipNotice).toContain("Nonstop Group");
   });
 
-  // Created by Rexora — owner-approved attribution link (2026-07-14). The
-  // credit must be a real external link to the approved URL (never plain
-  // text, never a fabricated URL) in BOTH shells: public footer + dashboard.
-  it("footer renders the Rexora credit as a safe external link to the approved URL", () => {
-    expect(footer).toContain('href="https://aiprocessautomation.eu"');
-    expect(footer).toContain('rel="noopener noreferrer"');
-    expect(footer).toContain('{t("rexora")}');
+  // THE "BUILT TOGETHER" CREDIT IS GONE — OWNER DECISIONS 2026-11-13.
+  //
+  // History: an attribution line was approved on 2026-07-14 and reworded on
+  // 2026-09-27 to name three collaborators. On 2026-11-13 the owner decided
+  // LabourMarket.ai is presented as one independent platform: the line left
+  // the PUBLIC footer first, and then the signed-in shell too ("remove it in
+  // the signed-in environment as well, if it is only a marketing line; do not
+  // change legal information"). It was a marketing credit, not a legal
+  // statement, so it is removed everywhere and no catalog carries it.
+  //
+  // What must NOT change with it is asserted around this block: who operates
+  // the platform, who owns the software, the copyright line.
+  it("neither shell carries a \"built together\" line or links to another company", () => {
+    for (const [name, source] of [
+      ["public footer", footer],
+      ["dashboard shell", dashboardShell],
+      ["dashboard chrome", read("components/app/dashboard-chrome.tsx")],
+    ] as const) {
+      expect(source, name).not.toMatch(/rich\("rexora"/);
+      expect(source, name).not.toContain("aiprocessautomation.eu");
+      expect(source, name).not.toMatch(/\brexora\b/);
+    }
   });
 
-  it("dashboard shell renders the Rexora credit as a safe external link too", () => {
-    expect(dashboardShell).toContain('href="https://aiprocessautomation.eu"');
-    expect(dashboardShell).toContain('rel="noopener noreferrer"');
-    expect(dashboardShell).toContain('rexora');
+  it("no catalog carries the credit line", () => {
+    // The legal sentences are pinned per routed locale above and are unchanged.
+    const localeFiles = readdirSync(join(web, "messages")).filter((f) =>
+      f.endsWith(".json"),
+    );
+    expect(localeFiles.length).toBeGreaterThanOrEqual(11);
+    for (const file of localeFiles) {
+      const messages = JSON.parse(read(`messages/${file}`)) as {
+        footer?: { rexora?: string };
+      };
+      expect(messages.footer?.rexora, `${file} footer.rexora`).toBeUndefined();
+    }
   });
 });
 
@@ -108,7 +132,7 @@ describe("terms: contracting party and governing law", () => {
     expect(all).toContain("302676973");
     expect(all).toContain("Labour Market AI Sp. z o.o.");
     // Lithuanian law named in every locale's own language:
-    expect(all).toMatch(/Lithuania|Lietuvos|Литов|Litouwen|Litauen/);
+    expect(all).toMatch(/Lithuania|Lietuvos|Литов|Litouwen|Litauen|Litw|litewsk/);
   });
 
   it("the terms page renders the structured sections", () => {
@@ -124,9 +148,8 @@ describe("privacy policy controller identity", () => {
     expect(first).toContain("302676973");
     expect(first).toContain("info@labourmarket.ai");
     expect(first).toContain("Labour Market AI Sp. z o.o.");
-    // Controller identity must NOT be in pendingItems anymore:
-    expect(JSON.stringify(priv.pendingItems).toLowerCase()).not.toContain("controller");
-    expect(JSON.stringify(priv.pendingItems)).not.toContain("valdytoj");
+    // No "still waiting for final wording" list at all (owner order 2026-10-23).
+    expect(priv.pendingItems).toBeUndefined();
   });
 });
 
@@ -176,6 +199,8 @@ describe("forbidden regressions", () => {
       ru: /не назначен/,
       nl: /geen functionaris/i,
       de: /nicht bestellt/i,
+      pl: /nie został wyznaczony/i,
+      sv: /har inte utsetts/i,
     };
     for (const l of LOCALES) {
       const ln = JSON.parse(catalogs[l]).legal.legalNotice;

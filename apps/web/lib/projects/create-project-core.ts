@@ -65,3 +65,25 @@ export async function insertProjectForCompany(
   }
   return { ok: true, id: data.id as string };
 }
+
+/**
+ * Compensating delete for a project the CALLER just created in the same
+ * request (a follow-up write failed, G-7). True only when the database
+ * confirms a row was actually removed — an RLS-filtered or failed delete is
+ * NOT a rollback, and the caller must then report the project as existing.
+ */
+export async function rollbackCreatedProject(
+  supabase: SupabaseClient,
+  projectId: string,
+): Promise<boolean> {
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("projects")
+      .delete()
+      .eq("id", projectId)
+      .select("id");
+    return !error && Array.isArray(data) && data.length > 0;
+  } catch {
+    return false;
+  }
+}

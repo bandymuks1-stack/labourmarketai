@@ -1,16 +1,23 @@
+import { Suspense } from "react";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
 import { Lock } from "lucide-react";
 import { AdminJoinConversation } from "@/components/app/admin-join-conversation";
 import { CommunicationComposer } from "@/components/app/communication-composer";
 import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
+import { readTeamOfferMessageLabels, readTeamOfferThreadContext } from "@/lib/company/team-offer-thread-context";
 import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerTexts } from "@/lib/communication/translation-read";
 import { readCommunicationLocale, viewerLocaleFor } from "@/lib/i18n/communication-locale";
+import { initialWriteLanguage } from "@/lib/communication/initial-write-language";
+import type { ViewerText } from "@/lib/communication/translation";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
 import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
@@ -21,6 +28,11 @@ import {
 import { isImageAttachmentMime } from "@/lib/communication/attachment-model";
 import { formatUtcDateTime } from "@/lib/time/display";
 import { PersonPresence, PlaceTimeStamp } from "@/components/app/work-world/primitives";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/communication/[conversationId]");
+
 
 type MessageRow = {
   id: string;
@@ -36,10 +48,13 @@ function asAny(supabase: SupabaseClient): any {
 
 export default async function ConversationDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; conversationId: string }>;
+  searchParams?: Promise<{ offer?: string }>;
 }) {
   const { locale, conversationId } = await params;
+  const offerParam = (await searchParams)?.offer;
   setRequestLocale(locale);
   const t = await getTranslations("communication");
 
@@ -59,7 +74,20 @@ export default async function ConversationDetailPage({
     .select("id, subject, kind, created_by, updated_at")
     .eq("id", conversationId)
     .maybeSingle();
-  if (!convRes.data) notFound();
+  if (!convRes.data) {
+    // A person REMOVED from the thread (revoked_at set) still sees their own
+    // participant row. Tell them honestly that it is no longer available and
+    // send them to the inbox — no thread shell, subject or participants.
+    // Anyone else gets the plain 404, as before.
+    const { data: ownRow } = await asAny(supabase)
+      .from("conversation_participants")
+      .select("revoked_at")
+      .eq("conversation_id", conversationId)
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    if (ownRow?.revoked_at) redirect(`/${locale}/dashboard/communication?notice=unavailable`);
+    notFound();
+  }
   const conversation = convRes.data;
 
   // Same honest context model as the list — so the thread header tells the
@@ -73,6 +101,12 @@ export default async function ConversationDetailPage({
   // header) until the owner applies the migration or when the thread carries
   // no relation. The raw source id never reaches this page.
   const sourceContexts = await readConversationSourceContexts([conversationId]);
+  // B2B: one thread per pair carries every offer between them. Opened from a
+  // specific offer, the thread names it — read through the SAME party-gated
+  // RPC that opened it (a non-party gets zero rows, so a crafted ?offer=
+  // shows nothing).
+  const offerContext = await readTeamOfferThreadContext(offerParam);
+  const tOffer = offerContext ? await getTranslations("teamDemandOffer") : null;
   const card = describeConversationCard({
     kind: conversation.kind,
     createdBy: conversation.created_by,
@@ -95,12 +129,22 @@ export default async function ConversationDetailPage({
     // automatically once applied, with no error while it is absent.
     .select("*")
     .eq("conversation_id", conversationId)
-    .order("created_at", { ascending: true })
+    // The NEWEST 500, shown oldest-first (audit 2026-10-20): ordered oldest
+    // first with the limit, a thread past 500 messages never showed its
+    // latest ones — including the message the person had just sent.
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
     .limit(500);
   // A failed read is NOT an empty thread (FAILED ≠ EMPTY): the page says so
   // instead of rendering "no messages yet" over a conversation that exists.
   const messagesFailed = Boolean(messagesRes.error);
-  const messages: MessageRow[] = messagesFailed ? [] : ((messagesRes.data ?? []) as MessageRow[]);
+  const messages: MessageRow[] = messagesFailed ? [] : ([...(messagesRes.data ?? [])].reverse() as MessageRow[]);
+  // Per-message offer labels (20261012180000): one thread per pair, so each
+  // message names the offer it is about. Details only through the party gate.
+  const offerLabels = await readTeamOfferMessageLabels(
+    messages.map((m) => (m as { team_offer_id?: string | null }).team_offer_id ?? null),
+  );
+  const tOfferLabel = offerLabels.size > 0 ? (tOffer ?? (await getTranslations("teamDemandOffer"))) : null;
 
   // MULTILINGUAL WORK COMMUNICATION: each message rendered in the VIEWER's
   // language through the existing AI runtime (egress-gated, audited), the
@@ -114,16 +158,22 @@ export default async function ConversationDetailPage({
   // column is not applied.
   const communicationLocale = await readCommunicationLocale(supabase, user.id);
   const viewerLocale = viewerLocaleFor(communicationLocale, locale);
-  const viewerTexts = await resolveViewerTexts(
+  // NOT awaited here: each message streams in behind its own Suspense
+  // boundary, showing the ORIGINAL until the viewer's rendering arrives.
+  // Awaited, a slow provider held the whole conversation back — production
+  // walk 2026-09-28: 32 s before any message appeared (two 15 s provider
+  // timeouts), then "no translation" anyway. A failed read yields originals.
+  const viewerTexts = resolveViewerTexts(
     messages.map((m) => ({
       id: m.id,
       body: m.body,
+      author_id: m.author_id,
       original_language:
         (m as { original_language?: string | null }).original_language ?? null,
     })),
     viewerLocale,
     user.id,
-  );
+  ).catch(() => new Map<string, ViewerText>());
 
   // Message attachments (user-journey repair v1) — participant-scoped
   // metadata + short-lived signed URLs from the PRIVATE bucket. Degrades to
@@ -163,17 +213,23 @@ export default async function ConversationDetailPage({
     .maybeSingle();
   const viewerIsParticipant = !!viewerParticipantRow;
 
+  // The language the composer starts in: what this person wrote last here,
+  // else their browser's language, else the page's (chat audit defect 2).
+  const ownLast = [...messages].reverse().find((m) => m.author_id === user.id);
+  const defaultWriteLanguage = initialWriteLanguage({
+    ownLastLanguage: ownLast
+      ? ((ownLast as unknown as { original_language?: string | null }).original_language ?? null)
+      : null,
+    acceptLanguage: (await headers()).get("accept-language"),
+    uiLocale: locale,
+  });
+
   return (
     <div className="flex flex-col gap-5">
       <header className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <Link
-            href="/dashboard/communication"
-            className="font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue"
-          >
-            ← {t("backToList")}
-          </Link>
-          <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+          <PageBack href="/dashboard/communication">{t("backToList")}</PageBack>
+          <PageTitle>
             {/* Real title fallback — never "(be temos)": subject, then the
                 permitted counterpart name, then the live source title, then
                 the support label / a neutral "Pokalbis". */}
@@ -183,7 +239,7 @@ export default async function ConversationDetailPage({
               (conversation.kind === "support"
                 ? t("counterparty.support")
                 : t("conversationFallback"))}
-          </h1>
+          </PageTitle>
           <span
             className="font-mono text-meta uppercase tracking-label text-text-muted"
             data-testid="thread-type"
@@ -247,6 +303,18 @@ export default async function ConversationDetailPage({
               participant-scoped RPC resolved a live source row (never guessed
               from the subject). With a route for this viewer it is a real
               link-back; without one it is a plain label — no dead ends. */}
+          {offerContext && tOffer && (
+            <p
+              className="text-meta text-text-secondary"
+              data-testid="thread-offer-context"
+              data-offer-status={offerContext.status}
+            >
+              {tOffer("threadContext", { subject: offerContext.subject ?? "—" })}
+              {" · "}
+              {tOffer.has(`status.${offerContext.status}`) ? tOffer(`status.${offerContext.status}`) : offerContext.status}
+              <span className="block text-text-muted">{tOffer("threadContextShared")}</span>
+            </p>
+          )}
           {card.sourceKey && (
             <div className="flex flex-wrap items-center gap-x-1.5 text-meta">
               {card.sourceHref ? (
@@ -317,57 +385,22 @@ export default async function ConversationDetailPage({
                   </PlaceTimeStamp>
                 </div>
                 {(() => {
-                  const vt = viewerTexts.get(m.id) ?? {
-                    text: m.body,
-                    kind: "original" as const,
-                    state: "unknown_language" as const,
-                    unavailable: null,
-                    languageBadge: null,
-                    original: m.body,
-                    provider: null,
-                  };
+                  const offerId = (m as { team_offer_id?: string | null }).team_offer_id ?? null;
+                  const label = offerId ? offerLabels.get(offerId) : undefined;
+                  if (!label || !tOfferLabel) return null;
                   return (
-                    <>
-                      {vt.languageBadge ? (
-                        <span
-                          className="self-start rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
-                          data-testid={`message-lang-${m.id}`}
-                          data-kind={vt.kind}
-                          data-state={vt.state}
-                          data-unavailable={vt.unavailable ?? undefined}
-                        >
-                          {vt.kind === "translated"
-                            ? t("translatedFrom", { lang: vt.languageBadge.toUpperCase() })
-                            : vt.state === "original_foreign"
-                              ? t("translationUnavailable", { lang: vt.languageBadge.toUpperCase() })
-                              : t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
-                        </span>
-                      ) : null}
-                      {vt.text.length > 0 ? (
-                        <p
-                          className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary"
-                          data-testid={`message-text-${m.id}`}
-                          data-kind={vt.kind}
-                        >
-                          {vt.text}
-                        </p>
-                      ) : null}
-                      {vt.kind === "translated" ? (
-                        <details
-                          className="text-meta text-text-muted"
-                          data-testid={`message-original-${m.id}`}
-                        >
-                          <summary className="cursor-pointer font-mono uppercase tracking-label">
-                            {t("showOriginal", { lang: (vt.languageBadge ?? "").toUpperCase() })}
-                          </summary>
-                          <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
-                            {vt.original}
-                          </p>
-                        </details>
-                      ) : null}
-                    </>
+                    <p
+                      className="text-meta text-text-muted"
+                      data-testid={`message-offer-label-${m.id}`}
+                      data-offer-id={offerId ?? undefined}
+                    >
+                      {tOfferLabel("messageAbout", { subject: label.subject ?? "—" })}
+                    </p>
                   );
                 })()}
+                <Suspense fallback={<OriginalMessageText id={m.id} body={m.body} />}>
+                  <ViewerMessageText m={m} viewerTexts={viewerTexts} t={t} />
+                </Suspense>
                 {(() => {
                   const atts = attachmentsByMessage.get(m.id) ?? [];
                   if (atts.length === 0) return null;
@@ -430,7 +463,87 @@ export default async function ConversationDetailPage({
       <CommunicationComposer
         conversationId={conversationId}
         locale={locale}
+        defaultWriteLanguage={defaultWriteLanguage}
+        teamOfferId={offerContext ? (offerParam ?? null) : null}
       />
     </div>
   );
 }
+
+/** A message's text as the viewer reads it — awaited INSIDE its Suspense
+ *  boundary, so a slow translation never holds the conversation back. */
+async function ViewerMessageText({
+  m,
+  viewerTexts,
+  t,
+}: {
+  m: { id: string; body: string };
+  viewerTexts: Promise<ReadonlyMap<string, ViewerText>>;
+  t: Awaited<ReturnType<typeof getTranslations<"communication">>>;
+}) {
+  const vt = (await viewerTexts).get(m.id) ?? {
+    text: m.body,
+    kind: "original" as const,
+    state: "unknown_language" as const,
+    unavailable: null,
+    languageBadge: null,
+    original: m.body,
+    provider: null,
+  };
+  return (
+    <>
+      {vt.languageBadge ? (
+        <span
+          className="self-start rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
+          data-testid={`message-lang-${m.id}`}
+          data-kind={vt.kind}
+          data-state={vt.state}
+          data-unavailable={vt.unavailable ?? undefined}
+        >
+          {vt.kind === "translated"
+            ? t("translatedFrom", { lang: vt.languageBadge.toUpperCase() })
+            : vt.state === "original_foreign"
+              ? t("translationUnavailable", { lang: vt.languageBadge.toUpperCase() })
+              : t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
+        </span>
+      ) : null}
+      {vt.text.length > 0 ? (
+        <p
+          className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary"
+          data-testid={`message-text-${m.id}`}
+          data-kind={vt.kind}
+        >
+          {vt.text}
+        </p>
+      ) : null}
+      {vt.kind === "translated" ? (
+        <details
+          className="text-meta text-text-muted"
+          data-testid={`message-original-${m.id}`}
+        >
+          <summary className="cursor-pointer font-mono uppercase tracking-label">
+            {t("showOriginal", { lang: (vt.languageBadge ?? "").toUpperCase() })}
+          </summary>
+          <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
+            {vt.original}
+          </p>
+        </details>
+      ) : null}
+    </>
+  );
+}
+
+/** Until the viewer's rendering arrives: the original, as written. */
+function OriginalMessageText({ id, body }: { id: string; body: string }) {
+  if (body.length === 0) return null;
+  return (
+    <p
+      className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary"
+      data-testid={`message-text-${id}`}
+      data-kind="original"
+    >
+      {body}
+    </p>
+  );
+}
+

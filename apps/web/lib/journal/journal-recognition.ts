@@ -384,7 +384,7 @@ export function deriveJournalRecognition(
       }
 
       // ── Lane 2: curated ambiguity → choice candidates ───────────────────
-      for (const a of describesWhere ? [] : extractAmbiguousCandidates(f.text)) {
+      for (const a of describesWhere ? [] : extractAmbiguousCandidates(workText)) {
         const choiceSlugs = a.choices.map((c) => c.slug);
         // Duplicate suppression: an EXPLICIT reading in the same fragment
         // resolves the ambiguity (the recognized slug represents it). A
@@ -436,7 +436,7 @@ export function deriveJournalRecognition(
       }
 
       // ── Lane 3: capability claims (deterministic lexicon) ───────────────
-      for (const c of describesWhere ? [] : extractProfileSkillClaims(f.text)) {
+      for (const c of describesWhere ? [] : extractProfileSkillClaims(workText)) {
         if (c.ambiguous === true) continue; // clarification-only reading
         const meta = getJournalClaimRowMeta(c.label);
         if (

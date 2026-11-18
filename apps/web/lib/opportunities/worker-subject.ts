@@ -3,22 +3,24 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   getPrimaryProfessionSlug,
+  getWorkerProfessionRows,
   getWorkerCoreRow,
   getWorkerSkillRows,
   readWorkerCoreRow,
   readWorkerProfessionRows,
   readWorkerSkillRows,
   type WorkerCoreRow,
+  type WorkerProfessionRow,
   type WorkerSkillRow,
 } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
-  sourceToEvidence,
   type EvidenceTier,
   type MatchSubject,
   type WorkerLanguageFact,
 } from "@/lib/market/match-v1";
+import { standingSourceTier } from "@/lib/evidence/skill-confirmation-standing";
 
 /**
  * The signed-in worker's OWN match subject (Worker Express Interest slice).
@@ -130,6 +132,7 @@ export async function buildOwnWorkerContextCore(
     skillRows: skillsRead.ok ? skillsRead.value : [],
     professionSlug:
       professionRows.find((r) => r.is_primary === true)?.professions?.slug ?? null,
+    professionSlugs: declaredCatalogueSlugs(professionRows),
     prefLocRes: side.prefLocRes,
     langsRes: side.langsRes,
     practiceRes: side.practiceRes,
@@ -150,19 +153,34 @@ export async function buildOwnWorkerContext(
   }
   const workerId = worker.id;
 
-  const [skillRows, professionSlug, side] = await Promise.all([
+  const [skillRows, professionSlug, professionRows, side] = await Promise.all([
     getWorkerSkillRows(),
     getPrimaryProfessionSlug(),
+    getWorkerProfessionRows(),
     readSubjectSideRows(supabase, profileId, workerId),
   ]);
   return assembleOwnWorkerContext({
     worker,
     skillRows,
     professionSlug,
+    professionSlugs: declaredCatalogueSlugs(professionRows),
     prefLocRes: side.prefLocRes,
     langsRes: side.langsRes,
     practiceRes: side.practiceRes,
   });
+}
+
+/** Every declared CATALOGUE profession, primary first — own-words rows with
+ *  no catalogue mapping carry no slug and so are never matched to a guessed
+ *  profession (owner decision 2026-09-28). */
+function declaredCatalogueSlugs(rows: readonly WorkerProfessionRow[]): string[] {
+  const ordered = [...rows].sort((a, b) => Number(b.is_primary === true) - Number(a.is_primary === true));
+  const out: string[] = [];
+  for (const r of ordered) {
+    const slug = r.professions?.slug?.trim();
+    if (slug && !out.includes(slug)) out.push(slug);
+  }
+  return out;
 }
 
 /** ONE assembly for both transports — pure over the fetched rows. */
@@ -170,6 +188,7 @@ function assembleOwnWorkerContext({
   worker,
   skillRows,
   professionSlug,
+  professionSlugs,
   prefLocRes,
   langsRes,
   practiceRes,
@@ -177,6 +196,7 @@ function assembleOwnWorkerContext({
   worker: WorkerCoreRow;
   skillRows: readonly WorkerSkillRow[];
   professionSlug: string | null;
+  professionSlugs: readonly string[];
   prefLocRes: { data: unknown };
   langsRes: { data: unknown };
   practiceRes: { data: unknown };
@@ -192,7 +212,9 @@ function assembleOwnWorkerContext({
   for (const s of skillRows) {
     const slug = s.skills?.slug;
     if (!slug) continue;
-    const tier: EvidenceTier = s.verified ? "manager_confirmed" : sourceToEvidence(s.source);
+    // `verified` is already the STANDING confirmation (worker-core.ts); an
+    // UNKNOWN one keeps its source, which must not lift it to the top tier.
+    const tier: EvidenceTier = standingSourceTier(s);
     const prev = ownSkillTiers.get(slug);
     if (!prev || tierRank[tier] > tierRank[prev]) ownSkillTiers.set(slug, tier);
   }
@@ -249,11 +271,17 @@ function assembleOwnWorkerContext({
     subject: {
       skills: [...ownSkillTiers.entries()].map(([uri, evidence]) => ({ uri, evidence })),
       professionSlug,
+      professionSlugs,
       country,
       city: preferredCity,
       preferredCountries,
       availabilityStatus: worker.availability_status ?? null,
       availableFrom: worker.available_from ?? null,
+      // The work card's pay floor (production walk 2026-09-29): the board
+      // said "atlygio lūkestis nenurodytas" to a worker whose card held
+      // 2750–3750, because this OWN subject never carried it — the employer
+      // side's supply subject always did (match-subject). Same column.
+      salaryMinEur: worker.salary_min_eur ?? null,
       // Contract v2 — engagement-form criterion (fires only when the demand
       // also states its engagement form via structured_v2).
       preferredContractType: worker.preferred_contract_type ?? null,

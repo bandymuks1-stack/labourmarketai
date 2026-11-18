@@ -28,7 +28,7 @@ import { join, relative } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -68,6 +68,9 @@ const PROVENANCE_KEYS = [
   // like a supervisor's confirmation. See
   // lib/guards/self-confirmation-not-independent.test.ts.
   "evidenceSelfConfirmed",
+  // Added 2026-10-04 (EVID-2 slice 2): the CLIENT accepted the work - a different
+  // claim by a different party than the employer class, never the gold edge.
+  "evidenceClientAccepted",
   "employerConfirmed",
   "employerConfirmedNoDate",
   "systemDerived",
@@ -142,7 +145,8 @@ describe("2. derived, not stored", () => {
     expect(MODEL).toMatch(/\.eq\("journal_entries\.worker_id", workerId\)/);
     expect(MODEL).toMatch(/\.limit\(PROVENANCE_CONFIRMATION_LIMIT\)/);
     // The confirming organisation is a LEFT join: unreadable → null → dash.
-    expect(MODEL).toMatch(/engagement_contexts\(organizations\(display_name, legal_name\)\)/);
+    // organization_id rides along so an ENDED relationship keeps its name (owner 2026-09-29).
+    expect(MODEL).toMatch(/engagement_contexts\(organization_id, organizations\(display_name, legal_name\)\)/);
     expect(MODEL).not.toMatch(/engagement_contexts!inner/);
   });
 

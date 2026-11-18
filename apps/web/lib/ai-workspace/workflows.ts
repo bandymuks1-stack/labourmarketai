@@ -8,6 +8,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
 import { getReportsView } from "@/lib/reports/reports-hub";
+import { getJournalWindowReport, type JournalWindowKey } from "@/lib/journal/journal-window-report";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
@@ -15,6 +16,7 @@ import { getPlanning } from "@/lib/planning/planning";
 import { loadOwnPrimaryProfessionSlug, loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import type { WorkIntelligence, WorkPeriodKey, WorkPeriodScope } from "@/lib/journal/work-intelligence";
 import { deriveGrowthReading } from "@/lib/journal/growth-reading";
+import { readTargetOccupationGap, targetOccupationFromSentence } from "@/lib/conversation/target-occupation-gap";
 import { parseJournalPeriodPhrase, type JournalPeriodPhrase } from "@/lib/conversation/journal-period-phrase";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
@@ -92,7 +94,15 @@ export async function runFindWork(
 
   const board = await loadWorkerOpportunityBoard("conversation");
   const needs = board.kind === "ready" ? board.opportunities.map((o) => o.need) : [];
-  const { terms, facets } = await buildWorkspaceVocabulary(needs);
+  // The board's public ads are part of what the person can see (the page
+  // renders them) — their countries count as "there is work there".
+  const adCountries =
+    board.kind === "ready"
+      ? board.externalVacancies.cards
+          .map((c) => c.view.country?.toUpperCase() ?? null)
+          .filter((c): c is string => Boolean(c))
+      : [];
+  const { terms, facets } = await buildWorkspaceVocabulary(needs, adCountries);
   const unavailable = await buildUnavailableCountryTerms(facets);
 
   const reading = readWorldState(text, [...terms, ...unavailable]);
@@ -111,7 +121,7 @@ export async function runFindWork(
         ? facets.countries.join(", ")
         : terms
             .filter((v) => v.dimension === missedDimension && v.available)
-            .map((v) => v.terms[0])
+            .map((v) => v.displayName ?? v.terms[0])
             .filter((label): label is string => typeof label === "string" && label.length > 0)
             .join(", ");
     const honest = alternatives
@@ -216,10 +226,19 @@ export async function runFindWork(
  * matched/missing sets the Context Panel shows for one demand. This aggregates
  * them; it computes no score and invents no "recommended skill".
  */
-export async function runSkillGap(): Promise<WorkflowResult> {
+export async function runSkillGap(text = ""): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const ctx = await loadAiWorkspaceContext();
   if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  // "Ką turėčiau išmokti, kad galėčiau dirbti X?" names ITS target — the
+  // answer measures against X, not against whatever the board happens to
+  // hold (owner 2026-09-29 §13).
+  const target = text ? targetOccupationFromSentence(text) : null;
+  if (target) {
+    const answer = await runTargetOccupationGap(target, t);
+    if (answer) return answer;
+  }
 
   const board = await loadWorkerOpportunityBoard("conversation");
   if (board.kind !== "ready") return blocked(t("blockedNoWorker"), t("whyNoWorker"));
@@ -280,6 +299,48 @@ export async function runSkillGap(): Promise<WorkflowResult> {
     explanation: { why: t("whySkillGap", { demands: board.opportunities.length }) },
     // The journal is where a skill becomes real — never a self-declaration.
     chips: [{ id: "logwork", label: t("chipLogWork") }, ...docChips],
+  };
+}
+
+/**
+ * The named-target gap: what occupation X needs (canonical
+ * `profession_skills`) against the person's OWN evidence rows (the one
+ * work-intelligence reader), each required skill on the rung the rows
+ * support — confirmed / recorded / said only / not yet. No score, no
+ * verdict. `null` when X has no requirements on file or the rows could not
+ * be read — the general answer then stands (never "nothing missing").
+ */
+async function runTargetOccupationGap(
+  professionSlug: string,
+  t: Awaited<ReturnType<typeof getTranslations>>,
+): Promise<WorkflowResult | null> {
+  const wi = await loadOwnWorkIntelligence({ focus: "all" }).catch(() => null);
+  if (wi === null) return null;
+  const gap = readTargetOccupationGap(professionSlug, wi.skills);
+  if (gap === null) return null;
+  const tSkill = await getTranslations("skillNames");
+  const tProf = await getTranslations("professions");
+  const list = (slugs: readonly string[]): string =>
+    slugs.map((slug) => (tSkill.has(slug) ? tSkill(slug) : slug)).join(", ");
+  const occupation = tProf.has(professionSlug) ? tProf(professionSlug) : professionSlug;
+  const lines = [t("targetGapIntro", { occupation })];
+  if (gap.confirmed.length > 0) lines.push(t("targetGapConfirmed", { list: list(gap.confirmed) }));
+  if (gap.recorded.length > 0) lines.push(t("targetGapRecorded", { list: list(gap.recorded) }));
+  if (gap.stated.length > 0) lines.push(t("targetGapStated", { list: list(gap.stated) }));
+  lines.push(
+    gap.missing.length > 0
+      ? t("targetGapMissing", { list: list(gap.missing) })
+      : t("targetGapNoneMissing"),
+  );
+  if (gap.missing.length > 0 || gap.stated.length > 0) lines.push(t("targetGapHow"));
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: { why: t("whyTargetGap", { occupation }) },
+    chips: [
+      { id: "logwork", label: t("chipLogWork") },
+      { id: "compass-page", label: t("targetGapChipCompass") },
+    ],
   };
 }
 
@@ -433,9 +494,10 @@ export async function runLearningCompass(): Promise<WorkflowResult> {
   for (const c of becoming.cohorts.slice(0, 2)) {
     lines.push(tc("cohortLine", { program: c.programName, cohort: c.cohortName }));
   }
-  // EVIDENCE
+  // EVIDENCE — an unreadable journal count is left out, never "0" (SEP-7)
   lines.push(
-    `${tc("evidence")}: ${tc("skills", { count: evidence.skillsTotal })} · ${tc("confirmed", { count: evidence.skillsConfirmed })} · ${tc("journalEntries", { count: evidence.journalEntries })}`,
+    `${tc("evidence")}: ${tc("skills", { count: evidence.skillsTotal })} · ${tc("confirmed", { count: evidence.skillsConfirmed })}` +
+      (evidence.journalEntries !== null ? ` · ${tc("journalEntries", { count: evidence.journalEntries })}` : ""),
   );
   // FITS NOW
   lines.push(`${tc("fits")}:`);
@@ -540,6 +602,60 @@ const PERIOD_WINDOW_DAYS: Record<Exclude<JournalPeriodPhrase, "all" | "today" | 
  * model is said as such (UNKNOWN), never re-derived from another surface;
  * a model built over a capped read says how many entries it rests on.
  */
+/**
+ * "Kiek valandų komanda dirbo šią savaitę?" asked in a COMPANY space
+ * (production walk 2026-09-29) was answered from the owner's PERSONAL
+ * journal ("Iš tavo paties žurnalo įrašų"). The organization's answer is its
+ * own journal report — the SAME `getJournalWindowReport` the reports page
+ * renders (org-manager RLS, per-member work time, approved = confirmed).
+ * today / week (default) / month; nothing else is re-derived here.
+ */
+export async function runOrganizationJournal(text?: string): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const locale = await getLocale();
+  const period = parseJournalPeriodPhrase(text);
+  const key: JournalWindowKey = period === "today" ? "today" : period === "month" ? "month" : "week";
+  const report = await getJournalWindowReport(key, undefined, { workTime: true });
+  if (!report.applied) {
+    return blocked(t("orgJournalUnavailable"), t("whyOrgJournal"));
+  }
+  const windowLabel = t(`orgJournalWindow_${key}` as never) as string;
+  const why = t("whyOrgJournal");
+  if (report.totals.entries === 0) {
+    return {
+      kind: "answer",
+      text: t("orgJournalEmpty", { window: windowLabel }),
+      explanation: { why },
+    };
+  }
+  const work = report.totals.work;
+  const lines = [
+    t("orgJournalTotals", {
+      window: windowLabel,
+      hours: fmtHours(work?.hours ?? 0, locale),
+      confirmed: fmtHours(work?.confirmedHours ?? 0, locale),
+      entries: report.totals.entries,
+      workers: report.totals.workers,
+      awaiting: report.totals.awaitingReview,
+    }),
+    ...[...report.workers]
+      .sort((a, b) => (b.work?.hours ?? 0) - (a.work?.hours ?? 0))
+      .slice(0, ANSWER_LIMIT)
+      .map((w) =>
+        t("orgJournalMember", {
+          name: w.name,
+          hours: fmtHours(w.work?.hours ?? 0, locale),
+          entries: w.entries,
+        }),
+      ),
+  ];
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: { why },
+  };
+}
+
 export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const locale = await getLocale();

@@ -18,7 +18,7 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 const playerCard = read("components/app/worker-player-card.tsx");
-const mapLive = read("components/app/market-map/location-map.tsx");
+const mapLive = read("components/app/market-map/own-location-layer.ts");
 const mapPage = read("app/[locale]/dashboard/market-map/page.tsx");
 
 describe("shared monogram is the single source of person initials", () => {
@@ -59,8 +59,13 @@ describe("map marker avatar fallback matches the Player Card tokens", () => {
     expect(mapLive).toMatch(
       /background:rgb\(var\(--c-ink-700\)\);color:rgb\(var\(--c-text-primary\)\)/,
     );
-    expect(playerCard).toMatch(/bg-ink-700/);
-    expect(playerCard).toMatch(/text-text-primary/);
+    // The card's monogram tile now lives in the identity stage (premium
+    // Player Card, 2026-09-29) and renders the SAME shared fallback surface
+    // (PLAYER_IDENTITY_FALLBACK_SURFACE = bg-ink-700 text-text-primary).
+    expect(playerCard).toMatch(/<IdentityStage/);
+    const stage = readFileSync(join(ROOT, "components/app/identity/person-portrait.tsx"), "utf8");
+    expect(stage).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
+    expect(read("lib/identity/player-identity.ts")).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE = "bg-ink-700 text-text-primary"/);
     // No hard-coded hex for the fallback avatar fill (old cyan OR the interim
     // dark-hex) — colours come from tokens now.
     expect(mapLive).not.toMatch(/background:#22D3EE;color:#0B1014/);

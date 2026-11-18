@@ -40,6 +40,8 @@ const MOBILITY: Record<string, RegExp> = {
   ru: /добира(ться|ется) до работы/i,
   nl: /naar het werk komen/i,
   de: /zur Arbeit kommen/i,
+  pl: /dotrze[ćc]? do pracy|doj(echać|edziesz|adą|eżdża)( Państwo)? do pracy|dojazd do pracy/i,
+  sv: /ta (mig|dig|sig) till (arbetet|jobbet)/i,
 };
 const OWNERSHIP: Record<string, RegExp> = {
   en: /own (transport|vehicle|car)/i,
@@ -47,8 +49,10 @@ const OWNERSHIP: Record<string, RegExp> = {
   ru: /собственн|свой транспорт/i,
   nl: /eigen (vervoer|voertuig|auto)/i,
   de: /eigenes (Fahrzeug|Auto)|eigenen (Wagen|Transport)/i,
+  pl: /własn(y|ego|ym) (pojazd|samochód|samochodu|auto|transport)/i,
+  sv: /eget (fordon|transportmedel)|egen bil|egna (fordon|transporter)/i,
 };
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 describe("W7 — has_transport copy states mobility, never ownership", () => {
   for (const locale of ACTIVE) {

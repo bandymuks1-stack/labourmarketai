@@ -6,6 +6,7 @@ import { getOrgWorkObjects } from "@/lib/objects/objects";
 import { getAllocationsForDate } from "@/lib/work-hours/allocations";
 import {
   objectTint,
+  isCountedAllocation,
   workerDayTotals,
   type WorkHourAllocation,
 } from "@/lib/work-hours/allocations-model";
@@ -55,6 +56,8 @@ export type HoursPageEntry = {
   /** True when somebody OTHER than the worker recorded it. Shown, because a
    *  record entered on a person's behalf should say so. */
   readonly enteredForSomeoneElse: boolean;
+  /** A timesheet rejected this row: shown, and excluded from every total. */
+  readonly rejected: boolean;
 };
 
 export type HoursPageData =
@@ -71,12 +74,6 @@ export type HoursPageData =
   | { readonly kind: "no-company" }
   | { readonly kind: "no-objects"; readonly organizationId: string }
   | { readonly kind: "error" };
-
-/** Today in UTC — the same day key the rest of the platform files work under
- *  (W12), so an entry never lands on a different day than the journal. */
-export function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
-}
 
 export async function getHoursPageData(workDate: string): Promise<HoursPageData> {
   const ctx = await resolveEmployerCompanyContext();
@@ -145,6 +142,8 @@ export async function getHoursPageData(workDate: string): Promise<HoursPageData>
       hours: a.hours,
       note: a.note,
       enteredForSomeoneElse: workerProfile.get(a.workerId) !== a.enteredBy,
+      // Listed, never hidden - but counted nowhere (`isCountedAllocation`).
+      rejected: !isCountedAllocation(a),
     };
   });
 
@@ -155,7 +154,7 @@ export async function getHoursPageData(workDate: string): Promise<HoursPageData>
     workers,
     objects,
     entries,
-    dayTotal: allocations.reduce(
+    dayTotal: allocations.filter(isCountedAllocation).reduce(
       (acc, a) => Math.round(acc * 100 + a.hours * 100) / 100,
       0,
     ),

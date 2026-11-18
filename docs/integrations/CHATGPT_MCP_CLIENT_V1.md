@@ -415,6 +415,19 @@ missing exposure.
 **After:** 26 — the two above. Exposure remains a reviewed decision, pinned in
 `lib/capabilities/capabilities.test.ts`.
 
+**Update 2026-10-02 (counts above are historical):** 62 exposed tools
+(`0.1.0+t62.142b9ca5`, see `MCP_TOOLSET_FINGERPRINTS.md`). The evidence-import
+flow is now 15 tool ids: `evidence.record.attest` and `evidence.import.withdraw`
+were single-step writes and are replaced by draft -> confirm pairs
+(`evidence.record.attest_draft` / `_confirm`, `evidence.import.withdraw_draft` /
+`_confirm`) over the same one-time-token machinery as demand close/reopen. The
+only single-step (`execute`) tools left are `context.switch`,
+`evidence.person.create` and the evidence-import staging steps
+(`create_session`, `submit_rows`, `resolve_row`, `resolve_label`,
+`resolve_time_semantics`); they are named in the server `instructions` and
+pinned by `lib/guards/mcp-execute-allowlist.test.ts`. Existing ChatGPT
+connectors must be **Refreshed** to see the new tool names.
+
 ---
 
 ## 10. Brand — the canonical mark on the ChatGPT app
@@ -454,3 +467,16 @@ drawn its own avatar from the connector name. If the LM mark does not appear
 after this deploys, the icon must be set **inside ChatGPT's connector
 settings** by the owner, from `public/app-icon.svg`. That is a ChatGPT-side UI
 action; no repository change can perform it.
+
+---
+
+## 11. Universal coverage — the bearer caller scope (2026-10-13)
+
+**Counts above are historical.** The door now publishes **229** tools
+(`0.1.0+t229.d05cd4a7`): the web chat's executable actions through the ONE
+conversation dispatcher, the web chat's read loaders, and the web pages' typed
+canonical actions, each run as the verified caller through
+`lib/api/bearer-caller-scope.ts` (an auth-core change, shipped RED /
+`needs-human-gate`). The coverage map by product area, the operation classes,
+the named gaps and the owner's ChatGPT verification steps live in
+[`LLM_INTEGRATION_COVERAGE_V1.md`](LLM_INTEGRATION_COVERAGE_V1.md).

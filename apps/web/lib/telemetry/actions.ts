@@ -1,7 +1,16 @@
 "use server";
 
 import "server-only";
+import { readRequestHost } from "@/lib/config/request-host";
 import { createClient } from "@/lib/supabase/server";
+import {
+  DEPLOY_ENV_KEY,
+  isLocalHostname,
+  isNonProductionHostname,
+  telemetryAppVersion,
+  telemetryOriginFromEnv,
+} from "./production-host";
+import { firstTouchFromUserMetadata } from "./first-touch-user-metadata";
 
 /**
  * Pilot telemetry server action — single entry point for any client-side
@@ -22,6 +31,19 @@ import { createClient } from "@/lib/supabase/server";
  *   - We DO NOT log the auth code, cookies, tokens, full URL, or any
  *     free-text profile / journal body. The action returns a tagged
  *     result so callers can tell why a record was rejected.
+ *
+ * Origin contract (2026-09-20, see lib/telemetry/production-host.ts):
+ *   - a write whose request `Host` header is a LOCAL host (localhost,
+ *     loopback, LAN) is REFUSED with `non_production_origin` — a local
+ *     production build walked by a browser must not write into the
+ *     production project's `pilot_events` at all;
+ *   - every accepted row is stamped server-side with `metadata.deploy_env`
+ *     (`production` | `preview` | `local`, from Vercel's own VERCEL_ENV)
+ *     and `app_version` (`<origin>@<commit>`). A client-supplied value for
+ *     either is overwritten: the client never says which build it is.
+ *   - a non-production Host (a *.vercel.app preview) also gets
+ *     `preview_host: true` stamped here, so the client's own marker is no
+ *     longer the only thing keeping preview traffic out of the funnel.
  */
 export type TelemetryEventInput = {
   sessionId: string;
@@ -54,6 +76,7 @@ export type PilotEventErrorCode =
   | "missing_event_name"
   | "metadata_too_large"
   | "metadata_invalid"
+  | "non_production_origin"
   | "insert_failed"
   | "unknown_error";
 
@@ -67,6 +90,11 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "fragment_count", // # of journal fragments parsed
   "unresolved_unknown_count", // # of unknown-phrase cards left unlabelled
   "skill_count", // # of skills the user accepted/dismissed in one action
+  // ── Real-visitor page speed (`web_vitals`, 2026-11-12). Three numbers and
+  //    nothing else; the Largest Contentful Paint rides `duration_ms`.
+  "cls", // cumulative layout shift up to the sample, unitless, 3 decimals
+  "fcp_ms", // first contentful paint, ms
+  "ttfb_ms", // time to the first byte of the document, ms
   "preview_host", // bool — was the tester on a vercel.app preview?
   "had_selection", // bool — language-feedback widget: was text highlighted?
   "comment_length", // language-feedback widget: chars typed (number only)
@@ -106,7 +134,33 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "billing_subject", // M-P0-7 canonical subject: 'profile' | 'organization'
   "ref_type", // referenced entity type: 'project' | 'booking' | 'engagement'
   "ref_id", // referenced entity id (opaque uuid)
+  // ── Employer funnel closure (2026-09-22): the stored requirement's status
+  //    at emission time — the closed `customer_requests` status set
+  //    (REQUIREMENT_STATUSES in funnel-events.ts), never free text.
+  "status",
+  // ── Chat resolution (owner program 2026-09-23). WHICH layer understood a
+  //    sentence: the deterministic router, the active conversation goal, or
+  //    the model proposer. The chat has sent it since 2026-09-05, and it was
+  //    stripped right here — so the owner could not measure how much the
+  //    goal layer or the model actually carries. BOUNDED: see
+  //    BOUNDED_METADATA_VALUES below; any other value is dropped.
+  "resolution",
+  // ── Write origin (2026-09-20). STAMPED SERVER-SIDE below from VERCEL_ENV;
+  //    listed here only so the sanitizer's allowlist and the stamp agree on
+  //    the key. A client-supplied value never survives — it is overwritten.
+  DEPLOY_ENV_KEY, // 'production' | 'preview' | 'local'
 ]);
+
+/**
+ * Keys whose value is a CLOSED set, not a bounded string. An allowlisted key
+ * normally keeps any string (capped at SCALAR_VALUE_MAX); a key listed here
+ * keeps its value only when it is one of these exact members — anything else
+ * (another word, a sentence, a number) is dropped, never truncated into the
+ * row. The allowlist decides WHICH keys; this decides which VALUES.
+ */
+const BOUNDED_METADATA_VALUES: Readonly<Record<string, ReadonlySet<string>>> = {
+  resolution: new Set(["deterministic", "goal", "llm"]),
+};
 
 const SCALAR_VALUE_MAX = 200;
 const METADATA_BYTE_MAX = 2048;
@@ -150,7 +204,54 @@ export async function recordTelemetryEvent(
     };
   }
 
-  const sanitizedMetadata = sanitizeMetadata(input.metadata ?? {});
+  // ── Origin (2026-09-20). The request's own Host header is the evidence a
+  //    local process is writing; it cannot be produced by production traffic
+  //    and the client cannot choose it. Unreadable → null → not refused: a
+  //    header failure must never blank the owner's funnel.
+  const requestHost = await readRequestHost();
+  if (isLocalHostname(requestHost)) {
+    return {
+      ok: false,
+      code: "non_production_origin",
+      message:
+        "pilot_events write refused: the request came from a local host, and local builds must not write telemetry into the production project.",
+    };
+  }
+  // Server-stamped origin — merged OVER the client's metadata inside the
+  // sanitizer, so the stamp wins on key collision and the byte cap is judged
+  // on what is actually inserted. `preview_host` is only ADDED (never
+  // cleared) and only when the header was actually read, so a client marker
+  // stays authoritative when the server cannot see a host.
+  const originStamp: Record<string, unknown> = {
+    [DEPLOY_ENV_KEY]: telemetryOriginFromEnv(),
+    ...(requestHost && isNonProductionHostname(requestHost)
+      ? { preview_host: true }
+      : {}),
+  };
+  const stampedAppVersion = telemetryAppVersion();
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const profileId = user?.id ?? null;
+
+  // The signed-in person's own first-touch campaign, read back from their
+  // account record (lib/telemetry/first-touch-user-metadata.ts), rides UNDER
+  // the client's keys so every step after sign-up is attributable without any
+  // device storage. The record holds it only when the person allowed
+  // analytics at sign-up (lib/consent/analytics-consent.ts), and a client
+  // event exists only after that same yes. If the extra keys would push the
+  // row over the byte cap, the event is kept without them.
+  const accountFirstTouch = user ? firstTouchFromUserMetadata(user.user_metadata) : {};
+  const withAccountFirstTouch =
+    Object.keys(accountFirstTouch).length > 0
+      ? sanitizeMetadata({ ...accountFirstTouch, ...(input.metadata ?? {}) }, originStamp)
+      : "too_large";
+  const sanitizedMetadata =
+    withAccountFirstTouch === "too_large" || withAccountFirstTouch === "invalid"
+      ? sanitizeMetadata(input.metadata ?? {}, originStamp)
+      : withAccountFirstTouch;
   if (sanitizedMetadata === "too_large") {
     return {
       ok: false,
@@ -165,12 +266,6 @@ export async function recordTelemetryEvent(
       message: "metadata must be a flat object of allowlisted keys.",
     };
   }
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const profileId = user?.id ?? null;
 
   // The generated `Database` type doesn't include `pilot_events` until
   // `pnpm db:types` is re-run after 0020 is applied. Cast supabase.from
@@ -204,7 +299,10 @@ export async function recordTelemetryEvent(
     result,
     error_code: errorCode,
     metadata: sanitizedMetadata,
-    app_version: appVersion,
+    // The build that wrote the row, decided here. The client's `appVersion`
+    // is kept only as a fallback for a process that knows nothing about
+    // itself — which, after the stamp above, cannot happen.
+    app_version: stampedAppVersion || appVersion,
   });
 
   if (error) {
@@ -220,9 +318,13 @@ export async function recordTelemetryEvent(
 
 /** Build a safe metadata object: allowlist keys, cap string values,
  *  reject jsonification failures, reject oversized payloads. Returns the
- *  sanitized object on success, `"too_large"` or `"invalid"` otherwise. */
+ *  sanitized object on success, `"too_large"` or `"invalid"` otherwise.
+ *  `stamp` holds the SERVER-decided keys (origin, 2026-09-20): merged after
+ *  the allowlist pass so a client value under the same key is overwritten,
+ *  and before the byte cap so the cap judges the row as inserted. */
 function sanitizeMetadata(
   raw: Record<string, unknown>,
+  stamp: Record<string, unknown> = {},
 ): Record<string, unknown> | "too_large" | "invalid" {
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
     return "invalid";
@@ -231,6 +333,11 @@ function sanitizeMetadata(
   for (const [k, v] of Object.entries(raw)) {
     if (!ALLOWED_METADATA_KEYS.has(k)) continue;
     if (v === null || v === undefined) continue;
+    const closedSet = BOUNDED_METADATA_VALUES[k];
+    if (closedSet) {
+      if (typeof v === "string" && closedSet.has(v)) out[k] = v;
+      continue;
+    }
     if (typeof v === "string") {
       out[k] = v.slice(0, SCALAR_VALUE_MAX);
     } else if (typeof v === "number") {
@@ -245,6 +352,7 @@ function sanitizeMetadata(
       continue;
     }
   }
+  for (const [k, v] of Object.entries(stamp)) out[k] = v;
   let serialized: string;
   try {
     serialized = JSON.stringify(out);

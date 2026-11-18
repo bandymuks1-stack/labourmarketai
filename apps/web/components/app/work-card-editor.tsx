@@ -4,18 +4,29 @@ import { useActionState, useEffect, useState, useTransition } from "react";
 
 import { WORK_CARD_OPEN_EDITOR_EVENT } from "./work-card-missing-chip";
 import {
+  EmployerVisibilityAsk,
+  type EmployerVisibilityAskLabels,
+} from "./employer-visibility-ask";
+import {
   WorkCardPlausibilityNote,
   type WorkCardCheckItem,
 } from "./work-card-plausibility-note";
 
 import { Link } from "@/lib/i18n/navigation";
+import { Button, buttonLinkClassName } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
 import {
   saveWorkerCardAction,
   confirmWorkerCardAction,
   type WorkCardActionResult,
 } from "@/lib/worker/work-card-actions";
 import type { WorkCardValues } from "@/lib/worker/work-card";
-import type { WorkCardState } from "@/lib/worker/work-card-state";
+import {
+  preferredCountriesCleared,
+  type WorkCardState,
+} from "@/lib/worker/work-card-state";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -45,9 +56,17 @@ export interface WorkCardLabels {
   availabilityOptionBusy: string;
   availabilityOptionUnavailable: string;
   availabilityOptionNone: string;
+  /** Saved figures can be changed, not cleared (save_worker_card coalesces
+   *  null = keep); shown once anything is saved so an empty field never
+   *  reads as "cleared". */
+  keepOnlyHint: string;
   availableFromLabel: string;
   locationLabel: string;
   locationHint: string;
+  /** The country list for the "country I am in" field. When present the field
+   *  is a <select> that submits the ISO code; when absent it stays free text
+   *  (the action resolves a code or a name either way). */
+  locationOptions?: ReadonlyArray<{ code: string; label: string }>;
   preferredLabel: string;
   preferredHint: string;
   salaryMinLabel: string;
@@ -61,17 +80,18 @@ export interface WorkCardLabels {
   saved: string;
   errorMsg: string;
   needsMigration: string;
+  /** The one-time "should employers find you?" ask shown after a save. */
+  visibilityAsk: EmployerVisibilityAskLabels;
 }
 
-const primaryCta =
-  "inline-flex w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5";
-const secondaryBtn =
-  "inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue";
+/** Fired after a save the server confirmed — a surface that read the card
+ *  BEFORE the save (the chat's result panel) re-reads it. */
+export const WORK_CARD_SAVED_EVENT = "lm:work-card-saved";
 
 export function WorkCardEditor({
   state,
   nextHref,
-  values,
+  values: propValues,
   labels,
   checks = [],
 }: {
@@ -85,6 +105,9 @@ export function WorkCardEditor({
   checks?: WorkCardCheckItem[];
 }) {
   const [open, setOpen] = useState(false);
+  // What is typed in the preferred-countries field, so an emptied field that
+  // had saved countries is sent as an EXPLICIT clear (not as "keep").
+  const [typedCountries, setTypedCountries] = useState<string | null>(null);
 
   // Inline-dim "+" chips (availability/location/pay) open this editor via a
   // window event — they used to self-anchor to #work-card and do nothing
@@ -106,8 +129,22 @@ export function WorkCardEditor({
     WorkCardActionResult | null,
     FormData
   >(saveWorkerCardAction, null);
+  // WHAT PERSISTED, not what was typed (production walk 2026-09-29): the chat
+  // panel's props were read before the save, and React resets an action form
+  // to its defaults — so the card said "Išsaugota" beside the OLD salary. After
+  // a confirmed save the fields show the row the server read back.
+  const values = saveState?.ok && saveState.saved ? saveState.saved : propValues;
+  useEffect(() => {
+    if (saveState?.ok) window.dispatchEvent(new Event(WORK_CARD_SAVED_EVENT));
+  }, [saveState]);
   const [confirmPending, startConfirm] = useTransition();
   const [confirmDone, setConfirmDone] = useState(false);
+  const hasSavedFigures =
+    values.availabilityStatus !== null ||
+    values.availableFrom !== null ||
+    values.locationCountry !== null ||
+    values.salaryMin !== null ||
+    values.salaryMax !== null;
 
   const why = (
     <p className="max-w-prose text-xs leading-relaxed text-text-muted">
@@ -122,7 +159,7 @@ export function WorkCardEditor({
       <div className="flex flex-col gap-2">
         <Link
           href={nextHref as "/dashboard/profile"}
-          className={primaryCta}
+          className={buttonLinkClassName("primary", "sm")}
           data-testid="work-card-next"
           onClick={() =>
             trackFunnel(FUNNEL_EVENTS.firstActionCardClicked, {
@@ -136,14 +173,16 @@ export function WorkCardEditor({
       </div>
     ) : (
       <div className="flex flex-col gap-2">
-        <button
+        <Button
           type="button"
-          className={primaryCta}
+          variant="primary"
+          size="sm"
+          className="min-h-11 w-fit"
           data-testid="work-card-next"
           onClick={() => setOpen(true)}
         >
           {labels.nextLabel}
-        </button>
+        </Button>
         {why}
       </div>
     );
@@ -165,9 +204,11 @@ export function WorkCardEditor({
             {labels.staleBody}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            <button
+            <Button
               type="button"
-              className={primaryCta}
+              variant="primary"
+              size="sm"
+              className="min-h-11 w-fit"
               disabled={confirmPending || confirmDone}
               data-testid="work-card-confirm-yes"
               onClick={() =>
@@ -178,15 +219,17 @@ export function WorkCardEditor({
               }
             >
               {confirmDone ? labels.staleSaved : labels.yes}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className={secondaryBtn}
+              variant="secondary"
+              size="sm"
+              className="min-h-11 w-fit"
               onClick={() => setOpen(true)}
               data-testid="work-card-confirm-change"
             >
               {labels.change}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -211,18 +254,23 @@ export function WorkCardEditor({
 
       {/* ── Secondary/collapsed editor (always available, never primary) ── */}
       <div id="work-card-editor-section">
-        <button
+        <Button
           type="button"
-          className={secondaryBtn}
+          variant="secondary"
+          size="sm"
+          className="min-h-11 w-fit"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
           data-testid="work-card-editor-toggle"
         >
           {labels.editorOpen}
-        </button>
+        </Button>
 
         {open && (
           <form
+            // Re-mounted on the persisted values, so the reset after the
+            // action lands on them rather than on the pre-save defaults.
+            key={JSON.stringify(values)}
             action={saveAction}
             className="mt-3 flex flex-col gap-4 rounded-md border border-ink-600 bg-ink-800/40 p-4"
             data-testid="work-card-editor"
@@ -231,17 +279,28 @@ export function WorkCardEditor({
               {labels.editorTitle}
             </p>
 
+            {/* Saved figures can be CHANGED here, not cleared: the RPC keeps
+                the stored value for every empty field (coalesce). Production
+                2026-09-21: choosing "not stated" over a saved status showed
+                "Saved" while the row kept `available`. So the empty choice is
+                offered only while nothing is saved, and the hint below says
+                what an empty field means once something is. Clearing needs a
+                write path with explicit clear flags (RED follow-up). */}
+            {hasSavedFigures ? (
+              <p className="text-xs leading-relaxed text-text-muted" data-testid="work-card-keep-only-hint">
+                {labels.keepOnlyHint}
+              </p>
+            ) : null}
             {/* kada — availability */}
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-mono uppercase tracking-label text-text-muted">
-                {labels.availabilityLabel}
-              </span>
-              <select
+              <Label>{labels.availabilityLabel}</Label>
+              <Select
                 name="availability_status"
                 defaultValue={values.availabilityStatus ?? ""}
-                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
               >
-                <option value="">{labels.availabilityOptionNone}</option>
+                {values.availabilityStatus ? null : (
+                  <option value="">{labels.availabilityOptionNone}</option>
+                )}
                 <option value="available">
                   {labels.availabilityOptionAvailable}
                 </option>
@@ -249,92 +308,107 @@ export function WorkCardEditor({
                 <option value="unavailable">
                   {labels.availabilityOptionUnavailable}
                 </option>
-              </select>
+              </Select>
             </label>
 
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-mono uppercase tracking-label text-text-muted">
-                {labels.availableFromLabel}
-              </span>
-              <input
+              <Label>{labels.availableFromLabel}</Label>
+              <Input
                 type="date"
                 name="available_from"
                 defaultValue={values.availableFrom ?? ""}
-                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
               />
             </label>
 
             {/* kur — location */}
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-mono uppercase tracking-label text-text-muted">
-                {labels.locationLabel}
-              </span>
-              <input
-                type="text"
-                name="location_country"
-                maxLength={2}
-                placeholder={labels.locationHint}
-                defaultValue={values.locationCountry ?? ""}
-                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm uppercase text-text-primary"
-              />
+              <Label>{labels.locationLabel}</Label>
+              {labels.locationOptions && labels.locationOptions.length > 0 ? (
+                <Select
+                  name="location_country"
+                  defaultValue={values.locationCountry ?? ""}
+                  data-testid="work-card-location-select"
+                >
+                  <option value="">—</option>
+                  {labels.locationOptions.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.label}
+                    </option>
+                  ))}
+                </Select>
+              ) : (
+                <Input
+                  type="text"
+                  name="location_country"
+                  maxLength={80}
+                  placeholder={labels.locationHint}
+                  defaultValue={values.locationCountry ?? ""}
+                />
+              )}
             </label>
 
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-mono uppercase tracking-label text-text-muted">
-                {labels.preferredLabel}
-              </span>
-              <input
+              <Label>{labels.preferredLabel}</Label>
+              <Input
                 type="text"
                 name="preferred_countries"
                 placeholder={labels.preferredHint}
                 defaultValue={values.preferredCountries.join(", ")}
-                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm uppercase text-text-primary"
+                onChange={(e) => setTypedCountries(e.target.value)}
+                className="uppercase"
               />
             </label>
+
+            {typedCountries !== null &&
+            preferredCountriesCleared(values.preferredCountries, typedCountries) ? (
+              <input type="hidden" name="preferred_countries_clear" value="1" />
+            ) : null}
 
             {/* kiek — pay */}
             <div className="grid grid-cols-2 gap-3">
               <label className="flex flex-col gap-1 text-xs">
-                <span className="font-mono uppercase tracking-label text-text-muted">
-                  {labels.salaryMinLabel}
-                </span>
-                <input
+                <Label>{labels.salaryMinLabel}</Label>
+                <Input
                   type="number"
                   name="salary_min"
                   min={0}
                   inputMode="numeric"
                   placeholder="1500"
                   defaultValue={values.salaryMin ?? ""}
-                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs">
-                <span className="font-mono uppercase tracking-label text-text-muted">
-                  {labels.salaryMaxLabel}
-                </span>
-                <input
+                <Label>{labels.salaryMaxLabel}</Label>
+                <Input
                   type="number"
                   name="salary_max"
                   min={0}
                   inputMode="numeric"
                   placeholder="2500"
                   defaultValue={values.salaryMax ?? ""}
-                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
                 />
               </label>
             </div>
 
             <div className="flex items-center gap-3">
-              <button type="submit" className={primaryCta} disabled={savePending}>
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                className="min-h-11 w-fit"
+                loading={savePending}
+                disabled={savePending}
+                data-testid="work-card-save"
+              >
                 {savePending ? labels.saving : labels.save}
-              </button>
+              </Button>
               {saveState?.ok && (
-                <span className="text-xs text-state-success" role="status">
+                <span className="text-xs text-state-success" role="status" data-testid="work-card-saved">
                   {labels.saved}
                 </span>
               )}
               {saveState && !saveState.ok && (
-                <span className="text-xs text-state-danger" role="status">
+                <span className="text-xs text-state-danger" role="status" data-testid="work-card-error">
                   {saveState.code === "needs_migration"
                     ? labels.needsMigration
                     : labels.errorMsg}
@@ -343,6 +417,10 @@ export function WorkCardEditor({
             </div>
           </form>
         )}
+        {/* After a SUCCESSFUL save only — the one non-blocking ask. It decides
+            for itself whether to render (never-decided consent, not ended on
+            this device) and writes nothing but its own device-local record. */}
+        {saveState?.ok ? <EmployerVisibilityAsk labels={labels.visibilityAsk} /> : null}
       </div>
     </div>
   );

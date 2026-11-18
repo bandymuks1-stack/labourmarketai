@@ -164,6 +164,9 @@ const CHAT_KEYS = [
   "assignAlreadyCommitted",
   "assignCommitmentUnknown",
   "assignFailed",
+  "keepPrompt",
+  "keepRecorded",
+  "keepFailed",
   // §7.1 — work relationships. Same rule again: "none recorded", "no company"
   // and "the read failed" are three different truths and stay three sentences.
   "chipEngagements",
@@ -188,6 +191,10 @@ const CHAT_KEYS = [
   "agencyNotAgencyWorkspace",
   "agencySwitchHint",
   "agencyClientDemandIntro",
+  // Connected clients, labelled as the partners page labels them.
+  "agencyClientsLine",
+  "agencyClientActive",
+  "agencyClientPending",
   "agencyClientDemandNone",
   "agencyProposalsIntro",
   "agencyProposalsNone",
@@ -223,6 +230,7 @@ const CHAT_KEYS = [
   "eduCohortCreated",
   "eduAssignNoCohort",
   "eduAssignNoLearners",
+  "eduMembersNotForRole",
   "eduAssignDone",
   "eduNotInstitution",
   "eduUnavailable",
@@ -248,6 +256,14 @@ const CHAT_KEYS = [
   "projectCreateIntro",
   "projectCreatedNext",
   "clientOffersIntro",
+  "teamOffersIntro",
+  "teamOfferStatusAgreed",
+  "chipTeamOfferAgree",
+  "chipTeamOfferThread",
+  "chipOfferOurs",
+  "teamOfferAgreed",
+  "teamOfferDeclined",
+  "teamOfferThreadFailed",
   "clientOffersNone",
   "clientBridgeInvitesIntro",
   "clientBridgeShareIntro",
@@ -289,6 +305,7 @@ const CHAT_KEYS = [
   // reprioritise, the other you cannot. Two keys, never one word for both.
   "capacityCommittedUntil",
   "capacityCommittedToUntil",
+  "capacityCommittedUndated",
   "capacityAbsencesUnknown",
   "capacityCommitmentsUnknown",
   "capacityEmpty",
@@ -393,7 +410,13 @@ const WORKLOG_KEYS = [
   // possible, so the flow asks instead of preselecting one.
   "contextChoose",
   "contextAmbiguous",
+  // The sentence named an organization whose relationship has ended.
+  "contextEndedOrg",
   "save",
+  // Activation audit fix #5: the FIRST button moves to the review step and
+  // saves nothing, so it is labelled "Toliau / Continue" — only the confirm
+  // step's button says "Save".
+  "continue",
   "cancel",
   "working",
   "confirmTitle",
@@ -405,11 +428,21 @@ const WORKLOG_KEYS = [
   "strengthenedSkillPrefix",
   "pendingConfirmPrefix",
   "cvUpdatedNote",
+  // After every save: the entry counts in the Living CV (recorded, not
+  // confirmed), one link there, and a calm "add tomorrow's work" line.
+  "livingCvNote",
+  "viewLivingCv",
+  "comeBackNote",
   "matchingNote",
   "viewOpportunities",
   "pipelineFailedNote",
   // The evidence carries no work content — ask, never save the request.
   "errorNoWorkContent",
+  // Owner P0 2026-09-23: the form refuses only what the server refuses —
+  // the 4000-character ceiling by name, and a NEUTRAL line (not an error)
+  // when no time, place or activity was recognised.
+  "errorNotesTooLong",
+  "noWorkSignalHint",
   // What the save will record as work time (issue #1689).
   "recordTitle",
   "recordNoActivity",
@@ -425,10 +458,20 @@ const WORKLOG_KEYS = [
  *  `greetingNamed` carries a `{name}` placeholder, so it is resolved separately
  *  by the caller that actually knows the name — it must never be rendered with
  *  the raw placeholder showing. */
-export function resolveChatLabels(t: T): ChatLabels {
+export function resolveChatLabels(t: T, tReservation: T): ChatLabels {
   const out = {} as Record<(typeof CHAT_KEYS)[number], string>;
   for (const k of CHAT_KEYS) out[k] = t(k);
-  return out as ChatLabels;
+  // The knowing-keep chips reuse the page's closed reason labels (one source,
+  // every locale): `projects.assign.reservation.reason.*` / `reasonNone`.
+  return {
+    ...out,
+    keepReasonNone: tReservation("reasonNone"),
+    keepReason_agreed_with_worker: tReservation("reason.agreed_with_worker"),
+    keepReason_agreed_with_client: tReservation("reason.agreed_with_client"),
+    keepReason_partial_overlap: tReservation("reason.partial_overlap"),
+    keepReason_urgent_need: tReservation("reason.urgent_need"),
+    keepReason_other: tReservation("reason.other"),
+  } as unknown as ChatLabels;
 }
 
 /** Resolve the work-log label bag from a `conversation.worklog`-scoped translator. */

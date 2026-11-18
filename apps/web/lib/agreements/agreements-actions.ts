@@ -23,6 +23,7 @@ import {
   type AgreementNotice,
 } from "@/lib/agreements/agreements-model";
 import { emitWorkflowStepPendingNotifications } from "@/lib/notifications/event-emitters";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Agreement & Rights Engine write actions (v1).
@@ -122,6 +123,7 @@ async function requireOwnOrgAgreement(
 
 /** Register an agreement record for the ACTIVE organization. */
 export async function createAgreementAction(formData: FormData): Promise<void> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = readLocale(formData);
   const ctx = await requireEmployerCompany();
   if (!ctx.ok) finish(locale, "not_allowed");

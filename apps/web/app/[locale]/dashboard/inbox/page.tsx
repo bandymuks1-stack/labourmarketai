@@ -11,12 +11,22 @@ import {
 } from "@/components/app/evidence-status-strip";
 import { EmptyState } from "@/components/app/empty-state";
 import { createClient } from "@/lib/supabase/server";
+import { readCounterpartyQueue } from "@/lib/journal/counterparty-review";
+import { queueBucket } from "@/lib/journal/counterparty-review-model";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import { reviewerHoursOf } from "@/lib/journal/reviewer-hours";
+import { countConfirmedEntriesFromRows, type ConfirmationRow } from "@/lib/journal/review-status";
 import {
   WORKER_NAME_FIELDS,
   resolveWorkerName,
   type WorkerNameRow,
 } from "@/lib/journal/worker-name";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/inbox", "journal.inbox.title");
+
 
 // Structured-field slugs that have a localized label; others fall back to slug.
 const FIELD_LABEL_SLUGS = new Set(["site_name", "tile_type", "area_done"]);
@@ -70,12 +80,27 @@ export default async function InboxPage({
       .filter((v: unknown): v is string => typeof v === "string");
   }
 
+  // CLIENT REVIEW is its own surface (/dashboard/inbox/counterparty): entries
+  // submitted to this caller as a client / customer / contracting party are
+  // decided there (accept / request correction / dispute), never as an
+  // employer confirmation with skill verification. The employer set above is
+  // employer-only (20261003150550); this only counts what waits over there.
+  const counterpartyQueue = await readCounterpartyQueue(supabase);
+  const counterpartyToDecide = (counterpartyQueue ?? []).filter(
+    (r) => queueBucket(r) === "to_decide",
+  ).length;
+
   let pending: InboxEntry[] = [];
   if (!loadFailed && reviewableIds.length > 0) {
+    // LEFT join on workers, never !inner (walk 2026-10-11): a learner's
+    // workers row is hidden from their institution by least privilege
+    // (can_view_worker: student grants no worker visibility), so an inner join
+    // dropped every student entry the institution may read AND review. The
+    // name falls back to NO_READABLE_NAME; the entry itself stays reviewable.
     const { data: rows, error: rowsError } = await supabase
       .from("journal_entries")
       .select(
-        `id, original_text, created_at, worker_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers!inner(${WORKER_NAME_FIELDS})`,
+        `id, original_text, created_at, worker_id, engagement_contexts(organization_id), journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug, source, created_at), workers(${WORKER_NAME_FIELDS})`,
       )
       .in("id", reviewableIds)
       .order("created_at", { ascending: true });
@@ -84,6 +109,23 @@ export default async function InboxPage({
     if (rowsError) loadFailed = true;
 
     const unconfirmed = rowsError ? [] : (rows ?? []);
+
+    // WHO CAN ACTUALLY DECIDE. Seeing the queue is `manages_organization()`;
+    // deciding needs an ACTIVE manager/owner/external_manager engagement in the
+    // entry's organization (the RPC's own `no_reviewer_engagement` rule). A
+    // manager without it used to be shown live "Approve" buttons that refused
+    // on click. The read below mirrors that predicate so the card can say so up
+    // front; the RPC stays the authority, and a failed read leaves the buttons
+    // (never hides an action on a guess).
+    const { data: engRows, error: engError } = await supabase
+      .from("engagement_contexts")
+      .select("organization_id")
+      .eq("profile_id", user.id)
+      .eq("status", "active")
+      .in("relationship_slug", ["manager", "owner", "external_manager"]);
+    const reviewerOrgs = new Set(
+      (engRows ?? []).map((e) => e.organization_id).filter(Boolean) as string[],
+    );
 
     // Batch the workers' declared skills WITH ids + verified state — the manager
     // picks which of these the entry proves, to confirm/verify them.
@@ -108,9 +150,40 @@ export default async function InboxPage({
       }
     }
 
+    // A manager confirms what THIS entry shows, never the worker's whole skill
+    // list (walk 2026-10-11: every unverified skill of the worker was offered,
+    // pre-ticked, so one submit verified skills detected in unrelated entries).
+    // Only skills linked to the entry are offered; unreadable links → none.
+    const linksByEntry = new Map<string, Set<string>>();
+    const entryIds = unconfirmed.map((r) => r.id);
+    if (entryIds.length > 0) {
+      const { data: links, error: linksError } = await supabase
+        .from("journal_entry_skills")
+        .select("journal_entry_id, skill_id")
+        .in("journal_entry_id", entryIds);
+      if (!linksError) {
+        for (const l of links ?? []) {
+          if (!l.journal_entry_id || !l.skill_id) continue;
+          const set = linksByEntry.get(l.journal_entry_id) ?? new Set<string>();
+          set.add(l.skill_id);
+          linksByEntry.set(l.journal_entry_id, set);
+        }
+      }
+    }
+
     pending = unconfirmed.map((r) => {
       const workerName = resolveWorkerName(r.workers as WorkerNameRow);
-      const metrics = (r.journal_entry_metrics ?? []).map((m) => {
+      // The reviewer sees only metrics that have a human label. The parser's
+      // provenance rows (work_date, parsed_fragment, fragment_*, pipeline_
+      // version …) stay in the database but are never shown as raw slugs — the
+      // work date is carried separately and rendered as the entry's date.
+      const workDate =
+        (r.journal_entry_metrics ?? []).find(
+          (m) => m.metric_slug === "work_date" && /^\d{4}-\d{2}-\d{2}$/.test(m.value_text ?? ""),
+        )?.value_text ?? null;
+      const metrics = (r.journal_entry_metrics ?? [])
+        .filter((m) => FIELD_LABEL_SLUGS.has(m.metric_slug))
+        .map((m) => {
         const label = FIELD_LABEL_SLUGS.has(m.metric_slug)
           ? tField(`field.${m.metric_slug}`)
           : m.metric_slug;
@@ -128,20 +201,34 @@ export default async function InboxPage({
         name: tSkill(w.slug),
         evidence: w.evidence,
       }));
-      const hours = depth.hours
-        ? {
-            value: depth.hours.value,
-            unit: tUnit(depth.hours.unit),
-            certain: depth.hours.certain,
-          }
+      // The STORED work time by the one canonical rule — what the timesheet
+      // and calendar count — never a re-parse of the text (reviewer-hours.ts).
+      const stored = reviewerHoursOf({
+        id: r.id,
+        createdAt: r.created_at,
+        metrics: r.journal_entry_metrics ?? [],
+      });
+      const hours = stored
+        ? { value: stored.value, unit: tUnit(stored.unit), certain: stored.certain }
         : null;
       return {
         id: r.id,
         originalText: r.original_text,
         workerName,
         createdAt: r.created_at,
+        workDate,
+        canApprove: engError
+          ? true
+          : reviewerOrgs.has(
+              ((r as unknown as { engagement_contexts?: { organization_id?: string | null } | null })
+                .engagement_contexts?.organization_id ?? "") as string,
+            ),
         metrics,
-        skills: r.worker_id ? (skillsByWorker.get(r.worker_id) ?? []) : [],
+        skills: r.worker_id
+          ? (skillsByWorker.get(r.worker_id) ?? []).filter((s) =>
+              linksByEntry.get(r.id)?.has(s.id),
+            )
+          : [],
         recognized,
         hours,
         certainty: depth.certainty,
@@ -150,24 +237,29 @@ export default async function InboxPage({
     });
   }
 
-  // Confirmed entries the caller can see (RLS-scoped: own / their org).
-  let confirmedCount = 0;
-  const { data: confRows } = await supabase
-    .from("journal_entry_confirmations")
-    .select("confirmation_scope");
+  // Confirmed ENTRIES the caller can see (RLS-scoped: own / their org) —
+  // counted once per entry by the latest-wins rule, never per decision row
+  // (an entry approved twice is one entry; one approved then sent back is
+  // not confirmed). Employer decisions only: a client's acceptance is a
+  // different claim (CLIENT_ACCEPTED), counted on the client review surface.
+  // An unreadable read is UNKNOWN ("—"), never 0.
+  let confirmedCount: number | null = null;
   let autoConfirmedCount = 0;
-  if (Array.isArray(confRows)) {
-    const scopes = confRows.map(
-      (r) =>
-        (r as { confirmation_scope?: { action?: string; decision?: string } | null })
-          .confirmation_scope ?? null,
+  const { data: confRows, error: confError } = await supabase
+    .from("journal_entry_confirmations")
+    .select("entry_id, confirmation_scope, created_at, confirmer_id, journal_entries(workers(profile_id))");
+  if (!confError && Array.isArray(confRows)) {
+    // Only a decision by someone else confirms an entry (EVID-2), so each row names its entry's author.
+    const counted = countConfirmedEntriesFromRows(
+      (confRows as unknown as (ConfirmationRow & {
+        entry_id: string;
+        journal_entries: { workers: { profile_id: string | null } | null } | null;
+      })[]).map((r) => ({ ...r, subject_profile_id: r.journal_entries?.workers?.profile_id ?? null })),
     );
-    confirmedCount = scopes.filter(
-      (s) => s?.decision === "approved" || s?.action === "confirm" || s?.action === "auto_confirm",
-    ).length;
-    // W6 slice 1: policy-written rows are surfaced with their honest marker —
-    // an automatic confirmation never hides inside the confirmed count.
-    autoConfirmedCount = scopes.filter((s) => s?.action === "auto_confirm").length;
+    confirmedCount = counted.confirmed;
+    // W6 slice 1: policy-written confirmations are surfaced with their honest
+    // marker — an automatic confirmation never hides inside the count.
+    autoConfirmedCount = counted.automatic;
   }
 
   // Manager Evidence Review Clarity v1 — the inbox lists only unconfirmed
@@ -176,14 +268,12 @@ export default async function InboxPage({
   // confirmed evidence in scope — never automatically.
   const reviewLegend: EvidenceStatus[] = ["self_declared"];
   if (pending.length > 0) reviewLegend.push("awaiting_confirmation");
-  if (confirmedCount > 0) reviewLegend.push("confirmed");
+  if (confirmedCount !== null && confirmedCount > 0) reviewLegend.push("confirmed");
 
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("inbox.title")}
-        </h1>
+        <PageTitle>{t("inbox.title")}</PageTitle>
         <div
           className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-secondary"
           data-testid="inbox-summary"
@@ -196,7 +286,7 @@ export default async function InboxPage({
           </span>
           <span>
             {t("inbox.summary.confirmed")}:{" "}
-            <span className="font-semibold text-text-primary">{confirmedCount}</span>
+            <span className="font-semibold text-text-primary">{confirmedCount ?? "—"}</span>
           </span>
         </div>
         <p
@@ -230,6 +320,14 @@ export default async function InboxPage({
             data-testid="inbox-quick-link"
           >
             {t("inbox.quick.openQuick")}
+          </Link>
+          <Link
+            href="/dashboard/inbox/counterparty"
+            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            data-testid="inbox-counterparty-link"
+          >
+            {t("counterparty.queue.openLink")}
+            {counterpartyToDecide > 0 ? ` (${counterpartyToDecide})` : ""}
           </Link>
           <Link
             href="/dashboard/inbox/report"

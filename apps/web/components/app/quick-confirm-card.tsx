@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -20,6 +20,10 @@ export type QuickConfirmEntryView = {
   id: string;
   workerName: string;
   createdAt: string;
+  /** The day the work happened (`resolveWorkDay`). */
+  workDay?: string;
+  /** The stored work time (`reviewerHoursOf`), never a re-parse of the text. */
+  hours?: { value: number; unit: string; certain: boolean } | null;
   originalText: string;
   recognizedNames: string[];
   /** The skills the tap will verify — listed EXPLICITLY on the card (no
@@ -29,6 +33,9 @@ export type QuickConfirmEntryView = {
   /** Which rule produced `skills` — `skills_unavailable` is the named read
    *  failure: the card says so instead of claiming "no unconfirmed skills". */
   confirmScope: QuickConfirmScope;
+  /** The organization the entry belongs to, shown when the queue spans several, so no
+   *  card is approved without saying whose hours it is. Absent: one organization. */
+  organization?: string;
 };
 
 /** What a successful tap reports upward — the queue keeps it as a receipt
@@ -38,6 +45,7 @@ export type QuickConfirmReceipt = {
   workerName: string;
   originalText: string;
   verifiedSkills: number;
+  decision: "approved" | "rejected";
 };
 
 /**
@@ -52,7 +60,7 @@ export function QuickConfirmCard({
   onConfirmed,
 }: {
   entry: QuickConfirmEntryView;
-  /** Called once when the tap succeeds (see QuickConfirmReceipt). */
+  /** Called when a decision is stored (see QuickConfirmReceipt). */
   onConfirmed?: (receipt: QuickConfirmReceipt) => void;
 }) {
   const t = useTranslations("journal");
@@ -61,34 +69,38 @@ export function QuickConfirmCard({
   /** Which action the manager submitted last — the discriminator for reading
    *  the right `useActionState` result (both persist independently). */
   const [lastAction, setLastAction] = useState<"confirm" | "reject" | null>(null);
-  const [confirmState, confirmAction, confirmPending] = useActionState<
-    QuickConfirmState | null,
-    FormData
-  >(quickConfirmEntry, null);
-  const [rejectState, rejectAction, rejectPending] = useActionState<
-    ReviewActionState | null,
-    FormData
-  >(reviewJournalEntry, null);
-
-  const pending = confirmPending || rejectPending;
-  const confirmed = confirmState?.ok === true;
-  const rejected = rejectState?.ok === true;
-  const verifiedSkills = confirmState?.ok === true ? confirmState.verifiedSkills : 0;
-
-  // Report the success upward exactly once. The action revalidates the route,
-  // so the server re-render drops this entry from the queue and unmounts the
-  // card — the receipt must live in the parent to stay on screen.
-  const reported = useRef(false);
-  useEffect(() => {
-    if (!confirmed || reported.current) return;
-    reported.current = true;
+  // Reported as soon as the action answers, not from an effect after the result renders.
+  // The action revalidates the route, and its result and the refreshed queue commit
+  // together: this card is already gone in that commit, so an effect here never runs and
+  // the person gets no answer (production walk 42414193078: stored, no receipt).
+  const report = (decision: QuickConfirmReceipt["decision"], verifiedSkills: number) =>
     onConfirmed?.({
       id: entry.id,
       workerName: entry.workerName,
       originalText: entry.originalText,
       verifiedSkills,
+      decision,
     });
-  }, [confirmed, verifiedSkills, entry.id, entry.workerName, entry.originalText, onConfirmed]);
+  const [confirmState, confirmAction, confirmPending] = useActionState<
+    QuickConfirmState | null,
+    FormData
+  >(async (previous, formData) => {
+    const result = await quickConfirmEntry(previous, formData);
+    if (result.ok) report("approved", result.verifiedSkills);
+    return result;
+  }, null);
+  const [rejectState, rejectAction, rejectPending] = useActionState<
+    ReviewActionState | null,
+    FormData
+  >(async (previous, formData) => {
+    const result = await reviewJournalEntry(previous, formData);
+    if (result.ok) report("rejected", 0);
+    return result;
+  }, null);
+
+  const pending = confirmPending || rejectPending;
+  const confirmed = confirmState?.ok === true;
+  const rejected = rejectState?.ok === true;
 
   // Report the failure of the action the manager MOST RECENTLY submitted.
   // `useActionState` keeps both results independently and neither is ever
@@ -123,6 +135,12 @@ export function QuickConfirmCard({
       // reviewer engagement on the People page.
       case "no_reviewer_engagement":
         return t("inbox.result.noReviewerEngagement");
+      case "self_review_not_allowed":
+        return t("inbox.result.selfReviewNotAllowed");
+      case "review_authority_not_established":
+        return t("inbox.result.reviewAuthorityNotEstablished");
+      case "already_accepted":
+        return t("inbox.result.alreadyAccepted");
       case "skill_not_owned":
         return t("inbox.result.skillNotOwned");
       default:
@@ -181,15 +199,29 @@ export function QuickConfirmCard({
       data-testid={`quick-confirm-card-${entry.id}`}
       data-confirm-scope={entry.confirmScope}
     >
+      {entry.organization ? (
+        <p className="text-meta font-medium text-text-secondary" data-testid={`quick-organization-${entry.id}`}>
+          {entry.organization}
+        </p>
+      ) : null}
       {/* WHO + WHEN — one glance. */}
       <div className="flex items-baseline justify-between gap-3">
         <p className="font-display text-base font-semibold text-text-primary">
           {entry.workerName}
         </p>
         <p className="shrink-0 text-xs text-text-muted">
-          {formatUtcDate(entry.createdAt, locale)}
+          {formatUtcDate(entry.workDay ?? entry.createdAt, locale)}
         </p>
       </div>
+
+      {entry.hours ? (
+        <p className="text-sm font-semibold text-text-primary" data-testid={`quick-hours-${entry.id}`}>
+          {t("inbox.hoursLabel")}: {entry.hours.value} {entry.hours.unit}
+          {entry.hours.certain ? null : (
+            <span className="ml-1 text-xs font-normal text-state-warning">({t("inbox.hoursUnclear")})</span>
+          )}
+        </p>
+      ) : null}
 
       {/* WHAT — the entry text + recognized works. */}
       <p className="line-clamp-4 whitespace-pre-wrap break-words text-sm text-text-secondary">

@@ -134,6 +134,14 @@ export interface SupplyRetrievalReport {
    * worker with none. Empty is the normal case and means the facts were read.
    */
   readonly unreadableFacts: readonly SupplyFactRead[];
+  /**
+   * The organization-history SIGNAL read could not be completed (failed, or
+   * the store is not installed). Deliberately NOT an `unreadableFacts` entry:
+   * the ranking never depends on it, so its absence cannot make the ranking
+   * untrustworthy - but "no history shown" must not be readable as "no
+   * history exists". Absent / false = the signals were read.
+   */
+  readonly historySignalsUnavailable?: boolean;
 }
 
 /** A Stage-2 read whose failure changes what a candidate LOOKS like. */

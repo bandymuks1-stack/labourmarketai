@@ -11,6 +11,7 @@ import {
   applyProviderReconciledStatus,
   findScopedSubscription,
 } from "@/lib/billing/subscription-store";
+import type { TrialHistory } from "@/lib/billing/trial-core";
 
 /**
  * Checkout ADMISSION (billing safety v1) — "ONE active subscription per
@@ -79,4 +80,21 @@ export async function admitCheckout(input: {
     });
   }
   return decision;
+}
+
+/**
+ * Trial history of a billing subject for ONE plan: has this subject EVER had a
+ * subscription row (any status — cancelled and expired rows count)? Read-only.
+ * Anything other than a positive "no row" is `unreadable` or `has_history`, so
+ * the trial decision (trial-core.decideTrial) fails closed.
+ */
+export async function readTrialHistory(input: {
+  scope: BillingScope;
+  planKey: string;
+  testMode: boolean;
+}): Promise<TrialHistory> {
+  const lookup = await findScopedSubscription(input);
+  if (lookup.status === "none") return "none";
+  if (lookup.status === "found") return "has_history";
+  return "unreadable";
 }

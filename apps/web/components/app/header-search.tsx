@@ -5,6 +5,7 @@ import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { CommandFinder } from "@/components/app/command-finder";
+import { usePathname } from "@/lib/i18n/navigation";
 import { OverlayPortal } from "@/components/ui/anchored-overlay";
 
 /**
@@ -47,6 +48,14 @@ export function HeaderSearch({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  // Close once a result has taken the person somewhere — by Enter, a click or
+  // any other navigation. Without this the overlay stayed open over the page
+  // it had just opened (production audit 2026-10-23).
+  const pathname = usePathname();
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   // Focus the finder input as soon as the overlay mounts it.
   useEffect(() => {
@@ -124,13 +133,13 @@ export function HeaderSearch({
       {open && (
         <OverlayPortal>
         <div
-          // z-[70] through the ONE portal root (owner audit P0.3): rendered
+          // z-toast (70) through the ONE portal root (owner audit P0.3): rendered
           // at document.body the backdrop competes only in the root stacking
           // context, so it dims EVERYTHING — composer (z-50), panel sheet
           // (z-50), dropdown menus (z-60). Inside the header its z was
           // trapped by the backdrop-blur stacking context and the right
           // panel stayed bright over it in production.
-          className="fixed inset-0 z-[70] flex items-start justify-center bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
+          className="fixed inset-0 z-toast flex items-start justify-center bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
           role="presentation"
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);

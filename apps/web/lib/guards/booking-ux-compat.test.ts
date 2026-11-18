@@ -7,6 +7,7 @@ import {
   WITHDRAW_REASON_KINDS,
   REASON_NOTE_MAX,
   canRescheduleProposal,
+  reschedulingReopensDecision,
   isResponseDeadlinePast,
   normalizeBookingReason,
   withDeadlineDisplayState,
@@ -228,11 +229,27 @@ describe("no client/action code writes the reserved terminal status", () => {
 
 // ── 5. Reschedule is a PROPOSED-only affordance ─────────────────────────────
 
-describe("reschedule exists ONLY on open proposals — accepted rows are never mutated", () => {
-  it("canRescheduleProposal allows exactly 'proposed'", () => {
+describe("reschedule: open proposals change in place; an accepted booking reopens for a new decision", () => {
+  it("canRescheduleProposal allows exactly 'proposed' and 'accepted'", () => {
     for (const s of ALL_STATUSES) {
-      expect(canRescheduleProposal(s), s).toBe(s === "proposed");
+      expect(canRescheduleProposal(s), s).toBe(s === "proposed" || s === "accepted");
     }
+  });
+
+  it("changing an ACCEPTED booking reopens the worker's decision — never stays accepted", () => {
+    for (const s of ALL_STATUSES) {
+      expect(reschedulingReopensDecision(s), s).toBe(s === "accepted");
+    }
+    const MIG = readFileSync(
+      join(__dirname, "..", "..", "..", "..", "supabase", "migrations", "20260928140000_booking_accepted_not_rewritten_v1.sql"),
+      "utf8",
+    );
+    const fn = MIG.slice(MIG.indexOf("create or replace function public.reschedule_booking_proposal_v1"));
+    // the accepted branch moves the row back to 'proposed' and keeps the old terms
+    expect(fn).toMatch(/status = 'proposed',/);
+    expect(fn).toMatch(/'rescheduled', 'accepted', 'proposed'/);
+    expect(fn).toMatch(/previous_terms/);
+    expect(ACTIONS).toMatch(/"reopened"/);
   });
 
   it("the page mounts the manage controls behind canRescheduleProposal, outgoing list only", () => {

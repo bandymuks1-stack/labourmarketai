@@ -8,11 +8,38 @@ import "server-only";
  *   - runs with the ADMIN client (the table grants authenticated no INSERT);
  *   - is called AFTER the domain RPC succeeded and is AWAITED end to end at
  *     every WRITE-PATH call site (see SERVERLESS DELIVERY below);
- *   - resolves the RECIPIENT from the domain rows themselves (never from
- *     caller-supplied ids alone — the caller knows who acted, the row knows
- *     who must hear about it);
+ *   - resolves the RECIPIENT from FACTS the write path hands over — read by
+ *     the caller, under the caller's OWN session, from the row the caller
+ *     just wrote (the RPC's return or a caller-scoped select). Never from
+ *     browser input, and never through an admin read of a domain table (see
+ *     SERVICE_ROLE GRANT TRUTH below);
  *   - never throws — so awaiting one can never fail the domain write it
- *     follows. Every failure collapses to a greppable console marker.
+ *     follows. Every failure collapses to a greppable console marker AND a
+ *     returned `NotificationEmitResult`, so a caller can tell delivered from
+ *     not without a database.
+ *
+ * SERVICE_ROLE GRANT TRUTH (verified on production 2026-09-23 through
+ * information_schema.role_table_grants, grantee = 'service_role'). Production
+ * deliberately allowlists service_role table grants. The notification spine
+ * holds exactly: notification_events INSERT/SELECT/UPDATE,
+ * notification_preferences SELECT, workers SELECT, journal_entries SELECT
+ * (and company_memberships, unrelated). It holds NOTHING on booking_requests,
+ * company_worker_engagements, work_tasks, worker_absences, companies,
+ * demand_interest_signals, customer_requests, invitations or profiles.
+ *
+ * Until 2026-09-23 the booking, engagement (created + ended), task and
+ * absence emitters opened with an admin read of exactly those ungranted
+ * tables; PostgREST answered 42501, `maybeSingle()` surfaced it as a null
+ * row, and every one of them logged `row_unreadable` and delivered nothing —
+ * the same class as the demand-interest silence closed by #1761. The
+ * CORRECTION to migration 20260908070000's comment (which may not be edited:
+ * applied files are frozen): the `workers` grant did NOT repair the booking
+ * and absence emitters, because their FIRST read was the domain row, not the
+ * worker. The fix grants nothing: the write path reads its own row and hands
+ * the facts over. The only admin reads left in the write-path emitters are
+ * `workers` (granted), the recipient's preferences (granted) and the event
+ * insert (granted). `lib/guards/notification-emitters-carry-facts.test.ts`
+ * pins this module off the ungranted tables.
  *
  * SERVERLESS DELIVERY (2026-08-31, TRAIN 10). These emitters were written
  * fire-and-forget for a server that outlives the response. On Vercel's
@@ -58,6 +85,7 @@ import {
   emitNotificationEventInBackground,
   isNotificationStoreWriteBlocked,
   type NotificationEventInput,
+  type JournalReviewDecision,
   type NotificationEventType,
 } from "./events";
 import {
@@ -70,10 +98,20 @@ import {
   resolveChannelEnabled,
   type NotificationPreferenceRow,
 } from "./notification-preferences";
-import { maybeDispatchNotificationEmail } from "./email-dispatch";
+import {
+  maybeDispatchNotificationEmail,
+  type NotificationEmailDispatchOutcome,
+} from "./email-dispatch";
+import { maybeDispatchWebPush } from "./web-push-dispatch";
+import {
+  journalReviewEntityId,
+  messageReceivedEntityId,
+} from "./message-coalescing";
 import { deterministicEntityId } from "./deterministic-entity-id";
 import { isoWeekKey } from "../worker/weekly-intelligence-model";
 import { getWorkerCoreRow } from "../data/worker-core";
+import { createClient as createServerClient } from "@/lib/supabase/server";
+import { buildOwnWorkerContext } from "@/lib/opportunities/worker-subject";
 import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
 import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 
@@ -117,6 +155,9 @@ async function readPrefRowsFailOpen(
   return prefs.kind === "ok" ? prefs.rows : [];
 }
 
+/** The email dispatcher's outcome tag (`sent`, `send_failed`, ...). */
+export type EmailOutcomeKind = NotificationEmailDispatchOutcome["kind"];
+
 /** What `deliver` did — the cron route reports these honestly. */
 type DeliverOutcome =
   | "written"
@@ -127,7 +168,126 @@ type DeliverOutcome =
   | "write_blocked"
   | "unexpected_error"
   /** The recipient stored an explicit in-app opt-out for this type. */
-  | "suppressed_preference";
+  | "suppressed_preference"
+  /** The send-time re-check said the recipient may no longer be told (a
+   *  participant removed between the read and the delivery). */
+  | "recipient_ineligible";
+
+/**
+ * Why a write-path emitter did not deliver. The LOGGED reasons are real
+ * misses (the marker fires); the rest are approved silences or named
+ * degradations that stay quiet, exactly as before — a marker that fires on
+ * correct behaviour is one everybody learns to ignore.
+ */
+export type NotificationUndeliveredReason =
+  /** LOGGED — the facts named nobody to tell (null id, unresolvable worker). */
+  | "recipient_unresolved"
+  /** LOGGED — the store refused the row with a code that is not a known state. */
+  | "insert_failed"
+  /** LOGGED — the emitter threw; the domain write is already committed. */
+  | "threw"
+  /** LOGGED — the demand-interest write path handed over no signal id. */
+  | "signal_unreadable"
+  /** LOGGED — the gated owner RPC named no demand owner. */
+  | "owner_unresolved"
+  /** Approved silence: the actor is the only recipient (self-assignment,
+   *  self-interest, an absence the worker filed for themselves). */
+  | "self_action"
+  /** Approved silence: the recipient stored an in-app opt-out. */
+  | "suppressed_preference"
+  /** Approved silence: the send-time re-check found the recipient no longer
+   *  eligible (removed from the thread) — no channel ran after that. */
+  | "recipient_ineligible"
+  /** Approved silence: this event type does not carry this status. */
+  | "not_applicable"
+  /** Named degradation: the store is not applied here. */
+  | "feature_unavailable"
+  /** Named degradation: the writer is unprivileged (42501 window). */
+  | "write_blocked";
+
+/**
+ * What a write-path emitter tells its caller. `delivered: true` means a row
+ * for at least one recipient is in the store — written now, or already
+ * there from an earlier identical emit (`duplicate`, the UNIQUE dedupe key).
+ * Anything else says WHY, with a bounded reason and never a person. Callers
+ * may ignore it (the domain write already succeeded); tests and the cron
+ * route read it.
+ */
+export type NotificationEmitResult =
+  | {
+      readonly delivered: true;
+      readonly outcome: "written" | "duplicate";
+      /** Distinct recipients that now hold a row. */
+      readonly recipients: number;
+      /**
+       * What the email hop did, per recipient whose row was WRITTEN now (a
+       * `duplicate` re-sends nothing). Absent for emitters that have not
+       * adopted it. `channel_disabled` is the default (email is opt-in);
+       * `not_configured` / `no_recipient_email` / `render_failed` /
+       * `send_failed` each mean the recipient OPTED IN and the mail still
+       * did not go — never to be read as success.
+       */
+      readonly emailOutcomes?: readonly EmailOutcomeKind[];
+    }
+  | { readonly delivered: false; readonly reason: NotificationUndeliveredReason };
+
+/** One `deliver` outcome, as a result. */
+function resultFromOutcome(
+  outcome: DeliverOutcome,
+  email?: EmailOutcomeKind | null,
+): NotificationEmitResult {
+  if (outcome === "written" || outcome === "duplicate") {
+    return email
+      ? { delivered: true, outcome, recipients: 1, emailOutcomes: [email] }
+      : { delivered: true, outcome, recipients: 1 };
+  }
+  if (outcome === "unexpected_error") return { delivered: false, reason: "insert_failed" };
+  return { delivered: false, reason: outcome };
+}
+
+/** Several recipients of one fact: delivered when ANY of them holds a row;
+ *  otherwise the first recipient's reason (they fail alike). */
+function combineResults(
+  results: readonly NotificationEmitResult[],
+  eventType: string,
+): NotificationEmitResult {
+  const held = results.filter((r) => r.delivered);
+  if (held.length > 0) {
+    return {
+      delivered: true,
+      outcome: held.some((r) => r.delivered && r.outcome === "written")
+        ? "written"
+        : "duplicate",
+      recipients: held.length,
+      ...(held.some((r) => r.delivered && r.emailOutcomes)
+        ? {
+            emailOutcomes: held.flatMap((r) =>
+              r.delivered ? (r.emailOutcomes ?? []) : [],
+            ),
+          }
+        : {}),
+    };
+  }
+  const first = results[0];
+  if (!first) {
+    notDelivered(eventType, "recipient_unresolved");
+    return { delivered: false, reason: "recipient_unresolved" };
+  }
+  return first;
+}
+
+/** The named-and-logged miss, as a result — one call, one marker. */
+function undeliveredResult(
+  eventType: string,
+  reason: Extract<
+    NotificationUndeliveredReason,
+    "recipient_unresolved" | "threw"
+  >,
+  detail?: string,
+): NotificationEmitResult {
+  notDelivered(eventType, reason, detail);
+  return { delivered: false, reason };
+}
 
 /**
  * The AWAITED insert every write-path emitter rides. A detached insert is
@@ -151,25 +311,107 @@ async function deliver(
   admin: AdminClient,
   input: NotificationEventInput,
 ): Promise<DeliverOutcome> {
+  return (await deliverDetailed(admin, input)).outcome;
+}
+
+/**
+ * Greppable marker for "the recipient OPTED IN to email for this type and no
+ * email went". `channel_disabled` (the default), `sent` and `logged` never
+ * come through here, so a hit is always an opted-in person who was not
+ * mailed. Event type + bounded outcome tag only — never the address, never
+ * content.
+ */
+export const NOTIFICATION_EMAIL_UNDELIVERED =
+  "[notifications/email] opted-in recipient not mailed";
+
+function reportEmailOutcome(
+  eventType: string,
+  email: NotificationEmailDispatchOutcome,
+): void {
+  if (
+    email.kind === "channel_disabled" ||
+    email.kind === "sent" ||
+    email.kind === "logged"
+  ) {
+    return;
+  }
+  const detail = {
+    eventType,
+    outcome: email.kind,
+    ...(email.kind === "send_failed" ? { reason: email.reason } : {}),
+  };
+  // `not_configured` is the NAMED, expected state until the owner sets a mail
+  // provider (like `feature_unavailable`): recorded, but not a warning - a
+  // warning that fires on correct behaviour is one everybody learns to ignore.
+  if (email.kind === "not_configured") {
+    console.info(NOTIFICATION_EMAIL_UNDELIVERED, detail);
+    return;
+  }
+  console.warn(NOTIFICATION_EMAIL_UNDELIVERED, detail);
+}
+
+/**
+ * `deliver`, with the email hop's outcome KEPT instead of discarded. The
+ * outcome is returned (so emitters can surface it in their result) and every
+ * opted-in-but-not-mailed outcome is logged through one marker. `email` is
+ * null when the row was not written now (duplicate / suppressed / blocked):
+ * no email hop ran.
+ */
+async function deliverDetailed(
+  admin: AdminClient,
+  input: NotificationEventInput,
+  opts?: {
+    /** Asked right before EACH channel (bell, e-mail, push); false stops
+     *  that channel and every later one. */
+    readonly isEligible?: () => Promise<boolean>;
+  },
+): Promise<{
+  readonly outcome: DeliverOutcome;
+  readonly email: NotificationEmailDispatchOutcome | null;
+}> {
   // The store refused the last write (42501): the preference read only
   // exists to feed the insert, so neither runs while the block holds.
-  if (isNotificationStoreWriteBlocked()) return "write_blocked";
+  if (isNotificationStoreWriteBlocked()) {
+    return { outcome: "write_blocked", email: null };
+  }
   const prefRows = await readPrefRowsFailOpen(admin, input.recipientProfileId);
   if (!resolveChannelEnabled(prefRows, input.eventType, "in_app")) {
     // APPROVED silence: the recipient turned this type off themselves.
-    return "suppressed_preference";
+    return { outcome: "suppressed_preference", email: null };
   }
+  const eligible = async (): Promise<boolean> => {
+    if (!opts?.isEligible) return true;
+    try {
+      return (await opts.isEligible()) === true;
+    } catch {
+      return false;
+    }
+  };
+  if (!(await eligible())) return { outcome: "recipient_ineligible", email: null };
   const outcome = await emitNotificationEvent(admin, input);
   if (outcome.kind === "unexpected_error") {
     // `duplicate` and `feature_unavailable` are approved outcomes and stay
     // quiet; this line only fires on something real.
     notDelivered(input.eventType, "insert_failed", outcome.code);
-    return "unexpected_error";
+    return { outcome: "unexpected_error", email: null };
   }
+  let email: NotificationEmailDispatchOutcome | null = null;
   if (outcome.kind === "written") {
-    await maybeDispatchNotificationEmail(admin, input, prefRows);
+    // Re-checked again: the bell insert above took a round trip, and a
+    // removal in that window must not reach the person's inbox or device.
+    if (!(await eligible())) return { outcome: outcome.kind, email: null };
+    email = await maybeDispatchNotificationEmail(admin, input, prefRows);
+    reportEmailOutcome(input.eventType, email);
+    // COM-3 push hop: the same event, the same recipient, the same copy as
+    // the bell. Inert until the owner switches the channel on (flag + VAPID
+    // keys) AND the person opted in on a device; never fails the insert.
+    if (!(await eligible())) return { outcome: outcome.kind, email };
+    const push = await maybeDispatchWebPush(admin, input, prefRows);
+    if (push.kind === "send_failed") {
+      console.warn("[notifications/push] not delivered", { eventType: input.eventType, reason: push.reason });
+    }
   }
-  return outcome.kind;
+  return { outcome: outcome.kind, email };
 }
 
 async function workerProfileId(
@@ -184,73 +426,84 @@ async function workerProfileId(
   return (data as { profile_id?: string } | null)?.profile_id ?? null;
 }
 
-/** Booking lifecycle events. `bookingId` is the booking_requests row id. */
+/**
+ * The facts a booking write path hands the two booking-shaped emitters. Read
+ * by the CALLER from `booking_requests` under their own session right after
+ * the RPC returned — `booking_requests_select` admits exactly the two parties
+ * (the proposing owner and the addressed worker), which is exactly who ever
+ * calls propose / respond / withdraw. service_role holds no grant on the
+ * table (see SERVICE_ROLE GRANT TRUTH), so this is the ONLY honest source.
+ *   - `ownerProfileId` — `owner_id`: the company-side recipient;
+ *   - `workerId`       — `worker_id` (workers.id): resolved to a profile by
+ *                        the emitter through `workers` (granted);
+ *   - dates/country    — the safe render hints the row already carries.
+ * Null fields mean the caller could not read the row; the emitter then
+ * reports `recipient_unresolved` instead of guessing.
+ */
+export interface BookingNotificationFacts {
+  readonly bookingId: string;
+  readonly ownerProfileId: string | null;
+  readonly workerId: string | null;
+  readonly startDate: string | null;
+  readonly locationCountry: string | null;
+}
+
+function bookingMetadata(facts: BookingNotificationFacts) {
+  return {
+    country: facts.locationCountry ?? undefined,
+    startDate: facts.startDate ?? undefined,
+  };
+}
+
+export type BookingNotificationEventType = Extract<
+  NotificationEventType,
+  "booking_proposed" | "booking_accepted" | "booking_declined" | "booking_withdrawn"
+>;
+
+/** Booking lifecycle events, from the facts the write path resolved. */
 export async function emitBookingNotification(
-  bookingId: string,
-  eventType: Extract<
-    NotificationEventType,
-    "booking_proposed" | "booking_accepted" | "booking_declined" | "booking_withdrawn"
-  >,
-): Promise<void> {
+  facts: BookingNotificationFacts,
+  eventType: BookingNotificationEventType,
+): Promise<NotificationEmitResult> {
   try {
     const admin = createAdminClient();
-    const { data } = await admin
-      .from("booking_requests")
-      .select("owner_id, worker_id, start_date, location_country")
-      .eq("id", bookingId)
-      .maybeSingle();
-    const row = data as {
-      owner_id?: string;
-      worker_id?: string;
-      start_date?: string | null;
-      location_country?: string | null;
-    } | null;
-    if (!row) {
-      notDelivered(eventType, "row_unreadable");
-      return;
-    }
-
-    const metadata = {
-      country: row.location_country ?? undefined,
-      startDate: row.start_date ?? undefined,
-    };
+    const metadata = bookingMetadata(facts);
 
     // The COMPANY acts on these two — the worker is who must hear about it.
     // A withdrawn proposal is v2's first gap: the worker who saw the offer
     // otherwise finds a silently vanished row.
     if (eventType === "booking_proposed" || eventType === "booking_withdrawn") {
-      const worker = row.worker_id
-        ? await workerProfileId(admin, row.worker_id)
+      const worker = facts.workerId
+        ? await workerProfileId(admin, facts.workerId)
         : null;
-      if (!worker) {
-        notDelivered(eventType, "recipient_unresolved");
-        return;
-      }
-      await deliver(admin, {
-        recipientProfileId: worker,
-        eventType,
-        entityType: "booking_request",
-        entityId: bookingId,
-        metadata,
-      });
-      return;
+      if (!worker) return undeliveredResult(eventType, "recipient_unresolved");
+      return resultFromOutcome(
+        await deliver(admin, {
+          recipientProfileId: worker,
+          eventType,
+          entityType: "booking_request",
+          entityId: facts.bookingId,
+          metadata,
+        }),
+      );
     }
 
-    if (!row.owner_id) {
-      notDelivered(eventType, "recipient_unresolved");
-      return;
+    if (!facts.ownerProfileId) {
+      return undeliveredResult(eventType, "recipient_unresolved");
     }
-    await deliver(admin, {
-      recipientProfileId: row.owner_id,
-      eventType,
-      entityType: "booking_request",
-      entityId: bookingId,
-      metadata,
-    });
+    return resultFromOutcome(
+      await deliver(admin, {
+        recipientProfileId: facts.ownerProfileId,
+        eventType,
+        entityType: "booking_request",
+        entityId: facts.bookingId,
+        metadata,
+      }),
+    );
   } catch (err) {
     // Emission is an enhancement; the domain write already succeeded. But the
     // failure is named — a bare catch is how interest delivery died unseen.
-    notDelivered(
+    return undeliveredResult(
       eventType,
       "threw",
       err instanceof Error ? err.message.slice(0, 200) : undefined,
@@ -258,56 +511,46 @@ export async function emitBookingNotification(
   }
 }
 
-/** Engagement creation — both parties hear it. Resolved from the booking the
- *  engagement was created from (v3 accepts create them in one transaction). */
+/** Engagement creation — both parties hear it. Carried by the SAME booking
+ *  facts the accept path already resolved (v3 accepts create the engagement
+ *  in one transaction and return no engagement id). */
 export async function emitEngagementCreatedNotification(
-  bookingId: string,
-): Promise<void> {
+  facts: BookingNotificationFacts,
+): Promise<NotificationEmitResult> {
   try {
     const admin = createAdminClient();
-    const { data } = await admin
-      .from("booking_requests")
-      .select("owner_id, worker_id, start_date, location_country")
-      .eq("id", bookingId)
-      .maybeSingle();
-    const row = data as {
-      owner_id?: string;
-      worker_id?: string;
-      start_date?: string | null;
-      location_country?: string | null;
-    } | null;
-    if (!row) {
-      notDelivered("engagement_created", "row_unreadable");
-      return;
-    }
-    const metadata = {
-      country: row.location_country ?? undefined,
-      startDate: row.start_date ?? undefined,
-    };
+    const metadata = bookingMetadata(facts);
     const recipients = new Set<string>();
-    if (row.owner_id) recipients.add(row.owner_id);
-    const worker = row.worker_id
-      ? await workerProfileId(admin, row.worker_id)
+    if (facts.ownerProfileId) recipients.add(facts.ownerProfileId);
+    const worker = facts.workerId
+      ? await workerProfileId(admin, facts.workerId)
       : null;
     if (worker) recipients.add(worker);
     if (recipients.size === 0) {
       notDelivered("engagement_created", "recipient_unresolved");
-      return;
+      return { delivered: false, reason: "recipient_unresolved" };
     }
+    const results: NotificationEmitResult[] = [];
     for (const recipientProfileId of recipients) {
-      await deliver(admin, {
-        recipientProfileId,
-        eventType: "engagement_created",
-        entityType: "engagement",
-        // v1 carries the BOOKING id as the entity: it is the row both sides
-        // can already open, and the engagement id is not returned by the RPC.
-        entityId: bookingId,
-        metadata,
-      });
+      results.push(
+        resultFromOutcome(
+          await deliver(admin, {
+            recipientProfileId,
+            eventType: "engagement_created",
+            entityType: "engagement",
+            // v1 carries the BOOKING id as the entity: it is the row both
+            // sides can already open, and the engagement id is not returned
+            // by the RPC.
+            entityId: facts.bookingId,
+            metadata,
+          }),
+        ),
+      );
     }
+    return combineResults(results, "engagement_created");
   } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
-    notDelivered(
+    return undeliveredResult(
       "engagement_created",
       "threw",
       err instanceof Error ? err.message.slice(0, 200) : undefined,
@@ -320,9 +563,16 @@ export async function emitEngagementCreatedNotification(
  * actor already watched it happen on their own screen.
  *
  * Recipient resolution mirrors the shared end action's authority model: the
- * row itself names both parties, and `actorSide` (server-derived by the RPC,
- * never client-supplied) says which of them acted. worker acted → the
- * company owner hears; company acted → the worker hears.
+ * row names both parties, and `actorSide` (server-derived by the RPC, never
+ * client-supplied) says which of them acted. worker acted → the company
+ * owner hears; company acted → the worker hears.
+ *
+ * The facts come from the END ACTION, under the actor's own session: the
+ * engagement row (`company_worker_engagements_select` admits both parties)
+ * and, when the worker acted, `companies.profile_id` (readable to any
+ * signed-in profile). service_role holds no grant on either table — the
+ * admin reads this emitter used to open with returned nothing, so no
+ * counterparty ever heard an engagement end (2026-09-23, see the header).
  *
  * The rendered label stays NEUTRAL about visibility on purpose: whether the
  * company still sees the worker after the end depends on other relationships
@@ -330,52 +580,47 @@ export async function emitEngagementCreatedNotification(
  * acting surface carries the measured rider; the notification only states
  * the fact that the engagement ended.
  */
+export interface EngagementEndedNotificationFacts {
+  readonly engagementId: string;
+  readonly actorSide: "company" | "worker";
+  /** `companies.profile_id` of the engagement's company — the owner pointer
+   *  `owns_company` checks first. Resolved by the caller only when the
+   *  WORKER acted (the company is the recipient); null otherwise. */
+  readonly companyOwnerProfileId: string | null;
+  /** `worker_id` (workers.id) of the engagement; resolved to a profile by
+   *  the emitter through `workers` (granted) when the COMPANY acted. */
+  readonly workerId: string | null;
+}
+
 export async function emitEngagementEndedNotification(
-  engagementId: string,
-  actorSide: "company" | "worker",
-): Promise<void> {
+  facts: EngagementEndedNotificationFacts,
+): Promise<NotificationEmitResult> {
   try {
     const admin = createAdminClient();
-    const { data } = await admin
-      .from("company_worker_engagements")
-      .select("company_id, worker_id")
-      .eq("id", engagementId)
-      .maybeSingle();
-    const row = data as { company_id?: string | null; worker_id?: string | null } | null;
-    if (!row) {
-      notDelivered("engagement_ended", "row_unreadable");
-      return;
-    }
-
+    const { actorSide } = facts;
     let recipient: string | null = null;
     if (actorSide === "worker") {
-      // The company owner hears. companies.profile_id is the owner pointer.
-      if (row.company_id) {
-        const { data: company } = await admin
-          .from("companies")
-          .select("profile_id")
-          .eq("id", row.company_id)
-          .maybeSingle();
-        recipient = (company as { profile_id?: string } | null)?.profile_id ?? null;
-      }
-    } else if (row.worker_id) {
-      recipient = await workerProfileId(admin, row.worker_id);
+      // The company owner hears — the caller read the owner pointer.
+      recipient = facts.companyOwnerProfileId;
+    } else if (facts.workerId) {
+      recipient = await workerProfileId(admin, facts.workerId);
     }
     if (!recipient) {
-      notDelivered("engagement_ended", "recipient_unresolved");
-      return;
+      return undeliveredResult("engagement_ended", "recipient_unresolved");
     }
 
-    await deliver(admin, {
-      recipientProfileId: recipient,
-      eventType: "engagement_ended",
-      entityType: "engagement",
-      entityId: engagementId,
-      metadata: {},
-    });
+    return resultFromOutcome(
+      await deliver(admin, {
+        recipientProfileId: recipient,
+        eventType: "engagement_ended",
+        entityType: "engagement",
+        entityId: facts.engagementId,
+        metadata: {},
+      }),
+    );
   } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
-    notDelivered(
+    return undeliveredResult(
       "engagement_ended",
       "threw",
       err instanceof Error ? err.message.slice(0, 200) : undefined,
@@ -386,42 +631,47 @@ export async function emitEngagementEndedNotification(
 /**
  * Task assignment — v4 (train D). The NEW assignee hears it durably; the
  * actor already watched the assignment happen on their own screen, so a
- * self-assignment emits nothing. The recipient is resolved from the TASK
- * ROW read AFTER the domain write succeeded — never from caller input.
+ * self-assignment emits nothing. The recipient comes from the TASK ROW read
+ * by the caller AFTER the domain write succeeded (`wt_select` admits the
+ * creator and any manager of the project — exactly who may assign) — never
+ * from browser input, and never through the admin client, which holds no
+ * grant on `work_tasks` (see the header).
  */
+export interface WorkTaskAssignedNotificationFacts {
+  readonly taskId: string;
+  /** `assignee_profile_id` as STORED after the RPC, read under the actor's session. */
+  readonly assigneeProfileId: string | null;
+  /** The acting profile (auth.uid()) — never notified about their own act. */
+  readonly actorProfileId: string;
+  /** `due_at` as stored — a safe render hint. */
+  readonly dueAt: string | null;
+}
+
 export async function emitWorkTaskAssignedNotification(
-  taskId: string,
-  actorProfileId: string,
-): Promise<void> {
+  facts: WorkTaskAssignedNotificationFacts,
+): Promise<NotificationEmitResult> {
   try {
-    const admin = createAdminClient();
-    const { data } = await admin
-      .from("work_tasks")
-      .select("assignee_profile_id, due_at")
-      .eq("id", taskId)
-      .maybeSingle();
-    const row = data as {
-      assignee_profile_id?: string | null;
-      due_at?: string | null;
-    } | null;
-    const assignee = row?.assignee_profile_id ?? null;
+    const assignee = facts.assigneeProfileId;
+    const actorProfileId = facts.actorProfileId;
     if (!assignee) {
-      notDelivered("work_task_assigned", "recipient_unresolved");
-      return;
+      return undeliveredResult("work_task_assigned", "recipient_unresolved");
     }
     // APPROVED silence: a self-assignment needs no telling.
-    if (assignee === actorProfileId) return;
+    if (assignee === actorProfileId) return { delivered: false, reason: "self_action" };
 
-    await deliver(admin, {
-      recipientProfileId: assignee,
-      eventType: "work_task_assigned",
-      entityType: "work_task",
-      entityId: taskId,
-      metadata: { startDate: row?.due_at?.slice(0, 10) ?? undefined },
-    });
+    const admin = createAdminClient();
+    return resultFromOutcome(
+      await deliver(admin, {
+        recipientProfileId: assignee,
+        eventType: "work_task_assigned",
+        entityType: "work_task",
+        entityId: facts.taskId,
+        metadata: { startDate: facts.dueAt?.slice(0, 10) ?? undefined },
+      }),
+    );
   } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
-    notDelivered(
+    return undeliveredResult(
       "work_task_assigned",
       "threw",
       err instanceof Error ? err.message.slice(0, 200) : undefined,
@@ -526,12 +776,12 @@ export interface DemandInterestNotificationFacts {
  */
 export async function emitDemandInterestNotification(
   facts: DemandInterestNotificationFacts,
-): Promise<void> {
+): Promise<NotificationEmitResult> {
   try {
     const { signalId, actorProfileId, country } = facts;
     if (!signalId) {
       undelivered("signal_unreadable");
-      return;
+      return { delivered: false, reason: "signal_unreadable" };
     }
     const owner = facts.ownerProfileId;
     if (!owner) {
@@ -539,13 +789,13 @@ export async function emitDemandInterestNotification(
       // the approved self-interest silence and the caller does not reach
       // here (see interest.ts); anything else is a real miss.
       undelivered("owner_unresolved");
-      return;
+      return { delivered: false, reason: "owner_unresolved" };
     }
 
     // APPROVED silence, not a failure: you do not need telling that you raised
     // your own hand. Deliberately unlogged so the marker below stays a signal.
     const actor = actorProfileId;
-    if (actor && actor === owner) return;
+    if (actor && actor === owner) return { delivered: false, reason: "self_action" };
 
     const admin = createAdminClient();
     // Preference gate + email hop (completion v1) — this emitter predates
@@ -555,7 +805,7 @@ export async function emitDemandInterestNotification(
     const prefRows = await readPrefRowsFailOpen(admin, owner);
     if (!resolveChannelEnabled(prefRows, "demand_interest_expressed", "in_app")) {
       // APPROVED silence: the owner turned this type off themselves.
-      return;
+      return { delivered: false, reason: "suppressed_preference" };
     }
 
     const outcome = await emitNotificationEvent(admin, {
@@ -583,6 +833,7 @@ export async function emitDemandInterestNotification(
         prefRows,
       );
     }
+    return resultFromOutcome(outcome.kind);
   } catch (err) {
     // Emission is an enhancement; the signal itself is already stored — the
     // worker's action still succeeded. But this catch used to be BARE, which
@@ -594,6 +845,7 @@ export async function emitDemandInterestNotification(
       "threw",
       err instanceof Error ? err.message.slice(0, 200) : undefined,
     );
+    return { delivered: false, reason: "threw" };
   }
 }
 
@@ -643,23 +895,27 @@ export async function emitDemandInterestResponseNotification(input: {
   readonly status: "reviewed" | "contacted";
   /** The acting profile — never notified about answering themselves. */
   readonly actorProfileId: string;
-}): Promise<void> {
-  if (input.status !== "reviewed") return;
+}): Promise<NotificationEmitResult> {
+  if (input.status !== "reviewed") return { delivered: false, reason: "not_applicable" };
   try {
     const admin = createAdminClient();
     const signalId = input.signalId;
     if (!signalId) {
       notDelivered("demand_interest_reviewed", "signal_unreadable");
-      return;
+      return { delivered: false, reason: "signal_unreadable" };
     }
 
     const recipient = await workerProfileId(admin, input.workerId);
-    if (!recipient || recipient === input.actorProfileId) return;
+    if (!recipient) {
+      return undeliveredResult("demand_interest_reviewed", "recipient_unresolved");
+    }
+    // APPROVED silence: nobody is told they answered themselves.
+    if (recipient === input.actorProfileId) return { delivered: false, reason: "self_action" };
 
     // Same two channel hops as the outbound half (rationale up there).
     const prefRows = await readPrefRowsFailOpen(admin, recipient);
     if (!resolveChannelEnabled(prefRows, "demand_interest_reviewed", "in_app")) {
-      return;
+      return { delivered: false, reason: "suppressed_preference" };
     }
 
     const outcome = await emitNotificationEvent(admin, {
@@ -670,9 +926,7 @@ export async function emitDemandInterestResponseNotification(input: {
       metadata: {},
     });
     if (outcome.kind === "unexpected_error") {
-      console.error(
-        `[notifications] demand_interest_reviewed emit failed: ${outcome.code}`,
-      );
+      notDelivered("demand_interest_reviewed", "insert_failed", outcome.code);
     }
     if (outcome.kind === "written") {
       await maybeDispatchNotificationEmail(
@@ -685,73 +939,94 @@ export async function emitDemandInterestResponseNotification(input: {
         prefRows,
       );
     }
-  } catch {
-    // Emission is an enhancement; the acknowledgement already succeeded.
+    return resultFromOutcome(outcome.kind);
+  } catch (err) {
+    // Emission is an enhancement; the acknowledgement already succeeded. The
+    // catch used to be bare — named now, like every sibling (2026-09-23).
+    return undeliveredResult(
+      "demand_interest_reviewed",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 
-/** Absence lifecycle events. `absenceId` is the worker_absences row id. */
+/**
+ * The facts an absence write path hands the absence emitter. Read by the
+ * CALLER from `worker_absences` under their own session. The applied
+ * `worker_absences_select` (20260808120000) admits the worker themselves
+ * always, and a real manager of that worker ONLY WHILE `status =
+ * 'requested'` — so the request path reads after its RPC (the requester is
+ * the worker) and the review path reads BEFORE its RPC, because
+ * `review_worker_absence_v1` is exactly what closes the manager's arm
+ * (lib/leave/absences-actions.ts, absenceNotificationFacts). service_role
+ * holds no grant on the table (see the header), so the admin read this
+ * emitter used to open with was the whole silence.
+ */
+export interface AbsenceNotificationFacts {
+  readonly absenceId: string;
+  /** `worker_id` (workers.id); resolved to a profile through `workers`. */
+  readonly workerId: string | null;
+  /** `requested_by` — the profile that filed it (the worker, per the RPC). */
+  readonly requestedByProfileId: string | null;
+  /** `start_date` — a safe render hint. */
+  readonly startDate: string | null;
+}
+
+/** Absence lifecycle events, from the facts the write path resolved. */
 export async function emitAbsenceNotification(
-  absenceId: string,
+  facts: AbsenceNotificationFacts,
   eventType: Extract<
     NotificationEventType,
     "absence_requested" | "absence_approved" | "absence_rejected"
   >,
-): Promise<void> {
+): Promise<NotificationEmitResult> {
   try {
     const admin = createAdminClient();
-    const { data } = await admin
-      .from("worker_absences")
-      .select("worker_id, requested_by, start_date")
-      .eq("id", absenceId)
-      .maybeSingle();
-    const row = data as {
-      worker_id?: string;
-      requested_by?: string;
-      start_date?: string | null;
-    } | null;
-    if (!row?.worker_id) {
-      notDelivered(eventType, "row_unreadable");
-      return;
-    }
-    const worker = await workerProfileId(admin, row.worker_id);
-    if (!worker) {
-      notDelivered(eventType, "recipient_unresolved");
-      return;
-    }
-    const metadata = { startDate: row.start_date ?? undefined };
+    if (!facts.workerId) return undeliveredResult(eventType, "recipient_unresolved");
+    const worker = await workerProfileId(admin, facts.workerId);
+    if (!worker) return undeliveredResult(eventType, "recipient_unresolved");
+    const metadata = { startDate: facts.startDate ?? undefined };
+    const requestedBy = facts.requestedByProfileId;
 
     if (eventType === "absence_requested") {
       // APPROVED silence otherwise: only when someone ELSE filed it for the
-      // worker — see the header.
-      if (row.requested_by && row.requested_by !== worker) {
-        await deliver(admin, {
-          recipientProfileId: worker,
-          eventType,
-          entityType: "worker_absence",
-          entityId: absenceId,
-          metadata,
-        });
+      // worker — see the header. (`request_worker_absence_v1` only lets the
+      // worker file their own, so today this is always the silence.)
+      if (requestedBy && requestedBy !== worker) {
+        return resultFromOutcome(
+          await deliver(admin, {
+            recipientProfileId: worker,
+            eventType,
+            entityType: "worker_absence",
+            entityId: facts.absenceId,
+            metadata,
+          }),
+        );
       }
-      return;
+      return { delivered: false, reason: "self_action" };
     }
 
     const recipients = new Set<string>([worker]);
-    if (row.requested_by && row.requested_by !== worker) {
-      recipients.add(row.requested_by);
-    }
+    if (requestedBy && requestedBy !== worker) recipients.add(requestedBy);
+    const results: NotificationEmitResult[] = [];
     for (const recipientProfileId of recipients) {
-      await deliver(admin, {
-        recipientProfileId,
-        eventType,
-        entityType: "worker_absence",
-        entityId: absenceId,
-        metadata,
-      });
+      results.push(
+        resultFromOutcome(
+          await deliver(admin, {
+            recipientProfileId,
+            eventType,
+            entityType: "worker_absence",
+            entityId: facts.absenceId,
+            metadata,
+          }),
+        ),
+      );
     }
+    return combineResults(results, eventType);
   } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
-    notDelivered(
+    return undeliveredResult(
       eventType,
       "threw",
       err instanceof Error ? err.message.slice(0, 200) : undefined,
@@ -1486,5 +1761,414 @@ export async function emitInvitationAcceptedNotification(input: {
     });
   } catch {
     undelivered("invitation_accepted_emit_failed");
+  }
+}
+
+/**
+ * MESSAGE RECEIVED (v10) - somebody wrote in a thread the recipient is in.
+ *
+ * RECIPIENT: every OTHER participant, never the author - you do not need a
+ * bell for your own sentence. The participant ids are read by the SEND PATH
+ * under the author's own session (`conversation_participants_select` admits
+ * co-participants); service_role holds no grant on that table or on
+ * `profiles`, so this emitter never reads them (see the header).
+ *
+ * COALESCING: one row per recipient per thread per window
+ * (`messageReceivedEntityId`) - a ten-message burst is one bell, the next
+ * window's message is a new one. METADATA: the thread's opaque id as a link
+ * target, nothing else. The text, the author's name and the attachments never
+ * reach the event.
+ */
+export interface MessageReceivedNotificationFacts {
+  readonly conversationId: string;
+  /** auth.uid() of the sender - never notified about their own message. */
+  readonly authorProfileId: string;
+  /** All participant profile ids as read under the sender's session (the
+   *  sender may be included; it is filtered here). */
+  readonly participantProfileIds: readonly string[];
+  /** SEND-TIME eligibility (P0 chat privacy, owner 2026-11-11): asked again
+   *  right before EACH channel (bell insert, e-mail, push) for each
+   *  recipient, so a removal that lands between the participant read and the
+   *  delivery stops the remaining channels. Read by the send path under the
+   *  author's session (service_role holds no grant on the participant table).
+   *  Must answer false when it cannot tell. Absent = no re-check. */
+  readonly isStillParticipant?: (profileId: string) => Promise<boolean>;
+  /** Clock seam - epoch ms; defaults to now. */
+  readonly nowMs?: number;
+}
+
+export async function emitMessageReceivedNotifications(
+  facts: MessageReceivedNotificationFacts,
+): Promise<NotificationEmitResult> {
+  try {
+    if (facts.participantProfileIds.length === 0) {
+      return undeliveredResult("message_received", "recipient_unresolved");
+    }
+    const recipients = [
+      ...new Set(
+        facts.participantProfileIds.filter(
+          (id) => id && id !== facts.authorProfileId,
+        ),
+      ),
+    ];
+    // APPROVED silence: the author is the only participant.
+    if (recipients.length === 0) return { delivered: false, reason: "self_action" };
+
+    const admin = createAdminClient();
+    const entityId = messageReceivedEntityId(
+      facts.conversationId,
+      facts.nowMs ?? Date.now(),
+    );
+    const results: NotificationEmitResult[] = [];
+    for (const recipient of recipients) {
+      const recheck = facts.isStillParticipant;
+      const d = await deliverDetailed(
+        admin,
+        {
+          recipientProfileId: recipient,
+          eventType: "message_received",
+          entityType: "conversation",
+          entityId,
+          metadata: { conversationId: facts.conversationId },
+        },
+        recheck ? { isEligible: () => recheck(recipient) } : undefined,
+      );
+      results.push(resultFromOutcome(d.outcome, d.email?.kind ?? null));
+    }
+    return combineResults(results, "message_received");
+  } catch (err) {
+    return undeliveredResult(
+      "message_received",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
+  }
+}
+
+/**
+ * JOURNAL REVIEW DECIDED (v10) - a manager confirmed / rejected / asked for
+ * changes on a worker's journal entry.
+ *
+ * RECIPIENT: the WORKER whose entry it is (workers.profile_id through the
+ * granted `workers` read) - the offline party who otherwise learns the
+ * outcome only by opening the journal. Never the reviewer: a manager
+ * reviewing their own entry is not told about their own tap. The reviewer's
+ * NOTE is free text and never reaches the event; metadata carries only the
+ * decision.
+ */
+export interface JournalReviewNotificationFacts {
+  readonly entryId: string;
+  /** `journal_entries.worker_id`, read by the review path under the reviewer's session. */
+  readonly workerId: string | null;
+  /** auth.uid() of the reviewer. */
+  readonly actorProfileId: string;
+  readonly decision: JournalReviewDecision;
+}
+
+export async function emitJournalReviewDecisionNotification(
+  facts: JournalReviewNotificationFacts,
+): Promise<NotificationEmitResult> {
+  try {
+    if (!facts.workerId) {
+      return undeliveredResult("journal_review_decided", "recipient_unresolved");
+    }
+    const admin = createAdminClient();
+    const recipient = await workerProfileId(admin, facts.workerId);
+    if (!recipient) {
+      return undeliveredResult("journal_review_decided", "recipient_unresolved");
+    }
+    // APPROVED silence: reviewing your own entry needs no telling.
+    if (recipient === facts.actorProfileId) {
+      return { delivered: false, reason: "self_action" };
+    }
+    const d = await deliverDetailed(admin, {
+      recipientProfileId: recipient,
+      eventType: "journal_review_decided",
+      entityType: "journal_entry",
+      entityId: journalReviewEntityId(facts.entryId, facts.decision),
+      metadata: { decision: facts.decision },
+    });
+    return resultFromOutcome(d.outcome, d.email?.kind ?? null);
+  } catch (err) {
+    return undeliveredResult(
+      "journal_review_decided",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
+  }
+}
+
+/**
+ * HISTORY LINK OFFERED (v11) - an organization offered to connect one of its
+ * roster records (`organization_people`, the person its recorded work
+ * history is about) to the recipient's account.
+ *
+ * RECIPIENT: the profile the offer names - the only person who may accept or
+ * refuse it. Never the manager who made the offer (offering a link to your
+ * own account needs no telling). The event carries no name, no hours, no
+ * organization: only that a decision waits on the profile page, where the
+ * offer itself is read under the recipient's own RLS.
+ */
+export interface HistoryLinkOfferFacts {
+  /** `organization_people.id` - the offered roster record. */
+  readonly personId: string;
+  /** The account the offer names. */
+  readonly profileId: string;
+  /** auth.uid() of the manager who made the offer. */
+  readonly actorProfileId: string;
+}
+
+export async function emitHistoryLinkOfferedNotification(
+  facts: HistoryLinkOfferFacts,
+): Promise<NotificationEmitResult> {
+  try {
+    if (facts.profileId === facts.actorProfileId) {
+      return { delivered: false, reason: "self_action" };
+    }
+    const admin = createAdminClient();
+    const d = await deliverDetailed(admin, {
+      recipientProfileId: facts.profileId,
+      eventType: "history_link_offered",
+      entityType: "organization_person",
+      entityId: facts.personId,
+    });
+    return resultFromOutcome(d.outcome, d.email?.kind ?? null);
+  } catch (err) {
+    return undeliveredResult(
+      "history_link_offered",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+ * JOB ALERTS (stream N, 2026-10-01) — a REAL active job that fits what the
+ * worker said they want reaches them in the bell, once.
+ *
+ * ONE chain, two entrances, ONE pure judgement (lib/opportunities/
+ * job-alert-model.ts, which applies the match engine's own profession /
+ * country / pay rules) and ONE canonical read (searchPublicVacancies):
+ *
+ *   read-time  — the worker's own dashboard render (below): their OWN session
+ *                supplies profession + countries + salary under RLS, so it
+ *                needs no privilege beyond the emit grant production holds.
+ *   sweep      — `emitJobAlertNotificationsForCron`: reaches workers who have
+ *                not logged in. Needs service_role SELECT on worker_professions
+ *                + professions (RED grant, separate PR); until then it reports
+ *                `unavailable` and the read-time path carries the feature.
+ *
+ * CONSENT is the existing rule, unchanged: `deliver` honours a stored in-app
+ * opt-out for `job_alert`; e-mail goes out ONLY with an explicit
+ * (job_alert, email, enabled) row, through the existing dispatcher.
+ * EXACTLY ONCE: entity id = hash(ad id + content hash); the store's UNIQUE
+ * (recipient, dedupe_key) refuses the second send of an unchanged job.
+ * ═════════════════════════════════════════════════════════════════════════ */
+
+import {
+  jobAlertEntityId,
+  jobAlertFacts,
+  missingJobAlertCriteria,
+  type JobAlertCriteria,
+} from "@/lib/opportunities/job-alert-model";
+import {
+  loadJobAlertVacancies,
+  pairReaderFor,
+  type JobAlertPairReader,
+} from "@/lib/opportunities/job-alert-candidates";
+import type { StoredPublicVacancyV1 } from "@/lib/vacancy-store/vacancy-read";
+import { claimJobAlertEvaluation } from "./job-alert-throttle";
+
+export interface JobAlertRunCounts {
+  written: number;
+  duplicates: number;
+  suppressed: number;
+  failures: number;
+}
+
+/** Deliver the selected ads to one person. Counts only. */
+async function announceJobs(
+  admin: AdminClient,
+  recipientProfileId: string,
+  vacancies: readonly StoredPublicVacancyV1[],
+): Promise<JobAlertRunCounts | "blocked"> {
+  const counts: JobAlertRunCounts = {
+    written: 0,
+    duplicates: 0,
+    suppressed: 0,
+    failures: 0,
+  };
+  for (const v of vacancies) {
+    const facts = jobAlertFacts(v);
+    if (!facts || !v.storeId) continue;
+    const outcome = await deliver(admin, {
+      recipientProfileId,
+      eventType: "job_alert",
+      entityType: "public_vacancy",
+      entityId: jobAlertEntityId(v.storeId, v.contentHash),
+      metadata: {
+        title: facts.title,
+        ...(facts.country ? { country: facts.country } : {}),
+        ...(facts.salary ? { salary: facts.salary } : {}),
+        vacancyId: facts.vacancyId,
+      },
+    });
+    if (outcome === "written") counts.written += 1;
+    else if (outcome === "duplicate") counts.duplicates += 1;
+    else if (outcome === "suppressed_preference") {
+      counts.suppressed += 1;
+      break; // opted out of the type: every further ad is suppressed too
+    } else if (outcome === "unexpected_error") counts.failures += 1;
+    else if (outcome === "feature_unavailable" || outcome === "write_blocked") {
+      return "blocked";
+    }
+  }
+  return counts;
+}
+
+
+/**
+ * Read-time entrance — fired from the worker's own dashboard render, detached
+ * like the weekly digest (an insert killed by the serverless freeze self-heals
+ * on the next visit: same deterministic ids).
+ */
+export function maybeEmitJobAlertsInBackground(): void {
+  void (async () => {
+    try {
+      if (isNotificationStoreWriteBlocked()) return;
+      const supabase = await createServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      // Best-effort throttle (job-alert-throttle.ts); a work-card save resets it.
+      if (!claimJobAlertEvaluation(user.id)) return;
+
+      const ctx = await buildOwnWorkerContext(supabase, user.id);
+      if (!ctx) return;
+      const criteria: JobAlertCriteria = {
+        professionSlugs: ctx.subject.professionSlugs?.length
+          ? [...ctx.subject.professionSlugs]
+          : ctx.subject.professionSlug
+            ? [ctx.subject.professionSlug]
+            : [],
+        preferredCountries: [...(ctx.subject.preferredCountries ?? [])],
+        salaryMinEur: ctx.subject.salaryMinEur ?? null,
+      };
+      if (missingJobAlertCriteria(criteria).length > 0) return;
+
+      const nowIso = new Date().toISOString();
+      const vacancies = await loadJobAlertVacancies(
+        pairReaderFor(supabase, nowIso),
+        criteria,
+        nowIso,
+      );
+      if (vacancies.length === 0) return;
+      await announceJobs(createAdminClient(), user.id, vacancies);
+    } catch {
+      // Observability only — never the page. The next visit tries again.
+    }
+  })();
+}
+
+export type JobAlertCronResult =
+  | ({ readonly kind: "ran"; readonly candidates: number } & JobAlertRunCounts)
+  | { readonly kind: "unavailable"; readonly reason: string };
+
+/** Workers a single sweep considers. */
+const JOB_ALERT_CRON_WORKER_LIMIT = 2000;
+
+/**
+ * Sweep entrance — service role. Reads ONLY: workers (profile, preferred
+ * countries, salary), their catalogue professions, public ads. Returns counts,
+ * never ids or people. `unavailable` (with a reason code) when a read is
+ * refused — e.g. 42501 until the owner applies the SELECT grant — so a missing
+ * grant is a named state, not silence.
+ */
+export async function emitJobAlertNotificationsForCron(): Promise<JobAlertCronResult> {
+  try {
+    const admin = createAdminClient();
+    const nowIso = new Date().toISOString();
+
+    const wres = await admin
+      .from("workers")
+      .select("id, profile_id, preferred_countries, salary_min_eur")
+      .not("profile_id", "is", null)
+      .not("preferred_countries", "eq", "{}")
+      .limit(JOB_ALERT_CRON_WORKER_LIMIT);
+    if (wres.error) {
+      return { kind: "unavailable", reason: `workers_${wres.error.code ?? "read"}` };
+    }
+    const workers = (wres.data ?? []) as {
+      id: string;
+      profile_id: string;
+      preferred_countries: string[] | null;
+      salary_min_eur: number | string | null;
+    }[];
+
+    const professionsByWorker = new Map<string, string[]>();
+    for (let i = 0; i < workers.length; i += 100) {
+      const ids = workers.slice(i, i + 100).map((w) => w.id);
+      const pres = await admin
+        .from("worker_professions")
+        .select("worker_id, professions ( slug )")
+        .in("worker_id", ids);
+      if (pres.error) {
+        return {
+          kind: "unavailable",
+          reason: `worker_professions_${pres.error.code ?? "read"}`,
+        };
+      }
+      for (const r of (pres.data ?? []) as unknown as {
+        worker_id: string;
+        professions: { slug?: string | null } | { slug?: string | null }[] | null;
+      }[]) {
+        const p = Array.isArray(r.professions) ? r.professions[0] : r.professions;
+        const slug = p?.slug?.trim();
+        if (!slug) continue;
+        const list = professionsByWorker.get(r.worker_id) ?? [];
+        if (!list.includes(slug)) list.push(slug);
+        professionsByWorker.set(r.worker_id, list);
+      }
+    }
+
+    // One canonical read per distinct (country, profession) across ALL workers.
+    const cache = new Map<string, Promise<readonly StoredPublicVacancyV1[]>>();
+    const base = pairReaderFor(admin, nowIso);
+    const read: JobAlertPairReader = (country, professionSlug) => {
+      const key = `${country}:${professionSlug}`;
+      let hit = cache.get(key);
+      if (!hit) {
+        hit = base(country, professionSlug);
+        cache.set(key, hit);
+      }
+      return hit;
+    };
+
+    const total: JobAlertRunCounts = { written: 0, duplicates: 0, suppressed: 0, failures: 0 };
+    let candidates = 0;
+    for (const w of workers) {
+      const criteria: JobAlertCriteria = {
+        professionSlugs: professionsByWorker.get(w.id) ?? [],
+        preferredCountries: w.preferred_countries ?? [],
+        salaryMinEur:
+          w.salary_min_eur === null || w.salary_min_eur === undefined
+            ? null
+            : Number(w.salary_min_eur),
+      };
+      if (missingJobAlertCriteria(criteria).length > 0) continue;
+      candidates += 1;
+      const vacancies = await loadJobAlertVacancies(read, criteria, nowIso);
+      if (vacancies.length === 0) continue;
+      const res = await announceJobs(admin, w.profile_id, vacancies);
+      if (res === "blocked") return { kind: "unavailable", reason: "store_blocked" };
+      total.written += res.written;
+      total.duplicates += res.duplicates;
+      total.suppressed += res.suppressed;
+      total.failures += res.failures;
+    }
+    return { kind: "ran", candidates, ...total };
+  } catch {
+    return { kind: "unavailable", reason: "thrown" };
   }
 }

@@ -1,0 +1,167 @@
+privacy-erasure-v3-local — 2026-11-09T10:30:48.027Z — WITH_CANCEL_MIGRATION=1
+cluster: <repo>/.tmp/pg-erasure-v3-110044 (port 5499)
+PASS  migration applied on the mirror: 273 registry rows, 21 value rules
+PASS  before the forward fix the sentinel carries 'infinity' (the incident state)
+PASS  sentinel auth user + profile + worker exist, banned until the finite date 2999-12-31 (20261019190000)
+PASS  no auth user carries an infinite ban after the forward fix
+PASS  the forward fix's rollback REFUSES (no safe inverse) and leaves the finite ban in place
+PASS  sentinel under the production signup chain: exactly one worker (the fixed id), no personal engagement, no e-mail, no role
+PASS  migration re-applies on the same database (idempotent) without a second sentinel worker
+
+[chain] 20261109120000 applied on top of the executor (WITH_CANCEL_MIGRATION=1)
+PASS  chain: 20261109120000 applied (cancel, status, grace, privacy-row trigger)
+
+[T1] dry run: AI usage + journal history + Stripe mapping
+PASS  T1a refuses while files remain and no Stripe decision is passed
+      refusal  public.billing_customers.owner_id: external decision required first: external.stripe
+      refusal  public.billing_subscriptions.owner_id: external decision required first: external.stripe
+      refusal  storage.objects: delete the person's files through the Storage API first
+PASS  T1a storage scan finds the owner-less avatar by path prefix AND the owned photo (2), not the org evidence
+PASS  T1a billing_customers refuses without external.stripe
+PASS  T1a billing_subscriptions refuses without external.stripe
+PASS  T1b owner rule: a class retained about the person (accounting) without a documented retention period -> human review
+PASS  T1b ...and it is the only open point (public.billing_subscriptions.owner_id: retained about the person without a documented legal basis and retention period - human review)
+PASS  T1b executable with files gone + external.stripe (16 actions, 1 retained classes)
+      action   public.ai_runs.profile_id set_null rows=1
+      action   public.audit_logs.actor_id set_null rows=1
+      action   public.billing_customers.owner_id delete_rows rows=1
+      action   public.billing_subscriptions.owner_id sever_sentinel rows=1
+      action   public.customer_requests.profile_id sever_sentinel rows=1
+      action   public.engagement_contexts.profile_id sever_sentinel rows=1
+      action   public.journal_entries.worker_id delete_rows rows=2
+      action   public.journal_entry_confirmations.confirmer_id sever_sentinel rows=1
+      action   public.personal_data_disclosures.worker_user_id pseudonymise_ledger rows=1
+      action   public.privacy_consent_events.user_id pseudonymise_ledger rows=2
+      action   public.usage_cost_events.profile_id set_null rows=2
+      action   public.workers.profile_id allow_cascade rows=1
+      action   public.audit_logs.payload pseudonymise_mentions rows=2
+      action   public.invitations.invited_email pseudonymise_value rows=1
+      action   public.payment_webhook_events.payload pseudonymise_mentions rows=1
+      action   public.waitlist.email delete_rows rows=1
+      retained auth.audit_log_entries.payload rows=1
+PASS  T1b plan names public.journal_entries.worker_id -> delete_rows (2)
+PASS  T1b plan names public.engagement_contexts.profile_id -> sever_sentinel (1)
+PASS  T1b plan names public.journal_entry_confirmations.confirmer_id -> sever_sentinel (1)
+PASS  T1b plan names public.usage_cost_events.profile_id -> set_null (2)
+PASS  T1b plan names public.ai_runs.profile_id -> set_null (1)
+PASS  T1b plan names public.privacy_consent_events.user_id -> pseudonymise_ledger (2)
+PASS  T1b plan names public.personal_data_disclosures.worker_user_id -> pseudonymise_ledger (1)
+PASS  T1b plan names public.billing_customers.owner_id -> delete_rows (1)
+PASS  T1b plan names public.billing_subscriptions.owner_id -> sever_sentinel (1)
+PASS  T1b plan names public.customer_requests.profile_id -> sever_sentinel (1)
+PASS  T1b plan names public.workers.profile_id -> allow_cascade (1)
+PASS  T1b plan names public.invitations.invited_email -> pseudonymise_value (1)
+PASS  T1b plan names public.waitlist.email -> delete_rows (1)
+PASS  T1b plan names public.audit_logs.payload -> pseudonymise_mentions (2)
+PASS  T1b plan names public.payment_webhook_events.payload -> pseudonymise_mentions (1)
+PASS  T1b auth.audit_log_entries counted as retained
+PASS  T1b the dry run changed nothing
+PASS  T1b plan function is STABLE (cannot write, cannot run DDL, takes no exclusive lock)
+PASS  T1c authorization refused until the completion notice is recorded as sent
+PASS  T1c notice=queued is refused while no completion notice holds the address
+PASS  T1c the completion notice is HELD with the address captured before the account is deleted
+PASS  T1c token issued (64 hex, shown once)
+PASS  T1c only sha256(token) is stored, unconsumed, bound to the request
+PASS  T1d execute: erased=true
+PASS  T1d auth user and profile are gone
+PASS  T1d L-1: the person's own journal entries and their free text are ERASED (3 other entries remain)
+PASS  T1d engagement context retained under the sentinel, labels scrubbed
+PASS  T1d a confirmation OF the erased entry goes with it
+PASS  T1d the subject's confirmation of the other worker's entry survives, confirmer severed
+PASS  T1d usage_cost_events retained (3), subject rows severed (2) despite the append-only trigger
+PASS  T1d usage_cost_events guard trigger is back in force after execution
+PASS  T1d ai_runs delinked via the existing RPC, rows retained
+PASS  T1d consent ledger pseudonymised: 2 rows, one tombstone, rows kept
+PASS  T1d consent ledger guard trigger is back in force
+PASS  T1d disclosure ledger pseudonymised, discloser untouched
+PASS  T1d Stripe mapping row deleted only after external.stripe; the other customer stays
+PASS  T1d subscription history retained under the sentinel (accounting)
+PASS  T1d invitation addressed to the person pseudonymised; the other invitation untouched
+PASS  T1d waitlist signup deleted, other signup kept
+PASS  T1d audit payload mentions replaced by tombstone / sentinel address; rows kept
+PASS  T1d Stripe webhook payload no longer names the person
+PASS  T1d the privacy request row survives: closed, severed, free text scrubbed
+PASS  T1d the other person is untouched
+PASS  T1d authorization marked consumed with outcome=erased
+
+[T1e] completion notice: release after success, send, erase the address
+PASS  T1e notice released to the queue only after the erasure committed
+PASS  T1e the sender sees exactly one due notice with the captured address
+PASS  T1e a failed send stays queued for retry (attempts=1)
+PASS  T1e sent: message id kept as proof, the address erased
+PASS  T1e a second 'sent' result is a no-op (idempotent)
+PASS  T1e no table keeps the person's address after the notice
+
+[T1f] residual data after the erasure: nothing still references the person
+PASS  T1f FK catalog post-check: 0 rows in 17 person FK columns (profiles + workers) still point at the person or their worker
+PASS  T1f value rules (e-mail / phone / mention) on 7 live columns: no erasable rule still matches the person (report_only kept: auth.audit_log_entries.payload=1)
+PASS  T1f the ONLY remaining mention is auth.audit_log_entries.payload (report_only: security evidence, M41 6 years)
+
+[T1g] what is retained, by decision
+PASS  T1g retained: receipt (erased_subject_id tombstone, requested_at, executed_at, 16 actions, 1 retained classes)
+PASS  T1g retained: the receipt holds no identifier of the person (id / e-mail / name / phone); executed_by is the operator, not the person
+PASS  T1g retained: the request row (Art. 5(2), M40 3 years) severed to the sentinel, closed as executed, tombstone = receipt's, free text scrubbed
+PASS  T1g retained: the completion notice as proof of delivery (message id) — recipient_email scrubbed after sending
+
+[T2] forged / expired / reused / cross-request tokens
+PASS  T2 forged token refused
+PASS  T2 the already-consumed T1 token is refused again (single use)
+PASS  T2 token issued for subject C with an already-passed expiry (test only)
+PASS  T2 expired token refused, subject C untouched
+PASS  T2 token for request C refused on request D (bound to the request id)
+PASS  T2 request state changed after issue -> refused, token consumed
+PASS  T2 a fresh token for the current state executes
+PASS  T2 the same token a second time is refused
+
+[T3] an FK added after seeding
+PASS  T3 undecided FK refused BY NAME with zero rows
+PASS  T3 no token can be issued while a reference is undecided
+PASS  T3 executable once the registry carries the decision
+PASS  T3 registry says allow_cascade but the live rule changed -> refused (drift)
+
+[T5] self-service confirmation (fresh sign-in) and grants
+PASS  T5 no session -> not_authenticated
+PASS  T5 a person without an open deletion request cannot confirm anything
+PASS  T5 never signed in -> reauth_required
+PASS  T5 sign-in 30 min ago -> reauth_required (window 15 min)
+PASS  T5 fresh sign-in -> confirmed, bound to the person's own request
+PASS  T5 confirming twice is idempotent (one row)
+PASS  T5 the person cannot read the confirmation table directly
+PASS  T5 runner primitives are not callable by a signed-in user
+PASS  T5 anon cannot call the confirmation
+
+[T6] runner path: employer-linked journal -> human review, no deletion
+PASS  chain T6 a request confirmed just now is NOT due (30-day grace)
+PASS  T6 only the confirmed request is due (1)
+PASS  T6 an unconfirmed request cannot be moved by the runner
+PASS  T6 runner marks the confirmed request approved
+PASS  T6 employer-linked journal entry refuses (L-2, retention not documented)
+PASS  T6 a held completion notice is NOT released without a receipt
+PASS  T6 runner records the block and queues a review notice
+PASS  T6 the request shows needs_followup with a system review-log entry
+PASS  T6 the review notice is queued at once (the account still exists)
+PASS  T6 the held completion notice (and its address) is dropped when the request goes to review
+PASS  T6 nothing of the person was deleted
+PASS  T6 the blocked request is no longer due (no retry loop)
+PASS  T6 after 8 failed sends the notice is failed, leaves the queue and keeps no address
+
+[T7] an erased request is never due again
+PASS  T7 the erased (closed, no auth user) request is not due even with a confirmation
+
+[T4] receipt without identifiers
+PASS  T4 two receipts (subjects A and C)
+PASS  T4 no receipt contains the subject's id, e-mail, name or phone
+PASS  T4 authorization rows hold neither identifiers nor the raw token
+PASS  T4 receipts are append-only
+PASS  T4 receipt lists treatments, tables and the legal basis per retained class
+
+[RB] rollback
+PASS  RB with receipts: refused, nothing changed (evidence kept)
+PASS  RB on a clean database: applied
+PASS  RB clean: functions, tables and the sentinel removed
+PASS  RB clean: consent ledger NOT NULL restored
+PASS  RB clean: migration re-applies after rollback (idempotent cycle)
+
+cluster removed: true
+
+ALL PASS

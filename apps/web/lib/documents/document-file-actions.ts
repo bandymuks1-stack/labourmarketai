@@ -21,6 +21,7 @@ import {
   DOCUMENT_FILE_MAX_BYTES,
   type DocumentEngineNotice,
 } from "@/lib/documents/document-file-model";
+import { orgStorageQuotaExceeded } from "@/lib/storage/org-storage-quota";
 import { emitDocumentAckNotification } from "@/lib/notifications/event-emitters";
 
 /**
@@ -259,6 +260,18 @@ export async function uploadOrgDocumentFileAction(
   }
   if (!docRes.data || docRes.data.organization_id !== ctx.organizationId) {
     finish(locale, "not_found");
+  }
+
+  // Fair-use cap on the organization's total stored document bytes
+  // (lib/storage/org-storage-quota.ts; default 2 GiB, fail-open if unreadable).
+  if (
+    await orgStorageQuotaExceeded(
+      supabase,
+      ctx.organizationId,
+      prepared.bytes.byteLength,
+    )
+  ) {
+    finish(locale, "storage_quota_exceeded");
   }
 
   const filesRes = await asAny(supabase)

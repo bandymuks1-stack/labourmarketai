@@ -96,23 +96,23 @@ export function SavedSearchesStrip({
     });
   }
 
-  return (
-    <section
-      className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
-      data-testid="saved-searches"
-    >
-      <div className="flex flex-wrap items-baseline gap-2">
-        <h2 className="font-display text-base font-semibold text-text-primary">
-          {t("title")}
-        </h2>
-        <p className="text-meta text-text-muted">{t("intro")}</p>
-      </div>
+  // Nothing saved and nothing to save (no filter set): there is nothing to
+  // show, so nothing takes space on the phone screen (owner order 2026-10-01).
+  if (readings.length === 0 && !canSaveCurrent) return null;
 
-      {readings.length === 0 ? (
-        <p className="text-sm text-text-secondary" data-testid="saved-searches-empty">
-          {t("empty")}
-        </p>
-      ) : (
+  return (
+    <details
+      className="group rounded-md border border-ink-600 bg-ink-800/30"
+      data-testid="saved-searches"
+      open={readings.length > 0 || msg !== null}
+    >
+      <summary className="flex min-h-11 cursor-pointer select-none items-center px-3 text-support font-medium text-text-primary marker:text-text-muted">
+        {t("title")}
+        {readings.length > 0 ? ` · ${readings.length}` : ""}
+      </summary>
+      <div className="flex flex-col gap-2 px-3 pb-3">
+
+      {readings.length === 0 ? null : (
         <ul className="flex flex-col gap-1" data-testid="saved-searches-list">
           {readings.map((reading) => (
             <li
@@ -186,6 +186,7 @@ export function SavedSearchesStrip({
           {msg}
         </p>
       ) : null}
-    </section>
+      </div>
+    </details>
   );
 }

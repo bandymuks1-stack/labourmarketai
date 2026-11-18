@@ -530,6 +530,31 @@ describe("the two halves of the register cannot drift apart", () => {
     }
   });
 
+  it("the tally is a true SEVEN-state count: every row is in exactly one state, and RETIRED is its own", () => {
+    const STATES = [
+      "BUILT_AND_USABLE",
+      "PARTIAL",
+      "BUILT_NOT_CONNECTED",
+      "BLOCKED",
+      "ARCHITECTURE_ONLY",
+      "MISSING",
+      "RETIRED",
+    ] as const;
+    const total = STATES.reduce((n, s) => n + CAPABILITY_REGISTER.filter((c) => c.status === s).length, 0);
+    expect(total, "a status outside the seven-state vocabulary would silently drop out of the tally").toBe(
+      CAPABILITY_REGISTER.length,
+    );
+  });
+
+  it("RETIRED if and only if the row carries a retired record - a retired capability is never counted as built-not-connected", () => {
+    for (const row of CAPABILITY_REGISTER) {
+      expect(
+        row.status === "RETIRED",
+        `${describeRow(row)}: status RETIRED and the retired record must travel together (status ${row.status})`,
+      ).toBe(Boolean(row.retired));
+    }
+  });
+
   it("a retired capability keeps its row, with a date and a reason", () => {
     for (const row of CAPABILITY_REGISTER) {
       if (!row.retired) continue;

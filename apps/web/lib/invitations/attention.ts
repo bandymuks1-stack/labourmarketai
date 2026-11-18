@@ -70,6 +70,10 @@ async function readAll(): Promise<
 > {
   const [canonical, roster] = await Promise.all([listInvitationsForMe(), listMyPendingWorkerInvitations()]);
   if (canonical.status === "needs-migration") return { status: "unavailable" };
+  // `email_unverified` (the caller's address has not been proved) deliberately
+  // takes the honest "could not read" path here: chat / brief / today never
+  // claim "no invitations" for a mailbox that was simply not proven. The
+  // network page, which has room for it, renders the progressive proof prompt.
   if (canonical.status !== "ok") return { status: "error" };
   const items: AttentionInvitation[] = [
     ...canonical.items.map((i) => ({

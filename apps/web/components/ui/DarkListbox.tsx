@@ -13,12 +13,51 @@ import { cn } from "@/lib/utils";
  * component renders a hidden input so FormData is unchanged (no business-logic
  * change). Closes on outside click + Escape; arrow/Enter keyboard nav; the open
  * panel is dark, scrollable, and uses large touch targets + existing tokens.
+ *
+ * ── SEARCHABLE (owner direction 2026-09-27, onboarding step 2)
+ * A long list is not navigable by scrolling. Measured on production
+ * onboarding: "Kur dabar gyveni?" offers every ISO country (249 — the
+ * global-access rule, and correctly so), and the only way to reach Vokietija
+ * was to scroll past ~230 others. `searchable` adds ONE filter input inside
+ * the panel this component already owns — not a second select component, not
+ * a second list of countries.
+ *
+ * The MATCH RULE stays with the caller (`filter`), because what counts as
+ * finding a thing is domain knowledge: a country answers to its localized
+ * name, its ISO code and its documented aliases
+ * (`lib/location/country-options.ts`), and a generic listbox must not hold a
+ * second, weaker copy of that. The callback takes the WHOLE list and returns
+ * the whole list, so it owns the ORDER too — Enter commits the first row, so a
+ * domain that knows one answer is exactly right must be able to put it there
+ * (Codex P2 on #1878: "DE" matched Denmark by prefix above Germany by code).
+ * The default is a plain folded substring on the label, original order.
  */
 export type DarkListboxOption = {
   readonly value: string;
   readonly label: string;
   readonly disabled?: boolean;
 };
+
+/** Case- and diacritic-insensitive fold for the default filter. A Lithuanian
+ *  person types "plyteliu", not "plytelių", and a filter that ignores that
+ *  finds nothing and reads as broken. */
+function fold(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+/** Default filter: folded substring on the visible label, original order. A
+ *  domain with its own rule (countries) passes `filter` instead. */
+function defaultFilter(
+  options: readonly DarkListboxOption[],
+  query: string,
+): readonly DarkListboxOption[] {
+  const q = fold(query);
+  return options.filter((o) => fold(o.label).includes(q));
+}
 
 export function DarkListbox({
   value,
@@ -30,6 +69,13 @@ export function DarkListbox({
   ariaLabel,
   className,
   testId,
+  searchable = false,
+  searchPlaceholder,
+  searchEmptyLabel,
+  filter = defaultFilter,
+  invalid = false,
+  describedBy,
+  buttonId,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -40,14 +86,42 @@ export function DarkListbox({
   ariaLabel?: string;
   className?: string;
   testId?: string;
+  /** Show a filter input inside the open panel (long lists). */
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  /** Shown when the filter matches nothing — never an empty panel. */
+  searchEmptyLabel?: string;
+  /** Domain rule for what a query shows, and in what order; defaults to a
+   *  folded label substring in the original order. */
+  filter?: (
+    options: readonly DarkListboxOption[],
+    query: string,
+  ) => readonly DarkListboxOption[];
+  /** The field failed validation: the toggle carries the danger border and
+   *  (with `describedBy`) points at the message right under it, so the error
+   *  is AT the field. `aria-invalid` is not a supported state of the `button`
+   *  role this trigger has (jsx-a11y/role-supports-aria-props), so the
+   *  message is linked through `aria-describedby` and announced by its own
+   *  `role="alert"`. */
+  invalid?: boolean;
+  /** id(s) of the message that explains the field (e.g. its error). */
+  describedBy?: string;
+  /** id for the toggle button, so a form can move focus to it. */
+  buttonId?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
 
   const selected = options.find((o) => o.value === value) ?? null;
   const buttonLabel = selected?.label ?? placeholder ?? "";
+  // What the panel actually lists. Only a searchable listbox filters, so every
+  // existing consumer keeps the exact list it passed in.
+  const q = query.trim();
+  const visible = searchable && q.length > 0 ? filter(options, q) : options;
 
   // Close on outside click + Escape (mobile-portrait friendly).
   useEffect(() => {
@@ -68,12 +142,26 @@ export function DarkListbox({
     };
   }, [open]);
 
+  // A fresh open starts from the whole list, and the filter is reachable
+  // without a second click: the person types straight away (the owner's
+  // production complaint was having to scroll at all).
+  useEffect(() => {
+    if (!open) {
+      setQuery("");
+      return;
+    }
+    setActiveIndex(-1);
+    if (searchable) searchRef.current?.focus();
+  }, [open, searchable]);
+
   function commit(next: string) {
     onChange(next);
     setOpen(false);
   }
 
-  function onButtonKeyDown(e: React.KeyboardEvent) {
+  /** Arrow/Enter over the VISIBLE rows — shared by the button and the filter
+   *  input, so keyboard use survives the focus moving into the search field. */
+  function onNavKeyDown(e: React.KeyboardEvent) {
     if (disabled) return;
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
@@ -83,14 +171,29 @@ export function DarkListbox({
       }
       const dir = e.key === "ArrowDown" ? 1 : -1;
       const from =
-        activeIndex < 0 ? options.findIndex((o) => o.value === value) : activeIndex;
-      setActiveIndex(Math.max(0, Math.min(options.length - 1, from + dir)));
+        activeIndex < 0
+          ? visible.findIndex((o) => o.value === value)
+          : activeIndex;
+      setActiveIndex(Math.max(0, Math.min(visible.length - 1, from + dir)));
     } else if (e.key === "Enter" || e.key === " ") {
-      if (open && activeIndex >= 0) {
-        e.preventDefault();
-        const o = options[activeIndex];
-        if (o && !o.disabled) commit(o.value);
-      } else if (!open) {
+      // A space is a character while typing a filter ("United Arab…"), never a
+      // commit — only Enter commits from inside the search field.
+      if (searchable && open && e.key === " ") return;
+      if (open) {
+        // Enter on a filtered list takes the one row the person is looking at:
+        // the arrowed-to row, or — having typed "Vok" and seen one answer —
+        // the first match, so the choice costs no extra keystroke.
+        const target =
+          activeIndex >= 0
+            ? visible[activeIndex]
+            : q.length > 0
+              ? visible[0]
+              : undefined;
+        if (target && !target.disabled) {
+          e.preventDefault();
+          commit(target.value);
+        }
+      } else {
         e.preventDefault();
         setOpen(true);
       }
@@ -106,10 +209,16 @@ export function DarkListbox({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={ariaLabel}
+        aria-describedby={describedBy}
+        data-invalid={invalid ? "true" : undefined}
+        id={buttonId}
         data-testid={testId}
         onClick={() => !disabled && setOpen((v) => !v)}
-        onKeyDown={onButtonKeyDown}
-        className="flex w-full items-center justify-between gap-2 rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-left text-sm text-text-primary outline-none transition-colors focus:border-brand-blue disabled:opacity-50"
+        onKeyDown={onNavKeyDown}
+        className={cn(
+          "flex w-full items-center justify-between gap-2 rounded-md border bg-ink-700 px-4 py-3 text-left text-sm text-text-primary outline-none transition-colors focus:border-brand-blue disabled:opacity-50",
+          invalid ? "border-state-danger" : "border-ink-500",
+        )}
       >
         <span className={cn("truncate", !selected && "text-text-muted")}>
           {buttonLabel}
@@ -119,40 +228,73 @@ export function DarkListbox({
         </span>
       </button>
       {open && (
-        <ul
-          role="listbox"
-          id={listboxId}
-          aria-label={ariaLabel}
-          className="absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border border-ink-500 bg-ink-900 p-1 shadow-card"
-        >
-          {options.map((o, i) => {
-            const isSelected = o.value === value;
-            const isActive = i === activeIndex;
-            return (
-              <li key={o.value || `opt-${i}`} role="option" aria-selected={isSelected}>
-                <button
-                  type="button"
-                  disabled={o.disabled}
-                  onClick={() => !o.disabled && commit(o.value)}
-                  onMouseEnter={() => setActiveIndex(i)}
-                  className={cn(
-                    "flex w-full items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left text-sm",
-                    isSelected ? "text-brand-blue" : "text-text-primary",
-                    isActive && !o.disabled && "bg-ink-700",
-                    o.disabled && "cursor-not-allowed text-text-muted",
-                  )}
+        // `left-0 right-0` keeps the panel exactly as wide as the field, so on
+        // a phone it can never reach past the screen edge; the list scrolls
+        // inside it instead of growing the page.
+        <div className="absolute left-0 right-0 z-50 mt-1 rounded-md border border-ink-500 bg-ink-900 p-1 shadow-card">
+          {searchable && (
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setActiveIndex(-1);
+              }}
+              onKeyDown={onNavKeyDown}
+              placeholder={searchPlaceholder}
+              aria-label={searchPlaceholder ?? ariaLabel}
+              data-testid={testId ? `${testId}-search` : undefined}
+              className="mb-1 min-h-11 w-full rounded-sm border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+            />
+          )}
+          {searchable && visible.length === 0 ? (
+            <p className="px-3 py-2.5 text-sm text-text-muted">
+              {searchEmptyLabel ?? ""}
+            </p>
+          ) : null}
+          <ul
+            role="listbox"
+            id={listboxId}
+            aria-label={ariaLabel}
+            // overscroll-contain: reaching the end of the list must not chain
+            // into the page — on a phone that chain is pull-to-refresh, which
+            // reloaded the onboarding wizard mid-choice (audit 2026-10-26).
+            className="max-h-60 overflow-auto overscroll-contain"
+          >
+            {visible.map((o, i) => {
+              const isSelected = o.value === value;
+              const isActive = i === activeIndex;
+              return (
+                <li
+                  key={o.value || `opt-${i}`}
+                  role="option"
+                  aria-selected={isSelected}
                 >
-                  <span className="truncate">{o.label}</span>
-                  {isSelected ? (
-                    <span aria-hidden className="shrink-0 text-brand-blue">
-                      ✓
-                    </span>
-                  ) : null}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                  <button
+                    type="button"
+                    disabled={o.disabled}
+                    onClick={() => !o.disabled && commit(o.value)}
+                    onMouseEnter={() => setActiveIndex(i)}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left text-sm",
+                      isSelected ? "text-brand-blue" : "text-text-primary",
+                      isActive && !o.disabled && "bg-ink-700",
+                      o.disabled && "cursor-not-allowed text-text-muted",
+                    )}
+                  >
+                    <span className="truncate">{o.label}</span>
+                    {isSelected ? (
+                      <span aria-hidden className="shrink-0 text-brand-blue">
+                        ✓
+                      </span>
+                    ) : null}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </div>
   );

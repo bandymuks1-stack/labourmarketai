@@ -2,7 +2,13 @@ import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
-import type { CompassNextStep, LearningCompass } from "@/lib/learning/learning-compass-model";
+import { ExplainMore } from "@/components/app/premium/disclosure";
+import {
+  importedJobsHref,
+  recommendationNextAction,
+  type CompassNextStep,
+  type LearningCompass,
+} from "@/lib/learning/learning-compass-model";
 
 /** Where each next step is actually done — in-page anchors on the profile
  *  (the compass renders there) or the one canonical route. */
@@ -40,7 +46,7 @@ export async function LearningCompassSection({
   const professionLabel = (slug: string) =>
     tProf.has(slug as never) ? tProf(slug as never) : slug.replace(/-/g, " ");
 
-  const { becoming, evidence, fitsNow, missing, nextSteps } = compass;
+  const { becoming, evidence, fitsNow, missing, nextSteps, recommendations } = compass;
 
   return (
     <Card compact>
@@ -54,7 +60,10 @@ export async function LearningCompassSection({
           <h2 id="learning-compass-title" className="font-display text-base font-semibold text-text-primary">
             {t("title")}
           </h2>
-          <p className="text-xs leading-relaxed text-text-secondary">{t("subtitle")}</p>
+          <ExplainMore>
+            <p>{t("subtitle")}</p>
+            <p data-testid="compass-fits-source">{t("fitsSource")}</p>
+          </ExplainMore>
         </header>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -94,11 +103,20 @@ export async function LearningCompassSection({
                       ) : null}
                       {c.targetProfessionSlug ? (
                         <span
-                          className="mt-0.5 w-fit rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-text-primary"
+                          className="mt-0.5 w-fit rounded-full border border-border-subtle px-2 py-0.5 text-text-primary"
                           data-testid={`compass-cohort-demand-${c.cohortId}`}
                         >
                           {c.demandCount === null ? t("cohortDemandUnknown") : t("cohortDemand", { count: c.demandCount })}
                         </span>
+                      ) : null}
+                      {c.targetProfessionSlug && c.demandCount !== null && c.demandCount > 0 ? (
+                        <Link
+                          href={importedJobsHref(c.targetProfessionSlug) as "/jobs"}
+                          className="w-fit text-text-primary underline-offset-4 hover:underline"
+                          data-testid={`compass-cohort-jobs-${c.cohortId}`}
+                        >
+                          {t("cohortDemandOpen")} →
+                        </Link>
                       ) : null}
                     </li>
                   ))}
@@ -119,13 +137,15 @@ export async function LearningCompassSection({
                 </li>
               ) : null}
               {evidence.skillsJournalSupported > 0 ? (
-                <li className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-text-primary">
+                <li className="rounded-full border border-border-subtle px-2 py-0.5 text-text-primary">
                   {t("journalSupported", { count: evidence.skillsJournalSupported })}
                 </li>
               ) : null}
-              <li className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 text-text-secondary">
-                {t("journalEntries", { count: evidence.journalEntries })}
-              </li>
+              {evidence.journalEntries !== null ? (
+                <li className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 text-text-secondary">
+                  {t("journalEntries", { count: evidence.journalEntries })}
+                </li>
+              ) : null}
               <li className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 text-text-secondary">
                 {t("educationEntries", { count: evidence.educationEntries })}
               </li>
@@ -149,7 +169,7 @@ export async function LearningCompassSection({
                     </span>
                     {o.opportunityType && o.opportunityType !== "employment" ? (
                       <span
-                        className="shrink-0 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-primary"
+                        className="shrink-0 rounded-full border border-border-subtle px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-primary"
                         data-testid="compass-fit-type"
                       >
                         {tsd(`opportunityType.${o.opportunityType}` as never)}
@@ -163,9 +183,23 @@ export async function LearningCompassSection({
               ))}
             </ul>
           )}
-          <Link href="/dashboard/opportunities" className="text-xs text-brand-blue hover:underline" data-testid="compass-open-board">
-            {t("openBoard")} →
-          </Link>
+          {/* The student's own door to practice places (owner 2026-11-14,
+              group 4: a dedicated internship discovery path). It is the ONE
+              board narrowed by the type the employer stated — the same
+              filters, the same interest button and the same conversation
+              with the employer — never a second listing engine. */}
+          <div className="flex flex-wrap gap-x-4">
+            <Link
+              href="/dashboard/opportunities?opportunityType=internship"
+              className="inline-flex min-h-11 items-center text-xs font-medium text-text-primary underline-offset-4 hover:underline"
+              data-testid="compass-open-internships"
+            >
+              {t("openInternships")} →
+            </Link>
+            <Link href="/dashboard/opportunities" className="inline-flex min-h-11 items-center text-xs font-medium text-text-primary underline-offset-4 hover:underline" data-testid="compass-open-board">
+              {t("openBoard")} →
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col gap-1" data-testid="compass-missing">
@@ -195,6 +229,129 @@ export async function LearningCompassSection({
           )}
         </div>
 
+        {recommendations.length > 0 ? (
+          <div className="flex flex-col gap-1" data-testid="compass-recommendations">
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("recTitle")}</h3>
+            {(() => {
+              // ONE reason, ONE action when every recommendation shares them
+              // (owner 2026-10-10: the same sentence and button repeated on
+              // every box). Different reasons keep their own rows.
+              const reasonOf = (r: (typeof recommendations)[number]) => {
+                const first = r.sources[0];
+                const role = first?.roleSlug ? professionLabel(first.roleSlug) : null;
+                return r.basis === "profession_gap"
+                  ? t("recWhyProfession", { profession: r.professionSlug ? professionLabel(r.professionSlug) : "" })
+                  : r.basis === "demand_weak_evidence"
+                    ? t(role ? "recWhyWeakRole" : "recWhyWeak", { role: role ?? "" })
+                    : t(role ? "recWhyMissingRole" : "recWhyMissing", { role: role ?? "" });
+              };
+              const actionOf = (r: (typeof recommendations)[number]) => {
+                const action = recommendationNextAction(r);
+                const href =
+                  action.kind === "opportunities"
+                    ? action.professionSlug
+                      ? `/dashboard/opportunities?profession=${encodeURIComponent(action.professionSlug)}`
+                      : "/dashboard/opportunities"
+                    : action.kind === "journal"
+                      ? "/dashboard/journal"
+                      : "/dashboard/profile#profile-edit";
+                const label = t(
+                  action.kind === "opportunities"
+                    ? "recActionOpportunity"
+                    : action.kind === "journal"
+                      ? "recActionJournal"
+                      : "recActionProfile",
+                );
+                return { kind: action.kind, href, label };
+              };
+              const reasons = new Set(recommendations.map(reasonOf));
+              const hrefs = new Set(recommendations.map((r) => actionOf(r).href));
+              if (recommendations.length < 2 || reasons.size !== 1 || hrefs.size !== 1) return null;
+              const action = actionOf(recommendations[0]!);
+              return (
+                <div className="flex flex-col gap-2 text-xs" data-testid="compass-recommendations-grouped">
+                  <p className="leading-relaxed text-text-secondary">{[...reasons][0]}</p>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {recommendations.map((r) => (
+                      <li
+                        key={`${r.basis}:${r.skillSlug}`}
+                        className="rounded-full border border-ink-500 px-2 py-0.5 text-text-primary"
+                        data-testid="compass-recommendation"
+                        data-basis={r.basis}
+                      >
+                        {skillLabel(r.skillSlug)}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={action.href as "/dashboard/profile"}
+                    className="inline-block font-medium text-text-primary underline-offset-4 hover:underline"
+                    data-testid="compass-recommendation-action"
+                    data-action={action.kind}
+                  >
+                    {action.label} →
+                  </Link>
+                </div>
+              );
+            })() ?? (
+            <ul className="flex flex-col gap-1.5 text-xs">
+              {recommendations.map((r) => {
+                const first = r.sources[0];
+                const role = first?.roleSlug ? professionLabel(first.roleSlug) : null;
+                return (
+                  <li
+                    key={`${r.basis}:${r.skillSlug}`}
+                    className="rounded-md border border-ink-500 px-2 py-1.5"
+                    data-testid="compass-recommendation"
+                    data-basis={r.basis}
+                  >
+                    <span className="font-medium text-text-primary">{skillLabel(r.skillSlug)}</span>
+                    <span className="block leading-relaxed text-text-secondary">
+                      {r.basis === "profession_gap"
+                        ? t("recWhyProfession", {
+                            profession: r.professionSlug ? professionLabel(r.professionSlug) : "",
+                          })
+                        : r.basis === "demand_weak_evidence"
+                          ? t(role ? "recWhyWeakRole" : "recWhyWeak", { role: role ?? "" })
+                          : t(role ? "recWhyMissingRole" : "recWhyMissing", { role: role ?? "" })}
+                      {r.sources.length > 1 ? ` ${t("recMoreRequests", { count: r.sources.length - 1 })}` : ""}
+                    </span>
+                    {(() => {
+                      const action = recommendationNextAction(r);
+                      return (
+                        <Link
+                          href={
+                            (action.kind === "opportunities"
+                              ? action.professionSlug
+                                ? `/dashboard/opportunities?profession=${encodeURIComponent(action.professionSlug)}`
+                                : "/dashboard/opportunities"
+                              : action.kind === "journal"
+                                ? "/dashboard/journal"
+                                : "/dashboard/profile#profile-edit") as "/dashboard/profile"
+                          }
+                          className="mt-1 inline-block font-medium text-text-primary underline-offset-4 hover:underline"
+                          data-testid="compass-recommendation-action"
+                          data-action={action.kind}
+                        >
+                          {t(
+                            action.kind === "opportunities"
+                              ? "recActionOpportunity"
+                              : action.kind === "journal"
+                                ? "recActionJournal"
+                                : "recActionProfile",
+                          )}{" "}
+                          →
+                        </Link>
+                      );
+                    })()}
+                  </li>
+                );
+              })}
+            </ul>
+            )}
+          </div>
+        ) : null}
+
         <div className="flex flex-col gap-1" data-testid="compass-next">
           <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("next")}</h3>
           {/* Every step is a door, not a sentence: each links to the exact
@@ -209,7 +366,7 @@ export async function LearningCompassSection({
             ))}
           </ol>
           <div className="mt-1 flex flex-wrap gap-2">
-            <Link href="/dashboard/journal" className="rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-xs font-semibold text-ink-900 transition-opacity hover:opacity-90">
+            <Link href="/dashboard/journal" className="rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90">
               {t("openJournal")}
             </Link>
           </div>

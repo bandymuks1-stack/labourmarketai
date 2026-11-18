@@ -23,7 +23,7 @@ describe("the doctrine set", () => {
 
   it("an inactive locale is not offered, even though its catalogue exists", () => {
     // Offering it would promise a translation nobody has verified.
-    expect(isActiveLocale("sv")).toBe(false);
+    expect(isActiveLocale("da")).toBe(false);
     expect(isActiveLocale("klingon")).toBe(false);
   });
 });
@@ -48,7 +48,11 @@ describe("resolving the device language", () => {
   });
 
   it("takes the first supported language in the device's own order", () => {
-    expect(resolveDeviceLocale(["pl-PL", "en-GB", "lt"])).toBe("en");
+    // da is not an active locale; pl (2026-09-20) and sv (2026-11-12) are, so
+    // each wins when listed first.
+    expect(resolveDeviceLocale(["da-DK", "en-GB", "lt"])).toBe("en");
+    expect(resolveDeviceLocale(["sv-SE", "en-GB", "lt"])).toBe("sv");
+    expect(resolveDeviceLocale(["pl-PL", "en-GB", "lt"])).toBe("pl");
   });
 
   it("falls back to the default when nothing matches", () => {

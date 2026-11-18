@@ -46,11 +46,19 @@ export interface InstructionProjectAsksLabels {
   readonly capabilityDemonstrated: string;
   readonly capabilitySelfReported: string;
   readonly capabilityStillRequired: string;
+  /** SKL-9: an assessing institution's recognition answers the requirement
+   *  (the formal answer RPL IS). Shown instead of "not recorded" - the paper
+   *  is not on file, the requirement is answered. Never a score. */
+  readonly capabilityRecognised: string;
 }
 
 /** Copy resolved by the page (server side) — the component holds no strings. */
 export interface InstructionLedgerLabels {
   readonly ratio: (have: number, total: number) => string;
+  /** Said instead of "0 of 0" when no row has a known state to count. */
+  readonly ratioNone: string;
+  /** The rows whose state is not known, said apart from the ratio. */
+  readonly ratioUnknown: (count: number) => string;
   readonly state: Record<RequirementLedgerRow["state"], string>;
   readonly why: (row: RequirementLedgerRow, country: string | null) => string;
   readonly stateFrom: (row: RequirementLedgerRow) => string;
@@ -107,7 +115,7 @@ function resolutionHref(r: RequirementResolution): string | null {
     case "set_availability":
     case "ask":
       return r.href;
-    case "issuing_authority":
+    case "information_source":
       return r.url;
     default:
       return null;
@@ -130,8 +138,15 @@ export function RequirementLedgerRows({ ledger, labels }: { ledger: RequirementL
         data-testid="instruction-ledger-ratio"
         data-have={ledger.ratio.have}
         data-total={ledger.ratio.total}
+        data-unknown={ledger.ratio.unknown}
       >
-        {labels.ratio(ledger.ratio.have, ledger.ratio.total)}
+        {/* "Yra 0 iš 0" said nothing true: with no known state to count the
+            line says so instead (walk-spec 2026-10-25). Unknown rows are named
+            apart, never folded into the total. */}
+        {ledger.ratio.total === 0
+          ? labels.ratioNone
+          : labels.ratio(ledger.ratio.have, ledger.ratio.total)}
+        {ledger.ratio.unknown > 0 ? ` · ${labels.ratioUnknown(ledger.ratio.unknown)}` : null}
       </p>
       <ul className="flex flex-col gap-2">
         {ledger.rows.map((row) => {
@@ -170,7 +185,7 @@ export function RequirementLedgerRows({ ledger, labels }: { ledger: RequirementL
                         data-testid="instruction-ledger-resolution"
                         data-resolution={r.kind}
                       >
-                        {href && r.kind === "issuing_authority" ? (
+                        {href && r.kind === "information_source" ? (
                           <a href={href} target="_blank" rel="noreferrer noopener" className={ACTION_LINK}>
                             {text}
                           </a>
@@ -217,7 +232,8 @@ export function InstructionProjectAsks({
 }) {
   const showLedger = ledger !== null && ledgerLabels !== undefined && ledger.rows.length > 0;
   if (asks.length === 0 && !showLedger) return null;
-  const recordable = asks.some((a) => a.own === "none");
+  const recognised = (a: WorkerProjectAsk) => a.capability?.standing === "recognized_equivalence";
+  const recordable = asks.some((a) => a.own === "none" && !recognised(a));
   return (
     <div
       className="flex flex-col gap-2 rounded-md border border-brand-blue/30 bg-brand-blue/5 p-3"
@@ -226,12 +242,29 @@ export function InstructionProjectAsks({
     >
       <span className="font-mono text-meta uppercase tracking-label text-brand-blue">{labels.title}</span>
       {showLedger ? (
-        <RequirementLedgerRows ledger={ledger} labels={ledgerLabels} />
+        <>
+          <RequirementLedgerRows ledger={ledger} labels={ledgerLabels} />
+          {/* The ledger answers from documents; an assessor's recognition is a
+              different, formal answer and is said beside it, by name. */}
+          {asks.filter(recognised).map((a) => (
+            <span
+              key={a.itemKey}
+              className="block text-meta leading-snug text-state-success"
+              data-testid="instruction-project-ask-recognised"
+              data-standing="recognized_equivalence"
+              data-formal-met="true"
+            >
+              {a.label}: {labels.capabilityRecognised}
+            </span>
+          ))}
+        </>
       ) : (
         <ul className="flex flex-col gap-1">
           {asks.map((a) => {
-            const own =
-              a.own === "ready" ? labels.ownReady : a.own === "expiring" ? labels.ownExpiring : a.own === "none" ? labels.ownNone : null;
+            const isRecognised = recognised(a);
+            const own = isRecognised
+              ? null
+              : a.own === "ready" ? labels.ownReady : a.own === "expiring" ? labels.ownExpiring : a.own === "none" ? labels.ownNone : null;
             const blocked = a.status === "rejected" || a.status === "expired";
             return (
               <li
@@ -243,6 +276,16 @@ export function InstructionProjectAsks({
               >
                 {a.label}
                 {blocked ? <span className="text-text-muted"> {labels.blocked}</span> : null}
+                {isRecognised ? (
+                  <span
+                    className="mt-0.5 block text-meta leading-snug text-state-success"
+                    data-testid="instruction-project-ask-recognised"
+                    data-standing="recognized_equivalence"
+                    data-formal-met="true"
+                  >
+                    {labels.capabilityRecognised}
+                  </span>
+                ) : null}
                 {own ? <span className={a.own === "ready" ? "text-state-success" : "text-state-amber"}> ({own})</span> : null}
                 {/* Five years of real work is not "certificate missing". When
                     the person has recorded work the paper does not capture,

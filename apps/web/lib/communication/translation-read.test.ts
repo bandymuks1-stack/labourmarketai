@@ -15,8 +15,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 const runAiAgent = vi.fn();
 vi.mock("@/lib/ai/run-agent-server", () => ({ runAiAgent: (...a: unknown[]) => runAiAgent(...a) }));
+// The egress pre-check (audit 2026-10-16) is answered by the faked runtime here.
+vi.mock("@/lib/ai/egress-precheck-server", () => ({ aiTaskServableNow: async () => true }));
 
-const { resolveViewerTexts, __clearTranslationCache } = await import("./translation-read");
+const { resolveViewerTexts, __clearTranslationCache, isTransientProviderRefusal } = await import("./translation-read");
 
 const lt = { id: "m1", body: "Rytoj pradedame 7 val. objekte Hoofdgracht 3.", original_language: "lt" };
 const ka = { id: "m2", body: "გასაგებია, ვიქნები.", original_language: "ka" };
@@ -29,7 +31,7 @@ beforeEach(() => {
 
 describe("resolveViewerTexts", () => {
   it("without an egress grant every foreign message stays the original, with its language badge", async () => {
-    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "egress_blocked" });
+    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "route_blocked" });
     const out = await resolveViewerTexts([lt, ka, en], "en", "viewer-1");
     expect(out.get("m1")).toMatchObject({ kind: "original", text: lt.body, languageBadge: "lt", provider: null });
     expect(out.get("m2")).toMatchObject({ kind: "original", text: ka.body, languageBadge: "ka" });
@@ -61,6 +63,38 @@ describe("resolveViewerTexts", () => {
     // the second read on this instance is served from the cache
     await resolveViewerTexts([lt], "en", "viewer-2");
     expect(runAiAgent).toHaveBeenCalledTimes(1);
+  });
+
+  it("the viewer's own words are never sent to a provider and carry no badge", async () => {
+    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "route_blocked" });
+    const mine = { ...lt, id: "own", author_id: "viewer-9" };
+    const out = await resolveViewerTexts([mine], "en", "viewer-9");
+    expect(runAiAgent).not.toHaveBeenCalled();
+    expect(out.get("own")).toMatchObject({ kind: "original", text: lt.body, languageBadge: null });
+  });
+
+  it("two simultaneous renders of the same message share ONE provider call (in-flight de-duplication)", async () => {
+    let release: (v: unknown) => void = () => {};
+    runAiAgent.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    );
+    const first = resolveViewerTexts([lt], "en", "viewer-10");
+    const second = resolveViewerTexts([lt], "en", "viewer-11");
+    await new Promise((r) => setTimeout(r, 0));
+    release({
+      status: "suggestion",
+      agent: "translation_copy",
+      provider: "libretranslate",
+      model: "m",
+      value: { data: { localized_copy: "Tomorrow we start at 7.", plain_language_version: null, wording_warnings: [] } },
+    });
+    const [a, b] = await Promise.all([first, second]);
+    expect(runAiAgent).toHaveBeenCalledTimes(1);
+    expect(a.get("m1")?.kind).toBe("translated");
+    expect(b.get("m1")?.kind).toBe("translated");
   });
 
   it("an echo of the original is not a translation", async () => {
@@ -119,8 +153,29 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
     });
     const out = await resolveViewerTexts([ka], "lt", "viewer-9");
     expect(out.get("m2")).toMatchObject({ kind: "original", text: ka.body, languageBadge: "ka" });
+    // Not cached as a rendering, but a failure is remembered for a few seconds
+    // so a re-render does not re-ask the provider at once (no hammering)...
     await resolveViewerTexts([ka], "lt", "viewer-9");
-    expect(runAiAgent).toHaveBeenCalledTimes(2); // not cached: a real answer may still arrive
+    expect(runAiAgent).toHaveBeenCalledTimes(1);
+    // ...and once the memo is gone a real answer may still arrive.
+    __clearTranslationCache();
+    await resolveViewerTexts([ka], "lt", "viewer-9");
+    expect(runAiAgent).toHaveBeenCalledTimes(2);
+  });
+
+  it("a quota answer (429) opens a cooldown: no further provider calls until it ends, originals show", async () => {
+    runAiAgent.mockResolvedValue({
+      status: "needs_review",
+      reason: "provider_error",
+      detail: "gemini http 429 RESOURCE_EXHAUSTED quota",
+    });
+    const msgs = [lt, ka].map((m, i) => ({ ...m, id: `q${i}` }));
+    const out = await resolveViewerTexts(msgs, "en", "viewer-q");
+    expect(runAiAgent).toHaveBeenCalledTimes(2); // the first batch (concurrency 4) was already out
+    expect(out.get("q0")?.kind).toBe("original");
+    const again = await resolveViewerTexts([{ ...lt, id: "q9", body: "Kitas tekstas." }], "en", "viewer-q");
+    expect(runAiAgent).toHaveBeenCalledTimes(2); // cooldown: nothing new was asked
+    expect(again.get("q9")?.kind).toBe("original");
   });
 
   it("8. the original is never rewritten: a rendering carries the untouched body beside it", async () => {
@@ -153,7 +208,7 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
 
   it("every message carries ONE explicit state, and a foreign original says WHY it is not translated", async () => {
     // declined by the gate → original_foreign / declined
-    runAiAgent.mockResolvedValueOnce({ status: "needs_review", reason: "egress_blocked" });
+    runAiAgent.mockResolvedValueOnce({ status: "needs_review", reason: "route_blocked" });
     const declined = await resolveViewerTexts([ka, en, { id: "m0", body: "?", original_language: null }], "en", "viewer-12");
     expect(declined.get("m2")).toMatchObject({ state: "original_foreign", unavailable: "declined", kind: "original" });
     expect(declined.get("m3")).toMatchObject({ state: "same_language", unavailable: null, languageBadge: null });
@@ -171,7 +226,7 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
     expect((await resolveViewerTexts([ka], "lt", "viewer-14")).get("m2")).toMatchObject({ state: "original_foreign", unavailable: "failed" });
 
     // beyond the per-read bound → not_attempted, and the runtime is not called for it
-    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "egress_blocked" });
+    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "route_blocked" });
     const many = Array.from({ length: 45 }, (_, i) => ({ id: `x${i}`, body: `t${i}`, original_language: "ka" }));
     const bounded = await resolveViewerTexts(many, "lt", "viewer-15");
     expect(bounded.get("x0")).toMatchObject({ state: "original_foreign", unavailable: "not_attempted" });
@@ -190,8 +245,52 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
     expect(page).toContain("const supabase = await createClient();");
     expect(page).not.toContain("createAdminClient");
     const rlsRead = page.indexOf('.from("conversation_messages")');
-    const resolve = page.indexOf("await resolveViewerTexts(");
+    // Started, not awaited, since 2026-09-28 (each message streams behind its
+    // own Suspense boundary) — the call still follows the RLS read.
+    const resolve = page.indexOf("= resolveViewerTexts(");
     expect(rlsRead).toBeGreaterThan(-1);
     expect(resolve).toBeGreaterThan(rlsRead);
+  });
+});
+
+/**
+ * Production walk 2026-09-28 (LT ↔ RU synthetic pair): Gemini answered
+ * "503 UNAVAILABLE — high demand" in 0.7–2.6 s, and every such answer was
+ * filed as a gate refusal ("declined"), which also stopped the rest of the
+ * thread. A busy provider now gets ONE short retry, and a failure never
+ * stops the other messages; the original stays canonical throughout.
+ */
+describe("a busy provider is retried once and never stops the thread", () => {
+  const busy = { status: "needs_review", reason: "provider_error", detail: "gemini http 503 — UNAVAILABLE: high demand" };
+  const ok = (text: string) => ({
+    status: "suggestion", agent: "translation_copy", provider: "gemini", model: "x",
+    value: { data: { localized_copy: text, plain_language_version: null, wording_warnings: [] } },
+  });
+
+  it("503 then success → translated, with the original beside it", async () => {
+    runAiAgent.mockResolvedValueOnce(busy).mockResolvedValueOnce(ok("Понял, буду."));
+    const out = await resolveViewerTexts([lt], "ru", "viewer-busy-1");
+    expect(out.get("m1")).toMatchObject({ kind: "translated", text: "Понял, буду.", original: lt.body });
+    expect(runAiAgent).toHaveBeenCalledTimes(2);
+  });
+
+  it("503 twice → failed (not declined); a timeout → failed; the next message is still attempted", async () => {
+    runAiAgent
+      .mockResolvedValueOnce(busy)
+      .mockResolvedValueOnce(busy)
+      .mockResolvedValueOnce({ status: "needs_review", reason: "timeout", detail: "policy latency ceiling 15000ms exceeded" });
+    const out = await resolveViewerTexts([lt], "ru", "viewer-busy-2");
+    expect(out.get("m1")).toMatchObject({ kind: "original", text: lt.body, unavailable: "failed" });
+    expect(runAiAgent).toHaveBeenCalledTimes(2);
+    const timedOut = await resolveViewerTexts([ka], "ru", "viewer-busy-3");
+    expect(timedOut.get("m2")).toMatchObject({ kind: "original", unavailable: "failed" });
+    expect(runAiAgent).toHaveBeenCalledTimes(3); // a timeout is not retried here
+  });
+
+  it("only load answers count as busy", () => {
+    expect(isTransientProviderRefusal("provider_error", "gemini http 503 — UNAVAILABLE")).toBe(true);
+    expect(isTransientProviderRefusal("provider_error", "gemini http 429 RESOURCE_EXHAUSTED")).toBe(true);
+    expect(isTransientProviderRefusal("provider_error", "gemini http 400 INVALID_ARGUMENT")).toBe(false);
+    expect(isTransientProviderRefusal("timeout", "503")).toBe(false);
   });
 });

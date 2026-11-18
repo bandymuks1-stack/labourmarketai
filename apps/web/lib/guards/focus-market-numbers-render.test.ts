@@ -28,7 +28,7 @@ vi.mock("next-intl/server", () => ({
     }),
 }));
 
-vi.mock("@/components/marketing/reveal", () => ({
+vi.mock("@/components/marketing/lazy-motion", () => ({
   Reveal: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -42,6 +42,8 @@ const LIVE_FIXTURE: LiveMarketLandingSnapshot = {
   lastRefreshedAt: "2026-08-22T06:15:00.000Z",
   basis: "live",
   professions: [],
+  // The vacancy sample is a separate band's input; this band never reads it.
+  sample: { basis: "unavailable", vacancies: [] },
 };
 
 const UNAVAILABLE_FIXTURE: LiveMarketLandingSnapshot = {
@@ -50,6 +52,7 @@ const UNAVAILABLE_FIXTURE: LiveMarketLandingSnapshot = {
   lastRefreshedAt: null,
   basis: "unavailable",
   professions: [],
+  sample: { basis: "unavailable", vacancies: [] },
 };
 
 async function render(

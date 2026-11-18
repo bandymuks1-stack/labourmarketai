@@ -1,21 +1,37 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ContactDisclosureRequests } from "@/components/app/contact-disclosure-requests";
 import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
 import { PartnerSupplyRepresentation } from "@/components/app/partner-supply-representation";
 import { Card } from "@/components/ui/Card";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { PrivacyDeletionRequest } from "@/components/app/privacy-deletion-request";
+import { PrivacyDeletionConfirm } from "@/components/app/privacy-deletion-confirm";
+import { PrivacyDeletionCancel } from "@/components/app/privacy-deletion-cancel";
 import { listMyPrivacyRequests } from "@/lib/privacy/actions";
+import { getMyAccountDeletionStatus } from "@/lib/privacy/deletion-cancel-actions";
+import {
+  deletionSectionMode,
+  deletionStatusLabelKey,
+  deletionStatusProvesRpc,
+} from "@/lib/privacy/deletion-cancel-model";
+import { formatUtcDateTime } from "@/lib/time/display";
 import { listMyContactDisclosureRequests } from "@/lib/privacy/contact-disclosure-actions";
 import {
   getMyConsentHistory,
   getMyDiscoverabilityState,
 } from "@/lib/privacy/discoverability-actions";
 import { buildOwnDiscoverabilityPreview } from "@/lib/privacy/discoverability-preview";
+import {
+  discoverabilityConsentLabels,
+  discoverabilityPreviewFields,
+  toConsentLocale,
+  consentLegalLanguageNote,
+} from "@/lib/privacy/discoverability-view";
 import { getMyPartnerSupplyState } from "@/lib/privacy/partner-supply-actions";
 import {
-  CONSENT_LOCALES,
   EMPLOYER_DATA_DISCLOSURE_V1,
   PARTNER_SUPPLY_REPRESENTATION_V1,
   PROFILE_DISCOVERABILITY_V1,
@@ -23,6 +39,12 @@ import {
 } from "@/lib/privacy/consent-definitions";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/privacy", "privacySelfService.title");
+
 
 /** Never show a worker a raw database code. Turns `chat_message` /
  *  `contact_email` into "Chat message" / "Contact email" as a safe fallback
@@ -72,6 +94,7 @@ export default async function PrivacyPage({
     myRequests,
     contactRequestsResult,
     partnerSupplyState,
+    deletionStatus,
   ] = await Promise.all([
     getMyDiscoverabilityState(),
     getMyConsentHistory(),
@@ -79,25 +102,59 @@ export default async function PrivacyPage({
     listMyPrivacyRequests(),
     listMyContactDisclosureRequests(),
     getMyPartnerSupplyState(),
+    getMyAccountDeletionStatus(),
   ]);
 
-  const consentLocale: ConsentLocale = (
-    CONSENT_LOCALES as readonly string[]
-  ).includes(locale)
-    ? (locale as ConsentLocale)
-    : "lt";
+  // The ONE consent-locale rule (PL → English, never Lithuanian), shared with
+  // the conversation's copy of the consent (lib/privacy/discoverability-view.ts).
+  const consentLocale: ConsentLocale = toConsentLocale(locale);
   const legal = PROFILE_DISCOVERABILITY_V1.texts[consentLocale];
   const partnerLegal = PARTNER_SUPPLY_REPRESENTATION_V1.texts[consentLocale];
 
-  const previewFields = preview.map((f) => ({
-    label: tc(`preview.${f.key}`),
-    value: f.value,
-  }));
+  const previewFields = discoverabilityPreviewFields(preview, tc);
 
-  const disclosureRows = history.filter(
+  // An open account-deletion request turns the form into its confirmation step.
+  const openDeletion = myRequests.find(
+    (r) =>
+      r.type === "account_deletion" &&
+      ["submitted", "in_review", "needs_followup", "approved"].includes(r.status),
+  );
+  // Owner P0 2026-11-09: the request's own status (and a self-service cancel
+  // while it is still cancellable). Until the RED migration that backs it is
+  // applied the read is `unavailable` and the section renders exactly as
+  // before — `deletionSectionMode` keeps the old rule for that case.
+  const deletionMode = deletionSectionMode(deletionStatus, openDeletion?.status ?? null);
+  // The scheduled date is the RPC's `scheduled_erasure_at` (deletion_confirmed_at + the
+  // owner's 30-day waiting period, computed in the database) — never derived
+  // here, so there is one source of truth.
+  const deletionDate = (value: string | null) =>
+    formatUtcDateTime(value, locale, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+    });
+  // The 30-day waiting period (owner decision 2026-11-09) is described only
+  // when the status RPC exists — that is when the migration introducing the
+  // wait is live. Before it, the existing copy stays true and stays shown.
+  const waitingPeriodLive = deletionStatusProvesRpc(deletionStatus);
+  const submittedLabel =
+    deletionStatus.kind === "request" ? deletionDate(deletionStatus.submittedAt) : null;
+  const scheduledLabel =
+    deletionStatus.kind === "request" && deletionStatus.status === "pending"
+      ? deletionDate(deletionStatus.scheduledErasureAt)
+      : null;
+
+  // SEP-7: a history that could not be read is NOT an empty history. Both
+  // sections below say "could not be read" instead of "nothing yet".
+  const historyFailed = history.kind !== "ok";
+  const historyRows = history.kind === "ok" ? history.rows : [];
+  const disclosureRows = historyRows.filter(
     (h) => h.purpose === "employer_data_disclosure",
   );
-  const discoverabilityRows = history.filter(
+  const discoverabilityRows = historyRows.filter(
     (h) => h.purpose === "profile_discoverability",
   );
 
@@ -144,9 +201,7 @@ export default async function PrivacyPage({
   return (
     <div className="flex flex-col gap-5" data-testid="privacy-page">
       <header>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="mt-2 text-sm text-text-secondary">{t("intro")}</p>
       </header>
 
@@ -161,24 +216,7 @@ export default async function PrivacyPage({
             state={state}
             legal={legal}
             preview={previewFields}
-            labels={{
-              statusHidden: tc("status.hidden"),
-              statusHiddenBody: tc("status.hiddenBody"),
-              statusVisible: tc("status.visible"),
-              statusWithdrawn: tc("status.withdrawn"),
-              statusStale: tc("status.stale"),
-              grant: tc("actions.grant"),
-              decline: tc("actions.decline"),
-              manage: tc("actions.manage"),
-              withdraw: tc("actions.withdraw"),
-              previewTitle: tc("preview.title"),
-              previewEmpty: tc("preview.empty"),
-              decidedAtLabel: tc("labels.decidedAt"),
-              versionLabel: tc("labels.version"),
-              needsMigration: tc("labels.needsMigration"),
-              errorGeneric: tc("labels.error"),
-              declinedNote: tc("labels.declinedNote"),
-            }}
+            labels={discoverabilityConsentLabels(tc, locale)}
           />
         </div>
       </section>
@@ -199,6 +237,7 @@ export default async function PrivacyPage({
             state={partnerSupplyState}
             legal={partnerLegal}
             labels={{
+              legalLanguageNote: consentLegalLanguageNote(tc, locale),
               sectionIntro: tps("sectionIntro"),
               noWorkerProfile: tps("noWorkerProfile"),
               statusNotRepresented: tps("statusNotRepresented"),
@@ -292,6 +331,7 @@ export default async function PrivacyPage({
             locale={locale}
             requests={contactRequestCards}
             labels={{
+              legalLanguageNote: consentLegalLanguageNote(tc, locale),
               empty: tc("contactRequests.empty"),
               requestedFields: tc("contactRequests.requestedFields"),
               acceptNote: tc("contactRequests.acceptNote"),
@@ -320,14 +360,47 @@ export default async function PrivacyPage({
       ) : null}
 
       {/* 2. Data transfers to companies — individual disclosure permissions. */}
-      <section className="card-border p-5" data-testid="privacy-disclosures" id="disclosures">
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+      {/* ── SECOND LAYER: THE AUDIT LOGS (§9, 2026-09-27) ──────────────────
+          This page had EIGHT always-open sections and NOT ONE disclosure, so
+          the four questions a person actually arrives with — who can find me,
+          what can they see, what do I allow to be passed on, how do I manage my
+          data and account — were buried among two append-only audit logs.
+
+          Those logs are not removed, reduced or made harder to obtain: they are
+          the same sections, one tap down, keeping their ids so
+          `#disclosures` and `#history` still resolve (`DetailsHashOpener`, the
+          component the profile page already uses for exactly this).
+
+          `open={historyFailed}` IS THE HONESTY CONDITION, not a detail. An
+          audit log that could not be READ is a failure a person must see
+          without hunting for it (SEP-7: FAILED ≠ EMPTY). So a healthy log
+          collapses and an unreadable one stays open, carrying its own
+          `role="status"` explanation exactly as before.
+
+          Nothing GDPR-bearing moved: visibility, partner-supply consent, export
+          and deletion all stay in the first layer. */}
+      <DetailsHashOpener targetId="disclosures" />
+      <details
+        className="card-border p-5"
+        data-testid="privacy-disclosures"
+        id="disclosures"
+        open={historyFailed}
+      >
+        <summary className="flex min-h-11 cursor-pointer select-none items-center font-mono text-meta uppercase tracking-label text-text-muted marker:text-text-muted">
           {tc("sections.disclosures")}
-        </p>
+        </summary>
         <p className="mt-2 text-sm leading-relaxed text-text-primary">
           {tc("disclosures.intro")}
         </p>
-        {disclosureRows.length === 0 ? (
+        {historyFailed ? (
+          <p
+            role="status"
+            className="mt-2 text-sm text-text-secondary"
+            data-testid="disclosures-unavailable"
+          >
+            {tc("history.unavailable")}
+          </p>
+        ) : disclosureRows.length === 0 ? (
           <p className="mt-2 text-sm text-text-secondary" data-testid="disclosures-empty">
             {tc("disclosures.empty")}
           </p>
@@ -365,20 +438,36 @@ export default async function PrivacyPage({
             ))}
           </ul>
         )}
-      </section>
+      </details>
 
-      {/* 3. Consent history — the user's own immutable ledger. */}
-      <section className="card-border p-5" data-testid="privacy-history" id="history">
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+      {/* 3. Consent history — the user's own immutable ledger. Second layer for
+          the same reason as the disclosures log above, and open on the same
+          honesty condition: a ledger that could not be read says so up front. */}
+      <DetailsHashOpener targetId="history" />
+      <details
+        className="card-border p-5"
+        data-testid="privacy-history"
+        id="history"
+        open={historyFailed}
+      >
+        <summary className="flex min-h-11 cursor-pointer select-none items-center font-mono text-meta uppercase tracking-label text-text-muted marker:text-text-muted">
           {tc("sections.history")}
-        </p>
-        {discoverabilityRows.length === 0 && disclosureRows.length === 0 ? (
+        </summary>
+        {historyFailed ? (
+          <p
+            role="status"
+            className="mt-2 text-sm text-text-secondary"
+            data-testid="history-unavailable"
+          >
+            {tc("history.unavailable")}
+          </p>
+        ) : discoverabilityRows.length === 0 && disclosureRows.length === 0 ? (
           <p className="mt-2 text-sm text-text-secondary" data-testid="history-empty">
             {tc("history.empty")}
           </p>
         ) : (
           <ul className="mt-3 flex flex-col gap-2" data-testid="history-list">
-            {history.map((r) => (
+            {historyRows.map((r) => (
               <li
                 key={r.id}
                 className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 px-3 py-2 text-sm"
@@ -401,9 +490,13 @@ export default async function PrivacyPage({
             ))}
           </ul>
         )}
-      </section>
+      </details>
 
-      {/* 4. Privacy rights & contact — pre-existing real self-service. */}
+      {/* 4. Privacy rights & contact — pre-existing real self-service. STAYS IN
+          THE FIRST LAYER: "how do I manage my data and my account" is one of the
+          four questions this page owes a person, and export/deletion are the
+          GDPR-bearing controls. Collapsing these would be a rights reduction,
+          not a simplification. */}
       <section className="card-border p-5" data-testid="privacy-export" id="rights">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tc("sections.rights")}
@@ -429,26 +522,110 @@ export default async function PrivacyPage({
         </p>
       </section>
 
-      <section className="card-border p-5" data-testid="privacy-deletion">
+      <section id="privacy-deletion" className="card-border scroll-mt-24 p-5" data-testid="privacy-deletion">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("deletion.title")}
         </p>
         <p className="mt-2 text-sm leading-relaxed text-text-primary">
           {t("deletion.body")}
         </p>
+        {deletionStatus.kind === "error" ? (
+          <p
+            role="status"
+            className="mt-3 text-sm text-text-secondary"
+            data-testid="privacy-deletion-status-error"
+          >
+            {t("deletion.status.loadError")}
+          </p>
+        ) : null}
+        {deletionStatus.kind === "request" ? (
+          <div
+            className="mt-3 flex flex-col gap-2 rounded-md border border-ink-500 p-3"
+            data-testid="privacy-deletion-status"
+            data-status={deletionStatus.status}
+          >
+            <p
+              role="status"
+              className={
+                deletionStatus.status === "withdrawn"
+                  ? "text-sm font-medium text-state-success"
+                  : "text-sm font-medium text-text-primary"
+              }
+            >
+              {t(`deletion.status.${deletionStatusLabelKey(deletionStatus)}`)}
+            </p>
+            {submittedLabel ? (
+              <p className="text-xs text-text-secondary">
+                {t("deletion.status.submittedAt", { date: submittedLabel })}
+              </p>
+            ) : null}
+            {scheduledLabel ? (
+              <p className="text-xs text-text-secondary" data-testid="privacy-deletion-scheduled">
+                {t("deletion.status.scheduledAt", { date: scheduledLabel })}
+                {deletionStatus.cancellable ? ` ${t("deletion.status.cancelUntil")}` : null}
+              </p>
+            ) : null}
+            {deletionStatus.cancellable ? (
+              <PrivacyDeletionCancel
+                locale={locale}
+                labels={{
+                  button: t("deletion.cancel.button"),
+                  question: t("deletion.cancel.question"),
+                  confirm: t("deletion.cancel.confirm"),
+                  keep: t("deletion.cancel.keep"),
+                  working: t("deletion.cancel.working"),
+                  messages: {
+                    cancelled: t("deletion.cancel.cancelled"),
+                    notCancellable: t("deletion.cancel.notCancellable"),
+                    notFound: t("deletion.cancel.notFound"),
+                    notSignedIn: t("deletion.cancel.notSignedIn"),
+                    unavailable: t("deletion.cancel.unavailable"),
+                    error: t("deletion.cancel.error"),
+                  },
+                }}
+              />
+            ) : null}
+          </div>
+        ) : null}
         <div className="mt-3">
-          <PrivacyDeletionRequest
-            labels={{
-              confirmLabel: t("deletion.confirmLabel"),
-              noteLabel: t("deletion.noteLabel"),
-              submit: t("deletion.submit"),
-              submitted: t("deletion.submitted"),
-              submittedBody: t("deletion.submittedBody"),
-              unavailable: t("deletion.unavailable"),
-              tooManyOpen: t("deletion.tooManyOpen"),
-              error: t("deletion.error"),
-            }}
-          />
+          {deletionMode === "status-only" ? null : deletionMode === "in-review" ? (
+            <p className="text-sm text-text-secondary" data-testid="privacy-deletion-in-review">
+              {t("deletion.inReview")}
+            </p>
+          ) : deletionMode === "confirm-step" ? (
+            <PrivacyDeletionConfirm
+              locale={locale}
+              refreshAfterConfirm={waitingPeriodLive}
+              labels={{
+                body: waitingPeriodLive
+                  ? t("deletion.confirmStepBodyWaiting")
+                  : t("deletion.confirmStepBody"),
+                confirm: t("deletion.confirmStep"),
+                reauthBody: t("deletion.reauthBody"),
+                reauth: t("deletion.reauth"),
+                confirmed: t("deletion.confirmedTitle"),
+                confirmedBody: waitingPeriodLive
+                  ? t("deletion.confirmedBodyWaiting")
+                  : t("deletion.confirmedBody"),
+                error: t("deletion.error"),
+              }}
+            />
+          ) : (
+            <PrivacyDeletionRequest
+              labels={{
+                confirmLabel: waitingPeriodLive
+                  ? t("deletion.confirmLabelWaiting")
+                  : t("deletion.confirmLabel"),
+                noteLabel: t("deletion.noteLabel"),
+                submit: t("deletion.submit"),
+                submitted: t("deletion.submitted"),
+                submittedBody: t("deletion.submittedBody"),
+                unavailable: t("deletion.unavailable"),
+                tooManyOpen: t("deletion.tooManyOpen"),
+                error: t("deletion.error"),
+              }}
+            />
+          )}
         </div>
       </section>
 
@@ -486,12 +663,7 @@ export default async function PrivacyPage({
         </section>
       )}
 
-      <Link
-        href="/dashboard/account"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
-      >
-        ← {t("backToAccount")}
-      </Link>
+      <PageBack href="/dashboard/account">{t("backToAccount")}</PageBack>
     </div>
   );
 }

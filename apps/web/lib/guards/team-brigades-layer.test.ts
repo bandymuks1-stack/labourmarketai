@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * TEAMS / BRIGADES LAYER guards (product-tree branch 13, train §8.3).
@@ -106,7 +107,11 @@ describe("teams migration — additive typed rows on the EXISTING organizations 
         // get_team_capability_summary_v1 (among six) to close a NULL-flip
         // authorization bypass (owner MASTER ORDER §4). The documented
         // hardening re-definition is not a parallel implementation.
-        f !== "20260824130000_null_safe_owner_guards_v2.sql",
+        f !== "20260824130000_null_safe_owner_guards_v2.sql" &&
+        // 2026-10-14 brigade disband v1 re-defines create_team_v1 with ONE
+        // change — its cap of 20 counts active (non-archived) brigades — and
+        // explicitly revokes anon. A documented successor, not a parallel.
+        f !== "20261014190000_team_disband_v1.sql",
     );
     expect(others.length).toBeGreaterThan(100);
     for (const f of others) {
@@ -264,10 +269,14 @@ describe("app surface — reuse of the existing spine, no parallel team system",
     expect(lib).not.toMatch(/\.delete\(/);
     expect(lib).not.toMatch(/add_team_member/);
     expect(panel).not.toMatch(/add_team_member/);
-    // The invitee's email / invite link never reach the client from this
-    // surface — the action returns only a closed outcome vocabulary.
-    expect(actions).not.toMatch(/inviteLink/);
+    // The invitee's email never reaches the client from this surface. The
+    // invite LINK does (2026-10-11): with no active e-mail provider it is the
+    // only delivery, exactly as on /dashboard/network, and acceptance is bound
+    // to the invited address (accept_invitation_apply_v2 ->
+    // invitation_session_email_matches_v1), so the link is not a bearer grant.
+    // It is the creation result's own link, never re-read from storage.
     expect(actions).not.toMatch(/first\?\.email/);
+    expect(actions).toMatch(/const inviteLink = first\?\.inviteLink;/);
   });
 
   it("membership provenance is derived from the real invitations ledger, never invented", () => {
@@ -339,7 +348,7 @@ describe("app surface — reuse of the existing spine, no parallel team system",
 });
 
 describe("i18n — teamBrigades + teamEnquiries namespaces present in every ACTIVE locale", () => {
-  for (const locale of ["en", "lt", "ru", "nl", "de"]) {
+  for (const locale of activeLocales) {
     it(`${locale} carries the full teamBrigades catalogue`, () => {
       const messages = JSON.parse(readWeb(`messages/${locale}.json`));
       const ns = messages.teamBrigades;
@@ -388,6 +397,7 @@ describe("i18n — teamBrigades + teamEnquiries namespaces present in every ACTI
         "created",
         "deliveryFailed",
         "alreadyInvited",
+        "alreadyInvitedNewLink",
         "rateLimited",
         "notAuthorized",
         "noEmail",

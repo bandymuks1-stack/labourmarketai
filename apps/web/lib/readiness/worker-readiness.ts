@@ -95,8 +95,10 @@ export function computeWorkerCountryReadiness(
 }
 
 /**
- * Whether a candidate may be shown to a company as "ready to start" for a
- * country. Honest gate used by discovery (PR7): only the top of the ladder.
+ * Whether the worker's own country checklist is complete ("ready to start").
+ * A READINESS label for the worker's documents page only. It must never gate
+ * discovery, matching, shortlist or offers (decision 0021; guarded by
+ * documents-are-readiness-not-a-gate.test.ts).
  */
 export function isReadyToStart(result: WorkerReadinessResult): boolean {
   return result.status === "ready_for_country";

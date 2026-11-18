@@ -128,16 +128,52 @@ describe("the assistant has one consistent identity", () => {
     }
   });
 
+  /** The component's CODE, without its doc comment — the comment legitimately
+   *  names what the mark must never become. */
+  const codeOf = (src: string): string =>
+    src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+
+  /** A JSX text node that is a bare letter standing in for the brand. */
+  const LETTER_STAND_IN = />\s*LM?\s*</;
+
   it("it is a product mark, not a mascot or a person", () => {
     // Explicit product decision: no character, no illustration, no invented
-    // human name. Checked against CODE only — the doc comment above the
-    // component legitimately names what it must never become.
-    const markCode = mark
-      .replace(/\/\*[\s\S]*?\*\//g, " ")
-      .replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+    // human name. Checked against CODE only.
+    const markCode = codeOf(mark);
     expect(markCode).not.toMatch(/emoji|mascot|avatarUrl|<img|<svg/i);
     expect(mark).toMatch(/aria-hidden/);
-    // The mark is decorative; the NAME carries the meaning for assistive tech.
-    expect(mark).toMatch(/font-display/);
+  });
+
+  it("it IS the canonical LabourMarket.ai mark — the component, not a letter or a redraw", () => {
+    // Re-anchored 2026-09-23 (owner §19). This guard used to REQUIRE a
+    // `font-display` letter here, which pinned a yellow "L" as the
+    // assistant's identity while the real mark shipped everywhere else. The
+    // mark is now the ONE logo component; the bans above still keep an
+    // inline <svg> redraw or an <img> copy out of this file, so the artwork
+    // can only ever come from `LmLogo`.
+    const markCode = codeOf(mark);
+    expect(markCode).toMatch(/import \{ LmLogo \} from "@\/components\/ui\/lm-logo"/);
+    // Decorative: the turn announces the assistant's NAME; the mark says nothing.
+    expect(markCode).toMatch(/<LmLogo\s+title=""/);
+    expect(markCode).not.toMatch(LETTER_STAND_IN);
+    expect(markCode).not.toMatch(/font-display/);
+    // The size ladder and the hook the visual evidence spec waits on survive.
+    expect(markCode).toMatch(/sm:\s*"size-5/);
+    expect(markCode).toMatch(/md:\s*"size-7/);
+    expect(markCode).toMatch(/data-testid="assistant-mark"/);
+  });
+
+  it("negative control: the retired letter mark would fail", () => {
+    const retired = `export function AssistantMark() {
+  return (
+    <span aria-hidden data-testid="assistant-mark" className="bg-brand-blue font-display font-bold">
+      L
+    </span>
+  );
+}`;
+    expect(codeOf(retired)).toMatch(LETTER_STAND_IN);
+    expect(codeOf(retired)).not.toMatch(/<LmLogo/);
+    // …and an inline redraw would trip the redraw ban.
+    expect(codeOf('<span><svg viewBox="0 0 700.27 660.2" /></span>')).toMatch(/<svg/i);
   });
 });

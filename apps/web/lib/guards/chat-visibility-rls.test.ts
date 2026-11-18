@@ -207,6 +207,12 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    the anon RPC, read-only via service role). Every entry point is
     //    fenced behind an explicit isSuperadmin() re-check; it touches no
     //    chat table and sends nothing outbound.
+    //  - components/admin/product-metrics-section.tsx — operator product
+    //    metrics (owner programme 2026-10-12 §8). READ-ONLY aggregate counts
+    //    via lib/ops/product-metrics.ts, rendered only by the launch-readiness
+    //    page AFTER requireSuperadmin(). From the
+    //    chat tables it reads only conversations.created_at/source_type to
+    //    COUNT threads — no subject, body, participant or id leaves the module.
     //  - lib/admin/launch-readiness.ts — operator launch-readiness view
     //    (launch repair Scope E). READ-ONLY head-counts over workers /
     //    profiles / companies / company_need_public_intakes /
@@ -219,6 +225,28 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    DESIGN (0005 — anon INSERT only, reads restricted to service
     //    role), the call is fenced behind an explicit isSuperadmin()
     //    re-check, SELECTs only `waitlist`, and writes nothing.
+    //  - lib/vacancy-store/vacancy-translation-read.ts — the reader-locale
+    //    rendering of PUBLIC job advertisements (owner P0 2026-09-22 Section 9).
+    //    Service role is genuinely required, not convenient: migration
+    //    20260809160000 grants `authenticated` SELECT on public_vacancies and
+    //    NOTHING else by design (ingestion is a trusted server job), so the
+    //    rendering cannot be written back beside the original under the
+    //    caller's own client. It touches ONE table, `public_vacancies`, and
+    //    only its `translations` column; it reads nothing about a person; the
+    //    rows it writes are DERIVED renderings of text that is already public
+    //    to the whole internet. The originals are never overwritten. Touches
+    //    no chat table; sends nothing outbound beyond the audited AI runtime.
+    //  - lib/vacancy-store/vacancy-translation-entitlement.ts — the TRANSLATION
+    //    ALLOWANCE meter (owner decision 2026-09-22). Service role is genuinely
+    //    required, not convenient: `usage_cost_events` has NO insert policy or
+    //    grant for `authenticated` BY DESIGN (migration 20260728114008 — admin
+    //    SELECT only, append-only, service role is the single write path), which
+    //    is the same reason lib/usage/usage-cost-store.ts is on this list. It
+    //    touches ONE table, counts and appends rows keyed to the CALLER'S OWN
+    //    profile id (resolved server-side from the session, never from an
+    //    argument), stores no advertisement text and no personal data beyond
+    //    that id, and reads nothing about anyone else. Touches no chat table;
+    //    sends nothing outbound.
     //  - lib/supply-bridge/feed-source.ts — the first-party supply feed
     //    reader. Service role is genuinely required, not convenient: the
     //    human-gated migration 20260904120000 grants EXECUTE on
@@ -258,6 +286,30 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    a profile. Reached only after the per-source machine secret
     //    (lib/api/external-referral-auth.ts) and the strict contract passed.
     //    Reads or writes no table directly, touches no chat table.
+    //  - lib/invitations/external-referral-reprocess-run.ts — the owner's
+    //    by-hand reprocess of unsent partner referrals (2026-10-27). The
+    //    caller is the VPS operator script behind CRON_SECRET, no user
+    //    session. It calls exactly three service_role-only RPCs —
+    //    external_referral_reprocess_candidates_v1 (read),
+    //    reissue_external_referral_v1 (re-checks consent, expiry, account,
+    //    delivery and the reissue ceiling) and
+    //    mark_external_referral_delivery_v1. Reads or writes no table
+    //    directly, touches no chat table.
+    //  - lib/invitations/delivery-attempts.ts — keeps WHY an invitation send
+    //    failed (owner P0 2026-11-13). Calls exactly one service_role-only
+    //    RPC, record_invitation_delivery_attempt_v1 (reason CODE + class +
+    //    next retry; never an address, never delivery_status). Reads no
+    //    table, touches no chat table.
+    //  - lib/invitations/delivery-retry-run.ts — the scheduled retry of
+    //    TEMPORARY failures of already-authorised partner referral sends
+    //    (owner P0 2026-11-13), behind CRON_SECRET, no user session. Only the
+    //    service_role-only RPCs invitation_delivery_retry_candidates_v1,
+    //    reissue_external_referral_v1, mark_external_referral_delivery_v1,
+    //    record_invitation_delivery_attempt_v1, dead_letter_invitation_delivery_v1
+    //    and invitation_delivery_health_v1, plus record_invitation_dsn_v1 for bounce
+    //    reconciliation (our Message-IDs only), and invitation_known_historical_unknown_v1
+    //    (one integer: owner-registered historical unknown outcomes, 2026-11-14).
+    //    Touches no chat table.
     //  - lib/invitations/public-preview.ts — the logged-out invitation
     //    landing's read (universal network v1). A stranger holding a link has
     //    no session; the alternative — granting a preview function to anon —
@@ -268,7 +320,12 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    addressee, no message, no need, no declared context, no id), and
     //    re-applies that allowlist in TypeScript so a widened function cannot
     //    widen the page. Reads or writes no table directly.
-    //  - lib/company/claim-public-intake.ts — canonical-journey P3 claim
+    //  - lib/email/send-ledger-store.ts - the durable outbound-email cost
+    //    guardrail (2026-10-06). Calls ONE service_role-only RPC
+    //    (reserve_email_send_v1) that records a recipient HASH + organization
+    //    id + timestamp in a RLS-locked ledger. Reads/writes no chat table, no
+    //    other table, stores no address/subject/body, sends nothing itself.
+    //  - lib/company/claim-public-intake.ts— canonical-journey P3 claim
     //    bridge. Reads company_need_public_intakes rows ONLY where the
     //    caller's AUTHENTICATED email equals contact_email (re-checked on
     //    the claimed row), and updates ONLY that row's status to
@@ -293,6 +350,19 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    chat table, sends nothing outbound. No product call site yet (no
     //    spend caller exists); it is the prepared seam for spend-failure
     //    compensation.
+    //  - lib/lmc/wallet.ts — LMC Wagon 2 wallet server layer (owner order
+    //    2026-10-21: build purchase/spend behind the flags, leave them OFF).
+    //    Typed callers for lmc_record_purchase_v1 and lmc_spend_v1. Service
+    //    role is genuinely required, not convenient: applied migration
+    //    20261006100300 revokes EXECUTE on both from public/anon/authenticated
+    //    and grants service_role ONLY. Every entry point returns `disabled`
+    //    on its literal-false TS kill-switch BEFORE the client is built
+    //    (pinned by lib/guards/lmc-wallet-flags-off.test.ts); behind it the
+    //    RPCs re-check lmc_settings, and lmc_spend_v1 re-checks that the actor
+    //    owns the debited account or is an admin. Calls exactly two RPCs
+    //    (+ compensation via lib/lmc/compensation.ts), reads/writes no table
+    //    directly, touches no chat table, sends nothing outbound, and has no
+    //    product call site.
     //  - lib/ai/runtime/audit-store.ts — AI Router v1 append-only run audit.
     //    Best-effort INSERT of one ai_runs row per LIVE AI run + a head-only
     //    COUNT for the daily-run budget. ai_runs by design carries NO
@@ -335,6 +405,13 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    closed governance row or env switch are refused by the runner
     //    regardless of the admin's wishes. Touches no chat table, sends
     //    nothing outbound.
+    //  - lib/profile/avatar.ts — D1 (owner 2026-09-30): signs ONE storage
+    //    path for one hour, and only a path the database has just returned
+    //    to the VIEWER's own session through `worker_avatar_path_v1` (the
+    //    worker, or an ACTIVE work relationship — never discovery alone,
+    //    never a role alone; the path must be in the worker's own folder).
+    //    The service key is used for storage signing only: no table read,
+    //    no chat table, no write, nothing public.
     //  - lib/notifications/event-emitters.ts — durable notification events
     //    v1. Emits ONE append-only notification_events row per completed
     //    domain write (booking propose/respond, absence request/review,
@@ -386,8 +463,65 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    app gate. Writes NOTHING (the report states writesPerformed: 0);
     //    provider access is the adapter's read-only methods; never a charge;
     //    touches no chat table; sends nothing outbound.
+    //  - lib/billing/effective-entitlements.ts — payments production calm v1
+    //    (2026-09-22): the ORGANIZATION-subject entitlement read. READ-ONLY
+    //    over billing_subscriptions, and only when the server-resolved
+    //    billing subject is an organization. Service role is genuinely
+    //    required, not convenient: the table's ONLY SELECT policy is
+    //    `owner_id = auth.uid() or is_admin()` (20260613200000), so through
+    //    the user client an organization's plan was visible solely to the
+    //    profile that paid — a co-manager holding manage-billing in the same
+    //    workspace resolved as free and never got the 10-position limit.
+    //    The authority is the SERVER-resolved subject (resolveBillingSubject
+    //    → resolveEmployerCompanyContext: the caller's own active
+    //    company_memberships row through the RLS-scoped session — the same
+    //    subject the checkout route binds a session to), never a client
+    //    value; the query is filtered by that organization id AND the
+    //    adapter mode; the projection is plan_key / status /
+    //    provider_subscription_id / updated_at (no payer identity, no
+    //    customer id, no amount); it writes nothing (P7 guard) and falls
+    //    back to the user client when no service key is configured.
+    //    Personal subjects keep the user-scoped read (owner_id = auth.uid()
+    //    IS the policy). No RLS change; touches no chat table; sends
+    //    nothing outbound.
+    //  - lib/communication/communication-core.ts — THE ONE EXCEPTION to "no
+    //    chat table is touched with the service role" (authority closure,
+    //    audit 2026-10-06 F-1). It performs exactly ONE service-role write:
+    //    inserting the OTHER participant(s) into a conversation THE CALLER
+    //    JUST CREATED under their own RLS, and only after a ContactAuthority
+    //    (lib/communication/contact-authority.ts) proves the section 8.1
+    //    contact gate held. Service role is genuinely required, not
+    //    convenient: migration 20261006100100 makes the database refuse any
+    //    end-user session that inserts ANOTHER profile into a conversation
+    //    (before it, any signed-in account could add anyone and message them,
+    //    bypassing the gate entirely), and the section 8.1 permission is a
+    //    server-side evaluation over many relationship facts that must not be
+    //    re-implemented in SQL as a parallel authorization system. The
+    //    authority is an identity-checked server-side token a browser cannot
+    //    forge; the browser-callable action (actions.ts) never has one and
+    //    never imports this client. Nothing is READ with the service role
+    //    (participants are still read under the sender's session), the
+    //    creator's own row and the thread are written under their own RLS,
+    //    and nothing is sent outbound. Pinned in
+    //    lib/guards/authority-closure-first-package.test.ts (exactly one
+    //    call, after the authority gate, only conversation_participants).
+    //  - (RETIRED 2026-10-12: lib/company/team-offer-conversation.ts now reads
+    //    through the party-gated team_offer_thread_party_v1 and holds no
+    //    service-role client; prod service_role could not read these tables.)
+    //    Former note — the brigade-offer
+    //    negotiation thread (2026-10-11). READ-ONLY, three columns, AFTER the
+    //    caller's side was proven by their OWN authorized read (the offer row
+    //    under team_demand_offers_select_v1 for the supplier; the
+    //    receiver-gated list_team_offers_for_request_v1 for the need's owner):
+    //    the counterpart's profile id (customer_requests.profile_id or
+    //    team_demand_offers.offered_by) and the offering team's name. The ids
+    //    never reach the client; they only become the other participant of
+    //    the gated thread. Service role is required because the two parties
+    //    deliberately cannot read each other's rows. Forward-fix: the supply
+    //    offer negotiation migration (20261011200000) can expose the
+    //    counterpart through a party-gated RPC and retire this read.
     //
-    // None touch a chat table; they write only billing_* /
+    // None of the others touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
     // ai_runs audit row / the two operator-only vacancy tables / the
     // append-only notification_events rows (the reads write nothing at all).
@@ -395,6 +529,18 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
     ).toEqual([
+      // 2026-10-19: the automated GDPR erasure sweep. It calls ONLY the
+      // service-role-granted privacy_erasure_* / erase_user_account_v3 RPCs and
+      // the Storage API for the listed files of the person being erased; it
+      // reads no chat table itself (the executor severs message authorship
+      // inside the database, by the reviewed registry).
+      "app/api/cron/privacy-erasure/route.ts",
+      "app/api/internal/capability-readback/v1/route.ts",
+      "app/api/internal/commercial-requests/v1/route.ts",
+      // 2026-11-14: registrations daily, aggregate counts only through the service_role-only
+      // lm_registrations_daily_v1 RPC; reads no chat table.
+      "app/api/internal/registrations-daily/v1/route.ts",
+      "components/admin/product-metrics-section.tsx",
       "components/admin/vacancy-sources-section.tsx",
       "lib/admin/billing-actions.ts",
       "lib/admin/company-need-intakes.ts",
@@ -402,18 +548,38 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/ai/runtime/audit-store.ts",
       "lib/billing/checkout-operations-store.ts",
       "lib/billing/customer-store.ts",
+      "lib/billing/effective-entitlements.ts",
       "lib/billing/reconcile.ts",
       "lib/billing/subscription-store.ts",
       "lib/commercial/handoff-dispatch.ts",
+      "lib/communication/communication-core.ts",
       "lib/company/claim-public-intake.ts",
+      "lib/email/send-ledger-store.ts",
+      // 2026-11-01: the project forecast on read. Calls ONLY the service-role-
+      // granted forecast_project_facts_v1 (opaque keys, statuses, dates, numbers;
+      // no text, no names), and only AFTER the viewer's own session passed the
+      // database's can_manage_project for that project. Reads no chat table,
+      // writes nothing.
+      "lib/forecast/forecast-read.ts",
+      // 2026-10-24: the forecast scheduler (cron forecast-recompute). ONLY the
+      // three service-role forecast doors; no chat table; nothing outbound.
+      "lib/forecast/forecast-store.ts",
+      "lib/invitations/delivery-attempts.ts",
+      "lib/invitations/delivery-retry-run.ts",
       "lib/invitations/external-referral-receive.ts",
+      "lib/invitations/external-referral-reprocess-run.ts",
       "lib/invitations/public-preview.ts",
+      "lib/invitations/signup-bridge.ts",
       "lib/lmc/compensation.ts",
+      "lib/lmc/wallet.ts",
       "lib/notifications/event-emitters.ts",
+      "lib/profile/avatar.ts",
       "lib/sales/lead-intake.ts",
       "lib/supply-bridge/feed-source.ts",
       "lib/usage/usage-cost-store.ts",
       "lib/vacancy-runner/vacancy-admin-actions.ts",
+      "lib/vacancy-store/vacancy-translation-entitlement.ts",
+      "lib/vacancy-store/vacancy-translation-read.ts",
     ]);
   });
 

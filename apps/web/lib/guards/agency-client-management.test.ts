@@ -55,9 +55,8 @@ describe("1. renders ONLY under the staffing_agency company type", () => {
   });
 
   it("client/demand data is fetched only in staffing-agency mode", () => {
-    expect(companyPage).toMatch(
-      /const isStaffingAgency = companyRow\.companyType === "staffing_agency"/,
-    );
+    // the ONE agency rule (owner decision 2026-09-28): type OR declared role
+    expect(companyPage).toMatch(/const isStaffingAgency = await readActsAsAgency\(/);
     // The invariant is the CONDITIONAL — never the `await` keyword. Both
     // reads now sit inside the page's batched `Promise.all` (the serial
     // waterfall this dashboard used to run was the measured reason it felt

@@ -40,8 +40,9 @@
 import type { WorldElementId } from "./world-elements";
 
 /**
- * The owner's six-value classification. Every capability is exactly one of
- * these — there is no seventh value and no "mostly done".
+ * The owner's seven-value classification (six live states plus RETIRED, which
+ * records a deliberate withdrawal). Every capability is exactly one of these —
+ * there is no eighth value and no "mostly done".
  */
 export type CapabilityStatus =
   /** A human can reach it and it does its job. */
@@ -55,7 +56,13 @@ export type CapabilityStatus =
   /** Not implemented at any layer. Kept here so it cannot be forgotten. */
   | "MISSING"
   /** Implementation exists but an owner decision, credential or gate stops it. */
-  | "BLOCKED";
+  | "BLOCKED"
+  /**
+   * Withdrawn from the PRODUCT by an owner decision and recorded, never deleted.
+   * The row survives with its `retired` record. A retired capability is not
+   * "built, not connected": nothing is waiting to be wired.
+   */
+  | "RETIRED";
 
 /**
  * The evidence ladder, weakest to strongest. `strongestEvidence` records the
@@ -197,7 +204,7 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/profile", "lib/worker"],
     coreModule: "lib/worker/work-card-core.ts",
     surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "`workers.headline` and `workers.bio` still have no person-facing editor.",
+    note: "The person writes their own employer-facing headline and summary on the profile page (save_worker_public_summary_v1, own row only); organisations with a working relationship read them on the person page. The private narrative stays profiles.profile_text.",
   },
   {
     id: "PER-3",
@@ -320,7 +327,10 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/privacy"],
     coreModule: "lib/privacy/export-data.ts",
     surfaces: ["app/[locale]/dashboard/account"],
-    note: "GDPR export now covers 48 relations, up from 6. The count in this note was itself wrong: it said ~14 were missing; a production sweep on 2026-09-14 found 60 person-keyed tables, so ~30 were neither exported nor named while the bundle's `excluded` list invited the reader to assume anything unmentioned was included. Every person-keyed relation is now EXPORTED, WITHHELD with a reason that travels in the bundle, or declared non-product (lib/privacy/personal-relations.ts), enforced by `privacy-export-completeness.test.ts`, which derives the table set from the MIGRATIONS so a new person-keyed table fails CI the day it lands. That guard immediately found four the production sweep had missed (dashboard_preferences, demand_interest_seen, worker_external_profiles, worker_opportunity_seen) — they are in migrations that are NOT applied to production. Bundle format is v2; a relation this database does not have reports as empty, not as unread. Still RLS-scoped as the person: no service role, guarded.",
+    note: "GDPR export (bundle format v3) reads `EXPORTED_RELATIONS` in lib/privacy/personal-relations.ts — the register, not this note, is the count (107 reads over 104 tables before PER-12 per the owner brief; that exact figure was not re-derived 2026-10-03; the earlier '48 relations, 4 unapplied' text was stale). Every person-keyed relation is EXPORTED, WITHHELD with a reason that travels in the bundle, or declared non-product, enforced by `privacy-export-completeness.test.ts` from the MIGRATIONS. Only dashboard_preferences and demand_interest_seen are absent from production; the exporter reports a missing relation (42P01/42703/PGRST205) as empty, which is true, not a live gap. " +
+      "PER-12 CLOSED A REAL INCOMPLETENESS (2026-10-03, production-verified read-only): child tables with no person column of their own (journal_entry_metrics 498 rows, booking_request_events 17, timesheet_events 6, work_task_events 4, worker_document_events 2, organization_evidence_competency_signals 62, workflow_instance_steps 1, plus onboarding/offboarding runs, lifecycle/review/trip/team-enquiry events, document_files, lmc_lots and consumptions) hold rows ABOUT the person and were invisible to the guard, some parked as actor-only. They are now read by CHAINED stages (`key: \"parent_row\"`) from ids already exported, as the person under RLS, in id chunks with paging; other people's ids are redacted per relation (`redactActors`/`omitColumns`, also applied to worker_absences requested_by/reviewed_by); projects.responsible_profile_id is exported via a column-override read. The guard now parses `alter table ... add column` person columns and fails on any table hanging off an exported parent that is neither exported nor reviewed with a reason (CHILD_TABLES_NOT_EXPORTED). A storage_manifest lists the person's journal photos and avatar with 24h signed links minted as the person. " +
+      "STILL PARTIAL, exactly: (1a) evidence_import_rows (158 rows) - THE LIVE GAP IS CLOSED AT RPC LEVEL (#2132, ledger 20261003142847 privacy_export_import_lines_subject_v1): `privacy_export_evidence_import_rows_v1` exists in production, a subject-safe projection keyed on auth.uid() through the linked roster row; the table's select policy was deliberately NOT widened (still manages_organization or admin). Closed in code and database, not proven through a real bundle. (1b) NEEDS CONTRACT/POLICY - agreement_events and agreement_amendments (admit org owner/admin and the responsible person, not the worker): the bundle lists them in `relationNotes` as NEEDS POLICY instead of silent empties; no service-role read was added. These two are FUTURE_CONTRACT_GAP: agreements and amendments are not yet a worker-facing contract, so there is no subject read to project. (2) market_intelligence_observations (76 rows) is deliberately not exported: subject_kind is role/skill/profession/geo_market/company_need/platform, never a person (aggregates). (3) File CONTENTS are by signed link only; document-files, conversation-attachments and customer-request-attachments hold 0 objects today and are not in the manifest. (4) Production proof of an actual export bundle (download) is BLOCKED_QA_IDENTITY (needs an authenticated QA session); proof so far is static plus unit tests and the RPC read-back. The row stays PARTIAL." +
+      "DELETION (re-checked 2026-10-21): no longer a manual runbook only. The automated erasure executor `20261019140000_privacy_erasure_executor_v3` and its follow-ups `20261019150000` / `20261019190000` are in the production ledger, and `/api/cron/privacy-erasure` runs every 10 minutes from ops/vps/labourmarket.cron (owner decision 2026-10-19). It erases CONFIRMED account-deletion requests only; everything else stays with human review. No production erasure receipt was read for this row, so it stays PARTIAL.",
   },
   {
     id: "PER-13",
@@ -331,8 +341,8 @@ const PERSON: readonly CapabilityRow[] = [
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/player-card/requirement-ledger.ts"],
     coreModule: "lib/player-card/requirement-ledger.ts",
-    surfaces: ["app/[locale]/dashboard/projects"],
-    note: "Built for three contexts, mounted for TWO. `project` renders under an instruction (/dashboard/instructions); `opportunity` now renders inside the opportunity card (/dashboard/opportunities) through `loadOwnOpportunityLedgers` — the loader branch that existed with no caller until Step B. Both surfaces render the SAME `RequirementLedgerRows` with the SAME copy (lib/player-card/requirement-ledger-labels.ts), so 'what is missing for me' cannot acquire two wordings. `role` (professionSlug + country) remains unmounted: it needs a surface where a person picks a profession to aim at, which does not exist yet.",
+    surfaces: ["app/[locale]/dashboard/projects", "app/[locale]/dashboard/profile/page.tsx"],
+    note: "Built for three contexts, mounted for all three. `project` renders under an instruction (/dashboard/instructions); `opportunity` now renders inside the opportunity card (/dashboard/opportunities) through `loadOwnOpportunityLedgers` — the loader branch that existed with no caller until Step B. Both surfaces render the SAME `RequirementLedgerRows` with the SAME copy (lib/player-card/requirement-ledger-labels.ts), so 'what is missing for me' cannot acquire two wordings. `role` (professionSlug + country) is mounted on the person's own profile (/dashboard/profile) for their primary profession in each country they aim at (preferred countries, else their location) through `loadOwnRoleLedgers`, with the SAME rows and copy — all three contexts are now mounted.",
   },
 ];
 
@@ -472,12 +482,12 @@ const SKILLS: readonly CapabilityRow[] = [
     domain: "skills",
     title: "Qualification recognition / RPL / equivalence",
     worldElement: "skills",
-    status: "MISSING",
-    strongestEvidence: "NONE",
-    anchors: [],
-    coreModule: null,
+    status: "PARTIAL",
+    strongestEvidence: "PRODUCTION_RPC_PROVEN",
+    anchors: ["lib/qualification", "lib/skills/recognition-model.ts", "lib/player-card/requirement-ledger.ts"],
+    coreModule: "lib/qualification/capability-standing.ts",
     surfaces: [],
-    note: "Nothing at any layer. Demonstrated capability must never silently satisfy a formal requirement — see SEP-6.",
+    note: "CORRECTED 2026-10-01 from MISSING by a full-history trace: the previous note ('nothing at any layer') was false. What EXISTS: the five SEP-6 concepts as a pure derivation (`lib/qualification/capability-standing.ts`, read by the worker's project asks through `capability-evidence.ts`), the PER-13 requirement ledger, the SKL-8 matrix, the SKL-10 register, and the pure recognition model (`lib/skills/recognition-model.ts`: the closed five-state set, the assessor authority rule - training_provider, managed by the actor, neither the subject nor an organization engaging the subject - and `recognitionAnswersDocumentTypes`, the only road to `hasRecognizedEquivalence`). The READ is wired: `getOwnRecognitionRows` answers the person's own `competency_recognitions` rows, an absent relation as `[]` and any other failure as unknown. UPDATE 2026-10-07: the recognition migration is now APPLIED (via #2184). UPDATE 2026-10-07 (recognition-downstream): the FULL chain was executed on production in ONE rolled-back DO block with synthetic zz-proof rows and zero residue - create_invitation_v2 (student) -> accept_invitation_v2 -> student engagement context -> create_education_cohort_v1 + set_education_cohort_member_v1 -> journal evidence confirmed by a non-learner -> record_competency_recognition_v1 for a document_type, a skill and a profession; the learner read all three, an outsider and the confirming employer read 0 rows, anon was refused, a self-recognition and a recognition citing unconfirmed evidence were refused by name. The real rows (exact shapes) are pinned in `lib/qualification/recognition-rows.test.ts` and run through `recognitionAnswersDocumentTypes` / `assessCapability`. DOWNSTREAM: skill and profession recognitions now appear on the person's OWN Living CV (`/cv`) and profile as 'recognised by <institution>' (`RecognisedByBlock`), evidence class `assessor_recognition` - not worker-verified, not a score, no effect on confidence or matching rank (SEP-6, doctrine section 7). The employer-side read does not exist: RLS gives employers no access to the table, so a company-side view needs a RED migration (drafted separately, not applied). WHAT IS STILL TRUE: no real recognition exists yet - the relation and its two commands (migration `20260915140000_competency_recognitions_v1`, originally draft PR #1741, owner packet P-3) landed only now, production holds 2 training providers (re-checked 2026-10-07; the capability exists in data, the recognition register does not), and no assessor act can be recorded: the assessor form and `recordRecognitionAction` are on main and can now write, but no assessor has recorded one, so `hasRecognizedEquivalence` is false for every person today (adoption, not a code gap). The person's own Recognitions block (document centre) renders the read honestly - empty, unavailable and rows are three different states, and nothing is ever labelled verified. `surfaces` stays empty on purpose until a real recognition exists. Demonstrated capability still never satisfies a formal requirement (SEP-6).",
   },
   {
     id: "SKL-10",
@@ -518,7 +528,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/product-gate/organization-roles.ts"],
     coreModule: "lib/product-gate/organization-roles.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "`organization_roles` is live, and `companies.company_type='staffing_agency'` still hard-gates seven agency features.",
+    note: "`organization_roles` is live. ORG-2: agency is a capability (type OR workforce role, `company_acts_as_agency` / `actsAsAgency`); the remaining legacy gates move to it in the ORG-2 app and SQL slices.",
     ownerDecision:
       "Migrate the seven gates to organization_roles, or keep the industry lock deliberately (§6.3 item 5).",
   },
@@ -556,7 +566,8 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/company"],
     coreModule: "lib/company/active-organization.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "Seven authority helpers; an org MANAGER cannot read `company_workers` because `owns_company` excludes managers. STEP C (2026-09-14) STOPPED this: it is a NEW AUTHORITY BOUNDARY, not a wiring gap. Verified against production — `owns_company` = company creator OR an active `owner`/`admin` company_membership, and the migration that widened it (20260904060000) records in its own proof note that a manager-role member deliberately satisfies neither arm. Meanwhile `manages_organization` DOES include manager/external_manager (20260806180000), so the two helpers encode two intentionally different authority levels and `company_workers_select` uses the narrower one. Pointing that policy at the wider helper would let managers read the roster (worker personal data) — RLS-loosening, RED class, owner gate. Production: 1 active manager, 7 company_workers rows, so exactly one real person is affected.",
+    note: "Seven authority helpers. The manager roster/project boundary was decided by the owner on 2026-09-24 (RED approval): `projects` select/insert/update and `company_workers_select` now also admit `manages_organization(...)` (active manager / external_manager), the helper `can_manage_project` already used — migration 20260924140000_manager_projects_roster_rls_v1, APPLIED (ledger 20260924092836); `projects_delete` and roster MANAGEMENT (provision / role RPCs) stay owner/admin (`owns_company`). Invitations are a per-person grant, never a title (owner direction 2026-09-24): `company_memberships.manages_invitations`, set only by the audited owner/admin command `membership_set_invitation_manager_v1`, admits a delegated member to organization and company worker invitations — migration 20260924150000_invitation_management_delegation_v1, APPLIED (ledger 20260924120147). Manager authority over a roster worker's project assignment is ALSO decided and applied (#2079, owner-approved RED, repo file 20261002142000, production ledger 20261003110012 manager_assigns_roster_worker_on_managed_project_v1): `assign_worker_to_project` gained exactly one more way to be true - the caller manages THIS project's organization - without widening the shared predicate or any other project right. Open: the manager's own walk, the delegate's own invitation and the manager's assignment in a real session.",
+
   },
   {
     id: "ORG-6",
@@ -580,7 +591,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/candidates", "lib/scouting"],
     coreModule: "lib/candidates/candidate-drafts.ts",
     surfaces: ["app/[locale]/dashboard/candidates"],
-    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link anywhere — it was named as this row's surface until the navigation guard proved nothing leads there.",
+    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link — the public /for-companies lifecycle step linked there until 2026-11-03 and now opens `/dashboard/company/scouting`; the preview-surface guard covers that component too.",
   },
   {
     id: "ORG-8",
@@ -592,7 +603,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/agency"],
     coreModule: "lib/agency/clients.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "`agency_client_connections` is live. `agency_clients` was APPLIED 2026-09-14 (owner item 4d, ledger `20260914202322`) under the confirmed canonical Model B: its policy is `owns_company(company_id) OR is_admin()` - company/org authority, never the legacy `owns_agency` - so applying it did not revive Model A (see ORG-10). The two are NOT rivals and this row used to imply they were: `agency_client_connections` is an invitation-based bidirectional bridge to a real platform organization, `agency_clients` is an agency's own private record of a client who may not be on the platform. `AgencyClientsSection` on /dashboard/company had been degrading against a 42P01 since it shipped; read back under a REAL staffing-agency owner's auth after the apply, the relation now reads cleanly (0 rows). 0 rows is adoption, not breakage - 4 staffing-agency companies can now use it. The demand link is one additive nullable column, `customer_requests.agency_client_id`; `customer_requests` was re-counted at 20 rows after the apply, unchanged, 0 linked.",
+    note: "`agency_client_connections` is live. `agency_clients` was APPLIED 2026-09-14 (owner item 4d, ledger `20260914202322`) under the confirmed canonical Model B: its policy is `owns_company(company_id) OR is_admin()` - company/org authority, never the legacy `owns_agency` - so applying it did not revive Model A (see ORG-10). The two are NOT rivals and this row used to imply they were: `agency_client_connections` is an invitation-based bidirectional bridge to a real platform organization, `agency_clients` is an agency's own private record of a client who may not be on the platform. `AgencyClientsSection` on /dashboard/company had been degrading against a 42P01 since it shipped; read back under a REAL staffing-agency owner's auth after the apply, the relation now reads cleanly (0 rows). 0 rows is adoption, not breakage - 4 staffing-agency companies can now use it. The demand link is one additive nullable column, `customer_requests.agency_client_id`; `customer_requests` was re-counted at 20 rows after the apply, unchanged, 0 linked. DELIVERY + COMMUNICATION (2026-09-24): `create_agency_client_connection_v1` only INSERTED a row keyed on the client's e-mail — nothing ever reached that e-mail, so step 1 of the owner's acceptance walk ended in a row nobody could see, and no contact permission existed for an active connection, so step 10 (agency ↔ client message) was impossible. The invite action now ALSO creates an `invite_company` invitation (marked `proposed_role = agency_client`) through the ONE invitation primitive (lib/invitations) and hands the agency the token link; e-mail stays inert until INVITE_EMAIL_* exists and the section says `created` (link ready), never `sent`. The invite page names a masked addressee when the signed-in e-mail differs (the connection accept RPC still requires e-mail equality — its widening is a RED owner item). `allowed_agency_connection` (lib/agency/bridge-conversation.ts) opens the conversation between the two consenting people once the connection is ACTIVE. Still PARTIAL: not yet walked in a browser by two real companies since the change.",
   },
   {
     id: "ORG-10",
@@ -600,7 +611,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     domain: "organization",
     title: "Agency worker pool (legacy `agencies` world)",
     worldElement: "organizations",
-    status: "BUILT_NOT_CONNECTED",
+    status: "RETIRED",
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/agency/pool.ts", "lib/agency/pool-actions.ts"],
     coreModule: "lib/agency/pool.ts",
@@ -661,7 +672,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     anchors: ["lib/projects"],
     coreModule: "lib/projects/create-project-core.ts",
     surfaces: ["app/[locale]/dashboard/projects"],
-    note: "`start_date` / `end_date` have no writer — a project has no dates a human set.",
+    note: "CORRECTED 2026-10-03: the earlier claim that `start_date` / `end_date` have no writer is false. `components/app/project-facts-form.tsx` posts to `lib/projects/project-admin-actions.ts`, which calls `update_project_facts_v1` with `p_start_date` / `p_end_date`. Production: 2 of 10 projects carry a start_date, so a human has set dates. What is thin is adoption (8 of 10 have none), not a missing control.",
   },
   {
     id: "WRK-2",
@@ -701,7 +712,7 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
       "app/[locale]/dashboard/projects/[id]/operations",
     ],
     note:
-      "Corrected 2026-09-08: this said `no_navigation`, and tasks is one of the BEST-connected capabilities in the product. `/dashboard/tasks` carries a surfaceRoute in the dashboard module registry, the chat action registry routes to it twice, notification hrefs point at it, the planning model links to it, journal task-evidence builds links into it, and primary-route-smoke covers it. Production carries 2 `work_tasks` and 3 `work_task_events`, so writes have persisted and been acted on. The old note quoted the migration calling it 'reachable, functional and pointless' - that was a judgement about VALUE (`follow_up_tasks` overlaps it), not about reachability, and it was read here as if it meant unreachable. Whether the two task stores should be merged is a real open question; it is not this field.",
+      "Corrected 2026-09-08: this said `no_navigation`, and tasks is one of the BEST-connected capabilities in the product. `/dashboard/tasks` carries a surfaceRoute in the dashboard module registry, the chat action registry routes to it twice, notification hrefs point at it, the planning model links to it, journal task-evidence builds links into it, and primary-route-smoke covers it. Production carries 3 `work_tasks` (re-counted 2026-10-03; earlier text said 2), so writes have persisted and been acted on. PROJECT -> STAGE -> TASK -> SUBTASK structure is APPLIED (#2123, ledger 20261003144407: nullable `stage_id` and `parent_task_id` on `work_tasks`, structure-check function present in production) and RPC-proven at the database layer; the UI for stages and subtasks is proven by static render and unit tests only, NOT in a browser by a human, so this row's evidence is not raised on its account. The old note quoted the migration calling it 'reachable, functional and pointless' - that was a judgement about VALUE (`follow_up_tasks` overlaps it), not about reachability, and it was read here as if it meant unreachable. Whether the two task stores should be merged is a real open question; it is not this field.",
   },
   {
     id: "WRK-5",
@@ -720,12 +731,17 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     domain: "work_execution",
     title: "Team → project assignment",
     worldElement: "teams",
-    status: "MISSING",
-    strongestEvidence: "NONE",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
-    note: "ASSIGNMENT is genuinely missing: no FK ties a team to a project assignment, so a brigade cannot be assigned as a UNIT. The rest of the team layer is NOT missing, and this note used to imply it was — re-measured against production 2026-09-09: `organization_type='team'` is in the live CHECK constraint, `create_team_v1` and `get_team_capability_summary_v1` both EXIST, `team_details` and `team_enquiries` both EXIST, `invitations.invitation_type` carries `join_team`, and `authenticated` HAS execute on `create_team_v1` — so a team can be created, given members by consent (the existing `engagement_contexts`, 80 rows in real use), described with availability/location, and enquired about. What is 0 is USAGE: 0 teams, 0 team_details, 0 team_enquiries, 0 join_team invitations. Nobody has created one, which is a human fact and not a code gap (the same distinction the institution's `members 0` needed). The sentence front door was the real reachability defect and is fixed (see `a-brigade-can-offer-itself.test.ts`).",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: [
+      "lib/projects/team-assignment.ts",
+      "lib/projects/team-assignment-actions.ts",
+      "lib/projects/team-assignment-model.ts",
+      "components/app/team-assign-form.tsx",
+    ],
+    coreModule: "lib/projects/team-assignment.ts",
+    surfaces: ["components/app/team-brigades-panel.tsx", "app/[locale]/dashboard/company/people"],
+    note: "CORRECTED 2026-10-03 from MISSING (#2084, merged 2026-10-01): a manager can assign a WHOLE TEAM to a project from the team panel on /dashboard/company/people. It is a FAN-OUT through the existing per-person write (`assign_worker_to_project`, whose manager authority #2079 widened and which is applied - ledger 20261003110012): each team member becomes an ordinary `project_worker_assignments` row. UPDATE 2026-10-07: unit-level assignment now EXISTS - `team_assignments` and `assign_team_to_work_v1` are applied in production, and a synthetic rolled-back production proof showed a team assigned as a unit. WHAT IS STILL TRUE: production holds 0 real teams (`team_details` 0), so the path has never run on real data (adoption, not a code gap), and offering a brigade as a unit against a demand (owner decision E6, DEM-6) is built in a draft PR whose migration is not yet applied; evidence stays TEST_PROVEN, below human-proven. Original 2026-09-09 measurement of the rest of the team layer, still accurate: ASSIGNMENT-AS-A-UNIT is genuinely missing. The rest of the team layer is NOT missing, and this note used to imply it was — re-measured against production 2026-09-09: `organization_type='team'` is in the live CHECK constraint, `create_team_v1` and `get_team_capability_summary_v1` both EXIST, `team_details` and `team_enquiries` both EXIST, `invitations.invitation_type` carries `join_team`, and `authenticated` HAS execute on `create_team_v1` — so a team can be created, given members by consent (the existing `engagement_contexts`, 80 rows in real use), described with availability/location, and enquired about. What is 0 is USAGE: 0 teams, 0 team_details, 0 team_enquiries, 0 join_team invitations. Nobody has created one, which is a human fact and not a code gap (the same distinction the institution's `members 0` needed). The sentence front door was the real reachability defect and is fixed (see `a-brigade-can-offer-itself.test.ts`).",
   },
   {
     id: "WRK-7",
@@ -778,6 +794,18 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     note:
       "Corrected 2026-09-15 (falsifiability sweep). Claimed `no_navigation` with no module and no surface named. Measured: `lib/economics/economics.ts` is the read service and `ProjectEconomicsPanel` renders at `app/[locale]/dashboard/projects/[id]/operations/page.tsx:570`, a route linked from six places. `project_budgets` holds 0 rows — that is ADOPTION, not disconnection, the same distinction this register already applied to WRK-6 and WRK-8. PARTIAL because the manager path is wired and nobody has used it yet.",
   },
+  {
+    id: "WRK-11",
+    domain: "work_execution",
+    title: "Project forecast",
+    worldElement: "projects",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/forecast/forecast-engine.ts", "lib/forecast/forecast-facts.ts", "lib/forecast/forecast-read.ts", "components/app/projects/project-forecast-panel.tsx"],
+    coreModule: "lib/forecast/forecast-engine.ts",
+    surfaces: ["app/[locale]/dashboard/projects/[id]"],
+    note: "2026-11-01 (register 3.34, owner order 2026-10-24 Stage 7): the deterministic forecast engine (#2733) is wired to the manager project page beside the project course. It is computed ON READ: the viewer's own session must pass can_manage_project, then the service-role-only facts door forecast_project_facts_v1 (applied migration 20261025045152) supplies opaque fact rows and the pure engine computes completion, deadline risk, people needed, quality risk, actions and stated assumptions, labelled as a forecast and never a fact (SEP-1); too little evidence renders as its own state (SEP-7). Still PARTIAL: forecast STORAGE, the recompute scheduler and the cadence modes (weekly/daily/hourly/live) are not wired (draft #2738 carries their app code; its tables and triggers are applied, so project_forecast_signals accumulate with no consumer), no version history or actual-vs-forecast is shown, and the panel is not yet production-walked.",
+  },
 ];
 
 // ── E. EVIDENCE · JOURNAL ───────────────────────────────────────────────────
@@ -815,6 +843,9 @@ const EVIDENCE: readonly CapabilityRow[] = [
       "lib/organization-evidence/import-projections.ts",
       "lib/organization-evidence/worker-evidence-read.ts",
       "lib/organization-evidence/time-semantics.ts",
+      "lib/organization-evidence/evidence-media-read.ts",
+      "lib/organization-evidence/evidence-media-write.ts",
+      "lib/organization-evidence/evidence-media-serve.ts",
     ],
     coreModule: "lib/organization-evidence/import-core.ts",
     surfaces: [
@@ -826,7 +857,8 @@ const EVIDENCE: readonly CapabilityRow[] = [
       "components/app/historical-field-board.tsx",
     ],
     note:
-      "2026-09-16 later (owner human walk of #1748 on production): cleaner but not the product; the 800 h / 165 h figures were aggregate work-from-home hours over months, not a day. Corrected: time-semantics.ts classifies a figure a day cannot hold from the source's words (never the numbers) into period_aggregate / unknown as a blocking question; resolveTimeSemantics records the human's answer; the commit writes a period record when the period is known, else a dated fact with duration UNKNOWN; only daily hours reach the ledger. The history-card variant of the ONE player identity and a read-only historical field board render the same projection. Awaits the owner's HUMAN acceptance; not proven. Earlier: 2026-09-16 (HUMAN walk, production): the owner staged a real 158-row XLSX (session 47627d4a, 7 people, 8 source weeks) and the preview rendered after #1747; 0 records written, commit deliberately not authorized. The walk exposed and this slice fixed: the object cell is composite ('Hoofdgracht 3; Kantoor') and was read as ONE label, so 37 composite objects would have been created; an activity and a duration note in that column would have become sites; 23 rows carried their site only in the text, misspelled; per-place hours written in the text were not read; 800 h / 165 h day rows were flagged but still committable; context_label was written null; and the first screen was the 158-row sheet. Now: lib/organization-evidence/work-context.ts splits, classifies, resolves typos by house number, reads sites and per-place hours from the text; the reading is DERIVED under derived.workContexts with method and confidence; label-level and acknowledgement decisions are staging-only writes; the reconstruction (understood -> issues -> people -> places -> calendar -> company) is the first screen with the rows behind disclosure; and organization_evidence_records finally has a reader outside the import module - worker-evidence-read.ts feeds the ONE work model through the person's LINKED roster row, so history reaches Work in Numbers, the Living CV and the team roll-up with no second upload. TEST_PROVEN against an anonymised structure-for-structure fixture of that real file; the new first screen awaits the owner's HUMAN acceptance and is not claimed as proven. Earlier history follows. UNBLOCKED 2026-09-08. The owner approved EVID-1 and 20260907220000_evidence_parties_recursion_fix_v1 was applied via Supabase MCP as ledger 20260908080950. The history matters, because this row was wrong twice: it first claimed PRODUCTION_DATA_PATH_PROVEN while four of the eight tables could not be read at all, and the verification that missed it had exercised organization_people (no cross-table policy, works fine) and then checked that the other policies EXISTED rather than reading THROUGH them. Policy presence is not policy reachability - SEP-8 caught inside this register's own evidence. MEASURED AFTER THE APPLY, against the live database, not inferred: (1) READ - all four formerly-recursing tables (records, parties, events, competency_signals) now return cleanly under a real organization manager's own auth where every one previously raised 42P17; (2) WRITE - a full chain ran under that same manager inside ONE transaction that was then ROLLED BACK: evidence_import_sessions -> organization_people -> organization_evidence_records INSERT ... RETURNING -> organization_evidence_parties INSERT ... RETURNING, returning records_written=1, parties_written=1. That RETURNING is precisely what used to die with the read; (3) BOUNDARY - a person who manages nothing reads 0 records, 0 parties, 0 signals, with no error, so it fails closed AND quietly; (4) RESOLVER - is_evidence_record_subject is SECURITY DEFINER, stable, search_path=public, EXECUTE held by authenticated and REFUSED to anon; (5) RESIDUE - re-counted after the rollback: all six tables back to 0. Nothing was left behind. The closed sets are unchanged and still enforcing: evidence_state admits no attested or verified value, and competency method admits only exact_term_match / synonym_term_match, so ai_inference is refused 23514 at the schema. Rollback is a faithful inverse of the pre-apply policy (verified against a snapshot taken before the apply) and reintroduces the recursion by design - prefer fixing forward. PARTIAL, not BUILT_AND_USABLE, and the reason is volume rather than correctness: both surfaces are wired and reachable (the importer on /dashboard/company, the subject's view on /dashboard/profile) but NO HUMAN HAS EVER COMPLETED AN IMPORT and all eight tables still hold 0 rows. The subject's right to REFUSE what an organization recorded is still unbuilt, and it is a WRITE-PATH gap rather than a missing screen - this row said 'no surface offers the act', which reads as UI work and is not. Measured on production 2026-09-08: organization_evidence_events carries exactly two INSERT policies, and neither can ever admit the subject. The attest policy requires manages_organization(organization_id), which the subject of an imported record is not, by definition - an organization is recording a person who does not manage it. The verify policy admits only independently_verified and then excludes the subject explicitly with NOT EXISTS over the linked profile. No SECURITY DEFINER function writes to the table either: the three dispute RPCs in pg_proc all belong to experience_records (EVID-6), a different table. And no application code anywhere emits event_type = 'disputed' - the only two writers in import-core.ts are the importing organization's own rollback/reinstate and its own attestation. Meanwhile deriveEvidenceStanding ranks DISPUTED second in its precedence order, so the model computes a state that no actor in the system can cause. Shipping the button alone would hand the one person it exists for a 42501. Closing it needs a narrow subject-only write path, which is RED and owner-gated.",
+      "HISTORICAL PHOTOS, 2026-10-07 (draft PR, RED storage policy, NOT applied): the code half exists - a reader (`evidence-media-read.ts`, project and person anchors only, never date proximity), a signed-URL serve path (`evidence-media-serve.ts`, caller RLS, 15 min), a writer (`evidence-media-write.ts` / `evidence-media-actions.ts`: real-byte MIME sniff, sha256 idempotency on unique(org, sha), orphan-blob cleanup, unknown dates stay unknown) and a strip on the project page and the company person card (`components/app/evidence-media-strip.tsx`) showing the original date with its basis, the source system and a fixed reported-not-verified label. NONE of it is live: `organization_evidence_media` is applied and empty in production, the private `evidence-media` bucket does not exist until migration 20261007180000 is applied (RED, owner gate), and no photo has ever been stored. An importer door now exists on the history page (`components/app/organization/historical-photo-import.tsx` -> `evidence-media-actions.ts` -> the writer): a manager attaches source image files to ONE stated anchor (evidence record, place, roster person or the organization), names the source system, and gives a date only with its basis (otherwise unknown); the file name is kept as supplied and nothing is inferred from dates or names. It cannot store anything until the bucket is applied (a refused upload says so; it never claims success). In-app files are capped at 4 MB by the server-action body limit; larger originals need a direct-upload path that is not built. Until the bucket is applied, no screen or report may claim imported photos are attached to evidence, a project or a person; the strip renders honest empty/unavailable states. Linked register documents (`components/app/linked-documents.tsx`) are likewise now listed read-only on the project page and the person card through `getOrgDocumentRegister` with a project/worker filter - no new access path. PARTIAL; nothing here changes the status of the import itself. " +
+      "2026-09-16 later (owner human walk of #1748 on production): cleaner but not the product; the 800 h / 165 h figures were aggregate work-from-home hours over months, not a day. Corrected: time-semantics.ts classifies a figure a day cannot hold from the source's words (never the numbers) into period_aggregate / unknown as a blocking question; resolveTimeSemantics records the human's answer; the commit writes a period record when the period is known, else a dated fact with duration UNKNOWN; only daily hours reach the ledger. The history-card variant of the ONE player identity and a read-only historical field board render the same projection. Awaits the owner's HUMAN acceptance; not proven. Earlier: 2026-09-16 (HUMAN walk, production): the owner staged a real 158-row XLSX (session 47627d4a, 7 people, 8 source weeks) and the preview rendered after #1747; 0 records written, commit deliberately not authorized. The walk exposed and this slice fixed: the object cell is composite ('Hoofdgracht 3; Kantoor') and was read as ONE label, so 37 composite objects would have been created; an activity and a duration note in that column would have become sites; 23 rows carried their site only in the text, misspelled; per-place hours written in the text were not read; 800 h / 165 h day rows were flagged but still committable; context_label was written null; and the first screen was the 158-row sheet. Now: lib/organization-evidence/work-context.ts splits, classifies, resolves typos by house number, reads sites and per-place hours from the text; the reading is DERIVED under derived.workContexts with method and confidence; label-level and acknowledgement decisions are staging-only writes; the reconstruction (understood -> issues -> people -> places -> calendar -> company) is the first screen with the rows behind disclosure; and organization_evidence_records finally has a reader outside the import module - worker-evidence-read.ts feeds the ONE work model through the person's LINKED roster row, so history reaches Work in Numbers, the Living CV and the team roll-up with no second upload. TEST_PROVEN against an anonymised structure-for-structure fixture of that real file; the new first screen awaits the owner's HUMAN acceptance and is not claimed as proven. Earlier history follows. UNBLOCKED 2026-09-08. The owner approved EVID-1 and 20260907220000_evidence_parties_recursion_fix_v1 was applied via Supabase MCP as ledger 20260908080950. The history matters, because this row was wrong twice: it first claimed PRODUCTION_DATA_PATH_PROVEN while four of the eight tables could not be read at all, and the verification that missed it had exercised organization_people (no cross-table policy, works fine) and then checked that the other policies EXISTED rather than reading THROUGH them. Policy presence is not policy reachability - SEP-8 caught inside this register's own evidence. MEASURED AFTER THE APPLY, against the live database, not inferred: (1) READ - all four formerly-recursing tables (records, parties, events, competency_signals) now return cleanly under a real organization manager's own auth where every one previously raised 42P17; (2) WRITE - a full chain ran under that same manager inside ONE transaction that was then ROLLED BACK: evidence_import_sessions -> organization_people -> organization_evidence_records INSERT ... RETURNING -> organization_evidence_parties INSERT ... RETURNING, returning records_written=1, parties_written=1. That RETURNING is precisely what used to die with the read; (3) BOUNDARY - a person who manages nothing reads 0 records, 0 parties, 0 signals, with no error, so it fails closed AND quietly; (4) RESOLVER - is_evidence_record_subject is SECURITY DEFINER, stable, search_path=public, EXECUTE held by authenticated and REFUSED to anon; (5) RESIDUE - re-counted after the rollback: all six tables back to 0. Nothing was left behind. The closed sets are unchanged and still enforcing: evidence_state admits no attested or verified value, and competency method admits only exact_term_match / synonym_term_match, so ai_inference is refused 23514 at the schema. Rollback is a faithful inverse of the pre-apply policy (verified against a snapshot taken before the apply) and reintroduces the recursion by design - prefer fixing forward. PARTIAL, not BUILT_AND_USABLE, and the reason is volume rather than correctness: both surfaces are wired and reachable (the importer on /dashboard/company, the subject's view on /dashboard/profile) but NO HUMAN HAS EVER COMPLETED AN IMPORT and all eight tables still hold 0 rows. The subject's right to REFUSE what an organization recorded is still unbuilt, and it is a WRITE-PATH gap rather than a missing screen - this row said 'no surface offers the act', which reads as UI work and is not. Measured on production 2026-09-08: organization_evidence_events carries exactly two INSERT policies, and neither can ever admit the subject. The attest policy requires manages_organization(organization_id), which the subject of an imported record is not, by definition - an organization is recording a person who does not manage it. The verify policy admits only independently_verified and then excludes the subject explicitly with NOT EXISTS over the linked profile. No SECURITY DEFINER function writes to the table either: the three dispute RPCs in pg_proc all belong to experience_records (EVID-6), a different table. And no application code anywhere emits event_type = 'disputed' - the only two writers in import-core.ts are the importing organization's own rollback/reinstate and its own attestation. Meanwhile deriveEvidenceStanding ranks DISPUTED second in its precedence order, so the model computes a state that no actor in the system can cause. Shipping the button alone would hand the one person it exists for a 42501. Closing it needs a narrow subject-only write path, which is RED and owner-gated. UPDATE 2026-10-03: the subject-only contest path has since landed - the subject can WITHDRAW a contest and contest again (#2138, ledger 20261003131904 subject_contest_withdraw_v1; append-only `dispute_withdrawn` event, per-actor latest-wins) and the event_type CHECK lineage was reconciled by forward-fix #2140 (ledger 20261003141047 subject_contest_withdraw_constraint_reconcile_v1) so withdraw does not violate the live `_chk`. Applied to production; the UI is proven by render and unit tests, not by a human walk, so the evidence level is unchanged.",
   },
   {
     id: "EVID-2",
@@ -838,9 +870,8 @@ const EVIDENCE: readonly CapabilityRow[] = [
     anchors: ["lib/journal"],
     coreModule: null,
     surfaces: ["app/[locale]/dashboard/journal"],
-    note: "13 confirmations in production, 3 of them self-confirmed by one person holding an owner engagement.",
-    ownerDecision:
-      "Block self-confirmation in review_journal_entry, or rely on the weaker classification (§6.3 item 1).",
+    note:
+      "13 confirmations in production, 3 of them self-confirmed by one person holding an owner engagement. RESOLVED by the owner 2026-11-02 (decision 0028): a person's own confirmation is a lawful personal declaration, kept apart from independent confirmation; only presenting oneself as the independent confirmer is refused (enforced since 20261003150500). Re-proof against 0028 by the journal-confirm production walk.",
   },
   {
     id: "EVID-3",
@@ -892,9 +923,7 @@ const EVIDENCE: readonly CapabilityRow[] = [
     anchors: ["lib/evidence", "lib/trust/experience-records.ts"],
     coreModule: "lib/trust/experience-records.ts",
     surfaces: ["components/app/workspace/experiences-result.tsx"],
-    note: "The right of reply got a READER on 2026-09-07 — `experience_responses` had shipped with a schema, an RPC, a policy and a form, and no surface had ever rendered a reply, to either side. The reply now shows with its own moderation state, and an unreadable reply says so rather than reading as none. Not yet walked by a human, so the evidence drops to TEST_PROVEN until it is.",
-    ownerDecision:
-      "The v1 select policy compares an unqualified `moderation_status` inside a subquery over `experience_records`, so it resolves to the RECORD's status and hands the experience author a reply moderation has not published. The surface now withholds it; correcting the policy is a schema change (RED).",
+    note: "The right of reply got a READER on 2026-09-07 — `experience_responses` had shipped with a schema, an RPC, a policy and a form, and no surface had ever rendered a reply, to either side. The reply now shows with its own moderation state, and an unreadable reply says so rather than reading as none. Not yet walked by a human, so the evidence drops to TEST_PROVEN until it is. POLICY DEFECT CLOSED 2026-10-03 (#2131, ledger 20261003090939 experience_responses_select_reply_status_v1): the v1 select policy compared an unqualified `moderation_status` inside a subquery over `experience_records`, so it resolved to the RECORD's status and handed the experience author a reply moderation had not published. The live policy now reads `experience_responses.moderation_status = 'published'` AND the record's own published status (read back from pg_policies 2026-10-03). No human walk and no authenticated probe of the reader exists, so the evidence stays TEST_PROVEN.",
   },
   {
     id: "EVID-7",
@@ -977,7 +1006,7 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     coreModule: "lib/vacancy-store/vacancy-read.ts",
     surfaces: ["app/[locale]/(marketing)/jobs"],
     note:
-      "80,708 vacancies live (47,710 active) and NO scheduler - ingestion is a manual script or an admin panel action. THE PUBLIC SURFACE WAS FAILING AND THIS ENTRY DID NOT SAY SO, corrected 2026-09-08 from production logs: `search_public_vacancy_previews_v1` computed total_count with `count(*) over ()`, walking every live row per call, and the 24 h to 2026-09-08 carried 1,595 statement timeouts of which EVERY ONE was that function under `postgrest`/`authenticator` - real anonymous traffic at ~66/hour, answered to the person as HTTP 500. Owner-approved and fixed the same day (ledger 20260908110702): the unfiltered total now reads the cron singleton. Measured under the real `anon` role with statement_timeout=3s - unfiltered 2.7 ms (was 3,351 ms cold), warm 1.0-1.3 ms, total_count 47,710 correct, per-filter totals correct, projection unchanged, privileges unchanged, and `anon` still refused 42501 on both `public_vacancies` and the counts singleton. The last organic timeout was 10:49:51, seventeen minutes BEFORE the apply, and none has followed. The profession-filtered path is ~14 ms slower because its total became a second scan - recorded, not hidden. PARTIAL is now about the MISSING SCHEDULER, not about the board falling over.",
+      "Scheduled ingestion exists (verified 2026-10-09): NAV self-rearms about every 10 min via nav-supply-cadence.yml (#2215/#2226) and Sweden runs 3-hourly with a 4.5 h freshness backstop (#2216/#2226), each with one-issue-per-streak incident handling; vacancy counts as of 2026-09-08 were 80,708 live (47,710 active). THE PUBLIC SURFACE WAS FAILING AND THIS ENTRY DID NOT SAY SO, corrected 2026-09-08 from production logs: `search_public_vacancy_previews_v1` computed total_count with `count(*) over ()`, walking every live row per call, and the 24 h to 2026-09-08 carried 1,595 statement timeouts of which EVERY ONE was that function under `postgrest`/`authenticator` - real anonymous traffic at ~66/hour, answered to the person as HTTP 500. Owner-approved and fixed the same day (ledger 20260908110702): the unfiltered total now reads the cron singleton. Measured under the real `anon` role with statement_timeout=3s - unfiltered 2.7 ms (was 3,351 ms cold), warm 1.0-1.3 ms, total_count 47,710 correct, per-filter totals correct, projection unchanged, privileges unchanged, and `anon` still refused 42501 on both `public_vacancies` and the counts singleton. The last organic timeout was 10:49:51, seventeen minutes BEFORE the apply, and none has followed. The profession-filtered path is ~14 ms slower because its total became a second scan - recorded, not hidden. PARTIAL now reflects scheduler health being unproven over time (GitHub cron is best-effort; the cadence is restored by self-rearm, not guaranteed) plus the open owner items, not the absence of a scheduler.",
   },
   {
     id: "DEM-5",
@@ -997,11 +1026,22 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     title: "Team matching",
     worldElement: "teams",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
-    anchors: ["lib/market/match-team-v1.ts"],
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
+    anchors: [
+      "lib/market/match-team-v1.ts",
+      "lib/company/team-offer.ts",
+      "lib/market/team-offer-model.ts",
+      "lib/company/team-offer-actions.ts",
+      "components/app/team-demand-offer-form.tsx",
+      "components/app/team-offers-received.tsx",
+    ],
     coreModule: "lib/market/match-team-v1.ts",
-    surfaces: ["app/[locale]/dashboard/admin"],
-    note: "Admin route only — that is the real gap, and it is a REACHABILITY gap, not a missing engine: `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest `insufficient_data` terminals). Re-measured 2026-09-09: 0 teams exist, so connecting it to the employer surface would today render an honest empty state — worth doing, but it is adoption that is missing, not the matcher. The clause 'no team exists to match' was true about the DATA and was being read as a statement about the capability; the team layer itself is applied and live (see WRK-6). A brigade can now also SAY it is available in all five routed locales — `a-brigade-can-offer-itself.test.ts`. STEP B (2026-09-14) STOPPED the employer surface on a missing consent relation, not on effort. The plan scopes it 'reachable only where a team has offered its supply against that employer's demand' (ARCH-4). No such relation exists: `team_enquiries` runs employer -> team and carries NO demand / customer_request reference, so consent there is ORG-scoped, not DEMAND-scoped. Implementing B4 as written needs a new demand-linked offer relation (NEW + migration, not authorized in Step B); implementing it on `team_enquiries` instead would silently widen the consent boundary the owner set in ARCH-4 from one demand to every demand that employer holds. That is an owner decision. Production 2026-09-14: 0 teams, 0 team_enquiries, 0 team_details — nobody is served either way today."
+    surfaces: [
+      "app/[locale]/dashboard/admin",
+      "app/[locale]/dashboard/company/scouting",
+      "components/app/team-brigades-panel.tsx",
+    ],
+    note: "UPDATE 2026-10-23: the hand-off is now production-proven too - brigade-formation B2B-7..B2B-10 (runs 39584631052 on 2026-10-21 and 39795574869 on 2026-10-22) hand the agreed brigade into the buyer's project as ONE team assignment, a member records work on it and the buyer reads those hours. The public pricing note no longer says a crew cannot offer itself as one unit. Still PARTIAL: the employer's automatic shortlist does not propose whole crews (team matching runs on received team offers and the admin route) and there are 0 real teams. UPDATE 2026-10-19: migration 20261007150000_team_demand_offer_v1 IS APPLIED (in the production ledger); the production walk brigade-formation proves the demand-scoped team offer, its thread, terms and agreement (B2B-1..6, 2026-10-12 and VPS 2026-10-18). Still PARTIAL: the accepted-offer hand-off into a team assignment is not production-proven and there are 0 real teams. The 2026-10-07 text below is kept for history. UPDATE 2026-10-07 (owner decision E6 - offer a team against a demand as ONE unit): the connecting relation is now BUILT IN CODE but NOT APPLIED. Migration 20261007150000_team_demand_offer_v1 (RED, draft PR on feat/cc/team-demand-offer-v1, needs-human-gate) adds `team_demand_offers` - a DEMAND-scoped offer (team x customer_request), which is exactly what the STEP B stop below said was missing; `team_enquiries` and `agency_candidate_offers` were assessed and deliberately NOT reused (org-scoped consent / worker-keyed through a connection+share handshake). Chain: brigade manager offers (offer_team_to_demand_v1) -> the demand's receiver reads TEAM-LEVEL AGGREGATES ONLY (list_team_offers_for_request_v1: size, skills, languages, availability, consent completeness - no profile id, worker id or name) matched with matchTeamToNeed on the team_aggregate basis -> accept/decline (respond_team_demand_offer_v1) -> hand-off to ONE team_assignments row on the receiver's own project (hand_off_team_demand_offer_v1), after which the EXISTING list_team_assignment_members_v1 discloses members exactly as it always has. Surfaces: the offer control on components/app/team-brigades-panel.tsx and an owner-side section on /dashboard/company/scouting (no longer admin-only). No payment, no confirmation gate. Proven locally on a throwaway PostgreSQL 16 (scripts/db-proof/team-demand-offer.sh, 126 checks incl. member non-disclosure, outsider/anon/NULL refusals, rollback) - evidence stays TEST_PROVEN, and until the migration is applied to production the capability is not live (the RPCs answer 42883 and the UI shows its honest unavailable state). Production holds 0 real teams, so even after apply nothing is walkable on real data (adoption). HISTORY (superseded by the above, kept for the record): Admin route only — that is the real gap, and it is a REACHABILITY gap, not a missing engine: `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest `insufficient_data` terminals). Re-measured 2026-09-09: 0 teams exist, so connecting it to the employer surface would today render an honest empty state — worth doing, but it is adoption that is missing, not the matcher. The clause 'no team exists to match' was true about the DATA and was being read as a statement about the capability; the team layer itself is applied and live (see WRK-6). A brigade can now also SAY it is available in all five routed locales — `a-brigade-can-offer-itself.test.ts`. STEP B (2026-09-14) STOPPED the employer surface on a missing consent relation, not on effort. The plan scopes it 'reachable only where a team has offered its supply against that employer's demand' (ARCH-4). No such relation exists: `team_enquiries` runs employer -> team and carries NO demand / customer_request reference, so consent there is ORG-scoped, not DEMAND-scoped. Implementing B4 as written needs a new demand-linked offer relation (NEW + migration, not authorized in Step B); implementing it on `team_enquiries` instead would silently widen the consent boundary the owner set in ARCH-4 from one demand to every demand that employer holds. That is an owner decision. Production 2026-09-14: 0 teams, 0 team_enquiries, 0 team_details — nobody is served either way today."
   },
   {
     id: "DEM-7",
@@ -1058,11 +1098,11 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     title: "Calendar (five views, single projection)",
     worldElement: "projects",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/planning"],
     coreModule: "lib/planning/planning-model.ts",
     surfaces: ["app/[locale]/dashboard/planning"],
-    note: "Eight sources reach the projection; ten further dated stores never do.",
+    note: "Eight sources reach the projection; ten further dated stores never do. PROD WALK 2026-10-12 (automated real-browser walk on production, synthetic cast, prod-qa-walk.yml): worker calendar day shows the approved leave, the plan and the conflict (run 38240973454). Not a human walk.",
   },
   {
     id: "CAL-2",
@@ -1070,11 +1110,11 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     title: "Employer calendar",
     worldElement: "organizations",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/planning/employer-availability.ts"],
     coreModule: "lib/planning/employer-availability.ts",
     surfaces: ["app/[locale]/dashboard/company/planning"],
-    note: "CORRECTED 2026-09-07: recorded as disconnected on the claim that the employer page never reads the planning projection. It does — `/dashboard/company/planning` reads `getEmployerWorkerAvailability`, which reuses the canonical planning model\'s own date projection, and the absences page and two conversation paths read it too. What it deliberately does NOT read is the full worker agenda: the employer projection omits `note` and `absence_type` at the QUERY, so an employer learns that somebody is unavailable and never why. Whether an employer also needs a month view is a product question, not a broken wire.",
+    note: "CORRECTED 2026-09-07: recorded as disconnected on the claim that the employer page never reads the planning projection. It does — `/dashboard/company/planning` reads `getEmployerWorkerAvailability`, which reuses the canonical planning model\'s own date projection, and the absences page and two conversation paths read it too. What it deliberately does NOT read is the full worker agenda: the employer projection omits `note` and `absence_type` at the QUERY, so an employer learns that somebody is unavailable and never why. Whether an employer also needs a month view is a product question, not a broken wire. PROD WALK 2026-10-12 (automated real-browser walk on production, synthetic cast, prod-qa-walk.yml): employer plans a worker on a day and is told it collides with approved leave; another org sees nothing (run 38240973454). Not a human walk.",
   },
   {
     id: "CAL-3",
@@ -1107,11 +1147,11 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     title: "Absences / leave",
     worldElement: "user_avatar",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/leave"],
     coreModule: "lib/leave/absences-model.ts",
     surfaces: ["app/[locale]/dashboard/planning"],
-    note: "0 rows; the privacy-narrowed manager view is correct and deliberate.",
+    note: "0 rows; the privacy-narrowed manager view is correct and deliberate. PROD WALK 2026-10-12 (automated real-browser walk on production, synthetic cast, prod-qa-walk.yml): leave requested by the worker, approved by the employer, cancelled, across sessions (run 38240973454). Not a human walk.",
   },
   {
     id: "CAL-6",
@@ -1123,7 +1163,7 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     anchors: ["lib/booking"],
     coreModule: "lib/booking/booking-state.ts",
     surfaces: ["app/[locale]/dashboard/bookings"],
-    note: "Nothing exists past `accepted`; the expiry RPC has no scheduler — and STEP C found the scheduler is not the blocker. `expire_stale_booking_requests_v1` raises 'Admin only' unless `auth.uid()` is non-null and `is_admin()`, and is granted to `authenticated`, not service_role; a Vercel cron request is a machine with no identity. The platform DOES already have a scheduler (vercel.json crons + `authorizeCronRequest`, fail-closed) — what is missing is an authority path for a machine caller, which is RED. Everything past `accepted` is separate and needs new state.",
+    note: "Corrected 2026-10-21 (read from code and the production DB): accepting is NOT a dead end. `respond_booking_request_v4` creates the company_worker_engagements row in the same transaction, the app sends `booking_accepted` + engagement notifications, `openBookingConversationAction` opens the accepted-booking conversation, and planning reads accepted bookings; reopen/re-accept/expiry keep the engagement truthful through `booking_reopened_close_ends_engagement`. What does NOT exist is state past `accepted` on the booking itself (started / completed / no-show) or a work-plan row minted from it. EXPIRY: `expire_stale_booking_requests_v1` raises 'Admin only' unless `auth.uid()` is non-null and `is_admin()`, and is granted to `authenticated`, not service_role, so no machine caller can run it; production pg_cron has no booking job and the VPS cron (the only app scheduler since vercel.json was removed 2026-10-18) has none either. 2 of 4 `proposed` bookings in production were past their window on 2026-10-21. The fix — a system-only expiry function on a daily pg_cron job — is a new SECURITY DEFINER authority path, RED, prepared as a draft PR for the owner.",
   },
   {
     id: "CAL-7",
@@ -1142,12 +1182,12 @@ const TIME_CAPACITY: readonly CapabilityRow[] = [
     domain: "time_capacity",
     title: "Shifts / rotas / rosters",
     worldElement: "organizations",
-    status: "MISSING",
-    strongestEvidence: "NONE",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
-    note: "'Roster' in this product means the active `company_workers` list, never a schedule (§6.0 rule 3).",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/planning/shift-pattern.ts", "lib/planning/work-plan-model.ts"],
+    coreModule: "lib/planning/shift-pattern.ts",
+    surfaces: ["app/[locale]/dashboard/company/planning"],
+    note: "'Roster' in this product means the active `company_workers` list, never a schedule (§6.0 rule 3). BUILT BY EXTENSION 2026-10-23, no second store: a shift pattern (weekly ISO weekdays, or an N-on/M-off rotation with a stagger offset) is ONE nullable property of the existing work plan window (`work_plan_entries.recurrence`). Only the RULE is stored; shift days are projected on read by `expandShiftRuns` (TIME is a projection, not a store) into the calendar (one band per run of shift days, clipped to the drawn range), the employer commitment read (so CAL-7 reservation and CAL-9 utilisation count shift days, not rest days) and the plan list. An overlap with approved leave, a booking, a trip or another plan is SAVED and then WARNED about through the one reservation rule, narrowed to shift days (`narrowVerdictToShiftRuns`) — never a refusal (SEP-2); the database refuses only a malformed pattern or one with no working day in its window. The override-receipt validator learns the same run rule so a knowing override on a rota stays verifiable. PARTIAL and NOT LIVE: the column, `create_work_plan_entry_v2` and the validator change are a RED draft migration (20261023160000, needs-human-gate, NOT applied); until it is applied the read retries without the column (42703) and the form hides its repeat controls, so nothing a person sees changes. Evidence is unit + guard tests and a 20/20 behavioural proof on a throwaway local PostgreSQL 16 (TS/SQL parity on 25 shapes and 720 pattern-days) — not production. One worker per submission; a crew rota is several plans with offsets.",
   },
   {
     id: "CAL-9",
@@ -1184,27 +1224,27 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     title: "Service offerings + request loop",
     worldElement: "market_world_map",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/services"],
     coreModule: "lib/services/service-offerings-shared.ts",
     surfaces: ["app/[locale]/dashboard/service-requests"],
-    note: "CORRECTED 2026-09-07: the note this row carried — \"no navigation leads to it, a human reaches it only by typing the URL\" — was false. Bookings, the market map, the opportunities board, the services page, the marketplace loop section, the spine signals and the planning zone all link to it. The claim came from the reconciliation\'s prose and was never checked; the navigation guard added with this correction is what would have caught it. What is actually true: the loop is complete and reachable, and the 2026-09-07 snapshot records no service offerings in production, so nothing has been through it.",
+    note: "CORRECTED 2026-09-07: the note this row carried — \"no navigation leads to it, a human reaches it only by typing the URL\" — was false. Bookings, the market map, the opportunities board, the services page, the marketplace loop section, the spine signals and the planning zone all link to it. The claim came from the reconciliation\'s prose and was never checked; the navigation guard added with this correction is what would have caught it. What is actually true: the loop is complete and reachable, and the 2026-09-07 snapshot records no service offerings in production, so nothing has been through it. PROD WALK 2026-10-12 (automated real-browser walk on production, synthetic cast, prod-qa-walk.yml): service offered → found from the market → requested → accepted → conversation opened by both sides (run 38249533050). Not a human walk.",
   },
   {
     id: "MKT-2",
     domain: "marketplace",
-    title: "Physical resource listings",
+    title: "Universal marketplace: listings + one discovery index",
     worldElement: "objects",
     status: "PARTIAL",
-    strongestEvidence: "CODE_PROVEN",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/marketplace"],
-    coreModule: null,
+    coreModule: "lib/marketplace/market-model.ts",
     surfaces: [
       "app/[locale]/dashboard/listings",
       "app/[locale]/business/[slug]",
     ],
     note:
-      "Corrected 2026-09-08: `no_navigation` was wrong. `/dashboard/listings` exists AND carries a surfaceRoute in the dashboard module registry; the public business page reads listings; chat references them. It is reachable. What is true is the rest of the old note: `marketplace_listings` holds 0 rows on production and there is no bridge to `assets`, so nothing proves the surface works end to end. PARTIAL and CODE_PROVEN for exactly that reason - reachable, wired, never once exercised. Reachability and use are different claims, and collapsing them is what produced the wrong status.",
+      "Owner direction (final): ONE universal marketplace — work resources, goods, free-standing SERVICE NEEDS, personal and project/contract listings, discoverable by others — over the EXISTING domain tables (marketplace_listings, service_offerings) with ONE discovery view (market_index_v1), a subject registry (market_subject_types) and ONE policy hook (market_publish_policy_v1). Contact stays the existing enquiry -> conversation path; NO payment, escrow or fulfilment; NO age / adult column (the model is person + a separate policy layer). STATUS, HONESTLY: the migration 20261003150300 is a DRAFT RED PR and is NOT applied to production, so on production the surface still runs the legacy work-resource shape and the app degrades to it (`extended: false`, probes 42703/42P01/42883). CODE_PROVEN means: the pure model + 13 use-case fixtures + guards pass, and the SQL was exercised end to end (create/activate/pause/expiry/anon-denied/rollback-guard/re-apply) on a scratch PostgreSQL 16 with stubbed auth helpers — NOT on production, NOT with real users. Earlier facts still hold: `marketplace_listings` held 0 rows on production and nothing has been through the surface end to end. Service offerings join the index but organization_id on service_offerings is deferred; demand (customer_requests) and public_vacancies are deliberately NOT in the index, and neither is worker supply. A project / contract opportunity IS discoverable: a `wanted` listing of subject project_work (a contractor's capability is the `sale` offer), optionally pointing at a real project via project_id (validated by can_manage_project). Execution and agreement stay in projects / proposals / agreements — no new engine; an accepted contact proceeds conversation -> agreement register, which is org-scoped (person-party agreements NOT BUILT). PROD WALK 2026-10-12 (automated real-browser walk on production, synthetic cast, prod-qa-walk.yml): goods listing created, published, found by another person in the one index, enquiry thread delivered (run 38249533050). Not a human walk.",
   },
   {
     id: "MKT-3",
@@ -1281,7 +1321,7 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     coreModule: "lib/lmc/lmc-account.ts",
     surfaces: ["app/[locale]/dashboard/account"],
     deferredByDesign: true,
-    note: "Corrected 2026-09-15: SEVEN lmc_* tables are live in production (lmc_accounts, lmc_account_balances, lmc_lots, lmc_lot_balances, lmc_lot_consumptions, lmc_transactions, lmc_settings), not five — re-counted from information_schema, and the note had drifted. Sixteen RPCs live; all six flags remain false in code AND in the database. Spend has no reversal — that is the recorded blocker, and it is why this stays ARCHITECTURE_ONLY + deferredByDesign even though the machinery exists: the capability is deliberately unarmed, not unbuilt. Arming it is MKT-7, an owner decision (two independent owner acts). The row now names `lib/lmc/lmc-account.ts` and `/dashboard/account`, where LmcBalanceSection renders the disabled state — so the claim is checkable rather than merely asserted. Naming them does not arm anything.",
+    note: "Corrected 2026-09-15: FIVE lmc_* base tables and TWO views are live in production (re-counted from information_schema 2026-10-03; the earlier 'seven tables' counted the two views as tables). Sixteen RPCs live. Re-checked 2026-10-21 in production: all SEVEN flags are false in code AND in `lmc_settings` (`lmc_compensation_enabled` is the seventh), `lmc_transactions` has 0 rows, and `authenticated` cannot execute `lmc_record_purchase_v1` / `lmc_spend_v1` / `lmc_grant_promotional_v1` / `lmc_compensate_spend_v1` (20261006100300 is applied). The old 'spend has no reversal' blocker is closed by `lmc_compensate_spend_v1` (20260828090000, service_role only). What keeps this ARCHITECTURE_ONLY + deferredByDesign is that nothing in the product calls purchase or spend: there is no wallet server layer, no top-up checkout, no spend call site and no top-up/spend UI (train doc Wagons 2, 4, 7). The capability is deliberately unarmed, not unbuilt. Arming it is MKT-7, an owner decision (two independent owner acts). The row now names `lib/lmc/lmc-account.ts` and `/dashboard/account`, where LmcBalanceSection renders the disabled state — so the claim is checkable rather than merely asserted. Naming them does not arm anything.",
   },
 ];
 
@@ -1323,7 +1363,7 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     coreModule: "lib/notifications/spine-signals.ts",
     surfaces: ["components/app"],
     note:
-      "CORRECTED 2026-09-08. This said flatly that all twenty are emitted. They were NOT: service_role held no write grant on notification_events, so every emitter failed 42501 from July until the grant was applied on 2026-09-08 (ledger 20260908061619, and the recipient-discovery SELECTs at 20260908065654 - the write grant alone left the cron returning 503, because the sweep could not read journal_entries or workers to find a recipient). The claim was true of the CODE and false of the PRODUCT, which is the distinction this register exists to keep. NOW MEASURED END TO END on production: 6 events exist, 4 of them written today after the grant; every row carries a recipient; and the readback is correctly scoped - a real recipient reads exactly their own 1 of 6, a person who is not a recipient reads 0. Emission and read are proven; the email channel is still inert because no provider is configured, which is what keeps this PARTIAL.",
+      "CORRECTED 2026-09-08. This said flatly that all twenty are emitted. They were NOT: service_role held no write grant on notification_events, so every emitter failed 42501 from July until the grant was applied on 2026-09-08 (ledger 20260908061619, and the recipient-discovery SELECTs at 20260908065654 - the write grant alone left the cron returning 503, because the sweep could not read journal_entries or workers to find a recipient). The claim was true of the CODE and false of the PRODUCT, which is the distinction this register exists to keep. (UPDATE 2026-10-03: `notification_events` now holds 65 rows, and #2116 - ledger 20261002184321 - added the `message_received` and `journal_review_decided` event types; their end-to-end proof is BLOCKED_QA_IDENTITY.) MEASURED END TO END on production 2026-09-08: 6 events exist, 4 of them written that day after the grant; every row carries a recipient; and the readback is correctly scoped - a real recipient reads exactly their own 1 of 6, a person who is not a recipient reads 0. CORRECTED AGAIN 2026-09-23: the 2026-09-08 proof covered the weekly digest only. The booking (proposed/accepted/declined/withdrawn), engagement (created/ended), work_task_assigned and absence emitters opened with an admin-client read of booking_requests, company_worker_engagements, companies, work_tasks or worker_absences - and service_role holds NO grant on any of them (verified 2026-09-23 via information_schema.role_table_grants), so each read returned a null row and those nine types delivered nothing, exactly the #1761 demand-interest class. Fixed without a grant: every write path now reads its own row under the caller's session and hands the emitter its facts; the emitter returns { delivered, reason } and lib/guards/notification-emitters-carry-facts.test.ts keeps lib/notifications off the ungranted tables. WHEN the write path reads matters: worker_absences_select (20260808120000) admits a manager only while status = 'requested', so the review path reads its facts BEFORE review_worker_absence_v1 closes that arm (the first cut read after it and would have left absence_approved/absence_rejected undelivered for every non-admin reviewer; caught in review, pinned by the same guard). Emission is code-proven for all types and production-proven for the digest and demand interest; the other types await their first live row. The email channel is still inert because no provider is configured, which is what keeps this PARTIAL. PUSH CHANNEL (2026-10-23, code only, OFF): web push is a third hop of the same `deliverDetailed` path, after the durable insert — same event, recipient, copy and deep link as the bell (`lib/notifications/web-push-dispatch.ts`). RFC 8291 encryption and RFC 8292 VAPID run on Node crypto (RFC 8291 Appendix A vector reproduced byte for byte), and only allowlisted push-service hosts are called. The per-person opt-in is ONE `notification_preferences` row ('*', 'push'), default OFF, and push mirrors the bell, so there is no second per-type matrix. Device subscriptions sit in `web_push_subscriptions` with own-row RLS, written through `register_web_push_subscription_v1`. The table, command and channel value are a RED draft migration (20261023171500, NOT applied). Everything is behind `WEB_PUSH_ENABLED` plus owner-entered VAPID keys (runbook §9.5): the opt-in is not rendered and no service worker is registered while that is off. No production evidence.",
   },
   {
     id: "COM-4",
@@ -1336,7 +1376,7 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     coreModule: "lib/notifications/weekly-digest-emitter.ts",
     surfaces: ["app/[locale]/dashboard/activity"],
     note:
-      "PROMOTED 2026-09-08 from TEST_PROVEN on real evidence, not on a green suite: the cron actually ran and PERSISTED, writing 4 weekly_digest rows to notification_events at 07:09 and 07:28 UTC - the first digests this product has ever stored. Until that morning it could not: it returned HTTP 503 because service_role could read neither journal_entries nor workers to find a recipient. The only cron in the product. Still PARTIAL because DELIVERY is not persistence - the email channel remains inert with no provider configured, so a digest is stored and readable in-product and reaches nobody by mail.",
+      "PROMOTED 2026-09-08 from TEST_PROVEN on real evidence, not on a green suite: the cron actually ran and PERSISTED, writing 4 weekly_digest rows to notification_events at 07:09 and 07:28 UTC - the first digests this product has ever stored. Until that morning it could not: it returned HTTP 503 because service_role could read neither journal_entries nor workers to find a recipient. (Corrected 2026-10-03: this is no longer 'the only cron' - `app/api/cron` holds four routes: weekly-digest and commercial-handoffs are scheduled in vercel.json, job-alerts runs from .github/workflows/job-alerts-cadence.yml, and billing-recovery sits behind the recovery flag.) Still PARTIAL because DELIVERY is not persistence - the email channel remains inert with no provider configured, so a digest is stored and readable in-product and reaches nobody by mail.",
   },
   {
     id: "COM-5",
@@ -1350,6 +1390,55 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     surfaces: ["components/app"],
     note: "Fragmented across four surfaces.",
   },
+  {
+    id: "COM-6",
+    domain: "communication",
+    title: "Voice Work Journal (record or upload, transcript, work journal)",
+    worldElement: "work_journal",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["components/app/voice-journal-recorder.tsx", "lib/voice"],
+    coreModule: "lib/voice/transcribe-action.ts",
+    surfaces: ["app/[locale]/dashboard/journal/voice/page.tsx"],
+    ownerDecision:
+      "U-26 ACCEPTED (voice work journal stays in scope; Permissions-Policy is microphone=(self)). Open: the production transcription service (VOICE_TRANSCRIBE_URL) is unverified, and real mic recording + STT is HUMAN-PROOF territory.",
+    note:
+      "ACCEPTED PLAN, BUILT 2026-07-12 (#741): voice is an INPUT METHOD into the one Work Journal - disclosure, record or upload, self-hosted whisper.cpp transcript, the worker edits it, then the existing deterministic work-log preview and explicit confirm; no second write path (voice-work-journal.test.ts). " +
+      "HEADER CORRECTED (verified live 2026-10-07): production sends `Permissions-Policy: microphone=(self)` (next.config.ts, U-26 accepted), so the browser may ask the person for the microphone on this origin; the earlier 2026-10-06 regression (`microphone=()`, #871) no longer holds. NOT PROVEN: the transcription service configuration in production (`VOICE_TRANSCRIBE_URL`) is unverified, and real microphone capture plus speech-to-text has not been walked by a human, so evidence stays TEST_PROVEN. " +
+      "ALSO: the 25 MB / 10 min limits are unreachable behind the 5 MB server-action cap; recognition language is the UI locale (no picker); no voice provenance is stored; the transcribe service's production deployment and env are UNVERIFIED (unset renders an honest not-configured state). Reachable only by workers through one text link on the journal page. voice_journal_jobs (#740) is an unapplied draft - do not apply blindly. Detail: apps/.evidence/audit/VOICE_FIRST_RECOVERY_AUDIT.md.",
+  },
+  {
+    id: "COM-7",
+    domain: "communication",
+    title: "Voice dictation in the command finder",
+    worldElement: "communication",
+    status: "PARTIAL",
+    strongestEvidence: "CODE_PROVEN",
+    anchors: ["components/app/command-finder.tsx"],
+    coreModule: null,
+    surfaces: ["components/app/command-finder.tsx"],
+    note:
+      "SHIPPED #796 (2026-07-17): a browser Web Speech mic button that only fills the search box; the person must still choose a result (no auto-execution, no transcript persisted). Probably denied by the same microphone=() Permissions-Policy (live behaviour UNKNOWN - headless Chromium has no speech recognition); the error handler is empty, so a denial is silent. Audio goes to the browser vendor with no disclosure, outside the AI-runtime governance. Not an action path.",
+  },
+  {
+    id: "COM-8",
+    domain: "communication",
+    title: "Voice as an equal door to the canonical action spine",
+    worldElement: "ai_conversation",
+    status: "PARTIAL",
+    strongestEvidence: "CODE_PROVEN",
+    anchors: [
+      "components/app/voice/voice-capture-panel.tsx",
+      "lib/conversation/voice-turn-policy.ts",
+      "lib/voice/capture-model.ts",
+    ],
+    coreModule: "lib/conversation/voice-turn-policy.ts",
+    surfaces: ["components/app/conversation/chat/conversation-chat.tsx"],
+    ownerDecision:
+      "The production transcription host (VOICE_TRANSCRIBE_URL) and its cost, and whether the first mobile release carries voice; it must keep reusing the one intent, authorization and canonical-action spine and never become a second architecture.",
+    note:
+      "Corrected 2026-10-23 (the earlier 'NOT IMPLEMENTED at any layer' note was false): a generic voice door over the typed chat spine exists (docs/VOICE_DOOR_ADAPTER_V1.md) - VoiceCapturePanel mounted in the conversation chat, the voice-turn policy that hands a transcript to the same typed spine, a signed single-use upload to the self-hosted STT service (services/transcribe/), boundary guard lib/guards/voice-door-adapter-boundary.test.ts; COM-6 is the voice journal. PARTIAL and CODE_PROVEN only: the production recognition service is unverified (VOICE_FIRST = NOT_GREEN), there is no real-device proof, and there is no voice in apps/mobile or the MCP door yet. FROZEN DESIGN DOCTRINE (docs/design/final/00-GALUTINE-DIZAINO-SISTEMA.md section A.2): two equal doors, visual and linguistic, over the SAME spine.",
+  },
 ];
 
 // ── J. MAP · MOBILITY · INTELLIGENCE ────────────────────────────────────────
@@ -1361,11 +1450,11 @@ const MAP_INTELLIGENCE: readonly CapabilityRow[] = [
     title: "Market map / world view",
     worldElement: "market_world_map",
     status: "PARTIAL",
-    strongestEvidence: "HUMAN_UI_PROVEN",
+    strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/market-map"],
     coreModule: "lib/market-map/signal-model.ts",
     surfaces: ["app/[locale]/dashboard"],
-    note: "Owner-scoped only; the cross-user aggregate is deliberately absent.",
+    note: "Owner-scoped only; the cross-user aggregate is deliberately absent. ONE canonical map on /dashboard/market-map (2026-10-01): location + radius are its controls, vacancies/territory/people/projects its layers; the former HUMAN_UI_PROVEN evidence predates the #2087 merge, so it is DOWNGRADED to TEST_PROVEN (2026-10-03) and may be raised again only after production screenshots at 390/1280/1440 are re-walked.",
   },
   {
     id: "GEO-2",
@@ -1443,9 +1532,9 @@ const EDUCATION: readonly CapabilityRow[] = [
     coreModule: "lib/education/programs.ts",
     surfaces: ["app/[locale]/dashboard/company"],
     note:
-      "One programme, one cohort, zero members in production - the journey has never run end to end. The WRITE paths are all present and reachable: create programme, create cohort, assign learner and remove member are all on `/dashboard/company`, and production holds 1 accepted `student` invitation, so the assignable list is not empty. What is missing is a human doing it, not a control to do it with. " +
+      "One programme, one cohort, ONE cohort member in production (re-counted 2026-10-03; earlier text said zero) - the journey has run once, not as a pattern. The WRITE paths are all present and reachable: create programme, create cohort, assign learner and remove member are all on `/dashboard/company`, and production holds 1 accepted `student` invitation, so the assignable list is not empty. What is missing is a human doing it, not a control to do it with. " +
       "THE 'ONE REAL GAP' THIS ROW CARRIED IS CLOSED, and the row said otherwise for five days. It asserted, as current truth, that a programme cannot be CORRECTED - 'there is no update function in `pg_proc`', so a field skipped once is skipped permanently and the one live programme 'reads `demandUnknown` and always will'. Every clause of that was measured false against production on 2026-09-13: `update_education_program_v1(uuid,text,text,text,text)` EXISTS (SECURITY DEFINER, migration `20260908120000_education_program_correction_v1`), `EditProgramForm` is MOUNTED in `institution-programs-section.tsx` beside the create form, and the single live programme now carries `builder` / `vocational` - it has in fact been corrected. The fix shipped on 2026-09-08 and this note was never updated with it. A register REDDER than the product is not a safe error: this one told two windows to go build a correction path that already existed. " +
-      "WHAT IS STILL TRUE: one programme, one cohort, ZERO members in production - the vertical has never run end to end. All five write paths are present and reachable on `/dashboard/company` (create programme, correct programme, create cohort, assign learner, remove member) and production holds 1 accepted `student` invitation, so the assignable list is not empty. What is missing is a human doing it, not a control to do it with.",
+      "WHAT IS STILL TRUE: one programme, one cohort, ONE member in production (n=1) - the vertical is thinly exercised. All five write paths are present and reachable on `/dashboard/company` (create programme, correct programme, create cohort, assign learner, remove member) and production holds 1 accepted `student` invitation, so the assignable list is not empty. What is missing is a human doing it, not a control to do it with.",
   },
   {
     id: "EDU-3",
@@ -1469,11 +1558,11 @@ const EDUCATION: readonly CapabilityRow[] = [
     title: "Learning compass (student path)",
     worldElement: "skills",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: ["lib/learning/learning-compass.ts"],
     coreModule: "lib/learning/learning-compass.ts",
     surfaces: ["app/[locale]/dashboard"],
-    note: "Reachable from the person's dashboard; production holds zero cohort members, so no learner has ever seen it.",
+    note: "Reachable from the person's dashboard; production holds 1 cohort member (2026-10-03), but whether that learner ever saw the compass is not verified. PROD WALK 2026-10-12 (automated real-browser walk on production, synthetic cast, prod-qa-walk.yml): learner placed in a cohort sees it on their own learning compass (run 38248738667). Not a human walk.",
   },
   {
     id: "EDU-5",
@@ -1487,6 +1576,7 @@ const EDUCATION: readonly CapabilityRow[] = [
     coreModule: "lib/learning/learning.ts",
     surfaces: ["app/[locale]/dashboard/learning"],
     note:
+      "EDU-5 PARTLY CONNECTED 2026-10-01 (status unchanged, TEST_PROVEN only). The signal writer now derives `organization_id` from the entry's engagement context (only when `journal_review_enabled`), and ONE code-only producer (`lib/learning/signal-queue-producer.ts`, pure plan in `signal-queue-plan.ts`) turns a worker's accepted-skill signal into a PENDING `confirm_skill` queue item under the MANAGER's own RLS (no migration, no SECURITY DEFINER, no new grant), idempotent per (entry, skill), organisation re-derived from the entry so a forged signal reaches nobody. The manager's opening brief states `Laukia peržiūros: N` only when N>0. THE DOOR (owner 2026-10-01: no count without a door, no door without a count): the manager brief chip links `/dashboard/learning` ONLY while N>0 pending items exist; there is still no static nav link, so the zero-state is door-less (the `orphan_route` kind below describes the pre-EDU-5 state and stays on the row as the unconditional-reachability gap). STILL TRUE: the policy stays OFF, nothing is auto-confirmed, production holds 0 rows in all three learning tables and no human has walked the chain, so the row stays BUILT_NOT_CONNECTED. " +
       "Made FALSIFIABLE 2026-09-15 without changing the verdict. The row claimed `orphan_route` while naming no module and no surface, so the claim could not be checked at all - the same unfalsifiable shape as WRK-8. It now names `lib/learning/learning.ts` and `app/[locale]/dashboard/learning`, and the claim VERIFIES: grep finds ZERO inbound links to `/dashboard/learning` from any route or component outside its own directory, so a person reaches it only by typing the URL. THE LIMITATION IS DELIBERATE AND PRESERVED - EDU-5 remains parked on F-N1 by owner instruction and this sweep does not bypass it; the capability stays BUILT_NOT_CONNECTED. Note the module IS imported (the learning page and two sections import it), which is exactly why `orphan_route` and not `no_importer` is the right kind: the code is reached, the ROUTE is not. Production: `learning_review_queue` 0, `learning_signals` 0. ORIGINAL NOTE: /dashboard/learning has zero inbound links — re-checked 2026-09-07: every reference to it in the codebase is a `revalidatePath` call, and no surface anywhere carries an href to it. A person can only arrive by typing the URL. Measured 2026-09-08: `learning_signals`, `learning_review_queue` and `learning_policy_settings` all hold 0 rows and no learning route carries a surfaceRoute in the dashboard module registry. Genuinely unreachable - this one is correct.",
   },
   {
@@ -1549,7 +1639,7 @@ const PLATFORM: readonly CapabilityRow[] = [
     anchors: ["lib/ai/runtime"],
     coreModule: "lib/ai/runtime/run-core.ts",
     surfaces: ["app/api"],
-    note: "47 real runs with real spend. SIX of the thirteen registered agents have zero call sites (admin_risk, booking_risk, country_readiness, document_assistant, skill_evidence, support_onboarding) — this note said SEVEN until translation_copy gained its call site on 2026-09-17 (the viewer-language read of work messages, egress-gated); the count is derived by `lib/guards/ai-agent-call-sites.test.ts` so it cannot drift. Each remaining one's domain is already answered DETERMINISTICALLY and connected (documents-gap, readiness-overview, skill-pipeline, the booking-conflict logic, the country-readiness matrix), so giving them call sites would add a second model-based answer beside a working one, or six new surfaces — an owner decision, not a wiring task.",
+    note: "355 `ai_runs` rows in production (re-counted 2026-10-03; the earlier text said 47) with real spend. Every one of the 9 registered agents has a product call site (0 uncalled) — derived by `lib/guards/ai-agent-call-sites.test.ts` so it cannot drift. OWNER DECISION 2026-10-25 (registry row 10.11) closed the six that had none: country_readiness was INTEGRATED as a labelled plain-language reading of the sourced country matrix on /labour-market/[country] (the matrix stays the answer; every step cites a row; honest AI-off state); admin_risk, booking_risk, document_assistant, skill_evidence and support_onboarding were RETIRED because connected deterministic code already gives their whole output (readiness-overview, the booking-conflict RPC + roster-conflicts, documents-gap, skill-pipeline + work_journal, dashboard next-action). Decision table: docs/ai/INTERNAL_LLM_AGENTS_V1.md §4.1. No egress grant changed.",
   },
   {
     id: "AI-4",
@@ -1562,7 +1652,7 @@ const PLATFORM: readonly CapabilityRow[] = [
     coreModule: "lib/product-gate/entity-model.ts",
     surfaces: [],
     deferredByDesign: true,
-    note: "Recorded in ARCHITECTURE §5.1; deliberately not now.",
+    note: "Recorded in ARCHITECTURE §5.1; extended by owner direction 2026-10-13 (OWNER_TARGET_ARCHITECTURE_V1 §1.13: agents as labour-market participants, DELEGATE vs PROVIDER, operator accountability). Plan, data-minimization rules and owner decisions AGENT-1..4: docs/integrations/AI_AGENT_PARTICIPANTS_V1.md. The DELEGATE mode exists today through /api/mcp; the PROVIDER subject is not built.",
   },
   {
     id: "GOV-1",

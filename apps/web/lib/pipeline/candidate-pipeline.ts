@@ -157,6 +157,11 @@ export function nextActionForStage(
   const scouting = `/${ctx.locale}/dashboard/company/scouting?request=${ctx.requestId}`;
   const communication = `/${ctx.locale}/dashboard/communication`;
   const bookings = `/${ctx.locale}/dashboard/bookings`;
+  // After the worker AGREED to the dates, the employer's next real step is to put
+  // the person on a project — the assign picker lives on the projects page and
+  // lists exactly the workers with an accepted booking. Offering the bookings
+  // list here left acceptance looking terminal.
+  const projects = `/${ctx.locale}/dashboard/projects`;
   switch (stage) {
     case "new":
       return { key: "candidatePipeline.action.review", href: scouting };
@@ -172,7 +177,7 @@ export function nextActionForStage(
     case "offer":
       return { key: "candidatePipeline.action.viewOffer", href: bookings };
     case "accepted":
-      return { key: "candidatePipeline.action.planWork", href: bookings };
+      return { key: "candidatePipeline.action.assignToProject", href: projects };
     case "rejected":
       return { key: "candidatePipeline.action.reviewOthers", href: scouting };
   }

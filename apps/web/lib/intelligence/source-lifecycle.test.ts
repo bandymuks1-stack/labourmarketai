@@ -24,7 +24,8 @@ describe("deriveSourceLifecycleState — deterministic precedence", () => {
       if (
         p.sourceKind === "internal_aggregated" ||
         p.key === "eurostat" ||
-        p.key === "arbetsformedlingen"
+        p.key === "arbetsformedlingen" ||
+        p.key === "nav"
       ) {
         expect(state, p.key).toBe("active");
       } else {
@@ -41,7 +42,8 @@ describe("deriveSourceLifecycleState — deterministic precedence", () => {
       expect(
         p.sourceKind === "internal_aggregated" ||
           p.key === "eurostat" ||
-          p.key === "arbetsformedlingen",
+          p.key === "arbetsformedlingen" ||
+          p.key === "nav",
         `${p.key} unexpectedly active`,
       ).toBe(true);
     }
@@ -101,9 +103,9 @@ describe("deriveSourceLifecycleState — deterministic precedence", () => {
       legalStatus: "confirmed" as const,
       activation: "on" as const,
     };
-    expect(
-      deriveSourceLifecycleState(confirmedOn, { available: false }),
-    ).toBe("not_available");
+    expect(deriveSourceLifecycleState(confirmedOn, { available: false })).toBe(
+      "not_available",
+    );
     expect(
       deriveSourceLifecycleState(confirmedOn, {
         available: false,

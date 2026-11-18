@@ -179,12 +179,34 @@ export function OfferDemandRecognizer() {
           </div>
 
           {/* Recognized */}
-          {card.recognized.length > 0 && (
+          {(card.recognized.length > 0 || card.headcount?.total != null) && (
             <div className="flex flex-col gap-2 border-t border-ink-600 pt-4">
               <span className="font-mono text-meta uppercase tracking-label text-state-success">
                 {t("recognizedTitle")}
               </span>
               <div className="flex flex-wrap gap-1.5">
+                {/* HOW MANY workers, as read — the total, and for teams of a
+                    stated size the composition beside it (3 × 4 = 12). */}
+                {card.headcount?.total != null && (
+                  <span
+                    data-testid="recognizer-headcount"
+                    data-total={card.headcount.total}
+                    data-teams={card.headcount.teams ?? undefined}
+                    data-per-team={card.headcount.perTeam ?? undefined}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-state-success/30 bg-state-success/5 px-2.5 py-1 text-meta text-text-primary"
+                  >
+                    <span aria-hidden className="text-state-success">
+                      ✓
+                    </span>
+                    {card.headcount.teams != null && card.headcount.perTeam != null
+                      ? t("headcount.teams", {
+                          total: card.headcount.total,
+                          teams: card.headcount.teams,
+                          perTeam: card.headcount.perTeam,
+                        })
+                      : t("headcount.total", { count: card.headcount.total })}
+                  </span>
+                )}
                 {card.recognized.map((f) => (
                   <span
                     key={f.key}
@@ -201,10 +223,27 @@ export function OfferDemandRecognizer() {
             </div>
           )}
 
+          {/* Teams named without a size, or as a range: ASK, never guess. */}
+          {card.headcount?.clarification && (
+            <div
+              role="status"
+              data-testid="recognizer-clarify"
+              data-clarification={card.headcount.clarification}
+              className="flex flex-col gap-1 rounded-md border border-brand-orange/40 bg-brand-orange/5 px-3 py-2.5"
+            >
+              <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+                {t("clarify.title")}
+              </span>
+              <span className="text-sm leading-relaxed text-text-secondary">
+                {t(`clarify.${card.headcount.clarification}`)}
+              </span>
+            </div>
+          )}
+
           {/* Missing */}
           {card.missing.length > 0 && (
             <div className="flex flex-col gap-2 border-t border-ink-600 pt-4">
-              <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("missingTitle")}
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -250,7 +289,7 @@ export function OfferDemandRecognizer() {
 
           {/* Up to 3 next steps → existing real surfaces. No dead end. */}
           <div className="flex flex-col gap-2 border-t border-ink-600 pt-4">
-            <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("nextActionTitle")}
             </span>
             {card.nextActions.map((a) => {

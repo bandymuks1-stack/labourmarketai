@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { orgDisplayName } from "@/lib/company/org-display";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -6,7 +8,12 @@ import {
   JournalEntryComposer,
   type JournalEngagement,
 } from "@/components/app/journal-entry-composer";
+import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
+import { projectsForContext } from "@/lib/journal/project-attribution";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
+import { EvidenceChain } from "@/components/app/work-world/evidence-chain";
+import { deriveEvidenceChain } from "@/lib/evidence/evidence-chain";
+import { buildEvidenceChainLabels } from "@/lib/evidence/evidence-chain-labels";
 import {
   EvidenceState,
   PlaceTimeStamp,
@@ -21,8 +28,15 @@ import {
   WORKSPACE_PERSONAL_DOT,
 } from "@/components/app/conversation/chat/workspace-chip";
 import { workspaceAccentIndex } from "@/lib/company/organization-switch";
-import { resolveEngagementContext } from "@/lib/journal/engagement-context-selection";
-import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
+import {
+  activeOrganizationOf,
+  orderContextsForChoice,
+  resolveEngagementContext,
+} from "@/lib/journal/engagement-context-selection";
+import {
+  composeDistinctEngagementLabels,
+  unnamedOrganizationKind,
+} from "@/lib/journal/engagement-label";
 import { detectUnrecordedHours } from "@/lib/journal/unrecorded-hours";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
@@ -30,7 +44,7 @@ import {
   EvidenceStatusStrip,
   type EvidenceStatus,
 } from "@/components/app/evidence-status-strip";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { groupLinkedSkillIdsByEntry } from "@/lib/journal/journal-entry-skills";
 import { buildEntrySkillSources } from "@/lib/journal/entry-skill-source";
 import { readWorkerEntrySkillLinks } from "@/lib/journal/entry-skill-link-read";
@@ -51,13 +65,26 @@ import { readModuleFieldValues } from "@/lib/journal/journal-module-fields";
 import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
+  deriveIndependentReviewResult,
   deriveReviewResult,
   deriveReviewTimeline,
+  isSelfConfirmedOnly,
 } from "@/lib/journal/review-status";
-import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
+import {
+  CorrectionProvenanceLine,
+  EvidenceDecisionTimeline,
+} from "@/components/app/evidence-decision-timeline";
+import { EntryReviewPanel } from "@/components/app/entry-review-panel";
+import { readEntryReviewStates } from "@/lib/journal/counterparty-review";
+import {
+  entryReviewPhase,
+  isResubmission,
+} from "@/lib/journal/counterparty-review-model";
 import { EmptyState } from "@/components/app/empty-state";
 import { JournalJobContext } from "@/components/app/journal-job-context";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionProfile } from "@/lib/auth/session-profile";
+import { getWorkerCoreRow } from "@/lib/data/worker-core";
 import { processJournalEntrySkills } from "@/lib/journal/skill-pipeline";
 import { JOURNAL_PIPELINE_VERSION } from "@/lib/journal/journal-recognition";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
@@ -68,6 +95,7 @@ import { Link } from "@/lib/i18n/navigation";
 // records below (owner IA: Mano CV = marketplace identity + work records).
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
+import { isPlayerCardMode } from "@/lib/player-card/card-modes";
 import { WorkerReadinessPanel } from "@/components/app/worker-readiness-panel";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
 import { buildPlayerCardLabels } from "@/lib/player-card/labels";
@@ -76,7 +104,8 @@ import {
   toThermometerView,
 } from "@/lib/market/thermometer-data";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { formatUtcDate, utcTodayKey } from "@/lib/time/display";
+import { createUtcFormatter, formatUtcDate } from "@/lib/time/display";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 // ONE day-resolution rule for the Work Journal — the canonical work-time
 // rule's own (`resolveWorkDayDetail`), the same one the work-in-numbers
 // model groups by, so a record cannot sit on one day in the diary and
@@ -111,12 +140,28 @@ import {
 import { resolveWorkLogLabels } from "@/components/app/conversation/chat/labels";
 import { JournalQuickRecord } from "./quick-record";
 import { JournalCalendar } from "@/components/app/journal/journal-calendar";
+import { JournalDayObject } from "@/components/app/journal/journal-day-object";
+import { buildDayObject } from "@/lib/journal/day-object";
+import {
+  readDayPhotoPreviews,
+  type DayPhotoPreviews,
+} from "@/lib/journal/day-photo-previews";
 import {
   buildJournalCalendar,
   isIsoDay,
   resolveAnchor,
   resolveScale,
 } from "@/lib/journal/journal-calendar";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { experienceFiguresOf } from "@/lib/journal/experience-figures";
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
+import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/journal", "journal.navTitle");
+
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -135,12 +180,30 @@ const HISTORY_RELATIONSHIPS = [...PROFESSIONAL_HISTORY_RELATIONSHIPS];
  * Bounded output with an honest "+n" (the same rule the calendar panel uses,
  * `lib/planning/calendar-result.ts`) — the phone opens on a readable page,
  * and the calendar above reaches every other day in one tap.
+ *
+ * ONE day (owner launch order 2026-10-10 §7): the main view is a day and its
+ * work, never a stack of collapsible past dates. History is the calendar —
+ * pick a date, see that date. Nothing is hidden: the count below names the
+ * other recorded days and every one of them is one tap away on the grid.
  */
-const DIARY_DAY_LIMIT = 7;
+const DIARY_DAY_LIMIT = 1;
 
 /** Worker "Mano dienoraštis" — the closed self-declare loop (M1). Logs work
  *  against an engagement context; entries stay private (visibility 'closed')
  *  until a manager confirms them (§13). */
+/**
+ * The link to the recorder. It KEEPS the day the person picked on the
+ * calendar (`?date=`), so "record on this day" records on that day and the
+ * readback never falls back to today (owner walk 2026-09-28: 27 → 28).
+ */
+function journalComposerHref(selectedDate: string | null, full: boolean): string {
+  const q = new URLSearchParams();
+  if (full) q.set("compose", "full");
+  if (selectedDate) q.set("date", selectedDate);
+  const qs = q.toString();
+  return `/dashboard/journal${qs ? `?${qs}` : ""}#journal-composer`;
+}
+
 export default async function JournalPage({
   params,
   searchParams,
@@ -152,6 +215,7 @@ export default async function JournalPage({
     skill?: string | string[];
     period?: string | string[];
     compose?: string | string[];
+    card?: string | string[];
     /** Journal calendar: the scale (`month` default, `week`) and the
      *  anchored period. See `lib/journal/journal-calendar.ts`. */
     cal?: string | string[];
@@ -160,6 +224,8 @@ export default async function JournalPage({
 }) {
   const { locale } = await params;
   const sp = (await searchParams) ?? {};
+  // The Player Card mode a link or the chat asked for (?card=), else none.
+  const cardMode = isPlayerCardMode(sp.card) ? sp.card : null;
   // The full composer for a NEW record only behind the explicit "detaliau"
   // door (`?compose=full`); the compact text-first recording is the default.
   const composeFull = sp.compose === "full";
@@ -175,7 +241,9 @@ export default async function JournalPage({
   // the anchored period. Both are URL state — no client store, no second
   // source of "which day am I looking at".
   const calendarScale = resolveScale(sp.cal);
-  const todayIsoKey = utcTodayKey();
+  // The person's own day (lib/time/local-day.ts): entries are stamped in it.
+  const viewerToday = await viewerWorkToday();
+  const todayIsoKey = viewerToday.todayIso;
   // Evidence drill-down (W5 slice 3): ?skill=<slug> filters the records to
   // those linked to ONE of the worker's own skills — the player-card evidence
   // bars land here. Same shape as ?date=; anything not a plain slug is ignored.
@@ -194,7 +262,6 @@ export default async function JournalPage({
   const t = await getTranslations("journal");
   const tSpaces = await getTranslations("spaces");
   const tRel = await getTranslations("relationshipTypes");
-  const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
   const tIntel = await getTranslations("journal.intelligence");
@@ -208,6 +275,7 @@ export default async function JournalPage({
   // key per canonical state and per next action; the page never spells the
   // words itself.
   const tVerify = await getTranslations("journal.verification");
+  const chainLabels = await buildEvidenceChainLabels();
   // The COLLAPSED card row is now the only thing naming the card on this page,
   // so it names it the way every other entry point does. `quickNav.identity`
   // stays shared with the profile hub's own `#profile-identity` anchor — one
@@ -229,14 +297,19 @@ export default async function JournalPage({
   // particular is called with the literal "person" and is consumed further
   // down purely to ORDER `ecRows`; ordering after the batch is identical to
   // ordering after a serial await.
+  //
+  // The worker row and the own profile row are THE request-cached session
+  // reads (perf 2026-10-23) — the shell, the player card and the bell read the
+  // same two rows in this render, so the page no longer re-queries them. A
+  // failed read is null in both, exactly as the page's own reads answered.
   const [
-    { data: worker },
-    { data: ownProfile },
+    workerRow,
+    { profile: ownProfile },
     { data: ecRows },
     workspaceForDefault,
   ] = await Promise.all([
-    supabase.from("workers").select("id").eq("profile_id", user.id).maybeSingle(),
-    supabase.from("profiles").select("full_name, email").eq("id", user.id).maybeSingle(),
+    getWorkerCoreRow(),
+    getSessionProfile(),
     supabase
       .from("engagement_contexts")
       .select(
@@ -246,8 +319,9 @@ export default async function JournalPage({
       .eq("status", "active")
       .in("relationship_slug", HISTORY_RELATIONSHIPS)
       .order("is_primary", { ascending: false }),
-    getWorkspaceContext("person"),
+    getWorkspaceContext(),
   ]);
+  const worker = workerRow ? { id: workerRow.id } : null;
   const submitterName =
     ownProfile?.full_name ??
     (ownProfile?.email ? ownProfile.email.split("@")[0] : null);
@@ -273,52 +347,78 @@ export default async function JournalPage({
   // The hierarchy now decides (see lib/journal/engagement-context-selection):
   //   A source-determined · B exactly one org context · C several → ASK ·
   //   D none → personal is correct.
-  // Ordering still puts the active workspace first so the list reads sensibly,
-  // but the DEFAULT is the resolution, and on ambiguity there is none.
+  // Ordering is the ONE choice order (active workspace's organization first,
+  // other organizations next, personal last — owner P0 2026-10-29), but the
+  // DEFAULT is the resolution, and on ambiguity there is none. The active
+  // workspace is also a resolution SIGNAL now (rule W): exactly one applicable
+  // context at the organization the person acts for is preselected.
   const activeWorkspaceOrgId = workspaceForDefault.activeWorkspaceId;
-  const ecOrdered = [...(ecRows ?? [])].sort(
-    (a, b) =>
-      Number(
-        ((b as { organization_id?: string | null }).organization_id ?? null) ===
-          activeWorkspaceOrgId,
-      ) -
-      Number(
-        ((a as { organization_id?: string | null }).organization_id ?? null) ===
-          activeWorkspaceOrgId,
-      ),
+  const activeOrganizationId = activeOrganizationOf(workspaceForDefault);
+  const actingWorkspace =
+    workspaceForDefault.workspaces.find(
+      (w) => w.id === activeWorkspaceOrgId && w.kind === "organization",
+    ) ?? null;
+  const actingOrgName = actingWorkspace?.name || null;
+  const ecOrdered = orderContextsForChoice(
+    ecRows ?? [],
+    activeOrganizationId,
+    (e) => (e as { organization_id?: string | null }).organization_id ?? null,
   );
 
-  const contextResolution = resolveEngagementContext({
-    candidates: (ecRows ?? []).map((e) => {
-      const r = e as {
-        id: string;
-        relationship_slug: string;
-        organization_id?: string | null;
-        status?: string | null;
-        started_at?: string | null;
-        ended_at?: string | null;
-        is_primary?: boolean | null;
-      };
-      return {
-        id: r.id,
-        relationshipSlug: r.relationship_slug,
-        organizationId: r.organization_id ?? null,
-        // The query already filters to status='active'; carry it explicitly so
-        // the pure model needs no knowledge of how it was fetched.
-        status: r.status ?? "active",
-        startedAt: r.started_at ?? null,
-        endedAt: r.ended_at ?? null,
-        isPrimary: r.is_primary === true,
-      };
-    }),
+  const contextCandidates = (ecRows ?? []).map((e) => {
+    const r = e as {
+      id: string;
+      relationship_slug: string;
+      organization_id?: string | null;
+      status?: string | null;
+      started_at?: string | null;
+      ended_at?: string | null;
+      is_primary?: boolean | null;
+    };
+    return {
+      id: r.id,
+      relationshipSlug: r.relationship_slug,
+      organizationId: r.organization_id ?? null,
+      // The query already filters to status='active'; carry it explicitly so
+      // the pure model needs no knowledge of how it was fetched.
+      status: r.status ?? "active",
+      startedAt: r.started_at ?? null,
+      endedAt: r.ended_at ?? null,
+      isPrimary: r.is_primary === true,
+    };
   });
+  // Bounded by the day the work happened (Codex P2 on #2884): the selected
+  // calendar day when there is one. The composer re-resolves on its own date
+  // with the same candidates, so a changed date never keeps a context whose
+  // bounds exclude it.
+  const contextResolution = resolveEngagementContext({
+    candidates: contextCandidates,
+    workDay: selectedDate,
+    activeOrganizationId,
+  });
+  // Acting for an organization with NO recorded work relationship there (a
+  // membership is access, not a work relationship): said plainly in the
+  // composer instead of that organization silently missing from the choice.
+  // Nothing is created — the person picks among their real contexts.
+  // The sentence is prepared whenever the person acts for an organization;
+  // the composer shows it only while the resolution for ITS work date says
+  // there is no applicable relationship there.
+  const activeWorkspaceNotice = actingWorkspace
+    ? t("activeWorkspaceNoRelationship", {
+        org:
+          actingOrgName ??
+          t(
+            `unnamedOrganization.${unnamedOrganizationKind(actingWorkspace?.organizationType)}`,
+          ),
+      })
+    : null;
 
   // ONE LABEL COMPOSER (issue #1689, defect J): the same facts the chat's
   // work-log selector hands to `composeDistinctEngagementLabels`, so a context
   // is named identically here and there. Rules live in
   // `lib/journal/engagement-label.ts`: an organization context reads "Org ·
-  // Relationship" (the org TYPE label when it has no display/legal name —
-  // never a bare "—"; existing role labels, no new i18n key); a personal one
+  // Relationship" ("Agency without a name" when it has no display/legal name —
+  // never a bare type that reads like a real name, owner P0 2026-10-29); a personal one
   // reads "Asmeninis įrašas [· title]" — the person's own title is what tells
   // two org-less contexts apart (production holds exactly that case: one
   // untitled personal context carrying entries, one titled "Darbų vadovas");
@@ -330,14 +430,11 @@ export default async function JournalPage({
       legal_name: string | null;
       organization_type: string | null;
     } | null;
-    const typeLabel =
-      org?.organization_type === "company"
-        ? tRole("company")
-        : org?.organization_type === "agency"
-          ? tRole("agency")
-          : null;
+    const typeLabel = org
+      ? t(`unnamedOrganization.${unnamedOrganizationKind(org.organization_type)}`)
+      : null;
     return {
-      orgName: org?.display_name ?? org?.legal_name ?? null,
+      orgName: orgDisplayName(org?.display_name, org?.legal_name),
       orgTypeLabel: typeLabel,
       title: e.title ?? null,
       relationshipLabel: tRel(e.relationship_slug),
@@ -422,6 +519,37 @@ export default async function JournalPage({
       ];
     }),
   );
+  // ENDED relationships still name their entries (owner 2026-09-29): an entry
+  // recorded for an organization the person no longer works with keeps
+  // "Org · Relationship", marked as ended — never presented as current, never
+  // anonymized. The org name comes through the historical read (names only).
+  {
+    const { data: endedRows } = await supabase
+      .from("engagement_contexts")
+      .select("id, relationship_slug, organization_id, organizations(display_name, legal_name)")
+      .eq("profile_id", user.id)
+      .eq("status", "ended")
+      .in("relationship_slug", HISTORY_RELATIONSHIPS);
+    const named = await withHistoricalOrgNames(
+      supabase,
+      (endedRows ?? []) as {
+        id: string;
+        relationship_slug: string;
+        organization_id: string | null;
+        organizations: { display_name: string | null; legal_name: string | null } | null;
+      }[],
+    );
+    for (const r of named) {
+      if (engagementChips.has(r.id)) continue;
+      const org = r.organizations?.display_name ?? r.organizations?.legal_name ?? null;
+      engagementChips.set(r.id, {
+        label: [org ?? t("personalEntry"), tRel(r.relationship_slug), t("contextEnded")].join(" · "),
+        dot: r.organization_id
+          ? WORKSPACE_ACCENT_DOT[workspaceAccentIndex(r.organization_id) % WORKSPACE_ACCENT_DOT.length]
+          : WORKSPACE_PERSONAL_DOT,
+      });
+    }
+  }
 
   if (!worker || engagements.length === 0) {
     // Fix C — distinguish the REAL reason there is no writable context, so
@@ -430,21 +558,15 @@ export default async function JournalPage({
     let hasRosterLink = false;
     let rosterOrgName: string | null = null;
     if (worker) {
-      const [cw, aw] = await Promise.all([
-        supabase
-          .from("company_workers")
-          .select("companies(display_name, legal_name)")
-          .eq("worker_id", worker.id)
-          .eq("status", "active")
-          .limit(1),
-        supabase
-          .from("agency_workers")
-          .select("agencies(legal_name)")
-          .eq("worker_id", worker.id)
-          .eq("status", "active")
-          .limit(1),
-      ]);
-      hasRosterLink = (cw.data?.length ?? 0) > 0 || (aw.data?.length ?? 0) > 0;
+      // Legacy `agency_workers` is not API-exposed (no SELECT grant, Model A
+      // retired) — see lib/guards/agency-workers-not-api-exposed.test.ts.
+      const cw = await supabase
+        .from("company_workers")
+        .select("companies(display_name, legal_name)")
+        .eq("worker_id", worker.id)
+        .eq("status", "active")
+        .limit(1);
+      hasRosterLink = (cw.data?.length ?? 0) > 0;
       const cwOrg = (
         cw.data?.[0] as
           | {
@@ -455,13 +577,7 @@ export default async function JournalPage({
             }
           | undefined
       )?.companies;
-      const awOrg = (
-        aw.data?.[0] as
-          | { agencies?: { legal_name: string | null } | null }
-          | undefined
-      )?.agencies;
-      rosterOrgName =
-        cwOrg?.display_name ?? cwOrg?.legal_name ?? awOrg?.legal_name ?? null;
+      rosterOrgName = cwOrg?.display_name ?? cwOrg?.legal_name ?? null;
     }
     const contextState =
       pending.length > 0 ? "pending" : hasRosterLink ? "roster" : "none";
@@ -480,9 +596,7 @@ export default async function JournalPage({
           metadata={{ surface: "journal", step: "no_context" }}
         />
         <header className="flex flex-col gap-1">
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("navTitle")}
-          </h1>
+          <PageTitle>{t("navTitle")}</PageTitle>
           <p className="text-sm leading-relaxed text-text-secondary">
             {t("navSubtitle")}
           </p>
@@ -544,12 +658,18 @@ export default async function JournalPage({
   // `esco_occupations.isco_group`), so the editors compose exactly the module
   // fields that family logs. Two bounded reads inside one batch slot; an
   // unmapped profession carries null and composes nothing.
-  const [ownPath, { data: skillIdRows }, linkRead, entriesRead, organizationLedger] =
-    await Promise.all([
+  const [
+    ownPath,
+    { data: skillIdRows },
+    linkRead,
+    entriesRead,
+    organizationLedger,
+    projectsByOrg,
+  ] = await Promise.all([
       readOwnOccupationPath(supabase, worker.id),
       supabase
         .from("worker_skills")
-        .select("skill_id, verified, source, skills(slug)")
+        .select("skill_id, verified, verified_by, verified_at, source, skills(slug)")
         .eq("worker_id", worker.id),
       readWorkerEntrySkillLinks(supabase, worker.id),
       // G4 bridge: THE canonical journal-list core (v3 select + legacy
@@ -564,7 +684,15 @@ export default async function JournalPage({
       // "work in numbers" can name the second ledger instead of hiding it.
       // RLS: the person's own rows. A failed read is null (UNKNOWN).
       readOrganizationRecords(supabase, worker.id),
+      // The projects this worker is ACTIVELY assigned to (RLS: their own
+      // rows). The composer needs them to ask "which project?" when there
+      // are two or more — the DB never guesses between them.
+      readActiveProjectsByOrg(supabase, worker.id),
     ]);
+  const composerEngagements: JournalEngagement[] = engagements.map((e, i) => {
+    const orgId = ecOrdered[i]?.organization_id ?? null;
+    return { ...e, projects: projectsForContext(projectsByOrg, orgId) };
+  });
   // The DAY records (what the calendar places and the day checks add) and
   // the PERIOD records (beside, never on a day) — one reading, split here.
   // Both null when the ledger could not be read (UNKNOWN ≠ ZERO).
@@ -631,7 +759,13 @@ export default async function JournalPage({
   const idToSlug = new Map<string, string>();
   const declaredSlugSet = new Set(availableSkillsForLinks.map((s) => s.slug));
   const verifiedSkillIds = new Set<string>();
-  for (const r of skillIdRows ?? []) {
+  // A recorded confirmation counts only while it STANDS
+  // (lib/evidence/skill-confirmation-standing.ts).
+  const standingSkillRows = withStandingConfirmation(
+    skillIdRows ?? [],
+    anyRecordedConfirmation(skillIdRows ?? []) ? await readOwnStandingConfirmedSkillIds(worker.id) : null,
+  );
+  for (const r of standingSkillRows) {
     const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
     if (r.skill_id && slug) idToSlug.set(r.skill_id as string, slug);
     if (r.skill_id && (r as { verified?: boolean }).verified) {
@@ -655,12 +789,42 @@ export default async function JournalPage({
   // Entries with their metrics + confirmation status — read through THE
   // canonical journal-list core (G4): v3 lifecycle select (deleted_at,
   // superseded_by hidden), legacy projection fallback while migration 0018
-  // is unapplied, newest first. A failed read renders as an empty list,
-  // exactly as the inline query degraded before the extraction.
+  // is unapplied, newest first. A failed read is `null` and renders as
+  // "could not be read" — never as an empty journal (SEP-7: UNKNOWN ≠ ZERO).
   type JournalEntryRow = JournalEntryListRow;
   const entries: JournalEntryRow[] | null = entriesRead.ok
     ? entriesRead.entries
     : null;
+  // What each listed correction ANSWERED (walk work-verification 2026-10-25):
+  // the decided original is not a card (counted once), so its decision and
+  // note reach the worker only through its correction's card. Provenance
+  // from the same read — no second query, no second count.
+  const correctionProvenance = entriesRead.ok
+    ? entriesRead.correctionProvenance
+    : {};
+
+  // ── Client review state (EVID-2 slice 2) ─────────────────────────────────
+  // Per entry: submitted? accepted / correction requested / disputed? and which
+  // counterparties the worker may submit to (valid registered links only).
+  // The ids of the entries a listed correction points at are included, so a
+  // corrected version knows its original WAS submitted ("Resubmit"). A failed
+  // read (null) shows no review panel - unknown is never rendered as "none".
+  const reviewStateIds = [
+    ...new Set(
+      (entries ?? []).flatMap((e) =>
+        e.correction_of ? [e.id, e.correction_of] : [e.id],
+      ),
+    ),
+  ];
+  const reviewStates =
+    entries && entries.length > 0
+      ? await readEntryReviewStates(supabase, reviewStateIds)
+      : null;
+  // Originals that already have a live correction among the read entries:
+  // their "changes requested" was answered, so no second correction is offered.
+  const correctedOriginalIds = new Set(
+    (entries ?? []).map((e) => e.correction_of).filter((id): id is string => !!id),
+  );
 
   // ── Lazy historical heal (Universal Journal Recall v2) ──────────────────
   // Up to 5 own live entries whose latest `pipeline_version` metric is below
@@ -680,18 +844,20 @@ export default async function JournalPage({
         return latest < JOURNAL_PIPELINE_VERSION;
       })
       .slice(0, 5);
-    for (const e of stale) {
-      try {
-        await processJournalEntrySkills({
+    // In PARALLEL, not one after another (2026-10-18 perf: a person with five
+    // unhealable entries paid five sequential pipeline runs on every visit).
+    // Entries are independent and the pipeline is idempotent per entry.
+    await Promise.allSettled(
+      stale.map((e) =>
+        processJournalEntrySkills({
           entryId: e.id,
           text: e.original_text ?? "",
           locale,
           revalidate: false,
-        });
-      } catch {
-        // Heal is best-effort — a failure never blocks the page.
-      }
-    }
+        }),
+      ),
+    );
+    // Heal is best-effort — a rejection never blocks the page (allSettled).
   }
 
   // EDIT preload (v5): when the worker arrived via ?editing=<id>, reconstruct
@@ -714,6 +880,7 @@ export default async function JournalPage({
   const editingEntry = editingRow
     ? buildEditingEntry({
         id: editingRow.id,
+        createdAt: editingRow.created_at ?? null,
         originalText: editingRow.original_text,
         metrics: editingRow.journal_entry_metrics,
         engagementContextId: editingRow.engagement_context_id ?? null,
@@ -726,9 +893,12 @@ export default async function JournalPage({
   // Evidence Status Strip (v1) for the list status zone — a compact legend
   // showing which honest states the worker's entries are actually in. Derived
   // purely from the existing review result; "confirmed" lights up ONLY when a
-  // real approved confirmation exists, never automatically.
+  // real approved confirmation exists, never automatically. The signed-in
+  // person IS the subject, so their own approval of their own entry never
+  // counts here (decision 0028 J-2.2): the strip's "confirmed" chip and the
+  // CV bridge's "confirmed" count mean another person confirmed it.
   const evidenceStatuses = (entries ?? []).map((e) =>
-    deriveReviewResult(e.journal_entry_confirmations),
+    deriveIndependentReviewResult(e.journal_entry_confirmations, user.id),
   );
 
   // Diary day-grouping (CV/records feed cleanup): the feed reads as a dated
@@ -854,22 +1024,13 @@ export default async function JournalPage({
       totalMinutes: g.totalMinutes,
       /**
        * The SAME derivation the rest of the page uses for "confirmed"
-       * (`deriveReviewResult` === "approved") — never a second rule.
-       *
-       * WHAT THIS COUNT CANNOT SAY, and why the calendar's words are careful:
-       * `deriveReviewResult` also returns "approved" when the SUBJECT
-       * approved their own entry (a worker who manages their organization),
-       * and this page's reader selects `confirmation_scope, created_at,
-       * confirmer_role` — not `confirmer_id` — so `isSelfConfirmation` cannot
-       * be evaluated here (review-status.ts documents exactly this). The
-       * marker therefore says a JOURNAL RECORD is confirmed and never that a
-       * MANAGER confirmed it: claiming independence the data cannot support
-       * would dress self-declared evidence as external confirmation (SEP-3).
-       * Widening the reader's select is a change to a shared canonical reader
-       * and belongs in its own slice, not in a UX pass.
+       * (`deriveIndependentReviewResult` === "approved") — never a second
+       * rule. The signed-in person is the subject, so a self-approval
+       * (decision 0028 J-2.2) never counts as a confirmed day.
        */
       confirmedCount: g.entries.filter(
-        (e) => deriveReviewResult(e.journal_entry_confirmations) === "approved",
+        (e) =>
+          deriveIndependentReviewResult(e.journal_entry_confirmations, user.id) === "approved",
       ).length,
       reportedMinutes: reportedByDay.get(g.isoKey) ?? 0,
     })).concat(
@@ -927,6 +1088,67 @@ export default async function JournalPage({
   if (skillFilterSlug) calendarCarry.skill = skillFilterSlug;
   if (periodKey !== "all") calendarCarry.period = periodKey;
   if (calendarScale !== "month") calendarCarry.cal = calendarScale;
+  // THE SELECTED DAY AS ONE OBJECT (Step 2). Built only from the rows already
+  // loaded above — the same entries, metrics, confirmations and skill links
+  // the cards below render — plus the day's own photo previews under the
+  // viewer's session. A day with no entries draws no object.
+  const selectedDayGroup =
+    dayFilterActive && selectedDate
+      ? (entryDayGroups.find((g) => g.isoKey === selectedDate) ?? null)
+      : null;
+  let dayObject: ReturnType<typeof buildDayObject> | null = null;
+  let dayPhotos: DayPhotoPreviews = { status: "ok", photos: [], total: 0 };
+  if (selectedDayGroup && selectedDayGroup.entries.length > 0) {
+    const photoCounts = await readPhotoCountsByEntry(
+      supabase,
+      selectedDayGroup.entries.map((e) => e.id),
+    );
+    dayObject = buildDayObject(
+      selectedDayGroup.entries.map((e) => {
+        const metrics = e.journal_entry_metrics ?? [];
+        const site = metrics.find((m) => m.metric_slug === "site_name");
+        const dir = metrics.find((m) => m.metric_slug === "work_direction");
+        const verification = deriveWorkVerificationState({
+          reviewResult: deriveReviewResult(e.journal_entry_confirmations),
+          context: e.engagement_context_id
+            ? (contextFacts.get(e.engagement_context_id) ?? null)
+            : null,
+          // The signed-in person IS the subject: their own approval is
+          // `self_confirmed`, never "manager confirmed" (review-status.ts).
+          selfConfirmedOnly: isSelfConfirmedOnly(e.journal_entry_confirmations, user.id),
+        });
+        const org = e.engagement_context_id
+          ? engagementChips.get(e.engagement_context_id)?.label
+          : null;
+        return {
+          id: e.id,
+          places: [org, site?.value_text?.trim() || null].filter(
+            (v): v is string => Boolean(v) && v !== "—",
+          ),
+          activity: dir?.value_text ? tProf(dir.value_text) : null,
+          minutes: Math.round(
+            deriveEntryWorkTime({
+              entryId: e.id,
+              createdAt: e.created_at,
+              originalText: e.original_text,
+              metrics,
+            }).totalHours * 60,
+          ),
+          verification: verification.state,
+          decisions: deriveReviewTimeline(e.journal_entry_confirmations),
+          photoCount: photoCounts.get(e.id) ?? 0,
+          skills: (linksByEntry.get(e.id) ?? []).flatMap((sid) => {
+            const slug = idToSlug.get(sid);
+            const name = slug ? skillNameOf(slug) : null;
+            return name
+              ? [{ id: sid, name, confirmed: verification.state === "verified" }]
+              : [];
+          }),
+        };
+      }),
+    );
+    dayPhotos = await readDayPhotoPreviews(selectedDayGroup.entries.map((e) => e.id));
+  }
   const journalEvidenceActive: EvidenceStatus[] = ["self_declared"];
   if (
     evidenceStatuses.some((s) => s === "submitted" || s === "changes_requested")
@@ -959,7 +1181,15 @@ export default async function JournalPage({
   // and declared skills loaded above — no second read, so the figures can
   // never disagree with the diary beneath them. Unreadable entries or links
   // → the section is withheld rather than rendered as zero hours (SEP-7).
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = viewerToday.todayIso;
+  // ONE bounded photo-count read over the live entries — shared by the work
+  // intelligence (evidence strength) and each row's EvidenceChain below.
+  const entryPhotoCounts = entries
+    ? await readPhotoCountsByEntry(
+        supabase,
+        entries.map((e) => e.id),
+      )
+    : null;
   const workIntelligence =
     entries && skillLinksReady
       ? assembleWorkIntelligence({
@@ -968,6 +1198,7 @@ export default async function JournalPage({
           provenanceByEntry,
           skillRows: (skillIdRows ?? []) as unknown as WorkerSkillSourceRow[],
           todayIso,
+          horizonIso: viewerToday.horizonIso,
           focus: periodKey,
           coverage: entriesRead.ok
             ? {
@@ -978,10 +1209,10 @@ export default async function JournalPage({
             : undefined,
           // Evidence strength needs to know which entries carry photos —
           // one bounded read over the live ids already in hand.
-          photoCountByEntry: await readPhotoCountsByEntry(
-            supabase,
-            entries.map((e) => e.id),
-          ),
+          photoCountByEntry: entryPhotoCounts ?? new Map<string, number>(),
+          // The signed-in person IS the subject: their own approval of their
+          // own entry is not a confirmation (review-status.ts).
+          subjectProfileId: user.id,
           organizationRecords,
           organizationPeriodRecords,
         })
@@ -1014,16 +1245,24 @@ export default async function JournalPage({
   // reads as before: the avatar never depended on the card, and the labels and
   // the thermometer are both gated on the SAME `manoCard` non-null check — so
   // they resolve together, and neither is fetched when there is no card.
-  const [manoCard, manoAvatar] = await Promise.all([
+  const [manoCard, manoAvatar, manoRelationships] = await Promise.all([
     getWorkerPlayerCard(),
     getOwnAvatar(),
+    // For the decision-0025 total on the card's fact strip (same rule as the profile).
+    readOwnExperienceRelationships(supabase, user.id).catch(() => null),
   ]);
   const [manoCardLabels, manoThermometer] = manoCard
     ? await Promise.all([
         // Hours per engagement on the card — the SAME journal model this
         // page already assembled above, joined on engagement id; no second
         // read, no second ledger.
-        buildPlayerCardLabels(manoCard, { contexts: workIntelligence?.contexts ?? null }),
+        buildPlayerCardLabels(manoCard, {
+          contexts: workIntelligence?.contexts ?? null,
+          // The identity stage's fact strip: the SAME model's all-time row.
+          allTime: workIntelligence?.periods.find((p) => p.key === "all") ?? null,
+          allTimeTruncated: workIntelligence?.coverage.truncated ?? false,
+          ...experienceFiguresOf(workIntelligence, manoRelationships),
+        }),
         getOwnThermometer().then(toThermometerView),
       ])
     : [null, null];
@@ -1036,12 +1275,10 @@ export default async function JournalPage({
       />
       <header id="mano-cv-top" className="flex flex-col gap-1 scroll-mt-20">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("navTitle")}
-          </h1>
+          <PageTitle>{t("navTitle")}</PageTitle>
           <Link
             href="/dashboard"
-            className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+            className="shrink-0 rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
             data-testid="room-my-spaces-link"
           >
             {tSpaces("mySpaces")} →
@@ -1053,9 +1290,28 @@ export default async function JournalPage({
         >
           {t("navSubtitle")}
         </p>
+        {actingOrgName ? (
+          // WHOSE journal this is, said plainly (owner order 2026-10-01:
+          // company context is company management, not the owner's personal
+          // CV). The core nav is deliberately the same in every context, so
+          // the page itself says it is the PERSON's diary and points at the
+          // organization's own work — never a silent mix of the two.
+          <p
+            className="mt-1 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+            data-testid="journal-org-context-notice"
+          >
+            {t("orgContextNotice", { org: actingOrgName })}{" "}
+            <Link
+              href="/dashboard/projects"
+              className="font-medium text-brand-blue underline-offset-2 hover:underline"
+            >
+              {t("orgContextCta")}
+            </Link>
+          </p>
+        ) : null}
       </header>
 
-      {/* The page-local quick-nav strip is gone (target worker IA 2026-09-13
+{/* The page-local quick-nav strip is gone (target worker IA 2026-09-13
           §4: a second nav strip is card soup) — three first-level blocks
           lead on a phone: recording, today's records, one numbers card. */}
 
@@ -1085,6 +1341,9 @@ export default async function JournalPage({
       {manoCard && manoCardLabels ? (
         <details
           id="mano-cv-identity"
+          // A requested card mode (?card=skills — a link, the chat) opens the
+          // card on that mode; otherwise it stays one tap away as before.
+          open={cardMode !== null || undefined}
           className="group order-4 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
@@ -1109,6 +1368,7 @@ export default async function JournalPage({
               labels={manoCardLabels}
               thermometer={manoThermometer}
               avatarUrl={manoAvatar.signedUrl}
+              initialMode={cardMode ?? "identity"}
             />
             <WorkerReadinessPanel card={manoCard} />
           </div>
@@ -1157,8 +1417,11 @@ export default async function JournalPage({
               // git history: stale create-mode text on client-side ?editing
               // navigation).
               key={editingId ?? "new"}
-              engagements={engagements}
+              engagements={composerEngagements}
               contextResolution={contextResolution}
+              activeWorkspaceNotice={activeWorkspaceNotice}
+              contextCandidates={contextCandidates}
+              activeOrganizationId={activeOrganizationId}
               directions={directions}
               workerSkills={workerSkills}
               editingEntry={editingEntry}
@@ -1168,15 +1431,19 @@ export default async function JournalPage({
         ) : composeFull ? (
           <div className="flex flex-col gap-2" data-testid="journal-compose-full">
             <JournalEntryComposer
-              key="new"
-              engagements={engagements}
+              key={selectedDate ?? "new"}
+              defaultWorkDate={selectedDate}
+              engagements={composerEngagements}
               contextResolution={contextResolution}
+              activeWorkspaceNotice={activeWorkspaceNotice}
+              contextCandidates={contextCandidates}
+              activeOrganizationId={activeOrganizationId}
               directions={directions}
               workerSkills={workerSkills}
               templates={journalTemplates}
             />
             <Link
-              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              href={journalComposerHref(selectedDate, false) as "/dashboard"}
               className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
               data-testid="journal-compose-full-back"
             >
@@ -1185,8 +1452,15 @@ export default async function JournalPage({
           </div>
         ) : (
           <JournalQuickRecord
+            key={selectedDate ?? "today"}
             locale={locale}
             labels={workLogLabels}
+            selectedDay={selectedDate}
+            selectedDayLabel={
+              selectedDate && selectedDate !== todayIsoKey
+                ? formatUtcDate(selectedDate, locale)
+                : null
+            }
             otherDoors={
               <p
                 className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-text-muted"
@@ -1197,7 +1471,7 @@ export default async function JournalPage({
                   // `?intent=log-work` — the chat opens the work-log flow on
                   // arrival, never the generic greeting.
                   href={"/dashboard?intent=log-work" as "/dashboard"}
-                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  className="inline-flex min-h-11 items-center font-medium text-text-primary underline-offset-4 hover:underline"
                   data-testid="journal-log-via-chat-cta"
                 >
                   {t("logViaChatCta")} →
@@ -1205,14 +1479,14 @@ export default async function JournalPage({
                 {/* W5 slice 2: the voice surface keeps its door. */}
                 <Link
                   href="/dashboard/journal/voice"
-                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  className="inline-flex min-h-11 items-center font-medium text-text-primary underline-offset-4 hover:underline"
                   data-testid="journal-log-via-voice-cta"
                 >
                   {t("logViaVoiceCta")} →
                 </Link>
                 <Link
-                  href={"/dashboard/journal?compose=full#journal-composer" as "/dashboard"}
-                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  href={journalComposerHref(selectedDate, true) as "/dashboard"}
+                  className="inline-flex min-h-11 items-center font-medium text-text-primary underline-offset-4 hover:underline"
                   data-testid="journal-compose-full-link"
                 >
                   {t("record.detailed")} →
@@ -1352,7 +1626,7 @@ export default async function JournalPage({
               {formatUtcDate(selectedDate, locale)}
             </span>
             <Link
-              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              href={journalComposerHref(selectedDate, false) as "/dashboard"}
               data-testid="journal-day-record"
               className="inline-flex min-h-11 items-center rounded-md border border-brand-blue/40 px-2.5 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
             >
@@ -1369,6 +1643,14 @@ export default async function JournalPage({
             </Link>
           </div>
         )}
+        {dayObject && selectedDate ? (
+          <JournalDayObject
+            day={dayObject}
+            iso={selectedDate}
+            locale={locale}
+            photos={dayPhotos}
+          />
+        ) : null}
         {/* Wagon 5 first view: the status/legend/count lines are REAL and
             stay word-for-word — but behind ONE deliberate disclosure, so the
             default view is input + history, not a wall of technical status.
@@ -1409,12 +1691,14 @@ export default async function JournalPage({
           className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-cv-bridge"
         >
-          {totalEntryCount > 0
-            ? t("cvBridge", {
-                confirmed: confirmedEntryCount,
-                total: totalEntryCount,
-              })
-            : t("cvBridgeEmpty")}{" "}
+          {entries === null
+            ? t("cvBridgeUnavailable")
+            : totalEntryCount > 0
+              ? t("cvBridge", {
+                  confirmed: confirmedEntryCount,
+                  total: totalEntryCount,
+                })
+              : t("cvBridgeEmpty")}{" "}
           <Link
             href="/cv"
             className="font-medium text-brand-blue hover:underline"
@@ -1424,28 +1708,42 @@ export default async function JournalPage({
           </Link>
         </p>
         {/* Proof-engine loop strip — ONE dense row, real counts only:
-            įrašai → įgūdžių įrodymai → CV → pasiūlymai. */}
-        <p
-          className="text-meta leading-relaxed text-text-muted"
-          data-testid="journal-proof-loop"
-        >
-          {t("proofLoop.stripPeriod", {
-            entries: entriesThisMonth,
-            period: t("intelligence.period.month"),
-            evidenced: evidencedSkillIds.size,
-            confirmed: verifiedSkillIds.size,
-          })}{" "}
-          <Link
-            href="/cv"
-            className="font-medium text-brand-blue hover:underline"
-            data-testid="journal-proof-loop-cv-link"
+            įrašai → įgūdžių įrodymai → CV → pasiūlymai. A failed
+            list read shows no counts at all (SEP-7). */}
+        {entries !== null && (
+          <p
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="journal-proof-loop"
           >
-            {t("proofLoop.cvLink")} →
-          </Link>
-        </p>
+            {t("proofLoop.stripPeriod", {
+              entries: entriesThisMonth,
+              period: t("intelligence.period.month"),
+              evidenced: evidencedSkillIds.size,
+              confirmed: verifiedSkillIds.size,
+            })}{" "}
+            <Link
+              href="/cv"
+              className="font-medium text-brand-blue hover:underline"
+              data-testid="journal-proof-loop-cv-link"
+            >
+              {t("proofLoop.cvLink")} →
+            </Link>
+          </p>
+        )}
           </div>
         </details>
-        {diaryScope !== "recent" && visibleDayGroups.length === 0 ? (
+        {entries === null ? (
+          /* The list read FAILED. Not an empty journal and not an empty day:
+             no first-entry door, no "nothing on this day" (SEP-7). */
+          <div
+            role="status"
+            className="flex flex-col gap-1 rounded-md border border-border-subtle bg-surface-1/40 px-4 py-4"
+            data-testid="journal-list-unavailable"
+          >
+            <p className="text-sm font-medium text-text-primary">{t("listUnavailableTitle")}</p>
+            <p className="text-sm leading-relaxed text-text-secondary">{t("listUnavailable")}</p>
+          </div>
+        ) : diaryScope !== "recent" && visibleDayGroups.length === 0 ? (
           /* A day — or a period — the person navigated to that holds no
              records. A real answer over a known window (SEP-7: a recorded
              zero, not an unknown), with the one action that changes it and
@@ -1460,7 +1758,7 @@ export default async function JournalPage({
               {diaryScope === "day" ? t("dayNav.dayEmpty") : t("dayNav.periodEmpty")}
             </p>
             <Link
-              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              href={journalComposerHref(selectedDate, false) as "/dashboard"}
               className="self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
               data-testid="journal-day-empty-record"
             >
@@ -1477,11 +1775,28 @@ export default async function JournalPage({
             // flow, not on the generic greeting. "Create your first entry"
             // that drops the worker on the home screen is the exact
             // interaction the tester read as being thrown out of the journal.
-            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work" }}
+            // SECONDARY (activation audit fix #7): the ONE primary on an empty
+            // journal is the recorder ABOVE this list; this door LEAVES the
+            // page, so it is bordered, never a second gradient button.
+            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work", variant: "secondary" }}
           />
         ) : (
           <div className="flex flex-col gap-4">
-            {visibleDayGroups.map((group, idx) => {
+            {(() => {
+              // THE STREAM'S SCALE (premium journal, 2026-09-29): each day's
+              // bar is drawn against the longest day on screen — the same
+              // rhythm the calendar week draws, from the same figures.
+              const maxDayMinutes = Math.max(
+                60,
+                ...visibleDayGroups.map((g) => g.totalMinutes),
+              );
+              const weekdayFmt = createUtcFormatter(locale, { weekday: "long" });
+              const yesterdayIso = new Date(
+                Date.parse(`${todayIsoKey}T00:00:00Z`) - 86_400_000,
+              )
+                .toISOString()
+                .slice(0, 10);
+              return visibleDayGroups.map((group, idx) => {
               // Compact day card: date + entry count + summed hours (only when
               // the day has time entries). Newest day open, older days collapse
               // so the records surface stays a tidy diary, not an endless raw
@@ -1490,8 +1805,7 @@ export default async function JournalPage({
                 group.totalMinutes > 0
                   ? formatDuration(
                       group.totalMinutes,
-                      "minutes",
-                      locale === "en" ? "en" : "lt",
+                      "minutes", durationLocale(locale),
                     )
                   : null;
               return (
@@ -1502,24 +1816,46 @@ export default async function JournalPage({
                   data-testid="journal-day-group"
                   data-day={group.key}
                 >
-                  <summary className="flex min-h-[3rem] cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
-                    <span className="flex items-center gap-2">
+                  <summary className="relative flex min-h-[3.5rem] cursor-pointer list-none items-center justify-between gap-3 overflow-hidden px-4 py-3 [&::-webkit-details-marker]:hidden">
+                    {/* The day's length as a line along the header's foot. */}
+                    {group.totalMinutes > 0 ? (
+                      <span
+                        aria-hidden
+                        className="rhythm-grow-x absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-brand-cyan/70 to-brand-cyan/20"
+                        style={{
+                          width: `${Math.max(4, (group.totalMinutes / maxDayMinutes) * 100)}%`,
+                        }}
+                      />
+                    ) : null}
+                    <span className="flex min-w-0 items-center gap-3">
                       <span
                         aria-hidden
                         className="text-text-muted transition-transform group-open:rotate-90"
                       >
                         ▸
                       </span>
-                      <span
-                        className="font-display text-sm font-semibold text-text-primary"
-                        data-testid="journal-day-header"
-                      >
-                        {group.label}
+                      <span className="flex min-w-0 flex-col">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                          {group.isoKey === todayIsoKey
+                            ? t("stream.today")
+                            : group.isoKey === yesterdayIso
+                              ? t("stream.yesterday")
+                              : (weekdayFmt(group.isoKey) ?? "")}
+                        </span>
+                        <span
+                          className="font-display text-base font-semibold text-text-primary sm:text-lg"
+                          data-testid="journal-day-header"
+                        >
+                          {group.label}
+                        </span>
                       </span>
                     </span>
-                    <span className="flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+                    <span className="flex items-center gap-3 font-mono text-meta uppercase tracking-label text-text-muted">
                       {totalLabel && (
-                        <span data-testid="journal-day-hours">
+                        <span
+                          className="font-display text-xl font-bold normal-case tracking-tightest text-text-primary tabular-nums sm:text-2xl"
+                          data-testid="journal-day-hours"
+                        >
                           {totalLabel}
                         </span>
                       )}
@@ -1537,7 +1873,13 @@ export default async function JournalPage({
                       words — only the shape is shared with identity/history. */}
                   <div className="px-4 pb-4">
                   <WorkSpine>
-                    {group.entries.map((e) => {
+                    {(() => {
+                    // ONE explanation per state per day (owner 2026-10-10: the
+                    // same sentence was repeated on every card). The first entry
+                    // in a state carries the sentence + next step; later entries
+                    // in the SAME state show the state chip only.
+                    const explainedStates = new Set<string>();
+                    return group.entries.map((e) => {
                       // Evidence Decision Timeline v1 — the real, ordered human-decision
                       // history (append-only rows). Empty while still submitted → the
                       // timeline shows "created → waiting", never a fabricated step.
@@ -1563,7 +1905,18 @@ export default async function JournalPage({
                         context: e.engagement_context_id
                           ? (contextFacts.get(e.engagement_context_id) ?? null)
                           : null,
+                        // A SELF-approval (the signed-in subject approved their
+                        // own entry) reads `self_confirmed` — never "Vadovo
+                        // patvirtinta". The reader selects `confirmer_id`
+                        // (JOURNAL_ENTRY_CONFIRMATIONS_EMBED), so this is
+                        // answerable here.
+                        selfConfirmedOnly: isSelfConfirmedOnly(
+                          e.journal_entry_confirmations,
+                          user.id,
+                        ),
                       });
+                      const explainVerification = !explainedStates.has(verification.state);
+                      explainedStates.add(verification.state);
                       const metrics = e.journal_entry_metrics ?? [];
                       const area =
                         metrics.find((m) => m.metric_slug === "quantity") ??
@@ -1584,16 +1937,45 @@ export default async function JournalPage({
                       // v3 — Delete control is offered only when the entry has no
                       // external confirmations yet. The RPC re-enforces the same
                       // rule server-side, so a stale client can't escalate.
+                      // An entry submitted to a client is no longer a private
+                      // draft: it is changed only through the visible
+                      // correction path below, never silently edited away.
+                      const reviewState = reviewStates?.get(e.id) ?? null;
+                      const reviewPhase = entryReviewPhase(reviewState);
                       const canDelete =
-                        (e.journal_entry_confirmations ?? []).length === 0;
+                        (e.journal_entry_confirmations ?? []).length === 0 &&
+                        reviewState?.submission == null;
                       // Edit-in-place (journal compact UX v1): the same full
                       // editable state the `?editing=` flow reconstructs, built
                       // per unconfirmed entry so the row's drawer-based editor
                       // opens over the list — no navigation, the worker's
                       // scroll position / selected day stay exactly as-is.
+                      // An EMPLOYER asked for changes (manager review in the
+                      // inbox, decision `changes_requested`) - the worker must
+                      // be able to answer it. Before, only the client-review
+                      // phase offered the correction control, so this request
+                      // was a dead end (walk 2026-10-09).
+                      // A REJECTION is answerable the same way (walk-spec
+                      // 2026-10-25): it was a dead end — no edit, no delete,
+                      // no correction. The correction is a NEW entry
+                      // (`correction_of`); the rejected one stays as history
+                      // with its decision (journal_entry_supersede_v2 keeps a
+                      // decided original untouched). The original is then no
+                      // card of its own (counted once); its decision and note
+                      // are read on the correction's card
+                      // (`correctionProvenance` → CorrectionProvenanceLine and
+                      // the timeline's "corrected-from" step).
+                      const latestEmployerDecision = timeline.at(-1)?.result;
+                      const employerAskedChanges =
+                        (latestEmployerDecision === "changes_requested" ||
+                          latestEmployerDecision === "rejected") &&
+                        !correctedOriginalIds.has(e.id) &&
+                        reviewPhase !== "correction_requested" &&
+                        reviewPhase !== "disputed";
                       const rowEditingEntry = canDelete
                         ? buildEditingEntry({
                             id: e.id,
+                            createdAt: e.created_at ?? null,
                             originalText: e.original_text,
                             metrics: e.journal_entry_metrics,
                             engagementContextId: e.engagement_context_id ?? null,
@@ -1662,6 +2044,52 @@ export default async function JournalPage({
                             verification.state,
                           )}
                           standingSolid={spineNodeSolid(verification.state)}
+                          provenanceSlot={
+                            correctionProvenance[e.id] ? (
+                              <CorrectionProvenanceLine
+                                key="corrected-from"
+                                entryId={e.id}
+                                steps={correctionProvenance[e.id]}
+                              />
+                            ) : undefined
+                          }
+                          needsAttention={
+                            employerAskedChanges ||
+                            (!!reviewState && reviewPhase !== "none")
+                          }
+                          chainSlot={
+                            <EvidenceChain
+                              size="compact"
+                              labels={chainLabels}
+                              chain={deriveEvidenceChain({
+                                verification: verification.state,
+                                photoCount: entryPhotoCounts
+                                  ? (entryPhotoCounts.get(e.id) ?? 0)
+                                  : null,
+                              })}
+                              testId={`journal-entry-evidence-chain-${e.id}`}
+                            />
+                          }
+                          correctionSlot={
+                            employerAskedChanges ? (
+                              <JournalEntryEditLauncher
+                                key="employer-correct-launcher"
+                                entry={buildEditingEntry({
+                                  id: e.id,
+                                  createdAt: e.created_at ?? null,
+                                  originalText: e.original_text,
+                                  metrics: e.journal_entry_metrics,
+                                  engagementContextId: e.engagement_context_id ?? null,
+                                  linkedSkillSlugs: (linksByEntry.get(e.id) ?? [])
+                                    .map((sid) => skillIdToSlug.get(sid))
+                                    .filter((s): s is string => !!s),
+                                })}
+                                engagements={engagements}
+                                directions={directions}
+                                workerSkills={workerSkills}
+                              />
+                            ) : undefined
+                          }
                           editSlot={
                             rowEditingEntry ? (
                               <JournalEntryEditLauncher
@@ -1696,17 +2124,99 @@ export default async function JournalPage({
                               <EvidenceDecisionTimeline
                                 createdAt={e.created_at}
                                 events={timeline}
+                                correctedFrom={correctionProvenance[e.id]}
+                                awaiting={
+                                  verification.state !== "verifier_available" &&
+                                  verification.state !== "verifier_not_identified"
+                                }
                               />
+                              {reviewState && reviewPhase !== "none" ? (
+                                <EntryReviewPanel
+                                  entryId={e.id}
+                                  phase={reviewPhase}
+                                  state={reviewState}
+                                  resubmission={isResubmission(
+                                    reviewState,
+                                    reviewStates ?? new Map(),
+                                  )}
+                                  correctSlot={
+                                    reviewPhase === "correction_requested" ||
+                                    reviewPhase === "disputed" ? (
+                                      <JournalEntryEditLauncher
+                                        key="correct-launcher"
+                                        entry={buildEditingEntry({
+                                          id: e.id,
+                                          createdAt: e.created_at ?? null,
+                                          originalText: e.original_text,
+                                          metrics: e.journal_entry_metrics,
+                                          engagementContextId:
+                                            e.engagement_context_id ?? null,
+                                          linkedSkillSlugs: (
+                                            linksByEntry.get(e.id) ?? []
+                                          )
+                                            .map((sid) => skillIdToSlug.get(sid))
+                                            .filter((s): s is string => !!s),
+                                        })}
+                                        engagements={engagements}
+                                        directions={directions}
+                                        workerSkills={workerSkills}
+                                      />
+                                    ) : undefined
+                                  }
+                                />
+                              ) : null}
                             </>
                           }
                         >
-                          {/* 1 · Entry text — first, so the worker immediately sees
-                        what they wrote. Long unbroken strings wrap cleanly. */}
+                          {/* 0 · WHERE · HOW LONG (premium journal, 2026-09-29):
+                              the organization the entry was recorded for and
+                              the entry's OWN site snapshot, then its length
+                              through THE canonical work-time rule. Nothing is
+                              inherited: no site → the org alone; no org → the
+                              site alone; neither → the line is not drawn. */}
+                          {(() => {
+                            const where = [
+                              e.engagement_context_id
+                                ? engagementChips.get(e.engagement_context_id)?.label
+                                : null,
+                              site?.value_text?.trim() || null,
+                            ].filter((v): v is string => Boolean(v) && v !== "—");
+                            const minutes = Math.round(
+                              deriveEntryWorkTime({
+                                entryId: e.id,
+                                createdAt: e.created_at,
+                                originalText: e.original_text,
+                                metrics: e.journal_entry_metrics ?? [],
+                              }).totalHours * 60,
+                            );
+                            if (where.length === 0 && minutes <= 0) return null;
+                            return (
+                              <div
+                                className="flex items-start justify-between gap-3"
+                                data-testid={`journal-entry-head-${e.id}`}
+                              >
+                                <span className="min-w-0 break-words pt-1 text-sm font-medium text-text-secondary">
+                                  {where.join(" · ")}
+                                </span>
+                                {minutes > 0 ? (
+                                  <span
+                                    className="shrink-0 font-display text-2xl font-bold leading-none tracking-tightest text-text-primary tabular-nums"
+                                    data-testid={`journal-entry-duration-${e.id}`}
+                                  >
+                                    {formatDuration(minutes, "minutes", durationLocale(locale))}
+                                  </span>
+                                ) : null}
+                              </div>
+                            );
+                          })()}
+                          {/* 1 · Entry text — first among the words, so the worker
+                        immediately sees what they wrote. The label stays for
+                        screen readers; the words speak for themselves. */}
                           <div className="flex flex-col gap-1">
-                            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                            <p className="sr-only">
                               {t("entry.textLabel")}
                             </p>
-                            <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
+                            <p className="whitespace-pre-wrap break-words text-base leading-relaxed text-text-primary">
                               {e.original_text}
                             </p>
                             {/* RECOVERY HINT (audit v1). Until 2026-08-20 a
@@ -1788,7 +2298,9 @@ export default async function JournalPage({
                               e.engagement_context_id &&
                               engagementChips.has(e.engagement_context_id) && (
                                 <p
-                                  className="flex items-center gap-1.5 text-meta text-text-muted"
+                                  // The entry head above names the organization; this line stays
+                                  // for screen readers (the dot is a visual cue only).
+                                  className="sr-only"
                                   data-testid={`journal-entry-context-${e.id}`}
                                 >
                                   <span
@@ -1806,10 +2318,12 @@ export default async function JournalPage({
                             {/* EVIDENCE STANDING (work-world grammar): the
                                 canonical chip names the standing in one
                                 short label — cyan = the person's own record,
-                                champagne = the organization stands behind
-                                it, amber = contested; NEVER green, because a
-                                manager's confirmation is attestation, not
-                                independent verification. The sentence
+                                trust-accent green = the organization stands
+                                behind it (design rule #4, 2026-09-22: a
+                                confirmation is green, never gold), amber =
+                                contested. The standing itself stays
+                                ORGANIZATION_ATTESTED, not independent
+                                verification. The sentence
                                 beneath is the same explanation as before, and
                                 the next action is still a real destination.
                                 Now shown on EVERY entry (a confirmed record
@@ -1828,10 +2342,12 @@ export default async function JournalPage({
                                     `standing.${verification.state}`,
                                   )}
                                 />
+                                {explainVerification ? (
                                 <span className="text-text-secondary">
                                   {tVerify(`state.${verification.state}`)}
                                 </span>
-                                {verification.nextAction !== "none" &&
+                                ) : null}
+                                {explainVerification && verification.nextAction !== "none" &&
                                 (verification.nextAction ===
                                 "identify_verifier" ? (
                                   <Link
@@ -1853,7 +2369,7 @@ export default async function JournalPage({
                           {hasUnderstood && (
                             <div className="flex flex-col gap-1 border-t border-border/40 pt-2">
                               <p
-                                className="font-mono text-meta uppercase tracking-label text-text-secondary"
+                                className="text-meta font-medium text-text-secondary"
                                 data-testid={`journal-entry-understood-${e.id}`}
                               >
                                 {t("entry.understoodLabel")}
@@ -1875,8 +2391,7 @@ export default async function JournalPage({
                                     area.unit_slug === "days"
                                       ? formatDuration(
                                           area.value_numeric,
-                                          area.unit_slug,
-                                          locale === "en" ? "en" : "lt",
+                                          area.unit_slug, durationLocale(locale),
                                         )
                                       : `${area.value_numeric} ${
                                           area.unit_slug
@@ -1890,12 +2405,14 @@ export default async function JournalPage({
                           )}
                         </JournalEntryRow>
                       );
-                    })}
+                    });
+                    })()}
                   </WorkSpine>
                   </div>
                 </details>
               );
-            })}
+              });
+            })()}
             {hiddenDayCount > 0 && (
               /* The diary is bounded, and says so. Every other day is one tap
                  away on the calendar above — nothing is hidden, only not

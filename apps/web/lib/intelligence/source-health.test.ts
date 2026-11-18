@@ -19,11 +19,15 @@ const ACTIVE_BASE: SourceHealthSignalsV1 = {
 describe("deriveSourceHealth — deterministic precedence", () => {
   it("lifecycle facts dominate: blocked > maintenance > paused > waiting", () => {
     expect(
-      deriveSourceHealth({ ...ACTIVE_BASE, lifecycle: "blocked", maintenance: true }),
+      deriveSourceHealth({
+        ...ACTIVE_BASE,
+        lifecycle: "blocked",
+        maintenance: true,
+      }),
     ).toBe("blocked");
-    expect(
-      deriveSourceHealth({ ...ACTIVE_BASE, maintenance: true }),
-    ).toBe("maintenance");
+    expect(deriveSourceHealth({ ...ACTIVE_BASE, maintenance: true })).toBe(
+      "maintenance",
+    );
     expect(deriveSourceHealth({ ...ACTIVE_BASE, lifecycle: "paused" })).toBe(
       "paused",
     );
@@ -90,7 +94,8 @@ describe("deriveSourceHealth — deterministic precedence", () => {
       if (
         profile.sourceKind === "internal_aggregated" ||
         profile.key === "eurostat" ||
-        profile.key === "arbetsformedlingen"
+        profile.key === "arbetsformedlingen" ||
+        profile.key === "nav"
       ) {
         // Active lifecycle (internal, or an owner-activated external) but no
         // recorded import session yet → "unknown" is the honest answer.

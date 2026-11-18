@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * V8 employer daily loop, GAP 1 — the employer no longer opens to silence.
@@ -19,8 +20,12 @@ const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
 describe("the employer opening brief", () => {
   it("exists, and the chat routes each identity to its OWN brief", () => {
     const chat = read("components", "app", "conversation", "chat", "conversation-chat.tsx");
-    expect(chat).toContain(
-      'identity === "person" ? loadOpeningBrief() : loadEmployerOpeningBrief()',
+    // Re-anchored 2026-09-23: the worker brief now takes the rungs ŠIANDIEN
+    // already states as an `omit` option (owner §20). The routing is the
+    // same — each identity to its OWN brief — and the employer call takes
+    // no option at all.
+    expect(chat).toMatch(
+      /identity === "person" \? loadOpeningBrief\(briefOptions\) : loadEmployerOpeningBrief\(\)/,
     );
     // The old silence gate must not come back.
     const opener = chat.slice(chat.indexOf("openedWithStateRef.current) return"));
@@ -35,7 +40,7 @@ describe("the employer opening brief", () => {
     const reviews = fn.indexOf("fetchQuickReviewQueue");
     const absences = fn.indexOf("getManagerPendingAbsences");
     const absentToday = fn.indexOf("absentOn");
-    const unread = fn.indexOf("getUnreadConversationCount");
+    const unread = fn.indexOf("getUnreadConversationIdsForOrganization");
     expect(reviews).toBeGreaterThan(-1);
     expect(absences).toBeGreaterThan(reviews);
     expect(absentToday).toBeGreaterThan(absences);
@@ -67,7 +72,7 @@ describe("the employer opening brief", () => {
   });
 
   it("the employer lines exist in every ROUTED locale", () => {
-    for (const l of ["en", "lt", "ru", "nl", "de"]) {
+    for (const l of activeLocales) {
       const m = JSON.parse(read("messages", `${l}.json`));
       const chat = m.conversation.chat;
       for (const key of [

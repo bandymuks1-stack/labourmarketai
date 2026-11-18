@@ -3,11 +3,17 @@ import "server-only";
 import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
+import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
+import {
+  teamProjectsFromRows,
+  viaTeamLabel,
+} from "@/lib/projects/team-work-context-model";
 import { listMyDocuments } from "@/lib/documents/readiness";
 import { listWorkerInstructions } from "@/lib/instructions/instructions";
 import { deriveWorkerProjectAsks, type WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
 import {
   UNKNOWN_RECORDED_WORK,
+  getOwnRecognitionRows,
   getOwnRecordedWorkEvidence,
 } from "@/lib/qualification/capability-evidence";
 
@@ -41,6 +47,10 @@ export interface WorkerAssignment {
 
 export interface WorkerProjectView {
   readonly assignment: WorkerAssignment;
+  /** Team name(s) when the caller reaches this project ONLY through an
+   *  actively assigned team (20261003150700) — "via team ...". Null/absent for
+   *  a person on the project roster. */
+  readonly viaTeam?: string | null;
   /** Null when the project row is not RLS-readable (e.g. no longer live). */
   readonly project: {
     readonly id: string;
@@ -61,6 +71,9 @@ export interface WorkerProjectListItem {
   readonly country: string | null;
   readonly assignmentStatus: "active" | "ended";
   readonly assignedAt: string;
+  /** Team name(s) when this project is reached ONLY through an actively
+   *  assigned team (20261003150700). Absent for a person assignment. */
+  readonly viaTeam?: string | null;
 }
 
 /** The caller's own profile id. Request-cached beside `getOwnWorkerId`, which
@@ -108,7 +121,14 @@ export async function getWorkerProjectView(
     .eq("project_id", projectId)
     .eq("worker_id", workerId)
     .maybeSingle();
-  if (!assignment) return null;
+  // No person assignment: the caller may still work here through a team that is
+  // ACTIVELY assigned (20261003150700). A person assignment always wins.
+  const teamProject = assignment
+    ? null
+    : teamProjectsFromRows(await readMyTeamWorkContexts(supabase)).find(
+        (t) => t.projectId === projectId,
+      ) ?? null;
+  if (!assignment && !teamProject) return null;
 
   const { data: project } = await supabase
     .from("projects")
@@ -117,12 +137,20 @@ export async function getWorkerProjectView(
     .maybeSingle();
 
   return {
-    assignment: {
-      assignmentId: assignment.id as string,
-      status: (assignment.status as "active" | "ended") ?? "active",
-      assignedAt: assignment.assigned_at as string,
-      endedAt: (assignment.ended_at as string | null) ?? null,
-    },
+    assignment: assignment
+      ? {
+          assignmentId: assignment.id as string,
+          status: (assignment.status as "active" | "ended") ?? "active",
+          assignedAt: assignment.assigned_at as string,
+          endedAt: (assignment.ended_at as string | null) ?? null,
+        }
+      : {
+          assignmentId: teamProject!.assignmentId,
+          status: "active" as const,
+          assignedAt: teamProject!.assignedAt ?? "",
+          endedAt: null,
+        },
+    viaTeam: teamProject ? viaTeamLabel(teamProject.teamNames) : null,
     project: project
       ? {
           id: project.id as string,
@@ -137,29 +165,49 @@ export async function getWorkerProjectView(
   };
 }
 
-/** All projects the caller is or was assigned to (own assignments only). */
-export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
+/**
+ * All projects the caller is or was assigned to (own assignments only), with
+ * a FAILED read told apart from an EMPTY one (SEP-7: UNKNOWN ≠ ZERO). The
+ * home needs the difference: "could not read your projects" is not "you have
+ * none". `listWorkerProjects` below keeps its historical, lossy shape by
+ * delegating. The team-reached rows come from the existing lossy
+ * `readMyTeamWorkContexts`: a failed team read only drops the team-only
+ * rows, never the person's own assignments.
+ */
+export type WorkerProjectsResult =
+  | { readonly status: "ok"; readonly rows: WorkerProjectListItem[] }
+  | { readonly status: "unavailable" };
+
+export async function listWorkerProjectsResult(): Promise<WorkerProjectsResult> {
   const workerId = await getOwnWorkerId();
-  if (!workerId) return [];
+  if (!workerId) return { status: "ok", rows: [] };
 
   const supabase = await createClient();
-  const { data: assignments } = await supabase
+  const { data: assignments, error } = await supabase
     .from("project_worker_assignments")
     .select("project_id, status, assigned_at")
     .eq("worker_id", workerId)
     .order("assigned_at", { ascending: false });
-  if (!assignments || assignments.length === 0) return [];
+  if (error) return { status: "unavailable" };
+  const own = assignments ?? [];
+  // Projects reached ONLY through an actively assigned team (20261003150700).
+  const ownIds = new Set(own.map((a) => a.project_id as string));
+  const teamOnly = teamProjectsFromRows(await readMyTeamWorkContexts(supabase)).filter(
+    (t) => !ownIds.has(t.projectId),
+  );
+  if (own.length === 0 && teamOnly.length === 0) return { status: "ok", rows: [] };
 
-  const ids = assignments.map((a) => a.project_id as string);
-  const { data: projects } = await supabase
+  const ids = [...own.map((a) => a.project_id as string), ...teamOnly.map((t) => t.projectId)];
+  const { data: projects, error: projectsError } = await supabase
     .from("projects")
     .select("id, title, status, city, country")
     .in("id", ids);
+  if (projectsError) return { status: "unavailable" };
   const byId = new Map(
     (projects ?? []).map((p) => [p.id as string, p] as const),
   );
 
-  return assignments.map((a) => {
+  const fromPerson: WorkerProjectListItem[] = own.map((a) => {
     const p = byId.get(a.project_id as string);
     return {
       projectId: a.project_id as string,
@@ -171,6 +219,26 @@ export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
       assignedAt: a.assigned_at as string,
     };
   });
+  const fromTeam: WorkerProjectListItem[] = teamOnly.map((t) => {
+    const p = byId.get(t.projectId);
+    return {
+      projectId: t.projectId,
+      title: (p?.title as string | null) ?? t.title,
+      status: (p?.status as string | null) ?? null,
+      city: (p?.city as string | null) ?? null,
+      country: (p?.country as string | null) ?? null,
+      assignmentStatus: "active" as const,
+      assignedAt: t.assignedAt ?? "",
+      viaTeam: viaTeamLabel(t.teamNames),
+    };
+  });
+  return { status: "ok", rows: [...fromPerson, ...fromTeam] };
+}
+
+/** All projects the caller is or was assigned to (own assignments only). */
+export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
+  const result = await listWorkerProjectsResult();
+  return result.status === "ok" ? result.rows : [];
 }
 
 /**
@@ -218,6 +286,16 @@ export async function listOwnReadinessItems(
   projectIds: readonly string[],
   options?: { readonly statuses: readonly string[] },
 ): Promise<OwnReadinessItem[] | OwnReadinessLedgerItem[]> {
+  return (await queryOwnReadinessItems(workerId, projectIds, options?.statuses)) ?? [];
+}
+
+/** The checklist query itself. `null` = the read did not answer (an error),
+ *  which a caller that SHOWS asks must not render as "nothing is open". */
+async function queryOwnReadinessItems(
+  workerId: string,
+  projectIds: readonly string[],
+  statuses?: readonly string[],
+): Promise<OwnReadinessLedgerItem[] | null> {
   if (!workerId || projectIds.length === 0) return [];
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -225,10 +303,10 @@ export async function listOwnReadinessItems(
     .select("project_id, item_key, label, status, updated_at")
     .eq("worker_id", workerId)
     .in("project_id", projectIds.slice(0, 10))
-    .in("status", [...(options?.statuses ?? OPEN_READINESS_STATUSES)])
+    .in("status", [...(statuses ?? OPEN_READINESS_STATUSES)])
     .order("updated_at", { ascending: false })
     .limit(OWN_READINESS_ITEMS_LIMIT);
-  if (error || !data) return [];
+  if (error || !data) return null;
   return data.map((r) => ({
     projectId: r.project_id as string,
     itemKey: r.item_key as string,
@@ -252,21 +330,42 @@ export async function listOwnReadinessItems(
  */
 export interface OwnProjectAsks {
   readonly asks: readonly WorkerProjectAsk[];
+  /** How many open rows the project has for the person. `asks` names at
+   *  most WORKER_PROJECT_ASK_LIMIT of them, so a surface that shows a count
+   *  says "N of total", never the preview length as the total. */
+  readonly asksTotal: number;
   readonly instruction: { readonly conversationId: string; readonly authorName: string | null; readonly text: string } | null;
 }
 
 export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise<Map<string, OwnProjectAsks>> {
+  return (await loadOwnProjectAsksResult(projectIds)).byProject;
+}
+
+/**
+ * The same read, saying whether the checklist ANSWERED. `checklistRead:
+ * false` = the checklist query failed: the asks are unknown, never "nothing
+ * is open". `totalsAtLeast` = the query hit OWN_READINESS_ITEMS_LIMIT, so a
+ * project's `asksTotal` is a lower bound.
+ */
+export interface OwnProjectAsksResult {
+  readonly checklistRead: boolean;
+  readonly totalsAtLeast: boolean;
+  readonly byProject: Map<string, OwnProjectAsks>;
+}
+
+export async function loadOwnProjectAsksResult(projectIds: readonly string[]): Promise<OwnProjectAsksResult> {
   const out = new Map<string, OwnProjectAsks>();
   const ids = [...new Set(projectIds)].slice(0, 10);
-  if (ids.length === 0) return out;
+  if (ids.length === 0) return { checklistRead: true, totalsAtLeast: false, byProject: out };
   const workerId = await getOwnWorkerId();
-  if (!workerId) return out;
-  const [items, docs, read, ownProfileId] = await Promise.all([
-    listOwnReadinessItems(workerId, ids),
+  if (!workerId) return { checklistRead: false, totalsAtLeast: false, byProject: out };
+  const [checklist, docs, read, ownProfileId] = await Promise.all([
+    queryOwnReadinessItems(workerId, ids) as Promise<OwnReadinessItem[] | null>,
     listMyDocuments(),
     listWorkerInstructions(),
     getOwnProfileId(),
   ]);
+  const items = checklist ?? [];
   /**
    * REAL WORK IS READ BESIDE THE PAPER (owner correction 2026-09-07).
    *
@@ -282,6 +381,12 @@ export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise
       ? await getOwnRecordedWorkEvidence(workerId, ownProfileId).catch(
           () => UNKNOWN_RECORDED_WORK,
         )
+      : null;
+  // SKL-9: the person's own recognition records. Empty today (the relation is
+  // an unapplied owner packet); `null` = unknown, which claims nothing.
+  const recognitions =
+    items.length > 0 && ownProfileId
+      ? await getOwnRecognitionRows(ownProfileId).catch(() => null)
       : null;
   const asks =
     items.length > 0
@@ -299,6 +404,7 @@ export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise
                 hasRecognizedEquivalence: false,
               }
             : null,
+          recognitions,
         )
       : new Map<string, WorkerProjectAsk[]>();
   const instructions = new Map<string, OwnProjectAsks["instruction"]>();
@@ -309,10 +415,16 @@ export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise
       }
     }
   }
+  const totals = new Map<string, number>();
+  for (const it of items) totals.set(it.projectId, (totals.get(it.projectId) ?? 0) + 1);
   for (const id of ids) {
     const a = asks.get(id) ?? [];
     const ins = instructions.get(id) ?? null;
-    if (a.length > 0 || ins) out.set(id, { asks: a, instruction: ins });
+    if (a.length > 0 || ins) out.set(id, { asks: a, asksTotal: totals.get(id) ?? a.length, instruction: ins });
   }
-  return out;
+  return {
+    checklistRead: checklist !== null,
+    totalsAtLeast: items.length >= OWN_READINESS_ITEMS_LIMIT,
+    byProject: out,
+  };
 }

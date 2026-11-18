@@ -11,6 +11,8 @@
  * legacy action is mapped otherwise.
  */
 
+import { correctedOriginalIds as correctedOriginalIdsOf } from "@/lib/journal/counted-once";
+
 export const REVIEW_DECISIONS = [
   "approved",
   "rejected",
@@ -48,6 +50,46 @@ export function isReviewDecision(value: unknown): value is ReviewDecision {
   );
 }
 
+/**
+ * A COUNTERPARTY-basis row (client / customer / contracting party accepting,
+ * asking for a correction, disputing) is a different claim by a different
+ * party than the EMPLOYER review this module derives. It is never read as the
+ * employer's result: a client acceptance must not make an entry read as
+ * "confirmed by the manager" anywhere (verified CV, journal standing, counts).
+ * Counterparty rows are read through `lib/journal/confirmation-origin.ts`
+ * (CLIENT_ACCEPTED) and the counterparty review state, never here.
+ */
+export function isCounterpartyScopeRow(row: ConfirmationRow): boolean {
+  const scope = row.confirmation_scope as
+    | { authority?: { basis?: unknown } | null }
+    | null;
+  return scope?.authority?.basis === "counterparty";
+}
+
+/**
+ * PostgREST `.or()` filter that keeps EMPLOYER-path rows (no authority block,
+ * or any basis other than 'counterparty') in a COUNT/HEAD query. Needed
+ * because `.neq()` on a JSON path drops rows whose key is absent - every row
+ * written before the counterparty model. Decision 0018.
+ */
+export const EMPLOYER_BASIS_OR_FILTER =
+  "confirmation_scope->authority->>basis.is.null,confirmation_scope->authority->>basis.neq.counterparty";
+
+/** Rows that are NOT counterparty (client) decisions, structurally typed. */
+export function withoutCounterpartyRows<T extends { confirmation_scope?: unknown }>(
+  rows: readonly T[] | null | undefined,
+): T[] {
+  return (rows ?? []).filter(
+    (r) => !isCounterpartyScopeRow({ confirmation_scope: r.confirmation_scope }),
+  );
+}
+
+function employerRowsOnly(
+  confirmations: readonly ConfirmationRow[] | null | undefined,
+): readonly ConfirmationRow[] {
+  return (confirmations ?? []).filter((r) => !isCounterpartyScopeRow(r));
+}
+
 /** Map the legacy confirmation_scope.action to a decision. */
 export function actionToDecision(action: unknown): ReviewDecision | null {
   switch (action) {
@@ -77,9 +119,10 @@ function rowDecision(row: ConfirmationRow): ReviewDecision | null {
  * no evidence yet. Rows with an unrecognised scope are ignored.
  */
 export function deriveReviewResult(
-  confirmations: readonly ConfirmationRow[] | null | undefined,
+  all: readonly ConfirmationRow[] | null | undefined,
 ): ReviewResult {
-  if (!confirmations || confirmations.length === 0) return "submitted";
+  const confirmations = employerRowsOnly(all);
+  if (confirmations.length === 0) return "submitted";
   const ordered = [...confirmations].sort((a, b) => {
     const ta = a.created_at ? Date.parse(a.created_at) : 0;
     const tb = b.created_at ? Date.parse(b.created_at) : 0;
@@ -166,9 +209,10 @@ export interface ReviewOrigin {
 }
 
 export function deriveReviewOrigin(
-  confirmations: readonly ConfirmationRow[] | null | undefined,
+  all: readonly ConfirmationRow[] | null | undefined,
 ): ReviewOrigin | null {
-  if (!confirmations || confirmations.length === 0) return null;
+  const confirmations = employerRowsOnly(all);
+  if (confirmations.length === 0) return null;
   const ordered = [...confirmations].sort((a, b) => {
     const ta = a.created_at ? Date.parse(a.created_at) : 0;
     const tb = b.created_at ? Date.parse(b.created_at) : 0;
@@ -224,9 +268,10 @@ function rowNote(row: ConfirmationRow): string | null {
  * UI shows "record created → waiting" from this emptiness, never a fake step.
  */
 export function deriveReviewTimeline(
-  confirmations: readonly ConfirmationRow[] | null | undefined,
+  all: readonly ConfirmationRow[] | null | undefined,
 ): ReviewTimelineEvent[] {
-  if (!confirmations || confirmations.length === 0) return [];
+  const confirmations = employerRowsOnly(all);
+  if (confirmations.length === 0) return [];
   const ordered = [...confirmations].sort((a, b) => {
     const ta = a.created_at ? Date.parse(a.created_at) : 0;
     const tb = b.created_at ? Date.parse(b.created_at) : 0;
@@ -245,4 +290,168 @@ export function deriveReviewTimeline(
     });
   }
   return events;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+ * WHAT A USER-VISIBLE "CONFIRMED" NUMBER MEANS — ONE DEFINITION.
+ *
+ * Before this block four unrelated bases sat behind the word:
+ *   · profile trust block / CV "confirmations"  — a ROW count of every
+ *     decision, rejected and self-made ones included, not counted-once;
+ *   · confirmed-work read (matching, professional history) — independent
+ *     approved entries;
+ *   · work-intelligence "confirmed hours"        — latest-wins, the subject's
+ *     own decision included;
+ *   · the window report                          — latest-wins, ditto.
+ * The CV printed two of them side by side, and the reports hub showed the row
+ * count as "confirmations". The same person read 12 on one page and 4 on the
+ * next with no word to say why.
+ *
+ * THE RULES (every reader routes through the functions below):
+ *
+ *   CONFIRMED ENTRY   a LIVE entry (not deleted, not superseded), counted once
+ *                     per correction chain (`counted-once.ts`), whose latest
+ *                     decision is `approved` AND was made by someone other
+ *                     than the entry's subject (`deriveIndependentReviewResult`).
+ *                     A rejected or changes-requested decision, a decision the
+ *                     subject made on their own work, and the approval that
+ *                     belonged to a corrected original never count.
+ *   CONFIRMATION      the count of APPROVING decisions, one per entry, on the
+ *   (independent)     same set — i.e. a confirmation is always a confirmed
+ *                     entry, never a row. There is no "row count" figure.
+ *
+ * What is deliberately NOT mixed in:
+ *   · a CLIENT / counterparty acceptance of an entry is a SEPARATE figure
+ *     (decision 0018, counterparty-review authority) and is never added to,
+ *     or presented as, a confirmed entry;
+ *   · `worker_skills.verified` (skill certification) is its own number;
+ *   · a *reviewed* entry (any decision) is not a *confirmed* entry.
+ *
+ * Where two surfaces legitimately differ, the difference is stated in the UI
+ * copy (i18n `confirmedMeaning.*`) and not left for a reader to discover.
+ * ──────────────────────────────────────────────────────────────────────── */
+
+/** An entry row carrying what the definition needs. */
+export interface ConfirmableEntryRow {
+  readonly id: string;
+  /** The confirmed original this live row corrects (counted-once chain). */
+  readonly correction_of?: string | null;
+  readonly journal_entry_confirmations?: readonly ConfirmationRow[] | null;
+}
+
+/** Is THIS entry's current review result a confirmation (the single test)? */
+export function isConfirmedEntry(
+  confirmations: readonly ConfirmationRow[] | null | undefined,
+  subjectProfileId: string | null | undefined,
+): boolean {
+  return deriveIndependentReviewResult(confirmations, subjectProfileId) === "approved";
+}
+
+/**
+ * The CONFIRMED ENTRIES among LIVE rows: counted-once first (a corrected
+ * original is replaced by its correction, whose own confirmation is none until
+ * a reviewer approves it), then the independent-approved test.
+ *
+ * `liveRows` must already exclude deleted / superseded rows. When the rows
+ * given are only the confirmed ones (an inner join), pass the ids of live
+ * corrections via `correctedOriginalIds` so a corrected original is still
+ * dropped.
+ */
+export function confirmedEntriesOf<T extends ConfirmableEntryRow>(
+  liveRows: readonly T[],
+  subjectProfileId: string | null | undefined,
+  correctedOriginalIds?: ReadonlySet<string>,
+): T[] {
+  const dropped = new Set<string>(correctedOriginalIds ?? []);
+  for (const id of correctedOriginalIdsOf(liveRows)) dropped.add(id);
+  return liveRows.filter(
+    (r) =>
+      !dropped.has(r.id) &&
+      isConfirmedEntry(r.journal_entry_confirmations, subjectProfileId),
+  );
+}
+
+/** Number of CONFIRMED ENTRIES — the one figure called "confirmed" / "confirmations". */
+export function countConfirmedEntries(
+  liveRows: readonly ConfirmableEntryRow[],
+  subjectProfileId: string | null | undefined,
+  correctedOriginalIds?: ReadonlySet<string>,
+): number {
+  return confirmedEntriesOf(liveRows, subjectProfileId, correctedOriginalIds).length;
+}
+
+/**
+ * CONFIRMED ENTRIES FROM A FLAT ROW READ — for a reviewer surface that reads
+ * `journal_entry_confirmations` directly (the manager inbox) instead of
+ * entries with their rows embedded.
+ *
+ * The inbox counted ROWS: an entry approved, sent back and approved again was
+ * "2 confirmed", and an entry approved and then sent back still counted as
+ * confirmed (walk-spec 2026-10-25). Here the rows are grouped by entry and the
+ * SAME latest-wins rule (`deriveReviewResult`, counterparty rows excluded)
+ * decides each entry once. `automatic` counts the confirmed entries whose
+ * deciding row was written by the auto-confirm policy, so an automatic
+ * confirmation never hides inside the confirmed figure.
+ */
+export function countConfirmedEntriesFromRows(
+  rows: readonly (ConfirmationRow & {
+    readonly entry_id?: string | null;
+    /** The entry's author. Unreadable: that person's row is hidden from this reader,
+     *  so the reader is someone else, and `isConfirmedEntry` has no self row to drop. */
+    readonly subject_profile_id?: string | null;
+  })[],
+): { confirmed: number; automatic: number } {
+  const byEntry = new Map<string, { subject: string | null; rows: ConfirmationRow[] }>();
+  for (const r of rows) {
+    if (!r.entry_id) continue;
+    const entry = byEntry.get(r.entry_id) ?? { subject: r.subject_profile_id ?? null, rows: [] };
+    entry.rows.push(r);
+    byEntry.set(r.entry_id, entry);
+  }
+  let confirmed = 0;
+  let automatic = 0;
+  for (const { subject, rows: list } of byEntry.values()) {
+    if (!isConfirmedEntry(list, subject)) continue;
+    confirmed += 1;
+    const latest = employerRowsOnly(list.filter((r) => !isSelfConfirmation(r, subject)))
+      .filter((r) => rowDecision(r) !== null)
+      .sort(
+        (a, b) =>
+          (a.created_at ? Date.parse(a.created_at) : 0) -
+          (b.created_at ? Date.parse(b.created_at) : 0),
+      )
+      .at(-1);
+    if (latest && rowIsAutomatic(latest)) automatic += 1;
+  }
+  return { confirmed, automatic };
+}
+
+/** What an entry read selects so `confirmedEntriesByWorker` can answer: its author and decisions. */
+export const CONFIRMABLE_ENTRY_BY_WORKER_COLUMNS =
+  "id, worker_id, correction_of, workers(profile_id), journal_entry_confirmations(confirmation_scope, created_at, confirmer_id)";
+
+/**
+ * CONFIRMED ENTRIES PER WORKER — for a surface listing many people (the agency pool, the
+ * admin workbench). The same test as everywhere: only a decision by someone else counts.
+ * A worker whose author row can't be read can't be asked that question, so nothing counts
+ * for them, rather than a number that may hold self-approvals.
+ */
+export function confirmedEntriesByWorker(
+  liveRows: readonly (ConfirmableEntryRow & {
+    readonly worker_id: string;
+    readonly workers?: { readonly profile_id?: string | null } | null;
+  })[],
+): Map<string, number> {
+  const byWorker = new Map<string, (typeof liveRows)[number][]>();
+  for (const r of liveRows) {
+    const list = byWorker.get(r.worker_id) ?? [];
+    list.push(r);
+    byWorker.set(r.worker_id, list);
+  }
+  const counts = new Map<string, number>();
+  for (const [workerId, rows] of byWorker) {
+    const subject = rows[0]?.workers?.profile_id ?? null;
+    counts.set(workerId, subject ? countConfirmedEntries(rows, subject) : 0);
+  }
+  return counts;
 }

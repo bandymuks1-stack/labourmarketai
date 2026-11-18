@@ -1,12 +1,21 @@
 /**
  * Universal first-run router — PURE (no React, no Supabase).
  *
- * After sign-in a new user is asked ONE small question — what they came to
- * do — and the answer is routed into the canonical identity model instead of
- * into a generic dashboard. Five intents, TWO base identities (owner
+ * After sign-in a new user is asked ONE small question — which parts of the
+ * world of work they are in today — and the answer is routed into the
+ * canonical identity model instead of into a generic dashboard. The cards
+ * name CONTEXTS a person is in (owner correction 2026-09-26: LabourMarket.ai
+ * is a daily work system, not an episode of looking for something), never a
+ * role they are locked into. Six intents, TWO base identities (owner
  * directives company-role-simplicity-v1 + systemic-ux-roles-v1):
  *
- *   work       → person  (worker)
+ *   work       → person  (worker) — "I work / have professional experience"
+ *   member     → person  (worker) — "I am part of a company or team": a
+ *                person, never an organisation. The membership itself comes
+ *                from the EXISTING organisation model (an invitation /
+ *                membership / engagement), so onboarding creates nothing for
+ *                it and routes like `work` (the person's own space, where
+ *                pending invitations are surfaced).
  *   student    → person  (worker) + a CURRENT education record — the
  *                canonical "I am studying" state (worker_education.is_current)
  *                that the institution link later attaches to; a student is a
@@ -26,6 +35,7 @@
 
 export const FIRST_RUN_INTENTS = [
   "work",
+  "member",
   "hire",
   "agency",
   "student",
@@ -38,6 +48,7 @@ export type FirstRunIdentity = "worker" | "company";
 
 export const INTENT_IDENTITY: Readonly<Record<FirstRunIntent, FirstRunIdentity>> = {
   work: "worker",
+  member: "worker",
   student: "worker",
   hire: "company",
   agency: "company",
@@ -70,14 +81,20 @@ export function identitiesForIntents(
   return (["worker", "company"] as const).filter((id) => set.has(id));
 }
 
-/** A profession is asked only when the person came to WORK. A student may
- *  not have one yet — asking would put a fact on them they did not state. */
-export function professionRequiredForIntents(
-  intents: readonly FirstRunIntent[],
-): boolean {
-  return intents.includes("work");
-}
-
+/**
+ * NO `professionRequiredForIntents` — a profession is never a condition of
+ * entry (owner direction 2026-09-27, removing the `work` intent's requirement).
+ *
+ * It was asked as mandatory of anyone who ticked "I work / have professional
+ * experience", which put three false assumptions on them at the door: that
+ * they are working right now (somebody between jobs had to name a job), that
+ * one name covers them, and that the name exists in a 49-row registry. The
+ * platform itself never needed the declaration — `bestEvidencedProfession`
+ * reads an occupation off the person's actual skills and work when none was
+ * stated (guard `no-mandatory-profession`), and matching treats it as a
+ * weighted criterion, never a gate. An unanswered field means "not stated
+ * here", never "has no profession".
+ */
 export function asksForCurrentEducation(intents: readonly FirstRunIntent[]): boolean {
   return intents.includes("student");
 }

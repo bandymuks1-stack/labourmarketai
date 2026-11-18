@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { PlacePrecision } from "@/components/app/work-world/primitives";
 import { notFound } from "next/navigation";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { vacancyFactChips } from "@/components/marketing/public-vacancy-card";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
@@ -16,12 +18,21 @@ import {
 } from "@/lib/opportunities/saved-opportunities";
 import { SaveVacancyButton } from "@/components/marketing/save-vacancy-button";
 import { formatUtcDate } from "@/lib/time/display";
+import { jsonLdScript } from "@/lib/seo/json-ld";
+import { buildJobDetailJsonLd } from "@/lib/seo/public-job-json-ld";
+import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { TrackedCta } from "@/components/app/tracked-cta";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { FitBandChip } from "@/components/app/opportunities/fit-band-chip";
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
 import { VacancyInterestButton } from "@/components/app/vacancy-interest-button";
+import { VacancyTranslateControl } from "@/components/app/vacancy-translate-control";
+// The pure helper comes from the NON-client module: this page is a server
+// component, and importing it from the `"use client"` control made it a client
+// reference. This route renders dynamically so it never hit the prerender error
+// that `/lt` did — the same latent boundary bug, closed here too.
+import { displayLanguageName } from "@/lib/i18n/language-name";
 import type { FitBand } from "@/lib/opportunities/fit-band";
 import {
   readPublicJobForMember,
@@ -88,20 +99,44 @@ export async function generateMetadata({
   const preview = await getPublicVacancyPreview(id);
 
   if (preview === "not_provisioned" || preview === null) {
-    return { title: "—", robots: { index: false, follow: false } };
+    // No title of its own: the not-found title applies, as on a missing question (UX-9).
+    // A title here made the 404 carry the home page's title.
+    return { robots: { index: false, follow: false } };
   }
 
   // Owner directive 2026-08-24: the raw title is member-only (it embeds
   // employer and location wording), so shared metadata is built from the
-  // occupation label — the same anonymous projection every caller receives.
-  const title = preview.occupation ?? GENERIC_TITLE[active];
+  // occupation — the same anonymous projection every caller receives — named
+  // in the READER'S language when the catalogue knows the profession (the
+  // registry the board card heads with), else the publisher's own label.
+  // Nothing is machine-translated.
+  const title =
+    (await localizedProfessionName(active, preview.professionSlug)) ??
+    preview.occupation ??
+    GENERIC_TITLE[active];
 
-  return {
+  // The ONE public-page metadata builder: brand suffix, canonical, the SAME
+  // hreflang variants the jobs sitemap declares (`hreflangAlternates` inside
+  // it — GEO/AEO P0, 2026-09-29), the per-locale share image and Twitter card.
+  // Before this the job page alone had no share image and no brand suffix
+  // (public audit 2026-10-10).
+  return buildPageMetadata({
+    locale: active,
+    path: `/jobs/${id}`,
     title,
     description: DESCRIPTION[active],
-    alternates: { canonical: `/${active}/jobs/${id}` },
-    openGraph: { title, description: DESCRIPTION[active] },
-  };
+  });
+}
+
+/** The catalogue profession name in the reader's language, or null when the
+ *  ad carries no slug or the catalogue has no entry — never a guess. */
+async function localizedProfessionName(
+  locale: ActiveLocale,
+  slug: string | null,
+): Promise<string | null> {
+  if (!slug) return null;
+  const t = await getTranslations({ locale, namespace: "professions" });
+  return t.has(slug as never) ? t(slug as never) : null;
 }
 
 type L = Record<ActiveLocale, string>;
@@ -112,6 +147,8 @@ const DESCRIPTION: L = {
   ru: "Открытая вакансия на LabourMarket.ai. Войдите, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
   nl: "Openstaande vacature op LabourMarket.ai. Log in om de werkgever, de locatie en de sollicitatiewijze te zien.",
   de: "Offene Stelle auf LabourMarket.ai. Melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+  pl: "Otwarta oferta pracy na LabourMarket.ai. Zaloguj się, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
+  sv: "Ledigt jobb på LabourMarket.ai. Logga in för att se arbetsgivaren, platsen och hur du söker.",
 };
 
 /** Metadata/heading fallback when even the occupation label is missing. */
@@ -121,6 +158,8 @@ const GENERIC_TITLE: L = {
   ru: "Открытая вакансия",
   nl: "Openstaande vacature",
   de: "Offene Stelle",
+  pl: "Otwarta oferta pracy",
+  sv: "Ledigt jobb",
 };
 
 /** Anonymous source line. Deliberately generic: naming the source employment
@@ -132,6 +171,8 @@ const ANONYMOUS_SOURCE: L = {
   ru: "Источник: официальная публичная служба занятости. Содержание объявления принадлежит опубликовавшему его работодателю.",
   nl: "Bron: een officiële openbare arbeidsbemiddelingsdienst. De inhoud van de advertentie is van de werkgever die haar publiceerde.",
   de: "Quelle: eine offizielle öffentliche Arbeitsvermittlung. Der Inhalt der Anzeige gehört dem veröffentlichenden Arbeitgeber.",
+  pl: "Źródło: oficjalna publiczna służba zatrudnienia. Treść ogłoszenia należy do pracodawcy, który je opublikował.",
+  sv: "Källa: en officiell offentlig arbetsförmedling. Annonsens innehåll tillhör arbetsgivaren som publicerade den.",
 };
 
 const LOCKED_TITLE: L = {
@@ -140,6 +181,8 @@ const LOCKED_TITLE: L = {
   ru: "Работодатель, местоположение и как откликнуться",
   nl: "Werkgever, locatie en hoe te solliciteren",
   de: "Arbeitgeber, Ort und Bewerbungsweg",
+  pl: "Pracodawca, lokalizacja i sposób aplikowania",
+  sv: "Arbetsgivare, plats och hur du söker",
 };
 
 const LOCKED_BODY: L = {
@@ -148,6 +191,8 @@ const LOCKED_BODY: L = {
   ru: "Эти данные доступны участникам. Регистрация бесплатна.",
   nl: "Deze gegevens zijn beschikbaar voor leden. Een account aanmaken is gratis.",
   de: "Diese Angaben sind für Mitglieder verfügbar. Ein Konto ist kostenlos.",
+  pl: "Te dane są dostępne dla członków. Założenie konta jest bezpłatne.",
+  sv: "De här uppgifterna är tillgängliga för medlemmar. Det är gratis att skapa ett konto.",
 };
 
 const CTA_SIGNUP: L = {
@@ -156,6 +201,8 @@ const CTA_SIGNUP: L = {
   ru: "Создать бесплатный аккаунт",
   nl: "Gratis account aanmaken",
   de: "Kostenloses Konto erstellen",
+  pl: "Załóż darmowe konto",
+  sv: "Skapa ett gratis konto",
 };
 
 const CTA_LOGIN: L = {
@@ -164,6 +211,8 @@ const CTA_LOGIN: L = {
   ru: "У меня уже есть аккаунт",
   nl: "Ik heb al een account",
   de: "Ich habe bereits ein Konto",
+  pl: "Mam już konto",
+  sv: "Jag har redan ett konto",
 };
 
 const BACK: L = {
@@ -172,6 +221,8 @@ const BACK: L = {
   ru: "← Все вакансии",
   nl: "← Alle vacatures",
   de: "← Alle Stellen",
+  pl: "← Wszystkie oferty pracy",
+  sv: "← Alla jobb",
 };
 
 const PUBLISHED: L = {
@@ -180,6 +231,8 @@ const PUBLISHED: L = {
   ru: "Опубликовано",
   nl: "Geplaatst",
   de: "Veröffentlicht",
+  pl: "Opublikowano",
+  sv: "Publicerad",
 };
 
 // ── Member-only labels ─────────────────────────────────────────────────────
@@ -190,6 +243,8 @@ const EMPLOYER: L = {
   ru: "Работодатель",
   nl: "Werkgever",
   de: "Arbeitgeber",
+  pl: "Pracodawca",
+  sv: "Arbetsgivare",
 };
 
 const LOCATION: L = {
@@ -198,6 +253,8 @@ const LOCATION: L = {
   ru: "Местоположение",
   nl: "Locatie",
   de: "Ort",
+  pl: "Lokalizacja",
+  sv: "Plats",
 };
 
 const DESCRIPTION_HEADING: L = {
@@ -206,6 +263,8 @@ const DESCRIPTION_HEADING: L = {
   ru: "Описание вакансии",
   nl: "Functieomschrijving",
   de: "Stellenbeschreibung",
+  pl: "Opis stanowiska",
+  sv: "Arbetsbeskrivning",
 };
 
 const APPLY: L = {
@@ -214,6 +273,8 @@ const APPLY: L = {
   ru: "Откликнуться на сайте источника",
   nl: "Solliciteer op de bronsite",
   de: "Auf der Quellseite bewerben",
+  pl: "Aplikuj na stronie źródłowej",
+  sv: "Sök på källans webbplats",
 };
 
 /** Honest: we hand the worker onward, we do not apply for them. */
@@ -223,6 +284,8 @@ const APPLY_NOTE: L = {
   ru: "Отклики обрабатывает источник объявления, а не LabourMarket.ai.",
   nl: "Sollicitaties worden afgehandeld door de aanbieder, niet door LabourMarket.ai.",
   de: "Bewerbungen bearbeitet die ausschreibende Stelle, nicht LabourMarket.ai.",
+  pl: "Aplikacje obsługuje wydawca ogłoszenia, nie LabourMarket.ai.",
+  sv: "Ansökningar hanteras av annonsören, inte av LabourMarket.ai.",
 };
 
 /* ── SAVE (private bookmark) ────────────────────────────────────────────────
@@ -237,6 +300,8 @@ const SAVE: L = {
   ru: "Сохранить вакансию",
   nl: "Vacature bewaren",
   de: "Stelle merken",
+  pl: "Zapisz tę ofertę pracy",
+  sv: "Spara jobbet",
 };
 
 const SAVED: L = {
@@ -245,6 +310,8 @@ const SAVED: L = {
   ru: "Сохранено",
   nl: "Bewaard",
   de: "Gemerkt",
+  pl: "Zapisano",
+  sv: "Sparad",
 };
 
 const UNSAVE: L = {
@@ -253,6 +320,8 @@ const UNSAVE: L = {
   ru: "Убрать из сохранённых",
   nl: "Uit bewaard verwijderen",
   de: "Aus Gemerkt entfernen",
+  pl: "Usuń z zapisanych",
+  sv: "Ta bort från sparade",
 };
 
 const SAVE_NOTE: L = {
@@ -261,6 +330,8 @@ const SAVE_NOTE: L = {
   ru: "Сохранённые вакансии видите только вы. Сохранение — это не отклик: работодатель не получает уведомления.",
   nl: "Alleen jij ziet je bewaarde vacatures. Bewaren is geen sollicitatie — de werkgever krijgt geen melding.",
   de: "Nur du siehst deine gemerkten Stellen. Merken ist keine Bewerbung — der Arbeitgeber wird nicht benachrichtigt.",
+  pl: "Tylko Ty widzisz swoje zapisane oferty pracy. Zapisanie nie jest aplikacją — pracodawca nie dostaje powiadomienia.",
+  sv: "Bara du ser dina sparade jobb. Att spara är ingen ansökan – arbetsgivaren får ingen avisering.",
 };
 
 const SAVE_FAILED: L = {
@@ -269,6 +340,8 @@ const SAVE_FAILED: L = {
   ru: "Не удалось сохранить. Попробуйте ещё раз.",
   nl: "Bewaren is niet gelukt. Probeer het opnieuw.",
   de: "Das Merken hat nicht geklappt. Bitte versuche es erneut.",
+  pl: "Nie udało się zapisać. Spróbuj ponownie.",
+  sv: "Det gick inte att spara. Försök igen.",
 };
 
 const SAVE_CLOSED: L = {
@@ -277,6 +350,8 @@ const SAVE_CLOSED: L = {
   ru: "Эта вакансия больше не активна, сохранить её нельзя.",
   nl: "Deze vacature is niet meer open en kan niet worden bewaard.",
   de: "Diese Stelle ist nicht mehr offen und kann nicht gemerkt werden.",
+  pl: "Ta oferta pracy nie jest już otwarta, więc nie można jej zapisać.",
+  sv: "Det här jobbet är inte längre öppet och kan därför inte sparas.",
 };
 
 const NEXT_HEADING: L = {
@@ -285,6 +360,8 @@ const NEXT_HEADING: L = {
   ru: "Получайте подходящие предложения",
   nl: "Word gematcht met werk zoals dit",
   de: "Passende Stellen erhalten",
+  pl: "Otrzymuj dopasowania do takiej pracy",
+  sv: "Få matchningar mot jobb som det här",
 };
 
 const NEXT_BODY: L = {
@@ -293,6 +370,8 @@ const NEXT_BODY: L = {
   ru: "Ваш профиль и навыки определяют, какие возможности до вас доходят. Чем они полнее, тем точнее подбор.",
   nl: "Je profiel en vaardigheden bepalen welke kansen je bereiken. Hoe vollediger, hoe beter de match.",
   de: "Ihr Profil und Ihre Fähigkeiten bestimmen, welche Angebote Sie erreichen. Je vollständiger, desto besser die Übereinstimmung.",
+  pl: "To Twój profil i umiejętności decydują, które możliwości do Ciebie trafiają. Im są pełniejsze, tym lepsze dopasowanie.",
+  sv: "Din profil och dina färdigheter avgör vilka möjligheter som når dig. Ju mer kompletta de är, desto bättre matchning.",
 };
 
 const NEXT_OPPORTUNITIES: L = {
@@ -301,6 +380,8 @@ const NEXT_OPPORTUNITIES: L = {
   ru: "Смотреть возможности",
   nl: "Bekijk je kansen",
   de: "Ihre Angebote ansehen",
+  pl: "Zobacz swoje możliwości",
+  sv: "Se dina möjligheter",
 };
 
 const NEXT_PROFILE: L = {
@@ -309,6 +390,8 @@ const NEXT_PROFILE: L = {
   ru: "Заполнить профиль",
   nl: "Profiel aanvullen",
   de: "Profil vervollständigen",
+  pl: "Uzupełnij swój profil",
+  sv: "Komplettera din profil",
 };
 
 // ── Acquisition loop P0 (2026-09-20): the member half no longer stops at the
@@ -324,6 +407,8 @@ const RETURNED_NOTE: L = {
   ru: "Вы вернулись к вакансии, которую открыли до входа.",
   nl: "Je bent terug bij de vacature die je opende voordat je inlogde.",
   de: "Du bist zurück bei der Stelle, die du vor der Anmeldung geöffnet hast.",
+  pl: "Jesteś z powrotem przy ofercie pracy otwartej przed zalogowaniem.",
+  sv: "Du är tillbaka på jobbet du öppnade innan du loggade in.",
 };
 
 const COMPARE_TITLE: L = {
@@ -332,6 +417,8 @@ const COMPARE_TITLE: L = {
   ru: "Как эта вакансия соотносится с вашим профилем",
   nl: "Hoe deze vacature zich verhoudt tot je profiel",
   de: "Wie diese Stelle zu deinem Profil passt",
+  pl: "Jak ta oferta pracy wypada w porównaniu z Twoim profilem",
+  sv: "Så stämmer jobbet med din profil",
 };
 
 /** One honest sentence per band. None of them dismisses the person: a
@@ -344,6 +431,8 @@ const BAND_SENTENCE: Record<FitBand, L> = {
     ru: "Информация в вашем профиле покрывает требования, указанные в объявлении. Там, где объявление молчит, ничего не предполагается.",
     nl: "De informatie in je profiel dekt de eisen die deze advertentie noemt. Waar de advertentie zwijgt, wordt niets aangenomen.",
     de: "Die Angaben in deinem Profil decken die in dieser Anzeige genannten Anforderungen ab. Wo die Anzeige schweigt, wird nichts angenommen.",
+    pl: "Informacje w Twoim profilu pokrywają wymagania podane w tym ogłoszeniu. Tam, gdzie ogłoszenie milczy, nic nie jest zakładane.",
+    sv: "Uppgifterna i din profil täcker de krav som annonsen anger. Där annonsen inte säger något antas ingenting.",
   },
   possible: {
     en: "Your profile covers part of the stated requirements. The items below are what is still missing or not yet known.",
@@ -351,6 +440,8 @@ const BAND_SENTENCE: Record<FitBand, L> = {
     ru: "Ваш профиль покрывает часть указанных требований. Ниже — чего пока не хватает или что ещё неизвестно.",
     nl: "Je profiel dekt een deel van de gestelde eisen. Hieronder staat wat nog ontbreekt of nog niet bekend is.",
     de: "Dein Profil deckt einen Teil der genannten Anforderungen ab. Unten steht, was noch fehlt oder noch nicht bekannt ist.",
+    pl: "Twój profil pokrywa część podanych wymagań. Poniżej jest to, czego jeszcze brakuje lub co nie jest znane.",
+    sv: "Din profil täcker en del av de angivna kraven. Nedan ser du vad som fortfarande saknas eller ännu inte är känt.",
   },
   missing_requirement: {
     en: "This advertisement states requirements that your profile does not yet show. Missing information is not a failed requirement — if you have it, add it to your profile.",
@@ -358,6 +449,8 @@ const BAND_SENTENCE: Record<FitBand, L> = {
     ru: "В объявлении указаны требования, которых пока нет в вашем профиле. Отсутствие информации — это не несоответствие: если она у вас есть, добавьте её в профиль.",
     nl: "Deze advertentie noemt eisen die je profiel nog niet toont. Ontbrekende informatie is geen afwijzing — heb je het, voeg het dan toe aan je profiel.",
     de: "Diese Anzeige nennt Anforderungen, die dein Profil noch nicht zeigt. Fehlende Angaben sind keine Ablehnung — wenn du sie hast, ergänze dein Profil.",
+    pl: "To ogłoszenie podaje wymagania, których Twój profil jeszcze nie pokazuje. Brak informacji nie oznacza niespełnionego wymagania — jeśli je masz, dodaj je do profilu.",
+    sv: "Annonsen anger krav som din profil ännu inte visar. Saknad information betyder inte att du inte uppfyller kravet – har du den, lägg till den i din profil.",
   },
   conflict: {
     en: "One of the stated hard requirements does not match the information in your profile. The conflicting requirement is named below; everything else is shown as it is.",
@@ -365,6 +458,8 @@ const BAND_SENTENCE: Record<FitBand, L> = {
     ru: "Одно из обязательных требований не совпадает с информацией в вашем профиле. Оно названо ниже; всё остальное показано как есть.",
     nl: "Een van de gestelde harde eisen komt niet overeen met de informatie in je profiel. De strijdige eis staat hieronder; al het andere wordt getoond zoals het is.",
     de: "Eine der genannten harten Anforderungen passt nicht zu den Angaben in deinem Profil. Sie ist unten benannt; alles andere wird so gezeigt, wie es ist.",
+    pl: "Jedno z podanych twardych wymagań nie zgadza się z informacjami w Twoim profilu. Sprzeczne wymaganie jest wymienione poniżej; reszta jest pokazana bez zmian.",
+    sv: "Ett av de angivna skallkraven stämmer inte med uppgifterna i din profil. Kravet det gäller anges nedan; allt annat visas som det är.",
   },
   not_assessed: {
     en: "This advertisement could not be assessed against your profile: it states no readable requirements, or your profile does not yet say what work you do. Nothing here is a verdict.",
@@ -372,6 +467,8 @@ const BAND_SENTENCE: Record<FitBand, L> = {
     ru: "Это объявление нельзя было сопоставить с вашим профилем: в нём нет распознаваемых требований или ваш профиль ещё не говорит, какую работу вы выполняете. Это не вывод.",
     nl: "Deze advertentie kon niet tegen je profiel worden beoordeeld: ze noemt geen leesbare eisen, of je profiel zegt nog niet welk werk je doet. Dit is geen oordeel.",
     de: "Diese Anzeige konnte nicht mit deinem Profil abgeglichen werden: Sie nennt keine lesbaren Anforderungen, oder dein Profil sagt noch nicht, welche Arbeit du machst. Das ist kein Urteil.",
+    pl: "Tego ogłoszenia nie dało się porównać z Twoim profilem: nie podaje czytelnych wymagań albo Twój profil nie mówi jeszcze, jaką pracę wykonujesz. Nic tutaj nie jest werdyktem.",
+    sv: "Annonsen kunde inte jämföras med din profil: den anger inga läsbara krav, eller så framgår det ännu inte av din profil vilket arbete du utför. Inget här är ett omdöme.",
   },
 };
 
@@ -381,6 +478,8 @@ const NOT_MATCHABLE: L = {
   ru: "Чтобы сопоставить эту вакансию с вашим профилем, сначала скажите, какую работу вы выполняете и какие у вас навыки — достаточно одного предложения.",
   nl: "Om deze vacature met je profiel te vergelijken, zeg eerst welk werk je doet en welke vaardigheden je hebt — één zin is genoeg.",
   de: "Um diese Stelle mit deinem Profil zu vergleichen, sag zuerst, welche Arbeit du machst und welche Fähigkeiten du hast — ein Satz genügt.",
+  pl: "Aby porównać tę ofertę pracy z Twoim profilem, najpierw napisz, jaką pracę wykonujesz i jakie masz umiejętności — wystarczy jedno zdanie.",
+  sv: "För att jämföra jobbet med din profil behöver du först berätta vilket arbete du gör och vilka färdigheter du har – en mening räcker.",
 };
 
 const NO_WORKER: L = {
@@ -389,6 +488,8 @@ const NO_WORKER: L = {
   ru: "У этого аккаунта пока нет профиля работника, поэтому сравнивать вакансию не с чем.",
   nl: "Dit account heeft nog geen werknemersprofiel, dus er is niets om deze vacature mee te vergelijken.",
   de: "Dieses Konto hat noch kein Arbeitnehmerprofil, daher gibt es nichts, womit diese Stelle verglichen werden könnte.",
+  pl: "To konto nie ma jeszcze profilu pracownika, więc nie ma z czym porównać tej oferty pracy.",
+  sv: "Det här kontot har ingen arbetstagarprofil än, så det finns inget att jämföra jobbet med.",
 };
 
 const INTEREST_TITLE: L = {
@@ -397,6 +498,8 @@ const INTEREST_TITLE: L = {
   ru: "Интересует эта вакансия?",
   nl: "Interesse in deze vacature?",
   de: "Interesse an dieser Stelle?",
+  pl: "Interesuje Cię ta oferta pracy?",
+  sv: "Intresserad av jobbet?",
 };
 
 const ALT_TITLE: L = {
@@ -405,6 +508,8 @@ const ALT_TITLE: L = {
   ru: "Другие текущие объявления по этой профессии",
   nl: "Andere actuele advertenties in dit beroep",
   de: "Weitere aktuelle Anzeigen in diesem Beruf",
+  pl: "Inne aktualne ogłoszenia w tym zawodzie",
+  sv: "Andra aktuella annonser inom samma yrke",
 };
 
 const ALT_NOTE: L = {
@@ -413,6 +518,8 @@ const ALT_NOTE: L = {
   ru: "Оценены тем же сравнением требований, что и вакансия выше. «Ближе» означает, что известные требования покрыты лучше — это не ваш рейтинг.",
   nl: "Beoordeeld met dezelfde eisenvergelijking als de vacature hierboven. \"Dichterbij\" betekent dat de bekende eisen beter gedekt zijn — het is geen rangschikking van jou.",
   de: "Beurteilt mit demselben Anforderungsabgleich wie die Stelle oben. „Näher“ heißt, die bekannten Anforderungen sind besser abgedeckt — es ist keine Bewertung deiner Person.",
+  pl: "Oceniane tym samym porównaniem wymagań co oferta pracy powyżej. „Bliżej” znaczy, że znane wymagania są lepiej pokryte — to nie jest ranking Twojej osoby.",
+  sv: "Bedömda med samma jämförelse av krav som jobbet ovan. ”Närmare” betyder att de kända kraven täcks bättre – det är ingen rangordning av dig.",
 };
 
 const ALT_CLOSER: L = {
@@ -421,6 +528,8 @@ const ALT_CLOSER: L = {
   ru: "Ближе по известным требованиям",
   nl: "Dichterbij op bekende eisen",
   de: "Näher bei den bekannten Anforderungen",
+  pl: "Bliżej pod względem znanych wymagań",
+  sv: "Närmare på kända krav",
 };
 
 const CLOSED_TITLE: L = {
@@ -429,6 +538,8 @@ const CLOSED_TITLE: L = {
   ru: "Это объявление больше не открыто",
   nl: "Deze advertentie is niet meer open",
   de: "Diese Anzeige ist nicht mehr offen",
+  pl: "To ogłoszenie nie jest już otwarte",
+  sv: "Annonsen är inte längre öppen",
 };
 
 const CLOSED_BODY: L = {
@@ -437,6 +548,8 @@ const CLOSED_BODY: L = {
   ru: "Источник снял его или истёк срок действия. С вашим аккаунтом всё в порядке — изменилась вакансия.",
   nl: "De aanbieder heeft ze ingetrokken of de geldigheid is verlopen. Met je account is niets mis — de vacature is veranderd.",
   de: "Die ausschreibende Stelle hat sie zurückgezogen oder die Gültigkeit ist abgelaufen. Mit deinem Konto ist alles in Ordnung — die Stelle hat sich geändert.",
+  pl: "Wydawca je wycofał albo skończył się okres jego ważności. Z Twoim kontem wszystko w porządku — zmieniła się oferta pracy.",
+  sv: "Annonsören har dragit tillbaka den eller så har giltighetstiden gått ut. Det är inget fel på ditt konto – det är jobbet som har ändrats.",
 };
 
 /** A plausible BCP-47 subtag or undefined ("we do not know" ≠ "the page's
@@ -457,8 +570,8 @@ function locationPrecision(
 }
 
 const PLACE_PRECISION: Record<"city" | "country", L> = {
-  city: { en: "City", lt: "Miestas", ru: "Город", nl: "Stad", de: "Stadt" },
-  country: { en: "Country only", lt: "Tik šalis", ru: "Только страна", nl: "Alleen land", de: "Nur Land" },
+  city: { en: "City", lt: "Miestas", ru: "Город", nl: "Stad", de: "Stadt", pl: "Miasto", sv: "Ort" },
+  country: { en: "Country only", lt: "Tik šalis", ru: "Только страна", nl: "Alleen land", de: "Nur Land", pl: "Tylko kraj", sv: "Endast land" },
 };
 
 function joinLocation(
@@ -543,6 +656,11 @@ export default async function JobDetailPage({
   const published = formatUtcDate(preview.publishedAt, active);
 
   const t = await getTranslations({ locale: active });
+  const tNeed = await getTranslations({ locale: active, namespace: "companyNeed" });
+  const employerNeedHref = `/company-need?${new URLSearchParams({
+    ...(preview.professionSlug ? { profession: preview.professionSlug } : {}),
+    from: "public_job",
+  }).toString()}`;
   // The comparison speaks the board's OWN vocabulary — criterion names, tier
   // titles, band chips, the ad-side gap words and the interest control's
   // copy all come from the `opportunities` namespace the destination already
@@ -640,9 +758,31 @@ export default async function JobDetailPage({
   )
     ? (preview.sourceLanguage as string)
     : undefined;
+  const localizedProfession = await localizedProfessionName(active, preview.professionSlug);
+  const factChips = vacancyFactChips(preview, active);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+      {/* Anonymous-safe structured data (owner 2026-10-14 §8; port of #1433):
+          a WebPage about an Occupation with the salary band, built ONLY from
+          the anonymous `preview` — never from `member`, even for a signed-in
+          visitor — so employer, location, publisher title, source and links
+          cannot appear. No JobPosting by design (it requires the employer and
+          the workplace). */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdScript(
+            buildJobDetailJsonLd({
+              origin: MARKETING_ORIGIN,
+              locale: active,
+              description: DESCRIPTION[active],
+              preview,
+              genericTitle: GENERIC_TITLE[active],
+            }),
+          ),
+        }}
+      />
       {/* FUNNEL (acquisition loop P0): one `job_opened` per page view — the
           job it was (opaque store id) and who was looking (anonymous or
           member). `once={false}` because the beacon's tab-session dedupe is
@@ -717,19 +857,38 @@ export default async function JobDetailPage({
       ) : null}
 
       {/* Members see the publisher's own title; anonymous visitors see the
-          occupation label — the raw title embeds employer and location wording
-          (owner directive 2026-08-24). */}
+          occupation — the raw title embeds employer and location wording
+          (owner directive 2026-08-24) — named in the reader's language when
+          the catalogue knows the profession, exactly as the board card heads.
+          `lang` follows whose words the heading is. */}
       <h1
-        lang={sourceLang}
+        lang={member?.titleRaw || !localizedProfession ? sourceLang : undefined}
         className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl"
       >
-        {member?.titleRaw ?? preview.occupation ?? GENERIC_TITLE[active]}
+        {member?.titleRaw ?? localizedProfession ?? preview.occupation ?? GENERIC_TITLE[active]}
       </h1>
 
-      {member?.titleRaw && preview.occupation && (
-        <p lang={sourceLang} className="mt-2 text-base text-text-muted">
-          {preview.occupation}
-        </p>
+      {/* The publisher's own occupation words, kept and marked as theirs
+          whenever the heading is something else. */}
+      {preview.occupation &&
+        (member?.titleRaw || (localizedProfession && localizedProfession !== preview.occupation)) && (
+          <p lang={sourceLang} className="mt-2 text-base text-text-muted">
+            {preview.occupation}
+          </p>
+        )}
+
+      {/* The same anonymous facts the board card shows (one builder). */}
+      {factChips.length > 0 && (
+        <ul className="mt-4 flex flex-wrap gap-2" data-testid="public-job-facts">
+          {factChips.map((chip) => (
+            <li
+              key={chip}
+              className="rounded-full border border-ink-500 px-3 py-1 text-meta text-text-secondary"
+            >
+              {chip}
+            </li>
+          ))}
+        </ul>
       )}
 
       {published && (
@@ -771,6 +930,43 @@ export default async function JobDetailPage({
               </div>
             )}
           </section>
+
+          {/* THE ADVERTISEMENT'S LANGUAGE, AND THE READER'S CHOICE
+              (owner decision 2026-09-22). A foreign-language ad names its
+              language and offers ONE explicit act: render it into the
+              reader's language. Nothing is translated on the way here — the
+              words below are the publisher's own until a person asks
+              otherwise, and they stay on the page afterwards either way. */}
+          {sourceLang && sourceLang.slice(0, 2) !== active ? (
+            <section className="mt-8" data-testid="vacancy-language">
+              <p className="text-sm text-text-muted" data-testid="vacancy-source-language">
+                {t("vacancySources.language.originalIn", {
+                  language: displayLanguageName(sourceLang, active),
+                })}
+              </p>
+              <VacancyTranslateControl
+                vacancyId={id}
+                descriptionHeading={DESCRIPTION_HEADING[active]}
+                labels={{
+                  translate: t("vacancySources.language.translate", {
+                    language: displayLanguageName(active, active),
+                  }),
+                  translating: t("vacancySources.language.translating"),
+                  machineNote: t("vacancySources.language.machineNote"),
+                  // TEMPLATES, not functions: this is a client component,
+                  // and a function prop threw the page to the error screen
+                  // (P0 2026-09-29). The control fills {count}/{limit}.
+                  remaining: t("vacancySources.language.allowanceRemaining", {
+                    count: "{count}",
+                    limit: "{limit}",
+                  }),
+                  exhausted: t("vacancySources.language.allowanceExhausted", { limit: "{limit}" }),
+                  unavailable: t("vacancySources.language.unavailable"),
+                  signedOut: t("vacancySources.language.signedOut"),
+                }}
+              />
+            </section>
+          ) : null}
 
           {member.descriptionRaw.trim().length > 0 && (
             <section className="mt-8">
@@ -1011,9 +1207,27 @@ export default async function JobDetailPage({
         </section>
       )}
 
+      {/* THE EMPLOYER'S DOOR from a public job (completion phase 2026-11-16):
+          a signed-out visitor hiring for this kind of work goes to the ONE
+          worker-need form (doctrine §17), with the job's profession filled in
+          through the form's own bounded prefill. The label is that form's own
+          title — no new copy (decision 0032). */}
+      {!member && (
+        <p className="mt-8">
+          <TrackedCta
+            ctaId="public_job_employer_need"
+            audience="companies"
+            href={employerNeedHref}
+            className="text-sm font-semibold text-brand-blue hover:underline"
+          >
+            {tNeed("title")} →
+          </TrackedCta>
+        </p>
+      )}
+
       {attribution && (
         <p className="mt-8 text-xs text-text-muted">{attribution}</p>
       )}
-    </main>
+    </div>
   );
 }

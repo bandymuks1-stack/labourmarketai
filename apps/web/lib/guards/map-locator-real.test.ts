@@ -7,6 +7,7 @@ import {
   isUsableForSearch,
   type SelectedLocation,
 } from "@/lib/location/location-model";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Real Market Map guard (owner-smoke follow-up, PR #490).
@@ -19,8 +20,14 @@ import {
  */
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
-const comp = read("components/app/market-map-base.tsx");
-const live = read("components/app/market-map/location-map.tsx");
+// One-canonical-map: the location + radius CONTROLS live in
+// `map-location-controls.tsx`; the own marker + radius are drawn by the ONE
+// canonical `market-map.tsx` through `own-location-layer.ts`. The former
+// standalone `market-map-base.tsx` + `location-map.tsx` (a second Leaflet
+// instance) are deliberately gone.
+const comp = read("components/app/market-map/map-location-controls.tsx");
+const live = read("components/app/market-map/market-map.tsx");
+const layer = read("components/app/market-map/own-location-layer.ts");
 const env = read("lib/env.ts");
 
 describe("real provider map, no paid/secret provider", () => {
@@ -41,26 +48,27 @@ describe("real provider map, no paid/secret provider", () => {
   });
   it("no Google Maps loader / key anywhere", () => {
     expect(existsSync(join(ROOT, "lib/maps/google-maps-loader.ts"))).toBe(false);
-    for (const src of [comp, live]) {
+    for (const src of [comp, live, layer]) {
       expect(src).not.toMatch(/google-maps-loader|googleapis|google\.maps/i);
       expect(src).not.toMatch(/NEXT_PUBLIC_GOOGLE_MAPS_API_KEY|GOOGLE_MAPS_API_KEY/);
     }
     expect(env).not.toMatch(/GOOGLE_MAPS/);
   });
   it("no Mapbox / paid provider and no provider key or secret", () => {
-    for (const src of [comp, live]) {
+    for (const src of [comp, live, layer]) {
       expect(src).not.toMatch(/mapbox|maplibre/i);
       expect(src).not.toMatch(/access[_-]?token|api[_-]?key|process\.env/i);
     }
   });
-  it("the base mounts the real map component (not an SVG locator)", () => {
-    expect(comp).toMatch(/<MarketMapLive\b/);
-    expect(comp).not.toMatch(/<LocationMap\b/);
+  it("the controls mount NO map of their own — the one map draws the location (not an SVG locator)", () => {
+    expect(comp).not.toMatch(/<MarketMapLive\b|<LocationMap\b|mountLeafletMap/);
+    expect(live).toMatch(/drawOwnLocation\(/);
+    expect(read("components/app/market-map/world-discovery.tsx")).toMatch(/<MapLocationControls\b/);
   });
   it("resolves city-level coordinates + shows an honest precision label", () => {
-    expect(live).toMatch(/resolveLocation/);
+    expect(layer).toMatch(/resolveLocation/);
     expect(comp).toMatch(/data-testid="location-precision"/);
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const b = JSON.parse(read(`messages/${loc}.json`)).marketMapBase;
       for (const k of ["precisionDevice", "precisionCity", "precisionCountry", "precisionUnset"]) {
         expect(typeof b?.[k] === "string" && b[k].length > 0, `${loc} ${k}`).toBe(true);
@@ -111,8 +119,8 @@ describe("privacy + honest empty state", () => {
   it("the map only draws the worker's OWN selection (no other-user reads, no fake points)", () => {
     // The live map plots only `selected`; it never fetches or renders other
     // users' locations and seeds no fake market markers.
-    expect(live).not.toMatch(/markers?\s*[:=]\s*\[/i);
-    expect(live).toMatch(/pointFor\(selected\)/);
+    expect(layer).not.toMatch(/markers?\s*[:=]\s*\[/i);
+    expect(layer).toMatch(/ownPointFor\(overlay\.selected\)/);
   });
 });
 
@@ -132,7 +140,7 @@ describe("no raw provider/env text in user-facing copy (lt/en/ru)", () => {
       for (const [k, v] of Object.entries(node as Record<string, unknown>))
         leaves(v, prefix ? `${prefix}.${k}` : k, out);
   }
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: no provider/env strings in product copy`, () => {
       const m = JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
       const offenders: string[] = [];
@@ -148,10 +156,10 @@ describe("no raw provider/env text in user-facing copy (lt/en/ru)", () => {
 });
 
 describe("marketMapBase copy is provider-free + complete (lt/en/ru)", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: has the provider-free keys`, () => {
       const b = JSON.parse(read(`messages/${loc}.json`)).marketMapBase;
-      for (const k of ["autoButton", "manualToggle", "countryLabel", "regionLabel", "radiusLabel", "radiusValue", "savedLocally", "usableNote", "sourceAuto", "sourceManual"]) {
+      for (const k of ["autoButton", "manualToggle", "countryLabel", "regionLabel", "radiusLabel", "radiusValue", "sourceAuto", "sourceManual"]) {
         expect(typeof b?.[k] === "string" && b[k].length > 0, `${loc} ${k}`).toBe(true);
       }
     });

@@ -39,8 +39,10 @@ import {
   sensitivityForTask,
   type AiDataSensitivity,
 } from "@/lib/ai/runtime/data-sensitivity";
-import { MAX_GRANTABLE_FOR_FREE_TIER } from "@/lib/ai/runtime/data-egress";
+import { AI_EGRESS_GRANTS, MAX_GRANTABLE_FOR_FREE_TIER } from "@/lib/ai/runtime/data-egress";
 import type { AiAgentKey } from "@/lib/ai/registry/types";
+import { vacancyTranslationInputSchema } from "@/lib/ai/registry/agents/vacancy-translation";
+import { countryReadinessInputSchema } from "@/lib/ai/registry/agents/country-readiness";
 
 /**
  * Every agent key the product invokes today, with the sensitivity class this
@@ -52,6 +54,7 @@ import type { AiAgentKey } from "@/lib/ai/registry/types";
  *   matching_explanation  lib/staffing/match-preview-actions.ts
  *   company_need          lib/staffing/company-need-actions.ts
  *   market_explanation    lib/market/market-explanation-actions.ts
+ *   country_readiness     lib/country-readiness/readiness-reading-actions.ts
  */
 const WIRED_AGENT_SENSITIVITY = {
   worker_profile: "PERSONAL",
@@ -59,6 +62,13 @@ const WIRED_AGENT_SENSITIVITY = {
   matching_explanation: "PERSONAL",
   // An employer's own future work — scope, headcount, timeframe. No person.
   company_need: "LOW_RISK_PROJECT_DATA",
+  // Wired 2026-10-25 (owner decision, registry row 10.11): the plain-language
+  // reading of the sourced country matrix
+  // (lib/country-readiness/readiness-reading-actions.ts). The payload is
+  // matrix rows only — no person — but it KEEPS the LOW_RISK class its task
+  // always had: moving it to PUBLIC would let it leave for an ungranted
+  // external provider, which is an egress widening and an owner act.
+  country_readiness: "LOW_RISK_PROJECT_DATA",
   // Aggregate counts of published job ads — the ONE PUBLIC surface.
   market_explanation: "PUBLIC",
   // ONE typed chat sentence the deterministic router could not read —
@@ -71,6 +81,14 @@ const WIRED_AGENT_SENSITIVITY = {
   // `translate_message` (none recorded yet), so today the runtime refuses and
   // the original is shown.
   translation_copy: "SENSITIVE_FREE_TEXT",
+  // A published job advertisement rendered in the reader's locale (wired
+  // 2026-09-22, lib/vacancy-store/vacancy-translation-read.ts). Proposed as
+  // PUBLIC and OVERRULED by the owner in review — "public source content does
+  // not automatically authorize unrestricted third-party AI transmission" —
+  // so it is unbounded third-party prose, grant-gated like every other
+  // free-text task. No grant names it today; the runtime refuses and the
+  // reader shows the publisher's own words.
+  vacancy_translation: "SENSITIVE_FREE_TEXT",
 } as const satisfies Partial<Record<AiAgentKey, AiDataSensitivity>>;
 
 // ── The wired list is derived from source, not maintained by hand ──────────
@@ -124,7 +142,7 @@ describe("the wired set and its classification stay in lockstep", () => {
     },
   );
 
-  it("exactly five wired surfaces describe a person; four stay refused, the granted one only for its own task", () => {
+  it("six wired surfaces carry unbounded or personal text; five stay refused, the granted ones only for their own tasks", () => {
     // This is the sentence the gate makes to the owner, expressed as a check:
     // the surfaces that read a person are refused by a free-tier ceiling —
     // and by any ungranted provider — by exactly the rule that refused them
@@ -135,7 +153,17 @@ describe("the wired set and its classification stay in lockstep", () => {
       .sort();
     // translation_copy joined on 2026-09-17 (a work message another person
     // wrote) — refused by every provider until an owner grant names its task.
-    expect(personal).toEqual(["conversation_intent", "matching_explanation", "translation_copy", "work_journal", "worker_profile"]);
+    // vacancy_translation joined on 2026-09-22 by OWNER DECISION, after being
+    // proposed as PUBLIC: an advertisement's body is unbounded prose this
+    // platform did not author, and a public source is not an authorization.
+    expect(personal).toEqual([
+      "conversation_intent",
+      "matching_explanation",
+      "translation_copy",
+      "vacancy_translation",
+      "work_journal",
+      "worker_profile",
+    ]);
     for (const agent of personal) {
       const sensitivity = sensitivityForTask(taskTypeForAgent(agent as AiAgentKey));
       expect(sensitivity).not.toBe(MAX_GRANTABLE_FOR_FREE_TIER);
@@ -191,7 +219,50 @@ describe("the classes the gate names have not moved", () => {
       .filter(([, s]) => s === "PUBLIC")
       .map(([task]) => task)
       .sort();
+    // `translate_vacancy` was proposed for this set on 2026-09-22 and the
+    // owner refused it: a public SOURCE is not an authorization to transmit.
+    // The set is still one.
     expect(publicTasks).toEqual(["explain_market_demand"]);
+  });
+
+  it("the vacancy-translation task is grant-gated and admits ONLY the ad text and the two locales", () => {
+    // The gate first: no grant names this task, so an external provider may
+    // receive PUBLIC only and this task is not PUBLIC.
+    expect(sensitivityForTask("translate_vacancy")).toBe("SENSITIVE_FREE_TEXT");
+    expect(
+      AI_EGRESS_GRANTS.some((g) => (g.tasks ?? []).includes("translate_vacancy")),
+      "no owner grant may name translate_vacancy without an owner decision recorded in data-egress.ts",
+    ).toBe(false);
+    const policy = TASK_POLICIES.translate_vacancy;
+    expect([...policy.allowedFields].sort()).toEqual(
+      ["source_locale", "target_locale", "vacancy_description", "vacancy_title"].sort(),
+    );
+    // Everything that would tie the text to a party is stated as prohibited,
+    // not merely absent.
+    for (const must of [
+      "employer_name",
+      "employer_external_org_id",
+      "application_url",
+      "worker_profile",
+      "profile_id",
+      "worker_id",
+      "match_result",
+      "exact_coordinates",
+    ]) {
+      expect(policy.prohibitedFields, must).toContain(must);
+    }
+    // No escalation and a low ceiling: a board cannot silently run up a bill.
+    expect(policy.escalationConditions).toEqual([]);
+    expect(policy.preferredTier).toBe("low_cost");
+    expect(policy.fallbackTier).toBe("low_cost");
+    expect(policy.maxEstimatedCostUsd).toBeLessThanOrEqual(0.03);
+    // The input schema is strict: a caller cannot widen the payload.
+    const widened = vacancyTranslationInputSchema.safeParse({
+      sourceLocale: "sv",
+      targetLocale: "lt",
+      items: [{ id: "v0", title: "Svetsare", employerName: "X AB" }],
+    });
+    expect(widened.success).toBe(false);
   });
 
   it("the PUBLIC task's own policy admits nothing that describes a person", () => {
@@ -234,8 +305,43 @@ describe("the classes the gate names have not moved", () => {
     expect(AGENT_TASK_TYPES.country_readiness).toBe(
       "derive_workforce_requirements",
     );
-    expect(AGENT_TASK_TYPES.document_assistant).toBe(
-      "derive_workforce_requirements",
-    );
+    // document_assistant also mapped here until it was RETIRED on 2026-10-25
+    // (owner decision, registry row 10.11): its whole output is
+    // lib/conversation/documents-gap.ts. It must not come back unmapped-but-
+    // registered or mapped-but-unregistered.
+    expect(Object.keys(AGENT_TASK_TYPES)).not.toContain("document_assistant");
+  });
+
+  it("the country reading admits matrix rows only — no person, no free text", () => {
+    // The input schema is strict, so these are refused before any provider.
+    const base = {
+      country: "NL",
+      scope: "worker_posted",
+      sourceRecords: [
+        {
+          ref: "a1_certificate",
+          level: "required",
+          risk: "high",
+          grade: "official",
+          source: "Your Europe",
+          statement: "An A1 document.",
+        },
+      ],
+    };
+    expect(countryReadinessInputSchema.safeParse(base).success).toBe(true);
+    for (const widened of [
+      { ...base, workerDocumentStatus: ["passport: ready"] },
+      { ...base, role: "electrician from Vilnius" },
+      { ...base, profileId: "p-1" },
+      { ...base, sourceRecords: [{ ...base.sourceRecords[0], workerName: "X" }] },
+    ]) {
+      expect(countryReadinessInputSchema.safeParse(widened).success).toBe(false);
+    }
+    // And no grant names its task: an external provider may receive PUBLIC
+    // only, so today this run is refused externally and served locally or not
+    // at all.
+    expect(
+      AI_EGRESS_GRANTS.some((g) => (g.tasks ?? []).includes("derive_workforce_requirements")),
+    ).toBe(false);
   });
 });

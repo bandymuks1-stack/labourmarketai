@@ -1,7 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { createElement, type ComponentProps, type ReactNode } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { NextIntlClientProvider } from "next-intl";
 
+import { requestDoorFromFragment, requestDoorHref } from "@/lib/staffing/request-door-link";
 import { readPublicEntry } from "@/lib/marketing/public-entry";
 import { INTENT_REGISTRY, type RoutedIntent } from "@/lib/conversation/intent-registry";
 import {
@@ -29,9 +33,23 @@ import {
  * must stay free to improve.
  */
 
+// The §22 block below RENDERS the first screen's two components. Their link
+// primitive needs Next request context and their telemetry needs a browser,
+// neither of which is the property under test — so both are stubbed to what
+// matters here: an <a> carrying its className, and a no-op event.
+vi.mock("@/lib/i18n/navigation", () => ({
+  Link: ({ href, children, ...rest }: Record<string, unknown>) =>
+    createElement("a", { href: String(href), ...rest }, children as ReactNode),
+}));
+vi.mock("@/lib/telemetry/task", () => ({ trackFunnel: () => undefined }));
+vi.mock("next-intl/server", () => ({
+  getTranslations: async (ns: string) => (k: string) => `${ns}.${k}`,
+}));
+
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+// 2026-09-20: PL is an active UI locale; the Polish catalog reached full parity in the same PR, so pl is covered here like the other five.
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 const catalog = (loc: string) =>
   JSON.parse(read(`messages/${loc}.json`)) as Record<string, never>;
 const at = (o: unknown, path: string): unknown =>
@@ -189,13 +207,17 @@ describe("§17 the public map is real geography and claims no activity", () => {
     // defined over ASCII `\w`, so `/\bне\b/` never matches Russian at all —
     // it failed on this very catalogue on the first run, on a string that
     // plainly reads "а не сегодняшняя активность".
-    const word = (w: string) => new RegExp(`(?<!\\p{L})${w}(?!\\p{L})`, "iu");
+    // The alternatives are GROUPED: ungrouped, `a|b` bounds only the first on the
+    // left and the last on the right, so `inte|inga?` matched almost anything.
+    const word = (w: string) => new RegExp(`(?<!\\p{L})(?:${w})(?!\\p{L})`, "iu");
     const NEGATION: Readonly<Record<(typeof ACTIVE)[number], RegExp>> = {
       lt: word("ne"),
       en: word("not"),
       ru: word("не"),
       nl: word("niet|geen"),
       de: word("nicht|keine?"),
+      pl: word("nie"),
+      sv: word("inte|inga?"),
     };
     for (const loc of ACTIVE) {
       const v = at(catalog(loc), "landing.marketMap.shows") as string;
@@ -253,7 +275,10 @@ describe("§17 the public map is real geography and claims no activity", () => {
 describe("§20 starting contexts are contexts, not identities", () => {
   it("partner is not one of them, and is still a real door", () => {
     expect(STARTING_CONTEXTS.map((c) => c.key)).not.toContain("partner");
-    expect(PARTNER_DOOR.href).toBe("/about");
+    // Since 2026-11-15 (owner P0, F3) the landing's partner request form:
+    // /about held no partner form or contact, so the door led nowhere real.
+    expect(PARTNER_DOOR.href).toBe(requestDoorHref("partner"));
+    expect(requestDoorFromFragment(PARTNER_DOOR.href.slice(1))).toBe("partner");
     // The full five-door list is unchanged, so every existing route check and
     // production walk still asserts the same destinations.
     expect(FINAL_CTA_LINKS.map((d) => d.key).sort()).toEqual([
@@ -280,28 +305,191 @@ describe("§20 starting contexts are contexts, not identities", () => {
 describe("§19 the visitor reaches a way to start without a long scroll", () => {
   const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
 
-  it("the doors come BEFORE the explanation, the chain and the sample card", () => {
+  // LANDING V3 (owner-approved, 2026-11-13). The starting-contexts band and
+  // the product chain left the page: the way to start is the goal centre at
+  // the very top, so there is no scroll to it at all. What §19 asks — a way
+  // to start before any explanation — is now stricter, and is pinned so.
+  it("the way to start (the goal centre) comes BEFORE the explanation", () => {
     const i = (c: string) => focus.indexOf(`<${c}`);
-    expect(i("StartingContextsBand")).toBeGreaterThan(0);
-    expect(i("StartingContextsBand")).toBeLessThan(i("ProductChainBand"));
-    expect(i("StartingContextsBand")).toBeLessThan(i("PlayerCardShowcase"));
+    expect(i("LandingIntentChoice")).toBeGreaterThan(0);
+    expect(i("LandingIntentChoice")).toBeLessThan(i("LandingHow"));
+    // The sample player-card showcase was removed from the landing (containment 2026-10-08).
+    expect(i("PlayerCardShowcase")).toBe(-1);
   });
 
-  it("the market map comes before both, directly under the entry", () => {
+  it("the market EVIDENCE comes directly after the entry, before the explanation", () => {
+    // The canonical vacancy and employer figures, now one sentence with its
+    // source (`LandingMarketFacts`), in the one place they are printed.
     const i = (c: string) => focus.indexOf(`<${c}`);
-    expect(i("PublicEntry")).toBeLessThan(i("PublicMarketMapBand"));
-    expect(i("PublicMarketMapBand")).toBeLessThan(i("StartingContextsBand"));
+    expect(i("PublicEntry")).toBeLessThan(i("LandingMarketFacts"));
+    expect(i("LandingMarketFacts")).toBeLessThan(i("LandingHow"));
+    // The sentence box no longer prints the counts a second time.
+    // (It also receives the request block's title, employer path P0 2026-11-15.)
+    expect(focus).toMatch(/<PublicEntry examples="none" supply=\{null\}( requestLabel=\{tDoors\("title"\)\})? \/>/);
+    // And the withdrawn band must not quietly return without a decision.
+    expect(i("PublicMarketMapBand")).toBe(-1);
+  });
+});
+
+/**
+ * §22 VALUE FIRST, ONE NEXT STEP, FOUR EXAMPLES (owner directive 2026-09-23:
+ * landing §22 "fix the story, not CSS").
+ *
+ * The owner's reading of production: the page showed controls and a map
+ * before it said what the product is, and offered ten equal choices before
+ * any value. The directive explicitly SUPERSEDES two window-11 readings — the
+ * #1609 §16 instruction-style h1, and the §18 reading that all ten example
+ * chips must be visible by default — and KEEPS §17 map honesty and §20
+ * contexts-not-identities (both still pinned above, unchanged).
+ *
+ * What is pinned here is structure, never prose, so the copy stays free:
+ *   · the hero namespace is still exactly one headline and one sub;
+ *   · the first screen carries exactly ONE primary action;
+ *   · at most four example chips are MOUNTED by default, and every one of
+ *     the catalogue's examples stays reachable through the disclosure.
+ * Each assertion carries a negative control proving it can fail.
+ */
+describe("§22 the first screen says what this is, then offers one next step", () => {
+  const PRIMARY = /bg-gradient-cta/g;
+  const countPrimary = (html: string) => (html.match(PRIMARY) ?? []).length;
+  const heroKeysOk = (hero: Record<string, unknown>) =>
+    JSON.stringify(Object.keys(hero).sort()) === JSON.stringify(["headline", "sub"]);
+
+  it("landing.hero is exactly [headline, sub] in every active locale", () => {
+    for (const loc of ACTIVE) {
+      const hero = at(catalog(loc), "landing.hero") as Record<string, unknown>;
+      expect(heroKeysOk(hero), `${loc}: landing.hero keys ${Object.keys(hero)}`).toBe(true);
+      for (const k of ["headline", "sub"]) {
+        expect(hero[k], `${loc}: landing.hero.${k}`).toBeTypeOf("string");
+      }
+    }
+    // Control: a third hero key (the old scenario's shape) must fail.
+    expect(heroKeysOk({ headline: "", sub: "", scenario: "" })).toBe(false);
   });
 
-  it("the sample card no longer out-shouts the page's own headings", () => {
-    // Read the h2's OWN className, not the file: the comment beside it names
-    // the old scale, and a whole-file match would fail on the explanation of
-    // the very change it is checking for.
-    const showcase = read("components/marketing/player-card-showcase.tsx");
-    const h2 = showcase.match(/<h2 className="([^"]+)"/)?.[1];
-    expect(h2, "the showcase has no <h2> with a className").toBeTypeOf("string");
-    expect(h2, "the showcase heading is a second hero").not.toMatch(/sm:text-5xl/);
-    expect(h2).toMatch(/text-3xl/);
-    expect(h2).toMatch(/sm:text-4xl/);
+  it("the h1 is not the entry's instruction any more — the field's label carries that", () => {
+    // Pinned as a RELATION, not a phrase: the headline may say anything except
+    // repeat the input label, which is what #1609 §16 had made it do.
+    for (const loc of ACTIVE) {
+      const headline = at(catalog(loc), "landing.hero.headline") as string;
+      const label = at(catalog(loc), "landing.entry.label") as string;
+      expect(headline.toLowerCase(), `${loc}: the h1 repeats the entry label`).not.toBe(
+        label.toLowerCase(),
+      );
+    }
+  });
+
+  it("the hero renders ONE primary action and one secondary", async () => {
+    const { LandingPrimaryActions } = await import("@/components/marketing/landing-primary-actions");
+    const html = renderToStaticMarkup(
+      await LandingPrimaryActions({ locale: "lt", surface: "landing_hero" }),
+    );
+    expect(countPrimary(html)).toBe(1);
+    expect(html).toContain('href="/lt/auth/signup"');
+    expect(html).toContain('href="/jobs"');
+    expect(html).toContain("nav.startNow");
+    expect(html).toContain("nav.jobs");
+    // Both report through the shared capture, tagged with their surface.
+    expect(html).toContain('data-cta-id="landing_hero_signup"');
+    expect(html).toContain('data-cta-id="landing_hero_jobs"');
+    // Control: the counter sees a second primary when there is one.
+    expect(countPrimary(`${html}${html}`)).toBe(2);
+  });
+
+  // 2026-11-12 — owner instruction 2026-11-12 ("Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori atlikti"):
+  // the first screen's one next step is now the CHOICE (the goal navigator),
+  // mounted once before the working entry; the "Start now" pair remains only
+  // as the closing band at the end of the page.
+  // Landing V3 (owner, 2026-11-13): the closing "Start now" pair is gone
+  // too — it was a third start button. The choice is offered ONCE.
+  it("the page offers the choice once, and no second or third start button", () => {
+    const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
+    const body = focus.slice(focus.lastIndexOf("<NextIntlClientProvider")); // the tag, not a comment naming it
+    expect(body).toContain('lead={tV3("lead")}');
+    expect(focus.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(0);
+    expect(focus.match(/<LandingClosingBand\b/g) ?? []).toHaveLength(0);
+    expect(focus.match(/<LandingIntentChoice\b/g) ?? []).toHaveLength(1);
+    expect(body).not.toContain("<LivingWorkerHero");
+    // The choice (with the page's h1 and its one line) first, then the entry.
+    expect(body.indexOf("<LandingIntentChoice")).toBeGreaterThan(-1);
+    expect(body.indexOf("<LandingIntentChoice")).toBeLessThan(body.indexOf("<PublicEntry"));
+    // And still no per-request read: the landing stays static.
+    const code = focus.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(code).not.toMatch(/cookies\(|headers\(/);
+    expect(read("components/marketing/landing-primary-actions.tsx")).not.toMatch(
+      /cookies\(|headers\(|getLocale\(/,
+    );
+  });
+
+  /** The entry as a first-time visitor receives it: lt copy, no reading yet. */
+  const renderEntry = async () => {
+    const { PublicEntry } = await import("@/components/marketing/public-entry");
+    // `children` goes as createElement's third argument (react/no-children-
+    // prop); the props object is cast because the provider's type marks
+    // `children` required on props.
+    const props = {
+      locale: "lt",
+      messages: { landing: catalog("lt").landing },
+    } as unknown as ComponentProps<typeof NextIntlClientProvider>;
+    return renderToStaticMarkup(
+      createElement(NextIntlClientProvider, props, createElement(PublicEntry, { supply: null })),
+    );
+  };
+
+  it("the entry itself adds no primary action before a reading", async () => {
+    const html = await renderEntry();
+    // The doors (one of them primary) appear only after a reading, so the
+    // hero's single primary action is the only one on the first screen.
+    expect(countPrimary(html)).toBe(0);
+  });
+
+  it("at most FOUR example chips are mounted by default, and the rest are one tap away", async () => {
+    const { DEFAULT_EXAMPLE_KEYS, EXAMPLE_KEYS, visibleExampleKeys } = await import(
+      "@/components/marketing/public-entry"
+    );
+    const html = await renderEntry();
+    const chips = html.match(/data-testid="entry-example"/g) ?? [];
+    expect(chips.length).toBeLessThanOrEqual(4);
+    expect(chips.length).toBe(DEFAULT_EXAMPLE_KEYS.length);
+    expect(html).toContain('data-testid="entry-more-examples"');
+    expect(html).toContain('aria-expanded="false"');
+
+    // Reachable: the disclosure mounts EVERY catalogue example, the default
+    // four still first, none twice, none missing.
+    const all = visibleExampleKeys(true);
+    expect([...all].sort()).toEqual([...EXAMPLE_KEYS].sort());
+    expect(new Set(all).size).toBe(all.length);
+    expect(all.slice(0, DEFAULT_EXAMPLE_KEYS.length)).toEqual([...DEFAULT_EXAMPLE_KEYS]);
+    expect(visibleExampleKeys(false)).toEqual(DEFAULT_EXAMPLE_KEYS);
+    // Every example the component knows is a sentence in every active
+    // catalogue, so "reachable" means a real routed sentence, not a key.
+    for (const loc of ACTIVE) {
+      const examples = at(catalog(loc), "landing.entry.examples") as Record<string, string>;
+      expect(Object.keys(examples).sort(), `${loc}: examples`).toEqual([...EXAMPLE_KEYS].sort());
+      expect(at(catalog(loc), "landing.entry.moreExamples"), `${loc}: moreExamples`).toBeTypeOf(
+        "string",
+      );
+    }
+    // The chip both CI landing specs click stays first: the need-workers one.
+    expect(DEFAULT_EXAMPLE_KEYS[0]).toBe("hire");
+    // Control: the expanded set is larger than the cap, so the cap is real.
+    expect(all.length).toBeGreaterThan(4);
+  });
+
+  it("the default four still span both sides of the market and more than hiring", () => {
+    const entry = at(catalog("lt"), "landing.entry") as { examples: Record<string, string> };
+    return import("@/components/marketing/public-entry").then(({ DEFAULT_EXAMPLE_KEYS }) => {
+      const domains = new Set<string>();
+      for (const key of DEFAULT_EXAMPLE_KEYS) {
+        const reading = readPublicEntry(entry.examples[key]);
+        expect(reading.kind, key).toBe("recognised");
+        if (reading.kind === "recognised") {
+          domains.add(INTENT_REGISTRY[reading.intent as RoutedIntent].domain);
+        }
+      }
+      // Four chips that were all "find me a job" would reintroduce §16 on the
+      // first screen; the default set must span at least three domains.
+      expect(domains.size).toBeGreaterThanOrEqual(3);
+    });
   });
 });

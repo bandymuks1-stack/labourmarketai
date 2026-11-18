@@ -1,16 +1,16 @@
 {
-  "minutes": "[EN] minutes",
-  "hours": "[EN] hours",
-  "days": "[EN] days",
+  "minutes": "minuty",
+  "hours": "godziny",
+  "days": "dni",
   "square_meters": "m²",
   "meters": "m",
-  "pieces": "[EN] pcs",
+  "pieces": "szt.",
   "kilograms": "kg",
-  "packages": "[EN] packages",
-  "box_per_day": "[EN] boxes/day",
-  "square_meters_per_day": "[EN] m²/day",
+  "packages": "paczki",
+  "box_per_day": "kartony/dzień",
+  "square_meters_per_day": "m²/dzień",
   "kilometers": "km",
-  "pallets": "[EN]pallets",
-  "covers": "[EN]covers",
-  "cases": "[EN]cases"
+  "pallets": "palety",
+  "covers": "nakrycia",
+  "cases": "skrzynki"
 }

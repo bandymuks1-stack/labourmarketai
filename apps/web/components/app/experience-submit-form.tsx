@@ -118,7 +118,7 @@ export function ExperienceSubmitForm({
         type="submit"
         disabled={pending}
         data-testid="experience-submit"
-        className="inline-flex min-h-[2.75rem] w-fit items-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90 disabled:opacity-60"
+        className="inline-flex min-h-[2.75rem] w-fit items-center rounded-md bg-gradient-cta px-4 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {pending ? t("submit.sending") : t("submit.cta")}
       </button>

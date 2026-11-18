@@ -97,7 +97,44 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 76 → 78 (2026-09-19): agency-invites (client bridge) + propose-booking.
     // 78 → 79 (2026-09-20): accept-offer — a decision by sentence lands on the
     // ONE offer card (the button stays the commitment).
-    expect(entries.length).toBe(79);
+    // 79 → 80 (2026-09-22, owner P0 §5): my-team — "Parodyk mano komandą"
+    // scored 0 everywhere while /dashboard/network, the relationships
+    // surface the primary nav carries and the invitation answers already
+    // chip to, was the answer. A ROUTE to that page; no new read, no new UI.
+    // 80 → 81 (2026-09-23, owner program CASE 3/4): rename-organization —
+    // "Pervadink šią agentūrą į Nonstop Group UAB." scored 0 in six locales
+    // and the proposer had no id to pick. A WRITE behind the ONE confirm form.
+    // 81 → 82 (2026-09-23, capability matrix P0): employer-visibility — "Kas
+    // mato mano profilį?" / "make me visible to employers" scored 0 while 57
+    // of 59 production workers were invisible to all supply matching, the
+    // consent reachable only behind the profile's closed "More". The state is
+    // read and said first, then the EXISTING consent component is embedded;
+    // the sentence itself writes nothing.
+    // 82 → 83 (2026-09-29, owner continuation §5): pay-statement — "Mano
+    // atlyginimo lūkestis nuo 2500 iki 3500 eurų" scored 0 and the fallback
+    // only READ the criteria back. It opens the SAME work-card form with the
+    // figures in it; the sentence writes nothing.
+    // 83 → 84 (2026-09-29, owner continuation §7): correct-work — "Ne 5, o 6
+    // valandas" after a saved entry opened a SECOND 6 h entry. It names the
+    // newest entry and hands over one chip to the canonical supersede editor.
+    // 84 → 85 (2026-09-29): current-work — "Kur dabar dirbu?" answered from
+    // the canonical work contexts; the booking-engagements panel listed only
+    // an ended placement.
+    // 85 → 86 (2026-09-29): language-statement — "Kalbu angliškai ir
+    // rusiškai" scored 0; one language form per stated language.
+    // 86 → 87 (2026-09-29): skill-statement — "Išmokau skaityti techninius
+    // brėžinius" scored 0; the words are offered as the person's own claim.
+    // 87 → 88 (2026-09-29): saved-opportunities — a job saved on the page
+    // was invisible to the chat ("parodyk išsaugotus darbus" ran a search).
+    // 88 → 89 (2026-09-29): open-tasks — "Kokios užduotys projekte …?" could
+    // not read the task the project panel already counted.
+    // 89 → 90 (2026-10-01): find-partners — "Noriu rasti partnerių savo
+    // verslui" was answered as a job search; a business-side route intent.
+    // 90 -> 91: product-help — how-to / where-is questions answered in words with the door.
+    // 91 -> 92: open-conversation - 'parašyk Jonui' opens the ONE conversation.
+    // 92 -> 93: new-jobs - the new ads over the one job-alert matching.
+    // 93 -> 94: what-changed - the ONE consequence trace, read in the chat.
+    expect(entries.length).toBe(94);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -128,6 +165,12 @@ describe("the intent registry is the enumerable routing contract", () => {
       "confirm-work",
       // F2 — the site as a project object, by sentence.
       "create-project",
+      // "Kas mato mano profilį?" — the EXISTING discoverability consent,
+      // embedded after the current state is said. Write-class because the
+      // consent can record a grant — behind its own equal buttons and the full
+      // legal text, never by the sentence. NOT route: a route intent may only
+      // hand over a chip, and this door can persist.
+      "employer-visibility",
       "invite-candidate",
       "invite-client",
       // Owner contract 2026-09-04 §15 — the institution's commands by
@@ -135,13 +178,23 @@ describe("the intent registry is the enumerable routing contract", () => {
       // through the `programmes` handler), all important-tier over the ONE
       // dispatcher.
       "invite-student",
+      // "kalbu angliškai" — the language form per language; its save is the write.
+      "language-statement",
       "log-work",
       "move-worker",
       "need-workers",
       // SUPPLY — the same canonical intake as a need, stamped "partner".
       "offer-capacity",
+      // "mano atlyginimo lūkestis nuo 2500 iki 3500" — the work card opened
+      // with the figures; the form's save is the write.
+      "pay-statement",
       "programmes",
       "propose-candidate",
+      // Owner program 2026-09-23: rename the ACTIVE organization — the ONE
+      // confirm form over `company.rename-organization` (important tier).
+      "rename-organization",
+      // "išmokau …" — the person's words as a skill claim, saved by an explicit chip.
+      "skill-statement",
       // PROJECT → PROGRESS: a stage moved to a real status, by sentence.
       "stage-status",
       "switch-context",
@@ -172,10 +225,19 @@ describe("the intent registry is the enumerable routing contract", () => {
       "cv-export",
       "cv-view",
       "documents",
+      // "Noriu rasti partnerių savo verslui" — chips to the existing
+      // marketplace doors (or which company); never a job search, no write.
+      "find-partners",
       "hours-import",
       "lmc",
       "market-map",
+      // "Parodyk mano komandą" (owner P0 2026-09-22 §5) — one chip to
+      // /dashboard/network, the relationships surface the primary nav
+      // already carries. Route-class for exactly the reason above.
+      "my-team",
       "need-service",
+      // "Parašyk Jonui" — resolves WHO, then navigates to the ONE conversation; sends nothing.
+      "open-conversation",
       "timesheets",
       "work-hours",
     ]);

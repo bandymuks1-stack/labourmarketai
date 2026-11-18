@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -18,8 +19,10 @@ import {
   saveDemandDraftAction,
 } from "@/lib/demand/demand-drafts-actions";
 import type { DemandPrefill, DemandUrgency } from "@/lib/demand/demand-request";
+import { parseCompanyNeedPrefill, type CompanyNeedPrefill } from "@/lib/staffing/company-need-prefill";
 import { DemandAdvancedSections } from "@/components/app/demand-advanced-sections";
 import {
+  defaultCurrencyForCountry,
   buildStructuredV2Input,
   storedV2ToFormState,
   EMPTY_ADVANCED_DEMAND_STATE,
@@ -30,10 +33,10 @@ import {
   deriveCompensationHonestyFlags,
   requiresTalentPoolDisclosure,
   sanitizeStructuredDemandV2,
+  teamCompositionFor,
 } from "@/lib/demand/structured-demand-v2";
 import {
   buildWorkCategoryOptions,
-  MARKET_COUNTRIES,
 } from "@/lib/taxonomy/work-categories";
 import { structureNeed } from "@/lib/structuring/structure-need";
 import { EstimateBuilder } from "@/components/app/estimate-builder";
@@ -48,6 +51,7 @@ import {
   type EstimateInputs,
 } from "@/lib/estimate/estimate";
 import { cn } from "@/lib/utils";
+import type { OpenNeedsUsageView } from "@/lib/billing/open-needs-usage";
 
 /** Required tools / equipment options (§8.6) — a CLOSED set of EXISTING
  *  canonical taxonomy skill slugs (lib/taxonomy/profession-skills.ts; labels
@@ -85,8 +89,18 @@ export function DemandRequestButton({
   intent,
   stepTitles,
   repeatRequestId = null,
+  usage = null,
+  organizationId = null,
 }: {
   intent: "hire_workers" | "partner";
+  /** The organization this page was rendered for. Sent with the submit so a
+   *  workspace switched meanwhile (another tab) REFUSES instead of posting
+   *  the need into a company the person did not see. */
+  organizationId?: string | null;
+  /** Pre-submit open-needs usage for the acting workspace: the ONE gate's
+   *  verdict reshaped (lib/billing/open-needs-usage.ts). Null / not visible
+   *  while billing is not enforced: nothing is shown. */
+  usage?: OpenNeedsUsageView | null;
   /** Localized titles for steps 1/2/3 (from auth.dashboard.wow.flow.company). */
   stepTitles: [string, string, string];
   /** "Repeat this need": a specific past request of the caller's whose
@@ -95,6 +109,7 @@ export function DemandRequestButton({
   repeatRequestId?: string | null;
 }) {
   const t = useTranslations("auth.dashboard.wow.demand");
+  const tStale = useTranslations("conversation.forms.ui");
   const router = useRouter();
   // Structured field labels reuse the existing 3-locale catalogues (no new
   // 11-locale keys): companyNeed for the field labels + accommodation options,
@@ -120,6 +135,9 @@ export function DemandRequestButton({
   const [workType, setWorkType] = useState("");
   const [country, setCountry] = useState("");
   const [teamSize, setTeamSize] = useState("");
+  // Teams of a stated size read from the description ("3 brigados po 4") —
+  // kept beside the total only while the count still equals teams × size.
+  const [teamComposition, setTeamComposition] = useState<{ teams: number; perTeam: number } | null>(null);
   const [accommodation, setAccommodation] = useState("");
   const accommodationOptions: { value: string; label: string }[] = [
     { value: "provided_free", label: tc("accFree") },
@@ -159,17 +177,21 @@ export function DemandRequestButton({
     workCategories.flatMap((c) =>
       c.options.map((o) => ({ value: o.slug, label: `${o.label} · ${c.sector}` })),
     );
-  const countryOptions: { value: string; label: string }[] =
-    MARKET_COUNTRIES.map((code) => ({
-      value: code,
-      label: tlm(`countryNames.${code}`),
-    }));
+  // Every ISO country, active markets first — a market list orders, it never shortens.
+  const countryOptions: { value: string; label: string }[] = countryOptionsForLocale(locale);
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
+  // A need with no country is invisible to every country filter (workers,
+  // agencies, search). The market is never guessed, so it is asked for.
+  const [showCountryError, setShowCountryError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
-  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual">(
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual" | "workspaceChanged">(
     "idle",
   );
+  // The need this form just saved, so its next step opens THAT need's
+  // candidates. Without it the scouting room picks a need by its own rule (most
+  // offers or hands raised first), which can be an older need.
+  const [savedRequestId, setSavedRequestId] = useState<string | null>(null);
   // Advanced structured clusters (structured_v2, PR 2) — optional; empty
   // stays an honest "not stated" and the request submits exactly as before.
   const tsd = useTranslations("structuredDemand");
@@ -178,6 +200,22 @@ export function DemandRequestButton({
   });
   const patchAdv = (patch: Partial<AdvancedDemandFormState>) =>
     setAdv((prev) => ({ ...prev, ...patch }));
+  // The pay currency follows the chosen country (SE → SEK) while no amount is
+  // typed yet: a default the person sees in the picker and can change, never
+  // a conversion of numbers already written (Swedish employer audit M-1).
+  useEffect(() => {
+    const currency = defaultCurrencyForCountry(country);
+    if (!currency) return;
+    // EVERY amount the currency applies to (buildStructuredV2Input prices the
+    // pay range, the guaranteed base and the per diem in `adv.currency`): any
+    // of them typed means the currency is the person's, and stays.
+    setAdv((prev) =>
+      [prev.compMin, prev.compMax, prev.guaranteedBase, prev.perDiem].every((v) => v.trim() === "") &&
+      prev.currency !== currency
+        ? { ...prev, currency }
+        : prev,
+    );
+  }, [country]);
   // Duplicate-and-edit: prefill the whole wizard from the owner's OWN last
   // request (repeat action, Capability E/G). Own data only; nothing invented.
   const [prefillState, setPrefillState] = useState<
@@ -213,6 +251,10 @@ export function DemandRequestButton({
         // draft" while the UI reported success (same class as the teamSize
         // loss fixed earlier).
         opportunityType: adv.opportunityType || undefined,
+        // The picked country (any ISO country — global-access rule 2026-09-22)
+        // used to be dropped by the draft leg too; the prefill reads it from
+        // `customer_requests.country`, which the action stamps.
+        country: country || undefined,
         notes,
       });
       setDraftSource(true);
@@ -270,6 +312,17 @@ export function DemandRequestButton({
   useEffect(() => {
     if (autoPrefillRan.current) return;
     autoPrefillRan.current = true;
+    // The estimate's worker count and country can arrive in the address (the
+    // project calculator's account route, the company-need adapter's bounded
+    // prefill; employer path P0 2026-11-15). Applied at once, and again after a
+    // saved draft, so the numbers the person just entered stay.
+    const fromAddress: CompanyNeedPrefill =
+      intent === "hire_workers" ? parseCompanyNeedPrefill(new URLSearchParams(window.location.search)) : {};
+    const applyAddress = () => {
+      if (fromAddress.country) setCountry(fromAddress.country);
+      if (fromAddress.numberOfWorkers != null) setTeamSize(String(fromAddress.numberOfWorkers));
+    };
+    applyAddress();
     void (async () => {
       try {
         if (repeatRequestId) {
@@ -278,6 +331,7 @@ export function DemandRequestButton({
           const rep = await getDemandPrefillByIdAction(intent, repeatRequestId);
           if (rep.found && !descRef.current.trim()) {
             applyPrefill(rep);
+            applyAddress();
             setDraftSource(false);
             setPrefillState("done");
             return;
@@ -287,6 +341,7 @@ export function DemandRequestButton({
         if (!res.found || res.source !== "draft") return;
         if (descRef.current.trim()) return; // untouched check at apply time
         applyPrefill(res);
+        applyAddress();
         setDraftSource(true);
         setPrefillState("draft");
       } catch {
@@ -299,10 +354,21 @@ export function DemandRequestButton({
   // server uses, so the preview never disagrees with what will be stored.
   const advWire = buildStructuredV2Input(adv);
   const advV2 = sanitizeStructuredDemandV2(advWire);
+  /** The structured cluster to send, with the team composition added while
+   *  it still explains the number of workers (the server re-checks). */
+  function withTeam(wire: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+    const team = teamCompositionFor(
+      teamSize.trim() ? Number(teamSize) : null,
+      teamComposition?.teams,
+      teamComposition?.perTeam,
+    );
+    return team ? { ...(wire ?? {}), team } : wire;
+  }
   const honestyFlags = deriveCompensationHonestyFlags(advV2);
   const talentPoolDisclosure = requiresTalentPoolDisclosure(advV2);
 
   const descOk = description.trim().length > 0;
+  const countryOk = country !== "";
   // The estimate is OPTIONAL. It only blocks submit when the user actually
   // engaged it AND it is invalid (negatives / impossible %). An untouched
   // estimate never blocks and is never persisted.
@@ -320,6 +386,13 @@ export function DemandRequestButton({
       return;
     }
     setShowDescError(false);
+    // Step 2 gate: the country is what puts the need in front of workers and
+    // agencies in that market. Without it the need is saved but never found.
+    if (step === 2 && !countryOk) {
+      setShowCountryError(true);
+      return;
+    }
+    setShowCountryError(false);
     // Deterministic auto-suggest: when entering the criteria step, pre-fill the
     // structured selects from the free text (only empty ones, never overriding
     // the user). Closed-set values only; the user reviews and can correct.
@@ -328,6 +401,9 @@ export function DemandRequestButton({
       if (s.workType && !workType) setWorkType(s.workType);
       if (s.country && !country) setCountry(s.country);
       if (s.teamSize != null && !teamSize.trim()) setTeamSize(String(s.teamSize));
+      setTeamComposition(
+        s.teamCount != null && s.perTeamSize != null ? { teams: s.teamCount, perTeam: s.perTeamSize } : null,
+      );
       if (s.startPeriod) setUrgency(s.startPeriod);
       if (s.accommodation && !accommodation) setAccommodation(s.accommodation);
       setAutoSuggested(s.reasons.length > 0);
@@ -343,6 +419,11 @@ export function DemandRequestButton({
     if (!descOk) {
       setStep(1);
       setShowDescError(true);
+      return;
+    }
+    if (!countryOk) {
+      setStep(2);
+      setShowCountryError(true);
       return;
     }
     setState("sending");
@@ -361,11 +442,22 @@ export function DemandRequestButton({
         transport: transport || undefined,
         requiredTools: requiredTools.length > 0 ? requiredTools : undefined,
         estimate: estimateEngaged ? estimate : undefined,
-        structuredV2: advWire,
-      });
+        structuredV2: withTeam(advWire),
+      }, { expectedOrganizationId: organizationId });
+      // The server is the rule (web, chat and MCP share it): a refused country
+      // sends the person back to the picker with the reason beside it.
+      if (!res.ok && res.code === "country_required") {
+        setState("idle");
+        setStep(2);
+        setShowCountryError(true);
+        return;
+      }
+      setSavedRequestId(res.ok ? res.requestId : null);
       setState(
         res.ok
           ? "done"
+          : res.code === "workspace_changed"
+            ? "workspaceChanged"
           : res.code === "needs_migration"
             ? "needsMigration"
             : res.code === "over_open_need_limit"
@@ -501,15 +593,31 @@ export function DemandRequestButton({
           ✓ {t(`${key}.done`)}
         </p>
         <p className="text-xs text-text-secondary">{t("form.submittedHeading")}</p>
-        {/* The exact next step — the scouting room where matches + interest for
-            this need appear (audit PR4: success used to be a dead-end panel). */}
-        <Link
-          href={"/dashboard/company/scouting" as "/dashboard"}
-          className="w-fit text-sm font-medium text-brand-blue hover:underline"
-          data-testid="demand-done-scouting-link"
-        >
-          {t("form.doneScoutingLink")} →
-        </Link>
+        {/* The exact next step. A NEED: the scouting room where matches +
+            interest for it appear (audit PR4: success used to be a dead-end
+            panel). An OFFER has no matches to scout — its next step is the
+            organisation's own offers list, where the saved offer now stands. */}
+        {intent === "hire_workers" ? (
+          <Link
+            href={
+              (savedRequestId
+                ? `/dashboard/company/scouting?request=${encodeURIComponent(savedRequestId)}`
+                : "/dashboard/company/scouting") as "/dashboard"
+            }
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
+            data-testid="demand-done-scouting-link"
+          >
+            {t("form.doneScoutingLink")} →
+          </Link>
+        ) : (
+          <Link
+            href={"/dashboard/company/needs#agency-offers" as "/dashboard"}
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
+            data-testid="demand-done-offers-link"
+          >
+            {t("form.doneOffersLink")} →
+          </Link>
+        )}
         {summaryList}
         {estimateSummary}
       </div>
@@ -518,6 +626,24 @@ export function DemandRequestButton({
 
   return (
     <div className="flex flex-col gap-5" data-testid="demand-form">
+      {usage && usage.visible ? (
+        <div
+          className={cn(
+            "flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border px-3 py-2 text-meta leading-relaxed",
+            usage.atLimit ? "border-state-warning/30 bg-state-warning/5 text-text-primary" : "border-border-subtle text-text-secondary",
+          )}
+          data-testid="demand-open-need-usage"
+          data-at-limit={usage.atLimit ? "true" : "false"}
+        >
+          <span>{t("openNeedUsage", { used: usage.used, limit: usage.limit, remaining: usage.remaining })}</span>
+          {usage.atLimit && usage.next === "upgrade" ? (
+            <Link href="/dashboard/account" className="font-medium text-accent underline underline-offset-2" data-testid="demand-open-need-upgrade-cta">
+              {t("openNeedUsageUpgradeCta")}
+            </Link>
+          ) : null}
+          {usage.atLimit && usage.next === "individual_plan" ? <span>{t("openNeedUsageIndividual")}</span> : null}
+        </div>
+      ) : null}
       {/* Progress dots — progress-only (current/done), not tap targets. */}
       <ol className="flex items-center gap-2" aria-label={t("form.progressLabel")}>
         {stepTitles.map((title, i) => {
@@ -661,12 +787,24 @@ export function DemandRequestButton({
               <Label>{tc("country")}</Label>
               <DarkListbox
                 value={country}
-                onChange={setCountry}
+                onChange={(v) => {
+                  setCountry(v);
+                  if (v) setShowCountryError(false);
+                }}
                 options={countryOptions}
                 ariaLabel={tc("country")}
                 placeholder="—"
                 testId="demand-country-select"
               />
+              {showCountryError && (
+                <span
+                  className="text-xs text-state-danger"
+                  role="alert"
+                  data-testid="demand-country-error"
+                >
+                  {t("form.countryRequired")}
+                </span>
+              )}
             </label>
             <label className="flex flex-col gap-1.5">
               <Label>{tc("numberOfWorkers")}</Label>
@@ -937,7 +1075,7 @@ export function DemandRequestButton({
             type="button"
             size="sm"
             onClick={create}
-            disabled={state === "sending" || !descOk || !estimateOk}
+            disabled={state === "sending" || !descOk || !estimateOk || !countryOk}
             // Mobile-first: the room's primary action is a full-width tap target
             // on phones, compact on larger screens.
             className="w-full sm:w-auto sm:self-start"
@@ -986,6 +1124,11 @@ export function DemandRequestButton({
       {(state === "limitUpgrade" || state === "limitIndividual") && (
         <p className="text-xs text-state-warning" role="alert" data-testid="demand-open-need-limit" data-next={state === "limitIndividual" ? "individual_plan" : "upgrade"}>
           {state === "limitIndividual" ? t("errorOpenNeedLimitIndividual") : t("errorOpenNeedLimitUpgrade")}
+        </p>
+      )}
+      {state === "workspaceChanged" && (
+        <p className="text-xs text-state-warning" role="alert" data-testid="demand-workspace-changed">
+          {tStale("errorStale")}
         </p>
       )}
       {state === "needsMigration" && (

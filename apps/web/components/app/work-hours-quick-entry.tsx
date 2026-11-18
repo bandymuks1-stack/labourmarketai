@@ -11,11 +11,13 @@ import {
   recordCorrectionAction,
 } from "@/lib/work-hours/allocations-actions";
 import type { AllocationActionState } from "@/lib/work-hours/allocations-actions";
+import { duplicateSavePress } from "@/lib/work-hours/allocations-model";
 import type {
   HoursPageEntry,
   HoursPageObject,
   HoursPageWorker,
 } from "@/lib/work-hours/hours-page-data";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * QUICK ENTRY — built for a site manager entering a whole crew on a phone.
@@ -160,15 +162,24 @@ export function WorkHoursQuickEntry({
   }
 
   return (
-    <div className="flex w-full flex-col gap-5">
+    // `grid-cols-1` (= minmax(0, 1fr)) is load-bearing: with no template the
+    // phone got one implicit `auto` column that grew to the min-content of
+    // the widest child, so a day with one long entry line made the whole
+    // screen 620px wide at 390px and pushed Save off-screen (UX review
+    // 2026-10-24).
+    <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] lg:items-start">
       <Link
         href="?import=1"
-        className="self-start text-sm underline underline-offset-4"
+        className="self-start text-sm underline underline-offset-4 lg:col-span-2"
         data-testid="hours-import-link"
       >
         {t("import.entryLink")}
       </Link>
-      <form action={action} className="flex flex-col gap-4">
+      <form
+        action={action}
+        className="flex flex-col gap-4 rounded-card border border-ink-600 bg-surface-1/40 p-4 sm:p-5"
+      >
+        <DisplayedWorkspaceField />
         {/* The server reads only these. `entered_by` is never a form field —
             it is taken from the session, so an operator cannot be recorded as
             somebody else. */}
@@ -293,11 +304,14 @@ export function WorkHoursQuickEntry({
           <button
             type="submit"
             disabled={pending}
-            onClick={() => {
+            onClick={(e) => {
               // A repeat of the exact last save arms the warning instead of
               // writing. The SECOND press goes through — the operator, not the
               // form, decides whether it is a mistake or a second shift.
-              if (wouldRepeatLastSave && !duplicateArmed) setDuplicateArmed(true);
+              if (duplicateSavePress(wouldRepeatLastSave, duplicateArmed) === "arm") {
+                e.preventDefault();
+                setDuplicateArmed(true);
+              }
             }}
             className="min-h-12 rounded-md bg-brand-blue px-4 text-base font-semibold text-text-on-brand disabled:opacity-60"
             data-testid="hours-save"
@@ -324,10 +338,16 @@ export function WorkHoursQuickEntry({
         </div>
       </form>
 
-      <section className="flex flex-col gap-2" data-testid="hours-entries">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-base font-semibold">{t("entriesTitle")}</h2>
-          <span className="text-sm text-text-secondary" data-testid="hours-day-total">
+      <section
+        className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4 sm:p-5"
+        data-testid="hours-entries"
+      >
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-display text-lg font-semibold tracking-tight text-text-primary">{t("entriesTitle")}</h2>
+          <span
+            className="rounded-full border border-ink-500 px-2.5 py-1 font-mono text-meta tabular-nums text-text-primary"
+            data-testid="hours-day-total"
+          >
             {t("dayTotal")}: {dayTotal} h
           </span>
         </div>
@@ -347,15 +367,20 @@ export function WorkHoursQuickEntry({
                     className="h-8 w-2 shrink-0 rounded-full"
                     style={{ backgroundColor: e.objectTint }}
                   />
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-medium">{e.workerName}</span>
-                    <span className="truncate text-xs text-text-secondary">
+                  {/* The entry WRAPS rather than truncates: the note is the
+                      operator's own words and is read here, not opened. */}
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="break-words text-sm font-medium">{e.workerName}</span>
+                    <span className="break-words text-xs text-text-secondary">
                       {e.objectName}
                       {e.note ? ` · ${e.note}` : ""}
                       {e.enteredForSomeoneElse ? ` · ${t("enteredForSomeoneElse")}` : ""}
+                      {e.rejected ? ` · ${t("rejectedNotCounted")}` : ""}
                     </span>
                   </span>
-                  <span className="ml-auto text-base font-semibold tabular-nums">
+                  <span
+                    className={`ml-auto shrink-0 text-base font-semibold tabular-nums ${e.rejected ? "text-text-muted line-through" : ""}`}
+                  >
                     {e.hours} h
                   </span>
                   <button

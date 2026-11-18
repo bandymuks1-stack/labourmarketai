@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { terminalStaleFromError } from "@/lib/learning/learning-shared";
+import { notifyJournalReviewDecisions } from "@/lib/journal/review-notification";
 
 /**
  * Canonical membership + verified-proof actions for the keystone
@@ -156,10 +157,21 @@ export async function confirmEntryAndVerifySkills(
 ): Promise<MembershipResult & { verified?: number }> {
   if (skillIds.length === 0) return { ok: false, code: "no_skills" };
   const supabase = await createClient();
-  await requireUser(supabase);
+  const actorId = await requireUser(supabase);
+  // A confirmation of THIS entry verifies only the skills this entry is linked
+  // to — never another skill of the worker that the manager did not see proven
+  // here (the RPC checks ownership, not the link). Unreadable links → refuse.
+  const { data: links, error: linksError } = await supabase
+    .from("journal_entry_skills")
+    .select("skill_id")
+    .eq("journal_entry_id", entryId);
+  if (linksError) return { ok: false, code: "error", message: linksError.message };
+  const linked = new Set((links ?? []).map((l) => l.skill_id as string));
+  const entrySkillIds = skillIds.filter((id) => linked.has(id));
+  if (entrySkillIds.length === 0) return { ok: false, code: "no_skills" };
   const { data, error } = await rpc(supabase, "confirm_entry_and_verify_skills", {
     p_entry_id: entryId,
-    p_skill_ids: skillIds,
+    p_skill_ids: entrySkillIds,
     p_note: note,
   });
   // The confirmation guard trigger RAISES when the entry went stale between
@@ -168,12 +180,23 @@ export async function confirmEntryAndVerifySkills(
   // the card actionable and inviting retries of an impossible action
   // (rev14, Codex P2). Surface the terminal outcome instead.
   if (error) {
+    if ((error.message ?? "").includes("self_review_not_allowed")) {
+      return { ok: false, code: "self_review_not_allowed" };
+    }
+    if ((error.message ?? "").includes("review_authority_not_established")) {
+      return { ok: false, code: "review_authority_not_established" };
+    }
     const stale = terminalStaleFromError(error.message);
     if (stale) return { ok: false, code: stale };
     return { ok: false, code: "error", message: error.message };
   }
   const code = String(data ?? "");
   if (code.startsWith("verified:")) {
+    // DURABLE NOTIFICATION (journal_review_decided): the entry is confirmed -
+    // tell the worker. Awaited, never throws, never fails the confirm.
+    await notifyJournalReviewDecisions(supabase, actorId, [
+      { entryId, decision: "approved" },
+    ]);
     revalidatePath(`/${locale}/dashboard/inbox`);
     revalidatePath(`/${locale}/dashboard/journal`);
     revalidatePath(`/${locale}/dashboard/profile`);

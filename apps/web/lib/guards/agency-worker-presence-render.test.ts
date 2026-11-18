@@ -60,7 +60,7 @@ describe("agency worker row — presence", () => {
     expect(html).toContain('data-testid="ww-person"');
     expect(html).toContain("Jonas Jonaitis");
     expect(html).toContain("jonas@example.test");
-    expect(html).toMatch(/>J</); // the initial tile, never a fabricated face
+    expect(html).toMatch(/>JJ</); // the shared monogram tile (same as the identity stage), never a fabricated face
     expect(html).not.toContain("<img");
     expect(html).toContain('data-testid="ww-place-time"');
     expect(html).toContain("2026-09-10");

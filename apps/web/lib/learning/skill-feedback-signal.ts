@@ -48,9 +48,11 @@ export interface SkillFeedbackInput {
 export function buildSkillFeedbackSignal(
   input: SkillFeedbackInput,
   skillId: string | null,
+  organizationId: string | null = null,
 ): {
   subject_worker_id: string;
   subject_skill_id: string | null;
+  organization_id: string | null;
   source: "skill_claim";
   source_object_type: "journal_entry";
   source_object_id: string;
@@ -67,6 +69,7 @@ export function buildSkillFeedbackSignal(
   return {
     subject_worker_id: input.workerId,
     subject_skill_id: skillId,
+    organization_id: organizationId,
     source: "skill_claim",
     source_object_type: "journal_entry",
     source_object_id: input.entryId,
@@ -89,6 +92,36 @@ export function buildSkillFeedbackSignal(
 const asAny = (c: SupabaseClient): any => c;
 
 /**
+ * EDU-5. The organisation whose manager may review this entry, derived from
+ * the entry's own work context: its engagement context's organisation, and
+ * ONLY when that context has `journal_review_enabled` (the same gate the
+ * manual confirmation spine uses). Anything else — no context, a context
+ * without review, an unreadable row — is `null`: the signal then stays the
+ * worker's private observation and reaches no queue. Never throws.
+ */
+export async function deriveEntryReviewOrganization(
+  supabase: SupabaseClient,
+  entryId: string,
+): Promise<string | null> {
+  try {
+    const { data } = await asAny(supabase)
+      .from("journal_entries")
+      .select("engagement_contexts(organization_id, journal_review_enabled)")
+      .eq("id", entryId)
+      .is("deleted_at", null)
+      .is("superseded_by", null)
+      .maybeSingle();
+    const ec = data?.engagement_contexts as
+      | { organization_id?: string | null; journal_review_enabled?: boolean | null }
+      | null
+      | undefined;
+    return ec?.journal_review_enabled === true ? (ec.organization_id ?? null) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Append one observation. Returns whether the ledger took it; NEVER throws.
  * An absent table or a refused insert is logged and swallowed — the decision
  * this observes has already happened.
@@ -103,7 +136,12 @@ export async function recordSkillFeedbackSignal(
       .select("id")
       .eq("slug", input.slug)
       .maybeSingle();
-    const row = buildSkillFeedbackSignal(input, (skill?.id as string | undefined) ?? null);
+    const organizationId = await deriveEntryReviewOrganization(supabase, input.entryId);
+    const row = buildSkillFeedbackSignal(
+      input,
+      (skill?.id as string | undefined) ?? null,
+      organizationId,
+    );
     const { error } = await asAny(supabase).from("learning_signals").insert(row);
     if (error) {
       console.warn("[learning] skill feedback signal not recorded", {

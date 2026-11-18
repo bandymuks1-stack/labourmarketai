@@ -28,7 +28,28 @@ describe("Guard: workspace switch resets scope (revalidates the layout)", () => 
   const actions = read("lib/auth/actions.ts");
   it("switchActiveRole exists and updates active_role", () => {
     expect(actions).toMatch(/export async function switchActiveRole/);
-    expect(actions).toMatch(/\.update\(\{\s*active_role:\s*role\s*\}\)/);
+    // RE-ANCHORED (owner program 2026-09-23): the UPDATE moved VERBATIM into
+    // the shared role core, so the web role switch, the web workspace switch
+    // and the MCP `context.switch` run one implementation. switchActiveRole
+    // delegates to it, and the UPDATE's error is now checked (it used to be
+    // discarded, so a refused write answered as a completed switch).
+    const switchFn = actions.slice(actions.indexOf("export async function switchActiveRole"));
+    expect(switchFn).toMatch(/setActiveRoleCore\(\{ supabase, userId: user\.id \}, role\)/);
+    expect(switchFn).toMatch(/if \(!result\.ok\)/);
+    const core = read("lib/auth/active-role-core.ts");
+    expect(core).toMatch(/\.update\(\{\s*active_role:\s*role\s*\}\)/);
+    expect(core).toMatch(/const \{ error \} = await supabase\s*\.from\("profiles"\)\s*\.update\(\{\s*active_role:\s*role\s*\}\)/);
+    expect(core).toMatch(/if \(error\) \{/);
+    // Admin preservation travelled with it.
+    expect(core).toMatch(/\{ profile_id: caller\.userId, role: "admin" \}/);
+  });
+
+  it("choosing to act as a PERSON also clears the organization pointer", () => {
+    // One pointer rule: a person role with an organization still pointed at
+    // would let the chat (identity follows the workspace) keep greeting the
+    // person as that organization. The clear runs the chip's own action.
+    const switchFn = actions.slice(actions.indexOf("export async function switchActiveRole"));
+    expect(switchFn).toMatch(/baseIdentityForRole\(role\) === "person"[\s\S]{0,120}clearActiveOrganization\(\)/);
   });
   it("switchActiveRole revalidates the whole layout so nav/scope re-resolve", () => {
     // Pin the scope-reset bridge: without this the header could keep showing
@@ -44,8 +65,12 @@ describe("Guard: personal journal is profile-scoped, not company-scoped", () => 
   it("the worker is resolved from the signed-in user's profile", () => {
     // worker = the user's own row (workers.profile_id = user.id). This is the
     // root of the personal scope — entries hang off this worker, never a company.
-    expect(journal).toMatch(/from\(\s*["']workers["']\s*\)/);
-    expect(journal).toMatch(/\.eq\(\s*["']profile_id["']\s*,\s*user\.id\s*\)/);
+    // Perf 2026-10-23: THE request-cached session worker row
+    // (`getWorkerCoreRow`: workers.profile_id = the signed-in user).
+    expect(journal).toMatch(/getWorkerCoreRow\(\)/);
+    const core = read("lib/data/worker-core.ts");
+    expect(core).toMatch(/from\("workers"\)[\s\S]{0,120}\.eq\("profile_id", caller\.userId\)/);
+    expect(core).toMatch(/readWorkerCoreRow\(\{ supabase, userId: user\.id \}\)/);
   });
   it("journal entries are keyed to that worker (worker_id), not a company", () => {
     // G4: the entries read lives in THE journal-list core; the page hands it

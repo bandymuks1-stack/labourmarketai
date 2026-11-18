@@ -18,6 +18,11 @@ import {
   type MarketRegion,
 } from "./market-map-model";
 import { mountLeafletMap } from "./leaflet-engine";
+import {
+  drawOwnLocation,
+  drawPreviewPoint,
+  type OwnLocationOverlay,
+} from "./own-location-layer";
 
 /**
  * THE CANONICAL MARKET MAP.
@@ -54,6 +59,7 @@ export function MarketMap({
   revealCount,
   onViewportChange,
   autoFly = true,
+  own,
 }: {
   view: MarketMapView;
   mode?: MarketMapMode;
@@ -100,6 +106,12 @@ export function MarketMap({
    * own panning.
    */
   autoFly?: boolean;
+  /**
+   * The viewer's OWN location + search radius, drawn on THIS map (never a
+   * second map). Taps report real coordinates through `own.onPick`; the
+   * caller decides whether a tap may stage a preview (F12 safe editing).
+   */
+  own?: OwnLocationOverlay;
 }) {
   // Origin labels live in the small `map` namespace — the one root every
   // surface that mounts this component (marketing landing, dashboard,
@@ -112,6 +124,10 @@ export function MarketMap({
   const [ready, setReady] = useState(false);
   const viewportRef = useRef(onViewportChange);
   viewportRef.current = onViewportChange;
+  const ownGroupRef = useRef<LeafletTypes.LayerGroup | null>(null);
+  const previewGroupRef = useRef<LeafletTypes.LayerGroup | null>(null);
+  const onPickRef = useRef(own?.onPick);
+  onPickRef.current = own?.onPick;
 
   // ── mount the map once (via the ONE Leaflet engine, W3 row 28) ────────────
   useEffect(() => {
@@ -139,6 +155,11 @@ export function MarketMap({
       }
       LRef.current = L;
       layerGroupRef.current = L.layerGroup().addTo(map);
+      ownGroupRef.current = L.layerGroup().addTo(map);
+      previewGroupRef.current = L.layerGroup().addTo(map);
+      map.on("click", (e: LeafletTypes.LeafletMouseEvent) => {
+        onPickRef.current?.(e.latlng.lat, e.latlng.lng);
+      });
       mapRef.current = map;
       // Report the REAL viewport (container-dependent) once, then on every
       // settled move. Leaflet fires `moveend` after zoom as well.
@@ -184,8 +205,50 @@ export function MarketMap({
       mapRef.current?.remove();
       mapRef.current = null;
       layerGroupRef.current = null;
+      ownGroupRef.current = null;
+      previewGroupRef.current = null;
     };
   }, [mode]);
+
+  // ── the viewer's own location + radius (a control OF this map) ────────────
+  const hasOwn = Boolean(own);
+  const ownSelected = own?.selected ?? null;
+  const ownRadius = own?.radiusKm ?? 0;
+  const ownIdentity = own?.identity;
+  const ownSuppress = own?.suppress ?? false;
+  const ownPreview = own?.previewPoint ?? null;
+  const ownName = ownIdentity?.name;
+  const ownAvatar = ownIdentity?.avatarUrl;
+  const ownAvail = ownIdentity?.availabilityLabel;
+  useEffect(() => {
+    const L = LRef.current;
+    const map = mapRef.current;
+    const group = ownGroupRef.current;
+    if (!ready || !L || !map || !group) return;
+    if (!hasOwn) {
+      group.clearLayers();
+      return;
+    }
+    const drawn = drawOwnLocation(L, group, {
+      selected: ownSelected,
+      radiusKm: ownRadius,
+      identity: ownIdentity,
+      suppress: ownSuppress,
+    });
+    // Frame the saved location only when it (or its radius) changes — never
+    // on a data refresh, which would fight the person's own panning.
+    if (drawn) map.setView(drawn.point, drawn.zoom);
+    // The identity object is rebuilt on every server render; depend on its
+    // primitives so a refresh does not re-frame the map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, hasOwn, ownSelected, ownRadius, ownName, ownAvatar, ownAvail, ownSuppress]);
+
+  useEffect(() => {
+    const L = LRef.current;
+    const group = previewGroupRef.current;
+    if (!ready || !L || !group) return;
+    drawPreviewPoint(L, group, ownPreview, ownRadius);
+  }, [ready, ownPreview, ownRadius]);
 
   // ── draw anchors whenever the data, layer or selection changes ────────────
   useEffect(() => {
@@ -382,13 +445,15 @@ export interface MarketMapViewport {
 
 /** Layer colours. Distinct hues so a layer switch is legible at a glance. */
 const LAYER_FILL: Record<MarketMapLayer, string> = {
-  demand: "#f59e0b",
+  demand: "#e7e0d1",
+  territory: "#94a3b8",
   people: "#22d3ee",
   projects: "#a78bfa",
   jobs: "#34d399",
 };
 const LAYER_STROKE: Record<MarketMapLayer, string> = {
-  demand: "#fbbf24",
+  demand: "#f5efe0",
+  territory: "#cbd5e1",
   people: "#67e8f9",
   projects: "#c4b5fd",
   jobs: "#6ee7b7",

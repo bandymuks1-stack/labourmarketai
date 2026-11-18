@@ -87,6 +87,11 @@ export const FUNNEL_EVENTS = {
   signupCompleted: "signup_completed",
   cvUploadStarted: "cv_upload_started",
   cvUploadSucceeded: "cv_upload_succeeded",
+  //    2026-10-20: a CV read that did NOT succeed. Without it a failed
+  //    upload left no trace at all — the funnel could not tell a
+  //    wrong format from a server failure. result = "error", error_code = the
+  //    client's closed failure code (cv-import-client.ts), never file data.
+  cvUploadFailed: "cv_upload_failed",
   bookingViewed: "booking_viewed",
   bookingAccepted: "booking_accepted",
   bookingDeclined: "booking_declined",
@@ -237,7 +242,97 @@ export const FUNNEL_EVENTS = {
   jobCompared: "job_compared",
   jobMissingInfoShown: "job_missing_info_shown",
   jobAlternativesShown: "job_alternatives_shown",
+  // ── Employer funnel closure (owner §23 canonical chain, 2026-09-22). The
+  //    logged-in employer's own requirement path (`submit_demand_request_v2`
+  //    → `customer_requests`) emitted NO pilot_event, so the chain stopped
+  //    being measurable exactly where a company first states a real need.
+  //    All three are SERVER-emitted at the real write points, through the
+  //    same RLS-safe insert path, with entity ids only — never a title, a
+  //    need summary, a note or a message body.
+  //    - requirement_activated      the stored requirement's status is one a
+  //                                 worker can see (`submitted` | `approved`);
+  //                                 `demand_saved` (above) carries the write
+  //                                 itself with `status` for the other cases.
+  //    - demand_interest_expressed  a worker stored interest in an employer's
+  //                                 OWN requirement (ref_type
+  //                                 `customer_request`) — the sibling of
+  //                                 `vacancy_interest_expressed`, which is the
+  //                                 public-vacancy source of the same object.
+  //    - conversation_message_sent  one message row was inserted through the
+  //                                 communication composer (ref_type
+  //                                 `conversation`, ref_id = the conversation).
+  requirementActivated: "requirement_activated",
+  demandInterestExpressed: "demand_interest_expressed",
+  conversationMessageSent: "conversation_message_sent",
+  // ── Remaining-instrumentation emitters (funnel-emitters v1, 2026-10-07).
+  //    Each is emitted ONLY after the product write / verified billing event
+  //    it names has succeeded; a failure emits nothing. Bounded scalars only.
+  //    - offer_created              the OFFER side became real: a marketplace
+  //                                 listing of an offering kind (sale|rental,
+  //                                 never `wanted`) was stored, or a service
+  //                                 offering went draft -> active.
+  //                                 `entity_type` says which.
+  //    - organization_hiring_ready  a company save moved the stored company from
+  //                                 not-hiring-ready to `hiring_ready` per
+  //                                 computeCompanyReadiness (all legal/billing
+  //                                 fields + a stated activity). Transition-only.
+  //    - subscription_started       verified Stripe checkout.session.completed
+  //                                 whose subscription link was persisted (ok).
+  //    - subscription_invoice_paid  verified Stripe invoice.paid with amount_paid
+  //                                 > 0, persisted ok. `result_kind` = the
+  //                                 invoice billing_reason (bounded). A zero-
+  //                                 amount (trial) invoice is NOT a payment.
+  offerCreated: "offer_created",
+  organizationHiringReady: "organization_hiring_ready",
+  subscriptionStarted: "subscription_started",
+  // The top of the revenue funnel (2026-10-19, owner "PRODUCT TO REVENUE"):
+  // nothing measured who saw the price or started paying, so the step between
+  // activation and payment was invisible. Plan-button clicks use cta_clicked
+  // with cta_id "pricing_plan_<slug>" (one click event, one vocabulary).
+  //    - pricing_viewed     the public /pricing page rendered for a visitor.
+  //    - checkout_started   the server created a provider checkout session
+  //                         (live or test, metadata carries no identity).
+  pricingViewed: "pricing_viewed",
+  checkoutStarted: "checkout_started",
+  // trial_started: a verified LIVE-mode `customer.subscription.created` whose
+  // subscription status is "trialing" with a trial_end, persisted ok. One per
+  // subscription (Stripe sends `created` once). NOT a payment and not paid
+  // conversion.
+  trialStarted: "trial_started",
+  subscriptionInvoicePaid: "subscription_invoice_paid",
 } as const;
+
+/**
+ * The bounded `step` a `registration_started` event may carry (2026-09-22).
+ *
+ * BOTH auth pages render the OAuth buttons with `context="signup"` because a
+ * new Google identity creates an account from either page — so the login
+ * page's returning users were being counted as registration CONVERSIONS
+ * (`lib/admin/conversion-funnel.ts`). The page now says WHICH page the press
+ * came from through this closed set; the admin funnel counts a conversion
+ * only for `signup_page` and keeps the raw `registration_started` count
+ * visible for both. Rows written before this step existed carry no `step`
+ * and are therefore raw-counted only.
+ */
+export const REGISTRATION_STEPS = ["login_page", "signup_page"] as const;
+export type RegistrationStep = (typeof REGISTRATION_STEPS)[number];
+/** The one `step` value the admin funnel counts as a registration conversion. */
+export const REGISTRATION_CONVERSION_STEP: RegistrationStep = "signup_page";
+
+/**
+ * The bounded `status` a requirement funnel event may carry (2026-09-22):
+ * the `customer_requests` status set, never free text. Mirrors the admin
+ * pipeline statuses documented in lib/demand/demand-lifecycle-model.ts.
+ */
+export const REQUIREMENT_STATUSES = [
+  "draft",
+  "submitted",
+  "in_review",
+  "needs_followup",
+  "approved",
+  "closed",
+] as const;
+export type RequirementStatus = (typeof REQUIREMENT_STATUSES)[number];
 
 export type FunnelEventName =
   (typeof FUNNEL_EVENTS)[keyof typeof FUNNEL_EVENTS];
@@ -276,8 +371,16 @@ export type FunnelMetadata = {
   success?: boolean;
   /** True when the event was fired from a non-production origin (localhost /
    *  Vercel preview). Stamped automatically by `trackFunnel` so dev/preview
-   *  traffic can be excluded from the owner's real acquisition funnel. */
+   *  traffic can be excluded from the owner's real acquisition funnel. Since
+   *  2026-09-20 the server action ALSO stamps it from the request's Host
+   *  header, so the client marker is no longer the only defence. */
   preview_host?: boolean;
+  /** Where the row was WRITTEN from — 'production' | 'preview' | 'local' —
+   *  stamped SERVER-SIDE from Vercel's own VERCEL_ENV (see
+   *  lib/telemetry/production-host.ts). A client value is overwritten; it is
+   *  typed here only so readers of the metadata know the key exists. Writes
+   *  from a LOCAL host are refused outright and never reach a row. */
+  deploy_env?: "production" | "preview" | "local";
   /** Coarse audience of a public marketing surface: 'workers' | 'companies' | 'agencies' | 'home'. */
   audience?: string;
   /** Stable, non-PII identifier of a CTA button, e.g. 'hero_signup' | 'company_need'. */
@@ -321,4 +424,9 @@ export type FunnelMetadata = {
    *  facts). Already allowlisted server-side for the journal review flow;
    *  typed here so the public job comparison can report it. */
   unresolved_unknown_count?: number;
+  /** The stored requirement's status at emission time (2026-09-22) — one of
+   *  `REQUIREMENT_STATUSES`, never free text. Carried by `demand_saved` from
+   *  the server submit path so a draft, a submitted and an approved
+   *  requirement are distinguishable without a second event per status. */
+  status?: RequirementStatus;
 };

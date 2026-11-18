@@ -4,12 +4,21 @@ import { Link } from "@/lib/i18n/navigation";
 import type { GrowthDirection } from "@/lib/journal/growth-reading";
 
 import { fmtHours, fmtPct, type Translate } from "./format";
+import { ExplainMore, RevealList } from "@/components/app/premium/disclosure";
 
 /** The skill-kinds of the growth reading — every direction except the
  *  adjacent one, which is rendered by the directions block. */
 export type GrowthSkillDirection = Exclude<GrowthDirection, { kind: "adjacent_opportunity" }>;
 
 export type GrowthKindRow = GrowthSkillDirection & { readonly name: string };
+
+/** A POTENTIAL capability (decision 0023): named with the evidenced skills
+ *  it comes from, labelled as possible — never confirmed, never stored. */
+export type GrowthPotentialRow = {
+  readonly slug: string;
+  readonly name: string;
+  readonly fromNames: readonly string[];
+};
 
 export type GrowthDirectionRow = {
   readonly professionId: string;
@@ -65,6 +74,8 @@ export function GrowthKinds({
   dayLabel,
   kindsCap,
   directionsCap,
+  intro,
+  potential = [],
 }: {
   kinds: readonly GrowthKindRow[];
   directions: readonly GrowthDirectionRow[];
@@ -74,16 +85,26 @@ export function GrowthKinds({
   dayLabel: (iso: string | null) => string | null;
   kindsCap?: ReactNode;
   directionsCap?: ReactNode;
+  /** The station's own "this is a reading" sentence — folded into the SAME
+   *  single explanation as the hints, so a section never stacks disclosures. */
+  intro?: string;
+  potential?: readonly GrowthPotentialRow[];
 }) {
-  if (kinds.length === 0 && directions.length === 0) return null;
+  if (kinds.length === 0 && directions.length === 0 && potential.length === 0) return null;
   return (
     <>
       {kinds.length > 0 && (
         <div className="flex flex-col gap-1.5" data-testid="wi-growth-kinds">
           <h4 className="text-meta font-medium text-text-secondary">{t("growthKindsTitle")}</h4>
-          <p className="text-meta leading-relaxed text-text-muted">{t("growthKindsHint")}</p>
-          <ul className="flex flex-col gap-1.5">
-            {kinds.map((d) => (
+          <ExplainMore>
+            {intro ? <p>{intro}</p> : null}
+            <p className="text-meta leading-relaxed text-text-muted">{t("growthKindsHint")}</p>
+            {directions.length > 0 ? <p>{t("directionsHint")}</p> : null}
+          </ExplainMore>
+          <RevealList
+            listAs="ul"
+            listClassName="flex flex-col gap-1.5"
+            items={kinds.map((d) => (
               <li
                 key={`${d.kind}:${d.slug}`}
                 className="flex flex-col gap-0.5 text-meta text-text-muted"
@@ -99,7 +120,7 @@ export function GrowthKinds({
                 <span className="leading-relaxed">{growthKindWhy(d, locale, t, dayLabel)}</span>
               </li>
             ))}
-          </ul>
+          />
           {kindsCap}
         </div>
       )}
@@ -111,9 +132,16 @@ export function GrowthKinds({
               {t("growthKind.adjacent_opportunity")}
             </span>
           </h4>
-          <p className="text-meta leading-relaxed text-text-muted">{t("directionsHint")}</p>
-          <ul className="flex flex-col gap-1.5">
-            {directions.map((d) => (
+          {kinds.length === 0 ? (
+            <ExplainMore>
+              {intro ? <p>{intro}</p> : null}
+              <p className="text-meta leading-relaxed text-text-muted">{t("directionsHint")}</p>
+            </ExplainMore>
+          ) : null}
+          <RevealList
+            listAs="ul"
+            listClassName="flex flex-col gap-1.5"
+            items={directions.map((d) => (
               <li
                 key={d.professionId}
                 className="flex flex-col gap-0.5 rounded-md border border-border-subtle bg-surface-1/40 px-3 py-2"
@@ -128,7 +156,7 @@ export function GrowthKinds({
                 </span>
               </li>
             ))}
-          </ul>
+          />
           {directionsCap}
         </div>
       )}
@@ -143,6 +171,26 @@ export function GrowthKinds({
           {t("openOpportunities")} →
         </Link>
       </p>
+      {potential.length > 0 && (
+        <div className="flex flex-col gap-1.5" data-testid="wi-potential" data-evidence-state="potential">
+          <h4 className="text-meta font-medium text-text-secondary">{t("potentialTitle")}</h4>
+          <ExplainMore>
+            <p className="text-meta leading-relaxed text-text-muted">{t("potentialHint")}</p>
+          </ExplainMore>
+          <ul className="flex flex-col gap-1.5">
+            {potential.map((p) => (
+              <li
+                key={p.slug}
+                className="flex flex-col gap-0.5 rounded-md border border-dashed border-border-subtle px-3 py-2"
+                data-testid={`wi-potential-${p.slug}`}
+              >
+                <span className="text-support font-medium text-text-primary">{p.name}</span>
+                <span className="text-meta text-text-muted">{t("potentialFrom", { skills: p.fromNames.join(", ") })}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </>
   );
 }

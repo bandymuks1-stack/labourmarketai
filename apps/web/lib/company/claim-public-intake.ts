@@ -2,6 +2,10 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { readVerifiedSessionEmail } from "@/lib/auth/verified-email-gate";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { demandWrittenLanguage } from "@/lib/demand/demand-written-language";
+import { resolveCountryCode } from "@/lib/location/country-model";
 
 /**
  * Canonical-journey P3 — claim bridge: public /company-need intake → the
@@ -12,13 +16,19 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * had to re-type everything. The bridge closes that loop WITHOUT weakening
  * the intake's security model (deny-all RLS, service-role-only reads):
  *
- *   - AUTHORIZATION IS THE EMAIL MATCH: a signed-in user may see and claim
- *     ONLY intakes whose contact_email equals their own AUTHENTICATED email
- *     (auth.users.email — verified by the auth flow, not user-editable free
- *     text). The service-role read happens strictly after that comparison's
- *     inputs are fixed server-side; no listing beyond the caller's own email,
- *     no enumeration path, no intake id accepted from the client without the
- *     same email re-check.
+ *   - AUTHORIZATION IS THE VERIFIED-EMAIL MATCH: a signed-in user may see and
+ *     claim ONLY intakes whose contact_email equals an address THEY HAVE
+ *     PROVEN (the separate verified-email state, migration 20261003151000 —
+ *     NEVER auth.users.email on its own: with "Confirm email" OFF that address
+ *     is merely typed, so anyone could register as a victim's address and read
+ *     or claim the victim's company-need intake). The verified check runs with
+ *     the caller's own client BEFORE the service role is reached, fails closed
+ *     (error / missing function / unverified => nothing), and the unverified
+ *     state is surfaced as a progressive "verify your e-mail" prompt rather than
+ *     a dead end. No listing beyond the caller's own proven address, no
+ *     enumeration path (an unverified caller learns nothing about whether an
+ *     intake exists), no intake id accepted from the client without the same
+ *     verified-email re-check.
  *   - CLAIMING = the existing save_demand_draft RPC (owner-scoped upsert
  *     into customer_requests, status='draft') with the intake's own fields
  *     echoed back — nothing invented. The draft then flows through the ONE
@@ -54,16 +64,32 @@ function normEmail(v: string | null | undefined): string {
   return (v ?? "").trim().toLowerCase();
 }
 
-/** The caller's own claimable public intakes (email-matched). Empty on any
- *  missing state — an absent table / no session / no matches all render the
- *  same honest nothing (no card, no error surface). */
-export async function listClaimablePublicIntakes(): Promise<ClaimableIntake[]> {
+export type ClaimableIntakesState =
+  | { readonly status: "ok"; readonly intakes: ClaimableIntake[] }
+  /** The caller's address is not VERIFIED: nothing is read (the service role is
+   *  never reached) and the UI may offer the progressive proof. */
+  | { readonly status: "email_unverified" };
+
+/** The caller's own claimable public intakes (VERIFIED-email matched), with the
+ *  unverified state kept distinct so the page can offer the proof. Empty on any
+ *  other missing state — an absent table / no session / no matches all render
+ *  the same honest nothing. */
+export async function listClaimablePublicIntakesState(): Promise<ClaimableIntakesState> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const email = normEmail(user?.email);
-  if (!user || !email) return [];
+  const proof = await readVerifiedSessionEmail(supabase);
+  if (proof.status === "unverified") return { status: "email_unverified" };
+  if (proof.status !== "verified") return { status: "ok", intakes: [] };
+  return { status: "ok", intakes: await readIntakesFor(proof.email) };
+}
+
+/** Back-compat shape for surfaces that only count: unverified reads as none. */
+export async function listClaimablePublicIntakes(): Promise<ClaimableIntake[]> {
+  const state = await listClaimablePublicIntakesState();
+  return state.status === "ok" ? state.intakes : [];
+}
+
+/** SERVICE-ROLE read, reachable ONLY from the verified branch above. */
+async function readIntakesFor(email: string): Promise<ClaimableIntake[]> {
 
   try {
     const admin = createAdminClient();
@@ -106,7 +132,16 @@ export type ClaimIntakeResult =
   | { ok: true }
   | {
       ok: false;
-      reason: "not_authenticated" | "not_yours" | "not_claimable" | "needs_migration" | "error";
+      reason:
+        | "not_authenticated"
+        | "email_unverified"
+        | "not_yours"
+        | "not_claimable"
+        /** The account already has an open company draft: claiming would
+         *  overwrite it (one draft per profile + kind). Nothing changed. */
+        | "draft_exists"
+        | "needs_migration"
+        | "error";
     };
 
 /** Claim ONE intake into the caller's own draft demand (server action body —
@@ -115,11 +150,12 @@ export async function claimPublicIntake(intakeId: string): Promise<ClaimIntakeRe
   if (!intakeId) return { ok: false, reason: "error" };
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const email = normEmail(user?.email);
-  if (!user || !email) return { ok: false, reason: "not_authenticated" };
+  const proof = await readVerifiedSessionEmail(supabase);
+  if (proof.status === "unauthenticated") return { ok: false, reason: "not_authenticated" };
+  // Fail closed BEFORE the service role: unverified, errored or malformed all stop here.
+  if (proof.status === "unverified") return { ok: false, reason: "email_unverified" };
+  if (proof.status !== "verified") return { ok: false, reason: "error" };
+  const email = proof.email;
 
   const admin = createAdminClient();
   const { data: intake, error } = await asAny(admin)
@@ -159,15 +195,15 @@ export async function claimPublicIntake(intakeId: string): Promise<ClaimIntakeRe
     : "";
   const payload = {
     title: (intake.sector ?? "").slice(0, 120) || undefined,
-    capabilities:
-      join(
-        [
-          intake.description,
-          intake.headcount != null ? `Darbuotojų: ${intake.headcount}` : null,
-        ],
-        "\n",
-      ).slice(0, 4000) || undefined,
-    location: join([intake.city_or_region, intake.country], ", ").slice(0, 160) || undefined,
+    // The employer's own words, unchanged. The headcount is its own field (it
+    // was appended here as hard-coded Lithuanian text).
+    capabilities: (intake.description ?? "").trim().slice(0, 4000) || undefined,
+    teamSize: intake.headcount != null ? String(intake.headcount) : undefined,
+    // The intake's country is an ISO code chosen from a required select. It
+    // was folded into the free-text location only, so the draft (and the need
+    // submitted from it) had no `customer_requests.country`.
+    country: resolveCountryCode(intake.country ?? undefined) ?? undefined,
+    location: (intake.city_or_region ?? "").trim().slice(0, 160) || undefined,
     timing: join([intake.start_window, intake.expected_duration], "; ").slice(0, 160) || undefined,
     accommodation,
     languages: (intake.languages ?? "").slice(0, 160) || undefined,
@@ -175,19 +211,68 @@ export async function claimPublicIntake(intakeId: string): Promise<ClaimIntakeRe
       join([intake.urgency, intake.engagement_type], "; ").slice(0, 500) || undefined,
   };
 
+  // NEVER OVER AN OPEN DRAFT (audit 2026-10-20): the draft save keeps ONE
+  // draft per profile + kind, so claiming a second intake — or one while the
+  // wizard draft was open — replaced that draft's content, and the earlier
+  // intake was already marked converted, so it could never be claimed again.
+  // The person finishes or discards their draft first; nothing is lost.
+  const {
+    data: { user: sessionUser },
+  } = await supabase.auth.getUser();
+  if (!sessionUser) return { ok: false, reason: "not_authenticated" };
+  const { data: openDraft, error: openDraftErr } = await asAny(supabase)
+    .from("customer_requests")
+    .select("id")
+    .eq("profile_id", sessionUser.id)
+    .eq("kind", "company_request")
+    .eq("status", "draft")
+    .limit(1);
+  if (openDraftErr) return { ok: false, reason: "error" };
+  if (Array.isArray(openDraft) && openDraft.length > 0) return { ok: false, reason: "draft_exists" };
+
   // Owner-scoped draft upsert — the SAME canonical path the dashboard draft
-  // form uses (customer_requests, status='draft', kind='company_request').
-  const { error: draftErr } = await asAny(supabase).rpc("save_demand_draft", {
+  // form uses (customer_requests, status='draft', kind='company_request'),
+  // stamped with the company the person is acting for (v2), like the form.
+  const employer = await requireEmployerCompany();
+  const draftArgs = {
     p_kind: "company_request",
     p_title: payload.title ?? intake.company_name ?? null,
     p_payload: payload,
-    p_original_language: "lt",
+    p_original_language: await demandWrittenLanguage(),
+  };
+  let { data: draftId, error: draftErr } = await asAny(supabase).rpc("save_demand_draft_v2", {
+    ...draftArgs,
+    p_organization_id: employer.ok ? employer.organizationId : null,
   });
+  if (draftErr && ["42883", "PGRST202"].includes((draftErr as { code?: string }).code ?? "")) {
+    ({ data: draftId, error: draftErr } = await asAny(supabase).rpc("save_demand_draft", draftArgs));
+  }
   if (draftErr) {
     if ((draftErr as { code?: string }).code === "42883") {
       return { ok: false, reason: "needs_migration" };
     }
     return { ok: false, reason: "error" };
+  }
+
+  // The country and the headcount live on the COLUMNS the wizard prefills
+  // (`toDemandPrefill` reads `country` and `team_size`, not the payload): the
+  // same owner-scoped stamp `saveDemandDraft` makes for the country. A failure
+  // here never fails the claim (the draft exists; the wizard then asks).
+  const headcount =
+    typeof intake.headcount === "number" && Number.isInteger(intake.headcount) && intake.headcount > 0
+      ? intake.headcount
+      : null;
+  if (typeof draftId === "string" && (payload.country || headcount != null)) {
+    const { error: countryErr } = await asAny(supabase)
+      .from("customer_requests")
+      .update({
+        ...(payload.country ? { country: payload.country } : {}),
+        ...(headcount != null ? { team_size: headcount } : {}),
+      })
+      .eq("id", draftId)
+      .eq("profile_id", sessionUser.id)
+      .eq("status", "draft");
+    if (countryErr) console.error("[claim-public-intake] country stamp failed:", countryErr.message);
   }
 
   // Mark the true outcome. Draft creation already succeeded — a failure here

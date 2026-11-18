@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { activeLocales } from "@/lib/i18n/config";
+
 import { readdirSync } from "node:fs";
 
 import {
@@ -58,11 +60,17 @@ function migrationSources(): { name: string; sql: string }[] {
     .map((f) => ({ name: f, sql: readFileSync(join(MIGRATIONS_DIR, f), "utf8") }));
 }
 
-describe("all five active locales have complete consent texts (test 23)", () => {
+describe("all six consent locales have complete consent texts (test 23)", () => {
   it.each(CONSENT_DEFINITIONS.map((d) => [d.purpose, d] as const))(
     "%s",
     (_purpose, def) => {
-      expect(CONSENT_LOCALES).toEqual(["lt", "en", "ru", "nl", "de"]);
+      // PL consent legal blocks landed 2026-09-20 on the owner's "APPROVE PL CONSENT
+      // TEXTS v1 WITH REQUIRED INLINE EDITS"; the en fallback in the three readers
+      // now only covers a future UI locale without its own blocks.
+      // Every active UI locale except sv: the Swedish legal texts wait for the
+      // owner's approval (RED #3232, with its hash re-pin). Until then sv
+      // readers get the clearly labelled English text (toConsentLocale).
+      expect(CONSENT_LOCALES).toEqual(activeLocales.filter((l) => l !== "sv"));
       for (const locale of CONSENT_LOCALES) {
         const t = def.texts[locale];
         expect(t, `${def.purpose}/${locale}`).toBeTruthy();

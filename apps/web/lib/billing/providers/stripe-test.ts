@@ -7,6 +7,7 @@ import {
   requireStripeSecret,
   requireStripeWebhookSecret,
 } from "@/lib/billing/config";
+import { trialConsentText } from "@/lib/billing/trial-core";
 import type {
   BillingProvider,
   BillingWebhookEvent,
@@ -15,6 +16,8 @@ import type {
   CreateCustomerInput,
   CreateCustomerResult,
   ListSubscriptionsResult,
+  OneTimeCheckoutInput,
+  RetrieveRawSubscriptionResult,
   PortalSessionInput,
   PortalSessionResult,
   ProviderSubscriptionView,
@@ -64,6 +67,14 @@ function isResourceMissing(e: unknown): boolean {
   return Boolean(e && typeof e === "object" && (e as { code?: unknown }).code === "resource_missing");
 }
 
+/** 429 / 5xx / connection-level failures are transient; everything else is not. */
+function isTransient(e: unknown): boolean {
+  if (!e || typeof e !== "object") return false;
+  const o = e as { statusCode?: unknown; type?: unknown };
+  if (typeof o.statusCode === "number") return o.statusCode === 429 || o.statusCode >= 500;
+  return o.type === "StripeConnectionError" || o.type === "StripeAPIError" || o.type === "StripeRateLimitError";
+}
+
 /** Normalize a Stripe subscription object into the provider-neutral read view. */
 function viewOf(sub: Stripe.Subscription): ProviderSubscriptionView {
   const item = sub.items?.data?.[0];
@@ -102,6 +113,38 @@ export function createStripeProvider(): BillingProvider {
           ...(input.metadata ?? { plan_key: input.planKey }),
           ...environmentStamp,
         };
+        // 14-day trial (owner decision): the hosted page must say that the card
+        // is charged the price after the trial. The figure is READ from the
+        // Stripe price that will bill — if it cannot be read, no trial session
+        // is created (fail closed), never a trial with an unstated charge.
+        const trialDays = input.trialPeriodDays;
+        let trialFields: Partial<Stripe.Checkout.SessionCreateParams> = {};
+        let trialSubscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {};
+        if (typeof trialDays === "number" && trialDays > 0) {
+          const price = await client().prices.retrieve(input.priceId);
+          if (typeof price.unit_amount !== "number" || !price.currency) {
+            return { ok: false, reason: "trial_price_unreadable" };
+          }
+          trialFields = {
+            payment_method_collection: "always",
+            custom_text: {
+              submit: {
+                message: trialConsentText({
+                  days: trialDays,
+                  unitAmountCents: price.unit_amount,
+                  currency: price.currency,
+                  interval: price.recurring?.interval ?? null,
+                }),
+              },
+            },
+          };
+          trialSubscriptionData = {
+            trial_period_days: trialDays,
+            // No card on file at trial end → the subscription ends; it never
+            // silently continues unpaid.
+            trial_settings: { end_behavior: { missing_payment_method: "cancel" } },
+          };
+        }
         const session = await client().checkout.sessions.create(
           {
             mode: "subscription",
@@ -130,7 +173,8 @@ export function createStripeProvider(): BillingProvider {
             // The SAME canonical metadata rides on the subscription object, so
             // customer.subscription.* events carry owner/plan/org linkage even
             // when they arrive before (or without) the session event.
-            subscription_data: { metadata },
+            subscription_data: { metadata, ...trialSubscriptionData },
+            ...trialFields,
             // Billing safety v1: the hosted session dies with the server-side
             // checkout operation's window — at most one payable session per
             // subject + plan at any instant.
@@ -139,6 +183,49 @@ export function createStripeProvider(): BillingProvider {
           input.idempotencyKey
             ? { idempotencyKey: input.idempotencyKey }
             : undefined,
+        );
+        if (!session.url) return { ok: false, reason: "no_session_url" };
+        return { ok: true, url: session.url, sessionId: session.id, testMode };
+      } catch (e) {
+        return { ok: false, reason: reasonFrom(e) };
+      }
+    },
+
+    async createOneTimeCheckoutSession(
+      input: OneTimeCheckoutInput,
+    ): Promise<CheckoutSessionResult> {
+      try {
+        const metadata: Record<string, string> = { ...input.metadata, ...environmentStamp };
+        const session = await client().checkout.sessions.create(
+          {
+            // One payment, a server-fixed amount: no subscription, no saved
+            // price, no tax computation (the pilot pass is exactly 1 €).
+            mode: "payment",
+            line_items: [
+              {
+                quantity: 1,
+                price_data: {
+                  currency: input.currency,
+                  unit_amount: input.amountCents,
+                  product_data: { name: input.productName },
+                },
+              },
+            ],
+            client_reference_id: input.clientReferenceId,
+            // The payer's stored customer, so the payment and its invoice sit
+            // in the same billing history and customer portal as a plan;
+            // otherwise Stripe creates one for this payment.
+            ...(input.providerCustomerId
+              ? { customer: input.providerCustomerId }
+              : { customer_creation: "always" as const, customer_email: input.customerEmail ?? undefined }),
+            // A real invoice/receipt for the 1 € — payment history, not just a charge.
+            invoice_creation: { enabled: true, invoice_data: { metadata } },
+            success_url: input.successUrl,
+            cancel_url: input.cancelUrl,
+            metadata,
+            payment_intent_data: { metadata },
+          },
+          { idempotencyKey: input.idempotencyKey },
         );
         if (!session.url) return { ok: false, reason: "no_session_url" };
         return { ok: true, url: session.url, sessionId: session.id, testMode };
@@ -213,6 +300,22 @@ export function createStripeProvider(): BillingProvider {
       } catch (e) {
         if (isResourceMissing(e)) return { ok: true, subscription: null };
         return { ok: false, reason: reasonFrom(e) };
+      }
+    },
+
+    async retrieveSubscriptionRaw(
+      providerSubscriptionId: string,
+    ): Promise<RetrieveRawSubscriptionResult> {
+      try {
+        const sub = await client().subscriptions.retrieve(providerSubscriptionId);
+        return {
+          ok: true,
+          object: sub as unknown as Record<string, unknown>,
+          livemode: sub.livemode === true,
+        };
+      } catch (e) {
+        if (isResourceMissing(e)) return { ok: true, object: null };
+        return { ok: false, reason: reasonFrom(e), retryable: isTransient(e) };
       }
     },
 

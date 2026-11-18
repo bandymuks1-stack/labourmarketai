@@ -45,6 +45,11 @@ describe("one domain core per table — no transport-side re-implementation", ()
     expect(actions).toMatch(/switchActiveWorkspaceCore\(/);
     expect(actions).not.toMatch(/from\("profiles"\)/);
     expect(REGISTRY).toMatch(/switchActiveWorkspaceCore\(caller/);
+    // …and the acting identity follows the workspace through ONE role core
+    // from both transports (2026-09-23), never a private profiles write.
+    expect(REGISTRY).toMatch(/followWorkspaceRoleCore\(caller, result\.workspace\)/);
+    expect(actions).toMatch(/followWorkspaceRoleCore\(caller, committed\.workspace\)/);
+    expect(read("lib", "auth", "actions.ts")).toMatch(/setActiveRoleCore\(/);
     // The capability reads memberships through the canonical reader. It moved
     // from `listWorkspaceMemberships` to `readWorkspaceMemberships` (2026-09-13)
     // because this capability SHOWS the list — on an unresolvable value it
@@ -54,8 +59,13 @@ describe("one domain core per table — no transport-side re-implementation", ()
     expect(REGISTRY).toMatch(/readWorkspaceMemberships\(caller\)/);
     // The membership list itself is built in exactly one place: the list
     // variant delegates to the complete-aware one rather than re-querying.
+    // RE-ANCHORED (owner program 2026-09-23): the cookie wrapper no longer
+    // lists memberships itself — it delegates to the caller-scoped resolver
+    // (below), handing it this browser's session pointer on the caller.
     const activeOrg = read("lib", "company", "active-organization.ts");
-    expect(activeOrg).toMatch(/listWorkspaceMemberships\(\{ supabase, userId: user\.id \}\)/);
+    expect(activeOrg).toMatch(
+      /resolveActiveWorkspaceForCaller\(\s*\{ supabase, userId: user\.id, sessionWorkspacePointer: sessionPointer \}/,
+    );
     expect(activeOrg).toMatch(/return \(await readWorkspaceMemberships\(caller\)\)\.workspaces;/);
   });
 
@@ -116,10 +126,19 @@ describe("one domain core per table — no transport-side re-implementation", ()
     expect(employerCtx).toMatch(/resolveEmployerCompanyCore\(\{ supabase, userId: user\.id \}, workspace\)/);
     // The bearer workspace resolution reuses the ONE membership core + the
     // SAME resolveActiveWorkspaceId rules (no second resolution algorithm).
+    // RE-ANCHORED (owner program 2026-09-23) from ">= 2 calls" to EXACTLY ONE:
+    // the cookie and bearer paths used to each run the rule with OPPOSITE
+    // pointer precedence (cookie-first vs DB-only, and the owned-only reader
+    // DB-first). Now `resolveActiveWorkspaceForCaller` is the one place it
+    // runs, under the one `pickStoredWorkspacePointer` rule, and the cookie
+    // wrapper and the owned-only projection both read its answer.
     const activeOrg = read("lib", "company", "active-organization.ts");
-    expect(activeOrg).toMatch(/resolveActiveWorkspaceForCaller/);
-    const resolverCalls = activeOrg.match(/resolveActiveWorkspaceId\(/g) ?? [];
-    expect(resolverCalls.length).toBeGreaterThanOrEqual(2);
+    const codeOnly = activeOrg.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^[ \t]*\/\/.*$/gm, "");
+    expect(codeOnly).toMatch(/resolveActiveWorkspaceForCaller/);
+    expect((codeOnly.match(/resolveActiveWorkspaceId\(/g) ?? []).length).toBe(1);
+    expect((codeOnly.match(/pickStoredWorkspacePointer\(/g) ?? []).length).toBe(1);
+    // NEGATIVE CONTROL: neither precedence spelling survives inline.
+    expect(codeOnly).not.toMatch(/sessionPointer \?\? dbPointer|dbPointer \?\? sessionPointer/);
   });
 
   it("capability confirmations share ONE minting/verification wiring", () => {

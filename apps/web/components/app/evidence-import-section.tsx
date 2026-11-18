@@ -1,4 +1,9 @@
 import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
+import {
+  formatHoursAsStated,
+  periodProvenance,
+  recordWhen,
+} from "@/lib/organization-evidence/period-provenance";
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
@@ -6,8 +11,8 @@ import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import { locales } from "@/lib/i18n/config";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import {
-  ATTESTATION_ROLES,
   SOURCE_KINDS,
   SUPPLIER_ROLES,
   buildPreview,
@@ -47,6 +52,7 @@ import {
   startEvidenceImportAction,
   withdrawEvidenceImportAction,
 } from "@/lib/organization-evidence/import-actions";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
 
 /**
  * ORGANIZATION EVIDENCE IMPORT — the human face of the one import engine.
@@ -95,30 +101,21 @@ const SECTION = "flex flex-col gap-4";
 const HEADING =
   "font-display text-lg font-bold tracking-tightest text-text-primary";
 
-const STATE_TONE: Record<string, string> = {
-  ready: "border-state-success/40 bg-state-success/10 text-state-success",
-  needs_review: "border-state-amber/40 bg-state-amber/10 text-state-amber",
-  duplicate: "border-ink-500 bg-ink-800/40 text-text-muted",
-  conflict: "border-state-warning/40 bg-state-warning/10 text-state-warning",
+/** Preview row state -> the one StatusChip pattern (word + shape). */
+const STATE_VARIANT: Record<string, StatusChipVariant> = {
+  ready: "success",
+  needs_review: "attention",
+  duplicate: "neutral",
+  conflict: "attention",
 };
-
-function Chip({ tone, children }: { tone: string; children: React.ReactNode }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${tone}`}
-    >
-      {children}
-    </span>
-  );
-}
 
 /** A row's headline state, chosen by the same precedence the core uses: a
  *  conflict outranks a duplicate, which outranks "needs a person". A row the
  *  PLAN makes ready reads as ready — the plan is part of the commit. */
-function rowTone(row: PreviewRow): string {
-  if (row.duplicateState === "conflict") return STATE_TONE.conflict;
-  if (row.duplicateState === "duplicate") return STATE_TONE.duplicate;
-  return row.ready || row.readyWithPlan ? STATE_TONE.ready : STATE_TONE.needs_review;
+function rowTone(row: PreviewRow): StatusChipVariant {
+  if (row.duplicateState === "conflict") return STATE_VARIANT.conflict;
+  if (row.duplicateState === "duplicate") return STATE_VARIANT.duplicate;
+  return row.ready || row.readyWithPlan ? STATE_VARIANT.ready : STATE_VARIANT.needs_review;
 }
 
 /** The derived-field methods the preview names in words. Anything else stays
@@ -152,11 +149,11 @@ export async function EvidenceImportSection({
   // section's accessible name, nothing else above the state strip.
   const header = sessionId ? (
     <header>
-      <h2 className="font-mono text-meta uppercase tracking-label text-brand-orange">{t("eyebrow")}</h2>
+      <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("eyebrow")}</h2>
     </header>
   ) : (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("eyebrow")}
       </p>
       <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
@@ -205,7 +202,13 @@ export async function EvidenceImportSection({
     );
 
   if (!user) return notice("unauthenticated");
-  const caller: DomainCaller = { supabase, userId: user.id, locale };
+  // Cookie transport: carries the session pointer, so the organization named
+  // here is the one the chip shows.
+  const caller: DomainCaller = await withSessionWorkspacePointer({
+    supabase,
+    userId: user.id,
+    locale,
+  });
 
   // ACTING CONTEXT FIRST — no read happens until the organization and the
   // authority to import for it are both established, so a personal workspace
@@ -252,6 +255,7 @@ export async function EvidenceImportSection({
       "month_not_stated",
       "confirmation_rejected",
       "confirmation_unavailable",
+      "already_withdrawn",
     ].map((k) => [k, t(`error.${k}` as never) as string]),
   );
   // Context refusals can also come back from an action (the workspace changed
@@ -582,6 +586,13 @@ export async function EvidenceImportSection({
           {" · "}
           {t(`role.${preview.source.supplierRole}` as never)} · {preview.source.language.toUpperCase()}
         </span>
+        {/* Source lines the parser could not turn into a row (no date, no
+            person) are SAID, never dropped silently (design v3 §11). */}
+        {(preview.source.notStagedSourceRows ?? 0) > 0 && (
+          <span className="text-state-amber" data-testid="evidence-preview-not-staged">
+            {t("preview.notStaged", { count: preview.source.notStagedSourceRows ?? 0 })}
+          </span>
+        )}
       </p>
 
       <EvidenceImportReconstruction
@@ -708,11 +719,11 @@ export async function EvidenceImportSection({
                         </td>
                         <td className="px-2 py-2">
                           <div className="flex flex-col items-start gap-1">
-                            <Chip tone={rowTone(row)}>
+                            <StatusChip variant={rowTone(row)}>
                               {t(
                                 `duplicateState.${row.duplicateState}` as never,
                               )}
-                            </Chip>
+                            </StatusChip>
                             {row.factFields.length > 0 && (
                               <span className="text-xs text-text-muted">
                                 {t("preview.fact")}: {row.factFields.join(", ")}
@@ -817,8 +828,10 @@ export async function EvidenceImportSection({
               <EvidenceAttestForm
                 action={attestSessionRecordsAction}
                 sessionId={sessionId}
-                roles={options(ATTESTATION_ROLES, "role")}
-                defaultRole={records[0]?.supplierRole ?? "employer"}
+                // The organization attests in the capacity it supplied the
+                // records in — and in no other (design v3 §8 P4).
+                roles={options([preview.source.supplierRole], "role")}
+                defaultRole={preview.source.supplierRole}
                 labels={{
                   attest: t("records.attestAll", {
                     count: records.filter((r) => !r.attestation && !r.withdrawn).length,
@@ -848,35 +861,58 @@ export async function EvidenceImportSection({
                     <span className="text-sm font-semibold text-text-primary">
                       {rec.personName ?? "—"}
                     </span>
-                    <span className="text-xs text-text-secondary">
-                      {rec.activityDate ??
-                        [rec.periodStart, rec.periodEnd]
-                          .filter(Boolean)
-                          .join(" – ")}
+                    <span
+                      className="text-xs text-text-secondary"
+                      data-testid="evidence-record-when"
+                      data-provenance={periodProvenance(rec)}
+                    >
+                      {/* At the precision it has: a span a person chose at
+                          import reads as months, not as two exact dates. */}
+                      {recordWhen(rec)}
                     </span>
+                    {/* SOURCE FACT ≠ DERIVED: a PERIOD the source never stated
+                        says how it came to be, beside it (owner P0 §18). */}
+                    {rec.activityDate === null && periodProvenance(rec) !== "source" ? (
+                      <span className="text-xs text-text-muted" data-testid="evidence-record-period-derived">
+                        {periodProvenance(rec) === "human_choice"
+                          ? t("records.periodDerivedHuman")
+                          : t("records.periodDerived")}
+                      </span>
+                    ) : null}
                     {rec.hours !== null && (
                       <span className="text-xs text-text-secondary">
-                        {rec.hours} h
+                        {formatHoursAsStated(rec.hours)} h
                       </span>
                     )}
-                    {/* DERIVED even monthly share of a period record (owner
-                        2026-09-17) — beside the record, never instead of it. */}
+                    {/* The period record through the ONE reading (owner rule
+                        2026-09-23) — a monthly share only for a period the
+                        SOURCE stated; otherwise the months and the source's
+                        own words, with no monthly figure. */}
                     {rec.activityDate === null && (
                       <PeriodMonthlyShare
                         hours={rec.hours}
                         periodStart={rec.periodStart}
                         periodEnd={rec.periodEnd}
-                        label={t("records.monthlyShare")}
+                        derived={rec.derived}
+                        factFields={rec.factFields}
+                        sourceText={rec.text}
+                        labels={{
+                          monthlyShare: t("records.monthlyShare"),
+                          noMonthlyFigure: t("records.noMonthlyFigure"),
+                          provenance: null,
+                          sourceStates: (words) => t("records.sourceStates", { words }),
+                          sourceDiffers: t("records.sourceDiffers"),
+                        }}
                         className="flex basis-full flex-col gap-0.5"
                       />
                     )}
-                    <Chip
-                      tone={
+                    <StatusChip
+                      variant={
                         rec.withdrawn
-                          ? STATE_TONE.duplicate
+                          ? STATE_VARIANT.duplicate
                           : isSelfVouched(rec.state as never)
-                            ? STATE_TONE.needs_review
-                            : STATE_TONE.ready
+                            ? STATE_VARIANT.needs_review
+                            : STATE_VARIANT.ready
                       }
                     >
                       {rec.withdrawn
@@ -886,7 +922,7 @@ export async function EvidenceImportSection({
                             ? t("records.selfAttested")
                             : t("records.attested")
                           : t(`evidenceState.${rec.state}` as never)}
-                    </Chip>
+                    </StatusChip>
                     {/* The one trust claim this page ever makes about an import,
                       and it is always the same one. */}
                     <span className="text-xs text-text-muted">
@@ -911,7 +947,7 @@ export async function EvidenceImportSection({
                       action={attestEvidenceRecordAction}
                       recordId={rec.id}
                       sessionId={sessionId}
-                      roles={options(ATTESTATION_ROLES, "role")}
+                      roles={options([rec.supplierRole], "role")}
                       defaultRole={rec.supplierRole}
                       labels={{
                         attest: t("records.attest"),

@@ -138,6 +138,8 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
         "кладка стен",
         "кладку стен",
         "кладкой стен",
+        "клал стен",
+        "клали стен",
         "кирпич",
       ],
     },
@@ -1470,10 +1472,24 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
       needles: [
         "blockwork",
         "block laying",
+        // EN / RU sentences the UX review of 2026-10-24 typed (row 8.2): "laid a
+        // block wall" and "клал стену из блоков" carried their hours as "kind
+        // of work not recognised" while the LT "mūrijau blokelių sieną" read.
+        "block wall",
+        "blockwall",
+        "laid a block",
+        "laid block",
+        "laying block",
+        "concrete block",
         "blokeli",
         "газоблок",
         "пеноблок",
         "клал блок",
+        "из блоков",
+        "из блока",
+        "блочную стен",
+        "кладка блок",
+        "кладку блок",
       ],
     },
     {
@@ -1984,8 +2000,10 @@ export const CONSTRUCTION_SKILL_HINT_SLUGS: ReadonlySet<string> = new Set(
 
 /** Lowercase substrings that map a free-text mention to a profession slug.
  *  RU needles ride the same rows (see SKILL_HINTS_LT note). Construction
- *  professions are one family among many — universal rows sit below them. */
-export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
+ *  professions are one family among many — universal rows sit below them.
+ *  `notWhen`: substrings that, when present, mean the row's needle is part of
+ *  ANOTHER occupation's compound — the row does not match (no guess). */
+export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: string[] }[] = [
   // Swedish needles (2026-08-14, worker-acquisition readiness loop) target the
   // Arbetsförmedlingen OCCUPATION LABELS — a closed publisher vocabulary —
   // and were derived from the measured production label distribution, never
@@ -2180,7 +2198,42 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
       "programmerare",
     ],
   },
-  { slug: "office_administrator", needles: ["administrator", "администратор"] },
+  {
+    slug: "office_administrator",
+    needles: ["administrator", "администратор"],
+    // "administrator" inside an IT compound is a different occupation:
+    // production /lt/jobs 2026-10-25 headed NAV "Systemadministrator" ads
+    // "Biuro administratorius". The catalogue has no IT-operations
+    // profession, so these stay unrecognized rather than mislabelled.
+    notWhen: [
+      "systemadministrat",
+      "system administrat",
+      "sysadmin",
+      "systemadministratör",
+      "nettverksadministrat",
+      "netzwerkadministrat",
+      "network administrat",
+      "nätverksadministrat",
+      "netwerkbeheer",
+      "databaseadministrat",
+      "datenbankadministrat",
+      "database administrat",
+      "databasadministrat",
+      "it-administrat",
+      "it administrat",
+      "системный администратор",
+      "системного администратора",
+      "администратор баз",
+      "сетевой администратор",
+      "sistemų administrat",
+      "sistemu administrat",
+      "tinklo administrat",
+      "duomenų bazių administrat",
+      "administrator systemów",
+      "administrator sieci",
+      "administrator baz",
+    ],
+  },
   {
     slug: "gardener",
     needles: [
@@ -2296,6 +2349,33 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
       "personbilsmekaniker",
       "fordonsmekaniker",
       "lastbilsmekaniker",
+      // ── MEASURED GAP, production 2026-09-27 ──────────────────────────────
+      // 30 049 of 53 392 active imported ads carry no `profession_slug`. Almost
+      // all of that is the CATALOGUE not holding the profession (nurse, doctor,
+      // physiotherapist, social worker, accountant, project manager — none is a
+      // slug), and those rows must stay unmapped. But the vehicle-mechanic
+      // family was a LEXICON gap on a profession the catalogue already has, so
+      // it is recovered here and nowhere else.
+      //
+      // `hjulmekaniker` (447 ads) — the SSYK label is
+      // "Däckmontör/Däck- och hjulmekaniker", which names itself a wheel
+      // MECHANIC; the four needles above already map the same `*mekaniker`
+      // family to this slug.
+      // `däckmontör` (172 further ads labelled with the short form only) — the
+      // compound label above proves the two names are ONE occupation.
+      // `bussmekaniker` (13 ads) — same family as `lastbilsmekaniker`.
+      //
+      // DELIBERATELY NOT ADDED, because each is a different trade or has no
+      // slug, and an invented mapping would be worse than an honest gap:
+      // `Underhållsmekaniker` / `Maskinmekaniker` (industrial maintenance, not
+      // automotive), `Fordonsmontör` / `Elektronikmontör` / `Montör
+      // träprodukter` (factory ASSEMBLY, not repair), `Elmontör`,
+      // `Kylmontör`, `Ventilationsmontör`, `Industrirörmontör` (separate
+      // trades the catalogue does not carry). Ambiguous rows stay unmapped.
+      "hjulmekaniker",
+      "däckmontör",
+      "dackmontor",
+      "bussmekaniker",
     ],
   },
   {

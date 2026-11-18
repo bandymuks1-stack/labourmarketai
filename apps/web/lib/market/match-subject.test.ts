@@ -163,7 +163,9 @@ describe("P0-3 regression — the newest-200 pool hid the best candidate", () =>
 
   it("assembles the star's real evidence, not a placeholder", async () => {
     const { client } = createFakeSupabase(buildTables());
-    const { candidates } = await buildSupplyCandidates(client, { need: WELDER_IN_NL });
+    const { candidates } = await buildSupplyCandidates(withStandingDoor(client, "standing"), {
+      need: WELDER_IN_NL,
+    });
 
     const star = candidates.find((c) => c.workerId === STAR);
     expect(star?.professionSlug).toBe("welder");
@@ -173,7 +175,51 @@ describe("P0-3 regression — the newest-200 pool hid the best candidate", () =>
     ]);
     expect(star?.subject.country).toBe("NL");
   });
+
+  // Skill confirmation withdrawal (phase B): the recorded flag on the star's
+  // welding is judged by the cross-party door, never trusted on its own.
+  it.each([
+    ["standing", "manager_confirmed"],
+    ["withdrawn", "self_declared"], // the manager_confirmed source no longer lifts it
+    ["self_confirmed", "self_declared"],
+    ["door_not_installed", "manager_confirmed"], // before the migration: today's reading
+    ["unknown", "work_journal"], // under-stated, never confirmed, never erased
+  ] as const)("a %s confirmation reads as %s evidence", async (door, evidence) => {
+    const { client } = createFakeSupabase(buildTables());
+    const { candidates } = await buildSupplyCandidates(withStandingDoor(client, door), {
+      need: WELDER_IN_NL,
+    });
+    const star = candidates.find((c) => c.workerId === STAR);
+    expect(star?.subject.skills.find((s) => s.uri === "welding")?.evidence).toBe(evidence);
+  });
 });
+
+/** The fake client plus the cross-party standing door, answering the star's
+ *  one recorded confirmation (welding) as `door`; every other RPC behaves as
+ *  the plain fake does. */
+function withStandingDoor(
+  client: ReturnType<typeof createFakeSupabase>["client"],
+  door: "standing" | "withdrawn" | "self_confirmed" | "door_not_installed" | "unknown",
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const base = client as any;
+  const answer =
+    door === "door_not_installed"
+      ? { data: null, error: { code: "PGRST202" } }
+      : door === "unknown"
+        ? { data: null, error: { code: "57014" } }
+        : { data: [{ worker_id: STAR, skill_id: "sk-weld", state: door }], error: null };
+  return new Proxy(base, {
+    get(target, prop) {
+      if (prop !== "rpc") return target[prop];
+      return (name: string, args: unknown) => {
+        if (name !== "worker_skill_confirmations_standing_v1") return target.rpc(name, args);
+        const q = { order: () => q, range: () => Promise.resolve(answer) };
+        return q;
+      };
+    },
+  }) as typeof client;
+}
 
 describe("staged retrieval — query shape", () => {
   it("never orders candidate retrieval by registration date", async () => {
@@ -397,5 +443,43 @@ describe("explicit-id retrieval (admin workbench)", () => {
       workerIds: [STAR, STAR, "w-005"],
     });
     expect(candidates.map((c) => c.workerId)).toEqual([STAR, "w-005"]);
+  });
+});
+
+describe("a raised hand is always looked at (alwaysInclude)", () => {
+  it("a worker the plan never searched is in the pool once they raise a hand", async () => {
+    // w-010 is a painter: the welder plan, at a budget of 2, never reaches them.
+    const plain = await buildSupplyCandidates(createFakeSupabase(buildTables()).client, {
+      need: WELDER_IN_NL,
+      budget: 2,
+    });
+    expect(plain.candidates.map((c) => c.workerId)).not.toContain("w-010");
+
+    const withHand = await buildSupplyCandidates(createFakeSupabase(buildTables()).client, {
+      need: WELDER_IN_NL,
+      budget: 2,
+      alwaysInclude: ["w-010"],
+    });
+    const ids = withHand.candidates.map((c) => c.workerId);
+    expect(ids).toContain("w-010");
+    // Pinning adds; it never pushes the demand's best match out.
+    expect(ids).toContain(STAR);
+  });
+
+  it("pinning an id the viewer cannot read reveals nobody", async () => {
+    const { candidates } = await buildSupplyCandidates(createFakeSupabase(buildTables()).client, {
+      need: WELDER_IN_NL,
+      budget: 2,
+      alwaysInclude: ["w-not-visible"],
+    });
+    expect(candidates.map((c) => c.workerId)).not.toContain("w-not-visible");
+  });
+
+  it("a pinned worker is listed once, even when the plan also found them", async () => {
+    const { candidates } = await buildSupplyCandidates(createFakeSupabase(buildTables()).client, {
+      need: WELDER_IN_NL,
+      alwaysInclude: [STAR, STAR],
+    });
+    expect(candidates.filter((c) => c.workerId === STAR)).toHaveLength(1);
   });
 });

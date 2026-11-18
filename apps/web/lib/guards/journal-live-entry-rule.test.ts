@@ -47,6 +47,7 @@ function recordingClient(rows: unknown[]) {
       b.is = (c: string, v: null) => (filters.push(`is:${c}:${String(v)}`), b);
       b.gte = (c: string) => (filters.push(`gte:${c}`), b);
       b.in = (c: string) => (filters.push(`in:${c}`), b);
+      b.or = () => b;
       b.order = () => b;
       b.limit = () => b;
       b.range = () => b;
@@ -112,6 +113,9 @@ describe("trust-signals — the number that reaches the Verified CV", () => {
         b.select = () => b;
         b.eq = () => b;
         b.is = () => b;
+        b.limit = () => b;
+        b.order = () => b;
+        b.range = () => Promise.resolve({ data: null, error: { message: "boom" }, count: null });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         b.then = (ok: any) =>
           Promise.resolve({ data: null, error: { message: "boom" }, count: null }).then(ok);
@@ -150,6 +154,9 @@ describe("player-card — one file may not hold two answers", () => {
       getWorkerCoreRow: async () => ({ id: "w-1" }),
       getWorkerSkillRows: async () => [],
       getPrimaryProfessionSlug: async () => null,
+      // The card also asks what the person says they do IN THEIR OWN WORDS
+      // (ledger 20260927060325) — the same cached rows, a different question.
+      getProfessionEntries: async () => [],
     }));
     vi.doMock("@/lib/player-card/work-history", () => ({ getOwnWorkHistory: async () => [] }));
     vi.doMock("@/lib/instructions/instructions", () => ({
@@ -215,19 +222,25 @@ const SEES_EVERY_ROW: Record<string, string> = {
   "lib/journal/journal-list-core.ts":
     "defines the rule; reads all rows because `correctedOriginals` needs the superseded ones",
 
+  // Notification recipient lookup: resolves ONE already-decided entry id to its
+  // worker so the decision can be announced. The review has happened; whether
+  // the entry was later superseded or retracted does not change who decided on
+  // it, and the lookup returns no content — only the worker id.
+  "lib/journal/review-notification.ts":
+    "recipient lookup for a decision already made — maps an entry id to its worker, returns no entry content",
+
   // Integrity: the append-only head must move when ANY row is appended,
   // including one later deleted or superseded — otherwise a confirm token
-  // stops being one-time and a replay writes a second entry.
-  "lib/capabilities/registry.ts":
+  // stops being one-time and a replay writes a second entry. (Moved out of
+  // lib/capabilities/registry.ts 2026-09-23 so the conversation dispatcher
+  // binds `worker.log-work` to the same head — one reader, both transports.)
+  "lib/journal/journal-chain-fingerprint.ts":
     "journal chain fingerprint — a one-time token's head must count every append",
 
   // Writers and ownership lookups act ON a row; they must be able to see the
   // row they are about to change.
   "lib/journal/journal-write-core.ts":
     "append/correct path — it writes the very rows the rule later filters",
-  "lib/journal/confirm-actions.ts": "writer path; its presented count uses the helper",
-  "lib/journal/review-actions.ts":
-    "writer — records a manager's review against one entry addressed by id",
   "lib/journal/journal-entry-skills-actions.ts": "writer — links skills to a specific entry",
   "lib/journal/skill-pipeline.ts": "ownership lookup of one entry by id before writing",
 

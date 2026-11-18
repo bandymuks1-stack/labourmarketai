@@ -7,6 +7,7 @@ import {
   withdrawContactDisclosureAction,
 } from "@/lib/privacy/contact-disclosure-actions";
 import type { ContactDisclosureStatus } from "@/lib/privacy/contact-disclosure-shared";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Company "request contact details" on a scouting candidate (Wagon 1, shared
@@ -74,6 +75,7 @@ export function RequestContactDetailsButton({
   };
 }) {
   const [pending, startTransition] = useTransition();
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
   const [state, setState] = useState<
     "idle" | "sent" | "rate_limited" | "no_organization" | "unavailable" | "error"
   >("idle");
@@ -130,7 +132,7 @@ export function RequestContactDetailsButton({
             onClick={withdraw}
             disabled={pending}
             data-testid={`contact-request-withdraw-${workerId}`}
-            className="w-fit rounded-md border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-muted transition-colors hover:bg-ink-500/10 disabled:opacity-60"
+            className="min-h-11 sm:min-h-0 w-fit rounded-md border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-muted transition-colors hover:bg-ink-500/10 disabled:opacity-60"
           >
             {pending ? labels.withdrawing : labels.withdraw}
           </button>
@@ -176,6 +178,7 @@ export function RequestContactDetailsButton({
         locale,
         requestId,
         workerId,
+        expectedWorkspaceId,
       });
       if (res.kind === "ok" || res.kind === "already-accepted") setState("sent");
       else if (res.kind === "rate-limited") setState("rate_limited");
@@ -193,7 +196,7 @@ export function RequestContactDetailsButton({
           onClick={send}
           disabled={pending}
           data-testid={`contact-request-open-${workerId}`}
-          className="w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-meta font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
+          className="min-h-11 sm:min-h-0 w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-meta font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
         >
           {pending ? labels.sending : labels.button}
         </button>
@@ -224,7 +227,9 @@ export function RequestContactDetailsButton({
         <p className="text-meta text-text-muted">{labels.unavailable}</p>
       ) : null}
       {state === "error" ? (
-        <p className="text-meta text-state-danger">{labels.error}</p>
+        <p className="text-meta text-state-danger" data-testid={`contact-request-error-${workerId}`}>
+          {labels.error}
+        </p>
       ) : null}
     </div>
   );

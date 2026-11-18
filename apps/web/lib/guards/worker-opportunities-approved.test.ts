@@ -7,6 +7,7 @@ import {
   safeApprovedCompanyName,
   WORKER_VISIBLE_ROUTE_STATUSES,
 } from "@/lib/opportunities/opportunity-fit";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Worker Opportunities v1 — workers see only approved supply routes.
@@ -72,7 +73,7 @@ describe("worker board UX — trust note, approved-empty state, admin separation
   });
 
   it("the trust copy exists in lt/en/ru", () => {
-    for (const loc of ["lt", "en", "ru"]) {
+    for (const loc of activeLocales) {
       const opp = JSON.parse(read(`messages/${loc}.json`)).opportunities;
       expect(opp.trustNote, `${loc} trustNote`).toBeTruthy();
       expect(opp.approvedEmptyTitle, `${loc} approvedEmptyTitle`).toBeTruthy();
@@ -88,7 +89,7 @@ describe("worker board UX — trust note, approved-empty state, admin separation
 
 describe("public positioning stays honest", () => {
   it("no guaranteed-job / verified-worker / instant-hire wording in the board copy", () => {
-    for (const loc of ["lt", "en", "ru"]) {
+    for (const loc of activeLocales) {
       const opp = JSON.stringify(JSON.parse(read(`messages/${loc}.json`)).opportunities).toLowerCase();
       for (const bad of ["guaranteed", "verified worker", "instant hire", "garantuot"]) {
         expect(opp.includes(bad), `${loc}: "${bad}" must not appear`).toBe(false);

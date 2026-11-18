@@ -4,13 +4,14 @@ import {
   getJournalWindowReport,
 } from "@/lib/journal/journal-window-report";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
+import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
 import { getManagerPendingAbsences } from "@/lib/leave/absences";
 import {
   absentOn,
   absentWithinDays,
   getEmployerWorkerAvailability,
 } from "@/lib/planning/employer-availability";
-import { utcTodayKey } from "@/lib/time/display";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * Organization Today (V8 employer daily loop, GAP 2) — the manager's morning
@@ -60,20 +61,48 @@ export type OrganizationToday =
       readonly pendingAbsenceDecisions: number | null;
       readonly journalEntriesToday: number | null;
       readonly awaitingReview: number | null;
+      /** Entries submitted to the caller as a CLIENT (decision 0018). Its own
+       *  number: never added to `awaitingReview`. null = unreadable. */
+      readonly clientReviewToDecide: number | null;
     }
   | { readonly applied: false; readonly reason: "not-authed" | "error" };
 
 const NEXT_DAYS = 7;
 
 export async function getOrganizationToday(): Promise<OrganizationToday> {
-  const todayIso = utcTodayKey();
+  const todayIso = (await viewerWorkToday()).todayIso;
+
+  // ONE STAGE (perf 2026-10-23): the five facts below are independent reads;
+  // they used to be asked one after another. Each keeps its own failure
+  // handling exactly as before — a failed read stays null, never 0.
+  const [availabilityRead, pendingRead, reportRead, awaitingRead, clientReviewToDecide] =
+    await Promise.all([
+      getEmployerWorkerAvailability().then(
+        (v) => ({ ok: true as const, v }),
+        () => ({ ok: false as const }),
+      ),
+      getManagerPendingAbsences().then(
+        (v) => ({ ok: true as const, v }),
+        () => ({ ok: false as const }),
+      ),
+      getJournalWindowReport("today", todayIso).then(
+        (v) => ({ ok: true as const, v }),
+        () => ({ ok: false as const }),
+      ),
+      countReviewablePendingEntries().then(
+        (v) => ({ ok: true as const, v }),
+        () => ({ ok: false as const }),
+      ),
+      countCounterpartyToDecide(),
+    ]);
 
   // Roster + absences — the W12 minimised availability read.
   let roster: number | null = null;
   let absentToday: readonly AbsentTodayRow[] | null = null;
   let absentNext7: readonly AbsentUpcomingRow[] | null = null;
   try {
-    const availability = await getEmployerWorkerAvailability();
+    if (!availabilityRead.ok) throw new Error("availability read failed");
+    const availability = availabilityRead.v;
     if (availability.status === "not-authed") {
       return { applied: false, reason: "not-authed" };
     }
@@ -104,27 +133,16 @@ export async function getOrganizationToday(): Promise<OrganizationToday> {
   }
 
   let pendingAbsenceDecisions: number | null = null;
-  try {
-    const pending = await getManagerPendingAbsences();
-    if (pending.applied) pendingAbsenceDecisions = pending.pending.length;
-  } catch {
-    /* stays null */
+  if (pendingRead.ok && pendingRead.v.applied) {
+    pendingAbsenceDecisions = pendingRead.v.pending.length;
   }
 
   let journalEntriesToday: number | null = null;
-  try {
-    const report = await getJournalWindowReport("today", todayIso);
-    if (report.applied) journalEntriesToday = report.totals.entries;
-  } catch {
-    /* stays null */
+  if (reportRead.ok && reportRead.v.applied) {
+    journalEntriesToday = reportRead.v.totals.entries;
   }
 
-  let awaitingReview: number | null = null;
-  try {
-    awaitingReview = await countReviewablePendingEntries();
-  } catch {
-    /* stays null */
-  }
+  const awaitingReview: number | null = awaitingRead.ok ? awaitingRead.v : null;
 
   // Nothing measurable at all → the panel must not render an empty shell that
   // impersonates "all clear".
@@ -146,5 +164,6 @@ export async function getOrganizationToday(): Promise<OrganizationToday> {
     pendingAbsenceDecisions,
     journalEntriesToday,
     awaitingReview,
+    clientReviewToDecide,
   };
 }

@@ -62,6 +62,10 @@ export const AI_TASK_TYPES = [
    *  EXISTING conversation intent id (owner approval 2026-09-05). Unbounded
    *  free text; Gemini-only by a task-scoped grant. */
   "propose_conversation_intent",
+  /** The verbatim title/description of a PUBLICLY published job advertisement
+   *  → the same words in the reader's locale. The second PUBLIC task; its
+   *  argument is the field list in `TASK_POLICIES.translate_vacancy`. */
+  "translate_vacancy",
 ] as const;
 export type AiTaskType = (typeof AI_TASK_TYPES)[number];
 
@@ -95,7 +99,18 @@ export const TIER_MODEL_ALIAS: Record<AiModelTier, AiModelAlias | null> = {
 };
 
 /** Providers with a per-alias candidate table (AI_MODEL_CANDIDATES keys). */
-export type AiModelProvider = "anthropic" | "openai" | "gemini" | "xai";
+export type AiModelProvider =
+  | "anthropic"
+  | "openai"
+  | "gemini"
+  | "xai"
+  // Free API tiers (2026-10-25). A provider may register fewer than three
+  // tiers; an absent tier resolves to undefined, which prices as `null` →
+  // `cost_unpriced` / the policy's priced fallback tier — never another
+  // vendor's model id.
+  | "cloudflare"
+  | "mistral"
+  | "groq";
 
 /**
  * Every provider a run can be costed against — the candidate-table providers
@@ -112,7 +127,7 @@ export function modelIdForAlias(
   alias: AiModelAlias,
   provider: AiModelProvider = "anthropic",
 ): string {
-  return AI_MODEL_CANDIDATES[provider][alias];
+  return (AI_MODEL_CANDIDATES[provider] ?? {})[alias];
 }
 
 // ── Task policies ───────────────────────────────────────────────────────────
@@ -203,7 +218,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
       "locale",
     ],
     prohibitedFields: ["full_cv", ...NEVER_NEEDED],
-    expectedSchema: "countryReadinessOutputSchema | documentAssistantOutputSchema",
+    expectedSchema: "countryReadinessOutputSchema",
     minQuality: 0.6,
     maxEstimatedCostUsd: 0.15,
     expectedOutputTokens: 900,
@@ -441,12 +456,72 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     // every write through the dispatcher's own confirmation tiers.
     humanReview: false,
   },
+  /**
+   * TRANSLATE A PUBLISHED ADVERTISEMENT INTO THE READER'S LOCALE.
+   *
+   * GRANT-GATED, not public (owner decision 2026-09-22): "Public source
+   * content does not automatically authorize unrestricted third-party AI
+   * transmission." `TASK_SENSITIVITY` classes this `SENSITIVE_FREE_TEXT`
+   * because `vacancy_description` is unbounded text a third party wrote, so
+   * an external provider receives it only under an owner grant naming this
+   * task. There is no such grant today; the runtime refuses and the reader
+   * shows the publisher's own words.
+   *
+   * MINIMUM NECESSARY FIELDS (owner decision 2026-09-22). Four, and the
+   * schema is `.strict()` so a caller cannot widen them: the title, the
+   * description, and the two locale codes. Employer identity, employer org
+   * id, application URL, coordinates, the reader, and the match result are
+   * all listed as prohibited and none is assembled anywhere. Before the call
+   * the reader additionally REDACTS e-mail addresses, phone numbers and URLs
+   * out of the description into opaque tokens and restores them afterwards,
+   * so contact data never leaves even though the reader still shows it.
+   *
+   * `low_cost` on both tiers, NO escalation, a tight ceiling: translating
+   * twenty short titles does not get better with a frontier model, and a
+   * board that could silently escalate is a board with an unbounded bill.
+   * The reader batches (one call per board render) and PERSISTS the result
+   * beside the original keyed by source hash + target locale, so an ad is
+   * translated ONCE per locale and never again per page view.
+   */
+  translate_vacancy: {
+    taskType: "translate_vacancy",
+    riskLevel: "low",
+    allowedFields: ["vacancy_title", "vacancy_description", "source_locale", "target_locale"],
+    prohibitedFields: [
+      "full_cv",
+      "worker_profile",
+      "journal_entry_text",
+      "employer_name",
+      "employer_external_org_id",
+      "application_url",
+      "worker_name",
+      "profile_id",
+      "worker_id",
+      "match_result",
+      ...NEVER_NEEDED,
+    ],
+    expectedSchema: "vacancyTranslationOutputSchema",
+    minQuality: 0.55,
+    maxEstimatedCostUsd: 0.03,
+    expectedOutputTokens: 1_500,
+    maxLatencyMs: 20_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: [],
+    secondModelReview: false,
+    // A rendering shown beside the original with its provenance named; the
+    // human decision it supports is reading. Never a record of fact.
+    humanReview: false,
+  },
   draft_follow_up: {
     taskType: "draft_follow_up",
     riskLevel: "medium",
     allowedFields: ["conversation_summary", "recipient_role", "goal", "locale"],
     prohibitedFields: ["full_cv", ...NEVER_NEEDED],
-    expectedSchema: "supportOnboardingOutputSchema",
+    // No registered agent performs this task since support_onboarding was
+    // retired (owner decision 2026-10-25, row 10.11). The policy stays as
+    // the seam a future drafting agent would route through.
+    expectedSchema: "none registered (support_onboarding retired 2026-10-25)",
     minQuality: 0.6,
     maxEstimatedCostUsd: 0.05,
     expectedOutputTokens: 500,
@@ -461,12 +536,15 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
   },
 };
 
-// ── Agent → task mapping (all 11 registered agents) ────────────────────────
+// ── Agent → task mapping (all 9 registered agents) ─────────────────────────
 
 /**
  * Which program task each existing registry agent performs. Two deterministic
  * tasks (detect_capacity_gap / detect_skill_gap) have NO agent on purpose —
- * they are computed by the pure workforce models, not by an LLM.
+ * they are computed by the pure workforce models, not by an LLM. Two LLM
+ * tasks (normalize_external_profile / draft_follow_up) have no agent since
+ * skill_evidence and support_onboarding were retired (owner decision
+ * 2026-10-25, row 10.11); their policies stay as routing seams.
  *
  * Rationale per row lives in
  * docs/product/cost-aware-ai-task-routing-contract-v1.md.
@@ -474,17 +552,17 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
 export const AGENT_TASK_TYPES: Record<AiAgentKey, AiTaskType> = {
   worker_profile: "extract_cv", // free-text bio/CV → structured profile draft
   work_journal: "normalize_work_scope", // journal free-text → structured work scope
-  skill_evidence: "normalize_external_profile", // evidence text → normalized capability claims
   company_need: "structure_future_work", // company's future work → structured need
-  country_readiness: "derive_workforce_requirements", // what working there requires
-  document_assistant: "derive_workforce_requirements", // documents needed = requirement derivation
+  // A plain-language reading of the sourced country matrix for one scope. The
+  // payload is researched reference data with no data subject; it keeps the
+  // LOW_RISK class it always had — reclassifying it PUBLIC would be an egress
+  // widening, which is an owner act (owner decision 2026-10-25, row 10.11).
+  country_readiness: "derive_workforce_requirements",
   matching_explanation: "explain_match",
-  booking_risk: "explain_match", // risk narrative = explanation over canonical signals
-  admin_risk: "explain_match", // same explanation-class task, admin audience
-  support_onboarding: "draft_follow_up", // guidance / next-step message drafts
   translation_copy: "translate_message",
   market_explanation: "explain_market_demand",
   conversation_intent: "propose_conversation_intent", // one typed sentence → one EXISTING intent id (proposer, not router)
+  vacancy_translation: "translate_vacancy",
 };
 
 export function taskTypeForAgent(agent: AiAgentKey): AiTaskType {
@@ -534,7 +612,16 @@ export interface AiTaskRouteContext {
 export type RouteBlockReason =
   | "cost_ceiling"
   | "cost_unpriced"
-  | "needs_human_confirmation";
+  | "needs_human_confirmation"
+  /**
+   * The data egress gate refused every provider (owner decision 2026-08-19,
+   * AI DATA BOUNDARY). No vendor received a byte. Audit 2026-10-16 (AI-1):
+   * before this value existed such a run was recorded with NO block reason,
+   * so it counted toward the daily run budget and the per-organization cap,
+   * and its pre-run estimate landed in the money ledger as spend for a model
+   * that never ran. A refusal is now named as one.
+   */
+  | "egress_refused";
 
 export interface TaskRouteDecision {
   readonly taskType: AiTaskType;
@@ -658,7 +745,7 @@ export function resolveRouteForPolicy(
    * needs the MODEL and call sites must never know the model (guard:
    * ai-task-routing). The caller supplies token SIZE; the router prices it.
    */
-  const modelAliasForTier = TIER_MODEL_ALIAS[tier];
+  let modelAliasForTier = TIER_MODEL_ALIAS[tier];
   const costProvider: AiCostProvider = ctx.provider ?? "anthropic";
 
   /* Price the CONCRETE model that will run, never the tier alias.
@@ -677,8 +764,8 @@ export function resolveRouteForPolicy(
     policy.expectedOutputTokens,
     ctx.maxOutputTokens ?? 0,
   );
-  const derivedEstimate =
-    ctx.expectedInputTokens === undefined || modelAliasForTier === null
+  const estimateForAlias = (alias: AiModelAlias | null): number | null | undefined =>
+    ctx.expectedInputTokens === undefined || alias === null
       ? undefined
       : costProvider === "local"
         ? // Self-hosted: the operator already paid for the hardware. Free by
@@ -689,10 +776,44 @@ export function resolveRouteForPolicy(
             // is honestly unpriceable here rather than wrong.
             null
           : estimateCostUsd(
-              modelIdForAlias(modelAliasForTier, costProvider),
+              modelIdForAlias(alias, costProvider),
               ctx.expectedInputTokens,
               outputBound,
             );
+  let derivedEstimate = estimateForAlias(modelAliasForTier);
+
+  /* The preferred tier's model carries no reviewed price FOR THIS PROVIDER,
+   * but the policy's own fallback tier does → run on the fallback tier,
+   * surfaced (fallbackApplied + reason), instead of refusing every run.
+   *
+   * Observed 2026-10-13..15 (#2407): with Gemini serving, `extract_cv` and
+   * `structure_future_work` prefer "standard" → gemini-2.5-flash, which is
+   * registered `enabled: false` with no reviewed price, so 19 of 60 runs in
+   * 7 days were blocked `cost_unpriced` before any call — while the enabled,
+   * priced gemini-3.5-flash-lite sat on the policy's declared fallback tier.
+   *
+   * Only the first route of a run moves (no escalation, no provider-failure
+   * retry): an escalation that lands on an unpriced tier must not quietly
+   * climb back down onto the model that just failed. The fallback's estimate
+   * is the one the ceiling below is judged on; if the fallback is unpriced
+   * too, the run is blocked exactly as before. */
+  if (
+    ctx.estimatedCostUsd === undefined &&
+    derivedEstimate === null &&
+    !escalated &&
+    !fallbackApplied &&
+    policy.fallbackTier !== tier
+  ) {
+    const fallbackAlias = TIER_MODEL_ALIAS[policy.fallbackTier];
+    const fallbackEstimate = estimateForAlias(fallbackAlias);
+    if (typeof fallbackEstimate === "number") {
+      reason = `preferred tier "${tier}" has no owner-reviewed price on provider "${costProvider}" — fell back to priced tier "${policy.fallbackTier}" (quality downgrade surfaced, not silent)`;
+      tier = policy.fallbackTier;
+      modelAliasForTier = fallbackAlias;
+      derivedEstimate = fallbackEstimate;
+      fallbackApplied = true;
+    }
+  }
   const estimate = ctx.estimatedCostUsd ?? derivedEstimate;
 
   // An unpriced model makes the ceiling UNCHECKABLE. A budget that cannot be

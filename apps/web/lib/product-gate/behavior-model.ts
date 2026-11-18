@@ -414,8 +414,18 @@ export const BEHAVIOR_CONFORMANCE = {
   // 52 → 55 (2026-09-19): the CLIENT's side of the agency bridge by chip —
   // company.accept-connection / decline-connection / share-request, each the
   // partners page's own canonical action, anchored to /dashboard/company/partners.
-  conversationActions: 55,
-  actionsAnchoredToAPage: 55,
+  // 55 → 56 (2026-09-23, owner program CASE 3/4/12): +1
+  // `company.rename-organization` — the active organization renamed by
+  // sentence through the ONE rename core over the canonical name writer
+  // (saveCompanySetup → save_company_setup_v3). Anchored to
+  // /dashboard/company/settings; keyed to the company actor type (subject
+  // "company"), so actionsKeyedToARelationship stays 1 and the verdict stands.
+  // 56 → 57 (2026-10-05, J-TIME-FREEDOM): +1 `company.keep-assignment` — the chat
+  // door of the knowing override the project page already offers (one keep
+  // core behind the page action, this action and the MCP assignment.keep_*
+  // tools). Anchored to /dashboard/projects; keyed to the company actor type.
+  conversationActions: 58, // +1 company.respond-team-offer (2026-10-11: the receiver answers a brigade / company offer in the chat)
+  actionsAnchoredToAPage: 58,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

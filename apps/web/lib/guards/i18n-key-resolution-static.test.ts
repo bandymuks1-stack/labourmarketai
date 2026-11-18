@@ -160,7 +160,12 @@ function bindingsIn(src: string): Binding[] {
     const open = m.index! + m[0].length - 1;
     const b = balanced(src, open, "[", "]");
     if (!b) continue;
-    const elements = splitTopLevel(b.inner);
+    // Comments are not elements: a comma inside a `// …` line between two
+    // entries used to shift every later binding onto the wrong call (found
+    // 2026-09-30 when a comment in the landing's list was shortened).
+    const elements = splitTopLevel(
+      b.inner.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, ""),
+    );
     elements.forEach((el, i) => {
       const name = names[i];
       if (!name || !/^[A-Za-z_$][\w$]*$/.test(name)) return;

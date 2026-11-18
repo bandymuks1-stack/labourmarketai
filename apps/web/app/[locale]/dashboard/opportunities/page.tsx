@@ -1,5 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { isAssessedFit } from "@/lib/opportunities/fit-band";
 import { TelemetryView } from "@/components/app/telemetry-view";
+import { PersonalOpportunities } from "@/components/app/opportunities/personal-opportunities";
+import {
+  FIRST_VIEW_COUNT,
+  FREE_DISCOVERY_SET,
+  selectPersonalOpportunities,
+} from "@/lib/opportunities/personal-recommendations";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import Link from "next/link";
 
@@ -56,19 +63,27 @@ import { getWorkerSalaryIntelligence } from "@/lib/intelligence/intelligence-rea
 import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
 import { getWeeklyPersonalIntelligence } from "@/lib/worker/weekly-intelligence";
 import { getMyPartnerSupplyState } from "@/lib/privacy/partner-supply-actions";
+import { getMyDiscoverabilityState } from "@/lib/privacy/discoverability-actions";
+import { employerVisibilityOf } from "@/lib/privacy/employer-visibility";
+import {
+  EmployerVisibilityItem,
+  employerVisibilityItemLabels,
+} from "@/components/app/employer-visibility-item";
 import {
   WORKER_INTENT_STATES,
   type WorkerIntentState,
 } from "@/lib/supply-bridge/first-party-signal-contract";
 import { WeeklyIntelligenceSection } from "@/components/app/weekly-intelligence-section";
 import { MarketExplanationPanel } from "@/components/app/market-explanation-panel";
-import { WorldDiscovery } from "@/components/app/market-map/world-discovery";
-import { loadWorldView } from "@/lib/market-map/world-read";
-import {
-  DEFAULT_WORLD_BOUNDS,
-  DEFAULT_WORLD_ZOOM,
-} from "@/lib/market-map/world-model";
+/* `WorldDiscovery`, `loadWorldView`, `DEFAULT_WORLD_BOUNDS` and
+   `DEFAULT_WORLD_ZOOM` are deliberately NO LONGER IMPORTED here — this page's
+   map viewport is withheld (owner decision 2026-09-27; the reasoning is at the
+   render site). Every one of those modules still exists and still serves
+   /dashboard/market-map unchanged. */
 import { SavedSearchesStrip } from "@/components/app/saved-searches-strip";
+import { createClient as createSessionClient } from "@/lib/supabase/server";
+import { buildOwnWorkerContext } from "@/lib/opportunities/worker-subject";
+import { missingJobAlertCriteria } from "@/lib/opportunities/job-alert-model";
 import { getMySavedSearches, notifySavedSearchMatches } from "@/lib/opportunities/saved-searches";
 import { hasAnyCriteria, readSavedSearches } from "@/lib/opportunities/saved-search-model";
 import {
@@ -104,6 +119,12 @@ import type {
   OpportunityStatus,
 } from "@/lib/opportunities/opportunity-fit";
 import { createUtcFormatter } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/opportunities", "opportunities.world.title");
+
 
 /**
  * PASAULIS — the worker's discovery-and-matching destination
@@ -138,7 +159,6 @@ import { createUtcFormatter } from "@/lib/time/display";
 const STATUS_TONE: Record<OpportunityStatus, string> = {
   possible_match: "border-state-success/40 bg-state-success/10 text-state-success",
   check_conditions: "border-state-amber/40 bg-state-amber/10 text-state-amber",
-  needs_documents: "border-brand-blue/40 bg-brand-blue/10 text-brand-blue",
   missing_profile_info: "border-ink-500 bg-ink-800/40 text-text-muted",
 };
 
@@ -183,6 +203,67 @@ type WorldRow =
       readonly missingDataCodes: ExternalOpportunityCardV1["match"]["missingData"];
     };
 
+/**
+ * JOB ALERT READINESS (stream N) — one honest block on the existing board:
+ * either "new real jobs that fit you reach your notifications" or exactly which
+ * of the two required facts (profession, preferred countries) is not yet
+ * stated, with the door to the EXISTING work-card editor on the profile.
+ * Salary is optional and never listed as missing. Reads the person's OWN
+ * context (the subject the board matches with), so the block and the alerts
+ * can never disagree. Lives in this page (an already-declared surface), not a
+ * new component.
+ */
+async function JobAlertReadiness({ locale }: { locale: string }) {
+  const supabase = await createSessionClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const ctx = await buildOwnWorkerContext(supabase, user.id);
+  if (!ctx) return null;
+  const professions = ctx.subject.professionSlugs?.length
+    ? [...ctx.subject.professionSlugs]
+    : ctx.subject.professionSlug
+      ? [ctx.subject.professionSlug]
+      : [];
+  const missing = missingJobAlertCriteria({
+    professionSlugs: professions,
+    preferredCountries: [...(ctx.subject.preferredCountries ?? [])],
+    salaryMinEur: ctx.subject.salaryMinEur ?? null,
+  });
+  const t = await getTranslations("opportunities.jobAlerts");
+  return (
+    <Card data-testid="job-alert-readiness">
+      <div className="flex flex-col gap-2 p-4">
+        <h2 className="font-display text-base font-semibold text-text-primary">
+          {t("title")}
+        </h2>
+        {missing.length === 0 ? (
+          <p className="text-sm text-text-secondary" data-testid="job-alert-ready">
+            {t("ready")}
+          </p>
+        ) : (
+          <>
+            <p className="text-sm text-text-secondary">{t("missing")}</p>
+            <ul className="list-disc pl-5 text-sm text-text-primary" data-testid="job-alert-missing">
+              {missing.map((m) => (
+                <li key={m}>{t(m)}</li>
+              ))}
+            </ul>
+            <Link
+              href={`/${locale}/dashboard/profile#work-card-editor-section`}
+              data-testid="job-alert-fill-cta"
+              className={`mt-1 self-start ${buttonLinkClassName("secondary", "sm")}`}
+            >
+              {t("cta")} →
+            </Link>
+          </>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 export default async function OpportunitiesPage({
   params,
   searchParams,
@@ -207,29 +288,32 @@ export default async function OpportunitiesPage({
   // the matches are counted against the SAME cards the worker sees, under
   // their own authorization. Unavailable (owner-gated migration unapplied, or
   // a failed read) renders no controls at all.
+  // THE PERSONAL FIRST VIEW (owner addendum 2026-10-09): the pristine page
+  // and the free discovery set render "Your opportunities" only. The full
+  // board (filters, sort, ?view=all) is unchanged - so the reads only it
+  // uses are skipped here and taken lazily if the page falls back to it.
+  const personalCandidate =
+    view !== "all" &&
+    activeFilterEntries(filters).length === 0 &&
+    sort === "relevance";
   const savedSearches = await getMySavedSearches();
   // Board + salary benchmark + weekly digest + world view + the person's
   // own work-seeking intent are independent reads — one combined await so
   // TTFB pays the slowest of them, not their sum.
-  const [result, salaryIntel, weekly, worldView, partnerSupply] = await Promise.all([
+  const [result, salaryIntelEarly, weeklyEarly, partnerSupply, discoverability, tVisibility] = await Promise.all([
     loadWorkerOpportunityBoard("opportunities_board", {
       externalDiscovery: {
         professionSlug: filters.profession,
         country: filters.country,
       },
     }),
-    getWorkerSalaryIntelligence(),
-    getWeeklyPersonalIntelligence(),
-    // PASAULIS' natural base (owner direction 2026-09-13): the SAME
-    // viewport-bounded world read the market map already uses, for the same
-    // default Europe viewport. No new reader, no new layer, no second map —
-    // the canonical `WorldDiscovery` container is rendered here too, and
-    // the client re-reads on pan/zoom exactly as it does on /market-map.
-    loadWorldView({
-      bounds: DEFAULT_WORLD_BOUNDS,
-      zoom: DEFAULT_WORLD_ZOOM,
-      layer: "demand",
-    }),
+    personalCandidate ? Promise.resolve(null) : getWorkerSalaryIntelligence(),
+    personalCandidate ? Promise.resolve(null) : getWeeklyPersonalIntelligence(),
+    // The world read that fed this page's map viewport is GONE WITH THE
+    // VIEWPORT (owner decision 2026-09-27, explained at the render site
+    // below). `loadWorldView` itself is untouched and still serves
+    // /dashboard/market-map; this page simply no longer pays for a read whose
+    // only consumer was a map it must not draw yet.
     // The five-state work-seeking intent the person declared under
     // /dashboard/privacy (`first_party_supply_declarations`) — the SAME
     // reader that page uses, so the board shows what the person said about
@@ -237,7 +321,14 @@ export default async function OpportunitiesPage({
     // non-ok state (not declared / withdrawn / unreadable) → no chip: the
     // board never says "not looking" on the person's behalf.
     getMyPartnerSupplyState().catch(() => null),
+    // "Matomas darbdaviams" — the profile-discoverability consent, the SAME
+    // reader the privacy screen uses. A throw is `null` → unknown (SEP-7),
+    // never "off": the board does not tell a person they are hidden because
+    // a read failed.
+    getMyDiscoverabilityState().catch(() => null),
+    getTranslations("privacyConsent.employerVisibility"),
   ]);
+  const employerVisibility = employerVisibilityOf(discoverability);
   const declaredIntent: WorkerIntentState | null = (() => {
     if (!partnerSupply || partnerSupply.kind !== "ok") return null;
     const d = partnerSupply.declaration;
@@ -294,6 +385,16 @@ export default async function OpportunitiesPage({
   // render exactly the rows the line says are shown.
   const externalView = selectExternalFirstView(externalCards, externalInitialCount);
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
+  // A language code named in the reader's own locale ("sv" → "švedų"), the
+  // same way the criteria summary names one; the code itself when the
+  // runtime cannot (never a guess).
+  const languageName = (code: string): string => {
+    try {
+      return new Intl.DisplayNames([locale], { type: "language" }).of(code) ?? code;
+    } catch {
+      return code;
+    }
+  };
 
   // ── Market context (Contextual Intelligence UI v1): the worker's OWN
   //    deterministic salary-vs-benchmark trust card plus the four honest
@@ -301,6 +402,53 @@ export default async function OpportunitiesPage({
   //    trend). Every card degrades honestly — the unavailable ones say WHY,
   //    what is required, which sources are off and what activation changes.
   //    Nothing here fabricates a number (§18).
+  if (personalCandidate && result.kind === "ready" && result.capabilities.boardAvailable) {
+    const personalItems = selectPersonalOpportunities(
+      result.opportunities,
+      externalCards,
+      view === "discover" ? FREE_DISCOVERY_SET : FIRST_VIEW_COUNT,
+    );
+    const discoverySize =
+      view === "discover"
+        ? personalItems.length
+        : selectPersonalOpportunities(result.opportunities, externalCards, FREE_DISCOVERY_SET).length;
+    const personalWorkLabels = buildWorkTypeLabelMap(locale);
+    const tProfessionPersonal = await getTranslations("professions");
+    return (
+      <>
+        <TelemetryView
+          event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
+          metadata={{
+            surface: "opportunities",
+            role_context: "worker",
+            candidate_count: result.opportunities.length,
+          }}
+        />
+        {result.readiness.hasWorkType && result.readiness.hasSkills ? (
+          <TelemetryView event={FUNNEL_EVENTS.profileMatchable} metadata={{ surface: "opportunities", role_context: "worker" }} />
+        ) : null}
+        {result.opportunities.length > 0 || result.externalVacancies.cards.length > 0 ? (
+          <TelemetryView
+            event={FUNNEL_EVENTS.realOpportunitiesLoaded}
+            metadata={{ surface: "opportunities", role_context: "worker", success: true }}
+          />
+        ) : null}
+        <PersonalOpportunities
+          items={personalItems}
+          mode={view === "discover" ? "discover" : "top"}
+          locale={locale}
+          roleLabel={(slug) => (slug && personalWorkLabels[slug]) || t("fieldRoleUnknown")}
+          professionLabel={(slug) => (slug && tProfessionPersonal.has(slug as never) ? tProfessionPersonal(slug as never) : null)}
+          countryLabel={(code) => (code && tlm.has(`countryNames.${code}`) ? tlm(`countryNames.${code}`) : (code ?? ""))}
+          discoverySet={FREE_DISCOVERY_SET}
+          canShowMore={discoverySize > personalItems.length}
+        />
+      </>
+    );
+  }
+  // Fallback to the full board: the reads the personal view skipped.
+  const salaryIntel = salaryIntelEarly ?? (await getWorkerSalaryIntelligence());
+  const weekly = weeklyEarly ?? (await getWeeklyPersonalIntelligence());
   const tIntel = await getTranslations("intelligence");
   // Root translator — provenance/attribution codes are FULL key paths
   // (vacancySources.*), stored as codes on the record, resolved only here.
@@ -377,6 +525,13 @@ export default async function OpportunitiesPage({
         ? "border-brand-blue bg-brand-blue/10 text-text-primary"
         : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
     }`;
+  // The opportunity-type heading lives with its values in the need form's
+  // catalogue (structuredDemand), present in every locale; the discovery
+  // namespace never had that key, so reading it there printed a raw key.
+  const filterDimLabel = (dim: keyof DiscoveryFilterState): string =>
+    dim === "opportunityType"
+      ? sd("opportunityTypeLabel")
+      : t(`discovery.filters.${dim}` as never);
   const filterValueLabel = (dim: keyof DiscoveryFilterState, value: string): string => {
     switch (dim) {
       case "profession":
@@ -618,48 +773,69 @@ export default async function OpportunitiesPage({
       ? result.opportunities.length - filtered.length
       : 0;
 
-  // ── The assessment line: WHAT the fit was assessed against, in words,
-  //    from the subject reader's own facts. "Not stated" is a stated fact
-  //    here, never an omission. ─────────────────────────────────────────────
-  const assessedFacts: string[] =
+  /*
+   * §7 — TWO DIFFERENT KINDS OF SENTENCE WERE JOINED INTO ONE STRIP, and that
+   * strip was the second thing on the page:
+   *
+   *   "platformos užklausos: rodoma 0 iš 0 · vieši skelbimai: rodoma 3 iš
+   *    111187 · 12 atidėta pagal jūsų filtrus"
+   *
+   * The first two are RETRIEVAL TELEMETRY. They name internal sources
+   * ("platformos užklausos", "vieši skelbimai") and report how a pipeline
+   * performed — the owner's "sistemos debug puslapis" in one line. They answer
+   * none of the five questions this surface owes a person (what do you know
+   * about me · what did you find · where is it · why am I seeing it · what can
+   * I do now), so they move into the existing "Kaip veikia atitikimas"
+   * disclosure, beside the calculation version and the trust note, where
+   * somebody who wants provenance will look for it. NOTHING IS DELETED and no
+   * new copy was written: the same strings, one tap away.
+   *
+   * The others are NOT telemetry, and burying them would be a lie by omission.
+   * They are the honest answer to "why am I seeing so little", so they stay in
+   * the first layer:
+   *   · `countsPlatformUnavailable` — a capability is not switched on;
+   *   · `countsExternalUnreadable`  — a READ FAILED. SEP-7: FAILED ≠ ZERO, and
+   *     rendering a failed read as an empty result is a defect class this repo
+   *     has already had to sweep;
+   *   · `countsFiltered`            — THE PERSON'S OWN filters hid results.
+   *     "Filtered out" is not "empty" (#1710); without this line the board
+   *     looks bare and the reason is invisible.
+   */
+  /**
+   * A source is degraded when a capability is off OR a read failed. The person
+   * is told the CONSEQUENCE — "this list may be incomplete" — in one sentence,
+   * not which internal source did what. `platformos užklausos: dar neįjungta`
+   * named an implementation at somebody looking for work; it says nothing about
+   * what that means for them. The precise per-source strings are not lost: they
+   * are in the provenance disclosure, which is where "which source, and what
+   * exactly happened" is a reasonable question.
+   */
+  const sourcesDegraded =
+    result.kind === "ready" &&
+    (!result.capabilities.boardAvailable || !result.externalVacancies.available);
+
+  const statusParts: string[] =
     result.kind === "ready"
-      ? (() => {
-          const r = result.readiness;
-          const facts: string[] = [];
-          facts.push(
-            r.professionSlug
-              ? t("world.fact.profession", { value: roleLabel(r.professionSlug) })
-              : r.evidencedProfessionSlug
-                ? t("world.fact.professionEvidenced", {
-                    value: roleLabel(r.evidencedProfessionSlug),
-                  })
-                : t("world.fact.professionMissing"),
-          );
-          facts.push(
-            r.assessedAgainst.skillCount > 0
-              ? t("world.fact.skills", { count: r.assessedAgainst.skillCount })
-              : t("world.fact.skillsMissing"),
-          );
-          const place = [r.assessedAgainst.city, r.countries[0] ? countryLabel(r.countries[0]) : null]
-            .filter(Boolean)
-            .join(", ");
-          facts.push(place ? t("world.fact.place", { value: place }) : t("world.fact.placeMissing"));
-          facts.push(
-            r.assessedAgainst.salaryMinEur != null
-              ? t("world.fact.pay", { amount: r.assessedAgainst.salaryMinEur })
-              : t("world.fact.payMissing"),
-          );
-          facts.push(
-            r.assessedAgainst.languages.length > 0
-              ? t("world.fact.languages", {
-                  list: r.assessedAgainst.languages.map(publicLanguageName).join(", "),
-                })
-              : t("world.fact.languagesMissing"),
-          );
-          return facts;
-        })()
+      ? [
+          ...(sourcesDegraded ? [t("world.sourcesIncomplete")] : []),
+          ...(filteredOut > 0 ? [t("world.countsFiltered", { count: filteredOut })] : []),
+        ]
       : [];
-  const countParts: string[] =
+
+  /**
+   * PROVENANCE, NOT THE HEADLINE — and the reason it must not be the headline is
+   * stronger than tidiness. `retrieved` here is the size of the BOUNDED
+   * CANDIDATE POOL the engine fetched (`PROFILE_POOL_LIMIT` = 30 externally,
+   * the board read internally), not a count of the market. So "rodoma 3 iš 20"
+   * reads to a person as "there are 20 jobs" when the canonical active
+   * population on 2026-09-27 is 53 392 (`MARKET_FACTS_PREDICATE`:
+   * `is_active AND (expires_at IS NULL OR expires_at > now())`). It is a
+   * pipeline measurement wearing the clothes of a market fact.
+   *
+   * Which is also why the per-source degradation strings live down here now:
+   * they name implementations, and the header carries the consequence instead.
+   */
+  const retrievalParts: string[] =
     result.kind === "ready"
       ? [
           result.capabilities.boardAvailable
@@ -674,7 +850,6 @@ export default async function OpportunitiesPage({
                 retrieved: externalCounts.retrieved,
               })
             : t("world.countsExternalUnreadable"),
-          ...(filteredOut > 0 ? [t("world.countsFiltered", { count: filteredOut })] : []),
         ]
       : [];
 
@@ -714,90 +889,59 @@ export default async function OpportunitiesPage({
         />
       ) : null}
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("world.title")}
-        </h1>
+        <PageTitle>{t("world.title")}</PageTitle>
         {result.kind === "ready" ? (
           <>
-            {/* ONE line: what the fit was assessed against. */}
-            <p
-              className="text-support leading-relaxed text-text-secondary"
-              data-testid="opportunities-assessment"
-            >
-              {t("world.assessedAgainst", { facts: assessedFacts.join(" · ") })}
-            </p>
-            {/* Retrieved vs shown — "kodėl šie / kiek atmesta" (§T). */}
-            <p
-              className="font-mono text-meta uppercase tracking-label text-text-muted"
-              data-testid="opportunities-counts"
-            >
-              {countParts.join(" · ")}
-            </p>
+            {/* WHY YOU MAY BE SEEING LESS — and nothing else (§7). A capability
+                that is off, a read that FAILED, or the person's own filters
+                holding rows back. Rendered only when there is something to say,
+                so a healthy board carries no strip at all instead of a line of
+                zeroes. The retrieval numbers moved into "Kaip veikia
+                atitikimas"; see `statusParts` for the full reasoning. */}
+            {statusParts.length > 0 ? (
+              <p
+                className="font-mono text-meta uppercase tracking-label text-text-muted"
+                data-testid="opportunities-counts"
+              >
+                {statusParts.join(" · ")}
+              </p>
+            ) : null}
           </>
         ) : null}
       </header>
 
-      {/* THE MAP IS PASAULIS' BASE (owner direction 2026-09-13: "jos
-          natūralus pagrindas turi būti interaktyvus žemėlapis su realiomis
-          galimybėmis pagal šalis/miestus; iš žemėlapio pereinama į
-          kompaktišką rezultatą/detalę").
-          
-          The canonical `WorldDiscovery` container — the same component,
-          the same viewport-bounded reader and the same honest counts strip
-          the market map page renders. It is a discovery surface: it shows
-          where demand IS, never a claim about fit. The fit is the banded
-          list below, and selecting a place links INTO that list through the
-          page's own `?country=` filter — one board, one filter vocabulary.
-          
-          `/dashboard/market-map` keeps every other layer and stays linked
-          from the market section below; nothing moved and nothing was
-          duplicated. */}
-      <section
-        aria-labelledby="opportunities-map-title"
-        data-testid="opportunities-map"
-        className="flex flex-col gap-2"
-      >
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2
-            id="opportunities-map-title"
-            className="font-mono text-meta uppercase tracking-label text-text-secondary"
-          >
-            {t("world.mapTitle")}
-          </h2>
-          <div className="flex flex-wrap items-baseline gap-4">
-            {/* The full geographic Map (every layer, the legend, own place)
-                — one tap from the PASAULIS tab, at every width. This is the
-                worker's canonical door to /dashboard/market-map; the phone
-                bar carries no map station (owner IA, R-11) and the primary
-                nav tabs render only in the admin chrome, so without this
-                link the protected MAP capability sat behind a collapsed
-                disclosure at the bottom of the page. */}
-            <Link
-              href={`/${locale}/dashboard/market-map`}
-              data-testid="opportunities-map-full-link"
-              className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
-            >
-              {t("marketMapLink")} →
-            </Link>
-            {/* One tap past the map for anyone who came for the list. */}
-            <a
-              href="#opportunities-results"
-              data-testid="opportunities-map-skip"
-              className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
-            >
-              {t("world.skipToList")} ↓
-            </a>
-          </div>
-        </div>
-        <WorldDiscovery
-          initial={worldView}
-          mapMode="result"
-          placeLink={{
-            hrefTemplate: `/${locale}/dashboard/opportunities?country={country}#opportunities-results`,
-            label: t("world.placeLink"),
-          }}
-        />
-      </section>
+      {/* THE MAP VIEWPORT IS WITHHELD HERE — owner decision 2026-09-27.
+          NOTHING WAS DELETED: `WorldDiscovery`, `loadWorldView`, the world
+          model and `/dashboard/market-map` are all untouched, and the door to
+          the full map stays in this page's header. Only the viewport that was
+          rendered ON THIS PAGE is gone.
+
+          WHY, measured rather than argued. The map opened on
+          `DEFAULT_WORLD_BOUNDS` / `DEFAULT_WORLD_ZOOM`, whose center is
+          `EUROPE_CENTER = [52.2, 6.0]`. That coordinate lies INSIDE THE
+          NETHERLANDS (the NL centroid is 52.13, 5.29; Germany's is 51.16,
+          10.45). So a person who told us they are in Germany opened this page,
+          read "vieta — Vokietija" in the list, and saw the map name the
+          Netherlands — which they reasonably read as "my opportunities are in
+          NL".
+
+          NL was neither. It was not their location, and it was not where the
+          opportunities are: on 2026-09-27 all 111 187 rows of
+          `public_vacancies` are `country = 'SE'`, and ZERO of them carry
+          lat/lng, so the demand layer had no mappable opportunity geography to
+          draw at all. The map was showing a hardcoded default and nothing else,
+          and a default that names a country is a claim about work geography
+          (SEP-1: FACT ≠ DERIVED — a viewport constant is neither).
+
+          Withheld rather than "fixed" to a different center, because centering
+          honestly requires geography the imported data does not yet have. The
+          §18 reality principle says a surface shows its true current state or
+          does not ship; there is no honest map here yet.
+
+          RESTORE IT when the demand layer can answer "where are these
+          opportunities" from real coordinates — then this section comes back
+          as it was, with a center derived from data or from the person's own
+          `current_location_country`, never from a constant. */}
 
       <div id="opportunities-results" className="scroll-mt-4" />
 
@@ -904,57 +1048,6 @@ export default async function OpportunitiesPage({
             </p>
           ) : null}
 
-          {rows.length === 0 && active.length > 0 ? (
-            /* Empty state names WHICH active filters produced zero. */
-            <section
-              className="rounded-lg border border-dashed border-ink-500 px-4 py-6"
-              data-testid="opportunities-filtered-empty"
-            >
-              <h2 className="font-display text-card-title font-semibold text-text-primary">
-                {t("discovery.emptyFiltered.title")}
-              </h2>
-              <p className="mt-1 text-basis leading-relaxed text-text-secondary">
-                {t("discovery.emptyFiltered.body", {
-                  filters: active
-                    .map(
-                      ([dim, v]) =>
-                        `${t(`discovery.filters.${dim}` as never)}: ${filterValueLabel(dim, v)}`,
-                    )
-                    .join(" · "),
-                })}
-              </p>
-              <Link
-                href={boardHref}
-                className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
-                data-testid="opportunities-filtered-empty-reset"
-              >
-                {t("discovery.emptyFiltered.reset")}
-              </Link>
-            </section>
-          ) : rows.length === 0 && result.capabilities.boardAvailable ? (
-            /* Honest empty (§18): the read worked, nothing was retrieved —
-               neither a platform need nor a public ad — and the ONE concrete
-               next step is named rather than implied. */
-            <section
-              className="rounded-lg border border-dashed border-ink-500 px-4 py-6"
-              data-testid="opportunities-empty"
-            >
-              <h2 className="font-display text-card-title font-semibold text-text-primary">
-                {t("approvedEmptyTitle")}
-              </h2>
-              <p className="mt-1 text-basis leading-relaxed text-text-secondary">
-                {t("approvedEmptyBody")}
-              </p>
-              <Link
-                href={profileHref}
-                data-testid="opportunities-empty-cta"
-                className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
-              >
-                {t("approvedEmptyCta")} →
-              </Link>
-            </section>
-          ) : null}
-
           {(() => {
             // Facets over the FULL authorized universe — the chips must
             // offer every present value even while the first view shows
@@ -966,17 +1059,61 @@ export default async function OpportunitiesPage({
               initialView.visible.map((o) => o.need.id),
             );
             const expandedHref = `${boardHref}?view=all`;
+            // Public ads carry a profession and a country too — a worker whose
+            // supply is public ads only must still be able to edit those two
+            // criteria. An ACTIVE value is always offered so it can be
+            // switched off, even when the narrowed read no longer shows it.
+            const withValues = (
+              base: readonly string[],
+              extra: readonly (string | null | undefined)[],
+              current: string | null,
+            ): string[] =>
+              [
+                ...new Set([
+                  ...base,
+                  ...extra.filter((v): v is string => !!v && v.trim() !== ""),
+                  ...(current ? [current] : []),
+                ]),
+              ].sort();
             const facetGroups: ReadonlyArray<{
               dim: keyof DiscoveryFilterState;
               values: readonly string[];
             }> = [
-              { dim: "profession", values: facets.professions },
-              { dim: "country", values: facets.countries },
+              {
+                dim: "profession",
+                values: withValues(
+                  facets.professions,
+                  externalCards.map((c) => c.view.professionSlug),
+                  filters.profession,
+                ),
+              },
+              {
+                dim: "country",
+                values: withValues(
+                  facets.countries,
+                  externalCards.map((c) => (c.view.country ?? "").toUpperCase() || null),
+                  filters.country,
+                ),
+              },
+              // Internship / apprenticeship / employment … — the type the
+              // employer stated on the need. The filter was already parsed
+              // and applied from the URL but had no control and no heading,
+              // so a student could narrow the board to internships only by
+              // typing the address. The active value stays listed so it can
+              // always be switched off.
+              {
+                dim: "opportunityType",
+                values: withValues(facets.opportunityTypes, [], filters.opportunityType),
+              },
               { dim: "start", values: facets.starts },
               { dim: "accommodation", values: facets.accommodations },
               { dim: "transport", values: facets.transports },
               { dim: "tool", values: facets.tools },
+              // opportunityType is listed ONCE, above (#3334 and #3338 each added it,
+              // so the type chips rendered twice with duplicate keys and testids).
             ];
+            const showFilterControls =
+              active.length > 0 || facetGroups.some((g) => g.values.length > 0);
             // Saved bookmarks joined against the LIVE rows (facts are never
             // copied into a save — a saved id with no live row is honestly
             // reported as "no longer open", never rendered from stale data).
@@ -996,6 +1133,159 @@ export default async function OpportunitiesPage({
                 : [];
             return (
               <OpportunityCompareProvider>
+                {/* ── CONTROLS: FILTERS · SORT · MAP (owner order 2026-10-01).
+                    Compact, ABOVE the results. The facet chips are the
+                    person's own search criteria and are editable in place:
+                    every chip is a real link, so a tap recomputes the list on
+                    the server immediately. Nothing is pre-selected from the
+                    profile — profile facts are not search filters; a filter
+                    exists only when the person set it. */}
+                <div
+                  className="flex flex-wrap items-center gap-2"
+                  data-testid="opportunities-controls"
+                >
+                  {showFilterControls ? (
+                    <details
+                      open={active.length > 0}
+                      className="group order-1 open:order-last open:w-full"
+                      data-testid="opportunities-filters"
+                    >
+                      <summary
+                        className="inline-flex min-h-11 cursor-pointer select-none items-center gap-1.5 rounded-md border border-ink-500 px-3 text-support font-medium text-text-primary marker:content-none hover:border-brand-blue [&::-webkit-details-marker]:hidden"
+                        data-testid="opportunities-filters-toggle"
+                      >
+                        {t("discovery.filters.title")}
+                        {active.length > 0 ? (
+                          <span className="rounded-full bg-brand-blue/20 px-1.5 text-meta text-text-primary">
+                            {active.length}
+                          </span>
+                        ) : null}
+                      </summary>
+                      <div className="mt-2 flex flex-col gap-3 rounded-lg border border-ink-600 bg-ink-800/30 p-3">
+                        {active.length > 0 ? (
+                          <div className="flex flex-wrap items-center justify-end gap-2">
+                            <Link
+                              href={boardHref}
+                              data-testid="opportunities-filters-reset"
+                              className="inline-flex min-h-11 items-center text-support font-medium text-brand-blue hover:text-brand-champagne"
+                            >
+                              {t("discovery.filters.reset")}
+                            </Link>
+                          </div>
+                        ) : null}
+                        {facetGroups
+                          .filter((g) => g.values.length > 0)
+                          .map((g) => (
+                            <div key={g.dim} className="flex flex-wrap items-center gap-1.5">
+                              <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
+                                {filterDimLabel(g.dim)}
+                              </span>
+                              {g.values.map((v) => {
+                                const isActive = filters[g.dim] === v;
+                                return (
+                                  <Link
+                                    key={v}
+                                    href={href({ [g.dim]: isActive ? null : v })}
+                                    aria-pressed={isActive}
+                                    className={chipClass(isActive)}
+                                    data-testid={`opportunities-filter-${g.dim}`}
+                                    data-active={isActive ? "true" : "false"}
+                                  >
+                                    {filterValueLabel(g.dim, v)}
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          ))}
+                      </div>
+                    </details>
+                  ) : null}
+                  {showFilterControls ? (
+                    /* Sort — relevance (shared §19 comparator) | newest. */
+                    <div
+                      className="order-2 inline-flex items-center gap-1"
+                      role="group"
+                      aria-label={t("discovery.sort.label")}
+                      data-testid="opportunities-sort"
+                    >
+                      {(["relevance", "newest"] as const).map((s) => (
+                        <Link
+                          key={s}
+                          href={href({ sort: s })}
+                          aria-pressed={sort === s}
+                          className={chipClass(sort === s)}
+                          data-testid={`opportunities-sort-${s}`}
+                        >
+                          {t(`discovery.sort.${s}`)}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : null}
+                  {/* The full geographic Map — the worker's canonical door to
+                      `/dashboard/market-map` (the embedded viewport stays
+                      withheld, owner decision 2026-09-27). */}
+                  <Link
+                    href={`/${locale}/dashboard/market-map`}
+                    data-testid="opportunities-map-full-link"
+                    className="order-3 inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 text-support font-medium text-text-primary hover:border-brand-blue"
+                  >
+                    {t("marketMapLink")}
+                  </Link>
+                </div>
+
+                {rows.length === 0 && active.length > 0 ? (
+                  /* Empty state names WHICH active filters produced zero. */
+                  <section
+                    className="rounded-lg border border-dashed border-ink-500 px-4 py-6"
+                    data-testid="opportunities-filtered-empty"
+                  >
+                    <h2 className="font-display text-card-title font-semibold text-text-primary">
+                      {t("discovery.emptyFiltered.title")}
+                    </h2>
+                    <p className="mt-1 text-basis leading-relaxed text-text-secondary">
+                      {t("discovery.emptyFiltered.body", {
+                        filters: active
+                          .map(
+                            ([dim, v]) =>
+                              `${filterDimLabel(dim)}: ${filterValueLabel(dim, v)}`,
+                          )
+                          .join(" · "),
+                      })}
+                    </p>
+                    <Link
+                      href={boardHref}
+                      className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
+                      data-testid="opportunities-filtered-empty-reset"
+                    >
+                      {t("discovery.emptyFiltered.reset")}
+                    </Link>
+                  </section>
+                ) : rows.length === 0 && result.capabilities.boardAvailable ? (
+                  /* Honest empty (§18): the read worked, nothing was retrieved —
+                     neither a platform need nor a public ad — and the ONE concrete
+                     next step is named rather than implied. */
+                  <section
+                    className="rounded-lg border border-dashed border-ink-500 px-4 py-6"
+                    data-testid="opportunities-empty"
+                  >
+                    <h2 className="font-display text-card-title font-semibold text-text-primary">
+                      {t("approvedEmptyTitle")}
+                    </h2>
+                    <p className="mt-1 text-basis leading-relaxed text-text-secondary">
+                      {t("approvedEmptyBody")}
+                    </p>
+                    <Link
+                      href={profileHref}
+                      data-testid="opportunities-empty-cta"
+                      className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
+                    >
+                      {t("approvedEmptyCta")} →
+                    </Link>
+                  </section>
+                ) : null}
+
+                <JobAlertReadiness locale={locale} />
+
                 {savedSearches.available ? (
                   <SavedSearchesStrip
                     readings={savedSearchReadings}
@@ -1052,9 +1342,6 @@ export default async function OpportunitiesPage({
                       surface="opportunities_board"
                       requestIds={initialView.visible.map((o) => o.need.id)}
                     />
-                    <p className="text-meta leading-relaxed text-text-muted" data-testid="opportunities-derived-note">
-                      {t("world.derivedNote")}
-                    </p>
                     {world.strong.kind === "empty" ? (
                       <OpportunityBandSection
                         band="strong"
@@ -1137,16 +1424,24 @@ export default async function OpportunitiesPage({
                                   skillLabel,
                                   detailsShow: t("discovery.details.show"),
                                   detailsHide: t("discovery.details.hide"),
+                                  languageName,
+                                  translatedFrom: (language) =>
+                                    tRoot("vacancySources.language.translatedFrom", { language }),
+                                  originalIn: (language) =>
+                                    tRoot("vacancySources.language.originalIn", { language }),
+                                  showOriginal: tRoot("vacancySources.language.showOriginal"),
+                                  hideOriginal: tRoot("vacancySources.language.hideOriginal"),
+                                  machineNote: tRoot("vacancySources.language.machineNote"),
+                                  originalTitle: tRoot("vacancySources.language.originalTitle"),
                                 }}
                               />
                             ) : (
                               (() => {
-                                const { need, fit, match, nextAction, interestStatus, structured, saved } = row.card;
+                                const { need, fit, match, nextAction, interestStatus, structured, saved, formalRequirements } = row.card;
                                 const rankIndex = row.rankIndex;
                                 const whyLines = whyCodesFor(row)
                                   .map(whyText)
                                   .filter((s): s is string => s !== null);
-                                const pay = payText(structured?.compensation, ts, sd);
                                 return (
                                   <li
                                     key={row.key}
@@ -1226,11 +1521,6 @@ export default async function OpportunitiesPage({
                                         sd={sd}
                                         essence
                                       />
-                                      {pay === null ? (
-                                        <p className="text-meta text-text-muted" data-testid="opportunity-pay-not-stated">
-                                          {t("world.payNotStated")}
-                                        </p>
-                                      ) : null}
 
                                       {/* WHY the row sits in its band — the engine's own codes in
                                           words; a strong / possible row with no gap says so through
@@ -1249,6 +1539,22 @@ export default async function OpportunitiesPage({
                                               ? t("world.whyUnknown")
                                               : t("world.whyNoGaps")}
                                       </p>
+
+                                      {/* WHAT ALREADY FITS — the engine's own met criteria,
+                                          brought up from the details disclosure; only
+                                          on a strong / possible row, never a score. */}
+                                      {isAssessedFit(row.band) && match.strengths.length > 0 ? (
+                                        <ul className="flex flex-wrap gap-1.5" data-testid="opportunity-strengths">
+                                          {match.strengths.slice(0, 3).map((s) => (
+                                            <li
+                                              key={s.criterion}
+                                              className="inline-flex min-h-7 items-center rounded-full border border-brand-cyan/40 bg-brand-cyan/[0.06] px-2.5 text-meta text-brand-cyan"
+                                            >
+                                              {criterionLabel(s.criterion)}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      ) : null}
 
                                       {/* The one clear next step for this row. */}
                                       <p
@@ -1284,6 +1590,7 @@ export default async function OpportunitiesPage({
                                               contacted: t("interest.contacted"),
                                               withdraw: t("interest.withdraw"),
                                               internalNote: t("interest.internalNote"),
+ identityConsent: t("interest.identityConsent"),
                                               error: t("interest.error"),
                                               contactedLink: t("interest.contactedLink"),
                                               contactEmployer: t("interest.contactEmployer"),
@@ -1499,6 +1806,34 @@ export default async function OpportunitiesPage({
                                           testId="opportunity-match-tiers"
                                         />
 
+                                        {/* FORMAL REQUIREMENTS — apart from skill fit (owner
+                                            decision 2026-10-29, SEP-6): a licence or a regulated
+                                            qualification is never satisfied by recorded work. */}
+                                        {formalRequirements && formalRequirements.length > 0 ? (
+                                          <div className="flex flex-col gap-1" data-testid="opportunity-formal-requirements">
+                                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                                              {t("skillMatch.formalTitle")}
+                                            </span>
+                                            <ul className="flex flex-col gap-1">
+                                              {formalRequirements.map((f) => (
+                                                <li
+                                                  key={f.kind}
+                                                  className={`text-basis ${f.standing === "missing_requirement" ? "text-state-amber" : "text-text-secondary"}`}
+                                                  data-testid="opportunity-formal-requirement"
+                                                  data-formal-kind={f.kind}
+                                                  data-standing={f.standing}
+                                                >
+                                                  {f.kind === "driving_licence"
+                                                    ? t(f.standing === "stated_held" ? "skillMatch.formalLicenceHeld" : "skillMatch.formalLicence", {
+                                                        categories: f.categories.join(", "),
+                                                      })
+                                                    : t("skillMatch.formalQualification")}
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        ) : null}
+
                                         <div className="flex flex-wrap items-center gap-3">
                                           <Link
                                             href={profileHref}
@@ -1579,6 +1914,7 @@ export default async function OpportunitiesPage({
                   result.savedVacancies.length > 0) ? (
                   <section
                     className="flex flex-col gap-2 rounded-lg border border-ink-600 bg-ink-800/30 p-4"
+                    id="opportunities-saved"
                     data-testid="opportunities-saved"
                     aria-label={t("saved.sectionTitle")}
                   >
@@ -1659,83 +1995,6 @@ export default async function OpportunitiesPage({
                       {t("saved.privateHint")}
                     </p>
                   </section>
-                ) : null}
-
-                {/* ── Refine (URL-param links, server-rendered) — on request,
-                    never the primary experience (§T). `open={active.length > 0}`
-                    is the honesty rule: a narrowed page always shows what is
-                    narrowing it, and the reset link with it. Same facets, same
-                    links, same sort, same reset as before. */}
-                {result.capabilities.boardAvailable && result.opportunities.length > 0 ? (
-                  <details
-                    open={active.length > 0}
-                    className="group rounded-lg border border-ink-600 bg-ink-800/30"
-                    data-testid="opportunities-filters"
-                  >
-                    <summary className="flex min-h-11 cursor-pointer select-none items-center px-4 font-mono text-meta uppercase tracking-label text-text-muted marker:text-text-muted">
-                      {t("discovery.filters.title")}
-                      {active.length > 0
-                        ? ` · ${t("discovery.filters.activeCount", { count: active.length })}`
-                        : ""}
-                    </summary>
-                    <div className="flex flex-col gap-3 px-4 pb-4">
-                      {active.length > 0 ? (
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                          <Link
-                            href={boardHref}
-                            data-testid="opportunities-filters-reset"
-                            className="inline-flex min-h-11 items-center text-support font-medium text-brand-blue hover:text-brand-champagne"
-                          >
-                            {t("discovery.filters.reset")}
-                          </Link>
-                        </div>
-                      ) : null}
-                      {facetGroups
-                        .filter((g) => g.values.length > 0)
-                        .map((g) => (
-                          <div key={g.dim} className="flex flex-wrap items-center gap-1.5">
-                            <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
-                              {t(`discovery.filters.${g.dim}` as never)}
-                            </span>
-                            {g.values.map((v) => {
-                              const isActive = filters[g.dim] === v;
-                              return (
-                                <Link
-                                  key={v}
-                                  href={href({ [g.dim]: isActive ? null : v })}
-                                  aria-pressed={isActive}
-                                  className={chipClass(isActive)}
-                                  data-testid={`opportunities-filter-${g.dim}`}
-                                  data-active={isActive ? "true" : "false"}
-                                >
-                                  {filterValueLabel(g.dim, v)}
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      {/* Sort — relevance (shared §19 comparator) | newest. */}
-                      <div
-                        className="flex flex-wrap items-center gap-1.5 border-t border-ink-600 pt-3"
-                        data-testid="opportunities-sort"
-                      >
-                        <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
-                          {t("discovery.sort.label")}
-                        </span>
-                        {(["relevance", "newest"] as const).map((s) => (
-                          <Link
-                            key={s}
-                            href={href({ sort: s })}
-                            aria-pressed={sort === s}
-                            className={chipClass(sort === s)}
-                            data-testid={`opportunities-sort-${s}`}
-                          >
-                            {t(`discovery.sort.${s}`)}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  </details>
                 ) : null}
 
                 {/* Compare (P2-PR5) — pure client state over the loaded rows;
@@ -1856,7 +2115,6 @@ export default async function OpportunitiesPage({
                       ["workType", result.readiness.hasWorkType],
                       ["skills", result.readiness.hasSkills],
                       ["country", result.readiness.countries.length > 0],
-                      ["documents", result.readiness.documentsCount > 0],
                       ["availability", result.readiness.availabilitySet],
                     ] as const
                   ).map(([key, ok]) => (
@@ -1873,6 +2131,16 @@ export default async function OpportunitiesPage({
                     </li>
                   ))}
                 </ul>
+                {/* MATOMAS DARBDAVIAMS — whether employers can find this person
+                    at all. Beside the list, not a chip in it: the five above
+                    are facts the person fills in, this one is a consent the
+                    person chooses, and OFF is never shown as "missing". The
+                    same item the profile hub renders; one tap to the consent. */}
+                <EmployerVisibilityItem
+                  visibility={employerVisibility}
+                  labels={employerVisibilityItemLabels(tVisibility)}
+                  testId="opportunities-employer-visibility"
+                />
                 {/* WHAT THE PERSON SAID — the declared work-seeking intent,
                     beside what the board reads. Rendered ONLY for a live
                     declaration; a chip is a door to the ONE place it is
@@ -1888,6 +2156,22 @@ export default async function OpportunitiesPage({
                       {t("intent.label")}
                     </span>
                     <span className="text-text-primary">{t(`intent.states.${declaredIntent}`)}</span>
+                  </Link>
+                ) : partnerSupply && partnerSupply.kind === "ok" && partnerSupply.hasWorkerProfile ? (
+                  /* MEASURED 2026-09-22: 59 workers, 0 declarations, /dashboard/privacy
+                     visited 3 times ever. The chip above is the board's only door to
+                     the declaration and it rendered ONLY for a person who had already
+                     declared — the undeclared saw nothing. This is the same door for
+                     them: same target, same editor, plain words, no default chosen. */
+                  <Link
+                    href={`/${locale}/dashboard/privacy#partner-supply`}
+                    data-testid="opportunities-intent-door"
+                    className="inline-flex min-h-11 w-fit flex-wrap items-center gap-x-2 rounded-md border border-state-amber/40 bg-state-amber/5 px-2.5 text-basis text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+                  >
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("intent.label")}
+                    </span>
+                    <span className="text-text-primary">{t("intent.notDeclared")}</span>
                   </Link>
                 ) : null}
                 <Link
@@ -1911,6 +2195,19 @@ export default async function OpportunitiesPage({
             </summary>
             <div className="flex flex-col gap-2 px-4 pb-4 text-basis leading-relaxed text-text-secondary">
               <p>{t("discovery.how.body")}</p>
+              {/* WHERE THE RETRIEVAL NUMBERS LIVE NOW (§7). They were the second
+                  line of the page; they are provenance, so they belong beside
+                  the calculation version and the trust note. Same strings, no
+                  new copy, one tap away — the capability to audit what was
+                  retrieved is preserved, it just no longer greets the person. */}
+              {retrievalParts.length > 0 ? (
+                <p
+                  className="font-mono text-meta uppercase tracking-label text-text-muted"
+                  data-testid="opportunities-retrieval-counts"
+                >
+                  {retrievalParts.join(" · ")}
+                </p>
+              ) : null}
               <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("discovery.how.version", { version: MATCH_CALC_VERSION })}
               </p>

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * FOLLOW-UP TASK QUEUE guards (product-tree branch 24, train §8.13 — the
@@ -86,7 +88,7 @@ describe("follow-up migration — one new table + two new gated RPCs, additive o
     );
     expect(others.length).toBeGreaterThan(100);
     for (const f of others) {
-      const src = read(`supabase/migrations/${f}`);
+      const src = withoutErasureRegistrySeed(read(`supabase/migrations/${f}`));
       expect(src, `${f} must not define ${NEW_CREATE_FN}`).not.toContain(NEW_CREATE_FN);
       expect(src, `${f} must not define ${NEW_STATUS_FN}`).not.toContain(NEW_STATUS_FN);
       // NB: word-boundary check — "follow_up_tasks" must not appear as a
@@ -309,7 +311,7 @@ describe("app surface — operator queue on the EXISTING admin control room only
 });
 
 describe("i18n — followUp namespace present in en/lt/ru", () => {
-  for (const locale of ["en", "lt", "ru"]) {
+  for (const locale of activeLocales) {
     it(`${locale} carries the full followUp catalogue`, () => {
       const messages = JSON.parse(readWeb(`messages/${locale}.json`));
       const ns = messages.followUp;

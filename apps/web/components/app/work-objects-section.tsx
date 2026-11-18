@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import { Archive, ArchiveRestore, Landmark, MapPin, UserRound } from "lucide-react";
 
 import type { WorkObject } from "@/lib/objects/objects-model";
@@ -12,6 +12,7 @@ import {
   setWorkObjectResponsibleAction,
   type WorkObjectActionState,
 } from "@/lib/objects/objects-actions";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Objects & sites management section — train D.
@@ -163,6 +164,28 @@ function ObjectFields({
         </label>
       ) : null}
     </>
+  );
+}
+
+/** A collapsed per-row edit panel whose form is rendered only once it is
+ *  opened. The projects page lists every active object (an organization's
+ *  history can be 200), and each closed panel used to carry the full country
+ *  and project pickers: ~120 options a row, ~2.9 MB of the page's 4 MB HTML
+ *  (measured 2026-10-19). Same form, same action, same fields once open. */
+function LazyEditDetails({ summary, children }: { summary: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <details
+      className="rounded-md border border-ink-600 bg-ink-800/40 p-2"
+      // LATCHED: once opened the form stays mounted, so collapsing the panel
+      // never discards unsaved edits (the closed list is what stays light).
+      onToggle={(e) => {
+        if ((e.currentTarget as HTMLDetailsElement).open) setOpen(true);
+      }}
+    >
+      <summary className="cursor-pointer text-xs text-text-secondary">{summary}</summary>
+      {open ? children : null}
+    </details>
   );
 }
 
@@ -367,14 +390,12 @@ export function WorkObjectsSection({
                       </form>
                     ) : null}
 
-                    <details className="rounded-md border border-ink-600 bg-ink-800/40 p-2">
-                      <summary className="cursor-pointer text-xs text-text-secondary">
-                        {labels.editButton}
-                      </summary>
+                    <LazyEditDetails summary={labels.editButton}>
                       <form
                         action={saveAction}
                         className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end"
                       >
+                        <DisplayedWorkspaceField />
                         <input type="hidden" name="id" value={row.id} />
                         <ObjectFields
                           labels={labels}
@@ -390,7 +411,7 @@ export function WorkObjectsSection({
                           {labels.saveButton}
                         </button>
                       </form>
-                    </details>
+                    </LazyEditDetails>
                   </li>
                 );
               })}
@@ -402,6 +423,7 @@ export function WorkObjectsSection({
             className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3 sm:flex-row sm:flex-wrap sm:items-end"
             data-testid="work-object-add-form"
           >
+            <DisplayedWorkspaceField />
             <ObjectFields labels={labels} projects={projects} />
             <button
               type="submit"

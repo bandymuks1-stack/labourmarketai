@@ -3,14 +3,17 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 /**
- * Rendered-DOM proof for the calendar's DERIVED period band: the 800 h
- * canonical shape (ONE period record, 2025-06-01 → 2025-11-30) drawn on the
- * month view with THIS month's derived share emphasised — and nothing drawn
- * at all when the person has no period record touching the month, when a
- * record is withdrawn, or when the read is not ok.
+ * Rendered-DOM proof for the calendar's DERIVED period band: a SOURCE-stated
+ * period (ONE period record, 2025-06-01 → 2025-11-30, the period in the
+ * source's own columns, no rate in its words) drawn on the month view with
+ * THIS month's derived share emphasised — and nothing drawn at all when the
+ * person has no period record touching the month, when a record is
+ * withdrawn, when the read is not ok, and (owner rule 2026-09-23 — never
+ * manufacture precision) when the period is one a PERSON chose at import:
+ * that span has no monthly figure to put on a month.
  *
- * The reader is mocked at the module boundary (no network); the projection
- * is the real `projectPeriodAggregateByMonth`.
+ * The reader is mocked at the module boundary (no network); the reading is
+ * the real `readPeriodEvidence`.
  */
 const holder: { result: unknown } = { result: null };
 
@@ -39,6 +42,7 @@ const { DerivedPeriodEvidence } = await import(
   "@/components/app/planning/derived-period-evidence"
 );
 
+/** A period the SOURCE stated: its own period columns, no derivation. */
 const record = (over: Record<string, unknown> = {}) => ({
   id: "rec-800",
   personId: "op-1",
@@ -48,8 +52,25 @@ const record = (over: Record<string, unknown> = {}) => ({
   text: "Tiling and plastering on site",
   contextLabel: null,
   withdrawn: false,
+  factFields: ["personLabel", "periodStart", "periodEnd", "hours", "workText"],
+  derived: {},
   ...over,
 });
+
+/** The production shape: the source said "at least 16 month … each month
+ *  only 50 hours"; a PERSON chose Jun–Nov 2025 at import. */
+const interpreted = (over: Record<string, unknown> = {}) =>
+  record({
+    text: "Human research and director for at least 16 month calculating each month only 50 hours",
+    factFields: ["personLabel", "hours", "projectLabel", "workText"],
+    derived: {
+      timeSemantics: {
+        value: "period_aggregate", method: "human_choice", confidence: 1, sourceHours: 800, note: "month",
+        remote: true, periodStart: "2025-06-01", periodEnd: "2025-11-30",
+      },
+    },
+    ...over,
+  });
 
 async function render(month: string) {
   const el = await DerivedPeriodEvidence({ month, locale: "en" });
@@ -57,7 +78,47 @@ async function render(month: string) {
 }
 
 describe("calendar month view — derived period evidence", () => {
-  it("draws the ONE 800 h record as a six-month band with this month's 133.33 h share emphasised", async () => {
+  it("a period a PERSON chose at import draws NO monthly figure on the month — nothing manufactured (owner rule 2026-09-23)", async () => {
+    holder.result = {
+      kind: "ok",
+      records: [interpreted()],
+      links: [{ id: "op-1", organizationName: "Nonstop" }],
+      pendingOffers: [],
+    };
+    for (const month of ["2025-06", "2025-09", "2025-11"]) {
+      const html = await render(month);
+      expect(html, month).toBe("");
+      expect(html, month).not.toMatch(/133\.3[34]|data-share=/);
+    }
+    // a period the importer DERIVED is an interpretation too
+    holder.result = {
+      kind: "ok",
+      records: [interpreted({ derived: { timeSemantics: { value: "period_aggregate", method: "month_heading", periodStart: "2025-06-01", periodEnd: "2025-11-30", sourceHours: 800 } } })],
+      links: [],
+      pendingOffers: [],
+    };
+    expect(await render("2025-09")).toBe("");
+    // a row-level day the source stated never turns a chosen span into a source period
+    holder.result = {
+      kind: "ok",
+      records: [interpreted({ factFields: ["personLabel", "workDate", "hours", "workText"] })],
+      links: [],
+      pendingOffers: [],
+    };
+    expect(await render("2025-09")).toBe("");
+  });
+
+  it("a SOURCE period whose words state a rate is not divided either — the rate is the source's own monthly figure", async () => {
+    holder.result = {
+      kind: "ok",
+      records: [record({ hours: 300, text: "coordination, 50 hours per month" })],
+      links: [],
+      pendingOffers: [],
+    };
+    expect(await render("2025-09")).toBe("");
+  });
+
+  it("NEGATIVE CONTROL — a SOURCE period with no stated rate still draws the six-month band with this month's 133.33 h share emphasised", async () => {
     holder.result = {
       kind: "ok",
       records: [record()],
@@ -74,8 +135,10 @@ describe("calendar month view — derived period evidence", () => {
     expect(html).toMatch(/data-month="2025-09"[^>]*data-active="true"/);
     expect(html).toContain('data-share="133.33"');
     expect(html).toContain("planning.derived.thisMonth:{&quot;hours&quot;:&quot;133.33&quot;}");
-    // total stays the one canonical figure; the derived warning label is rendered
-    expect(html).toContain("800.00 h");
+    // total stays the one canonical figure AS THE SOURCE GAVE IT (no invented
+    // decimals); the derived warning label is rendered
+    expect(html).toContain("800 h");
+    expect(html).not.toContain("800.00 h");
     expect(html).toContain("evidenceImport.records.monthlyShare");
     // it links the source record, never a planning-local page
     expect(html).toContain('href="/dashboard/profile"');

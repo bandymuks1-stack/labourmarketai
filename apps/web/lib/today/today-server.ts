@@ -4,8 +4,13 @@ import { cache } from "react";
 
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { listMyBookings } from "@/lib/booking/booking-actions";
-import { getUnreadConversationIds } from "@/lib/communication/unread";
-import { getPrimaryProfessionSlug, getWorkerCoreRow } from "@/lib/data/worker-core";
+import { getUnreadConversationIdsResult } from "@/lib/communication/unread";
+import {
+  getPrimaryProfessionSlug,
+  getProfessionEntries,
+  getWorkerCoreRow,
+} from "@/lib/data/worker-core";
+import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
 import { listInvitationsAddressedToMe } from "@/lib/invitations/attention";
 import { deriveGrowthReading, type GrowthReading } from "@/lib/journal/growth-reading";
 import type { WorkIntelligence } from "@/lib/journal/work-intelligence";
@@ -22,9 +27,18 @@ import { deriveWorkCardState, type WorkCardDerived } from "@/lib/worker/work-car
  * pieces so the page can stream (the #1011 lesson: the slowest worker read
  * must never hold the whole surface behind the route's loading skeleton):
  *
- *   head          who · profession · the one next action
- *                 ← session profile + the ONE canonical player card +
- *                   the work-card read model (`getWorkerCard`) through the
+ *   header        who · profession — NEVER the player card
+ *                 ← the request-cached session profile (name) and the ONE
+ *                   cached profession read (`getProfessionEntries` +
+ *                   `getPrimaryProfessionSlug`, the same rows the card
+ *                   reads). Split out of `head` for the home CLS P0
+ *                   (2026-10-26): the header used to wait on the card, so
+ *                   the whole ŠIANDIEN frame painted only when the card did
+ *                   (t≈8 s in production) and pushed the conversation down
+ *   head          the one next action
+ *                 ← the ONE canonical player card + the work-card read
+ *                   model (`getWorkerCard`, fed the request-cached core
+ *                   `workers` row — no second `workers` select) through the
  *                   ONE work-card engine (`deriveWorkCardState`)
  *   work          today · this week · open items · one growth line
  *                 ← `loadOwnWorkIntelligence` (the journal's ONE reader) +
@@ -49,32 +63,101 @@ import { deriveWorkCardState, type WorkCardDerived } from "@/lib/worker/work-car
 export type TodayHead = {
   readonly displayName: string | null;
   readonly professionSlug: string | null;
+  /** What this person says they do, in the order they hold it — a registry
+   *  slug or their OWN WORDS. The header names the first one it can render,
+   *  so somebody whose profession the registry does not carry is no longer
+   *  told "Profesija dar nenurodyta" after stating it (owner walk 2026-09-27,
+   *  the test user who typed "LLM programuotojas"). */
+  readonly professions: readonly ProfessionEntry[];
   readonly workCard: WorkCardDerived | null;
 };
+
+/**
+ * The header's NAME — the request-cached session profile only (the layout and
+ * the page already ran it, so this costs no round-trip). The card's own
+ * `displayName` is the SAME `profiles.full_name` (player-card.ts), so waiting
+ * on the card for it bought nothing but latency.
+ */
+export const loadTodayDisplayName = cache(async (): Promise<string | null> => {
+  try {
+    const session = await getSessionProfile();
+    return session.profile?.full_name?.trim() || null;
+  } catch {
+    return null;
+  }
+});
+
+export type TodayProfessions = {
+  /** The registry primary — the SAME value the card carries as
+   *  `professionSlug` (`getPrimaryProfessionSlug`, null without a worker row). */
+  readonly professionSlug: string | null;
+  readonly professions: readonly ProfessionEntry[];
+};
+
+/**
+ * The header's PROFESSION — the ONE cached profession read, never the player
+ * card. `getWorkerPlayerCard` derives `professionSlug` and `professions` from
+ * exactly these two readers, so the header says the same thing it did, only
+ * without waiting on the card's ~18 other queries. Degrades to "unknown"
+ * (empty), exactly like the old `head` catch path.
+ */
+export const loadTodayProfessions = cache(async (): Promise<TodayProfessions> => {
+  try {
+    const [professions, professionSlug] = await Promise.all([
+      getProfessionEntries(),
+      getPrimaryProfessionSlug(),
+    ]);
+    return { professionSlug, professions };
+  } catch {
+    return { professionSlug: null, professions: [] };
+  }
+});
 
 export const loadTodayHead = cache(async (): Promise<TodayHead> => {
   const session = await getSessionProfile();
   const displayName = session.profile?.full_name?.trim() || null;
   try {
-    const [card, worker] = await Promise.all([getWorkerPlayerCard(), getWorkerCoreRow()]);
-    if (!card) return { displayName, professionSlug: null, workCard: null };
+    const [card, worker, professions] = await Promise.all([
+      getWorkerPlayerCard(),
+      getWorkerCoreRow(),
+      getProfessionEntries(),
+    ]);
+    if (!card)
+      return { displayName, professionSlug: null, professions, workCard: null };
     const data = await getWorkerCard({
       workerId: worker?.id ?? null,
       name: displayName ?? "",
-      // `getWorkerCard` reads this for PRESENCE only (`hasProfession`); the
-      // human label is resolved by the screen from the professions catalogue.
-      professionName: card.professionSlug,
+      // `getWorkerCard` reads this for PRESENCE only (`hasProfession: !!name`);
+      // the human label is resolved by the screen.
+      //
+      // PRESENCE MEANS "THIS PERSON NAMED ONE", not "the catalogue carries it"
+      // (Codex P1 on #1880, verified): with only their own words
+      // `card.professionSlug` is null, so the next action told them to add a
+      // profession on the same screen whose header was already showing the one
+      // they had added. Matching is untouched by this — it reads
+      // `getPrimaryProfessionSlug`, which still answers with a catalogue slug
+      // only and is deliberately not widened.
+      professionName:
+        card.professionSlug ??
+        professions.find((e) => (e.label ?? "").trim())?.label ??
+        null,
       skillsCount: card.skillsDeclared,
       evidenceCount: card.evidenceEntries,
-    });
+      // The card columns are already in hand: the request-cached core row
+      // (`getWorkerCoreRow`, read above in the SAME batch as the card)
+      // selects every column `getWorkerCard` reads. Handing it over removes a
+      // THIRD sequential round-trip (a second `workers` select) that ran only
+      // after the whole card had finished (home CLS P0, 2026-10-26).
+    }, { row: worker });
     return {
       displayName: displayName ?? card.displayName,
       professionSlug: card.professionSlug,
+      professions,
       workCard: deriveWorkCardState(data.signals, Date.now()),
     };
   } catch {
     // The person is still greeted; the next action is honestly unknown.
-    return { displayName, professionSlug: null, workCard: null };
+    return { displayName, professionSlug: null, professions: [], workCard: null };
   }
 });
 
@@ -121,11 +204,15 @@ export const loadTodayAttention = cache(async (): Promise<TodayAttention> => {
     listInvitationsAddressedToMe()
       .then((res) => (res.status === "ok" ? res.total : null))
       .catch((): number | null => null),
-    getUnreadConversationIds()
-      .then((ids) => ({
-        count: ids.size,
-        onlyId: ids.size === 1 ? ([...ids][0] ?? null) : null,
-      }))
+    // The RESULT reader: a failed read is `null` (UNKNOWN), a successful
+    // empty read is a zero count. The lossy `getUnreadConversationIds` could
+    // never report a failure, which made this door's `null` unreachable.
+    getUnreadConversationIdsResult()
+      .then((res): TodayAttention["unread"] =>
+        res.status === "ok"
+          ? { count: res.ids.size, onlyId: res.ids.size === 1 ? ([...res.ids][0] ?? null) : null }
+          : null,
+      )
       .catch((): TodayAttention["unread"] => null),
   ]);
   return { offers, invitations, unread };

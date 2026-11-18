@@ -95,6 +95,22 @@ export interface CanonicalOpportunityViewV1 {
   readonly payMin: number | null;
   readonly payMax: number | null;
   readonly provenance: OpportunityProvenanceV1;
+  /**
+   * LANGUAGE PROVENANCE (owner P0 2026-09-22 §9). `title`/`description`
+   * above are what the reader sees: the DERIVED rendering for their locale
+   * when one exists, the publisher's original otherwise. These four fields
+   * say which, so the surface can name it ("translated from Swedish · show
+   * original") and never pass a machine rendering off as the source.
+   */
+  readonly sourceLanguage: string | null;
+  /** The locale `title`/`description` are presented in — the source when no
+   *  rendering exists. */
+  readonly presentedLanguage: string | null;
+  /** The publisher's own words — the FACT — always carried. */
+  readonly titleOriginal: string;
+  readonly descriptionOriginal: string;
+  /** Provider that produced the rendering, null when the original stands. */
+  readonly translationProvider: string | null;
 }
 
 /** i18n codes for the provenance copy. Codes, never sentences. */
@@ -114,9 +130,26 @@ export const OPPORTUNITY_CLAIMED_NOTE_CODE =
  */
 export function toCanonicalOpportunityView(
   vacancy: PublicVacancyV1,
-  options: { readonly employerHasClaimed?: boolean } = {},
+  options: {
+    readonly employerHasClaimed?: boolean;
+    /**
+     * The rendering for the READER's locale, resolved by
+     * `lib/vacancy-store/vacancy-translation-read.ts` (stored beside the
+     * original, generated once). Absent → the original stands, named as
+     * such. Only an `available` title is ever presented; a description is
+     * presented only when it was rendered too.
+     */
+    readonly translation?: {
+      readonly targetLanguage: string;
+      readonly title: string | null;
+      readonly description: string | null;
+      readonly provider: string | null;
+    } | null;
+  } = {},
 ): CanonicalOpportunityViewV1 {
   const claimed = options.employerHasClaimed === true;
+  const source = vacancy.sourceLanguage.toLowerCase().slice(0, 2) || null;
+  const rendering = options.translation?.title ? options.translation : null;
 
   // An unclaimed external vacancy ALWAYS routes the worker back to the
   // publisher. There is no configuration that changes this, because the
@@ -128,8 +161,16 @@ export function toCanonicalOpportunityView(
       : "unavailable";
 
   return {
-    title: vacancy.titleRaw,
-    description: vacancy.descriptionRaw,
+    // The reader's language when a rendering exists; the publisher's words
+    // otherwise. Employer name, place, pay, dates and URL below are NEVER
+    // translated — they are identifiers and contractual facts.
+    title: rendering?.title ?? vacancy.titleRaw,
+    description: rendering?.description ?? vacancy.descriptionRaw,
+    sourceLanguage: source,
+    presentedLanguage: rendering ? rendering.targetLanguage : source,
+    titleOriginal: vacancy.titleRaw,
+    descriptionOriginal: vacancy.descriptionRaw,
+    translationProvider: rendering?.provider ?? null,
     employerName: vacancy.employer.name,
     country: vacancy.location.country || null,
     city: vacancy.location.city,

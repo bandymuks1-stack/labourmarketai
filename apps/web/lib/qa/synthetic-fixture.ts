@@ -46,3 +46,18 @@ export function excludeSyntheticFixtures<T>(
 ): T[] {
   return rows.filter((r) => !isSyntheticFixtureLabel(...pick(r)));
 }
+
+/**
+ * Is the VIEWER a documented synthetic QA identity (so it may see fixtures)?
+ * `app_metadata.qa_synthetic` is the marker; the allowlisted QA address shape
+ * (`qa.*@labourmarket.ai`) is the fallback for accounts minted before the
+ * marker existed. A false positive only shows labelled fixtures, nothing else.
+ */
+export function isSyntheticViewer(
+  user: { email?: string | null; app_metadata?: unknown } | null | undefined,
+): boolean {
+  if (!user) return false;
+  const meta = user.app_metadata as { qa_synthetic?: unknown } | undefined;
+  if (meta?.qa_synthetic === true) return true;
+  return /^qa.[^@]*@labourmarket.ai$/i.test(user.email ?? "");
+}

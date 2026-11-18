@@ -180,3 +180,26 @@ asset, text, class name, component, or brand/product name is copied or reference
 anywhere in the product, files, tests, or commits. The principles are recorded
 here in the abstract so the team shares the intent without importing anyone's
 identity.
+
+---
+
+## 10. Addendum 2026-10-01 — `PersonIdentityCard` (candidate-review, team-member)
+
+One identity, different depth by context. `components/app/identity/person-identity-card.tsx`
+is the compact, list-friendly depth of the same vocabulary `IdentityStage` uses
+(monogram source, fallback surface, hairline). Variants added to the taxonomy:
+
+- `candidate-review` — an employer reading an application / candidate on the scouting page.
+  Layer 1: portrait/handle, main profession, place + mobility, availability, a few
+  vacancy facts. Then closed disclosure layers (why relevant, skills and what they
+  rest on, availability and readiness) and the caller's own actions.
+- `team-member` — a person in the company team list: name, role, availability,
+  review state, actions. Details by disclosure.
+
+Presentation only: no score, no percentage, no stars. No DB, no route, no auth
+change.
+
+- `assignment` — a person on a project assignment list (compact density).
+- `roster-person` — a person the organization roster / booking records name (compact density).
+
+`PersonIdentityCard` takes `density="full" | "compact"`; the API is otherwise stable so the calendar can reuse it.

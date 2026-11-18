@@ -132,8 +132,11 @@ describe("i18n — create copy exists in LT + EN, no unsupported claims", () => 
         expect(cp[k], `${locale} createProject.${k}`).toBeTruthy();
       }
     });
-    it(`${locale} states journal linking is not enabled`, () => {
-      expect(cp.journalLinkingDisabled.toLowerCase()).toMatch(/neįjungt|not enabled/);
+    it(`${locale} states how journal entries reach the project (no auto-fill)`, () => {
+      // 2026-10-09: attribution is live (by the people who record entries);
+      // the line states that, and that nothing is filled in automatically.
+      expect(cp.journalLinkingDisabled.toLowerCase()).toMatch(/priskiria|attributed/);
+      expect(cp.journalLinkingDisabled.toLowerCase()).toMatch(/automati/);
     });
     it(`${locale} makes no unsupported verified/AI/matched/linked claim`, () => {
       const blob = Object.values(cp).join(" ").toLowerCase();

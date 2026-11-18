@@ -84,12 +84,8 @@ describe("3. journal-derived skills show their evidence basis", () => {
 });
 
 describe("4. no fake verified labels", () => {
-  it("the showcase renders the CANONICAL card with a visible not-a-real-person line (owner audit §3.7)", () => {
-    const showcase = read("components/marketing/player-card-showcase.tsx");
-    // Landing = product: the SAME WorkerPlayerCard, never the FUT concept.
-    expect(showcase).toMatch(/WorkerPlayerCard/);
-    expect(showcase).not.toMatch(/<PlayerCard\b/);
-    expect(showcase).toMatch(/conceptNote/);
+  it("the public sample showcase is gone; the not-a-real-person copy stays in every locale for any labelled example", () => {
+    expect(() => read("components/marketing/player-card-showcase.tsx")).toThrow();
     for (const [locale, needle] of [
       ["en", "not a real person"],
       ["lt", "ne realus asmuo"],
@@ -137,12 +133,20 @@ describe("5. empty profile gets honest next actions (never a percentage)", () =>
     expect(hub).toMatch(/#cv-availability/);
     expect(hub).toMatch(/pillarMet\("availability"\)/);
     // The #work-card anchor died with /dashboard/advanced (W3 Package 4);
-    // the pillar now deep-links the player-card RESULT, whose editor is the
-    // one canonical Work Card surface.
-    expect(hub).toMatch(/\/dashboard\?result=player-card/);
+    // the pillar then deep-linked the player-card RESULT — whose own "open"
+    // control sent the person straight back to the profile (a ping-pong,
+    // 2026-09-23). The profile renders the SAME WorkCardEditor at
+    // `#cv-availability` since 2026-09-19, so the pillar names that anchor.
+    expect(hub).toMatch(/workCard: "#cv-availability",/);
+    expect(hub).not.toContain("/dashboard?result=player-card");
     expect(hub).toMatch(/profile-hub-opportunities-link/);
-    // The deep-link target is real: a registered result kind whose component
-    // renders the work editor.
+    // The deep-link target is real: the profile page renders the one work
+    // editor at that anchor, and the player-card result renders the same
+    // component (one editor, two mounts of it — not two editors).
+    const profile = read("app/[locale]/dashboard/profile/page.tsx");
+    const at = profile.indexOf('id="cv-availability"');
+    expect(at).toBeGreaterThan(-1);
+    expect(profile.slice(at, profile.indexOf("</details>", at))).toContain("<WorkCardEditor");
     expect(read("lib/conversation/result-registry.ts")).toMatch(/kind: "player-card"/);
     expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
       /player-card-work-editor/,

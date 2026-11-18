@@ -4,9 +4,18 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { activeLocales } from "@/lib/i18n/config";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
+import { resolveInvitedWorkerContext } from "@/lib/onboarding/invited-worker-context";
+import { acceptInvitationByIdAction } from "@/lib/invitations/actions";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
-import { LIVE_ROLE_IDS, type LiveRoleId } from "@/lib/config/roles";
+import {
+  parseSelfDeclaredProfessions,
+  recordableInputLanguage,
+} from "@/lib/worker/self-declared-profession";
+import { LIVE_ROLE_IDS, baseIdentityForRole, type LiveRoleId } from "@/lib/config/roles";
+import { setActiveRoleCore } from "@/lib/auth/active-role-core";
+import { clearActiveOrganization } from "@/lib/company/organization-actions";
 
 /**
  * THE PARTICIPATION MODE A PERSON ONBOARDS INTO — one of FOUR concepts this
@@ -70,25 +79,62 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   if (!user) throw new Error("Not authenticated");
 
   const rawRoles = String(formData.get("roles") ?? formData.get("role") ?? "");
-  const roles = [
+  let roles = [
     ...new Set(rawRoles.split(",").map((r) => r.trim()).filter(Boolean)),
   ] as Role[];
   if (roles.length === 0 || roles.some((r) => !ONBOARDING_ROLES.has(r))) {
     throw new Error(`Invalid onboarding roles: ${rawRoles}`);
   }
+  // THE INVITATION SETTLES THE ROLE (2026-10-27). When the server can prove
+  // from the person's own invitation that they were invited as a worker — the
+  // same decision that made the page skip the role question — the role is
+  // `worker`, whatever the submitted form says.
+  const rawNext = formData.get("next");
+  const invited = await resolveInvitedWorkerContext(
+    typeof rawNext === "string" && isSafeReturnPath(rawNext) ? rawNext : null,
+  );
+  if (invited.workerImplied) roles = ["worker"];
   const primary = ROLE_ORDER.find((r) => roles.includes(r)) as Role;
   const extras = roles.filter((r) => r !== primary);
 
   const display_name = String(formData.get("display_name") ?? "").trim();
   const country = String(formData.get("country") ?? "").trim();
-  // WHAT WORK THIS PERSON DOES. Closed set — the value must be one of the
+  // WHAT WORK THIS PERSON DOES. Closed set — every value must be one of the
   // slugs the platform's own registry holds, so a hand-crafted POST cannot
   // record a profession nothing else in the product understands.
-  const rawProfession = String(formData.get("profession_slug") ?? "").trim();
-  const professionSlug =
-    rawProfession.length > 0 && PROFESSION_SLUGS.includes(rawProfession)
-      ? rawProfession
-      : null;
+  //
+  // A LIST since the owner direction of 2026-09-27: one person, several
+  // professions. `profession_slugs` carries all of them in the order the
+  // person named them; `profession_slug` remains the PRIMARY and is what
+  // `complete_onboarding` writes, so an older client sending only that field
+  // behaves exactly as before. Bounded by construction: the registry is a
+  // closed 49-slug set and the list is deduped, so there is nothing unbounded
+  // to insert however the form is posted.
+  const professionSlugList = [
+    ...new Set(
+      [
+        String(formData.get("profession_slug") ?? ""),
+        ...String(formData.get("profession_slugs") ?? "").split(","),
+      ]
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && PROFESSION_SLUGS.includes(s)),
+    ),
+  ];
+  const professionSlug = professionSlugList[0] ?? null;
+  // THE PERSON'S OWN WORDS for what they do — a profession the 49-row registry
+  // does not carry (owner direction 2026-09-27: the classifier may suggest, it
+  // may not be the list of permitted human answers). Stored verbatim, never
+  // matched against the catalogue and never corrected.
+  const professionLabels = parseSelfDeclaredProfessions(
+    formData.get("profession_labels") as string | null,
+  );
+  // The language they wrote in: the REAL locale of the submitting session,
+  // never detected from the text. Read from the RAW form field rather than the
+  // `locale` variable below, because that one falls back to "lt" — a fallback
+  // that is right for the profile row and would be a fabricated language here.
+  const professionLanguage = recordableInputLanguage(
+    formData.get("locale") as string | null,
+  );
   const locale = String(formData.get("locale") ?? "lt");
   // Universal first-run router: what the person came to do. Optional — a
   // legacy submit without it behaves exactly as before.
@@ -138,15 +184,30 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   // match engine's subject, the profile-directed external ad pool, the CV's
   // work direction — reads that one field, so 32 of 36 people could not be
   // matched to anything, however good the engine was.
+  //
+  // ONE read for the whole list (the person's order preserved): the primary
+  // goes into the RPC as before, and any further profession is written after
+  // it, into the SAME `worker_professions` table that has carried a worker's
+  // additional directions since 0008 — no new table, no second write path.
   let professionId: string | null = null;
+  let extraProfessionIds: string[] = [];
   if (primary === "worker" && professionSlug) {
-    const { data: prof } = await supabase
+    const { data: profRows } = await supabase
       .from("professions")
-      .select("id")
-      .eq("slug", professionSlug)
-      .eq("is_active", true)
-      .maybeSingle();
-    professionId = (prof?.id as string | null) ?? null;
+      .select("id, slug")
+      .in("slug", professionSlugList)
+      .eq("is_active", true);
+    const idBySlug = new Map(
+      ((profRows ?? []) as { id: string; slug: string }[]).map((r) => [
+        r.slug,
+        r.id,
+      ]),
+    );
+    professionId = idBySlug.get(professionSlug) ?? null;
+    extraProfessionIds = professionSlugList
+      .slice(1)
+      .map((slug) => idBySlug.get(slug))
+      .filter((id): id is string => typeof id === "string");
   }
 
   const { error } = await supabase.rpc("complete_onboarding", {
@@ -166,6 +227,87 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       hint: error.hint,
     });
     throw new Error(`complete_onboarding RPC failed: ${error.message}`);
+  }
+
+  // THE ACCOUNT LANGUAGE IS THE ONE THE PERSON ONBOARDED IN (audit 2026-10-20).
+  // The shell upsert above never overwrites (ignoreDuplicates), the signup
+  // trigger defaults to 'lt' when OAuth carries no locale, and
+  // complete_onboarding does not write it — so a Google/LinkedIn/Facebook
+  // person who onboarded on /en was later redirected to /lt and pinned there
+  // by the account-preference rule (lib/auth/locale-preference.ts). Only an
+  // ACTIVE locale from the form is written; the person's own row (RLS).
+  const onboardedLocale = String(formData.get("locale") ?? "");
+  if ((activeLocales as readonly string[]).includes(onboardedLocale)) {
+    const { error: localeErr } = await supabase
+      .from("profiles")
+      .update({ locale: onboardedLocale })
+      .eq("id", user.id);
+    if (localeErr) console.error("[completeOnboarding] account language write failed", { code: localeErr.code });
+  }
+
+  // THE FURTHER PROFESSIONS the person named. The RPC wrote the primary; these
+  // are the equal, non-primary rows — the same shape `addWorkerDirection` (the
+  // profile's own "add a work direction") writes, under the same
+  // `worker_professions_write` policy (`owns_worker`), so nothing new is
+  // granted and nothing else in the product has to learn a new place to look.
+  //
+  // `ignoreDuplicates` covers the re-submit and the primary the RPC just
+  // inserted. A failure here is logged, not fatal: the person is onboarded and
+  // their primary profession is recorded — losing the signup over a second
+  // direction they can add on the profile would be the worse outcome.
+  if (
+    primary === "worker" &&
+    (extraProfessionIds.length > 0 || professionLabels.length > 0)
+  ) {
+    const { data: workerRow } = await supabase
+      .from("workers")
+      .select("id")
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    const workerId = (workerRow?.id as string | null) ?? null;
+    if (workerId && extraProfessionIds.length > 0) {
+      const { error: dirErr } = await supabase
+        .from("worker_professions")
+        .upsert(
+          extraProfessionIds.map((profession_id) => ({
+            worker_id: workerId,
+            profession_id,
+            is_primary: false,
+          })),
+          { onConflict: "worker_id,profession_id", ignoreDuplicates: true },
+        );
+      if (dirErr) {
+        console.error("[completeOnboarding] extra professions insert failed", {
+          code: dirErr.code,
+          message: dirErr.message,
+        });
+      }
+    }
+    // THE PERSON'S OWN WORDS, into the same canonical table — a row with no
+    // `profession_id` and no `is_primary`, which the schema has allowed since
+    // ledger 20260927060325. `normalized_label` is GENERATED in the database
+    // and is never written here. A failure is logged, not fatal: the person is
+    // onboarded and can add these on their profile rather than losing a signup.
+    // ONE ROW AT A TIME, not one batch (Codex P1 on #1880, verified). The
+    // partial unique index `worker_professions_one_label` cannot be an ON
+    // CONFLICT target through PostgREST, so a single duplicate — a retried
+    // onboarding, the same words typed twice in different sessions — would
+    // reject the whole statement and take every OTHER new profession with it.
+    // Bounded by SELF_DECLARED_PROFESSION_MAX_PER_SUBMIT, so this is a handful
+    // of inserts, and a duplicate means the words are already stored.
+    if (workerId && professionLabels.length > 0) {
+      for (const label of professionLabels) {
+        const { error: ownErr } = await supabase
+          .from("worker_professions")
+          .insert({ worker_id: workerId, label, original_language: professionLanguage });
+        if (ownErr && ownErr.code !== "23505") {
+          console.error("[completeOnboarding] self-declared profession insert failed", {
+            code: ownErr.code,
+            message: ownErr.message,
+          });
+        }
+      }
+    }
   }
 
   // Additional roles. add_role flips active_role to the role it adds, so we
@@ -224,6 +366,26 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
     }
   }
 
+  // THE ADDRESSED INVITATION IS ACCEPTED HERE, on the server, AFTER the role
+  // was settled from it while it was still pending (review on #2846: when the
+  // wizard accepted it first, it left the pending read and the role override
+  // above never ran). Same canonical by-id door as the network page: verified
+  // e-mail, address binding, accept_invitation_apply_v2. A failure is logged,
+  // not fatal — the person is onboarded and the home still offers it.
+  if (invited.addressedInvitationId) {
+    try {
+      await acceptInvitationByIdAction({
+        invitationId: invited.addressedInvitationId,
+        locale,
+        noticeSurface: "onboarding",
+      });
+    } catch (e) {
+      console.error("[completeOnboarding] addressed invitation accept failed", {
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
   revalidatePath(`/${locale}/dashboard`);
   // Deep-link continuity (core-network area B): a safe ?next= carried
   // through login -> onboarding (e.g. an invitation link) wins over the
@@ -262,42 +424,26 @@ export async function switchActiveRole(role: Role): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
-  // sanity: the role must already be one the user holds
-  const { data: held } = await supabase
-    .from("profile_roles")
-    .select("role")
-    .eq("profile_id", user.id)
-    .eq("role", role)
-    .maybeSingle();
-  if (!held) throw new Error("Role not held by user");
-
-  // Preserve admin across workspace switches. Before overwriting
-  // active_role, if the user is currently admin via active_role
-  // (the legacy single-source signal) we MUST persist an admin row
-  // in profile_roles so the app-level admin gate (dashboard layout,
-  // requireSuperadmin) keeps recognising them after the switch.
-  // Idempotent: a conflict on (profile_id, role) is a no-op. We do
-  // NOT touch profiles.is_admin or any other column. The DB-level
-  // RLS helper `public.is_admin()` still reads only active_role and
-  // is documented as a follow-up migration.
-  const { data: currentProfile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
-  if (currentProfile?.active_role === "admin") {
-    await supabase
-      .from("profile_roles")
-      .upsert(
-        { profile_id: user.id, role: "admin" },
-        { onConflict: "profile_id,role" },
-      );
+  // THE role write (held-role check, admin preservation, the active_role
+  // UPDATE) is one core shared with the workspace switch and the MCP
+  // `context.switch` — lib/auth/active-role-core.ts. Its UPDATE error is now
+  // checked: a refused write used to return as if the switch had happened.
+  const result = await setActiveRoleCore({ supabase, userId: user.id }, role);
+  if (!result.ok) {
+    throw new Error(
+      result.code === "not-held" ? "Role not held by user" : "Role switch failed",
+    );
   }
 
-  await supabase
-    .from("profiles")
-    .update({ active_role: role })
-    .eq("id", user.id);
+  // ONE POINTER RULE (owner program 2026-09-23): choosing to act as a PERSON
+  // is choosing the personal workspace. Leaving the organization pointer in
+  // place would let the two pointers disagree — the chat identity follows the
+  // workspace, so the person would still be greeted as that organization. The
+  // clear runs through the SAME action (and core) the workspace chip uses.
+  if (baseIdentityForRole(role) === "person") {
+    const cleared = await clearActiveOrganization();
+    if (!cleared.ok) throw new Error("Workspace clear failed");
+  }
 
   revalidatePath("/", "layout");
 }

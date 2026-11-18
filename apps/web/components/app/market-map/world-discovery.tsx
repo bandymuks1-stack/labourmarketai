@@ -5,12 +5,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { MarketMap, type MarketMapViewport } from "./market-map";
-import type { MarketAnchor, MarketMapMode } from "./market-map-model";
+import type {
+  MarketAnchor,
+  MarketMapLayer,
+  MarketMapMode,
+  MarketMapView,
+} from "./market-map-model";
+import {
+  MapLocationControls,
+  overlayFor,
+  useOwnLocation,
+} from "./map-location-controls";
+import type { MapIdentity } from "./own-location-layer";
 import { loadWorldViewAction } from "@/lib/market-map/world-actions";
 import {
   WORLD_LAYERS,
   WORLD_LAYER_TO_MAP_LAYER,
-  WORLD_OBJECT_CAP,
   WORLD_ROW_LIMIT,
   type WorldCluster,
   type WorldLayer,
@@ -59,11 +69,27 @@ export interface WorldPlaceLink {
   readonly label: string;
 }
 
+/** Layers drawn from a prepared view instead of the bounded world read. */
+export type StaticLayerKey = "jobs" | "territory";
+export interface StaticLayer {
+  readonly view: MarketMapView;
+  /** One quiet line under the map (e.g. the vacancy count). */
+  readonly caption?: string;
+}
+type LayerKey = WorldLayer | StaticLayerKey;
+const STATIC_LAYER_ORDER: readonly StaticLayerKey[] = ["jobs", "territory"];
+const STATIC_TO_MAP_LAYER: Record<StaticLayerKey, MarketMapLayer> = {
+  jobs: "jobs",
+  territory: "territory",
+};
+
 export function WorldDiscovery({
   initial,
   initialLayer = "demand",
   placeLink,
   mapMode = "dashboard",
+  ownLocation,
+  staticLayers,
 }: {
   /** The first view, rendered on the server for the default viewport. */
   initial: WorldViewResult;
@@ -78,10 +104,30 @@ export function WorldDiscovery({
    * Not a new size — one of the four the model already defines.
    */
   mapMode?: MarketMapMode;
+  /**
+   * Location + radius as controls OF this map. When present the viewer's own
+   * saved location and search radius are drawn on the map and the compact
+   * control bar is shown (use my location / radius / change). Omit to render
+   * the world without any own-location chrome.
+   */
+  ownLocation?: { identity?: MapIdentity; suppressOwnMarker?: boolean };
+  /**
+   * Further layers of the SAME map whose data is already read on the server
+   * and is not viewport-bounded (public vacancy volume, the owner company's
+   * territory). A layer is offered only when its entry exists — never a
+   * placeholder for data that is not there.
+   */
+  staticLayers?: Partial<Record<StaticLayerKey, StaticLayer>>;
 }) {
   const t = useTranslations("marketMap.world");
   const locale = useLocale();
-  const [layer, setLayer] = useState<WorldLayer>(initialLayer);
+  const [layerKey, setLayerKey] = useState<LayerKey>(initialLayer);
+  const own = useOwnLocation();
+  const isStatic = (STATIC_LAYER_ORDER as readonly string[]).includes(layerKey);
+  const staticLayer = isStatic ? staticLayers?.[layerKey as StaticLayerKey] : undefined;
+  // The bounded read only ever runs for a world layer.
+  const layer: WorldLayer = isStatic ? initialLayer : (layerKey as WorldLayer);
+  const availableStatic = STATIC_LAYER_ORDER.filter((k) => staticLayers?.[k]);
   const [result, setResult] = useState<WorldViewResult>(initial);
   const [fetchFailed, setFetchFailed] = useState(false);
   const [pending, setPending] = useState(false);
@@ -145,16 +191,16 @@ export function WorldDiscovery({
   const onViewportChange = useCallback(
     (viewport: MarketMapViewport) => {
       viewportRef.current = viewport;
-      refresh(layer);
+      if (!isStatic) refresh(layer);
     },
-    [layer, refresh],
+    [layer, isStatic, refresh],
   );
 
-  const chooseLayer = (next: WorldLayer) => {
-    if (next === layer) return;
-    setLayer(next);
+  const chooseLayer = (next: LayerKey) => {
+    if (next === layerKey) return;
+    setLayerKey(next);
     setSelectedKey(null);
-    refresh(next);
+    if (!(STATIC_LAYER_ORDER as readonly string[]).includes(next)) refresh(next as WorldLayer);
   };
 
   const onSelectAnchor = useCallback((anchor: MarketAnchor) => {
@@ -162,20 +208,52 @@ export function WorldDiscovery({
   }, []);
 
   const view = result.kind === "ok" ? result.view : null;
-  const clusters: readonly WorldCluster[] = view?.clusters ?? [];
-  const counts = view?.counts ?? null;
-  const stateKind: LayerStateKind = fetchFailed
-    ? "fetch_failed"
-    : result.kind === "ok"
-      ? result.view.state.kind
-      : result.kind;
+  const worldClusters: readonly WorldCluster[] = view?.clusters ?? [];
+  // A prepared layer lists the same places the map draws (design S: the list
+  // equivalent), in the one row shape.
+  const staticRows: readonly ListRow[] = staticLayer
+    ? staticLayer.view.regions.flatMap((r) =>
+        r.anchors.map((a) => ({
+          key: a.id,
+          label: a.label,
+          country: a.country,
+          precision: a.precision ?? "city",
+          provenance: a.precision === "country" ? ("derived" as const) : ("fact" as const),
+          count: typeof a.weight === "number" ? a.weight : null,
+          members: [] as readonly { id: string; label: string }[],
+          moreMembers: 0,
+        })),
+      )
+    : [];
+  const rows: readonly ListRow[] = staticLayer
+    ? staticRows
+    : worldClusters.map((c) => ({
+        key: c.key,
+        label: c.label,
+        country: c.country,
+        precision: c.precision,
+        provenance: c.provenance,
+        count: c.count,
+        members: c.members,
+        moreMembers: c.moreMembers,
+      }));
+  const counts = staticLayer ? null : (view?.counts ?? null);
+  const stateKind: LayerStateKind = staticLayer
+    ? rows.length > 0
+      ? "ok"
+      : "empty"
+    : fetchFailed
+      ? "fetch_failed"
+      : result.kind === "ok"
+        ? result.view.state.kind
+        : result.kind;
 
   const stateText = (() => {
     switch (stateKind) {
       case "ok":
         return null;
       case "empty":
-        return t(`state.empty.${layer}`);
+        return t(`state.empty.${layerKey}`);
       case "error":
         return t("state.error");
       case "unavailable":
@@ -189,54 +267,64 @@ export function WorldDiscovery({
     }
   })();
 
+  const mapLayer: MarketMapLayer = staticLayer
+    ? STATIC_TO_MAP_LAYER[layerKey as StaticLayerKey]
+    : WORLD_LAYER_TO_MAP_LAYER[layer];
+  const pillKeys: readonly LayerKey[] = [...WORLD_LAYERS, ...availableStatic];
+  // A place opens the opportunities list only where the layer IS opportunities.
+  const linkApplies = placeLink && (layerKey === "demand" || layerKey === "jobs");
+  const caption = staticLayer?.caption ?? null;
+
   return (
-    <section className="flex flex-col gap-2" data-testid="market-map-world" data-world-layer={layer}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("title")}
-        </h2>
-        <div
-          role="group"
-          aria-label={t("layersLabel")}
-          className="flex flex-wrap gap-1"
-          data-testid="world-layers"
-        >
-          {WORLD_LAYERS.map((l) => {
-            const active = l === layer;
-            return (
-              <button
-                key={l}
-                type="button"
-                aria-pressed={active}
-                data-testid={`world-layer-${l}`}
-                onClick={() => chooseLayer(l)}
-                className={`min-h-11 rounded-md border px-3 py-1.5 text-sm transition-colors ${
-                  active
-                    ? "border-brand-cyan bg-brand-cyan/15 text-text-primary"
-                    : "border-ink-500 bg-ink-800/40 text-text-secondary hover:border-brand-blue"
-                }`}
-              >
-                {t(`layers.${l}`)}
-              </button>
-            );
-          })}
-        </div>
+    <section className="flex flex-col gap-3" data-testid="market-map-world" data-world-layer={layerKey}>
+      {/* Layers — filters of the SAME map. Only layers whose data exists. */}
+      <div
+        role="group"
+        aria-label={t("layersLabel")}
+        className="flex flex-wrap gap-1"
+        data-testid="world-layers"
+      >
+        {pillKeys.map((l) => {
+          const active = l === layerKey;
+          return (
+            <button
+              key={l}
+              type="button"
+              aria-pressed={active}
+              data-testid={`world-layer-${l}`}
+              onClick={() => chooseLayer(l)}
+              className={`min-h-11 rounded-md border px-3 py-1.5 text-sm transition-colors ${
+                active
+                  ? "border-brand-cyan bg-brand-cyan/15 text-text-primary"
+                  : "border-ink-500 bg-ink-800/40 text-text-secondary hover:border-brand-blue"
+              }`}
+            >
+              {t(`layers.${l}`)}
+            </button>
+          );
+        })}
       </div>
-      <p className="text-sm leading-relaxed text-text-secondary">
-        {t("lead")}
-        {placeLink ? <> {t("placeLinkHint")}</> : null}
-      </p>
+
+      {ownLocation ? <MapLocationControls state={own} /> : null}
 
       <MarketMap
-        view={view?.view ?? EMPTY_VIEW}
+        view={staticLayer ? staticLayer.view : (view?.view ?? EMPTY_VIEW)}
         mode={mapMode}
-        layer={WORLD_LAYER_TO_MAP_LAYER[layer]}
-        autoFly={false}
+        layer={mapLayer}
+        autoFly={staticLayer ? true : false}
         onViewportChange={onViewportChange}
         onSelectAnchor={onSelectAnchor}
+        own={
+          ownLocation
+            ? overlayFor(own, {
+                identity: ownLocation.identity,
+                suppress: ownLocation.suppressOwnMarker,
+              })
+            : undefined
+        }
       />
 
-      {/* Counts — the honest "what is and is not on screen" strip. */}
+      {/* What is and is not on screen — only the parts that are non-zero. */}
       <div
         className="flex flex-wrap gap-x-3 gap-y-1 text-xs leading-relaxed text-text-muted"
         data-testid="world-counts"
@@ -249,9 +337,6 @@ export function WorldDiscovery({
                 places: counts.renderedClusters,
                 objects: counts.inViewObjects,
               })}
-            </span>
-            <span data-testid="world-counts-scale">
-              {t("scale.label", { scale: t(`scale.${view!.scale}`) })}
             </span>
             {counts.overflowClusters > 0 ? (
               <span data-testid="world-counts-overflow" className="text-state-amber">
@@ -278,25 +363,8 @@ export function WorldDiscovery({
             ) : null}
           </>
         ) : null}
-        <span data-testid="world-counts-cap">{t("counts.cap", { cap: WORLD_OBJECT_CAP })}</span>
+        {caption ? <span data-testid="world-caption">{caption}</span> : null}
         {pending ? <span data-testid="world-loading">{t("loading")}</span> : null}
-      </div>
-
-      {/* FACT / DERIVED — material AND words (never colour alone). */}
-      <div
-        className="flex flex-wrap gap-x-4 gap-y-1 text-xs leading-relaxed text-text-secondary"
-        data-testid="world-provenance-legend"
-      >
-        <span className="inline-flex items-center gap-1.5">
-          <i aria-hidden className="inline-block size-3 rounded-full border-2 border-current bg-current/50" />
-          <strong className="font-semibold text-text-primary">{t("provenance.fact")}</strong>
-          <span>— {t("provenance.factHint")}</span>
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <i aria-hidden className="inline-block size-3 rounded-full border-2 border-dashed border-current" />
-          <strong className="font-semibold text-text-primary">{t("provenance.derived")}</strong>
-          <span>— {t("provenance.derivedHint")}</span>
-        </span>
       </div>
 
       {stateText ? (
@@ -313,20 +381,20 @@ export function WorldDiscovery({
         </p>
       ) : null}
 
-      {view?.notes.includes("aggregate_only") ? (
+      {view?.notes.includes("aggregate_only") && layerKey === "supply" ? (
         <p className="text-xs leading-relaxed text-text-muted" data-testid="world-note-aggregate">
           {t("notes.aggregateOnly")}
         </p>
       ) : null}
 
       {/* The list equivalent — the same places, always present (design S). */}
-      <div className="flex flex-col gap-1" data-testid="world-list">
-        <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("list.title", { count: clusters.length })}
-        </h3>
-        {clusters.length > 0 ? (
+      {rows.length > 0 ? (
+        <div className="flex flex-col gap-1" data-testid="world-list">
+          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("list.title", { count: rows.length })}
+          </h3>
           <ol className="flex flex-col divide-y divide-ink-700 rounded-md border border-ink-600 bg-ink-800/30">
-            {clusters.map((c) => {
+            {rows.map((c) => {
               const selected = c.key === selectedKey;
               return (
                 <li
@@ -351,12 +419,12 @@ export function WorldDiscovery({
                           approximation — the chip says which, so the row can
                           never read more precisely than the record does. */}
                       <PlacePrecision kind={c.precision} label={t(`precision.${c.precision}`)} />
-                      <span>
-                        {t("list.count", { count: c.count })}
-                        {" · "}
-                        {t(`provenance.${c.provenance}`)}
-                        {selected ? ` · ${t("list.selected")}` : ""}
-                      </span>
+                      {c.count !== null ? (
+                        <span>
+                          {t("list.count", { count: c.count })}
+                          {selected ? ` · ${t("list.selected")}` : ""}
+                        </span>
+                      ) : null}
                     </span>
                   </div>
                   {selected && c.members.length > 0 ? (
@@ -367,12 +435,12 @@ export function WorldDiscovery({
                       {c.moreMembers > 0 ? <li>{t("list.more", { count: c.moreMembers })}</li> : null}
                     </ul>
                   ) : null}
-                  {placeLink ? (
+                  {linkApplies && placeLink ? (
                     <a
                       href={placeLink.hrefTemplate.replace("{country}", c.country)}
                       data-testid="world-place-link"
                       data-country={c.country}
-                      className="inline-flex min-h-9 w-fit items-center text-xs font-medium text-brand-blue underline-offset-4 hover:underline"
+                      className="inline-flex min-h-11 w-fit items-center text-xs font-medium text-brand-blue underline-offset-4 hover:underline"
                     >
                       {placeLink.label} →
                     </a>
@@ -381,10 +449,22 @@ export function WorldDiscovery({
               );
             })}
           </ol>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </section>
   );
+}
+
+interface ListRow {
+  readonly key: string;
+  readonly label: string;
+  readonly country: string;
+  readonly precision: "city" | "country";
+  readonly provenance: "fact" | "derived";
+  /** `null` = the place stands for itself, no quantity (UNKNOWN is not zero). */
+  readonly count: number | null;
+  readonly members: readonly { id: string; label: string }[];
+  readonly moreMembers: number;
 }
 
 /** A view with nothing in it — drawn while a non-ok result is explained in words. */

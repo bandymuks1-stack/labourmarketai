@@ -51,14 +51,20 @@ describe("Guard: the company dashboard wires the next-actions surface", () => {
     expect(page).toMatch(
       /companyProfile\.kind\s*===\s*"ok"\s*&&\s*\(?companyProfile\.row\s*===\s*null/,
     );
-    expect(page).toMatch(/<CompanyNoProfileGuide\s*\/>/);
+    // Re-anchored 2026-09-23 (capability matrix P1): the guide is handed the
+    // employer resolver's REASON, so a member or employee standing in their
+    // organization reads the membership state, not "create a company".
+    expect(page).toMatch(/<CompanyNoProfileGuide\b[\s\S]*?reason=\{/);
   });
 
   it("uses the workspace-scoped company-setup read (has verification status), not a singleton lookup", () => {
     // M-P0-3: the dashboard resolves the ACTIVE workspace's company through
-    // the canonical resolver + the creator-checked by-id read. The singleton
-    // getOwnCompany reads errored to null at 2 owned rows.
-    expect(page).toMatch(/getOwnedCompanyById.*[\s\S]*?from "@\/lib\/company\/company-setup"/);
+    // the canonical resolver + the membership-checked by-id read. The
+    // singleton getOwnCompany reads errored to null at 2 owned rows.
+    // Re-anchored 2026-09-23: the door READS, so it takes the OPEN access mode
+    // (any governance role) — the owner/admin read stays on the write surfaces.
+    expect(page).toMatch(/getAccessibleCompanyById.*[\s\S]*?from "@\/lib\/company\/company-setup"/);
+    expect(page).not.toMatch(/\bgetOwnedCompanyById\b/);
     expect(page).toMatch(/resolveEmployerCompanyContext/);
     expect(page).not.toMatch(/\bgetOwnCompany\b(?! as)/);
   });
@@ -86,8 +92,11 @@ describe("Guard: the next-actions component is honest + data-driven", () => {
     for (const c of ["completeDetails", "team", "verification"]) {
       expect(src).not.toContain(`cards.${c}.title`);
     }
-    expect(src).toContain("cards.requests.cta");
-    expect(src).toContain("companyDemandActionClicked");
+    // The tracked door is the shared need door (activation audit
+    // 2026-10-26 §2) — real route, real surface, one label.
+    expect(src).toContain("<NeedDoorLink");
+    expect(src).toContain('surface="company_settings"');
+    expect(src).not.toContain("#company-requests");
   });
 
   it("surfaces needs_checks / missing items with a fix link", () => {
@@ -113,7 +122,9 @@ describe("Guard: next-actions i18n is honest + parity-clean (LT/EN)", () => {
 
     it(`${loc}: ships the demand CTA + noCompany + fix headings`, () => {
       expect(na, `${loc} nextActions missing`).toBeTruthy();
-      expect(na.cards?.requests?.cta, `${loc} requests.cta`).toBeTruthy();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const door = ((loadJson(`messages/${loc}.json`).roleDashboards as any)?.company?.needDoor) as any;
+      expect(door?.label, `${loc} needDoor.label`).toBeTruthy();
       expect(na.noCompany?.title && na.noCompany?.body && na.noCompany?.cta).toBeTruthy();
       expect(na.fixHeading && na.missingHeading).toBeTruthy();
     });

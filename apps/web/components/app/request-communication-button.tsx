@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Step 4A — "Request to communicate" on a scouting candidate. Sends only the
@@ -33,6 +34,7 @@ export function RequestCommunicationButton({
   };
 }) {
   const router = useRouter();
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
   const [pending, startTransition] = useTransition();
   const [state, setState] = useState<
     | { kind: "idle" }
@@ -44,7 +46,12 @@ export function RequestCommunicationButton({
   function onRequest() {
     setState({ kind: "idle" });
     startTransition(async () => {
-      const res = await requestWorkerConversationAction({ locale, requestId, workerId });
+      const res = await requestWorkerConversationAction({
+        locale,
+        requestId,
+        workerId,
+        expectedWorkspaceId,
+      });
       if (res.ok) {
         setState({ kind: "opened", conversationId: res.conversationId });
       } else if (res.reason === "rate_limited") {
@@ -62,7 +69,7 @@ export function RequestCommunicationButton({
         <button
           type="button"
           onClick={() => router.push(`/${locale}/dashboard/communication/${state.conversationId}`)}
-          className="rounded-md border border-brand-blue/40 px-2.5 py-1 font-medium text-brand-blue hover:bg-brand-blue/10"
+          className="min-h-11 sm:min-h-0 rounded-md border border-brand-blue/40 px-2.5 py-1 font-medium text-brand-blue hover:bg-brand-blue/10"
         >
           {labels.view}
         </button>
@@ -77,7 +84,7 @@ export function RequestCommunicationButton({
         onClick={onRequest}
         disabled={pending}
         data-testid={`request-communication-${workerId}`}
-        className="w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
+        className="min-h-11 sm:min-h-0 w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
       >
         {pending ? labels.opening : labels.button}
       </button>

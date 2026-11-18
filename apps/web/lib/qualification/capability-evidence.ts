@@ -1,10 +1,15 @@
 import "server-only";
 
+import { isCounterpartyScopeRow } from "@/lib/journal/review-status";
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { confirmationStands, skillConfirmationState } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import type { CapabilityEvidence } from "@/lib/qualification/capability-standing";
+import type { RecognitionRow } from "@/lib/skills/recognition-model";
+import { RECOGNITION_ROW_COLUMNS, mapRecognitionRows } from "@/lib/qualification/recognition-rows";
 
 /**
  * THE PERSON'S OWN RECORDED WORK, counted for a capability question.
@@ -63,18 +68,30 @@ export async function getOwnRecordedWorkEvidence(
 ): Promise<RecordedWorkEvidence> {
   const supabase = await createClient();
 
-  const [skillsRes, entriesRes] = await Promise.all([
+  const [skillsRes, standing, entriesRes] = await Promise.all([
+    // The recorded confirmations; each counts only while it STANDS
+    // (lib/evidence/skill-confirmation-standing.ts) — a sticky flag whose work
+    // was rejected, corrected or deleted, or the person's own flag, is not a
+    // demonstrated capability.
     asAny(supabase)
       .from("worker_skills")
-      .select("id", { count: "exact", head: true })
+      .select("skill_id, verified, verified_by, verified_at")
       .eq("worker_id", workerId)
-      .eq("verified", true),
+      .eq("verified", true)
+      .limit(ENTRY_READ_LIMIT),
+    readOwnStandingConfirmedSkillIds(workerId),
     liveJournalEntriesOnly(
       asAny(supabase).from("journal_entries").select("id").eq("worker_id", workerId),
     ).limit(ENTRY_READ_LIMIT),
   ]);
 
-  const verifiedSkills = skillsRes.error ? null : (skillsRes.count ?? 0);
+  // A failed skill OR standing read is UNKNOWN (null), never a count.
+  const verifiedSkills =
+    skillsRes.error || standing === null
+      ? null
+      : ((skillsRes.data ?? []) as { skill_id: string | null; verified: boolean | null; verified_by: string | null; verified_at: string | null }[]).filter(
+          (r) => confirmationStands(skillConfirmationState(r, standing)),
+        ).length;
   if (entriesRes.error) {
     return { independentlyConfirmedEntries: null, recordedEntries: null, verifiedSkills };
   }
@@ -89,7 +106,7 @@ export async function getOwnRecordedWorkEvidence(
   // includes the person confirming themselves.
   const confRes = await asAny(supabase)
     .from("journal_entry_confirmations")
-    .select("entry_id, confirmer_id")
+    .select("entry_id, confirmer_id, confirmation_scope")
     .in("entry_id", entryIds)
     .limit(ENTRY_READ_LIMIT);
   if (confRes.error) {
@@ -98,6 +115,9 @@ export async function getOwnRecordedWorkEvidence(
 
   const independent = new Set<string>();
   for (const row of (confRes.data ?? []) as Record<string, unknown>[]) {
+    // Another party's CLIENT acceptance is not an independent employer
+    // confirmation of the capability (decision 0018).
+    if (isCounterpartyScopeRow({ confirmation_scope: row.confirmation_scope })) continue;
     const confirmer = (row.confirmer_id as string | null) ?? null;
     // Absent confirmer id → the question cannot be answered FOR THAT ROW, and
     // the safe reading of an unanswerable independence question is "not
@@ -111,4 +131,63 @@ export async function getOwnRecordedWorkEvidence(
     recordedEntries,
     verifiedSkills,
   };
+}
+
+/**
+ * THE PERSON'S OWN RECOGNITION RECORDS (SKL-9) - a READ of an assessor's act.
+ *
+ * `competency_recognitions` is APPLIED on production (#2184, 2026-10-07; the
+ * subject's own rows are always readable by RLS). A missing relation
+ * (42P01 / PGRST205, e.g. an environment that has not applied it) is still
+ * "nobody has recognised", never an error; any OTHER failure is `null` -
+ * unknown, which the caller must not turn into a claim in either direction.
+ *
+ * Nothing here writes, and nothing here derives a recognition from work
+ * evidence: only the assessor's record can reach `recognised`.
+ */
+export async function getOwnRecognitionRows(
+  subjectProfileId: string,
+): Promise<readonly RecognitionRow[] | null> {
+  const supabase = await createClient();
+  const res = await asAny(supabase)
+    .from("competency_recognitions")
+    .select(RECOGNITION_ROW_COLUMNS)
+    .eq("subject_profile_id", subjectProfileId)
+    .limit(ENTRY_READ_LIMIT);
+  if (res.error) {
+    const code = (res.error as { code?: string }).code;
+    return code === "42P01" || code === "PGRST205" ? [] : null;
+  }
+  return mapRecognitionRows((res.data ?? []) as Record<string, unknown>[]);
+}
+
+/**
+ * The person's own recognitions plus the NAMES of the assessing institutions
+ * (organization names are readable; an unreadable name stays null and the
+ * surface says "an assessing institution" rather than inventing one).
+ */
+export async function getOwnRecognisedByRows(
+  subjectProfileId: string,
+): Promise<{
+  readonly rows: readonly RecognitionRow[];
+  readonly institutionNames: Readonly<Record<string, string>>;
+} | null> {
+  const rows = await getOwnRecognitionRows(subjectProfileId);
+  if (rows === null) return null;
+  const ids = [...new Set(rows.map((r) => r.assessorOrganizationId))];
+  const institutionNames: Record<string, string> = {};
+  if (ids.length > 0) {
+    const supabase = await createClient();
+    const res = await asAny(supabase)
+      .from("organizations")
+      .select("id, display_name, legal_name")
+      .in("id", ids);
+    if (!res.error) {
+      for (const o of (res.data ?? []) as Record<string, unknown>[]) {
+        const name = (o.display_name as string | null) ?? (o.legal_name as string | null);
+        if (name) institutionNames[o.id as string] = name;
+      }
+    }
+  }
+  return { rows, institutionNames };
 }

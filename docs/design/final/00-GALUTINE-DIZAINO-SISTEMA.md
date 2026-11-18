@@ -25,7 +25,7 @@ Kas pasikeitė nuo DRAFT 1 dėl doktrinos:
 2. **Dvi lygiavertės durys.** Vizuali (paspaudimas, tempimas) ir kalbinė (sakinys, balsas) — tas pats stuburas: intent → kontekstas → trūkstami duomenys → autorizacija → kanoninis veiksmas → įrašas → readback → visi lęšiai. Nė viena galimybė neegzistuoja tik viename kelyje.
 3. **Būsena visada matoma, atsakymas visada su pagrindu.** Kiekvienas AI ar išvestas teiginys turi šaltinį, laiką, šviežumą. AI niekada nėra autoritetas ar duomenų bazė.
 4. **Spraga niekada nėra pabaiga.** Kiekvienas „trūksta" tęsiasi: kodėl svarbu → kas tinka → kas gali padėti → kur/kada/kiek → veiksmas → būsena → įrodymas → perskaičiavimas.
-5. **Kilmė yra medžiaga.** Savideklaruota — brūkšninis kraštas; įrodymais pagrįsta — cyan; darbdavio patvirtinta — auksas; trečiosios šalies — dvigubas auksas; sistemos išvesta — taškinis pilkas. Auksas niekada nėra dekoracija.
+5. **Kilmė yra medžiaga.** Savideklaruota — brūkšninis kraštas; įrodymais pagrįsta — cyan; darbdavio patvirtinta — `trust-accent` žalia (PATAISA 2026-09-22, FROZEN §1.11: ne auksas); trečiosios šalies — ta pati žalia + tekstinis ekvivalentas; sistemos išvesta — taškinis pilkas. Auksas niekada nėra dekoracija.
 6. **Laikas yra medžiaga.** Faktas — solid; išvesta — įžambi tekstūra + „išvesta iš…"; prognozė — brūkšninis kontūras + prielaida. Praeitis/Dabar/Toliau — vienas skruberis visuose lęšiuose.
 7. **Nėra bendro žmogaus balo.** Lygis L0–L5 + šaltinis + pasiruošimas konkrečiam kontekstui. Jokių žvaigždučių, žiedų-procentų, „87/100".
 8. **Tuščia = tvarkinga.** Attention, rizika, Marketplace rodo tik tai, kas tikrai reikia. Niekas nerodoma dėl pilnumo.

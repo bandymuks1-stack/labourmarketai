@@ -4,19 +4,33 @@ import { UserSearch } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
-import { getActiveOrganizationContext } from "@/lib/company/active-organization";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
+import {
+  getActiveOrganizationContext,
+  governedActiveOrganizationId,
+} from "@/lib/company/active-organization";
+import { actsAsAgency, resolveNeedsAudience } from "@/lib/company/agency-capability";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
-import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
+import { listClaimablePublicIntakesState } from "@/lib/company/claim-public-intake";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
 import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
 import { readDemandReadbackLabels } from "@/lib/company/company-section-labels";
+import { readOpenNeedsUsage } from "@/lib/billing/open-needs-usage-read";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/needs", "organizationDoors.pages.needs.title");
+
 
 // W3 rows 7/8/25: the employer demand kinds the owner readback is scoped to —
 // a dual-role user's buyer service requests stay in the buyer room.
@@ -40,12 +54,13 @@ export default async function CompanyNeedsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ repeat?: string }>;
+  searchParams?: Promise<{ repeat?: string; audience?: string }>;
 }) {
   const { locale } = await params;
   // "Repeat this need": the past request id is only a HINT for the wizard's
   // prefill; the server action re-checks ownership, kind and workspace.
-  const repeatRaw = (await searchParams)?.repeat ?? "";
+  const sp = await searchParams;
+  const repeatRaw = sp?.repeat ?? "";
   const repeatRequestId =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(repeatRaw)
       ? repeatRaw
@@ -61,8 +76,9 @@ export default async function CompanyNeedsPage({
   const tClaim = await getTranslations("companyClaimIntake");
 
   const employerCtx = await resolveEmployerCompanyContext();
+  // READ access (any governance role the resolver accepted).
   const companyProfile =
-    employerCtx.kind === "ok" ? await getOwnedCompanyById(employerCtx.companyId) : null;
+    employerCtx.kind === "ok" ? await getAccessibleCompanyById(employerCtx.companyId) : null;
   const companyRow =
     companyProfile && companyProfile.kind === "ok" ? companyProfile.row : null;
   // Same rule as /dashboard/company: a row with no legal name is the unnamed
@@ -71,29 +87,48 @@ export default async function CompanyNeedsPage({
   if (!companyRow || companyRow.legalName === null) {
     return (
       <div className="flex flex-col gap-6" data-testid="company-needs">
-        <CompanyNoProfileGuide />
+        <CompanyNoProfileGuide
+          reason={employerCtx.kind === "ok" ? null : employerCtx.reason}
+          activeWorkspaceName={employerCtx.kind === "ok" ? null : employerCtx.activeWorkspaceName}
+        />
       </div>
     );
   }
-  const isStaffingAgency = companyRow.companyType === "staffing_agency";
-  // SEP-4: an agency's page is about what it OFFERS; the wizard below runs
-  // with the `partner` intent (agency_offer) for exactly that reason.
-  const t = isStaffingAgency ? tNeedsAgency : tNeeds;
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
-    orgContext.activeOrganizationId;
+    // Only a GOVERNED active organization — never an employee-only one.
+    governedActiveOrganizationId(orgContext);
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
+  // ORG-2: agency is a capability (type OR declared workforce role), not the
+  // company type alone. An organization that is BOTH agency and client chooses
+  // its audience; the choice only selects an already-allowed demand kind.
+  const { audience, canChoose } = resolveNeedsAudience({
+    companyType: companyRow.companyType,
+    capabilities: declaredCapabilities,
+    requested: sp?.audience,
+  });
+  const isStaffingAgency = audience === "offer";
+  const actsAgency = actsAsAgency(companyRow.companyType, declaredCapabilities);
+  // SEP-4: an agency's page is about what it OFFERS; the wizard below runs
+  // with the `partner` intent (agency_offer) for exactly that reason.
+  const t = isStaffingAgency ? tNeedsAgency : tNeeds;
 
-  const [demandReadback, claimableIntakes, rPendingInterest, readbackLabels] =
+  const [demandReadback, claimableState, rPendingInterest, readbackLabels, openNeedsUsage] =
     await Promise.all([
       listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS),
-      listClaimablePublicIntakes(),
+      listClaimablePublicIntakesState(),
       listPendingInterestCountsForCompany(),
       readDemandReadbackLabels(),
+      readOpenNeedsUsage(),
     ]);
+
+  // An unverified address reads NOTHING from the intake queue (the service role is
+  // never reached); the page offers the progressive proof instead — and says
+  // nothing about whether an intake exists for that address.
+  const claimableIntakes = claimableState.status === "ok" ? claimableState.intakes : [];
 
   // WHO IS WAITING — one localized line per demand that has hands raised.
   // Resolved here because the plural form is a locale rule.
@@ -115,9 +150,7 @@ export default async function CompanyNeedsPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-needs">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
@@ -159,11 +192,86 @@ export default async function CompanyNeedsPage({
               {tWow(`demand.${demandPilotKey}.body`)}
             </p>
           </div>
+          {canChoose ? (
+            <div
+              className="flex flex-wrap gap-2"
+              role="group"
+              data-testid="company-needs-audience-choice"
+            >
+              <Link
+                href="/dashboard/company/needs?audience=need#demand-intake"
+                aria-current={!isStaffingAgency ? "true" : undefined}
+                className={`rounded-md border px-3 py-1.5 text-sm ${
+                  !isStaffingAgency
+                    ? "border-brand-cyan/60 bg-brand-cyan/10 text-text-primary"
+                    : "border-border text-text-secondary"
+                }`}
+                data-testid="company-needs-audience-need"
+              >
+                {tWow("demand.hire.title")}
+              </Link>
+              <Link
+                href="/dashboard/company/needs?audience=offer#demand-intake"
+                aria-current={isStaffingAgency ? "true" : undefined}
+                className={`rounded-md border px-3 py-1.5 text-sm ${
+                  isStaffingAgency
+                    ? "border-brand-cyan/60 bg-brand-cyan/10 text-text-primary"
+                    : "border-border text-text-secondary"
+                }`}
+                data-testid="company-needs-audience-offer"
+              >
+                {tWow("demand.partner.title")}
+              </Link>
+            </div>
+          ) : null}
+          {/* The intake rendered (activation audit 2026-10-26 §2): the step
+              between a need door's click (`company_demand_action_clicked`)
+              and the server-side `demand_saved`. Until now it fired only from
+              a form no company page mounts. Once per tab session per surface
+              (TelemetryView), so it counts companies that reached the form,
+              not re-renders; `entity_type` says need or offer. */}
+          <TelemetryView
+            event={FUNNEL_EVENTS.demandFormViewed}
+            metadata={{
+              surface: "company_needs",
+              role_context: "company",
+              entity_type: isStaffingAgency ? "agency_offer" : "company_request",
+            }}
+          />
           <DemandRequestButton
             intent={demandIntent}
             stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
             repeatRequestId={repeatRequestId}
+            usage={openNeedsUsage}
+            organizationId={employerCtx.kind === "ok" ? employerCtx.organizationId : null}
           />
+          {/* HONEST VISIBILITY (2026-09-22): `list_open_demand_for_workers`
+              shows a need to workers ONLY when companies.verification_status
+              = 'verified' (migration 20260906140000, the join on
+              c.verification_status). Every other status — active_unverified,
+              needs_checks, pending_verification, unverified, draft — keeps the
+              need private to this company and the review team, so the page
+              says so in the person's language instead of implying a reach it
+              does not have. Status-aware: a verified company never sees it. */}
+          {companyRow.verificationStatus !== "verified" ? (
+            <p
+              className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-meta leading-relaxed text-text-secondary"
+              data-testid="company-needs-not-verified-note"
+              data-verification-status={companyRow.verificationStatus}
+            >
+              {tReadback("notVerifiedYet")}{" "}
+              {/* The way forward, not only the fact: the company setup screen
+                  holds the registration code and the optional review request
+                  an operator verifies against. Nothing is verified here. */}
+              <Link
+                href="/dashboard/start/company"
+                className="font-semibold text-text-primary underline underline-offset-4 hover:text-brand-blue"
+                data-testid="company-needs-not-verified-howto"
+              >
+                {tReadback("notVerifiedHowTo")}
+              </Link>
+            </p>
+          ) : null}
           {/* Static-stepper honesty note (guarded): the steps show progress,
               they are not live modules. */}
           <p
@@ -182,10 +290,16 @@ export default async function CompanyNeedsPage({
         labels={readbackLabels}
         locale={locale}
         pendingInterest={pendingInterest}
+        companyVerificationStatus={companyRow.verificationStatus}
       />
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
           /company-need submissions continue here as a real draft demand. */}
+      {claimableState.status === "email_unverified" ? (
+        <div id="company-claims-verify" className="scroll-mt-20">
+          <VerifyEmailPrompt locale={locale} next="/dashboard/company/needs" variant="intake" />
+        </div>
+      ) : null}
       {claimableIntakes.length > 0 ? (
         <div id="company-claims" className="scroll-mt-20">
           <ClaimPublicIntakeCard
@@ -197,6 +311,7 @@ export default async function CompanyNeedsPage({
               claimCta: tClaim("claimCta"),
               claimed: tClaim("claimed"),
               error: tClaim("error"),
+              draftExists: tClaim("draftExists"),
               workersLabel: tClaim("workersLabel"),
             }}
           />
@@ -206,8 +321,8 @@ export default async function CompanyNeedsPage({
       {/* Real market demand on the first session (never an empty
           marketplace): the public vacancy pool for staffing agencies and
           education institutions, with its provenance stated on the card. */}
-      {isStaffingAgency || declaredCapabilities.includes("training_provider") ? (
-        <PublicDemandSection audience={isStaffingAgency ? "agency" : "institution"} />
+      {actsAgency || declaredCapabilities.includes("training_provider") ? (
+        <PublicDemandSection audience={actsAgency ? "agency" : "institution"} />
       ) : null}
 
       <CompanyScoutingBridge />

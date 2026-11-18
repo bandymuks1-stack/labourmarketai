@@ -17,6 +17,12 @@
  * real session token, so it must never be committed, attached to a report or
  * included in a trace that leaves the machine.
  *
+ * "Gitignored" is PROVEN, not assumed: the output name goes through the same
+ * #1842 guards the local mint uses (`lib/testing/e2e-storage-target.ts` — a
+ * bare filename, then `git check-ignore` on the exact resolved target), and
+ * both run BEFORE `generateLink`. A refusal (REFUSED_UNSAFE_E2E_STORAGE_TARGET)
+ * therefore never has a live production token in hand.
+ *
  * NO PASSWORD IS INVOLVED. The account is passwordless; this uses the same
  * magic-link OTP path `e2e-mint-session.ts` uses locally, so no credential for
  * this identity exists to be typed, stored or leaked.
@@ -29,18 +35,39 @@
  * by an innocent-looking edit.
  */
 import { join } from "node:path";
-import { writeFileSync } from "node:fs";
+import { chmodSync, writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 
 import { CANONICAL_HOST } from "../lib/domain/canonical";
 import {
+  PROD_QA_FRESH_IDENTITIES,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
   describeProdQaTarget,
 } from "../lib/testing/prod-qa-guard";
+import { findAuthUserByEmail } from "../lib/testing/prod-qa-find-user";
+import {
+  STORAGE_TARGET_REFUSAL_CODE,
+  UnsafeStorageTargetError,
+  assertBareStorageFilename,
+  assertIgnoredStorageTarget,
+} from "../lib/testing/e2e-storage-target";
 
-const OUT = join(process.cwd(), "tests", "e2e", ".storage-state.prod-qa.json");
+/**
+ * One file per identity when `PROD_QA_STORAGE_SLOT` is set (a multi-actor walk
+ * needs the owner AND the invited worker signed in at once). The slot is
+ * `[a-z0-9-]{1,24}` only, so the name stays a bare filename — and it still goes
+ * through the same bare-name + `git check-ignore` guards below, before any
+ * token exists. Unset: the original single file.
+ */
+const SLOT = process.env.PROD_QA_STORAGE_SLOT;
+if (SLOT !== undefined && !/^[a-z0-9-]{1,24}$/.test(SLOT)) {
+  console.error("[prod-qa-mint] REFUSED: PROD_QA_STORAGE_SLOT must match [a-z0-9-]{1,24}");
+  process.exit(1);
+}
+const OUT_FILENAME = ".storage-state.prod-qa.json";
+const OUT_NAME = SLOT ? `.storage-state.prod-qa.${SLOT}.json` : OUT_FILENAME;
 
 /**
  * The host the session cookie is scoped to — the CANONICAL apex.
@@ -53,6 +80,10 @@ const OUT = join(process.cwd(), "tests", "e2e", ".storage-state.prod-qa.json");
 const APP_HOST = process.env.PROD_QA_APP_HOST ?? CANONICAL_HOST;
 
 async function main(): Promise<void> {
+  // STEP 1 — the output name, before anything else. A constant today; asserted
+  // anyway so the guard, not review, is what keeps it a bare filename.
+  const requested = assertBareStorageFilename(OUT_NAME);
+
   const url = process.env.PROD_QA_SUPABASE_URL;
   const anonKey = process.env.PROD_QA_ANON_KEY;
   const serviceKey = process.env.PROD_QA_SERVICE_ROLE_KEY;
@@ -65,11 +96,14 @@ async function main(): Promise<void> {
     return;
   }
 
+  // STEP 2 — production, and only an allowlisted synthetic identity.
+  // `PROD_QA_IDENTITY` only SELECTS among the hard-coded allowlist (the guard
+  // below refuses anything else); absent, it is the original worker.
   let target;
   try {
     target = assertProdQaTarget({
       url,
-      email: PROD_QA_WORKER_EMAIL,
+      email: process.env.PROD_QA_IDENTITY ?? PROD_QA_WORKER_EMAIL,
       anonKey,
       serviceKey,
     });
@@ -83,9 +117,32 @@ async function main(): Promise<void> {
 
   console.info(`[prod-qa-mint] ${describeProdQaTarget(target)}`);
 
+  // STEP 3 — the target must be inside tests/e2e/ AND ignored by git, BEFORE
+  // generateLink: after it, a refusal would be a refusal with a live
+  // production token already minted.
+  const out = assertIgnoredStorageTarget({
+    filename: requested,
+    e2eDir: join(process.cwd(), "tests", "e2e"),
+  });
+  console.info(`[prod-qa-mint] target ignored by ${out.ignoreRule}`);
+
   const admin = createClient(target.origin, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+
+  // A FRESH identity is created by the owner only (owner decision 2026-10-26).
+  // A magic link for an address with no account could sign it up, so the mint
+  // checks first and refuses — a walk can never be the thing that creates it.
+  if (PROD_QA_FRESH_IDENTITIES.includes(target.email)) {
+    const existing = await findAuthUserByEmail(admin, target.email);
+    if (!existing) {
+      fail(
+        `${target.email} has not been created. Fresh identities are created by the ` +
+          "owner only (prod-qa-fresh-provision.yml); the walk never creates an account.",
+      );
+      return;
+    }
+  }
 
   const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
     type: "magiclink",
@@ -142,13 +199,16 @@ async function main(): Promise<void> {
           ...base,
         }));
 
-  writeFileSync(OUT, JSON.stringify({ cookies, origins: [] }, null, 2));
+  // Proven contained and ignored in step 3, before the session existed.
+  // Owner-only (0600): the file holds a live session.
+  writeFileSync(out.path, JSON.stringify({ cookies, origins: [] }, null, 2), { mode: 0o600 });
+  chmodSync(out.path, 0o600);
 
   // Metadata only — never the token.
   const user = sess.session.user;
   console.info(
     `[prod-qa-mint] minted for ${user.email} ` +
-      `(id=${user.id.slice(0, 8)}…), ${cookies.length} cookie(s) → ${OUT}`,
+      `(id=${user.id.slice(0, 8)}…), ${cookies.length} cookie(s) → ${out.path}`,
   );
   console.info(
     "[prod-qa-mint] this file holds a REAL session. It is gitignored; do not " +
@@ -168,6 +228,14 @@ function fail(message: string): void {
 }
 
 main().catch((err) => {
+  if (err instanceof UnsafeStorageTargetError) {
+    // Refused on the OUTPUT PATH, before generateLink: nothing to rotate.
+    fail(
+      `${err.message}\n${STORAGE_TARGET_REFUSAL_CODE} — no session was ` +
+        "minted, no file was written and no token was printed.",
+    );
+    return;
+  }
   console.error("[prod-qa-mint] FAILED:", (err as Error).message ?? String(err));
   process.exit(1);
 });

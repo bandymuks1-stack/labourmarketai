@@ -32,7 +32,7 @@ const FREE_CLOUD = { id: "gemini", costClass: "free_tier", locality: "cloud" } a
 describe("every task is classified, and the table matches the shipped profiles", () => {
   it("covers all 12 task types", () => {
     // 11 → 12 on 2026-09-05: `propose_conversation_intent`, SENSITIVE_FREE_TEXT.
-    expect(AI_TASK_TYPES.length).toBe(12);
+    expect(AI_TASK_TYPES.length).toBe(13);
     for (const t of AI_TASK_TYPES) {
       expect(TASK_SENSITIVITY[t], `missing sensitivity for ${t}`).toBeDefined();
       expect(AI_DATA_SENSITIVITY_CLASSES).toContain(TASK_SENSITIVITY[t]);
@@ -84,6 +84,12 @@ describe("every task is classified, and the table matches the shipped profiles",
     // Still an equality against a NAMED list rather than a count, for the same
     // reason as before: the risk is a second task being relabelled quietly,
     // and a count would go green on a swap.
+    //
+    // 2026-09-22: `translate_vacancy` was PROPOSED as the second and the
+    // owner refused it — "public source content does not automatically
+    // authorize unrestricted third-party AI transmission" — so it is
+    // SENSITIVE_FREE_TEXT and grant-gated. The set is still one, and that
+    // refusal is the fact worth pinning.
     const publicTasks = AI_TASK_TYPES.filter(
       (t) => TASK_SENSITIVITY[t] === "PUBLIC",
     );
@@ -224,15 +230,23 @@ describe("local is unrestricted; disabled never is", () => {
   });
 });
 
-describe("the shipped profile table still has no free_tier entry", () => {
-  it("every cloud provider is paid — promoting one is a conscious edit", () => {
-    // This mirrors the pin in provider-chain.test.ts and exists here for a
-    // different reason: it documents WHY the tests above must inject their
-    // subject. If this ever goes red, the injected cases become live cases and
-    // the free-provider matrix must carry the source for the promotion.
+describe("the shipped free_tier entries are exactly the verified three", () => {
+  it("promoting a cloud provider to free_tier is a conscious, sourced edit", () => {
+    // This mirrors the pin in provider-chain.test.ts. Until 2026-10-25 the
+    // list was EMPTY and the tests above had to inject their subject. The
+    // owner order of 2026-10-25 (free quotas first) promoted three vendors,
+    // each verified first-hand that day (sources on their registry rows), so
+    // the injected cases above are now live cases — and the one consequence
+    // that matters is pinned here: a free tier still receives PUBLIC only.
     const freeTier = AI_PROVIDER_PROFILES.filter(
       (p: AiProviderProfile) => p.costClass === "free_tier",
     );
-    expect(freeTier).toEqual([]);
+    expect(freeTier.map((p) => p.id)).toEqual(["cloudflare", "mistral", "groq"]);
+    for (const p of freeTier) {
+      expect(p.locality, p.id).toBe("cloud");
+      for (const s of AI_DATA_SENSITIVITY_CLASSES) {
+        expect(providerEligibleForSensitivity(p, s).eligible, `${p.id} ← ${s}`).toBe(s === "PUBLIC");
+      }
+    }
   });
 });

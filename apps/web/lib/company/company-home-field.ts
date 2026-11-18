@@ -1,12 +1,13 @@
 import "server-only";
 
-import { loadProjectRiskForChat } from "@/lib/conversation/project-risk";
+import { loadProjectRiskForHome } from "@/lib/conversation/project-risk";
 import type { ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import type { CapacityChatResult } from "@/lib/conversation/capacity-contract";
+import { getOrgDemandRollup } from "@/lib/company/org-demand-rollup";
 import { loadEmployerOpeningBrief, type OpeningBrief } from "@/lib/conversation/opening-brief";
 import { listProjectStages } from "@/lib/projects/stages";
-import { listProjectAssignments } from "@/lib/projects/projects";
+import { listProjectAssignedPeople } from "@/lib/projects/projects";
 import type { CompanyWorkersListResult } from "@/lib/company/company-workers";
 import {
   COMPANY_HOME_PEOPLE_CHIP_LIMIT,
@@ -26,9 +27,10 @@ import {
  * `capacity`, `attention-brief`, project reads; §2.6 C1 = projects in time
  * × capacity). This module duplicates no source record and writes nothing:
  *
- *   projects + risk   → loadProjectRiskForChat()   (the chat's "which project
- *                       is at risk" — ≤ PROJECT_RISK_SCAN_LIMIT live projects,
- *                       each through the panel's own detail read)
+ *   projects + risk   → loadProjectRiskForHome()   (the chat's "which project
+ *                       is at risk" answer, row for row — ≤ PROJECT_RISK_SCAN_LIMIT
+ *                       live projects — read through the batched project scan,
+ *                       one read per source for all of them, perf 2026-10-22)
  *   now / next        → the stages THAT READ already returned, carried on the
  *                       risk row (QA Q-3) — derived in the pure model, "next"
  *                       marked DERIVED; `listProjectStages()` runs only when a
@@ -71,10 +73,18 @@ export interface CompanyHomeField {
   readonly projects: HomeProjectsResult;
   readonly capacity: CapacityChatResult;
   readonly attention: OpeningBrief | { readonly kind: "unavailable" };
+  /**
+   * Where OPPORTUNITY appears from the company's side, from the ONE existing
+   * company-scoped demand read (`getOrgDemandRollup`, the reports door's
+   * source): people who showed interest in the company's own needs and have
+   * not been looked at. A FACT counted from real rows. `unknown` when the read
+   * did not answer — never a calm zero (SEP-7).
+   */
+  readonly interest: { readonly kind: "ok"; readonly waiting: number } | { readonly kind: "unknown" };
 }
 
 async function loadProjectRows(): Promise<HomeProjectsResult> {
-  const risk = await loadProjectRiskForChat();
+  const risk = await loadProjectRiskForHome();
   if (risk.kind !== "ok") return risk;
   const scanned = risk.rows.slice(0, COMPANY_HOME_PROJECT_LIMIT);
   const rows = await Promise.all(
@@ -96,7 +106,7 @@ async function loadProjectRows(): Promise<HomeProjectsResult> {
               .catch((): null => null),
         names !== undefined
           ? Promise.resolve<readonly string[]>(names)
-          : listProjectAssignments(r.projectId)
+          : listProjectAssignedPeople(r.projectId)
               .then((a): readonly string[] =>
                 a.slice(0, COMPANY_HOME_PEOPLE_CHIP_LIMIT).map((x) => x.name),
               )
@@ -132,13 +142,18 @@ export interface CompanyHomeFieldInput {
 export async function loadCompanyHomeField(
   input: CompanyHomeFieldInput = {},
 ): Promise<CompanyHomeField> {
-  const [projects, capacity, attention] = await Promise.all([
+  const [projects, capacity, attention, rollup] = await Promise.all([
     loadProjectRows().catch((): HomeProjectsResult => ({ kind: "error" })),
     loadWhoIsAvailableForChat(input.roster ? { roster: input.roster } : undefined).catch(
       (): CapacityChatResult => ({ kind: "error" }),
     ),
     // HONESTY (QA Q-2): a failed brief read is "unavailable", never "all clear".
     loadEmployerOpeningBrief().catch((): { kind: "unavailable" } => ({ kind: "unavailable" })),
+    getOrgDemandRollup().catch((): { kind: "unavailable" } => ({ kind: "unavailable" })),
   ]);
-  return { projects, capacity, attention };
+  const interest: CompanyHomeField["interest"] =
+    rollup.kind === "ok" && rollup.interest.state === "ok"
+      ? { kind: "ok", waiting: rollup.interest.byStatus.interested ?? 0 }
+      : { kind: "unknown" };
+  return { projects, capacity, attention, interest };
 }

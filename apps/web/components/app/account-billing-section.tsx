@@ -1,13 +1,18 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-import { getBillingConfig } from "@/lib/billing/config";
+import { billingPilotPassEnabled, billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
+import { RefreshBillingStatusButton } from "@/components/app/refresh-billing-status-button";
 import { TestCheckoutButton } from "@/components/marketing/test-checkout-button";
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import { ORGANIZATION_PLAN_KEY } from "@/lib/billing/plans";
 import { subscriptionBlocksCheckout } from "@/lib/billing/checkout-operations-core";
+import {
+  awaitingProviderSync,
+  classifyCheckoutReturn,
+} from "@/lib/billing/checkout-return-core";
 import { Card } from "@/components/ui/Card";
 
 /**
@@ -37,22 +42,45 @@ export async function AccountBillingSection({
   billingReturn?: string | null;
 }) {
   const t = await getTranslations("accountBilling");
-  const cfg = getBillingConfig();
+  // Pilot-aware (2026-10-21): the workspace's organization decides whether
+  // billing is on for this section; outside a pilot list it reads as off.
+  // resolveBillingSubject is request-cached (the entitlement read uses it too).
+  const workspace = await resolveBillingSubject();
+  const cfg = getBillingConfigFor(
+    workspace.subject?.type === "organization" ? workspace.subject.id : null,
+  );
   const ent = await getEffectiveEntitlements();
 
+  const returnKind = classifyCheckoutReturn(billingReturn);
+  // The success words follow the ADAPTER MODE, not the flag: `returned.success`
+  // says "test-mode … no real money moved", which was rendered for a LIVE
+  // success return too (measured 2026-09-22). Live gets the live sentence.
   const returnNotice =
-    billingReturn === "test_success" || billingReturn === "success"
-      ? t("returned.success")
-      : billingReturn === "test_cancelled" || billingReturn === "cancelled"
+    returnKind === "success"
+      ? (cfg.testMode ? t("returned.success") : t("returned.successLive"))
+      : returnKind === "cancelled"
         ? t("returned.cancelled")
-        : billingReturn === "portal_return"
+        : returnKind === "portal"
           ? t("returned.portal")
           : null;
 
   const status = ent.subscriptionStatus ?? "none";
+  const endsOnDate = formatPeriodEnd(ent.currentPeriodEnd, await getLocale());
   const hasSubscription = ent.source === "subscription";
   // D3: the section is live for BOTH adapter states; the TEST badge only in test.
   const billingOn = cfg.state === "stripe_test" || cfg.state === "stripe_live";
+  // Payments production calm v1 (owner §6, measured 2026-09-22): after a
+  // paid return with NO subscription row yet (the webhook is still in
+  // flight) the section used to say "No subscription" and offer the Order
+  // button again. While the return says success and no row exists, the
+  // button is withheld and a "syncing with the payment provider" notice
+  // replaces it. UI withholding only — the flag activates nothing (P7); the
+  // checkout route is untouched and still refuses a duplicate on its own.
+  const syncing = awaitingProviderSync({
+    billingOn,
+    billingReturn,
+    subscriptionStatus: ent.subscriptionStatus,
+  });
 
   // The portal opens ONLY for a stored billing customer — never offered
   // while payments are disabled, and never a dead button.
@@ -66,7 +94,7 @@ export async function AccountBillingSection({
   // server-bound to the organization the person acts for with billing
   // authority; never from a public page, never for a person (PERSON stays
   // free). The route re-checks membership, plan and price before any session.
-  const subject = billingOn ? await resolveBillingSubject() : null;
+  const subject = billingOn ? workspace : null;
   // Billing safety v1: the order button is also withheld while the subject's
   // row sits in ANY billing state (incomplete / unpaid included) — the route
   // refuses those with `subscription_exists` regardless; this keeps the UI
@@ -74,7 +102,23 @@ export async function AccountBillingSection({
   const canOrder =
     Boolean(subject && subject.subject?.type === "organization" && subject.billingAuthority) &&
     !hasSubscription &&
-    !subscriptionBlocksCheckout(status);
+    !subscriptionBlocksCheckout(status) &&
+    !syncing &&
+    // While the owner runs the 1 € pilot pass, the pass IS the way into the
+    // paid plan: a recurring €99 order beside it invites the one purchase the
+    // owner ruled out for the pilot (no automatic €99 renewal, 2026-10-22).
+    !billingPilotPassEnabled();
+
+  // "Refresh billing status": a calm optional control, shown ONLY while the page
+  // is waiting on the payment provider (redirect says paid but no row yet) or
+  // the row is still incomplete, and only for a person who may act on this
+  // workspace's billing. The click sends nothing; the server resolves everything
+  // and the page re-reads the row afterwards. The flag stays a redirect, never
+  // authority (P7).
+  const showRefresh =
+    billingOn &&
+    Boolean(subject?.billingAuthority) &&
+    (syncing || status === "incomplete");
 
   return (
     <Card compact>
@@ -121,10 +165,26 @@ export async function AccountBillingSection({
               {ent.grace ? (
                 <p className="text-xs text-state-warning">{t("graceNotice")}</p>
               ) : null}
+              {/* Cancelled in the portal "at period end": still entitled until then,
+                  and said so, with the date the provider reported (registry 7.18). */}
+              {ent.cancelAtPeriodEnd && ent.active ? (
+                <p className="text-sm text-text-secondary" data-testid="account-billing-ends-on">
+                  {endsOnDate ? t("endsOn", { date: endsOnDate }) : t("endsAtPeriodEnd")}
+                </p>
+              ) : null}
             </>
           ) : (
             <>
-              <p className="text-sm text-text-secondary">{t("none")}</p>
+              {syncing ? (
+                <p
+                  className="text-sm text-text-secondary"
+                  data-testid="account-billing-syncing"
+                >
+                  {t("returned.syncing")}
+                </p>
+              ) : (
+                <p className="text-sm text-text-secondary">{t("none")}</p>
+              )}
               {canOrder ? (
                 <div className="flex flex-col gap-1" data-testid="account-billing-order">
                   <p className="text-sm font-semibold text-text-primary">{t("subscribe.title")}</p>
@@ -133,10 +193,33 @@ export async function AccountBillingSection({
                     labels={{ start: t("subscribe.cta"), starting: t("manage.opening"), error: t("manage.error") }}
                   />
                   <p className="text-meta text-text-muted">{t("subscribe.note")}</p>
+                  {/* Paid from the first day (owner 2026-10-21): said before the
+                      person leaves for Stripe, which then shows the amount due today. */}
+                  {!billingTrialEnabled() && (
+                    <p className="text-meta text-text-secondary" data-testid="billing-charged-today">
+                      {t("subscribe.chargedToday")}
+                    </p>
+                  )}
                 </div>
               ) : null}
             </>
           )}
+
+          {showRefresh ? (
+            <>
+              <RefreshBillingStatusButton
+                labels={{
+                  cta: t("refresh.cta"),
+                  working: t("refresh.working"),
+                  updated: t("refresh.updated"),
+                  alreadyCurrent: t("refresh.alreadyCurrent"),
+                  notFound: t("refresh.notFound"),
+                  tryLater: t("refresh.tryLater"),
+                }}
+              />
+              <p className="text-meta text-text-muted">{t("refresh.hint")}</p>
+            </>
+          ) : null}
 
           {portalAvailable ? (
             <>
@@ -155,4 +238,12 @@ export async function AccountBillingSection({
       </section>
     </Card>
   );
+}
+
+/** The provider's period end as a calendar date in the page's language; null if absent or unparsable. */
+export function formatPeriodEnd(iso: string | null, locale: string): string | null {
+  if (!iso) return null;
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return null;
+  return new Intl.DateTimeFormat(locale, { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }).format(at);
 }

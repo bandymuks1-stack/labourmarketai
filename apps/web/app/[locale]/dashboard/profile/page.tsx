@@ -1,4 +1,6 @@
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { OrganizationsLeadership } from "@/components/app/organization/organizations-leadership";
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -19,6 +21,7 @@ import {
   supportedSkillIds,
   type EntrySkillLinkRow,
 } from "@/lib/journal/journal-entry-skills";
+import { RecognisedByBlock } from "@/components/app/recognised-by-block";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { SkillClarifySection } from "@/components/app/skill-clarify-section";
@@ -59,11 +62,12 @@ import {
   getOwnExternalProfiles,
   type ExternalProfilesRead,
 } from "@/lib/worker/external-profiles";
-import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { Link } from "@/lib/i18n/navigation";
 import { type CvSectionCard } from "@/components/app/cv-completeness-grid";
 import { WorkerEducationSection } from "@/components/app/worker-education-section";
 import { LearningCompassSection } from "@/components/app/learning-compass-section";
+import { LearnerCohortJoinSection } from "@/components/app/learner-cohort-join-section";
+import { readJoinableCohorts, type CohortJoinRead } from "@/lib/education/cohort-join";
 import { readLearningCompass, type LearningCompassRead } from "@/lib/learning/learning-compass";
 import { WorkerAchievementsSection } from "@/components/app/worker-achievements-section";
 import {
@@ -80,12 +84,17 @@ import {
   type PlayerCardResult,
 } from "@/lib/player-card/player-card-result";
 import { WorkCardEditor } from "@/components/app/work-card-editor";
+import { RequirementLedgerRows } from "@/components/app/instruction-project-asks";
+import { OWN_ROLE_LEDGERS_LIMIT, loadOwnRoleLedgers } from "@/lib/player-card/requirement-ledger-server";
+import { buildRequirementLedgerLabels } from "@/lib/player-card/requirement-ledger-labels";
+import { countryDisplayName } from "@/lib/location/country-model";
+import { WorkerPublicSummaryEditor } from "@/components/app/worker-public-summary-editor";
 import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
 import { OrganizationHistorySkillSuggestionsSection } from "@/components/app/organization-history-skill-suggestions-section";
 import { listMyTeamLinks } from "@/lib/company/team-links";
 import { TeamLinkWithdrawals } from "@/components/app/roster-link-end";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
-import type { ContextWorkTime } from "@/lib/journal/work-intelligence";
+import type { ContextWorkTime, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
 import {
   presentSkills,
   skillMagnitude,
@@ -96,9 +105,22 @@ import { groupCvSkillTiers } from "@/lib/cv-export/skill-tiers";
 import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promotion";
 import {
   OrganizationEvidenceSection,
+  OrganizationEvidenceSummary,
   RosterLinkOffers,
   RosterLinkWithdrawals,
 } from "@/components/app/organization-evidence-section";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { experienceFiguresOf } from "@/lib/journal/experience-figures";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { orgDisplayName } from "@/lib/company/org-display";
+import { endedUnnamedOrganizationContexts } from "@/lib/journal/engagement-label";
+import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/profile", "skills.pageTitle");
+
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -161,6 +183,10 @@ export default async function ProfilePage({
     tFeatureNotes,
     tIdentityNotice,
     tPrivacySections,
+    tEvidenceMine,
+    tPublicSummary,
+    tRoleLedger,
+    tJournal,
   ] = await Promise.all([
     getTranslations("skills"),
     getTranslations("spaces"),
@@ -192,6 +218,13 @@ export default async function ProfilePage({
     // supply stayed structurally invisible to scouting. Reuses the existing
     // privacyConsent.sections.visibility label in every locale.
     getTranslations("privacyConsent.sections"),
+    // Summary first: the organization-history bar names its section with the
+    // card's own title. Same ONE batch — never a standalone await (W7-S3).
+    getTranslations("evidenceImport.mine"),
+    getTranslations("workerPublicSummary"),
+    getTranslations("roleLedger"),
+    // The ONE "no name" phrase set (`journal.unnamedOrganization.*`, #3356).
+    getTranslations("journal"),
   ]);
 
   /**
@@ -260,7 +293,7 @@ export default async function ProfilePage({
     supabase
       .from("workers")
       .select(
-        "id, availability_status, available_from, current_location_country, salary_min_eur, salary_max_eur",
+        "id, availability_status, available_from, current_location_country, preferred_countries, salary_min_eur, salary_max_eur, headline, bio",
       )
       .eq("profile_id", user.id)
       .maybeSingle(),
@@ -318,6 +351,14 @@ export default async function ProfilePage({
 
   let currentProfessionId: string | null = null;
   let workerDirections: WorkerDirection[] = [];
+  // PER-13 role context: what is missing for my primary profession in the
+  // countries I aim at (filled in the second stage below; empty = not shown).
+  let roleLedgers: Awaited<ReturnType<typeof loadOwnRoleLedgers>> = [];
+  let roleLedgerLabels: Awaited<ReturnType<typeof buildRequirementLedgerLabels>> | null = null;
+  /** The professions this person named in their OWN WORDS — shown exactly as
+   *  typed. Separate from `workerDirections`, which are registry professions
+   *  the skills editor is keyed to. */
+  let ownProfessions: { id: string; label: string }[] = [];
   let initialSkillIds: string[] = [];
   let savedSkills: CvSkill[] = [];
   let skillDots: SkillDot[] = [];
@@ -351,6 +392,13 @@ export default async function ProfilePage({
   // the hub so each history row can say "recorded h / confirmed h". Stays
   // null when the journal was not read → no hours line, never "0 h".
   let workContexts: readonly ContextWorkTime[] | null = null;
+  // The identity stage's fact strip: the SAME model's all-time row.
+  let workAllTime: { totals: WorkPeriodTotals; truncated: boolean } | null = null;
+  let organizationHistoryHours: number | null = null;
+  // The ONE continuous professional history's total (decision 0025): every
+  // work hour once over the journal and the organization history.
+  let professionalExperienceHours: number | null = null;
+  let unrecordedHours: { entries: number; earliestDay: string } | null = null;
   // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
   // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
   // branch is kept for fresh/local databases, not because production lacks it.
@@ -368,9 +416,11 @@ export default async function ProfilePage({
   // count of project-linked journal entries powering the completeness grid.
   let workerEducation: WorkerEducationRead | null = null;
   let learningCompass: LearningCompassRead | null = null;
+  let cohortJoin: CohortJoinRead | null = null;
   let workerAchievements: WorkerAchievementsRead | null = null;
-  let projectLinkedEntryCount = 0;
-  let certificateDocCount = 0;
+  // null = the count read failed (SEP-7): that card is left out, never "empty".
+  let projectLinkedEntryCount: number | null = 0;
+  let certificateDocCount: number | null = 0;
   // Trust signals were awaited inside the JSX; resolved in stage 5 now.
   let trustSignals: Awaited<ReturnType<typeof getOwnTrustSignals>> | null = null;
   if (workerId) {
@@ -407,6 +457,9 @@ export default async function ProfilePage({
       trust,
       workIntelligence,
       playerCardRes,
+      experienceRelationships,
+      standingSkills,
+      cohortJoinRes,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       // Learning Compass (Track C): own records + the board's match results;
@@ -434,13 +487,13 @@ export default async function ProfilePage({
         ]),
       supabase
         .from("worker_professions")
-        .select("profession_id, is_primary")
+        .select("id, profession_id, is_primary, label")
         .eq("worker_id", workerId)
         .order("is_primary", { ascending: false }),
       // ALL of the worker's saved skills (read model — never filtered down).
       supabase
         .from("worker_skills")
-        .select("skill_id, confidence_bin, verified, source, skills(slug)")
+        .select("skill_id, confidence_bin, verified, verified_by, verified_at, source, skills(slug)")
         .eq("worker_id", workerId)
         .order("created_at", { ascending: true }),
       // DURABLE journal→skill links (v1) — graceful no-op if the migration is
@@ -455,12 +508,22 @@ export default async function ProfilePage({
       supabase
         .from("engagement_contexts")
         .select(
-          "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
+          "id, organization_id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
         )
         .eq("profile_id", user.id)
         .in("relationship_slug", HISTORY_RELATIONSHIPS)
         .order("is_primary", { ascending: false })
-        .order("started_at", { ascending: false, nullsFirst: false }),
+        .order("started_at", { ascending: false, nullsFirst: false })
+        // An ENDED relationship's organization is outside the organizations
+        // RLS (active relationships only), so its embed is empty: the shared
+        // historical-name reader fills it inside this same parallel stage
+        // (system audit 2026-10-20: former employers showed "—").
+        .then(
+          (res): Promise<typeof res> =>
+            res.data
+              ? withHistoricalOrgNames(supabase, res.data).then((data) => ({ ...res, data }) as typeof res)
+              : Promise.resolve(res),
+        ),
       // Was awaited INSIDE the JSX (`signals={await getOwnTrustSignals(…)}`),
       // so it could not overlap anything at all.
       getOwnTrustSignals(workerId),
@@ -474,18 +537,45 @@ export default async function ProfilePage({
       // The work-card editor's reads, in the SAME parallel stage (the render
       // path is stage-budgeted by profile-render-stages guards).
       loadPlayerCardResult().catch((): PlayerCardResult | null => null),
+      // Every relationship to an organization (jobs, ownership, management)
+      // for the one professional-experience reading (decision 0025).
+      readOwnExperienceRelationships(supabase, user.id).catch(() => null),
+      // Whether each recorded skill confirmation still STANDS
+      // (lib/evidence/skill-confirmation-standing.ts) — request-cached, the
+      // player card above shares the same read.
+      readOwnStandingConfirmedSkillIds(workerId),
+      // J-12: learning groups open for a learner's own join request, and the
+      // learner's requests (migration 20261102160000; absent → renders nothing).
+      readJoinableCohorts().catch((): CohortJoinRead | null => null),
     ]);
 
     availabilityPrefs = prefsRes;
     playerCardResult = playerCardRes;
     workContexts = workIntelligence?.contexts ?? null;
+    // Entries whose written hours never became recorded time (pre-2026-08-20
+    // composer) — counted from the SAME entries the totals read, so the
+    // profile does not present an incomplete total as the whole story.
+    unrecordedHours = workIntelligence?.unrecordedHours ?? null;
+    {
+      const all = workIntelligence?.periods.find((p) => p.key === "all");
+      // Imported organization history counts as experience (#2169): the ONE
+      // all-time rule, day + period records, no invoice consulted.
+      ({ organizationHistoryHours, professionalExperienceHours } = experienceFiguresOf(
+        workIntelligence,
+        experienceRelationships,
+      ));
+      workAllTime = all
+        ? { totals: all, truncated: workIntelligence?.coverage.truncated ?? false }
+        : null;
+    }
     workerLanguages = langsRes;
     externalProfiles = extRes;
     workerEducation = eduRes;
     learningCompass = compassRes;
+    cohortJoin = cohortJoinRes;
     workerAchievements = achRes;
-    projectLinkedEntryCount = projCountRes.count ?? 0;
-    certificateDocCount = certDocsRes.count ?? 0;
+    projectLinkedEntryCount = projCountRes.error ? null : (projCountRes.count ?? 0);
+    certificateDocCount = certDocsRes.error ? null : (certDocsRes.count ?? 0);
     trustSignals = trust;
 
     const wpAll = wpAllRes.data;
@@ -503,6 +593,18 @@ export default async function ProfilePage({
       .filter((d): d is WorkerDirection => d !== null)
       .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
 
+    // A profession the registry does not carry is still this person's answer
+    // (ledger 20260927060325). It has no catalogue row, so it cannot join the
+    // directions above — those drive the per-profession skills editor — but it
+    // must be visible, and it is shown verbatim.
+    ownProfessions = (wpAll ?? [])
+      .map((r) => {
+        const row = r as { id?: string; label?: string | null };
+        const label = (row.label ?? "").trim();
+        return row.id && label ? { id: row.id, label } : null;
+      })
+      .filter((v): v is { id: string; label: string } => v !== null);
+
     /**
      * ── W7-S3 STAGE 6 — the only reads that GENUINELY depend on stage 5 ────
      *
@@ -515,7 +617,13 @@ export default async function ProfilePage({
     const workerProfIds = (wpAll ?? [])
       .map((r) => r.profession_id)
       .filter((id): id is string => !!id);
-    const [coreRes, allowedRes, tmplRes] = await Promise.all([
+    const primaryProfessionSlug =
+      professions.find((p) => p.id === currentProfessionId)?.slug ?? null;
+    const workerRow = worker as { preferred_countries?: string[] | null; current_location_country?: string | null } | null;
+    const roleCountries: (string | null)[] = (workerRow?.preferred_countries ?? []).length > 0
+      ? (workerRow?.preferred_countries ?? []).slice(0, OWN_ROLE_LEDGERS_LIMIT)
+      : [workerRow?.current_location_country ?? null];
+    const [coreRes, allowedRes, tmplRes, roleLedgersRes, roleLedgerLabelsRes] = await Promise.all([
       // is_core per skill for the current profession (the [PAGRINDINIS] tag).
       currentProfessionId
         ? supabase
@@ -544,13 +652,25 @@ export default async function ProfilePage({
             .is("organization_id", null)
             .maybeSingle()
         : Promise.resolve(null),
+      // Same stage: the role ledgers need the primary profession too.
+      primaryProfessionSlug
+        ? loadOwnRoleLedgers(
+            roleCountries.map((country) => ({ professionSlug: primaryProfessionSlug, country })),
+          ).catch(() => [])
+        : Promise.resolve([]),
+      primaryProfessionSlug ? buildRequirementLedgerLabels() : Promise.resolve(null),
     ]);
+    roleLedgers = roleLedgersRes;
+    roleLedgerLabels = roleLedgerLabelsRes;
 
     const coreMap = new Map<string, boolean>();
     for (const r of coreRes?.data ?? []) coreMap.set(r.skill_id, r.is_core);
 
     recordReadUnavailable = Boolean(wsRes.error) || Boolean(ecRes.error);
-    const rows = wsRes.data ?? [];
+    // A recorded confirmation reads as confirmed only while it STANDS
+    // (lib/evidence/skill-confirmation-standing.ts).
+    const storedRows = wsRes.data ?? [];
+    const rows = withStandingConfirmation(storedRows, anyRecordedConfirmation(storedRows) ? standingSkills : null);
     initialSkillIds = rows
       .map((r) => r.skill_id)
       .filter((id): id is string => id !== null);
@@ -645,6 +765,20 @@ export default async function ProfilePage({
       nameOf: (slug) => tSkill(slug),
     });
 
+    // An organization without a name the person no longer works with is
+    // called so (owner 2026-11-15, #3356): renamed, never hidden. Judged per
+    // organization over every card, from the rows this page already read.
+    const endedUnnamedCards = endedUnnamedOrganizationContexts(
+      (ecRes.data ?? []).map((e) => {
+        const org = e.organizations as { display_name: string | null; legal_name: string | null } | null;
+        return {
+          engagementContextId: e.id,
+          organizationId: e.organization_id,
+          organizationName: orgDisplayName(org?.display_name, org?.legal_name),
+          endedAt: e.ended_at,
+        };
+      }),
+    );
     // Engagement-context cards (current first): primary first, then most-recent.
     engagementCards = (ecRes.data ?? []).map((e) => {
       const org = e.organizations as
@@ -666,14 +800,22 @@ export default async function ProfilePage({
       return {
         id: e.id,
         orgName:
-          org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—",
+          org?.display_name ??
+          org?.legal_name ??
+          (endedUnnamedCards.has(e.id) ? tJournal("unnamedOrganization.ended") : null) ??
+          typeLabel ??
+          e.title ??
+          "—",
         relationship: e.relationship_slug,
         startedAt: e.started_at,
         endedAt: e.ended_at,
         title: e.title,
         isPrimary: e.is_primary,
         // Exactly the RPC's preconditions, computed from rows already read.
-        selfDeclared: org === null && e.is_primary !== true,
+        // The RPC's own precondition is `organization_id is null` — an ENDED
+        // organization relationship whose name RLS hides is NOT self-declared
+        // (it showed a Remove button the RPC then refused).
+        selfDeclared: e.organization_id === null && e.is_primary !== true,
       };
     });
 
@@ -716,7 +858,7 @@ export default async function ProfilePage({
     const declaredCerts = achEntries.filter(
       (a) => a.achievementTypeSlug === "declared_certificate",
     ).length;
-    return [
+    const cards: (Omit<CvSectionCard, "filled"> & { filled: boolean | null })[] = [
       {
         key: "summary",
         filled: savedProfileText.trim().length > 0,
@@ -736,7 +878,8 @@ export default async function ProfilePage({
       },
       {
         key: "certificates",
-        filled: certificateDocCount > 0 || declaredCerts > 0,
+        filled:
+          declaredCerts > 0 ? true : certificateDocCount === null ? null : certificateDocCount > 0,
         href: DOCUMENTS_READINESS_ENABLED
           ? `/${locale}/dashboard/documents`
           : "#cv-achievements",
@@ -748,7 +891,7 @@ export default async function ProfilePage({
       },
       {
         key: "projects",
-        filled: projectLinkedEntryCount > 0,
+        filled: projectLinkedEntryCount === null ? null : projectLinkedEntryCount > 0,
         href: `/${locale}/dashboard/journal`,
       },
       {
@@ -769,7 +912,47 @@ export default async function ProfilePage({
         href: "#cv-availability",
       },
     ];
+    // A card whose read failed is not shown at all — never as "○ empty".
+    return cards.filter((c): c is CvSectionCard => c.filled !== null);
   })();
+
+  /**
+   * SUMMARY FIRST (owner P0/P1 §17, 2026-09-23). Organization history used to
+   * stand here as EVERY record card, open, above the person's own overview —
+   * each one with its provenance internals and a per-month list (28 cards for
+   * the first real offer, once accepted). It is now ONE summary line heading
+   * a disclosure, and the cards, the skill suggestions they named and the
+   * consent withdrawals that govern the same relationships live inside it.
+   *
+   * The disclosure exists whenever there is anything of that relationship to
+   * show — records, a confirmed roster link, or an active team link (or a
+   * team-link read that failed and says so) — so a withdrawal is never left
+   * without a home when there are no records. Derived from reads already
+   * made; no new request.
+   */
+  const orgHistoryVisible =
+    (myOrgEvidence.kind === "ok" &&
+      (myOrgEvidence.records.length > 0 ||
+        myOrgEvidence.links.some((l) => l.linkState === "linked"))) ||
+    myTeamLinks.kind === "error" ||
+    (myTeamLinks.kind === "ok" && myTeamLinks.rows.length > 0);
+  // WHICH organization recorded each row, keyed by the roster record. The
+  // record view carries no organization name of its own; the subject read
+  // resolves it on the roster link (the ONE org-name rule). Built once, handed
+  // to both the summary line and the cards so they cannot name a record's
+  // origin differently.
+  const orgNamesByPerson: Record<string, string> =
+    myOrgEvidence.kind === "ok"
+      ? Object.fromEntries(
+          myOrgEvidence.links.flatMap((l) =>
+            l.organizationName ? [[l.id, l.organizationName] as const] : [],
+          ),
+        )
+      : {};
+  // The work behind each record (project, client, capacity, source, proof
+  // facts) is composed INSIDE the evidence read already in the page's one
+  // batch (`listMyOrganizationEvidence`), so it adds no serial stage here.
+  const historyContexts = myOrgEvidence.kind === "ok" ? myOrgEvidence.contexts : {};
 
   return (
     <div className="flex flex-col gap-6">
@@ -779,9 +962,7 @@ export default async function ProfilePage({
       />
       <header id="profile-top" className="scroll-mt-20">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("pageTitle")}
-          </h1>
+          <PageTitle>{t("pageTitle")}</PageTitle>
           {/* systemic-ux-mobile-v1: action cluster never clips on 360px — it
               stacks to a 2-column grid on mobile (max 2 actions across) and
               flows inline only from sm+. */}
@@ -822,7 +1003,7 @@ export default async function ProfilePage({
             {workerId ? (
               <Link
                 href="/cv"
-                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                className="rounded-md px-2.5 py-1 text-xs font-medium text-text-secondary underline-offset-4 transition-colors hover:text-text-primary hover:underline"
                 data-testid="profile-cv-export-link"
               >
                 {tCv("exportButton")}
@@ -830,7 +1011,7 @@ export default async function ProfilePage({
             ) : null}
           </div>
           <details className="group" data-testid="profile-more-destinations">
-            <summary className="inline-flex min-h-11 cursor-pointer select-none list-none items-center font-mono text-meta uppercase tracking-label text-text-secondary transition-colors hover:text-text-primary [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex min-h-11 cursor-pointer select-none list-none items-center text-sm font-medium text-text-secondary transition-colors hover:text-text-primary [&::-webkit-details-marker]:hidden">
               {tQuick("moreDestinations")}
               <span aria-hidden className="ml-1 transition-transform group-open:rotate-90">
                 ›
@@ -842,7 +1023,7 @@ export default async function ProfilePage({
             {workerId && DOCUMENTS_READINESS_ENABLED ? (
               <Link
                 href={"/dashboard/documents" as "/dashboard"}
-                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                className="rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
                 data-testid="profile-documents-link"
               >
                 {tDocs("title")}
@@ -855,7 +1036,7 @@ export default async function ProfilePage({
             {workerId ? (
               <Link
                 href={"/dashboard/privacy" as "/dashboard"}
-                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                className="rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
                 data-testid="profile-visibility-link"
               >
                 {tPrivacySections("visibility")}
@@ -865,7 +1046,7 @@ export default async function ProfilePage({
             {workerId ? (
               <Link
                 href={"/dashboard/gallery" as "/dashboard"}
-                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                className="rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
                 data-testid="profile-gallery-link"
               >
                 {tGallery("title")}
@@ -877,14 +1058,14 @@ export default async function ProfilePage({
                 in an existing row, not a replacement card. */}
             <Link
               href={"/dashboard/network" as "/dashboard"}
-              className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              className="rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
               data-testid="profile-network-link"
             >
               {tNetwork("title")} →
             </Link>
             <Link
               href="/dashboard"
-              className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              className="rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
               data-testid="room-my-spaces-link"
             >
               {tSpaces("mySpaces")} →
@@ -898,30 +1079,17 @@ export default async function ProfilePage({
         </p>
       </header>
 
-      {/* Page-local quick nav (IA cleanup v2 #3) — anchors relevant to the
-          person identity surface so a long profile never loses the user. */}
-      <PageQuickNav
-        ariaLabel={tQuick("ariaLabel")}
-        items={[
-          { href: "#profile-top", label: tQuick("top") },
-          { href: "#profile-identity", label: tQuick("identity") },
-          // W7-S4: `#managed-companies` removed — the anchor's target moved to
-          // `/dashboard/network`. A jump chip pointing at a section that is no
-          // longer on the page is a dead control, and this bar is in-page
-          // anchors only. The route link lives in the header action row.
-          { href: "#profile-edit", label: tQuick("skills") },
-          // The CV detail editors moved into one disclosure below; without a
-          // chip they would be discoverable only by scrolling past the skills
-          // composer. `DetailsHashOpener` opens the disclosure on the jump.
-          { href: "#cv-details", label: tQuick("details") },
-          // Student path (Track C): the Learning Compass is the student's
-          // home and sits far down this page — without a chip it is
-          // reachable only by scrolling past every other section.
-          ...(learningCompass?.status === "ok" && learningCompass.student
-            ? [{ href: "#learning-compass", label: tQuick("compass") }]
-            : []),
-        ]}
-      />
+      {/* NO QUICK-NAV STRIP HERE ANY MORE (worker mobile IA 2026-09-13 §4:
+          PageQuickNav "REMOVE (worker)"; owner P0/P1 §17). The strip existed
+          because the page was a long sheet of open sections a reader could
+          get lost in. It is now summary → current state → action → closed
+          disclosures, each a one-tap bar in reading order, so the strip was
+          a second table of contents for a page that no longer needs one.
+          Every anchor it carried still resolves: `#profile-edit`,
+          `#cv-details` and `#profile-identity` (now inside `#cv-details`)
+          open their disclosures through `DetailsHashOpener`, and
+          `#learning-compass` stands open above the fold. `/cv` keeps its own
+          strip. */}
 
       {/* W7-S5b: when the account holds NO person identity (identity truth =
           `profile_roles`, the same set the RoleSwitcher offers "add person"
@@ -964,55 +1132,82 @@ export default async function ProfilePage({
         offers={myOrgEvidence.kind === "ok" ? myOrgEvidence.pendingOffers : []}
       />
 
-      {/* WHAT AN ORGANIZATION HAS RECORDED ABOUT THIS PERSON (2026-09-18).
-          The first real accepted roster link (800 h, one period record,
-          organization-attested) rendered — inside the same closed
-          `#cv-details` bar the offer used to hide in. Rendered ≠ reachable
-          (#1770, class F). When there IS linked history it stands here, above
-          the disclosures, because it is real work somebody else put on
-          record about this person; when there is none the card keeps its
-          quiet place inside the bar below (an empty "nothing recorded" line
-          is not worth the first screen). Same read, same card, same
-          derivation — only where it stands changes. */}
-      {myOrgEvidence.kind === "ok" && myOrgEvidence.records.length > 0 ? (
-        <OrganizationEvidenceSection
-          records={myOrgEvidence.records}
-          needsMigration={false}
-          organizationNames={Object.fromEntries(
-            myOrgEvidence.links.flatMap((l) =>
-              l.organizationName ? [[l.id, l.organizationName] as const] : [],
-            ),
-          )}
-        />
-      ) : null}
+      {/* WHAT AN ORGANIZATION HAS RECORDED ABOUT THIS PERSON — SUMMARY FIRST.
+          History (2026-09-18): the first real accepted roster link rendered
+          inside the closed `#cv-details` bar; #1771 fixed that class-F
+          defect (rendered ≠ reachable) by hoisting the WHOLE card list open
+          above the overview. The lesson holds — linked history must be
+          discoverable on arrival — but discoverable is a SUMMARY, not every
+          card: the bar below says how many records, from whom, over which
+          dates and in which standing, on arrival, in its own closed state.
+          One tap (or any hash naming the bar or a section inside it, via
+          `DetailsHashOpener`) opens the same cards, the skills they named
+          and the withdrawals that govern the same relationships. When there
+          are no records the empty card keeps its quiet place inside
+          `#cv-details`. Same reads, same cards, same derivation. */}
+      {orgHistoryVisible ? (
+        <>
+          <DetailsHashOpener targetId="organization-history" />
+          <details
+            id="organization-history"
+            className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
+            data-testid="organization-history-disclosure"
+          >
+            <summary className="flex min-h-11 cursor-pointer list-none flex-col items-start justify-center gap-1 px-4 py-2 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+              <span className="inline-flex items-center gap-2">
+                <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+                {tEvidenceMine("title")}
+              </span>
+              <OrganizationEvidenceSummary
+                records={myOrgEvidence.kind === "ok" ? myOrgEvidence.records : []}
+                organizationNames={orgNamesByPerson}
+              />
+            </summary>
+            <div className="flex flex-col gap-6 px-4 pb-4">
+              {myOrgEvidence.kind === "ok" && myOrgEvidence.records.length > 0 ? (
+                <OrganizationEvidenceSection
+                  records={myOrgEvidence.records}
+                  needsMigration={false}
+                  organizationNames={orgNamesByPerson}
+                  contexts={historyContexts}
+                  showTitle={false}
+                />
+              ) : null}
 
-      {/* SKILLS THOSE RECORDS NAMED (2026-09-20). The competency signals the
-          import derives were written and never read; this is the one place
-          they reach the person — as SUGGESTIONS with their provenance
-          (organization history), accepted only by the person's own tap and
-          then self-declared, never verified. Worker only; nothing when there
-          is nothing to suggest. */}
-      {workerId && myOrgEvidence.kind === "ok" && myOrgEvidence.records.length > 0 ? (
-        <OrganizationHistorySkillSuggestionsSection
-          records={myOrgEvidence.records}
-          declaredSlugs={skillDots.map((d) => d.slug)}
-        />
-      ) : null}
+              {/* SKILLS THOSE RECORDS NAMED (2026-09-20). The competency
+                  signals the import derives were written and never read; this
+                  is the one place they reach the person — as SUGGESTIONS with
+                  their provenance (organization history), accepted only by
+                  the person's own tap and then self-declared, never verified.
+                  Worker only; nothing when there is nothing to suggest. */}
+              {workerId && myOrgEvidence.kind === "ok" && myOrgEvidence.records.length > 0 ? (
+                <OrganizationHistorySkillSuggestionsSection
+                  records={myOrgEvidence.records}
+                  declaredSlugs={skillDots.map((d) => d.slug)}
+                />
+              ) : null}
 
-      {/* THE LINK CAN BE WITHDRAWN (2026-09-19). A confirmed roster link was
-          the one consent on this page with no way back: the policy admitted
-          "unlinked" from the subject all along, the product offered only the
-          two answers to an OFFER. Stands beside the history it governs; empty
-          when nothing is confirmed. */}
-      {myOrgEvidence.kind === "ok" ? (
-        <RosterLinkWithdrawals links={myOrgEvidence.links} />
-      ) : null}
+              {/* THE LINK CAN BE WITHDRAWN (2026-09-19). A confirmed roster
+                  link was the one consent on this page with no way back: the
+                  policy admitted "unlinked" from the subject all along, the
+                  product offered only the two answers to an OFFER. Stands
+                  beside the history it governs; empty when nothing is
+                  confirmed. */}
+              {myOrgEvidence.kind === "ok" ? (
+                <RosterLinkWithdrawals links={myOrgEvidence.links} />
+              ) : null}
 
-      {/* "I NO LONGER WORK HERE" (R-9). The roster relationship the person
-          accepted (company_workers / agency_workers) had no withdrawal at
-          all — the one relationship on this page that consent created and
-          consent could not end. Empty when there is no active link. */}
-      <TeamLinkWithdrawals result={myTeamLinks} />
+              {/* "I NO LONGER WORK HERE" (R-9). The roster relationship the
+                  person accepted (company_workers / agency_workers) had no
+                  withdrawal at all — the one relationship on this page that
+                  consent created and consent could not end. Empty when there
+                  is no active link; its presence alone keeps this bar on the
+                  page (`orgHistoryVisible`). */}
+              <TeamLinkWithdrawals result={myTeamLinks} />
+            </div>
+          </details>
+        </>
+      ) : null}
 
       {/* THE STUDENT'S IDENTITY, ABOVE THE FOLD (2026-09-18). The Learning
           Compass — what this person is becoming, in which cohort, and the
@@ -1024,6 +1219,15 @@ export default async function ProfilePage({
           imported history). Student path only; nothing generated. */}
       {learningCompass?.status === "ok" && learningCompass.student ? (
         <LearningCompassSection compass={learningCompass.compass} />
+      ) : null}
+
+      {/* J-12: ask to join a learning group; the learner's own record stays
+          their declaration until the institution confirms it. */}
+      {cohortJoin ? (
+        <LearnerCohortJoinSection
+          read={cohortJoin}
+          student={learningCompass?.status === "ok" && learningCompass.student}
+        />
       ) : null}
 
       {/* W7-S1: the readiness/summary surfaces that used to stand here —
@@ -1056,6 +1260,10 @@ export default async function ProfilePage({
         // The journal's per-engagement hours, joined on engagement id in the
         // hub's history list (the same ledger the skills above read).
         workContexts={workContexts}
+        workAllTime={workAllTime}
+        organizationHistoryHours={organizationHistoryHours}
+        professionalExperienceHours={professionalExperienceHours}
+        unrecordedHours={unrecordedHours}
         // Identity-essential presence sourced from the ONE minimum card contract
         // (launch audit §7.3) — only data already fetched above, no new reads.
         cardSource={{
@@ -1078,14 +1286,14 @@ export default async function ProfilePage({
            journal-entry count query went with them — it had no other consumer,
            so the slice removes one DB round trip as well as one number. */
       />
+      {/* Organizations the person owns or manages + their business history
+          (owner request 2026-10-09) - a relationship, never personal hours. */}
+      <OrganizationsLeadership locale={locale} variant="profile" />
 
-      <section
-        id="profile-identity"
-        className="card-border flex flex-col gap-3 p-5 scroll-mt-20"
-        data-testid="profile-avatar-section"
-      >
-        <ProfileAvatar signedUrl={avatar.signedUrl} displayName={personName} />
-      </section>
+      {/* The avatar EDITOR moved into `#cv-details` (summary first,
+          2026-09-23): the hub above already shows the avatar, so a second
+          open avatar block was the same face twice on one screen. The
+          upload is one tap away, under its old `#profile-identity` anchor. */}
 
       {/* W7-S4 — `#managed-companies` MOVED to `/dashboard/network`
           (`network-organizations`), which already rendered this exact
@@ -1099,36 +1307,10 @@ export default async function ProfilePage({
           read went with the block; it had no other consumer here, so the
           profile does one fewer DB round trip. */}
 
-      {/* Workstream C: the trust chain made VISIBLE on the person — counts
-          straight from canonical tables (verified skills, manager
-          confirmations, journal entries). Honest zeros with a growth hint. */}
-      {workerId && trustSignals ? (
-        <TrustBlock
-          signals={trustSignals}
-          labels={{
-            title: tTrust("title"),
-            caption: tTrust("caption"),
-            verifiedSkills: tTrust("verifiedSkills"),
-            managerConfirmations: tTrust("managerConfirmations"),
-            journalEntries: tTrust("journalEntries"),
-            zeroHint: tTrust("zeroHint"),
-            unreadHint: tTrust("unreadHint"),
-          }}
-        />
-      ) : null}
-
-      {/* W7-S5b: "Your professional passport: CV, skills and work journal…"
-          was rendered unconditionally — worker-framed copy shown verbatim to
-          accounts holding no person identity. Keyed on identity (roles), NOT
-          `workerId`: the 0009 trigger makes `workerId` non-null for every
-          normal account, so a workerId gate would never fire. A non-worker
-          identity gets the two-identities model note instead; the identity
-          notice above carries the full explanation. */}
-      <FeatureNote testId="feature-note-profile">
-        {identityNotice.kind === "hidden"
-          ? tFeatureNotes("workerProfile")
-          : tFeatureNotes("identityModel")}
-      </FeatureNote>
+      {/* The trust counts and the profile note moved to the END of the page,
+          into one disclosure (`#profile-about`, summary first 2026-09-23):
+          the hub above already states the same evidence counts, so the
+          open block repeated figures the reader had just read. */}
       {/* Consolidated (P0 profile rescue): the ProfileHubOverview above is the
           SINGLE output summary — CV + skills + journal-evidence pillars (which
           also show what's missing), the compact "Supported by work entries: N",
@@ -1153,8 +1335,30 @@ export default async function ProfilePage({
           composer + chips, which is the right canonical surface for
           their narrative-derived skills. The wrapper id is the anchor target
           for the hub overview's single "Complete profile" primary action. */}
-      <div id="profile-edit" className="scroll-mt-4">
+      {/* EDITING IS SECONDARY (summary first, 2026-09-23). The composer and
+          its CV input stood open on arrival, so the page opened as a form.
+          It is one closed bar now — and every one of the SIX hub links that
+          point here (the primary "add what is missing" action among them),
+          the chat's "set profession" chip and the CV grid's summary/skills
+          cards name `#profile-edit`, which `DetailsHashOpener` opens on
+          arrival and on every later in-page hash change. A worker with no
+          primary profession lands straight in the profession picker (the
+          flow's `manual` stage), which is what that chip promised. */}
+      <DetailsHashOpener targetId="profile-edit" />
+      <details
+        id="profile-edit"
+        className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
+        data-testid="profile-edit-disclosure"
+      >
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+          <span className="inline-flex items-center gap-2">
+            <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+            {t("editDisclosure")}
+          </span>
+        </summary>
+        <div className="px-4 pb-4">
         <ProfileTextFirstFlow
+        viewerEmail={user.email ?? null}
         hasPrimaryProfession={currentProfessionId !== null}
         initialText={savedProfileText}
         savedClaimNormalizedLabels={savedSkillClaims.map(
@@ -1167,6 +1371,7 @@ export default async function ProfilePage({
               professions={professions}
               currentProfessionId={currentProfessionId}
               directions={workerDirections}
+              ownProfessions={ownProfessions}
               initialSkillIds={initialSkillIds}
               personName={personName}
               roles={roles}
@@ -1176,7 +1381,33 @@ export default async function ProfilePage({
           ) : undefined
         }
         />
-      </div>
+        </div>
+      </details>
+
+      {/* PER-13 role context: "what do I have and what is missing to work as
+          my profession in the countries I aim at" — the SAME ledger rows and
+          copy as the project and opportunity surfaces. */}
+      {roleLedgerLabels && roleLedgers.some((r) => r.ledger.rows.length > 0) ? (
+        <section className="flex flex-col gap-3" data-testid="profile-role-ledgers">
+          {roleLedgers
+            .filter((r) => r.ledger.rows.length > 0)
+            .map((r) => (
+              <div
+                key={`${r.professionSlug}-${r.country ?? "any"}`}
+                className="flex flex-col gap-2 rounded-md border border-brand-blue/30 bg-brand-blue/5 p-3"
+                data-testid="profile-role-ledger"
+              >
+                <p className="text-sm font-medium text-text-primary">
+                  {tRoleLedger("title", {
+                    profession: tProf(r.professionSlug),
+                    country: r.country ? countryDisplayName(r.country, locale) : tRoleLedger("anyCountry"),
+                  })}
+                </p>
+                <RequirementLedgerRows ledger={r.ledger} labels={roleLedgerLabels!} />
+              </div>
+            ))}
+        </section>
+      ) : null}
 
       {/* IA (profile hierarchy): these five CV detail editors — work
           preferences, languages, education, achievements and external
@@ -1195,13 +1426,47 @@ export default async function ProfilePage({
         id="cv-details"
         className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
       >
-        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {tQuick("details")}
           </span>
         </summary>
         <div className="flex flex-col gap-6 px-4 pb-4">
+      {/* PER-2: the employer-facing summary the person writes themselves
+          (save_worker_public_summary_v1). Worker-only: it lives on the
+          workers row. */}
+      {workerId ? (
+        <WorkerPublicSummaryEditor
+          initialHeadline={(worker as { headline?: string | null } | null)?.headline ?? ""}
+          initialBio={(worker as { bio?: string | null } | null)?.bio ?? ""}
+          labels={{
+            title: tPublicSummary("title"),
+            audience: tPublicSummary("audience"),
+            headline: tPublicSummary("headline"),
+            headlinePlaceholder: tPublicSummary("headlinePlaceholder"),
+            bio: tPublicSummary("bio"),
+            bioPlaceholder: tPublicSummary("bioPlaceholder"),
+            save: tPublicSummary("save"),
+            saved: tPublicSummary("saved"),
+            tooLong: tPublicSummary("tooLong"),
+            error: tPublicSummary("error"),
+          }}
+        />
+      ) : null}
+      {/* The avatar EDITOR (upload / replace). The hub shows the avatar on
+          arrival; changing it is a personal detail like the ones below, so
+          it opens with them. `#profile-identity` still lands here: the
+          opener above resolves a hash naming any section inside this
+          disclosure. */}
+      <section
+        id="profile-identity"
+        className="flex flex-col gap-3 scroll-mt-20"
+        data-testid="profile-avatar-section"
+      >
+        <ProfileAvatar signedUrl={avatar.signedUrl} displayName={personName} />
+      </section>
+
       {/* Structured work preferences (PR 3) — after the trust/availability
           area, worker-only (needs a workers row: the RPC targets it). Saves go
           through the owner-scoped save_worker_availability_prefs RPC; every
@@ -1307,6 +1572,7 @@ export default async function ProfilePage({
               levelNative: tLangs("levelNative"),
               add: tLangs("add"),
               adding: tLangs("adding"),
+              added: tLangs("added"),
               remove: tLangs("remove"),
               empty: tLangs("empty"),
               notEnabled: tLangs("notEnabled"),
@@ -1427,7 +1693,7 @@ export default async function ProfilePage({
       ) : null}
       <DetailsHashOpener targetId="capabilities" />
       <details id="capabilities" className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40">
-        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {tQuick("capabilities")}
@@ -1436,7 +1702,7 @@ export default async function ProfilePage({
         <div className="flex flex-col gap-3 px-4 pb-4">
           <Link
             href="/dashboard/journal"
-            className="inline-flex min-h-11 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+            className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline"
             data-testid="profile-mano-cv-records-link"
           >
             {tQuick("fullRecordsInCv")} →
@@ -1448,16 +1714,66 @@ export default async function ProfilePage({
             skillPresentation={workerId ? skillPresentation : null}
             professionIconSlug={workerId ? professionIconSlug : null}
           />
+          <RecognisedByBlock profileId={user.id} variant="profile" locale={locale} />
+          {/* Candidate skill clarify-capture (slice skill-clarify-capture-v1)
+              — on the canonical capability surface, NOT a new route.
+              Worker-only. It stood OPEN after this disclosure as a four-field
+              form (summary first, 2026-09-23); it is part of the capability
+              surface, so it lives inside it. `#candidate-skills` keeps
+              landing on it: the opener above resolves a hash naming a
+              section INSIDE `#capabilities`. */}
+          {workerId ? (
+            <div id="candidate-skills" className="scroll-mt-4">
+              <SkillClarifySection />
+            </div>
+          ) : null}
         </div>
       </details>
 
-      {/* Candidate skill clarify-capture (slice skill-clarify-capture-v1) — on
-          the canonical capability surface, NOT a new route. Worker-only. */}
-      {workerId ? (
-        <div id="candidate-skills" className="scroll-mt-4">
-          <SkillClarifySection />
+      {/* HOW TO READ THIS PROFILE — one closed bar at the end (summary first,
+          2026-09-23). The trust counts (Workstream C: verified skills,
+          manager confirmations, journal entries — honest zeros with a growth
+          hint, an unread count never shown as zero) and the profile note used
+          to stand open between the overview and the editors. The overview
+          already states the evidence counts, so the open block repeated
+          figures; both are still here, one tap away.
+          W7-S5b rule kept: the note is keyed on identity (roles), not
+          `workerId` — a non-worker identity gets the two-identities model
+          note. */}
+      <DetailsHashOpener targetId="profile-about" />
+      <details
+        id="profile-about"
+        className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
+        data-testid="profile-about-disclosure"
+      >
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+          <span className="inline-flex items-center gap-2">
+            <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+            {t("aboutDisclosure")}
+          </span>
+        </summary>
+        <div className="flex flex-col gap-4 px-4 pb-4">
+          {workerId && trustSignals ? (
+            <TrustBlock
+              signals={trustSignals}
+              labels={{
+                title: tTrust("title"),
+                caption: tTrust("caption"),
+                verifiedSkills: tTrust("verifiedSkills"),
+                managerConfirmations: tTrust("managerConfirmations"),
+                journalEntries: tTrust("journalEntries"),
+                zeroHint: tTrust("zeroHint"),
+                unreadHint: tTrust("unreadHint"),
+              }}
+            />
+          ) : null}
+          <FeatureNote testId="feature-note-profile">
+            {identityNotice.kind === "hidden"
+              ? tFeatureNotes("workerProfile")
+              : tFeatureNotes("identityModel")}
+          </FeatureNote>
         </div>
-      ) : null}
+      </details>
     </div>
   );
 }

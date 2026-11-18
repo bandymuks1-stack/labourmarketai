@@ -80,8 +80,16 @@ describe("1. isEducationFirstWorkspace decides from the canonical capability lay
   it("works WITHIN the two-base-identity model — no third identity invented", () => {
     const roles = read("lib/config/roles.ts");
     expect(roles).toMatch(/export type BaseIdentity = "person" \| "company"/);
-    // The chat still derives identity from the SAME owner-locked mapping.
-    expect(CHAT).toMatch(/baseIdentityForRole\(auth0\.activeRole\)/);
+    // RE-ANCHORED (owner program 2026-09-23): the chat's identity is the
+    // server-resolved acting identity, typed by the SAME two-value
+    // `BaseIdentity` — it follows the active workspace (and the person's
+    // relationship to it) instead of `profiles.active_role` alone. The page
+    // still derives it through the owner-locked mapping.
+    expect(CHAT).toMatch(/const identity: BaseIdentity = actingIdentity;/);
+    expect(CHAT).toMatch(/actingIdentity\?: BaseIdentity;/);
+    expect(read("app/[locale]/dashboard/page.tsx")).toMatch(
+      /const identity = baseIdentityForRole\(activeRole\) \?\? "person";/,
+    );
   });
 });
 
@@ -203,7 +211,7 @@ describe("4. i18n parity for the M10 keys", () => {
   });
 
   it("the routed locales carry REAL translations (no [EN] markers)", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const chat = (
         JSON.parse(read(`messages/${loc}.json`)) as {
           conversation: { chat: Record<string, string> };

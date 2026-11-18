@@ -3,12 +3,22 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
-import { getActiveOrganizationContext } from "@/lib/company/active-organization";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
+import {
+  getActiveOrganizationContext,
+  governedActiveOrganizationId,
+} from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
 import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
+import { InstitutionRecognitionSection } from "@/components/app/institution-recognition-section";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/education");
+
 
 /**
  * MOKYMAI — the education door (owner IA correction 2026-09-16,
@@ -29,15 +39,18 @@ export default async function CompanyEducationPage({
   const t = await getTranslations("organizationDoors.pages.education");
 
   const employerCtx = await resolveEmployerCompanyContext();
+  // READ access (any governance role the resolver accepted).
   const companyProfile =
-    employerCtx.kind === "ok" ? await getOwnedCompanyById(employerCtx.companyId) : null;
+    employerCtx.kind === "ok" ? await getAccessibleCompanyById(employerCtx.companyId) : null;
   const companyRow =
     companyProfile && companyProfile.kind === "ok" ? companyProfile.row : null;
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =
     (companyRow
       ? orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id
-      : undefined) ?? orgContext.activeOrganizationId;
+      : undefined) ??
+    // Only a GOVERNED active organization — never an employee-only one.
+    governedActiveOrganizationId(orgContext);
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
@@ -51,13 +64,12 @@ export default async function CompanyEducationPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-education">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
       <InstitutionLearnersSection organizationId={capabilityOrgId} />
       <InstitutionProgramsSection organizationId={capabilityOrgId} />
+      <InstitutionRecognitionSection organizationId={capabilityOrgId} />
       <PublicDemandSection audience="institution" />
     </div>
   );

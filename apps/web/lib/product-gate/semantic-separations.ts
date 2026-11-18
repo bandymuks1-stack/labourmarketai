@@ -126,7 +126,7 @@ export const SEMANTIC_SEPARATIONS: readonly SemanticSeparation[] = [
     anchor: "lib/documents/credential-validity.ts",
     vocabulary: ["CREDENTIAL_VALIDITY_STATES", "deriveCredentialValidity"],
     manualAcceptance:
-      "RECOGNISED EQUIVALENCE (RPL) exists at no layer — SKL-9 is MISSING. Until it is built, no surface may present demonstrated capability as satisfying a formal requirement.",
+      "RECOGNISED EQUIVALENCE (RPL) has a pure model and a wired read but no recorded recognition — SKL-9 is PARTIAL and disconnected at the assessor's write (owner packet P-3). Until a recognition exists, no surface may present demonstrated capability as satisfying a formal requirement.",
   },
   {
     id: "SEP-7",

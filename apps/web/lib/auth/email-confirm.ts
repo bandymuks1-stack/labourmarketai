@@ -132,6 +132,19 @@ export type AuthRedirectOutcome =
  * person produces by pressing Cancel at Google. The `error_code` is what
  * tells them apart; without this a dead link read as "you cancelled".
  */
+/**
+ * Provider-round-trip errors that a REPLAY of an already-completed sign-in
+ * produces: the OAuth state was spent by the sign-in that worked (GoTrue
+ * `bad_oauth_state` — "OAuth state not found or expired"; flow_state_* for an
+ * expired flow). When the browser already holds a valid session, the callback
+ * sends the person on instead of reporting a failure. Any other error (a
+ * cancel, a dead e-mail link) keeps its message whatever the session.
+ */
+export function isReplayableProviderError(errorCode: string | null): boolean {
+  const code = (errorCode ?? "").toLowerCase();
+  return code === "bad_oauth_state" || code === "flow_state_not_found" || code === "flow_state_expired";
+}
+
 export function classifyAuthRedirectError(input: {
   error: string | null;
   errorCode: string | null;
@@ -165,6 +178,24 @@ export function classifyExchangeFailure(
     /code verifier/.test(message) ||
     /both auth code and code verifier/.test(message);
   return verifierMissing ? "confirmed_sign_in" : "exchange_failed";
+}
+
+/** What the callback reports when it was reached with nothing to verify. */
+export type MissingCodeOutcome = "missing_code" | "confirm_link_opened";
+
+/**
+ * A callback URL with no `?code=` and no `token_hash` normally means a broken
+ * provider round trip. On the E-MAIL CONFIRMATION return it has an ordinary
+ * cause: a RE-SENT confirmation link. The client library's `resend` carries no
+ * PKCE code challenge, so the auth server confirms the address and returns
+ * with the session in the URL fragment, which no server ever sees. The address
+ * is then confirmed and the person only has to sign in — telling them "the
+ * provider bounced back without a sign-in code" reports a fault that did not
+ * happen. Nothing is granted here: the outcome only chooses the message, and
+ * the copy says "most likely" because the server cannot see the proof.
+ */
+export function classifyMissingCode(emailConfirmFlow: boolean): MissingCodeOutcome {
+  return emailConfirmFlow ? "confirm_link_opened" : "missing_code";
 }
 
 /** Seconds a person must wait before asking for another confirmation mail —

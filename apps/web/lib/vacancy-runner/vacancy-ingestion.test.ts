@@ -151,6 +151,8 @@ function fakeDb(options: {
     chain.or = self;
     chain.order = self;
     chain.range = self;
+    chain.gt = self;
+    chain.limit = self;
     chain.maybeSingle = () => Promise.resolve(single);
     chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) => {
       if (headCount) {
@@ -358,6 +360,27 @@ describe("failure honesty", () => {
     expect(written).not.toHaveProperty("cursor_value");
   });
 
+  it("a FAILED DRY RUN leaves no failure marker (diagnostics do not bump the shared streak)", async () => {
+    enableEnv();
+    ctl.activationOverride = "on";
+    stubFetch({ error: "boom" }, 503);
+    const { client, ops } = fakeDb({
+      cursorRow: {
+        provider_key: "arbetsformedlingen",
+        channel: "snapshot",
+        cursor_value: "2026-08-08T00:00:00Z",
+        consecutive_failures: 1,
+      },
+    });
+
+    const result = await runVacancyIngestionSession(client, PROVIDER, request());
+
+    expect(result.status).toBe("fetch_failed");
+    expect(ops.filter((o) => o.kind !== "select")).toHaveLength(0);
+    // The evidence is still reported in the accounting.
+    expect(Array.isArray(result.fetchDiagnostics)).toBe(true);
+  });
+
   it("one provider's exception does not stop the batch", async () => {
     // Client whose reads throw outright — worse than an error result.
     const throwing = {
@@ -422,5 +445,26 @@ describe("source health is readable before the store exists", () => {
     expect(se.cursors).toHaveLength(1);
     expect(se.cursors[0].channel).toBe("stream");
     expect(se.cursors[0].lastSuccessAt).toBe("2026-08-09T00:00:00Z");
+  });
+
+  it("a timed-out stored-row count is UNKNOWN, never 0 and never a crash of the admin home", async () => {
+    // Production 2026-10-25: the exact count of ~50k active ads hit the 8 s
+    // statement_timeout (HTTP 500, no code on a HEAD) and the throw took the
+    // whole /dashboard/admin page down with it.
+    const countChain = {
+      eq: () => countChain,
+      then: (resolve: (v: unknown) => void) =>
+        resolve({ count: null, error: { code: null }, status: 500 }),
+    };
+    const client = {
+      from: (table: string) =>
+        table === "vacancy_import_cursors"
+          ? { select: async () => ({ data: [], error: null }) }
+          : { select: () => countChain },
+    } as unknown as Parameters<typeof readVacancySourceHealth>[0];
+
+    const health = await readVacancySourceHealth(client);
+    const se = health.find((h) => h.providerKey === "arbetsformedlingen")!;
+    expect(se.storedActive).toBeNull();
   });
 });

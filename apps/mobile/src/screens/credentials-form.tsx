@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from "react-native";
+import { KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
+import { Link, Redirect } from "expo-router";
 
 import { useAuth, type AuthFailure } from "../auth-context";
+import { CONFIG } from "../config";
 import { useLocale } from "../i18n/locale-context";
 import type { MessageKey } from "../i18n/messages";
-import { Button, Field, NotAvailable, Title } from "../ui/primitives";
+import { Body, Button, Field, NotAvailable, Title } from "../ui/primitives";
 import { theme } from "../ui/theme";
 
 /**
@@ -36,8 +37,8 @@ function failureKey(failure: AuthFailure): MessageKey {
 }
 
 export function CredentialsForm({ mode }: { mode: "sign-in" | "register" }) {
-  const { signIn, register, busy } = useAuth();
-  const { t } = useLocale();
+  const { state, signIn, register, busy } = useAuth();
+  const { t, locale } = useLocale();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [failure, setFailure] = useState<AuthFailure | null>(null);
@@ -48,13 +49,29 @@ export function CredentialsForm({ mode }: { mode: "sign-in" | "register" }) {
       mode === "sign-in"
         ? await signIn(email, password)
         : await register(email, password);
-    // Success navigates by itself: the auth state changes, and the gate at
-    // `app/index.tsx` is what decides where a signed-in person goes. No screen
-    // pushes a route on the strength of its own local success.
+    // Success navigates by itself: the auth state changes, the form hands the
+    // person back to the gate at `app/index.tsx` (below), and the gate decides
+    // where they go. No screen pushes a route on its own local success.
     if (result !== null) setFailure(result);
   };
 
+  // The gate redirected here and is no longer mounted, so it never sees the
+  // auth state change: without this a successful sign-in stays on the form.
+  if (state.status === "signed_in") return <Redirect href="/" />;
+
   const isSignIn = mode === "sign-in";
+
+  // Password recovery and the legal texts are the website's, opened in the
+  // browser on the SAME origin this build talks to (a preview build reaches
+  // its own server). The reset e-mail's link lands on the web reset page,
+  // after which the person signs in here with the new password: one recovery
+  // flow, not a second one forked onto the phone. A link that cannot be
+  // opened changes nothing, so a failure to open it is silent by design —
+  // the form stays exactly as it was.
+  const webOrigin = CONFIG === null ? "https://labourmarket.ai" : CONFIG.apiBaseUrl;
+  const openWeb = (path: string) => {
+    void Linking.openURL(`${webOrigin}/${locale}${path}`).catch(() => undefined);
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -111,6 +128,37 @@ export function CredentialsForm({ mode }: { mode: "sign-in" | "register" }) {
             label={isSignIn ? t("auth.signIn.submit") : t("auth.register.submit")}
             onPress={() => void submit()}
           />
+
+          {isSignIn ? (
+            <Text
+              testID="forgot-password"
+              accessibilityRole="link"
+              onPress={() => openWeb("/auth/forgot-password")}
+              style={styles.link}
+            >
+              {t("auth.signIn.forgot")}
+            </Text>
+          ) : (
+            <>
+              <Body muted>{t("auth.register.legal")}</Body>
+              <Text
+                testID="register-terms"
+                accessibilityRole="link"
+                onPress={() => openWeb("/legal/terms")}
+                style={styles.link}
+              >
+                {t("account.terms")}
+              </Text>
+              <Text
+                testID="register-privacy"
+                accessibilityRole="link"
+                onPress={() => openWeb("/legal/privacy")}
+                style={styles.link}
+              >
+                {t("account.privacyPolicy")}
+              </Text>
+            </>
+          )}
 
           <Link
             testID="switch-mode"

@@ -5,6 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import { getMyCommercial } from "@/lib/commercial/commercial";
 import { CommercialPanel } from "@/components/app/commercial-panel";
 import { AgreementsRegister } from "@/components/app/agreements-register";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/commercial");
+
 
 export const dynamic = "force-dynamic";
 
@@ -39,18 +46,19 @@ export default async function CommercialPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/${locale}/auth/login`);
+  if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/commercial`);
 
   const data = await getMyCommercial();
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("pageIntro")}</p>
       </header>
+      {/* Mutual, neutral pre-agreement recommendation — advice to both
+          parties, never a gate (decision 0021 extension, 2026-10-24). */}
+      <CollaborationChecksNote context={{ dealKind: "b2b_contract" }} testId="commercial-collaboration-checks" />
       <CommercialPanel data={data} />
       <AgreementsRegister locale={locale} searchParams={search} />
     </div>

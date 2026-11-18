@@ -54,7 +54,9 @@ describe("2. onboarding starts from what the person already said", () => {
   it("the page reads the hand-off on the server and passes defaults down", () => {
     expect(page).toMatch(/readLandingHandoff\(safeNext\)/);
     expect(page).toMatch(/saidSentence=\{handoff\.sentence \|\| null\}/);
-    expect(page).toMatch(/defaultIntents=\{handoff\.intents\}/);
+    // the handoff's intents, except when an addressed invitation canonically implies a worker
+    // (then the worker intent is pre-set and the role step is skipped - server-decided)
+    expect(page).toMatch(/defaultIntents=\{impliedWorker \? \["work"\] : handoff\.intents\}/);
     expect(page).toMatch(/defaultProfessionSlug=\{handoff\.professionSlug\}/);
   });
   it("the wizard pre-ticks from the defaults and shows the sentence back", () => {
@@ -63,8 +65,12 @@ describe("2. onboarding starts from what the person already said", () => {
     expect(wizard).toMatch(/PROFESSION_SLUGS\.includes\(defaultProfessionSlug\)/);
   });
   it("a defaulted profession is still a registry value the person submits, never a silent write", () => {
-    // the default only seeds the select; the submit path is unchanged
-    expect(wizard).toMatch(/form\.set\("profession_slug", professionSlug\)/);
+    // The default only seeds the field; the submit path is unchanged. Since the
+    // owner direction of 2026-09-27 the field holds a LIST, so the sentence's
+    // profession is the FIRST entry — still the primary `complete_onboarding`
+    // writes, still submitted by the person rather than written behind them.
+    expect(wizard).toMatch(/form\.set\("profession_slug", registrySlugs\[0\]\)/);
+    expect(wizard).toMatch(/\? \[\{ slug: defaultProfessionSlug, label: null \}\]/);
   });
 });
 
@@ -72,11 +78,11 @@ describe("3./4. signup copy for a private person, in every served locale", () =>
   for (const locale of activeLocales) {
     const m = messages(locale);
     it(`${locale}: e-mail is not a "work" e-mail and the placeholder is not a company`, () => {
-      expect(m.auth.signup.email_label).not.toMatch(/darbo|work|рабоч|zakelijk|geschäftlich/i);
-      expect(m.auth.signup.email_placeholder).not.toMatch(/imone|company|kompaniya|bedrijf/i);
+      expect(m.auth.signup.email_label).not.toMatch(/darbo|work|рабоч|zakelijk|geschäftlich|arbets|jobb/i);
+      expect(m.auth.signup.email_placeholder).not.toMatch(/imone|company|kompaniya|bedrijf|företag/i);
     });
     it(`${locale}: the check-your-e-mail body says what to do when nothing arrives`, () => {
-      expect(m.auth.signup.check_email_body).toMatch(/šlamšt|spam|спам/i);
+      expect(m.auth.signup.check_email_body).toMatch(/šlamšt|spam|спам|skräppost/i);
       expect(m.auth.signup.resend_label).toBeTruthy();
     });
     it(`${locale}: the onboarding "you wrote" keys exist`, () => {
@@ -133,8 +139,8 @@ describe("6. signup: one legal notice, the pilot line under the action", () => {
   for (const locale of activeLocales) {
     it(`${locale}: the subcopy no longer promises a "role" step`, () => {
       const sub = messages(locale).auth.signup.subcopy;
-      expect(sub).not.toMatch(/vaidmen|your role|роль|je rol|Ihre Rolle/i);
-      expect(sub).toMatch(/kitame žingsnyje|next step|следующем шаге|volgende stap|nächsten Schritt/i);
+      expect(sub).not.toMatch(/vaidmen|your role|роль|je rol|Ihre Rolle|din roll/i);
+      expect(sub).toMatch(/kitame žingsnyje|next step|следующем шаге|volgende stap|nächsten Schritt|następnym kroku|nästa steg/i);
     });
   }
 });
@@ -149,7 +155,7 @@ describe("7. the onboarding country field is labelled by what it writes (residen
     expect(rpc).toMatch(/current_location_country/);
   });
   const RESIDENCE: Record<string, RegExp> = {
-    lt: /gyveni/i,
+    lt: /gyvenate/i, // formal since the owner decision of 2026-11-15
     en: /live/i,
     ru: /живёте|живете/i,
     nl: /woon/i,

@@ -45,7 +45,6 @@ const walk = (rel: string, out: string[] = []): string[] => {
 
 const FOR_WORKERS = "app/[locale]/(marketing)/for-workers/page.tsx";
 const SAMPLE = "lib/player-card/sample-card.ts";
-const SHOWCASE = "components/marketing/player-card-showcase.tsx";
 const CANONICAL = "components/app/worker-player-card.tsx";
 
 describe("1. the FUT concept card stays deleted and unreferenced", () => {
@@ -83,13 +82,13 @@ describe("1. the FUT concept card stays deleted and unreferenced", () => {
   });
 });
 
-describe("2. /for-workers renders the canonical card from the shared sample", () => {
+describe("2. /for-workers mounts NO illustrative card (containment 2026-10-08)", () => {
   const page = read(FOR_WORKERS);
 
-  it("imports the canonical WorkerPlayerCard + the shared sample builder", () => {
-    expect(page).toMatch(/from\s+"@\/components\/app\/worker-player-card"/);
-    expect(page).toMatch(/buildSampleWorkerPlayerCard/);
-    expect(page).toMatch(/buildPlayerCardLabels/);
+  it("does not import the card or the shared sample builder", () => {
+    expect(page).not.toMatch(/worker-player-card/);
+    expect(page).not.toMatch(/buildSampleWorkerPlayerCard/);
+    expect(page).not.toMatch(/<WorkerPlayerCard\b/);
   });
 
   it("renders no OVR / tier / stat-bar fiction", () => {
@@ -98,13 +97,9 @@ describe("2. /for-workers renders the canonical card from the shared sample", ()
     expect(code).not.toMatch(/tier-(gold|silver|bronze)/);
     expect(code).not.toMatch(/\bSTAT_KEYS\b/);
   });
-
-  it("keeps the always-visible Example frame around the sample card", () => {
-    expect(page).toMatch(/<ExamplePreviewFrame>/);
-  });
 });
 
-describe("3. ONE public sample source, shared with the landing showcase", () => {
+describe("3. the shared sample module stays a single, score-free source", () => {
   it("the shared sample module exists and builds the canonical shape", () => {
     const sample = read(SAMPLE);
     expect(sample).toMatch(/buildSampleWorkerPlayerCard/);
@@ -113,13 +108,6 @@ describe("3. ONE public sample source, shared with the landing showcase", () => 
     const code = stripComments(sample);
     expect(code).not.toMatch(/\bovr\b/i);
     expect(code).not.toMatch(/\btier\b/i);
-  });
-
-  it("the landing showcase builds its sample from the SAME module", () => {
-    const showcase = read(SHOWCASE);
-    expect(showcase).toMatch(/buildSampleWorkerPlayerCard/);
-    // No second inline sample card literal may reappear in the showcase.
-    expect(showcase).not.toMatch(/skillsDeclared:\s*\d/);
   });
 });
 
@@ -157,7 +145,7 @@ describe("4. the retired rating fiction stays out of public worker copy", () => 
 
 describe("5. no manual two-locale localization on the card surfaces", () => {
   it('the public card surfaces never branch on locale === "lt"', () => {
-    for (const rel of [FOR_WORKERS, SAMPLE, SHOWCASE, CANONICAL]) {
+    for (const rel of [FOR_WORKERS, SAMPLE, CANONICAL]) {
       const code = stripComments(read(rel));
       expect(code, rel).not.toMatch(/locale\s*===\s*["']lt["']/);
       expect(code, rel).not.toMatch(/\?\s*[a-zA-Z_$.]+\.lt\s*:\s*[a-zA-Z_$.]+\.en\b/);
@@ -179,10 +167,8 @@ describe("6. one full Player Card system — no second card component", () => {
     expect(offenders, offenders.join(", ")).toEqual([]);
   });
 
-  it("every public mount of the card goes through the canonical component", () => {
-    for (const rel of [FOR_WORKERS, SHOWCASE]) {
-      expect(read(rel), rel).toMatch(/<WorkerPlayerCard\b/);
-      expect(read(rel), rel).not.toMatch(/<PlayerCard\b/);
-    }
+  it("no public marketing route mounts the card at all (containment 2026-10-08)", () => {
+    expect(exists("components/marketing/player-card-showcase.tsx")).toBe(false);
+    expect(read(FOR_WORKERS)).not.toMatch(/<WorkerPlayerCard\b/);
   });
 });

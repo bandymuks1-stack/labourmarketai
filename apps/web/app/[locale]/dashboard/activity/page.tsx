@@ -13,6 +13,12 @@ import {
   getDurableNotifications,
   getSpineCounts,
 } from "@/lib/notifications/spine";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/activity", "activityCentre.title");
+
 
 /**
  * Unified activity centre (control room PR C) — ONE cross-module surface
@@ -84,12 +90,10 @@ export default async function ActivityCentrePage({
   return (
     <div className="flex flex-col gap-6" data-testid="activity-centre-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tA("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {tA("title")}
-        </h1>
+        <PageTitle>{tA("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{tA("intro")}</p>
       </header>
 
@@ -184,7 +188,7 @@ export default async function ActivityCentrePage({
                   </span>
                 </span>
                 {row.count > 0 ? (
-                  <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold leading-none text-white tabular-nums">
+                  <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold leading-none text-text-on-brand tabular-nums">
                     {row.count}
                   </span>
                 ) : (
@@ -252,6 +256,8 @@ export default async function ActivityCentrePage({
                     <Link
                       href={e.href as "/dashboard"}
                       data-testid={`activity-stored-event-${e.id}`}
+                      data-event-type={e.type}
+                      data-read={e.read_at === null ? "false" : "true"}
                       className={`flex items-center rounded-md border border-ink-500 px-4 py-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
                         e.read_at === null ? "bg-ink-800/40" : "bg-ink-800/10"
                       }`}
@@ -261,6 +267,8 @@ export default async function ActivityCentrePage({
                   ) : (
                     <div
                       data-testid={`activity-stored-event-${e.id}`}
+                      data-event-type={e.type}
+                      data-read={e.read_at === null ? "false" : "true"}
                       className={`flex items-center rounded-md border border-ink-500 px-4 py-3 ${
                         e.read_at === null ? "bg-ink-800/40" : "bg-ink-800/10"
                       }`}

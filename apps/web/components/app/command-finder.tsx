@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Mic, MicOff, Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { Link } from "@/lib/i18n/navigation";
+import { Link, useRouter } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { activeLocales, type ActiveLocale } from "@/lib/i18n/config";
 import {
@@ -72,8 +72,12 @@ const OBJECT_SEARCH_TIMEOUT_MS = 8000;
 type ObjectSearchState = "idle" | "loading" | "ok" | "error";
 
 /* ── Voice adapter (unified-text-navigation v1, Phase 3 rules) ──────────
- * Browser-native Web Speech API only — no external AI service, no separate
- * command model. The transcript feeds the SAME setQuery state as typing,
+ * Browser-native Web Speech API only — no LabourMarket AI service, no separate
+ * command model. HONESTY: depending on the browser (Chrome, Safari) the
+ * browser VENDOR's speech service receives the audio, so the first use shows
+ * a disclosure the person must accept (remembered per browser) - owner
+ * decision U-26, option A. The audio that LabourMarket.ai itself processes
+ * goes through the voice journal, not through here. The transcript feeds the SAME setQuery state as typing,
  * so voice → text → the one search → the user clicks a result. Nothing is
  * auto-executed and no transcript is persisted (local component state only).
  * When the API is unsupported the mic button is NOT rendered at all —
@@ -109,6 +113,17 @@ function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
+/** One-time acceptance of the browser-dictation disclosure (per browser). */
+const SPEECH_CONSENT_KEY = "lmai:command-finder-speech-consent:v1";
+
+function readSpeechConsent(): boolean {
+  try {
+    return window.localStorage.getItem(SPEECH_CONSENT_KEY) === "accepted";
+  } catch {
+    return false;
+  }
+}
+
 /** BCP-47 recognition language per ACTIVE locale. */
 const SPEECH_LANG: Record<ActiveLocale, string> = {
   lt: "lt-LT",
@@ -116,6 +131,8 @@ const SPEECH_LANG: Record<ActiveLocale, string> = {
   ru: "ru-RU",
   nl: "nl-NL",
   de: "de-DE",
+  pl: "pl-PL",
+  sv: "sv-SE",
 };
 
 /** Parse the stored recent-command ids — ids only, anything else discarded. */
@@ -134,6 +151,7 @@ function parseRecentIds(rawJson: string | null): string[] {
 
 export function CommandFinder() {
   const t = useTranslations("commandFinder");
+  const router = useRouter();
   const rawLocale = useLocale();
   const locale: ActiveLocale = (activeLocales as readonly string[]).includes(
     rawLocale,
@@ -153,6 +171,8 @@ export function CommandFinder() {
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [voiceFailed, setVoiceFailed] = useState(false);
 
   useEffect(() => {
     setVoiceSupported(getSpeechRecognitionCtor() !== null);
@@ -165,6 +185,26 @@ export function CommandFinder() {
 
   const stopListening = () => {
     recognitionRef.current?.stop();
+  };
+
+  /** The mic button: disclosure first (until accepted), then listen. */
+  const requestListening = () => {
+    setVoiceFailed(false);
+    if (readSpeechConsent()) {
+      startListening();
+      return;
+    }
+    setConsentOpen(true);
+  };
+
+  const acceptSpeechConsent = () => {
+    try {
+      window.localStorage.setItem(SPEECH_CONSENT_KEY, "accepted");
+    } catch {
+      /* acceptance still applies to this start */
+    }
+    setConsentOpen(false);
+    startListening();
   };
 
   const startListening = () => {
@@ -191,6 +231,8 @@ export function CommandFinder() {
     };
     recognition.onerror = () => {
       // onend fires after onerror — state clears there; nothing to persist.
+      // The failure is NAMED (denied / no speech service / offline), never silent.
+      setVoiceFailed(true);
     };
     recognitionRef.current = recognition;
     setListening(true);
@@ -214,7 +256,9 @@ export function CommandFinder() {
   useEffect(() => {
     try {
       setRecentIds(
-        parseRecentIds(window.localStorage.getItem(RECENT_COMMANDS_STORAGE_KEY)),
+        parseRecentIds(
+          window.localStorage.getItem(RECENT_COMMANDS_STORAGE_KEY),
+        ),
       );
     } catch {
       // storage unavailable (private mode) — the finder works without recents
@@ -364,6 +408,40 @@ export function CommandFinder() {
   const rowClass =
     "flex items-center justify-between gap-3 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue";
 
+  // KEYBOARD SELECTION (production audit 2026-10-22: Enter did nothing). The
+  // registry commands first, then the caller's own objects — the order they
+  // render in. ArrowUp/Down move the highlight; Enter opens it. The first
+  // result is selected by default, so "type, Enter" opens the top hit.
+  const navigable = useMemo(
+    () => [
+      ...results.map((entry) => ({ key: `result-${entry.id}`, href: entry.route, commandId: entry.id as string | null })),
+      ...(objectState === "ok"
+        ? objectGroups.flatMap((g) =>
+            g.results.map((r) => ({ key: `object-${g.source}-${r.id}`, href: r.href, commandId: null as string | null })),
+          )
+        : []),
+    ],
+    [results, objectGroups, objectState],
+  );
+  const [activeIndex, setActiveIndex] = useState(0);
+  useEffect(() => setActiveIndex(0), [query]);
+  const selected = navigable[Math.min(activeIndex, navigable.length - 1)] ?? null;
+  const optionId = (key: string) => `command-finder-option-${key}`;
+  const onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (navigable.length === 0) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      setActiveIndex((i) => (Math.min(i, navigable.length - 1) + step + navigable.length) % navigable.length);
+    } else if (e.key === "Enter" && selected) {
+      e.preventDefault();
+      if (selected.commandId) rememberCommand(selected.commandId);
+      router.push(selected.href as "/dashboard");
+    }
+  };
+  const activeClass = (key: string) =>
+    selected?.key === key ? " border-brand-blue bg-ink-700/60" : "";
+
   return (
     <section
       role="search"
@@ -401,6 +479,8 @@ export function CommandFinder() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("placeholder")}
           aria-label={t("inputLabel")}
+          onKeyDown={onInputKeyDown}
+          aria-activedescendant={selected ? optionId(selected.key) : undefined}
           data-testid="command-finder-input"
           className={`w-full rounded-md border border-ink-500 bg-ink-800/60 py-2 pl-9 text-sm text-text-primary placeholder:text-text-muted focus:border-brand-blue focus:outline-none ${
             voiceSupported ? "pr-10" : "pr-3"
@@ -411,7 +491,7 @@ export function CommandFinder() {
         {voiceSupported && (
           <button
             type="button"
-            onClick={listening ? stopListening : startListening}
+            onClick={listening ? stopListening : requestListening}
             aria-label={listening ? t("voiceStop") : t("voiceStart")}
             aria-pressed={listening}
             data-testid="command-finder-voice"
@@ -429,6 +509,43 @@ export function CommandFinder() {
           </button>
         )}
       </div>
+      {consentOpen && (
+        <div
+          role="group"
+          aria-label={t("voiceStart")}
+          data-testid="command-finder-voice-consent"
+          className="rounded-md border border-ink-500 bg-ink-800/60 p-3 text-xs leading-relaxed text-text-secondary"
+        >
+          <p>{t("voiceConsentText")}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={acceptSpeechConsent}
+              data-testid="command-finder-voice-consent-allow"
+              className="min-h-9 rounded-md bg-brand-blue px-3 text-xs font-medium text-text-on-brand"
+            >
+              {t("voiceConsentAllow")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConsentOpen(false)}
+              data-testid="command-finder-voice-consent-cancel"
+              className="min-h-9 rounded-md border border-ink-500 px-3 text-xs text-text-secondary"
+            >
+              {t("voiceConsentCancel")}
+            </button>
+          </div>
+        </div>
+      )}
+      {voiceFailed && !listening && (
+        <p
+          role="status"
+          data-testid="command-finder-voice-failed"
+          className="text-xs leading-relaxed text-text-muted"
+        >
+          {t("voiceFailed")}
+        </p>
+      )}
       {listening && (
         <p
           data-testid="command-finder-voice-listening"
@@ -515,8 +632,10 @@ export function CommandFinder() {
                 <Link
                   href={entry.route as "/dashboard"}
                   onClick={() => rememberCommand(entry.id)}
+                  id={optionId(`result-${entry.id}`)}
                   data-testid={`command-finder-result-${entry.id}`}
-                  className={rowClass}
+                  data-active={selected?.key === `result-${entry.id}` ? "true" : undefined}
+                  className={rowClass + activeClass(`result-${entry.id}`)}
                 >
                   <span className="min-w-0 truncate font-medium">
                     {entry.labels[locale]}
@@ -551,7 +670,10 @@ export function CommandFinder() {
         </p>
       )}
       {objectState === "ok" && objectResultCount > 0 && (
-        <nav aria-label={t("objectsLabel")} data-testid="command-finder-objects">
+        <nav
+          aria-label={t("objectsLabel")}
+          data-testid="command-finder-objects"
+        >
           <ul className="flex flex-col gap-2">
             {objectGroups.map((group) => (
               <li key={group.source} className="flex flex-col gap-1">
@@ -563,8 +685,10 @@ export function CommandFinder() {
                     <li key={r.id}>
                       <Link
                         href={r.href as "/dashboard"}
+                        id={optionId(`object-${group.source}-${r.id}`)}
                         data-testid={`command-finder-object-${group.source}-${r.id}`}
-                        className={rowClass}
+                        data-active={selected?.key === `object-${group.source}-${r.id}` ? "true" : undefined}
+                        className={rowClass + activeClass(`object-${group.source}-${r.id}`)}
                       >
                         <span className="min-w-0 truncate font-medium">
                           {r.label}

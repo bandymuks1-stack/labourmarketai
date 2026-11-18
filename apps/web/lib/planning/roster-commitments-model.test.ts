@@ -96,7 +96,7 @@ describe("the surface: rendered on company planning, labelled in every routed lo
     // The overlap wears the calendar's own conflict token, never a new one.
     expect(page).toMatch(/c\.conflict \? \(\s*<TimeReality\s+kind="conflict"/);
     expect(page).toContain('data-testid="roster-commitments-conflict-note"');
-    expect((page.match(/\{utilisationSection\}\s*\n\s*\{commitmentsSection\}/g) ?? []).length).toBe(2);
+    expect((page.match(/\{utilisationSection\}\s*\n\s*\{timelineSection\}\s*\n\s*\{commitmentsSection\}/g) ?? []).length).toBe(2);
     // The read is the existing authorized commitment read — no new table.
     const read = readFileSync(join(WEB, "lib", "planning", "roster-commitments.ts"), "utf8");
     expect(read).toContain("getEmployerWorkerCommitments(ids, { supabase })");
@@ -114,7 +114,7 @@ describe("the surface: rendered on company planning, labelled in every routed lo
       }
       for (const k of ["project", "booking", "trip"]) expect(typeof c.kind[k], `${loc}.kind.${k}`).toBe("string");
       // The "nothing on record" line must never say "free" as a fact.
-      expect(String(c.withoutCommitment).toLowerCase()).toMatch(/not the same as free|nereiškia, kad laisvas|не значит «свободен»|niet hetzelfde als vrij|nicht dasselbe wie frei/);
+      expect(String(c.withoutCommitment).toLowerCase()).toMatch(/not the same as free|nereiškia, kad laisvas|не значит «свободен»|niet hetzelfde als vrij|nicht dasselbe wie frei|to nie to samo, co wolny|inte detsamma som ledig/);
     });
   }
 });

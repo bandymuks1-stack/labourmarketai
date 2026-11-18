@@ -8,6 +8,7 @@ import {
   resolveSourceRoute,
 } from "@/lib/communication/conversation-source-model";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * CONVERSATION SOURCE RELATION v1 — permanent CI guard.
@@ -41,7 +42,8 @@ const stripTs = (src: string): string =>
 
 const MODEL = "lib/communication/conversation-source-model.ts";
 const READER = "lib/communication/conversation-source.ts";
-const COMM_ACTIONS = "lib/communication/actions.ts";
+// The write logic lives in the shared core since 2026-09-30 (actions.ts delegates).
+const COMM_ACTIONS = "lib/communication/communication-core.ts";
 const DIRECT = "lib/communication/direct-conversation.ts";
 const OPEN_ACTION = "lib/communication/open-conversation-action.ts";
 const SUPPORT_LAUNCHER = "components/app/support-conversation-launcher.tsx";
@@ -142,6 +144,7 @@ describe("§8-1 single write path — only createConversation writes the stamp",
       const src = read(rel);
       return (
         /source_type/.test(src) &&
+        /\.insert\(/.test(src) &&
         /\.from\(\s*["']conversations["']\s*\)/.test(src)
       );
     });
@@ -226,7 +229,8 @@ describe("§8-2 exact stamping — each caller passes its own type, no other", (
     );
     for (const rel of plumbing) {
       expect(
-        [COMM_ACTIONS, DIRECT, MODEL, ...STAMPERS.map(([r]) => r)],
+        // actions.ts carries only the typed pass-through to the core (2026-09-30).
+        [COMM_ACTIONS, "lib/communication/actions.ts", DIRECT, MODEL, ...STAMPERS.map(([r]) => r)],
         `${rel} must not carry sourceHint plumbing`,
       ).toContain(rel);
     }
@@ -480,7 +484,7 @@ describe("§8-6 UI degradation — absent context renders exactly today's card",
 // ── 7. Locale parity ──────────────────────────────────────────────────────
 
 describe("§8-7 locale parity — lt/en/ru source labels, no [EN] markers", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: all four source labels exist, non-empty, translated`, () => {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         communication?: { source?: Record<string, string> };

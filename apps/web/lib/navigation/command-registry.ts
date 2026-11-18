@@ -81,6 +81,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Коммерция (предложения, договоры)",
       nl: "Commercieel (offertes, contracten)",
       de: "Kommerziell (Angebote, Verträge)",
+      pl: "Komercja (oferty, umowy)",
+      sv: "Affärer (offerter, avtal)",
     },
     synonyms: {
       en: ["proposal", "quote", "contract", "crm", "commercial", "deal"],
@@ -88,6 +90,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["предложение", "договор", "коммерция", "сделка", "crm"],
       nl: ["offerte", "contract", "commercieel", "deal"],
       de: ["angebot", "vertrag", "kommerziell", "deal"],
+      pl: ["oferta", "umowa", "komercja", "kontrakt", "crm"],
+      sv: ["offert", "avtal", "kontrakt", "affär", "affärer", "crm", "anbud"],
     },
   },
   {
@@ -100,6 +104,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Активы и логистика",
       nl: "Middelen & logistiek",
       de: "Betriebsmittel & Logistik",
+      pl: "Zasoby i logistyka",
+      sv: "Tillgångar och logistik",
     },
     synonyms: {
       en: ["assets", "tools", "equipment", "vehicles", "logistics", "issue", "return"],
@@ -107,6 +113,34 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["активы", "инструменты", "оборудование", "транспорт", "логистика"],
       nl: ["middelen", "gereedschap", "uitrusting", "voertuigen", "logistiek"],
       de: ["betriebsmittel", "werkzeuge", "ausrüstung", "fahrzeuge", "logistik"],
+      pl: ["zasoby", "narzędzia", "sprzęt", "pojazdy", "logistyka"],
+      sv: ["tillgångar", "verktyg", "utrustning", "fordon", "logistik", "utlämning", "återlämning"],
+    },
+  },
+  {
+    // Work hours — the day / week / timesheet page. It had no entry, so quick
+    // search answered "valandos" with "nothing found" while the page existed
+    // (production audit 2026-10-22).
+    id: "hours",
+    route: "/dashboard/hours",
+    audience: "public",
+    labels: {
+      en: "Work hours",
+      lt: "Darbo valandos",
+      ru: "Рабочие часы",
+      nl: "Werkuren",
+      de: "Arbeitsstunden",
+      pl: "Godziny pracy",
+      sv: "Arbetstid",
+    },
+    synonyms: {
+      en: ["hours", "work hours", "timesheet", "time tracking", "worked hours"],
+      lt: ["valandos", "darbo valandos", "valandų apskaita", "darbo laikas", "tabelis", "žiniaraštis"],
+      ru: ["часы", "рабочие часы", "табель", "учёт времени", "отработанные часы"],
+      nl: ["uren", "werkuren", "urenregistratie", "urenstaat", "gewerkte uren"],
+      de: ["stunden", "arbeitsstunden", "stundenzettel", "zeiterfassung", "arbeitszeit"],
+      pl: ["godziny", "godziny pracy", "ewidencja czasu", "karta czasu pracy", "przepracowane godziny"],
+      sv: ["timmar", "arbetstid", "arbetade timmar", "tidrapport", "tidrapportering", "stämpla"],
     },
   },
   {
@@ -119,6 +153,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Отпуска и отсутствия",
       nl: "Verlof & afwezigheid",
       de: "Urlaub & Abwesenheit",
+      pl: "Urlopy i nieobecności",
+      sv: "Ledighet och frånvaro",
     },
     synonyms: {
       en: ["leave", "holiday", "time off", "absence", "sick leave", "vacation"],
@@ -126,6 +162,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["отпуск", "отсутствие", "больничный", "выходной"],
       nl: ["verlof", "vakantie", "afwezigheid", "ziekteverlof"],
       de: ["urlaub", "abwesenheit", "krankheit", "freistellung"],
+      pl: ["urlop", "nieobecność", "zwolnienie", "wolne", "chorobowe"],
+      sv: ["ledighet", "semester", "frånvaro", "sjukfrånvaro", "sjuk", "ledig", "vab"],
     },
   },
   {
@@ -138,6 +176,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Объявления (ресурсы)",
       nl: "Marktplaats-advertenties",
       de: "Marktplatz-Anzeigen",
+      pl: "Ogłoszenia (zasoby)",
+      sv: "Marknadsplatsannonser",
     },
     synonyms: {
       en: ["marketplace", "listings", "rental", "accommodation", "housing", "premises", "vehicle", "tools", "equipment", "machinery"],
@@ -145,6 +185,25 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["маркетплейс", "объявления", "аренда", "жильё", "помещения", "транспорт", "оборудование", "техника", "инструменты"],
       nl: ["marktplaats", "advertenties", "huur", "huisvesting", "bedrijfsruimte", "voertuig", "gereedschap", "uitrusting", "machines"],
       de: ["marktplatz", "anzeigen", "miete", "unterkunft", "räume", "fahrzeug", "werkzeuge", "ausrüstung", "maschinen"],
+      pl: [
+        "ogłoszenia",
+        "wynajem",
+        "zakwaterowanie",
+        "lokal",
+        "sprzęt",
+        "maszyny",
+      ],
+      sv: [
+        "marknadsplats",
+        "annonser",
+        "uthyrning",
+        "boende",
+        "bostad",
+        "lokaler",
+        "fordon",
+        "verktyg",
+        "maskiner",
+      ],
     },
   },
   {
@@ -157,6 +216,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Мой профиль",
       nl: "Mijn profiel",
       de: "Mein Profil",
+      pl: "Mój profil",
+      sv: "Min profil",
     },
     synonyms: {
       en: ["profile", "my page", "identity"],
@@ -164,27 +225,33 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["профиль", "анкета", "моя страница"],
       nl: ["profiel", "mijn pagina", "mijn gegevens"],
       de: ["profil", "meine seite", "persönliche daten"],
+      pl: ["profil", "moja strona", "tożsamość"],
+      sv: ["profil", "min profil", "min sida", "identitet"],
     },
   },
   {
     id: "player_card",
-    // Canonical Player Card home is the profile (the old /dashboard/player-card
+    // Canonical professional-card home is the profile (the old /dashboard/player-card
     // route is a REDIRECT_STUB — we link the real destination directly).
     route: "/dashboard/profile",
     audience: "worker",
     labels: {
-      en: "Player Card (work card)",
-      lt: "Žaidėjo kortelė (darbo kortelė)",
-      ru: "Карточка игрока (рабочая карточка)",
-      nl: "Spelerskaart (werkkaart)",
-      de: "Spielerkarte (Arbeitskarte)",
+      en: "Professional profile (work card)",
+      lt: "Profesinė kortelė (darbo kortelė)",
+      ru: "Профессиональная карточка (рабочая карточка)",
+      nl: "Professionele kaart (werkkaart)",
+      de: "Berufskarte (Arbeitskarte)",
+      pl: "Karta zawodowa (karta pracy)",
+      sv: "Yrkesprofil (arbetskort)",
     },
     synonyms: {
-      en: ["player card", "work card", "card"],
-      lt: ["kortelė", "žaidėjo kortelė", "darbo kortelė"],
-      ru: ["карточка", "карта игрока", "рабочая карточка"],
-      nl: ["spelerskaart", "werkkaart", "kaart"],
-      de: ["spielerkarte", "arbeitskarte", "karte"],
+      en: ["professional profile", "work card", "card"],
+      lt: ["kortelė", "profesinė kortelė", "darbo kortelė"],
+      ru: ["карточка", "профессиональная карточка", "рабочая карточка"],
+      nl: ["professionele kaart", "werkkaart", "kaart"],
+      de: ["berufskarte", "arbeitskarte", "karte"],
+      pl: ["karta zawodowa", "karta pracy", "karta"],
+      sv: ["yrkesprofil", "arbetskort", "kort", "visitkort"],
     },
   },
   {
@@ -197,6 +264,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "CV (резюме)",
       nl: "CV (afdrukken / exporteren)",
       de: "Lebenslauf (drucken / exportieren)",
+      pl: "CV (druk / eksport)",
+      sv: "CV (skriv ut / exportera)",
     },
     synonyms: {
       en: ["cv", "resume", "curriculum vitae", "print cv", "create cv"],
@@ -204,6 +273,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["резюме", "cv", "печать резюме", "создать резюме"],
       nl: ["cv", "curriculum vitae", "cv afdrukken", "cv maken"],
       de: ["lebenslauf", "cv", "lebenslauf drucken", "lebenslauf erstellen"],
+      pl: ["cv", "życiorys", "curriculum vitae", "drukuj cv", "stwórz cv"],
+      sv: ["cv", "meritförteckning", "levande cv", "skriv ut cv", "skapa cv", "ladda ner cv"],
     },
   },
   // "Pridėti patirtį" — experience lives on the profile (the journal feeds
@@ -219,6 +290,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Добавить опыт (в профиле)",
       nl: "Ervaring toevoegen (profiel)",
       de: "Erfahrung hinzufügen (Profil)",
+      pl: "Dodaj doświadczenie (profil)",
+      sv: "Lägg till erfarenhet (profil)",
     },
     synonyms: {
       en: ["add experience", "experience", "work history"],
@@ -226,6 +299,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["добавить опыт", "опыт", "опыт работы"],
       nl: ["ervaring toevoegen", "ervaring", "werkervaring"],
       de: ["erfahrung hinzufügen", "erfahrung", "berufserfahrung"],
+      pl: ["dodaj doświadczenie", "doświadczenie", "historia pracy"],
+      sv: ["lägg till erfarenhet", "erfarenhet", "arbetslivserfarenhet", "tidigare jobb"],
     },
   },
   {
@@ -238,6 +313,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Рабочий журнал",
       nl: "Werkdagboek",
       de: "Arbeitsjournal",
+      pl: "Dziennik pracy",
+      sv: "Arbetsjournal",
     },
     synonyms: {
       en: ["journal", "diary", "log work", "record work"],
@@ -245,6 +322,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["журнал", "дневник", "записать работу"],
       nl: ["dagboek", "werkdagboek", "logboek", "werk vastleggen"],
       de: ["journal", "arbeitsjournal", "tagebuch", "arbeit erfassen"],
+      pl: ["dziennik", "dziennik pracy", "zapisz pracę", "raport dnia"],
+      sv: ["arbetsjournal", "journal", "dagbok", "logga arbete", "registrera arbete"],
     },
   },
   // Photo report = a work JOURNAL entry mode (owner clarification 2026-07-05,
@@ -260,6 +339,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Фотоотчёт (журнал работ)",
       nl: "Fotoverslag (werkdagboek)",
       de: "Fotobericht (Arbeitsjournal)",
+      pl: "Raport zdjęciowy (dziennik pracy)",
+      sv: "Fotorapport (arbetsjournal)",
     },
     synonyms: {
       en: ["photo report", "work photos", "photo entry"],
@@ -267,6 +348,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["фотоотчёт", "фото отчет", "рабочие фото"],
       nl: ["fotoverslag", "foto rapport", "werkfoto's"],
       de: ["fotobericht", "fotoreport", "arbeitsfotos"],
+      pl: ["raport zdjęciowy", "zdjęcia z pracy", "wpis ze zdjęciem"],
+      sv: ["fotorapport", "arbetsfoton", "bilder", "foto", "fotopost"],
     },
   },
   // Work gallery = the manager-side read of those SAME journal photos on the
@@ -284,6 +367,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Галерея работ (фотоотчёты проекта)",
       nl: "Werkgalerij (projectfotoverslagen)",
       de: "Arbeitsgalerie (Projekt-Fotoberichte)",
+      pl: "Galeria prac (raporty zdjęciowe projektów)",
+      sv: "Arbetsgalleri (projektets fotorapporter)",
     },
     synonyms: {
       en: ["gallery", "work gallery", "project photos"],
@@ -291,6 +376,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["галерея", "галерея работ", "фото проекта"],
       nl: ["galerij", "werkgalerij", "projectfoto's"],
       de: ["galerie", "arbeitsgalerie", "projektfotos"],
+      pl: ["galeria", "galeria prac", "zdjęcia projektu"],
+      sv: ["galleri", "arbetsgalleri", "projektfoton"],
     },
   },
   {
@@ -304,6 +391,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Навыки",
       nl: "Vaardigheden",
       de: "Fähigkeiten",
+      pl: "Umiejętności",
+      sv: "Färdigheter",
     },
     synonyms: {
       en: ["skills", "abilities", "competences"],
@@ -311,6 +400,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["навыки", "умения", "компетенции"],
       nl: ["vaardigheden", "skills", "competenties"],
       de: ["fähigkeiten", "kompetenzen", "qualifikationen"],
+      pl: ["umiejętności", "kompetencje", "zdolności"],
+      sv: ["färdigheter", "kompetenser", "kunskaper", "förmågor"],
     },
   },
   {
@@ -323,6 +414,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Найти работу (возможности)",
       nl: "Werk vinden (kansen)",
       de: "Arbeit finden (Angebote)",
+      pl: "Znajdź pracę (możliwości)",
+      sv: "Hitta arbete (möjligheter)",
     },
     synonyms: {
       en: ["job", "work", "find work", "vacancies", "opportunities", "job opportunities"],
@@ -330,6 +423,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["работа", "вакансии", "поиск работы", "возможности работы"],
       nl: ["werk", "baan", "vacatures", "werk zoeken", "kansen", "werkkansen"],
       de: ["arbeit", "job", "stellenangebote", "arbeit suchen", "jobangebote"],
+      pl: ["praca", "znajdź pracę", "oferty pracy", "wakaty", "możliwości"],
+      sv: ["jobb", "arbete", "hitta jobb", "hitta arbete", "lediga jobb", "platsannonser", "möjligheter"],
     },
   },
   // "Paraiškos / susidomėjimai" — the worker's expressions of interest live
@@ -346,6 +441,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Заявки и отклики",
       nl: "Aanmeldingen en interesses",
       de: "Bewerbungen und Interessen",
+      pl: "Aplikacje i zainteresowania",
+      sv: "Ansökningar och intressen",
     },
     synonyms: {
       en: ["applications", "interests", "expressed interest", "my applications"],
@@ -353,6 +450,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["заявки", "отклики", "интерес", "мои заявки"],
       nl: ["aanmeldingen", "interesses", "interesse tonen", "mijn aanmeldingen"],
       de: ["bewerbungen", "interessen", "interesse zeigen", "meine bewerbungen"],
+      pl: ["aplikacje", "zainteresowania", "moje aplikacje", "zgłoszenia"],
+      sv: ["ansökningar", "intressen", "intresseanmälan", "mina ansökningar", "sökt"],
     },
   },
   // Transport / tools / accommodation are honest work-condition fields on
@@ -368,6 +467,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Транспорт (условия работы)",
       nl: "Vervoer (werkomstandigheden)",
       de: "Transport (Arbeitsbedingungen)",
+      pl: "Transport (warunki pracy)",
+      sv: "Transport (arbetsvillkor)",
     },
     synonyms: {
       en: ["transport", "travel", "commute"],
@@ -375,6 +476,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["транспорт", "проезд"],
       nl: ["vervoer", "transport", "reizen", "woon-werkverkeer"],
       de: ["transport", "anfahrt", "fahrt", "pendeln"],
+      pl: ["transport", "dojazd", "podróż"],
+      sv: ["transport", "resor", "pendling", "resa till jobbet"],
     },
   },
   {
@@ -387,6 +490,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Инструменты и оборудование (условия работы)",
       nl: "Gereedschap en uitrusting (werkomstandigheden)",
       de: "Werkzeuge und Ausrüstung (Arbeitsbedingungen)",
+      pl: "Narzędzia i sprzęt (warunki pracy)",
+      sv: "Verktyg och utrustning (arbetsvillkor)",
     },
     synonyms: {
       en: ["tools", "equipment"],
@@ -394,6 +499,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["инструменты", "оборудование"],
       nl: ["gereedschap", "uitrusting", "materiaal"],
       de: ["werkzeug", "werkzeuge", "ausrüstung", "geräte"],
+      pl: ["narzędzia", "sprzęt"],
+      sv: ["verktyg", "utrustning", "arbetsverktyg"],
     },
   },
   {
@@ -406,6 +513,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Проживание (условия работы)",
       nl: "Huisvesting (werkomstandigheden)",
       de: "Unterkunft (Arbeitsbedingungen)",
+      pl: "Zakwaterowanie (warunki pracy)",
+      sv: "Boende (arbetsvillkor)",
     },
     synonyms: {
       en: ["accommodation", "housing", "lodging"],
@@ -413,6 +522,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["проживание", "жильё", "жилье"],
       nl: ["huisvesting", "woning", "accommodatie", "onderdak"],
       de: ["unterkunft", "wohnung", "wohnen"],
+      pl: ["zakwaterowanie", "nocleg", "mieszkanie"],
+      sv: ["boende", "bostad", "logi", "övernattning"],
     },
   },
 
@@ -427,6 +538,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Команда и бригады (пространство компании)",
       nl: "Team en ploegen (bedrijfsomgeving)",
       de: "Team und Kolonnen (Firmenbereich)",
+      pl: "Zespół i brygady (przestrzeń firmy)",
+      sv: "Team och arbetslag (företagets arbetsyta)",
     },
     synonyms: {
       en: ["team", "brigade", "crew", "company", "workers list"],
@@ -434,6 +547,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["команда", "бригада", "компания"],
       nl: ["team", "ploeg", "brigade", "bedrijf", "medewerkerslijst"],
       de: ["team", "kolonne", "brigade", "firma", "mitarbeiterliste"],
+      pl: ["zespół", "brygada", "ekipa", "firma", "lista pracowników"],
+      sv: ["team", "arbetslag", "lag", "företag", "medarbetare", "personallista"],
     },
   },
   {
@@ -448,6 +563,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Планирование персонала",
       nl: "Personeelsplanning",
       de: "Personalplanung",
+      pl: "Planowanie kadr",
+      sv: "Personalplanering",
     },
     synonyms: {
       en: ["workforce", "capacity", "skill gap", "headcount", "planning zone"],
@@ -455,6 +572,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["персонал", "мощность", "нехватка", "потребность в людях"],
       nl: ["personeel", "capaciteit", "tekort", "personeelsbehoefte"],
       de: ["personal", "kapazität", "engpass", "personalbedarf"],
+      pl: ["kadry", "obsada", "luka kompetencji", "zatrudnienie", "planowanie"],
+      sv: ["personalplanering", "bemanning", "kapacitet", "kompetensgap", "antal anställda", "planering"],
     },
   },
   {
@@ -467,6 +586,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Объекты и проекты",
       nl: "Objecten en projecten",
       de: "Objekte und Projekte",
+      pl: "Obiekty i projekty",
+      sv: "Objekt och projekt",
     },
     synonyms: {
       en: ["object", "project", "projects", "site", "construction site"],
@@ -474,6 +595,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["объект", "проект", "проекты", "стройка"],
       nl: ["object", "project", "projecten", "bouwplaats", "werf"],
       de: ["objekt", "projekt", "projekte", "baustelle"],
+      pl: ["obiekt", "projekt", "projekty", "budowa", "plac budowy"],
+      sv: ["objekt", "projekt", "arbetsplats", "bygge", "byggarbetsplats"],
     },
   },
   // Manager journal-review inbox — the dashboard chain-actions card links it
@@ -489,6 +612,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Проверка записей работников (входящие)",
       nl: "Werknemersinvoer beoordelen (inbox)",
       de: "Mitarbeitereinträge prüfen (Eingang)",
+      pl: "Sprawdź wpisy pracowników (skrzynka)",
+      sv: "Granska medarbetarnas poster (inkorg)",
     },
     synonyms: {
       en: ["inbox", "review entries", "journal review", "approve entries"],
@@ -496,6 +621,44 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["входящие", "проверить записи", "проверка журнала"],
       nl: ["inbox", "invoer beoordelen", "dagboek beoordelen"],
       de: ["eingang", "einträge prüfen", "journalprüfung"],
+      pl: [
+        "skrzynka",
+        "sprawdź wpisy",
+        "przegląd dziennika",
+        "zatwierdź wpisy",
+      ],
+      sv: [
+        "inkorg",
+        "granska poster",
+        "granska journal",
+        "godkänn poster",
+        "attestera",
+      ],
+    },
+  },
+  // Client review queue — the counterparty of a worker's work (client /
+  // customer / contracting party) decides the entries the worker submitted.
+  {
+    id: "client_review_queue",
+    route: "/dashboard/inbox/counterparty",
+    audience: "company",
+    labels: {
+      en: "Review work submitted to you as client",
+      lt: "Peržiūrėti jums kaip užsakovui pateiktą darbą",
+      ru: "Проверить работу, поданную вам как заказчику",
+      nl: "Werk beoordelen dat aan u als opdrachtgever is voorgelegd",
+      de: "Als Auftraggeber eingereichte Arbeit prüfen",
+      pl: "Sprawdź pracę przekazaną Tobie jako zleceniodawcy",
+      sv: "Granska arbete som skickats till dig som kund",
+    },
+    synonyms: {
+      en: ["client review", "client acceptance", "accept work", "customer review"],
+      lt: ["užsakovo peržiūra", "darbo priėmimas", "priimti darbą", "kliento patvirtinimas"],
+      ru: ["проверка заказчика", "принять работу", "приёмка работы"],
+      nl: ["opdrachtgever beoordeling", "werk accepteren", "oplevering"],
+      de: ["auftraggeber prüfung", "arbeit abnehmen", "abnahme"],
+      pl: ["przegląd zleceniodawcy", "odbiór pracy", "akceptacja pracy"],
+      sv: ["kundgranskning", "kundgodkännande", "godkänn arbete", "beställargranskning"],
     },
   },
   {
@@ -510,6 +673,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Последующие действия (ход проектов)",
       nl: "Opvolging (projectvoortgang)",
       de: "Nachverfolgung (Projektablauf)",
+      pl: "Działania następcze (operacje projektu)",
+      sv: "Uppföljning (projektdrift)",
     },
     synonyms: {
       en: ["follow-up", "follow up", "operations"],
@@ -517,6 +682,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["напоминания", "операции", "ход работ"],
       nl: ["opvolging", "follow-up", "herinneringen"],
       de: ["nachverfolgung", "wiedervorlage", "erinnerungen"],
+      pl: ["działania następcze", "follow-up", "operacje"],
+      sv: ["uppföljning", "följ upp", "drift", "projektdrift"],
     },
   },
   {
@@ -531,6 +698,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Разместить потребность в работниках (спрос)",
       nl: "Werkbehoefte plaatsen (vraag)",
       de: "Personalbedarf veröffentlichen (Nachfrage)",
+      pl: "Zgłoś zapotrzebowanie na pracowników (popyt)",
+      sv: "Lägg upp ett behov (arbetskraft)",
     },
     synonyms: {
       en: [
@@ -571,6 +740,21 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
         "unternehmensbedarf",
         "personalbedarf erstellen",
       ],
+      pl: [
+        "popyt",
+        "zapotrzebowanie",
+        "potrzeba pracowników",
+        "potrzeby firmy",
+        "zgłoś zapotrzebowanie",
+      ],
+      sv: [
+        "behov",
+        "arbetsbehov",
+        "behöver personal",
+        "rekryteringsbehov",
+        "företagets behov",
+        "skapa behov",
+      ],
     },
   },
   {
@@ -583,13 +767,31 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Найти работников (скаутинг)",
       nl: "Werknemers vinden (scouting)",
       de: "Arbeitskräfte finden (Scouting)",
+      pl: "Znajdź pracowników (wyszukiwanie)",
+      sv: "Hitta arbetskraft (sökning)",
     },
     synonyms: {
       en: ["find workers", "scouting", "staff", "hire", "worker search", "find a team"],
-      lt: ["darbuotojai", "rasti darbuotojų", "atranka", "samdyti", "darbuotojų paieška", "rasti komandą"],
+      lt: ["kandidatai", "darbuotojai", "rasti darbuotojų", "atranka", "samdyti", "darbuotojų paieška", "rasti komandą"],
       ru: ["работники", "найти работников", "подбор", "нанять", "поиск работников", "найти команду"],
       nl: ["werknemers", "personeel", "werknemers vinden", "werven", "personeel zoeken", "team vinden"],
       de: ["arbeiter", "arbeitskräfte", "personal finden", "einstellen", "personalsuche", "team finden"],
+      pl: [
+        "znajdź pracowników",
+        "szukanie pracowników",
+        "kadra",
+        "zatrudnij",
+        "znajdź zespół",
+      ],
+      sv: [
+        "hitta arbetskraft",
+        "hitta personal",
+        "personal",
+        "anställa",
+        "rekrytera",
+        "sök medarbetare",
+        "hitta ett team",
+      ],
     },
   },
   {
@@ -606,6 +808,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Импорт истории работы",
       nl: "Werkgeschiedenis importeren",
       de: "Arbeitsgeschichte importieren",
+      pl: "Importuj historię pracy",
+      sv: "Importera arbetshistorik",
     },
     synonyms: {
       en: [
@@ -648,6 +852,22 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
         "alte aufzeichnungen hochladen",
         "arbeitsnachweise importieren",
       ],
+      pl: [
+        "importuj historię pracy",
+        "importuj ewidencję czasu",
+        "zapisy historyczne",
+        "dawne prace",
+        "wgraj stare wpisy",
+        "import dowodów pracy",
+      ],
+      sv: [
+        "importera arbetshistorik",
+        "importera tidrapporter",
+        "historiska poster",
+        "tidigare arbete",
+        "ladda upp gamla poster",
+        "import",
+      ],
     },
   },
   {
@@ -660,13 +880,17 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Черновики кандидатов",
       nl: "Kandidaat-concepten",
       de: "Kandidaten-Entwürfe",
+      pl: "Szkice kandydatów",
+      sv: "Kandidatutkast",
     },
     synonyms: {
       en: ["candidates", "candidate pool", "drafts"],
-      lt: ["kandidatai", "kandidatų sąrašas"],
+      lt: ["kandidatų juodraščiai", "kandidatų sąrašas"],
       ru: ["кандидаты", "список кандидатов"],
       nl: ["kandidaten", "kandidatenlijst", "concepten"],
       de: ["kandidaten", "kandidatenliste", "entwürfe"],
+      pl: ["kandydaci", "baza kandydatów", "szkice"],
+      sv: ["kandidater", "kandidatpool", "utkast"],
     },
   },
 
@@ -681,6 +905,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Предлагать услуги",
       nl: "Diensten aanbieden",
       de: "Dienstleistungen anbieten",
+      pl: "Oferuj usługi",
+      sv: "Erbjud tjänster",
     },
     synonyms: {
       en: ["services", "my services", "offer a service", "publish service"],
@@ -688,6 +914,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["услуги", "мои услуги", "предложить услугу"],
       nl: ["diensten", "mijn diensten", "dienst aanbieden"],
       de: ["dienstleistungen", "meine dienstleistungen", "dienstleistung anbieten", "services"],
+      pl: ["usługi", "moje usługi", "zaoferuj usługę", "opublikuj usługę"],
+      sv: ["tjänster", "mina tjänster", "erbjud en tjänst", "publicera tjänst"],
     },
   },
   {
@@ -700,6 +928,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Поиск услуг и заявки",
       nl: "Diensten zoeken en aanvragen",
       de: "Dienstleistungen finden und Anfragen",
+      pl: "Znajdź usługi i zapytania o usługi",
+      sv: "Hitta tjänster och tjänsteförfrågningar",
     },
     synonyms: {
       en: ["service requests", "find services", "request a service"],
@@ -707,6 +937,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["заявки на услуги", "найти услугу", "заказать услугу"],
       nl: ["dienstaanvragen", "dienst zoeken", "dienst aanvragen"],
       de: ["serviceanfragen", "dienstleistung finden", "dienstleistung anfragen"],
+      pl: ["zapytania o usługi", "znajdź usługi", "zamów usługę"],
+      sv: ["tjänsteförfrågningar", "hitta tjänster", "beställ en tjänst", "förfrågan"],
     },
   },
   // WAGON 10 SHIPPED (owner lock #1 flip, updated together with
@@ -726,6 +958,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Запросить помощь рекрутера / подбор персонала",
       nl: "Recruiter- / wervingshulp aanvragen",
       de: "Recruiter- / Personalhilfe anfordern",
+      pl: "Poproś o pomoc rekrutera / agencji",
+      sv: "Be om hjälp med rekrytering / bemanning",
     },
     synonyms: {
       en: ["recruiter", "staffing help", "recruitment"],
@@ -733,6 +967,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["рекрутер", "подбор персонала", "рекрутинг"],
       nl: ["recruiter", "wervingshulp", "werving en selectie"],
       de: ["recruiter", "personalvermittlung", "personalbeschaffung"],
+      pl: ["rekruter", "pomoc kadrowa", "rekrutacja"],
+      sv: ["rekryterare", "rekrytering", "bemanning", "bemanningsföretag", "bemanningshjälp"],
     },
   },
   {
@@ -745,6 +981,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Запросить бухгалтерскую помощь",
       nl: "Boekhoudhulp aanvragen",
       de: "Buchhaltungshilfe anfordern",
+      pl: "Poproś o pomoc księgową",
+      sv: "Be om hjälp med redovisning",
     },
     synonyms: {
       en: ["accounting", "accountant", "bookkeeping", "taxes"],
@@ -752,6 +990,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["бухгалтерия", "бухгалтер", "налоги"],
       nl: ["boekhouding", "boekhouder", "administratie", "belastingen"],
       de: ["buchhaltung", "buchhalter", "steuern"],
+      pl: ["księgowość", "księgowy", "rachunkowość", "podatki"],
+      sv: ["redovisning", "bokföring", "revisor", "redovisningskonsult", "skatt", "skatter"],
     },
   },
   // Company sessions get the REAL legal/document help request (the typed
@@ -767,6 +1007,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Запросить юридическую и документную помощь",
       nl: "Juridische en documenthulp aanvragen",
       de: "Rechts- und Dokumentenhilfe anfordern",
+      pl: "Poproś o pomoc prawną i dokumentową",
+      sv: "Be om juridisk hjälp och dokumenthjälp",
     },
     synonyms: {
       en: ["legal help", "lawyer", "jurisdiction"],
@@ -774,6 +1016,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["юридическая помощь", "юрист", "юрисдикция"],
       nl: ["juridische hulp", "jurist", "advocaat"],
       de: ["rechtshilfe", "anwalt", "jurist"],
+      pl: ["pomoc prawna", "prawnik", "jurysdykcja"],
+      sv: ["juridisk hjälp", "jurist", "advokat", "juridik", "jurisdiktion"],
     },
   },
   {
@@ -786,6 +1030,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Документы",
       nl: "Documenten",
       de: "Dokumente",
+      pl: "Dokumenty",
+      sv: "Dokument",
     },
     synonyms: {
       // PR H: the page is the document & work-proof centre — work-proof
@@ -830,6 +1076,26 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
         "arbeitsnachweis",
         "dokumentenzentrum",
       ],
+      pl: [
+        "dokumenty",
+        "moje dokumenty",
+        "zaświadczenia",
+        "certyfikaty",
+        "dowód pracy",
+        "potwierdzenie pracy",
+        "centrum dokumentów",
+        "wygasające dokumenty",
+      ],
+      sv: [
+        "dokument",
+        "mina dokument",
+        "intyg",
+        "certifikat",
+        "arbetsbevis",
+        "bevis på arbete",
+        "dokumentcenter",
+        "dokument som löper ut",
+      ],
     },
   },
 
@@ -844,6 +1110,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Сообщения",
       nl: "Berichten",
       de: "Nachrichten",
+      pl: "Wiadomości",
+      sv: "Meddelanden",
     },
     synonyms: {
       en: ["messages", "inbox", "chat", "communication"],
@@ -851,6 +1119,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["сообщения", "чат", "переписка"],
       nl: ["berichten", "inbox", "chat", "communicatie"],
       de: ["nachrichten", "posteingang", "chat", "kommunikation"],
+      pl: ["wiadomości", "skrzynka", "czat", "komunikacja"],
+      sv: ["meddelanden", "inkorg", "chatt", "kommunikation", "meddelande"],
     },
   },
   {
@@ -866,6 +1136,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Задачи (мой список дел)",
       nl: "Taken (mijn werklijst)",
       de: "Aufgaben (meine Arbeitsliste)",
+      pl: "Zadania (moja lista pracy)",
+      sv: "Uppgifter (min arbetslista)",
     },
     synonyms: {
       en: ["tasks", "task", "todo", "to-do", "my tasks", "task board"],
@@ -873,6 +1145,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["задачи", "задача", "список дел", "мои задачи", "доска задач"],
       nl: ["taken", "taak", "takenlijst", "mijn taken", "takenbord"],
       de: ["aufgaben", "aufgabe", "aufgabenliste", "meine aufgaben", "aufgabenboard"],
+      pl: ["zadania", "zadanie", "todo", "moje zadania", "tablica zadań"],
+      sv: ["uppgifter", "uppgift", "att göra", "mina uppgifter", "uppgiftstavla", "todo"],
     },
   },
   {
@@ -890,6 +1164,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Финансовые записи (счета и расходы)",
       nl: "Financiële registraties (facturen & uitgaven)",
       de: "Finanzeinträge (Rechnungen & Ausgaben)",
+      pl: "Zapisy finansowe (faktury i wydatki)",
+      sv: "Ekonomiposter (fakturor och utgifter)",
     },
     synonyms: {
       en: ["finance", "invoices", "invoice", "expenses", "expense", "overdue"],
@@ -897,6 +1173,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["финансы", "счета", "счёт", "расходы", "просроченные счета"],
       nl: ["financiën", "facturen", "factuur", "uitgaven", "kosten"],
       de: ["finanzen", "rechnungen", "rechnung", "ausgaben", "kosten"],
+      pl: ["finanse", "faktury", "faktura", "wydatki", "wydatek", "zaległe"],
+      sv: ["ekonomi", "fakturor", "faktura", "utgifter", "utgift", "kostnader", "förfallna"],
     },
   },
   {
@@ -911,6 +1189,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Бронирования",
       nl: "Boekingen",
       de: "Buchungen",
+      pl: "Rezerwacje",
+      sv: "Bokningar",
     },
     synonyms: {
       en: ["bookings", "booking", "proposals", "engagements"],
@@ -918,6 +1198,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["бронирования", "бронирование", "предложения работы"],
       nl: ["boekingen", "boeking", "voorstellen"],
       de: ["buchungen", "buchung", "arbeitsangebote"],
+      pl: ["rezerwacje", "rezerwacja", "propozycje", "zaangażowania"],
+      sv: ["bokningar", "bokning", "förslag", "uppdrag"],
     },
   },
   {
@@ -934,6 +1216,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Планирование (расписание)",
       nl: "Planning (agenda)",
       de: "Planung (Agenda)",
+      pl: "Planowanie (agenda)",
+      sv: "Planering (agenda)",
     },
     synonyms: {
       en: ["planning", "calendar", "agenda", "schedule", "plan"],
@@ -941,6 +1225,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["планирование", "календарь", "расписание", "план", "график"],
       nl: ["planning", "agenda", "kalender", "schema", "plan"],
       de: ["planung", "kalender", "terminplanung", "zeitplan", "plan"],
+      pl: ["planowanie", "kalendarz", "agenda", "harmonogram", "plan"],
+      sv: ["planering", "kalender", "agenda", "schema", "plan"],
     },
   },
   {
@@ -956,6 +1242,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Моя сеть (пригласить)",
       nl: "Mijn netwerk (uitnodigen)",
       de: "Mein Netzwerk (einladen)",
+      pl: "Moja sieć (zaproszenia)",
+      sv: "Mitt nätverk (bjud in)",
     },
     synonyms: {
       en: ["network", "invite", "invitation", "team members", "partners", "people search"],
@@ -963,6 +1251,23 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["сеть", "пригласить", "приглашение", "команда", "партнеры", "поиск людей"],
       nl: ["netwerk", "uitnodigen", "uitnodiging", "teamleden", "partners", "mensen zoeken"],
       de: ["netzwerk", "einladen", "einladung", "teammitglieder", "partner", "personensuche"],
+      pl: [
+        "sieć",
+        "zaproś",
+        "zaproszenie",
+        "członkowie zespołu",
+        "partnerzy",
+        "szukaj osób",
+      ],
+      sv: [
+        "nätverk",
+        "bjud in",
+        "inbjudan",
+        "teammedlemmar",
+        "partner",
+        "sök personer",
+        "kontakter",
+      ],
     },
   },
   {
@@ -975,6 +1280,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Карта рынка",
       nl: "Marktkaart",
       de: "Marktkarte",
+      pl: "Mapa rynku",
+      sv: "Marknadskarta",
     },
     synonyms: {
       en: ["map", "market map"],
@@ -982,6 +1289,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["карта", "карта рынка"],
       nl: ["kaart", "marktkaart", "plattegrond"],
       de: ["karte", "marktkarte", "landkarte"],
+      pl: ["mapa", "mapa rynku"],
+      sv: ["karta", "marknadskarta"],
     },
   },
   {
@@ -997,6 +1306,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Центр активности",
       nl: "Activiteitencentrum",
       de: "Aktivitätszentrum",
+      pl: "Centrum aktywności",
+      sv: "Aktivitetscenter",
     },
     synonyms: {
       en: ["activity", "notifications", "signals", "what's waiting"],
@@ -1004,6 +1315,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["активность", "уведомления", "сигналы", "что ждёт"],
       nl: ["activiteit", "meldingen", "signalen", "wat wacht"],
       de: ["aktivität", "benachrichtigungen", "signale", "was wartet"],
+      pl: ["aktywność", "powiadomienia", "sygnały", "co czeka"],
+      sv: ["aktivitet", "aviseringar", "notiser", "signaler", "vad väntar"],
     },
   },
   {
@@ -1021,6 +1334,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Центр помощи (что требует моего внимания)",
       nl: "Assistentiecentrum (wat heeft mijn aandacht nodig)",
       de: "Assistenzzentrum (was braucht meine Aufmerksamkeit)",
+      pl: "Centrum wsparcia (co wymaga mojej uwagi)",
+      sv: "Assistanscenter (vad som behöver min uppmärksamhet)",
     },
     synonyms: {
       en: ["assist", "assistance", "ai", "attention", "summary", "overview of my data"],
@@ -1028,6 +1343,22 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["помощь", "ассистент", "ai", "внимание", "сводка"],
       nl: ["assistentie", "assistent", "ai", "aandacht", "samenvatting"],
       de: ["assistenz", "assistent", "ki", "aufmerksamkeit", "zusammenfassung"],
+      pl: [
+        "wsparcie",
+        "pomoc",
+        "ai",
+        "uwaga",
+        "podsumowanie",
+        "przegląd moich danych",
+      ],
+      sv: [
+        "assistans",
+        "hjälp",
+        "ai",
+        "uppmärksamhet",
+        "sammanfattning",
+        "översikt över mina uppgifter",
+      ],
     },
   },
   {
@@ -1045,6 +1376,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Отчёты (показатели моих данных и экспорт)",
       nl: "Rapporten (cijfers uit mijn gegevens & exports)",
       de: "Berichte (Kennzahlen aus meinen Daten & Exporte)",
+      pl: "Raporty (liczby i eksporty moich danych)",
+      sv: "Rapporter (mina siffror och exporter)",
     },
     synonyms: {
       en: ["reports", "report", "statistics", "figures", "export data"],
@@ -1052,6 +1385,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["отчёты", "отчет", "статистика", "показатели", "экспорт"],
       nl: ["rapporten", "rapport", "statistieken", "cijfers", "exporteren"],
       de: ["berichte", "bericht", "statistiken", "kennzahlen", "export"],
+      pl: ["raporty", "raport", "statystyki", "liczby", "eksport danych"],
+      sv: ["rapporter", "rapport", "statistik", "siffror", "exportera data"],
     },
   },
   {
@@ -1064,6 +1399,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Настройки аккаунта",
       nl: "Accountinstellingen",
       de: "Kontoeinstellungen",
+      pl: "Ustawienia konta",
+      sv: "Kontoinställningar",
     },
     synonyms: {
       en: ["account", "settings", "roles", "language"],
@@ -1071,6 +1408,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["аккаунт", "настройки", "роли", "язык"],
       nl: ["account", "instellingen", "rollen", "taal"],
       de: ["konto", "einstellingen", "rollen", "sprache"],
+      pl: ["konto", "ustawienia", "role", "język"],
+      sv: ["konto", "inställningar", "roller", "språk"],
     },
   },
   // Connected apps (Train A slice 2, 2026-09-02) — its OWN entry so "which
@@ -1087,6 +1426,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Подключённые приложения",
       nl: "Verbonden apps",
       de: "Verbundene Apps",
+      pl: "Połączone aplikacje",
+      sv: "Anslutna appar",
     },
     synonyms: {
       en: ["connected apps", "authorized apps", "disconnect", "revoke access", "chatgpt", "claude", "assistant access"],
@@ -1094,6 +1435,24 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["подключённые приложения", "отключить", "доступ", "chatgpt", "claude", "доступ ассистента"],
       nl: ["verbonden apps", "loskoppelen", "toegang intrekken", "chatgpt", "claude"],
       de: ["verbundene apps", "trennen", "zugriff widerrufen", "chatgpt", "claude"],
+      pl: [
+        "połączone aplikacje",
+        "autoryzowane aplikacje",
+        "odłącz",
+        "cofnij dostęp",
+        "chatgpt",
+        "claude",
+        "dostęp asystenta",
+      ],
+      sv: [
+        "anslutna appar",
+        "auktoriserade appar",
+        "koppla från",
+        "återkalla åtkomst",
+        "chatgpt",
+        "claude",
+        "assistentåtkomst",
+      ],
     },
   },
   // LMC — the platform credit a person actually holds. Deliberately its OWN
@@ -1114,6 +1473,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Мой кредит LMC",
       nl: "Mijn LMC-tegoed",
       de: "Mein LMC-Guthaben",
+      pl: "Moje kredyty LMC",
+      sv: "Min LMC-kredit",
     },
     synonyms: {
       en: [
@@ -1145,6 +1506,24 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ],
       nl: ["lmc", "tegoed", "saldo", "hoeveel lmc", "lmc historie", "opwaarderen"],
       de: ["lmc", "guthaben", "saldo", "wie viel lmc", "lmc historie", "aufladen"],
+      pl: [
+        "lmc",
+        "kredyt",
+        "saldo",
+        "ile mam lmc",
+        "historia lmc",
+        "doładuj",
+        "za co pobrano",
+      ],
+      sv: [
+        "lmc",
+        "kredit",
+        "saldo",
+        "hur mycket lmc",
+        "lmc-historik",
+        "fyll på",
+        "vad som debiterats",
+      ],
     },
   },
   // Canonical privacy CONTROL screen (consent-and-disclosure v1) — consents,
@@ -1160,6 +1539,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Управление приватностью (мои согласия)",
       nl: "Privacybeheer (mijn toestemmingen)",
       de: "Datenschutz-Verwaltung (meine Einwilligungen)",
+      pl: "Ustawienia prywatności (moje zgody)",
+      sv: "Integritetsinställningar (mina samtycken)",
     },
     synonyms: {
       en: ["privacy controls", "consents", "visibility", "data export", "delete account"],
@@ -1167,6 +1548,20 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["управление приватностью", "согласия", "видимость", "экспорт данных"],
       nl: ["privacybeheer", "toestemmingen", "zichtbaarheid", "gegevensexport"],
       de: ["datenschutzverwaltung", "einwilligungen", "sichtbarkeit", "datenexport"],
+      pl: [
+        "ustawienia prywatności",
+        "zgody",
+        "widoczność",
+        "eksport danych",
+        "usuń konto",
+      ],
+      sv: [
+        "integritetsinställningar",
+        "samtycken",
+        "synlighet",
+        "dataexport",
+        "radera konto",
+      ],
     },
   },
   // "Kontakto prašymai" — employer contact-disclosure requests live on the
@@ -1182,6 +1577,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Запросы контактов (приватность)",
       nl: "Contactverzoeken (privacy)",
       de: "Kontaktanfragen (Datenschutz)",
+      pl: "Prośby o kontakt (prywatność)",
+      sv: "Kontaktförfrågningar (integritet)",
     },
     synonyms: {
       en: ["contact requests", "disclosure requests", "who asked for my contact"],
@@ -1189,6 +1586,16 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["запросы контактов", "запросы на раскрытие"],
       nl: ["contactverzoeken", "wie vroeg mijn contact"],
       de: ["kontaktanfragen", "offenlegungsanfragen"],
+      pl: [
+        "prośby o kontakt",
+        "wnioski o udostępnienie",
+        "kto prosił o mój kontakt",
+      ],
+      sv: [
+        "kontaktförfrågningar",
+        "förfrågningar om uppgifter",
+        "vem bad om min kontakt",
+      ],
     },
   },
   // Market intelligence workspace — the ONLY command-surface module that had
@@ -1203,6 +1610,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Рыночная аналитика (сигналы зарплат и спроса)",
       nl: "Marktinzichten (loon- en vraagsignalen)",
       de: "Markteinblicke (Lohn- und Nachfragesignale)",
+      pl: "Analityka rynku (sygnały płac i popytu)",
+      sv: "Marknadsinsikter (lön och efterfrågan)",
     },
     synonyms: {
       en: ["intelligence", "market signals", "salary data", "demand data"],
@@ -1210,6 +1619,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["аналитика", "рыночные сигналы", "данные о зарплатах"],
       nl: ["inzichten", "marktsignalen", "loongegevens"],
       de: ["einblicke", "marktsignale", "lohndaten"],
+      pl: ["analityka", "sygnały rynku", "dane o płacach", "dane o popycie"],
+      sv: ["insikter", "marknadssignaler", "lönedata", "löner", "efterfrågedata", "lönestatistik"],
     },
   },
   // Spaces / role hub — the "Manage spaces" destination the identity card
@@ -1225,6 +1636,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Пространства и роли (стартовый центр)",
       nl: "Ruimtes en rollen (starthub)",
       de: "Bereiche und Rollen (Start-Hub)",
+      pl: "Przestrzenie i role (start)",
+      sv: "Ytor och roller (startsida)",
     },
     synonyms: {
       en: ["spaces", "manage spaces", "switch role", "start"],
@@ -1232,6 +1645,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["пространства", "управление пространствами", "сменить роль"],
       nl: ["ruimtes", "ruimtes beheren", "rol wisselen"],
       de: ["bereiche", "bereiche verwalten", "rolle wechseln"],
+      pl: ["przestrzenie", "zarządzaj przestrzeniami", "zmień rolę", "start"],
+      sv: ["ytor", "hantera ytor", "byt roll", "start"],
     },
   },
   // Create-company lane — the identity card's honest empty-state CTA
@@ -1246,6 +1661,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Создать компанию",
       nl: "Bedrijf aanmaken",
       de: "Firma erstellen",
+      pl: "Utwórz firmę",
+      sv: "Skapa ett företag",
     },
     synonyms: {
       en: ["create company", "new company", "register company"],
@@ -1253,6 +1670,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["создать компанию", "новая компания", "зарегистрировать компанию"],
       nl: ["bedrijf aanmaken", "nieuw bedrijf", "bedrijf registreren"],
       de: ["firma erstellen", "neue firma", "firma registrieren"],
+      pl: ["utwórz firmę", "nowa firma", "zarejestruj firmę"],
+      sv: ["skapa företag", "nytt företag", "registrera företag", "starta företag"],
     },
   },
   // Dashboard overview itself — the primary-nav home tab, findable by name.
@@ -1266,6 +1685,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Обзор (главная)",
       nl: "Overzicht (home)",
       de: "Übersicht (Startseite)",
+      pl: "Przegląd (strona główna)",
+      sv: "Översikt (hem)",
     },
     synonyms: {
       en: ["overview", "home", "dashboard"],
@@ -1273,6 +1694,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["обзор", "главная", "панель"],
       nl: ["overzicht", "home", "dashboard"],
       de: ["übersicht", "startseite", "dashboard"],
+      pl: ["przegląd", "strona główna", "pulpit"],
+      sv: ["översikt", "hem", "startsida", "dashboard"],
     },
   },
 
@@ -1289,6 +1712,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Цены и планы",
       nl: "Prijzen en abonnementen",
       de: "Preise und Pläne",
+      pl: "Cennik i plany",
+      sv: "Priser och planer",
     },
     synonyms: {
       en: ["pricing", "plans", "price", "free plan"],
@@ -1296,6 +1721,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["цены", "планы", "тарифы"],
       nl: ["prijzen", "abonnementen", "prijs", "gratis abonnement"],
       de: ["preise", "pläne", "tarife", "kostenloser plan"],
+      pl: ["cennik", "plany", "cena", "darmowy plan"],
+      sv: ["priser", "planer", "pris", "kostnad", "gratisplan", "gratis"],
     },
   },
   {
@@ -1308,6 +1735,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Политика конфиденциальности",
       nl: "Privacybeleid",
       de: "Datenschutzerklärung",
+      pl: "Polityka prywatności",
+      sv: "Integritetspolicy",
     },
     synonyms: {
       en: ["privacy", "personal data"],
@@ -1315,6 +1744,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["конфиденциальность", "личные данные"],
       nl: ["privacy", "persoonsgegevens"],
       de: ["datenschutz", "personenbezogene daten"],
+      pl: ["prywatność", "dane osobowe"],
+      sv: ["integritet", "personuppgifter", "integritetspolicy"],
     },
   },
   {
@@ -1327,6 +1758,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "GDPR и защита данных",
       nl: "AVG en gegevensbescherming",
       de: "DSGVO und Datenschutz",
+      pl: "RODO i ochrona danych",
+      sv: "GDPR och dataskydd",
     },
     synonyms: {
       en: ["gdpr", "data protection", "data rights"],
@@ -1334,6 +1767,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["gdpr", "защита данных", "права на данные"],
       nl: ["avg", "gdpr", "gegevensbescherming", "datarechten"],
       de: ["dsgvo", "gdpr", "datenschutz", "datenrechte"],
+      pl: ["rodo", "ochrona danych", "prawa do danych"],
+      sv: ["gdpr", "dataskydd", "dataskyddsförordningen", "rättigheter"],
     },
   },
   {
@@ -1346,6 +1781,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "О Labour Market AI",
       nl: "Over Labour Market AI",
       de: "Über Labour Market AI",
+      pl: "O Labour Market AI",
+      sv: "Om Labour Market AI",
     },
     synonyms: {
       en: ["about", "what is this", "how it works"],
@@ -1353,6 +1790,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["о платформе", "что это", "как работает"],
       nl: ["over", "wat is dit", "hoe werkt het"],
       de: ["über", "was ist das", "wie funktioniert es"],
+      pl: ["o nas", "co to jest", "jak to działa"],
+      sv: ["om", "vad är detta", "hur det fungerar", "om oss"],
     },
   },
 
@@ -1367,6 +1806,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Панель администратора",
       nl: "Beheerderspaneel",
       de: "Admin-Kontrollraum",
+      pl: "Panel administratora",
+      sv: "Admins kontrollrum",
     },
     synonyms: {
       en: ["admin", "control room", "operator"],
@@ -1374,6 +1815,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["админ", "администрирование"],
       nl: ["admin", "beheer", "beheerder"],
       de: ["admin", "verwaltung", "administrator"],
+      pl: ["admin", "panel sterowania", "operator"],
+      sv: ["admin", "kontrollrum", "operatör"],
     },
   },
   {
@@ -1390,6 +1833,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Воронка спроса (очередь оператора)",
       nl: "Vraagpijplijn (operatorwachtrij)",
       de: "Nachfrage-Pipeline (Operator-Warteschlange)",
+      pl: "Lejek zapotrzebowania (kolejka operatora)",
+      sv: "Behovspipeline (operatörskö)",
     },
     synonyms: {
       en: ["pipeline", "crm", "demand pipeline", "sales queue"],
@@ -1397,6 +1842,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["воронка", "crm", "очередь спроса"],
       nl: ["pijplijn", "crm", "verkooppijplijn"],
       de: ["pipeline", "crm", "vertriebspipeline"],
+      pl: ["lejek", "crm", "lejek zapotrzebowania", "kolejka sprzedaży"],
+      sv: ["pipeline", "crm", "behovspipeline", "säljkö"],
     },
   },
   {
@@ -1413,6 +1860,8 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: "Калькулятор стоимости проекта",
       nl: "Projectkosten-calculator",
       de: "Projektkosten-Rechner",
+      pl: "Kalkulator kosztów projektu",
+      sv: "Projektkostnadskalkylator",
     },
     synonyms: {
       en: [
@@ -1430,6 +1879,20 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ru: ["калькулятор", "рассчитать стоимость проекта", "смета"],
       nl: ["calculator", "projectkosten berekenen", "kostenraming"],
       de: ["rechner", "projektkosten berechnen", "kostenschätzung"],
+      pl: [
+        "kalkulator",
+        "oszacuj koszt projektu",
+        "kalkulator kosztów projektu",
+        "oblicz koszt projektu",
+        "kosztorys",
+      ],
+      sv: [
+        "kalkylator",
+        "räkna ut projektkostnad",
+        "kostnadsberäkning",
+        "kostnadskalkyl",
+        "personalkostnad",
+      ],
     },
   },
 ] as const;

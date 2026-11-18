@@ -19,9 +19,14 @@ const ENGINE = "components/app/market-map/leaflet-engine.ts";
 /** The presentations allowed to touch Leaflet at all. */
 const PRESENTATIONS = [
   "components/app/market-map/market-map.tsx",
-  "components/app/market-map/location-map.tsx",
   "components/app/world-state/workspace-map.tsx",
 ];
+/** Pure drawing helpers: they receive `L` from a presentation and only import
+ *  Leaflet's TYPES. `own-location-layer.ts` replaced the standalone own-location
+ *  picker map (`location-map.tsx`, a second Leaflet instance) when the market
+ *  map page collapsed to ONE map — the own location + radius are now drawn on
+ *  the canonical `market-map.tsx`. */
+const DRAW_HELPERS = ["components/app/market-map/own-location-layer.ts"];
 
 function* walk(dir: string): Generator<string> {
   for (const name of readdirSync(dir)) {
@@ -38,6 +43,13 @@ function* walk(dir: string): Generator<string> {
 describe("W3 row 28 — one Leaflet engine", () => {
   it("the old second chain is gone", () => {
     expect(existsSync(join(APP, "components/app/market-map-live.tsx"))).toBe(false);
+    // …and so is its successor, the standalone own-location picker map.
+    expect(existsSync(join(APP, "components/app/market-map/location-map.tsx"))).toBe(false);
+  });
+  it("the drawing helper never boots a map of its own", () => {
+    for (const rel of DRAW_HELPERS) {
+      expect(read(rel)).not.toMatch(/L\.map\(|\.tileLayer\(|mountLeafletMap\(|import\(["']leaflet["']\)/);
+    }
   });
 
   it("the OSM tile URL exists in exactly ONE source file — the engine", () => {
@@ -64,7 +76,7 @@ describe("W3 row 28 — one Leaflet engine", () => {
   });
 
   it("no runtime Leaflet import outside the engine + presentations (CSS/type-only allowed)", () => {
-    const allowed = new Set([ENGINE, ...PRESENTATIONS]);
+    const allowed = new Set([ENGINE, ...PRESENTATIONS, ...DRAW_HELPERS]);
     for (const dir of ["app", "components", "lib"]) {
       for (const p of walk(join(APP, dir))) {
         const rel = p.slice(APP.length + 1).replace(/\\/g, "/");

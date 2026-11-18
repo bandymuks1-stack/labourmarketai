@@ -146,6 +146,12 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
         "journal_entries",
         "journal_entry_metrics",
         "engagement_contexts",
+        // 2026-09-30: the caller's OWN active manager-class memberships — the
+        // manages_organization() predicate, so a manager sees what they manage.
+        "company_memberships",
+        // premium calendar 2026-09-29: the review rows of the SAME entry ids,
+        // so a week block can say an entry was confirmed by someone else.
+        "journal_entry_confirmations",
         "project_worker_assignments",
         "project_stages",
         "business_trips",
@@ -204,7 +210,11 @@ describe("2. every item href is a real registered route", () => {
     const smokeRoutes = new Set(PRIMARY_ROUTES.map((r) => r.urlPattern));
     expect(hrefForSource("booking", "x")).toBe("/dashboard/bookings");
     expect(smokeRoutes.has("/dashboard/bookings")).toBe(true);
-    expect(hrefForSource("task", "x")).toBe("/dashboard/tasks");
+    // Deep-links the specific task (anchor + highlight), not the bare list.
+    expect(hrefForSource("task", "x")).toBe("/dashboard/tasks?task=x#task-x");
+    expect(hrefForSource("task", "x", "p1")).toBe(
+      "/dashboard/tasks?project=p1&task=x#task-x",
+    );
     expect(smokeRoutes.has("/dashboard/tasks")).toBe(true);
   });
 
@@ -393,6 +403,8 @@ describe("5. real sources only — nothing that does not exist is simulated", ()
       "absence",
       "stage",
       "trip",
+      // CAL-8: the organization's planned work windows (work_plan_entries).
+      "plan",
     ]);
   });
 
@@ -500,11 +512,17 @@ describe("7. the page is an honest server-rendered agenda", () => {
     expect(PAGE).toMatch(/isPlanningSourceType/);
   });
 
-  it("renders the per-source honest degradation notes", () => {
-    expect(PAGE).toMatch(/planning-source-note-booking/);
-    expect(PAGE).toMatch(/planning-source-note-task/);
-    expect(PAGE).toMatch(/planning-source-note-project/);
+  it("states a FAILED source read; never narrates backlog (owner walk 2026-09-28)", () => {
+    // A read that failed is said per source (SEP-7: unknown is not zero)…
+    expect(PAGE).toMatch(/planning-source-note-task-error/);
+    expect(PAGE).toMatch(/planning-source-note-project-error/);
+    expect(PAGE).toMatch(/planning-source-note-journal-error/);
     expect(PAGE).toMatch(/sourceNotes\./);
+    // …but a source that is not switched on, or that only managers read, is
+    // silent: "the worker's schedule will appear when that view is built" is
+    // implementation backlog shown to a person, and it is gone.
+    expect(PAGE).not.toMatch(/sourceNotes\.\w+Unavailable/);
+    expect(PAGE).not.toMatch(/sourceNotes\.projectManagersOnly/);
     // The composition maps each source to an independent honest state.
     expect(COMPOSE).toMatch(/"unavailable"/);
     expect(COMPOSE).toMatch(/"managers-only"/);
@@ -681,15 +699,10 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "planning.source.journal",
     "planning.source.finance",
     "planning.source.invitation",
-    "planning.sourceNotes.bookingUnavailable",
-    "planning.sourceNotes.taskUnavailable",
     "planning.sourceNotes.taskError",
-    "planning.sourceNotes.projectManagersOnly",
     "planning.sourceNotes.projectError",
     "planning.sourceNotes.journalError",
-    "planning.sourceNotes.financeUnavailable",
     "planning.sourceNotes.financeError",
-    "planning.sourceNotes.invitationUnavailable",
     "planning.sourceNotes.invitationError",
     "planning.week.label",
     "planning.today",
@@ -732,6 +745,7 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "planning.month.hint",
     "planning.day.empty",
     "planning.year.count",
+    "planning.year.hint",
     // The myZone module-label keys left with the second dashboard's control
     // room (W3 Package 4); planning's own catalogue copy above is the label
     // source that survives.

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { claimPublicIntakeAction } from "@/lib/company/claim-public-intake-actions";
 import type { ClaimableIntake } from "@/lib/company/claim-public-intake";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
 
 /**
  * Canonical-journey P3 — "we found your earlier public submission" card.
@@ -28,6 +29,8 @@ export function ClaimPublicIntakeCard({
     claimCta: string;
     claimed: string;
     error: string;
+    /** An open company draft already exists — finish or discard it first. */
+    draftExists: string;
     workersLabel: string;
   };
 }) {
@@ -35,16 +38,25 @@ export function ClaimPublicIntakeCard({
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState<Set<string>>(new Set());
   const [failedId, setFailedId] = useState<string | null>(null);
+  const [draftBlockedId, setDraftBlockedId] = useState<string | null>(null);
+  // The claim is authorised by a VERIFIED mailbox only; when the server says the
+  // address is unverified the progressive proof is offered instead of a dead end.
+  const [needsProof, setNeedsProof] = useState(false);
 
   if (intakes.length === 0) return null;
 
   const onClaim = (id: string) =>
     startTransition(async () => {
       setFailedId(null);
+      setDraftBlockedId(null);
       const r = await claimPublicIntakeAction(locale, id);
       if (r.ok) {
         setDone((prev) => new Set(prev).add(id));
         router.refresh();
+      } else if (r.reason === "email_unverified") {
+        setNeedsProof(true);
+      } else if (r.reason === "draft_exists") {
+        setDraftBlockedId(id);
       } else {
         setFailedId(id);
       }
@@ -106,10 +118,18 @@ export function ClaimPublicIntakeCard({
                   {labels.error}
                 </span>
               ) : null}
+              {draftBlockedId === intake.id ? (
+                <span role="alert" className="text-meta text-state-warning" data-testid="intake-claim-draft-exists">
+                  {labels.draftExists}
+                </span>
+              ) : null}
             </div>
           </li>
         ))}
       </ul>
+      {needsProof ? (
+        <VerifyEmailPrompt locale={locale} next="/dashboard/company/needs" variant="intake" />
+      ) : null}
     </section>
   );
 }

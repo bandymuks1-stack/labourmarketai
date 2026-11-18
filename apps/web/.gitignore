@@ -38,8 +38,6 @@ yarn-error.log*
 # likewise tracks .env.example by exception.
 !.env.e2e.local.example
 
-# vercel
-.vercel
 
 # typescript
 *.tsbuildinfo
@@ -47,3 +45,6 @@ next-env.d.ts
 
 # Work Market Atlas — external-names denylist is supplied out-of-band (never committed)
 lib/guards/external-names.denylist.json
+
+# hero media pipeline: raw generated originals (local only)
+/.hero-raw/

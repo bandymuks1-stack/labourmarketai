@@ -44,7 +44,10 @@ describe("§11 what-if move — a person between projects", () => {
     // destination's empty checklist, absences inside the destination's dates
     expect(LOADER).toContain("headcountAfter: Math.max(0, from.workers.length - 1)");
     expect(LOADER).toContain("openTasksForWorker");
-    expect(LOADER).toContain("readinessTotal: DEFAULT_READINESS_ITEM_KEYS.length");
+    // the destination SUGGESTS rows to agree (no universal list, decision 0021
+    // extension 2026-10-24): A1 / posting only when the move changes country
+    expect(LOADER).toContain("readinessTotal: suggestedReadinessItemKeys({");
+    expect(LOADER).not.toContain("DEFAULT_READINESS_ITEM_KEYS.length");
     expect(LOADER).toContain("unavailabilitySpans");
     expect(LOADER).toContain("countryChanges:");
   });

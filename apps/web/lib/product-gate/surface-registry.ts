@@ -731,6 +731,78 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     },
   },
   {
+    // components/app/identity/person-identity-card.tsx — the compact,
+    // list-friendly depth of the ONE person identity (owner order 2026-10-01:
+    // one reusable professional-identity layer travelling PROFILE → APPLICATION
+    // → CANDIDATE → SHORTLIST → TEAM → PROJECT → ASSIGNMENT → CALENDAR, with
+    // different depth by context). Variants candidate-review and team-member.
+    // Presentation only: it takes already-authorized facts from its caller and
+    // shows no score, percentage or stars.
+    id: "components/app/identity/person-identity-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-01",
+    purpose:
+      "Shows ONE person as a professional identity — portrait or monogram, name, main profession, place, availability, a few facts for the context — with deeper layers opened on demand, so an employer reading an application and a manager reading the team see the same identity at different depth.",
+    whyNotChat:
+      "Scanning and comparing several people side by side (who, where, when free, on which project) is a visual act; chat can name one person's facts but cannot lay a team or a candidate list side by side. The assistant reaches the same facts through the existing capabilities; the card is their visual form, not a second source.",
+    whyNotExistingComponent:
+      "IdentityStage is the full-width portrait stage of one person's own card (hero scale, readiness ring, fact strip) and WorkerPlayerCard is bound to the worker's own data; neither is a list-row depth with disclosure layers and a caller-owned action slot. This component reuses their tokens (monogram source, fallback surface, hairline) and extends the identity variant registry (candidate-review, team-member) instead of forking it.",
+    owner:
+      "Product owner — owner order 2026-10-01 (one reusable professional-identity presentation layer)",
+    ownsAction: null,
+
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "Same element. It presents the existing worker/person and creates no new world element.",
+    chatIntegration:
+      "The chat opens the same candidate and team surfaces; the card only presents what those surfaces already read and authorize. Every action on it is the caller's existing control.",
+    avatarEffect:
+      "None: presentation of the existing avatar identity (monogram or consented photo).",
+    mapEffect:
+      "None. Country and availability are the person's own stated facts; nothing here renders on the market map.",
+    journalRelation:
+      "None written. Evidence tiers (self-declared, journal-grounded, manager-confirmed) are shown by the caller exactly as before, never merged and never scored.",
+
+    pillar: "avatar",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "Recognise WHO a person is at a glance in a list (candidate, team member), then open only the depth the decision needs.",
+      graphEdge:
+        "PERSON ↔ WORK ↔ TIME ↔ PLACE (nodes PEOPLE, REAL WORK, TIME, OBJECT): the person-as-presence edge in every list view of the graph.",
+      whyReuseDamages:
+        "Reusing the full identity stage in a list would stack a hero portrait and fact strip per row; leaving each list to its own text row (e-mail as the headline, a wall of badges) is what the owner rejected.",
+      evidence: [
+        "docs/design/player-identity-adaptation-plan.md §10 (candidate-review, team-member variants)",
+        "lib/guards/person-identity-card.test.ts (no score, same tokens, native disclosure, anonymity kept)",
+      ],
+      ownerRuling:
+        "Owner order 2026-10-01: ONE reusable professional-identity presentation layer (avatar / visual professional identity) that travels with the person across the product, showing different depth by context.",
+    },
+  },
+  {
     // ═══════════════════════════════════════════════════════════════════════
     // /dashboard/hours — where a day of real work becomes a record.
     //
@@ -1046,6 +1118,78 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
       ],
       ownerRuling:
         "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION PERSON CARD — the historical person BEFORE claim.
+  // Organization-provided history exists before any account does; this is the
+  // address where the supplying organization sees one roster person with all of
+  // their recorded work, hours, skills the history points to, and claim status.
+  // It composes the EXISTING evidence readers and PersonImportedHistory; it
+  // adds no data model, no write path and no gate of any kind.
+  {
+    id: "/dashboard/company/people/[personId]",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "One roster person of the supplying organization as a historical Person card: who they are to this organization, ALL of the history the organization supplied (including records tied to no known project), the stated hours, the skills the history points to, and whether an account has claimed them yet. It exists whether or not the person has claimed an account.",
+    whyNotChat:
+      "The conversation can answer a single question about a person, but the card is where a manager stands while reading one person's whole supplied history across projects and years, with the roster one tap away; the chat links here and reads the same readers.",
+    whyNotExistingComponent:
+      "The worker page /dashboard/people/[workerId] is keyed on a linked account and renders nothing for an unclaimed person (41 of 43 roster people in production). The roster row is a list item, not a history. The history rendering is REUSED (PersonImportedHistory), not duplicated; only the destination keyed on the roster person was missing.",
+    owner: "Product architecture (DI) — owner decision 0020 (2026-10-07)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the PERSON ↔ ORGANIZATION edge (§14 nodes PERSON, EVIDENCE, ORGANIZATION). No new element; it is the destination for evidence the model already holds.",
+    chatIntegration:
+      "Chat readbacks about a roster person link here; the card reads through the same evidence readers the chat answers from, and it adds no action the chat cannot already dispatch.",
+    avatarEffect:
+      "None — the card is read-only; claim later links an account and hands the PERSON control through the existing roster-claim flow.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented.",
+    journalRelation:
+      "Read-only relation: organization-provided history is shown as such (not self-declared, not independently verified), and every write stays in the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "person",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "See, as the supplying organization, one roster person's whole supplied history before or without any account claim.",
+      graphEdge:
+        "PERSON ↔ EVIDENCE ↔ ORGANIZATION (§14 nodes PERSON, EVIDENCE, ORGANIZATION). The linked-worker page serves the claimed edge; no surface served the unclaimed person.",
+      whyReuseDamages:
+        "Reuse of /dashboard/people/[workerId] would require an account that does not exist yet (organization_people.link_state unlinked), hiding the organization's own history from it until a claim — the exact inversion the owner ruled out.",
+      evidence: [
+        "production read 2026-10-07: organization_evidence_records 2944 rows, all with organization_person_id; 41 of 43 organization_people unlinked",
+        "migration 20260907114500_organization_evidence_import_v1.sql: manager SELECT branches admit unlinked rows; only the subject branch requires link_state='linked'",
+        "apps/web/components/app/people/person-imported-history.tsx previously required link_state='linked' and rendered nothing for an unclaimed person",
+      ],
+      ownerRuling:
+        "Owner decision 0020 (2026-10-07, docs/DECISIONS/0020-organization-history-exists-before-claim.md): organization-provided historical worker data exists before account claim and must build the historical Person/worker card and company worker history; claim only later links an account.",
     },
   },
 
@@ -1421,6 +1565,269 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
       ],
       ownerRuling:
         "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // JOURNAL PHOTO VIEWER — owner request 2026-09-30 ("paspaudus Journal Day
+  // Object nuotraukos miniatiūrą, nuotrauka turi atsidaryti didesnei
+  // peržiūrai"). An image zoom over the day's own already-signed private
+  // photos. Recorded as honest NO answers below — NOT dressed up as a
+  // workspace surface; the exception arrives as a scoped owner waiver.
+  {
+    id: "components/app/journal/journal-photo-viewer.tsx",
+    kind: "popup",
+    originAxiom: "A-09",
+    purpose:
+      "Shows one of the person's OWN journal-day photos larger (with previous/next and an explicit close), so a thumbnail of real work evidence can actually be looked at.",
+    whyNotChat:
+      "A photo is looked at, not asked about. The conversation cannot render a zoomable image of a private journal photo at the moment a person taps its thumbnail on the day view; the thumbnail is already the entry point and the viewer is its only sensible continuation.",
+    whyNotExistingComponent:
+      "No shared image viewer/lightbox exists in components/ (searched: lightbox, image-viewer, photo-viewer, ImageDialog; the only shared dialog, MobileSheet, is a phone-only bottom sheet). The viewer reuses the shared focus contract (useDialogFocus) rather than inventing its own.",
+    owner: "Product owner — Journal photo viewer request 2026-09-30",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the EVIDENCE edge: the day object already lists the day's photos; this only enlarges them. No new element.",
+    chatIntegration:
+      "None, recorded as a NO. The viewer is opened by tapping a thumbnail and is not an action the assistant performs.",
+    avatarEffect:
+      "None. It reads nothing new and writes nothing; it cannot change a person's profile, skills or history.",
+    mapEffect:
+      "None — recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Read-only presentation of journal_entry_photos rows the day object already loaded and signed (private bucket, one hour). No upload, no new table, no Journal model change.",
+
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: false,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
+
+  // EVID-2 slice 2 (PR #2143): the counterparty's own review surface. Declared
+  // here, in the same PR, as the gate demands; the A-14 block records why it is
+  // not the employer inbox.
+  {
+    id: "/dashboard/inbox/counterparty",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The client review queue: the representative of the party a worker submitted work to (client, customer, contracting party, project owner) sees the work, its hours, figures and photos, and decides - accept (final), request a correction, or dispute - with a note.",
+    whyNotChat:
+      "A decision about specific submitted work needs the work itself in front of the person - text, hours, photos, history - and an explicit, auditable act. The conversation can open this context (the command finder resolves 'client review' here) but cannot replace looking at the evidence and pressing a deliberate, final Accept.",
+    whyNotExistingComponent:
+      "The manager inbox is an employer surface (reviewer authority inside the worker's own organization, skill verification) and its set is employer-only; a client has neither. The queue reuses the shared EmptyState and Button primitives and the one review RPC; only the destination is new.",
+    owner: "Product owner - decision 0018 (counterparty review authority)",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the COUNTERPARTY edge: the entry, its evidence and its append-only decision rows already exist; this lets the party the work was submitted to see and decide them. No new element, no new table for the decision.",
+    chatIntegration:
+      "The command registry resolves 'client review / accept work' to this route; the decision runs through the same review_journal_entry RPC the employer path uses, so a capability can dispatch it later without a new write path.",
+    avatarEffect:
+      "None directly. An acceptance is read back separately as 'accepted by the client' (CLIENT_ACCEPTED) on the worker's journal, CV and card through the ONE provenance derivation; it is never an employer confirmation, never a skill verification and never a payment record.",
+    mapEffect:
+      "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Reads the submitted entry through list_counterparty_review_queue_v1 and counterparty_review_entry_detail_v1 (the explicit submission is the grant; journal_entries RLS is not widened) and writes only through review_journal_entry, which appends to journal_entry_confirmations with basis 'counterparty' and provenance. History is append-only.",
+
+    pillar: "work_journal",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The client / customer / contracting party of a worker's work decides the work that worker explicitly submitted to them: accept it, ask for a correction, or dispute it, with a note.",
+      graphEdge:
+        "PERSON - WORK - COUNTERPARTY (the transaction / project relationship, section 14 nodes WORK_JOURNAL, EVIDENCE and the counterparty edge); not the employer REVIEW edge the manager inbox serves.",
+      whyReuseDamages:
+        "The manager inbox is an EMPLOYER surface: its decision verifies skills and requires reviewer authority inside the worker's own organization. A client is not the worker's employer; folding client decisions into that inbox would either let an acceptance read as an employer confirmation (the defect EVID-2 exists to remove) or hand a client skill-verification buttons the database refuses. The two claims are different proof concepts (CLIENT_ACCEPTED vs EMPLOYER_CONFIRMED) and must stay on different surfaces.",
+      evidence: [
+        "supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql: the counterparty is a party of the work relationship; list_counterparty_review_queue_v1 is its only read door",
+        "apps/web/lib/journal/confirmation-origin.ts: CLIENT_ACCEPTED and EMPLOYER_CONFIRMED are distinct proof concepts",
+        "supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql: reviewable_journal_entry_ids() is employer-only, so the employer inbox cannot carry client decisions",
+        "scripts/db-proof/journal-counterparty-link-ui.sh and journal-counterparty-authority.sh: scratch-PG proof that the subject cannot be their own counterparty",
+      ],
+      ownerRuling:
+        "Owner decision 0018 (docs/DECISIONS/0018-counterparty-review-authority.md, owner-approved 2026-10-04): counterparty review authority derives from the real transaction / project relationship and the authorized counterparty representative, never implicitly from employer status; client acceptance is its own provenance-bearing signal.",
+    },
+  },
+
+  // EVID-2 slice 2 (PR #2143): the counterparty's own review surface. Declared
+  // here, in the same PR, as the gate demands; the A-14 block records why it is
+  // not the employer inbox.
+  {
+    id: "components/app/counterparty-review-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-14",
+    purpose:
+      "One submitted entry in the client review queue: the work, hours, figures, photos and history, and the decision form (accept / request correction / dispute with a note).",
+    whyNotChat:
+      "The card is the evidence the decision is about. A decision is made looking at it; a chat message cannot present a photo grid and an append-only history next to a final, explicit Accept control.",
+    whyNotExistingComponent:
+      "The employer inbox card (journal-inbox-entry) carries skill verification and employer-only copy; reusing it would show a client skill-verification controls the database refuses and would label the result with employer wording. This card shares the same primitives and a different, narrower action set.",
+    owner: "Product owner - decision 0018 (counterparty review authority)",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the COUNTERPARTY edge: the entry, its evidence and its append-only decision rows already exist; this lets the party the work was submitted to see and decide them. No new element, no new table for the decision.",
+    chatIntegration:
+      "It is rendered only by the queue page the command registry resolves; its action calls the shared review RPC through one server action that re-derives the caller.",
+    avatarEffect:
+      "None directly. An acceptance is read back separately as 'accepted by the client' (CLIENT_ACCEPTED) on the worker's journal, CV and card through the ONE provenance derivation; it is never an employer confirmation, never a skill verification and never a payment record.",
+    mapEffect:
+      "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Displays one entry's journal text, metrics and photo metadata read through the counterparty's narrow door, and appends one decision row via review_journal_entry; the worker sees it on the entry and in the CV as a client acceptance.",
+
+    pillar: "work_journal",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The client / customer / contracting party of a worker's work decides the work that worker explicitly submitted to them: accept it, ask for a correction, or dispute it, with a note.",
+      graphEdge:
+        "PERSON - WORK - COUNTERPARTY (the transaction / project relationship, section 14 nodes WORK_JOURNAL, EVIDENCE and the counterparty edge); not the employer REVIEW edge the manager inbox serves.",
+      whyReuseDamages:
+        "The manager inbox is an EMPLOYER surface: its decision verifies skills and requires reviewer authority inside the worker's own organization. A client is not the worker's employer; folding client decisions into that inbox would either let an acceptance read as an employer confirmation (the defect EVID-2 exists to remove) or hand a client skill-verification buttons the database refuses. The two claims are different proof concepts (CLIENT_ACCEPTED vs EMPLOYER_CONFIRMED) and must stay on different surfaces.",
+      evidence: [
+        "supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql: the counterparty is a party of the work relationship; list_counterparty_review_queue_v1 is its only read door",
+        "apps/web/lib/journal/confirmation-origin.ts: CLIENT_ACCEPTED and EMPLOYER_CONFIRMED are distinct proof concepts",
+        "supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql: reviewable_journal_entry_ids() is employer-only, so the employer inbox cannot carry client decisions",
+        "scripts/db-proof/journal-counterparty-link-ui.sh and journal-counterparty-authority.sh: scratch-PG proof that the subject cannot be their own counterparty",
+      ],
+      ownerRuling:
+        "Owner decision 0018 (docs/DECISIONS/0018-counterparty-review-authority.md, owner-approved 2026-10-04): counterparty review authority derives from the real transaction / project relationship and the authorized counterparty representative, never implicitly from employer status; client acceptance is its own provenance-bearing signal.",
+    },
+  },
+
+  // OWNER APPROVAL 2026-11-03, verbatim (given to the coordinator in its own
+  // session): "Patvirtinu #2828 komponento `premium-action-card` registravimą
+  // kaip atskiro veiksmų pasirinkimo paviršiaus pagal A-09 taisyklę. Tai nėra
+  // leidimas kurti papildomų dubliuojančių kortelių sistemų."
+  {
+    id: "components/ui/premium-action-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-09",
+    purpose:
+      "The one action-choice tile: on a page where a person chooses what to do next (projects, bookings, service requests) each tile is a link to a real destination, with one primary action per screen.",
+    whyNotChat:
+      "Choosing among a page's next steps is a glance at a few labelled doors; a chat reply cannot hold a stable, tappable set of destinations with one marked primary and the current one marked, and the conversation remains available beside it for anything typed.",
+    whyNotExistingComponent:
+      "It REPLACES the audit-PR8 ActionCard (deleted in #2828; bookings and service-requests moved onto this tile's list layout), so there is exactly one action-choice primitive. It never replaces PersonIdentityCard, the Player Card, the vacancy card or the capability card — those present an entity's state, this only chooses an action — and the guard premium-action-card.test.ts forbids any second ActionCard / ActionTile / ActionDeck export.",
+    owner: "Product owner - design direction A (2026-11-03), owner approval of #2828 the same day",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "No new world element: every tile links to an existing surface (a project, the journal, bookings, service requests) that already owns its action; the tile holds no data and decides nothing.",
+    chatIntegration:
+      "Every destination a tile links to is reachable from the conversation through the command registry / MCP capabilities; the tile is a shortcut to the same doors, not a separate path.",
+    avatarEffect: "None - recorded honestly; a navigation choice changes no state of the person.",
+    mapEffect: "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Indirect: some tiles lead to the Work Journal or its project context; the tile itself reads and writes nothing.",
+
+    pillar: "work_journal",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "A person on a work page (their projects, bookings or service requests) picks the next thing to do from a small set of labelled destinations, with the one main action made obvious.",
+      graphEdge:
+        "PERSON - next ACTION on an existing node (project, journal, booking, service request); a presentation of doors the graph already has, not a new edge and not an entity view.",
+      whyReuseDamages:
+        "Reusing an entity card (identity, Player Card, vacancy, capability) for navigation would make a door look like a record and blur 'this is a person / job' with 'go here'; keeping two action-card families (the old ActionCard beside this tile) would give the same job two looks, which the owner's ruling forbids.",
+      evidence: [
+        "apps/web/components/ui/premium-action-card.tsx: link-only tile, one emphasis=\"primary\" per screen, aria-current for the current place, 44 px targets, no motion under prefers-reduced-motion",
+        "apps/web/lib/guards/premium-action-card.test.ts: no other component may export an ActionCard / ActionTile / ActionDeck (the audit-PR8 ActionCard is deleted, no exception)",
+        "#2828 comments 6604167149 and 6609654286: current vs proposed at 390 and 1440 px, light and dark, tilt removed (hover is a 1 px lift), bookings and service-requests on the list layout",
+      ],
+      ownerRuling:
+        "Owner approval 2026-11-03 (coordinator session): register `premium-action-card` as a distinct action-choice surface under A-09; explicitly not a licence for additional duplicate card systems; design direction A, one primary action per screen, no 3D tilt, accessibility kept.",
     },
   },
 

@@ -12,17 +12,54 @@
  * ordering, fallback and privacy test run with no environment at all.
  */
 import "server-only";
+import { checkOutboundIntegrationUrl } from "@/lib/config/outbound-host-policy";
 import { env } from "@/lib/env";
 import {
   checkLocalBaseUrl,
   resolveAiRuntimeConfig,
   type AiRuntimeConfig,
 } from "./config-core";
+import type { AiProviderState } from "./provider-chain";
+import { geminiPaidTierConfirmed } from "./data-egress";
 import {
   observeProviderStates,
   type ProviderObservation,
 } from "./provider-health";
-import type { AiProviderState } from "./provider-chain";
+
+/**
+ * The request context an entry point can hand down: the request's own Host
+ * header, the second production evidence for the host policy (2026-09-24).
+ * Omitted where there is no request (a script, a build step) — `VERCEL_ENV`
+ * alone then decides, as before.
+ */
+export type AiRuntimeReadContext = {
+  readonly requestHost?: string | null;
+};
+
+/**
+ * AI_LOCAL_BASE_URL after the PRODUCTION host policy (2026-09-23). The local
+ * profile is first in the chain and the only one allowed sensitive free text,
+ * so an https tunnel to a PC would have become the first provider tried in
+ * production — and every call would fall through while that PC was off. On
+ * the production deployment a loopback / private / tunnel host is refused
+ * here and the provider is simply unconfigured; the observation carries the
+ * refusal as its detail so the operator sees why, not "not set".
+ */
+function localBaseUrlInput(ctx?: AiRuntimeReadContext): {
+  raw: string | undefined;
+  refusedDetail: string | undefined;
+} {
+  if (!env.AI_LOCAL_BASE_URL) return { raw: undefined, refusedDetail: undefined };
+  const policy = checkOutboundIntegrationUrl(env.AI_LOCAL_BASE_URL, {
+    integration: "AI_LOCAL_BASE_URL",
+    requestHost: ctx?.requestHost,
+  });
+  if (policy.ok) return { raw: policy.url, refusedDetail: undefined };
+  return {
+    raw: undefined,
+    refusedDetail: policy.reason === "refused_host" ? policy.detail : undefined,
+  };
+}
 
 /** The key that proves the SELECTED primary provider is usable: the
  *  provider-specific key when set, else the generic AI_API_KEY (which the
@@ -41,12 +78,22 @@ function apiKeyForProvider(provider: string): string | undefined {
       return env.GEMINI_API_KEY ?? env.AI_API_KEY;
     case "xai":
       return env.XAI_API_KEY ?? env.AI_API_KEY;
+    // Free API tiers: their OWN key only — never the generic AI_API_KEY, which
+    // is an Anthropic key and would prove nothing about these vendors.
+    case "cloudflare":
+      // Two values make Cloudflare usable: the token AND the account its
+      // endpoint lives under. Either missing → no proof of configuration.
+      return env.CLOUDFLARE_ACCOUNT_ID?.trim() ? env.CLOUDFLARE_API_TOKEN : undefined;
+    case "mistral":
+      return env.MISTRAL_API_KEY;
+    case "groq":
+      return env.GROQ_API_KEY;
     default:
       return env.AI_API_KEY;
   }
 }
 
-export function getAiRuntimeConfig(): AiRuntimeConfig {
+export function getAiRuntimeConfig(ctx?: AiRuntimeReadContext): AiRuntimeConfig {
   return resolveAiRuntimeConfig({
     mode: env.AI_PROVIDER_MODE,
     provider: env.AI_PROVIDER,
@@ -56,7 +103,7 @@ export function getAiRuntimeConfig(): AiRuntimeConfig {
     maxRetries: env.AI_MAX_RETRIES,
     maxOutputTokens: env.AI_MAX_OUTPUT_TOKENS,
     dailyRunBudget: env.AI_DAILY_RUN_BUDGET,
-    localBaseUrl: env.AI_LOCAL_BASE_URL,
+    localBaseUrl: localBaseUrlInput(ctx).raw,
     localModel: env.AI_LOCAL_MODEL,
     localApiKey: env.AI_LOCAL_API_KEY,
   });
@@ -70,16 +117,17 @@ export function getAiRuntimeConfig(): AiRuntimeConfig {
  * ever see the one selected provider would have nothing to fall back to. Key
  * PRESENCE only — no value is read into the returned object.
  */
-export function getProviderObservation(): ProviderObservation {
-  const cfg = getAiRuntimeConfig();
-  const localCheck = checkLocalBaseUrl(env.AI_LOCAL_BASE_URL);
+export function getProviderObservation(ctx?: AiRuntimeReadContext): ProviderObservation {
+  const cfg = getAiRuntimeConfig(ctx);
+  const { raw: localRaw, refusedDetail } = localBaseUrlInput(ctx);
+  const localCheck = checkLocalBaseUrl(localRaw);
   return {
     runtimeState: cfg.state,
     local: {
       enabled: env.AI_LOCAL_ENABLED === "true",
       baseUrl: localCheck.ok ? localCheck.url : null,
       model: cfg.localModel,
-      baseUrlDetail: localCheck.ok ? undefined : localCheck.detail,
+      baseUrlDetail: localCheck.ok ? undefined : (refusedDetail ?? localCheck.detail),
     },
     // Anthropic is the historically-active adapter and has no per-provider
     // enable flag of its own; AI_API_KEY has always been its whole gate.
@@ -91,15 +139,35 @@ export function getProviderObservation(): ProviderObservation {
     gemini: {
       enabled: env.AI_GEMINI_ENABLED === "true",
       hasKey: Boolean((env.GEMINI_API_KEY ?? env.AI_API_KEY)?.trim()),
+      // Gemini API Additional Terms (effective 2026-03-23): only Paid Services
+      // may serve users in the EEA / CH / UK. Not proven paid = not usable.
+      disabledReason: geminiPaidTierConfirmed(process.env)
+        ? undefined
+        : "Gemini free tier may not serve EEA users (Gemini API Additional Terms, effective 2026-03-23) — AI_GEMINI_PAID_TIER_CONFIRMED=1 only for a billed key",
     },
     xai: {
       enabled: env.AI_XAI_ENABLED === "true",
       hasKey: Boolean((env.XAI_API_KEY ?? env.AI_API_KEY)?.trim()),
     },
+    // Free API tiers (2026-10-25) through the open `cloud` map. Presence only.
+    cloud: {
+      cloudflare: {
+        enabled: env.AI_CLOUDFLARE_ENABLED === "true",
+        hasKey: Boolean(env.CLOUDFLARE_ACCOUNT_ID?.trim() && env.CLOUDFLARE_API_TOKEN?.trim()),
+      },
+      mistral: {
+        enabled: env.AI_MISTRAL_ENABLED === "true",
+        hasKey: Boolean(env.MISTRAL_API_KEY?.trim()),
+      },
+      groq: {
+        enabled: env.AI_GROQ_ENABLED === "true",
+        hasKey: Boolean(env.GROQ_API_KEY?.trim()),
+      },
+    },
   };
 }
 
 /** Observed readiness of every chain provider, from real configuration. */
-export function getAiProviderStates(): readonly AiProviderState[] {
-  return observeProviderStates(getProviderObservation());
+export function getAiProviderStates(ctx?: AiRuntimeReadContext): readonly AiProviderState[] {
+  return observeProviderStates(getProviderObservation(ctx));
 }

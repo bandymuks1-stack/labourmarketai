@@ -1,5 +1,6 @@
 import "server-only";
 
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -58,7 +59,7 @@ export const getOwnWorkHistory = cache(async (): Promise<WorkHistoryRead> => {
     const res = await asAny(supabase)
       .from("engagement_contexts")
       .select(
-        "id, title, relationship_slug, started_at, ended_at, status, country_code, organizations(display_name, legal_name)",
+        "id, title, relationship_slug, started_at, ended_at, status, country_code, organization_id, organizations(display_name, legal_name)",
       )
       .eq("profile_id", user.id)
       // The SAME relationship filter the CV and profile use — without it the
@@ -70,9 +71,15 @@ export const getOwnWorkHistory = cache(async (): Promise<WorkHistoryRead> => {
       .order("started_at", { ascending: false, nullsFirst: false })
       .limit(WORK_HISTORY_LIMIT);
     if (res.error) return { status: "unavailable" };
+    // An ENDED relationship still names its organization in the person's own
+    // history (owner 2026-09-29) — names only, via the historical read.
+    const rows = await withHistoricalOrgNames(
+      supabase,
+      (res.data ?? []) as (WorkHistorySourceRow & { organization_id?: string | null })[],
+    );
     return {
       status: "ok",
-      entries: deriveWorkHistory((res.data ?? []) as WorkHistorySourceRow[]),
+      entries: deriveWorkHistory(rows as WorkHistorySourceRow[]),
     };
   } catch {
     return { status: "unavailable" };
@@ -111,7 +118,7 @@ export async function readRecordedWorkFor(
     const res = await asAny(supabase)
       .from("engagement_contexts")
       .select(
-        "id, title, relationship_slug, started_at, ended_at, status, country_code, organizations(display_name, legal_name)",
+        "id, title, relationship_slug, started_at, ended_at, status, country_code, organization_id, organizations(display_name, legal_name)",
       )
       .eq("profile_id", profileId)
       // The SAME relationship filter the card, the CV and the profile use —

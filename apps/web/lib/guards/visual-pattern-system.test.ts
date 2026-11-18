@@ -25,24 +25,26 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const stripComments = (src: string): string =>
   src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
 
-describe("ActionCard is the single navigation-card pattern", () => {
-  const card = read("components/app/action-card.tsx");
+// RE-ANCHORED 2026-11-03: the audit-PR8 ActionCard folded into the ONE
+// action-choice tile (owner decision 2026-11-03 on #2828: "Tai nėra leidimas
+// kurti papildomų dubliuojančių kortelių sistemų"). The contract is the same —
+// a real link, a 44 px+ target, a visible focus ring — carried by one component.
+describe("the action tile is the single navigation-card pattern", () => {
+  const card = read("components/ui/premium-action-card.tsx");
 
-  it("encodes the contract: real link, 44px min, focus ring, token surfaces", () => {
-    expect(card).toMatch(/min-h-11/);
+  it("encodes the contract: real link, ≥ 44 px target, focus ring", () => {
+    expect(card).toMatch(/min-h-1[1-9]/);
     expect(card).toMatch(/focus-visible:ring-2/);
-    expect(card).toMatch(/border-border-subtle bg-surface-1/);
     expect(card).toMatch(/from "@\/lib\/i18n\/navigation"/);
   });
 
   it("is adopted by the navigation-card call sites", () => {
-    // The registry-driven DashboardModuleGrid died with the second dashboard
-    // (W3 Package 4); the surviving call sites keep the pattern adopted.
     for (const rel of [
       "app/[locale]/dashboard/service-requests/page.tsx",
       "app/[locale]/dashboard/bookings/page.tsx",
+      "app/[locale]/dashboard/projects/page.tsx",
     ]) {
-      expect(read(rel), `${rel} must use ActionCard`).toMatch(/<ActionCard/);
+      expect(read(rel), `${rel} must use the action tile`).toMatch(/<PremiumActionDeck/);
     }
   });
 });
@@ -95,21 +97,40 @@ describe("44px touch targets on decision controls", () => {
   });
 });
 
-describe("bottom nav: selected state is an indicator, icons are unambiguous", () => {
-  const nav = read("components/app/bottom-nav.tsx");
+describe("nav: selected state is an indicator, icons are unambiguous", () => {
+  // RE-ANCHORED 2026-10-25: the bottom nav retired with the one header; the
+  // selected-state rule (never colour alone) is pinned on the header's pill.
+  const nav = read("components/app/conversation/chat/conversation-header.tsx");
 
-  it("active tab renders a real indicator bar, not color alone", () => {
-    expect(nav).toMatch(/data-testid="bottom-nav-active-indicator"/);
+  it("the active destination renders a real indicator, not color alone", () => {
+    // A filled pill with an inset ring, plus aria-current for assistive tech.
+    expect(nav).toMatch(/bg-brand-blue\/10 text-brand-blue ring-1 ring-inset ring-brand-blue\/40/);
+    expect(nav).toMatch(/aria-current=\{active \? "page" : undefined\}/);
   });
 
   it("one icon per destination: journal=NotebookPen, messages=MessageSquare, map=MapPin", () => {
-    expect(nav).toMatch(/journal: NotebookPen/);
-    expect(nav).toMatch(/messages: MessageSquare/);
-    expect(nav).toMatch(/map: MapPin/);
+    // The map lives in `components/app/nav-icons.ts` since the one top bar
+    // started rendering the same core destinations. ONE icon per destination is
+    // now a property of that single module rather than of one component's
+    // private copy — the stronger form of the same rule, because two surfaces
+    // can no longer disagree about what "journal" looks like.
+    const icons = read("components/app/nav-icons.ts");
+    expect(icons).toMatch(/journal: NotebookPen/);
+    expect(icons).toMatch(/messages: MessageSquare/);
+    expect(icons).toMatch(/map: MapPin/);
+    expect(icons).toMatch(/calendar: CalendarDays/);
+    // Every nav surface must take its icons from there, never re-declare them.
+    for (const surface of [
+      "components/app/conversation/chat/conversation-header.tsx",
+    ]) {
+      expect(read(surface)).toMatch(/NAV_ICONS/);
+    }
     // The old ambiguous pairs must not return (FileText belongs to documents,
     // Inbox to nothing in primary nav, plain Map to nothing).
-    expect(stripComments(nav)).not.toMatch(/\bInbox\b/);
-    expect(stripComments(nav)).not.toMatch(/\bFileText\b/);
+    for (const src of [icons, nav]) {
+      expect(stripComments(src)).not.toMatch(/\bInbox\b/);
+      expect(stripComments(src)).not.toMatch(/\bFileText\b/);
+    }
   });
 
   it("the config icon keys say what they mean", () => {

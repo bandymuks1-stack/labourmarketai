@@ -4,7 +4,7 @@ import { activeLocales, isCommunicationLocale } from "@/lib/i18n/config";
 import { createClient } from "@/lib/supabase/server";
 
 /** Postgres undefined_column / PostgREST schema-cache column-not-found —
- *  the honest state while migration 20260920122000 is unapplied. */
+ *  the honest state while migration 20261118100100 is unapplied. */
 const MISSING_COLUMN_CODES = new Set(["42703", "PGRST204"]);
 
 export type CommunicationLocaleWriteResult =
@@ -15,7 +15,7 @@ export type CommunicationLocaleWriteResult =
 
 /**
  * COMM-1 — persist the language this person prefers to READ work messages
- * in (`profiles.communication_locale`, owner-gated migration 20260920122000).
+ * in (`profiles.communication_locale`, owner-gated migration 20261118100100).
  *
  * Mirrors `persistLocalePreferenceAction` below — own row only, under the
  * unchanged `profiles_update` RLS (id = auth.uid()) — with two differences

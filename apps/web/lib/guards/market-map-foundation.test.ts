@@ -39,8 +39,10 @@ const SHELL = "components/app/market-map-shell.tsx";
 describe("market map foundation — route + auth", () => {
   const page = read(PAGE);
 
-  it("the /dashboard/market-map route exists and renders the shell", () => {
-    expect(page).toMatch(/<MarketMapShell\b/);
+  it("the /dashboard/market-map route exists and renders the ONE map", () => {
+    // The signal-board shell (documentation blocks) was unmounted from the page
+    // by the one-canonical-map change; the route's job is the single map.
+    expect(page).toMatch(/<WorldDiscovery\b/);
   });
   it("is auth-gated like a dashboard room (getUser → redirect to login)", () => {
     expect(page).toMatch(/auth\.getUser\(\)/);

@@ -8,17 +8,26 @@
 
 export type ExecResult =
   | { ok: true; data?: Record<string, unknown> }
-  | { ok: false; code: string; message?: string; existing?: string };
+  | {
+      ok: false;
+      code: string;
+      message?: string;
+      existing?: string;
+      /** Fields the caller must supply before retrying (e.g. ["country"]). */
+      missing?: readonly string[];
+    };
 
 /**
  * Workspace context carried into every executor (rebuild W4). Resolved
  * SERVER-SIDE by the dispatcher from the canonical workspace resolver
- * (`getWorkspaceContext` — engagement_contexts spine + the owner-gated
- * active-organization pointer) — never trusted from the client. `null`
- * organizationId = the personal workspace. Executors pass it through to
- * canonical actions THAT ACCEPT an explicit organization; actions without
- * an org parameter keep their own server-side resolution (one authority,
- * no parallel resolution paths).
+ * (`getWorkspaceContext` — the ONE resolution the chip renders; its identity
+ * comes from the session, never from a caller-chosen argument) — never
+ * trusted from the client. `null` organizationId = the personal workspace.
+ * Executors pass it through to canonical actions THAT ACCEPT an explicit
+ * organization; actions without an org parameter keep their own server-side
+ * resolution (one authority, no parallel resolution paths). No executor reads
+ * it today (verified 2026-09-23): employer executors resolve their company
+ * through `requireEmployerCompany`, over the same request-cached resolution.
  */
 export type ExecWorkspace = { organizationId: string | null };
 
@@ -54,6 +63,10 @@ export function mapKind(kind: string): string {
       return "precondition";
     case "conflict":
       return "conflict";
+    // An acknowledged booking overlap the database cannot record yet — its
+    // own code, so no surface can mistake it for the plain conflict.
+    case "overlap-not-recordable":
+      return "overlap_not_recordable";
     // Employer-side canonical tags (lifecycle / shortlist / bridge results):
     case "not-owner":
       return "not_authorized";

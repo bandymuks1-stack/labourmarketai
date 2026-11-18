@@ -380,7 +380,8 @@ the same data controller"*. That is a legal fact about another system this repo
 cannot establish, and a controller statement is exactly the sentence that must
 not be guessed (Art. 13(1)(a)). It now states the **processor** relationship the
 contract actually supports: approved partner infrastructure that receives the
-de-identified projection only and processes it solely on the controller's
+projection without direct identifying data only (pseudonymised, never
+described as anonymised — owner correction 2026-09-20) and processes it solely on the controller's
 instructions. Version stays `2026-09-04.v1` — nothing had ever consented to the
 old wording — and the pinned hash moved to `1e756f06…788f`, re-pinned in the
 same unapplied migration. A guard asserts the old claim cannot come back.

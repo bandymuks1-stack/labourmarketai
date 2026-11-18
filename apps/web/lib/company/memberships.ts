@@ -44,6 +44,10 @@ export type OrganizationMember = {
   readonly email: string | null;
   readonly role: MembershipRole;
   readonly status: Extract<MembershipStatus, "invited" | "active">;
+  /** The owner (or an admin) delegated invitation management to this member
+   *  (`company_memberships.manages_invitations`, owner direction
+   *  2026-09-24). False where the column does not exist yet. */
+  readonly managesInvitations: boolean;
 };
 
 export type OrganizationMembersResult =
@@ -62,17 +66,22 @@ export async function listOrganizationMembers(
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", members: [], myRole: null };
 
-  const { data, error } = await asAny(supabase)
-    .from("company_memberships")
-    // Two FKs point at profiles (profile_id, invited_by) — the embed must
-    // name the relationship or PostgREST refuses it as ambiguous.
-    .select(
-      "id, profile_id, role, status, profiles!company_memberships_profile_id_fkey(full_name, email)",
-    )
-    .eq("organization_id", organizationId)
-    .in("status", ["invited", "active"])
-    .order("created_at", { ascending: true })
-    .limit(200);
+  // Two FKs point at profiles (profile_id, invited_by) — the embed must
+  // name the relationship or PostgREST refuses it as ambiguous. The
+  // delegation flag is feature-detected: without the column (42703) the list
+  // is read as before and nobody is delegated.
+  const BASE_COLUMNS =
+    "id, profile_id, role, status, profiles!company_memberships_profile_id_fkey(full_name, email)";
+  const read = (columns: string) =>
+    asAny(supabase)
+      .from("company_memberships")
+      .select(columns)
+      .eq("organization_id", organizationId)
+      .in("status", ["invited", "active"])
+      .order("created_at", { ascending: true })
+      .limit(200);
+  let { data, error } = await read(`${BASE_COLUMNS}, manages_invitations`);
+  if (error?.code === UNDEFINED_COLUMN_CODE) ({ data, error } = await read(BASE_COLUMNS));
   if (error) {
     if (
       error.code === UNDEFINED_COLUMN_CODE ||
@@ -98,6 +107,7 @@ export async function listOrganizationMembers(
         | null) ?? null,
     role: r.role as MembershipRole,
     status: r.status as "invited" | "active",
+    managesInvitations: r.manages_invitations === true,
   }));
   const myRole =
     members.find((m) => m.profileId === user.id && m.status === "active")
@@ -160,6 +170,10 @@ export type MembershipCommandOutcome =
   | "revoked"
   | "left"
   | "unchanged"
+  | "granted"
+  | "withdrawn"
+  | "held_by_role"
+  | "invalid"
   | "already_member"
   | "already_invited"
   | "already_active"
@@ -237,6 +251,20 @@ export function revokeMembership(
   membershipId: string,
 ): Promise<MembershipCommandResult> {
   return callCommand("membership_revoke_v1", { p_membership_id: membershipId });
+}
+
+/** Owner direction 2026-09-24: the owner (or an admin) grants or withdraws
+ *  invitation management for ONE active member — never a job title. The
+ *  command re-derives the actor's owner/admin authority and writes the audit
+ *  row; owner and admin rows answer `held_by_role`. */
+export function setMembershipInvitationManager(
+  membershipId: string,
+  enabled: boolean,
+): Promise<MembershipCommandResult> {
+  return callCommand("membership_set_invitation_manager_v1", {
+    p_membership_id: membershipId,
+    p_enabled: enabled,
+  });
 }
 
 export function leaveOrganization(

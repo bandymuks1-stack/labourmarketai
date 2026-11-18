@@ -49,7 +49,7 @@ describe("free-text inputs are length-capped", () => {
 
 describe("conversation participant fan-out is capped", () => {
   it("createConversation rejects oversized participant lists before insert", () => {
-    const src = read("lib/communication/actions.ts");
+    const src = read("lib/communication/communication-core.ts");
     expect(src).toMatch(/MAX_PARTICIPANTS = 20/);
     expect(src).toMatch(/requestedParticipants\.length > MAX_PARTICIPANTS/);
     // The cap must run BEFORE the conversation insert (no orphan rows).

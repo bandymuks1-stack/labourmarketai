@@ -19,6 +19,9 @@ export function noopProvider(): BillingProvider {
     async createCheckoutSession(): Promise<CheckoutSessionResult> {
       return { ok: false, reason: "payments_disabled" };
     },
+    async createOneTimeCheckoutSession(): Promise<CheckoutSessionResult> {
+      return { ok: false, reason: "payments_disabled" };
+    },
     async createCustomer(): Promise<CreateCustomerResult> {
       return { ok: false, reason: "payments_disabled" };
     },
@@ -30,6 +33,9 @@ export function noopProvider(): BillingProvider {
     },
     async retrieveSubscription() {
       return { ok: false as const, reason: "payments_disabled" };
+    },
+    async retrieveSubscriptionRaw() {
+      return { ok: false as const, reason: "payments_disabled", retryable: false };
     },
     async listCustomerSubscriptions() {
       return { ok: false as const, reason: "payments_disabled" };

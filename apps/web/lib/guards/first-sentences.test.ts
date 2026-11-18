@@ -81,17 +81,19 @@ describe("4. a named profession reaches the need form's role field", () => {
  *    brief and its first sentences (§3 above) still govern the conversation
  *    the moment it is opened (PAKLAUSK, or any deep link).
  */
-describe("6. the worker's first screen is ŠIANDIEN; the conversation's first sentences stay on demand", () => {
-  it("the dashboard root decides by the ONE pure predicate and renders the header first", () => {
+describe("6. the worker's first screen is the conversation opening with ŠIANDIEN; the header comes first", () => {
+  it("the dashboard root decides by the ONE pure predicate and composes ŠIANDIEN into the chat's opening slot", () => {
     const page = read("app", "[locale]", "dashboard", "page.tsx");
-    expect(page).toMatch(/dashboardRootSurface\(\{/);
-    expect(page.indexOf("<TodayScreen")).toBeGreaterThan(-1);
-    expect(page.indexOf("<TodayScreen")).toBeLessThan(page.indexOf("<ConversationChat"));
+    expect(page).toMatch(/conversationOpeningContext\(\{/);
+    expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
     const screen = read("components", "app", "today", "today-screen.tsx");
     const header = screen.indexOf('data-testid="today-header"');
-    const next = screen.indexOf('data-testid="today-next"');
+    // The header comes first; the WAITING region (which holds the ONE next
+    // action, `today-next`) is mounted right after it (four-region home, D1).
+    const waiting = screen.indexOf("<HomeWaiting");
     expect(header).toBeGreaterThan(-1);
-    expect(next).toBeGreaterThan(header);
+    expect(waiting).toBeGreaterThan(header);
+    expect(read("components", "app", "home", "home-regions.tsx")).toContain('data-testid="today-next"');
     // No welcome card, no first sentence of its own.
     expect(screen).not.toMatch(/PersonalWorkspaceIntro|openingBrief|starterChips/);
   });
@@ -170,8 +172,18 @@ describe("5. a profession outside both catalogues still reaches the form, honest
     expect(registry).toMatch(/"profession-statement": \{ domain: "profile", access: "read", handler: "professionStatement"/);
     const handler = chat.slice(chat.indexOf("professionStatement: () => {"), chat.indexOf("skillGap: () =>"));
     expect(handler).toMatch(/readProfessionStatement\(text\)/);
-    expect(handler).toContain('id: "link:/dashboard/profile"');
-    expect(handler).toContain('id: "f:worker.add-work-history"');
+    // The profile door names the SECTION that sets a profession
+    // (`#profile-edit`, opened on arrival by its DetailsHashOpener and started
+    // in the profession picker for a person with none) — never the bare page,
+    // which dropped the person at the top of the profile two interactions
+    // away from the one selector the chip promised (2026-09-23).
+    expect(handler).toContain('id: "link:/dashboard/profile#profile-edit"');
+    expect(handler).not.toContain('id: "link:/dashboard/profile"');
+    // Owner continuation 2026-09-29: a stated profession is REVIEWED and saved
+    // through the profile's own write path — the handler only offers it
+    // (chips run `saveStatedProfessionAction`, which calls the existing
+    // profile actions); the sentence itself still writes nothing.
+    expect(handler).toMatch(/offerProfessionSave\(text\);/);
     expect(handler).toMatch(/openForm\("worker\.add-work-history", undefined, undefined, \{ title: stated\.label \}\)/);
     // Nothing is persisted from the sentence itself.
     expect(handler).not.toMatch(/dispatch|execute|\.from\(/);

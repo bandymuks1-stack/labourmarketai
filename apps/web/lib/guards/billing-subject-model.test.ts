@@ -65,6 +65,48 @@ describe("§13 no entitlement transfer on workspace switch", () => {
     const detects = ent.match(/UNDEFINED_COLUMN\b/g);
     expect((detects?.length ?? 0)).toBeGreaterThanOrEqual(3);
   });
+
+  // Payments production calm v1 (2026-09-22). Two MEASURED defects re-pinned
+  // as invariants:
+  //   (a) every subscription read carries the adapter MODE — admission and the
+  //       customer lookup already did; a test_mode=true row (the column's
+  //       default) must never entitle a live workspace or vice versa;
+  //   (b) the ORGANIZATION read goes through the service-role client scoped by
+  //       the SERVER-resolved subject: the table's only SELECT policy is
+  //       owner-or-admin, so the user client showed an organization's plan to
+  //       the purchaser alone (a co-manager with manage-billing got free).
+  //       Personal subjects keep the user-scoped read (owner_id = auth.uid()
+  //       IS the policy). No RLS migration.
+  it("every subscription read is scoped to the adapter mode (test_mode = config.testMode)", () => {
+    // code lines only (the explanatory comment names the filter too)
+    const reads = ent.match(/^\s*\.from\("billing_subscriptions"\)/gm) ?? [];
+    const modeFilters = ent.match(/^\s*\.eq\("test_mode", config\.testMode\)/gm) ?? [];
+    expect(reads.length).toBeGreaterThanOrEqual(3);
+    expect(modeFilters.length).toBe(reads.length);
+  });
+
+  it("the organization read uses the service-role client scoped by the server-resolved subject; personal stays user-scoped", () => {
+    expect(ent).toMatch(/import \{ createAdminClient \} from "@\/lib\/supabase\/admin"/);
+    // the admin reader is created ONLY inside the organization branch …
+    const orgBranch = ent.slice(
+      ent.indexOf('if (subject && subject.type === "organization")'),
+      ent.indexOf("} else {"),
+    );
+    expect(orgBranch).toMatch(/createAdminClient\(\)/);
+    expect(orgBranch).toMatch(/\.eq\("organization_id", subject\.id\)/);
+    // … and the personal branch never touches it
+    const personalBranch = ent.slice(ent.indexOf("} else {"), ent.indexOf("const { data: subs, error }"));
+    expect(personalBranch).not.toMatch(/createAdminClient/);
+    expect(personalBranch).toMatch(/\.eq\("owner_id", user\.id\)/);
+    // the subject id is the server resolution, never a request value
+    // (or, for an explicit bearer caller, the organization ITS OWN employer
+    // gate proved — `caller.organizationId`, never a request value)
+    expect(ent).toMatch(/: \(await resolveBillingSubject\(\)\)\.subject/);
+    expect(ent).toMatch(/\{ type: "organization", id: caller\.organizationId \}/);
+    expect(ent).not.toMatch(/searchParams|formData|request\.json|cookies\(/);
+    // a missing service key degrades to the user client instead of throwing
+    expect(orgBranch).toMatch(/catch \{[\s\S]*?reader = supabase;/);
+  });
 });
 
 describe("§13 hard boundaries stay", () => {
@@ -79,7 +121,7 @@ describe("§13 hard boundaries stay", () => {
     expect((falses?.length ?? 0)).toBeGreaterThanOrEqual(6);
   });
 
-  it("PAYMENTS_ENABLED code pin remains false", () => {
-    expect(read("lib/billing/plans.ts")).toMatch(/PAYMENTS_ENABLED = false as const/);
+  it("plans.ts carries no static payments switch (the resolved billing config is the one answer)", () => {
+    expect(read("lib/billing/plans.ts")).not.toMatch(/export const PAYMENTS_ENABLED/);
   });
 });

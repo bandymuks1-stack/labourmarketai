@@ -43,6 +43,12 @@ import {
   readVacancyJsonLines,
   type VacancyJsonLinesStopReason,
 } from "@/lib/vacancy-sources/vacancy-json-lines";
+import { readContinuationToken } from "@/lib/vacancy-sources/vacancy-cursor";
+import {
+  expandDetailFanOut,
+  type DetailFanOutDiagnostics,
+  type DetailFetchResult,
+} from "@/lib/vacancy-sources/vacancy-detail-fanout";
 import { assertVacancyProviderOperational } from "./vacancy-kill-switch";
 
 /**
@@ -74,7 +80,9 @@ export type VacancyFetchErrorCode =
   | "response_too_large"
   | "invalid_json"
   | "network_error"
-  | "timeout";
+  | "timeout"
+  /** A two-level feed's detail request failed: the page fails closed. */
+  | "detail_fetch_failed";
 
 export interface VacancyFetchRequestV1 {
   readonly provider: VacancyProviderDescriptorV1;
@@ -83,18 +91,72 @@ export interface VacancyFetchRequestV1 {
   readonly query?: Readonly<Record<string, string | number>>;
   /** Owner-provisioned key for a key-requiring endpoint. Never logged. */
   readonly apiKey?: string | null;
+  /**
+   * The continuation token to resume from, for a `cursor` endpoint that names
+   * its next page by PATH. Substituted into the descriptor's `pathTemplate`
+   * after a plain-identifier check; never a caller-supplied path.
+   */
+  readonly continuationToken?: string | null;
+  /**
+   * The capture instant (ISO), used ONLY to start a cold walk at a time on a
+   * feed whose head is years old (`cursor.coldStart`). Deterministic: the
+   * caller's clock, never read here.
+   */
+  readonly coldStartAtIso?: string | null;
+  /**
+   * Two-level feeds only: most detail requests this page may spend (the
+   * session's REMAINING budget). Absent = the descriptor's per-page cap only.
+   */
+  readonly detailBudget?: number;
+  /** Two-level feeds only: leading entries of this page a previous session
+   *  already consumed (see `expandDetailFanOut`). */
+  readonly skipEntries?: number;
+  /**
+   * Called once per RETRY (an attempt after the first) of any request this
+   * fetch makes — the listing request and, on a two-level feed, each detail
+   * request. Lets the caller account retries exactly; the adapter keeps no
+   * counter of its own.
+   */
+  readonly onRetry?: () => void;
+}
+
+/** A continuation token that may be placed in a path: one identifier segment. */
+const PATH_TOKEN = /^[A-Za-z0-9_-]{8,100}$/;
+
+/**
+ * Timing evidence for one page fetch, reported on success AND failure (the
+ * accounting is how a stalled feed is diagnosed). Numbers and a public ad id
+ * only. `listingElapsedMs` is the network time of the last listing attempt.
+ */
+export interface VacancyFetchDiagnosticsV1 {
+  readonly listingElapsedMs: number | null;
+  readonly detail: DetailFanOutDiagnostics | null;
 }
 
 export type VacancyFetchResult =
   | {
+      readonly diagnostics?: VacancyFetchDiagnosticsV1;
       readonly ok: true;
       readonly requestRef: string;
       readonly httpStatus: number;
       readonly responseSha256: string;
       readonly byteLength: number;
       readonly body: unknown;
+      /** Present only for a two-level feed: how far into the page this fetch
+       *  got. `consumedEntries` counts the `skipEntries` prefix; `pageComplete`
+       *  is false when the session's detail budget stopped the page early. */
+      readonly fanOut?: {
+        /** True when the page names a successor: it is CLOSED and can no longer
+         *  receive appended entries. Only then is an in-page position valid. */
+        readonly pageClosed: boolean;
+        readonly consumedEntries: number;
+        readonly pageComplete: boolean;
+        readonly detailFetched: number;
+        readonly detailRequestsSpent: number;
+      };
     }
   | {
+      readonly diagnostics?: VacancyFetchDiagnosticsV1;
       readonly ok: false;
       readonly requestRef: string;
       readonly errorCode: VacancyFetchErrorCode;
@@ -110,17 +172,123 @@ export type VacancyFetchResult =
 export function buildVacancyRequestUrl(
   endpoint: VacancyChannelEndpointV1,
   query: Readonly<Record<string, string | number>> = {},
+  continuationToken: string | null = null,
 ): string {
-  const url = new URL(endpoint.path, `https://${endpoint.host}`);
+  const template = endpoint.pagination === "cursor" ? (endpoint.cursor?.pathTemplate ?? null) : null;
+  const path =
+    template !== null && continuationToken !== null && PATH_TOKEN.test(continuationToken)
+      ? template.replace("{token}", continuationToken)
+      : endpoint.path;
+  const url = new URL(path, `https://${endpoint.host}`);
+  // A `cursor` endpoint's continuation-token key is part of the closed set
+  // too — it is DECLARED on the descriptor, not supplied by a caller, so the
+  // allowlist stays closed while the adapter stays provider-agnostic.
+  const cursorKey =
+    endpoint.pagination === "cursor" ? (endpoint.cursor?.queryKey ?? null) : null;
   for (const [key, value] of Object.entries(query)) {
-    if (!ALLOWED_QUERY_KEYS.has(key)) continue;
+    if (!ALLOWED_QUERY_KEYS.has(key) && key !== cursorKey) continue;
     url.searchParams.set(key, String(value));
   }
   return url.toString();
 }
 
+/**
+ * The request headers for one endpoint: the Accept type plus, for a
+ * key-requiring endpoint that has its key, the credential in the header shape
+ * the descriptor declares. `api-key` is the default so every existing
+ * endpoint is byte-identical; `bearer` is `Authorization: Bearer <secret>`.
+ * The secret never goes anywhere else — not the URL, not `requestRef`, not a
+ * log line. Exported for the guard that pins the two shapes.
+ */
+export function buildVacancyRequestHeaders(
+  endpoint: Pick<VacancyChannelEndpointV1, "requiresApiKey" | "authScheme">,
+  accept: string,
+  apiKey: string | null | undefined,
+): Record<string, string> {
+  const headers: Record<string, string> = { Accept: accept };
+  if (!endpoint.requiresApiKey || !apiKey) return headers;
+  if ((endpoint.authScheme ?? "api-key") === "bearer") {
+    headers.Authorization = `Bearer ${apiKey}`;
+  } else {
+    headers["api-key"] = apiKey;
+  }
+  return headers;
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Request spacing for a host whose descriptor declares `minRequestSpacingMs`.
+ * Process-wide per host: slots are RESERVED synchronously, so concurrent
+ * workers queue behind one another instead of bursting. Tests replace
+ * `vacancyPacing.sleep` so they do not wait in real time.
+ */
+export const vacancyPacing = { sleep };
+const nextRequestSlotByHost = new Map<string, number>();
+async function paceRequest(host: string, spacingMs: number | undefined): Promise<void> {
+  if (typeof spacingMs !== "number" || !(spacingMs > 0)) return;
+  const now = Date.now();
+  const slot = Math.max(now, nextRequestSlotByHost.get(host) ?? 0);
+  nextRequestSlotByHost.set(host, slot + spacingMs);
+  if (slot > now) await vacancyPacing.sleep(slot - now);
+}
+
+/** Largest single ad accepted from a two-level feed's detail endpoint. */
+const MAX_DETAIL_BYTES = 1024 * 1024;
+
+/**
+ * One detail request of a two-level feed, under the provider's own retry,
+ * timeout and byte bounds. 404/410 report `gone` (the ad no longer exists);
+ * any other 4xx is deterministic and reported as a failure without retry.
+ */
+async function fetchDetailJson(
+  url: string,
+  headers: Readonly<Record<string, string>>,
+  bounds: ReturnType<typeof resolveProviderBounds>,
+  pace: () => Promise<void>,
+  onRequest: () => void,
+  onRetry?: () => void,
+): Promise<DetailFetchResult> {
+  const attempts = bounds.maxRetries + 1;
+  let detail = "no_attempt";
+  let elapsedMs = 0;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (attempt > 0) {
+      onRetry?.();
+      await sleep(bounds.retryBackoffMs * attempt);
+    }
+    await pace();
+    onRequest();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), bounds.requestTimeoutMs);
+    const attemptStart = Date.now();
+    try {
+      const res = await fetch(url, { method: "GET", headers, signal: controller.signal, redirect: "error" });
+      if (res.status === 404 || res.status === 410) return { ok: false, gone: true, detail: String(res.status), elapsedMs: elapsedMs + (Date.now() - attemptStart) };
+      if (!res.ok) {
+        detail = `http_${res.status}`;
+        if (res.status >= 400 && res.status < 500) return { ok: false, gone: false, detail, elapsedMs: elapsedMs + (Date.now() - attemptStart) };
+        continue;
+      }
+      if (!/json/i.test(res.headers.get("content-type") ?? "")) return { ok: false, gone: false, detail: "content_type_invalid", elapsedMs: elapsedMs + (Date.now() - attemptStart) };
+      const raw = await res.arrayBuffer();
+      const total = elapsedMs + (Date.now() - attemptStart);
+      if (raw.byteLength > MAX_DETAIL_BYTES) return { ok: false, gone: false, detail: "detail_too_large", elapsedMs: total };
+      try {
+        return { ok: true, body: JSON.parse(Buffer.from(raw).toString("utf8")), elapsedMs: total };
+      } catch {
+        return { ok: false, gone: false, detail: "invalid_json", elapsedMs: total };
+      }
+    } catch (err) {
+      detail = err instanceof Error && (err.name === "AbortError" || /abort/i.test(err.message)) ? "timeout" : "network_error";
+    } finally {
+      clearTimeout(timer);
+      elapsedMs += Date.now() - attemptStart;
+    }
+  }
+  return { ok: false, gone: false, detail, elapsedMs };
 }
 
 /**
@@ -129,6 +297,18 @@ function sleep(ms: number): Promise<void> {
  */
 export async function fetchVacancyPage(
   req: VacancyFetchRequestV1,
+): Promise<VacancyFetchResult> {
+  const probe: { listingElapsedMs: number | null; detail: DetailFanOutDiagnostics | null } = {
+    listingElapsedMs: null,
+    detail: null,
+  };
+  const result = await fetchVacancyPageInner(req, probe);
+  return { ...result, diagnostics: { listingElapsedMs: probe.listingElapsedMs, detail: probe.detail } };
+}
+
+async function fetchVacancyPageInner(
+  req: VacancyFetchRequestV1,
+  probe: { listingElapsedMs: number | null; detail: DetailFanOutDiagnostics | null },
 ): Promise<VacancyFetchResult> {
   assertVacancyProviderOperational(req.provider.key);
 
@@ -142,7 +322,7 @@ export async function fetchVacancyPage(
     };
   }
 
-  const requestUrl = buildVacancyRequestUrl(endpoint, req.query);
+  const requestUrl = buildVacancyRequestUrl(endpoint, req.query, req.continuationToken ?? null);
   // The provenance reference is the URL itself — it carries no secret by
   // construction, because the key (when required) travels as a header.
   const requestRef = requestUrl;
@@ -163,19 +343,37 @@ export async function fetchVacancyPage(
     detail: "no_attempt",
   };
 
-  const headers: Record<string, string> = { Accept: "application/json" };
-  if (endpoint.requiresApiKey && req.apiKey) {
-    headers["api-key"] = req.apiKey;
+  const headers = buildVacancyRequestHeaders(
+    endpoint,
+    "application/json",
+    req.apiKey,
+  );
+  // A cold walk on a feed whose head is years old starts at a time instead.
+  const coldStart = endpoint.pagination === "cursor" ? (endpoint.cursor?.coldStart ?? null) : null;
+  if (coldStart !== null && (req.continuationToken ?? null) === null && req.coldStartAtIso) {
+    const at = Date.parse(req.coldStartAtIso);
+    if (Number.isFinite(at)) {
+      headers["If-Modified-Since"] = new Date(at - coldStart.ifModifiedSinceLookbackSeconds * 1000).toUTCString();
+    }
   }
 
+  const spacingMs = endpoint.detailFanOut?.minRequestSpacingMs;
+  // A slow publisher may declare a longer PER-REQUEST wait for its own
+  // endpoint (never the shared bound, so no other provider is affected).
+  const requestTimeoutMs = endpoint.detailFanOut?.requestTimeoutMs ?? bounds.requestTimeoutMs;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    if (attempt > 0) await sleep(bounds.retryBackoffMs * attempt);
+    if (attempt > 0) {
+      req.onRetry?.();
+      await sleep(bounds.retryBackoffMs * attempt);
+    }
+    await paceRequest(endpoint.host, spacingMs);
 
     const controller = new AbortController();
     const timer = setTimeout(
       () => controller.abort(),
-      bounds.requestTimeoutMs,
+      requestTimeoutMs,
     );
+    const listingStart = Date.now();
     try {
       const res = await fetch(requestUrl, {
         method: "GET",
@@ -215,6 +413,7 @@ export async function fetchVacancyPage(
       }
 
       const raw = await res.arrayBuffer();
+      probe.listingElapsedMs = Date.now() - listingStart;
       const byteLength = raw.byteLength;
       if (byteLength > bounds.maxResponseBytes) {
         return {
@@ -231,11 +430,70 @@ export async function fetchVacancyPage(
       try {
         body = JSON.parse(text);
       } catch {
+        // A 200 JSON response that does not parse is, in practice, a body cut
+        // short by a slow publisher (Sweden, 2026-10-09: a 29.8 s listing, then
+        // invalid_json, about once a day, every time healed by the next run).
+        // The GET is read-only, so it is retried within the shared bound
+        // (maxRetries) like a timeout; a persistent failure still ends as
+        // invalid_json once the attempts are spent.
+        lastError = { errorCode: "invalid_json", detail: "unparseable_body" };
+        continue;
+      }
+
+      // A TWO-LEVEL feed (NAV): resolve the page's entries into full ads before
+      // the pure parser sees it. Any detail failure fails the WHOLE page, so
+      // the cursor can never move past an ad that was not read.
+      if (endpoint.detailFanOut) {
+        let detailRequestsSpent = 0;
+        // INVARIANT: an in-page resume position is honoured ONLY on a CLOSED
+        // page (one that names a successor). The open head page can still grow,
+        // so a stored position on it is ignored and the page is read from its
+        // start: a re-read is safe, a skip is not.
+        const nextPath = endpoint.cursor?.nextTokenPath ?? null;
+        const successor =
+          nextPath !== null ? readContinuationToken(body, nextPath) : null;
+        const pageClosed =
+          successor !== null && successor !== (req.continuationToken ?? null);
+        const expanded = await expandDetailFanOut({
+          endpoint,
+          body,
+          detailBudget: req.detailBudget,
+          skipEntries: pageClosed ? req.skipEntries : 0,
+          ...(endpoint.detailFanOut.sessionDeadlineMs !== undefined
+            ? { deadlineAtMs: Date.now() + endpoint.detailFanOut.sessionDeadlineMs }
+            : {}),
+          fetchDetail: (url) =>
+            fetchDetailJson(
+              url,
+              headers,
+              { ...bounds, requestTimeoutMs },
+              () => paceRequest(endpoint.host, spacingMs),
+              () => {
+                detailRequestsSpent += 1;
+              },
+              req.onRetry,
+            ),
+        });
+        probe.detail = expanded.diagnostics;
+        if (!expanded.ok) {
+          return { ok: false, requestRef, errorCode: "detail_fetch_failed", detail: expanded.detail };
+        }
         return {
-          ok: false,
+          ok: true,
           requestRef,
-          errorCode: "invalid_json",
-          detail: "unparseable_body",
+          httpStatus: res.status,
+          responseSha256,
+          byteLength,
+          body: expanded.body,
+          fanOut: {
+            pageClosed,
+            consumedEntries: expanded.consumedEntries,
+            pageComplete: expanded.pageComplete,
+            // Live entries resolved (fetched, or 404/410 -> withdrawal): what the
+            // session budget pays for.
+            detailFetched: expanded.stats.detailFetched + expanded.stats.goneAsWithdrawn,
+            detailRequestsSpent,
+          },
         };
       }
 
@@ -255,6 +513,7 @@ export async function fetchVacancyPage(
         errorCode: aborted ? "timeout" : "network_error",
         detail: aborted ? "request_timeout" : "fetch_failed",
       };
+      probe.listingElapsedMs = Date.now() - listingStart;
       // fall through to retry
     } finally {
       clearTimeout(timer);
@@ -378,10 +637,11 @@ export async function fetchVacancyJsonLines(
   }
 
   const bounds = resolveProviderBounds(req.provider);
-  const headers: Record<string, string> = { Accept: "application/jsonl" };
-  if (endpoint.requiresApiKey && req.apiKey) {
-    headers["api-key"] = req.apiKey;
-  }
+  const headers = buildVacancyRequestHeaders(
+    endpoint,
+    "application/jsonl",
+    req.apiKey,
+  );
 
   const maxAttempts = bounds.maxRetries + 1;
   let lastError: { errorCode: VacancyFetchErrorCode; detail: string } = {
@@ -390,7 +650,10 @@ export async function fetchVacancyJsonLines(
   };
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    if (attempt > 0) await sleep(bounds.retryBackoffMs * attempt);
+    if (attempt > 0) {
+      req.onRetry?.();
+      await sleep(bounds.retryBackoffMs * attempt);
+    }
 
     const controller = new AbortController();
     // A streamed session is bounded by its OWN wall clock, not by

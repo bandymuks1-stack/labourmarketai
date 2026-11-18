@@ -42,6 +42,25 @@ function isSet(v: string | null | undefined): boolean {
   return typeof v === "string" && v.trim().length > 0;
 }
 
+/**
+ * "Useful organization" for the conversion funnel (funnel-emitters v1): the
+ * company's stored data reached `hiring_ready` — every legal/billing field a
+ * real hire needs plus a stated activity. `verified` is NOT required (it is
+ * admin-set, never self-service). TRANSITION-ONLY: true when the state before
+ * the save was not hiring_ready and the state after it is. `before === null`
+ * (no stored company yet) counts as not ready. An unknown "before" (failed
+ * pre-read) must be passed as `undefined` and yields false — ambiguity is
+ * never counted as a transition.
+ */
+export function companyBecameHiringReady(
+  before: CompanyReadinessInput | null | undefined,
+  after: CompanyReadinessInput,
+): boolean {
+  if (before === undefined) return false;
+  const wasReady = before !== null && computeCompanyReadiness(before).status === "hiring_ready";
+  return !wasReady && computeCompanyReadiness(after).status === "hiring_ready";
+}
+
 export function computeCompanyReadiness(
   input: CompanyReadinessInput,
 ): CompanyReadinessResult {

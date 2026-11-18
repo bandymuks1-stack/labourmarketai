@@ -3,7 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
-import { isMarketCountry } from "@/lib/taxonomy/work-categories";
+import { isIsoCountry } from "@/lib/location/country-model";
 import {
   summarizeDemandLocations,
   buildDemandSignalBoard,
@@ -101,8 +101,10 @@ export async function addDemandLocation(
   const requestId = clamp(input.requestId, 64);
   if (!requestId) return { kind: "invalid", message: "missing_request" };
 
+  // Any ISO country. A market list orders the select; it does not decide where a need may
+  // be (global-access rule, 2026-09-22).
   const countryCode = clamp(input.countryCode, 2).toUpperCase();
-  if (!isMarketCountry(countryCode)) {
+  if (!isIsoCountry(countryCode)) {
     return { kind: "invalid", message: "invalid_country" };
   }
 

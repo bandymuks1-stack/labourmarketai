@@ -81,8 +81,15 @@ keys are refused):
     "skills": ["…"],                  // ≤50
     "yearsClaimed": 7,                // optional, 0..60
     "languages": ["lt", "ru"],        // ≤20
-    "residenceCountry": "LT",         // optional ISO-2
-    "availability": "AVAILABLE_NOW",  // optional, ≤40 chars
+    "residenceCountry": "LT",         // optional, ≤80: ISO-2, a country name, or "City, Country"
+                                      //   ("Istanbul, Turkey" → residenceCountry "TR" + city "Istanbul")
+    "city": "Kaunas",                 // optional, ≤80 — a separate fact from the country (2026-10-13)
+    "availability": "AVAILABLE_NOW",  // optional, ≤40 chars — READINESS to work, not the right to work
+    "workStatus": "OTHER",            // optional, closed set (EU_CITIZEN | EU_LONG_TERM_OR_PERMANENT_RESIDENT |
+                                      //   TEMPORARY_RESIDENCE | TEMPORARY_PROTECTION | WORK_PERMIT_BASED_RESIDENCE |
+                                      //   EMPLOYED_IN_EU | OTHER | UNKNOWN) — DECLARED situation, never a verified
+                                      //   right to work in any particular country (2026-10-13)
+    "accommodationNeed": "NEEDED",    // optional: NEEDED | NOT_NEEDED | FLEXIBLE | UNKNOWN (2026-10-13)
     "destinations": ["NO", "SE"],     // ≤40 ISO-2
     "mobilityScope": "LISTED | EU_WIDE",   // EU_WIDE stays a scope; never expanded
     "freeText": "…",                  // optional, ≤4000
@@ -162,3 +169,21 @@ envelope's `locale` sets the link's language; the person can switch.
   writes `worker_skills` / `worker_professions` on acceptance.
 - No second notification system, no second invitation system, no Nonstop
   special case outside `lib/invitations/external-sources.ts`.
+
+
+## Bounds a sender must meet (a breach is `400 invalid_envelope` with `issues` = paths only)
+
+| field | bound |
+|---|---|
+| `worker.professions[].raw` | ≤120 chars |
+| `worker.skills[]` | ≤120 chars each, ≤50 items |
+| `worker.languages[]` | ≤40 chars each |
+| `worker.residenceCountry` / `worker.city` | ≤80 chars |
+| `worker.yearsClaimed` | integer 0–60 |
+| `worker.freeText` | ≤4000 chars |
+| `worker.contact.phone` | ≤40 chars (dropped before storage anyway) |
+| `worker.contact.email` | a valid address with a domain suffix (`name@gmail` is refused) |
+
+The response's `issues` list names the failing paths (e.g. `worker.skills.0: too_big`) and never the
+values. A sender should keep it in its delivery record: it is the only place the exact reason exists —
+LabourMarket.ai stores nothing from a refused envelope (2026-10-13, lead_db65f2db).

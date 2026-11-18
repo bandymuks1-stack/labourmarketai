@@ -6,6 +6,7 @@ import {
   deriveOriginKey,
 } from "@/lib/communication/conversation-display";
 import { evaluateCommunicationRequest } from "@/lib/communication/communication-eligibility";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Message context + contact permissions honesty guard
@@ -78,8 +79,9 @@ describe("list page surfaces the honest origin", () => {
 describe("no stranger contact: CV / player card / map expose NO contact CTA", () => {
   const NO_CONTACT_SURFACES = [
     "components/app/worker-player-card.tsx",
-    "components/app/market-map/location-map.tsx",
-    "components/app/market-map-base.tsx",
+    "components/app/market-map/own-location-layer.ts",
+    "components/app/market-map/map-location-controls.tsx",
+    "components/app/market-map/world-discovery.tsx",
     "app/[locale]/dashboard/journal/page.tsx",
     "app/[locale]/dashboard/reports/evidence/page.tsx",
   ];
@@ -132,7 +134,7 @@ describe("no fake read/delivered/seen receipts in the thread UI", () => {
 });
 
 describe("honest origin copy exists in all active locales", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: communication.origin.you + .other are present and non-empty`, () => {
       const origin = (JSON.parse(read(`messages/${loc}.json`)) as Record<string, Record<string, Record<string, string>>>)
         .communication?.origin;

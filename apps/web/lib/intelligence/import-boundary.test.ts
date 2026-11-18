@@ -23,7 +23,7 @@ describe("external observation import boundary", () => {
     // imports NO metric observation: its importPolicy is null, so the
     // per-observation metric_policy check still refuses everything (pinned
     // in observation-validation.test.ts).
-    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen"]);
+    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen", "nav"]);
     for (const p of INTELLIGENCE_SOURCE_PROFILES) {
       const result = validateExternalImport(importFor(p.key));
       expect(result.ok, p.key).toBe(ACTIVATED.has(p.key));
@@ -31,7 +31,7 @@ describe("external observation import boundary", () => {
   });
 
   it("refuses every non-internal source outside the activated set with an honest governance reason", () => {
-    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen"]);
+    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen", "nav"]);
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
       (p) => p.sourceKind !== "internal_aggregated" && !ACTIVATED.has(p.key),
     );

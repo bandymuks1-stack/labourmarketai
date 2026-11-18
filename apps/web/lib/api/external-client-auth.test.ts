@@ -176,6 +176,17 @@ describe("observability events never carry credentials or personal data", () => 
     expect(line).not.toMatch(/eyJ/);
   });
 
+  it("a FAILED tool call serializes — its outcome code is countable, never dropped", () => {
+    const line = serializeAuthEvent({
+      event: "external_client.tool",
+      door: "/api/mcp",
+      tool: "service_offering_delete_confirm",
+      ok: false,
+      result_code: "confirmation_rejected",
+    });
+    expect(JSON.parse(line)).toMatchObject({ ok: false, result_code: "confirmation_rejected" });
+  });
+
   it("refuses an event that smuggles a forbidden key", () => {
     const smuggled = {
       event: "external_client.tool",

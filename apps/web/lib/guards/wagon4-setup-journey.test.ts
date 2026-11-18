@@ -3,7 +3,6 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import { deriveTodayNext, WORK_CARD_EDITOR_HREF } from "@/lib/today/today-model";
-import { CONVERSATION_PARAMS } from "@/lib/today/today-route";
 import { deriveWorkCardState } from "@/lib/worker/work-card-state";
 
 /**
@@ -53,13 +52,14 @@ describe("Wagon 4 — the guide exists and a fresh worker can reach it in one cl
     // RETIRED (worker mobile IA 2026-09-13 §2): "/dashboard is the
     // conversation" for the worker. The route is unchanged; what a worker in
     // their personal space finds there is ŠIANDIEN, whose ONE next action for
-    // a fresh worker (no profession yet) is the work-card engine's `work`
-    // dimension — the profile page, one tap. The conversation stays one tab
-    // (PAKLAUSK) and one deep link away.
+    // a fresh worker is now the first work entry (evidence first, activation
+    // audit #4); the work-card engine's `work` dimension — the profile page —
+    // stays one tap away as the secondary link. ŠIANDIEN is the conversation's
+    // opening context (owner decision 0017), so the composer is right there.
     const actions = read("lib/auth/actions.ts");
     expect(actions).toMatch(/worker:\s*`\/\$\{locale\}\/dashboard`,/);
     expect(actions).not.toMatch(/worker:\s*`[^`]*profile#setup-journey`/);
-    expect(read("app/[locale]/dashboard/page.tsx")).toMatch(/<TodayScreen\b/);
+    expect(read("app/[locale]/dashboard/page.tsx")).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
     const fresh = deriveTodayNext(
       deriveWorkCardState(
         {
@@ -74,7 +74,15 @@ describe("Wagon 4 — the guide exists and a fresh worker can reach it in one cl
         0,
       ),
     );
-    expect(fresh).toMatchObject({ kind: "action", dim: "work", href: "/dashboard/profile" });
+    // EVIDENCE FIRST (activation audit #4, 2026-10-26): a fresh worker's ONE
+    // gold action is the first work entry; the profile step is not hidden —
+    // it rides along as the quiet secondary link to the same route.
+    expect(fresh).toMatchObject({
+      kind: "action",
+      dim: "evidence",
+      href: "/dashboard/journal",
+      secondary: { dim: "work", href: "/dashboard/profile#profile-edit" },
+    });
   });
 
   it("the other identities keep their own first screens", () => {
@@ -120,13 +128,16 @@ describe("Wagon 4 — honest done-states, no fake understanding", () => {
     // the destinations are the same editors as before.
     expect(JOURNEY).toMatch(/href: "#profile-edit"/);
     // The `id="work-card"` anchor died with the second dashboard (W3
-    // Package 4); the location step now opens the work-card capability's
-    // canonical home — the player-card result in the workspace panel.
-    expect(JOURNEY).toMatch(/\/dashboard\?result=player-card/);
-    // …and that deep link STILL opens the conversation for a worker whose
-    // `/dashboard` is ŠIANDIEN: `result` is a conversation parameter, and
-    // ŠIANDIEN's own inline-dimension action points at the same address.
-    expect(CONVERSATION_PARAMS).toContain("result");
+    // Package 4). The location step then linked the player-card RESULT in
+    // the conversation — whose own "open" control sent the person straight
+    // back to this page (a ping-pong, 2026-09-23). Since 2026-09-19 the
+    // profile renders the SAME WorkCardEditor at `#cv-availability`, so the
+    // step names that in-page anchor. Negative control: the step no longer
+    // leaves the page.
+    expect(JOURNEY).toMatch(/key: "location",\s*done: pillarMet\("workCard"\),\s*href: "#cv-availability",/);
+    expect(JOURNEY).not.toContain("/dashboard?result=player-card");
+    // ŠIANDIEN (which is NOT on this page) still opens the card as the
+    // result — the conversation is where it stands there (decision 0017).
     expect(WORK_CARD_EDITOR_HREF).toBe("/dashboard?result=player-card");
     expect(JOURNEY).not.toMatch(/href: "\/dashboard#work-card"/);
     expect(JOURNEY).toMatch(/href: "#cv-availability"/);

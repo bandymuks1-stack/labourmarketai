@@ -44,6 +44,8 @@ export function WorkerInterestButton({
     contacted: string;
     withdraw: string;
     internalNote: string;
+    /** What an application shows the need's employer (name + profile photo). */
+    identityConsent: string;
     error: string;
     /** "contacted" is real (audit PR5): the company opened an in-app thread —
      *  this label links the worker to their messages, never a dead status. */
@@ -163,6 +165,7 @@ export function WorkerInterestButton({
         </Link>
       ) : null}
       {/* Honest scope line — REQUIRED copy: internal signal only. */}
+      <p className="text-meta leading-relaxed text-text-secondary" data-testid="interest-identity-consent">{labels.identityConsent}</p>
       <p className="text-meta leading-relaxed text-text-muted">{labels.internalNote}</p>
     </div>
   );

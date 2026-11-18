@@ -28,6 +28,7 @@ import {
   type TimesheetWorkflowState,
 } from "@/lib/timesheets/timesheets";
 import { createUtcFormatter } from "@/lib/time/display";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * Timesheets area of the planning (calendar) page — the audit's MISSING
@@ -125,7 +126,7 @@ export async function TimesheetsSection({
     );
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = (await viewerWorkToday()).todayIso;
   const defaultPeriod = currentMonthPeriod(today);
   const fmt = (d: string) => dateFmt(d) ?? d;
 

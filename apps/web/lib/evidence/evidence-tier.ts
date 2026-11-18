@@ -47,6 +47,60 @@ export function deriveEvidenceTier(row: {
   return "self_declared";
 }
 
+/**
+ * CONFIRMED WORK, PER SKILL — evidence that a manager confirmed REAL WORK in
+ * which this skill appears (entry-level confirmation), counted by query from
+ * `journal_entry_skills` ⨝ live `journal_entries` ⨝ `journal_entry_confirmations`
+ * (scope.action === 'confirm'). It is NOT a skill confirmation: only
+ * `worker_skills.verified` (the per-skill action) reaches the top tier above.
+ * No score, no star — an occurrence count with its day spread, so a single
+ * confirmed entry is never presented as certified competence.
+ *
+ *   none               no manager-confirmed work mentions this skill
+ *   confirmed_work     >= 1 confirmed entry
+ *   repeated_confirmed >= REPEATED_CONFIRMED_MIN_ENTRIES entries on
+ *                      >= REPEATED_CONFIRMED_MIN_DAYS distinct days
+ */
+export const REPEATED_CONFIRMED_MIN_ENTRIES = 3;
+export const REPEATED_CONFIRMED_MIN_DAYS = 2;
+
+export type ConfirmedWorkTier = "none" | "confirmed_work" | "repeated_confirmed";
+
+export interface ConfirmedWorkCounts {
+  readonly confirmedWorkEntries?: number | null;
+  readonly confirmedDays?: number | null;
+}
+
+/** Unknown / missing counts read as "none" (never a penalty — see matching). */
+export function deriveConfirmedWorkTier(counts: ConfirmedWorkCounts | null | undefined): ConfirmedWorkTier {
+  const entries = Math.max(0, counts?.confirmedWorkEntries ?? 0);
+  const days = Math.max(0, counts?.confirmedDays ?? 0);
+  if (entries >= REPEATED_CONFIRMED_MIN_ENTRIES && days >= REPEATED_CONFIRMED_MIN_DAYS) {
+    return "repeated_confirmed";
+  }
+  return entries >= 1 ? "confirmed_work" : "none";
+}
+
+/** The stored row tier plus the confirmed-work spread, side by side. */
+export interface SkillEvidenceDetail {
+  readonly tier: EvidenceTier;
+  readonly confirmedWork: ConfirmedWorkTier;
+  readonly confirmedWorkEntries: number;
+  readonly confirmedDays: number;
+}
+
+export function deriveSkillEvidenceDetail(
+  row: { verified?: boolean | null; source?: string | null },
+  counts?: ConfirmedWorkCounts | null,
+): SkillEvidenceDetail {
+  return {
+    tier: deriveEvidenceTier(row),
+    confirmedWork: deriveConfirmedWorkTier(counts),
+    confirmedWorkEntries: Math.max(0, counts?.confirmedWorkEntries ?? 0),
+    confirmedDays: Math.max(0, counts?.confirmedDays ?? 0),
+  };
+}
+
 /** The one i18n namespace + key per tier. Surfaces needing the tier WORD read
  *  these keys (namespace `evidenceTier`); per-surface sentences may add
  *  context but never rename the fact. */

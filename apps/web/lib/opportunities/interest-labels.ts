@@ -29,6 +29,7 @@ export async function resolveInterestLabels(): Promise<InterestLabelBag> {
     contacted: t("contacted"),
     withdraw: t("withdraw"),
     internalNote: t("internalNote"),
+    identityConsent: t("identityConsent"),
     error: t("error"),
     contactedLink: t("contactedLink"),
     contactEmployer: t("contactEmployer"),

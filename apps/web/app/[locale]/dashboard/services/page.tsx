@@ -9,6 +9,12 @@ import {
   ServiceOfferingsSection,
   type ServiceOfferingsLabels,
 } from "@/components/app/service-offerings-section";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/services", "serviceOfferings.pageTitle");
+
 
 /**
  * Services — provider-owned service offerings (W8 Phase 1). Authenticated
@@ -35,8 +41,11 @@ export default async function ServicesPage({
 
   const t = await getTranslations("serviceOfferings");
   const result = await listOwnServiceOfferings();
-  const needsMigration = result.kind === "needs-migration";
+  // A failed read degrades to the same calm "not available" state as an
+  // unapplied migration — never to "you have no offerings" (audit 2026-10-16).
+  const needsMigration = result.kind === "needs-migration" || result.kind === "unavailable";
   const rows = result.kind === "ok" ? result.rows : [];
+  const closedSupported = result.kind === "ok" && result.closedSupported === true;
 
   const labels: ServiceOfferingsLabels = {
     title: t("title"),
@@ -44,6 +53,7 @@ export default async function ServicesPage({
     notAvailable: t("notAvailable"),
     empty: t("empty"),
     addButton: t("addButton"),
+    addPartnership: t("addPartnership"),
     formTitleLabel: t("form.titleLabel"),
     formTitlePlaceholder: t("form.titlePlaceholder"),
     formDescriptionLabel: t("form.descriptionLabel"),
@@ -60,36 +70,23 @@ export default async function ServicesPage({
     saving: t("saving"),
     cancel: t("cancel"),
     edit: t("edit"),
-    remove: t("remove"),
-    activate: t("activate"),
-    pause: t("pause"),
     errorTitleRequired: t("errorTitleRequired"),
     errorCountry: t("errorCountry"),
     errorGeneric: t("errorGeneric"),
+    errorHasRequests: t("errorHasRequests"),
     remoteBadge: t("remoteBadge"),
-    status: {
-      draft: t("status.draft"),
-      active: t("status.active"),
-      paused: t("status.paused"),
-    },
-    discoverability: {
-      draft: t("discoverability.draft"),
-      active: t("discoverability.active"),
-      paused: t("discoverability.paused"),
-    },
   };
 
   return (
     <div className="flex flex-col gap-4" data-testid="services-page">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageLead")}</p>
       </header>
       <ServiceOfferingsSection
         initialRows={rows}
         needsMigration={needsMigration}
+        closedSupported={closedSupported}
         labels={labels}
       />
       {/* Cross-link to the other half of the loop — where requests for these

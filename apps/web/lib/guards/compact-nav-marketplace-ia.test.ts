@@ -6,8 +6,10 @@ import { join } from "node:path";
 import {
   VISIBLE_PRIMARY_NAV_ITEMS,
   ADMIN_NAV_ITEM,
+  getCoreNavItems,
 } from "../config/navigation";
 import { getFeatureConfig } from "../config/feature-availability";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Compact, MAP-FIRST navigation IA guard.
@@ -28,7 +30,7 @@ import { getFeatureConfig } from "../config/feature-availability";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
-const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
+const ACTIVE_LOCALES = activeLocales;
 const MAP = "app/[locale]/dashboard/market-map/page.tsx";
 
 
@@ -87,10 +89,12 @@ describe("Admin is a permission-gated nav item, never shown to non-admins", () =
     expect(ADMIN_NAV_ITEM.id).toBe("admin");
   });
 
-  it("desktop tabs gate the admin item behind isAdmin", () => {
-    const src = read("components/app/dashboard-tabs.tsx");
-    expect(src, "dashboard-tabs imports ADMIN_NAV_ITEM").toMatch(/ADMIN_NAV_ITEM/);
-    expect(src, "dashboard-tabs reads isAdmin").toMatch(/isAdmin/);
+  it("the one header gates the admin item behind isAdmin", () => {
+    // RE-ANCHORED 2026-10-25: the desktop tabs were retired with the one
+    // header; the header's "More" carries the admin item for admins only.
+    const nav = read("lib/config/navigation.ts");
+    expect(nav).toMatch(/return isAdmin \? \[\.\.\.extras, ADMIN_NAV_ITEM\] : extras;/);
+    expect(read("components/app/conversation/chat/conversation-header.tsx")).toMatch(/auth\?\.isAdmin/);
   });
 
   it("admin stays reachable for admins via the account dropdown", () => {
@@ -99,11 +103,11 @@ describe("Admin is a permission-gated nav item, never shown to non-admins", () =
     expect(menu).toMatch(/\/dashboard\/admin/);
   });
 
-  it("the mobile bottom nav stays the focused core (NO admin tab crowding it)", () => {
-    const src = read("components/app/bottom-nav.tsx");
-    expect(src, "bottom-nav must not append the admin item").not.toMatch(
-      /ADMIN_NAV_ITEM/,
-    );
+  it("the core loop stays the focused priority set (admin is never a core item)", () => {
+    // The phone bottom bar was retired with the one header (2026-10-25); the
+    // invariant it carried — admin never crowds the primary set — is pinned on
+    // the core list every width renders first.
+    expect(getCoreNavItems().map((i) => i.id)).not.toContain("admin");
   });
 });
 
@@ -117,31 +121,20 @@ describe("the map is the primary surface; marketplace is secondary", () => {
     );
   });
 
-  it("the map page is map-first: the live map leads", () => {
-    expect(map).toMatch(/<MarketMapBase\b/);
+  it("the map page is map-first: the ONE map leads (WorldDiscovery)", () => {
+    expect(map).toMatch(/<WorldDiscovery\b/);
+    expect(map).not.toMatch(/<MarketMapBase\b/);
   });
 
-  it("the map page carries a layers legend (visible now / future layers)", () => {
-    expect(map).toMatch(/<MapLayersLegend\b/);
+  it("the map page carries NO layers catalogue — layers appear only where data exists", () => {
+    // Deliberately removed (one-canonical-map): the "visible now / coming
+    // later" legend (`MapLayersLegend`) was a catalogue of layers that do not
+    // exist. The layer pills of the one map come from real reads only.
+    expect(map).not.toMatch(/<MapLayersLegend\b/);
   });
 
   it("/dashboard/marketplace is secondary — redirects to the map", () => {
     expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market-map")).toBe(true);
-  });
-});
-
-describe("the map layers legend is honest — real signals only, no fake data", () => {
-  const legend = read("components/app/map-layers-legend.tsx");
-
-  it("future layers render as DISABLED chips (aria-disabled), not fake markers", () => {
-    expect(legend).toMatch(/aria-disabled="true"/);
-    expect(legend).toMatch(/map-layers-future/);
-    expect(legend).toMatch(/map-layers-visible/);
-  });
-
-  it("no seeded marker / coordinate / fake data arrays in the legend", () => {
-    expect(legend).not.toMatch(/markers?\s*[:=]\s*\[/i);
-    expect(legend).not.toMatch(/coordinates\s*[:=]\s*\[/i);
   });
 });
 
@@ -152,24 +145,8 @@ describe("compact map-first nav + legend i18n exists in every active locale", ()
       expect(m.auth.dashboard.tabs.marketMap).toBeTruthy();
       expect(m.auth.dashboard.tabs.admin).toBeTruthy();
     });
-    it(`${loc}: mapLayers legend has visible-now + the future-layer items`, () => {
-      const ml = m.mapLayers;
-      expect(ml).toBeTruthy();
-      expect(ml.visibleNow && ml.futureLayers && ml.futureBadge).toBeTruthy();
-      for (const k of [
-        "selfSignal",
-        "companies",
-        "teams",
-        "opportunities",
-        "workNeeds",
-        "services",
-        "rentals",
-        "shops",
-        "availability",
-        "trust",
-      ]) {
-        expect(ml.items?.[k], `${loc}.mapLayers.items.${k}`).toBeTruthy();
-      }
+    it(`${loc}: the removed layers catalogue is gone (no mapLayers namespace)`, () => {
+      expect(m.mapLayers).toBeUndefined();
     });
   }
 });

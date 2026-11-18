@@ -8,6 +8,11 @@ import {
   DOCUMENT_FILE_MIME_TYPES,
   type DocumentEngineNotice,
 } from "@/lib/documents/document-file-model";
+import {
+  useAttachSink,
+  useInitialFile,
+  type RegisterAttachSink,
+} from "@/components/app/conversation/attach-sink";
 
 export type DocumentFileEmbedLabels = {
   readonly choose: string;
@@ -33,18 +38,27 @@ export function DocumentFileEmbed({
   labels,
   onUploaded,
   onSkip,
+  initialFile = null,
+  onRegisterAttachSink,
 }: {
   documentId: string;
   labels: DocumentFileEmbedLabels;
   /** Called ONLY after the core said "uploaded". */
   onUploaded: () => void;
   onSkip: () => void;
+  /** The file the person picked with the composer paperclip and said is this
+   *  document. It is only SELECTED here, through `pick` — the upload still
+   *  waits for this embed's own submit. */
+  initialFile?: File | null;
+  /** While open, a paperclip file goes into THIS embed, never a second one. */
+  onRegisterAttachSink?: RegisterAttachSink;
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [skipped, setSkipped] = useState(false);
 
   const noticeText = (notice: DocumentEngineNotice): string => {
     if (notice === "file_too_large") return labels.tooLarge;
@@ -72,6 +86,29 @@ export function DocumentFileEmbed({
     }
     setFile(picked);
   };
+
+  /** A file handed over by the conversation: the same pre-checks as a pick,
+   *  and it is shown IN the file input (best effort), so the person sees what
+   *  "submit" will send before anything travels. */
+  const handOver = (picked: File) => {
+    pick(picked);
+    try {
+      const dt = new DataTransfer();
+      dt.items.add(picked);
+      if (inputRef.current) inputRef.current.files = dt.files;
+    } catch {
+      /* an older browser without a DataTransfer constructor still holds the
+         file in state; only the input's own label stays empty */
+    }
+  };
+  useInitialFile(initialFile, handOver);
+  useAttachSink(
+    onRegisterAttachSink,
+    "document",
+    !done && !pending && !skipped,
+    (f) => (DOCUMENT_FILE_MIME_TYPES as readonly string[]).includes(f.type),
+    handOver,
+  );
 
   const submit = async () => {
     if (!file || pending || done) return;
@@ -133,7 +170,10 @@ export function DocumentFileEmbed({
           </button>
           <button
             type="button"
-            onClick={onSkip}
+            onClick={() => {
+              setSkipped(true);
+              onSkip();
+            }}
             disabled={pending}
             data-testid="doc-file-skip"
             className="rounded-md border border-ink-500 px-3 py-1.5 text-meta text-text-secondary"

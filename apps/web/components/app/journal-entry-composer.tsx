@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  resolveEngagementContext,
+  type EngagementCandidate,
+} from "@/lib/journal/engagement-context-selection";
+
+import { CameraCaptureButton } from "@/components/app/camera-capture-button";
 import { useLocale, useTranslations } from "next-intl";
+import { quoteText } from "@/lib/i18n/quote";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { DarkListbox } from "@/components/ui/DarkListbox";
@@ -52,6 +59,7 @@ import {
 } from "@/lib/journal/journal-recognition";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import type { JournalEditingEntry } from "@/lib/journal/edit-entry";
+import { seedFragmentsFromEntry } from "@/lib/journal/edit-fragment-seed";
 import {
   templateScaffoldText,
   type JournalTemplateOption,
@@ -63,7 +71,7 @@ import {
   type JournalPhotoUploadResult,
 } from "@/lib/journal/photo-upload";
 import { compressImageFile } from "@/lib/browser/image-compress";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { PLATFORM_OUTPUT_UNIT_SLUGS, WORK_TIME_UNIT_SLUGS } from "@/lib/journal/work-time";
 import {
   completeTask,
@@ -73,7 +81,11 @@ import {
   trackFunnel,
 } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { reviewUnconfirmedWorkTime } from "@/lib/journal/unconfirmed-work-time";
+import {
+  reviewUnconfirmedWorkTime,
+  statedDurationCount,
+} from "@/lib/journal/unconfirmed-work-time";
+import { reviewTimeSuggestion } from "@/lib/journal/intake-work-time";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
 import type { WorkDayCheck } from "@/lib/journal/work-time-plausibility";
@@ -86,6 +98,14 @@ import {
   type ModuleFieldValues,
 } from "@/lib/journal/journal-module-fields";
 
+import {
+  PROJECT_FIELD_NONE,
+  projectChoiceIsSatisfied,
+  projectDisplayLabel,
+  projectPromptFor,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
+
 export type JournalEngagement = {
   id: string;
   label: string;
@@ -95,6 +115,10 @@ export type JournalEngagement = {
    *  editors compose for an entry logged against it (owner §12). Optional
    *  so older callers keep working; absent → no module fields. */
   relationshipSlug?: string;
+  /** The projects the worker is ACTIVELY assigned to in THIS context's
+   *  organization. Two or more → the composer must ask which; one → the
+   *  database attributes it; none → a non-project entry, nothing to ask. */
+  projects?: AssignedProject[];
 };
 
 /** How the entry's engagement context was decided — see
@@ -102,8 +126,9 @@ export type JournalEngagement = {
  *  legitimately possible, so nothing is preselected and the worker must pick
  *  before the entry can be submitted. */
 export type JournalContextResolution = {
-  rule: "A" | "B" | "C" | "D" | "NONE";
+  rule: "A" | "W" | "B" | "C" | "D" | "NONE";
   selectedId: string | null;
+  activeWorkspaceWithoutContext?: true;
 };
 export type JournalDirection = {
   slug: string;
@@ -164,6 +189,10 @@ type FragmentReviewState = JournalFragmentSuggestion & {
    *  is forwarded to the save action as a review-only `unknown_phrase`
    *  metric — never auto-promoted to a verified taxonomy entry. */
   userLabel: string;
+  /** Provenance of a fragment SEEDED from the saved entry (an edit): an
+   *  untouched fragment keeps the source it was saved with; a parse-derived
+   *  or relabelled fragment is the worker's own input (server default). */
+  source?: "worker_input" | "ai_extracted" | null;
 };
 
 export type { JournalEditingEntry };
@@ -171,15 +200,32 @@ export type { JournalEditingEntry };
 export function JournalEntryComposer({
   engagements,
   contextResolution,
+  activeWorkspaceNotice = null,
+  contextCandidates,
+  activeOrganizationId = null,
   directions,
   workerSkills,
   editingEntry,
+  defaultWorkDate = null,
   templates,
   onSaved,
   onCancelEdit,
 }: {
   engagements: JournalEngagement[];
   contextResolution?: JournalContextResolution;
+  /** Server-localized sentence for an organization the person acts for —
+   *  shown under the context picker only while the resolution for the work
+   *  date says no work relationship there applies (owner P0 2026-10-29), so
+   *  that organization is never silently missing. */
+  activeWorkspaceNotice?: string | null;
+  /** The person's contexts with their bounds (the same facts the server
+   *  resolved from). When given, the composer RE-RESOLVES on its own work
+   *  date: a context is only a candidate on days inside its bounds, so a
+   *  September day is never preselected into a context that began in
+   *  October (Codex P2 on #2884). */
+  contextCandidates?: readonly EngagementCandidate[];
+  /** The server-resolved active workspace's organization (rule W), or null. */
+  activeOrganizationId?: string | null;
   directions: JournalDirection[];
   workerSkills: JournalSkill[];
   /** When set, the composer opens in EDIT mode: textarea is prefilled
@@ -188,6 +234,9 @@ export function JournalEntryComposer({
    *  `supersedeJournalEntry(editingEntry.id, …)` (RPC from migration 0018)
    *  instead of the create path. */
   editingEntry?: JournalEditingEntry | null;
+  /** The day the person already picked on the journal calendar. A NEW
+   *  record starts on it instead of today; an edit keeps its saved day. */
+  defaultWorkDate?: string | null;
   /** ACTIVE profession templates from the §10 registry
    *  (journal_profession_templates — owner-gated draft migration). Empty /
    *  omitted → the picker renders NOTHING (honest absence). A template only
@@ -223,7 +272,6 @@ export function JournalEntryComposer({
   // An empty default makes the picker required rather than pre-answered.
   const primaryId =
     contextResolution?.selectedId ?? (contextResolution ? "" : engagements[0]?.id ?? "");
-  const mustChooseContext = contextResolution?.rule === "C";
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -387,7 +435,9 @@ export function JournalEntryComposer({
   >({});
   // Multi-fragment review state — populated when the parser splits the text
   // into more than one work fragment (the owner sentence yields 3).
-  const [fragments, setFragments] = useState<FragmentReviewState[]>([]);
+  const [fragments, setFragments] = useState<FragmentReviewState[]>(() =>
+    seedFragmentsFromEntry(editingEntry),
+  );
   // v3 — institution / topic detection cards.
   const [institutionStatus, setInstitutionStatus] = useState<SuggestionStatus>(
     editingEntry?.institutionName ? "confirmed" : "pending",
@@ -405,6 +455,21 @@ export function JournalEntryComposer({
   const [engagementId, setEngagementId] = useState<string>(
     editingEntry?.engagementContextId ?? primaryId,
   );
+  // WHICH PROJECT the hours belong to. Only a NEW record asks (an edit keeps
+  // the entry's own project — the supersede RPC copies it). With two or more
+  // active projects in the chosen context nothing is preselected: the
+  // database never guesses between them (handoff 2026-10-02 §7).
+  const [projectChoice, setProjectChoice] = useState<string>("");
+  const contextProjects: AssignedProject[] = editingEntry
+    ? []
+    : (engagements.find((e) => e.id === engagementId)?.projects ?? []);
+  const projectPrompt = projectPromptFor(contextProjects);
+  // A choice made for another context's projects never carries over.
+  const projectChoiceValid =
+    projectChoice === PROJECT_FIELD_NONE ||
+    contextProjects.some((p) => p.id === projectChoice)
+      ? projectChoice
+      : "";
   // Owner §12 — archetype module fields for the selected engagement's
   // relationship, preloaded on edit so they are re-sent, not lost.
   const [moduleFields, setModuleFields] = useState<ModuleFieldValues>(
@@ -414,16 +479,43 @@ export function JournalEntryComposer({
     engagements.find((e) => e.id === engagementId)?.relationshipSlug ?? null;
   // Preserve the entry's saved work date on edit (do NOT reset to today).
   const [workDate, setWorkDate] = useState<string>(
-    editingEntry?.workDate ?? today,
+    editingEntry?.workDate ?? defaultWorkDate ?? today,
   );
   // A NEW entry defaults to the PERSON's calendar day, not the server's UTC
   // day (re-audit F10): at 01:30 in Vilnius the UTC key still says
   // yesterday. Applied after mount so server and client hydrate the same
   // markup; an already-edited date is left alone.
   useEffect(() => {
-    if (editingEntry?.workDate) return;
+    if (editingEntry?.workDate || defaultWorkDate) return;
     setWorkDate((d) => (d === today ? personCalendarDay() : d));
-  }, [editingEntry?.workDate, today]);
+  }, [editingEntry?.workDate, defaultWorkDate, today]);
+
+  // THE RESOLUTION FOLLOWS THE WORK DATE (Codex P2 on #2884). Applicability
+  // is bounded by the day the work happened, so the default is re-resolved
+  // whenever the date changes — the SAME pure resolver the server ran. Until
+  // the person picks a context themselves; after that their choice stands.
+  const liveResolution = useMemo(
+    () =>
+      contextCandidates
+        ? resolveEngagementContext({
+            candidates: contextCandidates,
+            workDay: workDate,
+            activeOrganizationId,
+          })
+        : (contextResolution ?? null),
+    [contextCandidates, workDate, activeOrganizationId, contextResolution],
+  );
+  const mustChooseContext = liveResolution?.rule === "C";
+  const contextTouched = useRef(false);
+  const liveSelectedId = liveResolution?.selectedId ?? "";
+  useEffect(() => {
+    if (editingEntry || contextTouched.current || !contextCandidates) return;
+    setEngagementId(liveSelectedId);
+  }, [editingEntry, contextCandidates, liveSelectedId]);
+  const pickEngagement = (id: string) => {
+    contextTouched.current = true;
+    setEngagementId(id);
+  };
 
   const existingSkillRefs = useMemo(
     () => workerSkills.map((s) => ({ slug: s.slug, label: s.name })),
@@ -443,9 +535,17 @@ export function JournalEntryComposer({
   const selectedIscoGroup =
     (dirSlug ? directionBySlug.get(dirSlug) : directions[0])?.iscoGroup ?? null;
 
+  function reviewedSuggestions(raw: string) {
+    const parsed = extractJournalSuggestions(raw);
+    const reviewed = reviewTimeSuggestion(raw, workDate || today, parsed);
+    return { ...parsed, time: reviewed.time, fragments: reviewed.fragments };
+  }
+
   function analyse(raw: string) {
     setError(null);
-    const s = extractJournalSuggestions(raw);
+    // The review offers the time the chat / MCP intake would record for the
+    // same sentence (a stated span, never the break) — reviewTimeSuggestion.
+    const s = reviewedSuggestions(raw);
     // Pilot telemetry: a journal entry begins when the worker asks for
     // structure suggestions. Edit mode lets us tell create vs supersede
     // apart downstream.
@@ -875,7 +975,7 @@ export function JournalEntryComposer({
 
   function setFragmentUserLabel(idx: number, label: string) {
     setFragments((prev) =>
-      prev.map((f, i) => (i === idx ? { ...f, userLabel: label } : f)),
+      prev.map((f, i) => (i === idx ? { ...f, userLabel: label, source: "worker_input" } : f)),
     );
   }
 
@@ -906,6 +1006,26 @@ export function JournalEntryComposer({
       setError(t("engagementAmbiguous"));
       return;
     }
+    // Two or more active projects: the hours must say which project they are
+    // for (or that they are not project work) — otherwise they would be saved
+    // against no project at all.
+    if (!projectChoiceIsSatisfied(contextProjects, projectChoiceValid)) {
+      setError(t("projectAmbiguous"));
+      return;
+    }
+    // A quick save from the text alone never parsed it: a stated duration
+    // ("dirbau 2 valandas") would be recorded with no time at all. Chat and
+    // quick-record show the parse and let the worker confirm it; the full form
+    // does the same by opening the existing review step first (doctrine §7 —
+    // never confirmed for them).
+    if (stage === "compose" && !editingEntry) {
+      const stated = statedDurationCount(reviewedSuggestions(text));
+      if (stated > 0) {
+        analyse(text);
+        setError(t("unconfirmedTimeBlocked", { count: stated }));
+        return;
+      }
+    }
     // Saving now would discard hours the worker actually wrote. Say so and
     // stop; `confirmAllPending` (the existing control) is one tap away, and
     // discarding deliberately is also a real answer.
@@ -922,6 +1042,7 @@ export function JournalEntryComposer({
       const fd = new FormData();
       fd.set("locale", locale);
       fd.set("engagement_context_id", engagementId);
+      if (projectPrompt === "ask") fd.set("project_id", projectChoiceValid);
       fd.set("notes", text);
       fd.set("work_date", workDate);
       if (siteStatus === "confirmed" && siteName.trim())
@@ -948,6 +1069,7 @@ export function JournalEntryComposer({
           activityLabel: f.activityLabel,
           isUnknown: f.isUnknown,
           userLabel: f.userLabel.trim() || null,
+          ...(f.source ? { source: f.source } : {}),
         }));
       if (institutionStatus === "confirmed" && institutionName.trim())
         fd.set("institution_name", institutionName.trim());
@@ -1143,6 +1265,35 @@ export function JournalEntryComposer({
     // ONE photo field, placed by the active mode preset: photo-first mode
     // leads with it, the other modes keep it after the text (same field,
     // same free-tier rules, same after-save upload either way).
+    /* ONE photo handler, shared by the picker and the camera button. */
+    const acceptPhoto = async (f: File | null) => {
+      if (!f) {
+        setPhotoFile(null);
+        setPhotoError(null);
+        setPhotoPrep("idle");
+        return;
+      }
+      // Wrong format → honest error; size is handled by compression.
+      if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
+        setPhotoFile(null);
+        setPhotoError(t("photo.invalidFile"));
+        setPhotoPrep("idle");
+        return;
+      }
+      setPhotoError(null);
+      setPhotoPrep("preparing");
+      // Auto-resize/compress normal phone photos before upload.
+      const { file: prepared } = await compressImageFile(f);
+      if (!isValidJournalPhoto(prepared)) {
+        setPhotoFile(null);
+        setPhotoPrep("idle");
+        setPhotoError(t("photo.tooLargeAfter"));
+        return;
+      }
+      setPhotoFile(prepared);
+      setPhotoPrep("ready");
+    };
+
     const photoField = (
       <div
         className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
@@ -1162,35 +1313,14 @@ export function JournalEntryComposer({
           type="file"
           accept="image/jpeg,image/png,image/webp"
           data-testid="journal-photo-input"
-          onChange={async (e) => {
-            const f = e.target.files?.[0] ?? null;
-            if (!f) {
-              setPhotoFile(null);
-              setPhotoError(null);
-              setPhotoPrep("idle");
-              return;
-            }
-            // Wrong format → honest error; size is handled by compression.
-            if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
-              setPhotoFile(null);
-              setPhotoError(t("photo.invalidFile"));
-              setPhotoPrep("idle");
-              return;
-            }
-            setPhotoError(null);
-            setPhotoPrep("preparing");
-            // Auto-resize/compress normal phone photos before upload.
-            const { file: prepared } = await compressImageFile(f);
-            if (!isValidJournalPhoto(prepared)) {
-              setPhotoFile(null);
-              setPhotoPrep("idle");
-              setPhotoError(t("photo.tooLargeAfter"));
-              return;
-            }
-            setPhotoFile(prepared);
-            setPhotoPrep("ready");
-          }}
+          onChange={(e) => void acceptPhoto(e.target.files?.[0] ?? null)}
           className="text-xs text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-xs file:text-text-primary"
+        />
+        {/* The camera as a second door into the SAME field (phones only). */}
+        <CameraCaptureButton
+          label={t("photo.takePhoto")}
+          testId="journal-photo-camera"
+          onFile={(f) => void acceptPhoto(f)}
         />
         {photoError ? (
           <p className="text-xs text-state-danger" role="alert">
@@ -1621,7 +1751,7 @@ export function JournalEntryComposer({
                               data-testid="journal-unresolved-chip"
                             >
                               <span className="text-xs font-semibold text-text-primary">
-                                „{u.text}“
+                                {quoteText(locale, u.text)}
                               </span>
                               {state === "named" ? (
                                 <span
@@ -1790,6 +1920,8 @@ export function JournalEntryComposer({
                   ? t("photo.uploaded")
                   : photoOutcome === "limit"
                     ? t("photo.limitReached")
+                    : photoOutcome === "quota"
+                      ? t("photo.quotaReached")
                     : photoOutcome === "not-ready"
                       ? t("photo.notReady")
                       : photoOutcome === "invalid"
@@ -1908,7 +2040,7 @@ export function JournalEntryComposer({
                   {formatDuration(
                     Number(timeValue.replace(",", ".")) || 0,
                     timeUnit,
-                    locale === "en" || locale === "ru" ? locale : "lt",
+                    durationLocale(locale),
                   )}
                 </span>
               )}
@@ -2102,7 +2234,7 @@ export function JournalEntryComposer({
           <Label>{t("engagement")}</Label>
           <DarkListbox
             value={engagementId}
-            onChange={setEngagementId}
+            onChange={pickEngagement}
             options={[
               // Rule C: an explicit unchosen option, so the field reads as a
               // question rather than as an answer someone already gave.
@@ -2122,7 +2254,54 @@ export function JournalEntryComposer({
               {t("engagementAmbiguous")}
             </p>
           ) : null}
+          {activeWorkspaceNotice && liveResolution?.activeWorkspaceWithoutContext ? (
+            <p
+              className="text-meta leading-relaxed text-text-secondary"
+              data-testid="journal-engagement-active-workspace-notice"
+            >
+              {activeWorkspaceNotice}
+            </p>
+          ) : null}
         </label>
+
+        {projectPrompt === "ask" ? (
+          <label className="flex flex-col gap-1.5">
+            <Label>{t("project")}</Label>
+            <DarkListbox
+              value={projectChoiceValid}
+              onChange={setProjectChoice}
+              options={[
+                { value: "", label: t("projectChoose") },
+                ...contextProjects.map((p) => ({
+                  value: p.id,
+                  label: projectDisplayLabel(p, (k, v) => t(k, v)),
+                })),
+                { value: PROJECT_FIELD_NONE, label: t("projectNone") },
+              ]}
+              ariaLabel={t("project")}
+              testId="journal-project-switcher"
+            />
+            {projectChoiceValid === "" ? (
+              <p
+                className="text-meta leading-relaxed text-state-warning"
+                data-testid="journal-project-must-choose"
+              >
+                {t("projectAmbiguous")}
+              </p>
+            ) : null}
+          </label>
+        ) : projectPrompt === "auto" ? (
+          <p
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="journal-project-auto"
+          >
+            {t("projectAuto", {
+              name: contextProjects[0]
+                ? projectDisplayLabel(contextProjects[0], (k, v) => t(k, v))
+                : "",
+            })}
+          </p>
+        ) : null}
 
         {/* Owner §12 — the module fields the entry's OCCUPATION (the named
             direction, else the worker's primary profession, through its
@@ -2244,8 +2423,7 @@ export function JournalEntryComposer({
                 const timeLabel = f.time
                   ? formatDuration(
                       f.time.value,
-                      f.time.unitSlug,
-                      locale === "en" || locale === "ru" ? locale : "lt",
+                      f.time.unitSlug, durationLocale(locale),
                     )
                   : t("fragment.noTime");
                 // Label-only activity/capability labels are canonical LT — localize
@@ -2263,7 +2441,7 @@ export function JournalEntryComposer({
                   <DetectedSuggestionCard
                     key={`${idx}-${f.rawPhrase}`}
                     label={`${timeLabel} · ${activityName}`}
-                    hint={`„${f.rawPhrase}"`}
+                    hint={quoteText(locale, f.rawPhrase)}
                     status={f.status}
                     onConfirm={() => setFragmentStatus(idx, "confirmed")}
                     onDiscard={() => setFragmentStatus(idx, "discarded")}
@@ -2355,7 +2533,7 @@ export function JournalEntryComposer({
                 label={formatDuration(
                   Number(timeValue.replace(",", ".")) || 0,
                   timeUnit,
-                  locale === "en" || locale === "ru" ? locale : "lt",
+                  durationLocale(locale),
                 )}
                 status={timeStatus}
                 onConfirm={() => setTimeStatus("confirmed")}
@@ -2624,7 +2802,7 @@ export function JournalEntryComposer({
       <JournalAiSuggestions
         text={text}
         engagements={engagements.map((e) => ({ id: e.id, label: e.label }))}
-        onPickEngagement={setEngagementId}
+        onPickEngagement={pickEngagement}
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -2632,7 +2810,7 @@ export function JournalEntryComposer({
           <Label>{t("engagement")}</Label>
           <DarkListbox
             value={engagementId}
-            onChange={setEngagementId}
+            onChange={pickEngagement}
             options={engagements.map((e) => ({ value: e.id, label: e.label }))}
             ariaLabel={t("engagement")}
             testId="journal-engagement-switcher"
@@ -2643,6 +2821,7 @@ export function JournalEntryComposer({
           <Input
             type="date"
             value={workDate}
+            max={personCalendarDay()}
             onChange={(e) => setWorkDate(e.target.value)}
           />
         </label>

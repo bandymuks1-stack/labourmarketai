@@ -27,6 +27,7 @@ import {
   emitDocumentAckNotification,
   emitWorkflowStepPendingNotifications,
 } from "@/lib/notifications/event-emitters";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Org document REGISTER write actions (Document & Evidence Engine v1).
@@ -94,6 +95,7 @@ function noticeForRpcError(error: { code?: string }): DocumentEngineNotice {
 export async function createOrgDocumentAction(
   formData: FormData,
 ): Promise<void> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = readLocale(formData);
 
   const ctx = await requireEmployerCompany();

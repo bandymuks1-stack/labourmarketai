@@ -8,5 +8,7 @@
   "student": "[EN] Student",
   "unemployed": "[EN] Unemployed",
   "volunteer": "[EN] Volunteer",
-  "external_manager": "Ārējais vadītājs (pasūtītāja)"
+  "intern": "Praktikants",
+  "external_manager": "Ārējais vadītājs (pasūtītāja)",
+  "other": "Cita saistība"
 }

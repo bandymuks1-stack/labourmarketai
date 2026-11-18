@@ -46,6 +46,21 @@ function isActiveLocale(value: string): value is ActiveLocale {
   return (activeLocales as readonly string[]).includes(value);
 }
 
+/**
+ * The language an e-mail is written in. A routed locale is used as stored. A
+ * STORED but unrouted language (a Swedish or Danish reader before that UI
+ * exists) gets English — the same rule the pages follow
+ * (`lib/i18n/entry-locale.ts`), never Lithuanian, which that reader most
+ * likely cannot read. No stored locale at all keeps the platform default.
+ * Pure.
+ */
+export function notificationEmailLocale(stored: string | null | undefined): ActiveLocale {
+  const value = (stored ?? "").trim().toLowerCase().split(/[-_]/)[0] ?? "";
+  if (!value) return defaultLocale;
+  if (isActiveLocale(value)) return value;
+  return "en";
+}
+
 type MessageTree = Record<string, unknown>;
 
 function readString(tree: MessageTree, path: readonly string[]): string | null {
@@ -74,8 +89,7 @@ export async function renderNotificationEmail(input: {
    *  Absent = the plain type key, as before. */
   readonly metadata?: NotificationEventMetadata;
 }): Promise<RenderedNotificationEmail | null> {
-  const locale: ActiveLocale =
-    input.locale && isActiveLocale(input.locale) ? input.locale : defaultLocale;
+  const locale = notificationEmailLocale(input.locale);
   let messages: MessageTree;
   try {
     messages = await loadMessages(locale);
@@ -113,8 +127,17 @@ export async function renderNotificationEmail(input: {
   const manageLine =
     readString(messages, ["auth", "notifications", "email", "manage"]) ?? "";
 
+  // JOB ALERT first layer: the position and, only when the ad stated it, its
+  // pay — public-ad facts from the stored row, no matching reasoning.
+  const jobLine = input.metadata?.title
+    ? input.metadata.salary
+      ? `${input.metadata.title} — ${input.metadata.salary}`
+      : input.metadata.title
+    : null;
+
   const text = [
     subject,
+    ...(jobLine ? ["", jobLine] : []),
     "",
     openLine ? `${openLine} ${deepLink}` : deepLink,
     "",

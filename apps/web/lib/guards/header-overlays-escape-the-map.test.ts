@@ -129,7 +129,10 @@ describe("dropdowns in the authenticated header escape the header's stacking con
 
   it("the overlay portal still owns the z scale it documents", () => {
     const overlay = read("components/ui/anchored-overlay.tsx");
-    expect(overlay).toMatch(/z-\[60\]/);
+    // The dropdown tier is the NAMED z-modal (60) from tokens/zindex.ts; a raw
+    // z-[60] would be the ad-hoc scale the 2026-09-22 hardening retired.
+    expect(overlay).toMatch(/\bz-modal\b/);
+    expect(overlay).not.toMatch(/z-\[\d+\]/);
     expect(overlay).toMatch(/data-overlay-root="anchored"/);
   });
 });

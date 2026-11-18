@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Clickability / actionability guard (owner browser-smoke repair,
@@ -27,9 +28,8 @@ const startCompany = read("app/[locale]/dashboard/start/company/page.tsx");
 const brigades = read("components/app/team-brigades-panel.tsx");
 const readback = read("components/app/demand-requests-readback.tsx");
 const mapShell = read("components/app/market-map-shell.tsx");
-const mapLegend = read("components/app/map-layers-legend.tsx");
 const mapPage = read("app/[locale]/dashboard/market-map/page.tsx");
-const mapBase = read("components/app/market-map-base.tsx");
+const mapControls = read("components/app/market-map/map-location-controls.tsx");
 const notifPanel = read("components/app/notification-panel.tsx");
 const evidenceStrip = read("components/app/evidence-status-strip.tsx");
 const readinessPanel = read("components/app/worker-readiness-panel.tsx");
@@ -96,7 +96,7 @@ describe("5+6. company identity and create-vs-edit", () => {
     expect(startCompany).toMatch(
       /company && !firstSetup \? t\("formTitleEdit"\) : t\("formTitleCreate"\)/,
     );
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const setup = JSON.parse(read(`messages/${loc}.json`)).roleDashboards
         .company.setup;
       expect(typeof setup.formTitleCreate).toBe("string");
@@ -121,10 +121,11 @@ describe("8. map surfaces", () => {
     );
     expect(filters).not.toMatch(/rounded-full/);
   });
-  it("incomplete layer rows carry a fix href to a real target", () => {
-    expect(mapLegend).toMatch(/data-testid="map-layer-fix-link"/);
-    expect(mapPage).toMatch(/href: hasPreferredLocation \? undefined : "#market-map-base"/);
-    expect(mapBase).toMatch(/id="market-map-base"/);
+  it("the location + radius controls of the one map keep their anchor", () => {
+    // The incomplete-layer legend rows (and their fix links) were removed with
+    // the layers catalogue; the controls remain addressable on the map page.
+    expect(mapControls).toMatch(/id="market-map-base"/);
+    expect(mapPage).toMatch(/<WorldDiscovery\b/);
   });
   it("my-signals place chips are neutral data, not filter-styled", () => {
     const sig = read("components/app/market-map-my-signals.tsx");
@@ -136,7 +137,7 @@ describe("9. notifications honest", () => {
   it("raw type enum never rendered — mapped with neutral fallback", () => {
     expect(notifPanel).not.toMatch(/>\{n\.type\}</);
     expect(notifPanel).toMatch(/tTypes\("generic"\)/);
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const g = JSON.parse(read(`messages/${loc}.json`)).auth.notifications
         .types?.generic;
       expect(typeof g === "string" && g.length > 0, `${loc} generic`).toBe(true);

@@ -8,11 +8,20 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import {
+  activeOrganizationOf,
+  orderContextsForChoice,
   resolveEngagementContext,
   type ContextResolution,
+  type EngagementCandidate,
 } from "@/lib/journal/engagement-context-selection";
-import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
+import {
+  composeDistinctEngagementLabels,
+  unnamedOrganizationKind,
+} from "@/lib/journal/engagement-label";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { projectsForContext, type AssignedProject } from "@/lib/journal/project-attribution";
+import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 
 /**
  * Read the worker's WRITABLE engagement contexts for the conversation work-log
@@ -36,6 +45,12 @@ export type WorkLogEngagement = {
   id: string;
   label: string;
   isPrimary: boolean;
+  /** The organization's own name (null = the personal context) — what a
+   *  sentence that names its employer is matched against. */
+  orgName?: string | null;
+  /** The projects the worker is ACTIVELY assigned to in this context's
+   *  organization (2+ → the flow must ask which; see project-attribution). */
+  projects?: AssignedProject[];
 };
 
 export type WorkLogEngagementsResult =
@@ -46,12 +61,34 @@ export type WorkLogEngagementsResult =
        *  are legitimately possible and `selectedId` is null — the flow must
        *  ASK rather than preselect. */
       resolution: ContextResolution;
+      /** Organizations the person's relationship with has ENDED (and none is
+       *  active) — names only, through the narrow historical-names read. A
+       *  sentence naming one of these must not be filed under another org. */
+      endedOrgNames?: string[];
+      /** Localized sentence for the organization the person ACTS FOR ("…no
+       *  work relationship with X is recorded" — a membership is access, not a
+       *  work relationship; owner P0 2026-10-29). Null in the personal space.
+       *  Shown only while the resolution for the work date says
+       *  `activeWorkspaceWithoutContext`, so that organization is never
+       *  silently missing from the choice. */
+      activeWorkspaceNotice?: string | null;
+      /** The facts `resolution` was computed from, so the flow re-resolves
+       *  with the SAME pure resolver when the person changes the work date —
+       *  applicability is bounded by the day (Codex P2 on #2884). */
+      candidates?: EngagementCandidate[];
+      activeOrganizationId?: string | null;
     }
   | { kind: "no-worker" }
   | { kind: "no-context" }
   | { kind: "not-authed" };
 
-export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult> {
+export async function listWorkLogEngagements(
+  workDay?: string | null,
+): Promise<WorkLogEngagementsResult> {
+  // The day the work happened, when the caller knows it. A malformed value is
+  // no signal (never an error): the resolution then ignores day bounds, as
+  // before.
+  const day = typeof workDay === "string" && /^\d{4}-\d{2}-\d{2}$/.test(workDay) ? workDay : null;
   const supabase = await createClient();
   const {
     data: { user },
@@ -132,7 +169,6 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
    * The relationship word still comes from `canonicalRelationship` above —
    * the ONE catalogue, with the older worklog wording as its fallback.
    */
-  const tRole = await getTranslations("auth.signup.role");
   const tJournal = await getTranslations("journal");
   const personalEntryLabel = tJournal("personalEntry");
   const rows = (ecRows ?? []).map((e) => {
@@ -141,12 +177,11 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
       legal_name: string | null;
       organization_type: string | null;
     } | null;
-    const orgTypeLabel =
-      org?.organization_type === "company"
-        ? tRole("company")
-        : org?.organization_type === "agency"
-          ? tRole("agency")
-          : null;
+    // An organization with no display/legal name says so ("Agency without a
+    // name"), never its bare type — that read like a real, named choice.
+    const orgTypeLabel = org
+      ? tJournal(`unnamedOrganization.${unnamedOrganizationKind(org.organization_type)}`)
+      : null;
     return {
       row: e,
       input: {
@@ -167,6 +202,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
       id: e.id,
       label: labels[i],
       isPrimary: Boolean(e.is_primary),
+      orgName: rows[i].input.orgName,
       organizationId:
         ((e as { organization_id?: string | null }).organization_id as
           | string
@@ -175,19 +211,22 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
 
   if (engagements.length === 0) return { kind: "no-context" };
 
-  // Context Intelligence (rebuild phase 3): the ACTIVE WORKSPACE resolves the
-  // default context — the engagement belonging to the active workspace's org
-  // sorts FIRST (then is_primary, preserved by the stable sort), so the flow
-  // preselects the context the user is already working in and only ASKS when
-  // real ambiguity remains. Request-cached read; honest no-op when the
-  // workspace is personal or matches nothing.
-  const workspace = await getWorkspaceContext("person");
-  const activeOrgId = workspace.activeWorkspaceId;
-  const ordered = [...engagements].sort(
-    (a, b) =>
-      Number(b.organizationId === activeOrgId) -
-      Number(a.organizationId === activeOrgId),
-  );
+  // The active projects per organization — one bounded read, so the flow can
+  // ask "which project?" instead of the hours landing against none.
+  const projectsByOrg = await readActiveProjectsByOrg(supabase, worker.id);
+
+  // Context Intelligence (rebuild phase 3): the ACTIVE WORKSPACE orders the
+  // choice — the ONE order (owner P0 2026-10-29): the active workspace's
+  // organization first, other organizations next, personal last (is_primary
+  // preserved within a group by the stable sort) — and is a resolution SIGNAL
+  // (rule W): exactly one applicable context at the organization the person
+  // acts for is preselected. Request-cached read; honest no-op when the
+  // workspace is personal.
+  // The SAME resolution the chip renders — no caller-chosen identity, so the
+  // default here can never name a different workspace than the header does.
+  const workspace = await getWorkspaceContext();
+  const activeOrgId = activeOrganizationOf(workspace);
+  const ordered = orderContextsForChoice(engagements, activeOrgId, (e) => e.organizationId);
 
   // The DEFAULT is the resolution, not the first row. Ordering above only
   // decides how the list reads; which context the work belongs to is decided
@@ -195,8 +234,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
   // asks. This is the second of the two work-log entry points; the journal
   // composer is the other, and both must resolve identically or the same
   // hours land in different places depending on where they were typed.
-  const resolution = resolveEngagementContext({
-    candidates: (ecRows ?? []).map((e) => {
+  const candidates: EngagementCandidate[] = (ecRows ?? []).map((e) => {
       const r = e as {
         id: string;
         relationship_slug: string;
@@ -215,12 +253,73 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
         endedAt: r.ended_at ?? null,
         isPrimary: r.is_primary === true,
       };
-    }),
+    });
+  const resolution = resolveEngagementContext({
+    candidates,
+    workDay: day,
+    activeOrganizationId: activeOrgId,
   });
+
+  // Acting for an organization with no recorded work relationship there: say
+  // it plainly. Nothing is created — the person picks among their real
+  // contexts (or records the relationship where the product offers it).
+  let activeWorkspaceNotice: string | null = null;
+  if (activeOrgId) {
+    const acting = workspace.workspaces.find((w) => w.id === activeOrgId) ?? null;
+    activeWorkspaceNotice = tJournal("activeWorkspaceNoRelationship", {
+      org:
+        acting?.name ||
+        tJournal(
+          `unnamedOrganization.${unnamedOrganizationKind(acting?.organizationType)}`,
+        ),
+    });
+  }
+
+  // ENDED relationships, named (2026-09-29): "…betonavau pamatus Alfa
+  // objekte" by a worker whose Alfa relationship had ended preselected their
+  // only active organization. Best-effort: a failed read names nothing and the
+  // card behaves exactly as before.
+  let endedOrgNames: string[] = [];
+  try {
+    const activeOrgIds = new Set(engagements.map((e) => e.organizationId).filter(Boolean));
+    const { data: endedRows } = await supabase
+      .from("engagement_contexts")
+      .select("organization_id, organizations(display_name, legal_name)")
+      .eq("profile_id", user.id)
+      .neq("status", "active")
+      .not("organization_id", "is", null)
+      .limit(50);
+    const named = await withHistoricalOrgNames(
+      supabase,
+      ((endedRows ?? []) as unknown as {
+        organization_id: string | null;
+        organizations: { display_name: string | null; legal_name: string | null } | null;
+      }[]).filter((r) => r.organization_id && !activeOrgIds.has(r.organization_id)),
+    );
+    endedOrgNames = [
+      ...new Set(
+        named
+          .map((r) => orgDisplayName(r.organizations?.display_name, r.organizations?.legal_name))
+          .filter((n): n is string => Boolean(n)),
+      ),
+    ];
+  } catch {
+    endedOrgNames = [];
+  }
 
   return {
     kind: "ok",
-    engagements: ordered.map(({ id, label, isPrimary }) => ({ id, label, isPrimary })),
+    engagements: ordered.map(({ id, label, isPrimary, orgName, organizationId }) => ({
+      id,
+      label,
+      isPrimary,
+      orgName,
+      projects: projectsForContext(projectsByOrg, organizationId),
+    })),
     resolution,
+    endedOrgNames,
+    activeWorkspaceNotice,
+    candidates,
+    activeOrganizationId: activeOrgId,
   };
 }

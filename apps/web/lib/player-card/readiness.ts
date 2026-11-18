@@ -40,7 +40,17 @@ export type WorkerReadiness = {
 /** Derive readiness from the REAL fields already on the player card. */
 export function deriveWorkerReadiness(card: WorkerPlayerCard): WorkerReadiness {
   const pillars: ReadinessPillar[] = [
-    { key: "profession", met: Boolean(card.professionSlug) },
+    // MET MEANS "THIS PERSON NAMED WHAT THEY DO" — not "the catalogue carries
+    // it". This read was `Boolean(card.professionSlug)`, the 49-row registry
+    // slug alone, so somebody whose profession the registry does not carry
+    // ("LLM programuotojas") stayed unmet forever: the hub kept asking them to
+    // pick a profession they had already given us, and the counter kept
+    // scoring them down for an answer the catalogue could not hold. The two
+    // fields stay separate — matching still receives `professionSlug` only.
+    {
+      key: "profession",
+      met: Boolean(card.professionSlug) || Boolean(card.professionOwnWords),
+    },
     { key: "availability", met: Boolean(card.availabilityStatus) },
     { key: "skills", met: card.skillsDeclared > 0 },
     { key: "journal", met: card.evidenceEntries > 0 },

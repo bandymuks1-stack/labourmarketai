@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * W7-S1 — ONE profile overview.
@@ -125,11 +126,28 @@ describe("W7-S1 — no capability was lost", () => {
       "#profile-edit",
       "#cv-availability",
       "/dashboard/journal",
-      "/dashboard?result=player-card",
       "/dashboard/opportunities",
     ]) {
       expect(HUB, `${href} lost`).toContain(href);
     }
+  });
+
+  it("the work-card destination is the editor ON this page — no ping-pong (2026-09-23)", () => {
+    // It was `/dashboard?result=player-card`: the hub sent the person to the
+    // conversation's result, whose open control sent them straight back to
+    // this page. Since 2026-09-19 the profile renders the SAME WorkCardEditor
+    // at `#cv-availability`, so the pillar and the location step name that
+    // anchor. Asserted on the CODE, and with a negative control, so a comment
+    // mentioning the old address cannot keep this green.
+    expect(HUB).toMatch(/workCard: "#cv-availability",/);
+    expect(HUB).toMatch(/key: "location",\s*done: pillarMet\("workCard"\),\s*href: "#cv-availability",/);
+    expect(HUB).not.toContain("/dashboard?result=player-card");
+    // …and the anchor really holds the one editor, inside the disclosure the
+    // page's opener resolves a nested hash for.
+    const at = PAGE.indexOf('id="cv-availability"');
+    expect(at).toBeGreaterThan(PAGE.indexOf('id="cv-details"'));
+    expect(PAGE.slice(at, PAGE.indexOf("</details>", at))).toContain("<WorkCardEditor");
+    expect(PAGE).toContain('<DetailsHashOpener targetId="cv-details" />');
   });
 });
 
@@ -169,12 +187,12 @@ describe("W7-S1 — accessibility of the surface it introduced", () => {
   it("semantic headings: the hub is an h2 with h3 subsections", () => {
     expect(HUB).toMatch(/<h2 className="truncate font-display/);
     expect(HUB).toMatch(/<h3 className="font-mono text-meta/);
-    // The page keeps exactly one h1.
-    expect((PAGE.match(/<h1/g) ?? []).length).toBe(1);
+    // The page keeps exactly one h1 (PageTitle renders the h1).
+    expect((PAGE.match(/<h1|<PageTitle/g) ?? []).length).toBe(1);
   });
 
   it("the new copy exists in every locale that ships the hub", () => {
-    for (const locale of ["lt", "en", "de", "nl", "ru"]) {
+    for (const locale of activeLocales) {
       const m = JSON.parse(read(`messages/${locale}.json`)) as {
         profileHub?: Record<string, unknown>;
       };

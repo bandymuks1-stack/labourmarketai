@@ -155,10 +155,17 @@ describe("a reference is resolved, not acted on", () => {
     }
   });
 
-  it("an unknown name is answered, not swallowed", () => {
+  it("an unknown name is answered, not swallowed — with a question, never the greeting row", () => {
     // "Low-confidence must not mean do nothing."
     expect(handlerBody()).toMatch(/refLooksLikeName/);
-    expect(handlerBody()).toMatch(/starterChips/);
+    // RE-ANCHORED 2026-09-23 (owner program P0 §10): the answer used to carry
+    // `starterChips` — the greeting's CV / profile / job row — which is what
+    // the owner read after asking an agency to rename itself. It now asks one
+    // question with the ONE context-derived door (see `askToClarify`), and
+    // the greeting row may not come back to the name handler.
+    const own = handlerBody().slice(0, handlerBody().indexOf("const handleFileIntent"));
+    expect(own).toMatch(/askToClarify\(t\("refLooksLikeName"\)\)/);
+    expect(own, "a bare name must not be answered with the greeting row").not.toMatch(/starterChips/);
   });
 
   it("the send path consults the understanding layer before routing", () => {

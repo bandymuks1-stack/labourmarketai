@@ -139,6 +139,174 @@ export function decodeRecordOffsetCursor(cursor: string | null): number | null {
   return Number.isSafeInteger(value) && value >= 0 ? value : null;
 }
 
+// ── CONTINUATION-TOKEN CHECKPOINT ───────────────────────────────────────────
+/**
+ * A `cursor` channel (a feed that hands back the token naming its next page)
+ * checkpoints on the publisher's OWN continuation token. It shares the same
+ * opaque `cursor_value` column as the two checkpoints above, so it carries
+ * its own prefix for the same reason the record offset does: the three kinds
+ * must never be confusable. `decodeContinuationTokenCursor` returns null for
+ * a timestamp or an offset, and both older decoders return null for a
+ * prefixed token — every direction fails CLOSED.
+ *
+ * The token is bounded because it is stored and echoed back on the wire:
+ * a publisher (or a corrupted row) handing back a multi-kilobyte "token"
+ * must not become a multi-kilobyte query string. Added 2026-09-22 for the
+ * NAV scaffold; no provider is walked this way until that gate opens.
+ */
+export const VACANCY_CONTINUATION_TOKEN_PREFIX = "continuation-token:";
+/** Longest token accepted, in characters. */
+export const VACANCY_CONTINUATION_TOKEN_MAX_CHARS = 512;
+
+/** Only characters a URL-safe token can carry. Anything else is refused —
+ *  a token is never a place to smuggle a path, a scheme or whitespace. */
+const CONTINUATION_TOKEN_SHAPE = /^[A-Za-z0-9._~:-]+$/;
+
+/** Encode a publisher continuation token as the stored checkpoint, or null
+ *  when the value is empty, over-long or not token-shaped. */
+export function encodeContinuationTokenCursor(token: string): string | null {
+  const trimmed = token.trim();
+  if (
+    trimmed.length === 0 ||
+    trimmed.length > VACANCY_CONTINUATION_TOKEN_MAX_CHARS ||
+    !CONTINUATION_TOKEN_SHAPE.test(trimmed)
+  ) {
+    return null;
+  }
+  return `${VACANCY_CONTINUATION_TOKEN_PREFIX}${trimmed}`;
+}
+
+/** The continuation token a stored checkpoint carries, or null when the value
+ *  is absent, is a timestamp, is an offset, or is malformed. Null means
+ *  "walk from the head of the feed" — the cold start a feed is designed for.
+ *  A MID-PAGE checkpoint (`<token>#<n>`) still yields its token, so an older
+ *  reader never mistakes it for a fresh cold start. */
+export function decodeContinuationTokenCursor(
+  cursor: string | null,
+): string | null {
+  return decodeContinuationCheckpoint(cursor).token;
+}
+
+/**
+ * A continuation-token checkpoint that may sit INSIDE a page.
+ *
+ * A session with a request budget (NAV: `maxDetailFetchesPerSession`) can run
+ * out part-way through a page. The page's own token cannot say "from entry
+ * 120", so the position travels in the same opaque value:
+ *
+ *   continuation-token:<token>             whole page not yet started (legacy)
+ *   continuation-token:<token>#<n>         first <n> entries of <token>'s page consumed
+ *   continuation-token:#<n>@<epochSeconds> the cold-start page (no token), <n> consumed,
+ *                                          cold-start anchor <epochSeconds>
+ *
+ * INVARIANT: a position is only ever STORED for a CLOSED page (one that names
+ * a successor and so can no longer receive appended entries), and the adapter
+ * only HONOURS one on a closed page. On the open end of the feed it is ignored
+ * and the page is read from its start.
+ *
+ * The anchor exists because the head page is requested with an
+ * `If-Modified-Since` computed from the capture instant; resuming it with a new
+ * instant would shift the page under the stored position. `n` only ever counts
+ * entries READ, so a wrong value costs a re-read, never a skipped ad — and a
+ * reader that finds fewer entries than `n` re-reads the page from the start.
+ */
+export interface ContinuationCheckpoint {
+  /** null = the head of the feed (cold start). */
+  readonly token: string | null;
+  /** Entries of this page already consumed. 0 = none. */
+  readonly skipEntries: number;
+  /** Head page only: the cold-start instant (ISO) the position refers to. */
+  readonly coldStartAtIso: string | null;
+}
+
+const NO_CHECKPOINT: ContinuationCheckpoint = {
+  token: null,
+  skipEntries: 0,
+  coldStartAtIso: null,
+};
+
+/** Largest in-page position stored. A page is far smaller; this only bounds a
+ *  corrupted value. */
+const CONTINUATION_SKIP_MAX = 1_000_000;
+
+export function encodeContinuationCheckpoint(
+  cp: ContinuationCheckpoint,
+): string | null {
+  const skip = Math.floor(cp.skipEntries);
+  if (!Number.isFinite(skip) || skip < 0 || skip > CONTINUATION_SKIP_MAX) {
+    return null;
+  }
+  if (cp.token !== null) {
+    const base = encodeContinuationTokenCursor(cp.token);
+    if (base === null) return null;
+    return skip > 0 ? `${base}#${skip}` : base;
+  }
+  // Head page: only meaningful mid-page, and only with its anchor.
+  if (skip === 0 || cp.coldStartAtIso === null) return null;
+  const at = Date.parse(cp.coldStartAtIso);
+  if (!Number.isFinite(at)) return null;
+  return `${VACANCY_CONTINUATION_TOKEN_PREFIX}#${skip}@${Math.floor(at / 1000)}`;
+}
+
+export function decodeContinuationCheckpoint(
+  cursor: string | null,
+): ContinuationCheckpoint {
+  if (typeof cursor !== "string") return NO_CHECKPOINT;
+  const trimmed = cursor.trim();
+  if (!trimmed.startsWith(VACANCY_CONTINUATION_TOKEN_PREFIX)) {
+    return NO_CHECKPOINT;
+  }
+  const body = trimmed.slice(VACANCY_CONTINUATION_TOKEN_PREFIX.length);
+  const m = /^([^#@]*)(?:#(\d{1,7}))?(?:@(\d{1,12}))?$/.exec(body);
+  if (m === null) return NO_CHECKPOINT;
+  const raw = m[1];
+  const skip = m[2] === undefined ? 0 : Number(m[2]);
+  if (skip > CONTINUATION_SKIP_MAX) return NO_CHECKPOINT;
+  if (raw.length === 0) {
+    // Head-page position: needs both a position and an anchor, else cold.
+    if (skip === 0 || m[3] === undefined) return NO_CHECKPOINT;
+    const iso = new Date(Number(m[3]) * 1000).toISOString();
+    return { token: null, skipEntries: skip, coldStartAtIso: iso };
+  }
+  if (m[3] !== undefined) return NO_CHECKPOINT; // an anchor belongs to the head only
+  if (
+    raw.length > VACANCY_CONTINUATION_TOKEN_MAX_CHARS ||
+    !CONTINUATION_TOKEN_SHAPE.test(raw)
+  ) {
+    return NO_CHECKPOINT;
+  }
+  return { token: raw, skipEntries: skip, coldStartAtIso: null };
+}
+
+/**
+ * Read the next continuation token off a response body at the descriptor's
+ * declared path. Returns null when the path is absent, the value is not a
+ * non-empty string, or it fails the token shape — all of which mean "no
+ * further page", never an error. Pure and total over `unknown`.
+ */
+export function readContinuationToken(
+  body: unknown,
+  path: readonly string[],
+): string | null {
+  let node: unknown = body;
+  for (const key of path) {
+    if (node === null || typeof node !== "object" || Array.isArray(node)) {
+      return null;
+    }
+    node = (node as Record<string, unknown>)[key];
+  }
+  if (typeof node !== "string") return null;
+  const trimmed = node.trim();
+  if (
+    trimmed.length === 0 ||
+    trimmed.length > VACANCY_CONTINUATION_TOKEN_MAX_CHARS ||
+    !CONTINUATION_TOKEN_SHAPE.test(trimmed)
+  ) {
+    return null;
+  }
+  return trimmed;
+}
+
 // ── TIME-WINDOW WALK ────────────────────────────────────────────────────────
 /**
  * Why a stream must be walked in SLICES rather than asked for in one go.

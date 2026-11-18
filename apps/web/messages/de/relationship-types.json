@@ -8,5 +8,7 @@
   "student": "Student",
   "unemployed": "Arbeitslos",
   "volunteer": "Freiwilliger",
-  "external_manager": "Externer Vorgesetzter (Auftraggeber)"
+  "intern": "Praktikant/in",
+  "external_manager": "Externer Vorgesetzter (Auftraggeber)",
+  "other": "Andere Beziehung"
 }

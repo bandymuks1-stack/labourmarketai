@@ -170,17 +170,23 @@ export function computeNewCounts(
 export type DiscoveryListResult =
   | { kind: "ok"; rows: DiscoverableOfferingRow[] }
   | { kind: "needs-migration" }
+  /** The read failed — never shown as "no offerings" (SEP-7, audit 2026-10-16). */
+  | { kind: "unavailable" }
   | { kind: "not-authed" };
 
 export type OutgoingListResult =
   | { kind: "ok"; rows: OutgoingRequestRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read failed — UNKNOWN, never "no requests" (SEP-7). */
+  | { kind: "error" };
 
 export type IncomingListResult =
   | { kind: "ok"; rows: IncomingRequestRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read failed — UNKNOWN, never "no requests" (SEP-7). */
+  | { kind: "error" };
 
 export type RequestMutateResult =
   | { kind: "ok"; id?: string; detail?: string }
@@ -192,3 +198,9 @@ export type RequestMutateResult =
    *  honestly instead of a generic "try again" (repeat actions, PR 6b). */
   | { kind: "inactive" }
   | { kind: "error"; message: string };
+
+/** The status string a status-returning RPC handed back; anything that is not a
+ *  string is treated as an unknown (non-ok) outcome, never as success. */
+export function rpcOutcome(data: unknown): string {
+  return typeof data === "string" && data.length > 0 ? data : "unknown";
+}

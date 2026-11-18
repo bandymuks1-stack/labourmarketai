@@ -1,10 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/env", () => ({
   env: {
     CONVERSATION_TOKEN_SECRET: "unit-test-secret-with-enough-length",
     SUPABASE_SERVICE_ROLE_KEY: undefined,
   },
+}));
+
+// The one-time spend, with primary-key semantics (lib/security/confirmation-spend).
+const spent = vi.hoisted(() => new Set<string>());
+vi.mock("@/lib/security/confirmation-spend", () => ({
+  spendConfirmationForRequest: async (token: string) => (spent.has(token) ? "already_spent" : (spent.add(token), "spent")),
 }));
 
 import { personKey } from "@/lib/organization-evidence/person-matching";
@@ -54,16 +60,31 @@ const verify = (
   relationship = "employee",
 ) => verifyPeopleCommitToken({ token, organizationId: ORG, relationship, userId, plan: p });
 
+// A token is a pure function of (action, input, caller, state, issuedAtMs) —
+// no nonce — so two tests minting the same batch within one millisecond get
+// the SAME token. With one ledger shared across the file, the second test's
+// first, legitimate verify answered `already_spent` (CI, 2026-10-23). Each
+// test gets its own empty ledger, and the clock is frozen so every mint in
+// the file collides: any leak between tests fails every run, not one in N.
+const FROZEN_NOW_MS = 1_790_000_000_000;
+beforeEach(() => {
+  spent.clear();
+  vi.spyOn(Date, "now").mockReturnValue(FROZEN_NOW_MS);
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe("the people commit token", () => {
-  it("accepts exactly the batch the preview showed", () => {
+  it("accepts exactly the batch the preview showed", async () => {
     const p = plan(["Jonas Petraitis", "Ona Kazlauskienė"]);
-    expect(verify(mint(p), p).ok).toBe(true);
+    expect((await verify(mint(p), p)).ok).toBe(true);
   });
 
-  it("REFUSES a replay: once committed, those people are on the roster", () => {
+  it("REFUSES a replay: once committed, those people are on the roster", async () => {
     const previewed = plan(["Jonas Petraitis", "Ona Kazlauskienė"]);
     const token = mint(previewed);
-    expect(verify(token, previewed).ok).toBe(true);
+    expect((await verify(token, previewed)).ok).toBe(true);
 
     // The commit happened: the same file previewed again now matches both
     // people against the roster, so nothing is left to create and the
@@ -73,19 +94,39 @@ describe("the people commit token", () => {
       ["Jonas Petraitis", "Ona Kazlauskienė"],
       ["Jonas Petraitis", "Ona Kazlauskienė"],
     );
-    const replay = verify(token, afterCommit);
+    const replay = await verify(token, afterCommit);
     expect(replay.ok).toBe(false);
     if (!replay.ok) expect(replay.reason).toBeTruthy();
   });
 
-  it("REFUSES a widened batch — an assistant cannot smuggle in an extra person", () => {
+  it("REFUSES a second use of the same token even when nothing has moved yet (one-time spend)", async () => {
+    const p = plan(["Jonas Petraitis"]);
+    const token = mint(p);
+    const [a, b] = await Promise.all([verify(token, p), verify(token, p)]);
+    expect([a.ok, b.ok].filter(Boolean)).toHaveLength(1);
+    expect((await verify(token, p)).ok).toBe(false);
+  });
+
+  it("two previews of one batch in the same millisecond are ONE permit — committing one spends the other", async () => {
+    // Same caller, action, organization, relationship and people at the same
+    // instant is the same authorization of the same transition; a second
+    // commit of it is a double commit, never a fresh one.
+    const p = plan(["Jonas Petraitis"]);
+    const first = mint(p);
+    const second = mint(p);
+    expect(second).toBe(first);
+    expect((await verify(first, p)).ok).toBe(true);
+    expect((await verify(second, p)).ok).toBe(false);
+  });
+
+  it("REFUSES a widened batch — an assistant cannot smuggle in an extra person", async () => {
     const shown = plan(["Jonas Petraitis"]);
     const token = mint(shown);
     const widened = plan(["Jonas Petraitis", "Someone Never Shown"]);
-    expect(verify(token, widened).ok).toBe(false);
+    expect((await verify(token, widened)).ok).toBe(false);
   });
 
-  it("REFUSES a changed relationship — a candidate is not an employee", () => {
+  it("REFUSES a changed relationship — a candidate is not an employee", async () => {
     const p = plan(["Jonas Petraitis"]);
     const token = mint(p, OWNER, "employee");
     // Same people, different claim about what they are to the organization.
@@ -94,22 +135,22 @@ describe("the people commit token", () => {
       roster: [],
       relationship: "candidate",
     });
-    expect(verify(token, asCandidates, OWNER, "candidate").ok).toBe(false);
+    expect((await verify(token, asCandidates, OWNER, "candidate")).ok).toBe(false);
   });
 
-  it("REFUSES another person's token", () => {
+  it("REFUSES another person's token", async () => {
     const p = plan(["Jonas Petraitis"]);
-    expect(verify(mint(p, OWNER), p, SOMEBODY_ELSE).ok).toBe(false);
+    expect((await verify(mint(p, OWNER), p, SOMEBODY_ELSE)).ok).toBe(false);
   });
 
-  it("REFUSES a tampered token", () => {
+  it("REFUSES a tampered token", async () => {
     const p = plan(["Jonas Petraitis"]);
     const token = mint(p);
-    expect(verify(`${token}x`, p).ok).toBe(false);
-    expect(verify(token.slice(0, -1), p).ok).toBe(false);
+    expect((await verify(`${token}x`, p)).ok).toBe(false);
+    expect((await verify(token.slice(0, -1), p)).ok).toBe(false);
   });
 
-  it("carries no personal data — a token in a transcript discloses no names", () => {
+  it("carries no personal data — a token in a transcript discloses no names", async () => {
     const p = plan(["Jonas Petraitis", "Ona Kazlauskienė"]);
     const token = mint(p);
     const fingerprint = peopleReadyFingerprint(p);
@@ -119,7 +160,7 @@ describe("the people commit token", () => {
     }
   });
 
-  it("an unresolved plan has nothing to commit, so its fingerprint is empty", () => {
+  it("an unresolved plan has nothing to commit, so its fingerprint is empty", async () => {
     // Two roster people share a name: the batch is ambiguous, `peopleToCreate`
     // is empty, and no commit permit can describe a real write.
     const ambiguous = planPeopleIngest({

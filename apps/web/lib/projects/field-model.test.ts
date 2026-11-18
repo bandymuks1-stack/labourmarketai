@@ -48,6 +48,7 @@ function worker(p: Partial<WorkerOps> & { workerId: string }): WorkerOps {
     operationalStatus: null,
     readinessItems: [],
     docsMissing: 0,
+    docsToAgree: 0,
     docsReceived: 0,
     docsChecked: 0,
     docsBlocked: 0,
@@ -59,6 +60,8 @@ function task(p: Partial<WorkTask> & { id: string }): WorkTask {
   return {
     projectId: "p1",
     objectId: null,
+    stageId: null,
+    parentTaskId: null,
     title: p.id,
     description: null,
     status: "todo",

@@ -1,0 +1,130 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  buildCompanyWorkHistory,
+  peopleInRecords,
+  placeKeyOf,
+  topWorkDescriptions,
+  type PlaceObjectFacts,
+} from "./company-work-history";
+import type { EvidenceRecordView } from "./import-core";
+
+// SYNTHETIC records only — people "Person A/B", places "Place 1/2".
+function rec(over: Partial<EvidenceRecordView> & { id: string }): EvidenceRecordView {
+  return {
+    personId: "pA",
+    personName: "Person A",
+    activityKind: "work",
+    activityDate: "2025-06-02",
+    periodStart: null,
+    periodEnd: null,
+    hours: 8,
+    text: "Work described",
+    language: "nl",
+    contextLabel: null,
+    workObjectId: null,
+    supplierRole: "employer",
+    sourceKind: "xlsx",
+    sourceFilename: null,
+    importedAt: "2026-01-01T00:00:00Z",
+    importedBy: null,
+    factFields: [],
+    derived: {},
+    state: "ORGANIZATION_REPORTED",
+    withdrawn: false,
+    attestation: null,
+    independentlyVerified: false,
+    disputedByViewer: false,
+    ...over,
+  } as EvidenceRecordView;
+}
+
+const objects: PlaceObjectFacts[] = [
+  { id: "o1", name: "Place 1", addressLine: null, city: null, projectId: null, archived: false },
+  { id: "o2", name: "Place 2", addressLine: "Street 1", city: "Town", projectId: "p1", archived: false },
+];
+
+describe("buildCompanyWorkHistory", () => {
+  it("places a record by object, else by its own label, else nowhere", () => {
+    expect(placeKeyOf({ workObjectId: "o1", contextLabel: "x" })).toBe("o:o1");
+    expect(placeKeyOf({ workObjectId: null, contextLabel: " Lbl " })).toBe("l:Lbl");
+    expect(placeKeyOf({ workObjectId: null, contextLabel: null })).toBe("none");
+  });
+
+  it("folds records by place, conserves every hour and keeps period totals apart", () => {
+    const h = buildCompanyWorkHistory(
+      [
+        rec({ id: "1", workObjectId: "o1", hours: 8 }),
+        rec({ id: "2", workObjectId: "o1", hours: 6.5, personId: "pB", personName: "Person B", activityDate: "2025-06-09" }),
+        rec({ id: "3", workObjectId: "o2", hours: 4 }),
+        rec({ id: "4", contextLabel: "Place 3", hours: 5 }),
+        rec({ id: "5", hours: 2 }),
+        rec({ id: "6", activityDate: null, periodStart: "2025-06-01", periodEnd: "2025-11-30", hours: 800, contextLabel: "Place 3" }),
+      ],
+      objects,
+    );
+    expect(h.totalRecords).toBe(6);
+    // F3: the 800 h period aggregate is NEVER summed into day hours.
+    expect(h.dayHours).toBe(25.5);
+    expect(h.periodHours).toBe(800);
+    expect(h.peopleCount).toBe(2);
+    expect(h.byPlacement).toEqual({ object: 3, label: 2, none: 1 });
+    const p1 = h.places.find((p) => p.key === "o:o1")!;
+    expect(p1.name).toBe("Place 1");
+    expect(p1.dayHours).toBe(14.5);
+    expect(p1.people.map((p) => p.name)).toEqual(["Person A", "Person B"]);
+    // per-person: day and period hours are separate figures, never one sum
+    const a = h.places.find((p) => p.key === "l:Place 3")!;
+    expect(a.people.map((p) => [p.dayHours, p.periodHours])).toEqual([[5, 800]]);
+    expect(p1.firstDate).toBe("2025-06-02");
+    expect(p1.lastDate).toBe("2025-06-09");
+    const l3 = h.places.find((p) => p.key === "l:Place 3")!;
+    expect(l3.periodHours).toBe(800);
+    expect(l3.dayHours).toBe(5);
+    // "no place stated" is always last
+    expect(h.places[h.places.length - 1]!.kind).toBe("none");
+    // sum of place hours === total (nothing lost, nothing double counted)
+    expect(h.places.reduce((s, p) => s + p.dayHours, 0)).toBe(h.dayHours);
+    expect(h.places.reduce((s, p) => s + p.periodHours, 0)).toBe(h.periodHours);
+  });
+
+  it("reports customer/address/project as absent unless the data carries them", () => {
+    const h = buildCompanyWorkHistory(
+      [rec({ id: "1", workObjectId: "o1" }), rec({ id: "2", workObjectId: "o2" })],
+      objects,
+    );
+    expect(h.places.find((p) => p.key === "o:o1")!.scope).toEqual({ hasProject: false, hasAddress: false, addressText: null, projectId: null });
+    expect(h.places.find((p) => p.key === "o:o2")!.scope).toEqual({ hasProject: true, hasAddress: true, addressText: "Street 1, Town", projectId: "p1" });
+  });
+
+  it("never counts a withdrawn record", () => {
+    const h = buildCompanyWorkHistory(
+      [rec({ id: "1", workObjectId: "o1" }), rec({ id: "2", workObjectId: "o1", withdrawn: true, hours: 99 })],
+      objects,
+    );
+    expect(h.dayHours).toBe(8);
+  });
+});
+
+describe("people in a project's records (project → historical person)", () => {
+  it("who, when, recorded days and day hours per person; period hours apart; withdrawn left out", () => {
+    const people = peopleInRecords([
+      rec({ id: "1", activityDate: "2023-03-06", hours: 8, text: "Tiling" }),
+      rec({ id: "2", activityDate: "2023-03-06", hours: 2, text: "tiling " }),
+      rec({ id: "3", activityDate: "2023-03-09", hours: 7.5, text: "Grouting" }),
+      rec({ id: "4", personId: "pB", personName: "Person B", activityDate: null, periodStart: "2023-03-01", periodEnd: "2023-03-31", hours: 120 }),
+      rec({ id: "5", activityDate: "2023-04-01", hours: 8, withdrawn: true }),
+    ]);
+    expect(people.map((p) => p.personId)).toEqual(["pA", "pB"]);
+    expect(people[0]).toMatchObject({ firstDate: "2023-03-06", lastDate: "2023-03-09", recordedDays: 2, dayHours: 17.5, periodHours: 0, records: 3 });
+    expect(people[0]!.work[0]).toEqual({ text: "Tiling", records: 2 });
+    expect(people[1]).toMatchObject({ recordedDays: 0, dayHours: 0, periodHours: 120 });
+  });
+
+  it("work descriptions are the organization's own words, most frequent first, never classified", () => {
+    expect(topWorkDescriptions([{ text: "A  b" }, { text: "a b" }, { text: "C" }, { text: "" }], 3)).toEqual([
+      { text: "A b", records: 2 },
+      { text: "C", records: 1 },
+    ]);
+  });
+});

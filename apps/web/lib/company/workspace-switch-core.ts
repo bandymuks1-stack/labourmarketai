@@ -3,7 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { listWorkspaceMemberships } from "@/lib/company/active-organization";
-import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+import { PERSONAL_WORKSPACE_ID, type WorkspaceInfo } from "@/lib/company/organization-switch";
 import type { DomainCaller } from "@/lib/domain/caller";
 
 /**
@@ -39,20 +39,35 @@ function asAny(supabase: SupabaseClient): any {
 }
 
 export type WorkspaceSwitchCoreResult =
-  | { ok: true; workspaceId: string }
-  | { ok: false; code: "not-member" | "needs-migration" | "error" };
+  | {
+      ok: true;
+      workspaceId: string;
+      /** The membership row the switch was validated against (null for the
+       *  personal workspace) — so a caller that follows the acting identity
+       *  reads the VERIFIED relationship, never a second list or a client
+       *  claim. */
+      workspace: WorkspaceInfo | null;
+    }
+  | {
+      ok: false;
+      code: "not-member" | "needs-migration" | "error";
+      /** Present on `needs-migration` only: membership WAS validated, only the
+       *  durable column is absent — a session transport may still switch. */
+      workspace?: WorkspaceInfo | null;
+    };
 
 export async function switchActiveWorkspaceCore(
   caller: DomainCaller,
   workspaceId: string,
 ): Promise<WorkspaceSwitchCoreResult> {
+  let workspace: WorkspaceInfo | null = null;
   if (workspaceId !== PERSONAL_WORKSPACE_ID) {
     // A foreign workspace id never reaches the DB write — the membership
     // list is the caller's own (RLS-scoped reads underneath).
     const memberships = await listWorkspaceMemberships(caller);
-    const isMember = memberships.some(
-      (w) => w.kind === "organization" && w.id === workspaceId,
-    );
+    workspace =
+      memberships.find((w) => w.kind === "organization" && w.id === workspaceId) ?? null;
+    const isMember = workspace !== null;
     if (!isMember) return { ok: false, code: "not-member" };
   }
 
@@ -62,7 +77,7 @@ export async function switchActiveWorkspaceCore(
     .update({ active_organization_id: target })
     .eq("id", caller.userId);
   if (error) {
-    if (isAbsentColumn(error.code)) return { ok: false, code: "needs-migration" };
+    if (isAbsentColumn(error.code)) return { ok: false, code: "needs-migration", workspace };
     if (error.code === NOT_MEMBER_CODE) {
       // The DB trigger disagrees with the app-level check — trust the DB.
       return { ok: false, code: "not-member" };
@@ -73,5 +88,5 @@ export async function switchActiveWorkspaceCore(
     });
     return { ok: false, code: "error" };
   }
-  return { ok: true, workspaceId };
+  return { ok: true, workspaceId, workspace };
 }

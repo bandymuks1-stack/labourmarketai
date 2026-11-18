@@ -38,6 +38,7 @@ describe("toScoutSafeCandidate — anonymized + profile-safe", () => {
     match: fakeMatch,
     shortlistStatus: null,
     lastActiveBucket: "active",
+    actionability: { kind: "actionable" },
   });
 
   it("exposes only the profile-safe preview (no name/contact/private key)", () => {
@@ -66,7 +67,10 @@ describe("toScoutSafeCandidate — anonymized + profile-safe", () => {
   });
 
   it("passes the deterministic match through untouched", () => {
-    expect(c.match).toBe(fakeMatch);
+    // Fit is untouched; readiness rides beside it as a sibling block.
+    const { readiness, ...fit } = c.match;
+    expect(fit).toEqual(fakeMatch);
+    expect(readiness).toBeDefined();
   });
 
   it("carries the honest freshness bucket (non-PII) through", () => {
@@ -83,6 +87,7 @@ describe("communication/booking eligibility (rule 6)", () => {
       match: fakeMatch,
       shortlistStatus: null,
     lastActiveBucket: "active",
+    actionability: { kind: "actionable" },
     });
     expect(c.canContact).toBe(true);
   });
@@ -95,6 +100,7 @@ describe("communication/booking eligibility (rule 6)", () => {
       match: fakeMatch,
       shortlistStatus: null,
     lastActiveBucket: "active",
+    actionability: { kind: "actionable" },
     });
     expect(c.canContact).toBe(true);
   });
@@ -107,6 +113,7 @@ describe("communication/booking eligibility (rule 6)", () => {
       match: fakeMatch,
       shortlistStatus: null,
     lastActiveBucket: "active",
+    actionability: { kind: "actionable" },
     });
     expect(c.canContact).toBe(false);
   });

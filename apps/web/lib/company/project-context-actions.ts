@@ -6,8 +6,9 @@ import {
   isEmployerContextFailure,
   requireEmployerCompany,
 } from "@/lib/company/employer-company-context";
-import { insertProjectForCompany } from "@/lib/projects/create-project-core";
+import { insertProjectForCompany, rollbackCreatedProject } from "@/lib/projects/create-project-core";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * First safe company-side project/client CREATE flow (v1).
@@ -30,8 +31,24 @@ import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
  */
 
 export type CreateProjectContextState =
-  | { ok: true }
-  | { ok: false; code: "no_company" | "invalid_name" | "error"; message?: string };
+  | {
+      ok: true;
+      /** Persistence honesty (G-7): the PROJECT exists, but the optional
+       *  client row could not be saved and the project could not be rolled
+       *  back. Success is reported, the gap is named, and the form never
+       *  offers a blind retry (which would create a duplicate project). */
+      warning?: "client_not_saved";
+    }
+  | {
+      ok: false;
+      /** `not_authorized` = the organization is real and the person is in it,
+       *  but creating projects is not theirs to do here — refused by the
+       *  capability matrix (a member) or by the row-level policy (a manager,
+       *  42501: `projects_insert` is still `owns_company`, owner/admin only).
+       *  Named, so the form can say who can grant it (SEP-7). */
+      code: "no_company" | "not_authorized" | "invalid_name" | "error";
+      message?: string;
+    };
 
 const NAME_MIN = 2;
 const NAME_MAX = 120;
@@ -41,6 +58,7 @@ export async function createProjectContextAction(
   _prev: CreateProjectContextState | null,
   formData: FormData,
 ): Promise<CreateProjectContextState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = String(formData.get("locale") ?? "lt");
   const name = String(formData.get("name") ?? "").trim();
   const location = String(formData.get("location") ?? "").trim().slice(0, FIELD_MAX) || null;
@@ -63,9 +81,11 @@ export async function createProjectContextAction(
       ? { ok: false, code: "error" }
       : { ok: false, code: "no_company" };
   }
-  // §11 capability matrix: project creation is operational governance.
+  // §11 capability matrix: project creation is operational governance. A
+  // member IS in a company workspace — the refusal is about their role, not
+  // a missing company, so it is named as such.
   if (!hasOrganizationCapability(company.role, "manage-projects")) {
-    return { ok: false, code: "no_company" };
+    return { ok: false, code: "not_authorized" };
   }
 
   const supabase = await createClient();
@@ -78,14 +98,28 @@ export async function createProjectContextAction(
   });
   if (!created.ok) {
     if (created.reason === "invalid_title") return { ok: false, code: "invalid_name" };
+    // 42501: the row-level policy refused the insert. `projects_insert` is
+    // `owns_company(company_id)` — the creator or an active owner/admin
+    // membership — so a MANAGER the matrix lets create projects is refused
+    // by the database until the owner widens the policy
+    // (`manages_organization`). The reason surfaces as itself, never as a
+    // generic "could not create" (capability matrix P1, 2026-09-23).
+    if (created.code === "42501") return { ok: false, code: "not_authorized" };
     return { ok: false, code: "error", message: created.message };
   }
   const project = { id: created.id };
 
   // Optional client record, linked to the just-created project. project_clients
   // is not in the generated Database type yet — cast (RLS still enforces
-  // can_manage_project). Best-effort: a client failure does not roll back the
-  // project; the owner can add a client later. No fake fallback row is written.
+  // can_manage_project). G-7 (persistence honesty): the project row is already
+  // committed when this runs, so a client failure must NEVER end as a plain
+  // `ok:false` — a retry would then create a DUPLICATE project. Either:
+  //   (a) the project, created seconds ago by THIS call and still empty, is
+  //       rolled back (compensating delete, verified by the returned row) and
+  //       the failure is reported — nothing persisted, retry is safe; or
+  //   (b) it cannot be removed (RLS / FK) — then success is reported WITH a
+  //       named warning (the project is real; the client is not) so the form
+  //       shows no retry. No fake fallback row is written either way.
   if (clientName) {
     const { error: clientError } = await (supabase as unknown as {
       from: (t: string) => {
@@ -95,9 +129,12 @@ export async function createProjectContextAction(
       .from("project_clients")
       .insert({ project_id: project.id, name: clientName });
     if (clientError) {
-      // Surface honestly but keep the created project; no silent fabrication.
+      const rolledBack = await rollbackCreatedProject(supabase, project.id);
       revalidatePath(`/${locale}/dashboard/company`);
-      return { ok: false, code: "error", message: clientError.message };
+      if (rolledBack) {
+        return { ok: false, code: "error", message: clientError.message };
+      }
+      return { ok: true, warning: "client_not_saved" };
     }
   }
 

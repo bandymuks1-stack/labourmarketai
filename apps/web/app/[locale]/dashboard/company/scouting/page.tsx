@@ -1,10 +1,16 @@
+import { countryDisplayName } from "@/lib/location/country-model";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { EmployerContextNotice } from "@/components/app/employer-context-notice";
-import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/scouting/scouting";
+import {
+  listCompanyDemands,
+  runScouting,
+  type ScoutSafeCandidate,
+  type ShortlistStatus,
+} from "@/lib/scouting/scouting";
 import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
 import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
@@ -12,20 +18,44 @@ import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibilit
 // Real two-subject bridge (issue #859): candidates a connected agency proposed
 // for THIS demand (which the client owns) — reviewed with the SAME canonical
 // controls below, keyed on (requestId, workerId).
-import { listOfferedCandidatesForRequest } from "@/lib/agency/bridge-read";
+import {
+  countOpenCandidateOffersByRequest,
+  listOfferedCandidatesForRequest,
+  readOfferBookingStatuses,
+} from "@/lib/agency/bridge-read";
+import { mostOfferedOpenRequest } from "@/lib/agency/bridge-model";
+import { TeamOffersReceived } from "@/components/app/team-offers-received";
+import { loadTeamOffersForDemand, countOpenTeamOffersByDemand } from "@/lib/company/team-offer";
+import { listManagedProjects } from "@/lib/projects/projects";
 import {
   hasActiveScoutFilters,
   parseScoutFilterParams,
   type ScoutFilters,
 } from "@/lib/scouting/scout-filters";
-import { getScoutingContactRequestStates } from "@/lib/privacy/contact-disclosure-actions";
+import {
+  getScoutingContactRequestStates,
+  type ScoutingContactRequestStates,
+} from "@/lib/privacy/contact-disclosure-actions";
 import { RequestContactDetailsButton } from "@/components/app/request-contact-details-button";
+import {
+  IdentityDisclosure,
+  PersonIdentityCard,
+  type IdentityMeta,
+} from "@/components/app/identity/person-identity-card";
+import { getApplicantIdentity, type ApplicantIdentity } from "@/lib/scouting/applicant-identity";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
 import { CompanyInterestAck } from "@/components/app/company-interest-ack";
 import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-controls";
+import { JourneyStrip } from "@/components/app/journey-strip";
+import { buildDemandJourney } from "@/lib/demand/demand-journey-model";
 import { FeatureNote } from "@/components/app/feature-note";
+import { AutoMatchReceiptNote } from "@/components/app/auto-match-receipt-note";
+import { readLastAutoMatchReceipt } from "@/lib/scouting/auto-match";
+import { createClient as createSupabaseServerClient } from "@/lib/supabase/server";
 import { AvailableSupplySection } from "@/components/app/available-supply-section";
 import { listAvailableSupplyForEmployer } from "@/lib/supply/employer-supply-discovery";
+import { isShortlistedForContact } from "@/lib/communication/communication-eligibility";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { OfferDecisionButtons } from "@/components/app/offer-decision-buttons";
@@ -38,6 +68,22 @@ import {
   type CandidatePipelineStage,
 } from "@/lib/pipeline/candidate-pipeline";
 import { loadDemandPipelineFacts } from "@/lib/pipeline/candidate-pipeline-facts";
+import { loadDemandHistory } from "@/lib/demand/demand-history-facts";
+import { DemandHistoryList } from "@/components/app/demand-history-list";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { Card } from "@/components/ui/Card";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/scouting", "scouting.title");
+
+
+/** A worker's own standing interest in this need — the signal the interest
+ *  card's in-app contact action is server-gated on. */
+function hasStandingInterest(status: string | null | undefined): boolean {
+  return status === "interested" || status === "reviewed" || status === "contacted";
+}
 
 const READINESS_TONE: Record<CompanyCandidateLabel, string> = {
   can_be_considered: "border-state-success/40 bg-state-success/10 text-state-success",
@@ -110,9 +156,7 @@ export default async function CompanyScoutingPage({
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-6">
         <header className="flex flex-col gap-1">
-          <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-            {t("title")}
-          </h1>
+          <PageTitle>{t("title")}</PageTitle>
           <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
         </header>
         <EmployerContextNotice
@@ -154,20 +198,139 @@ export default async function CompanyScoutingPage({
    * stays deterministic. When nothing is waiting — or the owner-gated table is
    * absent, which returns an empty map — the previous rule applies unchanged.
    */
+  // A brigade / team that OFFERED ITSELF waits for this company's own answer
+  // first — an organization's offer outranks a worker's interest signal.
+  // An agency's offered candidate waits the same way. The bell's link carries
+  // no `?request=` (its href is per signal type), so without this the page
+  // opened whichever need the rules below picked and the offer the bell
+  // announced was nowhere on it.
+  const [teamOffersWaiting, agencyOffersWaiting] = await Promise.all([
+    countOpenTeamOffersByDemand(demands.map((d) => d.id)),
+    countOpenCandidateOffersByRequest(employerContext.companyId),
+  ]);
+  const mostAgencyOffered = mostOfferedOpenRequest(
+    agencyOffersWaiting,
+    demands.filter((d) => d.status !== "closed").map((d) => d.id),
+  );
+  const mostTeamOffered = [...teamOffersWaiting.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0];
   const mostAwaited = [...pendingInterest.entries()]
     .filter(([id]) => demands.some((d) => d.id === id))
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0];
   const selected =
     request ??
+    mostTeamOffered ??
+    mostAgencyOffered ??
     mostAwaited ??
     demands.find((d) => d.structured)?.id ??
     demands[0]?.id ??
     null;
-  const result = selected ? await runScouting(selected, requestedFilters) : null;
-  // Agency-proposed candidates for THIS demand (the caller owns it; the RPC
-  // returns rows only to the request owner). Empty until the owner-gated bridge
-  // migration is applied.
-  const offeredCandidates = selected ? await listOfferedCandidatesForRequest(selected) : [];
+  // READ STAGES, NOT ONE AWAIT PER READ. Every read below depends either on
+  // the selected need alone or on the scouting result, so each group runs as
+  // one batch. Before, up to nine reads ran one after another, so the
+  // employer's "who fits this need" page waited for the sum of their round
+  // trips; now it waits for the slowest read of each of two stages (three
+  // when an accepted team offer needs the project list). Guarded by
+  // lib/guards/scouting-read-stages.test.ts.
+  //
+  // Stage 1 — needs only the selected need.
+  const [result, offeredCandidates, contactRequests] = await Promise.all([
+    selected ? runScouting(selected, requestedFilters) : null,
+    // Agency-proposed candidates for THIS demand (the caller owns it; the RPC
+    // returns rows only to the request owner). Empty until the owner-gated
+    // bridge migration is applied.
+    selected ? listOfferedCandidatesForRequest(selected) : [],
+    // Contact-detail ask states for THIS demand (Wagon 1) — owner-scoped read;
+    // applied:false while the draft-gated model is not applied (honest note,
+    // no dead button).
+    selected
+      ? getScoutingContactRequestStates(selected)
+      : Promise.resolve<ScoutingContactRequestStates>({ applied: false, byWorker: {} }),
+  ]);
+  // An AGENCY working on a need its client SHARED (owner decision 2026-09-28
+  // B): it may read the need and see who fits, and it presents candidates from
+  // its OWN roster (partners page). The client-owner actions — contact,
+  // booking, contact-detail ask, shortlist, interest acknowledgement — are
+  // refused server-side for it, so they are not offered here either.
+  const actsForClient =
+    (result?.kind === "ok" || result?.kind === "not-structured") &&
+    !demands.some((d) => d.id === result.demand.id);
+  // HAND-RAISERS ON A NEED THAT NAMES NO TRADE (owner decision 2026-10-22):
+  // shown now, never matched. The scouting core already applied the SAME
+  // visibility, fixture and actionability gates as for scouted candidates.
+  const handRaisers = result?.kind === "not-structured" ? result.handRaisers : [];
+  // A need that is not closed takes decisions; a closed one shows history.
+  const needOpen = result?.kind === "ok" ? result.demand.status !== "closed" : true;
+  // WHO APPLIED (owner order 2026-10-01): for a worker whose application is
+  // on THIS employer's own need, the database (applicant_identity_v1, owner of
+  // the demand + application not withdrawn) may release the name and photo.
+  // Absent function / no standing / agency acting for a client -> null and the
+  // anonymized handle stays. Nothing is guessed.
+  const applied =
+    result?.kind === "ok" && !actsForClient
+      ? result.candidates.filter((c) => {
+          const st = result.interestByWorker[c.workerId];
+          return st === "interested" || st === "reviewed" || st === "contacted";
+        })
+      : !actsForClient
+        ? handRaisers.filter(
+            (h) =>
+              h.interestStatus === "interested" ||
+              h.interestStatus === "reviewed" ||
+              h.interestStatus === "contacted",
+          )
+        : [];
+  // Stage 2 — needs the scouting result (or the stage-1 offers).
+  const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts, demandHistory] =
+    await Promise.all([
+      selected && result?.kind === "ok"
+        ? createSupabaseServerClient().then((client) => readLastAutoMatchReceipt(client, selected))
+        : null,
+      // E6 - brigades that offered THEMSELVES as one unit against this need. Team-level
+      // aggregates only (the database never returns a member), matched against the SAME
+      // need the candidates were judged against. An agency acting for a client does not
+      // answer for it, so the section is the owner's.
+      selected && !actsForClient
+        ? loadTeamOffersForDemand(selected, result?.kind === "ok" ? (result.need ?? null) : null)
+        : null,
+      result?.kind === "ok" || result?.kind === "not-structured"
+        ? Promise.all(
+            applied.map(async (c) => [c.workerId, await getApplicantIdentity(result.demand.id, c.workerId)] as const),
+          )
+        : [],
+      // The worker's own answer to each booking an accepted offer proposed.
+      readOfferBookingStatuses(
+        offeredCandidates.map((oc) => oc.bookingId).filter((id): id is string => Boolean(id)),
+      ),
+      // The two pipeline facts the scouting result does not already carry:
+      // booking status per pair + direct-conversation existence (both real,
+      // RLS-scoped reads; absent tables degrade to empty facts — see the
+      // candidate-pipeline-facts limitation note).
+      result?.kind === "ok" && result.candidates.length > 0
+        ? loadDemandPipelineFacts(
+            result.demand.id,
+            result.candidates.map((c) => c.workerId),
+          )
+        : result?.kind === "not-structured" && handRaisers.length > 0
+          ? loadDemandPipelineFacts(
+              result.demand.id,
+              handRaisers.map((h) => h.workerId),
+            )
+          : null,
+      // The need's history (4.30): its creation, the owner's proposals and their
+      // answers with actor and time, and how it ended. Owner only.
+      result?.kind === "ok" && !actsForClient ? loadDemandHistory(result.demand.id) : null,
+    ]);
+  const applicantIdentity = new Map<string, ApplicantIdentity>();
+  for (const [id, who] of appliedIdentities) if (who) applicantIdentity.set(id, who);
+  // Stage 3 — projects load only when a team offer is accepted and waiting for
+  // its assignment.
+  const teamOfferProjects =
+    teamOffers && teamOffers.offers.some((o) => o.offer.status === "accepted")
+      ? (await listManagedProjects())
+          .filter((p) => p.status !== "completed")
+          .map((p) => ({ id: p.id, title: p.title }))
+      : [];
   // ONE source of truth for the synthetic-title labels — the same catalogue
   // node the company hub and the buyer surface already read.
   const tDemandReadback = await getTranslations("demandReadback");
@@ -176,13 +339,6 @@ export default async function CompanyScoutingPage({
     agencyPartnership: tDemandReadback("syntheticTitle.agencyPartnership"),
   };
   const tOffered = await getTranslations("scoutingAgencyOffers");
-
-  // Contact-detail ask states for THIS demand (Wagon 1) — owner-scoped read;
-  // applied:false while the draft-gated model is not applied (honest note,
-  // no dead button).
-  const contactRequests = selected
-    ? await getScoutingContactRequestStates(selected)
-    : { applied: false as const, byWorker: {} };
 
   // Shareable filter links: preserve the selected demand, toggle one facet.
   const filterHref = (next: Partial<ScoutFilters>): string => {
@@ -195,18 +351,6 @@ export default async function CompanyScoutingPage({
     if (merged.availableNow) params.set("available", "1");
     return `/${locale}/dashboard/company/scouting?${params.toString()}`;
   };
-
-  // The two pipeline facts the scouting result does not already carry:
-  // booking status per pair + direct-conversation existence (both real,
-  // RLS-scoped reads; absent tables degrade to empty facts — see the
-  // candidate-pipeline-facts limitation note).
-  const pipelineFacts =
-    result?.kind === "ok" && result.candidates.length > 0
-      ? await loadDemandPipelineFacts(
-          result.demand.id,
-          result.candidates.map((c) => c.workerId),
-        )
-      : null;
 
   // W10 slice 3: "we did not compare everyone" is true when the pool budget
   // bound OR when a Stage-1 id read was truncated. Either way the employer is
@@ -233,6 +377,32 @@ export default async function CompanyScoutingPage({
     not_fit: t("shortlist.not_fit"),
     reviewed: t("shortlist.reviewed"),
   };
+  const tProfession = await getTranslations("professions");
+  const professionName = (slug: string): string =>
+    tProfession.has(slug as never) ? tProfession(slug as never) : slug;
+  /** Layer-1 facts of the identity: place, mobility, availability. */
+  const identityMeta = (c: Pick<ScoutSafeCandidate, "preview">): IdentityMeta[] => {
+    const p = c.preview;
+    const meta: IdentityMeta[] = [];
+    if (p.location) meta.push({ key: "loc", kind: "location", label: p.location });
+    const openTo = p.preferredCountries.filter((cc) => cc !== p.location);
+    if (openTo.length > 0) {
+      meta.push({
+        key: "mob",
+        kind: "mobility",
+        label: t("identity.openTo", { countries: openTo.join(", ") }),
+      });
+    }
+    meta.push({
+      key: "avail",
+      kind: "availability",
+      label: p.availableFrom
+        ? `${availabilityLabel(p.availability)} \u00b7 ${p.availableFrom}`
+        : availabilityLabel(p.availability),
+      live: p.availability === "available",
+    });
+    return meta;
+  };
   const reason = (code: string): string =>
     t.has(`reason.${code}`) ? t(`reason.${code}`) : code;
   const gap = (code: string): string => (t.has(`gap.${code}`) ? t(`gap.${code}`) : code);
@@ -244,9 +414,7 @@ export default async function CompanyScoutingPage({
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
       </header>
 
@@ -344,6 +512,15 @@ export default async function CompanyScoutingPage({
                   the hands were — the count is a real row count from
                   demand_interest_signals (status `interested` only), never an
                   estimate, and the chip simply does not render at zero. */}
+              {(teamOffersWaiting.get(d.id) ?? 0) > 0 ? (
+                <span
+                  className="ml-1.5 rounded-full bg-brand-blue/15 px-1.5 font-mono text-meta text-brand-blue"
+                  data-testid={`scouting-demand-team-offers-${d.id}`}
+                  title={t("teamOffersWaiting", { count: teamOffersWaiting.get(d.id) ?? 0 })}
+                >
+                  {teamOffersWaiting.get(d.id)}
+                </span>
+              ) : null}
               {(pendingInterest.get(d.id) ?? 0) > 0 ? (
                 <span
                   className="ml-1.5 rounded-full bg-state-success/15 px-1.5 font-mono text-meta text-state-success"
@@ -368,6 +545,13 @@ export default async function CompanyScoutingPage({
           that far". Retrieval is now planned from this demand, and how far it
           reached is stated either way — how many workers were compared, and
           whether the pool bound was hit. */}
+      {/* A need a CLIENT shared with this agency (owner decision 2026-09-28
+          B) is not in the agency's own list above — name it here. */}
+      {result?.kind === "ok" && !demands.some((d) => d.id === result.demand.id) ? (
+        <p className="text-sm font-semibold text-text-primary" data-testid="scouting-shared-need">
+          {t("sharedNeed", { title: result.demand.title })}
+        </p>
+      ) : null}
       {result?.kind === "ok" ? (
         <p
           className={
@@ -380,6 +564,26 @@ export default async function CompanyScoutingPage({
           {poolIncomplete
             ? t("pool.capped", { count: result.retrieval.poolSize })
             : t("pool.complete", { count: result.retrieval.poolSize })}
+        </p>
+      ) : null}
+
+      {result?.kind === "ok" ? (
+        <AutoMatchReceiptNote receipt={autoMatchReceipt} locale={locale} />
+      ) : null}
+
+      {/* Before any offer or booking for this need: the mutual, neutral
+          pre-agreement recommendation (decision 0021 extension, 2026-10-24) —
+          advice to both sides, never a filter on the candidates below. */}
+      {result?.kind === "ok" ? (
+        <CollaborationChecksNote context={{ dealKind: "work_engagement" }} testId="scouting-collaboration-checks" />
+      ) : null}
+
+      {result?.kind === "ok" && result.retrieval.historySignalsUnavailable ? (
+        <p
+          className="rounded-md border border-border-subtle bg-surface-1/50 px-4 py-3 text-xs leading-relaxed text-text-secondary"
+          data-testid="scouting-history-unavailable"
+        >
+          {t("pool.historyUnavailable")}
         </p>
       ) : null}
 
@@ -432,7 +636,7 @@ export default async function CompanyScoutingPage({
                     : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
                 }`}
               >
-                {cc}
+                {countryDisplayName(cc, locale)}
               </Link>
             ))}
             {result.facets.skills.map((s) => (
@@ -481,6 +685,47 @@ export default async function CompanyScoutingPage({
         </p>
       ) : null}
 
+      {/* THE NEED'S JOURNEY (premium company view, 2026-09-29): how many of
+          the compared people reached each step, from the SAME canonical
+          stage each card below derives. Owner only — an agency acting for a
+          client never sees the client's shortlist or contacts. */}
+      {result?.kind === "ok" && !actsForClient ? (
+        <section
+          className="flex flex-col gap-3 rounded-xl border border-border-subtle bg-surface-1/50 p-4"
+          data-testid="demand-journey"
+        >
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("journey.title")}
+          </span>
+          <JourneyStrip
+            ariaLabel={t("journey.title")}
+            testid="demand-journey-strip"
+            steps={buildDemandJourney({
+              demandStatus: result.demand.status,
+              stages: result.candidates.map((c) => ({
+                workerId: c.workerId,
+                stage: deriveCandidatePipelineStage({
+                  shortlistStatus: c.shortlistStatus,
+                  interestStatus: result.interestByWorker[c.workerId] ?? null,
+                  bookingStatus: pipelineFacts?.bookingByWorker.get(c.workerId) ?? null,
+                  conversationExists: pipelineFacts?.conversationByWorker.has(c.workerId) ?? false,
+                }),
+              })),
+              agencyOffers: offeredCandidates.map((oc) => ({
+                workerId: oc.workerId,
+                bookingStatus: oc.bookingId ? (offerBookingStatus.get(oc.bookingId) ?? "proposed") : null,
+              })),
+            }).map((s) => ({
+              key: s.key,
+              label: t(`journey.step.${s.key}`),
+              detail: s.count === null ? null : String(s.count),
+              state: s.state,
+              testid: `demand-journey-step-${s.key}`,
+            }))}
+          />
+        </section>
+      ) : null}
+
       {/* Demand lifecycle (PR10): confirm recognized skills (§19 human act)
           + close/reopen. Closing hides the demand from the worker board
           instantly (its RPC serves submitted only) — honest visibility,
@@ -508,6 +753,31 @@ export default async function CompanyScoutingPage({
         />
       ) : null}
 
+      {/* THE NEED'S HISTORY (4.30): what was proposed, who answered and when,
+          and how the need ended. Owner only, from facts the owner can read. */}
+      {result?.kind === "ok" && demandHistory ? (
+        <DemandHistoryList
+          history={demandHistory}
+          nameFor={(workerId) =>
+            applicantIdentity.get(workerId)?.name ??
+            `${t("candidate")} ${anonymizedToken(anonymizedWorkerLabel(workerId))}`
+          }
+        />
+      ) : null}
+
+      {/* LIFECYCLE (owner P0 2026-09-22 §12): on a CLOSED need the candidate
+          list is HISTORY — who was compared and what was decided — never an
+          actionable shortlist. The controls below are gated on `needOpen`
+          and the write itself refuses (`setShortlist` → `closed`). */}
+      {result?.kind === "ok" && result.demand.status === "closed" ? (
+        <p
+          className="rounded-md border border-ink-500 bg-ink-800/60 px-4 py-3 text-sm text-text-secondary"
+          data-testid="scouting-closed-history"
+        >
+          {t("lifecycle.closedCandidatesHistory")}
+        </p>
+      ) : null}
+
       {/* Results */}
       {result?.kind === "not-structured" ? (
         <p
@@ -516,6 +786,267 @@ export default async function CompanyScoutingPage({
         >
           {t("notStructured")}
         </p>
+      ) : null}
+      {/* PEOPLE WHO RAISED A HAND on a need that names no trade (owner
+          decision 2026-10-22). Shown NOW, beside the explanation above, and
+          labelled: the trade match was NOT assessed, so there is no status,
+          no skill count, no verdict, no readiness and no order of merit here
+          - only what the person stated about themselves. The employer's own
+          actions (shortlist, conversation, dates, contact-detail ask,
+          acknowledgement) are the same canonical controls, re-checked
+          server-side; none of them depends on a match. */}
+      {result?.kind === "not-structured" && handRaisers.length > 0 ? (
+        <section
+          className="flex flex-col gap-3"
+          data-testid="scouting-hand-raisers-unassessed"
+          data-match-assessed="false"
+        >
+          <header className="flex flex-col gap-1.5">
+            <h2 className="font-display text-base font-semibold text-text-primary">
+              {t("handRaisers.title")}
+            </h2>
+            <p
+              className="rounded-md border border-state-amber/40 bg-state-amber/10 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+              data-testid="scouting-hand-raisers-not-assessed-note"
+            >
+              {t("handRaisers.notAssessed")}
+            </p>
+          </header>
+          <ul className="flex flex-col gap-3">
+            {handRaisers.map((h) => {
+              const p = h.preview;
+              const who = applicantIdentity.get(h.workerId);
+              const stage = deriveCandidatePipelineStage({
+                shortlistStatus: h.shortlistStatus,
+                interestStatus: h.interestStatus,
+                bookingStatus: pipelineFacts?.bookingByWorker.get(h.workerId) ?? null,
+                conversationExists: pipelineFacts?.conversationByWorker.has(h.workerId) ?? false,
+              });
+              const inConversation = pipelineFacts?.conversationByWorker.has(h.workerId) ?? false;
+              // The worker raised their hand: the interest card below opens the
+              // in-app thread NOW (contactInterestedWorkerAction), so this box
+              // must not say messaging comes later or demand a shortlist first
+              // (UX review 2026-10-24, 4.16).
+              const interestDoor = hasStandingInterest(h.interestStatus);
+              return (
+                <li
+                  key={h.workerId}
+                  data-testid={`scout-candidate-${h.workerId}`}
+                  data-match-assessed="false"
+                >
+                  <Card compact>
+                  <PersonIdentityCard
+                    variant="candidate-review"
+                    testid={`scout-identity-${h.workerId}`}
+                    // The name opens the person page. That page decides by itself
+                    // what this viewer may see: no name and no private text for
+                    // someone found through the visibility consent.
+                    nameHref={`/dashboard/people/${h.workerId}` as "/dashboard"}
+                    name={who?.name ?? `${t("candidate")} ${anonymizedToken(p.anonymizedLabel)}`}
+                    initials={
+                      who?.name ? personMonogram(who.name) : anonymizedToken(p.anonymizedLabel).slice(0, 2)
+                    }
+                    avatarUrl={who?.avatarUrl ?? null}
+                    professions={h.professionSlug ? [professionName(h.professionSlug)] : []}
+                    meta={identityMeta(h)}
+                    status={
+                      <>
+                        <span
+                          className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-state-success"
+                          data-testid={`scout-interest-${h.workerId}`}
+                        >
+                          {t("interestBadge")}
+                        </span>
+                        <span
+                          className="rounded-full border border-state-amber/40 bg-state-amber/10 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-state-amber"
+                          data-testid={`scout-match-not-assessed-${h.workerId}`}
+                        >
+                          {t("handRaisers.badge")}
+                        </span>
+                        <span
+                          data-testid={`scout-pipeline-${h.workerId}`}
+                          data-stage={stage}
+                          className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${PIPELINE_TONE[stage]}`}
+                        >
+                          {tPipe(`stage.${stage}` as never)}
+                        </span>
+                      </>
+                    }
+                    chips={
+                      <>
+                        {h.actionability.kind === "actionable_later" ? (
+                          <span
+                            className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
+                            data-testid="candidate-available-later"
+                          >
+                            {t("actionability.availableFromChip", { date: h.actionability.availableFrom })}
+                          </span>
+                        ) : null}
+                        {p.rate.minEur != null ? (
+                          <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
+                            {t("rateFrom", { min: p.rate.minEur })}
+                          </span>
+                        ) : null}
+                        {p.experienceYears != null && p.experienceYears > 0 ? (
+                          <span
+                            className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
+                            data-testid={`scout-experience-${h.workerId}`}
+                          >
+                            {t("experienceYearsValue", { years: p.experienceYears })}
+                          </span>
+                        ) : null}
+                        <p className="basis-full text-meta leading-relaxed text-text-muted">
+                          {t("handRaisers.ownWords")}
+                        </p>
+                        <p
+                          className="basis-full text-meta leading-relaxed text-text-muted"
+                          data-testid={who?.name ? "identity-applied-note" : "identity-name-hidden-note"}
+                        >
+                          {who?.name ? t("identity.appliedToYou") : t("identity.nameHidden")}
+                        </p>
+                      </>
+                    }
+                    actions={
+                      <div className="flex flex-col gap-3">
+                      {actsForClient ? (
+                        <p className="text-meta text-text-muted" data-testid={`scout-agency-present-${h.workerId}`}>
+                          {t("agencyPresent.note")}{" "}
+                          <Link href={`/${locale}/dashboard/company/partners`} className="text-brand-blue hover:underline">
+                            {t("agencyPresent.link")} →
+                          </Link>
+                        </p>
+                      ) : (
+                        <>
+                          <div
+                            className="flex flex-col gap-2 rounded-md border border-ink-500/70 bg-ink-800/60 px-2.5 py-2"
+                            data-testid={`scout-comms-${h.workerId}`}
+                            data-can-contact={h.canContact ? "true" : "false"}
+                          >
+                            <p className="flex items-center gap-1.5 text-meta text-text-muted">
+                              <span aria-hidden>{h.canContact ? "💬" : "⏳"}</span>
+                              {inConversation
+                                ? t("comms.inConversation")
+                                : interestDoor
+                                  ? t("comms.interestDoor")
+                                  : h.canContact
+                                    ? t("comms.eligible")
+                                    : t("comms.blocked")}
+                            </p>
+                            {h.canContact ? (
+                              <div className="flex flex-col gap-2">
+                                {isShortlistedForContact(h.shortlistStatus) ? (
+                                  result.demand.ownedByCaller ? (
+                                    <RequestCommunicationButton
+                                      locale={locale}
+                                      requestId={result.demand.id}
+                                      workerId={h.workerId}
+                                      labels={{
+                                        button: t("request.button"), opening: t("request.opening"),
+                                        opened: t("request.opened"), view: t("request.view"),
+                                        error: t("request.error"), limitReached: t("request.limitReached"),
+                                      }}
+                                    />
+                                  ) : (
+                                    // The server starts a conversation only for the need's author
+                                    // (request-worker-conversation.ts). A colleague who may shortlist
+                                    // is told so instead of being given a button that always refuses.
+                                    <p className="text-meta text-text-muted" data-testid="scout-contact-author-only">
+                                      {t("request.authorOnly")}
+                                    </p>
+                                  )
+                                ) : inConversation || interestDoor ? null : (
+                                  <p className="text-meta text-text-muted" data-testid={`scout-shortlist-first-${h.workerId}`}>
+                                    {t("request.shortlistFirst")}
+                                  </p>
+                                )}
+                                {/* Proposing dates is the need author's act: the database function
+                                    refuses anyone else ("Not your demand"). A colleague is not
+                                    given a button that always fails; the line above says who can. */}
+                                {result.demand.ownedByCaller ? (
+                                  <ProposeBookingButton
+                                    locale={locale}
+                                    requestId={result.demand.id}
+                                    workerId={h.workerId}
+                                    countryCode={null}
+                                    labels={{
+                                      open: t("booking.open"), startDate: t("booking.startDate"),
+                                      note: t("booking.note"), send: t("booking.send"),
+                                      sending: t("booking.sending"), sent: t("booking.sent"),
+                                      unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
+                                      error: t("booking.error"), cancel: t("booking.cancel"),
+                                    }}
+                                  />
+                                ) : null}
+                                <RequestContactDetailsButton
+                                  locale={locale}
+                                  requestId={result.demand.id}
+                                  workerId={h.workerId}
+                                  requestRowId={contactRequests.byWorker[h.workerId]?.requestRowId ?? null}
+                                  currentStatus={contactRequests.byWorker[h.workerId]?.status ?? null}
+                                  disclosureGranted={contactRequests.byWorker[h.workerId]?.disclosureGranted ?? false}
+                                  modelApplied={contactRequests.applied}
+                                  labels={{
+                                    button: t("contactRequest.button"), sending: t("contactRequest.sending"),
+                                    pending: t("contactRequest.pending"), accepted: t("contactRequest.accepted"),
+                                    granted: t("contactRequest.granted"), declined: t("contactRequest.declined"),
+                                    expired: t("contactRequest.expired"), unavailable: t("contactRequest.unavailable"),
+                                    rateLimited: t("contactRequest.rateLimited"), noOrganization: t("contactRequest.noOrganization"),
+                                    withdraw: t("contactRequest.withdraw"), withdrawing: t("contactRequest.withdrawing"),
+                                    withdrawn: t("contactRequest.withdrawn"), withdrawNotOpen: t("contactRequest.withdrawNotOpen"),
+                                    withdrawError: t("contactRequest.withdrawError"), fieldsNote: t("contactRequest.fieldsNote"),
+                                    error: t("contactRequest.error"),
+                                  }}
+                                />
+                              </div>
+                            ) : null}
+                          </div>
+                          <CompanyInterestAck
+                            locale={locale}
+                            requestId={result.demand.id}
+                            workerId={h.workerId}
+                            initialStatus={h.interestStatus}
+                            labels={{
+                              statusLabels: Object.fromEntries(
+                                ["interested", "reviewed", "contacted"]
+                                  .filter((s) => t.has(`ack.status.${s}`))
+                                  .map((s) => [s, t(`ack.status.${s}` as never)]),
+                              ),
+                              markReviewed: t("ack.markReviewed"),
+                              markContacted: t("ack.markContacted"),
+                              internalNote: t("ack.internalNote"),
+                              error: t("ack.error"),
+                              notAvailable: t("ack.notAvailable"),
+                            }}
+                          />
+                          <ScoutingShortlistButtons
+                            locale={locale}
+                            requestId={result.demand.id}
+                            workerId={h.workerId}
+                            current={h.shortlistStatus}
+                            currentNote={h.shortlistNote}
+                            labels={{
+                              statuses: shortlistLabels,
+                              error: t("shortlistError"),
+                              note: {
+                                label: t("shortlistNote.label"), internalHint: t("shortlistNote.internalHint"),
+                                add: t("shortlistNote.add"), edit: t("shortlistNote.edit"),
+                                placeholder: t("shortlistNote.placeholder"), reasonTitle: t("shortlistNote.reasonTitle"),
+                                reasonPlaceholder: t("shortlistNote.reasonPlaceholder"), reasonRequired: t("shortlistNote.reasonRequired"),
+                                save: t("shortlistNote.save"), cancel: t("shortlistNote.cancel"),
+                              },
+                            }}
+                          />
+                        </>
+                      )}
+                      </div>
+                    }
+                  />
+                  </Card>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       ) : null}
       {result?.kind === "needs-migration" ? (
         <p className="rounded-md border border-ink-500 px-4 py-6 text-sm text-text-secondary">
@@ -528,9 +1059,11 @@ export default async function CompanyScoutingPage({
           data-testid="scouting-empty"
         >
           <p className="text-sm text-text-secondary">
-            {hasActiveScoutFilters(result.filters)
-              ? t("filters.noMatches")
-              : t("noCandidates")}
+            {result.filters.country && !result.filters.skill && !result.filters.availableNow
+              ? t("filters.noMatchesCountry", { country: countryDisplayName(result.filters.country, locale) })
+              : hasActiveScoutFilters(result.filters)
+                ? t("filters.noMatches")
+                : t("noCandidates")}
           </p>
           {hasActiveScoutFilters(result.filters) ? (
             <Link
@@ -570,7 +1103,7 @@ export default async function CompanyScoutingPage({
           </header>
           <ul className="flex flex-col gap-3">
             {offeredCandidates.map((oc) => (
-              <li key={oc.offerId} className="card-border flex flex-col gap-3 p-3" data-testid={`scout-offered-${oc.workerId}`}>
+              <li key={oc.offerId} className="card-border flex flex-col gap-3 p-3" data-testid={`scout-offered-${oc.workerId}`} data-offer-id={oc.offerId}>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                     {anonymizedToken(anonymizedWorkerLabel(oc.workerId))}
@@ -582,12 +1115,30 @@ export default async function CompanyScoutingPage({
                   >
                     {tOffered(`status.${oc.offerStatus}`)}
                   </span>
+                  {oc.bookingId && offerBookingStatus.get(oc.bookingId) &&
+                  tOffered.has(`worker.${offerBookingStatus.get(oc.bookingId)}` as never) ? (
+                    <span
+                      className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
+                      data-testid={`scout-offer-worker-${offerBookingStatus.get(oc.bookingId)}`}
+                    >
+                      {tOffered(`worker.${offerBookingStatus.get(oc.bookingId)}` as never)}
+                    </span>
+                  ) : null}
                   {oc.note ? <span className="min-w-0 flex-1 truncate text-xs text-text-secondary">{oc.note}</span> : null}
                 </div>
                 {/* The client's decision on THIS candidate (agency first value):
                     accept proposes the canonical booking to the worker, decline
                     closes the offer. Renders only while the offer is open. */}
-                {oc.offerStatus === "offered" ? (
+                {oc.offerStatus === "offered" && !needOpen ? (
+                  /* A closed need takes no decision: the database refuses it.
+                     The offer is still open on the agency's side, so the card
+                     says why there is no control instead of offering one
+                     that fails. */
+                  <p className="text-meta text-text-muted" data-testid={`scout-offered-need-closed-${oc.offerId}`}>
+                    {tOffered("decision.closed")}
+                  </p>
+                ) : null}
+                {oc.offerStatus === "offered" && needOpen ? (
                   <OfferDecisionButtons
                     offerId={oc.offerId}
                     labels={{
@@ -595,33 +1146,70 @@ export default async function CompanyScoutingPage({
                       accepted: tOffered("decision.accepted"), declined: tOffered("decision.declined"),
                       notReady: tOffered("decision.notReady"), forbidden: tOffered("decision.forbidden"),
                       closed: tOffered("decision.closed"), error: tOffered("decision.error"),
+                      limitOpen: tOffered("decision.limitOpen"), limitDaily: tOffered("decision.limitDaily"),
+                      limitUnknown: tOffered("decision.limitUnknown"), openBookings: tOffered("decision.openBookings"),
                     }}
                   />
                 ) : null}
+                {/* Contact, dates and shortlist are for an OPEN need only. */}
+                {needOpen ? (
                 <div className="flex flex-col gap-2">
-                  <RequestCommunicationButton
-                    locale={locale}
-                    requestId={selected}
-                    workerId={oc.workerId}
-                    labels={{
-                      button: t("request.button"), opening: t("request.opening"),
-                      opened: t("request.opened"), view: t("request.view"),
-                      error: t("request.error"), limitReached: t("request.limitReached"),
-                    }}
-                  />
-                  <ProposeBookingButton
-                    locale={locale}
-                    requestId={selected}
-                    workerId={oc.workerId}
-                    countryCode={null}
-                    labels={{
-                      open: t("booking.open"), startDate: t("booking.startDate"),
-                      note: t("booking.note"), send: t("booking.send"),
-                      sending: t("booking.sending"), sent: t("booking.sent"),
-                      unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
-                      error: t("booking.error"), cancel: t("booking.cancel"),
-                    }}
-                  />
+                  {/* SAME rule as the candidate card: the server gate needs the
+                      worker on THIS company's shortlist. An offered person who
+                      is shortlisted gets the button; one who appears among the
+                      matches below is told to shortlist first; one who is not
+                      on the list at all has no contact step here (the offer
+                      decision above is this card's own action). */}
+                  {isShortlistedForContact(
+                    result?.kind === "ok"
+                      ? (result.candidates.find((c) => c.workerId === oc.workerId)?.shortlistStatus ?? null)
+                      : null,
+                  ) ? (
+                    result?.kind === "ok" && result.demand.ownedByCaller ? (
+                      <RequestCommunicationButton
+                        locale={locale}
+                        requestId={selected}
+                        workerId={oc.workerId}
+                        labels={{
+                          button: t("request.button"), opening: t("request.opening"),
+                          opened: t("request.opened"), view: t("request.view"),
+                          error: t("request.error"), limitReached: t("request.limitReached"),
+                        }}
+                      />
+                    ) : (
+                      // The server starts a conversation only for the need's author
+                      // (request-worker-conversation.ts). A colleague who may shortlist
+                      // is told so instead of being given a button that always refuses.
+                      <p className="text-meta text-text-muted" data-testid="scout-contact-author-only">
+                        {t("request.authorOnly")}
+                      </p>
+                    )
+                  ) : result?.kind === "ok" && result.candidates.some((c) => c.workerId === oc.workerId) ? (
+                    <p
+                      className="text-meta text-text-muted"
+                      data-testid={`scout-offered-shortlist-first-${oc.workerId}`}
+                    >
+                      {t("request.shortlistFirst")}
+                    </p>
+                  ) : null}
+                  {/* Proposing dates is the need author's act: the database function
+                      refuses anyone else ("Not your demand"). A colleague is not
+                      given a button that always fails; the line above says who can. */}
+                  {result?.kind === "ok" && result.demand.ownedByCaller ? (
+                    <ProposeBookingButton
+                      locale={locale}
+                      requestId={selected}
+                      workerId={oc.workerId}
+                      countryCode={null}
+                      labels={{
+                        open: t("booking.open"), startDate: t("booking.startDate"),
+                        note: t("booking.note"), send: t("booking.send"),
+                        sending: t("booking.sending"), sent: t("booking.sent"),
+                        unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
+                        error: t("booking.error"), cancel: t("booking.cancel"),
+                      }}
+                    />
+                  ) : null}
                   <ScoutingShortlistButtons
                     locale={locale}
                     requestId={selected}
@@ -641,10 +1229,15 @@ export default async function CompanyScoutingPage({
                     }}
                   />
                 </div>
+                ) : null}
               </li>
             ))}
           </ul>
         </section>
+      ) : null}
+
+      {teamOffers && teamOffers.offers.length > 0 ? (
+        <TeamOffersReceived requestId={selected!} offers={teamOffers.offers} projects={teamOfferProjects} needOpen={needOpen} />
       ) : null}
 
       {result?.kind === "ok" && result.candidates.length > 0 ? (
@@ -662,6 +1255,10 @@ export default async function CompanyScoutingPage({
               conversationExists:
                 pipelineFacts?.conversationByWorker.has(c.workerId) ?? false,
             });
+            const inConversation = pipelineFacts?.conversationByWorker.has(c.workerId) ?? false;
+            // A candidate who raised their hand is reachable now through the
+            // interest card (UX review 2026-10-24, 4.16) — see the hand-raiser list.
+            const interestDoor = !actsForClient && hasStandingInterest(result.interestByWorker[c.workerId]);
             const nextAction = nextActionForStage(stage, {
               locale,
               requestId: result.demand.id,
@@ -672,157 +1269,66 @@ export default async function CompanyScoutingPage({
                 className="card-border flex flex-col gap-3 p-4"
                 data-testid={`scout-candidate-${c.workerId}`}
               >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-2">
-                    {/* Anonymized handle — never a name (Step 3A). */}
-                    <span
-                      aria-hidden
-                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-ink-500 bg-ink-800 font-mono text-xs font-semibold text-text-secondary"
-                    >
-                      {anonymizedToken(p.anonymizedLabel).slice(0, 2)}
-                    </span>
-                    <p className="truncate font-display text-base font-bold text-text-primary">
-                      {t("candidate")}{" "}
-                      <span className="font-mono text-sm text-text-secondary">
-                        {anonymizedToken(p.anonymizedLabel)}
-                      </span>
-                    </p>
-                  </div>
-                  {/* `flex-wrap`, measured: three status badges on one line
-                      rendered 355px wide inside a 309px parent at 375px, which
-                      is the 13px of body overflow this page carried. They are
-                      independent labels with no reading order between them, so
-                      wrapping costs nothing and a second line is the honest
-                      answer on a phone. */}
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {/* Worker-initiated interest — a REAL internal signal
-                        (demand_interest_signals row), never fabricated. */}
-                    {result.interestByWorker[c.workerId] ? (
-                      <span
-                        className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-state-success"
-                        data-testid={`scout-interest-${c.workerId}`}
-                      >
-                        {t("interestBadge")}
-                      </span>
-                    ) : null}
-                    {/* Honest profile freshness (Wagon 1) — real updated_at
-                        bucket; dormant is ranked lower, never hidden. */}
-                    <span
-                      className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${FRESHNESS_TONE[c.lastActiveBucket]}`}
-                      data-testid={`scout-freshness-${c.workerId}`}
-                      data-freshness={c.lastActiveBucket}
-                    >
-                      {t(`freshness.${c.lastActiveBucket}` as never)}
-                    </span>
-                    <span
-                      className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
-                      data-testid={`scout-status-${c.workerId}`}
-                    >
-                      {statusLabels[c.match.status]}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Canonical pipeline (P4): the ONE derived stage of this
-                    (demand, worker) pair + its ONE next action. Derived at
-                    read time from real facts — never a stored 7th enum. */}
-                <div
-                  className="flex flex-wrap items-center justify-between gap-2"
-                  data-testid={`scout-pipeline-${c.workerId}`}
-                  data-stage={stage}
-                >
-                  <span
-                    className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${PIPELINE_TONE[stage]}`}
-                  >
-                    {tPipe(`stage.${stage}` as never)}
-                  </span>
-                  <Link
-                    href={nextAction.href}
-                    className="text-meta font-medium text-brand-blue hover:text-brand-champagne"
-                    data-testid={`scout-pipeline-next-${c.workerId}`}
-                  >
-                    {tPipe(nextAction.key.replace("candidatePipeline.", "") as never)} →
-                  </Link>
-                </div>
-
-                {/* Profile-safe facts (owner-approved fields only). */}
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
-                  <div className="min-w-0">
-                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("fields.location")}
-                    </dt>
-                    <dd className="truncate text-xs text-text-primary">
-                      {p.location ?? t("availabilityValue.unknown")}
-                    </dd>
-                  </div>
-                  <div className="min-w-0">
-                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("fields.availability")}
-                    </dt>
-                    <dd className="truncate text-xs text-text-primary">
-                      {availabilityLabel(p.availability)}
-                      {p.availableFrom ? (
-                        <span className="text-text-secondary"> · {p.availableFrom}</span>
+                <PersonIdentityCard
+                  variant="candidate-review"
+                  testid={`scout-identity-${c.workerId}`}
+                  // The name opens the person page; what it shows is that
+                  // page's own, database-decided view of this person.
+                  nameHref={`/dashboard/people/${c.workerId}` as "/dashboard"}
+                  name={
+                    applicantIdentity.get(c.workerId)?.name ??
+                    `${t("candidate")} ${anonymizedToken(p.anonymizedLabel)}`
+                  }
+                  initials={
+                    applicantIdentity.get(c.workerId)?.name
+                      ? personMonogram(applicantIdentity.get(c.workerId)?.name)
+                      : anonymizedToken(p.anonymizedLabel).slice(0, 2)
+                  }
+                  avatarUrl={applicantIdentity.get(c.workerId)?.avatarUrl ?? null}
+                  professions={c.professionSlug ? [professionName(c.professionSlug)] : []}
+                  meta={identityMeta(c)}
+                  status={
+                    <>
+                      {/* Worker-initiated interest — a REAL internal signal
+                          (demand_interest_signals row), never fabricated. */}
+                      {result.interestByWorker[c.workerId] ? (
+                        <span
+                          className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-state-success"
+                          data-testid={`scout-interest-${c.workerId}`}
+                        >
+                          {t("interestBadge")}
+                        </span>
                       ) : null}
-                    </dd>
-                  </div>
-                  <div className="min-w-0">
-                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("fields.rate")}
-                    </dt>
-                    <dd className="truncate text-xs text-text-primary">
-                      {p.rate.minEur != null ? t("rateFrom", { min: p.rate.minEur }) : t("noRate")}
-                    </dd>
-                  </div>
-                  <div className="min-w-0">
-                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("fields.evidence")}
-                    </dt>
-                    <dd className="truncate text-xs text-text-primary">{p.evidenceCount}</dd>
-                  </div>
-                </dl>
-
-                {/* §19 skill-fit basis line — always with its basis, confirmed split */}
-                {fit ? (
-                  <p className="text-xs text-text-secondary">
-                    {t("skillFit", {
-                      pct: fit.pct,
-                      matched: fit.matchedTotal,
-                      total: fit.needTotal,
-                      confirmed: fit.matchedConfirmed,
-                    })}
-                  </p>
-                ) : null}
-                {/* Evidence ladder counts for the matched skills */}
-                <p className="font-mono text-meta text-text-muted">
-                  {t("evidence", {
-                    confirmed: c.match.evidence.matchedManagerConfirmed,
-                    journal: c.match.evidence.matchedJournalSupported,
-                    self: c.match.evidence.matchedSelfDeclared,
-                  })}
-                </p>
-
-                {/* Stage 7 — safe readiness signal: country + availability fit
-                    only. Document readiness stays consent-gated (a company can
-                    never see a worker's private documents). No fake doc claim. */}
-                <div
-                  className="flex flex-wrap items-center gap-1.5"
-                  data-testid={`scout-readiness-${c.workerId}`}
-                  data-readiness={c.readiness.label}
-                >
-                  <span
-                    className={`rounded-md border px-2 py-0.5 text-meta ${READINESS_TONE[c.readiness.label]}`}
-                  >
-                    {t(`readiness.label.${c.readiness.label}` as never)}
-                  </span>
-                  <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
-                    {t(`readiness.country.${c.readiness.countryFit}` as never)}
-                  </span>
-                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                    {t("readiness.docsConsent")}
-                  </span>
-                </div>
-
+                      {/* Canonical pipeline (P4): the ONE derived stage of this
+                          (demand, worker) pair — derived at read time from
+                          real facts, never a stored 7th enum. */}
+                      <span
+                        data-testid={`scout-pipeline-${c.workerId}`}
+                        data-stage={stage}
+                        className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${PIPELINE_TONE[stage]}`}
+                      >
+                        {tPipe(`stage.${stage}` as never)}
+                      </span>
+                    </>
+                  }
+                  chips={
+                    <>
+                      {fit ? (
+                        <span
+                          className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
+                          data-testid={`scout-skill-count-${c.workerId}`}
+                        >
+                          {/* "0 of 2" asserts a measured miss. When the person
+                              has stated no skills at all the engine says
+                              `insufficient_data` — an UNKNOWN, not a zero. */}
+                          {c.match.status === "insufficient_data"
+                            ? t("identity.skillUnknown", { total: fit.needTotal })
+                            : t("identity.skillCount", {
+                                matched: fit.matchedTotal,
+                                total: fit.needTotal,
+                              })}
+                        </span>
+                      ) : null}
                 {/* P4-B (2026-08-09): the verdict the employer could never
                     see. The engine has always computed `eligible` and the
                     hard-failed criteria behind it, and this surface rendered
@@ -838,9 +1344,27 @@ export default async function CompanyScoutingPage({
                   data-testid={`scout-verdict-${c.workerId}`}
                   data-eligible={c.match.eligible}
                 >
-                  {c.match.eligible ? (
+                  {/* THREE STATES, from fields the engine already returns.
+                      `eligible` is a hard-criteria verdict only (skills never
+                      feed it) and is TRUE when no hard criterion failed —
+                      including when none was stated or the facts are unknown.
+                      Rendering that as a green "meets requirements" next to
+                      "0 of 2 skills" / "not enough data" was a false claim.
+                        confirmed met   → matchedHard non-empty, nothing blocking
+                        confirmed not   → blocked
+                        unknown         → nothing checked, or insufficient data */}
+                  {c.match.eligible && c.match.status !== "insufficient_data" && c.match.matchedHard.length > 0 ? (
                     <span className="rounded-md border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-meta font-medium text-state-success">
                       {t("verdict.eligible")}
+                    </span>
+                  ) : c.match.eligible ? (
+                    <span
+                      className="rounded-md border border-ink-500 px-2 py-0.5 text-meta font-medium text-text-secondary"
+                      data-testid={`scout-verdict-unchecked-${c.workerId}`}
+                    >
+                      {c.match.status === "insufficient_data"
+                        ? t("verdict.insufficient")
+                        : t("verdict.noCriteria")}
                     </span>
                   ) : (
                     <span className="rounded-md border border-state-danger/40 bg-state-danger/10 px-2 py-0.5 text-meta font-medium text-state-danger">
@@ -856,6 +1380,254 @@ export default async function CompanyScoutingPage({
                     </span>
                   ) : null}
                 </div>
+                      {applicantIdentity.get(c.workerId)?.name ? (
+                        <p className="basis-full text-meta leading-relaxed text-text-muted" data-testid="identity-applied-note">
+                          {t("identity.appliedToYou")}
+                        </p>
+                      ) : (
+                        <p className="basis-full text-meta leading-relaxed text-text-muted" data-testid="identity-name-hidden-note">
+                          {t("identity.nameHidden")}
+                        </p>
+                      )}
+                    </>
+                  }
+                  actions={
+                    <div className="flex flex-col gap-3">
+                  {actsForClient ? null : (
+                  <Link
+                    href={nextAction.href}
+                    className="text-meta font-medium text-brand-blue hover:text-brand-champagne"
+                    data-testid={`scout-pipeline-next-${c.workerId}`}
+                  >
+                    {tPipe(nextAction.key.replace("candidatePipeline.", "") as never)} →
+                  </Link>
+                  )}
+                {/* The one clear next step for this result (PR4). */}
+                <p
+                  className="font-mono text-meta uppercase tracking-label text-text-muted"
+                  data-testid={`scout-next-${c.workerId}`}
+                >
+                  {t.has(`nextAction.${c.match.nextAction}`)
+                    ? t(`nextAction.${c.match.nextAction}` as never)
+                    : null}
+                </p>
+
+                {/* Communication — IN-APP only, contacts stay hidden. The
+                    request action is gated by canStartCommunicationOrBooking
+                    (Step 3A rule 6) + ownership + shortlist, re-checked
+                    server-side. When not contactable, only a transparent status
+                    shows (no dead/broken button). No booking persistence yet. */}
+                {actsForClient ? (
+                  <p className="text-meta text-text-muted" data-testid={`scout-agency-present-${c.workerId}`}>
+                    {t("agencyPresent.note")}{" "}
+                    <Link href={`/${locale}/dashboard/company/partners`} className="text-brand-blue hover:underline">
+                      {t("agencyPresent.link")} →
+                    </Link>
+                  </p>
+                ) : (
+                <div
+                  className="flex flex-col gap-2 rounded-md border border-ink-500/70 bg-ink-800/60 px-2.5 py-2"
+                  data-testid={`scout-comms-${c.workerId}`}
+                  data-can-contact={c.canContact && needOpen ? "true" : "false"}
+                >
+                  <p className="flex items-center gap-1.5 text-meta text-text-muted">
+                    <span aria-hidden>{c.canContact && needOpen ? "💬" : "⏳"}</span>
+                    {!needOpen
+                      ? t("lifecycle.closedNote")
+                      : inConversation
+                        ? t("comms.inConversation")
+                        : interestDoor
+                          ? t("comms.interestDoor")
+                          : c.canContact
+                            ? t("comms.eligible")
+                            : t("comms.blocked")}
+                  </p>
+                  {c.canContact && needOpen ? (
+                    <div className="flex flex-col gap-2">
+                      {/* The server gate needs a deliberate shortlist (owner +
+                          shortlisted + contactable). Offering the button before
+                          that only produced a generic error, so it appears once
+                          the worker is on the shortlist; until then the page
+                          says what to do — the shortlist control is below. */}
+                      {isShortlistedForContact(c.shortlistStatus) ? (
+                        result.demand.ownedByCaller ? (
+                          <RequestCommunicationButton
+                            locale={locale}
+                            requestId={result.demand.id}
+                            workerId={c.workerId}
+                            labels={{
+                              button: t("request.button"),
+                              opening: t("request.opening"),
+                              opened: t("request.opened"),
+                              view: t("request.view"),
+                              error: t("request.error"),
+                              limitReached: t("request.limitReached"),
+                            }}
+                          />
+                        ) : (
+                          // The server starts a conversation only for the need's author
+                          // (request-worker-conversation.ts). A colleague who may shortlist
+                          // is told so instead of being given a button that always refuses.
+                          <p className="text-meta text-text-muted" data-testid="scout-contact-author-only">
+                            {t("request.authorOnly")}
+                          </p>
+                        )
+                      ) : inConversation || interestDoor ? null : (
+                        // A conversation that already exists is the fact: no
+                        // "shortlist first" under it (scouting walk 2026-10-09);
+                        // nor under a raised hand, whose card opens the thread.
+                        <p
+                          className="text-meta text-text-muted"
+                          data-testid={`scout-shortlist-first-${c.workerId}`}
+                        >
+                          {t("request.shortlistFirst")}
+                        </p>
+                      )}
+                      {/* Proposing dates is the need author's act: the database function
+                          refuses anyone else ("Not your demand"). A colleague is not
+                          given a button that always fails; the line above says who can. */}
+                      {result.demand.ownedByCaller ? (
+                        <ProposeBookingButton
+                          locale={locale}
+                          requestId={result.demand.id}
+                          workerId={c.workerId}
+                          countryCode={c.readiness.countryFit === "match" ? p.location : null}
+                          labels={{
+                            open: t("booking.open"),
+                            startDate: t("booking.startDate"),
+                            note: t("booking.note"),
+                            send: t("booking.send"),
+                            sending: t("booking.sending"),
+                            sent: t("booking.sent"),
+                            unavailable: t("booking.unavailable"),
+                            notEntitled: t("booking.notEntitled"),
+                            error: t("booking.error"),
+                            cancel: t("booking.cancel"),
+                          }}
+                        />
+                      ) : null}
+                      {/* Contact-detail ASK (Wagon 1): the worker alone
+                          answers on their privacy screen; a grant never
+                          shows contact data here — server-enforced. */}
+                      <RequestContactDetailsButton
+                        locale={locale}
+                        requestId={result.demand.id}
+                        workerId={c.workerId}
+                        requestRowId={
+                          contactRequests.byWorker[c.workerId]?.requestRowId ?? null
+                        }
+                        currentStatus={
+                          contactRequests.byWorker[c.workerId]?.status ?? null
+                        }
+                        disclosureGranted={
+                          contactRequests.byWorker[c.workerId]?.disclosureGranted ??
+                          false
+                        }
+                        modelApplied={contactRequests.applied}
+                        labels={{
+                          button: t("contactRequest.button"),
+                          sending: t("contactRequest.sending"),
+                          pending: t("contactRequest.pending"),
+                          accepted: t("contactRequest.accepted"),
+                          granted: t("contactRequest.granted"),
+                          declined: t("contactRequest.declined"),
+                          expired: t("contactRequest.expired"),
+                          unavailable: t("contactRequest.unavailable"),
+                          rateLimited: t("contactRequest.rateLimited"),
+                          noOrganization: t("contactRequest.noOrganization"),
+                          withdraw: t("contactRequest.withdraw"),
+                          withdrawing: t("contactRequest.withdrawing"),
+                          withdrawn: t("contactRequest.withdrawn"),
+                          withdrawNotOpen: t("contactRequest.withdrawNotOpen"),
+                          withdrawError: t("contactRequest.withdrawError"),
+                          fieldsNote: t("contactRequest.fieldsNote"),
+                          error: t("contactRequest.error"),
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+                )}
+
+                {/* Company acknowledgement of a REAL worker interest signal
+                    (PR7) — internal record only; never rendered without an
+                    actual signal, nothing is sent anywhere. */}
+                {/* Not on a closed need: its people are history (the interest
+                    badge above still says they raised a hand), and a control
+                    that changes the record of a closed need is not offered. */}
+                {needOpen && !actsForClient && result.interestByWorker[c.workerId] ? (
+                  <CompanyInterestAck
+                    locale={locale}
+                    requestId={result.demand.id}
+                    workerId={c.workerId}
+                    initialStatus={result.interestByWorker[c.workerId]}
+                    labels={{
+                      statusLabels: Object.fromEntries(
+                        ["interested", "reviewed", "contacted"]
+                          .filter((s) => t.has(`ack.status.${s}`))
+                          .map((s) => [s, t(`ack.status.${s}` as never)]),
+                      ),
+                      markReviewed: t("ack.markReviewed"),
+                      markContacted: t("ack.markContacted"),
+                      internalNote: t("ack.internalNote"),
+                      error: t("ack.error"),
+                      notAvailable: t("ack.notAvailable"),
+                    }}
+                  />
+                ) : null}
+
+                {actsForClient ? null : (
+                <>
+                {needOpen ? (
+                <ScoutingShortlistButtons
+                  locale={locale}
+                  requestId={result.demand.id}
+                  workerId={c.workerId}
+                  current={c.shortlistStatus}
+                  currentNote={c.shortlistNote}
+                  labels={{
+                    statuses: shortlistLabels,
+                    error: t("shortlistError"),
+                    /* Extension B — the existing note column becomes usable:
+                       optional internal note, REQUIRED reason on not_fit.
+                       Internal to this company (worker never reads it). */
+                    note: {
+                      label: t("shortlistNote.label"),
+                      internalHint: t("shortlistNote.internalHint"),
+                      add: t("shortlistNote.add"),
+                      edit: t("shortlistNote.edit"),
+                      placeholder: t("shortlistNote.placeholder"),
+                      reasonTitle: t("shortlistNote.reasonTitle"),
+                      reasonPlaceholder: t("shortlistNote.reasonPlaceholder"),
+                      reasonRequired: t("shortlistNote.reasonRequired"),
+                      save: t("shortlistNote.save"),
+                      cancel: t("shortlistNote.cancel"),
+                    },
+                  }}
+                />
+                ) : c.shortlistStatus ? (
+                  /* History: the decision that was recorded while the need
+                     was open, as a fact — no control. */
+                  <p className="text-meta text-text-muted" data-testid={`scout-shortlist-history-${c.workerId}`}>
+                    {shortlistLabels[c.shortlistStatus] ?? c.shortlistStatus}
+                  </p>
+                ) : null}
+                </>
+                )}
+                    </div>
+                  }
+                >
+                  <IdentityDisclosure
+                    id="why"
+                    title={t("identity.why")}
+                    summary={statusLabels[c.match.status]}
+                  >
+                    <span
+                      className="sr-only"
+                      data-testid={`scout-status-${c.workerId}`}
+                    >
+                      {statusLabels[c.match.status]}
+                    </span>
                 {/* REQUIREMENT LEDGER for the employer (2026-09-19): the
                     same deterministic per-criterion results the engine
                     already returns, now ALL rendered — MET (hard criteria
@@ -1008,155 +1780,175 @@ export default async function CompanyScoutingPage({
                   </div>
                 ) : null}
 
-                {/* The one clear next step for this result (PR4). */}
-                <p
-                  className="font-mono text-meta uppercase tracking-label text-text-muted"
-                  data-testid={`scout-next-${c.workerId}`}
-                >
-                  {t.has(`nextAction.${c.match.nextAction}`)
-                    ? t(`nextAction.${c.match.nextAction}` as never)
-                    : null}
-                </p>
-
-                {/* Communication — IN-APP only, contacts stay hidden. The
-                    request action is gated by canStartCommunicationOrBooking
-                    (Step 3A rule 6) + ownership + shortlist, re-checked
-                    server-side. When not contactable, only a transparent status
-                    shows (no dead/broken button). No booking persistence yet. */}
-                <div
-                  className="flex flex-col gap-2 rounded-md border border-ink-500/70 bg-ink-800/60 px-2.5 py-2"
-                  data-testid={`scout-comms-${c.workerId}`}
-                  data-can-contact={c.canContact ? "true" : "false"}
-                >
-                  <p className="flex items-center gap-1.5 text-meta text-text-muted">
-                    <span aria-hidden>{c.canContact ? "💬" : "⏳"}</span>
-                    {c.canContact ? t("comms.eligible") : t("comms.blocked")}
+                  </IdentityDisclosure>
+                  <IdentityDisclosure id="skills" title={t("identity.skills")}>
+                {/* §19 skill-fit basis line — always with its basis, confirmed split */}
+                {fit ? (
+                  <p className="text-xs text-text-secondary">
+                    {t("skillFit", {
+                      matched: fit.matchedTotal,
+                      total: fit.needTotal,
+                      confirmed: fit.matchedConfirmed,
+                    })}
                   </p>
-                  {c.canContact ? (
-                    <div className="flex flex-col gap-2">
-                      <RequestCommunicationButton
-                        locale={locale}
-                        requestId={result.demand.id}
-                        workerId={c.workerId}
-                        labels={{
-                          button: t("request.button"),
-                          opening: t("request.opening"),
-                          opened: t("request.opened"),
-                          view: t("request.view"),
-                          error: t("request.error"),
-                          limitReached: t("request.limitReached"),
-                        }}
-                      />
-                      <ProposeBookingButton
-                        locale={locale}
-                        requestId={result.demand.id}
-                        workerId={c.workerId}
-                        countryCode={c.readiness.countryFit === "match" ? p.location : null}
-                        labels={{
-                          open: t("booking.open"),
-                          startDate: t("booking.startDate"),
-                          note: t("booking.note"),
-                          send: t("booking.send"),
-                          sending: t("booking.sending"),
-                          sent: t("booking.sent"),
-                          unavailable: t("booking.unavailable"),
-                          notEntitled: t("booking.notEntitled"),
-                          error: t("booking.error"),
-                          cancel: t("booking.cancel"),
-                        }}
-                      />
-                      {/* Contact-detail ASK (Wagon 1): the worker alone
-                          answers on their privacy screen; a grant never
-                          shows contact data here — server-enforced. */}
-                      <RequestContactDetailsButton
-                        locale={locale}
-                        requestId={result.demand.id}
-                        workerId={c.workerId}
-                        requestRowId={
-                          contactRequests.byWorker[c.workerId]?.requestRowId ?? null
-                        }
-                        currentStatus={
-                          contactRequests.byWorker[c.workerId]?.status ?? null
-                        }
-                        disclosureGranted={
-                          contactRequests.byWorker[c.workerId]?.disclosureGranted ??
-                          false
-                        }
-                        modelApplied={contactRequests.applied}
-                        labels={{
-                          button: t("contactRequest.button"),
-                          sending: t("contactRequest.sending"),
-                          pending: t("contactRequest.pending"),
-                          accepted: t("contactRequest.accepted"),
-                          granted: t("contactRequest.granted"),
-                          declined: t("contactRequest.declined"),
-                          expired: t("contactRequest.expired"),
-                          unavailable: t("contactRequest.unavailable"),
-                          rateLimited: t("contactRequest.rateLimited"),
-                          noOrganization: t("contactRequest.noOrganization"),
-                          withdraw: t("contactRequest.withdraw"),
-                          withdrawing: t("contactRequest.withdrawing"),
-                          withdrawn: t("contactRequest.withdrawn"),
-                          withdrawNotOpen: t("contactRequest.withdrawNotOpen"),
-                          withdrawError: t("contactRequest.withdrawError"),
-                          fieldsNote: t("contactRequest.fieldsNote"),
-                          error: t("contactRequest.error"),
-                        }}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-
-                {/* Company acknowledgement of a REAL worker interest signal
-                    (PR7) — internal record only; never rendered without an
-                    actual signal, nothing is sent anywhere. */}
-                {result.interestByWorker[c.workerId] ? (
-                  <CompanyInterestAck
-                    locale={locale}
-                    requestId={result.demand.id}
-                    workerId={c.workerId}
-                    initialStatus={result.interestByWorker[c.workerId]}
-                    labels={{
-                      statusLabels: Object.fromEntries(
-                        ["interested", "reviewed", "contacted"]
-                          .filter((s) => t.has(`ack.status.${s}`))
-                          .map((s) => [s, t(`ack.status.${s}` as never)]),
-                      ),
-                      markReviewed: t("ack.markReviewed"),
-                      markContacted: t("ack.markContacted"),
-                      internalNote: t("ack.internalNote"),
-                      error: t("ack.error"),
-                      notAvailable: t("ack.notAvailable"),
-                    }}
-                  />
+                ) : null}
+                {/* Evidence ladder counts for the matched skills */}
+                <p className="font-mono text-meta text-text-muted">
+                  {t("evidence", {
+                    confirmed: c.match.evidence.matchedManagerConfirmed,
+                    journal: c.match.evidence.matchedJournalSupported,
+                    self: c.match.evidence.matchedSelfDeclared,
+                  })}
+                </p>
+                {/* CONFIRMED WORK - a manager confirmed real entries that show a
+                    matched skill. A FACT, never a score: shown only when it
+                    exists; absence is silence, not a "0". Not a skill
+                    certification (that is the "confirmed" count above). */}
+                {(c.match.evidence.matchedConfirmedWork ?? 0) > 0 && fit ? (
+                  <p
+                    className="font-mono text-meta text-text-muted"
+                    data-testid={`scout-confirmed-work-${c.workerId}`}
+                  >
+                    {t("confirmedWork", {
+                      work: c.match.evidence.matchedConfirmedWork ?? 0,
+                      matched: fit.matchedTotal,
+                      repeated: c.match.evidence.matchedRepeatedConfirmed ?? 0,
+                    })}
+                  </p>
+                ) : null}
+                {/* ORGANIZATION-PROVIDED HISTORY - a labelled signal: an
+                    organization's own records of this person name the matched
+                    skill. Evidence, not verification, and not an input to the
+                    status or the order. Shown only when it exists; absence is
+                    silence, never a "0". */}
+                {(c.match.evidence.matchedHistorySignal ?? 0) > 0 && fit ? (
+                  <p
+                    className="font-mono text-meta text-text-muted"
+                    data-testid={`scout-history-signal-${c.workerId}`}
+                  >
+                    {t("historySignal", {
+                      history: c.match.evidence.matchedHistorySignal ?? 0,
+                      matched: fit.matchedTotal,
+                    })}
+                  </p>
                 ) : null}
 
-                <ScoutingShortlistButtons
-                  locale={locale}
-                  requestId={result.demand.id}
-                  workerId={c.workerId}
-                  current={c.shortlistStatus}
-                  currentNote={c.shortlistNote}
-                  labels={{
-                    statuses: shortlistLabels,
-                    error: t("shortlistError"),
-                    /* Extension B — the existing note column becomes usable:
-                       optional internal note, REQUIRED reason on not_fit.
-                       Internal to this company (worker never reads it). */
-                    note: {
-                      label: t("shortlistNote.label"),
-                      internalHint: t("shortlistNote.internalHint"),
-                      add: t("shortlistNote.add"),
-                      edit: t("shortlistNote.edit"),
-                      placeholder: t("shortlistNote.placeholder"),
-                      reasonTitle: t("shortlistNote.reasonTitle"),
-                      reasonPlaceholder: t("shortlistNote.reasonPlaceholder"),
-                      reasonRequired: t("shortlistNote.reasonRequired"),
-                      save: t("shortlistNote.save"),
-                      cancel: t("shortlistNote.cancel"),
-                    },
-                  }}
-                />
+                  </IdentityDisclosure>
+                  <IdentityDisclosure id="readiness" title={t("identity.readiness")}>
+                    {/* Honest profile freshness (Wagon 1) — real updated_at
+                        bucket; dormant is ranked lower, never hidden. */}
+                    <span
+                      className={`w-fit rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${FRESHNESS_TONE[c.lastActiveBucket]}`}
+                      data-testid={`scout-freshness-${c.workerId}`}
+                      data-freshness={c.lastActiveBucket}
+                    >
+                      {t(`freshness.${c.lastActiveBucket}` as never)}
+                    </span>
+                {/* Profile-safe facts (owner-approved fields only). */}
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
+                  <div className="min-w-0">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("fields.location")}
+                    </dt>
+                    <dd className="truncate text-xs text-text-primary">
+                      {p.location ?? t("availabilityValue.unknown")}
+                    </dd>
+                  </div>
+                  <div className="min-w-0">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("fields.availability")}
+                    </dt>
+                    <dd className="text-xs text-text-primary">
+                      {availabilityLabel(p.availability)}
+                      {p.availableFrom ? (
+                        <span className="text-text-secondary"> · {p.availableFrom}</span>
+                      ) : null}
+                      {/* ACTIONABLE LATER (owner ruling 2026-09-22). Real
+                          future supply: kept in the list, never presented as
+                          available now. The date is the worker's OWN stated
+                          one — the canonical verdict carries it, so nothing
+                          here estimates anything. */}
+                      {c.actionability.kind === "actionable_later" ? (
+                        <span
+                          className="mt-1 block text-text-secondary"
+                          data-testid="candidate-available-later"
+                        >
+                          {t("actionability.availableFromChip", {
+                            date: c.actionability.availableFrom,
+                          })}
+                        </span>
+                      ) : null}
+                    </dd>
+                  </div>
+                  <div className="min-w-0">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("fields.rate")}
+                    </dt>
+                    <dd className="truncate text-xs text-text-primary">
+                      {p.rate.minEur != null ? t("rateFrom", { min: p.rate.minEur }) : t("noRate")}
+                    </dd>
+                  </div>
+                  {p.experienceYears != null && p.experienceYears > 0 ? (
+                    <div className="min-w-0" data-testid={`scout-experience-${c.workerId}`}>
+                      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        {t("fields.experience")}
+                      </dt>
+                      <dd className="truncate text-xs text-text-primary">
+                        {t("experienceYearsValue", { years: p.experienceYears })}
+                      </dd>
+                    </div>
+                  ) : null}
+                  <div className="min-w-0">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("fields.evidence")}
+                    </dt>
+                    <dd className="truncate text-xs text-text-primary">
+                      {p.evidenceCount > 0 ? p.evidenceCount : t("evidenceNone")}
+                    </dd>
+                  </div>
+                </dl>
+
+                {/* Stage 7 — safe readiness signal: country + availability fit
+                    only. Document readiness stays consent-gated (a company can
+                    never see a worker's private documents). No fake doc claim. */}
+                <div
+                  className="flex flex-wrap items-center gap-1.5"
+                  data-testid={`scout-readiness-${c.workerId}`}
+                  data-readiness={c.readiness.label}
+                >
+                  <span
+                    className={`rounded-md border px-2 py-0.5 text-meta ${READINESS_TONE[c.readiness.label]}`}
+                  >
+                    {t(`readiness.label.${c.readiness.label}` as never)}
+                  </span>
+                  <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
+                    {t(`readiness.country.${c.readiness.countryFit}` as never)}
+                  </span>
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {t("readiness.docsConsent")}
+                  </span>
+                </div>
+
+                {/* READINESS beside FIT, never inside it (decision 0021): what
+                    still has to be checked and by which stage. Not a filter -
+                    the match above is unchanged - and no file is required. */}
+                {c.match.readiness ? (
+                  <p
+                    className="text-meta text-text-secondary"
+                    data-testid={`scout-readiness-checks-${c.workerId}`}
+                    data-readiness-checks={c.match.readiness.status}
+                  >
+                    {c.match.readiness.status === "checks_outstanding" && c.match.readiness.nextStage
+                      ? t("readinessChecks.outstanding", {
+                          count: c.match.readiness.outstanding,
+                          stage: t(`readinessChecks.stage.${c.match.readiness.nextStage}` as never),
+                        })
+                      : t(`readinessChecks.${c.match.readiness.status}` as never)}
+                  </p>
+                ) : null}
+
+                  </IdentityDisclosure>
+                </PersonIdentityCard>
               </li>
             );
           })}

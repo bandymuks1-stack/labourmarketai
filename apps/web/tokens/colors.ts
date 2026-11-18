@@ -46,6 +46,10 @@ export const colors = {
     // white: the brand is metallic gold, and white on gold is 2.10:1. This
     // token is why the rebrand did not silently break every primary action.
     "on-brand": c("text-on-brand"),
+    // `text-text-on-danger` — the readable foreground on a state-danger fill.
+    // Same polarity rule as on-brand: dark's danger is a light red, so the
+    // label is near-black; light's deep red takes white. Never literal white.
+    "on-danger": c("text-on-danger"),
   },
   tier: {
     diamond: c("tier-diamond"),

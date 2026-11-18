@@ -11,6 +11,7 @@ import {
   terminalStaleFromError,
 } from "@/lib/learning/learning-shared";
 import { REVIEW_DECISIONS, type ReviewDecision } from "./review-status";
+import { notifyJournalReviewDecisions } from "./review-notification";
 
 /**
  * Manager review → evidence result (slice manager-review-evidence-result-v1).
@@ -32,6 +33,15 @@ export type ReviewBlockCode =
   | "not_authorized"
   | "review_not_enabled"
   | "no_reviewer_engagement"
+  /** EVID-2: the reviewer is the entry's own author - self-declared work is
+   *  never turned into independent confirmation by reviewing it yourself. */
+  | "self_review_not_allowed"
+  /** The reviewer holds no authority FROM THE WORK RELATIONSHIP over this
+   *  entry (not its employer, not a submitted-to counterparty, or sharing an
+   *  organization with the subject). Never "some other manager exists". */
+  | "review_authority_not_established"
+  /** A counterparty ACCEPT is final for that entry. */
+  | "already_accepted"
   /** W1 (owner-hold v5): terminal stale outcomes — the entry was edited or
    *  deleted after the card loaded. The card must stop offering actions. */
   | "entry_superseded"
@@ -86,6 +96,12 @@ export async function reviewJournalEntry(
     // this RPC's pre-check and its confirmation INSERT — an error, not a
     // tagged return. Map it to the terminal outcome so the card stops offering
     // actions instead of retrying an impossible one (rev14, Codex P2).
+    if ((error.message ?? "").includes("self_review_not_allowed")) {
+      return { ok: false, code: "self_review_not_allowed" };
+    }
+    if ((error.message ?? "").includes("review_authority_not_established")) {
+      return { ok: false, code: "review_authority_not_established" };
+    }
     const stale = terminalStaleFromError(error.message);
     if (stale) {
       revalidatePath(`/${locale}/dashboard/inbox`);
@@ -111,21 +127,18 @@ export async function reviewJournalEntry(
     return { ok: false, code: outcome as ReviewBlockCode };
   }
 
-  // Approval closes the verified-skill loop (parity with legacy confirmEntry).
+  // Approval raises the confidence of the entry's linked skills (R-5): a
+  // bounded, idempotent, confidence-only write through a SECURITY DEFINER door.
+  // It does NOT verify any skill.
   if (decision === "approved") {
-    const { data: entry } = await supabase
-      .from("journal_entries")
-      .select("worker_id, profession_id")
-      .eq("id", entryId)
-      .maybeSingle();
-    if (entry) {
-      await applyApprovalSkillEffects(supabase, {
-        workerId: entry.worker_id as string,
-        professionId: (entry.profession_id as string | null) ?? null,
-        confirmerId: user.id,
-      });
-    }
+    await applyApprovalSkillEffects(supabase, { entryId, confirmerId: user.id });
   }
+
+  // DURABLE NOTIFICATION (journal_review_decided): tell the worker the
+  // outcome - all three decisions. The review is committed; this never fails it.
+  await notifyJournalReviewDecisions(supabase, user.id, [
+    { entryId, decision },
+  ]);
 
   revalidatePath(`/${locale}/dashboard/inbox`);
   revalidatePath(`/${locale}/dashboard/journal`);

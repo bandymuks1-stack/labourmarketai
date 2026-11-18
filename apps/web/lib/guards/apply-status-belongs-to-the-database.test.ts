@@ -113,16 +113,21 @@ describe("4. what really is absent stays a short, named list", () => {
     expect(drift).toMatch(/apply status belongs to the\s*\n?\s*database, not to a comment/i);
   });
 
-  it("the assistant migration is deliberately NOT in supabase/migrations", () => {
+  it("the assistant migration is the owner-approved promoted one, and the proposal says so", () => {
+    // 2026-10-12: the owner approved the transcript (Chat First keeps its
+    // conversation across sessions); it was promoted from the proposal to
+    // 20261012100000_assistant_transcript_v1.sql and applied. Exactly ONE
+    // assistant migration may exist, and the proposal must point at it.
     const listed = execSync("git ls-files supabase/migrations", {
       cwd: join(APP, "..", ".."),
       encoding: "utf8",
     });
-    expect(listed).not.toMatch(/assistant_transcript/);
+    expect(listed.match(/assistant_transcript/g) ?? []).toHaveLength(1);
+    expect(listed).toMatch(/20261012100000_assistant_transcript_v1.sql/);
     const proposal = readFileSync(
       join(APP, "..", "..", "docs/proposals/assistant-transcript-v1/README.md"),
       "utf8",
     );
-    expect(proposal).toMatch(/NOT APPLIED/);
+    expect(proposal).toMatch(/PROMOTED/);
   });
 });

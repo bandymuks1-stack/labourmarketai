@@ -156,17 +156,30 @@ describe("APPLIED_LEDGER carries both deferred entries", () => {
 // ── 4. switcher honesty (source pins) ───────────────────────────────────────
 
 describe("company switcher wiring", () => {
-  it("visibility comes from the ONE pure helper (multi-company only)", () => {
-    const sw = read("components/app/role-switcher.tsx");
-    expect(sw).toMatch(/shouldOfferOrganizationSwitch/);
-    expect(sw).toMatch(/data-testid="org-switcher-list"/);
+  it("a switcher renders ONLY for a real multi-workspace person", () => {
+    // RE-ANCHORED 2026-10-25: the role switcher's organization list was the
+    // second workspace selector and is deleted; the ONE selector is the
+    // workspace chip. A single-workspace person gets a pure indicator — no
+    // fake multi-tenancy chrome — and the pure helper still decides the
+    // server-side `canSwitch` flag.
+    const chip = read("components/app/conversation/chat/workspace-chip.tsx");
+    expect(chip).toMatch(/if \(workspaces\.length === 1\) \{/);
+    expect(chip).toMatch(/data-testid="workspace-chip-menu"/);
+    expect(read("lib/company/active-organization.ts")).toMatch(/canSwitch: shouldOfferOrganizationSwitch\(/);
     const helper = read("lib/company/organization-switch.ts");
     expect(helper).toMatch(/organizations\.length\s*>\s*1/);
   });
 
   it("active org resolution is membership-validated and 42703-degrading (server-side, never localStorage)", () => {
     const src = read("lib/company/active-organization.ts");
-    expect(src).toMatch(/resolveActiveOrganizationId/);
+    // RE-ANCHORED (owner program 2026-09-23): the owned-only reader no longer
+    // resolves on its own (`resolveActiveOrganizationId` over owned orgs, DB
+    // pointer first) — it is a projection of the ONE membership-validated
+    // workspace resolution, which runs `resolveActiveWorkspaceId` under the
+    // one pointer rule. Membership validation is unchanged; it simply happens
+    // in one place.
+    expect(src).toMatch(/resolveActiveWorkspaceId\(/);
+    expect(src).toMatch(/pickStoredWorkspacePointer\(/);
     expect(src).toMatch(/42703/);
     // Usage form only — prose in comments may NAME localStorage to ban it.
     expect(src).not.toMatch(/localStorage\.(get|set|remove)Item|window\.localStorage/);
@@ -222,14 +235,14 @@ describe("company overview decisions strip", () => {
 // ── 7. i18n keys exist in every active locale ───────────────────────────────
 
 describe("company/account i18n keys (lt/en/ru/nl/de)", () => {
-  const locales = ["lt", "en", "ru", "nl", "de"] as const;
+  const locales = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
   for (const locale of locales) {
     it(`${locale}: companySwitcher + roleDashboards.company.decisions keys exist and are translated`, () => {
       const m = JSON.parse(read(`messages/${locale}.json`));
       expect(m.companySwitcher?.heading, `${locale} companySwitcher.heading`).toBeTypeOf("string");
       expect(m.companySwitcher?.note, `${locale} companySwitcher.note`).toBeTypeOf("string");
       const d = m.roleDashboards?.company?.decisions;
-      for (const key of ["title", "review", "invitations", "claims"]) {
+      for (const key of ["title", "review", "reviewOff", "invitations", "claims"]) {
         expect(d?.[key], `${locale} decisions.${key}`).toBeTypeOf("string");
         expect(d?.[key]).not.toMatch(/^\[EN\]/);
       }

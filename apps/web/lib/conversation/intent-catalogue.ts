@@ -22,10 +22,12 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "cv-export": "download or print the person's verified CV sheet",
   "cv-view": "open and look at the CV the product already holds for the person",
   "cv-choose": "the person named their CV without saying whether to view, upload or change it",
+  "what-changed":
+    "what changed after the person's own work: recorded → confirmed → Living CV → matching, plus agreed bookings and other state changes (read only)",
   "evidence-photos":
     "show the work photos / files the person already uploaded to their work journal — did the photo save, show the one just uploaded, open the gallery. NOT the CV.",
   profile: "the person's profile: add a language, skill, experience or education",
-  "player-card": "show the person's professional card (player card)",
+  "player-card": "show the person's professional card (work card)",
   experiences: "the person's work experience list",
   engagements: "the person's engagements, contracts and memberships",
   offers: "incoming booking offers the person received",
@@ -48,11 +50,28 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "learning-compass": "what the person should learn next (learning compass)",
   "need-workers": "a company needs workers: describe a demand / need",
   "need-service": "a company or person needs a service from the marketplace",
+  "open-conversation":
+    "the speaker wants to message or open a conversation with a NAMED person ('parašyk Jonui', 'atidaryk pokalbį su Jonu', 'message Anna')",
+  "new-jobs":
+    "asks which NEW jobs appeared for the person ('kokių naujų darbų man atsirado?', 'any new jobs for me?') - not a fresh search",
+  "product-help":
+    "asks HOW to use the product or WHERE something is ('kaip pridėti žmogų?', 'kur mano valandos?', 'kodėl atsirado šis perspėjimas?', 'how do I schedule a worker?')",
+  "find-partners":
+    "the speaker wants to find other BUSINESSES to partner or cooperate with ('noriu rasti partnerių savo verslui', 'find business partners'). NOT a job search and NOT hiring workers.",
   "offer-value": "offer a service or value on the marketplace",
   "profession-statement": "the person states their profession or a past job ('esu buhalteris', 'dirbau projektų vadovu 5 metus')",
   availability: "the person states from when they can work ('galiu dirbti nuo spalio 1 d.', 'available from October')",
+  "pay-statement": "the person states their monthly pay / salary expectation ('mano atlyginimo lūkestis nuo 2500 iki 3500 eurų', 'at least 3000 EUR')",
+  "language-statement": "the person states which languages they speak ('kalbu angliškai ir rusiškai', 'I speak English B2')",
+  "skill-statement": "the person states a skill they learned or have ('išmokau skaityti techninius brėžinius')",
+  "saved-opportunities": "the jobs / opportunities the person saved (bookmarked) on the opportunities page",
+  "open-tasks": "which tasks are still open — all, or in a named project ('kokios užduotys projekte X?')",
+  "correct-work": "the person corrects their newest work-journal entry in words ('ne 5, o 6 valandas', 'tai buvo vakar')",
+  "current-work": "where the person works now: their active work relationships with organizations ('kur dabar dirbu?')",
   "company-overview": "overview of the company workspace",
   "create-organization": "create a company or organization",
+  "rename-organization":
+    "rename the organization the user is acting for, or give an unnamed one its name ('pervadink agentūrą į …', 'change our company name to …'). Not a person's profile, CV or a project.",
   context: "which company or role the user is acting for (context readback)",
   capabilities:
     "what the user can achieve from where they are standing right now — asked when they do not yet know the product ('what can I do here?'). Not what they still have to do, and not what we know about them.",
@@ -93,6 +112,9 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "market-map": "the labour-market map",
   activity: "the activity centre / recent activity",
   "messages-view": "messages and conversations inbox",
+  "my-team": "the people the speaker works with — their team, colleagues, crew or the organization's members",
+  "employer-visibility":
+    "whether employers can see or find the person's professional profile — current state, then the explicit revocable consent to turn it on or off ('kas mato mano profilį?')",
   invitations: "invitations addressed to me (join an organization, become a student or an employee)",
 };
 

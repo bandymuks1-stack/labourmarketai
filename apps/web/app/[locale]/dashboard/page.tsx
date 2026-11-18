@@ -23,8 +23,17 @@ import type {
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { loadPersonalWorkspaceIntro } from "@/lib/workspace/personal-workspace-intro-server";
+import { personalIntroMayShow } from "@/lib/workspace/personal-workspace-intro";
 import { resolvePersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 import { baseIdentityForRole } from "@/lib/config/roles";
+import { readHeldRoles } from "@/lib/auth/held-roles";
+import {
+  actingRoleForWorkspace,
+  PERSONAL_WORKSPACE_ID,
+  STALE_CONTEXT_NOTICE,
+  workspaceDisplayLabels,
+  workspaceRelationshipLabel,
+} from "@/lib/company/organization-switch";
 import { listMyEngagements } from "@/lib/invitations/network";
 import {
   loadCompanyStarterContext,
@@ -50,32 +59,48 @@ import {
   type DurablePointerKind,
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
-import { dashboardRootSurface, isWorkerPersonalSpace } from "@/lib/today/today-route";
+import { CompanyModelScreen } from "@/components/app/organization/company-model-screen";
+import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
+import { conversationOpeningContext } from "@/lib/today/today-route";
+import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
+import {
+  accessNoticeMessageKey,
+  accessNoticeOffersSetup,
+  parseAccessNotice,
+} from "@/lib/auth/access-notice";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard");
+
 
 /**
- * Dashboard root — ONE route, two compositions, decided by ONE pure predicate
- * (`lib/today/today-route.ts`; the chrome reads the same one):
+ * Dashboard root — the ONE authenticated home: the conversation, for EVERY
+ * identity (owner decision 0017, 2026-09-22). What differs per person is the
+ * OPENING CONTEXT the conversation composes above its greeting, decided by
+ * ONE pure predicate (`lib/today/today-route.ts`):
  *
- *   ŠIANDIEN (worker, personal space, no conversation parameter) — the
- *   worker's home as a PAGE (`docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md`
- *   §2): name · profession · today's state, ONE next action, today's recorded
- *   work, open items, one growth sentence, one opportunity sentence, a quiet
- *   door to the conversation, the stations as text links. It REPLACES the
+ *   ŠIANDIEN (worker, personal space) — the worker's "now"
+ *   (`docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md` §2 composition):
+ *   name · profession · today's state, ONE next action, today's recorded
+ *   work, open items, one growth sentence, one opportunity sentence, the
+ *   contextual workspaces as text links. It stands INSIDE the conversation's
+ *   opening composition, with the composer right under it, and REPLACES the
  *   opening intro card for the worker (owner direction 2026-09-13: no welcome
- *   card, no legacy popup composition).
+ *   card). It is not a page and not a second home — the 2026-09-13 root
+ *   split (ŠIANDIEN page · PAKLAUSK `?ask=1` tab) is retired.
  *
- *   THE CONVERSATION — for every other identity, for a worker acting inside
- *   an organization, and for the worker ON DEMAND (frozen contract §2.1):
- *   the PAKLAUSK tab (`?ask=1`) and every existing deep link (`?result=`,
- *   `?say=`, `?intent=`, …) open the same chat they always did. The former
- *   card control room (`/dashboard/advanced`) was DELETED by W3 Package 4 —
- *   nothing here brings a card wall back.
+ *   THE WORKSPACE COMPOSITION — for every other identity and for a worker
+ *   acting inside an organization: the opening brief, the "Mano erdvė"
+ *   block and the starters they already had. Every existing deep link
+ *   (`?result=`, `?say=`, `?intent=`, …) opens the same chat it always did.
+ *   The former card control room (`/dashboard/advanced`) was DELETED by W3
+ *   Package 4 — nothing here brings a card wall back.
  *
- * The wide module navbar is NOT hidden with an overlay any more: the layout's
- * `<DashboardChrome>` renders NO wide chrome on `/dashboard` (its DOM is absent,
- * not painted over). In the conversation the chat fills the viewport and
- * supplies its own header; in ŠIANDIEN the chrome supplies the one top bar and
- * the worker's 3-tab bar. Deterministic (LLM off).
+ * The wide module navbar is NOT hidden with an overlay: the layout's
+ * `<DashboardChrome>` renders NO wide chrome on `/dashboard` (its DOM is
+ * absent, not painted over). The chat fills the viewport and supplies the one
+ * top bar. Deterministic (LLM off).
  */
 export default async function DashboardHomePage({
   params,
@@ -104,8 +129,8 @@ export default async function DashboardHomePage({
   let pointer: DurablePointerKind = null;
   if (session.profileRead === "failed") {
     const [stored, ws] = await Promise.all([
-      readSessionWorkspacePointer(),
-      getWorkspaceContext(null),
+      readSessionWorkspacePointer(user.id),
+      getWorkspaceContext(),
     ]);
     pointer = classifyDurablePointer(
       stored,
@@ -137,38 +162,34 @@ export default async function DashboardHomePage({
       </section>
     );
   }
-  const activeRole: Role = decision.role;
+  // WHICH WORKSPACE, AND AS WHOM (owner program 2026-09-23). The workspace is
+  // the ONE resolution the chip renders (request-cached; the layout already
+  // ran it). The acting identity FOLLOWS that workspace by the person's
+  // relationship to it (`actingRoleForWorkspace`, d3) over the roles they
+  // really hold — it used to be `profiles.active_role` alone, so an employee
+  // of someone else's company was greeted as that company's employer while
+  // every employer read failed closed. `active_role` stands only where no held
+  // role fits the workspace (the switch keeps it in step anyway).
+  const [rootWorkspace, held] = await Promise.all([
+    getWorkspaceContext(),
+    readHeldRoles(supabase, user.id),
+  ]);
+  const activeOrgWorkspace =
+    rootWorkspace.workspaces.find(
+      (w) => w.kind === "organization" && w.id === rootWorkspace.activeWorkspaceId,
+    ) ?? null;
+  const activeRole: Role =
+    actingRoleForWorkspace(activeOrgWorkspace, [...held.roles]) ?? decision.role;
 
-  // ŠIANDIEN or the conversation — the ONE decision, from the identity the
-  // role decision produced, the workspace the chip resolves (request-cached;
-  // the layout already ran it) and the query string. A worker in their
-  // personal space lands on their day; `?ask=1` and the chat's own deep
-  // links keep opening the conversation.
+  // WHICH opening context the ONE conversation composes — from the acting
+  // identity and the workspace. A worker in their personal space opens with
+  // ŠIANDIEN above the greeting; everyone else with the workspace composition.
   const identity = baseIdentityForRole(activeRole) ?? "person";
-  const rootWorkspace = await getWorkspaceContext(identity);
-  const rootSurface = dashboardRootSurface({
-    activeRole,
-    activeWorkspaceId: rootWorkspace.activeWorkspaceId,
-    query: await searchParams,
-  });
-  if (rootSurface === "today") {
-    return (
-      <>
-        <TelemetryView
-          event={FUNNEL_EVENTS.dashboardViewed}
-          metadata={{ surface: "dashboard_root", step: "today" }}
-        />
-        <TodayScreen locale={locale as ActiveLocale} />
-      </>
-    );
-  }
-  // The worker reached the conversation on demand (PAKLAUSK / a deep link).
-  // Their "now" lives on ŠIANDIEN, so the opening intro card — the block
-  // ŠIANDIEN's header replaces — is not shown again here.
-  const workerOnDemand = isWorkerPersonalSpace({
-    activeRole,
-    activeWorkspaceId: rootWorkspace.activeWorkspaceId,
-  });
+  const workerToday =
+    conversationOpeningContext({
+      activeRole,
+      activeWorkspaceId: rootWorkspace.activeWorkspaceId,
+    }) === "today";
 
   // "Mano erdvė" (S2) — resolved on the server from the readers this request
   // already runs (session profile, workspace context, worker activity, the
@@ -187,12 +208,30 @@ export default async function DashboardHomePage({
   // conversation surface reaches the shell for every identity, and the intro
   // block appears the moment it is known.
   //
-  // For the worker who opened the conversation ON DEMAND the block is
-  // hidden with its reason named: ŠIANDIEN's header is where their space is
-  // introduced now (IA §4: the intro card is REPLACED, not shown twice).
-  const personalIntroPayload: Promise<PersonalIntroPayload> = workerOnDemand
+  // For the worker in their personal space the block is hidden with its
+  // reason named: ŠIANDIEN's header is where their space is introduced (IA
+  // §4: the intro card is REPLACED, not shown twice).
+  //
+  // WHETHER IT CAN RENDER AT ALL is decided HERE, before the slow read, from
+  // facts this request already holds (home CLS P0, 2026-10-26): the same
+  // session, the same workspace resolution and the same identity rule the
+  // loader uses. Where it cannot, no payload is handed over — no slow read,
+  // and the chat reserves nothing. Where it can, the chat reserves the
+  // block's space while it streams, so it no longer appears out of nothing
+  // above the greeting and pushes the screen down. Only the CONTENT
+  // resolves late — the surface still reaches the shell at once (#1011).
+  const introMayShow = personalIntroMayShow({
+    signedIn: Boolean(session.user),
+    workspaceKind:
+      rootWorkspace.activeWorkspaceId === PERSONAL_WORKSPACE_ID ? "personal" : "organization",
+    identity,
+    replacedByToday: workerToday,
+  });
+  const personalIntroPayload: Promise<PersonalIntroPayload> | null = workerToday
     ? Promise.resolve({ intro: { kind: "hidden", reason: "replaced-by-today" }, labels: null })
-    : loadPersonalIntroPayload();
+    : introMayShow
+      ? loadPersonalIntroPayload()
+      : null;
   // STARTERS ARE SUGGESTIONS, NOT A ROLE MENU (owner contract 2026-09-04
   // §5–§6, ARCHITECTURE §5.5). The company greeting used to branch on ONE
   // flag (education | agency | employer) and show that role's three chips —
@@ -208,6 +247,11 @@ export default async function DashboardHomePage({
   // account with real skills, history or journal entries is no longer told
   // its first step is to upload a CV. Read in the SAME parallel batch as the
   // rest — three bounded head-counts, each degrading to "unknown".
+  //
+  // The pins read (MY SPACE, below) needs only the active workspace, so it
+  // starts here with the starter batch instead of after it (perf 2026-10-23).
+  const pinsPromise = listMyPins(activeOrgWorkspace?.id ?? null);
+  pinsPromise.catch(() => {}); // awaited (and so thrown) in the batch below
   const [{ offers, labels: bookingLabels }, learnerLink, starterContext, personFacts] =
     await Promise.all([
       loadBookingOffers(activeRole),
@@ -225,18 +269,64 @@ export default async function DashboardHomePage({
   // MY SPACE (owner contract 2026-09-04 §4C): the person's own pins for
   // THIS workspace, under RLS. Unavailable (migration unapplied / read
   // failed) → `null` → no row, no ask.
-  // The pins read and the three translation bundles below are independent
-  // of each other — one batch, not four consecutive awaits (measured: the
-  // same reads, issued together).
-  const [pinsRead, tChat, tWorkLog, tCountryNames] = await Promise.all([
-    listMyPins(identity === "company" ? workspace.organizationId : null),
+  // The READ scope is the active organization workspace — the SAME id the pin
+  // actions write to (`getActiveOrganizationContext`, a projection of the one
+  // workspace resolution). It used to be the employer-resolved org, which is
+  // null for an unbound or non-governed organization, so a pin was written to
+  // one scope and read back from another.
+  // The pins read and the translation bundles below are independent of each
+  // other — one batch, not consecutive awaits (measured: the same reads,
+  // issued together).
+  const [pinsRead, tChat, tWorkLog, tCountryNames, tRelationships] = await Promise.all([
+    pinsPromise,
     getTranslations("conversation.chat"),
     getTranslations("conversation.worklog"),
     getTranslations("labourMarket"),
+    getTranslations("relationshipTypes"),
   ]);
   const pins = pinsRead.kind === "ok" ? pinsRead.pins : null;
-  const labels = resolveChatLabels(tChat);
+  const tReservationLabels = await getTranslations("projects.assign.reservation");
+  const labels = resolveChatLabels(tChat, tReservationLabels);
   const workLogLabels = resolveWorkLogLabels(tWorkLog);
+
+  // WHY THE PERSON IS HERE, when they did not choose to be.
+  //
+  // A role gate sends someone to this home carrying `?notice=needs_<role>_role`
+  // — and until 2026-09-22 nothing read it, so the refusal landed as a silent
+  // teleport. Resolved on the SERVER: the chat receives a finished element,
+  // so no message namespace is added to the client bundle and the internal
+  // token never travels to the browser. An unknown `?notice=` yields null and
+  // renders nothing, rather than echoing whatever was typed into the URL.
+  const noticeParam = (await searchParams).notice;
+  const refusedRole = parseAccessNotice(
+    typeof noticeParam === "string" ? noticeParam : null,
+  );
+  const tAccess = refusedRole ? await getTranslations("workspace") : null;
+  // A WRITE REFUSED BECAUSE THE SCREEN WAS STALE (`refuseStaleWorkspace`):
+  // the person acted on a workspace that had been switched away in another
+  // window or device, nothing was saved, and they now stand here in the
+  // workspace that IS active. Same closed-token rule: only this exact value
+  // renders, and the sentence is the chat's own stale-context line.
+  const staleNotice =
+    noticeParam === STALE_CONTEXT_NOTICE ? (
+      <AccessRefusalNotice
+        reason={STALE_CONTEXT_NOTICE}
+        labels={{ body: tChat("staleContext"), setupCta: null }}
+      />
+    ) : null;
+  const accessNotice =
+    staleNotice ??
+    (refusedRole && tAccess ? (
+      <AccessRefusalNotice
+        reason={refusedRole}
+        labels={{
+          body: tAccess(accessNoticeMessageKey(refusedRole)),
+          setupCta: accessNoticeOffersSetup(refusedRole)
+            ? tAccess("accessNotice.setupCta")
+            : null,
+        }}
+      />
+    ) : null);
 
   /**
    * Localized country names for the demand prefill.
@@ -271,10 +361,64 @@ export default async function DashboardHomePage({
     identity === "company" && phraseKeys.length > 0
       ? tChat("fallbackComposed", { list: capabilityList })
       : null;
-  const workspaceContextLine =
-    identity === "company" && workspace.organizationName && phraseKeys.length > 0
-      ? tChat("workspaceIntro", { company: workspace.organizationName, list: capabilityList })
-      : null;
+  // ON WHOSE BEHALF — stated for EVERY organization workspace (owner program
+  // 2026-09-23). It used to be produced only for a company identity whose
+  // organization the employer chain resolved WITH a stored name, so in an
+  // unbound agency, in someone else's company, or in any unnamed organization
+  // nothing in the conversation said where the person was acting. The label is
+  // the chip's own (`workspaceDisplayLabels` over the same resolution) and the
+  // relationship is the resolved one, so the line and the chip cannot name two
+  // different contexts. A company workspace with capabilities keeps the richer
+  // sentence that also says what the product can do there.
+  const workspaceLabel = activeOrgWorkspace
+    ? (workspaceDisplayLabels(rootWorkspace.workspaces, {
+        personal: tChat("workspacePersonal"),
+        unnamedOrganization: {
+          company: tChat("workspaceUnnamedCompany"),
+          agency: tChat("workspaceUnnamedAgency"),
+          team: tChat("workspaceUnnamedTeam"),
+          other: tChat("workspaceUnnamed"),
+        },
+      }).get(activeOrgWorkspace.id) ?? null)
+    : null;
+  const relationshipLabel = activeOrgWorkspace
+    ? workspaceRelationshipLabel(activeOrgWorkspace, {
+        owner: tRelationships("owner"),
+        manager: tRelationships("manager"),
+        employee: tRelationships("employee"),
+        other: tChat("workspaceRelationshipMember"),
+      })
+    : null;
+  const workspaceContextLine = !workspaceLabel
+    ? null
+    : identity === "company" && workspace.organizationName && phraseKeys.length > 0
+      ? tChat("workspaceIntro", { company: workspaceLabel, list: capabilityList })
+      : tChat("workspaceActingAs", {
+          workspace: workspaceLabel,
+          relationship: relationshipLabel ?? tChat("workspaceRelationshipMember"),
+        });
+  // THE CONVERSATION'S IDENTITY IS THE ACTIVE WORKSPACE. A switch re-renders
+  // this page with new props, but React keeps a client component's state
+  // across `router.refresh` — the thread, the opening brief, the pins, the
+  // goal state and the result panel's loaders were all initialised once, so
+  // after a switch the old workspace's conversation stayed on screen until a
+  // browser reload (owner P0 case 1). Keying the ONE conversation on the
+  // workspace AND the acting identity remounts it with a fresh opening for
+  // the new context (decision d1). One-shot deep links (`?say=`, `?intent=`)
+  // were stripped from the URL on first consumption, so a remount never
+  // re-sends them.
+  // The company workspace opens on the company model (existing doors).
+  const companyModel =
+    activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
+  // The pilot pass pointer leads it — the employer home is where an owner
+  // looks first, and it renders nothing unless the pass is theirs to start.
+  const companyOpeningContext = companyModel ? (
+    <>
+      <PilotPassInvite className="mb-4" />
+      {companyModel}
+    </>
+  ) : null;
+  const conversationKey = `${rootWorkspace.activeWorkspaceId}:${identity}`;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
   // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
@@ -291,12 +435,24 @@ export default async function DashboardHomePage({
         metadata={{ surface: "dashboard_root" }}
       />
       <ConversationChat
+        key={conversationKey}
+        actingIdentity={identity}
         locale={locale as ActiveLocale}
+        /* Why this home is the screen they got, when a link asked for a space
+           they do not hold. Inside the chat rather than above it: the chat is
+           `h-[100dvh]` and owns the viewport, so a sibling banner would push
+           the composer off the bottom on a phone. */
+        accessNotice={accessNotice}
         labels={labels}
         workLogLabels={workLogLabels}
         bookingOffers={offers}
         bookingLabels={bookingLabels}
         personalIntroPayload={personalIntroPayload}
+        // ŠIANDIEN — server-rendered, streamed section by section inside the
+        // chat's own opening composition (the worker's "now" above the
+        // greeting and the composer). One home, one conversation.
+        openingContext={workerToday ? <TodayScreen locale={locale as ActiveLocale} /> : companyOpeningContext}
+        openingContextWide={Boolean(workerToday)}
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}
@@ -352,7 +508,7 @@ async function loadBookingOffers(
   if (activeRole !== "worker") return { offers: [], labels: null };
   let offers: BookingOffer[] = [];
   try {
-    const res = await listMyBookings();
+    const [res, tBookings] = await Promise.all([listMyBookings(), getTranslations("bookings")]);
     if (res.kind === "ok") {
       offers = res.incoming
         .filter((b) => b.status === "proposed")
@@ -364,6 +520,12 @@ async function loadBookingOffers(
             b.startDate || b.expectedEndDate
               ? [b.startDate, b.expectedEndDate].filter(Boolean).join(" — ")
               : null,
+          proposerLine: b.proposerName ? tBookings("proposedBy", { name: b.proposerName }) : null,
+          changedLine: b.changedFrom
+            ? tBookings("termsChanged", {
+                previous: [b.changedFrom.startDate, b.changedFrom.expectedEndDate].filter(Boolean).join(" — ") || "—",
+              })
+            : null,
         }));
     }
   } catch {

@@ -1,4 +1,184 @@
 {
+  "counterparty": {
+    "link": {
+      "title": "Client acceptance of the work",
+      "lead": "Register your organization as the client of a worker who is actively assigned to this project, directly or through a team. Then the worker can submit their work to you for review. Nothing is registered without a real assignment.",
+      "empty": "No worker has an active assignment on this project yet. Assign a person or a team first; they will appear here.",
+      "loadFailed": "Could not load the workers for this project. Try again in a moment.",
+      "honestNote": "Only the client's own representative can register or revoke this. The worker can never register their own client. A client's acceptance is a different thing from a manager's record and is not a payment record.",
+      "unnamedWorker": "Unnamed worker",
+      "kind": {
+        "person": "Assigned directly",
+        "team": "Assigned through a team"
+      },
+      "roleLabel": "Your role in this work",
+      "role": {
+        "client": "Client",
+        "end_client": "End client",
+        "project_owner": "Project owner",
+        "customer": "Customer",
+        "contracting_party": "Contracting party"
+      },
+      "register": "Register as counterparty",
+      "registering": "Registering…",
+      "registered": "Registered",
+      "registeredAs": "Registered as {role}",
+      "revoke": "Revoke",
+      "revoking": "Revoking…",
+      "revokeQuestion": "Revoke this? You will no longer be able to decide this worker's submitted work.",
+      "revokeConfirm": "Yes, revoke",
+      "cancel": "Cancel",
+      "result": {
+        "registered": "Registered. The worker can now submit their work to you.",
+        "already_registered": "Already registered.",
+        "revoked": "Revoked. Decisions already made stay on record.",
+        "already_revoked": "Already revoked.",
+        "invalid_party_role": "Choose a valid role.",
+        "project_not_found": "This project was not found.",
+        "project_has_no_organization": "This project has no owning organization, so no client can be registered.",
+        "not_authorized": "Only an authorized representative of the project's organization can do this.",
+        "worker_not_found": "This worker was not found.",
+        "subject_cannot_register_own_counterparty": "You cannot register your own client.",
+        "no_work_relationship": "This worker has no active assignment on the project, so there is nothing to register.",
+        "subject_is_member_of_counterparty": "This person works inside your organization. Their manager's review applies instead.",
+        "counterparty_not_independent": "You share an organization with this worker, so you cannot be their client.",
+        "link_not_found": "This registration was not found.",
+        "error": "Something went wrong. Nothing was changed.",
+        "needs_migration": "This feature is not available yet."
+      }
+    },
+    "entry": {
+      "title": "Client review",
+      "partyUnknown": "the client",
+      "phase": {
+        "ready_to_submit": "Recorded",
+        "submitted": "Submitted",
+        "accepted": "Accepted by the client",
+        "correction_requested": "Correction requested",
+        "disputed": "Disputed"
+      },
+      "submitLead": "You can submit this entry to the client of this work for review. It is only sent when you press the button.",
+      "resubmitLead": "This is a corrected version of an entry you submitted before. Submit it again for the client to review.",
+      "pickParty": "Who should review this?",
+      "pickPartyPlaceholder": "Choose…",
+      "willGoTo": "It will go to {party}.",
+      "submit": "Submit for review",
+      "resubmit": "Resubmit",
+      "submitting": "Submitting…",
+      "neverAutomatic": "Entries are never submitted automatically.",
+      "submittedTo": "Submitted to {party} on {date}.",
+      "submittedGeneric": "Submitted for client review.",
+      "awaiting": "Waiting for their decision.",
+      "isResubmission": "This is the corrected version.",
+      "acceptedBy": "Accepted by {party} on {date}.",
+      "acceptedNotEmployer": "This is the client's acceptance of the work. It is a different thing from a manager's record, does not verify a skill and is not a payment record.",
+      "theirNote": "Their note",
+      "correctionRequestedBy": "{party} asked for a correction on {date}.",
+      "disputedBy": "{party} disputed this entry on {date}.",
+      "correctionHint": "Correct the entry, then submit the new version again. The earlier version and the request stay on record.",
+      "disputedHint": "The dispute stays on record and the client can withdraw it. You can also correct the entry and submit the new version.",
+      "result": {
+        "submitted": "Submitted for review.",
+        "already_submitted": "This entry was already submitted.",
+        "entry_not_found": "This entry was not found.",
+        "not_authorized": "Only the author of the entry can submit it.",
+        "entry_deleted": "This entry was deleted.",
+        "entry_superseded": "This entry was replaced by a newer version. Submit the newer one.",
+        "entry_has_no_project": "Link this entry to a project before submitting it.",
+        "counterparty_not_valid": "That client is no longer registered for this work.",
+        "no_counterparty_registered": "No client is registered for this work yet.",
+        "counterparty_ambiguous": "More than one client is registered. Choose who should review this.",
+        "error": "Something went wrong. Nothing was submitted.",
+        "needs_migration": "This feature is not available yet."
+      }
+    },
+    "queue": {
+      "title": "Client review",
+      "lead": "Work that workers submitted to you as their client, customer or contracting party. Accept it, ask for a correction or dispute it, with a note.",
+      "honestNote": "Your decision is recorded as the client's acceptance. It is a different thing from a manager's record, does not verify skills and is not a payment approval. Accepting is final.",
+      "employerInboxLink": "Manager review inbox",
+      "openLink": "Client review",
+      "bucket": {
+        "to_decide": "To decide",
+        "disputed": "Disputed",
+        "waiting_for_worker": "Waiting for the worker",
+        "accepted": "Accepted"
+      },
+      "loadFailed": "Could not load the review queue. Try again in a moment.",
+      "emptyTitle": "Nothing submitted to you yet",
+      "empty": "When a worker submits work to you as their client, it appears here.",
+      "emptyNext": "Register your organization as the client on a project page, so workers on it can submit their work to you.",
+      "truncated": "Showing the newest {n} of {m} submissions.",
+      "card": {
+        "workerUnknown": "Worker",
+        "yourRole": "you are the {role}",
+        "submittedOn": "submitted {date}",
+        "resubmission": "Corrected version of an entry you asked to correct.",
+        "work": "Work",
+        "hours": "Hours",
+        "hoursUnclear": "unclear in the text",
+        "quantity": "Quantity",
+        "photos": "Photos the worker attached",
+        "noPhotos": "No photos attached.",
+        "photoUnavailable": "Photo unavailable",
+        "photoAlt": "Work photo",
+        "history": "History",
+        "decision": {
+          "approved": "Accepted",
+          "changes_requested": "Correction requested",
+          "rejected": "Disputed"
+        },
+        "detailUnavailable": "The details of this submission could not be loaded, so it cannot be decided now. Try again in a moment.",
+        "acceptedFinal": "Accepted. This is final.",
+        "waitingForWorker": "You asked for a correction. The corrected version will appear here as a new submission.",
+        "yourDecision": "Your decision",
+        "action": {
+          "accept": "Accept the work",
+          "request_correction": "Request a correction",
+          "dispute": "Dispute"
+        },
+        "actionHint": {
+          "accept": "You stand behind this work as done. Final.",
+          "request_correction": "The worker corrects the entry and submits it again.",
+          "dispute": "You disagree. It stays on record; you can withdraw it later by accepting."
+        },
+        "withdrawDisputeHint": "You disputed this earlier. You can withdraw the dispute by accepting; the dispute stays in the history.",
+        "noteLabel": "Note (optional)",
+        "noteLabelRequired": "Note (required)",
+        "noteHint": "The worker sees this note.",
+        "chooseFirst": "Choose a decision",
+        "saving": "Saving…",
+        "submit": {
+          "accept": "Accept",
+          "request_correction": "Request correction",
+          "dispute": "Dispute"
+        },
+        "acceptIsFinal": "Accepting cannot be undone.",
+        "result": {
+          "ok": {
+            "approved": "Accepted. Recorded as the client's acceptance.",
+            "changes_requested": "Correction requested. The worker has been told.",
+            "rejected": "Dispute recorded."
+          },
+          "note_required": "Write a short note for the worker.",
+          "note_too_long": "The note is too long.",
+          "invalid_decision": "Choose a decision.",
+          "entry_not_found": "This entry was not found.",
+          "entry_not_org_scoped": "This entry cannot be decided here.",
+          "not_authorized": "You are not authorized to decide this.",
+          "review_not_enabled": "Review is not enabled for this work.",
+          "no_reviewer_engagement": "You do not hold review authority for this organization.",
+          "self_review_not_allowed": "You cannot decide your own work.",
+          "review_authority_not_established": "You are not the registered client for this work, or it was not submitted to you.",
+          "already_accepted": "This work was already accepted. An acceptance is final.",
+          "entry_superseded": "The worker replaced this entry with a newer version.",
+          "entry_deleted": "This entry was deleted.",
+          "error": "Something went wrong. Nothing was recorded.",
+          "needs_migration": "This feature is not available yet."
+        }
+      }
+    }
+  },
   "cvBridge": "{confirmed} of {total} entries reviewed — reviewed work shows on your CV.",
   "cvBridgeEmpty": "No entries yet — work records you create here will feed your CV.",
   "cvBridgeLink": "Open CV",
@@ -78,6 +258,20 @@
   "engagement": "Context",
   "engagementChoose": "Choose the engagement…",
   "engagementAmbiguous": "This work could belong to more than one engagement. Choose which one before saving.",
+  "unnamedOrganization": {
+    "company": "Company without a name",
+    "agency": "Agency without a name",
+    "other": "Organization without a name",
+    "ended": "Earlier organization without a name"
+  },
+  "activeWorkspaceNoRelationship": "You are acting for {org}, but no work relationship with {org} is recorded, so it is not offered here. Choose the context this work really belongs to.",
+  "project": "Project",
+  "projectChoose": "Choose the project…",
+  "projectNone": "Not project work",
+  "projectAmbiguous": "You are assigned to more than one project. Choose which project these hours belong to before saving (or mark them as not project work).",
+  "projectAuto": "Project: {name}",
+  "projectViaTeam": "{project} (via team {team})",
+  "projectClient": "{project} (client project)",
   "unconfirmedTimeBlocked": "{count, plural, one {# logged duration still awaits your review and would not be saved.} other {# logged durations still await your review and would not be saved.}} Keep or remove them first.",
   "entry": {
     "reviewedBy": "Reviewed by",
@@ -99,12 +293,21 @@
       "waiting": "Waiting for a human to review it — your organisation's manager or owner can review it; until then it stays the record you entered",
       "approved": "Reviewed",
       "changes_requested": "Changes requested",
-      "rejected": "Returned",
-      "reasonLabel": "Reason"
+      "rejected": "Rejected",
+      "reasonLabel": "Reason",
+      "notEnabled": "Recorded — your manager has not switched on confirmation, so nobody is reviewing this entry; until then it stays what you stated",
+      "correctedFrom": {
+        "changes_requested": "Corrected after it was returned",
+        "rejected": "Corrected after it was rejected",
+        "approved": "Corrected after review",
+        "earlierVersion": "The earlier version stays in your history with this decision; its hours count once — through this correction."
+      },
+      "quotedNote": "“{note}”"
     },
     "delete": "Delete entry",
     "deleting": "Deleting...",
     "deleteConfirm": "Remove this entry from your journal? It will no longer appear in your list. You can restore it right after removing.",
+    "more": "More about this entry",
     "deleteBlocked": "Entry already reviewed — send a correction request instead of deleting.",
     "deletedNotice": "Entry removed from your journal.",
     "restore": "Restore",
@@ -158,7 +361,7 @@
       "pending": "Waiting for review",
       "confirmed": "Confirmed"
     },
-    "projectNote": "Entries can be linked to a project — the data model is ready, but no entry is linked yet and nothing is filled automatically. The projects / sites / client layer is filled in a separate slice.",
+    "projectNote": "Entries can be linked to a project. Nothing is filled automatically.",
     "reviewClarity": {
       "lead": "Your review turns a worker's self-declared entry into confirmed evidence. Only a manager, owner, or client manager can do it — every confirmation is a real human decision.",
       "actionsTitle": "What each action does",
@@ -197,12 +400,18 @@
       "entrySuperseded": "The entry was already replaced by a newer version — this card is no longer actionable and will be removed from the list.",
       "entryDeleted": "The entry was deleted — this card is no longer actionable and will be removed from the list.",
       "staleTerminalHint": "Nothing was recorded. If the worker saved a newer version, it appears in the inbox as a new card.",
-      "noReviewerEngagement": "You can see this entry as a manager, but confirming needs confirmation authority. Ask the organization owner to grant it on the People page."
+      "noReviewerEngagement": "You can see this entry as a manager, but confirming needs confirmation authority. Ask the organization owner to grant it on the People page.",
+      "selfReviewNotAllowed": "You cannot confirm your own work. The entry stays recorded as self-declared; confirmation has to come from another authorized person.",
+      "reviewAuthorityNotEstablished": "You are not the legitimate counterparty for this work, so you cannot confirm it. Confirmation comes from the employer or from the client party the work was submitted to.",
+      "alreadyAccepted": "This work was already accepted. An acceptance is final."
     },
     "showOriginal": "Show original",
     "skills": "Skills",
     "title": "Entries to confirm",
     "quick": {
+      "elsewhere": "{n} more are waiting for your approval in other organizations you manage. Switch organization to see and approve them.",
+      "byOrganization": "By organization:",
+      "unnamedOrganization": "An organization whose name could not be read",
       "openQuick": "Quick confirm →",
       "title": "Quick confirm",
       "subtitle": "One glance, one tap: the card shows the worker, the date, the works and the exact skills your tap confirms. Every confirmation is your real decision, recorded only when you tap.",
@@ -237,8 +446,11 @@
   },
   "listEmpty": "You don't have any work records yet — your entries will show up here.",
   "listEmptyTitle": "Start building work records",
-  "listEmptyNext": "Create your first entry below — it stays private until you submit it.",
-  "listEmptyCta": "Create your first entry",
+  "listUnavailableTitle": "Your work records could not be read right now",
+  "listUnavailable": "This is a failed read, not an empty journal. Nothing you recorded has been lost — reload the page in a moment.",
+  "cvBridgeUnavailable": "Your records could not be read right now, so their count is unknown.",
+  "listEmptyNext": "Create your first entry in the box above — it stays private until you submit it.",
+  "listEmptyCta": "Or record it in the chat",
   "logViaChatBody": "Other ways to record work:",
   "logViaChatCta": "Log work in the chat",
   "logViaVoiceCta": "Record by voice",
@@ -247,6 +459,8 @@
   "listTitle": "Work entries",
   "navTitle": "Work journal",
   "navSubtitle": "Show what you did — it strengthens your work card.",
+  "orgContextNotice": "This is your personal work journal, not “{org}”. You are acting for the company — its work and people live elsewhere.",
+  "orgContextCta": "Company work →",
   "composerBenefit": "This entry strengthens your work card.",
   "newEntry": "New entry",
   "noEngagement": "You don't have an active work context yet. Join an organization or project to build your CV.",
@@ -286,6 +500,7 @@
     "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
     "uploaded": "Photo attached to the entry.",
     "limitReached": "This entry already has a photo — the free tier allows 1 photo per entry.",
+    "quotaReached": "Your organization's storage limit is reached, so the photo was not saved. The entry itself is saved.",
     "notReady": "Photo storage is not provisioned in this environment yet — the entry was saved without the photo.",
     "preparing": "Preparing photo…",
     "prepared": "Photo resized and ready to upload.",
@@ -293,7 +508,8 @@
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
     "uploading": "Uploading photo…",
     "remove": "Remove photo",
-    "previewAlt": "Selected photo"
+    "previewAlt": "Selected photo",
+    "takePhoto": "Take a photo"
   },
   "modes": {
     "title": "Entry type",
@@ -310,7 +526,7 @@
     "pageTitle": "Voice entry",
     "pageIntro": "Speak about your work day — you will review and edit the text before anything is saved.",
     "backToJournal": "Back to journal",
-    "unavailable": "Voice transcription is not configured yet. The transcription server has not been connected by the platform owner — recording is disabled until then. You can always write your entry as text.",
+    "unavailable": "Voice transcription is not available yet — recording is off for now. You can always write your entry as text.",
     "disclosureTitle": "Before you record",
     "disclosureProcessing": "Your audio is sent to a LabourMarket.ai-controlled processing server to be turned into text. No third-party speech service is used.",
     "disclosureWhy": "It is used only to create the text below — nothing else.",
@@ -344,9 +560,35 @@
       "too_large": "The recording is too large (max 25 MB).",
       "too_long": "The recording is too long (max 10 minutes).",
       "unavailable": "The transcription server is not available right now.",
-      "undecodable": "The audio could not be read — please try again."
+      "undecodable": "The audio could not be read — please try again.",
+      "rate_limited": "Too many recordings in a short time - wait a moment and try again.",
+      "token_expired": "The upload session expired - please try again.",
+      "unauthorized": "Your session is not authorised for voice - please sign in again.",
+      "service_unreachable": "The transcription server could not be reached. Check your connection and try again; your recording is kept on this page until you leave."
     },
-    "permissionDenied": "Microphone access was blocked. Allow microphone access in your browser settings and try again."
+    "permissionDenied": "Microphone access was blocked. Allow microphone access in your browser settings and try again.",
+    "disclosureProvenance": "The saved entry is marked as dictated by voice and reviewed by you.",
+    "state": {
+      "ready": "Ready. Choose the speaking language, then start recording.",
+      "permissionRequired": "Your browser will ask for microphone permission when you start. Nothing is recorded before you allow it.",
+      "policyBlocked": "The site's security policy blocks the microphone here. Voice recording is unavailable on this page - you can write the entry as text.",
+      "unsupported": "This browser cannot record audio here (it needs a secure page and microphone recording support). You can upload an audio file or write the entry as text.",
+      "noDevice": "No microphone was found on this device.",
+      "deviceBusy": "The microphone is in use by another app. Close it and try again.",
+      "cancelled": "Recording cancelled. Nothing was uploaded or saved.",
+      "requesting": "Waiting for your permission to use the microphone...",
+      "interrupted": "Recording paused because this page was hidden. Resume when you are back.",
+      "interruptedKept": "The microphone stopped, so the recording ended early. What was captured is transcribed below - check it.",
+      "uploading": "Uploading your recording..."
+    },
+    "language": {
+      "label": "Speaking language",
+      "auto": "Detect automatically",
+      "hint": "Choose the language you will speak - it does not have to match the language of this site."
+    },
+    "recordAgain": "Record again",
+    "announceStarted": "Recording started",
+    "announceMinutes": "{minutes} min recorded"
   },
   "savedOpenCv": "View your CV",
   "dayNav": {
@@ -355,7 +597,7 @@
     "openInCalendar": "Open in calendar",
     "recordOnDay": "Record work",
     "dayEmpty": "No records on this day.",
-    "moreDays": "Showing the most recent days. {count, plural, one {# more day} other {# more days}} — pick it on the calendar.",
+    "moreDays": "Showing the latest recorded day. {count, plural, one {# more day} other {# more days}} with records — pick a date on the calendar.",
     "periodEmpty": "No records in this period."
   },
   "spreadsheet": {
@@ -607,7 +849,11 @@
     "sessionExpired": "Your session has expired. Please sign in again.",
     "noWorkerProfile": "Worker profile not found. Open your account settings and enable the worker role.",
     "engagementRequired": "Choose the work context (organization or project) this entry belongs to.",
+    "projectNotAssignable": "The chosen project is not assigned to you or belongs to another organization. Pick a project from the list.",
     "notesRequired": "Describe what you worked on — the free text is the core of the entry.",
+    "workDateRequired": "Choose the day this work was done.",
+    "workDateInvalid": "The work date is not a valid date.",
+    "workDateFuture": "The work date cannot be in the future.",
     "quantityInvalid": "Quantity must be a non-negative number.",
     "unitSlugUnknown": "This unit is not recognised yet: {units}. Choose another unit or try again later.",
     "sourceDocumentInvalid": "The referenced source document was not found among your documents.",
@@ -644,6 +890,60 @@
     },
     "hours": "{hours} h",
     "plusDayUnits": "+ {days} d (recorded in days, never converted to hours)",
+    "experience": {
+      "eyebrow": "Professional experience · all time",
+      "journalLabel": "Work journal",
+      "journalSource": "Your own records",
+      "journalSourceConfirmed": "Your records · {hours} h confirmed by a manager",
+      "orgLabel": "Work history provided by organisations",
+      "orgSpan": "Period: {span}",
+      "spanSameYear": "{from}–{to} {year}",
+      "orgSource": "Provided by an organisation · not journal entries",
+      "foldTitle": "How this is counted",
+      "ruleOnce": "The total counts every piece of work once, whoever recorded it: your journal entries and the history organisations provided. An organisation record that describes one of your journal entries, and a period total that spans the same organisation's day records or your journal days, are shown but never added a second time.",
+      "rulePeriods": "The period tiles count journal entries only. A period provided by an organisation is never split into days or weeks.",
+      "ruleRoles": "Leadership or ownership is part of your professional history but adds no hours: an organisation's project hours are its people's work, not your personal hours. A confirmation state never hides experience — the part a manager confirmed is shown separately.",
+      "periodsLabel": "Journal periods",
+      "totalLabel": "Professional experience in total",
+      "totalSub": "Work journal {journal} h · organisation history {org} h",
+      "totalSubJournalOnly": "Work journal only — organisation history could not be read",
+      "totalSource": "Every piece of work counted once · sources shown separately",
+      "totalSourceConfirmed": "Every piece of work counted once · {confirmed} h confirmed by a manager",
+      "breakdownTitle": "What it is made of",
+      "personalRecords": "Personal records (no organisation)",
+      "orgUnnamed": "Organisation without a name",
+      "rowJournal": "Journal: {hours} h ({entries, plural, one {# entry} other {# entries}})",
+      "rowJournalConfirmed": "Journal: {hours} h, {confirmed} h of it confirmed by a manager ({entries, plural, one {# entry} other {# entries}})",
+      "rowOrganization": "Organisation records: {hours} h ({records, plural, one {# record} other {# records}})",
+      "rowSpan": "{from} – {to}",
+      "rowNoHours": "no hours recorded",
+      "roleNow": "now",
+      "roleDatesNotRecorded": "dates not recorded",
+      "businessPeriod": "Earlier business period: {label}",
+      "datesNotDocumented": "dates not documented",
+      "projectsTitle": "By project",
+      "projectUnnamed": "Project without a name",
+      "notCountedTitle": "Shown but not added to the total",
+      "notCounted": {
+        "describes_journal_entry": "the organisation's record describes your journal entry — the same work is already counted",
+        "period_spans_day_records": "the period total spans the same organisation's day records — it may be their summary",
+        "journal_within_organization_period": "the journal days fall inside a period the same organisation stated — the organisation's figure already stands"
+      },
+      "rolesUnknown": "Your relationships to organisations could not be read right now — roles are not listed; the hours are unchanged.",
+      "source": {
+        "journal": "work journal",
+        "organization_day": "organisation day records",
+        "organization_period": "organisation period total"
+      },
+      "formerly": "formerly {names}",
+      "periodBand": "Period: {label}",
+      "byPeriodUnplaced": "no stated period",
+      "relationTitle": "Legal relationship",
+      "earlierEntity": "Separate legal entity",
+      "administeredBy": "Records administered by {name}",
+      "continues": "Continues the activity of an earlier legal entity: {names}",
+      "roleDerived": "by the organisation’s period statement"
+    },
     "confirmedHours": "Manager-confirmed",
     "confirmedOf": "{confirmed} of {total} h confirmed by a manager's record",
     "confirmedNone": "No manager confirmations yet",
@@ -674,6 +974,9 @@
     "directionsHint": "Derived only from skills your entries back — not a rating and not a qualification, just directions your work already fits.",
     "directionCoverage": "your entries back {shared} of {total} skills of this direction",
     "directionMissing": "not evidenced yet: {skills}",
+    "potentialTitle": "Capabilities your work may also involve",
+    "potentialHint": "A possibility read from the skills your entries back — not confirmed, not a qualification. Say in your own words whether you do this, or a manager can confirm it.",
+    "potentialFrom": "possible · from {skills}",
     "growthTitle": "Where you could grow",
     "growthBasis": "Based on {count, plural, one {# skill} other {# skills}} your entries back — {hours} h from {entries, plural, one {# entry} other {# entries}} ({period}):",
     "growthBasisSkill": "{skill} {hours} h",
@@ -697,7 +1000,7 @@
     "provenance": "Where the hours come from: {worker} h entered by you, {extracted} h recognised from your text, {corrected} h corrected by a manager.",
     "provenanceRule": "Each entry is counted once; an hour is attributed to a skill only when the entry is linked to a single skill, or when your own phrase (“tiled 6 h”) names that skill.",
     "dayInferred": "{count, plural, one {# entry has no stated work day and is placed by the day it was saved.} other {# entries have no stated work day and are placed by the day they were saved.}}",
-    "glance": "{days, plural, one {# day} other {# days}} · {entries, plural, one {# entry} other {# entries}}",
+    "glance": "{days, plural, one {# day with hours} other {# days with hours}} · {entries, plural, one {# entry} other {# entries}}",
     "glanceNone": "no entries",
     "periodEmpty": "No entries in “{period}” — pick another period above.",
     "mainActivity": "Main activity",
@@ -752,7 +1055,8 @@
         "body": "{hours} h on {days, plural, one {# day} other {# days}} ({period}) — attendance hours your organization entered in a timesheet or imported from a document. Kept apart from the journal figures above and not added to them.",
         "periodEmpty": "Nothing in this window ({period}); {hours} h on {days, plural, one {# day} other {# days}} all time. Kept apart from the journal figures above and not added to them.",
         "rule": "An hour record says when and how long, not what was done — so these hours reach no skill and no kind of work. Only the person's journal entry does that."
-      }
+      },
+      "emptyNoEntriesLedger": "No entries logged against your organization. Below is what your organization has on record about this person."
     },
     "confirmedOfDays": "{confirmed} of {total} d. confirmed by a manager's record",
     "confirmedNoDuration": "{confirmed} of {entries, plural, one {# entry} other {# entries}} confirmed by a manager or client — recorded without a duration, so no hours to show",
@@ -771,6 +1075,8 @@
       "rejected": "{hours} h rejected in a timesheet — counted nowhere",
       "rule": "An hour record says when and how long, not what was done — so these hours reach no skill and no kind of work. Only a journal entry does that.",
       "periodRecord": "{hours} h over {span} — one figure for the whole period, not spread onto days",
+      "periodRecordHuman": "{hours} h, {span} — the source gives only the total; the months were chosen by a person when the document was imported. Not spread onto months or days",
+      "periodRecordDerived": "{hours} h, {span} — the source gives only the total; the months were worked out, not stated. Not spread onto months or days",
       "periodMore": "{count, plural, one {# more period record} other {# more period records}}"
     },
     "growthKindsTitle": "What your entries show",
@@ -830,7 +1136,8 @@
         "flat": "about the same",
         "new": "new"
       }
-    }
+    },
+    "emptyNoEntriesLedger": "No journal entries yet. What follows is the work the organization has on record."
   },
   "verification": {
     "state": {
@@ -867,6 +1174,7 @@
     "hint": "One sentence: what you did, where and for how long. A photo is optional and is added before saving.",
     "placeholder": "e.g. tiled 6 h at the site in Kaunas",
     "understand": "Read it back",
+    "whatOnDay": "What did you do on {day}?",
     "startOver": "Start over",
     "detailed": "In detail (full form)",
     "detailedBack": "Back to the simple entry"
@@ -883,6 +1191,12 @@
     "allDays": "All days",
     "dayWithRecords": "{day} — {count, plural, one {# record} other {# records}}",
     "dayEmpty": "{day} — no records",
+    "exportHours": "Download hours:",
+    "exportPeriod": {
+      "week": "week",
+      "2weeks": "2 weeks",
+      "month": "month"
+    },
     "periodEmpty": "No records in this period.",
     "periodSummary": "{days, plural, one {# day} other {# days}}, {entries, plural, one {# record} other {# records}}.",
     "periodSummaryWithTime": "{days, plural, one {# day} other {# days}}, {entries, plural, one {# record} other {# records}}, {time}.",
@@ -894,5 +1208,47 @@
     "reported": "organization recorded {time}",
     "periodReportedOnly": "No records of your own; the organization recorded {days, plural, one {# day} other {# days}}, {time}.",
     "reportedUnknown": "The organization's records for this period could not be read — that is not the same as none."
+  },
+  "contextEnded": "ended",
+  "stream": {
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "dayObject": {
+    "title": "This day of work",
+    "where": "Where I worked",
+    "what": "What I did",
+    "howLong": "How long",
+    "evidence": "What proves it",
+    "confirmed": "Who stood behind it",
+    "added": "What it added to my professional history",
+    "records": "{count, plural, one {# record} other {# records}}",
+    "whereNone": "No place recorded on this day.",
+    "whatNone": "No activity named — see the records below.",
+    "timeNone": "No time recorded yet.",
+    "untimed": "{count, plural, one {# record has no recorded time — it is not counted as zero work.} other {# records have no recorded time — they are not counted as zero work.}}",
+    "photosNone": "No photos on this day.",
+    "photosUnavailable": "Photos could not be read right now.",
+    "photoCount": "{count, plural, one {# photo you added} other {# photos you added}}",
+    "photoAlt": "Work photo you added",
+    "previewUnavailable": "Photo saved — preview unavailable right now.",
+    "photosMore": "{count, plural, one {+# more in the gallery} other {+# more in the gallery}}",
+    "confirmedByOther": "{count, plural, one {# record confirmed by someone else} other {# records confirmed by someone else}}",
+    "selfConfirmed": "{count, plural, one {# confirmed by you alone} other {# confirmed by you alone}}",
+    "waiting": "{count, plural, one {# waiting for confirmation} other {# waiting for confirmation}}",
+    "contested": "{count, plural, one {# returned or disputed} other {# returned or disputed}}",
+    "automatic": "automatic",
+    "confirmedNone": "No manager has answered for this day yet.",
+    "addedNoSkills": "No skills are linked to this day's records yet.",
+    "addedProof": "{time} of this day now stand as a manager-confirmed record in your professional history.",
+    "addedNoProof": "None of this day is a manager-confirmed record yet — a manager's answer is what turns your own record into a confirmed one.",
+    "openHistory": "Open my professional history",
+    "photoOpen": "Open photo larger",
+    "photoClose": "Close photo",
+    "photoPrev": "Previous photo",
+    "photoNext": "Next photo",
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# recorded — confirmation not switched on} other {# recorded — confirmation not switched on}}",
+    "confirmationNotEnabled": "Your manager has not switched on confirmation — nobody is reviewing these entries."
   }
 }

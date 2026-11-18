@@ -1,13 +1,14 @@
 import { getTranslations } from "next-intl/server";
 
 import type { ActiveLocale } from "@/lib/i18n/config";
+import { NavLinkPending } from "@/components/app/nav-link-pending";
 import { Link } from "@/lib/i18n/navigation";
 import {
   WEEKDAY_ANCHOR_ISO,
   type JournalCalendarGrid,
   type JournalCalendarScale,
 } from "@/lib/journal/journal-calendar";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 // The observed-reality colour of the work-world grammar (primitives.tsx
 // REALITY_CLASS.observed). That file is landing-frozen, so the class pair is
 // mirrored here verbatim rather than exported from it; the journal grid must
@@ -24,7 +25,8 @@ const REALITY_CLASS = { observed: "text-brand-cyan border-brand-cyan/40" } as co
  * day, and the page below shows exactly that day's records and that day's
  * actions. Quick recording stays where it is, above.
  *
- * WHAT IT IS. Links and text. No client JavaScript, no state, no store: the
+ * WHAT IT IS. Links and text (the only client leaf is the in-flight tap
+ * indicator). No client state, no store: the
  * selected day, the scale and the anchored period all live in the URL
  * (`?date=`, `?cal=`, `?month=`), so a day is shareable, survives a reload
  * and works with JS still loading. Every figure in a cell is the journal's
@@ -48,6 +50,11 @@ export async function JournalCalendar({
   carry?: Readonly<Record<string, string>>;
 }) {
   const t = await getTranslations("journal.calendar");
+  // The day whose week / fortnight / month the hours export covers.
+  const exportDay =
+    selected ??
+    grid.weeks.flat().find((c) => c.isToday && c.inScope)?.iso ??
+    grid.rangeEnd;
 
   const href = (params: Readonly<Record<string, string | null>>): "/dashboard" => {
     const q = new URLSearchParams({ ...(carry ?? {}) });
@@ -104,7 +111,7 @@ export async function JournalCalendar({
 
   const totalLabel =
     grid.recordedMinutes > 0
-      ? formatDuration(grid.recordedMinutes, "minutes", locale === "en" ? "en" : "lt")
+      ? formatDuration(grid.recordedMinutes, "minutes", durationLocale(locale))
       : null;
 
   return (
@@ -213,7 +220,7 @@ export async function JournalCalendar({
                 : "empty";
           const reportedLabel =
             cell.reportedMinutes > 0
-              ? t("reported", { time: formatDuration(cell.reportedMinutes, "minutes", locale === "en" ? "en" : "lt") })
+              ? t("reported", { time: formatDuration(cell.reportedMinutes, "minutes", durationLocale(locale)) })
               : null;
           return (
             <Link
@@ -230,7 +237,7 @@ export async function JournalCalendar({
                   ? t("dayEmpty", { day: dayTitle })
                   : `${t("dayWithRecords", { day: dayTitle, count: cell.entryCount })}${
                       cell.totalMinutes > 0
-                        ? `, ${formatDuration(cell.totalMinutes, "minutes", locale === "en" ? "en" : "lt")}`
+                        ? `, ${formatDuration(cell.totalMinutes, "minutes", durationLocale(locale))}`
                         : ""
                     }, ${t(`confirmation.${cell.confirmation}`)}`
               }${reportedLabel ? `, ${reportedLabel}` : ""}`}
@@ -251,6 +258,11 @@ export async function JournalCalendar({
                       : "border-transparent text-text-secondary hover:border-ink-500"
               } ${cell.isToday && !cell.isSelected ? "ring-1 ring-inset ring-ink-500" : ""}`}
             >
+              {/* The tap is acknowledged at once: the day re-reads on the
+                  server, and until it answers the cell says so (owner walk
+                  2026-09-28 — "the click seemed dead"). Honest: shown only
+                  while that navigation is actually in flight. */}
+              <NavLinkPending className="absolute right-1 top-1 h-2.5 w-2.5 text-brand-blue" />
               <span aria-hidden>{cell.dayOfMonth}</span>
               {/* WHAT THE DAY HOLDS, on the date itself: the recorded HOURS
                   when the day carries time, and the confirmation STATE as the
@@ -315,7 +327,7 @@ export async function JournalCalendar({
         {grid.recordedDays === 0 && grid.reportedDays > 0
           ? t("periodReportedOnly", {
               days: grid.reportedDays,
-              time: formatDuration(grid.reportedMinutes, "minutes", locale === "en" ? "en" : "lt"),
+              time: formatDuration(grid.reportedMinutes, "minutes", durationLocale(locale)),
             })
           : grid.recordedDays === 0
           ? t("periodEmpty")
@@ -329,6 +341,28 @@ export async function JournalCalendar({
                 days: grid.recordedDays,
                 entries: grid.recordedEntries,
               })}
+      </p>
+      {/* HOURS OUT (owner command 2026-09-28 §13): the same canonical hours as
+          a file, for one week, two weeks or one calendar month around the
+          picked day (else today in view, else the period's last day). A
+          download link to a route handler — not a navigation — and nothing
+          is stored: the file is a representation of the journal's facts. */}
+      <p
+        className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-muted"
+        data-testid="journal-hours-export"
+      >
+        <span>{t("exportHours")}</span>
+        {(["week", "2weeks", "month"] as const).map((period) => (
+          <a
+            key={period}
+            href={`/${locale}/dashboard/journal/hours?period=${period}&date=${exportDay}`}
+            download
+            className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+            data-testid={`journal-hours-export-${period}`}
+          >
+            {t(`exportPeriod.${period}`)}
+          </a>
+        ))}
       </p>
       {/* THE ORGANIZATION'S LAYER COULD NOT BE READ. Nothing was placed on
           any day above — and that is not the same as "the organization

@@ -20,12 +20,17 @@ const CATALOGUE = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "
 describe("booking_withdrawn — the worker durably learns the offer is gone", () => {
   it("EVERY withdraw success path emits, and to the type the constraint admits", () => {
     const src = read("lib", "booking", "booking-actions.ts");
-    const emits = src.match(/emitBookingNotification\(input\.bookingId, "booking_withdrawn"\)/g) ?? [];
+    // 2026-09-23: the call site rides `notifyBooking`, which reads the
+    // booking row under the CALLER's session and hands the emitter its
+    // facts (the admin client holds no grant on booking_requests).
+    const emits = src.match(/notifyBooking\(supabase, input\.bookingId, "booking_withdrawn"\)/g) ?? [];
     // v2 + v1 + no-reason: three success returns, three emits — a fourth
     // path added without its emit goes RED here.
     expect(emits).toHaveLength(3);
     const successes = src.match(/status: "withdrawn"/g) ?? [];
     expect(successes.length).toBe(emits.length);
+    // Negative control: the pre-2026-09-23 id-only call shape is gone.
+    expect(src).not.toMatch(/emitBookingNotification\(input\.bookingId/);
   });
 
   it("the emitter routes withdrawn to the WORKER branch (the company acted)", () => {
@@ -37,16 +42,33 @@ describe("booking_withdrawn — the worker durably learns the offer is gone", ()
 });
 
 describe("engagement_ended — the counterparty hears it, the actor does not", () => {
-  it("the end action emits after a real state change", () => {
+  it("the end action emits after a real state change, with facts read under the actor's session", () => {
     const src = read("lib", "engagements", "end-engagement.ts");
-    expect(src).toContain("emitEngagementEndedNotification(engagement, actorSide)");
+    // 2026-09-23: the emitter takes FACTS. The end action reads the
+    // engagement row and, for a worker actor, the company's owner pointer
+    // under its own session — the admin client holds no grant on either.
+    expect(src).toContain(
+      "await engagementEndedNotificationFacts(client, engagement, actorSide)",
+    );
+    const facts = src.slice(src.indexOf("async function engagementEndedNotificationFacts"));
+    expect(facts).toContain('.from("company_worker_engagements")');
+    expect(facts).toMatch(/actorSide === "worker"[\s\S]{0,300}\.from\("companies"\)/);
+    expect(src).not.toMatch(/createAdminClient/);
+    // Negative control: the pre-2026-09-23 id-only call shape is gone.
+    expect(src).not.toContain("emitEngagementEndedNotification(engagement, actorSide)");
   });
 
   it("recipient is the COUNTERPARTY of the server-derived actor side", () => {
     const src = read("lib", "notifications", "event-emitters.ts");
-    const fn = src.slice(src.indexOf("export async function emitEngagementEndedNotification"));
-    expect(fn).toMatch(/actorSide === "worker"[\s\S]{0,400}companies/);
+    const fn = src.slice(
+      src.indexOf("export async function emitEngagementEndedNotification"),
+      src.indexOf("export interface WorkTaskAssignedNotificationFacts"),
+    );
+    expect(fn).toMatch(/actorSide === "worker"[\s\S]{0,200}companyOwnerProfileId/);
     expect(fn).toMatch(/workerProfileId/);
+    // The emitter reads NEITHER ungranted table itself.
+    expect(fn).not.toContain('.from("companies")');
+    expect(fn).not.toContain('.from("company_worker_engagements")');
     // Neutral-visibility doctrine: the emitter must not carry visibility
     // claims it has not measured — metadata stays empty.
     expect(fn).toContain("metadata: {}");

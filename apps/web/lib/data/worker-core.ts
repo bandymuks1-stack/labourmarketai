@@ -3,7 +3,18 @@ import "server-only";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
 import type { CoreRead, DomainCaller } from "@/lib/domain/caller";
+import {
+  anyRecordedConfirmation,
+  withStandingConfirmation,
+  type SkillConfirmationState,
+  type StandingSkillRead,
+} from "@/lib/evidence/skill-confirmation-standing";
+import {
+  readOwnStandingConfirmedSkillIds,
+  readStandingConfirmedSkillIds,
+} from "@/lib/evidence/skill-confirmation-standing-read";
 
 /**
  * Request-cached CORE worker readers (P0 nav-performance repair, Track B).
@@ -40,7 +51,7 @@ function asAny(c: SupabaseClient): any {
  *  (player-card, worker-subject primary + mirrored-facts reads, hub
  *  availability). Every column exists in the generated Database types. */
 const WORKER_FULL_COLS =
-  "id, profile_id, availability_status, available_from, current_location_country, preferred_countries, preferred_contract_type, willing_to_relocate, has_transport, driving_licence_categories, pay_basis_preference, night_shifts_ok, weekend_shifts_ok, overtime_ok, own_vehicle, own_tools, work_card_confirmed_at";
+  "id, profile_id, availability_status, available_from, current_location_country, preferred_countries, preferred_contract_type, willing_to_relocate, has_transport, driving_licence_categories, pay_basis_preference, night_shifts_ok, weekend_shifts_ok, overtime_ok, own_vehicle, own_tools, work_card_confirmed_at, salary_min_eur, salary_max_eur";
 
 /** Fallback column set for environments where the human-gated MP-2 /
  *  work-card columns are not applied yet (Postgres 42703). Mirrors the old
@@ -69,6 +80,10 @@ export interface WorkerCoreRow {
   own_vehicle: boolean | null;
   own_tools: boolean | null;
   work_card_confirmed_at: string | null;
+  /** The work card's monthly EUR range (`save_worker_card`); absent on the
+   *  base-column fallback, read as "not stated". */
+  salary_min_eur?: number | null;
+  salary_max_eur?: number | null;
 }
 
 /**
@@ -150,6 +165,10 @@ export interface WorkerProfessionRow {
   is_primary: boolean | null;
   profession_id: string | null;
   professions: { slug: string | null } | null;
+  /** The person's OWN WORDS when the registry does not carry what they do
+   *  (ledger 20260927060325). Null on a registry row. Rendered through
+   *  `professionDisplayName`, never interpreted. */
+  label: string | null;
 }
 
 /**
@@ -164,7 +183,7 @@ export async function readWorkerProfessionRows(
   try {
     const { data, error } = await asAny(caller.supabase)
       .from("worker_professions")
-      .select("is_primary, profession_id, professions(slug)")
+      .select("is_primary, profession_id, label, professions(slug)")
       .eq("worker_id", workerId)
       .order("is_primary", { ascending: false });
     if (error || !Array.isArray(data)) return { ok: false };
@@ -205,7 +224,17 @@ export const getWorkerProfessionRows = cache(
 export interface WorkerSkillRow {
   id: string;
   skill_id: string | null;
+  /**
+   * The STANDING confirmation (lib/evidence/skill-confirmation-standing.ts):
+   * true only while a confirmation by someone other than the person is backed
+   * by live, counted-once, independently approved work. NOT the stored flag —
+   * that is `verifiedRecorded` (history, never rewritten).
+   */
   verified: boolean | null;
+  /** The stored `worker_skills.verified` flag: the confirmation ACT happened. */
+  verifiedRecorded?: boolean;
+  /** Why `verified` reads as it does (standing / withdrawn / self_confirmed / unknown / none). */
+  confirmation?: SkillConfirmationState;
   source: string | null;
   /** When the skill was confirmed — carried for the Living CV consumers
    *  (superset pattern: one select serves every transport). */
@@ -226,16 +255,33 @@ export interface WorkerSkillRow {
 export async function readWorkerSkillRows(
   caller: DomainCaller,
   workerId: string,
+  /** How the standing read is made — the request-cached own read on the
+   *  cookie path; the caller's own client otherwise (MCP bearer). */
+  readStanding: (workerId: string) => Promise<StandingSkillRead | null> = (id) =>
+    readStandingConfirmedSkillIds(caller.supabase as SupabaseClient, id),
 ): Promise<CoreRead<WorkerSkillRow[]>> {
   try {
     const { data, error } = await asAny(caller.supabase)
       .from("worker_skills")
       .select(
-        "id, skill_id, verified, source, verified_at, confidence_bin, skills(slug)",
+        "id, skill_id, verified, verified_by, source, verified_at, confidence_bin, skills(slug)",
       )
       .eq("worker_id", workerId);
     if (error || !Array.isArray(data)) return { ok: false };
-    return { ok: true, value: data as WorkerSkillRow[] };
+    const rows = data as (WorkerSkillRow & { verified_by: string | null })[];
+    // A recorded confirmation reads as confirmed only while it STANDS. The
+    // journal is read only when there is a recorded confirmation to judge.
+    const standing = anyRecordedConfirmation(rows) ? await readStanding(workerId) : null;
+    // verified_by is read to classify a self-confirmation, never handed out:
+    // the confirmer's identity is not part of this row (role-only rule).
+    const value: WorkerSkillRow[] = withStandingConfirmation(rows, standing).map(
+      (r) => {
+        const row: WorkerSkillRow & { verified_by?: string | null } = { ...r };
+        delete row.verified_by;
+        return row;
+      },
+    );
+    return { ok: true, value };
   } catch {
     return { ok: false };
   }
@@ -255,7 +301,11 @@ export const getWorkerSkillRows = cache(async (): Promise<WorkerSkillRow[]> => {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return [];
-    const read = await readWorkerSkillRows({ supabase, userId: user.id }, worker.id);
+    const read = await readWorkerSkillRows(
+      { supabase, userId: user.id },
+      worker.id,
+      readOwnStandingConfirmedSkillIds,
+    );
     return read.ok ? read.value : [];
   } catch {
     return [];
@@ -302,6 +352,27 @@ export const getPreferredLocationRows = cache(
 /** The signed-in worker's primary profession slug (or null) — derived from
  *  the ONE cached profession read; replaces the per-consumer
  *  `is_primary = true` selects. */
+/**
+ * EVERY profession this person holds, primary first, as the display layer
+ * needs them: a registry slug, or the person's own words, or nothing.
+ *
+ * Separate from `getPrimaryProfessionSlug` on purpose. That one answers "which
+ * REGISTRY profession is primary" and feeds the match subject and the market
+ * map, which can only work with a catalogue slug; widening it would quietly
+ * change what matching is given. This one answers "what does this person say
+ * they do", which is the question the profile, the Living CV and the ŠIANDIEN
+ * line are actually asking.
+ */
+export const getProfessionEntries = cache(
+  async (): Promise<ProfessionEntry[]> => {
+    const rows = await getWorkerProfessionRows();
+    return rows.map((r) => ({
+      slug: r.professions?.slug ?? null,
+      label: r.label ?? null,
+    }));
+  },
+);
+
 export const getPrimaryProfessionSlug = cache(
   async (): Promise<string | null> => {
     const rows = await getWorkerProfessionRows();

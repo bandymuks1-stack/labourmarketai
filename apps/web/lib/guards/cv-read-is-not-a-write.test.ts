@@ -36,7 +36,8 @@ import { INTENT_REGISTRY, type RoutedIntent } from "@/lib/conversation/intent-re
 const APP_ROOT = join(__dirname, "..", "..");
 
 /** The five ACTIVE locales the router is required to cover (G3 parity). */
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+// 2026-09-20: PL is an active UI locale; the Polish catalog reached full parity in the same PR, so pl is covered here like the other five.
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 type Active = (typeof ACTIVE)[number];
 
 /** ORDINARY ways a person asks to SEE the CV the product already holds.
@@ -70,6 +71,20 @@ const VIEW_SENTENCES: Record<Active, readonly string[]> = {
     "zeig mir meinen Lebenslauf",
     "wo ist mein Lebenslauf",
   ],
+  pl: [
+    "chcę zobaczyć swoje CV",
+    "pokaż moje CV",
+    "otwórz moje CV",
+    "gdzie jest moje CV",
+    "chcę przejrzeć swoje CV",
+  ],
+  sv: [
+    "jag vill se mitt CV",
+    "visa mitt CV",
+    "öppna mitt CV",
+    "var är mitt CV",
+    "kan jag titta på mitt CV?",
+  ],
 };
 
 /** Sentences that DO carry an explicit write verb — these must still reach
@@ -80,6 +95,8 @@ const IMPORT_SENTENCES: Record<Active, readonly string[]> = {
   ru: ["загрузить резюме", "прикрепи резюме"],
   nl: ["upload mijn cv"],
   de: ["meinen Lebenslauf hochladen"],
+  pl: ["wgraj moje CV", "zaimportuj moje CV"],
+  sv: ["ladda upp mitt CV", "importera mitt CV", "bifoga mitt CV"],
 };
 
 /** The object named and NOTHING that separates the five CV actions. §5:
@@ -90,6 +107,8 @@ const AMBIGUOUS_SENTENCES: Record<Active, readonly string[]> = {
   ru: ["моё резюме"],
   nl: ["mijn cv"],
   de: ["mein Lebenslauf"],
+  pl: ["moje CV", "CV"],
+  sv: ["mitt CV", "CV", "jag vill ändra mitt CV"],
 };
 
 const descriptorFor = (sentence: string) => {

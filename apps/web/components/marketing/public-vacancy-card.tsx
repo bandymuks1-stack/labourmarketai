@@ -3,6 +3,7 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import { formatUtcDate } from "@/lib/time/display";
 import { PlaceTimeStamp } from "@/components/app/work-world/primitives";
+import { vacancyPayLabel } from "@/lib/vacancy-store/vacancy-pay-label";
 
 /**
  * One anonymous vacancy row.
@@ -34,6 +35,8 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     ru: "Постоянная",
     nl: "Vast",
     de: "Unbefristet",
+    pl: "Na czas nieokreślony",
+    sv: "Tillsvidare",
   },
   temporary: {
     en: "Temporary",
@@ -41,6 +44,8 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     ru: "Временная",
     nl: "Tijdelijk",
     de: "Befristet",
+    pl: "Na czas określony",
+    sv: "Visstid",
   },
   seasonal: {
     en: "Seasonal",
@@ -48,6 +53,8 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     ru: "Сезонная",
     nl: "Seizoenswerk",
     de: "Saisonal",
+    pl: "Sezonowa",
+    sv: "Säsongsarbete",
   },
 };
 
@@ -58,6 +65,8 @@ const WORKING_TIME: Record<string, L> = {
     ru: "Полная занятость",
     nl: "Voltijd",
     de: "Vollzeit",
+    pl: "Pełny etat",
+    sv: "Heltid",
   },
   part_time: {
     en: "Part time",
@@ -65,6 +74,8 @@ const WORKING_TIME: Record<string, L> = {
     ru: "Частичная занятость",
     nl: "Deeltijd",
     de: "Teilzeit",
+    pl: "Niepełny etat",
+    sv: "Deltid",
   },
 };
 
@@ -74,27 +85,33 @@ const POSITIONS: L = {
   ru: "мест",
   nl: "plaatsen",
   de: "Stellen",
+  pl: "miejsc",
+  sv: "platser",
 };
 
-export function PublicVacancyCard({
-  vacancy,
-  locale,
-  savedLabel,
-  headingFallback,
-}: {
-  readonly vacancy: PublicVacancyPreview;
-  readonly locale: ActiveLocale;
-  /** Localized profession name for the anonymous heading (owner directive
-   *  2026-08-24): the raw title is member-only because it embeds employer and
-   *  location wording, so anonymous cards head with the profession in the
-   *  reader's language, falling back to the source occupation label. */
-  readonly headingFallback?: string;
-  /** Rendered only when the viewer has this ad in their OWN private bookmark
-   *  list. It is a note to the person looking at their own screen — it reaches
-   *  no employer and is never rendered for anyone else. */
-  readonly savedLabel?: string;
-}) {
+/**
+ * The anonymous fact chips (pay · employment form · working time · positions),
+ * in the reader's language from the fixed maps above. ONE builder for the card
+ * and `/jobs/[id]`, so the detail page never shows less than its own card.
+ * Pay is part of the anonymous projection, shown first when the publisher
+ * supplied it (owner P0-3, 2026-11-03).
+ */
+export function vacancyFactChips(
+  vacancy: Pick<
+    PublicVacancyPreview,
+    | "employmentForm"
+    | "workingTime"
+    | "positions"
+    | "compensationCurrency"
+    | "compensationMin"
+    | "compensationMax"
+  >,
+  locale: ActiveLocale,
+): string[] {
   const chips: string[] = [];
+
+  const pay = vacancyPayLabel(vacancy, locale);
+  if (pay) chips.push(pay);
 
   const form = vacancy.employmentForm
     ? EMPLOYMENT_FORM[vacancy.employmentForm]?.[locale]
@@ -109,6 +126,69 @@ export function PublicVacancyCard({
   if (vacancy.positions && vacancy.positions > 1) {
     chips.push(`${vacancy.positions} ${POSITIONS[locale]}`);
   }
+  return chips;
+}
+
+export function PublicVacancyCard({
+  vacancy,
+  locale,
+  savedLabel,
+  headingFallback,
+  genericTitle,
+  sourceLanguageLabel,
+  memberFacts,
+  lockedFactsLabel,
+}: {
+  readonly vacancy: PublicVacancyPreview;
+  /**
+   * MEMBER-ONLY facts (owner P0-3, 2026-11-03): the employer and the place,
+   * read by the caller under the signed-in person's OWN client from the
+   * member read path. Never passed for an anonymous viewer; the anonymous
+   * projection cannot carry them (owner directive 2026-08-24).
+   */
+  readonly memberFacts?: { readonly employer: string | null; readonly place: string | null } | null;
+  /** Already-localized "employer and place after sign-in" line, passed by the
+   *  board for an anonymous viewer INSTEAD of `memberFacts`, so the card says
+   *  what exists instead of leaving the gap unexplained. Omitted = no line. */
+  readonly lockedFactsLabel?: string;
+  readonly locale: ActiveLocale;
+  /** Localized profession name for the anonymous heading (owner directive
+   *  2026-08-24): the raw title is member-only because it embeds employer and
+   *  location wording, so anonymous cards head with the profession in the
+   *  reader's language, falling back to the source occupation label. */
+  readonly headingFallback?: string;
+  /** Localized generic noun ("Darbo pasiūlymas") for the last case: an ad with
+   *  no profession match AND no source occupation label (a Norwegian stream ad
+   *  can carry only its raw title, which is member-only). Without it the card
+   *  headed with a bare "—" (production /lt/jobs, 2026-10-18). */
+  readonly genericTitle?: string;
+  /** Rendered only when the viewer has this ad in their OWN private bookmark
+   *  list. It is a note to the person looking at their own screen — it reaches
+   *  no employer and is never rendered for anyone else. */
+  readonly savedLabel?: string;
+  /**
+   * ALREADY-LOCALIZED "this ad is written in X" line, supplied by the caller
+   * ONLY when the ad's language differs from the reader's — the same condition
+   * and the same `vacancySources.language.originalIn` copy `/jobs/[id]` uses.
+   *
+   * WHY THE CALLER COMPUTES IT: this component takes localized strings and
+   * renders them (`headingFallback`, `savedLabel`); it holds no translator. The
+   * callers already have one.
+   *
+   * WHAT IT FIXES (owner §6, production `/lt` 2026-09-27). The publisher's
+   * Swedish occupation was rendering as a BARE SECOND LINE under a Lithuanian
+   * heading — "Sandėlio darbininkas" with "Lagerarbetare" beneath it, nothing
+   * saying what that word was. A reader met an unexplained foreign string
+   * competing with the localized title. When this label is present the original
+   * is folded INTO it on one compact line, so the publisher's words are
+   * preserved and attributed instead of competing.
+   */
+  readonly sourceLanguageLabel?: string;
+}) {
+  const chips = vacancyFactChips(vacancy, locale);
+  const memberLine = memberFacts
+    ? [memberFacts.employer, memberFacts.place].filter((x): x is string => Boolean(x)).join(" · ")
+    : "";
 
   const published = formatUtcDate(vacancy.publishedAt, locale);
   // Only a plausible language subtag is emitted: a malformed value in the data
@@ -125,8 +205,10 @@ export function PublicVacancyCard({
   // occupation had to become the heading, repeating it as the subline below
   // would say the same thing twice, so it is suppressed there.
   const heading =
-    vacancy.title ?? headingFallback ?? vacancy.occupation ?? "—";
-  const headingIsPublisherText = vacancy.title !== null || !headingFallback;
+    vacancy.title ?? headingFallback ?? vacancy.occupation ?? genericTitle ?? "—";
+  // The generic noun is OUR text in the reader's language, never the publisher's.
+  const headingIsPublisherText =
+    vacancy.title !== null || (!headingFallback && vacancy.occupation !== null);
   const occupationSubline =
     vacancy.occupation && heading !== vacancy.occupation
       ? vacancy.occupation
@@ -151,11 +233,50 @@ export function PublicVacancyCard({
         )}
       </div>
 
-      {occupationSubline && (
-        <p lang={sourceLang} className="mt-1 text-sm text-text-muted">
-          {occupationSubline}
+      {/* THE AD'S OWN LANGUAGE, ON ONE LINE (owner §6, 2026-09-27).
+          ONE compact muted line, never a paragraph and never an explanation of
+          how the product works:
+
+            foreign ad, localized heading → "Skelbimo kalba: švedų · Lagerarbetare"
+            foreign ad, no localized name → "Skelbimo kalba: švedų" under the
+                                             publisher's own words as the heading
+            same-language ad             → the occupation subline exactly as before
+
+          The publisher's text is PRESERVED in every case and still carries its
+          own `lang` for assistive technology; what changed is that it is now
+          attributed instead of standing as an unexplained second title. Nothing
+          is translated here and nothing leaves the platform — this is the honest
+          fallback while `translate_vacancy` has no egress grant. */}
+      {sourceLanguageLabel ? (
+        <p
+          className="mt-1 text-sm text-text-muted"
+          data-testid="public-vacancy-source-language"
+        >
+          {sourceLanguageLabel}
+          {occupationSubline ? (
+            <>
+              {" · "}
+              <span lang={sourceLang}>{occupationSubline}</span>
+            </>
+          ) : null}
         </p>
+      ) : (
+        occupationSubline && (
+          <p lang={sourceLang} className="mt-1 text-sm text-text-muted">
+            {occupationSubline}
+          </p>
+        )
       )}
+
+      {memberLine ? (
+        <p className="mt-1 text-sm text-text-secondary" data-testid="public-vacancy-member-facts">
+          {memberLine}
+        </p>
+      ) : !memberFacts && lockedFactsLabel ? (
+        <p className="mt-1 text-sm text-text-muted" data-testid="public-vacancy-locked-facts">
+          {lockedFactsLabel}
+        </p>
+      ) : null}
 
       {chips.length > 0 && (
         <ul className="mt-2 flex flex-wrap gap-1.5">

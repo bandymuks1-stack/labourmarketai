@@ -1,11 +1,17 @@
 import "server-only";
+import { readCorrectedOriginalIds } from "@/lib/journal/corrected-originals-read";
+import { withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 
+import { countConfirmedEntries, type ConfirmableEntryRow } from "@/lib/journal/review-status";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import {
   getPrimaryProfessionSlug,
+  getProfessionEntries,
   getWorkerCoreRow,
   getWorkerSkillRows,
   type WorkerSkillRow,
@@ -18,6 +24,7 @@ import {
 } from "@/lib/documents/readiness";
 import { getOwnWorkHistory } from "./work-history";
 import type { WorkHistoryEntry } from "./work-history-model";
+import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
 import {
   deriveEvidenceTimeline,
   deriveSkillEvidence,
@@ -94,6 +101,12 @@ export interface WorkerPlayerCard {
   /** §5.2 LOCATION — the worker's own stated country code (ISO-2), or null.
    *  Country precision only: the card never implies an address. */
   locationCountry: string | null;
+  /** MOBILITY — the countries the worker says they would work in
+   *  (workers.preferred_countries, ISO-2 codes) and whether they would
+   *  relocate. The worker's OWN stated facts, read from the same canonical
+   *  row as the location; absent on the public sample card. */
+  preferredCountries?: readonly string[];
+  willingToRelocate?: boolean | null;
   /** §5.2 DOCUMENTS — real counts from the worker's OWN document records.
    *  `null` when the documents surface is unavailable for this account
    *  (honest absence, never a zeroed-out fake summary). */
@@ -106,6 +119,26 @@ export interface WorkerPlayerCard {
   availableFrom: string | null;
   /** Primary profession slug for the i18n label, or null. */
   professionSlug: string | null;
+  /**
+   * The person's profession IN THEIR OWN WORDS when the registry does not
+   * carry what they do (ledger 20260927060325), primary-first, or null.
+   *
+   * A SEPARATE field from `professionSlug` on purpose — the two may never
+   * collapse. `professionSlug` answers "which CATALOGUE profession is this"
+   * and is the only thing matching and the market map can use; this answers
+   * "what does this person SAY they do". A person may hold either, both, or
+   * neither. Shown through the display layer, never interpreted, never
+   * translated: these are their words, in the language they wrote them.
+   */
+  professionOwnWords: string | null;
+  /**
+   * EVERY profession the person holds, primary-first — 0 / 1 / N, never
+   * narrowed to one "true" profession (owner command 2026-09-29 §7). The
+   * SAME rows `professionSlug` / `professionOwnWords` are read from
+   * (`getProfessionEntries`, zero extra queries); each entry keeps the
+   * registry slug and the person's own words apart.
+   */
+  professions: readonly ProfessionEntry[];
   /** ISO timestamp of the newest live journal entry — the latest work proof. */
   latestEvidenceAt: string | null;
   /**
@@ -175,8 +208,15 @@ type VerifiedSkillsRead =
   | { readonly status: "ok"; readonly badges: VerifiedSkillBadge[] }
   | { readonly status: "unavailable" };
 
+/** The card shows at most this many confirmed-skill badges. */
+const VERIFIED_BADGE_LIMIT = 12;
+
 /**
- * Verified (manager-confirmed) skills + their icons. A failed SKILL read is
+ * Verified (manager-confirmed) skills + their icons — ONLY confirmations that
+ * still STAND (lib/evidence/skill-confirmation-standing.ts): a confirmation
+ * whose work was later rejected, corrected or deleted, or one the person made
+ * on their own skill, is not a badge. A standing read that failed is
+ * `unavailable`, never an empty "none confirmed yet". A failed SKILL read is
  * `unavailable` (identity truth: it used to return `[]`, and the card then
  * said "none confirmed yet" about a read that never happened). A failed
  * ICON read only drops the icons — the icon is decoration, the skill is the
@@ -189,17 +229,25 @@ async function verifiedSkillBadges(
   try {
     const { data: rows, error } = await asAny(supabase)
       .from("worker_skills")
-      .select("skill_id, skills(slug)")
+      .select("skill_id, verified, verified_by, verified_at, skills(slug)")
       .eq("worker_id", workerId)
-      .eq("verified", true)
-      .limit(12);
+      .eq("verified", true);
     if (error) return { status: "unavailable" };
-    const skills = ((rows ?? []) as {
+    const recorded = (rows ?? []) as {
       skill_id: string | null;
+      verified: boolean | null;
+      verified_by: string | null;
+      verified_at?: string | null;
       skills: { slug: string | null } | null;
-    }[])
+    }[];
+    if (recorded.length === 0) return { status: "ok", badges: [] };
+    const standing = await readOwnStandingConfirmedSkillIds(workerId);
+    if (standing === null) return { status: "unavailable" };
+    const skills = withStandingConfirmation(recorded, standing)
+      .filter((r) => r.verified)
       .map((r) => ({ id: r.skill_id, slug: r.skills?.slug ?? null }))
-      .filter((s): s is { id: string; slug: string } => !!s.id && !!s.slug);
+      .filter((s): s is { id: string; slug: string } => !!s.id && !!s.slug)
+      .slice(0, VERIFIED_BADGE_LIMIT);
     if (skills.length === 0) return { status: "ok", badges: [] };
 
     const { data: iconRows } = await asAny(supabase)
@@ -288,13 +336,13 @@ async function ownNewestConfirmations(
     const { data, error } = await asAny(supabase)
       .from("journal_entry_confirmations")
       .select(
-        "created_at, confirmer_id, confirmer_role, confirmation_scope, journal_entries!inner(worker_id, engagement_contexts(organizations(display_name, legal_name)))",
+        "created_at, confirmer_id, confirmer_role, confirmation_scope, journal_entries!inner(worker_id, engagement_contexts(organization_id, organizations(display_name, legal_name)))",
       )
       .eq("journal_entries.worker_id", workerId)
       .order("created_at", { ascending: false })
       .limit(PROVENANCE_CONFIRMATION_LIMIT);
     if (error || !Array.isArray(data)) return [];
-    return (
+    const rows = (
       data as {
         created_at: string | null;
         confirmer_id: string | null;
@@ -302,12 +350,23 @@ async function ownNewestConfirmations(
         confirmation_scope: unknown;
         journal_entries: {
           engagement_contexts: {
+            organization_id?: string | null;
             organizations: { display_name: string | null; legal_name: string | null } | null;
           } | null;
         } | null;
       }[]
-    ).map((r) => {
-      const org = r.journal_entries?.engagement_contexts?.organizations ?? null;
+    );
+    // The confirming organization stays named after the relationship ended
+    // (owner 2026-09-29) — names only, through the historical read.
+    const named = await withHistoricalOrgNames(
+      supabase,
+      rows.map((r) => ({
+        organization_id: r.journal_entries?.engagement_contexts?.organization_id ?? null,
+        organizations: r.journal_entries?.engagement_contexts?.organizations ?? null,
+      })),
+    );
+    return rows.map((r, i) => {
+      const org = named[i]?.organizations ?? null;
       return {
         created_at: r.created_at,
         // WHO decided — selected so `deriveProvenance` can tell an independent
@@ -324,10 +383,14 @@ async function ownNewestConfirmations(
   }
 }
 
-/** Manager confirmations on the worker's own entries. 0 on any error. */
+/**
+ * Entries of the worker's that someone else confirmed: employer decisions only (decision
+ * 0018), never the person's own (EVID-2). 0 on any error.
+ */
 async function ownConfirmationsCount(
   supabase: SupabaseClient,
   workerId: string,
+  subjectProfileId: string,
 ): Promise<number> {
   try {
     // LIVE ONLY — a confirmation on a retracted or superseded entry is not a
@@ -335,16 +398,12 @@ async function ownConfirmationsCount(
     // adjacent read four lines down had already been filtering `deleted_at`:
     // one file, two answers to the same question.
     const { data: entryRows } = await liveJournalEntriesOnly(
-      asAny(supabase).from("journal_entries").select("id").eq("worker_id", workerId),
-    );
-    const ids = ((entryRows ?? []) as { id: string }[]).map((e) => e.id);
-    if (ids.length === 0) return 0;
-    return await safeCount(
       asAny(supabase)
-        .from("journal_entry_confirmations")
-        .select("id", { count: "exact", head: true })
-        .in("entry_id", ids),
+        .from("journal_entries")
+        .select("id, correction_of, journal_entry_confirmations(confirmation_scope, created_at, confirmer_id)")
+        .eq("worker_id", workerId),
     );
+    return countConfirmedEntries((entryRows ?? []) as ConfirmableEntryRow[], subjectProfileId);
   } catch {
     return 0;
   }
@@ -390,15 +449,24 @@ async function journalSkillLinkSlugs(
   workerId: string,
 ): Promise<{ slug: string | null }[]> {
   try {
-    const { data, error } = await asAny(supabase)
-      .from("journal_entry_skills")
-      .select("skills(slug)")
-      .eq("worker_id", workerId)
-      .limit(2000);
-    if (error || !Array.isArray(data)) return [];
-    return (data as { skills: { slug: string | null } | null }[]).map((r) => ({
-      slug: r.skills?.slug ?? null,
-    }));
+    const [{ data, error }, corrected] = await Promise.all([
+      asAny(supabase)
+        .from("journal_entry_skills")
+        // LIVE entries only: a deleted or superseded entry is no longer
+        // evidence (its skill links are kept for history, not counted).
+        .select("journal_entry_id, skills(slug), journal_entries!inner(deleted_at, superseded_by)")
+        .eq("worker_id", workerId)
+        .is("journal_entries.deleted_at", null)
+        .is("journal_entries.superseded_by", null)
+        .limit(1000),
+      readCorrectedOriginalIds(supabase, workerId),
+    ]);
+    if (error || !Array.isArray(data) || corrected === null) return [];
+    // Counted once: a confirmed original that a live correction replaces is
+    // not evidence a second time (and not for a skill the correction dropped).
+    return (data as { journal_entry_id: string; skills: { slug: string | null } | null }[])
+      .filter((r) => !corrected.has(r.journal_entry_id))
+      .map((r) => ({ slug: r.skills?.slug ?? null }));
   } catch {
     return [];
   }
@@ -451,6 +519,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     verifiedSkillsRead,
     managerConfirmations,
     professionSlug,
+    professionEntries,
     latestEntry,
     documents,
     entryTimestamps,
@@ -495,11 +564,16 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
       ? verifiedSkillBadges(supabase, workerId)
       : Promise.resolve<VerifiedSkillsRead>({ status: "ok", badges: [] }),
     workerId
-      ? ownConfirmationsCount(supabase, workerId)
+      ? ownConfirmationsCount(supabase, workerId, user.id)
       : Promise.resolve(0),
     // Primary profession from the ONE cached profession read (was its own
     // `is_primary = true` select — one of 4 identical ones per navigation).
     workerId ? getPrimaryProfessionSlug() : Promise.resolve(null),
+    // The person's OWN WORDS for what they do. Reads the SAME cached
+    // `getWorkerProfessionRows` as `getPrimaryProfessionSlug` above, so this
+    // costs ZERO extra queries — it asks a different question of rows already
+    // in hand, rather than adding a second profession read.
+    workerId ? getProfessionEntries() : Promise.resolve([]),
     // `latestEvidenceAt` — was `deleted_at` only, so a SUPERSEDED entry could
     // date a person's newest evidence to work that has since been replaced.
     workerId
@@ -566,10 +640,21 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     availabilityStatus: worker?.availability_status ?? null,
     availableFrom: worker?.available_from ?? null,
     professionSlug: professionSlug ?? null,
+    // Primary-first, matching `getProfessionEntries`' own order. Only rows the
+    // registry does not carry contribute words; a registry row's label is null.
+    professionOwnWords:
+      professionEntries.find(
+        (e) => typeof e.label === "string" && e.label.length > 0,
+      )?.label ?? null,
+    professions: professionEntries,
     latestEvidenceAt: latestEntry?.created_at ?? null,
     workHistory,
     unavailable,
     locationCountry: worker?.current_location_country ?? null,
+    preferredCountries: Array.isArray(worker?.preferred_countries)
+      ? (worker.preferred_countries as string[]).filter((c) => typeof c === "string" && c.trim().length > 0)
+      : [],
+    willingToRelocate: worker?.willing_to_relocate ?? null,
     documents,
     // §5.2 — geometry comes from the pure derivers, so what the chart draws is
     // exactly what the unit tests assert.

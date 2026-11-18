@@ -11,12 +11,22 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * nowhere. This read lists the ACTIVE links so the profile can offer the
  * withdrawal beside the organization-history withdrawal it already has.
  *
- * RLS-scoped (`company_workers_select` / `agency_workers_select` let the
- * worker read their own rows); bounded; read-only. A failed read is its own
+ * RLS-scoped (`company_workers_select` lets the worker read their own rows);
+ * bounded; read-only. A failed read is its own
  * kind — never "you are on no team".
  */
 
 const RELATION_ABSENT = new Set(["42P01", "42703"]);
+/**
+ * `agency_workers` (the LEGACY Model A agency key space) is deliberately NOT
+ * read here. The API role has never held SELECT on it (0001 created it with no
+ * grant; production ACL = owner only, readback 2026-10-15), it holds 0 rows,
+ * and Model A was retired by owner decision 2026-09-14 — agencies are
+ * organizations now. Querying it only produced a 42501 per profile view
+ * (415+/day in postgres_logs). Pinned by
+ * lib/guards/agency-workers-not-api-exposed.test.ts; if an owner decision ever
+ * restores the grant, add the read back there and here together.
+ */
 export const TEAM_LINKS_LIMIT = 50;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,28 +52,17 @@ export async function listMyTeamLinks(
   supabase: SupabaseClient,
   userId: string,
 ): Promise<TeamLinksResult> {
-  const [cw, aw] = await Promise.all([
-    asAny(supabase)
-      .from("company_workers")
-      .select("company_id, worker_id, status, created_at, companies(display_name, legal_name), workers!inner(profile_id)")
-      .eq("workers.profile_id", userId)
-      .eq("status", "active")
-      .order("created_at", { ascending: false })
-      .limit(TEAM_LINKS_LIMIT),
-    asAny(supabase)
-      .from("agency_workers")
-      .select("agency_id, worker_id, status, created_at, agencies(legal_name), workers!inner(profile_id)")
-      .eq("workers.profile_id", userId)
-      .eq("status", "active")
-      .order("created_at", { ascending: false })
-      .limit(TEAM_LINKS_LIMIT),
-  ]);
+  const cw = await asAny(supabase)
+    .from("company_workers")
+    .select("company_id, worker_id, status, created_at, companies(display_name, legal_name), workers!inner(profile_id)")
+    .eq("workers.profile_id", userId)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(TEAM_LINKS_LIMIT);
 
-  for (const res of [cw, aw]) {
-    if (res.error) {
-      if (RELATION_ABSENT.has(res.error.code ?? "")) return { kind: "needs-migration" };
-      return { kind: "error", message: res.error.message };
-    }
+  if (cw.error) {
+    if (RELATION_ABSENT.has(cw.error.code ?? "")) return { kind: "needs-migration" };
+    return { kind: "error", message: cw.error.message };
   }
 
   type CwRow = {
@@ -71,12 +70,6 @@ export async function listMyTeamLinks(
     worker_id: string | null;
     created_at: string | null;
     companies: { display_name: string | null; legal_name: string | null } | null;
-  };
-  type AwRow = {
-    agency_id: string | null;
-    worker_id: string | null;
-    created_at: string | null;
-    agencies: { legal_name: string | null } | null;
   };
 
   const rows: TeamLink[] = [];
@@ -88,16 +81,6 @@ export async function listMyTeamLinks(
       workerId: r.worker_id,
       organizationName:
         r.companies?.display_name?.trim() || r.companies?.legal_name?.trim() || null,
-      since: r.created_at,
-    });
-  }
-  for (const r of (aw.data ?? []) as AwRow[]) {
-    if (!r.agency_id || !r.worker_id || !r.created_at) continue;
-    rows.push({
-      kind: "agency",
-      orgLegacyId: r.agency_id,
-      workerId: r.worker_id,
-      organizationName: r.agencies?.legal_name?.trim() || null,
       since: r.created_at,
     });
   }

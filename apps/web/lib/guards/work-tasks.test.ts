@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 import { join } from "node:path";
 
 import {
@@ -97,9 +98,14 @@ const ZERO: SpineCounts = {
   pendingIncomingBookings: 0,
   bookingResponsesNew: 0,
   pendingInvitations: 0,
+  pendingMembershipInvitations: 0,
   openTaskAttention: 0,
   newJobMatches: 0,
   pendingAbsenceReviews: 0,
+  pendingConnectionInvites: 0,
+  sharedRequestsAwaitingOffer: 0,
+  openCandidateOffers: 0,
+  openTeamOffers: 0,
 };
 
 /** Walk a source dir collecting ts/tsx files (skips tests). */
@@ -122,6 +128,11 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
   // sibling. Nothing else in the repo may (re)define the table or the RPCs.
   const D2 = "20260711210000_work_tasks_v1";
   const TRAIN_D = "20260817151000_work_tasks_v2_collaboration";
+  // Stage / subtask structure (20261002150000): the third and last pair that
+  // may touch work_tasks — adds stage_id / parent_task_id and re-issues the two
+  // v2 RPCs with optional parameters. Pinned in
+  // work-tasks-stage-subtask-migration.test.ts.
+  const STAGE_SUBTASK = "20261002150000_work_tasks_stage_and_subtask_v1";
   // Train G (employee lifecycle) is a sanctioned READER, not a definer: its
   // onboarding item link-verification SELECTs from work_tasks (assignee +
   // status='done') and never creates/alters/drops the table or touches the
@@ -151,7 +162,27 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
    */
   const CONSUMERS = [
     LIFECYCLE_READER,
+    // 20261025045152 project_forecasts_v1 (restored byte-exact by #2913, production-applied 2026-10-25):
+    // reads public.work_tasks for forecast facts and attaches its forecast_signal trigger to it.
+    // Creates/alters/writes/policies nothing on work_tasks and defines no task RPC.
+    "20261025045152_project_forecasts_v1",
     "20260817232000_management_decisions_v1",
+    // 20261003150600 — team_assignments (WRK-6): holds an FK to public.work_tasks and reads it to
+    // check a task belongs to the project a team is assigned to. Creates/alters/writes nothing on it.
+    "20261003150600_brigade_work_assignment_v1",
+    // 20261007150000 - team_demand_offers (E6): hand_off_team_demand_offer_v1 reads public.work_tasks to
+    // check a task belongs to the project the team is handed off to (the same check assign_team_to_work_v1
+    // makes). Creates/alters/writes nothing on it.
+    "20261007150000_team_demand_offer_v1",
+    // 20261011200000 - supply offer negotiation: re-issues hand_off_team_demand_offer_v1 with the
+    // 20261007150000 body (the same work_tasks read) plus one offer_kind check; its rollback restores
+    // that body verbatim. Creates/alters/writes nothing on work_tasks.
+    "20261011200000_supply_offer_negotiation_v1",
+    // 20261003150700 — team assignment as an active Journal/work context: widens the wt_select
+    // predicate with ONE team-task OR-term (team assigned to THAT task or its work object) and
+    // adds the team-or-person authority to the evidence link. Creates/drops/writes nothing on
+    // work_tasks; the existing task RPCs stay the only writers.
+    "20261003150700_brigade_journal_context_v1",
     "20260819190000_journal_task_evidence_link_v1",
     /**
      *   20260819220000 — task attribution of canonical work-time (chain step
@@ -189,15 +220,23 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
       const abs = join(REPO, "supabase", dir);
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
-        if (f.startsWith(D2) || f.startsWith(TRAIN_D)) continue;
-        const src = readFileSync(join(abs, f), "utf8");
+        // 20261002141500 — SECURITY forward-fix: re-issues the SAME existing task RPCs
+        // (update_work_task_v2, set_work_task_status_v2, add_work_task_dependency_v1,
+        // link/unlink_journal_entry_*, start_workflow_instance_v1) with ONLY the NULL-unsafe
+        // authorization guards made fail-closed. No table/column/policy/signature change;
+        // pinned separately by null-safe-authorization-guards.test.ts.
+        if (f.startsWith("20261002141500_work_task_authz_null_safe_v1")) continue;
+        if (f.startsWith(D2) || f.startsWith(TRAIN_D) || f.startsWith(STAGE_SUBTASK)) continue;
+        const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
         if (CONSUMERS.some((c) => f.startsWith(c))) {
           // A consumer may reference the table, and NOTHING more.
           expect(src, `${dir}/${f} must not create/alter/drop work_tasks`).not.toMatch(
-            /(create|alter|drop)\s+table\s+(if (not )?exists\s+)?public\.work_tasks\b/i,
+            /(create|alter|drop)\s+table\s+(if (not )?exists\s+)?(only\s+)?(public\.)?work_tasks\b/i,
           );
+          // Qualified OR unqualified: a function with `search_path = public` resolves a bare
+          // `work_tasks` to the same table, so both spellings are writes.
           expect(src, `${dir}/${f} must not write work_tasks`).not.toMatch(
-            /(insert\s+into|update|delete\s+from)\s+public\.work_tasks\b/i,
+            /(insert\s+into|update|delete\s+from|truncate(\s+table)?)\s+(only\s+)?(public\.)?work_tasks\b/i,
           );
           expect(src, `${dir}/${f} must not policy work_tasks`).not.toMatch(
             /(create|drop)\s+policy[\s\S]{0,80}on public\.work_tasks\b/i,
@@ -319,6 +358,11 @@ describe("2. writes are RPC-only, and only the task layer touches work_tasks", (
     //   - lib/projects/progress.ts       — derived progress (status only);
     //   - lib/notifications/event-emitters.ts — the assignment emitter's
     //     recipient resolution (admin client, AFTER the domain write).
+    //     REMOVED 2026-09-23: the admin client holds no grant on work_tasks
+    //     in production, so that read returned nothing and no assignee was
+    //     ever told. The recipient is now read by `readWorkTaskAssignmentFacts`
+    //     in lib/tasks/tasks.ts (already on this list) under the ACTOR's
+    //     session and handed to the emitter as facts.
     //
     // Chain step B adds two, both READ-ONLY and both there to keep an
     // approval inside the task's OWN organization:
@@ -335,8 +379,9 @@ describe("2. writes are RPC-only, and only the task layer touches work_tasks", (
       .sort();
     expect(normalized).toEqual([
       "lib/approvals/task-approvals.ts",
-      "lib/notifications/event-emitters.ts",
       "lib/projects/progress.ts",
+      // WRK-6: the task picker of a team assignment — a title read under the caller's RLS, no write.
+      "lib/projects/team-assignment.ts",
       "lib/tasks/task-approval-actions.ts",
       "lib/tasks/tasks.ts",
     ]);
@@ -571,9 +616,17 @@ describe("7. accessible controls — real actions, no drag-and-drop dependency",
     expect(ACTIONS).toMatch(/p_assignee_profile_id/);
     expect(ACTIONS).toMatch(/p_assign_to_self/); // the v1 fallback path
     expect(ACTIONS).toMatch(/emitWorkTaskAssignedNotification/);
-    // The emitter never trusts the caller for the recipient.
+    // The emitter never trusts the caller for the recipient: both write
+    // paths read the STORED assignee back under the actor's own session
+    // (`readWorkTaskAssignmentFacts`, RLS-scoped) and hand it over as facts.
+    // 2026-09-23: the emitter itself no longer reads work_tasks at all —
+    // the admin client holds no grant on it in production, so that read
+    // returned nothing and the bell never rang.
+    expect(ACTIONS.match(/readWorkTaskAssignmentFacts\(supabase, /g) ?? []).toHaveLength(2);
+    expect(READS).toContain("export async function readWorkTaskAssignmentFacts(");
     const EMITTERS = read("lib/notifications/event-emitters.ts");
-    expect(EMITTERS).toMatch(/from\("work_tasks"\)/);
+    expect(EMITTERS).not.toMatch(/from\("work_tasks"\)/);
+    expect(EMITTERS).toMatch(/facts: WorkTaskAssignedNotificationFacts/);
     expect(EMITTERS).toMatch(/assignee === actorProfileId\) return/);
   });
 });

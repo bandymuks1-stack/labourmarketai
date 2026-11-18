@@ -36,6 +36,7 @@ import { join } from "node:path";
 
 import { makeDocx } from "../../lib/cv/__fixtures__/cv-fixtures";
 import { FIXTURE_PROFILES, fixtureWorkerId } from "./fixture-ids";
+import { forgeSignature } from "./jwt-forge";
 import { HAS_LOCAL_STACK } from "./market-map-db-state";
 
 const SUPABASE_URL = process.env.SUPABASE_TEST_URL ?? "";
@@ -95,24 +96,8 @@ test.describe("auth-core bearer boundary", () => {
     return `${header}.${payload}.${sig}`;
   }
 
-  /**
-   * The same header and payload, signed with a key that is not this project's
-   * — i.e. a token minted by somebody else's Supabase project.
-   *
-   * The obvious version of this (flip the last character of the signature) is
-   * WRONG and flaked on the first run: a 32-byte HMAC is 43 base64url
-   * characters, and the final character carries only two significant bits, so
-   * several distinct characters decode to the identical signature. The token
-   * stayed valid and the test reported a security hole that was not there.
-   * Re-signing removes the ambiguity entirely.
-   */
-  function forgeSignature(token: string): string {
-    const [h, p] = token.split(".");
-    const sig = createHmac("sha256", `${JWT_SECRET || "x"}-not-this-project`)
-      .update(`${h}.${p}`)
-      .digest("base64url");
-    return `${h}.${p}.${sig}`;
-  }
+  // `forgeSignature` (a token re-signed with a key that is not this project's)
+  // lives in ./jwt-forge, shared with auth-forged-session-refusal.spec.ts.
 
   function skillsUrl(workerId: string): string {
     return `/api/workers/${workerId}/skills`;

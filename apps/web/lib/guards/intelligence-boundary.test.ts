@@ -124,7 +124,7 @@ describe("(c) source governance keeps every external source outside the owner-ac
   // NO external source outside the recorded owner-activated set is active,
   // whatever its legal status says — activation is a separate decision.
   it("no external profile outside {eurostat, arbetsformedlingen} is ACTIVE", () => {
-    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen"]);
+    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen", "nav"]);
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
       (p) => p.sourceKind !== "internal_aggregated" && !ACTIVATED.has(p.key),
     );
@@ -170,13 +170,13 @@ describe("(c) source governance keeps every external source outside the owner-ac
     expect(isExternalSourceActive("arbetsformedlingen")).toBe(true);
   });
 
-  it("the active external set is EXACTLY {eurostat, arbetsformedlingen} — nothing rides along", () => {
+  it("the active external set is EXACTLY {eurostat, arbetsformedlingen, nav} — nothing rides along", () => {
     const p = INTELLIGENCE_SOURCE_PROFILES.find((x) => x.key === "eurostat")!;
     expect(p.activation).toBe("on");
     expect(p.legalStatus).toBe("confirmed");
     expect(p.proposedOnly).toBe(false);
     expect(isExternalSourceActive("eurostat")).toBe(true);
-    // Exactly the two owner-approved externals — a third key appearing here
+    // Exactly the owner-approved externals (NAV recorded 2026-09-30) — a further key appearing here
     // means a source was activated without a recorded owner decision.
     const activeExternals = INTELLIGENCE_SOURCE_PROFILES.filter(
       (x) => x.sourceKind !== "internal_aggregated" && isExternalSourceActive(x.key),
@@ -184,6 +184,7 @@ describe("(c) source governance keeps every external source outside the owner-ac
     expect(activeExternals.map((x) => x.key).sort()).toEqual([
       "arbetsformedlingen",
       "eurostat",
+      "nav",
     ]);
     // allExternalSourcesOff reflects the activation
     expect(allExternalSourcesOff()).toBe(false);

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   parseExternalWorkerReferral,
+  resolveCountryIso2,
   toDeclaredContext,
 } from "./external-referral-contract";
 import { declaredContextItems } from "./model";
@@ -89,6 +90,42 @@ describe("external worker referral contract v1", () => {
     expect(parseExternalWorkerReferral(envelope({ leadId: "" })).ok).toBe(false);
   });
 
+  it("a country NAME is a residence, not a refusal (lead_4735a23a, 2026-09-22: \"Vietnam\" was refused and a consenting worker's referral was lost)", () => {
+    const w = (residenceCountry: unknown) => ({ ...(envelope().worker as Record<string, unknown>), residenceCountry });
+    for (const [typed, iso] of [["Vietnam", "VN"], ["vietnam", "VN"], ["Viet Nam", "VN"], ["Việt Nam", "VN"], ["Vietnamas", "VN"], ["Вьетнам", "VN"], ["VN", "VN"], ["vn", "VN"], ["Lithuania", "LT"], ["Ireland", "IE"], ["Saudi Arabia", "SA"], ["Polska", "PL"], ["Deutschland", "DE"], ["Oman", "OM"], ["Albania", "AL"], ["Bangladesh", "BD"], ["India", "IN"], ["Tunisia", "TN"], ["USA", "US"]] as const) {
+      const r = parseExternalWorkerReferral(envelope({ worker: w(typed) }));
+      expect(r.ok, typed).toBe(true);
+      if (r.ok) expect(r.envelope.worker.residenceCountry, typed).toBe(iso);
+    }
+    // Not a country: the field is dropped, the consent is kept, nothing is guessed.
+    for (const typed of ["Hanoi", "Europe", "somewhere in the Gulf", "ZZ", "x".repeat(80)]) {
+      const r = parseExternalWorkerReferral(envelope({ worker: w(typed) }));
+      expect(r.ok, typed).toBe(true);
+      if (r.ok) {
+        expect(r.envelope.worker.residenceCountry, typed).toBeUndefined();
+        expect(toDeclaredContext(r.envelope)).not.toHaveProperty("residenceCountry");
+      }
+    }
+    // Still bounded: an empty string or an essay is a schema refusal, as before.
+    expect(parseExternalWorkerReferral(envelope({ worker: w("") })).ok).toBe(false);
+    expect(parseExternalWorkerReferral(envelope({ worker: w("x".repeat(81)) })).ok).toBe(false);
+    expect(resolveCountryIso2("Vietnam")).toBe("VN");
+    expect(resolveCountryIso2("Viet Nam")).toBe("VN");
+    expect(resolveCountryIso2("")).toBeNull();
+  });
+
+  it("destinations accept names or codes; an unresolvable wish is dropped from the LIST, the person is kept", () => {
+    const w = (destinations: unknown) => ({ ...(envelope().worker as Record<string, unknown>), destinations });
+    const r = parseExternalWorkerReferral(envelope({ worker: w(["Norway", "se", "Vietnam", "Mars", "NO"]) }));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.envelope.worker.destinations).toEqual(["NO", "SE", "VN"]);
+    // Malformed entries are still a schema refusal: empty string, an essay, a non-string.
+    expect(parseExternalWorkerReferral(envelope({ worker: w([""]) })).ok).toBe(false);
+    expect(parseExternalWorkerReferral(envelope({ worker: w(["x".repeat(81)]) })).ok).toBe(false);
+    expect(parseExternalWorkerReferral(envelope({ worker: w([42]) })).ok).toBe(false);
+    expect(parseExternalWorkerReferral(envelope({ worker: w("NO") })).ok).toBe(false);
+  });
+
   it("issues name paths and codes only — never the values a person typed", () => {
     const r = parseExternalWorkerReferral(envelope({ leadId: "" }));
     expect(r.ok).toBe(false);
@@ -138,5 +175,65 @@ describe("external worker referral contract v1", () => {
     expect(declaredContextItems(null)).toEqual([]);
     expect(declaredContextItems("garbage")).toEqual([]);
     expect(declaredContextItems({ professions: "not-a-list" })).toEqual([]);
+  });
+});
+
+
+describe("residence, city, readiness and right-to-work stay separate facts (2026-10-13, lead_db65f2db)", () => {
+  const withWorker = (over: Record<string, unknown>) =>
+    envelope({ worker: { ...(envelope().worker as Record<string, unknown>), ...over } });
+
+  it('"City, Country" in the residence field becomes the country AND the city — the country is no longer lost', () => {
+    for (const raw of ["Istanbul, Turkey", "Turkey / Istanbul", "Istanbul (Türkiye)", "Istanbul - TR"]) {
+      const r = parseExternalWorkerReferral(withWorker({ residenceCountry: raw }));
+      expect(r.ok, raw).toBe(true);
+      if (!r.ok) continue;
+      expect(r.envelope.worker.residenceCountry, raw).toBe("TR");
+      expect(r.envelope.worker.city, raw).toBe("Istanbul");
+    }
+  });
+
+  it("an explicit city wins; a value with no country (or two) gives no country and no invented city", () => {
+    const explicit = parseExternalWorkerReferral(withWorker({ residenceCountry: "Istanbul, Turkey", city: "Esenyurt" }));
+    expect(explicit.ok && explicit.envelope.worker.city).toBe("Esenyurt");
+    for (const raw of ["Esenyurt district", "Turkey, Germany"]) {
+      const r = parseExternalWorkerReferral(withWorker({ residenceCountry: raw }));
+      expect(r.ok, raw).toBe(true);
+      if (!r.ok) continue;
+      expect(r.envelope.worker.residenceCountry, raw).toBeUndefined();
+      expect(r.envelope.worker.city, raw).toBeUndefined();
+    }
+  });
+
+  it("the bounds stay: an over-long residence is still refused, by path, never by value", () => {
+    const r = parseExternalWorkerReferral(withWorker({ residenceCountry: "x".repeat(81) }));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.issues).toEqual(["worker.residenceCountry: too_big"]);
+  });
+
+  it("readiness (availability) and the declared work situation travel as two fields; accommodation as a condition", () => {
+    const r = parseExternalWorkerReferral(
+      withWorker({ availability: "AVAILABLE_NOW", workStatus: "OTHER", accommodationNeed: "NEEDED", residenceCountry: "Istanbul, Turkey" }),
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const ctx = toDeclaredContext(r.envelope);
+    expect(ctx.availability).toBe("AVAILABLE_NOW");
+    expect(ctx.workStatus).toBe("OTHER");
+    expect(ctx.accommodationNeed).toBe("NEEDED");
+    expect(ctx.residenceCountry).toBe("TR");
+    expect(ctx.city).toBe("Istanbul");
+    // Unknown values are refused — the vocabulary is closed, and nothing can say "verified".
+    expect(parseExternalWorkerReferral(withWorker({ workStatus: "VERIFIED_RIGHT_TO_WORK" })).ok).toBe(false);
+    expect(parseExternalWorkerReferral(withWorker({ accommodationNeed: "maybe" })).ok).toBe(false);
+  });
+
+  it("an envelope without the new fields means exactly what it meant before", () => {
+    const r = parseExternalWorkerReferral(envelope());
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const ctx = toDeclaredContext(r.envelope);
+    expect(ctx.residenceCountry).toBe("LT");
+    expect("city" in ctx || "workStatus" in ctx || "accommodationNeed" in ctx).toBe(false);
   });
 });

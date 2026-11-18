@@ -12,6 +12,12 @@ import {
 import { AdminPilotGrantForm } from "@/components/app/admin-pilot-grant-form";
 import { AdminLmcPanel } from "@/components/app/admin-lmc-panel";
 import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/billing");
+
 
 /**
  * Admin billing center (Stripe sprint PR6). Shows the billing config state
@@ -46,12 +52,10 @@ export default async function AdminBillingPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-billing">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 

@@ -1,11 +1,14 @@
 "use client";
 
 import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
+import type { PeriodReadingLabels } from "@/components/app/period-monthly-share";
 import { EvidenceState, type EvidenceStanding } from "@/components/app/work-world/primitives";
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Card } from "@/components/ui/Card";
+import { HistoryContextBlock } from "@/components/app/history-context-block";
+import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
 
 import {
   respondToRosterLinkAction,
@@ -13,12 +16,19 @@ import {
 } from "@/lib/organization-evidence/roster-link-actions";
 import {
   disputeEvidenceRecordAction,
+  withdrawEvidenceContestAction,
   type DisputeEvidenceResult,
+  type WithdrawEvidenceContestResult,
 } from "@/lib/organization-evidence/dispute-actions";
 import type {
   EvidenceRecordView,
   SubjectRosterLink,
 } from "@/lib/organization-evidence/import-core";
+import {
+  formatHoursAsStated,
+  periodProvenance,
+  recordWhen,
+} from "@/lib/organization-evidence/period-provenance";
 
 /**
  * "WHAT ORGANIZATIONS HAVE RECORDED ABOUT ME" — the subject's side of the
@@ -196,6 +206,73 @@ function DisputeRecord({
 }
 
 /**
+ * "I WITHDRAW MY OBJECTION" - the way back from a contest.
+ *
+ * Offered ONLY while the viewer's own contest stands (never for somebody
+ * else's - an organisation may contest too, and that is not the reader's to
+ * take back). It ends the standing of the contest; it does not erase that the
+ * contest was made, and the copy says so. A fresh contest is offered again
+ * afterwards.
+ */
+function WithdrawContest({
+  recordId,
+  labels,
+}: {
+  recordId: string;
+  labels: {
+    hint: string;
+    submit: string;
+    done: string;
+    notStanding: string;
+    notAllowed: string;
+    failed: string;
+  };
+}) {
+  const [state, submit, pending] = useActionState<
+    WithdrawEvidenceContestResult | null,
+    FormData
+  >(withdrawEvidenceContestAction, null);
+
+  if (state?.ok) {
+    return (
+      <p
+        className="text-xs text-state-amber"
+        role="status"
+        data-testid="evidence-dispute-withdrawn"
+      >
+        {state.withdrawn ? labels.done : labels.notStanding}
+      </p>
+    );
+  }
+
+  return (
+    <form action={submit} className="flex flex-col gap-2">
+      <input type="hidden" name="record_id" value={recordId} />
+      <p className="text-xs text-text-muted">{labels.hint}</p>
+      <div>
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-xs font-semibold text-text-secondary hover:border-state-amber hover:text-state-amber disabled:opacity-50"
+          data-testid="evidence-dispute-withdraw"
+        >
+          {labels.submit}
+        </button>
+      </div>
+      {state?.ok === false ? (
+        <p
+          role="alert"
+          className="text-xs text-state-warning"
+          data-testid="evidence-dispute-withdraw-error"
+        >
+          {state.code === "not_allowed" ? labels.notAllowed : labels.failed}
+        </p>
+      ) : null}
+    </form>
+  );
+}
+
+/**
  * "WAITING FOR YOUR ANSWER" — the pending roster-link offers, as their OWN
  * surface at the top of the profile.
  *
@@ -265,12 +342,132 @@ export function RosterLinkOffers({
   );
 }
 
+/**
+ * How the record's WHEN came to be — the ONE rule, which lives with the
+ * period reading in `lib/organization-evidence/period-provenance.ts` (owner
+ * rule 2026-09-23) and is re-exported here for the callers that imported it
+ * from this surface.
+ */
+export { periodProvenance };
+
+/**
+ * The record's STANDING — the ONE rule the evidence chip and the profile's
+ * one-line history summary share, so the two can never name a record's
+ * standing differently. A withdrawal outranks everything; an attestation is
+ * an attestation (and a SELF-attestation when the attester is the subject);
+ * otherwise the derived base state stands. Pure.
+ */
+export function recordStanding(rec: {
+  readonly withdrawn: boolean;
+  readonly attestation: { readonly self: boolean } | null;
+  readonly state: string;
+}): EvidenceStanding {
+  return (
+    rec.withdrawn
+      ? "WITHDRAWN"
+      : rec.attestation
+        ? rec.attestation.self
+          ? "SELF_ATTESTED"
+          : "ORGANIZATION_ATTESTED"
+        : rec.state
+  ) as EvidenceStanding;
+}
+
+/** The standing's words — same labels the chip always used, chosen here and
+ *  handed to the i18n-free primitive. */
+function useStandingLabel(): (standing: EvidenceStanding) => string {
+  const tState = useTranslations("evidenceImport.evidenceState");
+  const tRecords = useTranslations("evidenceImport.records");
+  return (standing) =>
+    standing === "WITHDRAWN"
+      ? tRecords("withdrawn")
+      : standing === "SELF_ATTESTED"
+        ? tRecords("selfAttested")
+        : standing === "ORGANIZATION_ATTESTED"
+          ? tRecords("attested")
+          : tState(standing as never);
+}
+
+/**
+ * THE ONE-LINE HISTORY SUMMARY (profile summary-first, 2026-09-23).
+ *
+ * What the profile shows ON ARRIVAL about organization history, in place of
+ * every record card open at once: how many records, from which
+ * organization(s), over which dates, in which standing. The full cards stay
+ * one tap away (the page wraps them in a disclosure this line heads).
+ *
+ * WHAT IT DELIBERATELY DOES NOT SAY: a total of hours. Organization records
+ * sit BESIDE each other and beside the person's own ledger — never summed
+ * (IA §2); a period aggregate and a day record are not the same kind of
+ * figure, and adding them would manufacture a number no source stated. The
+ * dates are the records' own (a day, or a period's two ends), compared as
+ * ISO strings; nothing is derived here.
+ */
+export function OrganizationEvidenceSummary({
+  records,
+  organizationNames = {},
+}: {
+  records: readonly EvidenceRecordView[];
+  organizationNames?: Readonly<Record<string, string>>;
+}) {
+  const t = useTranslations("evidenceImport.mine");
+  const standingLabel = useStandingLabel();
+  if (records.length === 0) {
+    return (
+      <span className="font-sans text-xs normal-case tracking-normal text-text-secondary" data-testid="organization-history-summary-empty">
+        {t("summaryNoRecords")}
+      </span>
+    );
+  }
+  const names: string[] = [];
+  const standings = new Map<EvidenceStanding, number>();
+  let first: string | null = null;
+  let last: string | null = null;
+  for (const rec of records) {
+    const name = organizationNames[rec.personId];
+    if (name && !names.includes(name)) names.push(name);
+    const start = rec.activityDate ?? rec.periodStart;
+    const end = rec.activityDate ?? rec.periodEnd ?? rec.periodStart;
+    if (start && (first === null || start < first)) first = start;
+    if (end && (last === null || end > last)) last = end;
+    const s = recordStanding(rec);
+    standings.set(s, (standings.get(s) ?? 0) + 1);
+  }
+  const range = first && last ? (first === last ? first : `${first} – ${last}`) : null;
+  return (
+    <span
+      className="flex flex-wrap items-center gap-x-2 gap-y-1 font-sans text-xs normal-case tracking-normal text-text-secondary"
+      data-testid="organization-history-summary"
+      data-records={records.length}
+    >
+      <span className="font-semibold text-text-primary">
+        {t("summaryRecords", { count: records.length })}
+      </span>
+      {names.length > 0 ? <span>· {names.join(", ")}</span> : null}
+      {range ? <span className="font-mono tabular-nums">· {range}</span> : null}
+      {[...standings].map(([standing, n]) => (
+        <EvidenceState
+          key={standing}
+          state={standing}
+          label={standings.size > 1 ? `${standingLabel(standing)} · ${n}` : standingLabel(standing)}
+        />
+      ))}
+    </span>
+  );
+}
+
 export function OrganizationEvidenceSection({
   records,
   needsMigration,
   organizationNames = {},
+  contexts = {},
+  showTitle = true,
 }: {
   records: readonly EvidenceRecordView[];
+  /** The work behind each record, keyed by record id: project, client,
+   *  capacity, source and the distinct proof facts. A record with no entry,
+   *  or whose context is empty, shows nothing extra. */
+  contexts?: Readonly<Record<string, HistoryContext>>;
   /** The store is not provisioned in this environment. The card still renders,
    *  with its honest note instead of a silently empty list. */
   needsMigration: boolean;
@@ -281,11 +478,25 @@ export function OrganizationEvidenceSection({
    *  First real linked history (2026-09-18): the card showed a period, hours
    *  and a standing with no organization on it. */
   organizationNames?: Readonly<Record<string, string>>;
+  /** False when a disclosure summary above already names the section (the
+   *  profile's `#organization-history` bar) — the heading is not said twice.
+   *  The intro stays: it is what the records are, not what they are called. */
+  showTitle?: boolean;
 }) {
   const t = useTranslations("evidenceImport.mine");
   const tRole = useTranslations("evidenceImport.role");
-  const tState = useTranslations("evidenceImport.evidenceState");
   const tRecords = useTranslations("evidenceImport.records");
+  const standingLabel = useStandingLabel();
+  // ONE set of period words for both halves of a record's period reading —
+  // the row and its "how this was recorded" disclosure read the same labels.
+  // `provenance: null`: the provenance words already stand beside the date.
+  const periodLabels: PeriodReadingLabels = {
+    monthlyShare: tRecords("monthlyShare"),
+    noMonthlyFigure: tRecords("noMonthlyFigure"),
+    provenance: null,
+    sourceStates: (words) => tRecords("sourceStates", { words }),
+    sourceDiffers: tRecords("sourceDiffers"),
+  };
 
   return (
     <Card compact>
@@ -294,9 +505,11 @@ export function OrganizationEvidenceSection({
         data-testid="organization-evidence-section"
       >
         <header className="flex flex-col gap-1">
+          {showTitle ? (
           <h2 className="font-display text-lg font-bold tracking-tightest text-text-primary">
             {t("title")}
           </h2>
+          ) : null}
           <p className="text-sm leading-relaxed text-text-secondary">
             {t("intro")}
           </p>
@@ -348,27 +561,56 @@ export function OrganizationEvidenceSection({
                   </p>
                 ) : null}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm text-text-primary">
-                    {rec.activityDate ??
-                      [rec.periodStart, rec.periodEnd]
-                        .filter(Boolean)
-                        .join(" – ")}
+                  <span
+                    className="text-sm text-text-primary"
+                    data-testid="organization-evidence-record-when"
+                    data-provenance={periodProvenance(rec)}
+                  >
+                    {/* At the precision it has: a span a person chose reads
+                        as months, never as two day-precise dates. */}
+                    {recordWhen(rec)}
                   </span>
+                  {/* SOURCE FACT ≠ DERIVED (owner P0 2026-09-22 §11). A period
+                      the source never stated — chosen by a person at import
+                      ("800 h, at least 16 months × 50 h" became 2025-06 →
+                      2025-11) — must not read like an observed date. The
+                      record's own `derived.timeSemantics` says how the period
+                      came to be; the reader sees that beside it. */}
+                  {periodProvenance(rec) !== "source" ? (
+                    <span
+                      className="text-xs text-text-muted"
+                      data-testid="organization-evidence-record-period-derived"
+                    >
+                      {periodProvenance(rec) === "human_choice"
+                        ? tRecords("periodDerivedHuman")
+                        : tRecords("periodDerived")}
+                    </span>
+                  ) : null}
                   {rec.hours !== null && (
                     <span className="text-xs text-text-secondary">
-                      {rec.hours} h
+                      {formatHoursAsStated(rec.hours)} h
                     </span>
                   )}
-                  {/* DERIVED even monthly share of a period record (owner
-                      2026-09-17) — the subject reads the same derivation the
-                      organization does, beside the record, never instead. */}
+                  {/* The period record through the ONE reading (owner rule
+                      2026-09-23): an even monthly share only for a period the
+                      SOURCE stated; a span a person chose shows its months
+                      and the source's own words, with no monthly figure. The
+                      provenance words already stand beside the date above.
+                      On the row: a source period's RIBBON (with its own
+                      derived warning), or a chosen span's whole no-split
+                      reading; a source period's exact month list is inside
+                      "how this was recorded" below. */}
                   {rec.activityDate === null && (
                     <PeriodMonthlyShare
                       hours={rec.hours}
                       periodStart={rec.periodStart}
                       periodEnd={rec.periodEnd}
-                      label={tRecords("monthlyShare")}
+                      derived={rec.derived}
+                      factFields={rec.factFields}
+                      sourceText={rec.text}
+                      labels={periodLabels}
                       className="flex basis-full flex-col gap-0.5"
+                      part="ribbon"
                     />
                   )}
                   {/* Canonical evidence-standing chip (work-world primitive):
@@ -377,35 +619,16 @@ export function OrganizationEvidenceSection({
                       green verification. Same words as before — the label is
                       chosen here and handed in; the primitive stays i18n-free. */}
                   <EvidenceState
-                    state={
-                      (rec.withdrawn
-                        ? "WITHDRAWN"
-                        : rec.attestation
-                          ? rec.attestation.self
-                            ? "SELF_ATTESTED"
-                            : "ORGANIZATION_ATTESTED"
-                          : rec.state) as EvidenceStanding
-                    }
-                    label={
-                      rec.withdrawn
-                        ? tRecords("withdrawn")
-                        : rec.attestation
-                          ? rec.attestation.self
-                            ? tRecords("selfAttested")
-                            : tRecords("attested")
-                          : tState(rec.state as never)
-                    }
+                    state={recordStanding(rec)}
+                    label={standingLabel(recordStanding(rec))}
                   />
                 </div>
-                <p className="text-sm text-text-secondary">{rec.text}</p>
-                <p className="text-xs text-text-muted">
-                  {tRecords("supplier")}: {tRole(rec.supplierRole as never)} ·{" "}
-                  {tRecords("importedAt")}: {rec.importedAt.slice(0, 10)}
-                </p>
-                {/* The one claim this surface makes about imported evidence, and
-                  it is always the same one. */}
-                <p className="text-xs text-text-muted">
-                  {tRecords("notIndependentlyVerified")}
+                {/* The publisher's own words are THE fact of this record —
+                    named as such, so a precise-looking derived period above
+                    never outranks the imprecise sentence it was made from. */}
+                <p className="text-sm text-text-secondary" data-testid="organization-evidence-record-text">
+                  <span className="text-xs text-text-muted">{tRecords("sourceStatement")}: </span>
+                  {rec.text}
                 </p>
                 {/* CONTESTED is rendered as its own line rather than left to
                     the state chip, because "someone objected to this" is the
@@ -423,10 +646,83 @@ export function OrganizationEvidenceSection({
                       : tRecords("disputed")}
                   </p>
                 ) : null}
+                {/* HOW THIS WAS RECORDED — one tap away (profile
+                    summary-first, 2026-09-23). The row keeps what a reader
+                    needs to judge the record: who, when (with the derived
+                    label when the source stated no dates), how much, the
+                    ribbon, the standing, the source's own words, and the
+                    objection. The provenance internals — in what capacity it
+                    was supplied, the import day, the standing claim that an
+                    import is never independently verified, and the exact
+                    month figures — are the same lines, moved behind one
+                    disclosure per record. Nothing is dropped. */}
+                <details
+                  className="group/how"
+                  data-testid="organization-evidence-record-how"
+                >
+                  <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1 text-xs text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+                    <span aria-hidden className="transition-transform group-open/how:rotate-90">
+                      ›
+                    </span>
+                    {tRecords("howRecorded")}
+                  </summary>
+                  <div className="flex flex-col gap-1 pb-1">
+                    <p className="text-xs text-text-muted">
+                      {tRecords("supplier")}: {tRole(rec.supplierRole as never)} ·{" "}
+                      {tRecords("importedAt")}: {rec.importedAt.slice(0, 10)}
+                    </p>
+                    <HistoryContextBlock context={contexts[rec.id]} />
+                    {/* The one claim this surface makes about imported
+                      evidence, and it is always the same one. */}
+                    <p className="text-xs text-text-muted">
+                      {tRecords("notIndependentlyVerified")}
+                    </p>
+                    {/* A source period's exact month figures. A span with no
+                        monthly figure has none — this half renders nothing
+                        for it (the ONE reading decides, not this surface). */}
+                    {rec.activityDate === null && (
+                      <PeriodMonthlyShare
+                        hours={rec.hours}
+                        periodStart={rec.periodStart}
+                        periodEnd={rec.periodEnd}
+                        derived={rec.derived}
+                        factFields={rec.factFields}
+                        sourceText={rec.text}
+                        labels={periodLabels}
+                        className="flex flex-col gap-0.5"
+                        part="months"
+                      />
+                    )}
+                  </div>
+                </details>
                 {/* The objection is offered while the person has not already
                     made one. It never appears on a withdrawn record: the
                     organisation has already taken that claim back, and
                     contesting a retracted statement would be theatre. */}
+                {rec.disputedByViewer ? (
+                  <WithdrawContest
+                    recordId={rec.id}
+                    labels={{
+                      hint: tRecords("disputeWithdrawHint"),
+                      submit: tRecords("disputeWithdraw"),
+                      done: tRecords("disputeWithdrawn"),
+                      notStanding: tRecords("disputeNotStanding"),
+                      notAllowed: tRecords("disputeNotAllowed"),
+                      failed: tRecords("disputeWithdrawFailed"),
+                    }}
+                  />
+                ) : null}
+                {/* The contest existed and was taken back. Said plainly,
+                    because a record that silently went back to normal would
+                    erase that the person once objected. */}
+                {!rec.disputedByViewer && rec.contestWithdrawnByViewer ? (
+                  <p
+                    className="text-xs text-text-muted"
+                    data-testid="evidence-dispute-withdrawn-history"
+                  >
+                    {tRecords("disputeWithdrawnHistory")}
+                  </p>
+                ) : null}
                 {!rec.disputedByViewer && !rec.withdrawn ? (
                   <DisputeRecord
                     recordId={rec.id}

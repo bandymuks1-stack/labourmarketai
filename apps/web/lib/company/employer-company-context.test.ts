@@ -55,14 +55,36 @@ const COMPANY_B = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 
 type TableAnswer = { data?: unknown[] | null; error?: { code?: string } | null };
 
-/** Minimal PostgREST-shaped builder: `.select().eq().limit()` resolves. */
+/** Minimal PostgREST-shaped builder: `.select().eq().limit()` resolves.
+ *
+ *  The organization read embeds its bound company through the legacy-binding
+ *  foreign key (perf 2026-10-23): like PostgREST, an `organizations` row read
+ *  with `companies!organizations_legacy_company_id_fkey(...)` carries the ONE
+ *  `companies` row whose primary key is its `legacy_company_id` (or null). */
+const COMPANY_EMBED = "companies!organizations_legacy_company_id_fkey";
 function tableStub(answers: Record<string, TableAnswer>) {
   return (table: string) => {
     const answer = answers[table] ?? { data: [], error: null };
+    let select = "";
     const chain = {
-      select: () => chain,
+      select: (cols: string) => {
+        select = cols;
+        return chain;
+      },
       eq: () => chain,
-      limit: async () => ({ data: answer.data ?? null, error: answer.error ?? null }),
+      limit: async () => {
+        if (table === "organizations" && select.includes(COMPANY_EMBED) && answer.data) {
+          const companies = (answers.companies?.data ?? []) as { id: string }[];
+          return {
+            data: (answer.data as { legacy_company_id?: string | null }[]).map((row) => ({
+              ...row,
+              companies: companies.find((c) => c.id === row.legacy_company_id) ?? null,
+            })),
+            error: answer.error ?? null,
+          };
+        }
+        return { data: answer.data ?? null, error: answer.error ?? null };
+      },
     };
     return chain;
   };
@@ -120,21 +142,34 @@ describe("the happy path", () => {
       // No membership row in this stub — the creator-compatibility arm
       // resolves `owner` (§11).
       role: "owner",
+      isCreator: true,
+      invitationDelegate: false,
     });
   });
 
-  it("resolves the workspace with the caller's REAL identity, never a hardcoded one", async () => {
+  it("resolves THE session workspace — it cannot force an identity of its own", async () => {
+    // RE-ANCHORED (owner program 2026-09-23). This used to assert the resolver
+    // passed the caller's `active_role` identity into `getWorkspaceContext` —
+    // the right fix at the time for a hard-coded "company". But the argument
+    // WAS the defect class: the request cache is keyed by it, so the layout,
+    // the journal ("person") and the dispatcher ("company") each got their own
+    // answer, and one request could hold two active workspaces. The identity
+    // is now read from the session profile INSIDE the resolver
+    // (lib/company/active-organization-resolver.test.ts pins that), and every
+    // caller — this one included — asks the one resolution with no argument.
     await resolveEmployerCompanyContext();
-    expect(workspaceContextMock).toHaveBeenCalledWith("company");
+    expect(workspaceContextMock).toHaveBeenCalledTimes(1);
+    expect(workspaceContextMock).toHaveBeenCalledWith();
+    // NEGATIVE CONTROL: the old shape (a forced or caller-chosen identity).
+    expect(workspaceContextMock).not.toHaveBeenCalledWith("company");
+    expect(workspaceContextMock).not.toHaveBeenCalledWith("person");
 
     vi.clearAllMocks();
-    sessionProfileMock.mockResolvedValue({
-      user: USER,
-      profile: { id: USER.id, active_role: "worker" },
-    });
     workspaceContextMock.mockResolvedValue(workspace([ORG_A], "personal"));
-    await resolveEmployerCompanyContext();
-    expect(workspaceContextMock).toHaveBeenCalledWith("person");
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      reason: "personal-workspace",
+    });
+    expect(workspaceContextMock).toHaveBeenCalledWith();
   });
 });
 
@@ -247,25 +282,24 @@ describe("ambiguity and failure are never 'no data'", () => {
     expect(isEmployerContextFailure("ambiguous-binding")).toBe(true);
   });
 
-  it("a multi-row company answer is ambiguous, not silently reduced", async () => {
-    fromMock.mockImplementation(
-      tableStub({
-        organizations: {
-          data: [
-            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
-          ],
-        },
-        companies: {
-          data: [
-            { id: COMPANY_A, profile_id: USER.id },
-            { id: COMPANY_A, profile_id: USER.id },
-          ],
-        },
-      }),
-    );
-    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
-      reason: "ambiguous-binding",
+  it("the bound company rides the organization read — one row by its primary key, no second query", async () => {
+    // Perf 2026-10-23: the company used to be a separate `companies` read with
+    // its own "two rows = ambiguous" check. Through the foreign key the binding
+    // names exactly ONE row (its primary key), so that ambiguity cannot arise;
+    // the org row's own duplicate check above still stands.
+    const tables: string[] = [];
+    const stub = tableStub({
+      organizations: {
+        data: [{ id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A }],
+      },
+      companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
     });
+    fromMock.mockImplementation((t: string) => {
+      tables.push(t);
+      return stub(t);
+    });
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({ kind: "ok" });
+    expect(tables).not.toContain("companies");
   });
 
   it("a DB error is reported as a failure, never as an empty employer state", async () => {
@@ -308,6 +342,8 @@ describe("the client is never an authority", () => {
       organizationId: ORG_A,
       organizationName: "Alpha Statyba",
       role: "owner",
+      isCreator: true,
+      invitationDelegate: false,
     });
     workspaceContextMock.mockResolvedValue(workspace([ORG_A], "personal"));
     await expect(requireEmployerCompany()).resolves.toEqual({
@@ -336,23 +372,14 @@ describe("two organizations, two answers", () => {
 
     const forActive = (activeId: string) => {
       workspaceContextMock.mockResolvedValue(workspace([ORG_A, ORG_B], activeId));
-      fromMock.mockImplementation((table: string) => {
-        const answer =
-          table === "organizations"
-            ? [orgs[activeId as keyof typeof orgs]]
-            : [
-                {
-                  id: orgs[activeId as keyof typeof orgs].legacy_company_id,
-                  profile_id: USER.id,
-                },
-              ];
-        const chain = {
-          select: () => chain,
-          eq: () => chain,
-          limit: async () => ({ data: answer, error: null }),
-        };
-        return chain;
-      });
+      fromMock.mockImplementation(
+        tableStub({
+          organizations: { data: [orgs[activeId as keyof typeof orgs]] },
+          companies: {
+            data: [{ id: orgs[activeId as keyof typeof orgs].legacy_company_id, profile_id: USER.id }],
+          },
+        }),
+      );
     };
 
     forActive(ORG_A);
@@ -387,6 +414,84 @@ describe("§11 governance gate — membership truth decides the role", () => {
       kind: "ok",
       companyId: COMPANY_A,
       role: "admin",
+      // Not the creator: the fact is carried, never inferred from the role.
+      isCreator: false,
+    });
+  });
+
+  it("the owner's per-person invitation delegation rides the caller's own membership row", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: "someone-else" }] },
+        company_memberships: { data: [{ role: "manager", manages_invitations: true }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "ok",
+      role: "manager",
+      isCreator: false,
+      invitationDelegate: true,
+    });
+  });
+
+  it("a delegated MEMBER still opens no employer surface — the grant is invitations, not the company's pages", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: "someone-else" }] },
+        company_memberships: { data: [{ role: "member", manages_invitations: true }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "unavailable",
+      reason: "company-not-owned",
+    });
+  });
+
+  it("a manager row without the grant is not a delegate — the title grants nothing", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: "someone-else" }] },
+        company_memberships: { data: [{ role: "manager", manages_invitations: false }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "ok",
+      role: "manager",
+      invitationDelegate: false,
+    });
+  });
+
+  it("a creator whose membership row names a narrower role keeps the creator fact (owns_company admits them)", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
+        company_memberships: { data: [{ role: "manager" }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "ok",
+      role: "manager",
+      isCreator: true,
     });
   });
 
@@ -436,6 +541,44 @@ describe("§11 governance gate — membership truth decides the role", () => {
         },
         companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
         company_memberships: { data: null, error: { code: "42P01" } },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "ok",
+      role: "owner",
+    });
+  });
+
+  it("a creator whose accepted membership was REVOKED is no owner-equivalent (20261021093000)", async () => {
+    // The stub answers both membership reads with the same rows: no active
+    // role (the row carries none), and a revoked row that had been accepted.
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
+        company_memberships: { data: [{ accepted_at: "2026-08-06T05:24:45Z" }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "unavailable",
+      reason: "company-not-owned",
+    });
+  });
+
+  it("a creator with only a DECLINED invitation (revoked, never accepted) keeps the creator arm", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
+        company_memberships: { data: [{ accepted_at: null }] },
       }),
     );
     await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({

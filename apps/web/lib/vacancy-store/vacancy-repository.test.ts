@@ -11,9 +11,10 @@
  * `.upsert()` over the whole batch), which is exactly the implementation this
  * module exists to avoid.
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import {
+  __setVacancyRetrySleepForTest,
   persistVacancies,
   readVacancyCursor,
   writeVacancyCursor,
@@ -612,7 +613,7 @@ describe("persistVacancies — write arms stay under the statement timeout", () 
    * statement timeout (57014) and aborted the run. Writes must travel in
    * bounded chunks; idempotent ON CONFLICT makes a mid-run death safe.
    */
-  it("a 1200-ad insert batch travels as 6 bounded upserts covering every row", async () => {
+  it("a 1200-ad insert batch travels as 12 bounded upserts covering every row", async () => {
     const batch = Array.from({ length: 1200 }, (_, i) =>
       vacancy({ externalId: `ad-${i}` }),
     );
@@ -624,10 +625,10 @@ describe("persistVacancies — write arms stay under the statement timeout", () 
     const upserts = ops.filter((o) => o.kind === "upsert");
     // The naive single statement is exactly what timed out in production —
     // and 500-row statements timed out again once the table held ~37k rows
-    // (57014, runs 31826082813 / 31827497540, 2026-08-14), hence 200.
-    expect(upserts).toHaveLength(6);
+    // (57014, runs 31826082813 / 31827497540, 2026-08-14), then 200 again (2026-09-30) so 100.
+    expect(upserts).toHaveLength(12);
     for (const u of upserts) {
-      expect((u.payload as unknown[]).length).toBeLessThanOrEqual(200);
+      expect((u.payload as unknown[]).length).toBeLessThanOrEqual(100);
     }
     const written = upserts.flatMap((u) =>
       (u.payload as { external_id: string }[]).map((r) => r.external_id),
@@ -724,12 +725,20 @@ describe("persistVacancies — 57014 shrinks the statement instead of killing th
   }
 
   const TIMEOUT = { code: "57014" };
+  let sleeps: number[] = [];
+  beforeEach(() => {
+    sleeps = [];
+    __setVacancyRetrySleepForTest(async (ms) => {
+      sleeps.push(ms);
+    });
+  });
+  afterEach(() => __setVacancyRetrySleepForTest(null));
 
   it("an insert statement that times out is halved and every row still lands exactly once", async () => {
     const batch = Array.from({ length: 400 }, (_, i) =>
       vacancy({ externalId: `ad-${i}` }),
     );
-    // The FIRST 200-row statement times out; everything after succeeds.
+    // The FIRST 100-row statement times out; everything after succeeds.
     const { client, upsertSizes, upsertAttempts } = scriptedClient({
       upsertError: ({ index }) => (index === 0 ? TIMEOUT : null),
     });
@@ -738,8 +747,8 @@ describe("persistVacancies — 57014 shrinks the statement instead of killing th
 
     // Accounting is exact and untouched by the retry.
     expect(result).toEqual({ inserted: 400, updated: 0, unchanged: 0, withdrawnAbsent: 0 });
-    // 200 failed -> 100 + 100 succeeded -> next 200 succeeded.
-    expect(upsertAttempts).toEqual([200, 100, 100, 200]);
+    // 100 failed -> 50 + 50 succeeded -> next 100 succeeded x2.
+    expect(upsertAttempts).toEqual([100, 50, 50, 100, 100, 100]);
     expect(upsertSizes.reduce((a, b) => a + b, 0)).toBe(400);
   });
 
@@ -755,9 +764,45 @@ describe("persistVacancies — 57014 shrinks the statement instead of killing th
       persistVacancies(client, batch, SEEN_AT, SESSION_ID),
     ).rejects.toThrow("vacancy_persist_insert_failed:57014");
 
-    // 200 -> 100 -> 50 -> 25 -> 25 retried once. Five statements, then the
-    // honest failure — never an unbounded loop against a sick database.
-    expect(upsertAttempts).toEqual([200, 100, 50, 25, 25]);
+    // 100 -> 50 -> 25 -> 25 retried with backoff 3 times. Six statements,
+    // then the honest failure — never an unbounded loop against a sick database.
+    expect(upsertAttempts).toEqual([100, 50, 25, 25, 25, 25]);
+    expect(sleeps).toEqual([2000, 5000, 12000]);
+  });
+
+  it("a transient stall at minimum size is waited out with backoff and the run continues", async () => {
+    const batch = Array.from({ length: 25 }, (_, i) =>
+      vacancy({ externalId: `ad-${i}` }),
+    );
+    // First two attempts stall, third succeeds.
+    const { client, upsertAttempts, upsertSizes } = scriptedClient({
+      upsertError: ({ index }) => (index < 2 ? TIMEOUT : null),
+    });
+
+    const result = await persistVacancies(client, batch, SEEN_AT, SESSION_ID);
+
+    expect(result.inserted).toBe(25);
+    expect(upsertAttempts).toEqual([25, 25, 25]);
+    expect(upsertSizes).toEqual([25]);
+    expect(sleeps).toEqual([2000, 5000]);
+  });
+
+  it("the per-call timeout budget fails a sick database fast across chunks", async () => {
+    const batch = Array.from({ length: 1000 }, (_, i) =>
+      vacancy({ externalId: `ad-${i}` }),
+    );
+    const { client, upsertAttempts } = scriptedClient({
+      // Every chunk recovers on its third try, so no single chunk exhausts
+      // its own retries; only the shared budget can stop the session.
+      upsertError: ({ index }) => (index % 3 === 2 ? null : TIMEOUT),
+    });
+
+    await expect(
+      persistVacancies(client, batch, SEEN_AT, SESSION_ID),
+    ).rejects.toThrow("vacancy_persist_insert_failed:57014");
+    // 10 tolerated timeouts + the one that trips the budget (+ successes).
+    expect(upsertAttempts.length).toBeLessThan(20);
+    expect(upsertAttempts.length).toBeGreaterThanOrEqual(11);
   });
 
   it("a non-timeout error fails immediately without any splitting", async () => {
@@ -771,7 +816,7 @@ describe("persistVacancies — 57014 shrinks the statement instead of killing th
     await expect(
       persistVacancies(client, batch, SEEN_AT, SESSION_ID),
     ).rejects.toThrow("vacancy_persist_insert_failed:23514");
-    expect(upsertAttempts).toEqual([200]);
+    expect(upsertAttempts).toEqual([100]);
   });
 
   it("unchanged rows are touched in bounded id batches, not one statement per row", async () => {

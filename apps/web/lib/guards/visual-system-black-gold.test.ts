@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * BLACK + METALLIC GOLD — the visual-system contract.
@@ -19,6 +20,16 @@ import { join } from "node:path";
  *   • a palette ships below WCAG AA because nobody measured the one that is
  *     not the default — four light values really were failing when light was
  *     the unmeasured one.
+ *
+ * 2026-10-28 (owner): the PUBLIC site opens LIGHT; the signed-in workspace
+ * keeps the dark default; a saved choice always wins. The bootstrap checks
+ * below are re-anchored to that rule (lib/visual/theme-default.ts) — the same
+ * three failure modes are still guarded, per page instead of product-wide.
+ *
+ * 2026-11-15 (owner): a new account starts LIGHT in the workspace too; dark
+ * stays selectable and a saved choice still wins. The rule keeps its per-area
+ * shape (lib/visual/theme-default.ts), so the checks below are unchanged: a
+ * definite theme per page, and a saved choice never overwritten.
  *
  * Added by this file:
  *   • the ink ladder is the owner's tonal depth, not "some dark";
@@ -78,30 +89,28 @@ describe("black + gold is the product default", () => {
     expect(relLum(page), "light page background must be light").toBeGreaterThan(0.5);
   });
 
-  it("the pre-paint bootstrap resolves a definite theme, defaulting to dark", () => {
+  it("the pre-paint bootstrap resolves a definite theme per page (light by default, owner 2026-11-15)", () => {
+    const rule = read("lib/visual/theme-default.ts");
+    // ONE rule: the bootstrap string is BUILT from the workspace pattern, so the
+    // inline script and <ThemeReapply/> can never disagree.
+    expect(rule).toMatch(/WORKSPACE_PATH_SOURCE = "\^\/\[a-z\]\{2\}\/\(dashboard\|onboarding\|cv\)\(\/\|\$\)"/);
+    expect(rule).toMatch(/JSON\.stringify\(WORKSPACE_PATH_SOURCE\)/);
+    // Resolve-then-stamp, and a storage failure still lands on the page default.
+    expect(rule).toMatch(/document\.documentElement\.dataset\.theme=t/);
+    expect(rule).toMatch(/catch\(e\)\{document\.documentElement\.dataset\.theme=d;\}/);
     for (const file of ["app/[locale]/layout.tsx", "app/[locale]/not-found.tsx"]) {
       const src = read(file);
-      expect(src, `${file}: reads the shared key`).toMatch(/localStorage\.getItem\('theme'\)/);
-      // Resolve-then-stamp: never "stamp only if stored", which left the
-      // attribute absent and every reader guessing.
-      expect(src, `${file}: resolves light-or-dark`).toMatch(
-        /s\s*===\s*'light'\s*\?\s*'light'\s*:\s*'dark'/,
-      );
-      expect(src, `${file}: stamps before paint`).toMatch(
-        /document\.documentElement\.dataset\.theme=t/,
-      );
-      // The catch path must also land on the product default, not on light.
-      expect(src, `${file}: storage failure still lands on dark`).toMatch(
-        /catch\(e\)\{document\.documentElement\.dataset\.theme='dark'/,
-      );
+      expect(src, `${file}: uses the one bootstrap`).toMatch(/__html:\s*THEME_BOOTSTRAP_SCRIPT/);
+      expect(src, `${file}: no hand-written bootstrap left`).not.toMatch(/localStorage\.getItem\('theme'\)/);
     }
   });
 
-  it("a stored LIGHT preference is never overwritten", () => {
-    // The one regression worse than the original bug: a dark-first default
-    // that stomps on a deliberate choice. (Inverted twin of the old check.)
+  it("a stored preference (light OR dark) is never overwritten", () => {
+    // The one regression worse than the original bug: a default that stomps
+    // on a deliberate choice.
     const reapply = read("components/app/theme-reapply.tsx");
-    expect(reapply).toMatch(/localStorage\.getItem\("theme"\) === "light"/);
+    expect(reapply).toMatch(/resolveTheme\(localStorage\.getItem\("theme"\), window\.location\.pathname\)/);
+    expect(read("lib/visual/theme-default.ts")).toMatch(/if \(saved === "light" \|\| saved === "dark"\) return saved;/);
     // The watcher must still only act when the attribute was STRIPPED.
     expect(reapply).toMatch(/hasAttribute\("data-theme"\)/);
   });
@@ -149,7 +158,7 @@ describe("the switch is discoverable", () => {
   it("it reuses existing localized copy — no new i18n keys for a toggle", () => {
     const header = read("components/app/account-menu.tsx");
     expect(header).toMatch(/account\.theme/);
-    for (const locale of ["lt", "en", "ru"]) {
+    for (const locale of activeLocales) {
       const msgs = JSON.parse(read(`messages/${locale}.json`)) as Record<string, never>;
       const theme = (
         msgs as unknown as {
@@ -226,6 +235,25 @@ describe("the owner's black + gold palette", () => {
         `stop at ${s.at}% must be metallic gold or brighter, not bronze`,
       ).toBeGreaterThanOrEqual(goldLum - 0.001);
     }
+  });
+
+  it("light gold text clears AA on its own gold tint (light is every new account's start, owner 2026-11-15)", () => {
+    // ~130 places put `text-brand-blue` on `bg-brand-blue/10` (and a few on
+    // /15, /20). The old light gold #8A6A12 measured 4.12:1 there — an axe
+    // finding on the signed-in workspace once it opened light by default.
+    const gold = tokenIn(LIGHT, "brand-blue");
+    const mix = (bg: number[], a: number) => bg.map((c, i) => a * gold[i] + (1 - a) * c);
+    const surfaces = { page: tokenIn(LIGHT, "ink-900"), card: tokenIn(LIGHT, "ink-800"), nested: tokenIn(LIGHT, "ink-700") };
+    for (const [name, bg] of Object.entries(surfaces)) {
+      for (const a of [0, 0.05, 0.1, 0.15]) {
+        expect(ratio(gold, mix(bg, a)), `gold text on ${a * 100} % gold over ${name}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+    for (const bg of [surfaces.page, surfaces.card]) {
+      expect(ratio(gold, mix(bg, 0.2)), "gold text on 20 % gold over the page or a card").toBeGreaterThanOrEqual(4.5);
+    }
+    // White on a light gold fill stays AA too.
+    expect(ratio([255, 255, 255], gold)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("the brand accent is GOLD in both palettes", () => {
@@ -443,6 +471,105 @@ describe("the LM mark is the owner's original geometry", () => {
     // The archive is the PROOF the production asset was derived, not drawn.
     expect(source).toContain("#FFA100");
     expect(source).toContain("158.18,123.09 89.02,123.09 89.02,533.46");
+  });
+});
+
+/**
+ * NO LETTER STANDS IN FOR THE MARK IN THE AUTHENTICATED PRODUCT (owner §19,
+ * 2026-09-23).
+ *
+ * The canonical mark shipped to the public nav and the auth shell (#1683),
+ * but the signed-in product kept a yellow "L" tile in its two identity sites
+ * — the one top bar and the assistant's mark on every turn — and a guard
+ * pinned the letter as "the mark". The owner saw a generic letter where the
+ * brand belonged. This sweep keeps the substitute from coming back anywhere
+ * a signed-in person looks, not just in the two files that were fixed.
+ *
+ * PERSON MONOGRAMS ARE NOT THE BRAND. An avatar that shows a person's
+ * initial is identity data, and a person may well be called "L…". Those
+ * components are listed below, and each must still DERIVE its initial from
+ * the person's name through an expression — never a literal — so the scan
+ * (which flags only literal text) passes them by construction and still
+ * catches a literal "L" dropped into any of them.
+ */
+describe("no letter stands in for the mark in the authenticated product", () => {
+  const SCAN_ROOTS = ["components/app", "app/[locale]/dashboard"];
+
+  /** A JSX text node that is exactly `L` or `LM`, as literal text or as a
+   *  string-literal child (`{"L"}`). Multiline: the letter may sit on its
+   *  own line between the tags. */
+  const LETTER_STAND_IN = />\s*(?:LM?|\{\s*(["'`])LM?\1\s*\})\s*</;
+
+  /** Person-initial avatars — legitimate monograms, each with the expression
+   *  that proves the initial comes from the person's own name. */
+  const PERSON_MONOGRAMS: ReadonlyArray<readonly [string, RegExp]> = [
+    ["components/app/account-menu.tsx", /\{initial\}/],
+    ["components/app/avatar-display.tsx", /\{avatarMonogram\(displayName\)\}/],
+    // Renders the shared AvatarDisplay above, with the person's own name.
+    ["components/app/profile-avatar.tsx", /<AvatarDisplay\b[^>]*displayName=\{displayName\}/],
+    ["components/app/cv-preview.tsx", /\{initials\(personName\)\}/],
+    ["components/app/worker-player-card.tsx", /\{identity\.initials\}/],
+    ["components/app/project-operations-board.tsx", /\{initials\}/],
+    ["components/app/marketplace-loop-section.tsx", /\{requester\.initials\}/],
+    ["app/[locale]/dashboard/admin/matching/page.tsx", /\{initialsOf\(w\.displayName\)\}/],
+    ["app/[locale]/dashboard/projects/[id]/page.tsx", /\{initialsOf\(w\.name\)\}/],
+  ];
+
+  const tsxUnder = (dir: string): string[] => {
+    const out: string[] = [];
+    const walk = (rel: string): void => {
+      for (const entry of readdirSync(join(APP_ROOT, rel), { withFileTypes: true })) {
+        const child = `${rel}/${entry.name}`;
+        if (entry.isDirectory()) walk(child);
+        else if (child.endsWith(".tsx") && !/\.test\.tsx$/.test(child)) out.push(child);
+      }
+    };
+    walk(dir);
+    return out;
+  };
+
+  it("no component or dashboard route renders a bare L / LM as the mark", () => {
+    const files = SCAN_ROOTS.flatMap(tsxUnder);
+    // A broken walk would report a clean product — the silent failure this
+    // guard exists to prevent.
+    expect(files.length).toBeGreaterThan(200);
+    const offenders = files.filter((rel) => LETTER_STAND_IN.test(read(rel)));
+    expect(
+      offenders,
+      "a letter is not the brand — render <LmLogo /> (components/ui/lm-logo)",
+    ).toEqual([]);
+  });
+
+  it("the two identity sites render the canonical mark component", () => {
+    for (const rel of [
+      "components/app/conversation/chat/conversation-header.tsx",
+      "components/app/conversation/chat/assistant-identity.tsx",
+    ]) {
+      const src = read(rel);
+      expect(src, rel).toMatch(/import \{ LmLogo \} from "@\/components\/ui\/lm-logo"/);
+      expect(src, rel).toMatch(/<LmLogo\b/);
+    }
+  });
+
+  it("every listed person monogram exists and derives its initial from data", () => {
+    for (const [rel, expression] of PERSON_MONOGRAMS) {
+      expect(read(rel), `${rel}: the initial must come from the person's name`).toMatch(
+        expression,
+      );
+    }
+  });
+
+  it("negative control: the retired letter tiles are caught, a monogram expression is not", () => {
+    // The two lines this change removed, verbatim in shape.
+    expect(
+      '<span className="flex size-6 bg-brand-blue" aria-hidden>L</span>',
+    ).toMatch(LETTER_STAND_IN);
+    expect(`<span\n      aria-hidden\n    >\n      L\n    </span>`).toMatch(LETTER_STAND_IN);
+    expect('<span>{"LM"}</span>').toMatch(LETTER_STAND_IN);
+    // Not a stand-in: a data-derived initial, a real word, the component.
+    expect("<span aria-hidden>{initial}</span>").not.toMatch(LETTER_STAND_IN);
+    expect("<span>LabourMarket</span>").not.toMatch(LETTER_STAND_IN);
+    expect('<LmLogo title="" className="h-6 w-auto shrink-0" />').not.toMatch(LETTER_STAND_IN);
   });
 });
 

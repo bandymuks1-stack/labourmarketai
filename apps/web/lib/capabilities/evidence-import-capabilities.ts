@@ -1,5 +1,7 @@
 import "server-only";
 
+import { createHash } from "node:crypto";
+
 import { z } from "zod";
 
 import type { ExecResult } from "@/lib/conversation/executor-contract";
@@ -10,9 +12,13 @@ import {
   SUPPLIER_ROLES,
   ATTESTATION_ROLES,
   attestRecord,
+  previewAttestation,
+  previewWithdrawal,
   buildPreview,
   committableRows,
   commitImport,
+  correctRecord,
+  correctSessionDateProvenance,
   createImportSession,
   createRosterPerson,
   listEvidenceRecords,
@@ -20,14 +26,19 @@ import {
   resolveTimeSemantics,
   resolveContextLabel,
   resolveRow,
+  stageImportSource,
   submitRows,
   withdrawImport,
   type EvidenceImportFailure,
 } from "@/lib/organization-evidence/import-core";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
-import { fingerprintPayload } from "@/lib/organization-evidence/fingerprint";
+import { correctionInputSchema } from "@/lib/organization-evidence/record-correction";
+import { fetchSourceFile } from "@/lib/organization-evidence/fetch-source-file";
+import { detectHeaderLanguage } from "@/lib/organization-evidence/parse-tabular";
+import { readEvidenceSourceFile } from "@/lib/organization-evidence/read-source-file";
 import {
   sourceWorkRowSchema,
+  MAX_ROWS_PER_SESSION,
   MAX_ROWS_PER_SUBMIT,
 } from "@/lib/organization-evidence/source-rows";
 // THE shared commit gate — the human UI signs and verifies with the SAME
@@ -38,6 +49,10 @@ import {
 } from "@/lib/organization-evidence/commit-confirmation";
 
 import type { CapabilityCaller, CapabilityDescriptor } from "./contract";
+import {
+  mintCapabilityConfirmation,
+  verifyCapabilityConfirmation,
+} from "./confirmable";
 
 /**
  * ORGANIZATION EVIDENCE IMPORT — the AI/agent face of the SAME domain core the
@@ -299,9 +314,11 @@ const sessionCreateInput = z
     sourceLanguage: z.enum(locales),
     sourceFilename: z.string().min(1).max(300).nullish(),
     sourceReference: z.string().min(1).max(500).nullish(),
-    /** A stable identifier for the source. Omitted → derived from the filename
-     *  and reference, so the same named source resolves to the same session. */
-    sourceFingerprint: z.string().min(16).max(128).optional(),
+    /** THE SOURCE'S IDENTITY, stated explicitly — a digest of its CONTENT
+     *  (e.g. sha256 of the file's bytes, or of the canonical rows). Required:
+     *  deriving it from the filename let two different files with the same
+     *  name join ONE session (design v3 §12). */
+    sourceFingerprint: z.string().min(16).max(128),
     notes: z.string().max(1000).nullish(),
     agentLabel: z.string().max(120).nullish(),
   })
@@ -314,7 +331,10 @@ const sessionCreate: CapabilityDescriptor = {
   description:
     "Opens the immutable envelope for ONE source. IDEMPOTENT: the same source " +
     "for the same organization resolves to the SAME session — `reused: true` " +
-    "says so — instead of importing twice. `supplierRole` is required and says " +
+    "says so — instead of importing twice. `sourceFingerprint` is REQUIRED and " +
+    "must identify the source's CONTENT (a digest of the file's bytes or of " +
+    "its canonical rows), never its name: two different files with the same " +
+    "name must never join one session. `supplierRole` is required and says " +
     "in what capacity the organization speaks (an agency reporting its worker's " +
     "hours on a client's site is neither the employer nor the client).",
   exposed: true,
@@ -322,18 +342,11 @@ const sessionCreate: CapabilityDescriptor = {
   inputSchema: sessionCreateInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = sessionCreateInput.parse(input);
-    const fingerprint =
-      parsed.sourceFingerprint ??
-      fingerprintPayload("agent-source", {
-        filename: parsed.sourceFilename ?? null,
-        reference: parsed.sourceReference ?? null,
-        kind: parsed.sourceKind,
-      });
     const res = await createImportSession(caller, {
       organizationId: parsed.organization ?? null,
       sourceKind: parsed.sourceKind,
       supplierRole: parsed.supplierRole,
-      sourceFingerprint: fingerprint,
+      sourceFingerprint: parsed.sourceFingerprint,
       sourceLanguage: parsed.sourceLanguage,
       sourceFilename: parsed.sourceFilename ?? null,
       sourceReference: parsed.sourceReference ?? null,
@@ -351,6 +364,10 @@ const sessionCreate: CapabilityDescriptor = {
 const submitInput = z
   .object({
     sessionId: z.uuid(),
+    /** The SOURCE position of the batch's first row (0-based); the batch's
+     *  rows follow on. The staging key is `startIndex + i`, so a retried or
+     *  resumed batch lands on the same rows instead of new ones. */
+    startIndex: z.number().int().min(0).max(MAX_ROWS_PER_SESSION - 1),
     rows: z.array(sourceWorkRowSchema).min(1).max(MAX_ROWS_PER_SUBMIT),
   })
   .strict();
@@ -364,13 +381,18 @@ const rowsSubmit: CapabilityDescriptor = {
     "surface reads staging as history. Each row must separate FACT from " +
     "DERIVED: `factFields` names what the SOURCE stated, `derived` carries every " +
     "inference with its method and confidence, and a field may never be both. " +
-    "Retrying a batch cannot duplicate rows.",
+    "`startIndex` (required) is the source position of the batch's first row: " +
+    "send batch 1 at 0, batch 2 at the first row after it, and so on. A retried " +
+    "or repeated batch at the same `startIndex` stages nothing twice — " +
+    "`skipped` counts the rows already staged.",
   exposed: true,
   annotations: appendWrite,
   inputSchema: submitInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = submitInput.parse(input);
-    const res = await submitRows(caller, parsed.sessionId, parsed.rows);
+    const res = await submitRows(caller, parsed.sessionId, parsed.rows, {
+      startIndex: parsed.startIndex,
+    });
     if (res.kind !== "ok") return fail(res);
     return {
       ok: true,
@@ -379,6 +401,122 @@ const rowsSubmit: CapabilityDescriptor = {
         skipped: res.skipped,
         totalInSession: res.totalInSession,
         note: "Staged only. Call evidence.import.preview next; nothing is evidence yet.",
+      },
+    };
+  },
+};
+
+// ── evidence.import.stage_file ────────────────────────────────────────────
+
+/** The shape ChatGPT sends for a file argument (`openai/fileParams`): all four
+ *  properties are declared; `download_url` and `file_id` are always present. */
+const fileArgument = z
+  .object({
+    download_url: z.url().max(4000),
+    file_id: z.string().min(1).max(200),
+    mime_type: z.string().max(200).nullish(),
+    file_name: z.string().max(300).nullish(),
+  })
+  .strict();
+
+const stageFileInput = z
+  .object({
+    organization: z.string().min(1).max(200).optional(),
+    supplierRole: z.enum(SUPPLIER_ROLES),
+    /** Optional: derived from the source's own header words when absent. */
+    sourceLanguage: z.enum(locales).optional(),
+    notes: z.string().max(1000).nullish(),
+    file: fileArgument,
+  })
+  .strict();
+
+const fileStage: CapabilityDescriptor = {
+  id: "evidence.import.stage_file",
+  kind: "execute",
+  title: "Stage a spreadsheet or CSV into an evidence import",
+  description:
+    "Reads an uploaded .xlsx / .xlsm / .csv / .tsv (a ChatGPT file argument) with the SAME " +
+    "audited reader the web import uses — long-format sheets and monthly grids, header " +
+    "synonyms in the source languages, FACT vs DERIVED kept apart, a date nobody stated is " +
+    "never invented — and stages every row at its SOURCE POSITION into an import session. " +
+    "The session is keyed on the sha256 of the file's BYTES, never its name: the same file " +
+    "uploaded again resolves to the same session (`reused: true`) and stages nothing twice. " +
+    "Lines that could not become a row are counted in `notStaged`, never dropped silently. " +
+    "NOTHING here is evidence — call evidence.import.preview next, resolve what it asks, and " +
+    "commit through evidence.import.commit (the one commit path). Up to 5 MB and 20 000 rows. " +
+    "Use this instead of pasting rows into evidence.import.submit_rows.",
+  exposed: true,
+  annotations: appendWrite,
+  meta: { "openai/fileParams": ["file"] },
+  inputSchema: stageFileInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = stageFileInput.parse(input);
+    const fetched = await fetchSourceFile(parsed.file.download_url);
+    if (fetched.kind !== "ok") {
+      return {
+        ok: false,
+        code: fetched.reason === "too_large" ? "file_too_large" : "file_unreachable",
+        message:
+          fetched.reason === "too_large"
+            ? "The file is over 5 MB. Split it by year or sheet and stage each part."
+            : `The uploaded file could not be fetched (${fetched.reason}). Nothing was written.`,
+      };
+    }
+    const filename = parsed.file.file_name ?? "upload";
+    const read = await readEvidenceSourceFile(filename, fetched.bytes);
+    switch (read.kind) {
+      case "file-too-large":
+        return { ok: false, code: "file_too_large", message: "The file is over 5 MB. Split it and stage each part." };
+      case "file-unreadable":
+      case "unsupported-file":
+        return { ok: false, code: "file_unreadable", message: "Only .xlsx, .xlsm, .csv and .tsv files can be read. Nothing was written." };
+      case "month-not-stated":
+        return {
+          ok: false,
+          code: "month_not_stated",
+          message: "A monthly grid that never states its month would need every date invented. Nothing was written.",
+        };
+      case "nothing-parsed":
+        return { ok: false, code: "nothing_parsed", message: `No stageable rows were found (${read.detail}). Nothing was written.` };
+      case "ok":
+        break;
+    }
+    const sourceLanguage = parsed.sourceLanguage ?? detectHeaderLanguage(read.headers) ?? "en";
+    const staged = await stageImportSource(caller, {
+      session: {
+        organizationId: parsed.organization ?? null,
+        sourceKind: /\.(xlsx|xlsm)$/i.test(filename) ? "xlsx" : "csv",
+        supplierRole: parsed.supplierRole,
+        sourceLanguage,
+        sourceFilename: filename,
+        sourceReference: `chatgpt-file:${parsed.file.file_id}`,
+        sourceFingerprint: read.fingerprint,
+        sourceBytesSha256: read.bytesSha256,
+        notes: parsed.notes ?? null,
+        actorKind: "agent",
+        agentLabel: "chatgpt-file",
+      },
+      rows: read.rows,
+      positions: read.positions,
+      notStaged: read.notStaged,
+    });
+    if (staged.kind !== "ok") return fail(staged);
+    return {
+      ok: true,
+      data: {
+        session: staged.session,
+        reader: read.via,
+        sourceBytesSha256: read.bytesSha256,
+        rowsParsed: read.rows.length,
+        staged: staged.staged,
+        alreadyStaged: staged.alreadyStaged,
+        notStaged: staged.notStaged,
+        totalInSession: staged.totalInSession,
+        skipped: read.skipped.slice(0, 20),
+        skippedTotal: read.skipped.length,
+        note: staged.session.reused
+          ? "The same source was already staged: nothing was staged twice. Continue with evidence.import.preview."
+          : "Staged only. Call evidence.import.preview next; nothing is evidence yet.",
       },
     };
   },
@@ -530,8 +668,10 @@ const timeSemanticsInput = z
       .object({
         kind: z.enum(["daily", "period_aggregate", "unknown"]),
         remote: z.boolean().nullish(),
-        periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
-        periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
+        /** `YYYY-MM` (recorded at month precision) or `YYYY-MM-DD`; both
+         *  bounds or neither — the core refuses a start alone. */
+        periodStart: z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/).nullish(),
+        periodEnd: z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/).nullish(),
       })
       .strict(),
   })
@@ -547,9 +687,14 @@ const timeSemanticsResolve: CapabilityDescriptor = {
   description:
     "Settles rows whose hours figure a day cannot hold: a day's hours, a " +
     "period aggregate (optionally remote, with the period when known), or " +
-    "unknown. The source figure is never edited; a period aggregate is never " +
-    "written as a day's duration. Only the human's authority behind the " +
-    "caller can decide this — an agent relays a decision, it does not make one.",
+    "unknown. A period is two months (YYYY-MM, kept at month precision) or " +
+    "two days — both bounds or neither; a start alone is refused. A period " +
+    "that disagrees with the duration or rate the source's own words state " +
+    "is recorded WITH a warning (`conflictsWithSource`), never refused. The " +
+    "source figure is never edited; a period aggregate is never written as a " +
+    "day's duration and is never split into monthly figures. Only the " +
+    "human's authority behind the caller can decide this — an agent relays a " +
+    "decision, it does not make one.",
   exposed: true,
   annotations: appendWrite,
   inputSchema: timeSemanticsInput,
@@ -562,7 +707,17 @@ const timeSemanticsResolve: CapabilityDescriptor = {
       decision: parsed.decision,
     });
     if (res.kind !== "ok") return fail(res);
-    return { ok: true, data: { updated: res.updated, note: "Preview again to refresh the token." } };
+    return {
+      ok: true,
+      data: {
+        updated: res.updated,
+        conflictsWithSource: res.conflictsWithSource,
+        note:
+          res.conflictsWithSource > 0
+            ? "Recorded. The period disagrees with what the source's own words state on some rows — the preview shows where. Preview again to refresh the token."
+            : "Preview again to refresh the token.",
+      },
+    };
   },
 };
 
@@ -609,7 +764,7 @@ const importCommit: CapabilityDescriptor = {
     if (preview.kind !== "ok") return fail(preview);
     const committable = committableRows(preview.preview);
 
-    const verdict = verifyCommitToken({
+    const verdict = await verifyCommitToken({
       token: parsed.confirmationToken,
       sessionId: parsed.sessionId,
       userId: caller.userId,
@@ -667,10 +822,16 @@ const recordsList: CapabilityDescriptor = {
   title: "Read imported evidence back",
   description:
     "Returns committed evidence with its full provenance — who supplied it and " +
-    "in what capacity, who imported it, the original source, FACT vs DERIVED, " +
-    "and the DERIVED standing (reported / attested / self-attested / " +
+    "in what capacity, who imported it, the original source, FACT vs DERIVED " +
+    "(`factFields` names the canonical fields the record's own source line " +
+    "states; a field with a recorded derivation, and a period a person set " +
+    "at import, are never among them — `derived.timeSemantics` says how such " +
+    "a period came to be), and the DERIVED standing (reported / attested / self-attested / " +
     "independently verified / withdrawn). `independentlyVerified` is true ONLY " +
-    "for a real independent verification event; a self-attestation never counts.",
+    "for a real independent verification event; a self-attestation never counts. " +
+    "EFFECTIVE reading: a record replaced by a correction is not listed — its " +
+    "replacement is, and `correctionOf` names the record it replaced — so the " +
+    "same work is never counted twice.",
   exposed: true,
   annotations: readOnly,
   inputSchema: recordsListInput,
@@ -686,34 +847,119 @@ const recordsList: CapabilityDescriptor = {
   },
 };
 
-// ── evidence.record.attest ────────────────────────────────────────────────
+// ── evidence.record.attest_draft / attest_confirm ─────────────────────────
+//
+// DRAFT -> CONFIRM, the canonical write contract (lib/capabilities/contract.ts
+// WRITE SEMANTICS), over the SAME `confirmable.ts` helpers the demand
+// close/reopen pair uses. Attesting stands the organization behind a record in
+// an append-only ledger: it is consequential, so a natural-language
+// instruction alone must never write it.
 
 const attestInput = z
   .object({
     recordId: z.uuid(),
-    actorRole: z.enum(ATTESTATION_ROLES),
+    /** Optional: the organization attests in the capacity the record was
+     *  supplied in (its `supplierRole`). A different role is refused. */
+    actorRole: z.enum(ATTESTATION_ROLES).optional(),
     note: z.string().max(1000).nullish(),
   })
   .strict();
+const attestConfirmInput = attestInput.extend({ confirmationToken: z.string().min(10) }).strict();
 
-const recordAttest: CapabilityDescriptor = {
-  id: "evidence.record.attest",
-  kind: "execute",
-  title: "Attest an evidence record in the organization's name",
+/** The NORMALIZED draft shape the token is hashed over - null-vs-absent is
+ *  decided here once, so draft and confirm hash identically. */
+function attestTokenInput(p: z.infer<typeof attestInput>): Record<string, unknown> {
+  return { recordId: p.recordId, actorRole: p.actorRole ?? null, note: p.note ?? null };
+}
+
+const ATTEST_CONFIRM_ID = "evidence.record.attest_confirm";
+
+const recordAttestDraft: CapabilityDescriptor = {
+  id: "evidence.record.attest_draft",
+  kind: "draft",
+  title: "Draft attesting an evidence record in the organization's name",
   description:
-    "Records the organization standing behind one evidence record. Attesting " +
-    "one's OWN work is allowed — a sole trader legitimately has nobody above " +
-    "them — and the result derives SELF_ATTESTED, which is permanent and never " +
-    "counts as independent verification. Independent verification is a " +
-    "different act, available only to a separately recorded party.",
+    "Previews the organization standing behind one evidence record, in the " +
+    "capacity the record was supplied in (its `supplierRole`) - omit " +
+    "`actorRole` to use it; any other role is refused. NOTHING is written. " +
+    "Attesting one's OWN work is allowed (a sole trader has nobody above " +
+    "them) and derives SELF_ATTESTED, which is permanent and never counts as " +
+    "independent verification; independent verification is a different act " +
+    "for a separately recorded party. Returns a one-time token bound to the " +
+    `record's CURRENT attestation trail. Confirm with ${ATTEST_CONFIRM_ID}.`,
   exposed: true,
-  annotations: appendWrite,
+  annotations: readOnly,
   inputSchema: attestInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = attestInput.parse(input);
+    const pre = await previewAttestation(caller, { recordId: parsed.recordId, actorRole: parsed.actorRole ?? null });
+    if (pre.kind !== "ok") return fail(pre);
+    if (pre.attestedByCaller) {
+      return {
+        ok: false,
+        code: "already_attested",
+        message: "This record is already attested by this actor. Nothing was written and no token was issued.",
+      };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: ATTEST_CONFIRM_ID,
+      input: attestTokenInput(parsed),
+      userId: caller.userId,
+      stateFingerprint: `attest:${parsed.recordId}:${pre.attestedEventCount}:${pre.latestAttestedEventId ?? "none"}`,
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          recordId: parsed.recordId,
+          attestingAs: pre.supplierRole,
+          existingAttestations: pre.attestedEventCount,
+          recordWithdrawn: pre.withdrawn,
+          standing:
+            "Appends one `attested` event naming this organization. If the record's subject is the acting " +
+            "person the standing derives SELF_ATTESTED; either way it is NOT independent verification.",
+          independentlyVerified: false,
+        },
+        confirmationToken: token,
+        note: `Nothing was written. Confirming requires ${ATTEST_CONFIRM_ID} with this exact input and token.`,
+      },
+    };
+  },
+};
+
+const recordAttestConfirm: CapabilityDescriptor = {
+  id: ATTEST_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm attesting the evidence record",
+  description:
+    "Verifies the one-time token against the exact drafted input, the caller " +
+    "and the record's CURRENT attestation trail (a replay or a changed record " +
+    "is refused), then appends the `attested` event as the caller and reports " +
+    "`independentlyVerified: false`. The same actor cannot attest a record twice.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: attestConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = attestConfirmInput.parse(input);
+    const pre = await previewAttestation(caller, { recordId: parsed.recordId, actorRole: parsed.actorRole ?? null });
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = await verifyCapabilityConfirmation({
+      actionId: ATTEST_CONFIRM_ID,
+      token: parsed.confirmationToken,
+      input: attestTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: `attest:${parsed.recordId}:${pre.attestedEventCount}:${pre.latestAttestedEventId ?? "none"}`,
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The record changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
     const res = await attestRecord(caller, {
       recordId: parsed.recordId,
-      actorRole: parsed.actorRole,
+      actorRole: parsed.actorRole ?? null,
       note: parsed.note ?? null,
     });
     if (res.kind !== "ok") return fail(res);
@@ -724,37 +970,365 @@ const recordAttest: CapabilityDescriptor = {
   },
 };
 
-// ── evidence.import.withdraw (the rollback path) ──────────────────────────
+// ── evidence.import.withdraw_draft / withdraw_confirm (the rollback path) ──
 
 const withdrawInput = z
   .object({ sessionId: z.uuid(), note: z.string().max(1000).nullish() })
   .strict();
+const withdrawConfirmInput = withdrawInput.extend({ confirmationToken: z.string().min(10) }).strict();
+const WITHDRAW_CONFIRM_ID = "evidence.import.withdraw_confirm";
 
-const importWithdraw: CapabilityDescriptor = {
-  id: "evidence.import.withdraw",
-  kind: "execute",
-  title: "Withdraw everything an import wrote",
+function withdrawTokenInput(p: z.infer<typeof withdrawInput>): Record<string, unknown> {
+  return { sessionId: p.sessionId, note: p.note ?? null };
+}
+
+/** Bound to exactly the records the sweep would withdraw (hashed - a large
+ *  import must not bloat the token) and the session's own lifecycle state. */
+function withdrawFingerprint(
+  sessionId: string,
+  pre: { pendingRecordIds: readonly string[]; sessionWithdrawn: boolean },
+): string {
+  const ids = [...pre.pendingRecordIds].sort();
+  const digest = createHash("sha256").update(ids.join(",")).digest("hex").slice(0, 24);
+  return `withdraw:${sessionId}:${ids.length}:${digest}:${pre.sessionWithdrawn}`;
+}
+
+const importWithdrawDraft: CapabilityDescriptor = {
+  id: "evidence.import.withdraw_draft",
+  kind: "draft",
+  title: "Draft withdrawing everything an import wrote",
   description:
-    "The recovery path. It DELETES NOTHING: every record gains an append-only " +
-    "`withdrawn` event, so the evidence and the reason both stay readable and " +
-    "the action itself is auditable. Reversible by reinstating.",
+    "Previews the recovery path: how many records (and how many people's " +
+    "records) would gain an append-only `withdrawn` event. NOTHING is written " +
+    "and nothing is ever deleted - the evidence and the reason stay readable; " +
+    "reversible by reinstating. Returns a one-time token bound to exactly the " +
+    "records that would be withdrawn. When nothing is pending (already " +
+    `withdrawn) it says so and issues no token. Confirm with ${WITHDRAW_CONFIRM_ID}.`,
   exposed: true,
-  annotations: appendWrite,
+  annotations: readOnly,
   inputSchema: withdrawInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = withdrawInput.parse(input);
-    const res = await withdrawImport(
-      caller,
-      parsed.sessionId,
-      parsed.note ?? null,
-    );
+    const pre = await previewWithdrawal(caller, parsed.sessionId);
+    if (pre.kind !== "ok") return fail(pre);
+    if (pre.nothingToDo) {
+      return {
+        ok: true,
+        data: {
+          preview: { sessionId: parsed.sessionId, recordsToWithdraw: 0, peopleAffected: 0 },
+          alreadyWithdrawn: true,
+          note: "Already withdrawn - nothing to confirm and no token was issued. Nothing was written.",
+        },
+      };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: WITHDRAW_CONFIRM_ID,
+      input: withdrawTokenInput(parsed),
+      userId: caller.userId,
+      stateFingerprint: withdrawFingerprint(parsed.sessionId, pre),
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          sessionId: parsed.sessionId,
+          recordsToWithdraw: pre.pendingRecordIds.length,
+          peopleAffected: pre.peopleAffected,
+          deletes: 0,
+        },
+        alreadyWithdrawn: false,
+        confirmationToken: token,
+        note: `Nothing was written. Confirming requires ${WITHDRAW_CONFIRM_ID} with this exact input and token.`,
+      },
+    };
+  },
+};
+
+const importWithdrawConfirm: CapabilityDescriptor = {
+  id: WITHDRAW_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm withdrawing everything the import wrote",
+  description:
+    "Verifies the one-time token against the records that would be withdrawn " +
+    "NOW (a replay, or any change since the draft, is refused), then appends a " +
+    "`withdrawn` event per record and the session's `rolled_back` event as the " +
+    "caller. It DELETES NOTHING; the act is auditable and reversible.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: withdrawConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = withdrawConfirmInput.parse(input);
+    const pre = await previewWithdrawal(caller, parsed.sessionId);
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = await verifyCapabilityConfirmation({
+      actionId: WITHDRAW_CONFIRM_ID,
+      token: parsed.confirmationToken,
+      input: withdrawTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: withdrawFingerprint(parsed.sessionId, pre),
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The import changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
+    const res = await withdrawImport(caller, parsed.sessionId, parsed.note ?? null);
     if (res.kind !== "ok") return fail(res);
+    const already = res.outcome === "already_withdrawn";
     return {
       ok: true,
       data: {
         withdrawn: res.affected,
         deleted: 0,
-        note: "Nothing was deleted — each record carries a withdrawal event.",
+        alreadyWithdrawn: already,
+        note: already
+          ? "Already withdrawn - nothing was written."
+          : "Nothing was deleted - each record carries a withdrawal event.",
+      },
+    };
+  },
+};
+
+// ── evidence.record.correct / evidence.session.correct_date_provenance ────
+
+// Both correction writes are draft -> confirm pairs (the MCP write contract:
+// only `confirm` may write). The draft evaluates EVERY refusal the confirm
+// would (dry run) and writes nothing; the confirm re-checks the token against
+// the exact input and the correction's current state, then writes.
+
+const CORRECT_CONFIRM_ID = "evidence.record.correct_confirm";
+const correctConfirmInput = correctionInputSchema.and(z.object({ confirmationToken: z.string().min(10) }));
+
+function correctTokenInput(p: z.infer<typeof correctionInputSchema>): Record<string, unknown> {
+  return JSON.parse(JSON.stringify(p)) as Record<string, unknown>;
+}
+
+function correctFingerprint(
+  recordId: string,
+  changed: { readonly derived: readonly string[]; readonly columns: readonly string[] },
+): string {
+  return `correct:${recordId}:${[...changed.derived].sort().join(",")}:${[...changed.columns].sort().join(",")}`;
+}
+
+const recordCorrectDraft: CapabilityDescriptor = {
+  id: "evidence.record.correct_draft",
+  kind: "draft",
+  title: "Draft correcting a committed evidence record (insert-only)",
+  description:
+    "Previews correcting ONE committed record without touching it: the original is never " +
+    "edited or deleted. Confirming writes a replacement record (`correction_of` = the original, " +
+    "hash chained from it) and appends a `corrected` event (actor, reason, time, replacement) " +
+    "to the original. Only the CURRENT record of a chain can be corrected (A -> B -> C); every " +
+    "effective reading - hours, counts, timelines - counts only the leaf, so the work is " +
+    "never counted twice. `derivedPatch` adds or replaces DERIVED entries (each with method " +
+    "and confidence): this is how a field the source never stated stops being reported as a " +
+    "source FACT. `overrides` may restate the date/period, hours, object or place label; the " +
+    "person, work text and source line can never change. `carryAttestation` re-attests the " +
+    "replacement as the acting organization, only when the original's attestation stands and " +
+    "no content field changed. NOTHING is written by this step. Returns a one-time token; " +
+    `confirm with ${CORRECT_CONFIRM_ID}. Requires authority over the record's organization.`,
+  exposed: true,
+  annotations: readOnly,
+  inputSchema: correctionInputSchema,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = correctionInputSchema.parse(input);
+    const res = await correctRecord(caller, parsed, { dryRun: true });
+    if (res.kind !== "ok") return fail(res);
+    if (res.idempotent) {
+      return {
+        ok: false,
+        code: "already_corrected",
+        message: "This exact correction already exists. Nothing was written and no token was issued.",
+      };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: CORRECT_CONFIRM_ID,
+      input: correctTokenInput(parsed),
+      userId: caller.userId,
+      stateFingerprint: correctFingerprint(parsed.recordId, res.changed),
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          recordId: parsed.recordId,
+          changed: res.changed,
+          standing:
+            "Writes a replacement record and a `corrected` event; the original is unchanged and is marked corrected.",
+        },
+        confirmationToken: token,
+        note: `Nothing was written. Confirming requires ${CORRECT_CONFIRM_ID} with this exact input and token.`,
+      },
+    };
+  },
+};
+
+const recordCorrectConfirm: CapabilityDescriptor = {
+  id: CORRECT_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm correcting the evidence record",
+  description:
+    "Verifies the one-time token against the exact drafted input, the caller and the " +
+    "correction's current state (a replay or a record that changed is refused), then writes " +
+    "the insert-only correction. Idempotent: repeating the same correction writes nothing new.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: correctConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const all = correctConfirmInput.parse(input) as z.infer<typeof correctionInputSchema> & {
+      confirmationToken: string;
+    };
+    const { confirmationToken, ...rest } = all;
+    const parsed = correctionInputSchema.parse(rest);
+    const pre = await correctRecord(caller, parsed, { dryRun: true });
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = await verifyCapabilityConfirmation({
+      actionId: CORRECT_CONFIRM_ID,
+      token: confirmationToken,
+      input: correctTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: correctFingerprint(parsed.recordId, pre.changed),
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The record changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
+    const res = await correctRecord(caller, parsed);
+    if (res.kind !== "ok") return fail(res);
+    return {
+      ok: true,
+      data: {
+        recordId: res.recordId,
+        correctionOf: res.correctionOf,
+        eventId: res.eventId,
+        changed: res.changed,
+        attestationCarried: res.attestationCarried,
+        idempotent: res.idempotent,
+        note: res.idempotent
+          ? "This exact correction already existed; nothing new was written."
+          : "The original is unchanged and now marked corrected; the replacement is the record that stands.",
+      },
+    };
+  },
+};
+
+const sessionDatesInput = z
+  .object({
+    sessionId: z.uuid(),
+    reason: z.string().trim().min(3).max(1000),
+    /** Re-attest each replacement as the acting organization where the original's attestation stands. */
+    carryAttestation: z.boolean().optional(),
+  })
+  .strict();
+const SESSION_DATES_CONFIRM_ID = "evidence.session.correct_date_provenance_confirm";
+const sessionDatesConfirmInput = sessionDatesInput.extend({ confirmationToken: z.string().min(10) }).strict();
+
+function sessionDatesTokenInput(p: z.infer<typeof sessionDatesInput>): Record<string, unknown> {
+  return { sessionId: p.sessionId, reason: p.reason, carryAttestation: p.carryAttestation === true };
+}
+
+/** Bound to exactly what the sweep would act on right now. */
+function sessionDatesFingerprint(
+  sessionId: string,
+  r: { examined: number; candidates: number; alreadyClassified: number },
+): string {
+  return `datecorr:${sessionId}:${r.examined}:${r.candidates}:${r.alreadyClassified}`;
+}
+
+const sessionDatesCorrectDraft: CapabilityDescriptor = {
+  id: "evidence.session.correct_date_provenance_draft",
+  kind: "draft",
+  title: "Draft reclassifying reconstructed dates of an import session as DERIVED",
+  description:
+    "For one import session: counts every committed record whose OWN source line says its " +
+    "calendar date was reconstructed (year + week + weekday - the `Date provenance` column). " +
+    "Confirming corrects each through the insert-only correction so the date is recorded as " +
+    "DERIVED (`iso_week_weekday_reconstruction`, confidence 0.8), not as a stated source fact. " +
+    "A date the source explicitly stated stays a FACT, undated period records are untouched, " +
+    "and nothing is guessed: the rule re-reads what each line already said. NOTHING is " +
+    `written by this step. Returns a one-time token; confirm with ${SESSION_DATES_CONFIRM_ID}.`,
+  exposed: true,
+  annotations: readOnly,
+  inputSchema: sessionDatesInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = sessionDatesInput.parse(input);
+    const res = await correctSessionDateProvenance(caller, { ...parsed, apply: false });
+    if (res.kind !== "ok") return fail(res);
+    const token =
+      res.candidates > 0
+        ? mintCapabilityConfirmation({
+            actionId: SESSION_DATES_CONFIRM_ID,
+            input: sessionDatesTokenInput(parsed),
+            userId: caller.userId,
+            stateFingerprint: sessionDatesFingerprint(parsed.sessionId, res),
+          })
+        : null;
+    return {
+      ok: true,
+      data: {
+        preview: {
+          examined: res.examined,
+          candidates: res.candidates,
+          alreadyClassified: res.alreadyClassified,
+        },
+        confirmationToken: token,
+        note:
+          res.candidates > 0
+            ? `Nothing was written. Confirming requires ${SESSION_DATES_CONFIRM_ID} with this exact input and token.`
+            : "Nothing to reclassify; nothing was written and no token was issued.",
+      },
+    };
+  },
+};
+
+const sessionDatesCorrectConfirm: CapabilityDescriptor = {
+  id: SESSION_DATES_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm reclassifying the session's reconstructed dates",
+  description:
+    "Verifies the one-time token against the exact drafted input, the caller and what the " +
+    "sweep would act on now (a replay or a changed session is refused), then writes the " +
+    "insert-only corrections; originals are unchanged. Idempotent and resumable: a record " +
+    "already classified is not a candidate again.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: sessionDatesConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const { confirmationToken, ...rest } = sessionDatesConfirmInput.parse(input);
+    const parsed = sessionDatesInput.parse(rest);
+    const pre = await correctSessionDateProvenance(caller, { ...parsed, apply: false });
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = await verifyCapabilityConfirmation({
+      actionId: SESSION_DATES_CONFIRM_ID,
+      token: confirmationToken,
+      input: sessionDatesTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: sessionDatesFingerprint(parsed.sessionId, pre),
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The session changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
+    const res = await correctSessionDateProvenance(caller, { ...parsed, apply: true });
+    if (res.kind !== "ok") return fail(res);
+    return {
+      ok: true,
+      data: {
+        applied: res.applied,
+        examined: res.examined,
+        candidates: res.candidates,
+        corrected: res.corrected,
+        alreadyClassified: res.alreadyClassified,
+        failed: res.failed,
+        note: "Corrections written; originals unchanged. Read the session back with evidence.records.list.",
       },
     };
   },
@@ -766,12 +1340,19 @@ export const EVIDENCE_IMPORT_CAPABILITIES: readonly CapabilityDescriptor[] = [
   personCreate,
   sessionCreate,
   rowsSubmit,
+  fileStage,
   importPreview,
   rowResolve,
   labelResolve,
   timeSemanticsResolve,
   importCommit,
   recordsList,
-  recordAttest,
-  importWithdraw,
+  recordAttestDraft,
+  recordAttestConfirm,
+  importWithdrawDraft,
+  importWithdrawConfirm,
+  recordCorrectDraft,
+  recordCorrectConfirm,
+  sessionDatesCorrectDraft,
+  sessionDatesCorrectConfirm,
 ];

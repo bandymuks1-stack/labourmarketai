@@ -29,6 +29,7 @@ function provider(retrieve: BillingProvider["retrieveSubscription"]): BillingPro
     constructWebhookEvent: vi.fn(),
     listCustomerSubscriptions: vi.fn(),
     retrieveSubscription: retrieve,
+    retrieveSubscriptionRaw: vi.fn(),
   };
 }
 

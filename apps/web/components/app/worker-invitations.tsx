@@ -34,6 +34,7 @@ export interface WorkerInvitationsLabels {
   readonly outcomeLinked: string;
   readonly outcomeAlreadyLinked: string;
   readonly outcomeNoInvitation: string;
+  readonly outcomeEmailUnverified: string;
   readonly outcomeNoWorker: string;
   readonly outcomeError: string;
   readonly outcomeNeedsMigration: string;
@@ -63,6 +64,8 @@ function InvitationRow({
           return { text: labels.outcomeNoInvitation, ok: false };
         case "no_worker_profile":
           return { text: labels.outcomeNoWorker, ok: false };
+        case "email_unverified":
+          return { text: labels.outcomeEmailUnverified, ok: false };
       }
     }
     if (state.code === "needs_migration")
@@ -78,7 +81,7 @@ function InvitationRow({
       data-testid={`worker-invitation-${inv.kind}-${inv.orgId}`}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {inv.kind === "company" ? labels.companyLabel : labels.agencyLabel}
         </span>
         <span className="text-sm font-semibold text-text-primary">

@@ -44,6 +44,9 @@ describe("profession recovery prompt — an invitation, never a guess", () => {
   it("sends the worker to the CANONICAL profile editor, not a second one", () => {
     // The write surface stays worker-trade-profile on /dashboard/profile.
     expect(PROMPT).toMatch(/href="\/dashboard\/profile/);
+    // …at an anchor that EXISTS: the `#profile-edit` disclosure that holds
+    // worker-trade-profile (a `work-directions` anchor was never rendered).
+    expect(PROMPT).toMatch(/href="\/dashboard\/profile#profile-edit"/);
     // No profession registry, no select, no write path inside the banner.
     expect(PROMPT).not.toMatch(/<select/);
     expect(PROMPT).not.toMatch(/PROFESSION_SLUGS|worker_professions|\.rpc\(/);

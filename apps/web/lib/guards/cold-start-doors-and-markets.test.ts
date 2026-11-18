@@ -124,16 +124,22 @@ describe("1. the agency door carries the context the visitor already chose", () 
 });
 
 describe("2. the employer's first form knows every market the landing names", () => {
-  it("it reads the canonical market set, not the readiness set", () => {
-    expect(needPage).toContain("MARKET_COUNTRIES");
+  it("it reads EVERY ISO country, markets first — not the readiness set, not the market set", () => {
+    // 2026-09-22 (global-access rule, owner): the intake RPC accepts any code in
+    // public.countries (migration 20260922130000, applied), so the form must not be
+    // narrower than the door behind it. `countryOptionsForLocale` orders the active
+    // markets first and then the world.
+    expect(needPage).toContain("countryOptionsForLocale(locale)");
     expect(needPage).not.toMatch(/READINESS_COUNTRIES\.map/);
+    expect(needPage).not.toMatch(/MARKET_COUNTRIES\.map\(/);
   });
 
-  it("the country labels come from the shared catalogue that has all of them", () => {
-    // `companyNeed.countries` carries only the ten; reading it for the other
-    // seven would print raw message keys at a visitor (the leak class from
-    // `raw-message-key-leak-class`).
-    expect(needPage).toContain('tCountries(`countryNames.${code}`)');
+  it("the country labels come from CLDR, so no visitor ever sees a raw message key", () => {
+    // `companyNeed.countries` carries only ten and `labourMarket.countryNames` only the
+    // seventeen markets; reading either for the other 232 countries would print raw
+    // message keys at a visitor (the leak class from `raw-message-key-leak-class`).
+    // `countryOptionsForLocale` labels every code through `countryDisplayName` (CLDR).
+    expect(needPage).not.toMatch(/tCountries\(`countryNames/);
     expect(needPage).not.toMatch(/t\(`countries\.\$\{code\}`\)/);
   });
 

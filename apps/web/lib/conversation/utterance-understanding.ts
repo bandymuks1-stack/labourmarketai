@@ -48,6 +48,8 @@
  * CALLER'S OWN WORLD FIRST, and to ask when that does not settle it.
  */
 import { classifyIntent, type ConversationIntent } from "@/lib/conversation/intent-router";
+import type { PlanStep } from "@/lib/conversation/intent-plan";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 /**
  * Below this, a reference-shaped utterance is not treated as a command.
@@ -86,6 +88,9 @@ const POSSESSIVES: ReadonlySet<string> = new Set([
   "mein", "meine", "meinen", "meiner", "meines",
   "unser", "unsere", "unseren", "unserer",
 ]);
+/** sv possessives — counted in a Swedish sentence only: "Min" is a given name
+ *  ("Min Lee Bau") and "Mina" a company word in other languages. */
+const SV_POSSESSIVES: ReadonlySet<string> = new Set(["min", "mitt", "mina", "vår", "vårt", "våra"]);
 
 /** Strip leading/trailing punctuation from a token, keeping letters. */
 function core(token: string): string {
@@ -116,6 +121,7 @@ export function looksLikeReference(text: string): boolean {
   // One token is never enough to be sure ("CV"), and a long line is prose.
   if (tokens.length < 2 || tokens.length > 6) return false;
   if (tokens.some((t) => POSSESSIVES.has(core(t).toLocaleLowerCase()))) return false;
+  if (looksSwedish(raw) && tokens.some((t) => SV_POSSESSIVES.has(core(t).toLocaleLowerCase()))) return false;
   return tokens.every(startsUpper);
 }
 
@@ -141,13 +147,95 @@ export function looksLikeReference(text: string): boolean {
 /** Which layer produced the reading. Both normalise onto ONE union. */
 export type UnderstandingSource = "deterministic" | "model";
 
-/** Why nothing usable came back. `none` is not one of these — see below. */
+/**
+ * Why nothing usable came back. `none` is not one of these — see below.
+ *
+ * THE AI STATE IS NAMED, NOT COLLAPSED (owner program 2026-09-23, P1). Until
+ * this date every way the model half could fail — the assistant switched off,
+ * no key, the day's allowance spent, a vendor timeout — arrived as ONE
+ * `ai_unavailable`, and the chat rendered all of them exactly like "I did not
+ * understand you". A person cannot tell "the product is confused" from "the
+ * product's assistant is off" unless we say which it is, so each state that
+ * changes what the person should do next has its own reason:
+ *
+ *   · `ai_not_configured`          — the assistant is not switched on here
+ *                                    (mode disabled, no key, no provider);
+ *   · `allowance_exhausted`        — a cost ceiling or the day's run budget
+ *                                    refused the call before any vendor ran;
+ *   · `ai_temporarily_unavailable` — a vendor/runtime fault (timeout, provider
+ *                                    error, an answer that failed its schema);
+ *   · `rate_limited`               — this person sent too many in a short
+ *                                    window (the per-person limiter).
+ *
+ * `not_understood` stays what it always meant: the model answered, and the
+ * answer was not something the product can act on.
+ */
 export type UnsupportedReason =
   | "unauthenticated"
   | "empty"
   | "rate_limited"
-  | "ai_unavailable"
+  | "ai_not_configured"
+  | "allowance_exhausted"
+  | "ai_temporarily_unavailable"
   | "not_understood";
+
+/**
+ * Map a NON-suggestion AI runtime outcome onto the reason the person hears.
+ *
+ * Structural on purpose — `{ status, reason }` — so this pure module never
+ * imports the runtime (the chat imports this file, and the chat must not pull
+ * any `lib/ai` module into the client bundle). The runtime's shapes are:
+ *   `disabled`     + an `AiDisabledReason` (mode_disabled, missing_api_key,
+ *                    unknown_provider, missing_base_url, …) — every one of
+ *                    them is a configuration state, never a transient fault;
+ *   `needs_review` + an `AiAgentReviewReason` — `budget_exceeded` is the
+ *                    allowance, `no_api_key` is configuration, everything else
+ *                    (timeout, provider_error, malformed_output, truncated,
+ *                    schema_rejected, route_blocked, invalid_input,
+ *                    unsupported) is a runtime fault on OUR side.
+ * Anything unrecognised is a runtime fault — never "not understood", because
+ * that would blame the person's sentence for our failure.
+ */
+export function unsupportedReasonForAiOutcome(outcome: {
+  readonly status: string;
+  readonly reason?: string;
+}): UnsupportedReason {
+  if (outcome.status === "disabled") return "ai_not_configured";
+  if (outcome.status === "needs_review") {
+    if (outcome.reason === "budget_exceeded") return "allowance_exhausted";
+    if (outcome.reason === "no_api_key") return "ai_not_configured";
+  }
+  return "ai_temporarily_unavailable";
+}
+
+/** The `conversation.chat` message key for an AI-state reason. */
+export type AiStateMessageKey =
+  | "aiNotConfigured"
+  | "aiAllowanceExhausted"
+  | "aiTemporarilyUnavailable"
+  | "aiRateLimited";
+
+/**
+ * Which honest line the chat says for a reason — or `null` when the reason is
+ * about the SENTENCE (not understood, empty, signed out), in which case the
+ * ordinary clarifying question is the honest answer. Each non-null key is a
+ * distinct sentence in every active locale; none of them is the generic
+ * fallback, and none of them claims the sentence was misunderstood.
+ */
+export function aiStateMessageKey(reason: UnsupportedReason): AiStateMessageKey | null {
+  switch (reason) {
+    case "ai_not_configured":
+      return "aiNotConfigured";
+    case "allowance_exhausted":
+      return "aiAllowanceExhausted";
+    case "ai_temporarily_unavailable":
+      return "aiTemporarilyUnavailable";
+    case "rate_limited":
+      return "aiRateLimited";
+    default:
+      return null;
+  }
+}
 
 export type Understanding =
   | {
@@ -197,6 +285,18 @@ export type Understanding =
       readonly kind: "unsupported";
       readonly reason: UnsupportedReason;
       readonly source: UnderstandingSource;
+    }
+  | {
+      /**
+       * ONE message, an ORDERED PLAN of 2–3 existing intents (owner
+       * 2026-10-14 §4). Validated by lib/conversation/intent-plan.ts: reads,
+       * at most one write as the last step, never a navigating step. The
+       * surface runs the first step and offers the rest in order; each label
+       * is the person's own words (or null).
+       */
+      readonly kind: "plan";
+      readonly steps: readonly PlanStep[];
+      readonly source: "model";
     }
   /** The deterministic layer found nothing. The model has NOT been asked yet. */
   | { readonly kind: "none" };

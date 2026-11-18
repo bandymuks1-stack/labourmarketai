@@ -1,12 +1,27 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { mentionsOrganization } from "@/lib/journal/org-mention";
+import {
+  resolveEngagementContext,
+  type EngagementCandidate,
+} from "@/lib/journal/engagement-context-selection";
 import { useTranslations } from "next-intl";
+import {
+  PROJECT_FIELD_NONE,
+  projectChoiceIsSatisfied,
+  projectDisplayLabel,
+  projectNamedInText,
+  projectPromptFor,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
 import {
   ChatAction,
   ChatActionRow,
 } from "@/components/app/conversation/chat/chat-action";
 import { Clock, X } from "lucide-react";
+
+import { CameraCaptureButton } from "@/components/app/camera-capture-button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { compressImageFile } from "@/lib/browser/image-compress";
 import {
@@ -26,6 +41,12 @@ import {
   journalDraftReadiness,
   type WorkLogParse,
 } from "@/lib/conversation/worklog-extract";
+import { logWorkNotesRefusal } from "@/lib/conversation/worker-schemas";
+import {
+  useAttachSink,
+  useInitialFile,
+  type RegisterAttachSink,
+} from "@/components/app/conversation/attach-sink";
 import { deriveIntakeWorkTime } from "@/lib/journal/intake-work-time";
 import {
   confirmJournalSkillCandidate,
@@ -33,7 +54,10 @@ import {
 } from "@/lib/journal/skill-pipeline-actions";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { formatUtcDate } from "@/lib/time/display";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import { quoteText } from "@/lib/i18n/quote";
 
 export type WorkLogLabels = {
   understood: string;
@@ -51,7 +75,12 @@ export type WorkLogLabels = {
   labelContext: string;
   contextChoose: string;
   contextAmbiguous: string;
+  contextEndedOrg: string;
+  /** The CONFIRM step's button — the only press that writes. */
   save: string;
+  /** The FIRST button: it opens the review step ("Patvirtinti įrašą?") and
+   *  writes nothing, so it never says "Save" (activation audit fix #5). */
+  continue: string;
   cancel: string;
   working: string;
   confirmTitle: string;
@@ -65,15 +94,33 @@ export type WorkLogLabels = {
   strengthenedSkillPrefix: string;
   pendingConfirmPrefix: string;
   cvUpdatedNote: string;
+  /** Shown after EVERY save: the entry now counts in the Living CV as
+   *  recorded work — written by the person, not confirmed by anyone. The
+   *  Living CV prints its recorded-work facts from one entry on
+   *  (`lib/cv-export/professional-summary.ts`), so this is a fact, not a
+   *  promise. Never says "verified" / "confirmed". */
+  livingCvNote: string;
+  /** The one link from the confirmation to the Living CV (`/cv`). */
+  viewLivingCv: string;
+  /** A calm return line ("tomorrow, add that day's work too") — no streak,
+   *  no score, no pressure. */
+  comeBackNote: string;
   matchingNote: string;
   /** Next action after real enrichment: open the board where the updated
    *  skills are recomputed into recommendations (read-time, never pushed). */
   viewOpportunities: string;
   pipelineFailedNote: string;
-  /** The evidence text carries no work (no time, no place, no activity) —
-   *  e.g. the request "Užpildyk darbo žurnalą" typed into the field. The
+  /** The evidence text is not work the server would take: under 3 characters,
+   *  or only the request "Užpildyk darbo žurnalą" typed into the field. The
    *  flow asks for the work instead of saving the request (prod 2026-09-06). */
   errorNoWorkContent: string;
+  /** Over the server's 4000-character ceiling — said plainly, not as a
+   *  generic failure. */
+  errorNotesTooLong: string;
+  /** NEUTRAL (never red) line on the confirm step when the text carries no
+   *  recognised time, place or activity. The server takes such text, so the
+   *  form does too (owner P0 2026-09-23) — it just says what it did not read. */
+  noWorkSignalHint: string;
   /** What the save will RECORD as work time (issue #1689): the timed phrases
    *  the executor persists as fragments, in the person's own words, and the
    *  stated day total beside them. The person confirms figures, not a
@@ -195,6 +242,15 @@ type Phase =
     }
   | { kind: "error"; message: string };
 
+/** The bounded funnel surface labels this flow can report. */
+export type WorkLogSurface = "conversation" | "journal";
+
+/** `journal_rematch_viewed` keeps its historical per-surface label. */
+const REMATCH_SURFACE: Record<WorkLogSurface, string> = {
+  conversation: "worklog_chat",
+  journal: "worklog_journal",
+};
+
 /** Client-side preparation state for the picked photo. */
 type PhotoPrep = "idle" | "preparing" | "ready";
 
@@ -208,9 +264,13 @@ const PHOTO_OUTCOME_KEY: Record<JournalPhotoUploadResult, string> = {
   uploaded: "uploaded",
   invalid: "invalidFile",
   limit: "limitReached",
+  quota: "quotaReached",
   "not-ready": "notReady",
   failed: "uploadFailed",
 };
+
+/** The photo types the journal photo path re-encodes and stores. */
+const JOURNAL_PHOTO_TYPE = /^image\/(jpeg|png|webp)$/;
 
 /**
  * Conversation-first work-log (Phase 3). The worker types a natural sentence
@@ -238,24 +298,74 @@ export function WorkerWorkLogFlow({
   locale,
   labels,
   onClose,
+  onSaved,
   photoFirst = false,
+  initialFile = null,
+  onRegisterAttachSink,
+  voice,
+  surface = "conversation",
 }: {
+  /** WHERE the flow is mounted — the funnel label on the save events. The
+   *  journal page's quick record mounts this same flow, and its saves were
+   *  reported as "conversation" (activation audit fix #7). Bounded label. */
+  surface?: WorkLogSurface;
+  /** Set only when the text came from the voice door (already reviewed by the
+   *  person): carried to the save as provenance, nothing more. */
+  voice?: { language: string; disclosureVersion: string };
   draft: WorkLogParse;
   locale: string;
   labels: WorkLogLabels;
   onClose?: () => void;
+  /** Called once when the entry is persisted (the "done" phase) — the chat
+   *  retires the work-log goal so a later "ne 5, o 6" corrects THIS entry
+   *  instead of opening a second one (2026-09-29). */
+  onSaved?: (entryId: string) => void;
   /** Opened via the composer's attach path — the photo field leads and is the
    *  reason the flow is on screen. The short text stays REQUIRED either way: a
    *  photo alone is evidence without a claim, which the journal cannot store. */
   photoFirst?: boolean;
+  /** The photo the person picked with the composer paperclip BEFORE this flow
+   *  opened. It enters through the SAME `pickPhoto` a pick inside the form
+   *  takes (compress → validate → preview), and it is uploaded only after the
+   *  entry is saved — until then it lives in this browser tab only. */
+  initialFile?: File | null;
+  /** While this form is open it is where a paperclip photo goes — into THIS
+   *  form, never into a second one (owner P0 2026-09-23). Withdrawn on done,
+   *  cancel and unmount. The journal page's quick record passes none. */
+  onRegisterAttachSink?: RegisterAttachSink;
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>({ kind: "loading" });
+  const savedEntryId = phase.kind === "done" ? phase.entryId : null;
+  useEffect(() => {
+    if (savedEntryId) onSaved?.(savedEntryId);
+    // Once per persisted entry; the callback identity is not a trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedEntryId]);
   const [engagements, setEngagements] = useState<WorkLogEngagement[]>([]);
   const [engagementId, setEngagementId] = useState<string>("");
+  /** Which project the hours belong to. Two or more active projects in the
+   *  chosen context → nothing is preselected and the person must answer
+   *  (a project, or "not project work"); the shared rule lives in
+   *  lib/journal/project-attribution. */
+  const [projectChoice, setProjectChoice] = useState<string>("");
   /** Rule C: several engagements are legitimately possible, so the flow must
    *  ask instead of preselecting one. */
   const [mustChooseEngagement, setMustChooseEngagement] = useState(false);
+  /** The sentence named an organization whose relationship has ENDED. */
+  const [endedOrgNamed, setEndedOrgNamed] = useState<string | null>(null);
+  // Acting for an organization with no recorded work relationship (owner P0
+  // 2026-10-29): the server's localized sentence, shown under the picker.
+  const [activeWorkspaceNotice, setActiveWorkspaceNotice] = useState<string | null>(null);
+  // The facts the server resolved from, so a changed WORK DATE re-resolves
+  // with the same pure resolver (applicability is bounded by the day — Codex
+  // P2 on #2884). Until the person picks, or their sentence named an org.
+  const [contextFacts, setContextFacts] = useState<{
+    candidates: EngagementCandidate[];
+    activeOrganizationId: string | null;
+  } | null>(null);
+  const contextDecidedByPerson = useRef(false);
+  const resolvedForDate = useRef<string | null>(null);
   const [workDate, setWorkDate] = useState(draft.date);
   const [site, setSite] = useState(draft.site ?? "");
   const [notes, setNotes] = useState(draft.notes);
@@ -281,6 +391,10 @@ export function WorkerWorkLogFlow({
   const [photoPrep, setPhotoPrep] = useState<PhotoPrep>("idle");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const photoFieldRef = useRef<HTMLDivElement>(null);
+  /** The person pressed this form's own cancel. The form stays in the thread
+   *  as history, but it is no longer where a newly picked file goes. */
+  const [closed, setClosed] = useState(false);
 
   // The object URL is a live handle, not a value — revoke it whenever it is
   // replaced or the flow unmounts, or a long chat session leaks every photo
@@ -322,7 +436,7 @@ export function WorkerWorkLogFlow({
     // Wrong format → honest, specific error. Size is NOT judged here: that is
     // what compression is for, and judging it first is the 5 MB wall this
     // slice exists to remove.
-    if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
+    if (!JOURNAL_PHOTO_TYPE.test(f.type)) {
       setPhotoFile(null);
       setPhotoPrep("idle");
       setPhotoError(tPhoto("invalidFile"));
@@ -342,6 +456,36 @@ export function WorkerWorkLogFlow({
     setPhotoFile(prepared);
     setPhotoPrep("ready");
   }
+
+  // THE PAPERCLIP'S FILE ENTERS THROUGH THE FORM'S OWN PICK. No second
+  // uploader: the picked photo takes exactly the path a pick in the photo
+  // field takes, and it still uploads only after the entry is saved.
+  useInitialFile(initialFile, (f) => void pickPhoto(f));
+  useAttachSink(
+    onRegisterAttachSink,
+    "worklog",
+    // Open for a photo until the entry is on its way: not once it is saving,
+    // saved, blocked, or cancelled by the person.
+    !closed &&
+      (phase.kind === "loading" ||
+        phase.kind === "ready" ||
+        phase.kind === "error" ||
+        phase.kind === "confirm"),
+    (f) => !pending && JOURNAL_PHOTO_TYPE.test(f.type),
+    (f) => {
+      // A photo that arrives while "Patvirtinti įrašą?" is showing sends the
+      // person back one step: they confirm again WITH the photo in view.
+      setPhase((p) => (p.kind === "confirm" || p.kind === "error" ? { kind: "ready", token: null } : p));
+      void pickPhoto(f);
+      photoFieldRef.current?.scrollIntoView({ block: "nearest" });
+    },
+  );
+
+  /** An edit answers the error it was shown for — the red line must not stay
+   *  beside text that has since been corrected (owner P0 2026-09-23). */
+  function clearError() {
+    setPhase((p) => (p.kind === "error" ? { kind: "ready", token: null } : p));
+  }
   // Localized taxonomy skill names for the completion summary (slug → name,
   // falling back to the raw slug so an uncatalogued name never blanks a fact).
   const tSkill = useTranslations("skillNames");
@@ -357,7 +501,7 @@ export function WorkerWorkLogFlow({
 
   useEffect(() => {
     let alive = true;
-    listWorkLogEngagements()
+    listWorkLogEngagements(draft.date)
       .then((res) => {
         if (!alive) return;
         if (res.kind === "ok") {
@@ -368,8 +512,28 @@ export function WorkerWorkLogFlow({
           // legitimately possible — NOTHING, because guessing between
           // employers is what put 15 production entries where no employer
           // could ever read them. An empty id makes the picker a question.
-          setEngagementId(res.resolution.selectedId ?? "");
-          setMustChooseEngagement(res.resolution.rule === "C");
+          // WHAT THE PERSON SAID OUTRANKS THE DEFAULT (2026-09-29): a sentence
+          // naming one of their ACTIVE organizations files there; one naming
+          // an organization whose relationship ENDED preselects nothing and
+          // says so — it was one click from landing at a different employer.
+          const said = draft.notes ?? "";
+          const named = res.engagements.find(
+            (e) => e.orgName && mentionsOrganization(said, e.orgName),
+          );
+          const endedNamed = named
+            ? null
+            : ((res.endedOrgNames ?? []).find((n) => mentionsOrganization(said, n)) ?? null);
+          setEndedOrgNamed(endedNamed);
+          setActiveWorkspaceNotice(res.activeWorkspaceNotice ?? null);
+          contextDecidedByPerson.current = Boolean(named || endedNamed);
+          resolvedForDate.current = draft.date;
+          setContextFacts(
+            res.candidates
+              ? { candidates: res.candidates, activeOrganizationId: res.activeOrganizationId ?? null }
+              : null,
+          );
+          setEngagementId(named ? named.id : endedNamed ? "" : (res.resolution.selectedId ?? ""));
+          setMustChooseEngagement(!named && (endedNamed !== null || res.resolution.rule === "C"));
           setPhase({ kind: "ready", token: null });
         } else if (res.kind === "no-context") {
           setPhase({ kind: "blocked", reason: "no-context" });
@@ -388,26 +552,89 @@ export function WorkerWorkLogFlow({
     };
   }, [labels.errorGeneric]);
 
+  // The resolution for the CURRENT work date (null until the facts arrive).
+  const liveResolution = useMemo(
+    () =>
+      contextFacts
+        ? resolveEngagementContext({
+            candidates: contextFacts.candidates,
+            workDay: workDate,
+            activeOrganizationId: contextFacts.activeOrganizationId,
+          })
+        : null,
+    [contextFacts, workDate],
+  );
+  useEffect(() => {
+    if (!liveResolution || contextDecidedByPerson.current) return;
+    if (resolvedForDate.current === workDate) return;
+    resolvedForDate.current = workDate;
+    setEngagementId(liveResolution.selectedId ?? "");
+    setMustChooseEngagement(liveResolution.rule === "C");
+  }, [liveResolution, workDate]);
+  const showActiveWorkspaceNotice = Boolean(
+    activeWorkspaceNotice && liveResolution?.activeWorkspaceWithoutContext,
+  );
+
+  const contextProjects: AssignedProject[] =
+    engagements.find((e) => e.id === engagementId)?.projects ?? [];
+  const projectPrompt = projectPromptFor(contextProjects);
+  // The project the sentence itself names ("Oslo projekte …") is PRESELECTED
+  // in the picker below — visible before the confirm, changeable, and only
+  // ever one of the person's own assigned projects (owner launch order
+  // 2026-10-10 §5). An explicit pick always wins.
+  const namedProjectId =
+    projectPrompt === "ask"
+      ? projectNamedInText(contextProjects, `${notes} ${site}`)
+      : null;
+  const projectAnswer = projectChoice || namedProjectId || "";
+  // A choice made for another context's projects never carries over.
+  const projectChoiceValid = projectChoiceIsSatisfied(contextProjects, projectAnswer)
+    ? projectAnswer
+    : "";
+
   function input() {
     return {
       engagementContextId: engagementId,
       notes: notes.trim(),
       workDate,
       siteName: site.trim() || null,
+      ...(voice ? { voice } : {}),
+      ...(projectPrompt === "ask" && projectChoiceValid
+        ? { projectId: projectChoiceValid }
+        : {}),
     };
   }
 
   function beginConfirm() {
-    if (!engagementId || notes.trim().length < 3) {
-      setPhase({ kind: "error", message: labels.errorGeneric });
+    // THE FORM IS NEVER STRICTER THAN THE SERVER (owner P0 2026-09-23). It
+    // used to refuse anything its keyword recogniser could not read as work —
+    // "Buvau pas klientą", "Rašau kodą", "Darbas biure" — while the server
+    // schema accepted all of them, so text the record would take was blocked
+    // with a red line. It now refuses exactly what `workerLogWorkSchema`
+    // refuses, through the schema's own notes rule: under 3 characters, over
+    // 4000, or only the request "Užpildyk darbo žurnalą" (A2, prod
+    // 2026-09-06 — the request never becomes the record, on either layer).
+    const refusal = logWorkNotesRefusal(notes);
+    if (refusal !== null) {
+      setPhase({
+        kind: "error",
+        message:
+          refusal === "too-long" ? labels.errorNotesTooLong : labels.errorNoWorkContent,
+      });
       return;
     }
-    // The evidence must BE work: a time span, a place, or a recognised
-    // activity — the same deterministic rule the chat applied when it opened
-    // this flow and the server schema applies to the write. A request
-    // sentence ("Užpildyk darbo žurnalą") never becomes the record.
-    if (journalDraftReadiness(notes) !== "ok") {
-      setPhase({ kind: "error", message: labels.errorNoWorkContent });
+    // Nothing failed here: the person still has to choose WHICH context
+    // (Rule C). Say that — not "could not save, try again". With no context
+    // list at all the list itself could not be read, which IS a failure.
+    if (!engagementId) {
+      setPhase({
+        kind: "error",
+        message: engagements.length > 1 ? labels.contextAmbiguous : labels.errorGeneric,
+      });
+      return;
+    }
+    if (!projectChoiceIsSatisfied(contextProjects, projectChoiceValid)) {
+      setPhase({ kind: "error", message: tCandidate("projectAmbiguous") });
       return;
     }
     start(async () => {
@@ -436,7 +663,7 @@ export function WorkerWorkLogFlow({
         return;
       }
       trackFunnel(FUNNEL_EVENTS.journalEntrySaved, {
-        surface: "conversation",
+        surface,
         role_context: "worker",
         success: true,
       });
@@ -689,6 +916,25 @@ export function WorkerWorkLogFlow({
             {labels.cvUpdatedNote}
           </p>
         )}
+        {/* WHERE THE ENTRY NOW COUNTS (activation audit fix #5). The Living
+            CV prints its recorded-work facts from the first entry on
+            (`deriveProfessionalFacts`), so the line is a fact. It names the
+            entry as RECORDED by the person — never confirmed or verified:
+            only a manager / client review can confirm it. */}
+        <p className="text-text-primary" data-testid="worklog-living-cv-note">
+          {labels.livingCvNote}
+        </p>
+        <Link
+          href="/cv"
+          className="mt-1 inline-flex min-h-11 items-center self-start rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20"
+          data-testid="worklog-living-cv-link"
+        >
+          {labels.viewLivingCv} →
+        </Link>
+        {/* The calm return line — no streak, no count, no pressure. */}
+        <p className="text-text-muted" data-testid="worklog-come-back">
+          {labels.comeBackNote}
+        </p>
         {/* Honest matching phrasing: recommendations are computed from the
             worker's current skills at read time (no persisted score), so new
             skills flow into the next computation — nothing is "pushed". */}
@@ -709,7 +955,7 @@ export function WorkerWorkLogFlow({
               // The retention loop's measurable heartbeat: journal
               // contribution → recomputed board actually inspected.
               trackFunnel(FUNNEL_EVENTS.journalRematchViewed, {
-                surface: "worklog_chat",
+                surface: REMATCH_SURFACE[surface],
               });
             }}
           >
@@ -777,6 +1023,7 @@ export function WorkerWorkLogFlow({
      two surfaces cannot drift apart. */
   const photoField = (
     <div
+      ref={photoFieldRef}
       className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
       data-testid="worklog-photo-field"
     >
@@ -792,6 +1039,13 @@ export function WorkerWorkLogFlow({
           void pickPhoto(e.target.files?.[0] ?? null);
         }}
         className="text-meta text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-meta file:text-text-primary"
+      />
+      {/* The camera as a second door into the SAME field (phones only). */}
+      <CameraCaptureButton
+        label={tPhoto("takePhoto")}
+        disabled={confirming || pending}
+        testId="worklog-photo-camera"
+        onFile={(f) => void pickPhoto(f)}
       />
 
       {photoError ? (
@@ -882,7 +1136,10 @@ export function WorkerWorkLogFlow({
             aria-label={labels.labelDate}
             value={workDate}
             disabled={confirming || pending}
-            onChange={(e) => setWorkDate(e.target.value)}
+            onChange={(e) => {
+              setWorkDate(e.target.value);
+              clearError();
+            }}
             data-testid="worklog-date"
             className="w-full rounded border border-ink-500 bg-ink-800 px-2 py-1 text-support text-text-primary"
           />
@@ -896,10 +1153,17 @@ export function WorkerWorkLogFlow({
             v={`${draft.breakMinutes} ${labels.minutesUnit}`}
           />
         )}
-        {draft.hoursLabel && <Row k={labels.labelHours} v={draft.hoursLabel} />}
+        {draft.workedMinutes != null ? (
+          <Row
+            k={labels.labelHours}
+            v={formatDuration(draft.workedMinutes, "minutes", durationLocale(locale))}
+          />
+        ) : (
+          draft.hoursLabel && <Row k={labels.labelHours} v={draft.hoursLabel} />
+        )}
       </dl>
 
-      <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} />
+      <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} locale={locale} />
 
       <label className="flex flex-col gap-1 text-support">
         <span className="text-text-muted">{labels.labelSite}</span>
@@ -907,7 +1171,10 @@ export function WorkerWorkLogFlow({
           type="text"
           value={site}
           disabled={confirming || pending}
-          onChange={(e) => setSite(e.target.value)}
+          onChange={(e) => {
+            setSite(e.target.value);
+            clearError();
+          }}
           data-testid="worklog-site"
           className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
         />
@@ -918,20 +1185,27 @@ export function WorkerWorkLogFlow({
         <textarea
           value={notes}
           disabled={confirming || pending}
-          onChange={(e) => setNotes(e.target.value)}
+          onChange={(e) => {
+            setNotes(e.target.value);
+            clearError();
+          }}
           rows={2}
           data-testid="worklog-notes"
           className="resize-none rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
         />
       </label>
 
-      {engagements.length > 1 && (
+      {(engagements.length > 1 || mustChooseEngagement) && (
         <label className="flex flex-col gap-1 text-support">
           <span className="text-text-muted">{labels.labelContext}</span>
           <select
             value={engagementId}
             disabled={confirming || pending}
-            onChange={(e) => setEngagementId(e.target.value)}
+            onChange={(e) => {
+              contextDecidedByPerson.current = true;
+              setEngagementId(e.target.value);
+              clearError();
+            }}
             data-testid="worklog-context"
             className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
           >
@@ -946,7 +1220,15 @@ export function WorkerWorkLogFlow({
               </option>
             ))}
           </select>
-          {mustChooseEngagement && !engagementId ? (
+          {endedOrgNamed ? (
+            <span
+              className="text-meta leading-relaxed text-state-warning"
+              data-testid="worklog-context-ended-org"
+            >
+              {labels.contextEndedOrg} {quoteText(locale, endedOrgNamed)}
+            </span>
+          ) : null}
+          {mustChooseEngagement && !engagementId && !endedOrgNamed ? (
             <span
               className="text-meta leading-relaxed text-state-warning"
               data-testid="worklog-context-must-choose"
@@ -956,6 +1238,57 @@ export function WorkerWorkLogFlow({
           ) : null}
         </label>
       )}
+      {showActiveWorkspaceNotice ? (
+        <p
+          className="text-meta leading-relaxed text-text-secondary"
+          data-testid="worklog-context-active-workspace-notice"
+        >
+          {activeWorkspaceNotice}
+        </p>
+      ) : null}
+
+      {projectPrompt === "ask" ? (
+        <label className="flex flex-col gap-1 text-support">
+          <span className="text-text-muted">{tCandidate("project")}</span>
+          <select
+            value={projectChoiceValid}
+            disabled={confirming || pending}
+            onChange={(e) => {
+              setProjectChoice(e.target.value);
+              clearError();
+            }}
+            data-testid="worklog-project"
+            className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
+          >
+            <option value="">{tCandidate("projectChoose")}</option>
+            {contextProjects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {projectDisplayLabel(p, (k, v) => tCandidate(k, v))}
+              </option>
+            ))}
+            <option value={PROJECT_FIELD_NONE}>{tCandidate("projectNone")}</option>
+          </select>
+          {projectChoiceValid === "" ? (
+            <span
+              className="text-meta leading-relaxed text-state-warning"
+              data-testid="worklog-project-must-choose"
+            >
+              {tCandidate("projectAmbiguous")}
+            </span>
+          ) : null}
+        </label>
+      ) : projectPrompt === "auto" ? (
+        <p
+          className="text-meta leading-relaxed text-text-muted"
+          data-testid="worklog-project-auto"
+        >
+          {tCandidate("projectAuto", {
+            name: contextProjects[0]
+              ? projectDisplayLabel(contextProjects[0], (k, v) => tCandidate(k, v))
+              : "",
+          })}
+        </p>
+      ) : null}
 
       {photoFirst ? null : photoField}
 
@@ -964,6 +1297,17 @@ export function WorkerWorkLogFlow({
           <p className="font-display text-card-title font-semibold text-text-primary">
             {labels.confirmTitle}
           </p>
+          {/* Text the recogniser cannot read as work is still the person's
+              record to make — the server takes it, so the form does too. It
+              only says, neutrally, what it did not recognise. */}
+          {journalDraftReadiness(notes) === "no-content" ? (
+            <p
+              className="text-meta leading-relaxed text-text-muted"
+              data-testid="worklog-no-signal-hint"
+            >
+              {labels.noWorkSignalHint}
+            </p>
+          ) : null}
           <ChatActionRow>
             <ChatAction
               tone="primary"
@@ -984,16 +1328,30 @@ export function WorkerWorkLogFlow({
         </div>
       ) : (
         <ChatActionRow>
+          {/* THE FIRST PRESS WRITES NOTHING. `worker.log-work` is an
+              `important_write`: the server mints a one-time token bound to
+              exactly this input, and only the confirm step below spends it
+              (the consent gate `prod-chat-confirm-once` double-clicks). So
+              this button opens the review and says so — "Toliau / Continue"
+              — and "Save" is said once, on the press that saves
+              (activation audit fix #5). */}
           <ChatAction
             tone="primary"
             disabled={pending}
             testId="worklog-save"
             onClick={beginConfirm}
           >
-            {labels.save}
+            {labels.continue}
           </ChatAction>
           {onClose && (
-            <ChatAction tone="secondary" disabled={pending} onClick={onClose}>
+            <ChatAction
+              tone="secondary"
+              disabled={pending}
+              onClick={() => {
+                setClosed(true);
+                onClose();
+              }}
+            >
               {labels.cancel}
             </ChatAction>
           )}
@@ -1028,17 +1386,20 @@ function RecordedTimePreview({
   notes,
   workDate,
   labels,
+  locale,
 }: {
   notes: string;
   workDate: string;
   labels: WorkLogLabels;
+  /** The reader's quote pair around the person's own words (UX review 2026-10-24). */
+  locale: string;
 }) {
   // The SAME derivation the executor runs on save, over the notes as the
   // person has edited them — never a second parser, never a cached figure.
   const record = useMemo(() => {
     const anchor = /^\d{4}-\d{2}-\d{2}$/.test(workDate)
       ? workDate
-      : new Date().toISOString().slice(0, 10);
+      : personCalendarDay();
     const t = deriveIntakeWorkTime(notes, anchor);
     const partsMinutes = t.fragments.reduce((sum, f) => {
       if (f.timeUnit === "hours") return sum + f.timeValue * 60;
@@ -1067,7 +1428,7 @@ function RecordedTimePreview({
         <ul className="flex flex-col gap-0.5">
           {record.fragments.map((f, i) => (
             <li key={`${i}-${f.rawPhrase}`} className="flex justify-between gap-3">
-              <span className="min-w-0 truncate text-text-primary">„{f.rawPhrase}“</span>
+              <span className="min-w-0 truncate text-text-primary">{quoteText(locale, f.rawPhrase)}</span>
               <span className="shrink-0 text-right font-medium text-text-primary">
                 {fragmentTimeLabel(f.timeValue, f.timeUnit, labels)}
                 {f.activitySlug === null && f.activityLabel === null ? (

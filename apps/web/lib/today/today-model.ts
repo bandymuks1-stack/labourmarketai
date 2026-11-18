@@ -45,6 +45,11 @@ export type TodayNext =
       readonly whyKey: string;
       /** Whether the card is stale (a calm "does this still hold?"). */
       readonly stale: boolean;
+      /** The dimension the engine's evidence-first rule displaced (e.g. the
+       *  profession), with a real route — offered as a QUIET text link beside
+       *  the one gold action so nothing becomes unreachable. Absent when the
+       *  engine displaced nothing. Never a second primary. */
+      readonly secondary?: { readonly dim: WorkDim; readonly href: string };
     }
   | { readonly kind: "unknown" };
 
@@ -53,6 +58,9 @@ export type TodayPeriodFigures = {
   readonly entries: number;
   /** Entries counted but not timed — a figure is still owed. */
   readonly untimed: number;
+  /** Of `hours`, the part on entries a manager/client APPROVED (the journal
+   *  model's own `confirmedHours`) — a second party stands behind it. */
+  readonly confirmedHours?: number;
 };
 
 export type TodayWork =
@@ -161,7 +169,7 @@ function period(wi: WorkIntelligence, key: "today" | "week"): WorkPeriodTotals |
 }
 
 function figures(p: WorkPeriodTotals): TodayPeriodFigures {
-  return { hours: p.hours, entries: p.entries, untimed: p.entriesWithoutDuration };
+  return { hours: p.hours, entries: p.entries, untimed: p.entriesWithoutDuration, confirmedHours: p.confirmedHours };
 }
 
 export function deriveTodayState(wi: WorkIntelligence | null): TodayState {
@@ -180,6 +188,14 @@ export function deriveTodayNext(card: WorkCardDerived | null): TodayNext {
     href: card.next.href ?? WORK_CARD_EDITOR_HREF,
     whyKey: card.next.whyKey,
     stale: card.state === "stale",
+    ...(card.secondary
+      ? {
+          secondary: {
+            dim: card.secondary.dim,
+            href: card.secondary.href ?? WORK_CARD_EDITOR_HREF,
+          },
+        }
+      : {}),
   };
 }
 
@@ -282,6 +298,41 @@ export function deriveTodayGrowth(growth: GrowthReading | null): TodayGrowth {
   const direction = growth.directions[0];
   if (!direction) return { kind: "none" };
   return { kind: "direction", direction };
+}
+
+/**
+ * "TUŠČIA = TVARKINGA" for the growth line (design system §A.8, owner §20:
+ * the home shows what matters now). A line that has nothing to say about the
+ * person is left out rather than stated: "a growth reading needs at least two
+ * skills" (`insufficient`) and "no clear direction yet" (`none`) are the
+ * reading being EMPTY, not a fact about the person's work. What stays:
+ *   · `direction` — the reading itself;
+ *   · `unknown`   — a read that FAILED is named, never silently dropped
+ *                   (SEP-7: UNKNOWN ≠ ZERO — an absent line would read as
+ *                   "nothing to see", which the product does not know).
+ * The destination is one tap away either way: the "numbers" station.
+ */
+export function isTodayGrowthShown(
+  growth: TodayGrowth,
+): growth is Extract<TodayGrowth, { kind: "direction" | "unknown" }> {
+  return growth.kind === "direction" || growth.kind === "unknown";
+}
+
+/**
+ * The same rule for the opportunity line. `none` (no postings) and
+ * `no-worker` (no worker row yet — ŠIANDIEN's ONE next action already leads
+ * there) are the line being empty; `bands` is the reading, and `unavailable`
+ * / `unknown` are a source that could not answer — named, never read as
+ * "nothing for you". The destination stays one tap away: the "world" station.
+ */
+export function isTodayOpportunityShown(
+  opportunity: TodayOpportunity,
+): opportunity is Extract<TodayOpportunity, { kind: "bands" | "unavailable" | "unknown" }> {
+  return (
+    opportunity.kind === "bands" ||
+    opportunity.kind === "unavailable" ||
+    opportunity.kind === "unknown"
+  );
 }
 
 /**

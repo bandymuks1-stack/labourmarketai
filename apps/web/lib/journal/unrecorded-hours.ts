@@ -108,3 +108,28 @@ export function detectUnrecordedHours(
   if (mentions.length === 0) return NONE;
   return { hasUnrecordedHours: true, mentions };
 }
+
+/**
+ * How many of a worker's entries hold hours that were never recorded, and the
+ * earliest work day among them — so the person learns it where their total is
+ * shown (the profile), not only by opening each old day. Reports, never
+ * repairs: the count is of ENTRIES (no hours are summed from matched text) and
+ * the worker confirms their own hours through the normal edit flow. `null`
+ * when there is nothing to tell.
+ */
+export function summarizeUnrecordedHours(
+  entries: readonly {
+    readonly originalText: string | null | undefined;
+    readonly metrics: readonly UnrecordedHoursMetric[] | null | undefined;
+    readonly day: string;
+  }[],
+): { readonly entries: number; readonly earliestDay: string } | null {
+  let count = 0;
+  let earliest: string | null = null;
+  for (const e of entries) {
+    if (!detectUnrecordedHours(e.originalText, e.metrics).hasUnrecordedHours) continue;
+    count += 1;
+    if (earliest === null || e.day < earliest) earliest = e.day;
+  }
+  return count > 0 && earliest !== null ? { entries: count, earliestDay: earliest } : null;
+}

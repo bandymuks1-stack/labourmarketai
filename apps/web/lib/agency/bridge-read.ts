@@ -1,13 +1,21 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 import {
+  ZERO_BRIDGE_SPINE_COUNTS,
+  countDecidableCandidateOffers,
+  countPendingConnectionInvites,
+  countSharesAwaitingOffer,
   isMissingRpcCode,
   isMissingTableCode,
   mergeClientConnectionStates,
   type AgencyConnection,
   type AgencyConnectionsState,
+  type BridgeSpineCounts,
   type ClientConnectionInvite,
+  type ClientInviteDeliveriesState,
   type ClientInvitesState,
   type OfferProgressRow,
   type OfferProgressState,
@@ -15,6 +23,13 @@ import {
   type SharedRequestRow,
   type SharedRequestsState,
 } from "@/lib/agency/bridge-model";
+import { listCompanyDemands } from "@/lib/scouting/scouting";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { readActsAsAgency } from "@/lib/company/agency-capability-read";
+import { listAgencyPlacements } from "@/lib/agency/delegation-read";
+import { AGENCY_CLIENT_PROPOSED_ROLE } from "@/lib/invitations/model";
+import { listMySentInvitations } from "@/lib/invitations/network";
 
 /**
  * Real two-subject bridge — read services (issue #859), backed by migration
@@ -76,6 +91,31 @@ export async function listAgencyConnections(
  *  the connection table already scopes by `invited_email = jwt email`, so a
  *  plain select returns only the caller's invites (no email is leaked). */
 export async function listMyConnectionInvites(): Promise<ClientInvitesState> {
+  return readMyConnectionInvitesOnce();
+}
+
+/**
+ * REQUEST-SCOPED bridge reads (perf 2026-10-22). One `/dashboard/company`
+ * render asked the same argument-less bridge questions from several places —
+ * the page's partners strip, the organization doors, the chat starter
+ * context, the opening brief and the bell's bridge count — each a separate
+ * round trip with the same answer. React `cache()` deduplicates within ONE
+ * render only: every navigation reads again, and a server action (no render)
+ * reads itself, so a connection accepted or an offer made is never answered
+ * from an earlier read. Callers treat the results as read-only (none mutates
+ * them in place).
+ */
+const readMyConnectionInvitesOnce = cache(async (): Promise<ClientInvitesState> =>
+  readMyConnectionInvites(),
+);
+const readSharedRequestsForAgencyOnce = cache(async (): Promise<SharedRequestsState> =>
+  readSharedRequestsForAgency(),
+);
+const readAgencyOfferProgressOnce = cache(async (): Promise<OfferProgressState> =>
+  readAgencyOfferProgress(),
+);
+
+async function readMyConnectionInvites(): Promise<ClientInvitesState> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -204,6 +244,10 @@ export async function listMyClientBridgeConnections(
 
 /** AGENCY side: requests connected clients shared with the caller-agency. */
 export async function listSharedRequestsForAgency(): Promise<SharedRequestsState> {
+  return readSharedRequestsForAgencyOnce();
+}
+
+async function readSharedRequestsForAgency(): Promise<SharedRequestsState> {
   const supabase = await createClient();
   try {
     const { data, error } = await asAny(supabase).rpc("list_shared_requests_for_agency_v1");
@@ -310,6 +354,10 @@ export async function listSharedRequestsByClient(
 
 /** AGENCY side: the caller-agency's offers + derived client-review stage. */
 export async function listAgencyOfferProgress(): Promise<OfferProgressState> {
+  return readAgencyOfferProgressOnce();
+}
+
+async function readAgencyOfferProgress(): Promise<OfferProgressState> {
   const supabase = await createClient();
   try {
     const { data, error } = await asAny(supabase).rpc("list_agency_offer_progress_v1");
@@ -337,6 +385,137 @@ export async function listAgencyOfferProgress(): Promise<OfferProgressState> {
     return { kind: "error" };
   }
 }
+
+/**
+ * AGENCY side: the connection invitations this agency DELIVERED — the
+ * `invite_company` rows marked `agency_client` in the caller's own sent list
+ * (the primitive's read, inviter-pinned by `listMySentInvitations`). The
+ * partners door pairs each pending connection with its invitation by
+ * address, so it can state the real delivery outcome (`not_sent` until a
+ * provider acknowledged a send) and offer a fresh link. A failed read is
+ * UNKNOWN, never "no invitation was sent".
+ */
+export async function listMyClientInviteDeliveries(): Promise<ClientInviteDeliveriesState> {
+  try {
+    const read = await listMySentInvitations();
+    if (read.status === "needs-migration") return { kind: "needs-migration" };
+    if (read.status !== "ok") return { kind: "error" };
+    return {
+      kind: "ok",
+      rows: read.items
+        .filter(
+          (i) =>
+            i.invitationType === "invite_company" &&
+            i.proposedRole === AGENCY_CLIENT_PROPOSED_ROLE &&
+            !!i.invitedEmail,
+        )
+        .map((i) => ({
+          invitationId: i.id,
+          email: (i.invitedEmail as string).trim().toLowerCase(),
+          status: i.status,
+          deliveryStatus: i.deliveryStatus,
+          createdAt: i.createdAt,
+        })),
+    };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+/** Bound on the offer rows read for the per-need count. */
+const OPEN_CANDIDATE_OFFER_SCAN_LIMIT = 500;
+
+/**
+ * CLIENT side: agency offers still `offered`, counted per request. Same
+ * table and the same SELECT policy (`owns_company(client_company_id)`,
+ * migration 20260723180000 §3) the scouting page reads offers through.
+ * Empty on any failure — a spine count never fabricates attention from an
+ * unknown.
+ */
+export async function countOpenCandidateOffersByRequest(
+  clientCompanyId: string,
+): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  const supabase = await createClient();
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("agency_candidate_offers")
+      .select("request_id")
+      .eq("client_company_id", clientCompanyId)
+      .eq("status", "offered")
+      .limit(OPEN_CANDIDATE_OFFER_SCAN_LIMIT);
+    if (error || !Array.isArray(data)) return out;
+    for (const r of data as { request_id?: unknown }[]) {
+      if (typeof r.request_id !== "string") continue;
+      out.set(r.request_id, (out.get(r.request_id) ?? 0) + 1);
+    }
+    return out;
+  } catch {
+    return out;
+  }
+}
+
+/**
+ * CLIENT side: how many agency offers on this company's requests still wait
+ * for its decision. Offers on a need the caller's own list says is closed
+ * are left out: they can no longer be decided, so counting them would keep
+ * the bell lit for good (`countDecidableCandidateOffers`).
+ */
+export async function countOpenCandidateOffersForClient(
+  clientCompanyId: string,
+): Promise<number> {
+  try {
+    const [byRequest, demands] = await Promise.all([
+      countOpenCandidateOffersByRequest(clientCompanyId),
+      listCompanyDemands(),
+    ]);
+    const closed = new Set(demands.filter((d) => d.status === "closed").map((d) => d.id));
+    return countDecidableCandidateOffers(byRequest, closed);
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * THE BRIDGE'S SPINE COUNTS (2026-09-24), from the reads above and nothing
+ * new: the caller's ACTIVE workspace company decides the side. A staffing
+ * agency counts shared requests it has not answered; any other company
+ * counts the connection invites waiting on it and the candidate offers
+ * waiting on its decision. Zeros for a person with no company context, and
+ * zeros on any failure. Request-cached with the rest of the spine.
+ */
+export const getBridgeSpineCounts = cache(async (): Promise<BridgeSpineCounts> => {
+  try {
+    const ctx = await resolveEmployerCompanyContext();
+    if (ctx.kind !== "ok") return ZERO_BRIDGE_SPINE_COUNTS;
+    const company = await getOwnedCompanyById(ctx.companyId);
+    if (company.kind !== "ok" || !company.row) return ZERO_BRIDGE_SPINE_COUNTS;
+    if (await readActsAsAgency(company.row.companyType, ctx.organizationId)) {
+      // The placement read says whether an accepted candidate actually went
+      // (worker declined / placement ended re-opens the need for this agency).
+      const [shared, progress, placements] = await Promise.all([
+        listSharedRequestsForAgency(),
+        listAgencyOfferProgress(),
+        listAgencyPlacements(),
+      ]);
+      return {
+        ...ZERO_BRIDGE_SPINE_COUNTS,
+        sharedRequestsAwaitingOffer: countSharesAwaitingOffer(shared, progress, placements),
+      };
+    }
+    const [invites, openCandidateOffers] = await Promise.all([
+      listMyConnectionInvites(),
+      countOpenCandidateOffersForClient(company.row.id),
+    ]);
+    return {
+      ...ZERO_BRIDGE_SPINE_COUNTS,
+      pendingConnectionInvites: countPendingConnectionInvites(invites),
+      openCandidateOffers,
+    };
+  } catch {
+    return ZERO_BRIDGE_SPINE_COUNTS;
+  }
+});
 
 /** CLIENT side: agency-offered candidate worker ids for a request the caller
  *  owns — the client's scouting page renders these as candidates. */
@@ -373,4 +552,30 @@ export async function listOfferedCandidatesForRequest(
   } catch {
     return [];
   }
+}
+
+/**
+ * CLIENT side: the WORKER's answer to the bookings its accepted agency
+ * offers proposed (production walk 2026-09-28: a declined placement still
+ * read "priimtas" — the client's decision — with no trace of the worker's).
+ * The client owns those booking rows, so this is its own RLS read; an
+ * unreadable row simply shows no worker decision.
+ */
+export async function readOfferBookingStatuses(
+  bookingIds: readonly string[],
+): Promise<ReadonlyMap<string, string>> {
+  const out = new Map<string, string>();
+  if (bookingIds.length === 0) return out;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await asAny(supabase)
+      .from("booking_requests")
+      .select("id, status")
+      .in("id", [...bookingIds]);
+    if (error) return out;
+    for (const r of (data ?? []) as { id: string; status: string }[]) out.set(r.id, r.status);
+  } catch {
+    /* no worker decision shown */
+  }
+  return out;
 }

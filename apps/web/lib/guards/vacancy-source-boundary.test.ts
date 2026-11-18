@@ -139,6 +139,11 @@ describe("(c) every vacancy provider is OWNER-GATED in source governance", () =>
     // docs/human-gates/arbetsformedlingen-activation-gate.md — approved
     // 2026-08-09 (staged: dry-run first, bounded import, no cap raises).
     ["arbetsformedlingen", "2026-08-09"],
+    // docs/human-gates/nav-activation-gate.md: production API access granted
+    // by NAV after written acceptance of its API terms (thread of
+    // 2026-08-10 .. 2026-09-22); recorded 2026-09-30. Still inert until the
+    // env switch AND the private token exist.
+    ["nav", "2026-09-30"],
   ]);
 
   it("each provider is either in the recorded owner-activated set or NOT active", () => {
@@ -184,15 +189,32 @@ describe("(c) every vacancy provider is OWNER-GATED in source governance", () =>
     expect(profile.activation).toBe("on");
   });
 
-  it("no vacancy provider endpoint requires an API key", () => {
-    // JobTech is keyless. A descriptor that started demanding one would be a
-    // silent request for a secret we were told we do not need.
+  it("a key-requiring endpoint is declared honestly, and JobTech stays keyless", () => {
+    // RE-PINNED 2026-09-22 (NAV scaffold). This used to assert that NO
+    // endpoint requires a key, which was a proxy for "no descriptor quietly
+    // asks for a secret we were told we do not need". The invariant that
+    // carries the safety is kept and stated directly:
+    //   - arbetsformedlingen (JobTech) is keyless — the provider told us so;
+    //   - any endpoint that DOES require a key must say HOW the key travels
+    //     (`authScheme`), must belong to a provider that is NOT activated,
+    //     and is refused by the adapter without one — never an anonymous
+    //     fallback. The secret's NAME is conventional; its value is an owner
+    //     gate (docs/human-gates/nav-activation-gate.md).
+    const KEY_REQUIRING_OK: ReadonlySet<string> = new Set(["nav"]);
     for (const provider of VACANCY_PROVIDERS) {
       for (const endpoint of provider.endpoints) {
-        expect(
-          endpoint.requiresApiKey,
-          `${provider.key}/${endpoint.channel}`,
-        ).toBe(false);
+        const label = `${provider.key}/${endpoint.channel}`;
+        if (provider.key === "arbetsformedlingen") {
+          expect(endpoint.requiresApiKey, label).toBe(false);
+          continue;
+        }
+        if (endpoint.requiresApiKey) {
+          expect(KEY_REQUIRING_OK.has(provider.key), label).toBe(true);
+          expect(endpoint.authScheme, label).toMatch(/^(api-key|bearer)$/);
+          // A key-requiring provider stays inert without the key (the adapter
+          // refuses an anonymous call); activation additionally needs a
+          // recorded decision, which OWNER_ACTIVATED carries.
+        }
       }
     }
   });
@@ -266,6 +288,16 @@ describe("(e) the pipeline reuses the ONE matching engine", () => {
 
 // ── (f) provider keys stay confined ──────────────────────────────────────────
 
+/**
+ * A provider key HARD-CODED in a shared stage: the key as a string literal.
+ * RE-PINNED 2026-09-22: this used to be a bare substring test, which the
+ * three-letter key `nav` turned into a false positive on every module that
+ * says "unavailable". The invariant is unchanged — a shared stage may not
+ * name a provider — and a literal is the only way code can name one.
+ */
+const mentionsProviderKey = (src: string, key: string): boolean =>
+  new RegExp(`["'\`]${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'\`]`).test(src);
+
 describe("(f) shared stages never become country-aware", () => {
   it("no provider key appears in a shared pipeline module", () => {
     const allowed = new Set([
@@ -279,17 +311,23 @@ describe("(f) shared stages never become country-aware", () => {
       // The provider's own folder is where country knowledge belongs.
       if (allowed.has(r) || r.includes("/providers/")) continue;
       const src = code(read(file));
-      if (keys.some((k) => src.includes(k))) offenders.push(r);
+      if (keys.some((k) => mentionsProviderKey(src, k))) offenders.push(r);
     }
     expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+
+  it("the provider-key detector is real", () => {
+    expect(mentionsProviderKey('const k = "nav";', "nav")).toBe(true);
+    expect(mentionsProviderKey("translationsUnavailable: 0", "nav")).toBe(false);
   });
 
   it("the importer is provider-agnostic — it reaches providers through the dispatch", () => {
     const src = code(read(join(SERVER_DIR, "vacancy-importer.ts")));
     for (const provider of VACANCY_PROVIDERS) {
-      expect(src, `importer mentions ${provider.key}`).not.toContain(
-        provider.key,
-      );
+      expect(
+        mentionsProviderKey(src, provider.key),
+        `importer mentions ${provider.key}`,
+      ).toBe(false);
     }
     expect(src).toContain("getVacancyParser");
   });
@@ -297,9 +335,10 @@ describe("(f) shared stages never become country-aware", () => {
   it("the adapter is provider-agnostic too", () => {
     const src = code(read(join(SERVER_DIR, "vacancy-adapter.ts")));
     for (const provider of VACANCY_PROVIDERS) {
-      expect(src, `adapter mentions ${provider.key}`).not.toContain(
-        provider.key,
-      );
+      expect(
+        mentionsProviderKey(src, provider.key),
+        `adapter mentions ${provider.key}`,
+      ).toBe(false);
     }
   });
 });
@@ -522,7 +561,7 @@ describe("(g) the kill switch fails closed", () => {
         [`VACANCY_SOURCE_${provider.key.toUpperCase()}_ENABLED`]: "on",
       });
       expect(envOn.operational, provider.key).toBe(true);
-      if (provider.key !== "arbetsformedlingen") {
+      if (provider.key !== "arbetsformedlingen" && provider.key !== "nav") {
         expect(isExternalSourceActive(provider.key), provider.key).toBe(false);
       }
       const killed = evaluateVacancySwitch(provider.key, {

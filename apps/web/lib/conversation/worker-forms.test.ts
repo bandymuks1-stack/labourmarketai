@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  COUNTRY_TEXT_MAX,
   WORKER_FORMS,
   getWorkerForm,
   workCardPrefillFromCard,
@@ -7,6 +8,7 @@ import {
 } from "@/lib/conversation/worker-forms";
 import { WORKER_ACTION_SCHEMAS, type WorkerActionId } from "@/lib/conversation/worker-schemas";
 import { getConversationAction } from "@/lib/conversation/action-registry";
+import { normalizeCountry, normalizeCountryList } from "@/lib/worker/work-card-core";
 
 /**
  * Inline form ↔ schema ↔ registry contract. Every form must map to a real
@@ -85,9 +87,43 @@ describe("work-card form — blank keeps, prefill carries the current card", () 
     }
   });
 
-  it("a filled country field is the whole list, uppercased, ISO-2 only", () => {
+  // Re-pinned 2026-09-22 (global-access rule): the form no longer upper-cases
+  // or drops entries that are not two characters — a NAME is a country too.
+  // Resolution (code or name → ISO, refusal of the unresolvable) is the
+  // resolver's job in `lib/worker/work-card-core`, never the form's.
+  it("a filled country field is the whole list AS TYPED — codes and names, nothing dropped by length", () => {
     const input = form.build({ preferredCountries: "no, se ,de, xyz" }) as { preferredCountries?: string[] };
-    expect(input.preferredCountries).toEqual(["NO", "SE", "DE"]);
+    expect(input.preferredCountries).toEqual(["no", "se", "de", "xyz"]);
+    const named = form.build({ preferredCountries: "LT, Vietnam; Saudi Arabia\nviet nam" }) as { preferredCountries?: string[] };
+    expect(named.preferredCountries).toEqual(["LT", "Vietnam", "Saudi Arabia", "viet nam"]);
+    expect(schema.safeParse(named).success).toBe(true);
+  });
+
+  it("a typed country NAME passes through the form and the schema untruncated, and the core resolves it", () => {
+    const input = form.build({ locationCountry: "Vietnam", preferredCountries: "Ireland, Philippines" }) as {
+      locationCountry: string | null;
+      preferredCountries?: string[];
+    };
+    expect(input.locationCountry).toBe("Vietnam");
+    expect(input.preferredCountries).toEqual(["Ireland", "Philippines"]);
+    const parsed = schema.safeParse(input);
+    expect(parsed.success, JSON.stringify(parsed.error?.issues)).toBe(true);
+    // The name-aware resolver (PR #1824) is what turns the text into ISO codes.
+    expect(normalizeCountry(input.locationCountry)).toBe("VN");
+    expect(normalizeCountryList(input.preferredCountries)).toEqual(["IE", "PH"]);
+    // The old clamp would have sent "VI" (the Virgin Islands) for Vietnam.
+    expect(normalizeCountry(input.locationCountry)).not.toBe("VI");
+  });
+
+  it("a separators-only country field is undefined (= keep), never the explicit clear", () => {
+    const input = form.build({ preferredCountries: " , ; " }) as { preferredCountries?: string[] };
+    expect(input.preferredCountries).toBeUndefined();
+  });
+
+  it("the location field's maxLength fits a country name, not a two-letter code", () => {
+    const field = form.fields.find((f) => f.name === "locationCountry");
+    expect(field && "maxLength" in field ? field.maxLength : 0).toBe(COUNTRY_TEXT_MAX);
+    expect(COUNTRY_TEXT_MAX).toBeGreaterThanOrEqual("Saint Vincent and the Grenadines".length);
   });
 
   it("the blank scalars are null (keep) — no field is cleared by an empty form", () => {

@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { MARKET_COUNTRIES, isWorkTypeSlug, isMarketCountry } from "@/lib/taxonomy/work-categories";
+import { MARKET_COUNTRIES, isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
+import { isIsoCountry } from "@/lib/location/country-model";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Locks the structured employer-need intake → worker-board contract:
@@ -34,7 +36,10 @@ describe("server action validates against closed sets + writes structured column
   const action = read("lib/demand/demand-request.ts");
   it("validates work-type, country and accommodation against closed sets", () => {
     expect(action).toMatch(/isWorkTypeSlug/);
-    expect(action).toMatch(/isMarketCountry/);
+    // Country: any ISO country (global-access rule 2026-09-22) — the closed set is the ISO
+    // registry, not the market list.
+    expect(action).toMatch(/isIsoCountry\(/);
+    expect(action).not.toMatch(/isMarketCountry/);
     expect(action).toMatch(/ACCOMMODATION_OFFER_VALUES/);
   });
   it("writes the structured columns via an owner-scoped update", () => {
@@ -66,12 +71,14 @@ describe("market countries are all valid + named", () => {
   it("every market country is a 2-letter code and recognised", () => {
     for (const c of MARKET_COUNTRIES) {
       expect(c).toMatch(/^[A-Z]{2}$/);
-      expect(isMarketCountry(c)).toBe(true);
+      expect(isIsoCountry(c)).toBe(true);
     }
-    expect(isMarketCountry("ZZ")).toBe(false);
+    expect(isIsoCountry("ZZ")).toBe(false);
+    // Vietnam, Ireland, the United States: not active markets, still valid job locations.
+    for (const c of ["VN", "IE", "US"]) expect(isIsoCountry(c)).toBe(true);
   });
   it("every market country has a localized name in lt/en/ru", () => {
-    for (const loc of ["lt", "en", "ru"]) {
+    for (const loc of activeLocales) {
       const names = JSON.parse(read(`messages/${loc}/labour-market.json`)).countryNames as Record<string, string>;
       for (const c of MARKET_COUNTRIES) {
         expect(names[c], `${loc} missing countryNames.${c}`).toBeTruthy();

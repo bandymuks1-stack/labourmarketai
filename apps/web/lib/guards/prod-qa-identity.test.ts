@@ -1,11 +1,17 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, type Dirent } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
 import {
+  assertBareStorageFilename,
+  assertIgnoredStorageTarget,
+} from "@/lib/testing/e2e-storage-target";
+import {
   PRODUCTION_ORIGIN,
+  PROD_QA_FRESH_IDENTITIES,
   PROD_QA_IDENTITIES,
+  PROD_QA_INVITED_EMAIL,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
@@ -54,14 +60,64 @@ const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
   /alter\s+table/i,
 ];
 
-describe("exactly one synthetic identity is allowlisted", () => {
-  it("the allowlist has one entry, and it is unmistakably synthetic", () => {
-    expect(PROD_QA_IDENTITIES).toHaveLength(1);
+describe("exactly the synthetic cast is allowlisted", () => {
+  it("the allowlist is exactly these eleven, each unmistakably synthetic", () => {
+    // Widening is a reviewed code change (owner decision 2026-09-28 added the
+    // three +multiw identities beside the worker; owner decision 2026-10-26
+    // added the two fresh-activation identities; owner decision 2026-10-28 the
+    // one invited worker; owner decision 2026-11-10 the act2 fresh pair, act1
+    // being onboarded). Pinned exactly.
+    expect([...PROD_QA_IDENTITIES].sort()).toEqual(
+      [
+        "qa.agency+multiw@labourmarket.ai",
+        "qa.buyer+act1@labourmarket.ai",
+        "qa.freshcompany+act1@labourmarket.ai",
+        "qa.freshcompany+act2@labourmarket.ai",
+        "qa.freshworker+act1@labourmarket.ai",
+        "qa.freshworker+act2@labourmarket.ai",
+        "qa.invited@labourmarket.ai",
+        "qa.manager+multiw@labourmarket.ai",
+        "qa.owner+multiw@labourmarket.ai",
+        "qa.worker+goal3@labourmarket.ai",
+        "qa.worker+multiw@labourmarket.ai",
+      ].sort(),
+    );
     expect(PROD_QA_IDENTITIES[0]).toBe(PROD_QA_WORKER_EMAIL);
-    expect(PROD_QA_WORKER_EMAIL).toMatch(/^qa\./);
-    // `+` addressing keeps it routable to a mailbox the owner controls while
-    // being obviously not a person's address.
-    expect(PROD_QA_WORKER_EMAIL).toContain("+");
+    for (const email of PROD_QA_IDENTITIES) {
+      // Plus-tagged, except the one invited worker, which is the QA mailbox's own
+      // address (the mailbox host refuses plus addresses; owner D-4 2026-11-02).
+      expect(email).toMatch(email === PROD_QA_INVITED_EMAIL ? /^qa\.invited@labourmarket\.ai$/ : /^qa\.[a-z]+\+[a-z0-9]+@labourmarket\.ai$/);
+    }
+  });
+
+  it("a walk can never create a fresh identity — only the owner can", () => {
+    expect([...PROD_QA_FRESH_IDENTITIES].sort()).toEqual([
+      "qa.buyer+act1@labourmarket.ai",
+      "qa.freshcompany+act1@labourmarket.ai",
+      "qa.freshcompany+act2@labourmarket.ai",
+      "qa.freshworker+act1@labourmarket.ai",
+      "qa.freshworker+act2@labourmarket.ai",
+      "qa.invited@labourmarket.ai",
+    ]);
+    // The mint looks the account up and refuses before any magic link exists.
+    const mint = read(MINT);
+    const check = mint.indexOf("PROD_QA_FRESH_IDENTITIES.includes(target.email)");
+    expect(check).toBeGreaterThan(-1);
+    expect(check).toBeLessThan(mint.indexOf("generateLink("));
+    expect(mint.slice(check, mint.indexOf("generateLink("))).toMatch(/findAuthUserByEmail\(admin, target\.email\)[\s\S]*fail\(/);
+    // The walk mints the fresh pair WITHOUT the provision step.
+    const walk = readFileSync(join(WEB, "..", "..", ".github", "workflows", "prod-qa-walk.yml"), "utf8");
+    const fresh = walk.slice(walk.indexOf("mint_existing()"), walk.indexOf("- name: Walk"));
+    expect(fresh).toMatch(/mint_existing "qa\.freshworker\+act2@labourmarket\.ai"\s+freshworker/);
+    expect(fresh).toMatch(/mint_existing "qa\.freshcompany\+act2@labourmarket\.ai"\s+freshcompany/);
+    const body = fresh.slice(0, fresh.indexOf("}"));
+    expect(body).not.toMatch(/prod-qa-provision/);
+    // A fresh account starts like a real one: no role in its metadata; the
+    // buyer carries only the customer role (never admin).
+    expect(read(PROVISION)).toMatch(/: fresh\s*\? \{\}/);
+    expect(read(PROVISION)).toMatch(/PROD_QA_BUYER_EMAIL\s*\? \{ role: "customer" \}/);
+    expect(read(PROVISION)).not.toMatch(/role: "admin"/);
+    expect(walk).toMatch(/mint_existing "qa\.buyer\+act1@labourmarket\.ai"\s+buyer/);
   });
 
   it("accepts the allowlisted identity against production", () => {
@@ -85,6 +141,9 @@ describe("exactly one synthetic identity is allowlisted", () => {
       "qa.worker+goal4@labourmarket.ai", //  same prefix, different tag
       "qa.worker+goal3@evil.example", //     same local part, other domain
       "qa.worker+goal3@labourmarket.ai.evil.example", // suffix attack
+      "qa.owner@labourmarket.ai", //         cast prefix without its tag
+      "qa.owner+multiw2@labourmarket.ai", // cast tag extended
+      "qa.agency+other@labourmarket.ai", // plausible, never allowlisted
       "", //                                  nothing
       undefined,
     ]) {
@@ -139,6 +198,49 @@ describe("the target must be production — this is not a general-purpose mint",
   });
 });
 
+describe("the current Supabase key formats are accepted — strictly, by role", () => {
+  const secret = "sb_secret_" + "a1B2c3D4e5F6g7H8i9J0";
+  const publishable = "sb_publishable_" + "a1B2c3D4e5F6g7H8i9J0";
+
+  it("accepts a current-format service key and anon key against production", () => {
+    expect(() =>
+      assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, serviceKey: secret, anonKey: publishable }),
+    ).not.toThrow();
+  });
+
+  it("a key of the wrong role, a truncated key or a lookalike is still refused", () => {
+    for (const bad of [
+      { serviceKey: publishable },
+      { anonKey: secret },
+      { serviceKey: "sb_secret_short" },
+      { serviceKey: "sb_secret_" + "a".repeat(20) + " x" },
+      { serviceKey: "xsb_secret_" + "a".repeat(20) },
+      { serviceKey: "not-a-key-at-all" },
+    ]) {
+      expect(
+        () => assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, ...bad }),
+        JSON.stringify(Object.keys(bad)),
+      ).toThrow(ProdQaGuardError);
+    }
+  });
+
+  it("the production origin and the allowlisted identity are still required with such a key", () => {
+    expect(() =>
+      assertProdQaTarget({ url: "https://some-other-ref.supabase.co", email: PROD_QA_WORKER_EMAIL, serviceKey: secret }),
+    ).toThrow(ProdQaGuardError);
+    expect(() =>
+      assertProdQaTarget({ url: PROD_URL, email: "someone.real@example.com", serviceKey: secret }),
+    ).toThrow(ProdQaGuardError);
+  });
+
+  it("the redacted form of such a key never contains the key", () => {
+    const line = describeProdQaTarget(
+      assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, serviceKey: secret }),
+    );
+    expect(line).not.toContain("sb_secret_");
+  });
+});
+
 describe("no secret ever reaches a log, a report or an artefact", () => {
   it("the target description carries origin and identity, never a key", () => {
     const line = describeProdQaTarget(
@@ -166,6 +268,71 @@ describe("no secret ever reaches a log, a report or an artefact", () => {
   });
 });
 
+/**
+ * #1842 ON THE PRODUCTION MINT. The file it writes is a live PRODUCTION
+ * session, so "it is gitignored" is proven by `git check-ignore` at run time —
+ * the same guards the local mint uses — and not left to the `.gitignore` line
+ * asserted above. The ORDER is the property: both guards must complete before
+ * `generateLink`, or a refusal is a refusal with a live token already minted.
+ */
+describe("the production mint proves its output path is ignored BEFORE it mints", () => {
+  const src = read(MINT);
+  const at = (needle: string): number => {
+    const i = src.indexOf(needle);
+    expect(i, `expected to find "${needle}" in ${MINT}`).toBeGreaterThan(-1);
+    return i;
+  };
+
+  it("bare name -> production target -> ignored target -> mint -> write", () => {
+    const name = at("assertBareStorageFilename(OUT_NAME)");
+    const prodTarget = at("assertProdQaTarget({");
+    const ignored = at("assertIgnoredStorageTarget({");
+    const mint = at("admin.auth.admin.generateLink");
+    const write = at("writeFileSync(out.path,");
+
+    expect(name).toBeLessThan(prodTarget);
+    expect(prodTarget).toBeLessThan(ignored);
+    expect(ignored).toBeLessThan(mint);
+    expect(mint).toBeLessThan(write);
+  });
+
+  it("writes only to the guarded target — no raw path survives", () => {
+    // A second, unguarded `join(... ".storage-state.prod-qa.json")` would let a
+    // later edit write around the guard.
+    expect(src).not.toMatch(/writeFileSync\(OUT\b/);
+    expect(src.match(/writeFileSync\(/g)).toHaveLength(1);
+  });
+
+  it("ANTI-VACUITY: the real output name passes the real git decision", () => {
+    // Without this, a guard that refused EVERY name would pass the order test
+    // above while making the production gate impossible to run.
+    const filename = /const OUT_FILENAME = "([^"]+)";/.exec(src)?.[1];
+    expect(filename).toBe(".storage-state.prod-qa.json");
+    const target = assertIgnoredStorageTarget({
+      filename: assertBareStorageFilename(filename),
+      e2eDir: join(WEB, "tests", "e2e"),
+    });
+    expect(target.ignoreRule).toContain(".gitignore:");
+  });
+
+  it("a per-identity slot (multi-actor walks) stays a bare, ignored name", () => {
+    expect(src).toMatch(/\/\^\[a-z0-9-\]\{1,24\}\$\/\.test\(SLOT\)/);
+    expect(src).toMatch(/assertBareStorageFilename\(OUT_NAME\)/);
+    for (const slot of ["owner", "worker", "worker2", "manager", "agency"]) {
+      const target = assertIgnoredStorageTarget({
+        filename: assertBareStorageFilename(`.storage-state.prod-qa.${slot}.json`),
+        e2eDir: join(WEB, "tests", "e2e"),
+      });
+      expect(target.ignoreRule, slot).toContain(".gitignore:");
+    }
+  });
+
+  it("refuses by the #1842 code, before any session exists", () => {
+    expect(src).toContain("UnsafeStorageTargetError");
+    expect(src).toContain("STORAGE_TARGET_REFUSAL_CODE");
+  });
+});
+
 describe("the production path is a SCRIPT, never a reachable surface", () => {
   // 30s, not the 5s default. This walks app/, components/ and lib/ and reads
   // every .ts/.tsx in them; alone it takes ~2s, and under full-suite CPU
@@ -180,6 +347,15 @@ describe("the production path is a SCRIPT, never a reachable surface", () => {
     const ALLOWED = new Set([
       "lib/testing/prod-qa-guard.ts",
       "lib/guards/prod-qa-identity.test.ts",
+      // Another guard TEST (never shipped): pins the walk-token rules (#2537).
+      "lib/guards/prod-qa-token-hygiene.test.ts",
+      // Another guard TEST (never shipped): pins the mobile review identity's
+      // one-run password script to the allowlisted owner (#2871). Reads the
+      // guard as text, imports nothing from it.
+      "lib/guards/mobile-qa-credential.test.ts",
+      // Another guard TEST (never shipped): keeps the service-role key off the
+      // browser walk (R2 P3-1 on #3303). Names the key-reading scripts as text.
+      "lib/guards/prod-walk-service-key-scope.test.ts",
     ]);
     const offenders: string[] = [];
     for (const dir of ["app", "components", "lib"]) {
@@ -258,21 +434,18 @@ describe("the gate refuses to run rather than pass for the wrong reason", () => 
 
 function grepTree(dir: string, rx: RegExp): string[] {
   const out: string[] = [];
-  let entries: string[];
+  // Dirents, not a stat per path: the type comes with the listing, so there is
+  // no check-then-use window on a path another process may be rewriting.
+  let entries: Dirent[];
   try {
-    entries = readdirSync(dir);
+    entries = readdirSync(dir, { withFileTypes: true });
   } catch {
     return out;
   }
-  for (const entry of entries) {
+  for (const dirent of entries) {
+    const entry = dirent.name;
     const p = join(dir, entry);
-    let s;
-    try {
-      s = statSync(p);
-    } catch {
-      continue;
-    }
-    if (s.isDirectory()) {
+    if (dirent.isDirectory()) {
       // Build and test ARTEFACTS. Skipped both because they cannot contain a
       // source import and because walking a directory another process is
       // actively writing makes this assertion intermittently unreliable — the

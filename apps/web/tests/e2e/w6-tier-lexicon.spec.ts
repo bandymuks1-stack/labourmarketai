@@ -167,7 +167,9 @@ test.describe("worker self view", () => {
   test.use({ storageState: WORKER_STATE });
 
   test("profile: canonical count label + bin legend, no score, desktop", async ({ page }) => {
-    await page.goto("/lt/dashboard/profile");
+    // Summary first (2026-09-23): the trust counts live in the closed
+    // `#profile-about` bar; the hash opens it the way the reader's tap does.
+    await page.goto("/lt/dashboard/profile#profile-about");
     const trust = page.getByTestId("trust-block").or(page.locator("text=" + LT_COUNT).first());
     await expect(page.locator(`text=${LT_COUNT}`).first()).toBeVisible({ timeout: 60_000 });
     await expect(page.locator("text=Susieti įgūdžiai")).toHaveCount(0);

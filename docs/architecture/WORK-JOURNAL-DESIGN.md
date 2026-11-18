@@ -63,7 +63,7 @@ Every entry of every type carries `original_text` — for `structured`, this is 
 
 ## 3. Schema
 
-> All migrations are **hand-written SQL** in `supabase/migrations/NNNN_*.sql`. Latest applied at design time: `0012`. M1 migration adds tables below; auto-applies via `supabase db push` on merge to `main`.
+> All migrations are **hand-written SQL** in `supabase/migrations/NNNN_*.sql`. Latest applied at design time: `0012`. M1 migration adds tables below. *(Design-time note, SUPERSEDED: migrations do NOT auto-apply on merge and `supabase db push` is forbidden — production applies only via Supabase MCP `apply_migration` after review; see `docs/DEPLOYMENT.md` § Database migrations.)*
 > Naming follows live-schema convention from `SCHEMA_INVENTORY.md`: `uuid PK`, `created_at timestamptz NOT NULL DEFAULT now()` on every table (omitted below to reduce noise), `updated_at` likewise unless stated otherwise, `text` for slugs and ISO codes, `CHAR(2)` for `original_language`.
 
 ### 3.1 `journal_entries`

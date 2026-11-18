@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { withoutArchivedOrganizations } from "@/lib/company/archived-organizations";
 
 /**
  * W6 author/subject slice — the app-side mirror of `manages_organization()`.
@@ -78,7 +79,13 @@ export async function getManagedOrganizationIds(): Promise<string[]> {
     }
   }
 
-  return [...ids];
+  // ARCHIVED organizations (owner decision 2026-09-23) are acted for by no
+  // one; an unreadable archive state degrades to the narrowest truth.
+  const kept = await withoutArchivedOrganizations(
+    supabase,
+    [...ids].map((id) => ({ id })),
+  );
+  return kept.ok ? kept.rows.map((r) => r.id) : [];
 }
 
 export type GovernedOrganization = { id: string; name: string };
@@ -157,6 +164,59 @@ export async function getGovernedOrganizations(): Promise<
           "",
       });
     }
+  }
+  // ARCHIVED organizations (owner decision 2026-09-23) are governed by no one
+  // here — their workflow definitions stay as history, not as panels.
+  const kept = await withoutArchivedOrganizations(supabase, [...out.values()]);
+  return kept.ok ? [...kept.rows] : [];
+}
+
+/**
+ * Organizations whose INVITATIONS the current user may manage — the app-side
+ * mirror of `invitation_org_authority_v1` (owner direction 2026-09-24): the
+ * owned organization, an active owner/admin membership, or an active
+ * membership the owner delegated invitation management to
+ * (`manages_invitations`). Never a job title. UI-shaping only: the invite
+ * panel offers these; `create_invitation_v2` re-derives the authority.
+ * Feature-detected: without the delegation column (42703) this is the owned
+ * + owner/admin set. Archived organizations are left out, as everywhere a
+ * workspace acts.
+ */
+export async function getInvitationOrganizations(): Promise<GovernedOrganization[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const governed = await getGovernedOrganizations();
+  const out = new Map<string, GovernedOrganization>(governed.map((g) => [g.id, g]));
+
+  const delegated = await asAny(supabase)
+    .from("company_memberships")
+    .select("organization_id, organizations(display_name, legal_name)")
+    .eq("profile_id", user.id)
+    .eq("status", "active")
+    .eq("manages_invitations", true)
+    .limit(200);
+  if (!delegated.error) {
+    const extra: GovernedOrganization[] = [];
+    for (const row of (delegated.data ?? []) as {
+      organization_id?: string | null;
+      organizations?: { display_name?: string | null; legal_name?: string | null } | null;
+    }[]) {
+      const id = row.organization_id;
+      if (typeof id !== "string" || !id || out.has(id)) continue;
+      extra.push({
+        id,
+        name:
+          row.organizations?.display_name?.trim() ||
+          row.organizations?.legal_name?.trim() ||
+          "",
+      });
+    }
+    const kept = await withoutArchivedOrganizations(supabase, extra);
+    if (kept.ok) for (const row of kept.rows) out.set(row.id, row);
   }
   return [...out.values()];
 }

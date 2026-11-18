@@ -46,8 +46,13 @@ describe("the ONE form opener prefills the work card from the canonical snapshot
 describe("the save merges: omitted keeps, only an explicit [] clears", () => {
   it("form: a blank country field is undefined, never []", () => {
     const forms = read("lib", "conversation", "worker-forms.ts");
-    expect(forms).toMatch(/\.filter\(\(c\) => c\.length === 2\)\s*: undefined,/);
-    expect(forms).not.toMatch(/\.filter\(\(c\) => c\.length === 2\)\s*: \[\],/);
+    // Re-pinned 2026-09-22 (global-access rule): the form no longer clamps a
+    // country to two characters — `.filter((c) => c.length === 2)` dropped a
+    // typed NAME ("Vietnam") — it splits the text as typed and the resolver
+    // in work-card-core decides. The W6 invariant is unchanged: blank = keep.
+    expect(forms).toMatch(/\? splitCountryText\(s\(st\.preferredCountries\)\)\s*: undefined,/);
+    expect(forms).not.toMatch(/\.filter\(\(c\) => c\.length === 2\)\s*:/);
+    expect(forms).toMatch(/return parts\.length > 0 \? parts : undefined;/);
   });
   it("executor: the clear flag rides only with an explicit empty list", () => {
     const exec = read("lib", "conversation", "worker-executors.ts");

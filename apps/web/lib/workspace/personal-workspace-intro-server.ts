@@ -37,7 +37,9 @@ export async function loadPersonalWorkspaceIntro(): Promise<PersonalWorkspaceInt
     }
 
     const identity = baseIdentityForRole(session.profile?.active_role ?? "worker");
-    const workspace = await getWorkspaceContext(identity);
+    // The ONE request-scoped resolution the chip renders (its identity comes
+    // from the same session profile, inside the resolver).
+    const workspace = await getWorkspaceContext();
     const workspaceKind =
       workspace.activeWorkspaceId === PERSONAL_WORKSPACE_ID
         ? "personal"

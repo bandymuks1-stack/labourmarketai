@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { gateOpenNeeds } from "@/lib/billing/open-needs-gate";
 import { deriveNeedSkills } from "@/lib/market/need-skills";
+import { demandAdapter } from "@/lib/market-lifecycle/adapters";
+import { transition, type ClosedOutcome } from "@/lib/market-lifecycle/contract";
 import {
   canCloseFrom,
   canReopenFrom,
@@ -42,21 +44,36 @@ export type DemandLifecycleResult =
   | { kind: "not-owner" }
   | { kind: "nothing-to-confirm" }
   // Owner launch pricing 2026-09-05: reopening would exceed the organization's
-  // concurrent active open needs (FREE 1 / ORGANIZATION 10). The way forward is
-  // the paid plan or the individual plan; nothing is charged or reopened.
+  // concurrent active open needs (FREE 1; the ORGANIZATION plan has no fixed limit
+  // since 2026-10-06). The way forward is the paid plan; nothing is charged or
+  // reopened.
   | { kind: "over-limit"; limit: number; next: "upgrade" | "individual_plan" }
   | { kind: "error"; message: string };
 
-async function visibleRequest(requestId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+/**
+ * An EXPLICIT caller (G4 bridge): a bearer / agent transport hands in its own
+ * RLS-scoped client and the organization its OWN employer gate resolved
+ * (`requireEmployerCompanyForCaller`). Absent = the cookie session and the
+ * cookie workspace gate — every existing web call site, unchanged.
+ */
+export type DemandLifecycleCaller = {
+  readonly supabase: SupabaseClient;
+  readonly userId: string;
+  readonly organizationId: string;
+};
+
+async function visibleRequest(requestId: string, caller?: DemandLifecycleCaller) {
+  const supabase = caller?.supabase ?? (await createClient());
+  const user = caller
+    ? { id: caller.userId }
+    : (await supabase.auth.getUser()).data.user;
   if (!user) return { supabase, user: null, req: null, organizationId: null };
   // W8 slice 1 — the ONE workspace gate for all three lifecycle writes
   // (confirm / close / reopen). Not acting for a company ⇒ `not-owner`, which
   // is what every caller already renders honestly.
-  const employer = await resolveEmployerCompanyContext();
+  const employer = caller
+    ? ({ kind: "ok", organizationId: caller.organizationId } as const)
+    : await resolveEmployerCompanyContext();
   if (employer.kind !== "ok") {
     return { supabase, user: null, req: null, organizationId: null };
   }
@@ -64,18 +81,45 @@ async function visibleRequest(requestId: string) {
   // pin the row to the ACTIVE workspace — a deep link carrying another
   // organization's need must not resolve from this context even when the
   // caller could read it elsewhere.
-  const { data: row } = await asAny(supabase)
+  const COLUMNS =
+    "id, status, title, need_summary, role_or_work_type, notes, payload, profile_id, organization_id";
+  let outcomeStored = true;
+  let res = await asAny(supabase)
     .from("customer_requests")
-    .select(
-      "id, status, title, need_summary, role_or_work_type, notes, payload, profile_id, organization_id",
-    )
+    .select(`${COLUMNS}, closed_outcome`)
     .eq("id", requestId)
     .maybeSingle();
+  if (res.error?.code === "42703") {
+    // The lifecycle migration (closed_outcome) is not applied here yet.
+    outcomeStored = false;
+    res = await asAny(supabase).from("customer_requests").select(COLUMNS).eq("id", requestId).maybeSingle();
+  }
+  const row = res.data;
   const req =
     row && (row.profile_id === user.id || row.organization_id === employer.organizationId)
       ? row
       : null;
-  return { supabase, user, req, organizationId: employer.organizationId };
+  return { supabase, user, req, organizationId: employer.organizationId, outcomeStored };
+}
+
+/**
+ * Record WHY the need closed (lifecycle contract). The creator's own row only
+ * — owner UPDATE RLS — and only where the column exists; a colleague's close
+ * stays unrecorded (NULL), never guessed. Best-effort: the close already
+ * happened and is the fact; a failed outcome write is logged, not undone.
+ */
+async function recordOutcome(
+  supabase: SupabaseClient,
+  requestId: string,
+  userId: string,
+  outcome: ClosedOutcome | null,
+): Promise<void> {
+  const { error } = await asAny(supabase)
+    .from("customer_requests")
+    .update({ closed_outcome: outcome })
+    .eq("id", requestId)
+    .eq("profile_id", userId);
+  if (error) console.error("[demand-lifecycle] closed_outcome not recorded:", error.message);
 }
 
 /** The gated RPC answer → the lifecycle result the surfaces already render.
@@ -148,16 +192,24 @@ export async function confirmRecognizedNeed(
 
 /** Close the company's own demand — instantly hidden from the worker board
  *  (its RPC serves status='submitted' only). Row + history stay (§3). */
-export async function closeDemand(requestId: string): Promise<DemandLifecycleResult> {
+export async function closeDemand(
+  requestId: string,
+  caller?: DemandLifecycleCaller,
+  outcome: "completed" | "withdrawn" = "completed",
+): Promise<DemandLifecycleResult> {
   if (!requestId) return { kind: "invalid" };
-  const { supabase, user, req } = await visibleRequest(requestId);
+  const { supabase, user, req, outcomeStored } = await visibleRequest(requestId, caller);
   if (!user || !req) return { kind: "not-owner" };
   if (!canCloseFrom(req.status)) return { kind: "invalid" };
+  const ownRow = outcomeStored && req.profile_id === user.id;
   // R-15: the gated RPC first (creator / admin / has_org_demand_access);
   // absent RPC → the owner-only direct update below, unchanged.
   const rpc = await asAny(supabase).rpc("close_demand_v1", { p_request_id: requestId });
   const mapped = mapLifecycleRpc(rpc.data, rpc.error, "closed");
-  if (mapped) return mapped;
+  if (mapped) {
+    if (mapped.kind === "ok" && ownRow) await recordOutcome(supabase, requestId, user.id, outcome);
+    return mapped;
+  }
   const { error } = await asAny(supabase)
     .from("customer_requests")
     .update({ status: "closed", updated_at: new Date().toISOString() })
@@ -165,16 +217,27 @@ export async function closeDemand(requestId: string): Promise<DemandLifecycleRes
     .eq("profile_id", user.id)
     .eq("status", "submitted");
   if (error) return { kind: "error", message: error.message };
+  if (ownRow) await recordOutcome(supabase, requestId, user.id, outcome);
   return { kind: "ok", status: "closed" };
 }
 
 /** Reopen a previously closed demand (back to submitted → worker-visible
  *  again through the same verified-company gate). */
-export async function reopenDemand(requestId: string): Promise<DemandLifecycleResult> {
+export async function reopenDemand(
+  requestId: string,
+  caller?: DemandLifecycleCaller,
+): Promise<DemandLifecycleResult> {
   if (!requestId) return { kind: "invalid" };
-  const { supabase, user, req, organizationId } = await visibleRequest(requestId);
+  const { supabase, user, req, organizationId, outcomeStored } = await visibleRequest(requestId, caller);
   if (!user || !req || !organizationId) return { kind: "not-owner" };
   if (!canReopenFrom(req.status)) return { kind: "invalid" };
+  // THE LIFECYCLE CONTRACT: a discarded draft was never in the market, so it
+  // can never be "reopened" into it (owner decision 2026-10-24).
+  const adapter = demandAdapter({ closedOutcomeStored: outcomeStored });
+  if (!transition(adapter.support, adapter.facts({ status: req.status, closedOutcome: req.closed_outcome }), "resume")) {
+    return { kind: "invalid" };
+  }
+  const ownRow = outcomeStored && req.profile_id === user.id;
   // A reopened need is an ACTIVE need again: the SAME ceiling as creating one
   // (owner launch pricing 2026-09-05), decided by the ONE open-needs gate —
   // for the creator and for a colleague alike (R-15).
@@ -182,7 +245,10 @@ export async function reopenDemand(requestId: string): Promise<DemandLifecycleRe
   if (!needsGate.allowed) return { kind: "over-limit", limit: needsGate.limit, next: needsGate.next };
   const rpc = await asAny(supabase).rpc("reopen_demand_v1", { p_request_id: requestId });
   const mapped = mapLifecycleRpc(rpc.data, rpc.error, "submitted");
-  if (mapped) return mapped;
+  if (mapped) {
+    if (mapped.kind === "ok" && ownRow) await recordOutcome(supabase, requestId, user.id, null);
+    return mapped;
+  }
   const { error } = await asAny(supabase)
     .from("customer_requests")
     .update({ status: "submitted", updated_at: new Date().toISOString() })
@@ -190,5 +256,29 @@ export async function reopenDemand(requestId: string): Promise<DemandLifecycleRe
     .eq("profile_id", user.id)
     .eq("status", "closed");
   if (error) return { kind: "error", message: error.message };
+  if (ownRow) await recordOutcome(supabase, requestId, user.id, null);
   return { kind: "ok", status: "submitted" };
+}
+
+/**
+ * Discard ONE own draft (the contract's `withdraw` on a draft): it leaves the
+ * form and is recorded as `discarded` where the column exists, so it can
+ * never be reopened into the market. Owner UPDATE RLS; draft → closed is a
+ * guard-allowed owner transition.
+ */
+export async function discardDemandDraft(requestId: string): Promise<DemandLifecycleResult> {
+  if (!requestId) return { kind: "invalid" };
+  const { supabase, user, req, outcomeStored } = await visibleRequest(requestId);
+  if (!user || !req) return { kind: "not-owner" };
+  if (req.profile_id !== user.id || req.status !== "draft") return { kind: "invalid" };
+  const patch: Record<string, unknown> = { status: "closed", updated_at: new Date().toISOString() };
+  if (outcomeStored) patch.closed_outcome = "discarded";
+  const { error } = await asAny(supabase)
+    .from("customer_requests")
+    .update(patch)
+    .eq("id", requestId)
+    .eq("profile_id", user.id)
+    .eq("status", "draft");
+  if (error) return { kind: "error", message: error.message };
+  return { kind: "ok", status: "closed" };
 }

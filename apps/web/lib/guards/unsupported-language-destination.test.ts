@@ -25,10 +25,13 @@ import {
  */
 
 describe("a language code we do not route is not a page name", () => {
-  it("sends the three acquisition languages to the English product", () => {
-    expect(unsupportedLanguageRedirectPath("/sv")).toBe("/en");
-    expect(unsupportedLanguageRedirectPath("/pl")).toBe("/en");
+  it("sends the unrouted acquisition languages to the English product", () => {
+    expect(unsupportedLanguageRedirectPath("/da")).toBe("/en");
     expect(unsupportedLanguageRedirectPath("/uk")).toBe("/en");
+    expect(unsupportedLanguageRedirectPath("/ka")).toBe("/en");
+    // PL is ROUTED since 2026-09-20 (owner approval): no redirect, the list is
+    // derived from the active set and dropped it by itself.
+    expect(unsupportedLanguageRedirectPath("/pl")).toBeNull();
   });
 
   it("never sends any of them into Lithuanian", () => {
@@ -42,16 +45,16 @@ describe("a language code we do not route is not a page name", () => {
   });
 
   it("keeps the rest of the path so a deep link survives", () => {
-    expect(unsupportedLanguageRedirectPath("/sv/dashboard")).toBe(
+    expect(unsupportedLanguageRedirectPath("/da/dashboard")).toBe(
       "/en/dashboard",
     );
-    expect(unsupportedLanguageRedirectPath("/pl/for-workers/carpenter")).toBe(
+    expect(unsupportedLanguageRedirectPath("/da/for-workers/carpenter")).toBe(
       "/en/for-workers/carpenter",
     );
   });
 
   it("is case-insensitive on the language segment", () => {
-    expect(unsupportedLanguageRedirectPath("/SV")).toBe("/en");
+    expect(unsupportedLanguageRedirectPath("/DA")).toBe("/en");
   });
 });
 
@@ -79,8 +82,8 @@ describe("it touches nothing else", () => {
   });
 
   it("only looks at the FIRST segment", () => {
-    // `sv` deeper in the path belongs to a page inside an active locale.
-    expect(unsupportedLanguageRedirectPath("/en/sv")).toBeNull();
+    // `da` deeper in the path belongs to a page inside an active locale.
+    expect(unsupportedLanguageRedirectPath("/en/da")).toBeNull();
     expect(unsupportedLanguageRedirectPath("/lt/pl-tools")).toBeNull();
   });
 });
@@ -122,6 +125,7 @@ describe("this file may never become a claim of language support", () => {
     // Ukrainian speakers reject being addressed in Russian, and a redirect is
     // a statement about the reader that the product cannot take back.
     expect(unsupportedLanguageRedirectPath("/uk")).toBe("/en");
+    expect(unsupportedLanguageRedirectPath("/ka")).toBe("/en");
   });
 
   it("does not add any acquisition-only language to the catalog set", () => {

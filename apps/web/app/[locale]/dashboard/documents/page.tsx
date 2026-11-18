@@ -1,14 +1,18 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { countryDisplayName } from "@/lib/location/country-model";
 import type { CredentialValidityState } from "@/lib/documents/credential-validity";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
+import { readMyPreferredCountries } from "@/lib/documents/my-countries";
 import {
   DOCUMENT_COUNTRIES,
   DOCUMENTS_READINESS_ENABLED,
 } from "@/lib/config/documents";
 import {
   computeCountryReadiness,
+  documentReadinessScope,
   type DerivedDocumentStatus,
 } from "@/lib/documents/readiness";
 import { unmatchableRequirementRows } from "@/lib/country-readiness/requirement-rows";
@@ -32,6 +36,7 @@ import { DocumentJournalDraftReview } from "@/components/app/document-journal-dr
 import { DocumentAckInbox } from "@/components/app/document-ack-inbox";
 import { OrgDocumentsRegister } from "@/components/app/org-documents-register";
 import { TrainingRegister } from "@/components/app/training-register";
+import { OwnRecognitionsBlock } from "@/components/app/own-recognitions-block";
 import { getWorkerDocumentFiles } from "@/lib/documents/document-files";
 import { parseOrgRegisterFilters } from "@/lib/documents/document-file-model";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
@@ -44,6 +49,12 @@ import {
   type WorkerCountryReadinessStatus,
 } from "@/lib/readiness/worker-readiness";
 import type { Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/documents", "documents.title");
+
 
 /**
  * "Mano dokumentai" — the document & work-proof centre (control room PR H,
@@ -138,6 +149,7 @@ const DOC_NOTICE_WARN = new Set([
   "not_found",
   "limit_reached",
   "version_limit_reached",
+  "storage_quota_exceeded",
   "path_mismatch",
   "file_too_large",
   "unsupported_type",
@@ -211,15 +223,11 @@ export default async function WorkerDocumentsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  let activeRole: Role | null = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("active_role")
-      .eq("id", user.id)
-      .single();
-    activeRole = (profile?.active_role as Role | null) ?? null;
-  }
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const activeRole: Role | null = user
+    ? (((await getSessionProfile()).profile?.active_role as Role | null) ?? null)
+    : null;
 
   const sp = await searchParams;
 
@@ -320,9 +328,15 @@ export default async function WorkerDocumentsPage({
   // constant so the disabled branch issues exactly the queries it issued
   // before (today the constant is `true`, so that arm is unreachable; guarding
   // it keeps this change semantics-preserving if it is ever flipped).
-  const [centre, docsConsent] = await Promise.all([
+  //
+  // The person's preferred countries (below) depend only on the session too,
+  // so they start in the same batch instead of as a further serial stage.
+  const [centre, docsConsent, myCountries] = await Promise.all([
     getWorkerDocumentCentre(),
     DOCUMENTS_READINESS_ENABLED ? getDocsConsent() : Promise.resolve(null),
+    DOCUMENTS_READINESS_ENABLED && user
+      ? readMyPreferredCountries(user.id)
+      : Promise.resolve([] as string[]),
   ]);
 
   if (!DOCUMENTS_READINESS_ENABLED) {
@@ -351,6 +365,17 @@ export default async function WorkerDocumentsPage({
   )
     ? (sp.country as string)
     : null;
+
+  // MOBILITY -> DOCUMENTS. The countries the person said they would work in
+  // (workers.preferred_countries, owner-scoped by RLS) lead the chip row. It
+  // only orders the chips and selects nothing: a preference is not a right
+  // to work, and the checklist still appears only after the person picks.
+  // (Read in the batch above.)
+  const orderedCountries = [
+    ...DOCUMENT_COUNTRIES.filter((c) => myCountries.includes(c)),
+    ...DOCUMENT_COUNTRIES.filter((c) => !myCountries.includes(c)),
+  ];
+  const hasMyCountries = orderedCountries.some((c) => myCountries.includes(c));
 
   const now = new Date();
   // S6 — the worker's documents-aggregate consent (null until the gated
@@ -559,6 +584,9 @@ export default async function WorkerDocumentsPage({
                   <li
                     key={d.id}
                     className="card-border glow-hover rise-in flex flex-wrap items-center justify-between gap-2 p-3"
+                    data-testid="doc-centre-item"
+                    data-type={d.documentTypeSlug}
+                    data-country={d.country ?? ""}
                     data-status={d.derivedStatus}
                   >
                     <div className="flex min-w-0 flex-col gap-0.5">
@@ -693,7 +721,11 @@ export default async function WorkerDocumentsPage({
               statusOptions={(["ready", "missing", "blocked"] as const).map(
                 (s) => [s, t(`status.${s}` as never)] as const,
               )}
-              countryOptions={DOCUMENT_COUNTRIES}
+              // Named, not printed as an ISO code: the same reader the chat's
+              // document form uses, falling back to the code.
+              countryOptions={DOCUMENT_COUNTRIES.map(
+                (code) => [code, countryDisplayName(code, locale) || code] as const,
+              )}
             />
           </section>
 
@@ -702,8 +734,13 @@ export default async function WorkerDocumentsPage({
               {t("country.title")}
             </h2>
             <p className="text-xs text-text-secondary">{t("country.help")}</p>
+            {hasMyCountries ? (
+              <p className="text-xs text-text-secondary" data-testid="documents-country-mine">
+                {t("country.mine")}
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2">
-              {DOCUMENT_COUNTRIES.map((c) => (
+              {orderedCountries.map((c) => (
                 <Link
                   key={c}
                   href={`/dashboard/documents?country=${c}` as "/dashboard"}
@@ -794,6 +831,17 @@ export default async function WorkerDocumentsPage({
                     <p className="text-meta text-text-muted">
                       {t("scopeNote")}
                     </p>
+                    {/* Base country not stated: whether this work would be a
+                        POSTING is unknown, so the posting papers are not
+                        listed as missing — and the page says why. */}
+                    {!inv.readiness.homeCountry ? (
+                      <p
+                        className="text-meta text-text-muted"
+                        data-testid="documents-posting-needs-base"
+                      >
+                        {t("country.postingNeedsBase")}
+                      </p>
+                    ) : null}
 
                     {/* REQUIREMENTS THAT APPLY AND CANNOT BE CHECKED FROM
                         DOCUMENTS. `matrixRequirementRows` keys on a document
@@ -806,9 +854,11 @@ export default async function WorkerDocumentsPage({
                         folded into the status above — this list changes no
                         count and no overall verdict. */}
                     {(() => {
+                      // The SAME scope the checklist above was built in:
+                      // posting-only rules only across a known border.
                       const unmatchable = unmatchableRequirementRows(
                         country,
-                        "worker_posted",
+                        documentReadinessScope(country, inv.readiness.homeCountry),
                       );
                       if (unmatchable.length === 0) return null;
                       return (
@@ -912,12 +962,16 @@ export default async function WorkerDocumentsPage({
           certificates. Completing is self-only; nobody records it for them. */}
       <TrainingRegister locale={locale} notice={sp.trn} />
 
+      {/* SKL-9 — the person's own recognitions (assessor decisions), read-only;
+          distinct from certificates and from work evidence (SEP-6). */}
+      {user ? <OwnRecognitionsBlock profileId={user.id} /> : null}
+
       <DocsConsentToggle current={docsConsent} />
 
       {/* WAGON 9 (area 17) — Lithuanian-master jurisdiction/document
-          guidance. LT locale renders the full draft registry; other locales
-          see only the "being prepared from the Lithuanian master" notice
-          (owner correction 2026-07-05). */}
+          guidance. LT locale renders the full registry; other locales see
+          only the "available in Lithuanian only" notice (owner correction
+          2026-07-05). */}
       <LtDocumentGuidance locale={locale} />
     </div>
   );
@@ -1031,12 +1085,10 @@ function WorkProofExports({
 function Header({ t }: { t: Awaited<ReturnType<typeof getTranslations>> }) {
   return (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("subtitle")}</p>
     </header>
   );

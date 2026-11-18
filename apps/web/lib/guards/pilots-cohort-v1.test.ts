@@ -287,7 +287,10 @@ describe("W5 onboarding step events — bounded, no PII", () => {
 
 describe("time-to-value — honest limits", () => {
   it("excludes preview/non-production traffic like the acquisition funnel", () => {
-    expect(metrics).toContain("preview_host");
+    // Since 2026-09-20 the exclusion is the SHARED origin rule
+    // (lib/telemetry/production-host.ts: client `preview_host` marker OR
+    // server-stamped `deploy_env`), not a hand-written preview_host filter.
+    expect(metrics).toMatch(/isNonProductionOrigin\(/);
     expect(metrics).toMatch(/excludedPreview/);
   });
 
@@ -304,8 +307,10 @@ describe("time-to-value — honest limits", () => {
   });
 
   it("reads only bounded, non-PII columns from pilot_events", () => {
+    // `id` is the event row's own opaque key — the keyset paging cursor
+    // (created_at, id), not a person identifier.
     expect(metrics).toContain(
-      '"event_name, session_id, created_at, metadata"',
+      '"id, event_name, session_id, created_at, metadata"',
     );
     expect(metrics).not.toMatch(/profile_id/);
   });
