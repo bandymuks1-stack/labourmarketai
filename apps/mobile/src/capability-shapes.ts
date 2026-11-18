@@ -323,6 +323,9 @@ export type DemandUrgency = "flexible" | "this_week" | "urgent";
 
 export type DemandDraftFields = {
   readonly description: string;
+  /** Where the work is: a country name in any supported language or an ISO
+   *  code; the server resolves it (`resolveCountryCode`), as the web chat does. */
+  readonly country: string;
   readonly role?: string;
   readonly location?: string;
   readonly urgency?: DemandUrgency;
