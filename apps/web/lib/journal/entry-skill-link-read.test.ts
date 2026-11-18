@@ -38,6 +38,8 @@ function pagedClient(data: LinkRow[], opts: { extendedSelectFails?: boolean } = 
       };
       for (const m of ["eq", "order"]) b[m] = () => b;
       b.range = async (from: number, to: number) => {
+        // The dispute-marker read (entry-skill-disputes.ts) is not a link page.
+        if (select.startsWith("entry_id")) return { data: [], error: null };
         ranges.push([from, to]);
         if (opts.extendedSelectFails && select.includes("provenance")) {
           return { data: null, error: { message: "undefined_column" } };
@@ -77,7 +79,8 @@ describe("readWorkerEntrySkillLinks — every link row, in 1000-row pages", () =
     const r = await readWorkerEntrySkillLinks(client, "w-1");
     expect(r.ok).toBe(true);
     // one extended select (its first page fails), then one legacy select per page
-    expect(selects).toEqual([
+    // (the person's dispute markers are a separate read, not a link page)
+    expect(selects.filter((s) => s.startsWith("journal_entry_id"))).toEqual([
       "journal_entry_id, skill_id, provenance",
       "journal_entry_id, skill_id",
       "journal_entry_id, skill_id",

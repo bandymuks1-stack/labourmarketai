@@ -61,6 +61,38 @@ export function requiresConfirmation(tier: ConfirmationTier): boolean {
 }
 
 /**
+ * The roles a dispatch may act on, from three facts the dispatcher read.
+ *
+ * `profileRoles` is the RBAC catalogue as recorded. Two arms add a role the
+ * catalogue does not carry, each from the capability the WEB already acts on:
+ *
+ *  - `opensCompanySpace` — a governance membership in the active workspace
+ *    holds `company` (capability matrix P1, 2026-09-23; `membership_accept_v1`
+ *    never grants `profile_roles`).
+ *  - `ownsWorkerProfile` — the person's OWN `workers` row holds `worker`
+ *    (production defect measured 2026-11-02: 11 profiles that hold only
+ *    `company` but have their own worker profile were refused every worker
+ *    action — accepting a roster invitation included — through chat and MCP,
+ *    while the web, whose worker pages are not role-gated, let them act: the
+ *    authority there is the `owns_worker` RLS policy and the accept RPC keyed on
+ *    that row). It never adds `company`, `agency`, `customer` or `admin`.
+ *
+ * An empty result keeps the `worker` default for a brand-new account (a read
+ * that ANSWERED with no rows); a failed read never reaches here (see
+ * `heldRolesOf`).
+ */
+export function heldDispatchRoles(params: {
+  profileRoles: readonly string[];
+  opensCompanySpace: boolean;
+  ownsWorkerProfile: boolean;
+}): Set<Role> {
+  const set = new Set<Role>(params.profileRoles as Role[]);
+  if (params.opensCompanySpace) set.add("company");
+  if (params.ownsWorkerProfile) set.add("worker");
+  return set.size > 0 ? set : new Set<Role>(["worker"]);
+}
+
+/**
  * Decide whether a dispatch may proceed to input validation + execution.
  * `executable` = the action has a registered server executor (else it is a
  * deep-link-only action and must never be "run" from the conversation layer).

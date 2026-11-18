@@ -37,6 +37,12 @@ export type ReferralRow = {
   readonly deliveryStatus: string;
   readonly consentGiven: boolean;
   readonly externalSource: string | null;
+  /** The recipient opened the link (candidates v4). A reissue rotates the token and would break
+   *  the link they hold — owner correction 2026-11-13 item 4 (incident 862a91f4). */
+  readonly firstOpenedAt?: string | null;
+  /** The LAST failure's class (candidates v4). Only a send that provably never left may be sent
+   *  again; an UNKNOWN_OUTCOME (or an unclassified old failure) is reconciled first. */
+  readonly failureClass?: string | null;
 };
 
 export type ExclusionReason =
@@ -49,7 +55,11 @@ export type ExclusionReason =
   | "synthetic_address"
   | "has_account"
   | "already_mailed_address"
-  | "duplicate_address";
+  | "reserved_address"
+  | "duplicate_address"
+  | "link_opened"
+  | "outcome_unknown"
+  | "permanent_failure";
 
 export type Selection = {
   readonly eligible: readonly ReferralRow[];
@@ -64,6 +74,10 @@ export function selectReprocessCandidates(
     readonly existingAccountEmails: ReadonlySet<string>;
     /** Addresses that already received a partner invitation mail (any row). */
     readonly alreadyMailedEmails?: ReadonlySet<string>;
+    /** Addresses with a send reservation on any row (outcome unknown until
+     *  resolved): left out BEFORE the control row or the batch is chosen, so a
+     *  stuck reservation never occupies a slot. */
+    readonly reservedEmails?: ReadonlySet<string>;
   },
 ): Selection {
   const excluded: Partial<Record<ExclusionReason, number>> = {};
@@ -76,12 +90,21 @@ export function selectReprocessCandidates(
     if (!row.externalSource) skip("not_partner_referral");
     else if (row.status !== "pending") skip("not_pending");
     else if (row.deliveryStatus === "sent") skip("already_sent");
+    else if (row.firstOpenedAt) skip("link_opened");
+    else if (row.deliveryStatus === "delivery_failed" && row.failureClass === "PERMANENT") skip("permanent_failure");
+    else if (
+      row.deliveryStatus === "delivery_failed" &&
+      row.failureClass !== "TEMPORARY" &&
+      row.failureClass !== "CONFIGURATION"
+    )
+      skip("outcome_unknown");
     else if (!row.consentGiven) skip("no_consent");
     else if (!row.expiresAt || new Date(row.expiresAt) <= input.now) skip("expired");
     else if (!address) skip("no_address");
     else if (SYNTHETIC_ADDRESS.test(address)) skip("synthetic_address");
     else if (input.existingAccountEmails.has(address)) skip("has_account");
     else if (input.alreadyMailedEmails?.has(address)) skip("already_mailed_address");
+    else if (input.reservedEmails?.has(address)) skip("reserved_address");
     else {
       const seen = newestByAddress.get(address);
       if (!seen) newestByAddress.set(address, row);
@@ -105,7 +128,7 @@ export type ReprocessDeps = {
   readonly buildLink: (locale: string, token: string) => string;
   /** Sends ONE invitation mail in `locale`; true only on a provider ack. */
   readonly send: (to: string, locale: string, link: string) => Promise<boolean>;
-  /** `mark_external_referral_delivery_v1`. */
+  /** `mark_external_referral_delivery_v1` — throws when the outcome was not stored. */
   readonly mark: (invitationId: string, outcome: "sent" | "delivery_failed") => Promise<void>;
   readonly resolveLocale: (locale: string | null) => string;
 };
@@ -171,9 +194,18 @@ export async function reprocessExternalReferrals(
     } catch {
       ok = false;
     }
-    await deps.mark(row.id, ok ? "sent" : "delivery_failed");
     if (ok) sent += 1;
     else failed += 1;
+    // A mark that does not land leaves the row reserved in the database
+    // (`delivery_reserved_at`, migration 20261028070000), so no later run can
+    // mail that address again; stop here instead of sending more while the
+    // stored state is uncertain.
+    try {
+      await deps.mark(row.id, ok ? "sent" : "delivery_failed");
+    } catch {
+      refused.mark_failed = (refused.mark_failed ?? 0) + 1;
+      break;
+    }
   }
   return { outcome: "done", ...base, attempted: batch.length, sent, failed, refused };
 }

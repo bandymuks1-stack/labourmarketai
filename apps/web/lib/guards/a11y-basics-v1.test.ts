@@ -79,9 +79,24 @@ describe("a11y basics v1", () => {
     expect(src).toMatch(/<input\s+id="journal-photo"\s+type="file"/);
   });
 
-  it("benefit cards use h2 (first heading level after the page h1)", () => {
+  it("benefit cards use h2 at page level and h3 only under a section h2", () => {
     const src = read("components/marketing/benefit-cards.tsx");
-    expect(src).not.toMatch(/<h3/);
-    expect(src).toMatch(/<h2/);
+    // Page level (directly under the page h1): h2. Nested inside a section that
+    // already carries its own h2 (`nested`): h3 — never a skipped level.
+    expect(src).toMatch(/const Title = nested \? "h3" : "h2";/);
+    expect(src).toMatch(/nested = false/);
+    // role-enrichment.tsx renders every block under its own section h2, so any
+    // BenefitCards there must be nested. Its only such call (the "Why
+    // companies / Why agencies" grid) was removed as a duplicate of the page's
+    // own cards (owner copy cleanup 2026-11-15); the rule stays for any new one.
+    const sectionBlock = read("components/marketing/role-enrichment.tsx");
+    for (const call of sectionBlock.match(/<BenefitCards\b[^>]*>/g) ?? []) {
+      expect(call).toMatch(/<BenefitCards\s+nested\s/);
+    }
+    // The page-level call sites render directly under the page h1: not nested.
+    for (const page of ["for-agencies", "for-companies", "for-workers", "create-cv"]) {
+      const src = read(`app/[locale]/(marketing)/${page}/page.tsx`);
+      expect(src, page).toMatch(/<BenefitCards items=\{benefits\} \/>/);
+    }
   });
 });

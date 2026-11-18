@@ -76,6 +76,7 @@ describe("GET /api/public/claims/v1", () => {
     const { body } = await served();
     const retired = body.claims.filter((c) => c.status === "RETIRED");
     expect(retired.map((c) => c.claimId).sort()).toEqual([
+      "employer.one-position-free",
       "employer.organization-plan-price",
       "employer.vat-via-stripe-tax",
       "platform.four-entry-paths",

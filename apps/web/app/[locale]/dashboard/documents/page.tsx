@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { countryDisplayName } from "@/lib/location/country-model";
 import type { CredentialValidityState } from "@/lib/documents/credential-validity";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -720,7 +721,11 @@ export default async function WorkerDocumentsPage({
               statusOptions={(["ready", "missing", "blocked"] as const).map(
                 (s) => [s, t(`status.${s}` as never)] as const,
               )}
-              countryOptions={DOCUMENT_COUNTRIES}
+              // Named, not printed as an ISO code: the same reader the chat's
+              // document form uses, falling back to the code.
+              countryOptions={DOCUMENT_COUNTRIES.map(
+                (code) => [code, countryDisplayName(code, locale) || code] as const,
+              )}
             />
           </section>
 

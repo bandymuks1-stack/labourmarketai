@@ -119,7 +119,7 @@ describe("Guard: each role dashboard calls the gate FIRST", () => {
       it("uses the matching i18n namespace + data-testid", () => {
         expect(src).toMatch(
           new RegExp(
-            `getTranslations\\(["']${i18nKey.replace(/\./g, "\\.")}["']\\)`,
+            `getTranslations\\(["']${escapeRegExp(i18nKey)}["']\\)`,
           ),
         );
         expect(src).toMatch(
@@ -230,3 +230,8 @@ describe("Guard: roleDashboards i18n is honest (LT + EN)", () => {
     });
   }
 });
+
+/** Every RegExp metacharacter escaped (a partial escape is a different pattern). */
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+}

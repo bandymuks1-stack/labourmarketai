@@ -66,7 +66,7 @@ describe("2 · one backbone — the SAME actions the chat executes, with readbac
 
   for (const [symbol, module, chatAction] of REUSED) {
     it(`${symbol} — imported from ${module}, the executor of ${chatAction} uses the same symbol`, () => {
-      expect(FIELD).toMatch(new RegExp(`import \\{[^}]*\\b${symbol}\\b[^}]*\\} from "${module.replace(/\//g, "\\/")}"`));
+      expect(FIELD).toMatch(new RegExp(`import \\{[^}]*\\b${symbol}\\b[^}]*\\} from "${escapeRegExp(module)}"`));
       expect(FIELD).toMatch(new RegExp(`\\b${symbol}\\(`));
       expect(EXECUTORS).toMatch(new RegExp(`\\b${symbol}\\b`));
       expect(EXECUTORS).toContain(`"${chatAction}"`);
@@ -123,7 +123,7 @@ describe("3b · honesty — a failed tasks read is NAMED, never \"nothing is mis
     expect(FIELD.match(/t\("slotsUnavailable"\)/g)?.length).toBe(2);
   });
   it("the unavailable copy exists in every routed locale and differs from the empty copy", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const m = JSON.parse(read(`messages/${locale}.json`)) as { projectField: Record<string, string> };
       expect(typeof m.projectField.slotsUnavailable).toBe("string");
       expect(m.projectField.slotsUnavailable).not.toBe(m.projectField.slotsNone);
@@ -181,7 +181,7 @@ describe("5 · no sports vocabulary in the canonical model; tokens only", () => 
 });
 
 describe("6 · i18n — the namespace exists in the five active locales with honest vocabulary", () => {
-  const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+  const LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
   function keyPaths(obj: Record<string, unknown>, prefix = "", out: string[] = []): string[] {
     for (const k of Object.keys(obj)) {
@@ -225,3 +225,8 @@ describe("6 · i18n — the namespace exists in the five active locales with hon
     expect(en).toMatch(/derived from dates/);
   });
 });
+
+/** Every RegExp metacharacter escaped (a partial escape is a different pattern). */
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+}

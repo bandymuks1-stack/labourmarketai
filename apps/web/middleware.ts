@@ -1,3 +1,4 @@
+import { isUnknownAddress, UNKNOWN_ADDRESS_SEGMENT } from "@/lib/routing/known-first-segments";
 import { NextResponse, NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
@@ -8,7 +9,10 @@ import {
   stripLocaleSegment,
 } from "@/lib/auth/role-gated-routes";
 import { unsupportedLanguageRedirectPath } from "@/lib/i18n/unsupported-language";
-import { entryLocaleForUnmatchedLanguage } from "@/lib/i18n/entry-locale";
+import {
+  entryLocaleForUnmatchedLanguage,
+  languageFreeRootTarget,
+} from "@/lib/i18n/entry-locale";
 import { env } from "@/lib/env";
 import {
   ONBOARDING_RETURN_HEADER,
@@ -126,6 +130,26 @@ function maybeRedirectUnmatchedLanguageEntry(
   const url = request.nextUrl.clone();
   url.pathname = `/${target}${pathname === "/" ? "" : pathname}`;
   return NextResponse.redirect(url, 307);
+}
+
+/** `/` with no language and no earlier choice → a permanent redirect, so Google
+ *  keeps `/lt` instead of folding it into the root (lib/i18n/entry-locale.ts).
+ *  `no-store` and `Vary` keep the 301 from any cache a person could read. */
+function maybeRedirectLanguageFreeRoot(
+  request: NextRequest,
+): NextResponse | undefined {
+  const target = languageFreeRootTarget(
+    request.nextUrl.pathname,
+    request.headers.get("accept-language"),
+    request.cookies.get("NEXT_LOCALE")?.value ?? null,
+  );
+  if (!target) return undefined;
+  const url = request.nextUrl.clone();
+  url.pathname = target;
+  const response = NextResponse.redirect(url, 301);
+  response.headers.set("Cache-Control", "no-store");
+  response.headers.set("Vary", "Accept-Language, Cookie");
+  return response;
 }
 
 /** Locale-stripped pathname, e.g. "/lt/dashboard" → "/dashboard". */
@@ -320,6 +344,10 @@ export async function middleware(request: NextRequest) {
   const unmatchedEntry = maybeRedirectUnmatchedLanguageEntry(request);
   if (unmatchedEntry) return unmatchedEntry;
 
+  // 0e. The bare root with no language at all: a crawler. Permanent, not 307.
+  const languageFreeRoot = maybeRedirectLanguageFreeRoot(request);
+  if (languageFreeRoot) return languageFreeRoot;
+
   // 1. Locale routing — may redirect (`/` → `/lt`) or rewrite. When intl
   //    issues its own redirect (e.g. `/` → `/lt`, `/dashboard` → `/lt/dashboard`)
   //    we return it as-is; the redirected request re-enters middleware with a
@@ -328,6 +356,19 @@ export async function middleware(request: NextRequest) {
   if (intlResponse.headers.get("location")) return intlResponse;
 
   const { locale, rest } = stripLocale(request.nextUrl.pathname);
+
+  // 1a. No route can answer this address: the real 404 page, not Next's error shell
+  //     (UX-9). Redirects in next.config ran before this, so their spellings still work.
+  if (isUnknownAddress(rest)) {
+    // Only the document answers 404. A router fetch of this address after hydration
+    // (a first visit refreshes once) must not: a 404 there makes the router reload the
+    // whole page. Next strips `rsc` before middleware, so the browser's own header
+    // tells them apart; a crawler or curl sends none and gets the 404.
+    const target = new URL(`/${locale}/${UNKNOWN_ADDRESS_SEGMENT}`, request.url);
+    return request.headers.get("sec-fetch-dest") === "empty"
+      ? NextResponse.rewrite(target)
+      : NextResponse.rewrite(target, { status: 404 });
+  }
 
   // 1b. The landing has ONE arm (owner decision 2026-09-30: the optional
   //     LIVE arm and its cookie rewrite are removed). The root landing page

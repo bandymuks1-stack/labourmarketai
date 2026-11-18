@@ -15,7 +15,7 @@ import { readCounterpartyQueue } from "@/lib/journal/counterparty-review";
 import { queueBucket } from "@/lib/journal/counterparty-review-model";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 import { reviewerHoursOf } from "@/lib/journal/reviewer-hours";
-import { countConfirmedEntriesFromRows } from "@/lib/journal/review-status";
+import { countConfirmedEntriesFromRows, type ConfirmationRow } from "@/lib/journal/review-status";
 import {
   WORKER_NAME_FIELDS,
   resolveWorkerName,
@@ -247,9 +247,15 @@ export default async function InboxPage({
   let autoConfirmedCount = 0;
   const { data: confRows, error: confError } = await supabase
     .from("journal_entry_confirmations")
-    .select("entry_id, confirmation_scope, created_at");
+    .select("entry_id, confirmation_scope, created_at, confirmer_id, journal_entries(workers(profile_id))");
   if (!confError && Array.isArray(confRows)) {
-    const counted = countConfirmedEntriesFromRows(confRows);
+    // Only a decision by someone else confirms an entry (EVID-2), so each row names its entry's author.
+    const counted = countConfirmedEntriesFromRows(
+      (confRows as unknown as (ConfirmationRow & {
+        entry_id: string;
+        journal_entries: { workers: { profile_id: string | null } | null } | null;
+      })[]).map((r) => ({ ...r, subject_profile_id: r.journal_entries?.workers?.profile_id ?? null })),
+    );
     confirmedCount = counted.confirmed;
     // W6 slice 1: policy-written confirmations are surfaced with their honest
     // marker — an automatic confirmation never hides inside the count.

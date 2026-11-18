@@ -284,6 +284,14 @@ export type CampaignReadout = {
   returnedToJob: number;
   compared: number;
   interest: number;
+  /** Worker steps AFTER sign-up (owner decision 2026-11-03). Occurrences,
+   *  not people: "journal entries" is every saved entry, never "first entry",
+   *  which needs a per-person read (blocked RED #2886). Attributed only for
+   *  accounts whose own record carries the campaign (consented sign-ups). */
+  profileSaved: number;
+  profileMatchable: number;
+  journalEntrySaved: number;
+  jobSearch: number;
 };
 
 /** Column → the already-emitted event it counts. Declared as data so the
@@ -297,6 +305,10 @@ const CAMPAIGN_COLUMN_EVENTS = {
   returnedToJob: FUNNEL_EVENTS.jobReturnedAfterAuth,
   compared: FUNNEL_EVENTS.jobCompared,
   interest: FUNNEL_EVENTS.vacancyInterestExpressed,
+  profileSaved: FUNNEL_EVENTS.profileSaved,
+  profileMatchable: FUNNEL_EVENTS.profileMatchable,
+  journalEntrySaved: FUNNEL_EVENTS.journalEntrySaved,
+  jobSearch: FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed,
 } as const satisfies Record<
   Exclude<keyof CampaignReadout, "campaign" | "content">,
   string
@@ -558,6 +570,10 @@ export function summariseFunnel(
             returnedToJob: 0,
             compared: 0,
             interest: 0,
+            profileSaved: 0,
+            profileMatchable: 0,
+            journalEntrySaved: 0,
+            jobSearch: 0,
           };
           campaignRows.set(key, row);
         }

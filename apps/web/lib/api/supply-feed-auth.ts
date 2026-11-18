@@ -32,7 +32,7 @@ export type SupplyFeedAuthResult = "ok" | "not_configured" | "unauthorized";
  *  brute-forceable against an endpoint that answers in milliseconds. */
 const MIN_TOKEN_LENGTH = 32;
 
-function constantTimeEquals(a: string, b: string): boolean {
+export function constantTimeEquals(a: string, b: string): boolean {
   const left = Buffer.from(a, "utf8");
   const right = Buffer.from(b, "utf8");
   // `timingSafeEqual` throws on a length mismatch, and the throw itself is the

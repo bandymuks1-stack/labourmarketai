@@ -282,8 +282,12 @@ describe("no downstream reader turns an unreadable role table into a grant", () 
     expect(dispatch).not.toMatch(
       /catch[\s\S]{0,60}return new Set<Role>\(\["worker"\]\)/,
     );
-    // The answered-empty default (a brand-new account can still act) stays.
-    expect(dispatch).toMatch(/set\.size > 0 \? set : new Set<Role>\(\["worker"\]\)/);
+    // The answered-empty default (a brand-new account can still act) stays —
+    // decided by the pure core the dispatcher builds its held roles with.
+    const core = src("lib/conversation/dispatch-core.ts");
+    expect(core).not.toMatch(/catch[\s\S]{0,60}return new Set<Role>\(\["worker"\]\)/);
+    expect(core).toMatch(/set\.size > 0 \? set : new Set<Role>\(\["worker"\]\)/);
+    expect(dispatch).toMatch(/return heldDispatchRoles\(\{/);
     expect(dispatch).toMatch(/readActiveProfileRoles\(/);
   });
 

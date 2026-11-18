@@ -154,3 +154,14 @@ describe("training-register.tsx renders its forms from that authority", () => {
     expect(ui).toMatch(/authority\.assignOrganizationIds\.has\(a\.organizationId\) &&\s*a\.expiresOn/);
   });
 });
+
+describe("one organization's register per workspace (decision 0024)", () => {
+  it("the organization half reads only the ACTIVE workspace's courses and managed assignments", () => {
+    const ui = readFileSync(join(__dirname, "..", "..", "components", "app", "training-register.tsx"), "utf8");
+    expect(ui).toContain("await getWorkspaceContext()");
+    expect(ui).toMatch(/const programs = overview\.programs\.filter\(\(p\) => p\.organizationId === activeOrganizationId\)/);
+    expect(ui).toMatch(/a\.organizationId === activeOrganizationId/);
+    // Rendering uses the scoped list only.
+    expect(ui).not.toMatch(/overview\.programs\.(map|length)/);
+  });
+});

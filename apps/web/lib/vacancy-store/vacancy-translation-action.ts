@@ -1,12 +1,31 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
+import { aiTaskServableNow } from "@/lib/ai/egress-precheck-server";
 import { createClient } from "@/lib/supabase/server";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { getPublicVacancyById } from "@/lib/vacancy-store/vacancy-read";
 import { translateVacancyOnDemand } from "@/lib/vacancy-store/vacancy-translation-read";
-import type { TranslateVacancyActionResultV1 } from "@/lib/vacancy-store/vacancy-translation-contract";
+import type {
+  TranslationAvailabilityV1,
+  TranslateVacancyActionResultV1,
+} from "@/lib/vacancy-store/vacancy-translation-contract";
+
+/**
+ * CAN A TRANSLATION RUN AT ALL RIGHT NOW? (first real user's feedback,
+ * 2026-11-04). With no provider allowed to take the task, the button could only
+ * ever answer "could not be translated", so the control asks first and says so
+ * in words. This ONLY ASKS the same egress pre-check the translation path uses:
+ * it runs no provider, spends nothing and switches nothing on. A question that
+ * fails to answer is off, never a button that may fail.
+ */
+export async function vacancyTranslationAvailabilityAction(): Promise<TranslationAvailabilityV1> {
+  const on = await aiTaskServableNow("translate_vacancy").catch(() => false);
+  if (on) return { on: true };
+  const t = await getTranslations("vacancySources.language");
+  return { on: false, note: t("notSwitchedOn") };
+}
 
 /**
  * "TRANSLATE THIS ADVERTISEMENT" — the one door from a person's explicit

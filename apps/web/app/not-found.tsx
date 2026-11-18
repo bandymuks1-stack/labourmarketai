@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { LmLogo } from "@/components/ui/lm-logo";
+
 import "./globals.css";
 
 /**
@@ -23,6 +25,7 @@ export default function RootNotFound() {
           className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center"
           data-testid="branded-not-found-root"
         >
+          <LmLogo className="h-12 w-auto" />
           <p className="font-mono text-xs uppercase tracking-label text-text-muted">404</p>
           <h1 className="font-display text-4xl font-bold tracking-tightest text-text-primary">
             This address does not exist
