@@ -20,12 +20,11 @@ A read-only walk of the screens that #3451, #3453 and #3471 added. It runs on a 
 | Language form opened, then **Cancel** | — | none (no `worker.add-language`) |
 | Today: organization stations shown or absent | `context.list` | none |
 | *Organization workspace only:* Find candidates | `demand.list` | none (no close / reopen, no shortlist) |
-| *Organization workspace only:* one open need's candidates | `candidate.search` | none (no shortlist, no proposal) |
 | *Organization workspace only:* Agency offers | `client.agency_offers.get` | none (no answer) |
 | *Organization workspace only:* Programmes & cohorts | `education.workspace.get` | none (no programme, cohort, assignment or invitation) |
 | Sign-out | — | — |
 
-**The walk itself writes nothing.** The flows that run before it in the same job are unchanged and already approved: one journal entry drafted and confirmed, its correction drafted and confirmed. No reply is sent (`MESSAGE_SEND=0`) and no need is posted (`NEED_SUBMIT=0`).
+**The walk itself writes nothing, not even a telemetry row.** A need's candidate list is deliberately **not** opened. `candidate.search` runs the scouting core, which writes a `match_preview_generated` row to the product funnel, and that funnel does not exclude the synthetic identity (R on #3484). The candidate list is proven on the isolated local stack instead (#3482). None of the reads in the table emits a funnel event; I checked every `emitServerFunnelEvent` caller. The flows that run before it in the same job are unchanged and already approved: one journal entry drafted and confirmed, its correction drafted and confirmed. No reply is sent (`MESSAGE_SEND=0`) and no need is posted (`NEED_SUBMIT=0`).
 
 Personal or organization workspace: the walk passes both ways and says which in the log (`PERSONAL_WORKSPACE` / `ORGANIZATION_WORKSPACE`). In an organization workspace, each screen must show its loaded view or a named refusal (`capability-failed`, new in this PR), **never a spinner**.
 

@@ -6,17 +6,18 @@
 # with the owner's approval, never a PR or a push. It runs AFTER parity-journey
 # .yaml, which signs out, so it signs in itself.
 #
-# NOTHING IS WRITTEN. No save, no shortlist, no close, no proposal, no answer,
-# no invitation: every form opened here is left with its Cancel / Back button.
-# The production rows the walk can touch are the ones it reads.
+# NOTHING IS WRITTEN — not even a telemetry row. No save, no shortlist, no
+# close, no proposal, no answer, no invitation: every form opened here is left
+# with its Cancel / Back button. A need's candidate list is NOT opened: its
+# search writes a funnel row (R on #3484), so it is proven on the isolated
+# local stack only. None of the reads below emits a funnel event.
 #
 # What a green run proves:
 #   1. Profile: the Living CV sections render (cv.verified.get) with their add
 #      buttons; the work-history form opens and is cancelled without saving;
 #      the education and language forms open and are cancelled the same way.
 #   2. Today follows the active workspace (#3466). In an ORGANIZATION
-#      workspace the walk opens Find candidates (demand.list), one open need's
-#      candidates (candidate.search) when there is one, Agency offers
+#      workspace the walk opens Find candidates (demand.list), Agency offers
 #      (client.agency_offers.get) and Programmes & cohorts
 #      (education.workspace.get) — each must render its loaded view or a
 #      named refusal (`capability-failed`), never spin. In a PERSONAL workspace
@@ -188,19 +189,10 @@ name: new-screens-walk
           visible:
             id: "candidates-needs|capability-failed"
           timeout: 60000
-      - runFlow:
-          label: "ONE_NEED_CANDIDATES_READ"
-          when:
-            visible:
-              id: "candidates-need-.*"
-          commands:
-            - tapOn:
-                id: "candidates-need-.*"
-                index: 0
-            - extendedWaitUntil:
-                visible:
-                  id: "candidates-list|capability-failed"
-                timeout: 60000
+      # NOT opened here: one need's candidate list. That runs candidate.search,
+      # whose scouting core writes a `match_preview_generated` funnel row, and
+      # the funnel does not exclude the synthetic identity (R on #3484). The
+      # list is proven on the isolated local stack instead (#3482).
       - tapOn:
           id: "tab-today"
       - scrollUntilVisible:

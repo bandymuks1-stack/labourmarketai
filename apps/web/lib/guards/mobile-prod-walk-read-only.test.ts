@@ -32,6 +32,18 @@ describe("production new-screens walk", () => {
     expect(taps.filter((id) => WRITES.test(id))).toEqual([]);
   });
 
+  it("never opens a need's candidate list: candidate.search writes a funnel row (R on #3484)", () => {
+    expect(tapped(flow).filter((id) => id.startsWith("candidates-need-"))).toEqual([]);
+    expect(flow).not.toMatch(/id:\s*"candidates-list/);
+  });
+
+  it("taps by id only — no text tap but the iOS system sheet, no point tap", () => {
+    const textTaps = [...flow.matchAll(/-\s*tapOn:\s*\n\s*text:\s*"([^"]+)"/g)].map((m) => m[1]);
+    expect(new Set(textTaps)).toEqual(new Set(["Not Now"]));
+    expect(flow).not.toMatch(/-\s*tapOn:\s*\n\s*point:/);
+    expect(flow).not.toMatch(/-\s*tapOn:\s*"/);
+  });
+
   it("leaves every form it opens with Cancel", () => {
     for (const form of ["work", "education", "language"]) {
       expect(tapped(flow), form).toContain(`cv-${form}-cancel`);
