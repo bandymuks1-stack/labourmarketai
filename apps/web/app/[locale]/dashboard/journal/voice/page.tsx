@@ -4,6 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { Link } from "@/lib/i18n/navigation";
 import { VoiceJournalRecorder } from "@/components/app/voice-journal-recorder";
 import { isVoiceTranscriptionConfigured } from "@/lib/voice/transcribe-action";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/journal/voice", "journal.voice.pageTitle");
+
 
 /** Voice input for the ONE Work Journal (nested under /dashboard/journal —
  *  no new top-level module). Record → self-hosted transcription → review and
@@ -36,9 +42,7 @@ export default async function VoiceJournalPage({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-4">
       <div className="flex flex-col gap-1">
-        <h1 className="font-display text-xl font-semibold text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">
           {t("pageIntro")}
         </p>

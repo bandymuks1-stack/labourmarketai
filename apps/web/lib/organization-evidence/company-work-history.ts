@@ -37,6 +37,9 @@ export interface PlaceScope {
   readonly hasAddress: boolean;
   /** That address as text ("street number, city"), or null. */
   readonly addressText: string | null;
+  /** The project the work object belongs to — the link from a place to its
+   *  project page. Null when no project is linked (never guessed). */
+  readonly projectId: string | null;
 }
 
 export interface PlaceGroup {
@@ -53,6 +56,8 @@ export interface PlaceGroup {
   /** Hours of period aggregates, kept apart. */
   readonly periodHours: number;
   readonly dayCount: number;
+  /** Distinct calendar days with a day record (days between are never invented). */
+  readonly recordedDays: number;
   readonly periodCount: number;
   readonly firstDate: string | null;
   readonly lastDate: string | null;
@@ -91,6 +96,78 @@ export const isPeriodRecord = (r: EvidenceRecordView) =>
 function minMax(dates: readonly (string | null)[]): [string | null, string | null] {
   const ds = dates.filter((d): d is string => !!d).sort();
   return ds.length ? [ds[0]!, ds[ds.length - 1]!] : [null, null];
+}
+
+/**
+ * The work a set of records describes, in the organization's OWN words: the
+ * most frequent descriptions as written (whitespace folded, compared without
+ * case), with how many records say each. Nothing is classified, translated or
+ * merged beyond that — "what was done" is what the timesheet said.
+ */
+export function topWorkDescriptions(
+  records: readonly Pick<EvidenceRecordView, "text">[],
+  limit = 3,
+): { readonly text: string; readonly records: number }[] {
+  const by = new Map<string, { text: string; records: number }>();
+  for (const r of records) {
+    const text = (r.text ?? "").replace(/\s+/g, " ").trim();
+    if (!text) continue;
+    const key = text.toLocaleLowerCase();
+    const e = by.get(key);
+    if (e) e.records += 1;
+    else by.set(key, { text: text.length > 140 ? `${text.slice(0, 139)}…` : text, records: 1 });
+  }
+  return [...by.values()].sort((a, b) => b.records - a.records || a.text.localeCompare(b.text)).slice(0, limit);
+}
+
+/** One person's documented share of a set of records (e.g. ONE project). */
+export interface PersonInRecords {
+  readonly personId: string;
+  readonly name: string | null;
+  readonly firstDate: string | null;
+  readonly lastDate: string | null;
+  /** Distinct calendar days with a day record. */
+  readonly recordedDays: number;
+  /** Stated hours on day records. */
+  readonly dayHours: number;
+  /** Stated hours on period aggregates — apart, never added to dayHours. */
+  readonly periodHours: number;
+  readonly records: number;
+  readonly work: readonly { readonly text: string; readonly records: number }[];
+}
+
+/**
+ * WHO worked on the place/project these records cover, WHEN, HOW MUCH and on
+ * WHAT — folded from the live records only (withdrawn and superseded left
+ * out), the same never-sum rule as the place fold. Documented participation:
+ * it says nothing about who is assigned today.
+ */
+export function peopleInRecords(records: readonly EvidenceRecordView[]): PersonInRecords[] {
+  const by = new Map<string, EvidenceRecordView[]>();
+  for (const r of records) {
+    if (r.withdrawn || r.superseded) continue;
+    const arr = by.get(r.personId);
+    if (arr) arr.push(r);
+    else by.set(r.personId, [r]);
+  }
+  return [...by.entries()]
+    .map(([personId, recs]) => {
+      const day = recs.filter((r) => !isPeriodRecord(r));
+      const per = recs.filter(isPeriodRecord);
+      const [first, last] = minMax(recs.flatMap((r) => [r.activityDate, r.periodStart, r.periodEnd]));
+      return {
+        personId,
+        name: recs.find((r) => r.personName)?.personName ?? null,
+        firstDate: first,
+        lastDate: last,
+        recordedDays: new Set(day.map((r) => r.activityDate).filter((d): d is string => !!d)).size,
+        dayHours: day.reduce((s, r) => s + (r.hours ?? 0), 0),
+        periodHours: per.reduce((s, r) => s + (r.hours ?? 0), 0),
+        records: recs.length,
+        work: topWorkDescriptions(recs, 2),
+      };
+    })
+    .sort((a, b) => b.dayHours - a.dayHours || b.periodHours - a.periodHours || b.records - a.records);
 }
 
 export function buildCompanyWorkHistory(
@@ -146,6 +223,7 @@ export function buildCompanyWorkHistory(
         hasProject: !!obj?.projectId,
         hasAddress: !!(obj?.addressLine || obj?.city),
         addressText: obj ? [obj.addressLine, obj.city].filter(Boolean).join(", ") || null : null,
+        projectId: obj?.projectId ?? null,
       },
       records: [...recs].sort((a, b) =>
         (b.activityDate ?? b.periodStart ?? "").localeCompare(a.activityDate ?? a.periodStart ?? ""),
@@ -153,6 +231,7 @@ export function buildCompanyWorkHistory(
       dayHours: day.reduce((s, r) => s + (r.hours ?? 0), 0),
       periodHours: per.reduce((s, r) => s + (r.hours ?? 0), 0),
       dayCount: day.length,
+      recordedDays: new Set(day.map((r) => r.activityDate).filter((d): d is string => !!d)).size,
       periodCount: per.length,
       firstDate: first,
       lastDate: last,

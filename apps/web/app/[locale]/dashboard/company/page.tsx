@@ -1,11 +1,12 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { FolderPlus, History, UserPlus, UserSearch } from "lucide-react";
 
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
-import { actsAsAgency } from "@/lib/company/agency-capability";
+import { actsAsAgency, resolveNeedsAudience } from "@/lib/company/agency-capability";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
   getAccessibleCompanyById,
@@ -29,9 +30,19 @@ import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
 import { countWorkersWithUnconfirmableWork } from "@/lib/operations/org-members";
+import { countRosterConflicts } from "@/lib/planning/roster-conflicts";
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
+import { homeReadbackRows } from "@/lib/company/company-home-field-model";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
+import { OrganizationTodayView } from "@/components/app/organization/organization-today-view";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { NeedDoorLink } from "@/components/app/need-door-link";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company", "roleDashboards.company.title");
+
 
 // The employer demand kinds the home field's "what we are missing" reads —
 // a dual-role user's buyer service requests stay in the buyer room.
@@ -63,9 +74,8 @@ const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
  */
 export default async function CompanyDashboardPage({
   params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+  searchParams,
+}: { params: Promise<{ locale: string }>; searchParams?: Promise<{ view?: string | string[] }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
@@ -82,6 +92,21 @@ export default async function CompanyDashboardPage({
   // organization, the membership notice when there is one that does not act
   // as a company for this person — never empty technical blocks.
   const employerCtx = await resolveEmployerCompanyContext();
+  // The org context and declared capabilities below need the company row only
+  // to CONFIRM which organization it mirrors, and the employer context already
+  // names that company — so they start alongside the company read (perf
+  // 2026-10-23). Request-cached: the reads below reuse these promises.
+  const orgContextRead = getActiveOrganizationContext();
+  if (employerCtx.kind === "ok") {
+    orgContextRead
+      .then((ctx) => {
+        const id =
+          ctx.organizations.find((o) => o.legacyCompanyId === employerCtx.companyId)?.id ??
+          governedActiveOrganizationId(ctx);
+        return id ? readOrganizationCapabilities(id) : null;
+      })
+      .catch(() => null);
+  }
   const companyProfile: CompanyReadResult =
     employerCtx.kind === "ok"
       ? await getAccessibleCompanyById(employerCtx.companyId)
@@ -102,12 +127,10 @@ export default async function CompanyDashboardPage({
           metadata={{ surface: "company", step: setupIncomplete ? "setup_incomplete" : "no_profile" }}
         />
         <header className="flex flex-col gap-1">
-          <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("eyebrow")}
           </p>
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("title")}
-          </h1>
+          <PageTitle>{t("title")}</PageTitle>
         </header>
         <CompanyNoProfileGuide
           reason={employerCtx.kind === "ok" ? null : employerCtx.reason}
@@ -122,11 +145,14 @@ export default async function CompanyDashboardPage({
 
   // WHAT DOES THIS ORGANIZATION DO? — answered against the `organizations`
   // row this company mirrors; a separate axis from `companyType`.
-  const orgContext = await getActiveOrganizationContext();
+  const orgContext = await orgContextRead;
   const capabilityOrgId =
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow?.id)?.id ??
     // Only a GOVERNED active organization — never an employee-only one.
     governedActiveOrganizationId(orgContext);
+  if ((await searchParams)?.view === "today") {
+    return <OrganizationTodayView organizationId={capabilityOrgId} company={companyRow} context={employerCtx} />;
+  }
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
@@ -149,6 +175,7 @@ export default async function CompanyDashboardPage({
     reviewOffWorkers,
     rHomeField,
     clientToDecide,
+    rosterConflicts,
   ] = await Promise.all([
     listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS),
     listClaimablePublicIntakes(),
@@ -164,6 +191,10 @@ export default async function CompanyDashboardPage({
     // Entries submitted to THIS caller as a client (decision 0018) - a
     // different job from employer review, shown as its own labelled item.
     countCounterpartyToDecide(),
+    // People with a planning conflict (two commitments, or a commitment/plan
+    // against approved leave) — the SAME reads and rules the planning page's
+    // timeline flags, so the number matches what the link opens.
+    companyRow ? countRosterConflicts() : Promise.resolve<number | null>(0),
   ] as const);
 
   // UNKNOWN IS NOT ZERO (SEP-7): a failed invitations read is `null` and is
@@ -180,7 +211,8 @@ export default async function CompanyDashboardPage({
     // Never summed with the employer count above: its own number and label.
     {
       key: "clientReview",
-      count: clientToDecide ?? 0,
+      // null = the count could not be read (SEP-7) — kept, never 0.
+      count: clientToDecide,
       href: `/${locale}/dashboard/inbox/counterparty`,
     },
     // Recorded work nobody can confirm yet (review switched off). Unknown (a
@@ -190,6 +222,13 @@ export default async function CompanyDashboardPage({
       key: "reviewOff",
       count: reviewOffWorkers,
       href: `/${locale}/dashboard/company/people#org-members`,
+    },
+    // Planning conflicts (owner programme 2026-10-12, manager clarity in three
+    // seconds): who is committed twice on the same days, straight to the list.
+    {
+      key: "conflicts",
+      count: rosterConflicts,
+      href: `/${locale}/dashboard/company/planning#roster-timeline`,
     },
     {
       key: "invitations",
@@ -210,12 +249,6 @@ export default async function CompanyDashboardPage({
     .filter((e) => e.count > 0);
 
   const primaryActions = [
-    {
-      key: "need",
-      href: "/dashboard/company/needs#demand-intake",
-      label: tDoors("newNeed"),
-      icon: <UserSearch className="h-4 w-4" aria-hidden />,
-    },
     {
       key: "project",
       href: "/dashboard/company/projects/new",
@@ -244,13 +277,7 @@ export default async function CompanyDashboardPage({
       />
       <header className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Link
-            href="/dashboard"
-            className="shrink-0 text-xs font-medium text-brand-blue transition-colors hover:underline"
-            data-testid="back-to-action-center"
-          >
-            ← {tRooms("backToActions")}
-          </Link>
+          <PageBack href="/dashboard" data-testid="back-to-action-center">{tRooms("backToActions")}</PageBack>
           <Link
             href="/dashboard"
             className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
@@ -260,19 +287,17 @@ export default async function CompanyDashboardPage({
           </Link>
         </div>
         <p
-          className="font-mono text-meta uppercase tracking-label text-brand-orange"
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="company-context"
         >
           {tRooms("company.context")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{tDoors("subtitle")}</p>
         {/* ONE canonical company profile — the workspace re-labels itself
             from companies.company_type after every save/refresh. An agency is
             this same profile with type 'staffing_agency'. */}
-        {companyRow ? (
+        {companyRow && companyRow.companyType !== "other" ? (
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <span
               className="rounded-sm border border-brand-cyan/40 bg-brand-cyan/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
@@ -313,21 +338,22 @@ export default async function CompanyDashboardPage({
           data-testid="company-decisions-strip"
           className="flex flex-col gap-2"
         >
-          <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("decisions.title")}
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {decisionEntries.map((e) => (
               <a
                 key={e.key}
                 href={e.href}
                 data-testid={`company-decision-${e.key}`}
-                className="inline-flex items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/5 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-brand-orange"
+                className="group flex min-h-16 items-center gap-4 rounded-card border border-brand-blue/40 bg-brand-blue/5 px-4 py-3 text-base font-medium text-text-primary transition-colors hover:border-brand-blue hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
               >
-                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-text-on-brand tabular-nums">
+                <span className="font-display text-3xl font-semibold leading-none tracking-tight text-brand-blue tabular-nums">
                   {e.count}
                 </span>
-                {t(`decisions.${e.key}`)}
+                <span className="min-w-0 flex-1 break-words">{t(`decisions.${e.key}`)}</span>
+                <span aria-hidden className="text-brand-blue transition-transform group-hover:translate-x-0.5">→</span>
               </a>
             ))}
           </div>
@@ -338,20 +364,13 @@ export default async function CompanyDashboardPage({
       {rHomeField ? (
         <CompanyHomeFieldSection
           locale={locale}
+          companyType={companyRow?.companyType ?? null}
           capabilities={declaredCapabilities}
           field={rHomeField}
-          needs={
-            demandReadback.kind === "ok"
-              ? {
-                  kind: "ok",
-                  // NEEDS, not every request the organisation owns: an agency's
-                  // own `agency_offer` is capacity it HAS.
-                  rows: demandReadback.rows.filter((r) => r.direction === "demand"),
-                }
-              : demandReadback.kind === "needs-migration"
-                ? { kind: "needs-migration" }
-                : { kind: "error" }
-          }
+          // ONE read, two directions: its NEEDS are what is missing; an agency's
+          // own `agency_offer` is capacity it HAS, shown as what it offers.
+          needs={homeReadbackRows(demandReadback, "demand")}
+          offers={homeReadbackRows(demandReadback, "supply")}
           partners={{
             agencies: clientInvites && clientInvites.kind === "ok" ? clientInvites.rows : null,
             clients:
@@ -375,6 +394,13 @@ export default async function CompanyDashboardPage({
         data-testid="company-primary-actions"
         className="flex flex-wrap gap-2"
       >
+        {/* Not for an organisation whose Needs door opens on an offer. */}
+        {resolveNeedsAudience({ companyType: companyRow?.companyType, capabilities: declaredCapabilities }).audience === "need" ? (
+          <NeedDoorLink surface="company_home_actions" testId="company-primary-action-need"
+            icon={<UserSearch className="h-4 w-4" aria-hidden />}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+          />
+        ) : null}
         {primaryActions.map((a) => (
           <Link
             key={a.key}

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 import { readInstitutionPrograms } from "@/lib/education/programs";
+import { readRecognitionEvidence } from "@/lib/education/recognition-evidence";
 
 import { RecordRecognitionForm, type RecognitionFormLabels } from "./institution-recognition-form";
 
@@ -17,6 +18,10 @@ export async function InstitutionRecognitionSection({ organizationId }: { readon
   const t = await getTranslations("roleDashboards.company.programs.recognition");
   const read = await readInstitutionPrograms(organizationId);
   if (read.status !== "ok" || read.assignable.length === 0) return null;
+  // The entries the assessor may cite, read under the institution's own RLS.
+  // `null` = could not be read (never shown as "none yet", SEP-7).
+  const evidenceRead = await readRecognitionEvidence(organizationId);
+  const evidence = evidenceRead.status === "ok" ? evidenceRead.bySubject : null;
 
   const labels: RecognitionFormLabels = {
     title: t("title"),
@@ -31,6 +36,11 @@ export async function InstitutionRecognitionSection({ organizationId }: { readon
     country: t("country"),
     evidence: t("evidence"),
     evidenceHint: t("evidenceHint"),
+    evidenceChooseLearner: t("evidenceChooseLearner"),
+    evidenceNone: t("evidenceNone"),
+    evidenceUnavailable: t("evidenceUnavailable"),
+    evidenceRecorded: t("evidenceRecorded"),
+    evidenceConfirmed: t("evidenceConfirmed"),
     decision: t("decision"),
     recognised: t("recognised"),
     notRecognised: t("notRecognised"),
@@ -48,7 +58,7 @@ export async function InstitutionRecognitionSection({ organizationId }: { readon
 
   return (
     <Card compact>
-      <RecordRecognitionForm organizationId={organizationId} learners={read.assignable} labels={labels} />
+      <RecordRecognitionForm organizationId={organizationId} learners={read.assignable} evidence={evidence} labels={labels} />
     </Card>
   );
 }

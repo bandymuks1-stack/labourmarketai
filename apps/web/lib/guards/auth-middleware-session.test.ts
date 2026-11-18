@@ -86,6 +86,20 @@ describe("legacy host aliases (single-domain policy 2026-07-19)", () => {
 describe("stray OAuth code forwarding (Site-URL fallback safety net)", () => {
   const CODE = "6f2d71e2-9b5a-4a01-8b8c-2f4f2b9a7d10";
 
+  it("forwards a failed provider return (GoTrue error) on the home page to the callback (2026-10-18)", async () => {
+    const res = await middleware(
+      req("/lt?error=invalid_request&error_code=bad_oauth_state&error_description=OAuth+state+has+expired"),
+    );
+    const loc = res.headers.get("location")!;
+    expect(loc).toContain("/lt/auth/callback");
+    expect(loc).toContain("error_code=bad_oauth_state");
+  });
+
+  it("leaves an ordinary ?error= marketing param without a GoTrue error_code alone", async () => {
+    const res = await middleware(req("/en?error=1"));
+    expect(res.headers.get("location") ?? "").not.toContain("/auth/callback");
+  });
+
   it("forwards a UUID code on the root to the default-locale callback", async () => {
     const res = await middleware(req(`/?code=${CODE}`));
     const loc = res.headers.get("location")!;

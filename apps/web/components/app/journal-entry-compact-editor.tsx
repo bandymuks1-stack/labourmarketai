@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { quoteText } from "@/lib/i18n/quote";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -33,7 +34,7 @@ import {
   LT_HOUR_FORMS,
   LT_MINUTE_FORMS,
 } from "@/lib/i18n/lt-plural";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { PLATFORM_OUTPUT_UNIT_SLUGS } from "@/lib/journal/work-time";
 import { recordEvent } from "@/lib/telemetry/task";
 import { cn } from "@/lib/utils";
@@ -445,9 +446,9 @@ export function JournalEntryCompactEditor({
         : formatDuration(
             total.value,
             total.unitSlug,
-            // formatDuration supports lt/en/ru; other active locales (de/nl/pl)
-            // use neutral international "h/min" rather than LT abbreviations.
-            locale === "ru" ? "ru" : "en",
+            // Any locale: RU keeps its abbreviations, every other locale reads
+            // the international "h/min" with its own decimal separator.
+            durationLocale(locale),
           );
 
   return (
@@ -607,7 +608,7 @@ export function JournalEntryCompactEditor({
                 data-testid="journal-compact-add-freetext"
                 className="w-fit rounded-md border border-ink-500 inline-flex min-h-[2.5rem] items-center justify-center px-3 py-2 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
               >
-                {t("compactEdit.addAsClaim")}: „{addQuery.trim()}“
+                {t("compactEdit.addAsClaim")}: {quoteText(locale, addQuery.trim())}
               </button>
             )}
             <button

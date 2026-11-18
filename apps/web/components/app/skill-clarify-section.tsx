@@ -62,7 +62,7 @@ export async function SkillClarifySection() {
               data-testid="candidate-skill-item"
             >
               <span className="text-sm font-semibold text-text-primary">{c.label}</span>
-              <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("candidateBadge")}
               </span>
               {c.relatedTo && (

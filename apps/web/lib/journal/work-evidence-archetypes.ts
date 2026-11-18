@@ -574,6 +574,10 @@ export const ISCO_ARCHETYPES: Readonly<Record<string, readonly WorkEvidenceArche
 export const RELATIONSHIP_ARCHETYPES: Readonly<Record<string, readonly WorkEvidenceArchetypeId[]>> = {
   student: ["apprenticeship_training", "supervised_practice"],
   volunteer: ["field_project"],
+  // Practice hosted by a company (no training provider): the supervised-practice
+  // record (supervision, competency practised, learning outcome) without the
+  // apprenticeship-programme module, which belongs to an education provider.
+  intern: ["supervised_practice"],
 };
 
 export function archetypesForRelationship(

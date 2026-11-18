@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 import { join } from "node:path";
 
 import {
@@ -236,6 +237,14 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // defines or calls no engine command (the assertions below apply
       // unchanged); its DOWN does not mention the engine at all.
       "20260923114500_nonstop_org_consolidation_v1",
+      // service_role notification reads (20261012120000, owner-approved 2026-10-12):
+      // GRANT SELECT on four engine tables to service_role so the existing
+      // notification emitters can read who to notify. It creates, drops,
+      // alters, triggers and writes no engine object.
+      "20261012120000_service_role_notification_reads_v1",
+      // 2026-10-22 (RED, needs-human-gate): the Agentai OS capability readback COUNTS workflow_instances and
+      // onboarding_runs (count(*) only). It creates, drops, alters, triggers and writes no engine object.
+      "20261022150000_agentai_capability_readback_counts_v1",
     ];
     /**
      * 20260820070000 — chain step B on-ramp. The ONE later migration that
@@ -261,7 +270,7 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       const abs = join(REPO, "supabase", dir);
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(ENGINE) || f.startsWith(TYPES_V3)) continue;
-        const src = readFileSync(join(abs, f), "utf8");
+        const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
         if (f.startsWith(SECURITY_FIX)) {
           // 20261002141500 — SECURITY forward-fix (NULL-safe authorization). It may
           // replace exactly ONE engine command (start_workflow_instance_v1, only its

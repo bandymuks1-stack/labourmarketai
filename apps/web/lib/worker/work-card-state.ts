@@ -21,6 +21,18 @@
  * "Ask only what the system does not know": a dimension that is `set` is never
  * the next action and never re-asked (unless the user edits, or the card goes
  * stale).
+ *
+ * EVIDENCE FIRST (activation audit 2026-10-26, fix #4). Until the person has
+ * recorded ONE piece of work, the next action is that first work entry — not
+ * the profession again. Onboarding already asked for the profession and writes
+ * no skills, so the human-path order put "Set what I do" first for nearly
+ * every new worker, and the journal fifth with a "you can add it later" line.
+ * A profession is never mandatory (`no-mandatory-profession`): evidence is
+ * enough, and the Living CV INFERS from recorded work rather than being
+ * narrowed by a declaration (decision 0023). The displaced dimension is not
+ * hidden — it travels as `secondary`, which a surface may show as a quiet
+ * link, never as a second primary action. After the first entry the
+ * human-path order (work → availability → location → pay) applies unchanged.
  */
 
 export type WorkDim = "work" | "availability" | "location" | "pay" | "evidence";
@@ -63,6 +75,11 @@ export interface WorkCardDerived {
   readonly missing: WorkDim[];
   /** The single best next action (never more than one). */
   readonly next: WorkCardNext;
+  /** The dimension the evidence-first rule displaced (the first unmet
+   *  human-path dimension other than evidence), or null when nothing was
+   *  displaced. A surface may offer it as a QUIET secondary link so the
+   *  profession / profile stays one tap away — never as a second primary. */
+  readonly secondary: WorkCardNext | null;
   /** Time-sensitive dimensions to confirm when state === "stale". */
   readonly staleDims: WorkDim[];
 }
@@ -93,6 +110,11 @@ const WHY: Record<WorkDim, string> = {
   pay: "why.pay",
   evidence: "why.evidence",
 };
+
+/** The first-entry line: no "you can add it later" — the first entry IS the
+ *  start (activation audit fix #4). `why.evidence` stays in the catalogue for
+ *  the copy guards; with evidence-first it is no longer the live next line. */
+export const WHY_EVIDENCE_FIRST = "why.evidenceFirst";
 
 /** Route for dimensions whose editing lives on another page; null = inline. */
 const HREF: Record<WorkDim, string | null> = {
@@ -125,13 +147,24 @@ export function deriveWorkCardState(
   const clear = ORDER.filter((d) => isSet(s, d));
   const missing = ORDER.filter((d) => !isSet(s, d));
 
-  // The single best next action: the first unmet dimension in human-path order.
-  // When all five are set, the next move is to keep the record growing.
+  // EVIDENCE FIRST: no recorded work yet → the first work entry leads, and the
+  // human-path dimension it displaced stays reachable as `secondary`.
+  // Otherwise the single best next action is the first unmet dimension in
+  // human-path order; when all five are set, keep the record growing.
   const firstMissing = missing[0];
-  const nextDim: WorkDim = firstMissing ?? "evidence";
-  const next: WorkCardNext = firstMissing
-    ? { dim: nextDim, href: HREF[nextDim], whyKey: WHY[nextDim] }
-    : { dim: "evidence", href: "/dashboard/journal", whyKey: "why.complete" };
+  let next: WorkCardNext;
+  let secondary: WorkCardNext | null = null;
+  if (!isSet(s, "evidence")) {
+    next = { dim: "evidence", href: HREF.evidence, whyKey: WHY_EVIDENCE_FIRST };
+    const displaced = missing.find((d) => d !== "evidence");
+    secondary = displaced
+      ? { dim: displaced, href: HREF[displaced], whyKey: WHY[displaced] }
+      : null;
+  } else if (firstMissing) {
+    next = { dim: firstMissing, href: HREF[firstMissing], whyKey: WHY[firstMissing] };
+  } else {
+    next = { dim: "evidence", href: "/dashboard/journal", whyKey: "why.complete" };
+  }
 
   // "new" = nothing meaningful saved yet → show the guided path once. After ANY
   // saved dimension we are in continuity (returning/stale), never re-running the
@@ -155,7 +188,7 @@ export function deriveWorkCardState(
       ? "stale"
       : "returning";
 
-  return { state, clear, missing, next, staleDims };
+  return { state, clear, missing, next, secondary, staleDims };
 }
 
 /**

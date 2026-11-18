@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { orgDisplayName } from "@/lib/company/org-display";
+import { readHistoricalOrgNames } from "@/lib/company/historical-org-names";
 
 import type { EvidenceRecordView } from "./import-core";
 import {
@@ -84,6 +85,17 @@ export async function readHistoryLookups(
       orgDisplayName(r.display_name as string | null, r.legal_name as string | null),
     ),
   ]);
+  // An organization the caller's RLS hides (a person who CLAIMED their
+  // roster row, with no engagement there) still names itself on that
+  // person's own records — names only, through the worked-organization read.
+  const unnamed = ids.organizationIds.filter((id) => !organizations.has(id));
+  if (unnamed.length > 0) {
+    const extra = await readHistoricalOrgNames(supabase, unnamed);
+    for (const [id, n] of extra) {
+      const name = orgDisplayName(n.display_name, n.legal_name);
+      if (name) organizations.set(id, name);
+    }
+  }
   return { workObjects, projects, organizations };
 }
 

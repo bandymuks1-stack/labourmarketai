@@ -70,3 +70,47 @@ describe("internship / apprenticeship — canonical opportunity types", () => {
     expect(migFn).toBe(downFn);
   });
 });
+
+describe("the board's discovery filter can see the declared type", () => {
+  it("the worker board loader puts the demand's declared type on the card's need", () => {
+    // `needMatchesFilters` compares `need.opportunityType`; without this line
+    // `?opportunityType=internship` dropped every first-party need.
+    const loader = read("apps/web/lib/opportunities/load-worker-opportunities.ts");
+    expect(loader).toMatch(/opportunityType: matchNeed\.opportunityType \?\? null/);
+    const at = loader.indexOf("const { need: matchNeed } = needFromDemandRow(row);");
+    expect(at).toBeGreaterThan(-1);
+    expect(at).toBeLessThan(loader.indexOf("const need: OpportunityNeed = {"));
+  });
+});
+
+describe("the board offers the type filter, with a label every catalog has", () => {
+  const page = read("apps/web/app/[locale]/dashboard/opportunities/page.tsx");
+
+  it("the type is one of the filter groups on the page, listed once", () => {
+    // It used to work only for someone who typed `?opportunityType=` by hand.
+    const groups = page.slice(page.indexOf("const facetGroups"), page.indexOf("const showFilterControls"));
+    expect(groups.match(/dim: "opportunityType"/g) ?? []).toHaveLength(1);
+  });
+
+  it("no filter dimension is listed twice (two merges once each added the type: its chips rendered twice)", () => {
+    const groups = page.slice(page.indexOf("const facetGroups"), page.indexOf("const showFilterControls"));
+    const dims = [...groups.matchAll(/dim: "([A-Za-z]+)"/g)].map((m) => m[1]);
+    expect(dims.length).toBeGreaterThan(0);
+    expect(dims.filter((d, i) => dims.indexOf(d) !== i)).toEqual([]);
+  });
+
+  it("its heading is read from the catalogue that has it in every locale", () => {
+    expect(page).toMatch(/dim === "opportunityType"\s+\? sd\("opportunityTypeLabel"\)/);
+    // No direct read of a discovery.filters key by dimension is left: that
+    // namespace has no opportunityType entry and printed the raw key.
+    expect(page).not.toMatch(/t\(`discovery\.filters\.\$\{(g\.)?dim\}` as never\)\}/);
+    for (const locale of ["en", "lt", "ru", "nl", "de", "pl", "sv", "da", "no", "et", "lv"]) {
+      const m = JSON.parse(read(`apps/web/messages/${locale}.json`)) as {
+        structuredDemand?: { opportunityTypeLabel?: string; opportunityType?: Record<string, string> };
+      };
+      expect(m.structuredDemand?.opportunityTypeLabel, locale).toBeTruthy();
+      expect(m.structuredDemand?.opportunityType?.internship, locale).toBeTruthy();
+      expect(m.structuredDemand?.opportunityType?.apprenticeship, locale).toBeTruthy();
+    }
+  });
+});

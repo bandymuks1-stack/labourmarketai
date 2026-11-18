@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { recordRecognitionAction } from "@/lib/education/recognition-actions";
+import type { EvidenceBySubject } from "@/lib/education/recognition-evidence-model";
 import type { RecognitionActionState } from "@/lib/education/recognition-model";
 
 const IDLE: RecognitionActionState = { status: "idle" };
@@ -20,6 +21,11 @@ export type RecognitionFormLabels = {
   readonly country: string;
   readonly evidence: string;
   readonly evidenceHint: string;
+  readonly evidenceChooseLearner: string;
+  readonly evidenceNone: string;
+  readonly evidenceUnavailable: string;
+  readonly evidenceRecorded: string;
+  readonly evidenceConfirmed: string;
   readonly decision: string;
   readonly recognised: string;
   readonly notRecognised: string;
@@ -65,14 +71,24 @@ function Outcome({ state, labels }: { state: RecognitionActionState; labels: Rec
 export function RecordRecognitionForm({
   organizationId,
   learners,
+  evidence,
   labels,
 }: {
   readonly organizationId: string;
   readonly learners: ReadonlyArray<{ profileId: string; label: string }>;
+  /** Citable entries per learner; `null` when they could not be read. */
+  readonly evidence: EvidenceBySubject | null;
   readonly labels: RecognitionFormLabels;
 }) {
   const [state, action, pending] = useActionState(recordRecognitionAction, IDLE);
+  const [subject, setSubject] = useState("");
+  // Picks belong to one learner: changing the learner clears them, so an entry
+  // of person A can never ride along on a decision about person B.
+  const [picked, setPicked] = useState<readonly string[]>([]);
   if (learners.length === 0) return null;
+  const options = subject && evidence ? (evidence[subject] ?? []) : [];
+  const togglePick = (id: string) =>
+    setPicked((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
   return (
     <details className="rounded-md border border-ink-600 p-3" data-testid="record-recognition">
       <summary className="cursor-pointer text-xs font-semibold text-text-primary">{labels.title}</summary>
@@ -81,7 +97,16 @@ export function RecordRecognitionForm({
         <input type="hidden" name="assessorOrganizationId" value={organizationId} readOnly />
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {labels.subject}
-          <select name="subjectProfileId" required className={inputCls} defaultValue="">
+          <select
+            name="subjectProfileId"
+            required
+            className={inputCls}
+            value={subject}
+            onChange={(e) => {
+              setSubject(e.target.value);
+              setPicked([]);
+            }}
+          >
             <option value="" disabled>{labels.chooseSubject}</option>
             {learners.map((l) => (
               <option key={l.profileId} value={l.profileId}>{l.label}</option>
@@ -104,11 +129,41 @@ export function RecordRecognitionForm({
           {labels.country}
           <input name="requirementCountry" required minLength={2} maxLength={2} className={inputCls} defaultValue="LT" />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-text-secondary">
-          {labels.evidence}
-          <input name="evidenceEntryIds" required className={inputCls} />
+        <fieldset className="flex flex-col gap-1 text-xs text-text-secondary" data-testid="recognition-evidence">
+          <legend className="mb-1">{labels.evidence}</legend>
           <span className="text-meta text-text-muted">{labels.evidenceHint}</span>
-        </label>
+          {/* The ids the RPC needs travel as one hidden value; nobody types a uuid. */}
+          <input type="hidden" name="evidenceEntryIds" value={picked.join(",")} readOnly />
+          {!subject ? (
+            <p className="text-meta text-text-muted">{labels.evidenceChooseLearner}</p>
+          ) : evidence === null ? (
+            <p className="text-meta text-state-warning" role="alert">{labels.evidenceUnavailable}</p>
+          ) : options.length === 0 ? (
+            <p className="text-meta text-text-muted" data-testid="recognition-evidence-none">{labels.evidenceNone}</p>
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {options.map((o) => (
+                <li key={o.entryId}>
+                  <label className="flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      checked={picked.includes(o.entryId)}
+                      onChange={() => togglePick(o.entryId)}
+                      className="mt-0.5"
+                      data-testid="recognition-evidence-option"
+                    />
+                    <span className="flex flex-col">
+                      <span className="text-text-primary">{o.excerpt || o.entryType}</span>
+                      <span className="text-meta text-text-muted">
+                        {labels.evidenceRecorded} {o.recordedOn} · {labels.evidenceConfirmed} {o.confirmedOn}
+                      </span>
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )}
+        </fieldset>
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {labels.decision}
           <select name="decision" required className={inputCls} defaultValue="recognised">
@@ -131,7 +186,7 @@ export function RecordRecognitionForm({
           <textarea name="note" rows={2} maxLength={2000} className={inputCls} />
         </label>
         <div className="flex items-center gap-3">
-          <button type="submit" disabled={pending} className={btnCls}>
+          <button type="submit" disabled={pending || picked.length === 0} className={btnCls}>
             {pending ? labels.saving : labels.submit}
           </button>
           <Outcome state={state} labels={labels} />

@@ -1,4 +1,9 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+// These tests pin attribution BEHAVIOUR once a visitor has said yes. The
+// consent gate itself (nothing before a yes) is proven in
+// lib/consent/analytics-consent.test.ts.
+vi.mock("@/lib/consent/analytics-consent", () => ({ hasAnalyticsConsent: () => true }));
 
 import {
   captureFirstTouchAttribution,

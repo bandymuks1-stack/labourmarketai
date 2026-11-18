@@ -8,5 +8,7 @@
   "student": "Studentas",
   "unemployed": "Bedarbis",
   "volunteer": "Savanoris",
-  "external_manager": "Išorinis vadovas (užsakovo)"
+  "intern": "Praktikantas",
+  "external_manager": "Išorinis vadovas (užsakovo)",
+  "other": "Kitas ryšys"
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { Explain } from "@/components/app/premium/grammar";
 import { useActionState, useState } from "react";
 import { Link } from "@/lib/i18n/navigation";
 
@@ -59,6 +60,12 @@ export interface CompanyWorkersSectionLabels {
    *  without `manage-invitations`. */
   readonly invitationsManagedElsewhere: string;
   readonly statusInvited: string;
+  /** No e-mail is sent for a roster invitation, so the owner gets a link to
+   *  hand over themselves (sign-up; the invitation waits for that address). */
+  readonly inviteShareLinkLabel?: string;
+  readonly inviteShareLinkHint?: string;
+  readonly inviteShareCopy?: string;
+  readonly inviteShareCopied?: string;
   readonly statusAlreadyPending: string;
   readonly statusAlreadyLinked: string;
   readonly statusWordActive: string;
@@ -111,7 +118,7 @@ export interface CompanyWorkersTeamView {
 }
 
 const PRIMARY_ACTION =
-  "inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
+  "inline-flex min-h-11 items-center rounded-control border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
 const QUIET_ACTION =
   "inline-flex min-h-11 items-center rounded-control px-2.5 py-2 text-xs font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
 
@@ -192,6 +199,7 @@ export function CompanyWorkersSection({
     FormData
   >(inviteCompanyWorkerAction, null);
   const [shouldShowOutcome, setShouldShowOutcome] = useState(true);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const migrationNeeded =
     workersResult.kind === "needs-migration" ||
@@ -500,21 +508,13 @@ export function CompanyWorkersSection({
         </p>
       ) : null}
 
+      {/* A feature that is not on yet is a quiet line, not a block in the
+          team's way (owner 2026-10-10) — its explanation one tap away. */}
       {!roleCoordinationEnabled ? (
-        <div
-          className="rounded-md border border-ink-700 bg-surface-1 p-3"
-          data-testid="company-workers-coordination-note"
-        >
-          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {labels.coordinationHeading}
-          </p>
-          <p className="mt-1 text-xs text-text-secondary">
-            {labels.coordinationBody}
-          </p>
-          <p className="mt-1 text-meta text-text-muted">
-            {labels.coordinationNextAction}
-          </p>
-        </div>
+        <Explain summary={labels.coordinationHeading}>
+          <p data-testid="company-workers-coordination-note">{labels.coordinationBody}</p>
+          <p>{labels.coordinationNextAction}</p>
+        </Explain>
       ) : null}
 
       {/* INVITATIONS — `manage-invitations` only (owner direction 2026-09-24):
@@ -585,6 +585,14 @@ export function CompanyWorkersSection({
                 {outcomeLabel}
               </p>
             ) : null}
+            {shouldShowOutcome && state?.ok && (state.outcome === "invited" || state.outcome === "already_pending") && labels.inviteShareLinkLabel && typeof window !== "undefined" ? (
+              <InviteShareLink
+                url={`${window.location.origin}/${window.location.pathname.split("/")[1] || "lt"}/auth/signup`}
+                labels={labels}
+                copied={linkCopied}
+                onCopied={setLinkCopied}
+              />
+            ) : null}
           </form>
 
           <section
@@ -635,5 +643,42 @@ export function CompanyWorkersSection({
         </section>
       )}
     </section>
+  );
+}
+
+/** The link the owner hands over when no e-mail goes out: sign-up, after
+ *  which the pending roster invitation is found by the same address. */
+function InviteShareLink({
+  url,
+  labels,
+  copied,
+  onCopied,
+}: {
+  url: string;
+  labels: CompanyWorkersSectionLabels;
+  copied: boolean;
+  onCopied: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 p-2" data-testid="company-workers-invite-link">
+      <p className="text-xs font-semibold text-text-primary">{labels.inviteShareLinkLabel}</p>
+      <p className="text-xs text-text-secondary">{labels.inviteShareLinkHint}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <code className="max-w-full truncate rounded bg-ink-800 px-2 py-1 text-meta text-text-primary">{url}</code>
+        <button
+          type="button"
+          data-testid="company-workers-invite-copy-link"
+          onClick={() => {
+            void navigator.clipboard?.writeText(url).then(
+              () => onCopied(true),
+              () => onCopied(false),
+            );
+          }}
+          className="inline-flex min-h-11 sm:min-h-9 items-center rounded border border-ink-500 px-2 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
+        >
+          {copied ? labels.inviteShareCopied : labels.inviteShareCopy}
+        </button>
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import { test, expect, type FileChooser, type Page } from "@playwright/test";
 import { spawnSync } from "node:child_process";
 
+import { LOCAL_DB_CONTAINER } from "./local-db-container";
 import { chooseWorkContextIfAsked } from "./worklog-context";
 
 /**
@@ -23,7 +24,7 @@ import { chooseWorkContextIfAsked } from "./worklog-context";
  */
 const HAS_TEST_SUPABASE = !!process.env.SUPABASE_TEST_URL;
 const LOCAL_STACK = !!process.env.E2E_LOCAL_STACK;
-const DB_CONTAINER = "supabase_db_labourmarketai";
+const DB_CONTAINER = LOCAL_DB_CONTAINER;
 
 const WORKER = { email: "dev.worker@local.test", password: "password" };
 

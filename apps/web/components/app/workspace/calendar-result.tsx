@@ -180,7 +180,7 @@ export function CalendarResult({
             <span
               className={
                 d.isToday
-                  ? "font-mono text-meta uppercase tracking-label text-brand-orange"
+                  ? "font-mono text-meta uppercase tracking-label text-text-muted"
                   : "font-mono text-meta uppercase tracking-label text-text-muted"
               }
             >

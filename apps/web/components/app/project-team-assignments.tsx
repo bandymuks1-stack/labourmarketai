@@ -1,5 +1,6 @@
 "use client";
 
+import { Explain } from "@/components/app/premium/grammar";
 import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -29,21 +30,29 @@ const field =
   "min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
 const button =
   "inline-flex min-h-11 sm:min-h-9 items-center rounded-md border border-ink-500 px-3 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue disabled:opacity-60";
+// SECONDARY on purpose: this form repeats once per project card, so a gold
+// fill here made a dozen "main" buttons on the Work page (owner design pass
+// 2026-10-26: one primary per screen — the action deck's "New project").
 const primary =
-  "inline-flex min-h-11 sm:min-h-9 items-center rounded-md bg-gradient-cta px-4 py-1 text-xs font-semibold text-text-on-brand disabled:opacity-60";
+  "inline-flex min-h-11 sm:min-h-9 items-center rounded-md border border-brand-blue/60 px-4 py-1 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60";
 
 export function ProjectTeamAssignments({
   projectId,
   assignments,
   teams,
   tasks,
+  showIntro = true,
 }: {
   projectId: string;
+  /** The explanation is said ONCE per list (first project), not under
+   *  every project (owner 2026-10-10). */
+  showIntro?: boolean;
   assignments: readonly TeamAssignmentRow[];
   teams: readonly AssignableTeam[];
   tasks: readonly AssignableTask[];
 }) {
   const t = useTranslations("teamAssignment");
+  const tDisclosure = useTranslations("common.disclosure");
   const tRes = useTranslations("projects.assign.reservation");
   const router = useRouter();
   const uid = useId();
@@ -125,7 +134,12 @@ export function ProjectTeamAssignments({
   return (
     <div className="mt-2 flex flex-col gap-2 border-t border-ink-600 pt-3" data-testid="project-teams">
       <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("title")}</p>
-      <p className="text-xs text-text-muted">{t("intro")}</p>
+      {/* Same explanation under every project → one tap away (owner 2026-10-10). */}
+      {showIntro ? (
+        <Explain summary={tDisclosure("details")}>
+          <p>{t("intro")}</p>
+        </Explain>
+      ) : null}
 
       {assignments.length === 0 ? (
         <p className="text-xs text-text-muted" data-testid="project-teams-none">

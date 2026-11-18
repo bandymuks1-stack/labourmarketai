@@ -171,3 +171,57 @@ describe("extractWorkLog — the context slot (issue #1689, re-audit line 0): th
     expect(extractWorkLog("dirbau LabourMarket.ai", TODAY).site).toBe("LabourMarket.ai");
   });
 });
+
+describe("relative days in Polish, and the day before yesterday in every language", () => {
+  const TODAY = "2026-10-11";
+  it.each([
+    ["Wczoraj malowałem ściany w hali przez 6 godzin.", "2026-10-10"],
+    ["Dzisiaj spawałem 8 godzin.", "2026-10-11"],
+    ["Przedwczoraj pracowałem 7 godzin.", "2026-10-09"],
+    ["Užvakar dirbau 8 valandas.", "2026-10-09"],
+    ["Позавчера работал 8 часов.", "2026-10-09"],
+    ["Vorgestern habe ich 8 Stunden gearbeitet.", "2026-10-09"],
+    ["Eergisteren 8 uur gewerkt.", "2026-10-09"],
+    ["The day before yesterday I worked 8 hours.", "2026-10-09"],
+    ["Vakar dirbau 8 valandas.", "2026-10-10"],
+    ["Вчера работал 8 часов.", "2026-10-10"],
+  ])("%s → %s", (text, day) => {
+    expect(extractWorkLog(text, TODAY).date).toBe(day);
+  });
+});
+
+describe("Swedish work sentences are read, not only routed (sv active, 2026-11-12)", () => {
+  const TODAY = "2026-11-12";
+  it("hours and a relative day", () => {
+    const p = extractWorkLog("Jag jobbade 8 timmar igår", TODAY);
+    expect(p.workedMinutes).toBe(480);
+    expect(p.date).toBe("2026-11-11");
+    expect(p.hasSignal).toBe(true);
+  });
+  it("a clock span with från … till, and a break", () => {
+    const p = extractWorkLog("Jag arbetade från 8 till 17, 30 min rast", TODAY);
+    expect(p.start).toBe("08:00");
+    expect(p.end).toBe("17:00");
+    expect(p.breakMinutes).toBe(30);
+    expect(p.workedMinutes).toBe(510);
+  });
+  it.each([
+    ["Idag svetsade jag 7,5 timmar.", "2026-11-12", 450],
+    ["I dag målade jag 6 tim.", "2026-11-12", 360],
+    ["I går jobbade jag 8 timmar.", "2026-11-11", 480],
+    ["I förrgår arbetade jag 9 timmar.", "2026-11-10", 540],
+  ])("%s", (text, day, minutes) => {
+    const p = extractWorkLog(text, TODAY);
+    expect(p.date).toBe(day);
+    expect(p.workedMinutes).toBe(minutes);
+  });
+  it("a split shift joined by och adds up", () => {
+    expect(extractWorkLog("8-12 och 13-17", TODAY).workedMinutes).toBe(480);
+  });
+  it("Swedish words do not disturb other languages", () => {
+    // Dutch "dag" and German "Tag" are not Swedish "i dag"; "8 time" is not hours.
+    expect(extractWorkLog("Hele dag gewerkt, 8 uur.", TODAY).date).toBe(TODAY);
+    expect(extractWorkLog("Gisteren 8 uur gewerkt.", TODAY).date).toBe("2026-11-11");
+    expect(extractWorkLog("Yesterday I worked 8 hours.", TODAY).workedMinutes).toBe(480);
+  });
+});

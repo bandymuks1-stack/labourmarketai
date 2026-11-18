@@ -28,6 +28,11 @@ export const EVIDENCE_PAGE_SIZE = 1000;
 /** Upper bound on records read in one request. Far above any organization's
  *  history today; hitting it is disclosed, never hidden. */
 export const EVIDENCE_READ_CEILING = 20000;
+/** Pages requested together AFTER the first one came back full. The first
+ *  page is always read alone, so a short history (most organizations, every
+ *  person-scoped read) stays one request; bounded, so a large history never
+ *  fans out into dozens of simultaneous 1000-row reads. */
+export const EVIDENCE_PAGE_WINDOW = 2;
 
 type Filter = Parameters<typeof listEvidenceRecords>[1];
 type ListFn = typeof listEvidenceRecords;
@@ -45,19 +50,45 @@ export async function listAllEvidenceRecords(
 > {
   const list = opts.list ?? listEvidenceRecords;
   const ceiling = Math.max(opts.ceiling ?? EVIDENCE_READ_CEILING, EVIDENCE_PAGE_SIZE);
+  // Pages are read RAW (superseded originals included) so a short page means
+  // the end of the data: `listEvidenceRecords` drops superseded rows after the
+  // fetch, and a page with one corrected original would otherwise come back
+  // short and end the loop early, silently. The caller's choice is applied
+  // once, after the last page.
+  const keepSuperseded = filter.includeSuperseded === true;
+  const done = (records: EvidenceRecordView[], truncated: boolean) => ({
+    kind: "ok" as const,
+    records: keepSuperseded ? records : records.filter((r) => !r.superseded),
+    truncated,
+  });
   const all: EvidenceRecordView[] = [];
   let offset = 0;
   for (;;) {
-    const page = await list(caller, { ...filter, limit: EVIDENCE_PAGE_SIZE, offset });
-    if (page.kind !== "ok") return page;
-    all.push(...page.records);
-    if (page.records.length < EVIDENCE_PAGE_SIZE) return { kind: "ok", records: all, truncated: false };
-    offset += EVIDENCE_PAGE_SIZE;
+    // The first page alone; after a FULL page, a window of pages at once
+    // (2026-10-19 perf: the projects map waited ~1.8 s on three 1000-row pages
+    // read one after another). Pages are consumed strictly in offset order with
+    // the same rules as before — the first short page ends the read, the first
+    // failed page is the result — so a later page in the window is never looked
+    // at past the end.
+    const width = offset === 0 ? 1 : EVIDENCE_PAGE_WINDOW;
+    const offsets: number[] = [];
+    for (let i = 0; i < width && offset + i * EVIDENCE_PAGE_SIZE < ceiling; i++) {
+      offsets.push(offset + i * EVIDENCE_PAGE_SIZE);
+    }
+    const pages = await Promise.all(
+      offsets.map((o) => list(caller, { ...filter, includeSuperseded: true, limit: EVIDENCE_PAGE_SIZE, offset: o })),
+    );
+    for (const page of pages) {
+      if (page.kind !== "ok") return page;
+      all.push(...page.records);
+      if (page.records.length < EVIDENCE_PAGE_SIZE) return done(all, false);
+    }
+    offset += offsets.length * EVIDENCE_PAGE_SIZE;
     if (all.length >= ceiling) {
       // Exactly at the ceiling is not truncation: peek for one more row.
-      const peek = await list(caller, { ...filter, limit: 1, offset });
+      const peek = await list(caller, { ...filter, includeSuperseded: true, limit: 1, offset });
       if (peek.kind !== "ok") return peek;
-      return { kind: "ok", records: all, truncated: peek.records.length > 0 };
+      return done(all, peek.records.length > 0);
     }
   }
 }

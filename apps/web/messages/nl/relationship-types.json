@@ -8,5 +8,7 @@
   "student": "Student",
   "unemployed": "Werkzoekend",
   "volunteer": "Vrijwilliger",
-  "external_manager": "Externe manager (opdrachtgever)"
+  "intern": "Stagiair",
+  "external_manager": "Externe manager (opdrachtgever)",
+  "other": "Andere relatie"
 }

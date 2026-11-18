@@ -1,0 +1,56 @@
+# WEAK-NETWORK runtime proof — the flow behind ANDROID_OFFLINE_JOURNEY_PROVEN.
+#
+# Run by .github/scripts/android-emulator-journey.sh AFTER it switches the
+# emulator to airplane mode (no Wi-Fi, no mobile data) and BEFORE it switches
+# it back. It proves, on a real Android runtime, the rule the app is built on:
+# a request that could not be made is shown as "we could not reach the
+# server", never as "wrong password" (which would send someone to reset a
+# password that was fine) and never as a silent spinner.
+#
+# The capability screens (Today / Journal / Profile) apply the same rule to
+# /api/mcp through CapabilityGate → CapabilityFailureNotice (failure sentence
+# + "Try again"); reaching them needs a signed-in session, which CI does not
+# have — see docs/mobile/MOBILE_STATUS_2026-10-14.md §3. That half is proven
+# off-device by packages/client-core/src/transport.test.ts ("weak network").
+#
+# English assertions: the CI emulator's locale is en-US, and the app follows
+# the device language.
+appId: ai.labourmarket.app
+name: offline-sign-in-journey
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: "ci-offline@example.com"
+- tapOn:
+    id: "password"
+- inputText: "not-a-real-password-1"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- tapOn:
+    id: "submit"
+
+# The failure must SURFACE, and it must be the "unreachable" sentence.
+- extendedWaitUntil:
+    visible:
+      id: "auth-failure"
+    timeout: 45000
+- assertVisible: "(?s).*could not reach the server.*"
+- assertNotVisible: "(?s).*did not match.*"
+- takeScreenshot: android-artifacts/offline-01-unreachable
+
+# Still usable: the form is there and accepts input (no crash, no dead end).
+- assertVisible:
+    id: "email"
+- assertVisible:
+    id: "submit"
+- tapOn:
+    id: "email"

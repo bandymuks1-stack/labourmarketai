@@ -230,6 +230,7 @@ const CHAT_KEYS = [
   "eduCohortCreated",
   "eduAssignNoCohort",
   "eduAssignNoLearners",
+  "eduMembersNotForRole",
   "eduAssignDone",
   "eduNotInstitution",
   "eduUnavailable",
@@ -255,6 +256,14 @@ const CHAT_KEYS = [
   "projectCreateIntro",
   "projectCreatedNext",
   "clientOffersIntro",
+  "teamOffersIntro",
+  "teamOfferStatusAgreed",
+  "chipTeamOfferAgree",
+  "chipTeamOfferThread",
+  "chipOfferOurs",
+  "teamOfferAgreed",
+  "teamOfferDeclined",
+  "teamOfferThreadFailed",
   "clientOffersNone",
   "clientBridgeInvitesIntro",
   "clientBridgeShareIntro",
@@ -404,6 +413,10 @@ const WORKLOG_KEYS = [
   // The sentence named an organization whose relationship has ended.
   "contextEndedOrg",
   "save",
+  // Activation audit fix #5: the FIRST button moves to the review step and
+  // saves nothing, so it is labelled "Toliau / Continue" — only the confirm
+  // step's button says "Save".
+  "continue",
   "cancel",
   "working",
   "confirmTitle",
@@ -415,6 +428,11 @@ const WORKLOG_KEYS = [
   "strengthenedSkillPrefix",
   "pendingConfirmPrefix",
   "cvUpdatedNote",
+  // After every save: the entry counts in the Living CV (recorded, not
+  // confirmed), one link there, and a calm "add tomorrow's work" line.
+  "livingCvNote",
+  "viewLivingCv",
+  "comeBackNote",
   "matchingNote",
   "viewOpportunities",
   "pipelineFailedNote",

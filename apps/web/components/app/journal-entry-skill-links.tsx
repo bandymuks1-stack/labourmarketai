@@ -386,10 +386,10 @@ export function JournalEntrySkillLinks({
           themselves expand on request. Amber, and explicitly NOT clean evidence. */}
       {reviewChips.length > 0 && (
         <div
-          className="mt-1 flex flex-col gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/5 p-2"
+          className="mt-1 flex flex-col gap-1.5 rounded-md border border-ink-500 bg-ink-800/40 p-2"
           data-testid={`entry-skill-review-${entryId}`}
         >
-          <p className="font-mono text-meta uppercase tracking-label text-state-warning">
+          <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("reviewHeading")}
           </p>
           <p

@@ -51,4 +51,11 @@ describe("Guard: work-plan scope roster + engagement", () => {
     expect(down).not.toMatch(/company_workers|engagement_contexts/);
     expect(down).toMatch(/agency_workers/);
   });
+  it("the planner's worker picker offers exactly the engagement people the RPC accepts", () => {
+    const lib = readFileSync(resolve(__dirname, "..", "planning", "work-plan.ts"), "utf8");
+    expect(lib).toMatch(/PLANNABLE_ENGAGEMENT_SLUGS = \["employee", "collaborator", "freelancer"\]/);
+    expect(lib).toMatch(/from\("engagement_contexts"\)[\s\S]*\.eq\("organization_id", organizationId\)[\s\S]*\.eq\("status", "active"\)/);
+    const section = readFileSync(resolve(__dirname, "..", "..", "components", "app", "work-plan-section.tsx"), "utf8");
+    expect(section).toContain("listPlannableWorkers(organizationId)");
+  });
 });

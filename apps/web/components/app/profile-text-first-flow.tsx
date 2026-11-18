@@ -30,6 +30,7 @@ import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { clearWorkerIntakeDraft, readWorkerIntakeDraftFor } from "@/lib/staffing/worker-intake-draft";
 
 /** Tiny inline pill — tells the user the *narrative* is persisted. Suggestions
  *  still need per-card confirm; this is decoupled from "skills are verified". */
@@ -108,7 +109,11 @@ export function ProfileTextFirstFlow({
   savedClaimNormalizedLabels = [],
   manualSlot,
   hasPrimaryProfession = true,
+  viewerEmail = null,
 }: {
+  /** The signed-in account's email: the intake draft is placed only when it
+   *  was bound to this email (decision 0024). */
+  viewerEmail?: string | null;
   /**
    * FAST PATH TO MATCHABILITY (2026-09-17). The board's gate needs a work
    * type AND skill evidence, and confirmed claims become catalogued skills
@@ -175,6 +180,25 @@ export function ProfileTextFirstFlow({
   }, []);
 
   const [text, setText] = useState(initialText);
+  // What the person typed on /worker-intake before they had an account
+  // (owner P0 2026-11-15, F2): placed in the composer, never sent or saved
+  // for them. Only when they have no profile text of their own yet.
+  const [intakeSeeded, setIntakeSeeded] = useState(false);
+  useEffect(() => {
+    if (initialText.trim().length > 0) return;
+    const kept = readWorkerIntakeDraftFor(viewerEmail);
+    if (kept) {
+      setText(kept);
+      setStage("compose");
+      setIntakeSeeded(true);
+    }
+  }, [initialText, viewerEmail]);
+  // The composer sits in the profile's closed edit section; their own text
+  // waiting there is the reason to open it.
+  const composeRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (intakeSeeded) composeRef.current?.closest("details")?.setAttribute("open", "");
+  }, [intakeSeeded]);
   const [pasted, setPasted] = useState("");
   const [textSaveState, setTextSaveState] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -225,6 +249,8 @@ export function ProfileTextFirstFlow({
     setApplied(false);
     setPromotion(null);
     setText(raw);
+    // Sent by the person: the kept intake text has done its job.
+    if (raw.trim().length > 0) clearWorkerIntakeDraft();
 
     // Persist the user's own words. The text is the *claim* — saved into
     // the owner-only `profiles.profile_text` (migration 0014); reload
@@ -444,10 +470,12 @@ export function ProfileTextFirstFlow({
   if (stage === "compose" || !hasExtracted) {
     return (
       <div
+        ref={composeRef}
         className="flex flex-col gap-4"
         data-testid="profile-text-flow-compose"
       >
         <TextFirstComposer
+          key={intakeSeeded ? "intake" : "own"}
           title={t("title")}
           helper={t("helper")}
           placeholder={t("placeholder")}
@@ -696,7 +724,7 @@ export function ProfileTextFirstFlow({
               data-testid="profile-text-flow-needs-direction"
             >
               {t("needsDirection")}{" "}
-              <a href="#profile-edit" className="font-semibold text-brand-blue hover:text-brand-champagne">
+              <a href="#profile-edit" className="font-semibold text-text-primary underline underline-offset-4 hover:no-underline">
                 {t("needsDirectionCta")} →
               </a>
             </p>
@@ -723,7 +751,7 @@ export function ProfileTextFirstFlow({
               a silent dead end. */}
           <a
             href="#capabilities"
-            className="mt-2 inline-flex text-meta font-semibold text-brand-blue hover:text-brand-champagne"
+            className="mt-2 inline-flex text-meta font-semibold text-text-primary underline-offset-4 hover:underline"
             data-testid="profile-text-flow-view-capabilities"
           >
             {t("viewCapabilities")} →
@@ -731,7 +759,7 @@ export function ProfileTextFirstFlow({
           {promotion && promotion.promoted > 0 && (
             <Link
               href={"/cv" as "/dashboard"}
-              className="ml-3 mt-2 inline-flex text-meta font-semibold text-brand-blue hover:text-brand-champagne"
+              className="ml-3 mt-2 inline-flex text-meta font-semibold text-text-primary underline-offset-4 hover:underline"
               data-testid="profile-text-flow-view-cv"
             >
               {t("viewUpdatedCv")} →

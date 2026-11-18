@@ -39,7 +39,7 @@ export type DiscoverySort = "relevance" | "newest";
  * few strongest matches, everything else one explicit click away. "all" is
  * the person's own request to see the full authorized universe (?view=all).
  */
-export type DiscoveryView = "top" | "all";
+export type DiscoveryView = "top" | "discover" | "all";
 
 /** Default number of opportunities in the compressed first view. */
 export const INITIAL_VIEW_DEFAULT_COUNT = 3;
@@ -85,7 +85,9 @@ export function parseDiscoveryParams(
       opportunityType: str(sp.opportunityType),
     },
     sort: str(sp.sort) === "newest" ? "newest" : "relevance",
-    view: str(sp.view) === "all" ? "all" : "top",
+    // "discover" = the free curated discovery set of the personal view
+    // (owner addendum 2026-10-09); "all" = the whole board, as before.
+    view: str(sp.view) === "all" ? "all" : str(sp.view) === "discover" ? "discover" : "top",
   };
 }
 

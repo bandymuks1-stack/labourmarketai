@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { fetchWithDeadline } from "@labourmarket/client-core";
 
 import { CONFIG } from "./config";
 
@@ -52,4 +53,9 @@ export const supabase: SupabaseClient | null =
           // blocked upstream on the auth-domain/branding work, not here.
           detectSessionInUrl: false,
         },
+        // A dead link (one bar, a lift, a basement site) must END: past the
+        // shared deadline the request rejects like a dropped connection, and
+        // the form shows "we could not reach the server" instead of spinning
+        // on "Sign in" for minutes. Same deadline as every /api/mcp call.
+        global: { fetch: fetchWithDeadline((...args) => globalThis.fetch(...args)) },
       });

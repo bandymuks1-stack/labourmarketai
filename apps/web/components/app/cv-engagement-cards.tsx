@@ -108,7 +108,7 @@ export function CvEngagementCards({
                   </p>
                 </div>
                 {c.isPrimary && (
-                  <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">
+                  <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("primary")}
                   </span>
                 )}
@@ -172,7 +172,7 @@ export function CvEngagementCards({
                           );
                         })()}
                         {s.isCore && (
-                          <span className="rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">
+                          <span className="rounded-sm px-1 font-mono text-meta uppercase tracking-label text-text-muted">
                             {t("primary")}
                           </span>
                         )}

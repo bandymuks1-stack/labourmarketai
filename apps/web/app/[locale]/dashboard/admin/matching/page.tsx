@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
@@ -23,6 +24,12 @@ import {
 import { StructureNeedForm } from "@/components/app/structure-need-form";
 import { openDirectConversationAction } from "@/lib/communication/open-conversation-action";
 import type { DarkListboxOption } from "@/components/ui/DarkListbox";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/matching");
+
 
 /**
  * Phase 3.2 — Human-Run Matching Workbench (Marketplace v1 heart, product
@@ -160,12 +167,10 @@ export default async function AdminMatchingWorkbenchPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-matching-workbench">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         {/* Honest method statement — the match is a human decision. */}
         <p
@@ -174,12 +179,7 @@ export default async function AdminMatchingWorkbenchPage({
         >
           {t("humanNote")}
         </p>
-        <Link
-          href={"/dashboard/admin" as "/dashboard"}
-          className="mt-1 self-start text-xs text-text-secondary hover:underline"
-        >
-          ← {t("back")}
-        </Link>
+        <PageBack href={"/dashboard/admin" as "/dashboard"}>{t("back")}</PageBack>
       </header>
 
       {migrationNeeded ? (

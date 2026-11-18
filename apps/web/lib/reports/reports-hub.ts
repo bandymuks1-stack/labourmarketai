@@ -280,7 +280,9 @@ export async function readProjectCounts(): Promise<OrgReportsView["projects"]> {
       const q = asAny(supabase)
         .from("projects")
         .select("id", { count: "exact", head: true })
-        .eq("company_id", companyId);
+        .eq("company_id", companyId)
+        // A DUPLICATE row is a fragment of its canonical project.
+        .neq("record_state", "duplicate");
       return status ? q.eq("status", status) : q;
     };
     const [all, ...perStatus] = (await Promise.all([

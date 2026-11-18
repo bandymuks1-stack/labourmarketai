@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { periodProvenance as reExported } from "@/components/app/organization-evidence-section";
 import {
   formatHoursAsStated,
+  formatMonthSpanLong,
   isoMonthSpan,
   periodProvenance,
   readPeriodEvidence,
@@ -179,5 +180,16 @@ describe("totals as the source gave them; spans at the precision they have", () 
   it("ISO month spans", () => {
     expect(isoMonthSpan({ first: "2025-06", last: "2025-11", months: 6 })).toBe("2025-06 – 2025-11");
     expect(isoMonthSpan({ first: "2025-06", last: "2025-06", months: 1 })).toBe("2025-06");
+  });
+});
+
+describe("formatMonthSpanLong — headline month spans read as months, never as raw dates (2026-10-15)", () => {
+  const lt = (p: { year: string; from: string; to: string }) => `${p.year} m. ${p.from}–${p.to}`;
+  it("lt same year: '2025 m. birželis–lapkritis' (short months render numerically in lt)", () => {
+    expect(formatMonthSpanLong({ first: "2025-06", last: "2025-11", months: 6 }, "lt", lt)).toBe("2025 m. birželis–lapkritis");
+  });
+  it("one month and across years use Intl's own long forms", () => {
+    expect(formatMonthSpanLong({ first: "2025-06", last: "2025-06", months: 1 }, "en", lt)).toBe("June 2025");
+    expect(formatMonthSpanLong({ first: "2024-11", last: "2025-02", months: 4 }, "en", lt)).toMatch(/November 2024\s*–\s*February 2025/);
   });
 });

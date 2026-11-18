@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
 
 /**
  * Work-instructions read service (slice work-instructions-v1).
@@ -92,6 +93,21 @@ export async function listWorkerInstructions(): Promise<InstructionRead> {
     authorName:
       (r.author as { full_name: string | null } | null)?.full_name ?? null,
   }));
+  // The embedded `profiles` read is RLS-scoped: a worker may not read their
+  // manager's profile row, so the sender came back null and the card said
+  // "—" (UX review 2026-10-24, 3.26). An instruction lives in a 2-person
+  // direct thread whose OTHER participant is its author (only messages not
+  // written by the viewer are read), so the permission-gated counterpart
+  // reader names the sender — the same name the Messages thread shows.
+  const unnamed = instructions.filter((i) => !i.authorName).map((i) => i.conversationId);
+  if (unnamed.length > 0) {
+    const names = await readCounterpartIdentities(unnamed).catch(
+      () => new Map<string, string>() as ReadonlyMap<string, string>,
+    );
+    for (const i of instructions) {
+      if (!i.authorName) i.authorName = names.get(i.conversationId) ?? null;
+    }
+  }
   return { kind: "ok", instructions };
 }
 
@@ -125,8 +141,13 @@ export async function listAttentionInstructions(): Promise<WorkerInstruction[]> 
     lastRead.set(p.conversation_id, p.last_read_at ?? null);
 
   return read.instructions.filter((ins) => {
+    // Only the viewer's OWN threads (2026-10-18): the instruction read also
+    // admits is_admin(), and a thread the viewer is not part of used to read
+    // as "never opened", so an admin's attention card showed other people's
+    // instructions (including a documented test fixture's).
+    if (!lastRead.has(ins.conversationId)) return false;
     const lr = lastRead.get(ins.conversationId);
-    if (lr == null) return true; // never opened → needs attention
+    if (lr == null) return true; // a participant who never opened it → needs attention
     return Date.parse(ins.createdAt) > Date.parse(lr);
   });
 }
@@ -152,13 +173,12 @@ export async function listManagedWorkers(): Promise<ManagedWorker[]> {
   const select =
     "worker:workers!inner(profile_id, display_name, profiles(full_name))";
 
-  const [cw, aw] = await Promise.all([
-    asAny(supabase)
-      .from("company_workers")
-      .select(select)
-      .eq("status", "active"),
-    asAny(supabase).from("agency_workers").select(select).eq("status", "active"),
-  ]);
+  // Legacy `agency_workers` is not API-exposed (no SELECT grant, Model A
+  // retired) — see lib/guards/agency-workers-not-api-exposed.test.ts.
+  const cw = await asAny(supabase)
+    .from("company_workers")
+    .select(select)
+    .eq("status", "active");
 
   const out = new Map<string, ManagedWorker>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -177,7 +197,6 @@ export async function listManagedWorkers(): Promise<ManagedWorker[]> {
     }
   };
   if (!cw.error) collect(cw.data);
-  if (!aw.error) collect(aw.data);
   return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 

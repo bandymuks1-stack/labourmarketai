@@ -51,6 +51,7 @@ const ZERO: SpineCounts = {
   pendingConnectionInvites: 0,
   sharedRequestsAwaitingOffer: 0,
   openCandidateOffers: 0,
+  openTeamOffers: 0,
 };
 
 /* W3 row 5: the compact recommendation surface is no longer a card on the
@@ -188,6 +189,21 @@ describe("aggregate anti-spam notification (one signal, never per-job rows)", ()
       /import \{ getNewMarketplaceMatchCount \} from "@\/lib\/marketplace\/worker-opportunities"/,
     );
     expect(spine).toMatch(/getNewMarketplaceMatchCount\(\)/);
+  });
+
+  it("the spine count never pays for the external supply reads (production 2026-10-15)", () => {
+    // Every dashboard page renders the spine. The count is derived from the
+    // platform's own demand only, so it must read the board WITHOUT the
+    // external public-source ads (the heaviest reads on the largest table).
+    const use = read("lib/marketplace/worker-opportunities.ts");
+    expect(use).toMatch(/return await loadUnseenRecommendationCount\(\)/);
+    const model = read("lib/opportunities/recommendations.ts");
+    expect(model).toMatch(
+      /loadUnseenRecommendationCount = cache\([\s\S]*?loadWorkerPlatformDemand\(\)[\s\S]*?countUnseenRecommendations\(deriveJobRecommendations\(board\.opportunities, seen/,
+    );
+    const loader = read("lib/opportunities/load-worker-opportunities.ts");
+    expect(loader).toMatch(/loadWorkerPlatformDemand\(\)[\s\S]*?loadBoard\(undefined, false\)/);
+    expect(loader).toMatch(/readExternalSupply\s*\?\s*loadExternalVacancyCards\(/);
   });
 
   it("the read model reuses the canonical pipeline — no second engine", () => {

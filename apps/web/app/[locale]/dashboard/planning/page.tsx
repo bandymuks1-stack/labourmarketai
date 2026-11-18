@@ -46,6 +46,12 @@ import { WorkDay } from "@/components/app/planning/work-day";
 import { buildWorkRhythm, compactHours } from "@/lib/planning/work-rhythm";
 import { createUtcFormatter } from "@/lib/time/display";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/planning", "planning.title");
+
 
 /**
  * THE canonical calendar (core-network area C) — one planning surface over
@@ -186,9 +192,7 @@ export default async function PlanningPage({
 
   const header = (
     <header>
-      <h1 className="font-display text-title font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
     </header>
   );
 
@@ -252,7 +256,10 @@ export default async function PlanningPage({
     year: "numeric",
   });
   const monthOnlyFmt = createUtcFormatter(locale, { month: "long" });
-  const stripFmt = createUtcFormatter(locale, { weekday: "narrow" });
+  // "short", not "narrow": narrow LT weekdays read "P A T K P Š S" (two P,
+  // Š/S) and differed from the journal calendar's "PR AN TR…" — one
+  // calendar grammar across the product (production audit 2026-10-25).
+  const stripFmt = createUtcFormatter(locale, { weekday: "short" });
   const utc = (dayIso: string) => new Date(`${dayIso}T00:00:00Z`);
   const fmtDay = (dayIso: string) => dayFmt(dayIso) ?? "";
   const fmtShort = (dayIso: string) => shortFmt(dayIso) ?? "";
@@ -896,10 +903,11 @@ export default async function PlanningPage({
 
       {/* ---------------- YEAR ---------------- */}
       {yearCells ? (
-        <section
-          className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4"
-          data-testid="planning-year-view"
-        >
+        <section className="flex flex-col gap-2" data-testid="planning-year-view">
+          <p className="text-xs leading-relaxed text-text-secondary" data-testid="planning-year-hint">
+            {t("year.hint")}
+          </p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
           {yearCells.map((m) => (
             <Link
               key={m.month}
@@ -926,6 +934,7 @@ export default async function PlanningPage({
               </span>
             </Link>
           ))}
+          </div>
         </section>
       ) : null}
 

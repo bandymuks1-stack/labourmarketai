@@ -47,9 +47,13 @@ export async function ProjectFactsForm({
     );
   }
 
+  // `w-full min-w-0`: a date input carries its own intrinsic width (~200px in
+  // Chromium), and two of them side by side pushed the form to 456px inside
+  // a 390px phone (UX review 2026-10-24). A field fills its cell; it never
+  // decides the cell's width.
   const field =
-    "rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue";
-  const label = "flex flex-col gap-1 text-xs text-text-secondary";
+    "w-full min-w-0 rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue";
+  const label = "flex min-w-0 flex-col gap-1 text-xs text-text-secondary";
 
   return (
     <form
@@ -59,7 +63,7 @@ export async function ProjectFactsForm({
     >
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="projectId" value={projectId} />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <label className={`${label} sm:col-span-2 lg:col-span-2`}>
           <span>{t("title")}</span>
           <input
@@ -100,7 +104,7 @@ export async function ProjectFactsForm({
             ))}
           </select>
         </label>
-        <div className="grid grid-cols-2 gap-3 lg:col-span-1">
+        <div className="grid min-w-0 grid-cols-2 gap-3 lg:col-span-1">
           <label className={label}>
             <span>{t("startDate")}</span>
             <input

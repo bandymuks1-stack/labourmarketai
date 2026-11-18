@@ -17,6 +17,12 @@ import { FollowUpQueuePanel } from "@/components/app/follow-up-queue-panel";
 import { SalesIntakePanel } from "@/components/app/sales-intake-panel";
 import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
 import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin");
+
 
 /** Stable display order for the file-readiness summary. */
 const READINESS_KINDS: readonly ExtractionReadiness[] = [
@@ -481,12 +487,10 @@ export default async function AdminDashboardPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-dashboard">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
@@ -505,7 +509,7 @@ export default async function AdminDashboardPage({
 
       {/* BAND 1 — WHAT NEEDS AN OPERATOR DECISION. Each row IS the queue. */}
       <section className="flex flex-col gap-2" data-testid="admin-attention">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("room.attention.title")}
         </p>
         {attention.length === 0 ? (

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import {
   OPERATIONAL_STATUSES,
@@ -9,7 +10,8 @@ import {
   type OperationalStatus,
   type ReadinessStatus,
 } from "@/lib/projects/operations-derive";
-import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
+import { suggestedReadinessItemKeys } from "@/lib/projects/readiness-items";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
 import { getOperationsCentre } from "@/lib/projects/operations-centre";
 import { isProjectStatus } from "@/lib/projects/project-lifecycle-model";
 import {
@@ -59,6 +61,12 @@ import { listOrganizationMembers } from "@/lib/company/memberships";
 import { getProjectHoursSideBySide } from "@/lib/projects/project-hours";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { ProjectFinancialHistory } from "@/components/app/project-financial-history";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/projects/[id]/operations");
+
 
 export const dynamic = "force-dynamic";
 
@@ -109,11 +117,9 @@ export default async function ProjectOperationsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role = (profile?.active_role as Role) ?? "worker";
 
   if (!MANAGER_ROLES.has(role)) {
@@ -124,9 +130,7 @@ export default async function ProjectOperationsPage({
     if (workerView) redirect(`/${locale}/dashboard/projects/${id}`);
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-4">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("eyebrow")}
-        </h1>
+        <PageTitle>{t("eyebrow")}</PageTitle>
         <p className="card-border p-4 text-sm text-text-secondary">{t("managerOnly")}</p>
       </div>
     );
@@ -136,9 +140,7 @@ export default async function ProjectOperationsPage({
   if (!centre) {
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-4">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("eyebrow")}
-        </h1>
+        <PageTitle>{t("eyebrow")}</PageTitle>
         <p className="card-border p-4 text-sm text-text-secondary" data-testid="ops-not-authorized">
           {t("notAuthorized")}
         </p>
@@ -351,6 +353,7 @@ export default async function ProjectOperationsPage({
       seed: t("checklist.seed"),
       addItem: t("checklist.addItem"),
       addPlaceholder: t("checklist.addPlaceholder"),
+      toAgree: t("checklist.toAgree"),
       missing: t("checklist.missing"),
       received: t("checklist.received"),
       checked: t("checklist.checked"),
@@ -361,7 +364,11 @@ export default async function ProjectOperationsPage({
       READINESS_STATUSES.map((s) => [s, t(`readinessStatuses.${s}`)]),
     ) as Record<ReadinessStatus, string>,
     defaultItemLabels: Object.fromEntries(
-      DEFAULT_READINESS_ITEM_KEYS.map((k) => [k, t(`defaults.${k}`)]),
+      // SUGGESTIONS for this job, not a universal list (decision 0021,
+      // extended 2026-10-24). Whether the work crosses a border is not known
+      // on this board, so cross-border rows (A1 / posting) are left to the
+      // manager to add when they apply.
+      suggestedReadinessItemKeys({ crossBorder: false }).map((k) => [k, t(`defaults.${k}`)]),
     ) as Record<string, string>,
     // v2 — filters
     filters: {
@@ -443,9 +450,20 @@ export default async function ProjectOperationsPage({
         </p>
       ) : null}
 
-      {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
-          pulse — the real gated reviewable count, one tap to confirm. */}
-      <ConfirmPulse />
+      {/* WHICH PROJECT this is, first. The page used to open on the
+          organization-wide confirm pulse ("25 entries wait") with the
+          project's own name ~2,000px further down in the board header, so a
+          phone landed on a global banner instead of the project (UX review
+          2026-10-24). A plain line, not a second <h1> — the board keeps the
+          page heading. */}
+      <header className="flex min-w-0 flex-col gap-0.5" data-testid="ops-project-context">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("eyebrow")}
+        </span>
+        <p className="break-words font-display text-xl font-semibold tracking-tight text-text-primary">
+          {ops.project.title ?? t("untitledProject")}
+        </p>
+      </header>
 
       {/* P4 — the Field: the primary operational view, ADDED on the page
           (§1.5). Every control is a registered canonical action the chat
@@ -524,7 +542,12 @@ export default async function ProjectOperationsPage({
       >
         <h2 className={sectionTitleClass}>{tCentre("hours.title")}</h2>
         <div className="flex flex-wrap gap-2">
-          <span className={chipClass} data-testid="ops-centre-hours-allocated">
+          <span
+            className={chipClass}
+            data-testid="ops-centre-hours-allocated"
+            data-state={projectHours.allocated.state}
+            data-hours={projectHours.allocated.state === "measured" ? projectHours.allocated.hours : undefined}
+          >
             {tCentre("hours.allocated")}:{" "}
             {projectHours.allocated.state === "measured"
               ? tCentre("hours.value", { hours: hoursFmt.format(projectHours.allocated.hours) })
@@ -554,6 +577,13 @@ export default async function ProjectOperationsPage({
             : ""}
         </p>
       </section>
+
+      {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
+          pulse — the real gated reviewable count, one tap to confirm. It is
+          the ORGANIZATION's queue, so it follows this project's own facts
+          rather than leading the page (same placement as the project page,
+          where it sits after the project's own panels). */}
+      <ConfirmPulse />
 
       {/* ── Train D: project management strip — derived progress (never a
             stored number), the accountable person, and the applied W11
@@ -804,6 +834,12 @@ export default async function ProjectOperationsPage({
       </Link>
 
       <div id={OPS_BOARD_ANCHOR.slice(1)} className="flex flex-col gap-6">
+        {/* The mutual pre-agreement recommendation — advice for both sides,
+            never a gate (decision 0021 extension, 2026-10-24). */}
+        <CollaborationChecksNote
+          context={{ dealKind: "work_engagement", workCountry: ops.project.country }}
+          countryName={ops.project.country}
+        />
         <ProjectOperationsBoard
           ops={{ ...ops, project: { ...ops.project, status: projectStatusText } }}
           labels={labels}

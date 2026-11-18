@@ -13,6 +13,7 @@ import {
   isTransactionalEmailConfigured,
 } from "@/lib/email/transactional";
 import { guardedSendTransactionalEmail } from "@/lib/email/send-ledger-store";
+import { recordDeliveryAttempt } from "@/lib/invitations/delivery-attempts";
 import {
   buildInvitationBody,
   buildInvitationSubject,
@@ -36,6 +37,8 @@ import {
 } from "@/lib/notifications/event-emitters";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { recordStaffReviewNotice } from "@/lib/operations/auto-review";
+import { acceptedReviewNotice, type ReviewNoticeSurface } from "@/lib/operations/auto-review-model";
 
 /**
  * Canonical invitation server actions (core-network area B).
@@ -264,6 +267,11 @@ export async function createAndSendInvitations(input: {
         personalMessage: input.personalMessage ?? null,
       }),
     }, { kind: "invitation", organizationId: input.organizationId ?? null });
+    if (sendResult.status === "suppressed_synthetic_address") {
+      // Never mailed by design (synthetic QA plus-address): the link is the result.
+      results.push({ email, outcome: "created", invitationId, inviteLink });
+      continue;
+    }
     const deliveryOutcome =
       sendResult.status === "sent" ? "sent" : "delivery_failed";
     // Record the TRUTHFUL provider result (never 'sent' without an ack).
@@ -282,6 +290,9 @@ export async function createAndSendInvitations(input: {
         markRes.error.message,
       );
     }
+    // WHY it failed (reason code + class), never the address. No automatic
+    // retry here: the inviter sees `delivery_failed` and can resend.
+    await recordDeliveryAttempt({ invitationId, path: "create", result: sendResult, attempts: 1, autoRetry: false });
     results.push({
       email,
       outcome: sendResult.status === "sent" ? "sent" : "delivery_failed",
@@ -380,9 +391,21 @@ export async function resendInvitationAction(input: {
         personalMessage: input.personalMessage ?? null,
       }),
     }, { kind: "invitation" });
+    if (sendResult.status === "suppressed_synthetic_address") {
+      // Never mailed by design (synthetic QA plus-address): the new link is the result.
+      revalidatePath(`/${input.locale}/dashboard/network`);
+      return { status: "ok", outcome: "created", inviteLink };
+    }
     await asAny(supabase).rpc("mark_invitation_delivery_v1", {
       p_invitation_id: input.invitationId,
       p_outcome: sendResult.status === "sent" ? "sent" : "delivery_failed",
+    });
+    await recordDeliveryAttempt({
+      invitationId: input.invitationId,
+      path: "resend",
+      result: sendResult,
+      attempts: 1,
+      autoRetry: false,
     });
     revalidatePath(`/${input.locale}/dashboard/network`);
     return {
@@ -430,8 +453,20 @@ async function afterInvitationAccepted(args: {
   invitationId: string | null;
   surface: "invite_page" | "network";
   locale?: string | null;
+  /** Where the person accepted and which review sentence that surface showed
+   *  (null = it showed none; review then stays on the manual door). */
+  noticeSurface: ReviewNoticeSurface;
+  reviewNotice: unknown;
 }): Promise<void> {
   const { userId, data, invitationId, surface, locale } = args;
+  // FIRST, in the person's own session: the auditable acceptance fact for a
+  // staff invitation accepted under the review sentence (owner decision 1).
+  // Never blocks the accept; the RPC re-checks every condition in SQL.
+  await recordStaffReviewNotice({
+    invitationId,
+    surface: args.noticeSurface,
+    notice: acceptedReviewNotice(args.reviewNotice),
+  });
   if (invitationId) {
     await emitInvitationAcceptedNotification({
       inviterProfileId: (data?.inviter_profile_id ?? null) as string | null,
@@ -467,6 +502,10 @@ export async function acceptInvitationAction(input: {
   token: string;
   /** Lets the network page refresh after an accept (same as the by-id door). */
   locale?: string | null;
+  /** The surface that accepted (invite page, addressed signup, onboarding). */
+  noticeSurface?: ReviewNoticeSurface;
+  /** `REVIEW_NOTICE_VERSION` only when that surface showed the review sentence. */
+  reviewNotice?: string | null;
 }): Promise<AcceptInvitationResult> {
   const supabase = await createClient();
   const {
@@ -498,6 +537,8 @@ export async function acceptInvitationAction(input: {
       invitationId,
       surface: "invite_page",
       locale: input.locale,
+      noticeSurface: input.noticeSurface ?? "invite_page",
+      reviewNotice: input.reviewNotice ?? null,
     });
   }
   return {
@@ -555,6 +596,10 @@ export async function declineInvitationAction(input: {
 export async function acceptInvitationByIdAction(input: {
   invitationId: string;
   locale: string;
+  /** The network list or the chat card. */
+  noticeSurface?: ReviewNoticeSurface;
+  /** `REVIEW_NOTICE_VERSION` only when that surface showed the review sentence. */
+  reviewNotice?: string | null;
 }): Promise<SimpleInvitationResult> {
   const supabase = await createClient();
   const {
@@ -583,6 +628,8 @@ export async function acceptInvitationByIdAction(input: {
       data,
       invitationId: input.invitationId,
       surface: "network",
+      noticeSurface: input.noticeSurface ?? "network",
+      reviewNotice: input.reviewNotice ?? null,
     });
   }
   revalidatePath(`/${input.locale}/dashboard/network`);
@@ -745,11 +792,16 @@ export async function createShareableInvitationAction(input: {
       personalMessage: input.personalMessage ?? null,
     }),
   }, { kind: "invitation", organizationId: input.organizationId ?? null });
+  if (sendResult.status === "suppressed_synthetic_address") {
+    // Never mailed by design (synthetic QA plus-address): the link is the result.
+    return { status: "ok", outcome: "created", invitationId, inviteLink, maxUses };
+  }
   const deliveryOutcome = sendResult.status === "sent" ? "sent" : "delivery_failed";
   await asAny(supabase).rpc("mark_invitation_delivery_v1", {
     p_invitation_id: invitationId,
     p_outcome: deliveryOutcome,
   });
+  await recordDeliveryAttempt({ invitationId, path: "create", result: sendResult, attempts: 1, autoRetry: false });
   return { status: "ok", outcome: deliveryOutcome, invitationId, inviteLink, maxUses };
 }
 

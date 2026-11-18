@@ -59,8 +59,12 @@ describe("upload token - minted by the web app, verified by the service", () => 
     expect(
       svc.verifyUploadToken(SECRET, `${p}.${forgedBody}.${sig}`, NOW),
     ).toEqual({ ok: false, code: "bad_signature" });
+    // The tamper must CHANGE the signature: a signature that already ends in
+    // "AA" (random nonce, ~1 in 4096) made the old "tamper" a no-op and the
+    // test flaky in CI (2026-10-13, PR #2331).
+    const tail = sig.endsWith("AA") ? "BB" : "AA";
     expect(
-      svc.verifyUploadToken(SECRET, `${p}.${body}.${sig.slice(0, -2)}AA`, NOW)
+      svc.verifyUploadToken(SECRET, `${p}.${body}.${sig.slice(0, -2)}${tail}`, NOW)
         .ok,
     ).toBe(false);
   });

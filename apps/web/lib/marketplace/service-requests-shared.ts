@@ -170,17 +170,23 @@ export function computeNewCounts(
 export type DiscoveryListResult =
   | { kind: "ok"; rows: DiscoverableOfferingRow[] }
   | { kind: "needs-migration" }
+  /** The read failed — never shown as "no offerings" (SEP-7, audit 2026-10-16). */
+  | { kind: "unavailable" }
   | { kind: "not-authed" };
 
 export type OutgoingListResult =
   | { kind: "ok"; rows: OutgoingRequestRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read failed — UNKNOWN, never "no requests" (SEP-7). */
+  | { kind: "error" };
 
 export type IncomingListResult =
   | { kind: "ok"; rows: IncomingRequestRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read failed — UNKNOWN, never "no requests" (SEP-7). */
+  | { kind: "error" };
 
 export type RequestMutateResult =
   | { kind: "ok"; id?: string; detail?: string }

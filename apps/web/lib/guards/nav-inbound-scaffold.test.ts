@@ -341,7 +341,7 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
     expect(readContinuationToken([], ["next_id"])).toBeNull();
   });
 
-  it("dry run: walks page → page by path token, fans out to each ad, stops at the head", async () => {
+  it("dry run: walks page → page by path token (two per session), fans out to each ad, resumes to the head", async () => {
     enableNav(true);
     const impl = stubFeed(
       {
@@ -371,28 +371,39 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
       cursor: null,
     });
 
-    expect(pageTokens(impl)).toEqual(["", "token-page-2", "token-page-3"]);
+    // NAV's request budget caps a session at TWO listing pages (was five): the
+    // third page is left for the next session, with the checkpoint on it.
+    expect(pageTokens(impl)).toEqual(["", "token-page-2"]);
     const detailUrls = impl.mock.calls
       .map((c) => new URL(String(c[0])).pathname)
       .filter((p) => p.startsWith("/api/v1/feedentry/"));
     // INACTIVE entries are never fetched: they become withdrawals directly.
-    expect(detailUrls).toEqual([
-      "/api/v1/feedentry/nav-1",
-      "/api/v1/feedentry/nav-2",
-      "/api/v1/feedentry/nav-3",
-    ]);
-    expect(result.metrics.pagesRequested).toBe(3);
-    expect(result.metrics.itemsParsed).toBe(4);
-    // Governance is confirmed: the live ads are accepted. The INACTIVE entry
-    // withdraws an ad we do not hold, which is nothing to remove.
+    expect(detailUrls).toEqual(["/api/v1/feedentry/nav-1", "/api/v1/feedentry/nav-2"]);
+    expect(result.metrics.pagesRequested).toBe(2);
+    expect(result.metrics.itemsParsed).toBe(3);
     expect(result.activated).toBe(true);
-    expect(result.acceptedVacancies.map((v) => v.externalId).sort()).toEqual([
-      "nav-1",
-      "nav-2",
-      "nav-3",
-    ]);
     expect(result.nextCursor).toBe("continuation-token:token-page-3");
-    expect(result.caughtUp).toBe(true);
+    expect(result.caughtUp).toBe(false);
+
+    // The next session resumes at the checkpoint and reaches the head.
+    const second = await runVacancyImport({
+      provider: NAV,
+      channel: "stream",
+      mode: "dry_run",
+      sessionId: "s1-next",
+      startedAtIso: NOW,
+      finishedAtIso: NOW,
+      capturedAt: NOW,
+      apiKey: TOKEN,
+      cursor: result.nextCursor,
+    });
+    expect(second.acceptedVacancies.map((v) => v.externalId)).toEqual(["nav-3"]);
+    expect(second.caughtUp).toBe(true);
+    // Together the two sessions read every ad exactly once. The INACTIVE entry
+    // withdraws an ad we do not hold, which is nothing to remove.
+    expect(
+      [...result.acceptedVacancies, ...second.acceptedVacancies].map((v) => v.externalId).sort(),
+    ).toEqual(["nav-1", "nav-2", "nav-3"]);
   });
 
   it("the cold start sends If-Modified-Since on the head page", async () => {
@@ -512,6 +523,8 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
       chain.or = self;
       chain.order = self;
       chain.range = self;
+      chain.gt = self;
+      chain.limit = self;
       chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
       chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
         Promise.resolve({ data: [], error: null }).then(ok, err);
@@ -610,6 +623,8 @@ describe("(4) no nav.no host is reachable while the switch is closed", () => {
       chain.or = self;
       chain.order = self;
       chain.range = self;
+      chain.gt = self;
+      chain.limit = self;
       chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
       chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
         Promise.resolve({ data: [], error: null }).then(ok, err);
@@ -787,6 +802,34 @@ describe("nav parser: the field map is VERIFIED against a real payload; nothing 
     expect(JSON.stringify(v)).not.toMatch(/Not Stored|nobody@example/);
   });
 
+  it("apply URL: publisher url wins, then sourceurl, then NAV link; empty/non-http never counts", () => {
+    const url = (over: Record<string, unknown>): string | null => {
+      const o = parseNavBatch({
+        body: [navAd(over)],
+        channel: "stream",
+        capturedAt: NOW,
+        requestRef: "r",
+      }).outcomes[0];
+      if (o.kind !== "parsed") throw new Error("expected parsed");
+      return o.vacancy.applicationUrl;
+    };
+    const LINK = "https://arbeidsplassen.nav.no/stillinger/stilling/nav-1";
+    // NAV writes "" for both when the employer gave none -> falls through to link.
+    expect(url({ applicationUrl: "", sourceurl: "", link: LINK })).toBe(LINK);
+    expect(url({ applicationUrl: undefined, sourceurl: "", link: LINK })).toBe(LINK);
+    // Publisher's own apply route still wins, then sourceurl, over link.
+    expect(url({ applicationUrl: "https://bygg.example/apply", sourceurl: "", link: LINK })).toBe(
+      "https://bygg.example/apply",
+    );
+    expect(url({ applicationUrl: "", sourceurl: "https://bygg.example/ad", link: LINK })).toBe(
+      "https://bygg.example/ad",
+    );
+    // A non-http link is rejected; a missing link yields null.
+    expect(url({ applicationUrl: "", sourceurl: "", link: "javascript:alert(1)" })).toBeNull();
+    expect(url({ applicationUrl: "", sourceurl: "", link: "" })).toBeNull();
+    expect(url({ applicationUrl: "", sourceurl: "" })).toBeNull();
+  });
+
   it("an INACTIVE withdrawal (title only) is the shape the removal duty needs", () => {
     const batch = parseNavBatch({
       body: [{ uuid: "nav-9", status: "INACTIVE", title: "" }, navAd({ uuid: "nav-8", status: "INACTIVE" })],
@@ -866,27 +909,42 @@ describe("removal duty at store scale: the dedup state is read PAGED, never as a
     const target = stored[1700].external_id;
     stubFeed({ "": { items: [navEntry(target, "INACTIVE")] } });
 
-    const ranges: [number, number][] = [];
+    // KEYSET paging (2026-10-09): `external_id > last` + `limit`, never OFFSET.
+    const afters: (string | null)[] = [];
+    let usedRange = false;
     const chainFor = (table: string) => {
       const chain: Record<string, unknown> = {};
-      let range: [number, number] | null = null;
+      let after: string | null = null;
+      let isRead = false;
       const self = () => chain;
-      chain.select = self;
+      chain.select = () => {
+        isRead = true;
+        return chain;
+      };
       chain.eq = self;
       chain.in = self;
       chain.or = self;
       chain.order = self;
-      chain.range = (from: number, to: number) => {
-        range = [from, to];
-        ranges.push([from, to]);
+      chain.range = () => {
+        usedRange = true;
         return chain;
       };
+      chain.gt = (_c: string, v: string) => {
+        after = v;
+        return chain;
+      };
+      chain.limit = self;
       chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
-      chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
-        Promise.resolve({
-          data: table === "public_vacancies" && range ? stored.slice(range[0], range[1] + 1) : [],
+      chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) => {
+        if (table === "public_vacancies" && isRead) afters.push(after);
+        return Promise.resolve({
+          data:
+            table === "public_vacancies" && isRead
+              ? stored.filter((r) => after === null || r.external_id > after).slice(0, 1000)
+              : [],
           error: null,
         }).then(ok, err);
+      };
       chain.upsert = () => Promise.resolve({ data: null, error: null });
       return chain;
     };
@@ -896,11 +954,8 @@ describe("removal duty at store scale: the dedup state is read PAGED, never as a
       mode: "dry_run",
       nowIso: NOW,
     });
-    expect(ranges).toEqual([
-      [0, 999],
-      [1000, 1999],
-      [2000, 2999],
-    ]);
+    expect(usedRange).toBe(false);
+    expect(afters).toEqual([null, "held-00999", "held-01999"]);
     expect(session.metrics?.itemsRemoval).toBe(1);
   });
 });

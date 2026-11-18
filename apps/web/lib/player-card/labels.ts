@@ -2,6 +2,7 @@ import "server-only";
 
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { statedDateLabel } from "@/lib/cv/period-dates";
 import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
 import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
 import type { PlayerCardLabels } from "@/components/app/worker-player-card";
@@ -12,7 +13,6 @@ import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenan
 import type { ContextWorkTime, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { buildIdentityFacts } from "@/lib/player-card/identity-facts";
-import { computeAdjacentDirections } from "@/lib/opportunities/adjacent-directions";
 import { mobilityLabels } from "@/lib/people/person-page-labels";
 
 /**
@@ -38,6 +38,10 @@ export async function buildPlayerCardLabels(
      */
     readonly allTime?: WorkPeriodTotals | null;
     readonly allTimeTruncated?: boolean;
+    /** The decision-0025 figures (`experienceFiguresOf`) — the same the
+     *  profile hub passes; absent → the strip shows the journal only. */
+    readonly organizationHistoryHours?: number | null;
+    readonly professionalExperienceHours?: number | null;
   } = {},
 ): Promise<PlayerCardLabels> {
   const locale = await getLocale();
@@ -135,44 +139,11 @@ export async function buildPlayerCardLabels(
     truncated: opts.allTimeTruncated ?? false,
     locale,
     t: (key, values) => tIdentity(key, values),
+    organizationHistoryHours: opts.organizationHistoryHours ?? null,
+    professionalExperienceHours: opts.professionalExperienceHours ?? null,
   });
 
-  // NEXT in the card's world: where the person's OWN evidenced skills
-  // already reach — the existing adjacency engine over the skills a record
-  // or a confirmation backs (a declared-only skill does not open a
-  // direction), minus every profession the person already holds.
-  const tWorld = await getTranslations("playerCard.identity.world");
-  const held = new Set(
-    [card.professionSlug, ...card.professions.map((p) => p.slug)].filter((s): s is string => Boolean(s)),
-  );
-  const evidenced = card.skillEvidence.filter((b) => b.entries > 0 || b.tier === "verified").map((b) => b.slug);
-  const directions = computeAdjacentDirections({
-    workerSkillSlugs: evidenced,
-    primaryProfessionSlug: card.professionSlug ?? null,
-  })
-    .directions.filter((d) => !held.has(d.professionId))
-    .slice(0, 4)
-    .map((d) => {
-      const missing = d.missingSkills.slice(0, 2).map((s) => (tSkill.has(s) ? tSkill(s) : s));
-      return {
-        id: d.professionId,
-        label: tProf.has(d.professionId) ? tProf(d.professionId) : d.professionId,
-        detail:
-          missing.length > 0
-            ? tWorld("directionDetail", { shared: d.sharedCount, missing: missing.join(", ") })
-            : tWorld("directionDetailNoGap", { shared: d.sharedCount }),
-        shared: d.sharedCount,
-      };
-    });
-
   return {
-    world: {
-      sceneLabel: tWorld("sceneLabel"),
-      empty: tWorld("empty"),
-      emptyNext: tWorld("emptyNext"),
-      allDetails: tWorld("allDetails"),
-      directions,
-    },
     professionNames,
     currentWork,
     currentWorkLabel: t("identity.currentWork"),
@@ -372,13 +343,19 @@ export async function buildPlayerCardLabels(
         // readable without a second history list underneath the card.
         laneDetails: history.lanes.map((lane) => {
           const entry = card.workHistory.find((h) => h.id === lane.id);
+          // No organization: only what the person stated, never a padded day.
+          const own = entry !== undefined && entry.organizationName === null;
           const from = entry?.startedAt
-            ? dateFmt.format(new Date(`${entry.startedAt}T00:00:00Z`))
+            ? own
+              ? statedDateLabel(entry.startedAt, "start", locale)
+              : dateFmt.format(new Date(`${entry.startedAt}T00:00:00Z`))
             : null;
           const to = entry?.current
             ? t("workHistoryCurrent")
             : entry?.endedAt
-              ? dateFmt.format(new Date(`${entry.endedAt}T00:00:00Z`))
+              ? own
+                ? statedDateLabel(entry.endedAt, "end", locale)
+                : dateFmt.format(new Date(`${entry.endedAt}T00:00:00Z`))
               : null;
           return from && to ? `${from} — ${to}` : (from ?? "");
         }),

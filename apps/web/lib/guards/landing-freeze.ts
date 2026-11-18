@@ -20,6 +20,56 @@ import { join } from "node:path";
  *
  * BASELINE REGENERATIONS ON RECORD
  * --------------------------------
+ * The partner door is a real request form (owner P0 2026-11-15, production
+ * audit F3: "Become a partner" opened /about, which holds no partner form or
+ * contact): `PARTNER_DOOR` and the partners goal open `/#request=partner`, a
+ * fourth request door, and `landing.requestDoors` gains its title, line and one
+ * field label. Moved: public-doors.ts, starting-contexts-band.tsx (its `/about`
+ * cast and comment) and the `lt`, `en`, `ru` landing namespaces.
+ *
+ * No internal process notes in the UI (owner order P0 2026-11-15): the
+ * "In preparation" roadmap badge `landing.conv.comingLabel` now states the plain
+ * user-facing fact ("Not available yet"). Moved: the `lt`, `en`, `ru` landing
+ * namespace hashes. No source file.
+ *
+ * The first screen is the choice (owner instruction 2026-11-12: "Sumažink pagrindinio
+ * puslapio sudėtingumą. Pašalink nereikalingus tekstus, abstrakčius šūkius ir
+ * pasikartojančius blokus. Pirmame ekrane turi būti aiškus pasirinkimas, ką žmogus nori
+ * atlikti."): the goal navigator is first and carries the page's h1 (the question);
+ * the owner's headline is the one supporting line under it; the brand eyebrow, the
+ * second paragraph, the hero's "Start now" pair, the link down to the request doors
+ * and the three abstract cards left the first screen. EXACTLY ONE hash moved:
+ * focus-landing.tsx. No copy changed and no namespace moved (the labels are `siteNav`).
+ *
+ * No reply-time promise (owner decision 2026-11-10): the request doors no longer
+ * promise contact "within 24 hours" — the request is received and the team gets
+ * in touch after reviewing it. `requestDoors.promise` and `receivedBody` only.
+ * Moved: the `lt`, `en`, `ru` landing namespaces. No source file.
+ *
+ * Hero layout repair (owner order 2026-11-10, design completion): with the story
+ * column withdrawn the desktop first screen was half empty and the `order-1`
+ * wrapper put the entry above the h1 on phones. Source order is now promise →
+ * entry → doors, the entry beside the promise from `xl`. EXACTLY ONE hash moved:
+ * focus-landing.tsx. No copy, no namespace.
+ *
+ * No fictional people (owner order 2026-11-09): the living worker hero — sample
+ * personas with names, professions and careers under a "Sample" label — is
+ * withdrawn from the landing; the entry hero is the first screen. EXACTLY ONE
+ * hash moved: focus-landing.tsx. No namespace, no other frozen file.
+ *
+ * Request door wording (owner order 2026-11-07): the promise and the B2B door's title
+ * only. Moved: the `lt`, `en`, `ru` landing namespaces.
+ *
+ * Three commercial request doors (owner P0 2026-11-07): `LandingRequestDoors` under the
+ * hero and the new `landing.requestDoors` copy. Moved: focus-landing.tsx and the frozen
+ * `lt`, `en`, `ru` landing namespaces. No other frozen artefact.
+ *
+ * Owner-approved hero text (owner decision 2026-11-05): `landing.hero.headline`
+ * and `.sub` in the six active locales. Lithuanian is the owner's own words; the
+ * other five are machine-drafted, with no native review yet. EXACTLY THREE namespace
+ * hashes moved (lt, en, ru; nl, de and pl are outside the frozen set) and no file: the
+ * page, its layout and every test rule are untouched.
+ *
  * W14 Slice 1 (owner directive 2026-08-02) — "Remove fabricated AI
  * confidence". The hero rendered "Confidence 86%" from a literal in
  * `landing-scenario.ts` (W14 audit P0-1). Removing it necessarily changed a
@@ -616,6 +666,54 @@ import { join } from "node:path";
  * the real card over every combination of the varying facts (same markup
  * exactly when same facts) and by reading the card's own table keys from
  * its source and pinning the declared key sets to them.
+ *
+ * Formal address (owner decision 2026-11-15: "Jūs" in Lithuanian and "u" in
+ * Dutch are the default professional address; every language keeps a
+ * natural, respectful tone). It supersedes the informal "tu" order of
+ * 2026-10-28 below: Lithuanian moved back to jūs/jūsų, galite, pasirinkite …;
+ * Dutch to u/uw; the few Russian "ты" strings to "вы". The user's own words
+ * (chat bubbles, first-person example prompts) stay as written. Every key and
+ * every ICU placeholder / plural skeleton is unchanged; only wording moved.
+ * The regeneration moved EXACTLY SIX namespace hashes — `lt.landing`,
+ * `lt.hero`, `lt.livingMarketReview`, `lt.workEntryReview`,
+ * `lt.landingJourney`, `ru.landing` — and ZERO file hashes; `en.*` is
+ * byte-identical, which is the proof that no component, layout or English
+ * copy changed.
+ *
+ * LT informal "tu" register (owner order 2026-10-28) — the Lithuanian UI is
+ * unified to the informal singular address (tu/tavo/tau; gali, pasirink,
+ * prisijunk …) instead of the formal plural (jūs/jūsų; galite, pasirinkite,
+ * prisijunkite …). Legal texts (`legal.*`) were explicitly excluded. Every key
+ * and every ICU placeholder / plural skeleton is unchanged; only LT wording
+ * moved. The regeneration moved EXACTLY FIVE namespace hashes — `lt.landing`,
+ * `lt.hero`, `lt.livingMarketReview`, `lt.workEntryReview`,
+ * `lt.landingJourney` — and ZERO file hashes; `en.*` and `ru.*` are
+ * byte-identical, which is the proof that no component, layout or other
+ * locale changed.
+ *
+ * Adverts in the visitor's language first (owner decision 2026-11-15: "the
+ * visitor's language first, then other suitable offers" — a sort priority,
+ * never a filter). `live-market-landing.ts` keeps the board's whole first page
+ * in the shared cached snapshot (key `live-market-landing-v3`) and exports the
+ * language test; `pickLandingVacancySample` takes the visitor's language and
+ * orders own-language rows first, every other rule unchanged; `focus-landing.tsx`
+ * makes that pick per visitor at render time. The band and the card are
+ * byte-identical. The regeneration moved EXACTLY TWO file hashes —
+ * `lib/market/live-market-landing.ts` and `app/[locale]/focus-landing/focus-landing.tsx`
+ * — and ZERO namespace hashes: no copy moved.
+ *
+ * A worker or contractor sentence can be sent without an account (owner P0
+ * 2026-11-15, misleading public paths, F4). The entry's reading now offers, FIRST,
+ * the request the page already takes signed out: a sentence about needing workers
+ * opens the public need form with the sentence as its description
+ * (`?description=…&from=landing_entry`), and a job for someone to do opens the
+ * project request on this page (`#request=project`). Sign-up stays, second, with
+ * `?say=`; "sign in to save your request" is said only when it is true. The
+ * button reuses the request block's own title (`landing.requestDoors.title`),
+ * handed to the entry by the server landing so the client still receives
+ * `landing.entry` only; no copy moved. The regeneration moved EXACTLY TWO file
+ * hashes — `components/marketing/public-entry.tsx` and
+ * `app/[locale]/focus-landing/focus-landing.tsx` — and ZERO namespace hashes.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -647,10 +745,11 @@ export const FROZEN_LANDING_FILES = [
   // pure read-only hook into the conversation router) replaces the scripted
   // hero scenario at the top of the render tree.
   "components/marketing/public-entry.tsx",
+  // Owner positioning 2026-10-21: the three ways under the promise.
+  "components/marketing/landing-three-ways.tsx",
   "lib/marketing/public-entry.ts",
   "components/marketing/product-chain-band.tsx",
   "components/marketing/market-proof-band.tsx",
-  "components/marketing/player-card-showcase.tsx",
   "components/marketing/trust-band.tsx",
   "components/marketing/final-cta-band.tsx",
   // Window 6, 2026-09-06: the pure door registry the band renders from.
@@ -669,8 +768,6 @@ export const FROZEN_LANDING_FILES = [
   "components/marketing/landing-open-jobs-band.tsx",
   // Owner decision 2026-09-29: the freeze was lifted for the ENTRY HERO
   // only; the new entry story is frozen with it as the new floor.
-  "components/marketing/landing-journey.tsx",
-  "lib/marketing/sample-journey.ts",
   // Owner directive 2026-09-29 ("realistic living worker hero"): the same
   // lifted scope — the entry hero only. The living worker hero and its data
   // builder are frozen with it as the new floor; the photographs themselves
@@ -700,6 +797,23 @@ export const FROZEN_LANDING_FILES = [
   // recomposed with safe space above the head (media), and a head-safety
   // rule in the camera so holding the face never pushes a head out of frame.
   // The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
+  // 2026-10-10 (owner directive, verbatim: "Pradinio puslapio mobilųjį CTA
+  // sutvarkyk pagal jau patvirtintą vizualinę kryptį. Užšaldymo apsauga turi
+  // saugoti patvirtintą dizainą, o ne amžinai blokuoti jo funkcionalumo
+  // pataisymus. Keisk tik pagrįstai būtiną dalį."): on a phone the promise and
+  // the primary doors now come BEFORE the photograph (flex order; desktop
+  // untouched — the promise stays absolute over the picture). The first CTA
+  // had been at ~1,035 px on 375x812. The regeneration touched EXACTLY ONE
+  // hash — living-worker-hero.tsx; no copy, photograph or motion moved.
+  // 2026-10-18 (owner directive, final product completion: "Išsaugok esamą
+  // dizaino sistemą, bet pašalink nenuoseklumus"; the 2026-10-10 rule that the
+  // freeze protects the approved design, not its defects): three defects seen
+  // on production — a 56px two-tone seam between the header and the hero
+  // (-mt-14 pt-14 on the section), the subline running past the 28% left
+  // gradient onto bright frames (gradient 46%), and carousel controls with no
+  // backdrop (the hero chips' own translucent pill). The regeneration touched
+  // EXACTLY ONE hash — living-worker-hero.tsx; no copy, photograph, motion or
+  // structure moved.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",
 ] as const;

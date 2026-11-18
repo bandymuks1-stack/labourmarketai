@@ -22,7 +22,24 @@ export interface ClientChatOffer {
   readonly createdAt: string;
 }
 
+/** A brigade (or a company offering itself) against one of the company's
+ *  own needs — team-level only, never a member (2026-10-11). */
+export interface ClientChatTeamOffer {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+  readonly teamName: string;
+  readonly status: "offered" | "accepted" | "assigned";
+  readonly memberCount: number;
+  readonly offeredAt: string;
+}
+
 export type ClientOffersChatResult =
-  | { readonly kind: "ok"; readonly offers: readonly ClientChatOffer[]; readonly openDemands: number }
+  | {
+      readonly kind: "ok";
+      readonly offers: readonly ClientChatOffer[];
+      readonly teamOffers: readonly ClientChatTeamOffer[];
+      readonly openDemands: number;
+    }
   | { readonly kind: "no-company" }
   | { readonly kind: "error" };

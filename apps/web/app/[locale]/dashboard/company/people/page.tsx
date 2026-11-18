@@ -53,6 +53,15 @@ import { ManagerEvidenceCard } from "@/components/app/manager-evidence-card";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { LifecycleSection } from "../lifecycle-section";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { Fold } from "@/components/app/premium/grammar";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { TeamDemandOfferForm } from "@/components/app/team-demand-offer-form";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/people", "organizationDoors.pages.people.title");
+
 
 /**
  * ŽMONĖS — the organization's people door (owner IA correction 2026-09-16,
@@ -86,6 +95,7 @@ export default async function CompanyPeoplePage({
 
   const t = await getTranslations("organizationDoors.pages.people");
   const tNetwork = await getTranslations("network");
+  const tDisclosure = await getTranslations("common.disclosure");
 
   const employerCtx = await resolveEmployerCompanyContext();
   // READ access (any governance role the resolver accepted) — a manager
@@ -126,49 +136,92 @@ export default async function CompanyPeoplePage({
       isCreator: employerCtx.isCreator,
     }).canGovern;
 
-  const orgContext = await getActiveOrganizationContext();
-  const capabilityOrgId =
-    orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
-    // Only a GOVERNED active organization — never an employee-only one.
-    governedActiveOrganizationId(orgContext);
-  const declaredCapabilities = capabilityOrgId
-    ? await readOrganizationCapabilities(capabilityOrgId)
-    : [];
-  // ORG-2: the ONE agency rule (type OR declared workforce role).
-  const isStaffingAgency = actsAsAgency(companyRow.companyType, declaredCapabilities);
-
-  const [rWorkers, rInvitations, orgMembers, teamBrigades, managerEvidence, managedProjects] =
-    await Promise.all([
+  // WAVE A (2026-10-18 perf: this page ran ~9 reads one after another, 4.5 s
+  // in production). The organization context and the six company reads need
+  // only `companyRow`, so they run together.
+  const [
+    orgContext,
+    [rWorkers, rInvitations, orgMembers, teamBrigades, managerEvidence, managedProjects],
+  ] = await Promise.all([
+    getActiveOrganizationContext(),
+    Promise.all([
       listActiveCompanyWorkers(companyRow.id),
       canManageInvitations ? listCompanyWorkerInvitations(companyRow.id) : null,
       getOrgMembersData("company", companyRow.id),
       getTeamBrigadesData(),
       getManagerEvidence(),
       listManagedProjects(),
-    ]);
+    ]),
+  ]);
+  const capabilityOrgId =
+    orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
+    // Only a GOVERNED active organization — never an employee-only one.
+    governedActiveOrganizationId(orgContext);
   const workersResult = rWorkers ?? ({ kind: "ok", rows: [] } as const);
   const invitationsResult = rInvitations ?? ({ kind: "ok", rows: [] } as const);
   const activeWorkerRows = workersResult.kind === "ok" ? workersResult.rows : [];
-  // Roster-link candidates = the DATABASE's rule (active engagement or
-  // membership + a worker row), not the legacy company_workers list alone —
-  // the organization's own owner, named on its timesheet, is eligible too.
-  const engagementCandidates = capabilityOrgId
-    ? await listRosterLinkCandidatesFromEngagements(await createClient(), capabilityOrgId)
-    : [];
-  // The team's STATE (free / working / away) is the ONE capacity read the chat,
-  // the home and the planning page already use — handed the roster read above so
-  // the roster is not queried twice, for today, every person. A failed read says
-  // nothing about anyone (unknown is not zero).
-  const teamState = derivePeopleTeamState(
-    await whoIsAvailableCore(
+
+  // WAVE B: everything below needs only wave A's answers, so it runs together.
+  const [
+    declaredCapabilities,
+    engagementCandidates,
+    availability,
+    readinessMap,
+    avatarPairs,
+    bookedPeople,
+  ] = await Promise.all([
+    capabilityOrgId ? readOrganizationCapabilities(capabilityOrgId) : Promise.resolve([]),
+    // Roster-link candidates = the DATABASE's rule (active engagement or
+    // membership + a worker row), not the legacy company_workers list alone —
+    // the organization's own owner, named on its timesheet, is eligible too.
+    capabilityOrgId
+      ? createClient().then((client) => listRosterLinkCandidatesFromEngagements(client, capabilityOrgId))
+      : Promise.resolve([]),
+    // The team's STATE (free / working / away) is the ONE capacity read the chat,
+    // the home and the planning page already use — handed the roster read above so
+    // the roster is not queried twice, for today, every person. A failed read says
+    // nothing about anyone (unknown is not zero).
+    whoIsAvailableCore(
       companyRow.id,
       null,
       { roster: workersResult },
       new Date().toISOString().slice(0, 10),
       500,
     ),
-  );
+    getWorkerReadiness(activeWorkerRows.map((w) => w.workerId)),
+    Promise.all(
+      activeWorkerRows.map(
+        async (w) => [w.workerId, await getAvatarForVisibleWorker(w.workerId)] as const,
+      ),
+    ),
+    listBookedPeople(companyRow.id, {
+      excludeWorkerIds: new Set(activeWorkerRows.map((w) => w.workerId)),
+      memberProfileIds: new Set(
+        (orgMembers?.members ?? [])
+          .map((m) => m.profileId)
+          .filter((v): v is string => Boolean(v)),
+      ),
+    }),
+  ]);
+  // ORG-2: the ONE agency rule (type OR declared workforce role).
+  const isStaffingAgency = actsAsAgency(companyRow.companyType, declaredCapabilities);
+  const teamState = derivePeopleTeamState(availability);
   const tTeam = await getTranslations("roleDashboards.company.workers.team");
+  // JOINED THROUGH AN INVITATION (walk 2026-10-11): a worker who accepts a
+  // "join as employee" link gets the CANONICAL engagement_contexts relationship
+  // only; the roster above reads the legacy company_workers store, so the
+  // owner was told "no linked workers yet" about someone already working and
+  // already reviewable. They are named here from the same org-members read,
+  // with the review state and the one place that manages it.
+  const tInviteLinked = await getTranslations("roleDashboards.company.workers.inviteLinked");
+  const rosterProfileIds = new Set(activeWorkerRows.map((w) => w.profileId).filter(Boolean));
+  const inviteLinked = (orgMembers?.members ?? []).filter(
+    (m) =>
+      m.role === "employee" &&
+      !m.isRegisteredOwner &&
+      m.profileId !== null &&
+      !rosterProfileIds.has(m.profileId),
+  );
   const dayFmt = createUtcFormatter(locale, { day: "numeric", month: "short" });
   const teamView: CompanyWorkersTeamView = {
     counts: teamState.counts,
@@ -192,21 +245,11 @@ export default async function CompanyPeoplePage({
       }),
     ),
   };
-  const readinessMap = await getWorkerReadiness(activeWorkerRows.map((w) => w.workerId));
   // The team's PHOTOS (owner D1, 2026-09-30): an ACTIVE company_workers row is
   // a real work relationship, which the one photo rule
   // (worker_avatar_path_v1) already admits. The database decides per person;
   // anything else stays initials.
-  const avatarByWorker: Record<string, string | null> = Object.fromEntries(
-    await Promise.all(
-      activeWorkerRows.map(
-        async (w) => [w.workerId, await getAvatarForVisibleWorker(w.workerId)] as const,
-      ),
-    ),
-  );
-  // What each person DOES: the canonical profession read (registry slug via the
-  // catalogue, or their own words exactly as typed), primary first. Names are
-  // resolved here so the client section receives plain strings.
+  const avatarByWorker: Record<string, string | null> = Object.fromEntries(avatarPairs);
   const tProf = await getTranslations("professions");
   const professionsByWorker: Record<string, string[]> = Object.fromEntries(
     activeWorkerRows.map((w) => [
@@ -219,14 +262,6 @@ export default async function CompanyPeoplePage({
   // Booked people (R-2 GREEN half): the direct-booking relationship, visible
   // beside the roster it is not part of, with its honest journal state. The
   // read is RLS-scoped to this company's own engagement rows.
-  const bookedPeople = await listBookedPeople(companyRow.id, {
-    excludeWorkerIds: new Set(activeWorkerRows.map((w) => w.workerId)),
-    memberProfileIds: new Set(
-      (orgMembers?.members ?? [])
-        .map((m) => m.profileId)
-        .filter((v): v is string => Boolean(v)),
-    ),
-  });
   const readinessRows = activeWorkerRows.map((w) => ({
     workerName: w.displayName ?? (w.email ? w.email.split("@")[0] : "—"),
     readiness: readinessMap.get(w.workerId) ?? {
@@ -254,9 +289,7 @@ export default async function CompanyPeoplePage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-people">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         <p
           className="font-mono text-meta text-text-muted tabular-nums"
@@ -316,6 +349,32 @@ export default async function CompanyPeoplePage({
         />
       </div>
 
+      {inviteLinked.length > 0 ? (
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="people-invite-linked"
+          aria-labelledby="people-invite-linked-title"
+        >
+          <h2 id="people-invite-linked-title" className="font-display text-lg font-semibold text-text-primary">
+            {tInviteLinked("title", { count: inviteLinked.length })}
+          </h2>
+          <p className="text-sm text-text-secondary">{tInviteLinked("body")}</p>
+          <ul className="flex flex-col gap-1.5 text-sm">
+            {inviteLinked.map((m) => (
+              <li key={m.engagementId} className="flex flex-wrap items-baseline justify-between gap-2">
+                <span className="text-text-primary">{m.name}</span>
+                <span className="text-meta text-text-muted">
+                  {m.reviewEnabled ? tInviteLinked("reviewOn") : tInviteLinked("reviewOff")}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <a href="#org-members" className="w-fit text-sm text-brand-blue hover:underline">
+            {tInviteLinked("manage")}
+          </a>
+        </section>
+      ) : null}
+
       {/* People the company BOOKED directly: a real work relationship that no
           roster section shows, with the truthful reason its journal is not
           reviewable and the one legitimate way to change that. */}
@@ -335,6 +394,9 @@ export default async function CompanyPeoplePage({
         </Link>
       ) : null}
 
+      {/* WHO NEEDS ATTENTION — daily information, always open. */}
+      <WorkerReadinessSummary rows={readinessRows} />
+
       {/* Teams / brigades (§8.3): a brigade is an organizations row
           (organization_type='team'); membership arrives ONLY via an accepted
           join_team invitation; honest not-applied state otherwise. */}
@@ -345,6 +407,7 @@ export default async function CompanyPeoplePage({
           invitationsApplied={teamBrigades.invitationsApplied}
           detailsApplied={teamBrigades.detailsApplied}
           enquiriesApplied={teamBrigades.enquiriesApplied}
+          disbanded={teamBrigades.disbanded ?? []}
           projects={managedProjects
             .filter((p) => p.status !== "completed")
             .map((p) => ({ id: p.id, title: p.title }))}
@@ -353,62 +416,75 @@ export default async function CompanyPeoplePage({
         <TeamRosterEmptyState variant={isStaffingAgency ? "agency" : "company"} />
       )}
 
-      {/* BRINGING PEOPLE IN. The relationship that LEADS follows what the
-          workspace declared; every other truthful relationship stays
-          available, because an agency still employs people and a school
-          still hires. */}
-      {capabilityOrgId ? (
-        <div id="people-import-section" className="scroll-mt-20">
-          <PeopleImportPanel
-            organizationName={(companyRow.displayName || companyRow.legalName || "").trim()}
-            suggested={
-              declaredCapabilities.includes("training_provider")
-                ? "student"
-                : isStaffingAgency ||
-                    declaredCapabilities.includes("workforce_provider") ||
-                    declaredCapabilities.includes("recruitment_partner")
-                  ? "candidate"
-                  : "employee"
-            }
-          />
-        </div>
+      {/* The company / agency offers ITSELF against an open need — its people,
+          its service, as a subcontractor — with no brigade to create first
+          (owner P0 2026-10-11). Managers only; the database re-checks. */}
+      {canManageInvitations && employerCtx.kind === "ok" ? (
+        <TeamDemandOfferForm teamId={employerCtx.organizationId} memberCount={memberCount} kind="organization" />
       ) : null}
 
-      {/* THE ROSTER, READ BACK — directly under the panel that fills it. */}
-      {capabilityOrgId ? (
-        <OrganizationRosterSection
-          locale={locale}
-          linkCandidates={mergeRosterLinkCandidates(
-            activeWorkerRows
-              .filter((w) => w.status === "active")
-              .map((w) => ({ workerId: w.workerId, profileId: w.profileId, name: w.displayName ?? w.email ?? w.workerId })),
-            engagementCandidates,
-          )}
-        />
-      ) : null}
+      {/* ONE PAGE, ONE PRIMARY JOB (owner 2026-10-10: no walls of blocks):
+          the team, booked people, the invite, WHO NEEDS ATTENTION and the
+          brigades stay open; the secondary tools below are one tap away. Deep links into it (#org-members,
+          #people-import-section) open it via DetailsHashOpener. */}
+      <DetailsHashOpener targetId="people-more" />
+      <Fold id="people-more" title={tDisclosure("moreTools")} hint={t("moreToolsHint")} testId="people-more">
+        {/* BRINGING PEOPLE IN. The relationship that LEADS follows what the
+            workspace declared; every other truthful relationship stays
+            available, because an agency still employs people and a school
+            still hires. */}
+        {capabilityOrgId ? (
+          <div id="people-import-section" className="scroll-mt-20">
+            <PeopleImportPanel
+              organizationName={(companyRow.displayName || companyRow.legalName || "").trim()}
+              suggested={
+                declaredCapabilities.includes("training_provider")
+                  ? "student"
+                  : isStaffingAgency ||
+                      declaredCapabilities.includes("workforce_provider") ||
+                      declaredCapabilities.includes("recruitment_partner")
+                    ? "candidate"
+                    : "employee"
+              }
+            />
+          </div>
+        ) : null}
 
-      <WorkerReadinessSummary rows={readinessRows} />
-
-      {managerEvidence && <ManagerEvidenceCard evidence={managerEvidence} />}
-
-      {orgMembers && (
-        <div id="org-members" className="scroll-mt-20">
-          <OrgMembersPanel
-          orgId={orgMembers.orgId}
-          members={orgMembers.members}
-          addable={orgMembers.addable}
-          labels={orgMembersLabels}
-          viewerIsRegisteredOwner={orgMembers.viewerIsRegisteredOwner}
-          governanceWithoutReviewer={orgMembers.governanceWithoutReviewer}
+        {/* THE ROSTER, READ BACK — directly under the panel that fills it. */}
+        {capabilityOrgId ? (
+          <OrganizationRosterSection
+            locale={locale}
+            linkCandidates={mergeRosterLinkCandidates(
+              activeWorkerRows
+                .filter((w) => w.status === "active")
+                .map((w) => ({ workerId: w.workerId, profileId: w.profileId, name: w.displayName ?? w.email ?? w.workerId })),
+              engagementCandidates,
+            )}
           />
-        </div>
-      )}
+        ) : null}
 
-      {/* Employment lifecycle on the SAME canonical engagement_contexts rows
-          the members panel above manages. Honest gated state until applied. */}
-      {orgMembers && (
-        <LifecycleSection locale={locale} orgId={orgMembers.orgId} notice={lifecycleNotice} />
-      )}
+
+        {managerEvidence && <ManagerEvidenceCard evidence={managerEvidence} />}
+
+        {orgMembers && (
+          <div id="org-members" className="scroll-mt-20">
+            <OrgMembersPanel
+            orgId={orgMembers.orgId}
+            members={orgMembers.members}
+            addable={orgMembers.addable}
+            labels={orgMembersLabels}
+            viewerIsRegisteredOwner={orgMembers.viewerIsRegisteredOwner}
+            governanceWithoutReviewer={orgMembers.governanceWithoutReviewer}
+            />
+          </div>
+        )}
+
+        {/* Employment lifecycle on the SAME canonical engagement_contexts rows
+            the members panel above manages. Honest gated state until applied. */}
+        {orgMembers && (
+          <LifecycleSection locale={locale} orgId={orgMembers.orgId} notice={lifecycleNotice} />
+        )}
+      </Fold>
     </div>
   );
 }

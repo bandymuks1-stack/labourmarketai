@@ -213,14 +213,16 @@ export async function confirmTimesheetImportAction(
   if (!overrideDuplicates) {
     const starts = new Set(rows.map((r) => `${r.workDate.slice(0, 7)}-01`));
     const existing = new Set<string>();
-    for (const start of [...starts].slice(0, 3)) {
+    // EVERY month of the sheet, and an unreadable month stops the import
+    // (audit 2026-10-20): only the first 3 months were checked and a failed
+    // read was skipped, so a re-imported file wrote those hours twice.
+    for (const start of starts) {
       const res = await getAllocationsForMonth(start);
-      if (res.kind === "ok") {
-        for (const a of res.rows) {
-          existing.add(
-            duplicateKey(a.workerId, a.workDate, a.workObjectId, Math.round(a.hours * 100)),
-          );
-        }
+      if (res.kind !== "ok") return { status: "error" };
+      for (const a of res.rows) {
+        existing.add(
+          duplicateKey(a.workerId, a.workDate, a.workObjectId, Math.round(a.hours * 100)),
+        );
       }
     }
     const indexes = rows

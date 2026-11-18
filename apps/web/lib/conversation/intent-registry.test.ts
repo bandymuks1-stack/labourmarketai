@@ -133,7 +133,8 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 90 -> 91: product-help — how-to / where-is questions answered in words with the door.
     // 91 -> 92: open-conversation - 'parašyk Jonui' opens the ONE conversation.
     // 92 -> 93: new-jobs - the new ads over the one job-alert matching.
-    expect(entries.length).toBe(93);
+    // 93 -> 94: what-changed - the ONE consequence trace, read in the chat.
+    expect(entries.length).toBe(94);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

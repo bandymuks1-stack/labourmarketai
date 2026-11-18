@@ -25,6 +25,7 @@ const h = vi.hoisted(() => ({
   exec: vi.fn(),
   target: vi.fn(),
   workspace: vi.fn(),
+  spent: new Set<string>(),
 }));
 
 vi.mock("@/lib/env", () => ({
@@ -37,7 +38,19 @@ vi.mock("@/lib/auth/actions", () => ({}));
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     auth: { getUser: async () => ({ data: { user: { id: h.userId } } }) },
-    from: () => {
+    from: (table: string) => {
+      // The dispatcher's one-time spend (lib/security/confirmation-spend) —
+      // primary-key semantics; covered on its own in
+      // confirmation-spend-single-use.test.ts.
+      if (table === "confirmation_spends") {
+        return {
+          insert: async (row: { token_digest: string }) => {
+            if (h.spent.has(row.token_digest)) return { error: { code: "23505" } };
+            h.spent.add(row.token_digest);
+            return { error: null };
+          },
+        };
+      }
       throw new Error("the rename fingerprint must not query a table itself");
     },
   }),
@@ -84,6 +97,7 @@ const dispatch = (token: string) =>
 
 beforeEach(() => {
   vi.clearAllMocks();
+  h.spent.clear();
   // The SECOND workspace read the first shape fingerprinted. It stays on A
   // throughout, so any refusal below comes from the writer's own resolver.
   h.workspace.mockResolvedValue({ activeWorkspaceId: ORG_A, workspaces: [] });

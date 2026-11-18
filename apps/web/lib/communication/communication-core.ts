@@ -40,6 +40,8 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
  * participant, no source stamp, no row.
  */
 
+const TEAM_OFFER_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** The caller: its own RLS-scoped client and its authenticated id. */
 export type CommunicationCaller = {
   readonly supabase: SupabaseClient;
@@ -246,7 +248,7 @@ export async function createConversationCore(
     return {
       ok: false,
       code: "insert_failed",
-      message: `Pokalbio sukurti nepavyko: ${insertConv.error?.message ?? "nežinoma klaida"}`,
+      message: "Pokalbio sukurti nepavyko. Bandykite dar kartą.",
     };
   }
   const conversationId = insertConv.data.id as string;
@@ -276,7 +278,7 @@ export async function createConversationCore(
     return {
       ok: false,
       code: "insert_failed",
-      message: `Pokalbio dalyviai nepridėti: ${insertPart.error?.message ?? "nežinoma klaida"}`,
+      message: "Pokalbio dalyvių pridėti nepavyko. Bandykite dar kartą.",
     };
   }
 
@@ -284,10 +286,50 @@ export async function createConversationCore(
 }
 
 /**
+ * The people a new message may alert: participants whose grant is still
+ * live. A revoked participant (`revoked_at` set) can no longer open the
+ * thread under RLS (`is_conversation_participant`), so a bell row, e-mail or
+ * push to them would leak that the thread is still active and link to a page
+ * they cannot read. Co-participants CAN see revoked rows
+ * (`conversation_participants_select`), which is why the filter lives here.
+ * Pure.
+ */
+export function activeParticipantIds(
+  rows: readonly { profile_id?: string | null; revoked_at?: string | null }[],
+): string[] {
+  return rows
+    .filter((r) => r.revoked_at == null)
+    .map((r) => r.profile_id)
+    .filter((id): id is string => typeof id === "string" && id.length > 0);
+}
+
+/** Is this person still a live participant of the thread, as the sender's
+ *  session sees it right now? False when it cannot be read. */
+export async function isLiveParticipant(
+  supabase: SupabaseClient,
+  conversationId: string,
+  profileId: string,
+): Promise<boolean> {
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("conversation_participants")
+      .select("profile_id")
+      .eq("conversation_id", conversationId)
+      .eq("profile_id", profileId)
+      .is("revoked_at", null)
+      .maybeSingle();
+    return !error && !!data;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Read the thread's participants under the SENDER's own session
  * (`conversation_participants_select` admits co-participants; service_role
- * holds no grant here) and hand them to the durable emitter. Best-effort by
- * design: any failure is a console line, never an error to the sender.
+ * holds no grant here) and hand the still-live ones to the durable emitter.
+ * Best-effort by design: any failure is a console line, never an error to
+ * the sender.
  */
 async function notifyOtherParticipants(
   supabase: SupabaseClient,
@@ -297,19 +339,26 @@ async function notifyOtherParticipants(
   try {
     const { data, error } = await asAny(supabase)
       .from("conversation_participants")
-      .select("profile_id")
-      .eq("conversation_id", conversationId);
+      .select("profile_id, revoked_at")
+      .eq("conversation_id", conversationId)
+      .is("revoked_at", null);
     if (error) {
       console.warn("[communication] notify: participants unreadable:", error.code ?? "unknown");
       return;
     }
-    const participantProfileIds = ((data ?? []) as { profile_id?: string | null }[])
-      .map((r) => r.profile_id)
-      .filter((id): id is string => typeof id === "string" && id.length > 0);
+    const participantProfileIds = activeParticipantIds(
+      (data ?? []) as { profile_id?: string | null; revoked_at?: string | null }[],
+    );
     await emitMessageReceivedNotifications({
       conversationId,
       authorProfileId: authorId,
       participantProfileIds,
+      // Asked again right before each channel: a removal that lands between
+      // the read above and a delivery stops the remaining channels. Under the
+      // sender's session, so a sender who was removed meanwhile sees no live
+      // row and alerts nobody. Unreadable = not eligible (fail closed).
+      isStillParticipant: (profileId) =>
+        isLiveParticipant(supabase, conversationId, profileId),
     });
   } catch {
     console.warn("[communication] notify: emit threw");
@@ -327,10 +376,21 @@ export async function sendMessageCore(
    *  Georgian). Must be a communication locale; anything else falls back to
    *  the UI-locale rule below. Never a guessed code. */
   originalLanguage?: string | null;
+  /** What to store when no language was declared. `ui_locale` (the web
+   *  composer, which shows the author the language it will stamp) keeps the
+   *  UI-locale rule below; `unknown` (an assistant door, whose locale is only
+   *  the request's UI hint) stores NULL. Default `ui_locale`. */
+  languageFallback?: "ui_locale" | "unknown";
   /** Already-uploaded attachment descriptors (blobs live in the private
    *  bucket under `<conversationId>/<uid>/…`). Registered via the
    *  SECURITY DEFINER RPC after the message insert. */
   attachments?: ConversationAttachmentInput[];
+  /** The brigade / organization offer this message is about (B2B thread opened
+   *  from an offer). ADVISORY from the client: the database guard
+   *  (20261012180000) accepts it only when the author is a party of the offer
+   *  and the other side is in this thread; a refused label sends the message
+   *  without it, never drops the message. */
+  teamOfferId?: string | null;
 }): Promise<CommunicationResult<{ id: string; attachmentsFailed: number }>> {
   const supabase = caller.supabase;
   const user = { id: caller.userId };
@@ -416,9 +476,11 @@ export async function sendMessageCore(
     typeof input.originalLanguage === "string" ? input.originalLanguage.trim().toLowerCase() : "";
   const originalLanguage = (communicationLocales as readonly string[]).includes(declared)
     ? declared
-    : (communicationLocales as readonly string[]).includes(input.locale)
+    : input.languageFallback !== "unknown" &&
+        (communicationLocales as readonly string[]).includes(input.locale)
       ? input.locale
       : null;
+  const teamOfferId = typeof input.teamOfferId === "string" && TEAM_OFFER_UUID.test(input.teamOfferId) ? input.teamOfferId : null;
   let result = await asAny(supabase)
     .from("conversation_messages")
     .insert({
@@ -426,9 +488,24 @@ export async function sendMessageCore(
       author_id: user.id,
       body,
       original_language: originalLanguage,
+      ...(teamOfferId ? { team_offer_id: teamOfferId } : {}),
     })
     .select("id")
     .single();
+  // The offer label is refused by the database guard (not a party / the offer
+  // is not between this thread's sides): the MESSAGE still goes out, unlabelled.
+  if (teamOfferId && /team_offer_label_refused/.test(result.error?.message ?? "")) {
+    result = await asAny(supabase)
+      .from("conversation_messages")
+      .insert({
+        conversation_id: input.conversationId,
+        author_id: user.id,
+        body,
+        original_language: originalLanguage,
+      })
+      .select("id")
+      .single();
+  }
   if (result.error?.code === "42703" || /original_language/.test(result.error?.message ?? "")) {
     result = await asAny(supabase)
       .from("conversation_messages")
@@ -466,7 +543,7 @@ export async function sendMessageCore(
     return {
       ok: false,
       code: "insert_failed",
-      message: `Žinutės išsiųsti nepavyko: ${msg || "nežinoma klaida"}`,
+      message: "Žinutės išsiųsti nepavyko. Bandykite dar kartą.",
     };
   }
 
@@ -513,13 +590,10 @@ export async function sendMessageCore(
     },
   });
 
-  // Bump conversation.updated_at so the thread list sorts correctly.
-  // updated_at is owner-side (RLS allows the creator to update; others
-  // get a no-op). We deliberately don't error out if this fails.
-  await asAny(supabase)
-    .from("conversations")
-    .update({ updated_at: new Date().toISOString() })
-    .eq("id", input.conversationId);
+  // The thread's last activity (conversations.updated_at) is moved by the
+  // database on every message insert (20261020171000). The client-side update
+  // that stood here always failed: `authenticated` holds no UPDATE on
+  // conversations, so every thread list sorted by creation time.
 
   // DURABLE NOTIFICATION (message_received): the message is persisted, so tell
   // the OTHER participants - coalesced per thread per window, never the

@@ -107,8 +107,10 @@ describe("project anchor (through the project's own work objects)", () => {
   it("readEvidenceMediaForProject resolves the project's work objects first; a failed lookup is unavailable", async () => {
     const a = caller({ error: { code: "500" } });
     expect(await readEvidenceMediaForProject(a.c, "p1")).toEqual({ kind: "unavailable" });
-    expect(a.calls.from).toEqual(["work_objects"]);
-    expect(a.calls.eq).toEqual([["project_id", "p1"]]);
+    // the canonical map is read first (an unreadable one re-routes nothing),
+    // then the work objects of the project and its merged fragments
+    expect(a.calls.from).toEqual(["projects", "projects", "work_objects"]);
+    expect(a.calls.in).toContainEqual(["project_id", ["p1"]]);
   });
 
   it("a project with no work objects has no stated anchor: ok and empty", async () => {

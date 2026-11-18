@@ -262,7 +262,14 @@ export function AuthProvider({
 
   const markAllRead = useCallback(() => {
     const now = new Date().toISOString();
-    setNotifications((cur) => cur.map((n) => ({ ...n, read_at: now })));
+    // DURABLE rows only. A derived signal is a live count that clears by
+    // visiting its surface; stamping it read here turned the bell's dot off
+    // while the people waiting were still waiting, until the next hydration
+    // switched it back on — the "lie the next page-load reverts" the panel
+    // promises never to tell.
+    setNotifications((cur) =>
+      cur.map((n) => (n.durable && !n.read_at ? { ...n, read_at: now } : n)),
+    );
     // PERSIST for durable events (notification_events store). Fire-and-forget:
     // the optimistic state above is correct either way, and while the
     // owner-gated store is unapplied the action is an honest no-op — exactly

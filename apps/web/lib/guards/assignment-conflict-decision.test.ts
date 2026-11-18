@@ -35,7 +35,7 @@ describe("assignment conflict decision", () => {
     expect(panel).toMatch(/endAssignmentAction\(a\.projectId, a\.workerProfileId\)/);
   });
 
-  for (const loc of ["en", "lt", "ru", "nl", "de", "pl"]) {
+  for (const loc of ["en", "lt", "ru", "nl", "de", "pl", "sv"]) {
     it(`${loc} carries the decision copy`, () => {
       const r = JSON.parse(read(`messages/${loc}.json`)).projects?.assign?.reservation;
       for (const key of ["alternativesTitle", "swap", "undo", "decided"]) {

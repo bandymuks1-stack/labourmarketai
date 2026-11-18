@@ -57,6 +57,7 @@ const zeroCounts: SpineCounts = {
   pendingConnectionInvites: 0,
   sharedRequestsAwaitingOffer: 0,
   openCandidateOffers: 0,
+  openTeamOffers: 0,
 };
 
 describe("who is asked to review an absence", () => {

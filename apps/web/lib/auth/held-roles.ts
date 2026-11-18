@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import {
   RoleSignalUnavailableError,
-  readActiveProfileRoles,
+  readActiveRoleRows,
 } from "@/lib/auth/profile-roles";
 import type { Role } from "./actions";
 
@@ -38,13 +38,8 @@ export async function readHeldRoles(
   profileId: string,
 ): Promise<{ roles: Set<Role>; known: boolean }> {
   try {
-    const rows = await readActiveProfileRoles(() =>
-      supabase
-        .from("profile_roles")
-        .select("role")
-        .eq("profile_id", profileId)
-        .eq("is_active", true),
-    );
+    // `is_active` rides the shared read (`readActiveRoleRows`), once per render.
+    const rows = await readActiveRoleRows(supabase, profileId);
     return {
       roles: new Set<Role>(rows.map((r) => r.role as Role)),
       known: true,

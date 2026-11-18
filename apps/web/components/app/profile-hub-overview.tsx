@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { CheckCircle2, Circle } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { statedIsoText } from "@/lib/cv/period-dates";
 import { deriveProfileNextAction } from "@/lib/dashboard/next-action";
 import { skillEvidenceStatus } from "@/lib/profile/skill-evidence";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
@@ -26,11 +27,15 @@ import { buildIdentityFacts } from "@/lib/player-card/identity-facts";
 import { playerInitials } from "@/lib/identity/player-identity";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import type { WorkPeriodTotals } from "@/lib/journal/work-intelligence";
-import {
-  EmployerVisibilityItem,
-  employerVisibilityItemLabels,
-} from "@/components/app/employer-visibility-item";
+import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
 import { getMyDiscoverabilityState } from "@/lib/privacy/discoverability-actions";
+import { PROFILE_DISCOVERABILITY_V1 } from "@/lib/privacy/consent-definitions";
+import { buildOwnDiscoverabilityPreview } from "@/lib/privacy/discoverability-preview";
+import {
+  discoverabilityConsentLabels,
+  discoverabilityPreviewFields,
+  toConsentLocale,
+} from "@/lib/privacy/discoverability-view";
 import { employerVisibilityOf } from "@/lib/privacy/employer-visibility";
 import {
   CvCompletenessGrid,
@@ -130,6 +135,9 @@ export async function ProfileHubOverview({
   workerId,
   workContexts = null,
   workAllTime = null,
+  organizationHistoryHours = null,
+  professionalExperienceHours = null,
+  unrecordedHours = null,
 }: {
   cvProvided: boolean;
   selfDeclaredCount: number;
@@ -162,6 +170,13 @@ export async function ProfileHubOverview({
    *  that read was truncated) — the identity stage's fact strip. Null → no
    *  strip (the journal was not read), never zeros. */
   workAllTime?: { readonly totals: WorkPeriodTotals; readonly truncated: boolean } | null;
+  /** All-time hours organizations recorded (day + period records), #2169. */
+  organizationHistoryHours?: number | null;
+  /** The one continuous professional history's total (decision 0025). */
+  professionalExperienceHours?: number | null;
+  /** Entries whose written hours were never recorded as time, and the
+   *  earliest such work day (lib/journal/unrecorded-hours.ts). */
+  unrecordedHours?: { readonly entries: number; readonly earliestDay: string } | null;
 }) {
   /**
    * W7-S3: seven namespaces and the locale in ONE stage. They were eight
@@ -170,7 +185,7 @@ export async function ProfileHubOverview({
    * even be started. `tReview` is the absorbed SkillsReviewBanner's own copy,
    * reused verbatim — the message and destination the worker already knows.
    */
-  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, tVisibility, tProf, tIdentity, locale] =
+  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, tConsent, tProf, tIdentity, locale] =
     await Promise.all([
       getTranslations("profileHub"),
       getTranslations("setupJourney"),
@@ -182,8 +197,9 @@ export async function ProfileHubOverview({
       // The card's own "recorded h / confirmed h" sentence — ONE key, shared
       // with the player card's history band.
       getTranslations("playerCard.visuals"),
-      // "Matomas darbdaviams" — the readiness item shared with the board.
-      getTranslations("privacyConsent.employerVisibility"),
+      // "Matomas darbdaviams" — the ONE consent component's labels, the same
+      // map the privacy screen, onboarding and the conversation use.
+      getTranslations("privacyConsent"),
       // The identity stage: every profession's name + the fact strip's words.
       getTranslations("professions"),
       getTranslations("playerCard.identity"),
@@ -217,7 +233,7 @@ export async function ProfileHubOverview({
    * start together — measured as a real TTFB regression before this batch was
    * introduced, which is exactly the trap this slice exists to avoid.
    */
-  const [playerCard, signalOrNull, todayCount, discoverability] = await Promise.all([
+  const [playerCard, signalOrNull, todayCount, discoverability, visibilityPreview] = await Promise.all([
     getWorkerPlayerCard(),
     getProfileOpportunitySignal(),
     workerId ? countTodayJournalEntries(workerId) : Promise.resolve(0),
@@ -226,6 +242,9 @@ export async function ProfileHubOverview({
     // only behind "More"). Same stage — no new serial await. Workers only:
     // it is the worker profile an employer could find.
     hasWorker ? getMyDiscoverabilityState() : Promise.resolve(null),
+    // "This is how companies would see your profile" — the own-row preview the
+    // consent text points at. Same stage, workers only.
+    hasWorker ? buildOwnDiscoverabilityPreview() : Promise.resolve([]),
   ]);
   // SEP-7: a failed read is `unknown`, never `off`.
   const visibility = hasWorker ? employerVisibilityOf(discoverability) : null;
@@ -446,11 +465,26 @@ export async function ProfileHubOverview({
         facts={buildIdentityFacts({
           allTime: workAllTime?.totals,
           truncated: workAllTime?.truncated ?? false,
+          organizationHistoryHours,
+          professionalExperienceHours,
           locale,
           t: (key, values) => tIdentity(key, values),
         })}
       >
         <div className="flex min-w-0 flex-col gap-0.5">
+            {/* The hours above are what was RECORDED. Older entries whose
+                written hours were dropped before 2026-08-20 are named here,
+                with the way to their day — never added to the total. */}
+            {unrecordedHours ? (
+              <Link
+                href={`/dashboard/journal?date=${unrecordedHours.earliestDay}`}
+                className="text-meta leading-relaxed text-state-warning underline underline-offset-2"
+                data-testid="profile-hub-unrecorded-hours"
+                data-entries={unrecordedHours.entries}
+              >
+                {t("unrecordedHours", { count: unrecordedHours.entries })}
+              </Link>
+            ) : null}
             {readiness ? (
               <p
                 className="text-sm text-text-secondary"
@@ -494,6 +528,32 @@ export async function ProfileHubOverview({
             )}
         </div>
       </IdentityStage>
+
+      {/* ── CAN EMPLOYERS FIND ME? ─────────────────────────────────────────
+          Owner goal 2026-10-24 ("matchability"): the most important worker
+          question is answered right under the identity — the status line and
+          the ONE action in place (the SAME consent component as the privacy
+          screen, source "profile"), not a door to another page below the
+          fold. A choice, not a missing step: it sits beside the checklist,
+          never inside it (consent must be freely given). SEP-7: an unknown
+          read renders the component's "could not check", never "off". */}
+      {visibility && discoverability && (
+        <div
+          id="visibility"
+          className="scroll-mt-20 rounded-md border border-border-subtle p-4"
+          data-testid="profile-hub-employer-visibility"
+          data-visibility={visibility}
+        >
+          <DiscoverabilityConsent
+            locale={locale}
+            source="profile"
+            state={discoverability}
+            legal={PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)]}
+            preview={discoverabilityPreviewFields(visibilityPreview, tConsent)}
+            labels={discoverabilityConsentLabels(tConsent, locale)}
+          />
+        </div>
+      )}
 
       {/* ── WHAT IS MISSING ──────────────────────────────────────────────── */}
       {steps.length > 0 && (
@@ -549,13 +609,17 @@ export async function ProfileHubOverview({
               className="text-xs leading-relaxed text-text-secondary"
               data-testid="profile-hub-review-note"
             >
+              {/* The count is of SKILLS not yet backed by work entries — say
+                  so in the same sentence (production 2026-10-25 read
+                  "24 — Kai kurie įrašai dar neaiškūs", a count of skills
+                  glued to a sentence about entries). */}
               <span data-testid="profile-hub-review-count">
                 {skillEvidence.unsupported}
               </span>{" "}
-              — {tReview("body")}{" "}
+              {tReview("noteLead", { count: skillEvidence.unsupported })}{" "}
               <a
                 href="#profile-edit"
-                className="font-medium text-brand-blue hover:underline"
+                className="font-medium text-text-primary underline underline-offset-4 hover:no-underline"
                 data-testid="profile-hub-review-cta"
               >
                 {tReview("cta")} ↓
@@ -563,17 +627,6 @@ export async function ProfileHubOverview({
             </p>
           )}
         </div>
-      )}
-
-      {/* MATOMAS DARBDAVIAMS — the true consent state and a one-tap door to
-          the consent. A choice, not a missing step: it sits beside the
-          checklist, never inside it (consent must be freely given). */}
-      {visibility && (
-        <EmployerVisibilityItem
-          visibility={visibility}
-          labels={employerVisibilityItemLabels(tVisibility)}
-          testId="profile-hub-employer-visibility"
-        />
       )}
 
       {/* The single honest verification disclaimer for the unified profile. */}
@@ -614,7 +667,7 @@ export async function ProfileHubOverview({
             assistant, no parallel workflow. */}
         <Link
           href="/dashboard"
-          className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
+          className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
           data-testid="profile-hub-ask-workspace"
         >
           {t("askWorkspace")} →
@@ -624,7 +677,7 @@ export async function ProfileHubOverview({
         {hasWorker && !journalIsPrimary && (
           <Link
             href="/dashboard/journal"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
+            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
             data-testid="profile-hub-journal-link"
           >
             {t("journalLink")} →
@@ -634,7 +687,7 @@ export async function ProfileHubOverview({
         {!aboutOk && (
           <a
             href="#profile-edit"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
+            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
             data-testid="profile-hub-cv-import-link"
           >
             {t("cvImportLink")} ↓
@@ -643,7 +696,7 @@ export async function ProfileHubOverview({
         {hasWorker && (
           <Link
             href="/dashboard/opportunities"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-brand-blue transition-colors hover:text-brand-champagne"
+            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
             data-testid="profile-hub-opportunities-link"
           >
             {t("opportunitiesLink")} →
@@ -737,11 +790,12 @@ export async function ProfileHubOverview({
                             </span>
                             <span className="flex flex-wrap items-center gap-2">
                               <PlaceTimeStamp>
-                                {e.startedAt ?? tLive("dateUnknown")}
+                                {(e.organizationName ? e.startedAt : statedIsoText(e.startedAt, "start")) ??
+                                  tLive("dateUnknown")}
                                 {e.current
                                   ? ` · ${tLive("current")}`
                                   : e.endedAt
-                                    ? ` — ${e.endedAt}`
+                                    ? ` — ${e.organizationName ? e.endedAt : statedIsoText(e.endedAt, "end")}`
                                     : ""}
                               </PlaceTimeStamp>
                               {/* The journal's hours in THIS engagement —

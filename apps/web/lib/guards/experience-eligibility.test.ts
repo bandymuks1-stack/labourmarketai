@@ -12,7 +12,7 @@
  *    (OWNER_DECISION_GATED — MP-6).
  */
 import { describe, expect, it } from "vitest";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   canTransitionModeration,
@@ -184,9 +184,10 @@ describe("OWNER_DECISION_GATED — contract only, no consumers", () => {
     ];
     const offenders: string[] = [];
     const walk = (dir: string) => {
-      for (const entry of readdirSync(dir)) {
+      for (const dirent of readdirSync(dir, { withFileTypes: true })) {
+        const entry = dirent.name;
         const abs = join(dir, entry);
-        if (statSync(abs).isDirectory()) {
+        if (dirent.isDirectory()) {
           if (entry === "node_modules" || entry.startsWith(".")) continue;
           walk(abs);
         } else if (/\.(ts|tsx)$/.test(entry)) {

@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { workspaceDisplayLabels } from "@/lib/company/organization-switch";
 import { redirect } from "next/navigation";
 
@@ -43,6 +44,12 @@ import { DevelopmentReviewsSection } from "@/components/app/development-reviews-
 import { ManagementDecisionsSection } from "@/components/app/management-decisions-section";
 import { ApprovalsSection } from "./approvals-section";
 import { RequestsSection } from "./requests-section";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/network", "network.title");
+
 
 /**
  * "Mano tinklas" (core-network area B) — a SUB-SURFACE of the person /
@@ -315,13 +322,7 @@ export default async function NetworkPage({
     return (
       <div className="flex flex-col gap-6" data-testid="network-page">
         <header className="flex flex-col gap-1">
-          <Link
-            href={"/dashboard/network" as "/dashboard"}
-            className="inline-flex min-h-11 items-center gap-1 self-start font-mono text-meta uppercase tracking-label text-brand-orange transition-colors hover:text-text-primary"
-            data-testid="network-admin-back"
-          >
-            ← {t("admin.back")}
-          </Link>
+          <PageBack href={"/dashboard/network" as "/dashboard"} data-testid="network-admin-back">{t("admin.back")}</PageBack>
         </header>
         {openArea === "approvals" && (
           <ApprovalsSection
@@ -405,12 +406,10 @@ export default async function NetworkPage({
   return (
     <div className="flex flex-col gap-6" data-testid="network-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 
@@ -550,7 +549,7 @@ export default async function NetworkPage({
                         <span className="text-sm font-medium text-text-primary">
                           {c.displayName}
                         </span>
-                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        <span className="text-meta text-text-muted">
                           {t(`search.orgType.${c.organizationType}`)}
                         </span>
                         {c.country && (
@@ -764,7 +763,7 @@ export default async function NetworkPage({
                 <span className="text-sm text-text-primary">
                   {e.organizationName ?? t("relationships.noOrg")}
                 </span>
-                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <span className="text-meta text-text-muted">
                   {t(`relationships.slug.${e.relationshipSlug}`)}
                 </span>
                 {e.title && (

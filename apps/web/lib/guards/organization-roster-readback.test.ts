@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Guard: the roster is READ BACK, and the chat door to it tells the truth.
@@ -19,7 +20,7 @@ import { join } from "node:path";
 
 const APP_ROOT = join(__dirname, "..", "..");
 const read = (...p: string[]) => readFileSync(join(APP_ROOT, ...p), "utf8");
-const LOCALES = ["en", "lt", "ru", "nl", "de"] as const;
+const LOCALES = activeLocales;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const msgs = (loc: string): any => JSON.parse(read("messages", `${loc}.json`));

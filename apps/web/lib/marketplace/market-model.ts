@@ -131,11 +131,14 @@ export function contactActionFor(source: MarketSourceTable): MarketContactAction
  * Canonical destination of an index row, using ONLY routes that exist today.
  * Listings have no per-item route: the destination is the listings surface
  * with a `focus` anchor. Service offerings have no per-offering route: the
- * destination is the services surface. Mirrors the view expression.
+ * destination is the REQUEST surface, anchored on the offering — the place a
+ * buyer can actually ask for it. (`/dashboard/services` is the viewer's OWN
+ * offerings page: sending a buyer there was a dead end. The view still emits
+ * that path; the reader overrides it with this one.)
  */
 export function destinationPathFor(source: MarketSourceTable, id: string): string {
   return source === "service_offerings"
-    ? "/dashboard/services"
+    ? `/dashboard/service-requests#offering-${id}`
     : `/dashboard/listings?focus=${id}`;
 }
 

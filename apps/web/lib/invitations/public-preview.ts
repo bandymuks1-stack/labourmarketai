@@ -61,6 +61,9 @@ const str = (v: unknown): string | null =>
 
 export async function readPublicInvitationPreview(
   token: string,
+  /** false on a page that re-reads an invitation already opened (signup): the
+   *  funnel's "opened" counts the landing, not every later read. */
+  opts: { emitOpened?: boolean } = {},
 ): Promise<PublicPreviewResult> {
   if (!token || token.length > 128 || !/^[A-Za-z0-9_-]+$/.test(token)) {
     return { kind: "not_found" };
@@ -92,7 +95,7 @@ export async function readPublicInvitationPreview(
     locale: str(data.locale),
     expiresAt: str(data.expires_at),
   };
-  if (preview.status === "pending") {
+  if (preview.status === "pending" && opts.emitOpened !== false) {
     emitServerFunnelEvent(FUNNEL_EVENTS.invitationOpened, {
       source: "invitations",
       route: "/invite",

@@ -30,6 +30,8 @@ import {
 } from "../lib/testing/local-supabase-guard";
 import { stderrExcerpt } from "../lib/testing/local-supabase-env";
 
+const LOCAL_CONFIRMATION_TOKEN_SECRET = "local-stack-only-confirmation-secret-not-for-production";
+
 function fail(msg: string): never {
   console.error(msg);
   process.exit(1);
@@ -106,6 +108,12 @@ const env = {
   NEXT_PUBLIC_SUPABASE_URL: apiUrl,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey,
   SUPABASE_SERVICE_ROLE_KEY: serviceKey,
+  // Confirmation tokens are signed ONLY with the dedicated secret (#2444):
+  // the service-role key is never reused as HMAC material, so this local
+  // harness must supply one. An exported value wins; the fallback is a
+  // local-only literal that signs nothing outside this loopback stack.
+  CONVERSATION_TOKEN_SECRET:
+    process.env.CONVERSATION_TOKEN_SECRET ?? LOCAL_CONFIRMATION_TOKEN_SECRET,
   // The LOCAL stack's JWT signing secret, forwarded for ONE purpose: the
   // auth-core spec forges a correctly-signed but EXPIRED token, which is the
   // only way to test expiry as its own failure mode rather than folding it

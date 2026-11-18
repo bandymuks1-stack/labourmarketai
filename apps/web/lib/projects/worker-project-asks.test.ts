@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_READINESS_ITEM_KEYS, READINESS_ITEM_DOCUMENT_TYPES, documentTypesForReadinessItem } from "@/lib/projects/readiness-items";
 
 import { deriveWorkerProjectAsks, firstRecordableAsk, WORKER_PROJECT_ASK_LIMIT } from "@/lib/projects/worker-project-asks";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * The checklist ↔ document bridge, on the PERSON's side (owner contract §11
@@ -136,7 +137,8 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     const fn = ACCESS.slice(ACCESS.indexOf("export async function loadOwnProjectAsks"));
     expect(ACCESS).toContain('import { listMyDocuments } from "@/lib/documents/readiness";');
     expect(ACCESS).toContain('import { listWorkerInstructions } from "@/lib/instructions/instructions";');
-    expect(fn).toContain("listOwnReadinessItems(workerId, ids)");
+    // The same checklist query, through its failure-keeping form (#2941).
+    expect(fn).toContain("queryOwnReadinessItems(workerId, ids)");
     // An unanswered documents read is UNKNOWN (null), never "no documents".
     // Pinned as the INTENT rather than one line's exact spelling: the call
     // gained a fourth argument (the person's recorded work evidence) when
@@ -151,7 +153,10 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     expect(fn).toMatch(/if \(ins\.projectId && !instructions\.has\(ins\.projectId\)\)/);
     expect(fn).toMatch(/\.slice\(0, 10\)/);
     // The chat read composes it and a failed read leaves the asks empty.
-    expect(READ).toContain("const own = await loadOwnProjectAsks(activeIds).catch(() => new Map());");
+    // Failure-keeping form of the same read (#2941): a thrown read is null,
+    // and the checklist then answers "unavailable", never "nothing open".
+    expect(READ).toContain("const ownRead = await loadOwnProjectAsksResult(activeIds).catch(() => null);");
+    expect(ACCESS).toContain("return (await loadOwnProjectAsksResult(projectIds)).byProject;");
     expect(READ).toMatch(/asks: own\.get\(r\.projectId\)\?\.asks \?\? \[\]/);
     expect(READ).toMatch(/instruction: own\.get\(r\.projectId\)\?\.instruction \?\? null/);
     expect(READ).not.toMatch(/listMyDocuments|listOwnReadinessItems|listWorkerInstructions/);
@@ -165,7 +170,7 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     const COMP = read("components/app/instruction-project-asks.tsx");
     expect(COMP).toMatch(/href="\/dashboard\/documents"/);
     expect(COMP).not.toMatch(/\.from\(|\.rpc\(|"use server"|Action\(/);
-    for (const locale of ["lt", "en", "de", "nl", "ru"]) {
+    for (const locale of activeLocales) {
       const card = JSON.parse(read(`messages/${locale}.json`)).instructions.card as Record<string, string>;
       for (const k of ["asksTitle", "ownReady", "ownExpiring", "ownNone", "blocked", "record"]) expect(card[k], `${locale}.${k}`).toBeTypeOf("string");
     }

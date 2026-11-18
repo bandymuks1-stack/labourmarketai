@@ -8,8 +8,8 @@ import { z } from "zod";
 import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
-import { isDemandKind } from "@/lib/demand/market-direction";
-import { readDuplicateProjectIds } from "@/lib/projects/projects";
+import { isDemandKind, isLabourDemandRow } from "@/lib/demand/market-direction";
+import { readProjectDocumentedPeriods } from "@/lib/organization-evidence/project-documented-period";
 import { closeDemand, reopenDemand } from "@/lib/demand/demand-lifecycle";
 import { canCloseFrom, canReopenFrom } from "@/lib/demand/demand-lifecycle-model";
 import {
@@ -37,6 +37,7 @@ import {
 } from "./confirmable";
 import type { CapabilityCaller, CapabilityDescriptor } from "./contract";
 import { demandContextRefusal } from "./employer-context-refusal";
+import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";
 
 /**
  * EMPLOYER OPERATIONS — the company side of the work graph for an authorized
@@ -131,9 +132,9 @@ const demandList: CapabilityDescriptor = {
     const { data, error } = await asAny(caller.supabase)
       .from("customer_requests")
       .select(
-        "id, title, status, kind, country, location, role_or_work_type, team_size, start_period, duration, created_at",
+        "id, title, status, kind, payload, country, location, role_or_work_type, team_size, start_period, duration, created_at",
       )
-      .or(`profile_id.eq.${caller.userId},organization_id.eq.${employer.organizationId}`)
+      .or(demandsOfWorkspaceFilter(caller.userId, employer.organizationId))
       .order("created_at", { ascending: false })
       .limit(50);
     // FAILED ≠ EMPTY (SEP-7).
@@ -144,6 +145,8 @@ const demandList: CapabilityDescriptor = {
       title: string | null;
       status: string | null;
       kind: string | null;
+      /** Read only to classify (help-desk / privacy rows are not needs); never returned. */
+      payload: unknown;
       country: string | null;
       location: string | null;
       role_or_work_type: string | null;
@@ -154,8 +157,9 @@ const demandList: CapabilityDescriptor = {
     };
     const rows = ((data ?? []) as Row[])
       // DIRECTION (SEP-4): classified, never guessed — an unrecognised kind
-      // is dropped, exactly as the scouting read does.
-      .filter((r) => isDemandKind(r.kind))
+      // is dropped, exactly as the scouting read does; a help-desk or privacy
+      // request to the platform is not one of the organization's needs.
+      .filter((r) => isLabourDemandRow(r))
       .filter((r) => parsed.includeClosed || r.status !== "closed");
 
     const ids = rows.map((r) => r.id);
@@ -225,7 +229,7 @@ async function readNeedForLifecycle(
     .from("customer_requests")
     .select("id, title, status, kind")
     .eq("id", requestId)
-    .or(`profile_id.eq.${caller.userId},organization_id.eq.${organizationId}`)
+    .or(demandsOfWorkspaceFilter(caller.userId, organizationId))
     .maybeSingle();
   return (data as { id: string; title: string | null; status: string | null; kind: string | null } | null) ?? null;
 }
@@ -303,7 +307,7 @@ function makeDemandLifecyclePair(op: "close" | "reopen"): [CapabilityDescriptor,
       if (!employer.ok) return demandContextRefusal(employer.reason);
       const need = await readNeedForLifecycle(caller, employer.organizationId, requestId);
       if (!need) return { ok: false, code: "not_found", message: "No such need in the organization the caller is acting for." };
-      const verdict = verifyCapabilityConfirmation({
+      const verdict = await verifyCapabilityConfirmation({
         actionId: confirmId,
         token: confirmationToken,
         input: { requestId },
@@ -405,7 +409,13 @@ const rosterList: CapabilityDescriptor = {
 
 // ── projects.list ──────────────────────────────────────────────────────────
 
-const projectsListInput = z.object({}).strict();
+const PROJECTS_PAGE_SIZE = 100;
+const projectsListInput = z
+  .object({
+    /** 1-based page of PROJECTS_PAGE_SIZE, newest first. */
+    page: z.number().int().min(1).max(1000).optional(),
+  })
+  .strict();
 
 type ProjectRow = {
   id: string;
@@ -422,19 +432,27 @@ type ProjectRow = {
 async function readOrgProjects(
   caller: CapabilityCaller,
   employer: { companyId: string; organizationId: string },
-): Promise<{ ok: true; rows: ProjectRow[] } | { ok: false }> {
-  const { data, error } = await asAny(caller.supabase)
+  page = 1,
+): Promise<{ ok: true; rows: ProjectRow[]; total: number | null } | { ok: false }> {
+  const from = (page - 1) * PROJECTS_PAGE_SIZE;
+  const { data, error, count } = await asAny(caller.supabase)
     .from("projects")
-    .select("id, title, status, country, city, start_date, end_date, company_id, organization_id")
+    .select("id, title, status, country, city, start_date, end_date, company_id, organization_id", { count: "exact" })
     .or(`organization_id.eq.${employer.organizationId},company_id.eq.${employer.companyId}`)
+    // A DUPLICATE project (record fact, 20260930120000) is a fragment of its
+    // canonical project, not a project: filtered in the query, so `total`
+    // and the page boundaries count real projects (85, not the 180 rows).
+    .neq("record_state", "duplicate")
     .order("created_at", { ascending: false })
-    .limit(100);
+    // A total order, so a page boundary never repeats or skips a project.
+    .order("id", { ascending: false })
+    .range(from, from + PROJECTS_PAGE_SIZE - 1);
   if (error) return { ok: false };
-  // A DUPLICATE project (record fact, 20260930120000) leaves the working list
-  // — the same one reader the web list uses.
-  const rows = (data ?? []) as ProjectRow[];
-  const duplicates = await readDuplicateProjectIds(caller.supabase, rows.map((r) => r.id));
-  return { ok: true, rows: rows.filter((r) => !duplicates.has(r.id)) };
+  return {
+    ok: true,
+    rows: (data ?? []) as ProjectRow[],
+    total: typeof count === "number" ? count : null,
+  };
 }
 
 const projectsList: CapabilityDescriptor = {
@@ -442,18 +460,25 @@ const projectsList: CapabilityDescriptor = {
   kind: "read",
   title: "This organization's projects and who is assigned",
   description:
-    "Lists the projects of the organization the caller is acting for (at most " +
-    "100, newest first) with status, place and dates, and for each project the " +
-    "people actively assigned to it (name + workerProfileId). Only projects the " +
-    "caller's own access admits are returned. Writes nothing.",
+    "Lists the projects of the organization the caller is acting for, 100 per " +
+    "page, newest first (`page`, 1-based; `total` and `nextPage` say whether " +
+    "more exist), with status, place and dates, and for each project the " +
+    "people actively assigned to it (name + workerProfileId). `documentedPeriod` " +
+    "is the work the project's OWN records document — first and last recorded " +
+    "day, recorded days, day hours, period-summary hours kept apart, people in " +
+    "the record — derived on read; it is not a contract start/end and not the " +
+    "current team. Only projects the caller's own access admits are returned. " +
+    "Writes nothing.",
   exposed: true,
   annotations: readOnly,
   inputSchema: projectsListInput,
-  run: async (caller): Promise<ExecResult> => {
+  run: async (caller, input): Promise<ExecResult> => {
+    const { page = 1 } = projectsListInput.parse(input ?? {});
     const employer = await employerOrRefusal(caller);
     if (!employer.ok) return demandContextRefusal(employer.reason);
-    const projects = await readOrgProjects(caller, employer);
+    const projects = await readOrgProjects(caller, employer, page);
     if (!projects.ok) return { ok: false, code: "unavailable", message: "The project read failed." };
+    const periods = await readProjectDocumentedPeriods(caller, projects.rows.map((p) => p.id));
 
     const ids = projects.rows.map((p) => p.id);
     const byProject = new Map<string, { workerProfileId: string | null; name: string | null; assignedAt: string }[]>();
@@ -494,8 +519,14 @@ const projectsList: CapabilityDescriptor = {
           endDate: p.end_date,
           // null = the assignment read failed (UNKNOWN), [] = nobody assigned.
           activeAssignments: assignmentsKnown ? (byProject.get(p.id) ?? []) : null,
+          // null = no recorded work; "unknown" = the record read failed.
+          documentedPeriod: periods.kind === "ok" ? (periods.periods.get(p.id) ?? null) : "unknown",
         })),
         assignmentsKnown,
+        page,
+        total: projects.total,
+        nextPage:
+          projects.total !== null && page * PROJECTS_PAGE_SIZE < projects.total ? page + 1 : null,
         structuredDestination: "/dashboard/projects",
       },
     };
@@ -587,7 +618,7 @@ const projectCreateConfirm: CapabilityDescriptor = {
     const employer = await employerOrRefusal(caller);
     if (!employer.ok) return demandContextRefusal(employer.reason);
     if (!hasOrganizationCapability(employer.role, "manage-projects")) return manageProjectsRefusal();
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "project.create_confirm",
       token: confirmationToken,
       input: normalizedProject(draft),
@@ -746,7 +777,7 @@ const projectStatusConfirm: CapabilityDescriptor = {
     if (!hasOrganizationCapability(employer.role, "manage-projects")) return manageProjectsRefusal();
     const read = await readProjectForStatus(caller, employer, parsed.projectId);
     if (!read.ok) return read.result;
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "project.status_set_confirm",
       token: confirmationToken,
       input: parsed,
@@ -990,7 +1021,7 @@ function makeAssignmentPair(op: "assign" | "end"): [CapabilityDescriptor, Capabi
       const resolved = await resolveAssignmentSubject(caller, employer, parsed);
       if (!resolved.ok) return resolved.result;
       const s = resolved.subject;
-      const verdict = verifyCapabilityConfirmation({
+      const verdict = await verifyCapabilityConfirmation({
         actionId: confirmId,
         token: confirmationToken,
         input: parsed,
@@ -1145,7 +1176,7 @@ const assignmentKeepConfirm: CapabilityDescriptor = {
     if (!current) {
       return { ok: false, code: "unavailable", message: "The calendar could not be checked. NOTHING was saved; the decision is not made." };
     }
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "assignment.keep_confirm",
       token: confirmationToken,
       input: parsed,

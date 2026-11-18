@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import { isJournalMetaRequest } from "./worklog-extract";
 
@@ -108,7 +109,15 @@ export const workerSavePreferencesSchema = z.object({
  *  (`decline_invitation_v1`) and not at all for the roster — so the schema
  *  says so rather than inventing one. */
 export const workerRespondInvitationSchema = z.discriminatedUnion("source", [
-  z.object({ source: z.literal("invitation"), invitationId: uuid, decision: z.literal("accepted") }),
+  z.object({
+    source: z.literal("invitation"),
+    invitationId: uuid,
+    decision: z.literal("accepted"),
+    // Owner decision 1: present ONLY when the chat card showed the review
+    // sentence. Optional, so every existing caller and stored token keeps its
+    // meaning; the token binds the parsed input, so it cannot be added later.
+    reviewNotice: z.literal(REVIEW_NOTICE_VERSION).optional(),
+  }),
   z.object({ source: z.literal("company_roster"), orgId: uuid, decision: z.literal("accepted") }),
   z.object({ source: z.literal("agency_roster"), orgId: uuid, decision: z.literal("accepted") }),
 ]);

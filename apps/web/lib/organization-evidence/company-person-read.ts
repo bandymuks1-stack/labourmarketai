@@ -7,6 +7,8 @@ import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
 import { listAllEvidenceRecords } from "./evidence-pagination";
+import { untypedClient } from "./evidence-store";
+import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { readHistoryLookups } from "./history-context-read";
 import { readCompetencySignalsForPerson, type PersonCompetencySignalsRead } from "./competency-signals-read";
 import type { EvidenceRecordView } from "./import-core";
@@ -112,7 +114,7 @@ export async function readCompanyPerson(input: {
 
   const row = await db(supabase)
     .from("organization_people")
-    .select("id, display_name, relationship_kind, link_state, linked_worker_id")
+    .select("id, display_name, relationship_kind, link_state, link_method, linked_worker_id")
     .eq("id", personId)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -129,7 +131,13 @@ export async function readCompanyPerson(input: {
     name: ((row.data.display_name as string | null) ?? "").trim(),
     relationshipKind: (row.data.relationship_kind as string | null) ?? null,
     linkState,
-    linkedWorkerId: linkState === "linked" ? ((row.data.linked_worker_id as string | null) ?? null) : null,
+    // Identity only by the PERSON's own confirmation (integrity doors v1) —
+    // the same rule the company history uses (#3354): a link a manager made
+    // or an invitation alone never opens the person's own page from here.
+    linkedWorkerId:
+      linkState === "linked" && row.data.link_method === "worker_confirmed"
+        ? ((row.data.linked_worker_id as string | null) ?? null)
+        : null,
   };
 
   // EVERY record of this person — records WITHOUT a work object included.
@@ -144,12 +152,34 @@ export async function readCompanyPerson(input: {
   // does not resolve is not named (the group then says so).
   const workObjectIds = [...new Set(records.map((r) => r.workObjectId).filter((v): v is string => !!v))];
   const lookups = await readHistoryLookups(supabase, { workObjectIds, projectIds: [], organizationIds: [] });
+  // The project each place belongs to — the person card's link from a place
+  // to its project page. Same RLS session; an unreadable link is simply
+  // absent (the place then renders without one), never invented.
+  const projectOfObject = new Map<string, string | null>();
+  for (let i = 0; i < workObjectIds.length; i += 200) {
+    const res = await untypedClient(supabase)
+      .from("work_objects")
+      .select("id, project_id")
+      .in("id", workObjectIds.slice(i, i + 200));
+    for (const o of (res.data ?? []) as { id: string; project_id: string | null }[]) {
+      projectOfObject.set(o.id, o.project_id);
+    }
+  }
+  // A place on a fragment marked into a canonical project links to the
+  // canonical one — the project the organization now keeps.
+  const { canonicalOf } = await readProjectCanonicalMap(
+    supabase,
+    [...projectOfObject.values()].filter((v): v is string => !!v),
+  );
+  for (const [objectId, projectId] of projectOfObject) {
+    if (projectId && canonicalOf.has(projectId)) projectOfObject.set(objectId, canonicalOf.get(projectId)!);
+  }
   const objects: PlaceObjectFacts[] = [...lookups.workObjects.entries()].map(([id, name]) => ({
     id,
     name,
     addressLine: null,
     city: null,
-    projectId: null,
+    projectId: projectOfObject.get(id) ?? null,
     archived: false,
   }));
 

@@ -4,6 +4,7 @@ import type { DomainCaller } from "@/lib/domain/caller";
 import { untypedClient } from "./evidence-store";
 import { listAllEvidenceRecords, readAllPages } from "./evidence-pagination";
 import type { EvidenceRecordView } from "./import-core";
+import { readProjectCanonicalMap } from "@/lib/projects/projects";
 
 /**
  * HISTORICAL WORK ON A PLACE / PROJECT.
@@ -56,11 +57,15 @@ export async function readEvidenceForProject(
   projectId: string,
 ): Promise<WorkObjectEvidenceRead> {
   let failureCode = "";
+  // A consolidated project shows the work recorded on the fragments marked
+  // into it (duplicate → canonical): their rows and records stay untouched.
+  const { fragmentsOf } = await readProjectCanonicalMap(caller.supabase, [projectId]);
+  const projectIds = [projectId, ...(fragmentsOf.get(projectId) ?? [])];
   const objs = await readAllPages<{ id: string }>(async (from, to) => {
     const res = await untypedClient(caller.supabase)
       .from("work_objects")
       .select("id")
-      .eq("project_id", projectId)
+      .in("project_id", projectIds)
       .order("id", { ascending: true })
       .range(from, to);
     if (res.error) failureCode = res.error.code ?? "";

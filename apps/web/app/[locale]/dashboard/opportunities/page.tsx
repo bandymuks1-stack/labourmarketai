@@ -1,6 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isAssessedFit } from "@/lib/opportunities/fit-band";
 import { TelemetryView } from "@/components/app/telemetry-view";
+import { PersonalOpportunities } from "@/components/app/opportunities/personal-opportunities";
+import {
+  FIRST_VIEW_COUNT,
+  FREE_DISCOVERY_SET,
+  selectPersonalOpportunities,
+} from "@/lib/opportunities/personal-recommendations";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import Link from "next/link";
 
@@ -113,6 +119,12 @@ import type {
   OpportunityStatus,
 } from "@/lib/opportunities/opportunity-fit";
 import { createUtcFormatter } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/opportunities", "opportunities.world.title");
+
 
 /**
  * PASAULIS — the worker's discovery-and-matching destination
@@ -276,19 +288,27 @@ export default async function OpportunitiesPage({
   // the matches are counted against the SAME cards the worker sees, under
   // their own authorization. Unavailable (owner-gated migration unapplied, or
   // a failed read) renders no controls at all.
+  // THE PERSONAL FIRST VIEW (owner addendum 2026-10-09): the pristine page
+  // and the free discovery set render "Your opportunities" only. The full
+  // board (filters, sort, ?view=all) is unchanged - so the reads only it
+  // uses are skipped here and taken lazily if the page falls back to it.
+  const personalCandidate =
+    view !== "all" &&
+    activeFilterEntries(filters).length === 0 &&
+    sort === "relevance";
   const savedSearches = await getMySavedSearches();
   // Board + salary benchmark + weekly digest + world view + the person's
   // own work-seeking intent are independent reads — one combined await so
   // TTFB pays the slowest of them, not their sum.
-  const [result, salaryIntel, weekly, partnerSupply, discoverability, tVisibility] = await Promise.all([
+  const [result, salaryIntelEarly, weeklyEarly, partnerSupply, discoverability, tVisibility] = await Promise.all([
     loadWorkerOpportunityBoard("opportunities_board", {
       externalDiscovery: {
         professionSlug: filters.profession,
         country: filters.country,
       },
     }),
-    getWorkerSalaryIntelligence(),
-    getWeeklyPersonalIntelligence(),
+    personalCandidate ? Promise.resolve(null) : getWorkerSalaryIntelligence(),
+    personalCandidate ? Promise.resolve(null) : getWeeklyPersonalIntelligence(),
     // The world read that fed this page's map viewport is GONE WITH THE
     // VIEWPORT (owner decision 2026-09-27, explained at the render site
     // below). `loadWorldView` itself is untouched and still serves
@@ -382,6 +402,53 @@ export default async function OpportunitiesPage({
   //    trend). Every card degrades honestly — the unavailable ones say WHY,
   //    what is required, which sources are off and what activation changes.
   //    Nothing here fabricates a number (§18).
+  if (personalCandidate && result.kind === "ready" && result.capabilities.boardAvailable) {
+    const personalItems = selectPersonalOpportunities(
+      result.opportunities,
+      externalCards,
+      view === "discover" ? FREE_DISCOVERY_SET : FIRST_VIEW_COUNT,
+    );
+    const discoverySize =
+      view === "discover"
+        ? personalItems.length
+        : selectPersonalOpportunities(result.opportunities, externalCards, FREE_DISCOVERY_SET).length;
+    const personalWorkLabels = buildWorkTypeLabelMap(locale);
+    const tProfessionPersonal = await getTranslations("professions");
+    return (
+      <>
+        <TelemetryView
+          event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
+          metadata={{
+            surface: "opportunities",
+            role_context: "worker",
+            candidate_count: result.opportunities.length,
+          }}
+        />
+        {result.readiness.hasWorkType && result.readiness.hasSkills ? (
+          <TelemetryView event={FUNNEL_EVENTS.profileMatchable} metadata={{ surface: "opportunities", role_context: "worker" }} />
+        ) : null}
+        {result.opportunities.length > 0 || result.externalVacancies.cards.length > 0 ? (
+          <TelemetryView
+            event={FUNNEL_EVENTS.realOpportunitiesLoaded}
+            metadata={{ surface: "opportunities", role_context: "worker", success: true }}
+          />
+        ) : null}
+        <PersonalOpportunities
+          items={personalItems}
+          mode={view === "discover" ? "discover" : "top"}
+          locale={locale}
+          roleLabel={(slug) => (slug && personalWorkLabels[slug]) || t("fieldRoleUnknown")}
+          professionLabel={(slug) => (slug && tProfessionPersonal.has(slug as never) ? tProfessionPersonal(slug as never) : null)}
+          countryLabel={(code) => (code && tlm.has(`countryNames.${code}`) ? tlm(`countryNames.${code}`) : (code ?? ""))}
+          discoverySet={FREE_DISCOVERY_SET}
+          canShowMore={discoverySize > personalItems.length}
+        />
+      </>
+    );
+  }
+  // Fallback to the full board: the reads the personal view skipped.
+  const salaryIntel = salaryIntelEarly ?? (await getWorkerSalaryIntelligence());
+  const weekly = weeklyEarly ?? (await getWeeklyPersonalIntelligence());
   const tIntel = await getTranslations("intelligence");
   // Root translator — provenance/attribution codes are FULL key paths
   // (vacancySources.*), stored as codes on the record, resolved only here.
@@ -458,6 +525,13 @@ export default async function OpportunitiesPage({
         ? "border-brand-blue bg-brand-blue/10 text-text-primary"
         : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
     }`;
+  // The opportunity-type heading lives with its values in the need form's
+  // catalogue (structuredDemand), present in every locale; the discovery
+  // namespace never had that key, so reading it there printed a raw key.
+  const filterDimLabel = (dim: keyof DiscoveryFilterState): string =>
+    dim === "opportunityType"
+      ? sd("opportunityTypeLabel")
+      : t(`discovery.filters.${dim}` as never);
   const filterValueLabel = (dim: keyof DiscoveryFilterState, value: string): string => {
     switch (dim) {
       case "profession":
@@ -815,9 +889,7 @@ export default async function OpportunitiesPage({
         />
       ) : null}
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("world.title")}
-        </h1>
+        <PageTitle>{t("world.title")}</PageTitle>
         {result.kind === "ready" ? (
           <>
             {/* WHY YOU MAY BE SEEING LESS — and nothing else (§7). A capability
@@ -1023,10 +1095,22 @@ export default async function OpportunitiesPage({
                   filters.country,
                 ),
               },
+              // Internship / apprenticeship / employment … — the type the
+              // employer stated on the need. The filter was already parsed
+              // and applied from the URL but had no control and no heading,
+              // so a student could narrow the board to internships only by
+              // typing the address. The active value stays listed so it can
+              // always be switched off.
+              {
+                dim: "opportunityType",
+                values: withValues(facets.opportunityTypes, [], filters.opportunityType),
+              },
               { dim: "start", values: facets.starts },
               { dim: "accommodation", values: facets.accommodations },
               { dim: "transport", values: facets.transports },
               { dim: "tool", values: facets.tools },
+              // opportunityType is listed ONCE, above (#3334 and #3338 each added it,
+              // so the type chips rendered twice with duplicate keys and testids).
             ];
             const showFilterControls =
               active.length > 0 || facetGroups.some((g) => g.values.length > 0);
@@ -1094,7 +1178,7 @@ export default async function OpportunitiesPage({
                           .map((g) => (
                             <div key={g.dim} className="flex flex-wrap items-center gap-1.5">
                               <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
-                                {t(`discovery.filters.${g.dim}` as never)}
+                                {filterDimLabel(g.dim)}
                               </span>
                               {g.values.map((v) => {
                                 const isActive = filters[g.dim] === v;
@@ -1163,7 +1247,7 @@ export default async function OpportunitiesPage({
                         filters: active
                           .map(
                             ([dim, v]) =>
-                              `${t(`discovery.filters.${dim}` as never)}: ${filterValueLabel(dim, v)}`,
+                              `${filterDimLabel(dim)}: ${filterValueLabel(dim, v)}`,
                           )
                           .join(" · "),
                       })}
@@ -1353,7 +1437,7 @@ export default async function OpportunitiesPage({
                               />
                             ) : (
                               (() => {
-                                const { need, fit, match, nextAction, interestStatus, structured, saved } = row.card;
+                                const { need, fit, match, nextAction, interestStatus, structured, saved, formalRequirements } = row.card;
                                 const rankIndex = row.rankIndex;
                                 const whyLines = whyCodesFor(row)
                                   .map(whyText)
@@ -1721,6 +1805,34 @@ export default async function OpportunitiesPage({
                                           labels={tierLabels}
                                           testId="opportunity-match-tiers"
                                         />
+
+                                        {/* FORMAL REQUIREMENTS — apart from skill fit (owner
+                                            decision 2026-10-29, SEP-6): a licence or a regulated
+                                            qualification is never satisfied by recorded work. */}
+                                        {formalRequirements && formalRequirements.length > 0 ? (
+                                          <div className="flex flex-col gap-1" data-testid="opportunity-formal-requirements">
+                                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                                              {t("skillMatch.formalTitle")}
+                                            </span>
+                                            <ul className="flex flex-col gap-1">
+                                              {formalRequirements.map((f) => (
+                                                <li
+                                                  key={f.kind}
+                                                  className={`text-basis ${f.standing === "missing_requirement" ? "text-state-amber" : "text-text-secondary"}`}
+                                                  data-testid="opportunity-formal-requirement"
+                                                  data-formal-kind={f.kind}
+                                                  data-standing={f.standing}
+                                                >
+                                                  {f.kind === "driving_licence"
+                                                    ? t(f.standing === "stated_held" ? "skillMatch.formalLicenceHeld" : "skillMatch.formalLicence", {
+                                                        categories: f.categories.join(", "),
+                                                      })
+                                                    : t("skillMatch.formalQualification")}
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        ) : null}
 
                                         <div className="flex flex-wrap items-center gap-3">
                                           <Link

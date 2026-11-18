@@ -91,6 +91,12 @@ describe("job alert fit — the engine's own profession / country / pay rules", 
     const sek = vac({ compensation: { currency: "SEK", min: 100, max: 200, description: null } });
     expect(jobAlertFit(crit({ salaryMinEur: 9999 }), sek, NOW).fits).toBe(true);
     expect(formatOfferedPay(sek)).toBeNull();
+    // One bound is never printed as an exact amount (audit 2026-11-03): the
+    // card's wording, language-neutral because the alert text is stored.
+    const upTo = vac({ compensation: { currency: "EUR", min: null, max: 3200, description: null } });
+    expect(formatOfferedPay(upTo)).toBe("≤ 3200 EUR");
+    const from = vac({ compensation: { currency: "EUR", min: 2500, max: null, description: null } });
+    expect(formatOfferedPay(from)).toBe("≥ 2500 EUR");
     // No worker expectation: nothing is excluded on pay.
     const paid = vac({ compensation: { currency: "EUR", min: 1, max: 2, description: null } });
     expect(jobAlertFit(crit({ salaryMinEur: null }), paid, NOW).fits).toBe(true);
@@ -132,7 +138,7 @@ describe("first layer + link", () => {
     const f = jobAlertFacts(
       vac({ compensation: { currency: "EUR", min: 2500, max: 3200, description: null } }),
     );
-    expect(f).toMatchObject({ title: "Sveiser", country: "NO", salary: "2500-3200 EUR" });
+    expect(f).toMatchObject({ title: "Sveiser", country: "NO", salary: "2500–3200 EUR" });
     expect(jobAlertFacts(vac())?.salary).toBeNull();
   });
   it("a job alert opens THE job, not a list", () => {

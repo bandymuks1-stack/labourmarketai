@@ -37,6 +37,9 @@ export interface SubjectCompetencySignal {
   readonly terms: readonly string[];
   /** Distinct records the skill was named in. */
   readonly records: number;
+  /** Those records' ids — so a surface can say WHERE (which place/project)
+   *  the skill was named, without a second read. */
+  readonly recordIds: readonly string[];
   /** The strongest stored confidence (0..1) — carried, never rounded up. */
   readonly confidence: number;
 }
@@ -100,6 +103,7 @@ export async function readSubjectCompetencySignals(
       slug,
       terms: [...e.terms].slice(0, 6),
       records: e.records.size,
+      recordIds: [...e.records],
       confidence: e.confidence,
     }))
     // Most-evidenced first: more records, then stronger match, then name.

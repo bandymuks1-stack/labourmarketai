@@ -380,3 +380,78 @@ export function countConfirmedEntries(
   return confirmedEntriesOf(liveRows, subjectProfileId, correctedOriginalIds).length;
 }
 
+/**
+ * CONFIRMED ENTRIES FROM A FLAT ROW READ — for a reviewer surface that reads
+ * `journal_entry_confirmations` directly (the manager inbox) instead of
+ * entries with their rows embedded.
+ *
+ * The inbox counted ROWS: an entry approved, sent back and approved again was
+ * "2 confirmed", and an entry approved and then sent back still counted as
+ * confirmed (walk-spec 2026-10-25). Here the rows are grouped by entry and the
+ * SAME latest-wins rule (`deriveReviewResult`, counterparty rows excluded)
+ * decides each entry once. `automatic` counts the confirmed entries whose
+ * deciding row was written by the auto-confirm policy, so an automatic
+ * confirmation never hides inside the confirmed figure.
+ */
+export function countConfirmedEntriesFromRows(
+  rows: readonly (ConfirmationRow & {
+    readonly entry_id?: string | null;
+    /** The entry's author. Unreadable: that person's row is hidden from this reader,
+     *  so the reader is someone else, and `isConfirmedEntry` has no self row to drop. */
+    readonly subject_profile_id?: string | null;
+  })[],
+): { confirmed: number; automatic: number } {
+  const byEntry = new Map<string, { subject: string | null; rows: ConfirmationRow[] }>();
+  for (const r of rows) {
+    if (!r.entry_id) continue;
+    const entry = byEntry.get(r.entry_id) ?? { subject: r.subject_profile_id ?? null, rows: [] };
+    entry.rows.push(r);
+    byEntry.set(r.entry_id, entry);
+  }
+  let confirmed = 0;
+  let automatic = 0;
+  for (const { subject, rows: list } of byEntry.values()) {
+    if (!isConfirmedEntry(list, subject)) continue;
+    confirmed += 1;
+    const latest = employerRowsOnly(list.filter((r) => !isSelfConfirmation(r, subject)))
+      .filter((r) => rowDecision(r) !== null)
+      .sort(
+        (a, b) =>
+          (a.created_at ? Date.parse(a.created_at) : 0) -
+          (b.created_at ? Date.parse(b.created_at) : 0),
+      )
+      .at(-1);
+    if (latest && rowIsAutomatic(latest)) automatic += 1;
+  }
+  return { confirmed, automatic };
+}
+
+/** What an entry read selects so `confirmedEntriesByWorker` can answer: its author and decisions. */
+export const CONFIRMABLE_ENTRY_BY_WORKER_COLUMNS =
+  "id, worker_id, correction_of, workers(profile_id), journal_entry_confirmations(confirmation_scope, created_at, confirmer_id)";
+
+/**
+ * CONFIRMED ENTRIES PER WORKER — for a surface listing many people (the agency pool, the
+ * admin workbench). The same test as everywhere: only a decision by someone else counts.
+ * A worker whose author row can't be read can't be asked that question, so nothing counts
+ * for them, rather than a number that may hold self-approvals.
+ */
+export function confirmedEntriesByWorker(
+  liveRows: readonly (ConfirmableEntryRow & {
+    readonly worker_id: string;
+    readonly workers?: { readonly profile_id?: string | null } | null;
+  })[],
+): Map<string, number> {
+  const byWorker = new Map<string, (typeof liveRows)[number][]>();
+  for (const r of liveRows) {
+    const list = byWorker.get(r.worker_id) ?? [];
+    list.push(r);
+    byWorker.set(r.worker_id, list);
+  }
+  const counts = new Map<string, number>();
+  for (const [workerId, rows] of byWorker) {
+    const subject = rows[0]?.workers?.profile_id ?? null;
+    counts.set(workerId, subject ? countConfirmedEntries(rows, subject) : 0);
+  }
+  return counts;
+}

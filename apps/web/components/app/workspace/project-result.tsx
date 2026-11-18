@@ -621,7 +621,7 @@ function Pulse({ pulse, assignmentTotal }: { pulse: ProjectDetail["pulse"]; assi
     <div className="flex flex-col gap-1" data-testid="project-pulse">
       <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("pulseTitle")}</h3>
       <dl className="flex flex-col gap-1 text-support">
-        <Row label={t("pulseToday")} value={String(pulse.entriesToday)} />
+        <Row label={t("pulseToday")} value={pulse.entriesToday === null ? "—" : String(pulse.entriesToday)} />
         <Row label={t("pulseEvidence")} value={t("pulseEvidenceValue", { entries: pulse.evidenceEntries, photos: pulse.evidencePhotos })} />
         <Row label={t("pulseTasks")} value={t("pulseTasksValue", { open: pulse.tasksOpen, overdue: pulse.tasksOverdue })} />
         {pulse.readinessTotal > 0 && (

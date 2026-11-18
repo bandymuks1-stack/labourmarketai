@@ -49,6 +49,16 @@ describe("classifyIntent — brief example sentences", () => {
     // Seeking verb tips to find-work.
     expect(classifyIntent("noriu rasti darbą Vokietijoje").intent).toBe("find-work");
   });
+
+  it("a day + a duration in a project is recorded work, not the project list (owner 2026-10-10)", () => {
+    expect(
+      classifyIntent("Šiandien Oslo projekte armavome pamatus, 8 valandas").intent,
+    ).toBe("log-work");
+    expect(classifyIntent("Vakar projekte montavome langus 6 val.").intent).toBe("log-work");
+    // the list questions keep their own door
+    expect(classifyIntent("mano projektai").intent).toBe("projects");
+    expect(classifyIntent("parodyk projektus").intent).toBe("projects");
+  });
 });
 
 /**
@@ -459,7 +469,11 @@ describe("G8 — candidates and projects route to the chip handlers", () => {
  */
 // 2026-09-20: `pl` re-joins the ratchet — Polish patterns now exist in
 // lib/conversation/intent-router.ts, so every row below is real coverage.
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+// 2026-11-12: `sv` joins the same way — Swedish patterns sit beside the
+// Polish ones in the router, one natural Swedish sentence per row. The one
+// row the router alone cannot open is `product-help`: its patterns are read
+// from lib/conversation/product-help-topics.ts (the help answer's own data).
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 type ActiveLocale = (typeof ACTIVE_LOCALES)[number];
 
 const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>> = {
@@ -470,6 +484,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Vandaag heb ik 8 uur gewerkt",
     de: "Heute habe ich von 8 bis 17 gearbeitet",
     pl: "Dzisiaj pracowałem od 8 do 17",
+    sv: "Idag jobbade jag från 8 till 17",
   },
   "find-work": {
     lt: "Rask man darbą Nyderlanduose",
@@ -478,6 +493,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik zoek werk in Nederland",
     de: "Ich suche Arbeit in Deutschland",
     pl: "Szukam pracy w Holandii",
+    sv: "Jag söker jobb i Sverige",
   },
   "write-employer": {
     lt: "Parašyk šiai įmonei",
@@ -486,6 +502,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Schrijf naar deze werkgever",
     de: "Schreib dem Arbeitgeber",
     pl: "Napisz do tego pracodawcy",
+    sv: "Skriv till den här arbetsgivaren",
   },
   translate: {
     lt: "Išversk žinutę į olandų kalbą",
@@ -494,6 +511,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Vertaal dit bericht",
     de: "Übersetze diese Nachricht",
     pl: "Przetłumacz tę wiadomość",
+    sv: "Översätt det här meddelandet",
   },
   "calendar-view": {
     lt: "Kada turiu kitą susitikimą?",
@@ -502,6 +520,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wanneer is mijn volgende afspraak?",
     de: "Wann ist mein nächster Termin?",
     pl: "Kiedy mam następne spotkanie?",
+    sv: "När är mitt nästa möte?",
   },
   reminder: {
     lt: "Primink rytoj 8 valandą paskambinti",
@@ -510,6 +529,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Herinner me er morgen aan",
     de: "Erinnere mich morgen daran",
     pl: "Przypomnij mi jutro",
+    sv: "Påminn mig i morgon",
   },
   cv: {
     lt: "Įkelk mano CV",
@@ -518,6 +538,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Upload mijn cv",
     de: "Meinen Lebenslauf hochladen",
     pl: "Wgraj moje CV",
+    sv: "Ladda upp mitt CV",
   },
   profile: {
     lt: "Pridėk kalbą",
@@ -526,6 +547,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Voeg een taal toe aan mijn profiel",
     de: "Zeig mein Profil",
     pl: "Pokaż mój profil",
+    sv: "Visa min profil",
   },
   "accept-offer": {
     lt: "Priimu pasiūlymą",
@@ -534,6 +556,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik accepteer het aanbod",
     de: "Ich nehme das Angebot an",
     pl: "Przyjmuję ofertę",
+    sv: "Jag accepterar erbjudandet",
   },
   offers: {
     lt: "Ką man siūlo?",
@@ -542,6 +565,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welke aanbiedingen heb ik?",
     de: "Zeig meine Angebote",
     pl: "Pokaż moje oferty",
+    sv: "Visa mina erbjudanden",
   },
   "need-workers": {
     lt: "Reikia darbuotojų",
@@ -550,6 +574,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wij zoeken personeel",
     de: "Wir brauchen Mitarbeiter",
     pl: "Potrzebujemy pracowników na przyszły miesiąc",
+    sv: "Vi behöver personal nästa månad",
   },
   criteria: {
     lt: "Kokie kriterijai pas mane nurodyti?",
@@ -558,6 +583,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wat zijn mijn zoekcriteria?",
     de: "Meine Suchkriterien",
     pl: "Jakie są moje kryteria wyszukiwania?",
+    sv: "Vilka är mina sökkriterier?",
   },
   "next-action": {
     lt: "Ką dar turiu padaryti?",
@@ -566,6 +592,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wat moet ik nog doen?",
     de: "Was soll ich als Nächstes tun?",
     pl: "Co powinienem zrobić dalej?",
+    sv: "Vad ska jag göra härnäst?",
   },
   resume: {
     lt: "Kur sustojau?",
@@ -574,6 +601,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Waar was ik gebleven?",
     de: "Wo war ich stehengeblieben?",
     pl: "Gdzie skończyłem?",
+    sv: "Var slutade jag?",
   },
   "skill-gap": {
     lt: "Kokių įgūdžių man trūksta?",
@@ -582,6 +610,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welke vaardigheden mis ik?",
     de: "Welche Fähigkeiten fehlen mir?",
     pl: "Jakich umiejętności mi brakuje?",
+    sv: "Vilka färdigheter saknar jag?",
   },
   "journal-recent": {
     lt: "Parodyk paskutinius žurnalo įrašus",
@@ -590,6 +619,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn dagboek",
     de: "Zeig mein Tagebuch",
     pl: "Pokaż ostatnie wpisy w dzienniku",
+    sv: "Visa mina senaste inlägg i arbetsjournalen",
   },
   // Work intelligence by sentence (issue #1689, owner chat lines 2–7).
   "journal-skill": {
@@ -599,6 +629,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Hoeveel heb ik geprogrammeerd?",
     de: "Wie viel habe ich programmiert?",
     pl: "Ile programowałem?",
+    sv: "Hur mycket har jag programmerat?",
   },
   "journal-skills-top": {
     lt: "Kokius įgūdžius naudoju daugiausia?",
@@ -607,6 +638,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welke vaardigheden gebruik ik het meest?",
     de: "Welche Fähigkeiten nutze ich am meisten?",
     pl: "Jakich umiejętności używam najczęściej?",
+    sv: "Vilka färdigheter använder jag mest?",
   },
   "journal-activities-top": {
     lt: "Kokia veikla užima daugiausia mano laiko šį mėnesį?",
@@ -615,6 +647,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welke activiteit kost de meeste tijd?",
     de: "Welche Tätigkeit nimmt die meiste Zeit?",
     pl: "Która czynność zajmuje najwięcej mojego czasu?",
+    sv: "Vilken aktivitet tar mest av min tid den här månaden?",
   },
   "journal-confirmed": {
     lt: "Kas patvirtinta?",
@@ -623,6 +656,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wat is bevestigd?",
     de: "Was ist bestätigt?",
     pl: "Co jest potwierdzone?",
+    sv: "Vad är bekräftat?",
   },
   "journal-growth": {
     lt: "Kur yra didžiausias augimo potencialas?",
@@ -631,6 +665,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Waar kan ik groeien?",
     de: "Wo kann ich wachsen?",
     pl: "Gdzie mam największy potencjał rozwoju?",
+    sv: "Var kan jag växa?",
   },
   figures: {
     lt: "Paruošk ataskaitą",
@@ -639,6 +674,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn bevestigde uren",
     de: "Zeig meine bestätigten Stunden",
     pl: "Przygotuj raport",
+    sv: "Visa mina godkända timmar",
   },
   "open-project": {
     lt: "Atidaryk šį projektą",
@@ -647,6 +683,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Open dit project",
     de: "Öffne dieses Projekt",
     pl: "Otwórz ten projekt",
+    sv: "Öppna det här projektet",
   },
   projects: {
     lt: "Mano projektai",
@@ -655,6 +692,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Mijn projecten",
     de: "Meine Projekte",
     pl: "Moje projekty",
+    sv: "Mina projekt",
   },
   candidates: {
     lt: "Parodyk kandidatus",
@@ -663,6 +701,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon de kandidaten",
     de: "Zeig die Kandidaten",
     pl: "Pokaż kandydatów",
+    sv: "Visa kandidaterna",
   },
   "find-workers": {
     lt: "Surask darbuotojų",
@@ -671,6 +710,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Vind geschikte mensen",
     de: "Finde passende Leute",
     pl: "Znajdź pracowników",
+    sv: "Hitta lämpliga medarbetare",
   },
   "need-service": {
     lt: "Reikia, kad kas nors sutaisytų stogą",
@@ -679,6 +719,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Iemand nodig om het dak te repareren",
     de: "Jemand, der das Dach repariert",
     pl: "Potrzebuję kogoś do naprawy dachu",
+    sv: "Behöver någon som kan laga taket",
   },
   "open-conversation": {
     lt: "Atidaryk pokalbį su Jonu",
@@ -687,6 +728,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Open een gesprek met Jonas",
     de: "Öffne ein Gespräch mit Jonas",
     pl: "Napisz do Jonasa",
+    sv: "Öppna en konversation med Jonas",
   },
   "new-jobs": {
     lt: "Kokių naujų darbų man atsirado?",
@@ -695,6 +737,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welke nieuwe vacatures zijn er?",
     de: "Gibt es neue Jobs für mich?",
     pl: "Jakie nowe oferty pracy się pojawiły?",
+    sv: "Finns det några nya jobb för mig?",
   },
   "product-help": {
     lt: "Kaip pridėti žmogų?",
@@ -703,6 +746,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Hoe voeg ik een persoon toe?",
     de: "Wie füge ich eine Person hinzu?",
     pl: "Jak dodać osobę?",
+    sv: "Hur lägger jag till en person?",
   },
   "find-partners": {
     lt: "Noriu rasti partnerių savo verslui",
@@ -711,6 +755,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik wil zakelijke partners vinden",
     de: "Ich möchte Geschäftspartner finden",
     pl: "Chcę znaleźć partnerów biznesowych",
+    sv: "Jag vill hitta affärspartner",
   },
   context: {
     lt: "Ką tu apie mane žinai?",
@@ -719,6 +764,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wat weet je over mij?",
     de: "Was weißt du über mich?",
     pl: "Co o mnie wiesz?",
+    sv: "Vad vet du om mig?",
   },
   capabilities: {
     lt: "Ką galiu padaryti šioje paskyroje?",
@@ -727,6 +773,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wat kan ik hier doen?",
     de: "Was kann ich hier machen?",
     pl: "Co mogę tutaj zrobić?",
+    sv: "Vad kan jag göra här?",
   },
   "switch-context": {
     lt: "Perjunk į įmonę",
@@ -735,6 +782,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Schakel over naar mijn bedrijf",
     de: "Wechsle zu meiner Firma",
     pl: "Przełącz na moją firmę",
+    sv: "Byt till mitt företag",
   },
   opportunities: {
     lt: "Kokias galimybes man gali pasiūlyti?",
@@ -743,6 +791,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welke mogelijkheden heb ik?",
     de: "Welche Möglichkeiten habe ich?",
     pl: "Jakie mam możliwości?",
+    sv: "Vilka möjligheter har jag?",
   },
   "interest-inbox": {
     lt: "Kas susidomėjo mano poreikiu?",
@@ -751,6 +800,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wie heeft interesse in mijn aanvraag?",
     de: "Wer hat Interesse gezeigt?",
     pl: "Kto jest zainteresowany moim zapotrzebowaniem?",
+    sv: "Vem har visat intresse för mitt behov?",
   },
   "admin-approvals": {
     lt: "Ką turiu patvirtinti?",
@@ -759,6 +809,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wat wacht op mijn goedkeuring?",
     de: "Was muss ich genehmigen?",
     pl: "Co muszę zatwierdzić?",
+    sv: "Vad behöver jag godkänna?",
   },
   "admin-requests": {
     lt: "Noriu pateikti atostogų prašymą",
@@ -767,6 +818,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik wil verlof aanvragen",
     de: "Ich möchte Urlaub beantragen",
     pl: "Chcę złożyć wniosek urlopowy",
+    sv: "Jag vill ansöka om semester",
   },
   timesheets: {
     lt: "Parodyk mano tabelį",
@@ -775,6 +827,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Open mijn urenstaat",
     de: "Zeig meinen Stundenzettel",
     pl: "Otwórz moją ewidencję czasu pracy",
+    sv: "Öppna min tidrapport",
   },
   "hours-import": {
     lt: "Įkelk tabelį",
@@ -783,6 +836,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Urenstaat importeren",
     de: "Stundenzettel importieren",
     pl: "Zaimportuj ewidencję czasu pracy",
+    sv: "Importera en tidrapport",
   },
   "work-hours": {
     lt: "Atidaryk darbo valandas",
@@ -791,6 +845,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Open de werkuren",
     de: "Öffne die Arbeitsstunden",
     pl: "Otwórz godziny pracy",
+    sv: "Öppna arbetstimmarna",
   },
   absences: {
     lt: "Kiek atostogų dienų man liko?",
@@ -799,6 +854,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Hoeveel verlofdagen heb ik nog?",
     de: "Wie viele Urlaubstage habe ich noch?",
     pl: "Ile dni urlopu mi zostało?",
+    sv: "Hur många semesterdagar har jag kvar?",
   },
   documents: {
     lt: "Parodyk mano dokumentus",
@@ -807,6 +863,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn documenten",
     de: "Zeig meine Dokumente",
     pl: "Pokaż moje dokumenty",
+    sv: "Visa mina dokument",
   },
   "market-map": {
     lt: "Parodyk rinkos žemėlapį",
@@ -815,6 +872,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon de arbeidsmarktkaart",
     de: "Öffne die Arbeitsmarktkarte",
     pl: "Pokaż mapę rynku pracy",
+    sv: "Visa arbetsmarknadskartan",
   },
   activity: {
     lt: "Parodyk pranešimus",
@@ -823,6 +881,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn meldingen",
     de: "Zeig meine Benachrichtigungen",
     pl: "Pokaż powiadomienia",
+    sv: "Visa mina aviseringar",
   },
   "my-team": {
     lt: "Parodyk mano komandą",
@@ -831,6 +890,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn team",
     de: "Zeig mein Team",
     pl: "Pokaż mój zespół",
+    sv: "Visa mitt team",
   },
   "messages-view": {
     lt: "Parodyk žinutes",
@@ -839,6 +899,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn berichten",
     de: "Zeig meine Nachrichten",
     pl: "Pokaż moje wiadomości",
+    sv: "Visa mina meddelanden",
   },
   invitations: {
     lt: "Mano kvietimai",
@@ -847,6 +908,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Mijn uitnodigingen",
     de: "Meine Einladungen",
     pl: "Moje zaproszenia",
+    sv: "Mina inbjudningar",
   },
   "player-card": {
     lt: "Parodyk mano kortelę",
@@ -855,6 +917,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn kaart",
     de: "Zeig meine Karte",
     pl: "Pokaż moją kartę",
+    sv: "Visa mitt kort",
   },
   experiences: {
     lt: "Patirtys apie mane",
@@ -863,6 +926,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik wil een ervaring achterlaten",
     de: "Eine Erfahrung hinterlassen",
     pl: "Chcę zostawić opinię o współpracy",
+    sv: "Jag vill lämna ett omdöme om samarbetet",
   },
   engagements: {
     lt: "Su kuo aš dirbu?",
@@ -871,6 +935,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Met wie werk ik?",
     de: "Mit wem arbeite ich?",
     pl: "Z kim pracuję?",
+    sv: "Vem arbetar jag med?",
   },
   "company-overview": {
     lt: "Kas vyksta mano įmonėje?",
@@ -879,6 +944,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wat gebeurt er in mijn bedrijf?",
     de: "Was passiert in meiner Firma?",
     pl: "Co się dzieje w mojej firmie?",
+    sv: "Vad händer i mitt företag?",
   },
   "create-organization": {
     lt: "Sukurk įmonės profilį",
@@ -887,6 +953,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Bedrijf aanmaken",
     de: "Firma anlegen",
     pl: "Załóż firmę",
+    sv: "Skapa ett företag",
   },
   "rename-organization": {
     lt: "Pervadink šią agentūrą į Nonstop Group UAB.",
@@ -895,6 +962,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Hernoem mijn bedrijf naar Nonstop Group",
     de: "Benenne meine Firma in Nonstop Group um",
     pl: "Zmień nazwę firmy na Nonstop Group",
+    sv: "Byt namn på mitt företag till Nonstop Group",
   },
   lmc: {
     lt: "Kiek turiu LMC?",
@@ -903,6 +971,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Hoeveel LMC heb ik?",
     de: "Wie viel LMC habe ich?",
     pl: "Ile mam LMC?",
+    sv: "Hur mycket LMC har jag?",
   },
   "offer-value": {
     lt: "Turiu 30 kg agurkų ir noriu parduoti",
@@ -911,6 +980,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik wil 30 kg komkommers verkopen",
     de: "Ich möchte 500 Paletten verkaufen",
     pl: "Chcę sprzedać 500 drewnianych palet",
+    sv: "Jag vill sälja 500 träpallar",
   },
   // Window 6 (2026-09-06): the person names their profession — measured on
   // production, "esu programuotojas" answered nothing at all.
@@ -921,6 +991,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik ben boekhouder",
     de: "Ich bin Buchhalter",
     pl: "Jestem księgowym",
+    sv: "Jag är redovisningsekonom",
   },
   // Window 6 follow-up: the person states from WHEN they can work — measured
   // on production, "galiu dirbti nuo spalio 1 d." was a search with no criteria.
@@ -931,6 +1002,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik kan vanaf oktober werken",
     de: "Ich kann ab Oktober arbeiten",
     pl: "Mogę pracować od października",
+    sv: "Jag kan jobba från oktober",
   },
   "current-work": {
     lt: "Kur dabar dirbu?",
@@ -939,6 +1011,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Waar werk ik?",
     de: "Wo arbeite ich?",
     pl: "Gdzie teraz pracuję?",
+    sv: "Var jobbar jag nu?",
   },
   "correct-work": {
     lt: "Ne 5, o 6 valandas",
@@ -947,6 +1020,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Niet 5 maar 6 uur",
     de: "Nicht 5, sondern 6 Stunden",
     pl: "Nie 5, a 6 godzin",
+    sv: "Inte 5 utan 6 timmar",
   },
   "open-tasks": {
     lt: "Kokios užduotys dar atviros?",
@@ -955,6 +1029,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welke taken staan open?",
     de: "Welche Aufgaben sind offen?",
     pl: "Jakie zadania są otwarte?",
+    sv: "Vilka uppgifter är öppna?",
   },
   "saved-opportunities": {
     lt: "Parodyk išsaugotus darbus",
@@ -963,6 +1038,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Mijn opgeslagen vacatures",
     de: "Meine gespeicherten Jobs",
     pl: "Pokaż zapisane oferty",
+    sv: "Visa mina sparade jobb",
   },
   "skill-statement": {
     lt: "Išmokau skaityti techninius brėžinius",
@@ -971,6 +1047,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik heb tegelwerk geleerd",
     de: "Ich habe Fliesenlegen gelernt",
     pl: "Nauczyłem się czytać rysunki",
+    sv: "Jag har lärt mig läsa ritningar",
   },
   "language-statement": {
     lt: "Kalbu angliškai ir rusiškai",
@@ -979,6 +1056,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik spreek Engels",
     de: "Ich spreche Englisch",
     pl: "Mówię po angielsku",
+    sv: "Jag talar engelska och tyska",
   },
   "pay-statement": {
     lt: "Mano atlyginimo lūkestis nuo 2500 iki 3500 eurų",
@@ -987,6 +1065,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Mijn salaris minimaal 2500 euro",
     de: "Mein Gehalt mindestens 2500 Euro",
     pl: "Moje wynagrodzenie od 2500 do 3500 euro",
+    sv: "Min löneförväntan är 30000 till 35000 kr",
   },
   // ── AGENCY (real recruiter pilot, 2026-09-04) — the first row is the exact
   //    sentence the first real recruiter typed and the product did not
@@ -998,6 +1077,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Klant uitnodigen",
     de: "Kunden einladen",
     pl: "Zaproś klienta",
+    sv: "Bjud in en kund",
   },
   "invite-candidate": {
     lt: "Pakviesk darbuotoją į komandą",
@@ -1006,6 +1086,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Medewerker uitnodigen",
     de: "Mitarbeiter einladen",
     pl: "Zaproś pracownika do zespołu",
+    sv: "Bjud in en medarbetare till teamet",
   },
   "client-demand": {
     lt: "Parodyk kliento poreikį",
@@ -1014,6 +1095,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Aanvraag van de klant",
     de: "Kundenanfrage anzeigen",
     pl: "Pokaż zapotrzebowanie klienta",
+    sv: "Visa kundens förfrågningar",
   },
   "propose-candidate": {
     lt: "Pasiūlyk kandidatą",
@@ -1022,6 +1104,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Kandidaat voorstellen",
     de: "Kandidaten vorschlagen",
     pl: "Zaproponuj kandydata",
+    sv: "Föreslå en kandidat",
   },
   "proposal-status": {
     lt: "Pasiūlymų būsena",
@@ -1030,6 +1113,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Status van mijn voorstellen",
     de: "Stand der Vorschläge",
     pl: "Status moich propozycji",
+    sv: "Status för mina förslag",
   },
   // ── STUDENT / INSTITUTION (route-class) ──────────────────────────────────
   "learning-compass": {
@@ -1039,6 +1123,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Toon mijn leerkompas",
     de: "Zeig meinen Lernkompass",
     pl: "Pokaż mój kompas edukacyjny",
+    sv: "Visa min lärkompass",
   },
   "invite-student": {
     lt: "Pakviesk studentą",
@@ -1047,6 +1132,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Leerling uitnodigen",
     de: "Schüler einladen",
     pl: "Zaproś studenta",
+    sv: "Bjud in en student",
   },
   programmes: {
     lt: "Sukurk programą",
@@ -1055,6 +1141,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Nieuwe opleiding aanmaken",
     de: "Programm anlegen",
     pl: "Utwórz program",
+    sv: "Skapa ett utbildningsprogram",
   },
   "create-project": {
     lt: "Sukurk projektą Roterdame",
@@ -1063,6 +1150,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Nieuw project aanmaken",
     de: "Neues Projekt anlegen",
     pl: "Utwórz projekt w Rotterdamie",
+    sv: "Skapa ett nytt projekt i Göteborg",
   },
   // SUPPLY (owner window 7 §4) — the speaker HAS people and offers them.
   // Each sentence carries both halves the rule requires: a count or a word
@@ -1074,6 +1162,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wij hebben 20 lassers beschikbaar.",
     de: "Wir haben 20 Schweisser verfuegbar.",
     pl: "Mamy 20 spawaczy i szukamy dla nich pracy.",
+    sv: "Vi har 20 svetsare tillgängliga.",
   },
   "agency-invites": {
     lt: "Agentūra mane pakvietė bendradarbiauti",
@@ -1082,6 +1171,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Een bureau heeft ons uitgenodigd",
     de: "Eine Agentur hat uns eingeladen",
     pl: "Agencja zaprosiła nas do współpracy",
+    sv: "Ett bemanningsföretag har bjudit in oss",
   },
   "propose-booking": {
     lt: "Noriu pasiūlyti darbą kandidatui",
@@ -1090,6 +1180,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik wil werk aanbieden aan een kandidaat",
     de: "Ich möchte einem Kandidaten Arbeit anbieten",
     pl: "Chcę zaproponować pracę kandydatowi",
+    sv: "Jag vill erbjuda jobbet till en kandidat",
   },
   "agency-offers": {
     lt: "Kokius kandidatus pasiūlė agentūra?",
@@ -1098,6 +1189,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welke kandidaten heeft het bureau aangeboden?",
     de: "Welche Kandidaten hat die Agentur vorgeschlagen?",
     pl: "Jakich kandydatów zaproponowała agencja?",
+    sv: "Vilka kandidater har bemanningsföretaget föreslagit?",
   },
   "add-document": {
     lt: "Turiu naują A1 pažymą iki 2027-03-31",
@@ -1106,6 +1198,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik heb een nieuwe vergunning",
     de: "Ich habe einen neuen Ausweis",
     pl: "Mam nowe zaświadczenie A1",
+    sv: "Jag har ett nytt certifikat",
   },
   "cv-export": {
     lt: "Atsisiųsk mano CV",
@@ -1114,6 +1207,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Download mijn cv",
     de: "Meinen Lebenslauf herunterladen",
     pl: "Pobierz moje CV",
+    sv: "Ladda ner mitt CV",
   },
   "cv-view": {
     lt: "Noriu pamatyti savo CV",
@@ -1122,6 +1216,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Ik wil mijn cv bekijken",
     de: "Ich möchte meinen Lebenslauf ansehen",
     pl: "Chcę zobaczyć swoje CV",
+    sv: "Jag vill se mitt CV",
   },
   "cv-choose": {
     lt: "Mano CV",
@@ -1130,6 +1225,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Mijn cv",
     de: "Mein Lebenslauf",
     pl: "Moje CV",
+    sv: "Mitt CV",
   },
   // THE PHOTO SHOWN BACK (issue #1689, defect G) — the production sentence
   // that used to reach `cv-view`, and its parity forms.
@@ -1140,6 +1236,16 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Laat de foto zien",
     de: "Zeig das Foto",
     pl: "Pokaż wgrane zdjęcie",
+    sv: "Visa fotot jag laddade upp",
+  },
+  "what-changed": {
+    lt: "Kas pasikeitė nuo vakar?",
+    en: "What changed since yesterday?",
+    ru: "Что изменилось со вчера?",
+    nl: "Wat is er veranderd sinds gisteren?",
+    de: "Was hat sich seit gestern geändert?",
+    pl: "Co się zmieniło od wczoraj?",
+    sv: "Vad har ändrats sedan i går?",
   },
   "add-task": {
     lt: "Pridėk užduotį projektui: sumontuoti pastolius",
@@ -1148,6 +1254,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Nieuwe taak voor het project: steiger opbouwen",
     de: "Neue Aufgabe für das Projekt: Gerüst aufbauen",
     pl: "Dodaj zadanie do projektu: zmontować rusztowanie",
+    sv: "Lägg till en uppgift i projektet: montera ställningen",
   },
   "who-available": {
     lt: "Kas laisvas šią savaitę?",
@@ -1156,6 +1263,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wie is deze week beschikbaar?",
     de: "Wer ist diese Woche frei?",
     pl: "Kto jest dostępny w tym tygodniu?",
+    sv: "Vem är ledig den här veckan?",
   },
   "stage-status": {
     lt: "Etapas pamatai baigtas",
@@ -1164,6 +1272,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Fase fundering afgerond",
     de: "Phase Rohbau fertig",
     pl: "Etap fundamenty zakończony",
+    sv: "Etappen grundläggning är klar",
   },
   "move-worker": {
     lt: "Perkelk Joną į projektą Vilnius",
@@ -1172,6 +1281,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Verplaats Jan naar project Utrecht",
     de: "Versetze Jan in das Projekt Berlin",
     pl: "Przenieś Jana do projektu Warszawa",
+    sv: "Flytta Johan till projekt Malmö",
   },
   "task-status": {
     lt: "Užduotis sumontuoti pastolius atlikta",
@@ -1180,6 +1290,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Taak steiger opbouwen is klaar",
     de: "Aufgabe Gerüst aufbauen erledigt",
     pl: "Zadanie zmontować rusztowanie wykonane",
+    sv: "Uppgiften montera ställningen är klar",
   },
   "project-risk": {
     lt: "Kuris projektas rizikoje?",
@@ -1188,6 +1299,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Welk project loopt risico?",
     de: "Welches Projekt ist gefährdet?",
     pl: "Który projekt jest zagrożony?",
+    sv: "Vilket projekt är i riskzonen?",
   },
   "project-readiness": {
     lt: "Kas trūksta projektui Vilnius?",
@@ -1196,6 +1308,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Is het team klaar?",
     de: "Was fehlt dem Projekt?",
     pl: "Czego brakuje projektowi?",
+    sv: "Vad saknas för projektet?",
   },
   "confirm-work": {
     lt: "Patvirtink Jono darbą",
@@ -1204,6 +1317,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Bevestig het werk van Jan",
     de: "Bestätige Jans Arbeit",
     pl: "Potwierdź pracę Jana",
+    sv: "Bekräfta Johans arbete",
   },
   "who-verifies-work": {
     lt: "Kam pateikti atliktą darbą?",
@@ -1212,6 +1326,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wie kan mijn werk bevestigen?",
     de: "Wer kann meine Arbeit bestätigen?",
     pl: "Kto może potwierdzić moją pracę?",
+    sv: "Vem kan bekräfta mitt arbete?",
   },
   "employer-visibility": {
     lt: "Kas mato mano profilį?",
@@ -1220,6 +1335,7 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     nl: "Wie ziet mijn profiel?",
     de: "Wer sieht mein Profil?",
     pl: "Kto widzi mój profil?",
+    sv: "Vem ser min profil?",
   },
 };
 
@@ -1496,5 +1612,28 @@ describe("rename-organization — a rename sentence reaches the rename door", ()
     expect(classifyIntent("Perjunk į įmonę Nonstop").intent).toBe("switch-context");
     expect(classifyIntent("change my workspace").intent).toBe("switch-context");
     expect(classifyIntent("Kas vyksta mano įmonėje?").intent).toBe("company-overview");
+  });
+});
+
+describe("a question about the needs we already have reviews them; a new need still opens the form", () => {
+  it.each([
+    "Kiek darbuotojų poreikių šiuo metu turime atvirų?",
+    "kokie mūsų poreikiai dabar?",
+    "parodyk mūsų atvirus poreikius",
+    "how many open needs do we have?",
+    "сколько у нас открытых заявок?",
+    "wie viele offene Anfragen haben wir?",
+    "hoeveel openstaande aanvragen hebben we?",
+    "ile mamy otwartych zapotrzebowań?",
+  ])("%s → candidates", (text) => {
+    expect(classifyIntent(text).intent).toBe("candidates");
+  });
+  it.each([
+    "reikia darbuotojų",
+    "reikia 3 mūrininkų kitai savaitei",
+    "darbuotojų poreikis: 5 suvirintojai Norvegijoje",
+    "we need welders next month",
+  ])("%s → need-workers", (text) => {
+    expect(classifyIntent(text).intent).toBe("need-workers");
   });
 });

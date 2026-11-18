@@ -3,6 +3,7 @@ import "server-only";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
 import { untypedClient } from "./evidence-store";
+import { readSupersededRecordIds } from "./superseded-ids";
 import { buildRecordChoiceLabel, type PhotoAnchorChoice } from "./evidence-media-model";
 
 /**
@@ -70,10 +71,13 @@ export async function readPhotoAnchorChoices(caller: DomainCaller): Promise<Phot
       .limit(RECORDS_LIMIT + 1),
   ]);
   if (people.error || places.error || records.error) return { kind: "unavailable" };
+  // A superseded original is not a separate choice beside its correction.
+  const superseded = await readSupersededRecordIds(db, org.organizationId);
+  if (!superseded) return { kind: "unavailable" };
 
   const peopleRows = (people.data ?? []) as PersonRow[];
   const placeRows = (places.data ?? []) as PlaceRow[];
-  const recordRows = (records.data ?? []) as RecordRow[];
+  const recordRows = ((records.data ?? []) as RecordRow[]).filter((r) => !superseded.has(r.id));
   const nameOf = new Map(peopleRows.map((p) => [p.id, (p.display_name ?? "").trim()]));
 
   return {

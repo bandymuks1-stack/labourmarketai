@@ -65,6 +65,7 @@
  * Pure. No IO, no env, no server-only, no SDK import.
  */
 import type { AiDataSensitivity } from "./data-sensitivity";
+import { termsCeilingFor } from "./provider-catalogue";
 
 /** Ordered least → most restricted. Local copy so this module stays standalone. */
 const SENSITIVITY_RANK: Record<AiDataSensitivity, number> = {
@@ -95,6 +96,22 @@ export interface AiEgressGrant {
    * grant, which no owner has made).
    */
   readonly tasks?: readonly string[];
+  /**
+   * The grant's legal basis rests on the vendor's PAID-tier data terms (the
+   * free tier lets the vendor use content to improve its products). When
+   * true, the grant answers only while the deployment carries the owner's
+   * explicit confirmation that the key is on the paid tier
+   * (`AI_GEMINI_PAID_TIER_CONFIRMED=1`) — owner 2026-10-15: "jeigu tinkama
+   * asmens duomenų apsauga neįrodyta, apribok neviešų asmens duomenų
+   * perdavimą į Gemini". A code comment saying "paid tier" is not that proof.
+   */
+  readonly requiresPaidTierConfirmation?: boolean;
+}
+
+/** The owner's deployment-level confirmation that the Gemini key is on the
+ *  paid tier (billing enabled on its Google project). Absent = not proven. */
+export function geminiPaidTierConfirmed(env: Record<string, string | undefined> = process.env): boolean {
+  return env.AI_GEMINI_PAID_TIER_CONFIRMED === "1";
 }
 
 /**
@@ -120,6 +137,7 @@ export const AI_EGRESS_GRANTS: readonly AiEgressGrant[] = [
     provider: "gemini",
     maxSensitivity: "SENSITIVE_FREE_TEXT",
     tasks: ["propose_conversation_intent"],
+    requiresPaidTierConfirmation: true,
     basis:
       "Owner approval 2026-09-05 (GEMINI CONVERSATION NLU EGRESS): conversation intent proposal only; existing approved Gemini runtime, paid tier; least-privilege by task; revocable by deleting this row",
     grantedOn: "2026-09-05",
@@ -143,6 +161,7 @@ export const AI_EGRESS_GRANTS: readonly AiEgressGrant[] = [
     provider: "gemini",
     maxSensitivity: "SENSITIVE_FREE_TEXT",
     tasks: ["translate_message"],
+    requiresPaidTierConfirmation: true,
     basis:
       "Owner approval 2026-09-17 (RED-2 TRANSLATE_MESSAGE EGRESS, option 1 Gemini only): render an already-authorized message into the viewer's locale; existing approved Gemini runtime, paid tier; least-privilege by task; DeepL deferred; revocable by deleting this row",
     grantedOn: "2026-09-17",
@@ -174,11 +193,19 @@ export function egressGrantFor(
   provider: string,
   grants: readonly AiEgressGrant[] = AI_EGRESS_GRANTS,
   task?: string,
+  env: Record<string, string | undefined> = process.env,
 ): AiEgressGrant | null {
   // A task-scoped grant answers only for its tasks; a call that names no
-  // task cannot use one (fail closed — see `tasks` on AiEgressGrant).
+  // task cannot use one (fail closed — see `tasks` on AiEgressGrant). A
+  // grant that rests on paid-tier terms answers only while the owner's
+  // paid-tier confirmation is deployed (fail closed — not proven = no grant).
   return (
-    grants.find((g) => g.provider === provider && (!g.tasks || (task !== undefined && g.tasks.includes(task)))) ?? null
+    grants.find(
+      (g) =>
+        g.provider === provider &&
+        (!g.tasks || (task !== undefined && g.tasks.includes(task))) &&
+        (!g.requiresPaidTierConfirmation || geminiPaidTierConfirmed(env)),
+    ) ?? null
   );
 }
 
@@ -192,17 +219,30 @@ export function maxPermittedSensitivity(
   if (profile.locality === "local") return "SENSITIVE_FREE_TEXT";
 
   const grant = egressGrantFor(profile.id, grants, task);
-  if (!grant) return "PUBLIC";
+  let ceiling: AiDataSensitivity = grant ? grant.maxSensitivity : "PUBLIC";
 
   // A free tier's ceiling is capped regardless of what the grant claims.
   if (
     profile.costClass === "free_tier" &&
-    SENSITIVITY_RANK[grant.maxSensitivity] >
-      SENSITIVITY_RANK[MAX_GRANTABLE_FOR_FREE_TIER]
+    SENSITIVITY_RANK[ceiling] > SENSITIVITY_RANK[MAX_GRANTABLE_FOR_FREE_TIER]
   ) {
-    return MAX_GRANTABLE_FOR_FREE_TIER;
+    ceiling = MAX_GRANTABLE_FOR_FREE_TIER;
   }
-  return grant.maxSensitivity;
+
+  // THE VENDOR'S OWN TERMS (provider-catalogue.ts, 2026-10-25) cap it again:
+  // DeepL Free forbids personal data, Mistral's free mode trains by default,
+  // OpenRouter's free routes may log — none of them can be raised past PUBLIC
+  // by a grant. An EXCLUDED vendor is handled in `egressPermitted` (it gets
+  // nothing, not even PUBLIC).
+  const terms = termsCeilingFor(profile.id);
+  if (
+    terms !== null &&
+    terms !== "EXCLUDED" &&
+    SENSITIVITY_RANK[ceiling] > SENSITIVITY_RANK[terms]
+  ) {
+    ceiling = terms;
+  }
+  return ceiling;
 }
 
 export type EgressVerdict =
@@ -217,6 +257,13 @@ export function egressPermitted(
   task?: string,
 ): EgressVerdict {
   if (profile.locality === "local") return { permitted: true };
+
+  if (termsCeilingFor(profile.id) === "EXCLUDED") {
+    return {
+      permitted: false,
+      reason: `data egress gate: "${profile.id}" is excluded by its own terms (provider-catalogue.ts) — it may receive nothing, not even PUBLIC data`,
+    };
+  }
 
   const ceiling = maxPermittedSensitivity(profile, grants, task);
   if (SENSITIVITY_RANK[sensitivity] <= SENSITIVITY_RANK[ceiling]) {

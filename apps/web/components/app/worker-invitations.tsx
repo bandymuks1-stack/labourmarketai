@@ -81,7 +81,7 @@ function InvitationRow({
       data-testid={`worker-invitation-${inv.kind}-${inv.orgId}`}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {inv.kind === "company" ? labels.companyLabel : labels.agencyLabel}
         </span>
         <span className="text-sm font-semibold text-text-primary">

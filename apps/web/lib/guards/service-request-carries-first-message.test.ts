@@ -24,7 +24,7 @@ describe("a service request carries the requester's first message", () => {
     expect(src).toMatch(/slice\(0, 2000\)/);
   });
   it("copy exists in every routed locale", () => {
-    for (const loc of ["lt", "en", "de", "nl", "pl", "ru"]) {
+    for (const loc of ["lt", "en", "de", "nl", "pl", "ru", "sv"]) {
       const m = JSON.parse(read(`messages/${loc}.json`)) as {
         marketplace: { requestMessagePlaceholder?: string };
       };

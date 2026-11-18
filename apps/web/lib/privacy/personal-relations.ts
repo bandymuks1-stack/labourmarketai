@@ -141,6 +141,13 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "profile_roles", key: "profile_id" },
   { table: "notification_preferences", key: "profile_id" },
   { table: "dashboard_preferences", key: "profile_id" },
+  // My Space pins (20261020020000, applied 2026-10-20): the person's own shortcuts, owner-only RLS.
+  { table: "workspace_pins", key: "profile_id" },
+  // Push-notification devices (20261023171500, COM-3 push channel): the
+  // person's own browser subscriptions, owner-only RLS. The endpoint and the
+  // time are theirs to see; the browser's encryption key and auth secret are
+  // device credentials, not information about the person, and are left out.
+  { table: "web_push_subscriptions", key: "profile_id", omitColumns: ["p256dh", "auth"] },
   { table: "preferred_locations", key: "profile_id" },
   { table: "consented_login_location_signals", key: "profile_id" },
   // How the platform classifies the account for reporting (real / test /
@@ -561,6 +568,19 @@ export type WithheldRelation = {
  */
 export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
   {
+    table: "privacy_erasure_confirmations_v1",
+    reason:
+      "your confirmation of an account-deletion request (how and when you confirmed it) — held server-side as evidence that the deletion was yours to ask for; the request and its status are shown to you on the privacy page",
+  },
+  {
+    table: "privacy_erasure_authorizations_v3",
+    reason:
+      "single-use technical authorizations of an account deletion (a digest, the plan fingerprint and timestamps; never the token) — security state with no read path for your own session",
+  },
+  {
+    table: "privacy_erasure_receipts_v3",
+    reason:
+      "the receipt of an executed account deletion (what was deleted, retained and why) — written after your account no longer exists; it names no identifier of you and is available on request through the data-protection channel",
     table: "invoice_recipients",
     reason:
       "the issuing organization's contact book of the parties it invoices (legal names, addresses, tax ids, contact details of THIRD PARTIES that may include a sole trader). It is the issuer's business record, readable only by the issuer's owner/admin; the frozen copy on each issued invoice belongs to the issuer's books. A person referenced there is not given an export of the issuer's customers",
@@ -637,6 +657,14 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
     reason:
       "conversation threads you created — they hold the other party's words as well as yours, so they need a route that can separate the two",
   },
+  // 2026-10-12 (20261012100000): the assistant transcript is the person's own
+  // conversation with the product, kept per workspace. It has its own
+  // owner-only export (export_assistant_transcript) and whole-thread erasure.
+  {
+    table: "assistant_conversations",
+    reason:
+      "your conversation with the assistant — it has its own complete export (export_assistant_transcript) and can be erased thread by thread",
+  },
   {
     table: "conversation_messages",
     reason:
@@ -690,6 +718,13 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no
+  // content, purged after a day (20261013120000).
+  "confirmation_spends",
+  // Historical consolidation ledger: `decided_by` / `reverted_by` are who
+  // decided or undid a merge of PROJECT rows; the subject is a project, never
+  // the person (20261014090000).
+  "historical_consolidation_decisions",
   // Project-to-invoice lifecycle (20261008150000): the person is only the recorder / agreeing
   // party of an organization's commercial or accounting record (agreed_by, created_by,
   // confirmed_by, tax_set_by); they are not its subject.
@@ -743,6 +778,10 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // who offered it and the demand owner's staff who answered. No member of the
   // team is on the row.
   "team_demand_offers",
+  // 20261011200000: versioned terms of one offer; the person columns are the
+  // manager who proposed a version and the one who decided it. No member of
+  // the team is on the row; the terms are the two organizations' business.
+  "team_demand_offer_terms",
   "training_programs",
   "training_skill_links",
   "workflow_definition_versions",
@@ -762,6 +801,11 @@ export type ReviewedChild = {
   readonly reason: string;
 };
 export const CHILD_TABLES_NOT_EXPORTED: readonly ReviewedChild[] = [
+  {
+    table: "invitation_delivery_attempts_v1",
+    reason:
+      "transport diagnostics of an invitation send (reason and SMTP status codes, timing, our Message-ID) — no address, no reply text, no content; the invitation itself, with its delivery status, is exported to the inviter",
+  },
   {
     table: "decision_document_links",
     reason:

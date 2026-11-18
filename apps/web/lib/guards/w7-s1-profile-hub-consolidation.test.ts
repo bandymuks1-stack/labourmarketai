@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * W7-S1 — ONE profile overview.
@@ -186,12 +187,12 @@ describe("W7-S1 — accessibility of the surface it introduced", () => {
   it("semantic headings: the hub is an h2 with h3 subsections", () => {
     expect(HUB).toMatch(/<h2 className="truncate font-display/);
     expect(HUB).toMatch(/<h3 className="font-mono text-meta/);
-    // The page keeps exactly one h1.
-    expect((PAGE.match(/<h1/g) ?? []).length).toBe(1);
+    // The page keeps exactly one h1 (PageTitle renders the h1).
+    expect((PAGE.match(/<h1|<PageTitle/g) ?? []).length).toBe(1);
   });
 
   it("the new copy exists in every locale that ships the hub", () => {
-    for (const locale of ["lt", "en", "de", "nl", "ru"]) {
+    for (const locale of activeLocales) {
       const m = JSON.parse(read(`messages/${locale}.json`)) as {
         profileHub?: Record<string, unknown>;
       };

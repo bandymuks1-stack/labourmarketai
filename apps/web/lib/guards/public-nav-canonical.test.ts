@@ -159,8 +159,11 @@ describe("canonical demand funnel — action CTAs route to /company-need only", 
     // the employer path is the landing's door registry, which the starting
     // contexts band renders. The ACTION goes to /company-need; the
     // educational page stays only as its "learn more".
-    const landing = landingTreeSource(APP_ROOT, 2);
-    expect(landing).toContain("StartingContextsBand");
+    // Landing V3 (owner, 2026-11-13) removed the starting-contexts band from
+    // the page (it was a second role choice); the employer's ACTION is now the
+    // goal "Find workers", whose first action is the same /company-need.
+    const intents = read("lib/navigation/public-intents.ts");
+    expect(intents).toMatch(/id: "workers",[\s\S]*?\{ id: "companyNeed", href: "\/company-need", account: false \}/);
     const doors = read("lib/marketing/public-doors.ts");
     const employer = /\{\s*key:\s*"employer"[^}]*\}/.exec(doors)?.[0] ?? "";
     expect(employer).toMatch(/href:\s*"\/company-need"/);
@@ -175,7 +178,14 @@ describe("canonical demand funnel — action CTAs route to /company-need only", 
   it("PageHero supports the companyNeed CTA kind and links the canonical route", () => {
     const hero = read("components/marketing/page-hero.tsx");
     expect(hero).toContain('ctaKind === "companyNeed"');
-    expect(hero).toContain('href="/company-need"');
+    // The one route, optionally with the form's own bounded prefill query
+    // (an employer market page preselects its country) and the button's own
+    // id (`from=`, company-need-prefill.ts) — never another path.
+    expect(hero).toContain(
+      'href={`/company-need?${[ctaNeedQuery, `from=${ctaSource}`].filter(Boolean).join("&")}`}',
+    );
+    const companyNeedHrefs = hero.match(/href=\{`\/[a-z-]+\?/g) ?? [];
+    expect(companyNeedHrefs).toEqual(["href={`/company-need?"]);
   });
 });
 
@@ -208,13 +218,8 @@ describe("the landing player-card is the CANONICAL card (owner audit §3.7)", ()
   // Supersedes the FUT-card stat-legend contract: the acronym codes left the
   // landing together with the concept cards. The canonical WorkerPlayerCard
   // explains itself with full localized labels, so no legend is needed.
-  it("showcase renders WorkerPlayerCard, never the FUT concept card or its stat codes", () => {
-    const showcase = read("components/marketing/player-card-showcase.tsx");
-    expect(showcase).toMatch(/WorkerPlayerCard/);
-    expect(showcase).not.toContain("<PlayerCard ");
-    expect(showcase).not.toContain("STAT_KEYS");
-    // No universal human score / medal tiers anywhere near the landing card.
-    expect(showcase).not.toMatch(/gold|silver|bronze|\bOVR\b/i);
+  it("the landing no longer mounts a sample player-card showcase (containment 2026-10-08)", () => {
+    expect(() => read("components/marketing/player-card-showcase.tsx")).toThrow();
   });
 
   it("the stat-code legend died with the concept card in every active locale (S3)", () => {

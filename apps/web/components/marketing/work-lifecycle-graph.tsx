@@ -14,11 +14,13 @@ import {
   UserRound,
   Users,
   FileText,
+  LogIn,
   type LucideIcon,
 } from "lucide-react";
 
 import { PersonPortrait } from "@/components/app/identity/person-portrait";
-import { Link } from "@/lib/i18n/navigation";
+import { TrackedCta } from "@/components/app/tracked-cta";
+import { useSignedInHint } from "@/components/layouts/nav-auth-ctas";
 import { cn } from "@/lib/utils";
 
 /**
@@ -75,12 +77,15 @@ export interface LifecycleStage {
   readonly icon: LifecycleIcon;
   /** Short noun: "Team". */
   readonly label: string;
-  /** The example fact at this stage: "Kitchen team". */
-  readonly fact: string;
+  /** Optional fact line. Public pages pass none: no invented example data (containment 2026-10-08). */
+  readonly fact?: string;
   /** One sentence: what this stage adds. */
   readonly detail: string;
   /** Real product route this stage opens (locale-aware Link). */
   readonly href: string;
+  /** Where a signed-out visitor goes instead (sign-up that returns to `href`),
+   *  when `href` is inside the signed-in product. */
+  readonly guestHref?: string;
   /** Semantic tone: evidence is cyan, confirmation is green, history is gold. */
   readonly tone?: "evidence" | "confirmed" | "history" | "neutral";
 }
@@ -104,6 +109,7 @@ export function WorkLifecycleGraph({
   hint,
   exampleNote,
   openLabel,
+  accountLabel,
   listLabel,
   pendingLabel,
   subject,
@@ -111,18 +117,22 @@ export function WorkLifecycleGraph({
   testId = "work-lifecycle-graph",
 }: {
   readonly title: string;
-  readonly hint: string;
-  readonly exampleNote: string;
+  /** Optional line under the graph. Public pages pass none (owner copy cleanup 2026-11-15). */
+  readonly hint?: string;
+  readonly exampleNote?: string;
   readonly openLabel: string;
+  /** The public menus' "for signed-in users" note, shown beside a guest's link. */
+  readonly accountLabel?: string;
   readonly listLabel: string;
   /** "Not yet" — the dashed state of a row the lifecycle has not reached. */
   readonly pendingLabel: string;
-  /** The persistent subject of the record: a person (portrait) or a company. */
-  readonly subject: { readonly kind: "person" | "company"; readonly name: string; readonly initials: string };
+  /** Optional persistent subject of the record. Public pages pass none (no named persona). */
+  readonly subject?: { readonly kind: "person" | "company"; readonly name: string; readonly initials: string };
   readonly stages: readonly LifecycleStage[];
   readonly testId?: string;
 }) {
   const reduce = useReducedMotion();
+  const signedIn = useSignedInHint();
   const [active, setActive] = useState(0);
   const [auto, setAuto] = useState(true);
   const last = stages.length - 1;
@@ -157,7 +167,9 @@ export function WorkLifecycleGraph({
           <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
             {title}
           </h2>
-          <p className="font-mono text-meta uppercase tracking-label text-text-secondary">{exampleNote}</p>
+          {exampleNote ? (
+            <p className="font-mono text-meta uppercase tracking-label text-text-secondary">{exampleNote}</p>
+          ) : null}
         </div>
 
         {/* ── 1. THE LIFECYCLE STRIP ─────────────────────────────────────── */}
@@ -223,11 +235,11 @@ export function WorkLifecycleGraph({
 
         {/* ── 2. THE RECORD — one record that accumulates ───────────────── */}
         <div
-          className="mt-8 grid gap-6 rounded-xl border border-ink-600 bg-ink-800/50 p-4 sm:p-6 md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)]"
+          className={cn("mt-8 grid gap-6 rounded-xl border border-ink-600 bg-ink-800/50 p-4 sm:p-6", subject && "md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)]")}
           data-testid={`${testId}-record`}
           aria-live="polite"
         >
-          {/* The persistent subject: same portrait/mark at every step. */}
+          {subject ? (
           <div className="flex items-center gap-4 md:flex-col md:items-start md:gap-3">
             {subject.kind === "person" ? (
               <PersonPortrait
@@ -246,6 +258,7 @@ export function WorkLifecycleGraph({
             )}
             <p className="font-display text-xl font-bold tracking-tightest text-text-primary">{subject.name}</p>
           </div>
+          ) : null}
 
           <ul className="flex min-w-0 flex-col gap-1.5">
             {stages.map((s, i) => {
@@ -275,7 +288,7 @@ export function WorkLifecycleGraph({
                         {s.label}
                       </span>
                       <AnimatePresence mode="wait" initial={false}>
-                        {filled ? (
+                        {filled && !s.fact ? null : filled ? (
                           <motion.span
                             key="fact"
                             initial={reduce ? false : { opacity: 0, x: -6 }}
@@ -305,12 +318,25 @@ export function WorkLifecycleGraph({
                   {isCurrent ? (
                     <div className="mt-2 flex flex-col gap-2 pl-7 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-sm text-text-secondary">{current.detail}</p>
-                      <Link
-                        href={current.href}
-                        className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-brand-blue px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-                      >
-                        {openLabel} →
-                      </Link>
+                      <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
+                        <TrackedCta
+                          href={!signedIn && current.guestHref ? current.guestHref : current.href}
+                          ctaId={`lifecycle_${current.key}`}
+                          audience={current.href === "/company-need" ? "companies" : undefined}
+                          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-brand-blue px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                        >
+                          {openLabel} →
+                        </TrackedCta>
+                        {!signedIn && current.guestHref && accountLabel ? (
+                          <span
+                            className="inline-flex items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted"
+                            data-testid="lifecycle-account-note"
+                          >
+                            <LogIn aria-hidden className="h-3.5 w-3.5" />
+                            {accountLabel}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   ) : null}
                 </li>
@@ -318,7 +344,7 @@ export function WorkLifecycleGraph({
             })}
           </ul>
         </div>
-        <p className="mt-3 text-meta text-text-secondary">{hint}</p>
+        {hint ? <p className="mt-3 text-meta text-text-secondary">{hint}</p> : null}
       </div>
     </section>
   );

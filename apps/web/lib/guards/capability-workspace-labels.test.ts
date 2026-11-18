@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 const WEB = resolve(__dirname, "../..");
 const read = (p: string) => readFileSync(resolve(WEB, p), "utf8");
@@ -76,7 +77,7 @@ describe("capability workspace labels — one builder, one membership list", () 
   });
 
   it("those phrases exist in every UI-active locale", () => {
-    for (const locale of ["en", "lt", "ru", "nl", "de"] as const) {
+    for (const locale of activeLocales) {
       const chat = JSON.parse(read(`messages/${locale}.json`)).conversation?.chat;
       for (const key of [
         "workspacePersonal",

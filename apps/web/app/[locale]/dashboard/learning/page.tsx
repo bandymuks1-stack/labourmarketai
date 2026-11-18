@@ -10,6 +10,12 @@ import {
   LearningReviewSection,
   type LearningLabels,
 } from "@/components/app/learning-review-section";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/learning", "learning.pageTitle");
+
 
 /**
  * Learning — human-in-loop learning review surface (W6 Phase 1). Authenticated
@@ -96,9 +102,7 @@ export default async function LearningPage({
   return (
     <div className="flex flex-col gap-4" data-testid="learning-page">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageLead")}</p>
       </header>
       <LearningReviewSection

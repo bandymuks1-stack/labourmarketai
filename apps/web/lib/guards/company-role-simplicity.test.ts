@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 /**
@@ -41,14 +41,15 @@ const roleChoice = read("components/app/setup-role-choice.tsx");
 const onboarding = read("components/app/onboarding-wizard.tsx");
 const rolesConfig = read("lib/config/roles.ts");
 const setupForm = read("components/app/company-setup-form.tsx");
+const setupPage = read("app/[locale]/dashboard/start/company/page.tsx");
 const setupService = read("lib/company/company-setup.ts");
 const sharedProfile = read("lib/company/company-profile-shared.ts");
 const setupAction = read("lib/company/setup-actions.ts");
 const companyPage = read("app/[locale]/dashboard/company/page.tsx");
 const composer = read("components/app/manager-instruction-composer.tsx");
 const notifPanel = read("components/app/notification-panel.tsx");
-const roleSwitcher = read("components/app/role-switcher.tsx");
-const dismissHook = read("lib/hooks/use-popover-dismiss.ts");
+const header = read("components/app/conversation/chat/conversation-header.tsx");
+const overlay = read("components/ui/anchored-overlay.tsx");
 const journalComposer = read("components/app/journal-entry-composer.tsx");
 const photoUpload = read("lib/journal/photo-upload.ts");
 const ltJournal = JSON.parse(read("messages/lt/journal.json")) as {
@@ -113,7 +114,12 @@ describe("company country validation is human, never technical", () => {
     expect(setupForm).toMatch(/<select[\s\S]{0,200}name="country"/);
     // Global-access rule (2026-09-22): the SELECT offers EVERY ISO country, the priority
     // markets first — a market list orders the list, it never shortens it.
-    expect(setupForm).toMatch(/countryOptionsForLocale\(labels\.locale\)\.map/);
+    // 2026-10-08: the list is NAMED ON THE SERVER and handed to the client
+    // form. Built in the browser, its ICU named four countries differently
+    // from Node's and the page failed to hydrate (React #418).
+    expect(setupPage).toMatch(/countryList: countryOptionsForLocale\(locale\)/);
+    expect(setupForm).toMatch(/labels\.countryList\.map/);
+    expect(setupForm).not.toMatch(/countryOptionsForLocale\(/);
     expect(setupForm).not.toMatch(/COMPANY_COUNTRY_CODES\.map/);
     expect(setupForm).not.toMatch(/<input[\s\S]{0,200}name="country"/);
   });
@@ -175,23 +181,29 @@ describe("instruction composer select is controlled + localized", () => {
 // ── 4. Popovers close on route change + visible ✕ ───────────────────────
 
 describe("header popovers close on navigation and have a close button", () => {
-  it("the shared dismiss hook closes on pathname change, outside click and Escape", () => {
-    expect(dismissHook).toMatch(/usePathname/);
-    expect(dismissHook).toMatch(/\[pathname\]/);
-    expect(dismissHook).toMatch(/mousedown/);
-    expect(dismissHook).toMatch(/Escape/);
+  // RE-ANCHORED 2026-10-25: the role switcher (the last user of the shared
+  // `usePopoverDismiss` hook) was retired with the one header; both the hook
+  // and the switcher are deleted. The intent — every header popover closes on
+  // navigation, outside click and Escape, and shows a visible close — is
+  // pinned on the popovers the header actually has now.
+  it("the ONE overlay root closes on outside click and Escape", () => {
+    expect(overlay).toMatch(/mousedown/);
+    expect(overlay).toMatch(/Escape/);
   });
-  it("notification panel + role switcher dismiss on route change/outside/Escape and render ✕", () => {
+  it("notification panel + the header's More menu and area sheet dismiss on route change/outside/Escape", () => {
     // The notification panel moved to the ONE portal root (owner audit
     // P0.3): AnchoredOverlay owns outside-click + Escape, and the panel
-    // keeps its own pathname-close effect. The role switcher still uses the
-    // shared hook.
+    // keeps its own pathname-close effect.
     expect(notifPanel).toMatch(/AnchoredOverlay/);
     expect(notifPanel).toMatch(/usePathname/);
     expect(notifPanel).toMatch(/\[pathname\]/);
-    expect(roleSwitcher).toMatch(/usePopoverDismiss\(/);
     expect(notifPanel).toMatch(/notification-panel-close/);
-    expect(roleSwitcher).toMatch(/role-switcher-close/);
+    // The header's More menu and phone sheet close on every navigation.
+    expect(header.match(/setOpen\(false\);\s*\}, \[pathname\]\);/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+    expect(header).toMatch(/<AnchoredOverlay anchorRef=\{triggerRef\}/);
+    // The sheet's visible ✕ is MobileSheet's own close control.
+    expect(header).toMatch(/<MobileSheet[\s\S]{0,200}closeLabel=\{closeLabel\}/);
+    expect(existsSync(join(APP, "components/app/role-switcher.tsx"))).toBe(false);
   });
 });
 
@@ -210,6 +222,7 @@ describe("work-report photo: 1 free photo, server-enforced, honest copy", () => 
     expect(journalComposer).toMatch(/journal-photo-input/);
     expect(journalComposer).toMatch(/journal-photo-free-tier-note/);
     expect(ltJournal.photo?.freeTierNote).toBe(
+      // Formal address since the owner decision of 2026-11-15.
       "Nemokamai galite pridėti 1 nuotrauką prie įrašo. Daugiau nuotraukų ir išplėstiniai įrašai bus VIP funkcija.",
     );
   });

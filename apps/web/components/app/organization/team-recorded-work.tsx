@@ -118,54 +118,63 @@ export async function TeamRecordedWork({
       data-unknown={team.unknown}
       data-no-readable={team.noReadableRecords}
     >
-      <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
-        <NotebookPen className="h-3.5 w-3.5" aria-hidden />
-        {t("title")} · {periodLabel}
-      </h2>
-      <p className="text-meta leading-relaxed text-text-muted">
-        {t("intro", { period: periodLabel })}
-        {team.bound.shown < team.bound.total
-          ? ` ${t("bound", { shown: team.bound.shown, total: team.bound.total })}`
-          : ""}
-      </p>
+      {/* Title + team totals stay visible; the per-person rows (the roster
+          above already lists every person) and the reading rules open on
+          demand, so the page does not list each person a second time. */}
+      <details className="group" data-testid="team-recorded-work-details">
+        <summary className="flex cursor-pointer list-none flex-col gap-1 [&::-webkit-details-marker]:hidden">
+          <h2 className="inline-flex items-center gap-2 text-sm font-semibold text-text-primary">
+            <NotebookPen className="h-3.5 w-3.5" aria-hidden />
+            {t("title")} · {periodLabel}
+            <span aria-hidden className="text-text-muted transition-transform group-open:rotate-90">›</span>
+          </h2>
+          {/* The roll-up line: one figure per ledger, each naming its base.
+              UNKNOWN members are counted here and are in neither figure. */}
+          <p className="text-sm leading-relaxed text-text-secondary" data-testid="team-recorded-work-totals">
+            {team.journalHours
+              ? t("journalTotal", {
+                  hours: fmtHours(team.journalHours.hours, locale),
+                  members: team.journalHours.members,
+                })
+              : t("journalTotalNone")}
+            {team.organizationHours
+              ? ` · ${t("organizationTotal", {
+                  hours: fmtHours(team.organizationHours.hours, locale),
+                  members: team.organizationHours.members,
+                })}`
+              : ""}
+            {team.unknown > 0 ? ` · ${t("unknownCount", { count: team.unknown })}` : ""}
+            {team.noReadableRecords > 0
+              ? ` · ${t("noReadableCount", { count: team.noReadableRecords })}`
+              : ""}
+          </p>
+        </summary>
+        <div className="mt-3 flex flex-col gap-3">
+          <p className="text-meta leading-relaxed text-text-muted">
+            {t("intro", { period: periodLabel })}
+            {team.bound.shown < team.bound.total
+              ? ` ${t("bound", { shown: team.bound.shown, total: team.bound.total })}`
+              : ""}
+          </p>
 
-      {/* The roll-up line: one figure per ledger, each naming its base.
-          UNKNOWN members are counted here and are in neither figure. */}
-      <p className="text-sm leading-relaxed text-text-secondary" data-testid="team-recorded-work-totals">
-        {team.journalHours
-          ? t("journalTotal", {
-              hours: fmtHours(team.journalHours.hours, locale),
-              members: team.journalHours.members,
-            })
-          : t("journalTotalNone")}
-        {team.organizationHours
-          ? ` · ${t("organizationTotal", {
-              hours: fmtHours(team.organizationHours.hours, locale),
-              members: team.organizationHours.members,
-            })}`
-          : ""}
-        {team.unknown > 0 ? ` · ${t("unknownCount", { count: team.unknown })}` : ""}
-        {team.noReadableRecords > 0
-          ? ` · ${t("noReadableCount", { count: team.noReadableRecords })}`
-          : ""}
-      </p>
+          <ul className="flex flex-col gap-2">
+            {team.members.map((m) => (
+              <li key={m.workerId} data-testid={`team-recorded-work-row-${m.workerId}`}>
+                <MemberRow
+                  m={m}
+                  locale={locale}
+                  periodLabel={periodLabel}
+                  t={t}
+                  tIntel={tIntel}
+                  skillName={skillName}
+                />
+              </li>
+            ))}
+          </ul>
 
-      <ul className="flex flex-col gap-2">
-        {team.members.map((m) => (
-          <li key={m.workerId} data-testid={`team-recorded-work-row-${m.workerId}`}>
-            <MemberRow
-              m={m}
-              locale={locale}
-              periodLabel={periodLabel}
-              t={t}
-              tIntel={tIntel}
-              skillName={skillName}
-            />
-          </li>
-        ))}
-      </ul>
-
-      <p className="text-meta leading-relaxed text-text-muted">{t("rule")}</p>
+          <p className="text-meta leading-relaxed text-text-muted">{t("rule")}</p>
+        </div>
+      </details>
     </section>
   );
 }

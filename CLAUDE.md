@@ -196,7 +196,7 @@ auto-merge is inert and Claude Code falls back to waiting for CI then merging.
 
 ## Branch strategy
 
-- `main` — production branch, auto-deployed by Vercel
+- `main` — production branch, deployed to the VPS by `.github/workflows/deploy-vps.yml` after Quality Gates passes on `main`
 - Small fixes (≤3 files OR ≤200 LOC): commit directly to `main` is OK
 - Larger features (>3 files OR new module): use feature branch
   - Claude Code: `feat/cc/<short-name>` or `fix/cc/<short-name>`
@@ -204,6 +204,70 @@ auto-merge is inert and Claude Code falls back to waiting for CI then merging.
   - Manual DI work: `feat/manual/...`
 - Feature branches: GREEN-class PRs auto-merge once CI is green (see **Merge
   model** above); RED-class PRs open as **draft** with `needs-human-gate` for DI.
+
+## Reading owner instructions (binding, decision 0022)
+
+"Don't touch / mix / pause X while doing Y" is **task-local**: keep the current task
+isolated and preserve X during it. It never means "freeze X permanently" or "leave X's
+known defects unfixed". Only treat something as permanently prohibited, deferred or
+owner-gated when the owner explicitly said so; when wording is ambiguous, choose the
+narrower task-local reading. Known technical defects within existing authority are fixed
+without waiting for the owner to repeat the instruction. See
+`docs/DECISIONS/0022-task-local-instructions-are-not-permanent-restrictions.md`.
+
+## One memory, one context (binding, decision 0024)
+
+Long-term memory is the canonical tables under RLS — no second AI memory, vector store or
+external notebook. Keep facts, events, confirmations, derived readings, AI output and short-term
+chat apart; AI output never overwrites a confirmed fact. Every read/write is bound to the user,
+the server-resolved workspace and the object; one organization's context never shows in another.
+Confirmations are single-use. See `docs/DECISIONS/0024-memory-and-context-architecture.md`.
+
+## Living CV infers, never narrows (binding, decision 0023)
+
+Living CV is a model of a person's real work, learning and evidence — not a declared-skills list.
+Keep direct AND indirect/potential capability discovery, growth and reskilling paths across every
+sector; keep evidence states apart (recorded / declared / potential / confirmed / certified). Fix a
+wrong label or a false certainty without disabling inference. See
+`docs/DECISIONS/0023-living-cv-direct-indirect-potential-capabilities.md`.
+
+## One person, one continuous professional history (binding, decision 0025)
+
+A person's experience is one history, whoever recorded the work and under whichever role: journal
+entries, organization-supplied history (day and period records) and the person's relationships to
+organizations (employment, ownership, management, with the organization's earlier business periods).
+Every surface reads `lib/journal/professional-experience.ts` — one total, every work hour once, no
+invented days, provenance and confirmation state visible inside it, roles without hours, UNKNOWN never
+zero. Never attribute an organization's records about other people to a leader. See
+`docs/DECISIONS/0025-one-person-one-continuous-professional-history.md`.
+
+## No interface noise (binding, decision 0032)
+
+Never add primitive, redundant or patronising interface text. That includes „Paskyros nereikia" /
+"No account needed" badges, instructions for obvious actions, repeated explanations, demonstration
+captions and other noise. Aim for professional, minimal, Apple/macOS-level design: short, clear
+function names, only information the user needs, and no new helper text without a real need. Keep
+legal, consent, security and essential action-consequence texts. The rule applies to every agent,
+every PR and every locale, and it never changes functionality. See
+`docs/DECISIONS/0032-no-interface-noise.md`.
+
+## Internal validity rule (binding, owner P0 2026-10-22, all projects)
+
+An INTERNAL approval, owner decision, internal contract or temporary internal permission is valid
+for **12 months** and renews automatically in 12-month terms, without the owner, unless the owner set
+another term for that specific item. No 24 h / 72 h / 7-day / 30-day internal expiry otherwise.
+Renewal is TIME only — never scope, rate, source or authority, and never past a revocation.
+New code takes the term from the ONE central module
+`apps/web/lib/authority/internal-authority-validity.mjs` (`rollingInternalExpiryIso`,
+`INTERNAL_AUTHORITY_TERM_*`; plain ESM so the CI gate on Node 20 can import it, typed by its
+`.d.mts`) — never a new hard-coded date or short TTL, never a second copy. First consumer: the
+product gate's scoped owner waivers (`.github/scripts/owner-waivers.mjs`: `approvedAt` + rolling
+term; only an owner-set `ownerSetExpiresAt` expires by date).
+It NEVER re-dates: fact freshness (advert / vacancy recency, verification age, measured data),
+external legal permits, certificates and credential validity, OAuth / API / session tokens and keys,
+signed URLs, invitation / magic / password-reset links, one-shot security codes, confirmation tokens,
+anti-replay windows, payment / billing items and value grants, or anything user-facing security.
+When unsure whether something is internal authority or security / fact freshness: leave it.
 
 ## Policy overrides
 

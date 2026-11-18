@@ -27,6 +27,7 @@ import {
   FINANCE_READ_LIMIT,
   ZERO_FINANCE_SUMMARY,
   deriveFinanceSummary,
+  financeWorkspaceOrFilter,
   isMigrationMissingCode,
   isValidFinanceApprovalStatus,
   isValidFinanceRecordStatus,
@@ -116,22 +117,36 @@ function toRecord(r: Row): FinanceRecord | null {
  * The caller's finance records (RLS: creator / admin / company owner) —
  * bounded and deterministically ordered: nearest due date first (nulls
  * last), then newest created.
+ *
+ * `workspace` (optional): narrow the read to ONE workspace — the active
+ * company's records plus the caller's own company-less records
+ * (`financeWorkspaceOrFilter`, decision 0024). The finance page and its CSV
+ * export pass it, so a person who governs two organizations never sees or
+ * exports both in one place. `companyId: null` = a personal workspace.
  */
-export async function listMyFinanceRecords(): Promise<MyFinanceRecordsResult> {
+export async function listMyFinanceRecords(
+  workspace?: { readonly companyId: string | null },
+): Promise<MyFinanceRecordsResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
 
+  // Workspace narrowing (decision 0024): a malformed id reads nothing rather than everything (fail closed).
+  const filter = workspace
+    ? financeWorkspaceOrFilter({ userId: user.id, companyId: workspace.companyId })
+    : undefined;
+  if (filter === null) return { status: "ok", records: [], error: null };
   // The legacy manual register is EUR-only and single-currency. Lifecycle invoices (a billing period is
   // set) can be in ANY currency and have their own surface and per-currency totals
   // (lib/finance/project-invoice.ts), so they are excluded here: they can neither be summed into EUR
   // totals nor mislabelled by this register. Before the lifecycle migration the column does not exist
   // (42703) and the unfiltered read is exactly the old behaviour.
-  const run = (filtered: boolean) => {
+  const run = (lifecycleExcluded: boolean) => {
     let query = asAny(supabase).from("finance_records").select(SELECT_COLUMNS);
-    if (filtered) query = query.is("billing_period_id", null);
+    if (filter) query = query.or(filter);
+    if (lifecycleExcluded) query = query.is("billing_period_id", null);
     return query
       .order("due_date", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false })

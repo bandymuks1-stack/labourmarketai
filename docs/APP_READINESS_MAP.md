@@ -84,6 +84,33 @@ classified `shared-blocked` for exactly this reason, in the guard, with the
 measurement attached. That is the shared-core refactor, and it is now the next
 piece of work rather than the gate.
 
+### UPDATE 2026-10-13 — the domain half: the bearer caller scope (RED, owner-gated)
+
+The "257 modules call `createClient()` themselves" coupling above is closed at
+ONE point instead of 257: `lib/api/bearer-caller-scope.ts`. An external-client
+door (today only `/api/mcp`), AFTER `resolveApiIdentity` verified a bearer
+token, runs the capability inside an `AsyncLocalStorage` scope; inside it,
+`createClient()` returns that verified caller's own anon-key + JWT client
+instead of a cookie client. The same domain helpers and server-action bodies
+therefore run as the same person under the same RLS. Outside the scope —
+every browser request — `createClient()` is byte-for-byte the cookie client.
+
+What this does NOT change, deliberately:
+
+- **A phone or assistant still cannot call a server action** over the Next.js
+  action protocol. The capability layer calls the action's function
+  in-process, through a reviewed capability (schema, kind, annotations,
+  draft→confirm), never an arbitrary action id.
+- **No new verification.** `server.ts` never reads a header or a token; the
+  scope accepts only an `ApiIdentity` the ONE resolver produced. Pinned by
+  `lib/guards/app-shared-core.test.ts` and
+  `lib/guards/client-core-vocabulary-mirror.test.ts`.
+- **Workspace parity.** Inside the scope the workspace resolver uses the
+  durable pointer only — the same rule as `context_list`/`context_switch` —
+  so a tool cannot act in a workspace the client was not told is active.
+
+This is an AUTH-CORE change and ships as a RED, `needs-human-gate` PR.
+
 ---
 
 ## 3. WHAT A SECOND CLIENT WOULD *NOT* HAVE TO REIMPLEMENT
@@ -203,7 +230,7 @@ exists to prevent.
 | `ANDROID_NATIVE_BUILD_PROVEN` | **YES (build level, 2026-08-30)** — `gradlew assembleDebug` BUILD SUCCESSFUL, `app-debug.apk` produced (`ai.labourmarket.app` v0.1.0); hoisted linker + Expo SDK 57 bundled pins, see `docs/mobile/NATIVE_READINESS_2026-08-29.md`. Runtime install+launch still unproven: no emulator/device on the build machine |
 | `IOS_BUILD_PROVEN` | **YES (simulator, 2026-08-30)** — `ios.yml` on GitHub `macos-26` runners: prebuild → pod install → xcodebuild (scheme `LabourMarketai`, Xcode 26.6, unsigned) → BUILD SUCCEEDED → simulator install+launch, process alive 15s ("IOS_SIM_LAUNCH_PROVEN"). Toolchain floor: Xcode 26.4+/Swift 6.3 (expo/expo#46242). NOT claimed: device builds, signing, store readiness, real-backend auth/deep-link E2E |
 | `IOS_RUNTIME_JOURNEY_PROVEN` | **YES (CI simulator, 2026-08-31)** — `ios.yml` run 33405199015 (PR #1372): Release build with embedded Hermes bundle (ad-hoc signed so the keychain works), Maestro flow `apps/mobile/.maestro/auth-failure-journey.yaml` — auth screen rendered, real sign-in attempt against deterministic bad-network config, failure surfaced (`testID="auth-failure"`, honest "could not reach the server" copy), app interactive after; screenshots uploaded as run artifacts. NOT claimed: device builds, signing for distribution, store readiness, real-backend authenticated session |
-| `CHATGPT_APP_BACKEND_READY` | **PARTIAL** — the transport is there and four canonical capabilities are reachable over it (`profile.get`, `living_cv.skills.get`, `journal.create_draft`, `journal.confirm`; real-client OAuth + read PROVEN 2026-08-30, see `docs/integrations/CHATGPT_MCP_CLIENT_V1.md`); the rest wait on the same shared-core refactor |
+| `CHATGPT_APP_BACKEND_READY` | **PARTIAL, much wider (2026-10-13, pending owner approval of the RED PR)** — 229 MCP tools (`0.1.0+t229.d05cd4a7`) covering the canonical web functions listed in `docs/integrations/LLM_INTEGRATION_COVERAGE_V1.md`, each through the same domain function the web uses, as the caller, via the bearer caller scope (§2 UPDATE 2026-10-13). The named gaps there (FormData+redirect actions such as org documents, procurement, timesheets, approvals, work-plan create) wait on extracting their cores |
 
 Nothing left here is a decision — what remains is the mechanical work of
 letting domain helpers accept the caller's client instead of fetching their

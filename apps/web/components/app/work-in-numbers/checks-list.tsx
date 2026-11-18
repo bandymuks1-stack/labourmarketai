@@ -4,6 +4,7 @@ import type { WorkTimeCheck } from "@/lib/journal/work-time-plausibility";
 import { splitChecks } from "@/lib/journal/work-in-numbers-view";
 
 import { fmtHours, type Translate } from "./format";
+import { ExplainMore, RevealList } from "@/components/app/premium/disclosure";
 
 /**
  * Plausibility checks (owner §13) — warn, never corrupt: every figure around
@@ -49,9 +50,17 @@ export function ChecksList({
       <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
         {t("checks.title")}
       </h3>
-      <p className="text-meta leading-relaxed text-text-muted">{t("checks.hint")}</p>
-      <ul className="flex flex-col gap-1.5">
-        {openChecks.map((c) => (
+      <ExplainMore>
+        <p className="text-meta leading-relaxed text-text-muted">{t("checks.hint")}</p>
+      </ExplainMore>
+      {/* Open checks lead (they ask for a decision), at most two in view;
+          the rest — and every already-acknowledged one — one tap away. */}
+      <RevealList
+        listAs="ul"
+        listClassName="flex flex-col gap-1.5"
+        limit={Math.min(openChecks.length, 2)}
+        items={[
+        ...openChecks.map((c) => (
           <li
             key={c.key}
             className="flex flex-col gap-1.5 rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2"
@@ -76,8 +85,8 @@ export function ChecksList({
               />
             </span>
           </li>
-        ))}
-        {ackedChecks.map((c) => (
+        )),
+        ...ackedChecks.map((c) => (
           <li
             key={c.key}
             className="flex flex-col gap-0.5 rounded-md border border-border-subtle bg-surface-1/40 px-3 py-2"
@@ -89,8 +98,9 @@ export function ChecksList({
               {t("checks.acknowledged", { reason: c.acknowledged!.reason })}
             </span>
           </li>
-        ))}
-      </ul>
+        )),
+        ]}
+      />
     </div>
   );
 }

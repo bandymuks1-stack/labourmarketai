@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   createCohortAction,
   createProgramAction,
+  decideCohortJoinAction,
+  setCohortJoinRequestsAction,
   setCohortMemberAction,
   updateProgramAction,
   type ProgramActionState,
@@ -31,6 +33,13 @@ export type ProgramFormLabels = {
   readonly chooseLearner: string;
   readonly assign: string;
   readonly remove: string;
+  readonly openRequests: string;
+  readonly closeRequests: string;
+  readonly requestsOpenHint: string;
+  readonly accept: string;
+  readonly acceptConfirm: string;
+  readonly cancel: string;
+  readonly decline: string;
   readonly saving: string;
   readonly saved: string;
   readonly forbidden: string;
@@ -45,7 +54,7 @@ const btnCls =
 
 function StateLine({ state, labels }: { state: ProgramActionState; labels: ProgramFormLabels }) {
   if (state.status === "idle") return null;
-  if (state.status === "ok") return <p className="text-xs text-text-secondary">{labels.saved}</p>;
+  if (state.status === "ok") return <p className="text-xs text-text-secondary" data-testid="program-form-saved">{labels.saved}</p>;
   if (state.status === "forbidden") return <p className="text-xs text-state-danger" role="alert">{labels.forbidden}</p>;
   if (state.status === "invalid") return <p className="text-xs text-state-danger" role="alert">{labels.invalid}</p>;
   return <p className="text-xs text-state-danger" role="alert">{labels.error}</p>;
@@ -207,7 +216,7 @@ export function CreateCohortForm({ programId, labels }: { readonly programId: st
       <input type="hidden" name="programId" value={programId} readOnly />
       <label className="flex min-w-[10rem] flex-1 flex-col gap-1 text-xs text-text-secondary">
         {labels.cohortName}
-        <input name="name" required minLength={1} maxLength={120} className={inputCls} />
+        <input name="name" required minLength={1} maxLength={120} className={inputCls} data-testid={`cohort-name-${programId}`} />
       </label>
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         {labels.startsOn}
@@ -217,7 +226,7 @@ export function CreateCohortForm({ programId, labels }: { readonly programId: st
         {labels.endsOn}
         <input name="endsOn" type="date" className={inputCls} />
       </label>
-      <button type="submit" disabled={pending} className={btnCls}>
+      <button type="submit" disabled={pending} className={btnCls} data-testid={`cohort-create-${programId}`}>
         {pending ? labels.saving : labels.createCohort}
       </button>
       <StateLine state={state} labels={labels} />
@@ -242,14 +251,14 @@ export function AssignLearnerForm({
       <input type="hidden" name="status" value="active" readOnly />
       <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs text-text-secondary">
         {labels.assignLearner}
-        <select name="profileId" required className={inputCls} defaultValue="">
+        <select name="profileId" required className={inputCls} defaultValue="" data-testid={`assign-learner-select-${cohortId}`}>
           <option value="" disabled>{labels.chooseLearner}</option>
           {learners.map((l) => (
             <option key={l.profileId} value={l.profileId}>{l.label}</option>
           ))}
         </select>
       </label>
-      <button type="submit" disabled={pending} className={btnCls}>
+      <button type="submit" disabled={pending} className={btnCls} data-testid={`assign-learner-submit-${cohortId}`}>
         {pending ? labels.saving : labels.assign}
       </button>
       <StateLine state={state} labels={labels} />
@@ -275,6 +284,119 @@ export function RemoveMemberButton({
       <button type="submit" disabled={pending} className="text-xs text-text-muted hover:text-text-secondary hover:underline">
         {labels.remove}
       </button>
+    </form>
+  );
+}
+
+/** J-12: open or close this group for learners' join requests. */
+export function JoinRequestsToggle({
+  cohortId,
+  open,
+  labels,
+}: {
+  readonly cohortId: string;
+  readonly open: boolean;
+  readonly labels: ProgramFormLabels;
+}) {
+  const [state, action, pending] = useActionState(setCohortJoinRequestsAction, IDLE);
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-2" data-testid={`cohort-join-toggle-${cohortId}`}>
+      <input type="hidden" name="cohortId" value={cohortId} readOnly />
+      <input type="hidden" name="open" value={open ? "false" : "true"} readOnly />
+      {open ? <span className="text-meta text-text-secondary">{labels.requestsOpenHint}</span> : null}
+      <button
+        type="submit"
+        disabled={pending}
+        className="text-xs text-brand-blue hover:underline disabled:opacity-60"
+        data-testid={`cohort-join-toggle-submit-${cohortId}`}
+      >
+        {pending ? labels.saving : open ? labels.closeRequests : labels.openRequests}
+      </button>
+      <StateLine state={state} labels={labels} />
+    </form>
+  );
+}
+
+/** J-12: the institution's authorised person accepts or declines one learner's request. */
+export function DecideJoinRequest({
+  cohortId,
+  profileId,
+  labels,
+}: {
+  readonly cohortId: string;
+  readonly profileId: string;
+  readonly labels: ProgramFormLabels;
+}) {
+  const [state, action, pending] = useActionState(decideCohortJoinAction, IDLE);
+  // Accepting creates a student relationship, so it takes a second, explicit
+  // click; declining stays one click.
+  //
+  // Every button has its own `key`, and the two toggles prevent the default:
+  // without that React REUSES the clicked DOM <button> for the button that
+  // replaces it in the same position. The state flip runs inside the click, so
+  // the browser's default action then saw a `type="submit"` button — "Accept"
+  // submitted the accept at once (no confirm step), and "Cancel" would have
+  // submitted a DECLINE (production walk 41603432961).
+  const [confirming, setConfirming] = useState(false);
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-2" data-testid={`cohort-join-decide-${cohortId}-${profileId}`}>
+      <input type="hidden" name="cohortId" value={cohortId} readOnly />
+      <input type="hidden" name="profileId" value={profileId} readOnly />
+      {confirming ? (
+        <>
+          <button
+            key="accept-confirm"
+            type="submit"
+            name="decision"
+            value="accept"
+            disabled={pending}
+            className={btnCls}
+            data-testid={`cohort-join-accept-confirm-${cohortId}-${profileId}`}
+          >
+            {labels.acceptConfirm}
+          </button>
+          <button
+            key="accept-cancel"
+            type="button"
+            disabled={pending}
+            onClick={(e) => {
+              e.preventDefault();
+              setConfirming(false);
+            }}
+            className="text-xs text-text-muted hover:text-text-secondary hover:underline disabled:opacity-60"
+          >
+            {labels.cancel}
+          </button>
+        </>
+      ) : (
+        <>
+          <button
+            key="accept"
+            type="button"
+            disabled={pending}
+            onClick={(e) => {
+              e.preventDefault();
+              setConfirming(true);
+            }}
+            className={btnCls}
+            data-testid={`cohort-join-accept-${cohortId}-${profileId}`}
+          >
+            {labels.accept}
+          </button>
+          <button
+            key="decline"
+            type="submit"
+            name="decision"
+            value="decline"
+            disabled={pending}
+            className="text-xs text-text-muted hover:text-text-secondary hover:underline disabled:opacity-60"
+            data-testid={`cohort-join-decline-${cohortId}-${profileId}`}
+          >
+            {labels.decline}
+          </button>
+        </>
+      )}
+      <StateLine state={state} labels={labels} />
     </form>
   );
 }

@@ -18,11 +18,19 @@ import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interes
 import { readDemandReadbackLabels } from "@/lib/company/company-section-labels";
 import { readOpenNeedsUsage } from "@/lib/billing/open-needs-usage-read";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/needs", "organizationDoors.pages.needs.title");
+
 
 // W3 rows 7/8/25: the employer demand kinds the owner readback is scoped to —
 // a dual-role user's buyer service requests stay in the buyer room.
@@ -142,9 +150,7 @@ export default async function CompanyNeedsPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-needs">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
@@ -218,11 +224,26 @@ export default async function CompanyNeedsPage({
               </Link>
             </div>
           ) : null}
+          {/* The intake rendered (activation audit 2026-10-26 §2): the step
+              between a need door's click (`company_demand_action_clicked`)
+              and the server-side `demand_saved`. Until now it fired only from
+              a form no company page mounts. Once per tab session per surface
+              (TelemetryView), so it counts companies that reached the form,
+              not re-renders; `entity_type` says need or offer. */}
+          <TelemetryView
+            event={FUNNEL_EVENTS.demandFormViewed}
+            metadata={{
+              surface: "company_needs",
+              role_context: "company",
+              entity_type: isStaffingAgency ? "agency_offer" : "company_request",
+            }}
+          />
           <DemandRequestButton
             intent={demandIntent}
             stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
             repeatRequestId={repeatRequestId}
             usage={openNeedsUsage}
+            organizationId={employerCtx.kind === "ok" ? employerCtx.organizationId : null}
           />
           {/* HONEST VISIBILITY (2026-09-22): `list_open_demand_for_workers`
               shows a need to workers ONLY when companies.verification_status
@@ -238,7 +259,17 @@ export default async function CompanyNeedsPage({
               data-testid="company-needs-not-verified-note"
               data-verification-status={companyRow.verificationStatus}
             >
-              {tReadback("notVerifiedYet")}
+              {tReadback("notVerifiedYet")}{" "}
+              {/* The way forward, not only the fact: the company setup screen
+                  holds the registration code and the optional review request
+                  an operator verifies against. Nothing is verified here. */}
+              <Link
+                href="/dashboard/start/company"
+                className="font-semibold text-text-primary underline underline-offset-4 hover:text-brand-blue"
+                data-testid="company-needs-not-verified-howto"
+              >
+                {tReadback("notVerifiedHowTo")}
+              </Link>
             </p>
           ) : null}
           {/* Static-stepper honesty note (guarded): the steps show progress,
@@ -259,6 +290,7 @@ export default async function CompanyNeedsPage({
         labels={readbackLabels}
         locale={locale}
         pendingInterest={pendingInterest}
+        companyVerificationStatus={companyRow.verificationStatus}
       />
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
@@ -279,6 +311,7 @@ export default async function CompanyNeedsPage({
               claimCta: tClaim("claimCta"),
               claimed: tClaim("claimed"),
               error: tClaim("error"),
+              draftExists: tClaim("draftExists"),
               workersLabel: tClaim("workersLabel"),
             }}
           />

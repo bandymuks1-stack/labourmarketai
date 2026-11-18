@@ -1,4 +1,12 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { createClient } from "@/lib/supabase/server";
+
+// record_state (20260930120000) is not in the generated types yet.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(c: SupabaseClient): any {
+  return c;
+}
 
 /**
  * Company project/client context readiness (v1) — read-only, honest.
@@ -28,9 +36,12 @@ export async function getCompanyProjectContext(
 ): Promise<CompanyProjectContext> {
   if (!companyId) return { foundationReady: true, projects: 0 };
   const supabase = await createClient();
-  const { count } = await supabase
+  const { count } = await asAny(supabase)
     .from("projects")
     .select("*", { count: "exact", head: true })
-    .eq("company_id", companyId);
+    .eq("company_id", companyId)
+    // Real projects: a DUPLICATE row is a fragment of its canonical one, so
+    // this card agrees with the list and countManagedProjects beside it.
+    .neq("record_state", "duplicate");
   return { foundationReady: true, projects: count ?? 0 };
 }

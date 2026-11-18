@@ -1,13 +1,19 @@
 import { notFound } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import {
   listDemandDraftsForProfile,
   type DraftType,
 } from "@/lib/demand/demand-drafts";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/users/[id]");
+
 
 type ClaimRow = {
   id: string;
@@ -73,15 +79,8 @@ export default async function AdminUserPage({
       data-testid="admin-user-detail"
     >
       <header className="flex flex-col gap-1">
-        <Link
-          href="/dashboard/admin"
-          className="self-start text-xs text-text-secondary hover:text-text-primary"
-        >
-          ← {t("back")}
-        </Link>
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {profile.full_name ?? profile.email ?? id}
-        </h1>
+        <PageBack href="/dashboard/admin">{t("back")}</PageBack>
+        <PageTitle>{profile.full_name ?? profile.email ?? id}</PageTitle>
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {profile.active_role ?? "—"} ·{" "}
           {profile.onboarded_at ? t("user.onboarded") : t("user.notOnboarded")}
@@ -149,7 +148,7 @@ export default async function AdminUserPage({
                   className="card-border flex flex-col gap-2 p-3"
                 >
                   <header className="flex items-baseline justify-between gap-3">
-                    <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t(
                         `user.draftType.${d.draft_type as DraftType}`,
                       )}

@@ -17,6 +17,7 @@ import {
   type WorkerIntakeFormLabels,
 } from "@/components/app/worker-intake-form";
 import { buildWorkCategoryOptions } from "@/lib/taxonomy/work-categories";
+import { WORKER_PROFILE_DOOR_HREF, WORKER_PROFILE_DOOR_NEXT } from "@/lib/marketing/worker-profile-door";
 
 /**
  * Worker intake page (Staffing Operating Model v1, PR2 UI + PR10 AI display).
@@ -39,6 +40,7 @@ export default async function WorkerIntakePage({
     subtitle: t("subtitle"),
     fullName: t("fullName"),
     profession: t("profession"),
+    professionPlaceholder: t("professionPlaceholder"),
     targetCountries: t("targetCountries"),
     targetCountriesHelp: t("targetCountriesHelp"),
     availableFrom: t("availableFrom"),
@@ -105,14 +107,17 @@ export default async function WorkerIntakePage({
           {/* AuthCtaLink (plain <a>, not the SPA Link): auth is a full-page
               boundary. Single-domain policy: the link stays relative — the
               whole flow lives on labourmarket.ai. */}
+          {/* Both carry the profile builder as their return path (owner P0
+              2026-11-15, F2): the person lands where the profile is made,
+              not on a bare dashboard. */}
           <AuthCtaLink
-            relPath={`/${locale}/auth/signup`}
+            relPath={`/${locale}${WORKER_PROFILE_DOOR_HREF}`}
             className={buttonLinkClassName()}
           >
             {t("bridgeSignup")} →
           </AuthCtaLink>
           <AuthCtaLink
-            relPath={`/${locale}/auth/login`}
+            relPath={`/${locale}/auth/login?next=${encodeURIComponent(WORKER_PROFILE_DOOR_NEXT)}`}
             className={buttonLinkClassName("secondary")}
           >
             {t("bridgeLogin")}

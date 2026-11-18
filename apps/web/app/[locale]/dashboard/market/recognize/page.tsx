@@ -1,6 +1,11 @@
 import { setRequestLocale } from "next-intl/server";
 
 import { OfferDemandRecognizer } from "@/components/app/market/offer-demand-recognizer";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/market/recognize");
+
 
 /**
  * Offer–Demand recognition entry (v1) — the one place to say "what do you offer or

@@ -78,7 +78,11 @@ describe("copy is honest in LT + EN (no fake project data, states the truth)", (
       const link = base.companyOps.projectsLinkingNote.toLowerCase();
       expect(body).toMatch(/neaktyv|not active/);
       expect(body).toMatch(/automati/);
-      expect(link).toMatch(/neįjungt|not enabled/);
+      // 2026-10-09: journal entries ARE attributed to projects in production
+      // (by the people who record them); the note says that, and that nothing
+      // is filled in automatically. It no longer claims linking is off.
+      expect(link).toMatch(/priskiria|attributed/);
+      expect(link).toMatch(/automati/);
     });
     it(`${locale} new copy contains no fake/mock/demo/sample wording`, () => {
       const blob = (journal.projectContext.body + base.companyOps.projectsLinkingNote).toLowerCase();

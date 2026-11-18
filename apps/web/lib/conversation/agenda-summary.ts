@@ -123,7 +123,10 @@ export async function loadContextBrief(
       const name = item.label ?? tPlanning(`fallback.${item.sourceType}`);
       const status = tAll(item.statusKey);
       const conflictMark = agenda.conflictIds.has(item.id) ? " ⚠" : "";
-      return `${source}: ${name} (${status})${conflictMark}`;
+      // An untitled item's fallback name is often the source word itself
+      // ("Kvietimas: Kvietimas", prod chat 2026-10-13): say it once.
+      const head = name.trim().toLowerCase() === source.trim().toLowerCase() ? source : `${source}: ${name}`;
+      return `${head} (${status})${conflictMark}`;
     });
     const more = group.items.length - CHAT_AGENDA_ITEMS_PER_DAY;
     lines.push(

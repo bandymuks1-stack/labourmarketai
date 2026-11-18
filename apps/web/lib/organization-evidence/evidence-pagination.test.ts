@@ -52,6 +52,23 @@ describe("listAllEvidenceRecords — no silent 1000 cap", () => {
     expect(res.truncated).toBe(true);
   });
 
+  it("a corrected original on a page does not end the read early: pages are raw, superseded dropped after", async () => {
+    // 3109 raw rows = 2944 records + 165 corrections; every 19th row is a superseded original.
+    const superseded = (i: number) => i % 19 === 0;
+    const supersededCount = Array.from({ length: 3109 }, (_, i) => i).filter(superseded).length;
+    const list = (async (_c: unknown, f: { limit?: number; offset?: number; includeSuperseded?: boolean }) => {
+      const from = f.offset ?? 0;
+      const n = Math.max(0, Math.min(f.limit ?? 200, 3109 - from));
+      const rows = Array.from({ length: n }, (_, i) => ({ ...rec(from + i), superseded: superseded(from + i) }) as unknown as EvidenceRecordView);
+      return { kind: "ok", records: f.includeSuperseded ? rows : rows.filter((r) => !r.superseded) };
+    }) as never;
+    const res = await listAllEvidenceRecords(caller, { organizationId: "o1" }, { list });
+    expect(res.kind === "ok" && res.records.length).toBe(3109 - supersededCount);
+    expect(res.kind === "ok" && res.records.some((r) => r.superseded)).toBe(false);
+    const raw = await listAllEvidenceRecords(caller, { organizationId: "o1", includeSuperseded: true }, { list });
+    expect(raw.kind === "ok" && raw.records.length).toBe(3109);
+  });
+
   it("is not truncated when the ceiling equals exactly what exists", async () => {
     const { list } = source(2000);
     const res = await listAllEvidenceRecords(caller, {}, { list, ceiling: 2000 });
@@ -67,6 +84,34 @@ describe("listAllEvidenceRecords — no silent 1000 cap", () => {
         : { kind: "error" };
     }) as never;
     expect((await listAllEvidenceRecords(caller, {}, { list })).kind).toBe("error");
+  });
+
+  it("a short history is ONE request (the first page is always read alone)", async () => {
+    const { list, calls } = source(593);
+    const res = await listAllEvidenceRecords(caller, { organizationPersonId: "p1" }, { list });
+    expect(res.kind === "ok" && res.records.length).toBe(593);
+    expect(calls.map((c) => c.offset)).toEqual([0]);
+  });
+
+  it("after a full first page reads a window of pages concurrently, and never past a short page", async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const offsets: number[] = [];
+    const list = (async (_c: unknown, f: { limit?: number; offset?: number }) => {
+      offsets.push(f.offset ?? 0);
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((r) => setTimeout(r, 5));
+      inFlight -= 1;
+      const from = f.offset ?? 0;
+      const n = Math.max(0, Math.min(f.limit ?? 200, 4500 - from));
+      return { kind: "ok", records: Array.from({ length: n }, (_, i) => rec(from + i)) };
+    }) as never;
+    const res = await listAllEvidenceRecords(caller, {}, { list });
+    expect(res.kind === "ok" && res.records.length).toBe(4500);
+    expect(maxInFlight).toBe(2);
+    // 0 alone (full); then 1000+2000 together (full); then 3000+4000 — 4000 is short, so the read ends there.
+    expect(offsets).toEqual([0, 1000, 2000, 3000, 4000]);
   });
 
   it("an empty read is ok with no records", async () => {

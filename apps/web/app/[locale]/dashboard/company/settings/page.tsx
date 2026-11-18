@@ -30,6 +30,14 @@ import { HelpRequestPanel } from "@/components/app/help-request-panel";
 import { FeatureNote } from "@/components/app/feature-note";
 import { MembershipInvitationsPanel } from "@/components/app/membership-invitations-panel";
 import { OrganizationMembersSection } from "@/components/app/organization-members-section";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { Fold } from "@/components/app/premium/grammar";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/settings");
+
 
 /**
  * NUSTATYMAI — the organization's own record (owner IA correction
@@ -60,6 +68,7 @@ export default async function CompanySettingsPage({
   setRequestLocale(locale);
   const userId = await requireRoleOrRedirect(locale, "company");
   const t = await getTranslations("organizationDoors.pages.settings");
+  const tDisclosure = await getTranslations("common.disclosure");
   const tCompany = await getTranslations("roleDashboards.company");
   const tNotes = await getTranslations("featureNotes");
   const tMembers = await getTranslations("organizationMembers");
@@ -90,6 +99,7 @@ export default async function CompanySettingsPage({
             members={membersRes.members}
             myRole={membersRes.myRole}
             myProfileId={userId}
+            organizationId={memberOrgId ?? null}
             labels={membershipLabels.members}
           />
         </div>
@@ -138,9 +148,7 @@ export default async function CompanySettingsPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-settings">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         {/* ONE canonical company profile — the workspace re-labels itself
             from companies.company_type after every save/refresh. */}
@@ -181,43 +189,50 @@ export default async function CompanySettingsPage({
           controls inside) and the invitations addressed to me. */}
       {membershipSections}
 
-      {/* One plain question, several honest answers: what this organization DOES. */}
-      {capabilityOrgId ? (
-        <div id="company-capabilities" className="scroll-mt-20">
-          <OrganizationCapabilitiesCard
-            organizationId={capabilityOrgId}
-            declared={declaredCapabilities}
-          />
-        </div>
-      ) : null}
+      {/* Identity, readiness and members stay open; the rest of the settings
+          are one tap away (owner 2026-10-10). Deep links (#company-capabilities,
+          #public-business-profile) open the fold. */}
+      <DetailsHashOpener targetId="settings-more" />
+      <Fold id="settings-more" title={tDisclosure("moreTools")} hint={t("moreToolsHint")} testId="settings-more">
+        {/* One plain question, several honest answers: what this organization DOES. */}
+        {capabilityOrgId ? (
+          <div id="company-capabilities" className="scroll-mt-20">
+            <OrganizationCapabilitiesCard
+              organizationId={capabilityOrgId}
+              declared={declaredCapabilities}
+            />
+          </div>
+        ) : null}
 
-      {orgMembers && businessPublicSettings && (
-        <div id="public-business-profile" className="scroll-mt-20">
-          <BusinessPublicProfilePanel
-            orgId={orgMembers.orgId}
-            needsMigration={businessPublicSettings.kind === "needs-migration"}
-            settings={
-              businessPublicSettings.kind === "ok" ? businessPublicSettings.settings : null
-            }
-            locale={locale}
-          />
-        </div>
-      )}
+        {orgMembers && businessPublicSettings && (
+          <div id="public-business-profile" className="scroll-mt-20">
+            <BusinessPublicProfilePanel
+              orgId={orgMembers.orgId}
+              needsMigration={businessPublicSettings.kind === "needs-migration"}
+              settings={
+                businessPublicSettings.kind === "ok" ? businessPublicSettings.settings : null
+              }
+              locale={locale}
+            />
+          </div>
+        )}
 
-      <OrgTier1Warning />
+        <OrgTier1Warning />
 
-      <section
-        className="card-border flex flex-col gap-2 p-4"
-        data-testid="company-dashboard-pilot-disclaimer"
-      >
-        <p className="text-sm text-text-secondary">{tCompany("pilotDisclaimer")}</p>
-      </section>
+        <section
+          className="card-border flex flex-col gap-2 p-4"
+          data-testid="company-dashboard-pilot-disclaimer"
+        >
+          <p className="text-sm text-text-secondary">{tCompany("pilotDisclaimer")}</p>
+        </section>
 
-      {/* WAGON 10 (areas 18+19) — typed INTERNAL help requests. Creates an
-          operator-visible customer_requests record; sends nothing. */}
-      <HelpRequestPanel demandOptions={[]} />
+        {/* WAGON 10 (areas 18+19) — typed INTERNAL help requests. Creates an
+            operator-visible customer_requests record; sends nothing. */}
+        <HelpRequestPanel demandOptions={[]} />
 
-      <FeatureNote testId="feature-note-company">{tNotes("companySpace")}</FeatureNote>
+        <FeatureNote testId="feature-note-company">{tNotes("companySpace")}</FeatureNote>
+
+      </Fold>
 
       <Link
         href="/dashboard/profile"

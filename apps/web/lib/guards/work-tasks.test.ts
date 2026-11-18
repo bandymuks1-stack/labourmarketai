@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 import { join } from "node:path";
 
 import {
@@ -104,6 +105,7 @@ const ZERO: SpineCounts = {
   pendingConnectionInvites: 0,
   sharedRequestsAwaitingOffer: 0,
   openCandidateOffers: 0,
+  openTeamOffers: 0,
 };
 
 /** Walk a source dir collecting ts/tsx files (skips tests). */
@@ -160,6 +162,10 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
    */
   const CONSUMERS = [
     LIFECYCLE_READER,
+    // 20261025045152 project_forecasts_v1 (restored byte-exact by #2913, production-applied 2026-10-25):
+    // reads public.work_tasks for forecast facts and attaches its forecast_signal trigger to it.
+    // Creates/alters/writes/policies nothing on work_tasks and defines no task RPC.
+    "20261025045152_project_forecasts_v1",
     "20260817232000_management_decisions_v1",
     // 20261003150600 — team_assignments (WRK-6): holds an FK to public.work_tasks and reads it to
     // check a task belongs to the project a team is assigned to. Creates/alters/writes nothing on it.
@@ -168,6 +174,10 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
     // check a task belongs to the project the team is handed off to (the same check assign_team_to_work_v1
     // makes). Creates/alters/writes nothing on it.
     "20261007150000_team_demand_offer_v1",
+    // 20261011200000 - supply offer negotiation: re-issues hand_off_team_demand_offer_v1 with the
+    // 20261007150000 body (the same work_tasks read) plus one offer_kind check; its rollback restores
+    // that body verbatim. Creates/alters/writes nothing on work_tasks.
+    "20261011200000_supply_offer_negotiation_v1",
     // 20261003150700 — team assignment as an active Journal/work context: widens the wt_select
     // predicate with ONE team-task OR-term (team assigned to THAT task or its work object) and
     // adds the team-or-person authority to the evidence link. Creates/drops/writes nothing on
@@ -217,14 +227,16 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
         // pinned separately by null-safe-authorization-guards.test.ts.
         if (f.startsWith("20261002141500_work_task_authz_null_safe_v1")) continue;
         if (f.startsWith(D2) || f.startsWith(TRAIN_D) || f.startsWith(STAGE_SUBTASK)) continue;
-        const src = readFileSync(join(abs, f), "utf8");
+        const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
         if (CONSUMERS.some((c) => f.startsWith(c))) {
           // A consumer may reference the table, and NOTHING more.
           expect(src, `${dir}/${f} must not create/alter/drop work_tasks`).not.toMatch(
-            /(create|alter|drop)\s+table\s+(if (not )?exists\s+)?public\.work_tasks\b/i,
+            /(create|alter|drop)\s+table\s+(if (not )?exists\s+)?(only\s+)?(public\.)?work_tasks\b/i,
           );
+          // Qualified OR unqualified: a function with `search_path = public` resolves a bare
+          // `work_tasks` to the same table, so both spellings are writes.
           expect(src, `${dir}/${f} must not write work_tasks`).not.toMatch(
-            /(insert\s+into|update|delete\s+from)\s+public\.work_tasks\b/i,
+            /(insert\s+into|update|delete\s+from|truncate(\s+table)?)\s+(only\s+)?(public\.)?work_tasks\b/i,
           );
           expect(src, `${dir}/${f} must not policy work_tasks`).not.toMatch(
             /(create|drop)\s+policy[\s\S]{0,80}on public\.work_tasks\b/i,

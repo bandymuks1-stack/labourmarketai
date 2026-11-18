@@ -70,7 +70,7 @@ export type DashboardModuleId =
  *  and the grid keep speaking one visual language for shared destinations
  *  (journal = journal icon, messages = messages icon, map = map icon). The
  *  concrete lucide imports live in the grid component, mirroring how
- *  BottomNav / DashboardTabs own their icon maps. */
+ *  the nav takes its icons from `components/app/nav-icons.ts`. */
 export type ModuleIconKey =
   | NavIconKey
   | "compass"
@@ -417,6 +417,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
       "pending-connection-invites",
       "shared-requests-awaiting-offer",
       "open-candidate-offers",
+      "open-team-offers",
       "pending-membership-invitations",
     ],
   },

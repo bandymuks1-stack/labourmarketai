@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Guard: journal entry card + edit flow are immediately understandable
@@ -53,15 +54,22 @@ describe("Guard: entry card is text-first then understood signals", () => {
 });
 
 describe("Guard: card renders sections in the right order", () => {
-  it("children → linked skills → status → actions", () => {
+  // 2026-10-10 (owner: action first, details on demand): the entry, then
+  // its MAIN action, then ONE disclosure holding skills → status → the
+  // secondary actions.
+  it("children → main action → details (skills → status → secondary)", () => {
     const iChildren = row.indexOf("{children}");
+    const iEdit = row.indexOf("journal-entry-edit-");
+    const iMore = row.indexOf("<Explain");
     const iSkills = row.indexOf("<JournalEntrySkillLinks");
     const iStatus = row.indexOf("{statusSlot}");
-    const iActions = row.indexOf("journal-entry-edit-");
+    const iDelete = row.indexOf("journal-entry-delete-");
     expect(iChildren).toBeGreaterThan(-1);
-    expect(iChildren).toBeLessThan(iSkills);
+    expect(iChildren).toBeLessThan(iEdit);
+    expect(iEdit).toBeLessThan(iMore);
+    expect(iMore).toBeLessThan(iSkills);
     expect(iSkills).toBeLessThan(iStatus);
-    expect(iStatus).toBeLessThan(iActions);
+    expect(iStatus).toBeLessThan(iDelete);
   });
 });
 
@@ -113,7 +121,7 @@ describe("Guard: capability signals are localized for display (no LT leak)", () 
 });
 
 describe("Guard: new card copy is neutral (no certification wording)", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: textLabel / understoodLabel / signalsHeading present + neutral`, () => {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as {
         entry: Record<string, string>;

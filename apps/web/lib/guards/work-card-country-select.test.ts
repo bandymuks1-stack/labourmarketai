@@ -12,7 +12,8 @@ describe("work card: country I am in is a selector over the ONE country list", (
   });
   it("the editor renders a select that still submits location_country, text fallback kept", () => {
     const src = read("components/app/work-card-editor.tsx");
-    expect(src).toMatch(/<select\s+name="location_country"/);
+    // The shared Select (components/ui/Select.tsx) renders the native <select>.
+    expect(src).toMatch(/<Select\s+name="location_country"/);
     expect(src).toMatch(/type="text"\s+name="location_country"/);
   });
 });

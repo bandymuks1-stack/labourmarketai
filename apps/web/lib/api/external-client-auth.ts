@@ -348,8 +348,12 @@ export type ExternalClientAuthEvent =
       readonly door: string;
       readonly tool: string;
       readonly ok: boolean;
-      /** The capability's own outcome code on failure (e.g. `confirmation_rejected`). */
-      readonly code?: string;
+      /** The capability's own outcome code on failure (e.g. `confirmation_rejected`).
+       *  NOT named `code`: that key is forbidden below (it is the OAuth
+       *  authorization code), and carrying it made every failed tool call's
+       *  log line throw and vanish — refusals were uncountable in production
+       *  until 2026-10-13. */
+      readonly result_code?: string;
     };
 
 const FORBIDDEN_LOG_KEYS = new Set([

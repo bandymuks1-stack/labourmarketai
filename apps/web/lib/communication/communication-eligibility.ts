@@ -93,6 +93,16 @@ export function isShortlistedForContact(status: string | null | undefined): bool
  *     other side's consenting person) and passed as a grant exactly like
  *     allowed_accepted_booking. Never resolved from generic facts here —
  *     see evaluateAgencyConnectionContact below for the pure decision.
+ *   - allowed_team_demand_offer — the B2B negotiation thread (2026-10-11):
+ *     a brigade was offered against a real demand and the offer is still
+ *     live (offered / accepted / assigned). The caller is EITHER the
+ *     offering team's manager (the offer row is readable under their own
+ *     RLS) OR the demand's receiver (the offer is listed by the receiver-
+ *     gated list_team_offers_for_request_v1); the counterpart is the other
+ *     side's deciding person — the demand owner, or the manager who made the
+ *     offer. Verified server-side by lib/company/team-offer-conversation.ts,
+ *     passed as a grant; never resolved from generic facts. See
+ *     evaluateTeamOfferContact below for the pure decision.
  *   - allowed_team — the two profiles are on the SAME team: both hold an ACTIVE
  *     membership of, or an ACTIVE engagement in, one organization (owner P0
  *     2026-10-01: team member ↔ team member, and the people on a project the
@@ -116,6 +126,7 @@ export type ContactPermissionState =
   | "allowed_accepted_booking"
   | "allowed_marketplace_enquiry"
   | "allowed_agency_connection"
+  | "allowed_team_demand_offer"
   | "allowed_team"
   | "allowed_admin"
   | "no_permission";
@@ -130,6 +141,7 @@ export const CONTACT_PERMISSION_STATES: readonly ContactPermissionState[] = [
   "allowed_accepted_booking",
   "allowed_marketplace_enquiry",
   "allowed_agency_connection",
+  "allowed_team_demand_offer",
   "allowed_team",
   "allowed_admin",
   "no_permission",
@@ -261,5 +273,30 @@ export function evaluateAgencyConnectionContact(
 ): AgencyConnectionContactDecision {
   if (facts.connectionStatus !== "active") return "connection_not_active";
   if (agencyConnectionSide(facts) === null) return "not_a_party";
+  return "allowed";
+}
+
+/**
+ * Brigade offer ↔ demand contact eligibility (2026-10-11) — PURE decision
+ * behind `allowed_team_demand_offer`. Both sides of a LIVE offer may talk:
+ * before the decision (to clarify, to negotiate), after agreement (to plan the
+ * start) and after the hand-off to a project. A declined or withdrawn offer
+ * opens nothing new — an existing thread still reopens through
+ * allowed_existing_conversation, so no history is ever lost.
+ */
+export type TeamOfferContactDecision = "allowed" | "offer_not_live" | "not_a_party";
+
+export interface TeamOfferContactFacts {
+  /** The offer status as the CALLER's own authorized read returned it; null = not readable. */
+  readonly offerStatus: string | null | undefined;
+  /** Which side the caller's authorized read proved, or null. */
+  readonly side: "supplier" | "receiver" | null;
+}
+
+export const TEAM_OFFER_LIVE_STATUSES: readonly string[] = ["offered", "accepted", "assigned"];
+
+export function evaluateTeamOfferContact(facts: TeamOfferContactFacts): TeamOfferContactDecision {
+  if (facts.side !== "supplier" && facts.side !== "receiver") return "not_a_party";
+  if (!facts.offerStatus || !TEAM_OFFER_LIVE_STATUSES.includes(facts.offerStatus)) return "offer_not_live";
   return "allowed";
 }

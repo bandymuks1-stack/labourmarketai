@@ -178,11 +178,47 @@ export interface VacancyDetailFanOutV1 {
   readonly activeValue: string;
   /** Keys to copy from an INACTIVE entry into the withdrawal record. */
   readonly withdrawalKeys: readonly string[];
+  /** Path, root first, to the entry's own last-changed timestamp (SOURCE
+   *  time). Reported as the session's feed position; never used to decide. */
+  readonly changedAtPath?: readonly string[];
   /** Most detail requests one page may cost. Entries beyond it are not
    *  consumed: the page fails closed instead of silently dropping ads. */
   readonly maxDetailFetchesPerPage: number;
   /** Detail requests in flight at once. */
   readonly concurrency: number;
+  /**
+   * Most detail requests ONE import session may spend, across all its pages.
+   * When it runs out mid-page the session stops cleanly and its checkpoint
+   * records exactly how many of that page's entries were consumed, so the next
+   * session resumes there: nothing is skipped, nothing is silently dropped.
+   * Absent = no per-session cap (every other provider).
+   */
+  readonly maxDetailFetchesPerSession?: number;
+  /**
+   * Minimum gap, in ms, between the STARTS of two requests to this host
+   * (listing pages and details alike, process-wide). Absent = no spacing
+   * (every other provider). For a shared grant whose publisher states no
+   * numeric rate limit.
+   */
+  readonly minRequestSpacingMs?: number;
+  /**
+   * Per-request timeout, in ms, for THIS endpoint's listing and detail
+   * requests, when the publisher's real latency needs more than the shared
+   * `requestTimeoutMs`. It changes how long ONE request may take, never how
+   * many are made (retries, spacing, concurrency and budgets are untouched),
+   * so a slow publisher yields fewer false failures and no extra load. Absent
+   * = the shared bound (every other provider, including Sweden).
+   */
+  readonly requestTimeoutMs?: number;
+  /**
+   * Wall-clock budget, in ms, for the DETAIL phase of one session. When it
+   * passes, no further detail request STARTS; requests already in flight
+   * finish, and the page stops at an entry boundary exactly as the request
+   * budget does (every earlier entry resolved, every later one untouched, the
+   * checkpoint says where). Lets a slow publisher make steady partial progress
+   * instead of failing the whole session. Absent = no wall-clock cap.
+   */
+  readonly sessionDeadlineMs?: number;
 }
 
 /**
@@ -464,8 +500,30 @@ const NAV: VacancyProviderDescriptorV1 = {
         statusPath: ["_feed_entry", "status"],
         activeValue: "ACTIVE",
         withdrawalKeys: ["uuid", "status", "title"],
+        changedAtPath: ["_feed_entry", "sistEndret"],
+        // Anomaly guard only: one page may never cost more than this. The
+        // real cost control is the per-session budget below.
         maxDetailFetchesPerPage: 1000,
-        concurrency: 8,
+        // REQUEST BUDGET (2026-10-08, shared NAV grant; NAV states no numeric
+        // limit but may revoke for abuse). Pinned, with the worst-case
+        // arithmetic, by lib/vacancy-sources/nav-request-budget.test.ts.
+        // Before: 5 pages x (1 + 1000 details), concurrency 8, no spacing =
+        // 5,005 requests/session, ~720k/day on the */10 cron. Now: 100 details
+        // + 2 listing pages per session, 2 in flight, >= 500 ms between request
+        // starts. A cold start resumes across sessions (mid-page checkpoint).
+        concurrency: 2,
+        maxDetailFetchesPerSession: 100,
+        minRequestSpacingMs: 500,
+        // SLOW-PUBLISHER TOLERANCE (2026-10-09). Healthy NAV answers a detail
+        // in well under a second (a 100-detail session ran in ~55 s). On
+        // 2026-10-09 every request slowed to 8-21+ s (dry-run accounting: the
+        // listing 8.3 s, details 16.8-21.1 s with one at the 20 s cap), so the
+        // shared 20 s timeout failed whole pages. A longer per-request wait
+        // makes no extra request; the deadline makes a slow session stop at an
+        // entry boundary and resume, instead of failing. Pinned by
+        // nav-request-budget.test.ts.
+        requestTimeoutMs: 45_000,
+        sessionDeadlineMs: 150_000,
       },
       // RECORDED: a signed JWT, sent as `Authorization: Bearer <token>`.
       requiresApiKey: true,
@@ -485,9 +543,10 @@ const NAV: VacancyProviderDescriptorV1 = {
       },
     },
   ],
-  // A page is 1000 entries and every live one costs a detail request, so a
-  // session reads at most five pages (bounds may only ever be TIGHTENED).
-  boundOverrides: { maxPagesPerSession: 5, requestTimeoutMs: 20_000 },
+  // At most two listing pages per session (was five); the detail requests they
+  // cost are capped separately by detailFanOut.maxDetailFetchesPerSession.
+  // Bounds may only ever be TIGHTENED.
+  boundOverrides: { maxPagesPerSession: 2, requestTimeoutMs: 20_000 },
   transformVersion: "vacancy-nav-v1",
 };
 

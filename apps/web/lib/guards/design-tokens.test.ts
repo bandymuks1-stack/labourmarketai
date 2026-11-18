@@ -64,7 +64,9 @@ describe("Guard: typography decision lock (DI, 2026-06-12)", () => {
   // Serif as `--font-accent` in layout.tsx, declare the accent role in
   // tokens/typography.ts, and add the accent component file(s) here.
   const WIRING_FILES = ["tokens/typography.ts", "app/[locale]/layout.tsx"];
-  const ACCENT_ALLOWED: string[] = [];
+  // 2026-10-09: the frozen premium design class (4e695e261) ships through ONE
+  // grammar file; its `Accented` sets exactly one word of a region heading.
+  const ACCENT_ALLOWED: string[] = ["components/app/premium/grammar.tsx"];
 
   const SCAN_ROOTS = ["app", "components", "content", "lib", "tokens"];
   const SCAN_EXT = /\.(ts|tsx|css)$/;

@@ -424,8 +424,8 @@ export const BEHAVIOR_CONFORMANCE = {
   // door of the knowing override the project page already offers (one keep
   // core behind the page action, this action and the MCP assignment.keep_*
   // tools). Anchored to /dashboard/projects; keyed to the company actor type.
-  conversationActions: 57,
-  actionsAnchoredToAPage: 57,
+  conversationActions: 58, // +1 company.respond-team-offer (2026-10-11: the receiver answers a brigade / company offer in the chat)
+  actionsAnchoredToAPage: 58,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

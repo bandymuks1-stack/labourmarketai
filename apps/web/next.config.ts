@@ -1,5 +1,11 @@
+import { existsSync, readdirSync } from "node:fs";
+import path from "node:path";
+
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+
+import { activeLocales } from "./lib/i18n/config";
+import { HTML_LIMITED_BOTS } from "./lib/seo/html-limited-bots";
 
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
@@ -92,7 +98,9 @@ function contentSecurityPolicyReportOnly(): string {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
+    // `upgrade-insecure-requests` is NOT listed: browsers ignore it in a
+    // Report-Only policy and log a console error on every page. HSTS below
+    // already forces https. Re-add it when this policy is enforced.
   ].join("; ");
 }
 
@@ -152,10 +160,24 @@ const W1_CANONICAL_REDIRECTS = [
  * at mobile width). The canonical pages live under `/auth/…`; these keep the
  * short, human-typed form working. 308 so the method and locale are kept.
  */
+// `:locale` is CONSTRAINED to the routed locales. Unconstrained, `/auth/signup`
+// (no locale — e-mails, OAuth consoles, old links) matched as locale="auth"
+// and was sent to `/auth/auth/signup` → 404 (public audit 2026-10-10).
+const LOCALE = `:locale(${activeLocales.join("|")})`;
+
 const ENTRY_SHORTCUT_REDIRECTS = [
-  { source: "/:locale/signup", destination: "/:locale/auth/signup", permanent: true },
-  { source: "/:locale/login", destination: "/:locale/auth/login", permanent: true },
-  { source: "/:locale/register", destination: "/:locale/auth/signup", permanent: true },
+  { source: `/${LOCALE}/signup`, destination: "/:locale/auth/signup", permanent: true },
+  { source: `/${LOCALE}/login`, destination: "/:locale/auth/login", permanent: true },
+  { source: `/${LOCALE}/register`, destination: "/:locale/auth/signup", permanent: true },
+  // The spellings people type (UX-9).
+  { source: `/${LOCALE}/auth/sign-up`, destination: "/:locale/auth/signup", permanent: true },
+  { source: `/${LOCALE}/auth/sign-in`, destination: "/:locale/auth/login", permanent: true },
+  // Commonly guessed legal URLs (and what OAuth app consoles ask for). The
+  // canonical pages live under /legal/…; these 404'd before.
+  { source: `/${LOCALE}/privacy`, destination: "/:locale/legal/privacy", permanent: true },
+  // The privacy policy URL an OAuth console (e.g. Meta) may hold.
+  { source: `/${LOCALE}/privacy-policy`, destination: "/:locale/legal/privacy", permanent: true },
+  { source: `/${LOCALE}/terms`, destination: "/:locale/legal/terms", permanent: true },
 ] as const;
 
 const nextConfig: NextConfig = {
@@ -163,17 +185,54 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Never advertise the framework version to attackers scanning for CVEs.
   poweredByHeader: false,
+  // Crawlers that run no script must find canonical and robots in <head>.
+  htmlLimitedBots: HTML_LIMITED_BOTS,
+  // Self-hosting (P0 restore, 2026-10-16): `standalone` emits
+  // `.next/standalone/apps/web/server.js` plus a traced minimal node_modules,
+  // so the app can run with plain `node server.js` on any Node host (Hostinger
+  // Web Apps, a VPS) from an artefact built elsewhere. Vercel ignores this
+  // setting for its own output, so it is harmless there.
+  output: "standalone",
+  // Trace from the monorepo root. Without this Next "infers" the root from the
+  // nearest lockfile it finds walking up — on a developer machine that can be a
+  // stray ~/package-lock.json, which silently breaks standalone tracing.
+  outputFileTracingRoot: path.resolve(process.cwd(), "../.."),
   experimental: {
     // Document uploads (DOCUMENT_FILE_MAX_BYTES = 5 MB) go through server
     // actions; Next's 1 MB default rejected anything larger before the handler
     // ran. Voice (25 MB) does NOT fit here — it needs a non-action upload path.
     serverActions: { bodySizeLimit: "5mb" },
+    // Audit 2026-10-16 (U-9): the two libraries every page imports by named
+    // export are tree-shaken per import instead of pulling their barrels into
+    // the client graph. Build-time only; no runtime behaviour changes.
+    optimizePackageImports: ["lucide-react", "framer-motion"],
   },
   async redirects() {
     return [...LEGACY_HOST_REDIRECTS, ...W1_CANONICAL_REDIRECTS, ...ENTRY_SHORTCUT_REDIRECTS];
   },
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
+  },
+  webpack(config) {
+    // `patches/next@*.patch` edits Next's vendored React (see the patch file).
+    // With `node-linker=hoisted`, webpack's persistent cache treats
+    // node_modules/next as immutable and keys it by package version only, so a
+    // restored `.next/cache` (local or Vercel) keeps bundling the UNPATCHED
+    // code. Listing the patch files as build dependencies hashes their content
+    // into the cache key: adding, changing or removing a patch invalidates it.
+    const patchDir = path.resolve(process.cwd(), "../../patches");
+    const patches = existsSync(patchDir)
+      ? readdirSync(patchDir)
+          .filter((f) => f.endsWith(".patch"))
+          .map((f) => path.join(patchDir, f))
+      : [];
+    if (patches.length > 0 && config.cache && typeof config.cache === "object") {
+      config.cache.buildDependencies = {
+        ...config.cache.buildDependencies,
+        pnpmPatches: patches,
+      };
+    }
+    return config;
   },
 };
 

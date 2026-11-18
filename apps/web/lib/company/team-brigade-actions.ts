@@ -5,16 +5,23 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { createAndSendInvitations } from "@/lib/invitations/actions";
+import { createAndSendInvitations, resendInvitationAction } from "@/lib/invitations/actions";
 import {
   createTeamBrigade,
+  disbandTeamBrigade,
+  getTeamBrigadesData,
   lookupLinkedWorkerEmail,
   type CreateTeamOutcome,
+  type DisbandTeamOutcome,
   type TeamAvailabilityStatus,
+  type TeamBrigade,
 } from "./team-brigades";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
+import { parseEmailList } from "@/lib/invitations/model";
+import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
+import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 
 /**
  * Server actions for the company-room team/brigade panel (§8.3 + Trust
@@ -28,8 +35,9 @@ import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
  *
  * Privacy: the invitee's email is looked up server-side from the already
  * RLS-visible company_workers link and handed to the canonical invitation
- * action; neither the email nor the invite link is ever returned to the
- * client from here.
+ * action; the email is never returned to the client. The invite LINK is
+ * returned (by design since the 2026-10-11 walk) so the manager can hand it
+ * over on a channel the platform does not deliver on.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -43,18 +51,54 @@ const RELATION_NOT_FOUND_CODE = "42P01";
 export async function createTeamAction(
   name: string,
   expectedWorkspaceId?: string,
-): Promise<{ outcome: CreateTeamOutcome }> {
+): Promise<{ outcome: CreateTeamOutcome; teams?: readonly TeamBrigade[] }> {
   await refuseStaleWorkspace(expectedWorkspaceId);
   const { outcome } = await createTeamBrigade(name);
   // W14 mid-funnel: a team organization was really created (the org spine
   // gained a row). Entity type only — never the team name. Fire-and-forget.
   if (outcome === "created") {
+    // KEEP THE OWNER WHERE THEY ARE (walk 2026-10-11): a sole-company owner
+    // rode the "exactly one organization" default; the brigade is a second
+    // organization, the default stopped applying, and the owner landed in the
+    // personal space with every company page saying "no company profile".
+    // Pin the organization workspace the brigade was created FROM — the same
+    // membership-validated core the switcher uses. Best effort.
+    if (expectedWorkspaceId && expectedWorkspaceId !== PERSONAL_WORKSPACE_ID) {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) await switchActiveWorkspaceCore({ supabase, userId: user.id }, expectedWorkspaceId);
+    }
     emitServerFunnelEvent(FUNNEL_EVENTS.organizationCreated, {
       source: "teams",
       metadata: { surface: "company_teams", entity_type: "team" },
     });
+    // The new brigade is shown from THIS answer (the same read the page
+    // makes), not only after the whole people page re-renders: a slow
+    // refresh left the owner looking at a list without the brigade they had
+    // just created (walk 2026-10-20). A failed read returns no list and the
+    // refresh still follows.
+    const fresh = await getTeamBrigadesData();
+    if (fresh.applied && fresh.error === null) return { outcome, teams: fresh.teams };
   }
   return { outcome };
+}
+
+/**
+ * Disband a brigade the caller owns (owner directive 2026-10-14 §3.3). The
+ * brigade becomes an archived organization; each member's membership ends
+ * through the canonical lifecycle writer; assignments, offers, enquiries,
+ * messages and journal entries stay as history. Refused while open work
+ * remains — the owner closes it first with the controls that already exist.
+ */
+export async function disbandTeamAction(
+  teamId: string,
+  expectedWorkspaceId?: string,
+): Promise<{ outcome: DisbandTeamOutcome }> {
+  await refuseStaleWorkspace(expectedWorkspaceId);
+  if (!/^[0-9a-f-]{36}$/i.test(teamId)) return { outcome: "not_found" };
+  return disbandTeamBrigade(teamId);
 }
 
 export type TeamInviteOutcome =
@@ -78,14 +122,21 @@ export async function inviteWorkerToTeamAction(input: {
   teamId: string;
   workerId: string;
   locale: string;
-}): Promise<{ outcome: TeamInviteOutcome }> {
+  /** Typed by the owner when the worker's address cannot be read (profiles
+   *  are own-row-only). The worker still has to accept with their account. */
+  email?: string | null;
+}): Promise<{ outcome: TeamInviteOutcome; inviteLink?: string; linkRenewed?: boolean }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { outcome: "error" };
 
-  const email = await lookupLinkedWorkerEmail(input.workerId);
+  // The canonical invitation parser — the same validation every invite form
+  // uses (a hand-rolled regex here lost its escapes and refused any address
+  // with an "s" in it; walk 2026-10-11).
+  const typed = parseEmailList(input.email ?? "").valid[0] ?? null;
+  const email = (await lookupLinkedWorkerEmail(input.workerId)) ?? typed;
   if (!email) return { outcome: "no_email" };
 
   const result = await createAndSendInvitations({
@@ -98,15 +149,29 @@ export async function inviteWorkerToTeamAction(input: {
   if (result.status === "not-authed") return { outcome: "error" };
 
   const first = result.results[0];
+  // The token link is the delivery whenever e-mail is not (production has no
+  // active e-mail provider): the owner hands it to the worker themselves.
+  // Without it a worker whose mailbox is not yet proven never sees the
+  // invitation at all (walk 2026-10-11).
+  const inviteLink = first?.inviteLink;
   switch (first?.outcome) {
     case "sent":
-      return { outcome: "sent" };
+      return { outcome: "sent", inviteLink };
     case "created":
-      return { outcome: "created" };
+      return { outcome: "created", inviteLink };
     case "delivery_failed":
-      return { outcome: "delivery_failed" };
-    case "duplicate_pending":
-      return { outcome: "already_invited" };
+      return { outcome: "delivery_failed", inviteLink };
+    case "duplicate_pending": {
+      // The first link lived only in the owner's screen state (the raw token
+      // is never stored), so a second click used to end in "already invited"
+      // with no way to hand the worker anything. Re-issue the SAME invitation
+      // through the canonical resend (token rotated, cap and authority checked
+      // by resend_invitation_v1) and say plainly that the old link is dead.
+      const renewed = await renewPendingTeamInviteLink(supabase, input.teamId, email, input.locale);
+      return renewed
+        ? { outcome: "already_invited", inviteLink: renewed, linkRenewed: true }
+        : { outcome: "already_invited" };
+    }
     case "rate_limited":
       return { outcome: "rate_limited" };
     case "limit_reached":
@@ -116,6 +181,43 @@ export async function inviteWorkerToTeamAction(input: {
     default:
       return { outcome: "error" };
   }
+}
+
+/** The owner's own open join_team invitation to this address (RLS: inviter
+ *  or admin), re-issued with a fresh link. Null when there is none to renew
+ *  or the resend is refused (cap, authority) — the caller then reports the
+ *  plain "already invited". */
+async function renewPendingTeamInviteLink(
+  supabase: SupabaseClient,
+  teamId: string,
+  email: string,
+  locale: string,
+): Promise<string | null> {
+  const { data } = await asAny(supabase)
+    .from("invitations")
+    .select("id, invited_email, locale, personal_message")
+    .eq("invitation_type", "join_team")
+    .eq("organization_id", teamId)
+    .eq("status", "pending")
+    .eq("invited_email", email.trim().toLowerCase())
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const row = ((data ?? []) as {
+    id: string;
+    invited_email: string;
+    locale: string | null;
+    personal_message: string | null;
+  }[])[0];
+  if (!row) return null;
+  const res = await resendInvitationAction({
+    invitationId: row.id,
+    email: row.invited_email,
+    locale,
+    recipientLocale: row.locale,
+    invitationType: "join_team",
+    personalMessage: row.personal_message,
+  });
+  return res.status === "ok" && res.inviteLink ? res.inviteLink : null;
 }
 
 export type SaveTeamDetailsOutcome =

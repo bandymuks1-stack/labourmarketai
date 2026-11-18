@@ -24,6 +24,9 @@ import { useEffect, useRef, useState } from "react";
  * nothing is modal.
  */
 
+/** Appended to the armed buttons when `touch` is set. */
+const TOUCH_SIZE = " inline-flex min-h-11 items-center px-4 text-sm";
+
 export type ConfirmTier = "reversible_write" | "important_write" | "strong_irreversible";
 
 export interface InlineConfirmProps {
@@ -41,6 +44,9 @@ export interface InlineConfirmProps {
   /** Class for the resting trigger, so callers keep their existing visuals. */
   readonly className?: string;
   readonly testId?: string;
+  /** Armed-step buttons at the 44 px touch size (min-h-11) for surfaces used
+   *  on phones. Off by default so existing callers keep their visuals. */
+  readonly touch?: boolean;
 }
 
 /**
@@ -121,6 +127,7 @@ export function InlineConfirm({
   disabled = false,
   className,
   testId,
+  touch = false,
 }: InlineConfirmProps) {
   const [armed, setArmed] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -168,11 +175,11 @@ export function InlineConfirm({
       <button
         ref={confirmRef}
         type="button"
-        className={
+        className={`${
           danger
             ? "rounded-md bg-state-danger px-2 py-1 text-xs font-semibold text-text-on-danger"
             : "rounded-md bg-brand-cyan px-2 py-1 text-xs font-semibold text-ink-900"
-        }
+        }${touch ? TOUCH_SIZE : ""}`}
         onClick={() => {
           setArmed(false);
           onConfirm();
@@ -183,7 +190,9 @@ export function InlineConfirm({
       </button>
       <button
         type="button"
-        className="rounded-md px-2 py-1 text-xs text-text-secondary hover:text-text-primary"
+        className={`rounded-md px-2 py-1 text-xs text-text-secondary hover:text-text-primary${
+          touch ? TOUCH_SIZE : ""
+        }`}
         onClick={cancel}
         data-testid={testId ? `${testId}-no` : undefined}
       >

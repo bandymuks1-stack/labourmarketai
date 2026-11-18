@@ -159,6 +159,11 @@ architecture"* is not evidence; reviewed work is. Provider/model identity stays
 **Status:** architecture recorded, extension path preserved. **Not implemented,
 and deliberately not now** — it must not delay the external pilot.
 
+**Extended 2026-10-13 (owner direction):** agents as labour-market participants —
+DELEGATE vs PROVIDER, responsible operator, planned ≠ acquired competence,
+human-only work excluded, binding data minimization (store results and minimal proof, never conversations, logs or copied code). Canonical text: `OWNER_TARGET_ARCHITECTURE_V1.md`
+§1.13; plan: `docs/integrations/AI_AGENT_PARTICIPANTS_V1.md`.
+
 ### 5.2 Historical work-report import
 
 Years of real historical work reports must eventually become real Journal

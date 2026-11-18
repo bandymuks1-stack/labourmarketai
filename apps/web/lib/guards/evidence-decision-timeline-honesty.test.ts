@@ -128,8 +128,19 @@ describe("Guard: timeline copy is complete and honest", () => {
     // makes clear a human (not AI) is involved.
     expect(/reviewed/i.test(timelineCopy("en").approved ?? "")).toBe(true);
     expect(/peržiūrėt/i.test(timelineCopy("lt").approved ?? "")).toBe(true);
-    expect(/returned/i.test(timelineCopy("en").rejected ?? "")).toBe(true);
-    expect(/grąžint/i.test(timelineCopy("lt").rejected ?? "")).toBe(true);
+    // A REJECTION reads as one (walk-spec 2026-10-25). This guard used to pin
+    // `rejected` to "Returned" / "Grąžinta" — the word the entry's standing
+    // chip uses for a request for CHANGES (`standing.returned`), so a worker
+    // could not tell a rejected entry from one sent back for a fix. The
+    // honesty intent is unchanged: the label states the real decision, and
+    // "rejected" certifies nothing.
+    expect(/rejected/i.test(timelineCopy("en").rejected ?? "")).toBe(true);
+    expect(/atmest/i.test(timelineCopy("lt").rejected ?? "")).toBe(true);
+    expect(/returned/i.test(timelineCopy("en").rejected ?? "")).toBe(false);
+    expect(/grąžint/i.test(timelineCopy("lt").rejected ?? "")).toBe(false);
+    // …and a request for changes keeps its own words.
+    expect(/changes/i.test(timelineCopy("en").changes_requested ?? "")).toBe(true);
+    expect(/pataisym/i.test(timelineCopy("lt").changes_requested ?? "")).toBe(true);
     expect(/human/i.test(timelineCopy("en").waiting ?? "")).toBe(true);
     expect(/žmogaus/i.test(timelineCopy("lt").waiting ?? "")).toBe(true);
   });

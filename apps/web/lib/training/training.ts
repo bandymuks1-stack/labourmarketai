@@ -3,12 +3,16 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
+  NO_TRAINING_AUTHORITY,
   TRAINING_READ_LIMIT,
+  deriveTrainingAuthority,
   isTrainingMigrationMissingCode,
   isValidTrainingAssignmentStatus,
   type CertificationRow,
   type TrainingAssignmentRow,
+  type TrainingAuthority,
   type TrainingProgramRow,
 } from "@/lib/training/training-model";
 
@@ -34,6 +38,13 @@ function asAny(c: SupabaseClient): any {
 }
 
 type RawRow = Record<string, unknown>;
+
+const UUID_RX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** The worker-document types the register lists — each has a label under
+ *  `documents.types` in every locale. */
+const CERTIFICATE_DOCUMENT_TYPES = ["professional_certificate", "health_safety_card"] as const;
 
 const PROGRAM_COLUMNS =
   "id, organization_id, title, description, material_document_id, is_active, created_at";
@@ -132,6 +143,62 @@ export async function getTrainingOverview(): Promise<TrainingOverviewResult> {
   };
 }
 
+/** Distinct organizations the authority read asks about — bounded. */
+const AUTHORITY_ORG_LIMIT = 20;
+
+/**
+ * The caller's training AUTHORITY: which forms the register may offer.
+ *
+ * Asks the database the exact predicates the write commands enforce (see
+ * `TrainingAuthority` in training-model.ts) instead of re-deriving them from
+ * role strings or from whether the organization already has data. The add-a-
+ * course target is the same `requireEmployerCompany()` resolution
+ * `createTrainingProgramAction` uses. Any failed read fails CLOSED.
+ *
+ * @param organizationIds the organizations of the courses and managed
+ *   assignments the register shows.
+ */
+export async function getTrainingAuthority(
+  organizationIds: readonly string[],
+): Promise<TrainingAuthority> {
+  const supabase = await createClient();
+  const employer = await requireEmployerCompany();
+  const employerOrganizationId = employer.ok ? employer.organizationId : null;
+
+  const orgs = [
+    ...new Set([
+      ...(employerOrganizationId ? [employerOrganizationId] : []),
+      ...organizationIds.filter((id) => id.length > 0),
+    ]),
+  ].slice(0, AUTHORITY_ORG_LIMIT);
+  if (orgs.length === 0) return NO_TRAINING_AUTHORITY;
+
+  const yes = async (
+    name: string,
+    args?: Record<string, unknown>,
+  ): Promise<boolean> => {
+    const { data, error } = await asAny(supabase).rpc(name, args);
+    return !error && data === true;
+  };
+
+  const [platformAdmin, ownerAdminPairs, demandPairs] = await Promise.all([
+    yes("is_admin"),
+    Promise.all(
+      orgs.map(async (org) => [org, await yes("org_owner_admin_v1", { p_organization_id: org })] as const),
+    ),
+    Promise.all(
+      orgs.map(async (org) => [org, await yes("has_org_demand_access", { org })] as const),
+    ),
+  ]);
+
+  return deriveTrainingAuthority({
+    employerOrganizationId,
+    platformAdmin,
+    ownerAdmin: new Map(ownerAdminPairs),
+    demandAccess: new Map(demandPairs),
+  });
+}
+
 export type CertificationRegisterResult =
   | { readonly kind: "not-authed" }
   | { readonly kind: "needs-migration" }
@@ -145,20 +212,38 @@ export type CertificationRegisterResult =
  * decides both halves). Read-only on the worker side — no row is migrated,
  * copied or rewritten, and a document the caller cannot read simply does not
  * appear.
+ *
+ * ONE ORGANIZATION'S CONTEXT IN ONE WORKSPACE (decision 0024). RLS lets a
+ * person who manages several organizations read all of their certificates,
+ * so the read is scoped here: the ACTIVE organization's certificates plus the
+ * person's OWN (the same rule as "Your training"); with no active
+ * organization, only the person's own. The worker-document half is always
+ * the person's own records — never another worker's, even for a reader whose
+ * RLS would return more.
+ *
+ * @param activeOrganizationId the organization the active workspace shows,
+ *   or null in a personal workspace.
  */
-export async function getCertificationRegister(): Promise<CertificationRegisterResult> {
+export async function getCertificationRegister(
+  activeOrganizationId: string | null,
+): Promise<CertificationRegisterResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
 
-  const trainings = await asAny(supabase)
+  const base = asAny(supabase)
     .from("training_assignments")
     .select(
-      "id, assignee_profile_id, issued_on, expires_on, certificate_document_file_id, training_programs(title)",
+      "id, organization_id, assignee_profile_id, issued_on, expires_on, certificate_document_file_id, training_programs(title)",
     )
-    .not("certificate_document_file_id", "is", null)
+    .not("certificate_document_file_id", "is", null);
+  const scoped =
+    activeOrganizationId && UUID_RX.test(activeOrganizationId)
+      ? base.or(`organization_id.eq.${activeOrganizationId},assignee_profile_id.eq.${user.id}`)
+      : base.eq("assignee_profile_id", user.id);
+  const trainings = await scoped
     .order("expires_on", { ascending: true, nullsFirst: false })
     .limit(TRAINING_READ_LIMIT);
   if (trainings.error) {
@@ -174,6 +259,7 @@ export async function getCertificationRegister(): Promise<CertificationRegisterR
         source: "training" as const,
         id: String(r.id),
         label: String(program?.title ?? ""),
+        documentTypeSlug: null,
         holderProfileId: String(r.assignee_profile_id),
         issuedOn: (r.issued_on as string | null) ?? null,
         expiresOn: (r.expires_on as string | null) ?? null,
@@ -184,18 +270,34 @@ export async function getCertificationRegister(): Promise<CertificationRegisterR
   // READ-ONLY second half: the existing worker-document qualification slugs.
   // A failure here is NOT fatal — the training half is still real; the
   // register simply shows what it could read.
-  const docs = await asAny(supabase)
-    .from("worker_documents")
-    .select("id, document_type_slug, valid_from, valid_until")
-    .in("document_type_slug", ["professional_certificate", "health_safety_card"])
+  // Only the person's OWN worker records (see the scope note above).
+  const ownWorkers = await asAny(supabase)
+    .from("workers")
+    .select("id")
+    .eq("profile_id", user.id)
     .limit(TRAINING_READ_LIMIT);
+  const ownWorkerIds = ownWorkers.error
+    ? []
+    : ((ownWorkers.data ?? []) as RawRow[]).map((r) => String(r.id));
+  const docs =
+    ownWorkerIds.length === 0
+      ? { error: null, data: [] }
+      : await asAny(supabase)
+          .from("worker_documents")
+          .select("id, document_type_slug, valid_from, valid_until")
+          .in("worker_id", ownWorkerIds)
+          .in("document_type_slug", CERTIFICATE_DOCUMENT_TYPES)
+          .limit(TRAINING_READ_LIMIT);
   if (!docs.error) {
     for (const r of (docs.data ?? []) as RawRow[]) {
+      const slug = String(r.document_type_slug ?? "");
+      if (!(CERTIFICATE_DOCUMENT_TYPES as readonly string[]).includes(slug)) continue;
       rows.push({
         source: "worker_document",
         id: String(r.id),
-        label: String(r.document_type_slug ?? ""),
-        holderProfileId: null,
+        label: "",
+        documentTypeSlug: slug,
+        holderProfileId: user.id,
         issuedOn: (r.valid_from as string | null) ?? null,
         expiresOn: (r.valid_until as string | null) ?? null,
       });

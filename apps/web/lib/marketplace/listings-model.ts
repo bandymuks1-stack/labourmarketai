@@ -150,6 +150,8 @@ export interface MarketplaceDiscoveryRow {
 export type MarketplaceListingListResult =
   | { kind: "ok"; rows: MarketplaceListingRow[]; extended: boolean }
   | { kind: "needs-migration" }
+  /** The read failed (permission, timeout, …). NOT an empty board (SEP-7). */
+  | { kind: "unavailable" }
   | { kind: "not-authed" };
 
 export type MarketplaceDiscoveryResult =
@@ -161,6 +163,8 @@ export type MarketplaceDiscoveryResult =
       unavailable?: readonly ("vacancies" | "workforce" | "demand")[];
     }
   | { kind: "needs-migration" }
+  /** The platform's own listings read failed — a refusal is not "no listings" (SEP-7). */
+  | { kind: "unavailable" }
   | { kind: "not-authed" };
 
 export type MarketplaceListingMutateResult =

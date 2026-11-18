@@ -221,3 +221,19 @@ export async function sendCompanyNeedOwnerAlert(
   // 3) Nothing configured → honest no-op.
   return false;
 }
+
+/**
+ * Presence only, for the superadmin readiness view: which of the three
+ * standalone Telegram settings are there. Never a value, never a length.
+ */
+export function ownerTelegramPresence(): {
+  readonly enabled: boolean;
+  readonly botToken: boolean;
+  readonly chatId: boolean;
+} {
+  return {
+    enabled: env.OWNER_TELEGRAM_ALERTS_ENABLED === "true",
+    botToken: !!env.OWNER_TELEGRAM_BOT_TOKEN,
+    chatId: !!env.OWNER_TELEGRAM_CHAT_ID,
+  };
+}

@@ -7,6 +7,11 @@ import {
   encodeRecordOffsetCursor,
   planVacancyWindows,
 } from "./vacancy-cursor";
+import {
+  decodeContinuationCheckpoint,
+  decodeContinuationTokenCursor,
+  encodeContinuationCheckpoint,
+} from "./vacancy-cursor";
 import { computeVacancyContentHash } from "./vacancy-hash";
 import type { PublicVacancyV1 } from "./vacancy-contract";
 
@@ -240,5 +245,44 @@ describe("record-offset checkpoints", () => {
     // It returns a timestamp only from the BATCH, never by coercing the
     // offset — and the importer keeps the two paths apart entirely.
     expect(computeNextVacancyCursor("record-offset:5000", [])).toBeNull();
+  });
+});
+
+describe("continuation checkpoint with an in-page position", () => {
+  const COLD = { token: null, skipEntries: 0, coldStartAtIso: null };
+
+  it("round-trips a mid-page position and stays readable by the token-only decoder", () => {
+    const stored = encodeContinuationCheckpoint({ token: "tok-1", skipEntries: 120, coldStartAtIso: null });
+    expect(stored).toBe("continuation-token:tok-1#120");
+    expect(decodeContinuationCheckpoint(stored)).toEqual({ token: "tok-1", skipEntries: 120, coldStartAtIso: null });
+    expect(decodeContinuationTokenCursor(stored)).toBe("tok-1");
+  });
+
+  it("a legacy value (no position) decodes to position 0", () => {
+    expect(decodeContinuationCheckpoint("continuation-token:abc")).toEqual({ token: "abc", skipEntries: 0, coldStartAtIso: null });
+  });
+
+  it("the head page carries its cold-start anchor, and needs both", () => {
+    const iso = "2026-10-08T09:00:00.000Z";
+    const stored = encodeContinuationCheckpoint({ token: null, skipEntries: 40, coldStartAtIso: iso });
+    expect(stored).toBe(`continuation-token:#40@${Date.parse(iso) / 1000}`);
+    expect(decodeContinuationCheckpoint(stored)).toEqual({ token: null, skipEntries: 40, coldStartAtIso: iso });
+    expect(encodeContinuationCheckpoint({ token: null, skipEntries: 40, coldStartAtIso: null })).toBeNull();
+    expect(encodeContinuationCheckpoint({ token: null, skipEntries: 0, coldStartAtIso: iso })).toBeNull();
+  });
+
+  it("malformed or foreign values fail toward a cold start / full re-read, never a skip", () => {
+    for (const bad of [
+      "continuation-token:abc#-1",
+      "continuation-token:abc#x",
+      "continuation-token:abc@5",
+      "continuation-token:#0@5",
+      "continuation-token:#5",
+      "record-offset:5",
+      "2026-10-01T00:00:00Z",
+      null,
+    ]) {
+      expect(decodeContinuationCheckpoint(bad)).toEqual(COLD);
+    }
   });
 });

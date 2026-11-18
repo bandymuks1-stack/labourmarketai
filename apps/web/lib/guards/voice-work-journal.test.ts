@@ -270,7 +270,7 @@ describe("vendor (browser) dictation in the command finder is disclosed before i
     expect(src).not.toMatch(/no external AI service/);
   });
   it("every active locale carries the disclosure copy", () => {
-    for (const loc of ["de", "en", "lt", "nl", "pl", "ru"]) {
+    for (const loc of ["de", "en", "lt", "nl", "pl", "ru", "sv"]) {
       const d = JSON.parse(readFileSync(join(WEB, "messages", `${loc}.json`), "utf8")) as {
         commandFinder?: Record<string, string>;
       };

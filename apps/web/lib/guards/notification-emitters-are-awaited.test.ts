@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -32,7 +32,9 @@ const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
 
 /** Every file that calls a notification emitter after a domain WRITE. */
 const WRITE_PATH_EMITTER_FILES = [
-  "lib/booking/booking-actions.ts",
+  // The booking bells are awaited in the one shared notifier; booking-actions
+  // and the agency offer decision await `notifyBooking` from it.
+  "lib/booking/booking-notify.ts",
   "lib/leave/absences-actions.ts",
   "lib/engagements/end-engagement.ts",
   "lib/tasks/task-actions.ts",
@@ -69,10 +71,11 @@ describe("write-path notification emitters are awaited at every call site", () =
   it("no file anywhere in lib/ or components/ reintroduces `void emit...`", () => {
     const offenders: string[] = [];
     const walk = (rel: string): void => {
-      for (const name of readdirSync(join(WEB, rel))) {
+      for (const dirent of readdirSync(join(WEB, rel), { withFileTypes: true })) {
+        const name = dirent.name;
         const relPath = `${rel}/${name}`;
         const full = join(WEB, relPath);
-        if (statSync(full).isDirectory()) {
+        if (dirent.isDirectory()) {
           walk(relPath);
           continue;
         }

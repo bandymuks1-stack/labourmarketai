@@ -42,6 +42,7 @@ import {
   sendTransactionalEmail,
 } from "@/lib/email/transactional";
 import { reserveEmailSend } from "@/lib/email/send-ledger-store";
+import { isSyntheticQaPlusAddress } from "@/lib/email/synthetic-address";
 import { renderNotificationEmail } from "@/lib/email/notification-email";
 import {
   resolveChannelEnabled,
@@ -73,6 +74,8 @@ export type NotificationEmailDispatchOutcome =
   | { readonly kind: "render_failed" }
   /** Fan-out ceiling reached (email-send-guard.ts) — bell notification stands. */
   | { readonly kind: "rate_limited" }
+  /** Synthetic QA plus-address on our own domain: never mailed (it bounces). */
+  | { readonly kind: "suppressed_synthetic_address" }
   | { readonly kind: "send_failed"; readonly reason: string };
 
 /** Greppable marker for a REAL send failure (provider refused / transport
@@ -110,6 +113,8 @@ export async function maybeDispatchNotificationEmail(
     if (!email || !email.includes("@")) {
       return { kind: "no_recipient_email" };
     }
+    // Before the reservation: no ledger row for an address that is never mailed.
+    if (isSyntheticQaPlusAddress(email)) return { kind: "suppressed_synthetic_address" };
 
     // 4. Same copy as the bell, absolute canonical-origin deep link — in the
     // recipient's OWN stored locale (`profiles.locale`), with the row's safe
@@ -153,6 +158,7 @@ export async function maybeDispatchNotificationEmail(
       return { kind: "logged" };
     }
     if (result.status === "not_configured") return { kind: "not_configured" };
+    if (result.status === "suppressed_synthetic_address") return { kind: "suppressed_synthetic_address" };
     console.warn(NOTIFICATION_EMAIL_FAILED, {
       eventType: input.eventType,
       reason: result.reason,

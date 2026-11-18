@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Company demand first-action guards (findings F-D1/F-D2/F-D3/F-D5 of the
@@ -103,6 +104,19 @@ describe("the canonical demand intake lives on the company page (W3 7/8/25)", ()
     expect(form).toMatch(/\/dashboard\/company\/scouting/);
   });
 
+  // Employer-flow audit 2026-11-15: the link opened the scouting room without
+  // a need, so the room chose one by its own rule (most offers or hands raised
+  // first), which can be an OLDER need. The id the save returned now travels.
+  it("…and opens THAT need: the saved id travels in the link", () => {
+    const form = read("components/app/demand-request-button.tsx");
+    expect(form).toMatch(/setSavedRequestId\(res\.ok \? res\.requestId : null\)/);
+    expect(form).toMatch(
+      /\/dashboard\/company\/scouting\?request=\$\{encodeURIComponent\(savedRequestId\)\}/,
+    );
+    // An unreadable id falls back to the room itself, never to a broken link.
+    expect(form).toMatch(/: "\/dashboard\/company\/scouting"\) as "\/dashboard"/);
+  });
+
   it("the workspace-switching action targets the company route's anchor", () => {
     const action = read("lib/company/demand-intake-navigation.ts");
     expect(action).toMatch(/\/dashboard\/company\/needs#demand-intake/);
@@ -145,7 +159,7 @@ describe("the projects board is an organization door (F-D5, IA 2026-09-16)", () 
 
 describe("keys exist in en/lt/ru", () => {
   it("all new keys present", () => {
-    for (const locale of ["en", "lt", "ru"]) {
+    for (const locale of activeLocales) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
       expect(msgs.scouting.noDemandsCta, `noDemandsCta ${locale}`).toBeTruthy();
       expect(

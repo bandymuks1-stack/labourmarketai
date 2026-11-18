@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { readHeldProfileRoles } from "@/lib/auth/profile-roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
@@ -13,6 +13,11 @@ import {
   CandidateDraftsManager,
   type CandidateDraftsLabels,
 } from "@/components/app/candidate-drafts-manager";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/candidates", "candidates.title");
+
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +65,7 @@ export default async function CandidatesPage({
     title: t("title"),
     intro: t("intro"),
     honestyNote: t("honestyNote"),
+    howItWorks: (await getTranslations("common.disclosure"))("details"),
     labelNotRegistered: t("labels.notRegistered"),
     labelNotVerified: t("labels.notVerified"),
     labelDraft: t("labels.draft"),
@@ -100,30 +106,27 @@ export default async function CandidatesPage({
       {/* Company action framing: this is the "Hire" action under the company
           identity, not a separate system. */}
       <div className="flex flex-col gap-1">
-        <Link
-          href="/dashboard"
-          className="self-start text-xs font-medium text-brand-blue transition-colors hover:underline"
-          data-testid="back-to-action-center"
-        >
-          ← {tRooms("backToActions")}
-        </Link>
+        <PageBack href="/dashboard" data-testid="back-to-action-center">{tRooms("backToActions")}</PageBack>
         <p
-          className="font-mono text-meta uppercase tracking-label text-brand-orange"
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="company-context"
         >
           {inCompanySpace ? tRooms("candidates.context") : t("eyebrow")}
         </p>
       </div>
 
-      {inCompanySpace ? (
-        <CompanyActionNextActions room="candidates" primaryHref="/dashboard/company/scouting" />
-      ) : null}
-
+      {/* The page says where you are first (title), does its job (the
+          drafts), and only then offers the room's next step — the guide used
+          to sit above the title and answer "what can I do" before "where am I". */}
       <CandidateDraftsManager
         drafts={read.kind === "ok" ? read.drafts : []}
         labels={labels}
         needsMigration={read.kind === "needs-migration"}
       />
+
+      {inCompanySpace ? (
+        <CompanyActionNextActions room="candidates" primaryHref="/dashboard/company/scouting" />
+      ) : null}
     </div>
   );
 }

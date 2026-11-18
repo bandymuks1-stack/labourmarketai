@@ -444,7 +444,7 @@ export function HistoricalPlayerCard({
               <h3 className="truncate font-display text-title-lg font-semibold tracking-tightest text-text-primary">
                 {name}
               </h3>
-              <span className="inline-flex items-center gap-1 rounded-full border border-brand-orange/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-orange">
+              <span className="inline-flex items-center gap-1 rounded-full border border-brand-orange/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                 <SemanticIcon
                   concept="historical"
                   label={labels.historical}

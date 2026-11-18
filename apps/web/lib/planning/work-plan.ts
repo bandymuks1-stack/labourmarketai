@@ -4,11 +4,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import {
-  projectWorkPlanItem,
+  projectWorkPlanItems,
   type WorkPlanEntry,
   type WorkPlanStatus,
 } from "@/lib/planning/work-plan-model";
 import type { PlanningItem } from "@/lib/planning/planning-model";
+import { parseShiftPattern } from "@/lib/planning/shift-pattern";
 
 /**
  * Work plan — server read layer (FINAL COMPLETION Train F1).
@@ -26,11 +27,22 @@ function asAny(supabase: SupabaseClient): any {
 }
 
 const MISSING_RELATION = new Set(["42P01", "PGRST205"]);
+/** Postgres "undefined column" — the CAL-8 `recurrence` column before its
+ *  migration is applied. The read retries without it, so a deploy that
+ *  lands before the migration never empties anyone's plan list. */
+export const MISSING_COLUMN = "42703";
 const WORK_PLAN_READ_LIMIT = 500;
 
 export type WorkPlanReadResult =
   | { readonly applied: false }
-  | { readonly applied: true; readonly entries: readonly WorkPlanEntry[] };
+  | {
+      readonly applied: true;
+      readonly entries: readonly WorkPlanEntry[];
+      /** CAL-8: false while the shift-pattern column is not provisioned —
+       *  the form then hides its repeat controls instead of offering a
+       *  pattern the database cannot keep. */
+      readonly shiftPatterns: boolean;
+    };
 
 type Row = {
   id: string;
@@ -45,13 +57,16 @@ type Row = {
   note: string | null;
   status: string;
   created_at: string;
+  recurrence?: unknown;
   workers: { display_name: string | null; profiles: { full_name: string | null } | null } | null;
   projects: { title: string | null } | null;
   work_objects: { name: string | null } | null;
+  organizations: { display_name: string | null } | null;
 };
 
-const SELECT =
-  "id, organization_id, worker_id, project_id, work_object_id, start_date, end_date, start_time, end_time, note, status, created_at, workers(display_name, profiles(full_name)), projects(title), work_objects(name)";
+const SELECT_BASE =
+  "id, organization_id, worker_id, project_id, work_object_id, start_date, end_date, start_time, end_time, note, status, created_at, workers(display_name, profiles(full_name)), projects(title), work_objects(name), organizations(display_name)";
+const SELECT_WITH_RECURRENCE = `${SELECT_BASE}, recurrence`;
 
 function toEntry(r: Row): WorkPlanEntry | null {
   if (r.status !== "planned" && r.status !== "cancelled") return null;
@@ -64,6 +79,7 @@ function toEntry(r: Row): WorkPlanEntry | null {
     projectTitle: r.projects?.title?.trim() || null,
     workObjectId: r.work_object_id,
     workObjectName: r.work_objects?.name?.trim() || null,
+    organizationName: r.organizations?.display_name?.trim() || null,
     startDate: r.start_date,
     endDate: r.end_date,
     startTime: r.start_time ? r.start_time.slice(0, 5) : null,
@@ -71,6 +87,10 @@ function toEntry(r: Row): WorkPlanEntry | null {
     note: r.note,
     status: r.status as WorkPlanStatus,
     createdAt: r.created_at,
+    // A stored pattern the parser cannot read (the database CHECK makes this
+    // unreachable) falls back to the whole window: over-warning is honest,
+    // silently dropping planned days is not.
+    recurrence: r.recurrence == null ? null : parseShiftPattern(r.recurrence),
   };
 }
 
@@ -86,27 +106,35 @@ export async function listWorkPlanEntries(opts: {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { applied: true, entries: [] };
-  let q = asAny(supabase)
-    .from("work_plan_entries")
-    .select(SELECT)
-    .lte("start_date", opts.rangeEnd)
-    .gte("end_date", opts.rangeStart)
-    .order("start_date", { ascending: true })
-    .limit(WORK_PLAN_READ_LIMIT);
-  if (opts.organizationId) q = q.eq("organization_id", opts.organizationId);
-  if (!opts.includeCancelled) q = q.eq("status", "planned");
-  const { data, error } = await q;
+  if (!user) return { applied: true, entries: [], shiftPatterns: false };
+  const run = (select: string) => {
+    let q = asAny(supabase)
+      .from("work_plan_entries")
+      .select(select)
+      .lte("start_date", opts.rangeEnd)
+      .gte("end_date", opts.rangeStart)
+      .order("start_date", { ascending: true })
+      .limit(WORK_PLAN_READ_LIMIT);
+    if (opts.organizationId) q = q.eq("organization_id", opts.organizationId);
+    if (!opts.includeCancelled) q = q.eq("status", "planned");
+    return q;
+  };
+  let shiftPatterns = true;
+  let { data, error } = await run(SELECT_WITH_RECURRENCE);
+  if (error?.code === MISSING_COLUMN) {
+    shiftPatterns = false;
+    ({ data, error } = await run(SELECT_BASE));
+  }
   if (error) {
     if (MISSING_RELATION.has(error.code)) return { applied: false };
-    return { applied: true, entries: [] };
+    return { applied: true, entries: [], shiftPatterns };
   }
   const entries: WorkPlanEntry[] = [];
   for (const r of (data ?? []) as Row[]) {
     const e = toEntry(r);
     if (e) entries.push(e);
   }
-  return { applied: true, entries };
+  return { applied: true, entries, shiftPatterns };
 }
 
 /** Calendar source: the caller's planned windows. A manager sees the windows
@@ -135,37 +163,69 @@ export async function readWorkPlanItems(
   const ownWorkerId = (own?.id as string | undefined) ?? null;
   const items: PlanningItem[] = [];
   for (const e of result.entries) {
-    const item = projectWorkPlanItem(
-      e,
-      ownWorkerId !== null && e.workerId === ownWorkerId ? "assigned" : "managed",
+    items.push(
+      ...projectWorkPlanItems(
+        e,
+        ownWorkerId !== null && e.workerId === ownWorkerId ? "assigned" : "managed",
+        { startDate: rangeStart, endDate: rangeEnd },
+      ),
     );
-    if (item) items.push(item);
   }
   return { state: { status: "ok", count: items.length }, items };
 }
 
 export type PlannableWorker = { readonly workerId: string; readonly name: string };
 
-/** Workers the caller can plan for: the active roster of the companies /
- *  agencies the caller manages (the same three roster truths the RPC checks
- *  server-side). Names come from the worker's own display name. */
-export async function listPlannableWorkers(): Promise<readonly PlannableWorker[]> {
+/** Relationships `work_plan_worker_in_scope_v1` accepts as an engagement
+ *  (migration 20261007140000) — the picker offers exactly those people. */
+const PLANNABLE_ENGAGEMENT_SLUGS = ["employee", "collaborator", "freelancer"] as const;
+
+/** Workers the caller can plan for: the active roster of the companies the
+ *  caller manages (legacy `agency_workers` is not API-exposed — see
+ *  lib/guards/agency-workers-not-api-exposed.test.ts), plus — for the active organization — the
+ *  people engaged through it (a "join as employee" invitation writes
+ *  engagement_contexts only; walk 2026-10-11 found them unplannable although
+ *  the RPC already accepts them). Names come from the worker's own display name. */
+export async function listPlannableWorkers(
+  organizationId?: string | null,
+): Promise<readonly PlannableWorker[]> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return [];
   const select = "worker_id, workers(id, display_name, profiles(full_name))";
-  const [cw, aw] = await Promise.all([
+  const [cw, ec] = await Promise.all([
     asAny(supabase).from("company_workers").select(select).eq("status", "active").limit(200),
-    asAny(supabase).from("agency_workers").select(select).eq("status", "active").limit(200),
+    organizationId
+      ? asAny(supabase)
+          .from("engagement_contexts")
+          .select("profile_id")
+          .eq("organization_id", organizationId)
+          .eq("status", "active")
+          .in("relationship_slug", [...PLANNABLE_ENGAGEMENT_SLUGS])
+          .limit(200)
+      : Promise.resolve({ data: [] }),
   ]);
   type R = {
     worker_id: string;
     workers: { id: string; display_name: string | null; profiles: { full_name: string | null } | null } | null;
   };
+  const engagedProfiles = ((ec.data ?? []) as { profile_id: string | null }[])
+    .map((r) => r.profile_id)
+    .filter((p): p is string => Boolean(p));
+  let engaged: R[] = [];
+  if (engagedProfiles.length > 0) {
+    const { data } = await asAny(supabase)
+      .from("workers")
+      .select("id, display_name, profiles(full_name)")
+      .in("profile_id", engagedProfiles);
+    engaged = ((data ?? []) as { id: string; display_name: string | null; profiles: { full_name: string | null } | null }[]).map(
+      (w) => ({ worker_id: w.id, workers: w }),
+    );
+  }
   const out = new Map<string, PlannableWorker>();
-  for (const rows of [cw.data, aw.data]) {
+  for (const rows of [cw.data, engaged]) {
     for (const r of (rows ?? []) as R[]) {
       if (!r.worker_id || out.has(r.worker_id)) continue;
       out.set(r.worker_id, {

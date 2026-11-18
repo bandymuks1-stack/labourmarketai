@@ -341,7 +341,7 @@ function makeAssignPair(op: "create" | "replace"): [CapabilityDescriptor, Capabi
       const parsed = rest as ReplaceInput;
       const r = await resolve(caller, parsed);
       if (!r.ok) return r.result;
-      const verdict = verifyCapabilityConfirmation({
+      const verdict = await verifyCapabilityConfirmation({
         actionId: confirmId,
         token: confirmationToken,
         input: op === "create" ? normAssign(parsed) : normReplace(parsed),
@@ -458,7 +458,7 @@ const teamAssignmentEndConfirm: CapabilityDescriptor = {
     const parsed = rest as EndInput;
     const r = await resolveEnd(caller, parsed);
     if (!r.ok) return r.result;
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "team_assignment.end_confirm",
       token: confirmationToken,
       input: normEnd(parsed),

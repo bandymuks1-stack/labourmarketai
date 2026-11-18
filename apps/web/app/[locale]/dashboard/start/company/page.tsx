@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { COMPANY_TYPES, type CompanyType } from "@/lib/company/company-profile-shared";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import {
   COMPANY_COUNTRY_CODES,
   getOwnedCompanyById,
@@ -22,6 +24,12 @@ import {
   type CompanySetupFormLabels,
 } from "@/components/app/company-setup-form";
 import { Card } from "@/components/ui/Card";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/start/company");
+
 
 /**
  * Company profile-REQUEST setup (real persistence + honest verification).
@@ -200,8 +208,6 @@ export default async function CompanyStartPage({
   // even though it technically edits an existing row.
   const firstSetup = company !== null && isShellRow(company);
 
-  const uiLocale: "lt" | "en" = locale === "lt" ? "lt" : "en";
-  const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
 
   const formLabels: CompanySetupFormLabels = {
     // Dead-UI rule C (owner smoke 2026-07-05): one route serves create AND
@@ -225,10 +231,18 @@ export default async function CompanyStartPage({
     },
     country: t("country"),
     countryPlaceholder: t("countryPlaceholder"),
+    // Only codes the catalogue actually names: a missing key used to print
+    // "roleDashboards.company.setup.countryOptions.FI" in the select (agency
+    // onboarding walk 2026-10-08). Without an override the option keeps the
+    // canonical Intl country name from countryOptionsForLocale.
     countryOptions: Object.fromEntries(
-      COMPANY_COUNTRY_CODES.map((code) => [code, t(`countryOptions.${code}`)]),
+      COMPANY_COUNTRY_CODES.filter((code) => t.has(`countryOptions.${code}`)).map((code) => [
+        code,
+        t(`countryOptions.${code}`),
+      ]),
     ),
     locale,
+    countryList: countryOptionsForLocale(locale),
     statusInvalidCountry: t("statusInvalidCountry"),
     registrationCode: t("registrationCode"),
     registrationCodeHelp: t("registrationCodeHelp"),
@@ -263,20 +277,13 @@ export default async function CompanyStartPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-start-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
-          {label("ĮMONĖS NUSTATYMAS", "COMPANY SETUP")}
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {label("Įmonės profilis", "Company profile")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
       </header>
 
-      <Link
-        href={"/dashboard/start" as "/dashboard"}
-        className="self-start text-sm text-text-secondary hover:underline"
-      >
-        ← {label("Grįžti į veiklos pradžią", "Back to activity start")}
-      </Link>
+      <PageBack href={"/dashboard/start" as "/dashboard"}>{t("backToStart")}</PageBack>
 
       {safeNotice === AGENCY_CONNECTION_PENDING_NOTICE ? (
         <p
@@ -295,7 +302,7 @@ export default async function CompanyStartPage({
         >
           <header className="flex items-center gap-2">
             <span className="rounded bg-state-warning/20 px-2 py-0.5 text-xs text-state-warning">
-              {label("blokuota", "blocked")}
+              {t("blockedBadge")}
             </span>
             <h2 className="font-display text-lg font-semibold text-text-primary">
               {t("migrationBlockerHeading")}
@@ -375,7 +382,7 @@ export default async function CompanyStartPage({
             className="self-start text-sm text-brand-blue hover:underline"
             data-testid="company-start-goto-dashboard"
           >
-            {label("Eiti į įmonės erdvę →", "Go to company space →")}
+            {t("goToCompanySpace")}
           </Link>
         </section>
       ) : null}
@@ -421,13 +428,10 @@ export default async function CompanyStartPage({
             data-testid="company-start-ambiguous-chooser"
           >
             <h2 className="font-display text-lg font-semibold text-text-primary">
-              {label("Kurią organizaciją tvarkyti?", "Which organization to manage?")}
+              {t("pickOrgHeading")}
             </h2>
             <p className="text-sm text-text-secondary">
-              {label(
-                "Turite kelias organizacijas. Pasirinkite aktyvią erdvę viršuje arba kurkite naują.",
-                "You own several organizations. Pick the active workspace in the switcher above, or create a new one.",
-              )}
+              {t("pickOrgBody")}
             </p>
             <ul className="flex flex-col gap-1 text-sm text-text-primary">
               {ownedRows.map((row) => (
@@ -441,7 +445,7 @@ export default async function CompanyStartPage({
               className="self-start text-sm text-brand-blue hover:underline"
               data-testid="company-start-create-new-link"
             >
-              {label("+ Kurti naują organizaciją", "+ Create a new organization")}
+              {t("createNewOrg")}
             </Link>
           </div>
         </Card>
@@ -460,7 +464,7 @@ export default async function CompanyStartPage({
               className="self-start text-sm text-brand-blue hover:underline"
               data-testid="company-start-create-another-link"
             >
-              {label("+ Kurti naują organizaciją", "+ Create a new organization")}
+              {t("createNewOrg")}
             </Link>
           )}
           <CompanySetupForm

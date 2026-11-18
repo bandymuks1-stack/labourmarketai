@@ -51,6 +51,8 @@ describe("onboarding first screen — contexts, not an episode of searching", ()
     expect(html).toContain(
       "LabourMarket.ai padeda kaupti profesinę istoriją, valdyti dabartinį darbą ir atrasti naujas galimybes.",
     );
+    // Owner 2026-10-14: the worker environment said "tu"; owner 2026-11-15:
+    // "Jūs" is the default professional address, so it says "Galite …" again.
     expect(html).toContain("Galite pasirinkti kelis variantus ir vėliau juos pakeisti.");
     const titles = [
       "Dirbu / turiu profesinės patirties",

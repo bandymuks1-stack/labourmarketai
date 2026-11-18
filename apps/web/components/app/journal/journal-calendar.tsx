@@ -8,7 +8,7 @@ import {
   type JournalCalendarGrid,
   type JournalCalendarScale,
 } from "@/lib/journal/journal-calendar";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 // The observed-reality colour of the work-world grammar (primitives.tsx
 // REALITY_CLASS.observed). That file is landing-frozen, so the class pair is
 // mirrored here verbatim rather than exported from it; the journal grid must
@@ -111,7 +111,7 @@ export async function JournalCalendar({
 
   const totalLabel =
     grid.recordedMinutes > 0
-      ? formatDuration(grid.recordedMinutes, "minutes", locale === "en" ? "en" : "lt")
+      ? formatDuration(grid.recordedMinutes, "minutes", durationLocale(locale))
       : null;
 
   return (
@@ -220,7 +220,7 @@ export async function JournalCalendar({
                 : "empty";
           const reportedLabel =
             cell.reportedMinutes > 0
-              ? t("reported", { time: formatDuration(cell.reportedMinutes, "minutes", locale === "en" ? "en" : "lt") })
+              ? t("reported", { time: formatDuration(cell.reportedMinutes, "minutes", durationLocale(locale)) })
               : null;
           return (
             <Link
@@ -237,7 +237,7 @@ export async function JournalCalendar({
                   ? t("dayEmpty", { day: dayTitle })
                   : `${t("dayWithRecords", { day: dayTitle, count: cell.entryCount })}${
                       cell.totalMinutes > 0
-                        ? `, ${formatDuration(cell.totalMinutes, "minutes", locale === "en" ? "en" : "lt")}`
+                        ? `, ${formatDuration(cell.totalMinutes, "minutes", durationLocale(locale))}`
                         : ""
                     }, ${t(`confirmation.${cell.confirmation}`)}`
               }${reportedLabel ? `, ${reportedLabel}` : ""}`}
@@ -327,7 +327,7 @@ export async function JournalCalendar({
         {grid.recordedDays === 0 && grid.reportedDays > 0
           ? t("periodReportedOnly", {
               days: grid.reportedDays,
-              time: formatDuration(grid.reportedMinutes, "minutes", locale === "en" ? "en" : "lt"),
+              time: formatDuration(grid.reportedMinutes, "minutes", durationLocale(locale)),
             })
           : grid.recordedDays === 0
           ? t("periodEmpty")

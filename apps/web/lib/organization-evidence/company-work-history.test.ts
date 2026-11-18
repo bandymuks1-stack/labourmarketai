@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildCompanyWorkHistory,
+  peopleInRecords,
   placeKeyOf,
+  topWorkDescriptions,
   type PlaceObjectFacts,
 } from "./company-work-history";
 import type { EvidenceRecordView } from "./import-core";
@@ -91,8 +93,8 @@ describe("buildCompanyWorkHistory", () => {
       [rec({ id: "1", workObjectId: "o1" }), rec({ id: "2", workObjectId: "o2" })],
       objects,
     );
-    expect(h.places.find((p) => p.key === "o:o1")!.scope).toEqual({ hasProject: false, hasAddress: false, addressText: null });
-    expect(h.places.find((p) => p.key === "o:o2")!.scope).toEqual({ hasProject: true, hasAddress: true, addressText: "Street 1, Town" });
+    expect(h.places.find((p) => p.key === "o:o1")!.scope).toEqual({ hasProject: false, hasAddress: false, addressText: null, projectId: null });
+    expect(h.places.find((p) => p.key === "o:o2")!.scope).toEqual({ hasProject: true, hasAddress: true, addressText: "Street 1, Town", projectId: "p1" });
   });
 
   it("never counts a withdrawn record", () => {
@@ -101,5 +103,28 @@ describe("buildCompanyWorkHistory", () => {
       objects,
     );
     expect(h.dayHours).toBe(8);
+  });
+});
+
+describe("people in a project's records (project → historical person)", () => {
+  it("who, when, recorded days and day hours per person; period hours apart; withdrawn left out", () => {
+    const people = peopleInRecords([
+      rec({ id: "1", activityDate: "2023-03-06", hours: 8, text: "Tiling" }),
+      rec({ id: "2", activityDate: "2023-03-06", hours: 2, text: "tiling " }),
+      rec({ id: "3", activityDate: "2023-03-09", hours: 7.5, text: "Grouting" }),
+      rec({ id: "4", personId: "pB", personName: "Person B", activityDate: null, periodStart: "2023-03-01", periodEnd: "2023-03-31", hours: 120 }),
+      rec({ id: "5", activityDate: "2023-04-01", hours: 8, withdrawn: true }),
+    ]);
+    expect(people.map((p) => p.personId)).toEqual(["pA", "pB"]);
+    expect(people[0]).toMatchObject({ firstDate: "2023-03-06", lastDate: "2023-03-09", recordedDays: 2, dayHours: 17.5, periodHours: 0, records: 3 });
+    expect(people[0]!.work[0]).toEqual({ text: "Tiling", records: 2 });
+    expect(people[1]).toMatchObject({ recordedDays: 0, dayHours: 0, periodHours: 120 });
+  });
+
+  it("work descriptions are the organization's own words, most frequent first, never classified", () => {
+    expect(topWorkDescriptions([{ text: "A  b" }, { text: "a b" }, { text: "C" }, { text: "" }], 3)).toEqual([
+      { text: "A b", records: 2 },
+      { text: "C", records: 1 },
+    ]);
   });
 });

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { PROFESSION_SKILLS } from "../taxonomy/profession-skills";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * EQUIPMENT / TOOLS LAYER guards (product-tree branch 16, train §8.6).
@@ -312,7 +313,7 @@ describe("worker board — honest degradation + slug-whitelist-only display", ()
 });
 
 describe("i18n — tools keys + taxonomy names present in en/lt/ru", () => {
-  for (const locale of ["en", "lt", "ru"]) {
+  for (const locale of activeLocales) {
     it(`${locale} carries the board + wizard tools catalogue`, () => {
       const messages = JSON.parse(readWeb(`messages/${locale}.json`));
       // Worker board field label + honest-unknown label.

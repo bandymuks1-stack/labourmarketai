@@ -46,6 +46,8 @@ export function NotificationPanel() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={t("label")}
+        data-testid="notification-bell"
+        data-unread={unread > 0 ? "true" : "false"}
         // size-11 = 44px, the floor `account-menu.tsx` describes as the one
         // "every header control keeps" — while this button, its immediate
         // neighbour in the same cluster, measured 36x36. Measured at 375px on
@@ -215,12 +217,29 @@ function NotificationsBody({
             <button
               type="button"
               onClick={markAllRead}
+              data-testid="notification-mark-all-read"
               className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-champagne"
             >
               {markAllReadLabel}
             </button>
           )}
         </header>
+      )}
+      {/* The phone sheet has its own title row, so the header above is hidden
+          there — and "mark all read" went with it: on a phone a stored event
+          could only ever be cleared one click-through at a time. The control
+          stays, in a row of its own. */}
+      {chromeless && notifications.some((n) => n.durable) && (
+        <div className="flex justify-end border-b border-ink-600 px-3 py-2">
+          <button
+            type="button"
+            onClick={markAllRead}
+            data-testid="notification-mark-all-read"
+            className="inline-flex min-h-11 items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-champagne"
+          >
+            {markAllReadLabel}
+          </button>
+        </div>
       )}
 
       {notifications.length === 0 ? (
@@ -299,6 +318,10 @@ function NotificationsBody({
             return (
               <li
                 key={n.id}
+                data-testid="notification-row"
+                data-notification-type={n.type}
+                data-durable={n.durable ? "true" : "false"}
+                data-read={n.read_at ? "true" : "false"}
                 className={cn(
                   "border-b border-ink-600 last:border-b-0",
                   !n.read_at && "bg-ink-800/40",
@@ -326,6 +349,7 @@ function NotificationsBody({
                   <button
                     type="button"
                     onClick={() => switchRole(n.role)}
+                    data-testid="notification-switch-role"
                     className="mx-3 mb-3 inline-flex items-center rounded-sm border border-brand-blue/40 px-2 py-1 font-mono text-meta uppercase tracking-label text-brand-blue hover:border-brand-blue"
                   >
                     {switchRoleLabel(n.role)}

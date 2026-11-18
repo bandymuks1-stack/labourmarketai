@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
   WORK_OBJECT_READ_LIMIT,
@@ -153,15 +154,18 @@ export type ProjectObjectIdsResult =
  * project_id`) — the handle the organization's hour ledger is keyed on.
  * Ids only, bounded, RLS-scoped: a project the caller cannot see yields
  * nothing. A failed read is `error`, never an empty list (SEP-7).
+ * A canonical project includes the work objects of the fragments marked into
+ * it (record_state = duplicate), so a merge never hides their hours.
  */
 export async function listWorkObjectIdsForProject(
   projectId: string,
 ): Promise<ProjectObjectIdsResult> {
   const supabase = await createClient();
+  const { fragmentsOf } = await readProjectCanonicalMap(supabase, [projectId]);
   const res = (await asAny(supabase)
     .from("work_objects")
     .select("id")
-    .eq("project_id", projectId)
+    .in("project_id", [projectId, ...(fragmentsOf.get(projectId) ?? [])])
     .limit(WORK_OBJECT_READ_LIMIT)) as {
     data: { id: string }[] | null;
     error: { code?: string } | null;

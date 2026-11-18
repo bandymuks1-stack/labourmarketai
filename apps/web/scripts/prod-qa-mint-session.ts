@@ -35,16 +35,18 @@
  * by an innocent-looking edit.
  */
 import { join } from "node:path";
-import { writeFileSync } from "node:fs";
+import { chmodSync, writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 
 import { CANONICAL_HOST } from "../lib/domain/canonical";
 import {
+  PROD_QA_FRESH_IDENTITIES,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
   describeProdQaTarget,
 } from "../lib/testing/prod-qa-guard";
+import { findAuthUserByEmail } from "../lib/testing/prod-qa-find-user";
 import {
   STORAGE_TARGET_REFUSAL_CODE,
   UnsafeStorageTargetError,
@@ -52,7 +54,20 @@ import {
   assertIgnoredStorageTarget,
 } from "../lib/testing/e2e-storage-target";
 
+/**
+ * One file per identity when `PROD_QA_STORAGE_SLOT` is set (a multi-actor walk
+ * needs the owner AND the invited worker signed in at once). The slot is
+ * `[a-z0-9-]{1,24}` only, so the name stays a bare filename — and it still goes
+ * through the same bare-name + `git check-ignore` guards below, before any
+ * token exists. Unset: the original single file.
+ */
+const SLOT = process.env.PROD_QA_STORAGE_SLOT;
+if (SLOT !== undefined && !/^[a-z0-9-]{1,24}$/.test(SLOT)) {
+  console.error("[prod-qa-mint] REFUSED: PROD_QA_STORAGE_SLOT must match [a-z0-9-]{1,24}");
+  process.exit(1);
+}
 const OUT_FILENAME = ".storage-state.prod-qa.json";
+const OUT_NAME = SLOT ? `.storage-state.prod-qa.${SLOT}.json` : OUT_FILENAME;
 
 /**
  * The host the session cookie is scoped to — the CANONICAL apex.
@@ -67,7 +82,7 @@ const APP_HOST = process.env.PROD_QA_APP_HOST ?? CANONICAL_HOST;
 async function main(): Promise<void> {
   // STEP 1 — the output name, before anything else. A constant today; asserted
   // anyway so the guard, not review, is what keeps it a bare filename.
-  const requested = assertBareStorageFilename(OUT_FILENAME);
+  const requested = assertBareStorageFilename(OUT_NAME);
 
   const url = process.env.PROD_QA_SUPABASE_URL;
   const anonKey = process.env.PROD_QA_ANON_KEY;
@@ -114,6 +129,20 @@ async function main(): Promise<void> {
   const admin = createClient(target.origin, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+
+  // A FRESH identity is created by the owner only (owner decision 2026-10-26).
+  // A magic link for an address with no account could sign it up, so the mint
+  // checks first and refuses — a walk can never be the thing that creates it.
+  if (PROD_QA_FRESH_IDENTITIES.includes(target.email)) {
+    const existing = await findAuthUserByEmail(admin, target.email);
+    if (!existing) {
+      fail(
+        `${target.email} has not been created. Fresh identities are created by the ` +
+          "owner only (prod-qa-fresh-provision.yml); the walk never creates an account.",
+      );
+      return;
+    }
+  }
 
   const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
     type: "magiclink",
@@ -171,7 +200,9 @@ async function main(): Promise<void> {
         }));
 
   // Proven contained and ignored in step 3, before the session existed.
-  writeFileSync(out.path, JSON.stringify({ cookies, origins: [] }, null, 2));
+  // Owner-only (0600): the file holds a live session.
+  writeFileSync(out.path, JSON.stringify({ cookies, origins: [] }, null, 2), { mode: 0o600 });
+  chmodSync(out.path, 0o600);
 
   // Metadata only — never the token.
   const user = sess.session.user;

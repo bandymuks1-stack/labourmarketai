@@ -1,38 +1,18 @@
+import { getTranslations } from "next-intl/server";
+
 import type { AutoMatchReceipt } from "@/lib/scouting/auto-match-receipt";
 
 /**
  * One calm line on the scouting page: when the automatic internal search last
  * ran for this need and what it covered. Wording is deliberately narrow: it
  * speaks only of candidates already in LabourMarket.ai, and never implies that
- * anyone was contacted. Copy is inline (lt / en) because this slice must not
- * touch the shared message catalogues; other locales fall back to English.
+ * anyone was contacted.
+ *
+ * The copy lived inline in LT + EN only, so the Dutch, German, Polish and
+ * Russian owners read it in English (walk 2026-10-11); it now reads from the
+ * `scouting.autoMatchReceipt` catalogue like the rest of the page.
  */
-const COPY = {
-  en: {
-    ran: (n: number, rel: number, when: string) =>
-      `Last automatic search of relevant candidates in LabourMarket.ai: ${when}. ${n} candidates evaluated, ${rel} relevant. Nobody was contacted.`,
-    none: (n: number, when: string) =>
-      `Last automatic search of relevant candidates in LabourMarket.ai: ${when}. ${n} candidates evaluated, none relevant yet. Nobody was contacted.`,
-    notStructured: (when: string) =>
-      `Automatic search ${when}: the need has too little detail to match yet. Add skills or a profession to search.`,
-    failed: (when: string) =>
-      `Automatic search ${when} could not finish. The list below is still computed live.`,
-    capped: " The candidate pool was capped.",
-  },
-  lt: {
-    ran: (n: number, rel: number, when: string) =>
-      `Paskutinė automatinė tinkamų kandidatų paieška LabourMarket.ai: ${when}. Įvertinta kandidatų: ${n}, tinkamų: ${rel}. Niekas nebuvo kontaktuotas.`,
-    none: (n: number, when: string) =>
-      `Paskutinė automatinė tinkamų kandidatų paieška LabourMarket.ai: ${when}. Įvertinta kandidatų: ${n}, tinkamų kol kas nėra. Niekas nebuvo kontaktuotas.`,
-    notStructured: (when: string) =>
-      `Automatinė paieška ${when}: poreikis dar per menkai aprašytas. Pridėkite įgūdžių ar profesiją.`,
-    failed: (when: string) =>
-      `Automatinė paieška ${when} nebaigta. Žemiau esantis sąrašas vis tiek skaičiuojamas gyvai.`,
-    capped: " Kandidatų kiekis buvo apribotas.",
-  },
-} as const;
-
-export function AutoMatchReceiptNote({
+export async function AutoMatchReceiptNote({
   receipt,
   locale,
 }: {
@@ -40,15 +20,16 @@ export function AutoMatchReceiptNote({
   locale: string;
 }) {
   if (!receipt) return null;
-  const c = locale === "lt" ? COPY.lt : COPY.en;
+  const t = await getTranslations({ locale, namespace: "scouting.autoMatchReceipt" });
   const when = new Date(receipt.finishedAt).toISOString().slice(0, 16).replace("T", " ") + " UTC";
+  const count = receipt.poolSize ?? 0;
   let text: string;
-  if (receipt.status === "failed") text = c.failed(when);
-  else if (receipt.status === "not_structured") text = c.notStructured(when);
-  else if (receipt.status === "no_candidates") text = c.none(receipt.poolSize ?? 0, when);
-  else text = c.ran(receipt.poolSize ?? 0, receipt.relevantCount ?? 0, when);
+  if (receipt.status === "failed") text = t("failed", { when });
+  else if (receipt.status === "not_structured") text = t("notStructured", { when });
+  else if (receipt.status === "no_candidates") text = t("none", { when, count });
+  else text = t("ran", { when, count, relevant: receipt.relevantCount ?? 0 });
   if (receipt.poolCapped && (receipt.status === "completed" || receipt.status === "no_candidates")) {
-    text += c.capped;
+    text += ` ${t("capped")}`;
   }
   return (
     <p className="text-xs leading-relaxed text-text-muted" data-testid="scouting-auto-match-receipt">

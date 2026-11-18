@@ -9,13 +9,30 @@ import type { McpToolDef } from "./protocol";
 /** MCP tool names allow [a-zA-Z0-9_-]; capability ids use dots. */
 export const toolName = (capabilityId: string): string => capabilityId.replace(/\./g, "_");
 
+/**
+ * Tool arguments are always an object, and strict function-calling clients
+ * (OpenAI-API-style, Gemini) refuse a parameters schema whose ROOT does not
+ * say `type: "object"`. A zod intersection serializes as a bare root `allOf`
+ * (evidence_record_correct_confirm did). When every root branch already is an
+ * object, declaring the root type alongside it changes nothing a validator
+ * accepts — it only makes the object root explicit.
+ */
+function objectRoot(schema: Record<string, unknown>): Record<string, unknown> {
+  if (schema.type !== undefined) return schema;
+  const branches = (["allOf", "anyOf", "oneOf"] as const).flatMap((k) =>
+    Array.isArray(schema[k]) ? (schema[k] as Record<string, unknown>[]) : [],
+  );
+  if (branches.length === 0 || !branches.every((b) => b?.type === "object")) return schema;
+  return { ...schema, type: "object" };
+}
+
 /** The tool list a client is shown — derived from the capability registry. */
 export function toolDefsOf(capabilities: readonly CapabilityDescriptor[]): McpToolDef[] {
   return capabilities.map((c) => ({
     name: toolName(c.id),
     title: c.title,
     description: c.description,
-    inputSchema: z.toJSONSchema(c.inputSchema) as Record<string, unknown>,
+    inputSchema: objectRoot(z.toJSONSchema(c.inputSchema) as Record<string, unknown>),
     // Honest behavior hints declared per capability in review — clients can
     // tell reads from writes without parsing prose.
     annotations: c.annotations,

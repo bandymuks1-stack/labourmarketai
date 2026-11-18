@@ -5,21 +5,25 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Plus,
-  Pencil,
-  Trash2,
-  Play,
-  Pause,
-  Archive,
-  RotateCcw,
   MessageSquare,
   ArrowRight,
 } from "lucide-react";
 
+import { StatusChip } from "@/components/app/status-chip";
+import {
+  MarketEntryActions,
+  MarketEntryChip,
+  MarketEntryVisibility,
+} from "@/components/app/market-entry-lifecycle";
+import { listingAdapter } from "@/lib/market-lifecycle/adapters";
+import type { EntryAction } from "@/lib/market-lifecycle/contract";
 import { Link } from "@/lib/i18n/navigation";
+import { getCountryMeta } from "@/lib/location/country-model";
 import {
   createMarketplaceListingAction,
   updateMarketplaceListingAction,
   setMarketplaceListingStatusAction,
+  applyMarketplaceListingAction,
   deleteMarketplaceListingAction,
   enquireAboutListingAction,
 } from "@/lib/marketplace/listings";
@@ -57,16 +61,21 @@ import { assessPublish } from "@/lib/marketplace/publish-policy";
  * messaging).
  */
 
-const STATUS_RING: Record<ListingStatus, string> = {
-  draft: "border-ink-500 bg-ink-800/40 text-text-muted",
-  active: "border-state-success/40 bg-state-success/5 text-state-success",
-  paused: "border-ink-500 bg-ink-800/40 text-text-secondary",
-  closed: "border-state-warning/40 bg-state-warning/5 text-state-warning",
+/** Test ids the walk specs already use, one per contract action. */
+const LISTING_TEST_ID: Record<EntryAction, (id: string) => string> = {
+  publish: (id) => `listing-activate-${id}`,
+  resume: (id) => `listing-activate-${id}`,
+  pause: (id) => `listing-pause-${id}`,
+  complete: (id) => `listing-close-${id}`,
+  withdraw: (id) => `listing-withdraw-${id}`,
+  edit: (id) => `listing-edit-${id}`,
 };
 
 type Draft = {
   domain: ListingDomain;
-  listingKind: ListingKind;
+  /** "" until the person chooses — no silent default (walk 2026-10-09). */
+  listingKind: ListingKind | "";
+  /** "" until the person chooses. */
   category: string;
   title: string;
   description: string;
@@ -78,12 +87,18 @@ type Draft = {
   quantity: string;
   unit: string;
   expiresOn: string;
+  /** Publish as the governed active organization (create only; see `publisher`). */
+  asOrganization: boolean;
 };
 
 const EMPTY_DRAFT: Draft = {
   domain: "work_resource",
-  listingKind: "rental",
-  category: "accommodation",
+  // A listing that nobody chose a kind or a subject for read "For rent ·
+  // Home-grown food" once saved (walk 2026-10-09): the first option of each
+  // select was taken as the person's answer. Both start unchosen now; a
+  // select with exactly one possible value is filled (that is not a guess).
+  listingKind: "",
+  category: "",
   title: "",
   description: "",
   locationCountry: "",
@@ -94,6 +109,7 @@ const EMPTY_DRAFT: Draft = {
   quantity: "",
   unit: "",
   expiresOn: "",
+  asOrganization: true,
 };
 
 function toNumber(v: string): number | null {
@@ -122,22 +138,31 @@ export function MarketplaceListingsSection({
   myRows,
   discoveryRows,
   needsMigration,
+  readUnavailable = false,
   extended,
   unavailable = [],
+  publisher = null,
   locale,
 }: {
   myRows: MarketplaceListingRow[];
   discoveryRows: MarketplaceDiscoveryRow[];
   needsMigration: boolean;
+  /** The platform's own listings read failed (audit 2026-10-16, M-2). */
+  readUnavailable?: boolean;
   /** The universal-marketplace migration is applied. */
   extended: boolean;
   /** Federated sources that could not be read (never rendered as empty). */
   unavailable?: readonly ("vacancies" | "workforce" | "demand")[];
+  /** The organization the person governs in the active workspace — offered as
+   *  the publisher of a NEW listing (owner or manager only; the RPC re-checks). */
+  publisher?: { id: string; name: string } | null;
   locale: string;
 }) {
   const t = useTranslations("marketplaceListings");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  // The ONE lifecycle contract's view of a listing (lib/market-lifecycle).
+  const adapter = listingAdapter({ pauseSupported: extended, closedOutcomeStored: false });
   const [mode, setMode] = useState<
     { kind: "idle" } | { kind: "create" } | { kind: "edit"; id: string }
   >({ kind: "idle" });
@@ -159,7 +184,6 @@ export function MarketplaceListingsSection({
   const focusCls = (id: string) => (focusId === id ? " ring-2 ring-brand-blue" : "");
   // Two-step delete (G-12b): the trash icon only ARMS the row; the permanent
   // delete needs the explicit second press.
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
@@ -198,6 +222,7 @@ export function MarketplaceListingsSection({
       quantity: row.quantity != null ? String(row.quantity) : "",
       unit: row.unit ?? "",
       expiresOn: row.expiresAt ? row.expiresAt.slice(0, 10) : "",
+      asOrganization: row.organizationId !== null,
     });
     setMode({ kind: "edit", id: row.id });
   }
@@ -214,8 +239,13 @@ export function MarketplaceListingsSection({
     setDraft({
       ...draft,
       domain,
-      category: nextSubjects[0],
-      listingKind: kinds.includes(draft.listingKind) ? draft.listingKind : kinds[0],
+      category: nextSubjects.length === 1 ? nextSubjects[0] : "",
+      listingKind:
+        kinds.length === 1
+          ? kinds[0]
+          : draft.listingKind !== "" && kinds.includes(draft.listingKind)
+            ? draft.listingKind
+            : "",
     });
   }
 
@@ -235,11 +265,14 @@ export function MarketplaceListingsSection({
     setError(null);
     const priceAmount = toNumber(draft.priceAmount);
     const quantity = toNumber(draft.quantity);
+    const chosenKind = draft.listingKind;
+    if (chosenKind === "") return setError(t("errorKindRequired"));
+    if (draft.category === "") return setError(t("errorCategoryRequired"));
     if (Number.isNaN(priceAmount)) return setError(t("errorPrice"));
     if (Number.isNaN(quantity)) return setError(t("errorQuantity"));
     startTransition(async () => {
       const input = {
-        listingKind: draft.listingKind,
+        listingKind: chosenKind,
         category: draft.category,
         title: draft.title,
         description: draft.description || null,
@@ -254,6 +287,10 @@ export function MarketplaceListingsSection({
           extended && draft.expiresOn
             ? new Date(`${draft.expiresOn}T23:59:59`).toISOString()
             : null,
+        // The publisher is chosen once, at creation; an edit never moves a
+        // listing between a person and an organization.
+        organizationId:
+          mode.kind === "create" && publisher && draft.asOrganization ? publisher.id : null,
       };
       const res =
         mode.kind === "edit"
@@ -262,6 +299,27 @@ export function MarketplaceListingsSection({
       if (res.kind === "ok") {
         close();
         router.refresh();
+      } else {
+        setError(errorFor(res));
+      }
+    });
+  }
+
+  /** A lifecycle contract action from the row (`MarketEntryActions`). */
+  function runAction(row: MarketplaceListingRow, action: EntryAction) {
+    if (action === "edit") {
+      openEdit(row);
+      return;
+    }
+    startTransition(async () => {
+      const res = await applyMarketplaceListingAction(row.id, action, row.status);
+      if (res.kind === "ok") {
+        setAckFor(null);
+        setLegalAck(false);
+        router.refresh();
+      } else if (res.kind === "legal-check-required") {
+        setError(null);
+        setAckFor(row.id);
       } else {
         setError(errorFor(res));
       }
@@ -285,7 +343,6 @@ export function MarketplaceListingsSection({
   }
 
   function remove(id: string) {
-    setConfirmingId(null);
     startTransition(async () => {
       const res = await deleteMarketplaceListingAction(id);
       if (res.kind === "ok") router.refresh();
@@ -293,13 +350,16 @@ export function MarketplaceListingsSection({
     });
   }
 
-  if (needsMigration) {
+  if (needsMigration || readUnavailable) {
     return (
       <section className="card-border p-4">
         <h2 className="font-display text-lg font-semibold text-text-primary">{t("title")}</h2>
         <p className="mt-2 text-sm text-text-secondary">{t("intro")}</p>
-        <p className="mt-3 rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
-          {t("notAvailable")}
+        <p
+          className="mt-3 rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted"
+          data-testid={readUnavailable ? "listings-read-unavailable" : undefined}
+        >
+          {readUnavailable ? t("readUnavailable") : t("notAvailable")}
         </p>
       </section>
     );
@@ -308,9 +368,28 @@ export function MarketplaceListingsSection({
   const otherRows = discoveryRows.filter((r) => !r.isMine);
   // `job` and `workforce` exist only through the federation adapters
   // (lib/marketplace/federation*.ts); `project_work` mixes listings + demand.
-  const tabDomains = ["all", ...LISTING_DOMAINS, "service", "job", "workforce"] as const;
+  // NAVIGATION GROUPS (premium structure pass 2026-10-10): nine flat domain
+  // tabs read as nine products. Four groups say what the market holds; the
+  // group's own domains stay one tap away as sub-chips, so no filter is lost.
+  const GROUPS = {
+    work: ["job", "workforce", "project_work"],
+    services: ["service", "service_need"],
+    goods: ["goods", "work_resource"],
+    personal: ["personal"],
+  } as const satisfies Record<string, readonly string[]>;
+  type GroupKey = keyof typeof GROUPS;
+  const groupKeys = Object.keys(GROUPS) as GroupKey[];
+  const groupOf = (d: string): GroupKey | null =>
+    groupKeys.find((g) => (GROUPS[g] as readonly string[]).includes(d)) ?? null;
+  const activeGroup: GroupKey | null =
+    domainTab === "all" ? null : ((groupKeys as string[]).includes(domainTab) ? (domainTab as GroupKey) : groupOf(domainTab));
+  const groupLabel = (g: GroupKey) => (g === "personal" ? t("domains.personal") : t(`groups.${g}`));
   const domainRows =
-    domainTab === "all" ? otherRows : otherRows.filter((r) => r.domain === domainTab);
+    domainTab === "all"
+      ? otherRows
+      : (groupKeys as string[]).includes(domainTab)
+        ? otherRows.filter((r) => (GROUPS[domainTab as GroupKey] as readonly string[]).includes(r.domain))
+        : otherRows.filter((r) => r.domain === domainTab);
   // Actor filter: only kinds that actually occur in the current rows, so no
   // chip promises rows that do not exist.
   const actorKindsPresent = ACTOR_KINDS.filter((k) => domainRows.some((r) => r.actorKind === k));
@@ -332,9 +411,215 @@ export function MarketplaceListingsSection({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Browse first (premium structure pass 2026-10-10): the marketplace is
+          for finding work, services, goods and opportunities; managing one's
+          own listings follows. */}
+      {/* ── Browse active listings + enquire ───────────────────────────── */}
+      <section className="flex flex-col gap-3">
+        <div>
+          <h2 className="font-display text-lg font-semibold text-text-primary">{t("browseTitle")}</h2>
+          <p className="text-sm text-text-secondary">{t("browseIntro")}</p>
+        </div>
+
+        {extended && (
+          <div className="flex flex-col gap-2">
+            <div
+              role="tablist"
+              aria-label={t("domainFilterLabel")}
+              data-testid="market-group-tabs"
+              className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+            >
+              {(["all", ...groupKeys] as const).map((g) => {
+                const selected = g === "all" ? domainTab === "all" : activeGroup === g;
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    data-testid={`market-group-${g}`}
+                    onClick={() => setDomainTab(g)}
+                    className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                      selected
+                        ? "border-text-primary bg-ink-700 text-text-primary"
+                        : "border-ink-500 text-text-secondary hover:border-text-secondary"
+                    }`}
+                  >
+                    {g === "all" ? t("domains.all") : groupLabel(g)}
+                  </button>
+                );
+              })}
+            </div>
+            {activeGroup && GROUPS[activeGroup].length > 1 ? (
+              <div
+                role="group"
+                aria-label={groupLabel(activeGroup)}
+                data-testid="market-domain-chips"
+                className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+              >
+                {[activeGroup, ...GROUPS[activeGroup]].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    aria-pressed={domainTab === d}
+                    data-testid={`market-domain-${d}`}
+                    onClick={() => setDomainTab(d)}
+                    className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-1.5 text-meta transition-colors sm:min-h-9 ${
+                      domainTab === d
+                        ? "border-text-secondary text-text-primary"
+                        : "border-ink-600 text-text-secondary hover:border-text-secondary"
+                    }`}
+                  >
+                    {d === activeGroup ? t("domains.all") : t(`domains.${d}`)}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        {extended && actorKindsPresent.length > 1 && (
+          <div
+            role="group"
+            aria-label={t("actorFilterLabel")}
+            data-testid="market-actor-filter"
+            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+          >
+            {(["all", ...actorKindsPresent] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={actorTab === k}
+                onClick={() => setActorTab(k)}
+                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                  actorTab === k
+                    ? "border-text-primary bg-ink-700 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-text-secondary"
+                }`}
+              >
+                {t(`actorKinds.${k}`)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {unavailable.length > 0 && (
+          <p
+            role="status"
+            data-testid="federation-partial"
+            className="rounded-md border border-state-warning/40 bg-state-warning/5 p-3 text-sm text-text-secondary"
+          >
+            {t("federationPartial")}
+          </p>
+        )}
+
+        {extended && (domainTab === "job" || domainTab === "work") && (
+          <Link
+            href={"/jobs" as "/dashboard"}
+            data-testid="marketplace-all-jobs-link"
+            className="inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-medium text-text-primary underline-offset-4 hover:underline"
+          >
+            {t("allJobsLink")}
+            <ArrowRight aria-hidden className="h-4 w-4" />
+          </Link>
+        )}
+
+        {shownRows.length === 0 ? (
+          <p className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
+            {t("browseEmpty")}
+          </p>
+        ) : (
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {shownRows.map((row) => (
+              <li
+                key={`${row.sourceTable}:${row.id}`}
+                id={row.sourceTable === "marketplace_listings" ? `listing-${row.id}` : undefined}
+                data-testid="market-browse-row"
+                data-source={row.sourceTable}
+                className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${
+                  row.sourceTable === "marketplace_listings" ? focusCls(row.id) : ""
+                }`}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-text-primary">
+                    {row.title || t("titleNotStated")}
+                  </span>
+                  <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted">
+                    {t(`directions.${row.direction}`)}
+                  </span>
+                  <span
+                    data-testid="market-row-actor"
+                    data-actor-kind={row.actorKind}
+                    className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                  >
+                    {t(`actorKinds.${row.actorKind}`)}
+                  </span>
+                  {row.sourceTable === "public_vacancies" || row.sourceTable === "customer_requests" ? (
+                    <>
+                      <span
+                        data-testid="market-row-visibility"
+                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                      >
+                        {t(`visibility.${row.visibility}`)}
+                      </span>
+                      <span
+                        data-testid="market-row-provenance"
+                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                      >
+                        {t(`provenance.${row.provenance}`)}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
+                {row.publisherName && (
+                  <p className="text-xs text-text-secondary">{row.publisherName}</p>
+                )}
+                <p className="text-xs text-text-muted">
+                  {subjectLabel(row.subject, row.domain)}
+                  {row.locationLabel ? ` · ${row.locationLabel}` : ""}
+                  {row.locationCountry ? ` (${row.locationCountry})` : ""}
+                  {row.priceAmount != null
+                    ? ` · ${formatAmount(row.priceAmount, row.currency, locale)}`
+                    : row.priceText
+                      ? ` · ${row.priceText}`
+                      : ""}
+                  {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
+                  {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
+                </p>
+                {row.description && (
+                  <p className="line-clamp-3 text-sm text-text-secondary">{row.description}</p>
+                )}
+                {row.contactAction === "enquire" ? (
+                  <form action={enquireAboutListingAction} className="mt-1">
+                    <input type="hidden" name="listingId" value={row.id} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <button
+                      type="submit"
+                      data-testid={`listing-enquire-${row.id}`}
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-text-secondary"
+                    >
+                      <MessageSquare aria-hidden className="h-4 w-4" />
+                      {t("enquire")}
+                    </button>
+                  </form>
+                ) : (
+                  <Link
+                    href={row.destinationPath as "/dashboard"}
+                    className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary"
+                  >
+                    {row.contactAction === "open_source" ? t("openInSource") : t("openInServices")}
+                    <ArrowRight aria-hidden className="h-4 w-4" />
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       {/* ── Manage my listings ─────────────────────────────────────────── */}
       <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
           <div>
             <h2 className="font-display text-lg font-semibold text-text-primary">{t("myTitle")}</h2>
             <p className="text-sm text-text-secondary">{t("intro")}</p>
@@ -343,7 +628,8 @@ export function MarketplaceListingsSection({
             <button
               type="button"
               onClick={openCreate}
-              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue/10 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-brand-blue/20"
+              data-testid="listing-add"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-2 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
             >
               <Plus aria-hidden className="h-4 w-4" />
               {t("addButton")}
@@ -375,6 +661,7 @@ export function MarketplaceListingsSection({
                   <select
                     className={inputCls}
                     value={draft.domain}
+                    data-testid="listing-form-domain"
                     onChange={(e) => changeDomain(e.target.value as ListingDomain)}
                   >
                     {formDomains.map((d) => (
@@ -390,8 +677,12 @@ export function MarketplaceListingsSection({
                 <select
                   className={inputCls}
                   value={draft.listingKind}
+                  data-testid="listing-form-kind"
                   onChange={(e) => setDraft({ ...draft, listingKind: e.target.value as ListingKind })}
                 >
+                  <option value="" disabled>
+                    {t("formChoose")}
+                  </option>
                   {LISTING_KINDS.filter((k) => allowedKinds.includes(k)).map((k) => (
                     <option key={k} value={k}>
                       {t(`kinds.${k}`)}
@@ -404,8 +695,12 @@ export function MarketplaceListingsSection({
                 <select
                   className={inputCls}
                   value={draft.category}
+                  data-testid="listing-form-category"
                   onChange={(e) => setDraft({ ...draft, category: e.target.value })}
                 >
+                  <option value="" disabled>
+                    {t("formChoose")}
+                  </option>
                   {subjects.map((c) => (
                     <option key={c} value={c}>
                       {t(`categories.${c}`)}
@@ -417,12 +712,27 @@ export function MarketplaceListingsSection({
             {draft.domain === "service_need" && (
               <p className="text-xs text-text-muted">{t("serviceNeedHint")}</p>
             )}
+            {mode.kind === "create" && publisher && (
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-text-secondary">{t("formPublisherLabel")}</span>
+                <select
+                  className={inputCls}
+                  value={draft.asOrganization ? "organization" : "self"}
+                  data-testid="listing-form-publisher"
+                  onChange={(e) => setDraft({ ...draft, asOrganization: e.target.value === "organization" })}
+                >
+                  <option value="organization">{publisher.name}</option>
+                  <option value="self">{t("publisherSelf")}</option>
+                </select>
+              </label>
+            )}
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-text-secondary">{t("formTitleLabel")}</span>
               <input
                 className={inputCls}
                 value={draft.title}
                 maxLength={160}
+                data-testid="listing-form-title"
                 placeholder={t("formTitlePlaceholder")}
                 onChange={(e) => setDraft({ ...draft, title: e.target.value })}
               />
@@ -433,6 +743,7 @@ export function MarketplaceListingsSection({
                 className={inputCls}
                 value={draft.description}
                 maxLength={2000}
+                data-testid="listing-form-description"
                 rows={3}
                 placeholder={t("formDescriptionPlaceholder")}
                 onChange={(e) => setDraft({ ...draft, description: e.target.value })}
@@ -444,9 +755,19 @@ export function MarketplaceListingsSection({
                 <input
                   className={inputCls}
                   value={draft.locationCountry}
+                  data-testid="listing-form-country"
                   maxLength={2}
                   placeholder={t("formCountryPlaceholder")}
-                  onChange={(e) => setDraft({ ...draft, locationCountry: e.target.value.toUpperCase() })}
+                  onChange={(e) => {
+                    const code = e.target.value.toUpperCase();
+                    // The price currency follows the country while the person
+                    // has not chosen one themselves (audit 2026-10-16, M-4):
+                    // a Norwegian seller no longer publishes an EUR price by
+                    // inertia. A deliberate choice is never overwritten.
+                    const inherited = draft.currency === "" || draft.currency === EMPTY_DRAFT.currency;
+                    const next = inherited ? (getCountryMeta(code)?.currency ?? EMPTY_DRAFT.currency) : draft.currency;
+                    setDraft({ ...draft, locationCountry: code, currency: next });
+                  }}
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
@@ -548,6 +869,7 @@ export function MarketplaceListingsSection({
                 type="button"
                 onClick={submit}
                 disabled={pending}
+                data-testid="listing-form-save"
                 className="inline-flex min-h-11 items-center rounded-md border border-brand-blue bg-brand-blue px-4 py-2 text-sm font-medium text-text-on-brand disabled:opacity-50"
               >
                 {pending ? t("saving") : t("save")}
@@ -574,18 +896,31 @@ export function MarketplaceListingsSection({
               <li
                 key={row.id}
                 id={`listing-${row.id}`}
+                data-testid="my-listing-row"
                 className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${focusCls(row.id)}`}
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium text-text-primary">{row.title}</span>
-                      <span className={`rounded-full border px-2 py-0.5 text-meta ${STATUS_RING[row.status]}`}>
-                        {t(`status.${row.status}`)}
-                      </span>
+                      <MarketEntryChip
+                        facts={adapter.facts(row)}
+                        visibility={{ expired: isExpired(row.expiresAt) }}
+                        testId={`listing-status-${row.id}`}
+                      />
                       {isExpired(row.expiresAt) && (
-                        <span className="rounded-full border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 text-meta text-state-warning">
+                        <StatusChip variant="attention" className="px-2 py-0.5 text-meta">
                           {t("expired")}
+                        </StatusChip>
+                      )}
+                      {row.organizationId && (
+                        <span
+                          data-testid="my-listing-publisher"
+                          className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                        >
+                          {row.organizationId === publisher?.id
+                            ? t("publishedAs", { name: publisher.name })
+                            : t("publishedAsOrganization")}
                         </span>
                       )}
                     </div>
@@ -601,103 +936,30 @@ export function MarketplaceListingsSection({
                       {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
                       {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
                     </p>
+                    {/* Whether OTHERS can find it right now, in words — the
+                        ONE lifecycle contract's line, the same on every row. */}
+                    <div className="mt-1">
+                      <MarketEntryVisibility
+                        facts={adapter.facts(row)}
+                        visibility={{ expired: isExpired(row.expiresAt) }}
+                        testId={`listing-visibility-${row.id}`}
+                      />
+                    </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    {row.status !== "active" ? (
-                      <button
-                        type="button"
-                        title={t("activate")}
-                        aria-label={t("activate")}
-                        onClick={() => changeStatus(row.id, "active")}
-                        disabled={pending}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-success hover:border-state-success sm:h-8 sm:w-8"
-                      >
-                        <Play aria-hidden className="h-4 w-4" />
-                      </button>
-                    ) : (
-                      <>
-                        {extended && (
-                          <button
-                            type="button"
-                            title={t("pause")}
-                            aria-label={t("pause")}
-                            onClick={() => changeStatus(row.id, "paused")}
-                            disabled={pending}
-                            className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
-                          >
-                            <Pause aria-hidden className="h-4 w-4" />
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          title={t("close")}
-                          aria-label={t("close")}
-                          onClick={() => changeStatus(row.id, "closed")}
-                          disabled={pending}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-warning hover:border-state-warning sm:h-8 sm:w-8"
-                        >
-                          <Archive aria-hidden className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                    {row.status === "closed" && (
-                      <button
-                        type="button"
-                        title={t("reopen")}
-                        aria-label={t("reopen")}
-                        onClick={() => changeStatus(row.id, "draft")}
-                        disabled={pending}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
-                      >
-                        <RotateCcw aria-hidden className="h-4 w-4" />
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      title={t("edit")}
-                      aria-label={t("edit")}
-                      onClick={() => openEdit(row)}
-                      disabled={pending}
-                      className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
-                    >
-                      <Pencil aria-hidden className="h-4 w-4" />
-                    </button>
-                    {confirmingId === row.id ? (
-                      <span
-                        role="alertdialog"
-                        aria-label={t("removeConfirm")}
-                        className="inline-flex items-center gap-2 text-xs text-text-secondary"
-                      >
-                        {t("removeConfirm")}
-                        <button
-                          type="button"
-                          onClick={() => remove(row.id)}
-                          disabled={pending}
-                          data-testid={`listing-remove-confirm-${row.id}`}
-                          className="inline-flex min-h-11 items-center rounded border border-state-danger px-2 py-1 text-state-danger sm:min-h-8"
-                        >
-                          {t("remove")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmingId(null)}
-                          className="inline-flex min-h-11 items-center rounded border border-ink-500 px-2 py-1 sm:min-h-8"
-                        >
-                          {t("cancel")}
-                        </button>
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        title={t("remove")}
-                        aria-label={t("remove")}
-                        onClick={() => setConfirmingId(row.id)}
-                        disabled={pending}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-danger hover:border-state-danger sm:h-8 sm:w-8"
-                      >
-                        <Trash2 aria-hidden className="h-4 w-4" />
-                      </button>
-                    )}
+                  {/* The contract's actions, in words; hiding (pause /
+                      complete / remove from market) is one reversible click,
+                      apart from permanent deletion, which confirms first. */}
+                  {/* min-w-0, not shrink-0: an armed delete confirmation must
+                      wrap inside the row, never push past the card. */}
+                  <div className="min-w-0">
+                    <MarketEntryActions
+                      support={adapter.support}
+                      facts={adapter.facts(row)}
+                      onAction={(action) => runAction(row, action)}
+                      pending={pending}
+                      testIdFor={(action) => LISTING_TEST_ID[action](row.id)}
+                      erase={{ onConfirm: () => remove(row.id), testId: `listing-remove-${row.id}` }}
+                    />
                   </div>
                 </div>
                 {ackFor === row.id && (
@@ -721,174 +983,6 @@ export function MarketplaceListingsSection({
                       {t("activate")}
                     </button>
                   </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* ── Browse active listings + enquire ───────────────────────────── */}
-      <section className="flex flex-col gap-3">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-text-primary">{t("browseTitle")}</h2>
-          <p className="text-sm text-text-secondary">{t("browseIntro")}</p>
-        </div>
-
-        {extended && (
-          <div
-            role="tablist"
-            aria-label={t("domainFilterLabel")}
-            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
-          >
-            {tabDomains.map((d) => (
-              <button
-                key={d}
-                type="button"
-                role="tab"
-                aria-selected={domainTab === d}
-                onClick={() => setDomainTab(d)}
-                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
-                  domainTab === d
-                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
-                }`}
-              >
-                {t(`domains.${d}`)}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {extended && actorKindsPresent.length > 1 && (
-          <div
-            role="group"
-            aria-label={t("actorFilterLabel")}
-            data-testid="market-actor-filter"
-            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
-          >
-            {(["all", ...actorKindsPresent] as const).map((k) => (
-              <button
-                key={k}
-                type="button"
-                aria-pressed={actorTab === k}
-                onClick={() => setActorTab(k)}
-                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
-                  actorTab === k
-                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
-                }`}
-              >
-                {t(`actorKinds.${k}`)}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {unavailable.length > 0 && (
-          <p
-            role="status"
-            data-testid="federation-partial"
-            className="rounded-md border border-state-warning/40 bg-state-warning/5 p-3 text-sm text-text-secondary"
-          >
-            {t("federationPartial")}
-          </p>
-        )}
-
-        {extended && domainTab === "job" && (
-          <Link
-            href={"/jobs" as "/dashboard"}
-            data-testid="marketplace-all-jobs-link"
-            className="inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-medium text-brand-blue"
-          >
-            {t("allJobsLink")}
-            <ArrowRight aria-hidden className="h-4 w-4" />
-          </Link>
-        )}
-
-        {shownRows.length === 0 ? (
-          <p className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
-            {t("browseEmpty")}
-          </p>
-        ) : (
-          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {shownRows.map((row) => (
-              <li
-                key={`${row.sourceTable}:${row.id}`}
-                id={row.sourceTable === "marketplace_listings" ? `listing-${row.id}` : undefined}
-                className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${
-                  row.sourceTable === "marketplace_listings" ? focusCls(row.id) : ""
-                }`}
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-text-primary">
-                    {row.title || t("titleNotStated")}
-                  </span>
-                  <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted">
-                    {t(`directions.${row.direction}`)}
-                  </span>
-                  <span
-                    data-testid="market-row-actor"
-                    data-actor-kind={row.actorKind}
-                    className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
-                  >
-                    {t(`actorKinds.${row.actorKind}`)}
-                  </span>
-                  {row.sourceTable === "public_vacancies" || row.sourceTable === "customer_requests" ? (
-                    <>
-                      <span
-                        data-testid="market-row-visibility"
-                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
-                      >
-                        {t(`visibility.${row.visibility}`)}
-                      </span>
-                      <span
-                        data-testid="market-row-provenance"
-                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
-                      >
-                        {t(`provenance.${row.provenance}`)}
-                      </span>
-                    </>
-                  ) : null}
-                </div>
-                {row.publisherName && (
-                  <p className="text-xs text-text-secondary">{row.publisherName}</p>
-                )}
-                <p className="text-xs text-text-muted">
-                  {subjectLabel(row.subject, row.domain)}
-                  {row.locationLabel ? ` · ${row.locationLabel}` : ""}
-                  {row.locationCountry ? ` (${row.locationCountry})` : ""}
-                  {row.priceAmount != null
-                    ? ` · ${formatAmount(row.priceAmount, row.currency, locale)}`
-                    : row.priceText
-                      ? ` · ${row.priceText}`
-                      : ""}
-                  {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
-                  {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
-                </p>
-                {row.description && (
-                  <p className="line-clamp-3 text-sm text-text-secondary">{row.description}</p>
-                )}
-                {row.contactAction === "enquire" ? (
-                  <form action={enquireAboutListingAction} className="mt-1">
-                    <input type="hidden" name="listingId" value={row.id} />
-                    <input type="hidden" name="locale" value={locale} />
-                    <button
-                      type="submit"
-                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue/10 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-brand-blue/20"
-                    >
-                      <MessageSquare aria-hidden className="h-4 w-4" />
-                      {t("enquire")}
-                    </button>
-                  </form>
-                ) : (
-                  <Link
-                    href={row.destinationPath as "/dashboard"}
-                    className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-secondary transition-colors hover:border-brand-blue"
-                  >
-                    {row.contactAction === "open_source" ? t("openInSource") : t("openInServices")}
-                    <ArrowRight aria-hidden className="h-4 w-4" />
-                  </Link>
                 )}
               </li>
             ))}

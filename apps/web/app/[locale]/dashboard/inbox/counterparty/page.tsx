@@ -18,7 +18,13 @@ import {
   type QueueBucket,
   type QueueRow,
 } from "@/lib/journal/counterparty-review-model";
-import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import { reviewerHoursOf } from "@/lib/journal/reviewer-hours";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/inbox/counterparty");
+
 
 export const dynamic = "force-dynamic";
 
@@ -123,11 +129,26 @@ export default async function CounterpartyQueuePage({
         }
         return [];
       });
-      const depth = recognizeEntryDepth(detail.originalText);
-      const hours = depth.hours
-        ? `${depth.hours.value} ${tUnit(depth.hours.unit)}${
-            depth.hours.certain ? "" : ` (${t("card.hoursUnclear")})`
-          }`
+      // The STORED work time by the one canonical rule, never a re-parse of
+      // the text (reviewer-hours.ts). The RPC returns metrics oldest first.
+      const stored = reviewerHoursOf({
+        id: row.entryId,
+        createdAt: detail.createdAt ?? detail.submittedAt ?? row.submittedAt ?? new Date(0).toISOString(),
+        // ORDER IS EVIDENCE: "the latest quantity row wins" by (created_at,
+        // id). Both are passed through as the RPC returns them (migration
+        // 20261020080000, owner-approved #2558) — the real row ordering,
+        // never an invented one.
+        metrics: detail.metrics.map((mm) => ({
+          metric_slug: mm.slug,
+          value_text: mm.valueText,
+          value_numeric: mm.valueNumeric,
+          unit_slug: mm.unitSlug,
+          created_at: mm.createdAt ?? null,
+          id: mm.id ?? null,
+        })),
+      });
+      const hours = stored
+        ? `${stored.value} ${tUnit(stored.unit)}${stored.certain ? "" : ` (${t("card.hoursUnclear")})`}`
         : null;
       views.set(row.entryId, {
         entryId: row.entryId,
@@ -152,9 +173,7 @@ export default async function CounterpartyQueuePage({
   return (
     <div className="flex flex-col gap-6" data-testid="counterparty-queue">
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("lead")}</p>
         <p className="text-meta leading-relaxed text-text-muted">{t("honestNote")}</p>
         {!loadFailed ? (

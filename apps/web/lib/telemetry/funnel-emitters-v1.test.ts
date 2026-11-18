@@ -84,11 +84,17 @@ describe("offer_created - marketplace listing", () => {
 
 describe("offer_created - service offering first publication", () => {
   beforeEach(() => vi.clearAllMocks());
-  function client(prior: unknown, updateError: unknown) {
-    const select = {
-      eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: prior }) }) }),
+  function client(prior: unknown, updateError: unknown, touched: unknown[] = [{ id: "o1" }]) {
+    // Any depth of .eq(): the contract door reads the row, then updates it
+    // pinned to the prior status (a concurrent change touches nothing).
+    const select: Record<string, unknown> = {
+      eq: () => select,
+      maybeSingle: async () => ({ data: prior, error: null }),
     };
-    const update = { eq: () => ({ eq: async () => ({ error: updateError }) }) };
+    const update: Record<string, unknown> = {
+      eq: () => update,
+      select: async () => ({ data: updateError ? null : touched, error: updateError }),
+    };
     asMock(createClient).mockResolvedValue({
       auth: { getUser: async () => ({ data: { user: { id: "u1" } } }) },
       from: () => ({ select: () => select, update: () => update }),
@@ -111,6 +117,13 @@ describe("offer_created - service offering first publication", () => {
     await setServiceOfferingStatus("o1", "active");
     client({ status: "active" }, null);
     await setServiceOfferingStatus("o1", "paused");
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  it("does not fire, and says not-found, when no own row matched (not the caller's)", async () => {
+    client({ status: "draft" }, null, []);
+    const r = await setServiceOfferingStatus("o1", "active");
+    expect(r.kind).toBe("not-found");
     expect(emit).not.toHaveBeenCalled();
   });
 

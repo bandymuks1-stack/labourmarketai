@@ -2,7 +2,12 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { mergeAssignedPeople, readTeamAssignedPeople } from "@/lib/projects/assigned-people";
+import {
+  mergeAssignedPeople,
+  readTeamAssignedPeople,
+  type TeamAssignedPersonRow,
+} from "@/lib/projects/assigned-people";
+import { readActiveAssignmentRows } from "@/lib/projects/operations";
 import {
   isEmployerContextFailure,
   resolveEmployerCompanyContext,
@@ -85,6 +90,40 @@ export async function readDuplicateProjectIds(
 }
 
 /**
+ * The DUPLICATE ⇄ CANONICAL map for a set of projects (marker 20260930120000):
+ *   canonicalOf  duplicate id → the canonical project it was marked into
+ *   fragmentsOf  canonical id → the duplicates marked into it
+ * A consolidation keeps every duplicate row and every record on it; readers
+ * that show a project's history use this so the canonical project shows its
+ * fragments' work too, and a fragment points to its canonical. Unreadable
+ * marker (not applied / failed read) → empty maps: nothing is re-routed.
+ */
+export async function readProjectCanonicalMap(
+  supabase: SupabaseClient,
+  ids: readonly string[],
+): Promise<{ canonicalOf: Map<string, string>; fragmentsOf: Map<string, string[]> }> {
+  const canonicalOf = new Map<string, string>();
+  const fragmentsOf = new Map<string, string[]>();
+  if (ids.length === 0) return { canonicalOf, fragmentsOf };
+  const list = [...new Set(ids)];
+  const [asDuplicate, asCanonical] = await Promise.all([
+    asAny(supabase).from("projects").select("id, canonical_project_id").in("id", list).eq("record_state", "duplicate"),
+    asAny(supabase).from("projects").select("id, canonical_project_id").in("canonical_project_id", list).eq("record_state", "duplicate"),
+  ]);
+  for (const res of [asDuplicate, asCanonical]) {
+    if (res.error) continue;
+    for (const r of (res.data ?? []) as { id: string; canonical_project_id: string | null }[]) {
+      if (!r.canonical_project_id) continue;
+      canonicalOf.set(r.id, r.canonical_project_id);
+      const arr = fragmentsOf.get(r.canonical_project_id) ?? [];
+      if (!arr.includes(r.id)) arr.push(r.id);
+      fragmentsOf.set(r.canonical_project_id, arr);
+    }
+  }
+  return { canonicalOf, fragmentsOf };
+}
+
+/**
  * Per-bucket ceiling of the manager project list. ACTIVE (draft/live/paused,
  * or an unreadable status) and FINISHED (completed — including historical
  * projects promoted from imported sites) are read by SEPARATE queries, so a
@@ -132,8 +171,15 @@ export async function countManagedProjects(): Promise<{
  * come first and are read by their own query, then FINISHED ones by another:
  * 150 finished + 10 active always lists all 10 active. Each bucket is capped
  * at MANAGED_PROJECTS_BUCKET_LIMIT, newest first.
+ *
+ * `finishedPage` (0-based) pages the FINISHED bucket: an organization with
+ * 180 historical projects reaches every one of them (page 1 = 101–180),
+ * instead of a list that only says "100 of 180 shown".
  */
-export async function listManagedProjects(): Promise<ManagedProject[]> {
+export async function listManagedProjects(
+  opts: { readonly finishedPage?: number } = {},
+): Promise<ManagedProject[]> {
+  const finishedPage = Math.max(0, Math.floor(opts.finishedPage ?? 0));
   const supabase = await createClient();
   const {
     data: { user },
@@ -148,12 +194,17 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
   const columnsV1 =
     "id, title, city, country, status, organization_id, organizations(display_name, legal_name)";
   const run = (columns: string, completed: boolean) => {
-    const q = asAny(supabase).from("projects").select(columns);
-    return (
+    // DUPLICATE rows are filtered in the query, so a page holds a full
+    // bucket of real projects and its boundaries match countManagedProjects.
+    const q = asAny(supabase).from("projects").select(columns).neq("record_state", "duplicate");
+    const ordered = (
       completed ? q.eq("status", "completed") : q.or("status.is.null,status.neq.completed")
     )
       .order("created_at", { ascending: false })
-      .limit(MANAGED_PROJECTS_BUCKET_LIMIT);
+      // A total order, so a page boundary never repeats or skips a project.
+      .order("id", { ascending: false });
+    const from = completed ? finishedPage * MANAGED_PROJECTS_BUCKET_LIMIT : 0;
+    return ordered.range(from, from + MANAGED_PROJECTS_BUCKET_LIMIT - 1);
   };
   const bucket = async (completed: boolean) => {
     let r = await run(columnsV2, completed);
@@ -216,9 +267,26 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
 export async function listProjectAssignedPeople(
   projectId: string,
 ): Promise<ProjectAssignment[]> {
-  const persons = await listProjectAssignments(projectId);
-  const supabase = await createClient();
-  const team = await readTeamAssignedPeople(supabase, [projectId]);
+  // The person rows and the team members are independent reads: one wave.
+  const [persons, team] = await Promise.all([
+    listProjectAssignments(projectId),
+    createClient().then((supabase) => readTeamAssignedPeople(supabase, [projectId])),
+  ]);
+  return assignedPeopleOf(projectId, persons, team);
+}
+
+/**
+ * THE merge behind `listProjectAssignedPeople`, pure — so the company home's
+ * batched project scan (`lib/projects/project-scan.ts`), which reads the person
+ * rows and team members of every scanned project at once, builds each
+ * project's list by exactly the same rule. `team` may hold other projects'
+ * members; only this project's are merged.
+ */
+export function assignedPeopleOf(
+  projectId: string,
+  persons: readonly ProjectAssignment[],
+  team: readonly TeamAssignedPersonRow[],
+): ProjectAssignment[] {
   return mergeAssignedPeople(
     persons.map((a) => ({
       ...a,
@@ -226,7 +294,7 @@ export async function listProjectAssignedPeople(
       profileId: a.workerProfileId as string | null,
       workerId: (a.workerId ?? null) as string | null,
     })),
-    team,
+    team.filter((t) => t.projectId === projectId),
   ).map((m): ProjectAssignment =>
     m.viaTeam
       ? {
@@ -251,32 +319,34 @@ export async function listProjectAssignments(
   projectId: string,
 ): Promise<ProjectAssignment[]> {
   const supabase = await createClient();
-  const res = await asAny(supabase)
-    .from("project_worker_assignments")
-    // LEFT join on `profiles` — same reason as lib/projects/operations.ts:
-    // an employer cannot read another person's profile row, so `!inner` dropped
-    // every assignment and this list was always empty. The join only supplies
-    // an optional display name that already has a fallback below.
-    .select(
-      "assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
-    )
-    .eq("project_id", projectId)
-    .eq("status", "active")
-    .order("assigned_at", { ascending: false });
+  // THE SAME active-assignment read the operations pulse makes (identical
+  // select — LEFT join on `profiles`: an employer cannot read another person's
+  // profile row, so `!inner` dropped every assignment; the join only supplies
+  // an optional display name that already has a fallback below). Shared per
+  // client + project within one server render: see `readActiveAssignmentRows`.
+  const res = await readActiveAssignmentRows(asAny(supabase), projectId);
   if (res.error) {
     if (migMissing(res.error.code)) return [];
     return [];
   }
-  type Row = {
-    assigned_at: string;
-    worker: {
-      id: string | null;
-      profile_id: string | null;
-      display_name: string | null;
-      profiles: { full_name: string | null } | null;
-    } | null;
-  };
-  return ((res.data ?? []) as Row[])
+  return toProjectAssignments((res.data ?? []) as AssignmentRow[]);
+}
+
+export type AssignmentRow = {
+  project_id?: string;
+  assigned_at: string;
+  worker: {
+    id: string | null;
+    profile_id: string | null;
+    display_name: string | null;
+    profiles: { full_name: string | null } | null;
+  } | null;
+};
+
+/** Raw active-assignment rows → the person roster (rows without a profile are
+ *  not a person this roster can name). Shared with the batched project scan. */
+export function toProjectAssignments(rows: readonly AssignmentRow[]): ProjectAssignment[] {
+  return rows
     .map((r): ProjectAssignment | null => {
       const w = r.worker;
       if (!w?.profile_id) return null;
@@ -288,6 +358,52 @@ export async function listProjectAssignments(
       };
     })
     .filter((x: ProjectAssignment | null): x is ProjectAssignment => x !== null);
+}
+
+/** Ids per `.in()` read: keeps the PostgREST URL well under proxy limits. */
+const ASSIGNMENT_BATCH = 100;
+
+/**
+ * Active worker assignments for MANY projects in one read per 100 projects
+ * (2026-10-18: the projects page read them one project at a time — one round
+ * trip per active project, the main cause of a 5.5 s page). Same table, same
+ * columns, same RLS (can_manage_project) and the same per-project order
+ * (newest first) as `listProjectAssignments`; a project with none maps to [].
+ */
+export async function listProjectAssignmentsForProjects(
+  projectIds: readonly string[],
+): Promise<Map<string, ProjectAssignment[]>> {
+  const out = new Map<string, ProjectAssignment[]>(projectIds.map((id) => [id, []]));
+  if (projectIds.length === 0) return out;
+  const supabase = await createClient();
+  const chunks: string[][] = [];
+  for (let i = 0; i < projectIds.length; i += ASSIGNMENT_BATCH) {
+    chunks.push(projectIds.slice(i, i + ASSIGNMENT_BATCH));
+  }
+  const reads = await Promise.all(
+    chunks.map((ids) =>
+      asAny(supabase)
+        .from("project_worker_assignments")
+        .select(
+          "project_id, assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
+        )
+        .in("project_id", ids)
+        .eq("status", "active")
+        .order("assigned_at", { ascending: false }),
+    ),
+  );
+  const byProject = new Map<string, AssignmentRow[]>();
+  for (const res of reads as Array<{ data: AssignmentRow[] | null; error: unknown }>) {
+    if (res.error) continue; // a failed chunk reads as "no assignments", exactly like the single read
+    for (const row of res.data ?? []) {
+      if (!row.project_id) continue;
+      const list = byProject.get(row.project_id) ?? [];
+      list.push(row);
+      byProject.set(row.project_id, list);
+    }
+  }
+  for (const [id, rows] of byProject) out.set(id, toProjectAssignments(rows));
+  return out;
 }
 
 /**

@@ -333,7 +333,7 @@ describe("app: the landing page shows the mismatch honestly", () => {
     expect(page).toMatch(/"email_mismatch",/);
   });
 
-  const LOCALES = ["en", "lt", "de", "nl", "pl", "ru"] as const;
+  const LOCALES = ["en", "lt", "de", "nl", "pl", "ru", "sv"] as const;
   for (const loc of LOCALES) {
     it(`${loc}: every key is present, real copy, no "demo"`, () => {
       const msgs = JSON.parse(read(`apps/web/messages/${loc}.json`));
@@ -446,8 +446,9 @@ describe("F5: one shared post-accept helper for the token and by-id doors", () =
   });
 
   it("the invite page passes the locale so the network page refreshes after a token accept", () => {
-    expect(read("apps/web/lib/invitations/invite-page-actions.ts")).toContain(
-      "acceptInvitationAction({ token, locale })",
+    // The review-notice fields ride along (owner decision 1); the locale stays.
+    expect(read("apps/web/lib/invitations/invite-page-actions.ts")).toMatch(
+      /acceptInvitationAction\(\{ token, locale(, [^}]*)? \}\)/,
     );
   });
 });
