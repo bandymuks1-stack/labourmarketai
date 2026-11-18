@@ -690,6 +690,9 @@ const en = {
   "candidates.notFitReasonTitle": "Why not a fit?",
   "candidates.notFitReasonPlaceholder": "Write a short reason, e.g.: lacks experience with this kind of work.",
   "candidates.notFitReasonRequired": "Marking “Not a fit” needs a short reason.",
+  "need.countryLabel": "Country where the work is",
+  "need.countryPlaceholder": "e.g. Sweden or SE",
+  "need.countryRequired": "Choose the country where the work takes place.",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -1366,6 +1369,9 @@ const lt: Catalogue = {
   "candidates.notFitReasonTitle": "Kodėl netinka?",
   "candidates.notFitReasonPlaceholder": "Trumpai įrašykite priežastį, pvz.: trūksta patirties su šiuo darbu.",
   "candidates.notFitReasonRequired": "Žymint „Netinka“ reikia trumpos priežasties.",
+  "need.countryLabel": "Šalis, kurioje bus dirbama",
+  "need.countryPlaceholder": "Pvz., Švedija arba SE",
+  "need.countryRequired": "Pasirinkite šalį, kurioje bus dirbama.",
 };
 
 const ru: Catalogue = {
@@ -2038,6 +2044,9 @@ const ru: Catalogue = {
   "candidates.notFitReasonTitle": "Почему не подходит?",
   "candidates.notFitReasonPlaceholder": "Коротко укажите причину, например: не хватает опыта в этой работе.",
   "candidates.notFitReasonRequired": "Для отметки «Не подходит» нужна короткая причина.",
+  "need.countryLabel": "Страна, где будет работа",
+  "need.countryPlaceholder": "напр., Швеция или SE",
+  "need.countryRequired": "Выберите страну, где будет выполняться работа.",
 };
 
 const nl: Catalogue = {
@@ -2710,6 +2719,9 @@ const nl: Catalogue = {
   "candidates.notFitReasonTitle": "Waarom geen fit?",
   "candidates.notFitReasonPlaceholder": "Schrijf een korte reden, bijv.: mist ervaring met dit soort werk.",
   "candidates.notFitReasonRequired": "Voor “Geen fit” is een korte reden nodig.",
+  "need.countryLabel": "Land waar het werk plaatsvindt",
+  "need.countryPlaceholder": "bijv. Zweden of SE",
+  "need.countryRequired": "Kies het land waar het werk plaatsvindt.",
 };
 
 const de: Catalogue = {
@@ -3385,6 +3397,9 @@ const de: Catalogue = {
   "candidates.notFitReasonTitle": "Warum passt es nicht?",
   "candidates.notFitReasonPlaceholder": "Kurze Begründung, z. B.: fehlende Erfahrung mit dieser Arbeit.",
   "candidates.notFitReasonRequired": "Für „Passt nicht“ ist eine kurze Begründung nötig.",
+  "need.countryLabel": "Land, in dem gearbeitet wird",
+  "need.countryPlaceholder": "z. B. Schweden oder SE",
+  "need.countryRequired": "Wählen Sie das Land, in dem gearbeitet wird.",
 };
 
 const pl: Catalogue = {
@@ -4057,6 +4072,9 @@ const pl: Catalogue = {
   "candidates.notFitReasonTitle": "Dlaczego nie pasuje?",
   "candidates.notFitReasonPlaceholder": "Proszę napisać krótki powód, np.: brak doświadczenia w tego rodzaju pracy.",
   "candidates.notFitReasonRequired": "Oznaczenie „Niedopasowany” wymaga krótkiego powodu.",
+  "need.countryLabel": "Kraj, w którym będzie praca",
+  "need.countryPlaceholder": "np. Szwecja lub SE",
+  "need.countryRequired": "Proszę wybrać kraj, w którym będzie wykonywana praca.",
 };
 
 const sv: Catalogue = {
@@ -4730,6 +4748,9 @@ const sv: Catalogue = {
   "candidates.notFitReasonTitle": "Varför passar hen inte?",
   "candidates.notFitReasonPlaceholder": "Skriv en kort anledning, t.ex.: saknar erfarenhet av den här typen av arbete.",
   "candidates.notFitReasonRequired": "Att markera ”Passar inte” kräver en kort anledning.",
+  "need.countryLabel": "Land där arbetet utförs",
+  "need.countryPlaceholder": "t.ex. Sverige eller SE",
+  "need.countryRequired": "Välj landet där arbetet utförs.",
 };
 
 export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de, pl, sv };
