@@ -11440,7 +11440,7 @@
     "tax": {
       "lastPayment": "VAT w ostatniej płatności",
       "total": "razem",
-      "reverseCharge": "Bez VAT: Stripe Tax zastosował odwrotne obciążenie dla Twojego numeru VAT.",
+      "reverseCharge": "Bez VAT: Stripe Tax zastosował odwrotne obciążenie dla numeru VAT Państwa.",
       "vatId": "Numer VAT",
       "vatIdStatus": {
         "pending": "sprawdzanie w toku",

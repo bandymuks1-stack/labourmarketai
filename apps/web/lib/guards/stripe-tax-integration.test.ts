@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { activeLocales } from "@/lib/i18n/config";
 import { isHandledEventType, isRecordOnlyEventType } from "@/lib/billing/webhook-core";
 
 /**
@@ -139,11 +140,10 @@ describe("4. the customer read is RLS-bound", () => {
 });
 
 describe("5. no public Stripe Tax claim before production", () => {
-  const LOCALES = ["lt", "en", "de", "nl", "pl", "ru"];
   // Only the superadmin billing page and the signed-in account billing section
   // (rendered only when the switch is on and Stripe recorded tax) may name it.
   const ALLOWED = new Set(["adminBilling", "accountBilling"]);
-  for (const loc of LOCALES) {
+  for (const loc of activeLocales) {
     it(`${loc}: no other namespace names Stripe Tax`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
       const offenders = Object.entries(msgs)
