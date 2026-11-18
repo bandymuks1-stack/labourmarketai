@@ -1709,6 +1709,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261021120000_team_disband_closed_need_offers_v1.sql",
       // 2026-10-21 (RED, needs-human-gate): stale booking proposals expire daily (system function + pg_cron).
       "20261021130000_booking_expiry_system_schedule_v1.sql",
+      // 2026-10-21 (RED, needs-human-gate): one purchased LMC credit per payment reference (Stripe TEST top-ups).
+      "20261021150000_lmc_purchase_payment_reference_unique_v1.sql",
       // 2026-10-22 (RED, needs-human-gate): aggregate counts for the Agentai OS capability readback (SECURITY DEFINER + GRANT).
       "20261022150000_agentai_capability_readback_counts_v1.sql",
       // 2026-10-23: owner approved #2439 in chat (same approval as #2709/#2712; owner decision N-9;
@@ -1802,8 +1804,6 @@ describe("the migration set is exactly what this slice declared", () => {
       // is active and review is on (one RLS policy replaced). RED draft, the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261115120000_journal_learning_access_follows_link_v1.sql",
-      // 2026-10-21 (RED, needs-human-gate): one purchased LMC credit per payment reference (Stripe TEST top-ups).
-      "20261021150000_lmc_purchase_payment_reference_unique_v1.sql",
 ]);
   });
 
