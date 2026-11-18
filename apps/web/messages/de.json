@@ -14222,7 +14222,7 @@
           "description": "Laden Sie ein Unternehmen ein, sich mit Ihrer Agentur zu verbinden."
         },
         "proposeCandidate": {
-          "label": "Kandidat vorschlagen",
+          "label": "Kandidaten vorschlagen",
           "description": "Bieten Sie eine Arbeitskraft für einen geteilten Bedarf an."
         },
         "offerStatus": {
