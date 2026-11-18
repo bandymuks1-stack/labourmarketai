@@ -251,7 +251,12 @@ revoke all on function public.reviewable_journal_entry_ids() from public, anon;
 grant execute on function public.reviewable_journal_entry_ids() to authenticated;
 
 -- Added by 20261118164500 (nothing references them once the blocks above
--- are restored).
+-- are restored). The two correction-context triggers first, then their
+-- functions, then the read helpers.
+drop trigger if exists journal_entries_successor_context_v1 on public.journal_entries;
+drop trigger if exists journal_entries_ancestor_context_v1 on public.journal_entries;
+drop function if exists public.journal_entries_successor_context_v1();
+drop function if exists public.journal_entries_ancestor_context_v1();
 drop function if exists public.org_retains_journal_entry_v1(uuid);
 drop function if exists public.journal_entry_chain_root_at_v1(uuid);
 

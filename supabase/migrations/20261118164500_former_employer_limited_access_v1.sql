@@ -92,6 +92,7 @@
 -- and the photo bucket) follow the read rule, because RLS applies inside those
 -- sub-selects; the SECURITY DEFINER readers are replaced here explicitly.
 --
+-- APPLY / CHECK / ROLLBACK STEPS: docs/ops/FORMER_EMPLOYER_LIMITED_ACCESS_APPLY.md
 -- ROLLBACK: supabase/rollbacks/20261118164500_former_employer_limited_access_v1.down.sql
 -- restores every policy and function body exactly as it was before this
 -- migration, i.e. after #3421: journal_entries_select, can_read_journal_entry_v1
@@ -436,5 +437,81 @@ end $function$;
 
 revoke all on function public.reviewable_journal_entry_ids() from public, anon;
 grant execute on function public.reviewable_journal_entry_ids() to authenticated;
+
+-- 8. Corrections of an ended relationship's records stay in its context --------
+-- Owner decision 2026-11-18 (R2 P3-4): a correction of a historical record of
+-- an ENDED relationship is created in that record's own engagement context,
+-- never in the personal journal or another context, so it stays with the
+-- organization's history and reveals nothing from elsewhere. Two triggers,
+-- because engagement_context_id cannot change after insert
+-- (journal_entries_evidence_guard_v1):
+--   · a correction of a CONFIRMED record (correction_of set at insert) takes
+--     the original's context. The trigger name sorts before
+--     journal_entries_attribution_guard_v1 and journal_entries_chain_v1, so the
+--     ownership check and the hash run on the context that is stored;
+--   · an edit of an UNCONFIRMED record (the successor is linked afterwards,
+--     through superseded_by) is refused when the successor is in another
+--     context: the whole supersede rolls back, nothing is written. The app
+--     sends the original's context for such a record (lib/journal/actions.ts).
+-- A relationship that is still running is not affected. Nothing is rewritten:
+-- the original, its author and its time stay as they are.
+create or replace function public.journal_entries_ancestor_context_v1()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_ctx uuid;
+begin
+  if new.correction_of is null then
+    return new;
+  end if;
+  select o.engagement_context_id into v_ctx
+    from public.journal_entries o
+    join public.engagement_contexts ec on ec.id = o.engagement_context_id
+   where o.id = new.correction_of
+     and o.worker_id = new.worker_id
+     and ec.status = 'ended';
+  if found then
+    new.engagement_context_id := v_ctx;
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.journal_entries_ancestor_context_v1() from public, anon, authenticated;
+
+drop trigger if exists journal_entries_ancestor_context_v1 on public.journal_entries;
+create trigger journal_entries_ancestor_context_v1
+  before insert on public.journal_entries
+  for each row execute function public.journal_entries_ancestor_context_v1();
+
+create or replace function public.journal_entries_successor_context_v1()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if old.superseded_by is null
+     and new.superseded_by is not null
+     and exists (select 1 from public.engagement_contexts ec
+                  where ec.id = old.engagement_context_id
+                    and ec.status = 'ended')
+     and exists (select 1 from public.journal_entries s
+                  where s.id = new.superseded_by
+                    and s.engagement_context_id is distinct from old.engagement_context_id) then
+    raise exception 'correction_context_locked: a record of an ended relationship is corrected in its own context'
+      using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.journal_entries_successor_context_v1() from public, anon, authenticated;
+
+drop trigger if exists journal_entries_successor_context_v1 on public.journal_entries;
+create trigger journal_entries_successor_context_v1
+  before update of superseded_by on public.journal_entries
+  for each row execute function public.journal_entries_successor_context_v1();
 
 commit;

@@ -35,6 +35,10 @@ import {
  *   FE-4 (R2 P3-1) W moves a personal record and B's record into the ended
  *        context for A after the end: neither the copies nor the originals
  *        reach A, because the edit chain is walked only inside one context.
+ *   FE-5 (owner 2026-11-18, R2 P3-4) a correction of a historical record
+ *        stays in the employment's context: an edit into the personal journal
+ *        is refused with nothing written; a correction of a confirmed record
+ *        is stored under A whatever context was asked, and A reads it.
  *   FE-1b A PAUSE IS NOT AN END: while the relationship is paused, A keeps
  *        reading, adding to and deciding on W's records, and the entry W files
  *        during the pause belongs to the employment (retained after the end).
@@ -91,6 +95,8 @@ const s = {
   entryAfter: "",
   entryPaused: "",
   workItem: "",
+  edited: "",
+  corrected: "",
 };
 
 const pages = new Map<string, Page>();
@@ -475,6 +481,15 @@ function afterTheEnd(id: string): void {
 }
 
 test("FE-3. after the end, W corrects two retained records: the corrections stay with A beside their originals, traceable; the unrelated late entry does not", async () => {
+  // The originals as stored before any correction: text, author, time, hash.
+  const snapshot = () =>
+    sql<{ id: string; original_text: string; worker_id: string; created_at: string; hash_self: string }>(
+      `select id, original_text, worker_id, created_at::text as created_at, hash_self
+         from public.journal_entries where id in (${[s.entryDuring, s.entryDuring2].map(lit).join(",")}) order by id`,
+    );
+  const before = snapshot();
+  expect(before).toHaveLength(2);
+
   // An unconfirmed retained entry: a superseding edit.
   const edited = await correct(s.entryDuring2, `${TEXT.during2} (corrected after the end)`);
   expect(edited.id, `W edits a retained entry (${edited.status})`).toBeTruthy();
@@ -516,6 +531,23 @@ test("FE-3. after the end, W corrects two retained records: the corrections stay
     "the original's confirmation is kept",
   ).toBe(1);
 
+  expect(snapshot(), "the original's text, author, time and hash are unchanged by its corrections").toEqual(before);
+  // A reads each original and each correction with its author and time.
+  const seen = await rest(
+    O,
+    `journal_entries?id=in.(${[s.entryDuring, s.entryDuring2, edited.id!, corrected.id!].join(",")})&select=id,worker_id,created_at,correction_of`,
+  );
+  expect(seen.ok).toBe(true);
+  const seenRows = (await seen.json()) as Array<{ id: string; worker_id: string; created_at: string; correction_of: string | null }>;
+  expect(seenRows.map((r) => r.id).sort(), "A reads both originals and both corrections").toEqual(
+    [s.entryDuring, s.entryDuring2, edited.id!, corrected.id!].sort(),
+  );
+  expect(new Set(seenRows.map((r) => r.worker_id)), "A sees W as the author of every version").toEqual(new Set([s.workerId]));
+  expect(seenRows.every((r) => !!r.created_at), "A sees each version's time").toBe(true);
+  expect(seenRows.find((r) => r.id === corrected.id)?.correction_of, "A sees which original the correction corrects").toBe(s.entryDuring);
+  s.edited = edited.id!;
+  s.corrected = corrected.id!;
+
   // Still no change and no re-confirmation by A after the end, on the corrections too.
   const reconfirm = await rpc<string>(O, "review_journal_entry", { p_entry_id: corrected.id!, p_decision: "approved", p_note: null });
   expect(reconfirm.body, "A cannot re-confirm a correction after the end").not.toBe("approved");
@@ -543,4 +575,35 @@ test("FE-4. after the end, W moves a personal record and B's record into the end
   expect(await readable(O, [s.entryDuring]), "A still reads its retained entry").toEqual([s.entryDuring]);
   // The person keeps everything, originals included.
   expect(await readable(W, ids), "W still reads the moved copies and their originals").toEqual([...ids].sort());
+});
+
+test("FE-5. a correction of a historical record stays in the employment's context: an edit into the personal journal is refused, a correction of a confirmed record lands under A (owner 2026-11-18, R2 P3-4)", async () => {
+  expect(s.edited && s.corrected && s.ecPersonal, "FE-3 left an edit and a correction").toBeTruthy();
+  const count = () => sql<{ n: number }>(`select count(*)::int as n from public.journal_entries where worker_id = ${lit(s.workerId)}`)[0]?.n;
+  const rowsBefore = count();
+
+  // An unconfirmed historical record cannot be edited into another context: the whole edit rolls back.
+  const refused = await correct(s.edited, `${TEXT.during2} (moved to the personal journal)`, s.ecPersonal);
+  expect(refused.id, `the edit into the personal journal is refused (${refused.status})`).toBeNull();
+  expect(count(), "an edit of a historical record into the personal journal is refused, and nothing is written").toBe(rowsBefore);
+  expect(
+    sql<{ superseded_by: string | null }>(`select superseded_by from public.journal_entries where id = ${lit(s.edited)}`)[0]?.superseded_by,
+    "the record stays current",
+  ).toBeNull();
+
+  // A correction carrying a confirmed original is created in that original's context, whatever was asked.
+  const kept = await correct(s.corrected, `${TEXT.during} (second correction, asked for the personal journal)`, s.ecPersonal);
+  expect(kept.id, `W corrects the correction (${kept.status})`).toBeTruthy();
+  const row = sql<{ engagement_context_id: string; correction_of: string | null }>(
+    `select engagement_context_id, correction_of from public.journal_entries where id = ${lit(kept.id!)}`,
+  )[0];
+  expect(row, "the correction is stored in A's context and still points at the confirmed original").toEqual({
+    engagement_context_id: s.ecA,
+    correction_of: s.entryDuring,
+  });
+  afterTheEnd(kept.id!);
+  expect(
+    await readable(O, [kept.id!]),
+    "a correction of a confirmed historical record stays in the employment's context, and A reads it",
+  ).toEqual([kept.id!]);
 });

@@ -222,6 +222,59 @@ describe("writes: an ended relationship can no longer change or decide on the pe
   });
 });
 
+describe("corrections of an ended relationship's records stay in its context (owner 2026-11-18, R2 P3-4)", () => {
+  const sql = read(MIG);
+  const ANC = "create or replace function public.journal_entries_ancestor_context_v1()";
+  const SUC = "create or replace function public.journal_entries_successor_context_v1()";
+
+  it("a correction of a confirmed record of an ended relationship takes the original's context, for the same worker only", () => {
+    const f = statement(sql, ANC);
+    expect(f).toContain("security definer");
+    expect(f).toContain("where o.id = new.correction_of and o.worker_id = new.worker_id and ec.status = 'ended'");
+    expect(f).toContain("new.engagement_context_id := v_ctx");
+    const c = code(sql);
+    expect(c).toContain(
+      "create trigger journal_entries_ancestor_context_v1 before insert on public.journal_entries for each row execute function public.journal_entries_ancestor_context_v1();",
+    );
+    // Fires before the ownership check and the hash, so both see the stored context.
+    expect("journal_entries_ancestor_context_v1" < "journal_entries_attribution_guard_v1").toBe(true);
+    expect("journal_entries_ancestor_context_v1" < "journal_entries_chain_v1").toBe(true);
+  });
+
+  it("an edit of a record of an ended relationship into another context is refused when it is linked", () => {
+    const f = statement(sql, SUC);
+    expect(f).toContain("if old.superseded_by is null and new.superseded_by is not null");
+    expect(f).toContain("ec.id = old.engagement_context_id and ec.status = 'ended'");
+    expect(f).toContain("s.engagement_context_id is distinct from old.engagement_context_id");
+    expect(f).toContain("raise exception 'correction_context_locked");
+    expect(code(sql)).toContain(
+      "create trigger journal_entries_successor_context_v1 before update of superseded_by on public.journal_entries for each row execute function public.journal_entries_successor_context_v1();",
+    );
+  });
+
+  it("both trigger functions are internal, and the rollback drops triggers before functions", () => {
+    const c = code(sql);
+    for (const fn of ["journal_entries_ancestor_context_v1", "journal_entries_successor_context_v1"]) {
+      expect(c).toContain(`revoke all on function public.${fn}() from public, anon, authenticated;`);
+      expect(c).not.toMatch(new RegExp(`grant execute on function public\\.${fn}`));
+    }
+    const d = code(read(DOWN));
+    for (const fn of ["journal_entries_ancestor_context_v1", "journal_entries_successor_context_v1"]) {
+      const trig = d.indexOf(`drop trigger if exists ${fn} on public.journal_entries;`);
+      const func = d.indexOf(`drop function if exists public.${fn}();`);
+      expect(trig, fn).toBeGreaterThan(0);
+      expect(func, fn).toBeGreaterThan(trig);
+    }
+  });
+
+  it("the app's edit sends the original context for a record of an ended relationship", () => {
+    const a = read("apps/web/lib/journal/actions.ts");
+    expect(a).toContain('.select("id, superseded_by, deleted_at, original_text, original_language, engagement_context_id")');
+    expect(a).toMatch(/if \(oldContext\?\.status === "ended"\) engagementId = oldContextId;/);
+    expect(a).toContain("p_engagement_context_id: engagementId,");
+  });
+});
+
 describe("the rollback restores main's definitions exactly", () => {
   const down = read(DOWN);
 
@@ -264,6 +317,9 @@ describe("the local-stack proof travels with the SQL", () => {
       "W's corrections of retained records stay with A, beside their originals",
       "each correction is traceable to its original, its author and its time",
       "a personal or another organization's record moved into the ended context after the end stays out of A's reach",
+      "an edit of a historical record into the personal journal is refused, and nothing is written",
+      "a correction of a confirmed historical record stays in the employment's context, and A reads it",
+      "the original's text, author, time and hash are unchanged by its corrections",
     ]) {
       expect(spec, phrase).toContain(phrase);
     }
