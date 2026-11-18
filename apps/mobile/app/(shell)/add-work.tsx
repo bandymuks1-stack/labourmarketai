@@ -16,10 +16,9 @@ import { theme } from "../../src/ui/theme";
 export default function Screen() {
   const { t } = useLocale();
   const router = useRouter();
-  const done = () => {
-    if (router.canGoBack()) router.back();
-    else router.replace("/(shell)/profile");
-  };
+  // Hidden tab: `back` would land on the FIRST tab (Today), not the profile
+  // the form was opened from, and the new row would never be seen.
+  const done = () => router.navigate("/(shell)/profile");
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>

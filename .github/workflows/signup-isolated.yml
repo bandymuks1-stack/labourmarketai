@@ -53,6 +53,8 @@ on:
       - "apps/web/tests/e2e/journal-template-isolated.spec.ts"
       - "apps/web/lib/journal/journal-templates*.ts"
       - "apps/web/components/app/journal-entry-composer.tsx"
+      # ... and reaches the Living CV's journal-entry figure (T-4).
+      - "apps/web/lib/profile/trust-signals.ts"
       # The code experience-integration-isolated.spec.ts guards (#3354, decision 0025).
       - "apps/web/app/*/cv/**"
       - "apps/web/app/*/dashboard/work-in-numbers/**"
