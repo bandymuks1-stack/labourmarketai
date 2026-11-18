@@ -25,6 +25,7 @@ import {
 } from "@/lib/privacy/discoverability-actions";
 import { buildOwnDiscoverabilityPreview } from "@/lib/privacy/discoverability-preview";
 import {
+  defaultVisibilityNotice,
   discoverabilityConsentLabels,
   discoverabilityPreviewFields,
   toConsentLocale,
@@ -215,6 +216,7 @@ export default async function PrivacyPage({
             locale={locale}
             state={state}
             legal={legal}
+            notice={defaultVisibilityNotice(locale)}
             preview={previewFields}
             labels={discoverabilityConsentLabels(tc, locale)}
           />

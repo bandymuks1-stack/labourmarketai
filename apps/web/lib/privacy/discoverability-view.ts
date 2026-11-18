@@ -6,7 +6,9 @@ import type {
 } from "@/components/app/discoverability-consent";
 import {
   CONSENT_LOCALES,
+  PROFILE_DISCOVERABILITY_DEFAULT_NOTICE_V1,
   type ConsentLocale,
+  type ConsentTextBlocks,
 } from "@/lib/privacy/consent-definitions";
 import type { DiscoverabilityPreviewField } from "@/lib/privacy/discoverability-preview";
 
@@ -70,6 +72,8 @@ export function discoverabilityConsentLabels(
     details: tc("switch.details"),
     grantedNote: tc("switch.grantedNote"),
     withdrawnNote: tc("switch.withdrawnNote"),
+    defaultOnNote: tc("switch.defaultOnNote"),
+    defaultPendingNote: tc("switch.defaultPendingNote", { date: "{date}" }),
     previewTitle: tc("preview.title"),
     previewEmpty: tc("preview.empty"),
     decidedAtLabel: tc("labels.decidedAt"),
@@ -99,4 +103,10 @@ export function discoverabilityPreviewFields(
               tc("preview.anonymousValue", { token: f.value })
             : f.value,
   }));
+}
+
+/** The free-worker default notice (20261025100000) in the reader's consent
+ *  locale — the exact hashed text the ledger records as shown. */
+export function defaultVisibilityNotice(locale: string): ConsentTextBlocks {
+  return PROFILE_DISCOVERABILITY_DEFAULT_NOTICE_V1.texts[toConsentLocale(locale)];
 }

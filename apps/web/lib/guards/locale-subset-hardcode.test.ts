@@ -238,8 +238,8 @@ const PRODUCT_ALLOWLIST: Readonly<Record<string, { readonly hits: number; readon
     why: "FROZEN_LOCALES: the locales active when the landing freeze snapshot was taken; a historical hash baseline, not a served-locale list.",
   },
   "lib/privacy/consent-definitions.ts": {
-    hits: 4,
-    why: "CONSENT_LOCALES plus the three per-purpose legal-text maps keyed by it: the locales whose consent LEGAL texts the owner approved (each addition re-pins every purpose hash in a RED migration). sv is active but its texts wait for separate owner legal handling (#3232); until then toConsentLocale serves sv readers the labelled English text with a Swedish note, never Lithuanian. Remove this entry when #3232 lands.",
+    hits: 5,
+    why: "CONSENT_LOCALES plus the three per-purpose legal-text maps keyed by it, plus the free-worker default-visibility notice map (PROFILE_DISCOVERABILITY_DEFAULT_NOTICE_V1, #2747; hashed over CONSENT_LOCALES like the consents): the locales whose consent LEGAL texts the owner approved (each addition re-pins every purpose hash in a RED migration). sv is active but its texts wait for separate owner legal handling (#3232); until then toConsentLocale serves sv readers the labelled English text with a Swedish note, never Lithuanian. Remove this entry when #3232 lands.",
   },
   "lib/public-claims/registry.ts": {
     hits: 1,

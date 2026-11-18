@@ -109,8 +109,9 @@ describe("the component — one action each way, the result said", () => {
   });
 
   it("ON: the withdraw button is rendered directly, not behind a 'manage' step", () => {
-    expect(granted).toContain('data-testid="discoverability-withdraw"');
-    expect(granted.split('data-testid="discoverability-withdraw"')[0]).not.toMatch(/setManaging|discoverability-manage/);
+    expect(granted).toContain('{withdrawButton}');
+    expect(granted.split('{withdrawButton}')[0]).not.toMatch(/setManaging|discoverability-manage/);
+    expect(src).toMatch(/const withdrawButton = \(\s+<button[\s\S]{0,400}data-testid="discoverability-withdraw"/);
     expect(src).not.toContain("discoverability-reopen");
   });
 

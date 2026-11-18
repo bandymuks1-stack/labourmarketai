@@ -81,7 +81,10 @@ export function employerVisibilityOf(
   state: StateLike | null | undefined,
 ): EmployerVisibility {
   if (!state || state.kind !== "ok") return "unknown";
-  return state.status === "granted" ? "on" : "off";
+  // ON = what the RLS predicate says: a current grant, or the free-worker
+  // default in force (20261025100000). A default whose notice period still
+  // runs is not yet on.
+  return state.status === "granted" || state.status === "default_on" ? "on" : "off";
 }
 
 // ── THE ONE-TIME ASK AFTER A WORK-CARD SAVE ────────────────────────────────

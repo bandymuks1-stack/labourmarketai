@@ -89,6 +89,9 @@ export type TodayAttention = {
   readonly invitations: number | null;
   /** Unread conversations; `onlyId` when exactly one, so the door opens it. */
   readonly unread: { readonly count: number; readonly onlyId: string | null } | null;
+  /** The mailbox is not proven yet: invitations addressed to the e-mail are
+   *  hidden until it is (the count above is the account-keyed ones only). */
+  readonly invitationsMailboxUnproven?: boolean;
 };
 
 export type TodayDoorKind = "offers" | "invitations" | "unread";
@@ -104,6 +107,8 @@ export type TodayOpenItem =
   | { readonly kind: "offers"; readonly count: number; readonly href: string }
   | { readonly kind: "invitations"; readonly count: number; readonly href: string }
   | { readonly kind: "unread"; readonly count: number; readonly href: string }
+  /** Prove the mailbox to see invitations sent to it — one thing to do, not a failure. */
+  | { readonly kind: "verifyEmail"; readonly href: string }
   | { readonly kind: "untimed"; readonly entries: number }
   | { readonly kind: "unlabelled"; readonly entries: number }
   | { readonly kind: "check"; readonly check: WorkTimeCheck };
@@ -231,6 +236,9 @@ export function deriveTodayDoors(attention: TodayAttention | null): TodayOpenIte
       count: attention.invitations,
       href: TODAY_DOOR_HREFS.invitations,
     });
+  }
+  if (attention.invitationsMailboxUnproven === true) {
+    items.push({ kind: "verifyEmail", href: TODAY_DOOR_HREFS.invitations });
   }
   if (attention.unread !== null && attention.unread.count > 0) {
     items.push({

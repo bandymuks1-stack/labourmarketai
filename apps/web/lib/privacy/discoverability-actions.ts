@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import {
+  PROFILE_DISCOVERABILITY_DEFAULT_NOTICE_V1,
   PROFILE_DISCOVERABILITY_V1,
   consentTextHash,
 } from "@/lib/privacy/consent-definitions";
@@ -43,13 +44,52 @@ export type DiscoverabilityStatus =
   | "granted"
   | "withdrawn"
   | "granted_stale_version"
-  | "not_set";
+  | "not_set"
+  /** 20261025100000: a free worker who never decided, the switch armed and
+   *  the default notice on record — discoverable by DEFAULT (not a consent). */
+  | "default_on"
+  /** As `default_on`, but an existing account's notice period is running. */
+  | "default_pending";
+
+/**
+ * THE THREE CHOICE STATES (owner 2026-10-25), from the ONE ledger: a person
+ * who never decided is NOT_ASKED — never a refusal; a withdrawal or a recorded
+ * "not now" is EXPLICITLY_DISABLED and is never switched on by any default; a
+ * grant is EXPLICITLY_ENABLED. Before 20261025100000 the database does not
+ * return it, so it is derived from the status (a "not now" was not recorded
+ * then and cannot be told apart from never asked).
+ */
+export type DiscoverabilityChoice = "not_asked" | "explicitly_disabled" | "explicitly_enabled";
 
 export interface DiscoverabilityState {
   kind: "ok" | "needs-migration" | "not-authed" | "error";
   status: DiscoverabilityStatus;
   decidedAt: string | null;
   version: string | null;
+  /** Optional so every older constructor keeps compiling; readers default it. */
+  choice?: DiscoverabilityChoice;
+  /** The default notice is due for this person (switch armed, free worker, never decided). */
+  noticeDue?: boolean;
+  /** Why the default does or does not apply (null once the person decided). */
+  defaultScope?: "free" | "employed" | "learner" | null;
+  /** When the default makes this person discoverable (notice + any notice period). */
+  defaultFrom?: string | null;
+}
+
+const STATUSES: readonly DiscoverabilityStatus[] = [
+  "granted",
+  "withdrawn",
+  "granted_stale_version",
+  "not_set",
+  "default_on",
+  "default_pending",
+];
+
+function choiceOf(status: DiscoverabilityStatus, raw: unknown): DiscoverabilityChoice {
+  if (raw === "not_asked" || raw === "explicitly_disabled" || raw === "explicitly_enabled") return raw;
+  if (status === "granted" || status === "granted_stale_version") return "explicitly_enabled";
+  if (status === "withdrawn") return "explicitly_disabled";
+  return "not_asked";
 }
 
 export async function getMyDiscoverabilityState(): Promise<DiscoverabilityState> {
@@ -72,12 +112,22 @@ export async function getMyDiscoverabilityState(): Promise<DiscoverabilityState>
     if (error.code && ABSENT.has(error.code)) return empty("needs-migration");
     return empty("error");
   }
-  const status = (data?.status ?? "not_set") as DiscoverabilityStatus;
+  // An unrecognised status is UNKNOWN (SEP-7), never silently "not set".
+  const rawStatus: unknown = data?.status ?? "not_set";
+  if (typeof rawStatus !== "string" || !(STATUSES as readonly string[]).includes(rawStatus)) {
+    return empty("error");
+  }
+  const status = rawStatus as DiscoverabilityStatus;
+  const scope: unknown = data?.defaultScope;
   return {
     kind: "ok",
     status,
     decidedAt: typeof data?.decidedAt === "string" ? data.decidedAt : null,
     version: typeof data?.version === "string" ? data.version : null,
+    choice: choiceOf(status, data?.choice),
+    noticeDue: data?.noticeDue === true,
+    defaultScope: scope === "free" || scope === "employed" || scope === "learner" ? scope : null,
+    defaultFrom: typeof data?.defaultFrom === "string" ? data.defaultFrom : null,
   };
 }
 
@@ -140,6 +190,69 @@ export async function withdrawProfileDiscoverability(input?: {
     return { kind: "error" };
   }
   if (!data?.ok) return { kind: "error" };
+  revalidatePath("/", "layout");
+  return { kind: "ok" };
+}
+
+/**
+ * "Not now" — recorded as a DECISION (20261025100000), so it is never mistaken
+ * for "never asked" and no default ever switches it on. Before that migration
+ * the RPC is absent and the decline stays what it always was: local only,
+ * nothing written (`needs-migration` — the screen shows the same result).
+ */
+export async function declineProfileDiscoverability(input: {
+  locale: string;
+  source?: string;
+}): Promise<ConsentActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+  const { data, error } = await asAny(supabase).rpc("decline_profile_discoverability_v1", {
+    p_locale: toConsentLocale(input.locale),
+    p_source: discoverabilityConsentSourceOf(input.source),
+  });
+  if (error) {
+    if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
+    return { kind: "error" };
+  }
+  if (!data?.ok) return { kind: "error" };
+  revalidatePath("/", "layout");
+  return { kind: "ok" };
+}
+
+/**
+ * The default-visibility notice was on the person's screen — recorded in the
+ * ledger as `notice_shown` with the registry's notice version + hash (the RPC
+ * rejects any other text). Called ONLY by the consent component while it shows
+ * the notice. It decides nothing: the default then applies by the database
+ * rule (switch armed, free worker, never decided). Absent RPC → needs-migration.
+ */
+export async function recordVisibilityDefaultNotice(input: {
+  locale: string;
+  source?: string;
+}): Promise<ConsentActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+  const def = PROFILE_DISCOVERABILITY_DEFAULT_NOTICE_V1;
+  const { data, error } = await asAny(supabase).rpc("record_visibility_default_notice_v1", {
+    p_version: def.version,
+    p_hash: consentTextHash(def),
+    p_locale: toConsentLocale(input.locale),
+    p_source: discoverabilityConsentSourceOf(input.source),
+  });
+  if (error) {
+    if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
+    return { kind: "error" };
+  }
+  if (!data?.ok) {
+    if (data?.error === "stale_notice_version") return { kind: "stale-version" };
+    return { kind: "error" };
+  }
   revalidatePath("/", "layout");
   return { kind: "ok" };
 }

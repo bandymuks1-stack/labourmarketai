@@ -1729,6 +1729,9 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261023190000_ops_runtime_samples_v1.sql",
       // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
       "20261025045152_project_forecasts_v1.sql",
+      // 2026-10-25 (RED, needs-human-gate, applied by main after the owner's one confirmation):
+      // free workers discoverable by default — derived from the one consent ledger, switch OFF.
+      "20261025100000_free_worker_visibility_default_v1.sql",
       // 2026-10-27: owner approved #2841 in chat (apply + merge). Two service_role-only
       // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
       // 20261027193124.

@@ -9026,7 +9026,8 @@
         "unknown": "Öppna punkter kunde inte läsas.",
         "offers": "{n, plural, one {# bokningserbjudande} other {# bokningserbjudanden}} väntar på ditt svar",
         "invitations": "{n, plural, one {# inbjudan} other {# inbjudningar}} väntar på ditt svar",
-        "unread": "{n, plural, one {# konversation} other {# konversationer}} med olästa meddelanden"
+        "unread": "{n, plural, one {# konversation} other {# konversationer}} med olästa meddelanden",
+        "verifyEmail": "Öppna länken vi mejlade dig för att se inbjudningar som skickats till den adressen"
       },
       "growth": {
         "title": "Utveckling",
@@ -11476,7 +11477,9 @@
       "empty": "Inga poster än. Varje samtycke och återkallelse listas här.",
       "action": {
         "granted": "Lämnat",
-        "withdrawn": "Återkallat"
+        "withdrawn": "Återkallat",
+        "declined": "Inte nu",
+        "notice_shown": "Meddelande om synlighet visat"
       },
       "purpose": {
         "profile_discoverability": "Synlighet för arbetsgivare",
@@ -11620,7 +11623,9 @@
       "turnOn": "Läs villkoren och slå på",
       "details": "Vad företag ser och de fullständiga villkoren",
       "grantedNote": "Klart – företag kan nu hitta din yrkesprofil, under en anonym beteckning.",
-      "withdrawnNote": "Klart – din profil visas inte längre i nya sökningar från företag."
+      "withdrawnNote": "Klart – din profil visas inte längre i nya sökningar från företag.",
+      "defaultOnNote": "På som standard eftersom du söker arbete och inte arbetar för ett företag via LabourMarket.ai. Stäng av med ett tryck – då förblir den avstängd tills du själv slår på den.",
+      "defaultPendingNote": "Företag kan hitta din yrkesprofil från och med {date}. Om du inte vill det, stäng av nu – då förblir den avstängd."
     }
   },
   "planning": {
