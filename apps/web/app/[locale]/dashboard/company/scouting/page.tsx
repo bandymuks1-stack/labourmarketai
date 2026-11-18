@@ -72,6 +72,9 @@ import { loadDemandHistory } from "@/lib/demand/demand-history-facts";
 import { DemandHistoryList } from "@/components/app/demand-history-list";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Card } from "@/components/ui/Card";
+import { chipLinkClassName } from "@/components/ui/Chip";
+import { buttonLinkClassName } from "@/components/ui/Button";
+import { Check } from "lucide-react";
 import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
@@ -487,7 +490,7 @@ export default async function CompanyScoutingPage({
           <p className="text-sm text-text-secondary">{t("noDemands")}</p>
           <Link
             href={`/${locale}/dashboard/company/needs#demand-intake`}
-            className="rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
+            className={buttonLinkClassName("secondary", "sm")}
             data-testid="scouting-no-demands-cta"
           >
             {t("noDemandsCta")} →
@@ -499,12 +502,12 @@ export default async function CompanyScoutingPage({
             <Link
               key={d.id}
               href={`/${locale}/dashboard/company/scouting?request=${d.id}`}
-              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                selected === d.id
-                  ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                  : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
-              }`}
+              aria-current={selected === d.id ? "page" : undefined}
+              className={`${chipLinkClassName(selected === d.id)} max-w-full`}
             >
+              {selected === d.id ? (
+                <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
+              ) : null}
               {resolveDemandTitle(d.title, demandTitleLabels) ||
                 tDemandReadback("untitledInquiry")}
               {/* HOW MANY PEOPLE ARE WAITING ON THIS ONE. Without it the
@@ -608,19 +611,35 @@ export default async function CompanyScoutingPage({
           data-testid="scouting-filters"
           aria-label={t("filters.title")}
         >
-          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {t("filters.title")}
-          </p>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-x-3">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+              {t("filters.title")}
+            </p>
+            {/* The way back out of a narrowed list sits beside the title, so
+                it stays in reach when the chips below scroll sideways. */}
+            {hasActiveScoutFilters(result.filters) ? (
+              <Link
+                href={filterHref({ skill: null, country: null, availableNow: false })}
+                data-testid="scout-filter-clear"
+                className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue hover:text-brand-champagne"
+              >
+                {t("filters.clear")}
+              </Link>
+            ) : null}
+          </div>
+          {/* PHONE: one row that scrolls sideways inside itself, so a long
+              facet list never pushes the candidates below the fold and the
+              page itself never scrolls sideways. From sm up the chips wrap. */}
+          <div className="-m-1 flex gap-2 overflow-x-auto p-1 sm:m-0 sm:flex-wrap sm:overflow-visible sm:p-0">
             <Link
               href={filterHref({ availableNow: !result.filters.availableNow })}
               data-testid="scout-filter-available"
-              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                result.filters.availableNow
-                  ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                  : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
-              }`}
+              aria-current={result.filters.availableNow ? "true" : undefined}
+              className={`${chipLinkClassName(result.filters.availableNow)} shrink-0 whitespace-nowrap`}
             >
+              {result.filters.availableNow ? (
+                <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
+              ) : null}
               {t("filters.availableNow")}
             </Link>
             {result.facets.countries.map((cc) => (
@@ -630,12 +649,12 @@ export default async function CompanyScoutingPage({
                   country: result.filters.country === cc ? null : cc,
                 })}
                 data-testid={`scout-filter-country-${cc}`}
-                className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                  result.filters.country === cc
-                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
-                }`}
+                aria-current={result.filters.country === cc ? "true" : undefined}
+                className={`${chipLinkClassName(result.filters.country === cc)} shrink-0 whitespace-nowrap`}
               >
+                {result.filters.country === cc ? (
+                  <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
+                ) : null}
                 {countryDisplayName(cc, locale)}
               </Link>
             ))}
@@ -646,24 +665,15 @@ export default async function CompanyScoutingPage({
                   skill: result.filters.skill === s ? null : s,
                 })}
                 data-testid={`scout-filter-skill-${s}`}
-                className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                  result.filters.skill === s
-                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
-                }`}
+                aria-current={result.filters.skill === s ? "true" : undefined}
+                className={`${chipLinkClassName(result.filters.skill === s)} shrink-0 whitespace-nowrap`}
               >
+                {result.filters.skill === s ? (
+                  <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
+                ) : null}
                 {tSkill.has(s as never) ? tSkill(s as never) : s.replace(/-/g, " ")}
               </Link>
             ))}
-            {hasActiveScoutFilters(result.filters) ? (
-              <Link
-                href={filterHref({ skill: null, country: null, availableNow: false })}
-                data-testid="scout-filter-clear"
-                className="rounded-full border border-transparent px-3 py-1.5 text-xs font-medium text-brand-blue hover:text-brand-champagne"
-              >
-                {t("filters.clear")}
-              </Link>
-            ) : null}
           </div>
         </section>
       ) : null}
@@ -1068,7 +1078,7 @@ export default async function CompanyScoutingPage({
           {hasActiveScoutFilters(result.filters) ? (
             <Link
               href={filterHref({ skill: null, country: null, availableNow: false })}
-              className="text-xs font-medium text-brand-blue hover:text-brand-champagne"
+              className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue hover:text-brand-champagne"
             >
               {t("filters.clear")} →
             </Link>
@@ -1078,7 +1088,7 @@ export default async function CompanyScoutingPage({
               next action. */}
           <Link
             href={`/${locale}/dashboard/company/needs#demand-intake`}
-            className="text-xs font-medium text-brand-blue hover:text-brand-champagne"
+            className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue hover:text-brand-champagne"
             data-testid="scouting-empty-edit-need"
           >
             {t("editNeedCta")} →
@@ -1266,9 +1276,9 @@ export default async function CompanyScoutingPage({
             return (
               <li
                 key={c.workerId}
-                className="card-border flex flex-col gap-3 p-4"
                 data-testid={`scout-candidate-${c.workerId}`}
               >
+                <Card compact className="flex flex-col gap-3">
                 <PersonIdentityCard
                   variant="candidate-review"
                   testid={`scout-identity-${c.workerId}`}
@@ -1396,7 +1406,7 @@ export default async function CompanyScoutingPage({
                   {actsForClient ? null : (
                   <Link
                     href={nextAction.href}
-                    className="text-meta font-medium text-brand-blue hover:text-brand-champagne"
+                    className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue hover:text-brand-champagne"
                     data-testid={`scout-pipeline-next-${c.workerId}`}
                   >
                     {tPipe(nextAction.key.replace("candidatePipeline.", "") as never)} →
@@ -1949,6 +1959,7 @@ export default async function CompanyScoutingPage({
 
                   </IdentityDisclosure>
                 </PersonIdentityCard>
+                </Card>
               </li>
             );
           })}

@@ -44,7 +44,7 @@ export function CapabilityGate<T>({
 
   if (state.status === "loading") {
     return (
-      <View style={styles.loading} accessibilityLabel={t("domain.loading")}>
+      <View style={styles.loading} accessibilityLabel={t("domain.loading")} testID="capability-loading">
         <ActivityIndicator color={theme.color.accent} />
         <Body muted>{t("domain.loading")}</Body>
       </View>
