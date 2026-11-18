@@ -1,7 +1,7 @@
 name: prod-qa-walk
 # The spec in the run title lets acceptance-campaign.yml attribute a run that reached production
 # even when it left no artifact.
-run-name: prod-qa-walk ${{ github.event_name == 'workflow_dispatch' && inputs.spec || github.event_name }}
+run-name: prod-qa-walk ${{ github.event_name == 'workflow_dispatch' && format('{0} {1}', inputs.spec, inputs.device) || github.event_name }}
 
 # PRODUCTION SIGNED-IN QA, without an agent ever holding a production key
 # (owner programme 2026-10-12 §10). Before this, a signed-in production walk
@@ -78,6 +78,8 @@ on:
           # production in a real browser). Dispatch only, never in the rotation.
           - worker-records-exports
           - company-talent-history
+          # #3354: the CV as a signed-in person sees it, READ ONLY (non-GET requests aborted). Dispatch only.
+          - cv-readonly
           - company-governance
           - public-market-direction
           # AI-dependent rows proven with the AI runtime OFF (deterministic path or the honest off state).
@@ -531,6 +533,7 @@ jobs:
             admin-console) SPEC=tests/e2e/prod-admin-console.spec.ts ;;
             worker-records-exports) SPEC=tests/e2e/prod-worker-records-exports.spec.ts ;;
             company-talent-history) SPEC=tests/e2e/prod-company-talent-history.spec.ts ;;
+            cv-readonly) SPEC=tests/e2e/prod-cv-readonly.spec.ts ;;
             company-governance) SPEC=tests/e2e/prod-company-governance.spec.ts ;;
             public-market-direction) SPEC=tests/e2e/prod-public-market-direction.spec.ts ;;
             ai-off-honesty) SPEC=tests/e2e/prod-ai-off-honesty.spec.ts ;;

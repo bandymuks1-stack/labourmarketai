@@ -65,6 +65,12 @@ export type LiveMarketLandingSnapshot = {
  * `unavailable` covers "the read did not answer" AND "not switched on"; the
  * landing omits the band for both, and for an empty `live` page too. Unknown
  * is never rendered as "no jobs".
+ *
+ * The cached snapshot holds that page AS THE BOARD RETURNED IT; the few rows a
+ * visitor sees are picked at render time by `pickLandingVacancySample`, for
+ * the visitor's language (the owner's language-first decision, dated in
+ * `lib/guards/landing-freeze.ts`). The snapshot itself is
+ * shared by every locale, so it stays language-neutral.
  */
 export type LiveMarketVacancySample = {
   readonly basis: "live" | "unavailable";
@@ -208,11 +214,29 @@ export function landingVacancyFingerprint(v: PublicVacancyPreview): string {
 }
 
 /**
+ * The same language test the band and `/jobs` use to say "original in …":
+ * the advert's language is the visitor's when its code starts with the
+ * visitor's two-letter locale ("sv", "sv-SE" → Swedish).
+ */
+export function isVisitorLanguage(code: string | null, locale: string): boolean {
+  return !!code && code.slice(0, 2).toLowerCase() === locale.slice(0, 2).toLowerCase();
+}
+
+/**
  * The first few rows of the board's own first page, in the board's own
  * order — SELECTED, never re-ranked by a score and never filtered by a
  * profession.
  *
- * Three preferences, all about the reader rather than the market:
+ * Owner decision (dated in `lib/guards/landing-freeze.ts`): adverts in the
+ * VISITOR'S LANGUAGE come first,
+ * then the other suitable adverts. It is an ORDER, never a filter: an advert
+ * in another language (another EU country's, today almost all Swedish) is
+ * never left out for its language; it simply follows the visitor's own. The
+ * landing applies no profession, skill or place filter, so there is nothing
+ * for the language to outweigh here.
+ *
+ * Inside each language group, three preferences, all about the reader
+ * rather than the market:
  *   · a row with a canonical `professionSlug` heads the card in the
  *     VISITOR'S language (the anonymous title is withheld, so the heading is
  *     the profession name), while a row without one can only head with the
@@ -224,18 +248,24 @@ export function landingVacancyFingerprint(v: PublicVacancyPreview): string {
  *     looks different — and when the page holds fewer distinct-looking rows
  *     than the sample size, the sample is SHORTER, never padded with a
  *     look-alike.
- * The relative order inside each group is the RPC's, unchanged.
+ * The relative order inside each group is the RPC's, unchanged. Without a
+ * `visitorLanguage` every row is in one group, as before.
  */
 export function pickLandingVacancySample(
   vacancies: readonly PublicVacancyPreview[],
+  visitorLanguage?: string,
 ): PublicVacancyPreview[] {
-  const withSlug = vacancies.filter((v) => v.professionSlug);
-  const occupationOnly = vacancies.filter(
-    (v) => !v.professionSlug && v.occupation,
-  );
+  const own = (v: PublicVacancyPreview) =>
+    visitorLanguage !== undefined && isVisitorLanguage(v.sourceLanguage, visitorLanguage);
+  const groups = [
+    vacancies.filter((v) => own(v) && v.professionSlug),
+    vacancies.filter((v) => own(v) && !v.professionSlug && v.occupation),
+    vacancies.filter((v) => !own(v) && v.professionSlug),
+    vacancies.filter((v) => !own(v) && !v.professionSlug && v.occupation),
+  ];
   const seen = new Set<string>();
   const picked: PublicVacancyPreview[] = [];
-  for (const candidate of [...withSlug, ...occupationOnly]) {
+  for (const candidate of groups.flat()) {
     if (picked.length >= LANDING_VACANCY_SAMPLE_SIZE) break;
     const look = landingVacancyFingerprint(candidate);
     if (seen.has(look)) continue;
@@ -256,9 +286,12 @@ async function readVacancySample(
     searchPublicVacancyPreviews({ page: 1 }, publicClient),
   );
   if (result?.status !== "ok") return UNAVAILABLE_SAMPLE;
+  // The board's page as it came back: the cached snapshot is shared by every
+  // locale, so the visitor's pick (`pickLandingVacancySample`) is made at
+  // render time, where the visitor's language is known.
   return {
     basis: "live",
-    vacancies: pickLandingVacancySample(result.vacancies),
+    vacancies: result.vacancies,
   };
 }
 
@@ -389,11 +422,16 @@ export async function readFreshLiveMarketLandingSnapshot(
  * when the snapshot gained `sample` — so under the old key a data-cache entry
  * written before a deploy would be served to code that reads `sample` and
  * finds nothing. A new shape gets a new key.
+ *
+ * v3 (the language-first owner decision): `sample.vacancies` is now the board's whole
+ * first page, not the four rows picked from it — the pick moved to render
+ * time, per visitor language. An old v2 entry would hand the new code only
+ * four language-blind rows, so v2 is not read.
  */
 const readCachedSnapshot = unstable_cache(
   (resolveProfessions: boolean) =>
     readFreshLiveMarketLandingSnapshot(undefined, resolveProfessions),
-  ["live-market-landing-v2"],
+  ["live-market-landing-v3"],
   { revalidate: 300 },
 );
 

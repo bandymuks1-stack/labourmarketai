@@ -59,36 +59,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "[EN] Why agencies",
-      "headline": "[EN] Leverage, not loss of control",
-      "items": [
-        {
-          "desc": "[EN] Workers, availability and status in one place.",
-          "title": "[EN] Manage your pool"
-        },
-        {
-          "desc": "[EN] Broker demand without losing the relationship.",
-          "title": "[EN] Post on behalf of clients"
-        },
-        {
-          "desc": "[EN] Place the right people faster.",
-          "title": "[EN] Fit direction"
-        },
-        {
-          "desc": "[EN] Public, agencies-only or direct — your call.",
-          "title": "[EN] Visibility controls"
-        },
-        {
-          "desc": "[EN] Baltic + Nordic clients and workers.",
-          "title": "[EN] Cross-border reach"
-        },
-        {
-          "desc": "[EN] Capacity insights as demand shifts.",
-          "title": "[EN] Grow your desk"
-        }
-      ]
-    },
     "journey": {
       "eyebrow": "[EN] Agency workflow",
       "headline": "[EN] Run your pool like a desk",
@@ -228,7 +198,10 @@
           "errorOpenNeedLimitIndividual": "Šī organizācija ir sasniegusi sava plāna aktīvo pozīciju ierobežojumu. Nekas netika iekasēts vai mainīts. Sazinieties ar mums.",
           "openNeedUsage": "Aktīvās pozīcijas: izmantotas {used} no {limit} · atlikušas {remaining}",
           "openNeedUsageUpgradeCta": "Aktivizēt plānu „Organizācija”",
-          "openNeedUsageIndividual": "Jūs esat sasniedzis sava plāna ierobežojumu. Sazinieties ar mums, lai pārrunātu savas vajadzības."
+          "openNeedUsageIndividual": "Jūs esat sasniedzis sava plāna ierobežojumu. Sazinieties ar mums, lai pārrunātu savas vajadzības.",
+          "form": {
+            "countryRequired": "Izvēlieties valsti, kurā tiks veikts darbs."
+          }
         }
       },
       "account": {
@@ -630,36 +603,6 @@
         {
           "a": "[EN] Through confirmed skills, employer-confirmed history and contextual fit signals — not self-reported CVs.",
           "q": "[EN] How is worker experience guaranteed?"
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "[EN] Why companies",
-      "headline": "[EN] Supply you can act on",
-      "items": [
-        {
-          "desc": "[EN] Every fit signal shows the reasons behind it.",
-          "title": "[EN] Explainable fit direction"
-        },
-        {
-          "desc": "[EN] Baltic + Nordic supply in one place.",
-          "title": "[EN] Cross-border worker pool"
-        },
-        {
-          "desc": "[EN] You see and own the relationship.",
-          "title": "[EN] No opaque middlemen"
-        },
-        {
-          "desc": "[EN] Hire on evidence, not on claims.",
-          "title": "[EN] Confirmed skills + fit signals"
-        },
-        {
-          "desc": "[EN] See availability shift as it happens.",
-          "title": "[EN] Real-time supply signals"
-        },
-        {
-          "desc": "[EN] You own the worker relationship.",
-          "title": "[EN] Direct contact"
         }
       ]
     },
@@ -2102,7 +2045,8 @@
         "manage": "Mainīt komandas",
         "kindTeam": "komanda",
         "individual": "Piešķirti pa vienam"
-      }
+      },
+      "organizationLink": "Organizācijas vēsture un projekti"
     },
     "workerView": {
       "eyebrow": "Mans projekts",
@@ -3932,7 +3876,9 @@
         "supplyRole": "Kāda profesija",
         "supplyRolePlaceholder": "Piem., metinātājs",
         "supplyTeamSize": "Cik cilvēku jums ir",
-        "supplyLocation": "Kur viņi var strādāt"
+        "supplyLocation": "Kur viņi var strādāt",
+        "demandCountry": "Valsts, kurā tiks veikts darbs",
+        "demandCountryPlaceholder": "piem., Zviedrija vai SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -6473,7 +6419,7 @@
       "assigneePlaceholder": "[EN] Person's email",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -6905,6 +6851,14 @@
   "agencyBridge": {
     "deliveryAccepted": "[EN] Delivered — the client accepted the invitation and now confirms the connection on their Partners page."
   },
+  "scoutingAgencyOffers": {
+    "decision": {
+      "limitOpen": "[EN] You already have 10 booking proposals waiting for workers' answers — the most that can be open at once. Withdraw the ones you no longer need, then accept this candidate. The agency's offer stays open.",
+      "limitDaily": "[EN] You have sent 30 booking proposals in the last 24 hours — the daily limit. Accept this candidate later; nothing was sent and the agency's offer stays open.",
+      "limitUnknown": "[EN] The booking proposal limit is reached (10 waiting for an answer, 30 per day). Withdraw proposals you no longer need or try later; the agency's offer stays open.",
+      "openBookings": "[EN] Open bookings"
+    }
+  },
   "roleDashboards": {
     "company": {
       "programs": {
@@ -7134,7 +7088,8 @@
       "address": "Adrese",
       "project": "Projekts",
       "notInSource": "Avotā nav",
-      "linked": "Saistīts"
+      "linked": "Saistīts",
+      "openProject": "Atvērt projektu"
     },
     "whoWorked": "Kas šeit strādāja",
     "timeline": "Kas darīts",
@@ -7152,15 +7107,30 @@
       "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
       "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
     },
-    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
+    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos.",
+    "projects": {
+      "title": "Projekti platformā",
+      "counts": "{running} notiek · {completed} pabeigti",
+      "untitled": "Projekts bez nosaukuma",
+      "running": "Notiek",
+      "completed": "Pabeigts",
+      "all": "Visi {count} projekti"
+    },
+    "journal": {
+      "title": "Žurnālā ierakstītais darbs",
+      "hours": "Ierakstītās stundas",
+      "confirmed": "Organizācijas apstiprinātās stundas",
+      "people": "Cilvēki, kas ierakstīja darbu",
+      "period": "Ierakstīts",
+      "basis": "No {entries} žurnāla ierakstiem, ko cilvēki veica šajā organizācijā. Skaitīts atsevišķi no augstāk redzamās importētās vēstures un nekad tai nepieskaitīts.",
+      "unavailable": "Šobrīd neizdevās nolasīt šajā organizācijā žurnālā ierakstīto darbu."
+    }
   },
   "workLifecycle": {
     "pending": "Vēl nav",
     "title": "Kas notiek ar jūsu paveikto darbu",
     "titleCompany": "Kas notiek ar jūsu vadīto darbu",
     "example": "Piemērs — nav īsts cilvēks un nav īsti dati",
-    "hint": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
-    "hintWorkers": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
     "open": "Atvērt darba telpā",
     "list": "Darba dzīves cikla soļi",
     "workers": {
@@ -7933,6 +7903,9 @@
       "invites": "Ielūgumu un paziņojumu e-pasti",
       "invitesOn": "ieslēgti",
       "invitesOff": "IZSLĒGTI – ieslēdz atsevišķi: INVITE_EMAIL_PROVIDER=smtp un viena testa nosūtīšana"
+    },
+    "alerts": {
+      "title": "Īpašnieka brīdinājumi un push paziņojumi"
     }
   },
   "historyDuplicates": {
@@ -8075,7 +8048,6 @@
       "close": "Aizvērt",
       "functions": "Darbības",
       "professions": "Profesijas",
-      "opensNow": "Konts nav nepieciešams",
       "signInWhenOpen": "Jāpiesakās",
       "allSectors": "Visas nozares",
       "fullList": "Pilns saraksts"

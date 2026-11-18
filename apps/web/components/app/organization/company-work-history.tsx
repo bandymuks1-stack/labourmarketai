@@ -12,6 +12,8 @@ import {
   type CompanyWorkHistoryLoad,
 } from "@/lib/organization-evidence/company-work-history-read";
 import { isPeriodRecord, type PlaceGroup } from "@/lib/organization-evidence/company-work-history";
+import type { OrganizationProjects } from "@/lib/organization-evidence/organization-projects";
+import type { OrganizationJournal } from "@/lib/organization-evidence/organization-journal";
 import { BusinessHistoryOverview } from "@/components/app/organization/business-history-overview";
 import { OpenWorkspaceButton } from "@/components/app/organization/open-workspace-button";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
@@ -105,6 +107,10 @@ export async function CompanyWorkHistory({
             </p>
           ))}
         </Card>
+        {/* A company with no imported history can still have real projects
+            and journal work. */}
+        <OrganizationJournalBlock journal={load.journal} t={t} locale={locale} />
+        <OrganizationProjectsBlock projects={load.projects} t={t} />
       </section>
     );
   }
@@ -159,6 +165,10 @@ export async function CompanyWorkHistory({
         <Stat concept="calendar" value={periodLabel ?? "—"} label={t("stats.period")} />
       </div>
 
+      <OrganizationJournalBlock journal={load.journal} t={t} locale={locale} />
+
+      <OrganizationProjectsBlock projects={load.projects} t={t} />
+
       <ul id="company-work-history-places" className="grid scroll-mt-20 gap-3 md:grid-cols-2" data-testid="company-work-history-places">
         {placed.map((p) => (
           <li key={p.key}>
@@ -185,6 +195,105 @@ export async function CompanyWorkHistory({
           {t("scope.missing")}
         </p>
       </Card>
+    </section>
+  );
+}
+
+/** THE ORGANIZATION'S JOURNAL WORK (#3354, contract rule 2): what its people
+ *  recorded under its engagements, as one aggregate. A separate ledger from
+ *  the imported history above, never added to it; no name and no per-person
+ *  line. An unreadable ledger says so, never "0 h". */
+function OrganizationJournalBlock({
+  journal,
+  t,
+  locale,
+}: {
+  journal: OrganizationJournal | null;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+  locale: string;
+}) {
+  if (!journal) {
+    return (
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-journal-unavailable">
+        {t("journal.unavailable")}
+      </p>
+    );
+  }
+  if (journal.entries === 0) return null;
+  const when = span(journal.firstMonth ? `${journal.firstMonth}-01` : null, journal.lastMonth ? `${journal.lastMonth}-01` : null, locale);
+  return (
+    <section
+      className="flex flex-col gap-2"
+      data-testid="company-work-history-journal"
+      data-hours={journal.hours}
+      data-confirmed-hours={journal.confirmedHours}
+      data-people={journal.people}
+      aria-label={t("journal.title")}
+    >
+      <h3 className="font-display text-lg font-semibold text-text-primary">{t("journal.title")}</h3>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat concept="time" value={`${nf(journal.hours)} h`} label={t("journal.hours")} />
+        <Stat concept="time" value={`${nf(journal.confirmedHours)} h`} label={t("journal.confirmed")} />
+        <Stat concept="person" value={String(journal.people)} label={t("journal.people")} />
+        <Stat concept="calendar" value={when ?? "—"} label={t("journal.period")} />
+      </div>
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-journal-basis">
+        {t("journal.basis", { entries: journal.entries })}
+      </p>
+    </section>
+  );
+}
+
+/** THE ORGANIZATION'S PROJECTS (#3354): what it ran on the platform, each one
+ *  door to its project page. A track record, not a person's: no hours or
+ *  skills of anyone are shown or carried here. */
+function OrganizationProjectsBlock({
+  projects,
+  t,
+}: {
+  projects: OrganizationProjects | null;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  if (!projects || projects.total === 0) return null;
+  return (
+    <section className="flex flex-col gap-2" data-testid="company-work-history-projects" aria-label={t("projects.title")}>
+      <header className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="font-display text-lg font-semibold text-text-primary">{t("projects.title")}</h3>
+        <p className="text-meta text-text-muted" data-testid="company-work-history-projects-counts">
+          {t("projects.counts", { running: projects.running, completed: projects.completed })}
+        </p>
+      </header>
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {projects.items.map((p) => (
+          <li key={p.id}>
+            <Link
+              href={`/dashboard/projects/${p.id}` as "/dashboard"}
+              className="flex min-h-11 items-center justify-between gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-2.5 transition-colors hover:border-brand-blue"
+              data-testid="company-work-history-project"
+              data-project={p.id}
+            >
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-semibold text-text-primary">
+                  {p.title ?? t("projects.untitled")}
+                </span>
+                {p.city ? <span className="block truncate text-meta text-text-muted">{p.city}</span> : null}
+              </span>
+              <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
+                {p.completed ? t("projects.completed") : t("projects.running")}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {projects.total > projects.items.length ? (
+        <Link
+          href={"/dashboard/projects" as "/dashboard"}
+          className="w-fit text-meta font-semibold text-brand-blue hover:underline"
+          data-testid="company-work-history-projects-all"
+        >
+          {t("projects.all", { count: projects.total })} →
+        </Link>
+      ) : null}
     </section>
   );
 }
@@ -337,7 +446,24 @@ export async function CompanyPlaceHistory({
           ).map(([k, present]) => (
             <div key={k} className="flex flex-col">
               <dt className="font-mono text-meta uppercase tracking-label text-text-muted">{t(`facts.${k}`)}</dt>
-              <dd className="text-text-secondary">{k === "address" && place.scope.addressText ? place.scope.addressText : present ? t("facts.linked") : t("facts.notInSource")}</dd>
+              <dd className="text-text-secondary">
+                {k === "project" && place.scope.projectId ? (
+                  /* The place's project, one door away (#3354). */
+                  <Link
+                    href={`/dashboard/projects/${place.scope.projectId}` as "/dashboard"}
+                    className="font-medium text-brand-blue hover:underline"
+                    data-testid="company-place-project-link"
+                  >
+                    {t("facts.openProject")} →
+                  </Link>
+                ) : k === "address" && place.scope.addressText ? (
+                  place.scope.addressText
+                ) : present ? (
+                  t("facts.linked")
+                ) : (
+                  t("facts.notInSource")
+                )}
+              </dd>
             </div>
           ))}
         </dl>

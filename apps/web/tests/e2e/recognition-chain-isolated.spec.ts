@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import { clickUntilVisible } from "./click-until-visible";
 
 /**
  * A POSITIVE RECOGNITION FROM REAL EVIDENCE — THE WRITE PATH, on a THROWAWAY LOCAL Supabase stack
@@ -20,6 +21,19 @@ import { expect, test, type Browser, type BrowserContext, type Locator, type Pag
  *   I-6 it records a recognition citing THAT signed-off entry, and the stored recognition names the
  *       entry as its evidence and the institution as its assessor;
  *   I-7 the learner sees the recognition among their own.
+ *
+ * Lane L (owner order 2026-11-16), the rest of the learner's chain, after I-7 so a failure here
+ * cannot stop the steps above:
+ *   I-8  the institution runs a programme, opens a cohort and places the learner in it;
+ *   I-9  a separate employer signs up and invites the same person as an intern; they accept;
+ *   I-10 the employer switches review on for the intern (the same audited manual door);
+ *   I-11 the learner records a practice day in that intern relationship;
+ *   I-12 the employer confirms it;
+ *   I-13 the learner's Living CV (/cv) shows the practice period and the recognition;
+ *        I-13b the period stands as employer-confirmed;
+ *   I-14 least privilege: the institution's evidence list does not offer the employer's day;
+ *   I-15 EDU-5: a skill the learner accepted reaches the reviewer's learning queue through the
+ *        brief's door, and a human decision is recorded.
  *
  * It refuses to run anywhere but the local stack (owner decision 2026-10-28: no synthetic accounts in
  * production). Outcomes are read back from that local database — the page saying "done" is not the
@@ -50,15 +64,31 @@ const LEARNER_NAME = `Synthetic Learner ${RUN}`;
 const PRACTICE_MARK = `practice${RUN}`;
 const PRACTICE = `Practice day ${PRACTICE_MARK}: built a block partition wall under the master's supervision, 4 hours`;
 const RECOGNITION_KEY = `isolated-practice-${RUN}`;
+// Lane L (owner order 2026-11-16): programme and cohort, then practice at a separate employer.
+const PROGRAM = `Synthetic Programme ${RUN}`;
+const COHORT = `Synthetic Cohort ${RUN}`;
+const EMPLOYER = email("employer");
+const EMPLOYER_ORG = `Synthetic Practice Host ${RUN}`;
+const INTERN_MARK = `intern${RUN}`;
+const INTERN_PRACTICE = `Intern day ${INTERN_MARK}: assembled shelving units in the warehouse, 3 hours`;
+// I-15 (EDU-5) needs a fuzzy catalogue offer. The words after the colon are the recogniser's own
+// example of one (qa-testing, lib/journal/journal-recognition.test.ts).
+const EDU5_MARK = `edufive${RUN}`;
+const EDU5_PRACTICE = `Practice day ${EDU5_MARK}: testavau aplikaciją, radau klaidas, 2 val.`;
+const EDU5_SKILL = "qa-testing";
 
 /** learnerId is the profile (auth) id; learnerWorkerId is `workers.id`, which journal rows reference. */
-const s: { schoolId: string; orgId: string; learnerId: string; learnerWorkerId: string; engagementId: string; entryId: string } = {
+const s = {
   schoolId: "",
   orgId: "",
   learnerId: "",
   learnerWorkerId: "",
   engagementId: "",
   entryId: "",
+  employerId: "",
+  employerOrgId: "",
+  internEngagementId: "",
+  internEntryId: "",
 };
 
 // ── local helpers (service key: reads the local database only) ─────────────
@@ -127,11 +157,26 @@ async function as(browser: Browser, address: string): Promise<{ page: Page; clos
   };
 }
 
-/** Click until the expected result shows: a click before hydration is a silent no-op. */
-async function clickUntil(target: Locator, result: Locator, timeout = 60_000): Promise<void> {
+/** Register through the plain sign-up form (no invitation); ends on onboarding. */
+async function signUp(page: Page, address: string): Promise<void> {
+  await page.goto(`${BASE}/en/auth/signup`);
+  await page.locator('input[type="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+}
+
+/**
+ * Submit a server-action form until the local database holds its result. A click before
+ * hydration can be lost; a second click only happens when the first left nothing behind.
+ */
+async function submitUntil(button: Locator, stored: () => Promise<boolean>, timeout = 60_000): Promise<void> {
   await expect(async () => {
-    if (!(await result.isVisible().catch(() => false))) await target.click({ timeout: 5_000 });
-    await expect(result).toBeVisible({ timeout: 5_000 });
+    if (await stored()) return;
+    await button.click({ timeout: 5_000 });
+    await expect.poll(stored, { timeout: 10_000 }).toBe(true);
   }).toPass({ timeout });
 }
 
@@ -273,7 +318,7 @@ test("I-4. the learner records a practice day in that learning relationship", as
   const box = main.getByTestId("journal-quick-record-text");
   await expect(box).toBeVisible({ timeout: 60_000 });
   await box.fill(PRACTICE);
-  await clickUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  await clickUntilVisible(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
   const context = main.getByTestId("worklog-context");
   if ((await context.count()) > 0) {
     const opts = await context.locator("option").evaluateAll((os) =>
@@ -360,8 +405,411 @@ test("I-6. the institution records a recognition citing THAT signed-off practice
 test("I-7. the learner sees the recognition among their own", async ({ browser }) => {
   const { page, close } = await as(browser, LEARNER);
   await page.goto(`${BASE}/en/dashboard/documents`);
-  const list = page.getByTestId("own-recognitions-list");
+  // Scoped to <main>: while a section streams in, React can briefly hold a
+  // second, hidden copy outside it (CI 2026-11-16, strict-mode match of two).
+  const list = page.getByRole("main").getByTestId("own-recognitions-list");
   await expect(list).toBeVisible({ timeout: 30_000 });
   await expect(list).toContainText(RECOGNITION_KEY, { timeout: 30_000 });
   await close();
 });
+
+// ── I-8 … I-15 (Lane L) ─────────────────────────────────────────────────────
+
+test("I-8. the institution runs a programme, opens a cohort and places the learner in it", async ({ browser }) => {
+  const { page, close } = await as(browser, SCHOOL);
+  await page.goto(`${BASE}/en/dashboard/company/education`);
+  await expect(page.getByTestId("institution-programs")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("institution-programs-unavailable")).toHaveCount(0);
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+
+  // The programme: the add form starts open while the institution has none.
+  const create = page.getByTestId("create-program-form");
+  const disclosure = page.locator("details").filter({ has: create }).first();
+  if ((await disclosure.getAttribute("open")) === null) await disclosure.locator("summary").first().click();
+  await create.getByTestId("program-name").fill(PROGRAM);
+  const prof = create.getByTestId("program-profession");
+  const value = await prof.locator("option").evaluateAll((os) => (os as HTMLOptionElement[]).map((o) => o.value).find((v) => v));
+  if (value) await prof.selectOption(value);
+  let programId = "";
+  await submitUntil(create.getByTestId("program-create"), async () => {
+    const rows = await db<Array<{ id: string }>>(
+      `education_programs?organization_id=eq.${s.orgId}&name=eq.${encodeURIComponent(PROGRAM)}&select=id`,
+    );
+    programId = rows[0]?.id ?? "";
+    return rows.length > 0;
+  });
+
+  // The cohort, inside that programme.
+  await page.reload();
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await expect(page.getByTestId(`program-${programId}`), "the programme is listed").toContainText(PROGRAM, { timeout: 30_000 });
+  await page.getByTestId(`cohort-name-${programId}`).fill(COHORT);
+  let cohortId = "";
+  await submitUntil(page.getByTestId(`cohort-create-${programId}`), async () => {
+    const rows = await db<Array<{ id: string }>>(
+      `education_cohorts?program_id=eq.${programId}&name=eq.${encodeURIComponent(COHORT)}&select=id`,
+    );
+    cohortId = rows[0]?.id ?? "";
+    return rows.length > 0;
+  });
+
+  // The learner who joined in I-2 is offered by the name the institution typed, and placed.
+  await page.reload();
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  const cohort = page.getByTestId(`cohort-${cohortId}`);
+  await expect(cohort, "the cohort is listed").toContainText(COHORT, { timeout: 30_000 });
+  const select = page.getByTestId(`assign-learner-select-${cohortId}`);
+  await expect(select).toBeVisible({ timeout: 30_000 });
+  const offered = await select.locator("option").evaluateAll((os) => (os as HTMLOptionElement[]).map((o) => o.value));
+  expect(offered, "the joined learner can be placed").toContain(s.learnerId);
+  await select.selectOption(s.learnerId);
+  await submitUntil(page.getByTestId(`assign-learner-submit-${cohortId}`), async () => {
+    const rows = await db<Array<{ status: string }>>(
+      `education_cohort_members?cohort_id=eq.${cohortId}&profile_id=eq.${s.learnerId}&select=status`,
+    );
+    return rows.some((r) => r.status === "active");
+  });
+  await page.reload();
+  await expect(page.getByTestId(`cohort-${cohortId}`), "the cohort shows its learner").toContainText(LEARNER_NAME, { timeout: 30_000 });
+  await close();
+});
+
+test("I-9. a separate employer signs up and invites the same person as an intern; they accept", async ({ browser }) => {
+  // The employer: its own sign-up, its own organization (not a training provider).
+  const ctx = await browser.newContext({ timezoneId: "UTC" });
+  const page = await ctx.newPage();
+  await signUp(page, EMPLOYER);
+  await onboard(page, "hire", `Synthetic Practice Host Owner ${RUN}`);
+  await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  await expect(page.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("company-setup-legal-name").fill(EMPLOYER_ORG);
+  await page.getByTestId("company-setup-country").selectOption("LT");
+  await page.getByTestId("company-setup-save-draft").click();
+  await expect(page.getByTestId("company-setup-result").or(page.getByTestId("company-setup-next")).first()).toBeVisible({
+    timeout: 30_000,
+  });
+  s.employerId = await userId(EMPLOYER);
+  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${s.employerId}&select=id`);
+  expect(orgs, "the employer's organization is stored once").toHaveLength(1);
+  s.employerOrgId = orgs[0]!.id;
+  expect(s.employerOrgId, "a different organization from the institution").not.toBe(s.orgId);
+
+  // The invitation: join the organization, in the intern capacity, as a link.
+  await page.goto(
+    `${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${s.employerOrgId}&relationship=intern#network-invite`,
+  );
+  const panel = page.getByTestId("invite-panel");
+  await expect(panel).toBeVisible({ timeout: 30_000 });
+  const capacity = panel.getByTestId("invite-capacity");
+  const open = panel.getByTestId("invite-panel-open");
+  await expect(async () => {
+    if (!(await capacity.isVisible().catch(() => false)) && (await open.isVisible().catch(() => false))) {
+      await open.click({ timeout: 5_000 });
+    }
+    await expect(capacity).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
+  await expect(panel.getByTestId("invite-type")).toHaveValue("join_organization");
+  await expect(panel.getByTestId("invite-organization")).toHaveValue(s.employerOrgId);
+  await capacity.selectOption("intern");
+  await expect(capacity, "the employer offers practice, not employment").toHaveValue("intern");
+  await expect(panel.getByTestId("invite-capacity-blocked"), "an intern needs no training-provider status").toHaveCount(0);
+  await panel.getByTestId("invite-mode-link").click();
+  const name = panel.getByTestId("invite-name");
+  if (await name.isVisible().catch(() => false)) await name.fill(LEARNER_NAME);
+  await panel.getByTestId("invite-submit").click();
+  const copy = panel.getByTestId("invite-copy-link").first();
+  await expect(copy, "the invitation link is handed to the employer").toBeVisible({ timeout: 30_000 });
+  const raw = await copy.getAttribute("data-invite-link");
+  expect(raw, "an invitation link").toBeTruthy();
+  const u = new URL(raw!);
+  const link = `${BASE}${u.pathname}${u.search}`; // served locally, same path
+  sessions.set(EMPLOYER, await ctx.storageState());
+  await ctx.close();
+
+  // The learner, already signed in, opens the link and accepts.
+  const learner = await as(browser, LEARNER);
+  await learner.page.goto(link);
+  await expect(learner.page.getByTestId("invite-page")).toBeVisible({ timeout: 30_000 });
+  const accept = learner.page.getByTestId("invite-accept");
+  await expect(accept, "the learner is asked to accept").toBeVisible({ timeout: 30_000 });
+  await accept.click();
+  await learner.page.waitForURL((url) => !url.pathname.includes("/invite/"), { timeout: 30_000 }).catch(() => undefined);
+  await learner.close();
+  await expect
+    .poll(
+      async () =>
+        (
+          await db<Array<{ relationship_slug: string; status: string }>>(
+            `engagement_contexts?profile_id=eq.${s.learnerId}&organization_id=eq.${s.employerOrgId}&select=relationship_slug,status`,
+          )
+        ).map((e) => `${e.relationship_slug}:${e.status}`),
+      { message: "accepting connects the person to the employer as an intern", timeout: 30_000 },
+    )
+    .toEqual(["intern:active"]);
+  const [eng] = await db<Array<{ id: string }>>(
+    `engagement_contexts?profile_id=eq.${s.learnerId}&organization_id=eq.${s.employerOrgId}&relationship_slug=eq.intern&status=eq.active&select=id`,
+  );
+  s.internEngagementId = eng!.id;
+  // The learning relationship with the institution is untouched by the second one.
+  const school = await db<Array<{ status: string }>>(`engagement_contexts?id=eq.${s.engagementId}&select=status`);
+  expect(school.map((r) => r.status), "the person stays the institution's learner").toEqual(["active"]);
+});
+
+test("I-10. the employer switches review on for the intern through the audited manual door", async ({ browser }) => {
+  const { page, close } = await as(browser, EMPLOYER);
+  await page.goto(`${BASE}/en/dashboard/company/people#org-members`);
+  const fold = page.getByTestId("people-more");
+  await expect(fold).toBeAttached({ timeout: 30_000 });
+  if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
+  const row = page.getByTestId(`org-member-${s.internEngagementId}`);
+  await expect(row, "the intern is listed among the employer's people").toBeVisible({ timeout: 30_000 });
+  await expect(row).toHaveAttribute("data-role", "intern");
+  if ((await row.getAttribute("data-review")) !== "on") {
+    await row.getByTestId(`toggle-review-${s.internEngagementId}`).click();
+  }
+  await expect(row, "review is on for the intern").toHaveAttribute("data-review", "on", { timeout: 30_000 });
+  await expect
+    .poll(
+      async () =>
+        (
+          await db<Array<{ journal_review_enabled: boolean }>>(
+            `engagement_contexts?id=eq.${s.internEngagementId}&select=journal_review_enabled`,
+          )
+        )[0]?.journal_review_enabled,
+      { message: "the switch is stored on the intern relationship", timeout: 30_000 },
+    )
+    .toBe(true);
+  await close();
+});
+
+test("I-11. the learner records a practice day in the intern relationship", async ({ browser }) => {
+  const { page, close } = await as(browser, LEARNER);
+  await page.goto(`${BASE}/en/dashboard/journal`);
+  const main = page.getByRole("main");
+  const box = main.getByTestId("journal-quick-record-text");
+  await expect(box).toBeVisible({ timeout: 60_000 });
+  await box.fill(INTERN_PRACTICE);
+  await clickUntilVisible(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  // Two relationships now (learner, intern): the record names the one it belongs to.
+  const context = main.getByTestId("worklog-context");
+  await expect(context, "the person chooses where the day was worked").toBeVisible({ timeout: 30_000 });
+  const opts = await context.locator("option").evaluateAll((os) =>
+    (os as HTMLOptionElement[]).map((o) => ({ v: o.value, t: (o.textContent ?? "").trim() })),
+  );
+  const intern = opts.find((o) => o.v && o.t.includes(EMPLOYER_ORG));
+  expect(intern, `the intern relationship is offered: ${opts.map((o) => o.t).join(" | ")}`).toBeTruthy();
+  await context.selectOption(intern!.v);
+  await main.getByTestId("worklog-save").click();
+  const confirmBtn = main.getByTestId("worklog-confirm");
+  const early = main.getByTestId("worklog-error").or(main.getByTestId("worklog-blocked"));
+  await expect(confirmBtn.or(early).first()).toBeVisible({ timeout: 60_000 });
+  if (!(await confirmBtn.isVisible())) throw new Error(`practice not ready to confirm: ${await early.first().innerText()}`);
+  await confirmBtn.click();
+  const done = main.getByTestId("worklog-done");
+  await expect(done.or(early).first()).toBeVisible({ timeout: 60_000 });
+  await expect(done, "the practice day is saved").toBeVisible();
+  await close();
+
+  await expect
+    .poll(
+      async () => {
+        const rows = await db<Array<{ id: string; engagement_context_id: string | null }>>(
+          `journal_entries?worker_id=eq.${s.learnerWorkerId}&original_text=ilike.*${INTERN_MARK}*&deleted_at=is.null&select=id,engagement_context_id`,
+        );
+        s.internEntryId = rows[0]?.id ?? "";
+        return rows.map((r) => r.engagement_context_id);
+      },
+      { message: "exactly one practice day is stored, in the intern relationship", timeout: 60_000 },
+    )
+    .toEqual([s.internEngagementId]);
+});
+
+test("I-12. the employer confirms the intern's practice day", async ({ browser }) => {
+  const { page, close } = await as(browser, EMPLOYER);
+  await page.goto(`${BASE}/en/dashboard/inbox`);
+  const main = page.getByRole("main");
+  await expect(main.getByTestId(`inbox-entry-${s.internEntryId}`), "the day reaches the employer's review queue").toBeVisible({
+    timeout: 30_000,
+  });
+  await main.getByTestId(`journal-approve-entry-${s.internEntryId}`).click();
+  await expect
+    .poll(
+      async () =>
+        (
+          await db<Array<{ confirmer_id: string; confirmation_scope: { decision?: string } | null }>>(
+            `journal_entry_confirmations?entry_id=eq.${s.internEntryId}&select=confirmer_id,confirmation_scope`,
+          )
+        ).map((c) => `${c.confirmer_id === s.employerId ? "employer" : "other"}:${c.confirmation_scope?.decision ?? "?"}`),
+      { message: "the employer's confirmation is stored", timeout: 30_000 },
+    )
+    .toContain("employer:approved");
+  await close();
+});
+
+async function openCv(page: Page): Promise<Locator> {
+  await page.goto(`${BASE}/en/cv`);
+  const main = page.getByRole("main").first();
+  await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 60_000 });
+  return main;
+}
+
+test("I-13. the learner's Living CV shows the practice period and the recognition", async ({ browser }) => {
+  const { page, close } = await as(browser, LEARNER);
+  const main = await openCv(page);
+  // Practice has its own heading and is never claimed as a job (cv-practice-history).
+  const practice = main.getByTestId("cv-practice-history");
+  await expect(practice, "the CV has a practice section").toBeVisible({ timeout: 30_000 });
+  const internship = practice.getByTestId("cv-history-node").filter({ hasText: EMPLOYER_ORG });
+  await expect(internship, "the practice period at the employer is on the CV").toHaveCount(1, { timeout: 30_000 });
+  await expect(internship, "it carries the recorded practice day").toHaveAttribute("data-standing", /^(recorded|confirmed)$/);
+  await expect(main.getByTestId("cv-work-history").getByText(EMPLOYER_ORG), "practice is not listed as employment").toHaveCount(0);
+  // The institution's practice, signed off in I-5, stands as confirmed.
+  await expect(practice.getByTestId("cv-history-node").filter({ hasText: SCHOOL_ORG })).toHaveAttribute("data-standing", "confirmed");
+  // I-7's recognition is on the CV too, not only in the document centre.
+  const recognised = main.getByTestId("recognised-by");
+  await expect(recognised, "the recognition is on the CV").toBeVisible({ timeout: 30_000 });
+  await expect(recognised).toHaveAttribute("data-evidence-class", "assessor_recognition");
+  await expect(recognised.getByTestId("recognised-by-item").filter({ hasText: RECOGNITION_KEY })).toHaveCount(1);
+  await expect(recognised, "it names the institution that recognised it").toContainText(SCHOOL_ORG);
+  await close();
+});
+
+test("I-13b. the practice period on the CV stands as confirmed by the employer", async ({ browser }) => {
+  const { page, close } = await as(browser, LEARNER);
+  const main = await openCv(page);
+  const internship = main.getByTestId("cv-practice-history").getByTestId("cv-history-node").filter({ hasText: EMPLOYER_ORG });
+  await expect(internship, "it stands as confirmed by the employer").toHaveAttribute("data-standing", "confirmed", { timeout: 15_000 });
+  await close();
+});
+
+test("I-14. least privilege: the institution's evidence list does not offer the employer's intern day", async ({ browser }) => {
+  // While I-12 is blocked the intern day is not yet confirmed. The boundary is asserted either
+  // way, and it becomes the full "employer-CONFIRMED day" proof as soon as I-12 passes.
+  const conf = await db<Array<{ confirmation_scope: { decision?: string } | null }>>(
+    `journal_entry_confirmations?entry_id=eq.${s.internEntryId}&select=confirmation_scope`,
+  );
+  test.info().annotations.push({
+    type: "intern-day-confirmed",
+    description: String(conf.some((c) => c.confirmation_scope?.decision === "approved")),
+  });
+
+  const { page, close } = await as(browser, SCHOOL);
+  const form = await recognitionForm(page);
+  const evidence = form.getByTestId("recognition-evidence");
+  // Control: the list is the learner's, and it reads.
+  await expect(
+    evidence.locator("label", { hasText: PRACTICE_MARK }).getByTestId("recognition-evidence-option"),
+    "the institution's own signed-off practice is offered",
+  ).toHaveCount(1, { timeout: 30_000 });
+  await expect(evidence.getByRole("alert")).toHaveCount(0);
+  // RULE (SKL-9, lib/education/recognition-evidence.ts): an assessor may cite only entries recorded
+  // in ITS OWN organization's student relationships, read under its own RLS. A day the learner
+  // recorded, and an employer confirmed, in the employer's intern relationship stays invisible to
+  // the institution, even though the same person is its learner.
+  await expect(
+    evidence.locator("label", { hasText: INTERN_MARK }),
+    "the employer-confirmed intern day is not offered to the institution",
+  ).toHaveCount(0);
+  await expect(evidence, "no trace of the intern day on the evidence list").not.toContainText(INTERN_MARK);
+  await close();
+});
+
+/**
+ * I-15 runs where review is really on today: the learner's relationship with the institution (I-3).
+ * The same producer serves the intern host once the I-10 break is fixed. That leg is not written
+ * twice: it cannot start while the host cannot switch review on.
+ */
+test("I-15. EDU-5: the learner's accepted skill reaches the reviewer's learning queue, and a human decides", async ({ browser }) => {
+  // The learner records a practice day for the institution and stands behind the recognised skill.
+  const learner = await as(browser, LEARNER);
+  const main = learner.page.getByRole("main");
+  await learner.page.goto(`${BASE}/en/dashboard/journal`);
+  const box = main.getByTestId("journal-quick-record-text");
+  await expect(box).toBeVisible({ timeout: 60_000 });
+  await box.fill(EDU5_PRACTICE);
+  await clickUntilVisible(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  const context = main.getByTestId("worklog-context");
+  await expect(context).toBeVisible({ timeout: 30_000 });
+  const opts = await context.locator("option").evaluateAll((os) =>
+    (os as HTMLOptionElement[]).map((o) => ({ v: o.value, t: (o.textContent ?? "").trim() })),
+  );
+  const learning = opts.find((o) => o.v && o.t.includes(SCHOOL_ORG));
+  expect(learning, `the learning relationship is offered: ${opts.map((o) => o.t).join(" | ")}`).toBeTruthy();
+  await context.selectOption(learning!.v);
+  await main.getByTestId("worklog-save").click();
+  const confirmBtn = main.getByTestId("worklog-confirm");
+  const early = main.getByTestId("worklog-error").or(main.getByTestId("worklog-blocked"));
+  await expect(confirmBtn.or(early).first()).toBeVisible({ timeout: 60_000 });
+  if (!(await confirmBtn.isVisible())) throw new Error(`practice not ready to confirm: ${await early.first().innerText()}`);
+  await confirmBtn.click();
+  await expect(main.getByTestId("worklog-done"), "the practice day is saved").toBeVisible({ timeout: 60_000 });
+  const offer = main.locator(`[data-testid="worklog-pending-candidate"][data-candidate-slug="${EDU5_SKILL}"]`);
+  await expect(offer, "the recogniser offers the skill on this day").toBeVisible({ timeout: 30_000 });
+  await clickUntilVisible(offer.getByTestId("worklog-candidate-confirm"), offer.getByTestId("worklog-candidate-confirmed"));
+  await learner.close();
+
+  let entryId = "";
+  await expect
+    .poll(
+      async () => {
+        const rows = await db<Array<{ id: string; engagement_context_id: string | null }>>(
+          `journal_entries?worker_id=eq.${s.learnerWorkerId}&original_text=ilike.*${EDU5_MARK}*&deleted_at=is.null&select=id,engagement_context_id`,
+        );
+        entryId = rows[0]?.id ?? "";
+        return rows.map((r) => r.engagement_context_id);
+      },
+      { message: "the day is stored in the learning relationship", timeout: 60_000 },
+    )
+    .toEqual([s.engagementId]);
+
+  // The signal: an observation naming the institution, because review is on in that relationship.
+  const [skill] = await db<Array<{ id: string }>>(`skills?slug=eq.${EDU5_SKILL}&select=id`);
+  expect(skill?.id, "the catalogue knows the skill").toBeTruthy();
+  await expect
+    .poll(
+      async () =>
+        (
+          await db<Array<{ organization_id: string | null; subject_skill_id: string | null }>>(
+            `learning_signals?source_object_id=eq.${entryId}&source=eq.skill_claim&signal_kind=eq.skill_candidate&select=organization_id,subject_skill_id`,
+          )
+        ).map((r) => `${r.organization_id === s.orgId ? "institution" : r.organization_id}:${r.subject_skill_id === skill!.id}`),
+      { message: "the accepted skill is observed for the reviewer", timeout: 30_000 },
+    )
+    .toEqual(["institution:true"]);
+
+  // The producer runs in the manager's own session when the brief loads. The brief's one door to
+  // the review page appears only while something waits there. No menu link (owner-parked).
+  const { page, close } = await as(browser, SCHOOL);
+  await page.goto(`${BASE}/en/dashboard/company`);
+  // The visible section: while the brief streams in, React can briefly hold a second copy
+  // (CI 2026-11-17, strict-mode match of two), as I-7 met with the recognitions list.
+  const attention = page.locator('[data-testid="company-home-attention"]:visible').first();
+  await expect(attention, "the manager's home states what needs them").toBeVisible({ timeout: 60_000 });
+  const door = attention.locator('a[href*="/dashboard/learning"]');
+  await expect(door, "the brief offers the learning review").toHaveCount(1, { timeout: 30_000 });
+  const [item] = await db<Array<{ id: string; status: string; organization_id: string }>>(
+    `learning_review_queue?journal_entry_id=eq.${entryId}&select=id,status,organization_id`,
+  );
+  expect(item, "the suggestion is queued").toBeTruthy();
+  expect(item!.status).toBe("pending");
+  expect(item!.organization_id, "in the institution's queue").toBe(s.orgId);
+
+  await door.click();
+  await page.waitForURL(/\/en\/dashboard\/learning/, { timeout: 30_000 });
+  const actions = page.getByTestId(`learning-item-actions-${item!.id}`);
+  await expect(actions, "the suggestion is offered for a decision").toBeVisible({ timeout: 30_000 });
+  await actions.locator("button").first().click(); // approve: the first decision, before reject
+  await expect
+    .poll(
+      async () => {
+        const [row] = await db<Array<{ status: string; reviewed_by: string | null }>>(
+          `learning_review_queue?id=eq.${item!.id}&select=status,reviewed_by`,
+        );
+        return `${row?.status}:${row?.reviewed_by === s.schoolId ? "institution" : row?.reviewed_by}`;
+      },
+      { message: "the manager's decision is recorded", timeout: 30_000 },
+    )
+    .toBe("approved:institution");
+  await close();
+});
+
