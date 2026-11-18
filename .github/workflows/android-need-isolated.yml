@@ -34,6 +34,11 @@ on:
       - "apps/mobile/.maestro/jobs-need-journey.yaml"
       - "apps/mobile/.maestro/need-second-journey.yaml"
       - "apps/mobile/.maestro/employer-screens-journey.yaml"
+      - "apps/mobile/.maestro/cv-forms-journey.yaml"
+      - "apps/mobile/src/screens/work-history-form.tsx"
+      - "apps/mobile/src/screens/language-form.tsx"
+      - "apps/mobile/src/screens/education-form.tsx"
+      - "apps/mobile/src/screens/cv-entries.tsx"
       - "apps/mobile/src/screens/need-intake.tsx"
       - "apps/mobile/src/screens/candidates.tsx"
       - "apps/mobile/src/screens/need-lifecycle.tsx"
@@ -158,6 +163,7 @@ jobs:
           CTS="$(openssl rand -hex 32)"; echo "::add-mask::$CTS"
           CRON="$(openssl rand -hex 24)"; echo "::add-mask::$CRON"
           SEED_PW="Qa-$(openssl rand -hex 16)-1a!"; echo "::add-mask::$SEED_PW"
+          WORKER_PW="Qa-$(openssl rand -hex 16)-2b!"; echo "::add-mask::$WORKER_PW"
           {
             echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
             echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON"
@@ -173,6 +179,8 @@ jobs:
             echo "EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:3000"
             echo "MOBILE_NEED_SEED_EMAIL=qa.mobile.need.${GITHUB_RUN_ID}@local.test"
             echo "MOBILE_NEED_SEED_PASSWORD=$SEED_PW"
+            echo "MOBILE_WORKER_SEED_EMAIL=qa.mobile.cv.${GITHUB_RUN_ID}@local.test"
+            echo "MOBILE_WORKER_SEED_PASSWORD=$WORKER_PW"
           } >> "$GITHUB_ENV"
 
       - name: Prove the replay — ledger rows equal migration files
@@ -194,14 +202,14 @@ jobs:
           for i in $(seq 1 60); do curl -fsS -o /dev/null "$APP_ORIGIN/en" && break; sleep 2; done
           curl -fsS -o /dev/null "$APP_ORIGIN/en"
 
-      - name: Seed the synthetic company through the real sign-up form (local only)
+      - name: Seed the synthetic company and worker through the real sign-up form (local only)
         working-directory: apps/web
         env:
           SIGNUP_ISOLATED: "1"
           E2E_BASE_URL: http://127.0.0.1:3000
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
-        run: pnpm exec playwright test tests/e2e/signup-isolated.spec.ts -g "M-0" --reporter=list --trace=off
+        run: pnpm exec playwright test tests/e2e/signup-isolated.spec.ts -g "M-[01]\." --reporter=list --trace=off
 
       - name: Expo prebuild (Android)
         working-directory: apps/mobile
@@ -252,6 +260,8 @@ jobs:
           MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
           MOBILE_QA_EMAIL: ${{ env.MOBILE_NEED_SEED_EMAIL }}
           MOBILE_QA_PASSWORD: ${{ env.MOBILE_NEED_SEED_PASSWORD }}
+          MOBILE_WORKER_EMAIL: ${{ env.MOBILE_WORKER_SEED_EMAIL }}
+          MOBILE_WORKER_PASSWORD: ${{ env.MOBILE_WORKER_SEED_PASSWORD }}
         with:
           api-level: 34
           arch: x86_64
@@ -299,6 +309,20 @@ jobs:
           [ "$S" = "2" ] && [ "$X" = "0" ] || { echo "::error::expected both needs submitted again (submitted=$S closed=$X)"; exit 1; }
           echo "ANDROID_EMPLOYER_SCREENS_ISOLATED_PROVEN: on-device close → reopen of a need (draft + confirm each) stored once each; both needs open again (local stack, production untouched)"
           echo "- ANDROID_EMPLOYER_SCREENS_ISOLATED_PROVEN: Today organization stations → close + reopen a need → candidates → agency offers (none) → programmes (not a training provider)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the CV forms' writes — one job, one language, one school, owned by the worker seed
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          W="$(q "select id from auth.users where email = '$MOBILE_WORKER_SEED_EMAIL'")"
+          [ -n "$W" ] || { echo "::error::worker seed missing"; exit 1; }
+          J="$(q "select count(*) from public.engagement_contexts where profile_id = '$W' and title = 'QA-SYNTHETIC mobile tiler' and ended_at is null")"
+          L="$(q "select count(*) from public.worker_languages wl join public.workers w on w.id = wl.worker_id where w.profile_id = '$W' and wl.lang = 'en' and wl.level = 'B2'")"
+          E="$(q "select count(*) from public.worker_education where profile_id = '$W' and institution_name = 'QA-SYNTHETIC mobile school'")"
+          echo "work history rows=$J languages=$L education rows=$E"
+          [ "$J" = "1" ] && [ "$L" = "1" ] && [ "$E" = "1" ] || { echo "::error::expected one row each (work=$J language=$L education=$E)"; exit 1; }
+          echo "ANDROID_CV_FORMS_ISOLATED_PROVEN: on-device work history (ongoing), language and education stored once each for the synthetic worker (local stack, production untouched)"
+          echo "- ANDROID_CV_FORMS_ISOLATED_PROVEN: sign out company → sign in worker → add work history, language, education → one row each" >> "$GITHUB_STEP_SUMMARY"
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()
