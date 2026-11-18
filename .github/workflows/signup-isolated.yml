@@ -81,6 +81,9 @@ on:
       - "apps/web/lib/journal/entry-skill-retraction.ts"
       - "apps/web/lib/journal/journal-entry-skills-actions.ts"
       - "apps/web/lib/journal/skill-pipeline-actions.ts"
+      - "apps/web/lib/today/today-server.ts"
+      - "apps/web/lib/today/today-model.ts"
+      - "apps/web/lib/journal/work-intelligence-read.ts"
       - "apps/web/app/*/dashboard/company/people/**"
       - "apps/web/app/*/dashboard/company/settings/**"
       - "apps/web/app/*/dashboard/network/**"
@@ -412,6 +415,13 @@ jobs:
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
         run: pnpm exec playwright test tests/e2e/job-fit-main-compat-isolated.spec.ts --reporter=list --trace=off
+
+      # UX gap W-1 (2026-11-18): a new worker's home showed "Open items could
+      # not be read". The work-intelligence reads log only a read name and an
+      # error code (no ids, no values); print those lines on every run.
+      - name: Work-intelligence read failures (W-1)
+        if: always()
+        run: grep -E -A6 '\[(work-intelligence|today)\]' "$RUNNER_TEMP/next.log" | grep -viE 'key|secret|jwt|token|password|eyJ|@' | head -n 80 || echo "none"
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()
