@@ -317,11 +317,15 @@ test("TG-0. a training provider signs up, sets up its organization and adds two 
     const create = reg.getByTestId("training-create-form");
     await expect(create, "the owner may add a course").toBeVisible({ timeout: 30_000 });
     await create.locator('input[name="title"]').fill(title);
-    const stored = async () =>
-      (await db<Array<{ id: string }>>(
-        `training_programs?organization_id=eq.${s.orgId}&title=eq.${encodeURIComponent(title)}&select=id`,
-      )).length === 1;
-    await submitUntil(create.getByRole("button"), stored);
+    await create.getByRole("button").click();
+    // The action answers in the address: `trn=<outcome>`, or a stale-workspace `notice=`.
+    await page.waitForURL(/[?&](trn|notice)=/, { timeout: 60_000, waitUntil: "commit" });
+    const u = new URL(page.url());
+    expect(u.searchParams.get("trn"), `adding "${title}" answered ${u.search}`).toBe("created");
+    const stored = await db<Array<{ id: string }>>(
+      `training_programs?organization_id=eq.${s.orgId}&title=eq.${encodeURIComponent(title)}&select=id`,
+    );
+    expect(stored, `"${title}" is stored once in this organization`).toHaveLength(1);
   }
   const programs = await db<Array<{ id: string; title: string }>>(
     `training_programs?organization_id=eq.${s.orgId}&select=id,title`,
