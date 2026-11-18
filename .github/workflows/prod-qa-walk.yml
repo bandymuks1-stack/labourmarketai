@@ -164,6 +164,10 @@ on:
           # at the end) and a Swedish visitor (signed out, read-only). Dispatch only, never in the rotation.
           - pin-to-home
           - swedish-visitor
+          # 2026-11-18 register review: READ-ONLY proof for rows with production facts but no walk: the Google door
+          # in every routed locale, stopped before the auth server (1.2, 8.1), the command finder (5.14) and the
+          # public cross-border readiness matrix (6.11). Writes nothing (non-GET aborted). Dispatch only.
+          - register-walk-gaps
       # The screen the walk runs on. `phone` runs the SAME spec, accounts and writes at
       # 390 × 844 with touch, `phone-375` at 375 × 667 (apps/web/lib/testing/prod-qa-walk-device.ts). Automatic walks
       # (push, schedule) are always desktop. A phone walk counts in the daily budget and
@@ -567,6 +571,7 @@ jobs:
             need-intake) SPEC=tests/e2e/prod-need-intake.spec.ts ;;
             pin-to-home) SPEC=tests/e2e/prod-pin-to-home.spec.ts ;;
             swedish-visitor) SPEC=tests/e2e/prod-swedish-visitor.spec.ts ;;
+            register-walk-gaps) SPEC=tests/e2e/prod-register-walk-gaps.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
