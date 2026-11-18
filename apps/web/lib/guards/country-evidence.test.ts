@@ -13,10 +13,13 @@ import { resolve } from "node:path";
 import {
   SUPPORTED_COUNTRIES,
   PRIORITY_MARKETS,
+  MARKETS_WITH_PUBLIC_JOB_ADS,
+  isSupportedCountry,
   COUNTRY_SIGNALS,
   findCountryProvenanceProblems,
 } from "../labour-market/country-evidence";
 import { LABOUR_MARKET_SOURCES } from "../labour-market/sources";
+import { activeLocales } from "@/lib/i18n/config";
 
 const webRoot = resolve(__dirname, "..", "..");
 const loadLM = (locale: string) =>
@@ -41,7 +44,7 @@ describe("country evidence provenance", () => {
 });
 
 describe("country content is localized en/lt/ru", () => {
-  for (const locale of ["en", "lt", "ru"] as const) {
+  for (const locale of activeLocales) {
     it(`${locale}: every signal has a localized title + summary, + chrome/names`, () => {
       const j = loadLM(locale);
       for (const c of SUPPORTED_COUNTRIES) {
@@ -77,4 +80,35 @@ describe("no English leakage on LT/RU country content", () => {
       }
     });
   }
+});
+
+describe("markets whose job ads are on the board are not called coming soon", () => {
+  it("Sweden and Norway link to the board, and only markets without an evidence page do", () => {
+    expect(MARKETS_WITH_PUBLIC_JOB_ADS).toEqual(["SE", "NO"]);
+    for (const code of MARKETS_WITH_PUBLIC_JOB_ADS) {
+      expect(PRIORITY_MARKETS).toContain(code);
+      expect(isSupportedCountry(code)).toBe(false);
+    }
+  });
+});
+
+describe("IDX-20: a country page is indexed only with text of its own", () => {
+  it("the sitemap lists exactly the indexable country pages", async () => {
+    const { default: sitemap } = await import("@/app/sitemap");
+    const { INDEXABLE_COUNTRY_PAGES } = await import("../labour-market/country-evidence");
+    const listed = new Set(
+      sitemap()
+        .map((e) => /\/labour-market\/([a-z]{2})$/.exec(e.url)?.[1]?.toUpperCase())
+        .filter(Boolean),
+    );
+    expect([...listed].sort()).toEqual([...INDEXABLE_COUNTRY_PAGES].sort());
+  });
+
+  it("a page that is not indexable says noindex, follow (and keeps its canonical)", () => {
+    const page = readFileSync(
+      resolve(webRoot, "app", "[locale]", "(marketing)", "labour-market", "[country]", "page.tsx"),
+      "utf-8",
+    );
+    expect(page).toMatch(/isCountryPageIndexable\(code as CountryCode\)\s*\?\s*meta\s*:\s*\{ \.\.\.meta, robots: \{ index: false, follow: true \} \}/);
+  });
 });

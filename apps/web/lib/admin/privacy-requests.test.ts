@@ -127,6 +127,10 @@ describe("3 · the admin queue read", () => {
           type: "account_deletion",
           status: "in_review",
           createdAtIso: "2026-08-13T10:00:00.000Z",
+          // Art. 12(3): one month after receipt; open and past it = overdue
+          // (the fixture is dated 2026-08-13, so by now it is).
+          dueAtIso: "2026-09-12T10:00:00.000Z",
+          overdue: true,
           profileId: "p-1",
           email: "worker@example.org",
         },

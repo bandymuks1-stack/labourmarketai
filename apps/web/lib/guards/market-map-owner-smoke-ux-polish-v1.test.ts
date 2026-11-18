@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Market Map owner smoke + UX polish v1 guard (post-#462).
@@ -22,7 +23,7 @@ const CAPTURE = read("components/app/market-map-capture.tsx");
 const MY_SIGNALS = read("components/app/market-map-my-signals.tsx");
 const SHELL = read("components/app/market-map-shell.tsx");
 const SIGNALS = read("lib/market-map/signals.ts");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 
 // Strip line + block comments so guards check shipped copy, not annotations.
 // CRLF-safe (.split(/\r?\n/) — a bare \r left by "\n" defeats /--.*$/ et al).

@@ -40,47 +40,31 @@ export async function loadClientOffersForChat(): Promise<ClientOffersChatResult>
       (d) => d.status !== "closed" && d.status !== "draft",
     );
     const scanned = demands.slice(0, CLIENT_OFFERS_DEMAND_SCAN_LIMIT);
-    const perDemand = await Promise.all(
-      scanned.map(async (d) => {
-        const rows = await listOfferedCandidatesForRequest(d.id);
-        return rows
-          .filter((r) => r.offerStatus === "offered")
-          .map<ClientChatOffer>((r) => ({
-            offerId: r.offerId,
-            requestId: d.id,
-            demandTitle: d.title,
-            agencyName: r.agencyName,
-            note: r.note,
-            createdAt: r.createdAt,
-          }));
-      }),
-    );
+    // The agency-candidate reads and the team-offer reads are independent of
+    // each other, so they run as ONE wave instead of two in sequence (perf
+    // 2026-10-22) — the same reads, the same rows, half the waiting.
+    const [perDemand, teamPerDemand] = await Promise.all([
+      Promise.all(
+        scanned.map(async (d) => {
+          const rows = await listOfferedCandidatesForRequest(d.id);
+          return rows
+            .filter((r) => r.offerStatus === "offered")
+            .map<ClientChatOffer>((r) => ({
+              offerId: r.offerId,
+              requestId: d.id,
+              demandTitle: d.title,
+              agencyName: r.agencyName,
+              note: r.note,
+              createdAt: r.createdAt,
+            }));
+        }),
+      ),
+      readTeamOffersPerDemand(scanned),
+    ]);
     const offers = perDemand
       .flat()
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0))
       .slice(0, CLIENT_OFFERS_CHAT_LIMIT);
-    // Brigades / companies offered against the same needs — the receiver-gated
-    // RPC the scouting section renders (team-level aggregates only). A failed
-    // read lists nothing for that need; it never invents an offer.
-    const teamPerDemand = await Promise.all(
-      scanned.map(async (d) => {
-        const r = await listReceivedOffers(d.id);
-        if (r.status !== "ok") return [];
-        return r.rows.flatMap<ClientChatTeamOffer>((o) =>
-          o.status === "offered" || o.status === "accepted" || o.status === "assigned"
-            ? [{
-                offerId: o.offerId,
-                requestId: d.id,
-                demandTitle: d.title,
-                teamName: o.teamName,
-                status: o.status,
-                memberCount: o.memberCount,
-                offeredAt: o.offeredAt,
-              }]
-            : [],
-        );
-      }),
-    );
     const teamOffers = teamPerDemand
       .flat()
       .sort((a, b) => (a.status === "offered" ? 0 : 1) - (b.status === "offered" ? 0 : 1) || (a.offeredAt < b.offeredAt ? 1 : -1))
@@ -89,4 +73,32 @@ export async function loadClientOffersForChat(): Promise<ClientOffersChatResult>
   } catch {
     return { kind: "error" };
   }
+}
+
+/** Brigades / companies offered against the same needs — the receiver-gated
+ *  RPC the scouting section renders (team-level aggregates only). A failed
+ *  read lists nothing for that need; it never invents an offer. Module-private
+ *  (this is a "use server" module: only the action above is exported). */
+async function readTeamOffersPerDemand(
+  scanned: readonly { id: string; title: string }[],
+): Promise<ClientChatTeamOffer[][]> {
+  return Promise.all(
+    scanned.map(async (d) => {
+      const r = await listReceivedOffers(d.id);
+      if (r.status !== "ok") return [];
+      return r.rows.flatMap<ClientChatTeamOffer>((o) =>
+        o.status === "offered" || o.status === "accepted" || o.status === "assigned"
+          ? [{
+              offerId: o.offerId,
+              requestId: d.id,
+              demandTitle: d.title,
+              teamName: o.teamName,
+              status: o.status,
+              memberCount: o.memberCount,
+              offeredAt: o.offeredAt,
+            }]
+          : [],
+      );
+    }),
+  );
 }

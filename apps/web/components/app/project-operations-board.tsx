@@ -104,6 +104,8 @@ export interface OperationsBoardLabels {
     seed: string;
     addItem: string;
     addPlaceholder: string;
+    /** Suggested rows still to agree before the agreement — neutral. */
+    toAgree: string;
     missing: string;
     received: string;
     checked: string;
@@ -363,6 +365,9 @@ function ChecklistEditor({
           {labels.checklist.title}
         </span>
         <span className="flex flex-wrap gap-2 text-meta text-text-secondary">
+          <span data-testid="ops-docs-to-agree">
+            {labels.checklist.toAgree}: {worker.docsToAgree}
+          </span>
           <span data-testid="ops-docs-missing">
             {labels.checklist.missing}: {worker.docsMissing}
           </span>
@@ -476,13 +481,15 @@ function WorkerCard({
     <article
       className="card-border glow-hover rise-in flex flex-col gap-3 p-4"
       data-testid="ops-worker-card"
+      data-worker-id={worker.workerId}
+      data-readiness-items={worker.readinessItems.length}
     >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2.5">
           <span
             aria-hidden
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-xs font-bold text-text-primary ${
-              worker.confirmedSkills > 0 ? "border-trust-accent/50" : "border-ink-500"
+              (worker.confirmedSkills ?? 0) > 0 ? "border-trust-accent/50" : "border-ink-500"
             }`}
           >
             {initials}
@@ -538,7 +545,7 @@ function WorkerCard({
         </div>
         <div>
           <dt className="text-text-muted">{labels.confirmedSkills}</dt>
-          <dd className="font-display text-sm text-text-primary">{worker.confirmedSkills}</dd>
+          <dd className="font-display text-sm text-text-primary">{worker.confirmedSkills ?? "—"}</dd>
         </div>
         <div>
           <dt className="text-text-muted">{labels.evidence}</dt>

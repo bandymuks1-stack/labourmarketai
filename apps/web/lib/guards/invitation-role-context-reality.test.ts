@@ -72,9 +72,12 @@ describe("E — legacy pilot demand titles are sanitized at display", () => {
 });
 
 describe("D — admin UI is a display toggle, not a permission change", () => {
-  it("the header admin badge is gated on the display preference", () => {
-    const src = read("components/app/role-switcher.tsx");
-    expect(src).toMatch(/isAdmin && !adminUiHidden &&/);
+  it("the header admin entry is gated on the display preference", () => {
+    // The role switcher's badge was retired with the one header (2026-10-25);
+    // the header's admin destination and the avatar-menu link carry the gate.
+    const header = read("components/app/conversation/chat/conversation-header.tsx");
+    expect(header).toMatch(/auth\?\.isAdmin && !auth\?\.adminUiHidden/);
+    expect(read("components/app/account-menu.tsx")).toMatch(/isAdmin && !adminUiHidden/);
   });
   it("the preference is cookie/display-only (no auth/permission write)", () => {
     const code = stripComments(read("lib/auth/admin-ui-actions.ts"));

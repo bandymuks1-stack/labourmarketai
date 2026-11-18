@@ -7,7 +7,7 @@ import {
   extractCvFile,
   type CvExtractClientResult,
 } from "@/lib/cv/cv-import-client";
-import { trackFunnel } from "@/lib/telemetry/task";
+import { trackFunnel, trackFunnelFailure } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
@@ -77,6 +77,9 @@ export function CvImportUpload({
         });
         onExtracted(result.text);
       } else {
+        // The closed failure code only — so a failed read is no longer
+        // indistinguishable from someone who never tried.
+        trackFunnelFailure(FUNNEL_EVENTS.cvUploadFailed, result.code, { surface: "cv_import" });
         setError(messageFor(result.code));
       }
     } finally {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Homepage counter honesty guard (finding F-G1 of the full-project audit
@@ -40,7 +41,7 @@ describe("homepage counters carry the honesty disclaimer", () => {
   });
 
   it("the disclaimer key exists in en/lt/ru", () => {
-    for (const locale of ["en", "lt", "ru"]) {
+    for (const locale of activeLocales) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
       expect(msgs.live?.counters?.previewNote, locale).toBeTruthy();
     }

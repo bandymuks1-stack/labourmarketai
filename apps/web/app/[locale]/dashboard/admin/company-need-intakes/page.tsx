@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
@@ -10,7 +11,13 @@ import {
   CompanyNeedIntakeStatusControl,
   type CompanyNeedIntakeStatusLabels,
 } from "@/components/app/company-need-intake-status";
+import { looksLikeAdvertising } from "@/lib/staffing/intake-advertising";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/company-need-intakes");
+
 
 /**
  * Public Intake Owner Queue v1.
@@ -92,12 +99,7 @@ export default async function AdminCompanyNeedIntakesPage({
         </p>
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
-        <Link
-          href={"/dashboard/admin" as "/dashboard"}
-          className="mt-1 self-start text-xs text-text-secondary hover:underline"
-        >
-          ← {t("back")}
-        </Link>
+        <PageBack href={"/dashboard/admin" as "/dashboard"}>{t("back")}</PageBack>
         {/* Control room PR F — these rows also appear in the consolidated
             demand pipeline read view (read-only; statuses change here). */}
         <Link
@@ -172,6 +174,7 @@ export default async function AdminCompanyNeedIntakesPage({
             {rows.map((r) => (
               <li
                 key={r.id}
+                id={r.id}
                 className="card-border flex flex-col gap-3 p-4"
                 data-testid={`company-need-intake-row-${r.id}`}
                 data-status={r.status}
@@ -187,6 +190,15 @@ export default async function AdminCompanyNeedIntakesPage({
                       {r.locale ? ` · ${r.locale.toUpperCase()}` : ""}
                     </span>
                   </div>
+                  {/* Read from the text each time: no status or column holds this yet. */}
+                  {looksLikeAdvertising(r.description, r.companyName, r.sector) ? (
+                    <span
+                      className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
+                      data-testid={`company-need-intake-advertising-${r.id}`}
+                    >
+                      {t("advertising")}
+                    </span>
+                  ) : null}
                   <span
                     className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[r.status]}`}
                     data-testid={`company-need-intake-status-chip-${r.id}`}

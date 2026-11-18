@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Market map — honest person-signal state guard (Core Product Sprint Train v2,
@@ -42,7 +43,7 @@ describe("the own marker reflects real saved-location state only", () => {
 });
 
 describe("the removed legend copy is gone from every active locale", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: no mapLayers namespace (the overstating legend)`, () => {
       const m = JSON.parse(read(`messages/${loc}.json`)) as { mapLayers?: unknown };
       expect(m.mapLayers).toBeUndefined();

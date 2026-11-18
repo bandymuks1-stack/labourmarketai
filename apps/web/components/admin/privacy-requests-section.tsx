@@ -138,6 +138,18 @@ export async function PrivacyRequestsSection({
                 <span className="font-mono text-meta text-text-muted">
                   {formatUtcDateTime(r.createdAtIso, locale)}
                 </span>
+                <span
+                  className={
+                    r.overdue
+                      ? "font-mono text-meta font-semibold text-state-warning"
+                      : "font-mono text-meta text-text-muted"
+                  }
+                  data-testid={`admin-privacy-request-due-${r.id}`}
+                >
+                  {t(r.overdue ? "overdue" : "due", {
+                    date: formatUtcDateTime(r.dueAtIso, locale) ?? r.dueAtIso.slice(0, 10),
+                  })}
+                </span>
                 <span className="min-w-0 break-all font-mono text-meta text-text-muted">
                   {r.email ?? r.profileId?.slice(0, 8) ?? "—"}
                 </span>

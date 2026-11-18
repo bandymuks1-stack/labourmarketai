@@ -1,9 +1,19 @@
+import {
+  deriveHoursLedger,
+  type ConfidenceWeights,
+  type HoursLedger,
+  type HoursState,
+  type LineStateSplit,
+  type SkillLink,
+} from "@/lib/journal/hours-ledger";
 import type {
   JournalAllTimeLine,
   WorkIntelligence,
   WorkIntelligenceOrganizationPeriodRecord,
   WorkIntelligenceOrganizationRecord,
 } from "@/lib/journal/work-intelligence";
+import { innerPeriodBound } from "@/lib/organization-evidence/business-history";
+import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
 
 /**
  * ONE PERSON = ONE CONTINUOUS PROFESSIONAL HISTORY (owner decision 0025,
@@ -47,6 +57,16 @@ import type {
  *     an organization ledger that could not be read sets
  *     `organizationUnknown` and adds nothing. Neither renders as "no work".
  *  6. NO SCORE, NO RANK. Hours and spans, as recorded.
+ *  7. ONE HOURS LEDGER (owner order 2026-10-24). The total is the ledger's
+ *     total (`hours-ledger.ts`): states (actual / reported / estimated /
+ *     confirmed), confidence, the overlap-capacity check and the skill split
+ *     are read over these same lines, never over a second ledger.
+ *  8. PERFORMER AT THE TIME BY DATE. A record no source label places is
+ *     placed in a stated EARLIER LEGAL ENTITY (sold / succeeded — never a
+ *     former name) when its whole span lies inside that entity's DATED
+ *     period (the bounds' precision respected: only a record certainly
+ *     inside is placed). An undated period places nothing by date — UNKNOWN
+ *     is never guessed.
  */
 
 /** An earlier business period the organization states about itself
@@ -60,7 +80,76 @@ export type ExperienceBusinessPeriod = {
   readonly to: string | null;
   readonly basis: string;
   readonly legalEntityRelation: string;
+  /** The legal entity as then named (null = the period label stands for it). */
+  readonly legalEntityLabel: string | null;
+  /** The source labels (sheet names) that place a record in this period. */
+  readonly sourceLabels: readonly string[];
+  /** How precisely each bound is known (absent = to the day, as stated). */
+  readonly fromPrecision?: "day" | "month" | "year" | null;
+  readonly toPrecision?: "day" | "month" | "year" | null;
 };
+
+/** The legal-entity relations under which an earlier period's label is a
+ *  FORMER NAME of the same organization — the organization then carries ONE
+ *  identity with a name history ("X, formerly Y"). `not_asserted`,
+ *  `successor` and `sold_and_continued_by_new_entity` are continuity of the
+ *  business history, not of the legal person, and never rename anything. */
+export const FORMER_NAME_RELATIONS: ReadonlySet<string> = new Set(["renamed", "same_entity"]);
+
+/** The former names an organization's live period statements establish. */
+export function formerNamesOf(periods: readonly ExperienceBusinessPeriod[]): string[] {
+  const out: string[] = [];
+  for (const p of periods) {
+    if (!FORMER_NAME_RELATIONS.has(p.legalEntityRelation)) continue;
+    const name = p.label.trim();
+    if (name && !out.includes(name)) out.push(name);
+  }
+  return out;
+}
+
+const normLabel = (s: string | null | undefined) => (s ?? "").normalize("NFKC").trim().toLocaleLowerCase();
+
+/** The stated period a record's source label belongs to, or null. */
+export function periodFor(
+  sourceLabel: string | null | undefined,
+  periods: readonly ExperienceBusinessPeriod[],
+): ExperienceBusinessPeriod | null {
+  const key = normLabel(sourceLabel);
+  if (!key) return null;
+  return periods.find((p) => p.sourceLabels.some((l) => normLabel(l) === key)) ?? null;
+}
+
+/** The ONE stated dated period whose span certainly holds [from, to], or
+ *  null. A period with an unknown bound places nothing by date; when two
+ *  dated periods hold the span (overlapping statements) none is chosen — the
+ *  record stays with the organization that administers it. */
+export function periodForDates(
+  from: string | null,
+  to: string | null,
+  periods: readonly ExperienceBusinessPeriod[],
+): ExperienceBusinessPeriod | null {
+  if (!from || !to) return null;
+  const holding = periods.filter((p) => {
+    if (!p.from || !p.to) return false;
+    const a = innerPeriodBound(p.from, p.fromPrecision, "start");
+    const b = innerPeriodBound(p.to, p.toPrecision, "end");
+    return a <= b && from >= a && to <= b;
+  });
+  return holding.length === 1 ? holding[0] : null;
+}
+
+/** The stated period LABEL a record's source label belongs to, or null. */
+export function periodLabelFor(
+  sourceLabel: string | null | undefined,
+  periods: readonly ExperienceBusinessPeriod[],
+): string | null {
+  const key = normLabel(sourceLabel);
+  if (!key) return null;
+  for (const p of periods) {
+    if (p.sourceLabels.some((l) => normLabel(l) === key)) return p.label;
+  }
+  return null;
+}
 
 /**
  * One relationship the person has or had with an organization: a job, a
@@ -88,6 +177,9 @@ export type ExperienceHourSource = "journal" | "organization_day" | "organizatio
 
 export type ExperienceEvidence = "own_record" | "manager_confirmed" | "organization_reported";
 
+/** How a line was placed in a stated business period. */
+export type ExperiencePeriodPlacement = "source_label" | "date_within_period";
+
 export type ExperienceNotCountedReason =
   | "describes_journal_entry"
   | "period_spans_day_records"
@@ -107,6 +199,10 @@ export type ExperienceHourLine = {
   readonly place: string | null;
   /** Free text the source gave for the work (a context cell, a title). */
   readonly label: string | null;
+  /** The stated business period the record belongs to (resolved from its
+   *  source label against the organization's period statements the viewer
+   *  can read); null = not placed / no statements readable. */
+  readonly periodLabel: string | null;
   readonly from: string | null;
   readonly to: string | null;
   readonly hours: number;
@@ -117,26 +213,70 @@ export type ExperienceHourLine = {
   readonly notCountedReason: ExperienceNotCountedReason | null;
   /** Period lines: how the span came to be (`source` | `human_choice` | `derived`). */
   readonly spanProvenance: "source" | "human_choice" | "derived" | null;
+  /** How `periodLabel` was resolved (absent / null = not placed). */
+  readonly periodPlacement?: ExperiencePeriodPlacement | null;
+  /** Organization lines: of `hours`, attested by someone other than the
+   *  person (employer, client, verifier) — the confirmed part. */
+  readonly attestedHours?: number;
+  /** Organization lines: of `hours`, attested by the person themselves —
+   *  recorded as such, never a confirmation. */
+  readonly selfAttestedHours?: number;
+  /** Organization period lines: the figure's stated basis
+   *  (`derived.hoursBasis`, written by a correction); absent = not stated. */
+  readonly hoursBasis?: { readonly value: string; readonly method: string | null; readonly note: string | null } | null;
+  /** Somebody with standing contests (part of) the line right now. */
+  readonly contested?: boolean;
 };
 
 export type ExperienceRole = Pick<
   ExperienceRelationship,
   "relationship" | "title" | "startedAt" | "endedAt" | "current" | "source" | "engagementContextId"
->;
+> & {
+  /** True when the role is PROJECTED onto an earlier legal entity from the
+   *  owner's role in the continuing organization, by the organization's own
+   *  period statement — said as such, dated by the period. */
+  readonly derived?: boolean;
+};
 
 export type ExperienceOrganization = {
   readonly key: string;
-  /** null = the person's own, organization-less records. */
+  /** `organization` = an organization on the platform; `earlier_legal_entity`
+   *  = a separate legal entity the continuing organization states a period
+   *  for (sold / succeeded / not asserted), with the work done under it and
+   *  the leadership stated for it; `personal` = organization-less records. */
+  readonly kind: "organization" | "earlier_legal_entity" | "personal";
+  /** The organization that holds (administers) the records: for an earlier
+   *  legal entity this is the CONTINUING organization's id — the records
+   *  never move. null = the person's own, organization-less records. */
   readonly organizationId: string | null;
+  /** The name shown for the row: the organization, or the earlier legal
+   *  entity as then named. */
   readonly organizationName: string | null;
+  readonly legalEntityLabel: string | null;
+  readonly legalEntityRelation: string | null;
+  readonly basis: string | null;
+  readonly periodId: string | null;
+  /** Earlier-entity rows: who administers the records today. */
+  readonly administeredBy: { readonly organizationId: string; readonly organizationName: string | null } | null;
+  /** Organization rows: the earlier legal entities it continues. */
+  readonly earlierEntities: readonly { readonly periodId: string; readonly label: string }[];
   readonly roles: readonly ExperienceRole[];
   readonly businessPeriods: readonly ExperienceBusinessPeriod[];
+  /** Earlier names of the SAME legal entity (`FORMER_NAME_RELATIONS`). */
+  readonly formerNames: readonly string[];
+  /** Counted organization hours per stated business period (by the records'
+   *  source labels); records no statement places are under `null`. */
+  readonly byPeriod: readonly { readonly periodLabel: string | null; readonly hours: number; readonly records: number }[];
   readonly journalHours: number;
   readonly journalConfirmedHours: number;
   readonly organizationHours: number;
   readonly notCountedHours: number;
-  /** journalHours + organizationHours — counted lines only. */
+  /** Hours of this row the overlap-capacity check took from estimates. */
+  readonly capacityExcessHours: number;
+  /** journalHours + organizationHours − capacityExcessHours — counted lines only. */
   readonly totalHours: number;
+  /** `totalHours` by ledger state (actual / reported / estimated / confirmed). */
+  readonly byState: Readonly<Record<HoursState, number>>;
   readonly entries: number;
   readonly records: number;
   readonly from: string | null;
@@ -151,7 +291,12 @@ export type ExperienceProject = {
   readonly organizationName: string | null;
   readonly journalHours: number;
   readonly organizationHours: number;
+  /** Hours of this project the overlap-capacity check took from estimates. */
+  readonly capacityExcessHours: number;
+  /** journalHours + organizationHours − capacityExcessHours. */
   readonly totalHours: number;
+  /** Counted hours by ledger state. */
+  readonly byState: Readonly<Record<HoursState, number>>;
   readonly from: string | null;
   readonly to: string | null;
 };
@@ -165,9 +310,31 @@ export type ProfessionalExperienceHours = {
   readonly organizationPeriods: number;
   /** Hours listed but not added (overlaps, same work described twice). */
   readonly notCounted: number;
+  /** Hours the overlap-capacity check took from estimated / reported lines
+   *  (`hours-ledger.ts`); already out of `total`, itemised in `ledger`. */
+  readonly capacityExcess: number;
   /** The organization ledger could not be read: the total holds the journal
    *  only and says so. */
   readonly organizationUnknown: boolean;
+};
+
+/** Work an organization recorded about the person with NO stated duration,
+ *  grouped per organization and stated period (SEP-7: unknown, never zero).
+ *  Shown as "duration to be confirmed"; never a line, never in `hours`,
+ *  never in the ledger — decision 0025 totals are unchanged by it. */
+export type ExperienceDurationPending = {
+  readonly key: string;
+  readonly organizationId: string;
+  readonly organizationName: string | null;
+  readonly periodLabel: string | null;
+  readonly records: number;
+  /** Distinct recorded work days (day records only). */
+  readonly days: number;
+  /** Earliest / latest day the records cover (day or span), or null. */
+  readonly from: string | null;
+  readonly to: string | null;
+  /** Records with no usable date at all (counted in `records`). */
+  readonly undated: number;
 };
 
 export type ProfessionalExperience = {
@@ -180,9 +347,23 @@ export type ProfessionalExperience = {
   readonly projects: readonly ExperienceProject[];
   /** Every relationship, with or without hours — leadership included. */
   readonly roles: readonly ExperienceRelationship[];
+  /** The ONE hours ledger over these lines: states, confidence, capacity,
+   *  skill split. `ledger.total === hours.total` whenever `hours` is known. */
+  readonly ledger: HoursLedger;
+  /** Recorded work whose duration is not stated yet — beside the lines,
+   *  added to nothing. Empty when the organization ledger is unknown. */
+  readonly durationPending: readonly ExperienceDurationPending[];
 };
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+
+const zeroStates = (): Record<HoursState, number> => ({ actual: 0, reported: 0, estimated: 0, confirmed: 0 });
+const roundStates = (s: Readonly<Record<HoursState, number>>): Record<HoursState, number> => ({
+  actual: round2(s.actual),
+  reported: round2(s.reported),
+  estimated: round2(s.estimated),
+  confirmed: round2(s.confirmed),
+});
 
 const PERSONAL_KEY = "personal";
 
@@ -199,6 +380,18 @@ function maxDay(a: string | null, b: string | null): string | null {
   return a > b ? a : b;
 }
 
+/** Confirmation facts of one organization record, from its own proof. */
+function attestationOf(context: HistoryContext | undefined): { independent: boolean; self: boolean; contested: boolean } {
+  const proof = context?.proof;
+  if (!proof) return { independent: false, self: false, contested: false };
+  const independent =
+    proof.attestedByRole !== null ||
+    proof.concepts.includes("INDEPENDENTLY_VERIFIED") ||
+    proof.concepts.includes("EMPLOYER_CONFIRMED") ||
+    proof.concepts.includes("CLIENT_ACCEPTED");
+  return { independent, self: !independent && proof.concepts.includes("SELF_DECLARED"), contested: proof.contested };
+}
+
 function recordLabel(r: WorkIntelligenceOrganizationRecord | WorkIntelligenceOrganizationPeriodRecord): string | null {
   const c = r.context;
   if (!c) return null;
@@ -210,6 +403,11 @@ export function deriveProfessionalExperience(input: {
   readonly relationships?: readonly ExperienceRelationship[] | null;
   /** Project id → name, for journal lines (the records carry their own). */
   readonly projectNames?: ReadonlyMap<string, string> | null;
+  /** Skill links per line key (P_ij), for the ledger's skill split. */
+  readonly skillLinks?: readonly SkillLink[] | null;
+  /** Private confidence weights, injected by the server-side caller from
+   *  configuration outside this repository; absent = bands unrated. */
+  readonly confidenceWeights?: ConfidenceWeights | null;
 }): ProfessionalExperience {
   const relationships = input.relationships ?? [];
   const projectNames = input.projectNames ?? new Map<string, string>();
@@ -236,9 +434,33 @@ export function deriveProfessionalExperience(input: {
   }
   const nameOf = (organizationId: string | null, fallback: string | null): string | null =>
     (organizationId ? orgNameById.get(organizationId) : null) ?? fallback ?? null;
+  const periodOf = (
+    organizationId: string | null,
+    sourceLabel: string | null | undefined,
+    from: string | null,
+    to: string | null,
+  ): { label: string | null; placement: ExperiencePeriodPlacement | null } => {
+    if (!organizationId) return { label: null, placement: null };
+    const periods = periodsByOrg.get(organizationId) ?? [];
+    const byLabel = periodLabelFor(sourceLabel, periods);
+    if (byLabel) return { label: byLabel, placement: "source_label" };
+    // By date only into an EARLIER LEGAL ENTITY: work dated inside the
+    // predecessor's stated span was performed by the predecessor (the
+    // continuing company did not perform it). A former NAME of the same
+    // entity stays label-only — a name band is not a performer.
+    const byDate = periodForDates(
+      from,
+      to,
+      periods.filter((p) => !FORMER_NAME_RELATIONS.has(p.legalEntityRelation)),
+    );
+    return byDate ? { label: byDate.label, placement: "date_within_period" } : { label: null, placement: null };
+  };
 
   const wi = input.wi;
   const lines: ExperienceHourLine[] = [];
+  // The ACTUAL work days behind each day-made line (journal, organization
+  // day records), for the ledger's capacity check only — never on a line.
+  const daysByKey = new Map<string, { day: string; hours: number }[]>();
 
   if (wi) {
     const liveEntryIds = new Set(wi.entryIds);
@@ -258,8 +480,14 @@ export function deriveProfessionalExperience(input: {
       place: string | null;
       describesJournal: boolean;
       supplierName: string | null;
+      periodLabel: string | null;
+      placement: ExperiencePeriodPlacement | null;
       hours: number;
+      attested: number;
+      selfAttested: number;
+      contested: boolean;
       records: number;
+      days: Map<string, number>;
       from: string | null;
       to: string | null;
     };
@@ -268,7 +496,8 @@ export function deriveProfessionalExperience(input: {
       const describesJournal = r.journalEntryId !== null && liveEntryIds.has(r.journalEntryId);
       const projectId = r.context?.project?.id ?? null;
       const place = r.context?.place?.name ?? null;
-      const key = [r.organizationId, projectId ?? "", place ?? "", describesJournal ? "j" : "o"].join("|");
+      const { label: periodLabel, placement } = periodOf(r.organizationId, r.context?.source.label, r.workDate, r.workDate);
+      const key = [r.organizationId, projectId ?? "", place ?? "", periodLabel ?? "", describesJournal ? "j" : "o"].join("|");
       let a = dayAcc.get(key);
       if (!a) {
         a = {
@@ -278,19 +507,31 @@ export function deriveProfessionalExperience(input: {
           place,
           describesJournal,
           supplierName: r.context?.source.supplierName ?? null,
+          periodLabel,
+          placement,
           hours: 0,
+          attested: 0,
+          selfAttested: 0,
+          contested: false,
           records: 0,
+          days: new Map<string, number>(),
           from: null,
           to: null,
         };
         dayAcc.set(key, a);
       }
       a.hours += r.hours;
+      const att = attestationOf(r.context);
+      if (att.independent) a.attested += r.hours;
+      else if (att.self) a.selfAttested += r.hours;
+      if (att.contested) a.contested = true;
       a.records += 1;
+      a.days.set(r.workDate, (a.days.get(r.workDate) ?? 0) + r.hours);
       a.from = minDay(a.from, r.workDate);
       a.to = maxDay(a.to, r.workDate);
     }
     for (const [key, a] of dayAcc) {
+      daysByKey.set(`day:${key}`, [...a.days].map(([day, h]) => ({ day, hours: h })));
       lines.push({
         key: `day:${key}`,
         source: "organization_day",
@@ -302,6 +543,7 @@ export function deriveProfessionalExperience(input: {
         projectName: a.projectName,
         place: a.place,
         label: null,
+        periodLabel: a.periodLabel,
         from: a.from,
         to: a.to,
         hours: round2(a.hours),
@@ -310,6 +552,10 @@ export function deriveProfessionalExperience(input: {
         counted: !a.describesJournal,
         notCountedReason: a.describesJournal ? "describes_journal_entry" : null,
         spanProvenance: null,
+        periodPlacement: a.placement,
+        attestedHours: round2(a.attested),
+        selfAttestedHours: round2(a.selfAttested),
+        contested: a.contested,
       });
     }
 
@@ -320,6 +566,8 @@ export function deriveProfessionalExperience(input: {
         (d) => d.organizationId === p.organizationId && d.workDate >= p.periodStart && d.workDate <= p.periodEnd,
       );
       if (!spansDayRecords) countedPeriods.push(p);
+      const placed = periodOf(p.organizationId, p.context?.source.label, p.periodStart, p.periodEnd);
+      const att = attestationOf(p.context);
       lines.push({
         key: `period:${p.id}`,
         source: "organization_period",
@@ -331,6 +579,7 @@ export function deriveProfessionalExperience(input: {
         projectName: p.context?.project?.name ?? null,
         place: p.context?.place?.name ?? null,
         label: recordLabel(p),
+        periodLabel: placed.label,
         from: p.periodStart,
         to: p.periodEnd,
         hours: round2(p.hours),
@@ -339,6 +588,11 @@ export function deriveProfessionalExperience(input: {
         counted: !spansDayRecords,
         notCountedReason: spansDayRecords ? "period_spans_day_records" : null,
         spanProvenance: p.provenance,
+        periodPlacement: placed.placement,
+        attestedHours: att.independent ? round2(p.hours) : 0,
+        selfAttestedHours: att.self ? round2(p.hours) : 0,
+        hoursBasis: p.hoursBasis ?? null,
+        contested: att.contested,
       });
     }
 
@@ -357,8 +611,10 @@ export function deriveProfessionalExperience(input: {
     ): ExperienceHourLine => {
       const hours = round2(days.reduce((s, d) => s + d.hours, 0));
       const confirmed = round2(days.reduce((s, d) => s + d.confirmedHours, 0));
+      const key = `journal:${l.engagementContextId ?? ""}|${l.projectId ?? ""}|${counted ? "c" : "p"}`;
+      daysByKey.set(key, days.map((d) => ({ day: d.day, hours: d.hours })));
       return {
-        key: `journal:${l.engagementContextId ?? ""}|${l.projectId ?? ""}|${counted ? "c" : "p"}`,
+        key,
         source: "journal",
         evidence: confirmed > 0 ? "manager_confirmed" : "own_record",
         organizationId: org.organizationId,
@@ -368,6 +624,7 @@ export function deriveProfessionalExperience(input: {
         projectName: l.projectId ? (projectNames.get(l.projectId) ?? null) : null,
         place: null,
         label: null,
+        periodLabel: null,
         from: days[0]?.day ?? null,
         to: days[days.length - 1]?.day ?? null,
         hours,
@@ -394,6 +651,13 @@ export function deriveProfessionalExperience(input: {
     }
   }
 
+  // ── the one hours ledger over the same lines ─────────────────────────
+  const ledger = deriveHoursLedger({
+    lines: lines.map((l) => (daysByKey.has(l.key) ? { ...l, days: daysByKey.get(l.key) } : l)),
+    skillLinks: input.skillLinks ?? null,
+    confidenceWeights: input.confidenceWeights ?? null,
+  });
+
   // ── totals ───────────────────────────────────────────────────────────
   let hours: ProfessionalExperienceHours | null = null;
   if (wi) {
@@ -414,12 +678,15 @@ export function deriveProfessionalExperience(input: {
       else organizationPeriods += l.hours;
     }
     hours = {
-      total: round2(journal + organizationDays + organizationPeriods),
+      // The ledger's total: every counted line once, minus what the overlap
+      // capacity check took from estimates (0 when nothing overlaps).
+      total: round2(journal + organizationDays + organizationPeriods - ledger.capacity.excessHours),
       journal: round2(journal),
       journalConfirmed: round2(journalConfirmed),
       organizationDays: round2(organizationDays),
       organizationPeriods: round2(organizationPeriods),
       notCounted: round2(notCounted),
+      capacityExcess: ledger.capacity.excessHours,
       organizationUnknown: wi.organizationRecords === null,
     };
   }
@@ -432,28 +699,79 @@ export function deriveProfessionalExperience(input: {
     to = maxDay(to, l.to);
   }
 
-  // ── per organization: hours by source + roles + business periods ─────
+  // ── per organization AND per earlier legal entity ───────────────────
+  // SEPARATE LEGAL ENTITIES, ONE PERSON HISTORY (owner 2026-10-17, final):
+  // a stated period whose legal relation is NOT a former name (sold and
+  // continued by a new entity, successor, not asserted, other) is an EARLIER
+  // LEGAL ENTITY of its own — its own row in the person's history, named by
+  // the entity label, holding the work done under it (the records whose
+  // source label places them in that period) and the leadership stated for
+  // it. The records stay where they are, administered by the continuing
+  // organization; the row says both. A period that IS a former name
+  // (renamed / same_entity) stays inside the continuing organization's row
+  // with the name history.
   const orgAcc = new Map<string, ExperienceOrganization>();
+  const stateOfLine = new Map<string, LineStateSplit>(ledger.lines.map((x) => [x.key, x]));
+  const cutOfLine = new Map<string, number>(ledger.capacity.reductions.map((r) => [r.key, r.hours]));
+  const addStates = (
+    acc: Readonly<Record<HoursState, number>>,
+    l: ExperienceHourLine,
+  ): Readonly<Record<HoursState, number>> => {
+    const split = l.counted ? stateOfLine.get(l.key) : undefined;
+    if (!split) return acc;
+    return {
+      actual: acc.actual + split.byState.actual,
+      reported: acc.reported + split.byState.reported,
+      estimated: acc.estimated + split.byState.estimated,
+      confirmed: acc.confirmed + split.byState.confirmed,
+    };
+  };
   const orgKey = (id: string | null) => id ?? PERSONAL_KEY;
+  const entityKey = (periodId: string) => `entity:${periodId}`;
+  const earlierEntitiesOf = (id: string | null): ExperienceBusinessPeriod[] =>
+    id ? (periodsByOrg.get(id) ?? []).filter((p) => !FORMER_NAME_RELATIONS.has(p.legalEntityRelation)) : [];
+  const emptyRow = (
+    key: string,
+    kind: ExperienceOrganization["kind"],
+    id: string | null,
+    name: string | null,
+  ): ExperienceOrganization => ({
+    key,
+    kind,
+    organizationId: id,
+    organizationName: name,
+    legalEntityLabel: null,
+    legalEntityRelation: null,
+    basis: null,
+    periodId: null,
+    administeredBy: null,
+    earlierEntities: [],
+    roles: [],
+    businessPeriods: [],
+    formerNames: [],
+    byPeriod: [],
+    journalHours: 0,
+    journalConfirmedHours: 0,
+    organizationHours: 0,
+    notCountedHours: 0,
+    capacityExcessHours: 0,
+    totalHours: 0,
+    byState: zeroStates(),
+    entries: 0,
+    records: 0,
+    from: null,
+    to: null,
+  });
   const ensureOrg = (id: string | null, name: string | null): ExperienceOrganization => {
     const key = orgKey(id);
     let o = orgAcc.get(key);
     if (!o) {
+      const periods = id ? (periodsByOrg.get(id) ?? []) : [];
       o = {
-        key,
-        organizationId: id,
-        organizationName: nameOf(id, name),
-        roles: [],
-        businessPeriods: id ? (periodsByOrg.get(id) ?? []) : [],
-        journalHours: 0,
-        journalConfirmedHours: 0,
-        organizationHours: 0,
-        notCountedHours: 0,
-        totalHours: 0,
-        entries: 0,
-        records: 0,
-        from: null,
-        to: null,
+        ...emptyRow(key, id ? "organization" : "personal", id, nameOf(id, name)),
+        businessPeriods: periods,
+        formerNames: formerNamesOf(periods),
+        earlierEntities: earlierEntitiesOf(id).map((p) => ({ periodId: p.id, label: p.legalEntityLabel ?? p.label })),
       };
       orgAcc.set(key, o);
     } else if (o.organizationName === null && name) {
@@ -462,33 +780,89 @@ export function deriveProfessionalExperience(input: {
     }
     return o;
   };
+  const ensureEntity = (org: ExperienceOrganization, p: ExperienceBusinessPeriod): ExperienceOrganization => {
+    const key = entityKey(p.id);
+    let e = orgAcc.get(key);
+    if (!e) {
+      e = {
+        ...emptyRow(key, "earlier_legal_entity", org.organizationId, p.legalEntityLabel ?? p.label),
+        legalEntityLabel: p.legalEntityLabel ?? p.label,
+        legalEntityRelation: p.legalEntityRelation,
+        basis: p.basis,
+        periodId: p.id,
+        administeredBy: org.organizationId
+          ? { organizationId: org.organizationId, organizationName: org.organizationName }
+          : null,
+        businessPeriods: [p],
+        from: p.from,
+        to: p.to,
+      };
+      orgAcc.set(key, e);
+    }
+    return e;
+  };
   for (const r of relationships) {
     const o = ensureOrg(r.organizationId, r.organizationName);
-    orgAcc.set(o.key, {
-      ...o,
-      roles: [
-        ...o.roles,
-        {
-          relationship: r.relationship,
-          title: r.title,
-          startedAt: r.startedAt,
-          endedAt: r.endedAt,
-          current: r.current,
-          source: r.source,
-          engagementContextId: r.engagementContextId,
-        },
-      ],
-    });
+    const role: ExperienceRole = {
+      relationship: r.relationship,
+      title: r.title,
+      startedAt: r.startedAt,
+      endedAt: r.endedAt,
+      current: r.current,
+      source: r.source,
+      engagementContextId: r.engagementContextId,
+    };
+    orgAcc.set(o.key, { ...o, roles: [...o.roles, role] });
+    // The OWNER of the continuing organization led the earlier entity too —
+    // that is what the period statement (its basis is named on the row)
+    // says; the role is marked DERIVED and dated by the period, never by the
+    // engagement. A manager appointed to the continuing organization is NOT
+    // projected: the statement says nothing about them.
+    if (r.relationship === "owner") {
+      for (const p of earlierEntitiesOf(r.organizationId)) {
+        const e = ensureEntity(orgAcc.get(o.key)!, p);
+        if (e.roles.some((x) => x.relationship === "owner" && x.derived)) continue;
+        orgAcc.set(e.key, {
+          ...e,
+          roles: [
+            ...e.roles,
+            { ...role, startedAt: p.from, endedAt: p.to, current: false, derived: true, engagementContextId: null },
+          ],
+        });
+      }
+    }
   }
+  const rowFor = (l: ExperienceHourLine): ExperienceOrganization => {
+    const org = ensureOrg(l.organizationId, l.organizationName);
+    if (l.periodLabel && l.source !== "journal") {
+      const p = earlierEntitiesOf(l.organizationId).find((x) => x.label === l.periodLabel);
+      if (p) return ensureEntity(org, p);
+    }
+    return org;
+  };
   for (const l of lines) {
-    const o = ensureOrg(l.organizationId, l.organizationName);
+    const o = rowFor(l);
+    const byPeriod =
+      l.counted && l.source !== "journal"
+        ? (() => {
+            const existing = o.byPeriod.find((b) => b.periodLabel === l.periodLabel);
+            return existing
+              ? o.byPeriod.map((b) =>
+                  b === existing ? { ...b, hours: b.hours + l.hours, records: b.records + l.records } : b,
+                )
+              : [...o.byPeriod, { periodLabel: l.periodLabel, hours: l.hours, records: l.records }];
+          })()
+        : o.byPeriod;
     const next: ExperienceOrganization = {
       ...o,
+      byPeriod,
       journalHours: o.journalHours + (l.counted && l.source === "journal" ? l.hours : 0),
       journalConfirmedHours: o.journalConfirmedHours + (l.counted && l.source === "journal" ? l.confirmedHours : 0),
       organizationHours: o.organizationHours + (l.counted && l.source !== "journal" ? l.hours : 0),
       notCountedHours: o.notCountedHours + (l.counted ? 0 : l.hours),
+      capacityExcessHours: o.capacityExcessHours + (l.counted ? (cutOfLine.get(l.key) ?? 0) : 0),
       totalHours: 0,
+      byState: addStates(o.byState, l),
       entries: o.entries + (l.source === "journal" ? l.records : 0),
       records: o.records + (l.source === "journal" ? 0 : l.records),
       from: l.counted ? minDay(o.from, l.from) : o.from,
@@ -499,11 +873,16 @@ export function deriveProfessionalExperience(input: {
   const organizations = [...orgAcc.values()]
     .map((o) => ({
       ...o,
+      byPeriod: o.byPeriod
+        .map((b) => ({ ...b, hours: round2(b.hours) }))
+        .sort((x, y) => y.hours - x.hours || (x.periodLabel ?? "").localeCompare(y.periodLabel ?? "")),
       journalHours: round2(o.journalHours),
       journalConfirmedHours: round2(o.journalConfirmedHours),
       organizationHours: round2(o.organizationHours),
       notCountedHours: round2(o.notCountedHours),
-      totalHours: round2(o.journalHours + o.organizationHours),
+      capacityExcessHours: round2(o.capacityExcessHours),
+      totalHours: round2(o.journalHours + o.organizationHours - o.capacityExcessHours),
+      byState: roundStates(o.byState),
     }))
     .sort(
       (x, y) =>
@@ -526,7 +905,9 @@ export function deriveProfessionalExperience(input: {
       organizationName: l.organizationName,
       journalHours: 0,
       organizationHours: 0,
+      capacityExcessHours: 0,
       totalHours: 0,
+      byState: zeroStates(),
       from: null,
       to: null,
     };
@@ -535,7 +916,9 @@ export function deriveProfessionalExperience(input: {
       projectName: p.projectName ?? l.projectName,
       journalHours: p.journalHours + (l.source === "journal" ? l.hours : 0),
       organizationHours: p.organizationHours + (l.source === "journal" ? 0 : l.hours),
+      capacityExcessHours: p.capacityExcessHours + (cutOfLine.get(l.key) ?? 0),
       totalHours: 0,
+      byState: addStates(p.byState, l),
       from: minDay(p.from, l.from),
       to: maxDay(p.to, l.to),
     });
@@ -545,7 +928,9 @@ export function deriveProfessionalExperience(input: {
       ...p,
       journalHours: round2(p.journalHours),
       organizationHours: round2(p.organizationHours),
-      totalHours: round2(p.journalHours + p.organizationHours),
+      capacityExcessHours: round2(p.capacityExcessHours),
+      totalHours: round2(p.journalHours + p.organizationHours - p.capacityExcessHours),
+      byState: roundStates(p.byState),
     }))
     .sort((x, y) => y.totalHours - x.totalHours || (x.projectName ?? "").localeCompare(y.projectName ?? ""));
 
@@ -559,6 +944,66 @@ export function deriveProfessionalExperience(input: {
         x.key.localeCompare(y.key),
     );
 
+  // ── recorded work with no stated duration (SEP-7) ─────────────────────
+  // The work happened and an organization recorded it; its length is
+  // unknown. Shown beside the history, never an hour: not a line, not in
+  // `hours`, not in the ledger, so every total above is unchanged.
+  const durationPending: ExperienceDurationPending[] = [];
+  if (wi && wi.organizationRecords !== null) {
+    type PendAcc = {
+      organizationId: string;
+      supplierName: string | null;
+      periodLabel: string | null;
+      records: number;
+      days: Set<string>;
+      from: string | null;
+      to: string | null;
+      undated: number;
+    };
+    const acc = new Map<string, PendAcc>();
+    for (const r of wi.organizationPendingRecords ?? []) {
+      const first = r.workDate ?? r.periodStart;
+      const last = r.workDate ?? r.periodEnd;
+      // Source label first, then dates (periodOf accepts none): an undated
+      // record whose sheet names a business period is still placed in it.
+      const { label: periodLabel } = periodOf(r.organizationId, r.context?.source.label, first, last ?? first);
+      const key = `pending:${r.organizationId}|${periodLabel ?? ""}`;
+      let a = acc.get(key);
+      if (!a) {
+        a = {
+          organizationId: r.organizationId,
+          supplierName: r.context?.source.supplierName ?? null,
+          periodLabel,
+          records: 0,
+          days: new Set(),
+          from: null,
+          to: null,
+          undated: 0,
+        };
+        acc.set(key, a);
+      }
+      a.records += 1;
+      if (r.workDate) a.days.add(r.workDate);
+      if (!first) a.undated += 1;
+      a.from = minDay(a.from, first);
+      a.to = maxDay(a.to, last);
+    }
+    for (const [key, a] of acc) {
+      durationPending.push({
+        key,
+        organizationId: a.organizationId,
+        organizationName: nameOf(a.organizationId, a.supplierName),
+        periodLabel: a.periodLabel,
+        records: a.records,
+        days: a.days.size,
+        from: a.from,
+        to: a.to,
+        undated: a.undated,
+      });
+    }
+    durationPending.sort((x, y) => (y.to ?? "").localeCompare(x.to ?? "") || x.key.localeCompare(y.key));
+  }
+
   return {
     hours,
     from,
@@ -567,5 +1012,7 @@ export function deriveProfessionalExperience(input: {
     organizations,
     projects,
     roles: relationships,
+    ledger,
+    durationPending,
   };
 }

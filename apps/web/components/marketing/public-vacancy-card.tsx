@@ -3,6 +3,7 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import { formatUtcDate } from "@/lib/time/display";
 import { PlaceTimeStamp } from "@/components/app/work-world/primitives";
+import { vacancyPayLabel } from "@/lib/vacancy-store/vacancy-pay-label";
 
 /**
  * One anonymous vacancy row.
@@ -35,6 +36,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     nl: "Vast",
     de: "Unbefristet",
     pl: "Na czas nieokreślony",
+    sv: "Tillsvidare",
   },
   temporary: {
     en: "Temporary",
@@ -43,6 +45,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     nl: "Tijdelijk",
     de: "Befristet",
     pl: "Na czas określony",
+    sv: "Visstid",
   },
   seasonal: {
     en: "Seasonal",
@@ -51,6 +54,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     nl: "Seizoenswerk",
     de: "Saisonal",
     pl: "Sezonowa",
+    sv: "Säsongsarbete",
   },
 };
 
@@ -62,6 +66,7 @@ const WORKING_TIME: Record<string, L> = {
     nl: "Voltijd",
     de: "Vollzeit",
     pl: "Pełny etat",
+    sv: "Heltid",
   },
   part_time: {
     en: "Part time",
@@ -70,6 +75,7 @@ const WORKING_TIME: Record<string, L> = {
     nl: "Deeltijd",
     de: "Teilzeit",
     pl: "Niepełny etat",
+    sv: "Deltid",
   },
 };
 
@@ -80,18 +86,32 @@ const POSITIONS: L = {
   nl: "plaatsen",
   de: "Stellen",
   pl: "miejsc",
+  sv: "platser",
 };
 
 /**
- * The anonymous fact chips (employment form · working time · positions), in
- * the reader's language from the fixed maps above. ONE builder for the card
+ * The anonymous fact chips (pay · employment form · working time · positions),
+ * in the reader's language from the fixed maps above. ONE builder for the card
  * and `/jobs/[id]`, so the detail page never shows less than its own card.
+ * Pay is part of the anonymous projection, shown first when the publisher
+ * supplied it (owner P0-3, 2026-11-03).
  */
 export function vacancyFactChips(
-  vacancy: Pick<PublicVacancyPreview, "employmentForm" | "workingTime" | "positions">,
+  vacancy: Pick<
+    PublicVacancyPreview,
+    | "employmentForm"
+    | "workingTime"
+    | "positions"
+    | "compensationCurrency"
+    | "compensationMin"
+    | "compensationMax"
+  >,
   locale: ActiveLocale,
 ): string[] {
   const chips: string[] = [];
+
+  const pay = vacancyPayLabel(vacancy, locale);
+  if (pay) chips.push(pay);
 
   const form = vacancy.employmentForm
     ? EMPLOYMENT_FORM[vacancy.employmentForm]?.[locale]
@@ -114,15 +134,34 @@ export function PublicVacancyCard({
   locale,
   savedLabel,
   headingFallback,
+  genericTitle,
   sourceLanguageLabel,
+  memberFacts,
+  lockedFactsLabel,
 }: {
   readonly vacancy: PublicVacancyPreview;
+  /**
+   * MEMBER-ONLY facts (owner P0-3, 2026-11-03): the employer and the place,
+   * read by the caller under the signed-in person's OWN client from the
+   * member read path. Never passed for an anonymous viewer; the anonymous
+   * projection cannot carry them (owner directive 2026-08-24).
+   */
+  readonly memberFacts?: { readonly employer: string | null; readonly place: string | null } | null;
+  /** Already-localized "employer and place after sign-in" line, passed by the
+   *  board for an anonymous viewer INSTEAD of `memberFacts`, so the card says
+   *  what exists instead of leaving the gap unexplained. Omitted = no line. */
+  readonly lockedFactsLabel?: string;
   readonly locale: ActiveLocale;
   /** Localized profession name for the anonymous heading (owner directive
    *  2026-08-24): the raw title is member-only because it embeds employer and
    *  location wording, so anonymous cards head with the profession in the
    *  reader's language, falling back to the source occupation label. */
   readonly headingFallback?: string;
+  /** Localized generic noun ("Darbo pasiūlymas") for the last case: an ad with
+   *  no profession match AND no source occupation label (a Norwegian stream ad
+   *  can carry only its raw title, which is member-only). Without it the card
+   *  headed with a bare "—" (production /lt/jobs, 2026-10-18). */
+  readonly genericTitle?: string;
   /** Rendered only when the viewer has this ad in their OWN private bookmark
    *  list. It is a note to the person looking at their own screen — it reaches
    *  no employer and is never rendered for anyone else. */
@@ -147,6 +186,9 @@ export function PublicVacancyCard({
   readonly sourceLanguageLabel?: string;
 }) {
   const chips = vacancyFactChips(vacancy, locale);
+  const memberLine = memberFacts
+    ? [memberFacts.employer, memberFacts.place].filter((x): x is string => Boolean(x)).join(" · ")
+    : "";
 
   const published = formatUtcDate(vacancy.publishedAt, locale);
   // Only a plausible language subtag is emitted: a malformed value in the data
@@ -163,8 +205,10 @@ export function PublicVacancyCard({
   // occupation had to become the heading, repeating it as the subline below
   // would say the same thing twice, so it is suppressed there.
   const heading =
-    vacancy.title ?? headingFallback ?? vacancy.occupation ?? "—";
-  const headingIsPublisherText = vacancy.title !== null || !headingFallback;
+    vacancy.title ?? headingFallback ?? vacancy.occupation ?? genericTitle ?? "—";
+  // The generic noun is OUR text in the reader's language, never the publisher's.
+  const headingIsPublisherText =
+    vacancy.title !== null || (!headingFallback && vacancy.occupation !== null);
   const occupationSubline =
     vacancy.occupation && heading !== vacancy.occupation
       ? vacancy.occupation
@@ -223,6 +267,16 @@ export function PublicVacancyCard({
           </p>
         )
       )}
+
+      {memberLine ? (
+        <p className="mt-1 text-sm text-text-secondary" data-testid="public-vacancy-member-facts">
+          {memberLine}
+        </p>
+      ) : !memberFacts && lockedFactsLabel ? (
+        <p className="mt-1 text-sm text-text-muted" data-testid="public-vacancy-locked-facts">
+          {lockedFactsLabel}
+        </p>
+      ) : null}
 
       {chips.length > 0 && (
         <ul className="mt-2 flex flex-wrap gap-1.5">

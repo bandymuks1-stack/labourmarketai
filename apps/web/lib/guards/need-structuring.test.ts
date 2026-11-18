@@ -47,10 +47,20 @@ describe("admin backfill is safe — admin-gated, closed-set, no free-text write
     expect(action).toMatch(/ACCOMMODATION/);
   });
   it("writes only the structured columns + whitelisted accommodation", () => {
-    expect(action).toMatch(/role_or_work_type:/);
+    expect(action).toMatch(/patch\.role_or_work_type = workType/);
     // it must NOT write free text fields to the row
     expect(action).not.toMatch(/need_summary:\s/);
     expect(action).not.toMatch(/\brole:\s*raw\./);
+  });
+  it("a field the reviewer did not supply is left as recorded, never nulled", () => {
+    // Writing all four columns every time erased a demand's stated role and
+    // start when the reviewer filled in only the country.
+    expect(action).toMatch(/if \(workType\) patch\.role_or_work_type = workType;/);
+    expect(action).toMatch(/if \(country\) patch\.country = country;/);
+    expect(action).toMatch(/if \(teamSize != null\) patch\.team_size = teamSize;/);
+    expect(action).toMatch(/if \(startPeriod\) patch\.start_period = startPeriod;/);
+    expect(action).toMatch(/\.update\(patch\)/);
+    expect(action).not.toMatch(/role_or_work_type: workType/);
   });
 
   it("the admin loader is server-only and the worker board does not read free text", () => {

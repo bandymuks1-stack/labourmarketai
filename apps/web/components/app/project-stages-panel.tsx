@@ -210,7 +210,11 @@ function StageRow({
 }) {
   const t = useTranslations("projectStages");
   const [pending, startTransition] = useTransition();
+  // `status` is what the select shows (a choice may still be waiting for a
+  // blocked reason); `saved` is what the database holds, and only it drives
+  // the badge — a status that was never saved is never shown as the stage's.
   const [status, setStatus] = useState<StageStatus>(stage.status);
+  const [saved, setSaved] = useState<StageStatus>(stage.status);
   const [blockedReason, setBlockedReason] = useState(stage.blockedReason ?? "");
 
   function applyStatus(next: StageStatus) {
@@ -223,7 +227,8 @@ function StageRow({
         blockedReason: next === "blocked" ? blockedReason.trim() : undefined,
         today: localIsoDay(),
       });
-      if (!res.ok) setStatus(stage.status); // no fake success — revert the badge
+      if (res.ok) setSaved(next);
+      else setStatus(saved); // no fake success — the select returns to the saved status
       onDone(res.ok ? t("outcome.updated") : t(`outcome.${res.code}`));
     });
   }
@@ -249,10 +254,11 @@ function StageRow({
           {stage.name}
         </span>
         <span
-          className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[status]}`}
+          className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[saved]}`}
           data-testid="project-stage-status-badge"
+          data-status={saved}
         >
-          {t(`statuses.${status}`)}
+          {t(`statuses.${saved}`)}
         </span>
       </div>
 

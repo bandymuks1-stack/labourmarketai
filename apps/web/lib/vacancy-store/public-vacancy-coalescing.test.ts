@@ -173,16 +173,17 @@ describe("NEGATIVE CONTROL — retry behaviour is bounded", () => {
     const second = await Promise.all(
       Array.from({ length: 10 }, () => searchPublicVacancyPreviews({}, client as never)),
     );
-    // First wave coalesces to one; the retry wave is answered from the cooldown.
-    expect(afterFirstWave).toBe(1);
-    expect(calls.length).toBe(1);
+    // First wave coalesces to ONE search (one query + its single cold-cache
+    // retry, 2026-10-20); the retry wave is answered from the cooldown.
+    expect(afterFirstWave).toBe(2);
+    expect(calls.length).toBe(2);
     for (const r of second) expect(r.status).toBe("unavailable");
   });
 
-  it("this module issues no retries of its own", async () => {
+  it("this module issues at most ONE retry of its own, and only on a statement timeout", async () => {
     const { client, calls } = makeClient({ error: { code: "57014" } });
     await searchPublicVacancyPreviews({}, client as never);
-    expect(calls.length).toBe(1);
+    expect(calls.length).toBe(2);
   });
 });
 

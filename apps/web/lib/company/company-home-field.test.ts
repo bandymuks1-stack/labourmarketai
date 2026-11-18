@@ -16,7 +16,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const h = vi.hoisted(() => ({
   listProjectStages: vi.fn(),
   listProjectAssignments: vi.fn(),
-  loadProjectRiskForChat: vi.fn(),
+  loadProjectRiskForHome: vi.fn(),
   loadWhoIsAvailableForChat: vi.fn(),
   loadEmployerOpeningBrief: vi.fn(),
   getOrgDemandRollup: vi.fn(),
@@ -24,7 +24,7 @@ const h = vi.hoisted(() => ({
 
 vi.mock("@/lib/projects/stages", () => ({ listProjectStages: h.listProjectStages }));
 vi.mock("@/lib/projects/projects", () => ({ listProjectAssignedPeople: h.listProjectAssignments }));
-vi.mock("@/lib/conversation/project-risk", () => ({ loadProjectRiskForChat: h.loadProjectRiskForChat }));
+vi.mock("@/lib/conversation/project-risk", () => ({ loadProjectRiskForHome: h.loadProjectRiskForHome }));
 vi.mock("@/lib/conversation/capacity", () => ({ loadWhoIsAvailableForChat: h.loadWhoIsAvailableForChat }));
 vi.mock("@/lib/conversation/opening-brief", () => ({ loadEmployerOpeningBrief: h.loadEmployerOpeningBrief }));
 
@@ -79,7 +79,7 @@ beforeEach(() => {
   });
   h.listProjectStages.mockReset();
   h.listProjectAssignments.mockReset();
-  h.loadProjectRiskForChat.mockReset();
+  h.loadProjectRiskForHome.mockReset();
   h.loadWhoIsAvailableForChat.mockReset();
   h.loadEmployerOpeningBrief.mockReset();
   h.loadWhoIsAvailableForChat.mockResolvedValue({ kind: "empty" });
@@ -90,7 +90,7 @@ beforeEach(() => {
 
 describe("company home — no second read of what the risk row already carries", () => {
   it("performs NO listProjectStages / listProjectAssignments call when the rows carry complete stages and names", async () => {
-    h.loadProjectRiskForChat.mockResolvedValue({
+    h.loadProjectRiskForHome.mockResolvedValue({
       kind: "ok",
       total: 2,
       rows: [
@@ -123,7 +123,7 @@ describe("company home — no second read of what the risk row already carries",
   });
 
   it("stages the risk read could not read (null) stay 'unavailable' — no second attempt either", async () => {
-    h.loadProjectRiskForChat.mockResolvedValue({
+    h.loadProjectRiskForHome.mockResolvedValue({
       kind: "ok",
       total: 1,
       rows: [riskRow({ projectId: "p1", stagesBlocked: null, stages: null, stageTotal: null, peopleNames: [] })],
@@ -135,7 +135,7 @@ describe("company home — no second read of what the risk row already carries",
   });
 
   it("falls back to the canonical reads when a row carries nothing, or a list the panel's bound cut short", async () => {
-    h.loadProjectRiskForChat.mockResolvedValue({
+    h.loadProjectRiskForHome.mockResolvedValue({
       kind: "ok",
       total: 2,
       rows: [
@@ -180,7 +180,7 @@ describe("company home — no second read of what the risk row already carries",
   });
 
   it("hands the page's roster read to the capacity answer; without one the capacity read runs as before", async () => {
-    h.loadProjectRiskForChat.mockResolvedValue({ kind: "empty" });
+    h.loadProjectRiskForHome.mockResolvedValue({ kind: "empty" });
     const roster = Promise.resolve({ kind: "ok" as const, rows: [] });
 
     await loadCompanyHomeField({ roster });
@@ -191,7 +191,7 @@ describe("company home — no second read of what the risk row already carries",
   });
 
   it("a failed capacity read is the named error state, never a calm empty block", async () => {
-    h.loadProjectRiskForChat.mockResolvedValue({ kind: "empty" });
+    h.loadProjectRiskForHome.mockResolvedValue({ kind: "empty" });
     h.loadWhoIsAvailableForChat.mockRejectedValue(new Error("boom"));
     const field = await loadCompanyHomeField();
     expect(field.capacity).toEqual({ kind: "error" });
@@ -226,7 +226,7 @@ describe("carriedStages / carriedPeopleNames — the completeness rule (pure)", 
 
 describe("opportunity from the one existing company-scoped demand read", () => {
   it("counts people waiting from real rows, and is unknown (not zero) when the read fails", async () => {
-    h.loadProjectRiskForChat.mockResolvedValue({ kind: "empty" });
+    h.loadProjectRiskForHome.mockResolvedValue({ kind: "empty" });
     h.loadWhoIsAvailableForChat.mockResolvedValue({ kind: "empty" });
     h.loadEmployerOpeningBrief.mockResolvedValue({ kind: "none" });
     expect((await loadCompanyHomeField()).interest).toEqual({ kind: "ok", waiting: 2 });

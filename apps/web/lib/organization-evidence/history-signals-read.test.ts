@@ -15,7 +15,7 @@ function fake(tables: Record<string, Table>) {
       const call = { table, eq: [] as [string, unknown][], usedServiceRole: false as const };
       calls.push(call);
       const b: Record<string, unknown> = {};
-      for (const m of ["select", "in", "order", "limit", "not"]) b[m] = () => b;
+      for (const m of ["select", "in", "order", "range", "limit", "not"]) b[m] = () => b;
       b.eq = (col: string, val: unknown) => {
         call.eq.push([col, val]);
         return b;

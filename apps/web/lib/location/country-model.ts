@@ -633,8 +633,9 @@ function buildCountryNameIndex(): Map<string, string> {
 
 /**
  * ISO-3166-1 alpha-2 for a typed country, or null. Accepts the code, a CLDR
- * name in any product language, or a documented alias. Never a guess, never a
- * substring, never a default country.
+ * name in any product language, a documented alias, or a name with its code as
+ * lists show it: "Bangladesh (BD)". Never a guess, never a substring, never a
+ * default country. A name and a code that disagree are no country.
  */
 export function resolveCountryCode(input: string | null | undefined): string | null {
   if (typeof input !== "string") return null;
@@ -646,6 +647,11 @@ export function resolveCountryCode(input: string | null | undefined): string | n
     // "UK" is reserved, not assigned — an alias (GB), not a code. Fall through to the index.
   }
   countryNameIndex ??= buildCountryNameIndex();
+  const named = /^(.+?)\s*\(([A-Za-z]{2})\)$/.exec(t);
+  if (named) {
+    const code = named[2].toUpperCase();
+    return isIsoCountry(code) && countryNameIndex.get(countryNameKey(named[1])) === code ? code : null;
+  }
   return countryNameIndex.get(countryNameKey(t)) ?? null;
 }
 

@@ -285,7 +285,7 @@ export async function submitTripAction(formData: FormData): Promise<void> {
           p_instance_id: instanceId,
           p_reason: "trip submit failed",
         })
-        .catch(() => undefined);
+        .then(() => undefined, () => undefined);
     }
     if (submitRes.error) finish(ctx, noticeForRpcError(submitRes.error));
     finish(ctx, tripNoticeForOutcome(String(submitOutcome ?? "error")));
@@ -364,7 +364,7 @@ export async function cancelTripAction(formData: FormData): Promise<void> {
         p_instance_id: String((wfRes.data as { id: string }).id),
         p_reason: "trip cancelled",
       })
-      .catch(() => undefined);
+      .then(() => undefined, () => undefined);
   }
 
   const { data, error } = await asAny(supabase).rpc(

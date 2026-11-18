@@ -26,13 +26,15 @@ const msg = (loc: string) =>
 
 const LIST_PAGE = "app/[locale]/dashboard/communication/page.tsx";
 const THREAD_PAGE = "app/[locale]/dashboard/communication/[conversationId]/page.tsx";
-const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 describe("unread-first inbox ordering", () => {
   const src = read(LIST_PAGE);
   it("partitions unread conversations above read ones (stable within groups)", () => {
-    expect(src).toMatch(/fetched\.filter\(\(c\) => unreadIds\.has\(c\.id\)\)/);
-    expect(src).toMatch(/fetched\.filter\(\(c\) => !unreadIds\.has\(c\.id\)\)/);
+    // `listed` = the viewer's own threads minus synthetic QA fixtures (2026-10-18).
+    expect(src).toMatch(/listed\.filter\(\(c\) => unreadIds\.has\(c\.id\)\)/);
+    expect(src).toMatch(/listed\.filter\(\(c\) => !unreadIds\.has\(c\.id\)\)/);
+    expect(src).toMatch(/\.eq\("conversation_participants\.profile_id", user\.id\)/);
   });
   it("unread state comes from the single shared source (badge cannot drift)", () => {
     expect(src).toMatch(/getUnreadConversationIds/);

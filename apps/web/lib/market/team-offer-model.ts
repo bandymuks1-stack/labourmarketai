@@ -210,6 +210,8 @@ export function offerToTeamMatchInput(offer: ReceivedTeamOffer, now: number = Da
 // ── Refusals ────────────────────────────────────────────────────────────────
 
 export type TeamOfferRefusal =
+  /** "Agree" named a terms version that is no longer the proposed one. */
+  | "terms_changed"
   | "not_authed"
   | "not_authorized"
   | "demand_not_offerable"
@@ -236,6 +238,7 @@ export type TeamOfferRefusal =
   | "error";
 
 const STABLE_WORDS: readonly TeamOfferRefusal[] = [
+  "terms_changed",
   "demand_not_offerable",
   "team_too_small",
   "previously_declined",

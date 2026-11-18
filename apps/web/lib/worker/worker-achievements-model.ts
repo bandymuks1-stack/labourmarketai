@@ -84,6 +84,45 @@ export function validateAchievementInput(raw: {
   };
 }
 
+export const ACHIEVEMENT_COLUMNS =
+  "id, title, description, achieved_at, achievement_type_slug, confirmed_by_manager";
+
+export function achievementEntryFromRow(r: {
+  id: string;
+  title: string;
+  description: string | null;
+  achieved_at: string | null;
+  achievement_type_slug: string;
+  confirmed_by_manager: boolean | null;
+}): WorkerAchievementEntry {
+  return {
+    id: r.id,
+    title: r.title,
+    description: r.description,
+    achievedAt: r.achieved_at,
+    achievementTypeSlug: r.achievement_type_slug,
+    confirmedByManager: r.confirmed_by_manager === true,
+  };
+}
+
+/** The table has no unique key, so a second save of the same statement (someone
+ *  who saw no row and typed it again) would store it twice. Same words, any case. */
+export function findSameAchievement(
+  entries: readonly WorkerAchievementEntry[],
+  input: WorkerAchievementInput,
+): WorkerAchievementEntry | null {
+  const same = (x: string | null, y: string | null) => (x ?? "").toLowerCase() === (y ?? "").toLowerCase();
+  return (
+    entries.find(
+      (e) =>
+        same(e.title, input.title) &&
+        same(e.description, input.description) &&
+        (e.achievedAt ?? "").slice(0, 10) === (input.achievedAt ?? "") &&
+        e.achievementTypeSlug === input.achievementTypeSlug,
+    ) ?? null
+  );
+}
+
 export function classifyAchievementsError(
   code: string | undefined,
 ): "needs_migration" | "unauthenticated" | "error" {

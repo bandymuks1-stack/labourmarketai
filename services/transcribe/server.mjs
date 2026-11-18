@@ -29,9 +29,9 @@
 //   - per-subject rate limit for tokens, global limit for the master bearer
 
 import { createServer } from "node:http";
-import { createHash, timingSafeEqual, randomUUID } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { execFile } from "node:child_process";
-import { mkdir, readFile, writeFile, rm, readdir, stat, open } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile, rm, readdir, stat, open } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -245,12 +245,14 @@ async function handleTranscribe(req, res) {
   }
 
   const started = Date.now();
-  const work = join(tmpdir(), `tr-${randomUUID()}`);
-  await mkdir(work, { recursive: true });
+  // mkdtemp creates a fresh, unpredictable directory owned by this process
+  // with mode 0700, so no other local user can pre-create or read the audio
+  // (CodeQL js/insecure-temporary-file #11). The upload is written exclusively.
+  const work = await mkdtemp(join(tmpdir(), "tr-"));
   const src = join(work, "src");
   const wav = join(work, "audio.wav");
   try {
-    await writeFile(src, body);
+    await writeFile(src, body, { mode: 0o600, flag: "wx" });
     try {
       await run("ffmpeg", ["-y", "-i", src, "-ac", "1", "-ar", "16000", "-f", "wav", wav], 60_000);
     } catch {

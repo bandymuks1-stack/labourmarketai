@@ -105,7 +105,10 @@ describe("public job board is reachable by a human", () => {
   // board again, which is exactly the state this PR is fixing.
   it("the mobile menu is fed from the same link list, not its own copy", () => {
     const nav = read("components/layouts/site-nav.tsx");
-    expect(nav).toMatch(/<MobileNavMenu[\s\S]*?items=\{links\.map\(/);
+    // The More list is the shared `links` plus the one door for education
+    // institutions — built once, handed to both menus.
+    expect(nav).toMatch(/const moreLinks = \[\s*\.\.\.links\.map\(/);
+    expect(nav).toMatch(/<MobileNavMenu[\s\S]*?items=\{moreLinks\}/);
   });
 
   it("every active locale has a real, non-English nav.jobs label", () => {

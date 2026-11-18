@@ -42,9 +42,19 @@ export type CvExtractResult =
  */
 export const MAX_CV_BYTES = 25 * 1024 * 1024; // 25 MB
 
-/** Collapse runaway whitespace the extractors emit, without touching content. */
+/**
+ * Collapse runaway whitespace the extractors emit, without touching content.
+ *
+ * NFC first: a PDF can carry a Lithuanian letter as its base letter plus a
+ * combining mark ("e" + U+0307 for "ė", "S" + U+030C for "Š"), as a macOS-typed
+ * or LaTeX-made CV does, and pdf.js hands those back decomposed. They look the
+ * same on screen but are different strings, so a name, an employer or a title
+ * would not match, dedupe or search like the same words typed. Composition
+ * changes no letter, only how it is encoded.
+ */
 function tidy(text: string): string {
   return text
+    .normalize("NFC")
     .replace(/\r\n/g, "\n")
     .replace(/[ \t ]+/g, " ")
     .replace(/\n{3,}/g, "\n\n")

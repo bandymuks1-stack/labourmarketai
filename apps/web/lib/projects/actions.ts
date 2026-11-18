@@ -260,6 +260,10 @@ export async function endAssignmentAction(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "auth" };
   if (!projectId || !workerProfileId) return { ok: false, code: "invalid" };
+  // Same acting-context gate as assign (audit 2026-10-16, C-6): the RPC's
+  // `can_manage_project` still decides; this refuses an end issued from a
+  // workspace that is not acting for the owning company.
+  if (!(await callerCompanyId())) return { ok: false, code: "no_company" };
 
   const { error } = await asAny(supabase).rpc("end_worker_project_assignment", {
     p_project_id: projectId,

@@ -8,8 +8,10 @@ import { join } from "node:path";
  * Pins the installable-app baseline: a real manifest with honest fields, a
  * published brand icon, scheme-aware theme color + safe-area viewport, and
  * Apple add-to-home-screen metadata. Also pins what must NOT exist yet: no
- * service worker (offline needs its own explicit cache-policy PR — never
- * cache authenticated HTML by accident) and no create-next-app demo assets.
+ * offline service worker (offline needs its own explicit cache-policy PR —
+ * never cache authenticated HTML by accident) and no create-next-app demo
+ * assets. Since 2026-10-23 a PUSH-ONLY worker exists (`public/sw.js`, COM-3,
+ * flag-gated): it may handle push and notification clicks and nothing else.
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -25,6 +27,12 @@ describe("web app manifest", () => {
     expect(manifest).toMatch(/display: "standalone"/);
     expect(manifest).toMatch(/background_color: "#000000"/);
     expect(manifest).toMatch(/theme_color: "#000000"/);
+    // Install identity + navigation scope, and the language of the manifest's
+    // own (English) strings. Production audit 2026-11-08 found lang absent.
+    expect(manifest).toMatch(/id: "\/"/);
+    expect(manifest).toMatch(/scope: "\/"/);
+    expect(manifest).toMatch(/lang: "en"/);
+    expect(manifest).toMatch(/dir: "ltr"/);
   });
 
   it("carries the store taxonomy (readiness v2) — descriptive only", () => {
@@ -37,12 +45,19 @@ describe("web app manifest", () => {
   it("references only icons that exist at stable URLs", () => {
     expect(manifest).toMatch(/\/app-icon\.svg/);
     expect(existsSync(join(ROOT, "public/app-icon.svg"))).toBe(true);
-    expect(existsSync(join(ROOT, "app/favicon.ico"))).toBe(true);
+    expect(existsSync(join(ROOT, "public/favicon.ico"))).toBe(true);
   });
 
-  it("makes no offline promise (no SW exists yet)", () => {
-    expect(existsSync(join(ROOT, "public/sw.js"))).toBe(false);
+  it("makes no offline promise (the only SW is push-only: no fetch handler, no cache)", () => {
+    // One worker, push only. A fetch handler or a cache would be an offline
+    // capability, which needs its own cache-policy PR.
     expect(existsSync(join(ROOT, "public/service-worker.js"))).toBe(false);
+    const sw = read("public/sw.js");
+    expect(sw).toMatch(/addEventListener\("push"/);
+    expect(sw).not.toMatch(/addEventListener\(\s*["']fetch["']/);
+    expect(sw).not.toMatch(/\bcaches\b|CacheStorage|importScripts|workbox/i);
+    // The manifest promises no offline mode either.
+    expect(manifest).not.toMatch(/offline_enabled|"offline"/i);
   });
 });
 
@@ -62,6 +77,11 @@ describe("layout viewport + apple metadata", () => {
   it("declares Apple add-to-home-screen chrome", () => {
     expect(layout).toMatch(/appleWebApp: \{/);
     expect(layout).toMatch(/capable: true/);
+    // Next 15 emits only `mobile-web-app-capable` for `capable: true`; iOS
+    // before 16.4 needs the Apple-prefixed tag (absent in production
+    // 2026-11-08), so it is declared explicitly.
+    expect(layout).toMatch(/"apple-mobile-web-app-capable": "yes"/);
+    expect(layout).toMatch(/title: BRAND_NAME/);
   });
 });
 

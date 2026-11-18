@@ -16,6 +16,7 @@ import {
 } from "@/lib/projects/assignable-workers";
 import { listProjectStages } from "@/lib/projects/stages";
 import { getProjectStadium } from "@/lib/projects/stadium";
+import { readProjectHeaderRow } from "@/lib/projects/operations";
 import { deriveProjectReadinessRatio } from "@/lib/projects/operations-centre-model";
 import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
 import { listProjectTasks } from "@/lib/tasks/tasks";
@@ -174,13 +175,9 @@ export async function loadProjectDetailForResult(
     } = await supabase.auth.getUser();
     if (!user) return { kind: "blocked" };
 
-    const res = await asAny(supabase)
-      .from("projects")
-      .select(
-        "id, title, status, city, country, start_date, end_date, organizations(display_name, legal_name)",
-      )
-      .eq("id", projectId)
-      .maybeSingle();
+    // The project row under `projects_select`, shared with the operations
+    // pulse read below (one round trip per project per render).
+    const res = await readProjectHeaderRow(asAny(supabase), projectId);
     if (res.error) return migMissing(res.error.code) ? { kind: "blocked" } : { kind: "blocked" };
     if (!res.data) return { kind: "not-found" };
 
@@ -195,21 +192,28 @@ export async function loadProjectDetailForResult(
       organizations: { display_name: string | null; legal_name: string | null } | null;
     };
 
-    // THE authority — the same predicate the RPC enforces, asked once.
-    let canManage = false;
-    try {
-      const { data } = await asAny(supabase).rpc("can_manage_project", {
-        p_project_id: projectId,
-      });
-      canManage = data === true;
-    } catch {
-      // Unreadable authority is NOT authority. Fail closed: the panel then
-      // renders the project without lifecycle controls rather than offering
-      // buttons that would be refused.
-      canManage = false;
-    }
+    // perf 2026-10-22: the authority, the roster, the pulse and the stages are
+    // four INDEPENDENT reads of the same project. They used to run one after
+    // another (four sequential waves per project, six projects on the company
+    // home); they now run as one wave. Each keeps its own failure rule exactly
+    // as before, and nothing is read that was not read before.
 
-    const assignments = await listProjectAssignedPeople(projectId);
+    // THE authority — the same predicate the RPC enforces, asked once.
+    const canManageRead = (async (): Promise<boolean> => {
+      try {
+        const { data } = await asAny(supabase).rpc("can_manage_project", {
+          p_project_id: projectId,
+        });
+        return data === true;
+      } catch {
+        // Unreadable authority is NOT authority. Fail closed: the panel then
+        // renders the project without lifecycle controls rather than offering
+        // buttons that would be refused.
+        return false;
+      }
+    })();
+
+    const assignmentsRead = listProjectAssignedPeople(projectId);
 
     // Stages are behind an owner-gated migration. `applied: false` is a
     // DIFFERENT fact from "no stages" and travels as `null`, so the panel can
@@ -217,53 +221,66 @@ export async function loadProjectDetailForResult(
     // The PULSE — the operations centre's own reads, bounded, in parallel; any
     // failure makes the whole pulse null (never a zero pretending to be a fact).
     let pulse: ProjectPulse | null = null;
-    try {
-      const [stadium, gallery, tasks] = await Promise.all([
-        getProjectStadium(projectId),
-        getProjectGallerySummary(projectId),
-        listProjectTasks(projectId),
-      ]);
-      if (stadium && tasks.status === "ok") {
-        const now = new Date();
-        const open = tasks.tasks.filter((t) => (OPEN_WORK_TASK_STATUSES as readonly string[]).includes(t.status));
-        const ratio = deriveProjectReadinessRatio(stadium.ops.workers);
-        pulse = {
-          entriesToday: stadium.entriesToday,
-          evidenceEntries: gallery.entryCount,
-          evidencePhotos: gallery.photoCount,
-          tasksOpen: open.length,
-          tasksOverdue: open.filter((t) => isOverdue(t.dueAt, now)).length,
-          readinessChecked: ratio.checked,
-          readinessTotal: ratio.total,
-          workersWithMissingDocs: stadium.ops.counters.withMissingDocs,
-        };
+    const pulseRead = (async (): Promise<void> => {
+      try {
+        const [stadium, gallery, tasks] = await Promise.all([
+          getProjectStadium(projectId),
+          getProjectGallerySummary(projectId),
+          listProjectTasks(projectId),
+        ]);
+        if (stadium && tasks.status === "ok") {
+          const now = new Date();
+          const open = tasks.tasks.filter((t) => (OPEN_WORK_TASK_STATUSES as readonly string[]).includes(t.status));
+          const ratio = deriveProjectReadinessRatio(stadium.ops.workers);
+          pulse = {
+            entriesToday: stadium.entriesToday,
+            evidenceEntries: gallery.entryCount,
+            evidencePhotos: gallery.photoCount,
+            tasksOpen: open.length,
+            tasksOverdue: open.filter((t) => isOverdue(t.dueAt, now)).length,
+            readinessChecked: ratio.checked,
+            readinessTotal: ratio.total,
+            workersWithMissingDocs: stadium.ops.counters.withMissingDocs,
+          };
+        }
+      } catch {
+        pulse = null;
       }
-    } catch {
-      pulse = null;
-    }
+    })();
 
     let stages: readonly ProjectStageRow[] | null = null;
     let stageTotal: number | null = null;
-    try {
-      const data = await listProjectStages(projectId);
-      if (data.applied) {
-        stageTotal = data.stages.length;
-        stages = data.stages.slice(0, PROJECT_STAGE_LIMIT).map((s) => ({
-          id: s.id,
-          name: s.name,
-          status: s.status,
-          stageOrder: s.stageOrder,
-          plannedStart: s.plannedStart,
-          plannedEnd: s.plannedEnd,
-          actualStart: s.actualStart,
-          actualEnd: s.actualEnd,
-          blockedReason: s.blockedReason,
-        }));
+    const stagesRead = (async (): Promise<void> => {
+      try {
+        const data = await listProjectStages(projectId);
+        if (data.applied) {
+          stageTotal = data.stages.length;
+          stages = data.stages.slice(0, PROJECT_STAGE_LIMIT).map((s) => ({
+            id: s.id,
+            name: s.name,
+            status: s.status,
+            stageOrder: s.stageOrder,
+            plannedStart: s.plannedStart,
+            plannedEnd: s.plannedEnd,
+            actualStart: s.actualStart,
+            actualEnd: s.actualEnd,
+            blockedReason: s.blockedReason,
+          }));
+        }
+      } catch {
+        stages = null;
+        stageTotal = null;
       }
-    } catch {
-      stages = null;
-      stageTotal = null;
-    }
+    })();
+
+    // An unreadable roster still fails the whole detail (the outer catch), as
+    // it did when it was awaited on its own.
+    const [canManage, assignments] = await Promise.all([
+      canManageRead,
+      assignmentsRead,
+      pulseRead,
+      stagesRead,
+    ]);
 
     return {
       kind: "project",

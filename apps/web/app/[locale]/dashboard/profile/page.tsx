@@ -1,7 +1,5 @@
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { OrganizationsLeadership } from "@/components/app/organization/organizations-leadership";
-import { organizationAllTime } from "@/lib/journal/organization-all-time";
-import { deriveProfessionalExperience } from "@/lib/journal/professional-experience";
 import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -68,6 +66,8 @@ import { Link } from "@/lib/i18n/navigation";
 import { type CvSectionCard } from "@/components/app/cv-completeness-grid";
 import { WorkerEducationSection } from "@/components/app/worker-education-section";
 import { LearningCompassSection } from "@/components/app/learning-compass-section";
+import { LearnerCohortJoinSection } from "@/components/app/learner-cohort-join-section";
+import { readJoinableCohorts, type CohortJoinRead } from "@/lib/education/cohort-join";
 import { readLearningCompass, type LearningCompassRead } from "@/lib/learning/learning-compass";
 import { WorkerAchievementsSection } from "@/components/app/worker-achievements-section";
 import {
@@ -84,6 +84,11 @@ import {
   type PlayerCardResult,
 } from "@/lib/player-card/player-card-result";
 import { WorkCardEditor } from "@/components/app/work-card-editor";
+import { RequirementLedgerRows } from "@/components/app/instruction-project-asks";
+import { OWN_ROLE_LEDGERS_LIMIT, loadOwnRoleLedgers } from "@/lib/player-card/requirement-ledger-server";
+import { buildRequirementLedgerLabels } from "@/lib/player-card/requirement-ledger-labels";
+import { countryDisplayName } from "@/lib/location/country-model";
+import { WorkerPublicSummaryEditor } from "@/components/app/worker-public-summary-editor";
 import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
 import { OrganizationHistorySkillSuggestionsSection } from "@/components/app/organization-history-skill-suggestions-section";
 import { listMyTeamLinks } from "@/lib/company/team-links";
@@ -105,6 +110,17 @@ import {
   RosterLinkWithdrawals,
 } from "@/components/app/organization-evidence-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { experienceFiguresOf } from "@/lib/journal/experience-figures";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { orgDisplayName } from "@/lib/company/org-display";
+import { endedUnnamedOrganizationContexts } from "@/lib/journal/engagement-label";
+import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/profile", "skills.pageTitle");
+
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -168,6 +184,9 @@ export default async function ProfilePage({
     tIdentityNotice,
     tPrivacySections,
     tEvidenceMine,
+    tPublicSummary,
+    tRoleLedger,
+    tJournal,
   ] = await Promise.all([
     getTranslations("skills"),
     getTranslations("spaces"),
@@ -202,6 +221,10 @@ export default async function ProfilePage({
     // Summary first: the organization-history bar names its section with the
     // card's own title. Same ONE batch — never a standalone await (W7-S3).
     getTranslations("evidenceImport.mine"),
+    getTranslations("workerPublicSummary"),
+    getTranslations("roleLedger"),
+    // The ONE "no name" phrase set (`journal.unnamedOrganization.*`, #3356).
+    getTranslations("journal"),
   ]);
 
   /**
@@ -270,7 +293,7 @@ export default async function ProfilePage({
     supabase
       .from("workers")
       .select(
-        "id, availability_status, available_from, current_location_country, salary_min_eur, salary_max_eur",
+        "id, availability_status, available_from, current_location_country, preferred_countries, salary_min_eur, salary_max_eur, headline, bio",
       )
       .eq("profile_id", user.id)
       .maybeSingle(),
@@ -328,6 +351,10 @@ export default async function ProfilePage({
 
   let currentProfessionId: string | null = null;
   let workerDirections: WorkerDirection[] = [];
+  // PER-13 role context: what is missing for my primary profession in the
+  // countries I aim at (filled in the second stage below; empty = not shown).
+  let roleLedgers: Awaited<ReturnType<typeof loadOwnRoleLedgers>> = [];
+  let roleLedgerLabels: Awaited<ReturnType<typeof buildRequirementLedgerLabels>> | null = null;
   /** The professions this person named in their OWN WORDS — shown exactly as
    *  typed. Separate from `workerDirections`, which are registry professions
    *  the skills editor is keyed to. */
@@ -371,6 +398,7 @@ export default async function ProfilePage({
   // The ONE continuous professional history's total (decision 0025): every
   // work hour once over the journal and the organization history.
   let professionalExperienceHours: number | null = null;
+  let unrecordedHours: { entries: number; earliestDay: string } | null = null;
   // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
   // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
   // branch is kept for fresh/local databases, not because production lacks it.
@@ -388,9 +416,11 @@ export default async function ProfilePage({
   // count of project-linked journal entries powering the completeness grid.
   let workerEducation: WorkerEducationRead | null = null;
   let learningCompass: LearningCompassRead | null = null;
+  let cohortJoin: CohortJoinRead | null = null;
   let workerAchievements: WorkerAchievementsRead | null = null;
-  let projectLinkedEntryCount = 0;
-  let certificateDocCount = 0;
+  // null = the count read failed (SEP-7): that card is left out, never "empty".
+  let projectLinkedEntryCount: number | null = 0;
+  let certificateDocCount: number | null = 0;
   // Trust signals were awaited inside the JSX; resolved in stage 5 now.
   let trustSignals: Awaited<ReturnType<typeof getOwnTrustSignals>> | null = null;
   if (workerId) {
@@ -428,6 +458,8 @@ export default async function ProfilePage({
       workIntelligence,
       playerCardRes,
       experienceRelationships,
+      standingSkills,
+      cohortJoinRes,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       // Learning Compass (Track C): own records + the board's match results;
@@ -461,7 +493,7 @@ export default async function ProfilePage({
       // ALL of the worker's saved skills (read model — never filtered down).
       supabase
         .from("worker_skills")
-        .select("skill_id, confidence_bin, verified, source, skills(slug)")
+        .select("skill_id, confidence_bin, verified, verified_by, verified_at, source, skills(slug)")
         .eq("worker_id", workerId)
         .order("created_at", { ascending: true }),
       // DURABLE journal→skill links (v1) — graceful no-op if the migration is
@@ -476,12 +508,22 @@ export default async function ProfilePage({
       supabase
         .from("engagement_contexts")
         .select(
-          "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
+          "id, organization_id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
         )
         .eq("profile_id", user.id)
         .in("relationship_slug", HISTORY_RELATIONSHIPS)
         .order("is_primary", { ascending: false })
-        .order("started_at", { ascending: false, nullsFirst: false }),
+        .order("started_at", { ascending: false, nullsFirst: false })
+        // An ENDED relationship's organization is outside the organizations
+        // RLS (active relationships only), so its embed is empty: the shared
+        // historical-name reader fills it inside this same parallel stage
+        // (system audit 2026-10-20: former employers showed "—").
+        .then(
+          (res): Promise<typeof res> =>
+            res.data
+              ? withHistoricalOrgNames(supabase, res.data).then((data) => ({ ...res, data }) as typeof res)
+              : Promise.resolve(res),
+        ),
       // Was awaited INSIDE the JSX (`signals={await getOwnTrustSignals(…)}`),
       // so it could not overlap anything at all.
       getOwnTrustSignals(workerId),
@@ -498,20 +540,30 @@ export default async function ProfilePage({
       // Every relationship to an organization (jobs, ownership, management)
       // for the one professional-experience reading (decision 0025).
       readOwnExperienceRelationships(supabase, user.id).catch(() => null),
+      // Whether each recorded skill confirmation still STANDS
+      // (lib/evidence/skill-confirmation-standing.ts) — request-cached, the
+      // player card above shares the same read.
+      readOwnStandingConfirmedSkillIds(workerId),
+      // J-12: learning groups open for a learner's own join request, and the
+      // learner's requests (migration 20261102160000; absent → renders nothing).
+      readJoinableCohorts().catch((): CohortJoinRead | null => null),
     ]);
 
     availabilityPrefs = prefsRes;
     playerCardResult = playerCardRes;
     workContexts = workIntelligence?.contexts ?? null;
+    // Entries whose written hours never became recorded time (pre-2026-08-20
+    // composer) — counted from the SAME entries the totals read, so the
+    // profile does not present an incomplete total as the whole story.
+    unrecordedHours = workIntelligence?.unrecordedHours ?? null;
     {
       const all = workIntelligence?.periods.find((p) => p.key === "all");
       // Imported organization history counts as experience (#2169): the ONE
       // all-time rule, day + period records, no invoice consulted.
-      organizationHistoryHours = organizationAllTime(workIntelligence)?.totalHours ?? null;
-      professionalExperienceHours = workIntelligence
-        ? deriveProfessionalExperience({ wi: workIntelligence, relationships: experienceRelationships }).hours
-            ?.total ?? null
-        : null;
+      ({ organizationHistoryHours, professionalExperienceHours } = experienceFiguresOf(
+        workIntelligence,
+        experienceRelationships,
+      ));
       workAllTime = all
         ? { totals: all, truncated: workIntelligence?.coverage.truncated ?? false }
         : null;
@@ -520,9 +572,10 @@ export default async function ProfilePage({
     externalProfiles = extRes;
     workerEducation = eduRes;
     learningCompass = compassRes;
+    cohortJoin = cohortJoinRes;
     workerAchievements = achRes;
-    projectLinkedEntryCount = projCountRes.count ?? 0;
-    certificateDocCount = certDocsRes.count ?? 0;
+    projectLinkedEntryCount = projCountRes.error ? null : (projCountRes.count ?? 0);
+    certificateDocCount = certDocsRes.error ? null : (certDocsRes.count ?? 0);
     trustSignals = trust;
 
     const wpAll = wpAllRes.data;
@@ -564,7 +617,13 @@ export default async function ProfilePage({
     const workerProfIds = (wpAll ?? [])
       .map((r) => r.profession_id)
       .filter((id): id is string => !!id);
-    const [coreRes, allowedRes, tmplRes] = await Promise.all([
+    const primaryProfessionSlug =
+      professions.find((p) => p.id === currentProfessionId)?.slug ?? null;
+    const workerRow = worker as { preferred_countries?: string[] | null; current_location_country?: string | null } | null;
+    const roleCountries: (string | null)[] = (workerRow?.preferred_countries ?? []).length > 0
+      ? (workerRow?.preferred_countries ?? []).slice(0, OWN_ROLE_LEDGERS_LIMIT)
+      : [workerRow?.current_location_country ?? null];
+    const [coreRes, allowedRes, tmplRes, roleLedgersRes, roleLedgerLabelsRes] = await Promise.all([
       // is_core per skill for the current profession (the [PAGRINDINIS] tag).
       currentProfessionId
         ? supabase
@@ -593,13 +652,25 @@ export default async function ProfilePage({
             .is("organization_id", null)
             .maybeSingle()
         : Promise.resolve(null),
+      // Same stage: the role ledgers need the primary profession too.
+      primaryProfessionSlug
+        ? loadOwnRoleLedgers(
+            roleCountries.map((country) => ({ professionSlug: primaryProfessionSlug, country })),
+          ).catch(() => [])
+        : Promise.resolve([]),
+      primaryProfessionSlug ? buildRequirementLedgerLabels() : Promise.resolve(null),
     ]);
+    roleLedgers = roleLedgersRes;
+    roleLedgerLabels = roleLedgerLabelsRes;
 
     const coreMap = new Map<string, boolean>();
     for (const r of coreRes?.data ?? []) coreMap.set(r.skill_id, r.is_core);
 
     recordReadUnavailable = Boolean(wsRes.error) || Boolean(ecRes.error);
-    const rows = wsRes.data ?? [];
+    // A recorded confirmation reads as confirmed only while it STANDS
+    // (lib/evidence/skill-confirmation-standing.ts).
+    const storedRows = wsRes.data ?? [];
+    const rows = withStandingConfirmation(storedRows, anyRecordedConfirmation(storedRows) ? standingSkills : null);
     initialSkillIds = rows
       .map((r) => r.skill_id)
       .filter((id): id is string => id !== null);
@@ -694,6 +765,20 @@ export default async function ProfilePage({
       nameOf: (slug) => tSkill(slug),
     });
 
+    // An organization without a name the person no longer works with is
+    // called so (owner 2026-11-15, #3356): renamed, never hidden. Judged per
+    // organization over every card, from the rows this page already read.
+    const endedUnnamedCards = endedUnnamedOrganizationContexts(
+      (ecRes.data ?? []).map((e) => {
+        const org = e.organizations as { display_name: string | null; legal_name: string | null } | null;
+        return {
+          engagementContextId: e.id,
+          organizationId: e.organization_id,
+          organizationName: orgDisplayName(org?.display_name, org?.legal_name),
+          endedAt: e.ended_at,
+        };
+      }),
+    );
     // Engagement-context cards (current first): primary first, then most-recent.
     engagementCards = (ecRes.data ?? []).map((e) => {
       const org = e.organizations as
@@ -715,14 +800,22 @@ export default async function ProfilePage({
       return {
         id: e.id,
         orgName:
-          org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—",
+          org?.display_name ??
+          org?.legal_name ??
+          (endedUnnamedCards.has(e.id) ? tJournal("unnamedOrganization.ended") : null) ??
+          typeLabel ??
+          e.title ??
+          "—",
         relationship: e.relationship_slug,
         startedAt: e.started_at,
         endedAt: e.ended_at,
         title: e.title,
         isPrimary: e.is_primary,
         // Exactly the RPC's preconditions, computed from rows already read.
-        selfDeclared: org === null && e.is_primary !== true,
+        // The RPC's own precondition is `organization_id is null` — an ENDED
+        // organization relationship whose name RLS hides is NOT self-declared
+        // (it showed a Remove button the RPC then refused).
+        selfDeclared: e.organization_id === null && e.is_primary !== true,
       };
     });
 
@@ -765,7 +858,7 @@ export default async function ProfilePage({
     const declaredCerts = achEntries.filter(
       (a) => a.achievementTypeSlug === "declared_certificate",
     ).length;
-    return [
+    const cards: (Omit<CvSectionCard, "filled"> & { filled: boolean | null })[] = [
       {
         key: "summary",
         filled: savedProfileText.trim().length > 0,
@@ -785,7 +878,8 @@ export default async function ProfilePage({
       },
       {
         key: "certificates",
-        filled: certificateDocCount > 0 || declaredCerts > 0,
+        filled:
+          declaredCerts > 0 ? true : certificateDocCount === null ? null : certificateDocCount > 0,
         href: DOCUMENTS_READINESS_ENABLED
           ? `/${locale}/dashboard/documents`
           : "#cv-achievements",
@@ -797,7 +891,7 @@ export default async function ProfilePage({
       },
       {
         key: "projects",
-        filled: projectLinkedEntryCount > 0,
+        filled: projectLinkedEntryCount === null ? null : projectLinkedEntryCount > 0,
         href: `/${locale}/dashboard/journal`,
       },
       {
@@ -818,6 +912,8 @@ export default async function ProfilePage({
         href: "#cv-availability",
       },
     ];
+    // A card whose read failed is not shown at all — never as "○ empty".
+    return cards.filter((c): c is CvSectionCard => c.filled !== null);
   })();
 
   /**
@@ -1125,6 +1221,15 @@ export default async function ProfilePage({
         <LearningCompassSection compass={learningCompass.compass} />
       ) : null}
 
+      {/* J-12: ask to join a learning group; the learner's own record stays
+          their declaration until the institution confirms it. */}
+      {cohortJoin ? (
+        <LearnerCohortJoinSection
+          read={cohortJoin}
+          student={learningCompass?.status === "ok" && learningCompass.student}
+        />
+      ) : null}
+
       {/* W7-S1: the readiness/summary surfaces that used to stand here —
           `ProfileStateStrip`, `LiveProfileSection`, `WorkerSetupJourney`, the
           standalone `CvCompletenessGrid` and `SkillsReviewBanner` — are
@@ -1158,6 +1263,7 @@ export default async function ProfilePage({
         workAllTime={workAllTime}
         organizationHistoryHours={organizationHistoryHours}
         professionalExperienceHours={professionalExperienceHours}
+        unrecordedHours={unrecordedHours}
         // Identity-essential presence sourced from the ONE minimum card contract
         // (launch audit §7.3) — only data already fetched above, no new reads.
         cardSource={{
@@ -1252,6 +1358,7 @@ export default async function ProfilePage({
         </summary>
         <div className="px-4 pb-4">
         <ProfileTextFirstFlow
+        viewerEmail={user.email ?? null}
         hasPrimaryProfession={currentProfessionId !== null}
         initialText={savedProfileText}
         savedClaimNormalizedLabels={savedSkillClaims.map(
@@ -1277,6 +1384,31 @@ export default async function ProfilePage({
         </div>
       </details>
 
+      {/* PER-13 role context: "what do I have and what is missing to work as
+          my profession in the countries I aim at" — the SAME ledger rows and
+          copy as the project and opportunity surfaces. */}
+      {roleLedgerLabels && roleLedgers.some((r) => r.ledger.rows.length > 0) ? (
+        <section className="flex flex-col gap-3" data-testid="profile-role-ledgers">
+          {roleLedgers
+            .filter((r) => r.ledger.rows.length > 0)
+            .map((r) => (
+              <div
+                key={`${r.professionSlug}-${r.country ?? "any"}`}
+                className="flex flex-col gap-2 rounded-md border border-brand-blue/30 bg-brand-blue/5 p-3"
+                data-testid="profile-role-ledger"
+              >
+                <p className="text-sm font-medium text-text-primary">
+                  {tRoleLedger("title", {
+                    profession: tProf(r.professionSlug),
+                    country: r.country ? countryDisplayName(r.country, locale) : tRoleLedger("anyCountry"),
+                  })}
+                </p>
+                <RequirementLedgerRows ledger={r.ledger} labels={roleLedgerLabels!} />
+              </div>
+            ))}
+        </section>
+      ) : null}
+
       {/* IA (profile hierarchy): these five CV detail editors — work
           preferences, languages, education, achievements and external
           profiles — stood BETWEEN the identity summary and the one surface
@@ -1301,6 +1433,27 @@ export default async function ProfilePage({
           </span>
         </summary>
         <div className="flex flex-col gap-6 px-4 pb-4">
+      {/* PER-2: the employer-facing summary the person writes themselves
+          (save_worker_public_summary_v1). Worker-only: it lives on the
+          workers row. */}
+      {workerId ? (
+        <WorkerPublicSummaryEditor
+          initialHeadline={(worker as { headline?: string | null } | null)?.headline ?? ""}
+          initialBio={(worker as { bio?: string | null } | null)?.bio ?? ""}
+          labels={{
+            title: tPublicSummary("title"),
+            audience: tPublicSummary("audience"),
+            headline: tPublicSummary("headline"),
+            headlinePlaceholder: tPublicSummary("headlinePlaceholder"),
+            bio: tPublicSummary("bio"),
+            bioPlaceholder: tPublicSummary("bioPlaceholder"),
+            save: tPublicSummary("save"),
+            saved: tPublicSummary("saved"),
+            tooLong: tPublicSummary("tooLong"),
+            error: tPublicSummary("error"),
+          }}
+        />
+      ) : null}
       {/* The avatar EDITOR (upload / replace). The hub shows the avatar on
           arrival; changing it is a personal detail like the ones below, so
           it opens with them. `#profile-identity` still lands here: the
@@ -1419,6 +1572,7 @@ export default async function ProfilePage({
               levelNative: tLangs("levelNative"),
               add: tLangs("add"),
               adding: tLangs("adding"),
+              added: tLangs("added"),
               remove: tLangs("remove"),
               empty: tLangs("empty"),
               notEnabled: tLangs("notEnabled"),

@@ -24,7 +24,7 @@ export function AuthLegalNotice({
   return (
     <div
       data-testid="auth-legal-notice"
-      className="text-xs leading-relaxed text-text-secondary"
+      className="text-xs leading-snug text-text-secondary sm:leading-relaxed"
     >
       <p>
         {t.rich(variant, {
