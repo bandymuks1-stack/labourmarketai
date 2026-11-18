@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { addDemandLocationAction } from "@/lib/demand/demand-location-actions";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
+import { Select } from "@/components/ui/Select";
 
 /**
  * Demand location capture (v1) — a SIGNAL-ONLY entry for one of the owner's
@@ -61,15 +62,17 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
 
   if (!open) {
     return (
-      <button
+      <Button
         type="button"
+        variant="secondary"
+        size="sm"
         onClick={() => setOpen(true)}
         data-testid="demand-location-capture-open"
-        className="inline-flex w-fit items-center gap-1.5 rounded-md border border-border-subtle bg-surface-1 px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+        className="min-h-11 w-fit gap-1.5"
       >
         <MapPin className="h-3.5 w-3.5 text-brand-blue" strokeWidth={1.75} aria-hidden />
         {t("open")}
-      </button>
+      </Button>
     );
   }
 
@@ -99,11 +102,11 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
         <>
           <label className="flex flex-col gap-1">
             <Label>{t("country")}</Label>
-            <select
+            <Select
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               data-testid="demand-location-country"
-              className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+              className="w-full max-sm:min-h-11 max-sm:text-base"
             >
               <option value="">—</option>
               {countryOptions.map((o) => (
@@ -111,7 +114,7 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
                   {o.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
 
           <label className="flex flex-col gap-1">
@@ -152,6 +155,7 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
 
           <div className="flex items-center gap-2">
             <Button
+              className="min-h-11"
               type="button"
               onClick={submit}
               disabled={pending}
@@ -159,13 +163,15 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
             >
               {pending ? t("saving") : t("save")}
             </Button>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setOpen(false)}
-              className="text-xs text-text-muted hover:text-text-secondary"
+              className="min-h-11"
             >
               {t("cancel")}
-            </button>
+            </Button>
           </div>
         </>
       )}
