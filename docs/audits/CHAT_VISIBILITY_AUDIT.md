@@ -541,3 +541,11 @@ audit.
   entry text, review note or name. The pure engine computes the forecast in memory;
   nothing is written (no forecast row, no signal consumed), no chat table is read,
   nothing is sent outbound.
+
+- **2026-11-18 — `lib/commercial/live-payments-flag.ts`** (#2441, the second owner act for
+  LIVE checkouts). Reads one row of `lmc_settings` (`key = 'live_payments_enabled'`, column
+  `enabled`) and returns only enabled / disabled / unavailable to the test-checkout route; any
+  read error is treated as not enabled, so a live checkout is refused. It reads no user data or
+  chat table, writes nothing and sends nothing outbound. Kept outside `lib/billing` so the
+  Stripe / LMC-ledger separation stays literal. Pinned in the `chat-visibility-rls.test.ts`
+  caller inventory.
