@@ -8,7 +8,8 @@ import { Link } from "@/lib/i18n/navigation";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
 
 /**
- * THREE WORKING REQUEST DOORS, NO SIGN-UP (owner P0 2026-11-07). They sit under the
+ * WORKING REQUEST DOORS, NO SIGN-UP (owner P0 2026-11-07; the partner door
+ * owner P0 2026-11-15). They sit under the
  * hero and the three ways; the sign-up invitations above stay for people who serve
  * themselves. The form and its rules: `landing-request-doors-form.tsx`,
  * `lib/staffing/request-doors.ts`. No documents: no safe public upload path exists.
@@ -28,6 +29,7 @@ export async function LandingRequestDoors({
       "worker-search": { title: t("workerSearch.title"), body: t("workerSearch.body") },
       b2b: { title: t("b2b.title"), body: t("b2b.body") },
       project: { title: t("project.title"), body: t("project.body") },
+      partner: { title: t("partner.title"), body: t("partner.body") },
     },
     name: t("name"),
     email: t("email"),
@@ -44,6 +46,7 @@ export async function LandingRequestDoors({
     scope: t("scope"),
     deadline: t("deadline"),
     need: t("need"),
+    proposal: t("proposal"),
     customer: t("customer"),
     customerPrivate: t("customerPrivate"),
     customerBusiness: t("customerBusiness"),

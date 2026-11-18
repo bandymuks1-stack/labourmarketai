@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * PRODUCTION — A COMPANY'S TALENT AND HISTORY CHAINS (registry rows that had
@@ -184,6 +185,7 @@ async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await inMain(page).getByTestId("demand-next").click();
   const size = inMain(page).getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await inMain(page).getByTestId("demand-next").click();
   await inMain(page).getByTestId("demand-create").click();
   const done = inMain(page).getByTestId("demand-done");
@@ -634,7 +636,7 @@ test("T-2 (6.19). Gama finds the team in the network directory and sends a struc
 /** Open the team card's folded enquiry inbox and return it. */
 async function teamInbox(page: Page): Promise<Locator> {
   await page.goto("/lt/dashboard/company/people");
-  const card = page.getByTestId(`team-brigade-${teamId}`);
+  const card = page.getByRole("main").getByTestId(`team-brigade-${teamId}`);
   await expect(card).toBeVisible({ timeout: 30_000 });
   await settle(page);
   const fold = card.locator("details").filter({ has: page.locator('[data-testid^="team-enquir"]') }).first();
@@ -706,7 +708,7 @@ async function disbandSyntheticTeams(page: Page): Promise<number> {
     }
     if (!id) break;
     tried.add(id);
-    const card = page.getByTestId(`team-brigade-${id}`);
+    const card = page.getByRole("main").getByTestId(`team-brigade-${id}`);
     await card.getByTestId(`team-disband-${id}`).click();
     await card.getByTestId(`team-disband-confirm-${id}`).click();
     await expect(page.getByTestId("team-brigades-msg")).toBeVisible({ timeout: 30_000 });

@@ -417,9 +417,12 @@ export async function runScoutingCore(
   // A person who raised a hand on THIS demand is always looked at, whatever
   // the plan searched: they asked to be contacted. Withdrawn hands are not
   // pinned (they stay a fact for actionability, not a reason to retrieve).
+  // The person searching is never their own candidate: their own worker row
+  // reads back to them (employer-flow audit 2026-11-15).
   const { candidates: supply, retrieval } = await buildSupplyCandidates(supabase, {
     need,
     excludeFixtures: !isSyntheticFixtureLabel(employer.organizationName),
+    viewerProfileId: user.id,
     alwaysInclude: Object.entries(interestByWorker)
       .filter(([, status]) => status !== "withdrawn")
       .map(([workerId]) => workerId),
@@ -606,7 +609,11 @@ async function readUnassessedHandRaisers(
   const [pools, shortlist] = await Promise.all([
     Promise.all(
       batches.map((workerIds) =>
-        buildSupplyCandidates(supabase, { workerIds, excludeFixtures: input.excludeFixtures }),
+        buildSupplyCandidates(supabase, {
+          workerIds,
+          excludeFixtures: input.excludeFixtures,
+          viewerProfileId: input.userId,
+        }),
       ),
     ),
     readShortlistForDemand(supabase, input.userId, input.requestId),

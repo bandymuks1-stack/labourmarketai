@@ -12,7 +12,7 @@
  * registry + content in, view models / indexing decisions out.
  */
 import { ANSWER_QUESTIONS } from "@/lib/answer-engine/registry";
-import { ANSWER_ENGINE_LOCALES } from "@/lib/answer-engine/contract";
+import { ANSWER_CATEGORY_KEYS, ANSWER_ENGINE_LOCALES } from "@/lib/answer-engine/contract";
 import type { CanonicalQuestion, AnswerCategoryKey } from "@/lib/answer-engine/contract";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { PILOT_ANSWERS } from "@/content/answer-engine/pilot-answers";
@@ -190,6 +190,36 @@ export function publishedParams(): { id: string; locale: ActiveLocale; slug: str
     }
   }
   return out;
+}
+
+/**
+ * STATIC PARAMS THAT ARE NEVER EMPTY (production 404 of 2026-11-15).
+ *
+ * The question pages are nested under `[locale]`, whose layout sets
+ * `dynamicParams = false`. Next 15.5 builds their paths per locale; when a
+ * page's generateStaticParams returns `[]` for ONE locale, Next passes that
+ * locale through without the child key (`{ locale: "sv" }`), decides that not
+ * every param set is complete, and pre-renders NO path for the route in ANY
+ * locale. With dynamicParams off, every category and answer page then 404s.
+ * That is what happened when Swedish became a routed locale with its answers
+ * still awaiting review (#3261): 348 pre-rendered pages before, 0 after.
+ *
+ * So a locale with nothing published gets ONE placeholder param whose page
+ * renders notFound() at build time — the same 404 that locale already gets —
+ * and every published page in every other locale is pre-rendered again.
+ */
+export function staticCategoryParams(locale: ActiveLocale): { category: AnswerCategoryKey }[] {
+  const published = publishedCategories(locale).map((category) => ({ category }));
+  return published.length > 0 ? published : [{ category: ANSWER_CATEGORY_KEYS[0] }];
+}
+
+/** The answer pages' static params for a locale; never empty (see above). The
+ *  placeholder is a reserved slug, which `resolveSlug` always refuses → 404. */
+export function staticSlugParams(locale: ActiveLocale): { slug: string }[] {
+  const published = publishedParams()
+    .filter((p) => p.locale === locale)
+    .map((p) => ({ slug: p.slug }));
+  return published.length > 0 ? published : [{ slug: [...RESERVED_QUESTION_SLUGS][0] }];
 }
 
 /** Indexable questions for a category in a locale (for category pages). */

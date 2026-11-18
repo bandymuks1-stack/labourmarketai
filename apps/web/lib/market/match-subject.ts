@@ -102,6 +102,10 @@ export type SupplyRetrievalInput =
       readonly need: MatchNeed;
       readonly budget?: number;
       readonly excludeFixtures?: boolean;
+      /** The person searching. They are never their own candidate: every
+       *  profile has its own worker row, which the table returns to its owner,
+       *  so without this a new employer's own row was the whole pool. */
+      readonly viewerProfileId?: string | null;
       /** Workers who raised their hand on THIS demand. They asked to be
        *  contacted, so they are always in the pool — never lost to the budget
        *  or to a tier the plan did not search (a welder who raised a hand on a
@@ -117,6 +121,9 @@ export type SupplyRetrievalInput =
       readonly workerIds: readonly string[];
       readonly budget?: number;
       readonly excludeFixtures?: boolean;
+      /** The same rule as above. The admin workbench names its workers and
+       *  passes none. */
+      readonly viewerProfileId?: string | null;
     };
 
 /** Read one Stage-1 id column. Never throws: a tier that fails (table absent,
@@ -679,9 +686,16 @@ export async function buildSupplyCandidates(
   // 2026-09-28: every scoutable worker was one). Filtered here, where names
   // already live, so the scouting layer never handles them; `poolSize` then
   // counts only what the viewer may see.
-  const shown = input.excludeFixtures
+  //
+  // Nor is the person searching (employer-flow audit 2026-11-15). Their own
+  // worker row always reads back to them, so the search listed them, and
+  // counted them, as a candidate for their own need. Their row is always a
+  // related one, so its profile id is known here.
+  const others = input.excludeFixtures
     ? candidates.filter((c) => !c.syntheticFixture)
     : candidates;
+  const viewer = input.viewerProfileId ?? null;
+  const shown = viewer === null ? others : others.filter((c) => c.profileId !== viewer);
   return {
     candidates: shown,
     retrieval: {

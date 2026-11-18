@@ -42,6 +42,7 @@ import {
   type PremiumCvFact,
 } from "@/components/app/cv/premium-living-cv";
 import { ownEngagementHeading } from "@/lib/cv-export/own-engagement-heading";
+import { endedUnnamedOrganizationContexts } from "@/lib/journal/engagement-label";
 import { statedDateLabel } from "@/lib/cv/period-dates";
 import {
   buildEuFormatCv,
@@ -124,6 +125,7 @@ export default async function VerifiedCvPage({
   const tPremium = await getTranslations("cvExport.premium");
   const tJourney = await getTranslations("careerJourney");
   const tIntel = await getTranslations("journal.intelligence");
+  const tJournal = await getTranslations("journal");
   const fmtHours = (h: number) =>
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
   const tRole = await getTranslations("auth.signup.role");
@@ -440,6 +442,14 @@ export default async function VerifiedCvPage({
     else proofByEngagement.set(row.engagementId, [row]);
   }
 
+  // AN ORGANIZATION WITHOUT A NAME THE PERSON NO LONGER WORKS WITH is called
+  // so wherever its name would stand (owner 2026-11-15, #3356): renamed, never
+  // hidden. Found through the one experience reading's roles (decision 0025);
+  // the row's hours, dates and confirmations are untouched.
+  const endedUnnamed = endedUnnamedOrganizationContexts(cv.professionalExperience?.roles);
+  const orgSlotOf = (e: (typeof cv.workHistory)[number]): string | null =>
+    e.orgName ?? (e.id && endedUnnamed.has(e.id) ? tJournal("unnamedOrganization.ended") : null);
+
   // One renderer for both history sections — employment and placements differ
   // in their HEADING, never in how a real engagement is described.
   const historyItems = (rows: typeof cv.workHistory) =>
@@ -458,7 +468,7 @@ export default async function VerifiedCvPage({
           ? "recorded"
           : "stated";
       const orgDisplay =
-        e.orgName ??
+        orgSlotOf(e) ??
         (e.organizationType === "company"
           ? tRole("company")
           : e.organizationType === "agency"
@@ -749,7 +759,7 @@ export default async function VerifiedCvPage({
     ...uncoveredRoles.map(roleEntry),
     ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
       const heading = ownEngagementHeading({
-        orgName: e.orgName,
+        orgName: orgSlotOf(e),
         title: e.title,
         relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
         practice: e.kind === "practice",
@@ -849,7 +859,7 @@ export default async function VerifiedCvPage({
       }),
       ...cv.workHistory.map((e, i) => {
         const heading = ownEngagementHeading({
-          orgName: e.orgName,
+          orgName: orgSlotOf(e),
           title: e.title,
           relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
           practice: e.kind === "practice",

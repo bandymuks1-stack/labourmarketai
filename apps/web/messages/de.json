@@ -2052,6 +2052,7 @@
     "addError": "Konnte nicht hinzugefügt werden. Bitte versuchen Sie es erneut.",
     "addExperienceTitle": "Berufserfahrung hinzufügen",
     "expTitleLabel": "Position",
+    "expKindLabel": "Art der Tätigkeit",
     "expTitlePlaceholder": "z. B. Schweißer, Krankenpfleger, Lagerarbeiter, Entwickler",
     "expStartLabel": "Von (Monat / Jahr)",
     "expEndLabel": "Bis (Monat / Jahr)",
@@ -2208,7 +2209,7 @@
         },
         "noCompany": {
           "title": "Starten Sie Ihr Unternehmensprofil",
-          "body": "Sie haben noch kein Unternehmensprofil. Erstellen Sie eines — es ist sofort aktiv und nutzbar, ohne Warten auf eine Freigabe.",
+          "body": "Sie haben noch kein Unternehmensprofil. Erstellen Sie eines: Sie können es sofort nutzen. Arbeitskräfte sehen Ihre Bedarfe, sobald Ihr Unternehmen verifiziert ist.",
           "cta": "Unternehmenseinrichtung starten"
         },
         "personalSpace": {
@@ -2243,7 +2244,7 @@
         "formTitle": "Unternehmensprofil-Anfrage",
         "formTitleCreate": "Unternehmensprofil erstellen",
         "formTitleEdit": "Unternehmensprofil bearbeiten",
-        "formSubtitle": "Erstellen Sie Ihr Organisationsprofil aus Ihrem persönlichen Konto. Es ist sofort aktiv und nutzbar — ohne Warten auf eine Freigabe. Die Verifizierung ist ein stärkerer, separater Vertrauensschritt.",
+        "formSubtitle": "Erstellen Sie Ihr Organisationsprofil aus Ihrem persönlichen Konto. Sie können es sofort nutzen: Projekte, Team, Arbeitsjournal. Arbeitskräfte sehen Ihre Bedarfe, sobald Ihr Unternehmen verifiziert ist; fordern Sie die Verifizierung unten an.",
         "existingHeading": "Unternehmensprofil",
         "legalName": "Offizieller Unternehmensname",
         "legalNameHelp": "Erforderlich. 2–200 Zeichen.",
@@ -2297,7 +2298,7 @@
         "agencyConnectionPending": "Einladung angenommen. Eine Personalagentur möchte sich mit Ihrem Unternehmen verbinden — legen Sie zuerst Ihr Unternehmensprofil an; die Verbindungsanfrage wartet danach auf Ihrer Partnerseite, wo Sie sie mit diesem Unternehmen bestätigen.",
         "legalLockedNotice": "Dieses Unternehmen ist verifiziert. Seine rechtlichen Angaben (offizieller Name, Registrierungsnummer, Land und eingetragene Adresse) sind hier gesperrt und können nicht überschrieben werden — kontaktieren Sie den Support, um eine rechtliche Änderung zu beantragen. Kontakte, Website, Unternehmenstyp und Ihre Rolle können Sie weiterhin aktualisieren.",
         "saveDraft": "Unternehmen speichern",
-        "submitRequest": "Manuelle Prüfung anfordern (optional)",
+        "submitRequest": "Verifizierung anfordern (Arbeitskräfte sehen Ihre Bedarfe danach)",
         "statusDraftSaved": "Unternehmen gespeichert — es ist jetzt aktiv und nutzbar.",
         "statusSubmitted": "Manuelle Prüfung angefordert (optional). Ihr Unternehmen bleibt in der Zwischenzeit nutzbar.",
         "statusNeedsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
@@ -2318,7 +2319,7 @@
           "draft": "Entwurf. Speichern Sie, um Ihr Unternehmen zu aktivieren — es wird sofort nutzbar.",
           "active_unverified": "Jetzt aktiv und nutzbar. Grundlegende automatische Prüfungen bestanden. Noch nicht identitätsverifiziert — das ist ein separater, stärkerer Schritt. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
           "needs_checks": "Aktiv und nutzbar, aber eine grundlegende Prüfung benötigt Aufmerksamkeit (z. B. Land ergänzen oder eine fehlerhafte Nummer / Website / E-Mail korrigieren). Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
-          "pending_verification": "Sie haben eine optionale manuelle Prüfung angefordert. Ihr Unternehmen bleibt währenddessen voll nutzbar. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
+          "pending_verification": "Sie haben die Verifizierung angefordert. Ihr Unternehmen bleibt währenddessen voll nutzbar. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
           "unverified": "Nicht verifiziert. Sie können Ihr Unternehmen normal weiter nutzen. Ihre eingestellten Anfragen werden Arbeitskräften erst nach der Verifizierung Ihres Unternehmens angezeigt.",
           "verified": "Verifiziert — ein stärkerer Vertrauensstatus, der nur nach einer echten Prüfung vergeben wird."
         },
@@ -4430,7 +4431,7 @@
         "s1": "Benennen Sie Ihre Organisation und was sie tut (beschäftigt, stellt Personal, rekrutiert, bildet aus, führt Projekte)",
         "s2": "Fügen Sie Ihre Leute, Teams oder das Personal hinzu, das Sie stellen",
         "s3": "Veröffentlichen Sie einen Bedarf, bieten Sie Kapazität an — oder beides",
-        "s4": "Sprich mit passenden Personen und Organisationen und erledigt die Arbeit gemeinsam",
+        "s4": "Sprechen Sie mit passenden Personen und Organisationen und erledigen Sie die Arbeit gemeinsam",
         "note": "Ihre Organisation ist sofort nutzbar. Die Verifizierung ist ein separater, stärkerer Vertrauensschritt."
       },
       "display_name_label": "Anzeigename",
@@ -4578,10 +4579,11 @@
             "back": "Zurück",
             "next": "Weiter",
             "descRequired": "Fügen Sie eine Beschreibung hinzu, um fortzufahren.",
+            "countryRequired": "Wählen Sie das Land, in dem gearbeitet wird.",
             "optionalTag": "(optional)",
             "reviewIntro": "Überprüfen und erstellen. Die Anfrage bleibt privat in Ihrem Bereich.",
-            "locationLabel": "Ort oder Land",
-            "locationPlaceholder": "z. B. Vilnius, Litauen",
+            "locationLabel": "Stadt oder Einsatzort",
+            "locationPlaceholder": "z. B. Stadt, Bezirk oder Baustelle",
             "skillsLabel": "Erforderliche Fähigkeiten oder Kriterien",
             "skillsPlaceholder": "z. B. Führerschein, Englisch, Erfahrung",
             "urgencyLabel": "Wann Sie es benötigen",
@@ -5254,36 +5256,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Warum Unternehmen",
-      "headline": "Angebot, mit dem Sie arbeiten können",
-      "items": [
-        {
-          "title": "Erklärbare Passungsrichtung",
-          "desc": "Jedes Passungssignal zeigt die Gründe dahinter."
-        },
-        {
-          "title": "Grenzüberschreitender Arbeitskräftepool",
-          "desc": "Angebot aus jedem Markt, in dem wir tätig sind — an einem Ort."
-        },
-        {
-          "title": "Keine undurchsichtigen Zwischenhändler",
-          "desc": "Sie sehen die Beziehung, und sie gehört Ihnen."
-        },
-        {
-          "title": "Fähigkeitsnachweise + Passungssignale",
-          "desc": "Stellen Sie auf Basis von Nachweisen ein, nicht von Behauptungen."
-        },
-        {
-          "title": "Angebotssignale",
-          "desc": "Sehen Sie die angegebene Verfügbarkeit der Arbeitskräfte, sobald Profile aktualisiert werden."
-        },
-        {
-          "title": "Direkter Kontakt",
-          "desc": "Die Beziehung zur Arbeitskraft gehört Ihnen."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "FAQ für Unternehmen",
       "headline": "Klare Antworten",
@@ -5294,7 +5266,7 @@
         },
         {
           "q": "Was kostet es?",
-          "a": "Die Preise stehen auf der Preisseite: eine aktive Position pro Organisation ist kostenlos; für mehr Positionen braucht es den Organisationsplan, der im Konto aktiviert wird. Einen Personalbedarf einzureichen ist kostenlos."
+          "a": "Registrierung und das Einreichen eines Personalbedarfs sind kostenlos. Der bezahlte Organisationsplan, sein Preis und ob er heute schon aktiviert werden kann, stehen auf der Preisseite."
         },
         {
           "q": "Können wir nach Standort filtern?",
@@ -5352,36 +5324,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Warum Personalagenturen",
-      "headline": "Hebelwirkung statt Kontrollverlust",
-      "items": [
-        {
-          "title": "Ihren Pool verwalten",
-          "desc": "Arbeitskräfte, Verfügbarkeit und Status an einem Ort."
-        },
-        {
-          "title": "Im Auftrag von Kunden veröffentlichen",
-          "desc": "Vermitteln Sie Nachfrage, ohne die Kundenbeziehung zu verlieren."
-        },
-        {
-          "title": "Passgenaue Vermittlung",
-          "desc": "Setzen Sie die richtigen Leute schneller ein."
-        },
-        {
-          "title": "Sichtbarkeitseinstellungen",
-          "desc": "Öffentlich, nur für Personalagenturen oder direkt — Sie entscheiden."
-        },
-        {
-          "title": "Grenzüberschreitende Reichweite",
-          "desc": "Auftraggeber und Arbeitskräfte in jedem Markt, in dem wir tätig sind."
-        },
-        {
-          "title": "Ihren Desk ausbauen",
-          "desc": "Kapazitätseinblicke, wenn sich die Nachfrage verschiebt."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "Personalagentur-FAQ",
       "headline": "Klare Antworten",
@@ -5392,7 +5334,7 @@
         },
         {
           "q": "Was kostet es Personalagenturen?",
-          "a": "Eine Agentur ist eine Organisation und nutzt dieselben Pläne: eine aktive Position ist kostenlos, für mehr braucht es den Organisationsplan von der Preisseite. Einen separaten Agenturtarif gibt es nicht."
+          "a": "Eine Agentur ist eine Organisation und nutzt dieselben Pläne. Registrierung und das Angeben des Personals, das Sie stellen können, sind kostenlos; der bezahlte Organisationsplan, sein Preis und ob er heute schon aktiviert werden kann, stehen auf der Preisseite. Einen separaten Agenturtarif gibt es nicht."
         },
         {
           "q": "Können wir die Sichtbarkeit der Arbeitskräfte steuern?",
@@ -5751,7 +5693,7 @@
     "titleAccent": "fair angesetzt.",
     "subcopyLive": "Die Preise sind gültig. Die Aktivierung erfolgt im Organisationskonto über eine sichere Stripe-Zahlung; auf dieser Seite wird nichts abgebucht.",
     "subcopy": "Die Preise sind noch nicht endgültig, und die Abrechnung wird auf dieser Seite niemals für Sie gestartet. Die Stufen unten beschreiben den Umfang; die Aktivierung erfolgt manuell — melden Sie sich, und wir bestätigen Preis und Umfang mit Ihnen, bevor irgendetwas startet.",
-    "subcopyConfirmed": "Die Preise sind bestätigt. Die Online-Aktivierung ist noch nicht geöffnet — tragen Sie sich in die Warteliste ein, wir melden uns und starten Ihre Organisation manuell; auf dieser Seite wird nichts abgebucht.",
+    "subcopyConfirmed": "Die Registrierung ist für Personen und für Organisationen kostenlos, und das Veröffentlichen von Personalbedarf ist kostenlos. Es gibt einen bezahlten Plan, er ist unten dargestellt. Er kann noch nicht online gekauft werden, und auf dieser Seite wird nichts belastet.",
     "trialNote": "Das erste Abonnement einer Organisation beginnt mit einer 14-tägigen Testphase. Danach wird Ihre Karte mit dem Monatspreis belastet; vor Ablauf können Sie kündigen.",
     "planCta": "Für diesen Plan auf die Warteliste",
     "featuresLabel": "Enthält",
@@ -5761,6 +5703,12 @@
         "tagline": "Für den Einstieg",
         "features": [
           "1 aktive Position",
+          "Matching-Shortlist und Kandidatenkontakt",
+          "Buchungen, Projekte, Anweisungen",
+          "Arbeitsbestätigung und bestätigte Fähigkeiten"
+        ],
+        "featuresClosed": [
+          "Personalbedarf veröffentlichen",
           "Matching-Shortlist und Kandidatenkontakt",
           "Buchungen, Projekte, Anweisungen",
           "Arbeitsbestätigung und bestätigte Fähigkeiten"
@@ -5818,8 +5766,8 @@
     ],
     "priceState": {
       "draft_pricing": "Die Preise sind nicht endgültig — es kann noch nichts gekauft werden.",
-      "owner_confirmed": "Die Preise sind bestätigt. Auf dieser Seite wird nichts abgebucht.",
-      "owner_confirmed_closed": "Die Preise sind bestätigt. Die Online-Zahlung ist noch nicht geöffnet; auf dieser Seite wird nichts abgebucht."
+      "owner_confirmed": "Die Preise sind bestätigt. Auf dieser Seite wird nichts abgebucht. Preise verstehen sich zuzüglich MwSt.",
+      "owner_confirmed_closed": "Die Online-Zahlung ist noch nicht geöffnet; auf dieser Seite wird nichts belastet. Preise verstehen sich zuzüglich MwSt."
     },
     "individual": {
       "name": "Besondere Anforderungen",
@@ -5832,7 +5780,12 @@
     "pricePerMonth": "{price} €/Monat",
     "ctaStartFree": "Kostenlos im Organisationskonto starten",
     "ctaSubscribe": "Im Organisationskonto aktivieren",
-    "faqBillingClosed": "Die Online-Zahlung ist für die Öffentlichkeit noch nicht geöffnet, hier kann also nichts gekauft werden. Registrierung und eine aktive Stelle sind kostenlos. Für bezahlte Leistungen betreuen wir erste Kunden direkt und bestätigen den Preis mit Ihnen, bevor etwas beginnt."
+    "faqClosed": [
+      "Jede Organisation — Arbeitgeber, Personaldienstleister, Auftragnehmer oder Bildungsträger — erhält dasselbe Produkt und denselben einen bezahlten Plan. Die Online-Zahlung ist noch nicht geöffnet, daher wird heute nichts belastet.",
+      "Ja. Personen bleiben kostenlos, und die Registrierung einer Organisation sowie das Veröffentlichen ihres Personalbedarfs sind kostenlos.",
+      "Die Online-Zahlung ist für die Öffentlichkeit noch nicht geöffnet, hier kann also nichts gekauft werden. Registrierung und das Veröffentlichen von Personalbedarf sind kostenlos.",
+      "Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Die Online-Zahlung ist noch nicht geöffnet; eine Obergrenze des kostenlosen Plans gilt nur für eine Organisation, deren Konto die Abrechnung als aktiv zeigt, und dieses Konto zeigt die Obergrenze dann an. Übliche Schutzmaßnahmen gegen Missbrauch, etwa Anfragelimits, gelten weiterhin."
+    ]
   },
   "privacySelfService": {
     "title": "Datenschutz und Ihre Daten",
@@ -6919,7 +6872,8 @@
         "noMembers": "Derzeit keine Mitglieder.",
         "unavailable": "Die Teams konnten nicht geladen werden. Bitte erneut versuchen.",
         "manage": "Teams ändern"
-      }
+      },
+      "organizationLink": "Geschichte und Projekte der Organisation"
     },
     "workerView": {
       "eyebrow": "Mein Projekt",
@@ -9482,23 +9436,44 @@
       "notStructured": "Automatische Suche {when}: Der Bedarf ist noch zu knapp beschrieben. Fügen Sie Fähigkeiten oder einen Beruf hinzu.",
       "failed": "Automatische Suche {when} konnte nicht abgeschlossen werden. Die Liste unten wird weiterhin live berechnet.",
       "capped": "Die Zahl der Kandidaten wurde begrenzt."
+    },
+    "history": {
+      "title": "Verlauf",
+      "decision": "Eingestellt: {names}",
+      "created": "Bedarf erstellt",
+      "closed": "Bedarf geschlossen",
+      "closedFilled": "Bedarf geschlossen: besetzt",
+      "closedWithdrawn": "Bedarf geschlossen: zurückgezogen",
+      "event": {
+        "proposed": "Buchung vorgeschlagen an {name}",
+        "accepted": "{name} hat die Buchung angenommen",
+        "declined": "{name} hat die Buchung abgelehnt",
+        "withdrawn": "Buchung an {name} zurückgezogen",
+        "expired": "Buchung an {name} abgelaufen"
+      },
+      "actor": {
+        "you": "Sie",
+        "candidate": "Kandidat",
+        "automatic": "automatisch",
+        "other": "Kollege oder Administrator"
+      }
     }
   },
   "planBoundary": {
-    "title": "Was bezahlte Pläne enthalten",
-    "subcopy": "Zahlungen sind noch nicht aktiviert — keine Zahlungsseite und keine Karte. Bezahlte Pläne werden angezeigt, damit Sie den Umfang kennen; Pilotzugang wird manuell gewährt.",
+    "title": "Was jeder Plan umfasst",
+    "subcopy": "Auf dieser Seite kann nichts gekauft werden, und es wird keine Karte verlangt. Der bezahlte Plan wird gezeigt, damit Sie wissen, was er umfasst.",
     "note": "Die Pläne beschreiben den Umfang, keine aktive Abrechnung. Auf dieser Seite wird nichts berechnet.",
     "plans": {
       "free_worker": "Arbeitskraft (kostenlos)",
-      "worker_plus": "Person Plus (nicht angeboten)",
+      "worker_plus": "Zusatzfunktionen für Personen (nicht angeboten)",
       "company_pilot": "Organisation",
-      "agency_pilot": "Agentur-Stufe (nicht angeboten)",
+      "agency_pilot": "Eigener Agenturplan (nicht angeboten)",
       "admin_internal": "Admin / Intern",
       "free_organization": "Organisation (kostenlos)"
     },
     "access": {
       "free": "Kostenlos",
-      "payment_not_enabled": "Zahlung nicht aktiviert",
+      "payment_not_enabled": "Noch nicht kaufbar",
       "internal": "Intern"
     },
     "audience": {
@@ -9509,22 +9484,22 @@
     },
     "cta": {
       "use": "Jetzt verfügbar",
-      "request_pilot_access": "Pilotzugang — wird manuell gewährt",
+      "request_pilot_access": "Erste Kunden richtet das Team ein",
       "contact": "Individuell vereinbart"
     },
     "readiness": {
       "draft_pricing": "Kein Preis hier ist endgültig, und es kann noch nichts gekauft werden.",
-      "owner_confirmed": "Es kann nichts gekauft werden, bis Zahlungen aktiviert sind."
+      "owner_confirmed": "Der bezahlte Plan kann nicht gekauft werden, bis die Online-Zahlung geöffnet ist."
     },
-    "featuresLabel": "In diesem Plan enthalten",
-    "limitValue": "bis zu {count}",
+    "featuresLabel": "Enthält",
+    "limitValue": "bis zu {count}, sobald bezahlte Pläne starten",
     "freeToday": {
       "freeTitle": "Heute kostenlos",
-      "free": "Alles, was Sie im Produkt derzeit nutzen können, ist kostenlos — der Pilot läuft ohne Zahlungen, und nichts fragt nach einer Karte.",
-      "paidTitle": "Bezahlte Pläne",
-      "paid": "Derzeit nicht verfügbar.",
-      "preparedTitle": "Noch nicht kaufbar",
-      "prepared": "Es gibt keine Zahlungsseite, und es kann nichts gekauft werden. Pilotzugang zum Umfang der bezahlten Pläne wird manuell vom Team gewährt."
+      "free": "Alles, was Sie heute im Produkt nutzen können, ist kostenlos, und es wird keine Karte verlangt.",
+      "paidTitle": "Bezahlter Plan",
+      "paid": "Noch nicht kaufbar.",
+      "preparedTitle": "Kostenpflichtig, noch nicht kaufbar",
+      "prepared": "Es gibt keine Zahlungsseite, und es kann nichts gekauft werden. Ersten Kunden schaltet das Team die Funktionen des bezahlten Plans direkt frei."
     },
     "features": {
       "worker_profile": "Arbeitskraft-Profil",
@@ -9550,8 +9525,8 @@
     },
     "enforcement": {
       "free_surface": "Heute im Produkt",
-      "server_gate": "Heute verfügbar, je nach Ihren Berechtigungen",
-      "declared_boundary_only": "Startet erst mit der Abrechnung",
+      "server_gate": "Heute im Produkt, mit Berechtigungsprüfung",
+      "declared_boundary_only": "Noch nicht verfügbar",
       "admin_rbac": "Intern, nur für Admins"
     }
   },
@@ -9894,11 +9869,12 @@
       "body": "Öffentliche Zahlungen sind noch nicht aktiviert. Die ersten Kunden werden direkt betreut: Das Einreichen einer Personalanfrage ist kostenlos, und der endgültige Preis wird immer mit Ihnen bestätigt, bevor bezahlte Arbeit beginnt.",
       "cta": "Personalanfrage einreichen"
     },
-    "title": "So funktioniert der erste bezahlte Service",
+    "title": "Personalvermittlung der UAB „Nonstop Group“",
+    "separate": "Dies ist eine eigene Dienstleistung und kein LabourMarket.ai-Plan. Die Plattformpläne oben enthalten sie nicht, und die Nutzung der Plattform setzt sie nicht voraus.",
     "steps": [
       {
         "title": "Reichen Sie Ihre Anfrage kostenlos ein",
-        "body": "Beschreiben Sie, welche Arbeitskräfte oder welche Kolonne Sie brauchen. Keine Gebühr, keine Karte, nichts wird automatisch veröffentlicht."
+        "body": "Beschreiben Sie, welche Personen oder welches Team Sie brauchen. Keine Gebühr, keine Karte, nichts wird automatisch veröffentlicht."
       },
       {
         "title": "Ein Mensch prüft sie",
@@ -9906,14 +9882,14 @@
       },
       {
         "title": "Sie erhalten eine manuell geprüfte Shortlist",
-        "body": "Echte Kandidaten oder Kolonnen, von einem Menschen gegen Ihre Anfrage geprüft. Wenn wir keine passende Shortlist zusammenstellen können, fällt keine Gebühr an — und wir versprechen nie, dass immer ein Kandidat gefunden wird."
+        "body": "Echte Kandidaten oder Teams, von einem Menschen gegen Ihre Anfrage geprüft. Wenn wir keine passende Shortlist zusammenstellen können, fällt keine Gebühr an — und wir versprechen nie, dass immer ein Kandidat gefunden wird."
       },
       {
         "title": "Sie zahlen nur für erbrachte Leistung",
-        "body": "Pro eingestellter Arbeitskraft, Kolonne oder Unternehmensvermittlung gilt eine feste Erfolgsgebühr. Eine separate Koordinationsgebühr fällt nur an, wenn Dokumenten- oder Onboarding-Koordination tatsächlich erbracht wird. Der endgültige Preis wird bestätigt, bevor bezahlte Arbeit beginnt."
+        "body": "Eine Gebühr für eine erfolgreiche Einstellung gilt nur, wenn sie vorab mit Ihnen vereinbart wurde. Höhe und Bedingungen werden Ihnen schriftlich bestätigt, bevor bezahlte Arbeit beginnt. Eine separate Koordinationsgebühr fällt nur an, wenn Dokumenten- oder Onboarding-Koordination tatsächlich erbracht wird."
       }
     ],
-    "note": "Zwei Dinge laufen nebeneinander, und diese Seite beschreibt das zweite. Die Plattform selbst arbeitet automatisch: die Stellenübersicht ist öffentlich, die Match-Vorschau ist ohne Konto zugänglich, und eine gestellte Anfrage ergibt eine sortierte Kandidatenliste mit Begründung, warum jemand passt — eine aktive Position kostenfrei. Der bezahlte Service oben ist der menschliche Teil: ein Mitarbeiter liest Ihre Anfrage, nimmt Kontakt auf und prüft die Liste von Hand, bevor jemand vorgeschlagen wird. Eine ganze Kolonne kann sich bereits als eine Einheit auf Ihre Anfrage anbieten und, sobald beide Seiten einig sind, Ihrem Projekt als ein Team beitreten; die automatische Kandidatenliste schlägt noch nicht ganze Kolonnen vor — sie ordnet Personen einzeln.",
+    "note": "Zwei Dinge laufen nebeneinander, und diese Seite beschreibt das zweite. Die Plattform selbst arbeitet automatisch: die Stellenübersicht ist öffentlich, die Match-Vorschau ist ohne Konto zugänglich, und eine gestellte Anfrage ergibt eine sortierte Kandidatenliste mit Begründung, warum jemand passt — eine Anfrage zu stellen ist kostenlos. Der bezahlte Service oben ist der menschliche Teil: ein Mitarbeiter liest Ihre Anfrage, nimmt Kontakt auf und prüft die Liste von Hand, bevor jemand vorgeschlagen wird. Ein ganzes Team kann sich bereits als eine Einheit auf Ihre Anfrage anbieten und, sobald beide Seiten einig sind, Ihrem Projekt als ein Team beitreten; die automatische Kandidatenliste schlägt noch nicht ganze Teams vor — sie ordnet Personen einzeln.",
     "ctaLabel": "Personalanfrage einreichen →"
   },
   "adminLaunchReadiness": {
@@ -9987,6 +9963,9 @@
       "invites": "Einladungs- und Benachrichtigungs-E-Mails",
       "invitesOn": "an",
       "invitesOff": "AUS – wird separat eingeschaltet: INVITE_EMAIL_PROVIDER=smtp und ein Testversand"
+    },
+    "alerts": {
+      "title": "Inhaber-Benachrichtigungen und Push-Mitteilungen"
     }
   },
   "adminMetrics": {
@@ -10631,7 +10610,7 @@
   },
   "workerIntake": {
     "title": "Arbeitskraft-Aufnahme",
-    "subtitle": "Nennen Sie uns Ihr Gewerk und Ihre Verfügbarkeit, um Ihre Angaben zu prüfen. Dieses Formular speichert nichts — damit Arbeitgeber Sie finden, erstellen Sie Ihr kostenloses Profil und tragen Sie Ihre Angaben dort ein.",
+    "subtitle": "Hier wird nichts veröffentlicht. Arbeitgeber finden Sie über ein kostenloses Profil; was Sie hier eingeben, wird nach der Registrierung dorthin übernommen.",
     "fullName": "Vollständiger Name",
     "profession": "Branche & Arbeitsart",
     "professionPlaceholder": "Wählen Sie Branche und Arbeitsart",
@@ -10708,7 +10687,6 @@
     "contactPerson": "Ansprechpartner",
     "contactPersonHelp": "Optional. Wer zu dieser Anfrage erreichbar ist.",
     "contactEmail": "Kontakt-E-Mail",
-    "contactEmailHelp": "Optional, hilft uns aber, schneller zu Ihrer Anfrage nachzufassen.",
     "cityRegion": "Stadt oder Region",
     "cityRegionHelp": "Optional. Wo die Arbeit stattfinden wird.",
     "expectedDuration": "Voraussichtliche Dauer",
@@ -14008,9 +13986,8 @@
         "csv": "CSV herunterladen",
         "print": "Drucken / als PDF speichern",
         "ctaTitle": "Machen Sie aus dieser Schätzung eine echte Personalanfrage",
-        "ctaBody": "Derselbe Schätzungs-Baustein steckt im Bedarfsformular von LabourMarket.ai. Mit Konto können Sie eine Schätzung an eine strukturierte Personalanfrage anhängen; ohne Konto beschreiben Sie Ihren Bedarf im öffentlichen Formular.",
+        "ctaBody": "Mit Konto werden Arbeitskräftezahl und Land in die Personalanfrage übernommen; den Rest der Schätzung können Sie dort ergänzen. Ohne Konto nutzen Sie das öffentliche Formular.",
         "ctaDashboard": "Personalbedarf anlegen (mit Konto)",
-        "ctaDashboardHelp": "Die Konto-Route öffnet das Bedarfsformular in Ihrem Dashboard — der Rechner überträgt diese Zahlen nicht.",
         "ctaCompanyNeed": "Bedarf ohne Konto beschreiben",
         "ctaCompanyNeedHelp": "Das öffentliche Formular erhält nur Ihre Arbeitskräftezahl und das Land — keine Preise und keine Beschreibungen."
       }
@@ -14368,7 +14345,9 @@
         "supplyRole": "Welcher Beruf",
         "supplyRolePlaceholder": "Z. B. Schweißer",
         "supplyTeamSize": "Wie viele Menschen Sie haben",
-        "supplyLocation": "Wo sie arbeiten können"
+        "supplyLocation": "Wo sie arbeiten können",
+        "demandCountry": "Land, in dem gearbeitet wird",
+        "demandCountryPlaceholder": "z. B. Schweden oder SE"
       },
       "availability": {
         "available": "Verfügbar",
@@ -15584,6 +15563,10 @@
         "title": "Anfrage für ein Einzelprojekt",
         "body": "Für private und gewerbliche Auftraggeber: Beschreiben Sie, welches Projekt oder welche Dienstleistung Sie brauchen."
       },
+      "partner": {
+        "title": "Partnerschaftsanfrage",
+        "body": "Beschreiben Sie die Zusammenarbeit, die Sie vorschlagen."
+      },
       "title": "Bedarf melden",
       "promise": "Beschreiben Sie, welche Arbeitskräfte, Dienstleistungen oder Projektausführung Sie brauchen. Die Anfrage wird dem Team von LabourMarket.ai zur Prüfung übergeben.",
       "name": "Vor- und Nachname oder Firmenname",
@@ -15601,6 +15584,7 @@
       "scope": "Umfang",
       "deadline": "Fristen",
       "need": "Welches Projekt oder welche Dienstleistung Sie brauchen",
+      "proposal": "Vorgeschlagene Zusammenarbeit",
       "customer": "Auftraggeber",
       "customerPrivate": "Privatperson",
       "customerBusiness": "Unternehmen",
@@ -17509,7 +17493,7 @@
       "assigneePlaceholder": "E-Mail der Person",
       "requiredByLabel": "Abschließen bis",
       "assign": "Diese Person bitten",
-      "certificateFilePlaceholder": "Id der Zertifikatsdatei",
+      "certificateFileLabel": "Zertifikatsdatei",
       "issuedOnLabel": "Ausgestellt am",
       "expiresOnLabel": "Gültig bis",
       "attachCertificate": "Zertifikat speichern",
@@ -19298,7 +19282,8 @@
       "address": "Adresse",
       "project": "Projekt",
       "notInSource": "Nicht in der Quelle",
-      "linked": "Verknüpft"
+      "linked": "Verknüpft",
+      "openProject": "Projekt öffnen"
     },
     "whoWorked": "Wer hier gearbeitet hat",
     "timeline": "Was getan wurde",
@@ -19379,6 +19364,23 @@
         "opening": "Wird geöffnet…",
         "error": "Der Arbeitsbereich konnte nicht geöffnet werden."
       }
+    },
+    "projects": {
+      "title": "Projekte auf der Plattform",
+      "counts": "{running} laufend · {completed} abgeschlossen",
+      "untitled": "Projekt ohne Titel",
+      "running": "Laufend",
+      "completed": "Abgeschlossen",
+      "all": "Alle {count} Projekte"
+    },
+    "journal": {
+      "title": "Im Arbeitsjournal erfasste Arbeit",
+      "hours": "Erfasste Stunden",
+      "confirmed": "Von der Organisation bestätigte Stunden",
+      "people": "Personen, die Arbeit erfasst haben",
+      "period": "Erfasst",
+      "basis": "Aus {entries} Journaleinträgen, die Personen unter dieser Organisation erfasst haben. Getrennt von der importierten Historie oben gezählt und nie zu ihr addiert.",
+      "unavailable": "Die unter dieser Organisation im Journal erfasste Arbeit konnte gerade nicht gelesen werden."
     }
   },
   "workPlan": {
@@ -19437,8 +19439,6 @@
     "title": "Was mit Ihrer Arbeit passiert",
     "titleCompany": "Was mit der Arbeit passiert, die Sie leiten",
     "example": "Beispiel — keine echte Person und keine echten Daten",
-    "hint": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
-    "hintWorkers": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
     "open": "In Ihrem Arbeitsbereich öffnen",
     "list": "Schritte im Arbeitsverlauf",
     "workers": {
@@ -20728,7 +20728,6 @@
       "close": "Schließen",
       "functions": "Aktionen",
       "professions": "Berufe",
-      "opensNow": "Kein Konto erforderlich",
       "signInWhenOpen": "Anmeldung erforderlich",
       "allSectors": "Alle Branchen",
       "fullList": "Vollständige Liste"
