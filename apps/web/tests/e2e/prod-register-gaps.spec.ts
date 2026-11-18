@@ -22,13 +22,30 @@ import { test, expect, type Browser, type BrowserContext, type Page } from "./pr
  *               (nothing is saved). When no template is active for that worker
  *               the run records that fact — the seeds ship inactive and are
  *               activated by the owner — and the row stays unproven.
+ *   J-2 (2.36)  template → journal entry → CV, in production, under the QA
+ *               worker ONLY: when the owner has activated a profession
+ *               template, the worker picks it in the full composer, saves ONE
+ *               entry marked QA-SYNTHETIC with this run id (kept out of
+ *               statistics by lib/qa/synthetic-fixture.ts), finds it in the
+ *               journal, and sees the CV's "Journal entries" figure count it.
+ *               When no template is active the step is SKIPPED as unproven,
+ *               before anything is written — it never fails on that and never
+ *               writes. The walk never activates or deactivates a template.
+ *               OWNER STEP (not the walk's): activate exactly one seed, e.g.
+ *                 update public.journal_profession_templates
+ *                    set active = true where slug = 'construction_daily';
+ *               (seeds `construction_daily`, `transport_daily`,
+ *               `cleaning_daily`, all profession-unscoped, ship inactive —
+ *               migration 20260714180000; `active = false` undoes it). If
+ *               several are active, the first one offered is used.
  *   G-4 (3.34)  the project forecast: the organization owner opens one of
  *               its own projects and the forecast panel beside the course is
  *               READ (ok / too little evidence / nothing open — never
  *               "unavailable") and labelled a forecast, not a fact. Read only.
  *
  * Synthetic data only: the waitlist address is a reserved example.com
- * address tagged with this run id; no person's data is read or written.
+ * address tagged with this run id, and J-2's one entry belongs to the
+ * synthetic QA worker; no real person's data is read or written.
  */
 
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
@@ -132,6 +149,106 @@ test("G-3 (2.36). a profession journal template prefills the entry when one is a
   await first.click();
   await expect.poll(async () => (await text.inputValue()).length, { message: "the template prefilled the entry" }).toBeGreaterThan(before);
   console.log(`[templates] template ${slug} prefilled the entry (not saved)`);
+  await ctx.close();
+});
+
+/** The CV's "Journal entries" figure for the signed-in person, or null when
+ *  the CV shows it as unreadable (an em dash). A CV with no figures at all
+ *  draws no tiles, which is 0. The tiles are in a fixed order on the page
+ *  (verified skills, manager confirmations, journal entries). */
+async function cvJournalEntries(page: Page): Promise<number | null> {
+  await page.goto("/lt/cv");
+  const main = page.getByRole("main");
+  await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 30_000 });
+  const summary = main.getByTestId("cv-summary");
+  if ((await summary.count()) === 0) return 0;
+  const tile = summary.locator(":scope > div").nth(2);
+  await expect(tile.locator("dt"), "the third CV figure is the journal entries").toHaveText(/Žurnalo įrašai/);
+  const n = Number((await tile.locator("dd").innerText()).trim());
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Answers the composer's "which work context / which project" questions only
+ *  when it asks them, never guessing a project: the QA worker's employer when
+ *  offered, and the form's own "not project work" option (always last). */
+async function answerComposerQuestions(page: Page): Promise<void> {
+  const main = page.getByRole("main");
+  if ((await main.getByTestId("journal-engagement-must-choose").count()) > 0) {
+    await main.getByTestId("journal-engagement-switcher").click();
+    const options = main.getByRole("listbox").getByRole("option");
+    const alfa = options.filter({ hasText: /QA-SYNTHETIC Alfa/ });
+    await ((await alfa.count()) > 0 ? alfa.first() : options.nth(1)).locator("button").click();
+    await expect(main.getByTestId("journal-engagement-must-choose")).toHaveCount(0);
+  }
+  if ((await main.getByTestId("journal-project-must-choose").count()) > 0) {
+    await main.getByTestId("journal-project-switcher").click();
+    await main.getByRole("listbox").getByRole("option").last().locator("button").click();
+    await expect(main.getByTestId("journal-project-must-choose")).toHaveCount(0);
+  }
+}
+
+test("J-2 (2.36). an active template's entry is saved under the QA worker only and reaches the QA worker's CV", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker");
+  const main = page.getByRole("main");
+  const openTemplates = async () => {
+    await page.goto("/lt/dashboard/journal?compose=full");
+    await expect(main.getByTestId("journal-compose-full"), "the full composer is open").toBeVisible({ timeout: 30_000 });
+    const more = main.getByTestId("journal-more-options");
+    await expect(more, "the composer's more-options disclosure renders").toBeAttached({ timeout: 30_000 });
+    await more.locator(":scope > summary").click();
+    await expect(more, "the disclosure opened").toHaveAttribute("open", "");
+    return more.getByTestId("journal-template-picker").locator('[data-testid^="journal-template-"]');
+  };
+
+  // READ FIRST, write nothing: is any template active for this worker?
+  const offered = await openTemplates();
+  const slugs = (await offered.evaluateAll((els) => els.map((e) => e.getAttribute("data-testid") ?? ""))).map((id) =>
+    id.replace("journal-template-", ""),
+  );
+  if (slugs.length === 0) {
+    console.log("[templates] J-2: no active journal template for the QA worker — 2.36 stays unproven; nothing was written");
+    await ctx.close();
+    test.skip(true, "unproven: no active journal template for the QA worker (activation is the owner's step); nothing written");
+    return;
+  }
+  const slug = slugs[0];
+  if (slugs.length > 1) console.log(`[templates] J-2: ${slugs.length} templates active (${slugs.join(", ")}); using the first, ${slug}`);
+
+  const before = await cvJournalEntries(page);
+  // Still before any write: an unreadable figure could not show the entry arrive.
+  expect(before, "the CV's journal-entry figure is readable before the save").not.toBeNull();
+
+  await openTemplates();
+  const option = main.getByTestId("journal-template-picker").getByTestId(`journal-template-${slug}`);
+  await expect(option, "the template is offered").toBeVisible({ timeout: 30_000 });
+  const text = main.getByTestId("journal-compose-full").locator("textarea").first();
+  await expect(text).toBeVisible();
+  const empty = (await text.inputValue()).length;
+  await option.click();
+  await expect.poll(async () => (await text.inputValue()).length, { message: "the template prefilled the entry" }).toBeGreaterThan(empty);
+  const filled = await text.inputValue();
+
+  // One entry, the QA worker's own, marked so statistics leave it out. No
+  // duration is stated: an unconfirmed duration opens a review step first.
+  const marker = `${RUN}-${process.env.GITHUB_RUN_ATTEMPT ?? "1"}-J2`;
+  await text.fill(`QA-SYNTHETIC ${marker}: šablono ${slug} įrašas, sutvarkiau darbo vietą\n${filled}`);
+  await answerComposerQuestions(page);
+  await main.getByTestId("journal-save-entry").first().click();
+  await expect(main.getByTestId("journal-saved-banner"), "the entry was saved").toBeVisible({ timeout: 60_000 });
+
+  await page.goto("/lt/dashboard/journal");
+  await expect(
+    main.locator('[data-testid^="journal-entry-card-"]', { hasText: marker }).first(),
+    "the saved entry is in the QA worker's journal",
+  ).toBeVisible({ timeout: 30_000 });
+
+  // The CV counts it. Other walks only ever ADD to this worker's entries, so
+  // the figure must have risen by at least this one.
+  let after: number | null = null;
+  await expect
+    .poll(async () => (after = await cvJournalEntries(page)), { message: "the QA worker's CV counts the template entry", timeout: 60_000 })
+    .toBeGreaterThan(before ?? 0);
+  console.log(`[templates] J-2: template ${slug} → entry ${marker} saved → CV journal entries ${before} → ${after}`);
   await ctx.close();
 });
 
