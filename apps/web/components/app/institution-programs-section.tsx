@@ -265,7 +265,7 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                 only door, so it starts open instead of hiding behind a
                 collapsed disclosure. */}
             <details className="rounded-md border border-ink-600 p-3" open={read.programs.length === 0}>
-              <summary className="cursor-pointer text-xs font-semibold text-text-primary">{t("addProgram")}</summary>
+              <summary className="min-h-11 cursor-pointer content-center text-xs font-semibold text-text-primary">{t("addProgram")}</summary>
               <div className="mt-3">
                 <CreateProgramForm organizationId={organizationId} professions={professions} educationTypes={educationTypes} labels={labels} />
               </div>
