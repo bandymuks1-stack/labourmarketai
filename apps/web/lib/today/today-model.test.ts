@@ -202,6 +202,21 @@ describe("open items — what still needs a figure, a name or a look", () => {
     expect(open.kind === "known" && open.items.filter((i) => i.kind === "check")).toEqual([]);
   });
 
+  // UX gap W-1 (2026-11-18): a new worker's home showed "Open items could not
+  // be read." Both halves pinned: a reading that SUCCEEDED with no entries at
+  // all is a known empty list (the week row exists even then), and a reading
+  // that FAILED (null) stays unknown with every attention door read as zero
+  // — a failure is never turned into a false "nothing waiting".
+  it("a first-day reading with no entries at all is a known empty list; a failed one stays unknown", () => {
+    const firstDay = deriveWorkIntelligence({ entries: [], skills: [], todayIso: TODAY, focus: "today" });
+    expect(firstDay.periods.some((p) => p.key === "week")).toBe(true);
+    expect(deriveTodayOpenItems(firstDay)).toEqual({ kind: "known", items: [] });
+    const noDoors: TodayAttention = { offers: 0, invitations: 0, unread: { count: 0, onlyId: null } };
+    expect(deriveTodayOpenItems(firstDay, noDoors)).toEqual({ kind: "known", items: [] });
+    expect(deriveTodayOpenItems(null, noDoors)).toEqual({ kind: "unknown" });
+    expect(deriveTodayOpenItems(null, null)).toEqual({ kind: "unknown" });
+  });
+
   it("a clean week has no open items — an empty list, not an unknown", () => {
     const wi = deriveWorkIntelligence({ entries: [labelled("e1", TODAY, 4)], skills: SKILLS, todayIso: TODAY, focus: "today" });
     expect(deriveTodayOpenItems(wi)).toEqual({ kind: "known", items: [] });

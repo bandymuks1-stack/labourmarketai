@@ -166,7 +166,14 @@ export const loadTodayHead = cache(async (): Promise<TodayHead> => {
 export const loadTodayWorkIntelligence = cache(async (): Promise<WorkIntelligence | null> => {
   try {
     return await loadOwnWorkIntelligence({ focus: "today" });
-  } catch {
+  } catch (err) {
+    // Still UNKNOWN (never an empty reading), but named in the server log by
+    // its kind and code only (UX gap W-1, 2026-11-18).
+    const e = err as { name?: unknown; code?: unknown } | null;
+    console.error("[today] work intelligence read threw:", {
+      name: typeof e?.name === "string" ? e.name : typeof err,
+      code: typeof e?.code === "string" ? e.code : null,
+    });
     return null;
   }
 });
