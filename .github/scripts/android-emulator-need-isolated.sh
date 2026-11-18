@@ -46,3 +46,14 @@ echo "ANDROID_SECOND_NEED_ON_DEVICE: Done returned to Today; Post a need opened 
 # the close and reopen in the local database.
 maestro test apps/mobile/.maestro/employer-screens-journey.yaml
 echo "ANDROID_EMPLOYER_SCREENS_ON_DEVICE: organization stations shown; a need closed and reopened; candidates, agency offers and programmes opened"
+
+# The LIVING CV FORMS (#3451, #3453): the company signs out and the job's
+# synthetic WORKER signs in, then adds work history, a language and a school.
+# The next workflow step finds one row of each in the local database.
+: "${MOBILE_WORKER_EMAIL:?worker seed address missing}"
+: "${MOBILE_WORKER_PASSWORD:?worker seed password missing}"
+maestro test \
+  -e MOBILE_WORKER_EMAIL="$MOBILE_WORKER_EMAIL" \
+  -e MOBILE_WORKER_PASSWORD="$MOBILE_WORKER_PASSWORD" \
+  apps/mobile/.maestro/cv-forms-journey.yaml
+echo "ANDROID_CV_FORMS_ON_DEVICE: worker signed in; work history, language and education saved and shown on the profile"

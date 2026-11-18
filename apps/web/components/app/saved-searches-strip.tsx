@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -124,7 +126,7 @@ export function SavedSearchesStrip({
                 type="button"
                 disabled={pending}
                 onClick={() => open(reading)}
-                className="text-sm font-semibold text-brand-blue hover:underline"
+                className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-blue hover:underline"
                 data-testid="saved-search-open"
               >
                 {reading.label}
@@ -144,7 +146,7 @@ export function SavedSearchesStrip({
                 type="button"
                 disabled={pending}
                 onClick={() => remove(reading.id)}
-                className="ml-auto text-meta text-text-muted hover:text-state-danger"
+                className="ml-auto inline-flex min-h-11 items-center px-2 text-meta text-text-muted hover:text-state-danger"
                 data-testid="saved-search-delete"
               >
                 {t("delete")}
@@ -156,24 +158,24 @@ export function SavedSearchesStrip({
 
       {canSaveCurrent && !atLimit ? (
         <div className="flex flex-wrap items-center gap-2 border-t border-ink-600 pt-2">
-          <input
+          <Input
             aria-label={t("labelField")}
             value={label}
             maxLength={SAVED_SEARCH_LABEL_MAX}
             onChange={(e) => setLabel(e.target.value)}
             placeholder={t("labelPlaceholder")}
-            className="min-w-40 flex-1 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+            className="min-w-40 flex-1"
             data-testid="saved-search-label"
           />
-          <button
+          <Button
             type="button"
+            variant="secondary"
             disabled={pending || !label.trim()}
             onClick={save}
-            className="rounded-md border border-brand-blue/50 px-3 py-1 text-meta text-brand-blue hover:border-brand-blue disabled:opacity-50"
             data-testid="saved-search-save"
           >
             {t("saveCurrent")}
-          </button>
+          </Button>
         </div>
       ) : null}
       {atLimit ? (

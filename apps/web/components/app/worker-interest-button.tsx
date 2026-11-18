@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
@@ -105,41 +106,41 @@ export function WorkerInterestButton({
         {active ? (
           <>
             <span
-              className="rounded-md border border-state-success/40 bg-state-success/10 px-3 py-1.5 text-xs font-semibold text-state-success"
+              className="inline-flex min-h-11 items-center rounded-md border border-state-success/40 bg-state-success/10 px-3 text-xs font-semibold text-state-success"
               data-testid="interest-sent"
               data-interest-status={status}
             >
               ✓ {activeLabel}
             </span>
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onContactEmployer}
               disabled={pending}
-              className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
               data-testid="interest-contact-employer"
             >
               {labels.contactEmployer}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
               onClick={onWithdraw}
               disabled={pending}
-              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-state-warning hover:text-text-primary disabled:opacity-50"
               data-testid="interest-withdraw"
             >
               {labels.withdraw}
-            </button>
+            </Button>
           </>
         ) : (
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={onExpress}
             disabled={pending}
-            className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
             data-testid="interest-express"
           >
             {labels.express}
-          </button>
+          </Button>
         )}
         {failed ? (
           <span role="alert" className="text-meta text-state-warning">
