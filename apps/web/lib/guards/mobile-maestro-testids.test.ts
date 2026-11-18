@@ -8,7 +8,7 @@
  * literal, an id ending in `.*` (a database uuid at run time) by its stable
  * prefix, the way the screens build it (`need-close-${needId}`).
  */
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -16,11 +16,12 @@ const MOBILE = resolve(__dirname, "../../../mobile");
 const FLOWS = join(MOBILE, ".maestro");
 
 function sources(dir: string, out: string[] = []): string[] {
-  for (const name of readdirSync(dir)) {
-    if (name === "node_modules" || name.startsWith(".")) continue;
-    const p = join(dir, name);
-    if (statSync(p).isDirectory()) sources(p, out);
-    else if (/\.(tsx?|jsx?)$/.test(name)) out.push(readFileSync(p, "utf8"));
+  // The directory entry says what it is: no separate stat before the read.
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
+    const p = join(dir, entry.name);
+    if (entry.isDirectory()) sources(p, out);
+    else if (entry.isFile() && /\.(tsx?|jsx?)$/.test(entry.name)) out.push(readFileSync(p, "utf8"));
   }
   return out;
 }
