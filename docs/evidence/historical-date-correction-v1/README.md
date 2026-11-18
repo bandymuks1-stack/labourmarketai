@@ -4,14 +4,20 @@
 Nothing in this folder is a migration, and nothing here may be executed against any database.
 The original records stay exactly as imported. Effective totals: 2 944 records, 29 645.5 h, 43 people.
 
-| File | What it is | sha256 of the original bytes (below the header marker) |
-|---|---|---|
-| `historical_date_correction_v1.sql` | the held correction (was `supabase/migrations/20261118100000_historical_date_correction_v1.sql`) | `f59707090b0d176c1f63ffe3f44cfb610136858dd4aa22d675fca46728a0ca28` |
-| `historical_date_correction_v1.down.sql` | its rollback (was `supabase/rollbacks/20261118100000_historical_date_correction_v1.down.sql`) | `ddaeb18ea7afbea0b45d2500a269a4232c65793381f848f3fafb270445c60fa1` |
+The record list itself (165 production record ids with their original and reconstructed dates) and its
+rollback are **not in this repository**. They are kept in the owner's private evidence store, outside the
+repository and outside this pull request. This folder keeps only the method, the counts and the two hashes
+that identify the private files:
 
-Each file starts with a NOT-APPLIED header. Everything below its marker line is the reviewed SQL, byte for byte.
-`apps/web/lib/guards/historical-date-correction.test.ts` pins both hashes, the TypeScript/SQL hash parity
-from the production dry run, and the fact that no migration or rollback for this correction exists.
+| Private file | sha256 of the reviewed SQL body |
+|---|---|
+| correction body | `f59707090b0d176c1f63ffe3f44cfb610136858dd4aa22d675fca46728a0ca28` |
+| rollback body | `ddaeb18ea7afbea0b45d2500a269a4232c65793381f848f3fafb270445c60fa1` |
+
+Traceability: a person with access to the private store recomputes both hashes and records the result (date,
+who, both match) there. `apps/web/lib/guards/historical-date-correction.test.ts` pins the two hashes as text
+here, checks that no file in this folder carries a record id or a 2023 date, and that no migration or
+rollback for this correction exists.
 
 ## Any future correction
 
@@ -22,7 +28,7 @@ It needs a new, separately approved proposal:
 3. a new read-only production dry run;
 4. RED-class review (draft PR, `needs-human-gate`).
 
-These files must not be copied back into `supabase/migrations/` as they are.
+The private files must not be copied back into `supabase/migrations/` as they are.
 
 ## The rule that was evaluated
 
@@ -35,7 +41,7 @@ A record was treated as unambiguous (165 records) only when all of these held:
 - the file week equals the sheet's own week cell;
 - the weekday is stated;
 - the week lies in the month folder;
-- after the move, the person's ISO-week hours equal that person's weekly total in `Darbuotojai_savaite`;
+- after the move, the person's ISO-week hours equal that person's weekly total in the workbook's weekly-totals sheet;
 - no day goes above 16 h.
 
 Under that rule, the reconstructed date is the ISO date of (year, file week, weekday).
@@ -50,7 +56,7 @@ changed effective totals, or a corrected record on a day above 16 h.
 
 ```
 DRYRUN_OK effective 2944 / 29645.50 / 43
-sample 016709b4… fp ab9d1f13…d584 hash 96f3d523…6c8b   (== TypeScript writer)
+sample record: SQL fingerprint and chain hash equal the TypeScript correction writer
 ```
 
 Expected effect, had it been applied (read-only simulation):
