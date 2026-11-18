@@ -16,6 +16,9 @@ const FILES = [
   "components/app/company-workers-section.tsx",
   "components/app/demand-lifecycle-controls.tsx",
   "components/app/company-interest-ack.tsx",
+  // The candidate search's shortlist controls (phone pass 2026-11-18): the
+  // statuses are ui/Chip ToggleChips, the note is ui/Textarea.
+  "components/app/scouting-shortlist-buttons.tsx",
 ];
 const code = (f: string) =>
   readFileSync(join(WEB, f), "utf8")
@@ -37,6 +40,13 @@ describe("company screens use the shared primitives", () => {
     const buttons = code(f).match(/<Button\b(?:=>|[^>])*>/g) ?? [];
     expect(buttons.length, f).toBeGreaterThan(0);
     for (const b of buttons) expect(b, `${f}: ${b.slice(0, 80)}`).toMatch(/min-h-11/);
+  });
+
+  it("the shortlist statuses are the shared toggle chip (44 px, aria-pressed, check mark)", () => {
+    const src = code("components/app/scouting-shortlist-buttons.tsx");
+    expect(src).toMatch(/<ToggleChip\b/);
+    expect(src).toMatch(/from "@\/components\/ui\/Chip"/);
+    expect(src).toMatch(/<Textarea\b/);
   });
 
   it("a locked legal field keeps the shared field and dims through state variants", () => {
