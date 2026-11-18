@@ -1,12 +1,45 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requestPublicOrigin } from "@/lib/mcp/public-origin";
+import { isSameOriginRequest } from "@/lib/http/same-origin-request";
+
+/**
+ * WHO MAY END THIS SESSION (walk-spec finding, 2026-10-25: CSRF logout).
+ *
+ * Any page on the internet could sign a person out with
+ * `<img src="https://labourmarket.ai/lt/auth/logout">` or a self-submitting
+ * form, because both verbs signed out unconditionally. The session is ended
+ * only for a request the person's own browser made from this site:
+ *
+ *   · the shared same-origin check (`isSameOriginRequest`, the one
+ *     `/api/assistant/transcript` uses): the sign-out form in the account
+ *     menu and the account page, and the invite page's same-origin links;
+ *   · a GET the person started themselves — typed, bookmarked or opened in a
+ *     new tab — which the browser marks `Sec-Fetch-Site: none`. No other site
+ *     can produce that value, so it is not a cross-site door.
+ *
+ * Anything else (a cross-site page, a look-alike host, a request carrying
+ * neither fetch metadata nor an Origin) does NOT sign out: it is sent to the
+ * account page, where the real sign-out button is, with the session intact.
+ */
+function mayEndSession(request: Request): boolean {
+  if (isSameOriginRequest(request)) return true;
+  return request.method === "GET" && request.headers.get("sec-fetch-site") === "none";
+}
 
 async function handle(
   request: Request,
   { params }: { params: Promise<{ locale: string }> },
 ) {
   const { locale } = await params;
+  // The public origin, not the request URL: behind the VPS proxy that is the
+  // bind host (0.0.0.0:3000) and sign-out landed on an unreachable address.
+  const origin = requestPublicOrigin(request);
+  if (!mayEndSession(request)) {
+    return NextResponse.redirect(new URL(`/${locale}/dashboard/account`, origin), {
+      status: 303,
+    });
+  }
   try {
     const supabase = await createClient();
     // SCOPE IS `local` ON PURPOSE — and it is the fix for a real incident.
@@ -35,9 +68,6 @@ async function handle(
   } catch {
     // Logout should never error to the user; cookies still cleared by signOut.
   }
-  // The public origin, not the request URL: behind the VPS proxy that is the
-  // bind host (0.0.0.0:3000) and sign-out landed on an unreachable address.
-  const origin = requestPublicOrigin(request);
   // Localized login (not the locale home) so the next action after sign
   // out is unambiguous: re-authenticate, switch account, or close the
   // tab. Owner-requested in the account-menu-logout-admin-visibility
@@ -55,8 +85,9 @@ async function handle(
   );
 }
 
-/** Accept POST (form submit from the dashboard) and GET (direct link), both
- *  clear the session and route the visitor to the localized login page via
+/** Accept POST (form submit from the dashboard) and GET (direct link). Both
+ *  clear the session only for a same-origin / user-started request (see
+ *  `mayEndSession`) and route the visitor to the localized login page via
  *  HTTP 303 so a POST-from-form redirects as GET. */
 export const POST = handle;
 export const GET = handle;

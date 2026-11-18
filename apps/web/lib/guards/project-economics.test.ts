@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import { deriveEconomics } from "@/lib/economics/economics-model";
 import type { ProjectBudgetLine } from "@/lib/economics/economics-model";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Wagon 8 — Project Economics guard. Budget lives in the new project_budgets;
@@ -115,7 +116,7 @@ describe("deriveEconomics is pure and honest", () => {
 });
 
 describe("project economics strings exist in every active-parity locale", () => {
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} has projectEconomics with all categories + states`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`));
       expect(msgs.projectEconomics?.title, loc).toBeTruthy();

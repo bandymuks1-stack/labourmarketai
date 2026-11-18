@@ -3,7 +3,11 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import type { WorkerAchievementEntry } from "./worker-achievements-model";
+import {
+  ACHIEVEMENT_COLUMNS,
+  achievementEntryFromRow,
+  type WorkerAchievementEntry,
+} from "./worker-achievements-model";
 
 /**
  * Read service for the user's own achievements + declared certificates —
@@ -35,9 +39,7 @@ export async function getOwnWorkerAchievements(): Promise<WorkerAchievementsRead
 
   const { data, error } = await asAny(supabase)
     .from("worker_achievements")
-    .select(
-      "id, title, description, achieved_at, achievement_type_slug, confirmed_by_manager",
-    )
+    .select(ACHIEVEMENT_COLUMNS)
     .eq("profile_id", user.id)
     .order("achieved_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
@@ -52,24 +54,8 @@ export async function getOwnWorkerAchievements(): Promise<WorkerAchievementsRead
     return { kind: "ok", entries: [] };
   }
 
-  const rows = (data ?? []) as Array<{
-    id: string;
-    title: string;
-    description: string | null;
-    achieved_at: string | null;
-    achievement_type_slug: string;
-    confirmed_by_manager: boolean | null;
-  }>;
-
   return {
     kind: "ok",
-    entries: rows.map((r) => ({
-      id: r.id,
-      title: r.title,
-      description: r.description,
-      achievedAt: r.achieved_at,
-      achievementTypeSlug: r.achievement_type_slug,
-      confirmedByManager: r.confirmed_by_manager === true,
-    })),
+    entries: ((data ?? []) as Parameters<typeof achievementEntryFromRow>[0][]).map(achievementEntryFromRow),
   };
 }

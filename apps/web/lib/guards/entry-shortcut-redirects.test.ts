@@ -53,4 +53,12 @@ describe("entry shortcut redirects", () => {
       expect(redirects.some((r) => matches(r.source, path)), path).toBe(true);
     }
   });
+
+  it("/:locale/privacy-policy lands on the privacy policy in every routed locale", async () => {
+    const redirects = await loadRedirects();
+    for (const locale of activeLocales) {
+      const hit = redirects.find((r) => matches(r.source, `/${locale}/privacy-policy`));
+      expect(hit?.destination, locale).toBe("/:locale/legal/privacy");
+    }
+  });
 });

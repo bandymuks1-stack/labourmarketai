@@ -1,4 +1,5 @@
 import "server-only";
+import { effectivePilotPassStatus } from "@/lib/billing/pilot-pass-core";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -39,6 +40,10 @@ function pickAudience(roles: readonly string[]): PlanAudience {
 
 export interface EffectiveEntitlements extends EntitlementContext {
   readonly profileId: string | null;
+  /** The provider subscription ends at the period end instead of renewing (cancelled in the portal). */
+  readonly cancelAtPeriodEnd: boolean;
+  /** End of the current paid period (ISO), as the provider reported it; null when unknown. */
+  readonly currentPeriodEnd: string | null;
 }
 
 /**
@@ -79,7 +84,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
       subscriptionStatus: null,
       manualOverridePlanKey: null,
     });
-    return { ...ctx, profileId: null };
+    return { ...ctx, profileId: null, cancelAtPeriodEnd: false, currentPeriodEnd: null };
   }
 
   const isAdmin = caller ? await isSuperadminFor(supabase, user.id) : await isSuperadmin();
@@ -119,13 +124,27 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   // refused every need while billing is live. Roles still pick the audience
   // for the personal workspace. This changes the FALLBACK plan only - never
   // access: the employer gate / membership proof is decided before this read.
+  //
+  // The same holds for a PLATFORM ADMIN acting inside an organization
+  // (production defect measured 2026-11-02): the admin shortcut resolved the
+  // member to `admin_internal` BEFORE the organization's plan was read, and
+  // that internal plan carries no organization feature — a manager of a PAID
+  // organization who also holds the platform `admin` role was refused every
+  // new need (`over_open_need_limit`, limit 0) while the colleague who paid was
+  // not. Platform admin rights are RBAC-gated on their own surfaces
+  // (`requireSuperadmin`), never through an organization's entitlement, so an
+  // organization subject resolves the ORGANIZATION's plan whoever acts in it.
+  const actsForOrganization = subject?.type === "organization";
   const audience: PlanAudience =
-    subject?.type === "organization" && heldAudience === "worker" ? "company" : heldAudience;
+    actsForOrganization && (heldAudience === "worker" || heldAudience === "admin") ? "company" : heldAudience;
+  const adminShortcut = isAdmin && !actsForOrganization;
 
   // Real subscription + manual override (degrade if the billing tables are
   // not applied yet → null, i.e. free/permissive).
   let subscriptionPlanKey: string | null = null;
   let subscriptionStatus: SubStatus | null = null;
+  let cancelAtPeriodEnd = false;
+  let currentPeriodEnd: string | null = null;
   let manualOverridePlanKey: string | null = null;
   // MODE SCOPE (production defect measured 2026-09-22): admission
   // (`findScopedSubscription`) and the customer lookup filter by the
@@ -167,7 +186,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
     }
     subsQueryResult = await asAny(reader)
       .from("billing_subscriptions")
-      .select("plan_key, status, provider_subscription_id, updated_at")
+      .select("plan_key, status, provider_subscription_id, updated_at, cancel_at_period_end, current_period_end")
       .eq("organization_id", subject.id)
       .eq("test_mode", config.testMode)
       .order("updated_at", { ascending: false });
@@ -178,7 +197,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   } else {
     subsQueryResult = await asAny(supabase)
       .from("billing_subscriptions")
-      .select("plan_key, status, provider_subscription_id, updated_at, origin_organization_id")
+      .select("plan_key, status, provider_subscription_id, updated_at, cancel_at_period_end, current_period_end, origin_organization_id")
       .eq("owner_id", user.id)
       .eq("test_mode", config.testMode)
       .is("origin_organization_id", null)
@@ -187,7 +206,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
       // legacy schema — every row is personal by definition
       subsQueryResult = await asAny(supabase)
         .from("billing_subscriptions")
-        .select("plan_key, status, provider_subscription_id, updated_at")
+        .select("plan_key, status, provider_subscription_id, updated_at, cancel_at_period_end, current_period_end")
         .eq("owner_id", user.id)
         .eq("test_mode", config.testMode)
         .order("updated_at", { ascending: false });
@@ -208,7 +227,11 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
     );
     if (real) {
       subscriptionPlanKey = real.plan_key ?? null;
-      subscriptionStatus = (real.status as SubStatus) ?? null;
+      // A pilot pass past its end reads `expired` (nothing renews it and no
+      // provider event will arrive to end it — pilot-pass-core).
+      subscriptionStatus = (effectivePilotPassStatus(real, new Date()) as SubStatus) ?? null;
+      cancelAtPeriodEnd = real.cancel_at_period_end === true;
+      currentPeriodEnd = typeof real.current_period_end === "string" ? real.current_period_end : null;
     }
   } else if (error.code !== RELATION_ABSENT) {
     // a non-absent error → stay free/permissive, never throw into a page
@@ -216,13 +239,13 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
 
   const ctx = resolveEntitlements({
     billingActive,
-    isAdmin,
+    isAdmin: adminShortcut,
     audience,
     subscriptionPlanKey,
     subscriptionStatus,
     manualOverridePlanKey,
   });
-  return { ...ctx, profileId: user.id };
+  return { ...ctx, profileId: user.id, cancelAtPeriodEnd, currentPeriodEnd };
 }
 
 /** Server enforcement helper for routes/actions (not just UI hiding). */

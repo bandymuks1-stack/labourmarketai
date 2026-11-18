@@ -14,6 +14,20 @@
 
 ---
 
+## Refresh — 2026-11-01 (#2913; live gate PASS)
+
+The live parity gate in `quality` is active and gives **PASS — every production migration has a
+repository file** on `main` at `7c46946c3` (run 41342643253). The six migrations that production
+had applied without a repository file were restored by #2913 as ALREADY APPLIED. Nothing was
+applied or changed in production; per-file checksums are in each file's banner. Seven repository
+files have no production ledger row; they are unapplied drafts, listed informationally by the gate.
+The detailed ledger evidence is kept in the private record.
+
+Review record: the Codex code review found nothing on the merged head; the separately requested
+Codex security review did not run.
+
+---
+
 ## Refresh — 2026-09-08 (post #1572 apply; supersedes the earlier 2026-09-08 refresh below)
 
 Appended `20260908110702 search_public_vacancy_previews_count_v2` — #1572, applied

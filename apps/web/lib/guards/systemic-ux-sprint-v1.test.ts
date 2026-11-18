@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ROLE_BY_ID, baseIdentityForRole } from "@/lib/config/roles";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * systemic-ux-sprint-v1 — anti-regression guards for the systemic audit fixes:
@@ -13,15 +14,19 @@ import { ROLE_BY_ID, baseIdentityForRole } from "@/lib/config/roles";
 const APP_ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP_ROOT, rel), "utf8");
 
-describe("role switcher shows base identities, not 'Agentūra'/'Pirkėjas' as top-level roles", () => {
-  const switcher = read("components/app/role-switcher.tsx");
+describe("the workspace selector shows spaces, not 'Agentūra'/'Pirkėjas' as top-level roles", () => {
+  // RE-ANCHORED 2026-10-25: the role switcher was retired with the one header
+  // (it was a second workspace selector). The ONE selector, the workspace
+  // chip, names the person's own space and each organization — never a raw
+  // per-role label.
+  const chip = read("components/app/conversation/chat/workspace-chip.tsx");
 
-  it("renders BASE IDENTITIES (Asmuo / Įmonė), not raw per-role labels", () => {
-    expect(switcher).toMatch(/baseIdentityForRole/);
-    expect(switcher).toMatch(/baseIdentityLabelKey/);
-    expect(switcher).toMatch(/heldIdentities/);
+  it("renders SPACES (personal / organization), not raw per-role labels", () => {
+    expect(chip).toMatch(/workspaceDisplayLabels\(/);
+    expect(chip).toMatch(/personal: t\("workspacePersonal"\)/);
     // The old leak: rendering every held role via t(`signup.role.${r}`).
-    expect(switcher).not.toMatch(/signup\.role\.\$\{r\}/);
+    expect(chip).not.toMatch(/signup\.role/);
+    expect(existsSync(join(APP_ROOT, "components/app/role-switcher.tsx"))).toBe(false);
   });
 
   it("agency + customer fold into the company identity (never their own space)", () => {
@@ -39,7 +44,7 @@ describe("role switcher shows base identities, not 'Agentūra'/'Pirkėjas' as to
   });
 
   it("base-identity space labels exist in every active locale", () => {
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       expect(m.auth.roleSwitcher.personSpace, `${loc} personSpace`).toBeTruthy();
       expect(m.auth.roleSwitcher.companySpace, `${loc} companySpace`).toBeTruthy();
@@ -73,7 +78,7 @@ describe("project page is a real work object — location + communication", () =
   });
 
   it("location status copy + communication copy exist in every active locale", () => {
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const loc1 = m.projectOps.stadium.location;
       const comm = m.projectOps.stadium.communication;

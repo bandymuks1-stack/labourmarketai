@@ -3,6 +3,7 @@ import {
   localizeCapabilityLabel,
   CAPABILITY_LABEL_I18N,
 } from "@/lib/structuring/capability-labels";
+import { activeLocales } from "@/lib/i18n/config";
 
 const HANDOVER = "Darbų pristatymas klientui";
 
@@ -25,6 +26,11 @@ describe("localizeCapabilityLabel — client handover signal", () => {
   it("EN and RU do NOT render the Lithuanian label", () => {
     expect(localizeCapabilityLabel(HANDOVER, "en")).not.toBe(HANDOVER);
     expect(localizeCapabilityLabel(HANDOVER, "ru")).not.toBe(HANDOVER);
+  });
+  it("every other active locale reads EN, never the Lithuanian label", () => {
+    for (const loc of activeLocales.filter((l) => l !== "lt" && l !== "ru")) {
+      expect(localizeCapabilityLabel(HANDOVER, loc), loc).toBe("Work handover to client");
+    }
   });
   it("LT does not render a raw English slug (label is a human phrase)", () => {
     const lt = localizeCapabilityLabel(HANDOVER, "lt");

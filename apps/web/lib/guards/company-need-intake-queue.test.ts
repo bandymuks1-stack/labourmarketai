@@ -151,6 +151,14 @@ describe("the feature sends nothing outbound and adds no DB weakening", () => {
       // 2026-10-12 (owner-approved): UPDATE (status) to service_role only —
       // production service_role could not mark a claimed intake converted.
       "20261012120000_service_role_notification_reads_v1.sql",
+      // 2026-10-22 (RED, needs-human-gate): a whole-table COUNT for the Agentai OS capability readback. Reads only;
+      // grants nothing on the table and adds no policy.
+      "20261022150000_agentai_capability_readback_counts_v1.sql",
+      // company_need_intake_keep_locale_v1 (2026-11-10, RED): re-creates the
+      // public RPC with ONE changed line — the locale column keeps every UI
+      // locale instead of folding de/nl/pl to 'lt'. Grants nothing, adds no
+      // policy, every ceiling unchanged (lib/guards/company-need-intake-keep-locale.test.ts).
+      "20261110140000_company_need_intake_keep_locale_v1.sql",
     ]);
     const grants = readFileSync(
       join(migDir, "20260713190000_company_need_intake_service_grants.sql"),

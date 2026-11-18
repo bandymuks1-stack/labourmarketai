@@ -53,12 +53,12 @@ advanced (opus) → high_risk_verified (opus + human gate, currently blocked)`.
 | detect_skill_gap | deterministic (no LLM) | deterministic | — (pure workforce models) |
 | normalize_work_scope | low_cost | low_cost | work_journal |
 | translate_message | low_cost (DeepL preferred) | low_cost | translation_copy |
-| draft_follow_up | low_cost | low_cost | support_onboarding |
+| draft_follow_up | low_cost | low_cost | — (support_onboarding retired 2026-10-25) |
 | structure_future_work | standard | low_cost | company_need |
-| derive_workforce_requirements | standard | low_cost | country_readiness, document_assistant |
-| normalize_external_profile | standard | low_cost | skill_evidence |
+| derive_workforce_requirements | standard | low_cost | country_readiness (document_assistant retired 2026-10-25) |
+| normalize_external_profile | standard | low_cost | — (skill_evidence retired 2026-10-25) |
 | extract_cv | standard | low_cost | worker_profile |
-| explain_match | standard | low_cost | matching_explanation, booking_risk, admin_risk |
+| explain_match | standard | low_cost | matching_explanation (booking_risk, admin_risk retired 2026-10-25) |
 
 ## 3. Routing dimensions (all considered per run)
 

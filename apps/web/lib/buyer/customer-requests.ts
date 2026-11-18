@@ -1,5 +1,6 @@
 import "server-only";
 
+import { resolveCountryCode } from "@/lib/location/country-model";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -69,6 +70,12 @@ export interface CustomerRequestRow {
    * is never rendered as either direction.
    */
   readonly direction: MarketDirection;
+  /** Why a closed row is closed (lifecycle contract: completed / withdrawn /
+   *  discarded); null when open or closed before outcomes were recorded. */
+  readonly closedOutcome?: string | null;
+  /** The viewer created this row. The organization-scoped list also shows
+   *  colleagues' rows, whose DRAFTS only their creator can edit or discard. */
+  readonly ownedByCaller?: boolean;
 }
 
 export type CustomerRequestsListResult =
@@ -126,6 +133,7 @@ function mapRow(
     // The stored `kind` is the market DIRECTION, not a label. Resolved once,
     // here, so no consumer has to know the kind vocabulary.
     direction: marketDirection((r.kind as string | null) ?? null),
+    closedOutcome: (r.closed_outcome as string | null | undefined) ?? null,
   };
 }
 
@@ -158,35 +166,38 @@ export async function listOwnCustomerRequests(
     }
     workspaceOrganizationId = employer.organizationId;
   }
-  let query = asAny(supabase)
-    .from("customer_requests")
-    .select(
-      // `kind` carries the market direction. Selecting it adds no privilege —
-      // this read is already `profile_id = auth.uid()` under
-      // `customer_requests_select`; it was simply never asked for, which is
-      // why an agency's OFFER rendered as one of its own needs.
-      "id, profile_id, customer_id, title, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, payload, status, manual_review_note, created_at, updated_at, kind",
-    )
-  // THE ACTIVE WORKSPACE'S needs (audit 2026-10-20): a person running
-  // companies A and B saw A's needs while working in B, and posted under the
-  // wrong company. The same ONE filter scouting, the usage meter and the
-  // employer capabilities use — this organization's needs (a colleague's
-  // included: customer_requests_select admits has_org_demand_access), plus
-  // the caller's own needs that predate organization attribution. The buyer
-  // room keeps the caller's own rows only.
-  query = workspaceOrganizationId
-    ? query.or(demandsOfWorkspaceFilter(user.id, workspaceOrganizationId))
-    : query.eq("profile_id", user.id);
-  if (kinds && kinds.length > 0) query = query.in("kind", kinds);
-  const { data, error } = await query
-    .order("created_at", { ascending: false })
-    .limit(50);
+  // `kind` carries the market direction. Selecting it adds no privilege —
+  // this read is already `profile_id = auth.uid()` under
+  // `customer_requests_select`; it was simply never asked for, which is
+  // why an agency's OFFER rendered as one of its own needs.
+  // `closed_outcome`: why a closed row is closed (lifecycle contract); while
+  // its migration is unapplied the read falls back without it.
+  const COLUMNS =
+    "id, profile_id, customer_id, title, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, payload, status, manual_review_note, created_at, updated_at, kind";
+  const ownRequestsQuery = (columns: string) => {
+    let query = asAny(supabase).from("customer_requests").select(columns);
+    // THE ACTIVE WORKSPACE'S needs (audit 2026-10-20): a person running
+    // companies A and B saw A's needs while working in B, and posted under the
+    // wrong company. The same ONE filter scouting, the usage meter and the
+    // employer capabilities use — this organization's needs (a colleague's
+    // included: customer_requests_select admits has_org_demand_access), plus
+    // the caller's own needs that predate organization attribution. The buyer
+    // room keeps the caller's own rows only.
+    query = workspaceOrganizationId
+      ? query.or(demandsOfWorkspaceFilter(user.id, workspaceOrganizationId))
+      : query.eq("profile_id", user.id);
+    if (kinds && kinds.length > 0) query = query.in("kind", kinds);
+    return query.order("created_at", { ascending: false }).limit(50);
+  };
+  let res = await ownRequestsQuery(`${COLUMNS}, closed_outcome`);
+  if (res.error?.code === "42703") res = await ownRequestsQuery(COLUMNS);
+  const { data, error } = res;
   if (error) {
     if (error.code === RELATION_NOT_FOUND_CODE) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = (data ?? []).map((r: any) => mapRow(r));
+  const rows = (data ?? []).map((r: any) => ({ ...mapRow(r), ownedByCaller: r.profile_id === user.id }));
   return { kind: "ok", rows };
 }
 
@@ -230,12 +241,18 @@ export async function saveCustomerRequest(
       };
     }
   }
+  // The country is an ISO code or a name resolved to one; nothing else is
+  // stored. A request with none is invisible to every country filter.
+  const country = resolveCountryCode(input.country ?? null);
+  if (!country) {
+    return { kind: "invalid", message: "Choose the country where the work takes place." };
+  }
   const supabase = await createClient();
   const { data, error } = await asAny(supabase).rpc("save_customer_request", {
     p_request_id: input.requestId ?? null,
     p_title: title,
     p_need_summary: input.needSummary?.trim() || null,
-    p_country: input.country?.trim() || null,
+    p_country: country,
     p_location: input.location?.trim() || null,
     p_role_or_work_type: input.roleOrWorkType?.trim() || null,
     p_team_size: input.teamSize ?? null,

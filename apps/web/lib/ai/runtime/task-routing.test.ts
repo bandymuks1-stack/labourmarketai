@@ -308,9 +308,12 @@ describe("language as a routing dimension (AI Router v1)", () => {
   });
 });
 
-describe("agent → task mapping is total over the 13 registered agents", () => {
+describe("agent → task mapping is total over the 9 registered agents", () => {
   it("maps every registered agent to a valid task type", () => {
-    expect(ALL_AGENT_KEYS.length).toBe(13);
+    // 13 until 2026-10-25, when five duplicate agents were retired (owner
+    // decision, registry row 10.11); the map holds no key for a retired agent.
+    expect(ALL_AGENT_KEYS.length).toBe(9);
+    expect(Object.keys(AGENT_TASK_TYPES).sort()).toEqual([...ALL_AGENT_KEYS].sort());
     for (const agent of ALL_AGENT_KEYS) {
       const t = taskTypeForAgent(agent);
       expect(AI_TASK_TYPES, `${agent} → ${t}`).toContain(t);

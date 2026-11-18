@@ -62,7 +62,7 @@ describe("PWA — the manifest describes an app a browser will install", () => {
 
   it("every declared icon file actually exists", () => {
     for (const i of declared) {
-      // `/favicon.ico` is served by Next from `app/favicon.ico` (file-based
+      // `/favicon.ico` is served by Next from `public/favicon.ico` (a plain file
       // metadata), not from `public/`. Both locations are legitimate; what
       // may never happen is a manifest pointing at neither.
       const inApp = resolve(WEB_ROOT, "app", String(i.src).replace(/^\//, ""));

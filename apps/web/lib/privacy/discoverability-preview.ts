@@ -3,7 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
+import { anonymizedWorkerToken } from "@/lib/visibility/worker-profile-visibility";
 
 /**
  * "Taip jūsų profilį matys įmonės" — the EXACT limited professional summary
@@ -71,7 +71,8 @@ export async function buildOwnDiscoverabilityPreview(): Promise<
 
   const fields: DiscoverabilityPreviewField[] = [];
   // Companies see the anonymous label, never the name (owner command 2026-10-18).
-  fields.push({ key: "anonymousLabel", value: anonymizedWorkerLabel(String(worker.id)) });
+  // The token only: the view wraps it in the catalogue word (preview.anonymousValue).
+  fields.push({ key: "anonymousLabel", value: anonymizedWorkerToken(String(worker.id)) });
 
   const { data: professions } = await asAny(supabase)
     .from("worker_professions")

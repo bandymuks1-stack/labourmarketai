@@ -66,6 +66,8 @@ import { Link } from "@/lib/i18n/navigation";
 import { type CvSectionCard } from "@/components/app/cv-completeness-grid";
 import { WorkerEducationSection } from "@/components/app/worker-education-section";
 import { LearningCompassSection } from "@/components/app/learning-compass-section";
+import { LearnerCohortJoinSection } from "@/components/app/learner-cohort-join-section";
+import { readJoinableCohorts, type CohortJoinRead } from "@/lib/education/cohort-join";
 import { readLearningCompass, type LearningCompassRead } from "@/lib/learning/learning-compass";
 import { WorkerAchievementsSection } from "@/components/app/worker-achievements-section";
 import {
@@ -110,8 +112,15 @@ import {
 import { PageTitle } from "@/components/app/premium/page-title";
 import { experienceFiguresOf } from "@/lib/journal/experience-figures";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { orgDisplayName } from "@/lib/company/org-display";
+import { endedUnnamedOrganizationContexts } from "@/lib/journal/engagement-label";
 import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
 import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/profile", "skills.pageTitle");
+
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -177,6 +186,7 @@ export default async function ProfilePage({
     tEvidenceMine,
     tPublicSummary,
     tRoleLedger,
+    tJournal,
   ] = await Promise.all([
     getTranslations("skills"),
     getTranslations("spaces"),
@@ -213,6 +223,8 @@ export default async function ProfilePage({
     getTranslations("evidenceImport.mine"),
     getTranslations("workerPublicSummary"),
     getTranslations("roleLedger"),
+    // The ONE "no name" phrase set (`journal.unnamedOrganization.*`, #3356).
+    getTranslations("journal"),
   ]);
 
   /**
@@ -386,6 +398,7 @@ export default async function ProfilePage({
   // The ONE continuous professional history's total (decision 0025): every
   // work hour once over the journal and the organization history.
   let professionalExperienceHours: number | null = null;
+  let unrecordedHours: { entries: number; earliestDay: string } | null = null;
   // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
   // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
   // branch is kept for fresh/local databases, not because production lacks it.
@@ -403,9 +416,11 @@ export default async function ProfilePage({
   // count of project-linked journal entries powering the completeness grid.
   let workerEducation: WorkerEducationRead | null = null;
   let learningCompass: LearningCompassRead | null = null;
+  let cohortJoin: CohortJoinRead | null = null;
   let workerAchievements: WorkerAchievementsRead | null = null;
-  let projectLinkedEntryCount = 0;
-  let certificateDocCount = 0;
+  // null = the count read failed (SEP-7): that card is left out, never "empty".
+  let projectLinkedEntryCount: number | null = 0;
+  let certificateDocCount: number | null = 0;
   // Trust signals were awaited inside the JSX; resolved in stage 5 now.
   let trustSignals: Awaited<ReturnType<typeof getOwnTrustSignals>> | null = null;
   if (workerId) {
@@ -444,6 +459,7 @@ export default async function ProfilePage({
       playerCardRes,
       experienceRelationships,
       standingSkills,
+      cohortJoinRes,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       // Learning Compass (Track C): own records + the board's match results;
@@ -528,11 +544,18 @@ export default async function ProfilePage({
       // (lib/evidence/skill-confirmation-standing.ts) — request-cached, the
       // player card above shares the same read.
       readOwnStandingConfirmedSkillIds(workerId),
+      // J-12: learning groups open for a learner's own join request, and the
+      // learner's requests (migration 20261102160000; absent → renders nothing).
+      readJoinableCohorts().catch((): CohortJoinRead | null => null),
     ]);
 
     availabilityPrefs = prefsRes;
     playerCardResult = playerCardRes;
     workContexts = workIntelligence?.contexts ?? null;
+    // Entries whose written hours never became recorded time (pre-2026-08-20
+    // composer) — counted from the SAME entries the totals read, so the
+    // profile does not present an incomplete total as the whole story.
+    unrecordedHours = workIntelligence?.unrecordedHours ?? null;
     {
       const all = workIntelligence?.periods.find((p) => p.key === "all");
       // Imported organization history counts as experience (#2169): the ONE
@@ -549,9 +572,10 @@ export default async function ProfilePage({
     externalProfiles = extRes;
     workerEducation = eduRes;
     learningCompass = compassRes;
+    cohortJoin = cohortJoinRes;
     workerAchievements = achRes;
-    projectLinkedEntryCount = projCountRes.count ?? 0;
-    certificateDocCount = certDocsRes.count ?? 0;
+    projectLinkedEntryCount = projCountRes.error ? null : (projCountRes.count ?? 0);
+    certificateDocCount = certDocsRes.error ? null : (certDocsRes.count ?? 0);
     trustSignals = trust;
 
     const wpAll = wpAllRes.data;
@@ -741,6 +765,20 @@ export default async function ProfilePage({
       nameOf: (slug) => tSkill(slug),
     });
 
+    // An organization without a name the person no longer works with is
+    // called so (owner 2026-11-15, #3356): renamed, never hidden. Judged per
+    // organization over every card, from the rows this page already read.
+    const endedUnnamedCards = endedUnnamedOrganizationContexts(
+      (ecRes.data ?? []).map((e) => {
+        const org = e.organizations as { display_name: string | null; legal_name: string | null } | null;
+        return {
+          engagementContextId: e.id,
+          organizationId: e.organization_id,
+          organizationName: orgDisplayName(org?.display_name, org?.legal_name),
+          endedAt: e.ended_at,
+        };
+      }),
+    );
     // Engagement-context cards (current first): primary first, then most-recent.
     engagementCards = (ecRes.data ?? []).map((e) => {
       const org = e.organizations as
@@ -762,7 +800,12 @@ export default async function ProfilePage({
       return {
         id: e.id,
         orgName:
-          org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—",
+          org?.display_name ??
+          org?.legal_name ??
+          (endedUnnamedCards.has(e.id) ? tJournal("unnamedOrganization.ended") : null) ??
+          typeLabel ??
+          e.title ??
+          "—",
         relationship: e.relationship_slug,
         startedAt: e.started_at,
         endedAt: e.ended_at,
@@ -815,7 +858,7 @@ export default async function ProfilePage({
     const declaredCerts = achEntries.filter(
       (a) => a.achievementTypeSlug === "declared_certificate",
     ).length;
-    return [
+    const cards: (Omit<CvSectionCard, "filled"> & { filled: boolean | null })[] = [
       {
         key: "summary",
         filled: savedProfileText.trim().length > 0,
@@ -835,7 +878,8 @@ export default async function ProfilePage({
       },
       {
         key: "certificates",
-        filled: certificateDocCount > 0 || declaredCerts > 0,
+        filled:
+          declaredCerts > 0 ? true : certificateDocCount === null ? null : certificateDocCount > 0,
         href: DOCUMENTS_READINESS_ENABLED
           ? `/${locale}/dashboard/documents`
           : "#cv-achievements",
@@ -847,7 +891,7 @@ export default async function ProfilePage({
       },
       {
         key: "projects",
-        filled: projectLinkedEntryCount > 0,
+        filled: projectLinkedEntryCount === null ? null : projectLinkedEntryCount > 0,
         href: `/${locale}/dashboard/journal`,
       },
       {
@@ -868,6 +912,8 @@ export default async function ProfilePage({
         href: "#cv-availability",
       },
     ];
+    // A card whose read failed is not shown at all — never as "○ empty".
+    return cards.filter((c): c is CvSectionCard => c.filled !== null);
   })();
 
   /**
@@ -1175,6 +1221,15 @@ export default async function ProfilePage({
         <LearningCompassSection compass={learningCompass.compass} />
       ) : null}
 
+      {/* J-12: ask to join a learning group; the learner's own record stays
+          their declaration until the institution confirms it. */}
+      {cohortJoin ? (
+        <LearnerCohortJoinSection
+          read={cohortJoin}
+          student={learningCompass?.status === "ok" && learningCompass.student}
+        />
+      ) : null}
+
       {/* W7-S1: the readiness/summary surfaces that used to stand here —
           `ProfileStateStrip`, `LiveProfileSection`, `WorkerSetupJourney`, the
           standalone `CvCompletenessGrid` and `SkillsReviewBanner` — are
@@ -1208,6 +1263,7 @@ export default async function ProfilePage({
         workAllTime={workAllTime}
         organizationHistoryHours={organizationHistoryHours}
         professionalExperienceHours={professionalExperienceHours}
+        unrecordedHours={unrecordedHours}
         // Identity-essential presence sourced from the ONE minimum card contract
         // (launch audit §7.3) — only data already fetched above, no new reads.
         cardSource={{
@@ -1302,6 +1358,7 @@ export default async function ProfilePage({
         </summary>
         <div className="px-4 pb-4">
         <ProfileTextFirstFlow
+        viewerEmail={user.email ?? null}
         hasPrimaryProfession={currentProfessionId !== null}
         initialText={savedProfileText}
         savedClaimNormalizedLabels={savedSkillClaims.map(
@@ -1515,6 +1572,7 @@ export default async function ProfilePage({
               levelNative: tLangs("levelNative"),
               add: tLangs("add"),
               adding: tLangs("adding"),
+              added: tLangs("added"),
               remove: tLangs("remove"),
               empty: tLangs("empty"),
               notEnabled: tLangs("notEnabled"),

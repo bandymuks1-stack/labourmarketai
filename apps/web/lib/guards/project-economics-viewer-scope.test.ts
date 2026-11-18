@@ -60,7 +60,8 @@ function panelLocales(): Array<[string, Record<string, string>]> {
 const b = (alts: string) => new RegExp(`(?<!\\p{L})(?:${alts})(?!\\p{L})`, "iu");
 const VIEWER_WORD: Record<string, RegExp> = {
   en: b("you|your"),
-  lt: b("jūs|jums|jūsų|matote|matomos|matomus|matomų"),
+  // Formal (jūs) and informal "tu" register (owner order 2026-10-28) alike.
+  lt: b("jūs|jums|jūsų|matote|tu|tau|tavo|tave|matai|matomos|matomus|matomų"),
   ru: b("вы|вам|ваш\\w*|видите|видимые|видимых"),
   nl: b("u|uw"),
   de: b("sie|ihnen|ihre\\w*"),

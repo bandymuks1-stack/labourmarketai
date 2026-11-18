@@ -4,11 +4,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import {
-  projectWorkPlanItem,
+  projectWorkPlanItems,
   type WorkPlanEntry,
   type WorkPlanStatus,
 } from "@/lib/planning/work-plan-model";
 import type { PlanningItem } from "@/lib/planning/planning-model";
+import { parseShiftPattern } from "@/lib/planning/shift-pattern";
 
 /**
  * Work plan — server read layer (FINAL COMPLETION Train F1).
@@ -26,11 +27,22 @@ function asAny(supabase: SupabaseClient): any {
 }
 
 const MISSING_RELATION = new Set(["42P01", "PGRST205"]);
+/** Postgres "undefined column" — the CAL-8 `recurrence` column before its
+ *  migration is applied. The read retries without it, so a deploy that
+ *  lands before the migration never empties anyone's plan list. */
+export const MISSING_COLUMN = "42703";
 const WORK_PLAN_READ_LIMIT = 500;
 
 export type WorkPlanReadResult =
   | { readonly applied: false }
-  | { readonly applied: true; readonly entries: readonly WorkPlanEntry[] };
+  | {
+      readonly applied: true;
+      readonly entries: readonly WorkPlanEntry[];
+      /** CAL-8: false while the shift-pattern column is not provisioned —
+       *  the form then hides its repeat controls instead of offering a
+       *  pattern the database cannot keep. */
+      readonly shiftPatterns: boolean;
+    };
 
 type Row = {
   id: string;
@@ -45,14 +57,16 @@ type Row = {
   note: string | null;
   status: string;
   created_at: string;
+  recurrence?: unknown;
   workers: { display_name: string | null; profiles: { full_name: string | null } | null } | null;
   projects: { title: string | null } | null;
   work_objects: { name: string | null } | null;
   organizations: { display_name: string | null } | null;
 };
 
-const SELECT =
+const SELECT_BASE =
   "id, organization_id, worker_id, project_id, work_object_id, start_date, end_date, start_time, end_time, note, status, created_at, workers(display_name, profiles(full_name)), projects(title), work_objects(name), organizations(display_name)";
+const SELECT_WITH_RECURRENCE = `${SELECT_BASE}, recurrence`;
 
 function toEntry(r: Row): WorkPlanEntry | null {
   if (r.status !== "planned" && r.status !== "cancelled") return null;
@@ -73,6 +87,10 @@ function toEntry(r: Row): WorkPlanEntry | null {
     note: r.note,
     status: r.status as WorkPlanStatus,
     createdAt: r.created_at,
+    // A stored pattern the parser cannot read (the database CHECK makes this
+    // unreachable) falls back to the whole window: over-warning is honest,
+    // silently dropping planned days is not.
+    recurrence: r.recurrence == null ? null : parseShiftPattern(r.recurrence),
   };
 }
 
@@ -88,27 +106,35 @@ export async function listWorkPlanEntries(opts: {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { applied: true, entries: [] };
-  let q = asAny(supabase)
-    .from("work_plan_entries")
-    .select(SELECT)
-    .lte("start_date", opts.rangeEnd)
-    .gte("end_date", opts.rangeStart)
-    .order("start_date", { ascending: true })
-    .limit(WORK_PLAN_READ_LIMIT);
-  if (opts.organizationId) q = q.eq("organization_id", opts.organizationId);
-  if (!opts.includeCancelled) q = q.eq("status", "planned");
-  const { data, error } = await q;
+  if (!user) return { applied: true, entries: [], shiftPatterns: false };
+  const run = (select: string) => {
+    let q = asAny(supabase)
+      .from("work_plan_entries")
+      .select(select)
+      .lte("start_date", opts.rangeEnd)
+      .gte("end_date", opts.rangeStart)
+      .order("start_date", { ascending: true })
+      .limit(WORK_PLAN_READ_LIMIT);
+    if (opts.organizationId) q = q.eq("organization_id", opts.organizationId);
+    if (!opts.includeCancelled) q = q.eq("status", "planned");
+    return q;
+  };
+  let shiftPatterns = true;
+  let { data, error } = await run(SELECT_WITH_RECURRENCE);
+  if (error?.code === MISSING_COLUMN) {
+    shiftPatterns = false;
+    ({ data, error } = await run(SELECT_BASE));
+  }
   if (error) {
     if (MISSING_RELATION.has(error.code)) return { applied: false };
-    return { applied: true, entries: [] };
+    return { applied: true, entries: [], shiftPatterns };
   }
   const entries: WorkPlanEntry[] = [];
   for (const r of (data ?? []) as Row[]) {
     const e = toEntry(r);
     if (e) entries.push(e);
   }
-  return { applied: true, entries };
+  return { applied: true, entries, shiftPatterns };
 }
 
 /** Calendar source: the caller's planned windows. A manager sees the windows
@@ -137,11 +163,13 @@ export async function readWorkPlanItems(
   const ownWorkerId = (own?.id as string | undefined) ?? null;
   const items: PlanningItem[] = [];
   for (const e of result.entries) {
-    const item = projectWorkPlanItem(
-      e,
-      ownWorkerId !== null && e.workerId === ownWorkerId ? "assigned" : "managed",
+    items.push(
+      ...projectWorkPlanItems(
+        e,
+        ownWorkerId !== null && e.workerId === ownWorkerId ? "assigned" : "managed",
+        { startDate: rangeStart, endDate: rangeEnd },
+      ),
     );
-    if (item) items.push(item);
   }
   return { state: { status: "ok", count: items.length }, items };
 }

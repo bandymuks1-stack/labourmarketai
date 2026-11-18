@@ -152,6 +152,91 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261021120000_",
       // 2026-10-21 (RED, needs-human-gate): stale booking proposals expire daily (system function + pg_cron).
       "20261021130000_",
+      // 2026-10-22 (RED by SECURITY DEFINER + GRANT, needs-human-gate): aggregate counts for the Agentai OS capability readback route.
+      "20261022150000_",
+      // 2026-10-21: skill confirmation withdrawal phase B (cross-party
+      // standing read door; RED, needs-human-gate, NOT applied).
+      "20261021095500_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): CAL-8 shift patterns
+      // (one nullable column on work_plan_entries + create_work_plan_entry_v2).
+      "20261023160000_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): COM-3 web push channel
+      // (web_push_subscriptions + register command + push opt-in channel value).
+      "20261023171500_",
+      // 2026-10-23 (RED by GRANT, needs-human-gate, NOT applied): runtime stall sampler evidence table.
+      "20261023190000_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): journal evidence integrity v1
+      // (server-side hash chain + immutable evidence; renumbered from 20261016190000).
+      "20261023132610_",
+      // 2026-10-24 (GREEN strict superset): one market lifecycle contract —
+      // closed_outcome on customer_requests + service_offerings, services closed.
+      "20261024090000_",
+      // 2026-10-25 (RED, owner-gated, APPLIED): Vivat Rex + Labour Market AI business-history period bounds.
+      "20261025120000_",
+      // 2026-10-25 (RED, owner-gated, APPLIED): employer party labels for Vivat Rex records.
+      "20261025140000_",
+      // 2026-10-25 (GREEN, additive indexes): importer/admin vacancy reads stop walking the heap.
+      "20261025180000_",
+      // 2026-10-27 (RED, owner-approved, APPLIED ledger 20261027193124): reissue one unsent partner referral.
+      "20261027120000_",
+      // 2026-10-27 (RED, needs-human-gate, NOT applied): invitations-for-me read carries the partner source.
+      "20261027231000_",
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028044705): candidates v2 flags already-mailed addresses.
+      "20261027210000_",
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028081810): address lock + send reservation in the referral reissue.
+      "20261028070000_",
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028091725): recovery counts only this reservation's ledger row.
+      "20261028090000_",
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028161106): synthetic QA needs out of the three cross-org demand readers.
+      "20261028123000_",
+      // 2026-10-29 (RED, owner-approved, APPLIED ledger 20261029180012): the worker reader projects the need's required skills as catalogue slugs.
+      "20261029190000_",
+      // 2026-11-02 (RED draft #2959, NOT applied): J-12 learner join requests on the existing cohort membership row.
+      "20261102160000_",
+      // 2026-11-03 (RED draft, NOT applied): J-12 follow-up — set_education_cohort_member_v1 refuses request rows.
+      "20261103090000_",
+      // 2026-11-03 (RED, owner-approved, APPLIED ledger 20261103170942): work-plan scope predicate made internal only (client EXECUTE revoked).
+      "20261103120000_",
+      // 2026-11-03 (RED, owner-approved, APPLIED ledger 20261103171024): agency docs readiness reads the live agency roster.
+      "20261103130000_",
+      // 2026-11-03 (RED, owner-approved, APPLIED ledger 20261103171134): agency client records follow owns_company.
+      "20261103140000_",
+      // 2026-11-03 (RED, owner-approved, APPLIED ledger 20261103193811 / 20261103193911): pg_trgm + the job search trigram index; the index was rolled back the same day (ledger 20261103194208).
+      "20261103171000_",
+      "20261103171100_",
+      "20261103171300_",
+      "20261104160000_",
+      "20261105100000_",
+      "20261105100100_",
+      "20261104160100_",
+      // 2026-11-09 holder-cancelled account deletion (holder cancels own account-deletion request + 30-day grace + row lock; RED draft #3172, needs-human-gate, NOT applied).
+      "20261109120000_",
+      // 2026-11-10 company-need intake keeps the visitor's locale (one-line RPC re-create; RED draft #3195, needs-human-gate, NOT applied).
+      "20261110140000_",
+      // 2026-11-10 partner registration Slice 1: company takeover invitation, two-operator decision, link (RED draft #3211, needs-human-gate, NOT applied).
+      "20261110190000_",
+      // 2026-11-13 owner P0 invitation delivery reliability: codes-only send diagnostics, retry /
+      // dead-letter / bounce fields (RED draft #3318, needs-human-gate, NOT applied).
+      "20261113190000_",
+      // 2026-11-14 a closed need refuses a new proposal or a first accept (DB trigger; RED draft, needs-human-gate, NOT applied).
+      "20261114100000_",
+      // 2026-11-14 owner decision: NEW/ACTIVE counts for five platform groups, aggregate only
+      // (SECURITY DEFINER + GRANT; RED draft, needs-human-gate, NOT applied).
+      "20261114120000_",
+      // 2026-11-14 owner decision (invitation 862a91f4 NO RESEND): one service_role-only aggregate count of
+      // owner-registered historical unknown outcomes (SECURITY DEFINER + GRANT; RED draft, needs-human-gate, NOT applied).
+      "20261114150000_",
+      // 2026-11-15 owner decision: a learner's journal is read by the organization only while the learning
+      // link is active and review is on (one RLS policy replaced; RED draft, needs-human-gate, NOT applied).
+      "20261115120000_",
+      // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
+      "20261104060000_",
+      // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.
+      "20261007155339_",
+      "20261015193211_",
+      "20261020040457_",
+      "20261025045152_",
+      "20261025050302_",
       // 2026-10-21 (RED, needs-human-gate): one purchased LMC credit per payment reference (Stripe TEST top-ups).
       "20261021150000_",
     ];

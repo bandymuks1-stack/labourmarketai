@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Market Map living-signals guard.
@@ -17,7 +18,7 @@ import { join } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 
 const SHELL = "components/app/market-map-shell.tsx";
 const MODEL = "lib/market-map/signal-model.ts";

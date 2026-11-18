@@ -77,7 +77,11 @@ import { NON_UI_TAXONOMY_LOCALES } from "./launch-language-scope";
  * we know the code names a language, so the router must stop reading it as a
  * page. Adding a code here is not a §2.4 catalog change and creates no claim of
  * Ukrainian support anywhere in the product. */
-export const ACQUISITION_ONLY_LANGUAGES = ["uk", "ka"] as const;
+export const ACQUISITION_ONLY_LANGUAGES = [
+  "uk", "ka",
+  // Workers and readers from everywhere (2026-11-06: /fr and /bn ended in a Lithuanian 404).
+  "fr", "es", "it", "pt", "ro", "bg", "cs", "sk", "hu", "el", "hr", "sr", "sl", "tr", "ar", "hi", "bn", "ur", "ne", "vi", "id", "tl",
+] as const;
 
 /** Where a reader of an unrouted language is sent. */
 export const UNSUPPORTED_LANGUAGE_FALLBACK = "en";

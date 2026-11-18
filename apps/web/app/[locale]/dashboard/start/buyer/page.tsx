@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -6,6 +7,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getOwnCustomer } from "@/lib/buyer/customers";
 import { BuyerSetupForm } from "@/components/app/buyer-setup-form";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/start/buyer");
+
 
 /**
  * Stage 2 PR 1 — Buyer / customer setup (real persistence).
@@ -79,12 +85,7 @@ export default async function BuyerStartPage({
         <PageTitle>{t("pageTitle")}</PageTitle>
       </header>
 
-      <Link
-        href={"/dashboard/start" as "/dashboard"}
-        className="self-start text-sm text-text-secondary hover:underline"
-      >
-        ← {t("backToStart")}
-      </Link>
+      <PageBack href={"/dashboard/start" as "/dashboard"}>{t("backToStart")}</PageBack>
 
       {migrationNeeded ? (
         <section

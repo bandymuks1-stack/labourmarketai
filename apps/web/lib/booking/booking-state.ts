@@ -176,6 +176,23 @@ export function normalizeBookingReason(
 }
 
 /**
+ * Did the TABLE refuse an overlapping accept — not the RPC's own clash check?
+ *
+ * Both carry SQLSTATE 23P01. The RPC's hand-rolled check (v3, and v4 without
+ * an acknowledgement) says "Conflicting accepted booking for these dates";
+ * the exclusion constraint `booking_requests_no_overlapping_accepted` says
+ * "conflicting key value violates exclusion constraint …". Only the second
+ * can follow an ACKNOWLEDGED accept, and it means the overlap cannot be
+ * recorded yet (production 2026-10-25, walk orders-bookings O-5) — a
+ * different answer from "these dates clash", which the person already gave.
+ */
+export function isOverlapExclusionViolation(error: { code?: string; message?: string }): boolean {
+  const m = error.message ?? "";
+  if (/booking_requests_no_overlapping_accepted|exclusion constraint/i.test(m)) return true;
+  return error.code === "23P01" && !/conflicting accepted booking/i.test(m);
+}
+
+/**
  * Reschedule affordance (P2-PR6): the proposing company may change the dates
  * of an open `proposed` row, and of an `accepted` one — but an acceptance
  * covers only the terms the worker saw (owner decision 2026-09-28): changing

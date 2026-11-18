@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Wagon 7 — Workforce Operations (Leave & Absence) guard. Pins the
@@ -73,7 +74,7 @@ describe("leave & absence code degrades honestly", () => {
 });
 
 describe("leave & absence strings exist in every active-parity locale", () => {
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} has absences with all types + statuses`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`));
       expect(msgs.absences?.pageTitle, loc).toBeTruthy();

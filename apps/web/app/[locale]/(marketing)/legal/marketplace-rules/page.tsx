@@ -1,18 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { LegalDisclaimer } from "@/components/marketing/legal-notes";
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 /**
- * Marketplace rules (full-completion train PR 9). Honest, launch-ready rules:
- * no fake verification, no legal-eligibility promise, no contacts without
- * permission, moderation before public visibility, payments not active.
+ * Marketplace rules (full-completion train PR 9): no fake verification, no
+ * legal-eligibility promise, no contacts without permission, moderation
+ * before public visibility, no payments between users through the platform.
  * Rendered from real i18n content (not a placeholder).
- *
- * CR train WAGON 2 consistency pass: the rules keep their real content, and
- * the page now carries the same honesty framing as the rest of the legal
- * pack — a review note (final binding wording owner/lawyer-gated) and the
- * informational-only disclaimer.
  */
 export async function generateMetadata({
   params,
@@ -21,7 +15,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "legal.marketplaceRules" });
-  return buildPageMetadata({ locale, path: "/legal/marketplace-rules", title: t("title") });
+  return buildPageMetadata({
+    locale,
+    path: "/legal/marketplace-rules",
+    title: t("title"),
+    // The page's own opening line. Without it the page carried the home
+    // page's description in every locale (head-tag pass, 2026-11-12).
+    description: t("intro"),
+  });
 }
 
 export default async function MarketplaceRulesPage({
@@ -36,7 +37,7 @@ export default async function MarketplaceRulesPage({
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="marketplace-rules">
-      <h1 className="font-display text-4xl font-bold tracking-tightest text-text-primary">
+      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary break-words hyphens-auto sm:text-4xl">
         {t("title")}
       </h1>
       <p className="mt-4 text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
@@ -53,15 +54,6 @@ export default async function MarketplaceRulesPage({
           </li>
         ))}
       </ul>
-      <p
-        className="mt-8 text-sm leading-relaxed text-text-secondary"
-        data-testid="marketplace-rules-review-note"
-      >
-        {t("reviewNote")}
-      </p>
-      <div className="mt-4">
-        <LegalDisclaimer />
-      </div>
     </article>
   );
 }

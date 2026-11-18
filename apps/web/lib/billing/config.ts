@@ -68,6 +68,11 @@ export function billingTrialEnabled(): boolean {
   return env.BILLING_TRIAL_ENABLED !== "false";
 }
 
+/** Server-only: whether the organization pilot pass (1 € → the plan for the pilot period) is on. */
+export function billingPilotPassEnabled(): boolean {
+  return env.BILLING_PILOT_PASS_ENABLED === "true";
+}
+
 /** Server-only: whether billing is restricted to a pilot list (true unless ALL_ORGANIZATIONS). */
 export function billingPilotActive(): boolean {
   return parsePilotOrganizations(env.BILLING_PILOT_ORGANIZATION_IDS) !== null;

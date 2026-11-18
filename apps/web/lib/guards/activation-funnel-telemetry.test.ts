@@ -596,8 +596,16 @@ describe("activation funnel — key surfaces emit their events", () => {
       mustContain: ["firstActionCardClicked"],
     },
     {
-      file: "components/app/company-next-actions.tsx",
+      // The shared need door (activation audit 2026-10-26 §2): every
+      // "describe a need" door renders it, so the click is emitted here; the
+      // per-door surfaces are pinned by company-need-door.test.ts.
+      file: "components/app/need-door-link.tsx",
       mustContain: ["companyDemandActionClicked"],
+    },
+    {
+      // The company demand intake reports that it rendered.
+      file: "app/[locale]/dashboard/company/needs/page.tsx",
+      mustContain: ["demandFormViewed"],
     },
     {
       // CORRECTED 2026-08-08. This entry used to name

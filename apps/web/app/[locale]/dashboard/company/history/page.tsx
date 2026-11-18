@@ -13,6 +13,11 @@ import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { HistoryQualitySection } from "@/components/app/organization/history-quality-section";
 import { HistoryDuplicateReview } from "@/components/app/organization/history-duplicate-review";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/history");
+
 
 /**
  * ISTORIJA — the historical import door (owner IA correction 2026-09-16,
@@ -71,6 +76,15 @@ export default async function CompanyHistoryPage({
       {/* WHAT IS ALREADY ON RECORD — the committed history seen by place,
           before the door for adding more. */}
       <CompanyWorkHistory locale={locale} organizationId={org} />
+
+      {/* ONE PLACE — the detail every place tile links to (`?place=` +
+          #company-place-detail): who worked there, when, what, hours. Without
+          it the tiles reloaded the same page and the people were unreachable. */}
+      {place ? (
+        <section id="company-place-detail" className="scroll-mt-20" data-testid="company-place-detail">
+          <CompanyPlaceHistory locale={locale} placeKey={place} organizationId={org} />
+        </section>
+      ) : null}
 
       {/* DATA QUALITY — what the import produced vs what was recognised,
           every recorded mismatch and its undo (owner 2026-10-14). */}

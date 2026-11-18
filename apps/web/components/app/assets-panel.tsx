@@ -172,7 +172,14 @@ function AssetManagerRow({
   );
 }
 
-export function AssetsRegistry({ data }: { data: AssetsOverview }) {
+export function AssetsRegistry({
+  data,
+  activeOrganizationId = null,
+}: {
+  data: AssetsOverview;
+  /** The workspace the header chip shows; the add form starts there. */
+  activeOrganizationId?: string | null;
+}) {
   const t = useTranslations("assets");
   const { msg, report } = useReport();
   const [pending, startTransition] = useTransition();
@@ -181,7 +188,13 @@ export function AssetsRegistry({ data }: { data: AssetsOverview }) {
   const [name, setName] = useState("");
   const [serial, setSerial] = useState("");
 
-  const effectiveOrg = orgId || (data.applied && data.orgs[0]?.id) || "";
+  // A multi-organization manager starts in the organization they are acting
+  // for, never silently in whichever one is listed first (prod audit
+  // 2026-10-22: an Alfa workspace created assets in Beta by default).
+  const defaultOrg = data.applied
+    ? (data.orgs.find((o) => o.id === activeOrganizationId) ?? data.orgs[0])?.id
+    : undefined;
+  const effectiveOrg = orgId || defaultOrg || "";
 
   function create() {
     if (!effectiveOrg || !name.trim()) {

@@ -3,8 +3,8 @@ import { join } from "node:path";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { readFreshLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
-import { __resetPublicVacancyCache } from "@/lib/vacancy-store/public-vacancy-preview";
+import { pickLandingVacancySample, readFreshLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
+import { PUBLIC_VACANCY_PAGE_SIZE, __resetPublicVacancyCache } from "@/lib/vacancy-store/public-vacancy-preview";
 
 /**
  * THE LANDING WAS THE FAN-OUT.
@@ -254,9 +254,14 @@ describe("FOCUS does not pay for reads it never renders", () => {
     );
 
     expect(snapshot.sample.basis).toBe("live");
-    // Four at most; slugged rows first IN THE BOARD'S ORDER; a row with
-    // neither a slug nor an occupation is never chosen.
-    expect(snapshot.sample.vacancies.map((v) => v.professionSlug)).toEqual([
+    // The cached snapshot is the board's page as it came back (owner decision
+    // 2026-11-15: the visitor's pick is made at render time, per language),
+    // bounded by the board's own page size.
+    expect(snapshot.sample.vacancies.map((v) => v.id.slice(-1))).toEqual(["1", "2", "3", "4", "5", "6", "7"]);
+    expect(snapshot.sample.vacancies.length).toBeLessThanOrEqual(PUBLIC_VACANCY_PAGE_SIZE);
+    // What a visitor sees: four at most; slugged rows first IN THE BOARD'S
+    // ORDER; a row with neither a slug nor an occupation is never chosen.
+    expect(pickLandingVacancySample(snapshot.sample.vacancies).map((v) => v.professionSlug)).toEqual([
       "electrician",
       "cook",
       "driver",
@@ -266,6 +271,16 @@ describe("FOCUS does not pay for reads it never renders", () => {
       expect(v.title).toBeNull();
       expect(v.attributionCode).toBeNull();
     }
+  });
+
+  it("the landing picks the visitor's adverts at render time, in the visitor's language first", () => {
+    const landing = readFileSync(join(__dirname, "..", "..", "app", "[locale]", "focus-landing", "focus-landing.tsx"), "utf8");
+    expect(landing).toMatch(/pickLandingVacancySample\(market\.sample\.vacancies, activeLocale\)/);
+    expect(landing).toMatch(/<LandingOpenJobsBand sample=\{\{ basis: "live", vacancies: adverts \}\}/);
+    // The shared cache never holds a language-dependent pick.
+    const reader = readFileSync(join(__dirname, "..", "market", "live-market-landing.ts"), "utf8");
+    expect(reader).toMatch(/vacancies: result\.vacancies,/);
+    expect(reader).toMatch(/\["live-market-landing-v3"\]/);
   });
 
   it("an unfilled page still yields a sample from occupation-only rows", async () => {

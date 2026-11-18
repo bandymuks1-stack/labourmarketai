@@ -1,10 +1,10 @@
 /**
  * OAuth display-name repair — the pure decision behind the callback route.
  *
- * Where the synthetic value comes from: the onboarding wizard defaults the
- * name field to the e-mail local part when nothing better is known
- * (`app/[locale]/onboarding/page.tsx`, `emailLocal`), and people accept the
- * default. Later, a social sign-in (Google / LinkedIn / Facebook) delivers a
+ * Where the synthetic value comes from: until 2026-10-24 the onboarding wizard
+ * defaulted the name field to the e-mail local part when nothing better was
+ * known, and people accepted the default — those stored names remain. (The
+ * wizard no longer prefills it — UX review 1.4.) Later, a social sign-in (Google / LinkedIn / Facebook) delivers a
  * real human name in `user.user_metadata`. This module decides whether that
  * provider name may replace the stored one.
  *

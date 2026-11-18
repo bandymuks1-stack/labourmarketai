@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Clickability / actionability guard (owner browser-smoke repair,
@@ -95,7 +96,7 @@ describe("5+6. company identity and create-vs-edit", () => {
     expect(startCompany).toMatch(
       /company && !firstSetup \? t\("formTitleEdit"\) : t\("formTitleCreate"\)/,
     );
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const setup = JSON.parse(read(`messages/${loc}.json`)).roleDashboards
         .company.setup;
       expect(typeof setup.formTitleCreate).toBe("string");
@@ -136,7 +137,7 @@ describe("9. notifications honest", () => {
   it("raw type enum never rendered — mapped with neutral fallback", () => {
     expect(notifPanel).not.toMatch(/>\{n\.type\}</);
     expect(notifPanel).toMatch(/tTypes\("generic"\)/);
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const g = JSON.parse(read(`messages/${loc}.json`)).auth.notifications
         .types?.generic;
       expect(typeof g === "string" && g.length > 0, `${loc} generic`).toBe(true);

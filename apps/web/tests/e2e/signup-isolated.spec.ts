@@ -1,0 +1,1242 @@
+import { expect, test, type Page } from "@playwright/test";
+
+import { FIRST_VISIT_CAMPAIGN, refuseOnFirstVisit, storedAnalytics } from "./first-visit-consent";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
+
+/**
+ * SELF-SERVE SIGN-UP, end to end, on a THROWAWAY LOCAL Supabase stack
+ * (.github/workflows/signup-isolated.yml). The one journey no production walk
+ * covers: a stranger fills the sign-up form, picks what they came for, and
+ * reaches their first real surface — as a worker, as a company, as an agency.
+ *
+ * It refuses to run anywhere but the local stack: production synthetic
+ * accounts are owner-dispatch only (owner decision 2026-10-28), so this spec
+ * creates people ONLY in a database that dies with the CI job.
+ *
+ * Outcomes are checked in that local database through its service key (the
+ * page saying "done" is not the proof; the stored rows are).
+ */
+
+const BASE = process.env.E2E_BASE_URL ?? "";
+const SB_URL = process.env.E2E_SUPABASE_URL ?? "";
+const SB_SERVICE = process.env.E2E_SUPABASE_SERVICE_ROLE_KEY ?? "";
+const LOCAL = /^http:\/\/127\.0\.0\.1:\d+$/;
+
+test.skip(
+  process.env.SIGNUP_ISOLATED !== "1" || !LOCAL.test(BASE) || SB_URL !== "http://127.0.0.1:54321" || !SB_SERVICE,
+  "local stack only (SIGNUP_ISOLATED=1, app and Supabase on 127.0.0.1)",
+);
+test.describe.configure({ mode: "serial" });
+test.setTimeout(180_000);
+
+const RUN = Date.now().toString(36);
+const PASSWORD = "Synthetic-Pass-2026!";
+const email = (who: string) => `signup.${who}.${RUN}@local.test`;
+
+async function db<T>(path: string): Promise<T> {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}` },
+  });
+  if (!r.ok) throw new Error(`local db read ${path.split("?")[0]} → ${r.status}`);
+  return (await r.json()) as T;
+}
+
+async function userId(address: string): Promise<string> {
+  const r = await fetch(`${SB_URL}/auth/v1/admin/users?per_page=200`, {
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}` },
+  });
+  const body = (await r.json()) as { users?: Array<{ id: string; email?: string }> };
+  const u = (body.users ?? []).find((x) => x.email === address);
+  if (!u) throw new Error(`no auth user for ${address}`);
+  return u.id;
+}
+
+/**
+ * The public sign-up form → the onboarding wizard (Confirm email is OFF locally).
+ * `refuseConsent`: arrive like a stranger from a campaign link and answer the
+ * real first-visit consent banner with "refuse" before filling the form.
+ */
+async function signUp(
+  page: Page,
+  address: string,
+  password: string = PASSWORD,
+  opts: { refuseConsent?: boolean } = {},
+): Promise<void> {
+  if (opts.refuseConsent) {
+    await page.goto(`${BASE}/en/auth/signup?${FIRST_VISIT_CAMPAIGN}`);
+    await refuseOnFirstVisit(page);
+  } else {
+    await page.goto(`${BASE}/en/auth/signup`);
+  }
+  await page.locator('input[type="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(password);
+  await page.locator('input[name="confirm_password"]').fill(password);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 }).catch(async (cause: unknown) => {
+    // Say what the page said instead of a bare timeout (synthetic account, local stack).
+    const said = (await page.locator("form").first().innerText({ timeout: 2_000 }).catch(() => "")).replace(/\s+/g, " ");
+    const alerts = (await page.locator('[role="alert"], [role="status"], [aria-live]').allInnerTexts().catch(() => []))
+      .map((t) => t.replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+    throw new Error(
+      `sign-up did not reach onboarding; at ${new URL(page.url()).pathname}; alerts: ${JSON.stringify(alerts).slice(0, 400)}; form ends: ${said.slice(-400)}`,
+      { cause },
+    );
+  });
+  await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+}
+
+/** Step 1: what they came for. Step 2: name, country, then submit. */
+async function onboard(page: Page, intent: string, displayName: string): Promise<void> {
+  await page.getByTestId(`onboarding-intent-${intent}`).click();
+  await expect(page.getByTestId(`onboarding-intent-${intent}`)).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill(displayName);
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await page.getByTestId("onboarding-submit").click();
+}
+
+test("S-1. a worker refuses analytics on the first visit, signs up through the form, onboards, and lands as a worker", async ({ page }) => {
+  const address = email("worker");
+  await signUp(page, address, PASSWORD, { refuseConsent: true });
+  await onboard(page, "work", "Synthetic Signup Worker");
+  await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  const stored = await storedAnalytics(page);
+  expect(JSON.parse(stored.consent ?? "{}").choice, "the refusal survives sign-up and onboarding").toBe("refused");
+  expect(stored.analytics, "nothing analytics-related was stored on the way in").toEqual([]);
+  const id = await userId(address);
+  const [profile] = await db<Array<{ onboarded: boolean | null; active_role: string | null; country: string | null }>>(
+    `profiles?id=eq.${id}&select=onboarded,active_role,country`,
+  );
+  expect(profile?.onboarded, "profile is onboarded").toBe(true);
+  expect(profile?.active_role, "the worker identity is recorded").toBe("worker");
+  expect(profile?.country).toBe("LT");
+});
+
+test("S-2. a company signs up through the form and reaches its company setup", async ({ page }) => {
+  const address = email("company");
+  await signUp(page, address);
+  await onboard(page, "hire", "Synthetic Signup Owner");
+  await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  await expect(page.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("company-setup-legal-name").fill(`Synthetic Signup Co ${RUN}`);
+  await page.getByTestId("company-setup-country").selectOption("LT");
+  await page.getByTestId("company-setup-save-draft").click();
+  await expect(page.getByTestId("company-setup-result")).toBeVisible({ timeout: 30_000 });
+  const id = await userId(address);
+  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
+  expect(orgs.length, "the company's organization is stored and owned by the person who signed up").toBeGreaterThan(0);
+});
+
+test("S-3. an agency signs up through the form and its organization is an agency", async ({ page }) => {
+  const address = email("agency");
+  await signUp(page, address);
+  await onboard(page, "agency", "Synthetic Signup Agency Owner");
+  await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  await expect(page.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("company-setup-legal-name").fill(`Synthetic Signup Agency ${RUN}`);
+  await page.getByTestId("company-setup-country").selectOption("LT");
+  await page.getByTestId("company-setup-save-draft").click();
+  await expect(page.getByTestId("company-setup-result")).toBeVisible({ timeout: 30_000 });
+  const id = await userId(address);
+  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
+  expect(orgs.length, "the agency's organization is stored").toBeGreaterThan(0);
+});
+
+test("S-3b. a student signs up, names where they study, and lands on their learning compass with the study stored", async ({ page }) => {
+  const address = email("student");
+  await signUp(page, address);
+  await page.getByTestId("onboarding-intent-student").click();
+  await expect(page.getByTestId("onboarding-intent-student")).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Student");
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await expect(page.getByTestId("onboarding-student-fields")).toBeVisible();
+  await page.getByTestId("onboarding-institution").fill(`Synthetic College ${RUN}`);
+  await page.getByTestId("onboarding-program").fill("Synthetic programme");
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+  await expect(page.getByTestId("learning-compass"), "the student home is on the profile").toBeVisible({ timeout: 30_000 });
+  const id = await userId(address);
+  const [profile] = await db<Array<{ onboarded: boolean | null; active_role: string | null }>>(
+    `profiles?id=eq.${id}&select=onboarded,active_role`,
+  );
+  expect(profile?.onboarded).toBe(true);
+  expect(profile?.active_role, "a student is a person (worker identity), not a separate account kind").toBe("worker");
+  const studies = await db<Array<{ institution_name: string; is_current: boolean }>>(
+    `worker_education?profile_id=eq.${id}&select=institution_name,is_current`,
+  );
+  expect(studies, "exactly one study record, marked current").toEqual([
+    { institution_name: `Synthetic College ${RUN}`, is_current: true },
+  ]);
+});
+
+test("S-3c. an education institution signs up through its own door, and its organization trains people", async ({ page }) => {
+  const address = email("institution");
+  // The landing's institution door: sign-up carrying the organisation setup
+  // with the training-provider preset as its return path.
+  const door = "/dashboard/start/company?capability=training_provider";
+  await page.goto(`${BASE}/en/auth/signup?next=${encodeURIComponent(door)}`);
+  await page.locator('input[type="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+  // The door already said what they came for; tick it only if it is not ticked.
+  const intent = page.getByTestId("onboarding-intent-education");
+  if ((await intent.getAttribute("aria-pressed")) !== "true") await intent.click();
+  await expect(intent).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Lecturer");
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  expect(new URL(page.url()).searchParams.get("capability"), "the preset survives sign-up and onboarding").toBe("training_provider");
+  await expect(page.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("company-setup-legal-name").fill(`Synthetic Signup College ${RUN}`);
+  await page.getByTestId("company-setup-country").selectOption("LT");
+  await page.getByTestId("company-setup-save-draft").click();
+  const next = page.getByTestId("company-setup-next");
+  await expect(next).toBeVisible({ timeout: 30_000 });
+  const id = await userId(address);
+  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
+  expect(orgs.length, "the institution's organization is stored").toBeGreaterThan(0);
+  // The declaration is proven by what it opens, not by reading the table
+  // (the capability table is not readable through the REST door, by design):
+  // the form names the education home as the next door only on a confirmed
+  // declaration, and that page sends away any organization without it.
+  await expect(next).toHaveAttribute("data-first-door", "education");
+  await page.getByTestId("company-setup-go-workspace").click();
+  await page.waitForURL(/\/en\/dashboard\/company\/education/, { timeout: 60_000 });
+  await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
+});
+
+test("S-3d. what a worker types on the intake before having an account is in their own profile composer after sign-up, never in another account's", async ({ page }) => {
+  // Owner P0 2026-11-15 (F2): the intake used to store nothing, and its
+  // sign-up forgot both the typed text and where the person was going.
+  const address = email("intake");
+  await page.goto(`${BASE}/en/worker-intake`);
+  const form = page.getByTestId("worker-intake-form");
+  await form.locator('input[name="full_name"]').fill("Synthetic Intake Worker");
+  await form.locator('textarea[name="comment"]').fill(`Tiling and grouting, six years, run ${RUN}`);
+  const signUp = page.locator('[data-testid="intake-bridge"] a').first();
+  await expect(signUp).toHaveAttribute("href", "/en/auth/signup?next=%2Fdashboard%2Fprofile");
+  await signUp.click();
+  await page.waitForURL((url) => url.pathname === "/en/auth/signup", { timeout: 60_000 });
+  await page.locator('input[type="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
+  await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+  await onboard(page, "work", "Synthetic Intake Worker");
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+  const composer = page.locator('[data-testid="profile-text-flow-compose"] textarea').first();
+  await expect(composer, "the typed text waits in the composer, for the person to send").toHaveValue(
+    new RegExp(`Synthetic Intake Worker[\\s\\S]*Tiling and grouting, six years, run ${RUN}`),
+    { timeout: 30_000 },
+  );
+  const id = await userId(address);
+  const [profile] = await db<Array<{ profile_text: string | null }>>(`profiles?id=eq.${id}&select=profile_text`);
+  expect(profile?.profile_text ?? null, "nothing was saved for them").toBeNull();
+
+  // Decision 0024: a draft bound to ANOTHER email in this browser is never
+  // shown to this account, and is removed when it is met.
+  const other = "Synthetic Other Person, never to be shown";
+  await page.evaluate(
+    ([key, text]) => localStorage.setItem(key, JSON.stringify({ v: 2, at: Date.now(), text, email: "someone-else@example.invalid" })),
+    ["lm.workerIntakeDraft.v2", other] as const,
+  );
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+  await expect(page.locator("main")).not.toContainText(other);
+  for (const t of await page.locator("textarea").all()) expect(await t.inputValue()).not.toContain(other);
+  expect(await page.evaluate((k) => localStorage.getItem(k), "lm.workerIntakeDraft.v2"), "removed once met").toBeNull();
+
+  // Sign-out removes this account's own draft too.
+  await page.evaluate(
+    ([key, mail]) => localStorage.setItem(key, JSON.stringify({ v: 2, at: Date.now(), text: "own draft", email: mail })),
+    ["lm.workerIntakeDraft.v2", address] as const,
+  );
+  await page.getByTestId("account-menu-trigger").click();
+  await page.getByTestId("account-menu-signout").click();
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(await page.evaluate((k) => localStorage.getItem(k), "lm.workerIntakeDraft.v2"), "removed on sign-out").toBeNull();
+});
+
+test("S-4. an address that already has an account is sent to sign in, not to a mail that never comes", async ({ page }) => {
+  await page.goto(`${BASE}/en/auth/signup`);
+  await page.locator('input[type="email"]').fill(email("worker"));
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await expect(page.getByTestId("signup-login-instead")).toBeVisible({ timeout: 30_000 });
+});
+
+// ── Returning person: sign out, sign in, forgotten password ─────────────────
+
+const MAIL = "http://127.0.0.1:54324"; // the local stack's mail catcher (Mailpit)
+const NEW_PASSWORD = "Synthetic-Pass-2026-Reset!";
+
+async function signIn(page: Page, address: string, password: string): Promise<void> {
+  await page.goto(`${BASE}/en/auth/login`);
+  await page.locator('input[name="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(password);
+  await page.locator('form button[type="submit"]').first().click();
+  await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+}
+
+/** The newest link in the newest local mail to `address` (nothing leaves the runner). */
+async function lastMailLink(address: string): Promise<string> {
+  for (let i = 0; i < 30; i += 1) {
+    const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${address}`)}`);
+    const list = (await r.json()) as { messages?: Array<{ ID: string }> };
+    const id = list.messages?.[0]?.ID;
+    if (id) {
+      const m = (await (await fetch(`${MAIL}/api/v1/message/${id}`)).json()) as { Text?: string; HTML?: string };
+      const urls = `${m.Text ?? ""} ${m.HTML ?? ""}`.match(/https?:\/\/[^\s"'<>]+/g) ?? [];
+      const link = urls.find((u) => /verify|callback|token/.test(u));
+      if (link) return link.replace(/&amp;/g, "&");
+    }
+    await new Promise((res) => setTimeout(res, 1000));
+  }
+  throw new Error("no reset mail arrived in the local mail catcher");
+}
+
+test("S-5. a person signs out and signs back in; the session is gone after sign-out", async ({ page }) => {
+  const address = email("worker");
+  await signIn(page, address, PASSWORD);
+  await page.goto(`${BASE}/en/auth/logout`);
+  await page.goto(`${BASE}/en/dashboard`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  await signIn(page, address, PASSWORD);
+});
+
+test("S-6. a forgotten password: the reset mail arrives, the new password works, the old one does not", async ({ page }) => {
+  const address = email("company");
+  await page.goto(`${BASE}/en/auth/forgot-password`);
+  await page.locator('input[type="email"][name="email"]').fill(address);
+  await page.locator('form button[type="submit"]').first().click();
+  const link = await lastMailLink(address);
+  await page.goto(link);
+  await page.waitForURL(/reset-password/, { timeout: 60_000 });
+  await page.locator('input[name="password"]').fill(NEW_PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(NEW_PASSWORD);
+  await page.locator('form button[type="submit"]').first().click();
+  await page.waitForURL(/\/en\/(auth\/login|dashboard)/, { timeout: 60_000 });
+  await page.goto(`${BASE}/en/auth/logout`);
+  // The old password is refused…
+  await page.goto(`${BASE}/en/auth/login`);
+  await page.locator('input[name="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  const refused = page.waitForResponse((r) => r.url().includes("/auth/v1/token") && r.request().method() === "POST", {
+    timeout: 30_000,
+  });
+  await page.locator('form button[type="submit"]').first().click();
+  expect((await refused).status(), "the old password is refused by auth").toBe(400);
+  await expect(page).toHaveURL(/\/en\/auth\/login/);
+  // …the new one works.
+  await signIn(page, address, NEW_PASSWORD);
+});
+
+// ── Worker: Work Journal → Living CV ────────────────────────────────────────
+
+test("S-7. a worker records work in the Work Journal; it is stored and the Living CV door opens", async ({ page }) => {
+  const address = email("worker");
+  await signIn(page, address, PASSWORD);
+  await page.goto(`${BASE}/en/dashboard/journal`);
+  const main = page.getByRole("main");
+  await main.getByTestId("journal-quick-record-text").fill(`Installed 12 kitchen cabinets on site, 7 hours (${RUN})`);
+  await main.getByTestId("journal-quick-record-understand").click();
+  await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  await main.getByTestId("worklog-save").click();
+  await main.getByTestId("worklog-confirm").click();
+  const done = main.getByTestId("worklog-done");
+  await expect(done.or(main.getByTestId("worklog-error")).or(main.getByTestId("worklog-blocked"))).toBeVisible({ timeout: 30_000 });
+  await expect(done, "the entry is saved").toBeVisible();
+  await expect(done.getByTestId("worklog-living-cv-link")).toHaveAttribute("href", /\/en\/cv$/);
+  const entries = await db<Array<{ id: string }>>(
+    `journal_entries?original_text=ilike.*${encodeURIComponent(RUN)}*&select=id`,
+  );
+  expect(entries.length, "the journal entry is stored").toBeGreaterThan(0);
+  await page.goto(`${BASE}/en/cv`);
+  await expect(page.getByRole("main")).toBeVisible({ timeout: 30_000 });
+});
+
+// ── Company: free need ──────────────────────────────────────────────────────
+
+test("S-8. a company publishes its first need for free", async ({ page }) => {
+  const address = email("company");
+  await signIn(page, address, NEW_PASSWORD);
+  await page.goto(`${BASE}/en/dashboard/company/needs?audience=need#demand-intake`);
+  const main = page.getByRole("main");
+  await main.getByTestId("demand-role").fill(`Tiler ${RUN}`);
+  await main.getByTestId("demand-description").fill("Two tilers for a 3-week bathroom renovation in Vilnius.");
+  await main.getByTestId("demand-next").click();
+  const size = main.getByTestId("demand-team-size");
+  if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await chooseDemandCountryIfEmpty(page);
+  await main.getByTestId("demand-next").click();
+  await main.getByTestId("demand-create").click();
+  await expect(main.getByTestId("demand-done"), "the first need is accepted on the free plan").toBeVisible({ timeout: 30_000 });
+});
+
+// ── Invited worker: invitation → link → sign-up → accepted ─────────────────
+
+test("S-9. an invited person opens the link, registers through it, and the invitation is accepted", async ({ browser }) => {
+  const invitee = email("invited");
+  // The inviter: the worker from S-1 invites a new person to the platform.
+  const a = await browser.newContext();
+  const inviter = await a.newPage();
+  await signIn(inviter, email("worker"), PASSWORD);
+  await inviter.goto(`${BASE}/en/dashboard/network`);
+  const panel = inviter.getByTestId("invite-panel");
+  await expect(panel).toBeVisible({ timeout: 30_000 });
+  const open = panel.getByTestId("invite-panel-open");
+  if (await open.isVisible().catch(() => false)) await open.click();
+  await panel.getByTestId("invite-emails").fill(invitee);
+  await panel.getByTestId("invite-submit").click();
+  const copy = panel.getByTestId("invite-copy-link").first();
+  await expect(copy, "the invitation is created and its link is handed over").toBeVisible({ timeout: 30_000 });
+  const raw = await copy.getAttribute("data-invite-link");
+  expect(raw, "an invitation link").toBeTruthy();
+  // The link carries the canonical origin; this walk serves the same path locally.
+  const u = new URL(raw!);
+  const link = `${BASE}${u.pathname}${u.search}`;
+  await a.close();
+
+  // The invited person: a fresh browser, no session.
+  const b = await browser.newContext();
+  const page = await b.newPage();
+  await page.goto(link);
+  await page.getByTestId("invite-register").click();
+  await page.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
+  const addressed = page.locator('input[aria-describedby="invited-email-note"]');
+  if (await addressed.isVisible().catch(() => false)) {
+    await expect(addressed, "the address comes from the invitation").not.toBeEditable();
+  } else {
+    await page.locator('input[type="email"]').fill(invitee);
+  }
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  // The addressed form may ask for the password once (the address is already known).
+  const confirm = page.locator('input[name="confirm_password"]');
+  if (await confirm.count()) await confirm.fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
+  if (/\/onboarding/.test(page.url())) await onboard(page, "work", "Synthetic Invited Worker");
+  await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
+  if (/\/invite\//.test(page.url())) {
+    const accept = page.getByTestId("invite-accept");
+    if (await accept.isVisible().catch(() => false)) await accept.click();
+  }
+  const id = await userId(invitee);
+  const rows = await db<Array<{ status: string; accepted_by_profile_id: string | null }>>(
+    `invitations?invited_email=eq.${encodeURIComponent(invitee)}&select=status,accepted_by_profile_id`,
+  );
+  expect(rows[0]?.status, "the invitation is accepted").toBe("accepted");
+  expect(rows[0]?.accepted_by_profile_id, "by the person who registered through it").toBe(id);
+  await b.close();
+});
+
+// ── M-0: the company the ISOLATED Android need journey signs in as ────────
+// Runs only from android-need-isolated.yml (MOBILE_NEED_SEED_EMAIL set): the
+// same real sign-up form and company setup as S-2, with QA-SYNTHETIC names and
+// the server-set qa_synthetic marker; the app then posts its need on device.
+test("M-0. seed: a synthetic company for the isolated mobile need journey", async ({ page }) => {
+  const address = process.env.MOBILE_NEED_SEED_EMAIL ?? "";
+  const password = process.env.MOBILE_NEED_SEED_PASSWORD ?? "";
+  test.skip(!address || !password, "android-need-isolated.yml only");
+  await signUp(page, address, password);
+  await onboard(page, "hire", "QA-SYNTHETIC Mobile Need Owner");
+  await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  await expect(page.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("company-setup-legal-name").fill("QA-SYNTHETIC Mobile Need Co");
+  await page.getByTestId("company-setup-country").selectOption("LT");
+  await page.getByTestId("company-setup-save-draft").click();
+  await expect(page.getByTestId("company-setup-result")).toBeVisible({ timeout: 30_000 });
+  const id = await userId(address);
+  const r = await fetch(`${SB_URL}/auth/v1/admin/users/${id}`, {
+    method: "PUT",
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "content-type": "application/json" },
+    body: JSON.stringify({ app_metadata: { qa_synthetic: true } }),
+  });
+  expect(r.ok, "the seed carries the server-set qa_synthetic marker").toBe(true);
+  const needs = await db<Array<{ id: string }>>(`customer_requests?profile_id=eq.${id}&select=id`);
+  expect(needs.length, "the seed company starts with no need").toBe(0);
+});
+
+/**
+ * A-1..A-4. THE THREE SIGN-UP FAULTS OF THE 2026-11-13 TRUST AUDIT, each as the
+ * person meets it. None needs an account: they are what the sign-in page says
+ * after the auth server sends the browser back.
+ */
+test("A-1. a confirmation link that returns without a sign-in code is not reported as a fault", async ({ page }) => {
+  // What a RE-SENT confirmation link does: the auth server confirms the address
+  // and returns to the callback with nothing the server can read (the client
+  // library sends a resend without the code challenge).
+  await page.goto(`${BASE}/en/auth/callback?flow=email_confirm`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(new URL(page.url()).searchParams.get("error"), "the outcome names the confirmation link").toBe("confirm_link_opened");
+  const notice = page.getByTestId("login-oauth-error");
+  await expect(notice, "a calm status, not a red alert").toHaveAttribute("role", "status", { timeout: 30_000 });
+  await expect(notice, "it says what to do: sign in").toContainText(/signing in/i);
+  await expect(page.getByTestId("login-resend-confirmation"), "a new link can be requested right here").toBeVisible();
+});
+
+test("A-2. a bare callback with nothing in it is still reported as a failed sign-in", async ({ page }) => {
+  await page.goto(`${BASE}/en/auth/callback`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(new URL(page.url()).searchParams.get("error")).toBe("missing_code");
+  await expect(page.getByTestId("login-oauth-error")).toHaveAttribute("role", "alert", { timeout: 30_000 });
+});
+
+test("A-3. a provider failure that a retry cannot fix says what to do instead", async ({ page }) => {
+  await page.goto(`${BASE}/en/auth/callback?error=server_error&error_code=unexpected_failure&error_description=Database+error+saving+new+user`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  expect(new URL(page.url()).searchParams.get("error")).toBe("provider_error");
+  const alert = page.getByTestId("login-oauth-error");
+  await expect(alert).toBeVisible({ timeout: 30_000 });
+  await expect(alert, "not the bare 'please try again'").not.toHaveText("Couldn't sign in. Please try again.");
+  await expect(alert, "it names the way that works").toContainText(/email and password/i);
+  await expect(alert, "the provider's own free text is never shown").not.toContainText(/database error/i);
+});
+
+test("A-4. inside an app's built-in browser the sign-up and sign-in pages say Google sign-in needs the phone's browser", async ({ browser }) => {
+  const facebookApp =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/FBIOS;FBAV/470.0.0.30.109;FBDV/iPhone14,5;FBSN/iOS;FBSV/17.5;IABMV/1]";
+  const inApp = await browser.newContext({ userAgent: facebookApp, viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
+  const plain = await browser.newContext({ viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
+  try {
+    for (const path of ["/en/auth/signup", "/en/auth/login"]) {
+      const inside = await inApp.newPage();
+      await inside.goto(`${BASE}${path}`);
+      await expect(inside.getByTestId("auth-inapp-browser-notice"), `${path}: the notice shows inside the app's browser`).toBeVisible({ timeout: 30_000 });
+      await expect(inside.locator('input[name="email"]'), `${path}: e-mail sign-in stays available`).toBeVisible();
+      await inside.close();
+      const outside = await plain.newPage();
+      await outside.goto(`${BASE}${path}`);
+      await expect(outside.locator('input[name="email"]')).toBeVisible({ timeout: 30_000 });
+      await expect(outside.getByTestId("auth-inapp-browser-notice"), `${path}: an ordinary browser sees no notice`).toHaveCount(0);
+      await outside.close();
+    }
+  } finally {
+    await inApp.close();
+    await plain.close();
+  }
+});
+
+/**
+ * P-1. THE WAY FORWARD IS ON SCREEN ON A PHONE (trust and sign-up audit,
+ * 2026-11-13). Measured before the fix: the role step's Continue sat 1.7–2.1
+ * screens down and choosing a card did not bring it into view; the profile
+ * step's submit sat 2.7–3.4 screens down. Both now ride in a bar at the bottom
+ * of the screen on a phone. The viewport heights are the VISIBLE page area of
+ * a small Android phone, a 375 px phone and a 390 px phone with the browser's
+ * bars shown; English and Lithuanian. The numbers are still printed, so a
+ * later change has a baseline.
+ */
+for (const phone of [
+  { name: "360x560", width: 360, height: 560 },
+  { name: "375x553", width: 375, height: 553 },
+  { name: "390x664", width: 390, height: 664 },
+] as const) {
+  test(`P-1. onboarding on a phone: the primary button is on screen (${phone.name})`, async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: phone.width, height: phone.height }, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    try {
+      await signUp(page, email(`phone${phone.width}`));
+      const box = async (testId: string) =>
+        page.getByTestId(testId).first().evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          // "visible" = inside the visible area AND nothing drawn over its centre.
+          const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          // A disabled button ignores pointer events, so the hit test lands on
+          // its own bar behind it: that is still "nothing foreign on top".
+          const bar = el.closest('[data-testid="onboarding-action-bar"]');
+          const uncovered = top !== null && (el.contains(top) || (bar !== null && bar.contains(top)));
+          return { top: Math.round(r.top), bottom: Math.round(r.bottom), height: Math.round(r.height), visible: r.top >= 0 && r.bottom <= window.innerHeight && uncovered };
+        });
+      for (const locale of ["en", "lt"] as const) {
+        // The wizard restores an unfinished draft (and its step); each pass starts as a first visit.
+        await page.evaluate(() => {
+          window.localStorage.clear();
+          window.sessionStorage.clear();
+        });
+        await page.goto(`${BASE}/${locale}/onboarding`);
+        await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        const cards = await page.locator('[data-testid^="onboarding-intent-"]:not([data-testid="onboarding-intents-continue"])').evaluateAll((els) =>
+          els.map((el) => {
+            const r = el.getBoundingClientRect();
+            return r.top >= 0 && r.bottom <= window.innerHeight;
+          }),
+        );
+        const before = await box("onboarding-intents-continue");
+        // The role step says what to do while nothing is chosen, and stops saying it after the first pick.
+        await expect(page.getByTestId("onboarding-continue-hint"), `${locale}: the bar says to choose first`).toBeVisible();
+        await expect(page.getByTestId("onboarding-intents-continue")).toBeDisabled();
+        await page.getByTestId("onboarding-intent-work").tap();
+        await expect(page.getByTestId("onboarding-intent-work")).toHaveAttribute("aria-pressed", "true");
+        await expect(page.getByTestId("onboarding-continue-hint"), `${locale}: the hint goes with the first pick`).toHaveCount(0);
+        await expect(page.getByTestId("onboarding-intents-continue")).toBeEnabled();
+        const after = await box("onboarding-intents-continue");
+        const scrollAfterPick = await page.evaluate(() => Math.round(window.scrollY));
+        console.info(
+          `[onboarding-phone] ${JSON.stringify({ phone: phone.name, locale, step: "role", viewport: phone.height, cardsTotal: cards.length, cardsFullyVisible: cards.filter(Boolean).length, continueBeforePick: before, continueAfterPick: after, scrollAfterPick, pageHeight: await page.evaluate(() => document.documentElement.scrollHeight) })}`,
+        );
+        expect(before.visible, `${locale}: Continue is on screen before anything is chosen`).toBe(true);
+        expect(after.visible, `${locale}: Continue is on screen after a card is chosen, without scrolling`).toBe(true);
+        expect(after.height, `${locale}: Continue keeps the 44 px touch floor`).toBeGreaterThanOrEqual(44);
+        // Nothing is trapped under the bar: at the end of the page the last card is clear of it.
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        const lastCardBottom = await page.getByTestId("onboarding-intent-education").evaluate((el) => Math.round(el.getBoundingClientRect().bottom));
+        const barTop = await page.getByTestId("onboarding-action-bar").evaluate((el) => Math.round(el.getBoundingClientRect().top));
+        expect(lastCardBottom, `${locale}: the last card is not covered by the bar`).toBeLessThanOrEqual(barTop);
+        await page.evaluate(() => window.scrollTo(0, 0));
+
+        await page.getByTestId("onboarding-intents-continue").click();
+        await expect(page.getByTestId("onboarding-display-name")).toBeVisible({ timeout: 30_000 });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        const submit = await box("onboarding-submit");
+        const name = await box("onboarding-display-name");
+        const country = await box("onboarding-country");
+        await page.getByTestId("onboarding-country").tap();
+        const option = page.getByRole("option").first();
+        await expect(option, "the country list opens").toBeVisible({ timeout: 15_000 });
+        const list = await option.evaluate((el) => {
+          const r = (el.closest('[role="listbox"]') ?? el).getBoundingClientRect();
+          return { top: Math.round(r.top), bottom: Math.round(r.bottom), fitsViewport: r.top >= 0 && r.bottom <= window.innerHeight };
+        });
+        console.info(
+          `[onboarding-phone] ${JSON.stringify({ phone: phone.name, locale, step: "profile", viewport: phone.height, name, country, submit, countryList: list, pageHeight: await page.evaluate(() => document.documentElement.scrollHeight) })}`,
+        );
+        expect(submit.visible, `${locale}: the submit button is on screen when the profile step opens`).toBe(true);
+        expect(submit.height, `${locale}: the submit button keeps the 44 px touch floor`).toBeGreaterThanOrEqual(44);
+        expect(name.visible && name.bottom <= submit.top, `${locale}: the name field is clear of the bar`).toBe(true);
+        await page.keyboard.press("Escape");
+      }
+    } finally {
+      await ctx.close();
+    }
+  });
+}
+
+/**
+ * P-3. THE BAR NEVER HIDES WHAT A PERSON IS WORKING ON (independent review of the
+ * phone bar, 2026-11-14, three findings). On the smallest phone, on the profile
+ * step: (1) with a refusal showing above the buttons the bar is at its tallest,
+ * and the end of the form must still be clear of it — the step reserves the
+ * bar's measured height, not a fixed guess; (2) every field that takes focus
+ * ends up above the bar; (3) the country list, opened with its field low on
+ * the screen, is drawn over the bar, not under it.
+ */
+test("P-3. onboarding on a phone: the bar covers neither the end of the form, a focused field, nor an open list (360x560)", async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 560 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  try {
+    await signUp(page, email("phonebar360"));
+    await page.evaluate(() => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    });
+    await page.goto(`${BASE}/en/onboarding`);
+    await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
+    // "I study": the one choice whose profile step can refuse IN THE BAR (a missing name or
+    // country is said beside its own field; a missing institution is said above the button).
+    await page.getByTestId("onboarding-intent-student").tap();
+    await page.getByTestId("onboarding-intents-continue").click();
+    await expect(page.getByTestId("onboarding-display-name")).toBeVisible({ timeout: 30_000 });
+    const bar = page.getByTestId("onboarding-action-bar");
+    expect(await bar.evaluate((el) => getComputedStyle(el).position), "the profile step's bar is fixed on a phone").toBe("fixed");
+    const barBox = () => bar.evaluate((el) => ({ top: Math.round(el.getBoundingClientRect().top), height: Math.round(el.getBoundingClientRect().height) }));
+    const quiet = await barBox();
+
+    // (1) A refusal makes the bar taller: name and country given, the institution left empty.
+    await page.getByTestId("onboarding-display-name").fill("QA-SYNTHETIC Phone bar");
+    await page.getByTestId("onboarding-country").tap();
+    await page.getByRole("option", { name: /Lithuania/ }).first().click();
+    await expect(page.getByTestId("onboarding-institution"), "the study choice asks for an institution").toBeVisible();
+    await page.getByTestId("onboarding-submit").click();
+    await expect(bar.getByRole("alert"), "the refusal is said in the bar, above the button").toBeVisible({ timeout: 15_000 });
+    const loud = await barBox();
+    expect(loud.height, "the bar grows with the refusal").toBeGreaterThan(quiet.height);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const formEnd = await bar.evaluate((el) => {
+      const form = el.closest("form");
+      if (!form) return null;
+      // The last thing in the form that is not the bar itself.
+      const rest = [...form.querySelectorAll<HTMLElement>("input, select, textarea, button, [role=combobox], label, p")].filter((n) => !el.contains(n) && n.getClientRects().length > 0);
+      const last = rest.reduce<number>((max, n) => Math.max(max, n.getBoundingClientRect().bottom), 0);
+      return Math.round(last);
+    });
+    console.info(`[onboarding-phone] ${JSON.stringify({ phone: "360x560", step: "profile-bar", barQuiet: quiet, barWithRefusal: loud, formEndAtPageBottom: formEnd })}`);
+    expect(formEnd, "the profile form was found").not.toBeNull();
+    expect(formEnd!, "with the refusal showing, the end of the form is clear of the bar").toBeLessThanOrEqual(loud.top);
+
+    // (2) Whatever takes focus is brought above the bar.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const covered = await bar.evaluate(async (el) => {
+      const form = el.closest("form");
+      if (!form) return ["no form"];
+      const fields = [...form.querySelectorAll<HTMLElement>("input:not([type=hidden]), select, textarea, [role=combobox]")].filter(
+        (n) => !el.contains(n) && n.getClientRects().length > 0 && !(n as HTMLInputElement).disabled,
+      );
+      const bad: string[] = [];
+      for (const field of fields) {
+        // As a keyboard user arrives: programmatic focus counts as keyboard focus (:focus-visible).
+        field.focus({ focusVisible: true } as FocusOptions);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const r = field.getBoundingClientRect();
+        const barTop = el.getBoundingClientRect().top;
+        if (r.bottom > barTop || r.top < 0) bad.push(`${field.getAttribute("data-testid") ?? field.getAttribute("name") ?? field.tagName}: ${Math.round(r.top)}–${Math.round(r.bottom)} against bar top ${Math.round(barTop)}`);
+      }
+      return [`fields:${fields.length}`, ...bad];
+    });
+    console.info(`[onboarding-phone] ${JSON.stringify({ phone: "360x560", step: "profile-focus", result: covered })}`);
+    expect(Number(covered[0]?.split(":")[1] ?? 0), "the profile step has fields to focus").toBeGreaterThan(2);
+    expect(covered.slice(1), "no focused field is left under the bar or above the screen").toEqual([]);
+
+    // (3) The country list opened low on the screen is drawn over the bar.
+    await page.keyboard.press("Escape");
+    const country = page.getByTestId("onboarding-country");
+    await country.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      // Put the field just above the bar, so the list must open across it.
+      const bar = document.querySelector('[data-testid="onboarding-action-bar"]')!.getBoundingClientRect();
+      window.scrollBy(0, r.bottom - (bar.top - 12));
+    });
+    await country.tap();
+    const option = page.getByRole("option").first();
+    await expect(option, "the country list opens").toBeVisible({ timeout: 15_000 });
+    const overlap = await option.evaluate((el) => {
+      const list = (el.closest('[role="listbox"]') ?? el) as HTMLElement;
+      const l = list.getBoundingClientRect();
+      const bar = document.querySelector('[data-testid="onboarding-action-bar"]')!.getBoundingClientRect();
+      const y = Math.min(l.bottom, window.innerHeight) - 6;
+      const crossesBar = y > bar.top && l.top < bar.bottom;
+      const top = crossesBar ? document.elementFromPoint(l.left + l.width / 2, y) : null;
+      const popover = list.parentElement ?? list;
+      return { crossesBar, listTop: Math.round(l.top), listBottom: Math.round(l.bottom), barTop: Math.round(bar.top), onTop: crossesBar ? (top !== null && popover.contains(top) ? "list" : "bar-or-other") : "n/a" };
+    });
+    console.info(`[onboarding-phone] ${JSON.stringify({ phone: "360x560", step: "profile-list", overlap })}`);
+    if (overlap.crossesBar) expect(overlap.onTop, "where the open list crosses the bar, the list is on top").toBe("list");
+    await page.keyboard.press("Escape");
+  } finally {
+    await ctx.close();
+  }
+});
+
+test("P-2. on a desktop the onboarding buttons stay where they were, in the page flow", async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await ctx.newPage();
+  try {
+    await signUp(page, email("desktop1440"));
+    const bar = page.getByTestId("onboarding-action-bar");
+    await expect(bar).toBeVisible({ timeout: 30_000 });
+    expect(await bar.evaluate((el) => getComputedStyle(el).position), "role step: no fixed bar on a desktop").toBe("static");
+    await page.getByTestId("onboarding-intent-work").click();
+    await page.getByTestId("onboarding-intents-continue").click();
+    await expect(page.getByTestId("onboarding-submit")).toBeVisible({ timeout: 30_000 });
+    expect(await bar.evaluate((el) => getComputedStyle(el).position), "profile step: no fixed bar on a desktop").toBe("static");
+  } finally {
+    await ctx.close();
+  }
+});
+
+// ── Student / intern (#3322 item 6): the SAME account and worker record ─────
+
+test("ST-1. a student signs up, keeps one worker record with no company, and the school reaches the profile, the CV and the board", async ({ page }) => {
+  // Its own address: S-3b already signs up as email("student") in this file, and both
+  // run in one worker (same RUN), so a shared address is "already registered".
+  const address = email("student-intern");
+  const school = `Synthetic Vocational School ${RUN}`;
+  await signUp(page, address);
+  await page.getByTestId("onboarding-intent-student").click();
+  await expect(page.getByTestId("onboarding-intent-student")).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill("Synthetic Signup Student");
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await expect(page.getByTestId("onboarding-student-fields")).toBeVisible();
+  await page.getByTestId("onboarding-institution").fill(school);
+  await page.getByTestId("onboarding-program").fill("Hospitality and catering");
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+
+  // The stored rows, not the page, are the proof.
+  const id = await userId(address);
+  const [profile] = await db<Array<{ onboarded: boolean | null; active_role: string | null }>>(
+    `profiles?id=eq.${id}&select=onboarded,active_role`,
+  );
+  expect(profile?.onboarded).toBe(true);
+  expect(profile?.active_role, "a student is a worker identity, not a separate kind of account").toBe("worker");
+  const workers = await db<Array<{ id: string }>>(`workers?profile_id=eq.${id}&select=id`);
+  expect(workers.length, "exactly one worker record").toBe(1);
+  const orgs = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${id}&select=id`);
+  expect(orgs.length, "a new student starts without a company").toBe(0);
+  const edu = await db<Array<{ institution_name: string; is_current: boolean }>>(
+    `worker_education?profile_id=eq.${id}&select=institution_name,is_current`,
+  );
+  expect(edu.map((e) => e.institution_name), "the school is stored once, as current").toEqual([school]);
+  expect(edu[0]?.is_current).toBe(true);
+
+  // Profile: the school is listed and marked as the person's own statement.
+  // The editor sits in the collapsed CV details; its anchor opens it (the same
+  // way the profile-cv-history walk reaches it). A real load, not a hash-only
+  // navigation on the page the tab is already on.
+  await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
+  await page.reload();
+  await expect(page.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("worker-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("worker-education-self-stated")).toBeVisible();
+
+  // CV with zero work history: the education block is there, labelled the same way.
+  await page.goto(`${BASE}/en/cv`);
+  await expect(page.getByTestId("cv-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("cv-education-self-stated")).toBeVisible();
+
+  // The board opens for a student exactly as for any worker: no "not a worker" wall.
+  await page.goto(`${BASE}/en/dashboard/opportunities?opportunityType=internship`);
+  await expect(page.getByTestId("opportunities-no-worker")).toHaveCount(0);
+  expect(page.url()).toContain("/en/dashboard/opportunities");
+});
+
+// ── Education: institution ↔ student acceptance (owner direction 2026-11-14, Lane L) ──
+//
+// One institution and one student, both created here and gone with the job.
+// Order is deliberate: E-1 links them, E-3 turns the student into a worker.
+// The block sits LAST in this serial file, after ST-1, so a failure here can
+// never stop a test that was already on main. Ending the link, and what the
+// institution may still read afterwards, is proven with its access fix (RED
+// class, owner-gated), which appends E-4 here.
+//
+// Not covered here, on purpose: a learner writing FIRST to their institution.
+// The product has no door for it yet — the learner's relationship row on
+// /dashboard/network carries no message button, and the direct-contact gate
+// (lib/communication/direct-conversation-core.ts planDirectContact) refuses a
+// learner → institution person, because a learner is engaged, not a member,
+// and cannot read the organisation's memberships. Opening it changes that
+// permission gate (security-reviewed, RED class), so the requirement and its
+// acceptance test travel together in that change (Lane L, #3265). The
+// institution can write to its learner, and the learner can answer.
+
+const EDU = {
+  institution: email("edu.institution"),
+  student: email("edu.student"),
+  orgName: `Synthetic Training Centre ${RUN}`,
+  studiesAt: `Synthetic Vocational School ${RUN}`,
+  learnerName: `Synthetic Learner ${RUN}`,
+};
+const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+
+/**
+ * The synthetic person's own access token (password sign-in on the local stack).
+ * One sign-in per person per run: the local auth server limits sign-ins per address.
+ */
+const personTokens = new Map<string, string>();
+async function personToken(address: string): Promise<string> {
+  const known = personTokens.get(address);
+  if (known) return known;
+  const tok = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: { apikey: ANON, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: address, password: PASSWORD }),
+  });
+  const { access_token } = (await tok.json()) as { access_token?: string };
+  if (!access_token) throw new Error(`no session for the synthetic person (${tok.status})`);
+  personTokens.set(address, access_token);
+  return access_token;
+}
+
+/** A REST read AS a signed-in person (their own JWT, their own RLS). */
+async function asPerson<T>(address: string, path: string): Promise<T> {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    headers: { apikey: ANON, Authorization: `Bearer ${await personToken(address)}` },
+  });
+  if (!r.ok) throw new Error(`person read ${path.split("?")[0]} → ${r.status}`);
+  return (await r.json()) as T;
+}
+
+/** A database function called AS a signed-in person: the same door the app calls. */
+async function rpcAsPerson<T>(address: string, fn: string, args: Record<string, unknown>): Promise<T> {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: {
+      apikey: ANON,
+      Authorization: `Bearer ${await personToken(address)}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(args),
+  });
+  if (!r.ok) throw new Error(`person call ${fn} → ${r.status} ${await r.text()}`);
+  const body = await r.text();
+  return (body ? JSON.parse(body) : null) as T;
+}
+
+/** The entry ids a set-returning uuid function answered with, whichever row shape PostgREST used. */
+function entryIds(rows: unknown): string[] {
+  return ((rows as unknown[] | null) ?? []).map((r) =>
+    typeof r === "string" ? r : String(Object.values(r as Record<string, unknown>)[0] ?? ""),
+  );
+}
+
+/** A service read that some tables refuse even to the service key: null = not readable here. */
+async function dbOrNull<T>(path: string): Promise<T | null> {
+  try {
+    return await db<T>(path);
+  } catch (e) {
+    console.info(`[edu] ${String(e)} — falling back to what the screens show`);
+    return null;
+  }
+}
+
+async function signUpStudent(page: Page, address: string, displayName: string): Promise<void> {
+  await signUp(page, address);
+  await page.getByTestId("onboarding-intent-student").click();
+  await page.getByTestId("onboarding-intents-continue").click();
+  await page.getByTestId("onboarding-display-name").fill(displayName);
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await page.getByTestId("onboarding-institution").fill(EDU.studiesAt);
+  await page.getByTestId("onboarding-submit").click();
+  await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+}
+
+/** The institution's learner invitation by link (no e-mail), as in prod L-2. */
+async function inviteLearnerLink(page: Page, name: string): Promise<string> {
+  await page.goto(`${BASE}/en/dashboard/company/education`);
+  await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("institution-learners-invite").click();
+  await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
+  const open = page.getByTestId("invite-panel-open");
+  if (await open.isVisible().catch(() => false)) await open.click();
+  await expect(page.getByTestId("invite-capacity")).toHaveValue("student", { timeout: 30_000 });
+  const linkMode = page.getByTestId("invite-mode-link");
+  if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
+  const nameField = page.getByTestId("invite-name");
+  if (await nameField.isVisible().catch(() => false)) await nameField.fill(name);
+  await page.getByTestId("invite-submit").click();
+  const copy = page.getByTestId("invite-copy-link").first();
+  await expect(copy, "the learner invitation link is handed over").toBeVisible({ timeout: 30_000 });
+  const u = new URL((await copy.getAttribute("data-invite-link")) ?? "");
+  return `${BASE}${u.pathname}${u.search}`;
+}
+
+async function acceptInvite(page: Page, link: string): Promise<void> {
+  await page.goto(link);
+  await expect(page.getByTestId("invite-page")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("invite-accept").click();
+  await page.waitForURL((u) => !u.pathname.includes("/invite/"), { timeout: 30_000 });
+}
+
+let eduStudentWorkerId = "";
+
+test("E-1. an institution trains people and invites a learner by link; a student accepts it", async ({ browser }) => {
+  // The institution: sign-up → "education" intent → organisation setup with the training-provider preset.
+  const a = await browser.newContext();
+  const inst = await a.newPage();
+  await signUp(inst, EDU.institution);
+  await onboard(inst, "education", "Synthetic Lecturer");
+  await inst.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  await inst.getByTestId("company-setup-legal-name").fill(EDU.orgName);
+  await inst.getByTestId("company-setup-country").selectOption("LT");
+  await inst.getByTestId("company-setup-save-draft").click();
+  // The training-provider preset landed: the next door is the education home
+  // itself (#3334), never the generic workspace.
+  await expect(inst.getByTestId("company-setup-next")).toHaveAttribute("data-first-door", "education", { timeout: 30_000 });
+  await inst.goto(`${BASE}/en/dashboard/company/education`);
+  await expect(inst.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
+  const link = await inviteLearnerLink(inst, EDU.learnerName);
+  await a.close();
+
+  // The student: registers as a student, then joins through the link.
+  const b = await browser.newContext();
+  const stu = await b.newPage();
+  await signUpStudent(stu, EDU.student, "Synthetic Student");
+  await acceptInvite(stu, link);
+  await b.close();
+
+  const sid = await userId(EDU.student);
+  const [worker] = await db<Array<{ id: string }>>(`workers?profile_id=eq.${sid}&select=id`);
+  expect(worker?.id, "the student is a person with a worker record").toBeTruthy();
+  eduStudentWorkerId = worker!.id;
+  const inv = await db<Array<{ status: string; accepted_by_profile_id: string | null }>>(
+    `invitations?invited_name=eq.${encodeURIComponent(EDU.learnerName)}&select=status,accepted_by_profile_id`,
+  );
+  expect(inv[0], "the learner invitation is accepted by the student").toEqual({ status: "accepted", accepted_by_profile_id: sid });
+
+  // The institution sees one connected learner.
+  const c = await browser.newContext();
+  const again = await c.newPage();
+  await signIn(again, EDU.institution, PASSWORD);
+  await again.goto(`${BASE}/en/dashboard/company/education`);
+  await expect(again.getByTestId("institution-learners-counts")).toContainText("1 connected", { timeout: 30_000 });
+  await c.close();
+});
+
+test("E-3. the student becomes a worker: studies end, work is recorded, and nothing of the history is lost", async ({ page }) => {
+  await signIn(page, EDU.student, PASSWORD);
+  // Studies end — the student's own education editor. It sits in the folded CV
+  // details; the page's own hash opener unfolds it for #cv-education (as ST-1
+  // and prod P-9 reach it). A real load, never a click on the fold: a click can
+  // race the opener and close it again, leaving the row counted but hidden.
+  await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
+  await page.reload();
+  const main = page.getByRole("main");
+  await expect(main.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
+  const row = main.getByTestId("worker-education-row").filter({ hasText: EDU.studiesAt });
+  await expect(row, "the study is listed, visible").toBeVisible({ timeout: 30_000 });
+  await row.getByRole("button", { name: "Edit" }).click();
+  const form = main.getByTestId("worker-education-form");
+  await expect(form).toBeVisible();
+  await form.getByRole("checkbox").uncheck();
+  await form.locator('input[aria-labelledby="education-end-year-label"]').fill(String(new Date().getUTCFullYear()));
+  await form.getByTestId("worker-education-save").click();
+  await expect(row, "the study is now finished, not current").not.toContainText("Currently studying", { timeout: 30_000 });
+
+  // First work as a worker — the Work Journal (pattern S-7).
+  await page.goto(`${BASE}/en/dashboard/journal`);
+  await main.getByTestId("journal-quick-record-text").fill(`Assembled 8 office desks at the client's site, 6 hours (edu ${RUN})`);
+  await main.getByTestId("journal-quick-record-understand").click();
+  await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  await main.getByTestId("worklog-save").click();
+  await main.getByTestId("worklog-confirm").click();
+  // As S-7: an error or a block is shown as itself, not as a timeout.
+  const done = main.getByTestId("worklog-done");
+  await expect(done.or(main.getByTestId("worklog-error")).or(main.getByTestId("worklog-blocked"))).toBeVisible({ timeout: 30_000 });
+  await expect(done, "the first work day is saved").toBeVisible();
+
+  // Stored: one study row (ended, kept), the student link kept, the work entry.
+  const sid = await userId(EDU.student);
+  const studies = await db<Array<{ institution_name: string; is_current: boolean }>>(
+    `worker_education?profile_id=eq.${sid}&select=institution_name,is_current`,
+  );
+  expect(studies, "the study is kept, now finished").toEqual([{ institution_name: EDU.studiesAt, is_current: false }]);
+  const work = await db<Array<{ id: string }>>(`journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`);
+  expect(work.length, "the work day is stored on the same person").toBeGreaterThan(0);
+  const links = await dbOrNull<Array<{ relationship_slug: string; status: string }>>(
+    `engagement_contexts?profile_id=eq.${sid}&select=relationship_slug,status`,
+  );
+  if (links) expect(links.map((l) => l.relationship_slug), "the student period is kept").toContain("student");
+
+  // One history on the Living CV: the study, the student period at the institution, and the work.
+  await page.goto(`${BASE}/en/cv`);
+  await expect(page.getByTestId("cv-education-row").filter({ hasText: EDU.studiesAt }), "the study on the CV").toHaveCount(1, { timeout: 30_000 });
+  const periods = page
+    .locator('[data-testid="cv-practice-history"], [data-testid="cv-organizations-roles"], [data-testid="cv-work-history"]')
+    .filter({ hasText: EDU.orgName });
+  await expect(periods.first(), "the student period at the institution stays in the one history").toBeVisible({ timeout: 30_000 });
+});
+
+// E-4 travels with its access fix (owner decision, binding, 2026-11-17;
+// 20261115120000_journal_learning_access_follows_link_v1): an ended
+// relationship removes current access, never the organization's lawfully
+// retained records. An organization reaches a learner's journal entry — by RLS
+// read, review queue, review decision or can_read_journal_entry_v1 — only
+// while the learning link is active and review is on for it. Every read and
+// call below runs as the person, with their OWN JWT.
+test("E-4. the institution ends the student link: it loses access, the learner keeps their history", async ({ browser }) => {
+  const sid = await userId(EDU.student);
+  const [ctx] = await db<Array<{ id: string }>>(
+    `engagement_contexts?profile_id=eq.${sid}&relationship_slug=eq.student&status=eq.active&select=id`,
+  );
+  expect(ctx?.id, "the learner has one active student link").toBeTruthy();
+
+  // The learner records practice days IN that learning relationship, through the app's own write.
+  const recordPractice = (text: string) =>
+    rpcAsPerson<string>(EDU.student, "create_journal_entry_full", {
+      p_worker_id: eduStudentWorkerId,
+      p_engagement_context_id: ctx!.id,
+      p_entry_type_slug: "freeform",
+      p_profession_id: null,
+      p_original_text: text,
+      p_original_language: "en",
+      p_hash_prev: null,
+      p_hash_self: "set-by-the-database",
+      p_visibility_scope: "closed",
+      p_metrics: [],
+      p_project_id: null,
+      p_project_explicit: false,
+    });
+  const practiceId = await recordPractice(`Practice day at the training centre, 4 hours (edu ${RUN})`);
+  expect(practiceId, "the practice day is stored").toBeTruthy();
+  const practice = `journal_entries?id=eq.${practiceId}&select=id`;
+  // A second day that the institution has not decided on when the link ends.
+  const pendingId = await recordPractice(`Second practice day at the training centre, 3 hours (edu ${RUN})`);
+  expect(pendingId, "the second practice day is stored").toBeTruthy();
+
+  // While review is off the institution sees participation, not the journal.
+  expect(await asPerson<Array<{ id: string }>>(EDU.institution, practice), "review off: no journal read").toEqual([]);
+  // The audited review door opens it while the link is active.
+  expect(
+    await rpcAsPerson<string>(EDU.institution, "set_engagement_journal_review", { p_engagement_id: ctx!.id, p_enabled: true }),
+  ).toBe("enabled");
+  expect(
+    (await asPerson<Array<{ id: string }>>(EDU.institution, practice)).length,
+    "control: active link + review on, the institution reads the practice day",
+  ).toBe(1);
+  expect(
+    entryIds(await rpcAsPerson<unknown>(EDU.institution, "reviewable_journal_entry_ids", {})),
+    "control: active link + review on, both days wait in the institution's review queue",
+  ).toEqual(expect.arrayContaining([practiceId, pendingId]));
+  expect(
+    await rpcAsPerson<boolean>(EDU.institution, "can_read_journal_entry_v1", { p_entry_id: practiceId }),
+    "control: active link + review on, can_read_journal_entry_v1 is true",
+  ).toBe(true);
+
+  // While the link is active the institution creates its OWN records about the
+  // learner, through the same doors the app calls: a sign-off, a recognition
+  // citing it, and a programme with a cohort the learner is placed in.
+  expect(
+    await rpcAsPerson<string>(EDU.institution, "review_journal_entry", { p_entry_id: practiceId, p_decision: "approved", p_note: null }),
+    "the institution signs the practice day off",
+  ).toBe("approved");
+  const [link] = await db<Array<{ organization_id: string }>>(`engagement_contexts?id=eq.${ctx!.id}&select=organization_id`);
+  const orgId = link!.organization_id;
+  const recognitionId = await rpcAsPerson<string>(EDU.institution, "record_competency_recognition_v1", {
+    p_subject_profile_id: sid,
+    p_requirement_kind: "skill",
+    p_requirement_key: `edu-practice-${RUN}`,
+    p_requirement_country: "LT",
+    p_evidence_entry_ids: [practiceId],
+    p_assessor_organization_id: orgId,
+    p_decision: "recognised",
+    p_valid_from: null,
+    p_valid_until: null,
+    p_note: null,
+    p_supersedes_id: null,
+  });
+  expect(recognitionId, "the institution records a recognition citing the signed-off day").toBeTruthy();
+  const programId = await rpcAsPerson<string>(EDU.institution, "create_education_program_v1", {
+    p_organization_id: orgId,
+    p_name: `Synthetic Programme ${RUN}`,
+  });
+  const cohortId = await rpcAsPerson<string>(EDU.institution, "create_education_cohort_v1", {
+    p_program_id: programId,
+    p_name: `Synthetic Cohort ${RUN}`,
+  });
+  await rpcAsPerson<null>(EDU.institution, "set_education_cohort_member_v1", {
+    p_cohort_id: cohortId,
+    p_profile_id: sid,
+    p_status: "active",
+  });
+
+  const a = await browser.newContext();
+  const inst = await a.newPage();
+  await signIn(inst, EDU.institution, PASSWORD);
+  await inst.goto(`${BASE}/en/dashboard/company/people`);
+  await inst.waitForLoadState("networkidle").catch(() => undefined);
+  const member = inst.getByRole("main").getByTestId("lifecycle-member").filter({ hasText: "Student" });
+  await expect(member, "the institution's learner is in its people lifecycle").toHaveCount(1, { timeout: 30_000 });
+  // Each member's controls sit in that member's own fold, and the list itself
+  // may sit in folded sections. Open exactly the folds that hold this learner's
+  // controls (its ancestors and its own), by setting `open`: a click on a
+  // summary toggles, so it can close a fold the page has already opened.
+  await member.evaluate((li) => {
+    for (let el: Element | null = li; el; el = el.parentElement) {
+      if (el instanceof HTMLDetailsElement) el.open = true;
+    }
+    li.querySelectorAll("details").forEach((d) => {
+      (d as HTMLDetailsElement).open = true;
+    });
+  });
+  const end = member.getByRole("button", { name: "End employment" });
+  await expect(end, "the institution is offered an end control for its learner").toBeVisible({ timeout: 30_000 });
+  await end.click();
+
+  // Ending runs as a server action on this same page (no navigation to wait
+  // for): read its outcome back with a fresh load until it shows.
+  await expect
+    .poll(
+      async () => {
+        await inst.goto(`${BASE}/en/dashboard/company/education`);
+        return (await inst.getByTestId("institution-learners-counts").innerText().catch(() => "")).trim();
+      },
+      { message: "no connected learner remains", timeout: 60_000, intervals: [1_000, 2_000, 5_000] },
+    )
+    .toContain("0 connected");
+
+  const links = await dbOrNull<Array<{ relationship_slug: string; status: string }>>(
+    `engagement_contexts?profile_id=eq.${sid}&relationship_slug=eq.student&select=relationship_slug,status`,
+  );
+  if (links) expect(links, "the link is ended, not deleted").toEqual([{ relationship_slug: "student", status: "ended" }]);
+  await a.close();
+
+  // Access, read under the institution's own RLS: no active link, none of the learner's journal.
+  const activeLinks = await asPerson<Array<{ id: string }>>(
+    EDU.institution,
+    `engagement_contexts?profile_id=eq.${sid}&status=eq.active&select=id`,
+  );
+  expect(activeLinks, "the institution sees no active link to the learner").toEqual([]);
+  const journal = await asPerson<Array<{ id: string }>>(
+    EDU.institution,
+    `journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`,
+  );
+  expect(journal, "the institution reads none of the learner's journal").toEqual([]);
+  expect(await asPerson<Array<{ id: string }>>(EDU.institution, practice), "not even the reviewed practice day").toEqual([]);
+
+  // The SECURITY DEFINER doors follow the same rule (RLS does not apply inside them).
+  expect(
+    entryIds(await rpcAsPerson<unknown>(EDU.institution, "reviewable_journal_entry_ids", {})),
+    "ended link: nothing in the institution's review queue",
+  ).toEqual([]);
+  const refused = await rpcAsPerson<string>(EDU.institution, "review_journal_entry", {
+    p_entry_id: pendingId,
+    p_decision: "approved",
+    p_note: null,
+  });
+  expect(refused, "ended link: a review decision is refused").not.toBe("approved");
+  expect(["review_authority_not_established", "review_not_enabled", "not_authorized"]).toContain(refused);
+  expect(
+    await db<Array<{ id: string }>>(`journal_entry_confirmations?entry_id=eq.${pendingId}&select=id`),
+    "and nothing is stored for it",
+  ).toEqual([]);
+  for (const id of [practiceId, pendingId]) {
+    expect(
+      await rpcAsPerson<boolean>(EDU.institution, "can_read_journal_entry_v1", { p_entry_id: id }),
+      "ended link: can_read_journal_entry_v1 is false",
+    ).toBe(false);
+  }
+
+  // The institution's OWN historical records stay readable to it, under its own RLS.
+  const recognitions = await asPerson<Array<{ id: string; assessor_organization_id: string; evidence_entry_ids: string[] }>>(
+    EDU.institution,
+    `competency_recognitions?id=eq.${recognitionId}&select=id,assessor_organization_id,evidence_entry_ids`,
+  );
+  expect(recognitions, "the institution still reads its own recognition").toEqual([
+    { id: recognitionId, assessor_organization_id: orgId, evidence_entry_ids: [practiceId] },
+  ]);
+  const signOff = await asPerson<Array<{ entry_id: string }>>(
+    EDU.institution,
+    `journal_entry_confirmations?entry_id=eq.${practiceId}&select=entry_id`,
+  );
+  expect(signOff, "its own sign-off of the practice day").toEqual([{ entry_id: practiceId }]);
+  expect(
+    await asPerson<Array<{ id: string }>>(EDU.institution, `education_programs?id=eq.${programId}&select=id`),
+    "its programme",
+  ).toEqual([{ id: programId }]);
+  expect(
+    await asPerson<Array<{ id: string }>>(EDU.institution, `education_cohorts?id=eq.${cohortId}&select=id`),
+    "its cohort",
+  ).toEqual([{ id: cohortId }]);
+  const membership = await asPerson<Array<{ status: string }>>(
+    EDU.institution,
+    `education_cohort_members?cohort_id=eq.${cohortId}&profile_id=eq.${sid}&select=status`,
+  );
+  expect(membership.length, "the learner's cohort membership record").toBe(1);
+  expect(["active", "left"]).toContain(membership[0]!.status);
+
+  // The learner keeps their own history.
+  const own = await asPerson<Array<{ id: string }>>(EDU.student, `journal_entries?worker_id=eq.${eduStudentWorkerId}&select=id`);
+  expect(own.map((e) => e.id), "the learner still reads their own work").toContain(practiceId);
+  const b = await browser.newContext();
+  const stu = await b.newPage();
+  await signIn(stu, EDU.student, PASSWORD);
+  await stu.goto(`${BASE}/en/cv`);
+  await expect(stu.getByTestId("cv-education-row").filter({ hasText: EDU.studiesAt })).toHaveCount(1, { timeout: 30_000 });
+  await b.close();
+});

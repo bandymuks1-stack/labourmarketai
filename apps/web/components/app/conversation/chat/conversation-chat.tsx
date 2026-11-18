@@ -53,10 +53,11 @@ import {
 import { loadEducationWorkspaceForChat } from "@/lib/conversation/education-workspace";
 import { loadEducationAnswerForChat } from "@/lib/conversation/education-answers";
 import {
-  educationQuestionKind,
+  educationModeFromText,
   isEducationQuestionKind,
   type EducationQuestionKind,
 } from "@/lib/conversation/education-question";
+import { readStatedProgress } from "@/lib/conversation/progress-status-phrase";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { openTeamOfferThreadForChat } from "@/lib/company/team-offer-conversation";
@@ -66,7 +67,7 @@ import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 import { readMyCvState } from "@/lib/conversation/cv-state-server";
 import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-server";
 import { aiStateMessageKey, understand } from "@/lib/conversation/utterance-understanding";
-import { matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
+import { asksForPersonalWorkspace, matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
 import { readRenameTarget } from "@/lib/conversation/organization-rename-phrase";
 import { readRenameTargetForChat } from "@/lib/conversation/organization-rename-chat";
 import {
@@ -135,6 +136,7 @@ import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { NEED_DOOR_HREF } from "@/lib/company/need-door";
 import type { BaseIdentity } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
 import {
@@ -276,28 +278,31 @@ function PersonalWorkspaceIntroStream({
   return <PersonalWorkspaceIntro intro={intro} labels={labels} onAction={onAction} />;
 }
 
+/** The S2 block's place while its slow readiness read streams (home CLS P0,
+ *  2026-10-26). It used to be `fallback={null}`: the block (a compact card,
+ *  ~250–300 px) then appeared out of nothing above the greeting and pushed
+ *  the greeting and the centred composer down. The page hands a payload ONLY
+ *  when the block can render at all (`personalIntroMayShow`, decided from
+ *  facts it already holds), so this reservation is drawn only where a block
+ *  is genuinely coming — never a placeholder for something that cannot. */
+function PersonalWorkspaceIntroPending() {
+  return (
+    <div
+      aria-hidden
+      data-testid="personal-workspace-intro-pending"
+      className="min-h-64 rounded-card border border-ink-600/70 bg-ink-800/40 p-4"
+    >
+      <SkeletonText lines={4} />
+    </div>
+  );
+}
+
 /**
  * An e-mail address the person already typed in the sentence ("pakviesk
  * klientą jonas@imone.lt"). Chat-first rule: never ask for a fact the sentence
  * already carries — it pre-fills the ONE field and the person only confirms.
  * Shape gate only; the canonical validators stay authoritative server-side.
  */
-/** Which of the institution's commands a "programmes" sentence asks for —
- *  create / cohort / assign, else a plain list. Folded, five locales. */
-function educationModeFromText(text: string): "list" | "create" | "cohort" | "assign" | EducationQuestionKind {
-  const q = (text ?? "").toLowerCase();
-  // Window 6 (lane C): a lecturer's QUESTION about students (outcomes, who
-  // fits, what skills are missing, where to do practice) is answered from the
-  // institution's real reads — never routed to the owner's own worker answer.
-  const question = educationQuestionKind(q);
-  if (question) return question;
-  if (/priskir|assign|zuweis|toewijz|назнач|zapisz/.test(q)) return "assign";
-  const creates = /sukur|kurti|prid[eė]|nauj|create|new|add|erstell|anleg|maak|nieuw|создать|создай|нов/.test(q);
-  if (creates && /grup|kohort|cohort|groep|gruppe|групп|поток|когорт/.test(q)) return "cohort";
-  if (creates) return "create";
-  return "list";
-}
-
 function extractEmail(sentence: string): string | null {
   const m = sentence.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
   return m ? m[0].toLowerCase() : null;
@@ -700,6 +705,7 @@ export type ChatLabels = {
   eduCohortCreated: string;
   eduAssignNoCohort: string;
   eduAssignNoLearners: string;
+  eduMembersNotForRole: string;
   eduAssignDone: string;
   eduNotInstitution: string;
   eduUnavailable: string;
@@ -1469,6 +1475,15 @@ export function ConversationChat({
         const actionId = spec.actionId;
         const isEmployer =
           actionId.startsWith("company.") || actionId.startsWith("agency.");
+        // The chat's demand intake rendered (activation audit 2026-10-26 §2):
+        // the same `demand_form_viewed` the Needs door's intake sends, with
+        // the chat as its surface — whichever chip or sentence opened it.
+        if (actionId === "company.create-demand") {
+          trackFunnel(FUNNEL_EVENTS.demandFormViewed, {
+            surface: "chat",
+            role_context: "company",
+          });
+        }
         const render = (values?: Record<string, string | boolean>) => pushEmbed(
           <InlineActionForm
             spec={spec}
@@ -2563,14 +2578,17 @@ export function ConversationChat({
         withTyping(() => assistant(t("switchContextUnavailable")));
         return;
       }
-      const folded = fold(text);
-      // "asmenin…" / "personal" / "личн…" / "persoonlijk…" / "persönlich…"
-      // (folded: persönlich → personlich) — the personal space by name.
-      const wantsPersonal = ["asmenin", "personal", "личн", "persoonlijk", "personlich"].some(
-        (hint) => folded.includes(hint),
-      );
       const organizations = workspaces.filter(
         (w) => w.kind === "organization" && w.name.trim() !== "",
+      );
+      // "asmenin…" / "personal" / "личн…" / "persoonlijk…" / "persönlich…" /
+      // "personlig" / "privat" — the personal space by name. One reader
+      // (`asksForPersonalWorkspace`); a hint inside one of the person's own
+      // organization names is that organization, never the personal space.
+      const wantsPersonal = asksForPersonalWorkspace(
+        text,
+        fold,
+        organizations.map((w) => w.name),
       );
       let target: WorkspaceInfo | undefined = wantsPersonal
         ? workspaces.find((w) => w.kind === "personal")
@@ -4864,11 +4882,14 @@ export function ConversationChat({
   const startTaskStatus = useCallback(
     (sentence: string) => {
       const lower = sentence.toLowerCase();
-      const status: WorkTaskStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял|zablok/.test(lower)
-        ? "blocked"
-        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал|rozpocz/.test(lower)
-          ? "in_progress"
-          : "done";
+      // The state the sentence SAYS — never a default. A sentence that names a
+      // task and states no state ("Was ist mit der Aufgabe Malen?") writes
+      // nothing: it used to be recorded as done.
+      const status: WorkTaskStatus | null = readStatedProgress(sentence, "task");
+      if (status === null) {
+        assistant(fallbackText, starterChips);
+        return;
+      }
       setTyping(true);
       loadOpenTasksForChat()
         .then((res) => {
@@ -4897,7 +4918,7 @@ export function ConversationChat({
           assistant(labels.taskUnavailable);
         });
     },
-    [identity, assistant, labels, runTaskStatus],
+    [identity, assistant, labels, runTaskStatus, fallbackText, starterChips],
   );
 
   /** "Kuris projektas rizikoje?" (§11 / §16): every live project with the SAME
@@ -5035,11 +5056,13 @@ export function ConversationChat({
         return;
       }
       const lower = sentence.toLowerCase();
-      const status: StageStatus = /u[zž]strig|blokuot|sustoj|blocked|stuck|blockiert|geblokkeerd|vastgelopen|заблок|застрял/.test(lower)
-        ? "blocked"
-        : /prad[eė]|prasid[eė]|start|begonnen|angefangen|начал/.test(lower)
-          ? "in_progress"
-          : "done";
+      // The state the sentence SAYS — never a default. "Erkläre die Etappe
+      // Fundament" is a question; a stage is not marked done by one.
+      const status: StageStatus | null = readStatedProgress(sentence, "stage");
+      if (status === null) {
+        assistant(fallbackText, [{ id: "projects", label: labels.chipProjects }]);
+        return;
+      }
       setTyping(true);
       loadCompanyStagesForChat()
         .then((res) => {
@@ -5285,6 +5308,14 @@ export function ConversationChat({
               assistant(labels.eduAssignNoCohort, [{ id: "edu:cohort", label: labels.chipCreateCohort }]);
               return;
             }
+            // J-12: only the institution's own owner/admin/manager changes
+            // membership — say so instead of "no learners yet".
+            if (!res.membersVisible) {
+              assistant(labels.eduMembersNotForRole, [
+                { id: "link:/dashboard/company/education#institution-programs-title", label: labels.chipProgrammes },
+              ]);
+              return;
+            }
             if (res.assignable.length === 0) {
               assistant(labels.eduAssignNoLearners, [
                 { id: "f:company.invite-learner", label: labels.chipInviteStudent },
@@ -5480,6 +5511,17 @@ export function ConversationChat({
     (chip: ChoiceChip) => {
       if (runPinChip(chip.id)) return;
       noteUsage(chip.id, chip.label);
+      // A "describe a need" door was tapped — the starter chip, the follow-up
+      // after a saved need, or the employer bridge's link to the Needs door.
+      // Same event and the same bounded surface as every other need door
+      // (`lib/company/need-door.ts`); the form's own view is counted in
+      // `openForm`.
+      if (chip.id.split("?")[0] === "f:company.create-demand" || chip.id === `link:${NEED_DOOR_HREF}`) {
+        trackFunnel(FUNNEL_EVENTS.companyDemandActionClicked, {
+          surface: "chat",
+          role_context: "company",
+        });
+      }
       // PERSONAL ACTS ARE NOT COMPANY ACTS (owner 2026-10-01). The CV, the
       // personal profile and the person's own work log belong to the PERSON;
       // in a company workspace the chip says so and offers the personal space
@@ -6154,7 +6196,13 @@ export function ConversationChat({
       else if (v.workType) parts.push(workTypeLabels[v.workType] ?? v.workType);
       if (v.subject === "goods" && v.quantity) parts.push(v.quantity.raw);
       if (v.headcount !== null) {
-        parts.push(t("valueIntent.people", { count: v.headcount }));
+        // Teams of a stated size read back as both: "12 žmonių (3 brigados po 4)".
+        const people = t("valueIntent.people", { count: v.headcount });
+        parts.push(
+          v.teamCount != null && v.perTeamSize != null
+            ? `${people} (${t("valueIntent.teams", { teams: v.teamCount, perTeam: v.perTeamSize })})`
+            : people,
+        );
       }
       if (v.window) {
         if (v.window.kind === "days_count") {
@@ -6217,6 +6265,13 @@ export function ConversationChat({
       if (v.workType) out.workType = v.workType;
       if (v.country) out.country = v.country;
       if (v.headcount !== null) out.teamSize = String(v.headcount);
+      // Teams of a stated size ride the form state unrendered, like the work
+      // type: the executor stores them in `structured_v2.team` only while the
+      // number of workers still equals teams × size.
+      if (v.teamCount != null && v.perTeamSize != null) {
+        out.teamCount = String(v.teamCount);
+        out.perTeamSize = String(v.perTeamSize);
+      }
       if (v.window) {
         if (v.window.kind === "from_date" && v.window.startIso) {
           out.startDate = v.window.startIso;
@@ -6258,11 +6313,13 @@ export function ConversationChat({
         : null;
       const questions = v.missing
         .filter(
-          (m): m is "location" | "window" | "quantity" | "headcount" =>
+          (m): m is "location" | "window" | "quantity" | "headcount" | "team_size" =>
             m === "location" ||
             m === "window" ||
             m === "quantity" ||
-            m === "headcount",
+            m === "headcount" ||
+            // Teams named without a size or as a range: ask about the teams.
+            m === "team_size",
         )
         .map((m) => t(`valueIntent.ask.${m}` as Parameters<typeof t>[0]));
 
@@ -8241,11 +8298,13 @@ export function ConversationChat({
                 openingContext && !script ? (
                   openingContext
                 ) : personalIntroPayload && !script ? (
-                  /* Invisible boundary (#1011): the intro's slow readiness
-                     reads stream in AFTER the shell — the opening composition
-                     renders immediately and the block appears when known,
-                     exactly like the layout's SpineStream. */
-                  <Suspense fallback={null}>
+                  /* Own boundary (#1011): the intro's slow readiness reads
+                     stream in AFTER the shell — the opening composition
+                     renders immediately, exactly like the layout's
+                     SpineStream. The pending state RESERVES the block's
+                     space (home CLS P0): a payload only exists when the
+                     block can render, so nothing is reserved in vain. */
+                  <Suspense fallback={<PersonalWorkspaceIntroPending />}>
                     <PersonalWorkspaceIntroStream
                       payload={personalIntroPayload}
                       onAction={handlePanelChip}

@@ -212,6 +212,42 @@ describe("the read path actually asks the question", () => {
     expect(card).toMatch(/subjectProfileId:\s*user\.id/);
   });
 
+  it("the journal page asks it at EVERY verification-state call (walk-spec 2026-10-25)", () => {
+    // The page called deriveWorkVerificationState without `selfConfirmedOnly`,
+    // so a worker's own approval of their own entry read "Vadovo patvirtinta"
+    // — a false verification claim. Every call must pass the subject's answer.
+    const page = read("app/[locale]/dashboard/journal/page.tsx");
+    const calls = page.split("deriveWorkVerificationState({").slice(1);
+    expect(calls.length).toBeGreaterThan(0);
+    for (const call of calls) {
+      const args = call.slice(0, call.indexOf("});"));
+      expect(args).toMatch(
+        /selfConfirmedOnly:\s*isSelfConfirmedOnly\(\s*e\.journal_entry_confirmations,\s*user\.id,?\s*\)/,
+      );
+    }
+    // …and the reader it renders from selects the column the answer needs.
+    const core = read("lib/journal/journal-list-core.ts");
+    expect(core).toMatch(/JOURNAL_ENTRY_CONFIRMATIONS_EMBED\s*=\s*\n?\s*"journal_entry_confirmations\([^)]*confirmer_id/);
+  });
+
+  it("the journal page's confirmed COUNTS exclude the subject's own approval (audit 2026-11-03)", () => {
+    // The evidence strip ("Confirmed by a manager" chip), the CV bridge
+    // ("{confirmed} of {total} entries confirmed") and the calendar's
+    // confirmedCount used bare deriveReviewResult, which counts a legacy
+    // self-approval as confirmed. Only the verification-state calls may use
+    // the bare result, because they pass `selfConfirmedOnly` alongside it.
+    const page = read("app/[locale]/dashboard/journal/page.tsx");
+    expect(page).toMatch(
+      /const evidenceStatuses = \(entries \?\? \[\]\)\.map\(\(e\) =>\s*deriveIndependentReviewResult\(e\.journal_entry_confirmations, user\.id\)/,
+    );
+    expect(page).toMatch(
+      /confirmedCount: g\.entries\.filter\(\s*\(e\) =>\s*deriveIndependentReviewResult\(e\.journal_entry_confirmations, user\.id\) === "approved"/,
+    );
+    const bare = page.split("deriveReviewResult(").length - 1;
+    const inVerification = page.split(/reviewResult:\s*deriveReviewResult\(/).length - 1;
+    expect(bare).toBe(inVerification);
+  });
+
   it("the evidence is preserved, not deleted — nothing here removes a row", () => {
     const status = read("lib/journal/review-status.ts");
     expect(status).not.toMatch(/\.delete\(|DELETE FROM/i);

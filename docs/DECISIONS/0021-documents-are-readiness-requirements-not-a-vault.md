@@ -64,3 +64,56 @@ workflow genuinely requires. It is not a universal worker-document repository.
 Does this change make a file upload a precondition for participating, matching,
 applying, shortlisting, planning or being offered? If yes, it violates this
 decision unless a specific legal / contractual reason is recorded.
+
+## Extension — 2026-10-24 (owner correction, P0)
+
+The owner extended this decision. It now covers **readiness signals and the
+moment of agreement** as well as upload gates. It applies to worker AND company
+accounts.
+
+1. **No document requirement to take part.** Not uploading documents never
+   blocks or narrows:
+   - registration or onboarding;
+   - person or company profiles, or the Living CV;
+   - Marketplace search, listings or offers;
+   - worker, team or partner selection;
+   - messaging or negotiation;
+   - project planning.
+2. **No negative readiness from document counts.** Missing documents never:
+   - mean "not ready";
+   - lower a readiness or completion figure;
+   - act as an automatic negative professional signal.
+
+   Readiness is read from competencies, recorded work and availability. A
+   checklist row counts as "missing" only when a manager **explicitly** marks
+   it so for that job. A suggested row is "to agree before the agreement",
+   never "missing".
+3. **No universal mandatory list.** The suggested checks for a job depend on:
+   - the deal type;
+   - the profession;
+   - the country or jurisdiction;
+   - the project conditions.
+
+   A row that only applies across borders, such as A1 or posting
+   documentation, is suggested only when the countries are known to differ.
+4. **A mutual, neutral recommendation at the moment of agreement.** When two
+   parties consider a concrete collaboration, both see the same note: before
+   the final agreement, check the documents, qualifications, permits and terms
+   that matter for this job or deal. It appears on bookings, scouting / offers,
+   project operations, service requests and commercial proposals. Each topic
+   names its basis:
+   - **required by law**;
+   - **required by law under a stated condition**;
+   - **for the parties to agree**.
+
+   External legal duties are stated plainly. This decision never removes them.
+5. **Privacy stays.** Uploading stays voluntary. Documents are never disclosed
+   to the other party automatically. Already-uploaded documents and their
+   access rights are kept. A missing document never erases experience proven by
+   other sources. Nothing is called verified unless a verification happened.
+
+Code anchors:
+- `lib/collaboration/collaboration-checks.ts` (the recommendation);
+- `lib/projects/readiness-items.ts` (`suggestedReadinessItemKeys`);
+- `lib/projects/operations-derive.ts` (`docsToAgree` vs explicit `docsMissing`);
+- guard `lib/guards/documents-are-readiness-not-a-gate.test.ts`.

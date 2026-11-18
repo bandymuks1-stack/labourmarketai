@@ -98,12 +98,12 @@ export function WorkerPublicSummaryEditor({
             {labels.save}
           </button>
           {state === "saved" && !dirty ? (
-            <span role="status" className="text-xs text-state-success">
+            <span role="status" className="text-xs text-state-success" data-testid="profile-public-summary-saved">
               {labels.saved}
             </span>
           ) : null}
           {state === "too-long" || state === "error" ? (
-            <span role="alert" className="text-xs text-state-warning">
+            <span role="alert" className="text-xs text-state-warning" data-testid="profile-public-summary-error">
               {state === "too-long" ? labels.tooLong : labels.error}
             </span>
           ) : null}

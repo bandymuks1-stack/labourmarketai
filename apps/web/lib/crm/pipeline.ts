@@ -35,6 +35,7 @@ import {
   findPossibleDuplicateIds,
   leadToItem,
   publicIntakeToItem,
+  realPublicIntakes,
   sortPipelineItems,
   waitlistToItem,
   type PipelineItem,
@@ -120,8 +121,10 @@ export async function getPipelineOverview(): Promise<PipelineOverview> {
 
   // company_need_public_intakes (anonymous public funnel — deny-all RLS
   // untouched; read via the seed lib's own service-role + isSuperadmin gate).
+  // Real requests only: our own test rows stay in the admin intake queue and
+  // out of every pipeline stage and source count (realPublicIntakes).
   if (publicIntakes.kind === "ok") {
-    const rows = publicIntakes.rows.map((r) =>
+    const rows = realPublicIntakes(publicIntakes.rows).map((r) =>
       publicIntakeToItem({
         id: r.id,
         status: r.status,

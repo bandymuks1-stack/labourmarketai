@@ -41,6 +41,7 @@ import {
   type WorkIntelligence,
 } from "@/lib/journal/work-intelligence";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import { readDisputedEntrySkills, withoutDisputedLinks } from "@/lib/journal/entry-skill-disputes";
 import {
   deriveProfessionalExperience,
   type ProfessionalExperience,
@@ -544,12 +545,15 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   ];
   const projectNamesRes =
     contextProjectIds.length > 0
-      ? await tolerant<{ id: string; name: string | null }[]>(
-          sb.from("projects").select("id, name").in("id", contextProjectIds),
+      ? // `projects` names a project in `title`; there is no `name` column.
+        // Asking for `name` failed, the tolerant wrapper turned the failure
+        // into "no rows", and no job on the CV ever showed its project.
+        await tolerant<{ id: string; title: string | null }[]>(
+          sb.from("projects").select("id, title").in("id", contextProjectIds),
         )
       : { data: null };
   const projectNameById = new Map(
-    (projectNamesRes.data ?? []).map((p) => [p.id, p.name?.trim() || null] as const),
+    (projectNamesRes.data ?? []).map((p) => [p.id, p.title?.trim() || null] as const),
   );
   // The journal's per-context figures (canonical reader; null = unreadable).
   // Real work a manager independently confirmed, as facts (entries + distinct
@@ -629,9 +633,10 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       }),
     );
 
-  const personName =
-    profileRes.data?.full_name ??
-    (profileRes.data?.email ? profileRes.data.email.split("@")[0] : "—");
+  // No saved name is "—": the page then says the name is not provided. The
+  // part of the e-mail address before "@" is not a name, and this document is
+  // handed to an employer, so it is never printed in its place.
+  const personName = profileRes.data?.full_name?.trim() || "—";
 
   const professionalSummary =
     (
@@ -661,10 +666,16 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   const countedEntryIds = new Set(
     cvLiveEntries(((entriesRes.data ?? []) as unknown) as CvEntryRow[]).map((e) => e.id),
   );
+  // …and never a link the person DISPUTED on its entry, even while the row
+  // itself still exists (lib/journal/entry-skill-disputes.ts).
+  const disputed = linkRes.error ? null : await readDisputedEntrySkills(supabase, workerId);
   const durableSupported = linkRes.error
     ? new Set<string>()
     : supportedSkillIds(
-        ((linkRes.data ?? []) as EntrySkillLinkRow[]).filter((l) => countedEntryIds.has(l.journal_entry_id)),
+        withoutDisputedLinks(
+          ((linkRes.data ?? []) as EntrySkillLinkRow[]).filter((l) => countedEntryIds.has(l.journal_entry_id)),
+          disputed,
+        ),
       );
 
   // `verified` below is the STANDING confirmation, not the stored flag

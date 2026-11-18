@@ -36,6 +36,8 @@ import {
 } from "@/lib/marketplace/market-model";
 import { assessPublish } from "@/lib/marketplace/publish-policy";
 import { readFederatedMarketRows } from "@/lib/marketplace/federation";
+import { actionForStatus, listingAdapter } from "@/lib/market-lifecycle/adapters";
+import { transition, type EntryAction } from "@/lib/market-lifecycle/contract";
 import {
   filterByDirection,
   indexRowActor,
@@ -595,15 +597,29 @@ export async function setMarketplaceListingStatusAction(
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
 
+  // THE ONE LIFECYCLE CONTRACT (lib/market-lifecycle): the requested status
+  // must be what one of the contract's actions produces from the row's
+  // current state — for the UI, the MCP tool and any other door alike.
+  const { data: row, error: readError } = await asAny(supabase)
+    .from("marketplace_listings")
+    .select("status, category, listing_kind, title, description, owner_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (readError) {
+    if (isAbsent(readError)) return { kind: "needs-migration" };
+    return { kind: "error", message: "status_failed" };
+  }
+  if (!row || row.owner_id !== user.id) return { kind: "invalid", field: "id" };
+  if (row.status === status) return { kind: "ok", id };
+  const adapter = listingAdapter({ pauseSupported: true, closedOutcomeStored: false });
+  if (!actionForStatus(adapter, adapter.facts({ status: String(row.status) }), status)) {
+    return { kind: "invalid", field: "status" };
+  }
+
   if (status === "active") {
     // Publishing is where the policy bites (the RPC and the DB trigger apply
     // the registry half; the text-aware half is here).
-    const { data: row } = await asAny(supabase)
-      .from("marketplace_listings")
-      .select("category, listing_kind, title, description, owner_id")
-      .eq("id", id)
-      .maybeSingle();
-    if (row && row.owner_id === user.id) {
+    {
       const verdict = assessPublish({
         subject: row.category,
         listingKind: row.listing_kind,
@@ -640,6 +656,23 @@ export async function setMarketplaceListingStatusAction(
   }
   revalidatePath(LISTINGS_PATH, "page");
   return { kind: "ok", id };
+}
+
+/**
+ * A contract action on an own listing (publish, pause, resume, complete,
+ * withdraw) — resolved to the status the contract targets, then written by
+ * the one status door above, which re-checks the same contract.
+ */
+export async function applyMarketplaceListingAction(
+  id: string,
+  action: EntryAction,
+  currentStatus: string,
+  legalCheckAcknowledged = false,
+): Promise<MarketplaceListingMutateResult> {
+  const adapter = listingAdapter({ pauseSupported: true, closedOutcomeStored: false });
+  const target = action === "edit" ? null : transition(adapter.support, adapter.facts({ status: currentStatus }), action);
+  if (!target) return { kind: "invalid", field: "action" };
+  return setMarketplaceListingStatusAction(id, adapter.statusFor(target.state), legalCheckAcknowledged);
 }
 
 export async function deleteMarketplaceListingAction(

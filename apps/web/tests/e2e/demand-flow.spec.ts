@@ -21,6 +21,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 // The COMPANY-actor session file, not the shared `.storage-state.json`: the
 // generic file's identity is whatever the last mint chose (the 2026-08-31
@@ -61,8 +62,9 @@ async function shot(page: Page, name: string): Promise<void> {
  *  form renders. Switches active role via the role-switcher when needed. */
 async function ensureCompanyContext(page: Page): Promise<void> {
   // W3 rows 7/8/25: the wizard's canonical (and only) home is the company
-  // page — role-gated on the HELD company role, no active-role dance needed.
-  await page.goto("/lt/dashboard/company", { waitUntil: "networkidle" });
+  // NEEDS door (#1746 split /dashboard/company into doors) — role-gated on the
+  // HELD company role, no active-role dance needed.
+  await page.goto("/lt/dashboard/company/needs", { waitUntil: "networkidle" });
 }
 
 test("demand flow: empty blocked → describe → criteria → review → create", async ({
@@ -92,6 +94,7 @@ test("demand flow: empty blocked → describe → criteria → review → create
   await page.getByTestId("demand-location").fill("Vilnius, Lietuva");
   await page.getByTestId("demand-skills").fill("Krautuvo pažymėjimas, lietuvių kalba");
   await page.getByTestId("demand-notes").fill("Pradžia kitą savaitę");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
 
   // ── Step 3 — review shows the entered values.
