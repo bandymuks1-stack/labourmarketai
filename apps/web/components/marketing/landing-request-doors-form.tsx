@@ -2,12 +2,24 @@
 
 import { useEffect, useRef, useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { useLocale } from "next-intl";
 
-import { Button } from "@/components/ui/Button";
+import { Button, buttonLinkClassName } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
 import { submitRequestDoorAction, type RequestDoorResult } from "@/lib/staffing/request-door-actions";
 import { REQUEST_DOORS, type RequestDoor } from "@/lib/staffing/request-doors";
 import { REQUEST_DOOR_FRAGMENT_PREFIX, requestDoorFromFragment } from "@/lib/staffing/request-door-link";
+import { Link } from "@/lib/i18n/navigation";
+
+/**
+ * ONE WORKER NEED, ONE FORM (doctrine §17; employer path P0 2026-11-15, F5). The
+ * worker-search door had its own short form, stored through the same intake as
+ * /company-need but with different fields. It now opens /company-need, which
+ * takes everything the door asked (phone included) and more; the page id rides
+ * as `from`. The B2B and project doors keep their forms here.
+ */
+const WORKER_SEARCH_FORM = { pathname: "/company-need", query: { from: "request_worker_search" } } as const;
 
 export type RequestDoorLabels = {
   readonly doors: Readonly<Record<RequestDoor, { readonly title: string; readonly body: string }>>;
@@ -26,6 +38,8 @@ export type RequestDoorLabels = {
   readonly scope: string;
   readonly deadline: string;
   readonly need: string;
+  /** The partner door's one field: what cooperation is proposed. */
+  readonly proposal: string;
   readonly customer: string;
   readonly customerPrivate: string;
   readonly customerBusiness: string;
@@ -73,6 +87,7 @@ export function LandingRequestDoorsForm({
   countries: readonly { readonly code: string; readonly label: string }[];
   notice: ReactNode;
 }) {
+  const locale = useLocale();
   const [door, setDoor] = useState<RequestDoor | null>(null);
   const [result, setResult] = useState<RequestDoorResult | null>(null);
   const [pending, start] = useTransition();
@@ -97,6 +112,11 @@ export function LandingRequestDoorsForm({
     const fromAddress = () => {
       const wanted = requestDoorFromFragment(window.location.hash);
       if (!wanted) return;
+      if (wanted === "worker-search") {
+        // An older link to the retired short form opens the one form instead.
+        window.location.assign(`/${locale}${WORKER_SEARCH_FORM.pathname}?from=${WORKER_SEARCH_FORM.query.from}`);
+        return;
+      }
       const block = document.getElementById("request");
       if (block instanceof HTMLDetailsElement) block.open = true;
       openedAt.current = Date.now();
@@ -129,7 +149,7 @@ export function LandingRequestDoorsForm({
       window.removeEventListener("popstate", fromAddress);
       document.removeEventListener("click", afterClick);
     };
-  }, []);
+  }, [locale]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -157,6 +177,23 @@ export function LandingRequestDoorsForm({
         <ul className="grid gap-2">
           {REQUEST_DOORS.map((d) => (
             <li key={d}>
+              {d === "worker-search" ? (
+                <Link
+                  href={WORKER_SEARCH_FORM}
+                  data-testid={`request-door-${d}-open`}
+                  className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-ink-600 bg-ink-900/40 p-4 text-left transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue motion-reduce:transition-none"
+                >
+                  <span className="min-w-0">
+                    <span className="block font-display text-base font-semibold text-text-primary">
+                      {labels.doors[d].title}
+                    </span>
+                    <span className="mt-0.5 block text-sm leading-relaxed text-text-secondary">
+                      {labels.doors[d].body}
+                    </span>
+                  </span>
+                  <ArrowRight className="size-4 shrink-0 text-text-muted" aria-hidden />
+                </Link>
+              ) : (
               <button
                 type="button"
                 aria-expanded={door === d}
@@ -176,16 +213,27 @@ export function LandingRequestDoorsForm({
                 </span>
                 <ArrowRight className="size-4 shrink-0 text-text-muted" aria-hidden />
               </button>
+              )}
             </li>
           ))}
         </ul>
       ) : (
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {REQUEST_DOORS.map((d) => (
             <Card key={d} className="wow-card flex flex-col gap-3 p-5">
               <h3 className="font-display text-lg font-bold tracking-tightest text-text-primary">{labels.doors[d].title}</h3>
               <p className="text-sm leading-relaxed text-text-secondary">{labels.doors[d].body}</p>
               <div className="mt-auto pt-1">
+                {d === "worker-search" ? (
+                  <Link
+                    href={WORKER_SEARCH_FORM}
+                    data-testid={`request-door-${d}-open`}
+                    className={cn(buttonLinkClassName("secondary"), "min-h-11 w-full whitespace-normal rounded-xl")}
+                  >
+                    {labels.doors[d].title}
+                    <ArrowRight className="ml-1.5 size-3.5 shrink-0" aria-hidden />
+                  </Link>
+                ) : (
                 <Button
                   type="button"
                   variant="secondary"
@@ -199,6 +247,7 @@ export function LandingRequestDoorsForm({
                   {labels.doors[d].title}
                   <ArrowRight className="ml-1.5 size-3.5 shrink-0" aria-hidden />
                 </Button>
+                )}
               </div>
             </Card>
           ))}
@@ -223,20 +272,17 @@ export function LandingRequestDoorsForm({
               {/* Left empty by a person: out of sight, out of the tab order, not autofilled. */}
               <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
 
-              {door === "worker-search" ? (
-                <>
-                  <Field label={labels.profession}>
-                    <input name="profession" required minLength={2} maxLength={200} className={FIELD} />
-                  </Field>
-                  <Field label={labels.workers}>
-                    <input name="workers" type="number" inputMode="numeric" required min={1} max={100000} className={FIELD} />
-                  </Field>
-                </>
-              ) : null}
               {door === "b2b" ? (
                 <div className="sm:col-span-2">
                   <Field label={labels.work}>
                     <input name="work" required minLength={2} maxLength={200} className={FIELD} />
+                  </Field>
+                </div>
+              ) : null}
+              {door === "partner" ? (
+                <div className="sm:col-span-2">
+                  <Field label={labels.proposal}>
+                    <textarea name="proposal" required minLength={2} maxLength={4000} rows={3} className={FIELD} />
                   </Field>
                 </div>
               ) : null}
@@ -263,7 +309,7 @@ export function LandingRequestDoorsForm({
                 </>
               ) : null}
 
-              <Field label={door === "worker-search" ? labels.country : labels.place}>
+              <Field label={labels.place}>
                 <select name="country" required defaultValue="" className={FIELD}>
                   <option value="" disabled>
                     {labels.countryChoose}
@@ -275,23 +321,10 @@ export function LandingRequestDoorsForm({
                   ))}
                 </select>
               </Field>
-              {door === "worker-search" ? (
-                <Field label={labels.start} hint={optional}>
-                  <input name="start" type="date" className={FIELD} />
-                </Field>
-              ) : (
-                <Field label={labels.city} hint={optional}>
-                  <input name="city" maxLength={160} className={FIELD} />
-                </Field>
-              )}
+              <Field label={labels.city} hint={optional}>
+                <input name="city" maxLength={160} className={FIELD} />
+              </Field>
 
-              {door === "worker-search" ? (
-                <div className="sm:col-span-2">
-                  <Field label={labels.details} hint={optional}>
-                    <textarea name="details" maxLength={2000} rows={2} className={FIELD} />
-                  </Field>
-                </div>
-              ) : null}
               {door === "b2b" ? (
                 <>
                   <Field label={labels.scope} hint={optional}>

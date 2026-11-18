@@ -27,6 +27,17 @@ function hasAuthCookie(): boolean {
   }
 }
 
+/** The same hint as a hook, for any public link whose destination differs for
+ *  a signed-in person (the assistant entry, a workspace link). False on the
+ *  first paint, so server and client markup agree; never an authorisation. */
+export function useSignedInHint(): boolean {
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    setSignedIn(hasAuthCookie());
+  }, []);
+  return signedIn;
+}
+
 export function NavAuthCtas({
   guest,
   member,
@@ -34,9 +45,6 @@ export function NavAuthCtas({
   guest: ReactNode;
   member: ReactNode;
 }) {
-  const [signedIn, setSignedIn] = useState(false);
-  useEffect(() => {
-    setSignedIn(hasAuthCookie());
-  }, []);
+  const signedIn = useSignedInHint();
   return <>{signedIn ? member : guest}</>;
 }

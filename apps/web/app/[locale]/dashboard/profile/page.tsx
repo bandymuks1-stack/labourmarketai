@@ -116,6 +116,8 @@ import {
 import { PageTitle } from "@/components/app/premium/page-title";
 import { experienceFiguresOf } from "@/lib/journal/experience-figures";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { orgDisplayName } from "@/lib/company/org-display";
+import { endedUnnamedOrganizationContexts } from "@/lib/journal/engagement-label";
 import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
 import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
@@ -193,6 +195,7 @@ export default async function ProfilePage({
     tEvidenceMine,
     tPublicSummary,
     tRoleLedger,
+    tJournal,
   ] = await Promise.all([
     getTranslations("skills"),
     getTranslations("spaces"),
@@ -229,6 +232,8 @@ export default async function ProfilePage({
     getTranslations("evidenceImport.mine"),
     getTranslations("workerPublicSummary"),
     getTranslations("roleLedger"),
+    // The ONE "no name" phrase set (`journal.unnamedOrganization.*`, #3356).
+    getTranslations("journal"),
   ]);
 
   /**
@@ -769,6 +774,20 @@ export default async function ProfilePage({
       nameOf: (slug) => tSkill(slug),
     });
 
+    // An organization without a name the person no longer works with is
+    // called so (owner 2026-11-15, #3356): renamed, never hidden. Judged per
+    // organization over every card, from the rows this page already read.
+    const endedUnnamedCards = endedUnnamedOrganizationContexts(
+      (ecRes.data ?? []).map((e) => {
+        const org = e.organizations as { display_name: string | null; legal_name: string | null } | null;
+        return {
+          engagementContextId: e.id,
+          organizationId: e.organization_id,
+          organizationName: orgDisplayName(org?.display_name, org?.legal_name),
+          endedAt: e.ended_at,
+        };
+      }),
+    );
     // Engagement-context cards (current first): primary first, then most-recent.
     engagementCards = (ecRes.data ?? []).map((e) => {
       const org = e.organizations as
@@ -790,7 +809,12 @@ export default async function ProfilePage({
       return {
         id: e.id,
         orgName:
-          org?.display_name ?? org?.legal_name ?? typeLabel ?? e.title ?? "—",
+          org?.display_name ??
+          org?.legal_name ??
+          (endedUnnamedCards.has(e.id) ? tJournal("unnamedOrganization.ended") : null) ??
+          typeLabel ??
+          e.title ??
+          "—",
         relationship: e.relationship_slug,
         startedAt: e.started_at,
         endedAt: e.ended_at,
@@ -1344,6 +1368,7 @@ export default async function ProfilePage({
         </summary>
         <div className="px-4 pb-4">
         <ProfileTextFirstFlow
+        viewerEmail={user.email ?? null}
         hasPrimaryProfession={currentProfessionId !== null}
         initialText={savedProfileText}
         savedClaimNormalizedLabels={savedSkillClaims.map(

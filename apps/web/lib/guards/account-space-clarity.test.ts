@@ -70,7 +70,8 @@ describe("no abstract 'kas esu operacijoje' identity framing anywhere", () => {
 describe("buyer setup replacement copy is human, saved-to-account language", () => {
   it("LT formSubtitle / newRequestSubtitle are account-friendly", () => {
     const setup = lt.roleDashboards.buyer.setup;
-    expect(setup.formSubtitle).toMatch(/saugomi tavo paskyroje/);
+    // Formal address since the owner decision of 2026-11-15.
+    expect(setup.formSubtitle).toMatch(/saugomi jūsų paskyroje/);
   });
   it("EN equivalents are account-friendly", () => {
     expect(en.roleDashboards.buyer.setup.formSubtitle).toMatch(/saved to your account/);

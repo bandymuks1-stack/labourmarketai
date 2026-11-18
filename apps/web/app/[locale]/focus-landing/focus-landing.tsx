@@ -10,7 +10,7 @@ import { LandingOpenJobsBand } from "@/components/marketing/landing-open-jobs-ba
 import { LandingHow, LandingMarketFacts, LandingNeedPath } from "@/components/marketing/landing-v3";
 import { PublicEntry } from "@/components/marketing/public-entry";
 import { pickLandingMessages } from "@/lib/i18n/client-messages";
-import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
+import { pickLandingVacancySample, readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 
 /**
@@ -57,12 +57,13 @@ export async function FocusLanding({
   const activeLocale = resolveActiveLocale(locale);
   // The ONE canonical market snapshot, through its 300 s `unstable_cache`
   // entry — one market truth, one freshness window (owner command §9/§12).
-  const [market, t, tV3] = await Promise.all([
+  const [market, t, tV3, tDoors] = await Promise.all([
     // The landing renders the supply counts only; it reads `professions`
     // nowhere, so it does not pay for the per-profession reads.
     readLiveMarketLandingSnapshot({ resolveProfessions: false }),
     getTranslations("common"),
     getTranslations("landing.v3"),
+    getTranslations("landing.requestDoors"),
   ]);
 
   // Exact counts or nothing: a count the canonical reader could not return is
@@ -75,7 +76,12 @@ export async function FocusLanding({
           refreshedAt: market.lastRefreshedAt,
         }
       : null;
-  const hasAdverts = market.sample.basis === "live" && market.sample.vacancies.length > 0;
+  // Owner decision 2026-11-15: adverts in the visitor's language first, then
+  // the other suitable adverts — an order, never a filter. The cached snapshot
+  // is shared by every locale, so the pick is made here, per visitor.
+  const adverts =
+    market.sample.basis === "live" ? pickLandingVacancySample(market.sample.vacancies, activeLocale) : [];
+  const hasAdverts = adverts.length > 0;
 
   return (
     <NextIntlClientProvider messages={pickLandingMessages(await getMessages())}>
@@ -112,7 +118,7 @@ export async function FocusLanding({
                   {/* No example chips and no market counts here: the goals
                       above are the choice, and the counts are printed once,
                       in the market block. */}
-                  <PublicEntry examples="none" supply={null} />
+                  <PublicEntry examples="none" supply={null} requestLabel={tDoors("title")} />
                 </div>
                 <LandingNeedPath locale={locale} />
               </div>
@@ -124,7 +130,7 @@ export async function FocusLanding({
               market={marketFacts}
               adverts={
                 hasAdverts ? (
-                  <LandingOpenJobsBand sample={market.sample} locale={activeLocale} compact />
+                  <LandingOpenJobsBand sample={{ basis: "live", vacancies: adverts }} locale={activeLocale} compact />
                 ) : undefined
               }
             />
