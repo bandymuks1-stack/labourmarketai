@@ -99,7 +99,16 @@
       "outcomeBlocked": "[EN] not confirmed ({code})",
       "receipt": "Kinnitatud: {title}",
       "receiptSkills": "{count, plural, one {# oskus} other {# oskust}}",
-      "skillsUnavailable": "Oskuste loendit ei õnnestunud lugeda — puudutus kinnitab ainult kande enda."
+      "skillsUnavailable": "Oskuste loendit ei õnnestunud lugeda — puudutus kinnitab ainult kande enda.",
+      "projectFilterLabel": "Projekt",
+      "projectAll": "Kõik projektid ({n})",
+      "projectNone": "Projektita ({n})",
+      "projectUnnamed": "Projekt, nimi pole nähtav",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Näita",
+      "projectResult": "Näidatakse {shown} kirjet {total}-st",
+      "projectOnCard": "Projekt: {name}",
+      "noProjectOnCard": "Projektita"
     },
     "result": {
       "entrySuperseded": "Sissekanne on juba asendatud uuema versiooniga — kaart ei ole enam aktuaalne ja eemaldatakse loendist.",

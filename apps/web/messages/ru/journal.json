@@ -439,7 +439,16 @@
       "outcomeBlocked": "не подтверждено ({code})",
       "receipt": "Подтверждено: {title}",
       "receiptSkills": "{count, plural, one {# навык} few {# навыка} other {# навыков}}",
-      "skillsUnavailable": "Не удалось прочитать список навыков — нажатие подтвердит только саму запись."
+      "skillsUnavailable": "Не удалось прочитать список навыков — нажатие подтвердит только саму запись.",
+      "projectFilterLabel": "Проект",
+      "projectAll": "Все проекты ({n})",
+      "projectNone": "Без проекта ({n})",
+      "projectUnnamed": "Проект, название недоступно",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Показать",
+      "projectResult": "Показано {shown} из {total} записей",
+      "projectOnCard": "Проект: {name}",
+      "noProjectOnCard": "Без проекта"
     },
     "loadFailed": "Не удалось загрузить очередь на проверку. Это не значит, что проверять нечего — попробуйте ещё раз."
   },

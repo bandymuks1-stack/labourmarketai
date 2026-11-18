@@ -439,7 +439,16 @@
       "outcomeBlocked": "nicht bestätigt ({code})",
       "receipt": "Bestätigt: {title}",
       "receiptSkills": "{count, plural, one {# Fähigkeit} other {# Fähigkeiten}}",
-      "skillsUnavailable": "Die Fähigkeitenliste konnte nicht gelesen werden — der Tipp bestätigt nur den Eintrag selbst."
+      "skillsUnavailable": "Die Fähigkeitenliste konnte nicht gelesen werden — der Tipp bestätigt nur den Eintrag selbst.",
+      "projectFilterLabel": "Projekt",
+      "projectAll": "Alle Projekte ({n})",
+      "projectNone": "Ohne Projekt ({n})",
+      "projectUnnamed": "Projekt, Name nicht sichtbar",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Anzeigen",
+      "projectResult": "{shown} von {total} Einträgen angezeigt",
+      "projectOnCard": "Projekt: {name}",
+      "noProjectOnCard": "Ohne Projekt"
     },
     "loadFailed": "Die Prüfliste konnte nicht geladen werden. Das heißt nicht, dass nichts zu prüfen ist — bitte erneut versuchen."
   },
