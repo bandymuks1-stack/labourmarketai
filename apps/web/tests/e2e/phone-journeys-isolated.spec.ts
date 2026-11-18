@@ -31,6 +31,7 @@ import {
  *   M-4 APPLY    expresses interest in it (the interest row is stored);
  *   M-5 MESSAGES writes to the employer from that application; the company answers from ITS phone;
  *                the worker reaches the thread through the phone's area sheet and reads the answer.
+ *   M-7 JOURNAL  opens the work journal; it fits the phone, also with its disclosures open.
  *
  * M-2 runs LAST in each group (first run 2026-11-14: the CV page stopped answering at 375 px), so a
  * CV fault cannot hide search, applying and messages; if it stops answering again, the step says
@@ -438,6 +439,23 @@ for (const phone of PHONES) {
       await card.getByTestId("booking-accept-confirm").tap();
       await expect.poll(() => rows().map((r) => r.status), { message: "the booking is accepted", timeout: 30_000 }).toEqual(["accepted"]);
       await w2.done();
+    });
+    test(`M-7 (${phone.name}). the worker's work journal fits the phone`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      const main = page.getByRole("main");
+      await expect(main.getByTestId("journal-entries"), "the journal's records open").toBeVisible({ timeout: 30_000 });
+      await expect(main.getByTestId("journal-quick-record-text"), "quick recording is on the page").toBeVisible({ timeout: 30_000 });
+      await fitsTheScreen(page, "the work journal");
+      // The two disclosures on the page open in place and still fit.
+      for (const id of ["journal-status-details", "mano-cv-player-card-lead"]) {
+        const fold = main.getByTestId(id);
+        if (!(await fold.isVisible().catch(() => false))) continue;
+        await fold.locator("summary").first().tap();
+        await expect(fold).toHaveAttribute("open", "");
+      }
+      await fitsTheScreen(page, "the work journal with its disclosures open");
+      await done();
     });
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);

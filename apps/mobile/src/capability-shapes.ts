@@ -751,3 +751,30 @@ export type EducationWorkspaceData =
       readonly membersVisible: boolean;
     }
   | { readonly kind: "not-institution" };
+
+/**
+ * `agency.clients.get` — a staffing agency's client bridge
+ * (`lib/conversation/agency-workspace-contract.ts`): the needs clients shared,
+ * the agency's OWN roster (labels as the web's agency bridge shows them) and
+ * its proposals. `not-agency` arrives as data; an unreadable bridge as a failure.
+ */
+export type AgencySharedNeed = { readonly shareId: string; readonly requestId: string; readonly title: string };
+export type AgencyRosterWorker = { readonly workerId: string; readonly label: string };
+export type AgencyProposal = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly title: string;
+  readonly workerLabel: string;
+  readonly stageLabel: string;
+  readonly decisionLabel: string | null;
+  readonly offerStatus: string;
+};
+export type AgencyClientsData =
+  | {
+      readonly kind: "ok";
+      readonly agencyCompanyId: string;
+      readonly shared: readonly AgencySharedNeed[];
+      readonly roster: readonly AgencyRosterWorker[];
+      readonly progress: readonly AgencyProposal[];
+    }
+  | { readonly kind: "not-agency" };

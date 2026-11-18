@@ -6,6 +6,24 @@ import { cn } from "@/lib/utils";
 const CHIP =
   "inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3.5 text-sm transition-colors motion-reduce:transition-none";
 
+const CHIP_CONTROL =
+  "font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+
+const chipState = (pressed: boolean) =>
+  pressed
+    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+    : "border-ink-500 text-text-secondary hover:border-brand-blue/60 hover:text-text-primary";
+
+/**
+ * The toggle chip's look for a LINK: one of a few views where the chosen one
+ * is the current page (e.g. the CV's templates). Same shape, same 44px height,
+ * same chosen state as `ToggleChip`; the caller sets `aria-current` on the
+ * chosen link and keeps the check mark beside its words.
+ */
+export function chipLinkClassName(current: boolean): string {
+  return cn(CHIP, CHIP_CONTROL, chipState(current));
+}
+
 /**
  * TOGGLE CHIP — a filter or a choice that is on or off. A real button with
  * `aria-pressed`; the pressed state shows a check mark as well as colour, so
@@ -35,10 +53,9 @@ export function ToggleChip({
       onClick={() => onPressedChange(!pressed)}
       className={cn(
         CHIP,
-        "font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:cursor-not-allowed disabled:opacity-60",
-        pressed
-          ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-          : "border-ink-500 text-text-secondary hover:border-brand-blue/60 hover:text-text-primary",
+        CHIP_CONTROL,
+        "disabled:cursor-not-allowed disabled:opacity-60",
+        chipState(pressed),
         className,
       )}
     >
