@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+
+import { Button } from "@/components/ui/Button";
 import {
   confirmRecognizedNeedAction,
   closeDemandAction,
@@ -84,7 +86,7 @@ export function DemandLifecycleControls({
       data-demand-status={currentStatus}
     >
       {showConfirm && !confirmed ? (
-        <button
+        <Button
           type="button"
           disabled={pending}
           onClick={() =>
@@ -95,11 +97,13 @@ export function DemandLifecycleControls({
               else if (r.kind !== "nothing-to-confirm") setFailed(true);
             })
           }
-          className="min-h-11 sm:min-h-0 rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
+          variant="primary"
+          size="sm"
+          className="min-h-11"
           data-testid="demand-confirm-need"
         >
           {labels.confirm}
-        </button>
+        </Button>
       ) : null}
       {showConfirm && confirmed ? (
         <span
@@ -110,29 +114,33 @@ export function DemandLifecycleControls({
         </span>
       ) : null}
       {allowed.includes("complete") ? (
-        <button
+        <Button
           type="button"
           disabled={pending}
           onClick={() => run(() => closeDemandAction(locale, requestId))}
-          className="min-h-11 sm:min-h-0 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-state-warning hover:text-text-primary disabled:opacity-50"
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           data-testid="demand-close"
         >
           {labels.close}
-        </button>
+        </Button>
       ) : null}
       {currentStatus === "closed" ? (
         <>
           <span className="text-meta text-text-muted">{labels.closedNote}</span>
           {allowed.includes("resume") ? (
-            <button
+            <Button
               type="button"
               disabled={pending}
               onClick={() => run(() => reopenDemandAction(locale, requestId))}
-              className="min-h-11 sm:min-h-0 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-primary hover:border-brand-blue disabled:opacity-50"
+              variant="secondary"
+              size="sm"
+              className="min-h-11"
               data-testid="demand-reopen"
             >
               {labels.reopen}
-            </button>
+            </Button>
           ) : null}
         </>
       ) : null}
