@@ -411,13 +411,11 @@ export default async function CompanyScoutingPage({
     return t.has(key) ? t(key) : t("availabilityValue.unknown");
   };
 
-  return (
-    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <PageTitle>{t("title")}</PageTitle>
-        <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
-      </header>
-
+  // E-1: a structured-less need with nobody's hand up yet offers the available
+  // workforce as the action, right under its status card.
+  const supplyIsTheAction = result?.kind === "not-structured" && handRaisers.length === 0;
+  const guidanceTop = (
+    <>
       {/* Honest matching status (audit P1): what works today vs what an active
           candidate stream still depends on. No guaranteed/instant/AI claims. */}
       <section
@@ -447,13 +445,10 @@ export default async function CompanyScoutingPage({
         </p>
       </section>
 
-      {/* AVAILABLE WORKFORCE (2026-09-07) — the supply half of discovery, beside
-          the candidate half rather than in a separate product. Until this
-          landed, an agency's declared capacity was readable only by that agency
-          and an admin: the supply side of the market was written and
-          undiscoverable. */}
-      <AvailableSupplySection state={availableSupply} />
-
+    </>
+  );
+  const guidanceBottom = (
+    <>
       {/* Honest visibility: based on readiness/trust/permissions — NOT payment.
           Paid wider access is inert while billing is disabled; no fake unlock. */}
       <FeatureNote testId="scouting-visibility-note">{t("visibilityNote")}</FeatureNote>
@@ -480,6 +475,40 @@ export default async function CompanyScoutingPage({
           <p>{t("how.next")}</p>
         </div>
       </details>
+
+    </>
+  );
+  const supply = (
+    <>
+      {/* AVAILABLE WORKFORCE (2026-09-07) — the supply half of discovery, beside
+          the candidate half rather than in a separate product. Until this
+          landed, an agency's declared capacity was readable only by that agency
+          and an admin: the supply side of the market was written and
+          undiscoverable. */}
+      <AvailableSupplySection state={availableSupply} />
+
+    </>
+  );
+
+  return (
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
+      <header className="flex flex-col gap-1">
+        <PageTitle>{t("title")}</PageTitle>
+        <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
+      </header>
+
+      {/* A CHOSEN NEED COMES FIRST (UX gaps 2026-11-18, E-1). Opened from the
+          need just saved, the page used to lead with four explanatory cards and
+          put the need's own state about 1,700 px down. With a need chosen, its
+          state, its people and its actions follow the picker directly, and the
+          general explanation moves below them. */}
+      {selected ? null : (
+        <>
+          {guidanceTop}
+          {supply}
+          {guidanceBottom}
+        </>
+      )}
 
       {/* Demand picker */}
       {demands.length === 0 ? (
@@ -787,6 +816,7 @@ export default async function CompanyScoutingPage({
           {t("notStructured")}
         </p>
       ) : null}
+      {supplyIsTheAction ? supply : null}
       {/* PEOPLE WHO RAISED A HAND on a need that names no trade (owner
           decision 2026-10-22). Shown NOW, beside the explanation above, and
           labelled: the trade match was NOT assessed, so there is no status,
@@ -1953,6 +1983,14 @@ export default async function CompanyScoutingPage({
             );
           })}
         </ul>
+      ) : null}
+
+      {selected ? (
+        <>
+          {supplyIsTheAction ? null : supply}
+          {guidanceTop}
+          {guidanceBottom}
+        </>
       ) : null}
 
       <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>
