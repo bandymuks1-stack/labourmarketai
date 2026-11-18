@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 import { isSyntheticFixtureLabel } from "../../lib/qa/synthetic-fixture";
+import { storedAnalytics } from "./first-visit-consent";
 
 /**
  * REGISTER GAPS — production proof for function-register rows that had no
@@ -23,6 +24,44 @@ import { isSyntheticFixtureLabel } from "../../lib/qa/synthetic-fixture";
  *               (nothing is saved). When no template is active for that worker
  *               the run records that fact — the seeds ship inactive and are
  *               activated by the owner — and the row stays unproven.
+ *   J-2 (2.36)  template → journal entry → CV, in production, under the QA
+ *               worker ONLY: when a profession template is active, the worker
+ *               picks it in the full composer, saves ONE entry marked
+ *               QA-SYNTHETIC with this run id, finds it in the journal, and
+ *               sees the CV's "Journal entries" figure count it.
+ *               When no template is active the step is SKIPPED as unproven,
+ *               before anything is written — it never fails on that and never
+ *               writes. The walk never activates or deactivates a template.
+ *               WHAT IT DOES TO STATISTICS, exactly:
+ *                 - no product-funnel row (`pilot_events`). Every client
+ *                   event (`journal_viewed`, `journal_entry_started`,
+ *                   `journal_entry_saved`, …) is sent only with analytics
+ *                   consent (lib/telemetry/task.ts `fire`), and every walk
+ *                   context holds a REFUSED choice (analytics-consent-seed.ts
+ *                   via prod-walk.ts). The step asserts the refusal before it
+ *                   writes, and after the save that no analytics session id
+ *                   was ever minted (none is, unless an event is sent). The
+ *                   save's server path (lib/journal/actions.ts and every
+ *                   module it imports) has no server funnel emitter, and no
+ *                   database function writes `pilot_events`; both pinned by
+ *                   lib/guards/prod-template-walk-no-funnel.test.ts.
+ *                 - the entry IS a journal row: the operator metrics
+ *                   (`ops_product_metrics` journal_entries_*) count it under
+ *                   TEST, because the QA worker's account is a TEST account
+ *                   (`qa.*@labourmarket.ai`), not because of the text marker.
+ *                 - it counts, by design, in the QA worker's own journal,
+ *                   experience total and Living CV (decision 0025).
+ *               OWNER STEP — NOT RUN BY THE WALK, NOT RUN BY AGENTS, A
+ *               SEPARATE OWNER DECISION: activating a template is a change to
+ *               the WHOLE PRODUCT, not to the QA worker. The seeds
+ *               (`construction_daily`, `transport_daily`, `cleaning_daily`,
+ *               migration 20260714180000, shipped inactive) are
+ *               profession-unscoped: one activated seed is offered in EVERY
+ *               real worker's composer at once. That exceeds a permission
+ *               for one template for the isolated QA worker. Until the owner
+ *               decides it as a product change, this step stays skipped and
+ *               2.36 is proven on the isolated stack only
+ *               (journal-template-isolated.spec.ts T-1..T-4).
  *   G-4 (3.34)  the project forecast: the organization owner opens one of
  *               its own projects and the forecast panel beside the course is
  *               READ (ok / too little evidence / nothing open — never
@@ -49,11 +88,13 @@ import { isSyntheticFixtureLabel } from "../../lib/qa/synthetic-fixture";
  *               ARCH-5 and is not walked.
  *
  * Synthetic data only: the waitlist address is a reserved example.com
- * address tagged with this run id; no person's data is read or written.
+ * address tagged with this run id, J-2 (2.36)'s one entry belongs to the
+ * synthetic QA worker, and J-2 (2.37) touches only one QA-SYNTHETIC record
+ * linked to that worker; no real person's data is read or written.
  *
- * ── J-2 SEEDING (owner / coordinator, once; NOT done by this walk or by agents)
+ * ── J-2 (2.37) SEEDING (owner / coordinator, once; NOT done by this walk or by agents)
  *
- * J-2 needs ONE organization record about a roster person of a QA-SYNTHETIC
+ * J-2 (2.37) needs ONE organization record about a roster person of a QA-SYNTHETIC
  * organization, linked to the QA worker (slot `worker`, the Alfa employee of
  * `lib/testing/prod-qa-guard.ts`) by the worker's OWN confirmation. Made
  * through the product's own doors, as EX-0 does in CI (there the records are
@@ -199,6 +240,113 @@ test("G-3 (2.36). a profession journal template prefills the entry when one is a
   await first.click();
   await expect.poll(async () => (await text.inputValue()).length, { message: "the template prefilled the entry" }).toBeGreaterThan(before);
   console.log(`[templates] template ${slug} prefilled the entry (not saved)`);
+  await ctx.close();
+});
+
+/** The CV's "Journal entries" figure for the signed-in person, or null when
+ *  the CV shows it as unreadable (an em dash). A CV with no figures at all
+ *  draws no tiles, which is 0. The tiles are in a fixed order on the page
+ *  (verified skills, manager confirmations, journal entries). */
+async function cvJournalEntries(page: Page): Promise<number | null> {
+  await page.goto("/lt/cv");
+  const main = page.getByRole("main");
+  await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 30_000 });
+  const summary = main.getByTestId("cv-summary");
+  if ((await summary.count()) === 0) return 0;
+  const tile = summary.locator(":scope > div").nth(2);
+  await expect(tile.locator("dt"), "the third CV figure is the journal entries").toHaveText(/Žurnalo įrašai/);
+  const n = Number((await tile.locator("dd").innerText()).trim());
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Answers the composer's "which work context / which project" questions only
+ *  when it asks them, never guessing a project: the QA worker's employer when
+ *  offered, and the form's own "not project work" option (always last). */
+async function answerComposerQuestions(page: Page): Promise<void> {
+  const main = page.getByRole("main");
+  if ((await main.getByTestId("journal-engagement-must-choose").count()) > 0) {
+    await main.getByTestId("journal-engagement-switcher").click();
+    const options = main.getByRole("listbox").getByRole("option");
+    const alfa = options.filter({ hasText: /QA-SYNTHETIC Alfa/ });
+    await ((await alfa.count()) > 0 ? alfa.first() : options.nth(1)).locator("button").click();
+    await expect(main.getByTestId("journal-engagement-must-choose")).toHaveCount(0);
+  }
+  if ((await main.getByTestId("journal-project-must-choose").count()) > 0) {
+    await main.getByTestId("journal-project-switcher").click();
+    await main.getByRole("listbox").getByRole("option").last().locator("button").click();
+    await expect(main.getByTestId("journal-project-must-choose")).toHaveCount(0);
+  }
+}
+
+test("J-2 (2.36). an active template's entry is saved under the QA worker only and reaches the QA worker's CV", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker");
+  const main = page.getByRole("main");
+  const openTemplates = async () => {
+    await page.goto("/lt/dashboard/journal?compose=full");
+    await expect(main.getByTestId("journal-compose-full"), "the full composer is open").toBeVisible({ timeout: 30_000 });
+    const more = main.getByTestId("journal-more-options");
+    await expect(more, "the composer's more-options disclosure renders").toBeAttached({ timeout: 30_000 });
+    await more.locator(":scope > summary").click();
+    await expect(more, "the disclosure opened").toHaveAttribute("open", "");
+    return more.getByTestId("journal-template-picker").locator('[data-testid^="journal-template-"]');
+  };
+
+  // READ FIRST, write nothing: is any template active for this worker?
+  const offered = await openTemplates();
+  const slugs = (await offered.evaluateAll((els) => els.map((e) => e.getAttribute("data-testid") ?? ""))).map((id) =>
+    id.replace("journal-template-", ""),
+  );
+  if (slugs.length === 0) {
+    console.log("[templates] J-2: no active journal template for the QA worker — 2.36 stays unproven; nothing was written");
+    await ctx.close();
+    test.skip(true, "unproven: no active journal template for the QA worker (activation is the owner's step); nothing written");
+    return;
+  }
+  const slug = slugs[0];
+  if (slugs.length > 1) console.log(`[templates] J-2: ${slugs.length} templates active (${slugs.join(", ")}); using the first, ${slug}`);
+
+  // Still before any write: this browser has REFUSED analytics, so no event of
+  // this step reaches the product funnel. Anything else and nothing is written.
+  const consent = (await storedAnalytics(page)).consent;
+  expect(consent && JSON.parse(consent).choice, "the walk's browser refused analytics before any write").toBe("refused");
+
+  const before = await cvJournalEntries(page);
+  // Still before any write: an unreadable figure could not show the entry arrive.
+  expect(before, "the CV's journal-entry figure is readable before the save").not.toBeNull();
+
+  await openTemplates();
+  const option = main.getByTestId("journal-template-picker").getByTestId(`journal-template-${slug}`);
+  await expect(option, "the template is offered").toBeVisible({ timeout: 30_000 });
+  const text = main.getByTestId("journal-compose-full").locator("textarea").first();
+  await expect(text).toBeVisible();
+  const empty = (await text.inputValue()).length;
+  await option.click();
+  await expect.poll(async () => (await text.inputValue()).length, { message: "the template prefilled the entry" }).toBeGreaterThan(empty);
+  const filled = await text.inputValue();
+
+  // One entry, the QA worker's own, marked QA-SYNTHETIC with this run id. No
+  // duration is stated: an unconfirmed duration opens a review step first.
+  const marker = `${RUN}-${process.env.GITHUB_RUN_ATTEMPT ?? "1"}-J2`;
+  await text.fill(`QA-SYNTHETIC ${marker}: šablono ${slug} įrašas, sutvarkiau darbo vietą\n${filled}`);
+  await answerComposerQuestions(page);
+  await main.getByTestId("journal-save-entry").first().click();
+  await expect(main.getByTestId("journal-saved-banner"), "the entry was saved").toBeVisible({ timeout: 60_000 });
+  // No event was sent: `fire` mints the analytics session id only when it sends.
+  expect((await storedAnalytics(page)).analytics, "no analytics item exists after the save: no funnel event was sent").toEqual([]);
+
+  await page.goto("/lt/dashboard/journal");
+  await expect(
+    main.locator('[data-testid^="journal-entry-card-"]', { hasText: marker }).first(),
+    "the saved entry is in the QA worker's journal",
+  ).toBeVisible({ timeout: 30_000 });
+
+  // The CV counts it. Other walks only ever ADD to this worker's entries, so
+  // the figure must have risen by at least this one.
+  let after: number | null = null;
+  await expect
+    .poll(async () => (after = await cvJournalEntries(page)), { message: "the QA worker's CV counts the template entry", timeout: 60_000 })
+    .toBeGreaterThan(before ?? 0);
+  console.log(`[templates] J-2: template ${slug} → entry ${marker} saved → CV journal entries ${before} → ${after}`);
   await ctx.close();
 });
 

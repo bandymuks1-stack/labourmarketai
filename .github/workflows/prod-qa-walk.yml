@@ -124,7 +124,8 @@ on:
           - digest-setup
           - digest-check
           # 2026-11-01 register reconciliation: waitlist real submit (6.18), public JSON APIs (9.18),
-          # journal templates (2.36). Synthetic data only. Dispatch only, never in the rotation.
+          # journal templates (2.36; J-2 saves one QA-SYNTHETIC entry on the QA worker only when the owner has
+          # activated a template, else skips unproven). Synthetic data only. Dispatch only, never in the rotation.
           - register-gaps
           # #3102 (owner 2026-11-05): a CV imported once, again and from two tabs at once leaves one row. Synthetic
           # worker, real Chrome. Dispatch only, never in the rotation.
