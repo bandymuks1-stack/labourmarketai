@@ -33,7 +33,8 @@
   "unnamedOrganization": {
     "company": "Uzņēmums bez nosaukuma",
     "agency": "Aģentūra bez nosaukuma",
-    "other": "Organizācija bez nosaukuma"
+    "other": "Organizācija bez nosaukuma",
+    "ended": "Agrākā organizācija bez nosaukuma"
   },
   "activeWorkspaceNoRelationship": "Jūs darbojaties {org} vārdā, bet darba attiecības ar {org} nav reģistrētas, tāpēc tās šeit netiek piedāvātas. Izvēlieties kontekstu, kuram šis darbs patiešām pieder.",
   "project": "Projekts",

@@ -98,7 +98,7 @@ describe("needs reach workers only after verification — the copy says so (2026
       en: /shown to workers only after your company is verified/i,
       lt: /darbuotojams rodomos tik po įmonės verifikacijos/i,
       ru: /показываются работникам только после верификации/i,
-      nl: /pas na verificatie van je bedrijf aan werknemers getoond/i,
+      nl: /pas na verificatie van uw bedrijf aan werknemers getoond/i, // formal "u" since 2026-11-15
       de: /erst nach der Verifizierung Ihres Unternehmens angezeigt/i,
       pl: /pokazywane pracownikom dopiero po weryfikacji/i,
       sv: /visas för arbetstagare först när ditt företag är verifierat/i,

@@ -33,7 +33,8 @@
   "unnamedOrganization": {
     "company": "Nimeta ettevõte",
     "agency": "Nimeta agentuur",
-    "other": "Nimeta organisatsioon"
+    "other": "Nimeta organisatsioon",
+    "ended": "Varasem nimeta organisatsioon"
   },
   "activeWorkspaceNoRelationship": "Tegutsed organisatsiooni {org} nimel, kuid töösuhet organisatsiooniga {org} pole registreeritud, seega seda siin ei pakuta. Vali kontekst, kuhu see töö tegelikult kuulub.",
   "project": "Projekt",

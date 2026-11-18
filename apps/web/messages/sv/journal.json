@@ -261,7 +261,8 @@
   "unnamedOrganization": {
     "company": "Företag utan namn",
     "agency": "Bemanningsföretag utan namn",
-    "other": "Organisation utan namn"
+    "other": "Organisation utan namn",
+    "ended": "Tidigare organisation utan namn"
   },
   "activeWorkspaceNoRelationship": "Du agerar för {org}, men inget arbetsförhållande med {org} är registrerat, så det erbjuds inte här. Välj det sammanhang som arbetet verkligen hör till.",
   "project": "Projekt",

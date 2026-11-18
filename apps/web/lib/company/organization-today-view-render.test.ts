@@ -201,7 +201,7 @@ describe("work waiting for approval", () => {
     const html = await render();
     expect(html).not.toContain("Svetimas Žmogus");
     expect(html).not.toContain('data-testid="quick-confirm-tap-other"');
-    expect(html).toContain("Kitur tavo patvirtinimo laukia dar: 1.");
+    expect(html).toContain("Kitur jūsų patvirtinimo laukia dar: 1."); // formal since 2026-11-15
   });
 });
 

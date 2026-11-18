@@ -80,9 +80,12 @@ describe("no dead public links — every marketing CTA target route exists", () 
     expect(page).not.toContain('href="/onboarding"');
     // Signup CTA rides AuthCtaLink (app-host aware on apex; PKCE-safe OAuth
     // origin) instead of the bare locale Link — see auth-cta-app-host guard.
+    // F6 (2026-11-15): that sign-up returns to the one profile builder
+    // (WORKER_PROFILE_DOOR_HREF = /auth/signup?next=/dashboard/profile).
     expect(page).toMatch(
-      /AuthCtaLink[\s\S]*?relPath=\{`\/\$\{locale\}\/auth\/signup`\}/,
+      /AuthCtaLink[\s\S]*?relPath=\{`\/\$\{locale\}\$\{WORKER_PROFILE_DOOR_HREF\}`\}/,
     );
+    expect(page).toContain('from "@/lib/marketing/worker-profile-door"');
   });
 });
 

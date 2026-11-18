@@ -33,7 +33,8 @@
   "unnamedOrganization": {
     "company": "Virksomhed uden navn",
     "agency": "Bureau uden navn",
-    "other": "Organisation uden navn"
+    "other": "Organisation uden navn",
+    "ended": "Tidligere organisation uden navn"
   },
   "activeWorkspaceNoRelationship": "Du handler på vegne af {org}, men der er ikke registreret noget arbejdsforhold med {org}, så det tilbydes ikke her. Vælg den kontekst, arbejdet reelt hører til.",
   "project": "Projekt",
