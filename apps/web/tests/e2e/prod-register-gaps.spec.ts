@@ -1,12 +1,13 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
+import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { isSyntheticFixtureLabel } from "../../lib/qa/synthetic-fixture";
 
 /**
  * REGISTER GAPS — production proof for function-register rows that had no
  * walk of their own (2026-11-01 reconciliation). Dispatch only; one run is
- * three small checks, each named by its register row:
+ * a few small checks, each named by its register row:
  *
  *   G-1 (6.18)  the waitlist takes a REAL submit and keeps it: one synthetic
  *               address is sent from the plan card, then sent again — the
@@ -27,8 +28,74 @@ import { test, expect, type Browser, type BrowserContext, type Page } from "./pr
  *               READ (ok / too little evidence / nothing open — never
  *               "unavailable") and labelled a forecast, not a fact. Read only.
  *
+ *   J-2 (2.37)  a LINKED person contests an imported record and takes the
+ *               contest back. Signed in as the QA worker ONLY, on their own
+ *               profile (`#organization-history`, the selectors of the CI
+ *               walk EX-6 in experience-integration-isolated.spec.ts): the ONE
+ *               organization record that carries a synthetic-fixture label
+ *               (`lib/qa/synthetic-fixture.ts`) is pinned, contested through
+ *               the dispute form, shown as contested after a fresh load,
+ *               withdrawn, and shown with the withdrawn history line after a
+ *               fresh load. Writes exactly two append-only events on that one
+ *               record (`disputed`, `dispute_withdrawn`, both by the worker);
+ *               the record itself is never edited. Proof is UI only: a walk
+ *               has no database access, and both markers are server renders
+ *               of the stored events (re-read after `reload()`). When no such
+ *               record is linked to the QA worker the step SKIPS with that
+ *               reason and writes nothing — seeding is the owner's or the
+ *               coordinator's step (below). A standing contest left by an
+ *               interrupted earlier run is withdrawn first, so a rerun starts
+ *               from the same state. Who has NO account is owner decision
+ *               ARCH-5 and is not walked.
+ *
  * Synthetic data only: the waitlist address is a reserved example.com
  * address tagged with this run id; no person's data is read or written.
+ *
+ * ── J-2 SEEDING (owner / coordinator, once; NOT done by this walk or by agents)
+ *
+ * J-2 needs ONE organization record about a roster person of a QA-SYNTHETIC
+ * organization, linked to the QA worker (slot `worker`, the Alfa employee of
+ * `lib/testing/prod-qa-guard.ts`) by the worker's OWN confirmation. Made
+ * through the product's own doors, as EX-0 does in CI (there the records are
+ * written with the local service key only because the import UI is not what
+ * that walk is about; in production use the import door):
+ *
+ *   1. As the QA owner, workspace "QA-SYNTHETIC Alfa (testinis subjektas)"
+ *      (header workspace chip), open /lt/dashboard/company/history and import
+ *      a one-row file through the import door (upload → preview → commit),
+ *      for example `qa-synthetic-2-37.csv`:
+ *
+ *          vardas,data,valandos,darbai
+ *          QA-SYNTHETIC Ginčo Asmuo,2025-03-10,6,[QA-SYNTHETIC] 2.37 contest fixture: tinkavimo darbai
+ *
+ *      Let the commit plan create the person (relationship "employee"). Use a
+ *      DEDICATED roster name: "QA-SYNTHETIC Istorijos Asmuo" belongs to
+ *      prod-company-talent-history (H-*), whose cleanup withdraws its link
+ *      every run, and "QA-SYNTHETIC Importuotas Asmuo" to prod-org-roster.
+ *   2. Still as the owner in Alfa, /lt/dashboard/company/people#people-import-section:
+ *      on that roster row pick the QA worker in `roster-link-worker-<person id>`
+ *      and send the offer (`roster-link-offer-<person id>`).
+ *   3. As the QA worker, /lt/dashboard/profile: the offer waits at the top
+ *      (`roster-link-offer`) — Accept. The link is now `linked` /
+ *      `worker_confirmed`, and the record is on the worker's
+ *      `#organization-history`.
+ *
+ * Never withdraw that link afterwards (it would make J-2 skip again). No SQL
+ * is needed or proposed: every step above is an existing product action of
+ * the QA cast.
+ *
+ * Kept out of statistics: the organization's name carries `QA-SYNTHETIC` and
+ * the record text `[QA-SYNTHETIC]`, the markers of `isSyntheticFixtureLabel`
+ * (and its SQL twin `is_synthetic_fixture_label_v1`). The shared
+ * cross-organization readers drop fixture-labelled rows for real viewers
+ * (demand board, supply discovery, matching via `match-subject.ts`), and the
+ * operator metrics (`ops_product_metrics`) classify the organization and the
+ * QA accounts as TEST; those metrics count no evidence records or evidence
+ * events at all. What still COUNTS it, by design: the QA worker's own
+ * professional-experience total and Living CV (decision 0025: their own
+ * history, every hour once), Alfa's own history / business-history reads
+ * (Alfa is itself synthetic), and the competency suggestions shown only to
+ * the worker. No public or cross-organization statistic reads these records.
  */
 
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
@@ -155,4 +222,126 @@ test("G-4 (3.34). the owner reads a project forecast beside the course, labelled
   expect(["ok", "insufficient_data", "not_applicable"], `the forecast was read in production (got ${state})`).toContain(state);
   await expect(panel.getByTestId("project-forecast-note"), "labelled a forecast, not a fact").toBeVisible();
   await ctx.close();
+});
+
+test("J-2 (2.37). the QA worker contests the QA-SYNTHETIC record linked to them, sees it contested, and takes the contest back", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker", "en-GB");
+  try {
+    const open = async (): Promise<Locator> => {
+      await page.goto("/en/dashboard/profile#organization-history");
+      const main = page.getByRole("main");
+      // The profile rendered (this bar is unconditional); the history bar below
+      // renders only when the worker has linked organization history.
+      await expect(main.getByTestId("profile-edit-disclosure"), "the worker's profile renders").toBeAttached({ timeout: 60_000 });
+      return main;
+    };
+    let main = await open();
+    const list = main.getByTestId("organization-evidence-records");
+    const noRecord = "no QA-SYNTHETIC record linked to the QA account; seeding is the owner's/coordinator's step (spec header, J-2 SEEDING)";
+    if ((await main.getByTestId("organization-history-disclosure").count()) === 0 || (await list.count()) === 0) {
+      test.skip(true, noRecord);
+      return;
+    }
+    await expect(list, "the linked history opens from the hash").toBeVisible({ timeout: 60_000 });
+
+    // Only a record that carries a synthetic-fixture label, read from what the
+    // card shows: the recording organization and the source's own words.
+    const items = list.locator(":scope > li");
+    const labelled = await items.evaluateAll((els) =>
+      els.map((el) => ({
+        origin: el.querySelector('[data-testid="organization-evidence-record-origin"]')?.textContent ?? "",
+        text: el.querySelector('[data-testid="organization-evidence-record-text"]')?.textContent ?? "",
+        mine: el.querySelector('[data-testid="evidence-dispute-withdraw"]') !== null,
+        offers: el.querySelector('[data-testid="evidence-dispute-open"]') !== null,
+      })),
+    );
+    const qa = labelled
+      .map((r, i) => ({ ...r, i, fixture: isSyntheticFixtureLabel(r.origin, r.text) }))
+      .filter((r) => r.fixture && (r.offers || r.mine));
+    if (qa.length === 0) {
+      test.skip(true, noRecord);
+      return;
+    }
+    // The dedicated seed (its text names 2.37) first, else the first labelled one.
+    const pick = qa.find((r) => /\b2\.37\b/.test(r.text)) ?? qa[0]!;
+    console.log(`[contest] ${qa.length} QA-labelled record(s) linked to the QA worker; using one (standing contest from an earlier run: ${pick.mine})`);
+    let record = items.nth(pick.i);
+    const recordText = (await record.getByTestId("organization-evidence-record-text").innerText()).trim();
+    expect(isSyntheticFixtureLabel(pick.origin, recordText), "the pinned record is the QA fixture").toBe(true);
+
+    // The record's own id, from the form the product renders for it.
+    const recordIdIn = async (r: Locator): Promise<string> => {
+      const id = await r.locator('input[name="record_id"]').first().inputValue();
+      expect(id, "the record's form names it").toMatch(/^[0-9a-f-]{36}$/);
+      return id;
+    };
+    const byId = (id: string): Locator =>
+      page.getByRole("main").getByTestId("organization-evidence-records").locator(":scope > li").filter({
+        has: page.locator(`input[name="record_id"][value="${id}"]`),
+      });
+
+    // Withdraw the worker's standing contest on one record: the withdraw form
+    // (which names the record) leaves once the action has stored the event and
+    // the profile re-rendered; a refusal keeps the form and says so.
+    const withdraw = async (rid: string): Promise<void> => {
+      const r = byId(rid);
+      await r.getByTestId("evidence-dispute-withdraw").click();
+      await expect
+        .poll(async () => ((await r.getByTestId("evidence-dispute-withdraw-error").count()) > 0 ? "refused" : await r.count()), {
+          message: "the withdrawal is answered",
+          timeout: 30_000,
+        })
+        .toBe(0);
+    };
+
+    if (pick.mine) {
+      // An interrupted earlier run left its contest standing: take it back first.
+      await withdraw(await recordIdIn(record));
+      main = await open();
+      record = main
+        .getByTestId("organization-evidence-records")
+        .locator(":scope > li")
+        .filter({ hasText: recordText })
+        .filter({ has: page.getByTestId("evidence-dispute-open") })
+        .first();
+    }
+
+    // 1. Contest it.
+    await record.getByTestId("evidence-dispute-open").click();
+    const id = await recordIdIn(record);
+    await record.getByTestId("evidence-dispute-note").fill(`QA-SYNTHETIC contest ${RUN}: production walk J-2, withdrawn in the same run`);
+    await record.getByTestId("evidence-dispute-submit").click();
+    const refused = page.getByTestId("evidence-dispute-error");
+    // The action revalidates the profile: the record re-renders as contested by
+    // the worker (its withdraw form names the record) or the form says it refused.
+    await expect(byId(id).getByTestId("evidence-dispute-withdraw").or(refused).first()).toBeVisible({ timeout: 30_000 });
+    expect(await refused.count(), "the contest was accepted").toBe(0);
+
+    // 2. After a fresh load the stored contest is on the record.
+    await open();
+    const contested = byId(id);
+    await expect(contested, "the contested record is on the profile").toHaveCount(1, { timeout: 60_000 });
+    await expect(contested.getByTestId("evidence-record-disputed"), "the record shows the worker's contest").toBeVisible();
+    await expect(contested.getByTestId("organization-evidence-record-text"), "the record itself is unchanged").toHaveText(recordText);
+
+    // 3. Take it back.
+    await withdraw(id);
+
+    // 4. After a fresh load: no standing contest by the worker on that record,
+    //    and the history line says the contest existed and was withdrawn.
+    main = await open();
+    const after = main
+      .getByTestId("organization-evidence-records")
+      .locator(":scope > li")
+      .filter({ hasText: recordText })
+      .filter({ has: page.getByTestId("evidence-dispute-withdrawn-history") });
+    await expect(after.first(), "the contest is not erased, only withdrawn").toBeVisible({ timeout: 60_000 });
+    // Read once the list has rendered: no withdraw form names the record, so
+    // the worker's contest no longer stands.
+    await expect(byId(id), "no standing contest by the worker on the record").toHaveCount(0);
+    await expect(after.first().getByTestId("evidence-dispute-open"), "a fresh contest is offered again").toBeVisible();
+    console.log("[contest] contested, shown contested after reload, withdrawn, withdrawn history shown after reload");
+  } finally {
+    await ctx.close();
+  }
 });
