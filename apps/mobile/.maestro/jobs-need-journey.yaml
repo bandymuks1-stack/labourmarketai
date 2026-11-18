@@ -265,6 +265,28 @@ name: jobs-need-journey
           commands:
             - pressKey: Enter
             - waitForAnimationToEnd
+      # The country where the work is: required since #3225 (a name; the server
+      # resolves it to ISO).
+      - scrollUntilVisible:
+          element:
+            id: "need-country"
+          direction: DOWN
+          timeout: 20000
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "need-country"
+      - inputText: "Lithuania"
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - hideKeyboard
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - pressKey: Enter
+            - waitForAnimationToEnd
       - scrollUntilVisible:
           element:
             id: "need-location"

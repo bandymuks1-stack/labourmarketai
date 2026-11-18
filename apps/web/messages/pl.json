@@ -2215,7 +2215,7 @@
         },
         "noCompany": {
           "title": "Rozpocznij profil firmy",
-          "body": "Nie mają Państwo jeszcze profilu firmy. Proszę go utworzyć — jest od razu aktywny i użyteczny, bez czekania na zatwierdzenie.",
+          "body": "Nie mają Państwo jeszcze profilu firmy. Proszę go utworzyć: mogą Państwo z niego korzystać od razu. Pracownicy widzą Państwa zapotrzebowania po weryfikacji firmy.",
           "cta": "Rozpocznij zakładanie firmy"
         },
         "personalSpace": {
@@ -2250,7 +2250,7 @@
         "formTitle": "Zapytanie o profil firmy",
         "formTitleCreate": "Utwórz profil firmy",
         "formTitleEdit": "Edytuj profil firmy",
-        "formSubtitle": "Proszę utworzyć profil swojej organizacji z konta osobistego. Jest od razu aktywny i użyteczny — bez czekania na zatwierdzenie. Weryfikacja to osobny, silniejszy krok zaufania.",
+        "formSubtitle": "Proszę utworzyć profil swojej organizacji z konta osobistego. Mogą Państwo z niego korzystać od razu: projekty, zespół, dziennik pracy. Pracownicy widzą Państwa zapotrzebowania po weryfikacji firmy; o weryfikację można poprosić poniżej.",
         "existingHeading": "Profil firmy",
         "legalName": "Pełna nazwa firmy",
         "legalNameHelp": "Wymagane. 2–200 znaków.",
@@ -2304,7 +2304,7 @@
         "agencyConnectionPending": "Zaproszenie zaakceptowane. Agencja pracy chce nawiązać połączenie z Państwa firmą — najpierw proszę utworzyć profil firmy; prośba o połączenie będzie potem czekać na stronie Partnerzy, gdzie potwierdzą ją Państwo w imieniu tej firmy.",
         "legalLockedNotice": "Ta firma jest zweryfikowana. Jej dane prawne (pełna nazwa, numer rejestracyjny, kraj i adres siedziby) są tu zablokowane i nie można ich nadpisać — proszę skontaktować się z pomocą techniczną, aby poprosić o zmianę danych prawnych. Nadal mogą Państwo aktualizować kontakty, stronę internetową, typ firmy i swoją rolę.",
         "saveDraft": "Zapisz firmę",
-        "submitRequest": "Poproś o ręczną weryfikację (opcjonalnie)",
+        "submitRequest": "Proszę poprosić o weryfikację (pracownicy widzą zapotrzebowania po niej)",
         "statusDraftSaved": "Firma zapisana — jest teraz aktywna i użyteczna.",
         "statusSubmitted": "Poproszono o ręczną weryfikację (opcjonalnie). W międzyczasie Państwa firma pozostaje użyteczna.",
         "statusNeedsMigration": "Nie udało się wykonać tej czynności. Proszę spróbować ponownie.",
@@ -2325,7 +2325,7 @@
           "draft": "Szkic. Proszę zapisać, aby aktywować firmę — staje się od razu użyteczna.",
           "active_unverified": "Aktywna i użyteczna już teraz. Podstawowe automatyczne sprawdzenia zaliczone. Jeszcze niezweryfikowana tożsamościowo — to osobny, silniejszy krok. Państwa zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
           "needs_checks": "Aktywna i użyteczna, ale podstawowe sprawdzenie wymaga uwagi (np. proszę dodać kraj albo poprawić nieprawidłowy numer / stronę / e-mail). Państwa zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
-          "pending_verification": "Poprosili Państwo o opcjonalną ręczną weryfikację. Państwa firma pozostaje w pełni użyteczna w czasie oczekiwania. Państwa zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
+          "pending_verification": "Poprosili Państwo o weryfikację. Państwa firma pozostaje w pełni użyteczna w czasie oczekiwania. Państwa zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
           "unverified": "Niezweryfikowana. Mogą Państwo normalnie korzystać ze swojej firmy. Państwa zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
           "verified": "Zweryfikowana — silniejszy stan zaufania, przyznawany wyłącznie po realnej kontroli."
         },

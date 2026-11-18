@@ -16,6 +16,9 @@ import type {
   LinkedCompanyWorker,
 } from "@/lib/company/company-workers";
 import { MessageButton } from "@/components/app/message-button";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import {
   IdentityDisclosure,
   PersonIdentityCard,
@@ -542,36 +545,38 @@ export function CompanyWorkersSection({
             </header>
             <label className="flex flex-col gap-1 text-xs">
               <span className="text-text-secondary">{labels.inviteEmailLabel}</span>
-              <input
+              <Input
                 type="email"
                 name="email"
                 required
                 placeholder={labels.inviteEmailPlaceholder}
-                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                className="max-sm:min-h-11 max-sm:text-base"
                 data-testid="company-workers-invite-email"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs">
               <span className="text-text-secondary">{labels.inviteNoteLabel}</span>
-              <textarea
+              <Textarea
                 name="note"
                 rows={2}
                 maxLength={500}
-                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                className="max-sm:text-base"
                 data-testid="company-workers-invite-note"
               />
               <span className="text-meta text-text-muted">
                 {labels.inviteNoteHint}
               </span>
             </label>
-            <button
+            <Button
               type="submit"
               disabled={isPending}
-              className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              className="min-h-11 self-start"
               data-testid="company-workers-invite-submit"
             >
               {labels.inviteSubmit}
-            </button>
+            </Button>
             {outcomeLabel ? (
               <p
                 className={
@@ -665,8 +670,11 @@ function InviteShareLink({
       <p className="text-xs text-text-secondary">{labels.inviteShareLinkHint}</p>
       <div className="flex flex-wrap items-center gap-2">
         <code className="max-w-full truncate rounded bg-ink-800 px-2 py-1 text-meta text-text-primary">{url}</code>
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           data-testid="company-workers-invite-copy-link"
           onClick={() => {
             void navigator.clipboard?.writeText(url).then(
@@ -674,10 +682,9 @@ function InviteShareLink({
               () => onCopied(false),
             );
           }}
-          className="inline-flex min-h-11 sm:min-h-9 items-center rounded border border-ink-500 px-2 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
         >
           {copied ? labels.inviteShareCopied : labels.inviteShareCopy}
-        </button>
+        </Button>
       </div>
     </div>
   );

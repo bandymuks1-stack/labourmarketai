@@ -111,7 +111,7 @@ describe("agency is a companyType, never a root role", () => {
 
 describe("company country validation is human, never technical", () => {
   it("the form renders a country SELECT over seeded codes (no free text)", () => {
-    expect(setupForm).toMatch(/<select[\s\S]{0,200}name="country"/);
+    expect(setupForm).toMatch(/<[sS]elect[\s\S]{0,200}name="country"/);
     // Global-access rule (2026-09-22): the SELECT offers EVERY ISO country, the priority
     // markets first — a market list orders the list, it never shortens it.
     // 2026-10-08: the list is NAMED ON THE SERVER and handed to the client
