@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 import { isSyntheticFixtureLabel } from "../../lib/qa/synthetic-fixture";
+import { storedAnalytics } from "./first-visit-consent";
 
 /**
  * REGISTER GAPS — production proof for function-register rows that had no
@@ -24,21 +25,43 @@ import { isSyntheticFixtureLabel } from "../../lib/qa/synthetic-fixture";
  *               the run records that fact — the seeds ship inactive and are
  *               activated by the owner — and the row stays unproven.
  *   J-2 (2.36)  template → journal entry → CV, in production, under the QA
- *               worker ONLY: when the owner has activated a profession
- *               template, the worker picks it in the full composer, saves ONE
- *               entry marked QA-SYNTHETIC with this run id (kept out of
- *               statistics by lib/qa/synthetic-fixture.ts), finds it in the
- *               journal, and sees the CV's "Journal entries" figure count it.
+ *               worker ONLY: when a profession template is active, the worker
+ *               picks it in the full composer, saves ONE entry marked
+ *               QA-SYNTHETIC with this run id, finds it in the journal, and
+ *               sees the CV's "Journal entries" figure count it.
  *               When no template is active the step is SKIPPED as unproven,
  *               before anything is written — it never fails on that and never
  *               writes. The walk never activates or deactivates a template.
- *               OWNER STEP (not the walk's): activate exactly one seed, e.g.
- *                 update public.journal_profession_templates
- *                    set active = true where slug = 'construction_daily';
- *               (seeds `construction_daily`, `transport_daily`,
- *               `cleaning_daily`, all profession-unscoped, ship inactive —
- *               migration 20260714180000; `active = false` undoes it). If
- *               several are active, the first one offered is used.
+ *               WHAT IT DOES TO STATISTICS, exactly:
+ *                 - no product-funnel row (`pilot_events`). Every client
+ *                   event (`journal_viewed`, `journal_entry_started`,
+ *                   `journal_entry_saved`, …) is sent only with analytics
+ *                   consent (lib/telemetry/task.ts `fire`), and every walk
+ *                   context holds a REFUSED choice (analytics-consent-seed.ts
+ *                   via prod-walk.ts). The step asserts the refusal before it
+ *                   writes, and after the save that no analytics session id
+ *                   was ever minted (none is, unless an event is sent). The
+ *                   save's server path (lib/journal/actions.ts and every
+ *                   module it imports) has no server funnel emitter, and no
+ *                   database function writes `pilot_events`; both pinned by
+ *                   lib/guards/prod-template-walk-no-funnel.test.ts.
+ *                 - the entry IS a journal row: the operator metrics
+ *                   (`ops_product_metrics` journal_entries_*) count it under
+ *                   TEST, because the QA worker's account is a TEST account
+ *                   (`qa.*@labourmarket.ai`), not because of the text marker.
+ *                 - it counts, by design, in the QA worker's own journal,
+ *                   experience total and Living CV (decision 0025).
+ *               OWNER STEP — NOT RUN BY THE WALK, NOT RUN BY AGENTS, A
+ *               SEPARATE OWNER DECISION: activating a template is a change to
+ *               the WHOLE PRODUCT, not to the QA worker. The seeds
+ *               (`construction_daily`, `transport_daily`, `cleaning_daily`,
+ *               migration 20260714180000, shipped inactive) are
+ *               profession-unscoped: one activated seed is offered in EVERY
+ *               real worker's composer at once. That exceeds a permission
+ *               for one template for the isolated QA worker. Until the owner
+ *               decides it as a product change, this step stays skipped and
+ *               2.36 is proven on the isolated stack only
+ *               (journal-template-isolated.spec.ts T-1..T-4).
  *   G-4 (3.34)  the project forecast: the organization owner opens one of
  *               its own projects and the forecast panel beside the course is
  *               READ (ok / too little evidence / nothing open — never
@@ -282,6 +305,11 @@ test("J-2 (2.36). an active template's entry is saved under the QA worker only a
   const slug = slugs[0];
   if (slugs.length > 1) console.log(`[templates] J-2: ${slugs.length} templates active (${slugs.join(", ")}); using the first, ${slug}`);
 
+  // Still before any write: this browser has REFUSED analytics, so no event of
+  // this step reaches the product funnel. Anything else and nothing is written.
+  const consent = (await storedAnalytics(page)).consent;
+  expect(consent && JSON.parse(consent).choice, "the walk's browser refused analytics before any write").toBe("refused");
+
   const before = await cvJournalEntries(page);
   // Still before any write: an unreadable figure could not show the entry arrive.
   expect(before, "the CV's journal-entry figure is readable before the save").not.toBeNull();
@@ -296,13 +324,15 @@ test("J-2 (2.36). an active template's entry is saved under the QA worker only a
   await expect.poll(async () => (await text.inputValue()).length, { message: "the template prefilled the entry" }).toBeGreaterThan(empty);
   const filled = await text.inputValue();
 
-  // One entry, the QA worker's own, marked so statistics leave it out. No
+  // One entry, the QA worker's own, marked QA-SYNTHETIC with this run id. No
   // duration is stated: an unconfirmed duration opens a review step first.
   const marker = `${RUN}-${process.env.GITHUB_RUN_ATTEMPT ?? "1"}-J2`;
   await text.fill(`QA-SYNTHETIC ${marker}: šablono ${slug} įrašas, sutvarkiau darbo vietą\n${filled}`);
   await answerComposerQuestions(page);
   await main.getByTestId("journal-save-entry").first().click();
   await expect(main.getByTestId("journal-saved-banner"), "the entry was saved").toBeVisible({ timeout: 60_000 });
+  // No event was sent: `fire` mints the analytics session id only when it sends.
+  expect((await storedAnalytics(page)).analytics, "no analytics item exists after the save: no funnel event was sent").toEqual([]);
 
   await page.goto("/lt/dashboard/journal");
   await expect(
