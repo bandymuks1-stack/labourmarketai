@@ -27,11 +27,31 @@
  * so a context is named once, the same way, everywhere.
  */
 
+/**
+ * WHICH "WITHOUT A NAME" PHRASE AN UNNAMED ORGANIZATION GETS (owner P0
+ * 2026-10-29). An organization created at sign-up can carry neither a display
+ * nor a legal name. Its bare type ("Agentūra · Savininkas") read like a real,
+ * named choice, and work was filed there that belonged elsewhere. Every
+ * surface now says plainly that the organization has no name, through the
+ * `journal.unnamedOrganization.<kind>` keys (all locales). Display only — the
+ * organization's own type decides the phrase, never an authority (ORG-2).
+ */
+export type UnnamedOrganizationKind = "company" | "agency" | "other";
+
+export function unnamedOrganizationKind(
+  organizationType: string | null | undefined,
+): UnnamedOrganizationKind {
+  if (organizationType === "agency") return "agency";
+  if (organizationType === "company") return "company";
+  return "other";
+}
+
 export type EngagementLabelInput = {
   /** The organization's display name (already resolved), or null. */
   readonly orgName: string | null;
-  /** Localized organization TYPE ("Įmonė" / "Agentūra") — the fallback name
-   *  for an organization that has no display name. */
+  /** The fallback name for an organization that has no display/legal name:
+   *  the localized "Agency without a name" / "Company without a name" phrase
+   *  (`journal.unnamedOrganization.*`, see `unnamedOrganizationKind`). */
   readonly orgTypeLabel: string | null;
   /** The person's own title for the context, or null. */
   readonly title: string | null;
@@ -149,4 +169,81 @@ export function composeDistinctEngagementLabels(
     seen.set(l, n);
     return n === 1 ? l : `${l} (${n})`;
   });
+}
+
+/**
+ * AN ORGANIZATION WITHOUT A NAME THAT THE PERSON NO LONGER WORKS WITH (owner
+ * decision 2026-11-15, #3356: rename the row, never hide it).
+ *
+ * The 2026-09-23 consolidation retired a test organization that had no name
+ * and ended the person's engagement there, keeping its journal entries and
+ * its manager confirmation as history. The CV printed that engagement under a
+ * bare relationship word ("Employee") or "—". Dropping the row was rejected:
+ * its hours would have moved to the personal row, a false source (decision
+ * 0025). The row now says what the person's own rows can tell — an
+ * organization, no name recorded, every relationship with it ended — through
+ * the `journal.unnamedOrganization.ended` phrase, wherever the name would
+ * stand. Its hours, dates and confirmations are untouched.
+ *
+ * Readable facts only. Once a relationship has ended, the organization row is
+ * outside the person's RLS, so whether it is ARCHIVED cannot be read and is
+ * never claimed. A relationship has ended when it carries an end date and no
+ * reader marks it current; no relationship at all says nothing.
+ */
+export type EndedUnnamedOrganizationInput = {
+  readonly organizationId: string | null | undefined;
+  readonly organizationName: string | null | undefined;
+  /** Every relationship the reader holds with this organization. */
+  readonly relationships: readonly {
+    readonly endedAt: string | null | undefined;
+    readonly current?: boolean | null;
+  }[];
+};
+
+export function isEndedUnnamedOrganization(input: EndedUnnamedOrganizationInput): boolean {
+  return (
+    clean(input.organizationId) !== null &&
+    clean(input.organizationName) === null &&
+    input.relationships.length > 0 &&
+    input.relationships.every((r) => r.current !== true && clean(r.endedAt) !== null)
+  );
+}
+
+/** One relationship row, as each reader already holds it. */
+export type ContextRelationshipRow = {
+  readonly engagementContextId: string | null;
+  readonly organizationId: string | null;
+  readonly organizationName: string | null;
+  readonly endedAt: string | null;
+  readonly current?: boolean | null;
+};
+
+/**
+ * The engagement contexts whose organization is such a one, judged per
+ * organization over ALL the rows given (an ended job beside a current role in
+ * the same organization is not "earlier"). This is how the CV, whose rows carry
+ * no organization id, finds them in the one experience reading's roles
+ * (decision 0025). Unreadable rows (`null`) find none: those rows keep their
+ * earlier fallback.
+ */
+export function endedUnnamedOrganizationContexts(
+  rows: readonly ContextRelationshipRow[] | null | undefined,
+): ReadonlySet<string> {
+  const byOrganization = new Map<string, ContextRelationshipRow[]>();
+  for (const r of rows ?? []) {
+    const id = clean(r.organizationId);
+    if (id === null) continue;
+    byOrganization.set(id, [...(byOrganization.get(id) ?? []), r]);
+  }
+  const out = new Set<string>();
+  for (const [organizationId, rs] of byOrganization) {
+    const ended = isEndedUnnamedOrganization({
+      organizationId,
+      organizationName: rs.map((r) => clean(r.organizationName)).find((n) => n !== null) ?? null,
+      relationships: rs,
+    });
+    if (!ended) continue;
+    for (const r of rs) if (r.engagementContextId) out.add(r.engagementContextId);
+  }
+  return out;
 }

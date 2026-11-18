@@ -8,7 +8,8 @@ import { join } from "node:path";
  * Pins that the locale error boundary exists and behaves concretely:
  *   - it is a client component;
  *   - it auto-reloads ONLY for stale-chunk / failed-dynamic-import errors
- *     (the deploy-race symptom), guarded against reload loops;
+ *     (the deploy-race symptom), guarded against reload loops — and so does
+ *     the global boundary, through the same helper and the same budget;
  *   - it does NOT silently hide other errors — it logs them and shows a retry;
  *   - its copy exists with LT/EN parity.
  */
@@ -31,12 +32,22 @@ describe("Guard: root client error boundary", () => {
   });
 
   it("auto-reloads only on chunk / dynamic-import errors, loop-guarded", () => {
-    const src = read(ERROR_TSX);
-    expect(src).toMatch(/ChunkLoadError/);
-    expect(src).toMatch(/Loading chunk|dynamically imported module/i);
-    expect(src).toMatch(/window\.location\.reload\(\)/);
-    // A session flag prevents an infinite reload loop on a genuinely broken chunk.
-    expect(src).toMatch(/sessionStorage/);
+    // 2026-11-12: the detection and the loop guard moved to ONE helper, so the
+    // locale boundary and the global one share a single reload budget.
+    const HELPER = "lib/telemetry/chunk-reload.ts";
+    const helper = read(HELPER);
+    expect(helper).toMatch(/ChunkLoadError/);
+    expect(helper).toMatch(/Loading chunk|dynamically imported module/i);
+    expect(helper).toMatch(/window\.location\.reload\(\)/);
+    // A session mark prevents an infinite reload loop on a genuinely broken chunk.
+    expect(helper).toMatch(/sessionStorage/);
+    expect(helper).toMatch(/if \(!claimChunkReload\(store, Date\.now\(\)\)\) return false;\s+window\.location\.reload\(\);/);
+    for (const boundary of [ERROR_TSX, "app/global-error.tsx"]) {
+      const src = read(boundary);
+      expect(src, `${boundary} must reload through the shared helper`).toMatch(/reloadOnceForChunkError\(error\)/);
+      // No boundary reloads on its own: a second, unguarded reload is a loop.
+      expect(src, `${boundary} must not reload by itself`).not.toMatch(/location\.reload/);
+    }
   });
 
   it("does NOT silently hide non-chunk errors (logs + offers retry)", () => {

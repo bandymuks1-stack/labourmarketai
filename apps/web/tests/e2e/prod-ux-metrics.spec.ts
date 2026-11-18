@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
 import { COMMON_ROUTES, EMPLOYER_ROUTES } from "./prod-walk-routes";
-import { AXE_SOURCE, clsTopSource, componentTops, installObservers, measure, runAxe } from "./ux-probes";
+import { AXE_SOURCE, clsGrowerSource, clsTopSource, componentTops, installObservers, measure, runAxe } from "./ux-probes";
 
 /**
  * PRODUCTION UX MEASUREMENTS — NUMBERS ONLY (spec=ux-metrics, dispatch only).
@@ -54,11 +54,11 @@ const VIEWPORTS: Record<Viewport, { viewport: { width: number; height: number };
   phone: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, tapMin: 44 },
 };
 
-/** `activeLocales` in lib/i18n/config.ts (6 of the 11 UI locales are routed). Mirrored, not imported:
+/** `activeLocales` in lib/i18n/config.ts (7 of the 11 UI locales are routed). Mirrored, not imported:
  *  a Playwright spec cannot resolve the app's `@/` alias. Context `locale` is the browser's language. */
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 type Locale = (typeof ACTIVE_LOCALES)[number];
-const BROWSER_LOCALE: Record<Locale, string> = { lt: "lt-LT", en: "en-GB", ru: "ru-RU", nl: "nl-NL", de: "de-DE", pl: "pl-PL" };
+const BROWSER_LOCALE: Record<Locale, string> = { lt: "lt-LT", en: "en-GB", ru: "ru-RU", nl: "nl-NL", de: "de-DE", pl: "pl-PL", sv: "sv-SE" };
 
 const EMPLOYER_SET = ["/lt/dashboard", ...EMPLOYER_ROUTES];
 const ACTORS: readonly { slot: string; routes: readonly string[] }[] = [
@@ -158,6 +158,7 @@ async function measureRoute(page: Page, slot: string, vpLabel: string, vp: Viewp
   }
   const axe = await runAxe(page);
   const clsTop = await page.evaluate(clsTopSource).catch(() => "none");
+  const clsGrower = await page.evaluate(clsGrowerSource).catch(() => "none:0");
   const tops = await page.evaluate(componentTops).catch(() => ({ small: "none", cta: "none" }));
   const kv: Kv[] = [...head, ["measured", "1"]];
   // min_font_px keeps one decimal (11.5 px must not print as 12); every other value is an integer.
@@ -165,7 +166,7 @@ async function measureRoute(page: Page, slot: string, vpLabel: string, vp: Viewp
   if (axe) {
     kv.push(["axe_critical", n(axe.critical)], ["axe_serious", n(axe.serious)], ["axe_moderate", n(axe.moderate)], ["axe_minor", n(axe.minor)], ["axe_nodes", n(axe.nodes)]);
   } else kv.push(["axe", "na"]);
-  kv.push(["cls_top", clsTop], ["tap_small_top", tops.small], ["cta_ids", tops.cta]);
+  kv.push(["cls_top", clsTop], ["cls_grower", clsGrower], ["tap_small_top", tops.small], ["cta_ids", tops.cta]);
   console.info(line(slot, vpLabel, locale, url, kv));
 
   const where = `${slot} ${vpLabel} ${url}`;

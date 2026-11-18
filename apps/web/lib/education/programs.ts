@@ -33,12 +33,61 @@ export interface CohortMemberRow {
   readonly label: string;
 }
 
+/** A learner's own request to join (J-12): the name they typed, never their profile. */
+export interface CohortJoinRequestRow {
+  readonly profileId: string;
+  readonly label: string;
+  readonly note: string | null;
+  readonly requestedAt: string | null;
+}
+
 export interface CohortRow {
   readonly id: string;
   readonly name: string;
   readonly startsOn: string | null;
   readonly endsOn: string | null;
   readonly members: readonly CohortMemberRow[];
+  /** Learners may find this group and ask to join; `null` = this database has no join requests yet. */
+  readonly joinRequestsOpen: boolean | null;
+  readonly requests: readonly CohortJoinRequestRow[];
+}
+
+/**
+ * ONE MEMBERSHIP ROW, SEVERAL STATES (migration 20261102160000). A join
+ * request is the same (cohort, profile) row before the institution decides, so
+ * the roster and the request list are split here and nowhere else: only
+ * `active` / `left` rows are members; `requested` rows are open requests;
+ * `declined` / `withdrawn` rows are history and show in neither. Before that
+ * migration a requested row could not exist, and treating an unknown state as
+ * `active` would have counted a request as a member.
+ *
+ * A MEMBER is named by what the institution typed on its own invitation, else
+ * the name the learner typed on their request. A REQUEST is named only by what
+ * the learner typed on it — the card says exactly that ("typed by the learner,
+ * not checked"), so an older invitation name must never stand in for it. Never
+ * anything read from the profile.
+ */
+export function splitCohortMembers(
+  rows: ReadonlyArray<Record<string, unknown>>,
+  labelByProfile: ReadonlyMap<string, string>,
+): { members: CohortMemberRow[]; requests: CohortJoinRequestRow[] } {
+  const members: CohortMemberRow[] = [];
+  const requests: CohortJoinRequestRow[] = [];
+  for (const m of rows) {
+    const profileId = String(m.profile_id);
+    const status = String(m.status);
+    const typed = typeof m.request_label === "string" && m.request_label.trim() ? m.request_label.trim() : null;
+    if (status === "active" || status === "left")
+      members.push({ profileId, status, label: labelByProfile.get(profileId) ?? typed ?? profileId.slice(0, 8) });
+    else if (status === "requested")
+      requests.push({
+        profileId,
+        label: typed ?? profileId.slice(0, 8),
+        note: typeof m.request_note === "string" && m.request_note.trim() ? m.request_note.trim() : null,
+        requestedAt: typeof m.requested_at === "string" ? m.requested_at : null,
+      });
+  }
+  return { members, requests };
 }
 
 export interface ProgramRow {
@@ -99,6 +148,15 @@ export type InstitutionProgramsRead =
       readonly status: "ok";
       readonly programs: readonly ProgramRow[];
       readonly assignable: readonly AssignableLearner[];
+      /**
+       * Whether the caller may see and change cohort MEMBERSHIP: the
+       * institution's own owner / admin / manager (J-12 decider basis,
+       * `is_education_cohort_internal_decider_v1`). An external manager reads
+       * programmes and cohorts but no membership row, so for them every
+       * cohort's `members` / `requests` are empty because they are NOT KNOWN —
+       * never "0 members" (SEP-7, UNKNOWN != ZERO). Callers must check this.
+       */
+      readonly membersVisible: boolean;
     }
   | { readonly status: "unavailable" };
 
@@ -110,6 +168,30 @@ export function isMissingSchemaCode(code: string | undefined | null): boolean {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
   return c;
+}
+
+const COHORT_COLUMNS = "id, program_id, name, starts_on, ends_on, archived_at";
+const JOIN_COLUMNS = "join_requests_open, education_cohort_members(profile_id, status, request_label, request_note, requested_at)";
+
+/**
+ * Reads the cohorts with the join-request columns, and falls back to the
+ * columns every database has when they do not exist yet (42703: migration
+ * 20261102160000 not applied). The fallback keeps the whole section working
+ * and marks join requests as not available — never as "closed".
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function readCohorts(supabase: SupabaseClient, programIds: readonly string[]): Promise<any> {
+  const query = (columns: string) =>
+    asAny(supabase)
+      .from("education_cohorts")
+      .select(columns)
+      .in("program_id", programIds)
+      .is("archived_at", null)
+      .order("created_at", { ascending: true })
+      .limit(300);
+  const full = await query(`${COHORT_COLUMNS}, ${JOIN_COLUMNS}`);
+  if (!full.error || full.error.code !== "42703") return full;
+  return query(`${COHORT_COLUMNS}, education_cohort_members(profile_id, status)`);
 }
 
 export async function readInstitutionPrograms(organizationId: string): Promise<InstitutionProgramsRead> {
@@ -128,16 +210,10 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
   const programRows = (programsRes.data ?? []) as Array<Record<string, unknown>>;
   const programIds = programRows.map((p) => String(p.id));
 
-  const [cohortsRes, invRes, ctxRes, demandRes] = await Promise.all([
+  const [cohortsRes, invRes, ctxRes, demandRes, deciderRes] = await Promise.all([
     programIds.length === 0
       ? Promise.resolve({ data: [], error: null })
-      : asAny(supabase)
-          .from("education_cohorts")
-          .select("id, program_id, name, starts_on, ends_on, archived_at, education_cohort_members(profile_id, status)")
-          .in("program_id", programIds)
-          .is("archived_at", null)
-          .order("created_at", { ascending: true })
-          .limit(300),
+      : readCohorts(supabase, programIds),
     asAny(supabase)
       .from("invitations")
       .select("accepted_by_profile_id, invited_name, invited_email")
@@ -158,7 +234,10 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
       .eq("status", "active")
       .limit(500),
     asAny(supabase).rpc("count_public_vacancies_by_profession_v1", { p_limit: PUBLIC_DEMAND_LIMIT }),
+    asAny(supabase).rpc("is_education_cohort_internal_decider_v1", { p_org: organizationId }),
   ]);
+  // A failed or missing answer is "not visible", never "visible with zero".
+  const membersVisible = !deciderRes.error && deciderRes.data === true;
   // A failed eligibility read is `unavailable`, not an empty dropdown: an
   // empty list here reads as "this institution has no learners", which is a
   // different and false statement (SEP-7, UNKNOWN != ZERO).
@@ -182,17 +261,17 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
 
   const cohortsByProgram = new Map<string, CohortRow[]>();
   for (const c of (cohortsRes.data ?? []) as Array<Record<string, unknown>>) {
-    const members = ((c.education_cohort_members ?? []) as Array<Record<string, unknown>>).map((m) => ({
-      profileId: String(m.profile_id),
-      status: (String(m.status) === "left" ? "left" : "active") as "active" | "left",
-      label: labelByProfile.get(String(m.profile_id)) ?? String(m.profile_id).slice(0, 8),
-    }));
+    const { members, requests } = membersVisible
+      ? splitCohortMembers((c.education_cohort_members ?? []) as Array<Record<string, unknown>>, labelByProfile)
+      : { members: [], requests: [] };
     const row: CohortRow = {
       id: String(c.id),
       name: String(c.name),
       startsOn: (c.starts_on as string | null) ?? null,
       endsOn: (c.ends_on as string | null) ?? null,
       members,
+      joinRequestsOpen: typeof c.join_requests_open === "boolean" ? c.join_requests_open : null,
+      requests,
     };
     const key = String(c.program_id);
     cohortsByProgram.set(key, [...(cohortsByProgram.get(key) ?? []), row]);
@@ -216,5 +295,5 @@ export async function readInstitutionPrograms(organizationId: string): Promise<I
   );
   const assignable = eligibleLearners(labelByProfile, activeStudentProfileIds);
 
-  return { status: "ok", programs, assignable };
+  return { status: "ok", programs, assignable, membersVisible };
 }

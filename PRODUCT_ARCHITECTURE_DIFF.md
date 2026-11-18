@@ -7,15 +7,12 @@
 
 ## What appeared
 
-| What appeared | Kind | Why it appeared | Why it cannot be a conversation | Permitting axiom | Declared |
-|---|---|---|---|---|---|
-| `/dashboard/account/live-check` | screen | — | — | — | **NO** |
+_No new product surface was added by this PR._
 
 ## Axiom checks
 
 | Finding | Axiom | Where | Certainty | Detail |
 |---|---|---|---|---|
-| `undeclared_surface` | A-09 | `/dashboard/account/live-check` | certain | new screen with no declaration in the surface registry (origin_axiom / purpose / why_not_chat / why_not_existing_component / owner) |
 | `not_world_state_driven` | A-01 | `/create-cv` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
 | `not_reflected_on_map` | A-01 | `/create-cv` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
 | `not_ai_controlled` | A-01 | `/create-cv` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |

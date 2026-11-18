@@ -5,6 +5,7 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 import { activeLocales } from "./lib/i18n/config";
+import { HTML_LIMITED_BOTS } from "./lib/seo/html-limited-bots";
 
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
@@ -168,6 +169,9 @@ const ENTRY_SHORTCUT_REDIRECTS = [
   { source: `/${LOCALE}/signup`, destination: "/:locale/auth/signup", permanent: true },
   { source: `/${LOCALE}/login`, destination: "/:locale/auth/login", permanent: true },
   { source: `/${LOCALE}/register`, destination: "/:locale/auth/signup", permanent: true },
+  // The spellings people type (UX-9).
+  { source: `/${LOCALE}/auth/sign-up`, destination: "/:locale/auth/signup", permanent: true },
+  { source: `/${LOCALE}/auth/sign-in`, destination: "/:locale/auth/login", permanent: true },
   // Commonly guessed legal URLs (and what OAuth app consoles ask for). The
   // canonical pages live under /legal/…; these 404'd before.
   { source: `/${LOCALE}/privacy`, destination: "/:locale/legal/privacy", permanent: true },
@@ -181,6 +185,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Never advertise the framework version to attackers scanning for CVEs.
   poweredByHeader: false,
+  // Crawlers that run no script must find canonical and robots in <head>.
+  htmlLimitedBots: HTML_LIMITED_BOTS,
   // Self-hosting (P0 restore, 2026-10-16): `standalone` emits
   // `.next/standalone/apps/web/server.js` plus a traced minimal node_modules,
   // so the app can run with plain `node server.js` on any Node host (Hostinger

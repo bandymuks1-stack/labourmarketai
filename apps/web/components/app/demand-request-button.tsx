@@ -19,8 +19,10 @@ import {
   saveDemandDraftAction,
 } from "@/lib/demand/demand-drafts-actions";
 import type { DemandPrefill, DemandUrgency } from "@/lib/demand/demand-request";
+import { parseCompanyNeedPrefill, type CompanyNeedPrefill } from "@/lib/staffing/company-need-prefill";
 import { DemandAdvancedSections } from "@/components/app/demand-advanced-sections";
 import {
+  defaultCurrencyForCountry,
   buildStructuredV2Input,
   storedV2ToFormState,
   EMPTY_ADVANCED_DEMAND_STATE,
@@ -179,10 +181,17 @@ export function DemandRequestButton({
   const countryOptions: { value: string; label: string }[] = countryOptionsForLocale(locale);
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
+  // A need with no country is invisible to every country filter (workers,
+  // agencies, search). The market is never guessed, so it is asked for.
+  const [showCountryError, setShowCountryError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
   const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual" | "workspaceChanged">(
     "idle",
   );
+  // The need this form just saved, so its next step opens THAT need's
+  // candidates. Without it the scouting room picks a need by its own rule (most
+  // offers or hands raised first), which can be an older need.
+  const [savedRequestId, setSavedRequestId] = useState<string | null>(null);
   // Advanced structured clusters (structured_v2, PR 2) — optional; empty
   // stays an honest "not stated" and the request submits exactly as before.
   const tsd = useTranslations("structuredDemand");
@@ -191,6 +200,22 @@ export function DemandRequestButton({
   });
   const patchAdv = (patch: Partial<AdvancedDemandFormState>) =>
     setAdv((prev) => ({ ...prev, ...patch }));
+  // The pay currency follows the chosen country (SE → SEK) while no amount is
+  // typed yet: a default the person sees in the picker and can change, never
+  // a conversion of numbers already written (Swedish employer audit M-1).
+  useEffect(() => {
+    const currency = defaultCurrencyForCountry(country);
+    if (!currency) return;
+    // EVERY amount the currency applies to (buildStructuredV2Input prices the
+    // pay range, the guaranteed base and the per diem in `adv.currency`): any
+    // of them typed means the currency is the person's, and stays.
+    setAdv((prev) =>
+      [prev.compMin, prev.compMax, prev.guaranteedBase, prev.perDiem].every((v) => v.trim() === "") &&
+      prev.currency !== currency
+        ? { ...prev, currency }
+        : prev,
+    );
+  }, [country]);
   // Duplicate-and-edit: prefill the whole wizard from the owner's OWN last
   // request (repeat action, Capability E/G). Own data only; nothing invented.
   const [prefillState, setPrefillState] = useState<
@@ -287,6 +312,17 @@ export function DemandRequestButton({
   useEffect(() => {
     if (autoPrefillRan.current) return;
     autoPrefillRan.current = true;
+    // The estimate's worker count and country can arrive in the address (the
+    // project calculator's account route, the company-need adapter's bounded
+    // prefill; employer path P0 2026-11-15). Applied at once, and again after a
+    // saved draft, so the numbers the person just entered stay.
+    const fromAddress: CompanyNeedPrefill =
+      intent === "hire_workers" ? parseCompanyNeedPrefill(new URLSearchParams(window.location.search)) : {};
+    const applyAddress = () => {
+      if (fromAddress.country) setCountry(fromAddress.country);
+      if (fromAddress.numberOfWorkers != null) setTeamSize(String(fromAddress.numberOfWorkers));
+    };
+    applyAddress();
     void (async () => {
       try {
         if (repeatRequestId) {
@@ -295,6 +331,7 @@ export function DemandRequestButton({
           const rep = await getDemandPrefillByIdAction(intent, repeatRequestId);
           if (rep.found && !descRef.current.trim()) {
             applyPrefill(rep);
+            applyAddress();
             setDraftSource(false);
             setPrefillState("done");
             return;
@@ -304,6 +341,7 @@ export function DemandRequestButton({
         if (!res.found || res.source !== "draft") return;
         if (descRef.current.trim()) return; // untouched check at apply time
         applyPrefill(res);
+        applyAddress();
         setDraftSource(true);
         setPrefillState("draft");
       } catch {
@@ -330,6 +368,7 @@ export function DemandRequestButton({
   const talentPoolDisclosure = requiresTalentPoolDisclosure(advV2);
 
   const descOk = description.trim().length > 0;
+  const countryOk = country !== "";
   // The estimate is OPTIONAL. It only blocks submit when the user actually
   // engaged it AND it is invalid (negatives / impossible %). An untouched
   // estimate never blocks and is never persisted.
@@ -347,6 +386,13 @@ export function DemandRequestButton({
       return;
     }
     setShowDescError(false);
+    // Step 2 gate: the country is what puts the need in front of workers and
+    // agencies in that market. Without it the need is saved but never found.
+    if (step === 2 && !countryOk) {
+      setShowCountryError(true);
+      return;
+    }
+    setShowCountryError(false);
     // Deterministic auto-suggest: when entering the criteria step, pre-fill the
     // structured selects from the free text (only empty ones, never overriding
     // the user). Closed-set values only; the user reviews and can correct.
@@ -375,6 +421,11 @@ export function DemandRequestButton({
       setShowDescError(true);
       return;
     }
+    if (!countryOk) {
+      setStep(2);
+      setShowCountryError(true);
+      return;
+    }
     setState("sending");
     try {
       const res = await submitDemandRequestAction(intent, {
@@ -393,6 +444,15 @@ export function DemandRequestButton({
         estimate: estimateEngaged ? estimate : undefined,
         structuredV2: withTeam(advWire),
       }, { expectedOrganizationId: organizationId });
+      // The server is the rule (web, chat and MCP share it): a refused country
+      // sends the person back to the picker with the reason beside it.
+      if (!res.ok && res.code === "country_required") {
+        setState("idle");
+        setStep(2);
+        setShowCountryError(true);
+        return;
+      }
+      setSavedRequestId(res.ok ? res.requestId : null);
       setState(
         res.ok
           ? "done"
@@ -533,15 +593,31 @@ export function DemandRequestButton({
           ✓ {t(`${key}.done`)}
         </p>
         <p className="text-xs text-text-secondary">{t("form.submittedHeading")}</p>
-        {/* The exact next step — the scouting room where matches + interest for
-            this need appear (audit PR4: success used to be a dead-end panel). */}
-        <Link
-          href={"/dashboard/company/scouting" as "/dashboard"}
-          className="w-fit text-sm font-medium text-brand-blue hover:underline"
-          data-testid="demand-done-scouting-link"
-        >
-          {t("form.doneScoutingLink")} →
-        </Link>
+        {/* The exact next step. A NEED: the scouting room where matches +
+            interest for it appear (audit PR4: success used to be a dead-end
+            panel). An OFFER has no matches to scout — its next step is the
+            organisation's own offers list, where the saved offer now stands. */}
+        {intent === "hire_workers" ? (
+          <Link
+            href={
+              (savedRequestId
+                ? `/dashboard/company/scouting?request=${encodeURIComponent(savedRequestId)}`
+                : "/dashboard/company/scouting") as "/dashboard"
+            }
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
+            data-testid="demand-done-scouting-link"
+          >
+            {t("form.doneScoutingLink")} →
+          </Link>
+        ) : (
+          <Link
+            href={"/dashboard/company/needs#agency-offers" as "/dashboard"}
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
+            data-testid="demand-done-offers-link"
+          >
+            {t("form.doneOffersLink")} →
+          </Link>
+        )}
         {summaryList}
         {estimateSummary}
       </div>
@@ -711,12 +787,24 @@ export function DemandRequestButton({
               <Label>{tc("country")}</Label>
               <DarkListbox
                 value={country}
-                onChange={setCountry}
+                onChange={(v) => {
+                  setCountry(v);
+                  if (v) setShowCountryError(false);
+                }}
                 options={countryOptions}
                 ariaLabel={tc("country")}
                 placeholder="—"
                 testId="demand-country-select"
               />
+              {showCountryError && (
+                <span
+                  className="text-xs text-state-danger"
+                  role="alert"
+                  data-testid="demand-country-error"
+                >
+                  {t("form.countryRequired")}
+                </span>
+              )}
             </label>
             <label className="flex flex-col gap-1.5">
               <Label>{tc("numberOfWorkers")}</Label>
@@ -987,7 +1075,7 @@ export function DemandRequestButton({
             type="button"
             size="sm"
             onClick={create}
-            disabled={state === "sending" || !descOk || !estimateOk}
+            disabled={state === "sending" || !descOk || !estimateOk || !countryOk}
             // Mobile-first: the room's primary action is a full-width tap target
             // on phones, compact on larger screens.
             className="w-full sm:w-auto sm:self-start"

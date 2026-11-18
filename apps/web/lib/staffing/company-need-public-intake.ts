@@ -3,7 +3,13 @@ import "server-only";
 import { headers } from "next/headers";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseClientEnv } from "@/lib/env";
-import { clientKeyFromHeaders, rateLimit } from "@/lib/security/rate-limit";
+import { clientKeyFromHeaders } from "@/lib/security/rate-limit";
+import {
+  publicIntakeRateLimited,
+  recordPublicFormRefusal,
+  screenIntakeContent,
+  type SpamReason,
+} from "@/lib/security/public-form-guard";
 
 /**
  * Anonymous structured company-demand persistence (v1).
@@ -30,6 +36,7 @@ export type PublicIntakeInput = {
   readonly companyName: string;
   readonly contactName?: string;
   readonly contactEmail?: string;
+  readonly contactPhone?: string;
   readonly country: string;
   readonly cityRegion?: string;
   readonly sector: string;
@@ -46,17 +53,19 @@ export type PublicIntakeInput = {
 };
 
 export type PublicIntakeResult =
-  | { ok: true }
-  | { ok: false; code: "unavailable" | "invalid" | "error" | "rate_limited" };
+  /** `advertising` stays in the shape for callers; a new advert is refused, so it is false. */
+  | { ok: true; advertising: boolean }
+  /** `rejected`: the spam guard refused it. Nothing was stored; the caller tells it
+   *  the same generic "could not send" it tells a rate-limited sender. */
+  | { ok: false; code: "unavailable" | "invalid" | "error" | "rate_limited" | "rejected" };
 
 /**
- * Audit M-03. `lib/security/anon-secdef-allowlist.ts` documents this RPC's
- * abuse posture as `GAP — ... NO database-level rate limit, NO
- * duplicate-submission check, and NO per-IP or per-email throttle`, and notes
- * "Any protection today lives in the application layer only". Until this, there
- * was no application layer either. Rows are up to ~8 KB and carry employer PII.
+ * Audit M-03 + owner spam order 2026-11-09. The throttle (per IP, per e-mail) and
+ * the content screen live in `lib/security/public-form-guard.ts`; the database
+ * holds the persistent per-e-mail and platform-wide ceilings (P0004 below).
  */
-const RATE_LIMIT = { limit: 3, windowMs: 15 * 60 * 1000 } as const;
+const SURFACE = (sourcePath: string): "request-door" | "company-need" =>
+  sourcePath.includes("/request/") ? "request-door" : "company-need";
 
 /** Postgres SQLSTATEs that mean "backend not applied yet" → degrade honestly. */
 const NOT_APPLIED = new Set(["42883", "42P01"]);
@@ -75,16 +84,28 @@ export async function persistPublicCompanyNeed(
   input: PublicIntakeInput,
 ): Promise<PublicIntakeResult> {
   // Throttle BEFORE touching Supabase, so a flood costs us nothing downstream.
+  let ipKey: string | null = null;
   try {
-    const decision = rateLimit({
-      name: "company-need-public-intake",
-      key: clientKeyFromHeaders(await headers()),
-      ...RATE_LIMIT,
-    });
-    if (decision.limited) return { ok: false, code: "rate_limited" };
+    ipKey = clientKeyFromHeaders(await headers());
   } catch {
     // `headers()` throws outside a request scope (e.g. a unit test importing
-    // this module). Never let the throttle itself break the submit path.
+    // this module). The e-mail limit and the content screen still run.
+  }
+  const limited = publicIntakeRateLimited({ ipKey, email: input.contactEmail });
+  if (limited) {
+    recordPublicFormRefusal(SURFACE(input.sourcePath), limited);
+    return { ok: false, code: "rate_limited" };
+  }
+
+  // Spam screen: nothing that reads as an advert, or carries a pile of links, is
+  // stored. The reason is logged as a counter only, never the content.
+  const spam: SpamReason | null = screenIntakeContent({
+    freeText: [input.description, input.sector, input.cityRegion, input.expectedDuration, input.languages],
+    names: [input.companyName, input.contactName],
+  });
+  if (spam) {
+    recordPublicFormRefusal(SURFACE(input.sourcePath), spam);
+    return { ok: false, code: "rejected" };
   }
 
   let url: string;
@@ -106,7 +127,7 @@ export async function persistPublicCompanyNeed(
       p_company_name: input.companyName,
       p_contact_name: input.contactName ?? null,
       p_contact_email: input.contactEmail ?? null,
-      p_contact_phone: null,
+      p_contact_phone: input.contactPhone ?? null,
       p_country: input.country,
       p_city_region: input.cityRegion ?? null,
       p_sector: input.sector,
@@ -122,7 +143,8 @@ export async function persistPublicCompanyNeed(
       p_source_path: input.sourcePath,
     });
 
-    if (!error) return { ok: true };
+    // An advert was refused above, so a stored row is never one.
+    if (!error) return { ok: true, advertising: false };
 
     if (NOT_APPLIED.has(error.code ?? "")) {
       // Backend not applied yet — the caller degrades to the prepared state.

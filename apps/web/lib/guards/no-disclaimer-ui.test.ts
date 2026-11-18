@@ -34,9 +34,11 @@ const FORBIDDEN_PHRASES: RegExp[] = [
   /netampa faktais/i,
   /neišsaugoma automatiškai/i,
   /Patvirtinkite tik tai/i,
+  /Patvirtink tik tai/i, // informal "tu" register twin (owner order 2026-10-28)
   /nepatvirtinti neišsaugomi/i,
   /Tai pasiūlymas/i,
   /pasiūlymas iš jūsų teksto/i,
+  /pasiūlymas iš tavo teksto/i, // informal "tu" register twin
   /Patvirtinimas atsiras/i,
   /Patvirtinti gali/i,
   /gali patvirtinti/i,

@@ -40,6 +40,8 @@ const cohort = (members: Array<{ id: string; status: "active" | "left" }>) => ({
   startsOn: null,
   endsOn: null,
   members: members.map((m) => ({ profileId: m.id, status: m.status, label: `label-${m.id}` })),
+  joinRequestsOpen: null,
+  requests: [],
 });
 
 const program = (over: Partial<ProgramRow> = {}): ProgramRow => ({
@@ -136,6 +138,13 @@ describe("institution report — an unknown demand never exports as zero (SEP-7)
     // No direction set, and a failed read, are UNKNOWN — never 0.
     expect(demandCountFor(null, whole)).toBeNull();
     expect(demandCountFor("carpenter", null)).toBeNull();
+  });
+
+  it("writes `unknown`, not 0, for active learners when the caller may not see membership (J-12)", () => {
+    const csv = buildInstitutionReportCsv([program({ demandCount: 3 })], OK_OUTCOMES, false);
+    const cells = blocks(csv).programs[1].split(",");
+    expect(cells[4]).toBe(UNKNOWN_CELL);
+    expect(cells[5]).toBe("3");
   });
 
   it("writes a real zero when the count actually measured zero", () => {

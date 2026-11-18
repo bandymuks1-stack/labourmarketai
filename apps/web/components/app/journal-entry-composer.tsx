@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  resolveEngagementContext,
+  type EngagementCandidate,
+} from "@/lib/journal/engagement-context-selection";
 
 import { CameraCaptureButton } from "@/components/app/camera-capture-button";
 import { useLocale, useTranslations } from "next-intl";
@@ -81,6 +85,7 @@ import {
   reviewUnconfirmedWorkTime,
   statedDurationCount,
 } from "@/lib/journal/unconfirmed-work-time";
+import { reviewTimeSuggestion } from "@/lib/journal/intake-work-time";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
 import type { WorkDayCheck } from "@/lib/journal/work-time-plausibility";
@@ -121,8 +126,9 @@ export type JournalEngagement = {
  *  legitimately possible, so nothing is preselected and the worker must pick
  *  before the entry can be submitted. */
 export type JournalContextResolution = {
-  rule: "A" | "B" | "C" | "D" | "NONE";
+  rule: "A" | "W" | "B" | "C" | "D" | "NONE";
   selectedId: string | null;
+  activeWorkspaceWithoutContext?: true;
 };
 export type JournalDirection = {
   slug: string;
@@ -194,6 +200,9 @@ export type { JournalEditingEntry };
 export function JournalEntryComposer({
   engagements,
   contextResolution,
+  activeWorkspaceNotice = null,
+  contextCandidates,
+  activeOrganizationId = null,
   directions,
   workerSkills,
   editingEntry,
@@ -204,6 +213,19 @@ export function JournalEntryComposer({
 }: {
   engagements: JournalEngagement[];
   contextResolution?: JournalContextResolution;
+  /** Server-localized sentence for an organization the person acts for —
+   *  shown under the context picker only while the resolution for the work
+   *  date says no work relationship there applies (owner P0 2026-10-29), so
+   *  that organization is never silently missing. */
+  activeWorkspaceNotice?: string | null;
+  /** The person's contexts with their bounds (the same facts the server
+   *  resolved from). When given, the composer RE-RESOLVES on its own work
+   *  date: a context is only a candidate on days inside its bounds, so a
+   *  September day is never preselected into a context that began in
+   *  October (Codex P2 on #2884). */
+  contextCandidates?: readonly EngagementCandidate[];
+  /** The server-resolved active workspace's organization (rule W), or null. */
+  activeOrganizationId?: string | null;
   directions: JournalDirection[];
   workerSkills: JournalSkill[];
   /** When set, the composer opens in EDIT mode: textarea is prefilled
@@ -250,7 +272,6 @@ export function JournalEntryComposer({
   // An empty default makes the picker required rather than pre-answered.
   const primaryId =
     contextResolution?.selectedId ?? (contextResolution ? "" : engagements[0]?.id ?? "");
-  const mustChooseContext = contextResolution?.rule === "C";
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -469,6 +490,33 @@ export function JournalEntryComposer({
     setWorkDate((d) => (d === today ? personCalendarDay() : d));
   }, [editingEntry?.workDate, defaultWorkDate, today]);
 
+  // THE RESOLUTION FOLLOWS THE WORK DATE (Codex P2 on #2884). Applicability
+  // is bounded by the day the work happened, so the default is re-resolved
+  // whenever the date changes — the SAME pure resolver the server ran. Until
+  // the person picks a context themselves; after that their choice stands.
+  const liveResolution = useMemo(
+    () =>
+      contextCandidates
+        ? resolveEngagementContext({
+            candidates: contextCandidates,
+            workDay: workDate,
+            activeOrganizationId,
+          })
+        : (contextResolution ?? null),
+    [contextCandidates, workDate, activeOrganizationId, contextResolution],
+  );
+  const mustChooseContext = liveResolution?.rule === "C";
+  const contextTouched = useRef(false);
+  const liveSelectedId = liveResolution?.selectedId ?? "";
+  useEffect(() => {
+    if (editingEntry || contextTouched.current || !contextCandidates) return;
+    setEngagementId(liveSelectedId);
+  }, [editingEntry, contextCandidates, liveSelectedId]);
+  const pickEngagement = (id: string) => {
+    contextTouched.current = true;
+    setEngagementId(id);
+  };
+
   const existingSkillRefs = useMemo(
     () => workerSkills.map((s) => ({ slug: s.slug, label: s.name })),
     [workerSkills],
@@ -487,9 +535,17 @@ export function JournalEntryComposer({
   const selectedIscoGroup =
     (dirSlug ? directionBySlug.get(dirSlug) : directions[0])?.iscoGroup ?? null;
 
+  function reviewedSuggestions(raw: string) {
+    const parsed = extractJournalSuggestions(raw);
+    const reviewed = reviewTimeSuggestion(raw, workDate || today, parsed);
+    return { ...parsed, time: reviewed.time, fragments: reviewed.fragments };
+  }
+
   function analyse(raw: string) {
     setError(null);
-    const s = extractJournalSuggestions(raw);
+    // The review offers the time the chat / MCP intake would record for the
+    // same sentence (a stated span, never the break) — reviewTimeSuggestion.
+    const s = reviewedSuggestions(raw);
     // Pilot telemetry: a journal entry begins when the worker asks for
     // structure suggestions. Edit mode lets us tell create vs supersede
     // apart downstream.
@@ -963,7 +1019,7 @@ export function JournalEntryComposer({
     // does the same by opening the existing review step first (doctrine §7 —
     // never confirmed for them).
     if (stage === "compose" && !editingEntry) {
-      const stated = statedDurationCount(extractJournalSuggestions(text));
+      const stated = statedDurationCount(reviewedSuggestions(text));
       if (stated > 0) {
         analyse(text);
         setError(t("unconfirmedTimeBlocked", { count: stated }));
@@ -2178,7 +2234,7 @@ export function JournalEntryComposer({
           <Label>{t("engagement")}</Label>
           <DarkListbox
             value={engagementId}
-            onChange={setEngagementId}
+            onChange={pickEngagement}
             options={[
               // Rule C: an explicit unchosen option, so the field reads as a
               // question rather than as an answer someone already gave.
@@ -2196,6 +2252,14 @@ export function JournalEntryComposer({
               data-testid="journal-engagement-must-choose"
             >
               {t("engagementAmbiguous")}
+            </p>
+          ) : null}
+          {activeWorkspaceNotice && liveResolution?.activeWorkspaceWithoutContext ? (
+            <p
+              className="text-meta leading-relaxed text-text-secondary"
+              data-testid="journal-engagement-active-workspace-notice"
+            >
+              {activeWorkspaceNotice}
             </p>
           ) : null}
         </label>
@@ -2738,7 +2802,7 @@ export function JournalEntryComposer({
       <JournalAiSuggestions
         text={text}
         engagements={engagements.map((e) => ({ id: e.id, label: e.label }))}
-        onPickEngagement={setEngagementId}
+        onPickEngagement={pickEngagement}
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -2746,7 +2810,7 @@ export function JournalEntryComposer({
           <Label>{t("engagement")}</Label>
           <DarkListbox
             value={engagementId}
-            onChange={setEngagementId}
+            onChange={pickEngagement}
             options={engagements.map((e) => ({ value: e.id, label: e.label }))}
             ariaLabel={t("engagement")}
             testId="journal-engagement-switcher"

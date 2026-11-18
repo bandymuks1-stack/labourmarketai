@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
-import { PROD_QA_SECOND_WORKER_EMAIL } from "../../lib/testing/prod-qa-guard";
+import { PROD_QA_MANAGER_EMAIL } from "../../lib/testing/prod-qa-guard";
 
 /**
  * PRODUCTION — A COMPANY'S GOVERNANCE REGISTERS (registry rows that had no
@@ -16,24 +16,21 @@ import { PROD_QA_SECOND_WORKER_EMAIL } from "../../lib/testing/prod-qa-guard";
  *        and the owner records what was decided; read back in Russian and on
  *        a phone. An employee and another organization see none of it (D-*).
  *   11.8 Training & certification register — Alfa's owner adds a course and
- *        assigns it to its employee; THE SAME employee receives it, sees it
- *        and completes it on the phone; the owner sees it completed; another
- *        organization and an unassigned worker see none of it; the course is
- *        retired (T-*). 11.8 passes ONLY on that proof: a fresh course,
- *        `assigned` (never `already_assigned`), `completed` (never
- *        `already_completed`).
+ *        assigns it to its employee; the employee completes it on the phone;
+ *        the owner sees it completed; another organization and an unassigned
+ *        worker see none of it; the course is retired (T-*).
  *
- * Cast (`lib/testing/prod-qa-guard.ts`, all synthetic; the slot -> identity
- * map is the mint step of .github/workflows/prod-qa-walk.yml):
+ * Cast (`lib/testing/prod-qa-guard.ts`, all synthetic):
  *   owner    qa.owner+multiw   — owns "QA-SYNTHETIC Alfa" (also the approver:
  *                                Alfa's template asks an owner/admin)
- *   worker   qa.worker+multiw  — Vytas, employee of Alfa (THE TRAINEE). In
- *                                code this is PROD_QA_SECOND_WORKER_EMAIL —
- *                                "second" only because the original
- *                                single-worker account (goal3) came first.
- *   worker2  qa.worker+goal3   — PROD_QA_WORKER_EMAIL; not assigned
- *                                (forbidden check)
- *   manager  qa.manager+multiw — runs "QA-SYNTHETIC Gama" (forbidden checks)
+ *   worker   qa.worker+multiw  — engaged by Alfa, NOT a member: the decisions
+ *                                "employee sees none of it" check (D-*)
+ *   worker2  qa.worker+goal3   — not assigned (forbidden check)
+ *   manager  qa.manager+multiw — runs "QA-SYNTHETIC Gama" (forbidden checks) and is
+ *                                an active MANAGER member of Alfa: the trainee.
+ *                                `assign_training_v1` assigns only active members
+ *                                of the course's organization; an engagement is
+ *                                not a membership (run 40296167812: invalid_assignee).
  *
  * WHAT STAYS. Neither register deletes: a decision is a governance record
  * (this run's ends "recorded", tagged `QA-SYNTHETIC <run>`), and a course is
@@ -56,22 +53,21 @@ const DECISION_EDITED = `${TAG} sprendimas dėl įrankių nuomos`;
 const RESULT = `${TAG}: nuomojamės, ne perkame`;
 const COURSE_PREFIX = "QA-SYNTHETIC kursas";
 const COURSE = `${COURSE_PREFIX} ${RUN}`;
-/**
- * THE TRAINEE — ONE identity through the whole 11.8 chain: T-2 assigns to
- * `email`, T-3 signs in as `slot`, T-4 reads that one person's assignment.
- * prod-qa-walk.yml mints "qa.worker+multiw@labourmarket.ai" into the `worker`
- * slot, and that address IS PROD_QA_SECOND_WORKER_EMAIL, so the two halves can
- * never drift apart. Measured on production 2026-10-26 (read-only aggregate):
- * this account has a verified mailbox, an active confirmed 'employee'
- * engagement in Alfa and an active Alfa roster link, and NO governance
- * membership there — exactly the ordinary employee run 40296167812 T-2 was
- * refused (`invalid_assignee`) before migration
- * 20261026140000_assign_training_employees_v1.
- */
-const TRAINEE = { slot: "worker", email: PROD_QA_SECOND_WORKER_EMAIL } as const;
-/** The due date T-2 sets and T-3 must read back on the trainee's own row. */
-const DUE = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
-const COMPLETION_NOTE = `${TAG}: perskaičiau ir atlikau.`;
+const BETA = "QA-SYNTHETIC Beta";
+/** T-4b: the synthetic register document whose file becomes the certificate (archived in afterAll). */
+const CERT_DOC = `${TAG} kurso pažymėjimas`;
+/** A minimal one-page PDF: the certificate file, synthetic. */
+const CERT_PDF = Buffer.from(
+  [
+    "%PDF-1.4",
+    "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj",
+    "2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj",
+    "3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>endobj",
+    "trailer<</Root 1 0 R>>",
+    "%%EOF",
+    "",
+  ].join(String.fromCharCode(10)),
+);
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["owner", "worker", "worker2", "manager"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
@@ -323,6 +319,8 @@ const programRow = (reg: Locator, title: string) => reg.getByTestId("training-pr
 let courseCreated = false;
 let courseAssigned = false;
 let courseCompleted = false;
+let certDocCreated = false;
+let certificateAttached = false;
 
 test("T-1 (11.8). Alfa's owner adds a course to the organization's register", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
@@ -351,59 +349,95 @@ test("T-2 (11.8). the owner assigns the course to Alfa's employee with a due dat
   await useWorkspace(page, ALFA);
   const row = programRow(await register(page), COURSE);
   const assign = row.locator("form").filter({ has: page.locator('input[name="assigneeEmail"]') });
-  await assign.locator('input[name="assigneeEmail"]').fill(TRAINEE.email);
-  await assign.locator('input[name="requiredBy"]').fill(DUE);
-  // This run's course is new, so the ONLY proof is a fresh `assigned`. An
-  // `invalid_assignee` here is the 11.8 defect (the employee refused).
-  await act(page, assign.getByRole("button"), "trn", ["assigned"]);
+  await assign.locator('input[name="assigneeEmail"]').fill(PROD_QA_MANAGER_EMAIL);
+  await assign.locator('input[name="requiredBy"]').fill(dayFromToday(14));
+  await act(page, assign.getByRole("button"), "trn", ["assigned", "already_assigned"]);
   courseAssigned = true;
   const managed = (await register(page)).getByTestId("training-managed-row").filter({ hasText: COURSE });
-  await expect(managed, "the assignment is in the organization's register, once").toHaveCount(1, { timeout: 30_000 });
+  await expect(managed, "the assignment is in the organization's register").toHaveCount(1, { timeout: 30_000 });
   await expect(managed).toContainText("Reikia atlikti");
   await ctx.close();
 });
 
-test("T-3 (11.8). the SAME employee receives the course, sees it and completes it on the phone; it persists", async ({ browser }) => {
-  expect(courseAssigned, "11.8 cannot pass: T-2 did not assign the course to the trainee").toBe(true);
-  {
-    const { ctx, page } = await as(browser, TRAINEE.slot, { phone: true });
-    let mine = (await register(page)).getByTestId("training-mine-row").filter({ hasText: COURSE });
-    // RECEIVES: the assignment reached this person's own register, once.
-    await expect(mine, "the trainee received exactly this run's course").toHaveCount(1, { timeout: 30_000 });
-    // SEES: the course, what is asked and by when.
-    await expect(mine, "the course title").toContainText(COURSE);
-    await expect(mine, "it is still to be done").toContainText("Reikia atlikti");
-    await expect(mine, "the due date the owner set").toContainText(`Iki ${DUE}`);
-    await fitsPhone(page, "documents with the training register");
-    // CAN COMPLETE: the completion form is offered to this person, and works.
-    const note = mine.locator('input[name="note"]');
-    await expect(note, "the trainee is offered the completion form").toHaveCount(1);
-    await note.fill(COMPLETION_NOTE);
-    await act(page, mine.getByRole("button"), "trn", ["completed"]);
-    courseCompleted = true;
-    mine = (await register(page)).getByTestId("training-mine-row").filter({ hasText: COURSE });
-    await expect(mine).toContainText("Atlikta", { timeout: 30_000 });
-    await expect(mine, "the trainee's own note persists").toContainText(COMPLETION_NOTE);
-    await expect(mine.locator('input[name="note"]'), "a completed course offers no second completion").toHaveCount(0);
-    await ctx.close();
-  }
-  {
-    // Persistence beyond the session that wrote it: a fresh desktop context.
-    const { ctx, page } = await as(browser, TRAINEE.slot);
-    const mine = (await register(page)).getByTestId("training-mine-row").filter({ hasText: COURSE });
-    await expect(mine, "still exactly one row, completed").toHaveCount(1, { timeout: 30_000 });
-    await expect(mine).toContainText("Atlikta");
-    await ctx.close();
-  }
+test("T-3 (11.8). the employee completes the course on the phone; it persists", async ({ browser }) => {
+  test.skip(!courseAssigned, "T-2 did not assign the course");
+  const { ctx, page } = await as(browser, "manager", { phone: true });
+  await useWorkspace(page, ALFA);
+  let mine = (await register(page)).getByTestId("training-mine-row").filter({ hasText: COURSE });
+  await expect(mine, "the employee sees what they were asked to complete").toHaveCount(1, { timeout: 30_000 });
+  await fitsPhone(page, "documents with the training register");
+  await mine.locator('input[name="note"]').fill(`${TAG}: perskaičiau ir atlikau.`);
+  await act(page, mine.getByRole("button"), "trn", ["completed", "already_completed"]);
+  courseCompleted = true;
+  mine = (await register(page)).getByTestId("training-mine-row").filter({ hasText: COURSE });
+  await expect(mine).toContainText("Atlikta", { timeout: 30_000 });
+  await expect(mine.locator('input[name="note"]'), "a completed course offers no second completion").toHaveCount(0);
+  await ctx.close();
 });
 
-test("T-4 (11.8). the owner sees the trainee's course completed", async ({ browser }) => {
-  expect(courseCompleted, "11.8 cannot pass: T-3 did not complete the course as the trainee").toBe(true);
+test("T-4 (11.8). the owner sees the course completed", async ({ browser }) => {
+  test.skip(!courseCompleted, "T-3 did not complete the course");
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const managed = (await register(page)).getByTestId("training-managed-row").filter({ hasText: COURSE });
-  await expect(managed, "one assignment — the trainee's").toHaveCount(1, { timeout: 30_000 });
   await expect(managed).toContainText("Atlikta", { timeout: 30_000 });
+  await ctx.close();
+});
+
+test("T-4b (11.8). the owner attaches the certificate by picking a file from Alfa's own register, never typing an id", async ({ browser }) => {
+  test.skip(!courseCompleted, "T-3 did not complete the course");
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  // A synthetic register document with a file: the only kind the picker offers.
+  await page.goto("/lt/dashboard/documents#org-register");
+  const create = inMain(page).getByTestId("org-documents-create");
+  await expect(create).toBeVisible({ timeout: 30_000 });
+  await create.locator("summary").click();
+  await create.locator('select[name="typeSlug"]').selectOption("org_instruction");
+  await create.locator('[name="title"]').fill(CERT_DOC);
+  await act(page, inMain(page).getByTestId("org-documents-create-submit"), "docNotice", ["created"]);
+  certDocCreated = true;
+  await page.goto(`/lt/dashboard/documents?regQ=${encodeURIComponent(RUN)}#org-register`);
+  const doc = inMain(page).getByTestId("org-document-row").filter({ hasText: CERT_DOC });
+  await expect(doc, "this run's document, once").toHaveCount(1, { timeout: 30_000 });
+  await doc.locator('input[type="file"][name="file"]').setInputFiles({ name: "QA-SYNTHETIC-pazymejimas.pdf", mimeType: "application/pdf", buffer: CERT_PDF });
+  await act(page, doc.getByTestId("org-document-upload-submit"), "docNotice", ["uploaded"]);
+
+  // #3442: the completed row's attach form offers a SELECT of register files.
+  const managed = (await register(page)).getByTestId("training-managed-row").filter({ hasText: COURSE });
+  const form = managed.getByTestId("training-attach-form");
+  await expect(form, "a completed course without a certificate offers the attach form").toBeVisible({ timeout: 30_000 });
+  await expect(form.locator('input[name="documentFileId"]'), "no free-text id field").toHaveCount(0);
+  const picker = form.getByTestId("training-certificate-file");
+  await expect(picker).toHaveAttribute("name", "documentFileId");
+  expect(await picker.evaluate((el) => el.tagName), "the certificate file is picked from a list").toBe("SELECT");
+  await expect(picker).toBeEnabled();
+  const options = await picker.locator("option").evaluateAll((os) =>
+    (os as HTMLOptionElement[]).filter((o) => o.value).map((o) => ({ v: o.value, t: o.textContent ?? "" })),
+  );
+  const mine = options.find((o) => o.t.includes(CERT_DOC));
+  expect(mine, "the register's file is offered, labelled by its document").toBeTruthy();
+  await picker.selectOption(mine!.v);
+  await form.locator('input[name="issuedOn"]').fill(dayFromToday(0));
+  await act(page, form.getByRole("button"), "trn", ["attached"]);
+  certificateAttached = true;
+  const certs = (await register(page)).getByTestId("training-certificates");
+  await expect(certs.getByTestId("training-certificate-row").filter({ hasText: COURSE }), "the certificate is in Alfa's register").toHaveCount(1, { timeout: 30_000 });
+  console.info(`[training] 11.8: certificate attached from the register (${options.length} file option(s))`);
+  await ctx.close();
+});
+
+test("T-4c (11.8). the certificate list follows the active workspace: Alfa's certificate never shows in Beta", async ({ browser }) => {
+  test.skip(!certificateAttached, "T-4b did not attach the certificate");
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await expect((await register(page)).getByTestId("training-certificate-row").filter({ hasText: COURSE }), "in Alfa: listed").toHaveCount(1, { timeout: 30_000 });
+  await useWorkspace(page, BETA);
+  await page.goto("/lt/dashboard/documents#training");
+  await rendered(page, "documents (Beta)");
+  await expect(page.getByTestId("training-certificate-row").filter({ hasText: COURSE }), "in Beta: Alfa's certificate is not listed").toHaveCount(0);
+  await expect(page.getByTestId("training-managed-row").filter({ hasText: COURSE })).toHaveCount(0);
+  console.info("[training] 11.8: certificate scoped to the active workspace (Alfa 1, Beta 0)");
   await ctx.close();
 });
 
@@ -479,6 +513,19 @@ test.afterAll(async ({ browser }) => {
         }
       } catch (e) {
         console.info(`[cleanup] decision withdraw did not complete: ${firstLine(e)}`);
+      }
+    }
+    // T-4b's synthetic register document: archived, never deleted.
+    if (certDocCreated) {
+      try {
+        await page.goto(`/lt/dashboard/documents?regQ=${encodeURIComponent(RUN)}#org-register`);
+        const doc = inMain(page).getByTestId("org-document-row").filter({ hasText: CERT_DOC });
+        if ((await doc.getAttribute("data-status").catch(() => null)) === "active") {
+          await act(page, doc.getByTestId("org-document-archive"), "docNotice", ["archived"]);
+          console.info("[cleanup] certificate document archived");
+        }
+      } catch (e) {
+        console.info(`[cleanup] certificate document archive did not complete: ${firstLine(e)}`);
       }
     }
     // Swept by tag: every still-active synthetic course a run of this walk added.

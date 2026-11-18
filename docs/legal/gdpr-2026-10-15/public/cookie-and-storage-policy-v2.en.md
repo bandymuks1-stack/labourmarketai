@@ -9,7 +9,7 @@
 > - Current page: `apps/web/messages/en.json` → `legal.cookies`
 >
 > **Open decisions:**
-> 1. [OWNER DECISION: add a consent banner before the analytics items in §4 are written, OR make telemetry strictly necessary / aggregate-only and remove `lm.attr.first`, `lm.funnel.*` and `lm.pilot.session`. **Today these items are written without consent and no banner exists.** This policy must not be published as written until one option is implemented.]
+> 1. ~~[OWNER DECISION: banner or drop]~~ **Decided by the owner 2026-11-03: a consent choice.** Implemented in `apps/web/lib/consent/analytics-consent.ts` and `components/app/analytics-consent.tsx`: nothing in §4 is written, and no analytics event is sent from the browser, before an explicit yes; refusing or withdrawing removes the §4 items. The choice is changed on the live Cookie Policy page, linked from the footer ("Cookie settings"). The choice itself is kept in `lm.consent.analytics.v1` (local storage, the person's own choice and its date, re-asked after 12 months) — a §3 strictly-necessary item. [LAWYER: confirm the 12-month term]
 > 2. [LAWYER: whether any analytics exemption applies under Lithuanian law. Default reading: none for profile-linked analytics]
 > 3. [LAWYER: classification of the "functional" items in §3 that the user did not explicitly request (usage counters, recently viewed jobs)]
 > 4. [OWNER: confirm the sign-in cookie lifetime — library default, not set in our code]
@@ -41,6 +41,7 @@ These items do not need consent. Without them the service you asked for cannot w
 | `sb-<project>-auth-token-code-verifier` | cookie | short, for the sign-in step only | secures sign-in with Google (PKCE) |
 | `lm_active_workspace` | cookie (not readable by page scripts) | 180 days | remembers which workspace (personal or organisation) you are working in |
 | `lmai:command-finder-speech-consent:v1` | local storage | until you clear it | records that you accepted the voice-dictation notice |
+| `lm.consent.analytics.v1` | local storage | 12 months | your choice about usage measurement (§4) and the day you made it |
 | `lm.oauth.trace` | session storage | until the tab closes | a random ID that helps us trace a failed sign-in |
 | `lm-chunk-reload` | session storage | until the tab closes | stops the page reloading in a loop after an update |
 
@@ -70,7 +71,7 @@ These remember choices you made, or keep your work while you use a feature.
 
 We measure how the product is used: which pages and steps people reach, sign-up steps, daily activity, and which campaign brought a visitor. Events are stored on our own servers, linked to your account if you are signed in.
 
-[OWNER DECISION: banner or drop] **These items are set only after you agree.** You can change your choice at any time in [OWNER DECISION: where the choice is changed, e.g. footer link "Cookie settings"].
+**These items are set only after you agree.** You can change your choice at any time on the Cookie Policy page ("Cookie settings" in the footer).
 
 | Name | Type | Lifetime | Purpose |
 |---|---|---|---|
@@ -96,7 +97,7 @@ The analysis itself is based on our legitimate interest in improving the product
 - Your browser settings let you delete cookies and site data (local and session storage) at any time.
 - If you delete the sign-in cookies, you are signed out.
 - Session storage is cleared when you close the tab.
-- [OWNER DECISION: the in-product consent choice for §4, once built]
+- The consent choice for §4 is on the Cookie Policy page ("Cookie settings" in the footer). Refusing or withdrawing removes the §4 items from your device at once.
 
 ## 7. Changes
 

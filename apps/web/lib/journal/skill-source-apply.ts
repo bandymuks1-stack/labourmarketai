@@ -4,6 +4,7 @@ import {
   reconcileWorkerSkillSources,
   type WorkerSkillRow,
 } from "@/lib/journal/skill-source";
+import { readDisputedEntrySkills, withoutDisputedLinks } from "@/lib/journal/entry-skill-disputes";
 
 /**
  * Apply the worker-side evidence-tier reconcile (Journal Evidence Auto-Recompute
@@ -32,12 +33,17 @@ export async function applyWorkerSkillSourceReconcile(
         .eq("worker_id", workerId),
       supabase
         .from("journal_entry_skills")
-        .select("skill_id")
+        .select("journal_entry_id, skill_id")
         .eq("worker_id", workerId),
     ]);
     if (skillsRes.error || linksRes.error) return false;
     const skillRows = skillsRes.data;
-    const linkRows = linksRes.data;
+    // A link the person disputed on its entry is not support, even if the
+    // withdrawal of the row has not landed yet (entry-skill-disputes.ts).
+    const linkRows = withoutDisputedLinks(
+      (linksRes.data ?? []) as { journal_entry_id: string; skill_id: string }[],
+      await readDisputedEntrySkills(supabase, workerId),
+    );
     const rows = ((skillRows ?? []) as WorkerSkillRow[]).map((r) => ({
       skill_id: r.skill_id,
       source: r.source,

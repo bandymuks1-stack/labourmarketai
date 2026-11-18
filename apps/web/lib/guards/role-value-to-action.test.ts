@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { activeLocales } from "@/lib/i18n/config";
+import { FEATURES } from "@/lib/config/feature-availability";
 import { DASHBOARD_MODULES, getModuleRoute } from "@/lib/dashboard/dashboard-module-registry";
 
 /**
@@ -98,24 +99,31 @@ describe("each value line sits next to its REAL action", () => {
   });
 });
 
-describe("the planning value line claims exactly the projected sources", () => {
-  it("description names all six real sources in every active locale (no more, no less)", () => {
-    // Truthfulness both ways: the calendar projects booking/project/task/
-    // journal/invitation/finance-deadlines — the description must not
-    // advertise a source that is not projected, nor hide one that is.
-    const expectations: Record<string, readonly string[]> = {
-      lt: ["rezervacijos", "projektai", "užduotys", "žurnalo", "kvietimai", "mokėjimų terminai"],
-      en: ["bookings", "projects", "tasks", "journal", "invitations", "payment deadlines"],
-      ru: ["бронирования", "проекты", "задачи", "журнала", "приглашения", "сроки платежей"],
-      nl: ["boekingen", "projecten", "taken", "journaalnotities", "uitnodigingen", "betaaltermijnen"],
-      de: ["Buchungen", "Projekte", "Aufgaben", "Journaleinträge", "Einladungen", "Zahlungsfristen"],
-    };
-    for (const locale of activeLocales) {
-      const msgs = JSON.parse(read(`messages/${locale}.json`));
-      const text = resolve(msgs, "features.planning.description") as string;
-      for (const noun of expectations[locale] ?? []) {
-        expect(text, `${locale} names ${noun}`).toContain(noun);
-      }
+describe("the planning value line claims only what production proved", () => {
+  // Owner P0 2026-11-11 supersedes the earlier "name all six sources" pin: an
+  // active description may say only what a production walk proved
+  // (lib/guards/catalog-status-evidence.test.ts — description = its claim
+  // sentences, each with a walk run id). No walk shows every source on the
+  // calendar, so the copy says what calendar-planning proved: a company's plan
+  // for its people and the person's own calendar. A source named in the copy
+  // must still be one the calendar really projects.
+  const SOURCE_NOUNS: Record<string, Record<string, string>> = {
+    en: { booking: "bookings", project: "projects", task: "tasks", journal: "journal", invitation: "invitations", finance: "payment deadlines" },
+    lt: { booking: "rezervacijos", project: "projektai", task: "užduotys", journal: "žurnalo", invitation: "kvietimai", finance: "mokėjimų terminai" },
+  };
+  it("the calendar still projects every source the copy could name", () => {
+    const model = read("lib/planning/planning-model.ts");
+    for (const kind of Object.keys(SOURCE_NOUNS.en)) expect(model).toContain(`"${kind}",`);
+  });
+  it("the planning description is built from walk-proven claims", () => {
+    const planning = FEATURES.find((f) => f.key === "planning");
+    expect(planning?.availability).toBe("active");
+    expect(planning?.claims?.map((c) => c.register).sort()).toEqual(["3.14", "5.11"]);
+  });
+  it("no source is advertised beyond those claims (en, lt)", () => {
+    for (const [locale, nouns] of Object.entries(SOURCE_NOUNS)) {
+      const text = resolve(JSON.parse(read(`messages/${locale}.json`)), "features.planning.description") as string;
+      for (const noun of Object.values(nouns)) expect(text, `${locale} names ${noun} without a walk`).not.toContain(noun);
     }
   });
 });

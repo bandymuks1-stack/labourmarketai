@@ -121,7 +121,7 @@ export async function runFindWork(
         ? facets.countries.join(", ")
         : terms
             .filter((v) => v.dimension === missedDimension && v.available)
-            .map((v) => v.terms[0])
+            .map((v) => v.displayName ?? v.terms[0])
             .filter((label): label is string => typeof label === "string" && label.length > 0)
             .join(", ");
     const honest = alternatives
@@ -494,9 +494,10 @@ export async function runLearningCompass(): Promise<WorkflowResult> {
   for (const c of becoming.cohorts.slice(0, 2)) {
     lines.push(tc("cohortLine", { program: c.programName, cohort: c.cohortName }));
   }
-  // EVIDENCE
+  // EVIDENCE — an unreadable journal count is left out, never "0" (SEP-7)
   lines.push(
-    `${tc("evidence")}: ${tc("skills", { count: evidence.skillsTotal })} · ${tc("confirmed", { count: evidence.skillsConfirmed })} · ${tc("journalEntries", { count: evidence.journalEntries })}`,
+    `${tc("evidence")}: ${tc("skills", { count: evidence.skillsTotal })} · ${tc("confirmed", { count: evidence.skillsConfirmed })}` +
+      (evidence.journalEntries !== null ? ` · ${tc("journalEntries", { count: evidence.journalEntries })}` : ""),
   );
   // FITS NOW
   lines.push(`${tc("fits")}:`);

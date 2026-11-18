@@ -1,0 +1,12 @@
+# Hourly by the clock. It needs no new file to arrive, so a backup that never starts still alerts.
+# Persistent: a run missed while the host was down happens at the next start.
+[Unit]
+Description=LabourMarket backup watchdog, hourly
+
+[Timer]
+OnCalendar=*:07
+Persistent=true
+Unit=lm-backup-watchdog.service
+
+[Install]
+WantedBy=timers.target

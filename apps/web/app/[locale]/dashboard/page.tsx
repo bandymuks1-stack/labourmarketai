@@ -23,11 +23,13 @@ import type {
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { loadPersonalWorkspaceIntro } from "@/lib/workspace/personal-workspace-intro-server";
+import { personalIntroMayShow } from "@/lib/workspace/personal-workspace-intro";
 import { resolvePersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import { readHeldRoles } from "@/lib/auth/held-roles";
 import {
   actingRoleForWorkspace,
+  PERSONAL_WORKSPACE_ID,
   STALE_CONTEXT_NOTICE,
   workspaceDisplayLabels,
   workspaceRelationshipLabel,
@@ -209,9 +211,27 @@ export default async function DashboardHomePage({
   // For the worker in their personal space the block is hidden with its
   // reason named: ŠIANDIEN's header is where their space is introduced (IA
   // §4: the intro card is REPLACED, not shown twice).
-  const personalIntroPayload: Promise<PersonalIntroPayload> = workerToday
+  //
+  // WHETHER IT CAN RENDER AT ALL is decided HERE, before the slow read, from
+  // facts this request already holds (home CLS P0, 2026-10-26): the same
+  // session, the same workspace resolution and the same identity rule the
+  // loader uses. Where it cannot, no payload is handed over — no slow read,
+  // and the chat reserves nothing. Where it can, the chat reserves the
+  // block's space while it streams, so it no longer appears out of nothing
+  // above the greeting and pushes the screen down. Only the CONTENT
+  // resolves late — the surface still reaches the shell at once (#1011).
+  const introMayShow = personalIntroMayShow({
+    signedIn: Boolean(session.user),
+    workspaceKind:
+      rootWorkspace.activeWorkspaceId === PERSONAL_WORKSPACE_ID ? "personal" : "organization",
+    identity,
+    replacedByToday: workerToday,
+  });
+  const personalIntroPayload: Promise<PersonalIntroPayload> | null = workerToday
     ? Promise.resolve({ intro: { kind: "hidden", reason: "replaced-by-today" }, labels: null })
-    : loadPersonalIntroPayload();
+    : introMayShow
+      ? loadPersonalIntroPayload()
+      : null;
   // STARTERS ARE SUGGESTIONS, NOT A ROLE MENU (owner contract 2026-09-04
   // §5–§6, ARCHITECTURE §5.5). The company greeting used to branch on ONE
   // flag (education | agency | employer) and show that role's three chips —

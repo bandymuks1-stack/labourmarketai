@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { entryLocaleForUnmatchedLanguage } from "./entry-locale";
+import { entryLocaleForUnmatchedLanguage, languageFreeRootTarget } from "./entry-locale";
 
 /**
  * Audit 2026-10-16 (U-1 / U-2): international entry.
@@ -15,12 +15,12 @@ import { entryLocaleForUnmatchedLanguage } from "./entry-locale";
  */
 describe("entryLocaleForUnmatchedLanguage", () => {
   it("an unrouted preference → English", () => {
-    expect(entryLocaleForUnmatchedLanguage("sv-SE,sv;q=0.9", null)).toBe("en");
+    expect(entryLocaleForUnmatchedLanguage("da-DK,da;q=0.9", null)).toBe("en");
     expect(entryLocaleForUnmatchedLanguage("fi", null)).toBe("en");
     expect(entryLocaleForUnmatchedLanguage("fr-FR,fr;q=0.8,es;q=0.5", null)).toBe("en");
   });
   it("a routed preference anywhere in the list → let next-intl negotiate", () => {
-    expect(entryLocaleForUnmatchedLanguage("sv-SE,sv;q=0.9,en;q=0.5", null)).toBeNull();
+    expect(entryLocaleForUnmatchedLanguage("da-DK,da;q=0.9,en;q=0.5", null)).toBeNull();
     expect(entryLocaleForUnmatchedLanguage("lt", null)).toBeNull();
     expect(entryLocaleForUnmatchedLanguage("de-AT", null)).toBeNull();
     expect(entryLocaleForUnmatchedLanguage("ru-RU", null)).toBeNull();
@@ -31,10 +31,10 @@ describe("entryLocaleForUnmatchedLanguage", () => {
     expect(entryLocaleForUnmatchedLanguage("*", null)).toBeNull();
   });
   it("a chosen routed locale (cookie) always wins over the browser list", () => {
-    expect(entryLocaleForUnmatchedLanguage("sv-SE", "lt")).toBeNull();
-    expect(entryLocaleForUnmatchedLanguage("sv-SE", "pl")).toBeNull();
+    expect(entryLocaleForUnmatchedLanguage("da-DK", "lt")).toBeNull();
+    expect(entryLocaleForUnmatchedLanguage("da-DK", "pl")).toBeNull();
     // a stale cookie naming an unrouted locale does not count as a choice
-    expect(entryLocaleForUnmatchedLanguage("sv-SE", "sv")).toBe("en");
+    expect(entryLocaleForUnmatchedLanguage("da-DK", "da")).toBe("en");
   });
 });
 
@@ -49,6 +49,32 @@ describe("x-default hreflang points at English (U-2)", () => {
     expect(src).toContain("entryLocaleForUnmatchedLanguage(");
     expect(src.indexOf("entryLocaleForUnmatchedLanguage(")).toBeLessThan(
       src.indexOf("const intlResponse = intl("),
+    );
+  });
+});
+
+describe("languageFreeRootTarget", () => {
+  it("sends a crawler's bare root to the default locale", () => {
+    expect(languageFreeRootTarget("/", null, null)).toBe("/lt");
+    expect(languageFreeRootTarget("/", "  ", null)).toBe("/lt");
+  });
+
+  it("leaves a person's language and choice to the negotiation", () => {
+    expect(languageFreeRootTarget("/", "de-DE,de;q=0.9", null)).toBeNull();
+    expect(languageFreeRootTarget("/", null, "ru")).toBeNull();
+  });
+
+  it("touches only the bare root", () => {
+    expect(languageFreeRootTarget("/jobs", null, null)).toBeNull();
+    expect(languageFreeRootTarget("/lt", null, null)).toBeNull();
+    expect(languageFreeRootTarget("/en/auth/signup", null, null)).toBeNull();
+  });
+
+  it("the middleware answers it with a 301 before next-intl's 307", () => {
+    const src = readFileSync(join(__dirname, "..", "..", "middleware.ts"), "utf8");
+    expect(src).toMatch(/NextResponse\.redirect\(url, 301\)/);
+    expect(src.indexOf("maybeRedirectLanguageFreeRoot(request);")).toBeLessThan(
+      src.indexOf("intl(withGateHeaders(request))"),
     );
   });
 });
