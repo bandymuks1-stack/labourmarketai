@@ -33,7 +33,13 @@ on:
       - ".github/scripts/android-assemble-release.sh"
       - "apps/mobile/.maestro/jobs-need-journey.yaml"
       - "apps/mobile/.maestro/need-second-journey.yaml"
+      - "apps/mobile/.maestro/employer-screens-journey.yaml"
       - "apps/mobile/src/screens/need-intake.tsx"
+      - "apps/mobile/src/screens/candidates.tsx"
+      - "apps/mobile/src/screens/need-lifecycle.tsx"
+      - "apps/mobile/src/screens/agency-offers.tsx"
+      - "apps/mobile/src/screens/education.tsx"
+      - "apps/mobile/app/(shell)/today.tsx"
       - "packages/client-core/src/config.ts"
 
 permissions:
@@ -239,7 +245,7 @@ jobs:
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
           "$HOME/.maestro/bin/maestro" --version
 
-      - name: Emulator — sign in, search jobs, post ONE need (local stack)
+      - name: Emulator — sign in, search jobs, post two needs, walk the employer screens (local stack)
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         env:
           MAESTRO_CLI_NO_ANALYTICS: "1"
@@ -277,6 +283,22 @@ jobs:
           fi
           echo "ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: on-device draft + confirm stored the first AND the second need (two distinct rows, one each) for the synthetic company (local stack, production untouched)"
           echo "- ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: sign-in → jobs search → empty need refused → first need sent → Done → fresh form → second need sent → two submitted rows (local stack)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the employer screens' writes — one need closed, then reopened, by the seed
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          SEED="$(q "select id from auth.users where email = '$MOBILE_NEED_SEED_EMAIL'")"
+          [ -n "$SEED" ] || { echo "::error::seed user missing"; exit 1; }
+          C="$(q "select count(*) from public.audit_logs a join public.customer_requests cr on cr.id::text = a.entity_id::text where a.action = 'close_demand' and a.actor_id = '$SEED' and cr.profile_id = '$SEED'")"
+          R="$(q "select count(*) from public.audit_logs a join public.customer_requests cr on cr.id::text = a.entity_id::text where a.action = 'reopen_demand' and a.actor_id = '$SEED' and cr.profile_id = '$SEED'")"
+          S="$(q "select count(*) from public.customer_requests where profile_id = '$SEED' and status = 'submitted'")"
+          X="$(q "select count(*) from public.customer_requests where profile_id = '$SEED' and status = 'closed'")"
+          echo "close_demand rows=$C reopen_demand rows=$R submitted=$S closed=$X"
+          [ "$C" = "1" ] && [ "$R" = "1" ] || { echo "::error::expected exactly one close and one reopen by the seed (close=$C reopen=$R)"; exit 1; }
+          [ "$S" = "2" ] && [ "$X" = "0" ] || { echo "::error::expected both needs submitted again (submitted=$S closed=$X)"; exit 1; }
+          echo "ANDROID_EMPLOYER_SCREENS_ISOLATED_PROVEN: on-device close → reopen of a need (draft + confirm each) stored once each; both needs open again (local stack, production untouched)"
+          echo "- ANDROID_EMPLOYER_SCREENS_ISOLATED_PROVEN: Today organization stations → close + reopen a need → candidates → agency offers (none) → programmes (not a training provider)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()

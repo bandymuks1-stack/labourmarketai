@@ -2160,6 +2160,34 @@ describe("demand draft → confirm (G4 wagon 3)", () => {
     expect(demandSubmit).not.toHaveBeenCalled();
   });
 
+  it("a country NAME (any supported language) or a lower-case code is resolved to ISO — the phone types names", async () => {
+    for (const typed of ["Sweden", "Švedija", "se"]) {
+      const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country: typed });
+      expect(r.ok, typed).toBe(true);
+      if (r.ok) expect(r.data?.preview, typed).toMatchObject({ country: "SE" });
+    }
+  });
+
+  it("a name the resolver does not know is refused as country_required — never a guessed market", async () => {
+    demandSubmit.mockClear();
+    const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country: "Atlantis" });
+    expect(r).toMatchObject({ ok: false, code: "country_required", missing: ["country"] });
+    expect(JSON.stringify(r)).not.toContain("confirmationToken");
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("confirming with the SAME typed name spends the token and submits the resolved code", async () => {
+    demandSubmit.mockClear();
+    const typed = { ...DRAFT, country: "Sweden" };
+    const drafted = await runCapability("demand.create_draft", caller({}), typed);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("demand.create_confirm", caller({}), { ...typed, confirmationToken: token });
+    expect(confirmed.ok).toBe(true);
+    expect(demandSubmit).toHaveBeenCalledTimes(1);
+    const [, , , fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
+    expect(fieldsArg).toMatchObject({ country: "SE" });
+  });
+
   it("draft → confirm runs THE canonical submit core with the gate's own organization id", async () => {
     demandSubmit.mockClear();
     const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);

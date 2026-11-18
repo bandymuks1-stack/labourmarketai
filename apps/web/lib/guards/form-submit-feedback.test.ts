@@ -210,11 +210,21 @@ const NATIVE_NAV = new Set([
   // Goal navigator — its ONE form is the same plain GET search, submitted to
   // the public board: the feedback is the board itself.
   "components/navigation/goal-navigator.tsx",
+  // Review queue (Lane H) — the ONE form on this page is the plain GET
+  // project filter (`method="get"`, no server action, no client state): the
+  // browser navigates and the feedback is the narrowed queue with its
+  // "showing N of M" line. The approve/reject controls are client components
+  // in their own files and stay under the general rule.
+  "app/[locale]/dashboard/inbox/quick/page.tsx",
 ]);
 
 const PENDING_SIGNAL =
   /disabled=\{|aria-busy|useTransition|startTransition|status\s*===\s*["']sending["']/;
-const FEEDBACK_SURFACE = /role=\s*["'](?:alert|status)["']/;
+const FEEDBACK_SURFACE = /role=\s*["'](?:alert|status)["']|<Notice\b[^>]*\btone="(?:error|warning)"/;
+// The shared `ui/Notice` (DESIGN.md §10) IS a role-based surface: error and
+// warning render role="alert". Pinned below, so a Notice counts only while
+// that stays true.
+const NOTICE_SRC = readFileSync(join(APP_ROOT, "components", "ui", "Notice.tsx"), "utf8");
 const CLIENT_ASYNC = /useTransition|startTransition/;
 
 const formFiles = [
@@ -228,6 +238,10 @@ const formFiles = [
 const clientAsyncForms = formFiles.filter((f) => !NATIVE_NAV.has(f));
 
 describe("Guard: no silent form submits (pending + feedback surface)", () => {
+  it("ui/Notice announces errors and warnings (role=\"alert\"), so it counts as a feedback surface", () => {
+    expect(NOTICE_SRC).toMatch(/role=\{tone === "error" \|\| tone === "warning" \? "alert" : "status"\}/);
+  });
+
   it(`discovered a non-trivial set of form files (not a no-op): ${formFiles.length}`, () => {
     expect(clientAsyncForms.length).toBeGreaterThanOrEqual(15);
   });
