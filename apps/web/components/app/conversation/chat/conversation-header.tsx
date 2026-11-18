@@ -143,7 +143,7 @@ export function ConversationHeader({
           href="/dashboard"
           data-testid="shell-logo-home"
           aria-label={title}
-          className="flex flex-none items-center gap-2 rounded-sm outline-none ring-brand-blue focus-visible:ring-2"
+          className="flex flex-none items-center justify-center gap-2 min-h-11 min-w-11 rounded-sm outline-none ring-brand-blue focus-visible:ring-2"
         >
           {/* The canonical mark (owner §19) — never a letter standing in for
               it. Decorative: the Link's aria-label already names the product. */}
