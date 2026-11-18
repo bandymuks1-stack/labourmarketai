@@ -6,7 +6,9 @@ import { useActionState, useRef, useState } from "react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { NeedDoorLink } from "@/components/app/need-door-link";
-import { buttonLinkClassName } from "@/components/ui/Button";
+import { Button, buttonLinkClassName } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import {
   saveCompanySetupAction,
   type CompanySetupFormState,
@@ -154,9 +156,10 @@ export function CompanySetupForm({
   // user can't overwrite verified data. Contacts / website / type / role
   // stay editable. The server (saveCompanySetup) enforces this too.
   const legalLocked = existing?.verificationStatus === "verified";
-  const lockedInputCls = legalLocked
-    ? "cursor-not-allowed border-border-default bg-ink-800 text-text-muted"
-    : "border-border-default bg-surface-1 text-text-primary focus:border-brand-blue";
+  // A locked legal field keeps the shared field and only dims itself; the
+  // state variants win over the primitive's base colours.
+  const lockedInputCls =
+    "max-sm:min-h-11 max-sm:text-base read-only:cursor-not-allowed read-only:bg-ink-800 read-only:text-text-muted disabled:cursor-not-allowed disabled:bg-ink-800 disabled:text-text-muted";
 
   const banner: { tone: "success" | "warning"; text: string } | null = (() => {
     if (!state) return null;
@@ -226,7 +229,7 @@ export function CompanySetupForm({
 
       <label className="flex flex-col gap-1 text-xs">
         <span className="text-text-secondary">{labels.legalName}</span>
-        <input
+        <Input
           type="text"
           name="legal_name"
           required
@@ -236,7 +239,7 @@ export function CompanySetupForm({
           placeholder={labels.legalNamePlaceholder}
           readOnly={legalLocked}
           aria-readonly={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none max-sm:min-h-11 max-sm:text-base ${lockedInputCls}`}
+          className={lockedInputCls}
           data-testid="company-setup-legal-name"
         />
         <span className="text-meta text-text-muted">{labels.legalNameHelp}</span>
@@ -275,12 +278,12 @@ export function CompanySetupForm({
           server stores NULL (honest absence), never Lithuania. */}
       <label className="flex flex-col gap-1 text-xs">
         <span className="text-text-secondary">{labels.country}</span>
-        <select
+        <Select
           name="country"
           defaultValue={existing?.country ?? ""}
           disabled={legalLocked}
           aria-disabled={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none max-sm:min-h-11 max-sm:text-base ${lockedInputCls}`}
+          className={lockedInputCls}
           data-testid="company-setup-country"
         >
           <option value="" disabled>
@@ -291,19 +294,19 @@ export function CompanySetupForm({
               {labels.countryOptions[o.value] ?? o.label}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
 
       <label className="flex flex-col gap-1 text-xs">
         <span className="text-text-secondary">{labels.registrationCode}</span>
-        <input
+        <Input
           type="text"
           name="registration_code"
           maxLength={100}
           defaultValue={existing?.registrationCode ?? ""}
           readOnly={legalLocked}
           aria-readonly={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none max-sm:min-h-11 max-sm:text-base ${lockedInputCls}`}
+          className={lockedInputCls}
           data-testid="company-setup-registration-code"
         />
         <span className="text-meta text-text-muted">
@@ -313,7 +316,7 @@ export function CompanySetupForm({
 
       <label className="flex flex-col gap-1 text-xs">
         <span className="text-text-secondary">{labels.address}</span>
-        <input
+        <Input
           type="text"
           name="address"
           maxLength={300}
@@ -321,20 +324,20 @@ export function CompanySetupForm({
           placeholder={labels.addressPlaceholder}
           readOnly={legalLocked}
           aria-readonly={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none max-sm:min-h-11 max-sm:text-base ${lockedInputCls}`}
+          className={lockedInputCls}
           data-testid="company-setup-address"
         />
       </label>
 
       <label className="flex flex-col gap-1 text-xs">
         <span className="text-text-secondary">{labels.website}</span>
-        <input
+        <Input
           type="text"
           name="website"
           maxLength={200}
           defaultValue={existing?.website ?? ""}
           placeholder={labels.websitePlaceholder}
-          className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+          className="max-sm:min-h-11 max-sm:text-base"
           data-testid="company-setup-website"
         />
       </label>
@@ -342,23 +345,23 @@ export function CompanySetupForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-text-secondary">{labels.contactEmail}</span>
-          <input
+          <Input
             type="email"
             name="contact_email"
             maxLength={200}
             defaultValue={existing?.contactEmail ?? ""}
-            className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+            className="max-sm:min-h-11 max-sm:text-base"
             data-testid="company-setup-contact-email"
           />
         </label>
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-text-secondary">{labels.contactPhone}</span>
-          <input
+          <Input
             type="text"
             name="contact_phone"
             maxLength={50}
             defaultValue={existing?.contactPhone ?? ""}
-            className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+            className="max-sm:min-h-11 max-sm:text-base"
             data-testid="company-setup-contact-phone"
           />
         </label>
@@ -383,24 +386,28 @@ export function CompanySetupForm({
         {/* AUTOMATIC-FIRST: the primary action saves the company as usable
             now (active_unverified / needs_checks). Requesting a manual review
             is an OPTIONAL secondary action, never required to use the company. */}
-        <button
+        <Button
           type="submit"
           onClick={() => setIntent("draft")}
           disabled={isPending}
-          className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+          variant="primary"
+          size="sm"
+          className="min-h-11"
           data-testid="company-setup-save-draft"
         >
           {labels.saveDraft}
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           onClick={() => setIntent("submit")}
           disabled={isPending}
-          className="rounded-md border border-border-default bg-surface-1 px-4 py-2 text-sm font-medium text-text-secondary hover:border-brand-blue disabled:opacity-50"
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           data-testid="company-setup-submit-request"
         >
           {labels.submitRequest}
-        </button>
+        </Button>
       </div>
 
       {banner ? (
