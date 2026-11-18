@@ -3,7 +3,12 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { TRAINING_ASSIGNABLE_RELATIONSHIPS } from "@/lib/training/training-model";
+import {
+  TRAINING_ASSIGNABLE_RELATIONSHIPS,
+  TRAINING_LEARNING_RELATIONSHIPS,
+  TRAINING_PAUSE_ELIGIBLE_RELATIONSHIPS,
+  isTrainingAssignableEngagement,
+} from "@/lib/training/training-model";
 
 /**
  * TRAINING IS ASSIGNED TO THE FOUR OWNER-DECIDED GROUPS — registry 11.8,
@@ -17,9 +22,11 @@ import { TRAINING_ASSIGNABLE_RELATIONSHIPS } from "@/lib/training/training-model
  *   1. the signature, security, search_path and grants of assign_training_v1
  *      are production's;
  *   2. the eligibility predicate is exactly: active governance membership OR
- *      an ACTIVE, started, not-ended engagement in the programme's OWN
- *      organization with one of the eight relationships of the four groups —
- *      the same list the register's picker offers;
+ *      a started, not-ended engagement in the programme's OWN organization
+ *      with one of the eight relationships of the four groups — status
+ *      'active' or 'paused' for the six non-learning slugs, 'active' ONLY for
+ *      intern and student (owner decision 2026-11-18, "a paused relationship
+ *      is not an end") — the same list and split the register's picker uses;
  *   3. one answer (`invalid_assignee`) — no new outcome, no new oracle;
  *   4. the programme policy only adds "the assignee reads the programme of
  *      their own assignment", and the assignment read stays the one
@@ -139,7 +146,15 @@ describe("1. assign_training_v1: signature, security, search_path and grants are
 describe("2. eligibility = the four groups, active, in the programme's own organization", () => {
   const body = code(prosrc(MIG));
   const block = body.match(ENGAGEMENT_BLOCK)?.[0] ?? "";
-  const slugs = [...(block.match(/relationship_slug in \(([^)]*)\)/)?.[1] ?? "").matchAll(/'([a-z_]+)'/g)].map((m) => m[1]);
+  const slugLists = [...block.matchAll(/relationship_slug in \(([^)]*)\)/g)].map((m) =>
+    [...m[1].matchAll(/'([a-z_]+)'/g)].map((s) => s[1]),
+  );
+  const slugs = slugLists.flat();
+  /** The two arms of the status split, as written in the body. */
+  const SPLIT =
+    /and \(\s*\(ec\.relationship_slug in \(([^)]*)\)\s+and ec\.status in \('active', 'paused'\)\)\s+or \(ec\.relationship_slug in \(([^)]*)\)\s+and ec\.status = 'active'\)\s+\)/;
+  const split = block.match(SPLIT);
+  const listOf = (s: string | undefined) => [...(s ?? "").matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).sort();
 
   it("governance membership stays the first branch, unchanged", () => {
     expect(body).toMatch(
@@ -147,14 +162,58 @@ describe("2. eligibility = the four groups, active, in the programme's own organ
     );
   });
 
-  it("the engagement branch: same person, SAME organization, active, inside its dates", () => {
+  it("the engagement branch: same person, SAME organization, current, inside its dates", () => {
     expect(block, "the engagement block exists").not.toBe("");
     expect(block).toMatch(/ec\.profile_id = v_target/);
     expect(block).toMatch(/ec\.organization_id = prog\.organization_id/);
-    expect(block).toMatch(/ec\.status = 'active'/);
     expect(block).toMatch(/\(ec\.started_at is null or ec\.started_at <= current_date\)/);
     expect(block).toMatch(/\(ec\.ended_at is null or ec\.ended_at > current_date\)/);
-    expect(block).not.toMatch(/'(paused|ended|invited|pending)'/);
+    expect(block).not.toMatch(/'(ended|invited|pending)'/);
+  });
+
+  it("the status split (owner decision 2026-11-18): paused only for the non-learning slugs", () => {
+    expect(split, "the two-arm status split exists").not.toBeNull();
+    expect(listOf(split?.[1])).toEqual(
+      ["collaborator", "consultant", "employee", "freelancer", "manager", "owner"],
+    );
+    expect(listOf(split?.[2])).toEqual(["intern", "student"]);
+    // the dates apply to BOTH arms: they sit outside the split
+    const after = block.slice(block.indexOf(split?.[0] ?? "\u0000") + (split?.[0].length ?? 0));
+    expect(after).toMatch(/^\s*and \(ec\.started_at is null or ec\.started_at <= current_date\)\s+and \(ec\.ended_at is null or ec\.ended_at > current_date\)/);
+    // exactly two status tests, 'paused' exactly once, never next to a learning slug
+    expect(block.match(/ec\.status/g)?.length).toBe(2);
+    expect(block.match(/'paused'/g)?.length).toBe(1);
+    expect(slugLists).toHaveLength(2);
+  });
+
+  it("a learning slug can never be combined with 'paused'", () => {
+    for (const s of ["intern", "student"]) expect(listOf(split?.[1])).not.toContain(s);
+    expect(listOf(split?.[1]).sort()).toEqual([...TRAINING_PAUSE_ELIGIBLE_RELATIONSHIPS].sort());
+    expect(listOf(split?.[2]).sort()).toEqual([...TRAINING_LEARNING_RELATIONSHIPS].sort());
+    for (const s of TRAINING_LEARNING_RELATIONSHIPS) {
+      expect(isTrainingAssignableEngagement({ relationshipSlug: s, status: "paused", startedAt: null, endedAt: null }, "2026-11-18")).toBe(false);
+      expect(isTrainingAssignableEngagement({ relationshipSlug: s, status: "active", startedAt: null, endedAt: null }, "2026-11-18")).toBe(true);
+    }
+  });
+
+  it("the picker applies the same split and dates as the RPC (P3-3)", () => {
+    const at = (relationshipSlug: string, status: string, startedAt: string | null, endedAt: string | null) =>
+      isTrainingAssignableEngagement({ relationshipSlug, status, startedAt, endedAt }, "2026-11-18");
+    for (const s of TRAINING_PAUSE_ELIGIBLE_RELATIONSHIPS) {
+      expect(at(s, "active", null, null)).toBe(true);
+      expect(at(s, "paused", null, null)).toBe(true);
+      expect(at(s, "ended", null, null)).toBe(false);
+    }
+    expect(at("employee", "paused", "2026-01-01", "2026-11-17")).toBe(false);
+    expect(at("employee", "active", null, "2026-11-18")).toBe(false);
+    expect(at("employee", "active", "2026-11-19", null)).toBe(false);
+    expect(at("employee", "active", "2026-11-18", "2026-11-19")).toBe(true);
+    expect(at("volunteer", "active", null, null)).toBe(false);
+    const SERVICE = read(join(REPO, "apps", "web", "lib", "training", "training.ts"));
+    const fn = SERVICE.slice(SERVICE.indexOf("export async function getTrainingAssignees"));
+    expect(fn).toMatch(/\.in\("status", \["active", "paused"\]\)/);
+    expect(fn).toMatch(/started_at, ended_at/);
+    expect(fn).toMatch(/isTrainingAssignableEngagement\(/);
   });
 
   it("exactly the eight relationships of the owner decision — no volunteer, viewer or unemployed", () => {

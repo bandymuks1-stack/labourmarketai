@@ -15,12 +15,17 @@
 #   1. BASELINE (production): only governance members are assignable.
 #   2. FIXED: members (employee / manager / owner engagements), interns,
 #      learners and invited external people (collaborator / consultant /
-#      freelancer) are assignable while the link is ACTIVE; ended, paused,
-#      end-dated, not-yet-started, another organization's, volunteer, viewer,
+#      freelancer) are assignable while the link is ACTIVE; a PAUSED
+#      non-learning link (employee, collaborator) is assignable too (owner
+#      decision 2026-11-18, "a paused relationship is not an end"), a paused
+#      intern / student link is not; ended, end-dated (also when paused),
+#      not-yet-started, another organization's, volunteer, viewer,
 #      self-declared, unknown, unverified and ambiguous are refused with ONE
 #      answer; a profile id answers exactly like an e-mail.
 #   3. CHAIN per group: the person receives, sees and completes; the
 #      organization reads the completion; another organization sees nothing.
+#   3b. PAUSED reads no more than ACTIVE: the pause opens nothing beyond the
+#      assignment itself.
 #   4. ENDED LINK: once the intern's link ends, a NEW assignment is refused,
 #      the organization still reads the historical assignment, and the person
 #      still reads their own record with its course title.
@@ -93,7 +98,8 @@ COLLAB_A=$(u 1011); STUDENT_A=$(u 1012); FREELANCER_A=$(u 1013); MGRSLUG_A=$(u 1
 REVOKED_A=$(u 1016); UNVERIFIED_A=$(u 1017); DUP1=$(u 1018); DUP2=$(u 1019); OWNER_B=$(u 1020)
 EMP_A2=$(u 1021); EX_A_NOW_B=$(u 1022); ENDTODAY_A=$(u 1023)
 INTERN_A=$(u 1024); CONSULT_A=$(u 1025); VOLUNTEER_A=$(u 1026); VIEWER_A=$(u 1027); ENDINTERN_A=$(u 1028)
-PAUSEDSTU_A=$(u 1029); STUDENT_B=$(u 1030); GHOST=$(u 1099)
+PAUSEDSTU_A=$(u 1029); STUDENT_B=$(u 1030); PAUSEDCOL_A=$(u 1031); PAUSEDINT_A=$(u 1032); PAUSEDEND_A=$(u 1033)
+GHOST=$(u 1099)
 PROG_A1=$(u 8001); PROG_A2=$(u 8002); PROG_AOFF=$(u 8003); PROG_B=$(u 8004); PROG_A3=$(u 8005)
 
 section "harness (stubs documented in the prelude)"
@@ -112,7 +118,8 @@ insert into public.profiles (id, email) values
   ('$EMP_A2','emp2@a.test'), ('$EX_A_NOW_B','exa@b.test'), ('$ENDTODAY_A','endtoday@a.test'),
   ('$INTERN_A','intern@a.test'), ('$CONSULT_A','consult@a.test'), ('$VOLUNTEER_A','volunteer@a.test'),
   ('$VIEWER_A','viewer@a.test'), ('$ENDINTERN_A','endintern@a.test'), ('$PAUSEDSTU_A','pausedstu@a.test'),
-  ('$STUDENT_B','student@b.test');
+  ('$STUDENT_B','student@b.test'), ('$PAUSEDCOL_A','pausedcol@a.test'), ('$PAUSEDINT_A','pausedint@a.test'),
+  ('$PAUSEDEND_A','pausedend@a.test');
 -- every mailbox verified EXCEPT unverified@a.test
 insert into public.email_verifications_v1 (profile_id, email)
   select id, lower(email) from public.profiles where id <> '$UNVERIFIED_A';
@@ -152,13 +159,16 @@ insert into public.engagement_contexts (profile_id, organization_id, relationshi
   ('$VIEWER_A',     '$ORG_A','viewer','active', null, null),
   ('$ENDINTERN_A',  '$ORG_A','intern','ended', current_date - 90, current_date - 5),
   ('$PAUSEDSTU_A',  '$ORG_A','student','paused', null, null),
-  ('$STUDENT_B',    '$ORG_B','student','active', null, null);
+  ('$STUDENT_B',    '$ORG_B','student','active', null, null),
+  ('$PAUSEDCOL_A',  '$ORG_A','collaborator','paused', null, null),
+  ('$PAUSEDINT_A',  '$ORG_A','intern','paused', current_date - 20, null),
+  ('$PAUSEDEND_A',  '$ORG_A','employee','paused', current_date - 400, current_date - 1);
 insert into public.training_programs (id, organization_id, title, is_active) values
   ('$PROG_A1','$ORG_A','QA kursas A1',true), ('$PROG_A2','$ORG_A','QA kursas A2',true),
   ('$PROG_AOFF','$ORG_A','QA kursas A (retired)',false), ('$PROG_B','$ORG_B','QA kursas B',true),
   ('$PROG_A3','$ORG_A','QA kursas A3',true);
 SQL
-echo "  seeded: 2 organizations, 30 profiles, 5 programmes"
+echo "  seeded: 2 organizations, 33 profiles, 5 programmes"
 
 assign() { as authenticated "$1" "select public.assign_training_v1('$2', '$3', '2026-12-01');" | tok; }
 reset_assignments() { q "truncate public.training_assignment_events, public.training_assignments;" >/dev/null; }
@@ -196,8 +206,12 @@ matrix() {
   check "ex-employee of this org, now employee of another"                   "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" exa@b.test)"
   check "ended employment (status ended)"                                    "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" ended@a.test)"
   check "ended intern link (status ended)"                                   "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" endintern@a.test)"
-  check "paused employment"                                                  "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" paused@a.test)"
-  check "paused learner link"                                                "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" pausedstu@a.test)"
+  check "P3-1 paused employee (not ended)"                                  "$(pick invalid_assignee assigned)"         "$(assign "$OWNER_A" "$PROG_A1" paused@a.test)"
+  check "P3-1 paused collaborator (not ended)"                              "$(pick invalid_assignee assigned)"         "$(assign "$OWNER_A" "$PROG_A1" pausedcol@a.test)"
+  check "P3-1 paused intern (learning link must be active)"                 "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" pausedint@a.test)"
+  check "P3-1 paused intern by profile id"                                  "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" "$PAUSEDINT_A")"
+  check "P3-1 paused student (learning link must be active)"                "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" pausedstu@a.test)"
+  check "P3-1 paused employee whose ended_at has passed"                    "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" pausedend@a.test)"
   check "status active but end date passed (ended_at = yesterday)"           "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" enddated@a.test)"
   check "status active, end date = today (end_roster_link stamp)"            "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" endtoday@a.test)"
   check "link not started yet (started_at = tomorrow)"                       "invalid_assignee"                          "$(assign "$OWNER_A" "$PROG_A1" future@a.test)"
@@ -253,6 +267,24 @@ check "another org's learner cannot complete Org A's assignment" "not_found" \
   "$(as authenticated "$STUDENT_B" "select public.complete_training_assignment_v1('$(aid "$PROG_A2" "$INTERN_A")','x');" | tok)"
 check "the organization reads only the training rows it created for the intern" "2" \
   "$(as authenticated "$OWNER_A" "select count(*) from public.training_assignments where assignee_profile_id='$INTERN_A';" | tok)"
+
+section "3b. PAUSED reads no more than ACTIVE — the pause opens nothing beyond the assignment"
+# EMP_A2 (active employee) and PAUSED_A (paused employee) each hold exactly one
+# assignment (PROG_A1) at this point. Same probes, same role, each as themselves.
+reads() { as authenticated "$1" "$2" | tok; }
+check "paused employee holds the assignment (PROG_A1)" "1" "$(q "select count(*) from public.training_assignments where assignee_profile_id='$PAUSED_A' and program_id='$PROG_A1';")"
+check "active employee holds the assignment (PROG_A1)" "1" "$(q "select count(*) from public.training_assignments where assignee_profile_id='$EMP_A2' and program_id='$PROG_A1';")"
+for t in training_assignments training_assignment_events engagement_contexts company_memberships organizations profiles email_verifications_v1 company_worker_invitations; do
+  A=$(reads "$EMP_A2" "select count(*) from public.$t;"); P=$(reads "$PAUSED_A" "select count(*) from public.$t;")
+  check "$t: paused reads the same as active" "$A" "$P"
+done
+A=$(reads "$EMP_A2" "select count(*) from public.training_programs;"); P=$(reads "$PAUSED_A" "select count(*) from public.training_programs;")
+check "training_programs: paused reads no more than active (active=$A)" "yes" "$([ "$P" -le "$A" ] 2>/dev/null && echo yes || echo "no:$P")"
+check "training_programs: paused reads ONLY the programme assigned to them" "$PROG_A1" "$(reads "$PAUSED_A" "select id from public.training_programs;")"
+check "training_assignments: paused reads ONLY their own assignment" "1" "$(reads "$PAUSED_A" "select count(*) from public.training_assignments where assignee_profile_id='$PAUSED_A';")"
+check "paused employee cannot assign (no demand access)" "not_found" "$(assign "$PAUSED_A" "$PROG_A3" emp2@a.test)"
+check "paused employee cannot complete another person's assignment" "not_found" \
+  "$(as authenticated "$PAUSED_A" "select public.complete_training_assignment_v1('$(aid "$PROG_A1" "$EMP_A2")','x');" | tok)"
 
 section "4. ENDED LINK — no new assignment; the history stays with the organization and the person"
 HIST=$(aid "$PROG_A1" "$INTERN_A")

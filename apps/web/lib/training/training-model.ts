@@ -29,7 +29,8 @@ export type TrainingAssignmentStatus =
 /**
  * Who a course can be assigned to (owner decision 2026-11-18, registry 11.8):
  * an active governance member, or a person whose engagement with the
- * organization is ACTIVE in one of these relationships — the SAME list
+ * organization is current in one of these relationships (status split below)
+ * — the SAME list
  * `assign_training_v1` checks (migration 20261118143000, pinned by
  * lib/guards/training-assignment-engaged-groups-v1.test.ts):
  *   members   employee, manager, owner
@@ -46,6 +47,48 @@ export const TRAINING_ASSIGNABLE_RELATIONSHIPS = [
   "consultant",
   "freelancer",
 ] as const;
+
+/**
+ * The status rule, split by group (owner decision 2026-11-18, "a paused
+ * relationship is not an end"): a non-learning link counts while `active` or
+ * `paused`; a learning link (intern, student) only while `active`, as
+ * 20261115120000 requires. Both groups also need started_at <= today <
+ * ended_at. The SAME split `assign_training_v1` checks.
+ */
+export const TRAINING_LEARNING_RELATIONSHIPS = ["intern", "student"] as const;
+export const TRAINING_PAUSE_ELIGIBLE_RELATIONSHIPS = [
+  "employee",
+  "manager",
+  "owner",
+  "collaborator",
+  "consultant",
+  "freelancer",
+] as const;
+
+/** Whether one engagement row makes its person assignable on `today` (YYYY-MM-DD). */
+export function isTrainingAssignableEngagement(
+  row: {
+    readonly relationshipSlug: string;
+    readonly status: string;
+    readonly startedAt: string | null;
+    readonly endedAt: string | null;
+  },
+  today: string,
+): boolean {
+  const pauseEligible = (TRAINING_PAUSE_ELIGIBLE_RELATIONSHIPS as readonly string[]).includes(
+    row.relationshipSlug,
+  );
+  const learning = (TRAINING_LEARNING_RELATIONSHIPS as readonly string[]).includes(
+    row.relationshipSlug,
+  );
+  const statusOk =
+    (pauseEligible && (row.status === "active" || row.status === "paused")) ||
+    (learning && row.status === "active");
+  if (!statusOk) return false;
+  if (row.startedAt && row.startedAt.slice(0, 10) > today) return false;
+  if (row.endedAt && row.endedAt.slice(0, 10) <= today) return false;
+  return true;
+}
 
 /** One person the register's picker offers. */
 export type TrainingAssignee = {

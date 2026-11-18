@@ -11,6 +11,7 @@ import {
   TRAINING_ASSIGNABLE_RELATIONSHIPS,
   TRAINING_READ_LIMIT,
   deriveTrainingAuthority,
+  isTrainingAssignableEngagement,
   isTrainingMigrationMissingCode,
   isValidTrainingAssignmentStatus,
   type CertificationRow,
@@ -319,8 +320,11 @@ export async function getCertificationRegister(
  *   * active engagements in the four groups (TRAINING_ASSIGNABLE_RELATIONSHIPS —
  *     members, interns, learners, invited external people), the same
  *     engagement_contexts read as lib/operations/org-members.ts.
- * Only an active link is offered; `assign_training_v1` re-checks the same rule,
- * so a link that ended after the page loaded is still refused. Names: an owner
+ * Only a current link is offered — the same status split and dates as
+ * `assign_training_v1` (isTrainingAssignableEngagement: a paused non-learning
+ * link counts, a paused intern/student link does not; started, not ended).
+ * The RPC re-checks the same rule, so a link that ended after the page loaded
+ * is still refused. Names: an owner
  * cannot read another person's `profiles` row, so a missing name falls back to
  * the worker's display name (the one shared fallback) — never an e-mail or id.
  */
@@ -332,9 +336,9 @@ export async function getTrainingAssignees(
   const [engagements, governance] = await Promise.all([
     asAny(supabase)
       .from("engagement_contexts")
-      .select("profile_id, relationship_slug, profiles(full_name, email)")
+      .select("profile_id, relationship_slug, status, started_at, ended_at, profiles(full_name, email)")
       .eq("organization_id", organizationId)
-      .eq("status", "active")
+      .in("status", ["active", "paused"])
       .in("relationship_slug", [...TRAINING_ASSIGNABLE_RELATIONSHIPS])
       .limit(TRAINING_READ_LIMIT),
     listOrganizationMembers(organizationId),
@@ -350,9 +354,20 @@ export async function getTrainingAssignees(
     }
   }
   if (!engagements.error) {
+    const today = new Date().toISOString().slice(0, 10);
     for (const r of (engagements.data ?? []) as RawRow[]) {
       const profileId = (r.profile_id as string | null) ?? null;
       if (!profileId || byProfile.has(profileId)) continue;
+      const current = isTrainingAssignableEngagement(
+        {
+          relationshipSlug: String(r.relationship_slug ?? ""),
+          status: String(r.status ?? ""),
+          startedAt: (r.started_at as string | null) ?? null,
+          endedAt: (r.ended_at as string | null) ?? null,
+        },
+        today,
+      );
+      if (!current) continue;
       const p = (Array.isArray(r.profiles) ? r.profiles[0] : r.profiles) as
         | { full_name?: string | null; email?: string | null }
         | null;

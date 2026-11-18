@@ -3,6 +3,7 @@
 import { type CSSProperties, type FocusEvent, type ReactNode, useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
@@ -545,8 +546,6 @@ export function OnboardingWizard({
     });
   }
 
-  const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   // THE PHONE ACTION BAR TAKES THE ROOM IT ACTUALLY NEEDS. The bar is fixed to the
   // bottom of the screen on a phone, and the step reserves space under its content so
@@ -807,7 +806,7 @@ export function OnboardingWizard({
           autoComplete="name"
           aria-invalid={fieldError === "name" ? true : undefined}
           aria-describedby={fieldError === "name" ? nameErrorId : undefined}
-          className={fieldError === "name" ? inputCls.replace("border-ink-500", "border-state-danger") : inputCls}
+          className={AUTH_INPUT_CLASS}
           data-testid="onboarding-display-name"
         />
         {fieldError === "name" ? (
@@ -903,7 +902,7 @@ export function OnboardingWizard({
               minLength={2}
               maxLength={200}
               data-testid="onboarding-institution"
-              className={inputCls}
+              className={AUTH_INPUT_CLASS}
             />
           </label>
           <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
@@ -914,7 +913,7 @@ export function OnboardingWizard({
               onChange={(e) => setProgramOrField(e.target.value)}
               maxLength={200}
               data-testid="onboarding-program"
-              className={inputCls}
+              className={AUTH_INPUT_CLASS}
             />
           </label>
           <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
@@ -924,7 +923,7 @@ export function OnboardingWizard({
               value={educationTypeSlug}
               onChange={(e) => setEducationTypeSlug(e.target.value)}
               data-testid="onboarding-education-type"
-              className={inputCls}
+              className={AUTH_INPUT_CLASS}
             >
               {educationTypeOptions.map((o) => (
                 <option key={o.slug} value={o.slug}>
@@ -1005,7 +1004,7 @@ export function OnboardingWizard({
                 aria-label={t("profession_label")}
                 maxLength={SELF_DECLARED_PROFESSION_MAX_LENGTH}
                 data-testid="onboarding-profession-input"
-                className={inputCls}
+                className={AUTH_INPUT_CLASS}
               />
               <Button
                 type="button"
