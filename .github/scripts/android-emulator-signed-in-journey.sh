@@ -99,3 +99,14 @@ if grep -q "MARK_ALL_READ.*COMPLETED" "${RUNNER_TEMP:-/tmp}/maestro-parity-conso
 if [ "${PROJECT_EXPECTED:-0}" = 1 ]; then PROJECT_CLAIM="the synthetic project's detail opened"; else PROJECT_CLAIM="project detail NOT exercised (no synthetic project prepared)"; fi
 echo "ANDROID_PARITY_JOURNEY_PROVEN: journal entry corrected (journal.correct_draft -> journal.correct_confirm); conversation.list loaded, reply drafted when a conversation exists (sent only with MESSAGE_SEND=1); notification.list loaded, ${MARK_CLAIM}; worker.projects.list loaded, ${PROJECT_CLAIM}; sign-out"
 summary "- ANDROID_PARITY_JOURNEY_PROVEN: journal correction (draft + confirm) → messages read + reply draft → notifications read, ${MARK_CLAIM} → projects read, ${PROJECT_CLAIM} → sign-out"
+
+# The screens #3451 / #3453 / #3471 added, READ ONLY — only when the dispatch
+# asked for it (input new_screens_walk, J-2 with the owner's approval). Signs
+# in itself (parity signed out), opens and cancels every form, saves nothing.
+if [ "${NEW_SCREENS_WALK:-0}" = 1 ]; then
+  WALK_CONSOLE="${RUNNER_TEMP:-/tmp}/maestro-new-screens-console.txt"
+  maestro test -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" apps/mobile/.maestro/new-screens-walk.yaml | tee "$WALK_CONSOLE" || { on_screen_ids; exit 1; }
+  if grep -q "ORGANIZATION_WORKSPACE.*COMPLETED" "$WALK_CONSOLE"; then WS_CLAIM="organization workspace: candidates, agency offers and programmes read"; else WS_CLAIM="personal workspace: organization stations absent, as designed"; fi
+  echo "ANDROID_NEW_SCREENS_WALK_PROVEN: Living CV sections read, work / education / language forms opened and cancelled (nothing saved); ${WS_CLAIM}; sign-out"
+  summary "- ANDROID_NEW_SCREENS_WALK_PROVEN (read only): Living CV forms opened + cancelled → ${WS_CLAIM} → sign-out"
+fi

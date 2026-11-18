@@ -20,6 +20,11 @@ on:
         description: "API origin the app talks to (production, or an isolated staging URL the hosting agent names)"
         required: false
         default: "https://labourmarket.ai"
+      new_screens_walk:
+        description: "Also walk the screens #3451/#3453/#3471 added, READ ONLY (apps/mobile/.maestro/new-screens-walk.yaml). J-2 sets it with the owner's approval."
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -169,6 +174,7 @@ jobs:
           PROJECT_EXPECTED: ${{ steps.qa_project.outcome == 'success' && '1' || '0' }}
           MAESTRO_DRIVER_STARTUP_TIMEOUT: "480000"
           MAESTRO_CLI_NO_ANALYTICS: "1"
+          NEW_SCREENS_WALK: ${{ inputs.new_screens_walk && '1' || '0' }}
         run: |
           # No --debug-output: nothing from a signed-in session is written to disk.
           # The Maestro console (step names and statuses — what this log
@@ -185,7 +191,11 @@ jobs:
             : > "$CONSOLE"
             maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               apps/mobile/.maestro/signed-in-journey.yaml | tee -a "$CONSOLE" &&
             maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e NEED_SUBMIT=0               apps/mobile/.maestro/jobs-need-journey.yaml | tee -a "$CONSOLE" &&
-            maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e MESSAGE_SEND=0               -e PROJECT_EXPECTED="$PROJECT_EXPECTED"               apps/mobile/.maestro/parity-journey.yaml | tee -a "$CONSOLE"
+            maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               -e MESSAGE_SEND=0               -e PROJECT_EXPECTED="$PROJECT_EXPECTED"               apps/mobile/.maestro/parity-journey.yaml | tee -a "$CONSOLE" &&
+            if [ "$NEW_SCREENS_WALK" = 1 ]; then
+              # READ ONLY: forms opened and cancelled, nothing saved (new-screens-walk.yaml).
+              maestro test -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" apps/mobile/.maestro/new-screens-walk.yaml | tee -a "$CONSOLE"
+            fi
           }
           # On a failed attempt, print ONLY the test ids on screen (our own testID
           # strings, never text, values or a screenshot; at most ten averaged
@@ -260,6 +270,9 @@ jobs:
               echo "IOS_JOBS_READ_JOURNEY_PROVEN: Today read, jobs search loaded, job opened (hand-off ok), empty need refused (no need written)"
             fi
             echo "IOS_PARITY_JOURNEY_PROVEN: journal entry corrected (journal.correct_draft -> journal.correct_confirm); conversation.list loaded, reply drafted when a conversation exists (not sent); notification.list loaded, $( grep -q "MARK_ALL_READ.*COMPLETED" "$CONSOLE" && echo "unread marked read" || echo "nothing unread, mark-all NOT exercised" ); worker.projects.list loaded, $( [ "$PROJECT_EXPECTED" = 1 ] && echo "the synthetic project's detail opened" || echo "project detail NOT exercised (no synthetic project prepared)" ); sign-out"
+            if [ "$NEW_SCREENS_WALK" = 1 ]; then
+              echo "IOS_NEW_SCREENS_WALK_PROVEN: Living CV sections read, work / education / language forms opened and cancelled (nothing saved); $( grep -q "ORGANIZATION_WORKSPACE.*COMPLETED" "$CONSOLE" && echo "organization workspace: candidates, agency offers and programmes read" || echo "personal workspace: organization stations absent, as designed" ); sign-out"
+            fi
           else
             on_screen_ids
             bash .github/scripts/mobile-origin-probe.sh "$ORIGIN" after-attempt-2
