@@ -413,7 +413,7 @@ export function LoginForm({
           {t("password_label")}
           <Link
             href="/auth/forgot-password"
-            className="text-brand-blue hover:text-brand-champagne"
+            className="inline-flex min-h-11 items-center text-brand-blue hover:text-brand-champagne"
           >
             {t("forgot_password")}
           </Link>
@@ -515,7 +515,7 @@ export function LoginForm({
       >
         <Link
           href="/auth/forgot-password"
-          className="text-sm font-semibold text-brand-blue hover:text-brand-champagne"
+          className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-blue hover:text-brand-champagne"
           data-testid="login-recover-link"
         >
           {t("reset_password_cta")}
