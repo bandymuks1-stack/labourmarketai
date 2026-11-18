@@ -809,6 +809,12 @@ test("J-DEC. the company sees the need's history, closes it as filled, and the h
     /^\d{4}-\d{2}-\d{2}T/,
   );
   await expect(history).toHaveAttribute("data-decided", "false");
+  // Once the page has hydrated, no streamed segment is left behind: a hidden copy
+  // that stays means a context update forced the boundary into client rendering
+  // (components/app/spine-hydrator.tsx applies the spine as a transition).
+  await expect(co.locator('div[hidden][id^="S:"]'), "no leftover hidden copy of the page").toHaveCount(0, {
+    timeout: 15_000,
+  });
 
   // The decision: the company closes the need as filled.
   await co.getByRole("main").getByTestId("demand-close").click();
