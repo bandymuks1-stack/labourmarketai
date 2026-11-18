@@ -112,7 +112,7 @@ export default async function ForCompaniesPage({
           <p className="text-sm leading-relaxed text-text-secondary">{t("calculatorBody")}</p>
           <Link
             href="/calculators/project-cost"
-            className="w-fit text-sm font-semibold text-text-primary hover:text-brand-cyan"
+            className="inline-flex min-h-11 w-fit items-center text-sm font-semibold text-text-primary hover:text-brand-cyan"
           >
             {t("calculatorLink")} →
           </Link>
