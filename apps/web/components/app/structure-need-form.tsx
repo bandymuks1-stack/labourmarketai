@@ -9,6 +9,7 @@ import {
   structureRequestNeed,
   type StructureNeedState,
 } from "@/lib/admin/structure-need-actions";
+import { Button } from "@/components/ui/Button";
 
 /**
  * S6 — one-click HUMAN structuring of an unstructured demand request.
@@ -67,18 +68,18 @@ export function StructureNeedForm({ requestId }: { requestId: string }) {
         <ul className="flex flex-wrap gap-1.5" data-testid="structure-need-skills">
           {skills.map((s) => (
             <li key={s.conceptId}>
-              <button
+              <Button
                 type="button"
                 onClick={() =>
                   setSkills((prev) =>
                     prev.filter((x) => x.conceptId !== s.conceptId),
                   )
                 }
-                className="rounded-md border border-brand-blue/40 bg-brand-blue/10 px-2 py-1 text-meta text-brand-blue hover:border-state-danger hover:text-state-danger"
+                variant="secondary" size="sm" className="min-h-11 hover:border-state-danger hover:text-state-danger"
                 title={t("removeSkill")}
               >
                 {s.label} ×
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
@@ -110,14 +111,14 @@ export function StructureNeedForm({ requestId }: { requestId: string }) {
         value={occupation?.conceptId ?? ""}
       />
       <div className="flex items-center gap-2">
-        <button
+        <Button
           type="submit"
           disabled={pending || skills.length === 0}
-          className="inline-flex min-h-9 items-center rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors duration-fast hover:bg-brand-blue/10 disabled:opacity-50"
+          variant="secondary" size="sm" className="min-h-11"
           data-testid="structure-need-submit"
         >
           {pending ? t("saving") : t("submit", { n: skills.length })}
-        </button>
+        </Button>
         {state && !state.ok ? (
           <span className="text-meta text-state-warning" role="status">
             {t(`error.${state.code}`)}
