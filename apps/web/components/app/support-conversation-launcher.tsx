@@ -121,8 +121,6 @@ export function SupportConversationLauncher({
         <Button
           type="button"
           variant="ghost"
-          size="sm"
-          className="min-h-11"
           onClick={() => {
             reset();
             setOpen(false);

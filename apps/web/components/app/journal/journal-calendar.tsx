@@ -183,7 +183,7 @@ export async function JournalCalendar({
           <span
             key={iso}
             aria-hidden
-            className="py-1 text-center font-mono text-[0.625rem] uppercase tracking-label text-text-muted"
+            className="py-1 text-center font-mono text-meta uppercase tracking-label text-text-muted"
           >
             {weekdayFmt.format(new Date(`${iso}T00:00:00Z`)).slice(0, 2)}
           </span>
