@@ -415,6 +415,12 @@ for (const phone of PHONES) {
       await expect(cand.getByTestId(`scout-interest-${s.workerId}`), "marked as interested").toBeVisible();
       const open = cand.getByTestId("propose-booking-open");
       await expect(open, "the company can propose a booking to them").toBeVisible({ timeout: 30_000 });
+      // The shortlist statuses are the shared toggle chip: a thumb can hit each one (44 px).
+      const statuses = cand.getByTestId(`scout-shortlist-${s.workerId}`).locator("button[aria-pressed]");
+      for (let i = 0; i < (await statuses.count()); i += 1) {
+        const box = await statuses.nth(i).boundingBox();
+        expect(box?.height ?? 0, `shortlist status ${i + 1} is thumb-sized`).toBeGreaterThanOrEqual(43.5);
+      }
       await fitsTheScreen(c.page, "the need's candidates");
       await tapUntil(open, cand.getByTestId("propose-booking-form"));
       const start = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
