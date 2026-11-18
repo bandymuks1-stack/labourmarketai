@@ -636,6 +636,35 @@ test("M-3. seed: an employee with one journal entry waiting for the company's re
   );
   expect(entries.length, "exactly one marked entry").toBe(1);
   expect(entries[0]?.engagement_context_id, "recorded for the company").toBe(engagementId);
+
+  // The company's own doors see it: the review RPC, then the very read the
+  // phone's Work review screen calls (journal.review_queue.get over /api/mcp).
+  const tok = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: { apikey: ANON, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: owner, password: ownerPw }),
+  });
+  const jwt = ((await tok.json()) as { access_token?: string }).access_token ?? "";
+  expect(jwt, "the company signs in").not.toBe("");
+  const rpc = await fetch(`${SB_URL}/rest/v1/rpc/reviewable_journal_entry_ids`, {
+    method: "POST",
+    headers: { apikey: ANON, Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" },
+    body: "{}",
+  });
+  expect(rpc.ok, "the review RPC answers the company").toBe(true);
+  expect(entryIds(await rpc.json()), "the entry waits for the company's review").toContain(entries[0]!.id);
+  const mcp = await fetch(`${BASE}/api/mcp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream", Authorization: `Bearer ${jwt}` },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: { name: "journal_review_queue_get", arguments: {} },
+    }),
+  });
+  const raw = await mcp.text();
+  expect(raw, "the phone's review read lists the entry").toContain(entries[0]!.id);
 });
 
 /**
