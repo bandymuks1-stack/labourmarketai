@@ -32,6 +32,8 @@ import {
  *   M-5 MESSAGES writes to the employer from that application; the company answers from ITS phone;
  *                the worker reaches the thread through the phone's area sheet and reads the answer.
  *   M-7 JOURNAL  opens the work journal; it fits the phone, also with its disclosures open.
+ *   M-8 FIRST    records a first entry from the home's one action; the saved state links the CV;
+ *                back on the journal, the CV bridge leads the records: the CV is one tap away.
  *
  * M-2 runs LAST in each group (first run 2026-11-14: the CV page stopped answering at 375 px), so a
  * CV fault cannot hide search, applying and messages; if it stops answering again, the step says
@@ -40,7 +42,8 @@ import {
  * THE FOUR OTHER GROUPS (owner P0, evening 2026-11-14: "visoms 5 grupėms"), each at both widths and
  * each its own serial group, so one role's failure hides no other:
  *   E EMPLOYER     the area sheet to needs; the need form sent on the phone; candidate search for it;
- *                  the people page and a join-by-link invitation; messages.
+ *                  the people page and a join-by-link invitation; messages. The candidate search's
+ *                  chips, filters and next steps are thumb-sized (44 px) and its result is reachable.
  *   A AGENCY       the area sheet to clients; the roster invite on the people page; a need posted on
  *                  the phone; messages; the Lithuanian clients page with a connected client.
  *   S STUDENT      signs up ON THE PHONE (study fields), the learning compass, the internship board,
@@ -155,6 +158,44 @@ async function fitsTheScreen(page: Page, where: string): Promise<void> {
   expect(got.scroll - got.inner, `${where}: the body reaches ${got.scroll - got.inner} px past a ${got.inner} px screen`).toBeLessThanOrEqual(1);
 }
 
+/** A control a thumb can hit: at least 44 px tall (ui/Chip, buttonLinkClassName). */
+async function thumbSized(target: Locator, where: string): Promise<void> {
+  await target.scrollIntoViewIfNeeded();
+  const box = await target.boundingBox();
+  expect(box, `${where} is on the page`).not.toBeNull();
+  expect(box!.height, `${where} is ${box!.height} px tall`).toBeGreaterThanOrEqual(43.5);
+}
+
+/** The candidate search's own parts on a phone: the chosen need, the filters, a way onward. */
+async function candidateSearchOnPhone(page: Page, needId: string, where: string): Promise<void> {
+  const main = page.getByRole("main");
+  const chosen = main.locator(`a[aria-current="page"][href*="request=${needId}"]`);
+  await expect(chosen, `${where}: the need is the chosen chip`).toBeVisible({ timeout: 30_000 });
+  await thumbSized(chosen, `${where}: the chosen need chip`);
+  await thumbSized(main.getByTestId("scouting-how").locator("summary"), `${where}: the how-it-works row`);
+  // Filters, when the need has any: every chip is thumb-sized and the row never widens the page
+  // (on a phone it scrolls sideways inside itself).
+  const filters = main.getByTestId("scouting-filters");
+  if (await filters.isVisible().catch(() => false)) {
+    const chips = filters.locator("a[href]");
+    for (let i = 0; i < (await chips.count()); i += 1) await thumbSized(chips.nth(i), `${where}: filter ${i + 1}`);
+    const row = await filters.boundingBox();
+    expect(row!.x + row!.width, `${where}: the filters stay inside the screen`).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+  }
+  // The result is reachable below: candidates, or the empty list with its door onward.
+  const outcome = main
+    .getByTestId("scouting-results")
+    .or(main.getByTestId("scouting-empty"))
+    .or(main.getByTestId("scouting-not-structured"));
+  await outcome.first().scrollIntoViewIfNeeded();
+  await expect(outcome.first(), `${where}: the result is reachable`).toBeVisible();
+  const door = main.getByTestId("scouting-empty-edit-need");
+  if (await door.isVisible().catch(() => false)) await thumbSized(door, `${where}: the empty list's door`);
+  const next = main.locator('[data-testid^="scout-pipeline-next-"]');
+  if ((await next.count()) > 0) await thumbSized(next.first(), `${where}: a candidate's next step`);
+  await fitsTheScreen(page, `${where}, scrolled to the result`);
+}
+
 /** Tap until the expected result shows: a tap before hydration is a silent no-op. */
 async function tapUntil(target: Locator, result: Locator, timeout = 60_000): Promise<void> {
   await expect(async () => {
@@ -232,6 +273,8 @@ for (const phone of PHONES) {
   const headline = `Tiler and waterproofer ${phone.name} ${RUN}`;
   const message = `Hello from a ${phone.name} px phone ${RUN}`;
   const answer = `Answer to the ${phone.name} px phone ${RUN}`;
+  // No stated duration: this walk is about the path, not the hours review (doctrine §7).
+  const firstEntry = `QA-SYNTHETIC first entry ${phone.name} ${RUN}: tiled the bathroom floor`;
   /** profileId is the auth/profile id; workerId is `workers.id`, which interest rows reference. */
   const s: { profileId: string; workerId: string; conversationId: string } = { profileId: "", workerId: "", conversationId: "" };
 
@@ -415,7 +458,14 @@ for (const phone of PHONES) {
       await expect(cand.getByTestId(`scout-interest-${s.workerId}`), "marked as interested").toBeVisible();
       const open = cand.getByTestId("propose-booking-open");
       await expect(open, "the company can propose a booking to them").toBeVisible({ timeout: 30_000 });
+      // The shortlist statuses are the shared toggle chip: a thumb can hit each one (44 px).
+      const statuses = cand.getByTestId(`scout-shortlist-${s.workerId}`).locator("button[aria-pressed]");
+      for (let i = 0; i < (await statuses.count()); i += 1) {
+        const box = await statuses.nth(i).boundingBox();
+        expect(box?.height ?? 0, `shortlist status ${i + 1} is thumb-sized`).toBeGreaterThanOrEqual(43.5);
+      }
       await fitsTheScreen(c.page, "the need's candidates");
+      await candidateSearchOnPhone(c.page, shared.needId, "the need's candidates");
       await tapUntil(open, cand.getByTestId("propose-booking-form"));
       const start = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
       await cand.getByTestId("propose-booking-start-date").fill(start);
@@ -455,6 +505,45 @@ for (const phone of PHONES) {
         await expect(fold).toHaveAttribute("open", "");
       }
       await fitsTheScreen(page, "the work journal with its disclosures open");
+      await done();
+    });
+    test(`M-8 (${phone.name}). the worker's first entry, from the home's one action to the Living CV, and the CV one tap from the journal`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      // The home's ONE gold action for a worker with no recorded work opens the journal.
+      const cta = page.locator('[data-testid="today-next-cta"]:visible');
+      await expect(cta, "the home's one action").toHaveAttribute("href", /\/dashboard\/journal$/, { timeout: 60_000 });
+      await cta.tap();
+      await page.waitForURL(/\/en\/dashboard\/journal/, { timeout: 30_000 });
+      const main = page.getByRole("main");
+      await main.getByTestId("journal-quick-record-text").fill(firstEntry);
+      await tapUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+      // Only when the M-6 booking left this worker more than one work context or a project to name.
+      if (await main.getByTestId("worklog-context-must-choose").isVisible().catch(() => false)) {
+        await main.getByTestId("worklog-context").selectOption({ index: 1 });
+      }
+      if (await main.getByTestId("worklog-project-must-choose").isVisible().catch(() => false)) {
+        await main.getByTestId("worklog-project").selectOption("none");
+      }
+      await main.getByTestId("worklog-save").tap();
+      await main.getByTestId("worklog-confirm").tap();
+      await expect(main.getByTestId("worklog-done"), "the entry is saved").toBeVisible({ timeout: 60_000 });
+      await expect(main.getByTestId("worklog-living-cv-link"), "the saved state leads to the CV").toBeVisible();
+      const stored = sql<{ n: number }>(
+        `select count(*)::int as n from public.journal_entries e join public.workers w on w.id = e.worker_id
+          where w.profile_id = ${lit(s.profileId)} and e.superseded_by is null`,
+      );
+      expect(stored[0]?.n, "one live entry is stored").toBe(1);
+
+      // A later visit (a manager's decision notification lands here): with an entry, the CV bridge
+      // leads the records, so the CV is ONE tap away — the status disclosure stays closed.
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      const bridge = main.getByTestId("journal-cv-bridge");
+      await expect(bridge, "the CV bridge leads the records").toBeVisible({ timeout: 30_000 });
+      await expect(main.getByTestId("journal-status-details")).not.toHaveAttribute("open", "");
+      await fitsTheScreen(page, "the work journal with the CV bridge");
+      await bridge.getByTestId("journal-cv-bridge-link").tap();
+      await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
+      await expect(page.getByRole("main").getByTestId("cv-summary").first(), "the CV counts the entry").toBeVisible({ timeout: 30_000 });
       await done();
     });
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
@@ -504,6 +593,7 @@ for (const phone of PHONES) {
       await page.goto(`${BASE}/en/dashboard/company/scouting?request=${e.needId}`);
       await expect(page.getByRole("main").locator('[data-testid^="scouting-"]').first(), "the scouting page renders its own content").toBeVisible({ timeout: 60_000 });
       await fitsTheScreen(page, "the employer's candidate search");
+      await candidateSearchOnPhone(page, e.needId, "the employer's candidate search");
       await done();
     });
     test(`E-4 (${phone.name}). organisation management: the people page from the sheet, and a join-by-link invitation`, async ({ browser }) => {

@@ -97,14 +97,17 @@ export function ScoutingShortlistButtons({
 
   return (
     <div className="flex flex-col gap-1.5" data-testid={`scout-shortlist-${workerId}`}>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-2">
         {order.map((s) => {
           const active = status === s;
+          // The shared toggle chip: 44 px, aria-pressed, a check mark on the
+          // chosen status. Pressing any status (the chosen one too) asks the
+          // server for that status, as before.
           return (
             <ToggleChip
               key={s}
-              disabled={pending}
               pressed={active}
+              disabled={pending}
               onPressedChange={() => choose(s)}
             >
               {labels.statuses[s]}
@@ -132,7 +135,7 @@ export function ScoutingShortlistButtons({
       {!editorOpen ? (
         <Button
           type="button"
-          variant="ghost"
+          variant="secondary"
           size="sm"
           disabled={pending}
           onClick={() => {
@@ -140,7 +143,7 @@ export function ScoutingShortlistButtons({
             setDraft(note ?? "");
             setError(null);
           }}
-          className="min-h-11 w-fit"
+          className="min-h-11 w-fit sm:min-h-0"
           data-testid={`scout-shortlist-note-toggle-${workerId}`}
         >
           {note === null ? labels.note.add : labels.note.edit}
@@ -162,13 +165,11 @@ export function ScoutingShortlistButtons({
             maxLength={SHORTLIST_NOTE_MAX}
             rows={3}
             placeholder={reasonMode ? labels.note.reasonPlaceholder : labels.note.placeholder}
-            className="max-sm:text-base"
             data-testid={`scout-shortlist-note-input-${workerId}`}
           />
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
-              variant="primary"
               size="sm"
               disabled={pending || (reasonMode && draft.trim() === "")}
               onClick={() =>
@@ -176,7 +177,7 @@ export function ScoutingShortlistButtons({
                   ? submit("not_fit", draft)
                   : submit(status ?? "saved", draft.trim() === "" ? null : draft)
               }
-              className="min-h-11"
+              className="min-h-11 sm:min-h-0"
               data-testid={`scout-shortlist-note-save-${workerId}`}
             >
               {labels.note.save}
@@ -191,7 +192,7 @@ export function ScoutingShortlistButtons({
                 setDraft("");
                 setError(null);
               }}
-              className="min-h-11"
+              className="min-h-11 sm:min-h-0"
             >
               {labels.note.cancel}
             </Button>

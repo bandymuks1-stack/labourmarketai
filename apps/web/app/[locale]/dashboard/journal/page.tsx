@@ -129,6 +129,7 @@ import {
 // presentation model and the same lead component the station renders.
 import { Card } from "@/components/ui/Card";
 import { buttonLinkClassName } from "@/components/ui/Button";
+import { chipLinkClassName } from "@/components/ui/Chip";
 import { DominantLead } from "@/components/app/work-in-numbers/dominant-lead";
 import { scopeText } from "@/components/app/work-in-numbers/period-nav";
 import {
@@ -1264,6 +1265,42 @@ export default async function JournalPage({
       ])
     : [null, null];
 
+  // Journal → CV bridge: make the one path between the work log and the CV it
+  // feeds visible. Honest counts only when entries exist; with no entries yet
+  // the line stays as a quiet zero-state so the direct CV link is ALWAYS
+  // reachable from the journal (cv-workspace-ia). ONE element, rendered in ONE
+  // of two places: once the person has entries it leads the records list, so
+  // the CV — where a manager's confirmation shows as confirmed work — is one
+  // tap from the journal on a phone instead of two (open the status
+  // disclosure, then the link). With no entry yet it stays inside the
+  // disclosure: the empty state already says the list is empty, and the
+  // recorder's saved state carries its own CV link.
+  const cvBridgeLeads = entries !== null && totalEntryCount > 0;
+  const cvBridge = (
+    <p
+      className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta leading-relaxed text-text-muted"
+      data-testid="journal-cv-bridge"
+    >
+      <span>
+        {entries === null
+          ? t("cvBridgeUnavailable")
+          : totalEntryCount > 0
+            ? t("cvBridge", {
+                confirmed: confirmedEntryCount,
+                total: totalEntryCount,
+              })
+            : t("cvBridgeEmpty")}
+      </span>
+      <Link
+        href="/cv"
+        className={chipLinkClassName(false)}
+        data-testid="journal-cv-bridge-link"
+      >
+        {t("cvBridgeLink")} →
+      </Link>
+    </p>
+  );
+
   return (
     <div className="flex flex-col gap-6">
       <TelemetryView
@@ -1572,6 +1609,7 @@ export default async function JournalPage({
           {/* The ONE primary action lives in the log-via-chat block above
               (owner audit §6.1) — no duplicate gradient CTA here. */}
         </div>
+        {cvBridgeLeads ? cvBridge : null}
         {/* Evidence drill-down (W5 slice 3): a player-card evidence bar lands
             here with ?skill=<slug>. The strip names the active filter and the
             REAL count, and offers the one way back — never a silent subset. */}
@@ -1680,30 +1718,10 @@ export default async function JournalPage({
             data-testid="journal-evidence-status-strip"
           />
         )}
-        {/* Journal → CV bridge: make the one path between the work log and the
-            CV it feeds visible. Honest counts only when entries exist; with no
-            entries yet the line stays as a quiet zero-state so the direct CV
-            link is ALWAYS reachable from the journal (cv-workspace-ia). */}
-        <p
-          className="text-meta leading-relaxed text-text-muted"
-          data-testid="journal-cv-bridge"
-        >
-          {entries === null
-            ? t("cvBridgeUnavailable")
-            : totalEntryCount > 0
-              ? t("cvBridge", {
-                  confirmed: confirmedEntryCount,
-                  total: totalEntryCount,
-                })
-              : t("cvBridgeEmpty")}{" "}
-          <Link
-            href="/cv"
-            className="font-medium text-brand-blue hover:underline"
-            data-testid="journal-cv-bridge-link"
-          >
-            {t("cvBridgeLink")} →
-          </Link>
-        </p>
+        {/* The CV bridge sits here while there is no entry yet (or the list
+            could not be read); once entries exist it leads the records
+            above, outside this disclosure. */}
+        {cvBridgeLeads ? null : cvBridge}
         {/* Proof-engine loop strip — ONE dense row, real counts only:
             įrašai → įgūdžių įrodymai → CV → pasiūlymai. A failed
             list read shows no counts at all (SEP-7). */}
