@@ -11,6 +11,8 @@
  * Four copies also meant a fix could land in one form and silently miss the
  * other three, which is exactly the shape of the drift this repo keeps finding.
  * There is one string now, and a guard asserts no auth form re-declares its own.
+ * The onboarding wizard — the screen a new account lands on straight after
+ * sign-up — had a fifth copy at 42px and uses this class since 2026-11-12.
  *
  * `min-h-[2.75rem]` is the same 44px token used by the calendar toolbar, the
  * account menu and the feedback trigger — this adds no new convention. The

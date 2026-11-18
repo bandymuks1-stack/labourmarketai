@@ -6,7 +6,10 @@
 #
 # Signs in as the job's seeded QA-SYNTHETIC company, searches jobs, has an
 # empty need refused, then drafts, confirms and sends a need (NEED_SUBMIT=1),
-# returns, and sends a SECOND need from a fresh form (need-second-journey.yaml).
+# returns, and sends a SECOND need from a fresh form (need-second-journey.yaml),
+# then walks the employer screens (employer-screens-journey.yaml): Today's
+# organization stations, close → reopen a need, one candidate list, Agency
+# offers and Programmes & cohorts.
 # The stored row is checked by the next workflow step, in the local database.
 # Nothing from the session is written to disk or uploaded.
 set -euo pipefail
@@ -36,3 +39,33 @@ echo "ANDROID_NEED_JOURNEY_ON_DEVICE: jobs search loaded; empty need refused; ne
 # → drafted, confirmed, sent. The next workflow step expects two rows.
 maestro test apps/mobile/.maestro/need-second-journey.yaml
 echo "ANDROID_SECOND_NEED_ON_DEVICE: Done returned to Today; Post a need opened a fresh form; second need sent"
+
+# The EMPLOYER SCREENS (#3471): Today's organization stations, close → reopen a
+# need (draft → confirm each), one need's candidates, Agency offers (none),
+# Programmes & cohorts (not a training provider). The next workflow step checks
+# the close and reopen in the local database.
+maestro test apps/mobile/.maestro/employer-screens-journey.yaml
+echo "ANDROID_EMPLOYER_SCREENS_ON_DEVICE: organization stations shown; a need closed and reopened; candidates, agency offers and programmes opened"
+
+# The LIVING CV FORMS (#3451, #3453): the company signs out and the job's
+# synthetic WORKER signs in, then adds work history, a language and a school.
+# The next workflow step finds one row of each in the local database.
+: "${MOBILE_WORKER_EMAIL:?worker seed address missing}"
+: "${MOBILE_WORKER_PASSWORD:?worker seed password missing}"
+maestro test \
+  -e MOBILE_WORKER_EMAIL="$MOBILE_WORKER_EMAIL" \
+  -e MOBILE_WORKER_PASSWORD="$MOBILE_WORKER_PASSWORD" \
+  apps/mobile/.maestro/cv-forms-journey.yaml
+echo "ANDROID_CV_FORMS_ON_DEVICE: worker signed in; work history, language and education saved and shown on the profile"
+
+: "${BOOK_WORKER_ID:?booking worker id missing}"
+: "${NOT_FIT_WORKER_ID:?not-a-fit worker id missing}"
+maestro test \
+  -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+  -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+  -e MOBILE_WORKER_EMAIL="$MOBILE_WORKER_EMAIL" \
+  -e MOBILE_WORKER_PASSWORD="$MOBILE_WORKER_PASSWORD" \
+  -e BOOK_WORKER_ID="$BOOK_WORKER_ID" \
+  -e NOT_FIT_WORKER_ID="$NOT_FIT_WORKER_ID" \
+  apps/mobile/.maestro/booking-journey.yaml
+echo "ANDROID_BOOKING_ON_DEVICE: company shortlisted two workers, marked one not a fit, proposed a start to the other; that worker accepted it under Offers"

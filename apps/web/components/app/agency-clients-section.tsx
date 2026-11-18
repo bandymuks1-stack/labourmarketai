@@ -17,6 +17,9 @@ import {
   type AgencyClientActionState,
 } from "@/lib/agency/clients-actions";
 import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 /**
  * "Klientai" — staffing-agency client panel (canonical journey P5).
@@ -209,15 +212,14 @@ export function AgencyClientsSection({
                       </div>
                       <form action={removeAction}>
                         <input type="hidden" name="id" value={client.id} />
-                        <button
+                        <Button
                           type="submit"
                           aria-label={labels.removeButton}
-                          title={labels.removeButton}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger"
+                          title={labels.removeButton} variant="secondary" size="sm" className="min-h-11 min-w-11 text-text-muted hover:border-state-danger hover:text-state-danger"
                           data-testid={`agency-client-remove-${client.id}`}
                         >
                           <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                        </button>
+                        </Button>
                       </form>
                     </div>
                     {linked.length === 0 ? (
@@ -264,11 +266,11 @@ export function AgencyClientsSection({
                         <label className="sr-only" htmlFor={`assign-${d.id}`}>
                           {labels.assignLabel}
                         </label>
-                        <select
+                        <Select
                           id={`assign-${d.id}`}
                           name="clientId"
                           defaultValue=""
-                          className="rounded-md border border-ink-500 bg-ink-700 px-2 py-1 text-xs text-text-primary outline-none focus:border-brand-blue"
+                          className="min-w-0 sm:w-auto sm:max-w-xs"
                         >
                           <option value="">{labels.assignNone}</option>
                           {clientRows.map((c) => (
@@ -276,14 +278,13 @@ export function AgencyClientsSection({
                               {c.name}
                             </option>
                           ))}
-                        </select>
-                        <button
+                        </Select>
+                        <Button
                           type="submit"
-                          disabled={linkPending}
-                          className="rounded-md border border-brand-blue/50 px-2 py-1 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-60"
+                          disabled={linkPending} variant="secondary" size="sm" className="min-h-11"
                         >
                           {labels.assignButton}
-                        </button>
+                        </Button>
                       </form>
                     )}
                   </DemandRow>
@@ -321,56 +322,51 @@ export function AgencyClientsSection({
                 <span className="text-xs font-medium text-text-secondary">
                   {labels.nameLabel}
                 </span>
-                <input
+                <Input
                   type="text"
                   name="name"
                   required
                   minLength={2}
                   maxLength={160}
-                  className="rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                 />
               </label>
               <label className="flex min-w-36 flex-1 flex-col gap-1">
                 <span className="text-xs font-medium text-text-secondary">
                   {labels.contactNameLabel}
                 </span>
-                <input
+                <Input
                   type="text"
                   name="contactName"
                   maxLength={120}
-                  className="rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                 />
               </label>
               <label className="flex min-w-36 flex-1 flex-col gap-1">
                 <span className="text-xs font-medium text-text-secondary">
                   {labels.contactEmailLabel}
                 </span>
-                <input
+                <Input
                   type="email"
                   name="contactEmail"
                   maxLength={200}
-                  className="rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                 />
               </label>
               <label className="flex min-w-40 flex-1 flex-col gap-1">
                 <span className="text-xs font-medium text-text-secondary">
                   {labels.noteLabel}
                 </span>
-                <input
+                <Input
                   type="text"
                   name="note"
                   maxLength={500}
-                  className="rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                 />
               </label>
-              <button
+              <Button
                 type="submit"
                 disabled={savePending}
-                data-testid="agency-client-add-submit"
-                className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-brand-blue/50 bg-brand-blue/10 px-4 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-60"
+                data-testid="agency-client-add-submit" variant="primary" size="sm" className="min-h-11"
               >
                 {labels.addButton}
-              </button>
+              </Button>
             </div>
           </form>
           {(saveState.status === "error" ||
