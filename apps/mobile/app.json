@@ -137,6 +137,7 @@
             { "scheme": "https", "host": "labourmarket.ai", "path": "/candidates" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/agency-offers" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/education" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/agency" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/sign-in" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/register" },
@@ -161,7 +162,8 @@
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/add-education" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/candidates" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/agency-offers" },
-            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/education" }
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/education" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/agency" }
           ],
           "category": [
             "BROWSABLE",
