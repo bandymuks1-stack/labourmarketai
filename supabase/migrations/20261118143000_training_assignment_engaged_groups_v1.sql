@@ -33,6 +33,9 @@
 --   relationship removes current access, never the organization's lawfully
 --   retained records; for `education` links access requires an ACTIVE
 --   engagement.
+--   Owner decision 2026-11-18 (P3-1): a paused relationship is not an end. A
+--   paused, not-ended non-learning relationship may receive a training
+--   assignment; the pause gives no other access.
 --
 -- ----------------------------------------------------------------------------
 -- WHAT CHANGES
@@ -40,14 +43,23 @@
 --   1. assign_training_v1 — the assignee must, in the programme's OWN
 --      organization, hold EITHER
 --        · an active governance membership (company_memberships, as today), OR
---        · an ACTIVE, started, not-ended engagement_contexts row whose
---          relationship is one of the four groups:
+--        · a started, not-ended engagement_contexts row whose relationship
+--          is one of the four groups:
 --            members      employee, manager, owner
 --            interns      intern
 --            learners     student
 --            external     collaborator, consultant, freelancer
---      An ended, paused, end-dated or not-yet-started engagement never
---      qualifies, so a NEW assignment is refused once the link ends.
+--          The status test is split by group (owner decision 2026-11-18,
+--          "a paused relationship is not an end"):
+--            non-learning slugs (employee, manager, owner, collaborator,
+--              consultant, freelancer): status 'active' OR 'paused';
+--            learning slugs (intern, student): status 'active' ONLY, as
+--              20261115120000 requires for education links.
+--          The pause gives nothing else: no read policy, grant or other
+--          function changes with it.
+--      An ended, end-dated or not-yet-started engagement never qualifies, nor
+--      does a paused learning link, so a NEW assignment is refused once the
+--      link ends.
 --      The second argument also accepts the assignee's profile id: the
 --      register's picker lists the organization's own people, and an owner
 --      cannot read their e-mail addresses (profiles RLS). An id answers
@@ -74,8 +86,9 @@
 --
 -- CANONICAL CHECK (doctrine §2): no new table, column, helper or status. The
 --   groups are relationship_types slugs already in the registry (0013,
---   20261012170000); the active-link test is the one 20261026 used and
---   team_member_at_v1 uses (status 'active', started_at <= day < ended_at).
+--   20261012170000); the date test is the one 20261026 used and
+--   team_member_at_v1 uses (started_at <= day < ended_at); 'paused' is an
+--   existing engagement status (engagement_contexts_status_check).
 --   The slug list is explicit on purpose: a new relationship type (volunteer,
 --   viewer, a future apprentice) joins training only by a new owner decision.
 --
@@ -135,7 +148,9 @@ begin
   end if;
   if v_target is null then return 'invalid_assignee'; end if;
   -- The four groups of the owner decision (2026-11-18), in THIS organization,
-  -- while the link is active. One answer otherwise.
+  -- while the link is current. A paused non-learning link still counts (a
+  -- pause is not an end); a learning link (intern, student) must be active.
+  -- One answer otherwise.
   if not exists (
     select 1 from public.company_memberships m
      where m.profile_id = v_target
@@ -145,10 +160,13 @@ begin
     select 1 from public.engagement_contexts ec
      where ec.profile_id = v_target
        and ec.organization_id = prog.organization_id
-       and ec.relationship_slug in ('employee', 'manager', 'owner',
-                                    'intern', 'student',
-                                    'collaborator', 'consultant', 'freelancer')
-       and ec.status = 'active'
+       and (
+             (ec.relationship_slug in ('employee', 'manager', 'owner',
+                                       'collaborator', 'consultant', 'freelancer')
+              and ec.status in ('active', 'paused'))
+          or (ec.relationship_slug in ('intern', 'student')
+              and ec.status = 'active')
+       )
        and (ec.started_at is null or ec.started_at <= current_date)
        and (ec.ended_at is null or ec.ended_at > current_date)
   ) then

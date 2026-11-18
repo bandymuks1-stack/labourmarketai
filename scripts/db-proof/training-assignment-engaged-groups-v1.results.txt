@@ -1,7 +1,7 @@
 == throwaway cluster: postgres (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on localhost:55441 ==
 
 == harness (stubs documented in the prelude) ==
-  seeded: 2 organizations, 30 profiles, 5 programmes
+  seeded: 2 organizations, 33 profiles, 5 programmes
 
 == 1. BASELINE — the production body and policy (loaded from the rollback file) ==
   PASS  baseline md5(prosrc) = production's                                            74795f98243e2ce340c424cf3c0ee0a5
@@ -28,8 +28,12 @@
   PASS  ex-employee of this org, now employee of another                               invalid_assignee
   PASS  ended employment (status ended)                                                invalid_assignee
   PASS  ended intern link (status ended)                                               invalid_assignee
-  PASS  paused employment                                                              invalid_assignee
-  PASS  paused learner link                                                            invalid_assignee
+  PASS  P3-1 paused employee (not ended)                                               invalid_assignee
+  PASS  P3-1 paused collaborator (not ended)                                           invalid_assignee
+  PASS  P3-1 paused intern (learning link must be active)                              invalid_assignee
+  PASS  P3-1 paused intern by profile id                                               invalid_assignee
+  PASS  P3-1 paused student (learning link must be active)                             invalid_assignee
+  PASS  P3-1 paused employee whose ended_at has passed                                 invalid_assignee
   PASS  status active but end date passed (ended_at = yesterday)                       invalid_assignee
   PASS  status active, end date = today (end_roster_link stamp)                        invalid_assignee
   PASS  link not started yet (started_at = tomorrow)                                   invalid_assignee
@@ -77,8 +81,12 @@
   PASS  ex-employee of this org, now employee of another                               invalid_assignee
   PASS  ended employment (status ended)                                                invalid_assignee
   PASS  ended intern link (status ended)                                               invalid_assignee
-  PASS  paused employment                                                              invalid_assignee
-  PASS  paused learner link                                                            invalid_assignee
+  PASS  P3-1 paused employee (not ended)                                               assigned
+  PASS  P3-1 paused collaborator (not ended)                                           assigned
+  PASS  P3-1 paused intern (learning link must be active)                              invalid_assignee
+  PASS  P3-1 paused intern by profile id                                               invalid_assignee
+  PASS  P3-1 paused student (learning link must be active)                             invalid_assignee
+  PASS  P3-1 paused employee whose ended_at has passed                                 invalid_assignee
   PASS  status active but end date passed (ended_at = yesterday)                       invalid_assignee
   PASS  status active, end date = today (end_roster_link stamp)                        invalid_assignee
   PASS  link not started yet (started_at = tomorrow)                                   invalid_assignee
@@ -129,6 +137,23 @@
   PASS  another org's learner cannot complete Org A's assignment                       not_found
   PASS  the organization reads only the training rows it created for the intern        2
 
+== 3b. PAUSED reads no more than ACTIVE — the pause opens nothing beyond the assignment ==
+  PASS  paused employee holds the assignment (PROG_A1)                                 1
+  PASS  active employee holds the assignment (PROG_A1)                                 1
+  PASS  training_assignments: paused reads the same as active                          1
+  PASS  training_assignment_events: paused reads the same as active                    DENIED:permission denied for table training_assignment_events
+  PASS  engagement_contexts: paused reads the same as active                           DENIED:permission denied for table engagement_contexts
+  PASS  company_memberships: paused reads the same as active                           DENIED:permission denied for table company_memberships
+  PASS  organizations: paused reads the same as active                                 DENIED:permission denied for table organizations
+  PASS  profiles: paused reads the same as active                                      DENIED:permission denied for table profiles
+  PASS  email_verifications_v1: paused reads the same as active                        DENIED:permission denied for table email_verifications_v1
+  PASS  company_worker_invitations: paused reads the same as active                    DENIED:permission denied for table company_worker_invitations
+  PASS  training_programs: paused reads no more than active (active=4)                 yes
+  PASS  training_programs: paused reads ONLY the programme assigned to them            00000000-0000-4000-8000-000000008001
+  PASS  training_assignments: paused reads ONLY their own assignment                   1
+  PASS  paused employee cannot assign (no demand access)                               not_found
+  PASS  paused employee cannot complete another person's assignment                    not_found
+
 == 4. ENDED LINK — no new assignment; the history stays with the organization and the person ==
   PASS  ended intern: a NEW programme cannot be assigned (by e-mail)                   invalid_assignee
   PASS  ended intern: a NEW programme cannot be assigned (by id)                       invalid_assignee
@@ -147,11 +172,11 @@
   PASS  after rollback the ended intern loses the course title again (the old gap)     NOROWS
 
 == 6. RE-APPLY — idempotent ==
-  PASS  md5(prosrc) after re-apply = first apply                                       c41b14610b5d96f22b2da4502f055b23
+  PASS  md5(prosrc) after re-apply = first apply                                       58a5decbbba812394268da4886fa5be5
   PASS  catalog after re-apply = baseline                                              assign_training_v1(text,text,text)|true|search_path=public|postgres|{postgres=X/postgres,authenticated=X/postgres}|text|p_program_id text, p_assignee_email text, p_required_by text DEFAULT NULL::text
   PASS  policy after re-apply = first apply                                            (belongs_to_organization(organization_id) OR is_admin() OR (EXISTS ( SELECT 1
    FROM training_assignments a
   WHERE ((a.program_id = training_programs.id) AND (a.assignee_profile_id = auth.uid())))))
   PASS  active employee assignable again after re-apply                                assigned
 
-== RESULT: 137 passed, 0 failed ==
+== RESULT: 160 passed, 0 failed ==
