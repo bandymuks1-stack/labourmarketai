@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Card } from "@/components/ui/Card";
+import { Link } from "@/lib/i18n/navigation";
 import {
   cancelMembershipInviteAction,
   changeMembershipRoleAction,
@@ -56,8 +57,29 @@ export type MembersSectionLabels = {
   /** Owner/admin control: grant / withdraw invitation management. */
   readonly grantInvitations: string;
   readonly withdrawInvitations: string;
+  /** Shown under a `no_such_user` refusal: what the person CAN do instead. */
+  readonly noAccountHint: string;
+  readonly noAccountCta: string;
   readonly outcomes: Record<string, string>;
 };
+
+/**
+ * Where a person WITHOUT an account is invited: the canonical invite panel,
+ * opened on arrival with "join my organisation" pre-selected. A membership
+ * role needs an existing account (the command answers `no_such_user`); before
+ * 2026-10-24 that refusal was the only thing shown — a dead end next to a
+ * working invitation link one page away (local UX review, row 1.9).
+ */
+export const NO_ACCOUNT_INVITE_HREF =
+  "/dashboard/network?invite=1&type=join_organization#network-invite";
+
+/** The same door, bound to the organization the membership invite was for —
+ *  an administrator of several organizations must not land on another one
+ *  (the invite panel otherwise preselects the first organization). */
+export function noAccountInviteHref(organizationId: string | null): string {
+  if (!organizationId) return NO_ACCOUNT_INVITE_HREF;
+  return `/dashboard/network?invite=1&type=join_organization&org=${encodeURIComponent(organizationId)}#network-invite`;
+}
 
 function outcomeText(
   labels: MembersSectionLabels,
@@ -80,9 +102,12 @@ export function OrganizationMembersSection({
   members,
   myRole,
   myProfileId,
+  organizationId,
   labels,
 }: {
   members: readonly OrganizationMember[];
+  /** The organization these members belong to (the active workspace). */
+  organizationId: string | null;
   myRole: MembershipRole | null;
   myProfileId: string;
   labels: MembersSectionLabels;
@@ -343,6 +368,23 @@ export function OrganizationMembersSection({
             {inviteMessage}
           </p>
         )}
+        {inviteState && !inviteState.ok && inviteState.code === "no_such_user" ? (
+          <div
+            className="flex flex-col gap-2 rounded-md border border-brand-blue/40 bg-brand-blue/5 p-3"
+            data-testid="org-members-invite-no-account"
+          >
+            <p className="text-xs leading-relaxed text-text-secondary">
+              {labels.noAccountHint}
+            </p>
+            <Link
+              href={noAccountInviteHref(organizationId) as "/dashboard"}
+              className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/40 px-4 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              data-testid="org-members-invite-no-account-cta"
+            >
+              {labels.noAccountCta} →
+            </Link>
+          </div>
+        ) : null}
       </div>
     </Card>
   );

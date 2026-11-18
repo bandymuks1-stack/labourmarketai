@@ -1,13 +1,15 @@
 import { expect as baseExpect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * W3 rows 7/8/25 — EMPLOYER DEMAND CONSOLIDATION: browser proof.
  *
  * The FULL demand wizard (structured v2, estimate builder, prefill, draft
  * auto-continue, private save-draft leg) and the ONE owner readback now live
- * on /dashboard/company under the stable #demand-intake anchor. The advanced
+ * on the company NEEDS door, /dashboard/company/needs (#1746 split the company
+ * page into doors), under the stable #demand-intake anchor. The advanced
  * page carries NO demand surface. This spec proves, against the LOCAL stack
  * with the real fixture company session:
  *
@@ -40,6 +42,14 @@ const HAS_LOCAL_STACK = Boolean(SUPA_URL && SUPA_SERVICE);
 const COMPANY_USER_ID = "aaaaaaaa-0000-0000-0000-000000000002";
 const MARKER = `E2E W3-7825 poreikis ${Date.now()}`;
 const ROLE_MARKER = "E2E betonuotojų brigada";
+
+/** The intake a person sees. While the page streams, Next parks the streamed
+ *  section in a hidden `<div hidden id="S:n">` holder before React swaps it
+ *  into <main> — measured 2026-10-23: for a moment BOTH nodes exist, and a bare
+ *  testid locator fails strict mode. Strict over the VISIBLE nodes; the
+ *  "no intake here" assertions stay unfiltered (count every node). */
+const visibleIntake = (page: Page) =>
+  page.getByTestId("demand-intake-section").filter({ visible: true });
 
 async function db(
   method: "POST" | "DELETE" | "GET" | "PATCH",
@@ -126,9 +136,9 @@ test.describe("W3 7/8/25 — the company page is the ONE demand home (company se
   test.beforeAll(clearSpecRows);
   test.afterAll(clearSpecRows);
 
-  test("wizard + owner readback render on /dashboard/company", async ({ page }) => {
+  test("wizard + owner readback render on /dashboard/company/needs", async ({ page }) => {
     const w = watch(page);
-    await page.goto("/lt/dashboard/company");
+    await page.goto("/lt/dashboard/company/needs");
 
     const section = page.getByTestId("demand-intake-section");
     await expect(section).toBeVisible();
@@ -150,7 +160,7 @@ test.describe("W3 7/8/25 — the company page is the ONE demand home (company se
 
   test("private draft save writes a REAL draft row and survives reload", async ({ page }) => {
     const w = watch(page);
-    await page.goto("/lt/dashboard/company");
+    await page.goto("/lt/dashboard/company/needs");
 
     await page.getByTestId("demand-role").fill(ROLE_MARKER);
     await page.getByTestId("demand-description").fill(MARKER);
@@ -174,7 +184,7 @@ test.describe("W3 7/8/25 — the company page is the ONE demand home (company se
     page,
   }) => {
     const w = watch(page);
-    await page.goto("/lt/dashboard/company");
+    await page.goto("/lt/dashboard/company/needs");
     await expect(page.getByTestId("demand-description")).toHaveValue(MARKER);
 
     // Step 2 — the criteria screen carries the ONE estimate builder.
@@ -184,6 +194,7 @@ test.describe("W3 7/8/25 — the company page is the ONE demand home (company se
     await page.getByTestId("demand-team-size").fill("4");
 
     // Step 3 — review echoes the entered values.
+    await chooseDemandCountryIfEmpty(page);
     await page.getByTestId("demand-next").click();
     await expect(page.getByTestId("demand-review")).toBeVisible();
     await expect(page.getByTestId("demand-summary-description")).toHaveText(MARKER);
@@ -238,8 +249,8 @@ test.describe("W3 7/8/25 — the company page is the ONE demand home (company se
   }) => {
     const w = watch(page);
     // Direct anchor URL works.
-    await page.goto("/lt/dashboard/company#demand-intake");
-    await expect(page.getByTestId("demand-intake-section")).toBeVisible();
+    await page.goto("/lt/dashboard/company/needs#demand-intake");
+    await expect(visibleIntake(page)).toBeVisible();
 
     // A detour to another canonical surface carries no demand surface —
     // the ONE wizard lives on the company page. (The advanced page this test
@@ -250,15 +261,15 @@ test.describe("W3 7/8/25 — the company page is the ONE demand home (company se
 
     // Browser Back returns to the anchored wizard.
     await page.goBack();
-    await expect(page.getByTestId("demand-intake-section")).toBeVisible();
+    await expect(visibleIntake(page)).toBeVisible();
     w.assertClean();
   });
 
   test("375px: the wizard fits with no sideways scroll", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     const w = watch(page);
-    await page.goto("/lt/dashboard/company#demand-intake");
-    await expect(page.getByTestId("demand-intake-section")).toBeVisible();
+    await page.goto("/lt/dashboard/company/needs#demand-intake");
+    await expect(visibleIntake(page)).toBeVisible();
     const overflow = await page.evaluate(() => {
       const el = document.scrollingElement!;
       return el.scrollWidth - el.clientWidth;

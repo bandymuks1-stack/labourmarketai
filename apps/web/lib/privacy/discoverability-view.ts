@@ -37,19 +37,39 @@ export function toConsentLocale(locale: string): ConsentLocale {
 }
 
 /** The consent component's chrome, from the `privacyConsent` catalogue. */
+/** The note shown above a consent legal text that is NOT in the reader's
+ *  language — a routed locale whose legal texts the owner has not approved yet
+ *  (sv, until #3232) reads the English ones, and must be told so. `null` when
+ *  the text is in the reader's own language. */
+export function consentLegalLanguageNote(tc: ConsentTranslator, locale: string): string | null {
+  return toConsentLocale(locale) === locale ? null : tc("labels.legalTextInEnglish");
+}
+
 export function discoverabilityConsentLabels(
   tc: ConsentTranslator,
+  locale?: string,
 ): DiscoverabilityConsentLabels {
   return {
+    legalLanguageNote: locale ? consentLegalLanguageNote(tc, locale) : null,
+    // The status line reads the SAME words as the readiness item on the
+    // opportunities board ("Visible to employers · On / Off").
+    headline: tc("employerVisibility.title"),
+    stateOn: tc("employerVisibility.state.on"),
+    stateOff: tc("employerVisibility.state.off"),
     statusHidden: tc("status.hidden"),
     statusHiddenBody: tc("status.hiddenBody"),
     statusVisible: tc("status.visible"),
+    statusVisibleBody: tc("status.visibleBody"),
     statusWithdrawn: tc("status.withdrawn"),
     statusStale: tc("status.stale"),
+    privateLine: tc("switch.privateLine"),
     grant: tc("actions.grant"),
     decline: tc("actions.decline"),
-    manage: tc("actions.manage"),
+    turnOn: tc("switch.turnOn"),
     withdraw: tc("actions.withdraw"),
+    details: tc("switch.details"),
+    grantedNote: tc("switch.grantedNote"),
+    withdrawnNote: tc("switch.withdrawnNote"),
     previewTitle: tc("preview.title"),
     previewEmpty: tc("preview.empty"),
     decidedAtLabel: tc("labels.decidedAt"),

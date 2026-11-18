@@ -446,4 +446,25 @@ describe("source health is readable before the store exists", () => {
     expect(se.cursors[0].channel).toBe("stream");
     expect(se.cursors[0].lastSuccessAt).toBe("2026-08-09T00:00:00Z");
   });
+
+  it("a timed-out stored-row count is UNKNOWN, never 0 and never a crash of the admin home", async () => {
+    // Production 2026-10-25: the exact count of ~50k active ads hit the 8 s
+    // statement_timeout (HTTP 500, no code on a HEAD) and the throw took the
+    // whole /dashboard/admin page down with it.
+    const countChain = {
+      eq: () => countChain,
+      then: (resolve: (v: unknown) => void) =>
+        resolve({ count: null, error: { code: null }, status: 500 }),
+    };
+    const client = {
+      from: (table: string) =>
+        table === "vacancy_import_cursors"
+          ? { select: async () => ({ data: [], error: null }) }
+          : { select: () => countChain },
+    } as unknown as Parameters<typeof readVacancySourceHealth>[0];
+
+    const health = await readVacancySourceHealth(client);
+    const se = health.find((h) => h.providerKey === "arbetsformedlingen")!;
+    expect(se.storedActive).toBeNull();
+  });
 });

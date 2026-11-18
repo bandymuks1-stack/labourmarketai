@@ -181,7 +181,7 @@ export const readProjectHeaderRow = cache(
     const res = await supabase
       .from("projects")
       .select(
-        "id, title, status, city, country, start_date, end_date, organizations(display_name, legal_name)",
+        "id, title, status, city, country, start_date, end_date, organization_id, organizations(display_name, legal_name)",
       )
       .eq("id", projectId)
       .maybeSingle();
@@ -414,6 +414,7 @@ export async function getProjectOperations(
         start_date: string | null;
         end_date: string | null;
         status: string | null;
+        organization_id?: string | null;
       }
     | null;
   if (!p) return null; // RLS: not the caller's project → not authorised.
@@ -426,6 +427,7 @@ export async function getProjectOperations(
     startDate: p.start_date ?? null,
     endDate: p.end_date ?? null,
     status: p.status ?? null,
+    organizationId: p.organization_id ?? null,
   };
 
   // ONE meaning of "assigned" (lib/projects/assigned-people.ts): the active

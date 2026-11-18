@@ -89,11 +89,39 @@ async function fixtureWorkerRowId(): Promise<string> {
   return rows[0].id;
 }
 
+/** The booking's FK parent. `supabase/dev-fixtures.sql` does NOT create this
+ *  customer_request — only `scripts/e2e-seed-owner-rebuild.sql` does — so on a
+ *  stack where that seed was not run the booking insert hit
+ *  `booking_requests_request_id_fkey`. The spec now ensures the SAME row the
+ *  seed recipe writes (same id, owner and shape), and only when it is absent,
+ *  so a seeded stack is left exactly as it was. */
+async function ensureFixtureRequest(): Promise<void> {
+  const r = await db("GET", `customer_requests?id=eq.${REQUEST_ID}&select=id`);
+  if (!r.ok) throw new Error(`read fixture request failed: ${await r.text()}`);
+  if (((await r.json()) as unknown[]).length > 0) return;
+  const created = await db("POST", "customer_requests", {
+    id: REQUEST_ID,
+    profile_id: COMPANY_USER_ID,
+    title: "Mūrininkų komanda Amsterdame",
+    need_summary:
+      "Reikalingi mūrininkai: mūrijimas, betono liejimas, klojinių montavimas, pastolių montavimas, rankinių įrankių naudojimas.",
+    country: "NL",
+    location: "Amsterdam",
+    role_or_work_type: "Mūrininkas",
+    team_size: 4,
+    start_period: "2026-09",
+    status: "submitted",
+    kind: "company_request",
+  });
+  if (!created.ok) throw new Error(`seed fixture request failed: ${await created.text()}`);
+}
+
 /** Seed ONE real incoming proposal: company → worker, status 'proposed'.
  *  Idempotent — clears the fixture request's rows first, so a leftover from
  *  an aborted earlier run can never trip the unique (owner,request,worker)
  *  constraint. */
 async function seedProposedBooking(): Promise<string> {
+  await ensureFixtureRequest();
   await db("DELETE", `booking_requests?request_id=eq.${REQUEST_ID}`);
   const r = await db("POST", "booking_requests", {
     owner_id: COMPANY_USER_ID,
@@ -358,6 +386,10 @@ test.describe("row 11 — booking responses badge (company)", () => {
     // The seen-model gate, exactly as production computes it: the company
     // opened the surface YESTERDAY, the worker responded NOW.
     const yesterday = new Date(Date.now() - 86_400_000).toISOString();
+    // The zero-state test above OPENED /dashboard/bookings as the company, and
+    // opening the surface is exactly what writes the seen row (seen_at = now).
+    // Replace it rather than insert beside it (one row per user, PK user_id).
+    await db("DELETE", `booking_requests_seen?user_id=eq.${COMPANY_USER_ID}`);
     const seenRes = await db("POST", "booking_requests_seen", {
       user_id: COMPANY_USER_ID,
       seen_at: yesterday,

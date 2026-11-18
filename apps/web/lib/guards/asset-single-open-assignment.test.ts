@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * MKT-3 — ONE asset, ONE pair of hands.
@@ -229,7 +230,7 @@ describe("the product tells the truth about a refusal", () => {
     expect(already).toBeLessThan(invalid);
   });
 
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} can say each refusal in its own words`, () => {
       const outcome = JSON.parse(read(`messages/${loc}.json`)).assets?.outcome ?? {};
       for (const key of ["already_issued", "not_issuable", "not_found"]) {

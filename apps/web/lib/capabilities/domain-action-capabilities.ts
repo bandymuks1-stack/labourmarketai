@@ -585,7 +585,8 @@ export const DOMAIN_ACTION_CAPABILITIES: readonly CapabilityDescriptor[] = [
 
   // ── NOTIFICATIONS ─────────────────────────────────────────────────────────
   read("notification.list", "My notifications", "The caller's notifications, newest first, with read state and the screen each one is about.", z.object({ limit: z.number().int().min(1).max(100).optional() }).strict(), async ({ limit }) =>
-    (await import("@/lib/notifications/spine")).getDurableNotifications(limit),
+    // The failure-keeping read: a failed feed is a failure, never `items: []`.
+    (await import("@/lib/notifications/spine")).readDurableNotifications(limit),
   ),
   oneStep({
     id: "notification.mark_read",

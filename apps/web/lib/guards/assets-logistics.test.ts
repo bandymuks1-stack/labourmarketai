@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Wagon 9 — Assets & Logistics guard. Org-scoped, default-closed, no location
@@ -70,7 +71,7 @@ describe("assets code degrades honestly and reuses canonical projects", () => {
 });
 
 describe("assets strings exist in every active-parity locale", () => {
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} has assets with all types + assignment statuses`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`));
       expect(msgs.assets?.pageTitle, loc).toBeTruthy();

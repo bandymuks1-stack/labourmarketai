@@ -1,5 +1,6 @@
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import { utcDayKey } from "@/lib/time/display";
+import { vacancyPayLabel } from "@/lib/vacancy-store/vacancy-pay-label";
 
 /**
  * WHAT `<PublicVacancyCard>` PAINTS FROM A ROW — a pure projection beside
@@ -45,6 +46,9 @@ export const PUBLIC_VACANCY_CARD_WORKING_TIMES: readonly string[] = [
 ];
 
 export type PublicVacancyCardFacts = {
+  /** The pay chip's identity (currency + the amounts it prints), `null` when
+   *  the card paints no pay chip. Locale-free: same row, same facts. */
+  readonly pay: string | null;
   readonly employmentForm: string | null;
   readonly workingTime: string | null;
   readonly positions: number | null;
@@ -61,6 +65,7 @@ export function publicVacancyCardFacts(
   vacancy: PublicVacancyPreview,
 ): PublicVacancyCardFacts {
   return {
+    pay: vacancyPayLabel(vacancy, "en"),
     employmentForm: renderedKey(
       PUBLIC_VACANCY_CARD_EMPLOYMENT_FORMS,
       vacancy.employmentForm,

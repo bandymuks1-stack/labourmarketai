@@ -1,7 +1,8 @@
-import { existsSync } from "node:fs";
+import { appendFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type Page } from "@playwright/test";
+import { test, expect, type Browser, type Page } from "./prod-walk";
+import { proveActionTiles } from "./action-tile-proof";
 
 /**
  * PRODUCTION UNIVERSAL MARKETPLACE — owner programme 2026-10-12 §3D: a person
@@ -14,7 +15,9 @@ import { test, expect, type Browser, type Page } from "@playwright/test";
  * to each other and hidden from real people):
  *   worker   qa.worker+multiw  — the seller / provider
  *   worker2  qa.worker+goal3   — the buyer
- * The walk pauses what it published at the end.
+ * `afterAll` closes the listing and pauses the service this run published,
+ * even after a red step, closes and pauses the seller's synthetic listings and
+ * services that earlier runs left public, then checks this run left none.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const GOODS = `QA-SYNTHETIC ${RUN} rankų darbo lentyna`;
@@ -32,6 +35,7 @@ async function as(browser: Browser, slot: string): Promise<{ page: Page; close: 
 }
 
 let listingId = "";
+let serviceId = "";
 
 test("M-1. the seller lists a handmade shelf and publishes it", async ({ browser }) => {
   const { page, close } = await as(browser, "worker");
@@ -67,12 +71,22 @@ test("M-2. the provider offers a service and makes it discoverable", async ({ br
   await page.getByTestId("service-offering-save").click();
   const row = page.locator('[data-testid^="service-offering-row-"]', { hasText: SERVICE }).first();
   await expect(row).toBeVisible({ timeout: 30_000 });
-  const id = (await row.getAttribute("data-testid"))!.replace("service-offering-row-", "");
-  const status = page.getByTestId(`service-offering-status-${id}`);
-  if (!/aktyv|active/i.test(await status.innerText())) {
-    await page.getByTestId(`service-offering-toggle-${id}`).click();
-  }
-  await expect(page.getByTestId(`service-offering-discoverability-${id}`)).toBeVisible({ timeout: 30_000 });
+  serviceId = (await row.getAttribute("data-testid"))!.replace("service-offering-row-", "");
+  // Prove the publication, not the hint: the discoverability line renders in
+  // EVERY state (draft too), so its visibility proved nothing. Run 41721656743
+  // clicked publish while the save's router.refresh was still in flight; Next
+  // queues a server action behind a pending refresh, the already-true check
+  // passed at once and the context closed before the action was sent (no
+  // PATCH in edge logs). The row stayed a draft and M-5 failed far from the
+  // cause. Keep the page open until the row is findable; re-click if not.
+  const status = page.getByTestId(`service-offering-status-${serviceId}`);
+  const findable = page.getByTestId(`service-offering-discoverability-${serviceId}`);
+  await expect(async () => {
+    if (!/aktyv|active/i.test(await status.innerText())) {
+      await page.getByTestId(`service-offering-toggle-${serviceId}`).click();
+    }
+    await expect(findable).toHaveAttribute("data-visibility", "visible", { timeout: 10_000 });
+  }).toPass({ timeout: 45_000 });
   await close();
 });
 
@@ -154,4 +168,172 @@ test("M-6. the provider accepts; both sides can open the conversation", async ({
   await buyer.page.waitForURL(/\/dashboard\/communication\//, { timeout: 30_000 });
   await expect(buyer.page.getByTestId("communication-composer-input")).toBeVisible({ timeout: 20_000 });
   await buyer.close();
+});
+
+// ── Z: leave nothing published ─────────────────────────────────────────────
+//
+// `afterAll`, not a last test: a serial walk stops at its first red step, and
+// a run that failed half-way must still close what it opened. Each item is
+// cleaned on its own and a failure is logged, never thrown over the result.
+// Same steps as the Z section of `prod-marketplace-goods-services.spec.ts`,
+// plus earlier runs' services and a check that this run left nothing public.
+
+async function closeListing(page: Page, id: string): Promise<void> {
+  await page.goto("/lt/dashboard/listings");
+  // Scoped to <main>: the page streams in through a hidden `<div id="S:n">`
+  // that a never-painting headless tab keeps outside <main> beside the
+  // rendered copy, and an unscoped testid fails strict mode.
+  const main = page.getByRole("main");
+  await expect(main.locator(`[data-testid="my-listing-row"][id="listing-${id}"]`)).toBeVisible({ timeout: 30_000 });
+  const close = main.getByTestId(`listing-close-${id}`);
+  if (await close.isVisible().catch(() => false)) {
+    await close.click();
+    await expect(close).toHaveCount(0, { timeout: 30_000 });
+  }
+}
+
+/**
+ * Close what EARLIER runs left published on this slot's own listings page: a
+ * run that went red before its cleanup, or one from before this cleanup
+ * existed. Only the slot's own rows, only titles that carry the synthetic
+ * marker and a run id, only through the page's own close control. Returns how
+ * many it closed.
+ */
+async function closeEarlierListings(page: Page): Promise<number> {
+  await page.goto("/lt/dashboard/listings");
+  const main = page.getByRole("main");
+  await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
+  const open = main
+    .getByTestId("my-listing-row")
+    .filter({ hasText: /QA-SYNTHETIC \d+ / })
+    .filter({ has: page.locator('[data-testid^="listing-close-"]') });
+  let closed = 0;
+  for (let i = 0; i < 25 && (await open.count()) > 0; i++) {
+    const before = await open.count();
+    await open.first().locator('[data-testid^="listing-close-"]').first().click();
+    await expect(open).toHaveCount(before - 1, { timeout: 30_000 });
+    closed++;
+  }
+  return closed;
+}
+
+async function pauseService(page: Page, id: string): Promise<void> {
+  await page.goto("/lt/dashboard/services");
+  const main = page.getByRole("main");
+  const status = main.getByTestId(`service-offering-status-${id}`);
+  await expect(status).toBeVisible({ timeout: 30_000 });
+  if (/aktyv|active/i.test(await status.innerText())) {
+    await main.getByTestId(`service-offering-toggle-${id}`).click();
+    await expect(status).not.toHaveText(/aktyv|active/i, { timeout: 30_000 });
+  }
+}
+
+/** A row whose status chip says ACTIVE ("Aktyvus"); paused and draft stay private. */
+const activeChip = (page: Page) => page.locator('[data-testid^="service-offering-status-"]', { hasText: /aktyv|active/i });
+
+/**
+ * Pause what EARLIER runs left active on this slot's own services page (M-2
+ * had no cleanup before this one). Same limits as `closeEarlierListings`: own
+ * rows only, synthetic marker plus a run id, the page's own pause control.
+ */
+async function pauseEarlierServices(page: Page): Promise<number> {
+  await page.goto("/lt/dashboard/services");
+  const main = page.getByRole("main");
+  await expect(main.getByTestId("service-offerings-section")).toBeVisible({ timeout: 30_000 });
+  const active = main
+    .locator('[data-testid^="service-offering-row-"]', { hasText: /QA-SYNTHETIC \d+ / })
+    .filter({ has: activeChip(page) });
+  let paused = 0;
+  for (let i = 0; i < 25 && (await active.count()) > 0; i++) {
+    const before = await active.count();
+    await active.first().locator('[data-testid^="service-offering-toggle-"]').click();
+    await expect(active).toHaveCount(before - 1, { timeout: 30_000 });
+    paused++;
+  }
+  return paused;
+}
+
+/** The run's own check: nothing titled with this run's id is still public. */
+async function runLeftNothing(page: Page): Promise<string> {
+  const mine = new RegExp(`QA-SYNTHETIC ${RUN} `);
+  await page.goto("/lt/dashboard/listings");
+  let main = page.getByRole("main");
+  await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
+  const listings = await main
+    .getByTestId("my-listing-row")
+    .filter({ hasText: mine })
+    .filter({ has: page.locator('[data-testid^="listing-close-"]') })
+    .count();
+  await page.goto("/lt/dashboard/services");
+  main = page.getByRole("main");
+  await expect(main.getByTestId("service-offerings-section")).toBeVisible({ timeout: 30_000 });
+  const services = await main
+    .locator('[data-testid^="service-offering-row-"]', { hasText: mine })
+    .filter({ has: activeChip(page) })
+    .count();
+  if (listings + services > 0) throw new Error(`still public from this run: ${listings} listing(s), ${services} service(s)`);
+  return "nothing from this run is still public";
+}
+
+/**
+ * A cleanup that did not finish is its own QA problem, not the walk's result:
+ * one line in the run summary (counts and step names only; the repository is
+ * public), and the walk's pass or fail stays what its tests said.
+ */
+function reportCleanupProblem(failed: string[]): void {
+  const line = `cleanup NOT finished: ${failed.join(", ")} (synthetic rows may still be public)`;
+  console.info(`[cleanup] ${line}`);
+  const summary = process.env.GITHUB_STEP_SUMMARY;
+  if (!summary) return;
+  try {
+    appendFileSync(summary, `marketplace ${line}\n`);
+  } catch {
+    // The summary is a convenience; the log line above already carries it.
+  }
+}
+
+test.afterAll(async ({ browser }) => {
+  // Own budget: the default hook timeout is 30 s, less than one listing close,
+  // and the first run after this change pauses everything earlier runs left.
+  test.setTimeout(600_000);
+  const jobs: { what: string; skip: boolean; run: (p: Page) => Promise<string> }[] = [
+    { what: "shelf listing", skip: !listingId, run: (p) => closeListing(p, listingId).then(() => "closed") },
+    { what: "service offering", skip: !serviceId, run: (p) => pauseService(p, serviceId).then(() => "paused") },
+    // These two run even when M-1 or M-2 went red before it read the id.
+    { what: "earlier synthetic listings", skip: false, run: (p) => closeEarlierListings(p).then((n) => `closed ${n}`) },
+    { what: "earlier synthetic services", skip: false, run: (p) => pauseEarlierServices(p).then((n) => `paused ${n}`) },
+    { what: "this run's check", skip: false, run: runLeftNothing },
+  ];
+  const failed: string[] = [];
+  for (const job of jobs) {
+    if (job.skip) continue;
+    const { page, close } = await as(browser, "worker");
+    try {
+      console.info(`[cleanup] ${job.what}: ${await job.run(page)}`);
+    } catch (e) {
+      const first = (e as Error).message.split("\n")[0].slice(0, 160);
+      console.info(`[cleanup] ${job.what}: NOT done (${first})`);
+      failed.push(job.what);
+    } finally {
+      await close();
+    }
+  }
+  if (failed.length > 0) reportCleanupProblem(failed);
+});
+
+// ── T (#2828): the service-requests related-door grid is the ONE action tile.
+// Read-only: real links, no gold primary, no destination twice, 1280 and 390.
+test("T-1 (#2828). the service-requests related-door grid renders as action tiles", async ({ browser }) => {
+  await proveActionTiles(
+    async (mobile) => {
+      const ctx = await browser.newContext({
+        storageState: state("worker"),
+        locale: "lt-LT",
+        ...(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 900 } }),
+      });
+      return { page: await ctx.newPage(), close: () => ctx.close() };
+    },
+    "/lt/dashboard/service-requests",
+    { scopeTestId: "marketplace-connections", primaries: 0 },
+  );
 });

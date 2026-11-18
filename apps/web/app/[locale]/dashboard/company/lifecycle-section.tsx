@@ -28,6 +28,7 @@ import {
   LIFECYCLE_TEMPLATE_NAME_MAX,
   LIFECYCLE_TEMPLATE_NAME_MIN,
   ONBOARDING_ITEM_KINDS,
+  collapseDuplicateLifecycleRows,
   deriveRunProgress,
   type LifecycleMemberRow,
   type LifecycleNotice,
@@ -136,9 +137,14 @@ export async function LifecycleSection({
   const { members, templates, onboardingRuns, offboardingRuns, events } =
     overview;
   const activeTemplates = templates.filter((tpl) => tpl.isActive);
+  // History names come from EVERY engagement row; the "people and stages"
+  // list shows one row per person and relationship (see
+  // collapseDuplicateLifecycleRows — a duplicate with no lifecycle work of
+  // its own listed the owner twice, UX review 2026-10-24 row 3.23).
   const nameByEngagement = new Map(
     members.map((m) => [m.engagementId, m.name]),
   );
+  const listedMembers = collapseDuplicateLifecycleRows(members);
 
   function hiddenCtx() {
     return (
@@ -563,11 +569,11 @@ export async function LifecycleSection({
         <h3 className="text-sm font-medium text-text-primary">
           {t("members.title")}
         </h3>
-        {members.length === 0 ? (
+        {listedMembers.length === 0 ? (
           <p className="text-sm text-text-muted">{t("members.empty")}</p>
         ) : (
           <ul className="flex flex-col gap-3">
-            {members.map((m) => (
+            {listedMembers.map((m) => (
               <li
                 key={m.engagementId}
                 className="flex flex-col gap-2 rounded-md border border-ink-600 p-3"

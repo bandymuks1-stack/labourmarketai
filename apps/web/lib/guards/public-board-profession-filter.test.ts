@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * A WORKER MUST BE ABLE TO SEARCH IN THEIR OWN LANGUAGE.
@@ -18,7 +19,7 @@ import { join } from "node:path";
 
 const WEB = join(__dirname, "..", "..");
 const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
-const ACTIVE_LOCALES = ["en", "lt", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = activeLocales;
 const BOARD = ["app", "[locale]", "(marketing)", "jobs", "page.tsx"] as const;
 
 describe("the board passes the profession filter it always could have", () => {

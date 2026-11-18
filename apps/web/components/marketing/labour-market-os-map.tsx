@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import {
   FEATURES,
   getVisibleFeatures,
+  nonWorkerSpacesState,
   type FeatureConfig,
 } from "@/lib/config/feature-availability";
 import {
@@ -322,11 +323,15 @@ async function ControlRoomCard() {
   const t = await getTranslations();
   // Rows pulled straight from i18n so the founder-facing "what's blocked"
   // signals stay one source of truth + honest. No fake metrics.
-  const rows: { labelKey: string; statusKey: string; kind: "preparing" | "blocked" | "never" }[] = [
+  // The company / agency / customer row reads the catalogue (Codex P2 on
+  // #3212): once their workspaces are proven active it must not still say
+  // "coming soon" beside the "available now" list on the same page.
+  const nonWorker = nonWorkerSpacesState();
+  const rows: { labelKey: string; statusKey: string; kind: "active" | "preparing" | "blocked" | "never" }[] = [
     {
       labelKey: "vision.controlRoom.nonWorkerLabel",
-      statusKey: "vision.controlRoom.nonWorkerStatus",
-      kind: "preparing",
+      statusKey: nonWorker === "active" ? "vision.controlRoom.nonWorkerStatusActive" : "vision.controlRoom.nonWorkerStatus",
+      kind: nonWorker,
     },
     {
       labelKey: "vision.controlRoom.fakeClaimsLabel",

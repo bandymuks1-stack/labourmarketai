@@ -19,6 +19,7 @@
  * ## What a real person actually does
  *
  *   /lt/dashboard  →  says "įkelk mano CV" in the composer
+ *   →  the chat names the door with one "Įkelti CV" chip; the person takes it
  *   →  the CV import control APPEARS in the conversation (intent → surface)
  *   →  picks a file  →  POST /api/cv/extract (real unpdf / mammoth)
  *   →  deterministic `parseCvSections` proposes sections
@@ -106,6 +107,11 @@ async function askForCvImport(page: Page): Promise<void> {
   await expect(composer).toBeVisible({ timeout: 60_000 });
   await composer.fill("Įkelk mano CV");
   await page.getByTestId("composer-send").click();
+  // "my CV" + a file verb is a FILE intent (#1684, `handleFileIntent` →
+  // `fileSelfCv`): the chat names the door and offers it as ONE chip; the
+  // import opens only when the person takes it. The newest `cv` chip is the
+  // one answering this request (a starter row may carry an older one).
+  await page.getByTestId("chat-chip-cv").last().click({ timeout: 60_000 });
 }
 
 /** The real file-pick primitive, reached only through the conversation. */

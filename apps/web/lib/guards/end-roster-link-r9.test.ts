@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * R-9 (2026-09-19 completion audit): a roster relationship can be ENDED —
@@ -122,7 +123,7 @@ describe("R-9 application — both sides reach the ONE write, honestly gated", (
   });
 
   it("copy exists in every active locale and says leaving/removing is not deletion", () => {
-    for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`)).rosterLinkEnd;
       for (const k of ["title", "hint", "openSelf", "openOwner", "confirmSelf", "confirmOwner", "reasonLabel", "submit", "cancel", "doneSelf", "doneOwner", "needsMigration", "notFound", "failed", "readFailed", "since", "unnamedOrganization"]) {
         expect(typeof m[k], `${loc}.${k}`).toBe("string");

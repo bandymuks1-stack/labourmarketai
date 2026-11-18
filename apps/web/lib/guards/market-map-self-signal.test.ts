@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Market Map owner-signal + reachability guard.
@@ -21,7 +22,7 @@ import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
-const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
+const ACTIVE_LOCALES = activeLocales;
 
 describe("market map is the primary 'Žemėlapis' nav surface", () => {
   it("market_map is a visible primary nav item → /dashboard/market-map", () => {
@@ -30,11 +31,14 @@ describe("market map is the primary 'Žemėlapis' nav surface", () => {
     expect(item?.href).toBe("/dashboard/market-map");
   });
 
-  it("both nav surfaces render the catalogue-driven items (desktop + mobile)", () => {
-    const tabs = read("components/app/dashboard-tabs.tsx");
-    const bottom = read("components/app/bottom-nav.tsx");
-    expect(tabs).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
-    expect(bottom).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
+  it("the one header renders the catalogue-driven items (wide bar + phone sheet)", () => {
+    // RE-ANCHORED 2026-10-25: the desktop tabs and the phone bottom bar were
+    // retired with the one header; the map is reachable from its "More" on
+    // wide screens and from its sheet on phones, both fed by the catalogue.
+    const header = read("components/app/conversation/chat/conversation-header.tsx");
+    expect(read("lib/config/navigation.ts")).toMatch(/getAdvancedNavItems\(\)\.filter/);
+    expect(header).toMatch(/getHeaderOverflowNavItems\(/);
+    const bottom = header;
     // Audit PR8: ONE icon per destination. The map used to be asserted inside
     // bottom-nav.tsx; it moved to `components/app/nav-icons.ts` when the one
     // top bar also had to render these destinations, so the rule is now pinned

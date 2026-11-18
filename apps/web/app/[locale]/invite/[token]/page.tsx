@@ -9,6 +9,8 @@ import {
   declineInviteFormAction,
 } from "@/lib/invitations/invite-page-actions";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
+import { readClaimInvitationPreview } from "@/lib/organization-claims/claim-invitation";
+import { ClaimInvitationPanel } from "@/components/app/claim-invitation-panel";
 import { findExternalReferralSource } from "@/lib/invitations/external-sources";
 import {
   AGENCY_CLIENT_PROPOSED_ROLE,
@@ -26,6 +28,7 @@ import { REVIEW_NOTICE_VERSION, showsStaffReviewNotice } from "@/lib/operations/
 import { StaffReviewNotice } from "@/components/app/staff-review-notice";
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import type { Metadata } from "next";
+import { brandedTitle } from "@/lib/seo/metadata";
 
 /**
  * Invitation landing page (core-network area B; universal network v1) — the
@@ -119,18 +122,31 @@ function isMissingFunction(error: { code?: string } | null): boolean {
   return Boolean(error && (error.code === "PGRST202" || error.code === "42883"));
 }
 
-/** A page reached by a capability token is never a search result. */
-export const metadata: Metadata = { robots: { index: false, follow: false } };
+/**
+ * A page reached by a capability token is never a search result. Its title
+ * names the page ("Invitation") without reading the token: without one the tab
+ * and a shared link carried the home page's title, for a valid invitation and
+ * for one that does not exist alike.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "network.invitePage" });
+  return { title: brandedTitle(t("pageTitle")), robots: { index: false, follow: false } };
+}
 
 export default async function InvitePage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string; token: string }>;
-  searchParams: Promise<{ notice?: string }>;
+  searchParams: Promise<{ notice?: string; claim?: string }>;
 }) {
   const { locale, token } = await params;
-  const { notice } = await searchParams;
+  const { notice, claim: claimResult } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("network.invitePage");
   // The ONE localized relationship vocabulary — the words the CV also prints.
@@ -221,6 +237,15 @@ export default async function InvitePage({
           >
             {t(`closed.${p.status}`)}
           </p>
+        ) : null}
+        {closed ? (
+          <Link
+            href="/auth/signup"
+            className="w-fit rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
+            data-testid="invite-closed-selfstart"
+          >
+            {t("selfStart")}
+          </Link>
         ) : (
           <>
             <p className="text-sm text-text-secondary" data-testid="invite-anon-explainer">
@@ -260,12 +285,24 @@ export default async function InvitePage({
             </p>
           </>
         )}
-        <p className="text-meta text-text-muted">
-          {t("expiresNote", {
-            date: formatUtcDate(p.expiresAt ?? undefined, locale) ?? "—",
-          })}
-        </p>
+        {/* A closed invitation never shows a validity date next to the
+            sentence that says it is closed. */}
+        {!closed && (
+          <p className="text-meta text-text-muted">
+            {t("expiresNote", {
+              date: formatUtcDate(p.expiresAt ?? undefined, locale) ?? "—",
+            })}
+          </p>
+        )}
       </>,
+    );
+  }
+
+  // A "take over this company" invitation has its own panel (partner registration Slice 1).
+  const claim = await readClaimInvitationPreview(token);
+  if (claim.kind !== "not_claim") {
+    return shell(
+      <ClaimInvitationPanel locale={locale} token={token} preview={claim} result={claimResult ?? null} />,
     );
   }
 
@@ -548,12 +585,21 @@ export default async function InvitePage({
           </Link>
         </div>
       ) : closed ? (
-        <p
-          className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
-          data-testid="invite-closed"
-        >
-          {t(`closed.${closedKey}`)}
-        </p>
+        <div className="flex flex-col gap-3">
+          <p
+            className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
+            data-testid="invite-closed"
+          >
+            {t(`closed.${closedKey}`)}
+          </p>
+          <Link
+            href="/dashboard"
+            className="w-fit rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
+            data-testid="invite-closed-dashboard"
+          >
+            {t("toDashboard")}
+          </Link>
+        </div>
       ) : addressedToOther ? (
         <div
           role="status"
@@ -615,11 +661,13 @@ export default async function InvitePage({
         />
       )}
 
-      <p className="text-meta text-text-muted">
-        {t("expiresNote", {
-          date: formatUtcDate(preview.expires_at, locale) ?? "—",
-        })}
-      </p>
+      {!closed && (
+        <p className="text-meta text-text-muted">
+          {t("expiresNote", {
+            date: formatUtcDate(preview.expires_at, locale) ?? "—",
+          })}
+        </p>
+      )}
     </>,
   );
 }

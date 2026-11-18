@@ -7,6 +7,7 @@ import {
   isUsableForSearch,
   type SelectedLocation,
 } from "@/lib/location/location-model";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Real Market Map guard (owner-smoke follow-up, PR #490).
@@ -67,7 +68,7 @@ describe("real provider map, no paid/secret provider", () => {
   it("resolves city-level coordinates + shows an honest precision label", () => {
     expect(layer).toMatch(/resolveLocation/);
     expect(comp).toMatch(/data-testid="location-precision"/);
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const b = JSON.parse(read(`messages/${loc}.json`)).marketMapBase;
       for (const k of ["precisionDevice", "precisionCity", "precisionCountry", "precisionUnset"]) {
         expect(typeof b?.[k] === "string" && b[k].length > 0, `${loc} ${k}`).toBe(true);
@@ -139,7 +140,7 @@ describe("no raw provider/env text in user-facing copy (lt/en/ru)", () => {
       for (const [k, v] of Object.entries(node as Record<string, unknown>))
         leaves(v, prefix ? `${prefix}.${k}` : k, out);
   }
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: no provider/env strings in product copy`, () => {
       const m = JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
       const offenders: string[] = [];
@@ -155,7 +156,7 @@ describe("no raw provider/env text in user-facing copy (lt/en/ru)", () => {
 });
 
 describe("marketMapBase copy is provider-free + complete (lt/en/ru)", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: has the provider-free keys`, () => {
       const b = JSON.parse(read(`messages/${loc}.json`)).marketMapBase;
       for (const k of ["autoButton", "manualToggle", "countryLabel", "regionLabel", "radiusLabel", "radiusValue", "sourceAuto", "sourceManual"]) {

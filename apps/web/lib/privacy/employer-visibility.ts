@@ -47,6 +47,11 @@ export const DISCOVERABILITY_CONSENT_SOURCES = [
   // the ledger can prove where the person decided.
   "onboarding",
   "work_card",
+  // 2026-10-24 (owner goal "matchability": see the state and change it in ONE
+  // action) — the profile and the worker home render the SAME consent in
+  // place instead of only linking to the privacy screen.
+  "profile",
+  "home",
 ] as const;
 export type DiscoverabilityConsentSource =
   (typeof DISCOVERABILITY_CONSENT_SOURCES)[number];

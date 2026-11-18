@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Wording guard (production-trust-bugs-p0, issue C).
@@ -16,7 +17,7 @@ import { describe, expect, it } from "vitest";
  */
 
 const MESSAGES = join(__dirname, "..", "..", "messages");
-const LOCALES = ["en", "lt", "ru"];
+const LOCALES = activeLocales;
 const FORBIDDEN = /termometr|thermomet|термометр/i;
 
 function messageFilesFor(locale: string): string[] {
@@ -32,7 +33,7 @@ function messageFilesFor(locale: string): string[] {
   return files;
 }
 
-describe("no thermometer wording in user-facing copy (en/lt/ru)", () => {
+describe("no thermometer wording in user-facing copy (every active locale)", () => {
   for (const locale of LOCALES) {
     for (const file of messageFilesFor(locale)) {
       it(`${file.slice(file.indexOf("messages"))} is free of thermometer wording`, () => {

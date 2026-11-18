@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { inviteCapGate } from "./invite-cap";
-import { test, expect, type Browser, type Page } from "@playwright/test";
+import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
  * PRODUCTION — THE REVIEW SENTENCE ON EVERY STAFF ACCEPT PATH (owner decision

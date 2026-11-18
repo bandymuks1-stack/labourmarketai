@@ -5,9 +5,11 @@ import { computeLandingFreezeSnapshot } from "../lib/guards/landing-freeze";
 /**
  * Regenerate the landing-freeze baseline.
  *
- * OWNER-GATED: run this ONLY as part of the explicit landing real-data
- * replacement plan (or another owner-approved landing change). Any PR that
- * regenerates the baseline outside that plan violates the landing freeze.
+ * When to run it (owner 2026-10-25): the freeze guards against ACCIDENTAL
+ * drift of the landing; it must not block a justified functional or UX fix.
+ * Run this in the same PR as such a fix and name the reason in the PR body.
+ * Preserving the current design is not a goal in itself; a deliberate
+ * redesign still goes through the owner-approved landing plan.
  *
  * Usage: pnpm -F web exec tsx scripts/generate-landing-freeze-baseline.ts
  */

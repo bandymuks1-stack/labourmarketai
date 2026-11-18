@@ -14,7 +14,11 @@
  * Labels arrive as props from the server parent (the WorkerWorkLogFlow
  * precedent), so this client component reads no i18n namespace itself.
  */
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  resolveEngagementContext,
+  type EngagementCandidate,
+} from "@/lib/journal/engagement-context-selection";
 import {
   createJournalEntry,
   type CreateJournalEntryResult,
@@ -75,6 +79,8 @@ export function DocumentJournalDraftForm({
   initialText,
   engagements,
   defaultEngagementId,
+  contextCandidates,
+  activeOrganizationId = null,
   labels,
 }: {
   locale: string;
@@ -82,6 +88,12 @@ export function DocumentJournalDraftForm({
   initialText: string;
   engagements: readonly WorkLogEngagement[];
   defaultEngagementId: string | null;
+  /** The facts the server resolved the default from. When given, the default
+   *  is RE-RESOLVED against the work date the person chooses — a context only
+   *  applies on days inside its bounds (Codex P2 on #2884). */
+  contextCandidates?: readonly EngagementCandidate[];
+  /** The server-resolved active workspace's organization (rule W), or null. */
+  activeOrganizationId?: string | null;
   labels: DocumentJournalDraftFormLabels;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -91,6 +103,27 @@ export function DocumentJournalDraftForm({
   // Attribution is part of the draft: a document-derived entry is not saved as
   // work evidence until the project question (2+ active projects) is answered.
   const [engagementId, setEngagementId] = useState<string>(defaultEngagementId ?? "");
+  // The document does not state the day; the person chooses it. Once chosen,
+  // the default context is resolved FOR THAT DAY with the same pure resolver
+  // the server ran — until the person picks a context themselves.
+  const [workDate, setWorkDate] = useState<string>("");
+  const contextTouched = useRef(false);
+  const dayResolution = useMemo(
+    () =>
+      contextCandidates && workDate
+        ? resolveEngagementContext({
+            candidates: contextCandidates,
+            workDay: workDate,
+            activeOrganizationId,
+          })
+        : null,
+    [contextCandidates, workDate, activeOrganizationId],
+  );
+  const daySelectedId = dayResolution ? (dayResolution.selectedId ?? "") : null;
+  useEffect(() => {
+    if (daySelectedId === null || contextTouched.current) return;
+    setEngagementId(daySelectedId);
+  }, [daySelectedId]);
   const [projectChoice, setProjectChoice] = useState<string>("");
   const contextProjects: AssignedProject[] =
     engagements.find((e) => e.id === engagementId)?.projects ?? [];
@@ -173,6 +206,7 @@ export function DocumentJournalDraftForm({
           name="work_date"
           required
           defaultValue=""
+          onChange={(e) => setWorkDate(e.target.value)}
           max={todayLocalIso()}
           className="w-full max-w-xs rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
           data-testid="doc-journal-draft-work-date"
@@ -184,12 +218,15 @@ export function DocumentJournalDraftForm({
         <select
           name="engagement_context_id"
           required
-          defaultValue={defaultEngagementId ?? ""}
-          onChange={(e) => setEngagementId(e.target.value)}
+          value={engagementId}
+          onChange={(e) => {
+            contextTouched.current = true;
+            setEngagementId(e.target.value);
+          }}
           className="w-full max-w-md rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
           data-testid="doc-journal-draft-engagement"
         >
-          {defaultEngagementId === null ? <option value="" /> : null}
+          {engagementId === "" ? <option value="" /> : null}
           {engagements.map((e) => (
             <option key={e.id} value={e.id}>
               {e.label}

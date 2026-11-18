@@ -149,22 +149,6 @@ async function readEmployerWorkerAvailability(
   }
   if (!userId) return { status: "not-authed" };
 
-  const workersRes = await (supabase as AnyClient)
-    .from("company_workers")
-    .select("worker_id, workers(id, display_name)")
-    .eq("status", "active")
-    .limit(MANAGED_WORKER_LIMIT);
-  if (workersRes.error) return { status: "error" };
-
-  type WorkerRow = {
-    worker_id: string;
-    workers: { id: string; display_name: string | null } | null;
-  };
-  const managed = (workersRes.data ?? []) as WorkerRow[];
-  const nameByWorker = new Map<string, string | null>(
-    managed.map((r) => [r.worker_id, r.workers?.display_name ?? null]),
-  );
-
   // MINIMISED SELECT — `note` and `absence_type` are never requested. See the
   // module header: this is the enforcement point, not the component.
   //
@@ -184,7 +168,31 @@ async function readEmployerWorkerAvailability(
       .order("start_date", { ascending: true })
       .limit(ABSENCE_READ_LIMIT);
 
-  let absRes = await readAbsences("worker_absence_scheduling");
+  // ONE STAGE (perf 2026-10-23): the roster, the leave rows and the caller's
+  // own worker ids depend on nothing but the caller, so they are read together
+  // (they used to be three stages on the People page and the company home).
+  // Each answer is handled exactly as before, in the same order.
+  const [workersRes, firstAbsRes, ownRes] = await Promise.all([
+    (supabase as AnyClient)
+      .from("company_workers")
+      .select("worker_id, workers(id, display_name)")
+      .eq("status", "active")
+      .limit(MANAGED_WORKER_LIMIT),
+    readAbsences("worker_absence_scheduling"),
+    (supabase as AnyClient).from("workers").select("id").eq("profile_id", userId).limit(5),
+  ]);
+  if (workersRes.error) return { status: "error" };
+
+  type WorkerRow = {
+    worker_id: string;
+    workers: { id: string; display_name: string | null } | null;
+  };
+  const managed = (workersRes.data ?? []) as WorkerRow[];
+  const nameByWorker = new Map<string, string | null>(
+    managed.map((r) => [r.worker_id, r.workers?.display_name ?? null]),
+  );
+
+  let absRes = firstAbsRes;
   if (absRes.error) {
     const code = (absRes.error as { code?: string }).code;
     // The hardened relation is absent on a stack where the owner-gated
@@ -218,11 +226,7 @@ async function readEmployerWorkerAvailability(
   // 20261011160000 it admits people who joined by invitation (an engagement,
   // no `company_workers` row). Filtering by the roster list hid exactly their
   // approved leave from the employer's plan.
-  const ownRes = await (supabase as AnyClient)
-    .from("workers")
-    .select("id")
-    .eq("profile_id", userId)
-    .limit(5);
+  // (`ownRes` was read in the first stage above.)
   const ownWorkerIds = new Set<string>(
     ((ownRes.data ?? []) as { id: string }[]).map((r) => r.id),
   );

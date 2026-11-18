@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { extractWorkLog, type WorkLogParse } from "@/lib/conversation/worklog-extract";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { trackFunnel } from "@/lib/telemetry/task";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
 
 /**
@@ -58,6 +60,8 @@ export function JournalQuickRecord({
   const [text, setText] = useState("");
   const [draft, setDraft] = useState<WorkLogParse | null>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
+  /** `journal_entry_started` fires ONCE per recorder, like the composer's. */
+  const startedRef = useRef(false);
   // A sentence typed while the page was still loading lives only in the
   // field: the page's state starts empty, so the button stayed disabled and
   // the next re-render dropped the words (production walk 2026-10-21). Take
@@ -111,6 +115,12 @@ export function JournalQuickRecord({
               data-testid="journal-quick-record-understand"
               onClick={() => {
                 const today = personCalendarDay();
+                // The journal funnel's middle step (activation audit fix #7):
+                // viewed → STARTED → saved, all labelled "journal".
+                if (!startedRef.current) {
+                  startedRef.current = true;
+                  trackFunnel(FUNNEL_EVENTS.journalEntryStarted, { surface: "journal" });
+                }
                 setDraft(extractWorkLog(text, today, selectedDay ?? today));
               }}
             >
@@ -125,6 +135,9 @@ export function JournalQuickRecord({
             draft={draft}
             locale={locale}
             labels={labels}
+            // Saves made here are JOURNAL-page saves, not conversation ones
+            // (activation audit fix #7) — same flow, honest funnel label.
+            surface="journal"
             onClose={() => setDraft(null)}
           />
           <button
