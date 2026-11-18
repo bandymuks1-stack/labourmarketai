@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { countryDisplayName } from "@/lib/location/country-model";
 import type { CredentialValidityState } from "@/lib/documents/credential-validity";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -49,6 +50,11 @@ import {
 } from "@/lib/readiness/worker-readiness";
 import type { Role } from "@/lib/auth/actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/documents", "documents.title");
+
 
 /**
  * "Mano dokumentai" — the document & work-proof centre (control room PR H,
@@ -715,7 +721,11 @@ export default async function WorkerDocumentsPage({
               statusOptions={(["ready", "missing", "blocked"] as const).map(
                 (s) => [s, t(`status.${s}` as never)] as const,
               )}
-              countryOptions={DOCUMENT_COUNTRIES}
+              // Named, not printed as an ISO code: the same reader the chat's
+              // document form uses, falling back to the code.
+              countryOptions={DOCUMENT_COUNTRIES.map(
+                (code) => [code, countryDisplayName(code, locale) || code] as const,
+              )}
             />
           </section>
 

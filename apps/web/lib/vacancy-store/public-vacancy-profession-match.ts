@@ -19,12 +19,13 @@ export interface ProfessionLabel {
   readonly label: string;
 }
 
-/** Lowercase, diacritics removed ("Kepejas" and "kepejas" are the same word). */
+/** Lowercase, diacritics removed ("Kepejas" and "kepejas" are the same word), ß as ss ("Schweißer" and "Schweisser"). */
 export function foldForMatch(s: string): string {
   return s
     .normalize("NFD")
     .replace(/\p{M}/gu, "")
     .toLowerCase()
+    .replace(/ß/g, "ss")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -37,6 +38,15 @@ export function matchProfessionByLabel(
   if (q.length < 3) return null;
 
   const folded = options.map((o) => ({ slug: o.slug, l: foldForMatch(o.label) }));
+  const hit = matchFolded(q, folded);
+  if (hit) return hit;
+  // "Kuechenhilfe" is how a keyboard without ü writes "Küchenhilfe". Tried second, so a label
+  // that really holds ue or ae ("Steuerberater") is still matched as itself.
+  const typed = q.replace(/([aou])e/g, "$1");
+  return typed !== q && typed.length >= 3 ? matchFolded(typed, folded) : null;
+}
+
+function matchFolded(q: string, folded: readonly { slug: string; l: string }[]): string | null {
 
   const exact = folded.filter((o) => o.l === q);
   if (exact.length === 1) return exact[0]!.slug;
@@ -54,6 +64,36 @@ export function matchProfessionByLabel(
   });
   return loose.length === 1 ? loose[0]!.slug : null;
 }
+
+/**
+ * WORDS PEOPLE TYPE THAT NO CATALOGUE LABEL NAMES, each for one existing profession.
+ *
+ * On a Swedish and Norwegian supply these answer a false zero in text search. Only a
+ * word that cannot be publisher text belongs here: `chef` means manager in Swedish,
+ * `programmer` sits inside `programmerare` and `lagerist` is Swedish too, so all three
+ * stay free text. Tried last, so a catalogue label always wins.
+ */
+const TYPED_WORDS: Readonly<Record<string, readonly string[]>> = {
+  driver: [
+    "truck driver",
+    "lorry driver",
+    "sunkvežimio vairuotojas",
+    "vilkiko vairuotojas",
+    "lkw fahrer",
+    "lkw-fahrer",
+    "vrachtwagenchauffeur",
+    "дальнобойщик",
+    "водитель грузовика",
+  ],
+  cook: ["küchenchef", "szef kuchni", "шеф-повар"],
+  software_developer: ["entwickler", "softwareentwickler", "ontwikkelaar", "softwareontwikkelaar"],
+  teacher: ["учитель"],
+  warehouse_worker: ["sandėlininkas", "sandėlininkė", "magazynier", "кладовщик"],
+};
+
+const TYPED_WORD_SLUG: ReadonlyMap<string, string> = new Map(
+  Object.entries(TYPED_WORDS).flatMap(([slug, words]) => words.map((w) => [foldForMatch(w), slug] as const)),
+);
 
 /**
  * THE SAME WORD IN ANOTHER ACTIVE LANGUAGE (2026-10-08 anonymous walk).
@@ -78,5 +118,15 @@ export function matchProfessionAcrossLocales(
     const slug = matchProfessionByLabel(query, options);
     if (slug) hits.add(slug);
   }
-  return hits.size === 1 ? [...hits][0]! : null;
+  if (hits.size > 1) return null;
+  return hits.size === 1 ? [...hits][0]! : (TYPED_WORD_SLUG.get(foldForMatch(query)) ?? null);
+}
+
+/**
+ * Where a typed word that names a profession goes. The page stays, so a shared
+ * `?q=elektrikas&page=2` opens page 2 of that profession and not page 1 (SR-4).
+ */
+export function professionRedirectHref(slug: string, rawPage: string | undefined): string {
+  const page = Number.parseInt(rawPage ?? "1", 10) || 1;
+  return page > 1 ? `/jobs?profession=${slug}&page=${page}` : `/jobs?profession=${slug}`;
 }

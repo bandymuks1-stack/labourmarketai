@@ -139,7 +139,6 @@ export interface ProjectCostCalculatorLabels {
     readonly ctaTitle: string;
     readonly ctaBody: string;
     readonly ctaDashboard: string;
-    readonly ctaDashboardHelp: string;
     readonly ctaCompanyNeed: string;
     readonly ctaCompanyNeedHelp: string;
   };
@@ -207,6 +206,22 @@ export function ProjectCostCalculator({
     maximumFractionDigits: 2,
   });
   const money = (n: number) => `${nf.format(n)} ${result.currency}`;
+
+  // What both need forms receive from the estimate: the worker count and the
+  // country, bounded, never a price or a description (validated again by the
+  // company-need adapter). The account route used to receive nothing, so the
+  // person retyped what they had just entered (employer path P0 2026-11-15).
+  const bridgePrefill: Record<string, string> = {
+    ...(inputs.workerCount > 0 ? { number_of_workers: String(Math.trunc(inputs.workerCount)) } : {}),
+    ...(inputs.country ? { country: inputs.country } : {}),
+  };
+  /** A path with the prefill as its query, kept before any `#anchor`. Signing in on the way keeps the query (`next`). */
+  const withBridgeQuery = (path: string) => {
+    const query = new URLSearchParams(bridgePrefill).toString();
+    if (!query) return path;
+    const hash = path.indexOf("#");
+    return hash < 0 ? `${path}?${query}` : `${path.slice(0, hash)}?${query}${path.slice(hash)}`;
+  };
 
   const stepIndex = STEPS.indexOf(step);
 
@@ -683,7 +698,7 @@ export function ProjectCostCalculator({
                 </p>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <AuthCtaLink
-                    relPath={`/${locale}/dashboard/company/needs#demand-intake`}
+                    relPath={`/${locale}${withBridgeQuery("/dashboard/company/needs#demand-intake")}`}
                     className="inline-flex min-h-11 items-center justify-center rounded-md bg-brand-blue px-4 py-2 text-center text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80"
                   >
                     {labels.result.ctaDashboard}
@@ -691,14 +706,7 @@ export function ProjectCostCalculator({
                   <Link
                     href={{
                       pathname: "/company-need",
-                      query: {
-                        // Bounded, non-PII, non-price prefill only (validated
-                        // again by the company-need adapter).
-                        ...(inputs.workerCount > 0
-                          ? { number_of_workers: String(Math.trunc(inputs.workerCount)) }
-                          : {}),
-                        ...(inputs.country ? { country: inputs.country } : {}),
-                      },
+                      query: bridgePrefill,
                     }}
                     className="rounded-md border border-border-default px-4 py-2 text-center text-sm font-semibold text-text-primary transition-colors hover:border-brand-blue"
                     data-testid="pcc-cta-company-need"
@@ -707,7 +715,7 @@ export function ProjectCostCalculator({
                   </Link>
                 </div>
                 <p className="text-meta leading-relaxed text-text-muted">
-                  {labels.result.ctaDashboardHelp} {labels.result.ctaCompanyNeedHelp}
+                  {labels.result.ctaCompanyNeedHelp}
                 </p>
               </div>
             </>

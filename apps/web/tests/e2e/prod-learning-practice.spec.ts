@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { clickUntilVisible } from "./click-until-visible";
 import { inviteCapGate } from "./invite-cap";
 import { test, expect, type Browser, type Page } from "./prod-walk";
 
@@ -46,6 +47,7 @@ async function workspace(page: Page, orgName: string): Promise<void> {
 
 let link = "";
 
+
 test("L-1. the organization declares it trains people, and runs a programme", async ({ browser }) => {
   const { page, close } = await as(browser, "owner");
   await page.goto("/lt/dashboard");
@@ -90,10 +92,8 @@ test("L-2. the institution invites a learner with a link (no e-mail needed)", as
   await page.goto("/lt/dashboard/company/education");
   await page.getByTestId("institution-learners-invite").click();
   await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
-  const open = page.getByTestId("invite-panel-open");
-  if (await open.isVisible().catch(() => false)) await open.click();
   const capacity = page.getByTestId("invite-capacity");
-  await expect(capacity).toBeVisible({ timeout: 30_000 });
+  await clickUntilVisible(page.getByTestId("invite-panel-open"), capacity, { timeout: 30_000, what: "the invite panel" });
   await expect(capacity).toHaveValue("student");
   const linkMode = page.getByTestId("invite-mode-link");
   if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
@@ -210,10 +210,8 @@ test("L-8. a company can offer practice without being a school: the intern capac
   await page.goto("/lt/dashboard");
   await workspace(page, ALFA);
   await page.goto("/lt/dashboard/network");
-  const open = page.getByTestId("invite-panel-open");
-  if (await open.isVisible().catch(() => false)) await open.click();
   const type = page.getByTestId("invite-type");
-  await expect(type).toBeVisible({ timeout: 30_000 });
+  await clickUntilVisible(page.getByTestId("invite-panel-open"), type, { timeout: 30_000, what: "the invite panel" });
   await type.selectOption("join_organization").catch(() => undefined);
   const capacity = page.getByTestId("invite-capacity");
   await expect(capacity).toBeVisible({ timeout: 30_000 });
@@ -257,4 +255,82 @@ test("L-10 (11.6). the institution downloads its programme report as a CSV", asy
   expect(csv, "the report lists the programme").toContain(PROGRAM);
   expect(csv, "no learner is named in the file").not.toMatch(LEARNER);
   await close();
+});
+
+/**
+ * THE SAME TWO PEOPLE ON A PHONE (owner instruction 2026-11-14: every user
+ * group needs a signed-in scenario on a phone and on a computer). READ-ONLY:
+ * the steps above already created everything these read. Both phone widths
+ * the acceptance names (375 and 390 px).
+ */
+const PHONES = [
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+] as const;
+
+async function onPhone(browser: Browser, slot: string, vp: { width: number; height: number }): Promise<{ page: Page; close: () => Promise<void> }> {
+  const ctx = await browser.newContext({ storageState: state(slot), locale: "lt-LT", viewport: vp, isMobile: true, hasTouch: true });
+  return { page: await ctx.newPage(), close: () => ctx.close() };
+}
+
+/** The page is never wider than the phone (no sideways scroll). */
+async function fitsPhone(page: Page, label: string): Promise<void> {
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  const m = await page.evaluate(() => ({ doc: document.documentElement.scrollWidth, vw: window.innerWidth }));
+  expect(m.doc, `${label}: the page is wider than the phone (${m.doc} > ${m.vw})`).toBeLessThanOrEqual(m.vw + 1);
+}
+
+test("L-11. the learner on a phone: the compass with the group, and the board narrowed to internships", async ({ browser }) => {
+  for (const vp of PHONES) {
+    const { page, close } = await onPhone(browser, "worker2", vp);
+    await page.goto("/lt/dashboard/profile");
+    const compass = page.getByTestId("learning-compass");
+    await expect(compass, `compass @${vp.width}`).toBeVisible({ timeout: 30_000 });
+    await expect(compass).toContainText(COHORT, { timeout: 30_000 });
+    await fitsPhone(page, `/dashboard/profile @${vp.width}`);
+
+    // "Where can I do an internship?" — the board narrowed by the stated type.
+    await page.goto("/lt/dashboard/opportunities?opportunityType=internship");
+    await fitsPhone(page, `/dashboard/opportunities @${vp.width}`);
+    const chip = page.locator('[data-testid="opportunities-filter-opportunityType"][data-active="true"]');
+    await expect(chip, `the internship filter is a visible, switch-off-able control @${vp.width}`).toBeVisible({ timeout: 30_000 });
+    const box = await chip.boundingBox();
+    expect(box && box.x + box.width, "the control is inside the phone").toBeLessThanOrEqual(vp.width);
+    const body = await page.evaluate(() => document.body.innerText);
+    expect(body, "no untranslated key is shown").not.toMatch(/discovery\.filters\./);
+    const rows = await page.locator('[data-testid^="opportunity-rank-"]').count();
+    const empty = await page.getByTestId("opportunities-filtered-empty").count();
+    console.info(`[learning] phone ${vp.width}: internship board rows=${rows} filtered-empty=${empty}`);
+    await close();
+  }
+});
+
+test("L-12. the institution on a phone: its education home, programme and learner invitation are usable", async ({ browser }) => {
+  for (const vp of PHONES) {
+    const { page, close } = await onPhone(browser, "owner", vp);
+    await page.goto("/lt/dashboard");
+    await workspace(page, ALFA);
+    await page.goto("/lt/dashboard/company/education");
+    await expect(page.getByTestId("company-education"), `education home @${vp.width}`).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(PROGRAM).first()).toBeVisible({ timeout: 30_000 });
+    await fitsPhone(page, `/dashboard/company/education @${vp.width}`);
+    // The "add programme" form sits in a disclosure that is open only while
+    // the institution has no programme yet (by design, phone and desktop
+    // alike). This institution already has one, so open it the way a person
+    // does — by its summary — before checking the form fits the phone.
+    const form = page.getByTestId("create-program-form").first();
+    const disclosure = page.locator("details").filter({ has: form }).first();
+    if ((await disclosure.getAttribute("open")) === null) await disclosure.locator("summary").first().click();
+    await expect(form, `add-programme form opens @${vp.width}`).toBeVisible({ timeout: 30_000 });
+    for (const id of ["institution-learners-invite", "program-name", "program-profession", "program-create"]) {
+      const el = page.getByTestId(id).first();
+      await el.scrollIntoViewIfNeeded();
+      await expect(el, `${id} @${vp.width}`).toBeVisible();
+      const box = await el.boundingBox();
+      expect(box && box.x >= 0 && box.x + box.width <= vp.width, `${id} is inside the phone @${vp.width}`).toBe(true);
+    }
+    // With the form open the page is still never wider than the phone.
+    await fitsPhone(page, `/dashboard/company/education, add-programme form open @${vp.width}`);
+    await close();
+  }
 });

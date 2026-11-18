@@ -9,6 +9,7 @@ import { type Role } from "@/lib/auth/actions";
 import {
   ROLE_BY_ID,
   type LabourMarketRoleId,
+  isLiveRoleId,
   roleStatusChipKey,
 } from "@/lib/config/roles";
 import { RoleIcon } from "@/components/app/role-icon";
@@ -43,6 +44,11 @@ import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/account", "auth.dashboard.tabs.account");
+
 
 /**
  * Account — SETTINGS ONLY (marketplace IA cleanup 2026-06-25).
@@ -519,15 +525,25 @@ export default async function AccountPage({
             const role = r.role as Role;
             const cfg = ROLE_BY_ID[role as LabourMarketRoleId];
             const isAdminRole = r.role === "admin";
+            // A role this person HOLDS in a live workspace (worker, company,
+            // agency, customer) works for them: its chip says so. The catalogue
+            // availability answers a different question — whether the role is
+            // OFFERED to people who do not hold it (agency and customer are
+            // hidden from add-role surfaces by owner directive, company is
+            // "start") — and showed a holder "start" or nothing (owner P0
+            // 2026-11-10).
+            const heldLive = !isAdminRole && isLiveRoleId(r.role);
             const chipKey = isAdminRole
               ? isAdmin
                 ? "roles.status.active"
                 : null
-              : cfg && cfg.availability !== "active"
-                ? roleStatusChipKey(cfg.availability)
-                : null;
+              : heldLive
+                ? "roles.status.active"
+                : cfg && cfg.availability !== "active"
+                  ? roleStatusChipKey(cfg.availability)
+                  : null;
             const chipTone =
-              isAdminRole || cfg?.availability === "active"
+              isAdminRole || heldLive || cfg?.availability === "active"
                 ? "border-state-success/40 bg-state-success/5 text-state-success"
                 : cfg?.availability === "start-available"
                   ? "border-brand-blue/40 bg-brand-blue/5 text-brand-blue"

@@ -48,16 +48,19 @@ export function Button({
   label,
   onPress,
   busy = false,
+  disabled: off = false,
   variant = "primary",
   testID,
 }: {
   label: string;
   onPress: () => void;
   busy?: boolean;
+  /** Not pressable, without the busy spinner (another action is running). */
+  disabled?: boolean;
   variant?: "primary" | "quiet";
   testID?: string;
 }) {
-  const disabled = busy;
+  const disabled = busy || off;
   return (
     <Pressable
       accessibilityRole="button"
@@ -97,7 +100,16 @@ export function Field({
 }: TextInputProps & { label: string; hint?: string }) {
   return (
     <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+      {/* `<testID>-label`: a plain, non-input spot right above the box. With a
+          ScrollView's keyboardShouldPersistTaps="handled", a tap here puts the
+          keyboard away without a drag (the iOS journeys use it; a person can
+          do the same). */}
+      <Text
+        style={styles.fieldLabel}
+        testID={typeof props.testID === "string" ? `${props.testID}-label` : undefined}
+      >
+        {label}
+      </Text>
       <TextInput
         // The label is the accessible name; a hint that exists is the
         // accessible HINT, so a screen-reader user hears the format rule the

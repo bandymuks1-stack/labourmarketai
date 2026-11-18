@@ -24,6 +24,7 @@
  */
 import type { WorkPeriodKey } from "@/lib/journal/work-intelligence";
 import { fold } from "./intent-router";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 export type JournalPeriodPhrase = WorkPeriodKey | "yesterday";
 
@@ -42,14 +43,37 @@ const PERIOD_WORDS: ReadonlyArray<readonly [JournalPeriodPhrase, string]> = [
   ],
 ];
 
+/**
+ * The SWEDISH period words (folded), same precedence — read only for a
+ * sentence `looksSwedish` reads as Swedish. "år" folds to "ar", the Lithuanian
+ * "or": inside the shared list, "i ar" read "Kiek dirbau į ar iš Vilniaus?"
+ * as THIS YEAR (review finding 11). Even behind the gate the bare word is
+ * never read: only "i år", "året", "årets".
+ */
+const SV_PERIOD_WORDS: ReadonlyArray<readonly [JournalPeriodPhrase, string]> = [
+  ["today", "idag|i dag"],
+  ["yesterday", "igar|i gar"],
+  ["week", "veck(?:a|an|or|ans|ors)"],
+  ["month", "manad\\p{L}*"],
+  ["year", "i ar|aret|arets"],
+  ["all", "totalt|sammanlagt|hittills|hela tiden"],
+];
+
 const PERIOD_RX: ReadonlyArray<readonly [JournalPeriodPhrase, RegExp]> = PERIOD_WORDS.map(
   ([key, source]) => [key, new RegExp(`(?<!\\p{L})(?:${source})(?!\\p{L})`, "u")] as const,
+);
+
+const SV_PERIOD_RX: ReadonlyMap<JournalPeriodPhrase, RegExp> = new Map(
+  SV_PERIOD_WORDS.map(([key, source]) => [key, new RegExp(`(?<!\\p{L})(?:${source})(?!\\p{L})`, "u")] as const),
 );
 
 /** The period a journal question names, or `null` when it names none. */
 export function parseJournalPeriodPhrase(text: string | null | undefined): JournalPeriodPhrase | null {
   if (!text) return null;
   const folded = fold(text);
-  for (const [key, rx] of PERIOD_RX) if (rx.test(folded)) return key;
+  const swedish = looksSwedish(text);
+  for (const [key, rx] of PERIOD_RX) {
+    if (rx.test(folded) || (swedish && SV_PERIOD_RX.get(key)?.test(folded))) return key;
+  }
   return null;
 }

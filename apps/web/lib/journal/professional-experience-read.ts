@@ -137,6 +137,8 @@ export async function readOwnExperienceRelationships(
         legalEntityRelation: p.legalEntityRelation,
         legalEntityLabel: p.legalEntityLabel,
         sourceLabels: p.sourceLabels,
+        fromPrecision: p.periodStartPrecision ?? null,
+        toPrecision: p.periodEndPrecision ?? null,
       })),
     );
   }

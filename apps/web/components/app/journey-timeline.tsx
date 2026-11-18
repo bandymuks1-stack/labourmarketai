@@ -5,7 +5,9 @@ import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useMounted } from "@/lib/use-mounted";
 
 /** 4-step horizontal timeline (vertical < md). Steps fade in sequentially
- *  on scroll-into-view with a 100ms stagger; reduced-motion → instant.
+ *  on scroll-into-view with a 100ms stagger, ONCE: they never fade out again
+ *  when scrolled away (that blanked the tall phone list for a visitor scrolling
+ *  back up, and in full-page captures). Reduced-motion → instant.
  *  Renders the final state until mounted so SSR/client markup agree. */
 export function JourneyTimeline({
   steps,
@@ -13,7 +15,7 @@ export function JourneyTimeline({
   steps: { title: string; desc: string }[];
 }) {
   const ref = useRef<HTMLOListElement>(null);
-  const inView = useInView(ref, { amount: 0.3, once: false });
+  const inView = useInView(ref, { amount: 0.3, once: true });
   const reduce = useReducedMotion();
   const mounted = useMounted();
   const animateIn = mounted && !reduce;

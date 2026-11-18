@@ -222,7 +222,8 @@ describe("work-report photo: 1 free photo, server-enforced, honest copy", () => 
     expect(journalComposer).toMatch(/journal-photo-input/);
     expect(journalComposer).toMatch(/journal-photo-free-tier-note/);
     expect(ltJournal.photo?.freeTierNote).toBe(
-      "Nemokamai gali pridėti 1 nuotrauką prie įrašo. Daugiau nuotraukų ir išplėstiniai įrašai bus VIP funkcija.",
+      // Formal address since the owner decision of 2026-11-15.
+      "Nemokamai galite pridėti 1 nuotrauką prie įrašo. Daugiau nuotraukų ir išplėstiniai įrašai bus VIP funkcija.",
     );
   });
   it("upload degrades honestly when storage is not provisioned", () => {

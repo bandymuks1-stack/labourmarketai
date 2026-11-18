@@ -12,7 +12,6 @@ import { OrgLedger } from "@/components/app/work-in-numbers/org-ledger";
 import { PeriodNav, scopeText } from "@/components/app/work-in-numbers/period-nav";
 import { ExperienceScale } from "@/components/app/work-in-numbers/experience-scale";
 import { SkillShareList } from "@/components/app/work-in-numbers/skill-share-list";
-import { TelemetryView } from "@/components/app/telemetry-view";
 import { Link } from "@/lib/i18n/navigation";
 import { deriveAttributionExpectation } from "@/lib/journal/attribution-expectation";
 import { deriveGrowthReading } from "@/lib/journal/growth-reading";
@@ -36,10 +35,14 @@ import {
 import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import { createClient } from "@/lib/supabase/server";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
-import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { formatUtcDate } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { ExplainMore } from "@/components/app/premium/disclosure";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/work-in-numbers", "journal.intelligence.numbers.stationTitle");
+
 
 /**
  * MANO VEIKLA SKAIČIAIS — the Work-in-Numbers station (target worker IA
@@ -201,10 +204,9 @@ export default async function WorkInNumbersPage({
       data-state={answer.kind}
       data-period={wi?.scope ?? periodKey}
     >
-      <TelemetryView
-        event={FUNNEL_EVENTS.journalViewed}
-        metadata={{ surface: "journal", step: "numbers" }}
-      />
+      {/* No `journal_viewed` here (activation audit fix #7): this station is
+          not the journal, and counting it inflated the journal funnel's top
+          step. `journal_viewed` is emitted by the journal page only. */}
       <header className="flex flex-col gap-1">
         <PageTitle>{t("numbers.stationTitle")}</PageTitle>
         <p className="text-support leading-relaxed text-text-secondary">

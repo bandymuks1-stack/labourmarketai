@@ -193,11 +193,11 @@ describe("the success notice follows the adapter mode", () => {
     expect(html).not.toContain("No real money moved");
   });
 
-  it("test: the test-mode sentence + the TEST badge", async () => {
+  it("test: the no-real-money sentence + the no-real-charges badge", async () => {
     state.config = { state: "stripe_test", reason: "ok", testMode: true, paymentsEnabled: true, mode: "test" };
     const html = await render("test_success");
     expect(html).toContain("No real money moved");
-    expect(html).toContain("Test mode");
+    expect(html).toContain("No real charges");
   });
 });
 

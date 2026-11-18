@@ -45,6 +45,11 @@ import { ManagementDecisionsSection } from "@/components/app/management-decision
 import { ApprovalsSection } from "./approvals-section";
 import { RequestsSection } from "./requests-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/network", "network.title");
+
 
 /**
  * "Mano tinklas" (core-network area B) — a SUB-SURFACE of the person /

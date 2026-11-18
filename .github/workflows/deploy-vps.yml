@@ -21,6 +21,7 @@ name: Deploy to VPS
 #     Deploys queue (cancel-in-progress: false); a newer pending deploy supersedes an
 #     older pending one, never a running one. The ordering applies to this automatic
 #     path only; workflow_dispatch below still rolls back or redeploys any main sha.
+#     It ships nothing when everything since the build production serves is under docs/.
 #   - workflow_dispatch: manual deploy / redeploy of a sha on main (rollback path).
 # It never deploys a tree whose Quality Gates did not pass (checked below for both).
 #
@@ -74,6 +75,12 @@ jobs:
       sha: ${{ steps.resolve.outputs.sha }}
       sha256: ${{ steps.pack.outputs.sha256 }}
     steps:
+      # Into its own folder, so it can't affect the checkout of the commit below. On workflow_run this is main's script.
+      - uses: actions/checkout@v4
+        if: github.event_name == 'workflow_run'
+        with:
+          path: .deploy-check
+          sparse-checkout: .github/scripts
       - name: Resolve sha
         id: resolve
         env:
@@ -90,11 +97,19 @@ jobs:
           else
             sha="${INPUT_SHA:-$head}"
           fi
-          echo "skip=false" >> "$GITHUB_OUTPUT"
           [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be a full 40-hex commit"; exit 1; }
           gh api "repos/${GITHUB_REPOSITORY}/compare/main...${sha}" --jq '.status' | grep -qE '^(identical|behind)$' \
             || { echo "::error::${sha} is not on main (only main is deployed to production)"; exit 1; }
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          # Automatic path only: everything since the build production serves is under docs/, so there is nothing to ship.
+          # A manual dispatch always ships. Any doubt deploys.
+          skip=false
+          if [ "$EVENT" = "workflow_run" ]; then
+            verdict=$(node .deploy-check/.github/scripts/deploy-docs-only.mjs "$sha") || verdict="skip=false check did not run"
+            echo "docs-only check: $verdict" | tee -a "$GITHUB_STEP_SUMMARY"
+            [ "${verdict%% *}" = "skip=true" ] && skip=true
+          fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
       - name: Require a successful Quality Gates run for this sha
         if: ${{ steps.resolve.outputs.skip != 'true' && !inputs.skip_quality_check }}
         env:

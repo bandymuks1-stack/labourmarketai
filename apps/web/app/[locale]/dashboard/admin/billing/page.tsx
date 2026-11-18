@@ -14,6 +14,11 @@ import { AdminLmcPanel } from "@/components/app/admin-lmc-panel";
 import { AdminTaxReviewSection } from "@/components/app/admin-tax-review-section";
 import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/billing");
+
 
 /**
  * Admin billing center (Stripe sprint PR6). Shows the billing config state

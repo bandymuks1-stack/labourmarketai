@@ -257,7 +257,10 @@ export function DarkListbox({
             role="listbox"
             id={listboxId}
             aria-label={ariaLabel}
-            className="max-h-60 overflow-auto"
+            // overscroll-contain: reaching the end of the list must not chain
+            // into the page — on a phone that chain is pull-to-refresh, which
+            // reloaded the onboarding wizard mid-choice (audit 2026-10-26).
+            className="max-h-60 overflow-auto overscroll-contain"
           >
             {visible.map((o, i) => {
               const isSelected = o.value === value;

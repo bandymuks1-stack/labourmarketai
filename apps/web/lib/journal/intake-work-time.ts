@@ -100,6 +100,19 @@ const MAX_FRAGMENTS = 20;
 /** A timed fragment that names the BREAK, not work — "30 min pertrauka",
  *  "30 min break", "перерыв 30 мин". Never work time. */
 const BREAK_RX = /pertrauk|\bbreak\b|перерыв|обед|pietų|pietu|lunch|przerw|pause|pauze|mittag/i;
+/** A break that is NEGATED — "be pertraukos", "without a break", "no break",
+ *  "без перерыва", "bez przerwy", "ohne Pause", "zonder pauze" — is part of
+ *  a WORK clause; that clause keeps its duration (Codex review on #2893:
+ *  "Klijavau plyteles 6 val. be pertraukos" lost its 6 h). */
+const NEGATED_BREAK_RX =
+  /(?<!\p{L})(?:be\s+(?:pertrauk|piet)|without\s+(?:a\s+|any\s+)?(?:break|lunch)|no\s+(?:break|lunch)|non-?stop|без\s+(?:перерыв|обед)|bez\s+przerw|ohne\s+(?:pause|mittag)|zonder\s+(?:pauze|lunch))/iu;
+
+/** True for a clause that states the BREAK itself ("30 min pertrauka",
+ *  "pietų pertrauka 1 val.") — never for a work clause that only mentions or
+ *  negates one. The one rule every reader here uses. */
+export function isBreakClause(phrase: string): boolean {
+  return BREAK_RX.test(phrase) && !NEGATED_BREAK_RX.test(phrase);
+}
 
 export function deriveIntakeWorkTime(notes: string, todayIso: string): IntakeWorkTime {
   const text = String(notes ?? "").trim();
@@ -131,7 +144,7 @@ export function deriveIntakeWorkTime(notes: string, todayIso: string): IntakeWor
         Number.isFinite(f.time.value) &&
         f.time.value > 0 &&
         f.rawPhrase.trim().length > 0 &&
-        !BREAK_RX.test(f.rawPhrase),
+        !isBreakClause(f.rawPhrase),
     )
     .slice(0, MAX_FRAGMENTS);
 
@@ -159,6 +172,68 @@ export function deriveIntakeWorkTime(notes: string, todayIso: string): IntakeWor
   // "for 4 hours") but the work-log parser does.
   if (hasWorked) return { ...NOTHING, quantityMinutes: Math.round(worked) };
   return NOTHING;
+}
+
+type SuggestedTime = { value: number; unitSlug: "hours" | "days" | "minutes" };
+
+/**
+ * THE SAME TIME IN THE WEB REVIEW STEP AS ON THE CHAT / MCP RECORD (P0-A
+ * 2026-10-30). The composer's review read only the fragment recognizer, so
+ * "Dirbau nuo 8 iki 17, 30 min pertrauka" offered the 30-minute BREAK as the
+ * day's time (the span was never read), while the chat and MCP recorded the
+ * 8 h 30 min the span states. This takes the recognizer's suggestions and
+ * returns what the review should offer instead, by the intake's own rule:
+ *  - a stated span wins outright: its worked minutes (break subtracted)
+ *    become the entry's time, and per-fragment times are dropped so the
+ *    canonical rule never counts them instead of the span;
+ *  - a fragment that states the break is never work time (isBreakClause) — it is
+ *    removed, and a break that was the only "time" is no time at all.
+ * Pure; nothing is confirmed here — the person still reviews every value.
+ */
+export function reviewTimeSuggestion<
+  F extends { readonly rawPhrase: string; readonly time: SuggestedTime | null },
+>(
+  notes: string,
+  todayIso: string,
+  suggestions: {
+    readonly time: SuggestedTime | null;
+    readonly fragments: readonly F[];
+    /** A stated output; present → the entry-level slot may go to it. */
+    readonly quantity?: unknown;
+  },
+): { time: SuggestedTime | null; fragments: F[] } {
+  const work = suggestions.fragments.filter((f) => !isBreakClause(f.rawPhrase));
+  const derived = deriveIntakeWorkTime(notes, todayIso);
+  if (derived.span && derived.quantityMinutes !== null && derived.quantityMinutes > 0) {
+    return {
+      time: minutesAsSuggestedTime(derived.quantityMinutes),
+      // The span is the day's time, so per-fragment times are dropped — but
+      // only while the entry-level slot can carry it: a stated OUTPUT
+      // ("35 m²") takes that one slot when confirmed, and dropping the
+      // fragment times then would leave the record with no time at all.
+      fragments: suggestions.quantity ? work : work.map((f) => ({ ...f, time: null })),
+    };
+  }
+  return {
+    time: suggestions.time !== null && breakIsTheOnlyTime(notes) ? null : suggestions.time,
+    fragments: work,
+  };
+}
+
+/** True when every duration the sentence states sits in a clause that names
+ *  the break ("…, 30 min pertrauka") — read with the same recognizer. */
+function breakIsTheOnlyTime(notes: string): boolean {
+  const clauses = notes.split(/[,;\n]|\.(?:\s|$)/u).map((c) => c.trim()).filter(Boolean);
+  const timed = clauses.filter((c) => extractJournalSuggestions(c).time !== null);
+  return timed.length > 0 && timed.every((c) => isBreakClause(c));
+}
+
+/** Minutes in the unit a person reads best: whole or quarter hours as hours,
+ *  anything else as minutes — the value is exact either way. */
+function minutesAsSuggestedTime(minutes: number): SuggestedTime {
+  return minutes % 15 === 0
+    ? { value: minutes / 60, unitSlug: "hours" }
+    : { value: minutes, unitSlug: "minutes" };
 }
 
 const NOTHING: IntakeWorkTime = {

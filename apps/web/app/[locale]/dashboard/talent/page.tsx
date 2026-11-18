@@ -6,6 +6,11 @@ import { JobDemandCard, type JobDemandCardEntity } from "@/components/visual/job
 import { WorkerCard, type WorkerCardEntity } from "@/components/visual/worker-card";
 import { createClient } from "@/lib/supabase/server";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/talent", "auth.dashboard.tabs.discover");
+
 
 /**
  * Talent surface preview — Sprint P0 of the Visual Information

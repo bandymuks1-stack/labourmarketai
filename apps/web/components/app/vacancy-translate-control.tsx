@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
-import { translateVacancyAction } from "@/lib/vacancy-store/vacancy-translation-action";
-import type { TranslateVacancyActionResultV1 } from "@/lib/vacancy-store/vacancy-translation-contract";
+import {
+  translateVacancyAction,
+  vacancyTranslationAvailabilityAction,
+} from "@/lib/vacancy-store/vacancy-translation-action";
+import type {
+  TranslationAvailabilityV1,
+  TranslateVacancyActionResultV1,
+} from "@/lib/vacancy-store/vacancy-translation-contract";
 
 /**
  * "TRANSLATE THIS ADVERTISEMENT" — the reader's explicit act (owner decision
@@ -20,6 +26,11 @@ import type { TranslateVacancyActionResultV1 } from "@/lib/vacancy-store/vacancy
  * is "could not be translated right now" — said plainly, with the ad still
  * fully readable underneath. No spinner that never resolves, no silent
  * no-op, no technical enum on screen.
+ *
+ * NO BUTTON THAT CAN ONLY FAIL (first real user's feedback, 2026-11-04). The
+ * control first asks whether a translation can run at all. When none can it
+ * says so in one line instead of offering the button; the button returns by
+ * itself once a provider is allowed. Nothing is offered until the answer is in.
  *
  * THE ALLOWANCE IS SHOWN ONLY WHEN IT IS KNOWN AND REAL. While payments are
  * off the server counts honestly but does not enforce, so a remaining figure
@@ -61,12 +72,37 @@ export function VacancyTranslateControl({
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<TranslateVacancyActionResultV1 | null>(null);
 
+  const [availability, setAvailability] = useState<TranslationAvailabilityV1 | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    vacancyTranslationAvailabilityAction()
+      .then((answer) => {
+        if (live) setAvailability(answer);
+      })
+      // No answer offers nothing: the original language line and the
+      // publisher's words stay on the page either way.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
+
   const rendering = result?.kind === "ready" ? result : null;
 
   function request() {
     startTransition(async () => {
       setResult(await translateVacancyAction(vacancyId));
     });
+  }
+
+  if (availability === null) return null;
+  if (!availability.on) {
+    return (
+      <p className="mt-2 text-meta text-text-muted" data-testid="vacancy-translate-off">
+        {availability.note}
+      </p>
+    );
   }
 
   return (

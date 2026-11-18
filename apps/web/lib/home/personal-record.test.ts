@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -48,10 +48,11 @@ describe("personal record — stays on the person's own home", () => {
     const web = join(__dirname, "..", "..");
     const users: string[] = [];
     const walk = (dir: string) => {
-      for (const name of readdirSync(dir)) {
+      for (const dirent of readdirSync(dir, { withFileTypes: true })) {
+        const name = dirent.name;
         if (name === "node_modules" || name.startsWith(".")) continue;
         const full = join(dir, name);
-        if (statSync(full).isDirectory()) walk(full);
+        if (dirent.isDirectory()) walk(full);
         else if (/\.(ts|tsx)$/.test(name) && !/\.test\.tsx?$/.test(name)) {
           const src = readFileSync(full, "utf8");
           if (src.includes("@/lib/home/personal-record") || src.includes('from "./personal-record"')) users.push(relative(web, full).split("\\").join("/"));

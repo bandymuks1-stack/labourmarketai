@@ -165,12 +165,17 @@ test("M-6. concurrent confirms of one token: exactly one executes", async () => 
   const created = await tool(worker, "service_offering_create", { title: `${TAG} concurrency`, remote: true });
   expect(created.ok, JSON.stringify(created)).toBe(true);
   const [row] = await own(worker);
-  const draft = await tool(worker, "service_offering_status_set_draft", { offeringId: row.id, status: "paused" });
+  // A legal transition from a DRAFT: publish (draft → active). Since the one
+  // lifecycle contract (#2743, lib/market-lifecycle/contract.ts) a draft may be
+  // published, edited or withdrawn — never paused — so a "paused" confirm was
+  // a domain refusal (`invalid`) that spent the single-use token, and the race
+  // under test never ran. The synthetic row is deleted below.
+  const draft = await tool(worker, "service_offering_status_set_draft", { offeringId: row.id, status: "active" });
   expect(draft.ok, JSON.stringify(draft)).toBe(true);
   const token = String(draft.data?.confirmationToken ?? "");
   const results = await Promise.all(
     Array.from({ length: 4 }, () =>
-      tool(worker, "service_offering_status_set_confirm", { offeringId: row.id, status: "paused", confirmationToken: token }),
+      tool(worker, "service_offering_status_set_confirm", { offeringId: row.id, status: "active", confirmationToken: token }),
     ),
   );
   console.info(`[mcp] concurrent confirms → ${results.map((r) => (r.ok ? "ok" : r.code)).join(",")}`);
