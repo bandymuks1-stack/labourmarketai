@@ -2,7 +2,7 @@ import "server-only";
 
 import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import { z } from "zod";
-import { isIsoCountry } from "@/lib/location/country-model";
+import { isIsoCountry, resolveCountryCode } from "@/lib/location/country-model";
 import { getTranslations } from "next-intl/server";
 
 import {
@@ -1650,6 +1650,16 @@ const DEMAND_FIELDS = [
 
 /** null-vs-absent must not change the hash for optional fields — absent and
  *  null both mean "not stated" to the canonical submit. */
+/** The country as the person typed it — a code or a name in any supported
+ *  language — resolved to ISO by the ONE canonical resolver, in the draft AND
+ *  the confirm, so the token binds the resolved code both times. A name the
+ *  resolver does not know stays as typed and is refused as `country_required`
+ *  below: never a guessed market. */
+function withResolvedCountry(draft: DemandDraftInput): DemandDraftInput {
+  if (!draft.country) return draft;
+  return { ...draft, country: resolveCountryCode(draft.country) ?? draft.country };
+}
+
 function normalizedDemandForHash(draft: DemandDraftInput): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const f of DEMAND_FIELDS) out[f] = draft[f] ?? null;
@@ -1666,7 +1676,8 @@ const demandCreateDraft: CapabilityDescriptor = {
     "ACTING FOR (their active workspace), and returns a human-readable " +
     "preview naming that organization plus a one-time confirmation token. " +
     "NOTHING is created or sent. `description` is the need in the caller's " +
-    "own words (required) and `country` (required: ISO-3166 alpha-2 code of " +
+    "own words (required) and `country` (required: ISO-3166 alpha-2 code, or " +
+    "the country's name in any supported language, which is resolved to the code, of " +
     "the country where the work is; ASK the person when they have not said " +
     "it, never guess); role/location/skills/urgency/notes are optional " +
     "free text; workType/teamSize/accommodation/transport are structured " +
@@ -1682,7 +1693,7 @@ const demandCreateDraft: CapabilityDescriptor = {
   },
   inputSchema: companyCreateDemandFields,
   run: async (caller, input): Promise<ExecResult> => {
-    const draft = companyCreateDemandFields.parse(input);
+    const draft = withResolvedCountry(companyCreateDemandFields.parse(input));
     // THE employer-workspace gate — same chain as the web (wagon 3 core).
     const employer = await requireEmployerCompanyForCaller(caller);
     if (!employer.ok) return demandContextRefusal(employer.reason);
@@ -1753,7 +1764,8 @@ const demandCreateConfirm: CapabilityDescriptor = {
   inputSchema: demandConfirmInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = demandConfirmInput.parse(input);
-    const { confirmationToken, ...draft } = parsed;
+    const { confirmationToken, ...typed } = parsed;
+    const draft = withResolvedCountry(typed);
     const fingerprint = await demandStateFingerprint(caller);
     const verdict = await verifyCapabilityConfirmation({
       actionId: "demand.create_confirm",

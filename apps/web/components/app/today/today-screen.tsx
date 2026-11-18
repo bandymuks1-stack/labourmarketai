@@ -157,9 +157,9 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           settled from the first paint. */}
       <header data-testid="today-header" className="flex flex-col gap-1">
         <p className="text-support font-medium text-text-muted">{t("eyebrow")}</p>
-        <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg lg:text-title-lg">
+        <h2 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg lg:text-title-lg">
           {displayName ?? t("headerNoName")}
-        </h1>
+        </h2>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-support text-text-secondary">
           <Suspense fallback={<InlinePending />}>
             <TodayProfession />
