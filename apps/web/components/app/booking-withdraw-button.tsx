@@ -3,6 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { withdrawBookingAction } from "@/lib/booking/booking-actions";
 import { WITHDRAW_REASON_KINDS, REASON_NOTE_MAX } from "@/lib/booking/booking-state";
 
@@ -82,15 +86,17 @@ export function BookingWithdrawButton({
 
   return (
     <div className="flex w-full flex-col gap-1.5 sm:w-auto">
-      <button
+      <Button
         type="button"
         disabled={pending}
         onClick={() => setFormOpen((v) => !v)}
         data-testid="booking-withdraw"
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+        variant="secondary"
+        size="sm"
+        className="min-h-11 w-full sm:w-auto"
       >
         {labels.withdraw}
-      </button>
+      </Button>
       {formOpen ? (
         <div
           className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
@@ -98,11 +104,11 @@ export function BookingWithdrawButton({
         >
           <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reason.optionalTitle")}
-            <select
+            <Select
               value={reasonKind}
               onChange={(e) => setReasonKind(e.target.value)}
               data-testid="booking-withdraw-reason"
-              className="min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+              className="max-sm:text-base"
             >
               <option value="">{t("reason.none")}</option>
               {WITHDRAW_REASON_KINDS.map((kind) => (
@@ -110,35 +116,39 @@ export function BookingWithdrawButton({
                   {t(`reason.withdraw.${kind}`)}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reason.noteLabel")}
-            <input
+            <Input
               type="text"
               maxLength={REASON_NOTE_MAX}
               value={reasonNote}
               onChange={(e) => setReasonNote(e.target.value)}
-              className="min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+              className="max-sm:text-base"
             />
           </label>
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-            <button
+            <Button
               type="button"
               disabled={pending}
               onClick={withdraw}
               data-testid="booking-withdraw-confirm"
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+              variant="secondary"
+              size="sm"
+              className="min-h-11 w-full sm:w-auto"
             >
               {t("reason.confirmWithdraw")}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setFormOpen(false)}
-              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
+              variant="ghost"
+              size="sm"
+              className="min-h-11"
             >
               {t("reason.cancel")}
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}
