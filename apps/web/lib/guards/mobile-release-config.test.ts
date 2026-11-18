@@ -311,7 +311,7 @@ describe("iOS CI proves a DEVICE archive, not only a simulator build", () => {
   });
 });
 
-describe("store builds are owner-started, skip without secrets and upload to internal tracks only", () => {
+describe("store builds are owner-started, skip without secrets and never upload", () => {
   // The route is docs/launch/RELEASE_SUBMISSION_PACK_2026-10-14.md §0: EAS
   // holds signing and store keys in the owner's Expo account. The repository
   // is public, so the workflow may read ONE secret and must run without it.
@@ -337,25 +337,18 @@ describe("store builds are owner-started, skip without secrets and upload to int
     expect(gated).toBe(steps);
   });
 
-  it("upload is opt-in and lands on internal tracks as a draft", () => {
-    // The `submit` input block runs from its key to the next top-level key.
-    const submitInput = wf.slice(wf.indexOf("      submit:"), wf.indexOf("\npermissions:"));
-    expect(submitInput).toContain("type: boolean");
-    expect(submitInput).toContain("default: false");
-    expect(wf).toContain('if [ "$SUBMIT" = "true" ]');
-    expect(eas.submit.production.android).toEqual({ track: "internal", releaseStatus: "draft" });
+  it("builds only: no upload input, no auto-submit, no EAS Submit, no store app id (owner condition 2)", () => {
+    // Putting a build into TestFlight or the Play Console is a manual step in
+    // each store's console; nothing in this workflow may hand a build over.
+    expect(wf).not.toMatch(/^\s+submit:/m);
+    expect(wf).not.toContain("--auto-submit");
+    expect(wf).not.toMatch(/eas submit/i);
+    expect(wf).not.toContain("ASC_APP_ID");
+    expect(eas.submit).toEqual({ production: {} });
     expect(eas.build.production.environment).toBe("production");
   });
 
-  it("an iOS upload waits for the App Store Connect app id, which never lands in eas.json", () => {
-    // Non-interactive iOS submit needs `ascAppId`; eas.json carries no account
-    // id (asserted above), so the id is a repository VARIABLE, checked in the
-    // prerequisite step and written into the runner's copy only.
-    const check = wf.slice(wf.indexOf("- name: Check owner prerequisites"), wf.indexOf("- name: Set up pnpm"));
-    expect(check).toContain("ASC_APP_ID: ${{ vars.ASC_APP_ID }}");
-    expect(check).toMatch(/\[ "\$SUBMIT" = "true" \] && \[ "\$PLATFORM" != "android" \]/);
-    expect(check).toContain("repository variable ASC_APP_ID");
-    expect(wf).toContain("ascAppId:process.env.ASC_APP_ID");
-    expect(eas.submit.production.ios).toBeUndefined();
+  it("refuses a run dispatched from any branch but main", () => {
+    expect(wf).toContain("environment: store-release\n    if: github.ref == 'refs/heads/main'");
   });
 });
