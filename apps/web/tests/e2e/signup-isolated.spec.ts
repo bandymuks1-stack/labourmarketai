@@ -535,8 +535,13 @@ async function grantEmployerVisibility(page: Page): Promise<void> {
   await page.goto(`${BASE}/en/dashboard/privacy#visibility`);
   const vis = page.getByRole("main").getByTestId("privacy-visibility");
   await expect(vis, "the visibility choice is on the privacy page").toBeVisible({ timeout: 60_000 });
-  await vis.getByTestId("discoverability-open").click();
-  await expect(vis.getByTestId("discoverability-grant")).toBeVisible({ timeout: 30_000 });
+  // The full privacy page shows the terms and the grant at once; only the
+  // compact form needs "turn on" first.
+  const grant = vis.getByTestId("discoverability-grant");
+  const open = vis.getByTestId("discoverability-open");
+  await expect(grant.or(open)).toBeVisible({ timeout: 30_000 });
+  if (!(await grant.isVisible())) await open.click();
+  await expect(grant).toBeVisible({ timeout: 30_000 });
   await vis.getByTestId("discoverability-grant").click();
   await expect(vis.getByTestId("discoverability-granted"), "employers may now find them").toBeVisible({
     timeout: 30_000,
