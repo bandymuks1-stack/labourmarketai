@@ -1,0 +1,40 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+/**
+ * GUARD — the agency's and the client's partner screens draw their controls
+ * with the one design system (owner P0 2026-11-12, as #3279 did for teams):
+ * Button, Input and Select from components/ui. No hand-written button, select
+ * or visible input stays in these files, so a phone gets the shared 44 px tap
+ * floor and focus ring everywhere on the partners page. Only the controls
+ * changed: no behaviour, test id, element id or copy.
+ */
+const WEB = join(__dirname, "..", "..");
+const FILES = [
+  "components/app/agency-bridge-section.tsx",
+  "components/app/client-agency-bridge-section.tsx",
+  "components/app/agency-clients-section.tsx",
+  "components/app/agency-delegation-panel.tsx",
+];
+const code = (f: string) =>
+  readFileSync(join(WEB, f), "utf8")
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/[^\n]*/g, "");
+
+describe("agency partner screens use the shared primitives", () => {
+  it.each(FILES)("%s has no hand-written button, select or visible input", (f) => {
+    const src = code(f);
+    expect(src, `${f}: <button>`).not.toMatch(/<button\b/);
+    expect(src, `${f}: <select>`).not.toMatch(/<select\b/);
+    expect(src.match(/<input\b(?![^>]*type="hidden")[^>]*>/g) ?? [], `${f}: visible <input>`).toEqual([]);
+    expect(src).toMatch(/from "@\/components\/ui\/Button"/);
+  });
+
+  it.each(FILES)("%s keeps every action at the 44 px tap floor", (f) => {
+    const buttons = code(f).match(/<Button\b[^>]*>/g) ?? [];
+    expect(buttons.length, f).toBeGreaterThan(0);
+    for (const b of buttons) expect(b, `${f}: ${b.slice(0, 80)}`).toMatch(/min-h-11/);
+  });
+});

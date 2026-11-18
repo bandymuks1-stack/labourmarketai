@@ -18,6 +18,8 @@ import {
 } from "@/lib/agency/bridge-actions";
 import { openAgencyConnectionConversationAction } from "@/lib/agency/bridge-conversation";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
 
 /**
  * Client side of the REAL two-subject bridge (issue #859). A real client
@@ -121,17 +123,15 @@ export function ClientAgencyBridgeSection({
                     <form action={acceptAction} className="shrink-0">
                       <input type="hidden" name="connectionId" value={c.id} />
                       <input type="hidden" name="clientCompanyId" value={clientCompanyId} />
-                      <button type="submit" disabled={acceptPending} data-testid={`client-bridge-accept-${c.id}`}
-                        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success transition-colors hover:border-state-success disabled:opacity-60">
+                      <Button type="submit" disabled={acceptPending} data-testid={`client-bridge-accept-${c.id}`} variant="primary" size="sm" className="min-h-11">
                         <Check className="h-3.5 w-3.5" aria-hidden /> {labels.acceptButton}
-                      </button>
+                      </Button>
                     </form>
                     <form action={declineAction} className="shrink-0">
                       <input type="hidden" name="connectionId" value={c.id} />
-                      <button type="submit" title={labels.declineButton} aria-label={labels.declineButton}
-                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
+                      <Button type="submit" title={labels.declineButton} aria-label={labels.declineButton} variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger">
                         <X className="h-3.5 w-3.5" aria-hidden />
-                      </button>
+                      </Button>
                     </form>
                   </li>
                 ))}
@@ -157,17 +157,15 @@ export function ClientAgencyBridgeSection({
                         <DisplayedWorkspaceField />
                         <input type="hidden" name="connectionId" value={c.id} />
                         <input type="hidden" name="locale" value={locale} />
-                        <button type="submit" data-testid={`client-bridge-message-${c.id}`}
-                          className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue">
+                        <Button type="submit" data-testid={`client-bridge-message-${c.id}`} variant="secondary" size="sm" className="min-h-11">
                           <MessageSquare className="h-3.5 w-3.5" aria-hidden /> {labels.messageButton}
-                        </button>
+                        </Button>
                       </form>
                       <form action={revokeAction} className="shrink-0">
                         <input type="hidden" name="connectionId" value={c.id} />
-                        <button type="submit" title={labels.revokeButton} aria-label={labels.revokeButton}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
+                        <Button type="submit" title={labels.revokeButton} aria-label={labels.revokeButton} variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger">
                           <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                        </button>
+                        </Button>
                       </form>
                     </div>
                     <div className="flex flex-col gap-1" data-testid="client-bridge-shared">
@@ -185,11 +183,10 @@ export function ClientAgencyBridgeSection({
                                 <span className="min-w-0 flex-1 truncate text-xs text-text-primary">{s.title}</span>
                                 <form action={unshareAction} className="shrink-0">
                                   <input type="hidden" name="shareId" value={s.shareId} />
-                                  <button type="submit" title={labels.unshareButton} aria-label={labels.unshareButton}
-                                    data-testid={`client-bridge-unshare-${s.shareId}`}
-                                    className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
+                                  <Button type="submit" title={labels.unshareButton} aria-label={labels.unshareButton}
+                                    data-testid={`client-bridge-unshare-${s.shareId}`} variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger">
                                     <X className="h-3 w-3" aria-hidden />
-                                  </button>
+                                  </Button>
                                 </form>
                               </li>
                             ))}
@@ -203,18 +200,16 @@ export function ClientAgencyBridgeSection({
                         <input type="hidden" name="connectionId" value={c.id} />
                         <label className="flex min-w-44 flex-1 flex-col gap-1">
                           <span className="text-xs font-medium text-text-secondary">{labels.shareLabel}</span>
-                          <select name="requestId" required defaultValue=""
-                            className="rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue">
+                          <Select name="requestId" required defaultValue="">
                             <option value="" disabled>{labels.sharePlaceholder}</option>
                             {demands.map((d) => (
                               <option key={d.id} value={d.id}>{d.title}</option>
                             ))}
-                          </select>
+                          </Select>
                         </label>
-                        <button type="submit" disabled={sharePending} data-testid="client-bridge-share-submit"
-                          className="inline-flex h-10 items-center rounded-lg border border-brand-blue/50 bg-brand-blue/10 px-4 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-60">
+                        <Button type="submit" disabled={sharePending} data-testid="client-bridge-share-submit" variant="primary" size="sm" className="min-h-11">
                           {labels.shareButton}
-                        </button>
+                        </Button>
                       </form>
                     )}
                   </li>
