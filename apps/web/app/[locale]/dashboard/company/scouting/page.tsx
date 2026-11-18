@@ -68,6 +68,8 @@ import {
   type CandidatePipelineStage,
 } from "@/lib/pipeline/candidate-pipeline";
 import { loadDemandPipelineFacts } from "@/lib/pipeline/candidate-pipeline-facts";
+import { loadDemandHistory } from "@/lib/demand/demand-history-facts";
+import { DemandHistoryList } from "@/components/app/demand-history-list";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Card } from "@/components/ui/Card";
 import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
@@ -279,7 +281,7 @@ export default async function CompanyScoutingPage({
           )
         : [];
   // Stage 2 — needs the scouting result (or the stage-1 offers).
-  const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts] =
+  const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts, demandHistory] =
     await Promise.all([
       selected && result?.kind === "ok"
         ? createSupabaseServerClient().then((client) => readLastAutoMatchReceipt(client, selected))
@@ -315,6 +317,9 @@ export default async function CompanyScoutingPage({
               handRaisers.map((h) => h.workerId),
             )
           : null,
+      // The need's history (4.30): its creation, the owner's proposals and their
+      // answers with actor and time, and how it ended. Owner only.
+      result?.kind === "ok" && !actsForClient ? loadDemandHistory(result.demand.id) : null,
     ]);
   const applicantIdentity = new Map<string, ApplicantIdentity>();
   for (const [id, who] of appliedIdentities) if (who) applicantIdentity.set(id, who);
@@ -745,6 +750,18 @@ export default async function CompanyScoutingPage({
             limitUpgrade: t("lifecycle.limitUpgrade"),
             limitIndividual: t("lifecycle.limitIndividual"),
           }}
+        />
+      ) : null}
+
+      {/* THE NEED'S HISTORY (4.30): what was proposed, who answered and when,
+          and how the need ended. Owner only, from facts the owner can read. */}
+      {result?.kind === "ok" && demandHistory ? (
+        <DemandHistoryList
+          history={demandHistory}
+          nameFor={(workerId) =>
+            applicantIdentity.get(workerId)?.name ??
+            `${t("candidate")} ${anonymizedToken(anonymizedWorkerLabel(workerId))}`
+          }
         />
       ) : null}
 

@@ -2209,7 +2209,7 @@
         },
         "noCompany": {
           "title": "Starta din företagsprofil",
-          "body": "Du har ingen företagsprofil ännu. Skapa en – den är aktiv och användbar direkt, utan att vänta på godkännande.",
+          "body": "Du har ingen företagsprofil ännu. Skapa en: du kan använda den direkt. Arbetstagare ser behoven du publicerar när företaget är verifierat.",
           "cta": "Starta företagsinställningen"
         },
         "personalSpace": {
@@ -2244,7 +2244,7 @@
         "formTitle": "Begäran om företagsprofil",
         "formTitleCreate": "Skapa företagsprofil",
         "formTitleEdit": "Redigera företagsprofil",
-        "formSubtitle": "Skapa din organisationsprofil från ditt personliga konto. Den är aktiv och användbar direkt – utan att vänta på godkännande. Verifiering är ett starkare, separat förtroendesteg.",
+        "formSubtitle": "Skapa din organisationsprofil från ditt personliga konto. Du kan använda den direkt: projekt, team, arbetsjournal. Arbetstagare ser behoven du publicerar när ditt företag är verifierat; begär verifiering nedan.",
         "existingHeading": "Företagsprofil",
         "legalName": "Företagets juridiska namn",
         "legalNameHelp": "Obligatoriskt. 2–200 tecken.",
@@ -2298,7 +2298,7 @@
         "agencyConnectionPending": "Inbjudan accepterad. Ett bemanningsföretag vill ansluta till ditt företag – skapa först din företagsprofil; anslutningsförfrågan väntar sedan på sidan Partner, där du bekräftar den med det här företaget.",
         "legalLockedNotice": "Det här företaget är verifierat. Dess juridiska uppgifter (juridiskt namn, organisationsnummer, land och registrerad adress) är låsta här och kan inte skrivas över – kontakta supporten för att begära en juridisk ändring. Du kan fortfarande uppdatera kontaktuppgifter, webbplats, företagstyp och din roll.",
         "saveDraft": "Spara företag",
-        "submitRequest": "Begär manuell granskning (valfritt)",
+        "submitRequest": "Begär verifiering (arbetstagare ser dina behov när företaget är verifierat)",
         "statusDraftSaved": "Företaget har sparats – det är aktivt och användbart nu.",
         "statusSubmitted": "Manuell granskning begärd (valfritt). Ditt företag går att använda under tiden.",
         "statusNeedsMigration": "Åtgärden kunde inte slutföras. Försök igen.",
@@ -2319,7 +2319,7 @@
           "draft": "Utkast. Spara för att aktivera ditt företag – det blir användbart direkt.",
           "active_unverified": "Aktivt och användbart nu. Grundläggande automatiska kontroller har godkänts. Ännu inte identitetsverifierat – det är ett separat, starkare steg. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
           "needs_checks": "Aktivt och användbart, men en grundläggande kontroll behöver åtgärdas (t.ex. lägg till ditt land eller rätta en felaktigt formaterad kod/webbplats/e-post). Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
-          "pending_verification": "Du har begärt en valfri manuell granskning. Ditt företag är fullt användbart medan den väntar. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
+          "pending_verification": "Du har begärt verifiering. Ditt företag är fullt användbart medan den väntar. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
           "unverified": "Inte verifierat. Du kan fortsätta använda ditt företag som vanligt. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
           "verified": "Verifierat – en starkare förtroendestatus som ges först efter en verklig kontroll."
         },
@@ -6872,7 +6872,8 @@
         "noMembers": "Inga medlemmar just nu.",
         "unavailable": "Teamen kunde inte läsas in. Försök igen.",
         "manage": "Ändra team"
-      }
+      },
+      "organizationLink": "Organisationens historik och projekt"
     },
     "workerView": {
       "eyebrow": "Mitt projekt",
@@ -9435,6 +9436,27 @@
       "notStructured": "Automatisk sökning {when}: behovet har för få detaljer för att matcha ännu. Lägg till färdigheter eller ett yrke för att söka.",
       "failed": "Automatisk sökning {when} kunde inte slutföras. Listan nedan beräknas fortfarande direkt.",
       "capped": "Kandidatpoolen begränsades."
+    },
+    "history": {
+      "title": "Historik",
+      "decision": "Anställda: {names}",
+      "created": "Behov skapat",
+      "closed": "Behov stängt",
+      "closedFilled": "Behov stängt: tillsatt",
+      "closedWithdrawn": "Behov stängt: återkallat",
+      "event": {
+        "proposed": "Bokning föreslagen till {name}",
+        "accepted": "{name} accepterade bokningen",
+        "declined": "{name} avböjde bokningen",
+        "withdrawn": "Bokning till {name} återkallad",
+        "expired": "Bokning till {name} har gått ut"
+      },
+      "actor": {
+        "you": "du",
+        "candidate": "kandidat",
+        "automatic": "automatiskt",
+        "other": "kollega eller administratör"
+      }
     }
   },
   "planBoundary": {
@@ -9941,6 +9963,9 @@
       "invites": "Inbjudnings- och aviseringsmejl",
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp och ett testutskick"
+    },
+    "alerts": {
+      "title": "Ägarvarningar och pushnotiser"
     }
   },
   "adminMetrics": {
@@ -17468,7 +17493,7 @@
       "assigneePlaceholder": "Personens e-postadress",
       "requiredByLabel": "Slutför senast",
       "assign": "Be denna person",
-      "certificateFilePlaceholder": "Certifikatfilens id",
+      "certificateFileLabel": "Certifikatfil",
       "issuedOnLabel": "Utfärdat den",
       "expiresOnLabel": "Giltigt till",
       "attachCertificate": "Spara certifikat",
@@ -19257,7 +19282,8 @@
       "address": "Adress",
       "project": "Projekt",
       "notInSource": "Finns inte i källan",
-      "linked": "Länkad"
+      "linked": "Länkad",
+      "openProject": "Öppna projektet"
     },
     "whoWorked": "Vem som arbetade här",
     "timeline": "Vad som gjordes",
@@ -19338,6 +19364,23 @@
         "opening": "Öppnar …",
         "error": "Arbetsytan kunde inte öppnas."
       }
+    },
+    "projects": {
+      "title": "Projekt på plattformen",
+      "counts": "{running} pågående · {completed} avslutade",
+      "untitled": "Projekt utan namn",
+      "running": "Pågående",
+      "completed": "Avslutat",
+      "all": "Alla {count} projekt"
+    },
+    "journal": {
+      "title": "Arbete registrerat i journalen",
+      "hours": "Registrerade timmar",
+      "confirmed": "Timmar bekräftade av organisationen",
+      "people": "Personer som registrerade arbete",
+      "period": "Registrerat",
+      "basis": "Från {entries} journalposter som personer registrerade under den här organisationen. Räknas separat från den importerade historiken ovan och läggs aldrig till den.",
+      "unavailable": "Arbetet som registrerats i journalen under den här organisationen kunde inte läsas just nu."
     }
   },
   "workPlan": {

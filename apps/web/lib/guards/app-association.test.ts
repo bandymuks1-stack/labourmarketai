@@ -183,9 +183,15 @@ describe("deep-link claim — exactly the screens the app has", () => {
     expect(routes).toEqual(
       [
         "/",
+        "/add-education",
+        "/add-language",
+        "/add-work",
+        "/agency-offers",
         "/availability",
+        "/candidates",
         "/conversation",
         "/correct-entry",
+        "/education",
         "/jobs",
         "/journal",
         "/log-work",

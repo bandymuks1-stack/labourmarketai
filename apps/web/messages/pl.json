@@ -2209,7 +2209,7 @@
         },
         "noCompany": {
           "title": "Rozpocznij profil firmy",
-          "body": "Nie mają Państwo jeszcze profilu firmy. Proszę go utworzyć — jest od razu aktywny i użyteczny, bez czekania na zatwierdzenie.",
+          "body": "Nie mają Państwo jeszcze profilu firmy. Proszę go utworzyć: mogą Państwo z niego korzystać od razu. Pracownicy widzą Państwa zapotrzebowania po weryfikacji firmy.",
           "cta": "Rozpocznij zakładanie firmy"
         },
         "personalSpace": {
@@ -2244,7 +2244,7 @@
         "formTitle": "Zapytanie o profil firmy",
         "formTitleCreate": "Utwórz profil firmy",
         "formTitleEdit": "Edytuj profil firmy",
-        "formSubtitle": "Proszę utworzyć profil swojej organizacji z konta osobistego. Jest od razu aktywny i użyteczny — bez czekania na zatwierdzenie. Weryfikacja to osobny, silniejszy krok zaufania.",
+        "formSubtitle": "Proszę utworzyć profil swojej organizacji z konta osobistego. Mogą Państwo z niego korzystać od razu: projekty, zespół, dziennik pracy. Pracownicy widzą Państwa zapotrzebowania po weryfikacji firmy; o weryfikację można poprosić poniżej.",
         "existingHeading": "Profil firmy",
         "legalName": "Pełna nazwa firmy",
         "legalNameHelp": "Wymagane. 2–200 znaków.",
@@ -2298,7 +2298,7 @@
         "agencyConnectionPending": "Zaproszenie zaakceptowane. Agencja pracy chce nawiązać połączenie z Państwa firmą — najpierw proszę utworzyć profil firmy; prośba o połączenie będzie potem czekać na stronie Partnerzy, gdzie potwierdzą ją Państwo w imieniu tej firmy.",
         "legalLockedNotice": "Ta firma jest zweryfikowana. Jej dane prawne (pełna nazwa, numer rejestracyjny, kraj i adres siedziby) są tu zablokowane i nie można ich nadpisać — proszę skontaktować się z pomocą techniczną, aby poprosić o zmianę danych prawnych. Nadal mogą Państwo aktualizować kontakty, stronę internetową, typ firmy i swoją rolę.",
         "saveDraft": "Zapisz firmę",
-        "submitRequest": "Poproś o ręczną weryfikację (opcjonalnie)",
+        "submitRequest": "Proszę poprosić o weryfikację (pracownicy widzą zapotrzebowania po niej)",
         "statusDraftSaved": "Firma zapisana — jest teraz aktywna i użyteczna.",
         "statusSubmitted": "Poproszono o ręczną weryfikację (opcjonalnie). W międzyczasie Państwa firma pozostaje użyteczna.",
         "statusNeedsMigration": "Nie udało się wykonać tej czynności. Proszę spróbować ponownie.",
@@ -2319,7 +2319,7 @@
           "draft": "Szkic. Proszę zapisać, aby aktywować firmę — staje się od razu użyteczna.",
           "active_unverified": "Aktywna i użyteczna już teraz. Podstawowe automatyczne sprawdzenia zaliczone. Jeszcze niezweryfikowana tożsamościowo — to osobny, silniejszy krok. Państwa zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
           "needs_checks": "Aktywna i użyteczna, ale podstawowe sprawdzenie wymaga uwagi (np. proszę dodać kraj albo poprawić nieprawidłowy numer / stronę / e-mail). Państwa zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
-          "pending_verification": "Poprosili Państwo o opcjonalną ręczną weryfikację. Państwa firma pozostaje w pełni użyteczna w czasie oczekiwania. Państwa zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
+          "pending_verification": "Poprosili Państwo o weryfikację. Państwa firma pozostaje w pełni użyteczna w czasie oczekiwania. Państwa zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
           "unverified": "Niezweryfikowana. Mogą Państwo normalnie korzystać ze swojej firmy. Państwa zgłoszone zapytania są pokazywane pracownikom dopiero po weryfikacji firmy.",
           "verified": "Zweryfikowana — silniejszy stan zaufania, przyznawany wyłącznie po realnej kontroli."
         },
@@ -6872,7 +6872,8 @@
         "noMembers": "Obecnie brak członków.",
         "unavailable": "Nie udało się wczytać zespołów. Proszę spróbować ponownie.",
         "manage": "Zmień zespoły"
-      }
+      },
+      "organizationLink": "Historia i projekty organizacji"
     },
     "workerView": {
       "eyebrow": "Mój projekt",
@@ -9435,6 +9436,27 @@
       "notStructured": "Automatyczne wyszukiwanie {when}: zapotrzebowanie jest opisane zbyt ogólnie. Proszę dodać umiejętności lub zawód.",
       "failed": "Automatyczne wyszukiwanie {when} nie zostało ukończone. Lista poniżej jest nadal liczona na bieżąco.",
       "capped": "Liczba kandydatów została ograniczona."
+    },
+    "history": {
+      "title": "Historia",
+      "decision": "Zatrudnieni: {names}",
+      "created": "Zapotrzebowanie utworzone",
+      "closed": "Zapotrzebowanie zamknięte",
+      "closedFilled": "Zapotrzebowanie zamknięte: obsadzone",
+      "closedWithdrawn": "Zapotrzebowanie zamknięte: wycofane",
+      "event": {
+        "proposed": "Rezerwacja zaproponowana: {name}",
+        "accepted": "{name}: rezerwacja przyjęta",
+        "declined": "{name}: rezerwacja odrzucona",
+        "withdrawn": "Rezerwacja wycofana: {name}",
+        "expired": "Rezerwacja wygasła: {name}"
+      },
+      "actor": {
+        "you": "Państwo",
+        "candidate": "kandydat",
+        "automatic": "automatycznie",
+        "other": "współpracownik lub administrator"
+      }
     }
   },
   "planBoundary": {
@@ -9941,6 +9963,9 @@
       "invites": "E-maile z zaproszeniami i powiadomieniami",
       "invitesOn": "włączone",
       "invitesOff": "WYŁĄCZONE – włączane osobno: INVITE_EMAIL_PROVIDER=smtp i jedna wysyłka testowa"
+    },
+    "alerts": {
+      "title": "Alerty dla właściciela i powiadomienia push"
     }
   },
   "adminMetrics": {
@@ -17468,7 +17493,7 @@
       "assigneePlaceholder": "E-mail osoby",
       "requiredByLabel": "Ukończ do",
       "assign": "Poproś tę osobę",
-      "certificateFilePlaceholder": "ID pliku certyfikatu",
+      "certificateFileLabel": "Plik certyfikatu",
       "issuedOnLabel": "Wydano dnia",
       "expiresOnLabel": "Ważne do",
       "attachCertificate": "Zapisz certyfikat",
@@ -19257,7 +19282,8 @@
       "address": "Adres",
       "project": "Projekt",
       "notInSource": "Brak w źródle",
-      "linked": "Powiązano"
+      "linked": "Powiązano",
+      "openProject": "Otwórz projekt"
     },
     "whoWorked": "Kto tu pracował",
     "timeline": "Co zrobiono",
@@ -19338,6 +19364,23 @@
         "opening": "Otwieranie…",
         "error": "Nie udało się otworzyć przestrzeni roboczej."
       }
+    },
+    "projects": {
+      "title": "Projekty na platformie",
+      "counts": "{running} w toku · {completed, plural, one {# zakończony} few {# zakończone} many {# zakończonych} other {# zakończonego}}",
+      "untitled": "Projekt bez nazwy",
+      "running": "W toku",
+      "completed": "Zakończony",
+      "all": "Wszystkie projekty: {count}"
+    },
+    "journal": {
+      "title": "Praca zapisana w dzienniku",
+      "hours": "Zapisane godziny",
+      "confirmed": "Godziny potwierdzone przez organizację",
+      "people": "Osoby, które zapisały pracę",
+      "period": "Zapisano",
+      "basis": "Z {entries} wpisów w dzienniku, które osoby zapisały w tej organizacji. Liczone osobno od zaimportowanej historii powyżej i nigdy do niej nie dodawane.",
+      "unavailable": "Nie udało się teraz odczytać pracy zapisanej w dzienniku w tej organizacji."
     }
   },
   "workPlan": {

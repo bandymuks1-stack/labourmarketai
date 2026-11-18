@@ -61,3 +61,26 @@ describe("isolated sign-up walk: one address per registration", () => {
     expect(registeredKeys(collided)).toEqual(["student", "student"]);
   });
 });
+
+/**
+ * The recognition chain (recognition-chain-isolated.spec.ts) shares the same stack but names each
+ * person ONCE as a module constant (`const SCHOOL = email("school")`) and reuses that session for
+ * the rest of the chain. Its rule: every constant has its own key, and no constant is registered
+ * through `signUp(...)` twice.
+ */
+const RECOGNITION_SPEC = resolve(__dirname, "..", "..", "tests", "e2e", "recognition-chain-isolated.spec.ts");
+
+export function namedAddresses(src: string): { keys: string[]; signedUp: string[] } {
+  const keys = [...src.matchAll(/const\s+[A-Z_]+\s*=\s*email\((["'`])(.+?)\1\)/g)].map((m) => m[2]!);
+  const signedUp = [...src.matchAll(/signUp\(\s*\w+\s*,\s*([A-Z_]+)\s*\)/g)].map((m) => m[1]!);
+  return { keys, signedUp };
+}
+
+describe("isolated recognition chain: one address per person", () => {
+  it("names its people once each, and registers each through the helper at most once", () => {
+    const { keys, signedUp } = namedAddresses(readFileSync(RECOGNITION_SPEC, "utf8"));
+    expect(keys.length, "the chain names its people").toBeGreaterThanOrEqual(3);
+    expect(new Set(keys).size, `a key is used twice: ${keys.join(", ")}`).toBe(keys.length);
+    expect(new Set(signedUp).size, `registered twice: ${signedUp.join(", ")}`).toBe(signedUp.length);
+  });
+});

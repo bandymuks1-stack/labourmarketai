@@ -2,6 +2,20 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
+import {
+  summarizeOrganizationProjects,
+  type OrganizationProjects,
+} from "@/lib/organization-evidence/organization-projects";
+import {
+  summarizeOrganizationJournal,
+  type OrganizationJournal,
+  type OrganizationJournalRow,
+} from "@/lib/organization-evidence/organization-journal";
+import {
+  JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
+  JOURNAL_ENTRY_METRICS_EMBED,
+} from "@/lib/journal/journal-list-core";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { withSessionWorkspacePointer, listWorkspaceMemberships } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
 import type { BusinessHistoryIdentity } from "./business-history-header";
@@ -51,6 +65,14 @@ export type CompanyWorkHistoryLoad =
       readonly elsewhere: readonly { readonly id: string; readonly name: string; readonly count: number }[];
       /** Roster person id → linked worker id (only `linked` rows). */
       readonly linkedWorkers: Readonly<Record<string, string>>;
+      /** The organization's own projects on the platform (#3354: its track
+       *  record). Null when they could not be read — never shown as "none". */
+      readonly projects: OrganizationProjects | null;
+      /** Work its people recorded in the journal under THIS organization's
+       *  engagements (Lane G's contract, rule 2). A separate ledger from the
+       *  imported history, never added to it. Null when it could not be read
+       *  — never shown as "no hours". */
+      readonly journal: OrganizationJournal | null;
       /** This organization's own roster rows. A person on a record another
        *  organization attributes here belongs to THAT roster: their card is
        *  not this organization's to open. */
@@ -95,7 +117,7 @@ export async function loadCompanyWorkHistory(
   // Every read is PAGED to the end (the server answers at most 1000 rows):
   // production holds 2,944 records for one organization, and a bare
   // `.limit(1000)` made every total on this page silently wrong.
-  const [recs, objs, people] = await Promise.all([
+  const [recs, objs, people, projectRows, journal] = await Promise.all([
     listAllEvidenceRecords(caller, { organizationId: org.organizationId }),
     readAllPages<{
       id: string;
@@ -126,8 +148,33 @@ export async function loadCompanyWorkHistory(
           .order("id", { ascending: true })
           .range(from, to),
     ),
+    // The organization's own projects on the platform — its track record
+    // (#3354). RLS decides what the caller reads; a duplicate project is a
+    // record fact, never counted twice. Unreadable -> no projects section.
+    readAllPages<{ id: string; title: string | null; city: string | null; status: string | null; created_at: string }>(
+      (from, to) =>
+        db(supabase)
+          .from("projects")
+          .select("id, title, city, status, created_at")
+          .eq("organization_id", org.organizationId)
+          .neq("record_state", "duplicate")
+          .order("id", { ascending: true })
+          .range(from, to),
+    ),
+    readOrganizationJournal(supabase, org.organizationId),
   ]);
   if (recs.kind !== "ok" || !objs || !people) return { kind: "unavailable" };
+  const projects = projectRows
+    ? summarizeOrganizationProjects(
+        projectRows.rows.map((r) => ({
+          id: r.id,
+          title: r.title,
+          city: r.city,
+          status: r.status,
+          createdAt: r.created_at,
+        })),
+      )
+    : null;
 
   // A place on a fragment project (record_state = duplicate) belongs to the
   // canonical project it was merged into: periods count real projects and
@@ -204,10 +251,63 @@ export async function loadCompanyWorkHistory(
     history,
     elsewhere,
     linkedWorkers,
+    projects,
+    journal,
     ownPeople,
     attributedCount: attributed.length,
     truncated: recs.truncated,
   };
+}
+
+/**
+ * The organization's journal work, read the one way the contract allows: its
+ * engagements (`engagement_contexts.organization_id`), then the live entries
+ * on them (`journal_entries.engagement_context_id`). An engagement's status is
+ * not filtered: work recorded under a since-ended engagement still happened
+ * here. Ids, timestamps, review rows and metric rows only: never the entry
+ * text. RLS's org-manager branch decides what comes back; nothing widens it.
+ */
+async function readOrganizationJournal(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  organizationId: string,
+): Promise<OrganizationJournal | null> {
+  try {
+    const contexts = await readAllPages<{ id: string }>((from, to) =>
+      db(supabase)
+        .from("engagement_contexts")
+        .select("id")
+        .eq("organization_id", organizationId)
+        .order("id", { ascending: true })
+        .range(from, to),
+    );
+    if (!contexts) return null;
+    const ids = contexts.rows.map((r) => r.id);
+    const select = [
+      "id, worker_id, created_at, correction_of, engagement_context_id, subject:workers(profile_id)",
+      JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
+      JOURNAL_ENTRY_METRICS_EMBED,
+    ].join(", ");
+    const rows: OrganizationJournalRow[] = [];
+    for (let i = 0; i < ids.length; i += ID_CHUNK) {
+      const chunk = ids.slice(i, i + ID_CHUNK);
+      const page = await readAllPages<OrganizationJournalRow>((from, to) =>
+        db(supabase)
+          .from("journal_entries")
+          .select(select)
+          .in("engagement_context_id", chunk)
+          .is("deleted_at", null)
+          .is("superseded_by", null)
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      if (!page || page.truncated) return null;
+      rows.push(...page.rows);
+    }
+    const { todayIso, horizonIso } = await viewerWorkToday();
+    return summarizeOrganizationJournal(rows, todayIso, horizonIso);
+  } catch {
+    return null;
+  }
 }
 
 type PeriodRow = {
