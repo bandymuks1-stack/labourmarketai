@@ -4,10 +4,10 @@
   "profile-cv-history|phone": {
    "spec": "profile-cv-history",
    "device": "phone",
-   "run": 43794315356,
+   "run": 44245341057,
    "result": "success",
-   "build": "648da461",
-   "at": "2026-11-16T03:02:00Z"
+   "build": "62903b2d",
+   "at": "2026-11-18T05:48:49Z"
   },
   "profile-cv-history|phone-375": {
    "spec": "profile-cv-history",
@@ -36,10 +36,10 @@
   "agency-chain|phone": {
    "spec": "agency-chain",
    "device": "phone",
-   "run": 43965333204,
+   "run": 44241546296,
    "result": "success",
-   "build": "b4fd6fb2",
-   "at": "2026-11-16T22:03:43Z"
+   "build": "62903b2d",
+   "at": "2026-11-18T05:12:57Z"
   },
   "agency-chain|phone-375": {
    "spec": "agency-chain",
@@ -72,6 +72,22 @@
    "result": "success",
    "build": "a8dfb015",
    "at": "2026-11-16T08:46:45Z"
+  },
+  "company-governance|phone": {
+   "spec": "company-governance",
+   "device": "phone",
+   "run": 44243678287,
+   "result": "success",
+   "build": "62903b2d",
+   "at": "2026-11-18T05:26:59Z"
+  },
+  "register-gaps|phone": {
+   "spec": "register-gaps",
+   "device": "phone",
+   "run": 44241539906,
+   "result": "success",
+   "build": "62903b2d",
+   "at": "2026-11-18T05:05:47Z"
   }
  }
 }

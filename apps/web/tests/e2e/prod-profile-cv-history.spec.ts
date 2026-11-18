@@ -890,6 +890,37 @@ test("P-20 (3.27). the company's history page opens in Alfa's workspace", async 
   await ctx.close();
 });
 
+test("P-20b (3.36). Alfa's member reads its organization CV: the projects block, its counts, and the way back from a project", async ({ browser }) => {
+  // Read-only: Alfa's own projects, opened by its owner (a member).
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await page.goto("/lt/dashboard/company/history");
+  await expect(inMain(page).getByTestId("company-history")).toBeVisible({ timeout: 30_000 });
+  const projects = inMain(page).getByTestId("company-work-history-projects");
+  await expect(projects, "Alfa has projects, so its organization CV lists them").toBeVisible({ timeout: 30_000 });
+  const counts = projects.getByTestId("company-work-history-projects-counts");
+  await expect(counts).toBeVisible();
+  // #3452: the count reads as words, never a raw ICU pattern.
+  await expect(counts).not.toContainText("{");
+  await expect(counts).not.toContainText("plural");
+  const rows = projects.getByTestId("company-work-history-project");
+  const n = await rows.count();
+  expect(n, "at least one project row").toBeGreaterThan(0);
+  expect(n, "at most 12 rows").toBeLessThanOrEqual(12);
+  const id = await rows.first().getAttribute("data-project");
+  expect(id, "the row names its project").toBeTruthy();
+  await rows.first().click();
+  await page.waitForURL(new RegExp(`/dashboard/projects/${id}`), { timeout: 30_000 });
+  // #3452: a member of the project's organization gets the way back to its history.
+  const back = inMain(page).getByTestId("project-organization-link");
+  await expect(back, "a member sees the link to the organization history").toBeVisible({ timeout: 30_000 });
+  await back.click();
+  await page.waitForURL(/\/company\/history/, { timeout: 30_000 });
+  await expect(inMain(page).getByTestId("company-work-history-projects")).toBeVisible({ timeout: 30_000 });
+  console.info(`[company-history] 3.36: projects block rows=${n} counts="${(await counts.innerText()).trim()}"; member back link works`);
+  await ctx.close();
+});
+
 test("P-21 (3.31). the company report opens and its export downloads as a file", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
