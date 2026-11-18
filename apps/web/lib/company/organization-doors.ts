@@ -53,7 +53,11 @@ export const ORGANIZATION_DOOR_ROUTES: Readonly<
   work: "/dashboard/projects",
   needs: "/dashboard/company/needs",
   market: "/dashboard/service-requests",
-  calendar: "/dashboard/company/planning",
+  // The ONE calendar (owner calendar parity 2026-09-30;
+  // lib/guards/context-parity-one-calendar.test.ts). `/dashboard/company/planning`
+  // is the workforce CAPACITY zone, reached as its own area (Pajėgumai), never
+  // under the calendar's name (route drift fix 2026-11-03).
+  calendar: "/dashboard/planning",
   partners: "/dashboard/company/partners",
   education: "/dashboard/company/education",
   history: "/dashboard/company/history",

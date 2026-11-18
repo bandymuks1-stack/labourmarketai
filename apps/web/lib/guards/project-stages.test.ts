@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Wagon 6 — Project Operations Core (slice 1: Project Stages) guard.
@@ -81,7 +82,7 @@ describe("project stages code degrades honestly", () => {
 });
 
 describe("project stages strings exist in every active-parity locale", () => {
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} has projectStages with all five statuses`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`));
       expect(msgs.projectStages?.title, loc).toBeTruthy();

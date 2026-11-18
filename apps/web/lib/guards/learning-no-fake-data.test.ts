@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * W6 learning — no-fake-data / no-payment guard.
@@ -50,7 +51,7 @@ describe("no payment / no fake data in the learning surface", () => {
     expect(code).not.toMatch(/insert into public\.learning_/i);
   });
 
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: learning copy has no payment wording`, () => {
       const block = (
         JSON.parse(read(join(ROOT, "messages", `${loc}.json`))) as { learning?: unknown }

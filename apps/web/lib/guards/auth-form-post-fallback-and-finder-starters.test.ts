@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { COMMAND_REGISTRY } from "@/lib/navigation/command-registry";
+import { activeLocales } from "@/lib/i18n/config";
 
 const COMPONENTS = join(__dirname, "..", "..", "components", "app");
 const MESSAGES = join(__dirname, "..", "..", "messages");
@@ -100,7 +101,7 @@ describe("command finder offers the canonical destinations with no history", () 
   });
 
   it("has a startersLabel in every locale that ships the finder", () => {
-    for (const locale of ["lt", "en", "de", "nl", "ru"]) {
+    for (const locale of activeLocales) {
       const messages = JSON.parse(
         readFileSync(join(MESSAGES, `${locale}.json`), "utf8"),
       ) as { commandFinder?: Record<string, string> };

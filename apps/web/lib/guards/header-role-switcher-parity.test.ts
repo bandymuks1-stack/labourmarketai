@@ -23,8 +23,11 @@ import {
  */
 
 const repoRoot = resolve(__dirname, "..", "..", "..", "..");
+// RE-ANCHORED 2026-10-25: the header role switcher was retired with the one
+// header (it was a second workspace selector). The surface that still renders
+// per-role status chips is the account page, so parity is pinned there.
 const switcherSrc = readFileSync(
-  resolve(repoRoot, "apps/web/components/app/role-switcher.tsx"),
+  resolve(repoRoot, "apps/web/app/[locale]/dashboard/account/page.tsx"),
   "utf-8",
 );
 const catalogueSrc = readFileSync(
@@ -33,21 +36,15 @@ const catalogueSrc = readFileSync(
 );
 
 describe("Guard: header role switcher reads canonical role catalogue", () => {
-  it("imports ROLE_BY_ID + roleStatusChipKey + roleSwitcherTargetForRole from lib/config/roles", () => {
+  it("the account page imports ROLE_BY_ID + roleStatusChipKey from lib/config/roles", () => {
     expect(switcherSrc).toContain("from \"@/lib/config/roles\"");
     expect(switcherSrc).toContain("ROLE_BY_ID");
     expect(switcherSrc).toContain("roleStatusChipKey");
-    expect(switcherSrc).toContain("roleSwitcherTargetForRole");
   });
 
   it("dashboard catalogue card also imports roleStatusChipKey from the same module", () => {
     expect(catalogueSrc).toContain("from \"@/lib/config/roles\"");
     expect(catalogueSrc).toContain("roleStatusChipKey");
-  });
-
-  it("switcher uses the canonical Pradėti / Dalinis i18n keys (chip_start / chip_partial)", () => {
-    expect(switcherSrc).toContain("chip_start");
-    expect(switcherSrc).toContain("chip_partial");
   });
 
   it("switcher does NOT render `availability !== \"active\"` as a single Ruošiama collapse", () => {

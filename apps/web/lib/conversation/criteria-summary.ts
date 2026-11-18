@@ -70,7 +70,7 @@ export async function loadCriteriaSummaryForChat(): Promise<CriteriaResult> {
 
   const lines: CriteriaLine[] = [];
   if (present.skills)
-    lines.push({ key: "skills", label: t("factSkills"), value: t("skillsCount", { count: snapshot.skillsCount }) });
+    lines.push({ key: "skills", label: t("factSkills"), value: t("skillsCount", { count: snapshot.skillsCount ?? 0 }) });
   if (present.languages)
     lines.push({ key: "languages", label: t("factLanguages"), value: snapshot.languages.map(languageName).join(", ") });
   if (present.countries)
@@ -109,7 +109,7 @@ export async function loadCriteriaSummaryForChat(): Promise<CriteriaResult> {
       value: snapshot.preferredContractType as string,
     });
   if (present.documents)
-    lines.push({ key: "documents", label: t("factDocuments"), value: t("documentsCount", { count: snapshot.documentsCount }) });
+    lines.push({ key: "documents", label: t("factDocuments"), value: t("documentsCount", { count: snapshot.documentsCount ?? 0 }) });
 
   const missingKeys = missingImportantCriteria(snapshot);
   const missing = missingKeys.map((k) => t(`missing.${k}`));

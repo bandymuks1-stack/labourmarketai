@@ -242,7 +242,10 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     status: "LIVE",
     structural: null,
     pages: [
-      { path: P.companies, locales: ALL, fragments: [k("companies.features.items[3].desc")] },
+      // The "Why companies" grid that carried this line was removed as a
+      // duplicate (owner copy cleanup 2026-11-15); the FAQ answer makes the
+      // same claim on the same page.
+      { path: P.companies, locales: ALL, fragments: [k("companies.faq.items[3].a")] },
     ],
   },
   {
@@ -262,15 +265,6 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     pages: [{ path: P.companies, locales: ALL, fragments: [k("companies.faq.items[1].a")] }],
   },
   {
-    claimId: "employer.one-position-free",
-    audience: "EMPLOYER",
-    capabilityId: "MKT-7",
-    capabilityCaveat: BILLING_CAVEAT,
-    status: "LIVE",
-    structural: null,
-    pages: [{ path: P.pricing, locales: ALL, fragments: [k("pricing.faq[1].a")] }],
-  },
-  {
     claimId: "employer.organization-plan-99-per-month",
     audience: "EMPLOYER",
     capabilityId: "MKT-7",
@@ -278,7 +272,7 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     status: "LIVE",
     structural: null,
     note:
-      "English only, on purpose: the plan card's NAME is read from plans.name_en / name_lt (the i18n key is the fallback), so only `en` is known to render this key's text; non-lt locales show name_en. The price figure is read per request from plans.price_eur_monthly by the same rule as PricingTable (owner-confirmed only) and formatted by pricing.pricePerMonth; when the page shows no price, the fragment is omitted. A monthly subscription, VAT on top — never a one-time fee.",
+      "English only, on purpose: the plan card's NAME is read from plans.name_en / name_lt in en / lt (every other locale reads its own catalog name, and the i18n key is the fallback everywhere), so only `en` is known to render this key's text from the DB-or-catalog pair checked here. The price figure is read per request from plans.price_eur_monthly by the same rule as PricingTable (owner-confirmed only) and formatted by pricing.pricePerMonth; when the page shows no price, the fragment is omitted. A monthly subscription, VAT on top — never a one-time fee.",
     pages: [
       {
         path: P.pricing,
@@ -334,7 +328,7 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
       capabilityId: null,
       status: "LIVE",
       structural: null,
-      pages: [{ path: P.root, locales: [locale], fragments: [k("landing.hero.headline")] }],
+      pages: [{ path: P.root, locales: [locale], fragments: [k("landing.v3.lead")] }],
     }),
   ),
   {
@@ -346,6 +340,15 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     pages: [],
   },
   // ── RETIRED — listed so a consumer stops citing them; never deleted ──────
+  {
+    claimId: "employer.one-position-free",
+    audience: "EMPLOYER",
+    capabilityId: "MKT-7",
+    status: "RETIRED",
+    structural: null,
+    note: "\"An organization can run one active position at no cost\" — the free-position limit is enforced only for an organization whose billing is armed (open-needs-gate is permissive otherwise), so while public activation is closed /pricing no longer says it (owner approval 2026-11-12 (b)). Free registration and free need submission remain claimed by employer.inquiry-free.",
+    pages: [],
+  },
   {
     claimId: "employer.organization-plan-price",
     audience: "EMPLOYER",

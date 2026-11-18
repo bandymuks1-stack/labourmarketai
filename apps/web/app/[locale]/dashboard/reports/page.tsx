@@ -21,6 +21,11 @@ import { createUtcFormatter } from "@/lib/time/display";
 import type { Role } from "@/lib/auth/actions";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { ExplainMore } from "@/components/app/premium/disclosure";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/reports", "reports.title");
+
 
 /**
  * Reports hub (control room PR K, capability gap map §12) — the role-specific

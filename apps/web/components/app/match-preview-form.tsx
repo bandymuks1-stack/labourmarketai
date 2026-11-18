@@ -88,6 +88,12 @@ export function MatchPreviewForm({
     mismatch: labels.verdictMismatch,
     unknown: labels.verdictUnknown,
   };
+  /** Did an AI run actually produce the explanation on screen? */
+  const aiProduced =
+    state?.ok === true &&
+    state.explanationStatus === "suggestion" &&
+    typeof state.explanation === "string" &&
+    state.explanation.length > 0;
   const verdictTone: Record<string, string> = {
     fit: "text-state-success",
     mismatch: "text-state-warning",
@@ -197,13 +203,24 @@ export function MatchPreviewForm({
                   {state.blockers.join("; ")}
                 </p>
               ) : null}
-              <div className="rounded-md border border-border-subtle bg-surface-2 p-3">
+              <div className="rounded-md border border-border-subtle bg-surface-2 p-3" data-testid="match-preview-explanation">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-meta font-semibold uppercase tracking-label text-brand-blue">{labels.aiBadge}</span>
+                  {/* NO FAKE AI (doctrine §7): the badge claims an AI run, so it
+                      shows only when one produced this explanation. With the
+                      runtime off, throttled or refusing, there is no badge —
+                      the line below says plainly that nothing was generated. */}
+                  {aiProduced ? (
+                    <span
+                      className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-meta font-semibold uppercase tracking-label text-brand-blue"
+                      data-testid="match-preview-ai-badge"
+                    >
+                      {labels.aiBadge}
+                    </span>
+                  ) : null}
                   <span className="text-meta text-text-muted">{labels.aiExplanationTitle}</span>
                 </div>
                 <p className="mt-2 text-sm text-text-secondary">
-                  {state.explanationStatus === "suggestion" && state.explanation
+                  {aiProduced
                     ? state.explanation
                     : state.explanationStatus === "disabled"
                       ? labels.aiDisabled

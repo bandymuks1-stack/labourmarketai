@@ -36,6 +36,9 @@ import {
 
 const ORIGIN = "https://labourmarket.ai";
 
+/** What the browser sends for the account menu's sign-out form. */
+const SAME_ORIGIN_FORM = { origin: ORIGIN, "sec-fetch-site": "same-origin" } as const;
+
 beforeEach(() => {
   signOutMock.mockReset();
   signOutMock.mockResolvedValue({ error: null });
@@ -44,7 +47,7 @@ beforeEach(() => {
 describe("auth/logout route — 303 redirect to localized login", () => {
   it("POST /lt/auth/logout returns 303 with Location /lt/auth/login", async () => {
     const res = await POST(
-      new Request(`${ORIGIN}/lt/auth/logout`, { method: "POST" }),
+      new Request(`${ORIGIN}/lt/auth/logout`, { method: "POST", headers: SAME_ORIGIN_FORM }),
       { params: Promise.resolve({ locale: "lt" }) },
     );
     expect(res.status).toBe(303);
@@ -56,7 +59,7 @@ describe("auth/logout route — 303 redirect to localized login", () => {
 
   it("signs out THIS session only — scope 'local', never the library default 'global' (2026-09-02 incident)", async () => {
     await POST(
-      new Request(`${ORIGIN}/lt/auth/logout`, { method: "POST" }),
+      new Request(`${ORIGIN}/lt/auth/logout`, { method: "POST", headers: SAME_ORIGIN_FORM }),
       { params: Promise.resolve({ locale: "lt" }) },
     );
     expect(signOutMock).toHaveBeenCalledTimes(1);
@@ -74,16 +77,16 @@ describe("auth/logout route — 303 redirect to localized login", () => {
 
   it("POST /en/auth/logout returns 303 with Location /en/auth/login", async () => {
     const res = await POST(
-      new Request(`${ORIGIN}/en/auth/logout`, { method: "POST" }),
+      new Request(`${ORIGIN}/en/auth/logout`, { method: "POST", headers: SAME_ORIGIN_FORM }),
       { params: Promise.resolve({ locale: "en" }) },
     );
     expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe(`${ORIGIN}/en/auth/login`);
   });
 
-  it("GET /lt/auth/logout returns 303 too (direct-link path)", async () => {
+  it("GET /lt/auth/logout returns 303 too (same-origin link path)", async () => {
     const res = await GET(
-      new Request(`${ORIGIN}/lt/auth/logout`),
+      new Request(`${ORIGIN}/lt/auth/logout`, { headers: { "sec-fetch-site": "same-origin" } }),
       { params: Promise.resolve({ locale: "lt" }) },
     );
     expect(res.status).toBe(303);
@@ -93,7 +96,7 @@ describe("auth/logout route — 303 redirect to localized login", () => {
   it("still redirects (and does not crash) if signOut throws", async () => {
     signOutMock.mockRejectedValue(new Error("network down"));
     const res = await POST(
-      new Request(`${ORIGIN}/lt/auth/logout`, { method: "POST" }),
+      new Request(`${ORIGIN}/lt/auth/logout`, { method: "POST", headers: SAME_ORIGIN_FORM }),
       { params: Promise.resolve({ locale: "lt" }) },
     );
     expect(res.status).toBe(303);
@@ -106,12 +109,81 @@ describe("auth/logout route — behind the VPS proxy (2026-10-18 incident)", () 
     const res = await POST(
       new Request("http://0.0.0.0:3000/en/auth/logout", {
         method: "POST",
-        headers: { host: "labourmarket.ai", "x-forwarded-host": "labourmarket.ai", "x-forwarded-proto": "https" },
+        headers: {
+          host: "labourmarket.ai",
+          "x-forwarded-host": "labourmarket.ai",
+          "x-forwarded-proto": "https",
+          ...SAME_ORIGIN_FORM,
+        },
       }),
       { params: Promise.resolve({ locale: "en" }) },
     );
     expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe(`${ORIGIN}/en/auth/login`);
+  });
+});
+
+describe("auth/logout route — a foreign site cannot sign the person out (CSRF logout, 2026-10-25)", () => {
+  const refused: Array<[string, () => Request]> = [
+    [
+      "a cross-site <img>/link GET",
+      () => new Request(`${ORIGIN}/lt/auth/logout`, { headers: { "sec-fetch-site": "cross-site" } }),
+    ],
+    [
+      "a same-site (other subdomain) GET",
+      () => new Request(`${ORIGIN}/lt/auth/logout`, { headers: { "sec-fetch-site": "same-site" } }),
+    ],
+    [
+      "a cross-site self-submitting form POST",
+      () =>
+        new Request(`${ORIGIN}/lt/auth/logout`, {
+          method: "POST",
+          headers: { origin: "https://evil.example", "sec-fetch-site": "cross-site" },
+        }),
+    ],
+    [
+      "a look-alike host in Origin",
+      () =>
+        new Request(`${ORIGIN}/lt/auth/logout`, {
+          method: "POST",
+          headers: { origin: "https://labourmarket.ai.evil.example" },
+        }),
+    ],
+    [
+      "a POST with neither Origin nor fetch metadata",
+      () => new Request(`${ORIGIN}/lt/auth/logout`, { method: "POST" }),
+    ],
+    [
+      "a GET with neither Origin nor fetch metadata",
+      () => new Request(`${ORIGIN}/lt/auth/logout`),
+    ],
+    [
+      "a POST claiming `none` (only a user-started navigation may)",
+      () =>
+        new Request(`${ORIGIN}/lt/auth/logout`, {
+          method: "POST",
+          headers: { "sec-fetch-site": "none" },
+        }),
+    ],
+  ];
+  for (const [name, make] of refused) {
+    it(`${name}: no signOut, sent to the account page with the session intact`, async () => {
+      const req = make();
+      const handler = req.method === "POST" ? POST : GET;
+      const res = await handler(req, { params: Promise.resolve({ locale: "lt" }) });
+      expect(signOutMock).not.toHaveBeenCalled();
+      expect(res.status).toBe(303);
+      expect(res.headers.get("location")).toBe(`${ORIGIN}/lt/dashboard/account`);
+    });
+  }
+
+  it("a GET the person started themselves (typed / bookmarked: Sec-Fetch-Site none) still signs out", async () => {
+    const res = await GET(
+      new Request(`${ORIGIN}/lt/auth/logout`, { headers: { "sec-fetch-site": "none" } }),
+      { params: Promise.resolve({ locale: "lt" }) },
+    );
+    expect(signOutMock).toHaveBeenCalledWith({ scope: "local" });
+    expect(res.headers.get("location")).toBe(`${ORIGIN}/lt/auth/login`);
   });
 });
 

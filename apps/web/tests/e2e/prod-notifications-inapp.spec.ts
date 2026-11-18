@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -119,7 +119,7 @@ test("N-0. the worker's own worker id (own row, own token)", async () => {
 test("N-1. the worker raises a hand on Gama's need", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("main").getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const cards = page
     .locator('li[id^="opp-"]')
     .filter({ has: page.getByTestId("opportunity-company").filter({ hasText: GAMA }) })

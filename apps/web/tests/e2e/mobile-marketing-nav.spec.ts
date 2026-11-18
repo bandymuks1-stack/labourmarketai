@@ -43,14 +43,18 @@ const MOBILE_WIDTHS = [320, 375, 768] as const;
 /** Apple/WCAG 2.2 minimum. A 0.5px sub-pixel rounding slack, nothing more. */
 const MIN_TOUCH_PX = 43.5;
 
-/** The canonical public IA — the links a visitor must be able to reach. */
+/** The canonical public IA — the links a visitor must be able to reach
+ *  (`ALL_LINKS` in components/layouts/site-nav.tsx). The three audience pages
+ *  (/for-workers, /for-companies, /for-agencies) left the header in #1609
+ *  (owner window 11 §16) and stay reachable from the footer and the landing's
+ *  starting contexts; this spec follows the header's own list. */
 const EXPECTED_LINKS: ReadonlyArray<{ href: string }> = [
-  { href: "/for-workers" },
-  { href: "/for-companies" },
-  { href: "/for-agencies" },
+  { href: "/jobs" },
   { href: "/pricing" },
   { href: "/about" },
 ];
+/** Same-page landing anchors, matched by fragment (the locale prefix varies). */
+const EXPECTED_ANCHORS = ["#market", "#how-it-works"] as const;
 
 test.beforeAll(() => mkdirSync(SHOTS, { recursive: true }));
 
@@ -147,17 +151,21 @@ for (const width of MOBILE_WIDTHS) {
         const link = menu.locator(`a[href$="${href}"]`);
         await expect(link, `${href} reachable at ${width}px`).toBeVisible();
       }
-      // The landing anchor is same-page, so it is matched separately.
-      await expect(
-        menu.locator('a[href*="#how-it-works"]'),
-        `#how-it-works reachable at ${width}px`,
-      ).toBeVisible();
+      // The landing anchors are same-page, so they are matched separately.
+      for (const anchor of EXPECTED_ANCHORS) {
+        await expect(
+          menu.locator(`a[href*="${anchor}"]`),
+          `${anchor} reachable at ${width}px`,
+        ).toBeVisible();
+      }
 
       // Every marketing row is a >= 44px touch target, measured live. Scoped
       // to DIRECT children: the auth section below is a nested div that is
       // display:none from `sm` up, and a hidden element has no box to measure.
       const rows = await menu.locator("> a").all();
-      expect(rows.length, "menu row count").toBeGreaterThanOrEqual(6);
+      expect(rows.length, "menu row count").toBeGreaterThanOrEqual(
+        EXPECTED_LINKS.length + EXPECTED_ANCHORS.length,
+      );
       for (const row of rows) {
         const rb = await row.boundingBox();
         expect(rb, "row bounding box").not.toBeNull();
@@ -167,19 +175,21 @@ for (const width of MOBILE_WIDTHS) {
         ).toBeGreaterThanOrEqual(MIN_TOUCH_PX);
       }
 
-      // The auth CTAs are reachable at EVERY width — in the panel below `sm`
-      // (where the header row cannot fit them) and in the header from `sm` up.
-      // Whichever side owns them, both must be one tap from the header.
+      // Owner fix list 2026-11-12: Sign in is IN THE HEADER ROW at every
+      // width. Sign up is beside it from `sm`; below `sm` it is the first
+      // thing in the panel, next to the theme toggle that moved there.
       const inPanel = menu.getByTestId("mobile-nav-auth");
-      const headerCtas = page.locator("header > div > div a[data-testid='auth-cta-link']");
+      const headerAuth = page.getByTestId("header-auth");
+      await expect(headerAuth.locator("a[href*='/auth/login']")).toBeVisible();
       if (width < 640) {
-        await expect(inPanel, `auth CTAs belong in the panel at ${width}px`).toBeVisible();
-        await expect(inPanel.locator("a[href*='/auth/login']")).toBeVisible();
+        await expect(inPanel, `Sign up leads the panel at ${width}px`).toBeVisible();
         await expect(inPanel.locator("a[href*='/auth/signup']")).toBeVisible();
-        await expect(headerCtas.first(), "header CTAs hidden below sm").toBeHidden();
+        await expect(inPanel.getByTestId("menu-theme-toggle")).toBeVisible();
+        await expect(headerAuth.locator("a[href*='/auth/signup']")).toBeHidden();
       } else {
-        await expect(inPanel, `auth CTAs belong in the header at ${width}px`).toBeHidden();
-        await expect(headerCtas.first()).toBeVisible();
+        await expect(inPanel, `the panel carries no auth row at ${width}px`).toBeHidden();
+        await expect(headerAuth.locator("a[href*='/auth/signup']")).toBeVisible();
+        await expect(page.getByTestId("public-theme-toggle")).toBeVisible();
       }
 
       await page.screenshot({
@@ -243,9 +253,17 @@ test.describe("@1280px desktop", () => {
   test("the desktop nav is back and the menu button is gone", async ({ page }) => {
     await page.goto("/lt");
 
-    // The links live in the header's own nav at this width...
-    await expect(page.locator("header nav a[href$='/for-workers']")).toBeVisible();
-    // ...and the disclosure button must not be offered alongside them.
+    // ONE navigation (owner fix list 2026-11-12): the goal bar is the
+    // desktop navigation; the older links sit behind its "More".
+    await expect(page.getByTestId("intent-bar")).toBeVisible();
+    await expect(page.locator("header nav")).toHaveCount(1);
+    await page.getByTestId("intent-toggle-more").click();
+    await expect(
+      page.getByTestId("intent-more-links").locator("a[href$='/pricing']"),
+    ).toBeVisible();
+    await expect(page.getByTestId("intent-more-links").locator("a[href$='/about']")).toBeVisible();
+    await page.keyboard.press("Escape");
+    // ...and the disclosure button must not be offered alongside it.
     await expect(page.getByTestId("mobile-nav-toggle")).toBeHidden();
     expect(await headerOverflow(page), "desktop header overflow").toEqual([]);
   });

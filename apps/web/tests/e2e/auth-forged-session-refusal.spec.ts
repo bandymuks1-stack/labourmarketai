@@ -23,8 +23,9 @@
  * verified `getUser()` in a frame above its `loading.tsx`:
  *
  *   /lt/dashboard, /lt/dashboard/company, /lt/onboarding, /lt/cv
- *     → a real 3xx to /lt/auth/login; no shell or skeleton bytes; none of
- *       the identity the forged token names.
+ *     → a real 3xx to /lt/auth/login; no authenticated-shell bytes; none of
+ *       the identity the forged token names. (A static loading skeleton may
+ *       ride in the redirect's flight body — see RENDER_MARKERS.)
  *   `RSC: 1` to /lt/dashboard/company
  *     → no page data: the refusal travels in the flight stream, and neither
  *       the identity nor the authenticated shell's state does.
@@ -63,18 +64,24 @@ const PROTECTED_DOCUMENTS = [
   "/lt/cv",
 ] as const;
 
-/** Bytes that exist only once a protected tree started rendering: the
- *  authenticated shell's logo link and each tree's loading skeleton. */
-const RENDER_MARKERS = [
-  "shell-logo-home",
-  "dashboard-section-loading",
-  "onboarding-loading",
-  "cv-loading",
-] as const;
-
 /** A key of the dashboard layout's `AuthProvider` state. It is serialized only
  *  when that layout rendered for a verified user. */
 const AUTH_SHELL_STATE = "workspacePointerAvailable";
+
+/** Bytes that exist only once the AUTHENTICATED shell rendered for a verified
+ *  user: its logo link and its serialized auth state.
+ *
+ *  The trees' `loading.tsx` skeleton ids (`dashboard-section-loading`,
+ *  `onboarding-loading`, `cv-loading`) are deliberately NOT here any more.
+ *  A skeleton is static, identity-free markup, and Next ships the loading
+ *  element inside the flight payload of the 3xx response itself (measured
+ *  2026-10-23 on `next build` + `next start`: real 3xx to login, no shell, no
+ *  identity — and the skeleton id in the body). Its id therefore proves
+ *  nothing about a render for the refused visitor. What does: the REAL 3xx to
+ *  login (a gate below the boundary answers 200 — the #1843 negative control,
+ *  HTTP 200 with `cv-loading` streamed, still fails the status assertion) and
+ *  the absence of every byte that only a verified render produces. */
+const RENDER_MARKERS = ["shell-logo-home", AUTH_SHELL_STATE] as const;
 
 const LOGIN_PATH = "/lt/auth/login";
 /** `TOKEN_FRESH_MARGIN_S` in middleware.ts — below it the fast path is skipped. */

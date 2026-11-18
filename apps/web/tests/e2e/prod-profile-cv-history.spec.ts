@@ -1,9 +1,10 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import { contextPanel } from "./prod-context-panel";
+import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
-import { makeDocx } from "../../lib/cv/__fixtures__/cv-fixtures";
+import { makeDocx, makeUnicodePdf } from "../../lib/cv/__fixtures__/cv-fixtures";
 
 /**
  * PRODUCTION PROFILE · LIVING CV · HISTORY — owner areas 1 / 3 / 15: the
@@ -38,7 +39,9 @@ const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slo
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["worker", "worker2", "owner"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 240_000, retries: 0 });
-test.use({ actionTimeout: 30_000 });
+// The Chrome build the runner carries, not Playwright's Chromium (owner 2026-11-05).
+// Still headless and scripted: it is Chrome, not a person.
+test.use({ actionTimeout: 30_000, channel: "chrome" });
 
 const EXPERIENCE = `${TAG} darbo patirtis`;
 const PRACTICE = `${TAG} savanorystė`;
@@ -52,6 +55,17 @@ async function as(browser: Browser, slot: string): Promise<{ ctx: BrowserContext
   const ctx = await browser.newContext({ storageState: state(slot), locale: "lt-LT" });
   return { ctx, page: await ctx.newPage() };
 }
+
+/**
+ * The page content, never the streaming holder. Dashboard pages stream through
+ * a hidden `<div id="S:n">` whose reveal is rAF-driven; in a never-painting
+ * headless tab that hidden copy sits outside <main> beside the rendered one,
+ * so a bare testid fails strict mode at once and a count reads double
+ * (project-execution 40081437313 E-11 `hours-worker-select`, and its cleanup
+ * `toHaveCount(0)`; calendar-journal-history.spec.ts). Strict inside <main>
+ * still fails if a page really renders something twice.
+ */
+const inMain = (page: Page): Locator => page.getByRole("main");
 
 /** Make `orgName` the active workspace through the real header chip. */
 async function useWorkspace(page: Page, orgName: string): Promise<void> {
@@ -68,8 +82,19 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
 /** The profile opened at one section: the hash opens its closed fold. Streaming
  *  can briefly render a second copy outside `main`, so everything is scoped. */
 async function profileAt(page: Page, hash: string): Promise<Locator> {
+  // Always a REAL load. A goto to the page the tab is already on, differing
+  // only by hash, is a same-document navigation: nothing is re-read, and a
+  // "fresh" check would read the old tree (run 40175731734 P-13; #2702 P-4).
+  const already = (() => {
+    try {
+      return new URL(page.url()).pathname === "/lt/dashboard/profile";
+    } catch {
+      return false;
+    }
+  })();
   await page.goto(`/lt/dashboard/profile#${hash}`);
-  const main = page.locator("main");
+  if (already) await page.reload();
+  const main = inMain(page);
   await expect(main.locator(`#${hash}`).first()).toBeVisible({ timeout: 30_000 });
   return main;
 }
@@ -82,18 +107,22 @@ async function pick(page: Page, scope: Locator, testId: string, option: string):
 
 async function livingCv(page: Page): Promise<Locator> {
   await page.goto("/lt/cv");
-  const main = page.locator("main");
+  // The Living CV's own <main> (added for runs 40086140120 / 40153545718,
+  // which found none). By role, so a hidden streaming copy never counts.
+  const main = inMain(page);
   await expect(main.locator("h1").first()).toBeVisible({ timeout: 30_000 });
   return main;
 }
 
 /** Ask the conversation something and wait for the composer to take it. */
 async function say(page: Page, text: string): Promise<void> {
-  const composer = page.getByTestId("composer-input");
+  const composer = inMain(page).getByTestId("composer-input");
   await expect(composer).toBeVisible({ timeout: 60_000 });
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   await composer.fill(text);
-  await page.getByTestId("composer-send").click();
+  // On a phone an open context sheet lies over the composer; a person closes it to send.
+  await contextPanel(page, "closed");
+  await inMain(page).getByTestId("composer-send").click();
 }
 
 const short = (e: unknown) => (e as Error).message.split("\n")[0].slice(0, 160);
@@ -166,10 +195,10 @@ test("P-2 (1.4). an onboarded person is not sent back into onboarding, and the s
   await page.goto("/lt/onboarding");
   await expect(page).toHaveURL(/\/lt\/dashboard/, { timeout: 30_000 });
   await page.goto("/lt/dashboard/start");
-  await expect(page.getByTestId("activity-setup-hub")).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("activity-setup-lane-grid")).toBeVisible();
-  await expect(page.getByTestId("activity-setup-lane-company")).toBeVisible();
-  await expect(page.getByTestId("activity-setup-lane-buyer-start")).toBeVisible();
+  await expect(inMain(page).getByTestId("activity-setup-hub")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("activity-setup-lane-grid")).toBeVisible();
+  await expect(inMain(page).getByTestId("activity-setup-lane-company")).toBeVisible();
+  await expect(inMain(page).getByTestId("activity-setup-lane-buyer-start")).toBeVisible();
   await ctx.close();
 });
 
@@ -204,9 +233,19 @@ const CARD_FIELDS = {
 } as const;
 
 async function openWorkCard(page: Page): Promise<Locator> {
-  const main = await profileAt(page, "cv-availability");
+  // The persistence check needs a FRESH document. Going to the same URL and
+  // hash again is a same-document fragment navigation: nothing reloads, the
+  // editor stays open, and the toggle then CLOSED it (run 39970719710).
+  const again = page.url().includes("/dashboard/profile#cv-availability");
+  let main = await profileAt(page, "cv-availability");
+  if (again) {
+    await page.reload();
+    main = page.locator("main");
+    await expect(main.locator("#cv-availability").first()).toBeVisible({ timeout: 30_000 });
+  }
   await expect(main.getByTestId("profile-work-card-editor")).toBeVisible({ timeout: 30_000 });
-  await main.getByTestId("work-card-editor-toggle").click();
+  const toggle = main.getByTestId("work-card-editor-toggle");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const form = main.getByTestId("work-card-editor");
   await expect(form).toBeVisible({ timeout: 30_000 });
   return form;
@@ -315,27 +354,147 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
     "QA Synthetic profesine mokykla, statybos programa 2015-2019",
     "Anglu kalba B2",
   ];
-  await page.goto("/lt/dashboard");
-  await say(page, "Įkelk mano CV");
-  await expect(page.getByTestId("conversation-cv-flow").last()).toBeVisible({ timeout: 60_000 });
-  const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
-  await input.waitFor({ state: "attached", timeout: 30_000 });
-  await input.setInputFiles({
-    name: "qa-synthetic-cv.docx",
-    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    buffer: Buffer.from(makeDocx(lines.join("\n"))),
-  });
-  const review = page.getByTestId("cv-import-section-review").last();
-  const empty = page.getByTestId("conversation-cv-empty").last();
-  const error = page.getByTestId("cv-import-error").last();
-  await expect(review.or(empty).or(error)).toBeVisible({ timeout: 60_000 });
-  if (await error.isVisible()) throw new Error(`CV not read: ${(await error.innerText()).slice(0, 120)}`);
-  await expect(review, "the generated CV yields a proposal").toBeVisible();
-  const job = page.getByTestId("cv-import-item-wh-0").last();
+  const importCv = async () => {
+    await page.goto("/lt/dashboard");
+    await say(page, "Įkelk mano CV");
+    // "my CV" + a file verb is a FILE intent (#1684, `handleFileIntent` →
+    // `fileSelfCv`): the chat names the door as ONE `cv` chip and the import
+    // opens only when the person takes it (run 40049229470 waited 60 s for a
+    // flow that is never opened by the sentence alone). The newest chip answers
+    // this request; a starter row may carry an older one. Visible nodes only:
+    // the dashboard streams through a hidden `<div id="S:n">` copy at the end
+    // of <body>, so a bare `.last()` can land on the hidden starter row.
+    await inMain(page).getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
+    await expect(inMain(page).getByTestId("conversation-cv-flow").last()).toBeVisible({ timeout: 60_000 });
+    const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
+    await input.waitFor({ state: "attached", timeout: 30_000 });
+    await input.setInputFiles({
+      name: "qa-synthetic-cv.docx",
+      mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      buffer: Buffer.from(makeDocx(lines.join("\n"))),
+    });
+    const review = inMain(page).getByTestId("cv-import-section-review").last();
+    const empty = inMain(page).getByTestId("conversation-cv-empty").last();
+    const error = inMain(page).getByTestId("cv-import-error").last();
+    await expect(review.or(empty).or(error)).toBeVisible({ timeout: 60_000 });
+    if (await error.isVisible()) throw new Error(`CV not read: ${(await error.innerText()).slice(0, 120)}`);
+    await expect(review, "the generated CV yields a proposal").toBeVisible();
+  };
+  await importCv();
+  const job = inMain(page).getByTestId("cv-import-item-wh-0").last();
   await expect(job).toContainText(company, { timeout: 30_000 });
   const items = await page.locator('[data-testid^="cv-import-item-"]').count();
   console.info(`[cv-import] proposal items=${items}`);
   // Negative control: a proposal is not a save.
+  const cv = await livingCv(page);
+  await expect(cv.getByText(company)).toHaveCount(0);
+
+  // UF-3: the person corrects the proposal before saving; what they typed is what
+  // is stored and what the Living CV reads, as their own statement. The row is
+  // removed in `afterAll` with the others, even after a red step.
+  const corrected = `${TAG} pataisyta CV eilute`;
+  await importCv();
+  await expect(job).toContainText(company, { timeout: 30_000 });
+  await inMain(page).getByTestId("cv-import-edit-wh-0").last().click();
+  await inMain(page).getByTestId("cv-import-field-wh-0-title").last().fill(corrected);
+  await inMain(page).getByTestId("cv-import-field-wh-0-start").last().fill("2019-03");
+  await expect(job, "the row follows the correction").toContainText(corrected);
+  addedHistory.push(corrected);
+  await inMain(page).getByTestId("cv-import-confirm-wh-0").last().click();
+  await expect(inMain(page).getByTestId("cv-import-saved-wh-0").last()).toBeVisible({ timeout: 30_000 });
+  const after = await livingCv(page);
+  const saved = after
+    .locator('[data-testid="premium-cv-experience-row"][data-level="declared"]', { hasText: corrected })
+    .or(after.getByTestId("cv-history-node").filter({ hasText: corrected }));
+  await expect(saved.first(), "the corrected row is on the Living CV, as stated by the person").toBeVisible({ timeout: 60_000 });
+  await expect(after.getByText(company), "the parser's reading was not saved").toHaveCount(0);
+  await ctx.close();
+});
+
+test("P-6b (UF-3). a real CV layout is read correctly: title, dates, training and each language's level", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  const company = `UAB QASYNTHETICB${RUN.replace(/[^0-9a-z]/gi, "").toUpperCase()}`;
+  const lines = [
+    "Darbo patirtis",
+    "Plytelių klojėjas",
+    company,
+    "2019 – 2023",
+    "Išsilavinimas",
+    "QA Synthetic rengimo centras, profesinis mokymas 2015–2017",
+    "Kalbos",
+    "Anglų B2, rusų gimtoji",
+  ];
+  await page.goto("/lt/dashboard");
+  await say(page, "Įkelk mano CV");
+  await inMain(page).getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
+  const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
+  await input.waitFor({ state: "attached", timeout: 60_000 });
+  await input.setInputFiles({
+    name: "qa-synthetic-cv-layout.docx",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    buffer: Buffer.from(makeDocx(lines.join("\n"))),
+  });
+  await expect(inMain(page).getByTestId("cv-import-section-review").last()).toBeVisible({ timeout: 60_000 });
+
+  const job = inMain(page).getByTestId("cv-import-item-wh-0").last();
+  await expect(job, "the title is kept, not replaced by the company").toContainText("Plytelių klojėjas", { timeout: 30_000 });
+  await expect(job, "the dates on their own line are kept").toContainText("2019");
+  await expect(inMain(page).getByTestId("cv-import-item-edu-0").last(), "a training centre is education").toContainText("rengimo centras");
+  await expect(page.locator('[data-testid^="cv-import-item-wh-"]').filter({ hasText: "rengimo centras" }), "and never work history").toHaveCount(0);
+  await expect(inMain(page).getByTestId("cv-import-level-en").last(), "English keeps its own level").toHaveValue("B2");
+  await expect(inMain(page).getByTestId("cv-import-level-ru").last(), "Russian is not given English's level").not.toHaveValue("B2");
+
+  // Read, never confirmed: nothing of this reaches the Living CV.
+  const cv = await livingCv(page);
+  await expect(cv.getByText(company)).toHaveCount(0);
+  await ctx.close();
+});
+
+test("P-6c (UF-3). a PDF CV keeps Lithuanian letters in the name, the employer and the title", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  // Fixed synthetic strings carrying every Lithuanian letter class: caron
+  // (Š, Ž), ogonek (Ą, į, ų), dot (ė) and macron (ū). The PDF uses a Type0 /
+  // ToUnicode font, the shape Word and Chrome export, built in memory.
+  const name = "QA-SYNTHETIC Žydrūnė Ąžuolaitė";
+  const company = "UAB Šiaurės Ąžuolų Statyba";
+  const title = "Vyresnioji įrangos montuotoja";
+  const lines = [
+    name,
+    "Darbo patirtis",
+    title,
+    company,
+    "2018 – 2024",
+    "Išsilavinimas",
+    "QA Synthetic Ąžuolyno rengimo centras, profesinis mokymas 2015–2017",
+    "Kalbos",
+    "Lietuvių gimtoji, anglų B2",
+  ];
+  await page.goto("/lt/dashboard");
+  await say(page, "Įkelk mano CV");
+  await inMain(page).getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
+  const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
+  await input.waitFor({ state: "attached", timeout: 60_000 });
+  await input.setInputFiles({
+    name: "qa-synthetic-cv-lithuanian.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from(makeUnicodePdf(lines.join("\n"))),
+  });
+  const review = inMain(page).getByTestId("cv-import-section-review").last();
+  const error = inMain(page).getByTestId("cv-import-error").last();
+  await expect(review.or(error)).toBeVisible({ timeout: 60_000 });
+  if (await error.isVisible()) throw new Error(`PDF CV not read: ${(await error.innerText()).slice(0, 120)}`);
+
+  const job = inMain(page).getByTestId("cv-import-item-wh-0").last();
+  await expect(job, "the title keeps į").toContainText(title, { timeout: 30_000 });
+  await expect(job, "the employer keeps Š, ė, Ą, ž and ų").toContainText(company);
+  await expect(job, "the dates are kept").toContainText("2018");
+  await expect(
+    page.locator('[data-testid^="cv-import-item-unplaced-"]').filter({ hasText: name }),
+    "the name line keeps Ž, ū, ė and Ą, offered to place, not dropped",
+  ).toHaveCount(1);
+  await expect(inMain(page).getByTestId("cv-import-level-lt").last(), "Lithuanian is read from \"Lietuvių\"").toHaveValue("native");
+
+  // Read, never confirmed: nothing of this reaches the Living CV.
   const cv = await livingCv(page);
   await expect(cv.getByText(company)).toHaveCount(0);
   await ctx.close();
@@ -369,10 +528,15 @@ test("P-7 (2.5). an employment row is added on the profile and shows on the Livi
 test("P-8 (2.6). a volunteering period told through the chat form lands under practice on the Living CV", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2");
   await page.goto("/lt/dashboard");
-  await say(page, "Ką dar turiu padaryti?");
-  await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 45_000 });
-  await page.getByTestId("chat-chip-f:worker.add-work-history").last().click();
-  const form = page.getByTestId("inline-action-form-worker.add-work-history").last();
+  // A dated past period told to the chat opens the self-declared history form
+  // with its years (`professionStatement` → `readPastWorkPeriod`, the
+  // 2026-09-29 production fix). That door does not depend on profile state.
+  // The old door, "Ką dar turiu padaryti?" plus the `add-work-history` chip,
+  // offers that chip only while something is missing. P-7 has just added a
+  // history row, so the chat rightly answered with its starter chips
+  // (run 40163027393).
+  await say(page, "2020–2021 dirbau savanoriu maisto banke");
+  const form = inMain(page).getByTestId("inline-action-form-worker.add-work-history").last();
   await expect(form).toBeVisible({ timeout: 30_000 });
   await form.getByTestId("field-title").fill(PRACTICE);
   await form.getByTestId("field-relationship").selectOption("volunteer");
@@ -382,8 +546,8 @@ test("P-8 (2.6). a volunteering period told through the chat form lands under pr
   await expect(form.getByTestId("inline-action-review")).toBeVisible({ timeout: 30_000 });
   addedHistory.push(PRACTICE);
   await form.getByTestId("inline-action-save").click();
-  const done = page.getByTestId("inline-action-done").last();
-  const failed = page.getByTestId("inline-action-error").last();
+  const done = inMain(page).getByTestId("inline-action-done").last();
+  const failed = inMain(page).getByTestId("inline-action-error").last();
   await expect(done.or(failed)).toBeVisible({ timeout: 30_000 });
   if (!(await done.isVisible())) throw new Error(`practice not saved: ${(await failed.innerText()).slice(0, 120)}`);
 
@@ -426,9 +590,26 @@ async function addAchievement(page: Page, title: string, type: string): Promise<
   await pick(page, form, "worker-achievements-type", type);
   addedAchievements.push(title);
   await form.getByTestId("worker-achievements-save").click();
-  const row = section.getByTestId("worker-achievements-row").filter({ hasText: title });
-  await expect(row.or(section.getByTestId("worker-achievements-error")).first()).toBeVisible({ timeout: 30_000 });
-  if (!(await row.isVisible())) throw new Error(`achievement not saved: ${await section.getByTestId("worker-achievements-error").innerText()}`);
+  // The save's own answer: the form closes on ok (before the refresh) and
+  // shows the alert on a refusal.
+  const error = section.getByTestId("worker-achievements-error");
+  await expect(error.or(section.getByTestId("worker-achievements-add-open")).first(), "the save answered").toBeVisible({
+    timeout: 30_000,
+  });
+  if (await error.isVisible()) throw new Error(`achievement not saved: ${await error.innerText()}`);
+  // The row in place is logged, not asserted. Run 40166272659: the second
+  // save's insert answered 201 at 05:41:43 and the server re-read the list
+  // at 05:41:45, but the refreshed row never committed in the headless tab
+  // in 30 s. Cleanup later found and removed both rows. The cause is not
+  // proven; it is most likely the same never-painting tab that keeps the
+  // hidden `S:n` holder. The claim (saved,
+  // persisted, labelled declared) is asserted on a fresh load below.
+  const inPlace = section.getByTestId("worker-achievements-row").filter({ hasText: title });
+  const shownInPlace = await inPlace.waitFor({ state: "visible", timeout: 10_000 }).then(() => true, () => false);
+  console.info(`[achievements] "${title.slice(-20)}" shown in place after save=${shownInPlace}`);
+  const fresh = (await profileAt(page, "cv-achievements")).getByTestId("worker-achievements");
+  const row = fresh.getByTestId("worker-achievements-row").filter({ hasText: title });
+  await expect(row, "the saved achievement persists").toHaveCount(1, { timeout: 30_000 });
   await expect(row.getByTestId("worker-achievements-standing")).toHaveAttribute("data-standing", "declared");
 }
 
@@ -503,7 +684,31 @@ test("P-13 (2.15). a free-label skill claim is saved and shows as self-declared 
   addedClaim = CLAIM;
   await form.getByTestId("capability-profile-manual-input").fill(CLAIM);
   await form.getByTestId("capability-profile-manual-add-button").click();
-  await expect(main.getByTestId("capability-profile-claim").filter({ hasText: CLAIM })).toBeVisible({ timeout: 30_000 });
+  // The save's own answer: on ok the input is cleared before the refresh; a
+  // refusal shows the section's alert. Then the chip must show in place AND
+  // persist on a real reload. Runs 40169213003 and 40175731734 saved the claim
+  // (cleanup found and removed it), but the chip never showed: the section
+  // seeded its list with useState(claims) and ignored the refreshed prop.
+  const refused = main.locator('p[role="alert"]').filter({ hasText: /\S/ });
+  await expect(form.getByTestId("capability-profile-manual-input").or(refused).first()).toBeVisible();
+  await expect
+    .poll(
+      async () =>
+        (await refused.count()) > 0
+          ? `refused: ${await refused.first().innerText()}`
+          : await form.getByTestId("capability-profile-manual-input").inputValue(),
+      { timeout: 30_000, message: "the claim save answered" },
+    )
+    .toBe("");
+  // In place, as the person sees it. The section used to seed its list from
+  // the first prop and ignore the refresh (fixed with visibleSkillClaims).
+  await expect(main.getByTestId("capability-profile-claim").filter({ hasText: CLAIM }), "the new chip shows in place").toBeVisible({
+    timeout: 30_000,
+  });
+  const fresh = await profileAt(page, "capabilities");
+  await expect(fresh.getByTestId("capability-profile-claim").filter({ hasText: CLAIM }), "the claim persists").toHaveCount(1, {
+    timeout: 30_000,
+  });
   const cv = await livingCv(page);
   await expect(
     cv.locator('[data-testid="cv-tier-declared"]', { hasText: CLAIM }).first(),
@@ -553,9 +758,12 @@ test("P-15 (2.24). the experience records about the worker open, with the right 
   // Read-only on purpose: a reply has no withdraw path and goes to moderation.
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard?result=experiences");
-  const result = page.getByTestId("experiences-result");
-  const unavailable = page.getByTestId("experiences-result-unavailable").first();
-  const error = page.getByTestId("experiences-result-error");
+  // A result is shown in the context panel: on a phone that is a sheet, opened here if it is not.
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  await contextPanel(page, "open");
+  const result = inMain(page).getByTestId("experiences-result");
+  const unavailable = inMain(page).getByTestId("experiences-result-unavailable").first();
+  const error = inMain(page).getByTestId("experiences-result-error");
   await expect(result.or(unavailable).or(error).first()).toBeVisible({ timeout: 45_000 });
   if (await error.isVisible()) throw new Error("experience records did not load");
   if (!(await result.isVisible())) throw new Error("experience records report themselves unavailable");
@@ -589,8 +797,8 @@ test("P-16 (2.32). the counterparty's review is readable on both sides (read-onl
   const o = await as(browser, "owner");
   await useWorkspace(o.page, ALFA);
   await o.page.goto("/lt/dashboard/inbox/counterparty");
-  await expect(o.page.getByTestId("counterparty-queue")).toBeVisible({ timeout: 30_000 });
-  await expect(o.page.getByTestId("counterparty-queue-load-failed")).toHaveCount(0);
+  await expect(inMain(o.page).getByTestId("counterparty-queue")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(o.page).getByTestId("counterparty-queue-load-failed")).toHaveCount(0);
   console.info(`[review] counterparty queue cards=${await o.page.locator('[data-testid^="counterparty-card-"]').count()}`);
   await o.ctx.close();
 });
@@ -600,24 +808,24 @@ test("P-16 (2.32). the counterparty's review is readable on both sides (read-onl
 test("P-17 (2.25). Work in numbers answers from the worker's own recorded work", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/work-in-numbers");
-  const wi = page.getByTestId("work-in-numbers");
+  const wi = inMain(page).getByTestId("work-in-numbers");
   await expect(wi).toBeVisible({ timeout: 30_000 });
   const kind = await wi.getAttribute("data-state");
   const skills = await page.locator('[data-testid^="wi-skill-name-"]').count();
   console.info(`[work-in-numbers] state=${kind} skills=${skills}`);
   expect(kind, "a worker with weeks of recorded work is not an empty reading").not.toBe("no_entries");
-  await expect(page.getByTestId("wi-period-nav")).toBeVisible();
+  await expect(inMain(page).getByTestId("wi-period-nav")).toBeVisible();
   await ctx.close();
 });
 
 test("P-18 (2.26). one continuous professional history: one total, every hour counted once", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/work-in-numbers");
-  const experience = page.getByTestId("wi-experience");
+  const experience = inMain(page).getByTestId("wi-experience");
   await expect(experience).toBeVisible({ timeout: 30_000 });
   // Read EVERYTHING from Work in numbers before leaving it: a locator is
   // re-evaluated on whatever page is loaded when it is next asked.
-  const total = page.getByTestId("wi-experience-total");
+  const total = inMain(page).getByTestId("wi-experience-total");
   const num = async (l: Locator, a: string) => Number((await l.getAttribute(a)) ?? "NaN");
   const wi =
     (await total.count()) > 0
@@ -635,7 +843,7 @@ test("P-18 (2.26). one continuous professional history: one total, every hour co
     expect(addsUp, "the total is exactly journal + organization records").toBe(true);
   } else {
     // No organization-supplied history: the journal figure IS the history.
-    await expect(page.getByTestId("wi-experience-journal")).toBeVisible();
+    await expect(inMain(page).getByTestId("wi-experience-journal")).toBeVisible();
     console.info("[history] journal-only history (no organization records to add)");
   }
 
@@ -659,11 +867,11 @@ test("P-18 (2.26). one continuous professional history: one total, every hour co
 test("P-19 (12.3). the intelligence page reads the worker's market, with its method and sources", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/intelligence");
-  await expect(page.getByTestId("intelligence-page")).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("intelligence-not-available")).toHaveCount(0);
-  await expect(page.getByTestId("intelligence-methodology")).toBeVisible();
+  await expect(inMain(page).getByTestId("intelligence-page")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("intelligence-not-available")).toHaveCount(0);
+  await expect(inMain(page).getByTestId("intelligence-methodology")).toBeVisible();
   const cards = await page.locator('[data-testid^="intelligence-card-"]').count();
-  const missing = (await page.getByTestId("intelligence-missing").count()) > 0;
+  const missing = (await inMain(page).getByTestId("intelligence-missing").count()) > 0;
   console.info(`[intelligence] cards=${cards} salary_basis_missing=${missing}`);
   await ctx.close();
 });
@@ -674,11 +882,42 @@ test("P-20 (3.27). the company's history page opens in Alfa's workspace", async 
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/company/history");
-  await expect(page.getByTestId("company-history")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("company-history")).toBeVisible({ timeout: 30_000 });
   const history = page.locator('[data-testid="company-work-history"], [data-testid="company-work-history-unavailable"]');
   await expect(history.first()).toBeVisible({ timeout: 30_000 });
-  console.info(`[company-history] state=${await page.getByTestId("company-work-history").first().getAttribute("data-state").catch(() => "n/a")}`);
-  await expect(page.getByTestId("company-history-hours-door")).toBeVisible();
+  console.info(`[company-history] state=${await inMain(page).getByTestId("company-work-history").first().getAttribute("data-state").catch(() => "n/a")}`);
+  await expect(inMain(page).getByTestId("company-history-hours-door")).toBeVisible();
+  await ctx.close();
+});
+
+test("P-20b (3.36). Alfa's member reads its organization CV: the projects block, its counts, and the way back from a project", async ({ browser }) => {
+  // Read-only: Alfa's own projects, opened by its owner (a member).
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await page.goto("/lt/dashboard/company/history");
+  await expect(inMain(page).getByTestId("company-history")).toBeVisible({ timeout: 30_000 });
+  const projects = inMain(page).getByTestId("company-work-history-projects");
+  await expect(projects, "Alfa has projects, so its organization CV lists them").toBeVisible({ timeout: 30_000 });
+  const counts = projects.getByTestId("company-work-history-projects-counts");
+  await expect(counts).toBeVisible();
+  // #3452: the count reads as words, never a raw ICU pattern.
+  await expect(counts).not.toContainText("{");
+  await expect(counts).not.toContainText("plural");
+  const rows = projects.getByTestId("company-work-history-project");
+  const n = await rows.count();
+  expect(n, "at least one project row").toBeGreaterThan(0);
+  expect(n, "at most 12 rows").toBeLessThanOrEqual(12);
+  const id = await rows.first().getAttribute("data-project");
+  expect(id, "the row names its project").toBeTruthy();
+  await rows.first().click();
+  await page.waitForURL(new RegExp(`/dashboard/projects/${id}`), { timeout: 30_000 });
+  // #3452: a member of the project's organization gets the way back to its history.
+  const back = inMain(page).getByTestId("project-organization-link");
+  await expect(back, "a member sees the link to the organization history").toBeVisible({ timeout: 30_000 });
+  await back.click();
+  await page.waitForURL(/\/company\/history/, { timeout: 30_000 });
+  await expect(inMain(page).getByTestId("company-work-history-projects")).toBeVisible({ timeout: 30_000 });
+  console.info(`[company-history] 3.36: projects block rows=${n} counts="${(await counts.innerText()).trim()}"; member back link works`);
   await ctx.close();
 });
 
@@ -686,9 +925,9 @@ test("P-21 (3.31). the company report opens and its export downloads as a file",
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/reports");
-  await expect(page.getByTestId("reports-hub")).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("reports-org-journal")).toBeVisible({ timeout: 30_000 });
-  const exportLink = page.getByTestId("reports-export-finance-csv");
+  await expect(inMain(page).getByTestId("reports-hub")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("reports-org-journal")).toBeVisible({ timeout: 30_000 });
+  const exportLink = inMain(page).getByTestId("reports-export-finance-csv");
   if ((await exportLink.count()) === 0) {
     console.info("[report] finance export not offered (finance read unavailable for this workspace)");
   } else {
@@ -697,6 +936,192 @@ test("P-21 (3.31). the company report opens and its export downloads as a file",
     console.info(`[report] export downloaded as .${name.split(".").pop()}`);
     expect(name, "the export is a CSV file").toMatch(/\.csv$/i);
     await download.delete();
+  }
+  await ctx.close();
+});
+
+// ── P-9 (owner 2026-11-05): save, error, repeat, reload, remove, with real times ─
+//
+// The owner's question is what a person meets, so every wait here is reported in ms
+// and a slow one fails nothing: the times are the result. An aborted request stands
+// in for a failed save, because production offers no way to make one fail. It is
+// this browser's request that is aborted; nothing reaches the server.
+
+const failNextSave = async (page: Page): Promise<() => Promise<void>> => {
+  const url = "**/lt/dashboard/profile**";
+  await page.route(url, (route) => (route.request().method() === "POST" ? route.abort() : route.continue()));
+  return () => page.unroute(url);
+};
+
+async function timed(what: string, wait: () => Promise<unknown>): Promise<void> {
+  const started = Date.now();
+  await wait();
+  console.info(`[save-proof] ${what}: ${Date.now() - started} ms`);
+}
+
+async function proveSection(
+  page: Page,
+  c: { name: string; hash: string; prefix: string; field: string; type: string; title: string; remove: string; added: string[] },
+): Promise<void> {
+  const section = async () => (await profileAt(page, c.hash)).getByTestId(c.prefix);
+  const rowsIn = (s: Locator) => s.getByTestId(`${c.prefix}-row`).filter({ hasText: c.title });
+  const fill = async (s: Locator) => {
+    await s.getByTestId(`${c.prefix}-add-open`).click();
+    const form = s.getByTestId(`${c.prefix}-form`);
+    await form.getByTestId(`${c.prefix}-${c.field}`).fill(c.title);
+    await pick(page, form, `${c.prefix}-type`, c.type);
+    return form;
+  };
+
+  // A failed save: an error, no row, and what was typed is still there.
+  let s = await section();
+  const form = await fill(s);
+  const restore = await failNextSave(page);
+  await form.getByTestId(`${c.prefix}-save`).click();
+  await expect(s.getByRole("alert").first(), `${c.name}: the failed save says so`).toBeVisible({ timeout: 30_000 });
+  await expect(rowsIn(s), `${c.name}: a failed save shows no row`).toHaveCount(0);
+  await expect(form.getByTestId(`${c.prefix}-${c.field}`), `${c.name}: the typed text is not lost`).toHaveValue(c.title);
+  await restore();
+
+  // The same form, sent again: saved, and on screen without a reload.
+  c.added.push(c.title);
+  await form.getByTestId(`${c.prefix}-save`).click();
+  await timed(`${c.name} save to row visible`, () => expect(rowsIn(s).first()).toBeVisible({ timeout: 60_000 }));
+
+  // Survives a reload, once.
+  s = await section();
+  await expect(rowsIn(s), `${c.name}: survives a reload, once`).toHaveCount(1, { timeout: 30_000 });
+
+  // The same statement again: still one row.
+  const again = await fill(s);
+  await again.getByTestId(`${c.prefix}-save`).click();
+  await expect(s.getByTestId(`${c.prefix}-add-open`), `${c.name}: the repeat save answered`).toBeVisible({ timeout: 30_000 });
+  s = await section();
+  await expect(rowsIn(s), `${c.name}: a repeat save is not a second row`).toHaveCount(1, { timeout: 30_000 });
+
+  // Removed at once, and gone after a reload.
+  const row = rowsIn(s).first();
+  await row.locator(c.remove).first().click();
+  await timed(`${c.name} remove to row gone`, () => expect(rowsIn(s)).toHaveCount(0, { timeout: 60_000 }));
+  s = await section();
+  await expect(rowsIn(s), `${c.name}: stays removed after a reload`).toHaveCount(0, { timeout: 30_000 });
+}
+
+test("P-22 (2.7). education: failed save, save, reload, repeat and remove, with real times", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  console.info(`[save-proof] browser ${browser.browserType().name()} ${browser.version()}`);
+  await proveSection(page, {
+    name: "education",
+    hash: "cv-education",
+    prefix: "worker-education",
+    field: "institution",
+    type: "Profesinis",
+    title: `${TAG} kartojama mokykla`,
+    remove: '[data-testid^="worker-education-remove-"]',
+    added: addedEducation,
+  });
+  await ctx.close();
+});
+
+test("P-23 (2.8). achievements: failed save, save, reload, repeat and remove, with real times", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  await proveSection(page, {
+    name: "achievements",
+    hash: "cv-achievements",
+    prefix: "worker-achievements",
+    field: "title",
+    type: "Pasiekimas",
+    title: `${TAG} kartojamas pasiekimas`,
+    remove: '[data-testid^="worker-achievements-remove-"]',
+    added: addedAchievements,
+  });
+  await ctx.close();
+});
+
+test("P-24 (2.5). experience: failed save, save, reload, repeat and remove, with real times", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  const title = `${TAG} kartojama patirtis`;
+  const rowsIn = (m: Locator) => m.getByTestId("capability-experience-row").filter({ hasText: title });
+  const fill = async (m: Locator) => {
+    await m.getByTestId("add-experience-open").click();
+    const form = m.getByTestId("add-experience-form");
+    await form.getByTestId("add-experience-title").fill(title);
+    await form.getByTestId("add-experience-start-year").fill("2019");
+    await form.getByTestId("add-experience-current").check();
+    return form;
+  };
+
+  let main = await profileAt(page, "capabilities");
+  const form = await fill(main);
+  const restore = await failNextSave(page);
+  await form.getByTestId("add-experience-save").click();
+  await expect(form.getByTestId("add-experience-error"), "the failed save says so").toBeVisible({ timeout: 30_000 });
+  await expect(rowsIn(main), "a failed save shows no row").toHaveCount(0);
+  await expect(form.getByTestId("add-experience-title"), "the typed text is not lost").toHaveValue(title);
+  await restore();
+
+  addedHistory.push(title);
+  await form.getByTestId("add-experience-save").click();
+  await timed("experience save to row visible", () => expect(rowsIn(main).first()).toBeVisible({ timeout: 60_000 }));
+
+  main = await profileAt(page, "capabilities");
+  await expect(rowsIn(main), "survives a reload, once").toHaveCount(1, { timeout: 30_000 });
+
+  const again = await fill(main);
+  await again.getByTestId("add-experience-save").click();
+  await expect(again.getByTestId("add-experience-title"), "the repeat save answered").toHaveValue("", { timeout: 30_000 });
+  main = await profileAt(page, "capabilities");
+  await expect(rowsIn(main), "a repeat save is not a second row").toHaveCount(1, { timeout: 30_000 });
+
+  await rowsIn(main).first().locator('[data-testid^="capability-experience-remove-"]').click();
+  await timed("experience remove to row gone", () => expect(rowsIn(main)).toHaveCount(0, { timeout: 60_000 }));
+  main = await profileAt(page, "capabilities");
+  await expect(rowsIn(main), "stays removed after a reload").toHaveCount(0, { timeout: 30_000 });
+  await ctx.close();
+});
+
+test("P-25 (UF-3). a job with no organization reads as the person stated it on the Living CV", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  const title = `${TAG} tik metai`;
+  const main = await profileAt(page, "capabilities");
+  await main.getByTestId("add-experience-open").click();
+  const form = main.getByTestId("add-experience-form");
+  await form.getByTestId("add-experience-title").fill(title);
+  await form.getByTestId("add-experience-start-year").fill("2019");
+  await form.getByTestId("add-experience-current").check();
+  addedHistory.push(title);
+  await form.getByTestId("add-experience-save").click();
+  await expect(main.getByTestId("capability-experience-row").filter({ hasText: title }).first()).toBeVisible({ timeout: 60_000 });
+
+  const cv = await livingCv(page);
+  // The title leads the row (#3084), not the word for the relationship.
+  const row = cv.getByTestId("premium-cv-experience-row").filter({ hasText: title });
+  await expect(row, "the Living CV names the job by its title").toHaveCount(1, { timeout: 30_000 });
+  // Only the year was stated (#3086): no month, no day, on screen or in print.
+  await expect(row, "a stated year has no invented month").toContainText("2019");
+  await expect(row).not.toContainText("2019-01");
+  const printed = cv.getByTestId("cv-history-node").filter({ hasText: title });
+  await expect(printed, "the printed list reads the same").toHaveCount(1);
+  await expect(printed).not.toContainText("2019-01");
+  await ctx.close();
+});
+
+test("P-26 (2.1). the summary save answers on screen, every time, with real times", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  // One run saw the save stored and no "saved" for 30 s (41994411748, cleanup). This
+  // reports what a person sees on each try. A try with no answer fails the walk.
+  let main = await profileAt(page, "profile-public-summary");
+  const original = await main.getByTestId("profile-public-headline").inputValue();
+  summaryOriginal ??= { headline: original, bio: await main.getByTestId("profile-public-bio").inputValue() };
+  for (const attempt of [1, 2, 3]) {
+    main = await profileAt(page, "profile-public-summary");
+    await main.getByTestId("profile-public-headline").fill(`${TAG} bandymas ${attempt}`);
+    const saved = main.getByTestId("profile-public-summary-saved");
+    const error = main.getByTestId("profile-public-summary-error");
+    const started = Date.now();
+    await main.getByTestId("profile-public-summary-save").click();
+    await expect(saved.or(error), `try ${attempt}: the save answers on screen`).toBeVisible({ timeout: 60_000 });
+    console.info(`[save-proof] summary try ${attempt}: ${(await saved.isVisible()) ? "saved" : "error"} after ${Date.now() - started} ms`);
   }
   await ctx.close();
 });
@@ -720,6 +1145,9 @@ async function removeRows(rows: Locator, removeControl: string): Promise<number>
 }
 
 test.afterAll(async ({ browser }) => {
+  // Own budget: the default hook timeout is 30 s, less than one row removal
+  // (company-chain run 39960149411 lost its cleanup to it).
+  test.setTimeout(600_000);
   const jobs: { what: string; run: (page: Page) => Promise<string> }[] = [
     {
       what: "history rows",

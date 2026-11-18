@@ -143,6 +143,11 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "dashboard_preferences", key: "profile_id" },
   // My Space pins (20261020020000, applied 2026-10-20): the person's own shortcuts, owner-only RLS.
   { table: "workspace_pins", key: "profile_id" },
+  // Push-notification devices (20261023171500, COM-3 push channel): the
+  // person's own browser subscriptions, owner-only RLS. The endpoint and the
+  // time are theirs to see; the browser's encryption key and auth secret are
+  // device credentials, not information about the person, and are left out.
+  { table: "web_push_subscriptions", key: "profile_id", omitColumns: ["p256dh", "auth"] },
   { table: "preferred_locations", key: "profile_id" },
   { table: "consented_login_location_signals", key: "profile_id" },
   // How the platform classifies the account for reporting (real / test /
@@ -780,6 +785,11 @@ export type ReviewedChild = {
   readonly reason: string;
 };
 export const CHILD_TABLES_NOT_EXPORTED: readonly ReviewedChild[] = [
+  {
+    table: "invitation_delivery_attempts_v1",
+    reason:
+      "transport diagnostics of an invitation send (reason and SMTP status codes, timing, our Message-ID) — no address, no reply text, no content; the invitation itself, with its delivery status, is exported to the inviter",
+  },
   {
     table: "decision_document_links",
     reason:

@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { Globe, Mail, Phone, MapPin, Store, Boxes } from "lucide-react";
+import { Globe, Mail, Phone, MapPin, Boxes } from "lucide-react";
 
+import { CompanyTeamProfile, type CompanyTeamTranslate } from "@/components/app/company-team-profile";
 import { getPublicBusinessProfile } from "@/lib/company/public-profile";
-import { BRAND_NAME, buildPageMetadata } from "@/lib/seo/metadata";
+import { publicWebsiteHref } from "@/lib/company/public-website";
+import { buildCompanyTeamProfile, isCompanyTeamView } from "@/lib/company/team-profile-model";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -12,43 +15,62 @@ export const dynamic = "force-dynamic";
  * Public business showcase profile (Wagon 13 slice 2). A PUBLIC, unauthenticated,
  * shareable page at /business/<slug>. It renders ONLY the allowlisted public
  * fields the SECURITY DEFINER reads return, and ONLY for organizations that
- * opted in — default private. Identity from `organizations`, services from
- * `service_offerings`, listings from `marketplace_listings`. No private org /
- * worker / project / contact / membership / financial data.
+ * opted in — default private. Identity from `organizations`, listings from
+ * `marketplace_listings`. No private org / worker / project / contact /
+ * membership / financial data. Services are not shown: `service_offerings` has
+ * no organization column, so its read returns the owner's PERSONAL offerings.
+ *
+ * `?view=team` opens the team-presentation form of the same read: opt-in, noindex,
+ * linked from nowhere, its visual awaiting the owner's verdict. Without it this
+ * page is exactly the default profile.
  */
+
+type BusinessProfilePageProps = {
+  params: Promise<{ locale: string; slug: string }>;
+  searchParams: Promise<{ view?: string | string[] }>;
+};
 
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ locale: string; slug: string }>;
-}): Promise<Metadata> {
+  searchParams,
+}: BusinessProfilePageProps): Promise<Metadata> {
   const { locale, slug } = await params;
   const view = await getPublicBusinessProfile(slug);
-  if (!view) return { title: BRAND_NAME, robots: { index: false, follow: false } };
+  // No title of its own: the not-found title applies (UX-9), as on a missing job.
+  if (!view) return { robots: { index: false, follow: false } };
   const { profile } = view;
   const desc = profile.tagline ?? profile.description ?? undefined;
   // Canonical + hreflang + brand share card from the one builder every other
   // public page uses (2026-09-19: this page declared none of them).
-  return buildPageMetadata({
+  const metadata = buildPageMetadata({
     locale,
     path: `/business/${slug}`,
     title: profile.displayName,
     description: desc?.slice(0, 160),
   });
+  return isCompanyTeamView((await searchParams).view)
+    ? { ...metadata, robots: { index: false, follow: false } }
+    : metadata;
 }
 
 export default async function BusinessProfilePage({
   params,
-}: {
-  params: Promise<{ locale: string; slug: string }>;
-}) {
+  searchParams,
+}: BusinessProfilePageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("businessProfile");
 
   const view = await getPublicBusinessProfile(slug);
   if (!view) notFound();
-  const { profile, services, listings } = view;
+
+  if (isCompanyTeamView((await searchParams).view)) {
+    const translate = (await getTranslations()) as unknown as CompanyTeamTranslate;
+    return <CompanyTeamProfile view={buildCompanyTeamProfile(view, locale)} t={translate} />;
+  }
+
+  const { profile, listings } = view;
+  const websiteHref = publicWebsiteHref(profile.website);
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 sm:px-6 sm:py-14">
@@ -69,9 +91,9 @@ export default async function BusinessProfilePage({
               <MapPin aria-hidden className="h-4 w-4" /> {profile.country}
             </span>
           )}
-          {profile.website && (
+          {websiteHref && (
             <a
-              href={profile.website}
+              href={websiteHref}
               target="_blank"
               rel="noopener noreferrer nofollow"
               className="inline-flex items-center gap-1.5 text-brand-blue hover:underline"
@@ -110,31 +132,6 @@ export default async function BusinessProfilePage({
           </div>
         </section>
       )}
-
-      {/* Services (canonical service_offerings, active) */}
-      <section className="flex flex-col gap-3">
-        <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-text-primary">
-          <Store aria-hidden className="h-5 w-5 text-brand-blue" /> {t("servicesTitle")}
-        </h2>
-        {services.length === 0 ? (
-          <p className="rounded-md border border-border-subtle bg-ink-800/10 p-3 text-sm text-text-muted">
-            {t("servicesEmpty")}
-          </p>
-        ) : (
-          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {services.map((s) => (
-              <li key={s.id} className="flex flex-col gap-1 rounded-lg border border-border-subtle bg-surface-1 p-3">
-                <span className="font-medium text-text-primary">{s.title}</span>
-                {s.description && <span className="line-clamp-3 text-sm text-text-secondary">{s.description}</span>}
-                <span className="text-xs text-text-muted">
-                  {s.remote ? t("remote") : s.locationCountry ?? ""}
-                  {s.rateText ? ` · ${s.rateText}` : ""}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
 
       {/* Listings (canonical marketplace_listings, active) */}
       <section className="flex flex-col gap-3">

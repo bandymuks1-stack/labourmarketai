@@ -7,6 +7,7 @@ import {
   getSubdivisions,
 } from "../../lib/location/country-model";
 import { resolveCity } from "../../lib/location/city-coordinates";
+import { LOCAL_DB_CONTAINER } from "./local-db-container";
 
 /**
  * PR-I E2E reality matrix — authenticated chat-first scenarios (1–5, 7).
@@ -47,7 +48,7 @@ const EVIDENCE = join(
   "evidence",
   "pr-i-e2e-reality-v1",
 );
-const DB_CONTAINER = "supabase_db_labourmarketai";
+const DB_CONTAINER = LOCAL_DB_CONTAINER;
 const LOCAL_STACK = !!process.env.E2E_LOCAL_STACK;
 
 /** Copy read from the real catalog so the spec never hardcodes product copy. */

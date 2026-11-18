@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { isDashboardPath } from "@/lib/auth/role-gated-routes";
 import { WorkLifecycleGraph, type LifecycleStage } from "./work-lifecycle-graph";
 
 /**
@@ -23,7 +24,7 @@ const WORKER: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "tone
 
 const COMPANY: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "tone">> = [
   { key: "need", icon: "need", href: "/company-need" },
-  { key: "people", icon: "people", href: "/dashboard/talent" },
+  { key: "people", icon: "people", href: "/dashboard/company/scouting" },
   { key: "team", icon: "team", href: "/dashboard/company/people" },
   { key: "project", icon: "project", href: "/dashboard/projects" },
   { key: "work", icon: "work", href: "/dashboard/journal" },
@@ -31,19 +32,33 @@ const COMPANY: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "ton
   { key: "report", icon: "report", href: "/dashboard/reports", tone: "history" },
 ];
 
+/**
+ * Where a SIGNED-OUT visitor goes from a stage (owner P0 2026-11-15, F10): a
+ * workspace route opens sign-up and returns there after it, instead of a bare
+ * sign-in screen with no word of why. A public route (`/company-need`) needs
+ * none, so it keeps its own link.
+ */
+function guestHref(href: string): string | undefined {
+  return isDashboardPath(href.split("?")[0]) ? `/auth/signup?next=${encodeURIComponent(href)}` : undefined;
+}
+
 export async function WorkLifecycleSection({ audience }: { audience: "workers" | "companies" }) {
   const t = await getTranslations("workLifecycle");
+  // A signed-out visitor's stage link opens SIGN-UP (guestHref), so its note
+  // is the menus' existing "Sign up", not "For signed-in users".
+  const tNav = await getTranslations("siteNav");
   const defs = audience === "workers" ? WORKER : COMPANY;
   const stages: LifecycleStage[] = defs.map((d) => ({
     ...d,
+    guestHref: guestHref(d.href),
     label: t(`${audience}.${d.key}.label`),
     detail: t(`${audience}.${d.key}.detail`),
   }));
   return (
     <WorkLifecycleGraph
       title={audience === "workers" ? t("title") : t("titleCompany")}
-      hint={t("hint")}
       openLabel={t("open")}
+      accountLabel={tNav("signUp")}
       listLabel={t("list")}
       pendingLabel={t("pending")}
       stages={stages}

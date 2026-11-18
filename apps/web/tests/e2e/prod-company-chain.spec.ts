@@ -1,9 +1,11 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { closeOwnNeed, requestIdOf } from "./prod-need-close";
 
 /**
  * PRODUCTION COMPANY CHAIN — the three company-path steps the Product Master
@@ -50,14 +52,31 @@ test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted 
 test.describe.configure({ mode: "serial", timeout: 240_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
 
-async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx: BrowserContext; page: Page }> {
+/**
+ * `screen`: unset = the walk's device (a desktop, or a phone when the walk is dispatched for
+ * one); "phone" / "desktop" = this step is ABOUT that screen and runs on it on every walk.
+ */
+async function as(browser: Browser, slot: string, screen?: boolean | "phone" | "desktop"): Promise<{ ctx: BrowserContext; page: Page }> {
+  const named = screen === true ? "phone" : screen || undefined;
   const ctx = await browser.newContext({
     storageState: state(slot),
     locale: "lt-LT",
-    ...(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {}),
+    ...(named === "phone" ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {}),
+    ...(named === "desktop" ? { viewport: { width: 1280, height: 720 } } : {}),
   });
   return { ctx, page: await ctx.newPage() };
 }
+
+/**
+ * The page content, never the streaming holder. Dashboard pages stream through
+ * a hidden `<div id="S:n">` whose reveal is rAF-driven; in a never-painting
+ * headless tab that hidden copy sits outside <main> beside the rendered one,
+ * so a bare testid fails strict mode at once and a count reads double
+ * (project-execution 40081437313 E-11 `hours-worker-select`, and its cleanup
+ * `toHaveCount(0)`; calendar-journal-history.spec.ts). Strict inside <main>
+ * still fails if a page really renders something twice.
+ */
+const inMain = (page: Page): Locator => page.getByRole("main");
 
 /** Make `orgName` the active workspace through the real header chip. */
 async function useWorkspace(page: Page, orgName: string): Promise<void> {
@@ -84,28 +103,60 @@ test("C-0. the worker's own worker id (own row, own token)", async () => {
   workerId = rows[0].id;
 });
 
-function requestIdOf(href: string | null): string {
-  return /request=([0-9a-f-]{36})/.exec(href ?? "")?.[1] ?? "";
-}
 
 /**
  * Post a need through Gama's demand intake (Gama is the active workspace) and
  * return its id, found on the scouting list by `marker` (a run-unique part of
  * the role the list shows).
  */
-async function postNeed(page: Page, role: string, description: string, marker: string): Promise<string> {
+async function submitNeed(page: Page, role: string, description: string): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
-  await page.getByTestId("demand-role").fill(role);
-  await page.getByTestId("demand-description").fill(description);
-  await page.getByTestId("demand-next").click();
-  const size = page.getByTestId("demand-team-size");
+  await inMain(page).getByTestId("demand-role").fill(role);
+  await inMain(page).getByTestId("demand-description").fill(description);
+  await inMain(page).getByTestId("demand-next").click();
+  const size = inMain(page).getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
-  await page.getByTestId("demand-next").click();
-  await page.getByTestId("demand-create").click();
-  const done = page.getByTestId("demand-done");
-  const limit = page.getByTestId("demand-open-need-limit");
+  await chooseDemandCountryIfEmpty(page);
+  await inMain(page).getByTestId("demand-next").click();
+  await inMain(page).getByTestId("demand-create").click();
+  const done = inMain(page).getByTestId("demand-done");
+  const limit = inMain(page).getByTestId("demand-open-need-limit");
   await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
-  expect(await limit.isVisible(), "the open-need limit refused this run's need").toBe(false);
+  return (await limit.isVisible()) ? "limit" : "done";
+}
+
+/**
+ * Gama is on the free plan (one open need). A walk that stopped before its
+ * cleanup leaves a QA-SYNTHETIC need open and the next walk's intake is refused
+ * (company-chain 39960149411 left one; the limit is the product working). Close
+ * the synthetic leftovers through the scouting page's own controls, never this
+ * run's need.
+ */
+async function closeSyntheticLeftovers(page: Page): Promise<number> {
+  await page.goto("/lt/dashboard/company/scouting");
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  const ids = new Set<string>();
+  for (const a of await page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: "QA-SYNTHETIC" }).all()) {
+    if ((await a.innerText().catch(() => "")).includes(RUN)) continue;
+    const id = requestIdOf(await a.getAttribute("href"));
+    if (id) ids.add(id);
+  }
+  let closed = 0;
+  // Fails loudly: a leftover that cannot be closed is the reason this run's
+  // need is refused, and the error names it.
+  for (const id of [...ids].slice(0, 5)) {
+    if ((await closeNeed(page, id)) === "closed") closed += 1;
+  }
+  console.info(`[company-chain] synthetic leftovers seen=${ids.size} closed=${closed}`);
+  return closed;
+}
+
+async function postNeed(page: Page, role: string, description: string, marker: string): Promise<string> {
+  let outcome = await submitNeed(page, role, description);
+  if (outcome === "limit" && (await closeSyntheticLeftovers(page)) > 0) {
+    outcome = await submitNeed(page, role, description);
+  }
+  expect(outcome, "the open-need limit refused this run's need").toBe("done");
   await page.goto("/lt/dashboard/company/scouting");
   const link = page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: marker }).first();
   await expect(link, "this run's need is listed among Gama's needs").toBeVisible({ timeout: 30_000 });
@@ -115,20 +166,19 @@ async function postNeed(page: Page, role: string, description: string, marker: s
 }
 
 /** Close one need through its own lifecycle controls (Gama is the active workspace). */
-async function closeNeed(page: Page, id: string): Promise<void> {
-  await page.goto(`/lt/dashboard/company/scouting?request=${id}`);
-  const controls = page.getByTestId("demand-lifecycle-controls");
-  await expect(controls).toBeVisible({ timeout: 30_000 });
-  if ((await controls.getAttribute("data-demand-status")) !== "closed") {
-    await controls.getByTestId("demand-close").click();
-    await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
-  }
+async function closeNeed(page: Page, id: string): Promise<"closed" | "already-closed"> {
+  const outcome = await closeOwnNeed(page, id);
+  if (outcome === "closed") closedHere.add(id);
+  return outcome;
 }
+
+/** Needs this run already closed — afterAll never revisits them. */
+const closedHere = new Set<string>();
 
 /** The worker raises a hand on need `id` from the full opportunities board (from "not interested"). */
 async function raiseHand(page: Page, id: string): Promise<void> {
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const card = page.locator(`li[id="opp-${id}"]`);
   await expect(card.locator('[data-testid^="interest-"]').first(), "the need's card offers interest").toBeVisible({
     timeout: 60_000,
@@ -145,6 +195,7 @@ async function raiseHand(page: Page, id: string): Promise<void> {
 }
 
 test("C-0b. Gama posts this run's need through the demand intake", async ({ browser }) => {
+  test.setTimeout(480_000); // room for the leftover cleanup
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   requestId = await postNeed(
@@ -161,7 +212,7 @@ test("C-1. the worker raises a hand on Gama's need from the opportunities board"
   // The pristine page is the worker's PERSONAL first view (owner addendum
   // 2026-10-09); the whole board, with every need's card, is `?view=all`.
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const cards = page
     .locator(`li[id="opp-${requestId}"]`)
     .filter({ has: page.getByTestId("opportunity-company").filter({ hasText: GAMA }) })
@@ -176,7 +227,7 @@ test("C-1. the worker raises a hand on Gama's need from the opportunities board"
     .catch(() => false);
   if (!appeared) {
     const allCards = await page.locator('li[id^="opp-"]').count();
-    const companies = await page.getByTestId("opportunity-company").allInnerTexts();
+    const companies = await inMain(page).getByTestId("opportunity-company").allInnerTexts();
     const buttons = await page.locator('[data-testid^="interest-"]').count();
     // Counts only — never company names: the board can show real customers,
     // and this log is a public artefact.
@@ -206,7 +257,7 @@ test("C-2 (4.11). Gama opens its need and sees the person who raised a hand", as
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const candidate = page.getByTestId(`scout-candidate-${workerId}`);
+  const candidate = inMain(page).getByTestId(`scout-candidate-${workerId}`);
   await expect(candidate, "the hand-raiser is in Gama's candidate list").toBeVisible({ timeout: 60_000 });
   await expect(candidate.getByTestId(`scout-interest-${workerId}`)).toBeVisible();
   await expect(candidate.getByTestId(`interest-ack-${workerId}`)).toHaveAttribute("data-interest-status", "interested");
@@ -217,7 +268,7 @@ test("C-3 (4.16). Gama contacts them: a real thread opens", async ({ browser }) 
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const ack = page.getByTestId(`interest-ack-${workerId}`);
+  const ack = inMain(page).getByTestId(`interest-ack-${workerId}`);
   await expect(ack).toBeVisible({ timeout: 60_000 });
   await ack.getByTestId("interest-ack-contacted").click();
   await page.waitForURL(/\/dashboard\/communication\/[0-9a-f-]{36}/, { timeout: 60_000 });
@@ -239,18 +290,25 @@ test("C-4 (4.16). the worker sees they were contacted, on the phone", async ({ b
 async function siteReady(page: Page, org: string): Promise<void> {
   await useWorkspace(page, org);
   await page.goto("/lt/dashboard/hours");
-  const noSites = page.getByTestId("hours-state-no-objects");
-  const picker = page.getByTestId("hours-object-picker");
+  // Scoped to <main>: the page streams in through a hidden `<div id="S:n">`
+  // whose reveal is rAF-driven; in a never-painting headless tab that hidden
+  // copy sits outside <main> beside the rendered one, and an unscoped testid
+  // fails strict mode at once (run 40050881788 H-1: `hours-object-picker` in
+  // <main> plus `.nth(1)` outside it; calendar-journal-history.spec.ts). The
+  // claim is unchanged: exactly one picker or one no-sites door in <main>.
+  const main = page.getByRole("main");
+  const noSites = main.getByTestId("hours-state-no-objects");
+  const picker = main.getByTestId("hours-object-picker");
   await expect(noSites.or(picker)).toBeVisible({ timeout: 60_000 });
   if (await noSites.isVisible()) {
     console.info(`[hours] ${org}: no site yet, following the page's own door`);
-    await page.getByTestId("hours-no-objects-add-site").click();
+    await main.getByTestId("hours-no-objects-add-site").click();
     await page.waitForURL(/\/dashboard\/projects/, { timeout: 60_000 });
-    const form = page.getByTestId("work-object-add-form");
+    const form = inMain(page).getByTestId("work-object-add-form");
     await expect(form).toBeVisible({ timeout: 30_000 });
     await form.locator('input[name="name"]').fill(SITE);
     await form.getByTestId("work-object-add-submit").click();
-    await expect(page.getByTestId("work-object-row").filter({ hasText: SITE }).first()).toBeVisible({
+    await expect(inMain(page).getByTestId("work-object-row").filter({ hasText: SITE }).first()).toBeVisible({
       timeout: 30_000,
     });
     await page.goto("/lt/dashboard/hours");
@@ -261,19 +319,21 @@ async function siteReady(page: Page, org: string): Promise<void> {
 async function recordHours(page: Page, org: string, note: string): Promise<void> {
   await useWorkspace(page, org);
   await page.goto("/lt/dashboard/hours");
-  await page.getByTestId("hours-worker-select").selectOption(workerId);
-  await page.getByTestId("hours-object-picker").locator('[data-testid^="hours-object-"]').first().click();
-  await page.getByTestId("hours-input").fill("1.5");
-  await page.getByTestId("hours-note").fill(note);
-  await page.getByTestId("hours-save").click();
-  const saved = page.getByTestId("hours-saved");
-  const error = page.getByTestId("hours-error");
+  // Scoped to <main> for the same hidden streaming copy as `siteReady`.
+  const main = page.getByRole("main");
+  await main.getByTestId("hours-worker-select").selectOption(workerId);
+  await main.getByTestId("hours-object-picker").locator('[data-testid^="hours-object-"]').first().click();
+  await main.getByTestId("hours-input").fill("1.5");
+  await main.getByTestId("hours-note").fill(note);
+  await main.getByTestId("hours-save").click();
+  const saved = main.getByTestId("hours-saved");
+  const error = main.getByTestId("hours-error");
   await expect(saved.or(error)).toBeVisible({ timeout: 30_000 });
   if (await error.isVisible()) throw new Error(`hours not saved in ${org}: ${await error.innerText()}`);
-  // Persistence: a fresh load of the day lists the entry.
+  // Persistence: a fresh load of the day lists the entry, exactly once.
   await page.goto("/lt/dashboard/hours");
-  await expect(page.getByTestId("hours-entry").filter({ hasText: note })).toHaveCount(1, { timeout: 30_000 });
-  await expect(page.getByTestId("hours-day-total")).toBeVisible();
+  await expect(main.getByTestId("hours-entry").filter({ hasText: note })).toHaveCount(1, { timeout: 30_000 });
+  await expect(main.getByTestId("hours-day-total")).toBeVisible();
 }
 
 for (const { slot, org, label } of [
@@ -292,6 +352,86 @@ for (const { slot, org, label } of [
     await ctx.close();
   });
 }
+
+// ── N (P0-2, owner direction A 2026-11-03; #2995): navigation by role. The
+// primary row stays the A-03 core loop for every workspace; for the person
+// who runs the organization, the header's "More" and the phone sheet open with
+// that organization's own doors. Read-only: it opens two menus and writes
+// nothing, so it costs this walk no data.
+const CORE_IDS = ["overview", "journal_text_first", "planning", "communication"];
+const MORE_LEADS = {
+  company: ["area:people", "area:projects", "area:work"],
+  agency: ["area:people", "area:clients", "area:projects"],
+} as const;
+/** The ids under one literal testid prefix, in render order, with the prefix cut. */
+const idsAfter = (items: Locator, prefix: string) =>
+  items.evaluateAll((els, p) => els.map((e) => (e.getAttribute("data-testid") ?? "").slice(String(p).length)), prefix);
+
+for (const { slot, org, label, kinds } of [
+  { slot: "owner", org: ALFA, label: "Alfa (company)", kinds: ["company"] as const },
+  // The header follows the ACTING ROLE (actingRoleForWorkspace, the one
+  // resolver): the synthetic agency owner holds only `company` (onboarding's
+  // agency intent grants `company`), so its "More" leads with the company set.
+  // Whether agency-ness should come from the organization instead is the open
+  // owner decision ORG-2 (coordinator ruling 2026-11-03: assert the company set).
+  { slot: "agency", org: AGENCY, label: "the agency", kinds: ["company"] as const },
+]) {
+  test(`N-1 (P0-2). ${label}: the core loop stays; the organization's doors lead "More"`, async ({ browser }) => {
+    // The header bar and its "More" menu exist from the `md` width up, so this step is a
+    // desktop claim on every walk. The phone's own form of it is N-2 (the area sheet).
+    const { ctx, page } = await as(browser, slot, "desktop");
+    await useWorkspace(page, org);
+    await page.goto("/lt/dashboard/projects");
+    const core = page.getByTestId("header-core-nav");
+    await expect(core).toBeVisible({ timeout: 30_000 });
+    expect(await idsAfter(core.locator('[data-testid^="header-core-nav-"]'), "header-core-nav-")).toEqual(CORE_IDS);
+    await page.getByTestId("header-nav-more").click();
+    const more = page.getByTestId("header-nav-more-menu");
+    await expect(more).toBeVisible();
+    const leads = (await idsAfter(more.locator('[data-testid^="header-nav-more-"]'), "header-nav-more-")).slice(0, 3);
+    const kind = kinds.find((k) => JSON.stringify(MORE_LEADS[k]) === JSON.stringify(leads));
+    console.log(`[nav] ${slot}: More opens with ${leads.join(", ")} (${kind ?? "no match"})`);
+    expect(kind, `More leads ${leads.join(", ")}`).toBeTruthy();
+    // #3002: one door, one route — the calendar is the ONE calendar, "Rinka" is
+    // the service/request loop, and no destination appears twice.
+    await expect(core.getByTestId("header-core-nav-planning")).toHaveAttribute("href", "/lt/dashboard/planning");
+    await expect(more.getByTestId("header-nav-more-area:market")).toHaveAttribute("href", "/lt/dashboard/service-requests");
+    const hrefs = [
+      ...(await core.locator('[data-testid^="header-core-nav-"]').evaluateAll((els) => els.map((e) => e.getAttribute("href")))),
+      ...(await more.locator('[data-testid^="header-nav-more-"]').evaluateAll((els) => els.map((e) => e.getAttribute("href")))),
+    ];
+    expect(new Set(hrefs).size, `duplicate destinations: ${hrefs.join(" ")}`).toBe(hrefs.length);
+    // #3003: an organization workspace carries no customer door.
+    await expect(more.getByTestId("header-nav-more-area:buyer")).toHaveCount(0);
+    await ctx.close();
+  });
+}
+
+test("N-3 (#3002). Alfa's door strip: Kalendorius opens the one calendar, Rinka the service requests", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await page.goto("/lt/dashboard/company");
+  await expect(page.getByTestId("organization-door-calendar").first()).toHaveAttribute("href", "/lt/dashboard/planning", { timeout: 30_000 });
+  await expect(page.getByTestId("organization-door-market").first()).toHaveAttribute("href", "/lt/dashboard/service-requests");
+  await ctx.close();
+});
+
+test("N-2 (P0-2). on the phone, Alfa's area sheet lists the core loop, then its doors", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner", true);
+  await useWorkspace(page, ALFA);
+  await page.goto("/lt/dashboard/projects");
+  await page.getByTestId("header-nav-sheet-trigger").click();
+  const sheet = page.getByTestId("header-nav-sheet");
+  await expect(sheet).toBeVisible({ timeout: 30_000 });
+  const ids = await idsAfter(sheet.locator('[data-testid^="header-nav-sheet-"]'), "header-nav-sheet-");
+  expect(ids.slice(0, 4)).toEqual(CORE_IDS);
+  expect(ids.slice(4, 7)).toEqual([...MORE_LEADS.company]);
+  const hrefs = await sheet
+    .locator('[data-testid^="header-nav-sheet-"]')
+    .evaluateAll((els) => els.map((e) => e.getAttribute("href")));
+  expect(new Set(hrefs).size, `duplicate destinations: ${hrefs.join(" ")}`).toBe(hrefs.length);
+  await ctx.close();
+});
 
 // ── U (#2680, owner decision 2026-10-22): a need that names NO trade still
 // shows the people who raised a hand on it, labelled "trade match not
@@ -331,7 +471,7 @@ test("U-3 (#2680). Gama sees the hand-raiser, labelled not assessed, with the co
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${untradedId}`);
-  const section = page.getByTestId("scouting-hand-raisers-unassessed");
+  const section = inMain(page).getByTestId("scouting-hand-raisers-unassessed");
   await expect(section, "the unassessed hand-raisers section renders on a need with no trade").toBeVisible({
     timeout: 60_000,
   });
@@ -346,9 +486,13 @@ test("U-3 (#2680). Gama sees the hand-raiser, labelled not assessed, with the co
 
 // This run's needs are closed after the chain (the worker's board needs them
 // open while it runs), even after a red step; interest and contact rows stay
-// as history.
+// as history. The hook has its own budget: the default 30 s hook timeout ran
+// out on the first need (already closed by U-1) and left the untraded need
+// open, which then refused the next walk's need (run 39960149411). Still-open
+// needs go first, the newest first.
 test.afterAll(async ({ browser }) => {
-  const ids = [requestId, untradedId].filter((id) => id !== "");
+  test.setTimeout(180_000);
+  const ids = [untradedId, requestId].filter((id) => id !== "" && !closedHere.has(id));
   if (ids.length === 0) return;
   const { ctx, page } = await as(browser, "manager");
   try {

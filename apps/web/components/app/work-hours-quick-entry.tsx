@@ -162,7 +162,12 @@ export function WorkHoursQuickEntry({
   }
 
   return (
-    <div className="grid w-full gap-6 lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] lg:items-start">
+    // `grid-cols-1` (= minmax(0, 1fr)) is load-bearing: with no template the
+    // phone got one implicit `auto` column that grew to the min-content of
+    // the widest child, so a day with one long entry line made the whole
+    // screen 620px wide at 390px and pushed Save off-screen (UX review
+    // 2026-10-24).
+    <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] lg:items-start">
       <Link
         href="?import=1"
         className="self-start text-sm underline underline-offset-4 lg:col-span-2"
@@ -362,9 +367,11 @@ export function WorkHoursQuickEntry({
                     className="h-8 w-2 shrink-0 rounded-full"
                     style={{ backgroundColor: e.objectTint }}
                   />
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-medium">{e.workerName}</span>
-                    <span className="truncate text-xs text-text-secondary">
+                  {/* The entry WRAPS rather than truncates: the note is the
+                      operator's own words and is read here, not opened. */}
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="break-words text-sm font-medium">{e.workerName}</span>
+                    <span className="break-words text-xs text-text-secondary">
                       {e.objectName}
                       {e.note ? ` · ${e.note}` : ""}
                       {e.enteredForSomeoneElse ? ` · ${t("enteredForSomeoneElse")}` : ""}
@@ -372,7 +379,7 @@ export function WorkHoursQuickEntry({
                     </span>
                   </span>
                   <span
-                    className={`ml-auto text-base font-semibold tabular-nums ${e.rejected ? "text-text-muted line-through" : ""}`}
+                    className={`ml-auto shrink-0 text-base font-semibold tabular-nums ${e.rejected ? "text-text-muted line-through" : ""}`}
                   >
                     {e.hours} h
                   </span>

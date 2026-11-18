@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * PROJECT STAFFING MODEL guards (formerly "sports operating model", Commercial
@@ -39,7 +40,7 @@ const opsBoard = read("components/app/project-operations-board.tsx");
 const projectsLib = read("lib/projects/projects.ts");
 const actionsLib = read("lib/projects/actions.ts");
 
-const LOCALES = ["en", "lt", "ru"] as const;
+const LOCALES = activeLocales;
 
 /** Ranking-claim tokens per language (also matched inside longer words). */
 const RANKING_TOKEN = /rank|reiting|рейтинг/i;

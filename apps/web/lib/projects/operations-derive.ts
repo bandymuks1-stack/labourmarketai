@@ -65,6 +65,10 @@ export interface ProjectSummary {
   startDate: string | null;
   endDate: string | null;
   status: string | null;
+  /** The organization the project belongs to (projects.organization_id) —
+   *  the link from a project to its organization's history. Null when the
+   *  row carries none. */
+  organizationId?: string | null;
 }
 
 /** Per-worker operations row, derived from manager-readable signals only. */
@@ -94,7 +98,13 @@ export interface WorkerOps {
   /** Manager-maintained readiness/document checklist for this project worker (v2). */
   readinessItems: ReadinessItem[];
   /** Checklist roll-ups (counts of the real item rows). */
-  docsMissing: number; // 'needed' or 'missing'
+  /** Rows the manager EXPLICITLY marked 'missing' for this job. A suggested
+   *  row ('needed' = to agree before the agreement) is never counted here —
+   *  a document not yet discussed is not a negative readiness signal (owner
+   *  2026-10-24, decision 0021 extension). */
+  docsMissing: number; // 'missing' only
+  /** Suggested rows still to agree before the agreement ('needed'). Neutral. */
+  docsToAgree: number;
   docsReceived: number; // 'received'
   docsChecked: number; // 'checked'
   docsBlocked: number; // 'rejected' or 'expired'
@@ -114,9 +124,11 @@ export interface OpsCounters {
   instructionsSent: number;
   /** Count of workers per manager-set operational status (v2). */
   byOperationalStatus: Record<OperationalStatus, number>;
-  /** Workers with at least one outstanding (needed/missing) checklist item. */
+  /** Workers with at least one row the manager explicitly marked missing. */
   withMissingDocs: number;
   docsMissing: number;
+  /** Suggested rows still to agree (neutral, never a readiness signal). */
+  docsToAgree: number;
   docsReceived: number;
   docsChecked: number;
   docsBlocked: number;
@@ -194,7 +206,8 @@ export function deriveWorkerOps(input: WorkerOpsInput): WorkerOps {
     needsFollowUp,
     operationalStatus: input.operationalStatus ?? null,
     readinessItems: items,
-    docsMissing: countWith(["needed", "missing"]),
+    docsMissing: countWith(["missing"]),
+    docsToAgree: countWith(["needed"]),
     docsReceived: countWith(["received"]),
     docsChecked: countWith(["checked"]),
     docsBlocked: countWith(["rejected", "expired"]),
@@ -222,6 +235,7 @@ export function deriveOpsCounters(
     byOperationalStatus,
     withMissingDocs: workers.filter((w) => w.docsMissing > 0).length,
     docsMissing: workers.reduce((n, w) => n + w.docsMissing, 0),
+    docsToAgree: workers.reduce((n, w) => n + w.docsToAgree, 0),
     docsReceived: workers.reduce((n, w) => n + w.docsReceived, 0),
     docsChecked: workers.reduce((n, w) => n + w.docsChecked, 0),
     docsBlocked: workers.reduce((n, w) => n + w.docsBlocked, 0),

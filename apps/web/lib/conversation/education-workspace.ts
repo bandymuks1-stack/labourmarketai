@@ -48,9 +48,10 @@ export async function loadEducationWorkspaceForChat(): Promise<EducationWorkspac
       cohorts: p.cohorts.map((c) => ({
         id: c.id,
         name: c.name,
-        memberCount: c.members.filter((m) => m.status === "active").length,
+        memberCount: read.membersVisible ? c.members.filter((m) => m.status === "active").length : null,
       })),
     })),
-    assignable: read.assignable.slice(0, 50).map((l) => ({ profileId: l.profileId, label: l.label })),
+    assignable: read.membersVisible ? read.assignable.slice(0, 50).map((l) => ({ profileId: l.profileId, label: l.label })) : [],
+    membersVisible: read.membersVisible,
   };
 }

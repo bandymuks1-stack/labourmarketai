@@ -57,8 +57,12 @@ async function scanProjectRisk(
       const pulse = pr.pulse;
       const stagesBlocked = pr.stages === null ? null : pr.stages.filter((s) => s.status === "blocked").length;
       const nobodyOnLiveProject = pr.status === "live" && pr.assignmentTotal === 0;
+      // Documents are not a project risk score (decision 0021 extension,
+      // 2026-10-24): the count of people with rows a manager marked missing
+      // is still SHOWN (workersWithMissingDocs below), never summed into the
+      // order.
       const signals =
-        (pulse ? pulse.tasksOverdue + pulse.workersWithMissingDocs : 0) +
+        (pulse ? pulse.tasksOverdue : 0) +
         (stagesBlocked ?? 0) +
         (nobodyOnLiveProject ? 1 : 0);
       rows.push({

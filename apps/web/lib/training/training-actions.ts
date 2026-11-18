@@ -120,6 +120,7 @@ export async function createTrainingProgramAction(formData: FormData): Promise<v
 
 /** Org owner/admin edits a programme (null fields are left untouched). */
 export async function updateTrainingProgramAction(formData: FormData): Promise<void> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = readLocale(formData);
   const programId = String(formData.get("programId") ?? "").trim();
   if (!UUID_RX.test(programId)) finish(locale, "invalid");
@@ -142,6 +143,7 @@ export async function updateTrainingProgramAction(formData: FormData): Promise<v
 
 /** A managing role assigns the programme to an active member of the org. */
 export async function assignTrainingAction(formData: FormData): Promise<void> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = readLocale(formData);
   const programId = String(formData.get("programId") ?? "").trim();
   if (!UUID_RX.test(programId)) finish(locale, "invalid");
@@ -174,6 +176,7 @@ export async function completeTrainingAction(formData: FormData): Promise<void> 
 export async function attachTrainingCertificateAction(
   formData: FormData,
 ): Promise<void> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = readLocale(formData);
   const assignmentId = String(formData.get("assignmentId") ?? "").trim();
   const fileId = String(formData.get("documentFileId") ?? "").trim();

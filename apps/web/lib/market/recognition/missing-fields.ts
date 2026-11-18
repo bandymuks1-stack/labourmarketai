@@ -19,6 +19,7 @@ import {
   type NeedStructureSuggestion,
 } from "@/lib/structuring/structure-need";
 import { mentionsStartTime, parseDurationDays } from "@/lib/structuring/time-window";
+import { withUnicodeBoundaries } from "@/lib/structuring/unicode-word-boundary";
 import type {
   JobDemandFieldKey,
   FieldSeverity,
@@ -102,7 +103,10 @@ const RULES: readonly FieldRule[] = [
     severity: "recommended",
     reason: "experience_mentioned",
     patterns: [
-      /\b\d+\s*(\+\s*)?(years?|yrs?|metų|metai|met\b|лет|год)/,
+      // A year count after a DURATION preposition ("for 2 years", "на 2
+      // года", "für 2 Jahre", "na 2 lata", "voor 2 jaar") is how long the
+      // job lasts, not the experience asked for.
+      /(?<!\b(?:for|на|für|fur|na|voor)\s+)\b\d+\s*(\+\s*)?(years?|yrs?|metų|metai|met\b|лет|год)/,
       /\b(experience|patirt|опыт|erfahrung|doświadcz|doswiadcz|ervaring)/,
     ],
   },
@@ -291,16 +295,29 @@ export interface JobDemandFieldScan {
  * Scan a raw job-post text and split the known fields into recognized vs missing.
  * Returns ONLY closed-set field keys + reason codes (no free text echoed back).
  */
+/**
+ * The rule patterns, compiled with UNICODE word boundaries. They are written
+ * with `\b`, which in JS is ASCII-only: a space followed by a Cyrillic letter
+ * is not a boundary, so every Russian pattern above ("опыт", "зарплат",
+ * "часов в недел" …) could never match. Compiled once, on first use.
+ */
+let compiledRules: ReadonlyArray<readonly RegExp[]> | null = null;
+function rulePatterns(): ReadonlyArray<readonly RegExp[]> {
+  compiledRules ??= RULES.map((rule) => rule.patterns.map(withUnicodeBoundaries));
+  return compiledRules;
+}
+
 export function detectJobDemandFields(rawText: string): JobDemandFieldScan {
   const text = rawText ?? "";
   const hay = text.toLowerCase();
   const reading: CanonicalReading = { text, structured: structureNeed({ description: text }) };
   const recognized: RecognizedField[] = [];
   const missing: MissingField[] = [];
+  const patterns = rulePatterns();
 
-  for (const rule of RULES) {
+  for (const [index, rule] of RULES.entries()) {
     const present =
-      rule.patterns.some((re) => re.test(hay)) || (rule.understood?.(reading) ?? false);
+      patterns[index].some((re) => re.test(hay)) || (rule.understood?.(reading) ?? false);
     if (present) recognized.push({ key: rule.key, reason: rule.reason });
     else missing.push({ key: rule.key, severity: rule.severity });
   }

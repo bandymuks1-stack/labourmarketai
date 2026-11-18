@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * React #418 (2026-10-09): server-authored slots (`children`, `rexora`, the
+ * React #418 (2026-10-09): server-authored slots (`children`, the
  * full-mode header/bottom nav) reach DashboardChrome from the RSC payload and
  * can still be LAZY when hydration reaches `<main>`. Directly under a host
  * element, that suspension replays the host claim with an already-advanced
@@ -27,8 +27,13 @@ describe("DashboardChrome keeps RSC slots behind a non-DOM boundary", () => {
     }
   });
 
-  it("the full-mode header and bottom-nav slots are wrapped too", () => {
-    expect(src).toMatch(/<SlotBoundary>\{fullHeader\}<\/SlotBoundary>/);
-    expect(src).toMatch(/<SlotBoundary>\{fullBottomNav\}<\/SlotBoundary>/);
+  it("no server-authored header or bottom-nav slot is left to wrap", () => {
+    // The full-mode header and bottom-nav slots used to arrive from the RSC
+    // payload and had to sit behind SlotBoundary too. Since 2026-10-25 every
+    // mode renders the ONE client header (`<ConversationHeader>`) directly,
+    // so those slots no longer exist; if a server-authored slot comes back it
+    // must be wrapped again.
+    expect(src).not.toMatch(/fullHeader|fullBottomNav/);
+    expect(src).toMatch(/<ConversationHeader title=\{headerTitle\} nav=\{nav\} \/>/);
   });
 });

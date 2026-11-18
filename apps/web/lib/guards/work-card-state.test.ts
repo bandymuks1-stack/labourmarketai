@@ -117,20 +117,62 @@ describe("ask only what is unknown — clear vs missing", () => {
   });
 });
 
-describe("exactly one next action, in human-path priority", () => {
-  it("empty → work first", () => {
+describe("evidence first — the first work entry leads until one exists (activation audit #4)", () => {
+  it("empty → the first work entry, the profession kept as the quiet secondary", () => {
     const d = deriveWorkCardState(EMPTY, NOW);
+    expect(d.next.dim).toBe("evidence");
+    expect(d.next.href).toBe("/dashboard/journal");
+    expect(d.next.whyKey).toBe("why.evidenceFirst");
+    // Not hidden: the displaced profession step stays one tap away.
+    expect(d.secondary).toEqual({
+      dim: "work",
+      href: "/dashboard/profile#profile-edit",
+      whyKey: "why.work",
+    });
+  });
+
+  it("the onboarded worker (profession, no skills, no entries) → first entry, never 'Set what I do' again", () => {
+    const s = { ...EMPTY, hasProfession: true };
+    const d = deriveWorkCardState(s, NOW);
+    expect(d.next.dim).toBe("evidence");
+    expect(d.secondary?.dim).toBe("work");
+  });
+
+  it("the secondary is the first unmet NON-evidence dimension in human-path order", () => {
+    const s = { ...EMPTY, hasProfession: true, skillsCount: 1 };
+    const d = deriveWorkCardState(s, NOW);
+    expect(d.next.dim).toBe("evidence");
+    expect(d.secondary).toEqual({ dim: "availability", href: null, whyKey: "why.availability" });
+  });
+
+  it("no profession is ever required: with entries and no profession, work is asked as before", () => {
+    const s = { ...EMPTY, evidenceCount: 1 };
+    const d = deriveWorkCardState(s, NOW);
+    expect(d.next.dim).toBe("work");
+    expect(d.secondary).toBeNull();
+  });
+
+  it("evidence-first never changes the state classification", () => {
+    expect(deriveWorkCardState(EMPTY, NOW).state).toBe("new");
+    expect(deriveWorkCardState({ ...EMPTY, paySet: true }, NOW).state).toBe("returning");
+  });
+});
+
+describe("exactly one next action, in human-path priority (after the first entry)", () => {
+  it("one entry, nothing else → work first", () => {
+    const d = deriveWorkCardState({ ...EMPTY, evidenceCount: 1 }, NOW);
     expect(d.next.dim).toBe("work");
     expect(d.next.href).toBe("/dashboard/profile#profile-edit");
     expect(d.next.whyKey).toBe("why.work");
   });
 
   it("work done → availability next", () => {
-    const s = { ...EMPTY, hasProfession: true, skillsCount: 1 };
+    const s = { ...EMPTY, hasProfession: true, skillsCount: 1, evidenceCount: 1 };
     const d = deriveWorkCardState(s, NOW);
     expect(d.next.dim).toBe("availability");
     expect(d.next.href).toBeNull(); // inline edit
     expect(d.next.whyKey).toBe("why.availability");
+    expect(d.secondary).toBeNull();
   });
 
   it("work+availability done → location next", () => {
@@ -139,6 +181,7 @@ describe("exactly one next action, in human-path priority", () => {
       hasProfession: true,
       skillsCount: 1,
       availabilitySet: true,
+      evidenceCount: 1,
     };
     expect(deriveWorkCardState(s, NOW).next.dim).toBe("location");
   });
@@ -153,7 +196,7 @@ describe("exactly one next action, in human-path priority", () => {
     expect(d.next.whyKey).toBe("why.pay");
   });
 
-  it("only evidence missing → journal with the 'later' why", () => {
+  it("only evidence missing → journal with the first-entry why (no 'add it later')", () => {
     const s: WorkCardSignals = {
       ...FULL,
       evidenceCount: 0,
@@ -161,12 +204,14 @@ describe("exactly one next action, in human-path priority", () => {
     const d = deriveWorkCardState(s, NOW);
     expect(d.next.dim).toBe("evidence");
     expect(d.next.href).toBe("/dashboard/journal");
-    expect(d.next.whyKey).toBe("why.evidence");
+    expect(d.next.whyKey).toBe("why.evidenceFirst");
+    expect(d.secondary).toBeNull(); // nothing else was displaced
   });
 
   it("fully complete → keep record growing (journal), single action", () => {
     const d = deriveWorkCardState(FULL, NOW);
     expect(d.missing).toEqual([]);
+    expect(d.secondary).toBeNull();
     expect(d.next.href).toBe("/dashboard/journal");
     expect(d.next.whyKey).toBe("why.complete");
   });
@@ -190,7 +235,7 @@ describe("exactly one next action, in human-path priority", () => {
     for (const v of variants) seen.add(deriveWorkCardState(v, NOW).next.whyKey);
     for (const k of seen) {
       expect(k).toMatch(
-        /^why\.(work|availability|location|pay|evidence|complete)$/,
+        /^why\.(work|availability|location|pay|evidence|evidenceFirst|complete)$/,
       );
     }
   });

@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { daysInMonth, periodEndIso, periodStartIso } from "./period-dates";
+import {
+  daysInMonth,
+  periodEndIso,
+  periodStartIso,
+  statedDateLabel,
+  statedIsoText,
+  statedPrecision,
+} from "./period-dates";
 
 /**
  * DB-date semantics for self-declared work-history periods (PR #851
@@ -42,5 +49,48 @@ describe("period-dates", () => {
     expect(periodStartIso({ year: 1899, month: null, day: null })).toBeNull();
     expect(periodEndIso({ year: 2101, month: null, day: null })).toBeNull();
     expect(periodStartIso(null)).toBeNull();
+  });
+});
+
+describe("reading a stated date back", () => {
+  it("what is stored for a stated year, month or day reads at that precision", () => {
+    for (const [part, text] of [
+      [{ year: 2018, month: null, day: null }, "2018"],
+      [{ year: 2018, month: 3, day: null }, "2018-03"],
+      [{ year: 2018, month: 3, day: 14 }, "2018-03-14"],
+    ] as const) {
+      expect(statedIsoText(periodStartIso(part), "start")).toBe(text);
+      expect(statedIsoText(periodEndIso(part), "end")).toBe(text);
+    }
+  });
+
+  it("a leap February still ends a month, and a day before it does not", () => {
+    expect(statedPrecision("2024-02-29", "end")).toBe("month");
+    expect(statedPrecision("2024-02-28", "end")).toBe("day");
+    expect(statedPrecision("2023-02-28", "end")).toBe("month");
+  });
+
+  it("each edge has its own reading of the same date", () => {
+    expect(statedPrecision("2018-12-31", "start")).toBe("day");
+    expect(statedPrecision("2018-01-01", "end")).toBe("day");
+  });
+
+  it("nothing stored reads as nothing", () => {
+    expect(statedPrecision(null, "start")).toBeNull();
+    expect(statedIsoText(undefined, "end")).toBeNull();
+    expect(statedDateLabel("not a date", "start", "lt")).toBeNull();
+  });
+
+  it("a localized label never shows a month or day nobody stated", () => {
+    expect(statedDateLabel("2018-01-01", "start", "en")).toBe("2018");
+    expect(statedDateLabel("2019-12-31", "end", "en")).toBe("2019");
+    expect(statedDateLabel("2021-03-01", "start", "en")).toContain("Mar");
+    expect(statedDateLabel("2021-03-01", "start", "en")).not.toContain("1,");
+  });
+
+  it("a list that shows months keeps showing months for a stated day", () => {
+    const month = statedDateLabel("2016-06-15", "start", "en", "month");
+    expect(month).toContain("Jun");
+    expect(month).not.toContain("15");
   });
 });

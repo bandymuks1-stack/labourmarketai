@@ -13,6 +13,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 import type { NavIconKey } from "@/lib/config/navigation";
+import { WORK_AREA_ICONS } from "@/components/app/work-area-icons";
 
 /**
  * ONE ICON PER DESTINATION, for every nav surface that renders the catalogue.
@@ -29,6 +30,9 @@ import type { NavIconKey } from "@/lib/config/navigation";
  * one visual language. FileText stays reserved for documents.
  */
 export const NAV_ICONS: Record<NavIconKey, LucideIcon> = {
+  // An organization area promoted into the header keeps its area-switcher
+  // icon; the catalogue's own icons below win where the keys coincide.
+  ...WORK_AREA_ICONS,
   home: Home,
   store: Store,
   map: MapPin,
