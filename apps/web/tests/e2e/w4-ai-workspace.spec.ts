@@ -197,7 +197,7 @@ test.describe("W4 — goals in words, executed as workflows", () => {
     const answer = await transcript(page);
     // Workspace + permissions are always stated, as fact or as "unknown".
     expect(answer).toMatch(/Darbo erdvė|Nepavyko perskaityti, kurioje/);
-    expect(answer).toMatch(/Gali veikti kaip|Nepavyko perskaityti tavo teisių/);
+    expect(answer).toMatch(/Galite veikti kaip|Nepavyko perskaityti jūsų teisių/);
   });
 
   test("the workspace never navigates while the AI works", async ({ page }) => {

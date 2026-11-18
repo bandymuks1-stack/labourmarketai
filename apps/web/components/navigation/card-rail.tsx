@@ -16,6 +16,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { NAV_CARD_ICONS } from "@/components/navigation/nav-card-icon";
 import type { NavCardIconKey } from "@/lib/navigation/nav-card-icons";
 import { cn } from "@/lib/utils";
+import { useSignedInHint } from "@/components/layouts/nav-auth-ctas";
 
 /** A fragment (`#…`) stays on the page, so it is a plain anchor; everything
  *  else goes through the locale-aware Link. */
@@ -35,11 +36,17 @@ export type RailCard = {
   /** Locale-less internal path, or a fragment of the current page. Every
    *  card is a real link. */
   readonly href: string;
+  /** Where a signed-out visitor goes instead (an account card whose first
+   *  step for a newcomer is sign-up, e.g. "Create a free CV"). */
+  readonly guestHref?: string;
   readonly label: string;
   /** One short line; hidden on phones in the compact size. */
   readonly description?: string;
   /** A small factual line, e.g. "Opens now". */
   readonly note?: string;
+  /** The note a signed-out visitor sees instead when the card opens
+   *  `guestHref` (sign-up), so it never says "sign-in required" there. */
+  readonly guestNote?: string;
   readonly iconKey: NavCardIconKey;
   /**
    * A pin toggle in the card's corner (signed-in homes). It renders as a
@@ -113,6 +120,7 @@ export function CardRail({
   testId: string;
 }) {
   const trackRef = useRef<HTMLUListElement>(null);
+  const signedIn = useSignedInHint();
   const [edge, setEdge] = useState({ start: true, end: true, pages: 1, page: 0 });
 
   const measure = useCallback(() => {
@@ -217,7 +225,7 @@ export function CardRail({
                 )}
               >
                 <CardLink
-                  href={card.href}
+                  href={!signedIn && card.guestHref ? card.guestHref : card.href}
                   data-rail-card
                   data-card-id={card.id}
                   aria-current={active ? "true" : undefined}
@@ -256,9 +264,10 @@ export function CardRail({
                         {card.description}
                       </span>
                     )}
-                    {card.note && (
-                      <span className="text-xs leading-snug text-text-muted">{card.note}</span>
-                    )}
+                    {(() => {
+                      const note = !signedIn && card.guestHref && card.guestNote ? card.guestNote : card.note;
+                      return note ? <span className="text-xs leading-snug text-text-muted">{note}</span> : null;
+                    })()}
                   </span>
                 </CardLink>
                 {card.pin && (

@@ -16,6 +16,8 @@ import {
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
+import { bindWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
+import { isWorkerProfileDoorNext } from "@/lib/marketing/worker-profile-door";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { buildEmailConfirmRedirectTo } from "@/lib/auth/email-confirm";
 import {
@@ -192,6 +194,9 @@ export function LoginForm({
       setError(t("error_password_required"));
       return;
     }
+    // The intake draft, if this tab has one, is bound to this email only
+    // (decision 0024; lib/staffing/worker-intake-draft.ts).
+    if (nextParam && isWorkerProfileDoorNext(nextPath)) bindWorkerIntakeDraft(email);
     setStatus("signing");
     trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "password" });
     try {
@@ -408,7 +413,7 @@ export function LoginForm({
           {t("password_label")}
           <Link
             href="/auth/forgot-password"
-            className="text-brand-blue hover:text-brand-champagne"
+            className="inline-flex min-h-11 items-center text-brand-blue hover:text-brand-champagne"
           >
             {t("forgot_password")}
           </Link>
@@ -510,7 +515,7 @@ export function LoginForm({
       >
         <Link
           href="/auth/forgot-password"
-          className="text-sm font-semibold text-brand-blue hover:text-brand-champagne"
+          className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-blue hover:text-brand-champagne"
           data-testid="login-recover-link"
         >
           {t("reset_password_cta")}

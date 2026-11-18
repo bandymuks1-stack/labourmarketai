@@ -59,36 +59,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "[EN] Why agencies",
-      "headline": "[EN] Leverage, not loss of control",
-      "items": [
-        {
-          "desc": "[EN] Workers, availability and status in one place.",
-          "title": "[EN] Manage your pool"
-        },
-        {
-          "desc": "[EN] Broker demand without losing the relationship.",
-          "title": "[EN] Post on behalf of clients"
-        },
-        {
-          "desc": "[EN] Place the right people faster.",
-          "title": "[EN] Fit direction"
-        },
-        {
-          "desc": "[EN] Public, agencies-only or direct — your call.",
-          "title": "[EN] Visibility controls"
-        },
-        {
-          "desc": "[EN] Baltic + Nordic clients and workers.",
-          "title": "[EN] Cross-border reach"
-        },
-        {
-          "desc": "[EN] Capacity insights as demand shifts.",
-          "title": "[EN] Grow your desk"
-        }
-      ]
-    },
     "journey": {
       "eyebrow": "[EN] Agency workflow",
       "headline": "[EN] Run your pool like a desk",
@@ -205,7 +175,7 @@
         },
         "addMore": {
           "title": "[EN] Add another way to use labourmarket.ai",
-          "body": "[EN] You're not locked in. Add a worker, company, agency or customer role whenever you're ready.",
+          "body": "[EN] You're not locked into one role. Company, agency and customer spaces are not all available yet.",
           "cta": "[EN] Review roles"
         },
         "activity": {
@@ -228,7 +198,10 @@
           "errorOpenNeedLimitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust.",
           "openNeedUsage": "Aktiivsed ametikohad: kasutatud {used} / {limit} · jäänud {remaining}",
           "openNeedUsageUpgradeCta": "Aktiveeri plaan „Organisatsioon“",
-          "openNeedUsageIndividual": "Oled jõudnud oma plaani piirini. Võta meiega ühendust, et oma vajadusi arutada."
+          "openNeedUsageIndividual": "Oled jõudnud oma plaani piirini. Võta meiega ühendust, et oma vajadusi arutada.",
+          "form": {
+            "countryRequired": "Valige riik, kus tööd tehakse."
+          }
         }
       },
       "account": {
@@ -244,9 +217,9 @@
         "employerVisibility": "Nähtavus tööandjatele"
       },
       "comingSoon": {
-        "body_main": "[EN] We're finishing the company / agency functionality right now.",
+        "body_main": "[EN] Company / agency functionality is not available yet.",
         "body_meanwhile": "[EN] In the meantime — you can browse the platform via the \"Discover\" tab (read-only).",
-        "body_notify": "[EN] We'll let you know the moment it's ready.",
+        "body_notify": "[EN] We'll let you know when it is available.",
         "greeting": "[EN] 👋 Welcome, {name}"
       },
       "customer": {
@@ -630,36 +603,6 @@
         {
           "a": "[EN] Through confirmed skills, employer-confirmed history and contextual fit signals — not self-reported CVs.",
           "q": "[EN] How is worker experience guaranteed?"
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "[EN] Why companies",
-      "headline": "[EN] Supply you can act on",
-      "items": [
-        {
-          "desc": "[EN] Every fit signal shows the reasons behind it.",
-          "title": "[EN] Explainable fit direction"
-        },
-        {
-          "desc": "[EN] Baltic + Nordic supply in one place.",
-          "title": "[EN] Cross-border worker pool"
-        },
-        {
-          "desc": "[EN] You see and own the relationship.",
-          "title": "[EN] No opaque middlemen"
-        },
-        {
-          "desc": "[EN] Hire on evidence, not on claims.",
-          "title": "[EN] Confirmed skills + fit signals"
-        },
-        {
-          "desc": "[EN] See availability shift as it happens.",
-          "title": "[EN] Real-time supply signals"
-        },
-        {
-          "desc": "[EN] You own the worker relationship.",
-          "title": "[EN] Direct contact"
         }
       ]
     },
@@ -1092,7 +1035,7 @@
         ]
       }
     },
-    "subcopyLive": "Hinnad on omaniku kinnitatud ja kehtivad. Aktiveerimine toimub organisatsiooni kontol turvalise Stripe'i makse kaudu; sellel lehel midagi ei võeta.",
+    "subcopyLive": "Hinnad kehtivad. Aktiveerimine toimub organisatsiooni kontol turvalise Stripe'i makse kaudu; sellel lehel midagi ei võeta.",
     "subcopy": "Hinnad ei ole veel lõplikud ning arveldust ei käivitata sinu eest sellel lehel. Allolevad tasemed kirjeldavad mahtu; aktiveerimine on käsitsi — võta ühendust ning kinnitame hinna ja mahu enne igasugust alustamist.",
     "subcopyConfirmed": "Hinnad on kinnitatud. Veebipõhine aktiveerimine ei ole veel avatud — liitu ootenimekirjaga, võtame ühendust ja käivitame organisatsiooni käsitsi; sellel lehel midagi ei võeta.",
     "trialNote": "Organisatsiooni esimene tellimus algab 14-päevase prooviperioodiga. Pärast seda võetakse kaardilt kuuhind; tühistada saab enne prooviperioodi lõppu.",
@@ -1110,7 +1053,7 @@
     "ctaStartFree": "Start free in your organization account",
     "ctaSubscribe": "Aktiveeri organisatsiooni kontol",
     "priceState": {
-      "owner_confirmed": "Hinnad on omaniku kinnitatud. Aktiveerimine toimub organisatsiooni kontol; sellel lehel midagi ei võeta."
+      "owner_confirmed": "Hinnad on kinnitatud. Sellel lehel midagi ei võeta."
     }
   },
   "secondary": {
@@ -1196,7 +1139,7 @@
     "loading": "[EN] Loading...",
     "noProfession": "[EN] Pick a profession to see the skills linked to it.",
     "pageTitle": "[EN] Profession & skills",
-    "pickerHelp": "[EN] Select skills you have. They will be confirmed later by a site manager.",
+    "pickerHelp": "[EN] Select skills you have. They will be reviewed later by a site manager.",
     "pickerTitle": "[EN] Your skills",
     "professionLabel": "[EN] Your profession",
     "professionPlaceholder": "[EN] Select a profession",
@@ -1234,7 +1177,7 @@
     "submit": "[EN] Notify me",
     "success_body": "[EN] We'll let you know as soon as it's ready.",
     "success_title": "[EN] Thanks!",
-    "title": "[EN] For companies & agencies — coming soon"
+    "title": "[EN] For companies & agencies"
   },
   "workers": {
     "cta": {
@@ -2070,7 +2013,7 @@
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
       "positionsTitle": "[EN] Missing positions",
-      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "positionsEmpty": "[EN] Position needs are not available yet. When they are, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena",
       "history": {
         "title": "Varasem töö selles projektis",
@@ -2100,7 +2043,8 @@
         "noMembers": "Praegu liikmeid pole.",
         "unavailable": "Meeskondi ei õnnestunud laadida. Proovige uuesti.",
         "manage": "Muuda meeskondi"
-      }
+      },
+      "organizationLink": "Organisatsiooni ajalugu ja projektid"
     },
     "workerView": {
       "eyebrow": "Minu projekt",
@@ -2167,7 +2111,7 @@
       "title": "[EN] Readiness by market",
       "empty": "[EN] No declared countries in the pool yet — readiness appears with the first ones.",
       "availableNow": "[EN] available now",
-      "docsNote": "[EN] Document readiness stays with the worker: category-level aggregates will appear here only with the worker-consent switch (a gated change, in preparation). You never see document contents here."
+      "docsNote": "[EN] Document readiness stays with the worker: category-level aggregates will appear here only with the worker-consent switch. You never see document contents here."
     },
     "demand": {
       "title": "[EN] Open demand",
@@ -2183,7 +2127,7 @@
         "not_agency": "[EN] Finish agency setup first.",
         "request_not_found": "[EN] The request no longer exists.",
         "request_not_open": "[EN] The request is no longer open.",
-        "needs_gate": "[EN] This feature is in preparation (gated change pending).",
+        "needs_gate": "[EN] Couldn’t load. Please try again.",
         "error": "[EN] Could not save the mark. Try again."
       }
     },
@@ -2266,6 +2210,7 @@
         "accommodation": "[EN] Accommodation",
         "transport": "[EN] Transport",
         "tool": "[EN] Required tools",
+        "opportunityType": "Võimaluse tüüp",
         "activeCount": "[EN] Active filters: {count}",
         "reset": "[EN] Reset filters"
       },
@@ -2564,6 +2509,9 @@
       "skillCount": "{matched} / {total} nõutud oskust",
       "nameHidden": "Nimi ja kontaktandmed ilmuvad alles siis, kui inimene seda lubab.",
       "appliedToYou": "Esitas sellele vajadusele avalduse — nimi ja foto tulevad avaldusega. Telefon ja e-post jäävad peidetuks."
+    },
+    "filters": {
+      "noMatchesCountry": "Nähtavas pakkumises pole veel kedagi riigis {country}. Näita kõiki või laienda vajadust."
     }
   },
   "waze": {
@@ -2886,7 +2834,8 @@
     },
     "actions": {
       "planning": "[EN] View in planning",
-      "proposeAgain": "[EN] Propose again with new dates"
+      "proposeAgain": "[EN] Propose again with new dates",
+      "needClosed": "Tööandja sulges selle vajaduse, seega ei saa pakkumist enam vastu võtta. Saate selle siiski tagasi lükata."
     },
     "propose": {
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
@@ -3925,7 +3874,9 @@
         "supplyRole": "Milline amet",
         "supplyRolePlaceholder": "Nt keevitaja",
         "supplyTeamSize": "Kui palju inimesi sul on",
-        "supplyLocation": "Kus nad saavad töötada"
+        "supplyLocation": "Kus nad saavad töötada",
+        "demandCountry": "Riik, kus tööd tehakse",
+        "demandCountryPlaceholder": "nt Rootsi või SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -4609,7 +4560,7 @@
       "title": "Üks vestlusaken juhib sinu tööd",
       "subcopy": "Kümnete vormide asemel lihtsalt räägid. Assistent koostab, sina kinnitad — ja iga tegevus jätab kirje, mille juurde saab naasta.",
       "liveLabel": "Töötab juba täna",
-      "comingLabel": "Ettevalmistamisel",
+      "comingLabel": "Veel pole saadaval",
       "conceptLabel": "Kontseptuaalne vaade — stiliseeritud illustratsioon, mitte päris vestlus",
       "c1": "Uuenda CV-d ja profiili",
       "c2": "Kirjenda tööpäev",
@@ -6466,7 +6417,7 @@
       "assigneePlaceholder": "[EN] Person's email",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -6898,6 +6849,14 @@
   "agencyBridge": {
     "deliveryAccepted": "[EN] Delivered — the client accepted the invitation and now confirms the connection on their Partners page."
   },
+  "scoutingAgencyOffers": {
+    "decision": {
+      "limitOpen": "[EN] You already have 10 booking proposals waiting for workers' answers — the most that can be open at once. Withdraw the ones you no longer need, then accept this candidate. The agency's offer stays open.",
+      "limitDaily": "[EN] You have sent 30 booking proposals in the last 24 hours — the daily limit. Accept this candidate later; nothing was sent and the agency's offer stays open.",
+      "limitUnknown": "[EN] The booking proposal limit is reached (10 waiting for an answer, 30 per day). Withdraw proposals you no longer need or try later; the agency's offer stays open.",
+      "openBookings": "[EN] Open bookings"
+    }
+  },
   "roleDashboards": {
     "company": {
       "programs": {
@@ -7127,7 +7086,8 @@
       "address": "Aadress",
       "project": "Projekt",
       "notInSource": "Allikas puudub",
-      "linked": "Seotud"
+      "linked": "Seotud",
+      "openProject": "Ava projekt"
     },
     "whoWorked": "Kes siin töötas",
     "timeline": "Mida tehti",
@@ -7145,15 +7105,30 @@
       "refused": "Salvestamine ebaõnnestus. Midagi ei muudetud.",
       "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
     },
-    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
+    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid.",
+    "projects": {
+      "title": "Projektid platvormil",
+      "counts": "{running} käimas · {completed} lõpetatud",
+      "untitled": "Nimeta projekt",
+      "running": "Käimas",
+      "completed": "Lõpetatud",
+      "all": "Kõik {count} projekti"
+    },
+    "journal": {
+      "title": "Päevikusse kirja pandud töö",
+      "hours": "Kirja pandud tunnid",
+      "confirmed": "Organisatsiooni kinnitatud tunnid",
+      "people": "Tööd kirja pannud inimesed",
+      "period": "Kirja pandud",
+      "basis": "{entries} päevikukirjest, mille inimesed selle organisatsiooni all tegid. Loetakse eraldi ülaltoodud imporditud ajaloost ja sellele kunagi ei liideta.",
+      "unavailable": "Selle organisatsiooni all päevikusse kirja pandud tööd ei õnnestunud praegu lugeda."
+    }
   },
   "workLifecycle": {
     "pending": "Veel mitte",
     "title": "Mis saab sinu tehtud tööst",
     "titleCompany": "Mis saab teie juhitud tööst",
     "example": "Näide — mitte päris inimene ega päris andmed",
-    "hint": "Valige samm. Iga samm avab päris koha teie töökeskkonnas.",
-    "hintWorkers": "Valige samm. Iga samm avab päris koha teie töökeskkonnas.",
     "open": "Ava töökeskkonnas",
     "list": "Töö elutsükli sammud",
     "workers": {
@@ -7926,6 +7901,9 @@
       "invites": "Kutse- ja teavituskirjad",
       "invitesOn": "sees",
       "invitesOff": "VÄLJAS – lülitatakse eraldi sisse: INVITE_EMAIL_PROVIDER=smtp ja üks testsaatmine"
+    },
+    "alerts": {
+      "title": "Omaniku hoiatused ja tõuketeated"
     }
   },
   "historyDuplicates": {
@@ -8068,11 +8046,61 @@
       "close": "Sulge",
       "functions": "Tegevused",
       "professions": "Ametid",
-      "opensNow": "Kontot ei ole vaja",
       "signInWhenOpen": "Vajalik on sisselogimine",
       "allSectors": "Kõik sektorid",
       "fullList": "Täielik nimekiri"
     },
     "more": "Veel"
+  },
+  "commercial": {
+    "pageTitle": "[EN] Commercial",
+    "pageIntro": "[EN] Your proposals and contracts, linked to demand and projects. Invoices and payments are recorded in Finance.",
+    "preApply": "[EN] Commercial CRM will be available once the commercial update is applied.",
+    "proposalsTitle": "[EN] Proposals",
+    "honestNote": "[EN] A proposal moves draft → sent → accepted/rejected only when you set it. Nothing is sent to anyone automatically.",
+    "proposalsEmpty": "[EN] No proposals yet.",
+    "addProposal": "[EN] Add a proposal",
+    "proposalTitlePlaceholder": "[EN] Proposal title",
+    "contractsTitle": "[EN] Contracts",
+    "noSignatureNote": "[EN] Contracts store a status and an optional document reference. No electronic signature is created or claimed.",
+    "contractsEmpty": "[EN] No contracts yet.",
+    "addContract": "[EN] Add a contract",
+    "contractFromProposal": "[EN] Create contract",
+    "fromProposal": "[EN] From proposal: {title}",
+    "contractTitlePlaceholder": "[EN] Contract title",
+    "docRef": "[EN] Doc ref",
+    "docRefLabel": "[EN] Document reference",
+    "docRefPlaceholder": "[EN] Signed doc reference (optional)",
+    "invoicesTitle": "[EN] Invoices & payments",
+    "invoicesNote": "[EN] Invoices and payment records live in Finance — recorded manually, EUR. This platform moves no money.",
+    "openFinance": "[EN] Open Finance",
+    "statusLabel": "[EN] Status",
+    "titleLabel": "[EN] Title",
+    "amountLabel": "[EN] Amount (EUR)",
+    "valueLabel": "[EN] Value (EUR)",
+    "add": "[EN] Add",
+    "saving": "[EN] Saving…",
+    "delete": "[EN] Remove",
+    "proposalStatus": {
+      "draft": "[EN] Draft",
+      "sent": "[EN] Sent",
+      "accepted": "[EN] Accepted",
+      "rejected": "[EN] Rejected",
+      "withdrawn": "[EN] Withdrawn"
+    },
+    "contractStatus": {
+      "draft": "[EN] Draft",
+      "active": "[EN] Active",
+      "completed": "[EN] Completed",
+      "cancelled": "[EN] Cancelled"
+    },
+    "outcome": {
+      "saved": "[EN] Saved.",
+      "needs_migration": "[EN] Not available right now.",
+      "invalid": "[EN] Please check the details.",
+      "auth": "[EN] Please sign in again.",
+      "not_authorized": "[EN] You can only manage your own records.",
+      "error": "[EN] Something went wrong. Please try again."
+    }
   }
 }

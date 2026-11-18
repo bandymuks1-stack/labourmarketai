@@ -6,12 +6,18 @@ import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
 import type { RenderedIntent } from "@/components/layouts/intent-icons";
-import { ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
-import { INSTITUTION_DOOR_NEXT } from "@/lib/marketing/public-doors";
+import { ASSISTANT_GUEST_HREF, ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
+import { STARTING_CONTEXTS } from "@/lib/marketing/public-doors";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { LmLogo } from "@/components/ui/lm-logo";
 import { isVisionPublic } from "@/lib/config/vision-publication";
+
+/** The landing's own institution door — sign-up, with the institution setup
+ *  as its return path (lib/marketing/public-doors.ts). Read, never retyped, so
+ *  the header can never point a visitor at the signed-in setup itself. */
+const INSTITUTION_DOOR: string =
+  STARTING_CONTEXTS.find((c) => c.key === "institution")?.href ?? "/auth/signup";
 
 // `/vision` is gated by `lib/config/vision-publication.ts`. While the
 // flag is `false`, the route stays reachable by direct URL (so the
@@ -112,11 +118,13 @@ export async function SiteNav({
       href: link.href,
       label: tIntent(`links.${link.id}`),
       account: link.account,
+      guestHref: link.guestHref,
     })),
   }));
   // "Ask the assistant" — the existing conversation home (`/dashboard` IS the
-  // chat). A signed-out visitor is sent to login and lands back in it.
-  const assistant = { href: ASSISTANT_HREF, label: tIntent("assistant") };
+  // chat). A signed-out visitor is sent to the landing's question box instead
+  // (`guestHref`, desktop bar); the phone menu marks it as a signed-in entry.
+  const assistant = { href: ASSISTANT_HREF, guestHref: ASSISTANT_GUEST_HREF, label: tIntent("assistant") };
 
   // ONE definition, rendered in exactly one place at any given width: in the
   // header from `sm` up, inside the disclosure below it. Sharing the fragment
@@ -154,12 +162,16 @@ export async function SiteNav({
   );
   // Behind "More" and in the phone menu: the older links, then the one door
   // for schools, colleges and universities (owner P0 2026-11-13: they can
-  // register but had no entry). It opens the existing institution setup —
-  // sign-in first for a visitor — until the audience page exists; it is not
+  // register but had no entry). It is the landing's own institution door —
+  // sign-UP, then the existing institution setup — and carries the same
+  // account note as every goal link that needs an account (owner P0
+  // 2026-11-15, F9: it used to send a new institution to sign-in). It is not
   // a seventh goal.
   const moreLinks = [
     ...links.map((l) => ({ key: l.key as string, href: l.href, label: t(l.key) })),
-    { key: "education", href: INSTITUTION_DOOR_NEXT, label: tIntent("education") },
+    // It opens SIGN-UP, so its note is the existing "Sign up", not "For
+    // signed-in users".
+    { key: "education", href: INSTITUTION_DOOR, label: tIntent("education"), account: true, accountNote: tIntent("signUp") },
   ];
   // ONE goal bar element, placed by the page: the header's second row on
   // inner pages; on the landing (no goals in it) it sits in the first row.
@@ -170,6 +182,7 @@ export async function SiteNav({
       goalsOnPage={goalsOnPage}
       navLabel={tIntent("trigger")}
       accountLabel={tIntent("account")}
+      signUpLabel={tIntent("signUp")}
       assistant={assistant}
       more={{
         label: tIntent("more"),
@@ -195,7 +208,7 @@ export async function SiteNav({
       <div className="mx-auto flex max-w-container items-center gap-2 px-3 py-3 sm:gap-6 sm:px-12 sm:py-4">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
+          className="flex min-h-11 shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
         >
           {/* The mark is decorative here — the wordmark beside it already
               names the product, so announcing both would read it twice. */}
@@ -253,6 +266,7 @@ export async function SiteNav({
             closeLabel={t("menuClose")}
             intents={intents}
             accountLabel={tIntent("account")}
+            signUpLabel={tIntent("signUp")}
             assistant={assistant}
             // Below `sm` the panel also carries the auth CTAs the header row
             // cannot fit; from `sm` up the whole section is display:none and
