@@ -593,13 +593,27 @@ for (const phone of PHONES) {
       await fitsTheScreen(page, "the journal with the read-back open");
 
       // W-6: the profile's "current job" row and the licence toggles.
-      await page.goto(`${BASE}/en/dashboard/profile`);
+      // The experience form lives in the capabilities section, which the profile
+      // opens only when the address names it (DetailsHashOpener; the
+      // production walk P-7 opens it the same way).
+      await page.goto(`${BASE}/en/dashboard/profile#capabilities`);
       const profile = page.getByRole("main");
-      const openExp = profile.getByTestId("add-experience-open");
+      await expect(profile.locator("details#capabilities").first(), "the capabilities section is open").toHaveAttribute("open", "", {
+        timeout: 30_000,
+      });
+      const openExp = profile.getByTestId("add-experience-open").filter({ visible: true }).first();
       await openExp.scrollIntoViewIfNeeded();
       await tapUntil(openExp, profile.getByTestId("add-experience-current"));
       await size(profile.locator("label", { has: profile.getByTestId("add-experience-current") }), "the current-job row");
-      const licences = profile.locator('[data-testid^="prefs-licence-"]:not([data-testid="prefs-licence-categories"])');
+      // The licence toggles are in the CV-details section, opened the same way.
+      await page.goto(`${BASE}/en/dashboard/profile#cv-details`);
+      await expect(profile.locator("details#cv-details").first(), "the CV-details section is open").toHaveAttribute("open", "", {
+        timeout: 30_000,
+      });
+      const licences = profile
+        .locator('[data-testid^="prefs-licence-"]:not([data-testid="prefs-licence-categories"])')
+        .filter({ visible: true });
+      await expect.poll(() => licences.count(), { message: "the licence toggles render", timeout: 30_000 }).toBeGreaterThan(0);
       for (let i = 0; i < (await licences.count()); i += 1) await size(licences.nth(i), `licence toggle ${i + 1}`, "both");
       await fitsTheScreen(page, "the profile with the experience form open");
       await done();
