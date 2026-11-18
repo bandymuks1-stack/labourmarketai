@@ -1802,8 +1802,6 @@ describe("the migration set is exactly what this slice declared", () => {
       // is active and review is on (one RLS policy replaced). RED draft, the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261115120000_journal_learning_access_follows_link_v1.sql",
-      // 2026-10-14 (RED, needs-human-gate, NOT applied): historical date correction v1.
-      "20261118100000_historical_date_correction_v1.sql",
 ]);
   });
 

@@ -1,3 +1,20 @@
+-- EVIDENCE ONLY. NOT APPLIED. NOT A MIGRATION. NEVER EXECUTE THIS FILE.
+--
+-- Owner decision 2026-10-14: option C, HOLD all 165 dates. None of the 165
+-- historical date corrections is applied; the original records stay exactly
+-- as imported (effective totals 2 944 records / 29 645.5 h / 43 people).
+-- Any future correction needs a NEW, separately approved proposal: a fresh
+-- migration under supabase/migrations/ with its own rollback, a new owner
+-- approval of that exact file, a new production dry run, and RED-class review.
+-- This file may not be copied back into supabase/migrations/ as it stands.
+--
+-- This is its rollback, kept as evidence for PR #2362 (function 2.28). It was
+-- supabase/rollbacks/20261118100000_historical_date_correction_v1.down.sql
+-- (renamed 2026-11-18 from 20261014150000_*; never applied anywhere).
+-- Everything below the marker line is that file, byte for byte.
+-- sha256 of the bytes below the marker: ddaeb18ea7afbea0b45d2500a269a4232c65793381f848f3fafb270445c60fa1
+-- Pinned by apps/web/lib/guards/historical-date-correction.test.ts.
+-- ===== END OF EVIDENCE HEADER — original file bytes follow unchanged =====
 -- ROLLBACK of 20261118100000_historical_date_correction_v1.sql
 --
 -- Removes exactly the 165 correcting records this rule wrote and the
