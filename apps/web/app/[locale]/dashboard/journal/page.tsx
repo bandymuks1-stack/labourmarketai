@@ -2369,7 +2369,7 @@ export default async function JournalPage({
                                 "identify_verifier" ? (
                                   <Link
                                     href={IDENTIFY_VERIFIER_HREF as "/dashboard"}
-                                    className="underline underline-offset-2 hover:text-text-primary"
+                                    className="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-text-primary"
                                     data-testid={`journal-entry-identify-verifier-${e.id}`}
                                   >
                                     {tVerify("action.identify_verifier")}
