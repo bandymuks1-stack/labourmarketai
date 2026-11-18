@@ -14,7 +14,10 @@ import type {
   ReadState,
 } from "@/lib/agency/delegation-read";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 export interface AgencyDelegationLabels {
   readonly title: string;
@@ -69,7 +72,7 @@ export function AgencyDelegationPanel({
   // Administracinis Kinijos Regionas Honkongas"), which pushed a 390 px phone
   // sideways (production ux-metrics walk, /lt partners as an agency).
   const input =
-    "min-h-11 w-full min-w-0 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary";
+    "min-h-11 w-full min-w-0 rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue";
 
   return (
     <Card>
@@ -90,9 +93,9 @@ export function AgencyDelegationPanel({
             <DisplayedWorkspaceField />
             <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2">
               {labels.clientLabel}
-              <select
+              <Select
                 name="connectionId"
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-connection"
                 defaultValue={connections[0].id}
               >
@@ -101,53 +104,53 @@ export function AgencyDelegationPanel({
                     {c.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2">
               {labels.needTitle}
-              <input
+              <Input
                 name="title"
                 required
                 maxLength={200}
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-title"
               />
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {labels.role}
-              <input
+              <Input
                 name="role"
                 maxLength={120}
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-role"
               />
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {labels.teamSize}
-              <input
+              <Input
                 name="teamSize"
                 type="number"
                 min={1}
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-team-size"
               />
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {labels.location}
-              <input
+              <Input
                 name="location"
                 maxLength={120}
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-location"
               />
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {labels.country}
-              <select
+              <Select
                 name="country"
                 required
                 defaultValue=""
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-country"
               >
                 <option value="" disabled>
@@ -158,7 +161,7 @@ export function AgencyDelegationPanel({
                     {o.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2">
               {labels.summary}
@@ -171,14 +174,16 @@ export function AgencyDelegationPanel({
               />
             </label>
             <div className="flex items-center gap-3 sm:col-span-2">
-              <button
+              <Button
                 type="submit"
+                variant="primary"
+                size="sm"
+                className="min-h-11"
                 disabled={pending}
-                className="rounded-md bg-brand-blue px-3 py-2 text-sm font-semibold text-text-primary disabled:opacity-50"
                 data-testid="agency-draft-submit"
               >
                 {labels.draftSubmit}
-              </button>
+              </Button>
               {state.status === "ok" ? (
                 <span
                   className="text-meta text-state-success"

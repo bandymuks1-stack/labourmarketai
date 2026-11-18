@@ -45,7 +45,11 @@ export const companyCreateDemandFields = z.object({
   notes: z.string().trim().max(4000).nullable().optional(),
   /** Work-type slug — validated against the shared taxonomy canonically. */
   workType: z.string().trim().max(64).nullable().optional(),
-  country: z.string().trim().length(2).nullable().optional(),
+  /** An ISO-3166 alpha-2 code, or a country name in any supported language
+   *  ("Sweden", "Švedija") — resolved to the code by `resolveCountryCode`
+   *  before anything is drafted or hashed (the phone and MCP clients type
+   *  names; the web forms already send codes). */
+  country: z.string().trim().min(2).max(80).nullable().optional(),
   teamSize: z.number().int().min(1).max(100000).nullable().optional(),
   accommodation: z
     .enum(["provided_free", "provided_paid", "provided_deducted", "not_provided"])

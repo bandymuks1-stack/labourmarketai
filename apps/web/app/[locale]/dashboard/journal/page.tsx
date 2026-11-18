@@ -128,6 +128,7 @@ import {
 // the dominant-skill sentence and this period's hours — composed by the same
 // presentation model and the same lead component the station renders.
 import { Card } from "@/components/ui/Card";
+import { buttonLinkClassName } from "@/components/ui/Button";
 import { DominantLead } from "@/components/app/work-in-numbers/dominant-lead";
 import { scopeText } from "@/components/app/work-in-numbers/period-nav";
 import {
@@ -601,7 +602,7 @@ export default async function JournalPage({
             {t("navSubtitle")}
           </p>
         </header>
-        <div className="card-border max-w-2xl p-6">
+        <Card className="max-w-2xl">
           <p className="text-sm leading-relaxed text-text-secondary">
             {noContextOrg
               ? t(`noContext.${contextState}Named`, { org: noContextOrg })
@@ -613,23 +614,19 @@ export default async function JournalPage({
             {contextState === "none" && (
               <Link
                 href="/dashboard/profile"
-                className="inline-flex items-center gap-1.5 rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
+                className={buttonLinkClassName("primary", "sm")}
               >
                 {t("noContextProfileCta")}
               </Link>
             )}
             <Link
               href="/dashboard"
-              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-semibold text-text-primary ${
-                contextState === "none"
-                  ? "border-ink-500 hover:border-brand-blue"
-                  : "border-brand-blue hover:border-brand-blue/80"
-              }`}
+              className={buttonLinkClassName(contextState === "none" ? "secondary" : "primary", "sm")}
             >
               {t("noContextCta")}
             </Link>
           </div>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -1278,8 +1275,8 @@ export default async function JournalPage({
           <PageTitle>{t("navTitle")}</PageTitle>
           <Link
             href="/dashboard"
-            className="shrink-0 rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
             data-testid="room-my-spaces-link"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-md border border-border-subtle px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
           >
             {tSpaces("mySpaces")} →
           </Link>
@@ -1347,7 +1344,7 @@ export default async function JournalPage({
           className="group order-4 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
-          <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
             <span className="inline-flex items-center gap-2">
               <span
                 aria-hidden
@@ -1592,7 +1589,7 @@ export default async function JournalPage({
             <Link
               href={"/dashboard/journal#journal-entries" as "/dashboard"}
               data-testid="journal-skill-filter-clear"
-              className="inline-flex min-h-[2rem] items-center rounded-md border border-ink-500 px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
+              className={buttonLinkClassName("secondary", "sm")}
             >
               {t("skillFilterClear")}
             </Link>
@@ -1628,7 +1625,7 @@ export default async function JournalPage({
             <Link
               href={journalComposerHref(selectedDate, false) as "/dashboard"}
               data-testid="journal-day-record"
-              className="inline-flex min-h-11 items-center rounded-md border border-brand-blue/40 px-2.5 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              className={buttonLinkClassName("secondary", "sm")}
             >
               {t("dayNav.recordOnDay")}
             </Link>
@@ -1637,7 +1634,7 @@ export default async function JournalPage({
                 `/dashboard/planning?view=day&date=${selectedDate}` as "/dashboard"
               }
               data-testid="journal-day-open-calendar"
-              className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue"
+              className={buttonLinkClassName("secondary", "sm")}
             >
               {t("dayNav.openInCalendar")} →
             </Link>
@@ -1659,7 +1656,7 @@ export default async function JournalPage({
           className="group rounded-md border border-border-subtle bg-surface-1/40"
           data-testid="journal-status-details"
         >
-          <summary className="cursor-pointer select-none px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary">
+          <summary className="flex min-h-11 cursor-pointer select-none items-center px-3 text-xs font-medium text-text-secondary hover:text-text-primary">
             {t("statusExplainer")}
           </summary>
           <div className="flex flex-col gap-2 px-3 pb-3">
@@ -1748,8 +1745,10 @@ export default async function JournalPage({
              records. A real answer over a known window (SEP-7: a recorded
              zero, not an unknown), with the one action that changes it and
              the way back to every day. */
-          <div
-            className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1/40 px-4 py-4"
+          <Card
+            compact
+            variant="empty"
+            className="flex flex-col gap-2"
             data-testid="journal-day-empty"
             data-day={selectedDate ?? calendarGrid.rangeStart}
             data-scope={diaryScope}
@@ -1759,12 +1758,12 @@ export default async function JournalPage({
             </p>
             <Link
               href={journalComposerHref(selectedDate, false) as "/dashboard"}
-              className="self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
+              className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
               data-testid="journal-day-empty-record"
             >
               {t("dayNav.recordOnDay")} →
             </Link>
-          </div>
+          </Card>
         ) : (entries ?? []).length === 0 ? (
           <EmptyState
             testId="journal-empty-state"
