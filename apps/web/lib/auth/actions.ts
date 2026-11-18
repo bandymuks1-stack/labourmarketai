@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { activeLocales } from "@/lib/i18n/config";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
+import { resolveInvitedWorkerContext } from "@/lib/onboarding/invited-worker-context";
+import { acceptInvitationByIdAction } from "@/lib/invitations/actions";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import {
   parseSelfDeclaredProfessions,
@@ -77,12 +79,21 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   if (!user) throw new Error("Not authenticated");
 
   const rawRoles = String(formData.get("roles") ?? formData.get("role") ?? "");
-  const roles = [
+  let roles = [
     ...new Set(rawRoles.split(",").map((r) => r.trim()).filter(Boolean)),
   ] as Role[];
   if (roles.length === 0 || roles.some((r) => !ONBOARDING_ROLES.has(r))) {
     throw new Error(`Invalid onboarding roles: ${rawRoles}`);
   }
+  // THE INVITATION SETTLES THE ROLE (2026-10-27). When the server can prove
+  // from the person's own invitation that they were invited as a worker — the
+  // same decision that made the page skip the role question — the role is
+  // `worker`, whatever the submitted form says.
+  const rawNext = formData.get("next");
+  const invited = await resolveInvitedWorkerContext(
+    typeof rawNext === "string" && isSafeReturnPath(rawNext) ? rawNext : null,
+  );
+  if (invited.workerImplied) roles = ["worker"];
   const primary = ROLE_ORDER.find((r) => roles.includes(r)) as Role;
   const extras = roles.filter((r) => r !== primary);
 
@@ -352,6 +363,26 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
           message: eduErr.message,
         });
       }
+    }
+  }
+
+  // THE ADDRESSED INVITATION IS ACCEPTED HERE, on the server, AFTER the role
+  // was settled from it while it was still pending (review on #2846: when the
+  // wizard accepted it first, it left the pending read and the role override
+  // above never ran). Same canonical by-id door as the network page: verified
+  // e-mail, address binding, accept_invitation_apply_v2. A failure is logged,
+  // not fatal — the person is onboarded and the home still offers it.
+  if (invited.addressedInvitationId) {
+    try {
+      await acceptInvitationByIdAction({
+        invitationId: invited.addressedInvitationId,
+        locale,
+        noticeSurface: "onboarding",
+      });
+    } catch (e) {
+      console.error("[completeOnboarding] addressed invitation accept failed", {
+        message: e instanceof Error ? e.message : String(e),
+      });
     }
   }
 

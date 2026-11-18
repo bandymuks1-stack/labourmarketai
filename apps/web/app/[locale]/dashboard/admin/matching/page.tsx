@@ -25,6 +25,11 @@ import { StructureNeedForm } from "@/components/app/structure-need-form";
 import { openDirectConversationAction } from "@/lib/communication/open-conversation-action";
 import type { DarkListboxOption } from "@/components/ui/DarkListbox";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/matching");
+
 
 /**
  * Phase 3.2 — Human-Run Matching Workbench (Marketplace v1 heart, product

@@ -16,7 +16,10 @@
 
 import type { ProjectStage } from "@/lib/projects/stages-model";
 import type { ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
-import type { CustomerRequestRow } from "@/lib/buyer/customer-requests";
+import type {
+  CustomerRequestRow,
+  CustomerRequestsListResult,
+} from "@/lib/buyer/customer-requests";
 
 /** Projects the field shows before deferring to the projects page. */
 export const COMPANY_HOME_PROJECT_LIMIT = 6;
@@ -186,6 +189,75 @@ export function selectOpenNeeds(
   return [...open]
     .sort((a, b) => rank(a.status) - rank(b.status) || b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, limit);
+}
+
+/** Offers the home names before deferring to the Needs door's own list. */
+export const COMPANY_HOME_OFFER_LIMIT = 3;
+
+/** The address of the organisation's OWN saved offers: the supply section of
+ *  the one readback on the Needs door (`DemandRequestsReadback`). */
+export const COMPANY_OFFERS_HREF = "/dashboard/company/needs#agency-offers" as const;
+
+/** The offer intake: the same canonical wizard, on its offer audience (an
+ *  agency-only organisation ignores the parameter — its door is the offer). */
+export const COMPANY_OFFER_INTAKE_HREF = "/dashboard/company/needs?audience=offer#demand-intake" as const;
+
+/** One direction of the owner's own-requests read, as the home hands it on. */
+export type HomeReadbackSlice =
+  | { readonly kind: "ok"; readonly rows: readonly CustomerRequestRow[] }
+  | { readonly kind: "needs-migration" }
+  | { readonly kind: "error" };
+
+/**
+ * ONE read, two directions (activation audit 2026-10-26 §2). The company home
+ * reads `listOwnCustomerRequests` once; its NEEDS go to "missing within four
+ * weeks", its OFFERS (an agency's `agency_offer`, direction `supply`) to their
+ * own block — never mixed, never a second read. The row's own `direction`
+ * decides; a failed read stays failed in both slices (unknown is not zero).
+ */
+export function homeReadbackRows(
+  readback: CustomerRequestsListResult,
+  direction: "demand" | "supply",
+): HomeReadbackSlice {
+  if (readback.kind === "ok") {
+    return { kind: "ok", rows: readback.rows.filter((r) => r.direction === direction) };
+  }
+  return readback.kind === "needs-migration" ? { kind: "needs-migration" } : { kind: "error" };
+}
+
+export type HomeOffersState =
+  /** Not an organisation that offers people, or one that may but has none. */
+  | { readonly kind: "hidden" }
+  /** The read failed: said as such, never as "no offers". */
+  | { readonly kind: "unreadable" }
+  /** Nothing offered yet — the honest empty state with the offer intake. */
+  | { readonly kind: "none" }
+  /** Offers exist, all closed. */
+  | { readonly kind: "none-open" }
+  | { readonly kind: "list"; readonly rows: readonly CustomerRequestRow[]; readonly more: number };
+
+/**
+ * WHAT THIS ORGANISATION OFFERS, on its home. An agency's saved item is an
+ * OFFER (`resolveNeedsAudience` opens its Needs door on one), so after saving
+ * it must find the offer where it lands. Shown when the Needs door opens on an
+ * offer; for an organisation that may choose (agency AND client) only once it
+ * has saved one — a plain employer never sees an offers block. Pure.
+ */
+export function deriveHomeOffers(input: {
+  readonly audience: "need" | "offer";
+  readonly canChoose: boolean;
+  readonly offers: HomeReadbackSlice;
+  readonly limit?: number;
+}): HomeOffersState {
+  const { audience, canChoose, offers } = input;
+  if (audience !== "offer" && !canChoose) return { kind: "hidden" };
+  if (offers.kind !== "ok") return audience === "offer" ? { kind: "unreadable" } : { kind: "hidden" };
+  const rows = offers.rows.filter((r) => r.direction === "supply");
+  if (rows.length === 0) return audience === "offer" ? { kind: "none" } : { kind: "hidden" };
+  const open = rows.filter((r) => r.status !== "closed");
+  if (open.length === 0) return { kind: "none-open" };
+  const shown = selectOpenNeeds(open, input.limit ?? COMPANY_HOME_OFFER_LIMIT);
+  return { kind: "list", rows: shown, more: open.length - shown.length };
 }
 
 /**

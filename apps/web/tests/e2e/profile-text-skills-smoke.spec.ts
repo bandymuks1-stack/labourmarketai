@@ -25,7 +25,7 @@ import lt from "../../messages/lt.json";
 
 /** Real copy from the catalogue, never a literal — both hard-coded strings had
  *  gone stale: the text-first submit moved to the informal "tu" in #2369
- *  ("Pasiūlykite struktūrą" → "Pasiūlyk struktūrą", `skills.textFirst.submit`),
+ *  ("Pasiūlykite struktūrą" → "Pasiūlyk struktūrą" → "Pasiūlyti struktūrą" (formal address, 2026-11-15), `skills.textFirst.submit`),
  *  and the suggestion bucket the flow renders was renamed in #494 ("Paties
  *  nurodyti įgūdžiai" → `structuring.buckets.selfDeclared`). */
 const SUGGEST = lt.skills.textFirst.submit;

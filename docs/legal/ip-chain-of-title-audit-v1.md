@@ -26,7 +26,7 @@ What could NOT be verified from here: domain registrant identity, WHOIS data, Ve
 
 | Author identity | Commits | Notes |
 |---|---|---|
-| `bandymuks1-stack <bandymuks1@gmail.com>` | 677 | GitHub account of the owner |
+| `bandymuks1-stack <[owner contact, kept outside the repository]>` | 677 | GitHub account of the owner |
 | `Mano <mano@local>` | 51 | local git identity on the owner's machine (non-routable email) |
 
 Committer identities add only `GitHub <noreply@github.com>` (GitHub's merge-commit committer — not a person).
@@ -54,7 +54,7 @@ Committer identities add only `GitHub <noreply@github.com>` (GitHub's merge-comm
 
 ## 4. Honest conclusion
 
-1. **The code, design, and documentation were authored by the owner's contributor(s)** — the two git identities `bandymuks1-stack <bandymuks1@gmail.com>` and `Mano <mano@local>` — working with AI coding tools, inside the owner's personal GitHub account `bandymuks1-stack`. No third-party human contributor appears in the history.
+1. **The code, design, and documentation were authored by the owner's contributor(s)** — the two git identities `bandymuks1-stack <[owner contact, kept outside the repository]>` and `Mano <mano@local>` — working with AI coding tools, inside the owner's personal GitHub account `bandymuks1-stack`. No third-party human contributor appears in the history.
 2. **NO written IP assignment to Labour Market AI Sp. z o.o. is evidenced in the repository.** As of this audit the company's claim to own the platform IP rests on nothing in writing. Any licence agreement whose recitals state that Labour Market AI Sp. z o.o. "owns" the software is **not currently true** and depends on first executing the assignment in `docs/legal/ip-assignment-to-labour-market-ai-v1.md`. That document is a DRAFT and is **OWNER-SIGNATURE-REQUIRED** — it evidences nothing until signed.
 3. **Trademark: unregistered / unverified.** A non-exhaustive check found no registration; a professional trademark search and a filing decision are required. No document may assert a registered mark.
 4. **Domain: registrant identity unverified.** The domain demonstrably serves the platform and the hosting sits in the owner's personal Vercel account (`bandymuks1-6851`) — an operational fact that itself needs formal assignment/records to the company.

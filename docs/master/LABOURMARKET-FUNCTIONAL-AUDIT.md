@@ -1,5 +1,7 @@
 # LABOURMARKET-FUNCTIONAL-AUDIT
 
+> **2026-10-28:** the per-function status register is now [`docs/program/FUNCTION_REGISTER.md`](../program/FUNCTION_REGISTER.md) (owner order: one canonical register in the repository, public-safe). The counts below are the 2026-10-21 summary and are superseded by that file.
+
 The public summary of the functionality registry: how many processes exist, how many are proven in production, and how the rest stand — per area and per status.
 Part of the master set: [MASTER-MAP](LABOURMARKET-MASTER-MAP.md) · [IMPROVEMENT-OPPORTUNITIES](LABOURMARKET-IMPROVEMENT-OPPORTUNITIES.md) · [EXECUTION-ROADMAP](LABOURMARKET-EXECUTION-ROADMAP.md).
 

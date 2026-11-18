@@ -2,8 +2,9 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { proveActionTiles } from "./action-tile-proof";
 
-import { bearerOf, qaApi } from "./prod-qa-api";
+import { bearerOf, qaApi, qaMcp } from "./prod-qa-api";
 
 /**
  * PRODUCTION PROJECT EXECUTION — owner areas 5 (projects, objects, tasks) and
@@ -153,6 +154,18 @@ test("E-1 (3.2). Alfa has its two walk projects — created through the project 
   await ctx.close();
 });
 
+// A run that stopped before E-14 and whose afterAll cleanup also failed
+// (project-execution 41359872373 during a deploy, then 41360971243) leaves
+// Vytas assigned to A and B with a kept clash and a walk stage on A. The next
+// run then re-assigns an already-assigned, already-overridden worker and
+// measures that, not the chain. Every run starts from the clean state E-14
+// leaves behind.
+test("E-1b. leftovers of an earlier unfinished run are cleared first", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await cleanUp(page);
+  await ctx.close();
+});
+
 test("E-2 (3.13). both projects get the same dates on their operations board", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
@@ -172,6 +185,8 @@ test("E-2 (3.13). both projects get the same dates on their operations board", a
 });
 
 const STAGE = `${MARK} etapas`;
+/** Any run's stage of this walk (STAGE is `QA-SYNTHETIC <run> etapas`). */
+const WALK_STAGE = /QA-SYNTHETIC \d+ etapas/;
 
 test("E-3 (3.4). a stage is added to project A and its status persists", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
@@ -246,15 +261,35 @@ async function assign(page: Page, projectId: string): Promise<void> {
   await form.locator('select[name="project_id"]').selectOption(projectId);
   await form.getByTestId("assign-worker-select").selectOption(workerProfileId);
   await form.locator("#assign-worker-submit").click();
+  // Wait for the action's OWN answer before anyone navigates. A fixed 2 s
+  // sleep and then a fresh load raced the write (project-execution
+  // 41283540387 E-5): the assign action queues behind the pre-save clash
+  // check, so the reload rendered before the RPC committed, and a static page
+  // never shows a chip that was written a second later. A refusal now fails
+  // here, with its own message, instead of as a missing chip 30 s on.
+  const done = form.getByTestId("assign-worker-done");
+  const failed = form.getByTestId("assign-worker-failed");
+  await expect(done.or(failed), "the assign action answered").toBeVisible({ timeout: 60_000 });
+  if (await failed.isVisible()) throw new Error(`assign refused: ${(await failed.innerText()).slice(0, 160)}`);
+}
+
+/** Fresh loads of the projects page until `check` holds (the read side of a
+ *  write that already answered; never a substitute for that answer). */
+async function onFreshProjectsPage(page: Page, check: () => Promise<void>): Promise<void> {
+  await expect(async () => {
+    await page.goto("/lt/dashboard/projects");
+    await check();
+  }).toPass({ timeout: 60_000, intervals: [1_000, 3_000, 5_000] });
 }
 
 test("E-5 (3.6). the worker is assigned to project A, and it persists", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await assign(page, projectA);
-  await page.waitForTimeout(2_000);
-  await page.goto("/lt/dashboard/projects");
-  await expect(assignmentRow(page, PROJECT_A), "Vytas is on project A").toHaveCount(1, { timeout: 30_000 });
+  // Persisted = visible after a FRESH load, not in the action's own render.
+  await onFreshProjectsPage(page, () =>
+    expect(assignmentRow(page, PROJECT_A), "Vytas is on project A").toHaveCount(1, { timeout: 10_000 }),
+  );
   await ctx.close();
 });
 
@@ -452,6 +487,68 @@ test("E-12 (5.11 / 3.14). the assigned worker sees project A on their own projec
   await ctx.close();
 });
 
+test("E-12b (3.34). the owner reads project A's forecast beside the course; the assigned worker does not", async ({ browser }) => {
+  {
+    const { ctx, page } = await as(browser, "owner");
+    await useWorkspace(page, ALFA);
+    const res = await page.goto(`/lt/dashboard/projects/${projectA}`);
+    expect(res?.status() ?? 0, "project page answered").toBeLessThan(500);
+    await rendered(page, "owner project page");
+    const panel = inMain(page).getByTestId("project-forecast");
+    await expect(panel, "the forecast panel renders for the project's manager").toBeVisible({ timeout: 30_000 });
+    const state = await panel.getAttribute("data-state");
+    console.log(`[forecast] project A forecast state: ${state}`);
+    // "unavailable" means the facts door or the authority read failed in
+    // production — that is the failure this step exists to catch.
+    expect(["ok", "insufficient_data", "not_applicable"], `forecast read in production (got ${state})`).toContain(state);
+    await expect(panel.getByTestId("project-forecast-note"), "labelled a forecast, not a fact").toBeVisible();
+    await ctx.close();
+  }
+  {
+    // The STORED forecast (3.34 storage + recompute schedule): the page above
+    // computes on read, so only the recompute pass writes project_forecasts.
+    // Read through the app's own MCP door as the owner. Until the VPS cron
+    // runs the pass there is no stored row: that is logged, not failed, so
+    // this step reports the gap instead of hiding it or going red over an
+    // ops step. Once a row exists it must be well-formed and fresh.
+    const res = await qaMcp(bearerOf("owner"), {
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: { name: "project_forecast_get", arguments: { projectId: projectA } },
+    });
+    const text = await res.text();
+    let out: { ok?: boolean; data?: { latest?: { version?: number; computedAt?: string; mode?: string } | null; cadence?: { mode?: string } | null } } | undefined;
+    try {
+      out = (JSON.parse(text) as { result?: { structuredContent?: typeof out } }).result?.structuredContent;
+    } catch {
+      out = undefined;
+    }
+    expect(out?.ok, `the stored-forecast read answers (HTTP ${res.status}) ${text.slice(0, 200)}`).toBe(true);
+    const latest = out?.data?.latest ?? null;
+    if (!latest) {
+      console.log("[forecast] project A has no stored forecast yet: the recompute pass has not run (VPS cron not installed, or not yet due)");
+      test.info().annotations.push({ type: "3.34", description: "stored forecast: none yet" });
+    } else {
+      const ageDays = (Date.now() - Date.parse(latest.computedAt ?? "")) / 86_400_000;
+      console.log(`[forecast] stored v${latest.version} (${latest.mode}), ${ageDays.toFixed(1)} days old; cadence ${out?.data?.cadence?.mode ?? "?"}`);
+      expect(latest.version ?? 0, "a stored forecast has a version").toBeGreaterThanOrEqual(1);
+      expect(["weekly", "daily", "hourly", "live"], "stored under a known cadence").toContain(latest.mode);
+      // Weekly is the slowest cadence: older than 8 days means the pass stopped.
+      expect(ageDays, "recomputed within its weekly cadence").toBeLessThan(8);
+      test.info().annotations.push({ type: "3.34", description: `stored forecast v${latest.version}, ${latest.mode}` });
+    }
+  }
+  {
+    const { ctx, page } = await as(browser, "worker");
+    await page.goto(`/lt/dashboard/projects/${projectA}`);
+    await rendered(page, "worker project page");
+    await expect(page.locator("body")).toContainText(PROJECT_A, { timeout: 30_000 });
+    await expect(page.getByTestId("project-forecast"), "the forecast is the manager's, not the worker's").toHaveCount(0);
+    await ctx.close();
+  }
+});
+
 test("E-13 (3.13). the operations report downloads for the owner and for nobody else", async ({ browser }) => {
   const url = `/lt/dashboard/projects/${projectA}/operations/report`;
   {
@@ -499,29 +596,48 @@ test("E-13 (3.13). the operations report downloads for the owner and for nobody 
 async function cleanUp(page: Page): Promise<void> {
   await useWorkspace(page, ALFA);
   if (projectA) {
-    await page.goto(ops(projectA));
-    const stage = inMain(page).getByTestId("project-stage-row").filter({ hasText: STAGE });
-    if ((await stage.count()) > 0) {
-      await stage.getByTestId("project-stage-delete").click();
-      await page.waitForTimeout(2_000);
+    // Every stage this walk ever left on project A (`QA-SYNTHETIC <run> etapas`
+    // — this run's and any earlier run's whose cleanup did not finish), never
+    // another walk's stage (`… plano ir fakto etapas` does not match).
+    const walkStages = () => inMain(page).getByTestId("project-stage-row").filter({ hasText: WALK_STAGE });
+    for (let i = 0; i < 12; i += 1) {
       await page.goto(ops(projectA));
+      await expect(inMain(page).getByTestId("project-stages-panel")).toBeVisible({ timeout: 30_000 });
+      if ((await walkStages().count()) === 0) break;
+      await walkStages().first().getByTestId("project-stage-delete").click();
+      // The delete's own answer, then the next fresh load (no fixed sleep). A
+      // refused delete leaves the count unchanged and the final check says so.
+      await expect(inMain(page).getByTestId("project-stages-msg")).toBeVisible({ timeout: 30_000 });
     }
-    await expect(inMain(page).getByTestId("project-stage-row").filter({ hasText: STAGE })).toHaveCount(0, { timeout: 30_000 });
+    await expect(async () => {
+      await page.goto(ops(projectA));
+      await expect(walkStages(), "no stage of this walk is left on A").toHaveCount(0, { timeout: 10_000 });
+    }).toPass({ timeout: 60_000, intervals: [1_000, 3_000, 5_000] });
   }
 
   for (const title of [PROJECT_B, PROJECT_A]) {
     await page.goto("/lt/dashboard/projects");
     const row = assignmentRow(page, title);
     if ((await row.count()) === 0) continue;
-    await row.locator("button").last().click();
-    await page.waitForTimeout(2_000);
+    await row.getByTestId("assignment-end").click();
+    // The end action's own answer, in any of its shapes: the revalidated page
+    // reads active assignments only, so a successful end usually REMOVES the
+    // chip; before that re-render lands it is marked `data-ended="true"`; a
+    // refusal says so in the row. Persistence is proven below on a fresh load.
+    await expect(async () => {
+      const gone = (await row.count()) === 0;
+      const markedEnded = (await row.and(page.locator('[data-ended="true"]')).count()) > 0;
+      const refused = (await row.getByTestId("assignment-end-failed").count()) > 0;
+      expect(gone || markedEnded || refused, `the end of ${title === PROJECT_A ? "A" : "B"} answered`).toBe(true);
+    }).toPass({ timeout: 30_000, intervals: [500, 1_000, 2_000] });
   }
-  await page.goto("/lt/dashboard/projects");
-  for (const title of [PROJECT_A, PROJECT_B]) {
-    await expect(assignmentRow(page, title), `Vytas is no longer on ${title === PROJECT_A ? "A" : "B"}`).toHaveCount(0, {
-      timeout: 30_000,
-    });
-  }
+  await onFreshProjectsPage(page, async () => {
+    for (const title of [PROJECT_A, PROJECT_B]) {
+      await expect(assignmentRow(page, title), `Vytas is no longer on ${title === PROJECT_A ? "A" : "B"}`).toHaveCount(0, {
+        timeout: 10_000,
+      });
+    }
+  });
 }
 
 let cleanedUp = false;
@@ -549,4 +665,21 @@ test.afterAll(async ({ browser }) => {
   } finally {
     await ctx.close();
   }
+});
+
+// ── T (#2828): the Work page's action tiles. Read-only: real links, exactly
+// ONE gold primary ("Naujas projektas"), no route twice, 1280 and 390.
+test("T-1 (#2828). Alfa's Work page shows one primary action tile and its tools", async ({ browser }) => {
+  await proveActionTiles(
+    async (mobile) => {
+      const ctx = await browser.newContext({
+        storageState: state("owner"),
+        locale: "lt-LT",
+        ...(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 900 } }),
+      });
+      return { page: await ctx.newPage(), close: () => ctx.close() };
+    },
+    "/lt/dashboard/projects",
+    { primaries: 1, prepare: (page) => useWorkspace(page, ALFA) },
+  );
 });

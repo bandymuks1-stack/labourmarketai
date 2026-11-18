@@ -7,7 +7,7 @@ describe("llms.txt (AEO)", () => {
 
   it("is Markdown with the H1, a blockquote summary and the canonical origin", () => {
     expect(txt.startsWith("# LabourMarket.ai\n")).toBe(true);
-    expect(txt).toMatch(/^> LabourMarket\.ai is a work and professional-life platform/m);
+    expect(txt).toMatch(/^> LabourMarket\.ai is an international platform for work, specialists and services/m);
     expect(txt).toContain("Canonical origin: https://labourmarket.ai ");
     // trailing slash on the origin is normalised, never doubled
     expect(txt).not.toContain("https://labourmarket.ai//");
@@ -36,6 +36,22 @@ describe("llms.txt (AEO)", () => {
     expect(txt).not.toMatch(/accuracy of \d|% match/i);
     expect(txt).not.toMatch(/(?<![\p{L}\p{N}_])demos?(?![\p{L}\p{N}_])/iu);
     expect(txt).not.toMatch(/demonstr/i);
+  });
+});
+
+describe("llms.txt — says only what production does (audit 2026-11-04)", () => {
+  const txt = buildLlmsTxt("https://labourmarket.ai/");
+
+  it("does not call the paused app host a redirect", () => {
+    expect(txt).toContain("www. is a permanent redirect");
+    expect(txt).not.toMatch(/app\./);
+  });
+
+  it("does not promise what a signed-out reader cannot see", () => {
+    expect(txt).not.toContain("the job board states which");
+    expect(txt).toMatch(/signed-out job page shows the occupation/);
+    expect(txt).toMatch(/Do not describe them as automatically translated/);
+    expect(txt).toMatch(/no public service pages/);
   });
 });
 

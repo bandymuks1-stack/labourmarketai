@@ -167,6 +167,6 @@ describe("Wagon 5 — the daily question exists in every journal locale", () => 
     const lt = JSON.parse(read("messages/lt/journal.json")) as {
       whatDidYouDo?: string;
     };
-    expect(lt.whatDidYouDo).toBe("Ką šiandien dirbai?");
+    expect(lt.whatDidYouDo).toBe("Ką šiandien dirbote?"); // formal since the owner decision of 2026-11-15
   });
 });

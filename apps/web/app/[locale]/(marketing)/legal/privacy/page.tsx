@@ -22,7 +22,7 @@ export async function generateMetadata({
     locale,
     path: "/legal/privacy",
     title: t("privacy.title"),
-    description: t("privacy.intro"),
+    description: t("privacy.metaDescription"),
   });
 }
 

@@ -7,6 +7,10 @@ import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
 import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
+import {
+  recordEntrySkillDecision,
+  retractEntrySkillEvidence,
+} from "@/lib/journal/entry-skill-retraction";
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 
 /**
@@ -78,6 +82,62 @@ export async function setJournalEntrySkillLinks(
   // still enforces ownership at the DB layer.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const linkTable = () => (supabase as any).from("journal_entry_skills");
+
+  // What the entry evidenced BEFORE this save: a link the person now takes
+  // away is their dispute of that reading, and must survive the next
+  // pipeline run (see below).
+  const { data: before, error: beforeErr } = await linkTable()
+    .select("skill_id")
+    .eq("journal_entry_id", entryId)
+    .eq("worker_id", worker.id);
+  // Without knowing what is being taken away, nothing is removed.
+  if (beforeErr) return { ok: false, code: "link_write_failed", message: beforeErr.message };
+
+  // A link the person removes is a DISPUTE of what the entry shows, not a
+  // UI toggle: it is recorded FIRST as the entry-scoped, append-only
+  // `skill_rejected` marker, so a later pipeline run over the same text
+  // (version upgrade, "refresh recognition") no longer puts the link back.
+  // Only once the dispute is recorded are links removed — a failed record
+  // leaves every link in place, so the same save stays retryable. The entry
+  // text and the marker keep the basis; the skill row itself is untouched
+  // (whether the person holds the skill is their profile's call).
+  const kept = new Set(unique);
+  const removed = ((before ?? []) as { skill_id: string }[])
+    .map((r) => r.skill_id)
+    .filter((id) => typeof id === "string" && !kept.has(id));
+  if (removed.length > 0) {
+    const recorded = await retractEntrySkillEvidence(supabase, {
+      entryId,
+      workerId: worker.id,
+      skillIds: removed,
+      deleteLinks: false, // the replace below removes them
+    });
+    if (!recorded.ok || recorded.markedSlugs.length !== removed.length) {
+      return { ok: false, code: "link_write_failed", message: "dispute_not_recorded" };
+    }
+  }
+
+  // The person's explicit RE-LINK of a skill they disputed on this entry
+  // supersedes that dispute — recorded as their later decision in the same
+  // marker lane (`skill_reaffirmed`; latest decision per entry+slug wins),
+  // so neither the readers nor a recognition re-run hide or remove the link
+  // they just chose. Recognition alone never writes it.
+  const had = new Set(((before ?? []) as { skill_id: string }[]).map((r) => r.skill_id));
+  const added = unique.filter((id) => !had.has(id));
+  if (added.length > 0) {
+    const { data: addedSkills, error: addedErr } = await supabase
+      .from("skills")
+      .select("id, slug")
+      .in("id", added);
+    if (addedErr) return { ok: false, code: "link_write_failed", message: addedErr.message };
+    for (const row of (addedSkills ?? []) as { id: string; slug: string | null }[]) {
+      if (!row.slug || !added.includes(row.id)) continue;
+      const reaffirmed = await recordEntrySkillDecision(supabase, entryId, row.slug, "reaffirmed");
+      if (!reaffirmed) {
+        return { ok: false, code: "link_write_failed", message: "decision_not_recorded" };
+      }
+    }
+  }
 
   const del = await linkTable()
     .delete()

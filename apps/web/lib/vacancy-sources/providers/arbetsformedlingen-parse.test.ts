@@ -186,6 +186,11 @@ describe("defensive parsing — a malformed ad is rejected, never guessed at", (
     });
   });
 
+  it("keeps an ad whose start is free text, with no start date", () => {
+    const res = parseOne({ access: "Utbildningen startar 270111" });
+    expect(res).toMatchObject({ vacancy: { startDate: null } });
+  });
+
   it("refuses a null-island coordinate rather than pinning the job at 0,0", () => {
     const res = parseOne({
       workplace_address: {

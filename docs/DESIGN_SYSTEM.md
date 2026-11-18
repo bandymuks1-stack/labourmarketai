@@ -12,7 +12,8 @@
 | Tokens: colour (black + gold), type, radii, shadows, motion | `docs/DESIGN_TOKENS.md`, `apps/web/tokens/*`, `app/globals.css`, `tailwind-preset.ts` |
 | Agent-readable summary | root `DESIGN.md` |
 | Anti-slop checklist | `docs/design/final/ANTI-SLOP-REVIEW-CHECKLIST.md` |
-| Research verdicts (graph, motion, visual QA) | `docs/design/design-intelligence-2026-10.md` |
+| Research verdicts (graph, motion, visual QA) + design-technology register (§7) | `docs/design/design-intelligence-2026-10.md` |
+| UX/UI system proposal: three directions, mockups, staged plan (PROPOSAL, awaiting owner choice) | `docs/design/ux-system-2026-11/UX_UI_SYSTEM_PROPOSAL_2026-11-03.md` |
 | Work primitives (WorkSpine, PersonPresence, EvidenceDot) | `apps/web/components/app/work-world/primitives.tsx` |
 
 ## Layer added 2026-10 (rules, not new tokens)

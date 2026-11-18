@@ -104,6 +104,10 @@ export const CLIENT_MESSAGE_ROOTS = [
   "marketplace",
   "marketplaceListings",
   "messaging",
+  // Organization work-area labels (16 short strings): the one header names an
+  // organization's core areas for the person who runs it (owner P0-2,
+  // 2026-11-03; `getOrganizationHeaderNav`).
+  "companyModel",
   "needStructuring",
   "network",
   // The organization capability question ("What does your organization do?").
@@ -112,6 +116,10 @@ export const CLIENT_MESSAGE_ROOTS = [
   "organizationCapabilities",
   // Roster ingestion panel on /dashboard/company (people-import-panel).
   "peopleImport",
+  // The work behind an organization's record (HistoryContextBlock). It renders
+  // inside client sections (the profile's organization history), so its words
+  // must reach the browser or the person reads raw keys.
+  "historyContext",
   "opportunities",
   "playercards",
   "productivityUnits",
@@ -187,6 +195,33 @@ export const AUTH_CLIENT_MESSAGE_ROOTS = [
   "common",
   "professions",
 ] as const;
+
+/**
+ * THE LANDING's own pick (owner priority 2026-11-12: a lighter first screen).
+ * The landing mounted the whole marketing pick — ten namespaces, about 24 kB
+ * of text inlined into the document and parsed before hydration — while its
+ * client components read two things: `common` (the language switcher) and
+ * `landing.entry` (the sentence field). Everything else on the page is
+ * rendered on the server and needs no client copy.
+ * `lib/guards/client-messages-allowlist.test.ts` re-derives the roots from the
+ * landing's import graph; `LANDING_CLIENT_LANDING_KEYS` narrows inside
+ * `landing`, and the guard checks every `landing.*` namespace a client
+ * component of that tree names against it.
+ */
+export const LANDING_CLIENT_MESSAGE_ROOTS = ["common", "landing"] as const;
+export const LANDING_CLIENT_LANDING_KEYS = ["entry"] as const;
+
+export function pickLandingMessages(messages: AbstractIntlMessages): AbstractIntlMessages {
+  const out = pickMessages(messages, LANDING_CLIENT_MESSAGE_ROOTS) as Record<string, unknown>;
+  const landing = out.landing;
+  if (landing && typeof landing === "object") {
+    const keep: ReadonlySet<string> = new Set(LANDING_CLIENT_LANDING_KEYS);
+    out.landing = Object.fromEntries(
+      Object.entries(landing as Record<string, unknown>).filter(([k]) => keep.has(k)),
+    );
+  }
+  return out as AbstractIntlMessages;
+}
 
 /** Pure pick of top-level roots — no key is rewritten, so every resolved
  *  translation is byte-identical to the full-tree behaviour. */

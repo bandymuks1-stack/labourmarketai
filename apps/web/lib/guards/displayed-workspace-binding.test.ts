@@ -59,6 +59,9 @@ const BOUND_ACTIONS: readonly (readonly [string, string])[] = [
   ["lib/reviews/reviews-actions.ts", "createReviewCycleAction"],
   ["lib/timesheet-import/import-confirm-actions.ts", "confirmTimesheetImportAction"],
   ["lib/training/training-actions.ts", "createTrainingProgramAction"],
+  ["lib/training/training-actions.ts", "updateTrainingProgramAction"],
+  ["lib/training/training-actions.ts", "assignTrainingAction"],
+  ["lib/training/training-actions.ts", "attachTrainingCertificateAction"],
   ["lib/work-hours/allocations-actions.ts", "recordAllocationAction"],
   ["lib/workspace/pins-actions.ts", "pinAction"],
   ["lib/workspace/pins-actions.ts", "unpinAction"],
@@ -178,6 +181,9 @@ const BOUND_FORMS: readonly (readonly [string, string, number])[] = [
   ["components/app/development-reviews-section.tsx", "createReviewCycleAction}", 1],
   ["components/app/timesheet-import-review.tsx", "confirmAction}", 1],
   ["components/app/training-register.tsx", "createTrainingProgramAction}", 1],
+  ["components/app/training-register.tsx", "updateTrainingProgramAction}", 1],
+  ["components/app/training-register.tsx", "assignTrainingAction}", 1],
+  ["components/app/training-register.tsx", "attachTrainingCertificateAction}", 1],
   ["components/app/work-hours-quick-entry.tsx", "action}", 1],
 ];
 

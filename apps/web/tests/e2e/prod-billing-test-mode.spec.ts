@@ -6,6 +6,7 @@ import { test, expect, type Browser, type BrowserContext, type Locator, type Pag
 import { bearerOf, qaApi } from "./prod-qa-api";
 import { ORGANIZATION_PLAN_KEY } from "../../lib/billing/plans";
 import { PROD_QA_MANAGER_EMAIL, PROD_QA_OWNER_EMAIL } from "../../lib/testing/prod-qa-guard";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * PRODUCTION BILLING IN STRIPE TEST MODE — owner area 13 (Payments). Every step
@@ -172,6 +173,7 @@ async function createNeed(page: Page, n: number): Promise<"done" | "limit"> {
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
   const done = page.getByTestId("demand-done");

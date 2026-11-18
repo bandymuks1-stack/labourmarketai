@@ -14,6 +14,11 @@ import {
   type PipelineStage,
 } from "@/lib/crm/pipeline-model";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/pipeline");
+
 
 /**
  * CRM / demand pipeline — operator read surface (control room PR F,

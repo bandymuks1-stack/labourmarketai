@@ -65,7 +65,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter=!mobile
 
+      # tsc needs about 2.7 GB on this codebase; Node's default heap on the runner
+      # is about 2 GB, so without this the step dies now and then with
+      # "JavaScript heap out of memory" (runs 41585471700, 41790091398).
       - name: Typecheck
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
         run: pnpm -F web typecheck
 
       - name: Lint
@@ -73,6 +78,20 @@ jobs:
 
       - name: Unit tests (vitest)
         run: pnpm -F web test
+
+      # Every Playwright spec must load (2026-11-01: a duplicate declaration in a
+      # production walk passed typecheck - tests/e2e is outside the app tsconfig -
+      # and the walk then ran 0 tests). Listing parses every file; it starts no
+      # server and no browser. A file that does not load fails the gate.
+      - name: E2E specs load (every Playwright file parses)
+        working-directory: apps/web
+        run: |
+          if ! pnpm exec playwright test --list > "$RUNNER_TEMP/e2e-list.txt" 2>&1; then
+            grep -E -A8 "Error" "$RUNNER_TEMP/e2e-list.txt" | head -80
+            echo "::error::a Playwright spec does not load (see above)"
+            exit 1
+          fi
+          tail -1 "$RUNNER_TEMP/e2e-list.txt"
 
       - name: Placeholder governance check
         run: pnpm placeholders:check
@@ -148,6 +167,12 @@ jobs:
       # This is the cheap half, and it is also the agent bootstrap command:
       # `node .github/scripts/product-truth.mjs` prints what the product is,
       # what it must never be narrowed into, and which journeys are broken.
+      - name: Backup watchdog (synthetic test, no real backups, no mail)
+        run: sh ops/vps/lm-backup-watchdog.test.sh
+
+      - name: SEO watch (synthetic test, no network, no mail)
+        run: sh ops/vps/lm-seo-watch.test.sh
+
       - name: Product truth (capability register halves agree)
         run: node .github/scripts/product-truth.mjs --check
 
@@ -205,4 +230,7 @@ jobs:
           pnpm check:migration-parity
 
       - name: Build (env-independent)
+        env:
+          # Same heap as deploy-vps.yml: the default of about 2 GB fails now and then.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build

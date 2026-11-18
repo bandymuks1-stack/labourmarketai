@@ -17,6 +17,7 @@ import {
 } from "./provider-chain";
 import { observeProviderStates } from "./provider-health";
 import { ProviderCooldown } from "./provider-cooldown";
+import { ProviderCounters } from "./provider-counters";
 import { resolveTaskRoute, type AiTaskType } from "./task-routing";
 import { AI_EGRESS_GRANTS, egressPermitted, maxPermittedSensitivity } from "./data-egress";
 import { sensitivityForTask } from "./data-sensitivity";
@@ -217,6 +218,65 @@ describe("failover: 429 / 5xx / timeout advance, bounded", () => {
     behaviour = { cloudflare: "429", mistral: "429", groq: "429" };
     const r = await dispatchAiCompletion(marketRequest(), cfg(), chainFor("explain_market_demand"));
     expect(r.status === "error" && r.message).toMatch(/http 429 .*\(retry-after 7s\)$/);
+  });
+});
+
+describe("counters: every attempt is counted per provider, nothing else is", () => {
+  it("429 → 5xx → ok: one request each, a rate limit, an error class, a success", async () => {
+    behaviour = { cloudflare: "429", mistral: "500", groq: "ok" };
+    const counters = new ProviderCounters();
+    let t = 1_000;
+    const r = await dispatchAiCompletion(
+      marketRequest(),
+      cfg(),
+      chainFor("explain_market_demand", ALL_FREE_READY, { counters, now: () => (t += 25) }),
+    );
+    expect(r.status === "ok" && r.provider).toBe("groq");
+    const rows = Object.fromEntries(counters.snapshot().map((row) => [row.provider, row]));
+    expect(rows.cloudflare).toMatchObject({ requests: 1, ok: 0, rateLimited: 1, errorTotal: 0 });
+    expect(rows.mistral).toMatchObject({ requests: 1, ok: 0, rateLimited: 0, errorTotal: 1 });
+    expect(rows.mistral.errors).toEqual({ UNAVAILABLE: 1 });
+    expect(rows.groq).toMatchObject({ requests: 1, ok: 1, rateLimited: 0, errorTotal: 0 });
+    // Latency comes from the injected clock: 25 ms per attempt.
+    for (const row of Object.values(rows)) {
+      expect(row.latencyMsMean).toBe(25);
+      expect(row.latencyMsMax).toBe(25);
+    }
+  });
+
+  it("malformed output and a timeout are counted under their own classes", async () => {
+    behaviour = { cloudflare: "timeout", mistral: "garbage", groq: "garbage" };
+    const counters = new ProviderCounters();
+    await dispatchAiCompletion(marketRequest(), cfg(), chainFor("explain_market_demand", ALL_FREE_READY, { counters }));
+    const byId = Object.fromEntries(counters.snapshot().map((row) => [row.provider, row.errors]));
+    expect(byId.cloudflare).toEqual({ TIMEOUT: 1 });
+    expect(byId.mistral).toEqual({ INVALID_OUTPUT: 1 });
+  });
+
+  it("a snapshot carries ids, classes and numbers only — never the payload or the answer", async () => {
+    const counters = new ProviderCounters();
+    await dispatchAiCompletion(marketRequest(), cfg(), chainFor("explain_market_demand", ALL_FREE_READY, { counters }));
+    const text = JSON.stringify(counters.snapshot());
+    expect(text).not.toContain("welder");
+    expect(text).not.toContain("from cloudflare");
+    expect(text).not.toContain("presence-only");
+  });
+
+  it("a disabled runtime and a refused (ungranted) payload count no request at all", async () => {
+    const counters = new ProviderCounters();
+    const disabled = resolveAiRuntimeConfig({
+      mode: "disabled",
+      provider: "cloudflare",
+      apiKey: undefined,
+      model: undefined,
+      timeoutMs: undefined,
+      maxRetries: undefined,
+      maxOutputTokens: undefined,
+      dailyRunBudget: undefined,
+    });
+    await dispatchAiCompletion(marketRequest(), disabled, chainFor("explain_market_demand", ALL_FREE_READY, { counters }));
+    expect(counters.snapshot()).toEqual([]);
+    expect(calls).toHaveLength(0);
   });
 });
 

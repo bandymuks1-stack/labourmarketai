@@ -53,6 +53,7 @@ describe("private routes carry explicit noindex", () => {
     "app/[locale]/dashboard/layout.tsx",
     "app/[locale]/auth/layout.tsx",
     "app/[locale]/onboarding/layout.tsx",
+    "app/[locale]/oauth/layout.tsx",
     "app/[locale]/cv/page.tsx",
   ] as const;
 

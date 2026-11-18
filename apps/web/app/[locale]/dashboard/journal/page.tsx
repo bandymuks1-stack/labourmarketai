@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { orgDisplayName } from "@/lib/company/org-display";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -27,8 +28,15 @@ import {
   WORKSPACE_PERSONAL_DOT,
 } from "@/components/app/conversation/chat/workspace-chip";
 import { workspaceAccentIndex } from "@/lib/company/organization-switch";
-import { resolveEngagementContext } from "@/lib/journal/engagement-context-selection";
-import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
+import {
+  activeOrganizationOf,
+  orderContextsForChoice,
+  resolveEngagementContext,
+} from "@/lib/journal/engagement-context-selection";
+import {
+  composeDistinctEngagementLabels,
+  unnamedOrganizationKind,
+} from "@/lib/journal/engagement-label";
 import { detectUnrecordedHours } from "@/lib/journal/unrecorded-hours";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
@@ -57,6 +65,7 @@ import { readModuleFieldValues } from "@/lib/journal/journal-module-fields";
 import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import {
+  deriveIndependentReviewResult,
   deriveReviewResult,
   deriveReviewTimeline,
   isSelfConfirmedOnly,
@@ -148,6 +157,11 @@ import { experienceFiguresOf } from "@/lib/journal/experience-figures";
 import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
 import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/journal", "journal.navTitle");
+
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -248,7 +262,6 @@ export default async function JournalPage({
   const t = await getTranslations("journal");
   const tSpaces = await getTranslations("spaces");
   const tRel = await getTranslations("relationshipTypes");
-  const tRole = await getTranslations("auth.signup.role");
   const tUnit = await getTranslations("productivityUnits");
   const tProf = await getTranslations("professions");
   const tIntel = await getTranslations("journal.intelligence");
@@ -334,56 +347,78 @@ export default async function JournalPage({
   // The hierarchy now decides (see lib/journal/engagement-context-selection):
   //   A source-determined · B exactly one org context · C several → ASK ·
   //   D none → personal is correct.
-  // Ordering still puts the active workspace first so the list reads sensibly,
-  // but the DEFAULT is the resolution, and on ambiguity there is none.
+  // Ordering is the ONE choice order (active workspace's organization first,
+  // other organizations next, personal last — owner P0 2026-10-29), but the
+  // DEFAULT is the resolution, and on ambiguity there is none. The active
+  // workspace is also a resolution SIGNAL now (rule W): exactly one applicable
+  // context at the organization the person acts for is preselected.
   const activeWorkspaceOrgId = workspaceForDefault.activeWorkspaceId;
-  const actingOrgName =
+  const activeOrganizationId = activeOrganizationOf(workspaceForDefault);
+  const actingWorkspace =
     workspaceForDefault.workspaces.find(
       (w) => w.id === activeWorkspaceOrgId && w.kind === "organization",
-    )?.name || null;
-  const ecOrdered = [...(ecRows ?? [])].sort(
-    (a, b) =>
-      Number(
-        ((b as { organization_id?: string | null }).organization_id ?? null) ===
-          activeWorkspaceOrgId,
-      ) -
-      Number(
-        ((a as { organization_id?: string | null }).organization_id ?? null) ===
-          activeWorkspaceOrgId,
-      ),
+    ) ?? null;
+  const actingOrgName = actingWorkspace?.name || null;
+  const ecOrdered = orderContextsForChoice(
+    ecRows ?? [],
+    activeOrganizationId,
+    (e) => (e as { organization_id?: string | null }).organization_id ?? null,
   );
 
-  const contextResolution = resolveEngagementContext({
-    candidates: (ecRows ?? []).map((e) => {
-      const r = e as {
-        id: string;
-        relationship_slug: string;
-        organization_id?: string | null;
-        status?: string | null;
-        started_at?: string | null;
-        ended_at?: string | null;
-        is_primary?: boolean | null;
-      };
-      return {
-        id: r.id,
-        relationshipSlug: r.relationship_slug,
-        organizationId: r.organization_id ?? null,
-        // The query already filters to status='active'; carry it explicitly so
-        // the pure model needs no knowledge of how it was fetched.
-        status: r.status ?? "active",
-        startedAt: r.started_at ?? null,
-        endedAt: r.ended_at ?? null,
-        isPrimary: r.is_primary === true,
-      };
-    }),
+  const contextCandidates = (ecRows ?? []).map((e) => {
+    const r = e as {
+      id: string;
+      relationship_slug: string;
+      organization_id?: string | null;
+      status?: string | null;
+      started_at?: string | null;
+      ended_at?: string | null;
+      is_primary?: boolean | null;
+    };
+    return {
+      id: r.id,
+      relationshipSlug: r.relationship_slug,
+      organizationId: r.organization_id ?? null,
+      // The query already filters to status='active'; carry it explicitly so
+      // the pure model needs no knowledge of how it was fetched.
+      status: r.status ?? "active",
+      startedAt: r.started_at ?? null,
+      endedAt: r.ended_at ?? null,
+      isPrimary: r.is_primary === true,
+    };
   });
+  // Bounded by the day the work happened (Codex P2 on #2884): the selected
+  // calendar day when there is one. The composer re-resolves on its own date
+  // with the same candidates, so a changed date never keeps a context whose
+  // bounds exclude it.
+  const contextResolution = resolveEngagementContext({
+    candidates: contextCandidates,
+    workDay: selectedDate,
+    activeOrganizationId,
+  });
+  // Acting for an organization with NO recorded work relationship there (a
+  // membership is access, not a work relationship): said plainly in the
+  // composer instead of that organization silently missing from the choice.
+  // Nothing is created — the person picks among their real contexts.
+  // The sentence is prepared whenever the person acts for an organization;
+  // the composer shows it only while the resolution for ITS work date says
+  // there is no applicable relationship there.
+  const activeWorkspaceNotice = actingWorkspace
+    ? t("activeWorkspaceNoRelationship", {
+        org:
+          actingOrgName ??
+          t(
+            `unnamedOrganization.${unnamedOrganizationKind(actingWorkspace?.organizationType)}`,
+          ),
+      })
+    : null;
 
   // ONE LABEL COMPOSER (issue #1689, defect J): the same facts the chat's
   // work-log selector hands to `composeDistinctEngagementLabels`, so a context
   // is named identically here and there. Rules live in
   // `lib/journal/engagement-label.ts`: an organization context reads "Org ·
-  // Relationship" (the org TYPE label when it has no display/legal name —
-  // never a bare "—"; existing role labels, no new i18n key); a personal one
+  // Relationship" ("Agency without a name" when it has no display/legal name —
+  // never a bare type that reads like a real name, owner P0 2026-10-29); a personal one
   // reads "Asmeninis įrašas [· title]" — the person's own title is what tells
   // two org-less contexts apart (production holds exactly that case: one
   // untitled personal context carrying entries, one titled "Darbų vadovas");
@@ -395,14 +430,11 @@ export default async function JournalPage({
       legal_name: string | null;
       organization_type: string | null;
     } | null;
-    const typeLabel =
-      org?.organization_type === "company"
-        ? tRole("company")
-        : org?.organization_type === "agency"
-          ? tRole("agency")
-          : null;
+    const typeLabel = org
+      ? t(`unnamedOrganization.${unnamedOrganizationKind(org.organization_type)}`)
+      : null;
     return {
-      orgName: org?.display_name ?? org?.legal_name ?? null,
+      orgName: orgDisplayName(org?.display_name, org?.legal_name),
       orgTypeLabel: typeLabel,
       title: e.title ?? null,
       relationshipLabel: tRel(e.relationship_slug),
@@ -757,8 +789,8 @@ export default async function JournalPage({
   // Entries with their metrics + confirmation status — read through THE
   // canonical journal-list core (G4): v3 lifecycle select (deleted_at,
   // superseded_by hidden), legacy projection fallback while migration 0018
-  // is unapplied, newest first. A failed read renders as an empty list,
-  // exactly as the inline query degraded before the extraction.
+  // is unapplied, newest first. A failed read is `null` and renders as
+  // "could not be read" — never as an empty journal (SEP-7: UNKNOWN ≠ ZERO).
   type JournalEntryRow = JournalEntryListRow;
   const entries: JournalEntryRow[] | null = entriesRead.ok
     ? entriesRead.entries
@@ -861,9 +893,12 @@ export default async function JournalPage({
   // Evidence Status Strip (v1) for the list status zone — a compact legend
   // showing which honest states the worker's entries are actually in. Derived
   // purely from the existing review result; "confirmed" lights up ONLY when a
-  // real approved confirmation exists, never automatically.
+  // real approved confirmation exists, never automatically. The signed-in
+  // person IS the subject, so their own approval of their own entry never
+  // counts here (decision 0028 J-2.2): the strip's "confirmed" chip and the
+  // CV bridge's "confirmed" count mean another person confirmed it.
   const evidenceStatuses = (entries ?? []).map((e) =>
-    deriveReviewResult(e.journal_entry_confirmations),
+    deriveIndependentReviewResult(e.journal_entry_confirmations, user.id),
   );
 
   // Diary day-grouping (CV/records feed cleanup): the feed reads as a dated
@@ -989,22 +1024,13 @@ export default async function JournalPage({
       totalMinutes: g.totalMinutes,
       /**
        * The SAME derivation the rest of the page uses for "confirmed"
-       * (`deriveReviewResult` === "approved") — never a second rule.
-       *
-       * WHAT THIS COUNT CANNOT SAY, and why the calendar's words are careful:
-       * `deriveReviewResult` also returns "approved" when the SUBJECT
-       * approved their own entry (a worker who manages their organization),
-       * and this page's reader selects `confirmation_scope, created_at,
-       * confirmer_role` — not `confirmer_id` — so `isSelfConfirmation` cannot
-       * be evaluated here (review-status.ts documents exactly this). The
-       * marker therefore says a JOURNAL RECORD is confirmed and never that a
-       * MANAGER confirmed it: claiming independence the data cannot support
-       * would dress self-declared evidence as external confirmation (SEP-3).
-       * Widening the reader's select is a change to a shared canonical reader
-       * and belongs in its own slice, not in a UX pass.
+       * (`deriveIndependentReviewResult` === "approved") — never a second
+       * rule. The signed-in person is the subject, so a self-approval
+       * (decision 0028 J-2.2) never counts as a confirmed day.
        */
       confirmedCount: g.entries.filter(
-        (e) => deriveReviewResult(e.journal_entry_confirmations) === "approved",
+        (e) =>
+          deriveIndependentReviewResult(e.journal_entry_confirmations, user.id) === "approved",
       ).length,
       reportedMinutes: reportedByDay.get(g.isoKey) ?? 0,
     })).concat(
@@ -1393,6 +1419,9 @@ export default async function JournalPage({
               key={editingId ?? "new"}
               engagements={composerEngagements}
               contextResolution={contextResolution}
+              activeWorkspaceNotice={activeWorkspaceNotice}
+              contextCandidates={contextCandidates}
+              activeOrganizationId={activeOrganizationId}
               directions={directions}
               workerSkills={workerSkills}
               editingEntry={editingEntry}
@@ -1406,6 +1435,9 @@ export default async function JournalPage({
               defaultWorkDate={selectedDate}
               engagements={composerEngagements}
               contextResolution={contextResolution}
+              activeWorkspaceNotice={activeWorkspaceNotice}
+              contextCandidates={contextCandidates}
+              activeOrganizationId={activeOrganizationId}
               directions={directions}
               workerSkills={workerSkills}
               templates={journalTemplates}
@@ -1659,12 +1691,14 @@ export default async function JournalPage({
           className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-cv-bridge"
         >
-          {totalEntryCount > 0
-            ? t("cvBridge", {
-                confirmed: confirmedEntryCount,
-                total: totalEntryCount,
-              })
-            : t("cvBridgeEmpty")}{" "}
+          {entries === null
+            ? t("cvBridgeUnavailable")
+            : totalEntryCount > 0
+              ? t("cvBridge", {
+                  confirmed: confirmedEntryCount,
+                  total: totalEntryCount,
+                })
+              : t("cvBridgeEmpty")}{" "}
           <Link
             href="/cv"
             className="font-medium text-brand-blue hover:underline"
@@ -1674,28 +1708,42 @@ export default async function JournalPage({
           </Link>
         </p>
         {/* Proof-engine loop strip — ONE dense row, real counts only:
-            įrašai → įgūdžių įrodymai → CV → pasiūlymai. */}
-        <p
-          className="text-meta leading-relaxed text-text-muted"
-          data-testid="journal-proof-loop"
-        >
-          {t("proofLoop.stripPeriod", {
-            entries: entriesThisMonth,
-            period: t("intelligence.period.month"),
-            evidenced: evidencedSkillIds.size,
-            confirmed: verifiedSkillIds.size,
-          })}{" "}
-          <Link
-            href="/cv"
-            className="font-medium text-brand-blue hover:underline"
-            data-testid="journal-proof-loop-cv-link"
+            įrašai → įgūdžių įrodymai → CV → pasiūlymai. A failed
+            list read shows no counts at all (SEP-7). */}
+        {entries !== null && (
+          <p
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="journal-proof-loop"
           >
-            {t("proofLoop.cvLink")} →
-          </Link>
-        </p>
+            {t("proofLoop.stripPeriod", {
+              entries: entriesThisMonth,
+              period: t("intelligence.period.month"),
+              evidenced: evidencedSkillIds.size,
+              confirmed: verifiedSkillIds.size,
+            })}{" "}
+            <Link
+              href="/cv"
+              className="font-medium text-brand-blue hover:underline"
+              data-testid="journal-proof-loop-cv-link"
+            >
+              {t("proofLoop.cvLink")} →
+            </Link>
+          </p>
+        )}
           </div>
         </details>
-        {diaryScope !== "recent" && visibleDayGroups.length === 0 ? (
+        {entries === null ? (
+          /* The list read FAILED. Not an empty journal and not an empty day:
+             no first-entry door, no "nothing on this day" (SEP-7). */
+          <div
+            role="status"
+            className="flex flex-col gap-1 rounded-md border border-border-subtle bg-surface-1/40 px-4 py-4"
+            data-testid="journal-list-unavailable"
+          >
+            <p className="text-sm font-medium text-text-primary">{t("listUnavailableTitle")}</p>
+            <p className="text-sm leading-relaxed text-text-secondary">{t("listUnavailable")}</p>
+          </div>
+        ) : diaryScope !== "recent" && visibleDayGroups.length === 0 ? (
           /* A day — or a period — the person navigated to that holds no
              records. A real answer over a known window (SEP-7: a recorded
              zero, not an unknown), with the one action that changes it and
@@ -1727,7 +1775,10 @@ export default async function JournalPage({
             // flow, not on the generic greeting. "Create your first entry"
             // that drops the worker on the home screen is the exact
             // interaction the tester read as being thrown out of the journal.
-            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work" }}
+            // SECONDARY (activation audit fix #7): the ONE primary on an empty
+            // journal is the recorder ABOVE this list; this door LEAVES the
+            // page, so it is bordered, never a second gradient button.
+            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work", variant: "secondary" }}
           />
         ) : (
           <div className="flex flex-col gap-4">

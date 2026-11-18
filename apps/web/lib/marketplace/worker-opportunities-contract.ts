@@ -280,7 +280,15 @@ export interface OpportunitiesResultMatch {
     readonly matchedConfirmed: number;
   };
   readonly salary: "within" | "negotiable" | "unknown";
+  /** The need's skills this worker already holds (canonical slugs) — the
+   *  demonstrated half of the basis, so a reader (the panel or an external
+   *  assistant over MCP) can say WHICH recorded skills made the fit. */
+  readonly matchedSkillSlugs: readonly string[];
   readonly missingSkillSlugs: readonly string[];
+  /** The need's skill set was recognized from the demand text (or expanded
+   *  from its profession) and the company has not confirmed it yet — a
+   *  probable requirement set, never stated as the company's own. */
+  readonly needSkillsUnconfirmed: boolean;
   readonly isNew: boolean;
   /** The company name, when the demand carries one. The result IS the answer
    *  to "find me work" now, so a row must name who is hiring. */

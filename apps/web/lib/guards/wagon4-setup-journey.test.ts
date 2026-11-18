@@ -52,8 +52,9 @@ describe("Wagon 4 — the guide exists and a fresh worker can reach it in one cl
     // RETIRED (worker mobile IA 2026-09-13 §2): "/dashboard is the
     // conversation" for the worker. The route is unchanged; what a worker in
     // their personal space finds there is ŠIANDIEN, whose ONE next action for
-    // a fresh worker (no profession yet) is the work-card engine's `work`
-    // dimension — the profile page, one tap. ŠIANDIEN is the conversation's
+    // a fresh worker is now the first work entry (evidence first, activation
+    // audit #4); the work-card engine's `work` dimension — the profile page —
+    // stays one tap away as the secondary link. ŠIANDIEN is the conversation's
     // opening context (owner decision 0017), so the composer is right there.
     const actions = read("lib/auth/actions.ts");
     expect(actions).toMatch(/worker:\s*`\/\$\{locale\}\/dashboard`,/);
@@ -73,7 +74,15 @@ describe("Wagon 4 — the guide exists and a fresh worker can reach it in one cl
         0,
       ),
     );
-    expect(fresh).toMatchObject({ kind: "action", dim: "work", href: "/dashboard/profile#profile-edit" });
+    // EVIDENCE FIRST (activation audit #4, 2026-10-26): a fresh worker's ONE
+    // gold action is the first work entry; the profile step is not hidden —
+    // it rides along as the quiet secondary link to the same route.
+    expect(fresh).toMatchObject({
+      kind: "action",
+      dim: "evidence",
+      href: "/dashboard/journal",
+      secondary: { dim: "work", href: "/dashboard/profile#profile-edit" },
+    });
   });
 
   it("the other identities keep their own first screens", () => {

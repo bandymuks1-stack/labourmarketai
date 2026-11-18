@@ -75,6 +75,15 @@ registry, production evidence, capability graph, strategy and security analysis
 Internal Brain, namespaced per project. Ask the owner for access; do not
 reconstruct it from guesses, and do not copy it back into this repo.
 
+**Owner-approved exception (2026-10-28):** the per-function STATUS register
+[`docs/program/FUNCTION_REGISTER.md`](docs/program/FUNCTION_REGISTER.md) lives
+in this repository so every session and agent reads the same status. It holds
+only function, status, date, PR / commit / run id, whether it runs in
+production, and a one-line remaining issue. Production volumes, money amounts,
+infrastructure measurements, personal or partner names and any security or
+permission detail stay in the private Internal Brain; a security row says only
+that an item is open.
+
 **Living CV (binding, decision 0023):** any change to classifiers, skill
 taxonomy, evidence, CV display, review or matching must keep direct AND
 indirect/potential capability discovery and keep evidence states apart —
@@ -268,6 +277,16 @@ into a fact.
     tree that contains only your slice.
 
 ---
+
+## No interface noise (binding, decision 0032, owner rule 2026-11-15)
+
+No primitive, redundant, self-evident or patronising text in the user interface, in any locale. That
+includes „Paskyros nereikia" / "No account needed", instructions for obvious actions, repeated
+explanations, demonstration captions and other informational noise. The bar is professional,
+minimal, Apple/macOS-level design: short clear function names, only what the user needs, no new
+helper text without a real need. Legal, consent, security and essential action-consequence texts
+stay. Reviews apply this as a criterion (`.claude/skills/code-review/SKILL.md`). Full text:
+`docs/DECISIONS/0032-no-interface-noise.md`.
 
 ## Auto-commit policy
 

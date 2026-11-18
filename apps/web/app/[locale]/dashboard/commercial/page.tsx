@@ -7,6 +7,11 @@ import { CommercialPanel } from "@/components/app/commercial-panel";
 import { AgreementsRegister } from "@/components/app/agreements-register";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/commercial");
+
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +46,7 @@ export default async function CommercialPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/${locale}/auth/login`);
+  if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/commercial`);
 
   const data = await getMyCommercial();
 

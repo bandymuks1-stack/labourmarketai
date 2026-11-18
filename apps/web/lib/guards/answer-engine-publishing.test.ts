@@ -11,13 +11,13 @@ import { describe, it, expect, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-type Loc = "lt" | "en" | "ru" | "nl" | "de" | "pl";
+type Loc = "lt" | "en" | "ru" | "nl" | "de" | "pl" | "sv";
 // 2026-09-20: PL re-added. This proof is fixture-driven — it exercises the real
 // publishing/SEO logic and the real AnswerArticle render over synthetic answers,
 // so its per-locale evidence is the answer-engine content layer, not
 // messages/pl.json. The four content files now carry a reviewed `pl` body for
 // every published question, so `pl` asserts coverage that exists.
-const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de", "pl"];
+const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de", "pl", "sv"];
 
 function ans(id: string, locale: Loc, slug: string, status = "HUMAN_APPROVED") {
   return {
@@ -35,12 +35,15 @@ function ans(id: string, locale: Loc, slug: string, status = "HUMAN_APPROVED") {
   };
 }
 
-// AE-0001 published in all 5 locales; AE-0002 only lt+en; AE-0003 machine draft.
+// AE-0001 published in all 5 locales; AE-0002 only lt+en; AE-0003 machine draft;
+// AE-0004 only lt+de (no English version).
 const FIXTURES = [
   ...LOCALES.map((l) => ans("AE-0001", l, `q1-${l}`)),
   ans("AE-0002", "lt", "q2-lt"),
   ans("AE-0002", "en", "q2-en"),
   ans("AE-0003", "lt", "q3-lt", "MACHINE_DRAFT"),
+  ans("AE-0004", "lt", "q4-lt"),
+  ans("AE-0004", "de", "q4-de"),
 ];
 
 vi.mock("@/content/answer-engine/pilot-answers", () => ({ PILOT_ANSWERS: FIXTURES }));
@@ -67,7 +70,9 @@ const {
   relatedPublished,
   publishedInCategory,
 } = await import("@/lib/answer-engine/publishing");
-const { buildQuestionMetadata, buildAnswerSitemap } = await import("@/lib/answer-engine/answer-seo");
+const { buildQuestionMetadata, buildAnswerSitemap, buildStaticQuestionsMetadata } = await import(
+  "@/lib/answer-engine/answer-seo"
+);
 const { getAnswer } = await import("@/lib/answer-engine/publishing");
 const { AnswerArticle } = await import("@/components/marketing/answer-article");
 
@@ -94,7 +99,25 @@ describe("publishing engine — indexability + hreflang + canonical", () => {
   it("5. hreflang is reciprocal across all published locales", () => {
     const langs = meta("AE-0001", "en").alternates?.languages as Record<string, string>;
     for (const l of LOCALES) expect(langs[l]).toContain(`/${l}/questions/q1-${l}`);
-    expect(langs["x-default"]).toContain("/lt/questions/q1-lt");
+    // x-default is English, as on every other public page (U-2).
+    expect(langs["x-default"]).toBe("https://labourmarket.ai/en/questions/q1-en");
+  });
+
+  it("x-default is the English version when one is published, else the default-locale one", () => {
+    const withEn = meta("AE-0002", "lt").alternates?.languages as Record<string, string>;
+    expect(withEn["x-default"]).toBe("https://labourmarket.ai/en/questions/q2-en");
+    // No English version: x-default stays on a published page, never a 404.
+    const noEn = meta("AE-0004", "de").alternates?.languages as Record<string, string>;
+    expect(Object.keys(noEn).sort()).toEqual(["de", "lt", "x-default"]);
+    expect(noEn["x-default"]).toBe("https://labourmarket.ai/lt/questions/q4-lt");
+  });
+
+  it("the hub and category pages share the public hreflang set (x-default = English)", () => {
+    const langs = buildStaticQuestionsMetadata("de", "/questions", "T", "D").alternates
+      ?.languages as Record<string, string>;
+    expect(Object.keys(langs).sort()).toEqual([...LOCALES, "x-default"].sort());
+    for (const l of LOCALES) expect(langs[l]).toBe(`https://labourmarket.ai/${l}/questions`);
+    expect(langs["x-default"]).toBe("https://labourmarket.ai/en/questions");
   });
 
   it("7. canonical is self-referential (this locale, not the source language)", () => {
