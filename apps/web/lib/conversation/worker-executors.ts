@@ -15,6 +15,7 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { expressInterestAction } from "@/lib/opportunities/interest-actions";
 import { createJournalEntry } from "@/lib/journal/actions";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
+import type { JournalSkillPipelineResult } from "@/lib/journal/skill-pipeline";
 import { z } from "zod";
 
 import {
@@ -246,32 +247,53 @@ export const WORKER_EXECUTORS: {
     // the same deterministic parse the composer persists as fragments, with
     // machine-extraction provenance. Without this every chat-logged day read
     // 0 h downstream (lib/journal/intake-work-time.ts).
-    const r = await createJournalEntry(
-      fd({
-        locale: ctx.locale,
-        engagement_context_id: input.engagementContextId,
-        notes: input.notes,
-        work_date: input.workDate,
-        site_name: input.siteName ?? "",
-        project_id: input.projectId ?? "",
-        ...(input.voice
-          ? {
-              input_origin: "voice",
-              voice_language: input.voice.language,
-              voice_disclosure_version: input.voice.disclosureVersion,
-            }
-          : {}),
-        ...intakeWorkTimeFields(input.notes, input.workDate),
-      }),
-    );
+    const r = await createJournalEntry(fd(logWorkFields(ctx.locale, input)));
     if (!r.ok) return { ok: false, code: r.code, message: r.message };
-    // PR-C "what changed" visibility: pass the REAL awaited pipeline outcome
-    // through to the chat surface (a read-through of the canonical result —
-    // nothing computed or invented here; §7 the UI may only show these facts).
-    return {
-      ok: true,
-      data: {
+    return { ok: true, data: logWorkResultData(r.entryId, r.skills, r.dayCheck ?? null) };
+  },
+});
+
+/** THE FormData mapping worker.log-work sends to the canonical save — one
+ *  function, so the dispatcher's "already recorded" lookup compares exactly
+ *  what the executor writes (every signed field). */
+export function logWorkFields(
+  locale: string,
+  input: z.infer<(typeof WORKER_ACTION_SCHEMAS)["worker.log-work"]>,
+): Record<string, string> {
+  return {
+    locale,
+    engagement_context_id: input.engagementContextId,
+    notes: input.notes,
+    work_date: input.workDate,
+    site_name: input.siteName ?? "",
+    project_id: input.projectId ?? "",
+    ...(input.voice
+      ? {
+          input_origin: "voice",
+          voice_language: input.voice.language,
+          voice_disclosure_version: input.voice.disclosureVersion,
+        }
+      : {}),
+    ...intakeWorkTimeFields(input.notes, input.workDate),
+  };
+}
+
+/** The chat's `worker.log-work` result for a recorded entry — the executor's
+ *  own answer, and the dispatcher's "already recorded" answer to a retried
+ *  confirm (P0-A 2026-10-30), so the chat renders both the same way. */
+export function logWorkResultData(
+  entryId: string,
+  skills: JournalSkillPipelineResult,
+  dayCheck: unknown,
+  alreadyRecorded = false,
+): Record<string, unknown> {
+  const r = { entryId, skills, dayCheck };
+  // PR-C "what changed" visibility: pass the REAL awaited pipeline outcome
+  // through to the chat surface (a read-through of the canonical result —
+  // nothing computed or invented here; §7 the UI may only show these facts).
+  return {
         entryId: r.entryId,
+        ...(alreadyRecorded ? { alreadyRecorded: true } : {}),
         skills: {
           status: r.skills.status,
           addedSkills: r.skills.addedSkills.map((s) => s.slug),
@@ -293,7 +315,5 @@ export const WORKER_EXECUTORS: {
         // takes part in (read-through of the canonical result; null = none
         // or not readable — never invented).
         dayCheck: r.dayCheck ?? null,
-      },
-    };
-  },
-});
+  };
+}

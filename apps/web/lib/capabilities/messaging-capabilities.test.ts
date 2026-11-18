@@ -67,6 +67,27 @@ describe("message.send — draft, human confirm, the one core", () => {
     expect(preview).toMatchObject({ to: { name: "Ramunas Šukys" }, body: BODY, permission: "allowed_engagement" });
   });
 
+  it("a draft with a declared language confirms and sends that language (Codex review on #3244)", async () => {
+    const c = caller({
+      workers: { display_name: "Ramunas Šukys" },
+      conversation_messages: { id: "msg-1", conversation_id: "conv-new", created_at: "2026-09-30T10:00:00Z", body: BODY },
+      conversation_participants: { profile_id: RAMUNAS, revoked_at: null },
+    });
+    const d = await cap("message.send_draft").run(c, { recipientProfileId: RAMUNAS, projectId: PROJECT, body: BODY, language: "SV" });
+    expect(d.ok).toBe(true);
+    const token = d.ok ? (d.data as { confirmationToken: string }).confirmationToken : "";
+    // A different language than the drafted one voids the token.
+    const swapped = await cap("message.send_confirm").run(c, {
+      recipientProfileId: RAMUNAS, projectId: PROJECT, body: BODY, language: "lt", confirmationToken: token,
+    });
+    expect(swapped.ok === false && swapped.code).toBe("confirmation_rejected");
+    const ok = await cap("message.send_confirm").run(c, {
+      recipientProfileId: RAMUNAS, projectId: PROJECT, body: BODY, language: "sv", confirmationToken: token,
+    });
+    expect(ok.ok).toBe(true);
+    expect(send.mock.calls.at(-1)?.[1]).toMatchObject({ originalLanguage: "sv", languageFallback: "unknown" });
+  });
+
   it("no relationship → refused, nothing drafted", async () => {
     plan.mockResolvedValueOnce({ kind: "refused", permission: "no_permission" });
     const r = await cap("message.send_draft").run(caller(), { recipientProfileId: RAMUNAS, body: BODY });
@@ -95,7 +116,14 @@ describe("message.send — draft, human confirm, the one core", () => {
     expect(ok.ok).toBe(true);
     expect(openConv).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send.mock.calls[0][1]).toEqual({ conversationId: "conv-new", body: BODY, locale: "lt" });
+    expect(send.mock.calls[0][1]).toEqual({
+      conversationId: "conv-new",
+      body: BODY,
+      locale: "lt",
+      // No declared language: stored as unknown, never the request locale.
+      originalLanguage: null,
+      languageFallback: "unknown",
+    });
     const data = ok.ok ? (ok.data as { readBack: { id: string; bodyMatches: boolean; recipientIsParticipant: boolean } }) : null;
     expect(data!.readBack).toMatchObject({ id: "msg-1", bodyMatches: true, recipientIsParticipant: true });
   });

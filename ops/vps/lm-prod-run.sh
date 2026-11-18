@@ -13,6 +13,12 @@
 # old container and give the new one the canonical name. If the new release never becomes healthy,
 # it is removed and the old one keeps serving — nothing changes for anyone.
 # nginx reads the upstream from /etc/nginx/conf.d/domains/labourmarket-upstream.inc (one proxy_pass line).
+#
+# Agentai OS reaches the app privately (owner decision 2026-11-07, B): the Docker network
+# lm-agentai-internal, where the serving container answers as labourmarket-app:3000. It is
+# `--internal`, so nothing on it reaches the internet through it; the app keeps its own
+# default-bridge connection for Supabase. Agentai's scheduler joins it from its own compose
+# file. The alias moves to the new container at the same moment nginx does.
 set -eu
 SHA="${1:?usage: lm-prod-run.sh <release-sha>}"
 case "$SHA" in *[!0-9a-f]*|"") echo "bad sha"; exit 1;; esac
@@ -35,13 +41,21 @@ keep_logs() {
   ls -1t "$D/logs"/*.log.gz 2>/dev/null | tail -n +21 | while read -r f; do rm -f "$f"; done
 }
 
+NET=lm-agentai-internal
+docker network inspect "$NET" >/dev/null 2>&1 || docker network create --internal "$NET" >/dev/null
+
 CUR_PORT=$(cat "$D/active-port" 2>/dev/null || echo 3200)
 case "$CUR_PORT" in 3200) NEW_PORT=3201;; 3201) NEW_PORT=3200;; *) CUR_PORT=3200; NEW_PORT=3201;; esac
 
 keep_logs labourmarket-prod-next leftover
 docker rm -f labourmarket-prod-next >/dev/null 2>&1 || true
+# CPU (owner decision A, 2026-11-01): the host has ONE vCPU, shared with Agentai OS. A hard
+# --cpus=0.5 held this app at half a core even on an idle host, and the host's bursts (Agentai
+# redeploys and its four daily cycles) then starved user requests. The app may now use the whole
+# core and wins contention by weight: --cpu-shares=1024 here against 256 on the Agentai
+# containers (their compose file), 4:1 when both want CPU. Rollback: --cpus=0.5 and no shares.
 docker run -d --name labourmarket-prod-next \
-  --memory=768m --memory-swap=768m --cpus=0.5 --pids-limit=256 \
+  --memory=768m --memory-swap=768m --cpus=1 --cpu-shares=1024 --pids-limit=256 \
   --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges \
   -p "127.0.0.1:$NEW_PORT:3000" \
   --restart=unless-stopped \
@@ -78,6 +92,10 @@ if ! nginx -t >/dev/null 2>&1 || ! nginx -s reload; then
   docker rm -f labourmarket-prod-next >/dev/null 2>&1 || true
   echo "nginx switch failed; the current one keeps serving"; exit 1
 fi
+# Agentai's private path follows the switch. During the drain below both containers carry the
+# alias; the old one still answers until it stops. A failure here never stops the public deploy:
+# Agentai then sees the app as unreachable, which it reports, rather than an empty answer.
+docker network connect --alias labourmarket-app "$NET" labourmarket-prod-next 2>/dev/null   || echo "warning: labourmarket-prod-next not on $NET; Agentai's private path is down"
 echo "$NEW_PORT" > "$D/active-port"
 ln -sfn "releases/$SHA" "$D/current"
 

@@ -75,6 +75,9 @@ export interface PreviewField {
 }
 
 export interface DiscoverabilityConsentLabels {
+  /** Set only when the legal text below is NOT in the reader's language (a
+   *  locale whose consent texts are not approved yet reads the English ones). */
+  legalLanguageNote?: string | null;
   /** "Visible to employers" — the status line's subject. */
   headline: string;
   /** "On" / "Off" — the status word. */
@@ -228,16 +231,28 @@ export function DiscoverabilityConsent({
     });
   }
 
-  const textBlock = (t: ConsentLegalTexts) => (
-    <div className="mt-3 flex flex-col gap-2 text-sm leading-relaxed text-text-primary">
-      <p>{t.summary}</p>
-      <p>{t.visibleData}</p>
-      <p>{t.invisibleData}</p>
-      <p className="text-text-secondary">{t.freedom}</p>
-      <p className="text-text-secondary">{t.withdrawal}</p>
-      {/* GDPR Art. 13(1)(a): controller identity shown WITH the text. */}
+  const textBlock = (legal: ConsentLegalTexts) => (
+    <div
+      className="mt-3 flex flex-col gap-2 text-sm leading-relaxed text-text-primary"
+      lang={labels.legalLanguageNote ? "en" : undefined}
+    >
+      {labels.legalLanguageNote ? (
+        <p
+          lang={locale}
+          className="text-xs text-text-secondary"
+          data-testid="consent-legal-language-note"
+        >
+          {labels.legalLanguageNote}
+        </p>
+      ) : null}
+      <p>{legal.summary}</p>
+      <p>{legal.visibleData}</p>
+      <p>{legal.invisibleData}</p>
+      <p className="text-text-secondary">{legal.freedom}</p>
+      <p className="text-text-secondary">{legal.withdrawal}</p>
+      {/* GDPR Art. 13(1)(a): controller identity shown WITH the consent text. */}
       <p className="text-text-secondary" data-testid="consent-controller">
-        {t.controller}
+        {legal.controller}
       </p>
     </div>
   );
@@ -360,7 +375,12 @@ export function DiscoverabilityConsent({
             {labels.defaultPendingNote.replace("{date}", from)}
           </p>
         )}
-        <h3 className="mt-3 text-sm font-semibold text-text-primary">{notice.title}</h3>
+        <h3
+          className="mt-3 text-sm font-semibold text-text-primary"
+          lang={labels.legalLanguageNote ? "en" : undefined}
+        >
+          {notice.title}
+        </h3>
         {textBlock(notice)}
         {!compact && previewBlock}
         {withdrawButton}

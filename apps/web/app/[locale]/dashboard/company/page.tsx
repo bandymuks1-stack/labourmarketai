@@ -34,6 +34,7 @@ import { countRosterConflicts } from "@/lib/planning/roster-conflicts";
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { homeReadbackRows } from "@/lib/company/company-home-field-model";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
+import { OrganizationTodayView } from "@/components/app/organization/organization-today-view";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import { PageTitle } from "@/components/app/premium/page-title";
@@ -73,9 +74,8 @@ const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
  */
 export default async function CompanyDashboardPage({
   params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+  searchParams,
+}: { params: Promise<{ locale: string }>; searchParams?: Promise<{ view?: string | string[] }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
@@ -150,6 +150,9 @@ export default async function CompanyDashboardPage({
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow?.id)?.id ??
     // Only a GOVERNED active organization — never an employee-only one.
     governedActiveOrganizationId(orgContext);
+  if ((await searchParams)?.view === "today") {
+    return <OrganizationTodayView organizationId={capabilityOrgId} company={companyRow} context={employerCtx} />;
+  }
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
@@ -208,7 +211,8 @@ export default async function CompanyDashboardPage({
     // Never summed with the employer count above: its own number and label.
     {
       key: "clientReview",
-      count: clientToDecide ?? 0,
+      // null = the count could not be read (SEP-7) — kept, never 0.
+      count: clientToDecide,
       href: `/${locale}/dashboard/inbox/counterparty`,
     },
     // Recorded work nobody can confirm yet (review switched off). Unknown (a

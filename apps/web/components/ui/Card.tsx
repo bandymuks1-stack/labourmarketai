@@ -86,6 +86,7 @@ export function Card({
   compact = false,
   className,
   children,
+  ...dataAttributes
 }: {
   label?: string;
   live?: boolean;
@@ -94,10 +95,15 @@ export function Card({
   compact?: boolean;
   className?: string;
   children: React.ReactNode;
+  /** TypeScript never checks hyphenated JSX props, so a caller's `data-testid` used to
+   *  compile and vanish here. Production 2026-11-07: the approvals card on the
+   *  organization's first screen had no test id, and its walk could not find it. */
+  [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
 }) {
   const { surface, content } = splitCardClassName(className);
   return (
     <div
+      {...dataAttributes}
       data-variant={variant === "standard" ? undefined : variant}
       className={cn(
         "card-border",

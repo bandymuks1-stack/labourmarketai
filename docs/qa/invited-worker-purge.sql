@@ -1,11 +1,18 @@
 -- OWNER-RUN in the Supabase SQL editor, AFTER `prod-qa-invited-provision revoke-invited`.
--- Deletes the synthetic invited worker `qa.invited+act1@labourmarket.ai` and every row of
+-- FALLBACK ONLY (2026-11-01): once the walk has recorded a Work Journal entry this script
+-- aborts — journal entries are append-only evidence that only the sanctioned erasure path
+-- may delete (journal_entries_evidence_guard_v1). The walk's own I-6 step requests and
+-- confirms the account deletion so the system erasure runner removes the account; run this
+-- script only for an account that never reached the journal. After the erasure runner,
+-- docs/qa/invited-worker-invitation-cleanup.sql removes the one synthetic invitation that
+-- erasure deliberately keeps (pseudonymised); then the orphans check.
+-- Deletes the synthetic invited worker `qa.invited@labourmarket.ai` and every row of
 -- its walk. Touches NOTHING else. Any guard failure raises, the transaction aborts and the
 -- final COMMIT becomes a ROLLBACK — nothing changes.
 --
 --   G1  exactly ONE auth user with that address AND app_metadata.qa_synthetic = true
 --   G2  the only invitations deleted are addressed to it AND carry the synthetic reference
---       (QA-SYNTHETIC-invited-act1); no other invitation names the account
+--       (QA-SYNTHETIC-invited-mbx1); no other invitation names the account
 --   G3  afterwards: no auth user, profile, worker, role, journal row, acceptance or
 --       synthetic invitation is left for it
 -- Order matters: invitations FIRST (`invitations.accepted_by_profile_id` is NO ACTION and
@@ -16,8 +23,8 @@ begin;
 
 do $$
 declare
-  c_email constant text := 'qa.invited+act1@labourmarket.ai';
-  c_ref   constant text := 'QA-SYNTHETIC-invited-act1';
+  c_email constant text := 'qa.invited@labourmarket.ai';
+  c_ref   constant text := 'QA-SYNTHETIC-invited-mbx1';
   v_uid uuid;
   v_n int;
   v_other int;
@@ -41,6 +48,9 @@ begin
    where lower(invited_email) = c_email and external_reference = c_ref;
   get diagnostics v_inv = row_count;
 
+  -- pilot_events.profile_id is NO ACTION: the walk's own analytics events go first.
+  delete from public.pilot_events where profile_id = v_uid;
+
   delete from auth.users where id = v_uid;
 
   if exists (select 1 from auth.users where id = v_uid)
@@ -48,6 +58,7 @@ begin
      or exists (select 1 from public.workers where profile_id = v_uid)
      or exists (select 1 from public.profile_roles where profile_id = v_uid)
      or exists (select 1 from public.invitation_acceptances where profile_id = v_uid)
+     or exists (select 1 from public.pilot_events where profile_id = v_uid)
      or exists (select 1 from public.invitations where external_reference = c_ref) then
     raise exception 'G3 ABORT: rows of the synthetic account survived';
   end if;

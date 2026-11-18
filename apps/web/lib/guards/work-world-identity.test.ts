@@ -23,7 +23,7 @@ describe("Guard: PLAYER IDENTITY wears the work-world grammar (PLAYER_IDENTITY_R
   });
 
   it("dates are a mono stamp; the only place the row knows is the dashed country chip", () => {
-    expect(HUB).toMatch(/<PlaceTimeStamp>\s*\{e\.startedAt \?\? tLive\("dateUnknown"\)\}/);
+    expect(HUB).toMatch(/<PlaceTimeStamp>\s*\{\(e\.organizationName \? e\.startedAt : statedIsoText\(e\.startedAt, "start"\)\) \?\?\s*tLive\("dateUnknown"\)\}/);
     expect(HUB).toMatch(/e\.countryCode \? \(\s*<PlacePrecision kind="country" label=\{e\.countryCode\} \/>/);
     expect(HUB).not.toMatch(/PlacePrecision kind="(city|address)"/);
   });

@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { CheckCircle2, Circle } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { statedIsoText } from "@/lib/cv/period-dates";
 import { deriveProfileNextAction } from "@/lib/dashboard/next-action";
 import { skillEvidenceStatus } from "@/lib/profile/skill-evidence";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
@@ -551,7 +552,7 @@ export async function ProfileHubOverview({
             legal={PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)]}
             notice={defaultVisibilityNotice(locale)}
             preview={discoverabilityPreviewFields(visibilityPreview, tConsent)}
-            labels={discoverabilityConsentLabels(tConsent)}
+            labels={discoverabilityConsentLabels(tConsent, locale)}
           />
         </div>
       )}
@@ -791,11 +792,12 @@ export async function ProfileHubOverview({
                             </span>
                             <span className="flex flex-wrap items-center gap-2">
                               <PlaceTimeStamp>
-                                {e.startedAt ?? tLive("dateUnknown")}
+                                {(e.organizationName ? e.startedAt : statedIsoText(e.startedAt, "start")) ??
+                                  tLive("dateUnknown")}
                                 {e.current
                                   ? ` · ${tLive("current")}`
                                   : e.endedAt
-                                    ? ` — ${e.endedAt}`
+                                    ? ` — ${e.organizationName ? e.endedAt : statedIsoText(e.endedAt, "end")}`
                                     : ""}
                               </PlaceTimeStamp>
                               {/* The journal's hours in THIS engagement —

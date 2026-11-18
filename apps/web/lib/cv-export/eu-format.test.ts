@@ -1,3 +1,4 @@
+import { statedIsoText, type PeriodEdge } from "@/lib/cv/period-dates";
 import { describe, expect, it } from "vitest";
 
 import { buildEuFormatCv, resolveEuFormatDocument } from "./eu-format";
@@ -63,6 +64,7 @@ const R = {
   language: (s: string) => `lang:${s}`,
   certificateType: (s: string) => `cert:${s}`,
   date: (iso: string | null) => iso,
+  statedDate: (iso: string | null, edge: PeriodEdge) => statedIsoText(iso, edge),
   present: "present",
 };
 
@@ -125,13 +127,13 @@ describe("evidence strength survives the translation", () => {
 });
 
 describe("periods state only what was recorded", () => {
-  const entry = (startedAt: string | null, endedAt: string | null) =>
+  const entry = (startedAt: string | null, endedAt: string | null, orgName: string | null = "UAB Statyba") =>
     resolveEuFormatDocument(
       buildEuFormatCv({
         ...EMPTY,
         workHistory: [
           {
-            orgName: "UAB Statyba",
+            orgName,
             organizationType: "company",
             relationship: "employee",
             kind: "employment",
@@ -161,6 +163,11 @@ describe("periods state only what was recorded", () => {
 
   it("no dates at all means no period, never today", () => {
     expect(entry(null, null).period).toBeNull();
+  });
+
+  it("a job with no organization shows only what the person stated", () => {
+    expect(entry("2018-01-01", "2019-12-31", null).period).toBe("2018 – 2019");
+    expect(entry("2021-03-01", null, null).period).toBe("2021-03 – present");
   });
 });
 

@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { DomainCaller } from "@/lib/domain/caller";
 import { readWorkerCoreRow } from "@/lib/data/worker-core";
+import { forgetJobAlertEvaluation } from "@/lib/notifications/job-alert-throttle";
 
 /**
  * THE work-card save DOMAIN core (G4 tail wagon 2) — the same operation as an
@@ -109,6 +110,8 @@ export async function saveWorkerCardCore(
     console.error("[work-card] save failed:", error.message);
     return { ok: false, code: "error", message: error.message };
   }
+  // The card is what a job alert is computed from: the next visit re-asks.
+  forgetJobAlertEvaluation(caller.userId);
   return { ok: true };
 }
 

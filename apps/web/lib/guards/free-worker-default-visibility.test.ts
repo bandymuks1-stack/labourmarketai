@@ -3,7 +3,10 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { activeLocales } from "@/lib/i18n/config";
+
 import {
+  CONSENT_LOCALES,
   PROFILE_DISCOVERABILITY_DEFAULT_NOTICE_V1,
   PROFILE_DISCOVERABILITY_V1,
   consentTextHash,
@@ -180,14 +183,19 @@ describe("the app — the default reads ON, the notice is recorded only on scree
   });
 });
 
-describe("the privacy policy and copy say the same thing in all six active locales", () => {
-  for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+describe("the privacy policy and copy say the same thing in every active locale", () => {
+  for (const locale of activeLocales) {
     it(`${locale}: legitimate interest + objection in the policy; the default notes exist`, () => {
       const m = JSON.parse(read(`messages/${locale}.json`));
-      const sections = m.legal.privacy.sections;
-      expect(sections[4].items[1], locale).toMatch(/6/);
-      expect(sections[4].items[1], locale).not.toMatch(/NOT visible|NEmatomas|НЕ виден|NICHT sichtbar|NIET zichtbaar|NIE jest widoczny/);
-      expect(sections[7].items[2].length, locale).toBeGreaterThan(80);
+      // The policy wording is checked where the consent legal texts are owner-approved
+      // (CONSENT_LOCALES). sv is routed but its legal wording waits for the owner (#3232);
+      // its policy still states the opt-in rule — see the todo below.
+      if ((CONSENT_LOCALES as readonly string[]).includes(locale)) {
+        const sections = m.legal.privacy.sections;
+        expect(sections[4].items[1], locale).toMatch(/6/);
+        expect(sections[4].items[1], locale).not.toMatch(/NOT visible|NEmatomas|НЕ виден|NICHT sichtbar|NIET zichtbaar|NIE jest widoczny/);
+        expect(sections[7].items[2].length, locale).toBeGreaterThan(80);
+      }
       expect(m.privacyConsent.switch.defaultOnNote, locale).toMatch(/\S/);
       expect(m.privacyConsent.switch.defaultPendingNote, locale).toContain("{date}");
       expect(m.privacyConsent.history.action.declined, locale).toMatch(/\S/);
@@ -195,6 +203,11 @@ describe("the privacy policy and copy say the same thing in all six active local
       expect(m.todayScreen.home.open.verifyEmail, locale).toMatch(/\S/);
     });
   }
+
+  // OWNER DECISION before arming: the Swedish privacy policy (legal.privacy, sections 1.4, 4.1,
+  // 4.2, 5.0, 5.1, 7.2) still says the profile is NOT visible by default. It needs the same
+  // owner-approved wording as the six locales above (with the sv consent texts, #3232).
+  it.todo("sv: the privacy policy states the free-worker default, its 6(1)(f) basis and the objection");
 
   it("the legitimate-interests assessment exists and covers the three tests, the exclusions and the objection", () => {
     const lia = readFileSync(

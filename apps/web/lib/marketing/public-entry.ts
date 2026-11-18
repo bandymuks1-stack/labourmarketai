@@ -1,4 +1,3 @@
-import { buildReturnValue } from "@/lib/auth/redirect";
 import {
   INTENT_REGISTRY,
   type IntentHandlerId,
@@ -9,6 +8,7 @@ import { classifyIntent } from "@/lib/conversation/intent-router";
 // never here: this module owns NO patterns (public-entry-real-intent.test.ts).
 import { speaksOfOwnWork } from "@/lib/structuring/role-label";
 import type { FirstRunIntent } from "@/lib/onboarding/first-run-intent";
+import { normaliseEntrySentence } from "./public-entry-carry";
 
 /**
  * THE PUBLIC ENTRY — a visitor's own sentence, read by the ONE router.
@@ -36,19 +36,6 @@ import type { FirstRunIntent } from "@/lib/onboarding/first-run-intent";
  *     does not already govern.
  */
 
-/** Hard cap on a sentence the entry will read or carry. Long enough for a
- *  real need ("Reikia 12 pastolininkų Roterdame nuo spalio 5 d., su VCA"),
- *  short enough that the `next` value stays a small, loggable path. */
-export const PUBLIC_ENTRY_MAX_CHARS = 200;
-
-/** The query key the sentence rides under on the post-auth destination.
- *  Consumed by the conversation surface; NOT in the redirect sanitiser's
- *  credential denylist, so `getSafeReturnPath` lets it through. */
-export const PUBLIC_ENTRY_SAY_PARAM = "say";
-
-/** Where the sentence is delivered after auth — the ONE conversation root. */
-const CONVERSATION_ROOT = "/dashboard";
-
 export type PublicEntryReading =
   | { readonly kind: "empty" }
   | { readonly kind: "unrecognised"; readonly sentence: string }
@@ -60,12 +47,6 @@ export type PublicEntryReading =
        *  five values onboarding asks about (`lib/onboarding/first-run-intent`). */
       readonly family: FirstRunIntent;
     };
-
-/** Trim, collapse whitespace, cap. Returns "" for nothing worth reading. */
-export function normaliseEntrySentence(raw: string | null | undefined): string {
-  if (typeof raw !== "string") return "";
-  return raw.replace(/\s+/g, " ").trim().slice(0, PUBLIC_ENTRY_MAX_CHARS);
-}
 
 /**
  * Which first-run family an intent belongs to — a PROJECTION of the intent
@@ -203,59 +184,15 @@ export function familyForSentence(
   return speaksOfOwnWork(sentence) ? "work" : family;
 }
 
-/**
- * The locale-less internal path the auth doors hand to `?next=`:
- * `/dashboard?say=<sentence>`. Built through the SAME `buildReturnValue`
- * the middleware uses, so the value obeys the same length cap and the same
- * query filtering as every other post-login return. `null` when there is no
- * sentence to carry — the door then falls back to the plain dashboard.
- */
-export function entryReturnPath(sentence: string | null | undefined): string | null {
-  const clean = normaliseEntrySentence(sentence);
-  if (!clean) return null;
-  const query = new URLSearchParams({ [PUBLIC_ENTRY_SAY_PARAM]: clean }).toString();
-  return buildReturnValue(CONVERSATION_ROOT, query);
-}
-
-export type EntryDoor = "signup" | "login";
-
-/**
- * The sentence back OUT of a `?next=` value — the return half of
- * `entryReturnPath`, and the reason it exists is owner window 11 §21.
- *
- * The sentence already survived authentication when the owner walked
- * production: `/lt/auth/login?next=%2Fdashboard%3Fsay%3DIe%C5%A1kau...` is
- * exactly what the landing emits. What did NOT survive was the person's
- * knowledge that it had: the login screen said "Prisijungti" and nothing
- * about what they had just asked for, so from where they stood the request
- * was gone. This lets the auth screens say it back.
- *
- * Defensive by construction: any malformed value yields `null` rather than
- * throwing, and the result is capped by `normaliseEntrySentence` exactly as
- * the outbound half is. It reads a value the page already received; it never
- * reaches a store and never widens what `?next=` may carry.
- */
-export function sentenceFromReturnPath(next: string | null | undefined): string | null {
-  if (typeof next !== "string" || !next) return null;
-  const q = next.indexOf("?");
-  if (q < 0) return null;
-  let raw: string | null = null;
-  try {
-    raw = new URLSearchParams(next.slice(q + 1)).get(PUBLIC_ENTRY_SAY_PARAM);
-  } catch {
-    return null;
-  }
-  const clean = normaliseEntrySentence(raw);
-  return clean || null;
-}
-
-/** The locale-prefixed href of an auth door, carrying the sentence. */
-export function entryDoorHref(
-  locale: string,
-  door: EntryDoor,
-  sentence: string | null | undefined,
-): string {
-  const base = `/${locale}/auth/${door}`;
-  const next = entryReturnPath(sentence);
-  return next ? `${base}?next=${encodeURIComponent(next)}` : base;
-}
+// The carry half (constants, the return path, the sign-in links) lives in
+// `public-entry-carry.ts` so a client can render the field without loading
+// the router. Re-exported here: this module stays the one public surface.
+export {
+  PUBLIC_ENTRY_MAX_CHARS,
+  PUBLIC_ENTRY_SAY_PARAM,
+  entryDoorHref,
+  entryReturnPath,
+  normaliseEntrySentence,
+  sentenceFromReturnPath,
+  type EntryDoor,
+} from "./public-entry-carry";
