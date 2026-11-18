@@ -2035,14 +2035,16 @@
         "includes": "{count, plural, one {Omfatter # sammenslått prosjektrad — postene vises her.} other {Omfatter # sammenslåtte prosjektrader — postene vises her.}}"
       },
       "teams": {
-        "title": "Team på dette prosjektet",
+        "title": "Hvem jobber på prosjektet",
         "members": "{n, plural, one {# person} other {# personer}}",
         "personTeam": "Team: {team}",
         "unnamed": "Team uten navn",
         "unnamedMember": "Medlem",
         "noMembers": "Ingen medlemmer akkurat nå.",
         "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
-        "manage": "Endre team"
+        "manage": "Endre team",
+        "kindTeam": "arbeidslag",
+        "individual": "Tildelt én og én"
       },
       "organizationLink": "Organisasjonens historikk og prosjekter"
     },
@@ -8101,6 +8103,29 @@
       "auth": "[EN] Please sign in again.",
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
+    }
+  },
+  "teamBrigades": {
+    "structure": {
+      "title": "Teamstruktur",
+      "scopeNote": "Viser teamene du leder og bedriftens aktive personer.",
+      "kindTeam": "arbeidslag",
+      "teamEmpty": "Ingen medlemmer ennå.",
+      "company": "Bedrift",
+      "teamsCount": "arbeidslag",
+      "noTeams": "Ingen team ennå.",
+      "outside": "Ikke i noe team"
+    },
+    "addSearch": "Søk personer",
+    "addSearchNone": "Ingen treff.",
+    "removeMember": {
+      "label": "Fjern",
+      "question": "Fjerne {name} fra teamet? Arbeidshistorikken blir stående. Hvis teamet er på et prosjekt, er personen ikke lenger med via teamet.",
+      "confirm": "Ja, fjern",
+      "cancel": "Avbryt",
+      "done": "Fjernet fra teamet.",
+      "notAllowed": "Du kan ikke fjerne dette medlemmet.",
+      "failed": "Kunne ikke fjerne. Prøv igjen."
     }
   }
 }

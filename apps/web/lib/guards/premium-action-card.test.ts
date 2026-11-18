@@ -121,11 +121,21 @@ describe("the Work page: two tiers, navigation stays navigation", () => {
     // outlined, never a second gold primary — pinned by
     // lib/company/project-context-expansion.test.ts.
     expect(PAGE).toMatch(/data-testid="company-ops-projects-create"/);
-    for (const f of ["components/app/project-team-assignments.tsx", "components/app/project-assignment-manager.tsx"]) {
+    for (const f of ["components/app/project-assignment-manager.tsx"]) {
       const primary = read(f).match(/const primary =\s*"([^"]+)"/)?.[1] ?? "";
       expect(primary, f).not.toMatch(/bg-gradient-cta/);
       expect(primary, f).toMatch(/border-brand-blue\/60/);
     }
+    // The team block is on the shared Button (owner P0 2026-11-12: one design
+    // system). The same rule holds there: every button is the OUTLINED
+    // secondary — the Button default is the filled primary, so each one must
+    // say so — and no hand-written filled class comes back.
+    const teams = read("components/app/project-team-assignments.tsx");
+    expect(teams).not.toMatch(/bg-gradient-cta/);
+    expect(teams).not.toMatch(/<button\b/);
+    const buttons = teams.match(/<Button\b[^>]*>/g) ?? [];
+    expect(buttons.length).toBeGreaterThanOrEqual(4);
+    for (const b of buttons) expect(b).toMatch(/variant="secondary"/);
   });
 
   it("the deck copy exists in every active locale", () => {

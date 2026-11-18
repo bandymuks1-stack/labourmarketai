@@ -6864,14 +6864,16 @@
         "includes": "{count, plural, one {Apima # sujungtą projekto eilutę — jos įrašai rodomi čia.} few {Apima # sujungtas projekto eilutes — jų įrašai rodomi čia.} other {Apima # sujungtų projekto eilučių — jų įrašai rodomi čia.}}"
       },
       "teams": {
-        "title": "Komandos šiame projekte",
+        "title": "Kas dirba šiame projekte",
         "members": "{n, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
         "personTeam": "Komanda: {team}",
         "unnamed": "Komanda",
         "unnamedMember": "Narys",
         "noMembers": "Šiuo metu narių nėra.",
         "unavailable": "Komandų įkelti nepavyko. Bandykite dar kartą.",
-        "manage": "Keisti komandas"
+        "manage": "Keisti komandas",
+        "kindTeam": "komanda",
+        "individual": "Priskirti po vieną"
       },
       "organizationLink": "Organizacijos istorija ir projektai"
     },
@@ -7685,6 +7687,27 @@
       "failed": "Neišformuota: nepavyko užbaigti narystės. Niekas nepakeista.",
       "historyTitle": "{count, plural, one {# išformuota brigada} few {# išformuotos brigados} other {# išformuotų brigadų}}",
       "historyLine": "išformuota {date}"
+    },
+    "structure": {
+      "title": "Komandų struktūra",
+      "scopeNote": "Rodo jūsų valdomas komandas ir aktyvius įmonės žmones.",
+      "kindTeam": "komanda",
+      "teamEmpty": "Narių dar nėra.",
+      "company": "Įmonė",
+      "teamsCount": "komandos",
+      "noTeams": "Komandų dar nėra.",
+      "outside": "Ne komandoje"
+    },
+    "addSearch": "Ieškoti žmonių",
+    "addSearchNone": "Niekas neatitinka.",
+    "removeMember": {
+      "label": "Pašalinti",
+      "question": "Pašalinti {name} iš šios komandos? Darbo istorija lieka. Jei komanda dirba projekte, per komandą šis žmogus jame nebedalyvaus.",
+      "confirm": "Taip, pašalinti",
+      "cancel": "Atšaukti",
+      "done": "Pašalinta iš komandos.",
+      "notAllowed": "Šio nario pašalinti negalite.",
+      "failed": "Pašalinti nepavyko. Bandykite dar kartą."
     }
   },
   "teamEnquiries": {

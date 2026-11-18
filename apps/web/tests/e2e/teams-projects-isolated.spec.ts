@@ -308,6 +308,28 @@ test("T-5. the company sees its team with the member who accepted, and both of i
   const main = co.getByRole("main");
   await expect(main, "the worker who accepted is one of the company's people").toContainText(W1_NAME);
   await expect(main, "the worker who declined the TEAM is still the company's person").toContainText(W2_NAME);
+
+  // The company's team structure: company → team → member, and the person who
+  // declined listed outside the teams (never dropped, never put in the team).
+  const tree = co.getByTestId("company-team-tree");
+  await expect(tree).toBeVisible();
+  await expect(tree).toContainText(CO_ORG);
+  await expect(tree).toContainText(TEAM);
+  const teamNode = tree.locator("details").filter({ hasText: TEAM }).last();
+  await expect(teamNode, "the member is under the team").toContainText(W1_NAME);
+  await expect(teamNode, "a person who declined is not under the team").not.toContainText(W2_NAME);
+  const outside = tree.locator("details").filter({ hasText: "Not in a team" }).last();
+  await expect(outside, "the person who declined is listed outside the teams").toContainText(W2_NAME);
+  await expect(outside).not.toContainText(W1_NAME);
+  for (const width of [375, 768]) {
+    await co.setViewportSize({ width, height: 900 });
+    await expect(tree).toBeVisible();
+    const overflow = await co.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, `no sideways scroll on the people door at ${width}px`).toBeLessThanOrEqual(1);
+  }
+  await co.setViewportSize({ width: 1280, height: 800 });
 });
 
 // ── T-6 / T-7 ───────────────────────────────────────────────────────────────
@@ -350,35 +372,75 @@ test("T-6/T-7. the company assigns the team to a project; the project page names
     "no per-person row is invented for a team member",
   ).toBe(0);
 
-  // The project page: the person, their position line, and the team by name.
-  for (const [width, height] of [
-    [1440, 900],
-    [390, 844],
-    [320, 640],
-  ] as const) {
-    await co.setViewportSize({ width, height });
+  // The project page: the person, their position line, and the structure
+  // project → team → people — at five widths, in both themes.
+  for (const theme of ["dark", "light"] as const) {
     await co.goto(`${BASE}/en/dashboard/projects/${s.projectId}`);
-    const field = co.getByTestId("stadium-field");
-    await expect(field, "the manager's project page").toBeVisible({ timeout: 30_000 });
-    const player = field.getByTestId("stadium-player").filter({ hasText: W1_NAME });
-    await expect(player, "the team's member is on the project").toHaveCount(1);
-    await expect(field, "a person who is not in the team is not on the project").not.toContainText(W2_NAME);
-    await expect(player.getByTestId("stadium-player-teams"), "the person's card names the team").toContainText(TEAM);
-    await expect(
-      player.locator("a p").nth(1),
-      "the card carries a position line (the person's profession, or that none is set)",
-    ).not.toBeEmpty();
-    const teams = co.getByTestId("stadium-teams");
-    await expect(teams.getByTestId("stadium-team"), "one team on this project").toHaveCount(1);
-    await expect(teams.getByTestId("stadium-team")).toContainText(TEAM);
-    await expect(teams.getByTestId("stadium-team")).toContainText(W1_NAME);
-    await expect(teams.getByTestId("stadium-team-count")).toContainText("1");
-    await expect(teams.getByTestId("stadium-teams-unavailable")).toHaveCount(0);
-    const overflow = await co.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    );
-    expect(overflow, `no sideways scroll at ${width}px`).toBeLessThanOrEqual(1);
+    await co.evaluate((t) => localStorage.setItem("theme", t), theme);
+    for (const [width, height] of [
+      [1440, 900],
+      [768, 1024],
+      [390, 844],
+      [375, 667],
+      [320, 640],
+    ] as const) {
+      const at = `${theme} ${width}px`;
+      await co.setViewportSize({ width, height });
+      await co.goto(`${BASE}/en/dashboard/projects/${s.projectId}`);
+      const field = co.getByTestId("stadium-field");
+      await expect(field, "the manager's project page").toBeVisible({ timeout: 30_000 });
+      expect(await co.evaluate(() => document.documentElement.dataset.theme), `theme applied (${at})`).toBe(theme);
+      const player = field.getByTestId("stadium-player").filter({ hasText: W1_NAME });
+      await expect(player, "the team's member is on the project").toHaveCount(1);
+      await expect(field, "a person who is not in the team is not on the project").not.toContainText(W2_NAME);
+      await expect(player.getByTestId("stadium-player-teams"), "the person's card names the team").toContainText(TEAM);
+      await expect(
+        player.locator("a p").nth(1),
+        "the card carries a position line (the person's profession, or that none is set)",
+      ).not.toBeEmpty();
+      const tree = co.getByTestId("stadium-structure");
+      await expect(tree, `the structure is shown (${at})`).toBeVisible();
+      await expect(tree.getByTestId("stadium-team"), "one team on this project").toHaveCount(1);
+      await expect(tree.getByTestId("stadium-team")).toContainText(TEAM);
+      await expect(tree.getByTestId("stadium-team-member"), "the team's one member").toHaveCount(1);
+      await expect(tree.getByTestId("stadium-team-member")).toBeVisible();
+      await expect(tree.getByTestId("stadium-team-member")).toContainText(W1_NAME);
+      await expect(tree.getByTestId("stadium-individual"), "nobody is assigned one by one").toHaveCount(0);
+      await expect(co.getByTestId("stadium-teams-unavailable")).toHaveCount(0);
+      // The text is readable against its background in this theme: the team
+      // name's colour is not the colour behind it.
+      const colours = await tree.getByTestId("stadium-team").evaluate((el) => {
+        let bg = "rgba(0, 0, 0, 0)";
+        for (let n: Element | null = el; n; n = n.parentElement) {
+          const c = getComputedStyle(n).backgroundColor;
+          if (c !== "rgba(0, 0, 0, 0)" && c !== "transparent") {
+            bg = c;
+            break;
+          }
+        }
+        return { fg: getComputedStyle(el).color, bg };
+      });
+      expect(colours.fg, `text differs from its background (${at})`).not.toBe(colours.bg);
+      const overflow = await co.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow, `no sideways scroll (${at})`).toBeLessThanOrEqual(1);
+    }
   }
+
+  // Keyboard: the team node closes and opens from its summary with Enter.
+  await co.setViewportSize({ width: 1280, height: 800 });
+  await co.goto(`${BASE}/en/dashboard/projects/${s.projectId}`);
+  const teamSummary = co
+    .getByTestId("stadium-structure")
+    .locator("summary")
+    .filter({ has: co.getByTestId("stadium-team") })
+    .last();
+  await teamSummary.focus();
+  await co.keyboard.press("Enter");
+  await expect(co.getByTestId("stadium-team-member"), "Enter closes the team").toBeHidden();
+  await co.keyboard.press("Enter");
+  await expect(co.getByTestId("stadium-team-member"), "Enter opens it again").toBeVisible();
   await co.setViewportSize({ width: 1280, height: 800 });
 
   // The link under the section opens the place where teams are changed.
@@ -511,4 +573,65 @@ test("T-14. another organization sees neither the team, its people nor the proje
     await readAs(OUT, `invitations?organization_id=eq.${s.teamId}&select=id`),
     "team invitations",
   ).toEqual([]);
+});
+
+// ── T-R ─────────────────────────────────────────────────────────────────────
+
+test("T-R. the owner removes ONE member: the team stays, the history stays, the person leaves the project", async () => {
+  expect(teamMembers(), "T-4 left one member").toEqual([s.w1Id]);
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/company/people`);
+  const card = co.getByTestId(`team-brigade-${s.teamId}`);
+  await expect(card).toBeVisible({ timeout: 30_000 });
+  const [membership] = sql<{ id: string }>(
+    `select id from public.engagement_contexts
+      where organization_id = ${lit(s.teamId)} and profile_id = ${lit(s.w1Id)} and status = 'active'`,
+  );
+  expect(membership?.id, "the member's team membership").toBeTruthy();
+  const row = card.getByTestId(`team-member-${membership!.id}`);
+  await expect(row).toContainText(W1_NAME);
+
+  // Two steps: the first press only asks; cancelling changes nothing.
+  await row.getByTestId(`team-member-remove-${membership!.id}`).click();
+  await expect(row, "the question names the person and what happens").toContainText(W1_NAME);
+  await row.getByRole("button", { name: "Cancel" }).click();
+  expect(teamMembers(), "cancel removes nobody").toEqual([s.w1Id]);
+
+  await row.getByTestId(`team-member-remove-${membership!.id}`).click();
+  await row.getByRole("button", { name: "Yes, remove" }).click();
+  await expect.poll(() => teamMembers(), { message: "the membership is ended", timeout: 30_000 }).toEqual([]);
+
+  // Ended, not deleted: the row and the accepted invitation are history.
+  const after = sql<{ status: string; ended_at: string | null }>(
+    `select status, ended_at from public.engagement_contexts where id = ${lit(membership!.id)}`,
+  );
+  expect(after.length, "the membership row still exists").toBe(1);
+  expect(after[0]!.status).toBe("ended");
+  expect(after[0]!.ended_at).toBeTruthy();
+  expect(teamInvites().find((i) => i.invited_email === W1)?.status, "the invitation history is untouched").toBe(
+    "accepted",
+  );
+  // The team itself and the person's place in the COMPANY are untouched.
+  expect(
+    sql<{ n: number }>(`select count(*)::int as n from public.organizations where id = ${lit(s.teamId)}`)[0]?.n,
+  ).toBe(1);
+  expect(
+    sql<{ n: number }>(
+      `select count(*)::int as n from public.engagement_contexts
+        where profile_id = ${lit(s.w1Id)} and organization_id = ${lit(s.coOrgId)} and status = 'active'`,
+    )[0]?.n,
+    "still the company's employee",
+  ).toBe(1);
+
+  await co.goto(`${BASE}/en/dashboard/company/people`);
+  await expect(co.getByTestId(`team-brigade-${s.teamId}`), "the team is still listed").toBeVisible({ timeout: 30_000 });
+  await expect(co.getByTestId(`team-member-${membership!.id}`)).toHaveCount(0);
+
+  // The team is still on the project; the removed person is no longer there through it.
+  await co.goto(`${BASE}/en/dashboard/projects/${s.projectId}`);
+  const tree = co.getByTestId("stadium-structure");
+  await expect(tree).toBeVisible({ timeout: 30_000 });
+  await expect(tree.getByTestId("stadium-team")).toContainText(TEAM);
+  await expect(tree.getByTestId("stadium-team-member")).toHaveCount(0);
+  await expect(co.getByTestId("stadium-field")).not.toContainText(W1_NAME);
 });

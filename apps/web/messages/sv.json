@@ -6864,14 +6864,16 @@
         "includes": "{count, plural, one {Omfattar # sammanslagen projektrad — dess poster visas här.} other {Omfattar # sammanslagna projektrader — deras poster visas här.}}"
       },
       "teams": {
-        "title": "Team i det här projektet",
+        "title": "Vilka som arbetar i projektet",
         "members": "{n, plural, one {# person} other {# personer}}",
         "personTeam": "Team: {team}",
         "unnamed": "Team utan namn",
         "unnamedMember": "Medlem",
         "noMembers": "Inga medlemmar just nu.",
         "unavailable": "Teamen kunde inte läsas in. Försök igen.",
-        "manage": "Ändra team"
+        "manage": "Ändra team",
+        "kindTeam": "arbetslag",
+        "individual": "Tilldelade en och en"
       },
       "organizationLink": "Organisationens historik och projekt"
     },
@@ -7685,6 +7687,27 @@
       "failed": "Inte upplöst: ett medlemskap kunde inte avslutas. Inget ändrades.",
       "historyTitle": "{count, plural, one {# upplöst arbetslag} other {# upplösta arbetslag}}",
       "historyLine": "upplöst {date}"
+    },
+    "structure": {
+      "title": "Teamstruktur",
+      "scopeNote": "Visar teamen du leder och företagets aktiva personer.",
+      "kindTeam": "arbetslag",
+      "teamEmpty": "Inga medlemmar ännu.",
+      "company": "Företag",
+      "teamsCount": "arbetslag",
+      "noTeams": "Inga team ännu.",
+      "outside": "Inte i något team"
+    },
+    "addSearch": "Sök personer",
+    "addSearchNone": "Ingen matchar.",
+    "removeMember": {
+      "label": "Ta bort",
+      "question": "Ta bort {name} från teamet? Arbetshistoriken finns kvar. Om teamet är i ett projekt är personen inte längre med via teamet.",
+      "confirm": "Ja, ta bort",
+      "cancel": "Avbryt",
+      "done": "Borttagen från teamet.",
+      "notAllowed": "Du kan inte ta bort den här medlemmen.",
+      "failed": "Det gick inte att ta bort. Försök igen."
     }
   },
   "teamEnquiries": {

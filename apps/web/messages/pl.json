@@ -6864,14 +6864,16 @@
         "includes": "{count, plural, one {Obejmuje # scalony wiersz projektu — jego wpisy są tutaj.} few {Obejmuje # scalone wiersze projektu — ich wpisy są tutaj.} many {Obejmuje # scalonych wierszy projektu — ich wpisy są tutaj.} other {Obejmuje # scalonego wiersza projektu — wpisy są tutaj.}}"
       },
       "teams": {
-        "title": "Zespoły w tym projekcie",
+        "title": "Kto pracuje w tym projekcie",
         "members": "{n, plural, one {# osoba} few {# osoby} other {# osób}}",
         "personTeam": "Zespół: {team}",
         "unnamed": "Zespół",
         "unnamedMember": "Członek",
         "noMembers": "Obecnie brak członków.",
         "unavailable": "Nie udało się wczytać zespołów. Proszę spróbować ponownie.",
-        "manage": "Zmień zespoły"
+        "manage": "Zmień zespoły",
+        "kindTeam": "zespół",
+        "individual": "Przypisani pojedynczo"
       },
       "organizationLink": "Historia i projekty organizacji"
     },
@@ -7685,6 +7687,27 @@
       "failed": "Nie rozwiązano: nie udało się zakończyć członkostwa. Nic nie zostało zmienione.",
       "historyTitle": "{count, plural, one {# rozwiązana brygada} few {# rozwiązane brygady} many {# rozwiązanych brygad} other {# rozwiązanych brygad}}",
       "historyLine": "rozwiązana {date}"
+    },
+    "structure": {
+      "title": "Struktura zespołów",
+      "scopeNote": "Pokazuje zespoły, którymi zarządzasz, i aktywne osoby w firmie.",
+      "kindTeam": "zespół",
+      "teamEmpty": "Brak członków.",
+      "company": "Firma",
+      "teamsCount": "zespoły",
+      "noTeams": "Brak zespołów.",
+      "outside": "Poza zespołem"
+    },
+    "addSearch": "Szukaj osób",
+    "addSearchNone": "Nikt nie pasuje.",
+    "removeMember": {
+      "label": "Usuń",
+      "question": "Usunąć {name} z tego zespołu? Historia pracy zostaje. Jeśli zespół pracuje w projekcie, ta osoba nie będzie już w nim przez zespół.",
+      "confirm": "Tak, usuń",
+      "cancel": "Anuluj",
+      "done": "Usunięto z zespołu.",
+      "notAllowed": "Nie mogą Państwo usunąć tego członka.",
+      "failed": "Nie udało się usunąć. Spróbuj ponownie."
     }
   },
   "teamEnquiries": {

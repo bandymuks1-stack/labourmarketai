@@ -6,11 +6,16 @@ import { useTranslations } from "next-intl";
 import { Check, Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
+import { InlineConfirm } from "@/components/ui/InlineConfirm";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
 import {
   createTeamAction,
   disbandTeamAction,
   inviteWorkerToTeamAction,
 } from "@/lib/company/team-brigade-actions";
+import { endOrgMembership } from "@/lib/operations/org-membership";
 import type { DisbandedTeam, TeamBrigade } from "@/lib/company/team-brigades";
 import { TeamDetailsForm } from "@/components/app/team-details-form";
 import { TeamEnquiryInbox } from "@/components/app/team-enquiry-inbox";
@@ -37,6 +42,21 @@ import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-wo
  *   manager-confirmed). It is not a team rating and never claims team-level
  *   verification.
  */
+/** The name search appears once the list is longer than this. */
+const SEARCH_FROM = 5;
+
+/** The people whose name contains the typed text (any case). The person
+ *  already chosen stays in the list, so a search never silently unpicks them. */
+export function matchingAddable<T extends { workerId: string; name: string }>(
+  addable: readonly T[],
+  query: string | undefined,
+  chosen: string | undefined,
+): readonly T[] {
+  const q = (query ?? "").trim().toLocaleLowerCase();
+  if (!q) return addable;
+  return addable.filter((w) => w.workerId === chosen || w.name.toLocaleLowerCase().includes(q));
+}
+
 export function TeamBrigadesPanel({
   teams,
   locale,
@@ -69,6 +89,9 @@ export function TeamBrigadesPanel({
   // are own-row-only). Asked for only after the server said so.
   const [askEmail, setAskEmail] = useState<Record<string, boolean>>({});
   const [emails, setEmails] = useState<Record<string, string>>({});
+  // Find a person in a long list: narrows the picker by name, per team. The
+  // list itself is unchanged (the company's own people, read by the server).
+  const [search, setSearch] = useState<Record<string, string>>({});
   // The invitation link of the last invite — the delivery while e-mail is off.
   const [link, setLink] = useState<{ teamId: string; url: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -119,6 +142,18 @@ export function TeamBrigadesPanel({
       else if (res.outcome === "needs_migration") setMsg(t("outcome.needsMigration"));
       else if (res.outcome === "not_found") setMsg(t("disband.notFound"));
       else setMsg(t("disband.failed"));
+      router.refresh();
+    });
+  }
+
+  function removeMember(engagementId: string) {
+    setMsg(null);
+    startTransition(async () => {
+      const res = await endOrgMembership(engagementId, null);
+      if (res.ok) setMsg(t("removeMember.done"));
+      else if (res.code === "not_authorized") setMsg(t("removeMember.notAllowed"));
+      else if (res.code === "needs_migration") setMsg(t("outcome.needsMigration"));
+      else setMsg(t("removeMember.failed"));
       router.refresh();
     });
   }
@@ -200,8 +235,12 @@ export function TeamBrigadesPanel({
               ) : (
                 <ul className="flex flex-col gap-0.5">
                   {team.members.map((m) => (
-                    <li key={m.engagementId} className="text-xs text-text-primary">
-                      {m.name}
+                    <li
+                      key={m.engagementId}
+                      className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-primary"
+                      data-testid={`team-member-${m.engagementId}`}
+                    >
+                      <span className="min-w-0 break-words">{m.name}</span>
                       {m.provenance === "invited" && (
                         <span className="ml-1.5 text-meta text-state-success">
                           {t("provenance.invited")}
@@ -212,6 +251,21 @@ export function TeamBrigadesPanel({
                           {t("provenance.direct")}
                         </span>
                       )}
+                      {/* Remove ONE member (the team stays). The same canonical
+                          membership end the organization's member list uses;
+                          the database decides who may. Two steps, in place. */}
+                      <InlineConfirm
+                        label={t("removeMember.label")}
+                        question={t("removeMember.question", { name: m.name })}
+                        confirmLabel={t("removeMember.confirm")}
+                        cancelLabel={t("removeMember.cancel")}
+                        tier="important_write"
+                        touch
+                        disabled={pending}
+                        onConfirm={() => removeMember(m.engagementId)}
+                        className="ml-auto inline-flex min-h-11 items-center rounded-md px-2 text-meta text-text-secondary underline-offset-4 hover:text-text-primary hover:underline sm:min-h-9"
+                        testId={`team-member-remove-${m.engagementId}`}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -410,6 +464,24 @@ export function TeamBrigadesPanel({
                 <p className="text-meta text-text-muted">{t("noAddable")}</p>
               ) : (
                 <div className="flex flex-col gap-1.5">
+                  {team.addable.length > SEARCH_FROM ? (
+                    <Input
+                      type="search"
+                      autoComplete="off"
+                      className="min-w-0 sm:w-auto sm:max-w-xs"
+                      placeholder={t("addSearch")}
+                      aria-label={t("addSearch")}
+                      value={search[team.id] ?? ""}
+                      onChange={(e) => setSearch((m) => ({ ...m, [team.id]: e.target.value }))}
+                      data-testid={`team-add-search-${team.id}`}
+                    />
+                  ) : null}
+                  {team.addable.length > SEARCH_FROM &&
+                  matchingAddable(team.addable, search[team.id], selected[team.id]).length === 0 ? (
+                    <p className="text-meta text-text-muted" role="status" data-testid={`team-add-search-none-${team.id}`}>
+                      {t("addSearchNone")}
+                    </p>
+                  ) : null}
                   <div className="flex flex-wrap items-center gap-2">
                     <label
                       className="text-xs text-text-secondary"
@@ -417,28 +489,28 @@ export function TeamBrigadesPanel({
                     >
                       {t("addLabel")}
                     </label>
-                    <select
+                    <Select
                       id={`team-add-${team.id}`}
-                      className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+                      className="min-w-0 sm:w-auto sm:max-w-xs"
                       value={selected[team.id] ?? ""}
                       onChange={(e) =>
                         setSelected((s) => ({ ...s, [team.id]: e.target.value }))
                       }
                     >
                       <option value="">—</option>
-                      {team.addable.map((w) => (
+                      {matchingAddable(team.addable, search[team.id], selected[team.id]).map((w) => (
                         <option key={w.workerId} value={w.workerId}>
                           {w.invitePending
                             ? t("invitePendingOption", { name: w.name })
                             : w.name}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                     {askEmail[team.id] ? (
-                      <input
+                      <Input
                         type="email"
                         autoComplete="off"
-                        className="rounded-md border border-ink-500 bg-surface-1 px-2 py-1.5 text-sm text-text-primary"
+                        className="min-w-0 sm:w-auto sm:max-w-xs"
                         placeholder={t("emailPlaceholder")}
                         aria-label={t("emailPlaceholder")}
                         value={emails[team.id] ?? ""}
@@ -534,18 +606,16 @@ export function TeamBrigadesPanel({
       )}
 
       <div className="flex flex-wrap items-end gap-2 border-t border-ink-600 pt-3">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-text-secondary" htmlFor="team-create-name">
-            {t("createLabel")}
-          </label>
-          <input
+        <div className="flex min-w-0 flex-col gap-1 max-sm:w-full">
+          <Label htmlFor="team-create-name">{t("createLabel")}</Label>
+          <Input
             id="team-create-name"
             type="text"
             maxLength={80}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t("createPlaceholder")}
-            className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary"
+            className="min-w-0 sm:w-auto sm:min-w-64"
             data-testid="team-create-name"
           />
         </div>
@@ -574,8 +644,10 @@ export function TeamBrigadesPanel({
           <p className="text-xs text-text-secondary">{t("inviteLinkNote")}</p>
           <div className="flex flex-wrap items-center gap-2">
             <code className="max-w-full truncate rounded bg-ink-800 px-2 py-1 text-meta text-text-primary">{link.url}</code>
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               data-testid="team-invite-copy-link"
               onClick={() => {
                 void navigator.clipboard?.writeText(link.url).then(
@@ -583,11 +655,10 @@ export function TeamBrigadesPanel({
                   () => setCopied(false),
                 );
               }}
-              className="inline-flex min-h-11 sm:min-h-9 items-center gap-1 rounded border border-ink-500 px-2 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
             >
               {copied ? <Check className="h-3 w-3" aria-hidden /> : <Copy className="h-3 w-3" aria-hidden />}
               {copied ? t("inviteLinkCopied") : t("inviteLinkCopy")}
-            </button>
+            </Button>
           </div>
         </div>
       )}
