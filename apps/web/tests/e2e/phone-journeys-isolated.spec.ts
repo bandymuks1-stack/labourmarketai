@@ -32,6 +32,8 @@ import {
  *   M-5 MESSAGES writes to the employer from that application; the company answers from ITS phone;
  *                the worker reaches the thread through the phone's area sheet and reads the answer.
  *   M-7 JOURNAL  opens the work journal; it fits the phone, also with its disclosures open.
+ *   M-8 FIRST    records a first entry from the home's one action; the saved state links the CV;
+ *                back on the journal, the CV bridge leads the records: the CV is one tap away.
  *
  * M-2 runs LAST in each group (first run 2026-11-14: the CV page stopped answering at 375 px), so a
  * CV fault cannot hide search, applying and messages; if it stops answering again, the step says
@@ -232,6 +234,8 @@ for (const phone of PHONES) {
   const headline = `Tiler and waterproofer ${phone.name} ${RUN}`;
   const message = `Hello from a ${phone.name} px phone ${RUN}`;
   const answer = `Answer to the ${phone.name} px phone ${RUN}`;
+  // No stated duration: this walk is about the path, not the hours review (doctrine §7).
+  const firstEntry = `QA-SYNTHETIC first entry ${phone.name} ${RUN}: tiled the bathroom floor`;
   /** profileId is the auth/profile id; workerId is `workers.id`, which interest rows reference. */
   const s: { profileId: string; workerId: string; conversationId: string } = { profileId: "", workerId: "", conversationId: "" };
 
@@ -455,6 +459,45 @@ for (const phone of PHONES) {
         await expect(fold).toHaveAttribute("open", "");
       }
       await fitsTheScreen(page, "the work journal with its disclosures open");
+      await done();
+    });
+    test(`M-8 (${phone.name}). the worker's first entry, from the home's one action to the Living CV, and the CV one tap from the journal`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      // The home's ONE gold action for a worker with no recorded work opens the journal.
+      const cta = page.locator('[data-testid="today-next-cta"]:visible');
+      await expect(cta, "the home's one action").toHaveAttribute("href", /\/dashboard\/journal$/, { timeout: 60_000 });
+      await cta.tap();
+      await page.waitForURL(/\/en\/dashboard\/journal/, { timeout: 30_000 });
+      const main = page.getByRole("main");
+      await main.getByTestId("journal-quick-record-text").fill(firstEntry);
+      await tapUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+      // Only when the M-6 booking left this worker more than one work context or a project to name.
+      if (await main.getByTestId("worklog-context-must-choose").isVisible().catch(() => false)) {
+        await main.getByTestId("worklog-context").selectOption({ index: 1 });
+      }
+      if (await main.getByTestId("worklog-project-must-choose").isVisible().catch(() => false)) {
+        await main.getByTestId("worklog-project").selectOption("none");
+      }
+      await main.getByTestId("worklog-save").tap();
+      await main.getByTestId("worklog-confirm").tap();
+      await expect(main.getByTestId("worklog-done"), "the entry is saved").toBeVisible({ timeout: 60_000 });
+      await expect(main.getByTestId("worklog-living-cv-link"), "the saved state leads to the CV").toBeVisible();
+      const stored = sql<{ n: number }>(
+        `select count(*)::int as n from public.journal_entries e join public.workers w on w.id = e.worker_id
+          where w.profile_id = ${lit(s.profileId)} and e.superseded_by is null`,
+      );
+      expect(stored[0]?.n, "one live entry is stored").toBe(1);
+
+      // A later visit (a manager's decision notification lands here): with an entry, the CV bridge
+      // leads the records, so the CV is ONE tap away — the status disclosure stays closed.
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      const bridge = main.getByTestId("journal-cv-bridge");
+      await expect(bridge, "the CV bridge leads the records").toBeVisible({ timeout: 30_000 });
+      await expect(main.getByTestId("journal-status-details")).not.toHaveAttribute("open", "");
+      await fitsTheScreen(page, "the work journal with the CV bridge");
+      await bridge.getByTestId("journal-cv-bridge-link").tap();
+      await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
+      await expect(page.getByRole("main").getByTestId("cv-summary").first(), "the CV counts the entry").toBeVisible({ timeout: 30_000 });
       await done();
     });
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
