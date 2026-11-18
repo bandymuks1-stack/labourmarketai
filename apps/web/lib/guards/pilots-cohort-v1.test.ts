@@ -307,8 +307,10 @@ describe("time-to-value — honest limits", () => {
   });
 
   it("reads only bounded, non-PII columns from pilot_events", () => {
+    // `id` is the event row's own opaque key — the keyset paging cursor
+    // (created_at, id), not a person identifier.
     expect(metrics).toContain(
-      '"event_name, session_id, created_at, metadata"',
+      '"id, event_name, session_id, created_at, metadata"',
     );
     expect(metrics).not.toMatch(/profile_id/);
   });

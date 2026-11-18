@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+
+import { LmLogo } from "@/components/ui/lm-logo";
+import { reloadOnceForChunkError } from "@/lib/telemetry/chunk-reload";
+import { reportClientError } from "@/lib/telemetry/report-client-error";
 
 /**
  * Root error boundary for all locale pages (P0: previously there was NONE, so
@@ -15,14 +19,6 @@ import { useTranslations } from "next-intl";
  *   - Every OTHER error is SURFACED (logged + a visible retry button), never
  *     silently hidden.
  */
-
-const CHUNK_ERROR =
-  /ChunkLoadError|Loading chunk\s+[\w-]+\s+failed|Loading CSS chunk|Failed to fetch dynamically imported module|error loading dynamically imported module|importing a module script failed/i;
-
-function isChunkError(error: (Error & { digest?: string }) | undefined): boolean {
-  if (!error) return false;
-  return error.name === "ChunkLoadError" || CHUNK_ERROR.test(error.message ?? "");
-}
 
 /** Hardcoded last-resort labels — used ONLY if the intl context itself is
  *  broken (a boundary that crashes hands the user Next's dead error shell,
@@ -51,33 +47,35 @@ export default function LocaleError({
       return FALLBACK[key];
     }
   };
-  const chunk = isChunkError(error);
+  // True only while the one automatic reload is under way. A chunk error that
+  // comes back after it shows the retry button, not an endless "reloading".
+  const [reloading, setReloading] = useState(false);
 
   useEffect(() => {
-    if (chunk && typeof window !== "undefined") {
-      // Reload at most once per tab-session so a genuinely broken chunk can't
-      // loop forever — after that the retry UI shows instead.
-      const KEY = "lm-chunk-reload";
-      if (!sessionStorage.getItem(KEY)) {
-        sessionStorage.setItem(KEY, "1");
-        window.location.reload();
-        return;
-      }
+    // One sanitised crash report (no identity, no query string; never throws,
+    // and a beacon survives the reload below). 2026-10-18 incident.
+    reportClientError("boundary", error);
+    // Reload at most once (lib/telemetry/chunk-reload.ts) so a genuinely broken
+    // chunk can't loop forever — after that the retry UI shows instead.
+    if (reloadOnceForChunkError(error)) {
+      setReloading(true);
+      return;
     }
     // Do not hide unknown errors — log them so they remain diagnosable.
     console.error("[error-boundary]", error);
-  }, [chunk, error]);
+  }, [error]);
 
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 p-6 text-center">
+      <LmLogo className="h-12 w-auto" />
       <p
         className="max-w-sm text-sm leading-relaxed text-text-secondary"
         role="alert"
         data-testid="error-boundary-message"
       >
-        {chunk ? t("reloading") : t("body")}
+        {reloading ? t("reloading") : t("body")}
       </p>
-      {!chunk && (
+      {!reloading && (
         <button
           type="button"
           onClick={() => reset()}

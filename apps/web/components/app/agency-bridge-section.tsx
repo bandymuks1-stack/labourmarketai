@@ -63,6 +63,8 @@ export interface AgencyBridgeLabels {
   readonly sharedHeading: string;
   readonly noShared: string;
   readonly workerLabel: string;
+  readonly noteLabel: string;
+  readonly inviteLinkLabel: string;
   readonly workerPlaceholder: string;
   readonly offerButton: string;
   readonly noRoster: string;
@@ -379,6 +381,7 @@ export function AgencyBridgeSection({
                 {delivery.inviteLink && (
                   <div className="flex flex-wrap items-center gap-2">
                     <input readOnly value={delivery.inviteLink} data-testid="agency-bridge-invite-link"
+                      aria-label={labels.inviteLinkLabel}
                       onFocus={(e) => e.currentTarget.select()}
                       className="min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-700 px-2 py-1.5 font-mono text-meta text-text-primary" />
                     <button type="button" onClick={() => copyLink(delivery.inviteLink as string)} data-testid="agency-bridge-copy-link"
@@ -425,6 +428,7 @@ export function AgencyBridgeSection({
                           </select>
                         </label>
                         <input type="text" name="note" maxLength={500} placeholder=""
+                          aria-label={labels.noteLabel}
                           className="min-w-40 flex-1 rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue" />
                         <button type="submit" disabled={offerPending} data-testid="agency-bridge-offer-submit"
                           className="inline-flex h-10 items-center rounded-lg border border-brand-blue/50 bg-brand-blue/10 px-4 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-60">

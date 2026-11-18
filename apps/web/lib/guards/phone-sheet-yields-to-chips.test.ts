@@ -24,16 +24,31 @@ describe("on a phone the bottom sheet yields to a question the thread just asked
     expect(chat).toContain("chipsPostedAt={chipsPostedAt}");
   });
 
-  it("the opening brief stamps the moment too — it asks with chips like any assistant turn", () => {
+  it("the opening brief stamps ITS OWN moment — it asks with chips, but it is not an answer", () => {
     // Owner §20 (2026-09-23): on a phone a pending invitation auto-opens the
-    // sheet over the home. The brief is appended through pushMessage, not
-    // assistant(), so it never stamped — and the sheet never yielded to it.
+    // sheet over the home, and the brief's chips must win over it. But the
+    // brief is not a question about what the sheet shows: while it shared
+    // `chipsPostedAt`, it also collapsed a RESULT the person had just asked to
+    // see by URL (account menu "player card", a project deep link) — on a
+    // phone that result never appeared (QA 2026-10-16, W11 "mobile-375").
+    // The brief therefore stamps a separate moment.
     const chat = read("components/app/conversation/chat/conversation-chat.tsx");
     const opener = chat.slice(chat.indexOf("const openedWithStateRef = useRef(false);"));
     const block = opener.slice(0, opener.indexOf("/* the greeting stands on its own"));
-    expect(block).toMatch(/chips: brief\.chips,\s*\}\);[\s\S]*?if \(brief\.chips\.length > 0\) setChipsPostedAt\(Date\.now\(\)\);/);
-    // Negative control: a brief with NO chips asks nothing and must not stamp.
-    expect(block).not.toMatch(/\n\s*setChipsPostedAt\(Date\.now\(\)\);/);
+    expect(block).toMatch(/chips: brief\.chips,\s*\}\);[\s\S]*?if \(brief\.chips\.length > 0\) setBriefChipsPostedAt\(Date\.now\(\)\);/);
+    // Negative controls: a brief with NO chips must not stamp, and the brief
+    // never stamps the ANSWER moment the same-key yield reacts to.
+    expect(block).not.toMatch(/\n\s*setBriefChipsPostedAt\(Date\.now\(\)\);/);
+    expect(block).not.toMatch(/setChipsPostedAt\(/);
+    expect(chat).toContain("briefChipsPostedAt={briefChipsPostedAt}");
+  });
+
+  it("the brief collapses only a sheet nobody asked for — never a requested result or selection", () => {
+    const panel = read("components/app/world-state/context-panel.tsx");
+    expect(panel).toContain("briefChipsPostedAt = null,");
+    expect(panel).toMatch(
+      /if \(briefChipsPostedAt && !showsResult && panel\.mode !== "entity"\) setExpanded\(false\);/,
+    );
   });
 
   it("a pending invitation never re-opens the sheet over chips already posted — the order cannot decide (review P2 on #1856)", () => {
@@ -41,7 +56,9 @@ describe("on a phone the bottom sheet yields to a question the thread just asked
     // Brief-first: the chips stamp exists when the invitation read lands, so
     // the auto-open stands down; invitation-first: it opens, and the brief's
     // stamp then yields it. Both orders end collapsed under the question.
-    expect(panel).toMatch(/if \(work\?\.invitations && !chipsPostedAt\) setExpanded\(true\);\s*\}, \[work, chipsPostedAt\]\);/);
+    expect(panel).toMatch(
+      /if \(work\?\.invitations && !chipsPostedAt && !briefChipsPostedAt\) setExpanded\(true\);\s*\}, \[work, chipsPostedAt, briefChipsPostedAt\]\);/,
+    );
     // NEGATIVE CONTROL: the unguarded auto-open is gone.
     expect(panel).not.toMatch(/if \(work\?\.invitations\) setExpanded\(true\);/);
   });

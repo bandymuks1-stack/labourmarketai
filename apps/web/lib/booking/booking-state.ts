@@ -111,10 +111,11 @@ export function deriveBookingDisplayState(
 
 /**
  * Repeat action (Capability G, PR 6b): whether the PROPOSING company may
- * re-open this booking with new dates ("propose again"). Pure and
- * default-closed: ONLY the two closed-by-the-other-side-or-self terminal
- * statuses the UI actually reaches — `declined` (worker said no) and
- * `withdrawn` (company took it back). Never `proposed` (still open — withdraw
+ * propose this booking again with new dates. Pure and default-closed: ONLY
+ * `withdrawn` (the company took back its OWN proposal). Never `declined`
+ * (the worker said no — not re-opened without the worker's new consent,
+ * owner decision 2026-10-21, enforced by propose_booking_request
+ * 20261021095200). Never `proposed` (still open — withdraw
  * instead), never `accepted` (a real engagement — message/plan instead), and
  * never `expired` (unreachable, no scheduler writes it — see the lifecycle
  * guard). The applied propose RPC upserts on (owner_id, request_id,
@@ -123,7 +124,7 @@ export function deriveBookingDisplayState(
  * request + worker; the worker decides again.
  */
 export function canProposeAgain(status: BookingStatus): boolean {
-  return status === "declined" || status === "withdrawn";
+  return status === "withdrawn";
 }
 
 /**
@@ -172,6 +173,23 @@ export function normalizeBookingReason(
   if (k.length === 0 || !allowed.includes(k)) return null;
   const n = (note ?? "").trim().slice(0, REASON_NOTE_MAX);
   return { kind: k, note: n.length > 0 ? n : null };
+}
+
+/**
+ * Did the TABLE refuse an overlapping accept — not the RPC's own clash check?
+ *
+ * Both carry SQLSTATE 23P01. The RPC's hand-rolled check (v3, and v4 without
+ * an acknowledgement) says "Conflicting accepted booking for these dates";
+ * the exclusion constraint `booking_requests_no_overlapping_accepted` says
+ * "conflicting key value violates exclusion constraint …". Only the second
+ * can follow an ACKNOWLEDGED accept, and it means the overlap cannot be
+ * recorded yet (production 2026-10-25, walk orders-bookings O-5) — a
+ * different answer from "these dates clash", which the person already gave.
+ */
+export function isOverlapExclusionViolation(error: { code?: string; message?: string }): boolean {
+  const m = error.message ?? "";
+  if (/booking_requests_no_overlapping_accepted|exclusion constraint/i.test(m)) return true;
+  return error.code === "23P01" && !/conflicting accepted booking/i.test(m);
 }
 
 /**

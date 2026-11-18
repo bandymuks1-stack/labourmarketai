@@ -25,8 +25,9 @@ describe("locale switcher preserves route context", () => {
     // The switcher must read window.location.search + window.location.hash
     // (not usePathname alone, which strips both)…
     expect(src).toMatch(/window\.location\.search\s*\+\s*window\.location\.hash/);
-    // …and append it to the pathname it links to.
-    expect(src).toMatch(/href=\{`\$\{pathname\}\$\{suffix\}`\}/);
+    // …and append it to the path it links to: the page's own hreflang alternate
+    // for that locale (an answer's slug is translated), else the same pathname.
+    expect(src).toMatch(/href=\{`\$\{alternatePathFor\(l, alternates\) \?\? pathname\}\$\{suffix\}`\}/);
   });
 
   it("switches locale via next-intl Link (soft navigation, no reload)", () => {
@@ -64,8 +65,14 @@ describe("theme storage is locale-independent", () => {
 });
 
 describe("pre-paint theme bootstrap", () => {
-  const BOOTSTRAP =
-    /localStorage\.getItem\('theme'\)[\s\S]*document\.documentElement\.dataset\.theme=t/;
+  // 2026-10-28: the bootstrap is ONE shared script (lib/visual/theme-default.ts,
+  // per-page default, saved choice wins); the pages inline that script.
+  const BOOTSTRAP = /__html:\s*THEME_BOOTSTRAP_SCRIPT/;
+  it("the shared bootstrap reads the saved theme and stamps it before paint", () => {
+    expect(read("lib/visual/theme-default.ts")).toMatch(
+      /localStorage\.getItem\('theme'\)[\s\S]*document\.documentElement\.dataset\.theme=t/,
+    );
+  });
 
   it("the [locale] layout applies the saved theme before paint", () => {
     expect(read("app/[locale]/layout.tsx")).toMatch(BOOTSTRAP);

@@ -120,6 +120,51 @@ export function validateEducationInput(raw: {
   };
 }
 
+export const EDUCATION_COLUMNS =
+  "id, institution_name, program_or_field, education_type_slug, start_year, end_year, is_current, note";
+
+export function educationEntryFromRow(r: {
+  id: string;
+  institution_name: string;
+  program_or_field: string | null;
+  education_type_slug: string;
+  start_year: number | null;
+  end_year: number | null;
+  is_current: boolean | null;
+  note: string | null;
+}): WorkerEducationEntry {
+  return {
+    id: r.id,
+    institutionName: r.institution_name,
+    programOrField: r.program_or_field,
+    educationTypeSlug: r.education_type_slug,
+    startYear: r.start_year,
+    endYear: r.end_year,
+    isCurrent: r.is_current === true,
+    note: r.note,
+  };
+}
+
+/** The table has no unique key, so a second save of the same statement (someone
+ *  who saw no row and typed it again) would store it twice. Same words, any case. */
+export function findSameEducation(
+  entries: readonly WorkerEducationEntry[],
+  input: WorkerEducationInput,
+): WorkerEducationEntry | null {
+  const same = (x: string | null, y: string | null) => (x ?? "").toLowerCase() === (y ?? "").toLowerCase();
+  return (
+    entries.find(
+      (e) =>
+        same(e.institutionName, input.institutionName) &&
+        same(e.programOrField, input.programOrField) &&
+        e.educationTypeSlug === input.educationTypeSlug &&
+        e.startYear === input.startYear &&
+        e.endYear === input.endYear &&
+        e.isCurrent === input.isCurrent,
+    ) ?? null
+  );
+}
+
 /** Postgres/PostgREST error code → result code (same convention as
  *  classifyLanguagesError). 42501 covers both "not authenticated" RPC signals
  *  and grant-level permission denials. */

@@ -100,6 +100,7 @@ describe("deriveOpsCounters — exact rolls", () => {
     operationalStatus: null,
     readinessItems: [],
     docsMissing: 0,
+    docsToAgree: 0,
     docsReceived: 0,
     docsChecked: 0,
     docsBlocked: 0,
@@ -144,6 +145,7 @@ describe("deriveOpsCounters — exact rolls", () => {
       },
       withMissingDocs: 0,
       docsMissing: 0,
+      docsToAgree: 0,
       docsReceived: 0,
       docsChecked: 0,
       docsBlocked: 0,
@@ -183,7 +185,10 @@ describe("v2 — manager-set status + checklist are carried through honestly", (
         { itemKey: "client", label: "Client", status: "not_required", note: null },
       ],
     });
-    expect(r.docsMissing).toBe(2); // needed + missing
+    // only the row the manager EXPLICITLY marked missing is missing; a
+    // suggested row ("needed") is to agree — decision 0021 extension 2026-10-24
+    expect(r.docsMissing).toBe(1);
+    expect(r.docsToAgree).toBe(1);
     expect(r.docsReceived).toBe(1);
     expect(r.docsChecked).toBe(1);
     expect(r.docsBlocked).toBe(1); // expired (rejected would also count)
@@ -206,6 +211,7 @@ describe("v2 — manager-set status + checklist are carried through honestly", (
       operationalStatus: null,
       readinessItems: [],
       docsMissing: 0,
+      docsToAgree: 0,
       docsReceived: 0,
       docsChecked: 0,
       docsBlocked: 0,

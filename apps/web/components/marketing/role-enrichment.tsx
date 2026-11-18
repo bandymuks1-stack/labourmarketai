@@ -1,9 +1,10 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ConstellationBg } from "@/components/decor/constellation-bg";
-import { BenefitCards } from "@/components/marketing/benefit-cards";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { FAQAccordion } from "@/components/app/faq-accordion";
 import { JourneyTimeline } from "@/components/app/journey-timeline";
+import { faqPageJsonLd } from "@/lib/seo/faq-json-ld";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -15,7 +16,10 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Sections (a)–(e) shared by the three /for-* sub-pages (5b.3.5). The
+ * Sections (a), (b), (d), (e) shared by the /for-* sub-pages (5b.3.5). The
+ * former (c) feature grid repeated the page's benefit cards and journey
+ * steps item for item; it was removed (owner copy cleanup 2026-11-15).
+ * The
  * page supplies the role-specific preview node; everything else comes
  * from the `root` i18n namespace. One constellation ambient ties the
  * whole block to the live system without a per-section SVG cost.
@@ -48,11 +52,9 @@ export async function RoleEnrichment({
 
   const bullets = t.raw(`${previewKey}.bullets`) as string[];
   const steps = t.raw("journey.steps") as { title: string; desc: string }[];
-  const features = t.raw("features.items") as {
-    title: string;
-    desc: string;
-  }[];
   const faq = t.raw("faq.items") as { q: string; a: string }[];
+  // The same items the accordion below renders (AEO, decision 0009).
+  const faqLd = faqPageJsonLd(faq, await getLocale());
 
   return (
     <div className="relative overflow-hidden">
@@ -102,19 +104,6 @@ export async function RoleEnrichment({
         </div>
       </section>
 
-      {/* (c) feature grid */}
-      <section className="relative mx-auto max-w-container px-6 pt-20 sm:px-12">
-        <Eyebrow>{t("features.eyebrow")}</Eyebrow>
-        <h2 className="mt-5 font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
-          {t("features.headline")}
-        </h2>
-        <div className="mt-8">
-          <BenefitCards
-            items={features.map((f) => ({ title: f.title, body: f.desc }))}
-          />
-        </div>
-      </section>
-
       {/* (d) FAQ */}
       <section className="relative mx-auto max-w-3xl px-6 pt-20 sm:px-12">
         <Eyebrow>{t("faq.eyebrow")}</Eyebrow>
@@ -124,6 +113,9 @@ export async function RoleEnrichment({
         <div className="mt-8">
           <FAQAccordion items={faq} expandAria={sh("faq.expand_aria")} />
         </div>
+        {faqLd ? (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(faqLd) }} />
+        ) : null}
       </section>
 
       {/* (e) strong CTA */}

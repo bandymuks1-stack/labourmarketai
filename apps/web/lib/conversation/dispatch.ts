@@ -5,11 +5,13 @@ import { createHash } from "node:crypto";
 
 import { createClient } from "@/lib/supabase/server";
 import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
+import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import { env } from "@/lib/env";
 import { type Role } from "@/lib/auth/actions";
 import { getConversationAction } from "@/lib/conversation/action-registry";
 import {
   authorizeDispatch,
+  heldDispatchRoles,
   isStaleWorkspaceContext,
   requiresConfirmation,
   workspaceBoundFingerprint,
@@ -26,15 +28,23 @@ import {
   ENGAGEMENT_ACTION_SCHEMAS,
   type EngagementActionId,
 } from "@/lib/engagements/engagement-schemas";
-import { WORKER_EXECUTORS, type ExecResult } from "@/lib/conversation/worker-executors";
+import {
+  WORKER_EXECUTORS,
+  logWorkFields,
+  logWorkResultData,
+  type ExecResult,
+} from "@/lib/conversation/worker-executors";
+import { alreadyRecordedJournalEntry } from "@/lib/journal/confirmed-draft-replay";
 import { COMPANY_EXECUTORS } from "@/lib/conversation/company-executors";
 import { ENGAGEMENT_EXECUTORS } from "@/lib/engagements/engagement-executors";
 import {
   canonicalInputHash,
+  genuineTokenIssuedAt,
   issueConfirmationToken,
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
 import { spendConfirmation } from "@/lib/security/confirmation-spend";
+import { confirmationKeyMaterial } from "@/lib/security/confirmation-key-material";
 import { getWorkspaceContext, type WorkspaceContext } from "@/lib/company/active-organization";
 import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import { resolveRenameTarget } from "@/lib/company/organization-rename";
@@ -76,11 +86,12 @@ export type PrepareResult =
  * caller surfaces an error and the action does not run. Silently signing with a
  * known constant is the unsafe direction, and it looks identical to working.
  *
- * `CONVERSATION_TOKEN_SECRET` is preferred so this purpose can hold its own key
- * rather than reusing the service-role key as HMAC material (key-purpose reuse
- * — a rotation of one should not silently invalidate the other). The
- * service-role fallback keeps existing deployments working, since production
- * already sets it.
+ * `CONVERSATION_TOKEN_SECRET` holds this purpose's own key rather than reusing
+ * the service-role key as HMAC material (key-purpose reuse — a rotation of one
+ * should not silently invalidate the other). No service-role fallback remains
+ * in any environment (owner invariant 2026-10-17;
+ * lib/security/confirmation-key-material.ts). Local stacks get the value from
+ * .env.local or from the harness scripts.
  *
  * NO `SUPABASE_DB_PASSWORD` FALLBACK — removed after CodeQL flagged it
  * (js/insufficient-password-hash, HIGH) on the first run of the scanning this
@@ -98,14 +109,19 @@ export type PrepareResult =
  * key-derivation path — which is also one less purpose that credential serves.
  */
 function tokenSecret(): string {
-  const material = env.CONVERSATION_TOKEN_SECRET || env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!material) {
+  // ONE PURPOSE, ONE KEY, EVERYWHERE (2026-10-17) — the service-role key is
+  // never key material, in any environment; see
+  // lib/security/confirmation-key-material.ts.
+  const verdict = confirmationKeyMaterial({
+    dedicated: env.CONVERSATION_TOKEN_SECRET,
+  });
+  if (!verdict.ok) {
     throw new Error(
-      "conversation confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
-        "(or SUPABASE_SERVICE_ROLE_KEY). Refusing to sign with a hardcoded fallback.",
+      `conversation confirmation tokens cannot be signed: ${verdict.reason} ` +
+        "Refusing to sign with a hardcoded fallback.",
     );
   }
-  return createHash("sha256").update(`conversation-confirmation:v1:${material}`).digest("hex");
+  return createHash("sha256").update(`conversation-confirmation:v1:${verdict.material}`).digest("hex");
 }
 
 /**
@@ -127,6 +143,12 @@ function tokenSecret(): string {
  * before its executor could resolve their real role. The executor still
  * resolves the company through `requireEmployerCompany` and gates per
  * capability; RLS and the RPCs remain the backstop.
+ *
+ * THE OWN WORKER PROFILE IS THE WORKER GATE TOO (2026-11-02): a person whose
+ * own `workers` row exists holds `worker` for this dispatch, read through THE
+ * canonical workers-row core the web reads (`readWorkerCoreRow`, RLS
+ * `owns_worker`). Read only when the catalogue lacks `worker`; a failed read
+ * adds nothing (it never grants).
  */
 async function heldRolesOf(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -140,9 +162,17 @@ async function heldRolesOf(
       .eq("profile_id", userId)
       .eq("is_active", true),
   );
-  const set = new Set<Role>(rows.map((r) => r.role as Role));
-  if (workspaceOpensCompanySpace(workspace)) set.add("company");
-  return set.size > 0 ? set : new Set<Role>(["worker"]);
+  const profileRoles = rows.map((r) => r.role as string);
+  let ownsWorkerProfile = false;
+  if (profileRoles.length > 0 && !profileRoles.includes("worker")) {
+    const worker = await readWorkerCoreRow({ supabase, userId });
+    ownsWorkerProfile = worker.ok && worker.value !== null;
+  }
+  return heldDispatchRoles({
+    profileRoles,
+    opensCompanySpace: workspaceOpensCompanySpace(workspace),
+    ownsWorkerProfile,
+  });
 }
 
 /** The education tables are not in the generated types yet (lib/education/programs.ts uses the same cast). */
@@ -548,14 +578,42 @@ export async function dispatchWorkerAction(
       currentStateFingerprint: currentFp,
       nowMs: Date.now(),
     });
+    // A journal confirm retried after a lost response: the first call wrote,
+    // so answer with that entry rather than "stale" (P0-A 2026-10-30; the
+    // same lookup the journal.confirm capability uses). Writes nothing.
+    const alreadyRecorded = async (): Promise<ExecResult | null> => {
+      if (actionId !== "worker.log-work") return null;
+      const issuedAtMs = genuineTokenIssuedAt(tokenSecret(), token, {
+        actionId,
+        input: parsed.data,
+        userId: user.id,
+        currentStateFingerprint: "",
+        nowMs: Date.now(),
+      });
+      if (issuedAtMs === null) return null;
+      const locale = opts?.locale ?? "lt";
+      const found = await alreadyRecordedJournalEntry(
+        { supabase, userId: user.id, locale },
+        // the executor's OWN mapping — every signed field it would write
+        logWorkFields(locale, parsed.data as Parameters<typeof logWorkFields>[1]),
+        issuedAtMs,
+      );
+      return found
+        ? { ok: true, data: logWorkResultData(found.entryId, found.skills, null, true) }
+        : null;
+    };
     if (!verdict.ok) {
+      if (verdict.reason === "stale_state") {
+        const replay = await alreadyRecorded();
+        if (replay) return replay;
+      }
       return { ok: false, code: verdict.reason === "stale_state" ? "stale_confirmation" : "confirmation_invalid" };
     }
     // SINGLE USE, atomically (decision 0024): a genuine token is spent before
     // the executor runs, so a retried or concurrent second submission of the
     // same token is refused as stale and never reaches the write.
     const spend = await spendConfirmation(supabase, token, actionId);
-    if (spend === "already_spent") return { ok: false, code: "stale_confirmation" };
+    if (spend === "already_spent") return (await alreadyRecorded()) ?? { ok: false, code: "stale_confirmation" };
     if (spend === "error") return { ok: false, code: "error" };
   }
 

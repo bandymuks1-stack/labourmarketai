@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
 import { countedOnce } from "@/lib/journal/counted-once";
+import { readAllPages } from "@/lib/journal/journal-list-core";
 import {
   TIMESHEET_READ_LIMIT,
   isTimesheetMigrationMissingCode,
@@ -538,10 +539,8 @@ export async function getTimesheetForExport(
 export type DayHours = WorkTimeDayHours;
 
 const DAY_RX = /^\d{4}-\d{2}-\d{2}$/;
-const WORKLOAD_READ_LIMIT = 500;
-/** Metric rows per entry are small (a handful); this bound keeps the second
- *  read proportional to the first without truncating a real worker's day. */
-const WORKLOAD_METRIC_READ_LIMIT = WORKLOAD_READ_LIMIT * 8;
+/** 20 pages of 1000 live entries: the ceiling for ONE person's journal. */
+const WORKLOAD_MAX_PAGES = 20;
 
 /**
  * The caller's OWN recorded work hours inside [rangeStart, rangeEnd], grouped
@@ -582,7 +581,7 @@ export type EntryWorkRefs = {
  * The caller's OWN live journal entries with their canonical work time — ONE
  * read shared by the workload strip and the hours export, so a day's hours
  * can never differ between the calendar and the file a person downloads.
- * Unchanged rules: newest `WORKLOAD_READ_LIMIT` entries, one active entry per
+ * Unchanged rules: every live entry (paged), one active entry per
  * correction chain, `deriveEntryWorkTime` over `journal_entry_metrics`, and a
  * failed read is `unavailable`, never a confident zero.
  */
@@ -598,27 +597,18 @@ export async function readMyEntryWorkTime(): Promise<
   if (!workerId) return { status: "unavailable" };
   const supabase = await createClient();
 
-  // The caller's own LIVE entries. Deleted and superseded rows are excluded
-  // here; entries replaced by a live correction are dropped below, so an
-  // edited entry is counted once — never twice.
-  //
-  // BOUNDED, AND DETERMINISTICALLY SO (issue #1689, lane B): the read is
-  // capped at `WORKLOAD_READ_LIMIT`, and a `.limit()` with no `.order()`
-  // let PostgreSQL choose WHICH rows fell inside it — the strip could show
-  // a different set of days on two consecutive loads. Newest first (`id`
-  // as the tiebreaker) makes the bound a stable "the latest N entries";
-  // the cap itself is a known remaining limit, not a hidden one.
-  const entriesRes = await asAny(supabase)
-    .from("journal_entries")
-    .select("id, created_at, original_text, correction_of, engagement_context_id, project_id")
-    .eq("worker_id", workerId)
-    .is("deleted_at", null)
-    .is("superseded_by", null)
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: false })
-    .limit(WORKLOAD_READ_LIMIT);
-  if (entriesRes.error) return { status: "unavailable" };
-
+  // The caller's own LIVE entries, WITH their metric rows embedded, read in
+  // full (audit 2026-10-20). Before: the newest 500 entries, then ONE capped
+  // metrics read of up to 4000 rows with no order — but the server answers at
+  // most 1000 rows, so past ~250 entries arbitrary entries lost their
+  // fragment_time / work_date rows and showed 0 h or the wrong day, in the
+  // planning strip AND the hours export, while the journal (paged) showed the
+  // full figure. Embedding keeps an entry and its metrics in one answer; the
+  // read pages to the end on a stable order; past the ceiling it is
+  // `unavailable`, never a confident partial figure. Deleted and superseded
+  // rows are excluded here; entries replaced by a live correction are dropped
+  // below, so an edited entry is counted once — never twice.
+  type MetricRow = WorkTimeMetricRow & { entry_id?: string };
   type EntryRow = {
     id: string;
     created_at: string;
@@ -626,31 +616,36 @@ export async function readMyEntryWorkTime(): Promise<
     correction_of: string | null;
     engagement_context_id: string | null;
     project_id: string | null;
+    journal_entry_metrics: MetricRow[] | null;
   };
-  const rows = (entriesRes.data ?? []) as EntryRow[];
+  const entriesRes = await readAllPages<EntryRow>(
+    () =>
+      asAny(supabase)
+        .from("journal_entries")
+        .select(
+          "id, created_at, original_text, correction_of, engagement_context_id, project_id, " +
+            "journal_entry_metrics(id, metric_slug, value_text, value_numeric, unit_slug, source, created_at)",
+        )
+        .eq("worker_id", workerId)
+        .is("deleted_at", null)
+        .is("superseded_by", null)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false }),
+    { pageSize: 1000, maxPages: WORKLOAD_MAX_PAGES },
+  );
+  // A failed read must NOT degrade to a confident "0 hours" — that is exactly
+  // the shape of the defect this function was fixed for.
+  if (entriesRes.error || entriesRes.truncated) return { status: "unavailable" };
+
+  const rows = entriesRes.rows;
   if (rows.length === 0) return { status: "ok", entries: [], refs: new Map() };
   // ONE ACTIVE ENTRY PER CORRECTION CHAIN — the same rule the journal list,
   // the section, the CV and the calendar apply (`counted-once.ts`).
   const liveRows = countedOnce(rows);
-  const entryIds = liveRows.map((r) => r.id);
-  if (entryIds.length === 0) return { status: "ok", entries: [], refs: new Map() };
+  if (liveRows.length === 0) return { status: "ok", entries: [], refs: new Map() };
 
-  const metricsRes = await asAny(supabase)
-    .from("journal_entry_metrics")
-    .select("id, entry_id, metric_slug, value_text, value_numeric, unit_slug, source, created_at")
-    .in("entry_id", entryIds)
-    .limit(WORKLOAD_METRIC_READ_LIMIT);
-  // A failed metric read must NOT degrade to a confident "0 hours" — that is
-  // exactly the shape of the defect this function was fixed for.
-  if (metricsRes.error) return { status: "unavailable" };
-
-  type MetricRow = WorkTimeMetricRow & { entry_id: string };
   const metricsByEntry = new Map<string, WorkTimeMetricRow[]>();
-  for (const m of (metricsRes.data ?? []) as MetricRow[]) {
-    const list = metricsByEntry.get(m.entry_id);
-    if (list) list.push(m);
-    else metricsByEntry.set(m.entry_id, [m]);
-  }
+  for (const r of liveRows) metricsByEntry.set(r.id, r.journal_entry_metrics ?? []);
 
   const derived = liveRows.map((row) =>
     deriveEntryWorkTime({

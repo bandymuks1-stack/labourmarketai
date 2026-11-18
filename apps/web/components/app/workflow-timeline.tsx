@@ -7,6 +7,7 @@ import {
   type WorkflowTransitionRow,
 } from "@/lib/approvals/approvals-model";
 import { createUtcFormatter } from "@/lib/time/display";
+import { quoteText } from "@/lib/i18n/quote";
 
 /**
  * WorkflowTimeline — the ONE reusable rendering of a workflow instance's
@@ -120,7 +121,7 @@ export async function WorkflowTimeline({
                         ) : null}
                         {s.reason ? (
                           <span className="break-words text-text-muted">
-                            „{s.reason}“
+                            {quoteText(locale, s.reason)}
                           </span>
                         ) : null}
                       </li>
@@ -154,7 +155,7 @@ export async function WorkflowTimeline({
                 ) : null}
                 <span>{dateFmt(tr.createdAt)}</span>
                 {tr.reason ? (
-                  <span className="break-words">„{tr.reason}“</span>
+                  <span className="break-words">{quoteText(locale, tr.reason)}</span>
                 ) : null}
               </li>
             ))}

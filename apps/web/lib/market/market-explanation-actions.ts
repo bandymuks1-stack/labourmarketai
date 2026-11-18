@@ -44,7 +44,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { runAiAgent } from "@/lib/ai/run-agent-server";
-import type { AiLocale } from "@/lib/ai/runtime/types";
+import { aiLocaleFor, type AiLocale } from "@/lib/ai/runtime/types";
 import { getPublicMarketFacts } from "./public-market-facts-read";
 import {
   marketIsExplainable,
@@ -83,8 +83,6 @@ export type MarketExplanationOffReason =
   | "market_too_small"
   | "ai_unavailable";
 
-const SUPPORTED_AI_LOCALES: ReadonlySet<string> = new Set(["en", "lt", "ru"]);
-
 /** Per-user throttle. Deliberately tighter than the journal surface's 20/10min:
  *  this is a read-only curiosity action, not part of a workflow someone is
  *  trying to finish, and it is the first caller that can spend real money. */
@@ -121,9 +119,7 @@ export async function explainMarketForProfession(
     return { status: "off", reason: "market_too_small" };
   }
 
-  const aiLocale: AiLocale = SUPPORTED_AI_LOCALES.has(locale)
-    ? (locale as AiLocale)
-    : "en";
+  const aiLocale: AiLocale = aiLocaleFor(locale);
 
   try {
     const outcome = await runAiAgent(

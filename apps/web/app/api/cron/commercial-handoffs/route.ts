@@ -13,8 +13,8 @@ import { dispatchQueuedHandoffs } from "@/lib/commercial/handoff-dispatch";
  * `not_configured`, calls nothing and changes nothing. Both gates are the
  * owner's. Responses carry counts only — no ids, no people, no employers.
  *
- * Scheduled daily (apps/web/vercel.json) — the project is on the Vercel
- * Hobby plan, whose crons fire at most once a day — as the RETRY SWEEP; the
+ * Scheduled daily by the VPS cron (ops/vps/labourmarket.cron, 06:00 UTC) as
+ * the RETRY SWEEP; the
  * interest write path dispatches a fresh handoff immediately through the
  * same function. The door exists since 2026-09-17 (Nonstop 25b49fc).
  */

@@ -9,6 +9,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 const webRoot = resolve(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(resolve(webRoot, rel), "utf-8");
@@ -122,7 +123,7 @@ describe("no fake AI / matching / verification language in the demand surface", 
 });
 
 describe("copy is localized for active locales (lt/en/ru)", () => {
-  for (const locale of ["lt", "en", "ru"] as const) {
+  for (const locale of activeLocales) {
     it(`${locale}: demand.form + intent role/description + read-back keys exist`, () => {
       const j = JSON.parse(read(`messages/${locale}.json`));
       const d = j.auth.dashboard.wow.demand;

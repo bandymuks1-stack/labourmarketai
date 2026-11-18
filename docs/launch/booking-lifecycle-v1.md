@@ -25,7 +25,7 @@ what each booking status means, who sees it, and what happens next.
 | accepted | Outgoing row, success chip | Incoming row, success chip | **Send a message** (new — opens the conversation, grant `allowed_accepted_booking`) | **Send a message** (new — same action) | response counts via `booking_requests_seen`; visiting bookings clears |
 | declined | Outgoing row, muted chip | Incoming row ("You declined") | **Find another worker** (new — links to scouting) | none needed (worker made the decision) | same |
 | withdrawn | Outgoing row, muted chip | Incoming row, muted chip | none (proposer made the decision) | none needed | same |
-| expired | — unreachable — | — unreachable — | — | — | — |
+| expired (once `booking-expiry-daily` is applied) | Outgoing row, muted chip | Incoming row, muted chip | **Find another worker** / propose again | none needed | same |
 
 ## Conversation grant
 
@@ -40,19 +40,21 @@ counterpart profile id reaches the client. Failure lands on the honest
 ## The `expired` status — honest handling decision
 
 `expired` exists in the CHECK constraint and the pure state machine
-(`lib/booking/booking-state.ts`) but **no scheduler, trigger or cron exists
-anywhere in the repo**, so no row can ever reach it. Decision (per goal
-rule "expired status either gets honest handling or is removed from active
-UI if not fired"):
+(`lib/booking/booking-state.ts`). Until 2026-10-21 no scheduler existed, so
+only an admin calling `expire_stale_booking_requests_v1` could reach it.
 
-- KEEP it in the schema/state machine — removing it needs a production
-  CHECK-constraint migration for zero user value.
-- The UI makes **no expiry promise**: no countdown, no "expires in", no
-  copy implying automatic lapse. The status label renders only if a row
-  actually carries the status (currently impossible — honest degradation).
-- If proposal expiry becomes a product need, it requires a scheduled task
-  (pg_cron or an operator-run script) — that is its own PR with an owner
-  decision, not an improvisation here.
+**2026-10-21 (CAL-6, RED, owner-gated):** migration
+`20261021130000_booking_expiry_system_schedule_v1` adds a system-only twin,
+`expire_stale_booking_requests_system_v1` (EXECUTE revoked from every API
+role; only the database owner can call it), and the pg_cron job
+`booking-expiry-daily` (04:11 UTC). It expires exactly the rows the admin
+function would: `proposed`, past the response deadline, or with no deadline
+and 14 days since the latest proposal. The event names the lapsed proposer
+with reason_note `system_expiry`. The page already renders the translated
+`expired` chip.
+
+- The UI still makes **no countdown promise**: no "expires in" copy.
+- No server action writes `expired`; only the database does.
 
 ## Deferred (not in this PR)
 
@@ -79,7 +81,7 @@ worker-list-only; the full 75-combination from×to×actor transition
 matrix is swept against exactly the documented table (default-closed);
 no server action can write `expired` (literal absent + the respond
 decision is type-narrowed to `accepted | declined`); booking migrations
-install no pg_cron/scheduler; every status renders a translated chip in
+install no pg_cron/scheduler except the reviewed `20261021130000` system expiry; every status renders a translated chip in
 all three locales; the lt/en/ru `bookings` namespaces expose an
 identical key set; and `countOwnerResponsesSince` gets behavioural edge
 cases (withdrawn/expired never count, NaN timestamps ignored, seenAt tie

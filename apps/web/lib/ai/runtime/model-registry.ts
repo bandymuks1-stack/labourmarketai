@@ -364,6 +364,113 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     enabled: false,
   })),
 
+  // ── FREE API TIERS (owner order 2026-10-25) — priced, enabled, egress-capped.
+  //
+  // Three OpenAI-compatible vendors with a no-charge API allowance, wired as
+  // bindings on the one wire in providers/openai.ts (providers/free-tier.ts).
+  // The prices are each vendor's PUBLISHED metered rate, read first-hand on
+  // 2026-10-25 — the same rule as Gemini above: never €0, so a key moved onto
+  // billing by an owner action outside this repo can never spend past a
+  // ceiling that was judged against a price that stopped being true. While the
+  // key stays on the free allowance the vendor charges nothing; the run's
+  // recorded cost is then an over-statement, in the direction a budget absorbs.
+  //
+  // `enabled: true` is selectability, NOT permission: every one of these is a
+  // `free_tier` EXTERNAL provider in provider-chain.ts, so `data-egress.ts`
+  // sends it PUBLIC payloads only (no grant names them) and caps any future
+  // grant at LOW_RISK_PROJECT_DATA.
+  //
+  // Only ids the vendor PRICES are registered. Models priced "contact sales"
+  // (Groq's Llama rows) or not priced on the vendor's page (Mistral Small /
+  // Medium on mistral.ai/pricing) stay out rather than carrying a guessed
+  // number; a provider with no model for a tier is skipped for that tier by
+  // the chain (`requestForCandidate`), never dispatched with another id.
+  ...(
+    [
+      // Cloudflare Workers AI — tier ladder by multilingual quality per neuron.
+      { model: "@cf/google/gemma-4-26b-a4b-it", alias: "haiku", input: 0.1, output: 0.3 },
+      { model: "@cf/mistralai/mistral-small-3.1-24b-instruct", alias: "sonnet", input: 0.351, output: 0.555 },
+      { model: "@cf/openai/gpt-oss-120b", alias: "opus", input: 0.35, output: 0.75 },
+      // MODEL FAMILIES, NOT PROVIDERS (owner order 2026-10-25). Meta Llama and
+      // NVIDIA Nemotron are registered under the HOST that serves them. They
+      // hold no tier alias, so the alias router never picks them by itself;
+      // they are priced and sourced so an explicit, evaluated choice can.
+      { model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", alias: null, input: 0.293, output: 2.253 },
+      { model: "@cf/nvidia/nemotron-3-120b-a12b", alias: null, input: 0.5, output: 1.5 },
+    ] as const
+  ).map((entry) => ({
+    provider: "cloudflare",
+    transport: "openai-compatible" as const,
+    model: entry.model,
+    alias: entry.alias,
+    capabilities: GENERAL_TASKS,
+    qualityScore: null,
+    inputUsdPerMTok: entry.input,
+    outputUsdPerMTok: entry.output,
+    freeTier: true,
+    contextTokens: null,
+    maxOutputTokens: null,
+    latencyP50Ms: null,
+    dataRestrictions: [
+      "Cloudflare does not use Customer Content processed by Workers AI to train AI models; inputs/outputs not retained after the request (data-usage page updated 2026-10-16, read 2026-10-25)",
+      "free allocation 10,000 Neurons/day; on Workers Free requests fail past it — never billed",
+    ],
+    effectiveFrom: "2026-10-20",
+    pricingSource:
+      "Cloudflare Workers AI pricing, https://developers.cloudflare.com/workers-ai/platform/pricing/, page updated 2026-10-20, read 2026-10-25",
+    enabled: true,
+  })),
+  {
+    provider: "mistral",
+    transport: "openai-compatible" as const,
+    model: "mistral-large-latest",
+    // The ONE Mistral model with a published API price — it serves the
+    // low_cost slot for this provider. Strongest Lithuanian of the free set.
+    alias: "haiku",
+    capabilities: GENERAL_TASKS,
+    qualityScore: null,
+    inputUsdPerMTok: 0.5,
+    outputUsdPerMTok: 1.5,
+    freeTier: true,
+    contextTokens: null,
+    maxOutputTokens: null,
+    latencyP50Ms: null,
+    dataRestrictions: [
+      "free Experiment API plan: data MAY be used for training unless the owner switches the opt-out off (Admin console → Privacy; help.mistral.ai article 455207, read 2026-10-25)",
+    ],
+    effectiveFrom: "2026-10-25",
+    pricingSource:
+      "Mistral AI pricing, https://mistral.ai/pricing (\"Mistral Large costs $0.5 /M tokens in and $1.5 /M tokens out\"), read 2026-10-25",
+    enabled: true,
+  },
+  ...(
+    [
+      { model: "openai/gpt-oss-20b", alias: "haiku", input: 0.075, output: 0.3 },
+      { model: "openai/gpt-oss-120b", alias: "sonnet", input: 0.15, output: 0.6 },
+    ] as const
+  ).map((entry) => ({
+    provider: "groq",
+    transport: "openai-compatible" as const,
+    model: entry.model,
+    alias: entry.alias,
+    capabilities: GENERAL_TASKS,
+    qualityScore: null,
+    inputUsdPerMTok: entry.input,
+    outputUsdPerMTok: entry.output,
+    freeTier: true,
+    contextTokens: 131_072,
+    maxOutputTokens: null,
+    latencyP50Ms: null,
+    dataRestrictions: [
+      "Services Agreement §4.2 (last modified 2026-06-22): no training on inputs or outputs; DPA incorporated (§3.4)",
+      "inputs not retained by default, logs up to 30 days, Zero Data Retention switch available; data stored in GCP US (console.groq.com/docs/your-data, read 2026-10-25)",
+    ],
+    effectiveFrom: "2026-10-25",
+    pricingSource:
+      "Groq model list with on-demand prices, https://console.groq.com/docs/models, read 2026-10-25",
+    enabled: true,
+  })),
+
   // ── Qwen (Alibaba Cloud Model Studio) — REGISTERED, NOT ENABLED. ─────────
   //
   // Owner requirement: Qwen is to be evaluated as a real candidate, not

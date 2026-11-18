@@ -1,7 +1,9 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./prod-walk";
+
+import { bearerOf, qaMcp } from "./prod-qa-api";
 
 /**
  * PRODUCTION MCP — AI-AGENT SCENARIOS, driven exactly as an external assistant
@@ -21,6 +23,9 @@ import { test, expect } from "@playwright/test";
  *   A-7 ISOLATION        the agency cannot read or change the buyer's need, the
  *                        owner's project or a thread it is not part of
  *   A-8 WRAP-UP          the need is closed and the project completed, once each
+ *   A-9 JOURNAL          the worker records a Work Journal entry (draft →
+ *                        confirm) and corrects it (draft → confirm): one live
+ *                        version, the original replaced, a spent token refused
  *
  * Every write that has a prepare/confirm pair goes through it, and replaying a
  * spent confirmation is asserted refused. Runs only in
@@ -31,26 +36,14 @@ import { test, expect } from "@playwright/test";
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const TAG = `QA-SYNTHETIC ${RUN} agents`;
-const ORIGIN = process.env.PLAYWRIGHT_BASE_URL ?? "https://labourmarket.ai";
 const SLOTS = ["owner", "manager", "worker", "worker2", "agency"] as const;
 type Slot = (typeof SLOTS)[number];
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && SLOTS.every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
-// 9 tests × 60 s + afterAll 60 s = 10 min ceiling.
+// 10 tests × 60 s + afterAll 60 s = 11 min ceiling.
 test.describe.configure({ mode: "serial", timeout: 60_000, retries: 0 });
 
-/** The access token out of a minted @supabase/ssr storage state. */
-function bearerOf(slot: string): string {
-  const s = JSON.parse(readFileSync(state(slot), "utf8")) as { cookies: { name: string; value: string }[] };
-  const parts = s.cookies
-    .filter((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name))
-    .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }));
-  const raw = parts.map((c) => c.value).join("");
-  const b64 = raw.startsWith("base64-") ? raw.slice(7) : raw;
-  const json = JSON.parse(Buffer.from(b64.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
-  return json.access_token as string;
-}
 /** The caller's own profile id (the JWT `sub`) — what recipientProfileId names. */
 function profileIdOf(token: string): string {
   const payload = token.split(".")[1] ?? "";
@@ -61,15 +54,7 @@ type ToolResult = { ok: boolean; code?: string; data?: Record<string, unknown>; 
 type CatalogTool = { name: string };
 let rpcId = 0;
 async function rpc(token: string | null, method: string, params: Record<string, unknown> = {}) {
-  const res = await fetch(`${ORIGIN}/api/mcp`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      accept: "application/json, text/event-stream",
-      ...(token ? { authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ jsonrpc: "2.0", id: ++rpcId, method, params }),
-  });
+  const res = await qaMcp(token, { jsonrpc: "2.0", id: ++rpcId, method, params });
   const text = await res.text();
   let body: { result?: { structuredContent?: ToolResult; tools?: CatalogTool[] }; error?: unknown } | null = null;
   try {
@@ -170,9 +155,14 @@ test.afterAll(async () => {
   for (const n of (await needs(tok.manager)).filter((x) => WALK_ROW.test(x.title ?? ""))) {
     await prepareConfirm(tok.manager, "demand_close", { requestId: n.id }, { replay: false });
   }
-  // Provider: delete the offerings (their requests cascade with them).
+  // Provider: delete an offering without requests. One WITH requests is a
+  // buyer's history and is never deleted (#2582: the delete refuses) — it is
+  // paused instead, exactly as the page tells a real provider to do.
   for (const o of (await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? ""))) {
-    await prepareConfirm(tok.worker, "service_offering_delete", { offeringId: o.id }, { replay: false });
+    await prepareConfirm(tok.worker, "service_offering_delete", { offeringId: o.id }, { replay: false }).catch(() => null);
+  }
+  for (const o of (await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? "") && x.status !== "paused")) {
+    await prepareConfirm(tok.worker, "service_offering_status_set", { offeringId: o.id, status: "paused" }, { replay: false });
   }
   // Supplier: delete the proposals.
   for (const p of (await proposals(tok.agency)).filter((x) => WALK_ROW.test(x.title ?? ""))) {
@@ -184,7 +174,10 @@ test.afterAll(async () => {
     await prepareConfirm(tok.owner, "project_status_set", { projectId: p.id, toStatus: "completed" }, { replay: false });
   }
   expect((await needs(tok.manager)).filter((x) => WALK_ROW.test(x.title ?? "")), "open walk needs left behind").toHaveLength(0);
-  expect((await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? "")), "walk offerings left behind").toHaveLength(0);
+  expect(
+    (await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? "") && x.status !== "paused"),
+    "walk offerings left published (one with requests must be paused, never deleted)",
+  ).toHaveLength(0);
   expect((await proposals(tok.agency)).filter((x) => WALK_ROW.test(x.title ?? "")), "walk proposals left behind").toHaveLength(0);
   expect(
     (await projects(tok.owner)).rows.filter((x) => WALK_ROW.test(x.title ?? "") && x.status !== "completed"),
@@ -210,6 +203,7 @@ test("A-0. the agent toolset carries every tool these scenarios call", async () 
     "message_send_draft", "message_send_confirm", "conversation_list", "conversation_get",
     "projects_list", "project_create_draft", "project_create_confirm", "project_status_set_draft", "project_status_set_confirm",
     "evidence_records_list", "project_readiness_get", "project_risk_get",
+    "journal_create_draft", "journal_confirm", "journal_list", "journal_correct_draft", "journal_correct_confirm",
   ];
   expect(used.filter((n) => !catalog.includes(n)), "tools the scenarios need but the server does not publish").toEqual([]);
 });
@@ -283,6 +277,18 @@ test("A-2. SERVICE SEARCH: the buyer's discovery and matching tools answer", asy
   }
   const work = await tool(tok.worker, "work_find", { country: "LT" });
   ok(work);
+  // The worker's own board rows travel with the sentence (an external assistant
+  // has no panel): 'matches' carries rows with the demand id and the engine's
+  // verdict; 'empty' is an honest answer, distinct from an error.
+  expect(["matches", "empty"], JSON.stringify(work.data).slice(0, 300)).toContain(String(work.data?.kind));
+  const rows = work.data?.matches;
+  expect(rows === null || Array.isArray(rows), "matches is a list (or null when unreadable), never absent").toBe(true);
+  for (const m of (Array.isArray(rows) ? rows : []) as { requestId?: unknown; fitStatus?: unknown; matchedSkillSlugs?: unknown }[]) {
+    expect(String(m.requestId)).toMatch(/^[0-9a-f-]{36}$/);
+    expect(typeof m.fitStatus).toBe("string");
+    expect(Array.isArray(m.matchedSkillSlugs)).toBe(true);
+  }
+  test.info().annotations.push({ type: "work_find", description: `${String(work.data?.kind)} rows=${Array.isArray(rows) ? rows.length : "null"}` });
 });
 
 test("A-3. SUPPLIER AGENT: the provider publishes a service, the buyer requests it, the provider answers, the buyer sees it", async () => {
@@ -512,4 +518,69 @@ test("A-8. WRAP-UP: the buyer closes the need and the owner completes the projec
   const done = await prepareConfirm(tok.owner, "project_status_set", { projectId, toStatus: "completed" });
   ok(done.done);
   expect((await projects(tok.owner)).rows.find((p) => p.id === projectId)?.status).toBe("completed");
+});
+
+type JournalEntry = { entryId: string; text: string | null };
+const ownEntries = async (token: string) => {
+  const r = await tool(token, "journal_list", { limit: 50 });
+  ok(r);
+  return listOf<JournalEntry>(r, "entries");
+};
+
+// A re-run keeps GITHUB_RUN_ID (and TAG) while an earlier attempt's entry stays
+// in the append-only journal, so the journal marker names this execution.
+const JOURNAL_TAG = `${TAG} ${process.env.GITHUB_RUN_ATTEMPT ?? "1"}-${Date.now().toString(36)}`;
+
+test("A-9. JOURNAL: the worker records an entry and corrects it — one live version, a spent token refused", async () => {
+  // Yesterday (UTC): never "in the future" in any time zone the server reads.
+  const workDate = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  // "none": the synthetic worker may hold a walk's project assignment; these
+  // hours are not that project's.
+  const input = { notes: `${JOURNAL_TAG} klijavau plyteles vonios sienoje`, workDate, projectId: "none" };
+  let draft = await tool(tok.worker, "journal_create_draft", input);
+  ok(draft);
+  // The synthetic worker works in several synthetic organizations, so the
+  // assistant is asked which one the entry belongs to (nothing is saved yet);
+  // it answers as the person would — the stable QA-SYNTHETIC Alfa context.
+  if (draft.data?.status === "engagement_choice_required") {
+    const options = (draft.data.options ?? []) as Array<{ id: string; label: string }>;
+    const pick = options.find((o) => o.label.startsWith("QA-SYNTHETIC Alfa ")) ?? options[0];
+    expect(pick, `no engagement option offered: ${JSON.stringify(draft.data).slice(0, 300)}`).toBeTruthy();
+    draft = await tool(tok.worker, "journal_create_draft", { ...input, engagementContextId: pick.id });
+    ok(draft);
+  }
+  const preview = draft.data?.preview as Record<string, unknown> | undefined;
+  const confirmationToken = String(draft.data?.confirmationToken ?? "");
+  expect(preview, `journal_create_draft gave no preview: ${JSON.stringify(draft.data)}`).toBeTruthy();
+  expect(confirmationToken.length, "journal_create_draft returned no token").toBeGreaterThanOrEqual(10);
+  const exact = {
+    engagementContextId: preview?.engagementContextId,
+    notes: preview?.notes,
+    workDate: preview?.workDate,
+    siteName: preview?.siteName ?? null,
+    projectId: preview?.projectId ?? "none",
+  };
+  const saved = await tool(tok.worker, "journal_confirm", { ...exact, confirmationToken });
+  ok(saved);
+  const entryId = String(saved.data?.entryId ?? "");
+  expect(entryId, "journal_confirm returned no entry id").toMatch(/^[0-9a-f-]{36}$/);
+  // A retried confirm answers with the SAME entry or is refused — never a second row.
+  const retry = await tool(tok.worker, "journal_confirm", { ...exact, confirmationToken });
+  if (retry.ok) expect(String(retry.data?.entryId ?? ""), "a retried confirm wrote a second entry").toBe(entryId);
+  const mine = (await ownEntries(tok.worker)).filter((e) => (e.text ?? "").includes(JOURNAL_TAG));
+  expect(mine.map((e) => e.entryId), "exactly one live entry of this run").toEqual([entryId]);
+
+  const correctedWords = `${JOURNAL_TAG} klijavau plyteles vonios ir virtuvės sienose`;
+  const fix = await prepareConfirm(tok.worker, "journal_correct", { entryId, notes: correctedWords });
+  ok(fix.done);
+  const newId = String(fix.done.data?.entryId ?? "");
+  expect(newId, "journal_correct_confirm returned no entry id").toMatch(/^[0-9a-f-]{36}$/);
+  expect(newId, "a correction is a new version, not an in-place edit").not.toBe(entryId);
+  const after = (await ownEntries(tok.worker)).filter((e) => (e.text ?? "").includes(JOURNAL_TAG));
+  expect(after.map((e) => e.entryId), "the correction replaced the original: one live version").toEqual([newId]);
+  expect(after[0]?.text).toBe(correctedWords);
+  // The replaced version is no longer correctable.
+  const stale = await tool(tok.worker, "journal_correct_draft", { entryId, notes: `${correctedWords} vėl` });
+  refused(stale, "correcting a version that was already replaced");
+  console.info(`[agents] journal: entry ${entryId.slice(0, 8)} corrected → ${newId.slice(0, 8)}, stale draft → ${stale.code}`);
 });

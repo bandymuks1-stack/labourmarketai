@@ -11,9 +11,7 @@ import { emitJobAlertNotificationsForCron } from "@/lib/notifications/event-emit
  * run, per the person's existing notification preferences. E-mail only with an
  * explicit stored opt-in, through the existing dispatcher.
  *
- * Triggered by .github/workflows/job-alerts-cadence.yml (the Vercel Hobby plan
- * holds two crons already; the supply cadences use GitHub Actions the same
- * way). AUTH: `authorizeCronRequest` — CRON_SECRET bearer, fail-closed while
+ * Triggered by the VPS cron (ops/vps/labourmarket.cron, 06:17 UTC daily). AUTH: `authorizeCronRequest` — CRON_SECRET bearer, fail-closed while
  * unset. Responses carry counts and a reason code only.
  */
 export async function GET(request: Request): Promise<NextResponse> {

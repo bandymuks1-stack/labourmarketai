@@ -332,3 +332,20 @@ export function looksLikeAccidentalDuplicate(
     return Number.isFinite(age) && age >= 0 && age <= withinSeconds;
   });
 }
+
+/**
+ * What one press of "save" does on the quick-entry form when the operator has
+ * just saved this exact shape (same person, day, site and hours).
+ *
+ *   "arm"    — the FIRST repeat press writes nothing: it stops the submit and
+ *              shows the warning, because a double tap is the common mistake;
+ *   "submit" — anything else, including the SECOND press on the same repeat:
+ *              the operator, not the form, decides it is a second shift.
+ *
+ * Pure, so the rule is tested without a browser. Before this existed the
+ * button armed the warning AND let the form submit on the same press, so the
+ * accidental duplicate was written while the warning said it was held.
+ */
+export function duplicateSavePress(wouldRepeatLastSave: boolean, armed: boolean): "arm" | "submit" {
+  return wouldRepeatLastSave && !armed ? "arm" : "submit";
+}

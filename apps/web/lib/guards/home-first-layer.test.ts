@@ -26,8 +26,13 @@ describe("the home is usable before the Today head has read", () => {
     expect(today).toMatch(
       /export function TodayScreen\([\s\S]{0,120}<Suspense fallback=\{<TodayScreenPending \/>\}>\s*<TodayScreenHead locale=\{locale\} \/>/,
     );
-    // The head that awaits the player card is NOT the exported component.
+    // The head is NOT the exported component. Since the home CLS P0
+    // (2026-10-26) the head no longer awaits the player card at all — only
+    // translations and the session name — and every slow reader streams
+    // inside the frame it draws (pinned in home-cls-stability.test.ts).
     expect(today).not.toMatch(/export async function TodayScreen\b/);
+    const code = today.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+    expect(code).not.toMatch(/loadTodayHead\(/);
   });
 });
 
@@ -45,7 +50,7 @@ describe("a quiet home takes no room", () => {
 });
 
 describe("the found-postings heading does not deny an assessment that happened", () => {
-  const locales = ["lt", "en", "de", "nl", "pl", "ru"];
+  const locales = ["lt", "en", "de", "nl", "pl", "ru", "sv"];
   for (const locale of locales) {
     it(`${locale}: titleDiscovery makes no "not yet assessed" claim`, () => {
       const messages = JSON.parse(read(`messages/${locale}.json`)) as {
@@ -53,7 +58,7 @@ describe("the found-postings heading does not deny an assessment that happened",
       };
       const title = messages.conversation.results.opportunities.titleDiscovery;
       expect(title).toBeTruthy();
-      expect(title).not.toMatch(/\(|neįvertint|not yet assessed|nicht bewertet|niet beoordeeld|nieocenion|не оценен/i);
+      expect(title).not.toMatch(/\(|neįvertint|not yet assessed|nicht bewertet|niet beoordeeld|nieocenion|не оценен|inte bedöm|ej bedöm/i);
     });
   }
 });

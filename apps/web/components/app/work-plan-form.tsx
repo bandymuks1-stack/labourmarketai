@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import {
@@ -7,6 +8,126 @@ import {
   createWorkPlanEntryAction,
 } from "@/lib/planning/work-plan-actions";
 import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
+import {
+  ISO_WEEKDAYS,
+  SHIFT_CYCLE_MAX_OFF,
+  SHIFT_CYCLE_MAX_ON,
+  type ShiftRepeatMode,
+} from "@/lib/planning/shift-pattern";
+
+/** Localized short weekday names, Monday first (ISO), from the platform —
+ *  no copy to translate. 2024-01-01 was a Monday. */
+function weekdayNames(locale: string): string[] {
+  const fmt = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
+  return ISO_WEEKDAYS.map((d) => fmt.format(new Date(Date.UTC(2024, 0, d))));
+}
+
+export type ShiftRepeatLabels = {
+  legend: string;
+  none: string;
+  weekly: string;
+  cycle: string;
+  weekdays: string;
+  cycleOn: string;
+  cycleOff: string;
+  cycleOffset: string;
+  hint: string;
+};
+
+/**
+ * CAL-8 — the repeat controls of the ONE plan form (a shift pattern is a
+ * property of a work plan window, not a second form or a second store).
+ * Rendered only when the shift-pattern column is provisioned; the server
+ * validates everything again (`shiftPatternFromForm`) and the RPC is the
+ * authority.
+ */
+function ShiftRepeatFields({ locale, labels }: { locale: string; labels: ShiftRepeatLabels }) {
+  const [mode, setMode] = useState<ShiftRepeatMode>("none");
+  const names = weekdayNames(locale);
+  const field = "flex flex-col gap-1.5 text-xs text-text-secondary";
+  return (
+    <fieldset className="flex flex-col gap-3 sm:col-span-2" data-testid="work-plan-repeat">
+      <legend className="text-xs text-text-secondary">{labels.legend}</legend>
+      <div className="flex flex-wrap gap-4" role="radiogroup">
+        {(["none", "weekly", "cycle"] as const).map((m) => (
+          <label key={m} className="inline-flex min-h-10 items-center gap-2 text-sm text-text-primary">
+            <input
+              type="radio"
+              name="repeat"
+              value={m}
+              checked={mode === m}
+              onChange={() => setMode(m)}
+              data-testid={`work-plan-repeat-${m}`}
+            />
+            {labels[m]}
+          </label>
+        ))}
+      </div>
+      {mode === "weekly" && (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-xs text-text-secondary">{labels.weekdays}</legend>
+          <div className="flex flex-wrap gap-3">
+            {ISO_WEEKDAYS.map((d, i) => (
+              <label key={d} className="inline-flex min-h-10 items-center gap-1.5 text-sm text-text-primary">
+                <input
+                  type="checkbox"
+                  name="weekday"
+                  value={String(d)}
+                  defaultChecked={d <= 5}
+                  data-testid={`work-plan-weekday-${d}`}
+                />
+                {names[i]}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      {mode === "cycle" && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <label className={field}>
+            {labels.cycleOn}
+            <input
+              type="number"
+              name="cycle_on"
+              min={1}
+              max={SHIFT_CYCLE_MAX_ON}
+              defaultValue={4}
+              required
+              className={AUTH_INPUT_CLASS}
+              data-testid="work-plan-cycle-on"
+            />
+          </label>
+          <label className={field}>
+            {labels.cycleOff}
+            <input
+              type="number"
+              name="cycle_off"
+              min={1}
+              max={SHIFT_CYCLE_MAX_OFF}
+              defaultValue={2}
+              required
+              className={AUTH_INPUT_CLASS}
+              data-testid="work-plan-cycle-off"
+            />
+          </label>
+          <label className={field}>
+            {labels.cycleOffset}
+            <input
+              type="number"
+              name="cycle_offset"
+              min={0}
+              max={SHIFT_CYCLE_MAX_ON + SHIFT_CYCLE_MAX_OFF - 1}
+              defaultValue={0}
+              className={AUTH_INPUT_CLASS}
+              data-testid="work-plan-cycle-offset"
+            />
+          </label>
+        </div>
+      )}
+      {mode !== "none" && <p className="text-xs text-text-muted">{labels.hint}</p>}
+    </fieldset>
+  );
+}
 
 /**
  * Plan a work window (FINAL COMPLETION Train F1) — a plain server-action form:
@@ -44,6 +165,7 @@ export function WorkPlanForm({
   workObjects,
   today,
   labels,
+  repeatLabels,
 }: {
   locale: string;
   organizationId: string;
@@ -64,6 +186,8 @@ export function WorkPlanForm({
     pending: string;
     none: string;
   };
+  /** CAL-8: present only when shift patterns are provisioned. */
+  repeatLabels?: ShiftRepeatLabels | null;
 }) {
   const field = "flex flex-col gap-1.5 text-xs text-text-secondary";
   return (
@@ -124,6 +248,7 @@ export function WorkPlanForm({
           </select>
         </label>
       )}
+      {repeatLabels && <ShiftRepeatFields locale={locale} labels={repeatLabels} />}
       <label className={`${field} sm:col-span-2`}>
         {labels.note}
         <input type="text" name="note" maxLength={500} className={AUTH_INPUT_CLASS} />

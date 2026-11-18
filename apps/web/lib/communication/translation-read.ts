@@ -1,6 +1,8 @@
 import "server-only";
 
 import { runAiAgent } from "@/lib/ai/run-agent-server";
+import { aiLocaleFor } from "@/lib/ai/runtime/types";
+import { aiTaskServableNow } from "@/lib/ai/egress-precheck-server";
 import { communicationLanguageNames, isCommunicationLocale } from "@/lib/i18n/config";
 import { rateLimit } from "@/lib/security/rate-limit";
 
@@ -57,7 +59,6 @@ export interface TranslatableMessage {
 const MAX_PER_READ = 12;
 const RATE = { limit: 120, windowMs: 60 * 60 * 1000 } as const;
 const CACHE_MAX = 2000;
-const AI_LOCALES = new Set(["en", "lt", "ru"]);
 
 type Cached = { readonly text: string; readonly provider: string } | null;
 const cache = new Map<string, Cached>();
@@ -90,8 +91,8 @@ type TranslateResult =
   | { readonly ok: false; readonly reason: TranslationUnavailableReason };
 
 /** The target and source named in words for the model. The request-level
- *  `locale` hint below is limited to the AI runtime's three prompt locales, so
- *  a Dutch, Polish or Georgian reader would otherwise be asked for "en" — the
+ *  `locale` hint below covers the routed UI locales only, so a Georgian or
+ *  Ukrainian reader (communication-only languages) would otherwise be asked for "en" — the
  *  context line makes the target unambiguous for EVERY communication language.
  *  Codes outside the set are passed as codes (never guessed into a name). */
 function translationContext(target: string, source: string | null | undefined): string {
@@ -194,6 +195,12 @@ async function translateOnce(
   key: string,
 ): Promise<TranslateResult | { ok: false; reason: "transient" }> {
   try {
+    // No configured provider may receive a message body right now (grant
+    // suspended / only external providers): the gate would refuse every
+    // message of this read. Decline with zero ledger IO (audit 2026-10-16).
+    if (!(await aiTaskServableNow("translate_message"))) {
+      return { ok: false, reason: "declined" };
+    }
     const outcome = await runAiAgent(
       "translation_copy",
       {
@@ -202,7 +209,7 @@ async function translateOnce(
         context: translationContext(viewerLocale, m.original_language),
       },
       {
-        locale: AI_LOCALES.has(viewerLocale) ? (viewerLocale as "en" | "lt" | "ru") : "en",
+        locale: aiLocaleFor(viewerLocale),
         language: m.original_language ?? undefined,
         // A LABEL for the audit row — never the text, never the people.
         inputSource: "conversation_message",

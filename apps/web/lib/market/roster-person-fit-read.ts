@@ -7,6 +7,7 @@ import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
 import { compareMatches, type MatchStatus } from "@/lib/market/match-v1";
 import { matchRosterPersonToNeed } from "@/lib/market/roster-person-match";
 import { readSignalsForRosterPeople } from "@/lib/organization-evidence/history-signals-read";
+import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";
 
 /**
  * HOW ONE HISTORICAL PERSON FITS THE ORGANIZATION'S OWN OPEN NEEDS
@@ -66,7 +67,7 @@ export async function readRosterPersonFit(
     .select(
       "id, title, status, need_summary, role_or_work_type, notes, country, location, language_requirement, payload, kind, created_at",
     )
-    .or(`profile_id.eq.${input.userId},organization_id.eq.${input.organizationId}`)
+    .or(demandsOfWorkspaceFilter(input.userId, input.organizationId))
     .order("created_at", { ascending: false })
     .limit(MAX_NEEDS);
   if (res.error) return { kind: "unavailable" };

@@ -2,7 +2,7 @@
  * Public business profile (Wagon 13 slice 2) — shared client-safe types.
  *
  * A read-composition over canonical entities: identity from `organizations`,
- * services from `service_offerings`, listings from `marketplace_listings`.
+ * listings from `marketplace_listings`.
  * Every field here is part of the allowlisted PUBLIC projection returned by the
  * SECURITY DEFINER read functions — nothing private is represented. No payment,
  * no fake rows.
@@ -19,16 +19,6 @@ export interface PublicBusinessProfile {
   readonly contactPhone: string | null;
 }
 
-export interface PublicBusinessService {
-  readonly id: string;
-  readonly title: string;
-  readonly description: string | null;
-  readonly categorySlug: string | null;
-  readonly locationCountry: string | null;
-  readonly remote: boolean;
-  readonly rateText: string | null;
-}
-
 export interface PublicBusinessListing {
   readonly id: string;
   readonly listingKind: "sale" | "rental" | "wanted";
@@ -42,7 +32,6 @@ export interface PublicBusinessListing {
 
 export interface PublicBusinessProfileView {
   readonly profile: PublicBusinessProfile;
-  readonly services: PublicBusinessService[];
   readonly listings: PublicBusinessListing[];
 }
 

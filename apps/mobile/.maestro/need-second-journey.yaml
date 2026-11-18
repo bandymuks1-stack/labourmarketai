@@ -1,0 +1,105 @@
+# SECOND NEED — isolated runs only (android-need-isolated.yml), right after
+# jobs-need-journey.yaml with NEED_SUBMIT=1 left the app on the sent state.
+#
+# What a green run proves: Done returns to Today; opening Post a need again
+# shows a FRESH form (not the previous sent state — the station stays mounted
+# in the Tabs navigator, and #2871 keys it on each intake); a second need is
+# drafted, confirmed and sent. The job then expects TWO stored rows.
+# Navigation is by testID only.
+appId: ai.labourmarket.app
+name: need-second-journey
+---
+# A tap during scroll momentum only stops the scroll on Android, so every
+# scrollUntilVisible is followed by waitForAnimationToEnd before the tap.
+- scrollUntilVisible:
+    element:
+      id: "need-done"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "need-done"
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: "today-open-need"
+    direction: DOWN
+    timeout: 30000
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-need"
+
+# A fresh form, not the first need's sent state.
+- extendedWaitUntil:
+    visible:
+      id: "need-write"
+    timeout: 30000
+- assertNotVisible:
+    id: "need-sent"
+
+- scrollUntilVisible:
+    element:
+      id: "need-description"
+    direction: UP
+    timeout: 20000
+- tapOn:
+    id: "need-description"
+- inputText: "QA-SYNTHETIC mobile second need: one electrician for a kitchen, one week."
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "need-role"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "need-role"
+- inputText: "QA-SYNTHETIC mobile electrician"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "need-location"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "need-location"
+- inputText: "Kaunas"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "need-team-size"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "need-team-size"
+- inputText: "1"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "need-review"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "need-review"
+- extendedWaitUntil:
+    visible:
+      id: "need-preview"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "need-confirm"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "need-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "need-sent"
+    timeout: 60000

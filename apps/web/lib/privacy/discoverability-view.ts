@@ -26,7 +26,7 @@ import type { DiscoverabilityPreviewField } from "@/lib/privacy/discoverability-
  */
 
 /** A translator over the `privacyConsent` namespace. */
-type ConsentTranslator = (key: string) => string;
+type ConsentTranslator = (key: string, values?: Record<string, string>) => string;
 
 /** 2026-09-20: PL is an active UI locale; a locale WITHOUT its own consent
  *  blocks falls back to English — never Lithuanian (lib/i18n/unsupported-language.ts). */
@@ -37,19 +37,39 @@ export function toConsentLocale(locale: string): ConsentLocale {
 }
 
 /** The consent component's chrome, from the `privacyConsent` catalogue. */
+/** The note shown above a consent legal text that is NOT in the reader's
+ *  language — a routed locale whose legal texts the owner has not approved yet
+ *  (sv, until #3232) reads the English ones, and must be told so. `null` when
+ *  the text is in the reader's own language. */
+export function consentLegalLanguageNote(tc: ConsentTranslator, locale: string): string | null {
+  return toConsentLocale(locale) === locale ? null : tc("labels.legalTextInEnglish");
+}
+
 export function discoverabilityConsentLabels(
   tc: ConsentTranslator,
+  locale?: string,
 ): DiscoverabilityConsentLabels {
   return {
+    legalLanguageNote: locale ? consentLegalLanguageNote(tc, locale) : null,
+    // The status line reads the SAME words as the readiness item on the
+    // opportunities board ("Visible to employers · On / Off").
+    headline: tc("employerVisibility.title"),
+    stateOn: tc("employerVisibility.state.on"),
+    stateOff: tc("employerVisibility.state.off"),
     statusHidden: tc("status.hidden"),
     statusHiddenBody: tc("status.hiddenBody"),
     statusVisible: tc("status.visible"),
+    statusVisibleBody: tc("status.visibleBody"),
     statusWithdrawn: tc("status.withdrawn"),
     statusStale: tc("status.stale"),
+    privateLine: tc("switch.privateLine"),
     grant: tc("actions.grant"),
     decline: tc("actions.decline"),
-    manage: tc("actions.manage"),
+    turnOn: tc("switch.turnOn"),
     withdraw: tc("actions.withdraw"),
+    details: tc("switch.details"),
+    grantedNote: tc("switch.grantedNote"),
+    withdrawnNote: tc("switch.withdrawnNote"),
     previewTitle: tc("preview.title"),
     previewEmpty: tc("preview.empty"),
     decidedAtLabel: tc("labels.decidedAt"),
@@ -67,5 +87,16 @@ export function discoverabilityPreviewFields(
   preview: readonly DiscoverabilityPreviewField[],
   tc: ConsentTranslator,
 ): PreviewField[] {
-  return preview.map((f) => ({ label: tc(`preview.${f.key}`), value: f.value }));
+  return preview.map((f) => ({
+    label: tc(`preview.${f.key}`),
+    value:
+      f.value === "__yes"
+        ? tc("preview.yes")
+        : f.value === "__no"
+          ? tc("preview.no")
+          : f.key === "anonymousLabel"
+            ? // The anonymous name in the reader's own language, never English.
+              tc("preview.anonymousValue", { token: f.value })
+            : f.value,
+  }));
 }

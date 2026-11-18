@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -20,95 +20,70 @@ function read(p: string): string {
 }
 
 describe("mobile layout invariants", () => {
-  describe("dashboard header (apps/web/app/[locale]/dashboard/layout.tsx)", () => {
-    const src = read("app/[locale]/dashboard/layout.tsx");
+  // RE-ANCHORED 2026-10-25 (owner order: one navigation system). The module
+  // header these invariants used to pin lived in `dashboard/layout.tsx`; every
+  // chrome mode now renders THE ONE header, so the same invariants are pinned
+  // on it. The brand rule changed on purpose: the owner's production
+  // screenshot showed the old rule's outcome — a logo truncated to "Labour…" —
+  // so the brand no longer shrinks at all; the wordmark appears only where it
+  // fits whole, and the workspace chip is the element that gives width back.
+  describe("dashboard header (components/app/conversation/chat/conversation-header.tsx)", () => {
+    const src = read("components/app/conversation/chat/conversation-header.tsx");
 
-    it("header inner flex tightens gap and padding on mobile", () => {
-      // Header inner flex must NOT use the desktop gap/padding on mobile —
-      // 360px viewport breaks if we keep gap-6 + px-6.
-      expect(src).toMatch(/gap-3[^"]*md:gap-6/);
-      expect(src).toMatch(/px-3[^"]*sm:px-12/);
+    it("header flex tightens gap on a phone and wraps into two rows there", () => {
+      expect(src).toMatch(/flex flex-none flex-wrap items-center gap-x-2 gap-y-2[^"]*px-4/);
+      expect(src).toMatch(/md:flex-nowrap md:gap-x-3/);
     });
 
-    it("brand link can shrink + truncate so it never pushes the cluster off-screen", () => {
-      // Re-anchored 2026-09-23 (owner §19): the canonical mark now sits
-      // beside the wordmark, so the Link is a flex row and `truncate` moved
-      // to the wordmark SPAN — `text-overflow: ellipsis` only applies to a
-      // block's inline content, never to a flex container. The invariant is
-      // the same: the Link shrinks (`min-w-0 shrink`), the TEXT truncates,
-      // and the mark (`shrink-0`) never collapses into the wordmark.
+    it("the brand never shrinks or truncates; its wordmark shows only where it fits whole", () => {
       const link = src.match(
         /<Link\s+href="\/dashboard"\s+data-testid="shell-logo-home"[\s\S]*?<\/Link>/,
       );
       expect(link, "the brand Link").not.toBeNull();
-      expect(link![0]).toMatch(/className="[^"]*min-w-0[^"]*shrink[^"]*"/);
-      expect(link![0]).toMatch(/<span className="[^"]*truncate[^"]*">\s*LabourMarket/);
+      expect(link![0]).toMatch(/className="flex flex-none items-center/);
+      expect(link![0]).not.toMatch(/truncate/);
+      expect(link![0]).toMatch(/whitespace-nowrap[^`]*"hidden min-\[1800px\]:inline"/);
       expect(link![0]).toMatch(/<LmLogo[^>]*className="[^"]*shrink-0[^"]*"/);
-      // Negative control: the retired single-line Link (no mark, `truncate`
-      // on the Link) passed the OLD pattern and must fail the new one.
-      const retired =
-        '<Link href="/dashboard" data-testid="shell-logo-home" className="min-w-0 shrink truncate font-display">LabourMarket<span className="text-gradient-accent">.ai</span></Link>';
-      expect(retired).not.toMatch(/<span className="[^"]*truncate[^"]*">\s*LabourMarket/);
     });
 
-    it("right-side cluster does not shrink (header items stay tappable, brand truncates instead)", () => {
-      expect(src).toMatch(/ml-auto[^"]*flex[^"]*shrink-0/);
+    it("right-side cluster does not shrink (header items stay tappable, the chip truncates instead)", () => {
+      expect(src).toMatch(/ml-auto flex flex-none items-center/);
     });
 
-    it("main element clears the fixed bottom nav with safe-area padding", () => {
-      // The dashboard <main> must include env(safe-area-inset-bottom) in pb
-      // so the BottomNav cannot occlude content on iOS. The <main> lives in the
-      // chrome selector (which picks the per-route shell); its safe-area padding
-      // is asserted there.
+    it("main element keeps safe-area padding at the bottom", () => {
+      // No chrome mode carries a fixed bottom bar any more (the phone's
+      // destinations live in the header's bottom sheet), but the <main>
+      // still clears the iOS home indicator.
       const chrome = read("components/app/dashboard-chrome.tsx");
-      expect(chrome).toMatch(/pb-\[calc\(5rem\+env\(safe-area-inset-bottom\)\)\]/);
+      expect(chrome).toMatch(/pb-\[calc\(2\.5rem\+env\(safe-area-inset-bottom\)\)\]/);
+      expect(chrome).not.toMatch(/<BottomNav\b/);
     });
   });
 
-  describe("bottom nav (apps/web/components/app/bottom-nav.tsx)", () => {
-    const src = read("components/app/bottom-nav.tsx");
+  // RE-ANCHORED 2026-10-25 (owner order: one navigation system). The phone
+  // bottom bar and the role switcher were the operator console's private
+  // chrome; both are deleted. Their mobile invariants live on in the ONE
+  // header: the phone's destinations open in a safe-area-aware bottom sheet,
+  // every control keeps the 44px floor, and the workspace chip is the element
+  // that gives width back (never a control squeezed into illegibility).
+  describe("phone navigation (the one header's bottom sheet)", () => {
+    const header = read("components/app/conversation/chat/conversation-header.tsx");
+    const sheet = read("components/ui/MobileSheet.tsx");
 
-    it("is full-width fixed bottom + safe-area aware + mobile-only", () => {
-      expect(src).toContain("fixed inset-x-0 bottom-0");
-      expect(src).toContain("pb-[env(safe-area-inset-bottom)]");
-      expect(src).toContain("md:hidden");
-    });
-  });
-
-  describe("role switcher (apps/web/components/app/role-switcher.tsx)", () => {
-    const src = read("components/app/role-switcher.tsx");
-
-    it("admin badge is icon-only with tooltip + accessible label (production UX repair v2, F5)", () => {
-      // The old "ADMIN REŽIMAS" text pill shouted a state the icon already
-      // carries. The badge is now a fixed-size icon button at EVERY
-      // viewport; the words live in title (tooltip) + aria-label.
-      expect(src).toMatch(/h-9 w-9 shrink-0 items-center justify-center/);
-      expect(src).toContain('aria-label={tSwitcher("adminPanelLink")}');
-      expect(src).toContain('title={tSwitcher("adminMode")}');
+    it("the destinations open in a mobile-only, safe-area-aware bottom sheet", () => {
+      expect(header).toMatch(/<MobileSheet\b/);
+      expect(header).toMatch(/data-testid="header-nav-sheet-trigger"/);
+      expect(sheet).toContain("pb-[env(safe-area-inset-bottom)]");
+      expect(sheet).toContain("md:hidden");
     });
 
-    it("role trigger label is mobile-hidden (icon + chevron only on phones)", () => {
-      // F5: the workspace label is a short human word (never an uppercase
-      // mono pill) and still hides on phones — icon + chevron only.
-      // §12 design pass: the hand-rolled `text-[13px]` became the ROLE token
-      // `text-basis` — the product's own scale, one place sizes are decided.
-      expect(src).toMatch(/hidden text-basis[^"]*sm:inline/);
-      expect(src).not.toMatch(/hidden font-mono[^"]*uppercase[^"]*sm:inline/);
+    it("the More menu is capped to the viewport", () => {
+      expect(header).toMatch(/w-60 max-w-\[calc\(100vw-2rem\)\]/);
     });
 
-    it("admin badge + role trigger are shrink-0 (header truncates brand, not these)", () => {
-      // Both badge + trigger must use `shrink-0` so the flex container
-      // cannot compress them into illegibility on a tight header.
-      const shrinkHits = src.match(/shrink-0/g) ?? [];
-      expect(shrinkHits.length).toBeGreaterThanOrEqual(2);
-    });
-
-    it("dropdown menu is capped to the viewport on mobile", () => {
-      // w-72 (288px) anchored right-0 overflows a 360px viewport without
-      // a viewport-relative cap. The cap keeps a 24px right gutter.
-      expect(src).toMatch(
-        /absolute right-0[^"]*w-72[^"]*max-w-\[calc\(100vw-1\.5rem\)\]/,
-      );
+    it("the retired phone bar and role switcher do not come back", () => {
+      expect(existsSync(resolve(REPO_ROOT, "components/app/bottom-nav.tsx"))).toBe(false);
+      expect(existsSync(resolve(REPO_ROOT, "components/app/role-switcher.tsx"))).toBe(false);
     });
   });
 

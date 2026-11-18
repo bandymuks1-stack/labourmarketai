@@ -27,6 +27,9 @@ import type {
   ThermometerView,
 } from "@/components/app/worker-player-card";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { experienceFiguresOf } from "@/lib/journal/experience-figures";
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * THE PLAYER CARD RESULT (W3 row 1).
@@ -68,6 +71,19 @@ export type PlayerCardResult =
     }
   | { kind: "blocked"; message: string };
 
+/** The person's own relationships for the experience total; null when unreadable. */
+async function ownExperienceRelationships() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user ? await readOwnExperienceRelationships(supabase, user.id) : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function loadPlayerCardResult(): Promise<PlayerCardResult> {
   const t = await getTranslations("conversation.chat");
   try {
@@ -78,15 +94,16 @@ export async function loadPlayerCardResult(): Promise<PlayerCardResult> {
     const [labels, thermometer, avatar, editor] = await Promise.all([
       // The journal's own figures for the identity stage and the per-engagement
       // hours — the ONE hour ledger; an unreadable journal yields no strip.
-      loadOwnWorkIntelligence()
-        .catch(() => null)
-        .then((intel) =>
+      Promise.all([loadOwnWorkIntelligence().catch(() => null), ownExperienceRelationships()]).then(
+        ([intel, relationships]) =>
           buildPlayerCardLabels(card, {
             contexts: intel?.contexts ?? null,
             allTime: intel?.periods.find((p) => p.key === "all") ?? null,
             allTimeTruncated: intel?.coverage.truncated ?? false,
+            // The decision-0025 total beside the journal (the profile hub's rule).
+            ...experienceFiguresOf(intel, relationships),
           }),
-        ),
+      ),
       getOwnThermometer().then(toThermometerView),
       getOwnAvatar(),
       resolveWorkEditor(card),

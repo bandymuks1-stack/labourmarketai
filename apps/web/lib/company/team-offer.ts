@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -106,6 +107,18 @@ export function listSentOffers(teamId: string): Promise<ReadResult<SentTeamOffer
  * Zero rows for anyone else (the database answers empty, never an error).
  */
 export async function listReceivedOffers(requestId: string): Promise<ReadResult<ReceivedTeamOffer>> {
+  return readReceivedOffersOnce(requestId);
+}
+
+/** Read ONCE per demand per server render (perf 2026-10-22): the opening
+ *  brief's offers line and the bell's open team-offer count asked the same
+ *  demand's offers in one `/dashboard/company` render. Request-scoped — every
+ *  navigation and every server action (accept / decline) reads again. */
+const readReceivedOffersOnce = cache(
+  async (requestId: string): Promise<ReadResult<ReceivedTeamOffer>> => readReceivedOffers(requestId),
+);
+
+async function readReceivedOffers(requestId: string): Promise<ReadResult<ReceivedTeamOffer>> {
   // v2 = v1 + offer_kind (20261011200000). Until it is applied, v1 answers and
   // every offer is a brigade, which is exactly what v1 could hold.
   const v2 = await readRows("list_team_offers_for_request_v2", { p_request_id: requestId }, parseReceivedOffer);
@@ -198,13 +211,25 @@ export async function withdrawTeamOffer(
 export async function respondToTeamOffer(input: {
   readonly offerId: string;
   readonly decision: "accept" | "decline";
+  /** The terms version the person saw and agrees to (null = no terms). An
+   *  accept is refused with `terms_changed` when another version is proposed
+   *  by then (v2, 20261020172000) — never an agreement to unseen terms. */
+  readonly expectedVersion?: number | null;
 }): Promise<TeamOfferWriteResult<{ outcome: "accepted" | "declined" | "already_accepted" | "already_declined" }>> {
   const ctx = await authed();
   if (!ctx) return { status: "not_authed" };
-  const { data, error } = await asAny(ctx.supabase).rpc("respond_team_demand_offer_v1", {
+  let { data, error } = await asAny(ctx.supabase).rpc("respond_team_demand_offer_v2", {
     p_offer_id: input.offerId,
     p_decision: input.decision,
+    p_expected_version: input.expectedVersion ?? null,
   });
+  // Until the v2 migration is applied: v1, exactly as before.
+  if (error && ["42883", "PGRST202"].includes((error as { code?: string }).code ?? "")) {
+    ({ data, error } = await asAny(ctx.supabase).rpc("respond_team_demand_offer_v1", {
+      p_offer_id: input.offerId,
+      p_decision: input.decision,
+    }));
+  }
   if (error) return { status: offerRefusalOf(error) };
   if (data === "accepted" || data === "declined" || data === "already_accepted" || data === "already_declined") {
     return { status: "ok", outcome: data };

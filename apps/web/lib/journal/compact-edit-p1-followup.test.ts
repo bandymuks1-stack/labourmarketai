@@ -101,7 +101,7 @@ function makeSupabase(handler: Handler, user: { id: string } | null) {
       const calls: Call[] = [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const builder: any = {};
-      for (const m of ["select", "eq", "in", "order", "limit", "maybeSingle"]) {
+      for (const m of ["select", "eq", "in", "order", "limit", "range", "maybeSingle"]) {
         builder[m] = (...args: unknown[]) => {
           calls.push({ method: m, args });
           return builder;

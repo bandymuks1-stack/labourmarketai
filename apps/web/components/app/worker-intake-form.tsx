@@ -6,6 +6,7 @@ import {
   type WorkerIntakeFormState,
 } from "@/lib/staffing/worker-intake-form-actions";
 import type { WorkCategoryOptionGroup } from "@/lib/taxonomy/work-categories";
+import { intakeDraftText, writeWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
 
 /**
  * Worker intake form (Staffing Operating Model v1, PR10 UI). Posts the intake
@@ -18,6 +19,8 @@ export interface WorkerIntakeFormLabels {
   readonly subtitle: string;
   readonly fullName: string;
   readonly profession: string;
+  /** The empty choice of the trade select — words, never a bare dash. */
+  readonly professionPlaceholder: string;
   readonly targetCountries: string;
   readonly targetCountriesHelp: string;
   readonly availableFrom: string;
@@ -84,11 +87,59 @@ export function WorkerIntakeForm({
     FormData
   >(submitWorkerIntakeAction, null);
 
+  // What the person types is kept in this browser (owner P0 2026-11-15, F2):
+  // sign-up carries the profile builder as `next`, and the builder places
+  // this text in its composer for the person to read and send. Only fields
+  // they filled or changed are kept; an untouched default is not their word.
+  const fieldLabel: Readonly<Record<string, string>> = {
+    full_name: labels.fullName,
+    profession: labels.profession,
+    target_countries: labels.targetCountries,
+    available_from: labels.availableFrom,
+    accommodation: labels.accommodation,
+    transport: labels.transport,
+    engagement_type: labels.engagement,
+    languages: labels.languages,
+    business_name: labels.businessName,
+    vat_number: labels.vatNumber,
+    team_size: labels.teamSize,
+    insurance: labels.insurance,
+    team_professions: labels.teamProfessions,
+    tools: labels.tools,
+    invoice_ready: labels.invoiceReady,
+    comment: labels.comment,
+  };
+  const keepDraft = (form: HTMLFormElement) => {
+    const entries: { label: string; value: string }[] = [];
+    for (const el of Array.from(form.elements)) {
+      if (el instanceof HTMLSelectElement) {
+        const opt = el.selectedOptions[0];
+        if (el.name in fieldLabel && opt && !opt.defaultSelected && opt.value) {
+          entries.push({ label: fieldLabel[el.name], value: opt.text });
+        }
+      } else if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        if (el.name in fieldLabel && el.value !== el.defaultValue) {
+          entries.push({ label: fieldLabel[el.name], value: el.value });
+        }
+      }
+    }
+    writeWorkerIntakeDraft(intakeDraftText(entries));
+  };
+
   return (
     <div className="flex flex-col gap-6">
-      <form action={formAction} className="flex flex-col gap-4" data-testid="worker-intake-form">
+      <form
+        action={formAction}
+        onInput={(e) => keepDraft(e.currentTarget)}
+        onChange={(e) => keepDraft(e.currentTarget)}
+        className="flex flex-col gap-4"
+        data-testid="worker-intake-form"
+      >
         <header className="flex flex-col gap-1">
-          <h2 className="font-display text-lg font-semibold text-text-primary">{labels.title}</h2>
+          {/* The page's one title (2026-10-18 design pass): same scale as every public page title. */}
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">
+            {labels.title}
+          </h1>
           <p className="text-sm text-text-secondary">{labels.subtitle}</p>
         </header>
 
@@ -100,7 +151,7 @@ export function WorkerIntakeForm({
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.profession}</span>
           <select name="profession" required defaultValue="" className={FIELD}>
-            <option value="" disabled>—</option>
+            <option value="" disabled>{labels.professionPlaceholder}</option>
             {categories.map((c) => (
               <optgroup key={c.key} label={c.sector}>
                 {c.options.map((o) => (
