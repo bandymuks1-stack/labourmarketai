@@ -4,6 +4,10 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
+import { Input } from "@/components/ui/Input";
+import { Notice } from "@/components/ui/Notice";
+import { Textarea } from "@/components/ui/Textarea";
 import {
   createConversation,
   sendMessage,
@@ -90,80 +94,73 @@ export function SupportConversationLauncher({
 
   if (!open) {
     return (
-      <button
+      <Button
         type="button"
+        variant="secondary"
         onClick={() => {
           recordEvent("conversation_launcher_opened");
           setOpen(true);
         }}
-        className="rounded-md border border-brand-blue/40 px-4 py-2 text-sm font-semibold text-brand-blue hover:border-brand-blue hover:text-text-primary"
         data-testid="support-launcher-open"
       >
         {t("openLabel")}
-      </button>
+      </Button>
     );
   }
 
   return (
     <form
       onSubmit={onSubmit}
-      className="card-border flex flex-col gap-3 p-4"
+      className="card-border flex w-full flex-col gap-3 self-stretch p-4 text-left"
       data-testid="support-launcher-form"
     >
-      <header className="flex items-baseline justify-between gap-2">
+      <header className="flex items-center justify-between gap-2">
         <h3 className="font-display text-base font-semibold text-text-primary">
           {t("title")}
         </h3>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
+          className="min-h-11"
           onClick={() => {
             reset();
             setOpen(false);
           }}
-          className="font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-primary"
         >
           {t("cancel")}
-        </button>
+        </Button>
       </header>
       <p className="text-meta leading-relaxed text-text-secondary">
         {t("intro")}
       </p>
-      <label className="flex flex-col gap-1">
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("subjectLabel")}
-        </span>
-        <input
-          type="text"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          maxLength={240}
-          required
-          placeholder={t("subjectPlaceholder")}
-          className="rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
-        />
-      </label>
-      <label className="flex flex-col gap-1">
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("bodyLabel")}
-        </span>
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={4}
-          maxLength={10000}
-          required
-          placeholder={t("bodyPlaceholder")}
-          className="rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
-        />
-      </label>
-      {error && (
-        <p
-          role="alert"
-          className="rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs text-state-danger"
-        >
-          {error}
-        </p>
-      )}
+      <Field label={t("subjectLabel")}>
+        {(control) => (
+          <Input
+            {...control}
+            type="text"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            maxLength={240}
+            required
+            placeholder={t("subjectPlaceholder")}
+          />
+        )}
+      </Field>
+      <Field label={t("bodyLabel")}>
+        {(control) => (
+          <Textarea
+            {...control}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={4}
+            maxLength={10000}
+            required
+            placeholder={t("bodyPlaceholder")}
+          />
+        )}
+      </Field>
+      {error && <Notice tone="error">{error}</Notice>}
       <div className="flex items-center justify-end gap-3">
         <Button
           type="submit"
