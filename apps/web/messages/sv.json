@@ -11402,7 +11402,7 @@
       "title": "Organisationsplan",
       "cta": "Aktivera organisationsplanen",
       "note": "Du skickas till Stripe Checkout; abonnemanget knyts till den här organisationen.",
-      "chargedToday": "Ingen gratis provperiod: den första månaden debiteras i Stripe Checkout i dag och sedan varje månad tills du avslutar. Stripe visar det exakta beloppet inklusive moms innan du betalar."
+      "chargedToday": "Ingen gratis provperiod: den första månaden debiteras i Stripe Checkout i dag och sedan varje månad tills du avslutar. Stripe visar det exakta beloppet innan du betalar."
     }
   },
   "accountPlan": {
