@@ -114,7 +114,7 @@ export async function PricingTable() {
                 <TrackedCta
                   href="/dashboard/account"
                   ctaId={`pricing_plan_${slug}`}
-                  className="text-sm font-semibold text-brand-blue hover:underline"
+                  className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-blue hover:underline"
                   data-testid={`pricing-cta-${slug}`}
                 >
                   {price === 0 ? t("ctaStartFree") : t("ctaSubscribe")}
@@ -147,7 +147,7 @@ export async function PricingTable() {
             href="/company-need"
             ctaId="pricing_individual_need"
             audience="companies"
-            className="text-sm font-semibold text-brand-blue hover:underline"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-blue hover:underline"
             data-testid="pricing-cta-individual"
           >
             {t("individual.cta")}

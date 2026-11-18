@@ -57,6 +57,9 @@ export function CapabilityGate<T>({
         failure={state.failure}
         refusalText={refusalText}
         retry={reload}
+        // A stable id for the device journeys: a read that failed or was
+        // refused is told apart from one still loading.
+        testID="capability-failed"
       />
     );
   }

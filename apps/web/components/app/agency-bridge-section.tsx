@@ -35,6 +35,9 @@ import { openAgencyConnectionConversationAction } from "@/lib/agency/bridge-conv
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 /**
  * Agency side of the REAL two-subject bridge (issue #859). The staffing agency
@@ -278,19 +281,18 @@ export function AgencyBridgeSection({
                             <DisplayedWorkspaceField />
                             <input type="hidden" name="connectionId" value={c.id} />
                             <input type="hidden" name="locale" value={locale} />
-                            <button type="submit" data-testid={`agency-bridge-message-${c.id}`}
-                              className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue">
+                            <Button type="submit" variant="secondary" size="sm" className="min-h-11" data-testid={`agency-bridge-message-${c.id}`}>
                               <MessageSquare className="h-3.5 w-3.5" aria-hidden /> {labels.messageButton}
-                            </button>
+                            </Button>
                           </form>
                         )}
                         {(c.status === "pending" || c.status === "active") && (
                           <form action={revokeAction} className="shrink-0">
                             <input type="hidden" name="connectionId" value={c.id} />
-                            <button type="submit" title={labels.revokeButton} aria-label={labels.revokeButton}
-                              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
+                            <Button type="submit" variant="secondary" size="sm" className="min-h-11 min-w-11 text-text-muted hover:border-state-danger hover:text-state-danger"
+                              title={labels.revokeButton} aria-label={labels.revokeButton}>
                               <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                            </button>
+                            </Button>
                           </form>
                         )}
                       </div>
@@ -322,10 +324,9 @@ export function AgencyBridgeSection({
                                 <input type="hidden" name="invitationId" value={invitation.invitationId} />
                                 <input type="hidden" name="email" value={c.invitedEmail} />
                                 <input type="hidden" name="locale" value={locale} />
-                                <button type="submit" disabled={linkPending} data-testid={`agency-bridge-new-link-${c.id}`}
-                                  className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-60">
+                                <Button type="submit" variant="secondary" size="sm" className="min-h-11" disabled={linkPending} data-testid={`agency-bridge-new-link-${c.id}`}>
                                   <RefreshCw className="h-3 w-3" aria-hidden /> {labels.newLink}
-                                </button>
+                                </Button>
                               </form>
                             </>
                           ) : (
@@ -339,10 +340,9 @@ export function AgencyBridgeSection({
                                 <input type="hidden" name="agencyCompanyId" value={agencyCompanyId} />
                                 <input type="hidden" name="email" value={c.invitedEmail} />
                                 <input type="hidden" name="locale" value={locale} />
-                                <button type="submit" disabled={invitePending} data-testid={`agency-bridge-get-link-${c.id}`}
-                                  className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-60">
+                                <Button type="submit" variant="secondary" size="sm" className="min-h-11" disabled={invitePending} data-testid={`agency-bridge-get-link-${c.id}`}>
                                   <Link2 className="h-3 w-3" aria-hidden /> {labels.getLink}
-                                </button>
+                                </Button>
                               </form>
                             </>
                           )}
@@ -358,13 +358,11 @@ export function AgencyBridgeSection({
               <input type="hidden" name="locale" value={locale} />
               <label className="flex min-w-48 flex-1 flex-col gap-1">
                 <span className="text-xs font-medium text-text-secondary">{labels.inviteEmailLabel}</span>
-                <input type="email" name="email" required maxLength={254}
-                  className="rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue" />
+                <Input type="email" name="email" required maxLength={254} />
               </label>
-              <button type="submit" disabled={invitePending} data-testid="agency-bridge-invite-submit"
-                className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-brand-blue/50 bg-brand-blue/10 px-4 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-60">
+              <Button type="submit" variant="primary" size="sm" className="min-h-11" disabled={invitePending} data-testid="agency-bridge-invite-submit">
                 <UserPlus className="h-4 w-4" aria-hidden /> {labels.inviteButton}
-              </button>
+              </Button>
             </form>
             {/* WHAT HAPPENED to the invitation: the primitive's own outcome
                 word, what to do about it, and the link when one was minted.
@@ -380,15 +378,14 @@ export function AgencyBridgeSection({
                 <p className="text-xs text-text-secondary">{deliveryHint(delivery)}</p>
                 {delivery.inviteLink && (
                   <div className="flex flex-wrap items-center gap-2">
-                    <input readOnly value={delivery.inviteLink} data-testid="agency-bridge-invite-link"
+                    <Input readOnly value={delivery.inviteLink} data-testid="agency-bridge-invite-link"
                       aria-label={labels.inviteLinkLabel}
                       onFocus={(e) => e.currentTarget.select()}
-                      className="min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-700 px-2 py-1.5 font-mono text-meta text-text-primary" />
-                    <button type="button" onClick={() => copyLink(delivery.inviteLink as string)} data-testid="agency-bridge-copy-link"
-                      className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary">
+                      className="min-w-0 flex-1 font-mono text-meta" />
+                    <Button type="button" variant="secondary" size="sm" className="min-h-11" onClick={() => copyLink(delivery.inviteLink as string)} data-testid="agency-bridge-copy-link">
                       {copiedLink === delivery.inviteLink ? <Check className="h-3 w-3" aria-hidden /> : <Copy className="h-3 w-3" aria-hidden />}
                       {copiedLink === delivery.inviteLink ? labels.copied : labels.copyLink}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -419,21 +416,19 @@ export function AgencyBridgeSection({
                         <input type="hidden" name="shareId" value={s.shareId} />
                         <label className="flex min-w-44 flex-1 flex-col gap-1">
                           <span className="text-xs font-medium text-text-secondary">{labels.workerLabel}</span>
-                          <select name="workerId" required defaultValue=""
-                            className="rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue">
+                          <Select name="workerId" required defaultValue="">
                             <option value="" disabled>{labels.workerPlaceholder}</option>
                             {roster.map((w) => (
                               <option key={w.workerId} value={w.workerId}>{w.label}</option>
                             ))}
-                          </select>
+                          </Select>
                         </label>
-                        <input type="text" name="note" maxLength={500} placeholder=""
+                        <Input type="text" name="note" maxLength={500} placeholder=""
                           aria-label={labels.noteLabel}
-                          className="min-w-40 flex-1 rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue" />
-                        <button type="submit" disabled={offerPending} data-testid="agency-bridge-offer-submit"
-                          className="inline-flex h-10 items-center rounded-lg border border-brand-blue/50 bg-brand-blue/10 px-4 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-60">
+                          className="min-w-40 flex-1" />
+                        <Button type="submit" variant="primary" size="sm" className="min-h-11" disabled={offerPending} data-testid="agency-bridge-offer-submit">
                           {labels.offerButton}
-                        </button>
+                        </Button>
                       </form>
                     )}
                   </li>
@@ -495,10 +490,10 @@ export function AgencyBridgeSection({
                       {p.offerStatus === "offered" && (
                         <form action={withdrawAction} className="ml-auto shrink-0">
                           <input type="hidden" name="offerId" value={p.offerId} />
-                          <button type="submit" title={labels.withdrawButton} aria-label={labels.withdrawButton}
-                            className="inline-flex h-7 items-center gap-1 rounded-md border border-ink-500 px-2 text-xs text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
+                          <Button type="submit" variant="secondary" size="sm" className="min-h-11 min-w-11 text-text-muted hover:border-state-danger hover:text-state-danger"
+                            title={labels.withdrawButton} aria-label={labels.withdrawButton}>
                             <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                          </button>
+                          </Button>
                         </form>
                       )}
                     </li>

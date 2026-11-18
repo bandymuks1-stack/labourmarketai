@@ -549,6 +549,68 @@ Create a private market map surface that uses real data only. Show honest empty/
 
 ---
 
+## 10. The shared system: how to use it
+
+One design system for every module (owner decision 2026-11-12). Build screens
+from the parts below. Do not write a second version of any of them; if a part
+does not fit, extend it in place (a prop or a variant) and say so in the PR.
+`apps/web/lib/guards/shared-ui-system.test.ts` checks that this table matches
+the code. All paths are under `apps/web/components/`.
+
+| You need | Use | Notes |
+|---|---|---|
+| Button, link styled as a button | `ui/Button` | One primary action per screen. |
+| Card, panel | `ui/Card` | Variants include `empty` and `error`. |
+| Text field | `ui/Field` + `ui/Input` | `Field` is the form-field wrapper: it binds label, hint and error to the control. A width in `className` (`w-40`) replaces the default full width. |
+| Longer text | `ui/Field` + `ui/Textarea` | Grows by rows; the person can resize it. |
+| Yes / no, several of many | `ui/Choice` (`Checkbox`) | The label is the 44px hit area. |
+| One of a few, as a list | `ui/Choice` (`RadioGroup`) | `fieldset` + `legend`. As cards: `ui/OptionCards`. |
+| Filter or choice that is on / off | `ui/Chip` (`ToggleChip`) | `aria-pressed`; a check mark shows the pressed state. |
+| Chosen value that can be removed | `ui/Chip` (`RemovableChip`) | The remove button has its own name, e.g. "Remove Welding". |
+| Choice from a list | `ui/Field` + `ui/Select` or `ui/DarkListbox` | `DarkListbox` when the list is long or searchable. |
+| Choice shown as cards | `ui/OptionCards` | Radio semantics. |
+| Label on its own | `ui/Label` | |
+| Status, role or access indication | `app/status-chip` (`StatusChip`) | Five tones. Words carry the meaning; colour supports it. Role icon: `app/role-icon`. Meaning icon (person, team, evidence state): `app/semantic-icon`. |
+| Message on a screen or form | `ui/Notice` | `info`, `success`, `warning`, `error`. Purpose-built notices that exist stay. |
+| Nothing here yet | `ui/EmptyState` | Say why it is empty and what to do next. The same component as `app/empty-state`. |
+| Loading | `app/skeleton` (`SkeletonBlock`, `SkeletonText`, `SkeletonCardGrid`, `SkeletonScreen`) | Reserve the height; never a spinner over a blank page. |
+| Could not read, retry | `ui/Notice` with a retry action | A failed read is never shown as empty or zero. |
+| Confirm a consequential action | `ui/InlineConfirm` | Two steps, in place. No modal. |
+| Sheet on a phone, popover | `ui/MobileSheet`, `ui/anchored-overlay` | |
+| Page title, back link | `app/premium/page-title`, `app/premium/page-back` | One `h1` per page. |
+| Section head, collapsible section | `app/premium/grammar` (`RegionHead`, `Fold`) | |
+| Search + filters + sort + result count | `ui/FilterBar` | A layout; pass shared controls into it. `as="form"` for a GET search. |
+| Record in a list | `ui/ListRow` inside `<ul>` | Title is the link; status and actions are separate controls. |
+| Records grouped (people by team, teams by company) | `ui/GroupedList` | Headings and lists, no tree lines. Counts only from data. |
+| Structure, two levels or more (company → teams → people; project → teams → people) | `ui/StructureTree` | Nested lists that open and close without JavaScript. Counts only from data. |
+| Data compared across columns (hours, amounts, dates) | `ui/Table` | Real table with a caption; scrolls sideways inside its own box. Records a person opens are `ui/ListRow`, not a table. |
+| Worker card | `app/worker-player-card` (`WorkerPlayerCard`) | The one person card. |
+| Goals, functions, catalogues in a rail | `navigation/card-rail` (`CardRail`) | The one rail. Pin toggle via `RailCard.pin`. |
+| Icon on a navigation card | `navigation/nav-card-icon` | Ids in `lib/navigation/nav-card-icons.ts`. |
+| Public header and menu | `layouts/site-nav`, `layouts/mobile-nav-menu`, `layouts/intent-mega-menu` | One navigation. |
+| Logo | `ui/lm-logo` | The original mark only. |
+
+Rules that hold on every screen:
+
+- **Tokens only.** Colours, type, radii and motion come from `apps/web/tokens/`
+  through Tailwind classes. No hex, no inline colour, no typeface name in a
+  component. Use the `ink-*` / `text-text-*` / `brand-*` / `state-*` classes;
+  `bg-surface-*` and `border-border-*` are older aliases of the same colours
+  and are not for new code.
+- **Light and dark.** Both are real themes. Check both.
+- **Touch targets** are at least 44px. **Focus** is always visible.
+- **Motion** is short and optional: every transition has a
+  `motion-reduce:` variant; nothing moves on its own.
+- **States are words.** Empty, error, loading and success each have their
+  component above; a status is never colour alone.
+- **Copy** lives in `apps/web/messages/` for every locale, short and plain.
+  No promise the product does not keep. A function that is not built is
+  labelled as not available, never shown as working.
+- **Phone first.** Check 320, 375, 390, 768 and 1440px: no sideways scroll,
+  no clipped primary action.
+- **Not in the system:** a second carousel, a second card style, a modal
+  dialog, decorative illustration, an icon set other than lucide.
+
 ## Final Quality Gate
 
 Before accepting a UI change, check:
