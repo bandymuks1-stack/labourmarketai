@@ -18625,7 +18625,57 @@
         "needs_migration": "Nu niet beschikbaar"
       }
     },
-    "openHistory": "Open geschiedenis"
+    "openHistory": "Open geschiedenis",
+    "historyClaim": {
+      "title": "Historielinks voor oud-medewerkers",
+      "intro": "Iemand die hier niet meer werkt, kunt u niet als medewerker uitnodigen. Geef in plaats daarvan een eenmalige link: de persoon opent die, u bevestigt wie er kwam, en de persoon accepteert op het eigen profiel.",
+      "none": "Er staan geen historielinks open.",
+      "unavailable": "De historielinks konden niet worden geladen. Probeer het opnieuw.",
+      "waiting": "Wacht op uw antwoord",
+      "open": "Link afgegeven",
+      "openHint": "Niemand heeft deze link nog geopend.",
+      "came": "{name} ({email}) opende de link en zegt dat dit record van hem is.",
+      "approve": "Ja, dit is dezelfde persoon",
+      "reject": "Nee, dit is iemand anders",
+      "revoke": "Link intrekken",
+      "noteLabel": "Notitie (optioneel)",
+      "notePlaceholder": "Hoe u de persoon herkende",
+      "approved": "Aangeboden. Hij accepteert of weigert nu op zijn eigen profiel.",
+      "rejected": "Afgewezen. Aan het record is niets veranderd.",
+      "revoked": "De link werkt niet meer.",
+      "expires": "Geldig tot {date}.",
+      "offer": "Historielink geven",
+      "offering": "Bezig…",
+      "created": "Link klaar. Geef hem aan die persoon.",
+      "linkLabel": "Eenmalige historielink",
+      "onceOnly": "Wordt één keer getoond en werkt één keer.",
+      "unlink": {
+        "open": "Koppeling ongedaan maken",
+        "reasonLabel": "Reden",
+        "reasonPlaceholder": "Waarom deze koppeling fout is",
+        "confirm": "Koppeling ongedaan maken",
+        "cancel": "Annuleren",
+        "done": "De koppeling is ongedaan gemaakt. De records worden die persoon niet meer getoond.",
+        "note": "De records, hun bron en hun status blijven precies zoals ze zijn. Alleen die persoon ziet ze niet meer.",
+        "reasonRequired": "Geef een reden op.",
+        "notLinked": "Deze persoon is niet gekoppeld."
+      },
+      "errors": {
+        "auth": "Log opnieuw in.",
+        "invalid": "Er klopte iets niet aan het verzoek.",
+        "notFound": "Niet gevonden.",
+        "notAwaitingDecision": "Deze link wacht niet op een antwoord.",
+        "cannotDecideOwn": "U kunt uw eigen link niet beantwoorden.",
+        "noLongerPossible": "Dit kan niet meer. Controleer het record.",
+        "alreadyOnRoster": "Die persoon staat al op deze lijst.",
+        "notLive": "Deze link staat niet meer open.",
+        "needsMigration": "Deze functie is nog niet beschikbaar.",
+        "error": "Het is niet gelukt. Probeer het opnieuw.",
+        "alreadyLinked": "Dit record is al gekoppeld.",
+        "awaitingDecision": "Iemand heeft de vorige link al geopend. Beantwoord hem eerst.",
+        "rateLimited": "Te veel links voor vandaag. Probeer het morgen."
+      }
+    }
   },
   "peopleImport": {
     "alreadyThere": "{count} staan al op uw lijst",
@@ -20733,5 +20783,29 @@
       "fullList": "Volledige lijst"
     },
     "more": "Meer"
+  },
+  "historyClaim": {
+    "title": "Uw werkverleden bij een vorige werkgever",
+    "organization": "{name} bewaarde een record van werk dat u daar deed.",
+    "explain": "Er wordt nog niets getoond of toegevoegd: het bedrijf bevestigt dat u de persoon in het record bent, en daarna accepteert of weigert u het op uw eigen profiel.",
+    "redeem": "Dit ben ik",
+    "redeeming": "Versturen…",
+    "redeemedTitle": "Naar het bedrijf gestuurd",
+    "redeemedHint": "Zij bevestigen dat u de persoon in het record bent. Daarna komt het record naar uw profiel, waar u het accepteert of weigert.",
+    "waitingForOrganization": "Het bedrijf controleert of u de persoon in het record bent.",
+    "rejectedByOrganization": "Het bedrijf heeft deze koppeling niet bevestigd. Als dat een vergissing is, neem dan rechtstreeks contact op.",
+    "unavailable": "Deze link werkt niet. Hij is misschien gebruikt, ingetrokken of verlopen.",
+    "unnamedOrganization": "Een bedrijf",
+    "errors": {
+      "auth": "Log opnieuw in.",
+      "unavailable": "Deze link werkt niet meer.",
+      "emailNotVerified": "Bevestig eerst uw e-mailadres en open deze link daarna opnieuw.",
+      "creatorCannotRedeem": "Deze link heeft u zelf gemaakt, dus hij is niet voor u.",
+      "noWorkerProfile": "Maak eerst uw profiel af en open deze link daarna opnieuw.",
+      "alreadyOnRoster": "U staat al op de lijst van dit bedrijf.",
+      "rateLimited": "Te veel pogingen vandaag. Probeer het morgen.",
+      "needsMigration": "Deze functie is nog niet beschikbaar.",
+      "error": "Het is niet gelukt. Probeer het opnieuw."
+    }
   }
 }

@@ -18625,7 +18625,57 @@
         "needs_migration": "Chwilowo niedostępne"
       }
     },
-    "openHistory": "Otwórz historię"
+    "openHistory": "Otwórz historię",
+    "historyClaim": {
+      "title": "Linki do historii dla byłych pracowników",
+      "intro": "Osoby, która już tu nie pracuje, nie można zaprosić jako pracownika. Zamiast tego proszę przekazać jej jednorazowy link: otworzy go, Państwo potwierdzą, kto przyszedł, a ona przyjmie wpis w swoim profilu.",
+      "none": "Nie ma otwartych linków.",
+      "unavailable": "Nie udało się wczytać linków. Spróbuj ponownie.",
+      "waiting": "Czeka na Państwa odpowiedź",
+      "open": "Link przekazany",
+      "openHint": "Nikt jeszcze nie otworzył tego linku.",
+      "came": "{name} ({email}) otworzył link i mówi, że ten wpis dotyczy jego.",
+      "approve": "Tak, to ta sama osoba",
+      "reject": "Nie, to ktoś inny",
+      "revoke": "Wycofaj link",
+      "noteLabel": "Notatka (opcjonalnie)",
+      "notePlaceholder": "Po czym rozpoznano osobę",
+      "approved": "Zaproponowano. Teraz sama przyjmie lub odrzuci w swoim profilu.",
+      "rejected": "Odrzucono. We wpisie nic się nie zmieniło.",
+      "revoked": "Link już nie działa.",
+      "expires": "Ważny do {date}.",
+      "offer": "Daj link do historii",
+      "offering": "Przygotowywanie…",
+      "created": "Link gotowy. Przekaż go tej osobie.",
+      "linkLabel": "Jednorazowy link do historii",
+      "onceOnly": "Pokazywany raz i działa raz.",
+      "unlink": {
+        "open": "Cofnij powiązanie",
+        "reasonLabel": "Powód",
+        "reasonPlaceholder": "Dlaczego to powiązanie jest błędne",
+        "confirm": "Cofnij powiązanie",
+        "cancel": "Anuluj",
+        "done": "Powiązanie cofnięte. Wpisy nie są już pokazywane tej osobie.",
+        "note": "Wpisy, ich źródło i stan pozostają bez zmian. Tylko ta osoba przestaje je widzieć.",
+        "reasonRequired": "Podaj powód.",
+        "notLinked": "Ta osoba nie jest powiązana."
+      },
+      "errors": {
+        "auth": "Zaloguj się ponownie.",
+        "invalid": "Coś było nie tak z żądaniem.",
+        "notFound": "Nie znaleziono.",
+        "notAwaitingDecision": "Ten link nie czeka na odpowiedź.",
+        "cannotDecideOwn": "Nie mogą Państwo odpowiedzieć na własny link.",
+        "noLongerPossible": "To już niemożliwe. Sprawdź wpis.",
+        "alreadyOnRoster": "Ta osoba jest już na liście.",
+        "notLive": "Ten link nie jest już otwarty.",
+        "needsMigration": "Ta funkcja jeszcze nie działa.",
+        "error": "Nie udało się. Spróbuj ponownie.",
+        "alreadyLinked": "Ten wpis jest już powiązany.",
+        "awaitingDecision": "Ktoś już otworzył poprzedni link. Najpierw mu odpowiedz.",
+        "rateLimited": "Za dużo linków na dziś. Spróbuj jutro."
+      }
+    }
   },
   "peopleImport": {
     "alreadyThere": "{count} jest już na Państwa liście",
@@ -20733,5 +20783,29 @@
       "fullList": "Pełna lista"
     },
     "more": "Więcej"
+  },
+  "historyClaim": {
+    "title": "Państwa historia pracy u byłego pracodawcy",
+    "organization": "{name} zachowała zapis Państwa pracy w tym miejscu.",
+    "explain": "Na razie nic nie jest pokazywane ani dodawane: firma potwierdzi, że to Państwo są osobą z zapisu, a potem przyjmą go Państwo lub odrzucą w swoim profilu.",
+    "redeem": "To ja",
+    "redeeming": "Wysyłanie…",
+    "redeemedTitle": "Wysłano do firmy",
+    "redeemedHint": "Firma potwierdzi, że to Państwo są osobą z zapisu. Potem zapis trafi do Państwa profilu, gdzie go Państwo przyjmą lub odrzucą.",
+    "waitingForOrganization": "Firma sprawdza, czy to Państwo są osobą z zapisu.",
+    "rejectedByOrganization": "Firma nie potwierdziła tego powiązania. Jeśli to pomyłka, skontaktuj się z nią bezpośrednio.",
+    "unavailable": "Ten link nie działa. Mógł zostać użyty, wycofany albo stracić ważność.",
+    "unnamedOrganization": "Firma",
+    "errors": {
+      "auth": "Zaloguj się ponownie.",
+      "unavailable": "Ten link już nie działa.",
+      "emailNotVerified": "Najpierw potwierdź adres e-mail, a potem otwórz link ponownie.",
+      "creatorCannotRedeem": "Ten link utworzyli Państwo sami, więc nie jest przeznaczony dla Państwa.",
+      "noWorkerProfile": "Najpierw dokończ konfigurację profilu, a potem otwórz link ponownie.",
+      "alreadyOnRoster": "Są już Państwo na liście tej firmy.",
+      "rateLimited": "Za dużo prób dzisiaj. Spróbuj jutro.",
+      "needsMigration": "Ta funkcja jeszcze nie działa.",
+      "error": "Nie udało się. Spróbuj ponownie."
+    }
   }
 }

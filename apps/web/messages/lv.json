@@ -8102,5 +8102,81 @@
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
     }
+  },
+  "historyClaim": {
+    "title": "[EN] Your work history at a former employer",
+    "organization": "[EN] {name} kept a record of work you did there.",
+    "explain": "[EN] Nothing is shown or added yet: the company then confirms that you are the person in the record, and after that you accept or refuse it on your own profile.",
+    "redeem": "Tas esmu es",
+    "redeeming": "[EN] Sending…",
+    "redeemedTitle": "[EN] Sent to the company",
+    "redeemedHint": "[EN] They will confirm that you are the person in the record. When they do, the record comes to your profile, where you accept or refuse it.",
+    "waitingForOrganization": "[EN] The company is checking that you are the person in the record.",
+    "rejectedByOrganization": "[EN] The company did not confirm this link. If that is a mistake, ask them directly.",
+    "unavailable": "[EN] This link does not work. It may have been used, taken back, or it may have expired.",
+    "unnamedOrganization": "[EN] A company",
+    "errors": {
+      "auth": "[EN] Please sign in again.",
+      "unavailable": "[EN] This link does not work any more.",
+      "emailNotVerified": "[EN] Confirm your e-mail address first, then open this link again.",
+      "creatorCannotRedeem": "[EN] This link was made by you, so it is not for you.",
+      "noWorkerProfile": "[EN] Finish setting up your profile first, then open this link again.",
+      "alreadyOnRoster": "[EN] You are already on this company’s list.",
+      "rateLimited": "[EN] Too many attempts today. Try again tomorrow.",
+      "needsMigration": "[EN] This function is not available yet.",
+      "error": "[EN] It did not work. Try again."
+    }
+  },
+  "organizationRoster": {
+    "historyClaim": {
+      "title": "Vēstures saites bijušajiem darbiniekiem",
+      "intro": "[EN] A person who no longer works here cannot be invited as an employee. Give them a one-time link instead: they open it, you confirm who came, and they accept on their own profile.",
+      "none": "[EN] No history links are open.",
+      "unavailable": "[EN] The history links could not be loaded. Try again.",
+      "waiting": "[EN] Waiting for your answer",
+      "open": "[EN] Link handed out",
+      "openHint": "[EN] Nobody has opened this link yet.",
+      "came": "[EN] {name} ({email}) opened the link and says this record is theirs.",
+      "approve": "[EN] Yes, this is the same person",
+      "reject": "[EN] No, this is somebody else",
+      "revoke": "[EN] Take the link back",
+      "noteLabel": "[EN] Note (optional)",
+      "notePlaceholder": "[EN] How you recognised them",
+      "approved": "[EN] Offered to them. They now accept or refuse it on their own profile.",
+      "rejected": "[EN] Rejected. Nothing changed on the record.",
+      "revoked": "[EN] The link no longer works.",
+      "expires": "[EN] Valid until {date}.",
+      "offer": "Dot vēstures saiti",
+      "offering": "[EN] Preparing…",
+      "created": "[EN] Link ready. Hand it to that person.",
+      "linkLabel": "[EN] One-time history link",
+      "onceOnly": "[EN] It is shown once and works once.",
+      "unlink": {
+        "open": "[EN] Undo this link",
+        "reasonLabel": "[EN] Reason",
+        "reasonPlaceholder": "[EN] Why this link is wrong",
+        "confirm": "[EN] Undo the link",
+        "cancel": "[EN] Cancel",
+        "done": "[EN] The link is undone. The records are no longer shown to that person.",
+        "note": "[EN] The records, their source and their state stay exactly as they are. Only that person stops seeing them.",
+        "reasonRequired": "[EN] Please give a reason.",
+        "notLinked": "[EN] This person is not linked."
+      },
+      "errors": {
+        "auth": "[EN] Please sign in again.",
+        "invalid": "[EN] Something was wrong with the request.",
+        "notFound": "[EN] Not found.",
+        "notAwaitingDecision": "[EN] This link is not waiting for an answer.",
+        "cannotDecideOwn": "[EN] You cannot answer your own link.",
+        "noLongerPossible": "[EN] This is no longer possible. Check the record.",
+        "alreadyOnRoster": "[EN] That person is already on this list.",
+        "notLive": "[EN] This link is no longer open.",
+        "needsMigration": "[EN] This function is not available yet.",
+        "error": "[EN] It did not work. Try again.",
+        "alreadyLinked": "[EN] This record is already linked.",
+        "awaitingDecision": "[EN] Somebody has already opened the previous link. Answer them first.",
+        "rateLimited": "[EN] Too many links for today. Try again tomorrow."
+      }
+    }
   }
 }

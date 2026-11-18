@@ -8102,5 +8102,81 @@
       "not_authorized": "Du kan kun administrere dine egne poster.",
       "error": "Noget gik galt. Prøv igen."
     }
+  },
+  "historyClaim": {
+    "title": "Din arbejdshistorik hos en tidligere arbejdsgiver",
+    "organization": "{name} har gemt en post om arbejde, du udførte der.",
+    "explain": "Intet vises eller tilføjes endnu: virksomheden bekræfter derefter, at du er personen i posten, og bagefter accepterer eller afviser du den på din egen profil.",
+    "redeem": "Det er mig",
+    "redeeming": "Sender…",
+    "redeemedTitle": "Sendt til virksomheden",
+    "redeemedHint": "Virksomheden bekræfter, at du er personen i posten. Når det sker, kommer posten til din profil, hvor du accepterer eller afviser den.",
+    "waitingForOrganization": "Virksomheden tjekker, at du er personen i posten.",
+    "rejectedByOrganization": "Virksomheden bekræftede ikke denne kobling. Hvis det er en fejl, så spørg dem direkte.",
+    "unavailable": "Dette link virker ikke. Det kan være brugt, trukket tilbage eller udløbet.",
+    "unnamedOrganization": "En virksomhed",
+    "errors": {
+      "auth": "Log ind igen.",
+      "unavailable": "Dette link virker ikke længere.",
+      "emailNotVerified": "Bekræft først din e-mailadresse, og åbn så linket igen.",
+      "creatorCannotRedeem": "Du har selv lavet dette link, så det er ikke til dig.",
+      "noWorkerProfile": "Gør først din profil færdig, og åbn så linket igen.",
+      "alreadyOnRoster": "Du er allerede på virksomhedens liste.",
+      "rateLimited": "For mange forsøg i dag. Prøv igen i morgen.",
+      "needsMigration": "Denne funktion er ikke tilgængelig endnu.",
+      "error": "Det lykkedes ikke. Prøv igen."
+    }
+  },
+  "organizationRoster": {
+    "historyClaim": {
+      "title": "Historiklinks til tidligere medarbejdere",
+      "intro": "En person, der ikke længere arbejder her, kan ikke inviteres som medarbejder. Giv vedkommende et engangslink i stedet: personen åbner det, du bekræfter, hvem der kom, og personen accepterer på sin egen profil.",
+      "none": "Ingen historiklinks er åbne.",
+      "unavailable": "Historiklinkene kunne ikke indlæses. Prøv igen.",
+      "waiting": "Venter på dit svar",
+      "open": "Link udleveret",
+      "openHint": "Ingen har åbnet dette link endnu.",
+      "came": "{name} ({email}) åbnede linket og siger, at posten gælder vedkommende.",
+      "approve": "Ja, det er den samme person",
+      "reject": "Nej, det er en anden",
+      "revoke": "Træk linket tilbage",
+      "noteLabel": "Bemærkning (valgfri)",
+      "notePlaceholder": "Hvordan du genkendte personen",
+      "approved": "Tilbudt. Personen accepterer eller afviser det nu på sin egen profil.",
+      "rejected": "Afvist. Intet er ændret i posten.",
+      "revoked": "Linket virker ikke længere.",
+      "expires": "Gyldigt til {date}.",
+      "offer": "Giv et historiklink",
+      "offering": "Forbereder…",
+      "created": "Linket er klar. Giv det til personen.",
+      "linkLabel": "Engangslink til historikken",
+      "onceOnly": "Det vises én gang og virker én gang.",
+      "unlink": {
+        "open": "Fortryd koblingen",
+        "reasonLabel": "Begrundelse",
+        "reasonPlaceholder": "Hvorfor koblingen er forkert",
+        "confirm": "Fortryd koblingen",
+        "cancel": "Annuller",
+        "done": "Koblingen er fortrudt. Posterne vises ikke længere for personen.",
+        "note": "Posterne, deres kilde og deres status forbliver præcis, som de er. Kun den person holder op med at se dem.",
+        "reasonRequired": "Angiv en begrundelse.",
+        "notLinked": "Denne person er ikke koblet."
+      },
+      "errors": {
+        "auth": "Log ind igen.",
+        "invalid": "Der var noget galt med anmodningen.",
+        "notFound": "Ikke fundet.",
+        "notAwaitingDecision": "Dette link venter ikke på et svar.",
+        "cannotDecideOwn": "Du kan ikke svare på dit eget link.",
+        "noLongerPossible": "Det er ikke længere muligt. Tjek posten.",
+        "alreadyOnRoster": "Personen er allerede på denne liste.",
+        "notLive": "Dette link er ikke længere åbent.",
+        "needsMigration": "Denne funktion er ikke tilgængelig endnu.",
+        "error": "Det lykkedes ikke. Prøv igen.",
+        "alreadyLinked": "Denne post er allerede koblet.",
+        "awaitingDecision": "Nogen har allerede åbnet det forrige link. Svar personen først.",
+        "rateLimited": "For mange links i dag. Prøv igen i morgen."
+      }
+    }
   }
 }

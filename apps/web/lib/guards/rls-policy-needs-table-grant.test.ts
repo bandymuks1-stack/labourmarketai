@@ -57,6 +57,19 @@ function tablesWithAuthenticatedSelectPolicy(sql: string): Set<string> {
 function tablesGrantedSelect(sql: string): Set<string> {
   const out = new Set<string>();
   const grant = /grant\s+([a-z,\s]+?)\s+on\s+(?:table\s+)?([^;]+?)\s+to\s+([^;]+);/g;
+  // A COLUMN-level grant is a grant: `grant select (a, b) on t to authenticated`
+  // is how a table with a secret column (a token digest) is opened for reading
+  // without opening that column. The table is reachable, which is what this
+  // guard is about; what is NOT readable is stated per column.
+  const columnGrant =
+    /grant\s+select\s*\([^)]*\)\s+on\s+((?:public\.)?[a-z0-9_,"\s.]+?)\s+to\s+([a-z_,\s]+);/gi;
+  for (const m of sql.matchAll(columnGrant)) {
+    if (!/\bauthenticated\b/.test(m[2])) continue;
+    for (const t of m[1].split(",")) {
+      const name = t.trim().replace(/^public\./, "").replace(/"/g, "");
+      if (/^[a-z0-9_]+$/.test(name)) out.add(name);
+    }
+  }
   for (const m of sql.matchAll(grant)) {
     const privs = m[1];
     if (!/\b(select|all)\b/.test(privs)) continue;
