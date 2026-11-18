@@ -74,6 +74,11 @@ on:
         description: "API origin the app talks to: https scheme + host only (production, or an isolated staging that shares production Supabase). Empty = https://labourmarket.ai"
         required: false
         default: "https://labourmarket.ai"
+      new_screens_walk:
+        description: "Also walk the screens #3451/#3453/#3471 added, READ ONLY (apps/mobile/.maestro/new-screens-walk.yaml). J-2 sets it with the owner's approval."
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -437,6 +442,7 @@ jobs:
           MAESTRO_CLI_NO_ANALYTICS: "1"
           MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
           PROJECT_EXPECTED: ${{ steps.qa_project.outcome == 'success' && '1' || '0' }}
+          NEW_SCREENS_WALK: ${{ inputs.new_screens_walk && '1' || '0' }}
         with:
           api-level: 34
           arch: x86_64

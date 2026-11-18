@@ -44,6 +44,7 @@ const BINARY_EXTENSIONS: ReadonlySet<string> = new Set([
   ".eot",
   ".pdf",
   ".zip",
+  ".pptx", // an Office deck is a ZIP container (docs/presentations)
   ".gz",
 ]);
 
