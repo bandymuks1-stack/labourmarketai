@@ -201,7 +201,7 @@ describe("work waiting for approval", () => {
     const html = await render();
     expect(html).not.toContain("Svetimas Žmogus");
     expect(html).not.toContain('data-testid="quick-confirm-tap-other"');
-    expect(html).toContain("Kitur tavo patvirtinimo laukia dar: 1.");
+    expect(html).toContain("Kitur jūsų patvirtinimo laukia dar: 1."); // formal since 2026-11-15
   });
 });
 
@@ -280,7 +280,7 @@ describe("what the screen never claims", () => {
   });
 });
 
-describe.each(["lt", "en", "ru", "nl", "de", "pl"])("every key resolves in %s", (locale) => {
+describe.each(["lt", "en", "ru", "nl", "de", "pl", "sv"])("every key resolves in %s", (locale) => {
   it("in the waiting state, with every decision and failure line", async () => {
     reads.reviewable = 2;
     reads.queue = [entry("e1", { hours: { value: 8, unit: "hours", certain: false } }), entry("e2", { hours: null })];

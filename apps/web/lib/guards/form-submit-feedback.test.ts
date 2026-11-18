@@ -203,6 +203,15 @@ const NATIVE_NAV = new Set([
   // no async submit to show a pending state for: the browser performs a full
   // navigation. Same reasoning as the agreements-register filter form above.
   "app/[locale]/(marketing)/jobs/page.tsx",
+  // Goal navigator — its ONE form is the same plain GET search, submitted to
+  // the public board: the feedback is the board itself.
+  "components/navigation/goal-navigator.tsx",
+  // Review queue (Lane H) — the ONE form on this page is the plain GET
+  // project filter (`method="get"`, no server action, no client state): the
+  // browser navigates and the feedback is the narrowed queue with its
+  // "showing N of M" line. The approve/reject controls are client components
+  // in their own files and stay under the general rule.
+  "app/[locale]/dashboard/inbox/quick/page.tsx",
 ]);
 
 const PENDING_SIGNAL =

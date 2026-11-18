@@ -93,3 +93,13 @@ describe("recovery contract — retry only when retry can succeed", () => {
     expect(needsOpenInBrowserGuidance("timeout", normalEnv)).toBe(false);
   });
 });
+
+describe("detectInAppBrowser — LinkedIn's in-app browser", () => {
+  it("is recognised, so the sign-in pages can warn about Google sign-in there", async () => {
+    const { detectInAppBrowser } = await import("./geo-capability");
+    expect(
+      detectInAppBrowser("Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [LinkedInApp]/9.29.5522"),
+    ).toBe("other-in-app");
+    expect(detectInAppBrowser("Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1")).toBeNull();
+  });
+});

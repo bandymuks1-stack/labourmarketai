@@ -123,6 +123,12 @@ export interface SubscriptionUpsert {
   unitAmountCents?: number | null;
   currency?: string | null;
   /**
+   * The payment outcome already known when the row is written. A paid
+   * one-time session (the pilot pass) carries it itself: its invoice names no
+   * subscription, so no invoice event can ever set it afterwards.
+   */
+  lastPaymentStatus?: PaymentStatus | null;
+  /**
    * "link" = checkout.session.completed (knows ids, not state — never
    * regresses an existing row's status); default "subscription".
    */

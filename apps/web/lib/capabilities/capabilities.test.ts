@@ -2116,6 +2116,16 @@ describe("demand draft → confirm (G4 wagon 3)", () => {
     expect(demandSubmit).not.toHaveBeenCalled();
   });
 
+  it("a draft WITHOUT a country returns missing: [\"country\"] and NO token (Swedish employer audit CL-1)", async () => {
+    demandSubmit.mockClear();
+    for (const country of [undefined, null, "XX"]) {
+      const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country });
+      expect(r).toMatchObject({ ok: false, code: "country_required", missing: ["country"] });
+      expect(JSON.stringify(r)).not.toContain("confirmationToken");
+    }
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
   it("draft → confirm runs THE canonical submit core with the gate's own organization id", async () => {
     demandSubmit.mockClear();
     const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);

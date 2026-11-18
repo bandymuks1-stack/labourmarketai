@@ -28,7 +28,7 @@ const PAGE = read("app/[locale]/dashboard/company/scouting/page.tsx");
 const ADAPTER = read("lib/conversation/employer-workspace.ts");
 const PANEL = read("components/app/workspace/candidates-result.tsx");
 
-const LOCALES = ["en", "lt", "ru", "pl", "de", "nl"] as const;
+const LOCALES = ["en", "lt", "ru", "pl", "de", "nl", "sv"] as const;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const msgs = (loc: string): any => JSON.parse(read(`messages/${loc}.json`));
 
@@ -57,7 +57,11 @@ describe("the scouting core looks at hand-raisers before giving up on structure"
     // Every hand-raiser, batched by the pool budget (Codex review #2680): each
     // batch goes through the same supply read with the same fixture rule.
     expect(fn).toMatch(/i \+= SUPPLY_POOL_BUDGET/);
-    expect(fn).toMatch(/buildSupplyCandidates\(supabase, \{ workerIds, excludeFixtures: input\.excludeFixtures \}\)/);
+    // ...and the same viewer rule: the person searching is not their own
+    // hand-raiser either (employer-flow audit 2026-11-15).
+    expect(fn).toMatch(
+      /buildSupplyCandidates\(supabase, \{\s*workerIds,\s*excludeFixtures: input\.excludeFixtures,\s*viewerProfileId: input\.userId,\s*\}\)/,
+    );
     // Same live-proposal verdict; withdrawn hands are not even fetched.
     expect(fn).toMatch(/candidateActionability\(/);
     expect(fn).toMatch(/mayOfferEmployerActions\(actionability\)/);
@@ -164,7 +168,7 @@ describe("the chat candidates panel shows them, labelled, server-side", () => {
 });
 
 describe("copy: 6 locales, says 'not assessed', claims no qualification", () => {
-  const CERT_STEM = /verif|confirm|certif|tvirtin|sertifik|подтверж|верифиц|zertifi|bestätig|geverifieerd|bevestig|potwierdz|zweryfik/i;
+  const CERT_STEM = /verif|confirm|certif|tvirtin|sertifik|подтверж|верифиц|zertifi|bestätig|geverifieerd|bevestig|potwierdz|zweryfik|bekräft|certifi/i;
   const NOT_ASSESSED: Record<(typeof LOCALES)[number], RegExp> = {
     en: /not assessed/i,
     lt: /nevertinta/i,
@@ -172,6 +176,7 @@ describe("copy: 6 locales, says 'not assessed', claims no qualification", () => 
     pl: /nie zostało ocenione|nieocenione/i,
     de: /nicht bewertet/i,
     nl: /niet beoordeeld/i,
+    sv: /inte bedömd/i,
   };
 
   for (const loc of LOCALES) {

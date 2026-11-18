@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { AuthCarriedIntent } from "@/components/app/auth-carried-intent";
 import { Button } from "@/components/ui/Button";
 import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
+import { InAppBrowserNotice } from "@/components/app/in-app-browser-notice";
 import {
   FacebookButton,
   GoogleButton,
@@ -21,6 +22,8 @@ import {
 } from "@/lib/invitations/signup-accept-action";
 import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { StaffReviewNotice } from "@/components/app/staff-review-notice";
+import { bindWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
+import { isWorkerProfileDoorNext } from "@/lib/marketing/worker-profile-door";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import {
   RESEND_COOLDOWN_SECONDS,
@@ -225,6 +228,9 @@ export function SignupForm({
       fieldError("confirm", t("error_password_mismatch"));
       return;
     }
+    // The intake draft, if this tab has one, is bound to this email only
+    // (decision 0024; lib/staffing/worker-intake-draft.ts).
+    if (!invitation && nextParam && isWorkerProfileDoorNext(nextPath)) bindWorkerIntakeDraft(email);
     setStatus("signing");
     // Registration-started conversion signal (Pre-Advertising Launch
     // Readiness v1) with first-touch campaign attribution. Fires only after
@@ -382,7 +388,7 @@ export function SignupForm({
               ? `/auth/login?next=${encodeURIComponent(nextPath)}`
               : "/auth/login"
           }
-          className="text-sm text-brand-blue hover:text-brand-champagne"
+          className="inline-flex min-h-11 items-center text-sm text-brand-blue hover:text-brand-champagne"
         >
           {t("login_link")} →
         </Link>
@@ -419,6 +425,7 @@ export function SignupForm({
             second copy above the submit used to render — a real person read the
             same paragraph twice on one short form (window 6 walk, 2026-09-06). */}
         <AuthLegalNotice variant="signup" />
+        <InAppBrowserNotice text={tSocial("inAppBrowser")} />
 
         {/* ONE provider row on a phone (P0-1b, 360×740): Google keeps its
             words and the room; LinkedIn and Facebook are 48 px logo squares

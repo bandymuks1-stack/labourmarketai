@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Reveal } from "@/components/marketing/reveal";
+import { Reveal } from "@/components/marketing/lazy-motion";
 import { EvidenceDot, type EvidenceStanding } from "@/components/app/work-world/primitives";
 
 /**
