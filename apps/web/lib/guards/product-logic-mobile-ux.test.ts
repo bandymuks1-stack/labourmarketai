@@ -48,8 +48,8 @@ describe("finite company choices use OptionCards, not native <select>", () => {
   it("company setup imports + uses OptionCards for company type + requester role", () => {
     expect(setupForm).toMatch(/import \{ OptionCards \}/);
     // company_type is now radio cards, not a native dropdown.
-    expect(setupForm).not.toMatch(/<select[\s\S]{0,80}name="company_type"/);
-    expect(setupForm).not.toMatch(/<select[\s\S]{0,80}name="requester_role"/);
+    expect(setupForm).not.toMatch(/<[sS]elect[\s\S]{0,80}name="company_type"/);
+    expect(setupForm).not.toMatch(/<[sS]elect[\s\S]{0,80}name="requester_role"/);
     // The guard-pinned canonical mapping is preserved.
     expect(setupForm).toMatch(/COMPANY_TYPES\.map/);
     expect(setupForm).toMatch(/company-setup-company-type/);
