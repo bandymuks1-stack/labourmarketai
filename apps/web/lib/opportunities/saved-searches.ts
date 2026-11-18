@@ -10,6 +10,7 @@ import {
   type SavedSearchReading,
 } from "@/lib/opportunities/saved-search-model";
 import { emitSavedSearchMatchNotification } from "@/lib/notifications/event-emitters";
+import { resolveOwnWorkerId } from "@/lib/opportunities/saved-opportunities";
 
 /**
  * The worker's own saved searches (DEM-8).
@@ -61,9 +62,19 @@ export async function getMySavedSearches(): Promise<MySavedSearches> {
   } = await supabase.auth.getUser();
   if (!user) return { searches: [], available: false };
 
+  // The worker_id filter is NOT redundant with RLS (same rule as the private
+  // bookmarks in saved-opportunities.ts). `worker_saved_searches_select` also
+  // admits `is_admin()`, so without it an admin's board listed up to 50 OTHER
+  // workers' private searches, emitted `saved_search_match` alerts to the
+  // admin for them, and offered a delete the RPC (own rows only) silently
+  // ignored. A person without a worker row has no saved searches to show.
+  const workerId = await resolveOwnWorkerId(supabase, user.id);
+  if (!workerId) return { searches: [], available: false };
+
   const res = await asAny(supabase)
     .from("worker_saved_searches")
     .select("id, label, criteria, notify, last_seen_at")
+    .eq("worker_id", workerId)
     .order("created_at", { ascending: false })
     .limit(READ_LIMIT);
   if (res.error) {

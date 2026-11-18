@@ -202,7 +202,7 @@ describe("runAutoMatchForDemand", () => {
       { supabase: supabase as never, userId: USER } as never,
       employer,
       "hire_workers",
-      { description: "Need 3 welders", role: "Welder" },
+      { description: "Need 3 welders", role: "Welder", country: "SE" },
     );
     expect(res).toEqual({ ok: true, requestId: REQ });
     // the matcher was attempted and the failure was recorded on the row

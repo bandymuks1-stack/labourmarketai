@@ -736,8 +736,8 @@ describe("the organization's hour records — a ledger beside the journal, never
       entries: journal,
       organizationRecords: imported,
     });
-    const { organizationRecords: a, organizationPeriodRecords: pa, organizationContextRecords: xa, organizationDayRecords: da, checks: ca, ...restA } = without;
-    const { organizationRecords: b, organizationPeriodRecords: pb, organizationContextRecords: xb, organizationDayRecords: db, checks: cb, ...restB } = withLedger;
+    const { organizationRecords: a, organizationPeriodRecords: pa, organizationContextRecords: xa, organizationDayRecords: da, organizationPendingRecords: na, checks: ca, ...restA } = without;
+    const { organizationRecords: b, organizationPeriodRecords: pb, organizationContextRecords: xb, organizationDayRecords: db, organizationPendingRecords: nb, checks: cb, ...restB } = withLedger;
     // the day-record pass-through (#2169 all-time rule) follows the ledger:
     // UNKNOWN without it, every live day record with it, summed nowhere here.
     expect(da).toBeNull();
@@ -751,6 +751,9 @@ describe("the organization's hour records — a ledger beside the journal, never
     // the period list follows the ledger: UNKNOWN with it, read-and-empty with it
     expect(pa).toBeNull();
     expect(pb).toEqual([]);
+    // the no-duration pass-through (SEP-7) follows the ledger the same way
+    expect(na).toBeNull();
+    expect(nb).toEqual([]);
     expect(withLedger.totalHours).toBe(14);
     expect(withLedger.periods.find((p) => p.key === "all")!.hours).toBe(14);
     // the skill reading is untouched: 38 recorded hours reach no skill
@@ -1143,5 +1146,25 @@ describe("one time scope (issue #1689, lane B) — range focus, first day, conte
     expect([...organizationHoursPerDay(records, workPeriodBounds("week", TODAY))]).toEqual([["2026-09-10", 6]]);
     expect(organizationHoursPerDay(null).size).toBe(0);
     expect(organizationHoursPerDay(undefined).size).toBe(0);
+  });
+});
+
+describe("a recorded confirmation the standing read could not judge (Codex #2608)", () => {
+  it("stays journal-level evidence — never confirmed, never erased to self-declared", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: "2026-10-22",
+      focus: "all",
+      entries: [],
+      skills: [
+        // the standing mapping keeps the source and marks the row UNKNOWN
+        { skillId: "s-a", slug: "tiling", verified: false, source: "manager_confirmed", confirmation: "unknown" },
+        { skillId: "s-b", slug: "painting", verified: false, source: null, confirmation: "withdrawn" },
+        { skillId: "s-c", slug: "plaster", verified: true, source: "manager_confirmed", confirmation: "standing" },
+      ],
+    });
+    const tier = (slug: string) => wi.skills.find((s) => s.slug === slug)?.tier;
+    expect(tier("tiling")).toBe("work_journal");
+    expect(tier("painting")).toBe("self_declared");
+    expect(tier("plaster")).toBe("manager_confirmed");
   });
 });

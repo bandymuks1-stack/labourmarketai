@@ -5,10 +5,12 @@ import { createHash } from "node:crypto";
 import { env } from "@/lib/env";
 import {
   canonicalInputHash,
+  genuineTokenIssuedAt,
   issueConfirmationToken,
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
 import { spendConfirmationForRequest } from "@/lib/security/confirmation-spend";
+import { confirmationKeyMaterial } from "@/lib/security/confirmation-key-material";
 
 /**
  * THE capability confirmation wiring (G4 tail wagon 1) — the ONE way a
@@ -26,14 +28,18 @@ import { spendConfirmationForRequest } from "@/lib/security/confirmation-spend";
  * string — a token minted for one surface can never be replayed on the other.
  */
 export function capabilityTokenSecret(): string {
-  const material = env.CONVERSATION_TOKEN_SECRET || env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!material) {
+  // Same rule as the conversation signer: the dedicated key or a refusal; the
+  // service-role key is never key material, in any environment.
+  const verdict = confirmationKeyMaterial({
+    dedicated: env.CONVERSATION_TOKEN_SECRET,
+  });
+  if (!verdict.ok) {
     throw new Error(
-      "capability confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
-        "(or SUPABASE_SERVICE_ROLE_KEY). Refusing to sign with a hardcoded fallback.",
+      `capability confirmation tokens cannot be signed: ${verdict.reason} ` +
+        "Refusing to sign with a hardcoded fallback.",
     );
   }
-  return createHash("sha256").update(`capability-confirmation:v1:${material}`).digest("hex");
+  return createHash("sha256").update(`capability-confirmation:v1:${verdict.material}`).digest("hex");
 }
 
 /** Mint the one-time token a draft returns. `input` must be the NORMALIZED
@@ -83,4 +89,23 @@ export async function verifyCapabilityConfirmation(opts: {
   if (spend === "already_spent") return { ok: false, reason: "stale_state" };
   if (spend === "error") return { ok: false, reason: "spend_failed" };
   return { ok: true };
+}
+
+/** When a confirm was refused as `stale_state`: the issue time of the token
+ *  if it is genuine for this action, input and caller (see
+ *  `genuineTokenIssuedAt`), else null. Read-only; spends nothing. */
+export function capabilityTokenIssuedAt(opts: {
+  actionId: string;
+  token: string;
+  input: Record<string, unknown>;
+  userId: string;
+}): number | null {
+  return genuineTokenIssuedAt(capabilityTokenSecret(), opts.token, {
+    actionId: opts.actionId,
+    input: opts.input,
+    userId: opts.userId,
+    // Any value: a moved state is exactly the case this answers.
+    currentStateFingerprint: "",
+    nowMs: Date.now(),
+  });
 }

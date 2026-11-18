@@ -7,7 +7,8 @@ import { chainHash } from "@/lib/organization-evidence/fingerprint";
 import { correctionFingerprint } from "@/lib/organization-evidence/record-correction";
 
 /**
- * 20261014150000 — historical date correction v1 (RED, owner-gated).
+ * 20261118100000 (renamed 2026-11-18 from 20261014150000, never applied) —
+ * historical date correction v1 (RED, owner-gated; owner HOLD, option C).
  *
  * The migration writes the canonical INSERT-only correction from SQL. These
  * pins prove it is the SAME correction correctRecord would write: the
@@ -15,11 +16,11 @@ import { correctionFingerprint } from "@/lib/organization-evidence/record-correc
  * computed in SQL for one record equal what the TypeScript writer computes.
  */
 const MIGRATION = readFileSync(
-  join(__dirname, "../../../../supabase/migrations/20261014150000_historical_date_correction_v1.sql"),
+  join(__dirname, "../../../../supabase/migrations/20261118100000_historical_date_correction_v1.sql"),
   "utf8",
 );
 const ROLLBACK = readFileSync(
-  join(__dirname, "../../../../supabase/rollbacks/20261014150000_historical_date_correction_v1.down.sql"),
+  join(__dirname, "../../../../supabase/rollbacks/20261118100000_historical_date_correction_v1.down.sql"),
   "utf8",
 );
 const code = (sql: string) => sql.replace(/--[^\n]*/g, "");

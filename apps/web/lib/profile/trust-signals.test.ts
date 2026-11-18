@@ -36,6 +36,9 @@ function builderFor(table: string) {
     eq: () => chain,
     in: () => chain,
     limit: () => chain,
+    // the journal read is PAGED (ordered, then .range per page)
+    order: () => chain,
+    range: () => Promise.resolve(result),
     // The journal read applies the shared live-entry rule, which chains two
     // `.is()` calls. This double is about the UNREAD-vs-ZERO semantics below,
     // so it just has to stay chainable; that the reader really asks for live
@@ -65,15 +68,24 @@ const rejected = (by: string) => ({
   confirmer_id: by,
 });
 
+/** worker_skills rows with the stored flag (the read filters verified=true). */
+const recordedSkills = (ids: string[], by = "manager-1") =>
+  ok({ data: ids.map((skill_id) => ({ skill_id, verified_by: by })) });
+const links = (...ids: string[]) => ids.map((skill_id) => ({ skill_id }));
+
 beforeEach(() => {
   tables.clear();
-  tables.set("worker_skills", ok({ count: 4 }));
+  tables.set("worker_skills", recordedSkills(["s1", "s2", "s3", "s4"]));
   tables.set("workers", ok({ data: [{ profile_id: SUBJECT }] }));
   tables.set(
     "journal_entries",
     ok({
       data: [
-        { id: "e1", journal_entry_confirmations: [approved("manager-1")] },
+        {
+          id: "e1",
+          journal_entry_confirmations: [approved("manager-1")],
+          journal_entry_skills: links("s1", "s2", "s3", "s4"),
+        },
         { id: "e2", journal_entry_confirmations: [] },
       ],
     }),
@@ -90,7 +102,7 @@ describe("counts that were read are reported as they are", () => {
   });
 
   it("a genuine zero stays 0 — checked, and there is none yet", async () => {
-    tables.set("worker_skills", ok({ count: 0 }));
+    tables.set("worker_skills", ok({ data: [] }));
     tables.set("journal_entries", ok({ data: [] }));
     const s = await getOwnTrustSignals("w1");
     expect(s).toEqual({
@@ -166,7 +178,9 @@ describe("counts that failed are null, and only those", () => {
     const s = await getOwnTrustSignals("w1");
     expect(s.journalEntries).toBeNull();
     expect(s.managerConfirmations).toBeNull();
-    expect(s.verifiedSkills).toBe(4);
+    // Confirmed skills are judged by the SAME entries: unread, never the raw
+    // stored flag (which used to report 4 here whatever happened since).
+    expect(s.verifiedSkills).toBeNull();
   });
 
   it("an unreadable subject makes the confirmed figure unknown, never a number that counts self-approvals", async () => {
@@ -206,5 +220,97 @@ describe("the surface refuses to coach someone on numbers it could not read", ()
         "string",
       );
     }
+  });
+});
+
+describe("a skill confirmation counts only while the confirmed work stands", () => {
+  it("a LATER rejection of the confirming entry withdraws it (latest decision wins)", async () => {
+    tables.set("worker_skills", recordedSkills(["s1"]));
+    tables.set(
+      "journal_entries",
+      ok({
+        data: [
+          {
+            id: "e1",
+            journal_entry_confirmations: [
+              approved("m1"),
+              { ...rejected("m2"), created_at: "2026-09-02T10:00:00Z" },
+            ],
+            journal_entry_skills: links("s1"),
+          },
+        ],
+      }),
+    );
+    expect((await getOwnTrustSignals("w1")).verifiedSkills).toBe(0);
+  });
+
+  it("a correction replaces the confirmed original (counted once) and carries no approval of its own", async () => {
+    tables.set("worker_skills", recordedSkills(["s1"]));
+    tables.set(
+      "journal_entries",
+      ok({
+        data: [
+          { id: "orig", journal_entry_confirmations: [approved("m1")], journal_entry_skills: links("s1") },
+          { id: "fix", correction_of: "orig", journal_entry_confirmations: [], journal_entry_skills: links("s1") },
+        ],
+      }),
+    );
+    expect((await getOwnTrustSignals("w1")).verifiedSkills).toBe(0);
+  });
+
+  it("a deleted confirming entry (absent from the live read) withdraws it", async () => {
+    tables.set("worker_skills", recordedSkills(["s1"]));
+    tables.set("journal_entries", ok({ data: [{ id: "other", journal_entry_confirmations: [] }] }));
+    expect((await getOwnTrustSignals("w1")).verifiedSkills).toBe(0);
+  });
+
+  it("the person's own confirmation of their own skill never counts", async () => {
+    tables.set("worker_skills", recordedSkills(["s1"], SUBJECT));
+    expect((await getOwnTrustSignals("w1")).verifiedSkills).toBe(0);
+  });
+
+  it("a client acceptance never stands in for the employer confirmation (decision 0018)", async () => {
+    tables.set("worker_skills", recordedSkills(["s1"]));
+    tables.set(
+      "journal_entries",
+      ok({
+        data: [
+          {
+            id: "e1",
+            journal_entry_confirmations: [
+              {
+                confirmation_scope: { action: "client_accept", decision: "approved", authority: { basis: "counterparty" } },
+                created_at: "2026-09-12T10:00:00Z",
+                confirmer_id: "client-user",
+              },
+            ],
+            journal_entry_skills: links("s1"),
+          },
+        ],
+      }),
+    );
+    expect((await getOwnTrustSignals("w1")).verifiedSkills).toBe(0);
+  });
+
+  it("re-approval after a rejection restores it; a later approved entry showing the skill keeps it", async () => {
+    tables.set("worker_skills", recordedSkills(["s1", "s2"]));
+    tables.set(
+      "journal_entries",
+      ok({
+        data: [
+          {
+            id: "e1",
+            journal_entry_confirmations: [
+              approved("m1"),
+              { ...rejected("m1"), created_at: "2026-09-02T10:00:00Z" },
+              { ...approved("m1"), created_at: "2026-09-03T10:00:00Z" },
+            ],
+            journal_entry_skills: links("s1"),
+          },
+          { id: "e2", journal_entry_confirmations: [approved("m2")], journal_entry_skills: links("s2") },
+        ],
+      }),
+    );
+    expect((await getOwnTrustSignals("w1")).verifiedSkills).toBe(2);
   });
 });

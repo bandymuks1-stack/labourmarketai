@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -148,7 +149,18 @@ export type TeamBrigadesData =
       readonly detailsApplied: boolean;
       /** team_enquiries (20260716131000) readable. */
       readonly enquiriesApplied: boolean;
+      /** Brigades this owner DISBANDED (archived, history kept), newest
+       *  first. Empty when there are none or they could not be read. */
+      readonly disbanded?: readonly DisbandedTeam[];
     };
+
+/** A disbanded brigade: the archived organization row, nothing rewritten. */
+export type DisbandedTeam = {
+  readonly id: string;
+  readonly name: string;
+  readonly createdAt: string;
+  readonly disbandedAt: string;
+};
 
 function nameOf(p: { full_name: string | null; email: string | null } | null): string {
   return p?.full_name ?? (p?.email ? p.email.split("@")[0] : "—");
@@ -177,16 +189,86 @@ const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 const POOL_READ_LIMIT = 50;
 
 /**
+ * A clean probe answer that the team model IS applied, remembered for the
+ * life of the server process (perf 2026-10-23: the probe ran on every read of
+ * the panel — once per people-page render, 37 times in one production walk).
+ * Only a POSITIVE answer is kept: an applied migration is not un-applied under
+ * a running process (a deploy restarts it). "Not applied" and a probe that
+ * failed for another reason are never remembered, so applying the migration
+ * takes effect on the next read without a restart.
+ */
+let teamModelKnownApplied = false;
+
+/** Test seam: forget the remembered positive answer. */
+export function resetTeamModelProbeForTests(): void {
+  teamModelKnownApplied = false;
+}
+
+/**
  * Readiness probe: the capability RPC only exists once the owner applied
  * 20260705220000. A nil-uuid call is a cheap no-op that returns an empty set
  * when applied and 42883 when not.
  */
 async function isTeamModelApplied(supabase: DB): Promise<boolean> {
+  if (teamModelKnownApplied) return true;
   const { error } = await rpc(supabase, "get_team_capability_summary_v1", {
     p_org_id: NIL_UUID,
   });
-  if (!error) return true;
+  if (!error) {
+    teamModelKnownApplied = true;
+    return true;
+  }
+  // Any other failure keeps the earlier answer (the surface renders and each
+  // read degrades on its own) but is NOT remembered: the next read asks again.
   return error.code !== RPC_NOT_FOUND_CODE;
+}
+
+/** How many capability reads run at once. The panel lists at most 20 brigades
+ *  (create_team_v1's cap): 20 sequential round trips become 4 waves, without
+ *  one burst of 20 against the connection pool. */
+export const TEAM_CAPABILITY_READ_CONCURRENCY = 5;
+
+/** Map with at most `limit` calls in flight; results keep the input order. */
+async function mapBounded<T, R>(
+  items: readonly T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const out: R[] = new Array<R>(items.length);
+  let cursor = 0;
+  const lane = async (): Promise<void> => {
+    while (cursor < items.length) {
+      const i = cursor;
+      cursor += 1;
+      out[i] = await fn(items[i] as T);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => lane()));
+  return out;
+}
+
+/** One brigade's capability summary: the read-only gated RPC over its members'
+ *  existing worker_skills. A failed read is null — never a fabricated summary
+ *  and never an empty one. */
+async function readTeamCapability(
+  supabase: DB,
+  teamId: string,
+): Promise<TeamCapabilitySkill[] | null> {
+  const { data, error } = await rpc(supabase, "get_team_capability_summary_v1", {
+    p_org_id: teamId,
+  });
+  if (error || !Array.isArray(data)) return null;
+  return (data as {
+    skill_slug: string | null;
+    members_declared: number | null;
+    members_confirmed: number | null;
+  }[])
+    .filter((r) => typeof r.skill_slug === "string" && r.skill_slug.length > 0)
+    .map((r) => ({
+      slug: r.skill_slug as string,
+      membersDeclared: r.members_declared ?? 0,
+      membersConfirmed: r.members_confirmed ?? 0,
+    }));
 }
 
 type InvitationLedger = {
@@ -335,8 +417,21 @@ async function readTeamEnquiries(
  * engagement_contexts read), the read-only capability summary, plus the
  * Trust Connect layers: invitation provenance, team details and the enquiry
  * inbox — each with its own honest applied flag.
+ *
+ * Read ONCE per server render (perf 2026-10-22): the company page's partners
+ * strip and the workforce read behind the planning-conflicts count both asked
+ * for it in the same `/dashboard/company` render — the readiness probe, the
+ * team rows, the members and the ledgers twice. React `cache()` is
+ * request-scoped: every navigation reads again, and a server action (no
+ * render — e.g. the re-read after a brigade write) runs the read itself.
  */
 export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
+  return readTeamBrigadesDataOnce();
+}
+
+const readTeamBrigadesDataOnce = cache(async (): Promise<TeamBrigadesData> => readTeamBrigadesData());
+
+async function readTeamBrigadesData(): Promise<TeamBrigadesData> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -350,6 +445,10 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
     .select("id, display_name, legal_name, created_at")
     .eq("owner_profile_id", user.id)
     .eq("organization_type", "team")
+    // ACTIVE brigades only. A disbanded brigade is an archived organization
+    // (disband_team_v1): history, read separately below, and no longer
+    // counted by create_team_v1's cap of 20 — which is also this limit.
+    .is("archived_at", null)
     .order("created_at", { ascending: true })
     .limit(20);
   if (orgError) {
@@ -533,32 +632,19 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
     }
   }
 
+  // Capability summaries: one gated read per brigade (the RPC takes one org),
+  // run TOGETHER under a bound instead of one after another (perf 2026-10-23:
+  // 14–17 brigades were 14–17 sequential round trips on every render). Each
+  // failed read stays null for its own brigade.
+  const capabilities = await mapBounded(teamRows, TEAM_CAPABILITY_READ_CONCURRENCY, (t) =>
+    readTeamCapability(supabase, t.id),
+  );
+
   const teams: TeamBrigade[] = [];
-  for (const t of teamRows) {
+  for (const [index, t] of teamRows.entries()) {
     const members = membersByTeam.get(t.id) ?? [];
     const memberProfileIds = new Set(members.map((m) => m.profileId));
-
-    // Capability summary: read-only gated RPC over members' existing
-    // worker_skills. Errors → null (never a fabricated summary).
-    let capability: TeamCapabilitySkill[] | null = null;
-    const { data: capRows, error: capError } = await rpc(
-      supabase,
-      "get_team_capability_summary_v1",
-      { p_org_id: t.id },
-    );
-    if (!capError && Array.isArray(capRows)) {
-      capability = (capRows as {
-        skill_slug: string | null;
-        members_declared: number | null;
-        members_confirmed: number | null;
-      }[])
-        .filter((r) => typeof r.skill_slug === "string" && r.skill_slug.length > 0)
-        .map((r) => ({
-          slug: r.skill_slug as string,
-          membersDeclared: r.members_declared ?? 0,
-          membersConfirmed: r.members_confirmed ?? 0,
-        }));
-    }
+    const capability = capabilities[index] ?? null;
 
     const pendingEmails = ledger.pendingEmailsByTeam.get(t.id);
     teams.push({
@@ -592,7 +678,73 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
     invitationsApplied: ledger.applied,
     detailsApplied: details.applied,
     enquiriesApplied: enquiries.applied,
+    disbanded: await readDisbandedTeams(supabase, user.id),
   };
+}
+
+/** The owner's disbanded brigades (archived team orgs), newest first. A read
+ *  failure answers an empty list: the active panel must never fail because
+ *  the history line could not be read. */
+async function readDisbandedTeams(supabase: DB, ownerId: string): Promise<DisbandedTeam[]> {
+  const { data, error } = await asAny(supabase)
+    .from("organizations")
+    .select("id, display_name, legal_name, created_at, archived_at")
+    .eq("owner_profile_id", ownerId)
+    .eq("organization_type", "team")
+    .not("archived_at", "is", null)
+    .order("archived_at", { ascending: false })
+    .limit(20);
+  if (error || !Array.isArray(data)) return [];
+  return (
+    data as {
+      id: string;
+      display_name: string | null;
+      legal_name: string | null;
+      created_at: string;
+      archived_at: string;
+    }[]
+  ).map((r) => ({
+    id: r.id,
+    name: r.display_name ?? r.legal_name ?? "—",
+    createdAt: r.created_at,
+    disbandedAt: r.archived_at,
+  }));
+}
+
+export type DisbandTeamOutcome =
+  | "disbanded"
+  | "already_disbanded"
+  | "not_found"
+  | "has_open_work"
+  | "member_end_failed"
+  | "needs_migration"
+  | "error";
+
+/** Disband a brigade through the gated disband_team_v1 RPC: members'
+ *  memberships end through the canonical lifecycle writer, the brigade is
+ *  archived, nothing is deleted. Refused while the brigade has open work. */
+export async function disbandTeamBrigade(teamId: string): Promise<{ outcome: DisbandTeamOutcome }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { outcome: "error" };
+  const { data, error } = await rpc(supabase, "disband_team_v1", { p_team_id: teamId });
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE || error.code === "PGRST202") return { outcome: "needs_migration" };
+    return { outcome: "error" };
+  }
+  const code = String(data ?? "");
+  if (
+    code === "disbanded" ||
+    code === "already_disbanded" ||
+    code === "not_found" ||
+    code === "has_open_work" ||
+    code === "member_end_failed"
+  ) {
+    return { outcome: code };
+  }
+  return { outcome: "error" };
 }
 
 export type CreateTeamOutcome =

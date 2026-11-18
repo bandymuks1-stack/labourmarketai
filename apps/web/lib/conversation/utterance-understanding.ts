@@ -48,6 +48,8 @@
  * CALLER'S OWN WORLD FIRST, and to ask when that does not settle it.
  */
 import { classifyIntent, type ConversationIntent } from "@/lib/conversation/intent-router";
+import type { PlanStep } from "@/lib/conversation/intent-plan";
+import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
 /**
  * Below this, a reference-shaped utterance is not treated as a command.
@@ -86,6 +88,9 @@ const POSSESSIVES: ReadonlySet<string> = new Set([
   "mein", "meine", "meinen", "meiner", "meines",
   "unser", "unsere", "unseren", "unserer",
 ]);
+/** sv possessives — counted in a Swedish sentence only: "Min" is a given name
+ *  ("Min Lee Bau") and "Mina" a company word in other languages. */
+const SV_POSSESSIVES: ReadonlySet<string> = new Set(["min", "mitt", "mina", "vår", "vårt", "våra"]);
 
 /** Strip leading/trailing punctuation from a token, keeping letters. */
 function core(token: string): string {
@@ -116,6 +121,7 @@ export function looksLikeReference(text: string): boolean {
   // One token is never enough to be sure ("CV"), and a long line is prose.
   if (tokens.length < 2 || tokens.length > 6) return false;
   if (tokens.some((t) => POSSESSIVES.has(core(t).toLocaleLowerCase()))) return false;
+  if (looksSwedish(raw) && tokens.some((t) => SV_POSSESSIVES.has(core(t).toLocaleLowerCase()))) return false;
   return tokens.every(startsUpper);
 }
 
@@ -279,6 +285,18 @@ export type Understanding =
       readonly kind: "unsupported";
       readonly reason: UnsupportedReason;
       readonly source: UnderstandingSource;
+    }
+  | {
+      /**
+       * ONE message, an ORDERED PLAN of 2–3 existing intents (owner
+       * 2026-10-14 §4). Validated by lib/conversation/intent-plan.ts: reads,
+       * at most one write as the last step, never a navigating step. The
+       * surface runs the first step and offers the rest in order; each label
+       * is the person's own words (or null).
+       */
+      readonly kind: "plan";
+      readonly steps: readonly PlanStep[];
+      readonly source: "model";
     }
   /** The deterministic layer found nothing. The model has NOT been asked yet. */
   | { readonly kind: "none" };

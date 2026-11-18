@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { getModuleRoute } from "@/lib/dashboard/dashboard-module-registry";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * WAGON 8 guard (CR train areas 14/15/16) — journal entry modes + project
@@ -192,7 +193,7 @@ describe("photo report discoverability (owner smoke finding)", () => {
 });
 
 describe("i18n copy present (lt/en/ru)", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: journal.modes preset keys exist`, () => {
       const modes = JSON.parse(read(`messages/${loc}/journal.json`)).modes;
       for (const k of [
@@ -274,16 +275,16 @@ describe("the chat shows a stored photo back through the ONE gallery read", () =
   });
 
   it("the copy never says 'nothing uploaded' for a read that found none, and never claims verification", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const chatCopy = JSON.parse(read(`messages/${loc}.json`)).conversation.chat as Record<string, string>;
       for (const k of ["photosRecent", "photosNone", "photosNoWorker", "photosUnavailable", "photosPreviewUnavailable", "photoNoPreview", "photoAlt", "chipGallery"]) {
         expect(typeof chatCopy[k], `${loc}.conversation.chat.${k}`).toBe("string");
         expect(chatCopy[k].trim().length, `${loc}.conversation.chat.${k}`).toBeGreaterThan(0);
-        expect(chatCopy[k], `${loc}.${k} must not claim verification`).not.toMatch(/verified|patvirtint|verifiziert|geverifieerd|подтвержд/i);
+        expect(chatCopy[k], `${loc}.${k} must not claim verification`).not.toMatch(/verified|patvirtint|verifiziert|geverifieerd|подтвержд|verifiera|bekräftad/i);
       }
-      expect(chatCopy.photosNone, `${loc}.photosNone`).not.toMatch(/nothing uploaded|nieko neįkelta|ничего не загружено/i);
+      expect(chatCopy.photosNone, `${loc}.photosNone`).not.toMatch(/nothing uploaded|nieko neįkelta|ничего не загружено|inget uppladdat|ingenting (?:har )?(?:laddats upp|uppladdat)/i);
       // The failed-read copy says it could not CHECK.
-      expect(chatCopy.photosUnavailable, `${loc}.photosUnavailable`).toMatch(/nepavyko patikrinti|could not check|не удалось проверить|kon niet controleren|konnte nicht prüfen|nie udało się sprawdzić/i);
+      expect(chatCopy.photosUnavailable, `${loc}.photosUnavailable`).toMatch(/nepavyko patikrinti|could not check|не удалось проверить|kon niet controleren|konnte nicht prüfen|nie udało się sprawdzić|kunde inte kontrollera/i);
     }
   });
 });

@@ -146,6 +146,7 @@ export type IntentHandlerId =
   // The photo shown back (issue #1689, defect G): a read over the ONE
   // personal-gallery projection, embedded in the thread.
   | "evidencePhotos"
+  | "whatChanged"
   /**
    * "Ką galiu padaryti šioje paskyroje?" — the capability question.
    *
@@ -392,6 +393,7 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // chat with the stored photos and one chip to the gallery. Never a second
   // photo store; never a claim about the photo beyond "it is stored".
   "evidence-photos": { domain: "journal", access: "read", handler: "evidencePhotos", ownTyping: true },
+  "what-changed": { domain: "journal", access: "read", handler: "whatChanged", ownTyping: true },
   // PROJECT → WORK (§11): a work package on the company's project through
   // the one inline form over the one task create.
   "add-task": { domain: "project", access: "write", handler: "addTask", ownTyping: true },

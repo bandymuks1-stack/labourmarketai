@@ -16,6 +16,15 @@ export interface WorkerChatProject {
    *  joined with the person's own documents (§12: what the project still
    *  needs from me). Empty when nothing is open or nothing is tracked. */
   readonly asks: readonly WorkerProjectAsk[];
+  /** All open rows for the person; `asks` is capped (WORKER_PROJECT_ASK_LIMIT). */
+  readonly asksTotal: number;
+  /** Whether `asks` / `asksTotal` are a real answer. "ok" = the checklist was
+   *  read (empty means nothing is open); "unavailable" = the read failed;
+   *  "not_read" = not asked (an ended assignment). Only "ok" may say
+   *  "nothing is open". */
+  readonly asksRead: "ok" | "unavailable" | "not_read";
+  /** `asksTotal` is a lower bound (the checklist read hit its row cap). */
+  readonly asksTotalAtLeast: boolean;
   /** The manager's latest instruction for this project (the instructions
    *  page's own read: only threads the person participates in), so the person
    *  can ANSWER it from the chat after recording what was asked. */

@@ -1,16 +1,16 @@
 {
-  "minutes": "[EN] minutes",
-  "hours": "[EN] hours",
-  "days": "[EN] days",
+  "minutes": "minuter",
+  "hours": "timmar",
+  "days": "dagar",
   "square_meters": "m²",
   "meters": "m",
-  "pieces": "[EN] pcs",
+  "pieces": "st.",
   "kilograms": "kg",
-  "packages": "[EN] packages",
-  "box_per_day": "[EN] boxes/day",
-  "square_meters_per_day": "[EN] m²/day",
+  "packages": "paket",
+  "box_per_day": "lådor/dag",
+  "square_meters_per_day": "m²/dag",
   "kilometers": "km",
-  "pallets": "[EN]pallets",
-  "covers": "[EN]covers",
-  "cases": "[EN]cases"
+  "pallets": "pallar",
+  "covers": "kuvert",
+  "cases": "kartonger"
 }

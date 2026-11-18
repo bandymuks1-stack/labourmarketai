@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * W8 service_offerings — no-payment / no-transaction guard.
@@ -55,7 +56,7 @@ describe("no payment / transaction wording in the services surface", () => {
     expect(m, `forbidden payment token in migration: ${m?.[0]}`).toBeNull();
   });
 
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: serviceOfferings copy has no payment/transaction wording`, () => {
       const block = (
         JSON.parse(read(join(ROOT, "messages", `${loc}.json`))) as {

@@ -1,6 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/config";
+import { LmLogo } from "@/components/ui/lm-logo";
+import { reloadOnceForChunkError } from "@/lib/telemetry/chunk-reload";
+import { reportClientError } from "@/lib/telemetry/report-client-error";
 
 /**
  * Root global error boundary (RC6, F6). Catches errors thrown ABOVE the
@@ -18,7 +23,7 @@ import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/conf
  */
 
 /** Per-locale words for exactly the ACTIVE locales (lib/i18n/config.ts
- *  `activeLocales` — lt, en, ru, nl, de, pl). `Record<ActiveLocale, …>` makes the
+ *  `activeLocales` — lt, en, ru, nl, de, pl, sv). `Record<ActiveLocale, …>` makes the
  *  set exhaustive at compile time: promoting a locale in lib/i18n/config.ts
  *  fails typecheck until a row is added here. PL added 2026-09-20 (#1810). */
 const COPY: Record<ActiveLocale, { readonly body: string; readonly retry: string }> = {
@@ -35,7 +40,7 @@ const COPY: Record<ActiveLocale, { readonly body: string; readonly retry: string
     retry: "Попробовать ещё раз",
   },
   nl: {
-    body: "Er is iets misgegaan. Je gegevens zijn veilig — probeer het opnieuw.",
+    body: "Er is iets misgegaan. Uw gegevens zijn veilig — probeer het opnieuw.",
     retry: "Opnieuw proberen",
   },
   de: {
@@ -45,6 +50,10 @@ const COPY: Record<ActiveLocale, { readonly body: string; readonly retry: string
   pl: {
     body: "Coś poszło nie tak. Twoje dane są bezpieczne — spróbuj ponownie.",
     retry: "Spróbuj ponownie",
+  },
+  sv: {
+    body: "Något gick fel. Dina uppgifter är sparade — försök igen.",
+    retry: "Försök igen",
   },
 };
 
@@ -72,6 +81,16 @@ export default function GlobalError({
   reset: () => void;
 }) {
   console.error("[global-error-boundary]", error);
+  // One sanitised crash report; never throws (2026-10-18 incident).
+  // A chunk that failed to load (a deploy replaced it, or a proxy dropped the
+  // request) is recovered by ONE reload; a second failure shows the retry
+  // screen (lib/telemetry/chunk-reload.ts holds the loop guard). The report is
+  // a beacon, so it survives the reload.
+  const [reloading, setReloading] = useState(false);
+  useEffect(() => {
+    reportClientError("global", error);
+    if (reloadOnceForChunkError(error)) setReloading(true);
+  }, [error]);
   // Read at render time so the common case — a purely client-side crash, where
   // this shell never touches the server — is correct on first paint. On the
   // SSR path the server has no pathname, so the markup is the unchanged LT/EN
@@ -97,6 +116,10 @@ export default function GlobalError({
           font: "15px/1.6 ui-sans-serif, system-ui, sans-serif",
         }}
       >
+        {/* No stylesheet is guaranteed here, so the size comes from the box. */}
+        <div style={{ width: "51px" }}>
+          <LmLogo />
+        </div>
         <p
           style={{ maxWidth: "26rem" }}
           data-testid="global-error-message"
@@ -112,6 +135,7 @@ export default function GlobalError({
         </p>
         <button
           type="button"
+          disabled={reloading}
           onClick={() => reset()}
           data-testid="global-error-retry"
           suppressHydrationWarning

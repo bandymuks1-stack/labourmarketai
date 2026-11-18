@@ -8,6 +8,7 @@ import {
   resolveSourceRoute,
 } from "@/lib/communication/conversation-source-model";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * CONVERSATION SOURCE RELATION v1 — permanent CI guard.
@@ -483,7 +484,7 @@ describe("§8-6 UI degradation — absent context renders exactly today's card",
 // ── 7. Locale parity ──────────────────────────────────────────────────────
 
 describe("§8-7 locale parity — lt/en/ru source labels, no [EN] markers", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: all four source labels exist, non-empty, translated`, () => {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         communication?: { source?: Record<string, string> };

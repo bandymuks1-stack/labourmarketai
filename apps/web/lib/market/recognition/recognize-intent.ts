@@ -10,6 +10,7 @@
  * scopes to the subset that makes sense for it, so a worker never sees "legal
  * employer" and a project never sees "overtime".
  */
+import { readNeedHeadcount } from "@/lib/structuring/need-headcount";
 import { structureNeed } from "@/lib/structuring/structure-need";
 import { detectJobDemandFields } from "./missing-fields";
 import { deriveJobDemandRiskFlags } from "./risk-flags";
@@ -107,7 +108,9 @@ const INTENT_FIELDS: Record<RecognitionIntent, readonly JobDemandFieldKey[]> = {
 const PROFILE_HREF = "/dashboard/profile";
 const JOURNAL_HREF = "/dashboard/journal";
 const OPPORTUNITIES_HREF = "/dashboard/opportunities";
-const COMPANY_HREF = "/dashboard/company";
+// Since #1746 the demand form lives on the needs door, not the company page:
+// a hand-off to /dashboard/company landed the employer where no form exists.
+const NEEDS_HREF = "/dashboard/company/needs#demand-intake";
 const SERVICES_HREF = "/dashboard/services";
 const SERVICE_REQUESTS_HREF = "/dashboard/service-requests";
 
@@ -147,13 +150,13 @@ function buildNextActions(
     case "need_workers": {
       const actions: NextAction[] = [];
       if (importantMissing.length > 0)
-        actions.push({ code: "complete_missing_fields", href: COMPANY_HREF });
+        actions.push({ code: "complete_missing_fields", href: NEEDS_HREF });
       // The ONE hand-off that carries the employer's sentence with it. Without
       // this the recognizer read the need, scored it, and dropped it on the
       // floor - the demand form opened blank and the employer typed it twice.
       actions.push({
         code: "continue_to_demand",
-        href: COMPANY_HREF,
+        href: NEEDS_HREF,
         carriesNeedText: true,
       });
       // NOTE: a top 1–3 candidate preview is intentionally NOT a user action here
@@ -198,6 +201,9 @@ export function recognizeIntent(
 
   const readiness = deriveReadiness(intent, recognized, missing);
   const nextActions = buildNextActions(intent, missing);
+  // How many workers — for every intent that ASKS for people. A person
+  // looking for work ("ieškau suvirintojo darbo") is describing themself.
+  const headcount = intent === "need_work" ? null : readNeedHeadcount(text);
 
   return {
     intent,
@@ -207,6 +213,7 @@ export function recognizeIntent(
     confidence: structured.confidence,
     readiness,
     nextActions,
+    ...(headcount ? { headcount } : {}),
   };
 }
 

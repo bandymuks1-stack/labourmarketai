@@ -5,6 +5,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import {
   ZERO_BRIDGE_SPINE_COUNTS,
+  countDecidableCandidateOffers,
   countPendingConnectionInvites,
   countSharesAwaitingOffer,
   isMissingRpcCode,
@@ -22,6 +23,7 @@ import {
   type SharedRequestRow,
   type SharedRequestsState,
 } from "@/lib/agency/bridge-model";
+import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOwnedCompanyById } from "@/lib/company/company-setup";
 import { readActsAsAgency } from "@/lib/company/agency-capability-read";
@@ -89,6 +91,31 @@ export async function listAgencyConnections(
  *  the connection table already scopes by `invited_email = jwt email`, so a
  *  plain select returns only the caller's invites (no email is leaked). */
 export async function listMyConnectionInvites(): Promise<ClientInvitesState> {
+  return readMyConnectionInvitesOnce();
+}
+
+/**
+ * REQUEST-SCOPED bridge reads (perf 2026-10-22). One `/dashboard/company`
+ * render asked the same argument-less bridge questions from several places —
+ * the page's partners strip, the organization doors, the chat starter
+ * context, the opening brief and the bell's bridge count — each a separate
+ * round trip with the same answer. React `cache()` deduplicates within ONE
+ * render only: every navigation reads again, and a server action (no render)
+ * reads itself, so a connection accepted or an offer made is never answered
+ * from an earlier read. Callers treat the results as read-only (none mutates
+ * them in place).
+ */
+const readMyConnectionInvitesOnce = cache(async (): Promise<ClientInvitesState> =>
+  readMyConnectionInvites(),
+);
+const readSharedRequestsForAgencyOnce = cache(async (): Promise<SharedRequestsState> =>
+  readSharedRequestsForAgency(),
+);
+const readAgencyOfferProgressOnce = cache(async (): Promise<OfferProgressState> =>
+  readAgencyOfferProgress(),
+);
+
+async function readMyConnectionInvites(): Promise<ClientInvitesState> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -217,6 +244,10 @@ export async function listMyClientBridgeConnections(
 
 /** AGENCY side: requests connected clients shared with the caller-agency. */
 export async function listSharedRequestsForAgency(): Promise<SharedRequestsState> {
+  return readSharedRequestsForAgencyOnce();
+}
+
+async function readSharedRequestsForAgency(): Promise<SharedRequestsState> {
   const supabase = await createClient();
   try {
     const { data, error } = await asAny(supabase).rpc("list_shared_requests_for_agency_v1");
@@ -323,6 +354,10 @@ export async function listSharedRequestsByClient(
 
 /** AGENCY side: the caller-agency's offers + derived client-review stage. */
 export async function listAgencyOfferProgress(): Promise<OfferProgressState> {
+  return readAgencyOfferProgressOnce();
+}
+
+async function readAgencyOfferProgress(): Promise<OfferProgressState> {
   const supabase = await createClient();
   try {
     const { data, error } = await asAny(supabase).rpc("list_agency_offer_progress_v1");
@@ -387,25 +422,55 @@ export async function listMyClientInviteDeliveries(): Promise<ClientInviteDelive
   }
 }
 
+/** Bound on the offer rows read for the per-need count. */
+const OPEN_CANDIDATE_OFFER_SCAN_LIMIT = 500;
+
+/**
+ * CLIENT side: agency offers still `offered`, counted per request. Same
+ * table and the same SELECT policy (`owns_company(client_company_id)`,
+ * migration 20260723180000 §3) the scouting page reads offers through.
+ * Empty on any failure — a spine count never fabricates attention from an
+ * unknown.
+ */
+export async function countOpenCandidateOffersByRequest(
+  clientCompanyId: string,
+): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  const supabase = await createClient();
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("agency_candidate_offers")
+      .select("request_id")
+      .eq("client_company_id", clientCompanyId)
+      .eq("status", "offered")
+      .limit(OPEN_CANDIDATE_OFFER_SCAN_LIMIT);
+    if (error || !Array.isArray(data)) return out;
+    for (const r of data as { request_id?: unknown }[]) {
+      if (typeof r.request_id !== "string") continue;
+      out.set(r.request_id, (out.get(r.request_id) ?? 0) + 1);
+    }
+    return out;
+  } catch {
+    return out;
+  }
+}
+
 /**
  * CLIENT side: how many agency offers on this company's requests still wait
- * for its decision. Same table and the same SELECT policy
- * (`owns_company(client_company_id)`, migration 20260723180000 §3) the
- * scouting page reads offers through; a head count, no rows. 0 on any
- * failure — a spine count never fabricates attention from an unknown.
+ * for its decision. Offers on a need the caller's own list says is closed
+ * are left out: they can no longer be decided, so counting them would keep
+ * the bell lit for good (`countDecidableCandidateOffers`).
  */
 export async function countOpenCandidateOffersForClient(
   clientCompanyId: string,
 ): Promise<number> {
-  const supabase = await createClient();
   try {
-    const { count, error } = await asAny(supabase)
-      .from("agency_candidate_offers")
-      .select("id", { count: "exact", head: true })
-      .eq("client_company_id", clientCompanyId)
-      .eq("status", "offered");
-    if (error) return 0;
-    return typeof count === "number" ? count : 0;
+    const [byRequest, demands] = await Promise.all([
+      countOpenCandidateOffersByRequest(clientCompanyId),
+      listCompanyDemands(),
+    ]);
+    const closed = new Set(demands.filter((d) => d.status === "closed").map((d) => d.id));
+    return countDecidableCandidateOffers(byRequest, closed);
   } catch {
     return 0;
   }

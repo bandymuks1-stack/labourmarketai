@@ -183,8 +183,21 @@ describe("e-mail reads under RLS (user-scoped client) stay DB-gated", () => {
 describe("accepted, documented residual: the synthetic-QA viewer address shape", () => {
   it("isSyntheticViewer (qa.*@labourmarket.ai) is used ONLY to reveal labelled fixtures, never to authorise or write", () => {
     const users = FILES.filter((f) => /isSyntheticViewer/.test(stripComments(readFileSync(f, "utf8")))).map(rel).sort();
-    expect(users).toEqual(["lib/marketplace/qa-marked.ts", "lib/qa/synthetic-fixture.ts"]);
+    expect(users).toEqual([
+      "app/[locale]/dashboard/communication/page.tsx",
+      "lib/marketplace/qa-marked.ts",
+      "lib/opportunities/load-worker-opportunities.ts",
+      "lib/qa/synthetic-fixture.ts",
+    ]);
+    // The worker board (2026-10-20) likewise only CHOOSES which rows the
+    // worker-visibility RPC already returned are listed — no read, no write.
+    const board = stripComments(read("lib/opportunities/load-worker-opportunities.ts"));
+    expect(board).toMatch(/const qaViewer = isSyntheticViewer\(user\);/);
+    expect(board).toMatch(/\(row\) =>\s*qaViewer \|\|\s*!isSyntheticFixtureLabel\(/);
     const qa = stripComments(read("lib/marketplace/qa-marked.ts"));
     expect(qa).not.toMatch(/createAdminClient|\.insert\(|\.update\(|\.rpc\(/);
+    // The inbox (2026-10-18) only CHOOSES which already-readable threads to list.
+    const inbox = stripComments(read("app/[locale]/dashboard/communication/page.tsx"));
+    expect(inbox).toMatch(/const listed = isSyntheticViewer\(user\)\s*\?\s*fetched\s*:\s*fetched\.filter\(/);
   });
 });

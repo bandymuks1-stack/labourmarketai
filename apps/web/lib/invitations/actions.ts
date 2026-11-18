@@ -13,6 +13,7 @@ import {
   isTransactionalEmailConfigured,
 } from "@/lib/email/transactional";
 import { guardedSendTransactionalEmail } from "@/lib/email/send-ledger-store";
+import { recordDeliveryAttempt } from "@/lib/invitations/delivery-attempts";
 import {
   buildInvitationBody,
   buildInvitationSubject,
@@ -266,6 +267,11 @@ export async function createAndSendInvitations(input: {
         personalMessage: input.personalMessage ?? null,
       }),
     }, { kind: "invitation", organizationId: input.organizationId ?? null });
+    if (sendResult.status === "suppressed_synthetic_address") {
+      // Never mailed by design (synthetic QA plus-address): the link is the result.
+      results.push({ email, outcome: "created", invitationId, inviteLink });
+      continue;
+    }
     const deliveryOutcome =
       sendResult.status === "sent" ? "sent" : "delivery_failed";
     // Record the TRUTHFUL provider result (never 'sent' without an ack).
@@ -284,6 +290,9 @@ export async function createAndSendInvitations(input: {
         markRes.error.message,
       );
     }
+    // WHY it failed (reason code + class), never the address. No automatic
+    // retry here: the inviter sees `delivery_failed` and can resend.
+    await recordDeliveryAttempt({ invitationId, path: "create", result: sendResult, attempts: 1, autoRetry: false });
     results.push({
       email,
       outcome: sendResult.status === "sent" ? "sent" : "delivery_failed",
@@ -382,9 +391,21 @@ export async function resendInvitationAction(input: {
         personalMessage: input.personalMessage ?? null,
       }),
     }, { kind: "invitation" });
+    if (sendResult.status === "suppressed_synthetic_address") {
+      // Never mailed by design (synthetic QA plus-address): the new link is the result.
+      revalidatePath(`/${input.locale}/dashboard/network`);
+      return { status: "ok", outcome: "created", inviteLink };
+    }
     await asAny(supabase).rpc("mark_invitation_delivery_v1", {
       p_invitation_id: input.invitationId,
       p_outcome: sendResult.status === "sent" ? "sent" : "delivery_failed",
+    });
+    await recordDeliveryAttempt({
+      invitationId: input.invitationId,
+      path: "resend",
+      result: sendResult,
+      attempts: 1,
+      autoRetry: false,
     });
     revalidatePath(`/${input.locale}/dashboard/network`);
     return {
@@ -771,11 +792,16 @@ export async function createShareableInvitationAction(input: {
       personalMessage: input.personalMessage ?? null,
     }),
   }, { kind: "invitation", organizationId: input.organizationId ?? null });
+  if (sendResult.status === "suppressed_synthetic_address") {
+    // Never mailed by design (synthetic QA plus-address): the link is the result.
+    return { status: "ok", outcome: "created", invitationId, inviteLink, maxUses };
+  }
   const deliveryOutcome = sendResult.status === "sent" ? "sent" : "delivery_failed";
   await asAny(supabase).rpc("mark_invitation_delivery_v1", {
     p_invitation_id: invitationId,
     p_outcome: deliveryOutcome,
   });
+  await recordDeliveryAttempt({ invitationId, path: "create", result: sendResult, attempts: 1, autoRetry: false });
   return { status: "ok", outcome: deliveryOutcome, invitationId, inviteLink, maxUses };
 }
 

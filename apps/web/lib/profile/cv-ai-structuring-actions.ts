@@ -4,7 +4,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { runAiAgent } from "@/lib/ai/run-agent-server";
-import type { AiLocale } from "@/lib/ai/runtime/types";
+import { aiLocaleFor, type AiLocale } from "@/lib/ai/runtime/types";
 import {
   parseCvSections,
   type CvSectionProposals,
@@ -46,8 +46,6 @@ export type CvAiStructuringResult =
     }
   | { status: "off" };
 
-const SUPPORTED: ReadonlySet<string> = new Set(["en", "lt", "ru"]);
-
 export async function aiCvStructuringSuggestions(
   text: string,
   locale: string,
@@ -72,7 +70,7 @@ export async function aiCvStructuringSuggestions(
   }).limited;
   if (limited) return { status: "off" };
 
-  const aiLocale: AiLocale = SUPPORTED.has(locale) ? (locale as AiLocale) : "en";
+  const aiLocale: AiLocale = aiLocaleFor(locale);
   try {
     const outcome = await runAiAgent("worker_profile", { bio }, { locale: aiLocale });
     if (outcome.status !== "suggestion") return { status: "off" };

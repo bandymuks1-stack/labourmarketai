@@ -124,8 +124,12 @@ export function IdentityStage({
         </div>
 
         {/* ── WHO, WHAT, WHERE, NOW ───────────────────────────────────── */}
+        {/* The name keeps a 9rem minimum, so a trailing element (the readiness
+            ring) wraps below it instead of squeezing it — but never more than
+            its own cell: on a 320 px phone the cell is ~112 px, and a fixed
+            9rem pushed the name past the stage's clipped edge. */}
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-x-3 gap-y-2 self-center sm:flex-nowrap sm:self-start">
-            <div className="flex min-w-[9rem] flex-1 flex-col gap-1 [overflow-wrap:anywhere]">
+            <div className="flex min-w-[min(9rem,100%)] flex-1 flex-col gap-1 [overflow-wrap:anywhere]">
               {eyebrow}
               {heading}
             </div>

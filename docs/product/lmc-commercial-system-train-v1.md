@@ -25,6 +25,44 @@ canonical billing subject (`profile | organization`) — aligning the LMC
 subject model with `organizations` is a design task for the Commercial
 Train, recorded here so it is not discovered late.
 
+**Wagon 2 server layer — BUILT, flags OFF (2026-10-21).** Owner decision
+2026-10-21: *"LMC: build and test the purchase, spend and ledger flows behind
+the flags, and leave them OFF until the owner approves."* This is the new owner
+decision §15 requires before Wagon 2 starts. Built under it (no migration, no
+flag flipped, no money moved):
+
+- `apps/web/lib/lmc/wallet.ts` (server-only, service-role client — the RPCs
+  are `service_role`-only since applied migration `20261006100300`):
+  - `recordLmcPurchase` → `lmc_record_purchase_v1(p_amount_cents bigint,
+    p_reference text, p_idempotency_key text, p_profile_id uuid = null,
+    p_company_id uuid = null)`, gated by `LMC_PURCHASES_ENABLED`;
+  - `spendLmc` → `lmc_spend_v1(p_amount_cents bigint, p_reason text,
+    p_idempotency_key text, p_profile_id uuid = null, p_company_id uuid = null,
+    p_actor_profile_id uuid = null)`, gated by `LMC_SPENDING_ENABLED`;
+  - `spendLmcForAction` — spend, run the paid action, and on failure return
+    the credit through the existing `compensateSpend` seam; requires BOTH
+    `LMC_SPENDING_ENABLED` and `LMC_COMPENSATION_ENABLED` (no charge without a
+    reachable remedy); a replayed spend never re-runs the action.
+  - Typed results (`disabled` code/database layer, `rejected` with a stable
+    reason incl. `insufficient_balance` / `idempotency_conflict`, `recorded` /
+    `spent` with `replay`); the subject is person XOR company exactly as the
+    ledger holds it (the `organizations` alignment above is still open).
+- Tests: `apps/web/lib/lmc/wallet.test.ts` (admin client mocked; argument
+  names checked against the SQL signatures) and the guard
+  `apps/web/lib/guards/lmc-wallet-flags-off.test.ts` (every entry point checks
+  its flag before any DB call; all flags literal `false as const`; module is
+  server-only; no `lib/billing` module or billing route imports it; no product
+  call site).
+
+Every flag stays OFF in code and in `lmc_settings`. **Remaining before any LMC
+moves for a real user:**
+- Wagon 2 remainder — promotional grant wiring + activity-day instrumentation
+  (not part of this slice);
+- **Wagon 4** — Stripe TEST top-up checkout + signature-verified webhook that
+  calls `recordLmcPurchase` on settlement;
+- **Wagon 7** — wallet UI / ledger history / top-up flow, 11-locale copy;
+- **Wagon 8** — production activation: owner flips the flags (§14 gates).
+
 Prior status: **Wagon 0 (this document) + Wagon 1 (ledger foundation) only.**
 Everything commercial ships **disabled**. No production migration beyond the
 foundation, no Stripe activation, no LMC issued to any real user, no
@@ -516,7 +554,7 @@ remain `false` everywhere (TS constants and DB seeds, guard-pinned).
 |---|---|---|
 | 0 | Current-state audit + binding LMC contract (this document) | PR-A `feat(billing): add immutable LMC ledger foundation v1` (this PR, stacked on #842) |
 | 1 | Immutable LMC ledger foundation (schema, RPCs, flags OFF, proofs) | PR-A (same PR as Wagon 0) |
-| 2 | Wallet server layer, purchased top-ups (TEST), promotional grant wiring + activity-day instrumentation | PR-B (stacked on PR-A after it retargets `main`) |
+| 2 | Wallet server layer, purchased top-ups (TEST), promotional grant wiring + activity-day instrumentation | PR-B (stacked on PR-A after it retargets `main`). **Server layer BUILT 2026-10-21, flags OFF** (owner decision 2026-10-21; `lib/lmc/wallet.ts`); promo wiring + activity-day instrumentation remain |
 | 3 | Personal/company plan repricing + usage limits (owner price gate decided here) | PR-C |
 | 4 | Stripe TEST subscriptions + LMC top-ups (no live keys) | PR-D |
 | 5 | Direct Referral Network v1 — schema + attribution, rewards disabled by default | PR-E |
@@ -526,4 +564,5 @@ remain `false` everywhere (TS constants and DB seeds, guard-pinned).
 
 Each PR: Draft, one Codex review per exact final head, all commercial flags
 OFF, no production mutation. Wagons 2+ **do not start** without a new owner
-decision.
+decision. (Wagon 2 started under the owner decision of 2026-10-21 — see the
+status block at the top; Wagons 3–8 are not started by this slice.)

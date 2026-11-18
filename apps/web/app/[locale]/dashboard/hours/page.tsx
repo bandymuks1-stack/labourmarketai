@@ -4,6 +4,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { PageTitle } from "@/components/app/premium/page-title";
 
 import { WorkHoursQuickEntry } from "@/components/app/work-hours-quick-entry";
+import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { getHoursPageData } from "@/lib/work-hours/hours-page-data";
 import { isValidWorkDate } from "@/lib/work-hours/allocations-model";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
@@ -32,19 +33,32 @@ export default async function WorkHoursPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("workHours");
-  const tHome = await getTranslations("companyHome");
+  const tSites = await getTranslations("workObjects");
+  const tApprovals = await getTranslations("companyModel.approvals");
 
   const sp = await searchParams;
   const requested = typeof sp.d === "string" ? sp.d : "";
   const workDate = isValidWorkDate(requested) ? requested : (await viewerWorkToday()).todayIso;
 
-  const data = await getHoursPageData(workDate);
+  // What this reader may actually approve: the same gated set as the first screen's card.
+  // Null: the read failed, so the link says no number rather than zero.
+  const [data, pendingApprovals] = await Promise.all([getHoursPageData(workDate), countReviewablePendingEntries()]);
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-5 pb-16">
       <header className="flex flex-col gap-1">
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
+        {/* Owner 2026-11-07: this door says hours, and approving them lives one tap away. */}
+        {data.kind === "no-company" ? null : (
+          <Link
+            href={"/dashboard/inbox/quick" as "/dashboard"}
+            data-testid="hours-approvals-link"
+            className="mt-2 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-control border border-brand-blue/50 px-4 text-sm font-semibold text-brand-blue hover:underline"
+          >
+            {pendingApprovals === null ? tApprovals("titleUnknown") : tApprovals("title", { n: pendingApprovals })} →
+          </Link>
+        )}
       </header>
 
       {data.kind === "ok" ? (
@@ -82,15 +96,18 @@ export default async function WorkHoursPage({
               {t("states.noCompanyJournalLink")} →
             </Link>
           ) : null}
-          {/* No sites yet: say what to do next, one tap — a project is where
-              hours are recorded against. */}
+          {/* No sites yet: one tap to the place a site is ADDED. Hours are
+              recorded against a site (work_objects), not a project — the old
+              "create first project" door made a project and came back to this
+              same empty state (3 of 5 organizations with projects had no site,
+              2026-10-19). The sites form lives in the projects page fold. */}
           {data.kind === "no-objects" ? (
             <Link
-              href="/dashboard/company/projects/new"
-              data-testid="hours-no-objects-new-project"
+              href="/dashboard/projects#company-locations"
+              data-testid="hours-no-objects-add-site"
               className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue"
             >
-              {tHome("projects.emptyCta")} →
+              {tSites("addButton")} →
             </Link>
           ) : null}
         </div>

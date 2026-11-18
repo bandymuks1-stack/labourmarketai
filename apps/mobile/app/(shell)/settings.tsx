@@ -10,7 +10,9 @@ import { useActorContext } from "../../src/context-provider";
 import { useProfile } from "../../src/profile-provider";
 import { useAuth } from "../../src/auth-context";
 import { capability } from "../../src/domain";
+import { CapabilityFailureNotice } from "../../src/screens/capability-failure";
 import { useCapability } from "../../src/use-capability";
+import { useWorkspaceEpoch } from "../../src/workspace-epoch";
 import { useLocale } from "../../src/i18n/locale-context";
 import { LANGUAGE_NAMES } from "../../src/i18n/messages";
 import { Body, Button, Divider, NotAvailable, Title } from "../../src/ui/primitives";
@@ -75,6 +77,7 @@ export default function Settings() {
   const { signOut, busy, state, accessToken } = useAuth();
 
   const workspaces = useCapability<ContextListData>("context.list");
+  const { bump: workspaceSwitched } = useWorkspaceEpoch();
   const [switching, setSwitching] = useState<string | null>(null);
   const [switchError, setSwitchError] = useState<string | null>(null);
   // Bound once: narrowing a property access does not survive into the map
@@ -102,10 +105,14 @@ export default function Settings() {
         // switched NOTHING, so the list is re-read rather than a local guess
         // being painted over the truth.
         setSwitchError(t("workspace.switchFailed"));
+        workspaces.reload();
+        return;
       }
-      workspaces.reload();
+      // Every mounted station (this list included) reads again for the
+      // workspace the person now acts for.
+      workspaceSwitched();
     },
-    [accessToken, locale, t, workspaces],
+    [accessToken, locale, t, workspaces, workspaceSwitched],
   );
 
   // `CONFIG` is null only on the misconfiguration screen at `_layout`, which
@@ -116,6 +123,19 @@ export default function Settings() {
       key: "privacy",
       label: t("account.privacy"),
       url: `${webOrigin}/${locale}/dashboard/privacy`,
+    },
+    // The PUBLIC deletion page: readable without signing in again in the
+    // browser (the privacy page above needs a web session the app cannot hand
+    // over). It is also the URL the store listings declare for deletion.
+    {
+      key: "deletion",
+      label: t("account.deletionInfo"),
+      url: `${webOrigin}/${locale}/legal/data-deletion`,
+    },
+    {
+      key: "privacy-policy",
+      label: t("account.privacyPolicy"),
+      url: `${webOrigin}/${locale}/legal/privacy`,
     },
     { key: "terms", label: t("account.terms"), url: `${webOrigin}/${locale}/legal/terms` },
     { key: "support", label: t("account.support"), url: `mailto:${SUPPORT_EMAIL}` },
@@ -173,10 +193,21 @@ export default function Settings() {
         ) : workspaces.state.status === "failed" ? (
           // A failed read is a failure, never an empty list: "you belong to no
           // organization" is a different and false statement.
+          // The body says "try again in a moment" — so the screen offers it.
+          // Without this button a weak link left a person nothing to do but
+          // leave the screen and come back.
           <NotAvailable
+            testID="workspace-failed"
             title={t("workspace.failed.title")}
             body={t("workspace.failed.body")}
-          />
+          >
+            <Button
+              variant="quiet"
+              testID="workspace-retry"
+              label={t("domain.retry")}
+              onPress={workspaces.reload}
+            />
+          </NotAvailable>
         ) : listed === null ? null : (
           <>
             <View style={styles.list}>
@@ -242,6 +273,16 @@ export default function Settings() {
               );
             })}
           </View>
+        ) : profile.state.status === "failed" ? (
+          // The roles come from `profile.get`; when THAT read failed (a weak
+          // link, a timeout) the honest sentence is the failed read's, with a
+          // retry — not "this client cannot ask yet", which is no longer true
+          // since held roles arrive on profile.get (#1737).
+          <CapabilityFailureNotice
+            failure={profile.state.failure}
+            retry={profile.reload}
+            testID="context-failed"
+          />
         ) : (
           <NotAvailable
             title={t("context.unavailable.title")}

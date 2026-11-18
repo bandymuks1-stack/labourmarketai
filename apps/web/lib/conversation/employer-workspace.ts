@@ -4,9 +4,14 @@ import "server-only";
 
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { listCompanyDemands, runScouting } from "@/lib/scouting/scouting";
+import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
+import { getTranslations } from "next-intl/server";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { deriveCandidatePipelineStage } from "@/lib/pipeline/candidate-pipeline";
-import { loadDemandPipelineFacts } from "@/lib/pipeline/candidate-pipeline-facts";
+import {
+  loadDemandPipelineFacts,
+  type DemandPipelineFacts,
+} from "@/lib/pipeline/candidate-pipeline-facts";
 
 import {
   EMPLOYER_CANDIDATES_LIMIT,
@@ -16,6 +21,7 @@ import {
   type EmployerCandidatesResult,
   type EmployerDemandRow,
   type EmployerDemandsResult,
+  type EmployerHandRaiserRow,
 } from "@/lib/conversation/employer-workspace-contract";
 
 /**
@@ -57,6 +63,20 @@ import {
  * proved. There is no field here that policy did not approve.
  */
 
+/** The pair-level pipeline facts for the shown workers — the scouting page's
+ *  own loader. Honest degradation: absent facts fall through the precedence
+ *  ladder to the lower rungs. Nothing is invented, and the list still renders. */
+async function pipelineFactsFor(
+  requestId: string,
+  workerIds: readonly string[],
+): Promise<DemandPipelineFacts> {
+  try {
+    return await loadDemandPipelineFacts(requestId, workerIds);
+  } catch {
+    return { bookingByWorker: new Map<string, string>(), conversationByWorker: new Set<string>() };
+  }
+}
+
 /** Map the canonical gap union onto the opaque code the panel localizes. */
 function gapCodes(
   gaps: readonly { readonly code: string }[],
@@ -77,6 +97,17 @@ function gapCodes(
 }
 
 /**
+ * A need saved without naming the role stores an ENGLISH placeholder title
+ * ("Hiring workers — demand"). The needs readback shows it in the reader's
+ * language; the chat's panel printed it raw (production audit 2026-10-22).
+ * Localized HERE, on the server, so the panel stays a pure renderer.
+ */
+async function syntheticDemandTitleLabels() {
+  const t = await getTranslations("demandReadback.syntheticTitle");
+  return { hiringWorkers: t("hiringWorkers"), agencyPartnership: t("agencyPartnership") };
+}
+
+/**
  * The company's own demands, for the chat and for the panel's demand picker.
  *
  * `listCompanyDemands` returns `[]` for BOTH "no company context" and "no
@@ -90,7 +121,7 @@ export async function loadEmployerDemandsForChat(): Promise<EmployerDemandsResul
     const ctx = await resolveEmployerCompanyContext();
     if (ctx.kind !== "ok") return { kind: "no-company-context", reason: ctx.reason };
 
-    const demands = await listCompanyDemands();
+    const [demands, synthetic] = await Promise.all([listCompanyDemands(), syntheticDemandTitleLabels()]);
     if (demands.length === 0) return { kind: "empty" };
 
     return {
@@ -98,7 +129,7 @@ export async function loadEmployerDemandsForChat(): Promise<EmployerDemandsResul
       demands: demands.slice(0, EMPLOYER_DEMANDS_LIMIT).map(
         (d): EmployerDemandRow => ({
           requestId: d.id,
-          title: d.title,
+          title: resolveDemandTitle(d.title, synthetic),
           status: d.status,
           structured: d.structured,
           // Title-only derivation here — see the contract's degradation note.
@@ -147,14 +178,48 @@ export async function loadEmployerCandidatesForChat(
 
   const demand: EmployerDemandRow = {
     requestId: result.demand.id,
-    title: result.demand.title,
+    title: resolveDemandTitle(result.demand.title, await syntheticDemandTitleLabels()),
     status: result.demand.status,
     structured: result.demand.structured,
     // The AUTHORITATIVE derivation — `runScouting` ran it over the whole row.
     needSource: result.demand.needSource,
   };
 
-  if (result.kind === "not-structured") return { kind: "not-structured", demand };
+  if (result.kind === "not-structured") {
+    // Owner decision 2026-10-22: the people who raised a hand on a need that
+    // names no trade are shown NOW — in the order the scouting core returned
+    // them (not a ranking), with no match field at all.
+    const raised = result.handRaisers.slice(0, EMPLOYER_CANDIDATES_LIMIT);
+    const raisedFacts = await pipelineFactsFor(
+      requestId,
+      raised.map((h) => h.workerId),
+    );
+    return {
+      kind: "not-structured",
+      demand,
+      handRaisers: raised.map((h): EmployerHandRaiserRow => {
+        const bookingStatus = raisedFacts.bookingByWorker.get(h.workerId) ?? null;
+        return {
+          matchAssessed: false,
+          workerId: h.workerId,
+          label: anonymizedToken(h.preview.anonymizedLabel),
+          professionSlug: h.professionSlug,
+          country: h.preview.location,
+          canContact: h.canContact,
+          shortlistStatus: h.shortlistStatus,
+          shortlistNote: h.shortlistNote,
+          pipelineStage: deriveCandidatePipelineStage({
+            shortlistStatus: h.shortlistStatus,
+            interestStatus: h.interestStatus,
+            bookingStatus,
+            conversationExists: raisedFacts.conversationByWorker.has(h.workerId),
+          }),
+          bookingStatus,
+        };
+      }),
+      handRaisersTotal: result.handRaisers.length,
+    };
+  }
 
   // Ranked order is the ENGINE's order. The slice takes the top of the list
   // the §19 comparator produced; nothing is re-sorted here.
@@ -163,17 +228,10 @@ export async function loadEmployerCandidatesForChat(
   // The two pair-level facts the safe candidate view does not carry — the SAME
   // loader the scouting page uses, so the stage shown in the panel and the
   // stage shown on the full screen are one derivation, not two.
-  let facts;
-  try {
-    facts = await loadDemandPipelineFacts(
-      requestId,
-      shown.map((c) => c.workerId),
-    );
-  } catch {
-    // Honest degradation: absent facts fall through the precedence ladder to
-    // the lower rungs. Nothing is invented, and the list still renders.
-    facts = { bookingByWorker: new Map<string, string>(), conversationByWorker: new Set<string>() };
-  }
+  const facts = await pipelineFactsFor(
+    requestId,
+    shown.map((c) => c.workerId),
+  );
 
   const candidates: readonly EmployerCandidateRow[] = shown.map((c) => {
     const bookingStatus = facts.bookingByWorker.get(c.workerId) ?? null;

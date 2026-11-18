@@ -97,9 +97,12 @@ describe("the app: RPC-first with the owner-only fallback; confirm stays the cre
 });
 
 describe("the surface: the organization's needs are listed; only the creator sees the confirm act", () => {
-  it("scouting reads own rows OR the active organization's rows and carries ownedByCaller", () => {
+  it("scouting reads the active organization's rows (plus own org-less rows) and carries ownedByCaller", () => {
     const scouting = read(WEB, "lib", "scouting", "scouting.ts");
-    expect((scouting.match(/\.or\(`profile_id\.eq\.\$\{user\.id\},organization_id\.eq\.\$\{[a-z]+\.organizationId\}`\)/g) ?? []).length).toBe(3); // list, scout, shortlist write (2026-09-30)
+    // 2026-10-20: the shared workspace rule (lib/demand/demand-org-scope.ts) —
+    // a colleague still sees the organization's needs; the creator's needs of
+    // ANOTHER organization no longer leak into this one.
+    expect((scouting.match(/\.or\(demandsOfWorkspaceFilter\(user\.id, [a-z]+\.organizationId\)\)/g) ?? []).length).toBe(3); // list, scout, shortlist write (2026-09-30)
     expect(scouting).toContain("readonly ownedByCaller: boolean;");
     expect((scouting.match(/ownedByCaller: (r|req)\.profile_id === user\.id/g) ?? []).length).toBe(2);
   });

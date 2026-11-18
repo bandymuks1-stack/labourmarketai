@@ -74,3 +74,30 @@ export function receiptTitle(originalText: string): string {
   if (first.length <= RECEIPT_TITLE_MAX) return first;
   return `${first.slice(0, RECEIPT_TITLE_MAX - 1).trimEnd()}…`;
 }
+
+/** A queue row as a card's view, its slugs named by the caller's translators. */
+export function quickConfirmEntryView<
+  E extends {
+    id: string;
+    workerName: string;
+    createdAt: string;
+    workDay: string;
+    hours: { value: number; unit: string; certain: boolean } | null;
+    originalText: string;
+    recognizedSlugs: string[];
+    skillsToConfirm: QuickQueueSkill[];
+    confirmScope: QuickConfirmScope;
+  },
+>(e: E, skillName: (slug: string) => string, unitName: (slug: string) => string) {
+  return {
+    id: e.id,
+    workerName: e.workerName,
+    createdAt: e.createdAt,
+    workDay: e.workDay,
+    hours: e.hours ? { value: e.hours.value, unit: unitName(e.hours.unit), certain: e.hours.certain } : null,
+    originalText: e.originalText,
+    recognizedNames: e.recognizedSlugs.map(skillName),
+    skills: e.skillsToConfirm.map((s) => ({ id: s.id, name: skillName(s.slug) })),
+    confirmScope: e.confirmScope,
+  };
+}

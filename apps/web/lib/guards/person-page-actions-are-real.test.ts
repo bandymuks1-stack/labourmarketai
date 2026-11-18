@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * THE ACTIONS ON A PERSON'S PAGE LEAD SOMEWHERE.
@@ -54,7 +55,7 @@ describe("1. the request action is the canonical one", () => {
     ]) {
       expect(page, `label ${key}`).toContain(`tMarket("${key}")`);
       // …and the key really exists in the catalogue, in every routed locale.
-      for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+      for (const loc of activeLocales) {
         const cat = JSON.parse(read("messages", `${loc}.json`)) as {
           marketplace?: Record<string, unknown>;
         };
@@ -91,6 +92,10 @@ describe("2. every outcome says something DIFFERENT, and none is a dead button",
     expect(button).toContain("{retryable ? (");
     // The success state is a state, not a button that could fire again.
     expect(button).toContain('data-testid="person-service-requested"');
+    // A sent request is not a dead end: it names the page that holds the answer,
+    // in the marketplace namespace's own words (no new vocabulary).
+    expect(button).toMatch(/href=\{"\/dashboard\/service-requests" as "\/dashboard"\}/);
+    expect(page).toContain('myRequests: tMarket("outgoingHeading")');
   });
 
   it("success and failure are BOTH reported to the funnel", () => {

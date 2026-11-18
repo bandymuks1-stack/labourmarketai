@@ -3,11 +3,19 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import type { QuickConfirmEntryView } from "@/components/app/quick-confirm-card";
 import { QuickConfirmQueue } from "@/components/app/quick-confirm-queue";
+import { quickConfirmEntryView } from "@/lib/journal/quick-confirm-model";
 import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
+import { groupByOrganization, reviewScopeOf, rowsInScope } from "@/lib/journal/review-scope";
+import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { createClient } from "@/lib/supabase/server";
 import { utcDayKey, utcTodayKey } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/inbox/quick");
+
 
 /** One-Tap Confirm (S3.5) — the manager's mobile-first confirm queue. Same
  *  gated reviewable set as the inbox, same write RPCs; this view only cuts
@@ -23,6 +31,7 @@ export default async function QuickConfirmPage({
   setRequestLocale(locale);
   const t = await getTranslations("journal");
   const tSkill = await getTranslations("skillNames");
+  const tUnit = await getTranslations("productivityUnits");
 
   const supabase = await createClient();
   const {
@@ -38,15 +47,20 @@ export default async function QuickConfirmPage({
   } catch {
     queue = null;
   }
-  const entries: QuickConfirmEntryView[] = (queue ?? []).map((e) => ({
-    id: e.id,
-    workerName: e.workerName,
-    createdAt: e.createdAt,
-    workDay: e.workDay,
-    originalText: e.originalText,
-    recognizedNames: e.recognizedSlugs.map((slug) => tSkill(slug)),
-    skills: e.skillsToConfirm.map((s) => ({ id: s.id, name: tSkill(s.slug) })),
-    confirmScope: e.confirmScope,
+  // ONE ORGANIZATION'S CONTEXT (decision 0024). The reviewable set spans every organization
+  // the reader reviews. With an organization active, this page shows its entries only, the
+  // same set its "waiting for approval" counts name, and says how many wait elsewhere.
+  // With none active it shows every entry, grouped by organization and labelled on each
+  // card, never one unlabelled pile.
+  const scope = reviewScopeOf((await getActiveOrganizationContext()).activeOrganizationId);
+  const scoped = rowsInScope(queue ?? [], scope);
+  const groups = scope.kind === "all" ? groupByOrganization(scoped.rows) : [];
+  const labelled = groups.length > 1 || groups.some((g) => g.organizationId === null);
+  const organizationLabel = (name: string | null) => name ?? t("inbox.quick.unnamedOrganization");
+  const ordered = scope.kind === "all" ? groups.flatMap((g) => g.rows) : scoped.rows;
+  const entries: QuickConfirmEntryView[] = ordered.map((e) => ({
+    ...quickConfirmEntryView(e, tSkill, tUnit),
+    ...(labelled ? { organization: organizationLabel(e.organizationName) } : {}),
   }));
 
   // "Confirm all of today" — strictly the entries created today. "Today" is
@@ -80,6 +94,18 @@ export default async function QuickConfirmPage({
           {t("inbox.quick.detailedReview")} →
         </Link>
       </header>
+
+      {labelled ? (
+        <p className="text-sm leading-relaxed text-text-secondary" data-testid="quick-by-organization">
+          {t("inbox.quick.byOrganization")}{" "}
+          {groups.map((g) => `${organizationLabel(g.organizationName)}: ${g.rows.length}`).join(" · ")}
+        </p>
+      ) : null}
+      {scoped.elsewhere > 0 ? (
+        <p className="text-sm leading-relaxed text-text-secondary" data-testid="quick-elsewhere">
+          {t("inbox.quick.elsewhere", { n: scoped.elsewhere })}
+        </p>
+      ) : null}
 
       {/* One client boundary that stays mounted across the post-tap
           revalidation, so the manager's receipt survives the queue emptying

@@ -224,9 +224,37 @@ export async function resolveEmployerCompanyCore(
     // read. An environment without it answers 42703 and is re-read without it
     // (nothing is archived there); a 42703 on the re-read is the real
     // needs-migration below.
-    const orgColumns = "id, display_name, legal_name, legacy_company_id";
+    //
+    // ONE STAGE, NOT THREE (perf 2026-10-23). The bound company row rides this
+    // read through the legacy-binding foreign key (the same embed the
+    // workspace list reads; `companies` SELECT is open to authenticated
+    // readers, so a missing row embeds as null — "company-missing", exactly
+    // what the separate read answered). The caller's own governance row is
+    // keyed by the active id and the user alone, so it is read ALONGSIDE —
+    // its answer is used only once the org row has passed every gate below.
+    const orgColumns =
+      "id, display_name, legal_name, legacy_company_id, companies!organizations_legacy_company_id_fkey(id, profile_id)";
     const readOrg = (select: string) =>
       asAny(supabase).from("organizations").select(select).eq("id", activeId).limit(2);
+    // The per-person invitation delegation (owner direction 2026-09-24) rides
+    // the same own-row read; without the column (42703) it re-reads the role
+    // alone — the pre-migration truth, nobody delegated.
+    const readMembership = (columns: string) =>
+      asAny(supabase)
+        .from("company_memberships")
+        .select(columns)
+        .eq("organization_id", activeId)
+        .eq("profile_id", caller.userId)
+        .eq("status", "active")
+        .limit(1);
+    const membershipRead = (async () => {
+      let res = await readMembership("role, manages_invitations");
+      if (res.error?.code === UNDEFINED_COLUMN_CODE) res = await readMembership("role");
+      return res;
+    })();
+    // Awaited below on every path that reaches the governance gate; this only
+    // keeps an early return from reporting it as an unhandled rejection.
+    membershipRead.catch(() => {});
     let orgRes = await readOrg(`${orgColumns}, ${ORGANIZATION_ARCHIVED_COLUMN}`);
     if (orgRes.error?.code === UNDEFINED_COLUMN_CODE) orgRes = await readOrg(orgColumns);
     if (orgRes.error) {
@@ -247,6 +275,7 @@ export async function resolveEmployerCompanyCore(
       legal_name: string | null;
       legacy_company_id: string | null;
       archived_at?: string | null;
+      companies?: { id: string; profile_id: string | null } | null;
     }[];
     if (orgRows.length > 1) return unavailable("ambiguous-binding", label);
     const org = orgRows[0];
@@ -264,28 +293,13 @@ export async function resolveEmployerCompanyCore(
     }
 
     // Confirm the company row exists (and read the creator pointer for the
-    // compatibility arm below).
-    const compRes = await asAny(supabase)
-      .from("companies")
-      .select("id, profile_id")
-      .eq("id", companyId)
-      .limit(2);
-    if (compRes.error) {
-      if (
-        compRes.error.code === UNDEFINED_COLUMN_CODE ||
-        compRes.error.code === RELATION_NOT_FOUND_CODE
-      ) {
-        return unavailable("needs-migration", organizationName || label);
-      }
-      console.error("[employer-company-context] company read failed", {
-        code: compRes.error.code,
-      });
-      return unavailable("error", organizationName || label);
+    // compatibility arm below) — embedded in the org read above. A foreign key
+    // names exactly one company (its primary key), so there is no second row
+    // to be ambiguous about; an embed naming another id is not this binding.
+    const company = org.companies ?? null;
+    if (!company || company.id !== companyId) {
+      return unavailable("company-missing", organizationName || label);
     }
-    const compRows = (compRes.data ?? []) as { id: string; profile_id: string | null }[];
-    if (compRows.length > 1) return unavailable("ambiguous-binding", organizationName || label);
-    const company = compRows[0];
-    if (!company) return unavailable("company-missing", organizationName || label);
 
     // ── GOVERNANCE GATE (M-P0-4 consumer slice, §11) ────────────────────────
     // Membership proves the role; the active workspace selected the target.
@@ -301,19 +315,9 @@ export async function resolveEmployerCompanyCore(
     // use arm 2 alone, exactly the pre-slice behaviour.
     let role: GovernanceRole | null = null;
     let invitationDelegate = false;
-    // The per-person invitation delegation (owner direction 2026-09-24) rides
-    // the same own-row read; without the column (42703) it re-reads the role
-    // alone — the pre-migration truth, nobody delegated.
-    const readMembership = (columns: string) =>
-      asAny(supabase)
-        .from("company_memberships")
-        .select(columns)
-        .eq("organization_id", org.id)
-        .eq("profile_id", caller.userId)
-        .eq("status", "active")
-        .limit(1);
-    let memRes = await readMembership("role, manages_invitations");
-    if (memRes.error?.code === UNDEFINED_COLUMN_CODE) memRes = await readMembership("role");
+    // `org.id === activeId` (the org read filters on it), so the row read
+    // alongside it above is this organization's.
+    const memRes = await membershipRead;
     if (memRes.error) {
       if (
         memRes.error.code !== RELATION_NOT_FOUND_CODE &&
@@ -333,7 +337,33 @@ export async function resolveEmployerCompanyCore(
       if (isGovernanceRole(memberRole)) role = memberRole;
       invitationDelegate = memberRow?.manages_invitations === true;
     }
-    if (role === null && company.profile_id === caller.userId) role = "owner";
+    // The creator arm is compatibility for a creator whose governance was
+    // never ENDED. A creator whose accepted membership here was revoked (an
+    // owner removed by a co-owner, or one who pressed Leave) and who holds no
+    // active row is not an owner-equivalent any more — the same rule as
+    // owns_company() (20261021093000). Asked only on this rare path; a table
+    // that is absent (42P01) is the legacy environment, any other failure is
+    // an error, never a silent grant.
+    let governanceEnded = false;
+    if (role === null && company.profile_id === caller.userId) {
+      const endedRes = await asAny(supabase)
+        .from("company_memberships")
+        .select("accepted_at")
+        .eq("organization_id", org.id)
+        .eq("profile_id", caller.userId)
+        .eq("status", "revoked")
+        .limit(20);
+      if (endedRes.error && endedRes.error.code !== RELATION_NOT_FOUND_CODE) {
+        console.error("[employer-company-context] membership history read failed", {
+          code: endedRes.error.code,
+        });
+        return unavailable("error", organizationName || label);
+      }
+      governanceEnded = ((endedRes.data ?? []) as { accepted_at?: string | null }[]).some(
+        (r) => typeof r.accepted_at === "string" && r.accepted_at !== "",
+      );
+    }
+    if (role === null && !governanceEnded && company.profile_id === caller.userId) role = "owner";
     // A `member` opens no employer surface — a delegation does not change
     // that (it grants invitations, not the company's employer pages). A
     // delegated member manages invitations from the invite panel

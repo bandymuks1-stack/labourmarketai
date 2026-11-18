@@ -1,4 +1,5 @@
 import "server-only";
+import { dsrDueAtIso, dsrOverdue } from "@/lib/privacy/dsr-deadline";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -42,6 +43,10 @@ export interface PrivacyRequestQueueRow {
   readonly type: string;
   readonly status: string;
   readonly createdAtIso: string;
+  /** Art. 12(3): one month after receipt (audit 2026-10-16, G-5). */
+  readonly dueAtIso: string;
+  /** Open and past its due date. */
+  readonly overdue: boolean;
   readonly profileId: string | null;
   /** Resolved via the profiles FK — admin RLS permits the read. */
   readonly email: string | null;
@@ -213,6 +218,8 @@ export async function listPrivacyRequestQueue(): Promise<PrivacyRequestQueueResu
         type: typeof type === "string" ? type : "unknown",
         status: r.status,
         createdAtIso: r.created_at,
+        dueAtIso: dsrDueAtIso(r.created_at),
+        overdue: dsrOverdue(r.created_at, r.status),
         profileId: r.profile_id,
         email: prof?.email ?? null,
       };
