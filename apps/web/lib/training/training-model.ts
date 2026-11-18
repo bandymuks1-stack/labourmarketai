@@ -26,6 +26,35 @@ export const TRAINING_ASSIGNMENT_STATUSES = [
 export type TrainingAssignmentStatus =
   (typeof TRAINING_ASSIGNMENT_STATUSES)[number];
 
+/**
+ * Who a course can be assigned to (owner decision 2026-11-18, registry 11.8):
+ * an active governance member, or a person whose engagement with the
+ * organization is ACTIVE in one of these relationships — the SAME list
+ * `assign_training_v1` checks (migration 20261118143000, pinned by
+ * lib/guards/training-assignment-engaged-groups-v1.test.ts):
+ *   members   employee, manager, owner
+ *   interns   intern     learners  student
+ *   lawfully invited external people  collaborator, consultant, freelancer
+ */
+export const TRAINING_ASSIGNABLE_RELATIONSHIPS = [
+  "employee",
+  "manager",
+  "owner",
+  "intern",
+  "student",
+  "collaborator",
+  "consultant",
+  "freelancer",
+] as const;
+
+/** One person the register's picker offers. */
+export type TrainingAssignee = {
+  readonly profileId: string;
+  readonly name: string;
+  /** relationship slug, or the governance membership role */
+  readonly relationship: string;
+};
+
 export const TRAINING_EVENT_TYPES = [
   "assigned",
   "completed",

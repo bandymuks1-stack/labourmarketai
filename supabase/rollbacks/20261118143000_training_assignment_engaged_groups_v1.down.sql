@@ -1,23 +1,25 @@
 -- ============================================================================
--- ROLLBACK for 20261026140000_assign_training_employees_v1
+-- ROLLBACK for 20261118143000_training_assignment_engaged_groups_v1
 --
--- Restores public.assign_training_v1(text, text, text) EXACTLY as production
--- holds it before the forward migration (read 2026-10-26 from
--- pg_get_functiondef + pg_proc.proacl on project gorgitwvdzxbnaxhrsrw):
---   * body = 20260817230000_training_certification_v1 as patched by
---     20261003151000_email_verified_boundary_v1 (verified-email resolver),
---     with its comments stripped by that patch — md5(prosrc) on production
---     = 74795f98243e2ce340c424cf3c0ee0a5; this file reproduces that body byte
---     for byte (the guard and scripts/db-proof/assign-training-employees-v1.sh
---     both check the hash);
---   * SECURITY DEFINER, search_path = public, owner postgres;
---   * proacl = {postgres=X/postgres,authenticated=X/postgres}.
+-- Restores, exactly as production holds them before the forward migration:
+--   1. public.assign_training_v1(text, text, text) — the production body
+--      (read 2026-10-26 from pg_get_functiondef + pg_proc.proacl on the
+--      production project): 20260817230000_training_certification_v1 as
+--      patched by 20261003151000_email_verified_boundary_v1, md5(prosrc)
+--      74795f98243e2ce340c424cf3c0ee0a5 (checked by the guard
+--      training-assignment-engaged-groups-v1.test.ts); SECURITY DEFINER,
+--      search_path = public, owner postgres,
+--      proacl = {postgres=X/postgres,authenticated=X/postgres};
+--   2. the training_programs_select policy of 20260817230000.
 --
 -- Data: nothing to guard. The forward migration writes no rows; assignments
--- made to employees while it was live stay as the employee's history (they
--- are rows of training_assignments, not of the function), and the restored
--- body only decides who may be assigned NEXT. No DROP, no data change.
+-- made to any of the four groups while it was live stay as records of
+-- training_assignments (the organization's lawfully retained history and the
+-- person's own), and the restored body only decides who may be assigned
+-- NEXT. No DROP of data, no data change.
 -- ============================================================================
+
+begin;
 
 create or replace function public.assign_training_v1(p_program_id text, p_assignee_email text, p_required_by text default null)
  returns text
@@ -94,3 +96,10 @@ end $function$;
 revoke all on function public.assign_training_v1(text, text, text) from public;
 revoke all on function public.assign_training_v1(text, text, text) from anon;
 grant execute on function public.assign_training_v1(text, text, text) to authenticated;
+
+drop policy if exists training_programs_select on public.training_programs;
+create policy training_programs_select on public.training_programs
+  for select to authenticated
+  using (public.belongs_to_organization(organization_id) or public.is_admin());
+
+commit;

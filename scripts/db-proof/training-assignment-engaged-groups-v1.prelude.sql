@@ -1,5 +1,5 @@
 -- ============================================================================
--- STUB HARNESS for scripts/db-proof/assign-training-employees-v1.sh
+-- STUB HARNESS for scripts/db-proof/training-assignment-engaged-groups-v1.sh
 --
 -- A throwaway PostgreSQL 16 cluster is not Supabase, so the pieces of the
 -- platform that assign_training_v1 touches are recreated here. Everything the
