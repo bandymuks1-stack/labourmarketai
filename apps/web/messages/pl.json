@@ -340,7 +340,7 @@
     "buyingTitle": "Co chcę kupić",
     "buyingEmpty": "Nie wysłano jeszcze żadnej prośby o zakup. Znajdź towary na sprzedaż powyżej i użyj „Chcę kupić”.",
     "sellingTitle": "Prośby o zakup do moich ogłoszeń",
-    "sellingEmpty": "Nikt jeszcze nie poprosił o zakup z Twoich ogłoszeń.",
+    "sellingEmpty": "Nikt jeszcze nie poprosił o zakup z Państwa ogłoszeń.",
     "requestButton": "Chcę kupić",
     "formTitle": "Prośba o zakup: {title}",
     "quantityLabel": "Ilość",
@@ -353,7 +353,7 @@
     },
     "deliveryPlaceLabel": "Miejsce dostawy",
     "deliveryPlacePlaceholder": "np. brama B budowy, Kowno",
-    "deliveryPlaceHelp": "Podaj tylko to, czego sprzedający potrzebuje do dostawy — budowę, magazyn lub punkt odbioru. Widzisz to tylko Ty i sprzedający.",
+    "deliveryPlaceHelp": "Proszę podać tylko to, czego sprzedający potrzebuje do dostawy — budowę, magazyn lub punkt odbioru. Widzą to tylko Państwo i sprzedający.",
     "deliveryCountryLabel": "Kraj (2 litery)",
     "requestedDateLabel": "Potrzebne do",
     "noteLabel": "Wiadomość do sprzedającego (opcjonalnie)",
@@ -378,15 +378,15 @@
       "listing_not_found": "To ogłoszenie już nie istnieje.",
       "listing_not_active": "To ogłoszenie nie jest już aktywne.",
       "listing_not_purchasable": "To ogłoszenie nie jest sprzedażą towaru.",
-      "cannot_purchase_own_listing": "Nie możesz kupić własnego ogłoszenia (ani ogłoszenia swojej organizacji).",
-      "not_authorized_for_organization": "Możesz kupować tylko dla organizacji, którą zarządzasz.",
+      "cannot_purchase_own_listing": "Nie mogą Państwo kupić własnego ogłoszenia (ani ogłoszenia swojej organizacji).",
+      "not_authorized_for_organization": "Mogą Państwo kupować tylko dla organizacji, którą Państwo zarządzają.",
       "invalid_quantity": "Podaj ilość większą od zera.",
       "quantity_exceeds_listing": "To więcej, niż ma sprzedający.",
       "invalid_fulfilment_method": "Wybierz odbiór lub dostawę.",
       "delivery_place_required": "Przy dostawie podaj, dokąd dostarczyć.",
       "invalid_country": "Użyj dwuliterowego kodu kraju, np. LT.",
       "requested_date_in_past": "Wybierz dzisiejszą lub późniejszą datę.",
-      "already_requested": "Masz już otwartą prośbę dotyczącą tego ogłoszenia."
+      "already_requested": "Mają już Państwo otwartą prośbę dotyczącą tego ogłoszenia."
     },
     "statuses": {
       "requested": "Wysłano prośbę",
@@ -405,7 +405,7 @@
     "carrierNoteLabel": "Uwaga o przewoźniku lub przekazaniu (opcjonalnie)",
     "transitionRefused": {
       "not_found": "Ten zakup już nie istnieje.",
-      "not_party": "Nie jesteś stroną tego zakupu.",
+      "not_party": "Nie są Państwo stroną tego zakupu.",
       "not_seller": "Może to zrobić tylko sprzedający.",
       "bad_action": "Ta czynność jest niedostępna.",
       "invalid_transition": "Ten zakup już się zmienił — odśwież stronę, aby zobaczyć jego aktualny stan."
@@ -420,7 +420,7 @@
     "cancelledByBuyer": "Anulowane przez kupującego.",
     "cancelledBySeller": "Anulowane przez sprzedającego.",
     "listingRemoved": "Ogłoszenie usunięto; ten zakup pozostaje w zapisie.",
-    "viaOrganization": "Dla Twojej organizacji",
+    "viaOrganization": "Dla Państwa organizacji",
     "openConversation": "Otwórz rozmowę"
   },
   "quality": {
