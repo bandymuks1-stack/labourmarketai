@@ -59,6 +59,22 @@ name: need-second-journey
     id: "need-role"
 - inputText: "QA-SYNTHETIC mobile electrician"
 - hideKeyboard
+# The country where the work is: required since #3225 (a name; the server
+# resolves it to ISO).
+- scrollUntilVisible:
+    element:
+      id: "need-country"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "need-country"
+- inputText: "Lithuania"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
 - scrollUntilVisible:
     element:
       id: "need-location"
