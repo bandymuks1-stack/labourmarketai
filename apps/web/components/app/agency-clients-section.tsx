@@ -215,7 +215,7 @@ export function AgencyClientsSection({
                         <Button
                           type="submit"
                           aria-label={labels.removeButton}
-                          title={labels.removeButton} variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger"
+                          title={labels.removeButton} variant="secondary" size="sm" className="min-h-11 min-w-11 text-text-muted hover:border-state-danger hover:text-state-danger"
                           data-testid={`agency-client-remove-${client.id}`}
                         >
                           <Trash2 className="h-3.5 w-3.5" aria-hidden />

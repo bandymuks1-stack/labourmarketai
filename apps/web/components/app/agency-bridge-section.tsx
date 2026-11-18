@@ -289,7 +289,7 @@ export function AgencyBridgeSection({
                         {(c.status === "pending" || c.status === "active") && (
                           <form action={revokeAction} className="shrink-0">
                             <input type="hidden" name="connectionId" value={c.id} />
-                            <Button type="submit" variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger"
+                            <Button type="submit" variant="secondary" size="sm" className="min-h-11 min-w-11 text-text-muted hover:border-state-danger hover:text-state-danger"
                               title={labels.revokeButton} aria-label={labels.revokeButton}>
                               <Trash2 className="h-3.5 w-3.5" aria-hidden />
                             </Button>
@@ -490,7 +490,7 @@ export function AgencyBridgeSection({
                       {p.offerStatus === "offered" && (
                         <form action={withdrawAction} className="ml-auto shrink-0">
                           <input type="hidden" name="offerId" value={p.offerId} />
-                          <Button type="submit" variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger"
+                          <Button type="submit" variant="secondary" size="sm" className="min-h-11 min-w-11 text-text-muted hover:border-state-danger hover:text-state-danger"
                             title={labels.withdrawButton} aria-label={labels.withdrawButton}>
                             <Trash2 className="h-3.5 w-3.5" aria-hidden />
                           </Button>

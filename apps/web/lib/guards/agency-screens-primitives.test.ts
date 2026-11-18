@@ -37,4 +37,9 @@ describe("agency partner screens use the shared primitives", () => {
     expect(buttons.length, f).toBeGreaterThan(0);
     for (const b of buttons) expect(b, `${f}: ${b.slice(0, 80)}`).toMatch(/min-h-11/);
   });
+
+  it.each(FILES)("%s makes every icon-only action a 44 px square", (f) => {
+    const icons = (code(f).match(/<Button\b[^>]*aria-label=[^>]*>/g) ?? []).filter((b) => !/data-testid="[^"]*submit/.test(b));
+    for (const b of icons) expect(b, `${f}: ${b.slice(0, 80)}`).toMatch(/min-h-11 min-w-11/);
+  });
 });

@@ -129,7 +129,7 @@ export function ClientAgencyBridgeSection({
                     </form>
                     <form action={declineAction} className="shrink-0">
                       <input type="hidden" name="connectionId" value={c.id} />
-                      <Button type="submit" title={labels.declineButton} aria-label={labels.declineButton} variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger">
+                      <Button type="submit" title={labels.declineButton} aria-label={labels.declineButton} variant="secondary" size="sm" className="min-h-11 min-w-11 text-text-muted hover:border-state-danger hover:text-state-danger">
                         <X className="h-3.5 w-3.5" aria-hidden />
                       </Button>
                     </form>
@@ -163,7 +163,7 @@ export function ClientAgencyBridgeSection({
                       </form>
                       <form action={revokeAction} className="shrink-0">
                         <input type="hidden" name="connectionId" value={c.id} />
-                        <Button type="submit" title={labels.revokeButton} aria-label={labels.revokeButton} variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger">
+                        <Button type="submit" title={labels.revokeButton} aria-label={labels.revokeButton} variant="secondary" size="sm" className="min-h-11 min-w-11 text-text-muted hover:border-state-danger hover:text-state-danger">
                           <Trash2 className="h-3.5 w-3.5" aria-hidden />
                         </Button>
                       </form>
@@ -184,7 +184,7 @@ export function ClientAgencyBridgeSection({
                                 <form action={unshareAction} className="shrink-0">
                                   <input type="hidden" name="shareId" value={s.shareId} />
                                   <Button type="submit" title={labels.unshareButton} aria-label={labels.unshareButton}
-                                    data-testid={`client-bridge-unshare-${s.shareId}`} variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger">
+                                    data-testid={`client-bridge-unshare-${s.shareId}`} variant="secondary" size="sm" className="min-h-11 min-w-11 text-text-muted hover:border-state-danger hover:text-state-danger">
                                     <X className="h-3 w-3" aria-hidden />
                                   </Button>
                                 </form>
