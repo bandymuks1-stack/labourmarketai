@@ -26,7 +26,7 @@ const NAME = "20261115120000_journal_learning_access_follows_link_v1";
 const MIG = `supabase/migrations/${NAME}.sql`;
 const DOWN = `supabase/rollbacks/${NAME}.down.sql`;
 /** The one later migration allowed to redefine these objects: it carries this rule. */
-const SUCCESSOR = "20261117060000_former_employer_limited_access_v1.sql";
+const SUCCESSOR = "20261118164500_former_employer_limited_access_v1.sql";
 
 /** SQL without comments, whitespace collapsed, lower case. */
 const code = (sql: string) =>

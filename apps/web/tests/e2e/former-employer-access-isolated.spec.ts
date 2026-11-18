@@ -17,7 +17,7 @@ import {
 
 /**
  * Former employer: limited access (owner decision 2026-11-17;
- * supabase/migrations/20261117060000_former_employer_limited_access_v1.sql),
+ * supabase/migrations/20261118164500_former_employer_limited_access_v1.sql),
  * on the THROWAWAY local stack of .github/workflows/signup-isolated.yml.
  * Synthetic people only. Every read and write below runs under the person's
  * OWN session (their JWT, their RLS), through the doors the app calls.
@@ -32,6 +32,9 @@ import {
  *        correction). Both corrections stay with A beside their originals,
  *        decided by the ORIGINAL record; the unrelated late entry does not.
  *        Each correction keeps its original, its author and its time.
+ *   FE-4 (R2 P3-1) W moves a personal record and B's record into the ended
+ *        context for A after the end: neither the copies nor the originals
+ *        reach A, because the edit chain is walked only inside one context.
  *   FE-1b A PAUSE IS NOT AN END: while the relationship is paused, A keeps
  *        reading, adding to and deciding on W's records, and the entry W files
  *        during the pause belongs to the employment (retained after the end).
@@ -443,10 +446,10 @@ test("FE-2. A ends the employment: retained history stays readable; new records,
 });
 
 /** W edits or corrects one of their entries through the journal's own door. */
-async function correct(oldId: string, text: string): Promise<{ status: number; id: string | null }> {
+async function correct(oldId: string, text: string, engagementId: string = s.ecA): Promise<{ status: number; id: string | null }> {
   const r = await rpc<string | { message?: string }>(W, "journal_entry_supersede_v2", {
     p_old_entry_id: oldId,
-    p_engagement_context_id: s.ecA,
+    p_engagement_context_id: engagementId,
     p_entry_type_slug: "freeform",
     p_profession_id: null,
     p_original_text: text,
@@ -519,4 +522,25 @@ test("FE-3. after the end, W corrects two retained records: the corrections stay
   expect(
     sql<{ n: number }>(`select count(*)::int as n from public.journal_entry_confirmations where entry_id = ${lit(corrected.id!)}`)[0]?.n,
   ).toBe(0);
+});
+
+test("FE-4. after the end, W moves a personal record and B's record into the ended context for A: neither the moved copies nor their originals reach A (R2 P3-1)", async () => {
+  // Both originals were filed DURING the employment, so a chain walk that left
+  // the context would date them before the end and hand them to A.
+  const movedPersonal = await correct(s.entryPersonal, `${TEXT.personal} (moved under A after the end)`);
+  expect(movedPersonal.id, `W moves the personal record under A (${movedPersonal.status})`).toBeTruthy();
+  afterTheEnd(movedPersonal.id!);
+  const movedOther = await correct(s.entryOther, `${TEXT.other} (moved under A after the end)`);
+  expect(movedOther.id, `W moves B's record under A (${movedOther.status})`).toBeTruthy();
+  afterTheEnd(movedOther.id!);
+
+  const ids = [s.entryPersonal, s.entryOther, movedPersonal.id!, movedOther.id!];
+  expect(
+    await readable(O, ids),
+    "a personal or another organization's record moved into the ended context after the end stays out of A's reach",
+  ).toEqual([]);
+  // Positive control: A's own retained history is still there.
+  expect(await readable(O, [s.entryDuring]), "A still reads its retained entry").toEqual([s.entryDuring]);
+  // The person keeps everything, originals included.
+  expect(await readable(W, ids), "W still reads the moved copies and their originals").toEqual([...ids].sort());
 });

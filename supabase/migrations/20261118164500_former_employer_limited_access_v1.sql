@@ -1,5 +1,5 @@
 -- =====================================================================
--- 20261117060000_former_employer_limited_access_v1
+-- 20261118164500_former_employer_limited_access_v1
 --
 -- RED by rule: DROP POLICY + CREATE POLICY on public.journal_entries,
 -- public.journal_entry_work_items, public.journal_entry_metrics and
@@ -72,7 +72,10 @@
 --     correction of a retained record, made after the end, stays with the
 --     organization, and the corrected original stays readable beside it (the
 --     correction is traceable: original data, history, author and time). A
---     new entry unrelated to the employment is not shown. The end day counts as
+--     new entry unrelated to the employment is not shown, and neither is a
+--     record from the personal journal or another organization that the
+--     person moves into the ended context after the end (the chain is walked
+--     only inside the entry's own engagement context; R2 P3-1). The end day counts as
 --     part of the employment, because ended_at is a date. An ended row with no
 --     end date shows nothing (fail-closed; every end door sets ended_at);
 --   · a learning relationship (category `education`): only while it is
@@ -89,7 +92,7 @@
 -- and the photo bucket) follow the read rule, because RLS applies inside those
 -- sub-selects; the SECURITY DEFINER readers are replaced here explicitly.
 --
--- ROLLBACK: supabase/rollbacks/20261117060000_former_employer_limited_access_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261118164500_former_employer_limited_access_v1.down.sql
 -- restores every policy and function body exactly as it was before this
 -- migration, i.e. after #3421: journal_entries_select, can_read_journal_entry_v1
 -- and journal_entry_review_authority_v1 as 20261115120000 defines them, the
@@ -103,6 +106,12 @@ begin;
 -- superseded, else the confirmed row it corrects) to the root, as
 -- project_team_journal_hour_rows_v1 v3 (20261021091000) does. Internal: only
 -- the definer function below calls it.
+-- The walk stays INSIDE THE ENTRY'S OWN ENGAGEMENT CONTEXT (R2 P3-1, owner
+-- point 5): it stops at the first predecessor filed under another context
+-- (the personal journal, another organization, another engagement). So a
+-- record the person moves into the ended context after the end is dated by
+-- its first version IN that context, after the end, and is not retained; a
+-- record they moved into it during the employment is the employment's own.
 create or replace function public.journal_entry_chain_root_at_v1(p_entry_id uuid)
 returns timestamptz
 language sql
@@ -111,15 +120,17 @@ security definer
 set search_path = public
 as $$
   with recursive up as (
-    select e.id as node_id, e.correction_of as node_correction_of, e.created_at as at, 0 as depth
+    select e.id as node_id, e.correction_of as node_correction_of, e.created_at as at,
+           e.engagement_context_id as ctx, 0 as depth
       from public.journal_entries e
      where e.id = p_entry_id
     union all
-    select o.id, o.correction_of, o.created_at, up.depth + 1
+    select o.id, o.correction_of, o.created_at, up.ctx, up.depth + 1
       from up
       left join public.journal_entries pred on pred.superseded_by = up.node_id
       join public.journal_entries o on o.id = coalesce(pred.id, up.node_correction_of)
      where up.depth < 32
+       and o.engagement_context_id is not distinct from up.ctx
   )
   select up.at from up order by up.depth desc limit 1;
 $$;

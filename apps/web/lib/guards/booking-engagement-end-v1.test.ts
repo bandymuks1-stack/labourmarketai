@@ -1804,7 +1804,7 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261115120000_journal_learning_access_follows_link_v1.sql",
       // 2026-11-17: owner decision, a former employer keeps limited access (retained journal up to the end
       // date, nothing new, no more writes). RED draft, the marker is the human-gate acknowledgement, NOT applied.
-      "20261117060000_former_employer_limited_access_v1.sql",
+      "20261118164500_former_employer_limited_access_v1.sql",
 ]);
   });
 

@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 /**
  * A FORMER EMPLOYER KEEPS LIMITED ACCESS (owner decision 2026-11-17;
- * 20261117060000_former_employer_limited_access_v1).
+ * 20261118164500_former_employer_limited_access_v1).
  *
  * After an employment ends, the organization keeps reading the journal entries
  * recorded up to the end date (retained history), and no new entry, no other
@@ -17,7 +17,7 @@ import { join } from "node:path";
 const web = process.cwd();
 const repo = join(web, "..", "..");
 const read = (p: string) => readFileSync(join(repo, p), "utf8");
-const NAME = "20261117060000_former_employer_limited_access_v1";
+const NAME = "20261118164500_former_employer_limited_access_v1";
 const MIG = `supabase/migrations/${NAME}.sql`;
 const DOWN = `supabase/rollbacks/${NAME}.down.sql`;
 const migrations = () => readdirSync(join(repo, "supabase/migrations")).filter((f) => f.endsWith(".sql")).sort();
@@ -136,6 +136,10 @@ describe("retained history is decided by the ORIGINAL record (owner option A)", 
     expect(f).toContain("join public.journal_entries o on o.id = coalesce(pred.id, up.node_correction_of)");
     expect(f).toContain("where up.depth < 32");
     expect(f).toContain("order by up.depth desc limit 1");
+    // R2 P3-1 (owner point 5): the walk never leaves the entry's own context, so a
+    // personal or another organization's record moved in after the end is not retained.
+    expect(f).toContain("e.engagement_context_id as ctx");
+    expect(f).toContain("and o.engagement_context_id is not distinct from up.ctx");
     expect(code(sql)).toContain(
       "revoke all on function public.journal_entry_chain_root_at_v1(uuid) from public, anon, authenticated;",
     );
@@ -259,6 +263,7 @@ describe("the local-stack proof travels with the SQL", () => {
       "a paused relationship keeps A's review basis",
       "W's corrections of retained records stay with A, beside their originals",
       "each correction is traceable to its original, its author and its time",
+      "a personal or another organization's record moved into the ended context after the end stays out of A's reach",
     ]) {
       expect(spec, phrase).toContain(phrase);
     }

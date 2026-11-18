@@ -28,7 +28,7 @@ on:
       - ".github/workflows/signup-isolated.yml"
       - "apps/web/tests/e2e/signup-isolated.spec.ts"
       - "apps/web/tests/e2e/former-employer-access-isolated.spec.ts"
-      - "supabase/migrations/20261117060000_former_employer_limited_access_v1.sql"
+      - "supabase/migrations/20261118164500_former_employer_limited_access_v1.sql"
       - "apps/web/tests/e2e/sv-journey-isolated.spec.ts"
       # Every public path reaches its last step without an auth page (Lane L).
       - "apps/web/tests/e2e/public-paths-isolated.spec.ts"

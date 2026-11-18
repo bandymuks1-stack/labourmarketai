@@ -231,7 +231,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261115120000_",
       // 2026-11-17 owner decision: a former employer keeps the journal recorded during the employment and
       // nothing new, and can no longer change it (RLS + three SECURITY DEFINER bodies; RED draft, needs-human-gate, NOT applied).
-      "20261117060000_",
+      "20261118164500_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
       "20261104060000_",
       // #2913 restored six production-applied migrations byte-exact (owner option 2, 2026-11-01): historical restorations dated after the package, not pending work of it.
