@@ -11393,7 +11393,7 @@
       "number": "Fakturanummer",
       "noNumber": "Faktura utan nummer",
       "date": "Datum",
-      "period": "Period",
+      "period": "Faktureringsperiod",
       "oneTime": "Engångsbetalning",
       "excludingVat": "Belopp exkl. moms",
       "vat": "Moms",
