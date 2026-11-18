@@ -551,7 +551,7 @@ function makeWritePair<S extends z.ZodType<Record<string, unknown>>>(spec: Write
       const parsed = spec.schema.parse(rest);
       const p = await spec.prepare(caller, parsed);
       if (!isPrepared(p)) return p;
-      const verdict = verifyCapabilityConfirmation({
+      const verdict = await verifyCapabilityConfirmation({
         actionId: confirmId,
         token: confirmationToken as string,
         input: p.normalized,

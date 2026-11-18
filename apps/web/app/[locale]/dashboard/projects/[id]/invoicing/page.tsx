@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 import { InvoiceNote, InvoicePanel } from "@/components/app/invoice-panel";
 import { createClient } from "@/lib/supabase/server";
 import { getProjectManageFacts } from "@/lib/projects/responsible";
@@ -36,6 +37,9 @@ import {
 } from "@/lib/finance/project-invoice-actions";
 
 export const dynamic = "force-dynamic";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/projects/[id]/invoicing", "projectInvoice.page.title");
 
 const NOTICE_KEYS = new Set([
   "term_created", "term_ended", "period_created", "draft_created", "draft_discarded", "line_added", "tax_saved",

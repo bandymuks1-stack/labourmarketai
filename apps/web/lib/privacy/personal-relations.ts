@@ -581,6 +581,8 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
     table: "privacy_erasure_receipts_v3",
     reason:
       "the receipt of an executed account deletion (what was deleted, retained and why) — written after your account no longer exists; it names no identifier of you and is available on request through the data-protection channel",
+  },
+  {
     table: "invoice_recipients",
     reason:
       "the issuing organization's contact book of the parties it invoices (legal names, addresses, tax ids, contact details of THIRD PARTIES that may include a sole trader). It is the issuer's business record, readable only by the issuer's owner/admin; the frozen copy on each issued invoice belongs to the issuer's books. A person referenced there is not given an export of the issuer's customers",
