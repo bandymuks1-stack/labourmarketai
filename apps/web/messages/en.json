@@ -2275,6 +2275,7 @@
         },
         "statusInvalidCountry": "Choose a country from the list — other values are not supported yet.",
         "registrationCode": "Company / registration code",
+        "optionalDetails": "Registration, contacts and role",
         "registrationCodeHelp": "Optional. Helps verify the company later.",
         "address": "Address / location",
         "addressPlaceholder": "e.g. 1 Main St, Vilnius",

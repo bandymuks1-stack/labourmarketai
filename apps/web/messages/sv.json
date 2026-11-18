@@ -2275,6 +2275,7 @@
         },
         "statusInvalidCountry": "Välj ett land i listan – andra värden stöds inte ännu.",
         "registrationCode": "Organisationsnummer/registreringskod",
+        "optionalDetails": "Registrering, kontakt och roll",
         "registrationCodeHelp": "Valfritt. Hjälper till att verifiera företaget senare.",
         "address": "Adress/plats",
         "addressPlaceholder": "t.ex. Storgatan 1, Vilnius",

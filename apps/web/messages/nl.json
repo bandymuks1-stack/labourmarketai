@@ -2275,6 +2275,7 @@
         },
         "statusInvalidCountry": "Kies een land uit de lijst — andere waarden worden nog niet ondersteund.",
         "registrationCode": "Bedrijfs-/registratiecode",
+        "optionalDetails": "Registratie, contactgegevens en functie",
         "registrationCodeHelp": "Optioneel. Helpt om het bedrijf later te verifiëren.",
         "address": "Adres / locatie",
         "addressPlaceholder": "bijv. Hoofdstraat 1, Vilnius",

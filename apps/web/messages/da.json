@@ -6864,7 +6864,8 @@
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       },
       "setup": {
-        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
+        "optionalDetails": "Registrering, kontakt og rolle"
       },
       "workers": {
         "invitationsManagedElsewhere": "Invitationer håndteres af den person i virksomheden, der har ansvaret for dem.",
