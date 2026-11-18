@@ -9,6 +9,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 const APP = resolve(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf8");
@@ -65,7 +66,9 @@ describe("page — request button only when contactable", () => {
   it("renders RequestCommunicationButton behind canContact", () => {
     // Tolerates an optional wrapper element (PR6 places the ProposeBookingButton
     // alongside it, both gated behind the same canContact check).
-    expect(src).toMatch(/c\.canContact(\s*&&\s*needOpen)?\s*\?\s*\(?[\s\S]{0,200}?<RequestCommunicationButton/);
+    // ...and the author check (the server accepts only the need's author; see
+    // scouting-contact-author-only.test.ts), which sits between the two.
+    expect(src).toMatch(/c\.canContact(\s*&&\s*needOpen)?\s*\?\s*\(?[\s\S]{0,700}?<RequestCommunicationButton/);
   });
   it("passes no worker profileId to the button", () => {
     const idx = src.indexOf("<RequestCommunicationButton");
@@ -85,7 +88,7 @@ describe("no fake acceptance / booking / contact-unlock language", () => {
 });
 
 describe("i18n parity for the request copy (LT/EN/RU)", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}.json carries scouting.request.*`, () => {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         scouting?: { request?: Record<string, unknown> };

@@ -293,6 +293,40 @@ const processSchema = z
   })
   .strict();
 
+const teamSchema = z
+  .object({
+    count: z.number().int().min(1).max(100),
+    per_team: z.number().int().min(1).max(100),
+  })
+  .strict();
+
+/**
+ * The team composition to store, or null: only while it still EXPLAINS the
+ * number of workers the person confirmed (count × per_team = teamSize). A
+ * count the person edited afterwards is the fact; the composition is dropped
+ * rather than left contradicting it.
+ */
+export function teamCompositionFor(
+  teamSize: number | null | undefined,
+  teamCount: number | null | undefined,
+  perTeamSize: number | null | undefined,
+): { count: number; per_team: number } | null {
+  if (
+    typeof teamSize !== "number" ||
+    typeof teamCount !== "number" ||
+    typeof perTeamSize !== "number" ||
+    !Number.isInteger(teamCount) ||
+    !Number.isInteger(perTeamSize) ||
+    teamCount < 1 ||
+    teamCount > 100 ||
+    perTeamSize < 1 ||
+    perTeamSize > 100
+  ) {
+    return null;
+  }
+  return teamCount * perTeamSize === teamSize ? { count: teamCount, per_team: perTeamSize } : null;
+}
+
 export const structuredDemandV2Schema = z
   .object({
     opportunity_type: z.enum(OPPORTUNITY_TYPES).optional(),
@@ -312,6 +346,11 @@ export const structuredDemandV2Schema = z
      *  Optional + additive: absence keeps every engine default untouched. */
     requirement_priorities: requirementPrioritiesSchema.optional(),
     process: processSchema.optional(),
+    /** Teams of a stated size ("3 brigados po 4 žmones"): how many teams and
+     *  how many people in each. The TOTAL stays in the `team_size` column
+     *  (count × per_team); this only keeps the composition beside it.
+     *  Owner-side only — the worker projection is a SQL whitelist. */
+    team: teamSchema.optional(),
     meta: z
       .object({ contract_version: z.literal(STRUCTURED_DEMAND_CONTRACT_VERSION) })
       .strict(),

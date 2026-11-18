@@ -104,6 +104,8 @@ export interface OperationsBoardLabels {
     seed: string;
     addItem: string;
     addPlaceholder: string;
+    /** Suggested rows still to agree before the agreement — neutral. */
+    toAgree: string;
     missing: string;
     received: string;
     checked: string;
@@ -363,6 +365,9 @@ function ChecklistEditor({
           {labels.checklist.title}
         </span>
         <span className="flex flex-wrap gap-2 text-meta text-text-secondary">
+          <span data-testid="ops-docs-to-agree">
+            {labels.checklist.toAgree}: {worker.docsToAgree}
+          </span>
           <span data-testid="ops-docs-missing">
             {labels.checklist.missing}: {worker.docsMissing}
           </span>

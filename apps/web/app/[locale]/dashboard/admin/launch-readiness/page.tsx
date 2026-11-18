@@ -9,8 +9,15 @@ import {
 import { getWorkerAdsReadiness } from "@/lib/ads/limited-worker-ads-readiness";
 import { smtpReadiness } from "@/lib/email/smtp";
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
+import { ownerTelegramPresence } from "@/lib/notifications/telegram-owner-alerts";
+import { webPushStatus } from "@/lib/notifications/web-push-config";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { ProductMetricsSection } from "@/components/admin/product-metrics-section";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/launch-readiness");
+
 
 /**
  * Operator launch-readiness view (launch repair Scope E).
@@ -39,6 +46,34 @@ export default async function AdminLaunchReadinessPage({
   // (INVITE_EMAIL_PROVIDER, .env.example): a complete mailbox sends GDPR
   // notices only, until that switch is set.
   const invitesOn = isTransactionalEmailConfigured();
+  const telegram = ownerTelegramPresence();
+  const push = webPushStatus();
+  const pushMissing = new Set<string>(push.active ? [] : push.missing);
+  const channels: ReadonlyArray<{
+    id: "telegram" | "push";
+    label: string;
+    ready: boolean;
+    settings: ReadonlyArray<[string, boolean]>;
+  }> = [
+    {
+      id: "telegram",
+      label: "Telegram",
+      ready: telegram.enabled && telegram.botToken && telegram.chatId,
+      settings: [
+        ["OWNER_TELEGRAM_ALERTS_ENABLED", telegram.enabled],
+        ["OWNER_TELEGRAM_BOT_TOKEN", telegram.botToken],
+        ["OWNER_TELEGRAM_CHAT_ID", telegram.chatId],
+      ],
+    },
+    {
+      id: "push",
+      label: "Web push",
+      ready: push.active,
+      settings: (
+        ["WEB_PUSH_ENABLED", "WEB_PUSH_VAPID_PUBLIC_KEY", "WEB_PUSH_VAPID_PRIVATE_KEY", "WEB_PUSH_VAPID_SUBJECT"] as const
+      ).map((k) => [k, !pushMissing.has(k)] as [string, boolean]),
+    },
+  ];
   if (result.kind === "not-admin") {
     // requireSuperadmin already redirected; this is unreachable belt-and-braces.
     return null;
@@ -274,6 +309,40 @@ export default async function AdminLaunchReadinessPage({
           </li>
         </ul>
         <p className="text-meta leading-relaxed text-text-muted">{t("mail.note")}</p>
+      </section>
+
+      {/* OWNER ALERTS + WEB PUSH — presence only, never a value (5.16, 5.8).
+          Push counts a setting as present only when it is well-formed. */}
+      <section className="flex flex-col gap-3" data-testid="alert-readiness">
+        <h2 className="font-display text-lg font-semibold text-text-primary">{t("alerts.title")}</h2>
+        {channels.map((c) => (
+          <div key={c.id} className="flex flex-col gap-1.5" data-testid={`alert-readiness-${c.id}`} data-ready={c.ready ? "true" : "false"}>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-medium text-text-primary">{c.label}</span>
+              <span
+                className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${
+                  c.ready
+                    ? "border-state-success/40 bg-state-success/10 text-state-success"
+                    : "border-state-amber/40 bg-state-amber/10 text-state-amber"
+                }`}
+              >
+                {c.ready ? t("mail.ready") : t("mail.notReady")}
+              </span>
+            </div>
+            <ul className="flex flex-col gap-1.5">
+              {c.settings.map(([name, present]) => (
+                <li
+                  key={name}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 px-3 py-2"
+                  data-present={present ? "true" : "false"}
+                >
+                  <span className="font-mono text-sm text-text-primary">{name}</span>
+                  <span className="text-xs text-text-secondary">{present ? t("mail.present") : t("mail.missing")}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </section>
 
       <p className="text-meta leading-relaxed text-text-muted">

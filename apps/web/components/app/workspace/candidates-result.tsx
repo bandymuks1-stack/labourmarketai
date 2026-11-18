@@ -8,10 +8,7 @@ import {
   dispatchWorkerAction,
   prepareConfirmationAction,
 } from "@/lib/conversation/dispatch";
-import { roleContextForAction } from "@/lib/conversation/action-role-context";
 import { useAuthOptional } from "@/lib/auth/context";
-import { trackFunnel } from "@/lib/telemetry/task";
-import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
   loadEmployerCandidatesForChat,
   loadEmployerDemandsForChat,
@@ -874,11 +871,14 @@ function ActionButton({
         expectedWorkspaceId,
       });
       if (res.ok) {
-        trackFunnel(FUNNEL_EVENTS.companyDemandActionClicked, {
-          surface: "conversation",
-          role_context: roleContextForAction(actionId),
-          success: true,
-        });
+        // No client funnel event here (activation audit 2026-10-26 §2). This
+        // used to send `company_demand_action_clicked` after ANY of these
+        // writes — a shortlist, a contact, a booking — so the "describe a
+        // need" door count rose with candidate work and meant nothing. The
+        // write is already counted where it happens: the one dispatcher
+        // emits `chat_action_persisted` (step = the action id), and the
+        // shortlist / contact paths emit `shortlist_added` /
+        // `contact_requested` server-side.
         setDone(true);
         onDone();
         return;

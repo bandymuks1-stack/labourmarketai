@@ -11,6 +11,7 @@ import {
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { companyBecameHiringReady } from "@/lib/company/company-readiness";
+import { websiteHasForbiddenScheme } from "@/lib/company/public-website";
 
 /**
  * Company profile-request service.
@@ -442,6 +443,11 @@ export async function saveCompanySetup(
   const rawCountry = legal.country;
   if (!legal.locked && rawCountry !== null && !isKnownCountryCode(rawCountry)) {
     return { kind: "invalid-country" };
+  }
+  // A malformed website stays the RPC's `needs_checks` case; another scheme is
+  // never a website, and this value becomes a link on the public business page.
+  if (websiteHasForbiddenScheme(input.website)) {
+    return { kind: "invalid", message: "The website must be an http or https address." };
   }
   const rawType = input.companyType?.trim().toLowerCase() || null;
   if (

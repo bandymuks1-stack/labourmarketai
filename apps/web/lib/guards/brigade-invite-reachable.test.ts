@@ -25,7 +25,7 @@ describe("brigade invitations can reach a worker", () => {
     const a = read("lib/company/team-brigade-actions.ts");
     expect(a).toContain('parseEmailList(input.email ?? "").valid[0]');
     expect(a).not.toContain("[^s@]");
-    for (const ok of ["oksana.k@lmtest.local.test", "mateusz.kowalski@lmtest.local.test", "Sanne@VanDijk.nl"]) {
+    for (const ok of ["oksana.k@lmtest.local.test", "mateusz.kowalski@lmtest.local.test", "Sanne@VanDijk.example"]) {
       expect(parseEmailList(ok).valid).toEqual([ok.toLowerCase()]);
     }
     expect(parseEmailList("not an email").valid).toEqual([]);

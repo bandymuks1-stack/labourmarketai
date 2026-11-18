@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * VERIFIED MARKET DATA must actually be live (owner hotfix).
@@ -127,7 +128,7 @@ describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
     expect(focusBand).toContain("market.distinctEmployers !== null");
     expect(focusBand).not.toContain("asOfNote");
     // The catalogs may no longer carry a value for either stat.
-    for (const locale of ["en", "lt", "ru", "nl", "de"]) {
+    for (const locale of activeLocales) {
       const catalog = JSON.parse(
         read(`messages/${locale}.json`),
       ) as {

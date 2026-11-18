@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * HANDOVER PASSPORT SHELL guards (product-tree branch 19, train §8.8).
@@ -252,7 +253,7 @@ describe("app surface — passport shell reuses the EXISTING operations spine", 
 });
 
 describe("i18n — handoverPassport namespace present in en/lt/ru", () => {
-  for (const locale of ["en", "lt", "ru"]) {
+  for (const locale of activeLocales) {
     it(`${locale} carries the full handoverPassport catalogue`, () => {
       const messages = JSON.parse(readWeb(`messages/${locale}.json`));
       const ns = messages.handoverPassport;

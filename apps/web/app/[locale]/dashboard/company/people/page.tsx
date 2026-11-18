@@ -57,6 +57,11 @@ import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { TeamDemandOfferForm } from "@/components/app/team-demand-offer-form";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/people", "organizationDoors.pages.people.title");
+
 
 /**
  * ŽMONĖS — the organization's people door (owner IA correction 2026-09-16,

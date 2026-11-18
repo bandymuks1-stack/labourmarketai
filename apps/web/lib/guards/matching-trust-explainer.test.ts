@@ -8,6 +8,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 const APP = resolve(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf8");
@@ -28,7 +29,7 @@ describe("explainer is mounted on the scouting page", () => {
 });
 
 describe("explainer copy is complete + honest (LT/EN/RU)", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}.json scouting.how present`, () => {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         scouting?: { how?: Record<string, unknown> & { legend?: Record<string, unknown> } };

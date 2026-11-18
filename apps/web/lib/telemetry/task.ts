@@ -28,6 +28,13 @@ import type {
   FunnelMetadata,
 } from "@/lib/telemetry/funnel-events";
 import { isNonProductionHostname } from "@/lib/telemetry/production-host";
+import {
+  WEB_VITALS_EVENT,
+  buildWebVitalsSample,
+  webVitalsRoute,
+  type WebVitalsReading,
+} from "@/lib/telemetry/web-vitals";
+import { hasAnalyticsConsent } from "@/lib/consent/analytics-consent";
 
 const SESSION_KEY = "lm.pilot.session";
 const startTimes = new Map<string, number>();
@@ -94,14 +101,20 @@ function fire(
     durationMs?: number | null;
     errorCode?: string | null;
     metadata?: Record<string, unknown> | null;
+    /** Filed under this route instead of the current path (web vitals: the
+     *  path with ids and tokens removed). */
+    route?: string | null;
   } = {},
 ): void {
   // Skip when there's no window — the helper is used by client
   // components but defensively guards SSR too.
   if (typeof window === "undefined") return;
+  // No analytics without an explicit yes (lib/consent/analytics-consent.ts):
+  // nothing is sent and no session id is minted on the device.
+  if (!hasAnalyticsConsent()) return;
   const payload = {
     sessionId: getPilotSessionId(),
-    route: currentRoute(),
+    route: opts.route ?? currentRoute(),
     locale: currentLocale(),
     eventName,
     taskName: opts.taskName ?? null,
@@ -238,6 +251,21 @@ export function trackFunnelFailure(
   fire(eventName, "error", { errorCode: errorCode.slice(0, 64), metadata: enriched });
 }
 
+/** One real-visitor page-speed sample for this page load (see
+ *  lib/telemetry/web-vitals.ts). Sent only with consent, like every event
+ *  here; a load with no usable Largest Contentful Paint sends nothing. */
+export function trackWebVitals(pathname: string, reading: WebVitalsReading): void {
+  const sample = buildWebVitalsSample(reading);
+  if (!sample) return;
+  const metadata: Record<string, unknown> = { ...sample.metadata };
+  if (isNonProductionHost()) metadata.preview_host = true;
+  fire(WEB_VITALS_EVENT, "info", {
+    durationMs: sample.durationMs,
+    route: webVitalsRoute(pathname),
+    metadata,
+  });
+}
+
 // ── Signup-completion pending flag (Worker Launch Readiness v1) ──────────────
 // A brand-new signup and a returning login both land on an authenticated
 // surface, so `login_succeeded` alone cannot tell them apart. The signup
@@ -261,6 +289,7 @@ export type SignupSurface = (typeof SIGNUP_SURFACES)[number];
  *  surface can emit `signup_completed`. Bounded surface label only. */
 export function markSignupPending(surface: SignupSurface): void {
   if (typeof window === "undefined") return;
+  if (!hasAnalyticsConsent()) return;
   try {
     window.localStorage.setItem(SIGNUP_PENDING_KEY, surface);
   } catch {

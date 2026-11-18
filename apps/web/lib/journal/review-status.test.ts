@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   actionToDecision,
+  countConfirmedEntriesFromRows,
   deriveReviewResult,
   isReviewDecision,
   REVIEW_DECISIONS,
@@ -94,5 +95,49 @@ describe("decision helpers", () => {
     expect(actionToDecision("reject")).toBe("rejected");
     expect(actionToDecision("request_changes")).toBe("changes_requested");
     expect(actionToDecision("other")).toBe(null);
+  });
+});
+
+describe("countConfirmedEntriesFromRows — the inbox counts ENTRIES, not rows", () => {
+  const at = (entry_id: string, scope: unknown, created_at: string) => ({
+    entry_id,
+    confirmation_scope: scope,
+    created_at,
+  });
+
+  it("an entry approved twice is ONE confirmed entry", () => {
+    expect(
+      countConfirmedEntriesFromRows([
+        at("e1", { decision: "approved" }, "2026-10-01T08:00:00Z"),
+        at("e1", { decision: "approved" }, "2026-10-02T08:00:00Z"),
+      ]),
+    ).toEqual({ confirmed: 1, automatic: 0 });
+  });
+
+  it("approved, then sent back → not confirmed (latest wins)", () => {
+    expect(
+      countConfirmedEntriesFromRows([
+        at("e1", { decision: "approved" }, "2026-10-01T08:00:00Z"),
+        at("e1", { decision: "changes_requested" }, "2026-10-02T08:00:00Z"),
+        at("e2", { decision: "rejected" }, "2026-10-02T08:00:00Z"),
+      ]),
+    ).toEqual({ confirmed: 0, automatic: 0 });
+  });
+
+  it("a client's (counterparty) acceptance is not an employer confirmation", () => {
+    expect(
+      countConfirmedEntriesFromRows([
+        at("e1", { decision: "approved", authority: { basis: "counterparty" } }, "2026-10-01T08:00:00Z"),
+      ]),
+    ).toEqual({ confirmed: 0, automatic: 0 });
+  });
+
+  it("an automatic confirmation is counted AND named as automatic", () => {
+    expect(
+      countConfirmedEntriesFromRows([
+        at("e1", { action: "auto_confirm", decision: "approved" }, "2026-10-01T08:00:00Z"),
+        at("e2", { action: "confirm" }, "2026-10-01T08:00:00Z"),
+      ]),
+    ).toEqual({ confirmed: 2, automatic: 1 });
   });
 });

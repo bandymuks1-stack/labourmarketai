@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Requester identity on the provider inbox (Option A — enrichment RPC).
@@ -126,7 +127,7 @@ describe("identity copy present across active locales", () => {
     expect(page).toMatch(/requesterFallback: t\("requesterFallback"\)/);
   });
 
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: requestedBy + requesterFallback present`, () => {
       const m = (JSON.parse(read(`messages/${loc}.json`)) as { marketplace?: Record<string, unknown> }).marketplace ?? {};
       for (const k of ["requestedBy", "requesterFallback"]) {

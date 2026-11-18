@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * TEAMS / BRIGADES LAYER guards (product-tree branch 13, train §8.3).
@@ -347,7 +348,7 @@ describe("app surface — reuse of the existing spine, no parallel team system",
 });
 
 describe("i18n — teamBrigades + teamEnquiries namespaces present in every ACTIVE locale", () => {
-  for (const locale of ["en", "lt", "ru", "nl", "de"]) {
+  for (const locale of activeLocales) {
     it(`${locale} carries the full teamBrigades catalogue`, () => {
       const messages = JSON.parse(readWeb(`messages/${locale}.json`));
       const ns = messages.teamBrigades;

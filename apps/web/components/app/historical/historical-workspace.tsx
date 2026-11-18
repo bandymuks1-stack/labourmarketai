@@ -579,7 +579,7 @@ export function HistoricalWorkspace({
         <div
           role="tablist"
           aria-label={t("modesLabel")}
-          className="-mx-1 flex gap-1 overflow-x-auto border-b border-ink-600 px-1"
+          className="flex flex-wrap gap-x-1 border-b border-ink-600"
           data-testid="historical-modes"
           onKeyDown={(e) => {
             if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;

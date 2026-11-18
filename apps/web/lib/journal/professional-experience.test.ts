@@ -225,6 +225,7 @@ describe("the owner's real history (production rows, 2026-10-17)", () => {
       organizationDays: 0,
       organizationPeriods: 800,
       notCounted: 0,
+      capacityExcess: 0,
       organizationUnknown: false,
     });
     expect(exp.from).toBe("2025-06-01");
@@ -384,6 +385,7 @@ describe("owner scenarios (2026-10-17 §8)", () => {
       organizationDays: 5,
       organizationPeriods: 0,
       notCounted: 8,
+      capacityExcess: 0,
       organizationUnknown: false,
     });
     const listed = exp.lines.find((l) => !l.counted)!;

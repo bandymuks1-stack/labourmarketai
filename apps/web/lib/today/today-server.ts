@@ -27,9 +27,18 @@ import { deriveWorkCardState, type WorkCardDerived } from "@/lib/worker/work-car
  * pieces so the page can stream (the #1011 lesson: the slowest worker read
  * must never hold the whole surface behind the route's loading skeleton):
  *
- *   head          who · profession · the one next action
- *                 ← session profile + the ONE canonical player card +
- *                   the work-card read model (`getWorkerCard`) through the
+ *   header        who · profession — NEVER the player card
+ *                 ← the request-cached session profile (name) and the ONE
+ *                   cached profession read (`getProfessionEntries` +
+ *                   `getPrimaryProfessionSlug`, the same rows the card
+ *                   reads). Split out of `head` for the home CLS P0
+ *                   (2026-10-26): the header used to wait on the card, so
+ *                   the whole ŠIANDIEN frame painted only when the card did
+ *                   (t≈8 s in production) and pushed the conversation down
+ *   head          the one next action
+ *                 ← the ONE canonical player card + the work-card read
+ *                   model (`getWorkerCard`, fed the request-cached core
+ *                   `workers` row — no second `workers` select) through the
  *                   ONE work-card engine (`deriveWorkCardState`)
  *   work          today · this week · open items · one growth line
  *                 ← `loadOwnWorkIntelligence` (the journal's ONE reader) +
@@ -63,6 +72,47 @@ export type TodayHead = {
   readonly workCard: WorkCardDerived | null;
 };
 
+/**
+ * The header's NAME — the request-cached session profile only (the layout and
+ * the page already ran it, so this costs no round-trip). The card's own
+ * `displayName` is the SAME `profiles.full_name` (player-card.ts), so waiting
+ * on the card for it bought nothing but latency.
+ */
+export const loadTodayDisplayName = cache(async (): Promise<string | null> => {
+  try {
+    const session = await getSessionProfile();
+    return session.profile?.full_name?.trim() || null;
+  } catch {
+    return null;
+  }
+});
+
+export type TodayProfessions = {
+  /** The registry primary — the SAME value the card carries as
+   *  `professionSlug` (`getPrimaryProfessionSlug`, null without a worker row). */
+  readonly professionSlug: string | null;
+  readonly professions: readonly ProfessionEntry[];
+};
+
+/**
+ * The header's PROFESSION — the ONE cached profession read, never the player
+ * card. `getWorkerPlayerCard` derives `professionSlug` and `professions` from
+ * exactly these two readers, so the header says the same thing it did, only
+ * without waiting on the card's ~18 other queries. Degrades to "unknown"
+ * (empty), exactly like the old `head` catch path.
+ */
+export const loadTodayProfessions = cache(async (): Promise<TodayProfessions> => {
+  try {
+    const [professions, professionSlug] = await Promise.all([
+      getProfessionEntries(),
+      getPrimaryProfessionSlug(),
+    ]);
+    return { professionSlug, professions };
+  } catch {
+    return { professionSlug: null, professions: [] };
+  }
+});
+
 export const loadTodayHead = cache(async (): Promise<TodayHead> => {
   const session = await getSessionProfile();
   const displayName = session.profile?.full_name?.trim() || null;
@@ -93,7 +143,12 @@ export const loadTodayHead = cache(async (): Promise<TodayHead> => {
         null,
       skillsCount: card.skillsDeclared,
       evidenceCount: card.evidenceEntries,
-    });
+      // The card columns are already in hand: the request-cached core row
+      // (`getWorkerCoreRow`, read above in the SAME batch as the card)
+      // selects every column `getWorkerCard` reads. Handing it over removes a
+      // THIRD sequential round-trip (a second `workers` select) that ran only
+      // after the whole card had finished (home CLS P0, 2026-10-26).
+    }, { row: worker });
     return {
       displayName: displayName ?? card.displayName,
       professionSlug: card.professionSlug,

@@ -81,13 +81,14 @@ export function activeLearnerCount(program: ProgramRow): number {
   return ids.size;
 }
 
-function programCells(program: ProgramRow): readonly string[] {
+function programCells(program: ProgramRow, membersVisible: boolean): readonly string[] {
   return [
     program.name,
     program.targetProfessionSlug ?? "",
     program.educationTypeSlug ?? "",
     String(program.cohorts.length),
-    String(activeLearnerCount(program)),
+    // Membership the caller may not see is UNKNOWN, never 0 (SEP-7).
+    membersVisible ? String(activeLearnerCount(program)) : UNKNOWN_CELL,
     program.demandCount === null ? UNKNOWN_CELL : String(program.demandCount),
   ];
 }
@@ -125,10 +126,11 @@ function outcomesRows(outcomes: OutcomesForReport): readonly (readonly string[])
 export function buildInstitutionReportCsv(
   programs: readonly ProgramRow[],
   outcomes: OutcomesForReport,
+  membersVisible = true,
 ): string {
   const lines: string[] = [];
   lines.push(csvRow(PROGRAM_CSV_HEADER));
-  for (const program of programs) lines.push(csvRow(programCells(program)));
+  for (const program of programs) lines.push(csvRow(programCells(program, membersVisible)));
   lines.push("");
   lines.push(csvRow(OUTCOMES_CSV_HEADER));
   for (const row of outcomesRows(outcomes)) lines.push(csvRow(row));

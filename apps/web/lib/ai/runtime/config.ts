@@ -20,6 +20,7 @@ import {
   type AiRuntimeConfig,
 } from "./config-core";
 import type { AiProviderState } from "./provider-chain";
+import { geminiPaidTierConfirmed } from "./data-egress";
 import {
   observeProviderStates,
   type ProviderObservation,
@@ -77,6 +78,16 @@ function apiKeyForProvider(provider: string): string | undefined {
       return env.GEMINI_API_KEY ?? env.AI_API_KEY;
     case "xai":
       return env.XAI_API_KEY ?? env.AI_API_KEY;
+    // Free API tiers: their OWN key only — never the generic AI_API_KEY, which
+    // is an Anthropic key and would prove nothing about these vendors.
+    case "cloudflare":
+      // Two values make Cloudflare usable: the token AND the account its
+      // endpoint lives under. Either missing → no proof of configuration.
+      return env.CLOUDFLARE_ACCOUNT_ID?.trim() ? env.CLOUDFLARE_API_TOKEN : undefined;
+    case "mistral":
+      return env.MISTRAL_API_KEY;
+    case "groq":
+      return env.GROQ_API_KEY;
     default:
       return env.AI_API_KEY;
   }
@@ -128,10 +139,30 @@ export function getProviderObservation(ctx?: AiRuntimeReadContext): ProviderObse
     gemini: {
       enabled: env.AI_GEMINI_ENABLED === "true",
       hasKey: Boolean((env.GEMINI_API_KEY ?? env.AI_API_KEY)?.trim()),
+      // Gemini API Additional Terms (effective 2026-03-23): only Paid Services
+      // may serve users in the EEA / CH / UK. Not proven paid = not usable.
+      disabledReason: geminiPaidTierConfirmed(process.env)
+        ? undefined
+        : "Gemini free tier may not serve EEA users (Gemini API Additional Terms, effective 2026-03-23) — AI_GEMINI_PAID_TIER_CONFIRMED=1 only for a billed key",
     },
     xai: {
       enabled: env.AI_XAI_ENABLED === "true",
       hasKey: Boolean((env.XAI_API_KEY ?? env.AI_API_KEY)?.trim()),
+    },
+    // Free API tiers (2026-10-25) through the open `cloud` map. Presence only.
+    cloud: {
+      cloudflare: {
+        enabled: env.AI_CLOUDFLARE_ENABLED === "true",
+        hasKey: Boolean(env.CLOUDFLARE_ACCOUNT_ID?.trim() && env.CLOUDFLARE_API_TOKEN?.trim()),
+      },
+      mistral: {
+        enabled: env.AI_MISTRAL_ENABLED === "true",
+        hasKey: Boolean(env.MISTRAL_API_KEY?.trim()),
+      },
+      groq: {
+        enabled: env.AI_GROQ_ENABLED === "true",
+        hasKey: Boolean(env.GROQ_API_KEY?.trim()),
+      },
     },
   };
 }

@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { proposeBookingAction } from "@/lib/booking/booking-actions";
+import { proposeBookingAction, type BookingActionResult } from "@/lib/booking/booking-actions";
+import {
+  PROPOSE_TIMEOUT_LABEL,
+  isProposeTimeout,
+  proposeOutcomeState,
+  type ProposeOutcomeState,
+} from "@/lib/booking/propose-outcome";
+import { SAVE_TIMEOUT_MS, withTimeout } from "@/lib/async/with-timeout";
 import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
@@ -59,23 +66,26 @@ export function ProposeBookingButton({
   const [open, setOpen] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [note, setNote] = useState("");
-  const [pending, startTransition] = useTransition();
-  const [state, setState] = useState<
-    | "idle"
-    | "sent"
-    | "unavailable"
-    | "not_entitled"
-    | "rate_limited"
-    | "already_accepted"
-    | "refused_not_reachable"
-    | "refused_need_closed"
-    | "refused_answered"
-    | "error"
-  >("idle");
+  // The pending flag is OUR state, not a React transition's: a transition's
+  // isPending stays true for as long as the router's own server-action update
+  // is in flight, so a stalled request would hold "Siunčiama…" even after the
+  // bounded wait below gave up.
+  const [pending, setPending] = useState(false);
+  const [state, setState] = useState<"idle" | ProposeOutcomeState>("idle");
+  // Only the LATEST send may set the state: a late answer to an earlier,
+  // timed-out send must not overwrite a newer attempt's outcome.
+  const attempt = useRef(0);
 
-  function send() {
-    startTransition(async () => {
-      const res = await proposeBookingAction({
+  // Every send ends in a visible state and frees the button — never a
+  // "Siunčiama…" that outlives the request (UX run 2026-10-24, row 5.13).
+  // See `propose-outcome.ts` for the three endings and why a retry is safe.
+  async function send() {
+    const mine = ++attempt.current;
+    setState("idle");
+    setPending(true);
+    let call: Promise<BookingActionResult> | null = null;
+    try {
+      call = proposeBookingAction({
         locale,
         requestId,
         workerId,
@@ -84,21 +94,25 @@ export function ProposeBookingButton({
         note,
         expectedWorkspaceId,
       });
-      if (res.kind === "ok") setState("sent");
-      else if (res.kind === "needs-migration") setState("unavailable");
-      else if (res.kind === "not-entitled") setState("not_entitled");
-      else if (res.kind === "rate-limited") setState("rate_limited");
-      else if (res.kind === "already-accepted") setState("already_accepted");
-      else if (res.kind === "refused") {
-        setState(
-          res.reason === "worker-not-reachable"
-            ? "refused_not_reachable"
-            : res.reason === "need-closed"
-              ? "refused_need_closed"
-              : "refused_answered",
+      const res = await withTimeout(call, SAVE_TIMEOUT_MS, PROPOSE_TIMEOUT_LABEL);
+      if (attempt.current === mine) setState(proposeOutcomeState(res));
+    } catch (error) {
+      if (attempt.current !== mine) return;
+      if (isProposeTimeout(error) && call) {
+        setState("unconfirmed");
+        // The request may still answer: a slow success becomes "sent".
+        call.then(
+          (late) => {
+            if (attempt.current === mine) setState(proposeOutcomeState(late));
+          },
+          () => undefined,
         );
-      } else setState("error");
-    });
+      } else {
+        setState("error");
+      }
+    } finally {
+      if (attempt.current === mine) setPending(false);
+    }
   }
 
   if (state === "sent") {
@@ -162,16 +176,16 @@ export function ProposeBookingButton({
         <button
           type="button"
           disabled={pending}
-          onClick={send}
+          onClick={() => void send()}
           data-testid="propose-booking-send"
-          className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+          className="min-h-11 sm:min-h-0 rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
         >
           {pending ? labels.sending : labels.send}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-meta text-text-muted hover:text-text-secondary"
+          className="min-h-11 sm:min-h-0 text-meta text-text-muted hover:text-text-secondary"
         >
           {labels.cancel}
         </button>
@@ -209,8 +223,14 @@ export function ProposeBookingButton({
         <span className="text-meta text-state-warning" data-testid="propose-booking-refused">
           {tPropose("refusedAnswered")}
         </span>
+      ) : state === "unconfirmed" ? (
+        // No answer in time: the proposal MAY already be stored. Honest —
+        // check Bookings or send again (the same row, never a duplicate).
+        <span className="text-meta text-state-warning" data-testid="propose-booking-unconfirmed" role="status">
+          {tPropose("unconfirmed")}
+        </span>
       ) : state === "error" ? (
-        <span className="text-meta text-state-danger" data-testid="propose-booking-error">
+        <span className="text-meta text-state-danger" data-testid="propose-booking-error" role="alert">
           {labels.error}
         </span>
       ) : null}

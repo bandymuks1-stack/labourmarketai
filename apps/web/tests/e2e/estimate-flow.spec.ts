@@ -22,8 +22,17 @@
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
-const STORAGE_STATE = join(__dirname, ".storage-state.json");
+// The COMPANY-actor session file, not the shared `.storage-state.json` — the
+// exact pinning demand-flow.spec.ts documents: the generic file's identity is
+// whatever the last mint chose (measured 2026-10-23: dev.worker), and a worker
+// is redirected off the role-gated company Needs door, so the form "failed to
+// render" for a reason unrelated to the estimate builder. Mint with:
+//   E2E_OWNER_EMAIL=dev.company@local.test \
+//   E2E_STORAGE_FILE=.storage-state.company.json \
+//   npx tsx scripts/e2e-mint-session.ts
+const STORAGE_STATE = join(__dirname, ".storage-state.company.json");
 const SCREENSHOT_DIR = join(
   __dirname,
   "..",
@@ -53,8 +62,9 @@ async function shot(page: Page, name: string): Promise<void> {
  *  form (and its Estimate Builder) renders. */
 async function ensureCompanyContext(page: Page): Promise<void> {
   // W3 rows 7/8/25: the wizard's canonical (and only) home is the company
-  // page — role-gated on the HELD company role, no active-role dance needed.
-  await page.goto("/lt/dashboard/company", { waitUntil: "networkidle" });
+  // NEEDS door (#1746 split /dashboard/company into doors) — role-gated on the
+  // HELD company role, no active-role dance needed.
+  await page.goto("/lt/dashboard/company/needs", { waitUntil: "networkidle" });
 }
 
 /** Parse a money string the UI renders. The spec runs on /lt, where the format
@@ -111,6 +121,7 @@ test("estimate flow: criteria estimate → total + range → review → create �
   ).toBeVisible();
   await shot(page, "01-estimate-criteria");
 
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
 
   // ── Step 3 — review shows the estimate summary with the same total.

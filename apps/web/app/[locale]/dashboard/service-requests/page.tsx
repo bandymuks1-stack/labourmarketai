@@ -2,10 +2,20 @@ import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  CalendarDays,
+  ClipboardList,
+  MapPin,
+  NotebookPen,
+  Package,
+  ShoppingBag,
+  UserSearch,
+} from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
-import { ActionCard } from "@/components/app/action-card";
+import { PremiumActionDeck } from "@/components/ui/premium-action-card";
 import { createClient } from "@/lib/supabase/server";
 import {
   listDiscoverableOfferings,
@@ -25,6 +35,12 @@ import {
 } from "@/components/app/marketplace-loop-section";
 import { MarkServiceRequestsSeen } from "@/components/app/mark-service-requests-seen";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/service-requests");
+
 
 /**
  * Service requests — P0 marketplace request loop (Phase 1). Authenticated
@@ -159,6 +175,9 @@ export default async function ServiceRequestsPage({
         <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageLead")}</p>
       </header>
+      {/* Mutual, neutral pre-agreement recommendation — advice to both
+          parties, never a gate (decision 0021 extension, 2026-10-24). */}
+      <CollaborationChecksNote context={{ dealKind: "service" }} testId="service-requests-collaboration-checks" />
       {out.kind === "error" || inc.kind === "error" ? (
         <p role="alert" className="text-sm text-state-warning" data-testid="service-requests-read-failed">
           {t("loopReadFailed")}
@@ -212,30 +231,35 @@ function MarketplaceConnections({
     isCompany
       ? {
           key: "matching",
+          icon: UserSearch,
           href: "/dashboard/company/scouting",
           label: t("connections.scouting"),
           note: t("connections.scoutingNote"),
         }
       : {
           key: "matching",
+          icon: Briefcase,
           href: "/dashboard/opportunities",
           label: t("connections.matching"),
           note: t("connections.matchingNote"),
         },
     {
       key: "listings",
+      icon: Package,
       href: "/dashboard/listings",
       label: t("connections.listings"),
       note: t("connections.listingsNote"),
     },
     {
       key: "calendar",
+      icon: CalendarDays,
       href: "/dashboard/bookings",
       label: t("connections.calendar"),
       note: t("connections.calendarNote"),
     },
     {
       key: "map",
+      icon: MapPin,
       href: "/dashboard/market-map",
       label: t("connections.map"),
       note: t("connections.mapNote"),
@@ -243,16 +267,32 @@ function MarketplaceConnections({
     isCompany
       ? {
           key: "needs",
+          icon: ClipboardList,
           href: "/dashboard/company/needs",
           label: t("connections.needs"),
           note: t("connections.needsNote"),
         }
       : {
           key: "diary",
+          icon: NotebookPen,
           href: "/dashboard/journal",
           label: t("connections.diary"),
           note: t("connections.diaryNote"),
         },
+    // A person ordering services can keep a customer record and their own
+    // requests: the buyer lane of the Activity Setup Hub (it edits the record
+    // once it exists). A company orders through its needs, above.
+    ...(isCompany
+      ? []
+      : [
+          {
+            key: "buyer",
+            icon: ShoppingBag,
+            href: "/dashboard/start/buyer",
+            label: t("connections.buyer"),
+            note: t("connections.buyerNote"),
+          },
+        ]),
   ];
   return (
     <section
@@ -263,19 +303,20 @@ function MarketplaceConnections({
         {t("connections.title")}
       </span>
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
-      {/* Shared ActionCard pattern (audit PR8) — one visual grammar for
-          navigation cards across the app. */}
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-        {links.map((l) => (
-          <ActionCard
-            key={l.key}
-            href={l.href}
-            testid={`marketplace-connection-${l.key}`}
-            title={l.label}
-            description={l.note}
-          />
-        ))}
-      </div>
+      {/* The ONE action-choice tile (owner 2026-11-03: no second card system). */}
+      <PremiumActionDeck
+        ariaLabel={t("connections.title")}
+        layout="list"
+        items={links.map((l) => ({
+          key: l.key,
+          href: l.href,
+          icon: l.icon,
+          label: l.label,
+          hint: l.note,
+          hintAlways: true,
+          testId: `marketplace-connection-${l.key}`,
+        }))}
+      />
     </section>
   );
 }

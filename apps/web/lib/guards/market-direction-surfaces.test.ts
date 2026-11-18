@@ -68,7 +68,10 @@ describe("market direction — the own-rows reads select the column that carries
    */
   it("listOwnCustomerRequests selects kind", () => {
     const src = read("lib/buyer/customer-requests.ts");
-    const select = /\.select\(\s*(?:\/\/[^\n]*\n\s*)*"([^"]+)"/.exec(src);
+    // The projection is either inline or the read's `COLUMNS` constant (the
+    // lifecycle contract's closed_outcome is appended to it, with a fallback).
+    const select =
+      /\.select\(\s*(?:\/\/[^\n]*\n\s*)*"([^"]+)"/.exec(src) ?? /const COLUMNS =\s*"([^"]+)"/.exec(src);
     expect(select, "select projection not found").not.toBeNull();
     expect(select![1].split(",").map((c) => c.trim())).toContain("kind");
   });

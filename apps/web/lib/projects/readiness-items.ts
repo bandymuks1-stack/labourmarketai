@@ -42,6 +42,25 @@ export const READINESS_ITEM_DOCUMENT_TYPES: Record<DefaultReadinessItemKey, read
   client_specific_requirement: [],
 };
 
+/**
+ * The checklist rows SUGGESTED for one job — never a universal mandatory list
+ * (owner correction 2026-10-24, decision 0021 extension). A suggested row is
+ * seeded as `needed`, which the board reads as "to agree before the
+ * agreement": a neutral topic, never "missing", never a readiness signal.
+ *
+ * Context decides: A1 / posting documentation only applies when the work
+ * crosses a border, so it is suggested only when that is KNOWN (`crossBorder`
+ * true). Unknown is not cross-border. The manager can always add or remove
+ * rows for the job; nothing here is required by the platform.
+ */
+export function suggestedReadinessItemKeys(context: {
+  readonly crossBorder: boolean;
+}): readonly DefaultReadinessItemKey[] {
+  return DEFAULT_READINESS_ITEM_KEYS.filter(
+    (k) => k !== "a1_or_posting_document" || context.crossBorder,
+  );
+}
+
 export function documentTypesForReadinessItem(itemKey: string): readonly string[] {
   return (READINESS_ITEM_DOCUMENT_TYPES as Record<string, readonly string[] | undefined>)[itemKey] ?? [];
 }

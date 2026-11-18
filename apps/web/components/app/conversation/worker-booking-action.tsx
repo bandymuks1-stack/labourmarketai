@@ -66,6 +66,11 @@ type Phase =
   /** A REAL date clash. Terminal for the PLAIN accept; the person may still
    *  take one separate, explicit decision below (RED #5). */
   | { kind: "conflict" }
+  /** The person ACKNOWLEDGED the clash and the database still could not
+   *  record the overlapping accept (production 2026-10-25). Terminal for
+   *  accepting: no accept and no accept-anyway control is offered again, so
+   *  the acknowledgement cannot loop. Declining stays possible. */
+  | { kind: "overlap-not-recordable" }
   | { kind: "error"; message: string };
 
 /**
@@ -101,6 +106,10 @@ export function WorkerBookingAction({
   // misreport a two-booking overlap.
   const tClash = useTranslations("bookings.clash");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
+  // Once the acknowledged accept was refused, cancelling the decline step
+  // returns HERE, not to the plain offer — whose accept would only walk the
+  // person back through the same conflict and the same refusal.
+  const [overlapRefused, setOverlapRefused] = useState(false);
   const [pending, start] = useTransition();
 
   function beginConfirm(
@@ -153,6 +162,11 @@ export function WorkerBookingAction({
         // it is never taken automatically and needs its own confirmation.
         setPhase({ kind: "conflict" });
         router.refresh();
+      } else if (res.code === "overlap_not_recordable") {
+        // Its own answer, never the conflict again: that re-offered the same
+        // button, which then visibly did nothing.
+        setOverlapRefused(true);
+        setPhase({ kind: "overlap-not-recordable" });
       } else {
         const message =
           res.code === "stale_confirmation"
@@ -161,6 +175,36 @@ export function WorkerBookingAction({
         setPhase({ kind: "error", message });
       }
     });
+  }
+
+  if (phase.kind === "overlap-not-recordable") {
+    return (
+      <div
+        className="flex flex-col gap-2 rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3"
+        data-testid="conversation-booking-overlap-not-recordable-decision"
+      >
+        <span
+          className="text-support font-semibold text-state-warning"
+          role="status"
+          data-testid="conversation-booking-overlap-not-recordable"
+        >
+          {tClash("notRecordable")}
+        </span>
+        {/* Deliberately no accept and no second acknowledgement here: either
+            could only fail the same way. Declining goes through its own
+            confirmation. */}
+        <ChatActionRow>
+          <ChatAction
+            tone="danger"
+            disabled={pending}
+            testId="conversation-booking-overlap-decline"
+            onClick={() => beginConfirm("declined")}
+          >
+            {labels.decline}
+          </ChatAction>
+        </ChatActionRow>
+      </div>
+    );
   }
 
   if (phase.kind === "conflict") {
@@ -272,7 +316,13 @@ export function WorkerBookingAction({
             >
               {pending ? labels.working : labels.confirmCta}
             </ChatAction>
-            <ChatAction tone="secondary" disabled={pending} onClick={() => setPhase({ kind: "idle" })}>
+            <ChatAction
+              tone="secondary"
+              disabled={pending}
+              onClick={() =>
+                setPhase(overlapRefused ? { kind: "overlap-not-recordable" } : { kind: "idle" })
+              }
+            >
               {labels.cancelCta}
             </ChatAction>
           </ChatActionRow>

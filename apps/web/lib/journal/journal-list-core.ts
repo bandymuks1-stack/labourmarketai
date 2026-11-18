@@ -3,6 +3,10 @@ import "server-only";
 import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { countedOnce } from "@/lib/journal/counted-once";
+import {
+  deriveCorrectionProvenance,
+  type CorrectionProvenanceStep,
+} from "@/lib/journal/correction-provenance";
 
 /**
  * THE canonical Work Journal LIST read (G4 bridge; audit gap G6's "journal
@@ -99,6 +103,14 @@ export type JournalListResult =
       /** Live originals that a row in `entries` corrects: still real,
        *  still confirmed, no longer counted. Empty on the legacy path. */
       correctedOriginals: JournalEntryListRow[];
+      /** What each counted correction ANSWERED: `entry id → steps`, the
+       *  latest employer decision (with its real note) of every decided
+       *  original in its chain, nearest first
+       *  (`lib/journal/correction-provenance.ts`). Provenance for the
+       *  correction's card — never a second card, a second state or a
+       *  second count. Absent key = nothing to say. Empty on the legacy
+       *  path. */
+      correctionProvenance: Readonly<Record<string, readonly CorrectionProvenanceStep[]>>;
       coverage: JournalListCoverage;
     }
   | { ok: false; code: "no_worker" | "unavailable" };
@@ -255,11 +267,13 @@ export async function listJournalEntries(
     const live = v3.rows.filter(isLiveJournalEntry);
     const entries = countedOnce(live);
     const counted = new Set(entries.map((e) => e.id));
+    const correctedOriginals = live.filter((e) => !counted.has(e.id));
     return {
       ok: true,
       workerId,
       entries,
-      correctedOriginals: live.filter((e) => !counted.has(e.id)),
+      correctedOriginals,
+      correctionProvenance: deriveCorrectionProvenance(entries, correctedOriginals),
       coverage: { entriesRead: entries.length, truncated: v3.truncated },
     };
   }
@@ -274,6 +288,7 @@ export async function listJournalEntries(
     workerId,
     entries,
     correctedOriginals: [],
+    correctionProvenance: {},
     coverage: { entriesRead: entries.length, truncated: legacy.truncated },
   };
 }

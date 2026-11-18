@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { ESTIMATE_VERSION } from "@/lib/estimate/estimate";
 import { PAGE_SEO } from "@/lib/seo/metadata";
 import { parseCompanyNeedPrefill } from "@/lib/staffing/company-need-prefill";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * European Work & Project Calculator v1 — integration + honesty guard.
@@ -108,7 +109,7 @@ describe("CSV export — formula-injection safe", () => {
 describe("cross-sector positioning — no construction-first product frame", () => {
   const CONSTRUCTION_FIRST = /statyb|construction|бетон|строит|\bbau(?![a-z])|bouw(?!en)/i;
   it("page h1/title copy is not construction-framed in any active locale", () => {
-    for (const locale of ["en", "lt", "ru", "nl", "de"] as const) {
+    for (const locale of activeLocales) {
       const messages = JSON.parse(read(`messages/${locale}.json`));
       const pc = messages.calculators?.projectCost;
       expect(pc, `${locale}: calculators.projectCost missing`).toBeTruthy();
@@ -198,14 +199,65 @@ describe("company-need prefill bridge — bounded and validated", () => {
     expect(parse(`expected_duration=${long}`).expectedDuration?.length).toBe(120);
   });
   it("the calculator sends only worker count + country (no prices, no PII)", () => {
-    const query = component.slice(
-      component.indexOf("query: {"),
-      component.indexOf("}}", component.indexOf("query: {")),
-    );
+    const start = component.indexOf("const bridgePrefill");
+    expect(start).toBeGreaterThan(-1);
+    const query = component.slice(start, component.indexOf("};", start));
     expect(query).toContain("number_of_workers");
     expect(query).toContain("country");
     for (const banned of ["rate", "materials", "estimatedTotal", "workType", "description"]) {
       expect(query, `query must not carry ${banned}`).not.toContain(banned);
     }
+  });
+  it("both routes receive that same prefill; the account route keeps it through sign-in (employer path P0 2026-11-15)", () => {
+    // The public form, as before.
+    expect(component).toMatch(/pathname: "\/company-need",\s*query: bridgePrefill,/);
+    // The account route: the query sits before the anchor, so the sign-in
+    // redirect's `next` carries it (a fragment never reaches the server).
+    expect(component).toMatch(/withBridgeQuery\("\/dashboard\/company\/needs#demand-intake"\)/);
+    expect(component).toMatch(/\$\{path\.slice\(0, hash\)\}\?\$\{query\}\$\{path\.slice\(hash\)\}/);
+    // The signed-in need form reads it with the same bounded adapter, for a
+    // worker need only, and keeps it over a saved draft.
+    const form = read("components/app/demand-request-button.tsx");
+    expect(form).toMatch(
+      /intent === "hire_workers" \? parseCompanyNeedPrefill\(new URLSearchParams\(window\.location\.search\)\) : \{\}/,
+    );
+    expect(form).toMatch(/applyPrefill\(res\);\s*applyAddress\(\);/);
+    expect(form).toMatch(/applyPrefill\(rep\);\s*applyAddress\(\);/);
+    // The help line that said the numbers do not travel is gone with the fact.
+    expect(component).not.toMatch(/ctaDashboardHelp/);
+  });
+  it("the account route's text says what carries over, and promises no attached estimate (N4, 2026-11-16)", () => {
+    // Only the worker count and country travel (asserted above); the rest of
+    // the estimate is entered again in the request's own estimate builder.
+    const attachVerb: Record<string, RegExp> = {
+      en: /attach/i,
+      lt: /pridėti prie/i,
+      de: /anhängen/i,
+      nl: /koppelen/i,
+      pl: /dołącz/i,
+      ru: /прилож/i,
+      sv: /bifoga/i,
+    };
+    for (const locale of activeLocales) {
+      const body = (JSON.parse(read(`messages/${locale}.json`)) as {
+        calculators: { projectCost: { result: { ctaBody: string } } };
+      }).calculators.projectCost.result.ctaBody;
+      expect(body, locale).not.toMatch(attachVerb[locale]);
+    }
+    const en = (JSON.parse(read("messages/en.json")) as {
+      calculators: { projectCost: { result: { ctaBody: string } } };
+    }).calculators.projectCost.result.ctaBody;
+    expect(en).toMatch(/worker count and country carry over/);
+    expect(read("components/app/demand-request-button.tsx")).toMatch(/<EstimateBuilder\b/);
+  });
+});
+
+describe("company-need prefill: the button that opened the form", () => {
+  const parse = (qs: string) => parseCompanyNeedPrefill(new URLSearchParams(qs));
+  it("keeps a bounded button id and drops anything else", () => {
+    expect(parse("country=LU&from=companies_market_lu").entry).toBe("companies_market_lu");
+    expect(parse("from=Companies-Hero").entry).toBeUndefined();
+    expect(parse("from=a%3Futm_source%3Dx").entry).toBeUndefined();
+    expect(parse(`from=${"a".repeat(41)}`).entry).toBeUndefined();
   });
 });

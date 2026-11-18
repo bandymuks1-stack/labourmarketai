@@ -25,7 +25,7 @@ import {
   buildMatchingExplanationInput,
   type MatchScore,
 } from "./match-preview";
-import type { AiLocale } from "../ai/runtime/types";
+import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
 
 export interface MatchPreviewDimension {
   readonly dimension: string;
@@ -44,9 +44,8 @@ export interface MatchPreviewState {
   readonly message?: string;
 }
 
-function toAiLocale(value: string): AiLocale {
-  return value === "lt" || value === "ru" ? value : "en";
-}
+/** Every routed UI locale is an AI locale; anything else is answered in EN. */
+const toAiLocale = (value: string): AiLocale => aiLocaleFor(value);
 
 function str(value: FormDataEntryValue | null): string | undefined {
   const s = String(value ?? "").trim();

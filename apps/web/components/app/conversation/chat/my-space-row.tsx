@@ -31,7 +31,7 @@ export function MySpaceRow({
   if (pins.length === 0) return null;
   return (
     <div
-      className="flex items-center gap-2 overflow-x-auto border-b border-border-subtle px-3 py-2"
+      className="flex flex-wrap items-center gap-2 border-b border-border-subtle px-3 py-2"
       data-testid="my-space-row"
       role="toolbar"
       aria-label={title}

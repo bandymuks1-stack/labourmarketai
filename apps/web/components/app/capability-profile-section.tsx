@@ -4,7 +4,14 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Wrench } from "lucide-react";
+import { statedDateLabel } from "@/lib/cv/period-dates";
+import { useSavedRows } from "@/lib/hooks/use-saved-rows";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
+import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import type { ProfileSkillClaimRow } from "@/lib/profile/profile-skill-claims";
 import type { SkillPresentation } from "@/lib/cv-export/skill-presentation";
 import {
@@ -24,6 +31,7 @@ import {
   skillGroupLabelKey,
 } from "@/lib/skills/skill-groups";
 import { formatUtcDate } from "@/lib/time/display";
+import { visibleSkillClaims } from "@/lib/profile/visible-skill-claims";
 
 /**
  * Unified CV / capability surface (replaces the disconnected
@@ -87,8 +95,11 @@ export function CapabilityProfileSection({
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
 
   const router = useRouter();
-  const [savedClaims, setSavedClaims] =
-    useState<ProfileSkillClaimRow[]>(claims);
+  // Derived from the prop on every render (lib/profile/visible-skill-claims):
+  // a refresh after an add must show the new chip. Only the ids removed in
+  // this session are local state, hidden until the refresh drops them.
+  const [removedClaimIds, setRemovedClaimIds] = useState<ReadonlySet<string>>(() => new Set());
+  const savedClaims: ProfileSkillClaimRow[] = visibleSkillClaims(claims, removedClaimIds);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, startDelete] = useTransition();
   const [manualLabel, setManualLabel] = useState("");
@@ -99,7 +110,7 @@ export function CapabilityProfileSection({
     startDelete(() => {
       deleteProfileSkillClaimAction(id)
         .then(() =>
-          setSavedClaims((prev) => prev.filter((c) => c.id !== id)),
+          setRemovedClaimIds((prev) => new Set(prev).add(id)),
         )
         .catch((e: unknown) => {
           console.error("[capability-profile] delete failed", e);
@@ -174,6 +185,10 @@ export function CapabilityProfileSection({
   const [expEndYear, setExpEndYear] = useState("");
   const [expEndMonth, setExpEndMonth] = useState("");
   const [expCurrent, setExpCurrent] = useState(false);
+  // What the engagement WAS. The form used to send nothing, so a study
+  // placement or volunteering typed here was stored as employment. Same
+  // closed list the chat form and the save function use.
+  const [expKind, setExpKind] = useState<string>("employee");
   const [expError, setExpError] = useState<string | null>(null);
   const [isSavingExp, startSaveExp] = useTransition();
 
@@ -188,6 +203,12 @@ export function CapabilityProfileSection({
   const [removeError, setRemoveError] = useState<string | null>(null);
   const [isRemoving, startRemove] = useTransition();
 
+  const {
+    rows: engagementRows,
+    showSaved,
+    hideRemoved,
+  } = useSavedRows(engagements);
+
   function removeExperience(id: string) {
     setRemoveError(null);
     setRemovingId(id);
@@ -195,7 +216,10 @@ export function CapabilityProfileSection({
       void removeSelfDeclaredWorkHistoryAction(id)
         .then((res) => {
           setRemovingId(null);
-          if (res.ok) return;
+          if (res.ok) {
+            hideRemoved(id);
+            return;
+          }
           setRemoveError(
             res.code === "conflict" ? t("expRemoveInUse") : t("expRemoveError"),
           );
@@ -246,16 +270,30 @@ export function CapabilityProfileSection({
         start: startPart,
         end: endPart,
         isCurrent: expCurrent,
+        relationship: expKind,
       })
         .then((res) => {
           if (res.ok) {
+            // The server's confirmed row, on screen while the page catches up.
+            if (res.id) {
+              showSaved({
+                id: res.id,
+                orgName: title,
+                relationship: expKind,
+                startedAt: res.startedAt ?? null,
+                endedAt: res.endedAt ?? null,
+                title,
+                isPrimary: false,
+                selfDeclared: true,
+              });
+            }
             setExpTitle("");
             setExpStartYear("");
             setExpStartMonth("");
             setExpEndYear("");
             setExpEndMonth("");
             setExpCurrent(false);
-            router.refresh();
+            setExpKind("employee");
           } else if (res.code === "needs_migration") {
             setExpError(t("expNeedsMigration"));
           } else if (res.code === "invalid") {
@@ -272,7 +310,7 @@ export function CapabilityProfileSection({
   }
 
   const hasClaims = savedClaims.length > 0;
-  const hasEngagements = engagements.length > 0;
+  const hasEngagements = engagementRows.length > 0;
   // Always render — the manual-add form needs to be available even
   // when the user has no claims yet. The original "return null when
   // empty" preserved the slim-display invariant but blocked manual
@@ -312,29 +350,30 @@ export function CapabilityProfileSection({
           addManual();
         }}
       >
-        <label className="flex flex-1 min-w-[10rem] flex-col gap-1">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {t("manualAddLabel")}
-          </span>
-          <input
+        <div className="flex min-w-[10rem] flex-1 flex-col gap-1.5">
+          <Label htmlFor="capability-manual-skill">{t("manualAddLabel")}</Label>
+          <Input
+            id="capability-manual-skill"
             type="text"
             value={manualLabel}
             onChange={(e) => setManualLabel(e.target.value)}
             placeholder={t("manualAddPlaceholder")}
-            className="min-h-11 rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
             data-testid="capability-profile-manual-input"
             disabled={isAdding}
             maxLength={80}
           />
-        </label>
-        <button
+        </div>
+        <Button
           type="submit"
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
+          loading={isAdding}
           disabled={isAdding || manualLabel.trim().length === 0}
-          className="min-h-11 rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2 text-sm font-semibold text-state-success hover:border-state-success disabled:cursor-not-allowed disabled:opacity-50"
           data-testid="capability-profile-manual-add-button"
         >
           {isAdding ? t("manualAdding") : t("manualAddButton")}
-        </button>
+        </Button>
       </form>
 
       {hasClaims && (
@@ -409,9 +448,13 @@ export function CapabilityProfileSection({
             {t("experienceTitle")}
           </h3>
           <ul className="flex flex-col gap-3">
-            {engagements.map((c) => {
-              const start = fmt(c.startedAt);
-              const end = c.endedAt ? fmt(c.endedAt) : tEng("present");
+            {engagementRows.map((c) => {
+              const start = c.selfDeclared ? statedDateLabel(c.startedAt, "start", locale, "month") : fmt(c.startedAt);
+              const end = !c.endedAt
+                ? tEng("present")
+                : c.selfDeclared
+                  ? statedDateLabel(c.endedAt, "end", locale, "month")
+                  : fmt(c.endedAt);
               return (
                 <li key={c.id} className="card-border p-4" data-testid="capability-experience-row">
                   <div className="flex items-start justify-between gap-3">
@@ -437,15 +480,18 @@ export function CapabilityProfileSection({
                       </span>
                     )}
                     {c.selfDeclared && (
-                      <button
+                      <Button
                         type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="min-h-11 flex-none"
                         onClick={() => removeExperience(c.id)}
+                        loading={isRemoving && removingId === c.id}
                         disabled={isRemoving && removingId === c.id}
                         data-testid={`capability-experience-remove-${c.id}`}
-                        className="flex-none rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-muted transition-colors hover:border-state-danger hover:text-state-danger disabled:opacity-60"
                       >
                         {t("expRemove")}
-                      </button>
+                      </Button>
                     )}
                   </div>
                   {start && (
@@ -598,78 +644,103 @@ export function CapabilityProfileSection({
           {t("addExperienceTitle")}
         </summary>
         <div className="flex flex-col gap-3 px-3 pb-3" data-testid="add-experience-form">
-          <label className="flex flex-col gap-1 text-meta text-text-muted">
-            {t("expTitleLabel")}
-            <input
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="add-experience-title">{t("expTitleLabel")}</Label>
+            <Input
+              id="add-experience-title"
               type="text"
               value={expTitle}
               maxLength={200}
               onChange={(e) => setExpTitle(e.target.value)}
               placeholder={t("expTitlePlaceholder")}
               data-testid="add-experience-title"
-              className="min-h-11 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
             />
-          </label>
-          <div className="flex flex-wrap gap-3">
-            <label className="flex flex-1 flex-col gap-1 text-meta text-text-muted">
-              {t("expStartLabel")}
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={12}
-                  value={expStartMonth}
-                  onChange={(e) => setExpStartMonth(e.target.value)}
-                  placeholder={t("expMonthPlaceholder")}
-                  aria-label={t("expStartLabel")}
-                  className="min-h-11 w-16 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
-                />
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1900}
-                  max={2100}
-                  value={expStartYear}
-                  onChange={(e) => setExpStartYear(e.target.value)}
-                  placeholder={t("expYearPlaceholder")}
-                  aria-label={t("expStartLabel")}
-                  data-testid="add-experience-start-year"
-                  className="min-h-11 w-24 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
-                />
-              </div>
-            </label>
-            <label className="flex flex-1 flex-col gap-1 text-meta text-text-muted">
-              {t("expEndLabel")}
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={12}
-                  value={expEndMonth}
-                  disabled={expCurrent}
-                  onChange={(e) => setExpEndMonth(e.target.value)}
-                  placeholder={t("expMonthPlaceholder")}
-                  aria-label={t("expEndLabel")}
-                  className="min-h-11 w-16 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-40"
-                />
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1900}
-                  max={2100}
-                  value={expEndYear}
-                  disabled={expCurrent}
-                  onChange={(e) => setExpEndYear(e.target.value)}
-                  placeholder={t("expYearPlaceholder")}
-                  aria-label={t("expEndLabel")}
-                  className="min-h-11 w-24 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-40"
-                />
-              </div>
-            </label>
           </div>
-          <label className="inline-flex min-h-11 items-center gap-2 text-meta text-text-secondary">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="add-experience-kind">{t("expKindLabel")}</Label>
+            <Select
+              id="add-experience-kind"
+              value={expKind}
+              onChange={(e) => setExpKind(e.target.value)}
+              data-testid="add-experience-kind"
+            >
+              {SELF_DECLARED_RELATIONSHIPS.map((slug) => (
+                <option key={slug} value={slug}>
+                  {tRel(slug)}
+                </option>
+              ))}
+            </Select>
+          </div>
+          {/* One column on a phone, so a year field is never squeezed to a
+              letter; two from the small breakpoint up. */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label id="add-experience-start-label">{t("expStartLabel")}</Label>
+              {/* The shared Input is full width, so each field's width is its
+                  wrapper's: a fixed slot for the month, the rest for the year. */}
+              <div className="flex gap-2" role="group" aria-labelledby="add-experience-start-label">
+                <div className="w-20 flex-none">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={12}
+                    value={expStartMonth}
+                    onChange={(e) => setExpStartMonth(e.target.value)}
+                    placeholder={t("expMonthPlaceholder")}
+                    aria-label={`${t("expStartLabel")}: ${t("expMonthPlaceholder")}`}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    min={1900}
+                    max={2100}
+                    value={expStartYear}
+                    onChange={(e) => setExpStartYear(e.target.value)}
+                    placeholder={t("expYearPlaceholder")}
+                    aria-label={`${t("expStartLabel")}: ${t("expYearPlaceholder")}`}
+                    data-testid="add-experience-start-year"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label id="add-experience-end-label">{t("expEndLabel")}</Label>
+              {/* The shared Input is full width, so each field's width is its
+                  wrapper's: a fixed slot for the month, the rest for the year. */}
+              <div className="flex gap-2" role="group" aria-labelledby="add-experience-end-label">
+                <div className="w-20 flex-none">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={12}
+                    value={expEndMonth}
+                    disabled={expCurrent}
+                    onChange={(e) => setExpEndMonth(e.target.value)}
+                    placeholder={t("expMonthPlaceholder")}
+                    aria-label={`${t("expEndLabel")}: ${t("expMonthPlaceholder")}`} className="disabled:opacity-40"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    min={1900}
+                    max={2100}
+                    value={expEndYear}
+                    disabled={expCurrent}
+                    onChange={(e) => setExpEndYear(e.target.value)}
+                    placeholder={t("expYearPlaceholder")}
+                    aria-label={`${t("expEndLabel")}: ${t("expYearPlaceholder")}`} className="disabled:opacity-40"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <label className="inline-flex min-h-11 items-center gap-2 text-sm text-text-secondary">
             <input
               type="checkbox"
               className="size-5"
@@ -684,15 +755,18 @@ export function CapabilityProfileSection({
               {expError}
             </p>
           )}
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
+            className="min-h-11 w-fit"
+            loading={isSavingExp}
             disabled={isSavingExp}
             onClick={addExperience}
             data-testid="add-experience-save"
-            className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 text-xs font-semibold text-brand-blue hover:border-brand-blue disabled:opacity-50"
           >
             {isSavingExp ? t("expSaving") : t("expSave")}
-          </button>
+          </Button>
         </div>
       </details>
     </section>
