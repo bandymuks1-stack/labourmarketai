@@ -207,7 +207,7 @@ export function DemandAdvancedSections({
     testId?: string;
   }) {
     return (
-      <label className="flex items-center gap-2 text-sm text-text-secondary">
+      <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-text-secondary">
         <input
           type="checkbox"
           checked={checked}
