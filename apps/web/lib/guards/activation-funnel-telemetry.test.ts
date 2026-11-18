@@ -74,6 +74,7 @@ const EXPECTED_EVENTS = [
   "signup_completed",
   "cv_upload_started",
   "cv_upload_succeeded",
+  "cv_upload_failed",
   "booking_viewed",
   "booking_accepted",
   "booking_declined",
@@ -515,7 +516,9 @@ describe("employer funnel closure — server emitters at the real write points",
     expect(emit).toBeGreaterThan(insertFail);
     expect(send.match(/FUNNEL_EVENTS\.conversationMessageSent/g)).toHaveLength(1);
     expect(send).toMatch(/ref_type: "conversation",\s*ref_id: input\.conversationId,/);
-    const block = send.slice(emit, send.indexOf("// Bump conversation.updated_at"));
+    const end = send.indexOf("// The thread's last activity");
+    expect(end).toBeGreaterThan(emit);
+    const block = send.slice(emit, end);
     expect(block).not.toMatch(/\bbody\b|attachments|author_id|user\.id/);
   });
 
@@ -545,7 +548,7 @@ describe("activation funnel — key surfaces emit their events", () => {
     //    Readiness v1). Bounded scalars only; no PII, no schema change.
     {
       file: "components/app/cv-import-upload.tsx",
-      mustContain: ["cvUploadStarted", "cvUploadSucceeded"],
+      mustContain: ["cvUploadStarted", "cvUploadSucceeded", "cvUploadFailed", "trackFunnelFailure"],
     },
     {
       file: "components/app/booking-respond-buttons.tsx",
@@ -593,8 +596,16 @@ describe("activation funnel — key surfaces emit their events", () => {
       mustContain: ["firstActionCardClicked"],
     },
     {
-      file: "components/app/company-next-actions.tsx",
+      // The shared need door (activation audit 2026-10-26 §2): every
+      // "describe a need" door renders it, so the click is emitted here; the
+      // per-door surfaces are pinned by company-need-door.test.ts.
+      file: "components/app/need-door-link.tsx",
       mustContain: ["companyDemandActionClicked"],
+    },
+    {
+      // The company demand intake reports that it rendered.
+      file: "app/[locale]/dashboard/company/needs/page.tsx",
+      mustContain: ["demandFormViewed"],
     },
     {
       // CORRECTED 2026-08-08. This entry used to name

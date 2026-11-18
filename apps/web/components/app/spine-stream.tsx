@@ -4,7 +4,10 @@ import {
   getDurableNotifications,
   getSpineCounts,
 } from "@/lib/notifications/spine";
-import { buildSpineNotifications } from "@/lib/notifications/spine-signals";
+import {
+  buildSpineNotifications,
+  durableNotificationRole,
+} from "@/lib/notifications/spine-signals";
 import {
   maybeEmitJobAlertsInBackground,
   maybeEmitWeeklyDigestInBackground,
@@ -68,14 +71,12 @@ export async function SpineStream({ activeRole }: { activeRole: Role | null }) {
   // ALSO carry the surface their entity lives on (`href`), so "your absence
   // was rejected" is something you can act on rather than only read. Those two
   // facts are independent; the panel keys mark-all-read off `durable`, never
-  // off a missing href. The employer-outcome events get the company icon; the
-  // rest are worker-facing.
+  // off a missing href. The role comes from `durableNotificationRole`: an
+  // organization-side event never asks an employer to switch to worker, and
+  // an event that can reach either side follows the active role.
   const durableRows: Notification[] = durable.map((d) => ({
     id: d.id,
-    role:
-      d.type === "event_booking_accepted" || d.type === "event_booking_declined"
-        ? "company"
-        : "worker",
+    role: durableNotificationRole(d.type, activeRole),
     type: d.type,
     // The stored row's own safe render hints travel to the bell (owner
     // window 11 §28). Two events of the same type were indistinguishable

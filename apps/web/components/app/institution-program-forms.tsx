@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   createCohortAction,
   createProgramAction,
+  decideCohortJoinAction,
+  setCohortJoinRequestsAction,
   setCohortMemberAction,
   updateProgramAction,
   type ProgramActionState,
@@ -31,6 +33,13 @@ export type ProgramFormLabels = {
   readonly chooseLearner: string;
   readonly assign: string;
   readonly remove: string;
+  readonly openRequests: string;
+  readonly closeRequests: string;
+  readonly requestsOpenHint: string;
+  readonly accept: string;
+  readonly acceptConfirm: string;
+  readonly cancel: string;
+  readonly decline: string;
   readonly saving: string;
   readonly saved: string;
   readonly forbidden: string;
@@ -275,6 +284,119 @@ export function RemoveMemberButton({
       <button type="submit" disabled={pending} className="text-xs text-text-muted hover:text-text-secondary hover:underline">
         {labels.remove}
       </button>
+    </form>
+  );
+}
+
+/** J-12: open or close this group for learners' join requests. */
+export function JoinRequestsToggle({
+  cohortId,
+  open,
+  labels,
+}: {
+  readonly cohortId: string;
+  readonly open: boolean;
+  readonly labels: ProgramFormLabels;
+}) {
+  const [state, action, pending] = useActionState(setCohortJoinRequestsAction, IDLE);
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-2" data-testid={`cohort-join-toggle-${cohortId}`}>
+      <input type="hidden" name="cohortId" value={cohortId} readOnly />
+      <input type="hidden" name="open" value={open ? "false" : "true"} readOnly />
+      {open ? <span className="text-meta text-text-secondary">{labels.requestsOpenHint}</span> : null}
+      <button
+        type="submit"
+        disabled={pending}
+        className="text-xs text-brand-blue hover:underline disabled:opacity-60"
+        data-testid={`cohort-join-toggle-submit-${cohortId}`}
+      >
+        {pending ? labels.saving : open ? labels.closeRequests : labels.openRequests}
+      </button>
+      <StateLine state={state} labels={labels} />
+    </form>
+  );
+}
+
+/** J-12: the institution's authorised person accepts or declines one learner's request. */
+export function DecideJoinRequest({
+  cohortId,
+  profileId,
+  labels,
+}: {
+  readonly cohortId: string;
+  readonly profileId: string;
+  readonly labels: ProgramFormLabels;
+}) {
+  const [state, action, pending] = useActionState(decideCohortJoinAction, IDLE);
+  // Accepting creates a student relationship, so it takes a second, explicit
+  // click; declining stays one click.
+  //
+  // Every button has its own `key`, and the two toggles prevent the default:
+  // without that React REUSES the clicked DOM <button> for the button that
+  // replaces it in the same position. The state flip runs inside the click, so
+  // the browser's default action then saw a `type="submit"` button — "Accept"
+  // submitted the accept at once (no confirm step), and "Cancel" would have
+  // submitted a DECLINE (production walk 41603432961).
+  const [confirming, setConfirming] = useState(false);
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-2" data-testid={`cohort-join-decide-${cohortId}-${profileId}`}>
+      <input type="hidden" name="cohortId" value={cohortId} readOnly />
+      <input type="hidden" name="profileId" value={profileId} readOnly />
+      {confirming ? (
+        <>
+          <button
+            key="accept-confirm"
+            type="submit"
+            name="decision"
+            value="accept"
+            disabled={pending}
+            className={btnCls}
+            data-testid={`cohort-join-accept-confirm-${cohortId}-${profileId}`}
+          >
+            {labels.acceptConfirm}
+          </button>
+          <button
+            key="accept-cancel"
+            type="button"
+            disabled={pending}
+            onClick={(e) => {
+              e.preventDefault();
+              setConfirming(false);
+            }}
+            className="text-xs text-text-muted hover:text-text-secondary hover:underline disabled:opacity-60"
+          >
+            {labels.cancel}
+          </button>
+        </>
+      ) : (
+        <>
+          <button
+            key="accept"
+            type="button"
+            disabled={pending}
+            onClick={(e) => {
+              e.preventDefault();
+              setConfirming(true);
+            }}
+            className={btnCls}
+            data-testid={`cohort-join-accept-${cohortId}-${profileId}`}
+          >
+            {labels.accept}
+          </button>
+          <button
+            key="decline"
+            type="submit"
+            name="decision"
+            value="decline"
+            disabled={pending}
+            className="text-xs text-text-muted hover:text-text-secondary hover:underline disabled:opacity-60"
+            data-testid={`cohort-join-decline-${cohortId}-${profileId}`}
+          >
+            {labels.decline}
+          </button>
+        </>
+      )}
+      <StateLine state={state} labels={labels} />
     </form>
   );
 }

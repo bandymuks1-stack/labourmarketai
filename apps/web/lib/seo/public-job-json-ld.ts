@@ -50,14 +50,18 @@ export function buildJobsListJsonLd(input: {
   readonly description: string;
   readonly previews: readonly PublicVacancyPreview[];
   readonly genericTitle: string;
+  /** The listing's own path after the locale when it is not the board itself,
+   *  e.g. `/jobs?profession=welder`. Item URLs never depend on it. */
+  readonly path?: string;
 }): Record<string, unknown> {
-  const base = `${input.origin.replace(/\/$/, "")}/${input.locale}/jobs`;
+  const root = `${input.origin.replace(/\/$/, "")}/${input.locale}`;
+  const base = `${root}/jobs`;
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: input.name,
     description: input.description,
-    url: base,
+    url: input.path ? `${root}${input.path}` : base,
     inLanguage: input.locale,
     mainEntity: {
       "@type": "ItemList",

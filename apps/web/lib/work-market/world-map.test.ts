@@ -6,6 +6,7 @@ import {
   WORLD_MAP_LEGEND,
   type WorldMapInput,
 } from "@/lib/work-market/world-map";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Labour Market World Map v1 guard — the atlas is real-data-driven with honest
@@ -120,7 +121,7 @@ describe("component honesty", () => {
 });
 
 describe("worldMap i18n present + honest (en/lt/ru)", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     const m = JSON.parse(read(`messages/${loc}.json`)).worldMap;
     it(`${loc}: worldMap namespace covers the 8 zones`, () => {
       expect(m && m.title && m.zone).toBeTruthy();

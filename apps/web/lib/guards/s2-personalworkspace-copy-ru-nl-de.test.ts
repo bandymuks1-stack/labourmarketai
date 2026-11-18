@@ -143,27 +143,25 @@ describe("RU personalWorkspace copy", () => {
 
 describe("LT personalWorkspace register", () => {
   /**
-   * The whole „Mano erdvė" card speaks informal *tu* — the greeting rendered
-   * beside it does too. `unverifiedNote` arrived from the legacy
-   * `auth.dashboard.mySpace` namespace, which is written in formal *jūs*, and
-   * shipped a card that addressed the reader both ways at once.
-   *
-   * Scoped to `personalWorkspace`: the legacy namespace keeps its own *jūs*
-   * wording and is deliberately NOT covered here.
+   * The whole „Mano erdvė" card speaks ONE register. It once shipped a card
+   * that addressed the reader both ways at once (`unverifiedNote` came from a
+   * formal namespace into an informal card). Since the owner decision of
+   * 2026-11-15 the whole Lithuanian product speaks formal *jūs*, so the card
+   * must carry no informal *tu* form.
    */
-  const FORMAL_JUS =
-    /\b(jūs|jūsų|jums|jumis)\b|\b\w+(ate|ite|ote|kite|site)\b/i;
+  const INFORMAL_TU =
+    /(?<![a-ząčęėįšųūž])(tu|tavo|tau|tave|tavimi|tavęs)(?![a-ząčęėįšųūž])|(?<![a-ząčęėįšųūž])(pasakoji|matai|gali|turi|nori|esi|pasirink|pridėk|įrašyk|patvirtink|rasi|matysi|galėsi)(?![a-ząčęėįšųūž])/i;
 
-  it("addresses the reader as `tu` throughout — never a formal `jūs` form", () => {
+  it("addresses the reader as `jūs` throughout — never an informal `tu` form", () => {
     for (const v of values(ns("lt"))) {
-      expect(v, `LT personalWorkspace string: ${v}`).not.toMatch(FORMAL_JUS);
+      expect(v, `LT personalWorkspace string: ${v}`).not.toMatch(INFORMAL_TU);
     }
   });
 
   it("still says the note is self-declared and not human-reviewed", () => {
     // The register fix must not quietly drop the honesty claim itself.
     const note = at(ns("lt"), "unverifiedNote");
-    expect(note).toMatch(/pasakoji/);
+    expect(note).toMatch(/pasakojate/);
     expect(note).toMatch(/neperžiūrėta/);
   });
 });

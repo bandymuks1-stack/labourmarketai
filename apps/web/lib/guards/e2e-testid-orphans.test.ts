@@ -54,11 +54,12 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/** `data-testid="foo"`, `data-testid={"foo"}` — and the same for a `testId` prop. */
+/** `data-testid="foo"`, `data-testid={"foo"}` — and the same for a `testId`
+ *  prop, or the shared `StatusChip`'s lowercase `testid` prop. */
 const LITERAL_ATTR =
   /data-testid=(?:"([^"{}$`]+)"|'([^'{}$`]+)'|\{\s*"([^"]+)"\s*\}|\{\s*'([^']+)'\s*\})/g;
 const LITERAL_PROP =
-  /\btestId=(?:"([^"{}$`]+)"|'([^'{}$`]+)'|\{\s*"([^"]+)"\s*\}|\{\s*'([^']+)'\s*\})/g;
+  /\btest[Ii]d=(?:"([^"{}$`]+)"|'([^'{}$`]+)'|\{\s*"([^"]+)"\s*\}|\{\s*'([^']+)'\s*\})/g;
 /** `testId: "foo"` — the same id handed through an options object. */
 const LITERAL_PROP_OBJ = /\btestId:\s*(?:"([^"]+)"|'([^']+)')/g;
 /**
@@ -70,8 +71,16 @@ const LITERAL_PROP_OBJ = /\btestId:\s*(?:"([^"]+)"|'([^']+)')/g;
  */
 const DEFAULT_PARAM = /\btestId\s*=\s*(?:"([^"]+)"|'([^']+)')/g;
 /** ``data-testid={`foo-${id}`}`` → the dynamic prefix `foo-`. */
-const TEMPLATE_ATTR = /(?:data-testid|\btestId)=\{\s*`([^`$]*)\$\{/g;
+const TEMPLATE_ATTR = /(?:data-testid|\btest[Ii]d)=\{\s*`([^`$]*)\$\{/g;
 const TEMPLATE_PROP_OBJ = /\btestId:\s*`([^`$]*)\$\{/g;
+/**
+ * A declared per-action test-id map — `const LISTING_TEST_ID: Record<…> = {
+ * pause: (id) => `listing-pause-${id}`, … }` — handed to the shared lifecycle
+ * actions (`testIdFor`). Only templates INSIDE a `*_TEST_ID` map count, so a
+ * stray template string elsewhere never becomes testid vocabulary.
+ */
+const TEST_ID_MAP = /\b[A-Z_]+_TEST_ID\b[^\n]*=\s*\{\n([\s\S]*?)\n\};/g;
+const MAP_TEMPLATE = /`([a-z0-9-]+-)\$\{/g;
 
 function collectSourceVocabulary(): { literals: Set<string>; prefixes: Set<string> } {
   const literals = new Set<string>();
@@ -91,6 +100,13 @@ function collectSourceVocabulary(): { literals: Set<string>; prefixes: Set<strin
         re.lastIndex = 0;
         let m: RegExpExecArray | null;
         while ((m = re.exec(src))) if (m[1]) prefixes.add(m[1]);
+      }
+      TEST_ID_MAP.lastIndex = 0;
+      let map: RegExpExecArray | null;
+      while ((map = TEST_ID_MAP.exec(src))) {
+        MAP_TEMPLATE.lastIndex = 0;
+        let m: RegExpExecArray | null;
+        while ((m = MAP_TEMPLATE.exec(map[1]))) prefixes.add(m[1]);
       }
     }
   }
@@ -140,7 +156,7 @@ function specTestIds(src: string): { exact: Set<string>; prefix: Set<string> } {
 // and one of them was excluded from CI by name for that reason.
 const KNOWN_ORPHANS: Record<string, string[]> = {
   "ai-first-intent-coverage.spec.ts": ["msg-employer-match"],
-  "one-authenticated-shell.spec.ts": ["account-menu-profile-link", "notification-bell"],
+  "one-authenticated-shell.spec.ts": ["account-menu-profile-link"],
   "pr-i-reality-chat.spec.ts": ["msg-employer-match"],
   "pr250-company-multisector-smoke.spec.ts": [
     "my-spaces",

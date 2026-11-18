@@ -18,9 +18,13 @@
  *     they are never evaluated, never placed in a URL, never rendered as
  *     HTML.
  *   - No user-entered value is captured here. No cookie is written.
+ *   - Nothing is read or written without an explicit analytics consent
+ *     (lib/consent/analytics-consent.ts): first-touch is non-essential
+ *     device storage under ePrivacy Art. 5(3).
  */
 
 import type { FunnelMetadata } from "@/lib/telemetry/funnel-events";
+import { hasAnalyticsConsent } from "@/lib/consent/analytics-consent";
 
 const STORE_KEY = "lm.attr.first";
 const UTM_KEYS = [
@@ -109,6 +113,7 @@ function readStore(): FirstTouchAttribution | null {
  */
 export function captureFirstTouchAttribution(): FirstTouchAttribution | null {
   if (typeof window === "undefined") return null;
+  if (!hasAnalyticsConsent()) return null;
 
   const existing = readStore();
   if (existing) return existing;
@@ -143,5 +148,6 @@ export function captureFirstTouchAttribution(): FirstTouchAttribution | null {
 /** Return the stored first-touch attribution as bounded funnel metadata to
  *  attach to a conversion event, or an empty object if none was captured. */
 export function getFirstTouchAttribution(): FirstTouchAttribution {
+  if (!hasAnalyticsConsent()) return {};
   return readStore() ?? {};
 }

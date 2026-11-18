@@ -19,8 +19,9 @@ import {
 export async function submitDemandRequestAction(
   intent: DemandIntent,
   fields: DemandFields,
+  opts: { readonly expectedOrganizationId?: string | null } = {},
 ): Promise<DemandRequestResult> {
-  return _submitDemandRequest(intent, fields);
+  return _submitDemandRequest(intent, fields, opts);
 }
 
 /** Duplicate-and-edit: fetch the owner's own last request as prefill values. */

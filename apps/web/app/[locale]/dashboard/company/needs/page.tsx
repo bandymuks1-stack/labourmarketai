@@ -18,12 +18,19 @@ import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interes
 import { readDemandReadbackLabels } from "@/lib/company/company-section-labels";
 import { readOpenNeedsUsage } from "@/lib/billing/open-needs-usage-read";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/needs", "organizationDoors.pages.needs.title");
+
 
 // W3 rows 7/8/25: the employer demand kinds the owner readback is scoped to —
 // a dual-role user's buyer service requests stay in the buyer room.
@@ -217,11 +224,26 @@ export default async function CompanyNeedsPage({
               </Link>
             </div>
           ) : null}
+          {/* The intake rendered (activation audit 2026-10-26 §2): the step
+              between a need door's click (`company_demand_action_clicked`)
+              and the server-side `demand_saved`. Until now it fired only from
+              a form no company page mounts. Once per tab session per surface
+              (TelemetryView), so it counts companies that reached the form,
+              not re-renders; `entity_type` says need or offer. */}
+          <TelemetryView
+            event={FUNNEL_EVENTS.demandFormViewed}
+            metadata={{
+              surface: "company_needs",
+              role_context: "company",
+              entity_type: isStaffingAgency ? "agency_offer" : "company_request",
+            }}
+          />
           <DemandRequestButton
             intent={demandIntent}
             stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
             repeatRequestId={repeatRequestId}
             usage={openNeedsUsage}
+            organizationId={employerCtx.kind === "ok" ? employerCtx.organizationId : null}
           />
           {/* HONEST VISIBILITY (2026-09-22): `list_open_demand_for_workers`
               shows a need to workers ONLY when companies.verification_status
@@ -268,6 +290,7 @@ export default async function CompanyNeedsPage({
         labels={readbackLabels}
         locale={locale}
         pendingInterest={pendingInterest}
+        companyVerificationStatus={companyRow.verificationStatus}
       />
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
@@ -288,6 +311,7 @@ export default async function CompanyNeedsPage({
               claimCta: tClaim("claimCta"),
               claimed: tClaim("claimed"),
               error: tClaim("error"),
+              draftExists: tClaim("draftExists"),
               workersLabel: tClaim("workersLabel"),
             }}
           />

@@ -1,0 +1,31 @@
+name: App Links proof
+# F-4 — proves the SERVED half of App Links / Universal Links from a runner
+# that can reach the origin: the two .well-known documents exist, are JSON,
+# name our package / bundle id, carry well-formed fingerprints / a Team ID,
+# and claim exactly the app's route table. 404 is reported by name (the owner
+# has not set ANDROID_CERT_FINGERPRINTS / APPLE_TEAM_ID yet), never as a
+# server fault. workflow_dispatch only; no secret, no device.
+on:
+  workflow_dispatch:
+    inputs:
+      origin:
+        description: "Origin to check (production, or the hosting agent's staging URL)"
+        required: false
+        default: "https://labourmarket.ai"
+
+permissions:
+  contents: read
+
+jobs:
+  served:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+      - name: Fetch and check the association documents
+        run: node .github/scripts/app-links-proof.mjs "${{ inputs.origin }}"

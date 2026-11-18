@@ -11,6 +11,7 @@ import {
   type ExperienceHourLine,
   type ExperienceRelationship,
 } from "@/lib/journal/professional-experience";
+import { isEndedUnnamedOrganization } from "@/lib/journal/engagement-label";
 import type { WorkIntelligence } from "@/lib/journal/work-intelligence";
 import { formatMonthSpanLong, monthSpanOf } from "@/lib/organization-evidence/period-provenance";
 import { formatUtcDate } from "@/lib/time/display";
@@ -59,6 +60,8 @@ export async function ExperienceScale({
   // business history's own vocabulary — one statement, one wording.
   const tRelation = await getTranslations("companyWorkHistory.business.relation");
   const tBasis = await getTranslations("companyWorkHistory.business.basis");
+  // The ONE "no name" phrase set every surface shares (`journal.unnamedOrganization.*`).
+  const tJournal = await getTranslations("journal");
   const org = organizationAllTime(wi);
   const orgHours = organizationHoursBeyondJournal(wi);
   const span = org ? monthSpanOf(org.from, org.to) : null;
@@ -76,7 +79,11 @@ export async function ExperienceScale({
   const relName = (slug: string) => (tRel.has(slug as never) ? tRel(slug as never) : slug);
 
   const experience = deriveProfessionalExperience({ wi, relationships, projectNames });
-  const total = experience.hours;
+  // Unread relationships leave journal hours unattributed to their
+  // organization, so an hour inside an organization period would count twice:
+  // the total is UNKNOWN, never an inflated sum — the rule the profile and the
+  // Player Card already follow (experienceFiguresOf).
+  const total = relationships == null ? null : experience.hours;
   const hasTotal = total !== null && total.total > 0;
   const notCounted = experience.lines.filter((l) => !l.counted && l.hours > 0);
   const reasonWords = (l: ExperienceHourLine) =>
@@ -198,7 +205,20 @@ export async function ExperienceScale({
                     >
                       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                         <span className="font-medium text-text-primary">
-                          {o.organizationName ?? (o.organizationId ? t("experience.orgUnnamed") : t("experience.personalRecords"))}
+                          {/* An organization without a name the person no longer
+                              works with is called so (owner 2026-11-15, #3356):
+                              renamed, never hidden; its hours stay on this row. */}
+                          {o.organizationName ??
+                            (o.organizationId
+                              ? o.kind === "organization" &&
+                                isEndedUnnamedOrganization({
+                                  organizationId: o.organizationId,
+                                  organizationName: o.organizationName,
+                                  relationships: o.roles,
+                                })
+                                ? tJournal("unnamedOrganization.ended")
+                                : t("experience.orgUnnamed")
+                              : t("experience.personalRecords"))}
                           {/* SEPARATE LEGAL ENTITY (owner 2026-10-17, final): an
                               earlier entity the continuing organization states a
                               period for is its own row — a company of its own,

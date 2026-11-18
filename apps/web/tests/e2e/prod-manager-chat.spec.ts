@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type Page } from "@playwright/test";
+import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
  * PRODUCTION — A MANAGER RUNS THE DAY FROM THE CHAT (owner programme
@@ -40,25 +40,60 @@ async function open(browser: Browser): Promise<{ page: Page; close: () => Promis
   return { page, close: () => ctx.close() };
 }
 
-/** Ask, then wait for the product's own answer opening (or its honest "could not read"). */
+/** How many times `re` occurs in `s`, and where the last one starts. */
+function occurrences(s: string, re: RegExp): { n: number; last: number } {
+  const g = new RegExp(re.source, re.flags.includes("g") ? re.flags : `${re.flags}g`);
+  let n = 0;
+  let last = -1;
+  for (const m of s.matchAll(g)) {
+    n += 1;
+    last = m.index ?? -1;
+  }
+  return { n, last };
+}
+
+/**
+ * Ask, then wait for the product's own answer opening (or its honest "could
+ * not read"). The answer is detected as one MORE occurrence of the opening
+ * than before the question, anywhere on the page. It used to be looked for
+ * only in the text after the page's old length, but the chat thread sits
+ * above the workspace panel in the DOM, so a new answer lands in the middle
+ * of the body text, not at its end (run 39982749535 read the panel's
+ * "… Projektai Pridėti užduotį" as "no answer").
+ */
 async function ask(page: Page, text: string, answer: RegExp, unavailable: RegExp): Promise<string> {
-  const before = (await page.locator("body").innerText()).length;
+  const body = () => page.locator("body").innerText();
+  const start = await body();
+  const answersBefore = occurrences(start, answer).n;
+  const refusalsBefore = occurrences(start, unavailable).n;
   await page.getByTestId("composer-input").fill(text);
   await page.getByTestId("composer-send").click();
-  await expect
-    .poll(
-      async () => {
-        const tail = (await page.locator("body").innerText()).slice(Math.max(0, before - 50));
-        return answer.test(tail) || unavailable.test(tail);
-      },
-      { timeout: 45_000, intervals: [1_000] },
-    )
-    .toBe(true);
-  const tail = (await page.locator("body").innerText()).slice(Math.max(0, before - 50));
-  const m = answer.exec(tail);
-  const shown = m ? tail.slice(m.index, m.index + 400).replace(/\s+/g, " ") : tail.slice(-300).replace(/\s+/g, " ");
+  try {
+    await expect
+      .poll(
+        async () => {
+          const now = await body();
+          return occurrences(now, answer).n > answersBefore || occurrences(now, unavailable).n > refusalsBefore;
+        },
+        { timeout: 45_000, intervals: [1_000] },
+      )
+      .toBe(true);
+  } catch (err) {
+    // Name what the chat said instead (run 39605716305 timed out with no trace).
+    const now = await body();
+    const asked = now.lastIndexOf(text);
+    const after = asked >= 0 ? now.slice(asked, asked + 500) : now.slice(-500);
+    console.info(`[manager-chat] "${text}" → no answer in 45 s; after the question the page showed: ${after.replace(/\s+/g, " ")}`);
+    throw err;
+  }
+  const now = await body();
+  const hit = occurrences(now, answer);
+  const answered = hit.n > answersBefore;
+  const shown = answered
+    ? now.slice(hit.last, hit.last + 400).replace(/\s+/g, " ")
+    : now.slice(Math.max(0, occurrences(now, unavailable).last), occurrences(now, unavailable).last + 300).replace(/\s+/g, " ");
   console.info(`[manager-chat] "${text}" → ${shown}`);
-  expect(answer.test(tail), `"${text}" was answered (not "could not read"): ${shown}`).toBe(true);
+  expect(answered, `"${text}" was answered (not "could not read"): ${shown}`).toBe(true);
   return shown;
 }
 

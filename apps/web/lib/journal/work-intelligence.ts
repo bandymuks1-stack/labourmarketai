@@ -131,13 +131,13 @@ import {
   type EntryWorkTime,
   type WorkTimeMetricRow,
 } from "@/lib/journal/work-time";
-import {
-  deriveEvidenceTier,
-  EVIDENCE_TIER_RANK,
-  type EvidenceTier,
-} from "@/lib/evidence/evidence-tier";
+import { EVIDENCE_TIER_RANK, type EvidenceTier } from "@/lib/evidence/evidence-tier";
 import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
 import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
+import {
+  standingEvidenceTier,
+  type CrossPartyConfirmationState,
+} from "@/lib/evidence/skill-confirmation-standing";
 import { fragmentSkillsByIndex } from "@/lib/journal/fragment-skill-evidence";
 import {
   deriveWorkTimeChecks,
@@ -178,6 +178,10 @@ export type WorkIntelligenceSkillRow = {
   readonly slug: string;
   readonly verified: boolean | null;
   readonly source: string | null;
+  /** The standing read's verdict on a recorded confirmation (absent when
+   *  none was flagged) — an UNKNOWN one is journal-level evidence, never
+   *  erased to self-declared (standingEvidenceTier). */
+  readonly confirmation?: CrossPartyConfirmationState;
 };
 
 /** One live organization hour record (`work_hour_allocations`, not
@@ -204,6 +208,23 @@ export type WorkIntelligenceOrganizationRecord = {
   readonly context?: HistoryContext;
 };
 
+/** One record the organization holds about the person whose DURATION IS NOT
+ *  STATED (`hours` null at the source). The work happened and was recorded;
+ *  its length is unknown. UNKNOWN is never zero (SEP-7): carried beside the
+ *  other ledgers so the Living CV can show the day or span with "duration to
+ *  be confirmed" — never an hour in any period, total, skill or activity. */
+export type WorkIntelligenceOrganizationPendingRecord = {
+  readonly id: string;
+  readonly organizationId: string;
+  /** ISO day of a day record, or null. */
+  readonly workDate: string | null;
+  /** ISO span of a period record, or null. */
+  readonly periodStart: string | null;
+  readonly periodEnd: string | null;
+  readonly source: string;
+  readonly context?: HistoryContext;
+};
+
 /** One PERIOD record the organization holds about the person: a total over
  *  a span with NO source days ("800 h, 2025-06-01 → 2025-11-30", from an
  *  imported document). Carried BESIDE the day records (IA §2), never summed
@@ -222,6 +243,10 @@ export type WorkIntelligenceOrganizationPeriodRecord = {
    *  A span that is not the source's is shown at month precision with this
    *  label, and never split (owner rule 2026-09-23). */
   readonly provenance: "source" | "human_choice" | "derived";
+  /** The figure's stated basis (`derived.hoursBasis`: actual / estimated,
+   *  with its method), when a source or a correction stated one. Absent =
+   *  not stated — read as an organization-reported figure, never as actual. */
+  readonly hoursBasis?: { readonly value: string; readonly method: string | null; readonly note: string | null } | null;
   /** The same context the day records carry (imported evidence only). */
   readonly context?: HistoryContext;
 };
@@ -282,6 +307,9 @@ export type WorkIntelligenceInput = {
    *  read. Ignored when `organizationRecords` is null — a half-read ledger
    *  would pose as a smaller one. */
   readonly organizationPeriodRecords?: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's records with NO stated duration. Passed through,
+   *  summed into nothing; ignored when `organizationRecords` is null. */
+  readonly organizationPendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[] | null;
 };
 
 /** Inclusive UTC calendar-day windows ending today (W12 doctrine: dates are
@@ -496,6 +524,10 @@ export type WorkIntelligence = {
   readonly coverage: WorkIntelligenceCoverage;
   /** The section's five tabs, plus one `range` row when `focusRange` is set. */
   readonly periods: readonly WorkPeriodTotals[];
+  /** Entries whose written hours never became recorded time, with the
+   *  earliest such work day (lib/journal/unrecorded-hours.ts). Set by the
+   *  read layer; absent when the model was derived without entry text. */
+  readonly unrecordedHours?: { readonly entries: number; readonly earliestDay: string } | null;
   /** The organization's own hour records per period (owner §19) — read
    *  beside the journal, shown beside it, added to nothing. `null` when the
    *  ledger could not be read; every period at zero when it holds nothing. */
@@ -504,6 +536,11 @@ export type WorkIntelligence = {
    *  their own beside `organizationRecords`, in no period's `hours`, on no
    *  day. `null` exactly when `organizationRecords` is null (UNKNOWN). */
   readonly organizationPeriodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's records with NO stated duration (SEP-7: unknown,
+   *  never zero) — shown as "duration to be confirmed", in no sum. `null`
+   *  exactly when `organizationRecords` is null (UNKNOWN). Optional so
+   *  hand-built models in callers stay valid; absent = none. */
+  readonly organizationPendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[] | null;
   /** The organization's DAY records that carry a professional-history context
    *  (imported evidence), as read - handed through untouched so the Living CV can
    *  name the work behind the hours. A pass-through, never a sum: no figure in
@@ -796,7 +833,7 @@ export function deriveWorkIntelligence(
   for (const s of [...input.skills].sort((a, b) => a.skillId.localeCompare(b.skillId))) {
     const slug = (s.slug ?? "").trim();
     if (!slug || !s.skillId) continue;
-    const tier = deriveEvidenceTier({ verified: s.verified, source: s.source });
+    const tier = standingEvidenceTier({ verified: s.verified, source: s.source, confirmation: s.confirmation });
     const canonical = canonicalIdBySlug.get(slug) ?? s.skillId;
     canonicalIdBySlug.set(slug, canonical);
     canonicalIdByAlias.set(s.skillId, canonical);
@@ -1329,6 +1366,7 @@ export function deriveWorkIntelligence(
     periods,
     organizationRecords,
     organizationPeriodRecords,
+    organizationPendingRecords: orgRows === null ? null : [...(input.organizationPendingRecords ?? [])],
     organizationContextRecords:
       orgRows === null
         ? null

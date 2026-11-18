@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import {
@@ -69,6 +70,7 @@ export function PeopleImportPanel({
   readonly suggested?: IngestRelationship;
 }) {
   const t = useTranslations("peopleImport");
+  const router = useRouter();
   const [stage, setStage] = useState<Stage>({ kind: "idle" });
   const [relationship, setRelationship] = useState<IngestRelationship>(suggested);
   const [resolutions, setResolutions] = useState<Record<number, RowResolution>>({});
@@ -130,10 +132,17 @@ export function PeopleImportPanel({
         expectedWorkspaceId,
       });
       if (res.kind !== "ok") {
-        setStage({
-          kind: "error",
-          message: res.kind === "needs-migration" ? t("errNeedsMigration") : t("errFailed"),
-        });
+        // The commit names its refusal the same way the preview does; only a
+        // real failure is "something went wrong".
+        const message =
+          res.kind === "needs-migration"
+            ? t("errNeedsMigration")
+            : res.kind === "too-many-rows"
+              ? t("errTooMany", { limit: res.limit })
+              : res.kind === "not-authorized" || res.kind === "choice-required"
+                ? t("errNotAuthorized")
+                : t("errFailed");
+        setStage({ kind: "error", message });
         return;
       }
       setStage({
@@ -142,6 +151,9 @@ export function PeopleImportPanel({
         existing: res.skippedExisting,
         skipped: res.skippedDuplicate + res.skippedUnusable,
       });
+      // The roster on this same page is server-rendered: re-read it so the
+      // people just created are listed without a manual reload.
+      if (res.created > 0) router.refresh();
     });
   }
 

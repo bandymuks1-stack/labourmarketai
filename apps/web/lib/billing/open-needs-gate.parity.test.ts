@@ -49,7 +49,10 @@ vi.mock("@/lib/auth/superadmin", () => ({
   isSuperadmin: vi.fn(async () => false),
   isSuperadminFor: vi.fn(async () => false),
 }));
-vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => state.config }));
+vi.mock("@/lib/billing/config", () => ({
+  getBillingConfig: () => state.config,
+  getBillingConfigFor: () => state.config,
+}));
 vi.mock("@/lib/billing/billing-subject", () => ({
   // the cookie workspace resolver: a bearer request has none
   resolveBillingSubject: vi.fn(async () => ({ subject: null })),

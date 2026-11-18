@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cache } from "react";
-import { cookies } from "next/headers";
 
 import { getUnreadConversationCount } from "@/lib/communication/unread";
 import {
@@ -20,7 +19,7 @@ import { getNewMarketplaceMatchCount } from "@/lib/marketplace/worker-opportunit
 import { getBridgeSpineCounts } from "@/lib/agency/bridge-read";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { countOpenTeamOffersByDemand } from "@/lib/company/team-offer";
-import { ACTIVE_WORKSPACE_COOKIE } from "@/lib/company/active-organization";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { rememberBadge } from "@/lib/perf/badge-ttl-cache";
 
 /** Who is looking, in which workspace — the key the slow badges are remembered under. */
@@ -31,8 +30,11 @@ async function badgeViewerKey(): Promise<string | null> {
       data: { user },
     } = await supabase.auth.getUser(); // request-memoised: no extra round trip
     if (!user) return null;
-    const jar = await cookies();
-    return `${user.id}|${jar.get(ACTIVE_WORKSPACE_COOKIE)?.value ?? "-"}`;
+    // The RESOLVED workspace (the durable pointer outranks the cookie), not
+    // the raw cookie: with the two apart, one workspace's badges were stored
+    // under the other's key (audit 2026-10-21).
+    const ws = await getWorkspaceContext();
+    return `${user.id}|${ws.activeWorkspaceId ?? "-"}`;
   } catch {
     return null;
   }
@@ -167,6 +169,26 @@ export function buildNavBadges(
   return badges;
 }
 
+/** One durable notification as the bell, the activity page and the
+ *  `notification.list` capability render it. */
+export type DurableNotification = {
+  id: string;
+  type: string;
+  created_at: string;
+  read_at: string | null;
+  /** Canonical surface for the entity this event is about. */
+  href?: string;
+  /**
+   * The stored row's own safe render hints (`SAFE_METADATA_KEYS`: country,
+   * roleSlug, startDate). Carried through so the bell can say WHICH market
+   * an event belongs to (owner window 11 §28) — production showed two
+   * "Darbuotojas pareiškė susidomėjimą jūsų poreikiu" rows that were
+   * indistinguishable, because everything the row knew beyond its type was
+   * dropped here. Never free text; the write side gates the keys.
+   */
+  metadata: NotificationEventMetadata;
+};
+
 /**
  * DURABLE notification events, shaped for the same bell the derived spine
  * feeds. Distinct from the spine by construction:
@@ -185,41 +207,45 @@ export function buildNavBadges(
  * `limit` (default: the bell's FEED_LIMIT of 20) lets the activity page
  * show the longer history the bell truncates — the reader clamps it.
  */
-export async function getDurableNotifications(limit?: number): Promise<
-  readonly {
-    id: string;
-    type: string;
-    created_at: string;
-    read_at: string | null;
-    /** Canonical surface for the entity this event is about. */
-    href?: string;
-    /**
-     * The stored row's own safe render hints (`SAFE_METADATA_KEYS`: country,
-     * roleSlug, startDate). Carried through so the bell can say WHICH market
-     * an event belongs to (owner window 11 §28) — production showed two
-     * "Darbuotojas pareiškė susidomėjimą jūsų poreikiu" rows that were
-     * indistinguishable, because everything the row knew beyond its type was
-     * dropped here. Never free text; the write side gates the keys.
-     */
-    metadata: NotificationEventMetadata;
-  }[]
+export async function getDurableNotifications(limit?: number): Promise<readonly DurableNotification[]> {
+  const result = await readDurableNotifications(limit);
+  return result.kind === "ready" ? result.items : [];
+}
+
+/**
+ * The same read with its failure KEPT, for callers that must not render a
+ * failed read as "no notifications" (#1314): the `notification.list`
+ * capability, whose clients (the native app, MCP) cannot tell an empty list
+ * from a read that never happened. The bell and the activity page keep the
+ * quiet `[]` above and render exactly what they rendered before.
+ */
+export async function readDurableNotifications(
+  limit?: number,
+): Promise<
+  | { readonly kind: "ready"; readonly items: readonly DurableNotification[] }
+  | { readonly kind: "feature_unavailable" }
+  | { readonly kind: "error" }
 > {
   const supabase = await createServerClient();
   // `undefined` falls through to the reader's own FEED_LIMIT default.
   const feed = await readMyNotificationEvents(supabase, limit);
-  if (feed.kind !== "ready") return [];
-  return feed.events.map((e) => ({
-    id: e.id,
-    // A focused weekly digest renders as its own type key (see
-    // `notificationRenderedType`), so the label never promises more than the
-    // writer could know.
-    type: notificationRenderedType(e.eventType, e.metadata),
-    created_at: e.createdAt,
-    read_at: e.readAt,
-    // The stored row already knows which entity it is about; this turns that
-    // into somewhere the reader can actually go. Clearing still happens by
-    // marking read, not by visiting — see NOTIFICATION_ENTITY_HREF.
-    href: notificationEventHref(e.entityType, e.metadata),
-    metadata: e.metadata,
-  }));
+  if (feed.kind === "feature_unavailable") return { kind: "feature_unavailable" };
+  if (feed.kind !== "ready") return { kind: "error" };
+  return {
+    kind: "ready",
+    items: feed.events.map((e) => ({
+      id: e.id,
+      // A focused weekly digest renders as its own type key (see
+      // `notificationRenderedType`), so the label never promises more than the
+      // writer could know.
+      type: notificationRenderedType(e.eventType, e.metadata),
+      created_at: e.createdAt,
+      read_at: e.readAt,
+      // The stored row already knows which entity it is about; this turns that
+      // into somewhere the reader can actually go. Clearing still happens by
+      // marking read, not by visiting — see NOTIFICATION_ENTITY_HREF.
+      href: notificationEventHref(e.entityType, e.metadata),
+      metadata: e.metadata,
+    })),
+  };
 }

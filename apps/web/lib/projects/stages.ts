@@ -126,6 +126,71 @@ export async function listProjectStages(
     .order("created_at", { ascending: true })
     .limit(200);
 
+  return toProjectStagesData(res);
+}
+
+/** The API's row cap for one batched read (`max_rows`). */
+const STAGE_BATCH_ROW_CAP = 1000;
+/** `listProjectStages`'s own per-project bound. */
+const PROJECT_STAGE_READ_LIMIT = 200;
+
+/**
+ * `listProjectStages` for MANY projects in one read (the company home's
+ * project scan — perf 2026-10-22). Each project's answer is exactly what
+ * `listProjectStages` returns for it: same columns, RLS, order and per-project
+ * bound (the per-project order is the global order restricted to that
+ * project); a failed read is every project's failed read, mapped by the same
+ * rule (missing relation → not applied); the batch is used only when it is
+ * provably COMPLETE (rows read = exact count), otherwise each project is read
+ * on its own.
+ */
+export async function listProjectStagesForProjects(
+  projectIds: readonly string[],
+): Promise<Map<string, ProjectStagesData>> {
+  const ids = [...new Set(projectIds)];
+  const out = new Map<string, ProjectStagesData>();
+  if (ids.length === 0) return out;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    for (const id of ids) out.set(id, { applied: false });
+    return out;
+  }
+  const res = await asAny(supabase)
+    .from("project_stages")
+    .select(STAGE_COLUMNS, { count: "exact" })
+    .in("project_id", ids)
+    .order("stage_order", { ascending: true })
+    .order("created_at", { ascending: true })
+    .limit(STAGE_BATCH_ROW_CAP);
+  if (res.error) {
+    const mapped = toProjectStagesData(res);
+    for (const id of ids) out.set(id, mapped);
+    return out;
+  }
+  const rows = Array.isArray(res.data) ? (res.data as { project_id?: string }[]) : null;
+  if (rows && typeof res.count === "number" && rows.length === res.count) {
+    const byProject = new Map<string, unknown[]>(ids.map((id) => [id, []]));
+    for (const r of rows) {
+      const list = r.project_id ? byProject.get(r.project_id) : undefined;
+      if (list && list.length < PROJECT_STAGE_READ_LIMIT) list.push(r);
+    }
+    for (const id of ids) out.set(id, toProjectStagesData({ data: byProject.get(id) ?? [], error: null }));
+    return out;
+  }
+  const single = await Promise.all(ids.map((id) => listProjectStages(id)));
+  ids.forEach((id, i) => out.set(id, single[i]));
+  return out;
+}
+
+/** One project's stage read result → `ProjectStagesData` (shared by the single
+ *  and the batched read, so both answer by one rule). */
+function toProjectStagesData(res: {
+  data: unknown;
+  error: { code?: string; message?: string } | null;
+}): ProjectStagesData {
   if (res.error) {
     if (
       res.error.code === RELATION_NOT_FOUND_CODE ||
@@ -133,7 +198,7 @@ export async function listProjectStages(
     ) {
       return { applied: false };
     }
-    return { applied: true, stages: [], error: res.error.message };
+    return { applied: true, stages: [], error: res.error.message ?? "" };
   }
 
   type Row = {

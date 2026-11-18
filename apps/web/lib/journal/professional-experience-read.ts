@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { readHistoricalOrgNames, withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { orgDisplayName } from "@/lib/company/org-display";
 import type { ExperienceRelationship } from "@/lib/journal/professional-experience";
 import { readMyLedOrganizations } from "@/lib/organization-evidence/my-organizations-read";
@@ -52,11 +52,61 @@ type ContextRow = {
   organizations: { display_name: string | null; legal_name: string | null } | null;
 };
 
+type WorkedPeriodRow = {
+  id: string;
+  organization_id: string;
+  period_label: string;
+  legal_entity_label: string | null;
+  legal_entity_relation: string;
+  basis: string;
+  period_start: string | null;
+  period_end: string | null;
+  source_labels: string[] | null;
+  supersedes_id: string | null;
+};
+
+/** Stated business periods of organizations the caller worked for (names and
+ *  periods only; superseded statements dropped). Empty on any failure. */
+export async function readWorkedOrganizationPeriods(
+  supabase: SupabaseClient,
+  orgIds: readonly string[],
+): Promise<Map<string, ExperienceRelationship["businessPeriods"]>> {
+  const out = new Map<string, ExperienceRelationship["businessPeriods"]>();
+  if (orgIds.length === 0) return out;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any).rpc("my_worked_organization_periods_v1", {
+      p_org_ids: orgIds.slice(0, 100),
+    });
+    if (error || !Array.isArray(data)) return out;
+    const rows = data as WorkedPeriodRow[];
+    const superseded = new Set(rows.map((r) => r.supersedes_id).filter((x): x is string => !!x));
+    for (const r of rows) {
+      if (superseded.has(r.id)) continue;
+      const list = [...(out.get(r.organization_id) ?? [])];
+      list.push({
+        id: r.id,
+        label: r.period_label,
+        from: r.period_start,
+        to: r.period_end,
+        basis: r.basis,
+        legalEntityRelation: r.legal_entity_relation,
+        legalEntityLabel: r.legal_entity_label,
+        sourceLabels: r.source_labels ?? [],
+      });
+      out.set(r.organization_id, list);
+    }
+  } catch {
+    return out;
+  }
+  return out;
+}
+
 export async function readOwnExperienceRelationships(
   supabase: SupabaseClient,
   userId: string,
 ): Promise<ExperienceRelationship[] | null> {
-  const [contexts, led] = await Promise.all([
+  const [contexts, led, roster] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from("engagement_contexts")
@@ -66,6 +116,7 @@ export async function readOwnExperienceRelationships(
       .order("started_at", { ascending: false, nullsFirst: false })
       .limit(READ_LIMIT) as Promise<{ data: ContextRow[] | null; error: { code?: string } | null }>,
     readMyLedOrganizations().catch(() => ({ kind: "unavailable" }) as const),
+    readOwnConfirmedRosterRows(supabase, userId),
   ]);
   if (contexts.error) {
     console.error("[experience] engagement read failed:", contexts.error.code);
@@ -86,8 +137,25 @@ export async function readOwnExperienceRelationships(
         legalEntityRelation: p.legalEntityRelation,
         legalEntityLabel: p.legalEntityLabel,
         sourceLabels: p.sourceLabels,
+        fromPrecision: p.periodStartPrecision ?? null,
+        toPrecision: p.periodEndPrecision ?? null,
       })),
     );
+  }
+
+  // Organizations the person WORKED for but does not lead: their stated
+  // earlier periods (e.g. "Vivat Rex") through the worked-organization read
+  // (20261020100000) — the same statements, for every person who worked
+  // there, not only its managers. Absent function / failed read → none.
+  const workedOnly = [
+    ...new Set(
+      [...(contexts.data ?? []).map((r) => r.organization_id), ...roster.map((r) => r.organizationId)].filter(
+        (id): id is string => !!id && !periodsByOrg.has(id),
+      ),
+    ),
+  ];
+  for (const [id, periods] of await readWorkedOrganizationPeriods(supabase, workedOnly)) {
+    periodsByOrg.set(id, periods);
   }
 
   const named = await withHistoricalOrgNames(supabase, contexts.data ?? []);
@@ -118,6 +186,7 @@ export async function readOwnExperienceRelationships(
       (r) => r.organizationId === o.organizationId && r.relationship === o.relationship,
     );
     if (already) continue;
+    if (managerMembershipIsAccessOnly(o.relationship, o.organizationId, out)) continue;
     out.push({
       engagementContextId: null,
       organizationId: o.organizationId,
@@ -131,5 +200,113 @@ export async function readOwnExperienceRelationships(
       businessPeriods: periodsByOrg.get(o.organizationId) ?? [],
     });
   }
+  // A roster row the PERSON CONFIRMED (organization_people, linked +
+  // worker_confirmed) is a working relationship of its own: the organization
+  // recorded them, they accepted it. With no engagement row it was missing
+  // from their history — the organization's name, its stated earlier periods
+  // and the period of each record (audit 2026-10-20). Recorded by the
+  // organization, so it reads as recorded, never as their own declaration; a
+  // roster row carries no dates, so none are invented.
+  const rosterOnly = roster.filter((r) => !out.some((o) => o.organizationId === r.organizationId));
+  if (rosterOnly.length > 0) {
+    const names = await readHistoricalOrgNames(
+      supabase,
+      rosterOnly.map((r) => r.organizationId),
+    );
+    for (const r of rosterOnly) {
+      const n = names.get(r.organizationId);
+      out.push({
+        engagementContextId: null,
+        organizationId: r.organizationId,
+        organizationName: n ? orgDisplayName(n.display_name, n.legal_name) : null,
+        relationship: r.relationship,
+        title: null,
+        startedAt: null,
+        endedAt: null,
+        current: false,
+        source: "membership",
+        businessPeriods: periodsByOrg.get(r.organizationId) ?? [],
+      });
+    }
+  }
   return out;
+}
+
+/**
+ * ACCESS IS NOT A PROFESSIONAL ROLE (owner order 2026-10-24). A `manager`
+ * MEMBERSHIP is an administrative grant to a workspace. When the person ALSO
+ * has a recorded engagement with that organization (consultant, employee,
+ * freelancer …), the engagement is what they professionally are there, and
+ * the grant is not printed as "manager" in their history — a consultant who
+ * administers the operator's workspace is not its manager. Without such an
+ * engagement the membership stays a role (the manager appointed by
+ * membership only, decision 0025 §4). An OWNER membership is never dropped:
+ * ownership is a legal fact, not an access grant. Nothing is written; the
+ * membership and its access stay exactly as they are.
+ */
+export function managerMembershipIsAccessOnly(
+  relationship: string,
+  organizationId: string,
+  recorded: readonly Pick<ExperienceRelationship, "organizationId" | "relationship" | "source">[],
+): boolean {
+  if (relationship !== "manager") return false;
+  return recorded.some(
+    (r) =>
+      r.source === "engagement" &&
+      r.organizationId === organizationId &&
+      r.relationship !== "manager" &&
+      (PROFESSIONAL_HISTORY_RELATIONSHIPS as readonly string[]).includes(r.relationship),
+  );
+}
+
+/** Roster kinds that are a working relationship, as the canonical history
+ *  slug (PROFESSIONAL_HISTORY_RELATIONSHIPS); a candidate is not one. */
+const ROSTER_WORK_KINDS: Record<string, string> = {
+  employee: "employee",
+  former_employee: "employee",
+  agency_worker: "employee",
+  subcontractor: "freelancer",
+  contractor: "freelancer",
+  trainee: "intern",
+  apprentice: "intern",
+  student: "student",
+  graduate: "student",
+  programme_participant: "student",
+  volunteer: "volunteer",
+  // "other" / unset in the source stays exactly that — never a specific role
+  // the organization did not state.
+  other: "other",
+};
+
+/** The caller's own CONFIRMED roster rows — one per organization. RLS lets a
+ *  person read only their own rows (linked_profile_id = auth.uid()). A failed
+ *  read adds none (the engagement-based history stays as it is). */
+async function readOwnConfirmedRosterRows(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<{ organizationId: string; relationship: string }[]> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from("organization_people")
+      .select("organization_id, relationship_kind")
+      .eq("linked_profile_id", userId)
+      .eq("link_state", "linked")
+      .eq("link_method", "worker_confirmed")
+      .order("created_at", { ascending: true })
+      .limit(READ_LIMIT);
+    if (error || !Array.isArray(data)) {
+      if (error) console.error("[experience] roster read failed:", error.code);
+      return [];
+    }
+    const out = new Map<string, string>();
+    for (const r of data as { organization_id: string | null; relationship_kind: string | null }[]) {
+      const relationship = ROSTER_WORK_KINDS[r.relationship_kind ?? ""];
+      if (!r.organization_id || !relationship || out.has(r.organization_id)) continue;
+      out.set(r.organization_id, relationship);
+    }
+    return [...out].map(([organizationId, relationship]) => ({ organizationId, relationship }));
+  } catch {
+    return [];
+  }
 }

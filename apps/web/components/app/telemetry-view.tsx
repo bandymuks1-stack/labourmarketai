@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
+import { hasAnalyticsConsent } from "@/lib/consent/analytics-consent";
 import type {
   FunnelEventName,
   FunnelMetadata,
@@ -51,6 +52,8 @@ export function TelemetryView({
   useEffect(() => {
     if (fired.current) return;
     fired.current = true;
+    // No analytics item (dedupe marker or event) without an explicit yes.
+    if (!hasAnalyticsConsent()) return;
     if (once && typeof window !== "undefined") {
       try {
         // Keyed per (event, surface): two surfaces sharing one event name

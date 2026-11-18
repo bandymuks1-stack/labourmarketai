@@ -8,7 +8,14 @@
 
 export type ExecResult =
   | { ok: true; data?: Record<string, unknown> }
-  | { ok: false; code: string; message?: string; existing?: string };
+  | {
+      ok: false;
+      code: string;
+      message?: string;
+      existing?: string;
+      /** Fields the caller must supply before retrying (e.g. ["country"]). */
+      missing?: readonly string[];
+    };
 
 /**
  * Workspace context carried into every executor (rebuild W4). Resolved
@@ -56,6 +63,10 @@ export function mapKind(kind: string): string {
       return "precondition";
     case "conflict":
       return "conflict";
+    // An acknowledged booking overlap the database cannot record yet — its
+    // own code, so no surface can mistake it for the plain conflict.
+    case "overlap-not-recordable":
+      return "overlap_not_recordable";
     // Employer-side canonical tags (lifecycle / shortlist / bridge results):
     case "not-owner":
       return "not_authorized";

@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { env } from "@/lib/env";
 import {
   canonicalInputHash,
+  genuineTokenIssuedAt,
   issueConfirmationToken,
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
@@ -88,4 +89,23 @@ export async function verifyCapabilityConfirmation(opts: {
   if (spend === "already_spent") return { ok: false, reason: "stale_state" };
   if (spend === "error") return { ok: false, reason: "spend_failed" };
   return { ok: true };
+}
+
+/** When a confirm was refused as `stale_state`: the issue time of the token
+ *  if it is genuine for this action, input and caller (see
+ *  `genuineTokenIssuedAt`), else null. Read-only; spends nothing. */
+export function capabilityTokenIssuedAt(opts: {
+  actionId: string;
+  token: string;
+  input: Record<string, unknown>;
+  userId: string;
+}): number | null {
+  return genuineTokenIssuedAt(capabilityTokenSecret(), opts.token, {
+    actionId: opts.actionId,
+    input: opts.input,
+    userId: opts.userId,
+    // Any value: a moved state is exactly the case this answers.
+    currentStateFingerprint: "",
+    nowMs: Date.now(),
+  });
 }

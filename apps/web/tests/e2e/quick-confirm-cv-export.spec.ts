@@ -2,11 +2,13 @@ import { test, expect, type Browser } from "@playwright/test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
+import { activeLocales } from "../../lib/i18n/config";
 import { assertServerIsThisBuild } from "./build-identity";
 import { HAS_LOCAL_STACK } from "./market-map-db-state";
 import {
   confirmationsFor,
   ensureDeclaredSkills,
+  linkEntrySkills,
   removeDeclaredSkills,
   newRunMarker,
   removeSeeded,
@@ -238,6 +240,11 @@ test.describe("S3.5 — the confirm loop, across two actors", () => {
     browser,
   }) => {
     const [entryId] = await seed(1);
+    // #2271: a confirmation verifies ONLY the skills this entry is linked to.
+    // Link exactly one declared, unverified skill; a second declared skill is
+    // left unlinked as the negative control — it must stay unverified.
+    const [linkedSkill, unlinkedSkill] = declaredSkillIds;
+    await linkEntrySkills(entryId, [linkedSkill]);
     const ctx = await asManager(browser);
     const page = await ctx.newPage();
     await page.goto(QUICK, { waitUntil: "domcontentloaded" });
@@ -271,9 +278,9 @@ test.describe("S3.5 — the confirm loop, across two actors", () => {
     expect(scope.action, "recorded as a CONFIRM").toBe("confirm");
     expect(scope.decision, "and as approved").toBe("approved");
     expect(
-      (scope.skills_confirmed ?? []).length,
-      "the confirmation names the skills it verified",
-    ).toBeGreaterThan(0);
+      scope.skills_confirmed ?? [],
+      "the confirmation names exactly the skill this entry is linked to",
+    ).toEqual([linkedSkill]);
     expect(rows[0].confirmer_id, "attributed to the manager who tapped").toBeTruthy();
 
     // The named skills are now verified — the step that turns "they said so"
@@ -283,6 +290,13 @@ test.describe("S3.5 — the confirm loop, across two actors", () => {
     );
     for (const id of scope.skills_confirmed ?? []) {
       expect(verifiedIds.has(id), `skill ${id.slice(0, 8)} is now verified`).toBe(true);
+    }
+    // …and a skill this entry never showed is NOT (the #2271 defect).
+    if (unlinkedSkill) {
+      expect(
+        verifiedIds.has(unlinkedSkill),
+        `unlinked skill ${unlinkedSkill.slice(0, 8)} stays unverified`,
+      ).toBe(false);
     }
 
     await ctx.close();
@@ -459,6 +473,9 @@ test.describe("S3.5 — the confirm loop, across two actors", () => {
     browser,
   }) => {
     const [entryId] = await seed(1);
+    // Self-contained since #2271: the entry must be linked to a skill for its
+    // confirmation to verify one (an unlinked entry approves the entry only).
+    await linkEntrySkills(entryId, [declaredSkillIds[declaredSkillIds.length - 1]]);
 
     const mgr = await asManager(browser);
     const mgrPage = await mgr.newPage();
@@ -501,10 +518,12 @@ test.describe("S3.5 — the confirm loop, across two actors", () => {
     await wrk.close();
   });
 
-  test("the worker's CV prints in both locales", async ({ browser }) => {
+  test("the worker's CV prints in every active locale", async ({ browser }) => {
     const ctx = await asWorker(browser);
     const page = await ctx.newPage();
-    for (const route of ["/lt/cv", "/en/cv"]) {
+    // Derived from the canonical registry (lib/i18n/config.ts), never a
+    // hard-coded pair: a newly activated locale is covered the day it ships.
+    for (const route of activeLocales.map((l) => `/${l}/cv`)) {
       await page.goto(route, { waitUntil: "domcontentloaded" });
       await page.locator("h1").first().waitFor();
       const pdf = await page.pdf();

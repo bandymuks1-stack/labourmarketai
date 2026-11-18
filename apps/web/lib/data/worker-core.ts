@@ -5,6 +5,16 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
 import type { CoreRead, DomainCaller } from "@/lib/domain/caller";
+import {
+  anyRecordedConfirmation,
+  withStandingConfirmation,
+  type SkillConfirmationState,
+  type StandingSkillRead,
+} from "@/lib/evidence/skill-confirmation-standing";
+import {
+  readOwnStandingConfirmedSkillIds,
+  readStandingConfirmedSkillIds,
+} from "@/lib/evidence/skill-confirmation-standing-read";
 
 /**
  * Request-cached CORE worker readers (P0 nav-performance repair, Track B).
@@ -214,7 +224,17 @@ export const getWorkerProfessionRows = cache(
 export interface WorkerSkillRow {
   id: string;
   skill_id: string | null;
+  /**
+   * The STANDING confirmation (lib/evidence/skill-confirmation-standing.ts):
+   * true only while a confirmation by someone other than the person is backed
+   * by live, counted-once, independently approved work. NOT the stored flag —
+   * that is `verifiedRecorded` (history, never rewritten).
+   */
   verified: boolean | null;
+  /** The stored `worker_skills.verified` flag: the confirmation ACT happened. */
+  verifiedRecorded?: boolean;
+  /** Why `verified` reads as it does (standing / withdrawn / self_confirmed / unknown / none). */
+  confirmation?: SkillConfirmationState;
   source: string | null;
   /** When the skill was confirmed — carried for the Living CV consumers
    *  (superset pattern: one select serves every transport). */
@@ -235,16 +255,33 @@ export interface WorkerSkillRow {
 export async function readWorkerSkillRows(
   caller: DomainCaller,
   workerId: string,
+  /** How the standing read is made — the request-cached own read on the
+   *  cookie path; the caller's own client otherwise (MCP bearer). */
+  readStanding: (workerId: string) => Promise<StandingSkillRead | null> = (id) =>
+    readStandingConfirmedSkillIds(caller.supabase as SupabaseClient, id),
 ): Promise<CoreRead<WorkerSkillRow[]>> {
   try {
     const { data, error } = await asAny(caller.supabase)
       .from("worker_skills")
       .select(
-        "id, skill_id, verified, source, verified_at, confidence_bin, skills(slug)",
+        "id, skill_id, verified, verified_by, source, verified_at, confidence_bin, skills(slug)",
       )
       .eq("worker_id", workerId);
     if (error || !Array.isArray(data)) return { ok: false };
-    return { ok: true, value: data as WorkerSkillRow[] };
+    const rows = data as (WorkerSkillRow & { verified_by: string | null })[];
+    // A recorded confirmation reads as confirmed only while it STANDS. The
+    // journal is read only when there is a recorded confirmation to judge.
+    const standing = anyRecordedConfirmation(rows) ? await readStanding(workerId) : null;
+    // verified_by is read to classify a self-confirmation, never handed out:
+    // the confirmer's identity is not part of this row (role-only rule).
+    const value: WorkerSkillRow[] = withStandingConfirmation(rows, standing).map(
+      (r) => {
+        const row: WorkerSkillRow & { verified_by?: string | null } = { ...r };
+        delete row.verified_by;
+        return row;
+      },
+    );
+    return { ok: true, value };
   } catch {
     return { ok: false };
   }
@@ -264,7 +301,11 @@ export const getWorkerSkillRows = cache(async (): Promise<WorkerSkillRow[]> => {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return [];
-    const read = await readWorkerSkillRows({ supabase, userId: user.id }, worker.id);
+    const read = await readWorkerSkillRows(
+      { supabase, userId: user.id },
+      worker.id,
+      readOwnStandingConfirmedSkillIds,
+    );
     return read.ok ? read.value : [];
   } catch {
     return [];

@@ -40,6 +40,13 @@ vi.mock("@/lib/i18n/navigation", () => ({
     createElement("a", { href: String(href), ...rest }, children as never),
 }));
 
+// The animated wrapper is loaded as its own chunk in the browser
+// (`lazy-motion`); a synchronous static render has to be handed the real one.
+vi.mock("@/components/marketing/lazy-motion", async () => ({
+  Reveal: (await import("@/components/marketing/reveal")).Reveal,
+  TwoSidesLifecycle: (await import("@/components/marketing/two-sides-lifecycle")).TwoSidesLifecycle,
+}));
+
 vi.mock("next-intl/server", () => ({
   getTranslations: async () => Object.assign((k: string) => `t:${k}`, {
     raw: (k: string) => `raw:${k}`,

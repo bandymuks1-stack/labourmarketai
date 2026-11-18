@@ -7,6 +7,7 @@ import {
   buildJournalCsv,
   journalCsvFilename,
 } from "@/lib/journal/journal-export";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Journal CSV export guard (quality-train PR I).
@@ -79,7 +80,7 @@ describe("the documents surface stays honest about formats", () => {
     expect(page).toMatch(/download: true/);
   });
 
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: journal export copy exists; Excel/Word stay 'preparing'`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`)) as {
         documents: { reports: Record<string, string> };

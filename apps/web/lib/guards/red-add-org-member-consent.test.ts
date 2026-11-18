@@ -138,7 +138,9 @@ describe("the only application caller already passes roster-derived workers", ()
     // R-1 only the worker's acceptance writes. agency_workers is not
     // API-exposed and is never read (agency-workers-not-api-exposed.test.ts);
     // an agency org gets an empty addable list, never a non-roster one.
-    expect(read).toMatch(/kind === "company"\s*\?\s*await supabase\s*\.from\("company_workers"\)[^;]*\.eq\("status", "active"\)\s*:\s*\{ data: \[\] \}/);
+    // (Read in the members' one parallel stage since 2026-10-23, so no `await`
+    // of its own; still the company roster or an empty list, nothing else.)
+    expect(read).toMatch(/kind === "company"\s*\?\s*supabase\s*\.from\("company_workers"\)[^;]*\.eq\("status", "active"\)\s*:\s*Promise\.resolve\(\{ data: \[\] \}\)/);
     expect(read).not.toMatch(/\.from\("agency_workers"\)/);
   });
 

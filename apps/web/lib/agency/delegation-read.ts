@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -75,6 +77,17 @@ export async function listAgencyDraftedNeeds(): Promise<ReadState<DraftedNeedRow
 }
 
 export async function listAgencyPlacements(): Promise<ReadState<PlacementRow>> {
+  return readAgencyPlacementsOnce();
+}
+
+/** Request-scoped (perf 2026-10-22): the opening brief and the bell's bridge
+ *  count read the agency's placements in the same render. One round trip per
+ *  render; every navigation and every server action reads again. */
+const readAgencyPlacementsOnce = cache(
+  async (): Promise<ReadState<PlacementRow>> => readAgencyPlacements(),
+);
+
+async function readAgencyPlacements(): Promise<ReadState<PlacementRow>> {
   try {
     const supabase = await createClient();
     const { data, error } = await asAny(supabase).rpc("list_agency_placements_v1");

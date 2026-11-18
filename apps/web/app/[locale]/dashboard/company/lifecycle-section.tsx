@@ -28,6 +28,7 @@ import {
   LIFECYCLE_TEMPLATE_NAME_MAX,
   LIFECYCLE_TEMPLATE_NAME_MIN,
   ONBOARDING_ITEM_KINDS,
+  collapseDuplicateLifecycleRows,
   deriveRunProgress,
   type LifecycleMemberRow,
   type LifecycleNotice,
@@ -136,9 +137,14 @@ export async function LifecycleSection({
   const { members, templates, onboardingRuns, offboardingRuns, events } =
     overview;
   const activeTemplates = templates.filter((tpl) => tpl.isActive);
+  // History names come from EVERY engagement row; the "people and stages"
+  // list shows one row per person and relationship (see
+  // collapseDuplicateLifecycleRows — a duplicate with no lifecycle work of
+  // its own listed the owner twice, UX review 2026-10-24 row 3.23).
   const nameByEngagement = new Map(
     members.map((m) => [m.engagementId, m.name]),
   );
+  const listedMembers = collapseDuplicateLifecycleRows(members);
 
   function hiddenCtx() {
     return (
@@ -347,7 +353,7 @@ export async function LifecycleSection({
                   />
                   <div className="flex flex-col gap-1">
                     <Label
-                      
+                      htmlFor={`onb-tpl-${m.engagementId}`}
                       className="text-xs"
                     >
                       {t("runs.templateLabel")}
@@ -383,7 +389,7 @@ export async function LifecycleSection({
                 />
                 <div className="flex flex-col gap-1">
                   <Label
-                    
+                    htmlFor={`stage-${m.engagementId}`}
                     className="text-xs"
                   >
                     {t("stageForm.stageLabel")}
@@ -408,7 +414,7 @@ export async function LifecycleSection({
                 </div>
                 <div className="flex flex-col gap-1">
                   <Label
-                    
+                    htmlFor={`prob-${m.engagementId}`}
                     className="text-xs"
                   >
                     {t("stageForm.probationDateLabel")}
@@ -422,7 +428,7 @@ export async function LifecycleSection({
                 </div>
                 <div className="flex flex-col gap-1">
                   <Label
-                    
+                    htmlFor={`stage-note-${m.engagementId}`}
                     className="text-xs"
                   >
                     {t("stageForm.noteLabel")}
@@ -451,7 +457,7 @@ export async function LifecycleSection({
                 />
                 <div className="flex min-w-[220px] flex-1 flex-col gap-1">
                   <Label
-                    
+                    htmlFor={`off-extra-${m.engagementId}`}
                     className="text-xs"
                   >
                     {t("runs.extraItemsLabel")}
@@ -485,7 +491,7 @@ export async function LifecycleSection({
                   />
                   <div className="flex flex-col gap-1">
                     <Label
-                      
+                      htmlFor={`end-reason-${m.engagementId}`}
                       className="text-xs"
                     >
                       {t("end.reasonLabel")}
@@ -504,7 +510,7 @@ export async function LifecycleSection({
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label
-                      
+                      htmlFor={`end-note-${m.engagementId}`}
                       className="text-xs"
                     >
                       {t("end.noteLabel")}
@@ -563,11 +569,11 @@ export async function LifecycleSection({
         <h3 className="text-sm font-medium text-text-primary">
           {t("members.title")}
         </h3>
-        {members.length === 0 ? (
+        {listedMembers.length === 0 ? (
           <p className="text-sm text-text-muted">{t("members.empty")}</p>
         ) : (
           <ul className="flex flex-col gap-3">
-            {members.map((m) => (
+            {listedMembers.map((m) => (
               <li
                 key={m.engagementId}
                 className="flex flex-col gap-2 rounded-md border border-ink-600 p-3"
@@ -641,7 +647,7 @@ export async function LifecycleSection({
             {hiddenCtx()}
             <input type="hidden" name="organizationId" value={orgId} />
             <div className="flex flex-col gap-1">
-              <Label  className="text-xs">
+              <Label htmlFor="lifecycle-tpl-name" className="text-xs">
                 {t("templates.nameLabel")}
               </Label>
               <Input
@@ -658,7 +664,7 @@ export async function LifecycleSection({
             ).map((i) => (
               <div key={i} className="flex flex-wrap items-end gap-2">
                 <div className="flex min-w-[200px] flex-1 flex-col gap-1">
-                  <Label className="text-xs">
+                  <Label htmlFor={`tpl-item-${i}-title`} className="text-xs">
                     {t("templates.itemTitleLabel", { n: i })}
                   </Label>
                   <Input
@@ -668,7 +674,7 @@ export async function LifecycleSection({
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <Label className="text-xs">
+                  <Label htmlFor={`tpl-item-${i}-kind`} className="text-xs">
                     {t("templates.kindLabel")}
                   </Label>
                   <Select id={`tpl-item-${i}-kind`} name={`item-${i}-kind`}>

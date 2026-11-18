@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { buildJournalCalendar } from "@/lib/journal/journal-calendar";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * THE POST-COMMIT PATH of a historical import (owner completion mode
@@ -70,7 +71,7 @@ describe("the organization's actual layer on the worker's own calendar", () => {
     const page = read("app/[locale]/dashboard/journal/page.tsx");
     expect(page).toMatch(/reportedMinutes: reportedByDay\.get\(g\.isoKey\) \?\? 0/);
     expect(page).toMatch(/r\.status === "rejected"/);
-    for (const loc of ["en", "lt", "nl", "de", "ru"]) {
+    for (const loc of activeLocales) {
       const cal = JSON.parse(read(`messages/${loc}/journal.json`)).calendar as Record<string, string>;
       expect(cal.reported, loc).toMatch(/\{time\}/);
       expect(cal.periodReportedOnly, loc).toMatch(/\{days/);

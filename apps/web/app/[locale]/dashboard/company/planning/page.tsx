@@ -36,6 +36,11 @@ import { PersonIdentityCard } from "@/components/app/identity/person-identity-ca
 import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/planning", "workforcePlanning.title");
+
 
 /** The timeline window: four weeks, moved by whole windows. */
 const TIMELINE_DAYS = 28;

@@ -5,6 +5,8 @@
  * mode + idempotency around this, and persists via the service-role store.
  */
 
+import { summarizePilotPassSession } from "@/lib/billing/pilot-pass-core";
+
 export type SubStatus =
   | "none"
   | "trialing"
@@ -120,6 +122,12 @@ export interface SubscriptionUpsert {
   providerPriceId?: string | null;
   unitAmountCents?: number | null;
   currency?: string | null;
+  /**
+   * The payment outcome already known when the row is written. A paid
+   * one-time session (the pilot pass) carries it itself: its invoice names no
+   * subscription, so no invoice event can ever set it afterwards.
+   */
+  lastPaymentStatus?: PaymentStatus | null;
   /**
    * "link" = checkout.session.completed (knows ids, not state — never
    * regresses an existing row's status); default "subscription".
@@ -409,6 +417,9 @@ export function summarizeRecordedEvent(
     const d = parseDisputeObject(obj);
     return d ? { ...d } : null;
   }
+  // The organization pilot pass: the database row itself shows what was paid,
+  // by which organization, in which mode, for which plan (pilot-pass-core).
+  if (type === "checkout.session.completed") return summarizePilotPassSession(obj);
   return null;
 }
 

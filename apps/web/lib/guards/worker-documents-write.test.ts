@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * W4 Slice 2 — the worker_documents WRITE path.
@@ -70,7 +71,7 @@ describe("worker documents write path (W4 Slice 2)", () => {
   });
 
   it("every editor label ships in all five locales", () => {
-    for (const loc of ["lt", "en", "de", "nl", "ru"]) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const e = m.documents?.editor;
       expect(e, `${loc} documents.editor`).toBeTruthy();
@@ -92,5 +93,25 @@ describe("worker documents write path (W4 Slice 2)", () => {
         expect(typeof e[k], `${loc} documents.editor.${k}`).toBe("string");
       }
     }
+  });
+});
+
+describe("worker document form: a country is named, not printed as a code", () => {
+  const page = readFileSync(
+    join(__dirname, "..", "..", "app/[locale]/dashboard/documents/page.tsx"),
+    "utf8",
+  );
+  const formSrc = readFileSync(
+    join(__dirname, "..", "..", "components/app/worker-document-form.tsx"),
+    "utf8",
+  );
+  it("the page hands the form [code, name] pairs from the one country reader", () => {
+    expect(page).toMatch(
+      /countryOptions=\{DOCUMENT_COUNTRIES\.map\(\s*\(code\) => \[code, countryDisplayName\(code, locale\) \|\| code\] as const,/,
+    );
+  });
+  it("the form submits the code and shows the name", () => {
+    expect(formSrc).toMatch(/<option key=\{code\} value=\{code\}>\s*\{label\}/);
+    expect(formSrc).not.toMatch(/<option key=\{c\} value=\{c\}>/);
   });
 });

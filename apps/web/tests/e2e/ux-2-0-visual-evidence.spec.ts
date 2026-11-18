@@ -427,30 +427,9 @@ test.describe("navigation discovery", () => {
     expect(simple.calendar, "Calendar is persistent in the chat shell").toBeGreaterThan(0);
     await shot(page, "messages-calendar-ownership-simple", "light", "desktop");
 
-    // A surviving full-chrome module route (the advanced dashboard itself was
-    // deleted by W3 Package 4).
-    await page.goto("/lt/dashboard/bookings", { waitUntil: "domcontentloaded" });
-    await expect(page.locator('[data-chrome="full"]')).toBeVisible({ timeout: 60_000 });
-    const advanced = await page.evaluate(() => ({
-      tabs: [...document.querySelectorAll('[data-testid^="dashboard-tab-"]')].map(
-        (e) => (e as HTMLElement).dataset.testid,
-      ),
-      bottom: [...document.querySelectorAll('[data-testid^="bottom-nav-"]')].map(
-        (e) => (e as HTMLElement).dataset.testid,
-      ),
-    }));
-    expect(advanced.tabs, "not repeated as an Advanced tab").not.toContain(
-      "dashboard-tab-communication",
-    );
-    expect(advanced.tabs).not.toContain("dashboard-tab-planning");
-    expect(advanced.bottom).not.toContain("bottom-nav-communication");
-    expect(advanced.bottom).not.toContain("bottom-nav-planning");
-    expect(advanced.tabs.length, "Advanced keeps a real orientation nav").toBeGreaterThanOrEqual(4);
-    test.info().annotations.push({
-      type: "evidence",
-      description: `advanced tabs=${advanced.tabs.join(",")}`,
-    });
-    await shot(page, "messages-calendar-ownership-advanced", "light", "desktop");
+    // The "advanced" full-chrome half of this check retired with the one
+    // header (2026-10-25): every route now renders the same bar, and the
+    // desktop tabs / phone bottom bar it compared against are deleted.
   });
 
   test("command search: opens by button and by shortcut, Escape closes, focus returns", async ({

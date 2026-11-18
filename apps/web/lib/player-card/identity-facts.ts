@@ -48,6 +48,10 @@ export function buildIdentityFacts({
   readonly professionalExperienceHours?: number | null;
 }): IdentityFact[] {
   const n0 = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  // A journal read that hit its ceiling makes the TOTAL unknown, not a lower
+  // bound: an organization allocation linked to an entry outside the read is
+  // counted in that entry's place, so loading the entry can LOWER the sum.
+  // The total is withheld rather than shown with a false "≥".
   const historyFact: IdentityFact[] =
     organizationHistoryHours !== null && organizationHistoryHours > 0
       ? [
@@ -60,6 +64,7 @@ export function buildIdentityFacts({
         ]
       : [];
   const totalFact: IdentityFact[] =
+    !truncated &&
     professionalExperienceHours !== null &&
     professionalExperienceHours > 0 &&
     organizationHistoryHours !== null &&

@@ -110,6 +110,21 @@ describe("configuration is validated, and reported rather than thrown", () => {
     expect(result.ok === false && result.problems[0].kind).toBe("malformed");
   });
 
+  it("allows plaintext only for a stack on this machine (loopback, emulator host)", () => {
+    for (const local of ["http://127.0.0.1:54321", "http://localhost:54321", "http://10.0.2.2:54321"]) {
+      expect(readClientConfig({ ...VALID, supabaseUrl: local }).ok, local).toBe(true);
+    }
+    for (const remote of [
+      "http://10.0.2.3:54321",
+      "http://10.0.2.2.example.com",
+      "http://127.0.0.1.example.com:54321",
+      "http://localhost:54321/path",
+      "http://192.168.1.10:54321",
+    ]) {
+      expect(readClientConfig({ ...VALID, supabaseUrl: remote }).ok, remote).toBe(false);
+    }
+  });
+
   it("normalises a trailing slash so paths do not double up", () => {
     for (const given of [
       "https://labourmarket.ai/",

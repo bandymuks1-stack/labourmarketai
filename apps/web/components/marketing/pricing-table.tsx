@@ -1,16 +1,18 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/lib/i18n/navigation";
 import { TrackedCta } from "@/components/app/tracked-cta";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { getPlans, PLAN_SLUGS } from "@/lib/marketing/plans";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
 
 /**
  * /pricing — the owner's LAUNCH table (approved 2026-09-05):
  *
- *   €0          for getting started            1 active position
+ *   €0          for getting started            1 active position (shown only
+ *                                              while activation is open —
+ *                                              the limit is enforced only
+ *                                              where billing is armed)
  *   €99/month   for organizations actively     no fixed limit on active positions
  *               hiring / building teams
  *   Special requirements?  contact us (no public tier, no price)
@@ -27,16 +29,29 @@ export async function PricingTable() {
   const locale = await getLocale();
   const rows = await getPlans(); // null if Supabase unreachable in preview
   const confirmed = PRICING_READINESS_STATE === "owner_confirmed";
-  const billingOn = isStripeActive(getBillingConfig());
+  const billingOn = isStripeActive(getBillingConfigFor(null));
   const cardClass = "flex flex-col card-border p-6";
 
   return (
     <section className="mx-auto grid max-w-container gap-6 px-6 pb-16 sm:px-12 lg:grid-cols-3">
       {PLAN_SLUGS.map((slug) => {
         const row = rows?.find((r) => r.slug === slug);
-        const dbName = locale === "lt" ? row?.name_lt : row?.name_en;
+        // The plans table carries a name in LT and EN only. Every other locale
+        // reads its own catalog name — a German reader was shown the English
+        // DB name although `pricing.plans.<slug>.name` exists in German.
+        const dbName =
+          locale === "lt" ? row?.name_lt : locale === "en" ? row?.name_en : undefined;
         const name = dbName ?? t(`plans.${slug}.name`);
-        const features = t.raw(`plans.${slug}.features`) as string[];
+        // The free card's "1 active position" is enforced only where billing
+        // is armed (open-needs-gate is permissive otherwise), so while online
+        // activation is closed the card lists what a free organization really
+        // gets today (owner approval 2026-11-12 (b)).
+        const closedKey = `plans.${slug}.featuresClosed`;
+        const features = (
+          !(billingOn && confirmed) && t.has(closedKey as never)
+            ? t.raw(closedKey as never)
+            : t.raw(`plans.${slug}.features`)
+        ) as string[];
         const price = confirmed && typeof row?.price_eur_monthly === "number" ? row.price_eur_monthly : null;
 
         return (
@@ -63,7 +78,12 @@ export async function PricingTable() {
               data-testid={`pricing-price-state-${slug}`}
               data-state={PRICING_READINESS_STATE}
             >
-              {t(`priceState.${PRICING_READINESS_STATE}` as never)}
+              {/* Confirmed prices while online payment is closed must not say
+                  "activation happens in your organization account" (owner P0
+                  2026-11-10): the closed state has its own sentence. */}
+              {confirmed && !billingOn
+                ? t("priceState.owner_confirmed_closed")
+                : t(`priceState.${PRICING_READINESS_STATE}` as never)}
             </p>
 
             <p className="mt-6 font-mono text-meta uppercase tracking-label text-text-muted">
@@ -123,13 +143,15 @@ export async function PricingTable() {
         </p>
         <p className="mt-3 flex-1 text-sm text-text-secondary">{t("individual.body")}</p>
         <div className="mt-6">
-          <Link
+          <TrackedCta
             href="/company-need"
+            ctaId="pricing_individual_need"
+            audience="companies"
             className="text-sm font-semibold text-brand-blue hover:underline"
             data-testid="pricing-cta-individual"
           >
             {t("individual.cta")}
-          </Link>
+          </TrackedCta>
         </div>
       </div>
     </section>

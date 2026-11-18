@@ -17,12 +17,16 @@ import { cn } from "@/lib/utils";
 export function PageTitle({
   children,
   className,
+  "data-testid": testId,
 }: {
   readonly children: ReactNode;
   readonly className?: string;
+  /** Kept for pages whose title was already a test anchor. */
+  readonly "data-testid"?: string;
 }) {
   return (
     <h1
+      data-testid={testId}
       className={cn(
         "font-display text-[clamp(1.75rem,3.4vw,2.35rem)] font-semibold leading-[1.04] tracking-[-0.04em] text-text-primary",
         className,

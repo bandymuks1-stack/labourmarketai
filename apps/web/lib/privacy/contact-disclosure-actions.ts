@@ -8,11 +8,10 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
-  CONSENT_LOCALES,
   EMPLOYER_DATA_DISCLOSURE_V1,
   consentTextHash,
-  type ConsentLocale,
 } from "@/lib/privacy/consent-definitions";
+import { toConsentLocale } from "@/lib/privacy/discoverability-view";
 import {
   DEFAULT_CONTACT_REQUEST_FIELDS,
   isContactDisclosureStatus,
@@ -69,13 +68,9 @@ function asAny(c: SupabaseClient): any {
   return c;
 }
 
-// 2026-09-20: PL is an active UI locale without its own consent blocks yet;
-// English is the honest fallback, never Lithuanian (lib/i18n/unsupported-language.ts).
-function toConsentLocale(locale: string): ConsentLocale {
-  return (CONSENT_LOCALES as readonly string[]).includes(locale)
-    ? (locale as ConsentLocale)
-    : "en";
-}
+// The consent locale is the ONE `toConsentLocale` in discoverability-view.ts
+// (a locale without its own consent texts reads AND records English, never
+// Lithuanian) — shared with the screen that shows the text.
 
 // ─── Employer side ───────────────────────────────────────────────────────────
 
@@ -111,8 +106,13 @@ async function countOwnContactAsks(
     }
   };
   const [open, day] = await Promise.all([
+    // OPEN = created AND not yet past its 14-day expiry — the propose RPC's
+    // own rule (`status = 'created' and expires_at > now()`). The sweep that
+    // flips rows to `expired` is admin-run, so counting status alone kept an
+    // employer whose asks simply lapsed refused as `rate-limited` forever,
+    // while the database would have accepted the next ask.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    head((q) => (q as any).eq("status", "created")),
+    head((q) => (q as any).eq("status", "created").gt("expires_at", new Date().toISOString())),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     head((q) => (q as any).gt("created_at", rollingDayFloorIso())),
   ]);

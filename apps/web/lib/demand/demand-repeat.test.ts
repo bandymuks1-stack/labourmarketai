@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { stripTimingForRepeat } from "./demand-request";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * REPEAT THIS NEED (2026-09-19) — a past request is the starting point for a
@@ -77,7 +78,7 @@ describe("the by-id reader clones structure only, as the caller, in their worksp
     expect(button).toMatch(/getDemandPrefillByIdAction\(intent, repeatRequestId\)/);
     const page = read("app/[locale]/dashboard/company/needs/page.tsx");
     expect(page).toMatch(/repeatRequestId=\{repeatRequestId\}/);
-    for (const locale of ["en", "lt", "ru", "nl", "de"]) {
+    for (const locale of activeLocales) {
       expect(read(`messages/${locale}.json`)).toMatch(/"repeatLink": "/);
     }
   });

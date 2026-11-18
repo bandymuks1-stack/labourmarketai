@@ -33,4 +33,14 @@ describe("rememberBadge (2026-10-19 frame perf)", () => {
     await expect(rememberBadge("f", "u1|w1", 60_000, async () => { throw new Error("boom"); })).rejects.toThrow("boom");
     expect(await rememberBadge("f", "u1|w1", 60_000, async () => 7)).toBe(7);
   });
+
+  it("does not remember a value the caller marks as a failed read", async () => {
+    let calls = 0;
+    const load = async () => (++calls === 1 ? { kind: "unavailable" as const } : { kind: "ok" as const, n: calls });
+    const keep = (v: { kind: string }) => v.kind === "ok";
+    expect((await rememberBadge("p", "u1|w1|s", 60_000, load, Date.now, keep)).kind).toBe("unavailable");
+    expect(await rememberBadge("p", "u1|w1|s", 60_000, load, Date.now, keep)).toEqual({ kind: "ok", n: 2 });
+    // the ok value is now remembered
+    expect(await rememberBadge("p", "u1|w1|s", 60_000, load, Date.now, keep)).toEqual({ kind: "ok", n: 2 });
+  });
 });

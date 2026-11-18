@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * W7-S1 — ONE profile overview.
@@ -191,7 +192,7 @@ describe("W7-S1 — accessibility of the surface it introduced", () => {
   });
 
   it("the new copy exists in every locale that ships the hub", () => {
-    for (const locale of ["lt", "en", "de", "nl", "ru"]) {
+    for (const locale of activeLocales) {
       const m = JSON.parse(read(`messages/${locale}.json`)) as {
         profileHub?: Record<string, unknown>;
       };

@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isSuperadmin } from "@/lib/auth/superadmin";
+import { countRealIntakesByStatus, readIntakeCountRows } from "@/lib/staffing/intake-test-rows";
 
 /**
  * Operator launch-readiness overview (launch repair Scope E).
@@ -24,7 +25,8 @@ import { isSuperadmin } from "@/lib/auth/superadmin";
  *     profiles.consent_data_processing boolean is DEPRECATED here: it never
  *     had a write path and is not a real consent record. NO backfill —
  *     every count stays 0 until real users choose;
- *   - real companies, public company-need intakes by operator status,
+ *   - real companies, public company-need intakes by operator status (our own
+ *     test rows left out — lib/staffing/intake-test-rows.ts),
  *     submitted authenticated customer requests;
  *   - teams (organizations rows with organization_type = 'team').
  *
@@ -172,10 +174,7 @@ export async function getLaunchReadiness(): Promise<LaunchReadinessResult> {
     workersWithJournalEvidence,
     workersWithReadyDocs,
     companiesTotal,
-    intakesNew,
-    intakesContacted,
-    intakesQualified,
-    intakesRejected,
+    realIntakesByStatus,
     customerRequestsSubmitted,
     teamsTotal,
   ] = await Promise.all([
@@ -195,22 +194,23 @@ export async function getLaunchReadiness(): Promise<LaunchReadinessResult> {
       (q as any).eq("worker_documents.status", "ready"),
     ),
     opsTotal(sb, "organizations_by_type_company"),
-    count(sb, "company_need_public_intakes", "id", (q) =>
-      (q as any).eq("status", "new"),
-    ),
-    count(sb, "company_need_public_intakes", "id", (q) =>
-      (q as any).eq("status", "contacted"),
-    ),
-    count(sb, "company_need_public_intakes", "id", (q) =>
-      (q as any).eq("status", "qualified"),
-    ),
-    count(sb, "company_need_public_intakes", "id", (q) =>
-      (q as any).eq("status", "rejected"),
+    // Public intakes by status, REAL requests only: our own test rows (a
+    // production walk, an e2e proof) never raise these numbers (owner
+    // 2026-11-14; the feed's one predicate, lib/staffing/intake-test-rows.ts).
+    // A failed read is null for all four, never 0.
+    readIntakeCountRows(sb).then((rows) =>
+      rows === null ? null : countRealIntakesByStatus(rows),
     ),
     opsTotal(sb, "needs_open"),
     opsTotal(sb, "teams_total"),
   ]);
   /* eslint-enable @typescript-eslint/no-explicit-any */
+  const intakes = (status: string): number | null =>
+    realIntakesByStatus === null ? null : (realIntakesByStatus[status] ?? 0);
+  const intakesNew = intakes("new");
+  const intakesContacted = intakes("contacted");
+  const intakesQualified = intakes("qualified");
+  const intakesRejected = intakes("rejected");
 
   return {
     kind: "ok",

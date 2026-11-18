@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { countOwnerResponsesSince } from "../booking/booking-state";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Status → next-action guard (root-cause audit PR5).
@@ -23,14 +24,17 @@ import { countOwnerResponsesSince } from "../booking/booking-state";
 
 const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 const catalog = (loc: string) =>
   JSON.parse(read(`messages/${loc}.json`)) as never;
 
 describe("1. contacted → conversation, in that order", () => {
   const action = read("lib/communication/contact-interested-worker.ts");
   it("the action verifies ownership + the worker's own standing interest", () => {
-    expect(action).toMatch(/eq\("profile_id", user\.id\)/);
+    // ownership = the ONE active-workspace rule (creator, or a manage-demand
+    // role in the need's organization while acting in it — review of #2606)
+    expect(action).toMatch(/actingDemandForInterest\(supabase, user\.id, requestId\)/);
+    expect(action).toMatch(/acting\.kind !== "ok"\) return \{ ok: false, reason: "not_owner" \}/);
     expect(action).toMatch(/demand_interest_signals/);
     expect(action).toMatch(/interestStatus === "withdrawn"/);
   });

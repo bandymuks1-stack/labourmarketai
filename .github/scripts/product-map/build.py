@@ -1,11 +1,13 @@
 """LabourMarket.ai PRODUCT MASTER MAP — generator.
 
-Reads the canonical register (docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md), applies the
+Reads the canonical register — the owner's PRIVATE registry (Agentai OS Internal Brain,
+docs/internal-brain/projects/labourmarket-functionality-registry-v2.md; the public
+docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md holds only the summary since 2026-10-21), applies the
 production evidence gathered since it was last written, adds the commercial model and the
 priorities, and writes ONE self-contained HTML page. Re-run it after every audit update:
 the map is a view of the canonical documents, never a second source of truth.
 
-    python build.py <audit.md> <out.html> <source-sha> [private-facts.json]
+    python build.py <private registry.md> <out.html> <source-sha> [private-facts.json]
 """
 import html
 import json
@@ -51,20 +53,18 @@ for line in src.split("## 2. Per-area status", 1)[1].split("## 3.", 1)[0].splitl
         "action": action if action != "—" else "",
     })
 
-# Production evidence after the audit snapshot (2026-10-18/19, real production; see report).
-EVIDENCE = {
-    "1.2": ("LIVE_PROVEN", "Savininkas prisijungė per Google produkcijoje 2026-10-18 ir 10-19; #2482, #2488"),
-    "1.12": ("CODE_READY", "Nonstop slaptas raktas atkurtas abiejose pusėse 2026-10-18; laukiantis lead perdavimas – savininko veiksmas"),
-    "4.29": ("LIVE_PROVEN", "Perdavimo užduotis produkcijoje: HTTP 200, authFailed 0, sutikimo neturintis įrašas sulaikytas"),
-    "6.16": ("LIVE_PROVEN", "Komercinis perdavimas Nonstop atkurtas ir paleistas produkcijoje 2026-10-18"),
-    "9.16": ("CODE_READY", "Durys sukonfigūruotos (atsako unauthorized); pilnas siuntimas dar neįvykdytas"),
-    "10.22": ("CODE_READY", "Abi kryptys suporuotos; perdavimas veikia, referalo siuntimas laukia savininko"),
-    "13.16": ("LIVE_PROVEN", "Naršyklės klaidų pranešimai įdiegti, durys atsako 204 (#2484)"),
-}
+# The 2026-10-18/19 production evidence that used to be overlaid here is now in the
+# registry rows themselves (owner registry rebuild 2026-10-21), so the map reads one truth.
+# Rows kept only for traceability (DUPLICATE / RETIRED) are not processes: skip them.
+# A DUPLICATE row names the canonical row it is counted in ("counted in 5.13"); a journey
+# that still references the duplicate id reads the canonical row instead.
+ALIAS = {}
 for r in rows:
-    if r["id"] in EVIDENCE:
-        r["raw"], note = EVIDENCE[r["id"]]
-        r["evidence"] = note
+    if r["raw"] == "DUPLICATE":
+        m = re.search(r"counted in (\d+\.\d+)", r["evidence"])
+        if m:
+            ALIAS[r["id"]] = m.group(1)
+rows = [r for r in rows if r["raw"] not in ("DUPLICATE", "RETIRED")]
 
 def bucket(r):
     raw = r["raw"]
@@ -72,9 +72,9 @@ def bucket(r):
         return "LIVE_PROVEN"
     if raw == "BROKEN":
         return "BROKEN"
-    if raw == "PLANNED":
+    if raw in ("PLANNED", "NOT_BUILT"):
         return "PLANNED"
-    if raw == "DORMANT":
+    if raw in ("DORMANT", "BLOCKED"):
         return "BLOCKED"
     if raw == "PARTIAL":
         b = (r["blocker"] + " " + r["evidence"]).lower()
@@ -109,10 +109,17 @@ def chain_features(areas, rx):
             out.append(r["id"])
     return out
 
+# Which customer-funnel stage each link of the chain moves (public: labels only; the measured
+# numbers and the current blocker per link come from the private facts file, key "impact").
+CHAIN_STAGE = {
+    "person": "Pritraukimas", "need": "Aktyvacija", "match": "Aktyvacija", "offer": "Konversija",
+    "talk": "Konversija", "deal": "Konversija", "order": "Išlaikymas", "run": "Išlaikymas",
+    "proof": "Išlaikymas", "pay": "Pajamos", "next": "Augimas",
+}
 chain = []
 for key, name, desc, areas, rx in CHAIN:
     ids = chain_features(areas, rx)
-    chain.append({"key": key, "name": name, "desc": desc, "ids": ids})
+    chain.append({"key": key, "name": name, "desc": desc, "ids": ids, "stage": CHAIN_STAGE.get(key, "")})
 
 # ── 3. Commercial model per area ────────────────────────────────────────────────────────
 COMMERCIAL = {
@@ -122,7 +129,7 @@ COMMERCIAL = {
     4: ("Įmonė neranda patikimų darbuotojų ar komandų laiku.", "Įmonė, agentūra", "Prenumerata; vėliau profilių peržiūros / LMC", "Vidutinės: paieška, vakansijų importas", "Konversija, pajamos", "Dabar"),
     5: ("Susitarimai išsibarsto telefonuose ir žinutėse.", "Įtraukta į planą", "Netiesioginė (išlaikymas)", "Mažos", "Išlaikymas", "Dabar"),
     6: ("Paslaugos, prekės ir nuoma tarp šalių neturi patikimos vietos.", "Pirkėjas / pardavėjas", "Vėliau: komisiniai ar LMC (dar nepatvirtinta)", "Vidutinės–didelės: užsakymai, ginčai, logistika", "Pritraukimas, pajamos", "Vėliau"),
-    7: ("Be veikiančio atsiskaitymo nėra pajamų.", "Įmonė", "Prenumerata €99, LMC kreditai (1 LMC = €1)", "Stripe mokesčiai; webhook, sąskaitos", "Pajamos", "Dabar (P0)"),
+    7: ("Be veikiančio atsiskaitymo nėra pajamų.", "Įmonė", "Prenumerata €99, LMC kreditai (1 LMC = €1)", "Stripe mokesčiai; webhook, sąskaitos", "Pajamos", "Atidėta (savininkas, 2026-10-19): pirma esamos Stripe integracijos ir perkėlimo auditas"),
     8: ("Darbuotojai ir įmonės kalba skirtingomis kalbomis ir yra skirtingose šalyse.", "Niekas tiesiogiai", "Netiesioginė: tarptautinis pritraukimas, SEO", "Mažos–vidutinės: vertimai", "Pritraukimas", "Dabar"),
     9: ("Pasitikėjimas, privatumas ir teisinė atitiktis (GDPR).", "Niekas tiesiogiai", "Būtina sąlyga pardavimui įmonėms", "Vidutinės: auditai, priežiūra", "Pasitikėjimas, rizikos mažinimas", "Dabar"),
     10: ("Rankinis darbas ir izoliuoti partneriai lėtina srautą.", "Įmonė, partneris (Nonstop)", "Netiesioginė; partnerių perdavimai", "AI kaina (šiuo metu išjungta), integracijų priežiūra", "Pritraukimas, efektyvumas", "Dalis dabar, AI vėliau"),
@@ -134,13 +141,44 @@ COMMERCIAL = {
 # ── 4. Facts (production, 2026-10-19, aggregates only) ──────────────────────────────────
 # Production facts are telemetry and never live in the public repository: pass them as a
 # private JSON file (a list of [label, value, note]) — output/ is gitignored.
-FACTS, FUNNEL = [], []
+FACTS, FUNNEL, IMPACT, ACQ_NOW = [], [], {}, {}
 if len(sys.argv) > 4:
     _private = json.load(open(sys.argv[4], encoding="utf8"))
     if isinstance(_private, dict):
         FACTS, FUNNEL = _private.get("facts", []), _private.get("funnel", [])
+        IMPACT = _private.get("impact", {})
+        ACQ_NOW = _private.get("acquisition", {})
     else:
         FACTS = _private
+for _link in chain:
+    _measured = IMPACT.get(_link["key"])
+    if _measured:
+        _link["metric"], _link["blocker"] = _measured[0], _measured[1]
+
+# ── 4a. Company acquisition and demand generation — only channels that already work ─────
+# (owner command 2026-10-19). Each row: channel, what flows through it, the existing capability
+# rows it uses, the measure that proves it moves, who acts. Measured numbers per channel come
+# from the private facts file (key "acquisition"), never from this public file.
+ACQUISITION = [
+    ("A1", "Nonstop Group užklausos → LabourMarket poreikis",
+     "Įmonių užklausos dabar ateina į Nonstop paštą. Nonstop kaip agentūra paskelbia poreikį kliento vardu ir pasiūlo savo brigadas ar žmones",
+     "4.15, 4.1, 4.6", "Užklausos → paskelbti poreikiai → pasiūlymai per savaitę", "Savininkas (Nonstop) + agentas"),
+    ("A2", "Darbuotojų susidomėjimas viešais skelbimais → Nonstop susisiekia su darbdaviu",
+     "Realus darbuotojas pažymi skelbimą; perdavimas Nonstop; Nonstop pasiūlo darbdaviui žmones ir LabourMarket paskyrą",
+     "6.16, 4.29", "Perdavimai → susisiekta → darbdavio paskyra → poreikis", "Nonstop"),
+    ("A3", "Esami Nonstop klientai ir importuota istorija",
+     "Importuota projektų istorija ir žmonės: kvietimai pasiimti savo istoriją; buvę klientai kviečiami kaip įmonės",
+     "1.9, 2.4", "Pasiimta istorija; pakviesta ir aktyvuota įmonių", "Savininkas"),
+    ("A4", "Savininko B2B susirašinėjimas (partneriai, kurie atsakė)",
+     "Atsakę partneriai gauna įmonės ar agentūros paskyrą ir pirmą poreikį ar pasiūlymą kartu su agentu",
+     "1.5, 4.1, 4.15", "Atsakymai → paskyros → pirmas poreikis", "Savininkas"),
+    ("A5", "Viešos svetainės (LabourMarket, darbo skelbimai, nonstopgroup.eu)",
+     "Nuorodos „Paskelbti poreikį“ sekamos nuo #2515, išskyrus pradinio puslapio duris (pradinis puslapis įšaldytas iki jo plano); vieša poreikio forma veikia be paskyros",
+     "4.1, 9.14", "Įmonės mygtukų paspaudimai → pateikti poreikiai", "Agentas (matavimas), savininkas (turinys)"),
+    ("A6", "Aktyvacija per 24 val.",
+     "Kiekvienam naujam poreikiui – kandidatai ir brigados iš esamos paieškos ir pasiūlymų, žinutė per pokalbius",
+     "4.6, 4.7, 5.4", "Poreikis → pirmas pasiūlymas ≤ 24 val.", "Agentas + Nonstop"),
+]
 
 # ── 4b. First paying customer: the activation queue (dependency order) ─────────────────
 # Each step names the register rows it closes, who acts, and what it depends on.
@@ -232,6 +270,9 @@ JOURNEYS = [
 ]
 
 byid = {r["id"]: r for r in rows}
+for dup, canonical in ALIAS.items():
+    if canonical in byid:
+        byid[dup] = byid[canonical]
 journeys = []
 for name, steps in JOURNEYS:
     journeys.append({"name": name, "steps": [{"label": l, "id": i, "s": byid[i]["s"] if i in byid else "PLANNED", "feature": byid[i]["feature"] if i in byid else "—"} for l, i in steps]})
@@ -243,7 +284,7 @@ for r in rows:
 DATA = {
     "sha": SHA, "rows": rows, "areas": AREA_LT, "chain": chain, "counts": counts,
     "commercial": {str(k): v for k, v in COMMERCIAL.items()}, "facts": FACTS, "priorities": PRIORITIES,
-    "funnel": FUNNEL, "activation": ACTIVATION,
+    "funnel": FUNNEL, "activation": ACTIVATION, "acquisition": ACQUISITION, "acq_now": ACQ_NOW,
     "scenarios": SCENARIOS, "reco": RECO, "gaps": GAPS, "journeys": journeys,
 }
 

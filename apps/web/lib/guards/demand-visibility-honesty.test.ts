@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Demand-visibility honesty guards (findings F-E1/F-E2/F-E3 of the
@@ -31,7 +32,7 @@ describe("worker-visibility honesty note (F-E1)", () => {
   });
 
   it("the key exists in en/lt/ru and states the verified-only visibility truth", () => {
-    for (const locale of ["en", "lt", "ru"]) {
+    for (const locale of activeLocales) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
       expect(
         msgs.demandReadback.workerVisibilityNote,
@@ -59,7 +60,7 @@ describe("worker-visibility honesty note (F-E1)", () => {
  */
 describe("needs reach workers only after verification — the copy says so (2026-09-22)", () => {
   const ALL_LOCALES = ["da", "de", "en", "et", "lt", "lv", "nl", "no", "pl", "ru", "sv"] as const;
-  const ACTIVE = ["en", "lt", "ru", "nl", "de", "pl"] as const;
+  const ACTIVE = ["en", "lt", "ru", "nl", "de", "pl", "sv"] as const;
   const EXPLAINER_KEYS = ["active_unverified", "needs_checks", "pending_verification", "unverified"] as const;
 
   it("the RPC still shows needs to workers for verified companies only (the fact the copy states)", () => {
@@ -97,9 +98,10 @@ describe("needs reach workers only after verification — the copy says so (2026
       en: /shown to workers only after your company is verified/i,
       lt: /darbuotojams rodomos tik po įmonės verifikacijos/i,
       ru: /показываются работникам только после верификации/i,
-      nl: /pas na verificatie van je bedrijf aan werknemers getoond/i,
+      nl: /pas na verificatie van uw bedrijf aan werknemers getoond/i, // formal "u" since 2026-11-15
       de: /erst nach der Verifizierung Ihres Unternehmens angezeigt/i,
       pl: /pokazywane pracownikom dopiero po weryfikacji/i,
+      sv: /visas för arbetstagare först när ditt företag är verifierat/i,
     };
     for (const locale of ACTIVE) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
