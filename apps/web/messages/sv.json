@@ -4579,6 +4579,7 @@
             "back": "Tillbaka",
             "next": "Nästa",
             "descRequired": "Lägg till en beskrivning för att fortsätta.",
+            "countryRequired": "Välj landet där arbetet utförs.",
             "optionalTag": "(valfritt)",
             "reviewIntro": "Granska och skapa. Förfrågan förblir privat i din yta.",
             "locationLabel": "Plats eller land",
@@ -4587,7 +4588,6 @@
             "skillsPlaceholder": "t.ex. körkort, engelska, erfarenhet",
             "urgencyLabel": "När du behöver det",
             "urgencyFlexible": "Flexibelt",
-            "countryRequired": "Välj landet där arbetet utförs.",
             "urgencyThisWeek": "Den här veckan",
             "urgencyUrgent": "Brådskande",
             "notesLabel": "Övriga anteckningar",
@@ -7204,6 +7204,10 @@
       "title": "Det gick inte att öppna konversationen",
       "body": "Du kanske inte har behörighet att meddela den här personen, eller så är personen inte längre tillgänglig. Inget skickades."
     },
+    "noLongerAvailable": {
+      "title": "Den här konversationen är inte längre tillgänglig",
+      "body": "Du deltar inte längre i den, så dess meddelanden visas inte."
+    },
     "scope": {
       "support": "Supportkanal",
       "unknown": "Sammanhang inte angivet",
@@ -7312,11 +7316,7 @@
     "translatedFrom": "Maskinöversättning från {lang}",
     "showOriginal": "Original ({lang})",
     "translationUnavailable": "Original ({lang}) — ingen översättning tillgänglig",
-    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen.",
-    "noLongerAvailable": {
-      "title": "Den här konversationen är inte längre tillgänglig",
-      "body": "Du deltar inte längre i den, så dess meddelanden visas inte."
-    }
+    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen."
   },
   "orgTier1Warning": {
     "eyebrow": "Din organisation",
@@ -9597,8 +9597,8 @@
       "withdraw": "Dra tillbaka förslaget",
       "findAnother": "Hitta en annan arbetstagare",
       "proposeAgain": "Föreslå igen med nya datum",
-      "planning": "Visa i kalendern",
-      "needClosed": "Arbetsgivaren har stängt detta behov, så förslaget kan inte längre accepteras. Du kan fortfarande tacka nej."
+      "needClosed": "Arbetsgivaren har stängt detta behov, så förslaget kan inte längre accepteras. Du kan fortfarande tacka nej.",
+      "planning": "Visa i kalendern"
     },
     "connections": {
       "title": "Kalenderkopplingar",
@@ -9860,6 +9860,39 @@
         "blocked_by_design": "Blockerat avsiktligt"
       },
       "proofLabel": "bevis"
+    },
+    "tax": {
+      "title": "Stripe Tax-granskning",
+      "switchOn": "Stripe Tax är PÅ: webhooken registrerar skatteunderlaget för varje betalning och flaggar dem vars beskattning är oklar.",
+      "switchOff": "Stripe Tax är AV (BILLING_STRIPE_TAX_ENABLED): inget skatteunderlag registreras. Rader från en tidigare testkörning listas fortfarande.",
+      "unavailable": "Skatteunderlag kan inte visas ännu: lagringen för det är inte konfigurerad.",
+      "error": "Granskningslistan kunde inte läsas just nu.",
+      "empty": "Inget väntar på skattegranskning.",
+      "org": "Organisation",
+      "country": "Land",
+      "vatId": "Momsregistreringsnummer",
+      "vatIdCheck": "Kontroll av momsnummer",
+      "automaticTax": "Automatisk skatt",
+      "reverseCharge": "omvänd skattskyldighet",
+      "subtotal": "Delsumma",
+      "vat": "Moms",
+      "total": "Totalt",
+      "invoice": "Faktura",
+      "markReviewed": "Markera som granskad",
+      "saving": "Sparar…",
+      "markError": "Inte sparat",
+      "reason": {
+        "automaticTax": "Stripes automatiska skatt inte slutförd ({status})",
+        "notRequested": "Automatisk skatt begärdes inte för denna betalning",
+        "amountMissing": "Inget belopp angivet",
+        "countryMissing": "Inget faktureringsland",
+        "taxMissing": "Inget skattebelopp angivet",
+        "noBreakdown": "Ingen skatteuppdelning från Stripe",
+        "ltZero": "Litauisk kund debiterad 0 moms (21 % förväntas)",
+        "foreignVatId": "Utländsk B2B med 0 moms, kontroll av momsnummer: {status}",
+        "foreignNoVatId": "Utländsk kund med 0 moms utan momsnummer",
+        "other": "Övrigt: {code}"
+      }
     }
   },
   "conciergeOffer": {
@@ -11403,6 +11436,20 @@
       "cta": "Aktivera organisationsplanen",
       "note": "Du skickas till Stripe Checkout; abonnemanget knyts till den här organisationen.",
       "chargedToday": "Ingen gratis provperiod: den första månaden debiteras i Stripe Checkout i dag och sedan varje månad tills du avslutar. Stripe visar det exakta beloppet inklusive moms innan du betalar."
+    },
+    "tax": {
+      "lastPayment": "Moms på den senaste betalningen",
+      "total": "totalt",
+      "reverseCharge": "Ingen moms debiterad: Stripe Tax tillämpade omvänd skattskyldighet för ditt momsnummer.",
+      "vatId": "Momsregistreringsnummer",
+      "vatIdStatus": {
+        "pending": "kontroll pågår",
+        "verified": "giltigt enligt registerkontrollen i EU/Storbritannien",
+        "unverified": "inte giltigt enligt registerkontrollen",
+        "unavailable": "registerkontrollen är inte nåbar",
+        "unknown": "inget kontrollresultat mottaget"
+      },
+      "invoice": "Öppna faktura"
     }
   },
   "accountPlan": {
