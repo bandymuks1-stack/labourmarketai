@@ -795,7 +795,10 @@ test("J-DEC. the company sees the need's history, closes it as filled, and the h
   expect(s.needId && s.pwWorkerId && s.bookingId, "J-AGY placed the worker on this need").toBeTruthy();
   const co = as(CO);
   await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
-  const history = co.getByTestId("demand-history");
+  // Scoped to <main>, like `after` below: while the page streams in, React holds a
+  // hidden second copy outside it (div#S:n[hidden]); a whole-page strict locator
+  // then resolves to 2 elements (signup-isolated job 134697905062).
+  const history = co.getByRole("main").getByTestId("demand-history");
   await expect(history, "the need's history is on its page").toBeVisible({ timeout: 30_000 });
   await expect(history.getByTestId("demand-history-created")).toHaveCount(1);
   // The company proposed the booking (by accepting the agency's offer); the worker answered it.
