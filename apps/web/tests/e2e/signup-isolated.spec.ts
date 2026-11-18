@@ -489,7 +489,59 @@ test("M-1. seed: a synthetic worker for the isolated mobile CV forms journey", a
   expect(r.ok, "the seed carries the server-set qa_synthetic marker").toBe(true);
   const workers = await db<Array<{ id: string }>>(`workers?profile_id=eq.${id}&select=id`);
   expect(workers.length, "the worker seed has its workers row (the CV forms need it)").toBe(1);
+  // The booking journey: the company finds this worker only with their own
+  // consent (employer visibility), and offers a start only to someone available.
+  await grantEmployerVisibility(page);
+  await page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+  const toggle = page.getByRole("main").getByTestId("work-card-editor-toggle");
+  await expect(toggle, "the work card editor is on the worker's profile").toBeVisible({ timeout: 60_000 });
+  const editor = page.getByRole("main").getByTestId("work-card-editor");
+  await toggle.click();
+  await expect(editor).toBeVisible({ timeout: 30_000 });
+  await editor.locator('select[name="availability_status"]').selectOption("available");
+  await editor.getByTestId("work-card-save").click();
+  await expect(page.getByTestId("work-card-saved"), "availability is saved").toBeVisible({ timeout: 30_000 });
+  const avail = await db<Array<{ availability_status: string | null }>>(
+    `workers?profile_id=eq.${id}&select=availability_status`,
+  );
+  expect(avail[0]?.availability_status, "the worker seed is available").toBe("available");
 });
+
+// ── M-2: a SECOND worker, the one the company marks "not a fit" ───────────
+// Runs only from android-need-isolated.yml (MOBILE_WORKER2_SEED_EMAIL set).
+// Discoverable like M-1, so the company finds both on its need; a person must
+// be on the shortlist before they can be marked not a fit.
+test("M-2. seed: a second synthetic worker for the isolated booking journey", async ({ page }) => {
+  const address = process.env.MOBILE_WORKER2_SEED_EMAIL ?? "";
+  const password = process.env.MOBILE_WORKER2_SEED_PASSWORD ?? "";
+  test.skip(!address || !password, "android-need-isolated.yml only");
+  await signUp(page, address, password);
+  await onboard(page, "work", "QA-SYNTHETIC Mobile Second Worker");
+  await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  const id = await userId(address);
+  const r = await fetch(`${SB_URL}/auth/v1/admin/users/${id}`, {
+    method: "PUT",
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "content-type": "application/json" },
+    body: JSON.stringify({ app_metadata: { qa_synthetic: true } }),
+  });
+  expect(r.ok, "the seed carries the server-set qa_synthetic marker").toBe(true);
+  const workers = await db<Array<{ id: string }>>(`workers?profile_id=eq.${id}&select=id`);
+  expect(workers.length, "the second worker seed has its workers row").toBe(1);
+  await grantEmployerVisibility(page);
+});
+
+/** The worker turns on employer visibility on their own privacy page. */
+async function grantEmployerVisibility(page: Page): Promise<void> {
+  await page.goto(`${BASE}/en/dashboard/privacy#visibility`);
+  const vis = page.getByRole("main").getByTestId("privacy-visibility");
+  await expect(vis, "the visibility choice is on the privacy page").toBeVisible({ timeout: 60_000 });
+  await vis.getByTestId("discoverability-open").click();
+  await expect(vis.getByTestId("discoverability-grant")).toBeVisible({ timeout: 30_000 });
+  await vis.getByTestId("discoverability-grant").click();
+  await expect(vis.getByTestId("discoverability-granted"), "employers may now find them").toBeVisible({
+    timeout: 30_000,
+  });
+}
 
 /**
  * A-1..A-4. THE THREE SIGN-UP FAULTS OF THE 2026-11-13 TRUST AUDIT, each as the
