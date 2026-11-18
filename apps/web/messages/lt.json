@@ -20791,5 +20791,102 @@
       "auth": "Prisijunkite iš naujo.",
       "error": "Neišsaugota. Bandykite dar kartą."
     }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerės agentūros",
+    "intro": "Perduokite kliento poreikį kitai agentūrai. Kai jos kandidatas įdarbinamas, ji gauna sutartą jūsų įdarbinimo mokesčio dalį.",
+    "unavailable": "Partnerės agentūros dar neįjungtos.",
+    "empty": "Partnerių agentūrų dar nėra.",
+    "working": "Saugoma…",
+    "side": {
+      "lead": "Jūs vedate",
+      "partner": "Jūs – partnerė",
+      "invited": "Kvietimas jums"
+    },
+    "status": {
+      "pending": "Pakviesta",
+      "active": "Aktyvi",
+      "declined": "Atsisakyta",
+      "ended": "Baigta"
+    },
+    "shareLine": "Partnerės mokesčio dalis: {percent} %",
+    "acceptConsequence": "Jei sutiksite, {agency} galės jums perduoti savo klientų poreikius. Kai jūsų kandidatas bus įdarbintas, gausite {percent} % {agency} įdarbinimo mokesčio.",
+    "accept": "Sutikti",
+    "accepted": "Sutikta.",
+    "decline": "Atsisakyti",
+    "declined": "Atsisakyta.",
+    "end": "Baigti partnerystę",
+    "withdrawInvite": "Atšaukti kvietimą",
+    "ended": "Baigta. Per ją perduoti poreikiai atsiimti, atviri pasiūlymai atšaukti.",
+    "invite": {
+      "email": "Partnerės agentūros el. paštas",
+      "share": "Partnerės dalis, %",
+      "submit": "Pakviesti",
+      "sent": "Kvietimas sukurtas. Agentūra jį matys prisijungusi šiuo el. paštu."
+    },
+    "pass": {
+      "title": "Perduoti kliento poreikį",
+      "none": "Su jumis dar nepasidalyta jokiu kliento poreikiu.",
+      "need": "Kliento poreikis",
+      "choose": "Pasirinkite poreikį",
+      "submit": "Perduoti: {agency}",
+      "done": "Perduota.",
+      "takeBack": "Atsiimti"
+    },
+    "passedToMe": {
+      "title": "Jums perduoti poreikiai",
+      "from": "Iš {agency} · jūsų dalis {percent} %",
+      "noRoster": "Jūsų sąraše nėra aktyvaus darbuotojo, kurį galėtumėte pasiūlyti.",
+      "worker": "Jūsų kandidatas",
+      "choose": "Pasirinkite darbuotoją",
+      "offer": "Pasiūlyti",
+      "offered": "Pasiūlyta."
+    },
+    "partnerOffers": {
+      "title": "Partnerių kandidatai jūsų klientų poreikiams"
+    },
+    "offerStatus": {
+      "offered": "Pasiūlytas",
+      "withdrawn": "Atšauktas",
+      "accepted": "Priimtas",
+      "declined": "Atmestas"
+    },
+    "commissions": {
+      "title": "Komisiniai",
+      "intro": "Mokami tik įdarbinus darbuotoją. Čia niekas neapmokestinama.",
+      "empty": "Įdarbinimo mokestis dar nepriimtas.",
+      "need": "Kliento poreikis",
+      "role": {
+        "direct": "Jūsų kandidatas",
+        "lead": "{agency} kandidatas",
+        "partner": "Jūsų kandidatas per {agency}"
+      },
+      "amount": "{amount} ({percent} % nuo {fee})",
+      "status": {
+        "pending": "Laukiama įdarbinimo",
+        "placed": "Mokėtina",
+        "not_placed": "Neįdarbintas"
+      },
+      "due": "Mokėtina: {total}"
+    },
+    "errors": {
+      "not_owner": "Tai gali padaryti tik agentūros savininkas.",
+      "not_agency": "Ši įmonė nėra agentūra.",
+      "invalid_email": "Įveskite teisingą el. pašto adresą.",
+      "invalid_share": "Įveskite dalį, didesnę nei 0 ir mažesnę nei 100 %.",
+      "already_invited": "Šiuo adresu jau yra atviras kvietimas.",
+      "invitation_not_found": "Šis kvietimas nebegalioja.",
+      "same_agency": "Agentūra negali būti pati sau partnerė.",
+      "already_partners": "Šios agentūros jau yra partnerės.",
+      "partnership_not_found": "Partnerystė nerasta.",
+      "partnership_not_open": "Ši partnerystė jau baigta.",
+      "partnership_not_active": "Ši partnerystė neaktyvi.",
+      "share_not_active": "Šiuo poreikiu nebesidalijama.",
+      "partner_share_not_found": "Šis poreikis jau atsiimtas.",
+      "worker_not_on_roster": "Šio darbuotojo nėra jūsų aktyviame sąraše.",
+      "invalid_note": "Pastaba per ilga.",
+      "needs_migration": "Partnerės agentūros dar neįjungtos.",
+      "error": "Nepavyko. Bandykite dar kartą."
+    }
   }
 }

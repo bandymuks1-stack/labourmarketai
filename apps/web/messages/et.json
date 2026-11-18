@@ -8160,5 +8160,102 @@
       "auth": "Logige uuesti sisse.",
       "error": "Ei salvestatud. Proovige uuesti."
     }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerbürood",
+    "intro": "Andke kliendi vajadus edasi teisele büroole. Kui selle kandidaat tööle võetakse, saab büroo kokkulepitud osa teie vahendustasust.",
+    "unavailable": "Partnerbürood pole veel saadaval.",
+    "empty": "Partnerbüroosid veel pole.",
+    "working": "Salvestamine…",
+    "side": {
+      "lead": "Teie juhite",
+      "partner": "Teie olete partner",
+      "invited": "Kutse teile"
+    },
+    "status": {
+      "pending": "Kutsutud",
+      "active": "Aktiivne",
+      "declined": "Keeldutud",
+      "ended": "Lõpetatud"
+    },
+    "shareLine": "Partneri osa tasust: {percent} %",
+    "acceptConsequence": "Kui nõustute, saab {agency} anda teile edasi oma klientide vajadusi. Kui teie kandidaat tööle võetakse, saate {percent} % {agency} vahendustasust.",
+    "accept": "Nõustu",
+    "accepted": "Nõustutud.",
+    "decline": "Keeldu",
+    "declined": "Keeldutud.",
+    "end": "Lõpeta partnerlus",
+    "withdrawInvite": "Võta kutse tagasi",
+    "ended": "Lõpetatud. Selle kaudu edastatud vajadused on tagasi võetud ja avatud pakkumised tühistatud.",
+    "invite": {
+      "email": "Partnerbüroo e-post",
+      "share": "Partneri osa, %",
+      "submit": "Kutsu",
+      "sent": "Kutse loodud. Büroo näeb seda, kui logib sisse selle e-posti aadressiga."
+    },
+    "pass": {
+      "title": "Anna kliendi vajadus edasi",
+      "none": "Ükski klient pole teiega veel vajadust jaganud.",
+      "need": "Kliendi vajadus",
+      "choose": "Valige vajadus",
+      "submit": "Anna edasi: {agency}",
+      "done": "Edastatud.",
+      "takeBack": "Võta tagasi"
+    },
+    "passedToMe": {
+      "title": "Teile edastatud vajadused",
+      "from": "Saatja {agency} · teie osa {percent} %",
+      "noRoster": "Teie nimekirjas pole aktiivset töötajat, keda pakkuda.",
+      "worker": "Teie kandidaat",
+      "choose": "Valige töötaja",
+      "offer": "Paku",
+      "offered": "Pakutud."
+    },
+    "partnerOffers": {
+      "title": "Partnerite kandidaadid teie klientide vajadustele"
+    },
+    "offerStatus": {
+      "offered": "Pakutud",
+      "withdrawn": "Tagasi võetud",
+      "accepted": "Vastu võetud",
+      "declined": "Tagasi lükatud"
+    },
+    "commissions": {
+      "title": "Vahendustasud",
+      "intro": "Tasumisele kuuluvad alles siis, kui töötaja on tööle võetud. Siin midagi ei arveldata.",
+      "empty": "Vahendustasu pole veel aktsepteeritud.",
+      "need": "Kliendi vajadus",
+      "role": {
+        "direct": "Teie kandidaat",
+        "lead": "{agency} kandidaat",
+        "partner": "Teie kandidaat {agency} kaudu"
+      },
+      "amount": "{amount} ({percent} % summast {fee})",
+      "status": {
+        "pending": "Ootab töölevõtmist",
+        "placed": "Tasumisele kuuluv",
+        "not_placed": "Tööle ei võetud"
+      },
+      "due": "Tasumisele kuulub: {total}"
+    },
+    "errors": {
+      "not_owner": "Seda saab teha ainult büroo omanik.",
+      "not_agency": "See ettevõte ei ole büroo.",
+      "invalid_email": "Sisestage kehtiv e-posti aadress.",
+      "invalid_share": "Sisestage osa, mis on üle 0 ja alla 100 %.",
+      "already_invited": "Sellel aadressil on juba avatud kutse.",
+      "invitation_not_found": "See kutse ei ole enam avatud.",
+      "same_agency": "Büroo ei saa olla iseenda partner.",
+      "already_partners": "Need bürood on juba partnerid.",
+      "partnership_not_found": "Partnerlust ei leitud.",
+      "partnership_not_open": "See partnerlus on juba lõpetatud.",
+      "partnership_not_active": "See partnerlus ei ole aktiivne.",
+      "share_not_active": "Seda vajadust enam ei jagata.",
+      "partner_share_not_found": "See vajadus on juba tagasi võetud.",
+      "worker_not_on_roster": "Seda töötajat pole teie aktiivses nimekirjas.",
+      "invalid_note": "Märkus on liiga pikk.",
+      "needs_migration": "Partnerbürood pole veel saadaval.",
+      "error": "See ei õnnestunud. Proovige uuesti."
+    }
   }
 }

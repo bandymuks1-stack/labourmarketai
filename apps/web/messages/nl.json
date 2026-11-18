@@ -20791,5 +20791,102 @@
       "auth": "Log opnieuw in.",
       "error": "Niet opgeslagen. Probeer het opnieuw."
     }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerbureaus",
+    "intro": "Geef de behoefte van een klant door aan een ander bureau. Wordt diens kandidaat geplaatst, dan krijgt het het afgesproken deel van uw plaatsingsvergoeding.",
+    "unavailable": "Partnerbureaus zijn nog niet beschikbaar.",
+    "empty": "Nog geen partnerbureaus.",
+    "working": "Opslaan…",
+    "side": {
+      "lead": "U leidt",
+      "partner": "U bent partner",
+      "invited": "Uitnodiging aan u"
+    },
+    "status": {
+      "pending": "Uitgenodigd",
+      "active": "Actief",
+      "declined": "Afgewezen",
+      "ended": "Beëindigd"
+    },
+    "shareLine": "Deel van de partner in de vergoeding: {percent} %",
+    "acceptConsequence": "Als u accepteert, kan {agency} de behoeften van zijn klanten aan u doorgeven. Wordt uw kandidaat geplaatst, dan ontvangt u {percent} % van de plaatsingsvergoeding van {agency}.",
+    "accept": "Accepteren",
+    "accepted": "Geaccepteerd.",
+    "decline": "Afwijzen",
+    "declined": "Afgewezen.",
+    "end": "Partnerschap beëindigen",
+    "withdrawInvite": "Uitnodiging intrekken",
+    "ended": "Beëindigd. Doorgegeven behoeften zijn teruggenomen en open aanbiedingen ingetrokken.",
+    "invite": {
+      "email": "E-mail van het partnerbureau",
+      "share": "Deel van de partner, %",
+      "submit": "Uitnodigen",
+      "sent": "Uitnodiging aangemaakt. Het bureau ziet deze na aanmelding met dit e-mailadres."
+    },
+    "pass": {
+      "title": "Behoefte van een klant doorgeven",
+      "none": "Er is nog geen behoefte van een klant met u gedeeld.",
+      "need": "Behoefte van de klant",
+      "choose": "Kies een behoefte",
+      "submit": "Doorgeven aan {agency}",
+      "done": "Doorgegeven.",
+      "takeBack": "Terugnemen"
+    },
+    "passedToMe": {
+      "title": "Aan u doorgegeven behoeften",
+      "from": "Van {agency} · uw deel {percent} %",
+      "noRoster": "Uw bestand heeft geen actieve kracht om aan te bieden.",
+      "worker": "Uw kandidaat",
+      "choose": "Kies een kracht",
+      "offer": "Aanbieden",
+      "offered": "Aangeboden."
+    },
+    "partnerOffers": {
+      "title": "Kandidaten van partners voor de behoeften van uw klanten"
+    },
+    "offerStatus": {
+      "offered": "Aangeboden",
+      "withdrawn": "Ingetrokken",
+      "accepted": "Geaccepteerd",
+      "declined": "Afgewezen"
+    },
+    "commissions": {
+      "title": "Commissies",
+      "intro": "Alleen verschuldigd als de kracht is geplaatst. Hier wordt niets in rekening gebracht.",
+      "empty": "Nog geen plaatsingsvergoeding geaccepteerd.",
+      "need": "Behoefte van de klant",
+      "role": {
+        "direct": "Uw kandidaat",
+        "lead": "Kandidaat van {agency}",
+        "partner": "Uw kandidaat via {agency}"
+      },
+      "amount": "{amount} ({percent} % van {fee})",
+      "status": {
+        "pending": "Wacht op plaatsing",
+        "placed": "Verschuldigd",
+        "not_placed": "Niet geplaatst"
+      },
+      "due": "Verschuldigd: {total}"
+    },
+    "errors": {
+      "not_owner": "Alleen de eigenaar van het bureau kan dit doen.",
+      "not_agency": "Dit bedrijf is geen bureau.",
+      "invalid_email": "Vul een geldig e-mailadres in.",
+      "invalid_share": "Vul een deel in boven 0 en onder 100 %.",
+      "already_invited": "Voor dit adres staat al een uitnodiging open.",
+      "invitation_not_found": "Deze uitnodiging staat niet meer open.",
+      "same_agency": "Een bureau kan niet zijn eigen partner zijn.",
+      "already_partners": "Deze bureaus zijn al partners.",
+      "partnership_not_found": "Het partnerschap is niet gevonden.",
+      "partnership_not_open": "Dit partnerschap is al beëindigd.",
+      "partnership_not_active": "Dit partnerschap is niet actief.",
+      "share_not_active": "Deze behoefte wordt niet meer gedeeld.",
+      "partner_share_not_found": "Deze behoefte is al teruggenomen.",
+      "worker_not_on_roster": "Deze kracht staat niet in uw actieve bestand.",
+      "invalid_note": "De notitie is te lang.",
+      "needs_migration": "Partnerbureaus zijn nog niet beschikbaar.",
+      "error": "Dat is niet gelukt. Probeer het opnieuw."
+    }
   }
 }

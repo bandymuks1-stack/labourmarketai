@@ -40,6 +40,8 @@ import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { PlacementTermForm } from "@/components/app/agency/placement-term-form";
 import { formatPlacementFee, readOwnPlacementTerm } from "@/lib/agency/placement-terms";
+import { readAgencyCooperation } from "@/lib/agency/partnerships";
+import { AgencyPartnershipsSection } from "@/components/app/agency/agency-partnerships-section";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
@@ -173,6 +175,7 @@ export default async function CompanyPartnersPage({
       tDelegation,
       ownPlacementTerm,
       tTerm,
+      cooperation,
     ] = await Promise.all([
       listAgencyClients(),
       listAgencyDemands(),
@@ -191,6 +194,8 @@ export default async function CompanyPartnersPage({
       // The agency's own placement term (migration 20261114235900).
       readOwnPlacementTerm(ownCompany.id),
       getTranslations("agencyPlacementTerm"),
+      // Partner agencies and commissions (register 4.30, migration 20261118100000).
+      readAgencyCooperation(),
     ]);
     // The agency's delegated work (owner decisions 2026-09-28 A / D): the
     // needs it drafted for connected clients, and its placements' lifecycle.
@@ -305,6 +310,22 @@ export default async function CompanyPartnersPage({
                 error: tTerm("errors.error"),
               },
             }}
+          />
+          {/* Partner agencies and commissions (register 4.30). */}
+          <AgencyPartnershipsSection
+            companyId={ownCompany.id}
+            locale={locale}
+            cooperation={cooperation}
+            sharedNeeds={
+              bridgeShared.kind === "ok"
+                ? bridgeShared.rows.map((r) => ({
+                    shareId: r.shareId,
+                    requestId: r.requestId,
+                    title: resolveDemandTitle(r.title, syntheticTitle),
+                  }))
+                : []
+            }
+            roster={bridgeRosterOptions}
           />
           {/* P5 "Klientai": client → need → candidates path for the agency. */}
           <AgencyClientsSection

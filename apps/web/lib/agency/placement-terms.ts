@@ -88,7 +88,11 @@ export async function readCurrentPlacementTerms(
   };
 }
 
-/** Which agency made each offer (the client owns the offer rows it reads). */
+/** Whose term applies to each offer: the agency of the CLIENT'S connection the
+ *  offer was made on. For an agency's own candidate that is the offering
+ *  agency; for a partner agency's candidate (20261118100000) it is the lead
+ *  agency the client chose — exactly the term respond_agency_candidate_offer_v2
+ *  requires. The client reads its own connections and the offers on them. */
 export async function readOfferAgencies(
   offerIds: readonly string[],
 ): Promise<ReadonlyMap<string, string>> {
@@ -97,20 +101,33 @@ export async function readOfferAgencies(
   const supabase = await createClient();
   const { data, error } = await db(supabase)
     .from("agency_candidate_offers")
-    .select("id, agency_company_id")
+    .select("id, agency_company_id, connection:agency_client_connections(agency_company_id)")
     .in("id", ids);
   if (error) return new Map();
+  type OfferRow = {
+    id: string;
+    agency_company_id: string;
+    connection: { agency_company_id: string | null } | { agency_company_id: string | null }[] | null;
+  };
   return new Map(
-    ((data ?? []) as { id: string; agency_company_id: string }[]).map((r) => [r.id, r.agency_company_id] as const),
+    ((data ?? []) as OfferRow[]).map((r) => {
+      const c = Array.isArray(r.connection) ? r.connection[0] : r.connection;
+      return [r.id, c?.agency_company_id ?? r.agency_company_id] as const;
+    }),
   );
 }
 
-/** The term an employer sees on each offer: offer id → the offering agency's
- *  current term. Offers of agencies without a term are absent. */
+/** The term an employer sees on each offer: offer id → the current term of
+ *  the agency whose term applies (readOfferAgencies), with that agency's
+ *  name. Offers whose agency has no term are absent. */
 export async function readPlacementTermsForOffers(
   offerIds: readonly string[],
 ): Promise<
-  | { readonly kind: "ok"; readonly byOffer: ReadonlyMap<string, PlacementTerm> }
+  | {
+      readonly kind: "ok";
+      readonly byOffer: ReadonlyMap<string, PlacementTerm>;
+      readonly agencyNameByOffer: ReadonlyMap<string, string>;
+    }
   | { readonly kind: "unavailable" }
 > {
   const agencyByOffer = await readOfferAgencies(offerIds);
@@ -121,7 +138,30 @@ export async function readPlacementTermsForOffers(
     const term = terms.byAgency.get(agencyId);
     if (term) byOffer.set(offerId, term);
   }
-  return { kind: "ok", byOffer };
+  const names = await readCompanyNames([...new Set([...byOffer.values()].map((t) => t.companyId))]);
+  const agencyNameByOffer = new Map<string, string>();
+  for (const [offerId, term] of byOffer) {
+    const name = names.get(term.companyId);
+    if (name) agencyNameByOffer.set(offerId, name);
+  }
+  return { kind: "ok", byOffer, agencyNameByOffer };
+}
+
+/** Company display names (any signed-in user reads companies). */
+async function readCompanyNames(ids: readonly string[]): Promise<ReadonlyMap<string, string>> {
+  const clean = ids.filter((id) => UUID.test(id));
+  if (clean.length === 0) return new Map();
+  const supabase = await createClient();
+  const { data, error } = await db(supabase)
+    .from("companies")
+    .select("id, display_name, legal_name")
+    .in("id", clean);
+  if (error) return new Map();
+  return new Map(
+    ((data ?? []) as { id: string; display_name: string | null; legal_name: string | null }[])
+      .map((r) => [r.id, (r.display_name ?? r.legal_name ?? "").trim()] as const)
+      .filter(([, n]) => n !== ""),
+  );
 }
 
 /** The agency's own current term, for its partners page. */

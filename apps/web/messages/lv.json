@@ -8160,5 +8160,102 @@
       "auth": "Lūdzu, piesakieties vēlreiz.",
       "error": "Netika saglabāts. Mēģiniet vēlreiz."
     }
+  },
+  "agencyPartnerships": {
+    "title": "Partneraģentūras",
+    "intro": "Nododiet klienta vajadību citai aģentūrai. Kad tās kandidāts tiek iekārtots darbā, tā saņem saskaņoto daļu no jūsu iekārtošanas maksas.",
+    "unavailable": "Partneraģentūras vēl nav pieejamas.",
+    "empty": "Partneraģentūru vēl nav.",
+    "working": "Saglabā…",
+    "side": {
+      "lead": "Jūs vadāt",
+      "partner": "Jūs esat partneris",
+      "invited": "Uzaicinājums jums"
+    },
+    "status": {
+      "pending": "Uzaicināta",
+      "active": "Aktīva",
+      "declined": "Noraidīta",
+      "ended": "Beigta"
+    },
+    "shareLine": "Partnera daļa maksā: {percent} %",
+    "acceptConsequence": "Ja piekritīsiet, {agency} varēs nodot jums savu klientu vajadības. Kad jūsu kandidāts tiks iekārtots darbā, jūs saņemsiet {percent} % no {agency} iekārtošanas maksas.",
+    "accept": "Piekrist",
+    "accepted": "Piekrists.",
+    "decline": "Noraidīt",
+    "declined": "Noraidīts.",
+    "end": "Beigt partnerību",
+    "withdrawInvite": "Atsaukt uzaicinājumu",
+    "ended": "Beigta. Caur to nodotās vajadības ir atsauktas, atvērtie piedāvājumi atcelti.",
+    "invite": {
+      "email": "Partneraģentūras e-pasts",
+      "share": "Partnera daļa, %",
+      "submit": "Uzaicināt",
+      "sent": "Uzaicinājums izveidots. Aģentūra to redzēs, pierakstoties ar šo e-pastu."
+    },
+    "pass": {
+      "title": "Nodot klienta vajadību",
+      "none": "Neviens klients vēl nav dalījies ar jums vajadībā.",
+      "need": "Klienta vajadība",
+      "choose": "Izvēlieties vajadību",
+      "submit": "Nodot: {agency}",
+      "done": "Nodots.",
+      "takeBack": "Atsaukt"
+    },
+    "passedToMe": {
+      "title": "Jums nodotās vajadības",
+      "from": "No {agency} · jūsu daļa {percent} %",
+      "noRoster": "Jūsu sarakstā nav aktīva darbinieka, ko piedāvāt.",
+      "worker": "Jūsu kandidāts",
+      "choose": "Izvēlieties darbinieku",
+      "offer": "Piedāvāt",
+      "offered": "Piedāvāts."
+    },
+    "partnerOffers": {
+      "title": "Partneru kandidāti jūsu klientu vajadībām"
+    },
+    "offerStatus": {
+      "offered": "Piedāvāts",
+      "withdrawn": "Atsaukts",
+      "accepted": "Pieņemts",
+      "declined": "Noraidīts"
+    },
+    "commissions": {
+      "title": "Komisijas",
+      "intro": "Maksājamas tikai pēc darbinieka iekārtošanas darbā. Šeit nekas netiek iekasēts.",
+      "empty": "Iekārtošanas maksa vēl nav pieņemta.",
+      "need": "Klienta vajadība",
+      "role": {
+        "direct": "Jūsu kandidāts",
+        "lead": "{agency} kandidāts",
+        "partner": "Jūsu kandidāts ar {agency} starpniecību"
+      },
+      "amount": "{amount} ({percent} % no {fee})",
+      "status": {
+        "pending": "Gaida iekārtošanu",
+        "placed": "Maksājama",
+        "not_placed": "Nav iekārtots"
+      },
+      "due": "Maksājams: {total}"
+    },
+    "errors": {
+      "not_owner": "To var izdarīt tikai aģentūras īpašnieks.",
+      "not_agency": "Šis uzņēmums nav aģentūra.",
+      "invalid_email": "Ievadiet derīgu e-pasta adresi.",
+      "invalid_share": "Ievadiet daļu, kas lielāka par 0 un mazāka par 100 %.",
+      "already_invited": "Šai adresei jau ir atvērts uzaicinājums.",
+      "invitation_not_found": "Šis uzaicinājums vairs nav atvērts.",
+      "same_agency": "Aģentūra nevar būt pati sev partneris.",
+      "already_partners": "Šīs aģentūras jau ir partneres.",
+      "partnership_not_found": "Partnerība nav atrasta.",
+      "partnership_not_open": "Šī partnerība jau ir beigta.",
+      "partnership_not_active": "Šī partnerība nav aktīva.",
+      "share_not_active": "Ar šo vajadību vairs nedalās.",
+      "partner_share_not_found": "Šī vajadība jau ir atsaukta.",
+      "worker_not_on_roster": "Šī darbinieka nav jūsu aktīvajā sarakstā.",
+      "invalid_note": "Piezīme ir pārāk gara.",
+      "needs_migration": "Partneraģentūras vēl nav pieejamas.",
+      "error": "Neizdevās. Mēģiniet vēlreiz."
+    }
   }
 }

@@ -20791,5 +20791,102 @@
       "auth": "Please sign in again.",
       "error": "It did not save. Try again."
     }
+  },
+  "agencyPartnerships": {
+    "title": "Partner agencies",
+    "intro": "Pass a client's need to another agency. When its candidate is placed, it receives the agreed share of your placement fee.",
+    "unavailable": "Partner agencies are not available yet.",
+    "empty": "No partner agencies yet.",
+    "working": "Saving…",
+    "side": {
+      "lead": "You lead",
+      "partner": "You are the partner",
+      "invited": "Invitation to you"
+    },
+    "status": {
+      "pending": "Invited",
+      "active": "Active",
+      "declined": "Declined",
+      "ended": "Ended"
+    },
+    "shareLine": "Partner's share of the fee: {percent} %",
+    "acceptConsequence": "If you accept, {agency} can pass you its clients' needs. When your candidate is placed, you receive {percent} % of {agency}'s placement fee.",
+    "accept": "Accept",
+    "accepted": "Accepted.",
+    "decline": "Decline",
+    "declined": "Declined.",
+    "end": "End partnership",
+    "withdrawInvite": "Withdraw invitation",
+    "ended": "Ended. Needs passed through it are taken back and open offers withdrawn.",
+    "invite": {
+      "email": "Partner agency's e-mail",
+      "share": "Partner's share, %",
+      "submit": "Invite",
+      "sent": "Invitation created. The agency sees it when signed in with this e-mail."
+    },
+    "pass": {
+      "title": "Pass a client's need",
+      "none": "No client need is shared with you yet.",
+      "need": "Client's need",
+      "choose": "Choose a need",
+      "submit": "Pass to {agency}",
+      "done": "Passed.",
+      "takeBack": "Take back"
+    },
+    "passedToMe": {
+      "title": "Needs passed to you",
+      "from": "From {agency} · your share {percent} %",
+      "noRoster": "Your roster has no active worker to offer.",
+      "worker": "Your candidate",
+      "choose": "Choose a worker",
+      "offer": "Offer",
+      "offered": "Offered."
+    },
+    "partnerOffers": {
+      "title": "Partners' candidates on your clients' needs"
+    },
+    "offerStatus": {
+      "offered": "Offered",
+      "withdrawn": "Withdrawn",
+      "accepted": "Accepted",
+      "declined": "Declined"
+    },
+    "commissions": {
+      "title": "Commissions",
+      "intro": "Due only when the worker is placed. Nothing is charged here.",
+      "empty": "No placement fee accepted yet.",
+      "need": "Client's need",
+      "role": {
+        "direct": "Your candidate",
+        "lead": "Candidate of {agency}",
+        "partner": "Your candidate via {agency}"
+      },
+      "amount": "{amount} ({percent} % of {fee})",
+      "status": {
+        "pending": "Waiting for placement",
+        "placed": "Due",
+        "not_placed": "Not placed"
+      },
+      "due": "Due: {total}"
+    },
+    "errors": {
+      "not_owner": "Only the agency's owner can do this.",
+      "not_agency": "This company is not an agency.",
+      "invalid_email": "Enter a valid e-mail address.",
+      "invalid_share": "Enter a share above 0 and below 100 %.",
+      "already_invited": "This address already has an open invitation.",
+      "invitation_not_found": "This invitation is no longer open.",
+      "same_agency": "An agency cannot partner with itself.",
+      "already_partners": "These agencies are already partners.",
+      "partnership_not_found": "This partnership was not found.",
+      "partnership_not_open": "This partnership has already ended.",
+      "partnership_not_active": "This partnership is not active.",
+      "share_not_active": "This need is no longer shared.",
+      "partner_share_not_found": "This need was already taken back.",
+      "worker_not_on_roster": "This worker is not on your active roster.",
+      "invalid_note": "The note is too long.",
+      "needs_migration": "Partner agencies are not available yet.",
+      "error": "This did not work. Try again."
+    }
   }
 }

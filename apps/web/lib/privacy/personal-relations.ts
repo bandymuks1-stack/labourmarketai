@@ -715,6 +715,12 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // subject is an agency (20261114235900).
   "agency_placement_terms",
   "platform_suggested_agencies",
+  // Agency-to-agency partnerships and the client needs passed through them:
+  // `invited_by` / `decided_by` / `ended_by` / `shared_by` / `revoked_by` are the
+  // agency owners who acted; the subject is a pair of agencies (20261118100000).
+  // The invitation address has its own erasure value rule.
+  "agency_partnerships",
+  "agency_partner_request_shares",
   // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no
   // content, purged after a day (20261013120000).
   "confirmation_spends",

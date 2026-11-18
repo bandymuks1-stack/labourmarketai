@@ -20791,5 +20791,102 @@
       "auth": "Zaloguj się ponownie.",
       "error": "Nie zapisano. Spróbuj ponownie."
     }
+  },
+  "agencyPartnerships": {
+    "title": "Agencje partnerskie",
+    "intro": "Proszę przekazać potrzebę klienta innej agencji. Gdy jej kandydat zostanie zatrudniony, otrzyma ona uzgodnioną część Państwa opłaty za zatrudnienie.",
+    "unavailable": "Agencje partnerskie nie są jeszcze dostępne.",
+    "empty": "Nie ma jeszcze agencji partnerskich.",
+    "working": "Zapisywanie…",
+    "side": {
+      "lead": "Prowadzą Państwo",
+      "partner": "Są Państwo partnerem",
+      "invited": "Zaproszenie do Państwa"
+    },
+    "status": {
+      "pending": "Zaproszona",
+      "active": "Aktywna",
+      "declined": "Odrzucona",
+      "ended": "Zakończona"
+    },
+    "shareLine": "Udział partnera w opłacie: {percent} %",
+    "acceptConsequence": "Po akceptacji {agency} może przekazywać Państwu potrzeby swoich klientów. Gdy Państwa kandydat zostanie zatrudniony, otrzymają Państwo {percent} % opłaty {agency} za zatrudnienie.",
+    "accept": "Akceptuj",
+    "accepted": "Zaakceptowano.",
+    "decline": "Odrzuć",
+    "declined": "Odrzucono.",
+    "end": "Zakończ partnerstwo",
+    "withdrawInvite": "Wycofaj zaproszenie",
+    "ended": "Zakończono. Przekazane przez nie potrzeby zostały odebrane, a otwarte oferty wycofane.",
+    "invite": {
+      "email": "E-mail agencji partnerskiej",
+      "share": "Udział partnera, %",
+      "submit": "Zaproś",
+      "sent": "Zaproszenie utworzone. Agencja zobaczy je po zalogowaniu się tym adresem e-mail."
+    },
+    "pass": {
+      "title": "Przekaż potrzebę klienta",
+      "none": "Żaden klient nie udostępnił jeszcze Państwu potrzeby.",
+      "need": "Potrzeba klienta",
+      "choose": "Proszę wybrać potrzebę",
+      "submit": "Przekaż: {agency}",
+      "done": "Przekazano.",
+      "takeBack": "Odbierz"
+    },
+    "passedToMe": {
+      "title": "Potrzeby przekazane Państwu",
+      "from": "Od {agency} · Państwa udział {percent} %",
+      "noRoster": "Na Państwa liście nie ma aktywnego pracownika do zaproponowania.",
+      "worker": "Państwa kandydat",
+      "choose": "Proszę wybrać pracownika",
+      "offer": "Zaproponuj",
+      "offered": "Zaproponowano."
+    },
+    "partnerOffers": {
+      "title": "Kandydaci partnerów na potrzeby Państwa klientów"
+    },
+    "offerStatus": {
+      "offered": "Zaproponowany",
+      "withdrawn": "Wycofany",
+      "accepted": "Przyjęty",
+      "declined": "Odrzucony"
+    },
+    "commissions": {
+      "title": "Prowizje",
+      "intro": "Należne dopiero po zatrudnieniu pracownika. Nic nie jest tu pobierane.",
+      "empty": "Nie zaakceptowano jeszcze opłaty za zatrudnienie.",
+      "need": "Potrzeba klienta",
+      "role": {
+        "direct": "Państwa kandydat",
+        "lead": "Kandydat {agency}",
+        "partner": "Państwa kandydat przez {agency}"
+      },
+      "amount": "{amount} ({percent} % z {fee})",
+      "status": {
+        "pending": "Oczekuje na zatrudnienie",
+        "placed": "Należna",
+        "not_placed": "Nie zatrudniono"
+      },
+      "due": "Należne: {total}"
+    },
+    "errors": {
+      "not_owner": "Może to zrobić tylko właściciel agencji.",
+      "not_agency": "Ta firma nie jest agencją.",
+      "invalid_email": "Proszę podać poprawny adres e-mail.",
+      "invalid_share": "Proszę podać udział większy niż 0 i mniejszy niż 100 %.",
+      "already_invited": "Dla tego adresu jest już otwarte zaproszenie.",
+      "invitation_not_found": "To zaproszenie nie jest już otwarte.",
+      "same_agency": "Agencja nie może być własnym partnerem.",
+      "already_partners": "Te agencje są już partnerami.",
+      "partnership_not_found": "Nie znaleziono partnerstwa.",
+      "partnership_not_open": "To partnerstwo jest już zakończone.",
+      "partnership_not_active": "To partnerstwo nie jest aktywne.",
+      "share_not_active": "Ta potrzeba nie jest już udostępniana.",
+      "partner_share_not_found": "Ta potrzeba została już odebrana.",
+      "worker_not_on_roster": "Tego pracownika nie ma na Państwa aktywnej liście.",
+      "invalid_note": "Notatka jest za długa.",
+      "needs_migration": "Agencje partnerskie nie są jeszcze dostępne.",
+      "error": "Nie udało się. Proszę spróbować ponownie."
+    }
   }
 }

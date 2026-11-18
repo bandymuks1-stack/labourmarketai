@@ -31,6 +31,12 @@ import {
  *        is not possible; accepting with it records the exact term
  *   P-6  the fee's trigger is the placement: the worker accepts the booking
  *        and the engagement is the employer's
+ *   P-7  agency-to-agency (20261118100000): the lead invites a partner agency
+ *        at a share of its fee; the partner accepts; the lead passes its
+ *        client's need; the partner offers its OWN roster worker on it
+ *   P-8  the client accepts that candidate on the LEAD's term; once the
+ *        worker accepts the booking, the lead's and the partner's parts
+ *        fall due (nothing is charged)
  */
 
 test.skip(!isolatedStack(), "local stack only (SIGNUP_ISOLATED=1, app and Supabase on 127.0.0.1)");
@@ -386,4 +392,178 @@ test("P-6. the placement is the worker's own acceptance; the engagement is the e
     )[0]!.n,
     "one acceptance in the whole run: the accepted candidate's",
   ).toBe(1);
+});
+
+// ── P-7 ────────────────────────────────────────────────────────────────────
+// Agency-to-agency cooperation (register 4.30, migration 20261118100000).
+
+const p7 = { partnershipId: "", clientShareId: "", partnerShareId: "", w4Worker: "", offerId: "", bookingId: "" };
+
+test("P-7. the lead invites a partner agency, passes its client's need, and the partner offers its own worker", async () => {
+  const ag = as(AG);
+  const ag2 = as(AG2);
+  p7.w4Worker = workerOf(W4);
+
+  // The lead invites the other agency at a 20 % share of the lead's fee.
+  await ag.goto(`${BASE}/en/dashboard/company/partners`);
+  const invite = ag.getByTestId("agency-partnership-invite");
+  await expect(invite).toBeVisible({ timeout: 30_000 });
+  await invite.locator('input[name="email"]').fill(AG2);
+  await invite.locator('input[name="share_percent"]').fill("20");
+  await invite.getByTestId("agency-partnership-invite-submit").click();
+  await expect(invite.getByTestId("agency-partnership-invite-done")).toBeVisible({ timeout: 30_000 });
+  p7.partnershipId = sql<{ id: string }>(
+    `select id from public.agency_partnerships where lead_company_id = ${lit(s.agCompanyId)}`,
+  )[0]!.id;
+
+  // The invited agency's owner sees the consequence and accepts for its own agency.
+  await ag2.goto(`${BASE}/en/dashboard/company/partners`);
+  const card = ag2.getByTestId(`agency-partnership-${p7.partnershipId}`);
+  await expect(card).toHaveAttribute("data-side", "invited", { timeout: 30_000 });
+  await expect(card).toContainText("20");
+  await card.getByTestId(`agency-partnership-accept-${p7.partnershipId}-submit`).click();
+  await expect
+    .poll(
+      () =>
+        sql<{ st: string }>(
+          `select status || '/' || coalesce(partner_company_id::text, '-') as st from public.agency_partnerships where id = ${lit(p7.partnershipId)}`,
+        )[0]!.st,
+      { timeout: 30_000 },
+    )
+    .toBe(`active/${s.ag2CompanyId}`);
+
+  // The lead passes the need its client shared with it.
+  p7.clientShareId = sql<{ id: string }>(
+    `select id from public.agency_client_request_shares
+      where connection_id = ${lit(s.connectionId)} and request_id = ${lit(s.needId)} and status = 'active'`,
+  )[0]!.id;
+  await ag.goto(`${BASE}/en/dashboard/company/partners`);
+  const pass = ag.getByTestId(`agency-partnership-pass-${p7.partnershipId}`);
+  await expect(pass).toBeVisible({ timeout: 30_000 });
+  await pass.locator('select[name="client_share_id"]').selectOption(p7.clientShareId);
+  await pass.getByTestId(`agency-partnership-pass-${p7.partnershipId}-submit`).click();
+  await expect
+    .poll(
+      () =>
+        sql<{ id: string }>(
+          `select id from public.agency_partner_request_shares
+            where partnership_id = ${lit(p7.partnershipId)} and client_share_id = ${lit(p7.clientShareId)} and status = 'active'`,
+        )[0]?.id ?? "",
+      { timeout: 30_000 },
+    )
+    .not.toBe("");
+  p7.partnerShareId = sql<{ id: string }>(
+    `select id from public.agency_partner_request_shares where partnership_id = ${lit(p7.partnershipId)} and status = 'active'`,
+  )[0]!.id;
+
+  // The partner sees the need (never the client's name) and offers ITS OWN roster worker.
+  await ag2.goto(`${BASE}/en/dashboard/company/partners`);
+  const need = ag2.getByTestId(`agency-partnership-need-${p7.partnerShareId}`);
+  await expect(need).toBeVisible({ timeout: 30_000 });
+  await expect(need).toContainText(AG_ORG);
+  await expect(need).not.toContainText(CO_ORG);
+  const offer = ag2.getByTestId(`agency-partnership-offer-${p7.partnerShareId}`);
+  await offer.locator('select[name="worker_id"]').selectOption(p7.w4Worker);
+  await offer.getByTestId(`agency-partnership-offer-${p7.partnerShareId}-submit`).click();
+  await expect
+    .poll(
+      () =>
+        sql<{ id: string }>(
+          `select id from public.agency_candidate_offers
+            where partner_share_id = ${lit(p7.partnerShareId)} and worker_id = ${lit(p7.w4Worker)} and status = 'offered'`,
+        )[0]?.id ?? "",
+      { timeout: 30_000 },
+    )
+    .not.toBe("");
+  const row = sql<{ id: string; agency_company_id: string; connection_id: string; request_share_id: string }>(
+    `select id, agency_company_id, connection_id, request_share_id from public.agency_candidate_offers
+      where partner_share_id = ${lit(p7.partnerShareId)}`,
+  )[0]!;
+  p7.offerId = row.id;
+  expect(row, "the partner's offer rides on the client's own share and connection").toMatchObject({
+    agency_company_id: s.ag2CompanyId,
+    connection_id: s.connectionId,
+    request_share_id: p7.clientShareId,
+  });
+
+  // The lead sees its partner's candidate by status only.
+  await ag.goto(`${BASE}/en/dashboard/company/partners`);
+  await expect(ag.getByTestId(`agency-partnership-partner-offer-${p7.offerId}`)).toHaveAttribute(
+    "data-status",
+    "offered",
+    { timeout: 30_000 },
+  );
+});
+
+// ── P-8 ────────────────────────────────────────────────────────────────────
+
+test("P-8. the client accepts the partner's candidate on the LEAD's term; on placement both commissions fall due", async () => {
+  const co = as(CO);
+  const w4 = as(W4);
+  const ag = as(AG);
+  const ag2 = as(AG2);
+
+  // The partner states no term of its own: the fee shown is the lead's 250 EUR.
+  await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
+  await expect(co.getByTestId(`offer-placement-term-${p7.offerId}`)).toBeVisible({ timeout: 30_000 });
+  await expect(co.getByTestId(`offer-placement-fee-${p7.offerId}`)).toContainText("250");
+  await expect(co.getByTestId(`offer-placement-term-${p7.offerId}`)).toContainText(AG_ORG);
+  await co.getByTestId(`offer-placement-accept-${p7.offerId}`).check();
+  await co.getByTestId(`offer-accept-${p7.offerId}`).click();
+  await expect
+    .poll(
+      () =>
+        sql<{ st: string }>(
+          `select status || '/' || coalesce(accepted_placement_term_id::text, '-') as st
+             from public.agency_candidate_offers where id = ${lit(p7.offerId)}`,
+        )[0]!.st,
+      { message: "the lead's term is recorded on the partner's candidate", timeout: 30_000 },
+    )
+    .toBe(`accepted/${s.termId}`);
+  p7.bookingId = sql<{ id: string }>(
+    `select booking_id as id from public.agency_candidate_offers where id = ${lit(p7.offerId)}`,
+  )[0]!.id;
+
+  // Before the worker accepts: pending, no amount.
+  await ag.goto(`${BASE}/en/dashboard/company/partners`);
+  await expect(ag.getByTestId(`agency-commission-${p7.offerId}`)).toHaveAttribute("data-status", "pending", {
+    timeout: 30_000,
+  });
+
+  // The worker accepts the booking: the placement.
+  await w4.goto(`${BASE}/en/dashboard/bookings`);
+  const card = w4.getByTestId(`booking-${p7.bookingId}`).filter({ visible: true }).first();
+  await expect(card).toBeVisible({ timeout: 30_000 });
+  await card.getByTestId("booking-accept-open").click();
+  await card.getByTestId("booking-accept-confirm").click();
+  await expect
+    .poll(
+      () => sql<{ status: string }>(`select status from public.booking_requests where id = ${lit(p7.bookingId)}`)[0]?.status,
+      { timeout: 30_000 },
+    )
+    .toBe("accepted");
+
+  // The lead: 80 % of 250 = 200 due; its own earlier candidate (P-5/P-6): 250 due.
+  await ag.goto(`${BASE}/en/dashboard/company/partners`);
+  const lead = ag.getByTestId(`agency-commission-${p7.offerId}`);
+  await expect(lead).toHaveAttribute("data-status", "placed", { timeout: 30_000 });
+  await expect(lead).toHaveAttribute("data-role", "lead");
+  await expect(lead).toContainText("200");
+  const direct = ag.getByTestId(`agency-commission-${s.offerId}`);
+  await expect(direct).toHaveAttribute("data-role", "direct");
+  await expect(direct).toContainText("250");
+
+  // The partner: 20 % of 250 = 50 due, naming the lead.
+  await ag2.goto(`${BASE}/en/dashboard/company/partners`);
+  const partner = ag2.getByTestId(`agency-commission-${p7.offerId}`);
+  await expect(partner).toHaveAttribute("data-role", "partner", { timeout: 30_000 });
+  await expect(partner).toHaveAttribute("data-status", "placed");
+  await expect(partner).toContainText("50");
+  await expect(partner).toContainText(AG_ORG);
+
+  // Nothing was charged: no invoice or payment row exists for either agency.
+  expect(
+    sql<{ n: number }>(`select count(*)::int as n from public.audit_logs where action like '%invoice%' or action like '%payment%'`)[0]!
+      .n,
+  ).toBe(0);
 });

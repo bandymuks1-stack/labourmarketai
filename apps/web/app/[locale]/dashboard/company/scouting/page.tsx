@@ -333,6 +333,8 @@ export default async function CompanyScoutingPage({
       result?.kind === "ok" && !actsForClient ? loadDemandHistory(result.demand.id) : null,
     ]);
   const termByOffer = offerTerms.kind === "ok" ? offerTerms.byOffer : new Map<string, PlacementTerm>();
+  // A partner agency's candidate carries the LEAD agency's term (20261118100000): name whose it is.
+  const termAgencyByOffer = offerTerms.kind === "ok" ? offerTerms.agencyNameByOffer : new Map<string, string>();
   const applicantIdentity = new Map<string, ApplicantIdentity>();
   for (const [id, who] of appliedIdentities) if (who) applicantIdentity.set(id, who);
   // Stage 3 — projects load only when a team offer is accepted and waiting for
@@ -1177,7 +1179,7 @@ export default async function CompanyScoutingPage({
                     }}
                     placementTerm={offerTermView.get(oc.offerId) ?? null}
                     termLabels={{
-                      title: tOffered("placementTerm.title", { agency: oc.agencyName ?? "" }),
+                      title: tOffered("placementTerm.title", { agency: termAgencyByOffer.get(oc.offerId) ?? oc.agencyName ?? "" }),
                       conditionLabel: tOffered("placementTerm.conditionLabel"),
                       termsLink: tOffered("placementTerm.termsLink"),
                       termsPending: tOffered("placementTerm.termsPending"),

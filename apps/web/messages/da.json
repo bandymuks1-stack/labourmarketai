@@ -8160,5 +8160,102 @@
       "auth": "Log ind igen.",
       "error": "Det blev ikke gemt. Prøv igen."
     }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerbureauer",
+    "intro": "Send en kundes behov videre til et andet bureau. Når dets kandidat formidles, får det den aftalte andel af dit formidlingsgebyr.",
+    "unavailable": "Partnerbureauer er ikke tilgængelige endnu.",
+    "empty": "Ingen partnerbureauer endnu.",
+    "working": "Gemmer…",
+    "side": {
+      "lead": "Du leder",
+      "partner": "Du er partner",
+      "invited": "Invitation til dig"
+    },
+    "status": {
+      "pending": "Inviteret",
+      "active": "Aktiv",
+      "declined": "Afvist",
+      "ended": "Afsluttet"
+    },
+    "shareLine": "Partnerens andel af gebyret: {percent} %",
+    "acceptConsequence": "Hvis du accepterer, kan {agency} sende sine kunders behov til dig. Når din kandidat formidles, får du {percent} % af formidlingsgebyret fra {agency}.",
+    "accept": "Accepter",
+    "accepted": "Accepteret.",
+    "decline": "Afvis",
+    "declined": "Afvist.",
+    "end": "Afslut partnerskabet",
+    "withdrawInvite": "Træk invitationen tilbage",
+    "ended": "Afsluttet. Behov sendt via det er taget tilbage, og åbne tilbud er trukket tilbage.",
+    "invite": {
+      "email": "Partnerbureauets e-mail",
+      "share": "Partnerens andel, %",
+      "submit": "Inviter",
+      "sent": "Invitation oprettet. Bureauet ser den, når det er logget ind med denne e-mail."
+    },
+    "pass": {
+      "title": "Send en kundes behov videre",
+      "none": "Ingen kunde har delt et behov med dig endnu.",
+      "need": "Kundens behov",
+      "choose": "Vælg et behov",
+      "submit": "Send til {agency}",
+      "done": "Sendt.",
+      "takeBack": "Tag tilbage"
+    },
+    "passedToMe": {
+      "title": "Behov sendt til dig",
+      "from": "Fra {agency} · din andel {percent} %",
+      "noRoster": "Din liste har ingen aktiv medarbejder at tilbyde.",
+      "worker": "Din kandidat",
+      "choose": "Vælg en medarbejder",
+      "offer": "Tilbyd",
+      "offered": "Tilbudt."
+    },
+    "partnerOffers": {
+      "title": "Partneres kandidater til dine kunders behov"
+    },
+    "offerStatus": {
+      "offered": "Tilbudt",
+      "withdrawn": "Trukket tilbage",
+      "accepted": "Accepteret",
+      "declined": "Afvist"
+    },
+    "commissions": {
+      "title": "Provisioner",
+      "intro": "Forfalder først, når medarbejderen er formidlet. Intet opkræves her.",
+      "empty": "Intet formidlingsgebyr accepteret endnu.",
+      "need": "Kundens behov",
+      "role": {
+        "direct": "Din kandidat",
+        "lead": "Kandidat fra {agency}",
+        "partner": "Din kandidat via {agency}"
+      },
+      "amount": "{amount} ({percent} % af {fee})",
+      "status": {
+        "pending": "Venter på formidling",
+        "placed": "Forfalden",
+        "not_placed": "Ikke formidlet"
+      },
+      "due": "Forfalder: {total}"
+    },
+    "errors": {
+      "not_owner": "Kun bureauets ejer kan gøre dette.",
+      "not_agency": "Denne virksomhed er ikke et bureau.",
+      "invalid_email": "Angiv en gyldig e-mailadresse.",
+      "invalid_share": "Angiv en andel over 0 og under 100 %.",
+      "already_invited": "Denne adresse har allerede en åben invitation.",
+      "invitation_not_found": "Invitationen er ikke længere åben.",
+      "same_agency": "Et bureau kan ikke være sin egen partner.",
+      "already_partners": "Bureauerne er allerede partnere.",
+      "partnership_not_found": "Partnerskabet blev ikke fundet.",
+      "partnership_not_open": "Partnerskabet er allerede afsluttet.",
+      "partnership_not_active": "Partnerskabet er ikke aktivt.",
+      "share_not_active": "Behovet deles ikke længere.",
+      "partner_share_not_found": "Behovet er allerede taget tilbage.",
+      "worker_not_on_roster": "Medarbejderen er ikke på din aktive liste.",
+      "invalid_note": "Noten er for lang.",
+      "needs_migration": "Partnerbureauer er ikke tilgængelige endnu.",
+      "error": "Det lykkedes ikke. Prøv igen."
+    }
   }
 }

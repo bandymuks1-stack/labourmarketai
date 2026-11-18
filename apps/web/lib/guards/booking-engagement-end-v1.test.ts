@@ -1806,6 +1806,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // is active and review is on (one RLS policy replaced). RED draft, the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261115120000_journal_learning_access_follows_link_v1.sql",
+      // 2026-11-18 Lane H (register 4.30): agency-to-agency partnerships and commissions. RED draft #3353,
+      // the marker is the human-gate acknowledgement, NOT applied.
+      "20261118100000_agency_partnerships_commissions_v1.sql",
 ]);
   });
 

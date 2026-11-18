@@ -8160,5 +8160,102 @@
       "auth": "Logg inn igjen.",
       "error": "Det ble ikke lagret. Prøv igjen."
     }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerbyråer",
+    "intro": "Send en kundes behov videre til et annet byrå. Når kandidaten deres formidles, får byrået den avtalte andelen av formidlingsavgiften din.",
+    "unavailable": "Partnerbyråer er ikke tilgjengelige ennå.",
+    "empty": "Ingen partnerbyråer ennå.",
+    "working": "Lagrer…",
+    "side": {
+      "lead": "Du leder",
+      "partner": "Du er partner",
+      "invited": "Invitasjon til deg"
+    },
+    "status": {
+      "pending": "Invitert",
+      "active": "Aktiv",
+      "declined": "Avslått",
+      "ended": "Avsluttet"
+    },
+    "shareLine": "Partnerens andel av avgiften: {percent} %",
+    "acceptConsequence": "Hvis du godtar, kan {agency} sende kundenes behov til deg. Når kandidaten din formidles, får du {percent} % av formidlingsavgiften til {agency}.",
+    "accept": "Godta",
+    "accepted": "Godtatt.",
+    "decline": "Avslå",
+    "declined": "Avslått.",
+    "end": "Avslutt partnerskapet",
+    "withdrawInvite": "Trekk tilbake invitasjonen",
+    "ended": "Avsluttet. Behov sendt via det er tatt tilbake, og åpne tilbud er trukket tilbake.",
+    "invite": {
+      "email": "Partnerbyråets e-post",
+      "share": "Partnerens andel, %",
+      "submit": "Inviter",
+      "sent": "Invitasjon opprettet. Byrået ser den når det er logget inn med denne e-posten."
+    },
+    "pass": {
+      "title": "Send en kundes behov videre",
+      "none": "Ingen kunde har delt et behov med deg ennå.",
+      "need": "Kundens behov",
+      "choose": "Velg et behov",
+      "submit": "Send til {agency}",
+      "done": "Sendt.",
+      "takeBack": "Ta tilbake"
+    },
+    "passedToMe": {
+      "title": "Behov sendt til deg",
+      "from": "Fra {agency} · din andel {percent} %",
+      "noRoster": "Listen din har ingen aktiv arbeidstaker å tilby.",
+      "worker": "Din kandidat",
+      "choose": "Velg en arbeidstaker",
+      "offer": "Tilby",
+      "offered": "Tilbudt."
+    },
+    "partnerOffers": {
+      "title": "Partneres kandidater til kundenes behov"
+    },
+    "offerStatus": {
+      "offered": "Tilbudt",
+      "withdrawn": "Trukket tilbake",
+      "accepted": "Godtatt",
+      "declined": "Avslått"
+    },
+    "commissions": {
+      "title": "Provisjoner",
+      "intro": "Forfaller først når arbeidstakeren er formidlet. Ingenting belastes her.",
+      "empty": "Ingen formidlingsavgift godtatt ennå.",
+      "need": "Kundens behov",
+      "role": {
+        "direct": "Din kandidat",
+        "lead": "Kandidat fra {agency}",
+        "partner": "Din kandidat via {agency}"
+      },
+      "amount": "{amount} ({percent} % av {fee})",
+      "status": {
+        "pending": "Venter på formidling",
+        "placed": "Forfalt",
+        "not_placed": "Ikke formidlet"
+      },
+      "due": "Forfaller: {total}"
+    },
+    "errors": {
+      "not_owner": "Bare byråets eier kan gjøre dette.",
+      "not_agency": "Dette selskapet er ikke et byrå.",
+      "invalid_email": "Skriv inn en gyldig e-postadresse.",
+      "invalid_share": "Skriv inn en andel over 0 og under 100 %.",
+      "already_invited": "Denne adressen har allerede en åpen invitasjon.",
+      "invitation_not_found": "Invitasjonen er ikke lenger åpen.",
+      "same_agency": "Et byrå kan ikke være sin egen partner.",
+      "already_partners": "Byråene er allerede partnere.",
+      "partnership_not_found": "Partnerskapet ble ikke funnet.",
+      "partnership_not_open": "Partnerskapet er allerede avsluttet.",
+      "partnership_not_active": "Partnerskapet er ikke aktivt.",
+      "share_not_active": "Behovet deles ikke lenger.",
+      "partner_share_not_found": "Behovet er allerede tatt tilbake.",
+      "worker_not_on_roster": "Arbeidstakeren er ikke på den aktive listen din.",
+      "invalid_note": "Notatet er for langt.",
+      "needs_migration": "Partnerbyråer er ikke tilgjengelige ennå.",
+      "error": "Det gikk ikke. Prøv igjen."
+    }
   }
 }

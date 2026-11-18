@@ -20791,5 +20791,102 @@
       "auth": "Logga in igen.",
       "error": "Det sparades inte. Försök igen."
     }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerbyråer",
+    "intro": "Skicka en kunds behov vidare till ett annat byrå. När dess kandidat placeras får det den överenskomna andelen av din förmedlingsavgift.",
+    "unavailable": "Partnerbyråer är inte tillgängliga än.",
+    "empty": "Inga partnerbyråer än.",
+    "working": "Sparar…",
+    "side": {
+      "lead": "Du leder",
+      "partner": "Du är partner",
+      "invited": "Inbjudan till dig"
+    },
+    "status": {
+      "pending": "Inbjuden",
+      "active": "Aktiv",
+      "declined": "Avböjd",
+      "ended": "Avslutad"
+    },
+    "shareLine": "Partnerns andel av avgiften: {percent} %",
+    "acceptConsequence": "Om du tackar ja kan {agency} skicka sina kunders behov till dig. När din kandidat placeras får du {percent} % av förmedlingsavgiften från {agency}.",
+    "accept": "Tacka ja",
+    "accepted": "Godkänd.",
+    "decline": "Avböj",
+    "declined": "Avböjd.",
+    "end": "Avsluta partnerskapet",
+    "withdrawInvite": "Dra tillbaka inbjudan",
+    "ended": "Avslutad. Behov som skickats via det är återtagna och öppna erbjudanden tillbakadragna.",
+    "invite": {
+      "email": "Partnerbyråns e-post",
+      "share": "Partnerns andel, %",
+      "submit": "Bjud in",
+      "sent": "Inbjudan skapad. Byrån ser den när den loggar in med den här e-postadressen."
+    },
+    "pass": {
+      "title": "Skicka en kunds behov vidare",
+      "none": "Ingen kund har delat ett behov med dig än.",
+      "need": "Kundens behov",
+      "choose": "Välj ett behov",
+      "submit": "Skicka till {agency}",
+      "done": "Skickat.",
+      "takeBack": "Ta tillbaka"
+    },
+    "passedToMe": {
+      "title": "Behov som skickats till dig",
+      "from": "Från {agency} · din andel {percent} %",
+      "noRoster": "Din lista har ingen aktiv arbetstagare att erbjuda.",
+      "worker": "Din kandidat",
+      "choose": "Välj en arbetstagare",
+      "offer": "Erbjud",
+      "offered": "Erbjuden."
+    },
+    "partnerOffers": {
+      "title": "Partners kandidater på dina kunders behov"
+    },
+    "offerStatus": {
+      "offered": "Erbjuden",
+      "withdrawn": "Tillbakadragen",
+      "accepted": "Godkänd",
+      "declined": "Avböjd"
+    },
+    "commissions": {
+      "title": "Provisioner",
+      "intro": "Förfaller först när arbetstagaren placeras. Inget debiteras här.",
+      "empty": "Ingen förmedlingsavgift godkänd än.",
+      "need": "Kundens behov",
+      "role": {
+        "direct": "Din kandidat",
+        "lead": "Kandidat från {agency}",
+        "partner": "Din kandidat via {agency}"
+      },
+      "amount": "{amount} ({percent} % av {fee})",
+      "status": {
+        "pending": "Väntar på placering",
+        "placed": "Förfallen",
+        "not_placed": "Inte placerad"
+      },
+      "due": "Förfaller: {total}"
+    },
+    "errors": {
+      "not_owner": "Bara byråns ägare kan göra detta.",
+      "not_agency": "Det här företaget är inte ett byrå.",
+      "invalid_email": "Ange en giltig e-postadress.",
+      "invalid_share": "Ange en andel över 0 och under 100 %.",
+      "already_invited": "Den här adressen har redan en öppen inbjudan.",
+      "invitation_not_found": "Inbjudan är inte längre öppen.",
+      "same_agency": "Ett byrå kan inte vara sin egen partner.",
+      "already_partners": "Byråerna är redan partner.",
+      "partnership_not_found": "Partnerskapet hittades inte.",
+      "partnership_not_open": "Partnerskapet är redan avslutat.",
+      "partnership_not_active": "Partnerskapet är inte aktivt.",
+      "share_not_active": "Behovet delas inte längre.",
+      "partner_share_not_found": "Behovet är redan återtaget.",
+      "worker_not_on_roster": "Arbetstagaren finns inte på din aktiva lista.",
+      "invalid_note": "Anteckningen är för lång.",
+      "needs_migration": "Partnerbyråer är inte tillgängliga än.",
+      "error": "Det gick inte. Försök igen."
+    }
   }
 }
