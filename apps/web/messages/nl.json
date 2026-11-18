@@ -7690,7 +7690,7 @@
     },
     "structure": {
       "title": "Ploegstructuur",
-      "scopeNote": "Toont de ploegen die je beheert en de actieve mensen van het bedrijf.",
+      "scopeNote": "Toont de ploegen die u beheert en de actieve mensen van het bedrijf.",
       "kindTeam": "ploeg",
       "teamEmpty": "Nog geen leden.",
       "company": "Bedrijf",
@@ -7706,7 +7706,7 @@
       "confirm": "Ja, verwijderen",
       "cancel": "Annuleren",
       "done": "Uit de ploeg verwijderd.",
-      "notAllowed": "Je kunt dit lid niet verwijderen.",
+      "notAllowed": "U kunt dit lid niet verwijderen.",
       "failed": "Verwijderen is mislukt. Probeer het opnieuw."
     }
   },
