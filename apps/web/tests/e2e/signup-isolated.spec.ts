@@ -755,7 +755,15 @@ test("M-4. seed: a staffing agency, and the company's proven address", async ({ 
   await signIn(co, owner, ownerPw);
   await co.goto(`${BASE}/en/dashboard/network`);
   const prompt = co.getByTestId("network-email-unverified");
-  if (await prompt.isVisible({ timeout: 15_000 }).catch(() => false)) {
+  // isVisible() does not wait (it ignores a timeout): wait for the prompt to
+  // render, and treat "not shown within 15 s" as "already proven". Runs
+  // 44448318982 / 44450906361 / 44453321275 skipped the proof because the
+  // page had not rendered yet.
+  const unproven = await prompt
+    .waitFor({ state: "visible", timeout: 15_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (unproven) {
     // The company already has mail from the earlier seeds (a notice can carry
     // a callback link too), so follow the link of the NEW message only.
     const before = await mailIds(owner);
@@ -768,7 +776,12 @@ test("M-4. seed: a staffing agency, and the company's proven address", async ({ 
     });
     const landed = new URL(co.url());
     await co.goto(`${BASE}/en/dashboard/network`);
-    if (await co.getByTestId("network-email-unverified").isVisible({ timeout: 10_000 }).catch(() => false)) {
+    const stillUnproven = await co
+      .getByTestId("network-email-unverified")
+      .waitFor({ state: "visible", timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (stillUnproven) {
       // What happened, without a token: hosts and paths only.
       const subjects: string[] = [];
       const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${owner}`)}`);
