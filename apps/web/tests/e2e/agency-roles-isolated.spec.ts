@@ -384,10 +384,15 @@ test("A-3. the member is refused owner-only surfaces; the owner administers role
   // The owner CAN administer members: they raise the seat to manager.
   const owner = await as(browser, OWNER);
   await owner.page.goto(`${BASE}/en/dashboard/company/settings#organization-members`);
-  await expect(owner.page.getByTestId("org-members-invite-form")).toBeVisible({ timeout: 30_000 });
-  await owner.page.getByTestId(`org-member-role-select-${state.membershipId}`).selectOption("manager");
-  await owner.page.getByTestId(`org-member-role-save-${state.membershipId}`).click();
-  await expect(owner.page.getByTestId("org-members-row-result")).toBeVisible({ timeout: 30_000 });
+  // Scoped to <main>, like J-DEC (#3487): while the page streams in, React
+  // can hold a second, server-rendered copy of the form outside it (an
+  // unhydrated <form method="POST">), and a whole-page strict locator then
+  // resolves to 2 elements (signup-isolated run 44414625487).
+  const ownerMain = owner.page.getByRole("main");
+  await expect(ownerMain.getByTestId("org-members-invite-form")).toBeVisible({ timeout: 30_000 });
+  await ownerMain.getByTestId(`org-member-role-select-${state.membershipId}`).selectOption("manager");
+  await ownerMain.getByTestId(`org-member-role-save-${state.membershipId}`).click();
+  await expect(ownerMain.getByTestId("org-members-row-result")).toBeVisible({ timeout: 30_000 });
   await expect
     .poll(
       async () =>
