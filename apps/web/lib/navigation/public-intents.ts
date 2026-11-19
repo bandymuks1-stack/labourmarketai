@@ -26,7 +26,7 @@
  * the day its route works, not before.
  */
 
-import { AGENCY_DOOR_NEXT } from "@/lib/marketing/public-doors";
+import { AGENCY_DOOR_NEXT, INSTITUTION_DOOR_NEXT } from "@/lib/marketing/public-doors";
 import { WORKER_PROFILE_DOOR_HREF, WORKER_PROFILE_DOOR_NEXT } from "@/lib/marketing/worker-profile-door";
 import { requestDoorHref } from "@/lib/staffing/request-door-link";
 
@@ -124,6 +124,16 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
       // PARTNER_DOOR uses (a commercial relationship with the company behind
       // the product, not a workspace).
       { id: "partnerWithUs", href: requestDoorHref("partner"), account: false },
+      // THE EDUCATION INSTITUTION'S DOOR (owner 2026-11-19, UX gap I-6): the
+      // landing had no way in for a school or training provider. Inside this
+      // goal, not a seventh one: the organisation setup with the
+      // training_provider capability, through sign-up when signed out.
+      {
+        id: "setUpInstitution",
+        href: INSTITUTION_DOOR_NEXT,
+        account: true,
+        guestHref: `/auth/signup?next=${encodeURIComponent(INSTITUTION_DOOR_NEXT)}`,
+      },
     ],
   },
   {
