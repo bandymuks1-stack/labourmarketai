@@ -26,7 +26,7 @@ const CLIENT_BUILT: Record<string, string> = {
   "components/app/onboarding-wizard.tsx": "uses the server-built list first; the call is only a fallback",
   "components/app/demand-location-capture.tsx": "the list renders only after the open tap (useState false)",
   "components/app/demand-advanced-sections.tsx": "step 2 of the need form, drawn after the person moves on",
-  "components/app/demand-request-button.tsx": "UNVERIFIED: built on every render; check its server HTML before relying on it",
+  "components/app/demand-request-button.tsx": "verified: the need form at /lt and /en hydrates with no client error (phone-journeys S-0, run 44459702915)",
 };
 
 describe("country options are built on the server", () => {
