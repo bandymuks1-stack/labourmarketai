@@ -2275,6 +2275,7 @@
         },
         "statusInvalidCountry": "Proszę wybrać kraj z listy — inne wartości nie są jeszcze obsługiwane.",
         "registrationCode": "Numer firmy / rejestracyjny",
+        "optionalDetails": "Rejestracja, kontakt i stanowisko",
         "registrationCodeHelp": "Opcjonalnie. Pomaga zweryfikować firmę później.",
         "address": "Adres / lokalizacja",
         "addressPlaceholder": "np. ul. Główna 1, Wilno",

@@ -2275,6 +2275,7 @@
         },
         "statusInvalidCountry": "Wählen Sie ein Land aus der Liste — andere Werte werden noch nicht unterstützt.",
         "registrationCode": "Unternehmens-/Registrierungsnummer",
+        "optionalDetails": "Registrierung, Kontakt und Funktion",
         "registrationCodeHelp": "Optional. Hilft später bei der Verifizierung des Unternehmens.",
         "address": "Adresse / Standort",
         "addressPlaceholder": "z. B. Hauptstraße 1, Vilnius",

@@ -2275,6 +2275,7 @@
         },
         "statusInvalidCountry": "Pasirinkite šalį iš sąrašo — kitos reikšmės kol kas nepalaikomos.",
         "registrationCode": "Įmonės / registracijos kodas",
+        "optionalDetails": "Registracija, kontaktai ir pareigos",
         "registrationCodeHelp": "Neprivaloma. Padeda vėliau patvirtinti įmonę.",
         "address": "Adresas / vieta",
         "addressPlaceholder": "pvz. Gedimino pr. 1, Vilnius",
