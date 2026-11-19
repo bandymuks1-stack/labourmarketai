@@ -846,13 +846,13 @@ for (const phone of PHONES) {
       await page.goto(`${BASE}/en/dashboard/company/education`);
       await page.getByTestId("institution-learners-invite").tap();
       await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
-      const open = page.getByTestId("invite-panel-open");
-      const capacity = page.getByTestId("invite-capacity");
-      await expect(open.or(capacity).first()).toBeVisible({ timeout: 30_000 });
-      if (await open.isVisible().catch(() => false)) await open.tap();
-      await expect(capacity, "the learner capacity").toHaveValue("student", { timeout: 30_000 });
-      const linkMode = page.getByTestId("invite-mode-link");
-      if (await linkMode.isVisible().catch(() => false)) await linkMode.tap();
+      // UX_GAPS I-4: one read-only line for the preset, link mode by default, 44 px fields.
+      const preset = page.getByTestId("invite-preset");
+      await expect(preset, "the learner capacity").toHaveAttribute("data-relationship", "student", { timeout: 30_000 });
+      await expect(page.getByTestId("invite-capacity")).toHaveCount(0);
+      await expect(page.getByTestId("invite-mode-link")).toHaveAttribute("aria-checked", "true");
+      const nameBox = await page.getByTestId("invite-name").boundingBox();
+      expect(nameBox?.height ?? 0, "the name field is a 44 px target").toBeGreaterThanOrEqual(44);
       const name = page.getByTestId("invite-name");
       if (await name.isVisible().catch(() => false)) await name.fill(`Synthetic Learner ${phone.name} ${RUN}`);
       await page.getByTestId("invite-submit").tap();

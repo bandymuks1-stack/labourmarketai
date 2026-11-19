@@ -991,11 +991,12 @@ async function inviteLearnerLink(page: Page, name: string): Promise<string> {
   await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
   await page.getByTestId("institution-learners-invite").click();
   await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
-  const open = page.getByTestId("invite-panel-open");
-  if (await open.isVisible().catch(() => false)) await open.click();
-  await expect(page.getByTestId("invite-capacity")).toHaveValue("student", { timeout: 30_000 });
-  const linkMode = page.getByTestId("invite-mode-link");
-  if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
+  // UX_GAPS I-4: the door preset type, organisation and relationship — one read-only line, link mode by default.
+  const preset = page.getByTestId("invite-preset");
+  await expect(preset).toHaveAttribute("data-relationship", "student", { timeout: 30_000 });
+  await expect(preset).toHaveAttribute("data-type", "join_organization");
+  await expect(page.getByTestId("invite-capacity")).toHaveCount(0);
+  await expect(page.getByTestId("invite-mode-link")).toHaveAttribute("aria-checked", "true");
   const nameField = page.getByTestId("invite-name");
   if (await nameField.isVisible().catch(() => false)) await nameField.fill(name);
   await page.getByTestId("invite-submit").click();
