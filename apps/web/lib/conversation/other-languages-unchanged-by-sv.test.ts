@@ -201,7 +201,18 @@ const ACCOUNT_QUESTIONS_OPEN_SETTINGS: readonly Intended[] = [
   { sentence: "Password reset", reader: "helpTopic", now: "account" },
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS];
+/**
+ * (g) A DUTCH HEADCOUNT WITH THE SINGULAR "HEB" IS A NEED (chat path check
+ * 2026-11-19). "Ik heb 3 timmermannen nodig" — I need 3 carpenters — measured
+ * `unknown`: the verb-final `nodig` rule took the plural `hebben` only. It now
+ * opens the demand intake, as its plural form already did.
+ */
+const DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED: readonly Intended[] = [
+  { sentence: "Ik heb 3 timmermannen nodig", reader: "route", now: ["need-workers", 10] },
+  { sentence: "Ik heb 3 timmermannen nodig", reader: "turn", now: "new-goal" },
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).
