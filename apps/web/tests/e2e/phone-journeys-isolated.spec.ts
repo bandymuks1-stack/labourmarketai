@@ -711,6 +711,15 @@ for (const phone of PHONES) {
       await page.goto(`${BASE}/lt/dashboard/company/partners`);
       await expect(page.getByRole("main").getByTestId("agency-draft-need-form"), "the draft-a-need form is drawn for the client").toBeVisible({ timeout: 30_000 });
       await fitsTheScreen(page, "the agency's clients in Lithuanian, with a client");
+      // UX gaps 2026-11-18, A-5: the suite's app log carried a minified React client error on this
+      // route with a connected client. The page must render without one, in both languages.
+      const uncaught = () =>
+        (heard.get(page) ?? []).filter((n) => n.startsWith("pageerror:") || /Minified React error|react\.dev\/errors/.test(n));
+      expect(uncaught(), "the Lithuanian clients page raises no client error").toEqual([]);
+      await page.goto(`${BASE}/en/dashboard/company/partners`);
+      await expect(page.getByRole("main").getByTestId("agency-draft-need-form")).toBeVisible({ timeout: 30_000 });
+      await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+      expect(uncaught(), "the English clients page raises no client error").toEqual([]);
       await done();
     });
   });
