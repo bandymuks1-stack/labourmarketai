@@ -97,6 +97,7 @@ export const NATIVE_APP_PATHS: readonly string[] = [
   "/agency",
   "/invite-worker",
   "/absences",
+  "/sent-proposals",
   "/agencies",
   "/review",
 ];

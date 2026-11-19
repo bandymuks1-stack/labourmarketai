@@ -200,6 +200,12 @@ export default function Screen() {
                 label={t("agency.title")}
                 onPress={() => router.push("/(shell)/agency")}
               />
+              <Button
+                variant="quiet"
+                testID="today-open-sent-proposals"
+                label={t("sentProposals.title")}
+                onPress={() => router.push("/(shell)/sent-proposals")}
+              />
             </>
           )}
         </View>
