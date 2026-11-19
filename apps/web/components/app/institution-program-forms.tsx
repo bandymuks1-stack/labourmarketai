@@ -77,7 +77,7 @@ export function CreateProgramForm({
       <input type="hidden" name="organizationId" value={organizationId} readOnly />
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         {labels.programName}
-        <input name="name" required minLength={2} maxLength={160} className={`${inputCls} min-h-11`} data-testid="program-name" />
+        <input name="name" required minLength={2} maxLength={160} className={inputCls} data-testid="program-name" />
       </label>
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         {labels.targetProfession}
