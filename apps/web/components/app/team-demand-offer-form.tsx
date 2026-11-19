@@ -105,7 +105,7 @@ export function TeamDemandOfferForm({
         if ((e.currentTarget as HTMLDetailsElement).open) load();
       }}
     >
-      <summary className="cursor-pointer text-xs font-medium text-text-secondary">
+      <summary className="flex min-h-11 cursor-pointer items-center text-xs font-medium text-text-secondary">
         {org ? t("orgHeading") : t("heading")}
       </summary>
       <div className="flex flex-col gap-3 pt-3">

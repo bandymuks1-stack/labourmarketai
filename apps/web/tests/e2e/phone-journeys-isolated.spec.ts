@@ -655,6 +655,9 @@ for (const phone of PHONES) {
         `select i.status from public.company_worker_invitations i join public.organizations o on o.legacy_company_id = i.company_id where o.id = ${lit(a.orgId)} and lower(i.invited_email) = lower(${lit(rostered)})`,
       );
       expect(stored.map((r) => r.status), "one pending roster invitation for that address").toEqual(["pending"]);
+      // UX gaps 2026-11-18, A-3: the success state hands over a link to send the invitee.
+      await expect(main.getByTestId("company-workers-invite-link"), "the invitation offers a link to send").toBeVisible();
+      await expect(main.getByTestId("company-workers-invite-copy-link")).toBeVisible();
       await done();
     });
     test(`A-4 (${phone.name}). the agency posts a need on the phone`, async ({ browser }) => {
