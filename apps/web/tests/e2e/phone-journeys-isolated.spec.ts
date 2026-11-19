@@ -546,6 +546,82 @@ for (const phone of PHONES) {
       await expect(page.getByRole("main").getByTestId("cv-summary").first(), "the CV counts the entry").toBeVisible({ timeout: 30_000 });
       await done();
     });
+    // UX gaps W-2 to W-6 (docs/ux/UX_GAPS_2026-11-18.md): the worker's journal and profile controls
+    // are at least 44 px where the walk measured them smaller, and the read-back card opens in view.
+    // Its own test (not inside M-6/M-8), after M-8 so the worker has a saved entry.
+    test(`W-2..W-6 (${phone.name}). the worker's journal and profile controls are 44 px and the read-back opens in view`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const TAP = 44 - 0.5; // sub-pixel rounding at device scale 2 and 3
+      const size = async (target: Locator, what: string, axis: "height" | "width" | "both" = "height") => {
+        await target.scrollIntoViewIfNeeded();
+        const box = await target.boundingBox();
+        expect(box, `${what} is laid out`).not.toBeNull();
+        if (axis !== "width") expect(box!.height, `${what} is ${box!.height} px high`).toBeGreaterThanOrEqual(TAP);
+        if (axis !== "height") expect(box!.width, `${what} is ${box!.width} px wide`).toBeGreaterThanOrEqual(TAP);
+      };
+
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      const main = page.getByRole("main");
+      await expect(main.getByTestId("journal-quick-record-text")).toBeVisible({ timeout: 30_000 });
+
+      // W-3: the links that get an entry confirmed (present when the entry's state offers them).
+      for (const link of [main.locator('[data-testid^="journal-entry-identify-verifier-"]'), main.getByTestId("evidence-awaiting-review-link")]) {
+        if ((await link.count()) > 0 && (await link.first().isVisible())) await size(link.first(), "the confirmation link");
+      }
+      // W-5: readiness steps and the hours export links.
+      const steps = main.locator('[data-testid^="readiness-step-"]');
+      for (let i = 0; i < (await steps.count()); i += 1) {
+        if (await steps.nth(i).isVisible()) await size(steps.nth(i), `readiness step ${i + 1}`);
+      }
+      for (const period of ["week", "month"]) {
+        const exp = main.getByTestId(`journal-hours-export-${period}`);
+        if (await exp.isVisible().catch(() => false)) await size(exp, `the ${period} export link`, "both");
+      }
+
+      // W-2 + W-4: the read-back opens with its top in view; its photo, date and site fields are 44 px.
+      await main.getByTestId("journal-quick-record-text").fill(`QA-SYNTHETIC read-back ${phone.name} ${RUN}: grouted the hallway, 3 hours`);
+      await tapUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+      await expect
+        .poll(async () => {
+          const box = await main.getByTestId("worklog-flow").boundingBox();
+          return box !== null && box.y >= -1 && box.y < phone.viewport.height / 3;
+        }, { message: "the read-back card opens at the top of the screen", timeout: 10_000 })
+        .toBe(true);
+      await size(main.getByTestId("worklog-photo-input"), "the photo picker");
+      await size(main.getByTestId("worklog-date"), "the date field");
+      await size(main.getByTestId("worklog-site"), "the site field");
+      await fitsTheScreen(page, "the journal with the read-back open");
+
+      // W-6: the profile's "current job" row and the licence toggles.
+      // The experience form lives in the capabilities section, which the profile
+      // opens only when the address names it (DetailsHashOpener; the
+      // production walk P-7 opens it the same way).
+      await page.goto(`${BASE}/en/dashboard/profile#capabilities`);
+      const profile = page.getByRole("main");
+      await expect(profile.locator("details#capabilities").first(), "the capabilities section is open").toHaveAttribute("open", "", {
+        timeout: 30_000,
+      });
+      const openExp = profile.getByTestId("add-experience-open").filter({ visible: true }).first();
+      await openExp.scrollIntoViewIfNeeded();
+      await tapUntil(openExp, profile.getByTestId("add-experience-current"));
+      // `has` is matched INSIDE each label, so the inner locator is the bare test id.
+      await size(
+        profile.locator("label", { has: page.getByTestId("add-experience-current") }).filter({ visible: true }).first(),
+        "the current-job row",
+      );
+      // The licence toggles are in the CV-details section, opened the same way.
+      await page.goto(`${BASE}/en/dashboard/profile#cv-details`);
+      await expect(profile.locator("details#cv-details").first(), "the CV-details section is open").toHaveAttribute("open", "", {
+        timeout: 30_000,
+      });
+      const licences = profile
+        .locator('[data-testid^="prefs-licence-"]:not([data-testid="prefs-licence-categories"])')
+        .filter({ visible: true });
+      await expect.poll(() => licences.count(), { message: "the licence toggles render", timeout: 30_000 }).toBeGreaterThan(0);
+      for (let i = 0; i < (await licences.count()); i += 1) await size(licences.nth(i), `licence toggle ${i + 1}`, "both");
+      await fitsTheScreen(page, "the profile with the experience form open");
+      await done();
+    });
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await accountMenu(page, "account-menu-cv-link");
