@@ -1126,10 +1126,21 @@ test("ST-1. a student signs up, keeps one worker record with no company, and the
   // The editor sits in the collapsed CV details; its anchor opens it (the same
   // way the profile-cv-history walk reaches it). A real load, not a hash-only
   // navigation on the page the tab is already on.
+  // #3539: after the reload the page is ONE copy. A spine update that reached
+  // the page boundary while React held its streamed segment back made React
+  // client-render it, so a hidden server copy (`div[hidden][id^="S:"]`) stood
+  // beside <main> and the row resolved twice (lib/auth/context.tsx).
+  const profileErrors: string[] = [];
+  page.on("pageerror", (e) => profileErrors.push(String(e.message).slice(0, 300)));
   await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
   await page.reload();
   await expect(page.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("worker-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('div[hidden][id^="S:"]'), "no hidden copy of the profile page").toHaveCount(0, {
+    timeout: 15_000,
+  });
+  await expect(page.getByRole("main").getByTestId("worker-education-row").filter({ hasText: school })).toHaveCount(1);
+  expect(profileErrors, "the profile page raises no client error").toEqual([]);
   await expect(page.getByTestId("worker-education-self-stated")).toBeVisible();
 
   // CV with zero work history: the education block is there, labelled the same way.
@@ -1343,6 +1354,11 @@ test("E-3. the student becomes a worker: studies end, work is recorded, and noth
   await expect(main.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
   const row = main.getByTestId("worker-education-row").filter({ hasText: EDU.studiesAt });
   await expect(row, "the study is listed, visible").toBeVisible({ timeout: 30_000 });
+  // #3539: one copy of the page after the reload, as in ST-1.
+  await expect(page.locator('div[hidden][id^="S:"]'), "no hidden copy of the profile page").toHaveCount(0, {
+    timeout: 15_000,
+  });
+  await expect(row).toHaveCount(1);
   await row.getByRole("button", { name: "Edit" }).click();
   const form = main.getByTestId("worker-education-form");
   await expect(form).toBeVisible();
