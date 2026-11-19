@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest";
 const REPO = resolve(__dirname, "../../../..");
 const today = readFileSync(resolve(REPO, "apps/mobile/app/(shell)/today.tsx"), "utf8");
 
-const ORG_ONLY = ["today-open-candidates", "today-open-agencies", "today-open-agency-offers", "today-open-education", "today-open-review", "today-open-agency"];
+const ORG_ONLY = ["today-open-candidates", "today-open-invite-worker", "today-open-agencies", "today-open-agency-offers", "today-open-education", "today-open-review", "today-open-agency"];
 
 describe("mobile Today follows the active workspace", () => {
   it("hides organization stations only when the server says the workspace is personal", () => {

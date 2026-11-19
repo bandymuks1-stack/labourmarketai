@@ -190,6 +190,12 @@ export default function Screen() {
               />
               <Button
                 variant="quiet"
+                testID="today-open-invite-worker"
+                label={t("inviteWorker.title")}
+                onPress={() => router.push("/(shell)/invite-worker")}
+              />
+              <Button
+                variant="quiet"
                 testID="today-open-agency"
                 label={t("agency.title")}
                 onPress={() => router.push("/(shell)/agency")}

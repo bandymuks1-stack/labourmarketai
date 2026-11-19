@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
 
 import { FIRST_VISIT_CAMPAIGN, refuseOnFirstVisit, storedAnalytics } from "./first-visit-consent";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
@@ -305,6 +305,38 @@ async function lastMailLink(address: string): Promise<string> {
     await new Promise((res) => setTimeout(res, 1000));
   }
   throw new Error("no reset mail arrived in the local mail catcher");
+}
+
+/**
+ * The person proves their e-mail address the way the web asks (network page →
+ * send → the NEW mail's link), skipped when it already is proven; then the
+ * row the server reads (email_is_verified_v1) must exist.
+ */
+async function proveAddress(browser: Browser, address: string, password: string): Promise<void> {
+  const page = await (await browser.newContext()).newPage();
+  await signIn(page, address, password);
+  await page.goto(`${BASE}/en/dashboard/network`);
+  const prompt = page.getByTestId("network-email-unverified");
+  // isVisible() does not wait (it ignores a timeout): wait for the prompt.
+  const unproven = await prompt
+    .waitFor({ state: "visible", timeout: 15_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (unproven) {
+    const before = await mailIds(address);
+    await prompt.getByTestId("verify-email-send").click();
+    await expect(prompt.getByTestId("verify-email-sent")).toBeVisible({ timeout: 30_000 });
+    await page.goto(await newMailLink(address, before));
+    await page.waitForURL((u) => u.host === new URL(BASE).host && !u.pathname.includes("/auth/callback"), {
+      timeout: 60_000,
+    });
+    await page.goto(`${BASE}/en/dashboard/network`);
+  }
+  await expect(page.getByTestId("network-email-unverified"), `${address} is proven`).toHaveCount(0, { timeout: 30_000 });
+  const id = await userId(address);
+  const proofs = await db<Array<{ email: string }>>(`email_verifications_v1?profile_id=eq.${id}&select=email`);
+  expect(proofs.map((p) => p.email), `${address} is recorded as proven`).toContain(address.toLowerCase());
+  await page.context().close();
 }
 
 /** The ids of every message the local mail catcher holds for `address`. */
@@ -750,61 +782,13 @@ test("M-4. seed: a staffing agency, and the company's proven address", async ({ 
   );
   expect(company?.company_type, "the organization is recorded as a staffing agency").toBe("staffing_agency");
 
-  // The company proves its address (skipped when it already is proven).
-  const co = await (await browser.newContext()).newPage();
-  await signIn(co, owner, ownerPw);
-  await co.goto(`${BASE}/en/dashboard/network`);
-  const prompt = co.getByTestId("network-email-unverified");
-  // isVisible() does not wait (it ignores a timeout): wait for the prompt to
-  // render, and treat "not shown within 15 s" as "already proven". Runs
-  // 44448318982 / 44450906361 / 44453321275 skipped the proof because the
-  // page had not rendered yet.
-  const unproven = await prompt
-    .waitFor({ state: "visible", timeout: 15_000 })
-    .then(() => true)
-    .catch(() => false);
-  if (unproven) {
-    // The company already has mail from the earlier seeds (a notice can carry
-    // a callback link too), so follow the link of the NEW message only.
-    const before = await mailIds(owner);
-    await prompt.getByTestId("verify-email-send").click();
-    await expect(prompt.getByTestId("verify-email-sent")).toBeVisible({ timeout: 30_000 });
-    const link = await newMailLink(owner, before);
-    await co.goto(link);
-    await co.waitForURL((u) => u.host === new URL(BASE).host && !u.pathname.includes("/auth/callback"), {
-      timeout: 60_000,
-    });
-    const landed = new URL(co.url());
-    await co.goto(`${BASE}/en/dashboard/network`);
-    const stillUnproven = await co
-      .getByTestId("network-email-unverified")
-      .waitFor({ state: "visible", timeout: 10_000 })
-      .then(() => true)
-      .catch(() => false);
-    if (stillUnproven) {
-      // What happened, without a token: hosts and paths only.
-      const subjects: string[] = [];
-      const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${owner}`)}`);
-      for (const m of ((await r.json()) as { messages?: Array<{ ID: string; Subject?: string }> }).messages ?? []) {
-        subjects.push(`${before.has(m.ID) ? "old" : "new"}: ${m.Subject ?? "?"}`);
-      }
-      const l = new URL(link);
-      throw new Error(
-        `the company's address is still unproven: ${JSON.stringify({
-          followed: `${l.host}${l.pathname}`,
-          landed: `${landed.host}${landed.pathname}`,
-          mails: subjects,
-        })}`,
-      );
-    }
-  }
-  await expect(co.getByTestId("network-email-unverified"), "the company's address is proven").toHaveCount(0, {
-    timeout: 30_000,
-  });
-  // The row the accept RPC reads (email_is_verified_v1).
-  const ownerId = await userId(owner);
-  const proofs = await db<Array<{ email: string }>>(`email_verifications_v1?profile_id=eq.${ownerId}&select=email`);
-  expect(proofs.map((p) => p.email), "the company's address is recorded as proven").toContain(owner.toLowerCase());
+  // The company proves its address; so does the second worker (M-2), whom
+  // the agency later invites to its roster: a roster invitation, like an
+  // agency invitation, is answered only from a proven address.
+  await proveAddress(browser, owner, ownerPw);
+  const worker2 = process.env.MOBILE_WORKER2_SEED_EMAIL ?? "";
+  const worker2Pw = process.env.MOBILE_WORKER2_SEED_PASSWORD ?? "";
+  if (worker2 && worker2Pw) await proveAddress(browser, worker2, worker2Pw);
 });
 
 /**
