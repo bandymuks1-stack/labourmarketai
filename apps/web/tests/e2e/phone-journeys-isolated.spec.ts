@@ -466,6 +466,9 @@ for (const phone of PHONES) {
       // The home's ONE gold action for a worker with no recorded work opens the journal.
       const cta = page.locator('[data-testid="today-next-cta"]:visible');
       await expect(cta, "the home's one action").toHaveAttribute("href", /\/dashboard\/journal$/, { timeout: 60_000 });
+      // UX gap W-1: a healthy new account never shows the "could not be read"
+      // notice; a read that fails is named by the job's W-1 log step.
+      await expect(page.getByRole("main").getByTestId("today-open-unknown"), "the open items are read").toHaveCount(0);
       await cta.tap();
       await page.waitForURL(/\/en\/dashboard\/journal/, { timeout: 30_000 });
       const main = page.getByRole("main");
