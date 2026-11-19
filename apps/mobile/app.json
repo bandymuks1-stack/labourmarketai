@@ -138,6 +138,7 @@
             { "scheme": "https", "host": "labourmarket.ai", "path": "/agency-offers" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/education" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/agency" },
+            { "scheme": "https", "host": "labourmarket.ai", "path": "/invite-worker" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/absences" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/agencies" },
             { "scheme": "https", "host": "labourmarket.ai", "path": "/review" },
@@ -167,6 +168,7 @@
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/agency-offers" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/education" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/agency" },
+            { "scheme": "https", "host": "www.labourmarket.ai", "path": "/invite-worker" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/absences" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/agencies" },
             { "scheme": "https", "host": "www.labourmarket.ai", "path": "/review" }
