@@ -828,7 +828,19 @@ for (const phone of PHONES) {
       const owner = email(`studentco${phone.name}`);
       const org = await newOrganisation(browser, owner, "hire", `Synthetic Placement Owner ${phone.name} ${RUN}`, `Synthetic Placement Co ${phone.name} ${RUN}`);
       const { page, done } = await signedInOnPhone(browser, phone, owner);
+      // demand-request-button builds its country list in the browser (country-options-server-only
+      // lists it UNVERIFIED): the same cause as A-5's React #418 on /partners. The need form must
+      // render without a client error, in Lithuanian and English.
+      const clientErrors = () =>
+        (heard.get(page) ?? []).filter((n) => n.startsWith("pageerror:") || /Minified React error|react\.dev\/errors/.test(n));
+      await page.goto(`${BASE}/lt/dashboard/company/needs?audience=need#demand-intake`);
+      await expect(page.getByRole("main").getByTestId("demand-role")).toBeVisible({ timeout: 60_000 });
+      await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+      expect(clientErrors(), "the Lithuanian need form raises no client error").toEqual([]);
       await page.goto(`${BASE}/en/dashboard/company/needs?audience=need#demand-intake`);
+      await expect(page.getByRole("main").getByTestId("demand-role")).toBeVisible({ timeout: 60_000 });
+      await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+      expect(clientErrors(), "the English need form raises no client error").toEqual([]);
       st.needId = await postNeedOnPhone(page, org.profileId, STUDENT_NEED);
       await done();
       await verifyCompanyAsLocalAdmin(owner, email(`studentadmin${phone.name}`));
