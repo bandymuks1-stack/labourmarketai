@@ -203,6 +203,10 @@ jobs:
           [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
 
       - name: Build web
+        # Same heap as quality.yml's build: the default Node heap is no longer
+        # enough for the app (run 44426090349 died "JavaScript heap out of memory").
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Start web app (acceptance mode — refuses a non-local target)
