@@ -58,7 +58,7 @@ sed -n 's/^SUPABASE_SERVICE_ROLE_KEY=\(.*\)$/Authorization: Bearer \1/p' "$ENVF"
 STAMP=$(date -u +%Y%m%dT%H%M%SZ); OUT="$BK/archive-$NAME-$STAMP.jsonl.gz.age"
 PAGE=1000; total=0; last=""
 : > "$T/rows.jsonl"
-# Keyset pagination on the primary key (id > last, order id asc): a deep OFFSET on a 600 MB table hit the
+# Keyset pagination on the primary key (id > last, order id asc): a deep OFFSET on a large table hit the
 # statement timeout (PostgREST 500 at offset 7000 on 2026-10-17); a keyed page is an index seek.
 while :; do
   if [ -n "$last" ]; then key="&id=gt.$last"; else key=""; fi

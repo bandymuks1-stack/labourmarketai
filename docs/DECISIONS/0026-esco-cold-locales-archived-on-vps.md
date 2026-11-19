@@ -6,11 +6,13 @@
 ## Context
 
 The production Supabase project is on the Free plan (500 MB database allowance, 1 GB log
-ingestion). On 2026-10-17 the database held 1,103 MB; `esco_labels` alone was 408 MB
-(1,045,186 labels in all 28 official ESCO v1.2.1 languages: 132 MB of rows, 275 MB of indexes).
+ingestion). On 2026-10-17 the database was well over that allowance, and `esco_labels` (all 28
+official ESCO v1.2.1 languages, most of it indexes) was the largest part of it. The measured sizes
+and row counts are kept in the owner's private record, not in this public repository
+(note ref: sha256 f29ec6a9…2aaf).
 The product reads labels only in its UI locales (`da de en et fi lt lv nl no pl sv`; `ru` is a
 UI locale but ESCO has no Russian): every lookup pins the viewer's locale
-(`lib/esco/esco-lookup.ts`). The other 17 locales (585,863 rows) are platform content that no
+(`lib/esco/esco-lookup.ts`). The other 17 locales (over half of the rows) are platform content that no
 surface reads today. The quota deadline is 2026-10-20 and the budget rule is 0 € extra.
 
 ## Decision
