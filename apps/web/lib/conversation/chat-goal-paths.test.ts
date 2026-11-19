@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { readCompoundStatement } from "./compound-statement";
+import { guessDocumentType } from "./document-type-guess";
 import { classifyIntent } from "./intent-router";
+import { targetOccupationFromSentence } from "./target-occupation-gap";
 import { readHelpTopic } from "./product-help";
 
 /**
@@ -99,6 +102,14 @@ describe("every stated goal reaches its intent in all seven languages", () => {
   }
 });
 
+describe("the retraining answer measures against the occupation the person names", () => {
+  for (const [lang, goals] of Object.entries(GOALS)) {
+    it(`${lang}: "${goals.retrain}" names the electrician`, () => {
+      expect(targetOccupationFromSentence(goals.retrain)).toBe("electrician");
+    });
+  }
+});
+
 describe("a number that is not people opens no demand form", () => {
   for (const sentence of [
     "Ich brauche ab Montag 3 Stunden frei",
@@ -113,5 +124,19 @@ describe("a number that is not people opens no demand form", () => {
   }
   it('"Ik heb een baan nodig" (I need a job) stays out of the demand intake', () => {
     expect(classifyIntent("Ik heb een baan nodig").intent).not.toBe("need-workers");
+  });
+});
+
+describe("a wish to retrain is not a claim to hold a qualification", () => {
+  // "persikvalifikuoti" contains "kvalifik", the Lithuanian certificate
+  // needle: the chat answered "Certificate: you said you have it".
+  it("names no document", () => {
+    expect(guessDocumentType("Noriu persikvalifikuoti į elektriką")).toBeNull();
+  });
+  it("is not read as several stated facts, so the retraining answer owns it", () => {
+    expect(readCompoundStatement("Noriu persikvalifikuoti į elektriką").isCompound).toBe(false);
+  });
+  it("a stated qualification is still a certificate", () => {
+    expect(guessDocumentType("Turiu elektriko kvalifikaciją")).toBe("professional_certificate");
   });
 });
