@@ -87,3 +87,13 @@ maestro test \
   -e MOBILE_AGENCY_PASSWORD="$MOBILE_AGENCY_PASSWORD" \
   apps/mobile/.maestro/agency-clients-journey.yaml
 echo "ANDROID_AGENCY_CLIENTS_ON_DEVICE: agency invited the company; the company accepted and shared one of its needs"
+
+: "${MOBILE_WORKER3_EMAIL:?employee seed address missing}"
+: "${MOBILE_WORKER3_PASSWORD:?employee seed password missing}"
+maestro test \
+  -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+  -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+  -e MOBILE_WORKER3_EMAIL="$MOBILE_WORKER3_EMAIL" \
+  -e MOBILE_WORKER3_PASSWORD="$MOBILE_WORKER3_PASSWORD" \
+  apps/mobile/.maestro/absences-journey.yaml
+echo "ANDROID_ABSENCES_ON_DEVICE: employee requested two days of annual leave; the company approved it"
