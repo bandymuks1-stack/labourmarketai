@@ -652,7 +652,28 @@ test("M-3. seed: an employee with one journal entry waiting for the company's re
     body: "{}",
   });
   expect(rpc.ok, "the review RPC answers the company").toBe(true);
-  expect(entryIds(await rpc.json()), "the entry waits for the company's review").toContain(entries[0]!.id);
+  const queued = entryIds(await rpc.json());
+  if (!queued.includes(entries[0]!.id)) {
+    // Every input of the employer review decision, read with the local
+    // service key (synthetic rows on the throwaway stack only).
+    const facts = {
+      ownerEngagements: await db(`engagement_contexts?profile_id=eq.${ownerId}&select=organization_id,relationship_slug,status`),
+      ownerMemberships: await db(`company_memberships?profile_id=eq.${ownerId}&select=organization_id,role,status`),
+      workerEngagements: await db(`engagement_contexts?profile_id=eq.${workerId}&select=id,organization_id,relationship_slug,status,journal_review_enabled`),
+      workerMemberships: await db(`company_memberships?profile_id=eq.${workerId}&select=organization_id,role,status`),
+      entry: await db(`journal_entries?id=eq.${entries[0]!.id}&select=worker_id,engagement_context_id,superseded_by,deleted_at`),
+      confirmations: await db(`journal_entry_confirmations?entry_id=eq.${entries[0]!.id}&select=confirmer_id,confirmation_scope`),
+      authority: await fetch(`${SB_URL}/rest/v1/rpc/journal_entry_review_authority_v1`, {
+        method: "POST",
+        headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ p_entry_id: entries[0]!.id, p_actor: ownerId }),
+      }).then(async (r) => `${r.status} ${await r.text()}`),
+      org: org!.id,
+      ownerId,
+      workerId,
+    };
+    throw new Error(`the entry does not wait for the company's review: ${JSON.stringify(facts)}`);
+  }
   const mcp = await fetch(`${BASE}/api/mcp`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream", Authorization: `Bearer ${jwt}` },
