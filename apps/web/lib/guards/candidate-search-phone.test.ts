@@ -59,3 +59,41 @@ describe("candidate search on a phone", () => {
     }
   });
 });
+
+/**
+ * Round 2 (phone pass 2026-11-19): the facts on the card and the section of
+ * people an agency offered move onto the shared shapes, like for like.
+ *  - Verdict, evidence confidence, skill count, readiness label and country,
+ *    and the hand-raiser's stated facts are the shared status pill
+ *    (components/app/status-chip), never a hand-typed `rounded-md border ...
+ *    px-2 py-0.5` span. Test ids stay on the pill (its `testid` prop).
+ *  - The agency-offered section and each offered person are ui/Card.
+ * Criterion chips (met / blocking / reasons / gaps / negotiables) keep their
+ * own spans: they carry `data-criterion` and a source `title` the shared pill
+ * does not forward, so a swap would not be like for like.
+ */
+describe("candidate search on a phone, round 2", () => {
+  it("the card's verdict and facts are the shared status pill", () => {
+    const verdict = section("data-testid={`scout-verdict-${c.workerId}`}", "</div>");
+    expect(verdict.match(/<StatusChip\b/g) ?? []).toHaveLength(4);
+    expect(verdict).not.toMatch(/rounded-md border/);
+    for (const re of [
+      /<StatusChip\s+variant="neutral"\s+testid=\{`scout-skill-count-/,
+      /<StatusChip variant="neutral" testid=\{`scout-verdict-unchecked-/,
+      /<StatusChip variant="neutral" testid=\{`scout-evidence-confidence-/,
+      /<StatusChip variant="neutral" testid=\{`scout-experience-\$\{h\.workerId\}`\}>/,
+      /<StatusChip variant="neutral" testid="candidate-available-later">/,
+    ]) {
+      expect(src).toMatch(re);
+    }
+    const readiness = section("data-testid={`scout-readiness-${c.workerId}`}", "</div>");
+    expect(readiness.match(/<StatusChip\b/g) ?? []).toHaveLength(2);
+    expect(src).toMatch(/READINESS_TONE: Record<CompanyCandidateLabel, StatusChipVariant>/);
+  });
+
+  it("the people an agency offered sit on ui/Card", () => {
+    const offers = section('data-testid="scouting-agency-offers"', "</section>");
+    expect(offers.match(/<Card compact className="flex flex-col gap-3">/g) ?? []).toHaveLength(2);
+    expect(offers).not.toMatch(/card-border/);
+  });
+});

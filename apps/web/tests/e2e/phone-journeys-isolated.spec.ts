@@ -182,6 +182,14 @@ async function candidateSearchOnPhone(page: Page, needId: string, where: string)
     const row = await filters.boundingBox();
     expect(row!.x + row!.width, `${where}: the filters stay inside the screen`).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
   }
+  // Round 2: the card's status pills (verdict, evidence, readiness) and, when an
+  // agency offered people, that section on ui/Card stay inside the screen.
+  for (const sel of ['[data-testid^="scout-verdict-"]', '[data-testid^="scout-readiness-"]', '[data-testid="scouting-agency-offers"]']) {
+    const part = main.locator(sel).first();
+    if (!(await part.isVisible().catch(() => false))) continue;
+    const box = await part.boundingBox();
+    expect(box!.x + box!.width, `${where}: ${sel} stays inside the screen`).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+  }
   // The result is reachable below: candidates, or the empty list with its door onward.
   const outcome = main
     .getByTestId("scouting-results")
