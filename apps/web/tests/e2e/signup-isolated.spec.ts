@@ -976,6 +976,8 @@ test("P-3. onboarding on a phone: the bar covers neither the end of the form, a 
     expect(await bar.evaluate((el) => getComputedStyle(el).position), "the profile step's bar is fixed on a phone").toBe("fixed");
     const barBox = () => bar.evaluate((el) => ({ top: Math.round(el.getBoundingClientRect().top), height: Math.round(el.getBoundingClientRect().height) }));
     const quiet = await barBox();
+    // UX_GAPS ST-4: Finish and Back share one row, so the quiet bar is one button high (was 125 px).
+    expect(quiet.height, "the profile step's bar is one row").toBeLessThanOrEqual(80);
 
     // (1) A refusal makes the bar taller: name and country given, the institution left empty.
     await page.getByTestId("onboarding-display-name").fill("QA-SYNTHETIC Phone bar");

@@ -48,7 +48,7 @@ export type ProgramFormLabels = {
 };
 
 const inputCls =
-  "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
+  "min-h-11 w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 const btnCls =
   "inline-flex items-center rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60";
 
@@ -77,7 +77,7 @@ export function CreateProgramForm({
       <input type="hidden" name="organizationId" value={organizationId} readOnly />
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         {labels.programName}
-        <input name="name" required minLength={2} maxLength={160} className={`${inputCls} min-h-11`} data-testid="program-name" />
+        <input name="name" required minLength={2} maxLength={160} className={inputCls} data-testid="program-name" />
       </label>
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         {labels.targetProfession}
