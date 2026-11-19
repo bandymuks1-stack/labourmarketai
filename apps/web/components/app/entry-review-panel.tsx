@@ -126,7 +126,6 @@ export function EntryReviewPanel({
             <Button
               type="submit"
               size="sm"
-              className="min-h-11"
               variant="secondary"
               className="min-h-11"
               disabled={pending}
