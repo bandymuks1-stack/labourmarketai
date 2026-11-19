@@ -4110,8 +4110,12 @@
           "chipHelpPeople": "Komanda un uzaicinājumi",
           "chipHelpPlanning": "Atvērt plānošanu",
           "chipHelpServices": "Mani pakalpojumi",
-          "chipHelpJournal": "Darba žurnāls"
-        }
+          "chipHelpJournal": "Darba žurnāls",
+          "chipHelpSettings": "Iestatījumi",
+          "chipHelpPrivacy": "Privātums un jūsu dati"
+        },
+        "account": "Pieteikšanās, e-pasts, paziņojumi un izskats ir Iestatījumos.",
+        "privacy": "Sadaļā “Privātums un jūsu dati” varat lejupielādēt savus datus, redzēt, kas redz jūsu profilu, un pieprasīt konta dzēšanu."
       },
       "interestInboxAmbiguous": "Tas var nozīmēt divas lietas — ko vēlaties redzēt?",
       "chipInterestOnMyNeeds": "Interese par maniem pieprasījumiem",

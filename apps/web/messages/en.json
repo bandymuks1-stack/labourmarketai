@@ -14741,8 +14741,12 @@
           "chipHelpPeople": "Team and invitations",
           "chipHelpPlanning": "Open planning",
           "chipHelpServices": "My services",
-          "chipHelpJournal": "Work journal"
-        }
+          "chipHelpJournal": "Work journal",
+          "chipHelpSettings": "Settings",
+          "chipHelpPrivacy": "Privacy and your data"
+        },
+        "account": "Your sign-in, e-mail, notifications and appearance are in Settings.",
+        "privacy": "On Privacy and your data you can download your data, see who sees your profile and request deletion of your account."
       },
       "interestInboxAmbiguous": "That can mean two things — which one do you want?",
       "chipInterestOnMyNeeds": "Interest in my needs",

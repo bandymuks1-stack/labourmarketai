@@ -14741,8 +14741,12 @@
           "chipHelpPeople": "Team och inbjudningar",
           "chipHelpPlanning": "Öppna planering",
           "chipHelpServices": "Mina tjänster",
-          "chipHelpJournal": "Arbetsjournal"
-        }
+          "chipHelpJournal": "Arbetsjournal",
+          "chipHelpSettings": "Inställningar",
+          "chipHelpPrivacy": "Integritet och dina uppgifter"
+        },
+        "account": "Inloggning, e-post, aviseringar och utseende finns under Inställningar.",
+        "privacy": "Under Integritet och dina uppgifter kan du ladda ner dina uppgifter, se vem som ser din profil och begära att ditt konto raderas."
       },
       "interestInboxAmbiguous": "Det kan betyda två saker — vilken av dem vill du ha?",
       "chipInterestOnMyNeeds": "Intresse för mina förfrågningar",

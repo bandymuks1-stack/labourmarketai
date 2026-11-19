@@ -4110,8 +4110,12 @@
           "chipHelpPeople": "Meeskond ja kutsed",
           "chipHelpPlanning": "Ava planeerimine",
           "chipHelpServices": "Minu teenused",
-          "chipHelpJournal": "Tööpäevik"
-        }
+          "chipHelpJournal": "Tööpäevik",
+          "chipHelpSettings": "Seaded",
+          "chipHelpPrivacy": "Privaatsus ja sinu andmed"
+        },
+        "account": "Sisselogimise, e-posti, teavituste ja välimuse leiad seadetest.",
+        "privacy": "Jaotises „Privaatsus ja sinu andmed“ saad oma andmed alla laadida, näha, kes sinu profiili näeb, ja taotleda konto kustutamist."
       },
       "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
       "chipInterestOnMyNeeds": "Huvi minu päringute vastu",
