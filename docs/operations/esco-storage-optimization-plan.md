@@ -5,7 +5,7 @@ the platform direction is broader multilingual Europe. v1's A1 (prune 17 locales
 Optimization must preserve full 28-language capability.
 
 ## Facts (unchanged, VERIFIED_DB)
-Measured sizes are kept in the owner's private record (note ref: sha256 f29ec6a9…2aaf). In order of size:
+Measured sizes are kept in the owner's private record (note ref: sha256 bd95c52d…98cf). In order of size:
 esco_labels is mostly indexes; the unique 5-col arbiter is the largest (required for re-import),
 then typeahead_idx (query/index MISMATCH — `label ILIKE` cannot use the `lower(label)` expression;
 only leading `locale` column helps; `concept_type` filtered on every call but absent from index),
@@ -58,6 +58,6 @@ project is on the Supabase Free plan (500 MB allowance; the database was over it
   (performance, not storage). B3 as an in-Supabase cold TABLE was rejected for this plan: it keeps
   the bytes inside the quota.
 - Expected: esco_labels shrinks to roughly a third after `vacuum full` + `reindex` (both owner-gated).
-  Measured sizes: owner's private record (note ref: sha256 f29ec6a9…2aaf).
+  Measured sizes: owner's private record (note ref: sha256 bd95c52d…98cf).
 - The guard `esco-dataset-is-preserved.test.ts` allows exactly this migration (ARCHIVE-VERIFIED
   marker + decision reference) and still refuses any other delete.

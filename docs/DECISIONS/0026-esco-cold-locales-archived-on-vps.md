@@ -9,7 +9,7 @@ The production Supabase project is on the Free plan (500 MB database allowance, 
 ingestion). On 2026-10-17 the database was well over that allowance, and `esco_labels` (all 28
 official ESCO v1.2.1 languages, most of it indexes) was the largest part of it. The measured sizes
 and row counts are kept in the owner's private record, not in this public repository
-(note ref: sha256 f29ec6a9…2aaf).
+(note ref: sha256 bd95c52d…98cf).
 The product reads labels only in its UI locales (`da de en et fi lt lv nl no pl sv`; `ru` is a
 UI locale but ESCO has no Russian): every lookup pins the viewer's locale
 (`lib/esco/esco-lookup.ts`). The other 17 locales (over half of the rows) are platform content that no

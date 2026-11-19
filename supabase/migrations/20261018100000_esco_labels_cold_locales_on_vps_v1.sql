@@ -9,7 +9,7 @@
 -- locales no product surface reads) now lives OUTSIDE Supabase — on the Agentai VPS, age-encrypted,
 -- restorable row-for-row — because the Supabase Free project (500 MB allowance) is over its
 -- allowance and esco_labels is the largest table (sizes: owner's private record,
--- note ref: sha256 f29ec6a9…2aaf). No language is lost: the archive restores through
+-- note ref: sha256 bd95c52d…98cf). No language is lost: the archive restores through
 -- ops/vps/lm-archive-table.sh --restore (PostgREST upsert on the same unique key the importer uses).
 --
 -- PRECONDITION (checked by the person applying, not by SQL):
