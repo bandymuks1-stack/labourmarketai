@@ -790,43 +790,6 @@ test("M-4. seed: a staffing agency, and the company's proven address", async ({ 
   const worker2Pw = process.env.MOBILE_WORKER2_SEED_PASSWORD ?? "";
   if (worker2 && worker2Pw) await proveAddress(browser, worker2, worker2Pw);
 });
-    const link = await newMailLink(owner, before);
-    await co.goto(link);
-    await co.waitForURL((u) => u.host === new URL(BASE).host && !u.pathname.includes("/auth/callback"), {
-      timeout: 60_000,
-    });
-    const landed = new URL(co.url());
-    await co.goto(`${BASE}/en/dashboard/network`);
-    const stillUnproven = await co
-      .getByTestId("network-email-unverified")
-      .waitFor({ state: "visible", timeout: 10_000 })
-      .then(() => true)
-      .catch(() => false);
-    if (stillUnproven) {
-      // What happened, without a token: hosts and paths only.
-      const subjects: string[] = [];
-      const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${owner}`)}`);
-      for (const m of ((await r.json()) as { messages?: Array<{ ID: string; Subject?: string }> }).messages ?? []) {
-        subjects.push(`${before.has(m.ID) ? "old" : "new"}: ${m.Subject ?? "?"}`);
-      }
-      const l = new URL(link);
-      throw new Error(
-        `the company's address is still unproven: ${JSON.stringify({
-          followed: `${l.host}${l.pathname}`,
-          landed: `${landed.host}${landed.pathname}`,
-          mails: subjects,
-        })}`,
-      );
-    }
-  }
-  await expect(co.getByTestId("network-email-unverified"), "the company's address is proven").toHaveCount(0, {
-    timeout: 30_000,
-  });
-  // The row the accept RPC reads (email_is_verified_v1).
-  const ownerId = await userId(owner);
-  const proofs = await db<Array<{ email: string }>>(`email_verifications_v1?profile_id=eq.${ownerId}&select=email`);
-  expect(proofs.map((p) => p.email), "the company's address is recorded as proven").toContain(owner.toLowerCase());
-});
 
 /**
  * A-1..A-4. THE THREE SIGN-UP FAULTS OF THE 2026-11-13 TRUST AUDIT, each as the
