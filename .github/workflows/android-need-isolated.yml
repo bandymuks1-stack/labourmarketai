@@ -148,7 +148,10 @@ jobs:
           set -uo pipefail
           supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
           rc=$?
-          grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60
+          # An empty or fully-filtered log must not end the step before it
+          # reports supabase's own exit code (run 44431973350 printed nothing).
+          { grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" || true; } | tail -n 60
+          echo "supabase start exit code: $rc"
           exit $rc
 
       - name: Export the LOCAL stack env (masked; refuses anything non-local)
