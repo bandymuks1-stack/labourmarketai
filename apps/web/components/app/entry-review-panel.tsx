@@ -126,6 +126,7 @@ export function EntryReviewPanel({
             <Button
               type="submit"
               size="sm"
+              className="min-h-11"
               variant="secondary"
               disabled={pending}
               aria-busy={pending || undefined}

@@ -268,6 +268,7 @@ export function CounterpartyReviewCard({ view }: { view: CounterpartyCardView })
             <Button
               type="submit"
               size="sm"
+              className="min-h-11"
               variant={effective === "accept" ? "primary" : "secondary"}
               disabled={pending || effective === null}
               aria-busy={pending || undefined}
