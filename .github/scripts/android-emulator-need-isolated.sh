@@ -69,3 +69,31 @@ maestro test \
   -e NOT_FIT_WORKER_ID="$NOT_FIT_WORKER_ID" \
   apps/mobile/.maestro/booking-journey.yaml
 echo "ANDROID_BOOKING_ON_DEVICE: company shortlisted two workers, marked one not a fit, proposed a start to the other; that worker accepted it under Offers"
+
+: "${REVIEW_ENTRY_ID:?review entry id missing}"
+maestro test \
+  -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+  -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+  -e REVIEW_ENTRY_ID="$REVIEW_ENTRY_ID" \
+  apps/mobile/.maestro/review-journey.yaml
+echo "ANDROID_REVIEW_ON_DEVICE: company opened Work review, approved its employee's entry with a note; the entry left the queue"
+
+: "${MOBILE_AGENCY_EMAIL:?agency seed address missing}"
+: "${MOBILE_AGENCY_PASSWORD:?agency seed password missing}"
+maestro test \
+  -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+  -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+  -e MOBILE_AGENCY_EMAIL="$MOBILE_AGENCY_EMAIL" \
+  -e MOBILE_AGENCY_PASSWORD="$MOBILE_AGENCY_PASSWORD" \
+  apps/mobile/.maestro/agency-clients-journey.yaml
+echo "ANDROID_AGENCY_CLIENTS_ON_DEVICE: agency invited the company; the company accepted and shared one of its needs"
+
+: "${MOBILE_WORKER3_EMAIL:?employee seed address missing}"
+: "${MOBILE_WORKER3_PASSWORD:?employee seed password missing}"
+maestro test \
+  -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+  -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+  -e MOBILE_WORKER3_EMAIL="$MOBILE_WORKER3_EMAIL" \
+  -e MOBILE_WORKER3_PASSWORD="$MOBILE_WORKER3_PASSWORD" \
+  apps/mobile/.maestro/absences-journey.yaml
+echo "ANDROID_ABSENCES_ON_DEVICE: employee requested two days of annual leave; the company approved it"

@@ -271,7 +271,17 @@ async function workerIntake(page: Page): Promise<void> {
   await expect(page.getByTestId("worker-intake-result"), "the intake answers the visitor").toBeVisible({ timeout: 60_000 });
   expectNoAuth(seen, "the intake's answer");
 
-  await page.getByTestId("intake-bridge").locator("a").first().click();
+  // After the answer the form is reset; a field changed now is ADDED to what
+  // was kept, never a replacement for it (the earlier fields stay).
+  const languages = `Lithuanian, English ${RUN}`;
+  await page.getByRole("main").locator('input[name="languages"]').fill(languages);
+  await expect(page.getByRole("main").locator('input[name="full_name"]'), "the kept fields are put back").toHaveValue(name);
+
+  // Sign-up from the HEADER, not the intake's own link: on the intake it
+  // carries the profile builder as `next` too, so the typed text is bound.
+  const headerSignUp = page.locator('header [data-testid="header-auth"] a[href*="/auth/signup"]').first();
+  await expect(headerSignUp).toHaveAttribute("href", "/en/auth/signup?next=%2Fdashboard%2Fprofile");
+  await headerSignUp.click();
   await page.waitForURL(/\/en\/auth\/signup/, { timeout: 60_000 });
   await signUpHere(page, "intake");
   // The intake's sign-up returns to the profile builder (#3415): onboarding
@@ -285,9 +295,9 @@ async function workerIntake(page: Page): Promise<void> {
   await page.getByRole("option", { name: /Lithuania/ }).first().click();
   await page.getByTestId("onboarding-submit").click();
   await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
-  const composer = page.locator('[data-testid="profile-text-flow-compose"] textarea').first();
+  const composer = page.getByRole("main").locator('[data-testid="profile-text-flow-compose"] textarea').first();
   await expect(composer, "the typed intake survives sign-up, in the profile composer").toHaveValue(
-    new RegExp(`${name}[\\s\\S]*${note}`),
+    new RegExp(`${name}[\\s\\S]*${languages}[\\s\\S]*${note}`),
     { timeout: 30_000 },
   );
 }

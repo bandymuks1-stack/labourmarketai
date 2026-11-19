@@ -106,7 +106,7 @@ summary "- ANDROID_PARITY_JOURNEY_PROVEN: journal correction (draft + confirm) �
 if [ "${NEW_SCREENS_WALK:-0}" = 1 ]; then
   WALK_CONSOLE="${RUNNER_TEMP:-/tmp}/maestro-new-screens-console.txt"
   maestro test -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" apps/mobile/.maestro/new-screens-walk.yaml | tee "$WALK_CONSOLE" || { on_screen_ids; exit 1; }
-  if grep -q "ORGANIZATION_WORKSPACE.*COMPLETED" "$WALK_CONSOLE"; then WS_CLAIM="organization workspace: needs list, agency offers and programmes read"; else WS_CLAIM="personal workspace: organization stations absent, as designed"; fi
-  echo "ANDROID_NEW_SCREENS_WALK_PROVEN: Living CV sections read, work / education / language forms opened and cancelled (nothing saved); ${WS_CLAIM}; sign-out"
+  if grep -q "ORGANIZATION_WORKSPACE.*COMPLETED" "$WALK_CONSOLE"; then WS_CLAIM="organization workspace: needs list, agency offers, programmes and the agency station read"; else WS_CLAIM="personal workspace: organization stations absent, as designed"; fi
+  echo "ANDROID_NEW_SCREENS_WALK_PROVEN: Living CV sections read, work / education / language forms opened and cancelled (nothing saved); offers, opportunities and availability read; ${WS_CLAIM}; sign-out"
   summary "- ANDROID_NEW_SCREENS_WALK_PROVEN (read only): Living CV forms opened + cancelled → ${WS_CLAIM} → sign-out"
 fi

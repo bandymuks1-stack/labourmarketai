@@ -140,6 +140,12 @@ export default function Screen() {
           />
           <Button
             variant="quiet"
+            testID="today-open-absences"
+            label={t("absences.title")}
+            onPress={() => router.push("/(shell)/absences")}
+          />
+          <Button
+            variant="quiet"
             testID="today-open-availability"
             label={t("today.openAvailability")}
             onPress={() => router.push("/(shell)/availability")}
@@ -160,6 +166,12 @@ export default function Screen() {
               />
               <Button
                 variant="quiet"
+                testID="today-open-agencies"
+                label={t("clientBridge.title")}
+                onPress={() => router.push("/(shell)/agencies")}
+              />
+              <Button
+                variant="quiet"
                 testID="today-open-agency-offers"
                 label={t("agencyOffers.title")}
                 onPress={() => router.push("/(shell)/agency-offers")}
@@ -169,6 +181,12 @@ export default function Screen() {
                 testID="today-open-education"
                 label={t("education.title")}
                 onPress={() => router.push("/(shell)/education")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-review"
+                label={t("review.title")}
+                onPress={() => router.push("/(shell)/review")}
               />
               <Button
                 variant="quiet"

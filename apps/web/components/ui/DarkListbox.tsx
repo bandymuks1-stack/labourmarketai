@@ -277,7 +277,7 @@ export function DarkListbox({
                     onClick={() => !o.disabled && commit(o.value)}
                     onMouseEnter={() => setActiveIndex(i)}
                     className={cn(
-                      "flex w-full items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left text-sm",
+                      "flex min-h-11 w-full items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left text-sm",
                       isSelected ? "text-brand-blue" : "text-text-primary",
                       isActive && !o.disabled && "bg-ink-700",
                       o.disabled && "cursor-not-allowed text-text-muted",

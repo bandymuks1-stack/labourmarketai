@@ -3,7 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { OrganizationApprovalsCard } from "@/components/app/arena/confirm-pulse";
 import { AreaSwitcher } from "@/components/app/area-switcher";
 import { NeedDoorLink } from "@/components/app/need-door-link";
-import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
+import { Link } from "@/lib/i18n/navigation";
+import { learnerInviteHref, ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 
 /**
  * THE COMPANY CONTEXT'S CENTRE (owner order 2026-10-01): the company home is
@@ -26,13 +27,26 @@ import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
  * entry is the ONE calendar (/dashboard/planning); "capacity" is the
  * workforce zone, which the context-parity guard records as a different
  * capability, not a calendar.
+ *
+ * AN EDUCATION INSTITUTION'S ONE PRIMARY (UX_GAPS 2026-11-18 I-2): for an
+ * organization with the education capability (the organization doors' gate,
+ * `isEducationInstitution`, decided by the page) the one primary is the
+ * learner invite — the SAME address and label as the learners section's
+ * `institution-learners-invite`. Every other organization keeps the need door.
  */
-export async function CompanyModelScreen() {
+export async function CompanyModelScreen({
+  learnerInviteOrganizationId = null,
+}: {
+  /** The active organization's id when it holds the education capability. */
+  learnerInviteOrganizationId?: string | null;
+} = {}) {
   const [t, tAll, tNav] = await Promise.all([
     getTranslations("companyModel"),
     getTranslations(),
     getTranslations("common.nav"),
   ]);
+  const primaryClassName =
+    "inline-flex min-h-11 w-fit items-center rounded-full bg-brand-blue px-5 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne";
   return (
     <section
       aria-label={t("title")}
@@ -45,11 +59,18 @@ export async function CompanyModelScreen() {
       {/* What needs the owner first: the real reviewable-entry queue, approved
           right here (honest unknown when unreadable, says why when empty). */}
       <OrganizationApprovalsCard />
-      <NeedDoorLink
-        surface="company_model"
-        testId="company-model-primary"
-        className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-blue px-5 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
-      />
+      {learnerInviteOrganizationId ? (
+        <Link
+          href={learnerInviteHref(learnerInviteOrganizationId) as "/dashboard/network"}
+          data-testid="company-model-primary"
+          data-primary="learner-invite"
+          className={primaryClassName}
+        >
+          {tAll("roleDashboards.company.learners.invite")}
+        </Link>
+      ) : (
+        <NeedDoorLink surface="company_model" testId="company-model-primary" className={primaryClassName} />
+      )}
       {/* Every door of the company, by priority (the everyday six first),
           as the light 3D area switcher — one source: ORGANIZATION_WORK_AREAS.
           The carousel replaces the six-tile grid + "More" disclosure: the

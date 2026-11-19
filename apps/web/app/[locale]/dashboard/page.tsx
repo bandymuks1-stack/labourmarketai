@@ -60,6 +60,7 @@ import {
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { CompanyModelScreen } from "@/components/app/organization/company-model-screen";
+import { isEducationInstitution } from "@/lib/organizations/capabilities";
 import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
 import { conversationOpeningContext } from "@/lib/today/today-route";
 import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
@@ -409,7 +410,15 @@ export default async function DashboardHomePage({
   // re-sends them.
   // The company workspace opens on the company model (existing doors).
   const companyModel =
-    activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
+    activeOrgWorkspace && identity === "company" ? (
+      <CompanyModelScreen
+        learnerInviteOrganizationId={
+          isEducationInstitution({ roleSlugs: workspace.signals.capabilities })
+            ? workspace.organizationId
+            : null
+        }
+      />
+    ) : null;
   // The pilot pass pointer leads it — the employer home is where an owner
   // looks first, and it renders nothing unless the pass is theirs to start.
   const companyOpeningContext = companyModel ? (

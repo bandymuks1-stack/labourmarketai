@@ -121,6 +121,15 @@ describe("Guard: mobile tap floor lives once in globals.css", () => {
     );
   });
 
+  it("restores a declared 44px min-width the floor would otherwise clamp (min-w-11)", () => {
+    const rule = block.slice(block.indexOf(".min-w-11"), block.indexOf("}", block.indexOf(".min-w-11")));
+    expect(rule, "a restore rule for min-w-11 exists").toMatch(/min-width:\s*2\.75rem/);
+    expect(block.indexOf(".min-w-11")).toBeGreaterThan(block.indexOf('[data-tap-floor="off"]'));
+    expect(block).toMatch(
+      /:is\(\[data-chrome\], \[data-mobile-sheet\]\)\s*:is\(button, \[role="button"\], a\[href\], label\):is\(\.min-w-11/,
+    );
+  });
+
   it("the floor is mobile-only (nothing under 767.98px is redefined for desktop)", () => {
     expect(css.match(/@media \(max-width: 767\.98px\)/g)?.length).toBe(1);
   });

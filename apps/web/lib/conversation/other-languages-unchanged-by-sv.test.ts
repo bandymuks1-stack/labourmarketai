@@ -170,7 +170,38 @@ const NOT_EUROS_IS_NOT_PREFILLED: readonly Intended[] = [
   ...otherCurrency("Salary 3000 CHF", "chf"),
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED];
+/**
+ * (c) A PERSON'S OWN BOOKINGS REACH THE OFFERS ANSWER IN EVERY LANGUAGE.
+ *
+ * main's `offers` intent knew only the English singular `booking` (the word
+ * boundary refused "bookings") and the Swedish `bokning`, so "Show my
+ * bookings", "Meine Buchungen" or "moje rezerwacje" got the AI-off reply.
+ * Catalog sentences that name bookings now route there too.
+ */
+const BOOKINGS_ARE_OFFERS: readonly Intended[] = [
+  {
+    sentence:
+      "Buchungen und Projektzuweisungen konnten nicht gelesen werden, daher kann jemand, der als frei angezeigt wird, bereits verplant sein.",
+    reader: "route",
+    now: ["offers", 2],
+  },
+  { sentence: "Znika, gdy otworzysz stronę rezerwacji.", reader: "route", now: ["offers", 2] },
+];
+
+/**
+ * (d) ACCOUNT QUESTIONS OPEN THE SETTINGS PAGE (owner 2026-11-19).
+ *
+ * The chat had no answer for account and privacy questions ("Delete my
+ * account", "Change my password"): they got the AI-off reply. Two help
+ * topics now open the existing settings and privacy pages. One catalog
+ * sentence about resetting a password now routes to the settings door.
+ */
+const ACCOUNT_QUESTIONS_OPEN_SETTINGS: readonly Intended[] = [
+  { sentence: "Password reset", reader: "route", now: ["product-help", 16] },
+  { sentence: "Password reset", reader: "helpTopic", now: "account" },
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).

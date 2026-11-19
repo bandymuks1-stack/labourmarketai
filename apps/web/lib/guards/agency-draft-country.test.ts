@@ -16,10 +16,12 @@ describe("an agency-drafted need carries an ISO country", () => {
   it("the form offers the ISO list and requires a choice", () => {
     const src = read("components", "app", "agency-delegation-panel.tsx");
     const at = src.indexOf('data-testid="agency-draft-country"');
-    const field = src.slice(src.lastIndexOf("<select", at), src.indexOf("</select>", at));
+    const field = src.slice(src.search(/<[sS]elect\b[^]*?data-testid="agency-draft-country"/), src.indexOf("</Select>", at));
     expect(field).toContain('name="country"');
     expect(field).toContain("required");
-    expect(field).toContain("countryOptionsForLocale(locale).map(");
+    // The ISO list is built on the server and passed in (A-5: Intl data differs between
+    // Node and the browser, so a client-built list broke hydration with React #418).
+    expect(field).toContain("countryOptions.map(");
     expect(src).not.toMatch(/name="country"\s+maxLength=\{2\}/);
   });
 

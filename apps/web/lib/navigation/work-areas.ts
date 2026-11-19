@@ -40,7 +40,8 @@ export type WorkAreaIconKey =
   | "gauge"
   | "activity"
   | "barChart"
-  | "history";
+  | "history"
+  | "education";
 
 export type WorkArea = {
   readonly id: string;
@@ -103,19 +104,50 @@ export const ORGANIZATION_WORK_AREAS: readonly WorkArea[] = [
  * membership (`requireRoleOrRedirect` → `workspaceOpensCompanySpace`), which
  * is why an agency owner can open them too.
  */
+/**
+ * THE EDUCATION AREA (UX_GAPS 2026-11-18 I-1): an organization with the
+ * education capability gets its learning home in the header too — the SAME
+ * route and the SAME label as the `education` organization door
+ * (`ORGANIZATION_DOOR_ROUTES.education`, `organizationDoors.education`). It is
+ * not one of the company model's areas: only an organization that holds the
+ * capability has it, by the doors' own gate (`isEducationInstitution`).
+ */
+export const ORGANIZATION_EDUCATION_AREA: WorkArea = {
+  id: "education",
+  href: "/dashboard/company/education",
+  iconKey: "education",
+  labelKey: "organizationDoors.education",
+};
+
+/** The ONE address of "invite a learner": the invitation panel with the
+ *  type, the organization and the student relationship preset. */
+export function learnerInviteHref(organizationId: string): string {
+  return `/dashboard/network?type=join_organization&org=${organizationId}&relationship=student`;
+}
+
 const HEADER_AREA_LEADS: Record<"company" | "agency", readonly string[]> = {
   company: ["people", "projects", "work"],
   agency: ["people", "clients", "projects"],
 };
 const AREAS_IN_THE_CORE_LOOP = new Set(["messages", "calendar"]);
 
-export function organizationHeaderAreas(role: "company" | "agency"): readonly NavItem[] {
+export function organizationHeaderAreas(
+  role: "company" | "agency",
+  { education = false }: { readonly education?: boolean } = {},
+): readonly NavItem[] {
   const leads = HEADER_AREA_LEADS[role];
   const rank = (id: string) => (leads.includes(id) ? leads.indexOf(id) : leads.length);
-  return ORGANIZATION_WORK_AREAS.filter((a) => !AREAS_IN_THE_CORE_LOOP.has(a.id))
+  const areas = ORGANIZATION_WORK_AREAS.filter((a) => !AREAS_IN_THE_CORE_LOOP.has(a.id))
     .map((a, n) => ({ a, n }))
     .sort((x, y) => rank(x.a.id) - rank(y.a.id) || x.n - y.n)
-    .map(({ a }) => ({ id: `area:${a.id}` as const, href: a.href, tabLabelKey: a.labelKey, iconKey: a.iconKey }));
+    .map(({ a }) => a);
+  // An education institution's learning home leads its own doors.
+  return (education ? [ORGANIZATION_EDUCATION_AREA, ...areas] : areas).map((a) => ({
+    id: `area:${a.id}` as const,
+    href: a.href,
+    tabLabelKey: a.labelKey,
+    iconKey: a.iconKey,
+  }));
 }
 
 /**

@@ -4110,8 +4110,12 @@
           "chipHelpPeople": "Komanda un uzaicinājumi",
           "chipHelpPlanning": "Atvērt plānošanu",
           "chipHelpServices": "Mani pakalpojumi",
-          "chipHelpJournal": "Darba žurnāls"
-        }
+          "chipHelpJournal": "Darba žurnāls",
+          "chipHelpSettings": "Iestatījumi",
+          "chipHelpPrivacy": "Privātums un jūsu dati"
+        },
+        "account": "Pieteikšanās, e-pasts, paziņojumi un izskats ir Iestatījumos.",
+        "privacy": "Sadaļā “Privātums un jūsu dati” varat lejupielādēt savus datus, redzēt, kas redz jūsu profilu, un pieprasīt konta dzēšanu."
       },
       "interestInboxAmbiguous": "Tas var nozīmēt divas lietas — ko vēlaties redzēt?",
       "chipInterestOnMyNeeds": "Interese par maniem pieprasījumiem",
@@ -6875,7 +6879,8 @@
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       },
       "setup": {
-        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
+        "optionalDetails": "Reģistrācija, kontakti un amats"
       },
       "workers": {
         "invitationsManagedElsewhere": "Par ielūgumiem rūpējas par to atbildīgā uzņēmuma persona.",
@@ -8041,6 +8046,7 @@
       "partnerWithUs": "Kļūt par partneri",
       "forAgencies": "Kā tas darbojas aģentūrām",
       "setUpAgency": "Reģistrēt aģentūru",
+      "setUpInstitution": "Mācību iestādēm",
       "b2bEnquiry": "Uzņēmējdarbības pakalpojumu pieprasījums (B2B)",
       "projectEnquiry": "Individuāla projekta pieprasījums"
     },
