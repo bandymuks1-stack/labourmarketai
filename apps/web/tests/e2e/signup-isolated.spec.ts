@@ -690,6 +690,62 @@ test("M-3. seed: an employee with one journal entry waiting for the company's re
   expect(raw, "the phone's review read lists the entry").toContain(entries[0]!.id);
 });
 
+// ── M-4: a STAFFING AGENCY that invites the seed company from the phone ────
+// Runs only from android-need-isolated.yml (MOBILE_AGENCY_SEED_EMAIL set).
+// Real UI only: sign-up with the agency intent and company setup, which
+// records the organization as a staffing agency. The company (M-0) proves
+// its e-mail address the way the web asks, because answering an agency's
+// invitation requires a proven address that equals the invited one.
+test("M-4. seed: a staffing agency, and the company's proven address", async ({ browser }) => {
+  const address = process.env.MOBILE_AGENCY_SEED_EMAIL ?? "";
+  const password = process.env.MOBILE_AGENCY_SEED_PASSWORD ?? "";
+  const owner = process.env.MOBILE_NEED_SEED_EMAIL ?? "";
+  const ownerPw = process.env.MOBILE_NEED_SEED_PASSWORD ?? "";
+  test.skip(!address || !password || !owner || !ownerPw, "android-need-isolated.yml only");
+
+  const a = await (await browser.newContext()).newPage();
+  await signUp(a, address, password);
+  await onboard(a, "agency", "QA-SYNTHETIC Mobile Agency Owner");
+  await a.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  await expect(a.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+  await a.getByTestId("company-setup-legal-name").fill("QA-SYNTHETIC Mobile Agency");
+  await a.getByTestId("company-setup-country").selectOption("LT");
+  await a.getByTestId("company-setup-save-draft").click();
+  await expect(a.getByTestId("company-setup-result")).toBeVisible({ timeout: 30_000 });
+  const agencyId = await userId(address);
+  const marker = await fetch(`${SB_URL}/auth/v1/admin/users/${agencyId}`, {
+    method: "PUT",
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "content-type": "application/json" },
+    body: JSON.stringify({ app_metadata: { qa_synthetic: true } }),
+  });
+  expect(marker.ok, "the seed carries the server-set qa_synthetic marker").toBe(true);
+  const [org] = await db<Array<{ legacy_company_id: string | null }>>(
+    `organizations?owner_profile_id=eq.${agencyId}&select=legacy_company_id`,
+  );
+  const [company] = await db<Array<{ company_type: string | null }>>(
+    `companies?id=eq.${org?.legacy_company_id ?? "00000000-0000-0000-0000-000000000000"}&select=company_type`,
+  );
+  expect(company?.company_type, "the organization is recorded as a staffing agency").toBe("staffing_agency");
+
+  // The company proves its address (skipped when it already is proven).
+  const co = await (await browser.newContext()).newPage();
+  await signIn(co, owner, ownerPw);
+  await co.goto(`${BASE}/en/dashboard/network`);
+  const prompt = co.getByTestId("network-email-unverified");
+  if (await prompt.isVisible({ timeout: 15_000 }).catch(() => false)) {
+    await prompt.getByTestId("verify-email-send").click();
+    await expect(prompt.getByTestId("verify-email-sent")).toBeVisible({ timeout: 30_000 });
+    await co.goto(await lastMailLink(owner));
+    await co.waitForURL((u) => u.host === new URL(BASE).host && !u.pathname.includes("/auth/callback"), {
+      timeout: 60_000,
+    });
+    await co.goto(`${BASE}/en/dashboard/network`);
+  }
+  await expect(co.getByTestId("network-email-unverified"), "the company's address is proven").toHaveCount(0, {
+    timeout: 30_000,
+  });
+});
+
 /**
  * A-1..A-4. THE THREE SIGN-UP FAULTS OF THE 2026-11-13 TRUST AUDIT, each as the
  * person meets it. None needs an account: they are what the sign-in page says

@@ -37,6 +37,10 @@ on:
       - "apps/mobile/.maestro/cv-forms-journey.yaml"
       - "apps/mobile/.maestro/booking-journey.yaml"
       - "apps/mobile/.maestro/review-journey.yaml"
+      - "apps/mobile/.maestro/agency-clients-journey.yaml"
+      - "apps/mobile/src/screens/agency.tsx"
+      - "apps/mobile/src/screens/agency-invite-client.tsx"
+      - "apps/mobile/src/screens/client-agencies.tsx"
       - "apps/mobile/src/screens/journal-review.tsx"
       - "apps/mobile/src/screens/propose-booking.tsx"
       - "apps/mobile/src/screens/offers.tsx"
@@ -174,6 +178,7 @@ jobs:
           WORKER_PW="Qa-$(openssl rand -hex 16)-2b!"; echo "::add-mask::$WORKER_PW"
           WORKER2_PW="Qa-$(openssl rand -hex 16)-3c!"; echo "::add-mask::$WORKER2_PW"
           WORKER3_PW="Qa-$(openssl rand -hex 16)-4d!"; echo "::add-mask::$WORKER3_PW"
+          AGENCY_PW="Qa-$(openssl rand -hex 16)-5e!"; echo "::add-mask::$AGENCY_PW"
           {
             echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
             echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON"
@@ -195,6 +200,8 @@ jobs:
             echo "MOBILE_WORKER2_SEED_PASSWORD=$WORKER2_PW"
             echo "MOBILE_WORKER3_SEED_EMAIL=qa.mobile.worker3.${GITHUB_RUN_ID}@local.test"
             echo "MOBILE_WORKER3_SEED_PASSWORD=$WORKER3_PW"
+            echo "MOBILE_AGENCY_SEED_EMAIL=qa.mobile.agency.${GITHUB_RUN_ID}@local.test"
+            echo "MOBILE_AGENCY_SEED_PASSWORD=$AGENCY_PW"
           } >> "$GITHUB_ENV"
 
       - name: Prove the replay — ledger rows equal migration files
@@ -227,7 +234,7 @@ jobs:
           E2E_BASE_URL: http://127.0.0.1:3000
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
-        run: pnpm exec playwright test tests/e2e/signup-isolated.spec.ts -g "M-[0-3]\." --reporter=list --trace=off
+        run: pnpm exec playwright test tests/e2e/signup-isolated.spec.ts -g "M-[0-4]\." --reporter=list --trace=off
 
       - name: Read the two worker seeds' ids for the booking journey (local stack)
         run: |
@@ -294,6 +301,8 @@ jobs:
           BOOK_WORKER_ID: ${{ env.BOOK_WORKER_ID }}
           NOT_FIT_WORKER_ID: ${{ env.NOT_FIT_WORKER_ID }}
           REVIEW_ENTRY_ID: ${{ env.REVIEW_ENTRY_ID }}
+          MOBILE_AGENCY_EMAIL: ${{ env.MOBILE_AGENCY_SEED_EMAIL }}
+          MOBILE_AGENCY_PASSWORD: ${{ env.MOBILE_AGENCY_SEED_PASSWORD }}
         with:
           api-level: 34
           arch: x86_64
@@ -385,6 +394,20 @@ jobs:
           [ "$A" = "1" ] && [ "$ALL" = "1" ] && [ "$AUD" = "1" ] || { echo "::error::expected exactly one employer approval (with the note) and one audit row"; exit 1; }
           echo "ANDROID_REVIEW_ISOLATED_PROVEN: on-device work review — the company approved its employee's journal entry with a note (draft + confirm), stored once with employer authority (local stack, production untouched)"
           echo "- ANDROID_REVIEW_ISOLATED_PROVEN: company → Work review → approve the employee's entry with a note → one employer confirmation + one audit row" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the agency ↔ client writes — one active connection and one shared need
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          A="$(q "select o.legacy_company_id from public.organizations o join auth.users u on u.id = o.owner_profile_id where u.email = '$MOBILE_AGENCY_SEED_EMAIL'")"
+          C="$(q "select o.legacy_company_id from public.organizations o join auth.users u on u.id = o.owner_profile_id where u.email = '$MOBILE_NEED_SEED_EMAIL'")"
+          [ -n "$A" ] && [ -n "$C" ] || { echo "::error::agency or company seed has no company"; exit 1; }
+          CONN="$(q "select count(*) from public.agency_client_connections where agency_company_id = '$A' and client_company_id = '$C' and status = 'active' and invited_email = lower('$MOBILE_NEED_SEED_EMAIL')")"
+          SH="$(q "select count(*) from public.agency_client_request_shares s join public.agency_client_connections c on c.id = s.connection_id where c.agency_company_id = '$A' and c.client_company_id = '$C' and s.status = 'active'")"
+          echo "active_connections=$CONN active_shares=$SH"
+          [ "$CONN" = "1" ] && [ "$SH" = "1" ] || { echo "::error::expected one active connection and one shared need"; exit 1; }
+          echo "ANDROID_AGENCY_CLIENTS_ISOLATED_PROVEN: on-device agency invited the company by e-mail; the company accepted and shared one need (prepare + confirm each), stored once (local stack, production untouched)"
+          echo "- ANDROID_AGENCY_CLIENTS_ISOLATED_PROVEN: agency → invite client → company → Staffing agencies → accept → share a need → one active connection + one share" >> "$GITHUB_STEP_SUMMARY"
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()
