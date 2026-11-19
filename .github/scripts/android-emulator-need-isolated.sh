@@ -69,3 +69,11 @@ maestro test \
   -e NOT_FIT_WORKER_ID="$NOT_FIT_WORKER_ID" \
   apps/mobile/.maestro/booking-journey.yaml
 echo "ANDROID_BOOKING_ON_DEVICE: company shortlisted two workers, marked one not a fit, proposed a start to the other; that worker accepted it under Offers"
+
+: "${REVIEW_ENTRY_ID:?review entry id missing}"
+maestro test \
+  -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+  -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+  -e REVIEW_ENTRY_ID="$REVIEW_ENTRY_ID" \
+  apps/mobile/.maestro/review-journey.yaml
+echo "ANDROID_REVIEW_ON_DEVICE: company opened Work review, approved its employee's entry with a note; the entry left the queue"

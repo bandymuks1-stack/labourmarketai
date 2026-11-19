@@ -95,6 +95,7 @@ export const NATIVE_APP_PATHS: readonly string[] = [
   "/agency-offers",
   "/education",
   "/agency",
+  "/review",
 ];
 
 /** An Apple Team ID is 10 uppercase alphanumerics. */

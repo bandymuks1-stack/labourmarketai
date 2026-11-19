@@ -778,3 +778,19 @@ export type AgencyClientsData =
       readonly progress: readonly AgencyProposal[];
     }
   | { readonly kind: "not-agency" };
+
+/**
+ * journal.review_queue.get (`apps/web/lib/capabilities/employer-operations-
+ * capabilities.ts`): the work entries waiting for the caller's decision. An
+ * entry here is the person's own record — not rejected and not verified.
+ */
+export type JournalReviewEntry = {
+  readonly entryId: string;
+  readonly person: { readonly workerProfileId: string | null; readonly name: string | null };
+  readonly text: string | null;
+  readonly projectId: string | null;
+  readonly writtenAt: string;
+};
+export type JournalReviewQueueData = { readonly pending: readonly JournalReviewEntry[]; readonly total: number };
+/** `REVIEW_DECISIONS` in `apps/web/lib/journal/review-status.ts`. */
+export type JournalReviewDecision = "approved" | "changes_requested" | "rejected";

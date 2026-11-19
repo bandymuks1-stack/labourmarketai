@@ -205,6 +205,7 @@ describe("deep-link claim — exactly the screens the app has", () => {
         "/project",
         "/projects",
         "/register",
+        "/review",
         "/settings",
         "/sign-in",
         "/today",
