@@ -34,7 +34,7 @@ export const PUBLIC_PATH_CASES: readonly PublicPathCase[] = [
   { id: "entry:hire", title: "home free-text box, a hiring sentence, survives sign-up" },
   { id: "door:worker-search", title: "worker-search door opens the need form, sent without an account" },
   { id: "door:company-need", title: "the company-need form is sent without an account" },
-  { id: "intake:worker", title: "worker-intake: the typed intake survives sign-up" },
+  { id: "intake:worker", title: "worker-intake: the typed intake, edited after its answer, survives sign-up from the header" },
   { id: "calculator:project-cost", title: "calculator result carries its inputs into company-need" },
   { id: "header:assistant", title: "header assistant link, signed out → the home question box (/#find)" },
   { id: "header:education", title: "header More → education link → the institution sign-up door" },
