@@ -342,6 +342,7 @@ export function QuickConfirmCard({
               size="sm"
               variant="secondary"
               disabled={pending}
+              className="min-h-11"
               data-testid={`quick-reject-submit-${entry.id}`}
             >
               {t("inbox.reject")}
@@ -351,6 +352,7 @@ export function QuickConfirmCard({
               size="sm"
               variant="ghost"
               onClick={() => setRejecting(false)}
+              className="min-h-11"
             >
               {t("inbox.cancel")}
             </Button>

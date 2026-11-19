@@ -76,6 +76,15 @@ on:
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
       - "apps/web/tests/e2e/recognition-chain-isolated.spec.ts"
       - "apps/web/tests/e2e/phone-journeys-isolated.spec.ts"
+      # The phone confirmation path the C walk measures (worker entry -> the
+      # organization's approval -> the Living CV): the approval surfaces.
+      - "apps/web/app/*/dashboard/inbox/**"
+      - "apps/web/components/app/quick-confirm-*.tsx"
+      - "apps/web/components/app/journal-inbox-entry.tsx"
+      - "apps/web/components/app/arena/confirm-pulse.tsx"
+      - "apps/web/components/app/org-members-panel.tsx"
+      - "apps/web/components/app/entry-review-panel.tsx"
+      - "apps/web/components/app/counterparty-review-card.tsx"
       - "apps/web/tests/e2e/teams-projects-isolated.spec.ts"
       - "apps/web/app/*/dashboard/projects/**"
       - "apps/web/components/app/team-*.tsx"

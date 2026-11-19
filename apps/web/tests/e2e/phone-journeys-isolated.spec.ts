@@ -51,6 +51,10 @@ import {
  *   T INSTITUTION  signs up ON THE PHONE through its door and sets up its organisation; the education
  *                  home (no header or sheet door leads there: reached by address, recorded); a learner
  *                  invited by link; the people page with its members fold; messages.
+ *   C CONFIRMATION the second half of a worker's first entry: the owner turns on journal review on the
+ *                  phone, the worker records a day, the owner confirms it with one tap on the home's
+ *                  approvals card (the inbox and quick-queue decisions are 44 px), and the worker's
+ *                  Living CV, one tap from the journal, counts the confirmed work.
  * Organisation setup that is not itself under test happens at a desktop, like M-0.
  *
  * On every page the walk also asserts that nothing scrolls sideways (the page is never wider than
@@ -828,6 +832,203 @@ for (const phone of PHONES) {
       await expect(page.getByRole("main").getByTestId("agency-draft-need-form")).toBeVisible({ timeout: 30_000 });
       await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
       expect(uncaught(), "the English clients page raises no client error").toEqual([]);
+      await done();
+    });
+  });
+
+  // ── CONFIRMATION ──────────────────────────────────────────────────────────
+  // The second half of the worker path "sign-up → first CONFIRMED entry on the Living CV" (M-8 is
+  // the first half): the worker's entry reaches the organization that can confirm it, the owner
+  // confirms it from the phone, and the worker's Living CV counts it. Setup at a desktop (not the
+  // walk): an organisation, a join link, and a worker who registers through it. Steps on the phone:
+  //   C-2 the owner turns on journal review for that worker (people page, one toggle);
+  //   C-3 the worker records a day for the organisation; the entry says it waits for the owner;
+  //   C-4 the owner's approval controls are thumb-sized (inbox, quick queue), and the owner confirms
+  //       the entry with ONE tap on the home's approvals card;
+  //   C-5 the worker sees it confirmed and the Living CV, one tap from the journal, counts it.
+  const CONFIRMER = email(`confirmer${phone.name}`);
+  const CONFIRMED_WORKER = email(`confirmed${phone.name}`);
+  const confirmedEntry = `QA-SYNTHETIC confirmed entry ${phone.name} ${RUN}: sealed the shower tray`;
+  const c: { profileId: string; orgId: string; workerProfileId: string; engagementId: string; entryId: string } = {
+    profileId: "",
+    orgId: "",
+    workerProfileId: "",
+    engagementId: "",
+    entryId: "",
+  };
+  test.describe(`confirmation at ${phone.viewport.width} × ${phone.viewport.height}`, () => {
+    test.describe.configure({ mode: "serial" });
+    test(`C-1 (${phone.name}). setup at a desktop: an organisation, a join link, and a worker who registers through it`, async ({ browser }) => {
+      Object.assign(c, await newOrganisation(browser, CONFIRMER, "hire", `Synthetic Confirmer ${phone.name} ${RUN}`, `Synthetic Confirm Co ${phone.name} ${RUN}`));
+      const owner = await browser.newContext({ storageState: sessions.get(CONFIRMER), timezoneId: "UTC" });
+      const op = await owner.newPage();
+      await op.goto(`${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${c.orgId}#network-invite`);
+      const panel = op.getByTestId("invite-panel");
+      await expect(panel).toBeVisible({ timeout: 30_000 });
+      await panel.getByTestId("invite-mode-link").click();
+      await panel.getByTestId("invite-name").fill(`Synthetic Confirmed Worker ${phone.name} ${RUN}`);
+      await panel.getByTestId("invite-submit").click();
+      const copy = panel.getByTestId("invite-copy-link").first();
+      await expect(copy, "the invitation link is handed over").toBeVisible({ timeout: 30_000 });
+      const raw = await copy.getAttribute("data-invite-link");
+      expect(raw, "an invitation link").toBeTruthy();
+      sessions.set(CONFIRMER, await owner.storageState());
+      await owner.close();
+      const u = new URL(raw!);
+
+      const joined = await browser.newContext({ timezoneId: "UTC" });
+      const wp = await joined.newPage();
+      await wp.goto(`${BASE}${u.pathname}${u.search}`);
+      await wp.getByTestId("invite-register").click();
+      await wp.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
+      await wp.locator('input[type="email"]').fill(CONFIRMED_WORKER);
+      await wp.locator('input[name="password"]').fill(PASSWORD);
+      const repeat = wp.locator('input[name="confirm_password"]');
+      if (await repeat.count()) await repeat.fill(PASSWORD);
+      await wp.locator('form button[type="submit"]').click();
+      await wp.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
+      if (/\/onboarding/.test(wp.url())) await onboard(wp, "work", `Synthetic Confirmed Worker ${phone.name} ${RUN}`);
+      await wp.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
+      if (/\/invite\//.test(wp.url())) {
+        const accept = wp.getByTestId("invite-accept");
+        if (await accept.isVisible().catch(() => false)) await accept.click();
+      }
+      sessions.set(CONFIRMED_WORKER, await joined.storageState());
+      await joined.close();
+      c.workerProfileId = await userId(CONFIRMED_WORKER);
+      const employment = () =>
+        sql<{ id: string }>(
+          `select id from public.engagement_contexts where profile_id = ${lit(c.workerProfileId)} and organization_id = ${lit(c.orgId)}
+             and relationship_slug = 'employee' and status = 'active'`,
+        ).map((r) => r.id);
+      await expect
+        .poll(employment, { message: "registering through the link makes the worker the organisation's employee", timeout: 30_000 })
+        .toHaveLength(1);
+      c.engagementId = employment()[0]!;
+    });
+    test(`C-2 (${phone.name}). the owner turns on journal review for the worker on the phone`, async ({ browser }) => {
+      expect(c.engagementId, "C-1 joined the worker").toBeTruthy();
+      const { page, done } = await signedInOnPhone(browser, phone, CONFIRMER);
+      await page.goto(`${BASE}/en/dashboard/company/people#org-members`);
+      const main = page.getByRole("main");
+      const fold = main.getByTestId("people-more").first();
+      await expect(fold).toBeAttached({ timeout: 30_000 });
+      if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().tap();
+      const toggle = main.getByTestId(`toggle-review-${c.engagementId}`);
+      await expect(toggle, "journal review is offered for the worker").toBeVisible({ timeout: 30_000 });
+      await thumbSized(toggle, "the journal review toggle");
+      await fitsTheScreen(page, "the owner's people page");
+      const reviewOn = () =>
+        sql<{ on: boolean | null }>(`select journal_review_enabled as on from public.engagement_contexts where id = ${lit(c.engagementId)}`)[0]?.on ?? null;
+      // A tap before hydration is a silent no-op; a second tap after a stored one would turn it off.
+      await expect(async () => {
+        if (reviewOn() !== true) await toggle.tap({ timeout: 5_000 });
+        await expect.poll(reviewOn, { timeout: 10_000 }).toBe(true);
+      }).toPass({ timeout: 60_000 });
+      await done();
+    });
+    test(`C-3 (${phone.name}). the worker records a day for the organisation; the entry waits for the owner`, async ({ browser }) => {
+      expect(c.engagementId, "C-1 joined the worker").toBeTruthy();
+      const { page, done } = await signedInOnPhone(browser, phone, CONFIRMED_WORKER);
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      const main = page.getByRole("main");
+      await main.getByTestId("journal-quick-record-text").fill(confirmedEntry);
+      await tapUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+      const context = main.getByTestId("worklog-context");
+      if (await context.isVisible().catch(() => false)) await context.selectOption(c.engagementId);
+      if (await main.getByTestId("worklog-project-must-choose").isVisible().catch(() => false)) {
+        await main.getByTestId("worklog-project").selectOption("none");
+      }
+      await main.getByTestId("worklog-save").tap();
+      await main.getByTestId("worklog-confirm").tap();
+      await expect(main.getByTestId("worklog-done"), "the entry is saved").toBeVisible({ timeout: 60_000 });
+      const rows = sql<{ id: string; engagement_context_id: string | null }>(
+        `select e.id, e.engagement_context_id from public.journal_entries e join public.workers w on w.id = e.worker_id
+          where w.profile_id = ${lit(c.workerProfileId)} and e.superseded_by is null and e.original_text = ${lit(confirmedEntry)}`,
+      );
+      expect(rows, "the entry is stored once").toHaveLength(1);
+      expect(rows[0]!.engagement_context_id, "for the organisation's relationship").toBe(c.engagementId);
+      c.entryId = rows[0]!.id;
+      // No further step for the worker: with review on, the entry is already in the owner's queue.
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      await expect(main.getByTestId(`journal-entry-verification-${c.entryId}`), "the entry waits for the owner").toHaveAttribute(
+        "data-next-action",
+        "await_verifier",
+        { timeout: 30_000 },
+      );
+      await fitsTheScreen(page, "the journal with the entry waiting");
+      await done();
+    });
+    test(`C-4 (${phone.name}). the owner confirms the entry with one tap on the home's approvals card`, async ({ browser }) => {
+      expect(c.entryId, "C-3 recorded the entry").toBeTruthy();
+      const { page, done } = await signedInOnPhone(browser, phone, CONFIRMER);
+      const main = page.getByRole("main");
+
+      // The detailed inbox: its doors and the entry's decisions are thumb-sized.
+      await page.goto(`${BASE}/en/dashboard/inbox`);
+      await expect(main.getByTestId(`inbox-entry-${c.entryId}`), "the entry waits in the inbox").toBeVisible({ timeout: 30_000 });
+      for (const id of [
+        "inbox-quick-link",
+        "inbox-counterparty-link",
+        "inbox-report-link",
+        `journal-approve-entry-${c.entryId}`,
+        `journal-review-request-changes-${c.entryId}`,
+        `journal-review-reject-${c.entryId}`,
+      ]) {
+        await thumbSized(main.getByTestId(id), `the inbox's ${id}`);
+      }
+      await fitsTheScreen(page, "the owner's inbox");
+
+      // The quick queue: its door to the detailed review, the confirm, and the reject form's send.
+      await page.goto(`${BASE}/en/dashboard/inbox/quick`);
+      const quick = main.getByTestId(`quick-confirm-card-${c.entryId}`);
+      await expect(quick, "the entry waits in the quick queue").toBeVisible({ timeout: 30_000 });
+      await thumbSized(main.getByTestId("quick-detailed-link"), "the quick queue's detailed-review door");
+      await thumbSized(quick.getByTestId(`quick-confirm-tap-${c.entryId}`), "the quick confirm");
+      await tapUntil(quick.getByTestId(`quick-reject-open-${c.entryId}`), quick.getByTestId(`quick-reject-submit-${c.entryId}`));
+      await thumbSized(quick.getByTestId(`quick-reject-submit-${c.entryId}`), "the reject form's send");
+      await fitsTheScreen(page, "the quick queue with the reject form open");
+
+      // The confirmation itself: the home's approvals card, one tap.
+      await page.goto(`${BASE}/en/dashboard`);
+      const card = main.getByTestId("organization-approvals").filter({ visible: true }).first();
+      const confirm = card.getByTestId(`quick-confirm-tap-${c.entryId}`);
+      await expect(confirm, "the home's approvals card offers the entry").toBeVisible({ timeout: 60_000 });
+      await thumbSized(confirm, "the approvals card's confirm");
+      await fitsTheScreen(page, "the owner's home with the entry to confirm");
+      await tapUntil(confirm, card.getByTestId(`quick-receipt-${c.entryId}`));
+      await expect
+        .poll(
+          () =>
+            sql<{ d: string | null }>(
+              `select confirmation_scope->>'decision' as d from public.journal_entry_confirmations where entry_id = ${lit(c.entryId)}`,
+            ).map((r) => r.d),
+          { message: "the confirmation is stored once, as approved", timeout: 30_000 },
+        )
+        .toEqual(["approved"]);
+      await fitsTheScreen(page, "the owner's home with the receipt");
+      await done();
+    });
+    test(`C-5 (${phone.name}). the worker sees the entry confirmed and the Living CV counts it`, async ({ browser }) => {
+      expect(c.entryId, "C-3 recorded the entry").toBeTruthy();
+      const { page, done } = await signedInOnPhone(browser, phone, CONFIRMED_WORKER);
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      const main = page.getByRole("main");
+      await expect(main.getByTestId(`journal-entry-verification-${c.entryId}`), "the entry reads as confirmed").toHaveAttribute(
+        "data-verification-state",
+        "verified",
+        { timeout: 30_000 },
+      );
+      await fitsTheScreen(page, "the journal with the confirmed entry");
+      const bridge = main.getByTestId("journal-cv-bridge-link");
+      await expect(bridge, "the CV is one tap from the journal").toBeVisible({ timeout: 30_000 });
+      await thumbSized(bridge, "the journal's CV link");
+      await bridge.tap();
+      await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
+      const counted = main.getByTestId("cv-confirmed-work").filter({ visible: true }).first();
+      await expect(counted, "the Living CV counts the confirmed work").toBeVisible({ timeout: 30_000 });
+      expect(Number(await counted.getAttribute("data-entries")), "at least the one confirmed entry").toBeGreaterThanOrEqual(1);
+      await fitsTheScreen(page, "the Living CV with confirmed work");
       await done();
     });
   });

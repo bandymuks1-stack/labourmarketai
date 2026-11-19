@@ -180,6 +180,7 @@ export function OrgMembersPanel({
                     type="button"
                     size="sm"
                     variant={m.reviewEnabled ? "ghost" : "primary"}
+                    className="min-h-11"
                     disabled={pending}
                     onClick={() => toggleReview(m.engagementId, !m.reviewEnabled)}
                     data-testid={`toggle-review-${m.engagementId}`}

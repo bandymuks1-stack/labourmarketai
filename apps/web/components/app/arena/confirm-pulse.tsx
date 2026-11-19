@@ -155,7 +155,7 @@ export async function OrganizationApprovalsCard() {
     otherReviewer: facts.otherReviewer,
   });
   const entries = (queue ?? []).slice(0, ON_THE_CARD).map((e) => quickConfirmEntryView(e, tSkill, tUnit));
-  const lineLink = "w-fit text-sm font-medium text-brand-blue hover:underline";
+  const lineLink = "inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue hover:underline";
 
   return (
     <Card className="flex flex-col gap-3" data-testid="organization-approvals" data-state={view.state}>
