@@ -110,3 +110,9 @@ maestro test \
   -e ROSTER_WORKER_ID="$NOT_FIT_WORKER_ID" \
   apps/mobile/.maestro/agency-roster-journey.yaml
 echo "ANDROID_AGENCY_ROSTER_ON_DEVICE: agency invited a worker; the worker accepted under Offers; the agency proposed them for the shared need; the client sees the offer"
+
+maestro test \
+  -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+  -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+  apps/mobile/.maestro/sent-proposals-journey.yaml
+echo "ANDROID_SENT_PROPOSALS_ON_DEVICE: company changed the dates of its accepted booking (reopened), then withdrew it with a reason"
