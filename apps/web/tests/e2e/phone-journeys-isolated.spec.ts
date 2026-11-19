@@ -468,7 +468,14 @@ for (const phone of PHONES) {
       await expect(cta, "the home's one action").toHaveAttribute("href", /\/dashboard\/journal$/, { timeout: 60_000 });
       // UX gap W-1: a healthy new account never shows the "could not be read"
       // notice; a read that fails is named by the job's W-1 log step.
-      await expect(page.getByRole("main").getByTestId("today-open-unknown"), "the open items are read").toHaveCount(0);
+      const unknownOpen = page.getByRole("main").getByTestId("today-open-unknown");
+      if ((await unknownOpen.count()) > 0) {
+        const holder = page.getByRole("main").locator("[data-doors-unknown], [data-journal-unknown]").first();
+        console.log(
+          `[W-1] unknown: journal=${await holder.getAttribute("data-journal-unknown")} doors=${await holder.getAttribute("data-doors-unknown")}`,
+        );
+      }
+      await expect(unknownOpen, "the open items are read").toHaveCount(0);
       await cta.tap();
       await page.waitForURL(/\/en\/dashboard\/journal/, { timeout: 30_000 });
       const main = page.getByRole("main");

@@ -318,7 +318,13 @@ export async function HomeWaitingView({
       ) : null}
 
       {openUnknown ? (
-        <div className={cn(open.length > 0 || next ? "border-t border-ink-600/60 pt-3" : "")}>
+        <div
+          className={cn(open.length > 0 || next ? "border-t border-ink-600/60 pt-3" : "")}
+          // Which reading is unknown (no text): the journal's, and/or the door
+          // counters that could not be given (UX gap W-1 diagnosis).
+          data-journal-unknown={region.openUnknown ? "true" : undefined}
+          data-doors-unknown={unknownDoors.length > 0 ? unknownDoors.join(" ") : undefined}
+        >
           <Unreadable text={t("open.unknown")} testid="today-open-unknown" labels={rl} />
         </div>
       ) : null}
