@@ -11,6 +11,7 @@ name: launch-readiness-walks
 #   2. waits for that run;
 #   3. hands over to a fresh tick.
 #
+# At most DAILY_CAP plan walks per UTC day (owner decision 2026-11-19).
 # Every brake of prod-qa-walk.yml still applies unchanged: health, deploy, errors, the 180 s gap and
 # the 24 h budget of 48. This workflow adds no secret, writes nothing to production itself, and
 # passes nothing but `spec` and `device`. Each pair runs once. A failed pair is reported and is not
@@ -45,7 +46,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           WINDOW_START: "2026-11-19T20:00:00Z"
-          WINDOW_END: "2026-11-22T00:00:00Z"
+          WINDOW_END: "2026-11-23T00:00:00Z"
+          # Owner decision 2026-11-19: at most 6 plan walks per UTC day, to stay inside the Supabase
+          # Free plan's daily log-ingestion quota (8 walks used 23,400 of 25,200 entries on 2026-10-17).
+          DAILY_CAP: "6"
         run: |
           set -euo pipefail
           PLAN="profile-cv-history:desktop profile-cv-history:phone profile-cv-history:phone-375
@@ -80,6 +84,20 @@ jobs:
             done
             return 1
           }
+          # Plan walks whose walk job ran today (UTC) count against the daily cap.
+          today=$(date -u +%F); ran_today=0
+          while IFS=$'\t' read -r t c id; do
+            [ -n "${id:-}" ] || continue
+            case "$t" in "prod-qa-walk "*) ;; *) continue ;; esac
+            pair_ok=0; for pair in $PLAN; do [ "$t" = "prod-qa-walk ${pair%%:*} ${pair##*:}" ] && pair_ok=1; done
+            [ "$pair_ok" = 1 ] || continue
+            started=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk" and (.conclusion=="success" or .conclusion=="failure")) | .startedAt][0] // ""')
+            case "$started" in "$today"*) ran_today=$((ran_today + 1)) ;; esac
+          done <<< "$done_titles"
+          if [ "$ran_today" -ge "$DAILY_CAP" ]; then
+            log "today's cap reached ($ran_today of $DAILY_CAP plan walks): the next UTC day continues"; exit 0
+          fi
+
           next=""
           for pair in $PLAN; do
             spec=${pair%%:*}; device=${pair##*:}
