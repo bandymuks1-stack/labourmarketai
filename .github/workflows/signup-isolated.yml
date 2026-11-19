@@ -45,6 +45,11 @@ on:
       - "apps/web/app/*/(marketing)/worker-intake/**"
       - "apps/web/components/app/worker-intake-form.tsx"
       - "apps/web/components/app/profile-text-first-flow.tsx"
+      - "apps/web/components/app/intake-draft-sign-out-clear.tsx"
+      # ... and the header Sign up / Sign in, which carry the builder as
+      # `next` while on the intake (intake:worker).
+      - "apps/web/components/layouts/site-nav.tsx"
+      - "apps/web/components/layouts/header-auth-cta-link.tsx"
       - "apps/web/components/app/onboarding-wizard.tsx"
       - "apps/web/components/app/worker-education-section.tsx"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
