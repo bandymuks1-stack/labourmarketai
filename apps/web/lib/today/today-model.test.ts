@@ -255,6 +255,11 @@ describe("the doors — who is waiting on the person, from the domain readers' o
     expect(unknownTodayDoors(partial)).toEqual(["offers", "unread"]);
     expect(unknownTodayDoors(null)).toEqual(["offers", "invitations", "unread"]);
     expect(unknownTodayDoors(ATTENTION)).toEqual([]);
+    // W-1: invitations waiting on a mailbox proof are not unknown, and never a zero.
+    const proof: TodayAttention = { offers: 0, invitations: null, invitationsNeedMailboxProof: true, unread: { count: 0, onlyId: null } };
+    expect(unknownTodayDoors(proof)).toEqual([]);
+    expect(deriveTodayDoors(proof)).toEqual([]);
+    expect(unknownTodayDoors({ ...proof, invitationsNeedMailboxProof: false })).toEqual(["invitations"]);
     // NEGATIVE CONTROL: nothing in a null reader ever reads as a count.
     expect(JSON.stringify(deriveTodayDoors({ offers: null, invitations: null, unread: null }))).toBe("[]");
   });

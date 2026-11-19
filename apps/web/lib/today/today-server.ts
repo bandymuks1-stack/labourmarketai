@@ -200,7 +200,7 @@ export const loadTodayGrowth = cache(async (): Promise<GrowthReading | null> => 
  * list (the same rows the conversation's offer card filters).
  */
 export const loadTodayAttention = cache(async (): Promise<TodayAttention> => {
-  const [offers, invitations, unread] = await Promise.all([
+  const [offers, invitationsRead, unread] = await Promise.all([
     listMyBookings()
       .then((res) =>
         res.kind === "ok"
@@ -208,9 +208,7 @@ export const loadTodayAttention = cache(async (): Promise<TodayAttention> => {
           : null,
       )
       .catch((): number | null => null),
-    listInvitationsAddressedToMe()
-      .then((res) => (res.status === "ok" ? res.total : null))
-      .catch((): number | null => null),
+    listInvitationsAddressedToMe().catch(() => null),
     // The RESULT reader: a failed read is `null` (UNKNOWN), a successful
     // empty read is a zero count. The lossy `getUnreadConversationIds` could
     // never report a failure, which made this door's `null` unreachable.
@@ -222,7 +220,12 @@ export const loadTodayAttention = cache(async (): Promise<TodayAttention> => {
       )
       .catch((): TodayAttention["unread"] => null),
   ]);
-  return { offers, invitations, unread };
+  return {
+    offers,
+    invitations: invitationsRead?.status === "ok" ? invitationsRead.total : null,
+    invitationsNeedMailboxProof: invitationsRead?.status === "error" && invitationsRead.reason === "email_unverified",
+    unread,
+  };
 });
 
 export const loadTodayOpportunities = cache(async (): Promise<OpportunitiesResultView | null> => {

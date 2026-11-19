@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { HomeRetry } from "@/components/app/home/home-retry";
 import { LevelMark } from "@/components/app/premium/grammar";
 import { StatusChip } from "@/components/app/status-chip";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import {
   loadHomeBecause,
@@ -168,8 +169,8 @@ import { Region, Unreadable, retryLabels, type RetryLabels } from "@/components/
 // ───────────────────────── 01 · WAITING ─────────────────────────
 
 export async function HomeWaiting({ locale }: { readonly locale: ActiveLocale }) {
-  const { region, unknownDoors } = await loadHomeWaiting();
-  return <HomeWaitingView locale={locale} region={region} unknownDoors={unknownDoors} />;
+  const { region, unknownDoors, mailboxProof } = await loadHomeWaiting();
+  return <HomeWaitingView locale={locale} region={region} unknownDoors={unknownDoors} mailboxProof={mailboxProof} />;
 }
 
 /** Data-driven view, so every state is provable without a database
@@ -178,10 +179,14 @@ export async function HomeWaitingView({
   locale,
   region,
   unknownDoors,
+  mailboxProof = false,
 }: {
   readonly locale: ActiveLocale;
   readonly region: WaitingRegion;
   readonly unknownDoors: readonly TodayDoorKind[];
+  /** Invitations wait on the person proving their mailbox (W-1): the
+   *  existing proof prompt, never "could not be read". */
+  readonly mailboxProof?: boolean;
 }) {
   const [t, tRegion, tCard, tJournal, tUnits] = await Promise.all([
     getTranslations("todayScreen.home"),
@@ -329,7 +334,16 @@ export async function HomeWaitingView({
         </div>
       ) : null}
 
-      {!next && open.length === 0 && !openUnknown && !region.nextUnknown ? (
+      {/* Invitations reach only a proven mailbox (network page, the same
+          prompt and words): offered here instead of a false "could not be
+          read", and never as "no invitations" (W-1, 2026-11-19). */}
+      {mailboxProof ? (
+        <div className={cn(open.length > 0 || next || openUnknown ? "border-t border-ink-600/60 pt-3" : "")} data-testid="home-mailbox-proof">
+          <VerifyEmailPrompt locale={locale} next="/dashboard" />
+        </div>
+      ) : null}
+
+      {!next && open.length === 0 && !openUnknown && !mailboxProof && !region.nextUnknown ? (
         <p className={NOTE} data-testid="home-waiting-clear">
           {tRegion("clear")}
         </p>

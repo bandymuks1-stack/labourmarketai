@@ -476,6 +476,12 @@ for (const phone of PHONES) {
         );
       }
       await expect(unknownOpen, "the open items are read").toHaveCount(0);
+      // This worker signed up with a password and has not proven the mailbox:
+      // the home offers the network page's own proof prompt, not a fault.
+      await expect(
+        page.getByRole("main").getByTestId("home-mailbox-proof").filter({ visible: true }).first(),
+        "the mailbox proof is offered",
+      ).toBeVisible();
       await cta.tap();
       await page.waitForURL(/\/en\/dashboard\/journal/, { timeout: 30_000 });
       const main = page.getByRole("main");
