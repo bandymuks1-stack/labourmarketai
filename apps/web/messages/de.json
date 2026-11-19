@@ -2275,6 +2275,7 @@
         },
         "statusInvalidCountry": "Wählen Sie ein Land aus der Liste — andere Werte werden noch nicht unterstützt.",
         "registrationCode": "Unternehmens-/Registrierungsnummer",
+        "optionalDetails": "Registrierung, Kontakt und Funktion",
         "registrationCodeHelp": "Optional. Hilft später bei der Verifizierung des Unternehmens.",
         "address": "Adresse / Standort",
         "addressPlaceholder": "z. B. Hauptstraße 1, Vilnius",
@@ -14222,7 +14223,7 @@
           "description": "Laden Sie ein Unternehmen ein, sich mit Ihrer Agentur zu verbinden."
         },
         "proposeCandidate": {
-          "label": "Kandidat vorschlagen",
+          "label": "Kandidaten vorschlagen",
           "description": "Bieten Sie eine Arbeitskraft für einen geteilten Bedarf an."
         },
         "offerStatus": {

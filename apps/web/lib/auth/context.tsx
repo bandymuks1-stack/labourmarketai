@@ -92,6 +92,12 @@ type AuthState = {
   organizations?: SwitchableOrganization[];
   activeOrganizationId?: string | null;
   /**
+   * Display-only: the capabilities the ACTIVE organization declared
+   * (`organization_roles`, read under the caller's RLS). The header uses it
+   * only to name the education area (UX_GAPS I-1); every page re-checks.
+   */
+  activeOrganizationCapabilities?: readonly string[];
+  /**
    * Workspace context (real-user workflow rebuild W1): the ACTIVE WORK CONTEXT
    * for EVERY identity — the personal space plus every organization the person
    * owns, manages or works for (server-resolved from the canonical
@@ -301,6 +307,7 @@ export function AuthProvider({
       activeOrgName: initial.activeOrgName ?? null,
       organizations: initial.organizations ?? [],
       activeOrganizationId: initial.activeOrganizationId ?? null,
+      activeOrganizationCapabilities: initial.activeOrganizationCapabilities ?? [],
       workspaces: initial.workspaces ?? [],
       activeWorkspaceId: initial.activeWorkspaceId ?? null,
       workspacePointerAvailable: initial.workspacePointerAvailable ?? false,
@@ -325,6 +332,7 @@ export function AuthProvider({
       initial.activeOrgName,
       initial.organizations,
       initial.activeOrganizationId,
+      initial.activeOrganizationCapabilities,
       initial.workspaces,
       initial.activeWorkspaceId,
       initial.workspacePointerAvailable,

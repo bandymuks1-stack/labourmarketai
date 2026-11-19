@@ -233,13 +233,12 @@ test("I-2. the institution invites a person as a learner by link; they register 
   await school.page.goto(`${BASE}/en/dashboard/company/education`);
   await school.page.getByTestId("institution-learners-invite").click();
   await school.page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
-  const open = school.page.getByTestId("invite-panel-open");
-  const capacity = school.page.getByTestId("invite-capacity");
-  await expect(open.or(capacity).first()).toBeVisible({ timeout: 30_000 });
-  if (await open.isVisible().catch(() => false)) await open.click();
-  await expect(capacity, "the institution invites in the learner capacity").toHaveValue("student", { timeout: 30_000 });
-  const linkMode = school.page.getByTestId("invite-mode-link");
-  if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
+  // UX_GAPS I-4: the door preset type, organisation and relationship — one read-only line, link mode by default.
+  const preset = school.page.getByTestId("invite-preset");
+  await expect(preset, "the institution invites in the learner capacity").toHaveAttribute("data-relationship", "student", { timeout: 30_000 });
+  await expect(preset).toHaveAttribute("data-type", "join_organization");
+  await expect(school.page.getByTestId("invite-capacity")).toHaveCount(0);
+  await expect(school.page.getByTestId("invite-mode-link")).toHaveAttribute("aria-checked", "true");
   const name = school.page.getByTestId("invite-name");
   if (await name.isVisible().catch(() => false)) await name.fill(LEARNER_NAME);
   await school.page.getByTestId("invite-submit").click();
@@ -500,20 +499,15 @@ test("I-9. a separate employer signs up and invites the same person as an intern
   );
   const panel = page.getByTestId("invite-panel");
   await expect(panel).toBeVisible({ timeout: 30_000 });
-  const capacity = panel.getByTestId("invite-capacity");
-  const open = panel.getByTestId("invite-panel-open");
-  await expect(async () => {
-    if (!(await capacity.isVisible().catch(() => false)) && (await open.isVisible().catch(() => false))) {
-      await open.click({ timeout: 5_000 });
-    }
-    await expect(capacity).toBeVisible({ timeout: 2_000 });
-  }).toPass({ timeout: 30_000 });
-  await expect(panel.getByTestId("invite-type")).toHaveValue("join_organization");
-  await expect(panel.getByTestId("invite-organization")).toHaveValue(s.employerOrgId);
-  await capacity.selectOption("intern");
-  await expect(capacity, "the employer offers practice, not employment").toHaveValue("intern");
+  // UX_GAPS I-4: the door preset type, organisation and relationship — one read-only line, link mode by default.
+  const preset = panel.getByTestId("invite-preset");
+  await expect(preset).toBeVisible({ timeout: 30_000 });
+  await expect(preset).toHaveAttribute("data-type", "join_organization");
+  await expect(preset).toHaveAttribute("data-organization", s.employerOrgId);
+  await expect(preset, "the employer offers practice, not employment").toHaveAttribute("data-relationship", "intern");
+  await expect(panel.getByTestId("invite-capacity")).toHaveCount(0);
   await expect(panel.getByTestId("invite-capacity-blocked"), "an intern needs no training-provider status").toHaveCount(0);
-  await panel.getByTestId("invite-mode-link").click();
+  await expect(panel.getByTestId("invite-mode-link")).toHaveAttribute("aria-checked", "true");
   const name = panel.getByTestId("invite-name");
   if (await name.isVisible().catch(() => false)) await name.fill(LEARNER_NAME);
   await panel.getByTestId("invite-submit").click();

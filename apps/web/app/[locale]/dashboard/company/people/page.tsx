@@ -335,6 +335,7 @@ export default async function CompanyPeoplePage({
           reviewElsewhere={
             orgMembers ? { href: "#org-members", label: orgMembersLabels.title } : undefined
           }
+          inviteFirst={isStaffingAgency}
         />
         {/* Užfiksuotas darbas (owner req. 15–17, #1724): the roster's
             recorded work through THE one work-intelligence reader, one call

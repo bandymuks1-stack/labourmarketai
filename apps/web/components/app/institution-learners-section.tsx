@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
+import { learnerInviteHref } from "@/lib/navigation/work-areas";
 import { Link } from "@/lib/i18n/navigation";
 import { PersonPresence } from "@/components/app/work-world/primitives";
 import { readInstitutionLearners } from "@/lib/education/institution-learners";
@@ -143,7 +144,7 @@ export async function InstitutionLearnersSection({
           + `student`), so inviting a learner is one click, not four
           collapsed-panel steps. Same pattern the chat home uses. */}
       <Link
-        href={`/dashboard/network?type=join_organization&org=${organizationId}&relationship=student` as "/dashboard/network"}
+        href={learnerInviteHref(organizationId) as "/dashboard/network"}
         className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90"
         data-testid="institution-learners-invite"
       >

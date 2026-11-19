@@ -170,7 +170,25 @@ const NOT_EUROS_IS_NOT_PREFILLED: readonly Intended[] = [
   ...otherCurrency("Salary 3000 CHF", "chf"),
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED];
+/**
+ * (c) A PERSON'S OWN BOOKINGS REACH THE OFFERS ANSWER IN EVERY LANGUAGE.
+ *
+ * main's `offers` intent knew only the English singular `booking` (the word
+ * boundary refused "bookings") and the Swedish `bokning`, so "Show my
+ * bookings", "Meine Buchungen" or "moje rezerwacje" got the AI-off reply.
+ * Catalog sentences that name bookings now route there too.
+ */
+const BOOKINGS_ARE_OFFERS: readonly Intended[] = [
+  {
+    sentence:
+      "Buchungen und Projektzuweisungen konnten nicht gelesen werden, daher kann jemand, der als frei angezeigt wird, bereits verplant sein.",
+    reader: "route",
+    now: ["offers", 2],
+  },
+  { sentence: "Znika, gdy otworzysz stronę rezerwacji.", reader: "route", now: ["offers", 2] },
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...BOOKINGS_ARE_OFFERS];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).
