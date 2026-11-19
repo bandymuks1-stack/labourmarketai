@@ -166,12 +166,6 @@ export default function Screen() {
               />
               <Button
                 variant="quiet"
-                testID="today-open-sent-proposals"
-                label={t("sentProposals.title")}
-                onPress={() => router.push("/(shell)/sent-proposals")}
-              />
-              <Button
-                variant="quiet"
                 testID="today-open-agencies"
                 label={t("clientBridge.title")}
                 onPress={() => router.push("/(shell)/agencies")}
@@ -205,6 +199,12 @@ export default function Screen() {
                 testID="today-open-agency"
                 label={t("agency.title")}
                 onPress={() => router.push("/(shell)/agency")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-sent-proposals"
+                label={t("sentProposals.title")}
+                onPress={() => router.push("/(shell)/sent-proposals")}
               />
             </>
           )}
