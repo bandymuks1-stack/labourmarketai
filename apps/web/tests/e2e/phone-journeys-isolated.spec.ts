@@ -604,7 +604,11 @@ for (const phone of PHONES) {
       const openExp = profile.getByTestId("add-experience-open").filter({ visible: true }).first();
       await openExp.scrollIntoViewIfNeeded();
       await tapUntil(openExp, profile.getByTestId("add-experience-current"));
-      await size(profile.locator("label", { has: profile.getByTestId("add-experience-current") }), "the current-job row");
+      // `has` is matched INSIDE each label, so the inner locator is the bare test id.
+      await size(
+        profile.locator("label", { has: page.getByTestId("add-experience-current") }).filter({ visible: true }).first(),
+        "the current-job row",
+      );
       // The licence toggles are in the CV-details section, opened the same way.
       await page.goto(`${BASE}/en/dashboard/profile#cv-details`);
       await expect(profile.locator("details#cv-details").first(), "the CV-details section is open").toHaveAttribute("open", "", {
