@@ -193,6 +193,22 @@ async function candidateSearchOnPhone(page: Page, needId: string, where: string)
   if (await door.isVisible().catch(() => false)) await thumbSized(door, `${where}: the empty list's door`);
   const next = main.locator('[data-testid^="scout-pipeline-next-"]');
   if ((await next.count()) > 0) await thumbSized(next.first(), `${where}: a candidate's next step`);
+  // The card's shared actions, where this person's state offers them (round 2):
+  // ask for a conversation, ask for contact details or take the ask back, propose
+  // dates, the interest acknowledgement, and the decision on an agency's offer.
+  for (const [sel, name] of [
+    ['[data-testid^="request-communication-"]', "request a conversation"],
+    ['[data-testid^="contact-request-open-"]', "request contact details"],
+    ['[data-testid^="contact-request-withdraw-"]', "take the contact ask back"],
+    ['[data-testid="propose-booking-open"]', "propose a booking"],
+    ['[data-testid="interest-ack-reviewed"]', "mark the interest reviewed"],
+    ['[data-testid="interest-ack-contacted"]', "answer the interest"],
+    ['[data-testid^="offer-accept-"]', "accept an agency's offer"],
+    ['[data-testid^="offer-decline-"]', "decline an agency's offer"],
+  ] as const) {
+    const control = main.locator(`button${sel}`);
+    if ((await control.count()) > 0) await thumbSized(control.first(), `${where}: ${name}`);
+  }
   await fitsTheScreen(page, `${where}, scrolled to the result`);
 }
 
