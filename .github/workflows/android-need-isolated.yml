@@ -38,6 +38,8 @@ on:
       - "apps/mobile/.maestro/booking-journey.yaml"
       - "apps/mobile/.maestro/review-journey.yaml"
       - "apps/mobile/.maestro/agency-clients-journey.yaml"
+      - "apps/mobile/.maestro/absences-journey.yaml"
+      - "apps/mobile/src/screens/absences.tsx"
       - "apps/mobile/src/screens/agency.tsx"
       - "apps/mobile/src/screens/agency-invite-client.tsx"
       - "apps/mobile/src/screens/client-agencies.tsx"
@@ -303,6 +305,8 @@ jobs:
           REVIEW_ENTRY_ID: ${{ env.REVIEW_ENTRY_ID }}
           MOBILE_AGENCY_EMAIL: ${{ env.MOBILE_AGENCY_SEED_EMAIL }}
           MOBILE_AGENCY_PASSWORD: ${{ env.MOBILE_AGENCY_SEED_PASSWORD }}
+          MOBILE_WORKER3_EMAIL: ${{ env.MOBILE_WORKER3_SEED_EMAIL }}
+          MOBILE_WORKER3_PASSWORD: ${{ env.MOBILE_WORKER3_SEED_PASSWORD }}
         with:
           api-level: 34
           arch: x86_64
@@ -408,6 +412,20 @@ jobs:
           [ "$CONN" = "1" ] && [ "$SH" = "1" ] || { echo "::error::expected one active connection and one shared need"; exit 1; }
           echo "ANDROID_AGENCY_CLIENTS_ISOLATED_PROVEN: on-device agency invited the company by e-mail; the company accepted and shared one need (prepare + confirm each), stored once (local stack, production untouched)"
           echo "- ANDROID_AGENCY_CLIENTS_ISOLATED_PROVEN: agency → invite client → company → Staffing agencies → accept → share a need → one active connection + one share" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the leave & absence writes — one approved absence for the employee, reviewed by the company
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          C="$(q "select id from auth.users where email = '$MOBILE_NEED_SEED_EMAIL'")"
+          W="$(q "select w.id from public.workers w join auth.users u on u.id = w.profile_id where u.email = '$MOBILE_WORKER3_SEED_EMAIL'")"
+          [ -n "$C" ] && [ -n "$W" ] || { echo "::error::company or employee seed missing"; exit 1; }
+          AP="$(q "select count(*) from public.worker_absences where worker_id = '$W' and status = 'approved' and reviewed_by = '$C' and absence_type = 'annual_leave' and start_date = '2027-04-01' and end_date = '2027-04-02' and note = 'QA-SYNTHETIC two days off'")"
+          ALL="$(q "select count(*) from public.worker_absences where worker_id = '$W'")"
+          echo "approved=$AP absences=$ALL"
+          [ "$AP" = "1" ] && [ "$ALL" = "1" ] || { echo "::error::expected exactly one absence, approved by the company"; exit 1; }
+          echo "ANDROID_ABSENCES_ISOLATED_PROVEN: on-device the employee requested annual leave and the company approved it (draft + confirm each), stored once (local stack, production untouched)"
+          echo "- ANDROID_ABSENCES_ISOLATED_PROVEN: employee → Leave & absence → request 2 days → company → Requests to review → approve → one approved row" >> "$GITHUB_STEP_SUMMARY"
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()

@@ -813,3 +813,28 @@ export type ClientAgenciesData = {
   readonly shareable: readonly ClientAgencyShareable[];
   readonly activeConnections: number;
 };
+
+/**
+ * absence.mine.list / absence.pending_review.list (`apps/web/lib/leave/
+ * absences.ts`, types in absences-model.ts). `workerId` is the caller's own
+ * worker record — the one absence.request needs.
+ */
+export type AbsenceType = "annual_leave" | "sickness" | "unpaid" | "training" | "other";
+export type AbsenceStatus = "requested" | "approved" | "rejected" | "cancelled";
+export type WorkerAbsence = {
+  readonly id: string;
+  readonly workerId: string;
+  readonly workerName: string | null;
+  readonly absenceType: AbsenceType;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly halfDay: boolean;
+  readonly note: string | null;
+  readonly status: AbsenceStatus;
+};
+export type MyAbsencesData =
+  | { readonly applied: false }
+  | { readonly applied: true; readonly workerId: string | null; readonly absences: readonly WorkerAbsence[] };
+export type ManagerAbsencesData =
+  | { readonly applied: false }
+  | { readonly applied: true; readonly pending: readonly WorkerAbsence[] };
