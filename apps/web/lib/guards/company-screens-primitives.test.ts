@@ -19,6 +19,13 @@ const FILES = [
   // The candidate search's shortlist controls (phone pass 2026-11-18): the
   // statuses are ui/Chip ToggleChips, the note is ui/Textarea.
   "components/app/scouting-shortlist-buttons.tsx",
+  // The candidate card's shared actions (phone pass 2026-11-19): request a
+  // conversation, request contact details (and take the ask back), and the
+  // decision on a person an agency offered. Were hand-written buttons that
+  // fell below 44 px from sm up; now ui/Button with the 44 px floor.
+  "components/app/request-communication-button.tsx",
+  "components/app/request-contact-details-button.tsx",
+  "components/app/offer-decision-buttons.tsx",
 ];
 const code = (f: string) =>
   readFileSync(join(WEB, f), "utf8")

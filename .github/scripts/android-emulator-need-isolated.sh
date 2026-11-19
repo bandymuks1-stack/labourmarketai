@@ -97,3 +97,22 @@ maestro test \
   -e MOBILE_WORKER3_PASSWORD="$MOBILE_WORKER3_PASSWORD" \
   apps/mobile/.maestro/absences-journey.yaml
 echo "ANDROID_ABSENCES_ON_DEVICE: employee requested two days of annual leave; the company approved it"
+
+: "${MOBILE_WORKER2_EMAIL:?second worker seed address missing}"
+: "${MOBILE_WORKER2_PASSWORD:?second worker seed password missing}"
+maestro test \
+  -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+  -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+  -e MOBILE_AGENCY_EMAIL="$MOBILE_AGENCY_EMAIL" \
+  -e MOBILE_AGENCY_PASSWORD="$MOBILE_AGENCY_PASSWORD" \
+  -e MOBILE_WORKER2_EMAIL="$MOBILE_WORKER2_EMAIL" \
+  -e MOBILE_WORKER2_PASSWORD="$MOBILE_WORKER2_PASSWORD" \
+  -e ROSTER_WORKER_ID="$NOT_FIT_WORKER_ID" \
+  apps/mobile/.maestro/agency-roster-journey.yaml
+echo "ANDROID_AGENCY_ROSTER_ON_DEVICE: agency invited a worker; the worker accepted under Offers; the agency proposed them for the shared need; the client sees the offer"
+
+maestro test \
+  -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+  -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+  apps/mobile/.maestro/sent-proposals-journey.yaml
+echo "ANDROID_SENT_PROPOSALS_ON_DEVICE: company changed the dates of its accepted booking (reopened), then withdrew it with a reason"

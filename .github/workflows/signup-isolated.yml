@@ -83,6 +83,15 @@ on:
       - "apps/web/components/app/home/*agency-suggestion*.tsx"
       - "apps/web/components/app/offer-decision-buttons.tsx"
       - "supabase/migrations/20261114235900_agency_placement_terms_v1.sql"
+      # The phone confirmation path the C walk measures (worker entry -> the
+      # organization's approval -> the Living CV): the approval surfaces.
+      - "apps/web/app/*/dashboard/inbox/**"
+      - "apps/web/components/app/quick-confirm-*.tsx"
+      - "apps/web/components/app/journal-inbox-entry.tsx"
+      - "apps/web/components/app/arena/confirm-pulse.tsx"
+      - "apps/web/components/app/org-members-panel.tsx"
+      - "apps/web/components/app/entry-review-panel.tsx"
+      - "apps/web/components/app/counterparty-review-card.tsx"
       - "apps/web/tests/e2e/teams-projects-isolated.spec.ts"
       - "apps/web/app/*/dashboard/projects/**"
       - "apps/web/components/app/team-*.tsx"
@@ -129,6 +138,10 @@ on:
       - "apps/web/app/*/invite/**"
       - "apps/web/components/app/reset-password-form.tsx"
       - "apps/web/app/*/dashboard/journal/**"
+      # The worker's "submit for review" panel and the client's review queue.
+      - "apps/web/components/app/entry-review-panel.tsx"
+      - "apps/web/components/app/counterparty-review-card.tsx"
+      - "apps/web/app/*/dashboard/inbox/counterparty/**"
       - "supabase/config.toml"
       - "apps/web/tests/e2e/*-isolated-web-a.spec.ts"
       - "apps/web/tests/e2e/isolated-web-a-helpers.ts"

@@ -77,6 +77,7 @@ import { loadDemandHistory } from "@/lib/demand/demand-history-facts";
 import { DemandHistoryList } from "@/components/app/demand-history-list";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Card } from "@/components/ui/Card";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
 import { chipLinkClassName } from "@/components/ui/Chip";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { Check } from "lucide-react";
@@ -93,10 +94,12 @@ function hasStandingInterest(status: string | null | undefined): boolean {
   return status === "interested" || status === "reviewed" || status === "contacted";
 }
 
-const READINESS_TONE: Record<CompanyCandidateLabel, string> = {
-  can_be_considered: "border-state-success/40 bg-state-success/10 text-state-success",
-  limited_information: "border-state-amber/40 bg-state-amber/10 text-state-amber",
-  not_enough_information: "border-ink-500 bg-ink-800/40 text-text-muted",
+/** Readiness label -> the shared status pill's tone (phone pass 2026-11-19:
+ *  was a hand-written pill with the same three colour families). */
+const READINESS_TONE: Record<CompanyCandidateLabel, StatusChipVariant> = {
+  can_be_considered: "success",
+  limited_information: "attention",
+  not_enough_information: "neutral",
 };
 
 /** Visual tone per canonical pipeline stage (derived, never stored — P4). */
@@ -943,25 +946,17 @@ export default async function CompanyScoutingPage({
                     chips={
                       <>
                         {h.actionability.kind === "actionable_later" ? (
-                          <span
-                            className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
-                            data-testid="candidate-available-later"
-                          >
+                          <StatusChip variant="neutral" testid="candidate-available-later">
                             {t("actionability.availableFromChip", { date: h.actionability.availableFrom })}
-                          </span>
+                          </StatusChip>
                         ) : null}
                         {p.rate.minEur != null ? (
-                          <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
-                            {t("rateFrom", { min: p.rate.minEur })}
-                          </span>
+                          <StatusChip variant="neutral">{t("rateFrom", { min: p.rate.minEur })}</StatusChip>
                         ) : null}
                         {p.experienceYears != null && p.experienceYears > 0 ? (
-                          <span
-                            className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
-                            data-testid={`scout-experience-${h.workerId}`}
-                          >
+                          <StatusChip variant="neutral" testid={`scout-experience-${h.workerId}`}>
                             {t("experienceYearsValue", { years: p.experienceYears })}
-                          </span>
+                          </StatusChip>
                         ) : null}
                         <p className="basis-full text-meta leading-relaxed text-text-muted">
                           {t("handRaisers.ownWords")}
@@ -1155,7 +1150,8 @@ export default async function CompanyScoutingPage({
       ) : null}
 
       {selected && offeredCandidates.length > 0 ? (
-        <section className="card-border flex flex-col gap-3 p-4" data-testid="scouting-agency-offers">
+        <section data-testid="scouting-agency-offers">
+          <Card compact className="flex flex-col gap-3">
           {/* TIME_TO_EXTERNAL_HUMAN_RESPONSE for the client company: a real
               agency proposed a real candidate for this need, and the client
               is looking at it. Once per tab session; no ids. */}
@@ -1171,7 +1167,8 @@ export default async function CompanyScoutingPage({
           </header>
           <ul className="flex flex-col gap-3">
             {offeredCandidates.map((oc) => (
-              <li key={oc.offerId} className="card-border flex flex-col gap-3 p-3" data-testid={`scout-offered-${oc.workerId}`} data-offer-id={oc.offerId}>
+              <li key={oc.offerId} data-testid={`scout-offered-${oc.workerId}`} data-offer-id={oc.offerId}>
+                <Card compact className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                     {anonymizedToken(anonymizedWorkerLabel(oc.workerId))}
@@ -1309,9 +1306,11 @@ export default async function CompanyScoutingPage({
                   />
                 </div>
                 ) : null}
+                </Card>
               </li>
             ))}
           </ul>
+          </Card>
         </section>
       ) : null}
 
@@ -1393,9 +1392,9 @@ export default async function CompanyScoutingPage({
                   chips={
                     <>
                       {fit ? (
-                        <span
-                          className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
-                          data-testid={`scout-skill-count-${c.workerId}`}
+                        <StatusChip
+                          variant="neutral"
+                          testid={`scout-skill-count-${c.workerId}`}
                         >
                           {/* "0 of 2" asserts a measured miss. When the person
                               has stated no skills at all the engine says
@@ -1406,7 +1405,7 @@ export default async function CompanyScoutingPage({
                                 matched: fit.matchedTotal,
                                 total: fit.needTotal,
                               })}
-                        </span>
+                        </StatusChip>
                       ) : null}
                 {/* P4-B (2026-08-09): the verdict the employer could never
                     see. The engine has always computed `eligible` and the
@@ -1433,30 +1432,20 @@ export default async function CompanyScoutingPage({
                         confirmed not   → blocked
                         unknown         → nothing checked, or insufficient data */}
                   {c.match.eligible && c.match.status !== "insufficient_data" && c.match.matchedHard.length > 0 ? (
-                    <span className="rounded-md border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-meta font-medium text-state-success">
-                      {t("verdict.eligible")}
-                    </span>
+                    <StatusChip variant="success">{t("verdict.eligible")}</StatusChip>
                   ) : c.match.eligible ? (
-                    <span
-                      className="rounded-md border border-ink-500 px-2 py-0.5 text-meta font-medium text-text-secondary"
-                      data-testid={`scout-verdict-unchecked-${c.workerId}`}
-                    >
+                    <StatusChip variant="neutral" testid={`scout-verdict-unchecked-${c.workerId}`}>
                       {c.match.status === "insufficient_data"
                         ? t("verdict.insufficient")
                         : t("verdict.noCriteria")}
-                    </span>
+                    </StatusChip>
                   ) : (
-                    <span className="rounded-md border border-state-danger/40 bg-state-danger/10 px-2 py-0.5 text-meta font-medium text-state-danger">
-                      {t("verdict.blocked")}
-                    </span>
+                    <StatusChip variant="danger">{t("verdict.blocked")}</StatusChip>
                   )}
                   {c.match.evidenceConfidence ? (
-                    <span
-                      className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
-                      data-testid={`scout-evidence-confidence-${c.workerId}`}
-                    >
+                    <StatusChip variant="neutral" testid={`scout-evidence-confidence-${c.workerId}`}>
                       {t(`verdict.evidence.${c.match.evidenceConfidence}` as never)}
-                    </span>
+                    </StatusChip>
                   ) : null}
                 </div>
                       {applicantIdentity.get(c.workerId)?.name ? (
@@ -1995,14 +1984,12 @@ export default async function CompanyScoutingPage({
                   data-testid={`scout-readiness-${c.workerId}`}
                   data-readiness={c.readiness.label}
                 >
-                  <span
-                    className={`rounded-md border px-2 py-0.5 text-meta ${READINESS_TONE[c.readiness.label]}`}
-                  >
+                  <StatusChip variant={READINESS_TONE[c.readiness.label]}>
                     {t(`readiness.label.${c.readiness.label}` as never)}
-                  </span>
-                  <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
+                  </StatusChip>
+                  <StatusChip variant="neutral">
                     {t(`readiness.country.${c.readiness.countryFit}` as never)}
-                  </span>
+                  </StatusChip>
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("readiness.docsConsent")}
                   </span>
