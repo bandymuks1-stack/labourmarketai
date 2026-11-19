@@ -416,7 +416,10 @@ test("P-7. the lead invites a partner agency, passes its client's need, and the 
     `select id from public.agency_partnerships where lead_company_id = ${lit(s.agCompanyId)}`,
   )[0]!.id;
 
-  // The invited agency's owner sees the consequence and accepts for its own agency.
+  // The invited agency's owner sees the consequence and accepts for its own agency. The invitation
+  // is addressed to an e-mail, so it is shown and answerable only once that address is PROVEN
+  // (session_email_verified_v1, R2 P2-2), exactly as the client's connection invitation above.
+  await verifyEmail(ag2, AG2);
   await ag2.goto(`${BASE}/en/dashboard/company/partners`);
   const card = ag2.getByTestId(`agency-partnership-${p7.partnershipId}`);
   await expect(card).toHaveAttribute("data-side", "invited", { timeout: 30_000 });
