@@ -14741,8 +14741,12 @@
           "chipHelpPeople": "Team und Einladungen",
           "chipHelpPlanning": "Planung öffnen",
           "chipHelpServices": "Meine Leistungen",
-          "chipHelpJournal": "Arbeitsjournal"
-        }
+          "chipHelpJournal": "Arbeitsjournal",
+          "chipHelpSettings": "Einstellungen",
+          "chipHelpPrivacy": "Datenschutz und Ihre Daten"
+        },
+        "account": "Anmeldung, E-Mail, Benachrichtigungen und Darstellung finden Sie in den Einstellungen.",
+        "privacy": "Unter „Datenschutz und Ihre Daten“ können Sie Ihre Daten herunterladen, sehen, wer Ihr Profil sieht, und die Löschung Ihres Kontos beantragen."
       },
       "interestInboxAmbiguous": "Das kann zweierlei heißen — was möchten Sie sehen?",
       "chipInterestOnMyNeeds": "Interesse an meinen Anfragen",

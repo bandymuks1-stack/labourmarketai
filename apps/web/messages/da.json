@@ -4110,8 +4110,12 @@
           "chipHelpPeople": "Team og invitationer",
           "chipHelpPlanning": "Åbn planlægning",
           "chipHelpServices": "Mine ydelser",
-          "chipHelpJournal": "Arbejdsjournal"
-        }
+          "chipHelpJournal": "Arbejdsjournal",
+          "chipHelpSettings": "Indstillinger",
+          "chipHelpPrivacy": "Privatliv og dine data"
+        },
+        "account": "Login, e-mail, notifikationer og udseende finder du under Indstillinger.",
+        "privacy": "Under Privatliv og dine data kan du downloade dine data, se hvem der ser din profil, og anmode om sletning af din konto."
       },
       "interestInboxAmbiguous": "Det kan betyde to ting — hvad vil du se?",
       "chipInterestOnMyNeeds": "Interesse i mine forespørgsler",
