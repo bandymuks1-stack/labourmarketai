@@ -948,7 +948,13 @@ for (const phone of PHONES) {
     test(`T-3 (${phone.name}). the institution invites a learner by link`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, SCHOOL);
       await page.goto(`${BASE}/en/dashboard/company/education`);
-      await page.getByTestId("institution-learners-invite").tap();
+      // UX_GAPS I-3: the learner invite is on the first screen, a 44 px target.
+      const invite = page.getByTestId("institution-learners-invite");
+      await expect(invite).toBeVisible({ timeout: 30_000 });
+      const inviteBox = await invite.boundingBox();
+      expect(inviteBox?.height ?? 0, "the invite is a 44 px target").toBeGreaterThanOrEqual(44);
+      expect((inviteBox?.y ?? Infinity) + (inviteBox?.height ?? 0), "the invite is on the first screen").toBeLessThanOrEqual(phone.viewport.height);
+      await invite.tap();
       await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
       // UX_GAPS I-4: one read-only line for the preset, link mode by default, 44 px fields.
       const preset = page.getByTestId("invite-preset");

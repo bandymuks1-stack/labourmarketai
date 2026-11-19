@@ -1100,12 +1100,15 @@ export function OnboardingWizard({
             {error}
           </p>
         )}
-        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+        {/* One row on a phone too (UX_GAPS ST-4): stacked, Back under Finish
+            made the fixed bar 125 px. The submit stays first in the DOM (focus
+            order); row-reverse shows Back on its left. */}
+        <div className="flex flex-row-reverse items-center gap-3 sm:flex-row">
           <Button
             type="submit"
             disabled={pending}
             data-testid="onboarding-submit"
-            className="min-h-11 w-full rounded-xl sm:w-auto"
+            className="min-h-11 flex-1 rounded-xl sm:w-auto sm:flex-none"
           >
             {pending ? t("saving") : t("step2.continue")}
           </Button>

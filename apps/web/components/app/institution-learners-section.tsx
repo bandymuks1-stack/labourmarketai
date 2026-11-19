@@ -44,6 +44,20 @@ export async function InstitutionLearnersSection({
         <p className="text-xs leading-relaxed text-text-secondary">{t("subtitle")}</p>
       </header>
 
+      {/* Deep link straight into the ONE invitation panel with the right
+          type, organisation and relationship pre-selected (`join_organization`
+          + `student`), so inviting a learner is one click, not four
+          collapsed-panel steps. Same pattern the chat home uses. It sits under the
+          heading, above the counts and the list, so it is on the first screen of
+          a phone (UX_GAPS I-3). */}
+      <Link
+        href={learnerInviteHref(organizationId) as "/dashboard/network"}
+        className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90"
+        data-testid="institution-learners-invite"
+      >
+        {t("invite")} →
+      </Link>
+
       {read.status === "unavailable" ? (
         <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-learners-unavailable">
           {t("unavailable")}
@@ -139,17 +153,6 @@ export async function InstitutionLearnersSection({
         </>
       )}
 
-      {/* Deep link straight into the ONE invitation panel with the right
-          type, organisation and relationship pre-selected (`join_organization`
-          + `student`), so inviting a learner is one click, not four
-          collapsed-panel steps. Same pattern the chat home uses. */}
-      <Link
-        href={learnerInviteHref(organizationId) as "/dashboard/network"}
-        className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90"
-        data-testid="institution-learners-invite"
-      >
-        {t("invite")} →
-      </Link>
     </section>
     </Card>
   );
