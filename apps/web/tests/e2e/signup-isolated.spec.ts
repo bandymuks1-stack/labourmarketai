@@ -307,6 +307,29 @@ async function lastMailLink(address: string): Promise<string> {
   throw new Error("no reset mail arrived in the local mail catcher");
 }
 
+/** The ids of every message the local mail catcher holds for `address`. */
+async function mailIds(address: string): Promise<Set<string>> {
+  const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${address}`)}`);
+  const list = (await r.json()) as { messages?: Array<{ ID: string }> };
+  return new Set((list.messages ?? []).map((m) => m.ID));
+}
+
+/** The verify / callback link of the first message to `address` not in `before`. */
+async function newMailLink(address: string, before: Set<string>): Promise<string> {
+  for (let i = 0; i < 30; i += 1) {
+    const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${address}`)}`);
+    const list = (await r.json()) as { messages?: Array<{ ID: string }> };
+    for (const { ID } of (list.messages ?? []).filter((m) => !before.has(m.ID))) {
+      const m = (await (await fetch(`${MAIL}/api/v1/message/${ID}`)).json()) as { Text?: string; HTML?: string };
+      const urls = `${m.Text ?? ""} ${m.HTML ?? ""}`.match(/https?:\/\/[^\s"'<>]+/g) ?? [];
+      const link = urls.find((u) => /verify|callback|token/.test(u));
+      if (link) return link.replace(/&amp;/g, "&");
+    }
+    await new Promise((res) => setTimeout(res, 1000));
+  }
+  throw new Error(`no new mail with a link reached ${address} in the local mail catcher`);
+}
+
 test("S-5. a person signs out and signs back in; the session is gone after sign-out", async ({ page }) => {
   const address = email("worker");
   await signIn(page, address, PASSWORD);
@@ -733,9 +756,12 @@ test("M-4. seed: a staffing agency, and the company's proven address", async ({ 
   await co.goto(`${BASE}/en/dashboard/network`);
   const prompt = co.getByTestId("network-email-unverified");
   if (await prompt.isVisible({ timeout: 15_000 }).catch(() => false)) {
+    // The company already has mail from the earlier seeds (a notice can carry
+    // a callback link too), so follow the link of the NEW message only.
+    const before = await mailIds(owner);
     await prompt.getByTestId("verify-email-send").click();
     await expect(prompt.getByTestId("verify-email-sent")).toBeVisible({ timeout: 30_000 });
-    await co.goto(await lastMailLink(owner));
+    await co.goto(await newMailLink(owner, before));
     await co.waitForURL((u) => u.host === new URL(BASE).host && !u.pathname.includes("/auth/callback"), {
       timeout: 60_000,
     });
@@ -744,6 +770,10 @@ test("M-4. seed: a staffing agency, and the company's proven address", async ({ 
   await expect(co.getByTestId("network-email-unverified"), "the company's address is proven").toHaveCount(0, {
     timeout: 30_000,
   });
+  // The row the accept RPC reads (email_is_verified_v1).
+  const ownerId = await userId(owner);
+  const proofs = await db<Array<{ email: string }>>(`email_verifications_v1?profile_id=eq.${ownerId}&select=email`);
+  expect(proofs.map((p) => p.email), "the company's address is recorded as proven").toContain(owner.toLowerCase());
 });
 
 /**
