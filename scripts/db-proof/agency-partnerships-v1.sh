@@ -39,6 +39,11 @@ as() { local uid="$1" email="$2"; shift 2; [ "$email" = "-" ] && email=""
   printf "set local role authenticated;\nset local app.uid='%s';\nset local app.email='%s';\n%s\n" "$uid" "$email" "$*" \
   | { echo "begin;"; cat; echo "commit;"; } | $PSQL -v ON_ERROR_STOP=0 -f - 2>&1 \
   | tr -d '\r' | sed 's/^psql:<stdin>:[0-9]*: //; s/^ERROR: *//' | grep -vE '^(BEGIN|COMMIT|ROLLBACK|SET|$)' | head -1; }
+# as_unverified <uid> <email> <sql>: the same caller, but with the e-mail NOT proven (R2 P2-2).
+as_unverified() { local uid="$1" email="$2"; shift 2
+  printf "set local role authenticated;\nset local app.uid='%s';\nset local app.email='%s';\nset local app.email_verified='false';\n%s\n" "$uid" "$email" "$*" \
+  | { echo "begin;"; cat; echo "commit;"; } | $PSQL -v ON_ERROR_STOP=0 -f - 2>&1 \
+  | tr -d '\r' | sed 's/^psql:<stdin>:[0-9]*: //; s/^ERROR: *//' | grep -vE '^(BEGIN|COMMIT|ROLLBACK|SET|$)' | head -1; }
 
 L=a0000000-0000-4000-8000-00000000000a     # owner of the LEAD agency
 P=a0000000-0000-4000-8000-00000000000b     # owner of the PARTNER agency (invited as partner@example.test)
@@ -60,6 +65,8 @@ run_file "$HERE/agency-placement-terms-v1.prelude.sql"
 awk '/^create or replace function public.respond_agency_candidate_offer_v1/{p=1} p{print} p&&/^\$function\$;/{exit}' "$V1SRC" > "$TMP/v1.sql"
 [ -s "$TMP/v1.sql" ] || { echo "could not cut respond_agency_candidate_offer_v1"; exit 1; }
 run_file "$TMP/v1.sql"
+# as main leaves it (20260928210000 :84-85): not public, not anon, signed-in callers only
+su "revoke all on function public.respond_agency_candidate_offer_v1(uuid,text,text) from public" >/dev/null
 su "grant execute on function public.respond_agency_candidate_offer_v1(uuid,text,text) to authenticated" >/dev/null
 run_file "$TERMS"
 run_file "$HERE/agency-partnerships-v1.prelude.sql"
@@ -114,6 +121,13 @@ check "the audit trail records the invitation" "1" \
 echo "== 2. THE INVITED AGENCY ACCEPTS, FOR AN AGENCY IT GOVERNS ======================"
 check "a caller with another e-mail learns nothing" "invitation_not_found" \
   "$(as $X x@example.test "select accept_agency_partnership_v1('$PID', '$XC');")"
+check "R2 P2-2: an UNVERIFIED session with the invited address cannot accept" "invitation_not_found" \
+  "$(as_unverified $P $PE "select accept_agency_partnership_v1('$PID', '$PC');")"
+check "R2 P2-2: nor decline" "invitation_not_found" \
+  "$(as_unverified $P $PE "select decline_agency_partnership_v1('$PID');")"
+check "R2 P2-2: nor see the invitation in its list" "0" \
+  "$(as_unverified $P $PE "select count(*) from list_agency_partnerships_v1();")"
+check "R2 P2-2: the refused attempts changed nothing" "pending" "$(su "select status from agency_partnerships where id='$PID'")"
 check "the addressee cannot accept for an agency they do not govern" "not_owner" \
   "$(as $P $PE "select accept_agency_partnership_v1('$PID', '$XC');")"
 check "the addressee sees the invitation in their list" "invited/QA-SYNTHETIC Lead agency/-" \
@@ -164,6 +178,14 @@ check "the lead sees the partner's offer, by status" "QA-SYNTHETIC Partner agenc
 check "the lead's read carries no worker column" "0" \
   "$(su "select count(*) from pg_proc p, unnest(p.proargnames) a where p.proname='list_partner_offers_for_lead_v1' and a like '%worker%'")"
 check "the partner cannot list the lead's partner offers" "0" "$(as $P - "select count(*) from list_partner_offers_for_lead_v1();")"
+check "R2 P2-3: the partner cannot read its partner-offer row directly (no client_company_id)" "0" \
+  "$(as $P - "select count(*) from agency_candidate_offers where id='$OP';")"
+check "R2 P2-3: nor any row naming the lead's client" "0" \
+  "$(as $P - "select count(*) from agency_candidate_offers where client_company_id='$EC';")"
+check "R2 P2-3: the client still reads the offer made to it" "1" \
+  "$(as $EMP - "select count(*) from agency_candidate_offers where id='$OP';")"
+check "R2 P2-3: the policy narrows only the agency arm" "1" \
+  "$(su "select count(*) from pg_policies where policyname='agency_candidate_offers_select' and qual like '%partner_share_id IS NULL%'")"
 
 echo "== 5. THE CLIENT ACCEPTS ON THE LEAD'S TERM ====================================="
 as $L - "select set_agency_placement_term_v1('$LC', 1000, 'EUR', '$COND', 'en');" >/dev/null
@@ -259,6 +281,11 @@ for f in "invite_agency_partner_v1(uuid,text,numeric)" "accept_agency_partnershi
     "$(su "select has_function_privilege('anon','public.$f','execute')||'/'||has_function_privilege('authenticated','public.$f','execute')" | sed 's/true/t/g; s/false/f/g')"
 done
 
+check "R2 P2-1: a signed-in caller can no longer call v1 directly" "f" \
+  "$(su "select has_function_privilege('authenticated','public.respond_agency_candidate_offer_v1(uuid,text,text)','execute')" | sed 's/true/t/g; s/false/f/g')"
+checkre "R2 P2-1: a direct v1 call on the term-carrying partner offer is refused" "permission denied" \
+  "$(as $EMP - "select respond_agency_candidate_offer_v1('$OP', 'declined', null);")"
+
 echo "== 10. ROLLBACK =================================================================="
 checkre "the rollback refuses while partnerships exist" "ROLLBACK REFUSED" \
   "$($PSQL -v ON_ERROR_STOP=1 -f "$DOWN" 2>&1 | tr -d '\r' | grep -m1 'REFUSED')"
@@ -276,6 +303,10 @@ check "the restored v2 is still executable by signed-in callers only" "f/t" \
   "$(su "select has_function_privilege('anon','public.respond_agency_candidate_offer_v2(uuid,text,text,uuid)','execute')||'/'||has_function_privilege('authenticated','public.respond_agency_candidate_offer_v2(uuid,text,text,uuid)','execute')" | sed 's/true/t/g; s/false/f/g')"
 check "the rollback restores the term policy without the offering-agency arm" "0" \
   "$(su "select count(*) from pg_policies where policyname='agency_placement_terms_select' and qual like '%agency_company_id%'")"
+check "the rollback gives signed-in callers v1 back, as on main" "t" \
+  "$(su "select has_function_privilege('authenticated','public.respond_agency_candidate_offer_v1(uuid,text,text)','execute')" | sed 's/true/t/g; s/false/f/g')"
+check "the rollback restores main's offer read policy" "0" \
+  "$(su "select count(*) from pg_policies where policyname='agency_candidate_offers_select' and qual like '%partner_share_id%'")"
 check "the rollback leaves no new function behind" "0" \
   "$(su "select count(*) from pg_proc where proname in ('invite_agency_partner_v1','list_agency_commissions_v1','submit_partner_candidate_offer_v1')")"
 run_file "$MIG"

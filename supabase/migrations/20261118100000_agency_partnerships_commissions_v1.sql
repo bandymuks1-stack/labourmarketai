@@ -164,6 +164,22 @@ comment on column public.agency_candidate_offers.partner_share_id is
 create index if not exists agency_candidate_offers_partner_share
   on public.agency_candidate_offers (partner_share_id) where partner_share_id is not null;
 
+-- R2 P2-3: a partner offer row carries the CLIENT's ids (client_company_id,
+-- connection_id, request_share_id), and agency_company_id is the partner. The
+-- partner must never learn who the lead's client is, so its own partner-offer
+-- rows leave its DIRECT read. It follows them through definer reads that carry
+-- no client column (list_agency_offer_progress_v1). The client arm and the
+-- admin arm are unchanged; the agency arm narrows. Pure narrowing.
+drop policy if exists agency_candidate_offers_select on public.agency_candidate_offers;
+create policy agency_candidate_offers_select on public.agency_candidate_offers for select
+  using (
+    (public.owns_company(agency_company_id) and partner_share_id is null)
+    or (public.owns_company(client_company_id)
+        and exists (select 1 from public.agency_client_connections c
+                     where c.id = connection_id and c.status = 'active'))
+    or public.is_admin()
+  );
+
 -- ── 4. Partnership: invite, accept, decline, end ───────────────────────────
 create or replace function public.invite_agency_partner_v1(
   p_lead_company_id       uuid,
@@ -230,8 +246,11 @@ begin
   if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
   select * into v_row from public.agency_partnerships where id = p_partnership_id for update;
   -- Only the addressee of a live invitation; anyone else learns nothing.
+  -- R2 P2-2: the address must be PROVEN (20261003151000_email_verified_boundary_v1),
+  -- as on every other e-mail-addressed accept/decline/list.
   if v_row.id is null or v_row.status <> 'pending' or v_row.expires_at <= now()
-     or v_email = '' or lower(v_row.invited_email) <> v_email then
+     or v_email = '' or lower(v_row.invited_email) <> v_email
+     or not public.session_email_verified_v1() then
     raise exception 'invitation_not_found' using errcode = '42501';
   end if;
   if not public.owns_company(p_partner_company_id) then raise exception 'not_owner' using errcode = '42501'; end if;
@@ -269,7 +288,8 @@ begin
   if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
   select * into v_row from public.agency_partnerships where id = p_partnership_id for update;
   if v_row.id is null or v_row.status <> 'pending'
-     or v_email = '' or lower(v_row.invited_email) <> v_email then
+     or v_email = '' or lower(v_row.invited_email) <> v_email
+     or not public.session_email_verified_v1() then
     raise exception 'invitation_not_found' using errcode = '42501';
   end if;
   update public.agency_partnerships
@@ -529,17 +549,32 @@ $$;
 
 -- The accepted term must stay readable to the partner whose candidate it was accepted on, and the
 -- lead's current term must be readable on the client's page (it already is: current terms are).
+-- The offer lookup runs as the definer: the partner can no longer read its own partner-offer rows
+-- directly (R2 P2-3 below), and must still read the term accepted on them. It answers one yes/no
+-- for the CALLER's own companies only; it returns no offer data.
+create or replace function public.placement_term_accepted_for_caller_v1(p_term_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.agency_candidate_offers o
+     where o.accepted_placement_term_id = p_term_id
+       and (public.owns_company(o.client_company_id) or public.owns_company(o.agency_company_id))
+  );
+$$;
+revoke all on function public.placement_term_accepted_for_caller_v1(uuid) from public, anon;
+grant execute on function public.placement_term_accepted_for_caller_v1(uuid) to authenticated;
+
 drop policy if exists agency_placement_terms_select on public.agency_placement_terms;
 create policy agency_placement_terms_select on public.agency_placement_terms
   for select to authenticated
   using (
     retired_at is null
     or public.owns_company(company_id)
-    or exists (
-      select 1 from public.agency_candidate_offers o
-       where o.accepted_placement_term_id = agency_placement_terms.id
-         and (public.owns_company(o.client_company_id) or public.owns_company(o.agency_company_id))
-    )
+    or public.placement_term_accepted_for_caller_v1(id)
     or public.is_admin()
   );
 
@@ -580,7 +615,8 @@ as $$
    where public.owns_company(p.lead_company_id)
       or (p.partner_company_id is not null and public.owns_company(p.partner_company_id))
       or (p.status = 'pending' and p.expires_at > now()
-          and lower(p.invited_email) = lower(coalesce((select auth.jwt()) ->> 'email', '')))
+          and lower(p.invited_email) = lower(coalesce((select auth.jwt()) ->> 'email', ''))
+          and public.session_email_verified_v1())
    order by p.created_at desc
    limit 200;
 $$;
@@ -769,6 +805,11 @@ grant execute on function public.submit_partner_candidate_offer_v1(uuid, uuid, t
 revoke all on function public.respond_agency_candidate_offer_v2(uuid, text, text, uuid) from public;
 revoke all on function public.respond_agency_candidate_offer_v2(uuid, text, text, uuid) from anon;
 grant execute on function public.respond_agency_candidate_offer_v2(uuid, text, text, uuid) to authenticated;
+-- R2 P2-1: v1 decides the same offers WITHOUT the term and live-partnership
+-- rules, so a signed-in caller could skip them. Only v2 (definer, which still
+-- calls v1 as its owner) remains callable. Deploy the app that calls v2 only,
+-- then apply.
+revoke all on function public.respond_agency_candidate_offer_v1(uuid, text, text) from public, anon, authenticated;
 revoke all on function public.list_agency_partnerships_v1() from public;
 revoke all on function public.list_agency_partnerships_v1() from anon;
 grant execute on function public.list_agency_partnerships_v1() to authenticated;

@@ -30,3 +30,22 @@ create table public.company_worker_engagements (
   id uuid primary key default gen_random_uuid(), source_booking_id uuid references public.booking_requests(id),
   status text not null default 'active', started_at timestamptz not null default now(),
   created_at timestamptz default now());
+
+-- 20261003151000_email_verified_boundary_v1: the CALLING session's proven e-mail. Stand-in: a
+-- session setting, verified unless the proof says otherwise (R2 P2-2 cases set it false).
+create function public.session_email_verified_v1() returns boolean language sql stable as $$
+  select coalesce(nullif(current_setting('app.email_verified', true), ''), 'true') = 'true';
+$$;
+grant execute on function public.session_email_verified_v1() to authenticated;
+
+-- 20260901052300 :190-198, the offer read policy as main applies it (R2 P2-3 narrows its agency arm).
+alter table public.agency_candidate_offers enable row level security;
+grant select on public.agency_client_connections to authenticated;
+create policy agency_candidate_offers_select on public.agency_candidate_offers for select
+  using (
+    public.owns_company(agency_company_id)
+    or (public.owns_company(client_company_id)
+        and exists (select 1 from public.agency_client_connections c
+                     where c.id = connection_id and c.status = 'active'))
+    or public.is_admin()
+  );

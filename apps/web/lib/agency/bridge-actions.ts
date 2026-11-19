@@ -340,21 +340,14 @@ export async function respondCandidateOfferAction(
     return { status: "error", reason: "placement_term_not_accepted" };
   }
   const supabase = await createClient();
-  let { data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v2", {
+  const { data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v2", {
     p_offer_id: offerId,
     p_decision: decision,
     p_note: note,
     p_accepted_term_id: decision === "accepted" ? acceptedTermId : null,
   });
-  // A database without v2 has no term table either: the decision is v1's,
-  // exactly as before.
-  if (error && isMissingRpcCode(error.code) && !acceptedTermId) {
-    ({ data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v1", {
-      p_offer_id: offerId,
-      p_decision: decision,
-      p_note: note,
-    }));
-  }
+  // v2 is the only decision path (R2 P2-1: v1 is revoked from signed-in callers
+  // in 20261118100000 so the term and live-partnership rules cannot be skipped).
   if (error) {
     const m = (error.message ?? "").toLowerCase();
     if (m.includes("placement_term_not_accepted")) return { status: "error", reason: "placement_term_not_accepted" };

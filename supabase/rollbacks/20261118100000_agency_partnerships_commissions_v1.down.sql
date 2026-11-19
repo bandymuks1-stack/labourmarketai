@@ -105,6 +105,7 @@ create policy agency_placement_terms_select on public.agency_placement_terms
     or public.is_admin()
   );
 
+drop function if exists public.placement_term_accepted_for_caller_v1(uuid);
 drop function if exists public.list_agency_commissions_v1();
 drop function if exists public.list_partner_offers_for_lead_v1();
 drop function if exists public.list_partner_shared_requests_v1();
@@ -116,6 +117,21 @@ drop function if exists public.end_agency_partnership_v1(uuid);
 drop function if exists public.decline_agency_partnership_v1(uuid);
 drop function if exists public.accept_agency_partnership_v1(uuid, uuid);
 drop function if exists public.invite_agency_partner_v1(uuid, text, numeric);
+
+-- R2 P2-1: v1 callable again, exactly as on main.
+grant execute on function public.respond_agency_candidate_offer_v1(uuid, text, text) to authenticated;
+
+-- R2 P2-3: the offer read policy verbatim as 20260901052300 left it (before the
+-- column it now references is dropped).
+drop policy if exists agency_candidate_offers_select on public.agency_candidate_offers;
+create policy agency_candidate_offers_select on public.agency_candidate_offers for select
+  using (
+    public.owns_company(agency_company_id)
+    or (public.owns_company(client_company_id)
+        and exists (select 1 from public.agency_client_connections c
+                     where c.id = connection_id and c.status = 'active'))
+    or public.is_admin()
+  );
 
 drop index if exists public.agency_candidate_offers_partner_share;
 alter table public.agency_candidate_offers drop column if exists partner_share_id;
