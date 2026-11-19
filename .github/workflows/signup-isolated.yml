@@ -135,6 +135,10 @@ on:
       - "apps/web/app/*/invite/**"
       - "apps/web/components/app/reset-password-form.tsx"
       - "apps/web/app/*/dashboard/journal/**"
+      # The worker's "submit for review" panel and the client's review queue.
+      - "apps/web/components/app/entry-review-panel.tsx"
+      - "apps/web/components/app/counterparty-review-card.tsx"
+      - "apps/web/app/*/dashboard/inbox/counterparty/**"
       - "supabase/config.toml"
       - "apps/web/tests/e2e/*-isolated-web-a.spec.ts"
       - "apps/web/tests/e2e/isolated-web-a-helpers.ts"

@@ -186,6 +186,14 @@ async function candidateSearchOnPhone(page: Page, needId: string, where: string)
     const row = await filters.boundingBox();
     expect(row!.x + row!.width, `${where}: the filters stay inside the screen`).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
   }
+  // Round 2: the card's status pills (verdict, evidence, readiness) and, when an
+  // agency offered people, that section on ui/Card stay inside the screen.
+  for (const sel of ['[data-testid^="scout-verdict-"]', '[data-testid^="scout-readiness-"]', '[data-testid="scouting-agency-offers"]']) {
+    const part = main.locator(sel).first();
+    if (!(await part.isVisible().catch(() => false))) continue;
+    const box = await part.boundingBox();
+    expect(box!.x + box!.width, `${where}: ${sel} stays inside the screen`).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+  }
   // The result is reachable below: candidates, or the empty list with its door onward.
   const outcome = main
     .getByTestId("scouting-results")
@@ -1165,7 +1173,13 @@ for (const phone of PHONES) {
     test(`T-3 (${phone.name}). the institution invites a learner by link`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, SCHOOL);
       await page.goto(`${BASE}/en/dashboard/company/education`);
-      await page.getByTestId("institution-learners-invite").tap();
+      // UX_GAPS I-3: the learner invite is on the first screen, a 44 px target.
+      const invite = page.getByTestId("institution-learners-invite");
+      await expect(invite).toBeVisible({ timeout: 30_000 });
+      const inviteBox = await invite.boundingBox();
+      expect(inviteBox?.height ?? 0, "the invite is a 44 px target").toBeGreaterThanOrEqual(44);
+      expect((inviteBox?.y ?? Infinity) + (inviteBox?.height ?? 0), "the invite is on the first screen").toBeLessThanOrEqual(phone.viewport.height);
+      await invite.tap();
       await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
       // UX_GAPS I-4: one read-only line for the preset, link mode by default, 44 px fields.
       const preset = page.getByTestId("invite-preset");

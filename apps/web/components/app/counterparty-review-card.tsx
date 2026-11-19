@@ -4,6 +4,7 @@ import { useActionState, useId, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
+import { Textarea } from "@/components/ui/Textarea";
 import {
   decideCounterpartyEntry,
   type DecideActionState,
@@ -250,7 +251,7 @@ export function CounterpartyReviewCard({ view }: { view: CounterpartyCardView })
             <label htmlFor={noteId} className="text-meta text-text-muted">
               {noteRequired ? t("noteLabelRequired") : t("noteLabel")}
             </label>
-            <textarea
+            <Textarea
               id={noteId}
               name="note"
               rows={3}
@@ -258,7 +259,6 @@ export function CounterpartyReviewCard({ view }: { view: CounterpartyCardView })
               required={noteRequired}
               aria-describedby={hintId}
               disabled={pending}
-              className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue"
             />
             <p id={hintId} className="text-meta text-text-muted">
               {t("noteHint")}
@@ -270,6 +270,7 @@ export function CounterpartyReviewCard({ view }: { view: CounterpartyCardView })
               size="sm"
               className="min-h-11"
               variant={effective === "accept" ? "primary" : "secondary"}
+              className="min-h-11"
               disabled={pending || effective === null}
               aria-busy={pending || undefined}
               data-testid={`counterparty-decide-${view.entryId}`}

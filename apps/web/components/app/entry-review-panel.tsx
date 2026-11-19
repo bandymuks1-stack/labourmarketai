@@ -128,6 +128,7 @@ export function EntryReviewPanel({
               size="sm"
               className="min-h-11"
               variant="secondary"
+              className="min-h-11"
               disabled={pending}
               aria-busy={pending || undefined}
               data-testid={`entry-review-submit-${entryId}`}
