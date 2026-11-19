@@ -306,6 +306,10 @@ check "the partner cannot take the need back; only the lead can" "partner_share_
 as $L - "select unshare_request_with_partner_v1('$PS');" >/dev/null
 check "taking it back withdraws the open offer and revokes the pass" "withdrawn/revoked" \
   "$(su "select o.status||'/'||s.status from agency_candidate_offers o, agency_partner_request_shares s where o.id='$OP2' and s.id='$PS'")"
+check "R2 P3-b: passing the need is audited once (a repeated pass logs nothing)" "1/$PID/$LC/$PC/$SH/$EC/$REQ" \
+  "$(su "select count(*)||'/'||min(payload->>'partnership_id')||'/'||min(payload->>'lead_company_id')||'/'||min(payload->>'partner_company_id')||'/'||min(payload->>'client_share_id')||'/'||min(payload->>'client_company_id')||'/'||min(payload->>'request_id') from audit_logs where action='agency_partner_need_passed' and entity_id='$PS'")"
+check "R2 P3-b: taking it back is audited, by the lead, with the offers it withdrew" "1/$L/$PID/1" \
+  "$(su "select count(*)||'/'||min(actor_id::text)||'/'||min(payload->>'partnership_id')||'/'||min(payload->>'withdrawn_offers') from audit_logs where action='agency_partner_need_revoked' and entity_id='$PS'")"
 check "the accepted offer and its placement stay" "accepted" "$(su "select status from agency_candidate_offers where id='$OP'")"
 check "an offer on a revoked pass is refused" "share_not_active" \
   "$(as $P - "select submit_partner_candidate_offer_v1('$PS', '$WP2');")"
@@ -320,6 +324,8 @@ check "a third agency cannot end the partnership" "partnership_not_found" \
 check "the partner ends the partnership" "$PID" "$(as $P - "select end_agency_partnership_v1('$PID');")"
 check "ending revokes the pass and withdraws the open offer" "ended/revoked/withdrawn" \
   "$(su "select p.status||'/'||s.status||'/'||o.status from agency_partnerships p, agency_partner_request_shares s, agency_candidate_offers o where p.id='$PID' and s.id='$PS2' and o.id='$OP3'")"
+check "R2 P3-b: the end's audit row names the passes it took back" "$P/[\"$PS2\"]" \
+  "$(su "select actor_id||'/'||(payload->'revoked_partner_share_ids')::text from audit_logs where action='agency_partnership_ended' and entity_id='$PID'")"
 check "the placed offer is history and stays accepted" "accepted" "$(su "select status from agency_candidate_offers where id='$OP'")"
 check "an ended partnership cannot pass a need" "partnership_not_active" \
   "$(as $L - "select share_request_with_partner_v1('$PID', '$SH');")"

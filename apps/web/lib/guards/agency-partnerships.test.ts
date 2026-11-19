@@ -101,6 +101,17 @@ describe("agency partnerships — the database keeps every rule", () => {
     expect(offer).toMatch(/'agency_verification', 'not_recorded'/);
   });
 
+  it("decision 0033: passing a need, taking it back and ending are audited (R2 P3-b)", () => {
+    expect(fn("share_request_with_partner_v1")).toMatch(/'agency_partner_need_passed'/);
+    expect(fn("unshare_request_with_partner_v1")).toMatch(/'agency_partner_need_revoked'/);
+    expect(fn("end_agency_partnership_v1")).toMatch(/'revoked_partner_share_ids'/);
+  });
+
+  it("names the real order: apply both migrations, then deploy at once (R2 P2-5)", () => {
+    expect(sql).not.toMatch(/Deploy the app that calls v2 only,\s*-- then apply/);
+    expect(sql).toMatch(/apply 20261114235900, then this file,\s*-- then deploy the app that calls v2 only AT ONCE/);
+  });
+
   it("the client sees only its own (lead) agency: no partner column is readable by signed-in callers", () => {
     expect(sql).toMatch(/revoke select on public\.agency_candidate_offers from authenticated;/);
     const grant = sql.match(/grant select \(([^)]*)\)\s+on public\.agency_candidate_offers to authenticated;/);

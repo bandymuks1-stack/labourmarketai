@@ -578,13 +578,16 @@ begin
    where o.status = 'offered'
      and o.partner_share_id in (select s.id from public.agency_partner_request_shares s
                                  where s.partnership_id = p_partnership_id);
-  update public.agency_partner_request_shares
-     set status = 'revoked', revoked_by = v_uid, revoked_at = now()
-   where partnership_id = p_partnership_id and status = 'active';
-
+  with revoked as (
+    update public.agency_partner_request_shares
+       set status = 'revoked', revoked_by = v_uid, revoked_at = now()
+     where partnership_id = p_partnership_id and status = 'active'
+    returning id)
+  -- Decision 0033 traceability (R2 P3-b): the passes the end took back are named in its audit row.
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
-  values (v_uid, 'agency_partnership_ended', 'agency_partnerships', p_partnership_id,
-          jsonb_build_object('lead_company_id', v_row.lead_company_id, 'partner_company_id', v_row.partner_company_id));
+  select v_uid, 'agency_partnership_ended', 'agency_partnerships', p_partnership_id,
+         jsonb_build_object('lead_company_id', v_row.lead_company_id, 'partner_company_id', v_row.partner_company_id,
+                            'revoked_partner_share_ids', coalesce((select jsonb_agg(r.id) from revoked r), '[]'::jsonb));
   return p_partnership_id;
 end;
 $$;
@@ -600,12 +603,15 @@ security definer
 set search_path = ''
 as $$
 declare
-  v_uid  uuid := (select auth.uid());
-  v_lead uuid;
-  v_id   uuid;
+  v_uid     uuid := (select auth.uid());
+  v_lead    uuid;
+  v_partner uuid;
+  v_client  uuid;
+  v_request uuid;
+  v_id      uuid;
 begin
   if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
-  select p.lead_company_id into v_lead
+  select p.lead_company_id, p.partner_company_id into v_lead, v_partner
     from public.agency_partnerships p
    where p.id = p_partnership_id and p.status = 'active';
   if v_lead is null or not public.owns_company(v_lead) then
@@ -625,6 +631,23 @@ begin
   values (p_partnership_id, p_client_share_id, v_uid)
   on conflict (partnership_id, client_share_id) where (status = 'active') do nothing
   returning id into v_id;
+  if v_id is not null then
+    -- Decision 0033 traceability (R2 P3-b): passing a client's need along the chain is audited
+    -- (admin-only read). A repeated pass of the same need returns the same row and logs nothing.
+    select c.client_company_id, s.request_id into v_client, v_request
+      from public.agency_client_request_shares s
+      join public.agency_client_connections c on c.id = s.connection_id
+     where s.id = p_client_share_id;
+    insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+    values (v_uid, 'agency_partner_need_passed', 'agency_partner_request_shares', v_id,
+      jsonb_build_object('rule', 'decision 0033',
+                         'partnership_id', p_partnership_id,
+                         'lead_company_id', v_lead,
+                         'partner_company_id', v_partner,
+                         'client_share_id', p_client_share_id,
+                         'client_company_id', v_client,
+                         'request_id', v_request));
+  end if;
   if v_id is null then
     select s.id into v_id from public.agency_partner_request_shares s
      where s.partnership_id = p_partnership_id and s.client_share_id = p_client_share_id and s.status = 'active';
@@ -640,11 +663,16 @@ security definer
 set search_path = ''
 as $$
 declare
-  v_uid  uuid := (select auth.uid());
-  v_lead uuid;
+  v_uid       uuid := (select auth.uid());
+  v_lead      uuid;
+  v_partner   uuid;
+  v_pship     uuid;
+  v_client_sh uuid;
+  v_withdrawn int;
 begin
   if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
-  select p.lead_company_id into v_lead
+  select p.lead_company_id, p.partner_company_id, p.id, s.client_share_id
+    into v_lead, v_partner, v_pship, v_client_sh
     from public.agency_partner_request_shares s
     join public.agency_partnerships p on p.id = s.partnership_id
    where s.id = p_partner_share_id and s.status = 'active';
@@ -654,9 +682,19 @@ begin
   update public.agency_candidate_offers
      set status = 'withdrawn', withdrawn_by = v_uid, withdrawn_at = now()
    where partner_share_id = p_partner_share_id and status = 'offered';
+  get diagnostics v_withdrawn = row_count;
   update public.agency_partner_request_shares
      set status = 'revoked', revoked_by = v_uid, revoked_at = now()
    where id = p_partner_share_id;
+  -- Decision 0033 traceability (R2 P3-b): taking a need back is audited (admin-only read).
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (v_uid, 'agency_partner_need_revoked', 'agency_partner_request_shares', p_partner_share_id,
+    jsonb_build_object('rule', 'decision 0033',
+                       'partnership_id', v_pship,
+                       'lead_company_id', v_lead,
+                       'partner_company_id', v_partner,
+                       'client_share_id', v_client_sh,
+                       'withdrawn_offers', v_withdrawn));
   return p_partner_share_id;
 end;
 $$;
@@ -1083,8 +1121,10 @@ revoke all on function public.respond_agency_candidate_offer_v2(uuid, text, text
 grant execute on function public.respond_agency_candidate_offer_v2(uuid, text, text, uuid) to authenticated;
 -- R2 P2-1: v1 decides the same offers WITHOUT the term and live-partnership
 -- rules, so a signed-in caller could skip them. Only v2 (definer, which still
--- calls v1 as its owner) remains callable. Deploy the app that calls v2 only,
--- then apply.
+-- calls v1 as its owner) remains callable. ORDER (R2 P2-5): apply 20261114235900, then this file,
+-- then deploy the app that calls v2 only AT ONCE. Short window between the apply and the deploy:
+-- the app on main (which calls v1) gets permission denied on a client's accept/decline of an agency
+-- candidate, and nothing is written (the call is refused before any change); every other path works.
 revoke all on function public.respond_agency_candidate_offer_v1(uuid, text, text) from public, anon, authenticated;
 revoke all on function public.list_agency_partnerships_v1() from public;
 revoke all on function public.list_agency_partnerships_v1() from anon;
