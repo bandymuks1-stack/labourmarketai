@@ -421,7 +421,9 @@ jobs:
       # error code (no ids, no values); print those lines on every run.
       - name: Work-intelligence read failures (W-1)
         if: always()
-        run: grep -E -A6 '\[(work-intelligence|today)\]' "$RUNNER_TEMP/next.log" | grep -viE 'key|secret|jwt|token|password|eyJ|@' | head -n 80 || echo "none"
+        run: |
+          out="$(grep -E -A6 '\[(work-intelligence|today)\]' "$RUNNER_TEMP/next.log" | grep -viE 'key|secret|jwt|token|password|eyJ|@' | head -n 80 || true)"
+          if [ -n "$out" ]; then echo "$out"; else echo "none: no work-intelligence or today read failed"; fi
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()
