@@ -761,11 +761,29 @@ test("M-4. seed: a staffing agency, and the company's proven address", async ({ 
     const before = await mailIds(owner);
     await prompt.getByTestId("verify-email-send").click();
     await expect(prompt.getByTestId("verify-email-sent")).toBeVisible({ timeout: 30_000 });
-    await co.goto(await newMailLink(owner, before));
+    const link = await newMailLink(owner, before);
+    await co.goto(link);
     await co.waitForURL((u) => u.host === new URL(BASE).host && !u.pathname.includes("/auth/callback"), {
       timeout: 60_000,
     });
+    const landed = new URL(co.url());
     await co.goto(`${BASE}/en/dashboard/network`);
+    if (await co.getByTestId("network-email-unverified").isVisible({ timeout: 10_000 }).catch(() => false)) {
+      // What happened, without a token: hosts and paths only.
+      const subjects: string[] = [];
+      const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${owner}`)}`);
+      for (const m of ((await r.json()) as { messages?: Array<{ ID: string; Subject?: string }> }).messages ?? []) {
+        subjects.push(`${before.has(m.ID) ? "old" : "new"}: ${m.Subject ?? "?"}`);
+      }
+      const l = new URL(link);
+      throw new Error(
+        `the company's address is still unproven: ${JSON.stringify({
+          followed: `${l.host}${l.pathname}`,
+          landed: `${landed.host}${landed.pathname}`,
+          mails: subjects,
+        })}`,
+      );
+    }
   }
   await expect(co.getByTestId("network-email-unverified"), "the company's address is proven").toHaveCount(0, {
     timeout: 30_000,
