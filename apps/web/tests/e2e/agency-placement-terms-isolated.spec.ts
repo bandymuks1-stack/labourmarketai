@@ -483,8 +483,9 @@ test("P-7. the lead invites a partner agency, passes its client's need, and the 
       where partner_share_id = ${lit(p7.partnerShareId)}`,
   )[0]!;
   p7.offerId = row.id;
-  expect(row, "the partner's offer rides on the client's own share and connection").toMatchObject({
-    agency_company_id: s.ag2CompanyId,
+  // Owner principle 2026-11-19: the client's agency of record on the row is the LEAD.
+  expect(row, "the partner's offer rides on the client's own share and connection, under the lead").toMatchObject({
+    agency_company_id: s.agCompanyId,
     connection_id: s.connectionId,
     request_share_id: p7.clientShareId,
   });
@@ -511,6 +512,8 @@ test("P-8. the client accepts the partner's candidate on the LEAD's term; on pla
   await expect(co.getByTestId(`offer-placement-term-${p7.offerId}`)).toBeVisible({ timeout: 30_000 });
   await expect(co.getByTestId(`offer-placement-fee-${p7.offerId}`)).toContainText("250");
   await expect(co.getByTestId(`offer-placement-term-${p7.offerId}`)).toContainText(AG_ORG);
+  // Owner principle 2026-11-19: the employer sees only its own (lead) agency, never the partner.
+  await expect(co.getByRole("main")).not.toContainText(AG2_ORG);
   await co.getByTestId(`offer-placement-accept-${p7.offerId}`).check();
   await co.getByTestId(`offer-accept-${p7.offerId}`).click();
   await expect
@@ -563,6 +566,15 @@ test("P-8. the client accepts the partner's candidate on the LEAD's term; on pla
   await expect(partner).toHaveAttribute("data-status", "placed");
   await expect(partner).toContainText("50");
   await expect(partner).toContainText(AG_ORG);
+
+  // The employer, after the placement: still only the lead, on the need, its partners page and its
+  // inbox (owner principle 2026-11-19).
+  for (const path of [`/en/dashboard/company/scouting?request=${s.needId}`, "/en/dashboard/company/partners", "/en/dashboard/inbox"]) {
+    await co.goto(`${BASE}${path}`);
+    await expect(co.getByRole("main"), `${path} never names the partner agency`).not.toContainText(AG2_ORG, {
+      timeout: 30_000,
+    });
+  }
 
   // Nothing was charged: no invoice or payment row exists for either agency.
   expect(

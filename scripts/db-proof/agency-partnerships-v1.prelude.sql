@@ -31,6 +31,20 @@ create table public.company_worker_engagements (
   status text not null default 'active', started_at timestamptz not null default now(),
   created_at timestamptz default now());
 
+-- Read by main's list_agency_offer_progress_v1 / list_agency_placements_v1, which 20261118100000
+-- replaces with one condition changed: only the columns those bodies touch.
+alter table public.company_worker_engagements add column ended_at timestamptz;
+alter table public.booking_requests add column start_date date, add column expected_end_date date;
+create table public.booking_request_events (booking_request_id uuid, event_type text, created_at timestamptz default now());
+create table public.demand_shortlist (request_id uuid, worker_id uuid, owner_id uuid, status text);
+create table public.conversations (id uuid primary key, source_type text, source_id uuid);
+create table public.conversation_participants (conversation_id uuid, profile_id uuid);
+create table public.organizations (id uuid primary key, legacy_company_id uuid);
+create table public.projects (id uuid primary key, organization_id uuid, company_id uuid);
+create table public.project_worker_assignments (project_id uuid, worker_id uuid, status text,
+  assigned_at timestamptz default now(), ended_at timestamptz);
+alter table public.customer_requests add column profile_id uuid;
+
 -- 20261003151000_email_verified_boundary_v1: the CALLING session's proven e-mail. Stand-in: a
 -- session setting, verified unless the proof says otherwise (R2 P2-2 cases set it false).
 create function public.session_email_verified_v1() returns boolean language sql stable as $$
@@ -49,3 +63,8 @@ create policy agency_candidate_offers_select on public.agency_candidate_offers f
                      where c.id = connection_id and c.status = 'active'))
     or public.is_admin()
   );
+
+-- 0001_initial_schema :625-627: the audit trail is read by an admin only.
+alter table public.audit_logs enable row level security;
+grant select on public.audit_logs to authenticated;
+create policy audit_logs_select on public.audit_logs for select using (public.is_admin());

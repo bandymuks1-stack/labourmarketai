@@ -90,7 +90,29 @@ describe("agency partnerships — the database keeps every rule", () => {
     const offer = fn("submit_partner_candidate_offer_v1");
     expect(offer).toMatch(/cw\.company_id = v_partner and cw\.worker_id = p_worker_id and cw\.status = 'active'/);
     expect(offer).toMatch(/ps\.status = 'active'\s+and p\.status = 'active' and s\.status = 'active' and c\.status = 'active'/);
-    expect(offer).toMatch(/values\s+\(v_conn, v_share, v_partner, v_client, v_request, p_worker_id, 'offered', v_note, v_uid, p_partner_share_id\)/);
+    // Owner principle 2026-11-19: the row's agency is the LEAD, the client's agency of record.
+    expect(offer).toMatch(/values\s+\(v_conn, v_share, v_lead, v_client, v_request, p_worker_id, 'offered', v_note, v_uid, p_partner_share_id\)/);
+    // It re-affirms only its own pass's open offer, never the lead's or another partner's.
+    expect(offer).toMatch(/where public\.agency_candidate_offers\.partner_share_id = excluded\.partner_share_id/);
+    expect(offer).toMatch(/raise exception 'already_offered'/);
+    // Decision 0033: the whole chain is kept for internal (admin-only) audit, without guessing a verifier.
+    expect(offer).toMatch(/'agency_partner_candidate_offered'/);
+    for (const role of ["'source'", "'submitter'", "'presenter_to_client'"]) expect(offer).toContain(role);
+    expect(offer).toMatch(/'agency_verification', 'not_recorded'/);
+  });
+
+  it("the client sees only its own (lead) agency: no partner column is readable by signed-in callers", () => {
+    expect(sql).toMatch(/revoke select on public\.agency_candidate_offers from authenticated;/);
+    const grant = sql.match(/grant select \(([^)]*)\)\s+on public\.agency_candidate_offers to authenticated;/);
+    expect(grant, "a column-level read grant").not.toBeNull();
+    const cols = grant![1].split(",").map((c) => c.trim());
+    for (const hidden of ["created_by", "withdrawn_by", "partner_share_id"]) expect(cols).not.toContain(hidden);
+    // The agency side follows the OFFERER, so a partner keeps its own reads and withdrawal.
+    for (const name of ["list_agency_offer_progress_v1", "list_agency_placements_v1", "withdraw_agency_candidate_offer_v1"]) {
+      expect(fn(name)).toMatch(/public\.owns_company\(public\.agency_offer_owner_v1\(o\.agency_company_id, o\.partner_share_id\)\)/);
+    }
+    // A direct offer never takes over a partner's open offer.
+    expect(fn("submit_agency_candidate_offer_v1")).toMatch(/where public\.agency_candidate_offers\.partner_share_id is null/);
   });
 
   it("a partner's candidate carries the LEAD's term, and needs a live partnership to be accepted", () => {

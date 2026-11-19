@@ -97,6 +97,14 @@ insert into agency_client_request_shares (id, status, connection_id, request_id)
  ('$SH','active','$CONN','$REQ'),('$SHX','active','$CONNX','$REQX');
 SQL
 
+# The client's candidate list as main has it (20261003100000), to prove what the client sees.
+V2LIST="$REPO/supabase/migrations/20261003100000_list_agency_offered_candidates_v2_connection_gate_v1.sql"
+awk '/^create or replace function public.list_agency_offered_candidates_for_request_v2/{p=1} p{print} p&&/^\$\$;/{exit}' "$V2LIST" > "$TMP/v2list.sql"
+[ -s "$TMP/v2list.sql" ] || { echo "could not cut list_agency_offered_candidates_for_request_v2"; exit 1; }
+run_file "$TMP/v2list.sql"
+su "grant execute on function public.list_agency_offered_candidates_for_request_v2(uuid) to authenticated" >/dev/null
+su "update customer_requests set profile_id = '$EMP' where id in ('$REQ','$REQX')" >/dev/null
+
 run_file "$MIG"
 COND="QA-SYNTHETIC condition: due only on an actual placement"
 
@@ -170,8 +178,8 @@ check "a third agency cannot offer on the pass" "not_owner" \
   "$(as $X - "select submit_partner_candidate_offer_v1('$PS', '$WP1');")"
 OP=$(as $P - "select submit_partner_candidate_offer_v1('$PS', '$WP1', 'QA-SYNTHETIC note');")
 checkre "the partner offers its worker" "^[0-9a-f-]{36}$" "$OP"
-check "the offer is on the CLIENT's share and connection, from the partner, through the pass" \
-  "$PC/$EC/$CONN/$SH/$PS/offered" \
+check "the offer is on the CLIENT's share and connection, under the LEAD (the client's agency of record), through the pass" \
+  "$LC/$EC/$CONN/$SH/$PS/offered" \
   "$(su "select agency_company_id||'/'||client_company_id||'/'||connection_id||'/'||request_share_id||'/'||partner_share_id||'/'||status from agency_candidate_offers where id='$OP'")"
 check "the lead sees the partner's offer, by status" "QA-SYNTHETIC Partner agency/offered" \
   "$(as $L - "select partner_name||'/'||status from list_partner_offers_for_lead_v1();")"
@@ -186,6 +194,57 @@ check "R2 P2-3: the client still reads the offer made to it" "1" \
   "$(as $EMP - "select count(*) from agency_candidate_offers where id='$OP';")"
 check "R2 P2-3: the policy narrows only the agency arm" "1" \
   "$(su "select count(*) from pg_policies where policyname='agency_candidate_offers_select' and qual like '%partner_share_id IS NULL%'")"
+
+echo "== 4b. OWNER PRINCIPLE: THE CLIENT SEES ONLY ITS OWN (LEAD) AGENCY ============="
+check "decision 0033: the whole chain is kept for internal audit (source, submitter, presenter)" \
+  "source:$PC/submitter:$PC/presenter_to_client:$LC/$PID/$PS/not_recorded/$P" \
+  "$(su "select string_agg((e->>'role')||':'||(e->>'company_id'), '/' order by i)||'/'||(payload->>'partnership_id')||'/'||(payload->>'partner_share_id')||'/'||(payload->>'agency_verification')||'/'||actor_id from audit_logs, jsonb_array_elements(payload->'chain') with ordinality as c(e, i) where action='agency_partner_candidate_offered' and entity_id='$OP' group by payload, actor_id")"
+check "(a) the audit chain is not readable by the client or either agency" "0/0/0" \
+  "$(as $EMP - "select count(*) from audit_logs;")/$(as $L - "select count(*) from audit_logs;")/$(as $P - "select count(*) from audit_logs;")"
+check "(a) the client's candidate list names the LEAD on the partner's candidate" "QA-SYNTHETIC Lead agency" \
+  "$(as $EMP - "select agency_name from list_agency_offered_candidates_for_request_v2('$REQ') where offer_id='$OP';")"
+check "(a) no granted column of the client's row holds the partner's company or staff id" "0" \
+  "$(as $EMP - "select count(*) from (select row_to_json(t)::text j from (select id, connection_id, request_share_id, agency_company_id, client_company_id, request_id, worker_id, status, note, created_at, withdrawn_at, updated_at, booking_id, decision_note, decided_by, decided_at, accepted_placement_term_id, placement_term_accepted_at from agency_candidate_offers where id='$OP') t) x where j like '%$PC%' or j like '%$P%';")"
+checkre "(a) the client cannot read who created the offer" "permission denied" \
+  "$(as $EMP - "select created_by from agency_candidate_offers where id='$OP';")"
+checkre "(a) nor who withdrew an offer" "permission denied" \
+  "$(as $EMP - "select withdrawn_by from agency_candidate_offers where id='$OP';")"
+checkre "(a) nor the partner step an offer came through" "permission denied" \
+  "$(as $EMP - "select partner_share_id from agency_candidate_offers where id='$OP';")"
+check "(a) the client reads no partnership and no passed need" "0/0" \
+  "$(as $EMP - "select (select count(*) from agency_partnerships)||'/'||(select count(*) from agency_partner_request_shares);")"
+check "(a) nor any partnership read, commission or partner-offer list" "0/0/0" \
+  "$(as $EMP - "select (select count(*) from list_agency_partnerships_v1())||'/'||(select count(*) from list_agency_commissions_v1())||'/'||(select count(*) from list_partner_offers_for_lead_v1());")"
+check "(b) the partner follows its own offer, without a client column" "1/offered" \
+  "$(as $P - "select count(*)||'/'||min(offer_status) from list_agency_offer_progress_v1() where offer_id='$OP';")"
+check "(b) the partner's progress reads have no client column" "0" \
+  "$(su "select count(*) from pg_proc p, unnest(p.proargnames) a where p.proname in ('list_agency_offer_progress_v1','list_agency_placements_v1') and a like '%client%' and a <> 'client_decided_at'")"
+check "(b) the lead does not follow the partner's offer as its own (no worker identity)" "0" \
+  "$(as $L - "select count(*) from list_agency_offer_progress_v1() where offer_id='$OP';")"
+check "(b) the lead cannot withdraw the partner's offer" "f" \
+  "$(as $L - "select withdraw_agency_candidate_offer_v1('$OP');")"
+# (c) the direct flow, unchanged: the lead offers its own roster worker on its own client's need.
+ODIR=$(as $L - "select submit_agency_candidate_offer_v1('$SH', '$WL', 'QA-SYNTHETIC direct');")
+checkre "(c) the lead's direct offer is accepted as before" "^[0-9a-f-]{36}$" "$ODIR"
+check "(c) a direct offer: agency = the lead, no partner step" "$LC/true" \
+  "$(su "select agency_company_id||'/'||(partner_share_id is null) from agency_candidate_offers where id='$ODIR'")"
+check "(c) offering it again re-affirms the same offer" "$ODIR" \
+  "$(as $L - "select submit_agency_candidate_offer_v1('$SH', '$WL');")"
+check "(c) the client sees it under the lead, the lead follows it" "QA-SYNTHETIC Lead agency/1" \
+  "$(as $EMP - "select agency_name from list_agency_offered_candidates_for_request_v2('$REQ') where offer_id='$ODIR';")/$(as $L - "select count(*) from list_agency_offer_progress_v1() where offer_id='$ODIR';")"
+check "(c) the lead reads its direct row directly, as before" "1" \
+  "$(as $L - "select count(*) from agency_candidate_offers where id='$ODIR';")"
+# A worker on BOTH rosters: neither side may take over the other's open offer of them on this need.
+su "insert into company_workers (company_id, worker_id, status) values ('$LC','$WP1','active'),('$PC','$WL','active')" >/dev/null
+check "a direct offer never takes over the partner's open offer of the same worker" "already_offered" \
+  "$(as $L - "select submit_agency_candidate_offer_v1('$SH', '$WP1');")"
+check "a partner offer never takes over the lead's open direct offer" "already_offered" \
+  "$(as $P - "select submit_partner_candidate_offer_v1('$PS', '$WL');")"
+check "both offers kept their owner" "$PS/true" \
+  "$(su "select (select partner_share_id from agency_candidate_offers where id='$OP')||'/'||(select partner_share_id is null from agency_candidate_offers where id='$ODIR')")"
+su "delete from company_workers where (company_id, worker_id) in (('$LC','$WP1'),('$PC','$WL'))" >/dev/null
+check "(c) the lead withdraws its direct offer, as before" "t/withdrawn" \
+  "$(as $L - "select withdraw_agency_candidate_offer_v1('$ODIR');")/$(su "select status from agency_candidate_offers where id='$ODIR'")"
 
 echo "== 5. THE CLIENT ACCEPTS ON THE LEAD'S TERM ====================================="
 as $L - "select set_agency_placement_term_v1('$LC', 1000, 'EUR', '$COND', 'en');" >/dev/null
@@ -305,6 +364,10 @@ check "the rollback restores the term policy without the offering-agency arm" "0
   "$(su "select count(*) from pg_policies where policyname='agency_placement_terms_select' and qual like '%agency_company_id%'")"
 check "the rollback gives signed-in callers v1 back, as on main" "t" \
   "$(su "select has_function_privilege('authenticated','public.respond_agency_candidate_offer_v1(uuid,text,text)','execute')" | sed 's/true/t/g; s/false/f/g')"
+check "the rollback restores the full read grant" "t" \
+  "$(su "select has_column_privilege('authenticated','public.agency_candidate_offers','created_by','select')" | sed 's/true/t/g; s/false/f/g')"
+check "the rollback restores main's four function bodies" "0" \
+  "$(su "select count(*) from pg_proc where proname in ('list_agency_offer_progress_v1','list_agency_placements_v1','withdraw_agency_candidate_offer_v1','submit_agency_candidate_offer_v1') and (prosrc like '%agency_offer_owner_v1%' or prosrc like '%already_offered%')")"
 check "the rollback restores main's offer read policy" "0" \
   "$(su "select count(*) from pg_policies where policyname='agency_candidate_offers_select' and qual like '%partner_share_id%'")"
 check "the rollback leaves no new function behind" "0" \
