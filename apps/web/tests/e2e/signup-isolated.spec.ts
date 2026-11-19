@@ -599,26 +599,27 @@ test("M-3. seed: an employee with one journal entry waiting for the company's re
   await expect.poll(engagementOf, { message: "the worker is now the company's employee", timeout: 30_000 }).not.toBeNull();
   const engagementId = (await engagementOf())!;
 
-  // The company opens that relationship's journal for review.
-  await co.goto(`${BASE}/en/dashboard/company/people#org-members`);
-  const main = co.getByRole("main");
-  const fold = main.getByTestId("people-more").first();
-  await expect(fold).toBeAttached({ timeout: 30_000 });
-  if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
-  const toggle = main.getByTestId(`toggle-review-${engagementId}`);
-  await expect(toggle, "journal review is offered for the employee").toBeVisible({ timeout: 30_000 });
-  await toggle.click();
-  await expect
-    .poll(
-      async () =>
-        (
-          await db<Array<{ journal_review_enabled: boolean | null }>>(
-            `engagement_contexts?id=eq.${engagementId}&select=journal_review_enabled`,
-          )
-        )[0]?.journal_review_enabled ?? null,
-      { message: "review is on for that relationship", timeout: 30_000 },
-    )
-    .toBe(true);
+  // Journal review must be ON for that relationship. Joining as an employee
+  // may already switch it on, and the people-page button TOGGLES, so the
+  // company presses it only when review is off (run 44429163267: pressing an
+  // already-on switch turned review off).
+  const reviewOn = async () =>
+    (
+      await db<Array<{ journal_review_enabled: boolean | null }>>(
+        `engagement_contexts?id=eq.${engagementId}&select=journal_review_enabled`,
+      )
+    )[0]?.journal_review_enabled === true;
+  if (!(await reviewOn())) {
+    await co.goto(`${BASE}/en/dashboard/company/people#org-members`);
+    const main = co.getByRole("main");
+    const fold = main.getByTestId("people-more").first();
+    await expect(fold).toBeAttached({ timeout: 30_000 });
+    if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
+    const toggle = main.getByTestId(`toggle-review-${engagementId}`);
+    await expect(toggle, "journal review is offered for the employee").toBeVisible({ timeout: 30_000 });
+    await toggle.click();
+    await expect.poll(reviewOn, { message: "review is on for that relationship", timeout: 30_000 }).toBe(true);
+  }
 
   // The worker records one day for the company.
   await w.goto(`${BASE}/en/dashboard/journal`);
@@ -636,6 +637,7 @@ test("M-3. seed: an employee with one journal entry waiting for the company's re
   );
   expect(entries.length, "exactly one marked entry").toBe(1);
   expect(entries[0]?.engagement_context_id, "recorded for the company").toBe(engagementId);
+  expect(await reviewOn(), "review is still on for that relationship").toBe(true);
 
   // The company's own doors see it: the review RPC, then the very read the
   // phone's Work review screen calls (journal.review_queue.get over /api/mcp).
