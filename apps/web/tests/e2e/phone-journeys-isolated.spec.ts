@@ -512,6 +512,22 @@ for (const phone of PHONES) {
       // The home's ONE gold action for a worker with no recorded work opens the journal.
       const cta = page.locator('[data-testid="today-next-cta"]:visible');
       await expect(cta, "the home's one action").toHaveAttribute("href", /\/dashboard\/journal$/, { timeout: 60_000 });
+      // UX gap W-1: a healthy new account never shows the "could not be read"
+      // notice; a read that fails is named by the job's W-1 log step.
+      const unknownOpen = page.getByRole("main").getByTestId("today-open-unknown");
+      if ((await unknownOpen.count()) > 0) {
+        const holder = page.getByRole("main").locator("[data-doors-unknown], [data-journal-unknown]").first();
+        console.log(
+          `[W-1] unknown: journal=${await holder.getAttribute("data-journal-unknown")} doors=${await holder.getAttribute("data-doors-unknown")}`,
+        );
+      }
+      await expect(unknownOpen, "the open items are read").toHaveCount(0);
+      // This worker signed up with a password and has not proven the mailbox:
+      // the home offers the network page's own proof prompt, not a fault.
+      await expect(
+        page.getByRole("main").getByTestId("home-mailbox-proof").filter({ visible: true }).first(),
+        "the mailbox proof is offered",
+      ).toBeVisible();
       await cta.tap();
       await page.waitForURL(/\/en\/dashboard\/journal/, { timeout: 30_000 });
       const main = page.getByRole("main");
