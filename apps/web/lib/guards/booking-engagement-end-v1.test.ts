@@ -1649,6 +1649,9 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261014190000_team_disband_v1.sql",
       // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
       "20261015193211_20261015120000_esco_label_search_v1.sql",
+      // 2026-10-17: ESCO cold locales archived on the VPS (decision 0026) — marker added in the same
+      // commit as the decision record and the paired rollback; RED, needs-human-gate, NOT applied.
+      "20261018100000_esco_labels_cold_locales_on_vps_v1.sql",
       // 2026-10-18: the worker identity split (RED RLS policy + SECURITY DEFINER + GRANT). The
       // annotation acknowledges the RED class so CI can run; the PR stays a draft with
       // needs-human-gate and is applied only on the owner's explicit approval.
