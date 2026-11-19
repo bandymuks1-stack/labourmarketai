@@ -299,9 +299,18 @@ test("A-2. the owner invites a person by link; they register through it and acce
   });
 
   // The owner gives that person a LIMITED governance seat: member.
+  // R on #3523 (P3): after load, a hidden server copy of this page stayed in
+  // the DOM (`div[hidden][id^="S:"]`, the form outside <main>). The page must
+  // settle into one copy and raise no client error.
+  const settingsErrors: string[] = [];
+  owner.page.on("pageerror", (e) => settingsErrors.push(String(e.message).slice(0, 300)));
   await owner.page.goto(`${BASE}/en/dashboard/company/settings#organization-members`);
   const form = owner.page.getByTestId("org-members-invite-form");
   await expect(form, "the owner administers members").toBeVisible({ timeout: 30_000 });
+  await expect(owner.page.locator('div[hidden][id^="S:"]'), "no leftover hidden copy of the settings page").toHaveCount(0, {
+    timeout: 15_000,
+  });
+  expect(settingsErrors, "the settings page raises no client error").toEqual([]);
   await form.getByTestId("org-members-invite-email").fill(MEMBER);
   await form.getByTestId("org-members-invite-role").selectOption("member");
   await form.getByTestId("org-members-invite-submit").click();
