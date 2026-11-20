@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "[EN] Message language",
+    "intro": "[EN] Work messages and instructions written in another language are shown to you translated into this language. Leave it on the interface language unless you read another language better.",
+    "label": "[EN] I read messages in",
+    "sameAsInterface": "[EN] Same as the interface",
+    "saved": "[EN] Saved.",
+    "error": "[EN] The change could not be saved and was reverted. Please try again.",
+    "unavailable": "[EN] This setting is not available yet — messages follow the interface language until it is."
+  },
   "demandReadback": {
     "notVerifiedYet": "Teie ettevõte ei ole veel kinnitatud, seega siin esitatud vajadusi töötajatele enne kinnitamise lõppu ei näidata.",
     "notVerifiedHowTo": "Lisa registrikood ja taotle ülevaatust",
@@ -4118,8 +4127,12 @@
           "chipHelpPeople": "Meeskond ja kutsed",
           "chipHelpPlanning": "Ava planeerimine",
           "chipHelpServices": "Minu teenused",
-          "chipHelpJournal": "Tööpäevik"
-        }
+          "chipHelpJournal": "Tööpäevik",
+          "chipHelpSettings": "Seaded",
+          "chipHelpPrivacy": "Privaatsus ja sinu andmed"
+        },
+        "account": "Sisselogimise, e-posti, teavituste ja välimuse leiad seadetest.",
+        "privacy": "Jaotises „Privaatsus ja sinu andmed“ saad oma andmed alla laadida, näha, kes sinu profiili näeb, ja taotleda konto kustutamist."
       },
       "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
       "chipInterestOnMyNeeds": "Huvi minu päringute vastu",
@@ -6872,7 +6885,8 @@
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       },
       "setup": {
-        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
+        "optionalDetails": "Registreerimine, kontaktid ja roll"
       },
       "workers": {
         "invitationsManagedElsewhere": "Kutsete eest hoolitseb selle eest vastutav ettevõtte isik.",
@@ -8038,6 +8052,7 @@
       "partnerWithUs": "Hakka partneriks",
       "forAgencies": "Kuidas see agentuuridele toimib",
       "setUpAgency": "Registreeri agentuur",
+      "setUpInstitution": "Õppeasutustele",
       "b2bEnquiry": "Äriteenuste päring (B2B)",
       "projectEnquiry": "Individuaalse projekti päring"
     },

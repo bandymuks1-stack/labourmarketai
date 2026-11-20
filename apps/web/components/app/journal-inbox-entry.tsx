@@ -315,6 +315,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             <Button
               type="submit"
               size="sm"
+              className="min-h-11"
               variant="primary"
               disabled={isPending}
               data-testid={`journal-approve-entry-${entry.id}`}
@@ -326,6 +327,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             <Button
               type="button"
               size="sm"
+              className="min-h-11"
               variant="secondary"
               onClick={() => setMode("confirm")}
               data-testid={`journal-confirm-skills-${entry.id}`}
@@ -336,6 +338,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
           <Button
             type="button"
             size="sm"
+            className="min-h-11"
             variant="secondary"
             onClick={() => setMode("changes_requested")}
             data-testid={`journal-review-request-changes-${entry.id}`}
@@ -345,6 +348,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
           <Button
             type="button"
             size="sm"
+            className="min-h-11"
             variant="ghost"
             onClick={() => setMode("rejected")}
             data-testid={`journal-review-reject-${entry.id}`}
@@ -379,7 +383,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         declaredUnverified.length === 0 ? (
           <div className="flex flex-col gap-2">
             <p className="text-xs text-text-muted">{t("inbox.noSkillsToConfirm")}</p>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setMode("idle")}>
+            <Button type="button" size="sm" className="min-h-11" variant="ghost" onClick={() => setMode("idle")}>
               {t("inbox.cancel")}
             </Button>
           </div>
@@ -390,7 +394,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             <p className="text-xs text-text-secondary">{t("inbox.confirmSkillsHint")}</p>
             <div className="flex flex-col gap-1">
               {declaredUnverified.map((s) => (
-                <label key={s.id} className="flex items-center gap-2 text-sm text-text-primary">
+                <label key={s.id} className="flex min-h-11 items-center gap-2 text-sm text-text-primary">
                   <input
                     type="checkbox"
                     name="skill_id"
@@ -406,13 +410,14 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
               <Button
                 type="submit"
                 size="sm"
+                className="min-h-11"
                 variant="primary"
                 disabled={isPending}
                 data-testid={`journal-confirm-submit-${entry.id}`}
               >
                 {t("inbox.confirmSubmit")}
               </Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => setMode("idle")}>
+              <Button type="button" size="sm" className="min-h-11" variant="ghost" onClick={() => setMode("idle")}>
                 {t("inbox.cancel")}
               </Button>
             </div>
@@ -438,13 +443,15 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
               <p className="text-meta leading-relaxed text-text-secondary">
                 {clarificationSuggestion}
               </p>
-              <button
+              <Button
                 type="button"
+                size="sm"
+                variant="secondary"
                 onClick={copySuggestion}
-                className="w-fit rounded-md border border-state-warning/40 px-2 py-0.5 text-meta font-medium text-state-warning hover:bg-state-warning/10"
+                className="min-h-11 w-fit"
               >
                 {copied ? t("inbox.copied") : t("inbox.copySuggestion")}
-              </button>
+              </Button>
             </div>
           ) : null}
           <Input
@@ -460,10 +467,10 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             data-testid={`journal-review-note-${entry.id}`}
           />
           <div className="flex items-center gap-2">
-            <Button type="submit" size="sm" variant="secondary" disabled={isPending}>
+            <Button type="submit" size="sm" className="min-h-11" variant="secondary" disabled={isPending}>
               {mode === "rejected" ? t("inbox.reject") : t("inbox.requestChanges")}
             </Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setMode("idle")}>
+            <Button type="button" size="sm" className="min-h-11" variant="ghost" onClick={() => setMode("idle")}>
               {t("inbox.cancel")}
             </Button>
           </div>

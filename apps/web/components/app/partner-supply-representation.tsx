@@ -11,6 +11,9 @@ import {
   type PartnerSupplyState,
 } from "@/lib/privacy/partner-supply-actions";
 import type { ConsentLegalTexts } from "@/components/app/discoverability-consent";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 /**
  * Representation outside LabourMarket.ai — the worker's own control.
@@ -420,14 +423,16 @@ export function PartnerSupplyRepresentation({
             {labels.declinedNote}
           </p>
         ) : phase !== "expanded" ? (
-          <button
+          <Button
             type="button"
             onClick={() => setPhase("expanded")}
-            className="mt-3 inline-flex min-h-11 items-center rounded-md border border-brand-blue/40 px-4 text-sm font-medium text-brand-blue hover:border-brand-blue"
+            variant="secondary"
+            size="sm"
+            className="mt-3 min-h-11"
             data-testid="partner-supply-open"
           >
             {legal.title}
-          </button>
+          </Button>
         ) : (
           <div>
             <h3 className="mt-4 text-base font-semibold text-text-primary">
@@ -438,24 +443,28 @@ export function PartnerSupplyRepresentation({
             {/* Two EQUAL choices — same classes, same weight. Declining writes
                 nothing and removes nothing. */}
             <div className="mt-4 flex flex-wrap gap-3">
-              <button
+              <Button
                 type="button"
                 onClick={onGrantConsent}
                 disabled={pending}
-                className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60"
+                variant="secondary"
+            size="sm"
+            className="min-h-11"
                 data-testid="partner-supply-grant"
               >
                 {labels.grant}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setPhase("declined")}
                 disabled={pending}
-                className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60"
+                variant="secondary"
+            size="sm"
+            className="min-h-11"
                 data-testid="partner-supply-decline"
               >
                 {labels.decline}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -585,15 +594,17 @@ export function PartnerSupplyRepresentation({
       {/* Reconfirmation: offered exactly when the answer is old enough to want
           it, so the button is a real prompt rather than permanent furniture. */}
       {live && !showForm && (freshness === "AGEING" || freshness === "EXPIRED") && (
-        <button
+        <Button
           type="button"
           onClick={onReconfirm}
           disabled={pending}
-          className="mt-3 inline-flex min-h-11 items-center rounded-md border border-brand-blue/40 px-4 text-sm font-medium text-brand-blue hover:border-brand-blue disabled:opacity-60"
+          variant="secondary"
+            size="sm"
+            className="mt-3 min-h-11"
           data-testid="partner-supply-reconfirm"
         >
           {labels.reconfirm}
-        </button>
+        </Button>
       )}
 
       {showForm ? (
@@ -630,11 +641,11 @@ export function PartnerSupplyRepresentation({
               <span className="font-mono uppercase tracking-label text-text-muted">
                 {labels.availableFromLabel}
               </span>
-              <input
+              <Input
                 type="date"
                 value={availableFrom}
                 onChange={(e) => setAvailableFrom(e.target.value)}
-                className="w-fit rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
+                className="w-fit max-sm:min-h-11 max-sm:text-base"
                 data-testid="partner-supply-available-from"
               />
             </label>
@@ -646,12 +657,12 @@ export function PartnerSupplyRepresentation({
             <span className="font-mono uppercase tracking-label text-text-muted">
               {labels.workCountriesLabel}
             </span>
-            <input
+            <Input
               type="text"
               value={workCountries}
               onChange={(e) => setWorkCountries(e.target.value)}
               placeholder="LT, DE, NL"
-              className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm uppercase text-text-primary"
+              className="uppercase max-sm:min-h-11 max-sm:text-base"
               data-testid="partner-supply-work-countries"
             />
             <span className="text-text-muted normal-case">{labels.workCountriesHelp}</span>
@@ -661,12 +672,12 @@ export function PartnerSupplyRepresentation({
             <span className="font-mono uppercase tracking-label text-text-muted">
               {labels.marketsLabel}
             </span>
-            <input
+            <Input
               type="text"
               value={markets}
               onChange={(e) => setMarkets(e.target.value)}
               placeholder="DE"
-              className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm uppercase text-text-primary"
+              className="uppercase max-sm:min-h-11 max-sm:text-base"
               data-testid="partner-supply-markets"
             />
             <span className="text-text-muted normal-case">{labels.marketsHelp}</span>
@@ -731,16 +742,16 @@ export function PartnerSupplyRepresentation({
             <span className="font-mono uppercase tracking-label text-text-muted">
               {labels.validDaysLabel}
             </span>
-            <select
+            <Select
               value={validDays}
               onChange={(e) => setValidDays(Number(e.target.value))}
-              className="w-fit rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
+              className="w-fit max-sm:min-h-11 max-sm:text-base"
               data-testid="partner-supply-valid-days"
             >
               <option value={30}>30</option>
               <option value={60}>60</option>
               <option value={90}>90</option>
-            </select>
+            </Select>
             <span className="text-text-muted normal-case">{labels.validDaysHelp}</span>
           </label>
 
@@ -751,53 +762,61 @@ export function PartnerSupplyRepresentation({
           )}
 
           <div className="mt-4 flex flex-wrap gap-3">
-            <button
+            <Button
               type="button"
               onClick={onSave}
               disabled={pending}
-              className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60"
+              variant="secondary"
+            size="sm"
+            className="min-h-11"
               data-testid="partner-supply-save"
             >
               {pending ? labels.saving : labels.save}
-            </button>
+            </Button>
             {live && (
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   setEditing(false);
                   setFormError(null);
                 }}
                 disabled={pending}
-                className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60"
+                variant="secondary"
+            size="sm"
+            className="min-h-11"
                 data-testid="partner-supply-cancel"
               >
                 {labels.cancel}
-              </button>
+              </Button>
             )}
           </div>
         </div>
       ) : (
         <div className="mt-3 flex flex-wrap gap-3">
-          <button
+          <Button
             type="button"
             onClick={() => {
               setSavedNote(null);
               setEditing(true);
             }}
-            className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue"
+            variant="secondary"
+            size="sm"
+            className="min-h-11"
             data-testid="partner-supply-edit"
           >
             {labels.edit}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={onWithdrawDeclaration}
             disabled={pending}
-            className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60"
+            variant="secondary"
+            size="sm"
+            className="min-h-11"
             data-testid="partner-supply-withdraw-declaration"
           >
             {labels.withdrawDeclaration}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -805,15 +824,17 @@ export function PartnerSupplyRepresentation({
           than granting was. */}
       <div className="mt-4 border-t border-ink-500 pt-4">
         {authoritiesBlock}
-        <button
+        <Button
           type="button"
           onClick={onWithdrawConsent}
           disabled={pending}
-          className="mt-3 inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60"
+          variant="secondary"
+            size="sm"
+            className="mt-3 min-h-11"
           data-testid="partner-supply-withdraw-consent"
         >
           {labels.withdrawConsent}
-        </button>
+        </Button>
         <p className="mt-2 text-xs leading-relaxed text-text-muted">{legal.withdrawal}</p>
       </div>
 

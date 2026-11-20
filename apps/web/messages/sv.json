@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Språk för meddelanden",
+    "intro": "Arbetsmeddelanden och instruktioner som skrivits på ett annat språk visas översatta till det här språket. Behåll gränssnittets språk om du inte läser ett annat språk bättre.",
+    "label": "Jag läser meddelanden på",
+    "sameAsInterface": "Samma som gränssnittet",
+    "saved": "Sparat.",
+    "error": "Ändringen kunde inte sparas och har ångrats. Försök igen.",
+    "unavailable": "Den här inställningen är inte tillgänglig än — tills dess följer meddelandena gränssnittets språk."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Granska och godkänn",
@@ -2209,7 +2218,7 @@
         },
         "noCompany": {
           "title": "Starta din företagsprofil",
-          "body": "Du har ingen företagsprofil ännu. Skapa en – den är aktiv och användbar direkt, utan att vänta på godkännande.",
+          "body": "Du har ingen företagsprofil ännu. Skapa en: du kan använda den direkt. Arbetstagare ser behoven du publicerar när företaget är verifierat.",
           "cta": "Starta företagsinställningen"
         },
         "personalSpace": {
@@ -2244,7 +2253,7 @@
         "formTitle": "Begäran om företagsprofil",
         "formTitleCreate": "Skapa företagsprofil",
         "formTitleEdit": "Redigera företagsprofil",
-        "formSubtitle": "Skapa din organisationsprofil från ditt personliga konto. Den är aktiv och användbar direkt – utan att vänta på godkännande. Verifiering är ett starkare, separat förtroendesteg.",
+        "formSubtitle": "Skapa din organisationsprofil från ditt personliga konto. Du kan använda den direkt: projekt, team, arbetsjournal. Arbetstagare ser behoven du publicerar när ditt företag är verifierat; begär verifiering nedan.",
         "existingHeading": "Företagsprofil",
         "legalName": "Företagets juridiska namn",
         "legalNameHelp": "Obligatoriskt. 2–200 tecken.",
@@ -2275,6 +2284,7 @@
         },
         "statusInvalidCountry": "Välj ett land i listan – andra värden stöds inte ännu.",
         "registrationCode": "Organisationsnummer/registreringskod",
+        "optionalDetails": "Registrering, kontakt och roll",
         "registrationCodeHelp": "Valfritt. Hjälper till att verifiera företaget senare.",
         "address": "Adress/plats",
         "addressPlaceholder": "t.ex. Storgatan 1, Vilnius",
@@ -2298,7 +2308,7 @@
         "agencyConnectionPending": "Inbjudan accepterad. Ett bemanningsföretag vill ansluta till ditt företag – skapa först din företagsprofil; anslutningsförfrågan väntar sedan på sidan Partner, där du bekräftar den med det här företaget.",
         "legalLockedNotice": "Det här företaget är verifierat. Dess juridiska uppgifter (juridiskt namn, organisationsnummer, land och registrerad adress) är låsta här och kan inte skrivas över – kontakta supporten för att begära en juridisk ändring. Du kan fortfarande uppdatera kontaktuppgifter, webbplats, företagstyp och din roll.",
         "saveDraft": "Spara företag",
-        "submitRequest": "Begär manuell granskning (valfritt)",
+        "submitRequest": "Begär verifiering (arbetstagare ser dina behov när företaget är verifierat)",
         "statusDraftSaved": "Företaget har sparats – det är aktivt och användbart nu.",
         "statusSubmitted": "Manuell granskning begärd (valfritt). Ditt företag går att använda under tiden.",
         "statusNeedsMigration": "Åtgärden kunde inte slutföras. Försök igen.",
@@ -2319,7 +2329,7 @@
           "draft": "Utkast. Spara för att aktivera ditt företag – det blir användbart direkt.",
           "active_unverified": "Aktivt och användbart nu. Grundläggande automatiska kontroller har godkänts. Ännu inte identitetsverifierat – det är ett separat, starkare steg. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
           "needs_checks": "Aktivt och användbart, men en grundläggande kontroll behöver åtgärdas (t.ex. lägg till ditt land eller rätta en felaktigt formaterad kod/webbplats/e-post). Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
-          "pending_verification": "Du har begärt en valfri manuell granskning. Ditt företag är fullt användbart medan den väntar. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
+          "pending_verification": "Du har begärt verifiering. Ditt företag är fullt användbart medan den väntar. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
           "unverified": "Inte verifierat. Du kan fortsätta använda ditt företag som vanligt. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
           "verified": "Verifierat – en starkare förtroendestatus som ges först efter en verklig kontroll."
         },
@@ -14327,9 +14337,9 @@
         "saveAsDraft": "Spara som utkast",
         "opportunityType": "Typ av möjlighet",
         "clientEmail": "Kundens e-post",
-        "clientEmailPlaceholder": "name@company.com",
+        "clientEmailPlaceholder": "namn@foretag.se",
         "workerEmail": "Arbetstagarens e-post",
-        "workerEmailPlaceholder": "name@example.com",
+        "workerEmailPlaceholder": "namn@exempel.se",
         "inviteNote": "Anteckning (valfritt)",
         "inviteNotePlaceholder": "T.ex. start i oktober, arbetsplats i Kaunas",
         "documentType": "Dokumenttyp",
@@ -14748,8 +14758,12 @@
           "chipHelpPeople": "Team och inbjudningar",
           "chipHelpPlanning": "Öppna planering",
           "chipHelpServices": "Mina tjänster",
-          "chipHelpJournal": "Arbetsjournal"
-        }
+          "chipHelpJournal": "Arbetsjournal",
+          "chipHelpSettings": "Inställningar",
+          "chipHelpPrivacy": "Integritet och dina uppgifter"
+        },
+        "account": "Inloggning, e-post, aviseringar och utseende finns under Inställningar.",
+        "privacy": "Under Integritet och dina uppgifter kan du ladda ner dina uppgifter, se vem som ser din profil och begära att ditt konto raderas."
       },
       "interestInboxAmbiguous": "Det kan betyda två saker — vilken av dem vill du ha?",
       "chipInterestOnMyNeeds": "Intresse för mina förfrågningar",
@@ -20720,6 +20734,7 @@
       "partnerWithUs": "Bli partner",
       "forAgencies": "Så fungerar det för bemanningsföretag",
       "setUpAgency": "Starta ditt bemanningsföretag",
+      "setUpInstitution": "För utbildningsinstitutioner",
       "b2bEnquiry": "Förfrågan om företagstjänster (B2B)",
       "projectEnquiry": "Förfrågan om individuellt projekt"
     },

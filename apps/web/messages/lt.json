@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Žinučių kalba",
+    "intro": "Kita kalba parašytos darbo žinutės ir nurodymai jums rodomi išversti į šią kalbą. Palikite sąsajos kalbą, nebent kitą kalbą skaitote geriau.",
+    "label": "Žinutes skaitau",
+    "sameAsInterface": "Tokia pati kaip sąsajos",
+    "saved": "Išsaugota.",
+    "error": "Pakeitimo nepavyko išsaugoti, jis atšauktas. Bandykite dar kartą.",
+    "unavailable": "Šis nustatymas dar neveikia — kol kas žinutės rodomos sąsajos kalba."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Peržiūrėti ir patvirtinti",
@@ -2209,7 +2218,7 @@
         },
         "noCompany": {
           "title": "Pradėkite įmonės profilį",
-          "body": "Dar neturite įmonės profilio. Sukurkite jį — jis iškart aktyvus ir naudojamas, nereikia laukti patvirtinimo.",
+          "body": "Dar neturite įmonės profilio. Sukurkite jį: juo galite naudotis iš karto. Darbuotojai jūsų paskelbtus poreikius mato po įmonės patvirtinimo.",
           "cta": "Pradėti įmonės nustatymą"
         },
         "personalSpace": {
@@ -2244,7 +2253,7 @@
         "formTitle": "Įmonės profilio užklausa",
         "formTitleCreate": "Sukurti įmonės profilį",
         "formTitleEdit": "Redaguoti įmonės profilį",
-        "formSubtitle": "Sukurkite organizacijos profilį iš savo asmeninės paskyros. Jis iškart aktyvus ir naudojamas — nereikia laukti patvirtinimo. Patvirtinimas yra atskiras, stipresnis pasitikėjimo žingsnis.",
+        "formSubtitle": "Sukurkite organizacijos profilį iš savo asmeninės paskyros. Juo galite naudotis iš karto: projektai, komanda, darbo žurnalas. Darbuotojai jūsų paskelbtus poreikius mato, kai įmonė patvirtinta; patvirtinimo paprašykite žemiau.",
         "existingHeading": "Įmonės profilis",
         "legalName": "Įmonės teisinis pavadinimas",
         "legalNameHelp": "Privaloma. 2–200 simbolių.",
@@ -2275,6 +2284,7 @@
         },
         "statusInvalidCountry": "Pasirinkite šalį iš sąrašo — kitos reikšmės kol kas nepalaikomos.",
         "registrationCode": "Įmonės / registracijos kodas",
+        "optionalDetails": "Registracija, kontaktai ir pareigos",
         "registrationCodeHelp": "Neprivaloma. Padeda vėliau patvirtinti įmonę.",
         "address": "Adresas / vieta",
         "addressPlaceholder": "pvz. Gedimino pr. 1, Vilnius",
@@ -2298,7 +2308,7 @@
         "agencyConnectionPending": "Kvietimas priimtas. Personalo agentūra nori užmegzti ryšį su jūsų įmone — pirmiausia sukurkite įmonės profilį; ryšio prašymas tada lauks jūsų puslapyje „Klientai ir partneriai“, kur jį patvirtinsite šios įmonės vardu.",
         "legalLockedNotice": "Ši įmonė yra patvirtinta. Jos juridiniai duomenys (pavadinimas, įmonės kodas, šalis ir registracijos adresas) čia užrakinti ir negali būti perrašyti — dėl juridinių duomenų keitimo kreipkitės į palaikymą. Kontaktus, svetainę, veiklos tipą ir savo vaidmenį vis tiek galite atnaujinti.",
         "saveDraft": "Išsaugoti įmonę",
-        "submitRequest": "Prašyti rankinės peržiūros (neprivaloma)",
+        "submitRequest": "Prašyti patvirtinimo (darbuotojai poreikius mato po patvirtinimo)",
         "statusDraftSaved": "Įmonė išsaugota — ji aktyvi ir naudojama dabar.",
         "statusSubmitted": "Rankinė peržiūra paprašyta (neprivaloma). Įmonė tuo metu lieka naudojama.",
         "statusNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
@@ -2319,7 +2329,7 @@
           "draft": "Juodraštis. Išsaugokite, kad aktyvuotumėte įmonę — ji iškart taps naudojama.",
           "active_unverified": "Aktyvi ir naudojama dabar. Bazinės automatinės patikros praėjo. Dar ne tapatybės patvirtinta — tai atskiras, stipresnis žingsnis. Jūsų pateiktos užklausos darbuotojams rodomos tik po įmonės verifikacijos.",
           "needs_checks": "Aktyvi ir naudojama, bet vieną bazinę patikrą reikia patikslinti (pvz., nurodyti šalį arba pataisyti netaisyklingą kodą / svetainę / el. paštą). Jūsų pateiktos užklausos darbuotojams rodomos tik po įmonės verifikacijos.",
-          "pending_verification": "Paprašėte neprivalomos rankinės peržiūros. Įmonė lieka pilnai naudojama, kol laukiama. Jūsų pateiktos užklausos darbuotojams rodomos tik po įmonės verifikacijos.",
+          "pending_verification": "Paprašėte patvirtinimo. Įmonė lieka pilnai naudojama, kol laukiama. Jūsų pateiktos užklausos darbuotojams rodomos tik po įmonės verifikacijos.",
           "unverified": "Nepatvirtinta. Galite toliau normaliai naudotis įmone. Jūsų pateiktos užklausos darbuotojams rodomos tik po įmonės verifikacijos.",
           "verified": "Patvirtinta — stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros."
         },
@@ -14748,8 +14758,12 @@
           "chipHelpPeople": "Komanda ir kvietimai",
           "chipHelpPlanning": "Atidaryti planavimą",
           "chipHelpServices": "Mano paslaugos",
-          "chipHelpJournal": "Darbo žurnalas"
-        }
+          "chipHelpJournal": "Darbo žurnalas",
+          "chipHelpSettings": "Nustatymai",
+          "chipHelpPrivacy": "Privatumas ir jūsų duomenys"
+        },
+        "account": "Prisijungimas, el. paštas, pranešimai ir išvaizda yra Nustatymuose.",
+        "privacy": "Skiltyje „Privatumas ir jūsų duomenys“ galite atsisiųsti savo duomenis, matyti, kas mato jūsų profilį, ir pateikti paskyros šalinimo užklausą."
       },
       "interestInboxAmbiguous": "Tai gali reikšti du dalykus — ką norite pamatyti?",
       "chipInterestOnMyNeeds": "Kas susidomėjo mano poreikiais",
@@ -14798,7 +14812,7 @@
       "chipClientDemand": "Klientų poreikiai",
       "chipProposeReplacement": "Pasiūlyti kitą kandidatą",
       "chipProposalStatus": "Pasiūlymų būsena",
-      "chipProposeFor": "Siūlyti kandidatą",
+      "chipProposeFor": "Pasiūlyti kandidatą",
       "userClientDemand": "Parodyk klientų poreikius",
       "userProposalStatus": "Kaip sekasi mano pasiūlymams?",
       "learningCompassHint": "Jūsų mokymosi kompasas — kryptis, trūkstami įgūdžiai ir tinkamos galimybės:",
@@ -20720,6 +20734,7 @@
       "partnerWithUs": "Tapti partneriu",
       "forAgencies": "Kaip tai veikia agentūroms",
       "setUpAgency": "Užregistruoti agentūrą",
+      "setUpInstitution": "Mokymo įstaigoms",
       "b2bEnquiry": "Verslo paslaugų užklausa (B2B)",
       "projectEnquiry": "Individualaus projekto užklausa"
     },

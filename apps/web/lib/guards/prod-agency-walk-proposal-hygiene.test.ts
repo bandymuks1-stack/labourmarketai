@@ -55,6 +55,16 @@ describe("the production agency walk cleans up its own booking proposal", () => 
     expect(spec).not.toMatch(/engagement-end|endEngagement|end_company_worker_engagement/);
   });
 
+  it("A-8 closes only this run's own need, and only after its own proposal was accepted", () => {
+    const a8 = spec.slice(spec.indexOf('test("A-8'), spec.indexOf("test.afterAll("));
+    expect(a8.length, "an A-8 step exists").toBeGreaterThan(0);
+    expect(spec).toContain("ownNeed = pick.t.includes(RUN)");
+    expect(a8).toContain('expect(ownNeed && requestId !== ""');
+    expect(a8).toContain("expect(workerAccepted");
+    expect(a8.indexOf("expect(ownNeed")).toBeLessThan(a8.indexOf('getByTestId("demand-close")'));
+    expect(a8).toContain("scouting?request=${requestId}");
+  });
+
   it("it never withdraws by a broad match, so earlier runs' proposals stay untouched", () => {
     expect(teardown).not.toMatch(/hasText:\s*["'`]QA-SYNTHETIC/);
     expect(teardown).not.toMatch(/data-status="proposed"\]'\)\.(first|nth|all)\(/);

@@ -45,6 +45,11 @@ on:
       - "apps/web/app/*/(marketing)/worker-intake/**"
       - "apps/web/components/app/worker-intake-form.tsx"
       - "apps/web/components/app/profile-text-first-flow.tsx"
+      - "apps/web/components/app/intake-draft-sign-out-clear.tsx"
+      # ... and the header Sign up / Sign in, which carry the builder as
+      # `next` while on the intake (intake:worker).
+      - "apps/web/components/layouts/site-nav.tsx"
+      - "apps/web/components/layouts/header-auth-cta-link.tsx"
       - "apps/web/components/app/onboarding-wizard.tsx"
       - "apps/web/components/app/worker-education-section.tsx"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
@@ -53,6 +58,8 @@ on:
       - "apps/web/tests/e2e/journal-template-isolated.spec.ts"
       - "apps/web/lib/journal/journal-templates*.ts"
       - "apps/web/components/app/journal-entry-composer.tsx"
+      # ... and reaches the Living CV's journal-entry figure (T-4).
+      - "apps/web/lib/profile/trust-signals.ts"
       # The code experience-integration-isolated.spec.ts guards (#3354, decision 0025).
       - "apps/web/app/*/cv/**"
       - "apps/web/app/*/dashboard/work-in-numbers/**"
@@ -69,6 +76,19 @@ on:
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
       - "apps/web/tests/e2e/recognition-chain-isolated.spec.ts"
       - "apps/web/tests/e2e/phone-journeys-isolated.spec.ts"
+      # The phone confirmation path the C walk measures (worker entry -> the
+      # organization's approval -> the Living CV): the approval surfaces.
+      - "apps/web/app/*/dashboard/inbox/**"
+      - "apps/web/components/app/quick-confirm-*.tsx"
+      - "apps/web/components/app/journal-inbox-entry.tsx"
+      - "apps/web/components/app/arena/confirm-pulse.tsx"
+      - "apps/web/components/app/org-members-panel.tsx"
+      - "apps/web/components/app/entry-review-panel.tsx"
+      - "apps/web/components/app/counterparty-review-card.tsx"
+      # Client confirmation on phone and desktop, direct counterparty (decision 0033).
+      - "apps/web/tests/e2e/client-review-isolated.spec.ts"
+      - "apps/web/components/app/counterparty-link-panel.tsx"
+      - "apps/web/lib/journal/counterparty-*"
       - "apps/web/tests/e2e/teams-projects-isolated.spec.ts"
       - "apps/web/app/*/dashboard/projects/**"
       - "apps/web/components/app/team-*.tsx"
@@ -79,6 +99,9 @@ on:
       - "apps/web/lib/journal/entry-skill-retraction.ts"
       - "apps/web/lib/journal/journal-entry-skills-actions.ts"
       - "apps/web/lib/journal/skill-pipeline-actions.ts"
+      - "apps/web/lib/today/today-server.ts"
+      - "apps/web/lib/today/today-model.ts"
+      - "apps/web/lib/journal/work-intelligence-read.ts"
       - "apps/web/app/*/dashboard/company/people/**"
       - "apps/web/app/*/dashboard/company/settings/**"
       - "apps/web/app/*/dashboard/network/**"
@@ -112,6 +135,10 @@ on:
       - "apps/web/app/*/invite/**"
       - "apps/web/components/app/reset-password-form.tsx"
       - "apps/web/app/*/dashboard/journal/**"
+      # The worker's "submit for review" panel and the client's review queue.
+      - "apps/web/components/app/entry-review-panel.tsx"
+      - "apps/web/components/app/counterparty-review-card.tsx"
+      - "apps/web/app/*/dashboard/inbox/counterparty/**"
       - "supabase/config.toml"
       - "apps/web/tests/e2e/*-isolated-web-a.spec.ts"
       - "apps/web/tests/e2e/isolated-web-a-helpers.ts"
@@ -151,7 +178,7 @@ jobs:
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), the practice -> sign-off -> recognition
       # chain that production no longer writes (recognition-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -410,6 +437,15 @@ jobs:
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
         run: pnpm exec playwright test tests/e2e/job-fit-main-compat-isolated.spec.ts --reporter=list --trace=off
+
+      # UX gap W-1 (2026-11-18): a new worker's home showed "Open items could
+      # not be read". The work-intelligence reads log only a read name and an
+      # error code (no ids, no values); print those lines on every run.
+      - name: Work-intelligence read failures (W-1)
+        if: always()
+        run: |
+          out="$(grep -E -A6 '\[(work-intelligence|today)\]' "$RUNNER_TEMP/next.log" | grep -viE 'key|secret|jwt|token|password|eyJ|@' | head -n 80 || true)"
+          if [ -n "$out" ]; then echo "$out"; else echo "none: no work-intelligence or today read failed"; fi
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()
