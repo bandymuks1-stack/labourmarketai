@@ -1,0 +1,192 @@
+# LEAVE & ABSENCE — isolated runs only (android-need-isolated.yml), after
+# agency-clients-journey.yaml (which leaves the company signed in).
+#
+# What a green run proves, on the job's LOCAL stack (production untouched):
+#   1. the company's employee (M-3) signs in, opens Leave & absence from Today
+#      and requests two days of annual leave with a note
+#      (absence.request_draft → absence.request_confirm);
+#   2. the company (M-0) signs in, opens Leave & absence and APPROVES that
+#      request from "Requests to review" (absence.review_draft → _confirm).
+# The next workflow step finds exactly one approved absence, reviewed by the
+# company, for the employee's worker record.
+appId: ai.labourmarket.app
+name: absences-journey
+---
+# --- Sign the company out, the employee in ---
+- tapOn:
+    id: "tab-settings"
+- scrollUntilVisible:
+    element:
+      id: "sign-out"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sign-out"
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: ${MOBILE_WORKER3_EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${MOBILE_WORKER3_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "submit"
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 60000
+
+# --- 1. The employee requests time off ---
+- scrollUntilVisible:
+    element:
+      id: "today-open-absences"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-absences"
+- extendedWaitUntil:
+    visible:
+      id: "absences-mine"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "absences-type-annual_leave"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "absences-type-annual_leave"
+- scrollUntilVisible:
+    element:
+      id: "absences-start"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "absences-start"
+- inputText: "2027-04-01"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "absences-end"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "absences-end"
+- inputText: "2027-04-02"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "absences-note"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "absences-note"
+- inputText: "QA-SYNTHETIC two days off"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "absences-request"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "absences-request"
+- scrollUntilVisible:
+    element:
+      id: "absences-confirm"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "absences-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "absences-done"
+    timeout: 60000
+
+# --- Sign the employee out, the company in ---
+- tapOn:
+    id: "tab-settings"
+- scrollUntilVisible:
+    element:
+      id: "sign-out"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sign-out"
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: ${MOBILE_QA_EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${MOBILE_QA_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "submit"
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 60000
+
+# --- 2. The company approves it ---
+- scrollUntilVisible:
+    element:
+      id: "today-open-absences"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-absences"
+- scrollUntilVisible:
+    element:
+      id: "absences-review-list"
+    direction: DOWN
+    timeout: 60000
+    centerElement: true
+- scrollUntilVisible:
+    element:
+      id: "absences-approve-.*"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "absences-approve-.*"
+    index: 0
+- scrollUntilVisible:
+    element:
+      id: "absences-confirm"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "absences-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "absences-done"
+    timeout: 60000

@@ -3,6 +3,9 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import {
   rescheduleBookingAction,
   setBookingDeadlineAction,
@@ -104,10 +107,6 @@ export function BookingManageControls({
     });
   }
 
-  const inputCls =
-    "min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary";
-  const buttonCls =
-    "inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto";
 
   return (
     <div
@@ -115,27 +114,31 @@ export function BookingManageControls({
       data-testid="booking-manage-controls"
     >
       <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <button
+        <Button
           type="button"
           disabled={pending}
           onClick={() => setPanel(panel === "dates" ? "none" : "dates")}
           data-testid="booking-reschedule-open"
-          className={buttonCls}
+          variant="secondary"
+          size="sm"
+          className="min-h-11 w-full sm:w-auto"
         >
           {reopensDecision
             ? t("reschedule.openAccepted")
             : t("reschedule.open")}
-        </button>
+        </Button>
         {reopensDecision ? null : (
-          <button
+          <Button
             type="button"
             disabled={pending}
             onClick={() => setPanel(panel === "deadline" ? "none" : "deadline")}
             data-testid="booking-deadline-open"
-            className={buttonCls}
+            variant="secondary"
+            size="sm"
+            className="min-h-11 w-full sm:w-auto"
           >
             {t("deadline.open")}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -154,49 +157,53 @@ export function BookingManageControls({
           ) : null}
           <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reschedule.startDate")}
-            <input
+            <Input
               type="date"
               value={start}
               onChange={(e) => setStart(e.target.value)}
-              className={inputCls}
+              className="max-sm:text-base"
             />
           </label>
           <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reschedule.endDate")}
-            <input
+            <Input
               type="date"
               value={end}
               onChange={(e) => setEnd(e.target.value)}
-              className={inputCls}
+              className="max-sm:text-base"
             />
           </label>
           <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reschedule.note")}
-            <input
+            <Input
               type="text"
               maxLength={500}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className={inputCls}
+              className="max-sm:text-base"
             />
           </label>
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-            <button
+            <Button
               type="button"
               disabled={pending || !start}
               onClick={saveDates}
               data-testid="booking-reschedule-save"
-              className={buttonCls}
+              variant="secondary"
+              size="sm"
+              className="min-h-11 w-full sm:w-auto"
             >
               {t("reschedule.save")}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setPanel("none")}
-              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
+              variant="ghost"
+              size="sm"
+              className="min-h-11"
             >
               {t("reschedule.cancel")}
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}
@@ -208,30 +215,34 @@ export function BookingManageControls({
         >
           <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("deadline.label")}
-            <input
+            <Input
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              className={inputCls}
+              className="max-sm:text-base"
             />
           </label>
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-            <button
+            <Button
               type="button"
               disabled={pending || !deadline}
               onClick={saveDeadline}
               data-testid="booking-deadline-save"
-              className={buttonCls}
+              variant="secondary"
+              size="sm"
+              className="min-h-11 w-full sm:w-auto"
             >
               {t("deadline.save")}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setPanel("none")}
-              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
+              variant="ghost"
+              size="sm"
+              className="min-h-11"
             >
               {t("deadline.cancel")}
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}

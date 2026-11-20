@@ -433,6 +433,17 @@ export async function loadWorkIntelligence(
     // (decision 0028 J-2.3, audit 2026-11-03).
     caller.supabase.from("workers").select("profile_id").eq("id", workerId).limit(1),
   ]);
+  if (!entriesRead.ok || !linkRead.ok || skillsRead.error || subjectRead.error) {
+    // Which read failed, by code only (no ids, no values): an UNKNOWN reading
+    // is shown to the person as "could not be read", so the cause must be
+    // findable in the server log (UX gap W-1, 2026-11-18).
+    console.error("[work-intelligence] read failed:", {
+      entries: entriesRead.ok ? "ok" : entriesRead.code,
+      links: linkRead.ok ? "ok" : "error",
+      skills: skillsRead.error ? (skillsRead.error.code ?? "error") : "ok",
+      subject: subjectRead.error ? (subjectRead.error.code ?? "error") : "ok",
+    });
+  }
   if (!entriesRead.ok || !linkRead.ok || skillsRead.error || subjectRead.error) return null;
   const subjectProfileId =
     ((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null;
@@ -526,7 +537,10 @@ export async function loadOwnWorkIntelligence(
   if (!user) return null;
   const caller: DomainCaller = { supabase, userId: user.id };
   const worker = await readWorkerCoreRow(caller);
-  if (!worker.ok || !worker.value) return null;
+  if (!worker.ok || !worker.value) {
+    console.error("[work-intelligence] own worker row:", worker.ok ? "absent" : "unreadable");
+    return null;
+  }
   return loadWorkIntelligence(caller, worker.value.id, opts);
 }
 

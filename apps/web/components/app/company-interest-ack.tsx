@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MessageSquare } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
+
 import { acknowledgeInterestAction } from "@/lib/opportunities/interest-actions";
 import { contactInterestedWorkerAction } from "@/lib/communication/contact-interested-worker";
 import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
@@ -83,27 +85,31 @@ export function CompanyInterestAck({
           {labels.statusLabels[status] ?? status}
         </span>
         {status !== "reviewed" && status !== "contacted" ? (
-          <button
+          <Button
             type="button"
             onClick={markReviewed}
             disabled={pending}
-            className="min-h-11 rounded-md border border-ink-500 px-3 py-1.5 text-meta text-text-primary hover:border-brand-blue disabled:opacity-50"
+            variant="secondary"
+            size="sm"
+            className="min-h-11"
             data-testid="interest-ack-reviewed"
           >
             {labels.markReviewed}
-          </button>
+          </Button>
         ) : null}
         {/* The contact affordance stays available even at status=contacted —
             it REOPENS the same deduped thread (never a duplicate). */}
-        <button
+        <Button
           type="button"
           onClick={contact}
           disabled={pending}
-          className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-meta text-brand-blue hover:border-brand-blue disabled:opacity-50"
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           data-testid="interest-ack-contacted"
         >
           <MessageSquare className="h-3 w-3" /> {labels.markContacted}
-        </button>
+        </Button>
         {failure === "error" ? (
           <span role="alert" className="text-meta text-state-warning">
             {labels.error}

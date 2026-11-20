@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
+import { Button } from "@/components/ui/Button";
 
 /**
  * Step 4A — "Request to communicate" on a scouting candidate. Sends only the
@@ -66,28 +67,32 @@ export function RequestCommunicationButton({
     return (
       <div className="flex flex-wrap items-center gap-2 text-meta">
         <span className="text-state-success">{labels.opened}</span>
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
           onClick={() => router.push(`/${locale}/dashboard/communication/${state.conversationId}`)}
-          className="min-h-11 sm:min-h-0 rounded-md border border-brand-blue/40 px-2.5 py-1 font-medium text-brand-blue hover:bg-brand-blue/10"
+          className="min-h-11 w-fit"
         >
           {labels.view}
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <button
+      <Button
         type="button"
+        variant="secondary"
+        size="sm"
         onClick={onRequest}
         disabled={pending}
         data-testid={`request-communication-${workerId}`}
-        className="min-h-11 sm:min-h-0 w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
+        className="min-h-11 w-fit"
       >
         {pending ? labels.opening : labels.button}
-      </button>
+      </Button>
       {state.kind === "rate_limited" ? (
         <span className="text-meta text-state-warning" data-testid="request-communication-limit">
           {labels.limitReached}

@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
+import { HeaderAuthCtaLink } from "@/components/layouts/header-auth-cta-link";
 import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
@@ -134,23 +135,25 @@ export async function SiteNav({
   //   from `sm`    — Sign up beside it;
   //   below `sm`   — Sign up is the first thing in the menu.
   // Owner fix list 2026-11-12: on a phone neither was visible in the header.
+  // On the worker intake only, both carry the profile builder as `next`
+  // (HeaderAuthCtaLink), so what was typed there reaches the composer.
   const loginCta = (
-    <AuthCtaLink
+    <HeaderAuthCtaLink
       relPath={`/${locale}/auth/login`}
       className="flex min-h-11 items-center whitespace-nowrap rounded-control px-1 text-sm font-medium text-text-primary transition-colors hover:text-brand-blue sm:px-0 sm:font-normal sm:text-text-secondary sm:hover:text-text-primary"
     >
       {t("login")}
-    </AuthCtaLink>
+    </HeaderAuthCtaLink>
   );
   const signupCta = (
-    <AuthCtaLink
+    <HeaderAuthCtaLink
       relPath={`/${locale}/auth/signup`}
       className={buttonLinkClassName("primary", "sm")}
     >
       {/* Named for what it does (owner 2026-11-12): "Start now" did not say
           that it creates an account. */}
       {tIntent("signUp")}
-    </AuthCtaLink>
+    </HeaderAuthCtaLink>
   );
   const memberCta = (
     <AuthCtaLink
@@ -208,7 +211,7 @@ export async function SiteNav({
       <div className="mx-auto flex max-w-container items-center gap-2 px-3 py-3 sm:gap-6 sm:px-12 sm:py-4">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
+          className="flex min-h-11 shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
         >
           {/* The mark is decorative here — the wordmark beside it already
               names the product, so announcing both would read it twice. */}
