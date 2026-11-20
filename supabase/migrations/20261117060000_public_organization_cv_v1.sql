@@ -50,6 +50,11 @@
 --     engagement is active AND journal review is on for it — the predicate of
 --     20261115120000's journal_entries_select, verbatim, fail-closed: an
 --     unknown relationship type counts only under that same condition.
+--   * #3474 (former employer, 20261118164500): outside `education`, a relationship counts while it
+--     runs; once ended, only the retained history — entries whose original record was created
+--     before the end of the end day (UTC), via that migration's journal_entry_chain_root_at_v1.
+--     A relationship in any other state (or ended without an end date) counts nothing.
+--     APPLY AFTER 20261118164500 (this function calls its helper at run time).
 --   * Live entries and "one chain counted once": the predicate of
 --     timesheet_compute_lines_v1 (20260831170000) — not deleted, not
 --     superseded, and not an original that a live correction replaces
@@ -145,15 +150,23 @@ begin
 
   -- ── The journal block ────────────────────────────────────────────────────
   with ctx as (
-    select ec.id
+    -- 20261118164500 (#3474, former employer): outside `education`, a relationship counts while it
+    -- runs (active / paused); once ENDED, only what the organization retains — entries whose original
+    -- record was created before the end of the end day (UTC), the predicate of journal_entries_select
+    -- and org_retains_journal_entry_v1, via the same journal_entry_chain_root_at_v1. `retain_until`
+    -- is NULL when every entry of the context counts.
+    select ec.id,
+           case when ec.status = 'ended'
+                then ((ec.ended_at + 1)::timestamp at time zone 'UTC') end as retain_until
       from public.engagement_contexts ec
      where ec.organization_id = p_organization_id
        and (
-         exists (
-           select 1 from public.relationship_types rt
-            where rt.slug = ec.relationship_slug
-              and rt.category <> 'education'
-         )
+         (exists (
+            select 1 from public.relationship_types rt
+             where rt.slug = ec.relationship_slug
+               and rt.category <> 'education'
+          )
+          and (ec.status in ('active', 'paused') or (ec.status = 'ended' and ec.ended_at is not null)))
          or (ec.status = 'active' and ec.journal_review_enabled is true)
        )
   ),
@@ -163,6 +176,8 @@ begin
            coalesce(wd.value_text::date, (je.created_at at time zone 'utc')::date) as work_day
       from public.journal_entries je
       join ctx on ctx.id = je.engagement_context_id
+                 and (ctx.retain_until is null
+                      or public.journal_entry_chain_root_at_v1(je.id) < ctx.retain_until)
       left join lateral (
         select m.value_text
           from public.journal_entry_metrics m
@@ -272,11 +287,12 @@ begin
        and ec.organization_id = p_organization_id
        and ec.project_id is not null
        and (
-         exists (
-           select 1 from public.relationship_types rt
-            where rt.slug = ec.relationship_slug
-              and rt.category <> 'education'
-         )
+         (exists (
+            select 1 from public.relationship_types rt
+             where rt.slug = ec.relationship_slug
+               and rt.category <> 'education'
+          )
+          and (ec.status in ('active', 'paused') or (ec.status = 'ended' and ec.ended_at is not null)))
          or (ec.status = 'active' and ec.journal_review_enabled is true)
        )
     union

@@ -163,8 +163,15 @@ describe("public company Living CV — the database function keeps the owner's r
   });
 
   it("applies #3421's education rule verbatim, and counts only projects a passing block points at", () => {
-    const education = /rt\.category <> 'education'\s*\)\s*or \(ec\.status = 'active' and ec\.journal_review_enabled is true\)/g;
+    const education = /or \(ec\.status = 'active' and ec\.journal_review_enabled is true\)/g;
     expect(sql.match(education)?.length).toBe(2); // the journal contexts AND the linked projects
+    // #3474 (20261118164500): outside education, a relationship counts while it runs; once ended,
+    // only the retained history, through that migration's own helper (no second copy of the rule).
+    const running = /rt\.category <> 'education'\s*\)\s*and \(ec\.status in \('active', 'paused'\) or \(ec\.status = 'ended' and ec\.ended_at is not null\)\)\)/g;
+    expect(sql.match(running)?.length).toBe(2);
+    expect(sql).toMatch(/when ec\.status = 'ended'\s+then \(\(ec\.ended_at \+ 1\)::timestamp at time zone 'UTC'\) end as retain_until/);
+    expect(sql).toMatch(/public\.journal_entry_chain_root_at_v1\(je\.id\) < ctx\.retain_until/);
+    expect(sql).toMatch(/APPLY AFTER 20261118164500/);
     expect(sql).toMatch(/where v_j_pass\s+and ec\.organization_id = p_organization_id/);
     expect(sql).toMatch(/where v_h_pass\s+and r\.organization_id = p_organization_id/);
     expect(sql).toMatch(/p\.record_state is distinct from 'duplicate'/);

@@ -47,7 +47,8 @@ create table public.relationship_types (slug text primary key, category text not
 create table public.projects (id uuid primary key, organization_id uuid, status text, record_state text not null default 'active');
 create table public.engagement_contexts (
   id uuid primary key, organization_id uuid, project_id uuid, relationship_slug text not null,
-  status text not null default 'active', journal_review_enabled boolean not null default false);
+  status text not null default 'active', journal_review_enabled boolean not null default false,
+  ended_at date);
 create table public.journal_entries (
   id uuid primary key default gen_random_uuid(), worker_id uuid, engagement_context_id uuid,
   created_at timestamptz not null default now(), deleted_at timestamptz, superseded_by uuid, correction_of uuid);
@@ -186,6 +187,11 @@ select '$ORGB', ('74000000-0000-4000-8000-00000000000' || i)::uuid, date '2025-0
 SQL
 run_file "$TMP/seed.sql"
 
+# 20261118164500's journal_entry_chain_root_at_v1, verbatim (the former-employer rule reuses it).
+awk '/^create or replace function public.journal_entry_chain_root_at_v1/{p=1} p{print} p&&/^\$\$;/{exit}' \
+  "$REPO/supabase/migrations/20261118164500_former_employer_limited_access_v1.sql" > "$TMP/root_at.sql"
+[ -s "$TMP/root_at.sql" ] || { echo "could not cut journal_entry_chain_root_at_v1"; exit 1; }
+run_file "$TMP/root_at.sql"
 COUNTS0="$(q "select (select count(*) from public.journal_entries) || '|' || (select count(*) from public.organization_evidence_records) || '|' || (select count(*) from public.journal_entry_metrics) || '|' || (select count(*) from public.organization_evidence_events)")"
 echo "── before apply"
 check "function absent before apply" "" "$(q "select to_regprocedure('public.get_public_organization_cv_v1(uuid)')")"
@@ -231,6 +237,24 @@ q "update public.engagement_contexts set journal_review_enabled = false where id
 check "active learning link with review off: not counted" "1|1|6|40|2026-01|2026-06|5|150|2024-12|2025-07" "$(cv "$ORGA")"
 q "update public.engagement_contexts set relationship_slug = 'intern' where id = '50000000-0000-4000-8000-0000000000ea'" >/dev/null
 check "intern is education too: not counted" "1|1|6|40|2026-01|2026-06|5|150|2024-12|2025-07" "$(cv "$ORGA")"
+
+echo "── the former-employer rule (#3474, 20261118164500)"
+EMP=50000000-0000-4000-8000-00000000000a
+W1E="select je.id from public.journal_entries je join public.journal_entry_metrics m on m.entry_id = je.id and m.metric_slug = 'quantity' where je.worker_id = '60000000-0000-4000-8000-000000000001' and m.value_numeric = 8"
+q "update public.engagement_contexts set status = 'ended', ended_at = (now() at time zone 'utc')::date where id = '$EMP'" >/dev/null
+check "ended today: everything recorded before the end still counts" "1|1|6|40|2026-01|2026-06|5|150|2024-12|2025-07" "$(cv "$ORGA")"
+q "update public.journal_entries set created_at = now() + interval '2 days' where id = ($W1E)" >/dev/null
+check "an entry first recorded AFTER the end is not the organization's: W1 drops (6 -> 5 people, 37 -> 29 h)" \
+  "1|1|5|30|2026-01|2026-06|5|150|2024-12|2025-07" "$(cv "$ORGA")"
+q "update public.engagement_contexts set status = 'paused' where id = '$EMP'" >/dev/null
+check "paused: the relationship still runs, every entry counts" "1|1|6|40|2026-01|2026-06|5|150|2024-12|2025-07" "$(cv "$ORGA")"
+q "update public.engagement_contexts set status = 'ended', ended_at = null where id = '$EMP'" >/dev/null
+check "ended without an end date: nothing retained, journal block and its project gone" "0|1|5|150|2024-12|2025-07" "$(cv "$ORGA")"
+q "update public.engagement_contexts set status = 'pending', ended_at = null where id = '$EMP'" >/dev/null
+check "a relationship in any other state counts nothing" "0|1|5|150|2024-12|2025-07" "$(cv "$ORGA")"
+q "update public.engagement_contexts set status = 'active', ended_at = null where id = '$EMP'" >/dev/null
+q "update public.journal_entries set created_at = now() where id = ($W1E)" >/dev/null
+check "back to active: the full case again" "1|1|6|40|2026-01|2026-06|5|150|2024-12|2025-07" "$(cv "$ORGA")"
 
 echo "── gate 4: coarse hours"
 check "hours are multiples of 10" "0|0" "$(q "select (journal_hours % 10)::int || '|' || (history_day_hours % 10)::int from public.get_public_organization_cv_v1('$ORGA')")"
