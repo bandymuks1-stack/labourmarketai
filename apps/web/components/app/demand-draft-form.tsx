@@ -11,6 +11,10 @@ import {
   deleteDemandDraftAction,
 } from "@/lib/demand/demand-drafts-actions";
 import { OptionCards } from "@/components/ui/OptionCards";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
+import { Button } from "@/components/ui/Button";
 
 /**
  * Generic demand draft form. One form per draft_type — the caller
@@ -177,7 +181,7 @@ export function DemandDraftForm({
                 <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {label}
                 </span>
-                <textarea
+                <Textarea
                   id={id}
                   rows={4}
                   value={values[f.key as string] ?? ""}
@@ -185,7 +189,7 @@ export function DemandDraftForm({
                     setValue(f.key as string, e.target.value)
                   }
                   placeholder={placeholder}
-                  className="rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                  className="max-sm:text-base"
                   disabled={isSaving || isDeleting}
                 />
               </label>
@@ -226,13 +230,13 @@ export function DemandDraftForm({
                 <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {label}
                 </span>
-                <select
+                <Select
                   id={id}
                   value={values[f.key as string] ?? ""}
                   onChange={(e) =>
                     setValue(f.key as string, e.target.value)
                   }
-                  className="rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                  className="max-sm:min-h-11 max-sm:text-base"
                   disabled={isSaving || isDeleting}
                 >
                   <option value="">{placeholder}</option>
@@ -241,7 +245,7 @@ export function DemandDraftForm({
                       {t(opt.labelKey)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
             );
           }
@@ -250,7 +254,7 @@ export function DemandDraftForm({
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {label}
               </span>
-              <input
+              <Input
                 id={id}
                 type="text"
                 value={values[f.key as string] ?? ""}
@@ -258,7 +262,7 @@ export function DemandDraftForm({
                   setValue(f.key as string, e.target.value)
                 }
                 placeholder={placeholder}
-                className="rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                className="max-sm:min-h-11 max-sm:text-base"
                 disabled={isSaving || isDeleting}
                 maxLength={1000}
               />
@@ -268,24 +272,24 @@ export function DemandDraftForm({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        <Button
           type="submit"
           disabled={isSaving || isDeleting || !hasAnyValue}
-          className="rounded-md border border-state-success/40 bg-state-success/5 px-4 py-2 text-sm font-semibold text-state-success hover:border-state-success disabled:cursor-not-allowed disabled:opacity-50"
+          variant="primary" size="sm" className="min-h-11"
           data-testid={`pilot-draft-save-${draftType}`}
         >
           {isSaving ? t("saving") : t("saveButton")}
-        </button>
+        </Button>
         {hasExistingDraft && (
-          <button
+          <Button
             type="button"
             onClick={onDelete}
             disabled={isSaving || isDeleting}
-            className="rounded-md border border-ink-500 px-4 py-2 text-sm text-text-secondary hover:border-state-danger hover:text-state-danger disabled:opacity-50"
+            variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger"
             data-testid={`pilot-draft-delete-${draftType}`}
           >
             {isDeleting ? t("deleting") : t("deleteButton")}
-          </button>
+          </Button>
         )}
         {savedAt && (
           <span

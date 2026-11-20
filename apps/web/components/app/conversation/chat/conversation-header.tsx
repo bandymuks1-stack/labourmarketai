@@ -10,6 +10,8 @@ import {
   type NavItem,
 } from "@/lib/config/navigation";
 import { customerHeaderDoors, organizationHeaderAreas } from "@/lib/navigation/work-areas";
+import { isEducationInstitution } from "@/lib/organizations/capabilities";
+import { isEducationFirstWorkspace } from "@/lib/conversation/education-home";
 import { actingRoleForWorkspace } from "@/lib/company/organization-switch";
 import { activeNavItem, headerPlaceLabelKey } from "@/lib/navigation/header-place";
 import { NAV_ICONS } from "@/components/app/nav-icons";
@@ -97,8 +99,16 @@ export function ConversationHeader({
   const activeWorkspace =
     auth?.workspaces?.find((w) => w.id === auth.activeWorkspaceId) ?? auth?.workspaces?.[0] ?? null;
   const actingRole = actingRoleForWorkspace(activeWorkspace, auth?.roles ?? []);
+  // An education institution's learning home joins them, by the organization
+  // doors' own gate over the active organization's capabilities (UX_GAPS I-1).
+  // It leads only for an organization that is first of all an institution.
+  const capabilities = { roleSlugs: auth?.activeOrganizationCapabilities };
+  const education = isEducationInstitution(capabilities);
+  const educationFirst = isEducationFirstWorkspace(capabilities);
   const organizationAreas =
-    actingRole === "company" || actingRole === "agency" ? organizationHeaderAreas(actingRole) : [];
+    actingRole === "company" || actingRole === "agency"
+      ? organizationHeaderAreas(actingRole, { education, educationFirst })
+      : [];
   // The customer's own door leads "More" for a person who HOLDS the customer
   // role outside an organization workspace — the /dashboard/buyer gate's own
   // rule (client-side; no new read).
@@ -143,7 +153,7 @@ export function ConversationHeader({
           href="/dashboard"
           data-testid="shell-logo-home"
           aria-label={title}
-          className="flex flex-none items-center gap-2 rounded-sm outline-none ring-brand-blue focus-visible:ring-2"
+          className="flex flex-none items-center justify-center gap-2 min-h-11 min-w-11 rounded-sm outline-none ring-brand-blue focus-visible:ring-2"
         >
           {/* The canonical mark (owner §19) — never a letter standing in for
               it. Decorative: the Link's aria-label already names the product. */}

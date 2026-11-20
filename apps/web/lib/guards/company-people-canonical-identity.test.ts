@@ -37,7 +37,9 @@ describe("company people — one canonical identity", () => {
   it("removal stays available to the owner but is the quietest control", () => {
     expect(SECTION).toContain('side="owner"');
     const end = read("components/app/roster-link-end.tsx");
-    expect(end).toMatch(/side === "owner"\s*\?\s*"min-h-11 w-fit rounded-control px-2\.5 text-meta/);
+    // The owner's door is the shared Button's quietest look (ghost: no border,
+    // muted text); the person ending their own link gets the bordered one.
+    expect(end).toMatch(/variant=\{side === "owner" \? "ghost" : "secondary"\}/);
   });
 
   it("the card no longer prints internal role/review words or a bare status badge", () => {

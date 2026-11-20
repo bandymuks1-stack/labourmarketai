@@ -207,7 +207,7 @@ export function DemandAdvancedSections({
     testId?: string;
   }) {
     return (
-      <label className="flex items-center gap-2 text-sm text-text-secondary">
+      <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-text-secondary">
         <input
           type="checkbox"
           checked={checked}
@@ -251,7 +251,7 @@ export function DemandAdvancedSections({
                   aria-pressed={isSelected}
                   data-value={v}
                   className={cn(
-                    "inline-flex items-center rounded-full border px-3 py-1.5 text-sm transition-colors",
+                    "inline-flex min-h-11 items-center rounded-full border px-3 py-1.5 text-sm transition-colors",
                     isSelected
                       ? "border-brand-orange bg-brand-orange text-ink-900"
                       : "border-ink-500 text-text-secondary hover:border-text-muted",
@@ -335,7 +335,7 @@ export function DemandAdvancedSections({
               aria-pressed={active}
               data-tier={tier}
               className={cn(
-                "inline-flex items-center rounded-full border px-2.5 py-1 text-xs transition-colors",
+                "inline-flex min-h-11 items-center rounded-full border px-2.5 py-1 text-xs transition-colors",
                 active
                   ? tier === "mandatory"
                     ? "border-brand-orange bg-brand-orange text-ink-900"
@@ -558,6 +558,7 @@ export function DemandAdvancedSections({
                 options={[...periodOptions, { value: "once", label: t("period.once") }]}
               />
               <Button
+                className="min-h-11"
                 type="button"
                 size="sm"
                 variant="secondary"
@@ -571,6 +572,7 @@ export function DemandAdvancedSections({
           ))}
           <div className="flex flex-wrap items-center gap-3">
             <Button
+              className="min-h-11"
               type="button"
               size="sm"
               variant="secondary"
@@ -792,6 +794,7 @@ export function DemandAdvancedSections({
                 options={LANGUAGE_LEVELS.map((lv) => ({ value: lv, label: lv }))}
               />
               <Button
+                className="min-h-11"
                 type="button"
                 size="sm"
                 variant="secondary"
@@ -811,6 +814,7 @@ export function DemandAdvancedSections({
             </div>
           ))}
           <Button
+            className="min-h-11"
             type="button"
             size="sm"
             variant="secondary"
@@ -853,6 +857,7 @@ export function DemandAdvancedSections({
                 data-testid={`sdv2-certificate-${i}`}
               />
               <Button
+                className="min-h-11"
                 type="button"
                 size="sm"
                 variant="secondary"
@@ -867,6 +872,7 @@ export function DemandAdvancedSections({
             </div>
           ))}
           <Button
+            className="min-h-11"
             type="button"
             size="sm"
             variant="secondary"
