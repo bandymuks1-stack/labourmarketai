@@ -23,6 +23,7 @@ import {
 } from "@/lib/auth/role-gated-routes";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getSessionProfile } from "@/lib/auth/session-profile";
@@ -251,7 +252,15 @@ export default async function DashboardLayout({
   );
   // Simple-mode nav labels + the Rexora footer credit, resolved once and passed
   // to the client chrome selector (which needs no data fetch of its own).
-  const tChat = await getTranslations("conversation.chat");
+  // The active organization's declared capabilities name the education area
+  // in the header (UX_GAPS I-1). Request-cached: the organization pages read
+  // the same rows in the same render. Read beside the labels, not after them.
+  const [tChat, activeOrganizationCapabilities] = await Promise.all([
+    getTranslations("conversation.chat"),
+    activeOrganizationId
+      ? readOrganizationCapabilities(activeOrganizationId)
+      : Promise.resolve<readonly string[]>([]),
+  ]);
   const nav: ConversationNavLabels = {
     chat: tChat("navChat"),
     journal: tChat("navJournal"),
@@ -276,6 +285,7 @@ export default async function DashboardLayout({
           activeOrgName,
           organizations,
           activeOrganizationId,
+          activeOrganizationCapabilities,
           workspaces: [...workspace.workspaces],
           activeWorkspaceId: workspace.activeWorkspaceId,
           workspacePointerAvailable: workspace.pointerAvailable,

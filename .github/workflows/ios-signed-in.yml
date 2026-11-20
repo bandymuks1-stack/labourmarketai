@@ -271,7 +271,7 @@ jobs:
             fi
             echo "IOS_PARITY_JOURNEY_PROVEN: journal entry corrected (journal.correct_draft -> journal.correct_confirm); conversation.list loaded, reply drafted when a conversation exists (not sent); notification.list loaded, $( grep -q "MARK_ALL_READ.*COMPLETED" "$CONSOLE" && echo "unread marked read" || echo "nothing unread, mark-all NOT exercised" ); worker.projects.list loaded, $( [ "$PROJECT_EXPECTED" = 1 ] && echo "the synthetic project's detail opened" || echo "project detail NOT exercised (no synthetic project prepared)" ); sign-out"
             if [ "$NEW_SCREENS_WALK" = 1 ]; then
-              echo "IOS_NEW_SCREENS_WALK_PROVEN: Living CV sections read, work / education / language forms opened and cancelled (nothing saved); $( grep -q "ORGANIZATION_WORKSPACE.*COMPLETED" "$CONSOLE" && echo "organization workspace: needs list, agency offers and programmes read" || echo "personal workspace: organization stations absent, as designed" ); sign-out"
+              echo "IOS_NEW_SCREENS_WALK_PROVEN: Living CV sections read, work / education / language forms opened and cancelled (nothing saved); offers, opportunities and availability read; $( grep -q "ORGANIZATION_WORKSPACE.*COMPLETED" "$CONSOLE" && echo "organization workspace: needs list, agency offers, programmes and the agency station read" || echo "personal workspace: organization stations absent, as designed" ); sign-out"
             fi
           else
             on_screen_ids

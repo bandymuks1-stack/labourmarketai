@@ -2275,6 +2275,7 @@
         },
         "statusInvalidCountry": "Välj ett land i listan – andra värden stöds inte ännu.",
         "registrationCode": "Organisationsnummer/registreringskod",
+        "optionalDetails": "Registrering, kontakt och roll",
         "registrationCodeHelp": "Valfritt. Hjälper till att verifiera företaget senare.",
         "address": "Adress/plats",
         "addressPlaceholder": "t.ex. Storgatan 1, Vilnius",
@@ -14319,9 +14320,9 @@
         "saveAsDraft": "Spara som utkast",
         "opportunityType": "Typ av möjlighet",
         "clientEmail": "Kundens e-post",
-        "clientEmailPlaceholder": "name@company.com",
+        "clientEmailPlaceholder": "namn@foretag.se",
         "workerEmail": "Arbetstagarens e-post",
-        "workerEmailPlaceholder": "name@example.com",
+        "workerEmailPlaceholder": "namn@exempel.se",
         "inviteNote": "Anteckning (valfritt)",
         "inviteNotePlaceholder": "T.ex. start i oktober, arbetsplats i Kaunas",
         "documentType": "Dokumenttyp",
@@ -14740,8 +14741,12 @@
           "chipHelpPeople": "Team och inbjudningar",
           "chipHelpPlanning": "Öppna planering",
           "chipHelpServices": "Mina tjänster",
-          "chipHelpJournal": "Arbetsjournal"
-        }
+          "chipHelpJournal": "Arbetsjournal",
+          "chipHelpSettings": "Inställningar",
+          "chipHelpPrivacy": "Integritet och dina uppgifter"
+        },
+        "account": "Inloggning, e-post, aviseringar och utseende finns under Inställningar.",
+        "privacy": "Under Integritet och dina uppgifter kan du ladda ner dina uppgifter, se vem som ser din profil och begära att ditt konto raderas."
       },
       "interestInboxAmbiguous": "Det kan betyda två saker — vilken av dem vill du ha?",
       "chipInterestOnMyNeeds": "Intresse för mina förfrågningar",
@@ -20713,6 +20718,7 @@
       "partnerWithUs": "Bli partner",
       "forAgencies": "Så fungerar det för bemanningsföretag",
       "setUpAgency": "Starta ditt bemanningsföretag",
+      "setUpInstitution": "För utbildningsinstitutioner",
       "b2bEnquiry": "Förfrågan om företagstjänster (B2B)",
       "projectEnquiry": "Förfrågan om individuellt projekt"
     },
