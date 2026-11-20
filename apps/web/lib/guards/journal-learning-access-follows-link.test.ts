@@ -25,6 +25,8 @@ const read = (p: string) => readFileSync(join(repo, p), "utf8");
 const NAME = "20261115120000_journal_learning_access_follows_link_v1";
 const MIG = `supabase/migrations/${NAME}.sql`;
 const DOWN = `supabase/rollbacks/${NAME}.down.sql`;
+/** The one later migration allowed to redefine these objects: it carries this rule. */
+const SUCCESSOR = "20261118164500_former_employer_limited_access_v1.sql";
 
 /** SQL without comments, whitespace collapsed, lower case. */
 const code = (sql: string) =>
@@ -68,11 +70,13 @@ function policyOf(sql: string): string {
 describe("journal_entries_select: a learning relationship reads the journal only while active and reviewed", () => {
   const policy = policyOf(read(MIG));
 
-  it("is the latest definition of the policy: no later migration redefines it", () => {
+  it("is the latest definition of the policy except its one successor, which carries this rule (former employer, #3474)", () => {
     const later = readdirSync(join(repo, "supabase/migrations"))
       .filter((f) => f.endsWith(".sql") && f > `${NAME}.sql`)
       .filter((f) => /policy\s+journal_entries_select\b/i.test(code(read(`supabase/migrations/${f}`))));
-    expect(later).toEqual([]);
+    // Applied AFTER this migration (R2, 2026-11-17); it keeps the learning
+    // condition word for word, pinned by former-employer-limited-access.test.ts.
+    expect(later).toEqual([SUCCESSOR]);
   });
 
   it("replaces the policy inside one transaction", () => {
@@ -146,12 +150,12 @@ describe("the SECURITY DEFINER copies of the manager rule follow the same condit
     );
   });
 
-  it("they are the latest definitions: no later migration redefines either", () => {
+  it("they are the latest definitions except their one successor, which carries this rule (#3474)", () => {
     const fn = new RegExp(`function\\s+(public\\.)?(${AUTH}|${READ})\\b`, "i");
     const later = readdirSync(join(repo, "supabase/migrations"))
       .filter((f) => f.endsWith(".sql") && f > `${NAME}.sql`)
       .filter((f) => fn.test(code(read(`supabase/migrations/${f}`))));
-    expect(later).toEqual([]);
+    expect(later).toEqual([SUCCESSOR]);
   });
 });
 
