@@ -41,6 +41,8 @@ import {
 import { webPushClientConfig } from "@/lib/notifications/web-push-config";
 import { WebPushOptIn } from "@/components/app/web-push-opt-in";
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
+import { CommunicationLocaleSection } from "@/components/app/communication-locale-select";
+import { readCommunicationLocale } from "@/lib/i18n/communication-locale";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
@@ -110,6 +112,13 @@ export default async function AccountPage({
     profileRoles: rolesRows ?? [],
   });
   const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
+
+  // COMM-1: the language this person prefers to READ work messages in — the
+  // stored value on their own profiles row (owner-gated migration
+  // 20261118100100). `unavailable` while the column is not applied: the
+  // section then says so and disables the control instead of pretending.
+  const communicationLocale = await readCommunicationLocale(supabase, user.id);
+  const tComm = await getTranslations("communicationLocale");
 
   // Notification preferences (completion v1, M5 closure): the caller's own
   // stored rows resolved against the channel defaults (in-app ON, email OFF
@@ -507,6 +516,26 @@ export default async function AccountPage({
           }}
         />
       </section>
+
+      {/* COMM-1 — "I read messages in …" (UI_LANGUAGE ≠ COMMUNICATION_
+          LANGUAGE, owner contract RED-1). One control over the 13-language
+          communication set, every language named in itself; "same as the
+          interface" is the empty choice and today's behaviour. Real stored
+          state only: a refused save reverts and says so; an unapplied column
+          disables the control and says so. */}
+      <CommunicationLocaleSection
+        value={communicationLocale.kind === "ok" ? communicationLocale.value : null}
+        available={communicationLocale.kind !== "unavailable"}
+        labels={{
+          title: tComm("title"),
+          intro: tComm("intro"),
+          label: tComm("label"),
+          sameAsInterface: tComm("sameAsInterface"),
+          saved: tComm("saved"),
+          error: tComm("error"),
+          unavailable: tComm("unavailable"),
+        }}
+      />
 
       {/* Role / context management — collapsed by default (compression pass):
           settings stay practical, not a product dashboard. The rolesIntro +

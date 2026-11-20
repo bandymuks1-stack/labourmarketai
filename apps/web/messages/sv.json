@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Språk för meddelanden",
+    "intro": "Arbetsmeddelanden och instruktioner som skrivits på ett annat språk visas översatta till det här språket. Behåll gränssnittets språk om du inte läser ett annat språk bättre.",
+    "label": "Jag läser meddelanden på",
+    "sameAsInterface": "Samma som gränssnittet",
+    "saved": "Sparat.",
+    "error": "Ändringen kunde inte sparas och har ångrats. Försök igen.",
+    "unavailable": "Den här inställningen är inte tillgänglig än — tills dess följer meddelandena gränssnittets språk."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Granska och godkänn",
