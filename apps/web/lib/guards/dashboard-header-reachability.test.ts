@@ -55,7 +55,7 @@ describe("dashboard header reachability", () => {
 
   it("on a phone the area button shares its row with the workspace chip", () => {
     // Both halves shrink: neither may take the row from the other.
-    expect(header).toMatch(/"order-5 min-w-0 flex-1", !mobile && "md:hidden"/);
+    expect(header).toMatch(/"order-5 min-w-0 flex-initial", !mobile && "md:hidden"/);
     expect(header).toMatch(/line-clamp-2 min-w-0 flex-1 break-words text-left leading-tight/);
   });
 

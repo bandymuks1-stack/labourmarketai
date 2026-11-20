@@ -241,11 +241,14 @@ export function ConversationHeader({
           destination they may reach in a bottom sheet. It SHARES the row with
           the workspace chip (owner phone report 2026-11-20): as `flex-none`
           with a one-line label it took the whole row ("Смотреть возможности"
-          at 320px) and squeezed the chip to a dot. Both now take half the
-          row and may wrap their label to a second line inside 44px. */}
+          at 320px) and squeezed the chip to a dot. Now the button takes its
+          own width but may shrink (`flex-initial`) down to what the chip's
+          minimum leaves, and both may wrap their label to a second line
+          inside 44px. An even split was not enough: the CI runner's fonts
+          drew "Моё пространство" wider than the button's half of 320px. */}
       {auth && (
         <HeaderAreaSheet
-          className={cn("order-5 min-w-0 flex-1", !mobile && "md:hidden")}
+          className={cn("order-5 min-w-0 flex-initial", !mobile && "md:hidden")}
           items={allItems}
           activeItem={active}
           place={place}
