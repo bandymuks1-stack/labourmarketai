@@ -126,6 +126,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Agentai OS re-verifies its LabourMarket.ai capability contract from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is aggregate integer COUNTS only (lib/api/capability-readback.ts: a fixed key list, everything else refused) — no row, name, id, email or address exists in it to leak.",
   },
+  "internal/growth-daily/v1/route.ts": {
+    class: "public",
+    why: "Agentai OS reads one UTC day of real registrations (by first-touch utm) and active Living CVs from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is aggregate integer COUNTS only, attribution groups below 3 rolled up and free-text utm values replaced (lib/api/growth-daily.ts) — no row, name, id, email or address exists in it to leak.",
+  },
   "internal/registrations-daily/v1/route.ts": {
     class: "public",
     why: "Agentai OS reads one UTC day of NEW and ACTIVE counts for workers, employers, agencies, students and education institutions from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is REAL-population integer COUNTS only, 1–2 withheld (lib/api/registrations-daily.ts) — no row, name, id, email or per-person timestamp exists in it to leak.",
