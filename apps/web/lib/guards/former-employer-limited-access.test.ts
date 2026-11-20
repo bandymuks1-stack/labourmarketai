@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -320,6 +321,11 @@ describe("the local-stack proof travels with the SQL", () => {
       "an edit of a historical record into the personal journal is refused, and nothing is written",
       "a correction of a confirmed historical record stays in the employment's context, and A reads it",
       "the original's text, author, time and hash are unchanged by its corrections",
+      "an edit of a correction filed elsewhere while the employment ran stays where it was filed",
+      "the former employer cannot read the successor; the organization it was filed under can",
+      "a direct correction of the ended employment's record after the end still lands under it",
+      "the latest of 33+ edits after the end is still retained by the former employer",
+      "its chain root resolves to the original record",
     ]) {
       expect(spec, phrase).toContain(phrase);
     }
@@ -329,5 +335,156 @@ describe("the local-stack proof travels with the SQL", () => {
     const wf = read(".github/workflows/signup-isolated.yml");
     expect(wf).toContain("tests/e2e/former-employer-access-isolated.spec.ts");
     expect(wf).toContain(`supabase/migrations/${NAME}.sql`);
+    expect(wf).toContain(`supabase/migrations/${FIX}.sql`);
+  });
+});
+
+/**
+ * THE CHAIN FIXES (20261120190000_former_employer_chain_fixes_v1, after #3474
+ * was applied): P1, an edit of a correction filed elsewhere no longer moves
+ * into the ended original's context; P2, the chain root walk has no depth cap
+ * and fails closed only on a real cycle or a very high safety bound. Proven on
+ * the local stack by FE-6 and FE-7.
+ */
+const FIX = "20261120190000_former_employer_chain_fixes_v1";
+const FIX_MIG = `supabase/migrations/${FIX}.sql`;
+const FIX_DOWN = `supabase/rollbacks/${FIX}.down.sql`;
+const ROOT_FN = "create or replace function public.journal_entry_chain_root_at_v1";
+const ANC_FN = "create or replace function public.journal_entries_ancestor_context_v1()";
+const ROOT_REVOKE = "revoke all on function public.journal_entry_chain_root_at_v1(uuid) from public, anon, authenticated;";
+const ANC_REVOKE = "revoke all on function public.journal_entries_ancestor_context_v1() from public, anon, authenticated;";
+const RPCS = "supabase/migrations/20260720150000_journal_photo_continuity_v1.sql";
+
+/** The raw text of one function in a file, from its `create or replace` to
+ *  the end of its revoke line (byte for byte, comments and spacing kept). */
+function rawBlock(sql: string, opening: string, revoke: string): string {
+  const start = sql.indexOf(opening);
+  expect(start, `the file has: ${opening}`).toBeGreaterThanOrEqual(0);
+  const end = sql.indexOf(revoke, start);
+  expect(end, `the file has: ${revoke}`).toBeGreaterThan(start);
+  return sql.slice(start, end + revoke.length);
+}
+const md5 = (p: string) => createHash("md5").update(readFileSync(join(repo, p))).digest("hex");
+const FUNCTIONS = /create or replace function public\.[a-z0-9_]+/g;
+
+describe("the chain fixes replace exactly two functions of #3474", () => {
+  const sql = read(FIX_MIG);
+  const c = code(sql);
+
+  it("#3474's migration and rollback are untouched", () => {
+    expect(md5(MIG)).toBe("776539f35bc8231e315c7009fb0c7e21");
+    expect(md5(DOWN)).toBe("d4caa8b8b5af0c33a1d153dd819e4ee0");
+  });
+
+  it("follows §16, sorts after #3474, runs in one transaction and carries the human-gate marker", () => {
+    expect(FIX).toMatch(/^\d{14}_[a-z0-9_]+$/);
+    expect(FIX > NAME).toBe(true);
+    expect(c.startsWith("begin;")).toBe(true);
+    expect(c.endsWith("commit;")).toBe(true);
+    expect(sql).toMatch(/(^|\n)-- @human-gate-approved\b/);
+    expect(sql.slice(0, 4000)).toContain("APPLY ORDER: AFTER 20261118164500_former_employer_limited_access_v1");
+  });
+
+  it("defines only the two functions, and is their latest definition", () => {
+    expect(c.match(FUNCTIONS)).toEqual([
+      "create or replace function public.journal_entry_chain_root_at_v1",
+      "create or replace function public.journal_entries_ancestor_context_v1",
+    ]);
+    expect(c).not.toMatch(/\b(create|drop|alter) (policy|trigger|table|index|view|type|schema)\b/);
+    expect(c).not.toMatch(/\b(drop function|alter function|delete from|truncate|insert into|update public\.)/);
+    expect(c).not.toMatch(/\bgrant\b/);
+    for (const opening of [ROOT_FN, ANC_FN]) {
+      const later = migrations()
+        .filter((f) => f > `${FIX}.sql`)
+        .filter((f) => code(read(`supabase/migrations/${f}`)).includes(opening));
+      expect(later, opening).toEqual([]);
+    }
+  });
+
+  it("keeps each signature, SECURITY DEFINER, the search path and #3474's revoke", () => {
+    expect(statement(sql, ROOT_FN)).toContain(
+      "(p_entry_id uuid) returns timestamptz language sql stable security definer set search_path = public as $$",
+    );
+    expect(statement(sql, ANC_FN)).toContain("returns trigger language plpgsql security definer set search_path = public as $$");
+    expect(c).toContain(ROOT_REVOKE);
+    expect(c).toContain(ANC_REVOKE);
+  });
+});
+
+describe("P2: the chain root resolves any chain length and fails closed only on a cycle", () => {
+  const f = statement(read(FIX_MIG), ROOT_FN);
+
+  it("has no depth-32 cap", () => {
+    expect(f).not.toMatch(/depth < 32\b/);
+    expect(f).not.toMatch(/limit 1/);
+  });
+
+  it("walks the same edges and stays inside the entry's own engagement context", () => {
+    expect(f).toContain("left join public.journal_entries pred on pred.superseded_by = up.node_id");
+    expect(f).toContain("join public.journal_entries o on o.id = coalesce(pred.id, up.node_correction_of)");
+    expect(f).toContain("e.engagement_context_id as ctx");
+    expect(f).toContain("and o.engagement_context_id is not distinct from up.ctx");
+  });
+
+  it("tracks the visited path, never follows a repeated row, and returns null on a cycle or at the safety bound", () => {
+    expect(f).toContain("array[e.id] as path, false as is_cycle");
+    expect(f).toContain("up.path || o.id, o.id = any(up.path)");
+    expect(f).toContain("where not up.is_cycle and up.depth < 10000");
+    expect(f).toContain("when bool_or(up.is_cycle) or max(up.depth) >= 10000 then null");
+    expect(f).toContain("else (array_agg(up.at order by up.depth desc))[1]");
+  });
+});
+
+describe("P1: only a DIRECT correction of an ended context's record moves into it", () => {
+  const sql = read(FIX_MIG);
+  const f = statement(sql, ANC_FN);
+  const PREDICATE =
+    "if found and not exists ( select 1 from public.journal_entries c where c.correction_of = new.correction_of and c.id is distinct from new.id and c.deleted_at is null and c.superseded_by is null and c.engagement_context_id is distinct from v_ctx ) then new.engagement_context_id := v_ctx; end if;";
+
+  it("moves the row only when no other live correction of the same original sits outside that context", () => {
+    expect(f).toContain(PREDICATE);
+    // "Live" is the supersede RPCs' own test for a second correction.
+    const rpcs = read(RPCS);
+    expect(code(rpcs)).toContain("where c.correction_of = p_old_entry_id and c.deleted_at is null and c.superseded_by is null");
+    // Both RPCs insert the new row before linking superseded_by, so the edited row is still live at insert.
+    for (const fn of ["journal_entry_supersede_v2(", "journal_entry_supersede("]) {
+      const body = statement(rpcs, `create or replace function public.${fn}`);
+      const insert = body.indexOf("insert into public.journal_entries (");
+      expect(insert, fn).toBeGreaterThan(0);
+      expect(body.indexOf("set superseded_by = v_new_entry_id"), fn).toBeGreaterThan(insert);
+    }
+  });
+
+  it("is otherwise #3474's function word for word: same lookup, same worker, ended only", () => {
+    const before = statement(read(MIG), ANC_FN);
+    expect(f.replace(PREDICATE, "if found then new.engagement_context_id := v_ctx; end if;")).toBe(before);
+  });
+
+  it("leaves the successor lock as #3474 defines it", () => {
+    expect(code(sql)).not.toContain("function public.journal_entries_successor_context_v1");
+  });
+});
+
+describe("the chain fixes' rollback restores #3474's bodies byte for byte", () => {
+  const down = read(FIX_DOWN);
+  const mig = read(MIG);
+
+  it("both functions equal the text of 20261118164500 exactly", () => {
+    expect(down).toContain(rawBlock(mig, ROOT_FN, ROOT_REVOKE));
+    expect(down).toContain(rawBlock(mig, ANC_FN, ANC_REVOKE));
+    expect(code(down).match(FUNCTIONS)).toEqual([
+      "create or replace function public.journal_entry_chain_root_at_v1",
+      "create or replace function public.journal_entries_ancestor_context_v1",
+    ]);
+  });
+
+  it("carries no marker, runs in one transaction, and touches nothing else", () => {
+    expect(down).not.toMatch(/(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i);
+    const d = code(down);
+    expect(d.startsWith("begin;")).toBe(true);
+    expect(d.endsWith("commit;")).toBe(true);
+    expect(d).not.toMatch(/\b(create|drop|alter) (policy|trigger|table)\b/);
+    expect(d).not.toMatch(/\b(drop|alter) function\b/);
+    expect(d).not.toMatch(/\bgrant\b/);
   });
 });

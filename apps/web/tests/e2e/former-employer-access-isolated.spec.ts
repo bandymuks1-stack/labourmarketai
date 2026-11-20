@@ -607,3 +607,182 @@ test("FE-5. a correction of a historical record stays in the employment's contex
     "a correction of a confirmed historical record stays in the employment's context, and A reads it",
   ).toEqual([kept.id!]);
 });
+
+/*
+ * THE CHAIN FIXES (supabase/migrations/20261120190000_former_employer_chain_fixes_v1.sql).
+ *
+ *   FE-6 (P1) B plays the employer that ends here, and a third organization C
+ *        the other context. While B runs, B confirms W's entry and W files a
+ *        correction of it under C. After B ends, W edits that correction: the
+ *        successor stays under C (where it was filed), B cannot read it, C
+ *        can. A direct correction of B's confirmed record after the end still
+ *        lands under B, and B reads it (the behaviour FE-5 proves for A).
+ *   FE-7 (P2) W edits a retained, unconfirmed record of A 34 more times after
+ *        the end: the latest version is still A's retained history, because
+ *        its chain root is the original record, however long the chain.
+ */
+const Q = `fe-owner-c-${RUN}@example.test`;
+const ORG_C = `Synthetic Third Employer C ${RUN}`;
+const TEXT_B = {
+  first: `QA-SYNTHETIC ${RUN}: fitted the doors for B`,
+  second: `QA-SYNTHETIC ${RUN}: sealed the windows for B`,
+};
+
+test("FE-6. an edit of a correction filed under another organization while the employment ran stays there after the end; a direct correction still lands under the ended employment (P1)", async ({
+  browser,
+}) => {
+  expect(s.ecB && s.workerId, "FE-0 set up W's employment with B").toBeTruthy();
+  const q = await fresh(browser, Q);
+  await signUpOwner(q, Q, "Synthetic Owner C", ORG_C);
+  const orgC = ownedOrg(await userId(Q));
+  const w = pages.get(W)!;
+  await w.goto(await joinLink(q, orgC, W_NAME));
+  await expect(w.getByTestId("invite-page")).toBeVisible({ timeout: 30_000 });
+  await w.getByTestId("invite-accept").click();
+  await expect.poll(() => activeEmployee(s.wId, orgC).length, { message: "W is C's employee too", timeout: 30_000 }).toBe(1);
+  const ecC = activeEmployee(s.wId, orgC)[0]!;
+
+  // While B runs: two entries for B, both confirmed by B through the product's door.
+  const on = await rpc<string>(P, "set_engagement_journal_review", { p_engagement_id: s.ecB, p_enabled: true });
+  expect(on.body, "B switches review on while the employment runs").toBe("enabled");
+  const first = await file(s.ecB, TEXT_B.first);
+  const second = await file(s.ecB, TEXT_B.second);
+  expect(first.id && second.id, `W records two entries for B (${first.status}, ${second.status})`).toBeTruthy();
+  for (const id of [first.id!, second.id!]) {
+    const decided = await rpc<string>(P, "review_journal_entry", { p_entry_id: id, p_decision: "approved", p_note: null });
+    expect(decided.body, "B confirms W's entry while the employment runs").toBe("approved");
+  }
+
+  // While B runs, W files a correction of B's confirmed entry under C.
+  const c1 = await correct(first.id!, `${TEXT_B.first} (correction filed under C while B runs)`, ecC);
+  expect(c1.id, `W files the correction under C (${c1.status})`).toBeTruthy();
+  const ctxOf = (id: string) =>
+    sql<{ engagement_context_id: string; correction_of: string | null }>(
+      `select engagement_context_id, correction_of from public.journal_entries where id = ${lit(id)}`,
+    )[0];
+  expect(ctxOf(c1.id!), "while B runs, the correction is stored where W filed it").toEqual({
+    engagement_context_id: ecC,
+    correction_of: first.id,
+  });
+
+  // B ends the employment through the product's end door.
+  const ended = await rpc<{ outcome?: string }>(P, "end_org_membership_v1", { p_engagement_id: s.ecB, p_reason: "QA-SYNTHETIC end" });
+  expect(ended.status, `end_org_membership_v1 → ${JSON.stringify(ended.body)}`).toBe(200);
+  expect(
+    sql<{ status: string }>(`select status from public.engagement_contexts where id = ${lit(s.ecB)}`)[0]?.status,
+    "the employment with B is ended",
+  ).toBe("ended");
+
+  // After the end, W edits the correction filed under C. Both supersede RPCs
+  // carry correction_of forward, so the successor names B's original too.
+  const c2 = await correct(c1.id!, `${TEXT_B.first} (correction edited after B ended)`, ecC);
+  expect(c2.id, `W edits the correction after the end (${c2.status})`).toBeTruthy();
+  expect(
+    {
+      stored: ctxOf(c2.id!),
+      predecessorLinked: sql<{ superseded_by: string | null }>(
+        `select superseded_by from public.journal_entries where id = ${lit(c1.id!)}`,
+      )[0]?.superseded_by,
+    },
+    "an edit of a correction filed elsewhere while the employment ran stays where it was filed",
+  ).toEqual({ stored: { engagement_context_id: ecC, correction_of: first.id }, predecessorLinked: c2.id });
+  // No clock step here: a successor wrongly stored under B on the end day would
+  // be retained by B, so this read also fails if the context rule regresses.
+  expect(
+    await readable(P, [c1.id!, c2.id!]),
+    "the former employer cannot read the successor; the organization it was filed under can",
+  ).toEqual([]);
+  expect(await readable(Q, [c1.id!, c2.id!]), "C reads both versions filed under it").toEqual([c1.id!, c2.id!].sort());
+  expect(await readable(W, [first.id!, c1.id!, c2.id!]), "W reads every version").toEqual([first.id!, c1.id!, c2.id!].sort());
+  expect(await readable(P, [first.id!]), "B keeps its confirmed original").toEqual([first.id!]);
+
+  // A direct correction of B's other confirmed record after the end, asked for C, lands under B.
+  const direct = await correct(second.id!, `${TEXT_B.second} (corrected after B ended, asked for C)`, ecC);
+  expect(direct.id, `W corrects B's confirmed record after the end (${direct.status})`).toBeTruthy();
+  expect(ctxOf(direct.id!), "the direct correction is stored in B's context and points at B's original").toEqual({
+    engagement_context_id: s.ecB,
+    correction_of: second.id,
+  });
+  afterTheEnd(direct.id!);
+  expect(
+    await readable(P, [second.id!, direct.id!]),
+    "a direct correction of the ended employment's record after the end still lands under it",
+  ).toEqual([second.id!, direct.id!].sort());
+  expect(await readable(Q, [first.id!, second.id!, direct.id!]), "C reads none of B's records").toEqual([]);
+});
+
+/** One edit of A's record through the journal's own door, with a token the walk already holds. */
+async function supersedeWith(token: string, oldId: string, text: string): Promise<{ status: number; id: string | null }> {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/journal_entry_supersede_v2`, {
+    method: "POST",
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      p_old_entry_id: oldId,
+      p_engagement_context_id: s.ecA,
+      p_entry_type_slug: "freeform",
+      p_profession_id: null,
+      p_original_text: text,
+      p_original_language: "en",
+      p_hash_self: "client",
+      p_visibility_scope: "closed",
+      p_metrics: [],
+      p_selected_slugs: [],
+      p_rejected_slugs: [],
+    }),
+  });
+  const parsed = JSON.parse((await r.text()) || "null") as unknown;
+  return { status: r.status, id: typeof parsed === "string" ? parsed : null };
+}
+
+test("FE-7. an unconfirmed retained record of A edited 34 more times after the end stays A's retained history (P2)", async () => {
+  expect(s.edited && s.entryDuring2, "FE-3 left an unconfirmed retained record with one edit").toBeTruthy();
+  const token = await accessToken(W);
+  const versions: string[] = [];
+  let tip = s.edited;
+  for (let i = 1; i <= 34; i++) {
+    const r = await supersedeWith(token, tip, `${TEXT.during2} (edit ${i} after the end)`);
+    expect(r.id, `W edits the record, edit ${i} (${r.status})`).toBeTruthy();
+    versions.push(r.id!);
+    tip = r.id!;
+  }
+  // The file's one seeded clock step, for every new version at once: each is dated after the end day.
+  sqlExec(
+    `begin;
+     alter table public.journal_entries disable trigger user;
+     update public.journal_entries set created_at = created_at + interval '2 days' where id in (${versions.map(lit).join(",")});
+     alter table public.journal_entries enable trigger user;
+     commit;`,
+  );
+
+  // Read back: the chain from the latest version to the original is longer than the old cap of 32.
+  const [chain] = sql<{ depth: number; root: string; late: number }>(
+    `with recursive up as (
+       select id, 0 as depth from public.journal_entries where id = ${lit(tip)}
+       union all
+       select p.id, up.depth + 1 from up join public.journal_entries p on p.superseded_by = up.id
+     )
+     select (select max(depth)::int from up) as depth,
+            (select id::text from up order by depth desc limit 1) as root,
+            (select count(*)::int from public.journal_entries
+              where id in (${versions.map(lit).join(",")})
+                and created_at > (select (ended_at + 1)::timestamp at time zone 'UTC'
+                                    from public.engagement_contexts where id = ${lit(s.ecA)})) as late`,
+  );
+  expect(chain, "35 steps back to the original, every new version dated after the end").toEqual({
+    depth: 35,
+    root: s.entryDuring2,
+    late: versions.length,
+  });
+
+  expect(
+    await readable(O, [tip, versions[0]!, s.entryDuring2, s.entryAfter]),
+    "the latest of 33+ edits after the end is still retained by the former employer",
+  ).toEqual([tip, versions[0]!, s.entryDuring2].sort());
+  const [root] = sql<{ ok: boolean | null }>(
+    `select public.journal_entry_chain_root_at_v1(${lit(tip)})
+              = (select created_at from public.journal_entries where id = ${lit(s.entryDuring2)}) as ok`,
+  );
+  expect(root?.ok, "its chain root resolves to the original record").toBe(true);
+  expect(await readable(W, [tip, s.entryDuring2]), "W reads the latest version and the original").toEqual([tip, s.entryDuring2].sort());
+  expect(await readable(P, [tip]), "B never reads A's record").toEqual([]);
+});
