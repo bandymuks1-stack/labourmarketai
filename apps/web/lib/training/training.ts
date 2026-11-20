@@ -4,13 +4,18 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { listOrganizationMembers } from "@/lib/company/memberships";
+import { workerDisplayNamesByProfile } from "@/lib/operations/member-display-names";
 import {
   NO_TRAINING_AUTHORITY,
+  TRAINING_ASSIGNABLE_RELATIONSHIPS,
   TRAINING_READ_LIMIT,
   deriveTrainingAuthority,
+  isTrainingAssignableEngagement,
   isTrainingMigrationMissingCode,
   isValidTrainingAssignmentStatus,
   type CertificationRow,
+  type TrainingAssignee,
   type TrainingAssignmentRow,
   type TrainingAuthority,
   type TrainingProgramRow,
@@ -305,4 +310,81 @@ export async function getCertificationRegister(
   }
 
   return { kind: "ok", rows };
+}
+
+/**
+ * WHO A COURSE CAN BE ASSIGNED TO — the register's picker (owner decision
+ * 2026-11-18, registry 11.8). The organization's OWN people, read under the
+ * caller's RLS from the same rows the people page lists:
+ *   * active governance members (company_memberships, listOrganizationMembers);
+ *   * active engagements in the four groups (TRAINING_ASSIGNABLE_RELATIONSHIPS —
+ *     members, interns, learners, invited external people), the same
+ *     engagement_contexts read as lib/operations/org-members.ts.
+ * Only a current link is offered — the same status split and dates as
+ * `assign_training_v1` (isTrainingAssignableEngagement: a paused non-learning
+ * link counts, a paused intern/student link does not; started, not ended).
+ * The RPC re-checks the same rule, so a link that ended after the page loaded
+ * is still refused. Names: an owner
+ * cannot read another person's `profiles` row, so a missing name falls back to
+ * the worker's display name (the one shared fallback) — never an e-mail or id.
+ */
+export async function getTrainingAssignees(
+  organizationId: string,
+): Promise<readonly TrainingAssignee[]> {
+  if (!UUID_RX.test(organizationId)) return [];
+  const supabase = await createClient();
+  const [engagements, governance] = await Promise.all([
+    asAny(supabase)
+      .from("engagement_contexts")
+      .select("profile_id, relationship_slug, status, started_at, ended_at, profiles(full_name, email)")
+      .eq("organization_id", organizationId)
+      .in("status", ["active", "paused"])
+      .in("relationship_slug", [...TRAINING_ASSIGNABLE_RELATIONSHIPS])
+      .limit(TRAINING_READ_LIMIT),
+    listOrganizationMembers(organizationId),
+  ]);
+
+  const byProfile = new Map<string, { name: string; relationship: string }>();
+  const named = (full: string | null | undefined, email: string | null | undefined) =>
+    full?.trim() || (email ? email.split("@")[0]! : "");
+  if (governance.kind === "ok") {
+    for (const m of governance.members) {
+      if (m.status !== "active" || !m.profileId) continue;
+      byProfile.set(m.profileId, { name: named(m.fullName, m.email), relationship: m.role });
+    }
+  }
+  if (!engagements.error) {
+    const today = new Date().toISOString().slice(0, 10);
+    for (const r of (engagements.data ?? []) as RawRow[]) {
+      const profileId = (r.profile_id as string | null) ?? null;
+      if (!profileId || byProfile.has(profileId)) continue;
+      const current = isTrainingAssignableEngagement(
+        {
+          relationshipSlug: String(r.relationship_slug ?? ""),
+          status: String(r.status ?? ""),
+          startedAt: (r.started_at as string | null) ?? null,
+          endedAt: (r.ended_at as string | null) ?? null,
+        },
+        today,
+      );
+      if (!current) continue;
+      const p = (Array.isArray(r.profiles) ? r.profiles[0] : r.profiles) as
+        | { full_name?: string | null; email?: string | null }
+        | null;
+      byProfile.set(profileId, {
+        name: named(p?.full_name, p?.email),
+        relationship: String(r.relationship_slug ?? ""),
+      });
+    }
+  }
+
+  const unnamed = [...byProfile].filter(([, v]) => !v.name).map(([id]) => id);
+  const display = await workerDisplayNamesByProfile(supabase, unnamed);
+  return [...byProfile]
+    .map(([profileId, v]) => ({
+      profileId,
+      name: v.name || display.get(profileId) || "—",
+      relationship: v.relationship,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }

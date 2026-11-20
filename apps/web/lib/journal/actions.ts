@@ -121,7 +121,7 @@ export async function supersedeJournalEntry(
   }
 
   const locale = resolveEntryLanguage(formData.get("locale"));
-  const engagementId = String(formData.get("engagement_context_id") ?? "").trim();
+  const requestedEngagementId = String(formData.get("engagement_context_id") ?? "").trim();
   const siteName = String(formData.get("site_name") ?? "").trim();
   const workDirection = String(formData.get("work_direction") ?? "").trim();
   const quantityRaw = String(formData.get("quantity") ?? "").trim();
@@ -152,7 +152,7 @@ export async function supersedeJournalEntry(
   const workTimeSource: RpcMetricRow["source"] =
     String(formData.get("work_time_source") ?? "") === "ai_extracted" ? "ai_extracted" : "worker_input";
 
-  if (!engagementId) {
+  if (!requestedEngagementId) {
     return {
       ok: false,
       code: "engagement_required",
@@ -200,7 +200,7 @@ export async function supersedeJournalEntry(
   // owner-gated migration follow-up; this closes every app path today.
   const { data: oldEntry } = await supabase
     .from("journal_entries")
-    .select("id, superseded_by, deleted_at, original_text, original_language")
+    .select("id, superseded_by, deleted_at, original_text, original_language, engagement_context_id")
     .eq("id", oldEntryId)
     .maybeSingle();
   if (!oldEntry) {
@@ -216,6 +216,24 @@ export async function supersedeJournalEntry(
       code: "entry_superseded",
       message: t("entrySupersededElsewhere"),
     };
+  }
+
+  // A record of an ENDED relationship is corrected in its own context
+  // (owner decision 2026-11-18, former employer option A; R2 P3-4): the
+  // correction stays with that organization's history, and nothing from the
+  // personal journal or another organization moves into it. The database
+  // holds the same rule (journal_entries_successor_context_v1 refuses any
+  // other context; journal_entries_ancestor_context_v1 sets it on a
+  // correction of a confirmed record), so this only spares the person a refusal.
+  const oldContextId = (oldEntry as { engagement_context_id?: string | null }).engagement_context_id ?? null;
+  let engagementId = requestedEngagementId;
+  if (oldContextId && oldContextId !== requestedEngagementId) {
+    const { data: oldContext } = await supabase
+      .from("engagement_contexts")
+      .select("status")
+      .eq("id", oldContextId)
+      .maybeSingle();
+    if (oldContext?.status === "ended") engagementId = oldContextId;
   }
 
   // Pre-validate unit_slug just like the create path so the worker sees
