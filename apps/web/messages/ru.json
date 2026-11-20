@@ -17511,6 +17511,7 @@
       "createProgram": "Добавить курс",
       "noPrograms": "Курсов пока нет.",
       "assigneePlaceholder": "Эл. почта человека",
+      "assigneePick": "Человек",
       "requiredByLabel": "Выполнить до",
       "assign": "Попросить этого человека",
       "certificateFileLabel": "Файл сертификата",
