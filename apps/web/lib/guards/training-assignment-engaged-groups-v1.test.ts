@@ -112,8 +112,17 @@ describe("ships paired, gated as RED, after every migration on main", () => {
     expect(existsSync(join(REPO, "supabase", "rollbacks", "20261026140000_assign_training_employees_v1.down.sql"))).toBe(false);
   });
 
-  it("is a DRAFT: no approval marker until the owner approves the apply", () => {
-    expect(MIG).not.toMatch(/(^|\n)[ \t]*--[ \t]*@human-gate-approved\b/i);
+  it("carries the owner's approval on exactly the reviewed SQL, and the rollback carries none", () => {
+    // Owner decision 2026-11-20 (coordinator relay): the apply is approved for
+    // R2's reviewed version (head 2d5ddd64). The marker is the first line and
+    // the ONLY change: the rest of the file hashes to the approved body, so an
+    // edit below the marker fails here and needs a new approval. Not applied by
+    // this repository; the apply stays a manual owner-channel step.
+    expect(MIG.startsWith("-- @human-gate-approved\n")).toBe(true);
+    const body = MIG.slice("-- @human-gate-approved\n".length);
+    expect(createHash("md5").update(body).digest("hex")).toBe("40061333730df3b00987359b16857282");
+    expect(body).not.toMatch(/(^|\n)[ \t]*--[ \t]*@human-gate-approved\b/i);
+    expect(createHash("md5").update(DOWN).digest("hex")).toBe("08735a586489ebbfbe2407a3e6a05b64");
     expect(DOWN).not.toMatch(/(^|\n)[ \t]*--[ \t]*@human-gate-approved\b/i);
   });
 
