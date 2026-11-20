@@ -11,6 +11,9 @@ import {
   createGithubClient,
   mergeWalkLedger,
   narrativeDiscrepancies,
+  migrationClaimDiscrepancies,
+  finalCompleteness,
+  parseParityLog,
   parseGhInclude,
   parseWalkTitle,
   prBlocker,
@@ -334,6 +337,7 @@ describe("Rendered report — PARTIAL is shown, and the named register is the ba
   };
   const data = (errors: object[]) => ({
     schema: 2,
+    migrationParity: { applied: 1, files: 1, notApplied: [], passed: true, run: 1, headSha: "f461497e" },
     fetchedAt: "2026-11-14T21:00:00Z",
     sinceIso: "2026-11-14T09:00:00Z",
     completeness: errors.length ? "PARTIAL" : "COMPLETE",
@@ -441,7 +445,7 @@ describe("Report synchronisation — one latest confirmed state, never overwritt
       join(dir, "STATUS_EVIDENCE.json"),
       JSON.stringify({ schema: 1, walks: { "agency-chain|phone-375": { spec: "agency-chain", device: "phone-375", run: 43743349514, result: "success", build: "d225f58a", at: "2026-11-15T17:55:58Z" } } }),
     );
-    const base = { schema: 2, sinceIso: "2026-11-15T09:40:00Z", errors: [], requiredChecks: { names: [], source: "policy" }, health: { ok: true, build: "f461497e" }, deploys: [], merged: [], prs: [] };
+    const base = { schema: 2, migrationParity: { applied: 1, files: 1, notApplied: [], passed: true, run: 1, headSha: "f461497e" }, sinceIso: "2026-11-15T09:40:00Z", errors: [], requiredChecks: { names: [], source: "policy" }, health: { ok: true, build: "f461497e" }, deploys: [], merged: [], prs: [] };
     const run = (fetchedAt: string, walks: object[]) => {
       writeFileSync(dataPath, JSON.stringify({ ...base, fetchedAt, walks }));
       return spawnSync(process.execPath, [join(REPO, ".github", "scripts", "status-report.mjs"), "--data", dataPath, "--out", out], { encoding: "utf8" });
@@ -461,5 +465,56 @@ describe("Report synchronisation — one latest confirmed state, never overwritt
     const next = run("2026-11-16T09:40:00Z", []);
     expect(next.status, next.stderr).toBe(0);
     expect(readFileSync(out, "utf8")).toMatch(/\| agency-chain \| telefonas 375 px \| sėkmingas \| `d225f58a`/);
+  });
+});
+
+describe("migration truth (owner order 2026-11-20): the production ledger, never a PR body", () => {
+  const LOG = [
+    "quality\tMigration parity (live ledger gate)\t2026-11-20T20:00:00.0000000Z check-migration-parity: 481 applied in production, 481 files in repo.",
+    "quality\tMigration parity (live ledger gate)\t2026-11-20T20:00:00.0000000Z   matched by name: 472   reviewed split/union/follow-up: 9   not yet applied: 2",
+    "quality\tMigration parity (live ledger gate)\t2026-11-20T20:00:00.0000000Z ",
+    "quality\tMigration parity (live ledger gate)\t2026-11-20T20:00:00.0000000Z Repo files with no production ledger row (informational):",
+    "quality\tMigration parity (live ledger gate)\t2026-11-20T20:00:00.0000000Z   - 20260713120000_company_locations_v1",
+    "quality\tMigration parity (live ledger gate)\t2026-11-20T20:00:00.0000000Z   - 20261120190000_not_applied_yet_v1",
+    "quality\tMigration parity (live ledger gate)\t2026-11-20T20:00:00.0000000Z ",
+    "quality\tMigration parity (live ledger gate)\t2026-11-20T20:00:00.0000000Z PASS — every production migration has a repository file.",
+  ].join("\n");
+
+  it("reads the live parity step: counts, the not-applied list and the verdict", () => {
+    expect(parseParityLog(LOG)).toEqual({
+      applied: 481,
+      files: 481,
+      notApplied: ["20260713120000_company_locations_v1", "20261120190000_not_applied_yet_v1"],
+      passed: true,
+    });
+    expect(parseParityLog("no parity step here")).toBeNull();
+  });
+
+  it("flags a merged PR called not applied when its migration is in the ledger, and nothing else", () => {
+    const notApplied = parseParityLog(LOG)!.notApplied;
+    const prMigrations = {
+      2816: ["20261118143000_training_assignment_engaged_groups_v1"],
+      3474: ["20261118164500_former_employer_limited_access_v1"],
+      3600: ["20261120190000_not_applied_yet_v1"],
+    };
+    const text = [
+      "- #2816 (RED, 11.8) – ar pritaikyta produkcijoje, šiais duomenimis neįrodyta;",
+      "- #3474 – PR aprašyme „not applied“; pritaikymas – atskiras savininko leidimas;",
+      "- #3600 – migracija laukia savininko leidimo;",
+      "- #3489 sujungtas.",
+    ].join("\n");
+    const d = migrationClaimDiscrepancies(text, { prMigrations, notApplied });
+    expect(d).toHaveLength(2);
+    expect(d.join(" ")).toMatch(/#2816/);
+    expect(d.join(" ")).toMatch(/#3474/);
+    expect(d.join(" ")).not.toMatch(/#3600/);
+  });
+
+  it("COMPLETE needs all data, the migration ledger and no open contradiction", () => {
+    const parity = { applied: 1, files: 1, notApplied: [], passed: true };
+    expect(finalCompleteness({ migrationParity: parity })).toBe("COMPLETE");
+    expect(finalCompleteness({ migrationParity: parity, discrepancies: ["x"] })).toBe("PARTIAL");
+    expect(finalCompleteness({})).toBe("PARTIAL");
+    expect(finalCompleteness({ migrationParity: parity, errors: [{}] })).toBe("PARTIAL");
   });
 });
