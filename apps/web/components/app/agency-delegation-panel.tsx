@@ -2,7 +2,7 @@
 
 import { JourneyStrip } from "@/components/app/journey-strip";
 import { useActionState } from "react";
-import { countryOptionsForLocale } from "@/lib/location/country-options";
+import type { CountryOption } from "@/lib/location/country-options";
 
 import {
   draftClientNeedAction,
@@ -57,6 +57,7 @@ export function AgencyDelegationPanel({
   requestTitles,
   labels,
   locale,
+  countryOptions,
 }: {
   connections: readonly { id: string; label: string }[];
   drafts: ReadState<DraftedNeedRow>;
@@ -65,6 +66,11 @@ export function AgencyDelegationPanel({
   requestTitles: Readonly<Record<string, string>>;
   labels: AgencyDelegationLabels;
   locale: string;
+  /** Built on the SERVER (as every other country picker is): Intl country
+   *  names and their order differ between Node's and the browser's ICU, so a
+   *  list computed during a client render did not match the server HTML and
+   *  React threw #418 on /partners (UX gaps 2026-11-18, A-5). */
+  countryOptions: readonly CountryOption[];
 }) {
   const [state, action, pending] = useActionState(draftClientNeedAction, IDLE);
   // `w-full min-w-0`: a <select> is as wide as its longest option, and the
@@ -156,7 +162,7 @@ export function AgencyDelegationPanel({
                 <option value="" disabled>
                   —
                 </option>
-                {countryOptionsForLocale(locale).map((o) => (
+                {countryOptions.map((o) => (
                   <option key={o.value} value={o.value}>
                     {o.label}
                   </option>

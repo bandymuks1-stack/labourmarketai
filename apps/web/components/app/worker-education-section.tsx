@@ -173,7 +173,7 @@ export function WorkerEducationSection({
                   data-testid="worker-education-row"
                 >
                   <div className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-medium text-text-primary">
+                    <span className="break-words text-sm font-medium text-text-primary sm:truncate">
                       {entry.institutionName}
                     </span>
                     <span className="text-xs text-text-secondary">

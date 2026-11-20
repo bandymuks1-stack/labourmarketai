@@ -32,6 +32,11 @@ import {
  *   M-5 MESSAGES writes to the employer from that application; the company answers from ITS phone;
  *                the worker reaches the thread through the phone's area sheet and reads the answer.
  *   M-7 JOURNAL  opens the work journal; it fits the phone, also with its disclosures open.
+ *   M-8 FIRST    records a first entry from the home's one action; the saved state links the CV;
+ *                back on the journal, the CV bridge leads the records: the CV is one tap away.
+ *   M-9 SKILL    adds a free-label skill on the profile: the chip shows in place (no reload), is
+ *                stored once, persists on a reload and is declared on the Living CV; then the same
+ *                add at a desktop width (production walk P-13, run 44637832323 at 375 px).
  *
  * M-2 runs LAST in each group (first run 2026-11-14: the CV page stopped answering at 375 px), so a
  * CV fault cannot hide search, applying and messages; if it stops answering again, the step says
@@ -40,7 +45,8 @@ import {
  * THE FOUR OTHER GROUPS (owner P0, evening 2026-11-14: "visoms 5 grupėms"), each at both widths and
  * each its own serial group, so one role's failure hides no other:
  *   E EMPLOYER     the area sheet to needs; the need form sent on the phone; candidate search for it;
- *                  the people page and a join-by-link invitation; messages.
+ *                  the people page and a join-by-link invitation; messages. The candidate search's
+ *                  chips, filters and next steps are thumb-sized (44 px) and its result is reachable.
  *   A AGENCY       the area sheet to clients; the roster invite on the people page; a need posted on
  *                  the phone; messages; the Lithuanian clients page with a connected client.
  *   S STUDENT      signs up ON THE PHONE (study fields), the learning compass, the internship board,
@@ -48,6 +54,10 @@ import {
  *   T INSTITUTION  signs up ON THE PHONE through its door and sets up its organisation; the education
  *                  home (no header or sheet door leads there: reached by address, recorded); a learner
  *                  invited by link; the people page with its members fold; messages.
+ *   C CONFIRMATION the second half of a worker's first entry: the owner turns on journal review on the
+ *                  phone, the worker records a day, the owner confirms it with one tap on the home's
+ *                  approvals card (the inbox and quick-queue decisions are 44 px), and the worker's
+ *                  Living CV, one tap from the journal, counts the confirmed work.
  * Organisation setup that is not itself under test happens at a desktop, like M-0.
  *
  * On every page the walk also asserts that nothing scrolls sideways (the page is never wider than
@@ -155,6 +165,68 @@ async function fitsTheScreen(page: Page, where: string): Promise<void> {
   expect(got.scroll - got.inner, `${where}: the body reaches ${got.scroll - got.inner} px past a ${got.inner} px screen`).toBeLessThanOrEqual(1);
 }
 
+/** A control a thumb can hit: at least 44 px tall (ui/Chip, buttonLinkClassName). */
+async function thumbSized(target: Locator, where: string): Promise<void> {
+  await target.scrollIntoViewIfNeeded();
+  const box = await target.boundingBox();
+  expect(box, `${where} is on the page`).not.toBeNull();
+  expect(box!.height, `${where} is ${box!.height} px tall`).toBeGreaterThanOrEqual(43.5);
+}
+
+/** The candidate search's own parts on a phone: the chosen need, the filters, a way onward. */
+async function candidateSearchOnPhone(page: Page, needId: string, where: string): Promise<void> {
+  const main = page.getByRole("main");
+  const chosen = main.locator(`a[aria-current="page"][href*="request=${needId}"]`);
+  await expect(chosen, `${where}: the need is the chosen chip`).toBeVisible({ timeout: 30_000 });
+  await thumbSized(chosen, `${where}: the chosen need chip`);
+  await thumbSized(main.getByTestId("scouting-how").locator("summary"), `${where}: the how-it-works row`);
+  // Filters, when the need has any: every chip is thumb-sized and the row never widens the page
+  // (on a phone it scrolls sideways inside itself).
+  const filters = main.getByTestId("scouting-filters");
+  if (await filters.isVisible().catch(() => false)) {
+    const chips = filters.locator("a[href]");
+    for (let i = 0; i < (await chips.count()); i += 1) await thumbSized(chips.nth(i), `${where}: filter ${i + 1}`);
+    const row = await filters.boundingBox();
+    expect(row!.x + row!.width, `${where}: the filters stay inside the screen`).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+  }
+  // Round 2: the card's status pills (verdict, evidence, readiness) and, when an
+  // agency offered people, that section on ui/Card stay inside the screen.
+  for (const sel of ['[data-testid^="scout-verdict-"]', '[data-testid^="scout-readiness-"]', '[data-testid="scouting-agency-offers"]']) {
+    const part = main.locator(sel).first();
+    if (!(await part.isVisible().catch(() => false))) continue;
+    const box = await part.boundingBox();
+    expect(box!.x + box!.width, `${where}: ${sel} stays inside the screen`).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+  }
+  // The result is reachable below: candidates, or the empty list with its door onward.
+  const outcome = main
+    .getByTestId("scouting-results")
+    .or(main.getByTestId("scouting-empty"))
+    .or(main.getByTestId("scouting-not-structured"));
+  await outcome.first().scrollIntoViewIfNeeded();
+  await expect(outcome.first(), `${where}: the result is reachable`).toBeVisible();
+  const door = main.getByTestId("scouting-empty-edit-need");
+  if (await door.isVisible().catch(() => false)) await thumbSized(door, `${where}: the empty list's door`);
+  const next = main.locator('[data-testid^="scout-pipeline-next-"]');
+  if ((await next.count()) > 0) await thumbSized(next.first(), `${where}: a candidate's next step`);
+  // The card's shared actions, where this person's state offers them (round 2):
+  // ask for a conversation, ask for contact details or take the ask back, propose
+  // dates, the interest acknowledgement, and the decision on an agency's offer.
+  for (const [sel, name] of [
+    ['[data-testid^="request-communication-"]', "request a conversation"],
+    ['[data-testid^="contact-request-open-"]', "request contact details"],
+    ['[data-testid^="contact-request-withdraw-"]', "take the contact ask back"],
+    ['[data-testid="propose-booking-open"]', "propose a booking"],
+    ['[data-testid="interest-ack-reviewed"]', "mark the interest reviewed"],
+    ['[data-testid="interest-ack-contacted"]', "answer the interest"],
+    ['[data-testid^="offer-accept-"]', "accept an agency's offer"],
+    ['[data-testid^="offer-decline-"]', "decline an agency's offer"],
+  ] as const) {
+    const control = main.locator(`button${sel}`);
+    if ((await control.count()) > 0) await thumbSized(control.first(), `${where}: ${name}`);
+  }
+  await fitsTheScreen(page, `${where}, scrolled to the result`);
+}
+
 /** Tap until the expected result shows: a tap before hydration is a silent no-op. */
 async function tapUntil(target: Locator, result: Locator, timeout = 60_000): Promise<void> {
   await expect(async () => {
@@ -232,6 +304,8 @@ for (const phone of PHONES) {
   const headline = `Tiler and waterproofer ${phone.name} ${RUN}`;
   const message = `Hello from a ${phone.name} px phone ${RUN}`;
   const answer = `Answer to the ${phone.name} px phone ${RUN}`;
+  // No stated duration: this walk is about the path, not the hours review (doctrine §7).
+  const firstEntry = `QA-SYNTHETIC first entry ${phone.name} ${RUN}: tiled the bathroom floor`;
   /** profileId is the auth/profile id; workerId is `workers.id`, which interest rows reference. */
   const s: { profileId: string; workerId: string; conversationId: string } = { profileId: "", workerId: "", conversationId: "" };
 
@@ -415,7 +489,14 @@ for (const phone of PHONES) {
       await expect(cand.getByTestId(`scout-interest-${s.workerId}`), "marked as interested").toBeVisible();
       const open = cand.getByTestId("propose-booking-open");
       await expect(open, "the company can propose a booking to them").toBeVisible({ timeout: 30_000 });
+      // The shortlist statuses are the shared toggle chip: a thumb can hit each one (44 px).
+      const statuses = cand.getByTestId(`scout-shortlist-${s.workerId}`).locator("button[aria-pressed]");
+      for (let i = 0; i < (await statuses.count()); i += 1) {
+        const box = await statuses.nth(i).boundingBox();
+        expect(box?.height ?? 0, `shortlist status ${i + 1} is thumb-sized`).toBeGreaterThanOrEqual(43.5);
+      }
       await fitsTheScreen(c.page, "the need's candidates");
+      await candidateSearchOnPhone(c.page, shared.needId, "the need's candidates");
       await tapUntil(open, cand.getByTestId("propose-booking-form"));
       const start = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
       await cand.getByTestId("propose-booking-start-date").fill(start);
@@ -457,6 +538,194 @@ for (const phone of PHONES) {
       await fitsTheScreen(page, "the work journal with its disclosures open");
       await done();
     });
+    test(`M-8 (${phone.name}). the worker's first entry, from the home's one action to the Living CV, and the CV one tap from the journal`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      // The home's ONE gold action for a worker with no recorded work opens the journal.
+      const cta = page.locator('[data-testid="today-next-cta"]:visible');
+      await expect(cta, "the home's one action").toHaveAttribute("href", /\/dashboard\/journal$/, { timeout: 60_000 });
+      // UX gap W-1: a healthy new account never shows the "could not be read"
+      // notice; a read that fails is named by the job's W-1 log step.
+      const unknownOpen = page.getByRole("main").getByTestId("today-open-unknown");
+      if ((await unknownOpen.count()) > 0) {
+        const holder = page.getByRole("main").locator("[data-doors-unknown], [data-journal-unknown]").first();
+        console.log(
+          `[W-1] unknown: journal=${await holder.getAttribute("data-journal-unknown")} doors=${await holder.getAttribute("data-doors-unknown")}`,
+        );
+      }
+      await expect(unknownOpen, "the open items are read").toHaveCount(0);
+      // This worker signed up with a password and has not proven the mailbox:
+      // the home offers the network page's own proof prompt, not a fault.
+      await expect(
+        page.getByRole("main").getByTestId("home-mailbox-proof").filter({ visible: true }).first(),
+        "the mailbox proof is offered",
+      ).toBeVisible();
+      await cta.tap();
+      await page.waitForURL(/\/en\/dashboard\/journal/, { timeout: 30_000 });
+      const main = page.getByRole("main");
+      await main.getByTestId("journal-quick-record-text").fill(firstEntry);
+      await tapUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+      // Only when the M-6 booking left this worker more than one work context or a project to name.
+      if (await main.getByTestId("worklog-context-must-choose").isVisible().catch(() => false)) {
+        await main.getByTestId("worklog-context").selectOption({ index: 1 });
+      }
+      if (await main.getByTestId("worklog-project-must-choose").isVisible().catch(() => false)) {
+        await main.getByTestId("worklog-project").selectOption("none");
+      }
+      await main.getByTestId("worklog-save").tap();
+      await main.getByTestId("worklog-confirm").tap();
+      await expect(main.getByTestId("worklog-done"), "the entry is saved").toBeVisible({ timeout: 60_000 });
+      await expect(main.getByTestId("worklog-living-cv-link"), "the saved state leads to the CV").toBeVisible();
+      const stored = sql<{ n: number }>(
+        `select count(*)::int as n from public.journal_entries e join public.workers w on w.id = e.worker_id
+          where w.profile_id = ${lit(s.profileId)} and e.superseded_by is null`,
+      );
+      expect(stored[0]?.n, "one live entry is stored").toBe(1);
+
+      // A later visit (a manager's decision notification lands here): with an entry, the CV bridge
+      // leads the records, so the CV is ONE tap away — the status disclosure stays closed.
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      const bridge = main.getByTestId("journal-cv-bridge");
+      await expect(bridge, "the CV bridge leads the records").toBeVisible({ timeout: 30_000 });
+      await expect(main.getByTestId("journal-status-details")).not.toHaveAttribute("open", "");
+      await fitsTheScreen(page, "the work journal with the CV bridge");
+      await bridge.getByTestId("journal-cv-bridge-link").tap();
+      await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
+      await expect(page.getByRole("main").getByTestId("cv-summary").first(), "the CV counts the entry").toBeVisible({ timeout: 30_000 });
+      await done();
+    });
+    // UX gaps W-2 to W-6 (docs/ux/UX_GAPS_2026-11-18.md): the worker's journal and profile controls
+    // are at least 44 px where the walk measured them smaller, and the read-back card opens in view.
+    // Its own test (not inside M-6/M-8), after M-8 so the worker has a saved entry.
+    test(`W-2..W-6 (${phone.name}). the worker's journal and profile controls are 44 px and the read-back opens in view`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const TAP = 44 - 0.5; // sub-pixel rounding at device scale 2 and 3
+      const size = async (target: Locator, what: string, axis: "height" | "width" | "both" = "height") => {
+        await target.scrollIntoViewIfNeeded();
+        const box = await target.boundingBox();
+        expect(box, `${what} is laid out`).not.toBeNull();
+        if (axis !== "width") expect(box!.height, `${what} is ${box!.height} px high`).toBeGreaterThanOrEqual(TAP);
+        if (axis !== "height") expect(box!.width, `${what} is ${box!.width} px wide`).toBeGreaterThanOrEqual(TAP);
+      };
+
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      const main = page.getByRole("main");
+      await expect(main.getByTestId("journal-quick-record-text")).toBeVisible({ timeout: 30_000 });
+
+      // W-3: the links that get an entry confirmed (present when the entry's state offers them).
+      for (const link of [main.locator('[data-testid^="journal-entry-identify-verifier-"]'), main.getByTestId("evidence-awaiting-review-link")]) {
+        if ((await link.count()) > 0 && (await link.first().isVisible())) await size(link.first(), "the confirmation link");
+      }
+      // W-5: readiness steps and the hours export links.
+      const steps = main.locator('[data-testid^="readiness-step-"]');
+      for (let i = 0; i < (await steps.count()); i += 1) {
+        if (await steps.nth(i).isVisible()) await size(steps.nth(i), `readiness step ${i + 1}`);
+      }
+      for (const period of ["week", "month"]) {
+        const exp = main.getByTestId(`journal-hours-export-${period}`);
+        if (await exp.isVisible().catch(() => false)) await size(exp, `the ${period} export link`, "both");
+      }
+
+      // W-2 + W-4: the read-back opens with its top in view; its photo, date and site fields are 44 px.
+      await main.getByTestId("journal-quick-record-text").fill(`QA-SYNTHETIC read-back ${phone.name} ${RUN}: grouted the hallway, 3 hours`);
+      await tapUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+      await expect
+        .poll(async () => {
+          const box = await main.getByTestId("worklog-flow").boundingBox();
+          return box !== null && box.y >= -1 && box.y < phone.viewport.height / 3;
+        }, { message: "the read-back card opens at the top of the screen", timeout: 10_000 })
+        .toBe(true);
+      await size(main.getByTestId("worklog-photo-input"), "the photo picker");
+      await size(main.getByTestId("worklog-date"), "the date field");
+      await size(main.getByTestId("worklog-site"), "the site field");
+      await fitsTheScreen(page, "the journal with the read-back open");
+
+      // W-6: the profile's "current job" row and the licence toggles.
+      // The experience form lives in the capabilities section, which the profile
+      // opens only when the address names it (DetailsHashOpener; the
+      // production walk P-7 opens it the same way).
+      await page.goto(`${BASE}/en/dashboard/profile#capabilities`);
+      const profile = page.getByRole("main");
+      await expect(profile.locator("details#capabilities").first(), "the capabilities section is open").toHaveAttribute("open", "", {
+        timeout: 30_000,
+      });
+      const openExp = profile.getByTestId("add-experience-open").filter({ visible: true }).first();
+      await openExp.scrollIntoViewIfNeeded();
+      await tapUntil(openExp, profile.getByTestId("add-experience-current"));
+      // `has` is matched INSIDE each label, so the inner locator is the bare test id.
+      await size(
+        profile.locator("label", { has: page.getByTestId("add-experience-current") }).filter({ visible: true }).first(),
+        "the current-job row",
+      );
+      // The licence toggles are in the CV-details section, opened the same way.
+      await page.goto(`${BASE}/en/dashboard/profile#cv-details`);
+      await expect(profile.locator("details#cv-details").first(), "the CV-details section is open").toHaveAttribute("open", "", {
+        timeout: 30_000,
+      });
+      const licences = profile
+        .locator('[data-testid^="prefs-licence-"]:not([data-testid="prefs-licence-categories"])')
+        .filter({ visible: true });
+      await expect.poll(() => licences.count(), { message: "the licence toggles render", timeout: 30_000 }).toBeGreaterThan(0);
+      for (let i = 0; i < (await licences.count()); i += 1) await size(licences.nth(i), `licence toggle ${i + 1}`, "both");
+      await fitsTheScreen(page, "the profile with the experience form open");
+      await done();
+    });
+    test(`M-9 (${phone.name}). a free-label skill added on the profile shows in place, persists, and is declared on the Living CV`, async ({ browser }) => {
+      // The production walk P-13 (2.15) on the same steps: run 44637832323 at 375 px saved the claim
+      // (the input cleared; a reload found the chip) but the chip did not show in place in 30 s. The
+      // chip must show WITHOUT a reload, from the save's own answer, then persist on a real reload.
+      // The same add at a desktop width follows, so a phone-only fault names itself.
+      const addInPlace = async (page: Page, claim: string, where: string): Promise<void> => {
+        await page.goto(`${BASE}/en/dashboard/profile#capabilities`);
+        const main = page.getByRole("main");
+        await expect(main.locator("details#capabilities").first(), `${where}: the capabilities section is open`).toHaveAttribute("open", "", {
+          timeout: 30_000,
+        });
+        const form = main.getByTestId("capability-profile-manual-add");
+        const input = form.getByTestId("capability-profile-manual-input");
+        await input.scrollIntoViewIfNeeded();
+        await input.fill(claim);
+        const add = form.getByTestId("capability-profile-manual-add-button");
+        if (where === "desktop") await add.click();
+        else await add.tap();
+        await expect.poll(() => input.inputValue(), { message: `${where}: the claim save answered`, timeout: 30_000 }).toBe("");
+        await expect(main.getByTestId("capability-profile-claim").filter({ hasText: claim }), `${where}: the new chip shows in place`).toBeVisible({
+          timeout: 30_000,
+        });
+        await expect
+          .poll(
+            () =>
+              sql<{ n: number }>(
+                `select count(*)::int as n from public.profile_skill_claims where profile_id = ${lit(s.profileId)} and label = ${lit(claim)}`,
+              )[0]?.n ?? 0,
+            { message: `${where}: the claim is stored once`, timeout: 30_000 },
+          )
+          .toBe(1);
+        await page.reload();
+        await expect(main.locator("details#capabilities").first()).toHaveAttribute("open", "", { timeout: 30_000 });
+        await expect(main.getByTestId("capability-profile-claim").filter({ hasText: claim }), `${where}: the claim persists`).toHaveCount(1, {
+          timeout: 30_000,
+        });
+      };
+
+      const claim = `QA-SYNTHETIC skill ${phone.name} ${RUN}`;
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      await addInPlace(page, claim, `${phone.name} px`);
+      await fitsTheScreen(page, "the profile with a new skill chip");
+      await page.goto(`${BASE}/en/cv`);
+      await expect(
+        page.getByRole("main").locator('[data-testid="cv-tier-declared"]', { hasText: claim }).first(),
+        "a claim nobody has evidenced stays in the declared tier",
+      ).toBeVisible({ timeout: 30_000 });
+      const state = await page.context().storageState();
+      await done();
+
+      const desk = await browser.newContext({ storageState: state, timezoneId: "UTC" });
+      const dp = await desk.newPage();
+      watch(dp);
+      await addInPlace(dp, `QA-SYNTHETIC skill desktop ${phone.name} ${RUN}`, "desktop");
+      await desk.close();
+    });
+
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await accountMenu(page, "account-menu-cv-link");
@@ -504,6 +773,7 @@ for (const phone of PHONES) {
       await page.goto(`${BASE}/en/dashboard/company/scouting?request=${e.needId}`);
       await expect(page.getByRole("main").locator('[data-testid^="scouting-"]').first(), "the scouting page renders its own content").toBeVisible({ timeout: 60_000 });
       await fitsTheScreen(page, "the employer's candidate search");
+      await candidateSearchOnPhone(page, e.needId, "the employer's candidate search");
       await done();
     });
     test(`E-4 (${phone.name}). organisation management: the people page from the sheet, and a join-by-link invitation`, async ({ browser }) => {
@@ -565,6 +835,9 @@ for (const phone of PHONES) {
         `select i.status from public.company_worker_invitations i join public.organizations o on o.legacy_company_id = i.company_id where o.id = ${lit(a.orgId)} and lower(i.invited_email) = lower(${lit(rostered)})`,
       );
       expect(stored.map((r) => r.status), "one pending roster invitation for that address").toEqual(["pending"]);
+      // UX gaps 2026-11-18, A-3: the success state hands over a link to send the invitee.
+      await expect(main.getByTestId("company-workers-invite-link"), "the invitation offers a link to send").toBeVisible();
+      await expect(main.getByTestId("company-workers-invite-copy-link")).toBeVisible();
       await done();
     });
     test(`A-4 (${phone.name}). the agency posts a need on the phone`, async ({ browser }) => {
@@ -618,6 +891,212 @@ for (const phone of PHONES) {
       await page.goto(`${BASE}/lt/dashboard/company/partners`);
       await expect(page.getByRole("main").getByTestId("agency-draft-need-form"), "the draft-a-need form is drawn for the client").toBeVisible({ timeout: 30_000 });
       await fitsTheScreen(page, "the agency's clients in Lithuanian, with a client");
+      // UX gaps 2026-11-18, A-5: the suite's app log carried a minified React client error on this
+      // route with a connected client. The page must render without one, in both languages.
+      const uncaught = () =>
+        (heard.get(page) ?? []).filter((n) => n.startsWith("pageerror:") || /Minified React error|react\.dev\/errors/.test(n));
+      expect(uncaught(), "the Lithuanian clients page raises no client error").toEqual([]);
+      await page.goto(`${BASE}/en/dashboard/company/partners`);
+      await expect(page.getByRole("main").getByTestId("agency-draft-need-form")).toBeVisible({ timeout: 30_000 });
+      await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+      expect(uncaught(), "the English clients page raises no client error").toEqual([]);
+      await done();
+    });
+  });
+
+  // ── CONFIRMATION ──────────────────────────────────────────────────────────
+  // The second half of the worker path "sign-up → first CONFIRMED entry on the Living CV" (M-8 is
+  // the first half): the worker's entry reaches the organization that can confirm it, the owner
+  // confirms it from the phone, and the worker's Living CV counts it. Setup at a desktop (not the
+  // walk): an organisation, a join link, and a worker who registers through it. Steps on the phone:
+  //   C-2 the owner turns on journal review for that worker (people page, one toggle);
+  //   C-3 the worker records a day for the organisation; the entry says it waits for the owner;
+  //   C-4 the owner's approval controls are thumb-sized (inbox, quick queue), and the owner confirms
+  //       the entry with ONE tap on the home's approvals card;
+  //   C-5 the worker sees it confirmed and the Living CV, one tap from the journal, counts it.
+  const CONFIRMER = email(`confirmer${phone.name}`);
+  const CONFIRMED_WORKER = email(`confirmed${phone.name}`);
+  const confirmedEntry = `QA-SYNTHETIC confirmed entry ${phone.name} ${RUN}: sealed the shower tray`;
+  const c: { profileId: string; orgId: string; workerProfileId: string; engagementId: string; entryId: string } = {
+    profileId: "",
+    orgId: "",
+    workerProfileId: "",
+    engagementId: "",
+    entryId: "",
+  };
+  test.describe(`confirmation at ${phone.viewport.width} × ${phone.viewport.height}`, () => {
+    test.describe.configure({ mode: "serial" });
+    test(`C-1 (${phone.name}). setup at a desktop: an organisation, a join link, and a worker who registers through it`, async ({ browser }) => {
+      Object.assign(c, await newOrganisation(browser, CONFIRMER, "hire", `Synthetic Confirmer ${phone.name} ${RUN}`, `Synthetic Confirm Co ${phone.name} ${RUN}`));
+      const owner = await browser.newContext({ storageState: sessions.get(CONFIRMER), timezoneId: "UTC" });
+      const op = await owner.newPage();
+      await op.goto(`${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${c.orgId}#network-invite`);
+      const panel = op.getByTestId("invite-panel");
+      await expect(panel).toBeVisible({ timeout: 30_000 });
+      await panel.getByTestId("invite-mode-link").click();
+      await panel.getByTestId("invite-name").fill(`Synthetic Confirmed Worker ${phone.name} ${RUN}`);
+      await panel.getByTestId("invite-submit").click();
+      const copy = panel.getByTestId("invite-copy-link").first();
+      await expect(copy, "the invitation link is handed over").toBeVisible({ timeout: 30_000 });
+      const raw = await copy.getAttribute("data-invite-link");
+      expect(raw, "an invitation link").toBeTruthy();
+      sessions.set(CONFIRMER, await owner.storageState());
+      await owner.close();
+      const u = new URL(raw!);
+
+      const joined = await browser.newContext({ timezoneId: "UTC" });
+      const wp = await joined.newPage();
+      await wp.goto(`${BASE}${u.pathname}${u.search}`);
+      await wp.getByTestId("invite-register").click();
+      await wp.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
+      await wp.locator('input[type="email"]').fill(CONFIRMED_WORKER);
+      await wp.locator('input[name="password"]').fill(PASSWORD);
+      const repeat = wp.locator('input[name="confirm_password"]');
+      if (await repeat.count()) await repeat.fill(PASSWORD);
+      await wp.locator('form button[type="submit"]').click();
+      await wp.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
+      if (/\/onboarding/.test(wp.url())) await onboard(wp, "work", `Synthetic Confirmed Worker ${phone.name} ${RUN}`);
+      await wp.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
+      if (/\/invite\//.test(wp.url())) {
+        const accept = wp.getByTestId("invite-accept");
+        if (await accept.isVisible().catch(() => false)) await accept.click();
+      }
+      sessions.set(CONFIRMED_WORKER, await joined.storageState());
+      await joined.close();
+      c.workerProfileId = await userId(CONFIRMED_WORKER);
+      const employment = () =>
+        sql<{ id: string }>(
+          `select id from public.engagement_contexts where profile_id = ${lit(c.workerProfileId)} and organization_id = ${lit(c.orgId)}
+             and relationship_slug = 'employee' and status = 'active'`,
+        ).map((r) => r.id);
+      await expect
+        .poll(employment, { message: "registering through the link makes the worker the organisation's employee", timeout: 30_000 })
+        .toHaveLength(1);
+      c.engagementId = employment()[0]!;
+    });
+    test(`C-2 (${phone.name}). the owner turns on journal review for the worker on the phone`, async ({ browser }) => {
+      expect(c.engagementId, "C-1 joined the worker").toBeTruthy();
+      const { page, done } = await signedInOnPhone(browser, phone, CONFIRMER);
+      await page.goto(`${BASE}/en/dashboard/company/people#org-members`);
+      const main = page.getByRole("main");
+      const fold = main.getByTestId("people-more").first();
+      await expect(fold).toBeAttached({ timeout: 30_000 });
+      if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().tap();
+      const toggle = main.getByTestId(`toggle-review-${c.engagementId}`);
+      await expect(toggle, "journal review is offered for the worker").toBeVisible({ timeout: 30_000 });
+      await thumbSized(toggle, "the journal review toggle");
+      await fitsTheScreen(page, "the owner's people page");
+      const reviewOn = () =>
+        sql<{ on: boolean | null }>(`select journal_review_enabled as on from public.engagement_contexts where id = ${lit(c.engagementId)}`)[0]?.on ?? null;
+      // A tap before hydration is a silent no-op; a second tap after a stored one would turn it off.
+      await expect(async () => {
+        if (reviewOn() !== true) await toggle.tap({ timeout: 5_000 });
+        await expect.poll(reviewOn, { timeout: 10_000 }).toBe(true);
+      }).toPass({ timeout: 60_000 });
+      await done();
+    });
+    test(`C-3 (${phone.name}). the worker records a day for the organisation; the entry waits for the owner`, async ({ browser }) => {
+      expect(c.engagementId, "C-1 joined the worker").toBeTruthy();
+      const { page, done } = await signedInOnPhone(browser, phone, CONFIRMED_WORKER);
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      const main = page.getByRole("main");
+      await main.getByTestId("journal-quick-record-text").fill(confirmedEntry);
+      await tapUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+      const context = main.getByTestId("worklog-context");
+      if (await context.isVisible().catch(() => false)) await context.selectOption(c.engagementId);
+      if (await main.getByTestId("worklog-project-must-choose").isVisible().catch(() => false)) {
+        await main.getByTestId("worklog-project").selectOption("none");
+      }
+      await main.getByTestId("worklog-save").tap();
+      await main.getByTestId("worklog-confirm").tap();
+      await expect(main.getByTestId("worklog-done"), "the entry is saved").toBeVisible({ timeout: 60_000 });
+      const rows = sql<{ id: string; engagement_context_id: string | null }>(
+        `select e.id, e.engagement_context_id from public.journal_entries e join public.workers w on w.id = e.worker_id
+          where w.profile_id = ${lit(c.workerProfileId)} and e.superseded_by is null and e.original_text = ${lit(confirmedEntry)}`,
+      );
+      expect(rows, "the entry is stored once").toHaveLength(1);
+      expect(rows[0]!.engagement_context_id, "for the organisation's relationship").toBe(c.engagementId);
+      c.entryId = rows[0]!.id;
+      // No further step for the worker: with review on, the entry is already in the owner's queue.
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      await expect(main.getByTestId(`journal-entry-verification-${c.entryId}`), "the entry waits for the owner").toHaveAttribute(
+        "data-next-action",
+        "await_verifier",
+        { timeout: 30_000 },
+      );
+      await fitsTheScreen(page, "the journal with the entry waiting");
+      await done();
+    });
+    test(`C-4 (${phone.name}). the owner confirms the entry with one tap on the home's approvals card`, async ({ browser }) => {
+      expect(c.entryId, "C-3 recorded the entry").toBeTruthy();
+      const { page, done } = await signedInOnPhone(browser, phone, CONFIRMER);
+      const main = page.getByRole("main");
+
+      // The detailed inbox: its doors and the entry's decisions are thumb-sized.
+      await page.goto(`${BASE}/en/dashboard/inbox`);
+      await expect(main.getByTestId(`inbox-entry-${c.entryId}`), "the entry waits in the inbox").toBeVisible({ timeout: 30_000 });
+      for (const id of [
+        "inbox-quick-link",
+        "inbox-counterparty-link",
+        "inbox-report-link",
+        `journal-approve-entry-${c.entryId}`,
+        `journal-review-request-changes-${c.entryId}`,
+        `journal-review-reject-${c.entryId}`,
+      ]) {
+        await thumbSized(main.getByTestId(id), `the inbox's ${id}`);
+      }
+      await fitsTheScreen(page, "the owner's inbox");
+
+      // The quick queue: its door to the detailed review, the confirm, and the reject form's send.
+      await page.goto(`${BASE}/en/dashboard/inbox/quick`);
+      const quick = main.getByTestId(`quick-confirm-card-${c.entryId}`);
+      await expect(quick, "the entry waits in the quick queue").toBeVisible({ timeout: 30_000 });
+      await thumbSized(main.getByTestId("quick-detailed-link"), "the quick queue's detailed-review door");
+      await thumbSized(quick.getByTestId(`quick-confirm-tap-${c.entryId}`), "the quick confirm");
+      await tapUntil(quick.getByTestId(`quick-reject-open-${c.entryId}`), quick.getByTestId(`quick-reject-submit-${c.entryId}`));
+      await thumbSized(quick.getByTestId(`quick-reject-submit-${c.entryId}`), "the reject form's send");
+      await fitsTheScreen(page, "the quick queue with the reject form open");
+
+      // The confirmation itself: the home's approvals card, one tap.
+      await page.goto(`${BASE}/en/dashboard`);
+      const card = main.getByTestId("organization-approvals").filter({ visible: true }).first();
+      const confirm = card.getByTestId(`quick-confirm-tap-${c.entryId}`);
+      await expect(confirm, "the home's approvals card offers the entry").toBeVisible({ timeout: 60_000 });
+      await thumbSized(confirm, "the approvals card's confirm");
+      await fitsTheScreen(page, "the owner's home with the entry to confirm");
+      await tapUntil(confirm, card.getByTestId(`quick-receipt-${c.entryId}`));
+      await expect
+        .poll(
+          () =>
+            sql<{ d: string | null }>(
+              `select confirmation_scope->>'decision' as d from public.journal_entry_confirmations where entry_id = ${lit(c.entryId)}`,
+            ).map((r) => r.d),
+          { message: "the confirmation is stored once, as approved", timeout: 30_000 },
+        )
+        .toEqual(["approved"]);
+      await fitsTheScreen(page, "the owner's home with the receipt");
+      await done();
+    });
+    test(`C-5 (${phone.name}). the worker sees the entry confirmed and the Living CV counts it`, async ({ browser }) => {
+      expect(c.entryId, "C-3 recorded the entry").toBeTruthy();
+      const { page, done } = await signedInOnPhone(browser, phone, CONFIRMED_WORKER);
+      await page.goto(`${BASE}/en/dashboard/journal`);
+      const main = page.getByRole("main");
+      await expect(main.getByTestId(`journal-entry-verification-${c.entryId}`), "the entry reads as confirmed").toHaveAttribute(
+        "data-verification-state",
+        "verified",
+        { timeout: 30_000 },
+      );
+      await fitsTheScreen(page, "the journal with the confirmed entry");
+      const bridge = main.getByTestId("journal-cv-bridge-link");
+      await expect(bridge, "the CV is one tap from the journal").toBeVisible({ timeout: 30_000 });
+      await thumbSized(bridge, "the journal's CV link");
+      await bridge.tap();
+      await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
+      const counted = main.getByTestId("cv-confirmed-work").filter({ visible: true }).first();
+      await expect(counted, "the Living CV counts the confirmed work").toBeVisible({ timeout: 30_000 });
+      expect(Number(await counted.getAttribute("data-entries")), "at least the one confirmed entry").toBeGreaterThanOrEqual(1);
+      await fitsTheScreen(page, "the Living CV with confirmed work");
       await done();
     });
   });
@@ -634,7 +1113,19 @@ for (const phone of PHONES) {
       const owner = email(`studentco${phone.name}`);
       const org = await newOrganisation(browser, owner, "hire", `Synthetic Placement Owner ${phone.name} ${RUN}`, `Synthetic Placement Co ${phone.name} ${RUN}`);
       const { page, done } = await signedInOnPhone(browser, phone, owner);
+      // demand-request-button builds its country list in the browser (country-options-server-only
+      // lists it UNVERIFIED): the same cause as A-5's React #418 on /partners. The need form must
+      // render without a client error, in Lithuanian and English.
+      const clientErrors = () =>
+        (heard.get(page) ?? []).filter((n) => n.startsWith("pageerror:") || /Minified React error|react\.dev\/errors/.test(n));
+      await page.goto(`${BASE}/lt/dashboard/company/needs?audience=need#demand-intake`);
+      await expect(page.getByRole("main").getByTestId("demand-role")).toBeVisible({ timeout: 60_000 });
+      await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+      expect(clientErrors(), "the Lithuanian need form raises no client error").toEqual([]);
       await page.goto(`${BASE}/en/dashboard/company/needs?audience=need#demand-intake`);
+      await expect(page.getByRole("main").getByTestId("demand-role")).toBeVisible({ timeout: 60_000 });
+      await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+      expect(clientErrors(), "the English need form raises no client error").toEqual([]);
       st.needId = await postNeedOnPhone(page, org.profileId, STUDENT_NEED);
       await done();
       await verifyCompanyAsLocalAdmin(owner, email(`studentadmin${phone.name}`));
@@ -742,15 +1233,21 @@ for (const phone of PHONES) {
     test(`T-3 (${phone.name}). the institution invites a learner by link`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, SCHOOL);
       await page.goto(`${BASE}/en/dashboard/company/education`);
-      await page.getByTestId("institution-learners-invite").tap();
+      // UX_GAPS I-3: the learner invite is on the first screen, a 44 px target.
+      const invite = page.getByTestId("institution-learners-invite");
+      await expect(invite).toBeVisible({ timeout: 30_000 });
+      const inviteBox = await invite.boundingBox();
+      expect(inviteBox?.height ?? 0, "the invite is a 44 px target").toBeGreaterThanOrEqual(44);
+      expect((inviteBox?.y ?? Infinity) + (inviteBox?.height ?? 0), "the invite is on the first screen").toBeLessThanOrEqual(phone.viewport.height);
+      await invite.tap();
       await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
-      const open = page.getByTestId("invite-panel-open");
-      const capacity = page.getByTestId("invite-capacity");
-      await expect(open.or(capacity).first()).toBeVisible({ timeout: 30_000 });
-      if (await open.isVisible().catch(() => false)) await open.tap();
-      await expect(capacity, "the learner capacity").toHaveValue("student", { timeout: 30_000 });
-      const linkMode = page.getByTestId("invite-mode-link");
-      if (await linkMode.isVisible().catch(() => false)) await linkMode.tap();
+      // UX_GAPS I-4: one read-only line for the preset, link mode by default, 44 px fields.
+      const preset = page.getByTestId("invite-preset");
+      await expect(preset, "the learner capacity").toHaveAttribute("data-relationship", "student", { timeout: 30_000 });
+      await expect(page.getByTestId("invite-capacity")).toHaveCount(0);
+      await expect(page.getByTestId("invite-mode-link")).toHaveAttribute("aria-checked", "true");
+      const nameBox = await page.getByTestId("invite-name").boundingBox();
+      expect(nameBox?.height ?? 0, "the name field is a 44 px target").toBeGreaterThanOrEqual(44);
       const name = page.getByTestId("invite-name");
       if (await name.isVisible().catch(() => false)) await name.fill(`Synthetic Learner ${phone.name} ${RUN}`);
       await page.getByTestId("invite-submit").tap();

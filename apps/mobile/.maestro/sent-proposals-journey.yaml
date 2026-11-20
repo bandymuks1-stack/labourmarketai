@@ -1,0 +1,180 @@
+# PROPOSALS YOU SENT — isolated runs only (android-need-isolated.yml), after
+# agency-roster-journey.yaml (which leaves the company signed in).
+#
+# What a green run proves, on the job's LOCAL stack (production untouched):
+#   1. the seed company (M-0) opens "Proposals you sent" and finds the booking
+#      its worker accepted in booking-journey.yaml;
+#   2. it changes the dates (booking.reschedule prepare → confirm): an
+#      accepted booking REOPENS, the worker must accept again;
+#   3. it withdraws the reopened proposal with the reason "the dates changed"
+#      and a note (booking.withdraw prepare → confirm).
+# The next workflow step finds the booking withdrawn, the event history
+# proposed → accepted → rescheduled → withdrawn, and the stored reason.
+appId: ai.labourmarket.app
+name: sent-proposals-journey
+---
+- tapOn:
+    id: "tab-today"
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: "today-open-sent-proposals"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-sent-proposals"
+- extendedWaitUntil:
+    visible:
+      id: "sent-proposals-list"
+    timeout: 60000
+- assertVisible:
+    id: "sent-proposals-row-0"
+
+# --- 2. New dates for the accepted booking ---
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-reschedule-0"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-reschedule-0"
+- extendedWaitUntil:
+    visible:
+      id: "sent-proposals-reschedule-form"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-start"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-start"
+- eraseText: 20
+- inputText: "2027-04-05"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-end"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-end"
+- eraseText: 20
+- inputText: "2027-04-30"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-review"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-review"
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-confirm"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "sent-proposals-done"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-back"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-back"
+- extendedWaitUntil:
+    visible:
+      id: "sent-proposals-list"
+    timeout: 60000
+
+# --- 3. Withdraw the reopened proposal, with a reason ---
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-withdraw-0"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-withdraw-0"
+- extendedWaitUntil:
+    visible:
+      id: "sent-proposals-withdraw-form"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-reason-dates_changed"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-reason-dates_changed"
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-note"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-note"
+- inputText: "QA-SYNTHETIC new dates no longer fit"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-review"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-review"
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-confirm"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "sent-proposals-done"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "sent-proposals-back"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sent-proposals-back"
+- extendedWaitUntil:
+    visible:
+      id: "sent-proposals-list"
+    timeout: 60000

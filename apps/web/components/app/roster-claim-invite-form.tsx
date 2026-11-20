@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 import {
   inviteRosterPersonToClaimAction,
@@ -51,12 +53,12 @@ export function RosterClaimInviteForm({
               : labels.deliveryFailed}
         </span>
         {state.inviteLink ? (
-          <input
+          <Input
             readOnly
             value={state.inviteLink}
             aria-label={labels.created}
             onFocus={(e) => e.currentTarget.select()}
-            className="min-h-9 w-full max-w-md rounded-md border border-ink-500 bg-ink-800 px-2 font-mono text-meta text-text-primary"
+            className="w-full max-w-md font-mono max-sm:min-h-11"
             data-testid={`roster-claim-link-${personId}`}
           />
         ) : null}
@@ -74,24 +76,26 @@ export function RosterClaimInviteForm({
       <div className="flex flex-wrap items-center gap-2">
         <label className="flex items-center gap-2 text-xs text-text-secondary">
           <span className="sr-only">{labels.label}</span>
-          <input
+          <Input
             type="email"
             name="email"
             required
             autoComplete="off"
             placeholder={labels.placeholder}
-            className="min-h-9 w-56 rounded-md border border-ink-500 bg-ink-800 px-2 text-xs text-text-primary"
+            className="w-56 max-sm:min-h-11 max-sm:text-base"
             data-testid={`roster-claim-email-${personId}`}
           />
         </label>
-        <button
+        <Button
           type="submit"
+          variant="secondary"
+          size="sm"
           disabled={pending}
           aria-busy={pending}
-          className="min-h-9 rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+          className="min-h-11"
         >
           {pending ? "…" : labels.invite}
-        </button>
+        </Button>
       </div>
       <span className="text-meta text-text-muted">{labels.hint}</span>
       {state && !state.ok ? (

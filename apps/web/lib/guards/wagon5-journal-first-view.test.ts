@@ -36,10 +36,30 @@ describe("Wagon 5 — journal first view", () => {
     expect(details.length).toBeGreaterThan(100);
     // the honest lines were MOVED, not deleted
     expect(details).toMatch(/journal-who-can-confirm/);
-    expect(details).toMatch(/journal-cv-bridge/);
+    // The CV bridge is the one exception, and only once entries exist: it then
+    // leads the records list so the CV is one tap from the journal on a phone
+    // (phone worker path, 2026-11-18). With no entry, or an unreadable list,
+    // it stays in this disclosure. Either way it renders exactly once.
+    expect(details).toMatch(/\{cvBridgeLeads \? null : cvBridge\}/);
+    expect(details).not.toMatch(/\{cvBridgeLeads \? cvBridge : null\}/);
+    expect(PAGE).toMatch(/const cvBridgeLeads = entries !== null && totalEntryCount > 0;/);
+    expect(PAGE).toMatch(/const cvBridge = \(\s*<p[^>]*data-testid="journal-cv-bridge"/);
+    expect(PAGE.match(/\{cvBridgeLeads \? cvBridge : null\}/g)).toHaveLength(1);
+    expect(PAGE.match(/\{cvBridgeLeads \? null : cvBridge\}/g)).toHaveLength(1);
     expect(details).toMatch(/journal-proof-loop/);
     expect(details).toMatch(/EvidenceStatusStrip/);
     expect(details).toMatch(/statusExplainer/);
+  });
+
+  it("with entries, the CV bridge leads the records list (one tap to the CV on a phone)", () => {
+    const section = PAGE.indexOf('data-testid="journal-entries"');
+    const lead = PAGE.indexOf("{cvBridgeLeads ? cvBridge : null}");
+    const calendar = PAGE.indexOf("<JournalCalendar", section);
+    expect(section).toBeGreaterThan(-1);
+    expect(lead, "the bridge leads inside the records section").toBeGreaterThan(section);
+    expect(lead, "above the calendar and the status disclosure").toBeLessThan(calendar);
+    // The link is a 44 px chip, not a 16 px inline link inside the line.
+    expect(PAGE).toMatch(/className=\{chipLinkClassName\(false\)\}\s*data-testid="journal-cv-bridge-link"/);
   });
 
   it("history stays compact: newest day open, older days collapsed", () => {
