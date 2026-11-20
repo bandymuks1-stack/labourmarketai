@@ -6428,6 +6428,7 @@
       "createProgram": "Tilføj kursus",
       "noPrograms": "Ingen kurser endnu.",
       "assigneePlaceholder": "Personens e-mail",
+      "assigneePick": "Person",
       "requiredByLabel": "Færdig inden",
       "assign": "Bed denne person",
       "certificateFileLabel": "Bevisfil",

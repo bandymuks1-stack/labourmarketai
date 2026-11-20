@@ -17516,6 +17516,7 @@
       "createProgram": "Pridėti kursą",
       "noPrograms": "Kursų dar nėra.",
       "assigneePlaceholder": "Žmogaus el. paštas",
+      "assigneePick": "Žmogus",
       "requiredByLabel": "Atlikti iki",
       "assign": "Paprašyti šio žmogaus",
       "certificateFileLabel": "Pažymėjimo failas",
