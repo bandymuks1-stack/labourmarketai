@@ -141,20 +141,30 @@ export async function updateTrainingProgramAction(formData: FormData): Promise<v
   });
 }
 
-/** A managing role assigns the programme to an active member of the org. */
+/**
+ * A managing role assigns the programme to one of the organization's people
+ * (owner decision 2026-11-18: members, interns, learners, lawfully invited
+ * external people, while the link is active — the RPC decides). The picker
+ * submits the person's profile id; the e-mail field remains for anyone the
+ * picker could not list. `assign_training_v1` takes either in its second
+ * argument and answers both the same way.
+ */
 export async function assignTrainingAction(formData: FormData): Promise<void> {
   await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = readLocale(formData);
   const programId = String(formData.get("programId") ?? "").trim();
   if (!UUID_RX.test(programId)) finish(locale, "invalid");
+  const picked = String(formData.get("assigneeProfileId") ?? "").trim();
+  if (picked.length > 0 && !UUID_RX.test(picked)) finish(locale, "invalid");
   const email = String(formData.get("assigneeEmail") ?? "").trim();
-  if (email.length === 0 || email.length > 320) finish(locale, "invalid");
+  const assignee = picked.length > 0 ? picked : email;
+  if (assignee.length === 0 || assignee.length > 320) finish(locale, "invalid");
   const requiredBy = optionalDate(formData, "requiredBy");
   if (requiredBy === "invalid") finish(locale, "invalid");
 
   await callRpc(locale, "assign_training_v1", {
     p_program_id: programId,
-    p_assignee_email: email,
+    p_assignee_email: assignee,
     p_required_by: requiredBy,
   });
 }
