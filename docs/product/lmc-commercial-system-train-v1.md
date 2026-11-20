@@ -58,10 +58,75 @@ Every flag stays OFF in code and in `lmc_settings`. **Remaining before any LMC
 moves for a real user:**
 - Wagon 2 remainder — promotional grant wiring + activity-day instrumentation
   (not part of this slice);
-- **Wagon 4** — Stripe TEST top-up checkout + signature-verified webhook that
-  calls `recordLmcPurchase` on settlement;
+- ~~**Wagon 4**~~ — **BUILT, TEST-only, flags OFF, packages pending owner**
+  (2026-10-21; status block below);
 - **Wagon 7** — wallet UI / ledger history / top-up flow, 11-locale copy;
 - **Wagon 8** — production activation: owner flips the flags (§14 gates).
+
+**Wagon 4 — Stripe TEST top-ups: BUILT, TEST-only, flags OFF, packages
+pending owner (2026-10-21).** Owner order 2026-10-21: "finish Stripe payments
+… LMC top-ups …; test in Stripe TEST first; *Neleisk dvigubai suteikti
+kreditų*" + owner decision 2026-10-21 item 6 (issue #2628). Built:
+
+- **Route home (MDD-20 — built on the catalogue's own option; owner confirmation still open):** the separate
+  `/api/lmc` surface named in
+  `docs/product/lmc-canonical-commercial-catalogue-v1.md` §7.1 ("inside the
+  billing API with a narrowed guard, or a separate `/api/lmc` surface") — the
+  option that needs NO guard amendment. `/api/billing` stays subscription-only
+  and `stripe-lmc-separation.test.ts` is unchanged.
+- `app/api/lmc/topup-checkout/route.ts` — both flags first (503), strict body
+  `{ packageKey }` only, owner-approved package only, subject derived
+  server-side (organization workspace with `manage-billing` → that company's
+  `companies.id`; otherwise the person's `profiles.id`), adapter must be
+  `stripe_test` → a payment-mode Checkout Session (`price_data` from the
+  package, metadata on session AND payment intent, `environment=test`).
+- `app/api/lmc/topup-webhook/route.ts` — a SEPARATE Stripe endpoint with its
+  own TEST secret (`STRIPE_TOPUP_WEBHOOK_SECRET`); both flags first (503),
+  `stripe_test` only, signature verified, live events 400.
+- `lib/lmc/topup-settlement.ts` — `checkout.session.completed` /
+  `checkout.session.async_payment_succeeded` (mode `payment`, `paid`, top-up
+  purpose) → `recordLmcPurchase` with key `stripe_pi:<payment_intent>` and
+  reference `<payment_intent>`; the credit is the SERVER package figure and the
+  charged subtotal must match it.
+- **Exactly once, three layers:** payment-intent-derived key (all duplicate
+  events/retries/races converge on one ledger entry); the DB unique index
+  `lmc_purchase_payment_reference_unique` (migration
+  `20261021150000_lmc_purchase_payment_reference_unique_v1.sql`, RED,
+  **NOT applied**) so the same payment can never credit a second subject — its
+  violation maps to `already_credited`; amounts never read from the event.
+- Stripe seam: the one-time payment session + endpoint verification live in
+  `lib/billing/provider.ts` → `providers/stripe-test.ts` (the only SDK
+  import site), test-key client only, refusing every state but `stripe_test`.
+- Packages: `lib/lmc/topup-packages.ts` — `OWNER_APPROVED_LMC_TOPUP_PACKAGES`
+  is **empty** (MDD-03 open); no denomination exists anywhere in code.
+- **Refunds:** `charge.refunded` of a top-up is **not** reversed — no server
+  wrapper for `lmc_reverse_v1` exists and the refund rule is open (MDD-08). It
+  is answered `refund_pending_owner_decision` and logged loudly
+  (`[lmc-topup] refund_pending_owner_decision …`); the purchased credit stays.
+- Tests: `lib/lmc/topup-settlement.test.ts`, `topup-routes.test.ts`,
+  `topup-packages.test.ts`, the offline chain
+  `lib/lmc/topup-test-mode-chain.integration.test.ts` (real Stripe SDK
+  signing; flags forced on inside that file only) and the guard
+  `lib/guards/lmc-topup-test-only.test.ts`.
+
+**Remaining before one real top-up (each an owner act or a later wagon):**
+1. MDD-03/04/05 — fill `OWNER_APPROVED_LMC_TOPUP_PACKAGES` (key, credit,
+   charge, decision ref) and update the guard pin in the same PR.
+2. MDD-06 (VAT of a credit purchase) — the TEST session carries no tax lines.
+3. MDD-08 (refund rule) + a server wrapper for `lmc_reverse_v1`
+   (`refund_reversal`) behind its flag — today a refund only reports.
+4. Apply `20261021150000` via Supabase MCP `apply_migration` after owner
+   approval (preflight duplicate check in its header). Do not arm top-ups
+   without it.
+5. Stripe TEST: a second webhook endpoint `https://labourmarket.ai/api/lmc/topup-webhook`
+   (events `checkout.session.completed`,
+   `checkout.session.async_payment_succeeded`, `charge.refunded`) and its
+   secret in `STRIPE_TOPUP_WEBHOOK_SECRET` on the VPS.
+6. Flags: `STRIPE_LMC_TOPUPS_ENABLED` (owner_only — needs the §14a owner
+   activation mechanism, still unbuilt) and `LMC_PURCHASES_ENABLED`, in code
+   AND in `lmc_settings`.
+7. Wagon 7 — wallet/top-up UI + 11-locale copy (no UI calls the route yet).
+8. Live mode: none. Top-ups have no live path at all; adding one is Wagon 8.
 
 Prior status: **Wagon 0 (this document) + Wagon 1 (ledger foundation) only.**
 Everything commercial ships **disabled**. No production migration beyond the
@@ -556,7 +621,7 @@ remain `false` everywhere (TS constants and DB seeds, guard-pinned).
 | 1 | Immutable LMC ledger foundation (schema, RPCs, flags OFF, proofs) | PR-A (same PR as Wagon 0) |
 | 2 | Wallet server layer, purchased top-ups (TEST), promotional grant wiring + activity-day instrumentation | PR-B (stacked on PR-A after it retargets `main`). **Server layer BUILT 2026-10-21, flags OFF** (owner decision 2026-10-21; `lib/lmc/wallet.ts`); promo wiring + activity-day instrumentation remain |
 | 3 | Personal/company plan repricing + usage limits (owner price gate decided here) | PR-C |
-| 4 | Stripe TEST subscriptions + LMC top-ups (no live keys) | PR-D |
+| 4 | Stripe TEST subscriptions + LMC top-ups (no live keys) | PR-D. **Top-ups BUILT 2026-10-21, TEST-only, flags OFF, packages pending owner** (`/api/lmc/topup-*`, `lib/lmc/topup-settlement.ts`; migration 20261021150000 not applied) |
 | 5 | Direct Referral Network v1 — schema + attribution, rewards disabled by default | PR-E |
 | 6 | Admin controls, fraud/reversal tools, reporting | PR-F |
 | 7 | Wallet/referral UI, 11-locale copy, invitation lifecycle (sender `LabourMarket.ai <info@labourmarket.ai>`) | PR-G |

@@ -88,7 +88,9 @@ describe("Stripe subscriptions never touch the LMC ledger", () => {
     const FORBIDDEN = /top[-_]?up|cash[-_]?out|payout|withdraw/i;
     const offenders: string[] = [];
     for (const file of sources(join(webRoot, "app", "api", "billing"))) {
-      if (FORBIDDEN.test(readFileSync(file, "utf8")) || FORBIDDEN.test(file)) {
+      // The path is tested RELATIVE to apps/web: the checkout directory's own
+      // name (e.g. a worktree called `lm-topup`) is not a billing surface.
+      if (FORBIDDEN.test(readFileSync(file, "utf8")) || FORBIDDEN.test(rel(file))) {
         offenders.push(rel(file));
       }
     }

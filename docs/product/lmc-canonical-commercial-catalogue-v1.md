@@ -379,7 +379,7 @@ consumer) has never been written; §12 lists the surfaces, not their design.
 | **MDD-17** | Referral lot expiry policy (currently exempt → perpetual liability possible) | Liability model |
 | **MDD-18** | Flag policy classes for referrals + promotional grants (`admin` vs `owner_only`) | Governance |
 | **MDD-19** | Schema shape that structurally enforces single-level referrals | No-MLM guarantee |
-| **MDD-20** | Where the top-up route lives (billing API vs separate surface) | Wagon 4 |
+| **MDD-20** | Where the top-up route lives (billing API vs separate surface) — Wagon 4 (2026-10-21, TEST-only, flags OFF) was BUILT on §7.1's separate `/api/lmc` option (`/api/lmc/topup-checkout`, `/api/lmc/topup-webhook`), the one needing no guard amendment; moving it stays possible until the owner confirms | Wagon 4 |
 | **MDD-21** | Wallet / top-up / referral UI + consumer copy specification | Wagon 7 |
 
 **21 missing decisions.** None of them was filled in by this audit.
