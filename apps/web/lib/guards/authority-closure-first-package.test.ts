@@ -231,6 +231,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-15 owner decision: a learner's journal is read by the organization only while the learning
       // link is active and review is on (one RLS policy replaced; RED draft, needs-human-gate, NOT applied).
       "20261115120000_",
+      // 2026-11-17 owner decision: a former employer keeps the journal recorded during the employment and
+      // nothing new, and can no longer change it (RLS + three SECURITY DEFINER bodies; RED draft, needs-human-gate, NOT applied).
+      "20261118164500_",
       // 2026-11-18 COMM-1 profiles.communication_locale (renamed from 20260920122000; RED draft, needs-human-gate, NOT applied).
       "20261118100100_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
@@ -241,6 +244,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261020040457_",
       "20261025045152_",
       "20261025050302_",
+      // 2026-11-18 (RED, needs-human-gate, NOT applied): registry 11.8 — assign_training_v1 admits the four
+      // owner-decided groups (members, interns, learners, invited external people) while their link is active.
+      "20261118143000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

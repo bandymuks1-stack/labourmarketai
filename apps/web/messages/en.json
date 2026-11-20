@@ -17595,6 +17595,7 @@
       "createProgram": "Add course",
       "noPrograms": "No courses added yet.",
       "assigneePlaceholder": "Person's email",
+      "assigneePick": "Person",
       "requiredByLabel": "Complete by",
       "assign": "Ask this person",
       "certificateFileLabel": "Certificate file",

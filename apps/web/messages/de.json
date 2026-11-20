@@ -17595,6 +17595,7 @@
       "createProgram": "Kurs hinzufügen",
       "noPrograms": "Noch keine Kurse.",
       "assigneePlaceholder": "E-Mail der Person",
+      "assigneePick": "Wer",
       "requiredByLabel": "Abschließen bis",
       "assign": "Diese Person bitten",
       "certificateFileLabel": "Zertifikatsdatei",
