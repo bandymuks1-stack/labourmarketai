@@ -1802,6 +1802,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // is active and review is on (one RLS policy replaced). RED draft, the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261115120000_journal_learning_access_follows_link_v1.sql",
+      // 2026-09-20 — COMM-1: nullable profiles.communication_locale (CHECK = the 13 communication languages; NULL = follow the UI locale). RED by owner classification, DRAFT needs-human-gate, NOT applied.
+      "20261118100100_profiles_communication_locale_v1.sql",
       // 2026-11-17: owner decision, a former employer keeps limited access (retained journal up to the end
       // date, nothing new, no more writes). RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261118164500_former_employer_limited_access_v1.sql",
