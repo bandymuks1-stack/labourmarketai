@@ -131,6 +131,7 @@ function mapRow(r: any): MarketplaceListingRow {
     unit: r.unit ?? null,
     expiresAt: r.expires_at ?? null,
     status: r.status,
+    closedOutcome: r.closed_outcome ?? null,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -159,7 +160,12 @@ export async function listMyMarketplaceListings(): Promise<MarketplaceListingLis
       .order("updated_at", { ascending: false });
 
   let extended = true;
-  let { data, error } = await run(EXTENDED_COLS);
+  // `closed_outcome` (lifecycle contract, human-gated migration 20261024100000):
+  // asked for first, dropped silently while it does not exist yet.
+  let { data, error } = await run(`${EXTENDED_COLS}, closed_outcome`);
+  if (error?.code === "42703" || error?.code === "PGRST204") {
+    ({ data, error } = await run(EXTENDED_COLS));
+  }
   if (error?.code === "42703" || error?.code === "PGRST204") {
     // new columns absent → legacy shape, honestly flagged.
     extended = false;
@@ -589,6 +595,7 @@ export async function setMarketplaceListingStatusAction(
   id: string,
   status: string,
   legalCheckAcknowledged = false,
+  closedOutcome: "completed" | "withdrawn" | "discarded" | null = null,
 ): Promise<MarketplaceListingMutateResult> {
   if (!isListingStatus(status)) return { kind: "invalid", field: "status" };
   const supabase = await createClient();
@@ -600,21 +607,30 @@ export async function setMarketplaceListingStatusAction(
   // THE ONE LIFECYCLE CONTRACT (lib/market-lifecycle): the requested status
   // must be what one of the contract's actions produces from the row's
   // current state — for the UI, the MCP tool and any other door alike.
-  const { data: row, error: readError } = await asAny(supabase)
-    .from("marketplace_listings")
-    .select("status, category, listing_kind, title, description, owner_id")
-    .eq("id", id)
-    .maybeSingle();
+  const readRow = (cols: string) =>
+    asAny(supabase).from("marketplace_listings").select(cols).eq("id", id).maybeSingle();
+  let { data: row, error: readError } = await readRow(
+    "status, closed_outcome, category, listing_kind, title, description, owner_id",
+  );
+  if (readError?.code === "42703") {
+    ({ data: row, error: readError } = await readRow("status, category, listing_kind, title, description, owner_id"));
+  }
   if (readError) {
     if (isAbsent(readError)) return { kind: "needs-migration" };
     return { kind: "error", message: "status_failed" };
   }
   if (!row || row.owner_id !== user.id) return { kind: "invalid", field: "id" };
   if (row.status === status) return { kind: "ok", id };
-  const adapter = listingAdapter({ pauseSupported: true, closedOutcomeStored: false });
-  if (!actionForStatus(adapter, adapter.facts({ status: String(row.status) }), status)) {
+  const adapter = listingAdapter({ pauseSupported: true, closedOutcomeStored: true });
+  const facts = adapter.facts({ status: String(row.status), closedOutcome: row.closed_outcome ?? null });
+  const outcomeForClose = closedOutcome === "withdrawn" ? "withdrawn" : "completed";
+  if (!actionForStatus(adapter, facts, status, outcomeForClose)) {
     return { kind: "invalid", field: "status" };
   }
+  // The outcome the contract records: what the caller named, or `discarded`
+  // when a draft leaves for closed, or `completed` by default.
+  const outcome =
+    status !== "closed" ? null : facts.state === "draft" ? "discarded" : (closedOutcome ?? "completed");
 
   if (status === "active") {
     // Publishing is where the policy bites (the RPC and the DB trigger apply
@@ -638,10 +654,19 @@ export async function setMarketplaceListingStatusAction(
     }
   }
 
-  let { error } = await asAny(supabase).rpc("set_marketplace_listing_status_v2", {
+  // v3 = v2's checks + the closed outcome (human-gated migration
+  // 20261024100000); until it is applied, v2 exactly as before.
+  let { error } = await asAny(supabase).rpc("set_marketplace_listing_status_v3", {
     p_id: id,
     p_status: status,
+    p_closed_outcome: outcome,
   });
+  if (error && isFunctionAbsent(error)) {
+    ({ error } = await asAny(supabase).rpc("set_marketplace_listing_status_v2", {
+      p_id: id,
+      p_status: status,
+    }));
+  }
   if (error && isFunctionAbsent(error) && status !== "paused") {
     ({ error } = await asAny(supabase).rpc("set_marketplace_listing_status_v1", {
       p_id: id,
@@ -669,10 +694,11 @@ export async function applyMarketplaceListingAction(
   currentStatus: string,
   legalCheckAcknowledged = false,
 ): Promise<MarketplaceListingMutateResult> {
-  const adapter = listingAdapter({ pauseSupported: true, closedOutcomeStored: false });
+  const adapter = listingAdapter({ pauseSupported: true, closedOutcomeStored: true });
   const target = action === "edit" ? null : transition(adapter.support, adapter.facts({ status: currentStatus }), action);
   if (!target) return { kind: "invalid", field: "action" };
-  return setMarketplaceListingStatusAction(id, adapter.statusFor(target.state), legalCheckAcknowledged);
+  const outcome = target.closedOutcome === "withdrawn" ? "withdrawn" : null;
+  return setMarketplaceListingStatusAction(id, adapter.statusFor(target.state), legalCheckAcknowledged, outcome);
 }
 
 export async function deleteMarketplaceListingAction(
