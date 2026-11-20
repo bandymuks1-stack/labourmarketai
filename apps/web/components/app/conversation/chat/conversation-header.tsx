@@ -11,6 +11,7 @@ import {
 } from "@/lib/config/navigation";
 import { customerHeaderDoors, organizationHeaderAreas } from "@/lib/navigation/work-areas";
 import { isEducationInstitution } from "@/lib/organizations/capabilities";
+import { isEducationFirstWorkspace } from "@/lib/conversation/education-home";
 import { actingRoleForWorkspace } from "@/lib/company/organization-switch";
 import { activeNavItem, headerPlaceLabelKey } from "@/lib/navigation/header-place";
 import { NAV_ICONS } from "@/components/app/nav-icons";
@@ -100,10 +101,13 @@ export function ConversationHeader({
   const actingRole = actingRoleForWorkspace(activeWorkspace, auth?.roles ?? []);
   // An education institution's learning home joins them, by the organization
   // doors' own gate over the active organization's capabilities (UX_GAPS I-1).
-  const education = isEducationInstitution({ roleSlugs: auth?.activeOrganizationCapabilities });
+  // It leads only for an organization that is first of all an institution.
+  const capabilities = { roleSlugs: auth?.activeOrganizationCapabilities };
+  const education = isEducationInstitution(capabilities);
+  const educationFirst = isEducationFirstWorkspace(capabilities);
   const organizationAreas =
     actingRole === "company" || actingRole === "agency"
-      ? organizationHeaderAreas(actingRole, { education })
+      ? organizationHeaderAreas(actingRole, { education, educationFirst })
       : [];
   // The customer's own door leads "More" for a person who HOLDS the customer
   // role outside an organization workspace — the /dashboard/buyer gate's own
