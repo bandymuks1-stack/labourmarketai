@@ -282,7 +282,7 @@ function RequestRow({
       ) : null}
       {detailRows.length > 0 && (
         <details className="group">
-          <summary className="cursor-pointer select-none font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-secondary">
+          <summary className="flex min-h-11 cursor-pointer select-none items-center font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-secondary">
             {labels.detailsLabel}
           </summary>
           <dl
@@ -360,7 +360,6 @@ export function DemandRequestsReadback({
           >
             {labels.heading}
           </h2>
-          <p className="text-xs leading-relaxed text-text-secondary">{labels.note}</p>
           <p
             className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-meta leading-relaxed text-text-secondary"
             data-testid="demand-readback-worker-visibility-note"
@@ -368,15 +367,6 @@ export function DemandRequestsReadback({
             {labels.workerVisibilityNote}
           </p>
         </div>
-
-        {needs.length > 0 && (
-          <p
-            className="rounded-md border border-border-subtle bg-surface-1/60 px-3 py-2 text-meta leading-relaxed text-text-muted"
-            data-testid="demand-readback-manage-help"
-          >
-            {labels.manageHelp}
-          </p>
-        )}
 
         {needs.length === 0 ? (
           <p className="text-sm text-text-muted">{labels.empty}</p>

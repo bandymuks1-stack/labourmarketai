@@ -2,6 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 import {
   endRosterLinkAction,
@@ -49,18 +51,16 @@ export function RosterLinkEndControl({
 
   if (!open) {
     return (
-      <button
+      <Button
         type="button"
+        variant={side === "owner" ? "ghost" : "secondary"}
+        size="sm"
         onClick={() => setOpen(true)}
         data-testid="roster-link-end-open"
-        className={
-          side === "owner"
-            ? "min-h-11 w-fit rounded-control px-2.5 text-meta font-medium text-text-muted underline-offset-4 hover:text-state-warning hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
-            : "min-h-11 w-fit rounded-md border border-ink-500 bg-ink-800 px-3 text-xs font-semibold text-text-secondary hover:border-state-warning/60"
-        }
+        className="min-h-11 w-fit"
       >
         {side === "self" ? t("openSelf") : t("openOwner")}
-      </button>
+      </Button>
     );
   }
 
@@ -74,32 +74,36 @@ export function RosterLinkEndControl({
       </p>
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         <span>{t("reasonLabel")}</span>
-        <input
+        <Input
           name="reason"
           type="text"
           maxLength={500}
-          className="rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-xs text-text-primary outline-none focus:border-state-warning"
+          className="max-sm:min-h-11 max-sm:text-base"
           data-testid="roster-link-end-reason"
         />
       </label>
       <div className="flex flex-wrap items-center gap-2">
-        <button
+        <Button
           type="submit"
+          variant="secondary"
+          size="sm"
           disabled={pending}
           aria-busy={pending}
           data-testid="roster-link-end-submit"
-          className="min-h-11 rounded-md border border-state-warning/50 bg-state-warning/10 px-3 text-xs font-semibold text-state-warning disabled:opacity-50"
+          className="min-h-11 !border-state-warning/50 !text-state-warning"
         >
           {t("submit")}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
           onClick={() => setOpen(false)}
           disabled={pending}
-          className="min-h-11 rounded-md border border-ink-500 bg-ink-800 px-3 text-xs font-semibold text-text-secondary disabled:opacity-50"
+          className="min-h-11"
         >
           {t("cancel")}
-        </button>
+        </Button>
       </div>
       {state?.ok === false ? (
         <p role="alert" className="text-xs text-state-warning" data-testid="roster-link-end-error">

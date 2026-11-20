@@ -86,6 +86,10 @@ test("LT company setup — fields save, request works, no fake verified", async 
   // Required minimum + optional fields render.
   await expect(page.getByTestId("company-setup-legal-name")).toBeVisible();
   await expect(page.getByTestId("company-setup-country")).toBeVisible();
+  // A first setup keeps the optional fields in one closed group (UX gaps
+  // 2026-11-18, E-2); open it, then every optional field must render.
+  const optional = page.getByTestId("company-setup-optional");
+  if ((await optional.count()) > 0) await optional.locator("summary").click();
   for (const id of [
     "company-setup-registration-code",
     "company-setup-address",

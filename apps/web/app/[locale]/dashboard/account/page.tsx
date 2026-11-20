@@ -245,7 +245,7 @@ export default async function AccountPage({
           )}
           <Link
             href="/pricing"
-            className="mt-3 flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+            className="mt-3 flex min-h-11 items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
           >
             <span>{tRoot("accountPlan.pricingLink")}</span>
             <span aria-hidden className="text-text-muted">→</span>
@@ -306,7 +306,7 @@ export default async function AccountPage({
             <Link
               href="/auth/forgot-password"
               data-testid="account-change-password"
-              className="mt-1 flex w-fit items-center gap-2 text-sm text-text-primary hover:text-brand-blue"
+              className="mt-1 flex min-h-11 w-fit items-center gap-2 text-sm text-text-primary hover:text-brand-blue"
             >
               <span>{t("account.security.signin.changePassword")}</span>
               <span aria-hidden className="text-text-muted">→</span>
@@ -411,7 +411,7 @@ export default async function AccountPage({
       <section className="card-border p-5">
         <Link
           href="/dashboard/profile"
-          className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+          className="flex min-h-11 items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
           data-testid="account-edit-identity-link"
         >
           <span className="flex items-center gap-2">
@@ -443,7 +443,7 @@ export default async function AccountPage({
               <Link
                 href="/dashboard/privacy"
                 data-testid="account-privacy-self-service-link"
-                className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+                className="flex min-h-11 items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
               >
                 <span>{tRoot("privacySelfService.accountLink")}</span>
                 <span aria-hidden className="text-text-muted">→</span>
@@ -452,7 +452,7 @@ export default async function AccountPage({
             <li>
               <Link
                 href="/about"
-                className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+                className="flex min-h-11 items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
               >
                 <span>{tRoot("about.navLabel")}</span>
                 <span aria-hidden className="text-text-muted">→</span>
@@ -461,7 +461,7 @@ export default async function AccountPage({
             <li>
               <Link
                 href="/legal/privacy"
-                className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+                className="flex min-h-11 items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
               >
                 <span>{tRoot("legal.privacy.title")}</span>
                 <span aria-hidden className="text-text-muted">→</span>
@@ -470,7 +470,7 @@ export default async function AccountPage({
             <li>
               <Link
                 href="/legal/data-access"
-                className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+                className="flex min-h-11 items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
               >
                 <span>{tRoot("legal.dataAccess.title")}</span>
                 <span aria-hidden className="text-text-muted">→</span>
@@ -479,7 +479,7 @@ export default async function AccountPage({
             <li>
               <Link
                 href="/legal/data-protection"
-                className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+                className="flex min-h-11 items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
               >
                 <span>{tRoot("legal.dataProtection.title")}</span>
                 <span aria-hidden className="text-text-muted">→</span>
@@ -541,7 +541,7 @@ export default async function AccountPage({
           settings stay practical, not a product dashboard. The rolesIntro +
           per-role chips (roleStatusChipKey) remain in the source. */}
       <details className="card-border group p-5" data-testid="account-roles-details">
-        <summary className="flex cursor-pointer list-none items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-primary">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-primary">
           <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
           {t("account.roles_label")}
         </summary>

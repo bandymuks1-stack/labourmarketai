@@ -31,6 +31,9 @@ const AUTH_FORMS = [
   "signup-form",
   "forgot-password-form",
   "reset-password-form",
+  // The first screen after sign-up carried a FIFTH copy of the string, at
+  // 42px (found 2026-11-12). Same surface, same class.
+  "onboarding-wizard",
 ] as const;
 
 function readForm(name: string): string {

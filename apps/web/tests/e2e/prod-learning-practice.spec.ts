@@ -92,11 +92,10 @@ test("L-2. the institution invites a learner with a link (no e-mail needed)", as
   await page.goto("/lt/dashboard/company/education");
   await page.getByTestId("institution-learners-invite").click();
   await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
-  const capacity = page.getByTestId("invite-capacity");
-  await clickUntilVisible(page.getByTestId("invite-panel-open"), capacity, { timeout: 30_000, what: "the invite panel" });
-  await expect(capacity).toHaveValue("student");
-  const linkMode = page.getByTestId("invite-mode-link");
-  if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
+  // UX_GAPS I-4: the door preset type, organisation and relationship — one read-only line, link mode by default.
+  const preset = page.getByTestId("invite-preset");
+  await expect(preset).toHaveAttribute("data-relationship", "student", { timeout: 30_000 });
+  await expect(page.getByTestId("invite-mode-link")).toHaveAttribute("aria-checked", "true");
   const name = page.getByTestId("invite-name");
   if (await name.isVisible().catch(() => false)) await name.fill(`QA-SYNTHETIC mokinys ${RUN}`);
   await page.getByTestId("invite-submit").click();

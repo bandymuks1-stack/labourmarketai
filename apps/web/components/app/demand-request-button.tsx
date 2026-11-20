@@ -89,9 +89,14 @@ export function DemandRequestButton({
   intent,
   stepTitles,
   repeatRequestId = null,
+  hasOwnPreviousRequest = null,
   usage = null,
   organizationId = null,
 }: {
+  /** Whether the caller already has a request of this direction to copy
+   *  from (read by the page). False hides "Fill from my last request";
+   *  null (unknown) keeps it. */
+  hasOwnPreviousRequest?: boolean | null;
   intent: "hire_workers" | "partner";
   /** The organization this page was rendered for. Sent with the submit so a
    *  workspace switched meanwhile (another tab) REFUSES instead of posting
@@ -683,6 +688,7 @@ export function DemandRequestButton({
         <div className="flex flex-col gap-4">
           {/* Duplicate-and-edit — repeat action: copy the own last request
               into the form, then edit. Own data echoed back; nothing invented. */}
+          {hasOwnPreviousRequest === false ? null : (
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
@@ -718,6 +724,7 @@ export function DemandRequestButton({
               </span>
             )}
           </div>
+          )}
           <label className="flex flex-col gap-1.5">
             <Label>{t(`${key}.roleLabel`)}</Label>
             <Input

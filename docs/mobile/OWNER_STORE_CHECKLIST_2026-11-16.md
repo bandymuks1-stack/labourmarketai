@@ -37,15 +37,42 @@ Nothing on this page is done until the owner says so. No store has accepted anyt
 | E | Lawyer-reviewed privacy policy / terms and retention periods | the pack §6 item 8 |
 | F | Whether account deletion must start **inside** the app (Apple 5.1.1(v)) — it needs a new privacy capability; held as an owner decision | the pack §0.3 |
 
-## 3. What changes in the store answers with the new screens (#3451–#3455)
+## 3. Store answers for the new screens — DRAFT for the owner (updated 2026-11-18)
 
-These apply **once those PRs are merged**. Until then the pack's §1 scope stands.
+**These screens are on `main`** (#3451, #3453, #3471, #3485, #3497; the booking answer is proven by #3502). The drafts below are what the Play **Data safety** form and the Apple **App Privacy** label must say once a build with them ships. They are drafts: the owner approves them (item C above). Nothing here is submitted.
 
-| Screen | What a person does | Data safety / App Privacy |
-|---|---|---|
-| Profile → Work history, Education, Languages | Add their own past jobs, schooling and languages to the Living CV (`worker.add-work-history`, `worker.add-education`, `worker.add-language`) | already covered: *Other user-generated content* and *Name*, App functionality; the person's own statements, never shown as confirmed |
-| Find candidates (employers) | See the organization's needs and the **anonymized** candidates the web scouting search ranks for one need; shortlist one (`demand.list`, `candidate.search`, `shortlist.add_*`) | no new data type: candidates carry no name and no contact; the shortlist is the organization's own record |
-| Propose a booking (employers) | Send a booking proposal with optional dates and a note to a candidate who may be contacted (`company.propose-booking.*`) | *Other in-app messages / user content*: the note reaches only that person, in their Offers |
+### 3.1 Screen by screen
+
+| Screen | What a person does (capability) | Data type touched | New for the store answers? |
+|---|---|---|---|
+| Profile → Work history, Education, Languages | Add their own past jobs, schooling and languages (`worker.add-work-history`, `worker.add-education`, `worker.add-language`) | Other user-generated content (their own statements) | no: already declared; shown as the person's own statement, never as confirmed |
+| Find candidates (organization workspace) | See the organization's needs and the **anonymized** ranked candidates for one need (`demand.list`, `candidate.search`) | none collected: candidates carry no name and no contact | no |
+| Shortlist / Not a fit | Put a candidate on the organization's shortlist, or take them off with a short reason (`shortlist.add_*`, `shortlist.remove_*`) | Other user-generated content (the reason, kept as the organization's history) | no: same type |
+| Propose a booking | Send dates and an optional note to a candidate who may be contacted (`company.propose-booking.*`) | Other in-app messages (the note, delivered only to that person's Offers) | no: *Messages → Other in-app messages* is already declared (#2928) |
+| Close / reopen a need | Change a need's state (`demand.close_*`, `demand.reopen_*`) | none new | no |
+| Agency offers | Accept / decline an agency's candidate; agree in principle to or decline a brigade / company (`company.respond-offer.*`, `company.respond-team-offer.*`) | none new: the agency's note is shown, nothing new is collected | no |
+| Programmes & cohorts (training providers) | Create a programme or cohort; assign an accepted learner (`company.create-programme.*`, `company.create-cohort.*`, `company.assign-learner.*`) | Other user-generated content (programme and cohort names) | no |
+| Invite a learner | Send an invitation e-mail to a learner (`company.invite-learner.*`) | **Email address and an optional name of ANOTHER person**, entered by the institution | **wording only:** *Email address* and *Name* are already declared (App functionality). The privacy policy must say that an institution can enter a learner's address to invite them and that the address is used only for that invitation. |
+| Today | Organization stations shown only in an organization workspace (`context.list`) | none | no |
+| Post a need (#3485) | The work's country is now a required field (`demand.create_*`) | Other user-generated content (the organization's need) | no: a typed country of the work is not device location; no location permission is asked |
+| Agency (#3497) | An agency proposes one of **its own** people for a need a client shared, with an optional note (`agency.clients.get`, `agency.propose-candidate.*`) | Other user-generated content (the proposal); Other in-app messages (the note, shown to that client) | no: same types |
+| Offers → a proposed start (#3502) | The worker accepts or declines a start a company proposed (`booking.list`, `worker.respond-booking.*`) | none new: the answer is the person's own record | no |
+
+### 3.2 Resulting answers (unchanged types, one wording addition)
+
+- **Play Data safety:** the same five rows as the pack §2.1: Email address, Name, User IDs, Other user-generated content, Other in-app messages. All are *collected*, *not shared*, purpose *App functionality* (+ *Account management* for e-mail), encrypted in transit, deletable on request. **No new row.**
+- **Apple App Privacy:** Data Linked to You is Contact Info (Email), Identifiers (User ID), User Content (Other; Emails or Text Messages), Name. **Data Used to Track You: none.** It matches `ios.privacyManifests` in `app.json` on `main`, which already declares all five types, including `NSPrivacyCollectedDataTypeEmailsOrTextMessages`. The pack §2.1 "code gap" is **closed**.
+- **Owner text to approve:** one sentence in the privacy policy about learner invitations (above). It is a lawyer-reviewed text (item E), so the agent does not write it.
+
+### 3.3 Icon and splash
+
+Already generated from `apps/web/public/app-icon.svg` (the LM mark) by `apps/mobile/scripts/generate-app-assets.mjs` (#2368), wired in `app.json` (`icon`, `android.adaptiveIcon` with monochrome, `expo-splash-screen`). The SVG has not changed since then (2026-09-09), so re-running the script produces the same files. **Only the owner's approval of the art is open (item A).**
+
+### 3.4 Screenshots
+
+Store screenshots must show real screens (pack rule 5: no staged or fake states). The isolated Android job (`android-need-isolated.yml`) walks the new screens on a throwaway local stack with **synthetic** data only. It deliberately uploads nothing today.
+
+**Open question to the coordinator:** may that job save screenshots of the new screens as a short-lived artifact? These would be drafts, synthetic data only, never production. Real store screenshots still come from the owner's signed-in device (item D).
 
 **Pack corrections for the owner's copy:**
 - §1 Settings: the app has **7** languages (en, lt, ru, nl, de, pl, sv), not 6.
@@ -53,9 +80,16 @@ These apply **once those PRs are merged**. Until then the pack's §1 scope stand
 - The IARC answer "users can interact" stays **yes**.
 - The "not in the app" list still holds: no calendar, no AI chat, no marketplace, no push, no camera, no offline queue, no Google / Apple sign-in.
 
+### 3.5 Versions and permissions (checked 2026-11-18)
+
+- **Build numbers:** `eas.json` sets `appVersionSource: "remote"` and `autoIncrement` for `production`, so EAS owns the iOS build number and the Android version code. The `buildNumber: "1"` / `versionCode: 1` in `app.json` are only the starting point the release guard pins.
+- **Marketing version:** `app.json` `version` is **`0.1.0`**. Both stores accept it. **Owner decision:** keep `0.1.0` for the first internal / TestFlight builds, or set **`1.0.0`** for the first public release. The agent changes it only on the owner's word.
+- **Permissions:** the app asks for **no runtime permission**: no camera, photos, location, contacts, microphone or notifications dependency, so no iOS usage-description text is needed. Android blocks the legacy storage, overlay and biometric permissions (`android.blockedPermissions`, pinned by `mobile-release-config.test.ts`).
+- **Privacy manifest:** `ios.privacyManifests` declares the five collected types of §3.2 and the four required-reason APIs; `NSPrivacyTracking` is `false` (no analytics or advertising dependency, also pinned by the guard).
+
 ## 4. What the agent does after each owner step
 
 - **After #4 (`eas init`):** commit `extra.eas.projectId`, pin it in `mobile-release-config.test.ts`, and set the `eas.json` `submit.production` profile to internal track only, with no secret in the repository.
 - **After #9:** prove App Links / Universal Links in CI (`adb shell pm verify-app-links`, an AASA fetch).
 - **After #10:** run the signed-in Maestro journeys (`ios-signed-in.yml`, `android.yml` `signed-in`) and extend them to the new screens.
-- **Merging #3217 (`eas-release.yml`)** is the owner's call: it builds only behind the `store-release` environment's required reviewer.
+- **#3217 (`eas-release.yml`) is merged** and the owner has configured `store-release` (owner as required reviewer, `main` only, `EXPO_TOKEN` as its secret). The workflow is build-only. **The first real build runs only on the owner's separate permission; nothing is uploaded to a store.**

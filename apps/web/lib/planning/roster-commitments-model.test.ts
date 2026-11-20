@@ -124,6 +124,7 @@ describe("agency bridge: the client's accept / decline are 44 px targets", () =>
     const src = readFileSync(join(WEB, "components", "app", "client-agency-bridge-section.tsx"), "utf8");
     expect(src).not.toMatch(/inline-flex h-8 /);
     expect(src).toMatch(/data-testid=\{`client-bridge-accept-\$\{c\.id\}`\}[\s\S]{0,200}min-h-11/);
-    expect(src).toMatch(/min-h-11 min-w-11 items-center justify-center/);
+    // The icon-only decline is a square 44 px target on the shared Button.
+    expect(src).toMatch(/title=\{labels\.declineButton\}[^>]*className="min-h-11 min-w-11/);
   });
 });
