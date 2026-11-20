@@ -31,7 +31,7 @@ import {
   skillGroupLabelKey,
 } from "@/lib/skills/skill-groups";
 import { formatUtcDate } from "@/lib/time/display";
-import { visibleSkillClaims } from "@/lib/profile/visible-skill-claims";
+import { skillClaimChips, visibleSkillClaims } from "@/lib/profile/visible-skill-claims";
 
 /**
  * Unified CV / capability surface (replaces the disconnected
@@ -98,8 +98,12 @@ export function CapabilityProfileSection({
   // Derived from the prop on every render (lib/profile/visible-skill-claims):
   // a refresh after an add must show the new chip. Only the ids removed in
   // this session are local state, hidden until the refresh drops them.
+  // A claim the save CONFIRMED shows at once (useSavedRows, as the experience
+  // rows below): the refreshed page commits as one piece after its slowest
+  // read, so a chip that waited for it could miss 30 s (P-13, run 44637832323).
+  const { rows: claimsWithSaved, showSaved: showSavedClaim } = useSavedRows(claims);
   const [removedClaimIds, setRemovedClaimIds] = useState<ReadonlySet<string>>(() => new Set());
-  const savedClaims: ProfileSkillClaimRow[] = visibleSkillClaims(claims, removedClaimIds);
+  const savedClaims: ProfileSkillClaimRow[] = visibleSkillClaims(claimsWithSaved, removedClaimIds);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, startDelete] = useTransition();
   const [manualLabel, setManualLabel] = useState("");
@@ -124,19 +128,9 @@ export function CapabilityProfileSection({
   // the person saved under that spelling — an explicit act, never silent);
   // without one, the raw rows. Claims already folded INTO a catalogued
   // skill are not repeated here — they are that skill, shown above with
-  // its figures.
-  const savedIds = new Set(savedClaims.map((c) => c.id));
-  const claimItems: { key: string; label: string; ids: string[]; variants: readonly string[] }[] =
-    skillPresentation
-      ? (skillPresentation.groups.find((g) => g.tier === "self_stated")?.items ?? [])
-          .map((it) => ({
-            key: it.key,
-            label: it.name,
-            ids: it.claimIds.filter((id) => savedIds.has(id)),
-            variants: it.variants,
-          }))
-          .filter((it) => it.ids.length > 0)
-      : savedClaims.map((c) => ({ key: c.id, label: c.label, ids: [c.id], variants: [c.label] }));
+  // its figures. A claim saved after the presentation was built shows as its
+  // own chip until the refresh folds it (lib/profile/visible-skill-claims).
+  const claimItems = skillClaimChips(skillPresentation, savedClaims);
   const foldedIntoSkills = skillPresentation
     ? skillPresentation.claimsFoldedIntoSkills
     : 0;
@@ -157,7 +151,7 @@ export function CapabilityProfileSection({
     setError(null);
     startAdd(() => {
       saveProfileSkillClaimsAction([label])
-        .then(() => {
+        .then((stored) => {
           setManualLabel("");
           // router.refresh() re-fetches the server-rendered claims
           // list so the new chip appears in this section without a
@@ -165,6 +159,10 @@ export function CapabilityProfileSection({
           // constraint + `ignoreDuplicates: true` in the server
           // action handle the no-duplicate guarantee for us.
           router.refresh();
+          // The refreshed page commits only after its slowest read, so the
+          // rows the server read back after the insert show the new claim now.
+          const shown = new Set(claims.map((c) => c.id));
+          for (const row of stored) if (!shown.has(row.id)) showSavedClaim(row);
         })
         .catch((e: unknown) => {
           console.error("[capability-profile] add failed", e);
