@@ -1809,6 +1809,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-18 Lane H (register 4.30): agency-to-agency partnerships and commissions. RED draft #3353,
       // the marker is the human-gate acknowledgement, NOT applied.
       "20261118100000_agency_partnerships_commissions_v1.sql",
+      // 2026-09-20 — COMM-1: nullable profiles.communication_locale (CHECK = the 13 communication languages; NULL = follow the UI locale). RED by owner classification, DRAFT needs-human-gate, NOT applied.
+      "20261118100100_profiles_communication_locale_v1.sql",
 ]);
   });
 

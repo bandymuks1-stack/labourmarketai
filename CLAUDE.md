@@ -251,6 +251,21 @@ legal, consent, security and essential action-consequence texts. The rule applie
 every PR and every locale, and it never changes functionality. See
 `docs/DECISIONS/0032-no-interface-noise.md`.
 
+## Direct counterparty and responsibility chain (binding, decision 0033)
+
+This applies to every party: employers, workers, agencies, contractors, subcontractors, suppliers,
+service providers and other partners.
+- A client works only with its direct partner.
+- Each party sees only the data its own relationships and functions need.
+- Each party answers to its direct client for its own obligations and for the partners it brings in.
+- Other chain participants' identity and commercial terms are not disclosed, unless the law requires
+  it.
+- The whole chain is kept for internal audit, under access rights.
+
+The rule applies to LabourMarket.ai, Agentai OS and related projects. It is not a mandate to build or
+rework anything without a concrete need and the owner's permission. See
+`docs/DECISIONS/0033-direct-counterparty-and-responsibility-chain.md`.
+
 ## Internal validity rule (binding, owner P0 2026-10-22, all projects)
 
 An INTERNAL approval, owner decision, internal contract or temporary internal permission is valid

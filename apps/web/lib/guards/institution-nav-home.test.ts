@@ -31,10 +31,10 @@ describe("I-1 — the header names the learning area for an education institutio
       /const hasEducation = isEducationInstitution\(\{ roleSlugs: capabilities \}\);/,
     );
     const header = read("components/app/conversation/chat/conversation-header.tsx");
-    expect(header).toMatch(
-      /isEducationInstitution\(\{ roleSlugs: auth\?\.activeOrganizationCapabilities \}\)/,
-    );
-    expect(header).toMatch(/organizationHeaderAreas\(actingRole, \{ education \}\)/);
+    expect(header).toMatch(/const capabilities = \{ roleSlugs: auth\?\.activeOrganizationCapabilities \};/);
+    expect(header).toMatch(/const education = isEducationInstitution\(capabilities\);/);
+    expect(header).toMatch(/organizationHeaderAreas\(actingRole, \{ education, educationFirst \}\)/);
+    expect(header).toMatch(/const educationFirst = isEducationFirstWorkspace\(capabilities\)/);
     expect(read("app/[locale]/dashboard/layout.tsx")).toMatch(
       /readOrganizationCapabilities\(activeOrganizationId\)/,
     );
@@ -48,10 +48,18 @@ describe("I-1 — the header names the learning area for an education institutio
     expect(doors).toContain(`education: "${ORGANIZATION_EDUCATION_AREA.href}"`);
     expect(ORGANIZATION_EDUCATION_AREA.labelKey).toBe("organizationDoors.education");
     for (const role of ["company", "agency"] as const) {
-      const withEdu = organizationHeaderAreas(role, { education: true });
-      expect(withEdu[0]).toMatchObject({ id: "area:education", href: "/dashboard/company/education" });
-      expect(withEdu.slice(1)).toEqual(organizationHeaderAreas(role));
-      expect(organizationHeaderAreas(role).some((a) => a.id === "area:education")).toBe(false);
+      const plain = organizationHeaderAreas(role);
+      // An institution (education without employer): the learning home leads.
+      const institution = organizationHeaderAreas(role, { education: true, educationFirst: true });
+      expect(institution[0]).toMatchObject({ id: "area:education", href: "/dashboard/company/education" });
+      expect(institution.slice(1)).toEqual(plain);
+      // An employer that also trains (prod-company-chain N-1): its own three
+      // leads stay first, the learning home follows them, nothing else moves.
+      const employer = organizationHeaderAreas(role, { education: true });
+      expect(employer.slice(0, 3)).toEqual(plain.slice(0, 3));
+      expect(employer[3]).toMatchObject({ id: "area:education" });
+      expect(employer.filter((a) => a.id !== "area:education")).toEqual(plain);
+      expect(plain.some((a) => a.id === "area:education")).toBe(false);
     }
   });
 

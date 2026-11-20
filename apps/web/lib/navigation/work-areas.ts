@@ -131,9 +131,21 @@ const HEADER_AREA_LEADS: Record<"company" | "agency", readonly string[]> = {
 };
 const AREAS_IN_THE_CORE_LOOP = new Set(["messages", "calendar"]);
 
+/**
+ * `education`: the organization holds the education capability, so its
+ * learning home is one of its areas. `educationFirst`: it is first of all an
+ * institution (`isEducationFirstWorkspace` — the education capability without
+ * `employer`), so that home leads (I-1). An organization that ALSO employs
+ * people keeps its own leads first and finds the learning home right after
+ * them: the education capability never pushes a company's or an agency's
+ * areas down (prod-company-chain N-1).
+ */
 export function organizationHeaderAreas(
   role: "company" | "agency",
-  { education = false }: { readonly education?: boolean } = {},
+  {
+    education = false,
+    educationFirst = false,
+  }: { readonly education?: boolean; readonly educationFirst?: boolean } = {},
 ): readonly NavItem[] {
   const leads = HEADER_AREA_LEADS[role];
   const rank = (id: string) => (leads.includes(id) ? leads.indexOf(id) : leads.length);
@@ -141,8 +153,12 @@ export function organizationHeaderAreas(
     .map((a, n) => ({ a, n }))
     .sort((x, y) => rank(x.a.id) - rank(y.a.id) || x.n - y.n)
     .map(({ a }) => a);
-  // An education institution's learning home leads its own doors.
-  return (education ? [ORGANIZATION_EDUCATION_AREA, ...areas] : areas).map((a) => ({
+  const withEducation = !education
+    ? areas
+    : educationFirst
+      ? [ORGANIZATION_EDUCATION_AREA, ...areas]
+      : [...areas.slice(0, leads.length), ORGANIZATION_EDUCATION_AREA, ...areas.slice(leads.length)];
+  return withEducation.map((a) => ({
     id: `area:${a.id}` as const,
     href: a.href,
     tabLabelKey: a.labelKey,

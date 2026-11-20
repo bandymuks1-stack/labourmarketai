@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "[EN] Message language",
+    "intro": "[EN] Work messages and instructions written in another language are shown to you translated into this language. Leave it on the interface language unless you read another language better.",
+    "label": "[EN] I read messages in",
+    "sameAsInterface": "[EN] Same as the interface",
+    "saved": "[EN] Saved.",
+    "error": "[EN] The change could not be saved and was reverted. Please try again.",
+    "unavailable": "[EN] This setting is not available yet — messages follow the interface language until it is."
+  },
   "demandReadback": {
     "notVerifiedYet": "Jūsu uzņēmums vēl nav verificēts, tāpēc šeit iesniegtās vajadzības darbiniekiem netiek rādītas, kamēr verifikācija nav pabeigta.",
     "notVerifiedHowTo": "Pievienot reģistrācijas numuru un pieprasīt pārbaudi",

@@ -34,6 +34,9 @@ import {
  *   M-7 JOURNAL  opens the work journal; it fits the phone, also with its disclosures open.
  *   M-8 FIRST    records a first entry from the home's one action; the saved state links the CV;
  *                back on the journal, the CV bridge leads the records: the CV is one tap away.
+ *   M-9 SKILL    adds a free-label skill on the profile: the chip shows in place (no reload), is
+ *                stored once, persists on a reload and is declared on the Living CV; then the same
+ *                add at a desktop width (production walk P-13, run 44637832323 at 375 px).
  *
  * M-2 runs LAST in each group (first run 2026-11-14: the CV page stopped answering at 375 px), so a
  * CV fault cannot hide search, applying and messages; if it stops answering again, the step says
@@ -666,6 +669,63 @@ for (const phone of PHONES) {
       await fitsTheScreen(page, "the profile with the experience form open");
       await done();
     });
+    test(`M-9 (${phone.name}). a free-label skill added on the profile shows in place, persists, and is declared on the Living CV`, async ({ browser }) => {
+      // The production walk P-13 (2.15) on the same steps: run 44637832323 at 375 px saved the claim
+      // (the input cleared; a reload found the chip) but the chip did not show in place in 30 s. The
+      // chip must show WITHOUT a reload, from the save's own answer, then persist on a real reload.
+      // The same add at a desktop width follows, so a phone-only fault names itself.
+      const addInPlace = async (page: Page, claim: string, where: string): Promise<void> => {
+        await page.goto(`${BASE}/en/dashboard/profile#capabilities`);
+        const main = page.getByRole("main");
+        await expect(main.locator("details#capabilities").first(), `${where}: the capabilities section is open`).toHaveAttribute("open", "", {
+          timeout: 30_000,
+        });
+        const form = main.getByTestId("capability-profile-manual-add");
+        const input = form.getByTestId("capability-profile-manual-input");
+        await input.scrollIntoViewIfNeeded();
+        await input.fill(claim);
+        const add = form.getByTestId("capability-profile-manual-add-button");
+        if (where === "desktop") await add.click();
+        else await add.tap();
+        await expect.poll(() => input.inputValue(), { message: `${where}: the claim save answered`, timeout: 30_000 }).toBe("");
+        await expect(main.getByTestId("capability-profile-claim").filter({ hasText: claim }), `${where}: the new chip shows in place`).toBeVisible({
+          timeout: 30_000,
+        });
+        await expect
+          .poll(
+            () =>
+              sql<{ n: number }>(
+                `select count(*)::int as n from public.profile_skill_claims where profile_id = ${lit(s.profileId)} and label = ${lit(claim)}`,
+              )[0]?.n ?? 0,
+            { message: `${where}: the claim is stored once`, timeout: 30_000 },
+          )
+          .toBe(1);
+        await page.reload();
+        await expect(main.locator("details#capabilities").first()).toHaveAttribute("open", "", { timeout: 30_000 });
+        await expect(main.getByTestId("capability-profile-claim").filter({ hasText: claim }), `${where}: the claim persists`).toHaveCount(1, {
+          timeout: 30_000,
+        });
+      };
+
+      const claim = `QA-SYNTHETIC skill ${phone.name} ${RUN}`;
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      await addInPlace(page, claim, `${phone.name} px`);
+      await fitsTheScreen(page, "the profile with a new skill chip");
+      await page.goto(`${BASE}/en/cv`);
+      await expect(
+        page.getByRole("main").locator('[data-testid="cv-tier-declared"]', { hasText: claim }).first(),
+        "a claim nobody has evidenced stays in the declared tier",
+      ).toBeVisible({ timeout: 30_000 });
+      const state = await page.context().storageState();
+      await done();
+
+      const desk = await browser.newContext({ storageState: state, timezoneId: "UTC" });
+      const dp = await desk.newPage();
+      watch(dp);
+      await addInPlace(dp, `QA-SYNTHETIC skill desktop ${phone.name} ${RUN}`, "desktop");
+      await desk.close();
+    });
+
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await accountMenu(page, "account-menu-cv-link");
