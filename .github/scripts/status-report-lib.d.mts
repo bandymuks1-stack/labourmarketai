@@ -122,3 +122,21 @@ export declare function narrativeDiscrepancies(
   input: { openPrNumbers?: number[]; closedPrNumbers?: number[]; ledger?: WalkLedger | null },
 ): string[];
 export declare function privacyFindings(text: string | null | undefined): string[];
+
+export interface ParityReading {
+  applied: number;
+  files: number;
+  notApplied: string[];
+  passed: boolean;
+}
+export declare function parseParityLog(text: string): ParityReading | null;
+export declare function migrationClaimDiscrepancies(
+  text: string,
+  opts?: { prMigrations?: Record<string | number, string[]>; notApplied?: string[] },
+): string[];
+export declare function finalCompleteness(opts: {
+  errors?: unknown[];
+  registerProblems?: string[];
+  discrepancies?: string[];
+  migrationParity?: unknown;
+}): "COMPLETE" | "PARTIAL";
