@@ -672,6 +672,31 @@ test("FE-6. an edit of a correction filed under another organization while the e
     sql<{ status: string }>(`select status from public.engagement_contexts where id = ${lit(s.ecB)}`)[0]?.status,
     "the employment with B is ended",
   ).toBe("ended");
+  // W's chain clock runs ahead of the calendar here: journal_entries_chain_v1
+  // stamps each new row at least 1 µs after the worker's newest row, and the
+  // file's clock steps (FE-2..FE-5) moved W's newest rows days forward, so
+  // W's entries for B are dated after today while the end door wrote today's
+  // date. The end is put on the day W's entries for B carry, in the file's
+  // own seeded-step form: the employment ends the day its last entry was
+  // recorded, as it would on a real calendar.
+  sqlExec(
+    `begin;
+     alter table public.engagement_contexts disable trigger user;
+     update public.engagement_contexts
+        set ended_at = (select (created_at at time zone 'UTC')::date from public.journal_entries where id = ${lit(second.id!)})
+      where id = ${lit(s.ecB)};
+     alter table public.engagement_contexts enable trigger user;
+     commit;`,
+  );
+  expect(
+    sql<{ same_day: boolean }>(
+      `select bool_and(je.created_at < (ec.ended_at + 1)::timestamp at time zone 'UTC'
+                       and je.created_at >= ec.ended_at::timestamp at time zone 'UTC') as same_day
+         from public.journal_entries je join public.engagement_contexts ec on ec.id = ${lit(s.ecB)}
+        where je.id in (${lit(first.id!)}, ${lit(second.id!)}, ${lit(c1.id!)})`,
+    )[0]?.same_day,
+    "B's entries and the correction filed under C are dated on the end day",
+  ).toBe(true);
 
   // After the end, W edits the correction filed under C. Both supersede RPCs
   // carry correction_of forward, so the successor names B's original too.
@@ -694,31 +719,6 @@ test("FE-6. an edit of a correction filed under another organization while the e
   ).toEqual([]);
   expect(await readable(Q, [c1.id!, c2.id!]), "C reads both versions filed under it").toEqual([c1.id!, c2.id!].sort());
   expect(await readable(W, [first.id!, c1.id!, c2.id!]), "W reads every version").toEqual([first.id!, c1.id!, c2.id!].sort());
-  // Read-back of every predicate the retained-history read depends on (logged, not asserted).
-  console.log(
-    "FE-6 diagnostics:",
-    JSON.stringify(
-      sql(
-        `select je.engagement_context_id = ${lit(s.ecB)} as in_b, je.created_at::text as created_at,
-                je.superseded_by, je.correction_of, je.deleted_at,
-                ec.status, ec.ended_at::text as ended_at, ec.relationship_slug, rt.category,
-                ((ec.ended_at + 1)::timestamp at time zone 'UTC')::text as cut,
-                public.journal_entry_chain_root_at_v1(je.id)::text as root_at,
-                (select json_agg(json_build_object('slug', x.relationship_slug, 'status', x.status))
-                   from public.engagement_contexts x
-                  where x.profile_id = ${lit(s.pId)} and x.organization_id = ec.organization_id) as p_engagements,
-                (select json_agg(json_build_object('role', m.role, 'status', m.status))
-                   from public.company_memberships m
-                  where m.profile_id = ${lit(s.pId)} and m.organization_id = ec.organization_id) as p_memberships,
-                (select json_agg(json_build_object('id', c.id, 'ctx', c.engagement_context_id, 'sup', c.superseded_by))
-                   from public.journal_entries c where c.correction_of = je.id) as corrections
-           from public.journal_entries je
-           join public.engagement_contexts ec on ec.id = je.engagement_context_id
-           left join public.relationship_types rt on rt.slug = ec.relationship_slug
-          where je.id in (${lit(first.id!)}, ${lit(second.id!)})`,
-      ),
-    ),
-  );
   expect(await readable(P, [second.id!]), "B keeps its other confirmed record, which has no correction").toEqual([second.id!]);
   expect(await readable(P, [first.id!]), "B keeps its confirmed original").toEqual([first.id!]);
 
