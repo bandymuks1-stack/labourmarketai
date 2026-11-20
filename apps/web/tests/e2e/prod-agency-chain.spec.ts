@@ -424,6 +424,15 @@ test("A-5. the agency sees the shared need and offers its person", async ({ brow
   await close();
 });
 
+/**
+ * B2B offer notifications (v12, #3227). Production is walked with them only
+ * after the owner-approved apply: the coordinator sets
+ * PROD_OFFER_NOTIFICATIONS=1, and then the client must reach the offer FROM
+ * ITS BELL and the agency must see the answer in its own. Without the flag the
+ * walk keeps its direct navigation.
+ */
+const OFFER_NOTIFICATIONS = process.env.PROD_OFFER_NOTIFICATIONS === "1";
+
 test("A-6. the client answers the offer", async ({ browser }) => {
   const { page, close } = await as(browser, "owner");
   await page.goto("/lt/dashboard");
@@ -431,7 +440,18 @@ test("A-6. the client answers the offer", async ({ browser }) => {
   // Which proposals were open before this run's accept: the one it adds is
   // this run's own, the only one the teardown may withdraw.
   const before = await openOutgoingProposalIds(page);
-  await page.goto(`/lt/dashboard/company/scouting${requestId ? `?request=${requestId}` : ""}`);
+  if (OFFER_NOTIFICATIONS) {
+    await page.goto("/lt/dashboard");
+    await page.getByTestId("notification-bell").first().click();
+    const row = page
+      .locator('[data-testid="notification-row"][data-notification-type="event_candidate_offer_received"]')
+      .first();
+    await expect(row, "the agency's offer is in the client's bell").toBeVisible({ timeout: 30_000 });
+    await row.locator('[data-testid^="notification-signal-"]').click();
+    await page.waitForURL(/\/dashboard\/company\/scouting\?request=/, { timeout: 30_000 });
+  } else {
+    await page.goto(`/lt/dashboard/company/scouting${requestId ? `?request=${requestId}` : ""}`);
+  }
   const offers = page.getByTestId("scouting-agency-offers");
   await expect(offers).toBeVisible({ timeout: 30_000 });
   const accept = offers.locator('[data-testid^="offer-accept-"]').first();
@@ -523,6 +543,14 @@ test("A-7. the agency sees the decision and talks to the client in one thread", 
       // A-6b's accept reaches the agency too: the placement's last step.
       await expect(placement.getByTestId("agency-placement-step-workerAccepted")).toBeVisible();
     }
+  }
+  if (OFFER_NOTIFICATIONS) {
+    await page.getByTestId("notification-bell").first().click();
+    await expect(
+      page.locator('[data-testid="notification-row"][data-notification-type^="event_candidate_offer_answered"]').first(),
+      "the client's answer is in the agency's bell",
+    ).toBeVisible({ timeout: 30_000 });
+    await page.keyboard.press("Escape");
   }
   const conn = page.getByTestId("agency-bridge-connection-row").filter({ hasText: /Alfa|qa\.owner/ }).first();
   await conn.locator('[data-testid^="agency-bridge-message-"]').click();

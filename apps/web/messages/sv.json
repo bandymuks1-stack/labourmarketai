@@ -5088,7 +5088,15 @@
         "event_invitation_accepted": "Någon har tackat ja till din inbjudan",
         "event_weekly_digest_profile_completion": "För att se jobb som passar dig, bekräfta vilket arbete du utför",
         "event_weekly_digest_journal": "Veckans sammanfattning av din arbetsjournal är klar",
-        "event_history_link_offered": "En organisation har erbjudit sig att koppla din registrerade arbetshistorik till ditt konto"
+        "event_history_link_offered": "En organisation har erbjudit sig att koppla din registrerade arbetshistorik till ditt konto",
+        "event_team_offer_received": "Ett team har erbjudit sig för ert behov",
+        "event_team_offer_answered": "Ert teams erbjudande har besvarats",
+        "event_team_offer_answered_accepted": "Ert teams erbjudande har accepterats",
+        "event_team_offer_answered_declined": "Ert teams erbjudande har avböjts",
+        "event_candidate_offer_received": "En byrå har föreslagit en kandidat för ert behov",
+        "event_candidate_offer_answered": "Er föreslagna kandidat har besvarats",
+        "event_candidate_offer_answered_accepted": "Er föreslagna kandidat har accepterats",
+        "event_candidate_offer_answered_declined": "Er föreslagna kandidat har avböjts"
       },
       "label": "Mina aviseringar",
       "emptyTitle": "Inget kräver din uppmärksamhet just nu.",
