@@ -299,9 +299,18 @@ test("A-2. the owner invites a person by link; they register through it and acce
   });
 
   // The owner gives that person a LIMITED governance seat: member.
+  // R on #3523 (P3): after load, a hidden server copy of this page stayed in
+  // the DOM (`div[hidden][id^="S:"]`, the form outside <main>). The page must
+  // settle into one copy and raise no client error.
+  const settingsErrors: string[] = [];
+  owner.page.on("pageerror", (e) => settingsErrors.push(String(e.message).slice(0, 300)));
   await owner.page.goto(`${BASE}/en/dashboard/company/settings#organization-members`);
   const form = owner.page.getByTestId("org-members-invite-form");
   await expect(form, "the owner administers members").toBeVisible({ timeout: 30_000 });
+  await expect(owner.page.locator('div[hidden][id^="S:"]'), "no leftover hidden copy of the settings page").toHaveCount(0, {
+    timeout: 15_000,
+  });
+  expect(settingsErrors, "the settings page raises no client error").toEqual([]);
   await form.getByTestId("org-members-invite-email").fill(MEMBER);
   await form.getByTestId("org-members-invite-role").selectOption("member");
   await form.getByTestId("org-members-invite-submit").click();
@@ -384,10 +393,15 @@ test("A-3. the member is refused owner-only surfaces; the owner administers role
   // The owner CAN administer members: they raise the seat to manager.
   const owner = await as(browser, OWNER);
   await owner.page.goto(`${BASE}/en/dashboard/company/settings#organization-members`);
-  await expect(owner.page.getByTestId("org-members-invite-form")).toBeVisible({ timeout: 30_000 });
-  await owner.page.getByTestId(`org-member-role-select-${state.membershipId}`).selectOption("manager");
-  await owner.page.getByTestId(`org-member-role-save-${state.membershipId}`).click();
-  await expect(owner.page.getByTestId("org-members-row-result")).toBeVisible({ timeout: 30_000 });
+  // Scoped to <main>, like J-DEC (#3487): while the page streams in, React
+  // can hold a second, server-rendered copy of the form outside it (an
+  // unhydrated <form method="POST">), and a whole-page strict locator then
+  // resolves to 2 elements (signup-isolated run 44414625487).
+  const ownerMain = owner.page.getByRole("main");
+  await expect(ownerMain.getByTestId("org-members-invite-form")).toBeVisible({ timeout: 30_000 });
+  await ownerMain.getByTestId(`org-member-role-select-${state.membershipId}`).selectOption("manager");
+  await ownerMain.getByTestId(`org-member-role-save-${state.membershipId}`).click();
+  await expect(ownerMain.getByTestId("org-members-row-result")).toBeVisible({ timeout: 30_000 });
   await expect
     .poll(
       async () =>

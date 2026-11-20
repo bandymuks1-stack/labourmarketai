@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Žinučių kalba",
+    "intro": "Kita kalba parašytos darbo žinutės ir nurodymai jums rodomi išversti į šią kalbą. Palikite sąsajos kalbą, nebent kitą kalbą skaitote geriau.",
+    "label": "Žinutes skaitau",
+    "sameAsInterface": "Tokia pati kaip sąsajos",
+    "saved": "Išsaugota.",
+    "error": "Pakeitimo nepavyko išsaugoti, jis atšauktas. Bandykite dar kartą.",
+    "unavailable": "Šis nustatymas dar neveikia — kol kas žinutės rodomos sąsajos kalba."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Peržiūrėti ir patvirtinti",
@@ -2281,6 +2290,7 @@
         },
         "statusInvalidCountry": "Pasirinkite šalį iš sąrašo — kitos reikšmės kol kas nepalaikomos.",
         "registrationCode": "Įmonės / registracijos kodas",
+        "optionalDetails": "Registracija, kontaktai ir pareigos",
         "registrationCodeHelp": "Neprivaloma. Padeda vėliau patvirtinti įmonę.",
         "address": "Adresas / vieta",
         "addressPlaceholder": "pvz. Gedimino pr. 1, Vilnius",
@@ -14746,8 +14756,12 @@
           "chipHelpPeople": "Komanda ir kvietimai",
           "chipHelpPlanning": "Atidaryti planavimą",
           "chipHelpServices": "Mano paslaugos",
-          "chipHelpJournal": "Darbo žurnalas"
-        }
+          "chipHelpJournal": "Darbo žurnalas",
+          "chipHelpSettings": "Nustatymai",
+          "chipHelpPrivacy": "Privatumas ir jūsų duomenys"
+        },
+        "account": "Prisijungimas, el. paštas, pranešimai ir išvaizda yra Nustatymuose.",
+        "privacy": "Skiltyje „Privatumas ir jūsų duomenys“ galite atsisiųsti savo duomenis, matyti, kas mato jūsų profilį, ir pateikti paskyros šalinimo užklausą."
       },
       "interestInboxAmbiguous": "Tai gali reikšti du dalykus — ką norite pamatyti?",
       "chipInterestOnMyNeeds": "Kas susidomėjo mano poreikiais",
@@ -14796,7 +14810,7 @@
       "chipClientDemand": "Klientų poreikiai",
       "chipProposeReplacement": "Pasiūlyti kitą kandidatą",
       "chipProposalStatus": "Pasiūlymų būsena",
-      "chipProposeFor": "Siūlyti kandidatą",
+      "chipProposeFor": "Pasiūlyti kandidatą",
       "userClientDemand": "Parodyk klientų poreikius",
       "userProposalStatus": "Kaip sekasi mano pasiūlymams?",
       "learningCompassHint": "Jūsų mokymosi kompasas — kryptis, trūkstami įgūdžiai ir tinkamos galimybės:",
@@ -20718,6 +20732,7 @@
       "partnerWithUs": "Tapti partneriu",
       "forAgencies": "Kaip tai veikia agentūroms",
       "setUpAgency": "Užregistruoti agentūrą",
+      "setUpInstitution": "Mokymo įstaigoms",
       "b2bEnquiry": "Verslo paslaugų užklausa (B2B)",
       "projectEnquiry": "Individualaus projekto užklausa"
     },

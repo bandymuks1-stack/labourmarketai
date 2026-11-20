@@ -1806,6 +1806,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // numbers only. RED draft (SECURITY DEFINER + GRANT to anon), the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261117060000_public_organization_cv_v1.sql",
+      // 2026-09-20 — COMM-1: nullable profiles.communication_locale (CHECK = the 13 communication languages; NULL = follow the UI locale). RED by owner classification, DRAFT needs-human-gate, NOT applied.
+      "20261118100100_profiles_communication_locale_v1.sql",
 ]);
   });
 

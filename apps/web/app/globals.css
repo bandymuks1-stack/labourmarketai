@@ -1138,6 +1138,13 @@ html[data-consent-decided] [data-testid="analytics-consent-banner"] {
     :is(button, [role="button"], a[href], label):is(.min-h-16) {
     min-height: 4rem;
   }
+  /* The same floor clamps WIDTH too: a declared `min-w-11` (44 px) rendered at
+     40 px on phones (UX gap W-6, licence toggles, isolated walk 2026-11-19).
+     Restored the same way, equally specific and later. */
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-w-11, .min-w-\[2\.75rem\]) {
+    min-width: 2.75rem;
+  }
 }
 
 /* ── living worker hero (landing) ─────────────────────────────────────────

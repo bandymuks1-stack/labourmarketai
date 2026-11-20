@@ -14,6 +14,7 @@ import {
   type ProjectChoice,
 } from "@/lib/journal/review-project-filter";
 import { Button } from "@/components/ui/Button";
+import { chipLinkClassName } from "@/components/ui/Chip";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
@@ -118,7 +119,7 @@ export default async function QuickConfirmPage({
         </p>
         <Link
           href="/dashboard/inbox"
-          className="w-fit text-xs font-medium text-brand-blue hover:underline"
+          className={`${chipLinkClassName(false)} w-fit`}
           data-testid="quick-detailed-link"
         >
           {t("inbox.quick.detailedReview")} →
