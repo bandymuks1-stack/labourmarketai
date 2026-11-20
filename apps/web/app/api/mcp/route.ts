@@ -22,6 +22,7 @@ import {
   type McpToolDef,
 } from "@/lib/mcp/protocol";
 import { localeFromAcceptLanguage } from "@/lib/mcp/accept-language";
+import { MCP_RESOURCE_PATH } from "@/lib/mcp/protected-resource-metadata";
 import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 import { toolDefsOf, toolName, toolsetVersionOf } from "@/lib/mcp/toolset";
 import { summarizeCapabilityResult } from "@/lib/capabilities/presentation";
@@ -202,7 +203,11 @@ function serverTiming(marks: Record<string, number>): string {
 
 export async function POST(req: Request) {
   const t0 = performance.now();
-  const auth = await resolveApiIdentity(req);
+  // This door IS the OAuth protected resource (RFC 9728 `resource`), so it —
+  // and only it — accepts OAuth-client tokens, and only ones bound to it (C-3).
+  const auth = await resolveApiIdentity(req, {
+    resource: `${requestPublicOrigin(req)}${MCP_RESOURCE_PATH}`,
+  });
   const authMs = performance.now() - t0;
   if (!auth.ok) {
     const refusal = classifyRefusal(auth.reason);

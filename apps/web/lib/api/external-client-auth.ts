@@ -44,7 +44,7 @@ import { refusalStatus, type ApiIdentityFailure } from "@/lib/api/api-identity";
  * ## No oracle, still machine-readable
  *
  * `refusalStatus` in api-identity keeps every credential judgement the same
- * 401. This module keeps that property: `malformed-bearer` and
+ * 401. This module keeps that property: `malformed-bearer`, `wrong-audience` and
  * `invalid-bearer` map to the SAME class, status and header. The class adds a
  * documented next action, not information about the token.
  */
@@ -139,7 +139,8 @@ export function classifyRefusal(reason: ApiIdentityFailure): AuthRefusal {
       };
     case "malformed-bearer":
     case "invalid-bearer":
-      // Same class for both — see "No oracle" above.
+    case "wrong-audience":
+      // Same class for all three — see "No oracle" above.
       return {
         errorClass: "ACCESS_TOKEN_REJECTED",
         clientAction: "retry_after_refresh",
