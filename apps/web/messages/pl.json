@@ -17513,6 +17513,7 @@
       "createProgram": "Dodaj kurs",
       "noPrograms": "Nie dodano jeszcze żadnych kursów.",
       "assigneePlaceholder": "E-mail osoby",
+      "assigneePick": "Osoba",
       "requiredByLabel": "Ukończ do",
       "assign": "Poproś tę osobę",
       "certificateFileLabel": "Plik certyfikatu",

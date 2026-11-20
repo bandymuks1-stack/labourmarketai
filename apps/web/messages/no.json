@@ -6436,6 +6436,7 @@
       "createProgram": "[EN] Add course",
       "noPrograms": "[EN] No courses added yet.",
       "assigneePlaceholder": "[EN] Person's email",
+      "assigneePick": "Person",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
       "certificateFileLabel": "[EN] Certificate file",
