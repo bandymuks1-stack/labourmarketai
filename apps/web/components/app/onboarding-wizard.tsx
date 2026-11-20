@@ -663,6 +663,17 @@ export function OnboardingWizard({
           )}
         </header>
 
+        {/* UX gap SH-2 (2026-11-18): the hint is in the flow above the cards,
+            not in the fixed phone bar, where it made the bar 116 px high and
+            pushed the cards below the first screen. A premature tap is still
+            explained by the bar's `error_role_required` refusal. The hint has its
+            own sentence (`role_step_hint`) and goes with the first pick. */}
+        {!error && intents.size === 0 && (
+          <p className="text-xs leading-relaxed text-text-muted" data-testid="onboarding-continue-hint">
+            {t("role_step_hint")}
+          </p>
+        )}
+
         {/* Desktop: all six cards share ONE height — the tallest card's —
             across all three rows (`sm:auto-rows-fr` makes every implicit
             row as tall as the tallest, `sm:h-full` makes each card fill its
@@ -733,16 +744,6 @@ export function OnboardingWizard({
           {error && (
             <p className="text-xs text-state-danger" role="alert">
               {error}
-            </p>
-          )}
-          {/* The disabled button explains itself: until something is chosen
-              the bar says what to do first (its own sentence, `role_step_hint`: it says the same
-              as the refusal `error_role_required` today, and rewording that
-              refusal no longer rewords this hint). It goes away
-              with the first pick, when the button becomes active. */}
-          {!error && intents.size === 0 && (
-            <p className="text-xs leading-relaxed text-text-muted" data-testid="onboarding-continue-hint">
-              {t("role_step_hint")}
             </p>
           )}
           <Button
@@ -987,7 +988,7 @@ export function OnboardingWizard({
               answers. The registry offers matches as the person types; whatever
               they write can be added exactly as written, matched or not. */}
           <div className="flex flex-col gap-1.5">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 sm:flex-nowrap">
               <input
                 type="text"
                 value={professionDraft}
@@ -1004,7 +1005,7 @@ export function OnboardingWizard({
                 aria-label={t("profession_label")}
                 maxLength={SELF_DECLARED_PROFESSION_MAX_LENGTH}
                 data-testid="onboarding-profession-input"
-                className={AUTH_INPUT_CLASS}
+                className={`${AUTH_INPUT_CLASS} basis-full sm:basis-0 sm:flex-1`}
               />
               <Button
                 type="button"
@@ -1099,12 +1100,15 @@ export function OnboardingWizard({
             {error}
           </p>
         )}
-        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+        {/* One row on a phone too (UX_GAPS ST-4): stacked, Back under Finish
+            made the fixed bar 125 px. The submit stays first in the DOM (focus
+            order); row-reverse shows Back on its left. */}
+        <div className="flex flex-row-reverse items-center gap-3 sm:flex-row">
           <Button
             type="submit"
             disabled={pending}
             data-testid="onboarding-submit"
-            className="min-h-11 w-full rounded-xl sm:w-auto"
+            className="min-h-11 flex-1 rounded-xl sm:w-auto sm:flex-none"
           >
             {pending ? t("saving") : t("step2.continue")}
           </Button>

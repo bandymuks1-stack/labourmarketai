@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
 
 import { FIRST_VISIT_CAMPAIGN, refuseOnFirstVisit, storedAnalytics } from "./first-visit-consent";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
@@ -307,6 +307,61 @@ async function lastMailLink(address: string): Promise<string> {
   throw new Error("no reset mail arrived in the local mail catcher");
 }
 
+/**
+ * The person proves their e-mail address the way the web asks (network page →
+ * send → the NEW mail's link), skipped when it already is proven; then the
+ * row the server reads (email_is_verified_v1) must exist.
+ */
+async function proveAddress(browser: Browser, address: string, password: string): Promise<void> {
+  const page = await (await browser.newContext()).newPage();
+  await signIn(page, address, password);
+  await page.goto(`${BASE}/en/dashboard/network`);
+  const prompt = page.getByTestId("network-email-unverified");
+  // isVisible() does not wait (it ignores a timeout): wait for the prompt.
+  const unproven = await prompt
+    .waitFor({ state: "visible", timeout: 15_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (unproven) {
+    const before = await mailIds(address);
+    await prompt.getByTestId("verify-email-send").click();
+    await expect(prompt.getByTestId("verify-email-sent")).toBeVisible({ timeout: 30_000 });
+    await page.goto(await newMailLink(address, before));
+    await page.waitForURL((u) => u.host === new URL(BASE).host && !u.pathname.includes("/auth/callback"), {
+      timeout: 60_000,
+    });
+    await page.goto(`${BASE}/en/dashboard/network`);
+  }
+  await expect(page.getByTestId("network-email-unverified"), `${address} is proven`).toHaveCount(0, { timeout: 30_000 });
+  const id = await userId(address);
+  const proofs = await db<Array<{ email: string }>>(`email_verifications_v1?profile_id=eq.${id}&select=email`);
+  expect(proofs.map((p) => p.email), `${address} is recorded as proven`).toContain(address.toLowerCase());
+  await page.context().close();
+}
+
+/** The ids of every message the local mail catcher holds for `address`. */
+async function mailIds(address: string): Promise<Set<string>> {
+  const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${address}`)}`);
+  const list = (await r.json()) as { messages?: Array<{ ID: string }> };
+  return new Set((list.messages ?? []).map((m) => m.ID));
+}
+
+/** The verify / callback link of the first message to `address` not in `before`. */
+async function newMailLink(address: string, before: Set<string>): Promise<string> {
+  for (let i = 0; i < 30; i += 1) {
+    const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${address}`)}`);
+    const list = (await r.json()) as { messages?: Array<{ ID: string }> };
+    for (const { ID } of (list.messages ?? []).filter((m) => !before.has(m.ID))) {
+      const m = (await (await fetch(`${MAIL}/api/v1/message/${ID}`)).json()) as { Text?: string; HTML?: string };
+      const urls = `${m.Text ?? ""} ${m.HTML ?? ""}`.match(/https?:\/\/[^\s"'<>]+/g) ?? [];
+      const link = urls.find((u) => /verify|callback|token/.test(u));
+      if (link) return link.replace(/&amp;/g, "&");
+    }
+    await new Promise((res) => setTimeout(res, 1000));
+  }
+  throw new Error(`no new mail with a link reached ${address} in the local mail catcher`);
+}
+
 test("S-5. a person signs out and signs back in; the session is gone after sign-out", async ({ page }) => {
   const address = email("worker");
   await signIn(page, address, PASSWORD);
@@ -548,6 +603,194 @@ async function grantEmployerVisibility(page: Page): Promise<void> {
   });
 }
 
+// ── M-3: an EMPLOYEE whose work the company reviews from the phone ─────────
+// Runs only from android-need-isolated.yml (MOBILE_WORKER3_SEED_EMAIL set).
+// Real UI only: the worker signs up; the company (M-0) hands over a "join my
+// organization" link, which the worker accepts (employee); the company turns
+// on journal review for that relationship; the worker records one day. That
+// entry is what the phone's work review shows the company.
+test("M-3. seed: an employee with one journal entry waiting for the company's review", async ({ browser }) => {
+  const owner = process.env.MOBILE_NEED_SEED_EMAIL ?? "";
+  const ownerPw = process.env.MOBILE_NEED_SEED_PASSWORD ?? "";
+  const address = process.env.MOBILE_WORKER3_SEED_EMAIL ?? "";
+  const password = process.env.MOBILE_WORKER3_SEED_PASSWORD ?? "";
+  test.skip(!owner || !ownerPw || !address || !password, "android-need-isolated.yml only");
+
+  const w = await (await browser.newContext()).newPage();
+  await signUp(w, address, password);
+  await onboard(w, "work", "QA-SYNTHETIC Mobile Review Worker");
+  await w.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  const workerId = await userId(address);
+  const marker = await fetch(`${SB_URL}/auth/v1/admin/users/${workerId}`, {
+    method: "PUT",
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "content-type": "application/json" },
+    body: JSON.stringify({ app_metadata: { qa_synthetic: true } }),
+  });
+  expect(marker.ok, "the seed carries the server-set qa_synthetic marker").toBe(true);
+
+  // The company hands over a single-use "join my organization" link.
+  const ownerId = await userId(owner);
+  const [org] = await db<Array<{ id: string }>>(`organizations?owner_profile_id=eq.${ownerId}&select=id`);
+  expect(org?.id, "the seed company has its organization").toBeTruthy();
+  const co = await (await browser.newContext()).newPage();
+  await signIn(co, owner, ownerPw);
+  await co.goto(`${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${org!.id}#network-invite`);
+  const panel = co.getByTestId("invite-panel");
+  await expect(panel).toBeVisible({ timeout: 30_000 });
+  await expect(panel.getByTestId("invite-type")).toHaveValue("join_organization");
+  await panel.getByTestId("invite-mode-link").click();
+  await panel.getByTestId("invite-name").fill("QA-SYNTHETIC Mobile Review Worker");
+  await panel.getByTestId("invite-submit").click();
+  const copy = panel.getByTestId("invite-copy-link").first();
+  await expect(copy, "the invitation link is handed to the company").toBeVisible({ timeout: 30_000 });
+  const u = new URL((await copy.getAttribute("data-invite-link")) ?? "");
+  await acceptInvite(w, `${BASE}${u.pathname}${u.search}`);
+  const engagementOf = async () =>
+    (
+      await db<Array<{ id: string }>>(
+        `engagement_contexts?profile_id=eq.${workerId}&organization_id=eq.${org!.id}&relationship_slug=eq.employee&status=eq.active&select=id`,
+      )
+    )[0]?.id ?? null;
+  await expect.poll(engagementOf, { message: "the worker is now the company's employee", timeout: 30_000 }).not.toBeNull();
+  const engagementId = (await engagementOf())!;
+
+  // Journal review must be ON for that relationship. Joining as an employee
+  // may already switch it on, and the people-page button TOGGLES, so the
+  // company presses it only when review is off (run 44429163267: pressing an
+  // already-on switch turned review off).
+  const reviewOn = async () =>
+    (
+      await db<Array<{ journal_review_enabled: boolean | null }>>(
+        `engagement_contexts?id=eq.${engagementId}&select=journal_review_enabled`,
+      )
+    )[0]?.journal_review_enabled === true;
+  if (!(await reviewOn())) {
+    await co.goto(`${BASE}/en/dashboard/company/people#org-members`);
+    const main = co.getByRole("main");
+    const fold = main.getByTestId("people-more").first();
+    await expect(fold).toBeAttached({ timeout: 30_000 });
+    if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
+    const toggle = main.getByTestId(`toggle-review-${engagementId}`);
+    await expect(toggle, "journal review is offered for the employee").toBeVisible({ timeout: 30_000 });
+    await toggle.click();
+    await expect.poll(reviewOn, { message: "review is on for that relationship", timeout: 30_000 }).toBe(true);
+  }
+
+  // The worker records one day for the company.
+  await w.goto(`${BASE}/en/dashboard/journal`);
+  const wm = w.getByRole("main");
+  await wm.getByTestId("journal-quick-record-text").fill("QA-SYNTHETIC mobile review: laid 12 m2 of floor tiles today, 8 hours");
+  await wm.getByTestId("journal-quick-record-understand").click();
+  await expect(wm.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  const context = wm.getByTestId("worklog-context");
+  if (await context.isVisible().catch(() => false)) await context.selectOption(engagementId);
+  await wm.getByTestId("worklog-save").click();
+  await wm.getByTestId("worklog-confirm").click();
+  await expect(wm.getByTestId("worklog-done"), "the journal entry is saved").toBeVisible({ timeout: 30_000 });
+  const entries = await db<Array<{ id: string; engagement_context_id: string | null }>>(
+    `journal_entries?original_text=ilike.*QA-SYNTHETIC%20mobile%20review*&select=id,engagement_context_id`,
+  );
+  expect(entries.length, "exactly one marked entry").toBe(1);
+  expect(entries[0]?.engagement_context_id, "recorded for the company").toBe(engagementId);
+  expect(await reviewOn(), "review is still on for that relationship").toBe(true);
+
+  // The company's own doors see it: the review RPC, then the very read the
+  // phone's Work review screen calls (journal.review_queue.get over /api/mcp).
+  const tok = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: { apikey: ANON, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: owner, password: ownerPw }),
+  });
+  const jwt = ((await tok.json()) as { access_token?: string }).access_token ?? "";
+  expect(jwt, "the company signs in").not.toBe("");
+  const rpc = await fetch(`${SB_URL}/rest/v1/rpc/reviewable_journal_entry_ids`, {
+    method: "POST",
+    headers: { apikey: ANON, Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" },
+    body: "{}",
+  });
+  expect(rpc.ok, "the review RPC answers the company").toBe(true);
+  const queued = entryIds(await rpc.json());
+  if (!queued.includes(entries[0]!.id)) {
+    // Every input of the employer review decision, read with the local
+    // service key (synthetic rows on the throwaway stack only).
+    const facts = {
+      ownerEngagements: await db(`engagement_contexts?profile_id=eq.${ownerId}&select=organization_id,relationship_slug,status`),
+      ownerMemberships: await db(`company_memberships?profile_id=eq.${ownerId}&select=organization_id,role,status`),
+      workerEngagements: await db(`engagement_contexts?profile_id=eq.${workerId}&select=id,organization_id,relationship_slug,status,journal_review_enabled`),
+      workerMemberships: await db(`company_memberships?profile_id=eq.${workerId}&select=organization_id,role,status`),
+      entry: await db(`journal_entries?id=eq.${entries[0]!.id}&select=worker_id,engagement_context_id,superseded_by,deleted_at`),
+      confirmations: await db(`journal_entry_confirmations?entry_id=eq.${entries[0]!.id}&select=confirmer_id,confirmation_scope`),
+      authority: await fetch(`${SB_URL}/rest/v1/rpc/journal_entry_review_authority_v1`, {
+        method: "POST",
+        headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ p_entry_id: entries[0]!.id, p_actor: ownerId }),
+      }).then(async (r) => `${r.status} ${await r.text()}`),
+      org: org!.id,
+      ownerId,
+      workerId,
+    };
+    throw new Error(`the entry does not wait for the company's review: ${JSON.stringify(facts)}`);
+  }
+  const mcp = await fetch(`${BASE}/api/mcp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream", Authorization: `Bearer ${jwt}` },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: { name: "journal_review_queue_get", arguments: {} },
+    }),
+  });
+  const raw = await mcp.text();
+  expect(raw, "the phone's review read lists the entry").toContain(entries[0]!.id);
+});
+
+// ── M-4: a STAFFING AGENCY that invites the seed company from the phone ────
+// Runs only from android-need-isolated.yml (MOBILE_AGENCY_SEED_EMAIL set).
+// Real UI only: sign-up with the agency intent and company setup, which
+// records the organization as a staffing agency. The company (M-0) proves
+// its e-mail address the way the web asks, because answering an agency's
+// invitation requires a proven address that equals the invited one.
+test("M-4. seed: a staffing agency, and the company's proven address", async ({ browser }) => {
+  const address = process.env.MOBILE_AGENCY_SEED_EMAIL ?? "";
+  const password = process.env.MOBILE_AGENCY_SEED_PASSWORD ?? "";
+  const owner = process.env.MOBILE_NEED_SEED_EMAIL ?? "";
+  const ownerPw = process.env.MOBILE_NEED_SEED_PASSWORD ?? "";
+  test.skip(!address || !password || !owner || !ownerPw, "android-need-isolated.yml only");
+
+  const a = await (await browser.newContext()).newPage();
+  await signUp(a, address, password);
+  await onboard(a, "agency", "QA-SYNTHETIC Mobile Agency Owner");
+  await a.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  await expect(a.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+  await a.getByTestId("company-setup-legal-name").fill("QA-SYNTHETIC Mobile Agency");
+  await a.getByTestId("company-setup-country").selectOption("LT");
+  await a.getByTestId("company-setup-save-draft").click();
+  await expect(a.getByTestId("company-setup-result")).toBeVisible({ timeout: 30_000 });
+  const agencyId = await userId(address);
+  const marker = await fetch(`${SB_URL}/auth/v1/admin/users/${agencyId}`, {
+    method: "PUT",
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "content-type": "application/json" },
+    body: JSON.stringify({ app_metadata: { qa_synthetic: true } }),
+  });
+  expect(marker.ok, "the seed carries the server-set qa_synthetic marker").toBe(true);
+  const [org] = await db<Array<{ legacy_company_id: string | null }>>(
+    `organizations?owner_profile_id=eq.${agencyId}&select=legacy_company_id`,
+  );
+  const [company] = await db<Array<{ company_type: string | null }>>(
+    `companies?id=eq.${org?.legacy_company_id ?? "00000000-0000-0000-0000-000000000000"}&select=company_type`,
+  );
+  expect(company?.company_type, "the organization is recorded as a staffing agency").toBe("staffing_agency");
+
+  // The company proves its address; so does the second worker (M-2), whom
+  // the agency later invites to its roster: a roster invitation, like an
+  // agency invitation, is answered only from a proven address.
+  await proveAddress(browser, owner, ownerPw);
+  const worker2 = process.env.MOBILE_WORKER2_SEED_EMAIL ?? "";
+  const worker2Pw = process.env.MOBILE_WORKER2_SEED_PASSWORD ?? "";
+  if (worker2 && worker2Pw) await proveAddress(browser, worker2, worker2Pw);
+});
+
 /**
  * A-1..A-4. THE THREE SIGN-UP FAULTS OF THE 2026-11-13 TRUST AUDIT, each as the
  * person meets it. None needs an account: they are what the sign-in page says
@@ -733,6 +976,8 @@ test("P-3. onboarding on a phone: the bar covers neither the end of the form, a 
     expect(await bar.evaluate((el) => getComputedStyle(el).position), "the profile step's bar is fixed on a phone").toBe("fixed");
     const barBox = () => bar.evaluate((el) => ({ top: Math.round(el.getBoundingClientRect().top), height: Math.round(el.getBoundingClientRect().height) }));
     const quiet = await barBox();
+    // UX_GAPS ST-4: Finish and Back share one row, so the quiet bar is one button high (was 125 px).
+    expect(quiet.height, "the profile step's bar is one row").toBeLessThanOrEqual(80);
 
     // (1) A refusal makes the bar taller: name and country given, the institution left empty.
     await page.getByTestId("onboarding-display-name").fill("QA-SYNTHETIC Phone bar");
@@ -867,10 +1112,21 @@ test("ST-1. a student signs up, keeps one worker record with no company, and the
   // The editor sits in the collapsed CV details; its anchor opens it (the same
   // way the profile-cv-history walk reaches it). A real load, not a hash-only
   // navigation on the page the tab is already on.
+  // #3539: after the reload the page is ONE copy. A spine update that reached
+  // the page boundary while React held its streamed segment back made React
+  // client-render it, so a hidden server copy (`div[hidden][id^="S:"]`) stood
+  // beside <main> and the row resolved twice (lib/auth/context.tsx).
+  const profileErrors: string[] = [];
+  page.on("pageerror", (e) => profileErrors.push(String(e.message).slice(0, 300)));
   await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
   await page.reload();
   await expect(page.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("worker-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('div[hidden][id^="S:"]'), "no hidden copy of the profile page").toHaveCount(0, {
+    timeout: 15_000,
+  });
+  await expect(page.getByRole("main").getByTestId("worker-education-row").filter({ hasText: school })).toHaveCount(1);
+  expect(profileErrors, "the profile page raises no client error").toEqual([]);
   await expect(page.getByTestId("worker-education-self-stated")).toBeVisible();
 
   // CV with zero work history: the education block is there, labelled the same way.
@@ -991,11 +1247,12 @@ async function inviteLearnerLink(page: Page, name: string): Promise<string> {
   await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
   await page.getByTestId("institution-learners-invite").click();
   await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
-  const open = page.getByTestId("invite-panel-open");
-  if (await open.isVisible().catch(() => false)) await open.click();
-  await expect(page.getByTestId("invite-capacity")).toHaveValue("student", { timeout: 30_000 });
-  const linkMode = page.getByTestId("invite-mode-link");
-  if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
+  // UX_GAPS I-4: the door preset type, organisation and relationship — one read-only line, link mode by default.
+  const preset = page.getByTestId("invite-preset");
+  await expect(preset).toHaveAttribute("data-relationship", "student", { timeout: 30_000 });
+  await expect(preset).toHaveAttribute("data-type", "join_organization");
+  await expect(page.getByTestId("invite-capacity")).toHaveCount(0);
+  await expect(page.getByTestId("invite-mode-link")).toHaveAttribute("aria-checked", "true");
   const nameField = page.getByTestId("invite-name");
   if (await nameField.isVisible().catch(() => false)) await nameField.fill(name);
   await page.getByTestId("invite-submit").click();
@@ -1029,6 +1286,20 @@ test("E-1. an institution trains people and invites a learner by link; a student
   await expect(inst.getByTestId("company-setup-next")).toHaveAttribute("data-first-door", "education", { timeout: 30_000 });
   await inst.goto(`${BASE}/en/dashboard/company/education`);
   await expect(inst.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
+  // UX_GAPS I-1: the learning home is one of the institution's own header doors.
+  const more = inst.getByTestId("header-nav-more");
+  const phoneNav = !(await more.isVisible().catch(() => false));
+  await (phoneNav ? inst.getByTestId("header-nav-sheet-trigger") : more).click();
+  await expect(
+    inst.getByTestId(phoneNav ? "header-nav-sheet-area:education" : "header-nav-more-area:education"),
+  ).toHaveAttribute("href", "/en/dashboard/company/education", { timeout: 30_000 });
+  // UX_GAPS I-2: the institution's home leads with the learner invite, not "Describe a need".
+  await inst.goto(`${BASE}/en/dashboard`);
+  await expect(inst.getByTestId("company-model-primary")).toHaveAttribute(
+    "href",
+    /\/en\/dashboard\/network\?type=join_organization&org=[0-9a-f-]+&relationship=student$/,
+    { timeout: 30_000 },
+  );
   const link = await inviteLearnerLink(inst, EDU.learnerName);
   await a.close();
 
@@ -1069,6 +1340,11 @@ test("E-3. the student becomes a worker: studies end, work is recorded, and noth
   await expect(main.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
   const row = main.getByTestId("worker-education-row").filter({ hasText: EDU.studiesAt });
   await expect(row, "the study is listed, visible").toBeVisible({ timeout: 30_000 });
+  // #3539: one copy of the page after the reload, as in ST-1.
+  await expect(page.locator('div[hidden][id^="S:"]'), "no hidden copy of the profile page").toHaveCount(0, {
+    timeout: 15_000,
+  });
+  await expect(row).toHaveCount(1);
   await row.getByRole("button", { name: "Edit" }).click();
   const form = main.getByTestId("worker-education-form");
   await expect(form).toBeVisible();

@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Taal van berichten",
+    "intro": "Werkberichten en instructies die in een andere taal zijn geschreven, worden voor u vertaald in deze taal getoond. Laat de interfacetaal staan, tenzij u een andere taal beter leest.",
+    "label": "Ik lees berichten in",
+    "sameAsInterface": "Zelfde als de interface",
+    "saved": "Opgeslagen.",
+    "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
+    "unavailable": "Deze instelling is nog niet beschikbaar — berichten volgen tot die tijd de interfacetaal."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Bekijken en goedkeuren",
@@ -2275,6 +2284,7 @@
         },
         "statusInvalidCountry": "Kies een land uit de lijst — andere waarden worden nog niet ondersteund.",
         "registrationCode": "Bedrijfs-/registratiecode",
+        "optionalDetails": "Registratie, contactgegevens en functie",
         "registrationCodeHelp": "Optioneel. Helpt om het bedrijf later te verifiëren.",
         "address": "Adres / locatie",
         "addressPlaceholder": "bijv. Hoofdstraat 1, Vilnius",
@@ -14740,8 +14750,12 @@
           "chipHelpPeople": "Team en uitnodigingen",
           "chipHelpPlanning": "Planning openen",
           "chipHelpServices": "Mijn diensten",
-          "chipHelpJournal": "Werkjournaal"
-        }
+          "chipHelpJournal": "Werkjournaal",
+          "chipHelpSettings": "Instellingen",
+          "chipHelpPrivacy": "Privacy en uw gegevens"
+        },
+        "account": "Inloggen, e-mail, meldingen en weergave vindt u bij Instellingen.",
+        "privacy": "Bij Privacy en uw gegevens kunt u uw gegevens downloaden, zien wie uw profiel ziet en verwijdering van uw account aanvragen."
       },
       "interestInboxAmbiguous": "Dat kan twee dingen betekenen — wat wilt u zien?",
       "chipInterestOnMyNeeds": "Interesse in mijn aanvragen",
@@ -20712,6 +20726,7 @@
       "partnerWithUs": "Word partner",
       "forAgencies": "Zo werkt het voor bureaus",
       "setUpAgency": "Bureau registreren",
+      "setUpInstitution": "Voor opleidingsinstellingen",
       "b2bEnquiry": "Aanvraag zakelijke diensten (B2B)",
       "projectEnquiry": "Aanvraag individueel project"
     },

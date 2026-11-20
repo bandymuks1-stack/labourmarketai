@@ -357,7 +357,7 @@ export async function JournalCalendar({
             key={period}
             href={`/${locale}/dashboard/journal/hours?period=${period}&date=${exportDay}`}
             download
-            className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-medium text-brand-blue hover:underline"
             data-testid={`journal-hours-export-${period}`}
           >
             {t(`exportPeriod.${period}`)}

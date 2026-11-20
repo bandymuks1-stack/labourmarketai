@@ -15,6 +15,7 @@ import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerTexts } from "@/lib/communication/translation-read";
+import { readCommunicationLocale, viewerLocaleFor } from "@/lib/i18n/communication-locale";
 import { initialWriteLanguage } from "@/lib/communication/initial-write-language";
 import type { ViewerText } from "@/lib/communication/translation";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
@@ -150,6 +151,13 @@ export default async function ConversationDetailPage({
   // original always one tap away. Without an owner egress grant every
   // message comes back as its original — honestly, with a language badge.
   //
+  // COMM-1: the viewer's language is the one they chose to READ messages in
+  // (profiles.communication_locale — any of the 13 communication languages,
+  // including uk / ka which have no UI route), falling back to the page's UI
+  // locale exactly as before while nothing is chosen or the owner-gated
+  // column is not applied.
+  const communicationLocale = await readCommunicationLocale(supabase, user.id);
+  const viewerLocale = viewerLocaleFor(communicationLocale, locale);
   // NOT awaited here: each message streams in behind its own Suspense
   // boundary, showing the ORIGINAL until the viewer's rendering arrives.
   // Awaited, a slow provider held the whole conversation back — production
@@ -163,7 +171,7 @@ export default async function ConversationDetailPage({
       original_language:
         (m as { original_language?: string | null }).original_language ?? null,
     })),
-    locale,
+    viewerLocale,
     user.id,
   ).catch(() => new Map<string, ViewerText>());
 

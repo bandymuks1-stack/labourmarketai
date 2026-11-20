@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Sprache der Nachrichten",
+    "intro": "Arbeitsnachrichten und Anweisungen, die in einer anderen Sprache geschrieben wurden, werden Ihnen in diese Sprache übersetzt angezeigt. Lassen Sie die Oberflächensprache stehen, sofern Sie eine andere Sprache nicht besser lesen.",
+    "label": "Ich lese Nachrichten auf",
+    "sameAsInterface": "Wie die Oberfläche",
+    "saved": "Gespeichert.",
+    "error": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Bitte erneut versuchen.",
+    "unavailable": "Diese Einstellung ist noch nicht verfügbar — bis dahin folgen Nachrichten der Oberflächensprache."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Prüfen und freigeben",
@@ -2275,6 +2284,7 @@
         },
         "statusInvalidCountry": "Wählen Sie ein Land aus der Liste — andere Werte werden noch nicht unterstützt.",
         "registrationCode": "Unternehmens-/Registrierungsnummer",
+        "optionalDetails": "Registrierung, Kontakt und Funktion",
         "registrationCodeHelp": "Optional. Hilft später bei der Verifizierung des Unternehmens.",
         "address": "Adresse / Standort",
         "addressPlaceholder": "z. B. Hauptstraße 1, Vilnius",
@@ -14222,7 +14232,7 @@
           "description": "Laden Sie ein Unternehmen ein, sich mit Ihrer Agentur zu verbinden."
         },
         "proposeCandidate": {
-          "label": "Kandidat vorschlagen",
+          "label": "Kandidaten vorschlagen",
           "description": "Bieten Sie eine Arbeitskraft für einen geteilten Bedarf an."
         },
         "offerStatus": {
@@ -14740,8 +14750,12 @@
           "chipHelpPeople": "Team und Einladungen",
           "chipHelpPlanning": "Planung öffnen",
           "chipHelpServices": "Meine Leistungen",
-          "chipHelpJournal": "Arbeitsjournal"
-        }
+          "chipHelpJournal": "Arbeitsjournal",
+          "chipHelpSettings": "Einstellungen",
+          "chipHelpPrivacy": "Datenschutz und Ihre Daten"
+        },
+        "account": "Anmeldung, E-Mail, Benachrichtigungen und Darstellung finden Sie in den Einstellungen.",
+        "privacy": "Unter „Datenschutz und Ihre Daten“ können Sie Ihre Daten herunterladen, sehen, wer Ihr Profil sieht, und die Löschung Ihres Kontos beantragen."
       },
       "interestInboxAmbiguous": "Das kann zweierlei heißen — was möchten Sie sehen?",
       "chipInterestOnMyNeeds": "Interesse an meinen Anfragen",
@@ -20712,6 +20726,7 @@
       "partnerWithUs": "Partner werden",
       "forAgencies": "So funktioniert es für Agenturen",
       "setUpAgency": "Agentur registrieren",
+      "setUpInstitution": "Für Bildungseinrichtungen",
       "b2bEnquiry": "B2B-Dienstleistungsanfrage",
       "projectEnquiry": "Anfrage für ein Einzelprojekt"
     },

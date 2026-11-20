@@ -14,10 +14,25 @@ printf '\norg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m\n' >> gradle.p
 # status is captured explicitly in STATUS either way.
 set -o pipefail
 set +e
-./gradlew :app:assembleRelease \
-  -PreactNativeArchitectures=arm64-v8a,x86_64 \
-  --no-daemon --stacktrace --info > gradle.log 2>&1
+build() {
+  ./gradlew :app:assembleRelease \
+    -PreactNativeArchitectures=arm64-v8a,x86_64 \
+    --no-daemon --stacktrace --info > gradle.log 2>&1
+}
+build
 STATUS=$?
+# One retry, and only for a NETWORK failure resolving a plugin or dependency
+# (the Gradle plugin portal / Maven hosts flake on hosted runners). A compile
+# or configuration error is never retried — it fails as before.
+NETWORK_FAILURE='could not resolve plugin artifact|Could not resolve all (files|dependencies|artifacts)|Could not (GET|HEAD) .https?://|Read timed out|Connection reset|Remote host terminated the handshake'
+if [ $STATUS -ne 0 ] && grep -qE "$NETWORK_FAILURE" gradle.log; then
+  echo "Gradle failed resolving a plugin or dependency over the network — retrying once in 60 s:"
+  grep -m 3 -E "$NETWORK_FAILURE" gradle.log
+  mv gradle.log gradle.first-attempt.log
+  sleep 60
+  build
+  STATUS=$?
+fi
 if [ $STATUS -ne 0 ]; then
   # A failing configuration-time `node` call prints its stderr BEFORE the
   # FAILURE block — show what led up to it, not just the trace.
