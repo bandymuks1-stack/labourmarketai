@@ -1,9 +1,8 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { clickUntilVisible } from "./click-until-visible";
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
-
-import { PROD_QA_MANAGER_EMAIL } from "../../lib/testing/prod-qa-guard";
 
 /**
  * PRODUCTION — A COMPANY'S GOVERNANCE REGISTERS (registry rows that had no
@@ -16,21 +15,28 @@ import { PROD_QA_MANAGER_EMAIL } from "../../lib/testing/prod-qa-guard";
  *        and the owner records what was decided; read back in Russian and on
  *        a phone. An employee and another organization see none of it (D-*).
  *   11.8 Training & certification register — Alfa's owner adds a course and
- *        assigns it to its employee; the employee completes it on the phone;
- *        the owner sees it completed; another organization and an unassigned
- *        worker see none of it; the course is retired (T-*).
+ *        assigns it, through the register's person picker, to a worker Alfa
+ *        ENGAGES (not a member); the worker completes it on the phone; the
+ *        owner sees it completed; another organization, an unassigned worker
+ *        and Alfa's own manager see none of it; the course is retired (T-*).
  *
  * Cast (`lib/testing/prod-qa-guard.ts`, all synthetic):
  *   owner    qa.owner+multiw   — owns "QA-SYNTHETIC Alfa" (also the approver:
  *                                Alfa's template asks an owner/admin)
- *   worker   qa.worker+multiw  — engaged by Alfa, NOT a member: the decisions
- *                                "employee sees none of it" check (D-*)
+ *   worker   qa.worker+multiw  — Vytas Darbininkas, engaged by Alfa as an
+ *                                employee, NOT a member: the decisions "employee
+ *                                sees none of it" check (D-*) and the TRAINEE (T-*).
+ *                                `assign_training_v1` reaches active engagements
+ *                                (employee / intern / student / collaborator /
+ *                                consultant / freelancer) only from migration
+ *                                20261118143000_training_assignment_engaged_groups_v1
+ *                                (#2816). Before that apply it answered
+ *                                invalid_assignee (run 40296167812), so this walk
+ *                                must not be dispatched before the apply.
  *   worker2  qa.worker+goal3   — not assigned (forbidden check)
  *   manager  qa.manager+multiw — runs "QA-SYNTHETIC Gama" (forbidden checks) and is
- *                                an active MANAGER member of Alfa: the trainee.
- *                                `assign_training_v1` assigns only active members
- *                                of the course's organization; an engagement is
- *                                not a membership (run 40296167812: invalid_assignee).
+ *                                an active MANAGER member of Alfa, not assigned:
+ *                                the course reaches one person only (T-5).
  *
  * WHAT STAYS. Neither register deletes: a decision is a governance record
  * (this run's ends "recorded", tagged `QA-SYNTHETIC <run>`), and a course is
@@ -111,8 +117,9 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
   const chip = page.getByTestId("workspace-chip").first();
   await expect(chip).toBeVisible({ timeout: 30_000 });
   if ((await chip.innerText()).includes(orgName)) return;
-  await chip.getByRole("button").first().click();
   const menu = page.getByTestId("workspace-chip-menu");
+  // A client-toggled menu: a click before hydration opens nothing.
+  await clickUntilVisible(chip.getByRole("button").first(), menu, { timeout: 30_000, what: "the workspace menu" });
   await menu.locator('[data-testid^="workspace-option-"]', { hasText: orgName }).first().click();
   await expect(chip).toContainText(orgName, { timeout: 30_000 });
 }
@@ -343,28 +350,44 @@ test("T-1 (11.8). Alfa's owner adds a course to the organization's register", as
   await ctx.close();
 });
 
-test("T-2 (11.8). the owner assigns the course to Alfa's employee with a due date", async ({ browser }) => {
+/** The trainee, as the register's picker and its managed rows name them. */
+const TRAINEE = /Vytas Darbininkas/;
+
+test("T-2 (11.8). the owner assigns the course to a worker Alfa engages (not a member) with a due date", async ({ browser }) => {
   test.skip(!courseCreated, "T-1 did not add the course");
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const row = programRow(await register(page), COURSE);
-  const assign = row.locator("form").filter({ has: page.locator('input[name="assigneeEmail"]') });
-  await assign.locator('input[name="assigneeEmail"]').fill(PROD_QA_MANAGER_EMAIL);
+  const assign = row.getByTestId("training-assign-form");
+  // #2816: the picker lists Alfa's members AND its active engagements.
+  const picker = assign.getByTestId("training-assign-person");
+  await expect(picker, "the course offers a person picker").toBeVisible({ timeout: 30_000 });
+  const options = await picker.locator("option").evaluateAll((os) =>
+    (os as HTMLOptionElement[]).filter((o) => o.value).map((o) => ({ v: o.value, t: o.textContent ?? "" })),
+  );
+  const trainee = options.filter((o) => TRAINEE.test(o.t));
+  expect(trainee, "the picker offers the engaged worker, once").toHaveLength(1);
+  await picker.selectOption(trainee[0]!.v);
+  await expect(assign.locator('input[name="assigneeEmail"]'), "picked, not a typed address").toHaveValue("");
   await assign.locator('input[name="requiredBy"]').fill(dayFromToday(14));
+  // "invalid_assignee" here means #2816's migration is not applied in production.
   await act(page, assign.getByRole("button"), "trn", ["assigned", "already_assigned"]);
   courseAssigned = true;
   const managed = (await register(page)).getByTestId("training-managed-row").filter({ hasText: COURSE });
   await expect(managed, "the assignment is in the organization's register").toHaveCount(1, { timeout: 30_000 });
   await expect(managed).toContainText("Reikia atlikti");
+  await expect(managed.getByTestId("training-managed-assignee"), "assigned to the engaged worker").toHaveText(TRAINEE);
   await ctx.close();
 });
 
-test("T-3 (11.8). the employee completes the course on the phone; it persists", async ({ browser }) => {
+test("T-3 (11.8). the engaged worker completes the course on the phone; it persists", async ({ browser }) => {
   test.skip(!courseAssigned, "T-2 did not assign the course");
-  const { ctx, page } = await as(browser, "manager", { phone: true });
-  await useWorkspace(page, ALFA);
+  // No workspace switch: the worker is not Alfa's member, and their own
+  // assignments ("mine") show in every workspace.
+  const { ctx, page } = await as(browser, "worker", { phone: true });
   let mine = (await register(page)).getByTestId("training-mine-row").filter({ hasText: COURSE });
-  await expect(mine, "the employee sees what they were asked to complete").toHaveCount(1, { timeout: 30_000 });
+  await expect(mine, "the engaged worker sees what they were asked to complete").toHaveCount(1, { timeout: 30_000 });
+  await expect(mine).toContainText("Reikia atlikti");
   await fitsPhone(page, "documents with the training register");
   await mine.locator('input[name="note"]').fill(`${TAG}: perskaičiau ir atlikau.`);
   await act(page, mine.getByRole("button"), "trn", ["completed", "already_completed"]);
@@ -375,12 +398,14 @@ test("T-3 (11.8). the employee completes the course on the phone; it persists", 
   await ctx.close();
 });
 
-test("T-4 (11.8). the owner sees the course completed", async ({ browser }) => {
+test("T-4 (11.8). the owner sees the engaged worker's course completed", async ({ browser }) => {
   test.skip(!courseCompleted, "T-3 did not complete the course");
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const managed = (await register(page)).getByTestId("training-managed-row").filter({ hasText: COURSE });
+  await expect(managed, "one assignment of this run's course").toHaveCount(1, { timeout: 30_000 });
   await expect(managed).toContainText("Atlikta", { timeout: 30_000 });
+  await expect(managed.getByTestId("training-managed-assignee")).toHaveText(TRAINEE);
   await ctx.close();
 });
 
@@ -441,10 +466,14 @@ test("T-4c (11.8). the certificate list follows the active workspace: Alfa's cer
   await ctx.close();
 });
 
-test("T-5 (11.8). another organization and an unassigned worker see none of Alfa's course", async ({ browser }) => {
+test("T-5 (11.8). another organization, an unassigned worker and Alfa's own manager see none of Alfa's course", async ({ browser }) => {
   test.skip(!courseCreated, "T-1 did not add the course");
   {
     const { ctx, page } = await as(browser, "manager");
+    // A member of Alfa who was not assigned: nothing in "mine" (shown in every workspace).
+    await page.goto("/lt/dashboard/documents#training");
+    await rendered(page, "documents (manager)");
+    await expect(page.getByTestId("training-mine-row").filter({ hasText: COURSE }), "Alfa's manager was not assigned").toHaveCount(0);
     await useWorkspace(page, GAMA);
     await page.goto("/lt/dashboard/documents#training");
     await rendered(page, "documents (Gama)");

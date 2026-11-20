@@ -16,7 +16,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
-import { collect, createGithubClient, parseGhInclude } from "./status-report-lib.mjs";
+import { collect, createGithubClient, parseGhInclude, parseParityLog } from "./status-report-lib.mjs";
 
 const run = promisify(execFile);
 const REPO = process.env.REPORT_REPO ?? "bandymuks1-stack/labourmarketai";
@@ -70,6 +70,22 @@ const client = createGithubClient({ transport, sleep });
 const sinceIso = new Date(Date.now() - SINCE_HOURS * 3600 * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");
 const data = await collect({ client, repo: REPO, sinceIso, fetchHealth, sleep });
 data.fetchedAt = new Date().toISOString();
+
+// Migration truth (owner order 2026-11-20): the LIVE parity step of the latest successful `quality`
+// run on main reads production's own migration ledger. Its "no production ledger row" list is the
+// only source for "not applied"; a PR body or an earlier report is never one.
+try {
+  const { stdout: list } = await run("gh", ["run", "list", "-R", REPO, "-w", "quality.yml", "--branch", "main", "--status", "success", "--limit", "1", "--json", "databaseId,headSha"], { timeout: REQUEST_TIMEOUT_MS });
+  const [q] = JSON.parse(list);
+  if (!q) throw new Error("no successful quality run on main");
+  const { stdout: log } = await run("gh", ["run", "view", String(q.databaseId), "-R", REPO, "--log"], { maxBuffer: 256 * 1024 * 1024, timeout: 120_000 });
+  const parity = parseParityLog(log);
+  if (!parity) throw new Error(`quality run ${q.databaseId} has no live migration-parity step`);
+  data.migrationParity = { ...parity, run: q.databaseId, headSha: q.headSha };
+} catch (e) {
+  data.errors.push({ path: "quality.yml migration parity", status: "error", attempts: 1, message: String(e?.message ?? e).slice(0, 200) });
+  data.completeness = "PARTIAL";
+}
 
 process.stdout.write(JSON.stringify(data, null, 1) + "\n");
 console.error(
