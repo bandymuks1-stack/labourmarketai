@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Język wiadomości",
+    "intro": "Wiadomości służbowe i instrukcje napisane w innym języku są wyświetlane w tłumaczeniu na ten język. Zostaw język interfejsu, chyba że lepiej czytasz w innym języku.",
+    "label": "Czytam wiadomości w języku",
+    "sameAsInterface": "Taki sam jak interfejs",
+    "saved": "Zapisano.",
+    "error": "Nie udało się zapisać zmiany i została cofnięta. Spróbuj ponownie.",
+    "unavailable": "To ustawienie nie jest jeszcze dostępne — do tego czasu wiadomości są w języku interfejsu."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Sprawdź i zatwierdź",
