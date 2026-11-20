@@ -694,6 +694,32 @@ test("FE-6. an edit of a correction filed under another organization while the e
   ).toEqual([]);
   expect(await readable(Q, [c1.id!, c2.id!]), "C reads both versions filed under it").toEqual([c1.id!, c2.id!].sort());
   expect(await readable(W, [first.id!, c1.id!, c2.id!]), "W reads every version").toEqual([first.id!, c1.id!, c2.id!].sort());
+  // Read-back of every predicate the retained-history read depends on (logged, not asserted).
+  console.log(
+    "FE-6 diagnostics:",
+    JSON.stringify(
+      sql(
+        `select je.engagement_context_id = ${lit(s.ecB)} as in_b, je.created_at::text as created_at,
+                je.superseded_by, je.correction_of, je.deleted_at,
+                ec.status, ec.ended_at::text as ended_at, ec.relationship_slug, rt.category,
+                ((ec.ended_at + 1)::timestamp at time zone 'UTC')::text as cut,
+                public.journal_entry_chain_root_at_v1(je.id)::text as root_at,
+                (select json_agg(json_build_object('slug', x.relationship_slug, 'status', x.status))
+                   from public.engagement_contexts x
+                  where x.profile_id = ${lit(s.pId)} and x.organization_id = ec.organization_id) as p_engagements,
+                (select json_agg(json_build_object('role', m.role, 'status', m.status))
+                   from public.company_memberships m
+                  where m.profile_id = ${lit(s.pId)} and m.organization_id = ec.organization_id) as p_memberships,
+                (select json_agg(json_build_object('id', c.id, 'ctx', c.engagement_context_id, 'sup', c.superseded_by))
+                   from public.journal_entries c where c.correction_of = je.id) as corrections
+           from public.journal_entries je
+           join public.engagement_contexts ec on ec.id = je.engagement_context_id
+           left join public.relationship_types rt on rt.slug = ec.relationship_slug
+          where je.id in (${lit(first.id!)}, ${lit(second.id!)})`,
+      ),
+    ),
+  );
+  expect(await readable(P, [second.id!]), "B keeps its other confirmed record, which has no correction").toEqual([second.id!]);
   expect(await readable(P, [first.id!]), "B keeps its confirmed original").toEqual([first.id!]);
 
   // A direct correction of B's other confirmed record after the end, asked for C, lands under B.
