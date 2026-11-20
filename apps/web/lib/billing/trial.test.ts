@@ -25,6 +25,7 @@ vi.mock("@/lib/billing/config", () => ({
   getBillingConfig: () => ({ state: "stripe_test", reason: "ok", testMode: true, paymentsEnabled: true, mode: "test" }),
   getBillingConfigFor: () => ({ state: "stripe_test", reason: "ok", testMode: true, paymentsEnabled: true, mode: "test" }),
   billingTrialEnabled: () => true,
+  billingStripeTaxEnabled: () => false,
   requireStripeSecret: () => "sk_test_dummy",
   requireStripeWebhookSecret: () => "whsec_dummy",
 }));

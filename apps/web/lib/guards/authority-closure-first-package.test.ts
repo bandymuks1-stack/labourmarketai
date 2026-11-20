@@ -157,6 +157,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-21: skill confirmation withdrawal phase B (cross-party
       // standing read door; RED, needs-human-gate, NOT applied).
       "20261021095500_",
+      // 2026-10-23 (RED by GRANT/REVOKE + billing, needs-human-gate): Stripe Tax evidence table.
+      "20261023120000_",
       // 2026-10-23 (RED, needs-human-gate, NOT applied): CAL-8 shift patterns
       // (one nullable column on work_plan_entries + create_work_plan_entry_v2).
       "20261023160000_",

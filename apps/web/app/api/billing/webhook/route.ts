@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { getBillingProvider } from "@/lib/billing/provider";
-import { getBillingConfig } from "@/lib/billing/config";
+import { billingStripeTaxEnabled, getBillingConfig } from "@/lib/billing/config";
+import { applyTaxIdUpdate, captureTaxEvidence } from "@/lib/billing/tax-evidence-apply";
 import {
   isHandledEventType,
   isRecordOnlyEventType,
@@ -187,6 +188,20 @@ export async function POST(req: Request) {
       if (event.type === "invoice.paid" && invoiceHadPayment(event.object)) {
         funnelInvoicePaid = invoiceBillingReason(event.object);
       }
+    } else if (event.type === "customer.tax_id.updated") {
+      // Stripe Tax: the VAT id verification result lands on the tax evidence
+      // rows of that customer (only rows that exist; no subscription state).
+      const verified = await applyTaxIdUpdate(event);
+      if (verified === "error") result = "tax-evidence-error";
+    }
+
+    // Stripe Tax evidence (owner order 2026-10-23) — only while the switch is
+    // on, and only after the event's own processing succeeded. A failed WRITE
+    // keeps the event open (Stripe retries; every apply above is idempotent);
+    // a table that is not applied yet never blocks a payment.
+    if (billingStripeTaxEnabled() && (result === "ok" || result === "stale-event")) {
+      const tax = await captureTaxEvidence(event, provider);
+      if (tax === "error") result = "tax-evidence-error";
     }
   } catch (e) {
     // Keep the idempotency record OPEN (processed=false) and answer non-2xx so

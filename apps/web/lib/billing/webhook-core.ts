@@ -44,6 +44,10 @@ const HANDLED = new Set([
   // state is touched). Delivered only if the endpoint subscribes to it; the
   // local window closes the operation regardless.
   "checkout.session.expired",
+  // Stripe Tax (owner order 2026-10-23): the asynchronous VIES/HMRC result of a
+  // collected VAT id. Moves no subscription state — it records the
+  // verification on the tax evidence rows (lib/billing/tax-evidence-apply.ts).
+  "customer.tax_id.updated",
 ]);
 
 export function isHandledEventType(type: string): boolean {

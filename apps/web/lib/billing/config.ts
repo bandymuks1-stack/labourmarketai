@@ -73,6 +73,18 @@ export function billingPilotPassEnabled(): boolean {
   return env.BILLING_PILOT_PASS_ENABLED === "true";
 }
 
+/**
+ * Server-only: whether Stripe Tax is switched on (owner order 2026-10-23,
+ * default OFF). Off = the pilot-pass Checkout carries no tax parameters and the
+ * webhook records no tax evidence — exactly the behaviour before the switch.
+ * The €99 subscription Checkout already asks for automatic tax under the
+ * 2026-09-05 launch-pricing decision (checkout-tax-pins.test.ts); the switch
+ * does not change it.
+ */
+export function billingStripeTaxEnabled(): boolean {
+  return env.BILLING_STRIPE_TAX_ENABLED === "true";
+}
+
 /** Server-only: whether billing is restricted to a pilot list (true unless ALL_ORGANIZATIONS). */
 export function billingPilotActive(): boolean {
   return parsePilotOrganizations(env.BILLING_PILOT_ORGANIZATION_IDS) !== null;

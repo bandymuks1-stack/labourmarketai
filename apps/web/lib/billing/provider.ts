@@ -96,6 +96,21 @@ export type ListSubscriptionsResult =
   | { ok: true; subscriptions: readonly ProviderSubscriptionView[] }
   | { ok: false; reason: string };
 
+/**
+ * READ-ONLY tax evidence sources (Stripe Tax, owner order 2026-10-23): the
+ * Checkout Session re-read WITH its tax breakdown (a webhook payload never
+ * carries `total_details.breakdown` — it is expand-only), and the customer's
+ * tax ids with their current verification status. Either part may be null when
+ * not asked for or not found.
+ */
+export type TaxEvidenceSourcesResult =
+  | {
+      ok: true;
+      session: Record<string, unknown> | null;
+      taxIds: readonly Record<string, unknown>[] | null;
+    }
+  | { ok: false; reason: string };
+
 export type CheckoutSessionResult =
   | { ok: true; url: string; sessionId: string; testMode: boolean }
   | { ok: false; reason: string };
@@ -159,6 +174,15 @@ export interface BillingProvider {
   retrieveSubscriptionRaw(providerSubscriptionId: string): Promise<RetrieveRawSubscriptionResult>;
   /** READ-ONLY: every subscription (any status) of one provider customer. */
   listCustomerSubscriptions(providerCustomerId: string): Promise<ListSubscriptionsResult>;
+  /**
+   * READ-ONLY (Stripe Tax): the session with its tax breakdown and the
+   * customer's tax ids. Optional — the noop provider has none; never creates,
+   * updates or charges anything.
+   */
+  retrieveTaxEvidenceSources?(input: {
+    readonly sessionId?: string | null;
+    readonly customerId?: string | null;
+  }): Promise<TaxEvidenceSourcesResult>;
 }
 
 /**

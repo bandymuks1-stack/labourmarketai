@@ -13,7 +13,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/billing/provider", () => ({ getBillingProvider: vi.fn() }));
 const cfg = vi.hoisted(() => ({ state: "stripe_test" as string, testMode: true }));
-vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => cfg }));
+vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => cfg, billingStripeTaxEnabled: () => false }));
 vi.mock("@/lib/billing/subscription-store", () => ({
   recordWebhookEvent: vi.fn(),
   markWebhookProcessed: vi.fn(),

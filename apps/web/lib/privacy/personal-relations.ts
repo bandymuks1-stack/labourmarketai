@@ -361,6 +361,9 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "billing_customers", key: "profile_id", column: "owner_id" },
   { table: "billing_subscriptions", key: "profile_id", column: "owner_id" },
   { table: "billing_checkout_operations", key: "profile_id", column: "owner_id" },
+  // Stripe Tax evidence of the person's own payments (2026-10-23); read under
+  // RLS (owner_id = auth.uid()). The reviewing admin's id is not theirs.
+  { table: "billing_tax_evidence", key: "profile_id", column: "owner_id", redactActors: ["reviewed_by"] },
   { table: "lmc_transactions", key: "profile_id", column: "actor_profile_id" },
 
   // -- PER-12 (2026-10-03): children that hang off exported rows ---------

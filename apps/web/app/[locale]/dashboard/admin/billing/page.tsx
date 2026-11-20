@@ -11,6 +11,7 @@ import {
 } from "@/lib/billing/readiness";
 import { AdminPilotGrantForm } from "@/components/app/admin-pilot-grant-form";
 import { AdminLmcPanel } from "@/components/app/admin-lmc-panel";
+import { AdminTaxReviewSection } from "@/components/app/admin-tax-review-section";
 import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
@@ -182,6 +183,10 @@ export default async function AdminBillingPage({
           </ul>
         )}
       </section>
+
+      {/* Stripe Tax review list (owner order 2026-10-23): rows the webhook's
+          review rules flagged; read-only except "mark reviewed". */}
+      <AdminTaxReviewSection locale={locale} />
 
       {/* Stripe TEST checkout — moved here from the public /pricing page
           (launch repair Scope C): test checkout is internal-only, behind
