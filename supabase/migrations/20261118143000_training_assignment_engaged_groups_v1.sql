@@ -1,3 +1,4 @@
+-- @human-gate-approved
 -- ============================================================================
 -- 20261118143000 — training_assignment_engaged_groups_v1  (registry 11.8,
 -- training & certification register)

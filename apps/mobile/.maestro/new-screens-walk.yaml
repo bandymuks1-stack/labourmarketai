@@ -16,12 +16,20 @@
 #   1. Profile: the Living CV sections render (cv.verified.get) with their add
 #      buttons; the work-history form opens and is cancelled without saving;
 #      the education and language forms open and are cancelled the same way.
-#   2. Today follows the active workspace (#3466). In an ORGANIZATION
+#   2. Offers (booking.list, invitations.list), Opportunities (the board,
+#      interest.express_draft: a list and a stateless token, nothing stored)
+#      and Availability (workforce.availability) open in either workspace and
+#      stop loading: a loaded view or a named refusal, never a spinner.
+#   3. Today follows the active workspace (#3466). In an ORGANIZATION
 #      workspace the walk opens Find candidates (demand.list), Agency offers
-#      (client.agency_offers.get) and Programmes & cohorts
-#      (education.workspace.get) — each must render its loaded view or a
-#      named refusal (`capability-failed`), never spin. In a PERSONAL workspace
+#      (client.agency_offers.get), Programmes & cohorts
+#      (education.workspace.get) and the agency's own station
+#      (agency.clients.get) — each must render its loaded view or a named
+#      refusal (`capability-failed`), never spin. In a PERSONAL workspace
 #      those stations are absent, and the label below says so in the log.
+# None of these reads emits a funnel event (checked against every
+# emitServerFunnelEvent caller); no offer is answered, no hand raised, no
+# candidate proposed.
 #   last. sign-out returns to the sign-in form.
 # No screenshot and no debug output (the repository is public).
 appId: ai.labourmarket.app
@@ -157,7 +165,62 @@ name: new-screens-walk
 - tapOn:
     id: "cv-language-cancel"
 
-# --- 2. Today follows the workspace; the organization screens, read only ---
+# --- 2. Offers, opportunities and availability, read only ---
+- tapOn:
+    id: "tab-today"
+- scrollUntilVisible:
+    element:
+      id: "today-open-offers"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-offers"
+- extendedWaitUntil:
+    visible:
+      id: "offers-list"
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible:
+      id: "capability-loading"
+    timeout: 60000
+- tapOn:
+    id: "tab-today"
+- scrollUntilVisible:
+    element:
+      id: "today-open-opportunities"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-opportunities"
+- extendedWaitUntil:
+    visible:
+      id: "opportunities-list"
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible:
+      id: "capability-loading"
+    timeout: 60000
+- tapOn:
+    id: "tab-today"
+- scrollUntilVisible:
+    element:
+      id: "today-open-availability"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-availability"
+- extendedWaitUntil:
+    visible:
+      id: "availability-loaded|capability-failed"
+    timeout: 60000
+
+# --- 3. Today follows the workspace; the organization screens, read only ---
 - tapOn:
     id: "tab-today"
 - scrollUntilVisible:
@@ -176,6 +239,8 @@ name: new-screens-walk
           id: "today-open-agency-offers"
       - assertNotVisible:
           id: "today-open-education"
+      - assertNotVisible:
+          id: "today-open-agency"
 - runFlow:
     label: "ORGANIZATION_WORKSPACE (organization screens walked, read only)"
     when:
@@ -222,6 +287,21 @@ name: new-screens-walk
       - extendedWaitUntil:
           visible:
             id: "education-not-institution|education-list|capability-failed"
+          timeout: 60000
+      - tapOn:
+          id: "tab-today"
+      - scrollUntilVisible:
+          element:
+            id: "today-open-agency"
+          direction: DOWN
+          timeout: 30000
+          centerElement: true
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "today-open-agency"
+      - extendedWaitUntil:
+          visible:
+            id: "agency-not-agency|agency-list|capability-failed"
           timeout: 60000
 
 # --- last. Sign out, back to the form ---

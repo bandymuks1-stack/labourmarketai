@@ -10,6 +10,7 @@ import {
   type EvidenceStatus,
 } from "@/components/app/evidence-status-strip";
 import { EmptyState } from "@/components/app/empty-state";
+import { chipLinkClassName } from "@/components/ui/Chip";
 import { createClient } from "@/lib/supabase/server";
 import { readCounterpartyQueue } from "@/lib/journal/counterparty-review";
 import { queueBucket } from "@/lib/journal/counterparty-review-model";
@@ -313,17 +314,17 @@ export default async function InboxPage({
             {autoConfirmedCount} · {tTier("autoConfirmQualifier")}
           </p>
         ) : null}
-        <div className="flex flex-wrap gap-x-4">
+        <div className="flex flex-wrap gap-2">
           <Link
             href="/dashboard/inbox/quick"
-            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            className={chipLinkClassName(false)}
             data-testid="inbox-quick-link"
           >
             {t("inbox.quick.openQuick")}
           </Link>
           <Link
             href="/dashboard/inbox/counterparty"
-            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            className={chipLinkClassName(false)}
             data-testid="inbox-counterparty-link"
           >
             {t("counterparty.queue.openLink")}
@@ -331,7 +332,7 @@ export default async function InboxPage({
           </Link>
           <Link
             href="/dashboard/inbox/report"
-            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            className={chipLinkClassName(false)}
             data-testid="inbox-report-link"
           >
             {t("inbox.openReport")}

@@ -72,6 +72,10 @@ import { loadDemandHistory } from "@/lib/demand/demand-history-facts";
 import { DemandHistoryList } from "@/components/app/demand-history-list";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Card } from "@/components/ui/Card";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
+import { chipLinkClassName } from "@/components/ui/Chip";
+import { buttonLinkClassName } from "@/components/ui/Button";
+import { Check } from "lucide-react";
 import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
@@ -85,10 +89,12 @@ function hasStandingInterest(status: string | null | undefined): boolean {
   return status === "interested" || status === "reviewed" || status === "contacted";
 }
 
-const READINESS_TONE: Record<CompanyCandidateLabel, string> = {
-  can_be_considered: "border-state-success/40 bg-state-success/10 text-state-success",
-  limited_information: "border-state-amber/40 bg-state-amber/10 text-state-amber",
-  not_enough_information: "border-ink-500 bg-ink-800/40 text-text-muted",
+/** Readiness label -> the shared status pill's tone (phone pass 2026-11-19:
+ *  was a hand-written pill with the same three colour families). */
+const READINESS_TONE: Record<CompanyCandidateLabel, StatusChipVariant> = {
+  can_be_considered: "success",
+  limited_information: "attention",
+  not_enough_information: "neutral",
 };
 
 /** Visual tone per canonical pipeline stage (derived, never stored — P4). */
@@ -411,13 +417,11 @@ export default async function CompanyScoutingPage({
     return t.has(key) ? t(key) : t("availabilityValue.unknown");
   };
 
-  return (
-    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <PageTitle>{t("title")}</PageTitle>
-        <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
-      </header>
-
+  // E-1: a structured-less need with nobody's hand up yet offers the available
+  // workforce as the action, right under its status card.
+  const supplyIsTheAction = result?.kind === "not-structured" && handRaisers.length === 0;
+  const guidanceTop = (
+    <>
       {/* Honest matching status (audit P1): what works today vs what an active
           candidate stream still depends on. No guaranteed/instant/AI claims. */}
       <section
@@ -447,13 +451,10 @@ export default async function CompanyScoutingPage({
         </p>
       </section>
 
-      {/* AVAILABLE WORKFORCE (2026-09-07) — the supply half of discovery, beside
-          the candidate half rather than in a separate product. Until this
-          landed, an agency's declared capacity was readable only by that agency
-          and an admin: the supply side of the market was written and
-          undiscoverable. */}
-      <AvailableSupplySection state={availableSupply} />
-
+    </>
+  );
+  const guidanceBottom = (
+    <>
       {/* Honest visibility: based on readiness/trust/permissions — NOT payment.
           Paid wider access is inert while billing is disabled; no fake unlock. */}
       <FeatureNote testId="scouting-visibility-note">{t("visibilityNote")}</FeatureNote>
@@ -481,13 +482,47 @@ export default async function CompanyScoutingPage({
         </div>
       </details>
 
+    </>
+  );
+  const supply = (
+    <>
+      {/* AVAILABLE WORKFORCE (2026-09-07) — the supply half of discovery, beside
+          the candidate half rather than in a separate product. Until this
+          landed, an agency's declared capacity was readable only by that agency
+          and an admin: the supply side of the market was written and
+          undiscoverable. */}
+      <AvailableSupplySection state={availableSupply} />
+
+    </>
+  );
+
+  return (
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
+      <header className="flex flex-col gap-1">
+        <PageTitle>{t("title")}</PageTitle>
+        <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
+      </header>
+
+      {/* A CHOSEN NEED COMES FIRST (UX gaps 2026-11-18, E-1). Opened from the
+          need just saved, the page used to lead with four explanatory cards and
+          put the need's own state about 1,700 px down. With a need chosen, its
+          state, its people and its actions follow the picker directly, and the
+          general explanation moves below them. */}
+      {selected ? null : (
+        <>
+          {guidanceTop}
+          {supply}
+          {guidanceBottom}
+        </>
+      )}
+
       {/* Demand picker */}
       {demands.length === 0 ? (
         <div className="flex flex-col items-start gap-3 rounded-md border border-dashed border-ink-500 px-4 py-6">
           <p className="text-sm text-text-secondary">{t("noDemands")}</p>
           <Link
             href={`/${locale}/dashboard/company/needs#demand-intake`}
-            className="rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
+            className={buttonLinkClassName("secondary", "sm")}
             data-testid="scouting-no-demands-cta"
           >
             {t("noDemandsCta")} →
@@ -499,12 +534,12 @@ export default async function CompanyScoutingPage({
             <Link
               key={d.id}
               href={`/${locale}/dashboard/company/scouting?request=${d.id}`}
-              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                selected === d.id
-                  ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                  : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
-              }`}
+              aria-current={selected === d.id ? "page" : undefined}
+              className={`${chipLinkClassName(selected === d.id)} max-w-full`}
             >
+              {selected === d.id ? (
+                <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
+              ) : null}
               {resolveDemandTitle(d.title, demandTitleLabels) ||
                 tDemandReadback("untitledInquiry")}
               {/* HOW MANY PEOPLE ARE WAITING ON THIS ONE. Without it the
@@ -608,19 +643,35 @@ export default async function CompanyScoutingPage({
           data-testid="scouting-filters"
           aria-label={t("filters.title")}
         >
-          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {t("filters.title")}
-          </p>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-x-3">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+              {t("filters.title")}
+            </p>
+            {/* The way back out of a narrowed list sits beside the title, so
+                it stays in reach when the chips below scroll sideways. */}
+            {hasActiveScoutFilters(result.filters) ? (
+              <Link
+                href={filterHref({ skill: null, country: null, availableNow: false })}
+                data-testid="scout-filter-clear"
+                className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue hover:text-brand-champagne"
+              >
+                {t("filters.clear")}
+              </Link>
+            ) : null}
+          </div>
+          {/* PHONE: one row that scrolls sideways inside itself, so a long
+              facet list never pushes the candidates below the fold and the
+              page itself never scrolls sideways. From sm up the chips wrap. */}
+          <div className="-m-1 flex gap-2 overflow-x-auto p-1 sm:m-0 sm:flex-wrap sm:overflow-visible sm:p-0">
             <Link
               href={filterHref({ availableNow: !result.filters.availableNow })}
               data-testid="scout-filter-available"
-              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                result.filters.availableNow
-                  ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                  : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
-              }`}
+              aria-current={result.filters.availableNow ? "true" : undefined}
+              className={`${chipLinkClassName(result.filters.availableNow)} shrink-0 whitespace-nowrap`}
             >
+              {result.filters.availableNow ? (
+                <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
+              ) : null}
               {t("filters.availableNow")}
             </Link>
             {result.facets.countries.map((cc) => (
@@ -630,12 +681,12 @@ export default async function CompanyScoutingPage({
                   country: result.filters.country === cc ? null : cc,
                 })}
                 data-testid={`scout-filter-country-${cc}`}
-                className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                  result.filters.country === cc
-                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
-                }`}
+                aria-current={result.filters.country === cc ? "true" : undefined}
+                className={`${chipLinkClassName(result.filters.country === cc)} shrink-0 whitespace-nowrap`}
               >
+                {result.filters.country === cc ? (
+                  <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
+                ) : null}
                 {countryDisplayName(cc, locale)}
               </Link>
             ))}
@@ -646,24 +697,15 @@ export default async function CompanyScoutingPage({
                   skill: result.filters.skill === s ? null : s,
                 })}
                 data-testid={`scout-filter-skill-${s}`}
-                className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                  result.filters.skill === s
-                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
-                }`}
+                aria-current={result.filters.skill === s ? "true" : undefined}
+                className={`${chipLinkClassName(result.filters.skill === s)} shrink-0 whitespace-nowrap`}
               >
+                {result.filters.skill === s ? (
+                  <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
+                ) : null}
                 {tSkill.has(s as never) ? tSkill(s as never) : s.replace(/-/g, " ")}
               </Link>
             ))}
-            {hasActiveScoutFilters(result.filters) ? (
-              <Link
-                href={filterHref({ skill: null, country: null, availableNow: false })}
-                data-testid="scout-filter-clear"
-                className="rounded-full border border-transparent px-3 py-1.5 text-xs font-medium text-brand-blue hover:text-brand-champagne"
-              >
-                {t("filters.clear")}
-              </Link>
-            ) : null}
           </div>
         </section>
       ) : null}
@@ -787,6 +829,7 @@ export default async function CompanyScoutingPage({
           {t("notStructured")}
         </p>
       ) : null}
+      {supplyIsTheAction ? supply : null}
       {/* PEOPLE WHO RAISED A HAND on a need that names no trade (owner
           decision 2026-10-22). Shown NOW, beside the explanation above, and
           labelled: the trade match was NOT assessed, so there is no status,
@@ -875,25 +918,17 @@ export default async function CompanyScoutingPage({
                     chips={
                       <>
                         {h.actionability.kind === "actionable_later" ? (
-                          <span
-                            className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
-                            data-testid="candidate-available-later"
-                          >
+                          <StatusChip variant="neutral" testid="candidate-available-later">
                             {t("actionability.availableFromChip", { date: h.actionability.availableFrom })}
-                          </span>
+                          </StatusChip>
                         ) : null}
                         {p.rate.minEur != null ? (
-                          <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
-                            {t("rateFrom", { min: p.rate.minEur })}
-                          </span>
+                          <StatusChip variant="neutral">{t("rateFrom", { min: p.rate.minEur })}</StatusChip>
                         ) : null}
                         {p.experienceYears != null && p.experienceYears > 0 ? (
-                          <span
-                            className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
-                            data-testid={`scout-experience-${h.workerId}`}
-                          >
+                          <StatusChip variant="neutral" testid={`scout-experience-${h.workerId}`}>
                             {t("experienceYearsValue", { years: p.experienceYears })}
-                          </span>
+                          </StatusChip>
                         ) : null}
                         <p className="basis-full text-meta leading-relaxed text-text-muted">
                           {t("handRaisers.ownWords")}
@@ -1068,7 +1103,7 @@ export default async function CompanyScoutingPage({
           {hasActiveScoutFilters(result.filters) ? (
             <Link
               href={filterHref({ skill: null, country: null, availableNow: false })}
-              className="text-xs font-medium text-brand-blue hover:text-brand-champagne"
+              className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue hover:text-brand-champagne"
             >
               {t("filters.clear")} →
             </Link>
@@ -1078,7 +1113,7 @@ export default async function CompanyScoutingPage({
               next action. */}
           <Link
             href={`/${locale}/dashboard/company/needs#demand-intake`}
-            className="text-xs font-medium text-brand-blue hover:text-brand-champagne"
+            className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue hover:text-brand-champagne"
             data-testid="scouting-empty-edit-need"
           >
             {t("editNeedCta")} →
@@ -1087,7 +1122,8 @@ export default async function CompanyScoutingPage({
       ) : null}
 
       {selected && offeredCandidates.length > 0 ? (
-        <section className="card-border flex flex-col gap-3 p-4" data-testid="scouting-agency-offers">
+        <section data-testid="scouting-agency-offers">
+          <Card compact className="flex flex-col gap-3">
           {/* TIME_TO_EXTERNAL_HUMAN_RESPONSE for the client company: a real
               agency proposed a real candidate for this need, and the client
               is looking at it. Once per tab session; no ids. */}
@@ -1103,7 +1139,8 @@ export default async function CompanyScoutingPage({
           </header>
           <ul className="flex flex-col gap-3">
             {offeredCandidates.map((oc) => (
-              <li key={oc.offerId} className="card-border flex flex-col gap-3 p-3" data-testid={`scout-offered-${oc.workerId}`} data-offer-id={oc.offerId}>
+              <li key={oc.offerId} data-testid={`scout-offered-${oc.workerId}`} data-offer-id={oc.offerId}>
+                <Card compact className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                     {anonymizedToken(anonymizedWorkerLabel(oc.workerId))}
@@ -1230,9 +1267,11 @@ export default async function CompanyScoutingPage({
                   />
                 </div>
                 ) : null}
+                </Card>
               </li>
             ))}
           </ul>
+          </Card>
         </section>
       ) : null}
 
@@ -1266,9 +1305,9 @@ export default async function CompanyScoutingPage({
             return (
               <li
                 key={c.workerId}
-                className="card-border flex flex-col gap-3 p-4"
                 data-testid={`scout-candidate-${c.workerId}`}
               >
+                <Card compact className="flex flex-col gap-3">
                 <PersonIdentityCard
                   variant="candidate-review"
                   testid={`scout-identity-${c.workerId}`}
@@ -1314,9 +1353,9 @@ export default async function CompanyScoutingPage({
                   chips={
                     <>
                       {fit ? (
-                        <span
-                          className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
-                          data-testid={`scout-skill-count-${c.workerId}`}
+                        <StatusChip
+                          variant="neutral"
+                          testid={`scout-skill-count-${c.workerId}`}
                         >
                           {/* "0 of 2" asserts a measured miss. When the person
                               has stated no skills at all the engine says
@@ -1327,7 +1366,7 @@ export default async function CompanyScoutingPage({
                                 matched: fit.matchedTotal,
                                 total: fit.needTotal,
                               })}
-                        </span>
+                        </StatusChip>
                       ) : null}
                 {/* P4-B (2026-08-09): the verdict the employer could never
                     see. The engine has always computed `eligible` and the
@@ -1354,30 +1393,20 @@ export default async function CompanyScoutingPage({
                         confirmed not   → blocked
                         unknown         → nothing checked, or insufficient data */}
                   {c.match.eligible && c.match.status !== "insufficient_data" && c.match.matchedHard.length > 0 ? (
-                    <span className="rounded-md border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-meta font-medium text-state-success">
-                      {t("verdict.eligible")}
-                    </span>
+                    <StatusChip variant="success">{t("verdict.eligible")}</StatusChip>
                   ) : c.match.eligible ? (
-                    <span
-                      className="rounded-md border border-ink-500 px-2 py-0.5 text-meta font-medium text-text-secondary"
-                      data-testid={`scout-verdict-unchecked-${c.workerId}`}
-                    >
+                    <StatusChip variant="neutral" testid={`scout-verdict-unchecked-${c.workerId}`}>
                       {c.match.status === "insufficient_data"
                         ? t("verdict.insufficient")
                         : t("verdict.noCriteria")}
-                    </span>
+                    </StatusChip>
                   ) : (
-                    <span className="rounded-md border border-state-danger/40 bg-state-danger/10 px-2 py-0.5 text-meta font-medium text-state-danger">
-                      {t("verdict.blocked")}
-                    </span>
+                    <StatusChip variant="danger">{t("verdict.blocked")}</StatusChip>
                   )}
                   {c.match.evidenceConfidence ? (
-                    <span
-                      className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
-                      data-testid={`scout-evidence-confidence-${c.workerId}`}
-                    >
+                    <StatusChip variant="neutral" testid={`scout-evidence-confidence-${c.workerId}`}>
                       {t(`verdict.evidence.${c.match.evidenceConfidence}` as never)}
-                    </span>
+                    </StatusChip>
                   ) : null}
                 </div>
                       {applicantIdentity.get(c.workerId)?.name ? (
@@ -1396,7 +1425,7 @@ export default async function CompanyScoutingPage({
                   {actsForClient ? null : (
                   <Link
                     href={nextAction.href}
-                    className="text-meta font-medium text-brand-blue hover:text-brand-champagne"
+                    className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue hover:text-brand-champagne"
                     data-testid={`scout-pipeline-next-${c.workerId}`}
                   >
                     {tPipe(nextAction.key.replace("candidatePipeline.", "") as never)} →
@@ -1916,14 +1945,12 @@ export default async function CompanyScoutingPage({
                   data-testid={`scout-readiness-${c.workerId}`}
                   data-readiness={c.readiness.label}
                 >
-                  <span
-                    className={`rounded-md border px-2 py-0.5 text-meta ${READINESS_TONE[c.readiness.label]}`}
-                  >
+                  <StatusChip variant={READINESS_TONE[c.readiness.label]}>
                     {t(`readiness.label.${c.readiness.label}` as never)}
-                  </span>
-                  <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
+                  </StatusChip>
+                  <StatusChip variant="neutral">
                     {t(`readiness.country.${c.readiness.countryFit}` as never)}
-                  </span>
+                  </StatusChip>
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("readiness.docsConsent")}
                   </span>
@@ -1949,10 +1976,19 @@ export default async function CompanyScoutingPage({
 
                   </IdentityDisclosure>
                 </PersonIdentityCard>
+                </Card>
               </li>
             );
           })}
         </ul>
+      ) : null}
+
+      {selected ? (
+        <>
+          {supplyIsTheAction ? null : supply}
+          {guidanceTop}
+          {guidanceBottom}
+        </>
       ) : null}
 
       <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>

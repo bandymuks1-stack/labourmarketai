@@ -6,6 +6,8 @@ import { isSignOutTarget } from "@/components/app/intake-draft-sign-out-clear";
 import {
   WORKER_PROFILE_DOOR_HREF,
   WORKER_PROFILE_DOOR_NEXT,
+  headerAuthPathFor,
+  isWorkerIntakePath,
   isWorkerProfileDoorNext,
 } from "@/lib/marketing/worker-profile-door";
 import {
@@ -16,7 +18,9 @@ import {
   bindWorkerIntakeDraft,
   clearWorkerIntakeDraft,
   intakeDraftText,
+  keepWorkerIntakeDraftField,
   readUnboundWorkerIntakeDraft,
+  readWorkerIntakeDraftFields,
   readWorkerIntakeDraftFor,
   writeWorkerIntakeDraft,
 } from "@/lib/staffing/worker-intake-draft";
@@ -70,8 +74,12 @@ describe("/worker-intake is the first step, without an account", () => {
 
   it("the form keeps what is typed, and the builder places it in its composer", () => {
     const form = read("components/app/worker-intake-form.tsx");
-    expect(form).toMatch(/onInput=\{\(e\) => keepDraft\(e\.currentTarget\)\}/);
-    expect(form).toMatch(/onChange=\{\(e\) => keepDraft\(e\.currentTarget\)\}/);
+    expect(form).toMatch(/onInput=\{\(e\) => keepDraft\(e\.target\)\}/);
+    expect(form).toMatch(/onChange=\{\(e\) => keepDraft\(e\.target\)\}/);
+    expect(form, "per field: only the changed field is written").toContain("keepWorkerIntakeDraftField(el.name,");
+    expect(form, "never rebuilt from the whole (possibly reset) form").not.toMatch(/Array\.from\(form\.elements\)/);
+    expect(form, "the kept fields are put back after each answer").toMatch(/readWorkerIntakeDraftFields\(\)[\s\S]{0,900}\}, \[state\]\);/);
+    expect(form, "... including when the form resets itself").toContain("onReset={() => queueMicrotask(refill)}");
     const flow = read("components/app/profile-text-first-flow.tsx");
     expect(flow, "read only for the signed-in account's email").toContain("readWorkerIntakeDraftFor(viewerEmail)");
     expect(read("app/[locale]/dashboard/profile/page.tsx")).toContain("viewerEmail={user.email ?? null}");
@@ -81,7 +89,7 @@ describe("/worker-intake is the first step, without an account", () => {
     expect(flow).toContain('composeRef.current?.closest("details")?.setAttribute("open", "");');
   });
 
-  it("sign-up and sign-in from the intake bind it to the email used; nothing else does", () => {
+  it("sign-up and sign-in from the intake (its own links, or the header's while on it) bind it to the email used; nothing else does", () => {
     const signup = read("components/app/signup-form.tsx");
     expect(signup).toContain("if (!invitation && nextParam && isWorkerProfileDoorNext(nextPath)) bindWorkerIntakeDraft(email);");
     expect(read("components/app/login-form.tsx")).toContain("if (nextParam && isWorkerProfileDoorNext(nextPath)) bindWorkerIntakeDraft(email);");
@@ -90,6 +98,29 @@ describe("/worker-intake is the first step, without an account", () => {
     for (const other of ["/lt/dashboard", "/lt/dashboard/profile/cv", "/lt/dashboard/profiles", null, ""]) {
       expect(isWorkerProfileDoorNext(other), String(other)).toBe(false);
     }
+  });
+
+  it("on the intake, and only there, the header's Sign up and Sign in carry the profile builder as `next`", () => {
+    const nav = read("components/layouts/site-nav.tsx");
+    // Exactly the two header auth links go through the intake-aware link;
+    // the signed-in "My space" and every other link are untouched.
+    expect(nav.match(/<HeaderAuthCtaLink\s+relPath=\{`\/\$\{locale\}\/auth\/(login|signup)`\}/g)).toHaveLength(2);
+    expect(nav.match(/<HeaderAuthCtaLink/g)).toHaveLength(2);
+    const link = read("components/layouts/header-auth-cta-link.tsx");
+    expect(link).toContain("headerAuthPathFor(relPath, pathname)");
+    expect(link).toContain("<AuthCtaLink");
+
+    for (const here of ["/en/worker-intake", "/lt/worker-intake/", "/worker-intake", "/pt-BR/worker-intake"]) {
+      expect(isWorkerIntakePath(here), here).toBe(true);
+      expect(headerAuthPathFor("/en/auth/signup", here)).toBe("/en/auth/signup?next=%2Fdashboard%2Fprofile");
+      expect(headerAuthPathFor("/en/auth/login", here)).toBe("/en/auth/login?next=%2Fdashboard%2Fprofile");
+    }
+    for (const elsewhere of ["/en", "/en/create-cv", "/en/worker-intake/x", "/en/worker-intakes", "/en/company-need", null, ""]) {
+      expect(isWorkerIntakePath(elsewhere), String(elsewhere)).toBe(false);
+      expect(headerAuthPathFor("/en/auth/signup", elsewhere)).toBe("/en/auth/signup");
+    }
+    // The header's `next` is the one the bind condition already accepts.
+    expect(isWorkerProfileDoorNext(`/en${WORKER_PROFILE_DOOR_NEXT}`)).toBe(true);
   });
 
   it("every sign-out removes it: one listener in the locale layout; the sign-out route is untouched", () => {
@@ -160,7 +191,7 @@ describe("the kept draft", () => {
   it("bound at sign-up, it reaches that account (any letter case) and no other", () => {
     writeWorkerIntakeDraft("Name: Rasa", 0);
     bindWorkerIntakeDraft(" Rasa@Example.invalid ", 1_000);
-    expect(session.has(INTAKE_DRAFT_KEY), "moved out of the tab").toBe(false);
+    expect(session.has(INTAKE_DRAFT_KEY), "the tab copy stays until it is sent or sign-out").toBe(true);
     expect(readWorkerIntakeDraftFor("rasa@example.invalid", 2_000)).toBe("Name: Rasa");
     expect(readWorkerIntakeDraftFor("someone-else@example.invalid", 3_000), "a different account never receives it").toBeNull();
     expect(local.has(INTAKE_DRAFT_KEY), "and it is removed once met").toBe(false);
@@ -171,6 +202,7 @@ describe("the kept draft", () => {
     writeWorkerIntakeDraft("Name: Rasa", 0);
     bindWorkerIntakeDraft("rasa@example.invalid", 1_000);
     expect(readWorkerIntakeDraftFor(null, 2_000)).toBeNull();
+    session.clear();
     bindWorkerIntakeDraft("other@example.invalid", 3_000);
     expect(local.size, "an ordinary sign-in with nothing typed in this tab binds nothing").toBe(0);
   });
@@ -188,6 +220,65 @@ describe("the kept draft", () => {
     local.set(LEGACY_INTAKE_DRAFT_KEY, JSON.stringify({ v: 1, at: 0, text: "old unbound" }));
     readWorkerIntakeDraftFor("a@example.invalid", 1);
     expect(local.has(LEGACY_INTAKE_DRAFT_KEY)).toBe(false);
+  });
+
+  const ORDER = ["full_name", "profession", "languages", "comment"];
+  const field = (label: string, value: string, raw = value) => ({ label, value, raw });
+
+  it("kept per field: a change to one field replaces that field only, in form order", () => {
+    keepWorkerIntakeDraftField("comment", field("Comment", "Tiles, 6 years"), ORDER, 0);
+    keepWorkerIntakeDraftField("full_name", field("Name", "Rasa"), ORDER, 1);
+    expect(readUnboundWorkerIntakeDraft(2)).toBe("Name: Rasa\nComment: Tiles, 6 years");
+    keepWorkerIntakeDraftField("full_name", field("Name", "Rasa P."), ORDER, 3);
+    expect(readUnboundWorkerIntakeDraft(4)).toBe("Name: Rasa P.\nComment: Tiles, 6 years");
+    expect(readWorkerIntakeDraftFields(4).full_name?.raw).toBe("Rasa P.");
+    expect(local.size).toBe(0);
+  });
+
+  it("the form's reset after its answer does not lose fields: the next keystroke adds to them", () => {
+    keepWorkerIntakeDraftField("full_name", field("Name", "Rasa"), ORDER, 0);
+    keepWorkerIntakeDraftField("profession", field("Trade", "Tiler", "tiler"), ORDER, 1);
+    keepWorkerIntakeDraftField("comment", field("Comment", "Six years"), ORDER, 2);
+    // The reset itself fires no input event; the person then types in one field.
+    keepWorkerIntakeDraftField("languages", field("Languages", "English"), ORDER, 3);
+    expect(readUnboundWorkerIntakeDraft(4)).toBe("Name: Rasa\nTrade: Tiler\nLanguages: English\nComment: Six years");
+    // ... and it is what sign-up binds.
+    bindWorkerIntakeDraft("rasa@example.invalid", 5);
+    expect(readWorkerIntakeDraftFor("rasa@example.invalid", 6)).toBe("Name: Rasa\nTrade: Tiler\nLanguages: English\nComment: Six years");
+  });
+
+  it("a field the person empties is removed; emptying every field keeps nothing", () => {
+    keepWorkerIntakeDraftField("full_name", field("Name", "Rasa"), ORDER, 0);
+    keepWorkerIntakeDraftField("comment", field("Comment", "Six years"), ORDER, 1);
+    keepWorkerIntakeDraftField("comment", field("Comment", "", ""), ORDER, 2);
+    expect(readUnboundWorkerIntakeDraft(3)).toBe("Name: Rasa");
+    expect(readWorkerIntakeDraftFields(3).comment).toBeUndefined();
+    keepWorkerIntakeDraftField("full_name", field("Name", "  "), ORDER, 4);
+    expect(session.has(INTAKE_DRAFT_KEY)).toBe(false);
+  });
+
+  it("a retry with a corrected email binds it again, to the new email only", () => {
+    keepWorkerIntakeDraftField("full_name", field("Name", "Rasa"), ORDER, 0);
+    bindWorkerIntakeDraft("rasa@exmaple.invalid", 1);
+    bindWorkerIntakeDraft("rasa@example.invalid", 2);
+    expect(JSON.parse(local.get(INTAKE_DRAFT_KEY) ?? "{}").email).toBe("rasa@example.invalid");
+    expect(readWorkerIntakeDraftFor("rasa@example.invalid", 3)).toBe("Name: Rasa");
+    bindWorkerIntakeDraft("rasa@exmaple.invalid", 4);
+    bindWorkerIntakeDraft("rasa@example.invalid", 5);
+    expect(readWorkerIntakeDraftFor("rasa@exmaple.invalid", 6), "the mistyped email no longer holds it").toBeNull();
+  });
+
+  it("sending or signing out removes the tab copy as well as the bound one", () => {
+    keepWorkerIntakeDraftField("full_name", field("Name", "Rasa"), ORDER, 0);
+    bindWorkerIntakeDraft("rasa@example.invalid", 1);
+    expect(session.has(INTAKE_DRAFT_KEY) && local.has(INTAKE_DRAFT_KEY)).toBe(true);
+    clearWorkerIntakeDraft();
+    expect(session.size + local.size).toBe(0);
+    bindWorkerIntakeDraft("rasa@example.invalid", 2);
+    expect(local.size, "nothing left to bind after it is sent").toBe(0);
+    // Both the send and the sign-out paths call the one clear.
+    expect(read("components/app/profile-text-first-flow.tsx")).toMatch(/if \(raw\.trim\(\)\.length > 0\) clearWorkerIntakeDraft\(\);/);
+    expect(read("components/app/intake-draft-sign-out-clear.tsx").match(/clearWorkerIntakeDraft\(\)/g)).toHaveLength(2);
   });
 
   it("sending or signing out removes every copy", () => {
@@ -210,6 +301,8 @@ describe("the kept draft", () => {
       },
     };
     expect(() => writeWorkerIntakeDraft("Name: Rasa")).not.toThrow();
+    expect(() => keepWorkerIntakeDraftField("full_name", { label: "Name", value: "Rasa", raw: "Rasa" }, [])).not.toThrow();
+    expect(readWorkerIntakeDraftFields()).toEqual({});
     expect(() => bindWorkerIntakeDraft("a@example.invalid")).not.toThrow();
     expect(readWorkerIntakeDraftFor("a@example.invalid")).toBeNull();
     expect(() => clearWorkerIntakeDraft()).not.toThrow();

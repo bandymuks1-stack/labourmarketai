@@ -2,7 +2,7 @@
 
 import type { CountryOption } from "@/lib/location/country-options";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { NeedDoorLink } from "@/components/app/need-door-link";
@@ -59,6 +59,8 @@ export interface CompanySetupFormLabels {
   readonly statusInvalidCountry: string;
   readonly registrationCode: string;
   readonly registrationCodeHelp: string;
+  /** Summary of the closed group of optional fields on a first setup. */
+  readonly optionalDetails: string;
   readonly address: string;
   readonly addressPlaceholder: string;
   readonly website: string;
@@ -151,6 +153,20 @@ export function CompanySetupForm({
   const educationHome =
     presetCapability === "training_provider" && state?.ok === true && state.capabilityDeclared === true;
 
+  // UX gaps 2026-11-18, E-2: a first setup asks for what is needed (name, type,
+  // country); everything optional waits in one closed group. Editing an
+  // existing company keeps every field open.
+  const collapseOptional = existing === null || firstSetup;
+  // E-3: after a save, the result and its next door come into view; the door
+  // is then the one primary action and Save steps back to secondary.
+  const resultRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (!state) return;
+    const reduce =
+      typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    resultRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }, [state]);
+
   // Verified companies have LOCKED legal-registry fields (legal name,
   // country, registration code, address): rendered read-only so a normal
   // user can't overwrite verified data. Contacts / website / type / role
@@ -184,6 +200,95 @@ export function CompanySetupForm({
         return { tone: "warning", text: labels.statusError };
     }
   })();
+
+  const optionalFields = (
+    <>
+      <label className="flex flex-col gap-1 text-xs">
+        <span className="text-text-secondary">{labels.registrationCode}</span>
+        <Input
+          type="text"
+          name="registration_code"
+          maxLength={100}
+          defaultValue={existing?.registrationCode ?? ""}
+          readOnly={legalLocked}
+          aria-readonly={legalLocked}
+          className={lockedInputCls}
+          data-testid="company-setup-registration-code"
+        />
+        <span className="text-meta text-text-muted">
+          {labels.registrationCodeHelp}
+        </span>
+      </label>
+
+      <label className="flex flex-col gap-1 text-xs">
+        <span className="text-text-secondary">{labels.address}</span>
+        <Input
+          type="text"
+          name="address"
+          maxLength={300}
+          defaultValue={existing?.address ?? ""}
+          placeholder={labels.addressPlaceholder}
+          readOnly={legalLocked}
+          aria-readonly={legalLocked}
+          className={lockedInputCls}
+          data-testid="company-setup-address"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1 text-xs">
+        <span className="text-text-secondary">{labels.website}</span>
+        <Input
+          type="text"
+          name="website"
+          maxLength={200}
+          defaultValue={existing?.website ?? ""}
+          placeholder={labels.websitePlaceholder}
+          className="max-sm:min-h-11 max-sm:text-base"
+          data-testid="company-setup-website"
+        />
+      </label>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-text-secondary">{labels.contactEmail}</span>
+          <Input
+            type="email"
+            name="contact_email"
+            maxLength={200}
+            defaultValue={existing?.contactEmail ?? ""}
+            className="max-sm:min-h-11 max-sm:text-base"
+            data-testid="company-setup-contact-email"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-text-secondary">{labels.contactPhone}</span>
+          <Input
+            type="text"
+            name="contact_phone"
+            maxLength={50}
+            defaultValue={existing?.contactPhone ?? ""}
+            className="max-sm:min-h-11 max-sm:text-base"
+            data-testid="company-setup-contact-phone"
+          />
+        </label>
+      </div>
+
+      <fieldset className="flex flex-col gap-1.5 text-xs">
+        <legend className="text-text-secondary">{labels.requesterRole}</legend>
+        <OptionCards
+          name="requester_role"
+          ariaLabel={labels.requesterRole}
+          defaultValue={existing?.requesterRole ?? "owner"}
+          columns={3}
+          testId="company-setup-requester-role"
+          options={REQUESTER_ROLE_ORDER.map((role) => ({
+            value: role,
+            label: labels.requesterRoleOptions[role],
+          }))}
+        />
+      </fieldset>
+    </>
+  );
 
   return (
     <form
@@ -297,90 +402,20 @@ export function CompanySetupForm({
         </Select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-text-secondary">{labels.registrationCode}</span>
-        <Input
-          type="text"
-          name="registration_code"
-          maxLength={100}
-          defaultValue={existing?.registrationCode ?? ""}
-          readOnly={legalLocked}
-          aria-readonly={legalLocked}
-          className={lockedInputCls}
-          data-testid="company-setup-registration-code"
-        />
-        <span className="text-meta text-text-muted">
-          {labels.registrationCodeHelp}
-        </span>
-      </label>
-
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-text-secondary">{labels.address}</span>
-        <Input
-          type="text"
-          name="address"
-          maxLength={300}
-          defaultValue={existing?.address ?? ""}
-          placeholder={labels.addressPlaceholder}
-          readOnly={legalLocked}
-          aria-readonly={legalLocked}
-          className={lockedInputCls}
-          data-testid="company-setup-address"
-        />
-      </label>
-
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-text-secondary">{labels.website}</span>
-        <Input
-          type="text"
-          name="website"
-          maxLength={200}
-          defaultValue={existing?.website ?? ""}
-          placeholder={labels.websitePlaceholder}
-          className="max-sm:min-h-11 max-sm:text-base"
-          data-testid="company-setup-website"
-        />
-      </label>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-xs">
-          <span className="text-text-secondary">{labels.contactEmail}</span>
-          <Input
-            type="email"
-            name="contact_email"
-            maxLength={200}
-            defaultValue={existing?.contactEmail ?? ""}
-            className="max-sm:min-h-11 max-sm:text-base"
-            data-testid="company-setup-contact-email"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-xs">
-          <span className="text-text-secondary">{labels.contactPhone}</span>
-          <Input
-            type="text"
-            name="contact_phone"
-            maxLength={50}
-            defaultValue={existing?.contactPhone ?? ""}
-            className="max-sm:min-h-11 max-sm:text-base"
-            data-testid="company-setup-contact-phone"
-          />
-        </label>
-      </div>
-
-      <fieldset className="flex flex-col gap-1.5 text-xs">
-        <legend className="text-text-secondary">{labels.requesterRole}</legend>
-        <OptionCards
-          name="requester_role"
-          ariaLabel={labels.requesterRole}
-          defaultValue={existing?.requesterRole ?? "owner"}
-          columns={3}
-          testId="company-setup-requester-role"
-          options={REQUESTER_ROLE_ORDER.map((role) => ({
-            value: role,
-            label: labels.requesterRoleOptions[role],
-          }))}
-        />
-      </fieldset>
+      {/* The optional fields stay inside the form either way: a closed
+          <details> still submits its controls. */}
+      {collapseOptional ? (
+        <details className="group flex flex-col gap-4" data-testid="company-setup-optional">
+          <summary className="flex min-h-11 cursor-pointer select-none items-center text-sm font-medium text-text-primary marker:text-text-muted">
+            {labels.optionalDetails}
+          </summary>
+          <div className="flex flex-col gap-4 pt-2">
+            {optionalFields}
+          </div>
+        </details>
+      ) : (
+        optionalFields
+      )}
 
       <div className="flex flex-wrap gap-3">
         {/* AUTOMATIC-FIRST: the primary action saves the company as usable
@@ -390,7 +425,7 @@ export function CompanySetupForm({
           type="submit"
           onClick={() => setIntent("draft")}
           disabled={isPending}
-          variant="primary"
+          variant={state?.ok ? "secondary" : "primary"}
           size="sm"
           className="min-h-11"
           data-testid="company-setup-save-draft"
@@ -414,10 +449,11 @@ export function CompanySetupForm({
         <p
           className={
             banner.tone === "success"
-              ? "rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
-              : "rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
+              ? "scroll-mt-20 rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
+              : "scroll-mt-20 rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
           }
           role="status"
+          ref={resultRef}
           data-testid="company-setup-result"
         >
           {banner.text}

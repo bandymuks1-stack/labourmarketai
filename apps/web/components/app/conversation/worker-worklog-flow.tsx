@@ -571,6 +571,20 @@ export function WorkerWorkLogFlow({
     setEngagementId(liveResolution.selectedId ?? "");
     setMustChooseEngagement(liveResolution.rule === "C");
   }, [liveResolution, workDate]);
+
+  // UX gap W-2 (2026-11-18): on the journal page the read-back opened below
+  // the quick-record field, and on a phone only its date and hours were in
+  // view; both Save steps sat below the fold. Bring the card to the top ONCE
+  // when it first opens. Instant (no `behavior: "smooth"`), so reduced motion
+  // is respected. Journal only: the conversation thread keeps its own scroll.
+  const flowRef = useRef<HTMLDivElement>(null);
+  const openedInView = useRef(false);
+  const formOpen = phase.kind === "ready" || phase.kind === "error" || phase.kind === "confirm";
+  useEffect(() => {
+    if (surface !== "journal" || !formOpen || openedInView.current) return;
+    openedInView.current = true;
+    flowRef.current?.scrollIntoView({ block: "start" });
+  }, [surface, formOpen]);
   const showActiveWorkspaceNotice = Boolean(
     activeWorkspaceNotice && liveResolution?.activeWorkspaceWithoutContext,
   );
@@ -1038,7 +1052,7 @@ export function WorkerWorkLogFlow({
         onChange={(e) => {
           void pickPhoto(e.target.files?.[0] ?? null);
         }}
-        className="text-meta text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-meta file:text-text-primary"
+        className="min-h-11 text-meta text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-meta file:text-text-primary"
       />
       {/* The camera as a second door into the SAME field (phones only). */}
       <CameraCaptureButton
@@ -1118,6 +1132,7 @@ export function WorkerWorkLogFlow({
 
   return (
     <div
+      ref={flowRef}
       className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4"
       data-testid="worklog-flow"
     >
@@ -1141,7 +1156,7 @@ export function WorkerWorkLogFlow({
               clearError();
             }}
             data-testid="worklog-date"
-            className="w-full rounded border border-ink-500 bg-ink-800 px-2 py-1 text-support text-text-primary"
+            className="min-h-11 w-full rounded border border-ink-500 bg-ink-800 px-2 py-1 text-support text-text-primary"
           />
         </Field>
         {draft.start && draft.end && (
@@ -1176,7 +1191,7 @@ export function WorkerWorkLogFlow({
             clearError();
           }}
           data-testid="worklog-site"
-          className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
+          className="min-h-11 rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
         />
       </label>
 

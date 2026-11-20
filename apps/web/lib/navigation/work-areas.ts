@@ -40,7 +40,8 @@ export type WorkAreaIconKey =
   | "gauge"
   | "activity"
   | "barChart"
-  | "history";
+  | "history"
+  | "education";
 
 export type WorkArea = {
   readonly id: string;
@@ -103,19 +104,66 @@ export const ORGANIZATION_WORK_AREAS: readonly WorkArea[] = [
  * membership (`requireRoleOrRedirect` → `workspaceOpensCompanySpace`), which
  * is why an agency owner can open them too.
  */
+/**
+ * THE EDUCATION AREA (UX_GAPS 2026-11-18 I-1): an organization with the
+ * education capability gets its learning home in the header too — the SAME
+ * route and the SAME label as the `education` organization door
+ * (`ORGANIZATION_DOOR_ROUTES.education`, `organizationDoors.education`). It is
+ * not one of the company model's areas: only an organization that holds the
+ * capability has it, by the doors' own gate (`isEducationInstitution`).
+ */
+export const ORGANIZATION_EDUCATION_AREA: WorkArea = {
+  id: "education",
+  href: "/dashboard/company/education",
+  iconKey: "education",
+  labelKey: "organizationDoors.education",
+};
+
+/** The ONE address of "invite a learner": the invitation panel with the
+ *  type, the organization and the student relationship preset. */
+export function learnerInviteHref(organizationId: string): string {
+  return `/dashboard/network?type=join_organization&org=${organizationId}&relationship=student`;
+}
+
 const HEADER_AREA_LEADS: Record<"company" | "agency", readonly string[]> = {
   company: ["people", "projects", "work"],
   agency: ["people", "clients", "projects"],
 };
 const AREAS_IN_THE_CORE_LOOP = new Set(["messages", "calendar"]);
 
-export function organizationHeaderAreas(role: "company" | "agency"): readonly NavItem[] {
+/**
+ * `education`: the organization holds the education capability, so its
+ * learning home is one of its areas. `educationFirst`: it is first of all an
+ * institution (`isEducationFirstWorkspace` — the education capability without
+ * `employer`), so that home leads (I-1). An organization that ALSO employs
+ * people keeps its own leads first and finds the learning home right after
+ * them: the education capability never pushes a company's or an agency's
+ * areas down (prod-company-chain N-1).
+ */
+export function organizationHeaderAreas(
+  role: "company" | "agency",
+  {
+    education = false,
+    educationFirst = false,
+  }: { readonly education?: boolean; readonly educationFirst?: boolean } = {},
+): readonly NavItem[] {
   const leads = HEADER_AREA_LEADS[role];
   const rank = (id: string) => (leads.includes(id) ? leads.indexOf(id) : leads.length);
-  return ORGANIZATION_WORK_AREAS.filter((a) => !AREAS_IN_THE_CORE_LOOP.has(a.id))
+  const areas = ORGANIZATION_WORK_AREAS.filter((a) => !AREAS_IN_THE_CORE_LOOP.has(a.id))
     .map((a, n) => ({ a, n }))
     .sort((x, y) => rank(x.a.id) - rank(y.a.id) || x.n - y.n)
-    .map(({ a }) => ({ id: `area:${a.id}` as const, href: a.href, tabLabelKey: a.labelKey, iconKey: a.iconKey }));
+    .map(({ a }) => a);
+  const withEducation = !education
+    ? areas
+    : educationFirst
+      ? [ORGANIZATION_EDUCATION_AREA, ...areas]
+      : [...areas.slice(0, leads.length), ORGANIZATION_EDUCATION_AREA, ...areas.slice(leads.length)];
+  return withEducation.map((a) => ({
+    id: `area:${a.id}` as const,
+    href: a.href,
+    tabLabelKey: a.labelKey,
+    iconKey: a.iconKey,
+  }));
 }
 
 /**

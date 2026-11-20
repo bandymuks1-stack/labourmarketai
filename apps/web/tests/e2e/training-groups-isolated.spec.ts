@@ -1,5 +1,7 @@
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
 
+import { clickUntilVisible } from "./click-until-visible";
+
 /**
  * TRAINING REACHES THE FOUR OWNER-DECIDED GROUPS — registry 11.8, on a THROWAWAY LOCAL Supabase
  * stack (.github/workflows/signup-isolated.yml, the same job as signup-isolated.spec.ts).
@@ -164,17 +166,19 @@ async function inviteAndJoin(browser: Browser, g: Group): Promise<void> {
   );
   const panel = page.getByTestId("invite-panel");
   await expect(panel).toBeVisible({ timeout: 30_000 });
-  const capacity = panel.getByTestId("invite-capacity");
+  // The address presets type, organization and relationship, so the panel
+  // shows them as one read-only line instead of three selects (UX_GAPS I-4,
+  // #3530). The line carries the values the invitation is created with.
+  const preset = panel.getByTestId("invite-preset");
   const open = panel.getByTestId("invite-panel-open");
-  await expect(async () => {
-    if (!(await capacity.isVisible().catch(() => false)) && (await open.isVisible().catch(() => false))) {
-      await open.click({ timeout: 5_000 });
-    }
-    await expect(capacity).toBeVisible({ timeout: 2_000 });
-  }).toPass({ timeout: 30_000 });
-  await expect(panel.getByTestId("invite-organization")).toHaveValue(s.orgId);
-  await capacity.selectOption(g.relationship);
-  await expect(capacity).toHaveValue(g.relationship);
+  if (!(await preset.isVisible().catch(() => false)) && (await open.isVisible().catch(() => false))) {
+    await clickUntilVisible(open, preset, { timeout: 30_000, what: "the invite panel" });
+  }
+  await expect(preset).toBeVisible({ timeout: 30_000 });
+  await expect(preset).toHaveAttribute("data-type", "join_organization");
+  await expect(preset).toHaveAttribute("data-organization", s.orgId);
+  await expect(preset, "the invitation's relationship").toHaveAttribute("data-relationship", g.relationship);
+  await expect(panel.getByTestId("invite-capacity")).toHaveCount(0);
   await expect(panel.getByTestId("invite-capacity-blocked")).toHaveCount(0);
   const linkMode = panel.getByTestId("invite-mode-link");
   if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
