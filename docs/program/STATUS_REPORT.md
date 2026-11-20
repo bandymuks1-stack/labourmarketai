@@ -10,7 +10,7 @@ Privalomos CI patikros: quality, migration-safety (šaltinis: repository policy 
 
 Kanoninis dokumentas (savininko nurodymas 2026-11-14, P0). Kiekviena ataskaita perrašo šį failą; ankstesnės ataskaitos — šio failo git istorijoje. Funkcijų būsenos imamos tik iš [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md) eilučių: funkcija laikoma veikiančia tik tada, kai jos eilutė turi produkcijos įrodymą (`LIVE_VERIFIED`). Kodas ar žalias CI veikimo neįrodo. Generatorius: `.github/scripts/status-report.mjs`.
 
-**Produkcija:** versija `ebfd6cab`, sveikata gera (DB 160 ms), patikrinta 2026-11-20 09:41.
+**Produkcija:** versija `ebfd6cab`, sveikata gera, patikrinta 2026-11-20 09:41.
 
 **Funkcijos:** 287 privalomos apimties funkcijų; veikia produkcijoje (įrodyta) 200 (69.7 %).
 
@@ -44,13 +44,7 @@ Paskutinis užbaigtas produkcijos bandymas kiekvienam scenarijui ir ekranui, nep
 
 ## Pokyčiai nuo ankstesnės ataskaitos
 
-Lyginama su ataskaita, sugeneruota 2026-11-19 21:41.
-
-- Veikia produkcijoje: 200 → 200.
-- Atvirų PR: 112 → 107; sujungta per laikotarpį 13.
-- Produkcijos diegimų per laikotarpį: 10 sėkmingi, 0 nepavykę.
-
-Funkcijų būsenų pokyčių registre nėra.
+Ankstesnė ataskaita sugeneruota tuo pačiu metu (2026-11-20 09:41) — palyginimo nėra.
 
 ## B. Trumpa vadovo suvestinė
 

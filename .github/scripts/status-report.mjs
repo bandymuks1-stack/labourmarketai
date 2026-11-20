@@ -497,7 +497,7 @@ P(
     "Funkcijų būsenos imamos tik iš [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md) eilučių: funkcija laikoma veikiančia tik tada, kai jos eilutė turi produkcijos įrodymą (`LIVE_VERIFIED`). " +
     "Kodas ar žalias CI veikimo neįrodo. Generatorius: `.github/scripts/status-report.mjs`.",
   "",
-  `**Produkcija:** versija \`${data.health?.build ?? "nežinoma"}\`, sveikata ${data.health?.ok ? "gera" : "BLOGA"} (DB ${data.health?.dbMs ?? "?"} ms), patikrinta ${data.health?.at ? vilnius(data.health.at) : "?"}.`,
+  `**Produkcija:** versija \`${data.health?.build ?? "nežinoma"}\`, sveikata ${data.health?.ok ? "gera" : "BLOGA"}, patikrinta ${data.health?.at ? vilnius(data.health.at) : "?"}.`,
   "",
   `**Funkcijos:** ${countedFns.length} privalomos apimties funkcijų; veikia produkcijoje (įrodyta) ${live} (${((live / countedFns.length) * 100).toFixed(1)} %).`,
   "",
