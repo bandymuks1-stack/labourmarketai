@@ -4019,7 +4019,15 @@ const RULES: IntentRule[] = [
     patterns: [
       p("\\bpasiūlym", 3),
       p("\\boffer", 3),
-      p("\\bbooking\\b", 2),
+      // "Show my bookings" missed: `\bbooking\b` refused the plural, and no
+      // language but Swedish had its own word, so the AI-off reply was the
+      // only answer (local chat probe 2026-11-18).
+      p("\\bbookings?\\b", 2),
+      p("rezervacij", 2), // lt rezervacija / rezervacijas
+      p("\\bbuchung", 2), // de Buchung / Buchungen
+      p("\\bboeking", 2), // nl boeking / boekingen
+      p("\\brezerwacj", 2), // pl rezerwacja / rezerwacje
+      p("бронировани", 2), // ru
       p("предложени", 3),
       p("angebot", 3), // de Angebot / Angebote
       p("(aanbieding|\\baanbod\\b)", 3), // nl

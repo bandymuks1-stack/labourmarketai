@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Message language",
+    "intro": "Work messages and instructions written in another language are shown to you translated into this language. Leave it on the interface language unless you read another language better.",
+    "label": "I read messages in",
+    "sameAsInterface": "Same as the interface",
+    "saved": "Saved.",
+    "error": "The change could not be saved and was reverted. Please try again.",
+    "unavailable": "This setting is not available yet — messages follow the interface language until it is."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Review and approve",
@@ -2365,6 +2374,7 @@
         },
         "statusInvalidCountry": "Choose a country from the list — other values are not supported yet.",
         "registrationCode": "Company / registration code",
+        "optionalDetails": "Registration, contacts and role",
         "registrationCodeHelp": "Optional. Helps verify the company later.",
         "address": "Address / location",
         "addressPlaceholder": "e.g. 1 Main St, Vilnius",
@@ -14830,8 +14840,12 @@
           "chipHelpPeople": "Team and invitations",
           "chipHelpPlanning": "Open planning",
           "chipHelpServices": "My services",
-          "chipHelpJournal": "Work journal"
-        }
+          "chipHelpJournal": "Work journal",
+          "chipHelpSettings": "Settings",
+          "chipHelpPrivacy": "Privacy and your data"
+        },
+        "account": "Your sign-in, e-mail, notifications and appearance are in Settings.",
+        "privacy": "On Privacy and your data you can download your data, see who sees your profile and request deletion of your account."
       },
       "interestInboxAmbiguous": "That can mean two things — which one do you want?",
       "chipInterestOnMyNeeds": "Interest in my needs",
@@ -20802,6 +20816,7 @@
       "partnerWithUs": "Become a partner",
       "forAgencies": "How it works for agencies",
       "setUpAgency": "Set up your agency",
+      "setUpInstitution": "For training institutions",
       "b2bEnquiry": "Business services enquiry (B2B)",
       "projectEnquiry": "Individual project enquiry"
     },

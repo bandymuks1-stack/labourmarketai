@@ -39,7 +39,7 @@ Nothing on this page is done until the owner says so. No store has accepted anyt
 
 ## 3. Store answers for the new screens — DRAFT for the owner (updated 2026-11-18)
 
-**These screens are on `main`** (#3451, #3453, #3471). The drafts below are what the Play **Data safety** form and the Apple **App Privacy** label must say once a build with them ships. They are drafts: the owner approves them (item C above). Nothing here is submitted.
+**These screens are on `main`** (#3451, #3453, #3471, #3485, #3497; the booking answer is proven by #3502). The drafts below are what the Play **Data safety** form and the Apple **App Privacy** label must say once a build with them ships. They are drafts: the owner approves them (item C above). Nothing here is submitted.
 
 ### 3.1 Screen by screen
 
@@ -54,6 +54,9 @@ Nothing on this page is done until the owner says so. No store has accepted anyt
 | Programmes & cohorts (training providers) | Create a programme or cohort; assign an accepted learner (`company.create-programme.*`, `company.create-cohort.*`, `company.assign-learner.*`) | Other user-generated content (programme and cohort names) | no |
 | Invite a learner | Send an invitation e-mail to a learner (`company.invite-learner.*`) | **Email address and an optional name of ANOTHER person**, entered by the institution | **wording only:** *Email address* and *Name* are already declared (App functionality). The privacy policy must say that an institution can enter a learner's address to invite them and that the address is used only for that invitation. |
 | Today | Organization stations shown only in an organization workspace (`context.list`) | none | no |
+| Post a need (#3485) | The work's country is now a required field (`demand.create_*`) | Other user-generated content (the organization's need) | no: a typed country of the work is not device location; no location permission is asked |
+| Agency (#3497) | An agency proposes one of **its own** people for a need a client shared, with an optional note (`agency.clients.get`, `agency.propose-candidate.*`) | Other user-generated content (the proposal); Other in-app messages (the note, shown to that client) | no: same types |
+| Offers → a proposed start (#3502) | The worker accepts or declines a start a company proposed (`booking.list`, `worker.respond-booking.*`) | none new: the answer is the person's own record | no |
 
 ### 3.2 Resulting answers (unchanged types, one wording addition)
 
@@ -77,9 +80,16 @@ Store screenshots must show real screens (pack rule 5: no staged or fake states)
 - The IARC answer "users can interact" stays **yes**.
 - The "not in the app" list still holds: no calendar, no AI chat, no marketplace, no push, no camera, no offline queue, no Google / Apple sign-in.
 
+### 3.5 Versions and permissions (checked 2026-11-18)
+
+- **Build numbers:** `eas.json` sets `appVersionSource: "remote"` and `autoIncrement` for `production`, so EAS owns the iOS build number and the Android version code. The `buildNumber: "1"` / `versionCode: 1` in `app.json` are only the starting point the release guard pins.
+- **Marketing version:** `app.json` `version` is **`0.1.0`**. Both stores accept it. **Owner decision:** keep `0.1.0` for the first internal / TestFlight builds, or set **`1.0.0`** for the first public release. The agent changes it only on the owner's word.
+- **Permissions:** the app asks for **no runtime permission**: no camera, photos, location, contacts, microphone or notifications dependency, so no iOS usage-description text is needed. Android blocks the legacy storage, overlay and biometric permissions (`android.blockedPermissions`, pinned by `mobile-release-config.test.ts`).
+- **Privacy manifest:** `ios.privacyManifests` declares the five collected types of §3.2 and the four required-reason APIs; `NSPrivacyTracking` is `false` (no analytics or advertising dependency, also pinned by the guard).
+
 ## 4. What the agent does after each owner step
 
 - **After #4 (`eas init`):** commit `extra.eas.projectId`, pin it in `mobile-release-config.test.ts`, and set the `eas.json` `submit.production` profile to internal track only, with no secret in the repository.
 - **After #9:** prove App Links / Universal Links in CI (`adb shell pm verify-app-links`, an AASA fetch).
 - **After #10:** run the signed-in Maestro journeys (`ios-signed-in.yml`, `android.yml` `signed-in`) and extend them to the new screens.
-- **Merging #3217 (`eas-release.yml`)** is the owner's call: it builds only behind the `store-release` environment's required reviewer.
+- **#3217 (`eas-release.yml`) is merged** and the owner has configured `store-release` (owner as required reviewer, `main` only, `EXPO_TOKEN` as its secret). The workflow is build-only. **The first real build runs only on the owner's separate permission; nothing is uploaded to a store.**

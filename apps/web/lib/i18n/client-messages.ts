@@ -111,6 +111,10 @@ export const CLIENT_MESSAGE_ROOTS = [
   // organization's core areas for the person who runs it (owner P0-2,
   // 2026-11-03; `getOrganizationHeaderNav`).
   "companyModel",
+  // The education institution's learning area in the same header names
+  // itself with its organization door's label (`organizationDoors.education`,
+  // UX_GAPS 2026-11-18 I-1).
+  "organizationDoors",
   "needStructuring",
   "network",
   // The organization capability question ("What does your organization do?").

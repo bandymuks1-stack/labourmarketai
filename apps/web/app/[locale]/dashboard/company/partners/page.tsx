@@ -22,6 +22,7 @@ import {
   readAgencyClientsLabels,
   readClientBridgeLabels,
 } from "@/lib/company/company-section-labels";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { AgencyClientsSection } from "@/components/app/agency-clients-section";
 import { AgencyBridgeSection } from "@/components/app/agency-bridge-section";
 import { ClientAgencyBridgeSection } from "@/components/app/client-agency-bridge-section";
@@ -296,6 +297,7 @@ export default async function CompanyPartnersPage({
             requestTitles={requestTitles}
             labels={readDelegationLabels(tDelegation)}
             locale={locale}
+            countryOptions={countryOptionsForLocale(locale)}
           />
         </div>
         {/* The same organization as a CLIENT of other agencies — shown only

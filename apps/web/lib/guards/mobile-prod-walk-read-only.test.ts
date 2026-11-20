@@ -21,7 +21,7 @@ function tapped(flow: string): string[] {
 /** Controls that write: save, confirm, review (prepare), shortlist, close /
  *  reopen, booking, offer answers, invitations. `submit` is the sign-in
  *  button and is the one exception. */
-const WRITES = /(-save|-confirm|-review|shortlist|not-fit|need-close|need-reopen|-book|-accept|-decline|-agree|invite|add-programme|add-cohort|assign)/;
+const WRITES = /(-save|-confirm|-review|shortlist|not-fit|need-close|need-reopen|-book|-accept|-decline|-agree|invite|add-programme|add-cohort|assign|-express|-propose|-write|-send)/;
 
 describe("production new-screens walk", () => {
   const flow = read("apps/mobile/.maestro/new-screens-walk.yaml");
@@ -42,6 +42,14 @@ describe("production new-screens walk", () => {
     expect(new Set(textTaps)).toEqual(new Set(["Not Now"]));
     expect(flow).not.toMatch(/-\s*tapOn:\s*\n\s*point:/);
     expect(flow).not.toMatch(/-\s*tapOn:\s*"/);
+  });
+
+  it("walks the newer screens too: offers, opportunities, availability, the agency station", () => {
+    for (const station of ["today-open-offers", "today-open-opportunities", "today-open-availability", "today-open-agency"]) {
+      expect(tapped(flow), station).toContain(station);
+    }
+    // A loaded view or a named refusal, never a spinner.
+    expect(flow).toMatch(/notVisible:\s*\n\s*id:\s*"capability-loading"/);
   });
 
   it("leaves every form it opens with Cancel", () => {

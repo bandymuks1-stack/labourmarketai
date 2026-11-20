@@ -15,6 +15,7 @@ import { theme } from "../ui/theme";
 import { useCapability } from "../use-capability";
 import { useReloadOnReturn } from "../use-reload-on-return";
 import { CapabilityFailureNotice } from "./capability-failure";
+import { AgencyInviteClient } from "./agency-invite-client";
 import { CapabilityGate } from "./capability-gate";
 
 /**
@@ -259,6 +260,8 @@ export function AgencyScreen() {
                 ))}
               </>
             )}
+            <Divider />
+            <AgencyInviteClient />
           </View>
         );
       }}

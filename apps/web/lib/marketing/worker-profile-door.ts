@@ -31,3 +31,26 @@ export function isWorkerProfileDoorNext(path: string | null | undefined): boolea
   const bare = path.split(/[?#]/)[0];
   return /^\/[a-z]{2}(?:-[A-Za-z]{2,4})?\/dashboard\/profile\/?$/.test(bare) || bare === WORKER_PROFILE_DOOR_NEXT;
 }
+
+/**
+ * True when a pathname (locale-prefixed or bare) is the public worker intake
+ * itself. While a visitor is there, the HEADER's Sign up and Sign in carry the
+ * profile builder as `next` too (`components/layouts/header-auth-cta-link.tsx`),
+ * like the intake's own links, so what they typed is bound and placed. Every
+ * other page's header links stay as they are.
+ */
+export function isWorkerIntakePath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  const bare = pathname.split(/[?#]/)[0];
+  return /^(?:\/[a-z]{2}(?:-[A-Za-z]{2,4})?)?\/worker-intake\/?$/.test(bare);
+}
+
+/**
+ * The header auth link for `pathname`: on the worker intake, `relPath` with
+ * the profile builder as `next` (only when `relPath` has no query of its own);
+ * anywhere else, `relPath` unchanged.
+ */
+export function headerAuthPathFor(relPath: string, pathname: string | null | undefined): string {
+  if (!isWorkerIntakePath(pathname) || relPath.includes("?")) return relPath;
+  return `${relPath}?next=${encodeURIComponent(WORKER_PROFILE_DOOR_NEXT)}`;
+}

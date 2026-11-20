@@ -22,7 +22,9 @@ export type HelpTopicId =
   | "warning"
   | "forecast"
   | "scheduleWorker"
-  | "doneWork";
+  | "doneWork"
+  | "account"
+  | "privacy";
 
 export type HelpChip = {
   /** `link:` target the chat renders as a button. */
@@ -171,6 +173,55 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       { target: "/dashboard/journal", label: "chipHelpJournal", only: "person" },
       { target: "/dashboard/hours", label: "workHoursChip", only: "company" },
     ],
+  },
+  {
+    // ACCOUNT SETTINGS (owner 2026-11-19): sign-in, password, e-mail,
+    // notifications and appearance live on the settings page. Action phrases
+    // only, so "search settings" stays the criteria answer.
+    id: "account",
+    sources: [
+      "\\bslaptazod",
+      "\\bpaskyros\\s+nustatym",
+      "\\b(?:pakeist|keist)\\w*\\s+(?:savo\\s+|mano\\s+)?el\\.?\\s*(?:pasto\\s+)?adres",
+      "\\b(?:change|reset|forgot|new)\\s+(?:my\\s+|the\\s+)?password\\b",
+      "\\bpassword\\s+(?:change|reset)\\b",
+      "\\baccount\\s+settings\\b",
+      "\\bchange\\s+(?:my\\s+)?e-?mail\\b",
+      "парол",
+      "настройки\\s+(?:аккаунт|учетн)",
+      "\\bwachtwoord",
+      "\\baccountinstelling",
+      "\\bpasswort",
+      "\\bkontoeinstellung",
+      "\\bhasl[oa]\\b",
+      "\\bustawienia\\s+konta",
+    ],
+    svSources: ["\\blosenord", "\\bkontoinstallning"],
+    chips: [{ target: "/dashboard/account", label: "chipHelpSettings" }],
+  },
+  {
+    // PRIVACY AND DATA (owner 2026-11-19): deleting the account, downloading
+    // one's data. The privacy page holds the deletion request (reviewed before
+    // anything is erased) and the data export; the chat only opens it.
+    id: "privacy",
+    sources: [
+      "\\b(?:istrint|istrink|panaikint|panaikink|pasalint|pasalink|uzdaryt|uzdaryk)\\w*\\s+(?:mano\\s+|savo\\s+)?paskyr",
+      "\\b(?:atsisiust|atsisiusk|eksportuot)\\w*\\s+(?:mano\\s+|savo\\s+)?duomen",
+      "\\b(?:delete|close|remove|erase)\\s+(?:my\\s+)?account\\b",
+      "\\b(?:download|export)\\s+(?:all\\s+)?my\\s+data\\b",
+      "удал[а-яё]*\\s+(?:мой\\s+|свой\\s+)?(?:аккаунт|учетн|профил)",
+      "(?:скачать|выгрузить|экспорт[а-яё]*)\\s+(?:мои\\s+|свои\\s+)?данн",
+      "\\b(?:verwijder|opzeg|ophef)\\w*\\s+(?:mijn\\s+)?account\\b",
+      "\\baccount\\s+(?:verwijderen|opheffen)\\b",
+      "\\bmijn\\s+gegevens\\s+(?:downloaden|exporteren)",
+      "\\b(?:losche|loschen)\\s+(?:sie\\s+)?(?:mein\\s+)?konto\\b",
+      "\\bkonto\\s+(?:loschen|kundigen)\\b",
+      "\\bmeine\\s+daten\\s+(?:herunterladen|exportieren)",
+      "\\busun\\w*\\s+(?:moje\\s+)?konto\\b",
+      "\\b(?:pobierz|pobrac|eksportuj)\\w*\\s+(?:moje\\s+)?dane\\b",
+    ],
+    svSources: ["\\bradera\\s+(?:mitt\\s+)?konto", "\\bladda\\s+ner\\s+mina\\s+uppgifter"],
+    chips: [{ target: "/dashboard/privacy", label: "chipHelpPrivacy" }],
   },
 ];
 

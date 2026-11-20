@@ -158,7 +158,7 @@ export function HeaderSearch({
               onClick={() => setOpen(false)}
               aria-label={t("closeLabel")}
               data-testid="header-search-close"
-              className="absolute right-2 top-2 z-10 inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+              className="absolute right-1 top-1 z-10 inline-flex size-11 items-center justify-center rounded-md text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
             >
               <X aria-hidden className="h-4 w-4" />
             </button>

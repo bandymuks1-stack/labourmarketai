@@ -44,7 +44,6 @@ export function ThemeToggle({
       <span className="text-sm text-text-secondary">{labels.appearance}</span>
       <Button
         type="button"
-        size="sm"
         variant="secondary"
         onClick={() => apply(next)}
         data-testid="theme-toggle"

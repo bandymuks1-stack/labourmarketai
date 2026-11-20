@@ -72,7 +72,30 @@ test("T-1..T-3. the full composer offers an active template, it prefills the ent
   ).toBe(0);
 
   await text.fill(`${filled}\n${OWN}`);
+  await expect(text, "T-3: the person's own words are in the entry before the save").toHaveValue(`${filled}\n${OWN}`);
+  // Intermittent in CI (2 of ~9 runs, 2026-11-19): the entry was never stored
+  // and nothing said why. Not reproduced locally, so the walk now names the
+  // outcome itself (pattern S-7): the saved banner, the composer's own error,
+  // or a document load that would mean the form submitted without the app.
+  const pageErrors: string[] = [];
+  page.on("pageerror", (e) => pageErrors.push(String(e.message).slice(0, 300)));
+  const documentLoads: string[] = [];
+  page.on("request", (r) => {
+    if (r.isNavigationRequest() && r.frame() === page.mainFrame()) documentLoads.push(`${r.method()} ${r.url().replace(BASE, "")}`);
+  });
   await main.getByTestId("journal-save-entry").first().click();
+  const saved = main.getByTestId("journal-saved-banner");
+  const saveError = main.getByTestId("journal-save-error");
+  await expect(saved.or(saveError), "T-3: the save answers on the page").toBeVisible({ timeout: 30_000 }).catch(async (cause) => {
+    throw new Error(
+      `T-3: neither the saved banner nor an error appeared; document loads after the click: ${JSON.stringify(documentLoads)}; ` +
+        `page errors: ${JSON.stringify(pageErrors)}; url: ${page.url().replace(BASE, "")}`,
+      { cause },
+    );
+  });
+  if (await saveError.isVisible()) throw new Error(`T-3: the composer refused the save: ${await saveError.innerText()}`);
+  expect(documentLoads, "T-3: the save stays in the app (no form submission by the browser)").toEqual([]);
+  expect(pageErrors, "T-3: the save raises no client error").toEqual([]);
   await expect
     .poll(
       () =>
