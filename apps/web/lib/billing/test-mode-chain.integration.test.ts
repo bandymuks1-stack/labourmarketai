@@ -342,6 +342,10 @@ import { eventModeMatches } from "@/lib/billing/webhook-core";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { entitlementAllows } from "@/lib/billing/entitlements-v1";
 import { limitFor } from "@/lib/billing/entitlements";
+import { ACTIVE_OPEN_NEED_STATUSES, gateOpenNeeds } from "@/lib/billing/open-needs-gate";
+import { TRIAL_PERIOD_DAYS } from "@/lib/billing/trial-core";
+import { PRE_PAYMENT_PLANS, type FeatureKey } from "@/lib/billing/plans";
+import { planIncludes } from "@/lib/billing/entitlements";
 import { getPlan, ORGANIZATION_PLAN_KEY, FREE_ORGANIZATION_PLAN_KEY } from "@/lib/billing/plans";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { POST as checkoutPOST } from "@/app/api/billing/test-checkout/route";
@@ -398,6 +402,71 @@ const chain = {
   sessionEvent: {} as Record<string, unknown>,
   subscriptionEvent: {} as Record<string, unknown>,
 };
+
+// ─── Lifecycle event builders (steps 6–14) ──────────────────────────────────
+let lifeClock = Math.floor(Date.now() / 1000) + 100;
+
+function signedEvent(id: string, type: string, object: Record<string, unknown>): Record<string, unknown> {
+  lifeClock += 10;
+  return { id, object: "event", type, api_version: STRIPE_PINNED_API_VERSION, created: lifeClock, livemode: false, data: { object } };
+}
+
+/** customer.subscription.* for the chain's subscription, with a state override. */
+function subEvent(id: string, over: Record<string, unknown>, type = "customer.subscription.updated"): Record<string, unknown> {
+  const base = (chain.subscriptionEvent.data as { object: Row }).object;
+  return signedEvent(id, type, { ...base, cancel_at_period_end: false, ...over });
+}
+
+/** invoice.* in the post-Basil shape (parent.subscription_details.subscription). */
+function invoiceEvent(id: string, type: string, over: Record<string, unknown>): Record<string, unknown> {
+  return signedEvent(id, type, {
+    id: `in_${id}`, object: "invoice", livemode: false, customer: chain.customerId, currency: "eur",
+    parent: { type: "subscription_details", subscription_details: { subscription: chain.subscriptionId } },
+    ...over,
+  });
+}
+
+async function deliver(event: Record<string, unknown>): Promise<void> {
+  const res = await webhookPOST(signedDelivery(event));
+  expect(res.status, String(event.id)).toBe(200);
+  expect(await res.json(), String(event.id)).toMatchObject({ ok: true, processed: true });
+}
+
+// ─── Plan-access scenarios (owner P0 2026-11-12: FREE / paid / trial) ───────
+// The organization's needs live in `customer_requests`. The ONE server gate
+// that separates FREE from the paid plan (`gateOpenNeeds`, called by the
+// canonical demand creation and reopen paths) is run for real; only its COUNT
+// query is answered from this array (the PostgREST `or` / head-count shape is
+// a database edge, like every other I/O edge in this file). The billing rows
+// it reads are the SAME in-memory rows the webhook wrote.
+const needs: Array<{ id: string; organization_id: string; status: string }> = [];
+const activeNeeds = (org: string) =>
+  needs.filter((n) => n.organization_id === org && (ACTIVE_OPEN_NEED_STATUSES as readonly string[]).includes(n.status));
+
+function gateClient(org: string) {
+  const base = fakeClient();
+  return {
+    ...base,
+    from: (table: string) => {
+      if (table !== "customer_requests") return base.from(table);
+      const result = { count: activeNeeds(org).length, error: null };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const q: any = { select: () => q, in: () => q, or: () => q, then: (ok: (v: unknown) => unknown) => Promise.resolve(result).then(ok) };
+      return q;
+    },
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const gate = (org: string) => gateOpenNeeds(gateClient(org) as any, org, ids.OWNER);
+const addNeeds = (org: string, n: number) => {
+  for (let i = 0; i < n; i++) needs.push({ id: `need-${needs.length + 1}`, organization_id: org, status: "submitted" });
+};
+/** Every feature the organization's effective plan declares, checked through the shared resolver. */
+function planFeatures(planKey: string): FeatureKey[] {
+  const plan = PRE_PAYMENT_PLANS.find((p) => p.slug === planKey)!;
+  return (Object.keys(plan.entitlements) as FeatureKey[]).filter((k) => planIncludes(plan, k));
+}
 
 describe("test-mode chain: config → checkout → signed webhook → entitlement (offline, real modules)", () => {
   it("1. config: the real resolver yields stripe_test for test-shaped input, and the env-fed wrapper agrees", () => {
@@ -566,6 +635,28 @@ describe("test-mode chain: config → checkout → signed webhook → entitlemen
     expect(limitFor(getPlan(ctx.effectivePlanKey)!, "company_create_needs")).toBeNull();
   });
 
+  it("S12. TRIAL: for the set time the organization uses every function of the paid plan, through the server gate", async () => {
+    // The trial length is the code constant the checkout sent to Stripe.
+    expect(TRIAL_PERIOD_DAYS).toBe(14);
+    expect((chain.checkoutParams.subscription_data as Record<string, unknown>).trial_period_days).toBe(TRIAL_PERIOD_DAYS);
+    const row = ourSubs()[0];
+    const days = (Date.parse(String(row.current_period_end)) - Date.parse(String(row.current_period_start))) / 86_400_000;
+    expect(days).toBe(TRIAL_PERIOD_DAYS);
+
+    signIn(ids.PILOT_ORG);
+    const ctx = await getEffectiveEntitlements();
+    expect(ctx).toMatchObject({ subscriptionStatus: "trialing", active: true, enforced: true });
+    for (const f of planFeatures(ORGANIZATION_PLAN_KEY)) expect(entitlementAllows(ctx, f), f).toBe(true);
+
+    // Five concurrent needs — four more than FREE allows — pass the server gate.
+    addNeeds(ids.PILOT_ORG, 5);
+    expect(await gate(ids.PILOT_ORG)).toMatchObject({ allowed: true, enforced: true, limit: null });
+    // A trial grants nothing outside its own organization: another pilot
+    // organization (no test subscription) is still FREE and limited.
+    addNeeds(ids.PILOT_ORG_LIVE_ROW, 1);
+    expect(await gate(ids.PILOT_ORG_LIVE_ROW)).toMatchObject({ allowed: false, reason: "over_open_need_limit", limit: 1, used: 1 });
+  });
+
   it("4b. test_mode=true rows only: a pilot organization holding only a LIVE-mode row stays FREE", async () => {
     signIn(ids.PILOT_ORG_LIVE_ROW);
     const ctx = await getEffectiveEntitlements();
@@ -614,6 +705,159 @@ describe("test-mode chain: config → checkout → signed webhook → entitlemen
     signIn(ids.PILOT_ORG);
     const ctx = await getEffectiveEntitlements();
     expect(ctx).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, source: "subscription", active: true });
+  });
+
+  // ─── 6–12. LIFECYCLE after activation (owner approval 2026-11-12 (a)) ─────
+  // Renewal, payment failure (dunning), recovery, refund, pause, cancellation
+  // at period end and final deletion — every state the subscription row can
+  // reach after checkout, through the SAME signed-webhook route and the SAME
+  // entitlement resolver. Each event is newer than the last (ordering guard).
+
+  it("6. VAT: the checkout asked Stripe Tax for VAT, a billing address and the buyer's VAT id (EU B2B reverse charge)", () => {
+    // Stripe Tax computes Swedish 25 % VAT, or 0 % + "reverse charge" when a
+    // valid EU VAT id is collected; the rates themselves live in the Stripe
+    // dashboard (tax registrations), never in this code.
+    expect(chain.checkoutParams.automatic_tax).toEqual({ enabled: true });
+    expect(chain.checkoutParams.tax_id_collection).toEqual({ enabled: true });
+    expect(chain.checkoutParams.billing_address_collection).toBe("required");
+    expect(chain.checkoutParams.customer_update).toEqual({ address: "auto", name: "auto" });
+  });
+
+  it("7. renewal: trial → active and the first paid invoice records a succeeded payment", async () => {
+    await deliver(subEvent("evt_life_active", { status: "active" }));
+    await deliver(invoiceEvent("evt_life_inv_paid_1", "invoice.paid", { amount_paid: 12375, billing_reason: "subscription_cycle" }));
+    expect(ourSubs()[0]).toMatchObject({ status: "active", last_payment_status: "succeeded" });
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({
+      effectivePlanKey: ORGANIZATION_PLAN_KEY, source: "subscription", subscriptionStatus: "active", active: true, grace: false,
+    });
+  });
+
+  it("S11. PREMIUM: a paying organization can use every function of its plan, with no position ceiling", async () => {
+    signIn(ids.PILOT_ORG);
+    const ctx = await getEffectiveEntitlements();
+    expect(ctx).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, subscriptionStatus: "active", active: true, enforced: true });
+    for (const f of planFeatures(ORGANIZATION_PLAN_KEY)) expect(entitlementAllows(ctx, f), f).toBe(true);
+    addNeeds(ids.PILOT_ORG, 20); // 25 concurrent needs
+    expect(activeNeeds(ids.PILOT_ORG)).toHaveLength(25);
+    expect(await gate(ids.PILOT_ORG)).toMatchObject({ allowed: true, enforced: true, limit: null });
+  });
+
+  it("8. payment failure: invoice.payment_failed moves the row to past_due — still entitled, flagged as grace", async () => {
+    await deliver(invoiceEvent("evt_life_inv_failed", "invoice.payment_failed", { amount_paid: 0, attempt_count: 1 }));
+    expect(ourSubs()[0]).toMatchObject({ status: "past_due", last_payment_status: "failed" });
+    signIn(ids.PILOT_ORG);
+    const ctx = await getEffectiveEntitlements();
+    expect(ctx).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, subscriptionStatus: "past_due", active: true, grace: true });
+    expect(entitlementAllows(ctx, "company_create_needs")).toBe(true);
+  });
+
+  it("9. dunning exhausted: Stripe marks the subscription unpaid → the organization falls back to FREE (1 open need), enforced", async () => {
+    await deliver(subEvent("evt_life_unpaid", { status: "unpaid" }));
+    expect(ourSubs()[0]).toMatchObject({ status: "unpaid" });
+    signIn(ids.PILOT_ORG);
+    const ctx = await getEffectiveEntitlements();
+    expect(ctx).toMatchObject({ effectivePlanKey: FREE_ORGANIZATION_PLAN_KEY, enforced: true, active: false, grace: false });
+    expect(limitFor(getPlan(ctx.effectivePlanKey)!, "company_create_needs")).toBe(1);
+  });
+
+  it("10. recovery: the retried invoice is paid and the subscription is active again → the paid plan returns", async () => {
+    await deliver(invoiceEvent("evt_life_inv_paid_2", "invoice.paid", { amount_paid: 12375, billing_reason: "subscription_cycle" }));
+    await deliver(subEvent("evt_life_recovered", { status: "active" }));
+    expect(ourSubs()[0]).toMatchObject({ status: "active", last_payment_status: "succeeded" });
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, active: true, grace: false });
+  });
+
+  it("11. refund: charge.refunded is RECORDED with its amounts and changes no subscription state", async () => {
+    const before = { ...ourSubs()[0] };
+    await deliver(signedEvent("evt_life_refund", "charge.refunded", {
+      id: "ch_test_life", object: "charge", livemode: false, payment_intent: "pi_test_life",
+      invoice: "in_test_life_2", amount_refunded: 12375, currency: "eur", refunded: true,
+    }));
+    const rec = db.tables.payment_webhook_events.find((e) => e.event_id === "evt_life_refund");
+    expect(rec).toMatchObject({ event_type: "charge.refunded", test_mode: true });
+    expect(JSON.stringify(rec)).toContain("12375");
+    expect(ourSubs()[0]).toMatchObject({ status: before.status, last_payment_status: before.last_payment_status });
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, active: true });
+  });
+
+  it("12. pause: a paused subscription collects nothing → no paid grace, FREE plan", async () => {
+    await deliver(subEvent("evt_life_paused", { status: "paused" }));
+    expect(ourSubs()[0]).toMatchObject({ status: "unpaid" });
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: FREE_ORGANIZATION_PLAN_KEY, active: false, grace: false });
+    // …and resuming it (a payment method added) restores the paid plan.
+    await deliver(subEvent("evt_life_resumed", { status: "active" }));
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: ORGANIZATION_PLAN_KEY, active: true });
+  });
+
+  it("13. cancellation at period end: still entitled until the period ends, and the account says so", async () => {
+    await deliver(subEvent("evt_life_cancel_at_end", { status: "active", cancel_at_period_end: true }));
+    expect(ourSubs()[0]).toMatchObject({ status: "active", cancel_at_period_end: true });
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({
+      effectivePlanKey: ORGANIZATION_PLAN_KEY, active: true, cancelAtPeriodEnd: true,
+    });
+  });
+
+  it("14. deletion: customer.subscription.deleted ends the paid plan → FREE, and a late 'active' event cannot revive it", async () => {
+    await deliver(subEvent("evt_life_deleted", { status: "canceled" }, "customer.subscription.deleted"));
+    expect(ourSubs()[0]).toMatchObject({ status: "cancelled" });
+    signIn(ids.PILOT_ORG);
+    const ctx = await getEffectiveEntitlements();
+    expect(ctx).toMatchObject({ effectivePlanKey: FREE_ORGANIZATION_PLAN_KEY, enforced: true, active: false });
+    expect(limitFor(getPlan(ctx.effectivePlanKey)!, "company_create_needs")).toBe(1);
+
+    // A delayed 'active' delivery (newer timestamp, same subscription id) is
+    // refused by the terminal-state rule: Stripe never revives a cancelled id.
+    const late = await webhookPOST(signedDelivery(subEvent("evt_life_late_active", { status: "active" })));
+    expect(late.status).toBe(200);
+    expect(ourSubs()[0]).toMatchObject({ status: "cancelled" });
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: FREE_ORGANIZATION_PLAN_KEY, active: false });
+    expect(ourSubs()).toHaveLength(1);
+  });
+
+  it("S13. AFTER THE PAID / TRIAL PERIOD ENDS: the data stays, and the FREE limit applies to new needs", async () => {
+    signIn(ids.PILOT_ORG);
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: FREE_ORGANIZATION_PLAN_KEY, enforced: true, active: false });
+    // Nothing was destroyed: all 25 needs created under the plan are still there, still active.
+    expect(activeNeeds(ids.PILOT_ORG)).toHaveLength(25);
+    // …the subscription row is kept as history (cancelled), not deleted…
+    expect(ourSubs()).toHaveLength(1);
+    expect(ourSubs()[0]).toMatchObject({ status: "cancelled" });
+    // …and the server refuses a NEW need until the organization is within the FREE limit.
+    expect(await gate(ids.PILOT_ORG)).toMatchObject({
+      allowed: false, reason: "over_open_need_limit", limit: 1, used: 25, next: "upgrade", planKey: FREE_ORGANIZATION_PLAN_KEY,
+    });
+  });
+
+  it("S10. FREE: the server refuses what the plan does not include — not only a hidden button", async () => {
+    // At the limit: refused by the gate the demand creation path calls.
+    signIn(ids.PILOT_ORG_LIVE_ROW);
+    expect(await getEffectiveEntitlements()).toMatchObject({ effectivePlanKey: FREE_ORGANIZATION_PLAN_KEY, enforced: true });
+    expect(await gate(ids.PILOT_ORG_LIVE_ROW)).toMatchObject({ allowed: false, reason: "over_open_need_limit", limit: 1, used: 1 });
+    // Under the limit (the one need closed): allowed.
+    needs.filter((n) => n.organization_id === ids.PILOT_ORG_LIVE_ROW).forEach((n) => { n.status = "closed"; });
+    expect(await gate(ids.PILOT_ORG_LIVE_ROW)).toMatchObject({ allowed: true, enforced: true, limit: 1, used: 0 });
+    // An unreadable count fails CLOSED for a limited plan (a limit that cannot be checked is not a limit).
+    const broken = gateClient(ids.PILOT_ORG_LIVE_ROW);
+    const from = broken.from;
+    broken.from = (t: string) => {
+      if (t !== "customer_requests") return from(t);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const q: any = { select: () => q, in: () => q, or: () => q, then: (ok: (v: unknown) => unknown) => Promise.resolve({ count: null, error: { code: "500" } }).then(ok) };
+      return q;
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(await gateOpenNeeds(broken as any, ids.PILOT_ORG_LIVE_ROW, ids.OWNER)).toMatchObject({ allowed: false, reason: "over_open_need_limit" });
+    // A plan that is not sold grants nothing a FREE organization could reach:
+    // no feature of the deferred plans is allowed beyond the FREE plan's own.
+    const ctx = await getEffectiveEntitlements();
+    for (const f of ["expanded_cv", "document_expiry_reminders", "priority_visibility", "verify_documents", "manage_pilots"] as FeatureKey[]) {
+      expect(entitlementAllows(ctx, f), f).toBe(false);
+    }
   });
 
   it("the chain touched only the modelled tables and made no unexpected Stripe network call", () => {

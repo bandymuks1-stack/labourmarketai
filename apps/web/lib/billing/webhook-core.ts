@@ -91,7 +91,17 @@ export function mapStripeStatus(s: string | undefined): SubStatus {
     case "canceled": return "cancelled";
     case "incomplete": return "incomplete";
     case "incomplete_expired": return "expired";
-    case "paused": return "past_due";
+    // A PAUSED subscription collects nothing (Stripe pauses it when a trial
+    // ends without a payment method under `missing_payment_method: "pause"`,
+    // or when an operator pauses it in the dashboard; this adapter itself asks
+    // for "cancel", so pausing reaches us only from outside the checkout).
+    // Mapping it to past_due granted the paid plan as a payment "grace" for a
+    // subscription that is not being billed at all. `unpaid` is the honest
+    // state: no paid entitlement (entitlements-v1 falls back to free), still a
+    // live provider subscription that blocks a second checkout
+    // (BLOCKING_SUBSCRIPTION_STATUSES), and not terminal — adding a payment
+    // method resumes it and the next customer.subscription.updated applies.
+    case "paused": return "unpaid";
     default: return "none";
   }
 }
