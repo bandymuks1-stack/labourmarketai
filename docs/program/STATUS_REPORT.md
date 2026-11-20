@@ -44,13 +44,7 @@ Paskutinis užbaigtas produkcijos bandymas kiekvienam scenarijui ir ekranui, nep
 
 ## Pokyčiai nuo ankstesnės ataskaitos
 
-Lyginama su ataskaita, sugeneruota 2026-11-20 09:41.
-
-- Veikia produkcijoje: 200 → 200.
-- Atvirų PR: 107 → 105; sujungta per laikotarpį 4.
-- Produkcijos diegimų per laikotarpį: 3 sėkmingi, 0 nepavykę.
-
-Funkcijų būsenų pokyčių registre nėra.
+Ankstesnė ataskaita sugeneruota tuo pačiu metu (2026-11-20 21:40) — palyginimo nėra.
 
 ## B. Trumpa vadovo suvestinė
 
@@ -59,14 +53,10 @@ Funkcijų būsenų pokyčių registre nėra.
 **Pataisymas:** 09:41 ataskaitoje parašyta, kad #1816 migracija nepritaikyta. Pagal #2816 komentarą (2026-11-20 05:44) migracija `profiles_communication_locale_v1` produkcijoje pritaikyta 05:28 UTC (ledger `20261120052828`).
 
 - **Produkcija ir main:** produkcijoje `bc0eaabc` = `main` HEAD, sveikata gera. 3 sėkmingi diegimai, 0 nepavykusių. Neįdiegtų commit'ų nėra.
-- **Pokyčiai:** sujungti 3 PR, du iš jų – RED:
-  - #2816 (RED, 11.8) – mokymus galima priskirti keturioms grupėms: darbuotojams, praktikantams, besimokantiems ir teisėtai pakviestiems išoriniams žmonėms;
-    - savininkas migraciją patvirtino 2026-11-20 (žymė `@human-gate-approved`);
-    - pritaikoma rankiniu būdu per `apply_migration`; ar jau pritaikyta, šiais duomenimis neįrodyta;
-  - #3474 (RED) – buvęs darbdavys mato tik savo išsaugotą istoriją, nieko naujo (savininko sprendimas, A variantas, 2026-11-17/18):
-    - PR aprašyme parašyta „not applied“; pritaikymui reikia atskiro leidimo;
-    - #3421 migracija produkcijoje jau pritaikyta;
-  - #3489 – mokymų bandymas priskiria mokymą darbuotojui (po #2816 pritaikymo).
+- **Pokyčiai:** sujungti 3 PR, du iš jų – RED (prieigos taisyklių pakeitimai; detalės – privačiame Internal Brain):
+  - #2816 (RED, 11.8, mokymų priskyrimas) – savininkas migraciją patvirtino 2026-11-20; ar pritaikyta produkcijoje, šiais duomenimis neįrodyta;
+  - #3474 (RED, buvusio darbdavio prieiga) – savininko sprendimas priimtas 2026-11-17/18; PR aprašyme – „not applied“; pritaikymas – atskiras savininko leidimas;
+  - #3489 – mokymų produkcijos bandymo atnaujinimas.
 - **Užbaigta su produkcijos įrodymu:**
   - per laikotarpį naujų produkcijos bandymų nebuvo;
   - paleidimo pasirengimo plano bandymai šiame lange nepaleisti, nors pataisos #3562 ir #3563 įdiegtos;
@@ -89,7 +79,7 @@ Funkcijų būsenų pokyčių registre nėra.
   - #2816 ir #3474 migracijų pritaikymas (savininkas) ir patikra;
   - pakartoti company-chain ×3 ir profile-cv-history 375 px;
   - paleisti learning-practice ×3.
-- **#3354:** naujų komentarų nėra. #3474 nustato, ką buvęs darbdavys mato iš asmens darbo istorijos (tik savo įrašus ir jų pataisas). Migracija dar nepritaikyta. Galutinio įrodymo nėra.
+- **#3354:** naujų komentarų nėra. Sujungtas #3474 (RED), migracija nepritaikyta. Galutinio įrodymo nėra.
 - **#3345:** naujų komentarų nėra; naujų telefono paleidimų produkcijoje nebuvo.
 
 ## A1. Būsenos pagal registro grupes
@@ -173,11 +163,7 @@ Funkcija priskiriama grupei pagal registro stulpelį „Kam“; viena funkcija g
 
 #3354 (P0). Nuo 2026-11-15 11:13 naujų komentarų nėra.
 
-**Šio laikotarpio pažanga:** #3474 (RED, sujungtas). Pasibaigus darbo santykiui, buvęs darbdavys:
-- mato tik savo išsaugotus istorinius įrašus, jų pataisas, autorių ir laiką;
-- nemato naujų, asmeninių ar kitų darbdavių įrašų.
-
-Migracija nepritaikyta. Patikrinta tik izoliuotoje aplinkoje (FE-0–FE-5).
+**Šio laikotarpio pažanga:** #3474 (RED) sujungtas, migracija nepritaikyta; patikrinta tik izoliuotoje aplinkoje.
 
 **Anksčiau įrodyta produkcijoje:** įmonės Living CV (3.36), `cv-readonly`, profile-cv-history kompiuteriu ir 390 px (`7e517e32`).
 
