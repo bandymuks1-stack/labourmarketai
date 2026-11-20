@@ -17505,6 +17505,7 @@
       "createProgram": "Lägg till kurs",
       "noPrograms": "Inga kurser tillagda ännu.",
       "assigneePlaceholder": "Personens e-postadress",
+      "assigneePick": "Vem",
       "requiredByLabel": "Slutför senast",
       "assign": "Be denna person",
       "certificateFileLabel": "Certifikatfil",

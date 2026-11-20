@@ -10,6 +10,7 @@ import {
 } from "@/lib/training/training-actions";
 import {
   getCertificationRegister,
+  getTrainingAssignees,
   getTrainingAuthority,
   getTrainingOverview,
 } from "@/lib/training/training";
@@ -123,17 +124,26 @@ export async function TrainingRegister({
   // already read courses or managed assignments (the read view).
   const showOrganization =
     canCreate || programs.length > 0 || managed.length > 0;
+  // Who a course can be assigned to: the organization's own people in the
+  // four groups of the owner decision (2026-11-18), active links only. Read
+  // only when this reader may assign in the active workspace.
+  const tRel = await getTranslations("relationshipTypes");
+  const assignees =
+    activeOrganizationId && authority.assignOrganizationIds.has(activeOrganizationId)
+      ? await getTrainingAssignees(activeOrganizationId)
+      : [];
   // Who each managed assignment is for — the organization's own member list,
   // labelled the way the document register labels its assignees.
   const members =
     managed.length > 0 && activeOrganizationId
       ? await listOrganizationMembers(activeOrganizationId)
       : null;
-  const assigneeLabel = new Map(
-    members?.kind === "ok"
+  const assigneeLabel = new Map<string, string>([
+    ...assignees.map((a) => [a.profileId, a.name] as const),
+    ...(members?.kind === "ok"
       ? members.members.map((m) => [m.profileId, m.fullName || m.email || ""] as const)
-      : [],
-  );
+      : []),
+  ]);
 
   // A certificate is a file version from the organization's OWN document
   // register (the attach command refuses anything else) — picked from that
@@ -370,10 +380,26 @@ export async function TrainingRegister({
                     <DisplayedWorkspaceField />
                     <input type="hidden" name="locale" value={locale} />
                     <input type="hidden" name="programId" value={p.id} />
+                    {assignees.length > 0 ? (
+                      <select
+                        name="assigneeProfileId"
+                        defaultValue=""
+                        aria-label={t("org.assigneePick")}
+                        data-testid="training-assign-person"
+                        className="min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      >
+                        <option value="">{t("org.assigneePick")}</option>
+                        {assignees.map((a) => (
+                          <option key={a.profileId} value={a.profileId}>
+                            {tRel.has(a.relationship) ? `${a.name} · ${tRel(a.relationship)}` : a.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : null}
                     <input
                       type="email"
                       name="assigneeEmail"
-                      required
+                      required={assignees.length === 0}
                       maxLength={320}
                       placeholder={t("org.assigneePlaceholder")}
                       aria-label={t("org.assigneePlaceholder")}
