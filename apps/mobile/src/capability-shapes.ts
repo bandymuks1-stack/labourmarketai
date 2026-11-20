@@ -778,3 +778,63 @@ export type AgencyClientsData =
       readonly progress: readonly AgencyProposal[];
     }
   | { readonly kind: "not-agency" };
+
+/**
+ * journal.review_queue.get (`apps/web/lib/capabilities/employer-operations-
+ * capabilities.ts`): the work entries waiting for the caller's decision. An
+ * entry here is the person's own record — not rejected and not verified.
+ */
+export type JournalReviewEntry = {
+  readonly entryId: string;
+  readonly person: { readonly workerProfileId: string | null; readonly name: string | null };
+  readonly text: string | null;
+  readonly projectId: string | null;
+  readonly writtenAt: string;
+};
+export type JournalReviewQueueData = { readonly pending: readonly JournalReviewEntry[]; readonly total: number };
+/** `REVIEW_DECISIONS` in `apps/web/lib/journal/review-status.ts`. */
+export type JournalReviewDecision = "approved" | "changes_requested" | "rejected";
+
+/**
+ * client.agency_connections.get (`apps/web/lib/conversation/client-bridge-
+ * contract.ts`, kind "ok"): the agency invitations waiting for this company's
+ * answer, and its open needs not yet shared with a connected agency.
+ */
+export type ClientAgencyInvite = { readonly connectionId: string; readonly agencyName: string; readonly createdAt: string };
+export type ClientAgencyShareable = {
+  readonly connectionId: string;
+  readonly agencyName: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+};
+export type ClientAgenciesData = {
+  readonly kind: "ok";
+  readonly invites: readonly ClientAgencyInvite[];
+  readonly shareable: readonly ClientAgencyShareable[];
+  readonly activeConnections: number;
+};
+
+/**
+ * absence.mine.list / absence.pending_review.list (`apps/web/lib/leave/
+ * absences.ts`, types in absences-model.ts). `workerId` is the caller's own
+ * worker record — the one absence.request needs.
+ */
+export type AbsenceType = "annual_leave" | "sickness" | "unpaid" | "training" | "other";
+export type AbsenceStatus = "requested" | "approved" | "rejected" | "cancelled";
+export type WorkerAbsence = {
+  readonly id: string;
+  readonly workerId: string;
+  readonly workerName: string | null;
+  readonly absenceType: AbsenceType;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly halfDay: boolean;
+  readonly note: string | null;
+  readonly status: AbsenceStatus;
+};
+export type MyAbsencesData =
+  | { readonly applied: false }
+  | { readonly applied: true; readonly workerId: string | null; readonly absences: readonly WorkerAbsence[] };
+export type ManagerAbsencesData =
+  | { readonly applied: false }
+  | { readonly applied: true; readonly pending: readonly WorkerAbsence[] };

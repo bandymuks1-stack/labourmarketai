@@ -139,13 +139,31 @@ export function InvitePanel({
   const [linkResult, setLinkResult] = useState<ShareableInvitationResult | null>(null);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
   /**
+   * THE DOOR ALREADY SAID WHAT TO INVITE (UX_GAPS 2026-11-18 I-4). A deep link
+   * that names an organization invitation type, one of the caller's own
+   * organizations AND a relationship from the closed choice list (the
+   * institution's "Invite students": `type=join_organization&org=…&relationship=student`)
+   * has nothing left to choose in those three controls. They render as ONE
+   * read-only line, the link is the default way it travels, and the fields are
+   * 44 px targets. Any other address keeps the full panel, unchanged.
+   */
+  const preset =
+    (ORG_INVITATION_TYPES as readonly string[]).includes(defaultType ?? "") &&
+    organizations.some((o) => o.id === defaultOrganizationId) &&
+    RELATIONSHIP_INVITE_CHOICES.some((c) => c.slug === defaultRelationshipSlug);
+  const presetOrganizationName = preset
+    ? (organizations.find((o) => o.id === defaultOrganizationId)?.name ?? "")
+    : "";
+  /** Field height: 44 px when preset (I-4), the panel's own size otherwise. */
+  const fieldHeight = preset ? "min-h-11" : "min-h-9";
+  /**
    * HOW THE INVITATION TRAVELS (universal network v1). "email": addressed,
    * mailed when a provider exists — the flow that existed. "link": ONE secure
    * link with no addressee, copied or shared by hand; optionally a campaign
    * (many seats, one link, each acceptance its own person). The link is the
    * distribution primitive; e-mail is one channel over it.
    */
-  const [mode, setMode] = useState<"email" | "link">("email");
+  const [mode, setMode] = useState<"email" | "link">(preset ? "link" : "email");
   const [seats, setSeats] = useState(1);
   const [campaignLabel, setCampaignLabel] = useState("");
   const [targetRequestId, setTargetRequestId] = useState(demands[0]?.id ?? "");
@@ -272,6 +290,22 @@ export function InvitePanel({
     }
   }
 
+  const capacityBlockedNotice = (
+    <span
+      className="text-meta text-state-danger"
+      data-testid="invite-capacity-blocked"
+    >
+      {t("capacityNeedsCapability")}{" "}
+      <a
+        href={`/${locale}/dashboard/company`}
+        className="underline hover:text-text-primary"
+        data-testid="invite-capacity-blocked-cta"
+      >
+        {t("capacityNeedsCapabilityCta")}
+      </a>
+    </span>
+  );
+
   return (
     <section
       className="card-border flex flex-col gap-4 p-4"
@@ -301,13 +335,24 @@ export function InvitePanel({
 
       {open && (
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
+        {preset ? (
+          <p
+            data-testid="invite-preset"
+            data-type={type}
+            data-organization={organizationId}
+            data-relationship={relationshipSlug}
+            className="text-sm text-text-primary"
+          >
+            {t(`types.${type}`)} · {presetOrganizationName} · {tRelationships(relationshipSlug)}
+          </p>
+        ) : (
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {t("typeLabel")}
           <select
             value={type}
             onChange={(e) => setType(e.target.value as InvitationType)}
             data-testid="invite-type"
-            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
           >
             {availableTypes.map((v) => (
               <option key={v} value={v}>
@@ -316,6 +361,7 @@ export function InvitePanel({
             ))}
           </select>
         </label>
+        )}
 
         {/* HOW IT TRAVELS — addressed e-mail, or one link to hand over. */}
         <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label={t("modeLabel")}>
@@ -346,7 +392,7 @@ export function InvitePanel({
               value={targetRequestId}
               onChange={(e) => setTargetRequestId(e.target.value)}
               data-testid="invite-demand"
-              className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
             >
               {demands.map((d) => (
                 <option key={d.id} value={d.id}>
@@ -358,14 +404,14 @@ export function InvitePanel({
           </label>
         )}
 
-        {needsOrg && (
+        {needsOrg && !preset && (
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
             {t("organizationLabel")}
             <select
               value={organizationId}
               onChange={(e) => setOrganizationId(e.target.value)}
               data-testid="invite-organization"
-              className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
             >
               {organizations.map((o) => (
                 <option key={o.id} value={o.id}>
@@ -380,14 +426,14 @@ export function InvitePanel({
             learner instead of accidentally declaring them an employee. The
             names come from the `relationshipTypes` catalogue, never from the
             slug (invariant I-8). */}
-        {needsOrg && (
+        {needsOrg && !preset && (
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
             {t("capacityLabel")}
             <select
               value={relationshipSlug}
               onChange={(e) => setRelationshipSlug(e.target.value)}
               data-testid="invite-capacity"
-              className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
             >
               {RELATIONSHIP_INVITE_CHOICES.map((c) => (
                 <option key={c.slug} value={c.slug}>
@@ -396,23 +442,11 @@ export function InvitePanel({
               ))}
             </select>
             <span className="text-meta text-text-muted">{t("capacityHint")}</span>
-            {blockedChoice && (
-              <span
-                className="text-meta text-state-danger"
-                data-testid="invite-capacity-blocked"
-              >
-                {t("capacityNeedsCapability")}{" "}
-                <a
-                  href={`/${locale}/dashboard/company`}
-                  className="underline hover:text-text-primary"
-                  data-testid="invite-capacity-blocked-cta"
-                >
-                  {t("capacityNeedsCapabilityCta")}
-                </a>
-              </span>
-            )}
+            {blockedChoice && capacityBlockedNotice}
           </label>
         )}
+        {/* Preset: the capacity is on the line above; what it still needs is said here. */}
+        {preset && blockedChoice && capacityBlockedNotice}
 
         {needsProject && (
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
@@ -421,7 +455,7 @@ export function InvitePanel({
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               data-testid="invite-project"
-              className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
             >
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -438,7 +472,7 @@ export function InvitePanel({
             value={recipientLocale}
             onChange={(e) => setRecipientLocale(e.target.value)}
             data-testid="invite-recipient-language"
-            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
           >
             {activeLocales.map((l) => (
               <option key={l} value={l}>
@@ -475,7 +509,7 @@ export function InvitePanel({
                 value={seats}
                 onChange={(e) => setSeats(clampCampaignUses(type, Number(e.target.value)))}
                 data-testid="invite-seats"
-                className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+                className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
               />
               <span className="text-meta text-text-muted">{t("seatsHint")}</span>
             </label>
@@ -487,7 +521,7 @@ export function InvitePanel({
                   onChange={(e) => setCampaignLabel(e.target.value)}
                   maxLength={120}
                   data-testid="invite-campaign-label"
-                  className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+                  className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
                 />
               </label>
             )}
@@ -502,7 +536,7 @@ export function InvitePanel({
               onChange={(e) => setInvitedName(e.target.value)}
               maxLength={120}
               data-testid="invite-name"
-              className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
             />
           </label>
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
@@ -512,7 +546,7 @@ export function InvitePanel({
               onChange={(e) => setProposedRole(e.target.value)}
               maxLength={80}
               data-testid="invite-role"
-              className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
             />
           </label>
         </div>

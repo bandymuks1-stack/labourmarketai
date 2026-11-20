@@ -4,6 +4,7 @@ import { cache } from "react";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
+import { isEducationInstitution } from "@/lib/organizations/capabilities";
 import { actsAsAgency } from "@/lib/company/agency-capability";
 import { listMyClientBridgeConnections } from "@/lib/agency/bridge-read";
 
@@ -110,7 +111,9 @@ export const loadOrganizationDoors = cache(
     // The ONE agency rule (lib/company/agency-capability): type OR declared role.
     const isStaffingAgency = actsAsAgency(companyType, capabilities);
     const invites = isStaffingAgency ? null : await listMyClientBridgeConnections(ctx.companyId);
-    const hasEducation = capabilities.includes("training_provider");
+    // The ONE education gate — the header (I-1) and the company home (I-2) ask
+    // the same predicate over the same capability read.
+    const hasEducation = isEducationInstitution({ roleSlugs: capabilities });
     const hasPartners =
       isStaffingAgency ||
       (invites !== null && invites.kind === "ok" && invites.rows.length > 0);
