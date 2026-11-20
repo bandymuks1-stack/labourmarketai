@@ -529,6 +529,64 @@ export function narrativeDiscrepancies(text, { openPrNumbers, closedPrNumbers, l
   return [...new Set(out)];
 }
 
+// ------------------------------------------------------------------ migration truth (owner order 2026-11-20)
+
+/**
+ * Reads the LIVE migration-parity step of a `quality` run on main (`pnpm check:migration-parity`,
+ * which reads production's own `supabase_migrations.schema_migrations`). Returns the repo files that
+ * have NO production ledger row, and whether the gate passed. `null` when the log has no such step.
+ */
+export function parseParityLog(text) {
+  const lines = String(text ?? "").split("\n").map((l) => l.replace(/^[^\t]*\t[^\t]*\t\d{4}-\d\d-\d\dT[\d:.]+Z\s?/, ""));
+  const head = lines.findIndex((l) => /check-migration-parity: \d+ applied in production, \d+ files in repo/.test(l));
+  if (head < 0) return null;
+  const m = lines[head].match(/(\d+) applied in production, (\d+) files in repo/);
+  const notApplied = [];
+  let inList = false;
+  for (const l of lines.slice(head + 1, head + 400)) {
+    if (/Repo files with no production ledger row/.test(l)) { inList = true; continue; }
+    if (inList) {
+      const it = l.match(/^\s*-\s+(\d{4,}_[A-Za-z0-9_]+)\s*$/);
+      if (it) { notApplied.push(it[1]); continue; }
+      if (l.trim() === "") continue;
+      inList = false;
+    }
+    if (/^(PASS|FAIL) — /.test(l.trim())) break;
+  }
+  const passed = lines.slice(head).some((l) => /PASS — every production migration has a repository file/.test(l));
+  return { applied: Number(m[1]), files: Number(m[2]), notApplied, passed };
+}
+
+const NOT_APPLIED_WORDS = /(nepritaikyt\w*|neįrodyt\w*|not applied|nepritaikoma|laukia\b[^.]*pritaikym\w*|pritaikym\w*[^.]*(laukia|leidim\w*)|migracij\w*[^.]*laukia)/i;
+
+/**
+ * A narrative line that calls a PR's migration not applied / waiting, when every migration file that
+ * PR added is in production (in the repo and NOT in the parity gate's "no production ledger row" list).
+ * `prMigrations` maps a PR number to the migration stems it added on main.
+ */
+export function migrationClaimDiscrepancies(text, { prMigrations = {}, notApplied = [] } = {}) {
+  const missing = new Set(notApplied);
+  const out = [];
+  for (const line of String(text ?? "").split("\n")) {
+    if (!NOT_APPLIED_WORDS.test(line)) continue;
+    for (const m of line.matchAll(/#(\d{3,5})\b/g)) {
+      const stems = prMigrations[m[1]] ?? prMigrations[Number(m[1])];
+      if (!stems?.length) continue;
+      if (stems.every((s) => !missing.has(s))) {
+        out.push(`#${m[1]} tekste minimas kaip nepritaikytas ar laukiantis leidimo, bet jo migracija (${stems.join(", ")}) produkcijos žurnale jau yra.`);
+      }
+    }
+  }
+  return [...new Set(out)];
+}
+
+/** A report is COMPLETE only with all data AND no unresolved internal contradiction. */
+export function finalCompleteness({ errors = [], registerProblems = [], discrepancies = [], migrationParity }) {
+  if (errors.length || registerProblems.length) return "PARTIAL";
+  if (!migrationParity) return "PARTIAL";
+  return discrepancies.length ? "PARTIAL" : "COMPLETE";
+}
+
 /**
  * Text that must not reach the public report (AGENTS.md: no personal or partner contact data, money
  * amounts or production volumes). The coordinator's narrative is checked before anything is written.

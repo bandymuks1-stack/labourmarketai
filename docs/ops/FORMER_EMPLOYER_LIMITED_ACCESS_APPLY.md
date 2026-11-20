@@ -167,3 +167,6 @@ select tgname from pg_trigger
 Entries created while the migration was live stay as they are after a
 rollback: a correction kept in its employment's context stays there, and the
 former employer's reads go back to #3421's rule.
+
+Follow-up fixes to two of these functions (direct corrections only, cycle-safe
+chain root): `FORMER_EMPLOYER_CHAIN_FIXES_APPLY.md`.
