@@ -37,10 +37,32 @@ name: employer-screens-journey
     direction: DOWN
     timeout: 30000
     centerElement: true
-- assertVisible:
-    id: "today-open-agency-offers"
-- assertVisible:
-    id: "today-open-education"
+# Each station is SCROLLED to, not assumed on screen: the organization block
+# grows as screens arrive, and a station below the fold is still there.
+- scrollUntilVisible:
+    element:
+      id: "today-open-agency-offers"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- scrollUntilVisible:
+    element:
+      id: "today-open-education"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- scrollUntilVisible:
+    element:
+      id: "today-open-sent-proposals"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- scrollUntilVisible:
+    element:
+      id: "today-open-candidates"
+    direction: UP
+    timeout: 30000
+    centerElement: true
 - waitForAnimationToEnd
 - tapOn:
     id: "today-open-candidates"
