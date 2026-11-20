@@ -11412,7 +11412,7 @@
       "title": "Planas „Organizacija“",
       "cta": "Aktyvuoti planą „Organizacija“",
       "note": "Nukreipsime jus į Stripe Checkout; prenumerata susiejama su šia organizacija.",
-      "chargedToday": "Be nemokamo bandomojo laikotarpio: pirmas mėnuo apmokamas šiandien per Stripe Checkout, vėliau kas mėnesį, kol atšauksite. Prieš mokant Stripe parodys tikslią sumą su PVM."
+      "chargedToday": "Be nemokamo bandomojo laikotarpio: pirmas mėnuo apmokamas šiandien per Stripe Checkout, vėliau kas mėnesį, kol atšauksite. Prieš mokant Stripe parodys tikslią sumą."
     }
   },
   "accountPlan": {
