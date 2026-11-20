@@ -3,6 +3,9 @@
 import { useActionState } from "react";
 
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { Link } from "@/lib/i18n/navigation";
 import {
   cancelMembershipInviteAction,
@@ -197,14 +200,16 @@ export function OrganizationMembersSection({
                     <DisplayedWorkspaceField />
                     <input type="hidden" name="intent" value="cancel" />
                     <input type="hidden" name="membershipId" value={m.membershipId} />
-                    <button
+                    <Button
                       type="submit"
+                      variant="ghost"
+                      size="sm"
                       disabled={rowPending}
-                      className="text-xs text-text-secondary underline-offset-2 hover:underline"
+                      className="min-h-11"
                       data-testid={`org-member-cancel-${m.membershipId}`}
                     >
                       {labels.cancelInvite}
-                    </button>
+                    </Button>
                   </form>
                 )}
 
@@ -217,11 +222,11 @@ export function OrganizationMembersSection({
                       <label className="sr-only" htmlFor={`role-${m.membershipId}`}>
                         {labels.inviteRole}
                       </label>
-                      <select
+                      <Select
                         id={`role-${m.membershipId}`}
                         name="role"
                         defaultValue={m.role}
-                        className="rounded-md border border-ink-500 bg-ink-700 px-2 py-1 text-xs text-text-primary"
+                        className="w-auto max-sm:min-h-11 max-sm:text-base"
                         data-testid={`org-member-role-select-${m.membershipId}`}
                       >
                         {inviteRoles.map((r) => (
@@ -229,15 +234,17 @@ export function OrganizationMembersSection({
                             {labels.roleLabels[r]}
                           </option>
                         ))}
-                      </select>
-                      <button
+                      </Select>
+                      <Button
                         type="submit"
+                        variant="secondary"
+                        size="sm"
                         disabled={rowPending}
-                        className="text-xs text-brand-blue underline-offset-2 hover:underline disabled:opacity-50"
+                        className="min-h-11"
                         data-testid={`org-member-role-save-${m.membershipId}`}
                       >
                         OK
-                      </button>
+                      </Button>
                     </form>
                     {m.role !== "owner" && m.role !== "admin" && (
                       <form action={rowAction}>
@@ -249,30 +256,34 @@ export function OrganizationMembersSection({
                           name="enabled"
                           value={m.managesInvitations ? "false" : "true"}
                         />
-                        <button
+                        <Button
                           type="submit"
+                          variant="ghost"
+                          size="sm"
                           disabled={rowPending}
-                          className="text-xs text-brand-blue underline-offset-2 hover:underline disabled:opacity-50"
+                          className="min-h-11"
                           data-testid={`org-member-invitations-${m.membershipId}`}
                         >
                           {m.managesInvitations
                             ? labels.withdrawInvitations
                             : labels.grantInvitations}
-                        </button>
+                        </Button>
                       </form>
                     )}
                     <form action={rowAction}>
                       <DisplayedWorkspaceField />
                       <input type="hidden" name="intent" value="revoke" />
                       <input type="hidden" name="membershipId" value={m.membershipId} />
-                      <button
+                      <Button
                         type="submit"
+                        variant="ghost"
+                        size="sm"
                         disabled={rowPending}
-                        className="text-xs text-state-danger underline-offset-2 hover:underline disabled:opacity-50"
+                        className="min-h-11 !text-state-danger"
                         data-testid={`org-member-revoke-${m.membershipId}`}
                       >
                         {labels.revoke}
-                      </button>
+                      </Button>
                     </form>
                   </>
                 )}
@@ -281,14 +292,16 @@ export function OrganizationMembersSection({
                   <form action={rowAction}>
                     <DisplayedWorkspaceField />
                     <input type="hidden" name="intent" value="leave" />
-                    <button
+                    <Button
                       type="submit"
+                      variant="ghost"
+                      size="sm"
                       disabled={rowPending}
-                      className="text-xs text-text-secondary underline-offset-2 hover:underline"
+                      className="min-h-11"
                       data-testid="org-member-leave"
                     >
                       {labels.leave}
-                    </button>
+                    </Button>
                   </form>
                 )}
               </li>
@@ -319,12 +332,12 @@ export function OrganizationMembersSection({
               >
                 {labels.inviteEmail}
               </label>
-              <input
+              <Input
                 id="membership-invite-email"
                 name="email"
                 type="email"
                 required
-                className="rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary"
+                className="max-sm:min-h-11 max-sm:text-base"
                 data-testid="org-members-invite-email"
               />
             </div>
@@ -335,11 +348,11 @@ export function OrganizationMembersSection({
               >
                 {labels.inviteRole}
               </label>
-              <select
+              <Select
                 id="membership-invite-role"
                 name="role"
                 defaultValue="member"
-                className="rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary"
+                className="max-sm:min-h-11 max-sm:text-base"
                 data-testid="org-members-invite-role"
               >
                 {inviteRoles.map((r) => (
@@ -347,16 +360,18 @@ export function OrganizationMembersSection({
                     {labels.roleLabels[r]}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              size="sm"
               disabled={invitePending}
-              className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand disabled:opacity-50"
+              className="min-h-11"
               data-testid="org-members-invite-submit"
             >
               {labels.inviteSubmit}
-            </button>
+            </Button>
           </form>
         )}
         {inviteMessage && (

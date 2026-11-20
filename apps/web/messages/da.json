@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Sprog for beskeder",
+    "intro": "Arbejdsbeskeder og instruktioner skrevet på et andet sprog vises for dig oversat til dette sprog. Behold grænsefladens sprog, medmindre du læser et andet sprog bedre.",
+    "label": "Jeg læser beskeder på",
+    "sameAsInterface": "Samme som grænsefladen",
+    "saved": "Gemt.",
+    "error": "Ændringen kunne ikke gemmes og blev fortrudt. Prøv igen.",
+    "unavailable": "Denne indstilling er endnu ikke tilgængelig — indtil da følger beskeder grænsefladens sprog."
+  },
   "demandReadback": {
     "notVerifiedYet": "Din virksomhed er endnu ikke verificeret, så de behov, du indsender her, vises ikke for arbejdere, før verificeringen er gennemført.",
     "notVerifiedHowTo": "Tilføj registreringsnummer og anmod om en gennemgang",
@@ -4110,8 +4119,12 @@
           "chipHelpPeople": "Team og invitationer",
           "chipHelpPlanning": "Åbn planlægning",
           "chipHelpServices": "Mine ydelser",
-          "chipHelpJournal": "Arbejdsjournal"
-        }
+          "chipHelpJournal": "Arbejdsjournal",
+          "chipHelpSettings": "Indstillinger",
+          "chipHelpPrivacy": "Privatliv og dine data"
+        },
+        "account": "Login, e-mail, notifikationer og udseende finder du under Indstillinger.",
+        "privacy": "Under Privatliv og dine data kan du downloade dine data, se hvem der ser din profil, og anmode om sletning af din konto."
       },
       "interestInboxAmbiguous": "Det kan betyde to ting — hvad vil du se?",
       "chipInterestOnMyNeeds": "Interesse i mine forespørgsler",
@@ -6864,7 +6877,8 @@
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       },
       "setup": {
-        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
+        "optionalDetails": "Registrering, kontakt og rolle"
       },
       "workers": {
         "invitationsManagedElsewhere": "Invitationer håndteres af den person i virksomheden, der har ansvaret for dem.",
@@ -8030,6 +8044,7 @@
       "partnerWithUs": "Bliv partner",
       "forAgencies": "Sådan virker det for bureauer",
       "setUpAgency": "Registrer dit bureau",
+      "setUpInstitution": "For uddannelsesinstitutioner",
       "b2bEnquiry": "Forespørgsel om erhvervsydelser (B2B)",
       "projectEnquiry": "Forespørgsel om individuelt projekt"
     },

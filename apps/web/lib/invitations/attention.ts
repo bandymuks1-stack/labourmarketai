@@ -55,7 +55,10 @@ export type InvitationsAddressedToMe =
   | { readonly status: "ok"; readonly items: readonly AttentionInvitation[]; readonly total: number }
   /** The canonical invitations migration is not applied — an honest "not enabled". */
   | { readonly status: "unavailable" }
-  | { readonly status: "error" };
+  /** `reason` names the one non-fault cause: the mailbox is not proven yet
+   *  (database `email_unverified`). Still not a count — callers that only
+   *  check `status` keep treating it as unknown. */
+  | { readonly status: "error"; readonly reason?: "email_unverified" };
 
 function refKey(ref: InvitationRef): string {
   return ref.source === "invitation" ? `invitation:${ref.invitationId}` : `${ref.source}:${ref.orgId}`;
@@ -66,7 +69,7 @@ function refKey(ref: InvitationRef): string {
 async function readAll(): Promise<
   | { readonly status: "ok"; readonly items: readonly AttentionInvitation[] }
   | { readonly status: "unavailable" }
-  | { readonly status: "error" }
+  | { readonly status: "error"; readonly reason?: "email_unverified" }
 > {
   const [canonical, roster] = await Promise.all([listInvitationsForMe(), listMyPendingWorkerInvitations()]);
   if (canonical.status === "needs-migration") return { status: "unavailable" };
@@ -74,6 +77,7 @@ async function readAll(): Promise<
   // takes the honest "could not read" path here: chat / brief / today never
   // claim "no invitations" for a mailbox that was simply not proven. The
   // network page, which has room for it, renders the progressive proof prompt.
+  if (canonical.status === "email_unverified") return { status: "error", reason: "email_unverified" };
   if (canonical.status !== "ok") return { status: "error" };
   const items: AttentionInvitation[] = [
     ...canonical.items.map((i) => ({

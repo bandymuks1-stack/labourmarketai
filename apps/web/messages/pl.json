@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Język wiadomości",
+    "intro": "Wiadomości służbowe i instrukcje napisane w innym języku są wyświetlane w tłumaczeniu na ten język. Zostaw język interfejsu, chyba że lepiej czytasz w innym języku.",
+    "label": "Czytam wiadomości w języku",
+    "sameAsInterface": "Taki sam jak interfejs",
+    "saved": "Zapisano.",
+    "error": "Nie udało się zapisać zmiany i została cofnięta. Spróbuj ponownie.",
+    "unavailable": "To ustawienie nie jest jeszcze dostępne — do tego czasu wiadomości są w języku interfejsu."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Sprawdź i zatwierdź",
@@ -2275,6 +2284,7 @@
         },
         "statusInvalidCountry": "Proszę wybrać kraj z listy — inne wartości nie są jeszcze obsługiwane.",
         "registrationCode": "Numer firmy / rejestracyjny",
+        "optionalDetails": "Rejestracja, kontakt i stanowisko",
         "registrationCodeHelp": "Opcjonalnie. Pomaga zweryfikować firmę później.",
         "address": "Adres / lokalizacja",
         "addressPlaceholder": "np. ul. Główna 1, Wilno",
@@ -14319,9 +14329,9 @@
         "saveAsDraft": "Zapisz jako wersję roboczą",
         "opportunityType": "Rodzaj oferty",
         "clientEmail": "E-mail klienta",
-        "clientEmailPlaceholder": "name@company.com",
+        "clientEmailPlaceholder": "imie@firma.pl",
         "workerEmail": "E-mail pracownika",
-        "workerEmailPlaceholder": "name@example.com",
+        "workerEmailPlaceholder": "imie@przyklad.pl",
         "inviteNote": "Uwaga (opcjonalnie)",
         "inviteNotePlaceholder": "Np. start w październiku, budowa w Kownie",
         "documentType": "Rodzaj dokumentu",
@@ -14740,8 +14750,12 @@
           "chipHelpPeople": "Zespół i zaproszenia",
           "chipHelpPlanning": "Otwórz planowanie",
           "chipHelpServices": "Moje usługi",
-          "chipHelpJournal": "Dziennik pracy"
-        }
+          "chipHelpJournal": "Dziennik pracy",
+          "chipHelpSettings": "Ustawienia",
+          "chipHelpPrivacy": "Prywatność i Państwa dane"
+        },
+        "account": "Logowanie, e-mail, powiadomienia i wygląd znajdą Państwo w Ustawieniach.",
+        "privacy": "W sekcji „Prywatność i Państwa dane” mogą Państwo pobrać swoje dane, zobaczyć, kto widzi Państwa profil, i złożyć wniosek o usunięcie konta."
       },
       "interestInboxAmbiguous": "To może znaczyć dwie rzeczy — co chcą Państwo zobaczyć?",
       "chipInterestOnMyNeeds": "Zainteresowanie moimi zapytaniami",
@@ -20712,6 +20726,7 @@
       "partnerWithUs": "Zostać partnerem",
       "forAgencies": "Jak to działa dla agencji",
       "setUpAgency": "Rejestracja agencji",
+      "setUpInstitution": "Dla instytucji szkoleniowych",
       "b2bEnquiry": "Zapytanie o usługi dla firm (B2B)",
       "projectEnquiry": "Zapytanie o projekt indywidualny"
     },

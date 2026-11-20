@@ -75,6 +75,22 @@ const SENTENCES: Record<HelpTopicId, string[]> = {
     "Wo sehe ich die erledigte Arbeit?",
     "Gdzie zobaczę wykonaną pracę?",
   ],
+  account: [
+    "Pakeisti slaptažodį",
+    "Change my password",
+    "Сменить пароль",
+    "wachtwoord wijzigen",
+    "Passwort ändern",
+    "zmienić hasło",
+  ],
+  privacy: [
+    "Noriu ištrinti savo paskyrą",
+    "Delete my account",
+    "Удалить мой аккаунт",
+    "Mijn account verwijderen",
+    "Mein Konto löschen",
+    "Usuń moje konto",
+  ],
 };
 
 describe("product-help sentences route to product-help and read back the same topic", () => {
@@ -153,5 +169,29 @@ describe("every topic answers in every locale, in plain words, with a door", () 
       expect(helpChipsFor(topic, "company").length, `${topic.id} company`).toBeGreaterThan(0);
       expect(helpChipsFor(topic, "person").length, `${topic.id} person`).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("account and privacy questions open the existing settings and privacy pages (owner 2026-11-19)", () => {
+  it.each([
+    ["I want to delete my account", "privacy"],
+    ["Download my data", "privacy"],
+    ["Radera mitt konto", "privacy"],
+    ["account settings", "account"],
+    ["Ändra lösenord", "account"],
+  ] as const)("%s → %s", (text, id) => {
+    expect(classifyIntent(text).intent).toBe("product-help");
+    expect(readHelpTopic(text)?.id).toBe(id);
+  });
+
+  it("search settings stay the criteria answer", () => {
+    expect(classifyIntent("search settings").intent).toBe("criteria");
+    expect(classifyIntent("paieškos nustatymai").intent).toBe("criteria");
+  });
+
+  it("the doors are the existing settings and privacy pages", () => {
+    const byId = Object.fromEntries(HELP_TOPICS.map((t) => [t.id, t.chips.map((c) => c.target)]));
+    expect(byId.account).toEqual(["/dashboard/account"]);
+    expect(byId.privacy).toEqual(["/dashboard/privacy"]);
   });
 });
