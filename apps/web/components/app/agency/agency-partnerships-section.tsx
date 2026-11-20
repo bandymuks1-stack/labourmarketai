@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { PartnershipActionForm } from "@/components/app/agency/partnership-action-form";
 import type { AgencyCooperation } from "@/lib/agency/partnerships";
 import { dueByCurrency, PARTNERSHIP_ERROR_CODES } from "@/lib/agency/partnerships-model";
@@ -9,9 +11,12 @@ import {
   declinePartnershipAction,
   endPartnershipAction,
   invitePartnerAgencyAction,
-  offerPartnerCandidateAction,
+  forwardPartnerCandidateAction,
   passNeedToPartnerAction,
+  proposePartnerCandidateAction,
+  returnPartnerCandidateAction,
   takeBackNeedAction,
+  withdrawPartnerCandidateAction,
 } from "@/lib/agency/partnerships-actions";
 
 /**
@@ -21,8 +26,10 @@ import {
  * Partner agencies (invite, accept for this agency, decline, end); passing one
  * of this agency's client needs to an active partner and taking it back; the
  * needs partners passed to this agency, each with this agency's own roster to
- * offer from; the partners' candidates on this agency's clients' needs; and
- * the commissions — due only on an actual placement, never charged here.
+ * propose from; the partners' candidates for THIS agency to review, forward to
+ * its own client or return (owner decision 2026-11-20: the client sees a
+ * partner's candidate only once its own agency forwards it, as that agency's);
+ * and the commissions — due only on an actual placement, never charged here.
  */
 const SELECT =
   "rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue";
@@ -73,7 +80,13 @@ export async function AgencyPartnershipsSection({
     );
   }
 
-  const { partnerships, passedToMe, myPasses, partnerOffers, commissions } = cooperation;
+  const { partnerships, passedToMe, myPasses, proposals, commissions } = cooperation;
+  const toReview = proposals.filter((p) => p.side === "lead");
+  const mineByShare = new Map<string, typeof proposals>();
+  for (const p of proposals) {
+    if (p.side !== "partner") continue;
+    mineByShare.set(p.partnerShareId, [...(mineByShare.get(p.partnerShareId) ?? []), p]);
+  }
   const activeLead = partnerships.filter((p) => p.side === "lead" && p.status === "active");
   const titleByShare = new Map(sharedNeeds.map((n) => [n.shareId, n.title]));
   const titleByRequest = new Map<string, string>([
@@ -268,7 +281,7 @@ export async function AgencyPartnershipsSection({
                   <p className="text-sm text-text-muted">{t("passedToMe.noRoster")}</p>
                 ) : (
                   <PartnershipActionForm
-                    action={offerPartnerCandidateAction}
+                    action={proposePartnerCandidateAction}
                     hidden={{ partner_share_id: n.partnerShareId }}
                     submit={t("passedToMe.offer")}
                     done={t("passedToMe.offered")}
@@ -288,30 +301,120 @@ export async function AgencyPartnershipsSection({
                         ))}
                       </select>
                     </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-xs font-medium text-text-secondary">{t("passedToMe.note")}</span>
+                      <Textarea name="note" rows={2} maxLength={500} />
+                    </label>
                   </PartnershipActionForm>
                 )}
+                {(mineByShare.get(n.partnerShareId) ?? []).length > 0 ? (
+                  <ul className="flex flex-col gap-1" data-testid={`agency-partnership-mine-${n.partnerShareId}`}>
+                    {(mineByShare.get(n.partnerShareId) ?? []).map((m) => (
+                      <li
+                        key={m.proposalId}
+                        className="flex flex-col gap-1 text-sm text-text-secondary"
+                        data-testid={`agency-partnership-proposal-${m.proposalId}`}
+                        data-status={m.status}
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span>
+                            {m.workerName ?? "—"} · {t(`proposalStatus.${m.status}`)}
+                            {m.status === "forwarded" && m.offerStatus
+                              ? ` · ${t(`offerStatus.${m.offerStatus}` as never)}`
+                              : ""}
+                          </span>
+                          {m.status === "proposed" ? (
+                            <PartnershipActionForm
+                              action={withdrawPartnerCandidateAction}
+                              hidden={{ proposal_id: m.proposalId }}
+                              submit={t("passedToMe.withdraw")}
+                              done={null}
+                              testId={`agency-partnership-withdraw-${m.proposalId}`}
+                              variant="ghost"
+                              {...common}
+                            />
+                          ) : null}
+                        </div>
+                        {m.status === "returned" && m.returnReason ? (
+                          <p className="text-xs text-text-muted">{t("passedToMe.returnedWhy", { reason: m.returnReason })}</p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </li>
             ))}
           </ul>
         </section>
       ) : null}
 
-      {/* Partners' candidates on this agency's clients' needs */}
-      {partnerOffers.length > 0 ? (
-        <section className="flex flex-col gap-2" data-testid="agency-partnerships-partner-offers">
-          <h3 className="text-sm font-semibold text-text-primary">{t("partnerOffers.title")}</h3>
-          <ul className="flex flex-col gap-1">
-            {partnerOffers.map((o) => (
+      {/* Partners' candidates for THIS agency to review: forward to its own client, or return */}
+      {toReview.length > 0 ? (
+        <section className="flex flex-col gap-3" data-testid="agency-partnerships-review">
+          <h3 className="text-sm font-semibold text-text-primary">{t("review.title")}</h3>
+          <ul className="flex flex-col gap-3">
+            {toReview.map((r) => (
               <li
-                key={o.offerId}
-                className="flex flex-wrap justify-between gap-2 text-sm text-text-secondary"
-                data-testid={`agency-partnership-partner-offer-${o.offerId}`}
-                data-status={o.status}
+                key={r.proposalId}
+                className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
+                data-testid={`agency-partnership-review-${r.proposalId}`}
+                data-status={r.status}
               >
-                <span>
-                  {titleByRequest.get(o.requestId) ?? "—"} · {o.partnerName}
-                </span>
-                <span className="text-text-muted">{t(`offerStatus.${o.status}` as never)}</span>
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="text-sm font-semibold text-text-primary">
+                    {t("review.candidate", { worker: r.workerName ?? "—", agency: r.counterpartName })}
+                  </p>
+                  <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {t(`proposalStatus.${r.status}`)}
+                    {r.status === "forwarded" && r.offerStatus ? ` · ${t(`offerStatus.${r.offerStatus}` as never)}` : ""}
+                  </p>
+                </div>
+                <p className="text-sm text-text-secondary">{titleByRequest.get(r.requestId) ?? "—"}</p>
+                {r.note ? (
+                  <p className="text-xs text-text-muted" data-testid={`agency-partnership-review-note-${r.proposalId}`}>
+                    {t("review.partnerNote", { note: r.note })}
+                  </p>
+                ) : null}
+                {r.status === "proposed" ? (
+                  <div className="flex flex-col gap-2">
+                    <details className="rounded-md border border-ink-500 p-3" data-testid={`agency-partnership-forward-${r.proposalId}-open`}>
+                      <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold text-text-primary sm:min-h-0">
+                        {t("review.forward")}
+                      </summary>
+                      <div className="mt-2 flex flex-col gap-2">
+                        <p className="text-sm text-text-secondary">{t("review.forwardConsequence")}</p>
+                        <PartnershipActionForm
+                          action={forwardPartnerCandidateAction}
+                          hidden={{ proposal_id: r.proposalId }}
+                          submit={t("review.confirm")}
+                          done={t("review.forwarded")}
+                          testId={`agency-partnership-forward-${r.proposalId}`}
+                          variant="primary"
+                          {...common}
+                        >
+                          <label className="flex flex-col gap-1">
+                            <span className="text-xs font-medium text-text-secondary">{t("review.yourNote")}</span>
+                            <Textarea name="note" rows={2} maxLength={500} defaultValue={r.note ?? ""} />
+                          </label>
+                        </PartnershipActionForm>
+                      </div>
+                    </details>
+                    <PartnershipActionForm
+                      action={returnPartnerCandidateAction}
+                      hidden={{ proposal_id: r.proposalId }}
+                      submit={t("review.return")}
+                      done={t("review.returned")}
+                      testId={`agency-partnership-return-${r.proposalId}`}
+                      variant="ghost"
+                      {...common}
+                    >
+                      <label className="flex flex-col gap-1">
+                        <span className="text-xs font-medium text-text-secondary">{t("review.reason")}</span>
+                        <Input name="reason" maxLength={500} autoComplete="off" />
+                      </label>
+                    </PartnershipActionForm>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

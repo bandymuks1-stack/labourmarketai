@@ -8214,11 +8214,11 @@
       "noRoster": "Teie nimekirjas pole aktiivset töötajat, keda pakkuda.",
       "worker": "Teie kandidaat",
       "choose": "Valige töötaja",
-      "offer": "Paku",
-      "offered": "Pakutud."
-    },
-    "partnerOffers": {
-      "title": "Partnerite kandidaadid teie klientide vajadustele"
+      "offer": "Paku juhtivale agentuurile",
+      "offered": "Pakutud. Juhtiv agentuur vaatab kandidaadi üle enne, kui tema klient seda näeb.",
+      "note": "Märkus juhtivale agentuurile (valikuline)",
+      "withdraw": "Võta tagasi",
+      "returnedWhy": "Tagastatud: {reason}"
     },
     "offerStatus": {
       "offered": "Pakutud",
@@ -8261,7 +8261,28 @@
       "worker_not_on_roster": "Seda töötajat pole teie aktiivses nimekirjas.",
       "invalid_note": "Märkus on liiga pikk.",
       "needs_migration": "Partnerbürood pole veel saadaval.",
-      "error": "See ei õnnestunud. Proovige uuesti."
+      "error": "See ei õnnestunud. Proovige uuesti.",
+      "proposal_not_open": "See kandidaat ei oota enam ülevaatust.",
+      "already_offered": "See töötaja on sellele vajadusele juba pakutud."
+    },
+    "proposalStatus": {
+      "proposed": "Ootab juhtiva agentuuri ülevaatust",
+      "forwarded": "Kliendile edastatud",
+      "returned": "Tagastatud",
+      "withdrawn": "Tagasi võetud"
+    },
+    "review": {
+      "title": "Partnerite kandidaadid ülevaatamiseks",
+      "candidate": "{worker} · agentuurilt {agency}",
+      "partnerNote": "Partneri märkus, klient seda ei näe: {note}",
+      "forward": "Edasta oma kliendile",
+      "forwardConsequence": "Teie klient näeb seda kandidaati teie omana, koos allpool oleva märkusega. Kliendi ees vastutate selle kandidaadi eest teie.",
+      "yourNote": "Teie märkus kliendile (valikuline)",
+      "confirm": "Edasta",
+      "forwarded": "Edastatud.",
+      "return": "Tagasta partnerile",
+      "reason": "Põhjus, mida partner näeb (valikuline)",
+      "returned": "Tagastatud."
     }
   }
 }

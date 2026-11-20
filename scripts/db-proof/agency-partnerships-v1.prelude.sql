@@ -52,7 +52,7 @@ create function public.session_email_verified_v1() returns boolean language sql 
 $$;
 grant execute on function public.session_email_verified_v1() to authenticated;
 
--- 20260901052300 :190-198, the offer read policy as main applies it (R2 P2-3 narrows its agency arm).
+-- 20260901052300 :190-198, the offer read policy as main applies it (unchanged by 20261118100000).
 alter table public.agency_candidate_offers enable row level security;
 grant select on public.agency_client_connections to authenticated;
 create policy agency_candidate_offers_select on public.agency_candidate_offers for select

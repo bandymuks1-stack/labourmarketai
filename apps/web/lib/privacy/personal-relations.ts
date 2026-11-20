@@ -235,6 +235,10 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "invitation_acceptances", key: "profile_id" },
   { table: "matches", key: "worker_id" },
   { table: "agency_candidate_offers", key: "worker_id" },
+  // A partner agency's proposal of THIS person to a lead agency, before any
+  // client saw it (20261118100000, owner decision 2026-11-20). Theirs: which
+  // agency proposed them, the note and what became of it.
+  { table: "agency_partner_candidate_proposals", key: "worker_id" },
   // Requests to disclose THIS person's contact details — theirs above all.
   { table: "contact_disclosure_requests", key: "worker_id" },
   { table: "market_intelligence_insight_queries", key: "profile_id" },

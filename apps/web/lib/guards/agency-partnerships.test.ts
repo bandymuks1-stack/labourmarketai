@@ -33,11 +33,14 @@ const FUNCTIONS = [
   "end_agency_partnership_v1",
   "share_request_with_partner_v1",
   "unshare_request_with_partner_v1",
-  "submit_partner_candidate_offer_v1",
+  "propose_partner_candidate_v1",
+  "forward_partner_candidate_v1",
+  "return_partner_candidate_v1",
+  "withdraw_partner_candidate_v1",
   "respond_agency_candidate_offer_v2",
   "list_agency_partnerships_v1",
   "list_partner_shared_requests_v1",
-  "list_partner_offers_for_lead_v1",
+  "list_partner_candidate_proposals_v1",
   "list_agency_commissions_v1",
 ];
 
@@ -58,8 +61,8 @@ describe("agency partnerships — the database keeps every rule", () => {
     expect(sql).not.toMatch(/to anon\b(?!;)|grant [^;]* to anon/i);
   });
 
-  it("the two new tables force RLS and are written by no role", () => {
-    for (const t of ["agency_partnerships", "agency_partner_request_shares"]) {
+  it("the three new tables force RLS and are written by no role", () => {
+    for (const t of ["agency_partnerships", "agency_partner_request_shares", "agency_partner_candidate_proposals"]) {
       expect(sql).toContain(`alter table public.${t} force row level security;`);
       expect(sql).toContain(`revoke all on public.${t} from authenticated;`);
       expect(sql).toContain(`grant select on public.${t} to authenticated;`);
@@ -86,19 +89,32 @@ describe("agency partnerships — the database keeps every rule", () => {
     );
   });
 
-  it("the partner offers only its own active roster, onto the client's share and connection", () => {
-    const offer = fn("submit_partner_candidate_offer_v1");
-    expect(offer).toMatch(/cw\.company_id = v_partner and cw\.worker_id = p_worker_id and cw\.status = 'active'/);
-    expect(offer).toMatch(/ps\.status = 'active'\s+and p\.status = 'active' and s\.status = 'active' and c\.status = 'active'/);
-    // Owner principle 2026-11-19: the row's agency is the LEAD, the client's agency of record.
-    expect(offer).toMatch(/values\s+\(v_conn, v_share, v_lead, v_client, v_request, p_worker_id, 'offered', v_note, v_uid, p_partner_share_id\)/);
-    // It re-affirms only its own pass's open offer, never the lead's or another partner's.
-    expect(offer).toMatch(/where public\.agency_candidate_offers\.partner_share_id = excluded\.partner_share_id/);
-    expect(offer).toMatch(/raise exception 'already_offered'/);
-    // Decision 0033: the whole chain is kept for internal (admin-only) audit, without guessing a verifier.
-    expect(offer).toMatch(/'agency_partner_candidate_offered'/);
-    for (const role of ["'source'", "'submitter'", "'presenter_to_client'"]) expect(offer).toContain(role);
-    expect(offer).toMatch(/'agency_verification', 'not_recorded'/);
+  it("the partner only PROPOSES its own active roster; nothing reaches the client before the lead forwards", () => {
+    const propose = fn("propose_partner_candidate_v1");
+    expect(propose).toMatch(/cw\.company_id = v_partner and cw\.worker_id = p_worker_id and cw\.status = 'active'/);
+    expect(propose).toMatch(/ps\.status = 'active'\s+and p\.status = 'active' and s\.status = 'active' and c\.status = 'active'/);
+    expect(propose).toMatch(/insert into public\.agency_partner_candidate_proposals/);
+    expect(propose).not.toMatch(/agency_candidate_offers/);
+    // The proposals table has no client read arm.
+    const policy = /create policy agency_partner_candidate_proposals_select[\s\S]*?;\n/.exec(sql)?.[0] ?? "";
+    expect(policy).toMatch(/owns_company\(p\.lead_company_id\)/);
+    expect(policy).not.toMatch(/client/);
+  });
+
+  it("only the LEAD forwards (owner decision 2026-11-20): the offer is the lead's, with the lead's note, audited", () => {
+    const fwd = fn("forward_partner_candidate_v1");
+    expect(fwd).toMatch(/if not public\.owns_company\(v_lead\) then raise exception 'not_owner'/);
+    expect(fwd).toMatch(/values\s+\(v_conn, v_share, v_lead, v_client, v_request, v_worker, 'offered', v_note, v_uid, v_pshare\)/);
+    expect(fwd).toMatch(/on conflict \(agency_company_id, request_id, worker_id\) where \(status = 'offered'\) do nothing/);
+    expect(fwd).toMatch(/raise exception 'already_offered'/);
+    // The partner's note is never copied into the offer: only p_note (the lead's) is.
+    expect(fwd).not.toMatch(/pr\.note/);
+    // Decision 0033: presenter_to_client is a real act of the lead, with the whole chain.
+    expect(fwd).toMatch(/'agency_partner_candidate_forwarded'/);
+    for (const role of ["'source'", "'submitter'", "'reviewer'", "'presenter_to_client'"]) expect(fwd).toContain(role);
+    expect(fwd).toMatch(/'agency_verification', 'not_recorded'/);
+    expect(fn("return_partner_candidate_v1")).toMatch(/if not public\.owns_company\(v_lead\)/);
+    expect(fn("withdraw_partner_candidate_v1")).toMatch(/if not public\.owns_company\(v_partner\)/);
   });
 
   it("decision 0033: passing a need, taking it back and ending are audited (R2 P3-b)", () => {
@@ -118,12 +134,12 @@ describe("agency partnerships — the database keeps every rule", () => {
     expect(grant, "a column-level read grant").not.toBeNull();
     const cols = grant![1].split(",").map((c) => c.trim());
     for (const hidden of ["created_by", "withdrawn_by", "partner_share_id"]) expect(cols).not.toContain(hidden);
-    // The agency side follows the OFFERER, so a partner keeps its own reads and withdrawal.
-    for (const name of ["list_agency_offer_progress_v1", "list_agency_placements_v1", "withdraw_agency_candidate_offer_v1"]) {
-      expect(fn(name)).toMatch(/public\.owns_company\(public\.agency_offer_owner_v1\(o\.agency_company_id, o\.partner_share_id\)\)/);
+    // The lead presents a forwarded candidate as its own, so main's agency functions and its offer read
+    // policy stay exactly main's: this migration replaces none of them.
+    for (const name of ["list_agency_offer_progress_v1", "list_agency_placements_v1", "withdraw_agency_candidate_offer_v1", "submit_agency_candidate_offer_v1"]) {
+      expect(sql).not.toContain(`create or replace function public.${name}(`);
     }
-    // A direct offer never takes over a partner's open offer.
-    expect(fn("submit_agency_candidate_offer_v1")).toMatch(/where public\.agency_candidate_offers\.partner_share_id is null/);
+    expect(sql).not.toMatch(/create policy agency_candidate_offers_select/);
   });
 
   it("a partner's candidate carries the LEAD's term, and needs a live partnership to be accepted", () => {
@@ -151,10 +167,10 @@ describe("agency partnerships — the database keeps every rule", () => {
     expect(c).not.toMatch(/\b(insert|update|delete)\b/i);
   });
 
-  it("the partner never reads the client's identity; the lead never reads the worker's", () => {
+  it("the partner never reads the client's identity, in any read", () => {
     const shape = (name: string) => /returns table \(([\s\S]*?)\)\s*language/.exec(fn(name))?.[1] ?? "";
     expect(shape("list_partner_shared_requests_v1")).not.toMatch(/client/);
-    expect(shape("list_partner_offers_for_lead_v1")).not.toMatch(/worker/);
+    expect(shape("list_partner_candidate_proposals_v1")).not.toMatch(/client/);
   });
 
   it("no money moves: no billing, invoice or payment object is touched", () => {
@@ -183,7 +199,10 @@ describe("agency partnerships — the app holds no rule and no service role", ()
       "end_agency_partnership_v1",
       "share_request_with_partner_v1",
       "unshare_request_with_partner_v1",
-      "submit_partner_candidate_offer_v1",
+      "propose_partner_candidate_v1",
+      "forward_partner_candidate_v1",
+      "return_partner_candidate_v1",
+      "withdraw_partner_candidate_v1",
     ]) {
       expect(actions).toContain(`"${rpc}"`);
     }

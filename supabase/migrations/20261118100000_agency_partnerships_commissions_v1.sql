@@ -29,17 +29,19 @@
 --    ending the partnership, or the client unsharing / ending its connection stops it, and open
 --    offers made through it are withdrawn.
 --
--- 3. submit_partner_candidate_offer_v1. The partner offers a worker from ITS OWN active roster on a
---    need passed to it. The offer is an ordinary agency_candidate_offers row on the CLIENT'S share and
---    connection (so the client sees it, decides it and books it exactly as today, and every existing
---    withdrawal applies), with agency_company_id = the LEAD and partner_share_id naming the step it
---    came through. OWNER PRINCIPLE 2026-11-19: the employer sees ONLY its own (lead) agency. The
---    lead is the client's agency of record on the row, so every client-side reader (the candidate
---    list, its agency name, the term, counts, chat/MCP, exports) shows the lead by construction. The
---    partner is derived from partner_share_id → agency_partnerships.partner_company_id, only inside
---    definer reads for the lead and the partner; the actor columns that would name the partner's
---    staff (created_by, withdrawn_by) and partner_share_id itself are not readable by signed-in
---    callers at all (column grant, §3b). The partner still never sees the client's identity.
+-- 3. THE LEAD REVIEWS, THEN PRESENTS (owner decision 2026-11-20; decision 0033 variant A).
+--    propose_partner_candidate_v1: the partner proposes a worker from ITS OWN active roster on a
+--    need passed to it. The proposal (agency_partner_candidate_proposals) is read by the lead and the
+--    partner only; the client cannot read it and no offer exists yet, so no client reader shows it.
+--    forward_partner_candidate_v1: the LEAD reviews it and forwards it. Only then is an ordinary
+--    agency_candidate_offers row written, on the CLIENT'S share and connection, with
+--    agency_company_id = the lead, the lead's own note (the partner's note is never copied) and the
+--    lead's user as creator, and partner_share_id naming the step it came through. The client sees,
+--    decides and books it exactly like any candidate of its own agency. return_partner_candidate_v1:
+--    the lead sends it back instead; withdraw_partner_candidate_v1: the partner takes it back before
+--    the lead decides. The partner never sees the client's identity; the client never sees the
+--    partner (partner_share_id and the actor columns are not readable by signed-in callers, §3b).
+--    Each step is audited with its chain (decision 0033).
 --
 -- 4. respond_agency_candidate_offer_v2 (replaced). For an offer that came through a partner, the
 --    term the client must accept is the LEAD's current placement term — the client's agreement is
@@ -56,21 +58,17 @@
 --    or withdrawn booking it is not due. Nothing is charged, invoiced or paid by this migration.
 --
 -- 6. Reads for each side: list_agency_partnerships_v1 (both sides and invitations addressed to the
---    caller), list_partner_shared_requests_v1 (the partner), list_partner_offers_for_lead_v1 (the lead
---    sees its partners' offers and their status, without the worker's identity — no more than the
---    client sees before a booking is accepted).
+--    caller), list_partner_shared_requests_v1 (the partner), list_partner_candidate_proposals_v1
+--    (the lead reviews its partners' proposals, with the worker's name and the partner's note; the
+--    partner follows its own; no client column on either side).
 --
--- WHAT IS NOT DONE. No APPLIED table or trigger is altered or dropped. agency_candidate_offers gains
--- one nullable column, its read policy's agency arm narrows (R2 P2-3), and its signed-in read grant
--- narrows to the columns any reader uses (§3b). Four APPLIED functions are replaced so a partner's
--- offer keeps behaving as the partner's own on the agency side (list_agency_offer_progress_v1,
--- list_agency_placements_v1, withdraw_agency_candidate_offer_v1) and a direct offer cannot take over
--- a partner's (submit_agency_candidate_offer_v1); each is main's body with one condition changed,
--- and the rollback restores main's body verbatim. Replaced here are only this PR's own, unapplied
--- objects from 20261114235900: respond_agency_candidate_offer_v2, and agency_placement_terms_select
--- (which gains one arm: the offering agency may read a term accepted on its own offer, so a partner
--- can read the lead's term its placement was made under). No row is written by the migration
--- itself. No money moves.
+-- WHAT IS NOT DONE. No APPLIED table, policy, trigger or function body is altered or dropped, except
+-- respond_agency_candidate_offer_v1's grant (R2 P2-1, below). agency_candidate_offers gains one
+-- nullable column, and its signed-in read grant narrows to the columns any reader uses (§3b).
+-- Replaced here are only this PR's own, unapplied objects from 20261114235900:
+-- respond_agency_candidate_offer_v2, and agency_placement_terms_select (the partner may read the
+-- lead's term its forwarded candidate was accepted under). No row is written by the migration itself.
+-- No money moves.
 --
 -- @plan-cache-proof: n/a — the indexes are uniqueness rules (one open partnership per pair, one active pass per need and partnership) and lookups by their own foreign keys; no existing RPC filters by them
 -- ============================================================================
@@ -164,38 +162,71 @@ revoke all on public.agency_partner_request_shares from anon;
 revoke all on public.agency_partner_request_shares from authenticated;
 grant select on public.agency_partner_request_shares to authenticated;
 
+-- ── 2b. A partner's candidate, for the LEAD's review (owner decision 2026-11-20) ─
+-- The partner proposes a worker from its own roster on a passed need. Until the lead reviews it and
+-- forwards it to its client, it exists only here: the client cannot read this table, and no
+-- agency_candidate_offers row exists, so no client reader can show it. The lead forwards it (and then
+-- it becomes the LEAD's own offer, with the lead's own note) or returns it to the partner.
+create table if not exists public.agency_partner_candidate_proposals (
+  id               uuid primary key default gen_random_uuid(),
+  partner_share_id uuid not null references public.agency_partner_request_shares(id) on delete cascade,
+  worker_id        uuid not null references public.workers(id) on delete cascade,
+  note             text check (note is null or char_length(note) <= 500),
+  status           text not null default 'proposed'
+                     check (status in ('proposed', 'forwarded', 'returned', 'withdrawn')),
+  return_reason    text check (return_reason is null or char_length(return_reason) <= 500),
+  offer_id         uuid references public.agency_candidate_offers(id) on delete set null,
+  proposed_by      uuid references public.profiles(id) on delete set null,
+  decided_by       uuid references public.profiles(id) on delete set null,
+  created_at       timestamptz not null default now(),
+  decided_at       timestamptz,
+  updated_at       timestamptz not null default now()
+);
+
+comment on table public.agency_partner_candidate_proposals is
+  'A partner agency''s candidate on a need the lead passed to it, awaiting the lead''s review (owner decision 2026-11-20). Read by the lead and the partner only; never by the client. Written only through propose/forward/return/withdraw_partner_candidate_v1.';
+
+create unique index if not exists agency_partner_candidate_proposals_one_open
+  on public.agency_partner_candidate_proposals (partner_share_id, worker_id) where status = 'proposed';
+create index if not exists agency_partner_candidate_proposals_offer
+  on public.agency_partner_candidate_proposals (offer_id) where offer_id is not null;
+
+alter table public.agency_partner_candidate_proposals enable row level security;
+alter table public.agency_partner_candidate_proposals force row level security;
+
+drop policy if exists agency_partner_candidate_proposals_select on public.agency_partner_candidate_proposals;
+create policy agency_partner_candidate_proposals_select on public.agency_partner_candidate_proposals
+  for select to authenticated
+  using (
+    exists (
+      select 1 from public.agency_partner_request_shares ps
+        join public.agency_partnerships p on p.id = ps.partnership_id
+       where ps.id = agency_partner_candidate_proposals.partner_share_id
+         and (public.owns_company(p.lead_company_id)
+              or (p.partner_company_id is not null and public.owns_company(p.partner_company_id)))
+    )
+    or public.is_admin()
+  );
+
+revoke all on public.agency_partner_candidate_proposals from public;
+revoke all on public.agency_partner_candidate_proposals from anon;
+revoke all on public.agency_partner_candidate_proposals from authenticated;
+grant select on public.agency_partner_candidate_proposals to authenticated;
+
 -- ── 3. The offer remembers the step it came through ────────────────────────
 alter table public.agency_candidate_offers
   add column if not exists partner_share_id uuid
     references public.agency_partner_request_shares(id) on delete set null;
 
 comment on column public.agency_candidate_offers.partner_share_id is
-  'Set when a partner agency offered this candidate on a need the lead agency passed to it (submit_partner_candidate_offer_v1). agency_company_id is then the LEAD (the client''s agency of record; the client never sees the partner); the partner is agency_partnerships.partner_company_id of this share.';
+  'Set when the lead agency forwarded a partner agency''s candidate to its client (forward_partner_candidate_v1, owner decision 2026-11-20). agency_company_id is the LEAD, which reviewed the candidate, presented it and answers to the client; the client never sees the partner. The partner is agency_partnerships.partner_company_id of this share.';
 
 create index if not exists agency_candidate_offers_partner_share
   on public.agency_candidate_offers (partner_share_id) where partner_share_id is not null;
 
--- R2 P2-3: a partner offer row carries the CLIENT's ids (client_company_id, connection_id,
--- request_share_id). Its agency_company_id is the lead (owner principle, §3b), and a lead reads its
--- partners' offers only through list_partner_offers_for_lead_v1 (no worker identity), so partner
--- offers leave the agency arm's DIRECT read; the partner, not being agency_company_id, has no direct
--- read of them at all and follows them through definer reads without a client column
--- (list_agency_offer_progress_v1, list_agency_placements_v1). The client arm and the admin arm are
--- unchanged; the agency arm narrows. Pure narrowing.
-drop policy if exists agency_candidate_offers_select on public.agency_candidate_offers;
-create policy agency_candidate_offers_select on public.agency_candidate_offers for select
-  using (
-    (public.owns_company(agency_company_id) and partner_share_id is null)
-    or (public.owns_company(client_company_id)
-        and exists (select 1 from public.agency_client_connections c
-                     where c.id = connection_id and c.status = 'active'))
-    or public.is_admin()
-  );
-
 -- ── 3b. The client sees only its own agency (owner principle 2026-11-19) ────
 -- Signed-in callers read only the columns any reader uses. Not readable: created_by and withdrawn_by
--- (on a partner offer they would name the partner's staff) and partner_share_id (the step a partner
--- offer came through). Definer functions and the service role are unaffected. The four app readers
+-- (actor columns no reader uses) and partner_share_id (that a candidate came through a partner). Definer functions and the service role are unaffected. The four app readers
 -- (scouting counts, the term on an offer, the marketplace count, the conversation's offer pair) select
 -- only granted columns.
 revoke select on public.agency_candidate_offers from authenticated;
@@ -204,8 +235,8 @@ grant select (id, connection_id, request_share_id, agency_company_id, client_com
               decided_by, decided_at, accepted_placement_term_id, placement_term_accepted_at)
   on public.agency_candidate_offers to authenticated;
 
--- The agency that OFFERED a candidate: the partner for a partner's offer, else agency_company_id.
--- Internal to the definer functions below; not callable by signed-in users.
+-- The agency a candidate CAME FROM: the partner for a forwarded partner candidate, else
+-- agency_company_id. Internal to the definer functions below; not callable by signed-in users.
 create or replace function public.agency_offer_owner_v1(p_agency_company_id uuid, p_partner_share_id uuid)
 returns uuid
 language sql
@@ -221,209 +252,6 @@ as $$
 $$;
 revoke all on function public.agency_offer_owner_v1(uuid, uuid) from public, anon, authenticated;
 
--- The offering agency's own reads and its withdrawal follow the OFFERER (main's bodies, one
--- condition changed: owns_company(o.agency_company_id) → owns_company(agency_offer_owner_v1(...))).
--- For every direct offer the two are the same company, so nothing changes for them.
-create or replace function public.list_agency_offer_progress_v1()
-returns table (
-  offer_id     uuid,
-  request_id   uuid,
-  worker_id    uuid,
-  offer_status text,
-  review_stage text,
-  created_at   timestamptz
-)
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select o.id, o.request_id, o.worker_id, o.status,
-    case
-      when exists (select 1 from public.booking_requests b
-                    where b.request_id = o.request_id and b.worker_id = o.worker_id
-                      and b.status = 'accepted') then 'accepted'
-      when exists (select 1 from public.booking_requests b
-                    where b.request_id = o.request_id and b.worker_id = o.worker_id
-                      and b.status = 'proposed') then 'booking_started'
-      when exists (select 1 from public.demand_shortlist d
-                    where d.request_id = o.request_id and d.worker_id = o.worker_id
-                      and d.owner_id = (select r.profile_id from public.customer_requests r where r.id = o.request_id)
-                      and d.status = 'not_fit') then 'rejected'
-      when exists (select 1 from public.conversations cv
-                    join public.workers w on w.id = o.worker_id
-                    join public.conversation_participants cp
-                      on cp.conversation_id = cv.id and cp.profile_id = w.profile_id
-                    where cv.source_type = 'scouting' and cv.source_id = o.request_id) then 'contacted'
-      when exists (select 1 from public.demand_shortlist d
-                    where d.request_id = o.request_id and d.worker_id = o.worker_id
-                      and d.owner_id = (select r.profile_id from public.customer_requests r where r.id = o.request_id)) then 'reviewed'
-      else 'offered'
-    end as review_stage,
-    o.created_at
-    from public.agency_candidate_offers o
-    join public.agency_client_request_shares s on s.id = o.request_share_id
-    join public.agency_client_connections c on c.id = o.connection_id
-   where public.owns_company(public.agency_offer_owner_v1(o.agency_company_id, o.partner_share_id))  -- caller = the offering agency (a partner for its partner offers)
-     and c.status = 'active'
-     and s.status = 'active'
-   order by o.created_at desc
-   limit 200;
-$$;
-
-create or replace function public.list_agency_placements_v1()
-returns table(
-  offer_id uuid,
-  request_id uuid,
-  worker_id uuid,
-  offered_at timestamptz,
-  client_decided_at timestamptz,
-  booking_status text,
-  start_date date,
-  expected_end_date date,
-  worker_decided_at timestamptz,
-  engagement_status text,
-  engagement_started_at timestamptz,
-  engagement_ended_at timestamptz,
-  assignment_status text,
-  assigned_at timestamptz,
-  assignment_ended_at timestamptz
-)
-language sql
-stable
-security definer
-set search_path to 'public'
-as $function$
-  select o.id, o.request_id, o.worker_id, o.created_at, o.decided_at,
-         b.status, b.start_date, b.expected_end_date,
-         (select max(e.created_at) from public.booking_request_events e
-           where e.booking_request_id = b.id and e.event_type in ('accepted', 'declined')),
-         g.status, g.started_at, g.ended_at,
-         a.status, a.assigned_at, a.ended_at
-    from public.agency_candidate_offers o
-    left join public.booking_requests b on b.id = o.booking_id
-    left join lateral (
-      select ce.status, ce.started_at, ce.ended_at
-        from public.company_worker_engagements ce
-       where ce.source_booking_id = b.id
-       order by ce.created_at desc limit 1) g on true
-    left join lateral (
-      select pa.status, pa.assigned_at, pa.ended_at
-        from public.project_worker_assignments pa
-        join public.projects p on p.id = pa.project_id
-        left join public.organizations org on org.id = p.organization_id
-       where pa.worker_id = o.worker_id
-         and (org.legacy_company_id = o.client_company_id
-              or (p.organization_id is null and p.company_id = o.client_company_id))
-         and pa.assigned_at >= coalesce(o.decided_at, o.created_at)
-       order by pa.assigned_at desc limit 1) a on true
-   where public.owns_company(public.agency_offer_owner_v1(o.agency_company_id, o.partner_share_id))
-     and o.status = 'accepted'
-   order by o.decided_at desc nulls last
-   limit 100;
-$function$;
-
-create or replace function public.withdraw_agency_candidate_offer_v1(p_offer_id uuid)
-returns boolean
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_uid uuid := auth.uid();
-  v_upd int;
-begin
-  if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
-  -- Only the offering agency owner may withdraw. The client never withdraws an
-  -- agency offer (it rejects via its own demand_shortlist not_fit instead).
-  update public.agency_candidate_offers o
-     set status = 'withdrawn', withdrawn_by = v_uid, withdrawn_at = now(), updated_at = now()
-   where o.id = p_offer_id
-     and o.status = 'offered'
-     and public.owns_company(public.agency_offer_owner_v1(o.agency_company_id, o.partner_share_id));
-  get diagnostics v_upd = row_count;
-  return v_upd > 0;
-end;
-$$;
-
--- A direct offer never takes over a partner's open offer of the same worker on the same need.
-create or replace function public.submit_agency_candidate_offer_v1(p_request_share_id uuid, p_worker_id uuid, p_note text default null::text)
- returns uuid
- language plpgsql
- security definer
- set search_path to 'public'
-as $function$
-declare
-  v_uid       uuid := auth.uid();
-  v_note      text := nullif(btrim(coalesce(p_note, '')), '');
-  v_conn      uuid;
-  v_agency    uuid;
-  v_client    uuid;
-  v_request   uuid;
-  v_id        uuid;
-begin
-  if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
-  if v_note is not null and char_length(v_note) > 500 then
-    raise exception 'invalid_note' using errcode = '22023';
-  end if;
-
-  -- Resolve the connection + request from the SHARE (client cannot forge these).
-  -- Everything must be live at submit time.
-  select c.id, c.agency_company_id, c.client_company_id, s.request_id
-    into v_conn, v_agency, v_client, v_request
-    from public.agency_client_request_shares s
-    join public.agency_client_connections c on c.id = s.connection_id
-   where s.id = p_request_share_id
-     and s.status = 'active'
-     and c.status = 'active';
-  if v_conn is null then raise exception 'share_not_active' using errcode = '42501'; end if;
-
-  -- The caller must OWN the agency company, and it must act as an agency.
-  if not public.owns_company(v_agency) then raise exception 'not_owner' using errcode = '42501'; end if;
-  if not public.company_acts_as_agency(v_agency) then
-    raise exception 'not_agency' using errcode = '42501';
-  end if;
-
-  -- The worker must be an ACTIVE roster member of THAT agency company.
-  if not exists (
-    select 1 from public.company_workers cw
-    where cw.company_id = v_agency and cw.worker_id = p_worker_id and cw.status = 'active'
-  ) then
-    raise exception 'worker_not_on_roster' using errcode = '42501';
-  end if;
-
-  -- Idempotent: re-affirm an existing active offer, never duplicate.
-  insert into public.agency_candidate_offers
-    (connection_id, request_share_id, agency_company_id, client_company_id,
-     request_id, worker_id, status, note, created_by)
-  values
-    (v_conn, p_request_share_id, v_agency, v_client, v_request, p_worker_id, 'offered', v_note, v_uid)
-  -- A re-offer re-binds to the CURRENT active share/connection (a stale row
-  -- from a previously revoked connection must never keep the old provenance).
-  on conflict (agency_company_id, request_id, worker_id) where (status = 'offered')
-  do update set connection_id     = excluded.connection_id,
-                request_share_id  = excluded.request_share_id,
-                client_company_id = excluded.client_company_id,
-                note              = coalesce(excluded.note, public.agency_candidate_offers.note),
-                updated_at        = now()
-   -- 20261118100000: never re-affirm (and so never take over) a PARTNER's open offer of the same
-   -- worker on the same need; the client sees one candidate, offered once.
-   where public.agency_candidate_offers.partner_share_id is null
-  returning id into v_id;
-  if v_id is null then raise exception 'already_offered' using errcode = 'P0004'; end if;
-  return v_id;
-end;
-$function$;
-
--- Grants as main has them, re-asserted for the four replaced functions (create or replace keeps them).
-revoke all on function public.list_agency_offer_progress_v1() from public, anon;
-grant execute on function public.list_agency_offer_progress_v1() to authenticated;
-revoke all on function public.list_agency_placements_v1() from public, anon;
-grant execute on function public.list_agency_placements_v1() to authenticated;
-revoke all on function public.withdraw_agency_candidate_offer_v1(uuid) from public, anon;
-grant execute on function public.withdraw_agency_candidate_offer_v1(uuid) to authenticated;
-revoke all on function public.submit_agency_candidate_offer_v1(uuid, uuid, text) from public, anon;
-grant execute on function public.submit_agency_candidate_offer_v1(uuid, uuid, text) to authenticated;
 
 -- ── 4. Partnership: invite, accept, decline, end ───────────────────────────
 create or replace function public.invite_agency_partner_v1(
@@ -578,6 +406,11 @@ begin
    where o.status = 'offered'
      and o.partner_share_id in (select s.id from public.agency_partner_request_shares s
                                  where s.partnership_id = p_partnership_id);
+  update public.agency_partner_candidate_proposals pr
+     set status = 'withdrawn', decided_by = v_uid, decided_at = now(), updated_at = now()
+   where pr.status = 'proposed'
+     and pr.partner_share_id in (select s.id from public.agency_partner_request_shares s
+                                  where s.partnership_id = p_partnership_id);
   with revoked as (
     update public.agency_partner_request_shares
        set status = 'revoked', revoked_by = v_uid, revoked_at = now()
@@ -683,6 +516,10 @@ begin
      set status = 'withdrawn', withdrawn_by = v_uid, withdrawn_at = now()
    where partner_share_id = p_partner_share_id and status = 'offered';
   get diagnostics v_withdrawn = row_count;
+  -- Open proposals on the pass close with it; the client never saw them.
+  update public.agency_partner_candidate_proposals
+     set status = 'withdrawn', decided_by = v_uid, decided_at = now(), updated_at = now()
+   where partner_share_id = p_partner_share_id and status = 'proposed';
   update public.agency_partner_request_shares
      set status = 'revoked', revoked_by = v_uid, revoked_at = now()
    where id = p_partner_share_id;
@@ -699,8 +536,8 @@ begin
 end;
 $$;
 
--- ── 6. The partner offers its own roster worker ────────────────────────────
-create or replace function public.submit_partner_candidate_offer_v1(
+-- ── 6. The partner proposes; the lead reviews and forwards or returns ───────
+create or replace function public.propose_partner_candidate_v1(
   p_partner_share_id uuid,
   p_worker_id        uuid,
   p_note             text default null
@@ -716,18 +553,14 @@ declare
   v_partner uuid;
   v_lead    uuid;
   v_pship   uuid;
-  v_share   uuid;
-  v_conn    uuid;
-  v_client  uuid;
-  v_request uuid;
   v_id      uuid;
 begin
   if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
   if v_note is not null and char_length(v_note) > 500 then raise exception 'invalid_note' using errcode = '22023'; end if;
 
   -- Everything must be live: the pass, the partnership, the client's share and its connection.
-  select p.partner_company_id, p.lead_company_id, p.id, s.id, c.id, c.client_company_id, s.request_id
-    into v_partner, v_lead, v_pship, v_share, v_conn, v_client, v_request
+  select p.partner_company_id, p.lead_company_id, p.id
+    into v_partner, v_lead, v_pship
     from public.agency_partner_request_shares ps
     join public.agency_partnerships p on p.id = ps.partnership_id
     join public.agency_client_request_shares s on s.id = ps.client_share_id
@@ -745,47 +578,171 @@ begin
     raise exception 'worker_not_on_roster' using errcode = '42501';
   end if;
 
-  -- agency_company_id is the LEAD: the client's agency of record (owner principle 2026-11-19).
+  -- A proposal, for the lead only. Proposing the same worker again on the same pass re-affirms it.
+  insert into public.agency_partner_candidate_proposals (partner_share_id, worker_id, note, proposed_by)
+  values (p_partner_share_id, p_worker_id, v_note, v_uid)
+  on conflict (partner_share_id, worker_id) where (status = 'proposed')
+  do update set note = coalesce(excluded.note, public.agency_partner_candidate_proposals.note),
+                updated_at = now()
+  returning id into v_id;
+
+  -- Decision 0033: the whole chain is kept for internal audit (admin-only read). The proposing
+  -- person is this row's actor_id (erasure handles that column; no copy in the payload).
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (v_uid, 'agency_partner_candidate_proposed', 'agency_partner_candidate_proposals', v_id,
+    jsonb_build_object('rule', 'decision 0033',
+                       'chain', jsonb_build_array(
+                         jsonb_build_object('role', 'source',    'company_id', v_partner),
+                         jsonb_build_object('role', 'submitter', 'company_id', v_partner),
+                         jsonb_build_object('role', 'reviewer',  'company_id', v_lead)),
+                       'partnership_id', v_pship,
+                       'partner_share_id', p_partner_share_id,
+                       'worker_id', p_worker_id));
+  return v_id;
+end;
+$$;
+
+-- The LEAD forwards a proposal to its client. Only now does an agency_candidate_offers row exist: on
+-- the client's own share and connection, with agency_company_id = the lead (the client's agency of
+-- record, which reviewed the candidate and answers for it), the LEAD's note (the partner's note is
+-- never copied; the lead may write its own, edited from it), created by the lead's own user.
+create or replace function public.forward_partner_candidate_v1(p_proposal_id uuid, p_note text default null)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_uid     uuid := (select auth.uid());
+  v_note    text := nullif(btrim(coalesce(p_note, '')), '');
+  v_worker  uuid;
+  v_pshare  uuid;
+  v_lead    uuid;
+  v_partner uuid;
+  v_pship   uuid;
+  v_share   uuid;
+  v_conn    uuid;
+  v_client  uuid;
+  v_request uuid;
+  v_id      uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
+  if v_note is not null and char_length(v_note) > 500 then raise exception 'invalid_note' using errcode = '22023'; end if;
+
+  select pr.worker_id, pr.partner_share_id, p.lead_company_id, p.partner_company_id, p.id,
+         s.id, c.id, c.client_company_id, s.request_id
+    into v_worker, v_pshare, v_lead, v_partner, v_pship, v_share, v_conn, v_client, v_request
+    from public.agency_partner_candidate_proposals pr
+    join public.agency_partner_request_shares ps on ps.id = pr.partner_share_id
+    join public.agency_partnerships p on p.id = ps.partnership_id
+    join public.agency_client_request_shares s on s.id = ps.client_share_id
+    join public.agency_client_connections c on c.id = s.connection_id
+   where pr.id = p_proposal_id and pr.status = 'proposed'
+     and ps.status = 'active' and p.status = 'active' and s.status = 'active' and c.status = 'active'
+     and c.agency_company_id = p.lead_company_id
+   for update of pr;
+  if v_lead is null then raise exception 'proposal_not_open' using errcode = 'P0004'; end if;
+  if not public.owns_company(v_lead) then raise exception 'not_owner' using errcode = '42501'; end if;
+  if not exists (select 1 from public.company_workers cw
+                  where cw.company_id = v_partner and cw.worker_id = v_worker and cw.status = 'active') then
+    raise exception 'worker_not_on_roster' using errcode = '42501';
+  end if;
+
+  -- One open candidate per worker and need: a worker the lead already offered is not offered twice.
   insert into public.agency_candidate_offers
     (connection_id, request_share_id, agency_company_id, client_company_id,
      request_id, worker_id, status, note, created_by, partner_share_id)
   values
-    (v_conn, v_share, v_lead, v_client, v_request, p_worker_id, 'offered', v_note, v_uid, p_partner_share_id)
-  on conflict (agency_company_id, request_id, worker_id) where (status = 'offered')
-  do update set connection_id     = excluded.connection_id,
-                request_share_id  = excluded.request_share_id,
-                client_company_id = excluded.client_company_id,
-                note              = coalesce(excluded.note, public.agency_candidate_offers.note),
-                updated_at        = now()
-   -- Re-affirm only this partner share's own open offer; never take over the lead's direct offer
-   -- or another partner's offer of the same worker on the same need.
-   where public.agency_candidate_offers.partner_share_id = excluded.partner_share_id
+    (v_conn, v_share, v_lead, v_client, v_request, v_worker, 'offered', v_note, v_uid, v_pshare)
+  on conflict (agency_company_id, request_id, worker_id) where (status = 'offered') do nothing
   returning id into v_id;
   if v_id is null then raise exception 'already_offered' using errcode = 'P0004'; end if;
 
-  -- Decision 0033: the client deals only with its direct partner (the lead), and the WHOLE chain is
-  -- kept for internal audit (audit_logs: admin-only read). Roles as the platform knows them: the
-  -- partner is the candidate's source (its roster) and the submitter; the lead presents the
-  -- candidate to the client and answers to it. v1 has no intermediary (a partner cannot pass a need
-  -- on), and no agency-level verification is recorded in the platform (document checks are the
-  -- platform's own, worker_documents.verified_by), so the chain says so instead of guessing.
+  update public.agency_partner_candidate_proposals
+     set status = 'forwarded', offer_id = v_id, decided_by = v_uid, decided_at = now(), updated_at = now()
+   where id = p_proposal_id;
+
+  -- Decision 0033: presenter_to_client is now a real act of the lead, audited with the whole chain.
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
-  values (v_uid, 'agency_partner_candidate_offered', 'agency_candidate_offers', v_id,
+  values (v_uid, 'agency_partner_candidate_forwarded', 'agency_candidate_offers', v_id,
     jsonb_build_object(
       'rule', 'decision 0033',
       'chain', jsonb_build_array(
         jsonb_build_object('role', 'source',              'company_id', v_partner),
-        -- the submitting person is this row's actor_id (erasure handles that column; no copy in the payload)
         jsonb_build_object('role', 'submitter',           'company_id', v_partner),
+        jsonb_build_object('role', 'reviewer',            'company_id', v_lead),
         jsonb_build_object('role', 'presenter_to_client', 'company_id', v_lead)),
       'intermediaries', jsonb_build_array(),
       'agency_verification', 'not_recorded',
+      'lead_note_forwarded', v_note is not null,
+      'proposal_id', p_proposal_id,
       'partnership_id', v_pship,
-      'partner_share_id', p_partner_share_id,
+      'partner_share_id', v_pshare,
       'client_share_id', v_share,
       'client_company_id', v_client,
-      'worker_id', p_worker_id));
+      'worker_id', v_worker));
   return v_id;
+end;
+$$;
+
+-- The LEAD returns a proposal to the partner, optionally saying why. The client never saw it.
+create or replace function public.return_partner_candidate_v1(p_proposal_id uuid, p_reason text default null)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_uid    uuid := (select auth.uid());
+  v_reason text := nullif(btrim(coalesce(p_reason, '')), '');
+  v_lead   uuid;
+  v_pship  uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
+  if v_reason is not null and char_length(v_reason) > 500 then raise exception 'invalid_note' using errcode = '22023'; end if;
+  select p.lead_company_id, p.id into v_lead, v_pship
+    from public.agency_partner_candidate_proposals pr
+    join public.agency_partner_request_shares ps on ps.id = pr.partner_share_id
+    join public.agency_partnerships p on p.id = ps.partnership_id
+   where pr.id = p_proposal_id and pr.status = 'proposed'
+   for update of pr;
+  if v_lead is null then raise exception 'proposal_not_open' using errcode = 'P0004'; end if;
+  if not public.owns_company(v_lead) then raise exception 'not_owner' using errcode = '42501'; end if;
+  update public.agency_partner_candidate_proposals
+     set status = 'returned', return_reason = v_reason, decided_by = v_uid, decided_at = now(), updated_at = now()
+   where id = p_proposal_id;
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (v_uid, 'agency_partner_candidate_returned', 'agency_partner_candidate_proposals', p_proposal_id,
+    jsonb_build_object('rule', 'decision 0033', 'partnership_id', v_pship, 'lead_company_id', v_lead,
+                       'reason_given', v_reason is not null));
+  return p_proposal_id;
+end;
+$$;
+
+-- The PARTNER withdraws its own proposal before the lead decides.
+create or replace function public.withdraw_partner_candidate_v1(p_proposal_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_uid     uuid := (select auth.uid());
+  v_partner uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
+  select p.partner_company_id into v_partner
+    from public.agency_partner_candidate_proposals pr
+    join public.agency_partner_request_shares ps on ps.id = pr.partner_share_id
+    join public.agency_partnerships p on p.id = ps.partnership_id
+   where pr.id = p_proposal_id and pr.status = 'proposed'
+   for update of pr;
+  if v_partner is null then raise exception 'proposal_not_open' using errcode = 'P0004'; end if;
+  if not public.owns_company(v_partner) then raise exception 'not_owner' using errcode = '42501'; end if;
+  update public.agency_partner_candidate_proposals
+     set status = 'withdrawn', decided_by = v_uid, decided_at = now(), updated_at = now()
+   where id = p_proposal_id;
+  return p_proposal_id;
 end;
 $$;
 
@@ -969,15 +926,24 @@ as $$
    limit 200;
 $$;
 
--- The lead's view of its partners' candidates on its clients' needs: status only, no worker identity.
-create or replace function public.list_partner_offers_for_lead_v1()
+-- Both sides' view of the partner candidates: the lead reviews them (with the worker's name and
+-- the partner's note, to decide), the partner follows its own. No client column on either side;
+-- offer_status is only how far the forwarded candidate got (offered / accepted / declined / withdrawn).
+create or replace function public.list_partner_candidate_proposals_v1()
 returns table (
-  offer_id         uuid,
+  proposal_id      uuid,
   partner_share_id uuid,
   request_id       uuid,
-  partner_name     text,
+  side             text,
+  counterpart_name text,
+  worker_id        uuid,
+  worker_name      text,
+  note             text,
   status           text,
-  offered_at       timestamptz,
+  return_reason    text,
+  offer_id         uuid,
+  offer_status     text,
+  created_at       timestamptz,
   decided_at       timestamptz
 )
 language sql
@@ -985,15 +951,26 @@ stable
 security definer
 set search_path = ''
 as $$
-  select o.id, o.partner_share_id, o.request_id, coalesce(pc.display_name, pc.legal_name),
-         o.status, o.created_at, o.decided_at
-    from public.agency_candidate_offers o
-    join public.agency_partner_request_shares ps on ps.id = o.partner_share_id
+  select pr.id, pr.partner_share_id, s.request_id,
+         case when public.owns_company(p.lead_company_id) then 'lead' else 'partner' end,
+         case when public.owns_company(p.lead_company_id)
+              then coalesce(pc.display_name, pc.legal_name)
+              else coalesce(lc.display_name, lc.legal_name) end,
+         pr.worker_id, wp.full_name, pr.note, pr.status, pr.return_reason,
+         pr.offer_id, o.status, pr.created_at, pr.decided_at
+    from public.agency_partner_candidate_proposals pr
+    join public.agency_partner_request_shares ps on ps.id = pr.partner_share_id
     join public.agency_partnerships p on p.id = ps.partnership_id
-    join public.companies pc on pc.id = p.partner_company_id
+    join public.agency_client_request_shares s on s.id = ps.client_share_id
+    join public.companies lc on lc.id = p.lead_company_id
+    left join public.companies pc on pc.id = p.partner_company_id
+    left join public.workers w on w.id = pr.worker_id
+    left join public.profiles wp on wp.id = w.profile_id
+    left join public.agency_candidate_offers o on o.id = pr.offer_id
    where public.owns_company(p.lead_company_id)
-   order by o.created_at desc
-   limit 200;
+      or (p.partner_company_id is not null and public.owns_company(p.partner_company_id))
+   order by (pr.status = 'proposed') desc, pr.created_at desc
+   limit 300;
 $$;
 
 -- COMMISSIONS. Every accepted offer with an accepted term that involves the caller's agency, with the
@@ -1080,7 +1057,15 @@ begin
    'Art. 17(3)(e): which need was passed to whom is part of both companies'' record; without the id it names nobody',
    'the lead agency owner who passed the need'),
   ('public', 'agency_partner_request_shares', 'revoked_by', 'profiles', 'set null', 'set_null', 'engineering', false,
-   'Art. 17(3)(e): as above', 'the agency owner who took the need back')
+   'Art. 17(3)(e): as above', 'the agency owner who took the need back'),
+  ('public', 'agency_partner_candidate_proposals', 'proposed_by', 'profiles', 'set null', 'set_null', 'engineering', false,
+   'Art. 17(3)(e): which candidate a partner proposed to the lead is part of both companies'' record; without the id it names nobody',
+   'the partner agency owner who proposed the candidate'),
+  ('public', 'agency_partner_candidate_proposals', 'decided_by', 'profiles', 'set null', 'set_null', 'engineering', false,
+   'Art. 17(3)(e): as above', 'the agency owner who forwarded, returned or withdrew the proposal'),
+  ('public', 'agency_partner_candidate_proposals', 'worker_id', 'workers', 'cascade', 'allow_cascade', 'engineering', false,
+   'Art. 17(1)(a)/(b): a proposal of the person between two agencies, never seen by a client; deleted with them. A forwarded proposal''s client offer keeps agency_candidate_offers'' own rule',
+   'the person a partner agency proposed to the lead')
   on conflict (schema_name, table_name, column_name) do nothing;
   if to_regclass('public.privacy_erasure_value_rules_v3') is not null then
     -- The partnership invitation is addressed to a person: on their erasure the address is replaced
@@ -1113,9 +1098,18 @@ grant execute on function public.share_request_with_partner_v1(uuid, uuid) to au
 revoke all on function public.unshare_request_with_partner_v1(uuid) from public;
 revoke all on function public.unshare_request_with_partner_v1(uuid) from anon;
 grant execute on function public.unshare_request_with_partner_v1(uuid) to authenticated;
-revoke all on function public.submit_partner_candidate_offer_v1(uuid, uuid, text) from public;
-revoke all on function public.submit_partner_candidate_offer_v1(uuid, uuid, text) from anon;
-grant execute on function public.submit_partner_candidate_offer_v1(uuid, uuid, text) to authenticated;
+revoke all on function public.propose_partner_candidate_v1(uuid, uuid, text) from public;
+revoke all on function public.propose_partner_candidate_v1(uuid, uuid, text) from anon;
+grant execute on function public.propose_partner_candidate_v1(uuid, uuid, text) to authenticated;
+revoke all on function public.forward_partner_candidate_v1(uuid, text) from public;
+revoke all on function public.forward_partner_candidate_v1(uuid, text) from anon;
+grant execute on function public.forward_partner_candidate_v1(uuid, text) to authenticated;
+revoke all on function public.return_partner_candidate_v1(uuid, text) from public;
+revoke all on function public.return_partner_candidate_v1(uuid, text) from anon;
+grant execute on function public.return_partner_candidate_v1(uuid, text) to authenticated;
+revoke all on function public.withdraw_partner_candidate_v1(uuid) from public;
+revoke all on function public.withdraw_partner_candidate_v1(uuid) from anon;
+grant execute on function public.withdraw_partner_candidate_v1(uuid) to authenticated;
 revoke all on function public.respond_agency_candidate_offer_v2(uuid, text, text, uuid) from public;
 revoke all on function public.respond_agency_candidate_offer_v2(uuid, text, text, uuid) from anon;
 grant execute on function public.respond_agency_candidate_offer_v2(uuid, text, text, uuid) to authenticated;
@@ -1132,9 +1126,9 @@ grant execute on function public.list_agency_partnerships_v1() to authenticated;
 revoke all on function public.list_partner_shared_requests_v1() from public;
 revoke all on function public.list_partner_shared_requests_v1() from anon;
 grant execute on function public.list_partner_shared_requests_v1() to authenticated;
-revoke all on function public.list_partner_offers_for_lead_v1() from public;
-revoke all on function public.list_partner_offers_for_lead_v1() from anon;
-grant execute on function public.list_partner_offers_for_lead_v1() to authenticated;
+revoke all on function public.list_partner_candidate_proposals_v1() from public;
+revoke all on function public.list_partner_candidate_proposals_v1() from anon;
+grant execute on function public.list_partner_candidate_proposals_v1() to authenticated;
 revoke all on function public.list_agency_commissions_v1() from public;
 revoke all on function public.list_agency_commissions_v1() from anon;
 grant execute on function public.list_agency_commissions_v1() to authenticated;

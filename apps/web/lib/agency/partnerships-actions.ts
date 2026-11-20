@@ -95,13 +95,50 @@ export async function takeBackNeedAction(
   return call("unshare_request_with_partner_v1", { p_partner_share_id: id });
 }
 
-export async function offerPartnerCandidateAction(
+/** PARTNER: propose a worker from its own roster to the LEAD, who reviews it before any client sees it. */
+export async function proposePartnerCandidateAction(
   _prev: PartnershipActionState,
   form: FormData,
 ): Promise<PartnershipActionState> {
   const id = field(form, "partner_share_id");
   const workerId = field(form, "worker_id");
+  const note = field(form, "note");
   if (!UUID.test(id)) return { status: "error", code: "share_not_active" };
   if (!UUID.test(workerId)) return { status: "error", code: "worker_not_on_roster" };
-  return call("submit_partner_candidate_offer_v1", { p_partner_share_id: id, p_worker_id: workerId, p_note: null });
+  if (note.length > 500) return { status: "error", code: "invalid_note" };
+  return call("propose_partner_candidate_v1", { p_partner_share_id: id, p_worker_id: workerId, p_note: note || null });
+}
+
+/** LEAD: forward a reviewed partner candidate to its own client, with the lead's own note. */
+export async function forwardPartnerCandidateAction(
+  _prev: PartnershipActionState,
+  form: FormData,
+): Promise<PartnershipActionState> {
+  const id = field(form, "proposal_id");
+  const note = field(form, "note");
+  if (!UUID.test(id)) return { status: "error", code: "proposal_not_open" };
+  if (note.length > 500) return { status: "error", code: "invalid_note" };
+  return call("forward_partner_candidate_v1", { p_proposal_id: id, p_note: note || null });
+}
+
+/** LEAD: return a partner candidate to the partner, optionally saying why. */
+export async function returnPartnerCandidateAction(
+  _prev: PartnershipActionState,
+  form: FormData,
+): Promise<PartnershipActionState> {
+  const id = field(form, "proposal_id");
+  const reason = field(form, "reason");
+  if (!UUID.test(id)) return { status: "error", code: "proposal_not_open" };
+  if (reason.length > 500) return { status: "error", code: "invalid_note" };
+  return call("return_partner_candidate_v1", { p_proposal_id: id, p_reason: reason || null });
+}
+
+/** PARTNER: withdraw its own proposal before the lead decides. */
+export async function withdrawPartnerCandidateAction(
+  _prev: PartnershipActionState,
+  form: FormData,
+): Promise<PartnershipActionState> {
+  const id = field(form, "proposal_id");
+  if (!UUID.test(id)) return { status: "error", code: "proposal_not_open" };
+  return call("withdraw_partner_candidate_v1", { p_proposal_id: id });
 }

@@ -8214,11 +8214,11 @@
       "noRoster": "Din liste har ingen aktiv medarbejder at tilbyde.",
       "worker": "Din kandidat",
       "choose": "Vælg en medarbejder",
-      "offer": "Tilbyd",
-      "offered": "Tilbudt."
-    },
-    "partnerOffers": {
-      "title": "Partneres kandidater til dine kunders behov"
+      "offer": "Foreslå for det ledende bureau",
+      "offered": "Foreslået. Det ledende bureau gennemgår kandidaten, før dets kunde ser den.",
+      "note": "Note til det ledende bureau (valgfrit)",
+      "withdraw": "Træk tilbage",
+      "returnedWhy": "Returneret: {reason}"
     },
     "offerStatus": {
       "offered": "Tilbudt",
@@ -8261,7 +8261,28 @@
       "worker_not_on_roster": "Medarbejderen er ikke på din aktive liste.",
       "invalid_note": "Noten er for lang.",
       "needs_migration": "Partnerbureauer er ikke tilgængelige endnu.",
-      "error": "Det lykkedes ikke. Prøv igen."
+      "error": "Det lykkedes ikke. Prøv igen.",
+      "proposal_not_open": "Kandidaten afventer ikke længere gennemgang.",
+      "already_offered": "Denne medarbejder er allerede tilbudt til dette behov."
+    },
+    "proposalStatus": {
+      "proposed": "Afventer det ledende bureaus gennemgang",
+      "forwarded": "Videresendt til kunden",
+      "returned": "Returneret",
+      "withdrawn": "Trukket tilbage"
+    },
+    "review": {
+      "title": "Partneres kandidater til gennemgang",
+      "candidate": "{worker} · fra {agency}",
+      "partnerNote": "Partnerens note, vises ikke for din kunde: {note}",
+      "forward": "Videresend til din kunde",
+      "forwardConsequence": "Din kunde ser kandidaten som din, med din note herunder. Du står inde for kandidaten over for din kunde.",
+      "yourNote": "Din note til kunden (valgfrit)",
+      "confirm": "Videresend",
+      "forwarded": "Videresendt.",
+      "return": "Returnér til partneren",
+      "reason": "Årsag, vises for partneren (valgfrit)",
+      "returned": "Returneret."
     }
   }
 }

@@ -20845,11 +20845,11 @@
       "noRoster": "Your roster has no active worker to offer.",
       "worker": "Your candidate",
       "choose": "Choose a worker",
-      "offer": "Offer",
-      "offered": "Offered."
-    },
-    "partnerOffers": {
-      "title": "Partners' candidates on your clients' needs"
+      "offer": "Propose to the lead agency",
+      "offered": "Proposed. The lead agency reviews it before its client sees it.",
+      "note": "Note for the lead agency (optional)",
+      "withdraw": "Withdraw",
+      "returnedWhy": "Returned: {reason}"
     },
     "offerStatus": {
       "offered": "Offered",
@@ -20892,7 +20892,28 @@
       "worker_not_on_roster": "This worker is not on your active roster.",
       "invalid_note": "The note is too long.",
       "needs_migration": "Partner agencies are not available yet.",
-      "error": "This did not work. Try again."
+      "error": "This did not work. Try again.",
+      "proposal_not_open": "This candidate is no longer awaiting review.",
+      "already_offered": "This worker is already offered on this need."
+    },
+    "proposalStatus": {
+      "proposed": "Awaiting the lead's review",
+      "forwarded": "Forwarded to the client",
+      "returned": "Returned",
+      "withdrawn": "Withdrawn"
+    },
+    "review": {
+      "title": "Partners' candidates to review",
+      "candidate": "{worker} · from {agency}",
+      "partnerNote": "Partner's note, not shown to your client: {note}",
+      "forward": "Forward to your client",
+      "forwardConsequence": "Your client sees this candidate as yours, with your note below. You answer to your client for this candidate.",
+      "yourNote": "Your note to the client (optional)",
+      "confirm": "Forward",
+      "forwarded": "Forwarded.",
+      "return": "Return to the partner",
+      "reason": "Reason, shown to the partner (optional)",
+      "returned": "Returned."
     }
   }
 }

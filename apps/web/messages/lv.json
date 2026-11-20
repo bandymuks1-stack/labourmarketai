@@ -8214,11 +8214,11 @@
       "noRoster": "Jūsu sarakstā nav aktīva darbinieka, ko piedāvāt.",
       "worker": "Jūsu kandidāts",
       "choose": "Izvēlieties darbinieku",
-      "offer": "Piedāvāt",
-      "offered": "Piedāvāts."
-    },
-    "partnerOffers": {
-      "title": "Partneru kandidāti jūsu klientu vajadībām"
+      "offer": "Piedāvāt vadošajai aģentūrai",
+      "offered": "Piedāvāts. Vadošā aģentūra izvērtē kandidātu, pirms to redz tās klients.",
+      "note": "Piezīme vadošajai aģentūrai (nav obligāta)",
+      "withdraw": "Atsaukt",
+      "returnedWhy": "Atgriezts: {reason}"
     },
     "offerStatus": {
       "offered": "Piedāvāts",
@@ -8261,7 +8261,28 @@
       "worker_not_on_roster": "Šī darbinieka nav jūsu aktīvajā sarakstā.",
       "invalid_note": "Piezīme ir pārāk gara.",
       "needs_migration": "Partneraģentūras vēl nav pieejamas.",
-      "error": "Neizdevās. Mēģiniet vēlreiz."
+      "error": "Neizdevās. Mēģiniet vēlreiz.",
+      "proposal_not_open": "Šis kandidāts vairs negaida izvērtējumu.",
+      "already_offered": "Šis darbinieks jau ir piedāvāts šai vajadzībai."
+    },
+    "proposalStatus": {
+      "proposed": "Gaida vadošās aģentūras izvērtējumu",
+      "forwarded": "Nodots klientam",
+      "returned": "Atgriezts",
+      "withdrawn": "Atsaukts"
+    },
+    "review": {
+      "title": "Partneru kandidāti izvērtēšanai",
+      "candidate": "{worker} · no {agency}",
+      "partnerNote": "Partnera piezīme, klients to neredz: {note}",
+      "forward": "Nodot savam klientam",
+      "forwardConsequence": "Jūsu klients redzēs šo kandidātu kā jūsējo, ar jūsu piezīmi zemāk. Klienta priekšā par šo kandidātu atbildat jūs.",
+      "yourNote": "Jūsu piezīme klientam (nav obligāta)",
+      "confirm": "Nodot",
+      "forwarded": "Nodots.",
+      "return": "Atgriezt partnerim",
+      "reason": "Iemesls, ko redzēs partneris (nav obligāts)",
+      "returned": "Atgriezts."
     }
   }
 }

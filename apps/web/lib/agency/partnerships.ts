@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import {
   commissionFromRow,
   partnershipFromRow,
+  proposalFromRow,
+  type CandidateProposal,
   type Commission,
   type Partnership,
 } from "./partnerships-model";
@@ -33,21 +35,14 @@ export type MyPass = {
   readonly clientShareId: string;
 };
 
-export type PartnerOffer = {
-  readonly offerId: string;
-  readonly requestId: string;
-  readonly partnerName: string;
-  readonly status: string;
-  readonly offeredAt: string;
-};
-
 export type AgencyCooperation =
   | {
       readonly kind: "ok";
       readonly partnerships: readonly Partnership[];
       readonly passedToMe: readonly PassedToMe[];
       readonly myPasses: readonly MyPass[];
-      readonly partnerOffers: readonly PartnerOffer[];
+      /** Partner candidates: for the lead to review, or the partner's own to follow. */
+      readonly proposals: readonly CandidateProposal[];
       readonly commissions: readonly Commission[];
     }
   | { readonly kind: "unavailable" };
@@ -58,7 +53,7 @@ type Rows = Record<string, unknown>[];
 
 export async function readAgencyCooperation(): Promise<AgencyCooperation> {
   const supabase = await createClient();
-  const [p, passed, mine, offers, commissions] = await Promise.all([
+  const [p, passed, mine, proposals, commissions] = await Promise.all([
     db(supabase).rpc("list_agency_partnerships_v1"),
     db(supabase).rpc("list_partner_shared_requests_v1"),
     db(supabase)
@@ -66,10 +61,10 @@ export async function readAgencyCooperation(): Promise<AgencyCooperation> {
       .select("id, partnership_id, client_share_id")
       .eq("status", "active")
       .limit(500),
-    db(supabase).rpc("list_partner_offers_for_lead_v1"),
+    db(supabase).rpc("list_partner_candidate_proposals_v1"),
     db(supabase).rpc("list_agency_commissions_v1"),
   ]);
-  const errors = [p.error, passed.error, mine.error, offers.error, commissions.error].filter(Boolean);
+  const errors = [p.error, passed.error, mine.error, proposals.error, commissions.error].filter(Boolean);
   // Not applied (or refused): one honest "unavailable", never a partial picture.
   if (errors.length > 0) return { kind: "unavailable" };
   return {
@@ -99,19 +94,9 @@ export async function readAgencyCooperation(): Promise<AgencyCooperation> {
         ? [{ partnerShareId: r.id, partnershipId: r.partnership_id, clientShareId: r.client_share_id }]
         : [],
     ),
-    partnerOffers: ((offers.data ?? []) as Rows).flatMap((r) =>
-      typeof r.offer_id === "string" && typeof r.request_id === "string" && typeof r.status === "string"
-        ? [
-            {
-              offerId: r.offer_id,
-              requestId: r.request_id,
-              partnerName: typeof r.partner_name === "string" ? r.partner_name : "",
-              status: r.status,
-              offeredAt: typeof r.offered_at === "string" ? r.offered_at : "",
-            },
-          ]
-        : [],
-    ),
+    proposals: ((proposals.data ?? []) as Rows)
+      .map(proposalFromRow)
+      .filter((x): x is CandidateProposal => x !== null),
     commissions: ((commissions.data ?? []) as Rows)
       .map(commissionFromRow)
       .filter((x): x is Commission => x !== null),

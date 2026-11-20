@@ -20845,11 +20845,11 @@
       "noRoster": "Na Państwa liście nie ma aktywnego pracownika do zaproponowania.",
       "worker": "Państwa kandydat",
       "choose": "Proszę wybrać pracownika",
-      "offer": "Zaproponuj",
-      "offered": "Zaproponowano."
-    },
-    "partnerOffers": {
-      "title": "Kandydaci partnerów na potrzeby Państwa klientów"
+      "offer": "Zaproponuj agencji wiodącej",
+      "offered": "Zaproponowano. Agencja wiodąca sprawdzi kandydata, zanim zobaczy go jej klient.",
+      "note": "Uwaga dla agencji wiodącej (opcjonalnie)",
+      "withdraw": "Wycofaj",
+      "returnedWhy": "Zwrócono: {reason}"
     },
     "offerStatus": {
       "offered": "Zaproponowany",
@@ -20892,7 +20892,28 @@
       "worker_not_on_roster": "Tego pracownika nie ma na Państwa aktywnej liście.",
       "invalid_note": "Notatka jest za długa.",
       "needs_migration": "Agencje partnerskie nie są jeszcze dostępne.",
-      "error": "Nie udało się. Proszę spróbować ponownie."
+      "error": "Nie udało się. Proszę spróbować ponownie.",
+      "proposal_not_open": "Ten kandydat nie oczekuje już na sprawdzenie.",
+      "already_offered": "Ten pracownik jest już zaproponowany do tej potrzeby."
+    },
+    "proposalStatus": {
+      "proposed": "Oczekuje na sprawdzenie przez agencję wiodącą",
+      "forwarded": "Przekazano klientowi",
+      "returned": "Zwrócono",
+      "withdrawn": "Wycofano"
+    },
+    "review": {
+      "title": "Kandydaci partnerów do sprawdzenia",
+      "candidate": "{worker} · od {agency}",
+      "partnerNote": "Uwaga partnera, niewidoczna dla Państwa klienta: {note}",
+      "forward": "Przekaż Państwa klientowi",
+      "forwardConsequence": "Państwa klient zobaczy tego kandydata jako Państwa, z Państwa uwagą poniżej. Wobec klienta to Państwo odpowiadają za tego kandydata.",
+      "yourNote": "Państwa uwaga dla klienta (opcjonalnie)",
+      "confirm": "Przekaż",
+      "forwarded": "Przekazano.",
+      "return": "Zwróć partnerowi",
+      "reason": "Powód widoczny dla partnera (opcjonalnie)",
+      "returned": "Zwrócono."
     }
   }
 }

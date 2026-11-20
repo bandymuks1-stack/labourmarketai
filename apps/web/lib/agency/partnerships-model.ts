@@ -21,6 +21,8 @@ export const PARTNERSHIP_ERROR_CODES = [
   "partner_share_not_found",
   "worker_not_on_roster",
   "invalid_note",
+  "proposal_not_open",
+  "already_offered",
   "needs_migration",
   "error",
 ] as const;
@@ -152,4 +154,52 @@ export function dueByCurrency(rows: readonly Commission[]): ReadonlyMap<string, 
     out.set(r.currency, Math.round(((out.get(r.currency) ?? 0) + r.amount) * 100) / 100);
   }
   return out;
+}
+
+/** A partner's candidate awaiting, or past, the LEAD's review (owner decision 2026-11-20). */
+export type ProposalStatus = "proposed" | "forwarded" | "returned" | "withdrawn";
+const PROPOSAL_STATUSES: readonly ProposalStatus[] = ["proposed", "forwarded", "returned", "withdrawn"];
+
+export type CandidateProposal = {
+  readonly proposalId: string;
+  readonly partnerShareId: string;
+  readonly requestId: string;
+  /** "lead": this agency reviews it; "partner": this agency proposed it. */
+  readonly side: "lead" | "partner";
+  /** The other agency: the partner for the lead, the lead for the partner. Never the client. */
+  readonly counterpartName: string;
+  readonly workerId: string;
+  readonly workerName: string | null;
+  /** The partner's note, for the lead's review only; it never reaches the client. */
+  readonly note: string | null;
+  readonly status: ProposalStatus;
+  readonly returnReason: string | null;
+  /** How far the forwarded candidate got with the client (offered / accepted / declined / withdrawn). */
+  readonly offerStatus: string | null;
+  readonly createdAt: string;
+};
+
+export function proposalFromRow(r: Record<string, unknown>): CandidateProposal | null {
+  const str = (v: unknown) => (typeof v === "string" && v.length > 0 ? v : null);
+  const id = str(r.proposal_id);
+  const share = str(r.partner_share_id);
+  const req = str(r.request_id);
+  const worker = str(r.worker_id);
+  const status = PROPOSAL_STATUSES.find((s) => s === r.status);
+  const side = r.side === "lead" || r.side === "partner" ? r.side : null;
+  if (!id || !share || !req || !worker || !status || !side) return null;
+  return {
+    proposalId: id,
+    partnerShareId: share,
+    requestId: req,
+    side,
+    counterpartName: str(r.counterpart_name) ?? "",
+    workerId: worker,
+    workerName: str(r.worker_name),
+    note: str(r.note),
+    status,
+    returnReason: str(r.return_reason),
+    offerStatus: str(r.offer_status),
+    createdAt: str(r.created_at) ?? "",
+  };
 }

@@ -20845,11 +20845,11 @@
       "noRoster": "Din lista har ingen aktiv arbetstagare att erbjuda.",
       "worker": "Din kandidat",
       "choose": "Välj en arbetstagare",
-      "offer": "Erbjud",
-      "offered": "Erbjuden."
-    },
-    "partnerOffers": {
-      "title": "Partners kandidater på dina kunders behov"
+      "offer": "Föreslå för den ledande byrån",
+      "offered": "Föreslagen. Den ledande byrån granskar kandidaten innan dess kund ser den.",
+      "note": "Anteckning till den ledande byrån (valfritt)",
+      "withdraw": "Dra tillbaka",
+      "returnedWhy": "Returnerad: {reason}"
     },
     "offerStatus": {
       "offered": "Erbjuden",
@@ -20892,7 +20892,28 @@
       "worker_not_on_roster": "Arbetstagaren finns inte på din aktiva lista.",
       "invalid_note": "Anteckningen är för lång.",
       "needs_migration": "Partnerbyråer är inte tillgängliga än.",
-      "error": "Det gick inte. Försök igen."
+      "error": "Det gick inte. Försök igen.",
+      "proposal_not_open": "Kandidaten väntar inte längre på granskning.",
+      "already_offered": "Den här personen är redan erbjuden för det här behovet."
+    },
+    "proposalStatus": {
+      "proposed": "Väntar på den ledande byråns granskning",
+      "forwarded": "Vidarebefordrad till kunden",
+      "returned": "Returnerad",
+      "withdrawn": "Tillbakadragen"
+    },
+    "review": {
+      "title": "Partners kandidater att granska",
+      "candidate": "{worker} · från {agency}",
+      "partnerNote": "Partnerns anteckning, visas inte för din kund: {note}",
+      "forward": "Vidarebefordra till din kund",
+      "forwardConsequence": "Din kund ser kandidaten som din, med din anteckning nedan. Du ansvarar inför din kund för den här kandidaten.",
+      "yourNote": "Din anteckning till kunden (valfritt)",
+      "confirm": "Vidarebefordra",
+      "forwarded": "Vidarebefordrad.",
+      "return": "Returnera till partnern",
+      "reason": "Anledning, visas för partnern (valfritt)",
+      "returned": "Returnerad."
     }
   }
 }

@@ -20845,11 +20845,11 @@
       "noRoster": "In Ihrem Bestand ist keine aktive Arbeitskraft, die Sie anbieten können.",
       "worker": "Ihr Kandidat",
       "choose": "Arbeitskraft wählen",
-      "offer": "Anbieten",
-      "offered": "Angeboten."
-    },
-    "partnerOffers": {
-      "title": "Kandidaten von Partnern für den Bedarf Ihrer Kunden"
+      "offer": "Der Hauptagentur vorschlagen",
+      "offered": "Vorgeschlagen. Die Hauptagentur prüft den Kandidaten, bevor ihr Kunde ihn sieht.",
+      "note": "Notiz für die Hauptagentur (optional)",
+      "withdraw": "Zurückziehen",
+      "returnedWhy": "Zurückgegeben: {reason}"
     },
     "offerStatus": {
       "offered": "Angeboten",
@@ -20892,7 +20892,28 @@
       "worker_not_on_roster": "Diese Arbeitskraft ist nicht in Ihrem aktiven Bestand.",
       "invalid_note": "Die Notiz ist zu lang.",
       "needs_migration": "Partneragenturen sind noch nicht verfügbar.",
-      "error": "Das hat nicht geklappt. Versuchen Sie es erneut."
+      "error": "Das hat nicht geklappt. Versuchen Sie es erneut.",
+      "proposal_not_open": "Dieser Kandidat wartet nicht mehr auf Prüfung.",
+      "already_offered": "Diese Arbeitskraft ist für diesen Bedarf bereits angeboten."
+    },
+    "proposalStatus": {
+      "proposed": "Wartet auf Prüfung durch die Hauptagentur",
+      "forwarded": "An den Kunden weitergeleitet",
+      "returned": "Zurückgegeben",
+      "withdrawn": "Zurückgezogen"
+    },
+    "review": {
+      "title": "Kandidaten von Partnern zur Prüfung",
+      "candidate": "{worker} · von {agency}",
+      "partnerNote": "Notiz des Partners, für Ihren Kunden nicht sichtbar: {note}",
+      "forward": "An Ihren Kunden weiterleiten",
+      "forwardConsequence": "Ihr Kunde sieht diesen Kandidaten als Ihren, mit Ihrer Notiz unten. Gegenüber Ihrem Kunden stehen Sie für diesen Kandidaten ein.",
+      "yourNote": "Ihre Notiz an den Kunden (optional)",
+      "confirm": "Weiterleiten",
+      "forwarded": "Weitergeleitet.",
+      "return": "An den Partner zurückgeben",
+      "reason": "Grund, für den Partner sichtbar (optional)",
+      "returned": "Zurückgegeben."
     }
   }
 }

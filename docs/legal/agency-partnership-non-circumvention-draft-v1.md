@@ -19,12 +19,14 @@ migration `20261118100000_agency_partnerships_commissions_v1`, not applied). Fol
 | Party | Role in a cooperation | Sees |
 |---|---|---|
 | Client (employer) | shares its own need with its own agency | only its own agency (the **lead**), which presents every candidate and answers for it. Never the partner's name or id, on any surface. |
-| Lead agency | the client's agency; passes the need to a partner | its client, its partner, and its partner's candidates by status (no worker identity before a booking) |
-| Partner agency | offers a worker from its own roster on the passed need | the lead and the need (title, role, country). Never the client's identity. |
+| Lead agency | the client's agency; passes the need to a partner, **reviews** the partner's candidate and **forwards** it to the client as its own, or returns it (owner decision 2026-11-20) | its client, its partner, and the partner's candidates it reviews (worker's name, the partner's note) |
+| Partner agency | **proposes** a worker from its own roster to the lead on the passed need | the lead, the need (title, role, country) and what became of its proposal. Never the client's identity. |
 | Worker | the candidate | the client once a booking is proposed. The worker is **not** a party to these terms. |
 
-Both rules are enforced in the database, not only in the interface (the client's row names the lead
-as the agency of record; the partner reads only definer functions without client columns).
+Both rules are enforced in the database, not only in the interface:
+- until the lead forwards a candidate, no offer exists for the client to read;
+- a forwarded offer is the lead's own, with the lead's own note;
+- the partner reads only definer functions, which have no client columns.
 
 ## 2. Responsibility along the chain (draft, decision 0033)
 
@@ -42,13 +44,18 @@ as the agency of record; the partner reads only definer functions without client
 - **R4. Disclosure.** The client is told which agency is directly responsible: the lead. The partner's
   identity and the commercial split are not disclosed to the client, except where the law requires it.
   Lawyer: list the cases, see Q9.
-- **R5. Internal audit.** Each partner offer is recorded with its chain as the platform knows it:
-  - source and submitter: the partner;
-  - presenter to the client: the lead;
-  - intermediaries: none in v1;
-  - agency verification: not recorded in the platform.
+- **R5. Internal audit.** Each step is recorded with its chain as the platform knows it, in
+  `audit_logs`, which only an admin can read:
+  - the partner's proposal (`agency_partner_candidate_proposed`): source and submitter are the
+    partner, the reviewer is the lead;
+  - the lead's forward to the client (`agency_partner_candidate_forwarded`): it adds the lead as
+    presenter to the client;
+  - a return (`agency_partner_candidate_returned`);
+  - passing a need (`agency_partner_need_passed`) and taking it back (`agency_partner_need_revoked`);
+  - ending a partnership.
 
-  The record is `audit_logs`, action `agency_partner_candidate_offered`, which only an admin can read.
+  Intermediaries: none in v1. Agency verification: not recorded in the platform. The lead's review
+  before forwarding is the act by which it takes R1 responsibility toward its client.
   Document checks recorded in the platform are the platform's own (`worker_documents.verified_by`).
   An agency's off-platform checks are not recorded, and the duty to have done them follows R1–R3.
 
@@ -83,7 +90,8 @@ The "last documented act" can be read from existing timestamps, without new colu
 |---|---|
 | partnership invited / answered / ended | `agency_partnerships.created_at`, `decided_at`, `ended_at` |
 | need passed to the partner / taken back | `agency_partner_request_shares.created_at`, `revoked_at` |
-| candidate presented (and re-affirmed) | `agency_candidate_offers.created_at`, `updated_at` (with `partner_share_id` naming the pass) |
+| candidate proposed to the lead / reviewed (forwarded, returned, withdrawn) | `agency_partner_candidate_proposals.created_at`, `updated_at`, `decided_at` |
+| candidate presented to the client by the lead (and re-affirmed) | `agency_candidate_offers.created_at`, `updated_at` (with `partner_share_id` naming the pass) |
 | client's decision | `agency_candidate_offers.decided_at` |
 | offer withdrawn | `agency_candidate_offers.withdrawn_at` |
 | booking proposed / answered | `booking_requests.created_at`, `booking_request_events.created_at` |

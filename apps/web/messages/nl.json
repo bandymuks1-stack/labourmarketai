@@ -20845,11 +20845,11 @@
       "noRoster": "Uw bestand heeft geen actieve kracht om aan te bieden.",
       "worker": "Uw kandidaat",
       "choose": "Kies een kracht",
-      "offer": "Aanbieden",
-      "offered": "Aangeboden."
-    },
-    "partnerOffers": {
-      "title": "Kandidaten van partners voor de behoeften van uw klanten"
+      "offer": "Voorstellen aan het hoofdbureau",
+      "offered": "Voorgesteld. Het hoofdbureau beoordeelt de kandidaat voordat de klant die ziet.",
+      "note": "Notitie voor het hoofdbureau (optioneel)",
+      "withdraw": "Intrekken",
+      "returnedWhy": "Teruggestuurd: {reason}"
     },
     "offerStatus": {
       "offered": "Aangeboden",
@@ -20892,7 +20892,28 @@
       "worker_not_on_roster": "Deze kracht staat niet in uw actieve bestand.",
       "invalid_note": "De notitie is te lang.",
       "needs_migration": "Partnerbureaus zijn nog niet beschikbaar.",
-      "error": "Dat is niet gelukt. Probeer het opnieuw."
+      "error": "Dat is niet gelukt. Probeer het opnieuw.",
+      "proposal_not_open": "Deze kandidaat wacht niet meer op beoordeling.",
+      "already_offered": "Deze medewerker is al aangeboden voor deze behoefte."
+    },
+    "proposalStatus": {
+      "proposed": "Wacht op beoordeling door het hoofdbureau",
+      "forwarded": "Doorgestuurd naar de klant",
+      "returned": "Teruggestuurd",
+      "withdrawn": "Ingetrokken"
+    },
+    "review": {
+      "title": "Kandidaten van partners om te beoordelen",
+      "candidate": "{worker} · van {agency}",
+      "partnerNote": "Notitie van de partner, niet zichtbaar voor uw klant: {note}",
+      "forward": "Doorsturen naar uw klant",
+      "forwardConsequence": "Uw klant ziet deze kandidaat als de uwe, met uw notitie hieronder. U staat tegenover uw klant in voor deze kandidaat.",
+      "yourNote": "Uw notitie voor de klant (optioneel)",
+      "confirm": "Doorsturen",
+      "forwarded": "Doorgestuurd.",
+      "return": "Terugsturen naar de partner",
+      "reason": "Reden, zichtbaar voor de partner (optioneel)",
+      "returned": "Teruggestuurd."
     }
   }
 }

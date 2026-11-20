@@ -459,7 +459,7 @@ test("P-7. the lead invites a partner agency, passes its client's need, and the 
     `select id from public.agency_partner_request_shares where partnership_id = ${lit(p7.partnershipId)} and status = 'active'`,
   )[0]!.id;
 
-  // The partner sees the need (never the client's name) and offers ITS OWN roster worker.
+  // The partner sees the need (never the client's name) and PROPOSES its own roster worker to the lead.
   await ag2.goto(`${BASE}/en/dashboard/company/partners`);
   const need = ag2.getByTestId(`agency-partnership-need-${p7.partnerShareId}`);
   await expect(need).toBeVisible({ timeout: 30_000 });
@@ -467,7 +467,44 @@ test("P-7. the lead invites a partner agency, passes its client's need, and the 
   await expect(need).not.toContainText(CO_ORG);
   const offer = ag2.getByTestId(`agency-partnership-offer-${p7.partnerShareId}`);
   await offer.locator('select[name="worker_id"]').selectOption(p7.w4Worker);
+  await offer.locator('textarea[name="note"]').fill("QA-SYNTHETIC partner note");
   await offer.getByTestId(`agency-partnership-offer-${p7.partnerShareId}-submit`).click();
+  await expect
+    .poll(
+      () =>
+        sql<{ id: string }>(
+          `select id from public.agency_partner_candidate_proposals
+            where partner_share_id = ${lit(p7.partnerShareId)} and worker_id = ${lit(p7.w4Worker)} and status = 'proposed'`,
+        )[0]?.id ?? "",
+      { timeout: 30_000 },
+    )
+    .not.toBe("");
+  const proposalId = sql<{ id: string }>(
+    `select id from public.agency_partner_candidate_proposals where partner_share_id = ${lit(p7.partnerShareId)}`,
+  )[0]!.id;
+
+  // Owner decision 2026-11-20: before the lead forwards it, the client sees nothing.
+  expect(
+    sql<{ n: number }>(
+      `select count(*)::int as n from public.agency_candidate_offers where partner_share_id = ${lit(p7.partnerShareId)}`,
+    )[0]!.n,
+    "no offer exists before the lead forwards",
+  ).toBe(0);
+  const co = as(CO);
+  await co.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
+  await expect(co.getByRole("main")).toBeVisible({ timeout: 30_000 });
+  await expect(co.getByRole("main")).not.toContainText(AG2_ORG);
+
+  // The lead reviews it (worker and the partner's note) and forwards it with its OWN note.
+  await ag.goto(`${BASE}/en/dashboard/company/partners`);
+  const review = ag.getByTestId(`agency-partnership-review-${proposalId}`);
+  await expect(review).toHaveAttribute("data-status", "proposed", { timeout: 30_000 });
+  await expect(review).toContainText(AG2_ORG);
+  await expect(ag.getByTestId(`agency-partnership-review-note-${proposalId}`)).toContainText("QA-SYNTHETIC partner note");
+  await ag.getByTestId(`agency-partnership-forward-${proposalId}-open`).locator("summary").click();
+  const fwd = ag.getByTestId(`agency-partnership-forward-${proposalId}`);
+  await fwd.locator('textarea[name="note"]').fill("QA-SYNTHETIC lead note");
+  await fwd.getByTestId(`agency-partnership-forward-${proposalId}-submit`).click();
   await expect
     .poll(
       () =>
@@ -478,25 +515,23 @@ test("P-7. the lead invites a partner agency, passes its client's need, and the 
       { timeout: 30_000 },
     )
     .not.toBe("");
-  const row = sql<{ id: string; agency_company_id: string; connection_id: string; request_share_id: string }>(
-    `select id, agency_company_id, connection_id, request_share_id from public.agency_candidate_offers
+  const row = sql<{ id: string; agency_company_id: string; connection_id: string; request_share_id: string; note: string }>(
+    `select id, agency_company_id, connection_id, request_share_id, note from public.agency_candidate_offers
       where partner_share_id = ${lit(p7.partnerShareId)}`,
   )[0]!;
   p7.offerId = row.id;
-  // Owner principle 2026-11-19: the client's agency of record on the row is the LEAD.
-  expect(row, "the partner's offer rides on the client's own share and connection, under the lead").toMatchObject({
+  expect(row, "the forwarded candidate is the LEAD's offer, on the client's own share and connection").toMatchObject({
     agency_company_id: s.agCompanyId,
     connection_id: s.connectionId,
     request_share_id: p7.clientShareId,
+    note: "QA-SYNTHETIC lead note",
   });
 
-  // The lead sees its partner's candidate by status only.
-  await ag.goto(`${BASE}/en/dashboard/company/partners`);
-  await expect(ag.getByTestId(`agency-partnership-partner-offer-${p7.offerId}`)).toHaveAttribute(
-    "data-status",
-    "offered",
-    { timeout: 30_000 },
-  );
+  // The partner follows its proposal: forwarded, and how far the candidate got.
+  await ag2.goto(`${BASE}/en/dashboard/company/partners`);
+  await expect(ag2.getByTestId(`agency-partnership-proposal-${proposalId}`)).toHaveAttribute("data-status", "forwarded", {
+    timeout: 30_000,
+  });
 });
 
 // ── P-8 ────────────────────────────────────────────────────────────────────
@@ -514,6 +549,9 @@ test("P-8. the client accepts the partner's candidate on the LEAD's term; on pla
   await expect(co.getByTestId(`offer-placement-term-${p7.offerId}`)).toContainText(AG_ORG);
   // Owner principle 2026-11-19: the employer sees only its own (lead) agency, never the partner.
   await expect(co.getByRole("main")).not.toContainText(AG2_ORG);
+  // It carries the LEAD's note, never the partner's.
+  await expect(co.getByRole("main")).toContainText("QA-SYNTHETIC lead note");
+  await expect(co.getByRole("main")).not.toContainText("QA-SYNTHETIC partner note");
   await co.getByTestId(`offer-placement-accept-${p7.offerId}`).check();
   await co.getByTestId(`offer-accept-${p7.offerId}`).click();
   await expect

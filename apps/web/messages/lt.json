@@ -20845,11 +20845,11 @@
       "noRoster": "Jūsų sąraše nėra aktyvaus darbuotojo, kurį galėtumėte pasiūlyti.",
       "worker": "Jūsų kandidatas",
       "choose": "Pasirinkite darbuotoją",
-      "offer": "Pasiūlyti",
-      "offered": "Pasiūlyta."
-    },
-    "partnerOffers": {
-      "title": "Partnerių kandidatai jūsų klientų poreikiams"
+      "offer": "Pasiūlyti pagrindinei agentūrai",
+      "offered": "Pasiūlyta. Pagrindinė agentūra peržiūri kandidatą, kol jo dar nemato jos klientas.",
+      "note": "Pastaba pagrindinei agentūrai (nebūtina)",
+      "withdraw": "Atšaukti",
+      "returnedWhy": "Grąžinta: {reason}"
     },
     "offerStatus": {
       "offered": "Pasiūlytas",
@@ -20892,7 +20892,28 @@
       "worker_not_on_roster": "Šio darbuotojo nėra jūsų aktyviame sąraše.",
       "invalid_note": "Pastaba per ilga.",
       "needs_migration": "Partnerės agentūros dar neįjungtos.",
-      "error": "Nepavyko. Bandykite dar kartą."
+      "error": "Nepavyko. Bandykite dar kartą.",
+      "proposal_not_open": "Šis kandidatas nebelaukia peržiūros.",
+      "already_offered": "Šis darbuotojas jau pasiūlytas šiam poreikiui."
+    },
+    "proposalStatus": {
+      "proposed": "Laukia pagrindinės agentūros peržiūros",
+      "forwarded": "Perduota klientui",
+      "returned": "Grąžinta",
+      "withdrawn": "Atšaukta"
+    },
+    "review": {
+      "title": "Partnerių kandidatai peržiūrai",
+      "candidate": "{worker} · iš {agency}",
+      "partnerNote": "Partnerio pastaba, klientas jos nemato: {note}",
+      "forward": "Perduoti savo klientui",
+      "forwardConsequence": "Jūsų klientas matys šį kandidatą kaip jūsų, su žemiau esančia jūsų pastaba. Už šį kandidatą klientui atsakote jūs.",
+      "yourNote": "Jūsų pastaba klientui (nebūtina)",
+      "confirm": "Perduoti",
+      "forwarded": "Perduota.",
+      "return": "Grąžinti partneriui",
+      "reason": "Priežastis, kurią matys partneris (nebūtina)",
+      "returned": "Grąžinta."
     }
   }
 }

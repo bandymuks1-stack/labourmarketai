@@ -104,6 +104,18 @@ awk '/^create or replace function public.list_agency_offered_candidates_for_requ
 run_file "$TMP/v2list.sql"
 su "grant execute on function public.list_agency_offered_candidates_for_request_v2(uuid) to authenticated" >/dev/null
 su "update customer_requests set profile_id = '$EMP' where id in ('$REQ','$REQX')" >/dev/null
+# main's own agency functions, verbatim (the migration no longer replaces them): the lead's direct
+# offer, its withdrawal, and the agency's own reads, which now also carry its FORWARDED candidates.
+cut_fn() { awk -v fn="$2" 'index($0, "create or replace function public." fn "(")==1{p=1} p{print} p&&/^\$(function)?\$;/{exit}' "$REPO/supabase/migrations/$1" > "$TMP/$2.sql"
+  [ -s "$TMP/$2.sql" ] || { echo "could not cut $2"; exit 1; }; run_file "$TMP/$2.sql"; }
+cut_fn 20260928180000_agency_capability_one_rule_v1.sql submit_agency_candidate_offer_v1
+cut_fn 20260723180000_agency_real_client_bridge_v1.sql withdraw_agency_candidate_offer_v1
+cut_fn 20260901052300_agency_disclosure_revocation_v1.sql list_agency_offer_progress_v1
+cut_fn 20260928190000_agency_delegated_demand_and_placement_v1.sql list_agency_placements_v1
+for f in "submit_agency_candidate_offer_v1(uuid,uuid,text)" "withdraw_agency_candidate_offer_v1(uuid)" \
+         "list_agency_offer_progress_v1()" "list_agency_placements_v1()"; do
+  su "revoke all on function public.$f from public; grant execute on function public.$f to authenticated" >/dev/null
+done
 
 run_file "$MIG"
 COND="QA-SYNTHETIC condition: due only on an actual placement"
@@ -169,81 +181,120 @@ check "the partner's read has no client column" "0" \
   "$(su "select count(*) from pg_proc p, unnest(p.proargnames) a where p.proname='list_partner_shared_requests_v1' and a like '%client%'")"
 check "a third agency reads no passed need" "0" "$(as $X - "select count(*) from list_partner_shared_requests_v1();")"
 
-echo "== 4. THE PARTNER OFFERS ITS OWN ROSTER WORKER =================================="
+echo "== 4. THE PARTNER PROPOSES; THE LEAD REVIEWS (owner decision 2026-11-20) ====="
 check "a worker not on the partner's roster is refused" "worker_not_on_roster" \
-  "$(as $P - "select submit_partner_candidate_offer_v1('$PS', '$WN');")"
-check "the lead's own worker is not the partner's to offer" "worker_not_on_roster" \
-  "$(as $P - "select submit_partner_candidate_offer_v1('$PS', '$WL');")"
-check "a third agency cannot offer on the pass" "not_owner" \
-  "$(as $X - "select submit_partner_candidate_offer_v1('$PS', '$WP1');")"
-OP=$(as $P - "select submit_partner_candidate_offer_v1('$PS', '$WP1', 'QA-SYNTHETIC note');")
-checkre "the partner offers its worker" "^[0-9a-f-]{36}$" "$OP"
-check "the offer is on the CLIENT's share and connection, under the LEAD (the client's agency of record), through the pass" \
-  "$LC/$EC/$CONN/$SH/$PS/offered" \
-  "$(su "select agency_company_id||'/'||client_company_id||'/'||connection_id||'/'||request_share_id||'/'||partner_share_id||'/'||status from agency_candidate_offers where id='$OP'")"
-check "the lead sees the partner's offer, by status" "QA-SYNTHETIC Partner agency/offered" \
-  "$(as $L - "select partner_name||'/'||status from list_partner_offers_for_lead_v1();")"
-check "the lead's read carries no worker column" "0" \
-  "$(su "select count(*) from pg_proc p, unnest(p.proargnames) a where p.proname='list_partner_offers_for_lead_v1' and a like '%worker%'")"
-check "the partner cannot list the lead's partner offers" "0" "$(as $P - "select count(*) from list_partner_offers_for_lead_v1();")"
-check "R2 P2-3: the partner cannot read its partner-offer row directly (no client_company_id)" "0" \
-  "$(as $P - "select count(*) from agency_candidate_offers where id='$OP';")"
-check "R2 P2-3: nor any row naming the lead's client" "0" \
-  "$(as $P - "select count(*) from agency_candidate_offers where client_company_id='$EC';")"
-check "R2 P2-3: the client still reads the offer made to it" "1" \
-  "$(as $EMP - "select count(*) from agency_candidate_offers where id='$OP';")"
-check "R2 P2-3: the policy narrows only the agency arm" "1" \
-  "$(su "select count(*) from pg_policies where policyname='agency_candidate_offers_select' and qual like '%partner_share_id IS NULL%'")"
+  "$(as $P - "select propose_partner_candidate_v1('$PS', '$WN');")"
+check "the lead's own worker is not the partner's to propose" "worker_not_on_roster" \
+  "$(as $P - "select propose_partner_candidate_v1('$PS', '$WL');")"
+check "a third agency cannot propose on the pass" "not_owner" \
+  "$(as $X - "select propose_partner_candidate_v1('$PS', '$WP1');")"
+PR1=$(as $P - "select propose_partner_candidate_v1('$PS', '$WP1', 'QA-SYNTHETIC partner note');")
+checkre "the partner proposes its worker" "^[0-9a-f-]{36}$" "$PR1"
+check "proposing again re-affirms the same proposal" "$PR1" \
+  "$(as $P - "select propose_partner_candidate_v1('$PS', '$WP1');")"
+check "(a) before the lead forwards, no offer exists at all" "0" \
+  "$(su "select count(*) from agency_candidate_offers where request_id='$REQ' and worker_id='$WP1'")"
+check "(a) the client's candidate list shows nothing" "0" \
+  "$(as $EMP - "select count(*) from list_agency_offered_candidates_for_request_v2('$REQ');")"
+check "(a) the client cannot read the proposal, nor list it" "0/0" \
+  "$(as $EMP - "select (select count(*) from agency_partner_candidate_proposals)||'/'||(select count(*) from list_partner_candidate_proposals_v1());")"
+check "the lead reviews it: partner, worker, the partner's note" \
+  "lead/QA-SYNTHETIC Partner agency/QA-SYNTHETIC W1/QA-SYNTHETIC partner note/proposed" \
+  "$(as $L - "select side||'/'||counterpart_name||'/'||worker_name||'/'||note||'/'||status from list_partner_candidate_proposals_v1() where proposal_id='$PR1';")"
+check "the partner follows it, naming the lead" "partner/QA-SYNTHETIC Lead agency/proposed" \
+  "$(as $P - "select side||'/'||counterpart_name||'/'||status from list_partner_candidate_proposals_v1() where proposal_id='$PR1';")"
+check "the proposals read has no client column" "0" \
+  "$(su "select count(*) from pg_proc p, unnest(p.proargnames) a where p.proname='list_partner_candidate_proposals_v1' and a like '%client%'")"
+check "a third agency reads no proposal" "0/0" \
+  "$(as $X - "select (select count(*) from agency_partner_candidate_proposals)||'/'||(select count(*) from list_partner_candidate_proposals_v1());")"
+check "the proposal is audited with its chain (source, submitter, reviewer); a re-affirm is audited too" "source:$PC/submitter:$PC/reviewer:$LC/$P" \
+  "$(su "select string_agg((e->>'role')||':'||(e->>'company_id'), '/' order by i)||'/'||actor_id from (select * from audit_logs where action='agency_partner_candidate_proposed' and entity_id='$PR1' order by id limit 1) a, jsonb_array_elements(a.payload->'chain') with ordinality as c(e, i) group by a.payload, a.actor_id")"
+check "the partner cannot forward its own proposal" "not_owner" \
+  "$(as $P - "select forward_partner_candidate_v1('$PR1', null);")"
+check "a third agency cannot forward it" "not_owner" \
+  "$(as $X - "select forward_partner_candidate_v1('$PR1', null);")"
 
-echo "== 4b. OWNER PRINCIPLE: THE CLIENT SEES ONLY ITS OWN (LEAD) AGENCY ============="
-check "decision 0033: the whole chain is kept for internal audit (source, submitter, presenter)" \
-  "source:$PC/submitter:$PC/presenter_to_client:$LC/$PID/$PS/not_recorded/$P" \
-  "$(su "select string_agg((e->>'role')||':'||(e->>'company_id'), '/' order by i)||'/'||(payload->>'partnership_id')||'/'||(payload->>'partner_share_id')||'/'||(payload->>'agency_verification')||'/'||actor_id from audit_logs, jsonb_array_elements(payload->'chain') with ordinality as c(e, i) where action='agency_partner_candidate_offered' and entity_id='$OP' group by payload, actor_id")"
-check "(a) the audit chain is not readable by the client or either agency" "0/0/0" \
+echo "== 4a. (c) THE LEAD RETURNS A PROPOSAL; THE PARTNER WITHDRAWS ONE ============"
+PR2=$(as $P - "select propose_partner_candidate_v1('$PS', '$WP2', 'QA-SYNTHETIC second');")
+check "the partner cannot return a proposal; only the lead can" "not_owner" \
+  "$(as $P - "select return_partner_candidate_v1('$PR2', null);")"
+check "(c) the lead returns it, saying why" "$PR2" \
+  "$(as $L - "select return_partner_candidate_v1('$PR2', 'QA-SYNTHETIC reason');")"
+check "(c) the partner sees it returned, and why; no offer was made" "returned/QA-SYNTHETIC reason/0" \
+  "$(as $P - "select status||'/'||return_reason from list_partner_candidate_proposals_v1() where proposal_id='$PR2';")/$(su "select count(*) from agency_candidate_offers where worker_id='$WP2'")"
+check "(c) a returned proposal cannot be forwarded" "proposal_not_open" \
+  "$(as $L - "select forward_partner_candidate_v1('$PR2', null);")"
+check "(c) the client never saw it" "0" \
+  "$(as $EMP - "select count(*) from list_agency_offered_candidates_for_request_v2('$REQ');")"
+check "(c) the return is audited" "1" \
+  "$(su "select count(*) from audit_logs where action='agency_partner_candidate_returned' and entity_id='$PR2'")"
+PR3=$(as $P - "select propose_partner_candidate_v1('$PS', '$WP2');")
+check "a returned worker can be proposed again (a new proposal)" "t" "$(su "select '$PR3' <> '$PR2'")"
+check "the lead cannot withdraw the partner's proposal" "not_owner" \
+  "$(as $L - "select withdraw_partner_candidate_v1('$PR3');")"
+check "the partner withdraws its own proposal" "$PR3/withdrawn" \
+  "$(as $P - "select withdraw_partner_candidate_v1('$PR3');")/$(su "select status from agency_partner_candidate_proposals where id='$PR3'")"
+check "a withdrawn proposal cannot be forwarded" "proposal_not_open" \
+  "$(as $L - "select forward_partner_candidate_v1('$PR3', null);")"
+
+echo "== 4b. (b) THE LEAD FORWARDS: THE CLIENT SEES ITS OWN AGENCY'S CANDIDATE ======"
+check "a forwarded note over 500 characters is refused" "invalid_note" \
+  "$(as $L - "select forward_partner_candidate_v1('$PR1', repeat('x', 501));")"
+OP=$(as $L - "select forward_partner_candidate_v1('$PR1', 'QA-SYNTHETIC lead note');")
+checkre "(b) the lead forwards the partner's candidate to its client" "^[0-9a-f-]{36}$" "$OP"
+check "(b) the offer is the LEAD's, by the lead's user, on the client's share and connection, through the pass" \
+  "$LC/$EC/$CONN/$SH/$PS/offered/$L" \
+  "$(su "select agency_company_id||'/'||client_company_id||'/'||connection_id||'/'||request_share_id||'/'||partner_share_id||'/'||status||'/'||created_by from agency_candidate_offers where id='$OP'")"
+check "(b) the client sees it as its own agency's candidate, with the LEAD's note only" "QA-SYNTHETIC Lead agency/QA-SYNTHETIC lead note" \
+  "$(as $EMP - "select agency_name||'/'||note from list_agency_offered_candidates_for_request_v2('$REQ') where offer_id='$OP';")"
+check "(b) the partner's own note reached no offer" "0" \
+  "$(su "select count(*) from agency_candidate_offers where note like '%partner note%'")"
+check "(b) the proposal is forwarded and follows the offer" "forwarded/$OP/offered" \
+  "$(as $P - "select status||'/'||offer_id||'/'||offer_status from list_partner_candidate_proposals_v1() where proposal_id='$PR1';")"
+check "(b) forwarding it again is refused" "proposal_not_open" \
+  "$(as $L - "select forward_partner_candidate_v1('$PR1', null);")"
+check "decision 0033: the forward is audited with the whole chain, by the lead" \
+  "source:$PC/submitter:$PC/reviewer:$LC/presenter_to_client:$LC/$PID/$PS/not_recorded/true/$PR1/$L" \
+  "$(su "select string_agg((e->>'role')||':'||(e->>'company_id'), '/' order by i)||'/'||(payload->>'partnership_id')||'/'||(payload->>'partner_share_id')||'/'||(payload->>'agency_verification')||'/'||(payload->>'lead_note_forwarded')||'/'||(payload->>'proposal_id')||'/'||actor_id from audit_logs, jsonb_array_elements(payload->'chain') with ordinality as c(e, i) where action='agency_partner_candidate_forwarded' and entity_id='$OP' group by payload, actor_id")"
+check "(a) the audit trail is not readable by the client or either agency" "0/0/0" \
   "$(as $EMP - "select count(*) from audit_logs;")/$(as $L - "select count(*) from audit_logs;")/$(as $P - "select count(*) from audit_logs;")"
-check "(a) the client's candidate list names the LEAD on the partner's candidate" "QA-SYNTHETIC Lead agency" \
-  "$(as $EMP - "select agency_name from list_agency_offered_candidates_for_request_v2('$REQ') where offer_id='$OP';")"
-check "(a) no granted column of the client's row holds the partner's company or staff id" "0" \
+check "(a) no readable column of the client's row holds the partner's company or staff id" "0" \
   "$(as $EMP - "select count(*) from (select row_to_json(t)::text j from (select id, connection_id, request_share_id, agency_company_id, client_company_id, request_id, worker_id, status, note, created_at, withdrawn_at, updated_at, booking_id, decision_note, decided_by, decided_at, accepted_placement_term_id, placement_term_accepted_at from agency_candidate_offers where id='$OP') t) x where j like '%$PC%' or j like '%$P%';")"
 checkre "(a) the client cannot read who created the offer" "permission denied" \
   "$(as $EMP - "select created_by from agency_candidate_offers where id='$OP';")"
 checkre "(a) nor who withdrew an offer" "permission denied" \
   "$(as $EMP - "select withdrawn_by from agency_candidate_offers where id='$OP';")"
-checkre "(a) nor the partner step an offer came through" "permission denied" \
+checkre "(a) nor that it came through a partner" "permission denied" \
   "$(as $EMP - "select partner_share_id from agency_candidate_offers where id='$OP';")"
 check "(a) the client reads no partnership and no passed need" "0/0" \
   "$(as $EMP - "select (select count(*) from agency_partnerships)||'/'||(select count(*) from agency_partner_request_shares);")"
-check "(a) nor any partnership read, commission or partner-offer list" "0/0/0" \
-  "$(as $EMP - "select (select count(*) from list_agency_partnerships_v1())||'/'||(select count(*) from list_agency_commissions_v1())||'/'||(select count(*) from list_partner_offers_for_lead_v1());")"
-check "(b) the partner follows its own offer, without a client column" "1/offered" \
-  "$(as $P - "select count(*)||'/'||min(offer_status) from list_agency_offer_progress_v1() where offer_id='$OP';")"
-check "(b) the partner's progress reads have no client column" "0" \
-  "$(su "select count(*) from pg_proc p, unnest(p.proargnames) a where p.proname in ('list_agency_offer_progress_v1','list_agency_placements_v1') and a like '%client%' and a <> 'client_decided_at'")"
-check "(b) the lead does not follow the partner's offer as its own (no worker identity)" "0" \
-  "$(as $L - "select count(*) from list_agency_offer_progress_v1() where offer_id='$OP';")"
-check "(b) the lead cannot withdraw the partner's offer" "f" \
-  "$(as $L - "select withdraw_agency_candidate_offer_v1('$OP');")"
-# (c) the direct flow, unchanged: the lead offers its own roster worker on its own client's need.
+check "(a) nor any partnership read or commission" "0/0" \
+  "$(as $EMP - "select (select count(*) from list_agency_partnerships_v1())||'/'||(select count(*) from list_agency_commissions_v1());")"
+check "partner: no direct read of the offer row, nor of any row naming the client" "0/0" \
+  "$(as $P - "select (select count(*) from agency_candidate_offers where id='$OP')||'/'||(select count(*) from agency_candidate_offers where client_company_id='$EC');")"
+check "the lead follows the forwarded candidate as its own, and reads its row" "1/1" \
+  "$(as $L - "select (select count(*) from list_agency_offer_progress_v1() where offer_id='$OP')||'/'||(select count(*) from agency_candidate_offers where id='$OP');")"
+
+echo "== 4c. (d) THE DIRECT AGENCY FLOW, UNCHANGED ===================================="
 ODIR=$(as $L - "select submit_agency_candidate_offer_v1('$SH', '$WL', 'QA-SYNTHETIC direct');")
-checkre "(c) the lead's direct offer is accepted as before" "^[0-9a-f-]{36}$" "$ODIR"
-check "(c) a direct offer: agency = the lead, no partner step" "$LC/true" \
+checkre "(d) the lead's direct offer is made as before" "^[0-9a-f-]{36}$" "$ODIR"
+check "(d) a direct offer: agency = the lead, no partner step" "$LC/true" \
   "$(su "select agency_company_id||'/'||(partner_share_id is null) from agency_candidate_offers where id='$ODIR'")"
-check "(c) offering it again re-affirms the same offer" "$ODIR" \
+check "(d) offering it again re-affirms the same offer" "$ODIR" \
   "$(as $L - "select submit_agency_candidate_offer_v1('$SH', '$WL');")"
-check "(c) the client sees it under the lead, the lead follows it" "QA-SYNTHETIC Lead agency/1" \
+check "(d) the client sees it under the lead, the lead follows it" "QA-SYNTHETIC Lead agency/1" \
   "$(as $EMP - "select agency_name from list_agency_offered_candidates_for_request_v2('$REQ') where offer_id='$ODIR';")/$(as $L - "select count(*) from list_agency_offer_progress_v1() where offer_id='$ODIR';")"
-check "(c) the lead reads its direct row directly, as before" "1" \
-  "$(as $L - "select count(*) from agency_candidate_offers where id='$ODIR';")"
-# A worker on BOTH rosters: neither side may take over the other's open offer of them on this need.
-su "insert into company_workers (company_id, worker_id, status) values ('$LC','$WP1','active'),('$PC','$WL','active')" >/dev/null
-check "a direct offer never takes over the partner's open offer of the same worker" "already_offered" \
-  "$(as $L - "select submit_agency_candidate_offer_v1('$SH', '$WP1');")"
-check "a partner offer never takes over the lead's open direct offer" "already_offered" \
-  "$(as $P - "select submit_partner_candidate_offer_v1('$PS', '$WL');")"
-check "both offers kept their owner" "$PS/true" \
-  "$(su "select (select partner_share_id from agency_candidate_offers where id='$OP')||'/'||(select partner_share_id is null from agency_candidate_offers where id='$ODIR')")"
-su "delete from company_workers where (company_id, worker_id) in (('$LC','$WP1'),('$PC','$WL'))" >/dev/null
-check "(c) the lead withdraws its direct offer, as before" "t/withdrawn" \
+# A worker on BOTH rosters: the lead already offered them directly, so a partner's proposal of the
+# same worker on the same need cannot become a second offer.
+su "insert into company_workers (company_id, worker_id, status) values ('$PC','$WL','active')" >/dev/null
+PRW=$(as $P - "select propose_partner_candidate_v1('$PS', '$WL');")
+check "(d) a forward never makes a second offer of a worker the lead already offered" "already_offered" \
+  "$(as $L - "select forward_partner_candidate_v1('$PRW', null);")"
+check "(d) the refused forward changed nothing" "proposed/true" \
+  "$(su "select (select status from agency_partner_candidate_proposals where id='$PRW')||'/'||(select partner_share_id is null from agency_candidate_offers where id='$ODIR')")"
+as $L - "select return_partner_candidate_v1('$PRW', null);" >/dev/null
+su "delete from company_workers where company_id='$PC' and worker_id='$WL'" >/dev/null
+check "(d) the lead withdraws its direct offer, as before" "t/withdrawn" \
   "$(as $L - "select withdraw_agency_candidate_offer_v1('$ODIR');")/$(su "select status from agency_candidate_offers where id='$ODIR'")"
 
 echo "== 5. THE CLIENT ACCEPTS ON THE LEAD'S TERM ====================================="
@@ -300,7 +351,9 @@ check "the commission keeps the term it was accepted under" "800.00" \
   "$(as $L - "select amount from list_agency_commissions_v1() where offer_id='$OP';")"
 
 echo "== 8. TAKING A NEED BACK, AND ENDING THE PARTNERSHIP ============================"
-OP2=$(as $P - "select submit_partner_candidate_offer_v1('$PS', '$WP2');")
+PRO=$(as $P - "select propose_partner_candidate_v1('$PS', '$WP2');")
+OP2=$(as $L - "select forward_partner_candidate_v1('$PRO', null);")
+PRX=$(as $P - "select propose_partner_candidate_v1('$PS', '$WP1');")
 check "the partner cannot take the need back; only the lead can" "partner_share_not_found" \
   "$(as $P - "select unshare_request_with_partner_v1('$PS');")"
 as $L - "select unshare_request_with_partner_v1('$PS');" >/dev/null
@@ -310,11 +363,15 @@ check "R2 P3-b: passing the need is audited once (a repeated pass logs nothing)"
   "$(su "select count(*)||'/'||min(payload->>'partnership_id')||'/'||min(payload->>'lead_company_id')||'/'||min(payload->>'partner_company_id')||'/'||min(payload->>'client_share_id')||'/'||min(payload->>'client_company_id')||'/'||min(payload->>'request_id') from audit_logs where action='agency_partner_need_passed' and entity_id='$PS'")"
 check "R2 P3-b: taking it back is audited, by the lead, with the offers it withdrew" "1/$L/$PID/1" \
   "$(su "select count(*)||'/'||min(actor_id::text)||'/'||min(payload->>'partnership_id')||'/'||min(payload->>'withdrawn_offers') from audit_logs where action='agency_partner_need_revoked' and entity_id='$PS'")"
+check "taking it back also closes the open proposal on it" "withdrawn" \
+  "$(su "select status from agency_partner_candidate_proposals where id='$PRX'")"
 check "the accepted offer and its placement stay" "accepted" "$(su "select status from agency_candidate_offers where id='$OP'")"
 check "an offer on a revoked pass is refused" "share_not_active" \
-  "$(as $P - "select submit_partner_candidate_offer_v1('$PS', '$WP2');")"
+  "$(as $P - "select propose_partner_candidate_v1('$PS', '$WP2');")"
 PS2=$(as $L - "select share_request_with_partner_v1('$PID', '$SH');")
-OP3=$(as $P - "select submit_partner_candidate_offer_v1('$PS2', '$WP2');")
+PRO3=$(as $P - "select propose_partner_candidate_v1('$PS2', '$WP2');")
+OP3=$(as $L - "select forward_partner_candidate_v1('$PRO3', null);")
+PRY=$(as $P - "select propose_partner_candidate_v1('$PS2', '$WP1');")
 su "update agency_partnerships set status='ended' where id='$PID'" >/dev/null
 check "a partner offer cannot be accepted once the partnership is not active" "partnership_not_active" \
   "$(as $EMP - "select respond_agency_candidate_offer_v2('$OP3', 'accepted', null, (select id from agency_placement_terms where company_id='$LC' and retired_at is null));")"
@@ -326,6 +383,8 @@ check "ending revokes the pass and withdraws the open offer" "ended/revoked/with
   "$(su "select p.status||'/'||s.status||'/'||o.status from agency_partnerships p, agency_partner_request_shares s, agency_candidate_offers o where p.id='$PID' and s.id='$PS2' and o.id='$OP3'")"
 check "R2 P3-b: the end's audit row names the passes it took back" "$P/[\"$PS2\"]" \
   "$(su "select actor_id||'/'||(payload->'revoked_partner_share_ids')::text from audit_logs where action='agency_partnership_ended' and entity_id='$PID'")"
+check "ending also closes the open proposal" "withdrawn" \
+  "$(su "select status from agency_partner_candidate_proposals where id='$PRY'")"
 check "the placed offer is history and stays accepted" "accepted" "$(su "select status from agency_candidate_offers where id='$OP'")"
 check "an ended partnership cannot pass a need" "partnership_not_active" \
   "$(as $L - "select share_request_with_partner_v1('$PID', '$SH');")"
@@ -339,9 +398,11 @@ echo "== 9. GRANTS =============================================================
 for f in "invite_agency_partner_v1(uuid,text,numeric)" "accept_agency_partnership_v1(uuid,uuid)" \
          "decline_agency_partnership_v1(uuid)" "end_agency_partnership_v1(uuid)" \
          "share_request_with_partner_v1(uuid,uuid)" "unshare_request_with_partner_v1(uuid)" \
-         "submit_partner_candidate_offer_v1(uuid,uuid,text)" "respond_agency_candidate_offer_v2(uuid,text,text,uuid)" \
+         "propose_partner_candidate_v1(uuid,uuid,text)" "forward_partner_candidate_v1(uuid,text)" \
+         "return_partner_candidate_v1(uuid,text)" "withdraw_partner_candidate_v1(uuid)" \
+         "respond_agency_candidate_offer_v2(uuid,text,text,uuid)" \
          "list_agency_partnerships_v1()" "list_partner_shared_requests_v1()" \
-         "list_partner_offers_for_lead_v1()" "list_agency_commissions_v1()"; do
+         "list_partner_candidate_proposals_v1()" "list_agency_commissions_v1()"; do
   check "anon cannot execute $f" "f/t" \
     "$(su "select has_function_privilege('anon','public.$f','execute')||'/'||has_function_privilege('authenticated','public.$f','execute')" | sed 's/true/t/g; s/false/f/g')"
 done
@@ -357,11 +418,11 @@ checkre "the rollback refuses while partnerships exist" "ROLLBACK REFUSED" \
 check "a refused rollback changed nothing" "2" "$(su "select count(*) from agency_partnerships")"
 $PSQL -v ON_ERROR_STOP=1 >/dev/null <<SQL
 delete from company_worker_engagements; update agency_candidate_offers set partner_share_id = null;
-delete from agency_partner_request_shares; delete from agency_partnerships;
+delete from agency_partner_candidate_proposals; delete from agency_partner_request_shares; delete from agency_partnerships;
 SQL
 run_file "$DOWN"
-check "the rollback drops both tables and the column" "0/0/0" \
-  "$(su "select (to_regclass('public.agency_partnerships') is not null)::int||'/'||(to_regclass('public.agency_partner_request_shares') is not null)::int||'/'||count(*) from information_schema.columns where table_name='agency_candidate_offers' and column_name='partner_share_id'")"
+check "the rollback drops the three tables and the column" "0/0/0/0" \
+  "$(su "select (to_regclass('public.agency_partnerships') is not null)::int||'/'||(to_regclass('public.agency_partner_request_shares') is not null)::int||'/'||(to_regclass('public.agency_partner_candidate_proposals') is not null)::int||'/'||count(*) from information_schema.columns where table_name='agency_candidate_offers' and column_name='partner_share_id'")"
 check "the rollback restores 20261114235900's v2 (no partner rule)" "0" \
   "$(su "select count(*) from pg_proc where proname='respond_agency_candidate_offer_v2' and prosrc like '%partner_share%'")"
 check "the restored v2 is still executable by signed-in callers only" "f/t" \
@@ -372,12 +433,10 @@ check "the rollback gives signed-in callers v1 back, as on main" "t" \
   "$(su "select has_function_privilege('authenticated','public.respond_agency_candidate_offer_v1(uuid,text,text)','execute')" | sed 's/true/t/g; s/false/f/g')"
 check "the rollback restores the full read grant" "t" \
   "$(su "select has_column_privilege('authenticated','public.agency_candidate_offers','created_by','select')" | sed 's/true/t/g; s/false/f/g')"
-check "the rollback restores main's four function bodies" "0" \
-  "$(su "select count(*) from pg_proc where proname in ('list_agency_offer_progress_v1','list_agency_placements_v1','withdraw_agency_candidate_offer_v1','submit_agency_candidate_offer_v1') and (prosrc like '%agency_offer_owner_v1%' or prosrc like '%already_offered%')")"
-check "the rollback restores main's offer read policy" "0" \
-  "$(su "select count(*) from pg_policies where policyname='agency_candidate_offers_select' and qual like '%partner_share_id%'")"
+check "main's own agency functions and offer read policy were never touched" "0/0" \
+  "$(su "select (select count(*) from pg_proc where proname in ('list_agency_offer_progress_v1','list_agency_placements_v1','withdraw_agency_candidate_offer_v1','submit_agency_candidate_offer_v1') and (prosrc like '%agency_offer_owner_v1%' or prosrc like '%already_offered%'))||'/'||(select count(*) from pg_policies where policyname='agency_candidate_offers_select' and qual like '%partner_share_id%')")"
 check "the rollback leaves no new function behind" "0" \
-  "$(su "select count(*) from pg_proc where proname in ('invite_agency_partner_v1','list_agency_commissions_v1','submit_partner_candidate_offer_v1')")"
+  "$(su "select count(*) from pg_proc where proname in ('invite_agency_partner_v1','list_agency_commissions_v1','propose_partner_candidate_v1','forward_partner_candidate_v1','list_partner_candidate_proposals_v1','agency_offer_owner_v1')")"
 run_file "$MIG"
 check "the migration re-applies after the rollback" "1" "$(su "select (to_regclass('public.agency_partnerships') is not null)::int")"
 
