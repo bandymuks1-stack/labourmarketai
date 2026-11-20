@@ -11,6 +11,10 @@ import { PrivacyDeletionRequest } from "@/components/app/privacy-deletion-reques
 import { PrivacyDeletionConfirm } from "@/components/app/privacy-deletion-confirm";
 import { PrivacyDeletionCancel } from "@/components/app/privacy-deletion-cancel";
 import { listMyPrivacyRequests } from "@/lib/privacy/actions";
+import {
+  countMyShareableExternalProfiles,
+  listMyContactDisclosureRequests,
+} from "@/lib/privacy/contact-disclosure-actions";
 import { getMyAccountDeletionStatus } from "@/lib/privacy/deletion-cancel-actions";
 import {
   deletionSectionMode,
@@ -18,7 +22,6 @@ import {
   deletionStatusProvesRpc,
 } from "@/lib/privacy/deletion-cancel-model";
 import { formatUtcDateTime } from "@/lib/time/display";
-import { listMyContactDisclosureRequests } from "@/lib/privacy/contact-disclosure-actions";
 import {
   getMyConsentHistory,
   getMyDiscoverabilityState,
@@ -94,6 +97,7 @@ export default async function PrivacyPage({
     myRequests,
     contactRequestsResult,
     partnerSupplyState,
+    shareableLinkCount,
     deletionStatus,
   ] = await Promise.all([
     getMyDiscoverabilityState(),
@@ -102,6 +106,7 @@ export default async function PrivacyPage({
     listMyPrivacyRequests(),
     listMyContactDisclosureRequests(),
     getMyPartnerSupplyState(),
+    countMyShareableExternalProfiles(),
     getMyAccountDeletionStatus(),
   ]);
 
@@ -184,6 +189,7 @@ export default async function PrivacyPage({
             needTitle: contextTitle,
             createdAtDate: r.createdAt.slice(0, 10),
             fieldLabels: r.requestedFields.map(fieldLabel),
+            requestsExternalProfiles: r.requestedFields.includes("external_profiles"),
             disclosureGranted: r.disclosureGranted,
             legal: {
               title: fill(disclosureLegal.title),
@@ -330,6 +336,7 @@ export default async function PrivacyPage({
           <ContactDisclosureRequests
             locale={locale}
             requests={contactRequestCards}
+            shareableLinkCount={shareableLinkCount}
             labels={{
               legalLanguageNote: consentLegalLanguageNote(tc, locale),
               empty: tc("contactRequests.empty"),
@@ -353,6 +360,8 @@ export default async function PrivacyPage({
               withdrawGrant: tc("contactRequests.withdrawGrant"),
               withdrawGrantNote: tc("contactRequests.withdrawGrantNote"),
               withdrawnNote: tc("contactRequests.withdrawnNote"),
+              includeLinks: tc("contactRequests.includeLinks", { count: shareableLinkCount }),
+              includeLinksNote: tc("contactRequests.includeLinksNote"),
               error: tc("contactRequests.error"),
             }}
           />

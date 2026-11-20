@@ -1649,6 +1649,10 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261014190000_team_disband_v1.sql",
       // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
       "20261015193211_20261015120000_esco_label_search_v1.sql",
+      // 2026-10-18: external profile links in the contact permission (RED SECURITY DEFINER + GRANT). The
+      // annotation acknowledges the RED class so CI can run; the PR stays a draft with
+      // needs-human-gate and is applied only on the owner's explicit approval.
+      "20261018130000_external_profile_disclosure_v1.sql",
       // 2026-10-18: the worker identity split (RED RLS policy + SECURITY DEFINER + GRANT). The
       // annotation acknowledges the RED class so CI can run; the PR stays a draft with
       // needs-human-gate and is applied only on the owner's explicit approval.

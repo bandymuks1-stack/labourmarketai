@@ -9350,7 +9350,8 @@
       "withdrawing": "Drar tillbaka…",
       "withdrawn": "Du drog tillbaka den här begäran.",
       "withdrawNotOpen": "Den här begäran är inte längre öppen – den kan inte dras tillbaka.",
-      "withdrawError": "Begäran kunde inte dras tillbaka. Försök igen."
+      "withdrawError": "Begäran kunde inte dras tillbaka. Försök igen.",
+      "sharedLinks": "Profillänkar som arbetstagaren delade:"
     },
     "shortlistNote": {
       "label": "Anteckning",
@@ -11492,7 +11493,8 @@
       "cv_document": "CV-fil",
       "preferred_locations": "Önskade orter",
       "availability_details": "Detaljer om tillgänglighet",
-      "salary_expectation": "Löneanspråk"
+      "salary_expectation": "Löneanspråk",
+      "external_profiles": "Länkar till externa profiler"
     },
     "rights": {
       "notice": "Mer om dina rättigheter och hur uppgifter hanteras:",
@@ -11526,7 +11528,9 @@
       "accept": "Acceptera",
       "acceptedNote": "Accepterat. Inget har delats än – att tillåta kontaktuppgifter är ett separat val nedan.",
       "grantTitle": "Dela kontaktuppgifter?",
-      "grantIntro": "Det här är ett separat beslut. Endast de uppgifter som listas nedan skulle lämnas till det här företaget, och endast för det här behovet."
+      "grantIntro": "Det här är ett separat beslut. Endast de uppgifter som listas nedan skulle lämnas till det här företaget, och endast för det här behovet.",
+      "includeLinks": "Dela även mina länkar till externa profiler som är markerade som ”Kan delas” ({count})",
+      "includeLinksNote": "Om du inte kryssar i rutan delas ingen länk. Bara det här företaget får dem, och bara för det här behovet."
     },
     "partnerSupply": {
       "sectionIntro": "Att jämföras mot ett jobb och att namnges är inte samma sak. Den här behörigheten låter LabourMarket.ai söka lämpligt arbete åt dig hos arbetsgivare och projekt utanför den här plattformen, via godkänd partnerinfrastruktur. Endast en yrkessammanfattning utan direkt identifierande uppgifter lämnas vidare – aldrig ditt namn eller dina kontaktuppgifter.",
@@ -12594,8 +12598,8 @@
     "cancel": "Avbryt",
     "visibility": "Synlighet",
     "visibilityPrivate": "Privat",
-    "visibilityEmployers": "Arbetsgivare",
-    "visibilityNote": "Inte tillgängligt just nu.",
+    "visibilityEmployers": "Kan delas",
+    "visibilityNote": "Företag ser inte de här länkarna. En länk som är markerad som ”Kan delas” går bara till ett företag som du själv ger tillåtelse när du svarar på dess förfrågan om kontaktuppgifter. Du kan återkalla det när som helst i dina integritetsinställningar.",
     "importNote": "Automatisk import från de här webbplatserna erbjuds inte. Ladda upp en exporterad CV-fil i profilredigeraren för att föra in dina uppgifter.",
     "importLink": "Öppna profilredigeraren",
     "empty": "Inga externa profiler länkade än.",

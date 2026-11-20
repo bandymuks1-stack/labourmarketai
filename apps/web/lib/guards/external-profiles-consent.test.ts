@@ -36,7 +36,16 @@ import { describe, expect, it } from "vitest";
  * read, no employer read, no automatic fetch/import/scrape, soft disconnect,
  * bounded snapshot/profile inputs. The parent's assertions stay exactly as they
  * were — it remains recorded architecture, and P5/P7 stay deferred rather than
- * quietly declared implemented.
+ * quietly declared implemented. *
+ * EXTENDED 2026-10-18 (owner command: one sharing feature inside the existing
+ * consent system). §(i) pins the ONE employer path that now exists, and it is
+ * not a table policy: 20261018130000_external_profile_disclosure_v1 adds a
+ * SECURITY DEFINER read that returns a worker's links only to the organization
+ * named in that worker's live per-need disclosure grant with the
+ * `external_profiles` field, and only links the worker marked shareable and
+ * still connected. The table's RLS, discovery and every assertion above stay
+ * unchanged — "(b) no employer read path" still holds for the table and for the
+ * external-profile modules; the ledger-gated read lives in the disclosure module.
  */
 
 const APP = join(__dirname, "..", "..");
@@ -467,5 +476,81 @@ describe("(h) external profiles are accounted for by the privacy surfaces", () =
     expect(splitNoComments).toMatch(
       /worker_id\s+uuid not null references public\.workers\(id\) on delete cascade/,
     );
+  });
+});
+
+// ── (i) the ONE employer path: the per-organization disclosure ledger ───────
+//
+// Owner command 2026-10-18. A link reaches a company only through
+// list_disclosed_external_profiles_v1, which re-checks the consent ledger on
+// every read. Nothing here widens the table's policy or discovery.
+
+const DISCLOSURE = join(
+  ROOT,
+  "supabase",
+  "migrations",
+  "20261018130000_external_profile_disclosure_v1.sql",
+);
+const DISCLOSURE_ROLLBACK = join(
+  ROOT,
+  "supabase",
+  "rollbacks",
+  "20261018130000_external_profile_disclosure_v1.down.sql",
+);
+
+describe("(i) external links reach a company only through a live per-need grant", () => {
+  const disclosureSql = readFileSync(DISCLOSURE, "utf8");
+  const code = disclosureSql.replace(/--[^\n]*/g, "");
+  const readFn =
+    code.split("function public.list_disclosed_external_profiles_v1")[1]?.split("$$;")[0] ?? "";
+
+  it("is a RED, human-gated migration with a rollback that removes the read", () => {
+    expect(disclosureSql).toMatch(/^--\s*@human-gate-approved/m);
+    const down = readFileSync(DISCLOSURE_ROLLBACK, "utf8");
+    expect(down).toMatch(/drop function if exists public\.list_disclosed_external_profiles_v1/);
+    expect(down).toMatch(/drop function if exists public\.set_external_profile_visibility_v1/);
+  });
+
+  it("adds no policy or grant on the table, and never touches discovery", () => {
+    expect(code).not.toMatch(/create policy/);
+    expect(code).not.toMatch(/grant[^;]*on public\.worker_external_profiles/);
+    expect(code).not.toMatch(/worker_profile_discoverable|list_open_supply_for_employers|is_employer/);
+  });
+
+  it("the read re-checks the ledger: latest event, granted, current version, the field", () => {
+    expect(readFn).toMatch(/manages_organization\(o\.id\)/);
+    expect(readFn).toMatch(/order by e\.created_at desc, e\.seq desc/);
+    expect(readFn).toMatch(/v_latest\.action <> 'granted'/);
+    expect(readFn).toMatch(/consent_text_version is distinct from/);
+    expect(readFn).toMatch(/selected_fields \? 'external_profiles'/);
+  });
+
+  it("the read returns only links the worker marked shareable and still connected", () => {
+    expect(readFn).toMatch(/ep\.visibility = 'employers'/);
+    expect(readFn).toMatch(/ep\.disconnected_at is null/);
+    expect(readFn).toMatch(/select ep\.id, ep\.platform, ep\.url/);
+    expect(readFn).not.toMatch(/imported_snapshot/);
+    expect(code).toMatch(
+      /revoke all on function public\.list_disclosed_external_profiles_v1\(uuid, uuid, uuid\) from anon/,
+    );
+  });
+
+  it("the employer read lives in the disclosure module, never in the external-profile modules", () => {
+    const actions = read("lib/privacy/contact-disclosure-actions.ts");
+    expect(actions).toMatch(/"list_disclosed_external_profiles_v1"/);
+    for (const f of CONSUMER_FILES) {
+      expect(read(f), f).not.toMatch(/list_disclosed_external_profiles_v1/);
+    }
+  });
+
+  it("the worker's opt-in at grant time is per request and unchecked by default", () => {
+    const component = read("components/app/contact-disclosure-requests.tsx");
+    expect(component).toMatch(/useState<Record<string, boolean>>\(\{\}\)/);
+    expect(component).toMatch(/includeExternalProfiles: includeLinks\[id\] === true/);
+    const actions = read("lib/privacy/contact-disclosure-actions.ts");
+    const grantFn =
+      actions.split("export async function grantContactDisclosureAction")[1]?.split("\nexport ")[0] ?? "";
+    expect(grantFn).toMatch(/input\.includeExternalProfiles === true/);
+    expect(grantFn).toMatch(/\.eq\("visibility", "employers"\)/);
   });
 });

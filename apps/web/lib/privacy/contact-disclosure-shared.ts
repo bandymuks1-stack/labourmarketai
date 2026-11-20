@@ -34,6 +34,7 @@ export const CONTACT_DISCLOSURE_FIELD_WHITELIST = [
   "preferred_locations",
   "availability_details",
   "salary_expectation",
+  "external_profiles",
 ] as const;
 export type ContactDisclosureField =
   (typeof CONTACT_DISCLOSURE_FIELD_WHITELIST)[number];
@@ -53,14 +54,20 @@ export function isContactDisclosureStatus(
 }
 
 /**
- * Validate a requested-fields payload: array, 1..7 entries, no duplicates,
+ * Validate a requested-fields payload: array, 1..8 entries, no duplicates,
  * every entry in the closed whitelist. Returns the normalized list or null
  * (never a partially-cleaned list — fail closed).
  */
 export function validateRequestedFields(
   input: unknown,
 ): ContactDisclosureField[] | null {
-  if (!Array.isArray(input) || input.length < 1 || input.length > 7) return null;
+  if (
+    !Array.isArray(input) ||
+    input.length < 1 ||
+    input.length > CONTACT_DISCLOSURE_FIELD_WHITELIST.length
+  ) {
+    return null;
+  }
   const out: ContactDisclosureField[] = [];
   for (const raw of input) {
     if (

@@ -10,6 +10,7 @@ import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
   addExternalProfileAction,
   disconnectExternalProfileAction,
+  setExternalProfileVisibilityAction,
   type ExternalProfileActionResult,
 } from "@/lib/worker/external-profiles-actions";
 import {
@@ -26,9 +27,11 @@ import {
  * 20260713210000_multi_source_talent_v1 (human-gated, NOT applied yet).
  *
  * Consent-first honesty rules encoded in this component:
- *   - default visibility is PRIVATE; the "employers" choice is a SAVED
- *     PREFERENCE only in v1 (no employer read path exists) and the card says
- *     so in plain words next to the toggle — never a fake reach claim.
+ *   - default visibility is PRIVATE; "Shareable" (stored as 'employers') only
+ *     makes a link ELIGIBLE. No company sees it through discovery; one company
+ *     receives it only when the worker grants that company's contact request
+ *     with the links included (2026-10-18, consent v3). The card says so in
+ *     plain words next to the toggle — never a reach claim.
  *   - disconnect is a soft disconnect (row preserved as provenance) behind
  *     an inline two-step confirm.
  *   - NO import button: official/automatic import does not exist in v1, so
@@ -85,12 +88,17 @@ function ProfileRow({
   labels: ExternalProfilesLabels;
 }) {
   const [confirming, setConfirming] = useState(false);
+  const [visState, visAction, visPending] = useActionState<
+    ExternalProfileActionResult | null,
+    FormData
+  >(setExternalProfileVisibilityAction, null);
   const [discState, discAction, discPending] = useActionState<
     ExternalProfileActionResult | null,
     FormData
   >(disconnectExternalProfileAction, null);
 
-  const rowError = actionErrorText(discState, labels);
+  const nextVisibility = entry.visibility === "private" ? "employers" : "private";
+  const rowError = actionErrorText(visState, labels) ?? actionErrorText(discState, labels);
 
   return (
     <li
@@ -108,17 +116,25 @@ function ProfileRow({
         </span>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          {/* Visibility is SHOWN, not toggled: the RPC that would save a change is not part of the
-              applied schema (the 2026-09-15 split shipped save/disconnect only), so a toggle could
-              never save. The stored value is still shown, and the note below says employer viewing
-              is not switched on. */}
-          <span
-            className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary"
-            data-testid={`external-profile-visibility-${entry.id}`}
-          >
-            {labels.visibility}:{" "}
-            {entry.visibility === "private" ? labels.visibilityPrivate : labels.visibilityEmployers}
-          </span>
+          {/* The per-link choice (set_external_profile_visibility_v1): "Shareable" only makes the
+              link ELIGIBLE. A company receives it solely when the worker also grants that company's
+              contact request with the links included (consent ledger, per organization, per need). */}
+          <form action={visAction}>
+            <input type="hidden" name="id" value={entry.id} />
+            <input type="hidden" name="visibility" value={nextVisibility} />
+            <button
+              type="submit"
+              disabled={visPending}
+              aria-pressed={entry.visibility === "employers"}
+              className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:text-text-primary disabled:opacity-50"
+              data-testid={`external-profile-visibility-${entry.id}`}
+            >
+              {labels.visibility}:{" "}
+              {entry.visibility === "private"
+                ? labels.visibilityPrivate
+                : labels.visibilityEmployers}
+            </button>
+          </form>
 
           {/* Soft disconnect behind an inline two-step confirm. */}
           {confirming ? (
@@ -228,9 +244,8 @@ export function ExternalProfilesSection({
             </p>
           )}
 
-          {/* Honest v1 visibility note: the "employers" preference is saved,
-              but no employer can see these links yet. Always visible so the
-              toggle can never read as a live reach claim. */}
+          {/* Honest visibility note: "Shareable" is not "visible to employers". Always visible so
+              the toggle can never read as a reach claim. */}
           <p
             className="text-xs leading-relaxed text-text-muted"
             data-testid="external-profiles-visibility-note"
