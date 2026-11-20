@@ -122,7 +122,8 @@ export function ConversationHeader({
     <header
       data-testid="app-header"
       className={cn(
-        "flex flex-none flex-wrap items-center gap-x-2 gap-y-2 border-b border-ink-600 bg-ink-900/80 px-4 py-2.5 backdrop-blur",
+        "flex flex-none flex-wrap items-center gap-x-2 gap-y-2 border-b border-ink-600 bg-ink-900/80 px-4 py-2 backdrop-blur",
+        !mobile && "md:py-2.5",
         !mobile && "md:flex-nowrap md:gap-x-3",
       )}
     >
@@ -166,7 +167,9 @@ export function ConversationHeader({
       {auth && (
         <span
           className={cn(
-            "order-4 flex min-w-0 flex-1 items-center gap-1.5",
+            // max-md:min-w-[7.5rem]: the chip keeps room for its longest word
+            // ("пространство", 83px) beside the area button at 320px.
+            "order-4 flex min-w-0 flex-1 items-center gap-1.5 max-md:min-w-[7.5rem]",
             !mobile && "md:order-none md:flex-initial",
           )}
         >
@@ -231,10 +234,14 @@ export function ConversationHeader({
       <span aria-hidden className={cn("order-3 h-0 basis-full", !mobile && "md:hidden")} />
 
       {/* Phone: ONE area button — names where the person is, opens every
-          destination they may reach in a bottom sheet. */}
+          destination they may reach in a bottom sheet. It SHARES the row with
+          the workspace chip (owner phone report 2026-11-20): as `flex-none`
+          with a one-line label it took the whole row ("Смотреть возможности"
+          at 320px) and squeezed the chip to a dot. Both now take half the
+          row and may wrap their label to a second line inside 44px. */}
       {auth && (
         <HeaderAreaSheet
-          className={cn("order-5 flex-none", !mobile && "md:hidden")}
+          className={cn("order-5 min-w-0 flex-1", !mobile && "md:hidden")}
           items={allItems}
           activeItem={active}
           place={place}
@@ -506,13 +513,16 @@ function HeaderAreaSheet({
         aria-label={current ? `${current} · ${menuLabel}` : menuLabel}
         onClick={() => setOpen(true)}
         className={cn(
-          "relative flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full border border-ink-500 px-3 text-support font-medium text-text-primary transition-colors hover:border-brand-blue",
+          "relative flex min-h-11 items-center gap-1.5 rounded-full border border-ink-500 px-3 text-support font-medium text-text-primary transition-colors hover:border-brand-blue",
           className,
         )}
       >
-        <Icon {...iconControl("text-brand-blue")} aria-hidden />
-        <span>{current ?? menuLabel}</span>
-        <ChevronDown {...iconControl("text-text-muted")} aria-hidden />
+        {/* On a phone the label needs the icon's width: "Смотреть возможности"
+            at 320px and "Моё пространство" at 360px were cut beside it. The
+            sheet itself shows every area with its icon. */}
+        <Icon {...iconControl("flex-none text-brand-blue max-sm:hidden")} aria-hidden />
+        <span className="line-clamp-2 min-w-0 flex-1 break-words text-left leading-tight">{current ?? menuLabel}</span>
+        <ChevronDown {...iconControl("flex-none text-text-muted")} aria-hidden />
         <NavBadge id="sheet" count={total} />
       </button>
       <MobileSheet open={open} onClose={() => setOpen(false)} title={sheetTitle} closeLabel={closeLabel}>

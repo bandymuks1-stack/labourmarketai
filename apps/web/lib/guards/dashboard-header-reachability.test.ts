@@ -53,10 +53,16 @@ describe("dashboard header reachability", () => {
     expect(header).toMatch(/data-testid="header-nav-sheet-trigger"/);
   });
 
+  it("on a phone the area button shares its row with the workspace chip", () => {
+    // Both halves shrink: neither may take the row from the other.
+    expect(header).toMatch(/"order-5 min-w-0 flex-1", !mobile && "md:hidden"/);
+    expect(header).toMatch(/line-clamp-2 min-w-0 flex-1 break-words text-left leading-tight/);
+  });
+
   it("the workspace chip is the one element that gives width back", () => {
     // min-w-0 on its wrapper lets the chip truncate (full name in its
     // tooltip) instead of pushing the controls off-screen.
-    expect(header).toMatch(/"order-4 flex min-w-0 flex-1 items-center gap-1\.5"/);
+    expect(header).toMatch(/"order-4 flex min-w-0 flex-1 items-center gap-1\.5 max-md:min-w-\[7\.5rem\]"/);
   });
 
   it("the control cluster is a shrink-0 anchor", () => {
@@ -90,6 +96,10 @@ describe("dashboard header reachability", () => {
     }
     // The header's own destinations keep the same floor.
     expect(header).toMatch(/relative flex h-11 flex-none items-center/);
-    expect(header).toMatch(/relative flex min-h-11 items-center gap-1\.5 whitespace-nowrap/);
+    // The phone's area button keeps the 44px floor. Its label wraps to a
+    // second line instead of staying on one (owner phone report 2026-11-20):
+    // a one-line, flex-none button took the whole row and squeezed the
+    // workspace chip beside it to a dot at 320px.
+    expect(header).toMatch(/relative flex min-h-11 items-center gap-1\.5 rounded-full/);
   });
 });
