@@ -18,6 +18,8 @@ import { BASE, isolatedStack, onboard, PASSWORD, setUpCompany, signIn, signUp } 
  *   - the page never scrolls sideways (scrollWidth ≤ clientWidth);
  *   - nothing in the header starts before 0 or ends past the screen, and
  *     neither label of the shared row is cut by its two-line clamp;
+ *   - the header keeps two rows (a third row means the area button wrapped
+ *     under the chip instead of sharing the row);
  *   - every header control is at least 44 × 44 px, so neither half of the
  *     shared row can be squeezed (the chip used to measure 0–42 px wide);
  *   - nothing on the page ends past the right edge outside a deliberate
@@ -68,6 +70,7 @@ async function onPhone(browser: Browser, address: string): Promise<{ ctx: Browse
 
 type Fit = {
   overflow: number;
+  headerHeight: number;
   headerOut: string[];
   headerSmall: string[];
   clipped: string[];
@@ -138,6 +141,7 @@ async function measure(page: Page): Promise<Fit> {
     }
     return {
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      headerHeight: header ? Math.round(header.getBoundingClientRect().height) : 0,
       headerOut: headerOut.slice(0, 6),
       headerSmall: headerSmall.slice(0, 6),
       clipped: clipped.map((el) => `${label(el)} right=${Math.round(el.getBoundingClientRect().right)}`),
@@ -211,6 +215,9 @@ for (const role of ROLES) {
           const fit = await measure(page);
           const at = `${lang}${path} at ${width}px`;
           if (fit.overflow > 1) problems.push(`${at}: the page scrolls ${fit.overflow}px sideways`);
+          // Two rows of 44px controls: a third row means the area button
+          // wrapped under the chip instead of sharing the row.
+          if (fit.headerHeight > 130) problems.push(`${at}: the header is ${fit.headerHeight}px tall (a third row)`);
           for (const h of fit.headerOut) problems.push(`${at}: header element off screen: ${h}`);
           for (const h of fit.headerSmall) problems.push(`${at}: header control under 44px: ${h}`);
           for (const c of fit.clipped) problems.push(`${at}: clipped past the right edge: ${c}`);

@@ -171,9 +171,11 @@ export function ConversationHeader({
       {auth && (
         <span
           className={cn(
-            // max-md:min-w-[7.5rem]: the chip keeps room for its longest word
-            // ("пространство", 83px) beside the area button at 320px.
-            "order-4 flex min-w-0 flex-1 items-center gap-1.5 max-md:min-w-[7.5rem]",
+            // max-md:min-w-[8rem]: the chip keeps room for its longest word
+            // beside the area button at 320px — "пространство" is 83px in
+            // Inter and 87px in DejaVu Sans, the fallback a phone or the CI
+            // runner draws Cyrillic with (Inter loads Latin subsets only).
+            "order-4 flex min-w-0 flex-1 items-center gap-1.5 max-md:min-w-[8rem]",
             !mobile && "md:order-none md:flex-initial",
           )}
         >
@@ -241,14 +243,15 @@ export function ConversationHeader({
           destination they may reach in a bottom sheet. It SHARES the row with
           the workspace chip (owner phone report 2026-11-20): as `flex-none`
           with a one-line label it took the whole row ("Смотреть возможности"
-          at 320px) and squeezed the chip to a dot. Now the button takes its
-          own width but may shrink (`flex-initial`) down to what the chip's
-          minimum leaves, and both may wrap their label to a second line
-          inside 44px. An even split was not enough: the CI runner's fonts
-          drew "Моё пространство" wider than the button's half of 320px. */}
+          at 320px) and squeezed the chip to a dot. Both now start from zero
+          width (so neither wraps to a third header row) and share the row
+          1 : 1.4, the chip keeping its 8rem minimum; both labels may wrap to
+          a second line inside 44px. Sized for the wider fallback font a
+          phone draws Cyrillic with: "возможности" needs 99px in DejaVu Sans,
+          and the button leaves 107px for it at 320px. */}
       {auth && (
         <HeaderAreaSheet
-          className={cn("order-5 min-w-0 flex-initial", !mobile && "md:hidden")}
+          className={cn("order-5 min-w-0 flex-[1.4_1_0%]", !mobile && "md:hidden")}
           items={allItems}
           activeItem={active}
           place={place}
@@ -520,7 +523,7 @@ function HeaderAreaSheet({
         aria-label={current ? `${current} · ${menuLabel}` : menuLabel}
         onClick={() => setOpen(true)}
         className={cn(
-          "relative flex min-h-11 items-center gap-1.5 rounded-full border border-ink-500 px-3 text-support font-medium text-text-primary transition-colors hover:border-brand-blue",
+          "relative flex min-h-11 items-center gap-1 rounded-full border border-ink-500 px-2.5 text-support font-medium text-text-primary transition-colors hover:border-brand-blue sm:gap-1.5 sm:px-3",
           className,
         )}
       >
