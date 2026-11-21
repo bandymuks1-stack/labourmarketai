@@ -78,6 +78,12 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {} }) }))
 vi.mock("@/lib/billing/billing-subject", () => ({
   resolveBillingSubject: vi.fn(async () => state.subject),
 }));
+// Registry 7.20: the organization's invoices (live Stripe read) are mocked
+// here; their own states and authorization are pinned in org-invoices*.test.ts.
+const invoiceRead = vi.hoisted(() => ({ result: { state: "not_authorized" } as Record<string, unknown> }));
+vi.mock("@/lib/billing/org-invoices", () => ({
+  readOrganizationInvoices: vi.fn(async () => invoiceRead.result),
+}));
 
 import { AccountBillingSection } from "@/components/app/account-billing-section";
 
@@ -101,6 +107,54 @@ beforeEach(() => {
     currentPeriodEnd: null,
   };
   state.subject = { ...state.subject, billingAuthority: true };
+});
+
+describe("the organization's invoices sit inside the billing section (registry 7.20)", () => {
+  const paid = {
+    id: "in_1",
+    number: "LM-0001",
+    created: 1_761_200_000,
+    periodStart: null,
+    periodEnd: null,
+    amountExcludingTax: 100,
+    tax: 0,
+    total: 100,
+    currency: "eur",
+    status: "paid",
+    hostedInvoiceUrl: "https://invoice.stripe.com/i/x",
+    invoicePdfUrl: "https://pay.stripe.com/invoice/x/pdf",
+  };
+  it("a billing manager sees the list in every active locale, from the real catalog", async () => {
+    invoiceRead.result = { state: "list", invoices: [paid], incomplete: false };
+    try {
+      for (const loc of activeLocales) {
+        state.locale = loc;
+        const html = await render(null);
+        expect(html, loc).toContain('data-testid="account-billing-invoices"');
+        expect(html, loc).toContain('data-invoice-status="paid"');
+        expect(html, loc).toContain("LM-0001");
+        expect(html, loc).toContain("https://pay.stripe.com/invoice/x/pdf");
+        expect(html, loc).not.toContain("MISSING:");
+      }
+    } finally {
+      invoiceRead.result = { state: "not_authorized" };
+    }
+  });
+  it("a member without billing authority sees no invoice block at all", async () => {
+    invoiceRead.result = { state: "not_authorized" };
+    expect(await render(null)).not.toContain('data-testid="account-billing-invoices"');
+  });
+  it("billing off still states why no invoices are shown (not 'none')", async () => {
+    state.config = { state: "disabled", reason: "off", testMode: false, paymentsEnabled: false, mode: "off" } as never;
+    invoiceRead.result = { state: "billing_off" };
+    try {
+      const html = await render(null);
+      expect(html).toContain('data-invoices-state="billing_off"');
+      expect(html).not.toContain("MISSING:");
+    } finally {
+      invoiceRead.result = { state: "not_authorized" };
+    }
+  });
 });
 
 describe("the paid return with no row yet", () => {

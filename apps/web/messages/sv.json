@@ -4589,6 +4589,7 @@
             "back": "Tillbaka",
             "next": "Nästa",
             "descRequired": "Lägg till en beskrivning för att fortsätta.",
+            "countryRequired": "Välj landet där arbetet utförs.",
             "optionalTag": "(valfritt)",
             "reviewIntro": "Granska och skapa. Förfrågan förblir privat i din yta.",
             "locationLabel": "Plats eller land",
@@ -4597,7 +4598,6 @@
             "skillsPlaceholder": "t.ex. körkort, engelska, erfarenhet",
             "urgencyLabel": "När du behöver det",
             "urgencyFlexible": "Flexibelt",
-            "countryRequired": "Välj landet där arbetet utförs.",
             "urgencyThisWeek": "Den här veckan",
             "urgencyUrgent": "Brådskande",
             "notesLabel": "Övriga anteckningar",
@@ -7214,6 +7214,10 @@
       "title": "Det gick inte att öppna konversationen",
       "body": "Du kanske inte har behörighet att meddela den här personen, eller så är personen inte längre tillgänglig. Inget skickades."
     },
+    "noLongerAvailable": {
+      "title": "Den här konversationen är inte längre tillgänglig",
+      "body": "Du deltar inte längre i den, så dess meddelanden visas inte."
+    },
     "scope": {
       "support": "Supportkanal",
       "unknown": "Sammanhang inte angivet",
@@ -7322,11 +7326,7 @@
     "translatedFrom": "Maskinöversättning från {lang}",
     "showOriginal": "Original ({lang})",
     "translationUnavailable": "Original ({lang}) — ingen översättning tillgänglig",
-    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen.",
-    "noLongerAvailable": {
-      "title": "Den här konversationen är inte längre tillgänglig",
-      "body": "Du deltar inte längre i den, så dess meddelanden visas inte."
-    }
+    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen."
   },
   "orgTier1Warning": {
     "eyebrow": "Din organisation",
@@ -9607,8 +9607,8 @@
       "withdraw": "Dra tillbaka förslaget",
       "findAnother": "Hitta en annan arbetstagare",
       "proposeAgain": "Föreslå igen med nya datum",
-      "planning": "Visa i kalendern",
-      "needClosed": "Arbetsgivaren har stängt detta behov, så förslaget kan inte längre accepteras. Du kan fortfarande tacka nej."
+      "needClosed": "Arbetsgivaren har stängt detta behov, så förslaget kan inte längre accepteras. Du kan fortfarande tacka nej.",
+      "planning": "Visa i kalendern"
     },
     "connections": {
       "title": "Kalenderkopplingar",
@@ -11393,6 +11393,32 @@
     "graceNotice": "Den senaste betalningen misslyckades – abonnemanget är i en anståndsperiod tills betalningen görs om.",
     "endsOn": "Avslutat – planen är aktiv till och med {date} och förnyas inte.",
     "endsAtPeriodEnd": "Avslutat – planen är aktiv till slutet av den betalda perioden och förnyas inte.",
+    "invoices": {
+      "title": "Fakturor",
+      "billingOff": "Fakturor visas inte medan betalningar är avstängda för den här organisationen.",
+      "noCustomer": "Inga fakturor ännu: den här organisationen har inte betalat via betalleverantören.",
+      "unknown": "Fakturorna kunde inte läsas från betalleverantören just nu. Det betyder inte att det inte finns några – försök igen senare.",
+      "empty": "Betalleverantören har inga fakturor för den här organisationen ännu.",
+      "incomplete": "Listan kan vara ofullständig: alla fakturor kunde inte läsas från betalleverantören.",
+      "number": "Fakturanummer",
+      "noNumber": "Faktura utan nummer",
+      "date": "Datum",
+      "period": "Faktureringsperiod",
+      "oneTime": "Engångsbetalning",
+      "excludingVat": "Belopp exkl. moms",
+      "vat": "Moms",
+      "total": "Totalt",
+      "notReported": "inte angivet",
+      "view": "Visa faktura",
+      "pdf": "Ladda ner PDF",
+      "opensStripe": "öppnar Stripe i en ny flik",
+      "status": {
+        "paid": "Betald",
+        "open": "Väntar på betalning",
+        "void": "Makulerad",
+        "uncollectible": "Ej indrivningsbar"
+      }
+    },
     "manage": {
       "open": "Hantera abonnemang",
       "opening": "Öppnar…",

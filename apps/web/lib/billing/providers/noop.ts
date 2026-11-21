@@ -28,6 +28,9 @@ export function noopProvider(): BillingProvider {
     async createPortalSession(): Promise<PortalSessionResult> {
       return { ok: false, reason: "payments_disabled" };
     },
+    async listCustomerInvoices() {
+      return { ok: false as const, reason: "payments_disabled" };
+    },
     async constructWebhookEvent() {
       throw new Error("Billing disabled — no webhook processing.");
     },
