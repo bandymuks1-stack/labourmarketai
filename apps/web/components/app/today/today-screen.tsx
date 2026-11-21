@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { HomeTrace } from "@/components/app/home/home-trace";
 import { HomeEmployerVisibility } from "@/components/app/home/home-employer-visibility";
+import { HomeAgencySuggestion } from "@/components/app/home/home-agency-suggestion";
 import {
   HomeAvailability,
   HomeBecause,
@@ -265,6 +266,15 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           there can no longer push the painted home down, as it did from
           above the regions (it was the one `fallback={null}` boundary that
           could move everything). */}
+      {/* A RECRUITMENT AGENCY the worker may choose to join (admin-kept list,
+          database-gated: only a worker no agency represents, never again after
+          they left that agency). Never pre-selected, never blocking. AFTER the
+          stations, so arriving late it moves nothing that is already painted;
+          for everyone else it renders nothing. */}
+      <Suspense fallback={null}>
+        <HomeAgencySuggestion />
+      </Suspense>
+
       <Suspense fallback={null}>
         <HomeAvailability />
       </Suspense>

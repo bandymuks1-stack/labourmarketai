@@ -6869,6 +6869,17 @@
       "limitDaily": "[EN] You have sent 30 booking proposals in the last 24 hours — the daily limit. Accept this candidate later; nothing was sent and the agency's offer stays open.",
       "limitUnknown": "[EN] The booking proposal limit is reached (10 waiting for an answer, 30 per day). Withdraw proposals you no longer need or try later; the agency's offer stays open.",
       "openBookings": "[EN] Open bookings"
+    },
+    "placementTerm": {
+      "title": "[EN] {agency}'s placement fee",
+      "feeLine": "[EN] Placement fee – {fee} per successfully placed worker.",
+      "conditionLabel": "[EN] Condition:",
+      "termsLink": "[EN] The agency's full terms",
+      "termsPending": "[EN] The agency has not published its full terms yet.",
+      "onlyOnPlacement": "[EN] Due only if this worker is actually placed with you — not for viewing, contacting or this offer.",
+      "accept": "[EN] I accept this agency's placement fee and condition for this candidate.",
+      "mustAccept": "[EN] To accept this candidate, first accept the agency's placement fee.",
+      "changed": "[EN] The agency's placement fee has changed. Reload the page to see it before deciding."
     }
   },
   "roleDashboards": {
@@ -8117,6 +8128,171 @@
       "auth": "[EN] Please sign in again.",
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
+    }
+  },
+  "agencySuggestion": {
+    "eyebrow": "Darbā iekārtošanas aģentūra",
+    "title": "{agency} – vai vēlaties pievienoties tās kandidātu sarakstam?",
+    "body": "Ja pievienosieties, {agency} redzēs jūsu profilu un varēs jūs piedāvāt piemērotam darbam.",
+    "leave": "Sarakstu varat atstāt jebkurā laikā savā profilā.",
+    "consent": "Piekrītu būt {agency} kandidātu sarakstā.",
+    "join": "Pievienoties sarakstam",
+    "joining": "Pievieno…",
+    "notNow": "Ne tagad",
+    "joined": "Jūs esat {agency} kandidātu sarakstā. To varat atstāt savā profilā.",
+    "errors": {
+      "consentRequired": "Ja vēlaties pievienoties, vispirms atzīmējiet lodziņu.",
+      "consentTextChanged": "Teksts ir mainījies. Pārlādējiet lapu un izlasiet to vēlreiz.",
+      "representedElsewhere": "Jūs jau pārstāv cita aģentūra, tāpēc šis saraksts netiek piedāvāts.",
+      "alreadyKnown": "Jūs jau esat atbildējis šai aģentūrai.",
+      "notAvailable": "Pašlaik tas nav pieejams.",
+      "noWorkerProfile": "Vispirms pabeidziet sava profila izveidi.",
+      "auth": "Lūdzu, piesakieties vēlreiz.",
+      "error": "Neizdevās. Mēģiniet vēlreiz."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Jūsu iekārtošanas maksa",
+    "intro": "Ko darba devēji redz pie jūsu kandidātiem. Darba devējs to pieņem tikai pieņemot kādu no jūsu kandidātiem, un tā attiecas tikai uz faktiski iekārtotu darbinieku – nekad uz apskati, kontaktu vai pieteikumu.",
+    "current": "Pašlaik rādīts darba devējiem",
+    "none": "Jūs neesat norādījis iekārtošanas maksu. Darba devēji to neredz.",
+    "amount": "Summa",
+    "currency": "Valūta",
+    "condition": "Kad maksa tiek piemērota",
+    "conditionHint": "Jūsu pašu vārdi, darba devējam rādīti tā, kā uzrakstīti.",
+    "termsUrl": "Saite uz jūsu pilnajiem noteikumiem (nav obligāti)",
+    "termsUrlHint": "Ja atstāsiet tukšu, darba devējiem tiks pateikts, ka pilnie noteikumi nav publicēti.",
+    "save": "Saglabāt",
+    "saving": "Saglabā…",
+    "retire": "Vairs nerādīt maksu",
+    "saved": "Saglabāts. Darba devēji tagad redz šo maksu pie jūsu kandidātiem.",
+    "retired": "Darba devēji vairs neredz maksu.",
+    "unavailable": "Iekārtošanas maksas vēl nav pieejamas.",
+    "feeLine": "Iekārtošanas maksa – {fee} par katru veiksmīgi iekārtotu darbinieku.",
+    "errors": {
+      "invalid": "Pārbaudiet summu, trīs burtu valūtu un saiti (https://).",
+      "notAgency": "Iekārtošanas maksu var norādīt tikai aģentūra.",
+      "notFound": "Jūs nevarat mainīt šīs organizācijas maksu.",
+      "auth": "Lūdzu, piesakieties vēlreiz.",
+      "error": "Netika saglabāts. Mēģiniet vēlreiz."
+    }
+  },
+  "agencyPartnerships": {
+    "title": "Partneraģentūras",
+    "intro": "Nododiet klienta vajadību citai aģentūrai. Kad tās kandidāts tiek iekārtots darbā, tā saņem saskaņoto daļu no jūsu iekārtošanas maksas.",
+    "unavailable": "Partneraģentūras vēl nav pieejamas.",
+    "empty": "Partneraģentūru vēl nav.",
+    "working": "Saglabā…",
+    "side": {
+      "lead": "Jūs vadāt",
+      "partner": "Jūs esat partneris",
+      "invited": "Uzaicinājums jums"
+    },
+    "status": {
+      "pending": "Uzaicināta",
+      "active": "Aktīva",
+      "declined": "Noraidīta",
+      "ended": "Beigta"
+    },
+    "shareLine": "Partnera daļa maksā: {percent} %",
+    "acceptConsequence": "Ja piekritīsiet, {agency} varēs nodot jums savu klientu vajadības. Kad jūsu kandidāts tiks iekārtots darbā, jūs saņemsiet {percent} % no {agency} iekārtošanas maksas.",
+    "accept": "Piekrist",
+    "accepted": "Piekrists.",
+    "decline": "Noraidīt",
+    "declined": "Noraidīts.",
+    "end": "Beigt partnerību",
+    "withdrawInvite": "Atsaukt uzaicinājumu",
+    "ended": "Beigta. Caur to nodotās vajadības ir atsauktas, atvērtie piedāvājumi atcelti.",
+    "invite": {
+      "email": "Partneraģentūras e-pasts",
+      "share": "Partnera daļa, %",
+      "submit": "Uzaicināt",
+      "sent": "Uzaicinājums izveidots. Aģentūra to redzēs, pierakstoties ar šo e-pastu."
+    },
+    "pass": {
+      "title": "Nodot klienta vajadību",
+      "none": "Neviens klients vēl nav dalījies ar jums vajadībā.",
+      "need": "Klienta vajadība",
+      "choose": "Izvēlieties vajadību",
+      "submit": "Nodot: {agency}",
+      "done": "Nodots.",
+      "takeBack": "Atsaukt"
+    },
+    "passedToMe": {
+      "title": "Jums nodotās vajadības",
+      "from": "No {agency} · jūsu daļa {percent} %",
+      "noRoster": "Jūsu sarakstā nav aktīva darbinieka, ko piedāvāt.",
+      "worker": "Jūsu kandidāts",
+      "choose": "Izvēlieties darbinieku",
+      "offer": "Piedāvāt vadošajai aģentūrai",
+      "offered": "Piedāvāts. Vadošā aģentūra izvērtē kandidātu, pirms to redz tās klients.",
+      "note": "Piezīme vadošajai aģentūrai (nav obligāta)",
+      "withdraw": "Atsaukt",
+      "returnedWhy": "Atgriezts: {reason}"
+    },
+    "offerStatus": {
+      "offered": "Piedāvāts",
+      "withdrawn": "Atsaukts",
+      "accepted": "Pieņemts",
+      "declined": "Noraidīts"
+    },
+    "commissions": {
+      "title": "Komisijas",
+      "intro": "Maksājamas tikai pēc darbinieka iekārtošanas darbā. Šeit nekas netiek iekasēts.",
+      "empty": "Iekārtošanas maksa vēl nav pieņemta.",
+      "need": "Klienta vajadība",
+      "role": {
+        "direct": "Jūsu kandidāts",
+        "lead": "{agency} kandidāts",
+        "partner": "Jūsu kandidāts ar {agency} starpniecību"
+      },
+      "amount": "{amount} ({percent} % no {fee})",
+      "status": {
+        "pending": "Gaida iekārtošanu",
+        "placed": "Maksājama",
+        "not_placed": "Nav iekārtots"
+      },
+      "due": "Maksājams: {total}"
+    },
+    "errors": {
+      "not_owner": "To var izdarīt tikai aģentūras īpašnieks.",
+      "not_agency": "Šis uzņēmums nav aģentūra.",
+      "invalid_email": "Ievadiet derīgu e-pasta adresi.",
+      "invalid_share": "Ievadiet daļu, kas lielāka par 0 un mazāka par 100 %.",
+      "already_invited": "Šai adresei jau ir atvērts uzaicinājums.",
+      "invitation_not_found": "Šis uzaicinājums vairs nav atvērts.",
+      "same_agency": "Aģentūra nevar būt pati sev partneris.",
+      "already_partners": "Šīs aģentūras jau ir partneres.",
+      "partnership_not_found": "Partnerība nav atrasta.",
+      "partnership_not_open": "Šī partnerība jau ir beigta.",
+      "partnership_not_active": "Šī partnerība nav aktīva.",
+      "share_not_active": "Ar šo vajadību vairs nedalās.",
+      "partner_share_not_found": "Šī vajadība jau ir atsaukta.",
+      "worker_not_on_roster": "Šī darbinieka nav jūsu aktīvajā sarakstā.",
+      "invalid_note": "Piezīme ir pārāk gara.",
+      "needs_migration": "Partneraģentūras vēl nav pieejamas.",
+      "error": "Neizdevās. Mēģiniet vēlreiz.",
+      "proposal_not_open": "Šis kandidāts vairs negaida izvērtējumu.",
+      "already_offered": "Šis darbinieks jau ir piedāvāts šai vajadzībai."
+    },
+    "proposalStatus": {
+      "proposed": "Gaida vadošās aģentūras izvērtējumu",
+      "forwarded": "Nodots klientam",
+      "returned": "Atgriezts",
+      "withdrawn": "Atsaukts"
+    },
+    "review": {
+      "title": "Partneru kandidāti izvērtēšanai",
+      "candidate": "{worker} · no {agency}",
+      "partnerNote": "Partnera piezīme, klients to neredz: {note}",
+      "forward": "Nodot savam klientam",
+      "forwardConsequence": "Jūsu klients redzēs šo kandidātu kā jūsējo, ar jūsu piezīmi zemāk. Klienta priekšā par šo kandidātu atbildat jūs.",
+      "yourNote": "Jūsu piezīme klientam (nav obligāta)",
+      "confirm": "Nodot",
+      "forwarded": "Nodots.",
+      "return": "Atgriezt partnerim",
+      "reason": "Iemesls, ko redzēs partneris (nav obligāts)",
+      "returned": "Atgriezts."
     }
   }
 }

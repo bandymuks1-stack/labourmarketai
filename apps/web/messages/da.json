@@ -6869,6 +6869,17 @@
       "limitDaily": "Du har sendt 30 bookingforslag inden for de seneste 24 timer – det er dagsgrænsen. Accepter denne kandidat senere: intet er sendt, og bureauets tilbud forbliver åbent.",
       "limitUnknown": "Grænsen for bookingforslag er nået (10 venter på svar, 30 pr. dag). Træk forslag tilbage, du ikke længere har brug for, eller prøv senere; bureauets tilbud forbliver åbent.",
       "openBookings": "Åbn bookinger"
+    },
+    "placementTerm": {
+      "title": "{agency}s formidlingsgebyr",
+      "feeLine": "Formidlingsgebyr – {fee} pr. vellykket placeret medarbejder.",
+      "conditionLabel": "Betingelse:",
+      "termsLink": "Bureauets fulde vilkår",
+      "termsPending": "Bureauet har endnu ikke offentliggjort sine fulde vilkår.",
+      "onlyOnPlacement": "Betales kun, hvis denne medarbejder faktisk bliver placeret hos jer – ikke for at se, kontakte eller for dette tilbud.",
+      "accept": "Jeg accepterer bureauets formidlingsgebyr og betingelse for denne kandidat.",
+      "mustAccept": "Accepter først bureauets formidlingsgebyr for at tage imod denne kandidat.",
+      "changed": "Bureauets formidlingsgebyr er ændret. Genindlæs siden for at se det, før du beslutter dig."
     }
   },
   "roleDashboards": {
@@ -8117,6 +8128,171 @@
       "auth": "Log ind igen.",
       "not_authorized": "Du kan kun administrere dine egne poster.",
       "error": "Noget gik galt. Prøv igen."
+    }
+  },
+  "agencySuggestion": {
+    "eyebrow": "Rekrutteringsbureau",
+    "title": "{agency} – vil du stå på kandidatlisten?",
+    "body": "Hvis du er med, ser {agency} din profil og kan foreslå dig til passende arbejde.",
+    "leave": "Du kan forlade listen når som helst på din profil.",
+    "consent": "Jeg giver samtykke til at stå på {agency}s kandidatliste.",
+    "join": "Kom på listen",
+    "joining": "Tilmelder…",
+    "notNow": "Ikke nu",
+    "joined": "Du står på {agency}s kandidatliste. Du kan forlade den på din profil.",
+    "errors": {
+      "consentRequired": "Sæt først kryds i feltet, hvis du vil være med.",
+      "consentTextChanged": "Teksten er ændret. Genindlæs siden og læs den igen.",
+      "representedElsewhere": "Et andet bureau repræsenterer dig allerede, så denne liste tilbydes ikke.",
+      "alreadyKnown": "Du har allerede svaret dette bureau.",
+      "notAvailable": "Det er ikke tilgængeligt lige nu.",
+      "noWorkerProfile": "Gør først din profil færdig.",
+      "auth": "Log ind igen.",
+      "error": "Det lykkedes ikke. Prøv igen."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Dit formidlingsgebyr",
+    "intro": "Det, arbejdsgivere ser ved dine kandidater. En arbejdsgiver accepterer det kun, når den tager imod en af dine kandidater, og det gælder kun en person, der faktisk ansættes – aldrig en visning, kontakt eller ansøgning.",
+    "current": "Vises for arbejdsgivere nu",
+    "none": "Du har ikke angivet noget formidlingsgebyr. Arbejdsgivere ser intet.",
+    "amount": "Beløb",
+    "currency": "Valuta",
+    "condition": "Hvornår gebyret gælder",
+    "conditionHint": "Dine egne ord, vist for arbejdsgiveren som skrevet.",
+    "termsUrl": "Link til dine fulde vilkår (valgfrit)",
+    "termsUrlHint": "Lader du feltet stå tomt, får arbejdsgivere at vide, at de fulde vilkår ikke er offentliggjort.",
+    "save": "Gem",
+    "saving": "Gemmer…",
+    "retire": "Stop med at vise et gebyr",
+    "saved": "Gemt. Arbejdsgivere ser nu gebyret ved dine kandidater.",
+    "retired": "Arbejdsgivere ser ikke længere noget gebyr.",
+    "unavailable": "Formidlingsgebyrer er ikke tilgængelige endnu.",
+    "feeLine": "Formidlingsgebyr – {fee} pr. vellykket ansat medarbejder.",
+    "errors": {
+      "invalid": "Tjek beløbet, valutaen på tre bogstaver og linket (https://).",
+      "notAgency": "Kun et bureau kan angive et formidlingsgebyr.",
+      "notFound": "Du kan ikke ændre denne organisations gebyr.",
+      "auth": "Log ind igen.",
+      "error": "Det blev ikke gemt. Prøv igen."
+    }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerbureauer",
+    "intro": "Send en kundes behov videre til et andet bureau. Når dets kandidat formidles, får det den aftalte andel af dit formidlingsgebyr.",
+    "unavailable": "Partnerbureauer er ikke tilgængelige endnu.",
+    "empty": "Ingen partnerbureauer endnu.",
+    "working": "Gemmer…",
+    "side": {
+      "lead": "Du leder",
+      "partner": "Du er partner",
+      "invited": "Invitation til dig"
+    },
+    "status": {
+      "pending": "Inviteret",
+      "active": "Aktiv",
+      "declined": "Afvist",
+      "ended": "Afsluttet"
+    },
+    "shareLine": "Partnerens andel af gebyret: {percent} %",
+    "acceptConsequence": "Hvis du accepterer, kan {agency} sende sine kunders behov til dig. Når din kandidat formidles, får du {percent} % af formidlingsgebyret fra {agency}.",
+    "accept": "Accepter",
+    "accepted": "Accepteret.",
+    "decline": "Afvis",
+    "declined": "Afvist.",
+    "end": "Afslut partnerskabet",
+    "withdrawInvite": "Træk invitationen tilbage",
+    "ended": "Afsluttet. Behov sendt via det er taget tilbage, og åbne tilbud er trukket tilbage.",
+    "invite": {
+      "email": "Partnerbureauets e-mail",
+      "share": "Partnerens andel, %",
+      "submit": "Inviter",
+      "sent": "Invitation oprettet. Bureauet ser den, når det er logget ind med denne e-mail."
+    },
+    "pass": {
+      "title": "Send en kundes behov videre",
+      "none": "Ingen kunde har delt et behov med dig endnu.",
+      "need": "Kundens behov",
+      "choose": "Vælg et behov",
+      "submit": "Send til {agency}",
+      "done": "Sendt.",
+      "takeBack": "Tag tilbage"
+    },
+    "passedToMe": {
+      "title": "Behov sendt til dig",
+      "from": "Fra {agency} · din andel {percent} %",
+      "noRoster": "Din liste har ingen aktiv medarbejder at tilbyde.",
+      "worker": "Din kandidat",
+      "choose": "Vælg en medarbejder",
+      "offer": "Foreslå for det ledende bureau",
+      "offered": "Foreslået. Det ledende bureau gennemgår kandidaten, før dets kunde ser den.",
+      "note": "Note til det ledende bureau (valgfrit)",
+      "withdraw": "Træk tilbage",
+      "returnedWhy": "Returneret: {reason}"
+    },
+    "offerStatus": {
+      "offered": "Tilbudt",
+      "withdrawn": "Trukket tilbage",
+      "accepted": "Accepteret",
+      "declined": "Afvist"
+    },
+    "commissions": {
+      "title": "Provisioner",
+      "intro": "Forfalder først, når medarbejderen er formidlet. Intet opkræves her.",
+      "empty": "Intet formidlingsgebyr accepteret endnu.",
+      "need": "Kundens behov",
+      "role": {
+        "direct": "Din kandidat",
+        "lead": "Kandidat fra {agency}",
+        "partner": "Din kandidat via {agency}"
+      },
+      "amount": "{amount} ({percent} % af {fee})",
+      "status": {
+        "pending": "Venter på formidling",
+        "placed": "Forfalden",
+        "not_placed": "Ikke formidlet"
+      },
+      "due": "Forfalder: {total}"
+    },
+    "errors": {
+      "not_owner": "Kun bureauets ejer kan gøre dette.",
+      "not_agency": "Denne virksomhed er ikke et bureau.",
+      "invalid_email": "Angiv en gyldig e-mailadresse.",
+      "invalid_share": "Angiv en andel over 0 og under 100 %.",
+      "already_invited": "Denne adresse har allerede en åben invitation.",
+      "invitation_not_found": "Invitationen er ikke længere åben.",
+      "same_agency": "Et bureau kan ikke være sin egen partner.",
+      "already_partners": "Bureauerne er allerede partnere.",
+      "partnership_not_found": "Partnerskabet blev ikke fundet.",
+      "partnership_not_open": "Partnerskabet er allerede afsluttet.",
+      "partnership_not_active": "Partnerskabet er ikke aktivt.",
+      "share_not_active": "Behovet deles ikke længere.",
+      "partner_share_not_found": "Behovet er allerede taget tilbage.",
+      "worker_not_on_roster": "Medarbejderen er ikke på din aktive liste.",
+      "invalid_note": "Noten er for lang.",
+      "needs_migration": "Partnerbureauer er ikke tilgængelige endnu.",
+      "error": "Det lykkedes ikke. Prøv igen.",
+      "proposal_not_open": "Kandidaten afventer ikke længere gennemgang.",
+      "already_offered": "Denne medarbejder er allerede tilbudt til dette behov."
+    },
+    "proposalStatus": {
+      "proposed": "Afventer det ledende bureaus gennemgang",
+      "forwarded": "Videresendt til kunden",
+      "returned": "Returneret",
+      "withdrawn": "Trukket tilbage"
+    },
+    "review": {
+      "title": "Partneres kandidater til gennemgang",
+      "candidate": "{worker} · fra {agency}",
+      "partnerNote": "Partnerens note, vises ikke for din kunde: {note}",
+      "forward": "Videresend til din kunde",
+      "forwardConsequence": "Din kunde ser kandidaten som din, med din note herunder. Du står inde for kandidaten over for din kunde.",
+      "yourNote": "Din note til kunden (valgfrit)",
+      "confirm": "Videresend",
+      "forwarded": "Videresendt.",
+      "return": "Returnér til partneren",
+      "reason": "Årsag, vises for partneren (valgfrit)",
+      "returned": "Returneret."
     }
   }
 }

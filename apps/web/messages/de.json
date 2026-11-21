@@ -13153,6 +13153,17 @@
       "declined": "Arbeitskraft hat abgelehnt",
       "withdrawn": "Angebot zurückgezogen",
       "expired": "Angebot abgelaufen"
+    },
+    "placementTerm": {
+      "title": "Vermittlungsgebühr von {agency}",
+      "feeLine": "Vermittlungsgebühr – {fee} pro erfolgreich vermittelter Arbeitskraft.",
+      "conditionLabel": "Bedingung:",
+      "termsLink": "Vollständige Bedingungen der Agentur",
+      "termsPending": "Die Agentur hat ihre vollständigen Bedingungen noch nicht veröffentlicht.",
+      "onlyOnPlacement": "Fällig nur, wenn diese Person tatsächlich bei Ihnen eingestellt wird – nicht für Ansicht, Kontakt oder dieses Angebot.",
+      "accept": "Ich akzeptiere die Vermittlungsgebühr und die Bedingung dieser Agentur für diesen Kandidaten.",
+      "mustAccept": "Um diesen Kandidaten anzunehmen, akzeptieren Sie zuerst die Vermittlungsgebühr der Agentur.",
+      "changed": "Die Vermittlungsgebühr der Agentur hat sich geändert. Laden Sie die Seite neu, um sie vor der Entscheidung zu sehen."
     }
   },
   "cvSections": {
@@ -20749,5 +20760,170 @@
       "fullList": "Vollständige Liste"
     },
     "more": "Mehr"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Personalvermittlung",
+    "title": "{agency} – möchten Sie in die Kandidatenliste aufgenommen werden?",
+    "body": "Wenn Sie beitreten, sieht {agency} Ihr Profil und kann Sie für passende Arbeit vorschlagen.",
+    "leave": "Sie können die Liste jederzeit in Ihrem Profil verlassen.",
+    "consent": "Ich bin einverstanden, auf der Kandidatenliste von {agency} zu stehen.",
+    "join": "Der Liste beitreten",
+    "joining": "Wird beigetreten…",
+    "notNow": "Nicht jetzt",
+    "joined": "Sie stehen auf der Kandidatenliste von {agency}. Sie können sie in Ihrem Profil verlassen.",
+    "errors": {
+      "consentRequired": "Kreuzen Sie zuerst das Kästchen an, wenn Sie beitreten möchten.",
+      "consentTextChanged": "Der Text hat sich geändert. Laden Sie die Seite neu und lesen Sie ihn erneut.",
+      "representedElsewhere": "Eine andere Agentur vertritt Sie bereits, daher wird diese Liste nicht angeboten.",
+      "alreadyKnown": "Sie haben dieser Agentur bereits geantwortet.",
+      "notAvailable": "Das ist derzeit nicht verfügbar.",
+      "noWorkerProfile": "Richten Sie zuerst Ihr Profil fertig ein.",
+      "auth": "Bitte melden Sie sich erneut an.",
+      "error": "Das hat nicht geklappt. Versuchen Sie es erneut."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Ihre Vermittlungsgebühr",
+    "intro": "Was Arbeitgeber bei Ihren Kandidaten sehen. Ein Arbeitgeber akzeptiert sie nur, wenn er einen Ihrer Kandidaten annimmt, und sie gilt nur für eine tatsächlich vermittelte Person – nie für eine Ansicht, einen Kontakt oder eine Bewerbung.",
+    "current": "Arbeitgebern derzeit angezeigt",
+    "none": "Sie haben keine Vermittlungsgebühr angegeben. Arbeitgeber sehen keine.",
+    "amount": "Betrag",
+    "currency": "Währung",
+    "condition": "Wann die Gebühr gilt",
+    "conditionHint": "Ihre eigenen Worte, dem Arbeitgeber so gezeigt, wie geschrieben.",
+    "termsUrl": "Link zu Ihren vollständigen Bedingungen (optional)",
+    "termsUrlHint": "Bleibt das Feld leer, wird Arbeitgebern gesagt, dass die vollständigen Bedingungen noch nicht veröffentlicht sind.",
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "retire": "Keine Gebühr mehr anzeigen",
+    "saved": "Gespeichert. Arbeitgeber sehen diese Gebühr jetzt bei Ihren Kandidaten.",
+    "retired": "Arbeitgeber sehen keine Gebühr mehr.",
+    "unavailable": "Vermittlungsgebühren sind noch nicht verfügbar.",
+    "feeLine": "Vermittlungsgebühr – {fee} pro erfolgreich vermittelter Arbeitskraft.",
+    "errors": {
+      "invalid": "Prüfen Sie den Betrag, die dreistellige Währung und den Link (https://).",
+      "notAgency": "Nur eine Agentur kann eine Vermittlungsgebühr angeben.",
+      "notFound": "Sie können die Gebühr dieser Organisation nicht ändern.",
+      "auth": "Bitte melden Sie sich erneut an.",
+      "error": "Nicht gespeichert. Versuchen Sie es erneut."
+    }
+  },
+  "agencyPartnerships": {
+    "title": "Partneragenturen",
+    "intro": "Geben Sie den Bedarf eines Kunden an eine andere Agentur weiter. Wird deren Kandidat vermittelt, erhält sie den vereinbarten Anteil Ihrer Vermittlungsgebühr.",
+    "unavailable": "Partneragenturen sind noch nicht verfügbar.",
+    "empty": "Noch keine Partneragenturen.",
+    "working": "Wird gespeichert…",
+    "side": {
+      "lead": "Sie führen",
+      "partner": "Sie sind Partner",
+      "invited": "Einladung an Sie"
+    },
+    "status": {
+      "pending": "Eingeladen",
+      "active": "Aktiv",
+      "declined": "Abgelehnt",
+      "ended": "Beendet"
+    },
+    "shareLine": "Anteil des Partners an der Gebühr: {percent} %",
+    "acceptConsequence": "Wenn Sie annehmen, kann {agency} Ihnen den Bedarf ihrer Kunden weitergeben. Wird Ihr Kandidat vermittelt, erhalten Sie {percent} % der Vermittlungsgebühr von {agency}.",
+    "accept": "Annehmen",
+    "accepted": "Angenommen.",
+    "decline": "Ablehnen",
+    "declined": "Abgelehnt.",
+    "end": "Partnerschaft beenden",
+    "withdrawInvite": "Einladung zurückziehen",
+    "ended": "Beendet. Darüber weitergegebener Bedarf ist zurückgenommen, offene Angebote sind zurückgezogen.",
+    "invite": {
+      "email": "E-Mail der Partneragentur",
+      "share": "Anteil des Partners, %",
+      "submit": "Einladen",
+      "sent": "Einladung erstellt. Die Agentur sieht sie, wenn sie mit dieser E-Mail angemeldet ist."
+    },
+    "pass": {
+      "title": "Bedarf eines Kunden weitergeben",
+      "none": "Noch hat kein Kunde einen Bedarf mit Ihnen geteilt.",
+      "need": "Bedarf des Kunden",
+      "choose": "Bedarf wählen",
+      "submit": "An {agency} weitergeben",
+      "done": "Weitergegeben.",
+      "takeBack": "Zurücknehmen"
+    },
+    "passedToMe": {
+      "title": "An Sie weitergegebener Bedarf",
+      "from": "Von {agency} · Ihr Anteil {percent} %",
+      "noRoster": "In Ihrem Bestand ist keine aktive Arbeitskraft, die Sie anbieten können.",
+      "worker": "Ihr Kandidat",
+      "choose": "Arbeitskraft wählen",
+      "offer": "Der Hauptagentur vorschlagen",
+      "offered": "Vorgeschlagen. Die Hauptagentur prüft den Kandidaten, bevor ihr Kunde ihn sieht.",
+      "note": "Notiz für die Hauptagentur (optional)",
+      "withdraw": "Zurückziehen",
+      "returnedWhy": "Zurückgegeben: {reason}"
+    },
+    "offerStatus": {
+      "offered": "Angeboten",
+      "withdrawn": "Zurückgezogen",
+      "accepted": "Angenommen",
+      "declined": "Abgelehnt"
+    },
+    "commissions": {
+      "title": "Provisionen",
+      "intro": "Fällig erst, wenn die Arbeitskraft vermittelt ist. Hier wird nichts abgerechnet.",
+      "empty": "Noch keine Vermittlungsgebühr angenommen.",
+      "need": "Bedarf des Kunden",
+      "role": {
+        "direct": "Ihr Kandidat",
+        "lead": "Kandidat von {agency}",
+        "partner": "Ihr Kandidat über {agency}"
+      },
+      "amount": "{amount} ({percent} % von {fee})",
+      "status": {
+        "pending": "Wartet auf Vermittlung",
+        "placed": "Fällig",
+        "not_placed": "Nicht vermittelt"
+      },
+      "due": "Fällig: {total}"
+    },
+    "errors": {
+      "not_owner": "Das kann nur der Inhaber der Agentur.",
+      "not_agency": "Dieses Unternehmen ist keine Agentur.",
+      "invalid_email": "Geben Sie eine gültige E-Mail-Adresse ein.",
+      "invalid_share": "Geben Sie einen Anteil über 0 und unter 100 % ein.",
+      "already_invited": "Für diese Adresse gibt es bereits eine offene Einladung.",
+      "invitation_not_found": "Diese Einladung ist nicht mehr offen.",
+      "same_agency": "Eine Agentur kann nicht ihr eigener Partner sein.",
+      "already_partners": "Diese Agenturen sind bereits Partner.",
+      "partnership_not_found": "Die Partnerschaft wurde nicht gefunden.",
+      "partnership_not_open": "Diese Partnerschaft ist bereits beendet.",
+      "partnership_not_active": "Diese Partnerschaft ist nicht aktiv.",
+      "share_not_active": "Dieser Bedarf wird nicht mehr geteilt.",
+      "partner_share_not_found": "Dieser Bedarf wurde bereits zurückgenommen.",
+      "worker_not_on_roster": "Diese Arbeitskraft ist nicht in Ihrem aktiven Bestand.",
+      "invalid_note": "Die Notiz ist zu lang.",
+      "needs_migration": "Partneragenturen sind noch nicht verfügbar.",
+      "error": "Das hat nicht geklappt. Versuchen Sie es erneut.",
+      "proposal_not_open": "Dieser Kandidat wartet nicht mehr auf Prüfung.",
+      "already_offered": "Diese Arbeitskraft ist für diesen Bedarf bereits angeboten."
+    },
+    "proposalStatus": {
+      "proposed": "Wartet auf Prüfung durch die Hauptagentur",
+      "forwarded": "An den Kunden weitergeleitet",
+      "returned": "Zurückgegeben",
+      "withdrawn": "Zurückgezogen"
+    },
+    "review": {
+      "title": "Kandidaten von Partnern zur Prüfung",
+      "candidate": "{worker} · von {agency}",
+      "partnerNote": "Notiz des Partners, für Ihren Kunden nicht sichtbar: {note}",
+      "forward": "An Ihren Kunden weiterleiten",
+      "forwardConsequence": "Ihr Kunde sieht diesen Kandidaten als Ihren, mit Ihrer Notiz unten. Gegenüber Ihrem Kunden stehen Sie für diesen Kandidaten ein.",
+      "yourNote": "Ihre Notiz an den Kunden (optional)",
+      "confirm": "Weiterleiten",
+      "forwarded": "Weitergeleitet.",
+      "return": "An den Partner zurückgeben",
+      "reason": "Grund, für den Partner sichtbar (optional)",
+      "returned": "Zurückgegeben."
+    }
   }
 }

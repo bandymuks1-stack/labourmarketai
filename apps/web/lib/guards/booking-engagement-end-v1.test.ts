@@ -1798,10 +1798,17 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-14: owner decision, invitation 862a91f4 KNOWN_HISTORICAL_UNKNOWN_OUTCOME — one integer count,
       // service_role only. RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
       "20261114150000_invitation_known_historical_unknown_v1.sql",
+      // 2026-11-14 Lane H: an agency's placement term accepted at the hire decision, and a
+      // worker's opt-in to a suggested agency. RED draft, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261114235900_agency_placement_terms_v1.sql",
       // 2026-11-15: owner decision, an organization reads a learner's journal only while the learning link
       // is active and review is on (one RLS policy replaced). RED draft, the marker is the human-gate
       // acknowledgement, NOT applied.
       "20261115120000_journal_learning_access_follows_link_v1.sql",
+      // 2026-11-18 Lane H (register 4.30): agency-to-agency partnerships and commissions. RED draft #3353,
+      // the marker is the human-gate acknowledgement, NOT applied.
+      "20261118100000_agency_partnerships_commissions_v1.sql",
       // 2026-09-20 — COMM-1: nullable profiles.communication_locale (CHECK = the 13 communication languages; NULL = follow the UI locale). RED by owner classification, DRAFT needs-human-gate, NOT applied.
       "20261118100100_profiles_communication_locale_v1.sql",
       // 2026-11-20: owner decision (coordinator relay) approves the 11.8 training migration at R2's reviewed

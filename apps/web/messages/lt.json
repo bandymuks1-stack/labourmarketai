@@ -13153,6 +13153,17 @@
       "declined": "darbuotojas atsisakė",
       "withdrawn": "pasiūlymas atšauktas",
       "expired": "pasiūlymas nebegalioja"
+    },
+    "placementTerm": {
+      "title": "{agency} įdarbinimo mokestis",
+      "feeLine": "Įdarbinimo mokestis – {fee} už sėkmingai įdarbintą darbuotoją.",
+      "conditionLabel": "Sąlyga:",
+      "termsLink": "Visos agentūros sąlygos",
+      "termsPending": "Agentūra visų sąlygų dar nepaskelbė.",
+      "onlyOnPlacement": "Mokamas tik tada, jei šis darbuotojas faktiškai įdarbinamas pas jus – ne už peržiūrą, kontaktą ar šį pasiūlymą.",
+      "accept": "Sutinku su šios agentūros įdarbinimo mokesčiu ir sąlyga šiam kandidatui.",
+      "mustAccept": "Kad priimtumėte šį kandidatą, pirmiausia sutikite su agentūros įdarbinimo mokesčiu.",
+      "changed": "Agentūros įdarbinimo mokestis pasikeitė. Perkraukite puslapį ir peržiūrėkite jį prieš spręsdami."
     }
   },
   "cvSections": {
@@ -20749,5 +20760,170 @@
       "fullList": "Visas sąrašas"
     },
     "more": "Daugiau"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Įdarbinimo agentūra",
+    "title": "{agency} – ar norite prisijungti prie jos kandidatų sąrašo?",
+    "body": "Prisijungus {agency} matys jūsų profilį ir galės jus siūlyti tinkamam darbui.",
+    "leave": "Iš sąrašo galite išeiti bet kada savo profilyje.",
+    "consent": "Sutinku būti {agency} kandidatų sąraše.",
+    "join": "Prisijungti prie sąrašo",
+    "joining": "Jungiama…",
+    "notNow": "Ne dabar",
+    "joined": "Esate {agency} kandidatų sąraše. Išeiti galite savo profilyje.",
+    "errors": {
+      "consentRequired": "Jei norite prisijungti, pirmiausia pažymėkite langelį.",
+      "consentTextChanged": "Tekstas pasikeitė. Perkraukite puslapį ir perskaitykite jį dar kartą.",
+      "representedElsewhere": "Jus jau atstovauja kita agentūra, todėl šis sąrašas nesiūlomas.",
+      "alreadyKnown": "Šiai agentūrai jau atsakėte.",
+      "notAvailable": "Šiuo metu tai nepasiekiama.",
+      "noWorkerProfile": "Pirmiausia užbaikite kurti profilį.",
+      "auth": "Prisijunkite iš naujo.",
+      "error": "Nepavyko. Bandykite dar kartą."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Jūsų įdarbinimo mokestis",
+    "intro": "Ką darbdaviai mato prie jūsų kandidatų. Darbdavys jį priima tik priimdamas jūsų kandidatą, ir jis taikomas tik faktiškai įdarbintam darbuotojui – ne už peržiūrą, kontaktą ar kandidatavimą.",
+    "current": "Dabar rodoma darbdaviams",
+    "none": "Įdarbinimo mokesčio nenurodėte. Darbdaviai jo nemato.",
+    "amount": "Suma",
+    "currency": "Valiuta",
+    "condition": "Kada mokestis taikomas",
+    "conditionHint": "Jūsų žodžiai, darbdaviui rodomi taip, kaip parašyti.",
+    "termsUrl": "Nuoroda į visas sąlygas (nebūtina)",
+    "termsUrlHint": "Palikus tuščią, darbdaviams pranešama, kad visos sąlygos dar nepaskelbtos.",
+    "save": "Išsaugoti",
+    "saving": "Saugoma…",
+    "retire": "Nebrodyti mokesčio",
+    "saved": "Išsaugota. Darbdaviai dabar mato šį mokestį prie jūsų kandidatų.",
+    "retired": "Darbdaviai mokesčio nebemato.",
+    "unavailable": "Įdarbinimo mokesčiai dar nepasiekiami.",
+    "feeLine": "Įdarbinimo mokestis – {fee} už sėkmingai įdarbintą darbuotoją.",
+    "errors": {
+      "invalid": "Patikrinkite sumą, trijų raidžių valiutą ir nuorodą (https://).",
+      "notAgency": "Įdarbinimo mokestį gali nurodyti tik agentūra.",
+      "notFound": "Šios organizacijos mokesčio keisti negalite.",
+      "auth": "Prisijunkite iš naujo.",
+      "error": "Neišsaugota. Bandykite dar kartą."
+    }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerės agentūros",
+    "intro": "Perduokite kliento poreikį kitai agentūrai. Kai jos kandidatas įdarbinamas, ji gauna sutartą jūsų įdarbinimo mokesčio dalį.",
+    "unavailable": "Partnerės agentūros dar neįjungtos.",
+    "empty": "Partnerių agentūrų dar nėra.",
+    "working": "Saugoma…",
+    "side": {
+      "lead": "Jūs vedate",
+      "partner": "Jūs – partnerė",
+      "invited": "Kvietimas jums"
+    },
+    "status": {
+      "pending": "Pakviesta",
+      "active": "Aktyvi",
+      "declined": "Atsisakyta",
+      "ended": "Baigta"
+    },
+    "shareLine": "Partnerės mokesčio dalis: {percent} %",
+    "acceptConsequence": "Jei sutiksite, {agency} galės jums perduoti savo klientų poreikius. Kai jūsų kandidatas bus įdarbintas, gausite {percent} % {agency} įdarbinimo mokesčio.",
+    "accept": "Sutikti",
+    "accepted": "Sutikta.",
+    "decline": "Atsisakyti",
+    "declined": "Atsisakyta.",
+    "end": "Baigti partnerystę",
+    "withdrawInvite": "Atšaukti kvietimą",
+    "ended": "Baigta. Per ją perduoti poreikiai atsiimti, atviri pasiūlymai atšaukti.",
+    "invite": {
+      "email": "Partnerės agentūros el. paštas",
+      "share": "Partnerės dalis, %",
+      "submit": "Pakviesti",
+      "sent": "Kvietimas sukurtas. Agentūra jį matys prisijungusi šiuo el. paštu."
+    },
+    "pass": {
+      "title": "Perduoti kliento poreikį",
+      "none": "Su jumis dar nepasidalyta jokiu kliento poreikiu.",
+      "need": "Kliento poreikis",
+      "choose": "Pasirinkite poreikį",
+      "submit": "Perduoti: {agency}",
+      "done": "Perduota.",
+      "takeBack": "Atsiimti"
+    },
+    "passedToMe": {
+      "title": "Jums perduoti poreikiai",
+      "from": "Iš {agency} · jūsų dalis {percent} %",
+      "noRoster": "Jūsų sąraše nėra aktyvaus darbuotojo, kurį galėtumėte pasiūlyti.",
+      "worker": "Jūsų kandidatas",
+      "choose": "Pasirinkite darbuotoją",
+      "offer": "Pasiūlyti pagrindinei agentūrai",
+      "offered": "Pasiūlyta. Pagrindinė agentūra peržiūri kandidatą, kol jo dar nemato jos klientas.",
+      "note": "Pastaba pagrindinei agentūrai (nebūtina)",
+      "withdraw": "Atšaukti",
+      "returnedWhy": "Grąžinta: {reason}"
+    },
+    "offerStatus": {
+      "offered": "Pasiūlytas",
+      "withdrawn": "Atšauktas",
+      "accepted": "Priimtas",
+      "declined": "Atmestas"
+    },
+    "commissions": {
+      "title": "Komisiniai",
+      "intro": "Mokami tik įdarbinus darbuotoją. Čia niekas neapmokestinama.",
+      "empty": "Įdarbinimo mokestis dar nepriimtas.",
+      "need": "Kliento poreikis",
+      "role": {
+        "direct": "Jūsų kandidatas",
+        "lead": "{agency} kandidatas",
+        "partner": "Jūsų kandidatas per {agency}"
+      },
+      "amount": "{amount} ({percent} % nuo {fee})",
+      "status": {
+        "pending": "Laukiama įdarbinimo",
+        "placed": "Mokėtina",
+        "not_placed": "Neįdarbintas"
+      },
+      "due": "Mokėtina: {total}"
+    },
+    "errors": {
+      "not_owner": "Tai gali padaryti tik agentūros savininkas.",
+      "not_agency": "Ši įmonė nėra agentūra.",
+      "invalid_email": "Įveskite teisingą el. pašto adresą.",
+      "invalid_share": "Įveskite dalį, didesnę nei 0 ir mažesnę nei 100 %.",
+      "already_invited": "Šiuo adresu jau yra atviras kvietimas.",
+      "invitation_not_found": "Šis kvietimas nebegalioja.",
+      "same_agency": "Agentūra negali būti pati sau partnerė.",
+      "already_partners": "Šios agentūros jau yra partnerės.",
+      "partnership_not_found": "Partnerystė nerasta.",
+      "partnership_not_open": "Ši partnerystė jau baigta.",
+      "partnership_not_active": "Ši partnerystė neaktyvi.",
+      "share_not_active": "Šiuo poreikiu nebesidalijama.",
+      "partner_share_not_found": "Šis poreikis jau atsiimtas.",
+      "worker_not_on_roster": "Šio darbuotojo nėra jūsų aktyviame sąraše.",
+      "invalid_note": "Pastaba per ilga.",
+      "needs_migration": "Partnerės agentūros dar neįjungtos.",
+      "error": "Nepavyko. Bandykite dar kartą.",
+      "proposal_not_open": "Šis kandidatas nebelaukia peržiūros.",
+      "already_offered": "Šis darbuotojas jau pasiūlytas šiam poreikiui."
+    },
+    "proposalStatus": {
+      "proposed": "Laukia pagrindinės agentūros peržiūros",
+      "forwarded": "Perduota klientui",
+      "returned": "Grąžinta",
+      "withdrawn": "Atšaukta"
+    },
+    "review": {
+      "title": "Partnerių kandidatai peržiūrai",
+      "candidate": "{worker} · iš {agency}",
+      "partnerNote": "Partnerio pastaba, klientas jos nemato: {note}",
+      "forward": "Perduoti savo klientui",
+      "forwardConsequence": "Jūsų klientas matys šį kandidatą kaip jūsų, su žemiau esančia jūsų pastaba. Už šį kandidatą klientui atsakote jūs.",
+      "yourNote": "Jūsų pastaba klientui (nebūtina)",
+      "confirm": "Perduoti",
+      "forwarded": "Perduota.",
+      "return": "Grąžinti partneriui",
+      "reason": "Priežastis, kurią matys partneris (nebūtina)",
+      "returned": "Grąžinta."
+    }
   }
 }

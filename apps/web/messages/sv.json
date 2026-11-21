@@ -13153,6 +13153,17 @@
       "declined": "arbetstagaren avböjde",
       "withdrawn": "förslaget drogs tillbaka",
       "expired": "förslaget har gått ut"
+    },
+    "placementTerm": {
+      "title": "{agency}s förmedlingsavgift",
+      "feeLine": "Förmedlingsavgift – {fee} per framgångsrikt placerad arbetstagare.",
+      "conditionLabel": "Villkor:",
+      "termsLink": "Bemanningsföretagets fullständiga villkor",
+      "termsPending": "Bemanningsföretaget har inte publicerat sina fullständiga villkor än.",
+      "onlyOnPlacement": "Betalas bara om den här arbetstagaren faktiskt placeras hos er – inte för att visa, kontakta eller för det här erbjudandet.",
+      "accept": "Jag godtar bemanningsföretagets förmedlingsavgift och villkor för den här kandidaten.",
+      "mustAccept": "Godta först bemanningsföretagets förmedlingsavgift för att acceptera den här kandidaten.",
+      "changed": "Bemanningsföretagets förmedlingsavgift har ändrats. Ladda om sidan och läs den innan ni bestämmer."
     }
   },
   "cvSections": {
@@ -20749,5 +20760,170 @@
       "fullList": "Hela listan"
     },
     "more": "Mer"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Rekryteringsbyrå",
+    "title": "{agency} – vill du stå på dess kandidatlista?",
+    "body": "Om du går med ser {agency} din profil och kan föreslå dig för passande arbete.",
+    "leave": "Du kan lämna listan när som helst i din profil.",
+    "consent": "Jag samtycker till att stå på {agency}s kandidatlista.",
+    "join": "Gå med i listan",
+    "joining": "Går med…",
+    "notNow": "Inte nu",
+    "joined": "Du står på {agency}s kandidatlista. Du kan lämna den i din profil.",
+    "errors": {
+      "consentRequired": "Kryssa först i rutan om du vill gå med.",
+      "consentTextChanged": "Texten har ändrats. Ladda om sidan och läs den igen.",
+      "representedElsewhere": "En annan byrå representerar dig redan, så den här listan erbjuds inte.",
+      "alreadyKnown": "Du har redan svarat den här byrån.",
+      "notAvailable": "Det är inte tillgängligt just nu.",
+      "noWorkerProfile": "Gör först klart din profil.",
+      "auth": "Logga in igen.",
+      "error": "Det gick inte. Försök igen."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Din förmedlingsavgift",
+    "intro": "Det arbetsgivare ser vid dina kandidater. En arbetsgivare godtar den bara när den tar emot en av dina kandidater, och den gäller bara en person som faktiskt anställs – aldrig en visning, kontakt eller ansökan.",
+    "current": "Visas för arbetsgivare nu",
+    "none": "Du har inte angett någon förmedlingsavgift. Arbetsgivare ser ingen.",
+    "amount": "Belopp",
+    "currency": "Valuta",
+    "condition": "När avgiften gäller",
+    "conditionHint": "Dina egna ord, visas för arbetsgivaren som de är skrivna.",
+    "termsUrl": "Länk till dina fullständiga villkor (valfritt)",
+    "termsUrlHint": "Lämnar du fältet tomt får arbetsgivare veta att de fullständiga villkoren inte är publicerade.",
+    "save": "Spara",
+    "saving": "Sparar…",
+    "retire": "Sluta visa en avgift",
+    "saved": "Sparat. Arbetsgivare ser nu avgiften vid dina kandidater.",
+    "retired": "Arbetsgivare ser inte längre någon avgift.",
+    "unavailable": "Förmedlingsavgifter är inte tillgängliga ännu.",
+    "feeLine": "Förmedlingsavgift – {fee} per framgångsrikt anställd medarbetare.",
+    "errors": {
+      "invalid": "Kontrollera beloppet, valutan med tre bokstäver och länken (https://).",
+      "notAgency": "Bara en byrå kan ange en förmedlingsavgift.",
+      "notFound": "Du kan inte ändra den här organisationens avgift.",
+      "auth": "Logga in igen.",
+      "error": "Det sparades inte. Försök igen."
+    }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerbyråer",
+    "intro": "Skicka en kunds behov vidare till ett annat byrå. När dess kandidat placeras får det den överenskomna andelen av din förmedlingsavgift.",
+    "unavailable": "Partnerbyråer är inte tillgängliga än.",
+    "empty": "Inga partnerbyråer än.",
+    "working": "Sparar…",
+    "side": {
+      "lead": "Du leder",
+      "partner": "Du är partner",
+      "invited": "Inbjudan till dig"
+    },
+    "status": {
+      "pending": "Inbjuden",
+      "active": "Aktiv",
+      "declined": "Avböjd",
+      "ended": "Avslutad"
+    },
+    "shareLine": "Partnerns andel av avgiften: {percent} %",
+    "acceptConsequence": "Om du tackar ja kan {agency} skicka sina kunders behov till dig. När din kandidat placeras får du {percent} % av förmedlingsavgiften från {agency}.",
+    "accept": "Tacka ja",
+    "accepted": "Godkänd.",
+    "decline": "Avböj",
+    "declined": "Avböjd.",
+    "end": "Avsluta partnerskapet",
+    "withdrawInvite": "Dra tillbaka inbjudan",
+    "ended": "Avslutad. Behov som skickats via det är återtagna och öppna erbjudanden tillbakadragna.",
+    "invite": {
+      "email": "Partnerbyråns e-post",
+      "share": "Partnerns andel, %",
+      "submit": "Bjud in",
+      "sent": "Inbjudan skapad. Byrån ser den när den loggar in med den här e-postadressen."
+    },
+    "pass": {
+      "title": "Skicka en kunds behov vidare",
+      "none": "Ingen kund har delat ett behov med dig än.",
+      "need": "Kundens behov",
+      "choose": "Välj ett behov",
+      "submit": "Skicka till {agency}",
+      "done": "Skickat.",
+      "takeBack": "Ta tillbaka"
+    },
+    "passedToMe": {
+      "title": "Behov som skickats till dig",
+      "from": "Från {agency} · din andel {percent} %",
+      "noRoster": "Din lista har ingen aktiv arbetstagare att erbjuda.",
+      "worker": "Din kandidat",
+      "choose": "Välj en arbetstagare",
+      "offer": "Föreslå för den ledande byrån",
+      "offered": "Föreslagen. Den ledande byrån granskar kandidaten innan dess kund ser den.",
+      "note": "Anteckning till den ledande byrån (valfritt)",
+      "withdraw": "Dra tillbaka",
+      "returnedWhy": "Returnerad: {reason}"
+    },
+    "offerStatus": {
+      "offered": "Erbjuden",
+      "withdrawn": "Tillbakadragen",
+      "accepted": "Godkänd",
+      "declined": "Avböjd"
+    },
+    "commissions": {
+      "title": "Provisioner",
+      "intro": "Förfaller först när arbetstagaren placeras. Inget debiteras här.",
+      "empty": "Ingen förmedlingsavgift godkänd än.",
+      "need": "Kundens behov",
+      "role": {
+        "direct": "Din kandidat",
+        "lead": "Kandidat från {agency}",
+        "partner": "Din kandidat via {agency}"
+      },
+      "amount": "{amount} ({percent} % av {fee})",
+      "status": {
+        "pending": "Väntar på placering",
+        "placed": "Förfallen",
+        "not_placed": "Inte placerad"
+      },
+      "due": "Förfaller: {total}"
+    },
+    "errors": {
+      "not_owner": "Bara byråns ägare kan göra detta.",
+      "not_agency": "Det här företaget är inte ett byrå.",
+      "invalid_email": "Ange en giltig e-postadress.",
+      "invalid_share": "Ange en andel över 0 och under 100 %.",
+      "already_invited": "Den här adressen har redan en öppen inbjudan.",
+      "invitation_not_found": "Inbjudan är inte längre öppen.",
+      "same_agency": "Ett byrå kan inte vara sin egen partner.",
+      "already_partners": "Byråerna är redan partner.",
+      "partnership_not_found": "Partnerskapet hittades inte.",
+      "partnership_not_open": "Partnerskapet är redan avslutat.",
+      "partnership_not_active": "Partnerskapet är inte aktivt.",
+      "share_not_active": "Behovet delas inte längre.",
+      "partner_share_not_found": "Behovet är redan återtaget.",
+      "worker_not_on_roster": "Arbetstagaren finns inte på din aktiva lista.",
+      "invalid_note": "Anteckningen är för lång.",
+      "needs_migration": "Partnerbyråer är inte tillgängliga än.",
+      "error": "Det gick inte. Försök igen.",
+      "proposal_not_open": "Kandidaten väntar inte längre på granskning.",
+      "already_offered": "Den här personen är redan erbjuden för det här behovet."
+    },
+    "proposalStatus": {
+      "proposed": "Väntar på den ledande byråns granskning",
+      "forwarded": "Vidarebefordrad till kunden",
+      "returned": "Returnerad",
+      "withdrawn": "Tillbakadragen"
+    },
+    "review": {
+      "title": "Partners kandidater att granska",
+      "candidate": "{worker} · från {agency}",
+      "partnerNote": "Partnerns anteckning, visas inte för din kund: {note}",
+      "forward": "Vidarebefordra till din kund",
+      "forwardConsequence": "Din kund ser kandidaten som din, med din anteckning nedan. Du ansvarar inför din kund för den här kandidaten.",
+      "yourNote": "Din anteckning till kunden (valfritt)",
+      "confirm": "Vidarebefordra",
+      "forwarded": "Vidarebefordrad.",
+      "return": "Returnera till partnern",
+      "reason": "Anledning, visas för partnern (valfritt)",
+      "returned": "Returnerad."
+    }
   }
 }

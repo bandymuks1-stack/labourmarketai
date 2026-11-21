@@ -235,6 +235,10 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "invitation_acceptances", key: "profile_id" },
   { table: "matches", key: "worker_id" },
   { table: "agency_candidate_offers", key: "worker_id" },
+  // A partner agency's proposal of THIS person to a lead agency, before any
+  // client saw it (20261118100000, owner decision 2026-11-20). Theirs: which
+  // agency proposed them, the note and what became of it.
+  { table: "agency_partner_candidate_proposals", key: "worker_id" },
   // Requests to disclose THIS person's contact details — theirs above all.
   { table: "contact_disclosure_requests", key: "worker_id" },
   { table: "market_intelligence_insight_queries", key: "profile_id" },
@@ -710,6 +714,17 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // An agency's placement term and the admin list of agencies suggested to
+  // workers: `created_by` is who stated the term or added the row; the
+  // subject is an agency (20261114235900).
+  "agency_placement_terms",
+  "platform_suggested_agencies",
+  // Agency-to-agency partnerships and the client needs passed through them:
+  // `invited_by` / `decided_by` / `ended_by` / `shared_by` / `revoked_by` are the
+  // agency owners who acted; the subject is a pair of agencies (20261118100000).
+  // The invitation address has its own erasure value rule.
+  "agency_partnerships",
+  "agency_partner_request_shares",
   // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no
   // content, purged after a day (20261013120000).
   "confirmation_spends",

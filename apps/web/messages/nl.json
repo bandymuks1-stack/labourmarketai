@@ -13153,6 +13153,17 @@
       "declined": "werknemer heeft afgewezen",
       "withdrawn": "voorstel ingetrokken",
       "expired": "voorstel verlopen"
+    },
+    "placementTerm": {
+      "title": "Plaatsingsvergoeding van {agency}",
+      "feeLine": "Plaatsingsvergoeding – {fee} per succesvol geplaatste werknemer.",
+      "conditionLabel": "Voorwaarde:",
+      "termsLink": "Volledige voorwaarden van het bureau",
+      "termsPending": "Het bureau heeft zijn volledige voorwaarden nog niet gepubliceerd.",
+      "onlyOnPlacement": "Alleen verschuldigd als deze werknemer echt bij u wordt geplaatst — niet voor bekijken, contact of dit aanbod.",
+      "accept": "Ik accepteer de plaatsingsvergoeding en voorwaarde van dit bureau voor deze kandidaat.",
+      "mustAccept": "Accepteer eerst de plaatsingsvergoeding van het bureau om deze kandidaat aan te nemen.",
+      "changed": "De plaatsingsvergoeding van het bureau is gewijzigd. Herlaad de pagina om hem te zien voordat u beslist."
     }
   },
   "cvSections": {
@@ -20749,5 +20760,170 @@
       "fullList": "Volledige lijst"
     },
     "more": "Meer"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Uitzend- en wervingsbureau",
+    "title": "{agency} — wilt u op de kandidatenlijst?",
+    "body": "Als u zich aansluit, ziet {agency} uw profiel en kan het u voorstellen voor passend werk.",
+    "leave": "U kunt de lijst altijd verlaten via uw profiel.",
+    "consent": "Ik ga akkoord om op de kandidatenlijst van {agency} te staan.",
+    "join": "Aansluiten bij de lijst",
+    "joining": "Bezig met aansluiten…",
+    "notNow": "Niet nu",
+    "joined": "U staat op de kandidatenlijst van {agency}. U kunt die verlaten via uw profiel.",
+    "errors": {
+      "consentRequired": "Vink eerst het vakje aan als u zich wilt aansluiten.",
+      "consentTextChanged": "De tekst is gewijzigd. Herlaad de pagina en lees hem opnieuw.",
+      "representedElsewhere": "Een ander bureau vertegenwoordigt u al, daarom wordt deze lijst niet aangeboden.",
+      "alreadyKnown": "U hebt dit bureau al geantwoord.",
+      "notAvailable": "Dit is nu niet beschikbaar.",
+      "noWorkerProfile": "Maak eerst uw profiel af.",
+      "auth": "Log opnieuw in.",
+      "error": "Dat is niet gelukt. Probeer het opnieuw."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Uw plaatsingsvergoeding",
+    "intro": "Wat werkgevers bij uw kandidaten zien. Een werkgever accepteert hem alleen bij het aannemen van een van uw kandidaten, en hij geldt alleen voor iemand die echt geplaatst wordt — nooit voor een weergave, contact of sollicitatie.",
+    "current": "Nu getoond aan werkgevers",
+    "none": "U hebt geen plaatsingsvergoeding opgegeven. Werkgevers zien er geen.",
+    "amount": "Bedrag",
+    "currency": "Valuta",
+    "condition": "Wanneer de vergoeding geldt",
+    "conditionHint": "Uw eigen woorden, aan de werkgever getoond zoals geschreven.",
+    "termsUrl": "Link naar uw volledige voorwaarden (optioneel)",
+    "termsUrlHint": "Laat u dit leeg, dan krijgen werkgevers te horen dat de volledige voorwaarden niet zijn gepubliceerd.",
+    "save": "Opslaan",
+    "saving": "Bezig met opslaan…",
+    "retire": "Geen vergoeding meer tonen",
+    "saved": "Opgeslagen. Werkgevers zien deze vergoeding nu bij uw kandidaten.",
+    "retired": "Werkgevers zien geen vergoeding meer.",
+    "unavailable": "Plaatsingsvergoedingen zijn nog niet beschikbaar.",
+    "feeLine": "Plaatsingsvergoeding – {fee} per succesvol geplaatste werknemer.",
+    "errors": {
+      "invalid": "Controleer het bedrag, de valuta van drie letters en de link (https://).",
+      "notAgency": "Alleen een bureau kan een plaatsingsvergoeding opgeven.",
+      "notFound": "U kunt de vergoeding van deze organisatie niet wijzigen.",
+      "auth": "Log opnieuw in.",
+      "error": "Niet opgeslagen. Probeer het opnieuw."
+    }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerbureaus",
+    "intro": "Geef de behoefte van een klant door aan een ander bureau. Wordt diens kandidaat geplaatst, dan krijgt het het afgesproken deel van uw plaatsingsvergoeding.",
+    "unavailable": "Partnerbureaus zijn nog niet beschikbaar.",
+    "empty": "Nog geen partnerbureaus.",
+    "working": "Opslaan…",
+    "side": {
+      "lead": "U leidt",
+      "partner": "U bent partner",
+      "invited": "Uitnodiging aan u"
+    },
+    "status": {
+      "pending": "Uitgenodigd",
+      "active": "Actief",
+      "declined": "Afgewezen",
+      "ended": "Beëindigd"
+    },
+    "shareLine": "Deel van de partner in de vergoeding: {percent} %",
+    "acceptConsequence": "Als u accepteert, kan {agency} de behoeften van zijn klanten aan u doorgeven. Wordt uw kandidaat geplaatst, dan ontvangt u {percent} % van de plaatsingsvergoeding van {agency}.",
+    "accept": "Accepteren",
+    "accepted": "Geaccepteerd.",
+    "decline": "Afwijzen",
+    "declined": "Afgewezen.",
+    "end": "Partnerschap beëindigen",
+    "withdrawInvite": "Uitnodiging intrekken",
+    "ended": "Beëindigd. Doorgegeven behoeften zijn teruggenomen en open aanbiedingen ingetrokken.",
+    "invite": {
+      "email": "E-mail van het partnerbureau",
+      "share": "Deel van de partner, %",
+      "submit": "Uitnodigen",
+      "sent": "Uitnodiging aangemaakt. Het bureau ziet deze na aanmelding met dit e-mailadres."
+    },
+    "pass": {
+      "title": "Behoefte van een klant doorgeven",
+      "none": "Er is nog geen behoefte van een klant met u gedeeld.",
+      "need": "Behoefte van de klant",
+      "choose": "Kies een behoefte",
+      "submit": "Doorgeven aan {agency}",
+      "done": "Doorgegeven.",
+      "takeBack": "Terugnemen"
+    },
+    "passedToMe": {
+      "title": "Aan u doorgegeven behoeften",
+      "from": "Van {agency} · uw deel {percent} %",
+      "noRoster": "Uw bestand heeft geen actieve kracht om aan te bieden.",
+      "worker": "Uw kandidaat",
+      "choose": "Kies een kracht",
+      "offer": "Voorstellen aan het hoofdbureau",
+      "offered": "Voorgesteld. Het hoofdbureau beoordeelt de kandidaat voordat de klant die ziet.",
+      "note": "Notitie voor het hoofdbureau (optioneel)",
+      "withdraw": "Intrekken",
+      "returnedWhy": "Teruggestuurd: {reason}"
+    },
+    "offerStatus": {
+      "offered": "Aangeboden",
+      "withdrawn": "Ingetrokken",
+      "accepted": "Geaccepteerd",
+      "declined": "Afgewezen"
+    },
+    "commissions": {
+      "title": "Commissies",
+      "intro": "Alleen verschuldigd als de kracht is geplaatst. Hier wordt niets in rekening gebracht.",
+      "empty": "Nog geen plaatsingsvergoeding geaccepteerd.",
+      "need": "Behoefte van de klant",
+      "role": {
+        "direct": "Uw kandidaat",
+        "lead": "Kandidaat van {agency}",
+        "partner": "Uw kandidaat via {agency}"
+      },
+      "amount": "{amount} ({percent} % van {fee})",
+      "status": {
+        "pending": "Wacht op plaatsing",
+        "placed": "Verschuldigd",
+        "not_placed": "Niet geplaatst"
+      },
+      "due": "Verschuldigd: {total}"
+    },
+    "errors": {
+      "not_owner": "Alleen de eigenaar van het bureau kan dit doen.",
+      "not_agency": "Dit bedrijf is geen bureau.",
+      "invalid_email": "Vul een geldig e-mailadres in.",
+      "invalid_share": "Vul een deel in boven 0 en onder 100 %.",
+      "already_invited": "Voor dit adres staat al een uitnodiging open.",
+      "invitation_not_found": "Deze uitnodiging staat niet meer open.",
+      "same_agency": "Een bureau kan niet zijn eigen partner zijn.",
+      "already_partners": "Deze bureaus zijn al partners.",
+      "partnership_not_found": "Het partnerschap is niet gevonden.",
+      "partnership_not_open": "Dit partnerschap is al beëindigd.",
+      "partnership_not_active": "Dit partnerschap is niet actief.",
+      "share_not_active": "Deze behoefte wordt niet meer gedeeld.",
+      "partner_share_not_found": "Deze behoefte is al teruggenomen.",
+      "worker_not_on_roster": "Deze kracht staat niet in uw actieve bestand.",
+      "invalid_note": "De notitie is te lang.",
+      "needs_migration": "Partnerbureaus zijn nog niet beschikbaar.",
+      "error": "Dat is niet gelukt. Probeer het opnieuw.",
+      "proposal_not_open": "Deze kandidaat wacht niet meer op beoordeling.",
+      "already_offered": "Deze medewerker is al aangeboden voor deze behoefte."
+    },
+    "proposalStatus": {
+      "proposed": "Wacht op beoordeling door het hoofdbureau",
+      "forwarded": "Doorgestuurd naar de klant",
+      "returned": "Teruggestuurd",
+      "withdrawn": "Ingetrokken"
+    },
+    "review": {
+      "title": "Kandidaten van partners om te beoordelen",
+      "candidate": "{worker} · van {agency}",
+      "partnerNote": "Notitie van de partner, niet zichtbaar voor uw klant: {note}",
+      "forward": "Doorsturen naar uw klant",
+      "forwardConsequence": "Uw klant ziet deze kandidaat als de uwe, met uw notitie hieronder. U staat tegenover uw klant in voor deze kandidaat.",
+      "yourNote": "Uw notitie voor de klant (optioneel)",
+      "confirm": "Doorsturen",
+      "forwarded": "Doorgestuurd.",
+      "return": "Terugsturen naar de partner",
+      "reason": "Reden, zichtbaar voor de partner (optioneel)",
+      "returned": "Teruggestuurd."
+    }
   }
 }

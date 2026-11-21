@@ -6869,6 +6869,17 @@
       "limitDaily": "[EN] You have sent 30 booking proposals in the last 24 hours — the daily limit. Accept this candidate later; nothing was sent and the agency's offer stays open.",
       "limitUnknown": "[EN] The booking proposal limit is reached (10 waiting for an answer, 30 per day). Withdraw proposals you no longer need or try later; the agency's offer stays open.",
       "openBookings": "[EN] Open bookings"
+    },
+    "placementTerm": {
+      "title": "[EN] {agency}'s placement fee",
+      "feeLine": "[EN] Placement fee – {fee} per successfully placed worker.",
+      "conditionLabel": "[EN] Condition:",
+      "termsLink": "[EN] The agency's full terms",
+      "termsPending": "[EN] The agency has not published its full terms yet.",
+      "onlyOnPlacement": "[EN] Due only if this worker is actually placed with you — not for viewing, contacting or this offer.",
+      "accept": "[EN] I accept this agency's placement fee and condition for this candidate.",
+      "mustAccept": "[EN] To accept this candidate, first accept the agency's placement fee.",
+      "changed": "[EN] The agency's placement fee has changed. Reload the page to see it before deciding."
     }
   },
   "roleDashboards": {
@@ -8117,6 +8128,171 @@
       "auth": "[EN] Please sign in again.",
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
+    }
+  },
+  "agencySuggestion": {
+    "eyebrow": "Värbamisagentuur",
+    "title": "{agency} – kas soovite liituda selle kandidaatide nimekirjaga?",
+    "body": "Kui liitute, näeb {agency} teie profiili ja saab teid pakkuda sobivale tööle.",
+    "leave": "Nimekirjast saate igal ajal oma profiilil lahkuda.",
+    "consent": "Nõustun olema {agency} kandidaatide nimekirjas.",
+    "join": "Liitu nimekirjaga",
+    "joining": "Liitumine…",
+    "notNow": "Mitte praegu",
+    "joined": "Olete {agency} kandidaatide nimekirjas. Lahkuda saate oma profiilil.",
+    "errors": {
+      "consentRequired": "Kui soovite liituda, märkige kõigepealt ruut.",
+      "consentTextChanged": "Tekst on muutunud. Laadige leht uuesti ja lugege see uuesti läbi.",
+      "representedElsewhere": "Teid esindab juba teine agentuur, seega seda nimekirja ei pakuta.",
+      "alreadyKnown": "Olete sellele agentuurile juba vastanud.",
+      "notAvailable": "See pole praegu saadaval.",
+      "noWorkerProfile": "Lõpetage kõigepealt oma profiili loomine.",
+      "auth": "Logige uuesti sisse.",
+      "error": "See ei õnnestunud. Proovige uuesti."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Teie vahendustasu",
+    "intro": "Mida tööandjad teie kandidaatide juures näevad. Tööandja aktsepteerib selle ainult teie kandidaadi vastuvõtmisel ja see kehtib ainult tegelikult tööle võetud inimese kohta – mitte kunagi vaatamise, kontakti ega kandideerimise eest.",
+    "current": "Praegu tööandjatele näidatud",
+    "none": "Te pole vahendustasu märkinud. Tööandjad ei näe seda.",
+    "amount": "Summa",
+    "currency": "Valuuta",
+    "condition": "Millal tasu kehtib",
+    "conditionHint": "Teie enda sõnad, tööandjale näidatakse neid nii, nagu need on kirjutatud.",
+    "termsUrl": "Link teie täielikele tingimustele (valikuline)",
+    "termsUrlHint": "Kui jätate tühjaks, öeldakse tööandjatele, et täielikke tingimusi pole avaldatud.",
+    "save": "Salvesta",
+    "saving": "Salvestamine…",
+    "retire": "Lõpeta tasu näitamine",
+    "saved": "Salvestatud. Tööandjad näevad nüüd seda tasu teie kandidaatide juures.",
+    "retired": "Tööandjad ei näe enam tasu.",
+    "unavailable": "Vahendustasud pole veel saadaval.",
+    "feeLine": "Vahendustasu – {fee} iga edukalt tööle võetud töötaja eest.",
+    "errors": {
+      "invalid": "Kontrollige summat, kolmetähelist valuutat ja linki (https://).",
+      "notAgency": "Vahendustasu saab märkida ainult agentuur.",
+      "notFound": "Te ei saa selle organisatsiooni tasu muuta.",
+      "auth": "Logige uuesti sisse.",
+      "error": "Ei salvestatud. Proovige uuesti."
+    }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerbürood",
+    "intro": "Andke kliendi vajadus edasi teisele büroole. Kui selle kandidaat tööle võetakse, saab büroo kokkulepitud osa teie vahendustasust.",
+    "unavailable": "Partnerbürood pole veel saadaval.",
+    "empty": "Partnerbüroosid veel pole.",
+    "working": "Salvestamine…",
+    "side": {
+      "lead": "Teie juhite",
+      "partner": "Teie olete partner",
+      "invited": "Kutse teile"
+    },
+    "status": {
+      "pending": "Kutsutud",
+      "active": "Aktiivne",
+      "declined": "Keeldutud",
+      "ended": "Lõpetatud"
+    },
+    "shareLine": "Partneri osa tasust: {percent} %",
+    "acceptConsequence": "Kui nõustute, saab {agency} anda teile edasi oma klientide vajadusi. Kui teie kandidaat tööle võetakse, saate {percent} % {agency} vahendustasust.",
+    "accept": "Nõustu",
+    "accepted": "Nõustutud.",
+    "decline": "Keeldu",
+    "declined": "Keeldutud.",
+    "end": "Lõpeta partnerlus",
+    "withdrawInvite": "Võta kutse tagasi",
+    "ended": "Lõpetatud. Selle kaudu edastatud vajadused on tagasi võetud ja avatud pakkumised tühistatud.",
+    "invite": {
+      "email": "Partnerbüroo e-post",
+      "share": "Partneri osa, %",
+      "submit": "Kutsu",
+      "sent": "Kutse loodud. Büroo näeb seda, kui logib sisse selle e-posti aadressiga."
+    },
+    "pass": {
+      "title": "Anna kliendi vajadus edasi",
+      "none": "Ükski klient pole teiega veel vajadust jaganud.",
+      "need": "Kliendi vajadus",
+      "choose": "Valige vajadus",
+      "submit": "Anna edasi: {agency}",
+      "done": "Edastatud.",
+      "takeBack": "Võta tagasi"
+    },
+    "passedToMe": {
+      "title": "Teile edastatud vajadused",
+      "from": "Saatja {agency} · teie osa {percent} %",
+      "noRoster": "Teie nimekirjas pole aktiivset töötajat, keda pakkuda.",
+      "worker": "Teie kandidaat",
+      "choose": "Valige töötaja",
+      "offer": "Paku juhtivale agentuurile",
+      "offered": "Pakutud. Juhtiv agentuur vaatab kandidaadi üle enne, kui tema klient seda näeb.",
+      "note": "Märkus juhtivale agentuurile (valikuline)",
+      "withdraw": "Võta tagasi",
+      "returnedWhy": "Tagastatud: {reason}"
+    },
+    "offerStatus": {
+      "offered": "Pakutud",
+      "withdrawn": "Tagasi võetud",
+      "accepted": "Vastu võetud",
+      "declined": "Tagasi lükatud"
+    },
+    "commissions": {
+      "title": "Vahendustasud",
+      "intro": "Tasumisele kuuluvad alles siis, kui töötaja on tööle võetud. Siin midagi ei arveldata.",
+      "empty": "Vahendustasu pole veel aktsepteeritud.",
+      "need": "Kliendi vajadus",
+      "role": {
+        "direct": "Teie kandidaat",
+        "lead": "{agency} kandidaat",
+        "partner": "Teie kandidaat {agency} kaudu"
+      },
+      "amount": "{amount} ({percent} % summast {fee})",
+      "status": {
+        "pending": "Ootab töölevõtmist",
+        "placed": "Tasumisele kuuluv",
+        "not_placed": "Tööle ei võetud"
+      },
+      "due": "Tasumisele kuulub: {total}"
+    },
+    "errors": {
+      "not_owner": "Seda saab teha ainult büroo omanik.",
+      "not_agency": "See ettevõte ei ole büroo.",
+      "invalid_email": "Sisestage kehtiv e-posti aadress.",
+      "invalid_share": "Sisestage osa, mis on üle 0 ja alla 100 %.",
+      "already_invited": "Sellel aadressil on juba avatud kutse.",
+      "invitation_not_found": "See kutse ei ole enam avatud.",
+      "same_agency": "Büroo ei saa olla iseenda partner.",
+      "already_partners": "Need bürood on juba partnerid.",
+      "partnership_not_found": "Partnerlust ei leitud.",
+      "partnership_not_open": "See partnerlus on juba lõpetatud.",
+      "partnership_not_active": "See partnerlus ei ole aktiivne.",
+      "share_not_active": "Seda vajadust enam ei jagata.",
+      "partner_share_not_found": "See vajadus on juba tagasi võetud.",
+      "worker_not_on_roster": "Seda töötajat pole teie aktiivses nimekirjas.",
+      "invalid_note": "Märkus on liiga pikk.",
+      "needs_migration": "Partnerbürood pole veel saadaval.",
+      "error": "See ei õnnestunud. Proovige uuesti.",
+      "proposal_not_open": "See kandidaat ei oota enam ülevaatust.",
+      "already_offered": "See töötaja on sellele vajadusele juba pakutud."
+    },
+    "proposalStatus": {
+      "proposed": "Ootab juhtiva agentuuri ülevaatust",
+      "forwarded": "Kliendile edastatud",
+      "returned": "Tagastatud",
+      "withdrawn": "Tagasi võetud"
+    },
+    "review": {
+      "title": "Partnerite kandidaadid ülevaatamiseks",
+      "candidate": "{worker} · agentuurilt {agency}",
+      "partnerNote": "Partneri märkus, klient seda ei näe: {note}",
+      "forward": "Edasta oma kliendile",
+      "forwardConsequence": "Teie klient näeb seda kandidaati teie omana, koos allpool oleva märkusega. Kliendi ees vastutate selle kandidaadi eest teie.",
+      "yourNote": "Teie märkus kliendile (valikuline)",
+      "confirm": "Edasta",
+      "forwarded": "Edastatud.",
+      "return": "Tagasta partnerile",
+      "reason": "Põhjus, mida partner näeb (valikuline)",
+      "returned": "Tagastatud."
     }
   }
 }

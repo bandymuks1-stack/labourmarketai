@@ -151,7 +151,6 @@ export const CANONICAL_APP_RPCS = [
   "requester_identities_for_provider",
   "reschedule_booking_proposal_v1",
   "resend_invitation_v1",
-  "respond_agency_candidate_offer_v1",
   "respond_booking_request",
   "respond_booking_request_v2",
   "respond_booking_request_v3",
