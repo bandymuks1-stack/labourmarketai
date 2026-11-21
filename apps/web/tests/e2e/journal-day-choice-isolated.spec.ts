@@ -75,8 +75,10 @@ test("D-1..D-4. the journal opens with the day; yesterday's entry keeps its work
     .poll(
       () =>
         sql<{ work_date: string; fresh: boolean }>(
-          `select e.work_date::text as work_date, (e.created_at > now() - interval '10 minutes') as fresh
+          // The work day is the entry's `work_date` metric (lib/journal/actions.ts).
+          `select m.value_text as work_date, (e.created_at > now() - interval '10 minutes') as fresh
              from public.journal_entries e join public.workers w on w.id = e.worker_id
+             join public.journal_entry_metrics m on m.entry_id = e.id and m.metric_slug = 'work_date'
             where w.profile_id = ${lit(me)} and e.superseded_by is null and e.original_text like ${lit(`%${RUN}%`)}`,
         ),
       { message: "D-2: the entry's work date is yesterday and it was created now", timeout: 60_000 },
