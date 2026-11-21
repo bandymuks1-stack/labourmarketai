@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { refusalStatus, resolveApiIdentity } from "@/lib/api/api-identity";
+import { firstPartyRefusalStatus, resolveFirstPartyIdentity } from "@/lib/api/api-identity";
 import {
   DOCUMENT_FILES_BUCKET,
   DOCUMENT_FILE_SIGNED_URL_TTL_SECONDS,
@@ -49,9 +49,9 @@ export async function GET(
   // SHARED AUTHENTICATED API — cookie session OR bearer token, one resolver.
   // Every authority below (the RLS read, the gated download recording, the
   // signed-URL mint) is untouched and still runs as the CALLER.
-  const auth = await resolveApiIdentity(req);
+  const auth = await resolveFirstPartyIdentity(req);
   if (!auth.ok) {
-    return NextResponse.json({ ok: false }, { status: refusalStatus(auth.reason) });
+    return NextResponse.json({ ok: false }, { status: firstPartyRefusalStatus(auth.reason) });
   }
   const { supabase } = auth.identity;
 

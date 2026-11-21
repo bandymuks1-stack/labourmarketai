@@ -69,7 +69,9 @@ describe("CV extraction route is auth-gated, size-capped, non-logging", () => {
   // it, and that it never builds a second identity path, is guarded by
   // lib/guards/api-auth-boundary.test.ts.
   const refusesUnresolvedIdentity = (s: string): boolean =>
-    /resolveApiIdentity\s*\(/.test(s) && /if\s*\(!auth\.ok\)/.test(s);
+    // resolveFirstPartyIdentity = the same boundary, minus third-party OAuth
+    // clients (accepted only at /api/mcp — lib/api/oauth-client-door-only.test.ts).
+    /(resolveApiIdentity|resolveFirstPartyIdentity)\s*\(/.test(s) && /if\s*\(!auth\.ok\)/.test(s);
 
   it("negative control: the guard rejects a route that skips the boundary", () => {
     // The exact source shape this guard replaced — direct cookie-client auth.
