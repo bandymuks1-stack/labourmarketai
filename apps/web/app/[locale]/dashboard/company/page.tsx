@@ -257,7 +257,7 @@ export default async function CompanyDashboardPage({
     },
     {
       key: "invite",
-      href: "/dashboard/network?type=join_as_employee",
+      href: "/dashboard/network?invite=1&type=join_as_employee",
       label: tDoors("invite"),
       icon: <UserPlus className="h-4 w-4" aria-hidden />,
     },
