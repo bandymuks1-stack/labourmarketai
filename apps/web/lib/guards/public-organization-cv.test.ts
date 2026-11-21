@@ -172,6 +172,12 @@ describe("public company Living CV — the database function keeps the owner's r
     expect(sql).toMatch(/when ec\.status = 'ended'\s+then \(\(ec\.ended_at \+ 1\)::timestamp at time zone 'UTC'\) end as retain_until/);
     expect(sql).toMatch(/public\.journal_entry_chain_root_at_v1\(je\.id\) < ctx\.retain_until/);
     expect(sql).toMatch(/APPLY AFTER 20261118164500/);
+    // R2 P3 (2026-11-21): the file's version sorts BEFORE 20261118164500, whose helper it calls. That is safe
+    // only because plpgsql resolves the call at run time (a language-sql body is checked at creation and
+    // would break a fresh replay). Keep it plpgsql.
+    const fn = /create or replace function public\.get_public_organization_cv_v1\([\s\S]*?\nas \$\$/.exec(sql)?.[0] ?? "";
+    expect(fn).toMatch(/\nlanguage plpgsql\n/);
+    expect(fn).not.toMatch(/\nlanguage sql\n/);
     expect(sql).toMatch(/where v_j_pass\s+and ec\.organization_id = p_organization_id/);
     expect(sql).toMatch(/where v_h_pass\s+and r\.organization_id = p_organization_id/);
     expect(sql).toMatch(/p\.record_state is distinct from 'duplicate'/);
