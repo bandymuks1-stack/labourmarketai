@@ -31,7 +31,7 @@ Per scenario it also proves:
 
 Measurements go to `MATRIX_REPORT` (JSON lines) and screenshots to `MATRIX_SHOTS`. Neither is committed.
 
-**Runs on the final build (with fixes #A and #B below):**
+**Runs on the final build (with fixes #3580 and #3581 below):**
 - 3 full runs in a row, each 24/24 passed in about 2.2 min.
 - Regression: the 14 isolated specs mapped to the scenarios had 195 passed, 0 failed, 5 skipped by their own gates (16.6 min). Those specs are `signup`, `agency-roles`, `role-journeys`, `recognition-chain`, `phone-journeys`, `sv-journey`, `public-need`, `audit-trail`, `skills-chain`, `teams-projects`, `journal-template`, `client-review`, `training-groups` and `former-employer-access`.
 - `journeys-coverage-isolated` (#3578): 26/26 passed.
@@ -58,11 +58,11 @@ Measurements go to `MATRIX_REPORT` (JSON lines) and screenshots to `MATRIX_SHOTS
 
 | # | Scenario | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Sign-up / invitation | PASS | PASS | PASS | PASS | N/A (no AI in sign-up) | PASS | PASS | PASS (after fix #A) | PASS |
+| 1 | Sign-up / invitation | PASS | PASS | PASS | PASS | N/A (no AI in sign-up) | PASS | PASS | PASS (after fix #3580) | PASS |
 | 2 | Worker | PASS* | PASS | PASS* | PASS | PROD | PASS | PASS | PASS | PASS |
 | 3 | Employer | PASS | PASS | PASS | PASS | PROD | PASS | PASS | PASS* | PASS |
 | 4 | Agency | PASS | PASS | PASS | PASS (A-1..A-6) | PROD | PASS | PASS | PASS | PASS |
-| 5 | Subcontractor | PASS | PASS | PASS | PASS | N/A (no AI step) | PASS | PASS | PASS (after fix #B) | PASS |
+| 5 | Subcontractor | PASS | PASS | PASS | PASS | N/A (no AI step) | PASS | PASS | PASS (after fix #3581) | PASS |
 | 6 | Student / education | PASS | PASS | PASS | PASS | N/A (no AI step) | PASS | PASS | PASS | PASS |
 | 7 | AI | PASS (surface) | PROD | PASS | PROD | **PROD** | PROD | PROD | PASS (surface) | PROD |
 | 8 | Admin | PASS | PASS | PASS | PASS (governance: PROD) | N/A | PASS | PASS | PASS | PASS |
@@ -129,8 +129,8 @@ Measurements go to `MATRIX_REPORT` (JSON lines) and screenshots to `MATRIX_SHOTS
 
 | # | Scenario | Defect (evidence) | Root cause | Fix | PR |
 |---|---|---|---|---|---|
-| A | 1, 6, 8 | The invitation panel's send button measured **40 px** on the touch tablet and the phone (M-1). | `invite-submit` carried `min-h-10` on every screen. #3530 had raised the panel's fields to 44 px but not the button. | `min-h-11`; the guard `invite-preset-line.test.ts` pins it. | #A |
-| B | 5 | "Add a service" measured **30 px** on the tablet and **40 px** on the phone (M-5). | The services section's buttons and fields had no height floor. | `min-h-11` on both add buttons, save, cancel and the form's one `inputCls`; the guard `service-offerings-tap.test.ts`. | #B |
+| A | 1, 6, 8 | The invitation panel's send button measured **40 px** on the touch tablet and the phone (M-1). | `invite-submit` carried `min-h-10` on every screen. #3530 had raised the panel's fields to 44 px but not the button. | `min-h-11`; the guard `invite-preset-line.test.ts` pins it. | #3580 |
+| B | 5 | "Add a service" measured **30 px** on the tablet and **40 px** on the phone (M-5). | The services section's buttons and fields had no height floor. | `min-h-11` on both add buttons, save, cancel and the form's one `inputCls`; the guard `service-offerings-tap.test.ts`. | #3581 |
 
 After the fixes, M-1..M-8 passed 3 runs in a row on all three screens, and the mapped isolated specs passed (above).
 
@@ -138,7 +138,7 @@ After the fixes, M-1..M-8 passed 3 runs in a row on all three screens, and the m
 
 **Workflow:** `prod-qa-walk.yml`, `workflow_dispatch`. The `spec` and `device` input values below are exact.
 
-**Prerequisite:** dispatch phone runs that touch the invitation panel or the services page only after #A and #B are deployed.
+**Prerequisite:** dispatch phone runs that touch the invitation panel or the services page only after #3580 and #3581 are deployed.
 
 **Tablet:** the production walk has no tablet device; the tablet is proven by the local matrix above.
 
@@ -148,8 +148,8 @@ After the fixes, M-1..M-8 passed 3 runs in a row on all three screens, and the m
 | 2 Worker | `jobs-search:phone`, `profile-cv-history:desktop`, `journal-confirm:phone`, `chat-continuity:desktop` |
 | 3 Employer | `company-chain:desktop`, `org-roster:desktop`, `brigade-formation:desktop`, `need-intake:phone` (raises a real internal intake alert and adds intake rows; dispatch only deliberately) |
 | 4 Agency | `agency-chain:desktop`, `agency-chain:phone` |
-| 5 Subcontractor | `marketplace:desktop`, `marketplace-goods-services:phone`, `orders-bookings:desktop` (after #B for phone) |
-| 6 Student / education | `learning-practice:phone`, `cohort-join-request:desktop` (after #A for phone) |
+| 5 Subcontractor | `marketplace:desktop`, `marketplace-goods-services:phone`, `orders-bookings:desktop` (after #3581 for phone) |
+| 6 Student / education | `learning-practice:phone`, `cohort-join-request:desktop` (after #3580 for phone) |
 | 7 AI | `chat-continuity:phone`, `chat-confirm-once:desktop`, `manager-chat:desktop`, `mcp-chain:desktop` |
 | 8 Admin | `company-governance:desktop`, `documents-approvals:desktop`, `search-support-privacy:desktop` |
 
