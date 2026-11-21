@@ -609,6 +609,13 @@
     "moreDays": "Der neueste Tag mit Einträgen wird gezeigt. Noch {count, plural, one {# Tag} other {# Tage}} mit Einträgen — Datum im Kalender wählen.",
     "periodEmpty": "In diesem Zeitraum gibt es keine Einträge."
   },
+  "dayChoice": {
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "weekAgo": "Vor einer Woche",
+    "otherDate": "Anderes Datum",
+    "earlier": "Frühere Einträge"
+  },
   "spreadsheet": {
     "title": "Tabellenmodus — mehrere Einträge auf einmal",
     "hint": "Jede Zeile wird ein eigener Arbeitsjournal-Eintrag. Leere Zeilen werden übersprungen; fehlgeschlagene Zeilen bleiben mit genauem Grund bearbeitbar.",

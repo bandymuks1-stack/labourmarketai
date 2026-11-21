@@ -322,5 +322,12 @@
     "metricsInsertFailed": "Posten blev ikke gemt fuldstændigt: {reason}. Posten blev afvist — prøv igen.",
     "moduleFieldInvalid": "Disse oplysninger hører ikke til denne type engagement: {fields}. Intet blev gemt — fjern dem, og prøv igen."
   },
-  "contextEnded": "afsluttet"
+  "contextEnded": "afsluttet",
+  "dayChoice": {
+    "today": "I dag",
+    "yesterday": "I går",
+    "weekAgo": "For en uge siden",
+    "otherDate": "Anden dato",
+    "earlier": "Tidligere poster"
+  }
 }

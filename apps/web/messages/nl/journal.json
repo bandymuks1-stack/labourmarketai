@@ -609,6 +609,13 @@
     "moreDays": "De meest recente dag met registraties wordt getoond. Nog {count, plural, one {# dag} other {# dagen}} met registraties — kies een datum in de kalender.",
     "periodEmpty": "Geen registraties in deze periode."
   },
+  "dayChoice": {
+    "today": "Vandaag",
+    "yesterday": "Gisteren",
+    "weekAgo": "Een week geleden",
+    "otherDate": "Andere datum",
+    "earlier": "Eerdere werkitems"
+  },
   "spreadsheet": {
     "title": "Spreadsheetmodus — meerdere regels tegelijk",
     "hint": "Elke rij wordt een eigen werkjournaalvermelding. Lege rijen worden overgeslagen; mislukte rijen blijven bewerkbaar met de exacte reden.",

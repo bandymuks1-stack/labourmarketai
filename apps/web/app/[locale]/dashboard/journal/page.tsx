@@ -141,6 +141,7 @@ import {
 } from "@/lib/journal/work-in-numbers-view";
 import { resolveWorkLogLabels } from "@/components/app/conversation/chat/labels";
 import { JournalQuickRecord } from "./quick-record";
+import { JournalDayChoice } from "./day-choice";
 import { JournalCalendar } from "@/components/app/journal/journal-calendar";
 import { JournalDayObject } from "@/components/app/journal/journal-day-object";
 import { buildDayObject } from "@/lib/journal/day-object";
@@ -1444,6 +1445,18 @@ export default async function JournalPage({
           conversation and the voice door stay reachable as text links inside
           the recorder (§1.5: nothing removed). */}
       <div id="journal-composer" className="order-1">
+        <div className="flex flex-col gap-3">
+        {/* THE WORK DAY FIRST (owner P1 2026-11-21): today, yesterday, a week
+            ago, another date, or the earlier entries — the same `?date=` the
+            calendar sets. An edit keeps its own saved date, so no choice. */}
+        {!editingEntry && (
+          <JournalDayChoice
+            today={todayIsoKey}
+            selected={selectedDate}
+            full={composeFull}
+            selectedLabel={selectedDate ? formatUtcDate(selectedDate, locale) : null}
+          />
+        )}
         {editingEntry ? (
           <div className="flex flex-col gap-2">
             <JournalEntryComposer
@@ -1529,6 +1542,7 @@ export default async function JournalPage({
             }
           />
         )}
+        </div>
       </div>
 
       {/* MANO VEIKLA SKAIČIAIS — one compact card (target IA §2): the

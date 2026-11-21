@@ -609,6 +609,13 @@
     "moreDays": "Pokazywany jest najnowszy dzień z wpisami. Jeszcze {count, plural, one {# dzień} few {# dni} many {# dni} other {# dnia}} z wpisami — proszę wybrać datę w kalendarzu.",
     "periodEmpty": "Brak wpisów w tym okresie."
   },
+  "dayChoice": {
+    "today": "Dziś",
+    "yesterday": "Wczoraj",
+    "weekAgo": "Tydzień temu",
+    "otherDate": "Inna data",
+    "earlier": "Wcześniejsze wpisy"
+  },
   "spreadsheet": {
     "title": "Tryb arkusza — kilka wpisów naraz",
     "hint": "Każdy wiersz staje się osobnym wpisem w dzienniku pracy. Puste wiersze są pomijane; wiersze z błędem pozostają edytowalne wraz z dokładnym powodem.",
