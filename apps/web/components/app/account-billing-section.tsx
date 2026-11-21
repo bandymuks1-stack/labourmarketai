@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 
 import { billingPilotPassEnabled, billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
+import { VIP_PLAN_LABEL } from "@/lib/billing/vip-organizations";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
 import { RefreshBillingStatusButton } from "@/components/app/refresh-billing-status-button";
@@ -148,7 +149,13 @@ export async function AccountBillingSection({
         </p>
       ) : null}
 
-      {!billingOn ? (
+      {ent.source === "vip" ? (
+        // A permanent VIP organization (owner decision 2026-11-15): the plan's
+        // name only — no status, no end date, no order, card or portal.
+        <p className="mt-2 text-sm text-text-primary" data-testid="account-billing-vip">
+          {t("planLabel")}: {VIP_PLAN_LABEL}
+        </p>
+      ) : !billingOn ? (
         <p className="mt-2 text-sm leading-relaxed text-text-secondary">
           {t("disabled")}
         </p>

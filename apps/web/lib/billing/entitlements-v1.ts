@@ -14,7 +14,10 @@
 
 import {
   FREE_ORGANIZATION_PLAN_KEY,
+  ORGANIZATION_PLAN_KEY,
   PRE_PAYMENT_PLANS,
+  isSellablePlan,
+  type PrePaymentPlan,
   getPlan,
   type FeatureKey,
   type PlanAudience,
@@ -24,6 +27,9 @@ import type { SubStatus } from "@/lib/billing/webhook-core";
 
 export type EntitlementSource =
   | "admin"
+  /** A permanent VIP organization (owner decision 2026-11-15): the highest
+   *  organization plan, at no charge, with no end and no return to free. */
+  | "vip"
   | "subscription"
   | "manual_override"
   | "free"
@@ -61,6 +67,8 @@ export interface ResolveEntitlementsInput {
   readonly subscriptionStatus: SubStatus | null;
   /** Admin-granted pilot access (no subscription required). */
   readonly manualOverridePlanKey: string | null;
+  /** The organization acted for is a permanent VIP (lib/billing/vip-organizations.ts). */
+  readonly vip?: boolean;
 }
 
 export function resolveEntitlements(
@@ -71,6 +79,20 @@ export function resolveEntitlements(
     return {
       effectivePlanKey: "admin_internal",
       source: "admin",
+      subscriptionStatus: input.subscriptionStatus,
+      active: true,
+      grace: false,
+      enforced: input.billingActive,
+    };
+  }
+
+  // A permanent VIP organization holds the highest organization plan before any
+  // subscription row is read: no status, no period end and no expired pilot pass
+  // can move it to free (owner decision 2026-11-15).
+  if (input.vip) {
+    return {
+      effectivePlanKey: highestOrganizationPlanKey(),
+      source: "vip",
       subscriptionStatus: input.subscriptionStatus,
       active: true,
       grace: false,
@@ -135,4 +157,42 @@ export function entitlementAllows(
 /** The set of plan keys (for admin/debug surfaces). */
 export function allPlanKeys(): string[] {
   return PRE_PAYMENT_PLANS.map((p) => p.slug);
+}
+
+/** Weight of one entitlement when comparing plans: `true` (included, no
+ *  ceiling) outranks any number; a number counts by its size; absent/false = 0. */
+function entitlementWeight(e: boolean | number | undefined): number {
+  if (e === true) return Number.POSITIVE_INFINITY;
+  if (typeof e === "number") return e;
+  return 0;
+}
+
+/** Whether plan `a` gives at least as much as plan `b` in every feature and more in one. */
+function dominates(a: PrePaymentPlan, b: PrePaymentPlan): boolean {
+  const keys = new Set([...Object.keys(a.entitlements), ...Object.keys(b.entitlements)]) as Set<keyof PrePaymentPlan["entitlements"]>;
+  let more = false;
+  for (const k of keys) {
+    const wa = entitlementWeight(a.entitlements[k]);
+    const wb = entitlementWeight(b.entitlements[k]);
+    if (wa < wb) return false;
+    if (wa > wb) more = true;
+  }
+  return more;
+}
+
+/**
+ * THE HIGHEST ORGANIZATION PLAN that exists — what a permanent VIP organization
+ * holds (owner decision 2026-11-15). Derived from the catalogue, never named, so
+ * a higher organization plan added later is picked up with no change here:
+ * among the organization plans that are sold (`sellable`), the one no other plan
+ * dominates; on a tie the catalogue order decides. With no sellable plan at all
+ * it is the one paid organization plan.
+ */
+export function highestOrganizationPlanKey(): string {
+  const candidates = PRE_PAYMENT_PLANS.filter(
+    (p) => (p.audience === "company" || p.audience === "agency") && isSellablePlan(p),
+  );
+  if (candidates.length === 0) return ORGANIZATION_PLAN_KEY;
+  const top = candidates.find((c) => !candidates.some((o) => o !== c && dominates(o, c)));
+  return (top ?? candidates[0]).slug;
 }
