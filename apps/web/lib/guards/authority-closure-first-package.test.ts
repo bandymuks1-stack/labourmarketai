@@ -232,6 +232,10 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-17 owner decision: a former employer keeps the journal recorded during the employment and
       // nothing new, and can no longer change it (RLS + three SECURITY DEFINER bodies; RED draft, needs-human-gate, NOT applied).
       "20261118164500_",
+      // 2026-11-20 owner approval: the two #3474 chain fixes (a correction moves into an ended context only when
+      // it corrects that context's record; the chain root walk is cycle-safe, no depth cap). Two SECURITY DEFINER
+      // bodies; RED draft, needs-human-gate, NOT applied.
+      "20261120190000_",
       // 2026-11-18 COMM-1 profiles.communication_locale (renamed from 20260920122000; RED draft, needs-human-gate, NOT applied).
       "20261118100100_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
