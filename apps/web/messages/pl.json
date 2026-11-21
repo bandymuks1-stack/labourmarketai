@@ -18917,7 +18917,8 @@
       "heading": "Zaproszenia od organizacji",
       "explainer": "Skierowane do Państwa zaproszenia do zarządu. Po przyjęciu organizacja pojawi się w przełączniku przestrzeni.",
       "accept": "Przyjmij",
-      "decline": "Odrzuć"
+      "decline": "Odrzuć",
+      "invitedBy": "Zaproszenie od {name}"
     },
     "members": {
       "heading": "Członkowie organizacji",

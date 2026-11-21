@@ -18917,7 +18917,8 @@
       "heading": "Organization invitations",
       "explainer": "Governance invitations addressed to you. Accepting makes the organization appear in your workspace switcher.",
       "accept": "Accept",
-      "decline": "Decline"
+      "decline": "Decline",
+      "invitedBy": "Invited by {name}"
     },
     "members": {
       "heading": "Organization members",
