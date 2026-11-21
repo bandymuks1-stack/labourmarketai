@@ -609,6 +609,13 @@
     "moreDays": "Showing the latest recorded day. {count, plural, one {# more day} other {# more days}} with records — pick a date on the calendar.",
     "periodEmpty": "No records in this period."
   },
+  "dayChoice": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "weekAgo": "A week ago",
+    "otherDate": "Another date",
+    "earlier": "Earlier entries"
+  },
   "spreadsheet": {
     "title": "Spreadsheet mode — several entries at once",
     "hint": "Each row becomes its own work journal entry. Empty rows are skipped; failed rows stay editable with the exact reason.",

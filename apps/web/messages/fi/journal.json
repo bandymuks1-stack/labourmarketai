@@ -435,5 +435,12 @@
     "conflictNote": "Tätä merkintää on jo muutettu toisessa välilehdessä tai istunnossa. Jos haluat säilyttää tähän kirjoitetut muutokset, kopioi teksti ensin — sivun uudelleenlataus hävittää ne, ja muokkaat sen jälkeen uusinta versiota.",
     "conflictReload": "Lataa sivu uudelleen"
   },
-  "contextEnded": "päättynyt"
+  "contextEnded": "päättynyt",
+  "dayChoice": {
+    "today": "Tänään",
+    "yesterday": "Eilen",
+    "weekAgo": "Viikko sitten",
+    "otherDate": "Muu päivämäärä",
+    "earlier": "Aiemmat merkinnät"
+  }
 }

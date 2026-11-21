@@ -322,5 +322,12 @@
     "metricsInsertFailed": "Oppføringen ble ikke lagret fullstendig: {reason}. Oppføringen ble forkastet — prøv igjen.",
     "moduleFieldInvalid": "Disse opplysningene hører ikke til denne typen engasjement: {fields}. Ingenting ble lagret — fjern dem og prøv igjen."
   },
-  "contextEnded": "avsluttet"
+  "contextEnded": "avsluttet",
+  "dayChoice": {
+    "today": "I dag",
+    "yesterday": "I går",
+    "weekAgo": "For en uke siden",
+    "otherDate": "Annen dato",
+    "earlier": "Tidligere oppføringer"
+  }
 }
