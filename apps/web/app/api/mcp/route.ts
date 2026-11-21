@@ -13,7 +13,17 @@ import {
   exposedCapabilities,
   runCapability,
 } from "@/lib/capabilities/registry";
-import { recordExternalReceipt } from "@/lib/capabilities/external-receipt";
+import {
+  recordExternalReceipt,
+  recordScopeRefusalReceipt,
+} from "@/lib/capabilities/external-receipt";
+import { env } from "@/lib/env";
+import {
+  decideScope,
+  insufficientScopeResult,
+  scopeEnforcementModeOf,
+  scopeGrantOf,
+} from "@/lib/mcp/scopes";
 import {
   handleMcpMessage,
   parseErrorResponse,
@@ -355,6 +365,46 @@ export async function POST(req: Request) {
       if (!capabilityId) {
         return { isError: true, payload: { ok: false, code: "unknown_capability" } };
       }
+      const descriptor = exposedCapabilities().find((c) => c.id === capabilityId);
+
+      // PERMISSION SCOPE (lib/mcp/scopes.ts) — the ONE place a tool call is
+      // checked against what the OAuth client was allowed to ask for. It can
+      // only NARROW: RLS, the draft->confirm contract and the bearer caller
+      // scope below are untouched. `off` (default) evaluates nothing; the
+      // person's own web / mobile session is never scoped.
+      const scopeMode = scopeEnforcementModeOf(env.MCP_SCOPE_ENFORCEMENT);
+      const grant = scopeGrantOf(auth.identity.oauthClient);
+      // A scoped grant is checked even with the flag `off` (decideScope); the
+      // flag only governs unscoped tokens. A tool with no descriptor can
+      // never satisfy a scope, so it fails closed for any checked grant.
+      const checked = grant.kind === "oauth_scoped" || (scopeMode !== "off" && grant.kind !== "first_party");
+      if (checked && !descriptor) {
+        return { isError: true, payload: { ok: false, code: "unknown_capability" } };
+      }
+      if (checked && descriptor) {
+        const decision = decideScope(scopeMode, grant, descriptor);
+        if (decision.outcome !== "allow") {
+          logEvent({
+            event: "external_client.scope",
+            door: DOOR,
+            tool: name,
+            outcome: decision.outcome === "refuse" ? "refused" : "would_refuse",
+            mode: decision.outcome === "refuse" ? "enforce" : "log",
+            grant: decision.grantKind,
+            required_scope: decision.requiredScope,
+            oauth_client: decision.clientId,
+          });
+          if (decision.outcome === "refuse") {
+            // Audit receipt for the refusal; it never changes the answer.
+            const receipt = await recordScopeRefusalReceipt(caller, capabilityId, args);
+            return {
+              isError: true,
+              payload: { ...insufficientScopeResult(capabilityId, decision.requiredScope, grant), receipt },
+            };
+          }
+        }
+      }
+
       const tCap = performance.now();
       // BEARER CALLER SCOPE: inside it the web's own domain entrypoints
       // (`createClient()`) resolve to THIS verified caller's RLS client, so a
@@ -368,7 +418,6 @@ export async function POST(req: Request) {
       // AUDIT RECEIPT for every write through this door (confirm/execute):
       // who, which capability, which object, which confirmation, outcome.
       // Never undoes nor fails the write; the client is told its state.
-      const descriptor = exposedCapabilities().find((c) => c.id === capabilityId);
       const receipt = descriptor
         ? await recordExternalReceipt(caller, descriptor, args, result)
         : ({ state: "not_applicable" } as const);

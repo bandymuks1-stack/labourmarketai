@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { confirmationRef, recordExternalReceipt } from "./external-receipt";
+import { confirmationRef, recordExternalReceipt, recordScopeRefusalReceipt } from "./external-receipt";
 import type { CapabilityCaller } from "./contract";
 
 const TOKEN = "a-real-one-time-confirmation-token-value";
@@ -87,5 +87,29 @@ describe("the audit receipt for an assistant's write", () => {
       { ok: false, code: "confirmation_rejected", message: "x" },
     );
     expect(calls[0].args).toMatchObject({ p_organization_id: null, p_readback_ok: null });
+  });
+});
+
+describe("the audit receipt for a scope refusal (lib/mcp/scopes.ts, enforce)", () => {
+  it("is written for a READ too: capability, insufficient_scope, no read-back, never the token", async () => {
+    const { c, calls } = caller({ data: "rcpt-s", error: null });
+    const r = await recordScopeRefusalReceipt(c, "journal.list", { confirmationToken: TOKEN });
+    expect(r).toEqual({ state: "recorded", id: "rcpt-s" });
+    expect(calls[0].fn).toBe("record_external_action_receipt_v1");
+    expect(calls[0].args).toMatchObject({
+      p_capability: "journal.list",
+      p_organization_id: ORG,
+      p_outcome: "insufficient_scope",
+      p_readback_ok: null,
+      p_confirmation_ref: confirmationRef(TOKEN),
+    });
+    expect(JSON.stringify(calls[0].args)).not.toContain(TOKEN);
+  });
+
+  it("folds a bridge id's hyphens like every receipt, and degrades honestly", async () => {
+    const { c, calls } = caller({ data: null, error: { code: "PGRST202" } });
+    const r = await recordScopeRefusalReceipt(c, "company.create-task", {});
+    expect(calls[0].args).toMatchObject({ p_capability: "company.create_task" });
+    expect(r).toEqual({ state: "not_enabled" });
   });
 });

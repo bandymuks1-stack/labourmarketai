@@ -69,7 +69,52 @@ export type ApiIdentity = {
   /** The caller's own client. Every query through it is subject to RLS as
    *  that user — exactly as the cookie-backed client always was. */
   readonly supabase: SupabaseClient<Database>;
+  /**
+   * Present ONLY when the verified bearer token was obtained by an OAuth
+   * client (Supabase Auth's OAuth 2.1 server adds the `client_id` claim to
+   * those, and to nothing else). Read off the token AFTER the auth server
+   * verified it, so these are the verified token's own claims, never a header
+   * value. It widens nothing: the MCP door may only NARROW what such a client
+   * may ask for (`lib/mcp/scopes.ts`). Absent for a cookie session and for a
+   * first-party Supabase session bearer (web, Android, iOS).
+   */
+  readonly oauthClient?: OauthClientClaims;
 };
+
+/** The OAuth facts on a verified bearer token (consumed by `lib/mcp/scopes.ts`). */
+export type OauthClientClaims = {
+  readonly clientId: string;
+  /** The space-separated `scope` claim (RFC 9068 §2.2.3), split; null when absent. */
+  readonly scopeClaim: readonly string[] | null;
+};
+
+/**
+ * Read the OAuth client facts off a token's payload. PURE. Call it ONLY on a
+ * token the auth server has already verified — it decodes, it does not
+ * verify. A malformed payload, or one without a string `client_id`, is
+ * "not an OAuth client token" (undefined), never an error: verification has
+ * already decided WHO the caller is; this only labels which kind of client
+ * is asking.
+ */
+export function oauthClientClaimsOf(token: string): OauthClientClaims | undefined {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return undefined;
+    const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Record<string, unknown>;
+    const clientId = claims.client_id;
+    if (typeof clientId !== "string" || clientId.length === 0 || clientId.length > 200) return undefined;
+    const rawScope = claims.scope;
+    const scopeClaim =
+      typeof rawScope === "string"
+        ? rawScope.split(/\s+/).filter(Boolean)
+        : Array.isArray(rawScope) && rawScope.every((v) => typeof v === "string")
+          ? (rawScope as string[])
+          : null;
+    return { clientId, scopeClaim };
+  } catch {
+    return undefined;
+  }
+}
 
 export type ApiIdentityResult =
   | { readonly ok: true; readonly identity: ApiIdentity }
@@ -247,9 +292,15 @@ async function identityFromBearer(
     const verified = { data: { user: data.user }, error: null };
     supabase.auth.getUser = ((jwt?: string) =>
       jwt !== undefined ? realGetUser(jwt) : Promise.resolve(verified)) as typeof supabase.auth.getUser;
+    const oauthClient = oauthClientClaimsOf(token);
     return {
       ok: true,
-      identity: { userId: data.user.id, transport: "bearer", supabase },
+      identity: {
+        userId: data.user.id,
+        transport: "bearer",
+        supabase,
+        ...(oauthClient ? { oauthClient } : {}),
+      },
     };
   } catch {
     return { ok: false, reason: "identity-unavailable" };
