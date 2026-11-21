@@ -187,9 +187,11 @@ select '$ORGB', ('74000000-0000-4000-8000-00000000000' || i)::uuid, date '2025-0
 SQL
 run_file "$TMP/seed.sql"
 
-# 20261118164500's journal_entry_chain_root_at_v1, verbatim (the former-employer rule reuses it).
+# The former-employer rule's journal_entry_chain_root_at_v1, verbatim from the LATEST migration that
+# defines it (20261118164500, replaced in place by 20261120190000, #3567).
+ROOTSRC=$(grep -l '^create or replace function public.journal_entry_chain_root_at_v1' "$REPO"/supabase/migrations/*.sql | sort | tail -1)
 awk '/^create or replace function public.journal_entry_chain_root_at_v1/{p=1} p{print} p&&/^\$\$;/{exit}' \
-  "$REPO/supabase/migrations/20261118164500_former_employer_limited_access_v1.sql" > "$TMP/root_at.sql"
+  "$ROOTSRC" > "$TMP/root_at.sql"
 [ -s "$TMP/root_at.sql" ] || { echo "could not cut journal_entry_chain_root_at_v1"; exit 1; }
 run_file "$TMP/root_at.sql"
 COUNTS0="$(q "select (select count(*) from public.journal_entries) || '|' || (select count(*) from public.organization_evidence_records) || '|' || (select count(*) from public.journal_entry_metrics) || '|' || (select count(*) from public.organization_evidence_events)")"

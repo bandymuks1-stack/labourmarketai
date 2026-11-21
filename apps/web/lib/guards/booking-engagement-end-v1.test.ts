@@ -1815,6 +1815,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-17: owner decision, a former employer keeps limited access (retained journal up to the end
       // date, nothing new, no more writes). RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261118164500_former_employer_limited_access_v1.sql",
+      // 2026-11-20: owner approval, the two #3474 chain fixes (direct corrections only move into an ended
+      // context; cycle-safe chain root). RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261120190000_former_employer_chain_fixes_v1.sql",
 ]);
   });
 
