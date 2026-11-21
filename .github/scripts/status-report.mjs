@@ -27,6 +27,8 @@ import {
   isRedPr,
   mergeWalkLedger,
   narrativeDiscrepancies,
+  migrationClaimDiscrepancies,
+  finalCompleteness,
   parseWalkTitle,
   prBlocker,
   privacyFindings,
@@ -200,7 +202,7 @@ if (mapRows.size < 250) registerProblems.push(`Lithuanian function map rows pars
 if (!journeys.size) registerProblems.push("journeys table not found");
 if (data.schema !== 2) registerProblems.push(`fetch data schema ${data.schema ?? "missing"} (expected 2)`);
 const fetchErrors = Array.isArray(data.errors) ? data.errors : [{ path: "fetch", status: "missing", attempts: 0, message: "no error log in the fetch data" }];
-const REPORT_STATE = completeness({ errors: fetchErrors, registerProblems });
+let REPORT_STATE = completeness({ errors: fetchErrors, registerProblems });
 const openNums = new Set(data.prs.map((p) => p.number));
 
 function fnFields(r) {
@@ -376,10 +378,31 @@ const discrepancies = [
     closedPrNumbers: [...(data.closedPrNumbers ?? []), ...data.merged.map((m) => m.number)],
     ledger,
   }),
+  ...migrationClaimDiscrepancies(narrativeText, {
+    prMigrations: migrationsByPr(),
+    notApplied: data.migrationParity?.notApplied ?? [],
+  }),
   ...ledgerMerge.conflicts.map(
     (c) => `Bandymas ${c.key} (run ${c.run}): patvirtintų rezultatų sąraše „${c.ledger}“, GitHub rodo „${c.github}“. Reikia patikrinti.`,
   ),
 ];
+
+// A report is COMPLETE only with the production migration ledger read AND no open contradiction
+// (owner order 2026-11-20): the narrative is checked before the state is written.
+REPORT_STATE = finalCompleteness({ errors: fetchErrors, registerProblems, discrepancies, migrationParity: data.migrationParity });
+
+/** PR number -> migration stems it ADDED on the checked-out history (squash subjects end "(#N)"). */
+function migrationsByPr() {
+  const g = spawnSync("git", ["-C", ROOT, "log", "--diff-filter=A", "--name-only", "--format=@@%s", "--", "supabase/migrations"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  const map = {};
+  let pr = null;
+  for (const l of (g.stdout ?? "").split("\n")) {
+    if (l.startsWith("@@")) { pr = l.match(/\(#(\d+)\)\s*$/)?.[1] ?? null; continue; }
+    const m = l.match(/^supabase\/migrations\/(.+)\.sql$/);
+    if (pr && m) (map[pr] ??= []).push(m[1]);
+  }
+  return map;
+}
 
 // ---------------------------------------------------------------- previous report (for "what changed")
 const prev = { states: new Map(), live: null, openPrs: null, at: null };
@@ -480,7 +503,7 @@ P(
   "",
   `Sugeneruota ${vilnius(data.fetchedAt)} (Lietuvos laiku). Laikotarpis: nuo ${vilnius(data.sinceIso)}.`,
   "",
-  `**Ataskaitos būsena: ${REPORT_STATE}**${REPORT_STATE === "COMPLETE" ? " — visos užklausos pavyko, registras perskaitytas visas." : " — dalis duomenų nesurinkta; žr. „Duomenų surinkimo klaidos“. Nepilnų PR būsena rodoma kaip nežinoma, ne kaip praėjusi."}`,
+  `**Ataskaitos būsena: ${REPORT_STATE}**${REPORT_STATE === "COMPLETE" ? " — visos užklausos pavyko, registras ir migracijų žurnalas perskaityti, prieštaravimų nėra." : discrepancies.length && !fetchErrors.length && !registerProblems.length && data.migrationParity ? " — tekste yra prieštaravimų faktams; žr. „Neatitikimai, kuriuos reikia patikrinti“. Ištaisius tekstą, ataskaita generuojama iš naujo." : " — dalis duomenų nesurinkta; žr. „Duomenų surinkimo klaidos“. Nepilnų PR būsena rodoma kaip nežinoma, ne kaip praėjusi."}`,
   "",
   ...(REPORT_STATE === "COMPLETE"
     ? []
@@ -497,7 +520,7 @@ P(
     "Funkcijų būsenos imamos tik iš [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md) eilučių: funkcija laikoma veikiančia tik tada, kai jos eilutė turi produkcijos įrodymą (`LIVE_VERIFIED`). " +
     "Kodas ar žalias CI veikimo neįrodo. Generatorius: `.github/scripts/status-report.mjs`.",
   "",
-  `**Produkcija:** versija \`${data.health?.build ?? "nežinoma"}\`, sveikata ${data.health?.ok ? "gera" : "BLOGA"} (DB ${data.health?.dbMs ?? "?"} ms), patikrinta ${data.health?.at ? vilnius(data.health.at) : "?"}.`,
+  `**Produkcija:** versija \`${data.health?.build ?? "nežinoma"}\`, sveikata ${data.health?.ok ? "gera" : "BLOGA"}, patikrinta ${data.health?.at ? vilnius(data.health.at) : "?"}.`,
   "",
   `**Funkcijos:** ${countedFns.length} privalomos apimties funkcijų; veikia produkcijoje (įrodyta) ${live} (${((live / countedFns.length) * 100).toFixed(1)} %).`,
   "",
@@ -506,6 +529,7 @@ P(
       .map((x) => `${x} ${total[x]}`)
       .join(", ")}. Neveikiančiomis laikomos tik NEVEIKIA eilutės; NEPATIKRINTA, TIK KODE ir TIK CI PATIKRINTA reiškia „neįrodyta produkcijoje“, ne „sugedę“.`,
   "",
+  `**Migracijos produkcijoje:** ${data.migrationParity ? `${data.migrationParity.applied} pritaikyta, ${data.migrationParity.notApplied.length} repozitorijos failų nepritaikyta (gyvas žurnalo patikrinimas, quality run ${data.migrationParity.run}, main ${String(data.migrationParity.headSha).slice(0, 8)})` : "žurnalas neperskaitytas — ataskaita PARTIAL"}.`,
   `**Neatitikimai:** ${discrepancies.length ? `${discrepancies.length} — žr. „Neatitikimai, kuriuos reikia patikrinti“` : "nerasta"}.`,
   "",
   "## Patvirtinta naujausia būsena",
