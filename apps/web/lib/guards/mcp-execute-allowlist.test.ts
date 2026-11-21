@@ -33,7 +33,7 @@ function bridgedReversible(id: string): boolean {
  * single-step capabilities. This guard makes that list the ONLY way a
  * single-step (`kind: "execute"`) capability can be exposed: a new one fails
  * here until it is added deliberately, and the instructions in
- * `app/api/mcp/route.ts` are updated to name it.
+ * `lib/mcp/http-door.ts` (FULL_DOOR_INSTRUCTIONS) are updated to name it.
  */
 const SINGLE_STEP_ALLOWLIST: readonly string[] = [
   // The session's active-workspace pointer: reversible, one row, a no-op when repeated.
