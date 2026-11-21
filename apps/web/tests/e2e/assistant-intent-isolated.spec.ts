@@ -210,20 +210,6 @@ for (const device of DEVICES) {
       expect(entries(s.workerId), "the worker starts with an empty journal").toEqual([]);
     });
 
-    for (const [lang, phrase] of JOB) {
-      test(`S-${lang} (${device.name}). "${phrase}" opens the job search with results`, async ({ browser }) => {
-        const { ctx, page } = await open(browser, device, s.worker);
-        await home(page);
-        await say(page, phrase);
-        const view = page.getByTestId("opportunities-view").filter({ visible: true }).first();
-        await expect(view, "the job search result opens").toBeVisible({ timeout: 60_000 });
-        await expect(view.getByTestId("opportunities-band-counts"), "with results, not an empty list").toHaveText(/[1-9]/);
-        await expect(page.getByTestId("worklog-flow"), "no journal flow for a job search").toHaveCount(0);
-        await fits(page, `job search ${lang}`);
-        await ctx.close();
-      });
-    }
-
     test(`J-LT (${device.name}). "Užpildyk vakarykštį darbo žurnalą": a draft dated yesterday, confirmed, saved once, readable`, async ({ browser }) => {
       const { ctx, page } = await open(browser, device, s.worker);
       await home(page);
@@ -356,5 +342,32 @@ for (const device of DEVICES) {
       await expect(page.getByTestId("composer-input"), "it opens the assistant").toBeVisible({ timeout: 60_000 });
       await ctx.close();
     });
+
+    // Last in the group: a job-search defect must not hide the journal,
+    // need and switch walks (serial groups stop at the first failure).
+    for (const [lang, phrase] of JOB) {
+      test(`S-${lang} (${device.name}). "${phrase}" opens the job search with results`, async ({ browser }) => {
+        const { ctx, page } = await open(browser, device, s.worker);
+        await home(page);
+        await say(page, phrase);
+        const view = page.getByTestId("opportunities-view").filter({ visible: true }).first();
+        await expect(view, "the job search result opens").toBeVisible({ timeout: 60_000 }).catch(async (cause) => {
+          const said = await page.locator('[data-testid^="msg-"]').allInnerTexts().catch(() => []);
+          const states = [];
+          for (const id of ["opportunities-empty", "opportunities-unavailable", "opportunities-no-worker", "opportunities-error", "result-body-pending"]) {
+            if ((await page.getByTestId(id).count()) > 0) states.push(id);
+          }
+          throw new Error(
+            `the job search result did not open; url ${page.url().replace(BASE, "")}; states ${JSON.stringify(states)}; ` +
+              `last turns ${JSON.stringify(said.slice(-3).map((t) => t.slice(0, 300)))}`,
+            { cause },
+          );
+        });
+        await expect(view.getByTestId("opportunities-band-counts"), "with results, not an empty list").toHaveText(/[1-9]/);
+        await expect(page.getByTestId("worklog-flow"), "no journal flow for a job search").toHaveCount(0);
+        await fits(page, `job search ${lang}`);
+        await ctx.close();
+      });
+    }
   });
 }
