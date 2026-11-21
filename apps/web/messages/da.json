@@ -8118,5 +8118,13 @@
       "not_authorized": "Du kan kun administrere dine egne poster.",
       "error": "Noget gik galt. Prøv igen."
     }
+  },
+  "businessProfile": {
+    "cv": {
+      "title": "Erfaring",
+      "historyHours": "Timer på enkelte dage",
+      "historyPeople": "Personer i registreringerne",
+      "enableHint": "Når det er slået til, vises også summer af det arbejde, der er registreret under din organisation: timer, personer og måneder, kun hvor mindst 5 personer står bag. Aldrig navne."
+    }
   }
 }

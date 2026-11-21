@@ -23,6 +23,11 @@ const reader = vi.hoisted(() => ({ result: null as PublicBusinessProfileView | n
 vi.mock("@/lib/company/public-profile", () => ({
   getPublicBusinessProfile: async () => reader.result,
 }));
+// The public company Living CV (3.36) is an async server read with its own
+// guard (public-organization-cv.test.ts); this file is about ?view=team.
+vi.mock("@/components/app/organization/public-organization-cv", () => ({
+  PublicOrganizationCv: () => null,
+}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => {},
   getTranslations: async (namespace?: string) =>

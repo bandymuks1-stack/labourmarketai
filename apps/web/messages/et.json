@@ -8118,5 +8118,13 @@
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
     }
+  },
+  "businessProfile": {
+    "cv": {
+      "title": "Kogemus",
+      "historyHours": "Tunnid üksikutel päevadel",
+      "historyPeople": "Inimesi kirjetes",
+      "enableHint": "Kui see on sees, näidatakse ka teie organisatsiooni all registreeritud töö kokkuvõtteid: tunnid, inimeste arv ja kuud, ainult kui nende taga on vähemalt 5 inimest. Nimesid ei näidata kunagi."
+    }
   }
 }

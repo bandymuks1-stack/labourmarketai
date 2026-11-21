@@ -8118,5 +8118,13 @@
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
     }
+  },
+  "businessProfile": {
+    "cv": {
+      "title": "Pieredze",
+      "historyHours": "Stundas atsevišķās dienās",
+      "historyPeople": "Cilvēki ierakstos",
+      "enableHint": "Kad ieslēgts, tiek rādītas arī jūsu organizācijā reģistrētā darba kopsummas: stundas, cilvēku skaits un mēneši, tikai ja aiz tām ir vismaz 5 cilvēki. Vārdi netiek rādīti nekad."
+    }
   }
 }

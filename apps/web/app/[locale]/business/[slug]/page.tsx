@@ -8,6 +8,7 @@ import { getPublicBusinessProfile } from "@/lib/company/public-profile";
 import { publicWebsiteHref } from "@/lib/company/public-website";
 import { buildCompanyTeamProfile, isCompanyTeamView } from "@/lib/company/team-profile-model";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { PublicOrganizationCv } from "@/components/app/organization/public-organization-cv";
 
 export const dynamic = "force-dynamic";
 
@@ -132,6 +133,11 @@ export default async function BusinessProfilePage({
           </div>
         </section>
       )}
+
+      {/* The company's track record (register 3.36): aggregates only, at
+          least 5 people behind every figure, only while the profile is
+          public. Renders nothing otherwise. */}
+      <PublicOrganizationCv organizationId={profile.id} locale={locale} />
 
       {/* Listings (canonical marketplace_listings, active) */}
       <section className="flex flex-col gap-3">
