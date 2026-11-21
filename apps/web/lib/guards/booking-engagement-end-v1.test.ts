@@ -1819,6 +1819,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // acknowledgement, NOT applied.
       "20261121100000_signup_role_admin_guard_manager_consent_v1.sql",
       "20261121100100_journal_lineage_and_metrics_authorship_v1.sql",
+      // 2026-11-21: owner P0 security (B): access arms follow ended governance membership; the inviter is
+      // shown on a membership invitation. RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261121100200_former_member_access_arms_v1.sql",
+      "20261121100300_membership_invitation_inviter_v1.sql",
 ]);
   });
 

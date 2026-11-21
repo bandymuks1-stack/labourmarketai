@@ -8,6 +8,8 @@
  *   grant_org_manager()          only to an ACTIVE governance member of that organization
  *   journal lineage              a new entry corrects only its own person's entry
  *   journal_entry_metrics_write  a manager's metric is labelled manager_corrected
+ *   former-member arms           creator arms follow ended governance membership
+ *   membership invitations       the invited person sees who invited them
  *
  * The isolated proof is apps/web/tests/e2e/security-p0-isolated.spec.ts.
  */
@@ -67,5 +69,30 @@ describe("security P0 — latest database definitions keep the fixes", () => {
   it("a manager's metric write is labelled manager_corrected", () => {
     const { body } = latest(/create policy journal_entry_metrics_write/, /\)\)\)\)\)\);|\)\)\)\)\);/);
     expect(body).toContain("journal_entry_metrics.source = 'manager_corrected'");
+  });
+
+  it("a former company/agency creator no longer passes the worker-visibility predicates", () => {
+    for (const fn of ["caller_has_worker_relation_v1", "can_view_worker", "worker_avatar_path_v1", "worker_recognitions_for_viewer_v1"]) {
+      const { body } = latest(new RegExp(`create or replace function public\\.${fn}\\(`), /\$\$;|\$function\$;/);
+      expect(body, fn).toContain("public.owns_company(cw.company_id)");
+      expect(body, fn).toContain("public.owns_agency(aw.agency_id)");
+      expect(body, fn).not.toMatch(/and c\.profile_id = auth\.uid\(\)/);
+    }
+    const priv = latest(/create or replace function public\.read_companies_private_v1\(/, /\$\$;|\$function\$;/);
+    expect(priv.body).toContain("where public.owns_company(c.id)");
+  });
+
+  it("a creator's organization rows follow demand access; personal rows stay theirs", () => {
+    for (const pol of ["customer_requests_select", "customer_requests_update", "demand_shortlist_select", "booking_requests_select", "demand_shortlist_write"]) {
+      const { body } = latest(new RegExp(`create policy ${pol} on`), /;/);
+      expect(body, pol).toMatch(/organization_id is null or public\.has_org_demand_access\(organization_id\)/);
+    }
+  });
+
+  it("the invited person's own invitations name the inviter", () => {
+    const { body } = latest(/create or replace function public\.membership_my_invitations_v2\(\)/, /\$\$;/);
+    expect(body).toContain("inviter_name text");
+    expect(body).toContain("left join public.profiles p on p.id = m.invited_by");
+    expect(body).toContain("where m.profile_id = auth.uid()");
   });
 });

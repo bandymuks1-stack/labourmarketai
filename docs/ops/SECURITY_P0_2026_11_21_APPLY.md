@@ -8,8 +8,12 @@ rows, grants or memberships.
 
 1. `20261121100000_signup_role_admin_guard_manager_consent_v1`
 2. `20261121100100_journal_lineage_and_metrics_authorship_v1`
+3. `20261121100200_former_member_access_arms_v1`
+4. `20261121100300_membership_invitation_inviter_v1`
 
-The two migrations are independent of each other. Each runs in one transaction.
+The four migrations are independent of each other. Each runs in one
+transaction. Apply 3 only after the check below returns no rows (or the owner
+accepts each row it lists).
 
 ## Before applying (read-only)
 
@@ -43,6 +47,19 @@ select m.id, m.entry_id, m.metric_slug, m.source, m.created_at
   from public.journal_entry_metrics m
   join public.journal_entry_confirmations jc on jc.entry_id = m.entry_id
  where m.created_at > jc.created_at;
+
+-- (before 3) Creators who would stop seeing an organization's demand row they
+-- created: they hold no active governance membership of that organization.
+-- Each row is either a former member (intended) or a current one without a
+-- membership row (decide before applying).
+select r.id as request_id, r.organization_id, r.profile_id, r.created_at
+  from public.customer_requests r
+ where r.organization_id is not null
+   and not exists (select 1 from public.company_memberships m
+                    where m.organization_id = r.organization_id
+                      and m.profile_id = r.profile_id
+                      and m.status = 'active'
+                      and m.role in ('owner','admin','manager','external_manager'));
 ```
 
 Report any unexpected row to the owner. Do not change it.
@@ -57,15 +74,22 @@ select count(*) = 1 as lineage_trigger from pg_trigger
  where tgname = 'journal_entries_lineage_guard_v1' and not tgisinternal;
 select pg_get_expr(polwithcheck, polrelid) like '%manager_corrected%' as metrics_policy
   from pg_policy where polname = 'journal_entry_metrics_write';
+select pg_get_functiondef('public.can_view_worker(uuid)'::regprocedure) like '%owns_company(cw.company_id)%' as former_creator_arms;
+select pg_get_expr(polqual, polrelid) like '%has_org_demand_access(organization_id)%' as demand_select
+  from pg_policy where polname = 'customer_requests_select';
+select to_regprocedure('public.membership_my_invitations_v2()') is not null as inviter_read;
 ```
 
 Every value must be `true`.
 
 ## Rollback
 
-`supabase/rollbacks/20261121100000_signup_role_admin_guard_manager_consent_v1.down.sql`
-and `supabase/rollbacks/20261121100100_journal_lineage_and_metrics_authorship_v1.down.sql`
-restore the previous definitions verbatim.
+`supabase/rollbacks/20261121100000_signup_role_admin_guard_manager_consent_v1.down.sql`,
+`supabase/rollbacks/20261121100100_journal_lineage_and_metrics_authorship_v1.down.sql`,
+`supabase/rollbacks/20261121100200_former_member_access_arms_v1.down.sql` and
+`supabase/rollbacks/20261121100300_membership_invitation_inviter_v1.down.sql`
+restore the previous definitions verbatim (the last one drops the new v2 read;
+the app falls back to v1).
 
 ## Proof
 

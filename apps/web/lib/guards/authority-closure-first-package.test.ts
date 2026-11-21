@@ -241,6 +241,10 @@ describe("the four migrations ship paired, gated and stated", () => {
       // a trigger and one policy; RED draft, needs-human-gate, NOT applied.
       "20261121100000_",
       "20261121100100_",
+      // 2026-11-21 owner P0 security (B): access arms follow ended governance membership; the invited person
+      // sees who invited them. RED draft, needs-human-gate, NOT applied.
+      "20261121100200_",
+      "20261121100300_",
       // 2026-11-18 COMM-1 profiles.communication_locale (renamed from 20260920122000; RED draft, needs-human-gate, NOT applied).
       "20261118100100_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).

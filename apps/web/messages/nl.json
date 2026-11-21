@@ -18917,7 +18917,8 @@
       "heading": "Uitnodigingen van organisaties",
       "explainer": "Bestuursuitnodigingen die aan u zijn gericht. Na acceptatie verschijnt de organisatie in uw werkruimtekiezer.",
       "accept": "Accepteren",
-      "decline": "Afwijzen"
+      "decline": "Afwijzen",
+      "invitedBy": "Uitgenodigd door {name}"
     },
     "members": {
       "heading": "Leden van de organisatie",
