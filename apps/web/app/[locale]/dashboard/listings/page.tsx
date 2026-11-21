@@ -9,6 +9,8 @@ import {
   discoverMarketplaceListings,
 } from "@/lib/marketplace/listings";
 import { MarketplaceListingsSection } from "@/components/app/marketplace-listings-section";
+import { ListingPurchasesSection } from "@/components/app/listing-purchases-section";
+import { listMyListingPurchases } from "@/lib/marketplace/listing-purchases";
 import {
   getActiveOrganizationContext,
   governedActiveOrganizationId,
@@ -51,11 +53,16 @@ export default async function ListingsPage({
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/listings`);
 
   const t = await getTranslations("marketplaceListings");
-  const [mine, discovery, orgCtx] = await Promise.all([
+  const [mine, discovery, orgCtx, purchases] = await Promise.all([
     listMyMarketplaceListings(),
     discoverMarketplaceListings(),
     getActiveOrganizationContext(),
+    listMyListingPurchases(),
   ]);
+  // The goods purchase lifecycle (registry 6.13) exists only once its RED
+  // migration is applied; until then the "Request to buy" door stays hidden
+  // and the purchases section renders nothing.
+  const purchasesAvailable = purchases.kind !== "needs-migration";
   // A company sells, rents out or looks for things as ITSELF: when the active
   // workspace (the chip) is an organization the person governs, the form
   // offers it as the publisher. The RPC re-checks `manages_organization`.
@@ -89,8 +96,13 @@ export default async function ListingsPage({
         extended={extended}
         unavailable={unavailable}
         publisher={publisher}
+        purchasesAvailable={purchasesAvailable}
         locale={locale}
       />
+
+      {/* Goods purchases (6.13 + 6.14 delivery fields): both sides, in the
+          workspace where listings already live. No payment is taken. */}
+      <ListingPurchasesSection result={purchases} sides={["buyer", "seller"]} locale={locale} />
 
       {/* Cross-link to the professional-services half of the marketplace —
           the canonical service_offerings surface (reused, not duplicated). */}
