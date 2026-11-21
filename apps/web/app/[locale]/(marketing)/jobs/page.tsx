@@ -608,6 +608,12 @@ export default async function JobsPage({
                 path: professionCopy ? pageHref(1) : undefined,
                 previews: result.vacancies,
                 genericTitle: GENERIC_TITLE[active],
+                // The name the board itself shows: the catalogue profession
+                // in the reader's language when the ad carries a known slug.
+                localizedName: (p) =>
+                  p.professionSlug && tProfession.has(p.professionSlug as never)
+                    ? tProfession(p.professionSlug as never)
+                    : null,
               }),
             ),
           }}

@@ -784,6 +784,8 @@ export default async function JobDetailPage({
               description: pageDescription,
               preview,
               genericTitle: GENERIC_TITLE[active],
+              // The heading's own name (catalogue profession, reader's language).
+              localizedName: localizedProfession,
             }),
           ),
         }}

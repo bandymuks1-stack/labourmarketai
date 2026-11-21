@@ -86,10 +86,13 @@ export function categorizeVacancy(
   //    tagged cook or driver by their body text. A title is short and, when
   //    it names a profession, names THIS ad's profession.
   //    Not when the publisher's label names an occupation the catalogue
-  //    positively knows it lacks (production 2026-10-26: "Systemadministratör"
-  //    ads titled "Administratör" fell back to office_administrator, one to
-  //    receptionist). The publisher already said what the job is; a title
-  //    guess would contradict it.
+  //    positively knows it lacks (a lexicon row's `notWhen`). Production
+  //    2026-10-26: "Systemadministratör" ads titled "Administratör" fell
+  //    back to office_administrator, one to receptionist. Production
+  //    2026-10-15: "Militär lärare sjösäkerhet" filed under
+  //    "Specialistofficer" became `teacher`, "Business Developer" under
+  //    "Affärsutvecklare" became `software_developer`. The publisher already
+  //    said what the job is; a title guess would contradict it.
   const knownOutside =
     fromOccupation === null && occupation.length > 0 && namesOccupationOutsideCatalogue(occupation);
   const fromTitle =

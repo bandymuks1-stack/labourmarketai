@@ -69,3 +69,38 @@ describe("public job JSON-LD (K3)", () => {
     expect((ld.about as { estimatedSalary?: unknown }).estimatedSalary).toBeUndefined();
   });
 });
+
+describe("the structured name is the name the page shows (production 2026-10-15)", () => {
+  const p = {
+    id: "62fc92df-55b4-43f0-821c-96ac3dcaa1e5",
+    title: null,
+    professionSlug: "teacher",
+    occupation: "Specialistofficer",
+    employmentForm: null,
+    workingTime: null,
+    positions: null,
+    compensationCurrency: null,
+    compensationMin: null,
+    compensationMax: null,
+    sourceLanguage: "sv",
+    sourceName: null,
+    publishedAt: "2026-10-15T07:52:06+00:00",
+  } as unknown as Parameters<typeof buildJobDetailJsonLd>[0]["preview"];
+
+  it("detail: the localized heading name wins over the publisher's raw label", () => {
+    const ld = buildJobDetailJsonLd({ origin: "https://labourmarket.ai", locale: "en", description: "d", preview: p, genericTitle: "Job opening", localizedName: "Teacher" });
+    expect(ld.name).toBe("Teacher");
+    expect((ld.about as { name: string }).name).toBe("Teacher");
+  });
+
+  it("detail: without a localized name the publisher label is still used (no invention)", () => {
+    const ld = buildJobDetailJsonLd({ origin: "https://labourmarket.ai", locale: "en", description: "d", preview: p, genericTitle: "Job opening", localizedName: null });
+    expect(ld.name).toBe("Specialistofficer");
+  });
+
+  it("list: the board's own name per row", () => {
+    const ld = buildJobsListJsonLd({ origin: "https://labourmarket.ai", locale: "en", name: "n", description: "d", previews: [p], genericTitle: "Job opening", localizedName: () => "Teacher" });
+    const items = (ld.mainEntity as { itemListElement: { name: string }[] }).itemListElement;
+    expect(items[0].name).toBe("Teacher");
+  });
+});

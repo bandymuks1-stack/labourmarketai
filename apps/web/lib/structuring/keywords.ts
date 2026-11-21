@@ -2022,7 +2022,14 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: s
     slug: "plumber",
     needles: ["santechn", "сантехник", "rörmokare", "vvs-montör"],
   },
-  { slug: "electrician", needles: ["elektros", "elektrik", "elektrine instaliac", "elektrinė instaliac", "elektromontaz", "elektromontaž", "elektrotechn", "электрик", "электромонтаж", "электропровод", "электрощит", "электроустанов", "электрическ", "электросет"] },
+  {
+    slug: "electrician",
+    needles: ["elektros", "elektrik", "elektrine instaliac", "elektrinė instaliac", "elektromontaz", "elektromontaž", "elektrotechn", "электрик", "электромонтаж", "электропровод", "электрощит", "электроустанов", "электрическ", "электросет"],
+    // A publisher label for another occupation whose ad title carries this
+    // needle (Doktorand, elektroteknik): a title-fallback collision measured on
+    // production active ads, 2026-10-15.
+    notWhen: ["doktorand"],
+  },
   {
     slug: "carpenter",
     needles: [
@@ -2197,6 +2204,10 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: s
       "mjukvaruutvecklare",
       "programmerare",
     ],
+    // A publisher label for another occupation whose ad title carries this
+    // needle (Business Developer): a title-fallback collision measured on
+    // production active ads, 2026-10-15.
+    notWhen: ["affärsutvecklare"],
   },
   {
     slug: "office_administrator",
@@ -2260,6 +2271,10 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: s
       "lärare",
       "fritidspedagog",
     ],
+    // A publisher label for another occupation whose ad title carries this
+    // needle (Militär lärare sjösäkerhet): a title-fallback collision measured on
+    // production active ads, 2026-10-15.
+    notWhen: ["specialistofficer"],
   },
   {
     slug: "caregiver",
@@ -2276,6 +2291,10 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: s
       "barnvakt",
       "stödassistent",
     ],
+    // A publisher label for another occupation whose ad title carries this
+    // needle (Bil vårdare): a title-fallback collision measured on
+    // production active ads, 2026-10-15.
+    notWhen: ["bilrekonditionerare"],
   },
   {
     slug: "furniture_assembler",
@@ -2385,6 +2404,10 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: s
   {
     slug: "hairdresser",
     needles: ["kirpej", "kirpėj", "hairdresser", "парикмахер", "frisör"],
+    // A publisher label for another occupation whose ad title carries this
+    // needle (hundfrisör): a title-fallback collision measured on
+    // production active ads, 2026-10-15.
+    notWhen: ["hundtrimmare"],
   },
   { slug: "barber", needles: ["barzdaskut", "barber", "барбер"] },
   {
