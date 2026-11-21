@@ -96,6 +96,7 @@ import {
   advanceGoal,
   classifyTurn,
   EVIDENCE_BEARING_INTENTS,
+  GOAL_BEARING_INTENTS,
   declineOutstandingOffers,
   goalSentence,
   noteOffered,
@@ -2437,6 +2438,25 @@ export function ConversationChat({
     },
     [assistant, auth, t, workspaceLabelOf],
   );
+
+  /**
+   * THE GOAL RIDES ACROSS A WORKSPACE SWITCH (owner P1 2026-11-21).
+   *
+   * The switch remounts this chat, and the goal lived only in this instance's
+   * `goalRef`: "Man reikia penkių darbuotojų" said in the personal space,
+   * then the company picked from a chip, landed on the company's greeting with
+   * the five workers forgotten. The words that built the goal are handed to
+   * the SAME one-shot continuation `performContextSwitch` already carries for
+   * the partner request, and re-run through the one router in the new
+   * workspace — where the server-resolved context decides what they can do.
+   * Only a goal-bearing goal with words is carried; nothing is executed by
+   * the hand-off itself (a write still opens its confirm card).
+   */
+  const goalContinuation = useCallback((): string | undefined => {
+    const goal = goalRef.current;
+    if (!goal || !GOAL_BEARING_INTENTS.has(goal.intent) || goal.said.length === 0) return undefined;
+    return goalSentence(goal, "") || undefined;
+  }, []);
 
   /**
    * FIND BUSINESS PARTNERS (owner 2026-10-01) — what the company context
@@ -5801,7 +5821,8 @@ export function ConversationChat({
             );
             if (target) {
               user(chip.label);
-              performContextSwitch(target);
+              // The goal in flight continues in the workspace picked.
+              performContextSwitch(target, goalContinuation());
             }
           } else if (chip.id.startsWith("oc:")) {
             // "Which Jonas?" — the chip carries an id and nothing else; the
@@ -6030,7 +6051,7 @@ export function ConversationChat({
           }
       }
     },
-    [identity, t, labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runKeepAssignment, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, openConversationTarget, runAgencyRead, openProposeForm, startCapabilities],
+    [identity, t, labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runKeepAssignment, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, goalContinuation, openConversationTarget, runAgencyRead, openProposeForm, startCapabilities],
   );
   handleChipRef.current = handleChip;
 
@@ -6463,6 +6484,10 @@ export function ConversationChat({
       ) {
         if (understood) assistant(understood);
         assistant(labels.employerBridgeHint, [
+          // The person's organizations first: picking one switches, and the
+          // goal in flight continues there (`goalContinuation`), so the need
+          // form opens with what was already said. Then the page door.
+          ...workspaceChips,
           {
             id: "link:/dashboard/company/needs#demand-intake",
             label: labels.chipNeedWorkers,
@@ -6490,6 +6515,7 @@ export function ConversationChat({
       labels.chipJobs,
       labels.employerBridgeHint,
       labels.chipNeedWorkers,
+      workspaceChips,
       openForm,
       starterChips,
     ],
@@ -7357,8 +7383,12 @@ export function ConversationChat({
           } else if (canActAsEmployer) {
             // They ARE an employer, just not in that workspace right now.
             // Say so and hand them the door rather than pretending not to
-            // understand a sentence the product understood perfectly.
+            // understand a sentence the product understood perfectly. The
+            // door is the company itself first: picking it switches and the
+            // SAME sentence continues there (`goalContinuation`), so the need
+            // form opens with what was already said — five stays five.
             assistant(labels.employerBridgeHint, [
+              ...workspaceChips,
               {
                 id: "link:/dashboard/company/needs#demand-intake",
                 label: labels.chipNeedWorkers,
@@ -7961,7 +7991,7 @@ export function ConversationChat({
           askToClarify(t("answerFailed"));
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, workspaceChips, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
 
   /**

@@ -438,6 +438,48 @@ const SEEK_GUARD_SOURCE =
   // en / ru / nl / de twins do, instead of stopping at the self-introduction.
   "iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta|looking\\s+for|\\bwant\\s+(?:a\\s+)?(?:job|work)|\\bneed\\b|ищу|ищем|хочу\\s+работ|нужн|\\bzoek|\\bsuche\\b|\\bbrauch|\\bszuka|\\bposzukuj|\\bpotrzebuj";
 
+/**
+ * FILLING IN A WORK RECORD IS AN ACTION ON THE JOURNAL, NOT A REPORT READ
+ * (owner P1 2026-11-21).
+ *
+ * Measured on this router before the rule existed: "noriu užpildyti darbo
+ * ataskaitas" ("I want to fill in work reports") scored 4 on `figures` — the
+ * bare `\bataskait` noun — and 0 on `log-work`, because no rule knew the verb
+ * FILL. The chat answered with the organisation's project figures and CSV
+ * exports. "Хочу заполнить рабочие отчёты" did the same through `отчёт`, and
+ * "I want to fill in work reports" went to `find-work` (10: "I want … work").
+ *
+ * The discriminator is the VERB, not the noun: "paruošk ataskaitą" / "prepare
+ * a report" asks for figures to be READ; "užpildyk ataskaitą" / "fill in the
+ * report" asks to WRITE the day's work, and the only place a person writes
+ * their work is the journal. So the rule binds a FILL verb to a WORK-RECORD
+ * noun, in either order (German and Dutch put the verb last), and is weighted
+ * above every read rule and above the job-seek direction rule (10) — an
+ * action the person asked to take outranks a read that merely shares a noun.
+ *
+ * MORPHOLOGY BY STEM, not by phrase. `pild` carries every Lithuanian form
+ * (užpildyti / užpildyk / pildau / užpildysiu / užpildžiau); `заполн` every
+ * Russian one (заполнить / заполни / заполняю); `ataskait` / `отч[её]т` /
+ * `žurnal` / `журнал` every case ending. `\b` before `pild` keeps
+ * "papildyti" (to supplement) out. Without a work-record noun a FILL verb
+ * stays where it was: "fill the position" is still the employer's need.
+ */
+const FILL_VERB_SOURCE =
+  "\\b(?:už|iš)?pild|заполн|\\bfill(?:ing|ed|s)?\\b|ausf[uü]ll|invul|wype[lł]n|uzupe[lł]n";
+const WORK_RECORD_NOUN_SOURCE =
+  "ataskait|žurnal|tabel|dienyn|\\breports?\\b|journal|time\\s*sheet|work\\s*log|отч[её]т|журнал|табел|bericht|tagebuch|stundenzettel|arbeitsnachweis|rapport|dagboek|urenbriefje|urenstaat|raport|dziennik|sprawozdan|karta\\s+pracy";
+const FILL_WORK_RECORD_SOURCES = [
+  `(${FILL_VERB_SOURCE})[^?.!]{0,40}?(${WORK_RECORD_NOUN_SOURCE})`,
+  `(${WORK_RECORD_NOUN_SOURCE})[^?.!]{0,30}?(${FILL_VERB_SOURCE})`,
+  // The separable verbs carry the noun INSIDE them: de "ich fülle den
+  // Stundenzettel aus", nl "vul het rapport in".
+  `\\bf[uü]ll\\w*\\s+[^?.!]{0,40}?(${WORK_RECORD_NOUN_SOURCE})[^?.!]{0,20}?\\baus\\b`,
+  `\\bvul\\s+[^?.!]{0,40}?(${WORK_RECORD_NOUN_SOURCE})[^?.!]{0,20}?\\bin\\b`,
+] as const;
+/** sv — "fyll i tidrapporten / dagboken". Swedish sentences only (see `sv()`). */
+const SV_FILL_WORK_RECORD_SOURCE =
+  "\\bfyll(?:a|er|de)?\\s+i\\b[^?.!]{0,40}?(tidrapport|rapport|dagbok|arbetslogg|journal)";
+
 /** The Swedish seek forms (folded) — "Jag är svetsare och söker jobb" runs
  *  the search too. Apart from `SEEK_GUARD_SOURCE` on purpose: they count only
  *  in a sentence `looksSwedish` reads as Swedish. */
@@ -993,6 +1035,13 @@ const RULES: IntentRule[] = [
       ),
       p("\\bataskait", 4),
       p("\\breport\\b", 4),
+      // STATISTICS is the reports read too (the reports hub's own synonym in
+      // lib/navigation/command-registry.ts). "Show project stats" scored 6 on
+      // `projects` and listed the projects instead; bound to a project noun
+      // it outranks that list (7 + 4 > 6). A FILL verb still wins (12).
+      p("(statisti|statystyk|\\bstats\\b|статисти)", 4),
+      p("(projekt|project|проект)[^?.!]{0,24}(statisti|statystyk|\\bstats\\b|статисти)", 7),
+      p("(statisti|statystyk|\\bstats\\b|статисти)[^?.!]{0,24}(projekt|project|проект)", 7),
       p("(отчёт|отчет)", 4),
       p("\\braport", 4), // pl — "przygotuj raport" (not the nl `rapport`)
       p("(bericht|rapport)", 3),
@@ -2628,6 +2677,11 @@ const RULES: IntentRule[] = [
   {
     intent: "log-work",
     patterns: [
+      // FILL + a WORK RECORD — "noriu užpildyti darbo ataskaitas", "fill in
+      // my timesheet", "заполни рабочий отчёт" (see FILL_VERB_SOURCE). 12:
+      // above `figures` (the shared noun, 4) and the seek direction rule (10).
+      ...FILL_WORK_RECORD_SOURCES.map((source) => p(source, 12)),
+      sv(SV_FILL_WORK_RECORD_SOURCE, 12),
       // past-tense "worked" across LT/EN/RU/other launch stems
       p("\\bdirbau\\b", 3),
       p("\\bdirbome\\b", 3),
@@ -4247,14 +4301,42 @@ const JOURNAL_REQUEST_PATTERNS: readonly RegExp[] = [
   p("записать\\s+работу").re,
   // pl — "zapisz pracę", "wprowadź godziny", "uzupełnij dziennik pracy"
   p("(zapisz|zapisa[cć]|wpisz|wprowad[zź]|uzupe[lł]nij|odnotuj)\\s*.{0,20}(prac|godzin)").re,
+  // FILL + a WORK RECORD ("noriu užpildyti darbo ataskaitas", "fill in my
+  // timesheet") — the same sources the `log-work` rule routes on, so the two
+  // halves cannot disagree about a request.
+  ...FILL_WORK_RECORD_SOURCES.map((source) => p(source).re),
 ];
 /** sv — "registrera mitt arbete", "för in timmarna". A Swedish sentence only:
  *  "logga" / "registrera" beside "job…" is other languages' text too. */
 const SV_JOURNAL_REQUEST = p("(registrera|fora\\s+in|skriv\\s+in|logga)\\s*.{0,20}(arbet|jobb|timm)");
+const SV_FILL_WORK_RECORD = p(SV_FILL_WORK_RECORD_SOURCE);
 
 export function isExplicitJournalRequest(text: string): boolean {
   const q = fold(text ?? "");
   if (!q.trim()) return false;
   if (JOURNAL_REQUEST_PATTERNS.some((re) => re.test(q))) return true;
-  return looksSwedish(text) && SV_JOURNAL_REQUEST.re.test(q);
+  return looksSwedish(text) && (SV_JOURNAL_REQUEST.re.test(q) || SV_FILL_WORK_RECORD.re.test(q));
+}
+
+/**
+ * The sentence with its REQUEST words taken out — what is left is what the
+ * person said about the work itself (folded).
+ *
+ * WHY. `journalDraftReadiness` asks whether a sentence carries work content,
+ * and one of its signals is the skill recogniser. "Noriu užpildyti darbo
+ * ataskaitas" names REPORTS, and report writing is a real skill in the
+ * catalogue — so the request itself read as work, and the flow would have
+ * opened with "noriu užpildyti darbo ataskaitas" as the entry's evidence: the
+ * request becoming the record, the defect `journalDraftReadiness` exists to
+ * prevent. The recogniser therefore reads only what remains once the request
+ * is removed. A sentence that is not a request is returned whole (folded).
+ */
+export function withoutJournalRequest(text: string): string {
+  let q = fold(text ?? "");
+  const swedish = looksSwedish(text ?? "");
+  const patterns = swedish ? [...JOURNAL_REQUEST_PATTERNS, SV_JOURNAL_REQUEST.re, SV_FILL_WORK_RECORD.re] : JOURNAL_REQUEST_PATTERNS;
+  for (const re of patterns) {
+    q = q.replace(new RegExp(re.source, "gu"), " ");
+  }
+  return q.trim();
 }

@@ -18,7 +18,7 @@
  * Pure module: no IO. `today` (YYYY-MM-DD) is passed in so the function stays
  * deterministic and unit-testable; the client supplies the real current date.
  */
-import { isExplicitJournalRequest } from "./intent-router";
+import { isExplicitJournalRequest, withoutJournalRequest } from "./intent-router";
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 import { looksSwedish } from "@/lib/structuring/looks-swedish";
 
@@ -522,14 +522,18 @@ export function journalDraftReadiness(text: string): JournalDraftReadiness {
   const raw = (text ?? "").trim();
   if (!raw) return "no-content";
   const parse = extractWorkLog(raw, "2000-01-01");
+  const request = isExplicitJournalRequest(raw);
+  // A request's own words are not work: "užpildyti darbo ATASKAITAS" names
+  // report writing, a real catalogue skill, so the skill recogniser reads
+  // only what is left once the request is taken out (owner P1 2026-11-21).
   const hasContent =
     parse.start !== null ||
     parse.workedMinutes !== null ||
     parse.site !== null ||
     PAST_WORK_VERB_RE.test(raw) ||
-    recognizeSkills(raw, 1).length > 0;
+    recognizeSkills(request ? withoutJournalRequest(raw) : raw, 1).length > 0;
   if (hasContent) return "ok";
-  return isExplicitJournalRequest(raw) ? "meta-request" : "no-content";
+  return request ? "meta-request" : "no-content";
 }
 
 /** The server-floor form of the rule: a sentence that only ASKS for the

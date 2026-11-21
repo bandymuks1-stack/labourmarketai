@@ -201,7 +201,34 @@ const ACCOUNT_QUESTIONS_OPEN_SETTINGS: readonly Intended[] = [
   { sentence: "Password reset", reader: "helpTopic", now: "account" },
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS];
+/**
+ * (e) FILLING IN A WORK RECORD IS THE JOURNAL ACTION (owner P1 2026-11-21).
+ *
+ * "Noriu užpildyti darbo ataskaitas" reached `figures` on the bare report
+ * noun and the chat answered with the organisation's figures and exports. A
+ * FILL verb bound to a work-record noun now routes to `log-work` at 12, in
+ * every language (intent-router.ts, FILL_VERB_SOURCE). Sentences that were
+ * already `log-work` only score higher; the two that were `figures` describe
+ * work the person did (filling Excel reports), which is a journal entry, not a
+ * figures read — and with the log-work goal of the fixture they continue it.
+ */
+const FILL_IS_THE_JOURNAL: readonly Intended[] = [
+  { sentence: "pildyk žurnalą", reader: "route", now: ["log-work", 14] },
+  { sentence: "fill in my work journal", reader: "route", now: ["log-work", 14] },
+  { sentence: "Tagebuch ausfüllen", reader: "route", now: ["log-work", 14] },
+  { sentence: "uzpildyk darbo zurnala", reader: "route", now: ["log-work", 14] },
+  { sentence: "You fill it in here, in the Work journal.", reader: "route", now: ["log-work", 14] },
+  ...[
+    "Tvarkiau sandėlio likučius, pildžiau Excel ataskaitą ir ruošiau sąskaitas",
+    "Excel ataskaitų pildymas",
+  ].flatMap((sentence): Intended[] => [
+    { sentence, reader: "route", now: ["log-work", 12] },
+    { sentence, reader: "journalRequest", now: true },
+    { sentence, reader: "turn", now: "follow-up" },
+  ]),
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).
