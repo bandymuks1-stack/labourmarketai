@@ -62,6 +62,12 @@ export type AddressedSignupResult =
   | { status: "unavailable" }
   | { status: "error"; code: string | null; message: string; httpStatus: number | null };
 
+function withoutRole(metadata: Record<string, string> | undefined): Record<string, string> {
+  const rest: Record<string, string> = {};
+  for (const [k, v] of Object.entries(metadata ?? {})) if (k !== "role") rest[k] = v;
+  return rest;
+}
+
 export async function signUpAddressedInviteAction(input: {
   token: string;
   password: string;
@@ -80,7 +86,9 @@ export async function signUpAddressedInviteAction(input: {
     password: String(input.password ?? ""),
     options: {
       emailRedirectTo: input.emailRedirectTo,
-      data: { locale: input.locale, ...(input.metadata ?? {}) },
+      // Roles are never taken from the form: the role column is decided in
+      // onboarding and by the database's own allow-list, so `role` is dropped.
+      data: { locale: input.locale, ...withoutRole(input.metadata) },
     },
   });
   if (error) {
