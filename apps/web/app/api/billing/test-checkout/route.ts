@@ -5,7 +5,11 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
-import { billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
+import {
+  billingPilotPassEnabled,
+  billingTrialEnabled,
+  getBillingConfigFor,
+} from "@/lib/billing/config";
 import { getBillingProvider } from "@/lib/billing/provider";
 import { testPriceIdFor } from "@/lib/billing/prices";
 import {
@@ -122,6 +126,16 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { ok: false, reason: gate.reason, testMode: config.testMode },
       { status: gate.status },
+    );
+  }
+
+  // While the owner runs the 1 € pilot pass, the pass IS the way into the paid
+  // plan and no recurring order may start (owner ruling 2026-10-22). The account
+  // page withholds the button on this same switch; this is the server's half.
+  if (billingPilotPassEnabled()) {
+    return NextResponse.json(
+      { ok: false, reason: "pilot_pass_active", testMode: config.testMode },
+      { status: 409 },
     );
   }
 
