@@ -108,7 +108,10 @@ async function day(page: Page, delta: number): Promise<string> {
 
 const entries = (profileId: string) =>
   sql<{ text: string; day: string }>(
-    `select e.original_text as text, e.work_date::text as day from public.journal_entries e
+    // The day lives in the entry's `work_date` metric (lib/journal/actions.ts).
+    `select e.original_text as text,
+            (select m.value_text from public.journal_entry_metrics m where m.entry_id = e.id and m.metric_slug = 'work_date' limit 1) as day
+       from public.journal_entries e
        join public.workers w on w.id = e.worker_id
       where w.profile_id = ${lit(profileId)} and e.superseded_by is null order by e.created_at`,
   );
