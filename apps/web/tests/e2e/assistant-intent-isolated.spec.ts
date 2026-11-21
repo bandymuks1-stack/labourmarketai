@@ -230,8 +230,10 @@ for (const device of DEVICES) {
       await expect(confirm, "the confirmation is shown").toBeVisible({ timeout: 30_000 });
       expect(entries(s.workerId), "nothing is saved before confirm").toEqual([]);
       await confirm.click();
-      await expect(flow.getByTestId("worklog-done").or(flow.getByTestId("worklog-error"))).toBeVisible({ timeout: 60_000 });
-      await expect(flow.getByTestId("worklog-done"), "the entry is saved").toBeVisible();
+      // The saved state replaces the form in the thread (its own root).
+      const done = page.getByTestId("worklog-done").last();
+      await expect(done.or(page.getByTestId("worklog-error").last())).toBeVisible({ timeout: 60_000 });
+      await expect(done, "the entry is saved").toBeVisible();
       await expect
         .poll(() => entries(s.workerId), { message: "one row, dated yesterday, in the worker's words", timeout: 30_000 })
         .toEqual([{ text: NOTE, day: yesterday }]);
