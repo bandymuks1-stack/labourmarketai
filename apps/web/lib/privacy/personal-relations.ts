@@ -583,6 +583,16 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
       "the receipt of an executed account deletion (what was deleted, retained and why) — written after your account no longer exists; it names no identifier of you and is available on request through the data-protection channel",
   },
   {
+    table: "invoice_recipients",
+    reason:
+      "the issuing organization's contact book of the parties it invoices (legal names, addresses, tax ids, contact details of THIRD PARTIES that may include a sole trader). It is the issuer's business record, readable only by the issuer's owner/admin; the frozen copy on each issued invoice belongs to the issuer's books. A person referenced there is not given an export of the issuer's customers",
+  },
+  {
+    table: "finance_record_line_sources",
+    reason:
+      "the issuer's accounting evidence for one invoice line: a frozen copy of which confirmed work-report rows (day, hours or quantity, confirmation ids) were billed. Your own journal entries and their reviews are exported; the invoice and its lines belong to the issuing organization's books and cannot be separated from its other customers' figures",
+  },
+  {
     table: "email_verifications_v1",
     reason:
       "proof that you control an email address (address, method, time) — held server-side as security evidence with no read path for your own session; whether your address is verified is shown to you in the product, and the evidence is available on request through the data-protection channel",
@@ -717,6 +727,14 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // decided or undid a merge of PROJECT rows; the subject is a project, never
   // the person (20261014090000).
   "historical_consolidation_decisions",
+  // Project-to-invoice lifecycle (20261008150000): the person is only the recorder / agreeing
+  // party of an organization's commercial or accounting record (agreed_by, created_by,
+  // confirmed_by, tax_set_by); they are not its subject.
+  "project_rate_terms",
+  "billing_periods",
+  "invoice_series_configs",
+  "organization_tax_presets",
+  "finance_record_lines",
   // Discovered-organization provenance: the person is only the recorder of a
   // fact or identifier about a COMPANY, never its subject.
   "organization_facts",

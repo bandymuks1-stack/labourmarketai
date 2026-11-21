@@ -253,6 +253,14 @@ describe("1. exactly three human-gated migration pairs own the financial-ops sli
         if (TRAIN_J.some((p) => f.startsWith(p))) continue;
         const raw = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
         const src = FORECAST_SIGNAL_HOOKS.some((p) => f.startsWith(p)) ? withoutForecastSignalHooks(raw) : raw;
+        if (f.startsWith("20261008150000_project_invoice_lifecycle_v1")) {
+          // owner-gated lifecycle migration: replaces ONLY update_finance_record_v2 (to refuse
+          // changes to an issued invoice); it defines none of the other owned names.
+          for (const name of OWNED.filter((n) => n !== "update_finance_record_v2")) {
+            expect(src, `${dir}/${f} must not define ${name}`).not.toContain(name);
+          }
+          continue;
+        }
         if (TRIP_READERS.some((p) => f.startsWith(p))) {
           // A reader may name business_trips ONLY to read it: `to_regclass(...)`
           // or `from public.business_trips`. Nothing else it names may be owned.
