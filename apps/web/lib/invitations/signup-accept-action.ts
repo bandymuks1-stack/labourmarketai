@@ -62,10 +62,12 @@ export type AddressedSignupResult =
   | { status: "unavailable" }
   | { status: "error"; code: string | null; message: string; httpStatus: number | null };
 
+/** The form's metadata without `role` (and never a prototype key). */
+const DROPPED_METADATA_KEYS = new Set(["role", "__proto__", "constructor", "prototype"]);
 function withoutRole(metadata: Record<string, string> | undefined): Record<string, string> {
-  const rest: Record<string, string> = {};
-  for (const [k, v] of Object.entries(metadata ?? {})) if (k !== "role") rest[k] = v;
-  return rest;
+  return Object.fromEntries(
+    Object.entries(metadata ?? {}).filter(([k]) => !DROPPED_METADATA_KEYS.has(k)),
+  );
 }
 
 export async function signUpAddressedInviteAction(input: {

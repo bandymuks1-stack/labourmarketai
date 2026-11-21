@@ -49,6 +49,6 @@ describe("security P0 — code-only fixes", () => {
   it("an invitation sign-up drops any role from the auth metadata", () => {
     const src = read("lib/invitations/signup-accept-action.ts");
     expect(src).toContain("...withoutRole(input.metadata)");
-    expect(src).toContain('if (k !== "role")');
+    expect(src).toContain('new Set(["role", "__proto__", "constructor", "prototype"])');
   });
 });
