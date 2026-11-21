@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
+import { WORKER_INVITE_HREF } from "@/lib/navigation/work-areas";
 
 /**
  * Sports-team roster empty-state card (Priority 6 of the next-layer v2
@@ -38,7 +39,7 @@ export async function TeamRosterEmptyState({
           end on the first visit (2026-09-19). Same canonical invitation
           door the people page links to. */}
       <Link
-        href="/dashboard/network?type=join_as_employee"
+        href={WORKER_INVITE_HREF as "/dashboard"}
         className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/40 px-4 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
         data-testid={`team-roster-empty-${variant}-cta`}
       >

@@ -90,7 +90,7 @@ describe("I-2 — an education institution's home leads with the learner invite"
 
   it("every learner invite uses the ONE address", () => {
     expect(learnerInviteHref("org-1")).toBe(
-      "/dashboard/network?type=join_organization&org=org-1&relationship=student",
+      "/dashboard/network?invite=1&type=join_organization&org=org-1&relationship=student",
     );
     for (const f of [
       "components/app/institution-learners-section.tsx",

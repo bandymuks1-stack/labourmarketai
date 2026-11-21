@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+
+import { PageTitle } from "@/components/app/premium/page-title";
 import { Check, Copy, Share2 } from "lucide-react";
 
 import { NATIVE_LOCALE_NAMES } from "@/components/marketing/locale-switcher";
@@ -51,6 +53,7 @@ export function InvitePanel({
   defaultProjectId,
   defaultRelationshipSlug,
   defaultOpen = false,
+  pageTitle,
 }: {
   locale: string;
   /**
@@ -79,6 +82,13 @@ export function InvitePanel({
    * the panel on their own; this only adds the case with no preset.
    */
   defaultOpen?: boolean;
+  /**
+   * The page's own title when the panel IS the page (`/dashboard/network?
+   * invite=1`, the invite action view): rendered as the page's h1 in place of
+   * the panel's h2, so the screen is named after the action the person chose
+   * ("Kviesti studentus") and says it once.
+   */
+  pageTitle?: string;
 }) {
   const t = useTranslations("network.invite");
   // The ONE localized relationship vocabulary — the same words the CV prints.
@@ -316,7 +326,9 @@ export function InvitePanel({
             already the word the owner named for this action ("Pakviesti"), so
             the compact state needs no new string in any locale, and the
             reader sees the same word whether it is open or shut. */}
-        {open ? (
+        {pageTitle ? (
+          <PageTitle data-testid="invite-page-title">{pageTitle}</PageTitle>
+        ) : open ? (
           <h2 className="font-display text-lg font-bold text-text-primary">
             {t("title")}
           </h2>

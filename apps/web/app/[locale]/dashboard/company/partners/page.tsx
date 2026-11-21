@@ -230,7 +230,7 @@ export default async function CompanyPartnersPage({
             <div className="grid gap-2 sm:grid-cols-3">
               {[
                 { key: "roster", href: "/dashboard/company/people#company-team" },
-                { key: "offer", href: "/dashboard/company/needs#demand-intake" },
+                { key: "offer", href: "/dashboard/company/needs?audience=offer#demand-intake" },
                 { key: "scouting", href: "/dashboard/company/scouting" },
               ].map((a) => (
                 <Link

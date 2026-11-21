@@ -119,10 +119,28 @@ export const ORGANIZATION_EDUCATION_AREA: WorkArea = {
   labelKey: "organizationDoors.education",
 };
 
+/**
+ * BUTTON = ACTION (owner directive 2026-11-21, P1). Each invite CTA names one
+ * action and opens it: `invite=1` makes /dashboard/network open AS the invite
+ * form (titled after the action), not as the relationships overview whose
+ * first screen is about the person's organisations. One address per action,
+ * used by every CTA for it (lib/guards/cta-routes.test.ts).
+ */
+/** "Invite a worker / an employee": the invitation panel, employee type. */
+export const WORKER_INVITE_HREF = "/dashboard/network?invite=1&type=join_as_employee";
+/** "Add / create an organisation": the setup form in CREATE mode. Without
+ *  `new=1` the form EDITS the active or single owned company, so "+ Add
+ *  company" used to open the existing company's profile. `new=1` still
+ *  completes an unfinished first organisation (a shell row) instead of
+ *  inserting a second one. */
+export const NEW_ORGANIZATION_HREF = "/dashboard/start/company?new=1";
+
 /** The ONE address of "invite a learner": the invitation panel with the
  *  type, the organization and the student relationship preset. */
 export function learnerInviteHref(organizationId: string): string {
-  return `/dashboard/network?type=join_organization&org=${organizationId}&relationship=student`;
+  // `invite=1`: the page opens AS the invite action (button = action, owner
+  // directive 2026-11-21), not as the relationships overview.
+  return `/dashboard/network?invite=1&type=join_organization&org=${organizationId}&relationship=student`;
 }
 
 const HEADER_AREA_LEADS: Record<"company" | "agency", readonly string[]> = {
