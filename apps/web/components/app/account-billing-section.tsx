@@ -42,6 +42,7 @@ export async function AccountBillingSection({
   billingReturn?: string | null;
 }) {
   const t = await getTranslations("accountBilling");
+  const tPlans = await getTranslations("planBoundary.plans");
   // Pilot-aware (2026-10-21): the workspace's organization decides whether
   // billing is on for this section; outside a pilot list it reads as off.
   // resolveBillingSubject is request-cached (the entitlement read uses it too).
@@ -157,7 +158,12 @@ export async function AccountBillingSection({
           {hasSubscription ? (
             <>
               <p className="text-sm text-text-primary" data-testid="account-billing-plan">
-                {t("planLabel")}: {ent.effectivePlanKey}
+                {/* The plan's NAME, never its storage key ("company_pilot" was
+                    printed raw — production, 2026-10-23). */}
+                {t("planLabel")}:{" "}
+                {ent.effectivePlanKey && tPlans.has(ent.effectivePlanKey as never)
+                  ? tPlans(ent.effectivePlanKey as never)
+                  : ent.effectivePlanKey}
               </p>
               <p className="text-sm text-text-secondary">
                 {t("statusLabel")}: {t(`status.${status}` as never)}
@@ -168,8 +174,20 @@ export async function AccountBillingSection({
               {/* Cancelled in the portal "at period end": still entitled until then,
                   and said so, with the date the provider reported (registry 7.18). */}
               {ent.cancelAtPeriodEnd && ent.active ? (
-                <p className="text-sm text-text-secondary" data-testid="account-billing-ends-on">
-                  {endsOnDate ? t("endsOn", { date: endsOnDate }) : t("endsAtPeriodEnd")}
+                <p
+                  className="text-sm text-text-secondary"
+                  data-testid="account-billing-ends-on"
+                  data-pilot-pass={ent.pilotPass ? "true" : undefined}
+                >
+                  {/* A pilot pass is a fixed term that ends by itself — it was
+                      never "cancelled" (the subscription wording said so). */}
+                  {ent.pilotPass
+                    ? endsOnDate
+                      ? t("pilotPassEndsOn", { date: endsOnDate })
+                      : t("pilotPassEnds")
+                    : endsOnDate
+                      ? t("endsOn", { date: endsOnDate })
+                      : t("endsAtPeriodEnd")}
                 </p>
               ) : null}
             </>
