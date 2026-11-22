@@ -142,7 +142,7 @@ check "the agency cannot read the need row" "0" "$AGENT" "select count(*)::text 
 check "the agency cannot disclose for the client" "ERROR: not allowed" "$AGENT" "select public.disclose_open_need_identity_v1('$T1')::text"
 check "a stranger cannot disclose" "ERROR: not allowed" "$STRANGER" "select public.disclose_open_need_identity_v1('$T1')::text"
 check "anon cannot disclose" "ERROR: permission denied for function disclose_open_need_identity_v1" anon "select public.disclose_open_need_identity_v1('$T1')::text"
-check "nobody writes a disclosure directly" "ERROR: new row violates row-level security policy for table \"open_need_identity_disclosures\"" "$AGENT" "insert into public.open_need_identity_disclosures(conversation_id, disclosed_by) values ('$T1','$AGENT') returning 'x'"
+check "nobody writes a disclosure directly (no table privilege)" "ERROR: permission denied for table open_need_identity_disclosures" "$AGENT" "insert into public.open_need_identity_disclosures(conversation_id, disclosed_by) values ('$T1','$AGENT') returning 'x'"
 check "still hidden after every refusal" "$LABEL" "$AGENT" "select display_name from public.conversation_counterpart_identities(array['$T1']::uuid[])"
 check "the client chooses to show its name" "true" "$CLIENT" "select public.disclose_open_need_identity_v1('$T1')::text"
 check "the agency now sees the client name" "Clara Client" "$AGENT" "select display_name from public.conversation_counterpart_identities(array['$T1']::uuid[])"
