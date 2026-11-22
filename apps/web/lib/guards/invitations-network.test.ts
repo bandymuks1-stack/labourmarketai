@@ -287,10 +287,10 @@ describe("network surface — registered, private, no second dashboard", () => {
 
   it("company + project surfaces link the ONE canonical invite action", () => {
     expect(read("app/[locale]/dashboard/company/page.tsx")).toMatch(
-      /dashboard\/network\?type=join_as_employee/,
+      /dashboard\/network\?invite=1&type=join_as_employee/,
     );
     expect(read("app/[locale]/dashboard/projects/[id]/operations/page.tsx")).toMatch(
-      /dashboard\/network\?type=join_project&project=/,
+      /dashboard\/network\?invite=1&type=join_project&project=/,
     );
   });
 });

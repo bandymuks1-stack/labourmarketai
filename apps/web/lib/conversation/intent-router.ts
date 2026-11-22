@@ -313,6 +313,11 @@ type IntentRule = { intent: ConversationIntent; patterns: Pattern[] };
  */
 export { UNICODE_WORD_BOUNDARY };
 
+/** Units that follow a number and are not people: money, quantities,
+ *  measures. Used with DURATION_UNIT_SOURCE by the headcount rules. */
+const NOT_PEOPLE_UNIT_SOURCE =
+  "euro|eur|chf|prozent|procent|kg|km|liter|st\\b|stuck|stk|stuks|ton|palett|pallet";
+
 const UB = UNICODE_WORD_BOUNDARY;
 
 /**
@@ -780,6 +785,20 @@ const RULES: IntentRule[] = [
       // sv — "Vad behöver jag lära mig för att jobba som elektriker?" (the
       // lt 11-weight learn-for-work shape).
       sv("\\bvad\\s+(behover|borde|bor|ska|maste)\\s+jag\\s*.{0,8}lara\\s+mig\\s*.{0,40}(jobba|arbeta|jobb)", 11),
+      // RETRAINING (chat path check 2026-11-19): "Noriu persikvalifikuoti į
+      // elektriką", "I want to retrain as an electrician", "Ich möchte mich
+      // zum Elektriker umschulen" measured `unknown` in all seven languages.
+      // A person changing occupation asks what separates them from it — the
+      // same target-occupation gap as "what am I missing to work as X", read
+      // from the same sentence (targetOccupationFromSentence). The retrain
+      // VERB is required; "become" alone stays with the rules that read it.
+      p("persikvalifik", 12),
+      p("\\b(retrain|retraining|reskill|reskilling|re-skill|requalify|requalifying)\\b", 12),
+      p("(переквалифиц|переучит|переобуч)", 12),
+      p("(przekwalifik|przebranzow)", 12),
+      p("(umschul|umsattel)", 12),
+      p("\\b(omscholen|omscholing|omgeschoold|omschol)", 12),
+      sv("\\b(omskol|skola\\s+om\\s+mig)", 12),
     ],
   },
   {
@@ -3118,6 +3137,25 @@ const RULES: IntentRule[] = [
       // pattern it would otherwise be mistaken for. Caught by the supply
       // guard's cross-check, not in production.
       p("\\bhebben\\b\\s*.{0,30}\\bnodig\\b", 10),
+      // A HEADCOUNT WITH A NEED VERB THAT IS NOT NEXT TO IT (chat path check
+      // 2026-11-19). "Ich brauche ab Montag 3 Lagerarbeiter" and "Ik heb vanaf
+      // maandag 3 magazijnmedewerkers nodig" measured `unknown`: the count is
+      // separated from the verb by a date, the trade is a compound word
+      // (no \\b before "arbeiter"), and the Dutch rule above takes the plural
+      // `hebben` only. A number of PEOPLE needed is a demand; durations,
+      // money and quantities ("3 Stunden", "500 euro nodig", "5 St. Ziegel")
+      // are excluded, so they never open the demand form. The German rule
+      // needs a word between the verb and the count: "wir brauchen 12
+      // Schweisser" is already read by the rules above and is not counted
+      // twice.
+      p(
+        `\\b(brauche|brauchen|benotige|benotigen)\\s+(?:[^\\s0-9]+\\s+){1,4}?[0-9]{1,4}\\s+(?!(?:${DURATION_UNIT_SOURCE}|${NOT_PEOPLE_UNIT_SOURCE})\\w*\\b)[a-z]`,
+        6,
+      ),
+      p(
+        `\\b(heb|hebt)\\s+(?:[^\\s0-9]+\\s+){0,4}?[0-9]{1,4}\\s+(?!(?:${DURATION_UNIT_SOURCE}|${NOT_PEOPLE_UNIT_SOURCE})\\w*\\b)[a-z]\\S*\\s*.{0,20}\\bnodig\\b`,
+        10,
+      ),
       // ── A NEED VERB AND A HEADCOUNT, WHATEVER THE TRADE IS CALLED ───────
       //
       // "reikia 12 TIG kitai savaitei" measured `unknown` on 2026-09-08. TIG
