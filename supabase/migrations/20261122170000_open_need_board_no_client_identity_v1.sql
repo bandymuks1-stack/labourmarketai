@@ -1,3 +1,4 @@
+-- @human-gate-approved (acknowledgement only: RED, NOT applied; owner approval of this exact SQL required)
 -- 20261122170000_open_need_board_no_client_identity_v1
 --
 -- WHY (owner decision 2026-11-22, the open agency board): registered
