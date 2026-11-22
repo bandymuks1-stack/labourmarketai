@@ -25,7 +25,16 @@ describe("#3604 worker-lookup policies", () => {
     expect(u).toHaveLength(18);
     expect(d).toHaveLength(18);
     expect(u.map((s) => s.replaceAll("(select auth.uid())", "auth.uid()"))).toEqual(d);
-    expect(up).not.toMatch(/\b(drop|create|grant|revoke|security definer)\b/i);
+    expect(up).not.toMatch(/\b(drop|create|grant|revoke|security definer|insert|update|delete|execute)\b/i);
+  });
+
+  it("builds on #3575: booking_requests_select keeps its owner arm, and the file refuses to run before it", () => {
+    const booking = statements(up).find((s) => s.startsWith("alter policy booking_requests_select"));
+    expect(booking).toContain(
+      "(owner_id = (select auth.uid())) AND ((organization_id IS NULL) OR has_org_demand_access(organization_id))",
+    );
+    expect(up).toContain("needs 20261121100200_former_member_access_arms_v1 (#3575) applied first");
+    expect(up.indexOf("do $guard$")).toBeLessThan(up.indexOf("alter policy"));
   });
 
   it("the isolated workflow runs the equivalence check on any change of these files", () => {

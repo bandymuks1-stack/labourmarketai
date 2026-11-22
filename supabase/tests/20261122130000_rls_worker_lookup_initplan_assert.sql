@@ -506,3 +506,9 @@ rollback to savepoint chk; reset role;
 savepoint chk; set local role anon; select set_config('request.jwt.claims','{"role":"anon"}',true) is null as _c1, set_config('request.jwt.claim.sub','',true) is null as _c2 \gset
 select 'WRITE|anon|op_link_self_to_other_worker => '||public._eq3604_try($q$with x as (update public.organization_people set link_state='linked', link_method='worker_confirmed', linked_worker_id='00000000-0000-4000-8000-000000000012' where id='00000000-0000-4000-8000-000000001015' returning 1) select 'rows='||count(*) from x$q$);
 rollback to savepoint chk; reset role;
+savepoint chk; set local role authenticated; select set_config('request.jwt.claims','{"sub":"00000000-0000-4000-8000-000000000007","role":"authenticated"}',true) is null as _c1, set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000007',true) is null as _c2 \gset
+select 'READ|former_manager|booking_requests_of_former_org => '||public._eq3604_try($q$select 'visible='||coalesce(string_agg(case id::text when '00000000-0000-4000-8000-000000009003' then 'booking_requests#former_member' end, ','),'') from public.booking_requests where id = '00000000-0000-4000-8000-000000009003'$q$);
+rollback to savepoint chk; reset role;
+savepoint chk; set local role authenticated; select set_config('request.jwt.claims','{"sub":"00000000-0000-4000-8000-000000000003","role":"authenticated"}',true) is null as _c1, set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000003',true) is null as _c2 \gset
+select 'READ|employer|booking_requests_of_former_org => '||public._eq3604_try($q$select 'visible='||coalesce(string_agg(case id::text when '00000000-0000-4000-8000-000000009003' then 'booking_requests#former_member' end, ','),'') from public.booking_requests where id = '00000000-0000-4000-8000-000000009003'$q$);
+rollback to savepoint chk; reset role;

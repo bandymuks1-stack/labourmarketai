@@ -1,5 +1,7 @@
--- Rollback for 20261122130000_rls_worker_lookup_initplan_v1: the 18 policy bodies exactly as they
--- were on production before it (read 2026-11-22).
+-- Rollback for 20261122130000_rls_worker_lookup_initplan_v1: the 18 policy
+-- bodies exactly as they were before it, i.e. after #3575
+-- (20261121100200, booking_requests_select) and as production read
+-- 2026-11-22 for the other 17.
 
 begin;
 
@@ -16,7 +18,7 @@ alter policy booking_request_events_select on public.booking_request_events
           WHERE ((w.id = br.worker_id) AND (w.profile_id = auth.uid())))))))) OR is_admin()));
 
 alter policy booking_requests_select on public.booking_requests
-  using (((owner_id = auth.uid()) OR (EXISTS ( SELECT 1
+  using ((((owner_id = auth.uid()) AND ((organization_id IS NULL) OR has_org_demand_access(organization_id))) OR (EXISTS ( SELECT 1
    FROM workers w
   WHERE ((w.id = booking_requests.worker_id) AND (w.profile_id = auth.uid())))) OR is_admin() OR has_org_demand_access(organization_id)));
 
@@ -102,5 +104,6 @@ alter policy worker_saved_searches_select on public.worker_saved_searches
   using (((EXISTS ( SELECT 1
    FROM workers w
   WHERE ((w.id = worker_saved_searches.worker_id) AND (w.profile_id = auth.uid())))) OR is_admin()));
+
 
 commit;

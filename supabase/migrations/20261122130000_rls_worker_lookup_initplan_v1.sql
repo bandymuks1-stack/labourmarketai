@@ -17,8 +17,14 @@
 --
 -- SEMANTICS: (select auth.uid()) returns the same value as auth.uid() (one
 -- JWT per statement). No predicate, role, command or permissive flag
--- changes. The bodies below are the live production definitions read
--- 2026-11-22 with only that substitution.
+-- changes. The bodies below are the definitions AFTER #3575
+-- (20261121100200_former_member_access_arms_v1, which replaces
+-- booking_requests_select) with only that substitution; the other 17 are
+-- production's as read 2026-11-22, which #3575 does not touch.
+--
+-- ORDER: #3575 first. The guard below stops this migration if
+-- booking_requests_select does not carry #3575's owner arm yet, so this file
+-- can never write the older booking policy back over #3575's.
 --
 -- RED CLASS (ALTER POLICY): human gate before apply. Apply only via
 -- Supabase MCP apply_migration, after approval.
@@ -26,6 +32,19 @@
 -- =====================================================================
 
 begin;
+
+do $guard$
+begin
+  if not exists (
+    select 1 from pg_policies
+     where schemaname = 'public' and tablename = 'booking_requests'
+       and policyname = 'booking_requests_select'
+       and qual like '%(owner_id = auth.uid()) AND ((organization_id IS NULL) OR has_org_demand_access(organization_id))%'
+  ) then
+    raise exception '20261122130000 needs 20261121100200_former_member_access_arms_v1 (#3575) applied first';
+  end if;
+end
+$guard$;
 
 alter policy asset_assignments_select on public.asset_assignments
   using ((caller_manages_asset(asset_id) OR is_admin() OR (EXISTS ( SELECT 1
@@ -40,7 +59,7 @@ alter policy booking_request_events_select on public.booking_request_events
           WHERE ((w.id = br.worker_id) AND (w.profile_id = (select auth.uid()))))))))) OR is_admin()));
 
 alter policy booking_requests_select on public.booking_requests
-  using (((owner_id = (select auth.uid())) OR (EXISTS ( SELECT 1
+  using ((((owner_id = (select auth.uid())) AND ((organization_id IS NULL) OR has_org_demand_access(organization_id))) OR (EXISTS ( SELECT 1
    FROM workers w
   WHERE ((w.id = booking_requests.worker_id) AND (w.profile_id = (select auth.uid()))))) OR is_admin() OR has_org_demand_access(organization_id)));
 
@@ -126,5 +145,6 @@ alter policy worker_saved_searches_select on public.worker_saved_searches
   using (((EXISTS ( SELECT 1
    FROM workers w
   WHERE ((w.id = worker_saved_searches.worker_id) AND (w.profile_id = (select auth.uid()))))) OR is_admin()));
+
 
 commit;

@@ -57,6 +57,13 @@ insert into public.public_vacancies(id,provider_key,external_id,content_hash,cha
 insert into public.public_vacancies(id,provider_key,external_id,content_hash,channel,lifecycle,title_raw,source_language,country,published_at,captured_at,attribution_code,transform_version,request_ref,is_active) values ('00000000-0000-4000-8000-000000000040','test','00000000-0000-4000-8000-000000000040','h','snapshot','published','Welder','en','SE',now(),now(),'t','1','r',true);
 insert into public.public_vacancies(id,provider_key,external_id,content_hash,channel,lifecycle,title_raw,source_language,country,published_at,captured_at,attribution_code,transform_version,request_ref,is_active) values ('00000000-0000-4000-8000-000000000041','test','00000000-0000-4000-8000-000000000041','h','snapshot','published','Welder','en','SE',now(),now(),'t','1','r',true);
 set session_replication_role = origin;
+-- #3575: a former manager (no active governance membership of O) who created an
+-- organization booking of O. Under #3575 they no longer see it; the employer
+-- (owner of O) still does.
+set session_replication_role = replica;
+insert into public.profiles(id) values ('00000000-0000-4000-8000-000000000007');
+insert into public.booking_requests(id,owner_id,request_id,worker_id,status,organization_id) values ('00000000-0000-4000-8000-000000009003','00000000-0000-4000-8000-000000000007','00000000-0000-4000-8000-000000009003','00000000-0000-4000-8000-000000000012','proposed','00000000-0000-4000-8000-000000000023');
+set session_replication_role = origin;
 create function public._eq3604_try(q text) returns text language plpgsql as $f$
 declare r text;
 begin
