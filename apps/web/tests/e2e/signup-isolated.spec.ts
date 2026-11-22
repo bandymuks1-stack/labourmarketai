@@ -2,6 +2,7 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 
 import { FIRST_VISIT_CAMPAIGN, refuseOnFirstVisit, storedAnalytics } from "./first-visit-consent";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { onboardInvited } from "./isolated-web-a-helpers";
 
 /**
  * SELF-SERVE SIGN-UP, end to end, on a THROWAWAY LOCAL Supabase stack
@@ -482,7 +483,7 @@ test("S-9. an invited person opens the link, registers through it, and the invit
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(page.url())) await onboard(page, "work", "Synthetic Invited Worker");
+  if (/\/onboarding/.test(page.url())) await onboardInvited(page, "Synthetic Invited Worker");
   await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(page.url())) {
     const accept = page.getByTestId("invite-accept");

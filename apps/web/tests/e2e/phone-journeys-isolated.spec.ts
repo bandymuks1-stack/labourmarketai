@@ -14,6 +14,7 @@ import {
   sqlExec,
   userId,
   verifyCompanyAsLocalAdmin,
+  onboardInvited,
 } from "./isolated-web-a-helpers";
 
 /**
@@ -955,7 +956,7 @@ for (const phone of PHONES) {
       if (await repeat.count()) await repeat.fill(PASSWORD);
       await wp.locator('form button[type="submit"]').click();
       await wp.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-      if (/\/onboarding/.test(wp.url())) await onboard(wp, "work", `Synthetic Confirmed Worker ${phone.name} ${RUN}`);
+      if (/\/onboarding/.test(wp.url())) await onboardInvited(wp, `Synthetic Confirmed Worker ${phone.name} ${RUN}`);
       await wp.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
       if (/\/invite\//.test(wp.url())) {
         const accept = wp.getByTestId("invite-accept");
