@@ -82,7 +82,9 @@ export async function POST(req: Request) {
   if (error) {
     if (error.code === PG_UNIQUE_VIOLATION) {
       console.log("[waitlist] duplicate email [redacted]");
-      return NextResponse.json({ ok: true, duplicate: true });
+      // The same answer as a new address: a reply must not reveal whether an
+      // e-mail is already listed.
+      return NextResponse.json({ ok: true });
     }
     // Audit L-09: `message`/`details`/`hint` echo table and column names into
     // the server log. The code alone is enough to diagnose an insert failure,

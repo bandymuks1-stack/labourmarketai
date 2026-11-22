@@ -122,8 +122,11 @@ export async function readCompanyGalleryLabels() {
 
 export async function readAgencyClientsLabels() {
   const tAgencyClients = await getTranslations("agencyClients");
+  const tFold = await getTranslations("common.disclosure");
   return {
     title: tAgencyClients("title"),
+    // The list fills in its own count (client component: labels are strings).
+    showAll: tFold("showAll", { count: "{count}" }),
     subtitle: tAgencyClients("subtitle"),
     gatedHeading: tAgencyClients("gatedHeading"),
     gatedBody: tAgencyClients("gatedBody"),
@@ -317,6 +320,7 @@ export async function readOrgMembersLabels() {
 
 export async function readWorkersLabels() {
   const tWorkers = await getTranslations("roleDashboards.company.workers");
+  const tChat = await getTranslations("conversation.chat");
   return {
     title: tWorkers("title"),
     subtitle: tWorkers("subtitle"),
@@ -360,6 +364,9 @@ export async function readWorkersLabels() {
     coordinationBody: tWorkers("coordinationBody"),
     coordinationNextAction: tWorkers("coordinationNextAction"),
     identity: {
+      // The same words the company page and the chat use for a person with no
+      // name on record, never a dash.
+      unnamed: tChat("unnamedPerson"),
       availability: {
         available: tWorkers("identity.availability.available"),
         busy: tWorkers("identity.availability.busy"),
