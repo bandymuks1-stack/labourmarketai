@@ -110,7 +110,12 @@ export const TRADE_STEM_SOURCE =
   "fitter\\b|fitters\\b|installer|montuotoj|" +
   // pl (2026-11-22): "Potrzebujemy 5 spawaczy" measured `unknown` — the
   // list held no Polish trade. Stems cover the counted genitive ("spawaczy").
-  "spawacz|elektryk|hydraulik|stolarz|cie[sś]l|murarz|malarz|dekarz|kierowc|kucharz|kelner|sprz[aą]tacz|magazynier|glazurnik|tynkarz|betoniarz|zbrojarz|monter(?:a|ów|ow|zy|ami)?\\b";
+  "spawacz|elektryk|hydraulik|stolarz|cie[sś]l|murarz|malarz|dekarz|kierowc|kucharz|kelner|sprz[aą]tacz|magazynier|glazurnik|tynkarz|betoniarz|zbrojarz|monter(?:a|ów|ow|zy|ami)?\\b|" +
+  // 2026-11-22: "Нужны пять строителей с понедельника" measured `unknown` —
+  // the general construction worker had no stem in any language. Not the
+  // adjective "строительн…" ("строительных лесов") nor "строительство";
+  // never the English "builder" ("website builder").
+  "строител(?:ь(?![нс])|[еияю])|statybinink|bauarbeiter|bouwvakker";
 
 /**
  * SWEDISH TRADE NOUNS (sv activation, 2026-11-12), folded.

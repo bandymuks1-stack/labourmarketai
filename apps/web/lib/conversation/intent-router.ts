@@ -3161,7 +3161,7 @@ const RULES: IntentRule[] = [
       p("работник", 4),
       p("сотрудник", 4),
       p("\\b(mitarbeiter|arbeiter|arbeitskräfte|fachkräfte)\\b", 4), // de
-      p("\\b(medewerkers|personeel|arbeiders|arbeidskrachten|vakmensen)\\b", 4), // nl
+      p("\\b(medewerkers|werknemers|personeel|arbeiders|arbeidskrachten|vakmensen)\\b", 4), // nl — "Ik heb vijf werknemers nodig" (2026-11-22)
       p("(pracownik|robotnik|pracownic)", 4), // pl — pracownicy / pracowników
       p("\\b(hire|hiring|recruit(ing|ment)?|staffing)\\b", 3),
       p("(нанять|наним|найм)", 3),

@@ -9,8 +9,10 @@
  * NL/DE and, in a Swedish sentence only, SV. Matching is diacritic-folded like the rest of lib/structuring, so
  * "keturiu" typed without diacritics parses identically.
  *
- * Deliberately NOT a numeral grammar: single tokens only (compounds like
- * "dvidešimt trys" parse as their tens word — coarse and honest). Ambiguous
+ * Deliberately NOT a numeral grammar: one token is one word. A RUN of number
+ * words is one quantity only when it is tens + unit ("twenty five",
+ * "dvidešimt trys", "двадцать пять" → 25, `wordNumberRunValue`); any other
+ * run ("one hundred", "two three") is unknown — never one of its parts. Ambiguous
  * article-words (NL "een", DE "ein") are excluded on purpose: reading every
  * Dutch article as the number 1 would fabricate quantities.
  */
@@ -150,6 +152,58 @@ export interface FoundWordNumber {
   readonly raw: string;
   /** Token index in the text's word sequence (for adjacency checks). */
   readonly tokenIndex: number;
+}
+
+/**
+ * The value of a RUN of adjacent number words, read as ONE quantity: a single
+ * word is itself, tens + unit is their sum ([20, 5] → 25). Any other run is
+ * null — unknown, never one of its parts: "twenty five workers" must not read
+ * as five, nor "one hundred workers" as one or as a hundred.
+ */
+export function wordNumberRunValue(values: readonly number[]): number | null {
+  if (values.length === 1) return values[0];
+  if (values.length !== 2) return null;
+  const [tens, unit] = values;
+  return tens >= 20 && tens <= 90 && tens % 10 === 0 && unit >= 1 && unit <= 9 ? tens + unit : null;
+}
+
+/**
+ * The text with every written number as digits ("мне нужны пять рабочих" →
+ * "мне нужны 5 рабочих"), every other character untouched — so a digit reader
+ * reads the same count said in words. A run of number words joined by spaces
+ * or a hyphen becomes its `wordNumberRunValue`; a run that has none stays as
+ * typed, which no digit reader counts.
+ */
+export function digitizeWordNumbers(
+  text: string,
+  /** Is the SENTENCE Swedish? Pass it when `text` is no longer as typed. */
+  swedish: boolean = looksSwedish(text),
+): string {
+  return (text ?? "").replace(/\p{L}+(?:[ \t-]+\p{L}+)*/gu, (phrase) => {
+    // [word, separator, word, separator, …, word]
+    const parts = phrase.split(/([ \t-]+)/u);
+    let out = "";
+    let i = 0;
+    while (i < parts.length) {
+      const values: number[] = [];
+      let j = i;
+      for (;;) {
+        const v = j < parts.length ? parseWordNumber(parts[j], swedish) : null;
+        if (v === null) break;
+        values.push(v);
+        j += 2;
+      }
+      if (values.length === 0) {
+        out += parts[i] + (parts[i + 1] ?? "");
+        i += 2;
+        continue;
+      }
+      const value = wordNumberRunValue(values);
+      out += (value === null ? parts.slice(i, j - 1).join("") : String(value)) + (parts[j - 1] ?? "");
+      i = j;
+    }
+    return out;
+  });
 }
 
 /** Every written number in the text, in order, with token positions. */
