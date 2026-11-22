@@ -9,6 +9,7 @@ import {
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
+import { placeOverlay, samePosition, type OverlayPosition } from "@/lib/ui/overlay-placement";
 
 /**
  * THE ONE OVERLAY PORTAL ROOT (owner audit P0.3: "vienas portal root; aiški
@@ -30,8 +31,10 @@ import { createPortal } from "react-dom";
  *   z-toast (70) — the command search dialog, above everything
  *
  * The overlay anchors to its trigger with fixed positioning recomputed on
- * resize and scroll; Escape and outside-pointerdown close it (clicks inside
- * the portal or on the trigger never count as outside).
+ * resize, scroll and its own resize; it stays inside the screen and scrolls
+ * inside itself when taller than the room it has (`overlay-placement.ts`).
+ * Escape and outside-pointerdown close it (clicks inside the portal or on the
+ * trigger never count as outside).
  */
 export function AnchoredOverlay({
   anchorRef,
@@ -53,11 +56,7 @@ export function AnchoredOverlay({
   className?: string;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{
-    top: number;
-    left?: number;
-    right?: number;
-  } | null>(null);
+  const [pos, setPos] = useState<OverlayPosition | null>(null);
 
   useLayoutEffect(() => {
     if (!open) {
@@ -67,17 +66,33 @@ export function AnchoredOverlay({
     const update = () => {
       const r = anchorRef.current?.getBoundingClientRect();
       if (!r) return;
-      setPos(
-        align === "right"
-          ? { top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right) }
-          : { top: r.bottom + 8, left: Math.max(8, r.left) },
+      const panel = panelRef.current;
+      const next = placeOverlay(
+        r,
+        panel ? { width: panel.offsetWidth, height: panel.scrollHeight } : null,
+        { width: document.documentElement.clientWidth, height: window.innerHeight },
+        align,
       );
+      setPos((prev) => (prev && samePosition(prev, next) ? prev : next));
     };
     update();
     window.addEventListener("resize", update);
     // Capture-phase scroll: any scrolling ancestor re-anchors the panel.
     window.addEventListener("scroll", update, true);
+    // The panel's own size decides where it fits; it is only known once it is
+    // rendered, and it changes when its content does (a submenu, a list).
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    const observe = () => {
+      if (panelRef.current && ro) ro.observe(panelRef.current);
+    };
+    observe();
+    const raf = requestAnimationFrame(() => {
+      observe();
+      update();
+    });
     return () => {
+      cancelAnimationFrame(raf);
+      ro?.disconnect();
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update, true);
     };
@@ -115,7 +130,20 @@ export function AnchoredOverlay({
   return createPortal(
     <div
       ref={panelRef}
-      style={{ position: "fixed", top: pos.top, left: pos.left, right: pos.right }}
+      style={{
+        position: "fixed",
+        top: pos.top,
+        bottom: pos.bottom,
+        left: pos.left,
+        right: pos.right,
+        maxHeight: pos.maxHeight,
+        maxWidth: pos.maxWidth,
+        // Taller than the room it has (a phone on its side, 200 % text): the
+        // panel scrolls inside itself instead of running off the screen. Only
+        // then, so a panel that fits keeps its shadow unclipped.
+        overflowY: pos.scroll ? "auto" : undefined,
+        overscrollBehavior: pos.scroll ? "contain" : undefined,
+      }}
       className={`z-modal ${className}`}
       data-overlay-root="anchored"
     >

@@ -1326,3 +1326,106 @@ test.describe("an organisation with many needs on a phone", () => {
     await done();
   });
 });
+
+// ── POPUPS STAY ON THE SCREEN (responsive sweep 2026-11-21) ──────────────────
+// Measured on this stack before the fix: at 320 × 568 the onboarding country
+// list opened from y = 423 to 721, under the fixed Finish bar and past the
+// screen; on a phone on its side (568 × 320) the account menu ran from y = 162
+// to 622 and the command dialog from 32 to 368, with no way to reach their
+// last controls. The shared components now keep every popup on the screen
+// (components/ui/anchored-overlay.tsx, components/ui/DarkListbox.tsx,
+// components/app/header-search.tsx; rule in lib/ui/overlay-placement.ts).
+// The public language menu is held by overlay-viewport-fit.spec.ts.
+test.describe("popups on a short phone screen", () => {
+  test.describe.configure({ mode: "serial" });
+  let ctx: BrowserContext;
+  let page: Page;
+  const address = email("overlay");
+
+  test.beforeAll(async ({ browser }: { browser: Browser }) => {
+    ctx = await browser.newContext({
+      viewport: { width: 320, height: 568 },
+      deviceScaleFactor: 2,
+      isMobile: true,
+      hasTouch: true,
+      userAgent: USER_AGENT,
+    });
+    page = await ctx.newPage();
+  });
+  test.afterAll(async () => {
+    await ctx?.close();
+  });
+
+  /** The open popup's box, and whether its last control can be brought on screen and hit. */
+  const fit = (panel: Locator) =>
+    panel.evaluate((el) => {
+      const vh = window.innerHeight;
+      const vw = document.documentElement.clientWidth;
+      const items = [...el.querySelectorAll<HTMLElement>("a[href], button, [role=option]")].filter(
+        (x) => x.getBoundingClientRect().height > 0,
+      );
+      const last = items.at(-1);
+      let lastReachable = false;
+      if (last) {
+        last.scrollIntoView({ block: "nearest" });
+        const q = last.getBoundingClientRect();
+        const hit = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2);
+        lastReachable = q.top >= 0 && q.bottom <= vh && !!hit && (last === hit || last.contains(hit));
+      }
+      const r = el.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, vh, vw, lastReachable };
+    });
+
+  test("the country list just above the Finish bar opens above its field", async () => {
+    await signUp(page, BASE, address);
+    await page.getByTestId("onboarding-intent-work").tap();
+    await page.getByTestId("onboarding-intents-continue").tap();
+    await page.getByTestId("onboarding-display-name").fill("Synthetic Overlay Worker");
+    const field = page.getByTestId("onboarding-country");
+    const bar = page.getByTestId("onboarding-action-bar");
+    // The field's bottom edge sits just above the fixed bar, as a person meets it while scrolling.
+    await field.evaluate((el) => {
+      const barTop = document.querySelector('[data-testid="onboarding-action-bar"]')?.getBoundingClientRect().top ?? window.innerHeight;
+      window.scrollBy(0, el.getBoundingClientRect().bottom - (barTop - 6));
+    });
+    await field.tap();
+    const panel = page.locator("[data-listbox-side]");
+    await expect(panel).toBeVisible();
+    const barTop = (await bar.boundingBox())?.y ?? 568;
+    const f = await fit(panel);
+    expect(f.top).toBeGreaterThanOrEqual(0);
+    expect(f.bottom).toBeLessThanOrEqual(barTop);
+    await page.getByRole("option", { name: /Lithuania/ }).first().tap();
+    await page.getByTestId("onboarding-submit").tap();
+    await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  });
+
+  test("on a phone on its side the account menu and the command dialog stay reachable", async () => {
+    await page.setViewportSize({ width: 568, height: 320 });
+    await page.goto(`${BASE}/en/dashboard`);
+    const trigger = page.getByTestId("account-menu-trigger");
+    const menu = page.locator("[data-overlay-root]").last();
+    await expect(async () => {
+      if (!(await menu.isVisible())) await trigger.tap({ timeout: 3_000 });
+      await expect(menu).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+    const m = await fit(menu);
+    expect(m.top).toBeGreaterThanOrEqual(0);
+    expect(m.bottom).toBeLessThanOrEqual(m.vh);
+    expect(m.right).toBeLessThanOrEqual(m.vw);
+    expect(m.lastReachable).toBe(true);
+    await page.keyboard.press("Escape");
+
+    await page.getByTestId("chat-command-search").tap();
+    const dialog = page.getByTestId("header-search-dialog");
+    await expect(dialog).toBeVisible();
+    const d = await fit(dialog);
+    expect(d.lastReachable).toBe(true);
+    // the dialog's own bottom edge can be scrolled onto the screen
+    const bottom = await dialog.evaluate((el) => {
+      el.parentElement?.scrollTo(0, el.parentElement.scrollHeight);
+      return el.getBoundingClientRect().bottom;
+    });
+    expect(bottom).toBeLessThanOrEqual(320);
+  });
+});
