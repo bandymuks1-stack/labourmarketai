@@ -1391,7 +1391,7 @@ export function ConversationChat({
     } catch {
       /* storage unavailable or malformed: start without the goal */
     }
-    return () => {
+    const keep = () => {
       try {
         if (goalRef.current) {
           window.sessionStorage.setItem(
@@ -1402,6 +1402,29 @@ export function ConversationChat({
       } catch {
         /* storage unavailable: the goal is simply not kept */
       }
+    };
+    // The unmount cleanup only runs on an in-app navigation. When the
+    // DOCUMENT goes — a link that loads a page, a reload, an address typed,
+    // the phone discarding the tab — React never unmounts, so the goal was
+    // lost on exactly those switches (signup-isolated PG, 2026-11-22: the
+    // six hours were filed today). `pagehide` is the one event every browser
+    // fires then; the same keep, same key, same owner check on the way back.
+    // Back from the back/forward cache this chat still holds its goal, so the
+    // kept copy is retired: a goal finished here must not be revived later.
+    const back = (e: PageTransitionEvent) => {
+      if (!e.persisted) return;
+      try {
+        window.sessionStorage.removeItem(GOAL_ACROSS_PAGES_KEY);
+      } catch {
+        /* storage unavailable: nothing was kept */
+      }
+    };
+    window.addEventListener("pagehide", keep);
+    window.addEventListener("pageshow", back);
+    return () => {
+      window.removeEventListener("pagehide", keep);
+      window.removeEventListener("pageshow", back);
+      keep();
     };
   }, [auth0?.user?.id, goalOwnerKey]);
 
