@@ -22,15 +22,38 @@ describe("an invitation into an existing organization", () => {
     expect([...JOINS_EXISTING_ORGANIZATION_TYPES].sort()).toEqual(
       ["join_as_employee", "join_organization", "join_project", "join_team"].sort(),
     );
-    expect(invitationJoinsExistingOrganization({ invitationType: "join_organization", organizationName: "Acme" })).toBe(true);
-    expect(invitationJoinsExistingOrganization({ invitationType: "join_organization", organizationName: " " })).toBe(false);
+    const open = { status: "pending", expiresAt: "2026-12-31T00:00:00Z", now: Date.parse("2026-11-22T00:00:00Z") };
+    expect(invitationJoinsExistingOrganization({ invitationType: "join_organization", organizationName: "Acme", ...open })).toBe(true);
+    expect(invitationJoinsExistingOrganization({ invitationType: "join_organization", organizationName: " ", ...open })).toBe(false);
     for (const t of ["invite_company", "collaborate_partner", "join_platform", "invite_to_demand"]) {
-      expect(invitationJoinsExistingOrganization({ invitationType: t, organizationName: "Acme" }), t).toBe(false);
+      expect(invitationJoinsExistingOrganization({ invitationType: t, organizationName: "Acme", ...open }), t).toBe(false);
     }
   });
 
+  it("a closed or expired invitation brings nobody in (R3 on #3586)", () => {
+    const now = Date.parse("2026-11-22T00:00:00Z");
+    for (const status of ["revoked", "accepted", "declined", "expired", "archived", null]) {
+      expect(
+        invitationJoinsExistingOrganization({ invitationType: "join_organization", organizationName: "Acme", status, expiresAt: null, now }),
+        String(status),
+      ).toBe(false);
+    }
+    expect(
+      invitationJoinsExistingOrganization({ invitationType: "join_organization", organizationName: "Acme", status: "pending", expiresAt: "2026-11-21T23:59:59Z", now }),
+      "a pending link past its expiry",
+    ).toBe(false);
+    expect(
+      invitationJoinsExistingOrganization({ invitationType: "join_organization", organizationName: "Acme", status: "pending", expiresAt: null, now }),
+      "a pending link without an expiry",
+    ).toBe(true);
+  });
+
   it("the server action and the onboarding page use the same rule", () => {
-    expect(read("lib/onboarding/invited-worker-context.ts")).toContain("invitationJoinsExistingOrganization({");
+    for (const p of ["lib/onboarding/invited-worker-context.ts", "app/[locale]/onboarding/page.tsx", "app/[locale]/auth/signup/page.tsx"]) {
+      const src = read(p);
+      expect(src, p).toContain("invitationJoinsExistingOrganization({");
+      expect(src, p).toMatch(/status: \w+\.preview\.status,\s*\n\s*expiresAt: \w+\.preview\.expiresAt,/);
+    }
     expect(read("lib/auth/actions.ts")).toContain("if (invited.workerImplied) roles = [\"worker\"];");
     expect(read("app/[locale]/onboarding/page.tsx")).toContain("invitationJoinsExistingOrganization({");
   });

@@ -85,6 +85,8 @@ export default async function OnboardingPage({
         invitationJoinsExistingOrganization({
           invitationType: preview.preview.invitationType,
           organizationName: preview.preview.organizationName,
+          status: preview.preview.status,
+          expiresAt: preview.preview.expiresAt,
         }));
     if (
       preview.kind === "ok" &&

@@ -480,7 +480,17 @@ export const JOINS_EXISTING_ORGANIZATION_TYPES: readonly InvitationType[] = [
 export function invitationJoinsExistingOrganization(input: {
   invitationType: string | null | undefined;
   organizationName: string | null | undefined;
+  /** Only a PENDING invitation still brings anyone in (R3 on #3586): a
+   *  revoked, accepted or expired link promises nothing and fixes no role. */
+  status: string | null | undefined;
+  expiresAt: string | null | undefined;
+  now?: number;
 }): boolean {
+  if (input.status !== "pending") return false;
+  if (input.expiresAt) {
+    const at = Date.parse(input.expiresAt);
+    if (!Number.isFinite(at) || at <= (input.now ?? Date.now())) return false;
+  }
   if (!input.organizationName || !input.organizationName.trim()) return false;
   return (JOINS_EXISTING_ORGANIZATION_TYPES as readonly string[]).includes(input.invitationType ?? "");
 }

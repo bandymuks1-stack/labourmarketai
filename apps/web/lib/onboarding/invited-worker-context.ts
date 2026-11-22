@@ -54,6 +54,8 @@ export async function resolveInvitedWorkerContext(
           invitationJoinsExistingOrganization({
             invitationType: preview.preview.invitationType,
             organizationName: preview.preview.organizationName,
+            status: preview.preview.status,
+            expiresAt: preview.preview.expiresAt,
           })),
     };
   }

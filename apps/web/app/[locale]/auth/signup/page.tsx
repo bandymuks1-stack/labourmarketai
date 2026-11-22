@@ -64,6 +64,8 @@ export default async function SignupPage({
     invitationJoinsExistingOrganization({
       invitationType: pub.preview.invitationType,
       organizationName: pub.preview.organizationName,
+      status: pub.preview.status,
+      expiresAt: pub.preview.expiresAt,
     })
   ) {
     const tSignup = await getTranslations({ locale, namespace: "auth.signup" });
