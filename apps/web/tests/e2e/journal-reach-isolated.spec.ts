@@ -11,8 +11,10 @@ import { BASE, isolatedStack, lit, onboard, signIn, signUp, sql, userId } from "
  * Synthetic person only; nothing here changes product code.
  *
  *   R-1 every worker surface (home/assistant, CV, profile, calendar, the
- *       opportunities list) shows a visible way to the journal at 390 and
- *       1280 px, and the journal's "Earlier entries" reaches the history;
+ *       opportunities list) leads to the journal at 390 and 1280 px — a
+ *       visible link, or on a phone the header's area sheet (one more tap) —
+ *       and the journal's "Earlier entries" reaches the history; the taps per
+ *       page are recorded as evidence;
  *   R-2 a historical day follows the existing rule: a day long past is
  *       stored as that day; a future day is refused (lib/journal/work-date.ts);
  *   R-3 the entry survives a validation error: the refused readback keeps
@@ -46,6 +48,23 @@ async function noSidewaysScroll(page: Page, what: string): Promise<void> {
   expect(overflow, `${what}: no sideways scroll`).toBeLessThanOrEqual(1);
 }
 
+/**
+ * The way to the journal from a page: 1 = a visible link on the page (the
+ * header's core row from `md`, or the page's own link); 2 = on a phone, the
+ * header's ONE area button opens the sheet of every destination, and the
+ * journal is in it (`conversation-header.tsx`, owner phone report 2026-11-20).
+ */
+async function wayToJournal(page: Page, what: string): Promise<1 | 2> {
+  const direct = page.locator('a[href^="/en/dashboard/journal"]').filter({ visible: true });
+  if (await direct.first().waitFor({ state: "visible", timeout: 10_000 }).then(() => true).catch(() => false)) return 1;
+  const trigger = page.getByTestId("header-nav-sheet-trigger").filter({ visible: true }).first();
+  await expect(trigger, `${what}: the header's area button`).toBeVisible({ timeout: 30_000 });
+  await trigger.click();
+  const inSheet = page.getByTestId("header-nav-sheet").locator('a[href^="/en/dashboard/journal"]');
+  await expect(inSheet.first(), `${what}: the journal is in the area sheet`).toBeVisible({ timeout: 30_000 });
+  return 2;
+}
+
 /** The person's "today" as the journal itself reads it (its Yesterday link). */
 async function journalToday(page: Page): Promise<string> {
   await page.goto(`${BASE}/en/dashboard/journal`);
@@ -67,15 +86,22 @@ for (const size of SIZES) {
     const ctx = await browser.newContext({ viewport: { width: size.width, height: size.height }, deviceScaleFactor: 2 });
     const page = await ctx.newPage();
     await signIn(page, BASE, W);
+    const taps: Record<string, number> = {};
     for (const path of SURFACES) {
       await page.goto(`${BASE}${path}`);
       await page.waitForLoadState("networkidle").catch(() => {});
-      const way = page.locator('a[href^="/en/dashboard/journal"]').filter({ visible: true });
-      await expect(way.first(), `${size.label} ${path}: a visible way to the journal`).toBeVisible({ timeout: 30_000 });
       await noSidewaysScroll(page, `${size.label} ${path}`);
+      taps[path] = await wayToJournal(page, `${size.label} ${path}`);
+      // Close the area sheet again if it was opened.
+      if (taps[path] === 2) await page.keyboard.press("Escape");
     }
+    test.info().annotations.push({ type: "evidence", description: `${size.label} taps to the journal: ${JSON.stringify(taps)}` });
     await page.goto(`${BASE}/en/dashboard/opportunities`);
-    await page.locator('a[href^="/en/dashboard/journal"]').filter({ visible: true }).first().click();
+    if ((await wayToJournal(page, `${size.label} opportunities`)) === 2) {
+      await page.getByTestId("header-nav-sheet").locator('a[href^="/en/dashboard/journal"]').first().click();
+    } else {
+      await page.locator('a[href^="/en/dashboard/journal"]').filter({ visible: true }).first().click();
+    }
     await page.waitForURL(/\/en\/dashboard\/journal/, { timeout: 30_000 });
     const main = page.getByRole("main");
     await main.getByTestId("journal-day-choice-earlier").click();
