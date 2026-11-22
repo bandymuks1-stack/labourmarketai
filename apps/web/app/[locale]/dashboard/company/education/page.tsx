@@ -68,7 +68,6 @@ export default async function CompanyEducationPage({
     <div className="flex flex-col gap-6" data-testid="company-education">
       <header className="flex flex-col gap-1">
         <PageTitle>{t("title")}</PageTitle>
-        <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         {/* The page's one primary action, under its title: a deep link into
             the ONE invitation panel with type, organisation and relationship
             pre-selected (`join_organization` + `student`). Here, not inside the

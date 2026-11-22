@@ -10,6 +10,9 @@ import {
   type ServiceOfferingsLabels,
 } from "@/components/app/service-offerings-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { TeamDemandOfferForm } from "@/components/app/team-demand-offer-form";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { projectOrganizationAuthority } from "@/lib/company/organization-authority";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
@@ -46,6 +49,18 @@ export default async function ServicesPage({
   const needsMigration = result.kind === "needs-migration" || result.kind === "unavailable";
   const rows = result.kind === "ok" ? result.rows : [];
   const closedSupported = result.kind === "ok" && result.closedSupported === true;
+  // "What we offer" is where a provider (an agency, a subcontractor) looks
+  // for work to offer on: the open needs it may offer ITSELF against are the
+  // same form the People door carries, for the same authority (owner/admin;
+  // the database re-checks). A person without an organization sees no form.
+  const employerCtx = await resolveEmployerCompanyContext();
+  const canOfferOrganization =
+    employerCtx.kind === "ok" &&
+    projectOrganizationAuthority({
+      role: employerCtx.role,
+      isCreator: employerCtx.isCreator,
+      invitationDelegate: employerCtx.invitationDelegate,
+    }).canManageInvitations;
 
   const labels: ServiceOfferingsLabels = {
     title: t("title"),
@@ -89,6 +104,9 @@ export default async function ServicesPage({
         closedSupported={closedSupported}
         labels={labels}
       />
+      {canOfferOrganization && employerCtx.kind === "ok" ? (
+        <TeamDemandOfferForm teamId={employerCtx.organizationId} memberCount={0} kind="organization" />
+      ) : null}
       {/* Cross-link to the other half of the loop — where requests for these
           services arrive and are answered. Quiet, secondary affordance. */}
       <Link

@@ -1,6 +1,9 @@
 import { getTranslations } from "next-intl/server";
+import { Users } from "lucide-react";
 
 import { Card } from "@/components/ui/Card";
+import { Explain } from "@/components/app/premium/grammar";
+import { SectionHead } from "@/components/app/premium/section-head";
 import { PersonPresence } from "@/components/app/work-world/primitives";
 import { readInstitutionLearners } from "@/lib/education/institution-learners";
 import { OUTCOMES_K_ANONYMITY_FLOOR, readInstitutionLearnerOutcomes } from "@/lib/education/institution-outcomes";
@@ -23,6 +26,7 @@ export async function InstitutionLearnersSection({
   readonly organizationId: string;
 }) {
   const t = await getTranslations("roleDashboards.company.learners");
+  const tDisclosure = await getTranslations("common.disclosure");
   const [read, outcomes] = await Promise.all([
     readInstitutionLearners(organizationId),
     readInstitutionLearnerOutcomes(organizationId),
@@ -35,12 +39,7 @@ export async function InstitutionLearnersSection({
       data-testid="institution-learners"
       aria-labelledby="institution-learners-title"
     >
-      <header className="flex flex-col gap-1">
-        <h2 id="institution-learners-title" className="font-display text-base font-semibold text-text-primary">
-          {t("title")}
-        </h2>
-        <p className="text-xs leading-relaxed text-text-secondary">{t("subtitle")}</p>
-      </header>
+      <SectionHead id="institution-learners-title" icon={Users} title={t("title")} />
 
       {read.status === "unavailable" ? (
         <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-learners-unavailable">
@@ -141,6 +140,9 @@ export async function InstitutionLearnersSection({
         </>
       )}
 
+      <Explain summary={tDisclosure("details")}>
+        <p>{t("subtitle")}</p>
+      </Explain>
     </section>
     </Card>
   );

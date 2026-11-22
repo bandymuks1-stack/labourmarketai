@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",
-    "subtitleAgency": "O co pyta teraz rynek publiczny — ta sama pula, którą Twoi kandydaci widzą na tablicy.",
-    "subtitleInstitution": "O co pyta teraz rynek publiczny — kierunki, w które idą Twoi uczniowie.",
     "active": "aktywne oferty: {count}",
     "employers": "pracodawcy: {count}",
     "filtered": "{profession}: oferty: {count}",
@@ -2082,7 +2080,6 @@
       "eyebrow": "PRZESTRZEŃ ROBOCZA FIRMY",
       "programs": {
         "title": "Programy i grupy",
-        "subtitle": "To, czego Państwo uczą, powiązane z kierunkiem rynku pracy, oraz grupy uczestników w jego ramach. Popyt pokazuje aktualne publiczne oferty pracy dla tego kierunku.",
         "empty": "Brak programów. Proszę dodać pierwszy i wskazać kierunek zawodowy, do którego prowadzi.",
         "addProgram": "Dodaj program",
         "noDirection": "Nie ustawiono kierunku zawodowego",
@@ -4276,6 +4273,9 @@
         "admin": "Administrator"
       },
       "subcopy": "Jeden profil dla Państwa doświadczenia zawodowego i możliwości — w następnym kroku wskażą Państwo, po co przychodzą.",
+      "inviteFrom": "{inviter} zaprasza Państwa do dołączenia do {organization}.",
+      "inviteTo": "Zaproszenie do dołączenia do {organization}.",
+      "inviteNext": "Po rejestracji dołączą Państwo do {organization}.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
@@ -4286,7 +4286,6 @@
       "confirm_password_label": "Powtórz hasło",
       "submit_label": "Zarejestruj się",
       "signing": "Tworzenie...",
-      "disclaimer": "Państwa opinia kształtuje produkt — prosimy napisać nam, co działa, a czego brakuje.",
       "has_account": "Mają Państwo już konto?",
       "login_link": "Logowanie",
       "error_generic": "Coś poszło nie tak. Proszę spróbować ponownie za chwilę.",
@@ -7111,7 +7110,6 @@
   "learning": {
     "pageTitle": "Nauka i weryfikacja",
     "pageLead": "Sugestie wyciągnięte z rzeczywistej aktywności zawodowej, przechowywane do weryfikacji przez osobę. Nic tu nie jest traktowane jako udowodnione samo w sobie.",
-    "title": "Kolejka weryfikacji",
     "lead": "Sygnały stają się sugestiami, a decyduje osoba. Uczenie nigdy niczego nie rozstrzyga samodzielnie.",
     "notAvailable": "Chwilowo niedostępne.",
     "empty": "Nic jeszcze do weryfikacji.",
@@ -12841,7 +12839,7 @@
         "invite_to_demand": "Pracodawca zaprosił Państwa do zapotrzebowania na pracowników"
       },
       "from": "Zaproszenie od {name}",
-      "organization": "Firma: {name}",
+      "organization": "Organizacja: {name}",
       "project": "Projekt: {name}",
       "role": "Proponowana rola: {role}",
       "accept": "Zaakceptuj zaproszenie",
@@ -12870,10 +12868,9 @@
       "capacity": "Relacja: {capacity}",
       "capacityNotEmployment": "To nie jest oferta pracy i nie tworzy zatrudnienia.",
       "selfStart": "Utwórz własne konto",
-      "anonExplainer": "Proszę się zarejestrować lub zalogować, aby odpowiedzieć na to zaproszenie. Zachowują Państwo własne konto, profil i historię pracy — osoba, która Państwa zaprosiła, tworzy jedynie połączenie, nic więcej.",
+      "anonExplainer": "Proszę się zarejestrować lub zalogować, aby odpowiedzieć na to zaproszenie. Konto, profil i historia pracy pozostają Państwa: przyjęcie tworzy jedynie połączenie, nigdy zweryfikowanej umiejętności, zatrudnienia ani przydziału.",
       "register": "Zarejestruj się i kontynuuj",
       "signIn": "Mam już konto",
-      "youOwnYourIdentity": "Państwa tożsamość zawodowa pozostaje Państwa. Zaakceptowanie zaproszenia samo w sobie nigdy nie tworzy zweryfikowanej umiejętności, zatrudnienia ani przydziału.",
       "referredVia": "Polecono przez {source}",
       "campaign": "Zaproszenie: {label}",
       "seats": "Zajęto {used} z {max} miejsc",
@@ -14296,9 +14293,7 @@
         "preferredCountries": "Preferowane kraje",
         "preferredCountriesPlaceholder": "np. NL, DE",
         "salaryMin": "Wynagrodzenie od (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Wynagrodzenie do (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Gotowość do przeprowadzki?",
         "hasTransport": "Czy dojadą Państwo do pracy samodzielnie?",
         "needsAccommodation": "Potrzebują Państwo zakwaterowania?",
@@ -18843,8 +18838,7 @@
         "invitationAccepted": "Zaproszenie zaakceptowane. Proszę potwierdzić poniżej prośbę agencji o połączenie w imieniu swojej firmy."
       },
       "education": {
-        "title": "Nauka i programy",
-        "subtitle": "Programy, uczestnicy i popyt rynkowy na ich kierunki."
+        "title": "Nauka i programy"
       },
       "history": {
         "title": "Import danych i historia",
@@ -19627,6 +19621,7 @@
     "heading": "Zaproponuj ten zespół do zapotrzebowania",
     "intro": "Proszę zaproponować zespół jako jedną jednostkę do jednego otwartego zapotrzebowania zweryfikowanej firmy.",
     "privacy": "Firma widzi tylko fakty na poziomie zespołu: wielkość, umiejętności, dostępność. Oferta nie wskazuje żadnego członka ani nie pokazuje profilu członka. Członkowie pojawiają się w projekcie dopiero po tym, jak firma przyjmie zespół i tam go przypisze.",
+    "orgPrivacy": "Firma widzi nazwę Państwa firmy, wiadomość i warunki. Nikt nie jest wymieniony z nazwiska, dopóki nie uzgodnią Państwo, kto będzie pracować.",
     "tooSmall": "Zespół można zaproponować tylko wtedy, gdy ma co najmniej 2 aktywnych członków.",
     "loading": "Ładowanie…",
     "unavailable": "Nie udało się teraz wczytać otwartego zapotrzebowania.",
@@ -19637,6 +19632,7 @@
     "noteLabel": "Wiadomość do firmy (opcjonalnie)",
     "notePlaceholder": "Na przykład: brygada 3 osób, start za dwa tygodnie",
     "submit": "Zaproponuj zespół",
+    "orgSubmit": "Zaoferuj naszą firmę",
     "submitting": "Wysyłanie…",
     "sent": {
       "heading": "Państwa oferty",
@@ -19715,8 +19711,14 @@
       },
       "blockers": "Zespół jako całość nie spełnia: {list}",
       "missing": "Nie podano: {list}",
+      "missingData": {
+        "need_not_structured": "wymagania potrzeby",
+        "no_team_members": "aktywni członkowie",
+        "team_skills_not_stated": "umiejętności zespołu"
+      },
       "noNeedStructure": "To zapotrzebowanie nie jest jeszcze uporządkowane, więc zespołu nie można z nim porównać.",
       "note": "Wiadomość od zespołu",
+      "noteCompany": "Wiadomość od firmy",
       "accept": "Uzgodnij wstępnie",
       "decline": "Odrzuć",
       "noProjects": "Nie mają Państwo jeszcze otwartego projektu, do którego można przypisać zespół.",
@@ -19735,6 +19737,7 @@
       },
       "createProject": "Utwórz projekt",
       "message": "Napisz do zespołu",
+      "messageCompany": "Napisz do firmy",
       "kindOrganization": "Oferta firmy",
       "orgNext": "Uzgodnione wstępnie (nie umowa). Szczegóły i ludzi, którzy będą pracować, proszę ustalić w rozmowie."
     },

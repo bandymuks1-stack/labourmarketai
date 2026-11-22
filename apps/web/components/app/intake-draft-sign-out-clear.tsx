@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import { clearAllTabDrafts } from "@/lib/drafts/tab-draft";
 import { clearQuickRecordDraft } from "@/lib/journal/quick-record-draft";
 import { clearWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
 
@@ -16,8 +17,8 @@ export function isSignOutTarget(urlOrPath: string | null | undefined): boolean {
 }
 
 /**
- * Every sign-out removes the intake draft and the journal's started entry
- * from this browser (decision 0024, `lib/staffing/worker-intake-draft.ts`,
+ * Every sign-out removes the intake draft, the journal's started entry and
+ * every unsent tab draft (`lib/drafts/tab-draft.ts`) from this browser (decision 0024, `lib/staffing/worker-intake-draft.ts`,
  * `lib/journal/quick-record-draft.ts`). The sign-out route itself is auth
  * core and is not touched: this listens, in the capture phase, for any form
  * submitted to it or any link opening it (the account menu, the account page,
@@ -30,6 +31,7 @@ export function IntakeDraftSignOutClear() {
       if (form instanceof HTMLFormElement && isSignOutTarget(form.getAttribute("action"))) {
         clearWorkerIntakeDraft();
         clearQuickRecordDraft();
+        clearAllTabDrafts();
       }
     };
     const onClick = (e: Event) => {
@@ -37,6 +39,7 @@ export function IntakeDraftSignOutClear() {
       if (link && isSignOutTarget(link.getAttribute("href"))) {
         clearWorkerIntakeDraft();
         clearQuickRecordDraft();
+        clearAllTabDrafts();
       }
     };
     document.addEventListener("submit", onSubmit, true);

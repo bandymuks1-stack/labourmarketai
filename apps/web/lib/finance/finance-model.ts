@@ -1,4 +1,4 @@
-import { csvCell } from "@/lib/projects/operations-report";
+import { csvExportCell } from "@/lib/projects/operations-report";
 
 /**
  * Pure operational-finance model (control room PR I, capability gap map §9) —
@@ -409,7 +409,7 @@ export function buildFinanceCsvRow(record: FinanceRecord, now: Date): string[] {
 }
 
 function csvRow(cells: string[]): string {
-  return cells.map(csvCell).join(",");
+  return cells.map(csvExportCell).join(",");
 }
 
 /** Build the full CSV string for a finance export. No rows produce a

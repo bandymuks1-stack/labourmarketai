@@ -3,10 +3,12 @@ import "server-only";
 import {
   addressedReferralImpliesWorker,
   invitationImpliesWorkerContext,
+  invitationJoinsExistingOrganization,
   inviteTokenFromNextPath,
   pickAddressedJoinPlatform,
 } from "@/lib/invitations/model";
 import { listInvitationsForMe } from "@/lib/invitations/network";
+import { readMyInvitationDecision } from "@/lib/invitations/my-decision";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 
 /**
@@ -16,7 +18,9 @@ import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
  * hand-crafted form cannot change what the invitation already settled.
  *
  *   - a token in `?next=/invite/<token>`: the invitation preview decides, by
- *     the unchanged token-path rule (`invitationImpliesWorkerContext`);
+ *     the token-path rule (`invitationImpliesWorkerContext`) or because the
+ *     invitation joins an existing organization
+ *     (`invitationJoinsExistingOrganization`, owner P0 2026-11-22);
  *   - no token: the caller's own pending invitations for their VERIFIED
  *     e-mail; exactly one `join_platform` (`pickAddressedJoinPlatform`), and a
  *     worker only for a registered partner whose notice is about the person's
@@ -36,16 +40,28 @@ export async function resolveInvitedWorkerContext(
 ): Promise<InvitedWorkerContext> {
   const inviteToken = inviteTokenFromNextPath(nextPath);
   if (inviteToken) {
-    const preview = await readPublicInvitationPreview(inviteToken, { emitOpened: false });
+    const [preview, myDecision] = await Promise.all([
+      readPublicInvitationPreview(inviteToken, { emitOpened: false }),
+      readMyInvitationDecision(inviteToken),
+    ]);
     return {
       inviteToken,
       addressedInvitationId: null,
+      // A person joining an existing organization is not asked to set one up
+      // (owner P0 2026-11-22: no duplicate organization by accident).
       workerImplied:
         preview.kind === "ok" &&
-        invitationImpliesWorkerContext({
+        (invitationImpliesWorkerContext({
           invitationType: preview.preview.invitationType,
           externalSourceSlug: preview.preview.externalSourceSlug,
-        }),
+        }) ||
+          invitationJoinsExistingOrganization({
+            invitationType: preview.preview.invitationType,
+            organizationName: preview.preview.organizationName,
+            status: preview.preview.status,
+            expiresAt: preview.preview.expiresAt,
+            myDecision,
+          })),
     };
   }
   const mine = await listInvitationsForMe();
