@@ -21,7 +21,7 @@ Cost: 0 € on top of what already existed (VPS, Cloudflare Free, Supabase as be
 | Releases | `/root/lm-prod/releases/<sha>/` (standalone build, side by side), `/root/lm-prod/current` symlink | [`ops/vps/lm-deploy-receive.sh`](../../ops/vps/lm-deploy-receive.sh) |
 | Env | `/root/lm-prod/env` (600, 19 names, see §3); backups `/root/lm-prod/env.bak-*` | owner-run scripts only |
 | Cron | `/etc/cron.d/labourmarket` (**prepared, not installed** — §5) | [`ops/vps/labourmarket.cron`](../../ops/vps/labourmarket.cron), [`ops/vps/lm-cron.sh`](../../ops/vps/lm-cron.sh) |
-| Smoke | [`ops/vps/lm-smoke.sh`](../../ops/vps/lm-smoke.sh) (health, routes, OAuth PRM, MCP 401, resources, Agentai 5/5) | — |
+| Smoke | [`ops/vps/lm-smoke.sh`](../../ops/vps/lm-smoke.sh) **read-only** (2026-11-22): the release `current` points at, container health, local + public `/api/health` build = that release, routes, OAuth PRM, MCP 401, resources; Agentai OS containers are printed for information only and never fail it (separate project, owner decision 2026-11-22); `sh lm-smoke.sh <sha>` also asserts the expected release. It never starts or swaps a container (that is `lm-prod-run.sh` only); non-zero exit on any failure | — |
 
 Boot persistence (verified after the unplanned VPS reboot at 2026-10-17 16:36 UTC): `docker`,
 `nginx`, `cron` are `systemctl enabled`; the container restart policy brought it back healthy.
@@ -77,9 +77,12 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
   `status` — release, docker health, RestartCount — with the existing deploy key, read-only.
 - Container: `docker logs labourmarket-prod` (rotated), `docker stats`. A swap REMOVES the old
   container and, with it, its logs; since 2026-10-23 `lm-prod-run.sh` first saves them to
-  `/root/lm-prod/logs/*.log.gz` (root-only, newest 20). VPS: `/proc/pressure/cpu`,
-  Agentai OS must stay 5/5 healthy (Agentai has priority: `docker update --cpus=0.3
-  labourmarket-prod` or stop it if Agentai degrades).
+  `/root/lm-prod/logs/*.log.gz` (root-only, newest 20). VPS: `/proc/pressure/cpu`.
+  Agentai OS is a separate project (owner decision 2026-11-22): its health is diagnostic
+  information only, it never fails a LabourMarket.ai check, and LabourMarket.ai is not
+  throttled or stopped because of it. The two still share this host's one vCPU; the
+  separation is a dedicated VPS for LabourMarket.ai (infra audit 2026-11-21, option 1),
+  an owner purchase decision.
 - nginx: the vhost has no `access_log` directive yet (HestiaCP default is off) — proposed
   change: per-domain access log for incident diagnosis (owner approval, §7).
 

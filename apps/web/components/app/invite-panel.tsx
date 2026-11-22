@@ -300,6 +300,15 @@ export function InvitePanel({
     }
   }
 
+  /**
+   * The missing step, then back (owner 2026-11-22): the organisation's
+   * capability card, with a link under it back to THIS invite (same type,
+   * organisation and relationship). It used to open the company home and
+   * leave the person there.
+   */
+  const capabilityFixHref = `/${locale}/dashboard/company/settings?need=training_provider&next=${encodeURIComponent(
+    `/dashboard/network?invite=1&type=${type}${organizationId ? `&org=${organizationId}` : ""}&relationship=${relationshipSlug}`,
+  )}#company-capabilities`;
   const capacityBlockedNotice = (
     <span
       className="text-meta text-state-danger"
@@ -307,7 +316,7 @@ export function InvitePanel({
     >
       {t("capacityNeedsCapability")}{" "}
       <a
-        href={`/${locale}/dashboard/company`}
+        href={capabilityFixHref}
         className="underline hover:text-text-primary"
         data-testid="invite-capacity-blocked-cta"
       >
