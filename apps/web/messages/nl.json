@@ -19624,6 +19624,7 @@
     "heading": "Dit team aanbieden voor een vraag",
     "intro": "Bied het team als één eenheid aan voor één openstaande vraag van een geverifieerd bedrijf.",
     "privacy": "Het bedrijf ziet alleen feiten op teamniveau: omvang, vaardigheden, beschikbaarheid. Het aanbod noemt geen enkel lid en toont geen ledenprofiel. Leden verschijnen pas in een project nadat het bedrijf het team heeft geaccepteerd en daar heeft ingedeeld.",
+    "orgPrivacy": "Het bedrijf ziet de naam van uw bedrijf, uw bericht en uw voorwaarden. Er wordt niemand genoemd totdat u afspreekt wie het werk doet.",
     "tooSmall": "Een team kan alleen worden aangeboden met minstens 2 actieve leden.",
     "loading": "Laden…",
     "unavailable": "De openstaande vraag kon nu niet worden geladen.",
@@ -19642,6 +19643,7 @@
     "noteLabel": "Bericht aan het bedrijf (optioneel)",
     "notePlaceholder": "Bijvoorbeeld: ploeg van 3, kan over twee weken starten",
     "submit": "Team aanbieden",
+    "orgSubmit": "Ons bedrijf aanbieden",
     "submitting": "Aanbieden…",
     "sent": {
       "heading": "Uw aanbiedingen",
@@ -19720,8 +19722,14 @@
       },
       "blockers": "Het team als geheel voldoet niet aan: {list}",
       "missing": "Niet opgegeven: {list}",
+      "missingData": {
+        "need_not_structured": "de eisen van de behoefte",
+        "no_team_members": "actieve leden",
+        "team_skills_not_stated": "de vaardigheden van het team"
+      },
       "noNeedStructure": "Deze vraag is nog niet gestructureerd, dus het team kan er niet mee worden vergeleken.",
       "note": "Bericht van het team",
+      "noteCompany": "Bericht van het bedrijf",
       "accept": "In principe akkoord",
       "decline": "Afwijzen",
       "noProjects": "U heeft nog geen open project om het team aan toe te wijzen.",
@@ -19740,6 +19748,7 @@
       },
       "createProject": "Project aanmaken",
       "message": "Bericht aan het team",
+      "messageCompany": "Bericht aan het bedrijf",
       "kindOrganization": "Bedrijfsaanbod",
       "orgNext": "In principe akkoord (geen contract). Spreek de details en de mensen die het werk doen af in het gesprek."
     },

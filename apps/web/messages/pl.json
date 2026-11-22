@@ -19624,6 +19624,7 @@
     "heading": "Zaproponuj ten zespół do zapotrzebowania",
     "intro": "Proszę zaproponować zespół jako jedną jednostkę do jednego otwartego zapotrzebowania zweryfikowanej firmy.",
     "privacy": "Firma widzi tylko fakty na poziomie zespołu: wielkość, umiejętności, dostępność. Oferta nie wskazuje żadnego członka ani nie pokazuje profilu członka. Członkowie pojawiają się w projekcie dopiero po tym, jak firma przyjmie zespół i tam go przypisze.",
+    "orgPrivacy": "Firma widzi nazwę Państwa firmy, wiadomość i warunki. Nikt nie jest wymieniony z nazwiska, dopóki nie uzgodnią Państwo, kto będzie pracować.",
     "tooSmall": "Zespół można zaproponować tylko wtedy, gdy ma co najmniej 2 aktywnych członków.",
     "loading": "Ładowanie…",
     "unavailable": "Nie udało się teraz wczytać otwartego zapotrzebowania.",
@@ -19642,6 +19643,7 @@
     "noteLabel": "Wiadomość do firmy (opcjonalnie)",
     "notePlaceholder": "Na przykład: brygada 3 osób, start za dwa tygodnie",
     "submit": "Zaproponuj zespół",
+    "orgSubmit": "Zaoferuj naszą firmę",
     "submitting": "Wysyłanie…",
     "sent": {
       "heading": "Państwa oferty",
@@ -19720,8 +19722,14 @@
       },
       "blockers": "Zespół jako całość nie spełnia: {list}",
       "missing": "Nie podano: {list}",
+      "missingData": {
+        "need_not_structured": "wymagania potrzeby",
+        "no_team_members": "aktywni członkowie",
+        "team_skills_not_stated": "umiejętności zespołu"
+      },
       "noNeedStructure": "To zapotrzebowanie nie jest jeszcze uporządkowane, więc zespołu nie można z nim porównać.",
       "note": "Wiadomość od zespołu",
+      "noteCompany": "Wiadomość od firmy",
       "accept": "Uzgodnij wstępnie",
       "decline": "Odrzuć",
       "noProjects": "Nie mają Państwo jeszcze otwartego projektu, do którego można przypisać zespół.",
@@ -19740,6 +19748,7 @@
       },
       "createProject": "Utwórz projekt",
       "message": "Napisz do zespołu",
+      "messageCompany": "Napisz do firmy",
       "kindOrganization": "Oferta firmy",
       "orgNext": "Uzgodnione wstępnie (nie umowa). Szczegóły i ludzi, którzy będą pracować, proszę ustalić w rozmowie."
     },
