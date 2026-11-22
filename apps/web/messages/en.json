@@ -19624,6 +19624,7 @@
     "heading": "Offer this team to a demand",
     "intro": "Offer the team as one unit against one open demand from a verified company.",
     "privacy": "The company sees only team-level facts: size, skills, availability. The offer names no member and shows no member profile. Members appear on a project only after the company accepts and assigns the team there.",
+    "orgPrivacy": "The company sees your company's name, your note and your terms. No person is named until you agree who will work.",
     "tooSmall": "A team needs at least 2 active members to be offered.",
     "loading": "Loading…",
     "unavailable": "Open demand could not be loaded right now.",
@@ -19634,6 +19635,7 @@
     "noteLabel": "Note to the company (optional)",
     "notePlaceholder": "For example: crew of 3, can start in two weeks",
     "submit": "Offer team",
+    "orgSubmit": "Offer our company",
     "submitting": "Offering…",
     "sent": {
       "heading": "Your offers",
@@ -19712,8 +19714,14 @@
       },
       "blockers": "The team as a whole does not meet: {list}",
       "missing": "Not stated: {list}",
+      "missingData": {
+        "need_not_structured": "the need's requirements",
+        "no_team_members": "active members",
+        "team_skills_not_stated": "the team's skills"
+      },
       "noNeedStructure": "This need is not structured yet, so the team cannot be matched against it.",
       "note": "Note from the team",
+      "noteCompany": "Note from the company",
       "accept": "Agree in principle",
       "decline": "Decline",
       "noProjects": "You have no open project to assign the team to yet.",
@@ -19732,6 +19740,7 @@
       },
       "createProject": "Create a project",
       "message": "Message the team",
+      "messageCompany": "Message the company",
       "kindOrganization": "Company offer",
       "orgNext": "Agreed in principle (not a contract). Settle the details and the people who will work in the conversation."
     },

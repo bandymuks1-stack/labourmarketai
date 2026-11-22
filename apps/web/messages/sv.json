@@ -19624,6 +19624,7 @@
     "heading": "Erbjud det här teamet till ett behov",
     "intro": "Erbjud teamet som en enhet mot ett öppet behov från ett verifierat företag.",
     "privacy": "Företaget ser bara fakta på teamnivå: storlek, färdigheter, tillgänglighet. Erbjudandet namnger ingen medlem och visar ingen medlemsprofil. Medlemmarna visas i ett projekt först när företaget accepterar och tilldelar teamet dit.",
+    "orgPrivacy": "Företaget ser ert företags namn, ert meddelande och era villkor. Ingen person namnges förrän ni kommer överens om vem som arbetar.",
     "tooSmall": "Ett team behöver minst 2 aktiva medlemmar för att kunna erbjudas.",
     "loading": "Läser in …",
     "unavailable": "Öppna behov kunde inte läsas in just nu.",
@@ -19634,6 +19635,7 @@
     "noteLabel": "Meddelande till företaget (valfritt)",
     "notePlaceholder": "Till exempel: arbetslag på 3, kan börja om två veckor",
     "submit": "Erbjud team",
+    "orgSubmit": "Erbjud vårt företag",
     "submitting": "Erbjuder …",
     "sent": {
       "heading": "Dina erbjudanden",
@@ -19712,8 +19714,14 @@
       },
       "blockers": "Teamet som helhet uppfyller inte: {list}",
       "missing": "Inte angivet: {list}",
+      "missingData": {
+        "need_not_structured": "behovets krav",
+        "no_team_members": "aktiva medlemmar",
+        "team_skills_not_stated": "teamets färdigheter"
+      },
       "noNeedStructure": "Det här behovet är inte strukturerat ännu, så teamet kan inte matchas mot det.",
       "note": "Meddelande från teamet",
+      "noteCompany": "Meddelande från företaget",
       "accept": "Godkänn i princip",
       "decline": "Avböj",
       "noProjects": "Du har inget öppet projekt att tilldela teamet till ännu.",
@@ -19732,6 +19740,7 @@
       },
       "createProject": "Skapa ett projekt",
       "message": "Skicka meddelande till teamet",
+      "messageCompany": "Skicka meddelande till företaget",
       "kindOrganization": "Företagserbjudande",
       "orgNext": "Överenskommet i princip (inget avtal). Kom överens om detaljerna och vilka personer som ska arbeta i samtalet."
     },

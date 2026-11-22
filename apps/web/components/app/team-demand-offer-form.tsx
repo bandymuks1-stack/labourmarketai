@@ -121,7 +121,7 @@ export function TeamDemandOfferForm({
       </summary>
       <div className="flex flex-col gap-3 pt-3">
         <p className="text-xs text-text-secondary">{org ? t("orgIntro") : t("intro")}</p>
-        <p className="text-meta leading-relaxed text-text-muted">{t("privacy")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{org ? t("orgPrivacy") : t("privacy")}</p>
 
         {!org && memberCount < 2 ? (
           <p className="text-xs text-text-muted" data-testid={`team-offer-too-small-${teamId}`}>
@@ -211,7 +211,7 @@ export function TeamDemandOfferForm({
                     onClick={submit}
                     data-testid={`team-offer-submit-${teamId}`}
                   >
-                    {pending ? t("submitting") : t("submit")}
+                    {pending ? t("submitting") : org ? t("orgSubmit") : t("submit")}
                   </Button>
                 </div>
               </div>

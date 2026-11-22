@@ -19624,6 +19624,7 @@
     "heading": "Dieses Team für einen Bedarf anbieten",
     "intro": "Bieten Sie das Team als eine Einheit für einen offenen Bedarf eines verifizierten Unternehmens an.",
     "privacy": "Das Unternehmen sieht nur Fakten auf Teamebene: Größe, Fähigkeiten, Verfügbarkeit. Das Angebot nennt kein Mitglied und zeigt kein Mitgliedsprofil. Mitglieder erscheinen erst in einem Projekt, nachdem das Unternehmen das Team angenommen und dort zugewiesen hat.",
+    "orgPrivacy": "Das Unternehmen sieht den Namen Ihres Unternehmens, Ihren Hinweis und Ihre Bedingungen. Niemand wird genannt, bis Sie vereinbaren, wer arbeitet.",
     "tooSmall": "Ein Team kann nur angeboten werden, wenn es mindestens 2 aktive Mitglieder hat.",
     "loading": "Wird geladen…",
     "unavailable": "Der offene Bedarf konnte gerade nicht geladen werden.",
@@ -19634,6 +19635,7 @@
     "noteLabel": "Hinweis an das Unternehmen (optional)",
     "notePlaceholder": "Zum Beispiel: Trupp von 3, Start in zwei Wochen möglich",
     "submit": "Team anbieten",
+    "orgSubmit": "Unser Unternehmen anbieten",
     "submitting": "Wird angeboten…",
     "sent": {
       "heading": "Ihre Angebote",
@@ -19712,8 +19714,14 @@
       },
       "blockers": "Das Team als Ganzes erfüllt nicht: {list}",
       "missing": "Nicht angegeben: {list}",
+      "missingData": {
+        "need_not_structured": "die Anforderungen des Bedarfs",
+        "no_team_members": "aktive Mitglieder",
+        "team_skills_not_stated": "die Fähigkeiten des Teams"
+      },
       "noNeedStructure": "Dieser Bedarf ist noch nicht strukturiert, daher kann das Team nicht damit abgeglichen werden.",
       "note": "Hinweis des Teams",
+      "noteCompany": "Hinweis des Unternehmens",
       "accept": "Grundsätzlich zustimmen",
       "decline": "Ablehnen",
       "noProjects": "Sie haben noch kein offenes Projekt, dem Sie das Team zuweisen können.",
@@ -19732,6 +19740,7 @@
       },
       "createProject": "Projekt anlegen",
       "message": "Dem Team schreiben",
+      "messageCompany": "Dem Unternehmen schreiben",
       "kindOrganization": "Unternehmensangebot",
       "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Details und die arbeitenden Personen klären Sie im Gespräch."
     },
