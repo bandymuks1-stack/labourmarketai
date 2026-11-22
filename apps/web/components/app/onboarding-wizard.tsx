@@ -20,6 +20,7 @@ import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import { acceptInvitationAfterSignup } from "@/lib/invitations/signup-accept-action";
 import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { StaffReviewNotice } from "@/components/app/staff-review-notice";
+import { Fold } from "@/components/app/premium/grammar";
 import {
   SELF_DECLARED_PROFESSION_MAX_LENGTH,
   normalizeSelfDeclaredProfession,
@@ -1048,17 +1049,13 @@ export function OnboardingWizard({
         <div data-testid="onboarding-employer-visibility">{employerVisibility}</div>
       ) : null}
 
-      {/* Landing→profile continuity (DESIGN.md): honestly preview the real
-          profile the user builds next, so the first post-CTA screen does not
-          feel weaker than the premium landing. Concept labels only — no fake
-          data, nothing auto-verified. */}
-      <div
-        className="card-border flex flex-col gap-3 p-4"
-        data-testid="onboarding-next-steps"
-      >
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t(`${nextStepsKey}.eyebrow`)}
-        </p>
+      {/* Landing→profile continuity (DESIGN.md): the real profile the user
+          builds next, as concept labels only (no fake data, nothing
+          auto-verified). Folded by default (owner 2026-11-22, decision 0032):
+          four numbered lines and a note sat between the fields and Finish on
+          every phone; the title alone says what is next, and the steps stay
+          one tap away. */}
+      <Fold title={t(`${nextStepsKey}.eyebrow`)} testId="onboarding-next-steps">
         <ul className="flex flex-col gap-2">
           {(["s1", "s2", "s3", "s4"] as const).map((k, i) => (
             <li
@@ -1075,7 +1072,7 @@ export function OnboardingWizard({
         <p className="text-xs leading-relaxed text-text-muted">
           {t(`${nextStepsKey}.note`)}
         </p>
-      </div>
+      </Fold>
 
       {invitationToken && invitationReviewNotice ? (
         <StaffReviewNotice text={invitationReviewNotice} testId="onboarding-review-notice" />
