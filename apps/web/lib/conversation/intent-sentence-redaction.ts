@@ -20,7 +20,8 @@
  *     sentence never leaves, whatever else it says.
  *
  * E-mails, URLs and phones are tokenised first (the vacancy redactor's
- * patterns); numbers of up to 4 digits stay (a quantity: "5 darbuotojai").
+ * patterns); every number is a token too, as the privacy text says (a
+ * quantity stays on the platform and is restored locally).
  *
  * Pure. No IO, no server-only, no provider.
  */
@@ -111,7 +112,6 @@ const SHORT_STEM_ENDINGS = ["", "s", "es", "ed", "ing", "e", "er", "ers", "d"];
 
 function isVocabulary(word: string): boolean {
   if (EXACT.has(word)) return true;
-  if (/^\d{1,4}$/.test(word)) return true;
   return STEMS.some((s) =>
     [...s].length <= 3 ? SHORT_STEM_ENDINGS.some((e) => word === s + e) : word.startsWith(s),
   );

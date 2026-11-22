@@ -55,7 +55,9 @@ describe("redactIntentSentence (owner decision 2026-11-22): an allow-list, fail 
     expect(redactIntentSentence("užsakymo 4485123 būsena")?.text).toBe("užsakymo [[0]] būsena");
   });
 
-  it("keeps small quantities", () => {
-    expect(sent("reikia 5 darbuotojų")).toBe("reikia 5 darbuotojų");
+  it("every number stays local, a quantity too (as the privacy text says)", () => {
+    const r = redactIntentSentence("reikia 5 darbuotojų")!;
+    expect(r.text).toBe("reikia [[0]] darbuotojų");
+    expect(r.tokens).toEqual(["5"]);
   });
 });
