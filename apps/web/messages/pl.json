@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",
-    "subtitleAgency": "O co pyta teraz rynek publiczny — ta sama pula, którą Twoi kandydaci widzą na tablicy.",
-    "subtitleInstitution": "O co pyta teraz rynek publiczny — kierunki, w które idą Twoi uczniowie.",
     "active": "aktywne oferty: {count}",
     "employers": "pracodawcy: {count}",
     "filtered": "{profession}: oferty: {count}",
@@ -2082,7 +2080,6 @@
       "eyebrow": "PRZESTRZEŃ ROBOCZA FIRMY",
       "programs": {
         "title": "Programy i grupy",
-        "subtitle": "To, czego Państwo uczą, powiązane z kierunkiem rynku pracy, oraz grupy uczestników w jego ramach. Popyt pokazuje aktualne publiczne oferty pracy dla tego kierunku.",
         "empty": "Brak programów. Proszę dodać pierwszy i wskazać kierunek zawodowy, do którego prowadzi.",
         "addProgram": "Dodaj program",
         "noDirection": "Nie ustawiono kierunku zawodowego",
@@ -4276,6 +4273,9 @@
         "admin": "Administrator"
       },
       "subcopy": "Jeden profil dla Państwa doświadczenia zawodowego i możliwości — w następnym kroku wskażą Państwo, po co przychodzą.",
+      "inviteFrom": "{inviter} zaprasza Państwa do dołączenia do {organization}.",
+      "inviteTo": "Zaproszenie do dołączenia do {organization}.",
+      "inviteNext": "Po rejestracji dołączą Państwo do {organization}.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
@@ -5987,6 +5987,8 @@
             "Stripe — obsługa płatności za płatne usługi platformy. Gdy organizacja rozpoczyna płatność, Stripe otrzymuje adres e-mail płacącego użytkownika i wewnętrzny identyfikator konta; dane karty są wprowadzane na własnej stronie płatności Stripe i nie są przechowywane przez platformę.",
             "Google, Facebook (Meta) i LinkedIn — tylko jeśli zdecydujesz się logować przez nich, jak opisano powyżej.",
             "Google (Gemini API) — tylko w sposób opisany poniżej w części o AI.",
+            "Cloudflare (Workers AI) — dopiero po włączeniu: 1) do objaśniania publicznych, zagregowanych statystyk rynku pracy; 2) gdy platforma sama nie rozumie prośby wpisanej na czacie — do zaproponowania, o którą istniejącą funkcję platformy chodzi. Przed wysłaniem usuwane są imiona i nazwiska, dane kontaktowe, liczby oraz wszystkie słowa spoza ustalonej listy słów oznaczających czynności; prośba zawierająca informacje o zdrowiu lub inne dane wrażliwe w ogóle nie jest wysyłana. Cloudflare nie wykorzystuje tych treści do trenowania modeli i nie przechowuje ich po zakończeniu zapytania.",
+            "Mistral AI i Groq — dopiero po włączeniu i wyłącznie do objaśniania publicznych, zagregowanych statystyk rynku pracy. Nie przesyłamy im treści wiadomości ani danych osobowych.",
             "Pełna lista dostawców infrastruktury znajduje się na stronie „Ochrona danych”."
           ]
         },
@@ -6125,6 +6127,8 @@
             "Cloudflare — sieć przed stroną: usługa nazw domen, szyfrowanie podczas przesyłania, pamięć podręczna i ochrona przed atakami. Przez nią przechodzi każde żądanie do strony.",
             "GitHub — hosting kodu źródłowego. Nie są tam przechowywane żadne dane użytkowników.",
             "Google (Gemini API) — przetwarzanie AI do tłumaczenia wiadomości i ogłoszeń o pracy oraz do podpowiadania, o co prosi zdanie wpisane na czacie. Wysyłany jest tylko tekst potrzebny do zadania.",
+            "Cloudflare (Workers AI) — dopiero po włączeniu: 1) do objaśniania publicznych, zagregowanych statystyk rynku pracy; 2) gdy platforma sama nie rozumie prośby wpisanej na czacie — do zaproponowania, o którą istniejącą funkcję platformy chodzi. Przed wysłaniem usuwane są imiona i nazwiska, dane kontaktowe, liczby oraz wszystkie słowa spoza ustalonej listy słów oznaczających czynności; prośba zawierająca informacje o zdrowiu lub inne dane wrażliwe w ogóle nie jest wysyłana. Cloudflare nie wykorzystuje tych treści do trenowania modeli i nie przechowuje ich po zakończeniu zapytania.",
+            "Mistral AI i Groq — dopiero po włączeniu i wyłącznie do objaśniania publicznych, zagregowanych statystyk rynku pracy. Nie przesyłamy im treści wiadomości ani danych osobowych.",
             "Stripe — obsługa płatności. Rekord klienta powstaje tylko wtedy, gdy organizacja rozpoczyna płatność za subskrypcję.",
             "Żaden inny dostawca poczty e-mail, AI, tłumaczeń ani płatności nie jest aktywny. Jeśli któryś zostanie uruchomiony, ta lista zostanie wcześniej zaktualizowana."
           ]
@@ -7107,7 +7111,6 @@
   "learning": {
     "pageTitle": "Nauka i weryfikacja",
     "pageLead": "Sugestie wyciągnięte z rzeczywistej aktywności zawodowej, przechowywane do weryfikacji przez osobę. Nic tu nie jest traktowane jako udowodnione samo w sobie.",
-    "title": "Kolejka weryfikacji",
     "lead": "Sygnały stają się sugestiami, a decyduje osoba. Uczenie nigdy niczego nie rozstrzyga samodzielnie.",
     "notAvailable": "Chwilowo niedostępne.",
     "empty": "Nic jeszcze do weryfikacji.",
@@ -12837,7 +12840,7 @@
         "invite_to_demand": "Pracodawca zaprosił Państwa do zapotrzebowania na pracowników"
       },
       "from": "Zaproszenie od {name}",
-      "organization": "Firma: {name}",
+      "organization": "Organizacja: {name}",
       "project": "Projekt: {name}",
       "role": "Proponowana rola: {role}",
       "accept": "Zaakceptuj zaproszenie",
@@ -12866,10 +12869,9 @@
       "capacity": "Relacja: {capacity}",
       "capacityNotEmployment": "To nie jest oferta pracy i nie tworzy zatrudnienia.",
       "selfStart": "Utwórz własne konto",
-      "anonExplainer": "Proszę się zarejestrować lub zalogować, aby odpowiedzieć na to zaproszenie. Zachowują Państwo własne konto, profil i historię pracy — osoba, która Państwa zaprosiła, tworzy jedynie połączenie, nic więcej.",
+      "anonExplainer": "Proszę się zarejestrować lub zalogować, aby odpowiedzieć na to zaproszenie. Konto, profil i historia pracy pozostają Państwa: przyjęcie tworzy jedynie połączenie, nigdy zweryfikowanej umiejętności, zatrudnienia ani przydziału.",
       "register": "Zarejestruj się i kontynuuj",
       "signIn": "Mam już konto",
-      "youOwnYourIdentity": "Państwa tożsamość zawodowa pozostaje Państwa. Zaakceptowanie zaproszenia samo w sobie nigdy nie tworzy zweryfikowanej umiejętności, zatrudnienia ani przydziału.",
       "referredVia": "Polecono przez {source}",
       "campaign": "Zaproszenie: {label}",
       "seats": "Zajęto {used} z {max} miejsc",
@@ -18839,8 +18841,7 @@
         "invitationAccepted": "Zaproszenie zaakceptowane. Proszę potwierdzić poniżej prośbę agencji o połączenie w imieniu swojej firmy."
       },
       "education": {
-        "title": "Nauka i programy",
-        "subtitle": "Programy, uczestnicy i popyt rynkowy na ich kierunki."
+        "title": "Nauka i programy"
       },
       "history": {
         "title": "Import danych i historia",

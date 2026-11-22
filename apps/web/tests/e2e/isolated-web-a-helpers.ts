@@ -89,6 +89,27 @@ export async function onboard(page: Page, intent: string, displayName: string): 
   await page.getByTestId("onboarding-submit").click();
 }
 
+/**
+ * Onboarding after registering through an invitation link. An invitation into
+ * an existing organization asks no "what did you come for" question (owner P0
+ * 2026-11-22: such a person never sets up an organization by accident), so
+ * the intent is picked only when the question is shown; the profile step
+ * follows either way.
+ */
+export async function onboardInvited(page: Page, displayName: string): Promise<void> {
+  const name = page.getByTestId("onboarding-display-name");
+  const work = page.getByTestId("onboarding-intent-work");
+  await expect(name.or(work).first()).toBeVisible({ timeout: 30_000 });
+  if (await work.isVisible()) {
+    await work.click();
+    await page.getByTestId("onboarding-intents-continue").click();
+  }
+  await name.fill(displayName);
+  await page.getByTestId("onboarding-country").click();
+  await page.getByRole("option", { name: /Lithuania/ }).first().click();
+  await page.getByTestId("onboarding-submit").click();
+}
+
 export async function signIn(page: Page, origin: string, address: string): Promise<void> {
   await page.goto(`${origin}/en/auth/login`);
   await page.locator('input[name="email"]').fill(address);

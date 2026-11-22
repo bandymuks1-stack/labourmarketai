@@ -826,7 +826,7 @@ export default async function ProjectOperationsPage({
       {/* Canonical Pakviesti (core-network area B): invite a person into
           THIS project via the one invitation surface, project preselected. */}
       <Link
-        href={`/dashboard/network?type=join_project&project=${id}` as "/dashboard"}
+        href={`/dashboard/network?invite=1&type=join_project&project=${id}` as "/dashboard"}
         data-testid="project-invite-link"
         className="flex w-fit items-center gap-2 rounded-md border border-brand-blue/50 px-4 py-2 text-sm font-medium text-brand-blue transition-colors hover:border-brand-blue"
       >

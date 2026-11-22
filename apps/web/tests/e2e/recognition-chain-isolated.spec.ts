@@ -1,5 +1,6 @@
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
 import { clickUntilVisible } from "./click-until-visible";
+import { onboardInvited } from "./isolated-web-a-helpers";
 
 /**
  * A POSITIVE RECOGNITION FROM REAL EVIDENCE — THE WRITE PATH, on a THROWAWAY LOCAL Supabase stack
@@ -263,7 +264,7 @@ test("I-2. the institution invites a person as a learner by link; they register 
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(page.url())) await onboard(page, "work", LEARNER_NAME);
+  if (/\/onboarding/.test(page.url())) await onboardInvited(page, LEARNER_NAME);
   await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(page.url())) {
     const accept = page.getByTestId("invite-accept");

@@ -79,6 +79,24 @@ export const UNDERSTANDING_KINDS = [
 ] as const;
 export type UnderstandingKind = (typeof UNDERSTANDING_KINDS)[number];
 
+const planStep = z
+  .object({
+    intent: z.string().min(1).max(60),
+    words: z.string().min(1).max(60).optional(),
+  })
+  .strict();
+
+/**
+ * EMPTY IS ABSENT (production 2026-11-22, Cloudflare Gemma 4). A model that
+ * fills every key of the projected schema answers `"reference": null`,
+ * `"intent": null` or `"steps": []` for a field that does not apply. Each of
+ * those means exactly "not given", and the server already reads them so
+ * (`cleanReference` → null, `isRoutedIntent` → false, `validatePlan` → null),
+ * yet the strict schema failed the whole answer on them: 3 of 5 replays of
+ * one real request. So null and an empty plan are accepted as "not given".
+ * Nothing else widens: no new key, a one-step plan still fails, and every
+ * real value keeps its bounds.
+ */
 const conversationIntentData = z
   .object({
     /** What KIND of thing was said — the widening. */
@@ -88,16 +106,16 @@ const conversationIntentData = z
      * server drops it for every other kind, so a model cannot smuggle an
      * operation in behind a `question`.
      */
-    intent: z.string().min(1).max(60).optional(),
+    intent: z.string().min(1).max(60).nullish(),
     /** Up to two other plausible catalogue ids, most likely first. */
-    alternatives: z.array(z.string().min(1).max(60)).max(2).optional(),
+    alternatives: z.array(z.string().min(1).max(60)).max(2).nullish(),
     /**
      * For `reference` and `question`: the NAME the person used, copied
      * verbatim out of their own sentence. The model does not resolve it, look
      * it up, or say anything about it — resolution happens in the product,
      * against the caller's own authorized context.
      */
-    reference: z.string().min(1).max(80).optional(),
+    reference: z.string().min(1).max(80).nullish(),
     /**
      * For `action` ONLY, when ONE message asks for two or three things in
      * order: the ordered catalogue ids, each with the span of the message
@@ -106,17 +124,8 @@ const conversationIntentData = z
      * (lib/conversation/intent-plan.ts); otherwise it uses `intent` alone.
      */
     steps: z
-      .array(
-        z
-          .object({
-            intent: z.string().min(1).max(60),
-            words: z.string().min(1).max(60).optional(),
-          })
-          .strict(),
-      )
-      .min(2)
-      .max(3)
-      .optional(),
+      .union([z.array(planStep).length(0), z.array(planStep).min(2).max(3)])
+      .nullish(),
   })
   .strict();
 

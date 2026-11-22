@@ -2,6 +2,7 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 
 import { FIRST_VISIT_CAMPAIGN, refuseOnFirstVisit, storedAnalytics } from "./first-visit-consent";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { onboardInvited } from "./isolated-web-a-helpers";
 
 /**
  * SELF-SERVE SIGN-UP, end to end, on a THROWAWAY LOCAL Supabase stack
@@ -482,7 +483,7 @@ test("S-9. an invited person opens the link, registers through it, and the invit
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(page.url())) await onboard(page, "work", "Synthetic Invited Worker");
+  if (/\/onboarding/.test(page.url())) await onboardInvited(page, "Synthetic Invited Worker");
   await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(page.url())) {
     const accept = page.getByTestId("invite-accept");
@@ -993,7 +994,9 @@ test("P-3. onboarding on a phone: the bar covers neither the end of the form, a 
       const form = el.closest("form");
       if (!form) return null;
       // The last thing in the form that is not the bar itself.
-      const rest = [...form.querySelectorAll<HTMLElement>("input, select, textarea, button, [role=combobox], label, p")].filter((n) => !el.contains(n) && n.getClientRects().length > 0);
+      // Shown ones only: text folded inside a closed <details> still reports a
+      // box in Chromium (content-visibility), though nobody can see it.
+      const rest = [...form.querySelectorAll<HTMLElement>("input, select, textarea, button, [role=combobox], label, p")].filter((n) => !el.contains(n) && n.checkVisibility());
       const last = rest.reduce<number>((max, n) => Math.max(max, n.getBoundingClientRect().bottom), 0);
       return Math.round(last);
     });
@@ -1247,6 +1250,9 @@ async function inviteLearnerLink(page: Page, name: string): Promise<string> {
   await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
   await page.getByTestId("institution-learners-invite").click();
   await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
+  // Button = action (owner directive 2026-11-21): the page opens AS the invite,
+  // titled after the button, not as the relationships overview.
+  await expect(page.getByTestId("invite-page-title")).toHaveText("Invite students", { timeout: 30_000 });
   // UX_GAPS I-4: the door preset type, organisation and relationship — one read-only line, link mode by default.
   const preset = page.getByTestId("invite-preset");
   await expect(preset).toHaveAttribute("data-relationship", "student", { timeout: 30_000 });
@@ -1297,7 +1303,7 @@ test("E-1. an institution trains people and invites a learner by link; a student
   await inst.goto(`${BASE}/en/dashboard`);
   await expect(inst.getByTestId("company-model-primary")).toHaveAttribute(
     "href",
-    /\/en\/dashboard\/network\?type=join_organization&org=[0-9a-f-]+&relationship=student$/,
+    /\/en\/dashboard\/network\?invite=1&type=join_organization&org=[0-9a-f-]+&relationship=student$/,
     { timeout: 30_000 },
   );
   const link = await inviteLearnerLink(inst, EDU.learnerName);

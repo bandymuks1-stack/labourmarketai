@@ -65,7 +65,7 @@ describe("empty states lead somewhere", () => {
 
   it("the team-roster card links the invitation it describes", () => {
     const src = read("components/app/team-roster-empty-state.tsx");
-    expect(src).toMatch(/href="\/dashboard\/network\?type=join_as_employee"/);
+    expect(src).toMatch(/href=\{WORKER_INVITE_HREF as "\/dashboard"\}/);
     expect(src).toMatch(/team-roster-empty-\$\{variant\}-cta/);
     for (const l of LOCALES) {
       expect(at(msgs[l], "teamRosterEmpty.company.cta"), l).toBeTruthy();

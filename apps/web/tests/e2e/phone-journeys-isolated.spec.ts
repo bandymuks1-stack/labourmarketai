@@ -14,6 +14,7 @@ import {
   sqlExec,
   userId,
   verifyCompanyAsLocalAdmin,
+  onboardInvited,
 } from "./isolated-web-a-helpers";
 
 /**
@@ -955,7 +956,7 @@ for (const phone of PHONES) {
       if (await repeat.count()) await repeat.fill(PASSWORD);
       await wp.locator('form button[type="submit"]').click();
       await wp.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-      if (/\/onboarding/.test(wp.url())) await onboard(wp, "work", `Synthetic Confirmed Worker ${phone.name} ${RUN}`);
+      if (/\/onboarding/.test(wp.url())) await onboardInvited(wp, `Synthetic Confirmed Worker ${phone.name} ${RUN}`);
       await wp.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
       if (/\/invite\//.test(wp.url())) {
         const accept = wp.getByTestId("invite-accept");
@@ -1276,3 +1277,162 @@ for (const phone of PHONES) {
   });
 
 }
+
+// ── AN ORGANISATION WITH VOLUME STAYS SHORT (responsive pass 2026-11-22) ─────
+// Measured on this stack at 390 px with 18 needs and 15 people: the agency's
+// Needs page was 9,883 px (about 400 px a need), its People page 7,500 px
+// (285 px a person) and the company workspace 5,080 px (the home listed up to
+// 20 open needs). A need now keeps its next step on the row and folds the
+// rest; the home names five open needs and folds the others.
+test.describe("an organisation with many needs on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("volume-agency");
+  const org = { profileId: "", orgId: "" };
+
+  test("seven open needs: the home names five, a need row stays short, its extras are one tap away", async ({ browser }) => {
+    Object.assign(org, await newOrganisation(browser, OWNER, "agency", `Synthetic Volume Owner ${RUN}`, `Synthetic Volume Staffing ${RUN}`));
+    // Synthetic needs written straight to the local stack (a volume, not a flow under test).
+    sqlExec(
+      `insert into public.customer_requests (profile_id, title, need_summary, role_or_work_type, team_size, status, kind, payload, organization_id)
+       select ${lit(org.profileId)}, 'Synthetic volume need ' || g, 'Two people for three weeks.', 'Synthetic role ' || g, 2, 'submitted',
+              'company_request', jsonb_build_object('intent', 'hire_workers', 'role', 'Synthetic role ' || g), ${lit(org.orgId)}
+       from generate_series(1, 7) g`,
+    );
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+
+    await page.goto(`${BASE}/en/dashboard/company`);
+    const home = page.getByTestId("company-home-missing");
+    await expect(home).toBeVisible({ timeout: 60_000 });
+    await expect(home.locator('[data-testid="company-home-need"]:visible')).toHaveCount(5);
+    const rest = home.getByTestId("company-home-needs-rest");
+    await expect(rest.locator(":scope > summary")).toContainText("7");
+    await rest.locator(":scope > summary").tap();
+    await expect(home.locator('[data-testid="company-home-need"]:visible')).toHaveCount(7);
+
+    await page.goto(`${BASE}/en/dashboard/company/needs`);
+    const rows = page.getByTestId("demand-readback-row");
+    await expect(rows.first()).toBeVisible({ timeout: 60_000 });
+    const heights = await rows.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+    expect(heights.length).toBeGreaterThanOrEqual(7);
+    for (const h of heights) expect(h, "a need row stays compact on a phone").toBeLessThanOrEqual(300);
+    // The newest five are listed; the rest open in place.
+    await expect(page.locator('[data-testid="demand-readback-row"]:visible')).toHaveCount(5);
+    const listRest = page.getByTestId("demand-readback-rest");
+    await expect(listRest.locator(":scope > summary")).toContainText("7");
+    await listRest.locator(":scope > summary").tap();
+    await expect(page.locator('[data-testid="demand-readback-row"]:visible')).toHaveCount(7);
+    // Every function of the row is still there, one tap away.
+    const row = rows.first();
+    await expect(row.getByTestId("demand-readback-scout-link")).toBeVisible();
+    await expect(row.getByTestId("demand-location-capture-open")).toBeHidden();
+    await row.getByTestId("demand-readback-more").locator("summary").tap();
+    await expect(row.getByTestId("demand-location-capture-open")).toBeVisible();
+    await expect(row.getByTestId("demand-readback-details")).toBeVisible();
+    await fitsTheScreen(page, "the needs page with many needs");
+    await done();
+  });
+});
+
+// ── POPUPS STAY ON THE SCREEN (responsive sweep 2026-11-21) ──────────────────
+// Measured on this stack before the fix: at 320 × 568 the onboarding country
+// list opened from y = 423 to 721, under the fixed Finish bar and past the
+// screen; on a phone on its side (568 × 320) the account menu ran from y = 162
+// to 622 and the command dialog from 32 to 368, with no way to reach their
+// last controls. The shared components now keep every popup on the screen
+// (components/ui/anchored-overlay.tsx, components/ui/DarkListbox.tsx,
+// components/app/header-search.tsx; rule in lib/ui/overlay-placement.ts).
+// The public language menu is held by overlay-viewport-fit.spec.ts.
+test.describe("popups on a short phone screen", () => {
+  test.describe.configure({ mode: "serial" });
+  let ctx: BrowserContext;
+  let page: Page;
+  const address = email("overlay");
+
+  test.beforeAll(async ({ browser }: { browser: Browser }) => {
+    ctx = await browser.newContext({
+      viewport: { width: 320, height: 568 },
+      deviceScaleFactor: 2,
+      isMobile: true,
+      hasTouch: true,
+      userAgent: USER_AGENT,
+    });
+    page = await ctx.newPage();
+  });
+  test.afterAll(async () => {
+    await ctx?.close();
+  });
+
+  /** The open popup's box, and whether its last control can be brought on screen and hit. */
+  const fit = (panel: Locator) =>
+    panel.evaluate((el) => {
+      const vh = window.innerHeight;
+      const vw = document.documentElement.clientWidth;
+      const items = [...el.querySelectorAll<HTMLElement>("a[href], button, [role=option]")].filter(
+        (x) => x.getBoundingClientRect().height > 0,
+      );
+      const last = items.at(-1);
+      let lastReachable = false;
+      if (last) {
+        last.scrollIntoView({ block: "nearest" });
+        const q = last.getBoundingClientRect();
+        const hit = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2);
+        lastReachable = q.top >= 0 && q.bottom <= vh && !!hit && (last === hit || last.contains(hit));
+      }
+      const r = el.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, vh, vw, lastReachable };
+    });
+
+  test("the country list just above the Finish bar opens above its field", async () => {
+    await signUp(page, BASE, address);
+    await page.getByTestId("onboarding-intent-work").tap();
+    await page.getByTestId("onboarding-intents-continue").tap();
+    await page.getByTestId("onboarding-display-name").fill("Synthetic Overlay Worker");
+    const field = page.getByTestId("onboarding-country");
+    const bar = page.getByTestId("onboarding-action-bar");
+    // The field's bottom edge sits just above the fixed bar, as a person meets it while scrolling.
+    await field.evaluate((el) => {
+      const barTop = document.querySelector('[data-testid="onboarding-action-bar"]')?.getBoundingClientRect().top ?? window.innerHeight;
+      window.scrollBy(0, el.getBoundingClientRect().bottom - (barTop - 6));
+    });
+    await field.tap();
+    const panel = page.locator("[data-listbox-side]");
+    await expect(panel).toBeVisible();
+    const barTop = (await bar.boundingBox())?.y ?? 568;
+    const f = await fit(panel);
+    expect(f.top).toBeGreaterThanOrEqual(0);
+    expect(f.bottom).toBeLessThanOrEqual(barTop);
+    await page.getByRole("option", { name: /Lithuania/ }).first().tap();
+    await page.getByTestId("onboarding-submit").tap();
+    await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  });
+
+  test("on a phone on its side the account menu and the command dialog stay reachable", async () => {
+    await page.setViewportSize({ width: 568, height: 320 });
+    await page.goto(`${BASE}/en/dashboard`);
+    const trigger = page.getByTestId("account-menu-trigger");
+    const menu = page.locator("[data-overlay-root]").last();
+    await expect(async () => {
+      if (!(await menu.isVisible())) await trigger.tap({ timeout: 3_000 });
+      await expect(menu).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+    const m = await fit(menu);
+    expect(m.top).toBeGreaterThanOrEqual(0);
+    expect(m.bottom).toBeLessThanOrEqual(m.vh);
+    expect(m.right).toBeLessThanOrEqual(m.vw);
+    expect(m.lastReachable).toBe(true);
+    await page.keyboard.press("Escape");
+
+    await page.getByTestId("chat-command-search").tap();
+    const dialog = page.getByTestId("header-search-dialog");
+    await expect(dialog).toBeVisible();
+    const d = await fit(dialog);
+    expect(d.lastReachable).toBe(true);
+    // the dialog's own bottom edge can be scrolled onto the screen
+    const bottom = await dialog.evaluate((el) => {
+      el.parentElement?.scrollTo(0, el.parentElement.scrollHeight);
+      return el.getBoundingClientRect().bottom;
+    });
+    expect(bottom).toBeLessThanOrEqual(320);
+  });
+});

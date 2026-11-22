@@ -5,6 +5,9 @@ name: launch-readiness-walks
 # OWNER ORDER 2026-11-19: launch readiness of the free platform. Fifteen production walks on the
 # current production build: five scenarios x three screens. The verdict is READY only if all
 # fifteen pass.
+# OWNER ORDER 2026-11-21: final Chrome acceptance of the eight user scenarios (sign-up, worker,
+# employer, agency, subcontractor, student/education, AI, administration) appended to the plan, up to
+# 24 walks per UTC day until 2026-11-23.
 #
 # This is the acceptance-campaign pattern (owner-approved 2026-10-21), narrowed to one fixed plan.
 # GitHub's own scheduler runs it, independently of any agent session or the owner's computer. A tick:
@@ -48,10 +51,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           WINDOW_START: "2026-11-19T20:00:00Z"
-          WINDOW_END: "2026-11-23T00:00:00Z"
-          # Owner decision 2026-11-19: at most 6 plan walks per UTC day, to stay inside the Supabase
-          # Free plan's daily log-ingestion quota (8 walks used 23,400 of 25,200 entries on 2026-10-17).
-          DAILY_CAP: "6"
+          WINDOW_END: "2026-11-24T00:00:00Z"
+          # Owner decision 2026-11-19: at most 6 plan walks per UTC day (Supabase Free log quota).
+          # Owner decision 2026-11-21: the project is on Supabase Pro; up to 24 per UTC day until
+          # 2026-11-23, while production stays stable (every prod-qa-walk brake still applies).
+          DAILY_CAP: "24"
+          # invited-worker:phone is out of the plan: its synthetic account is created by the owner only
+          # (prod-qa-invited-provision.yml) and does not exist, so every re-run after a deploy failed at
+          # the mint and spent the day's budget (run 45001807853). Dispatch it by hand once provisioned.
         run: |
           set -euo pipefail
           PLAN="company-governance:desktop
@@ -59,7 +66,19 @@ jobs:
                 company-chain:desktop company-chain:phone company-chain:phone-375
                 need-intake:desktop need-intake:phone need-intake:phone-375
                 agency-chain:desktop agency-chain:phone agency-chain:phone-375
-                learning-practice:desktop learning-practice:phone learning-practice:phone-375"
+                learning-practice:desktop learning-practice:phone learning-practice:phone-375
+                role-routes:desktop role-routes:phone fresh-activation:desktop
+                jobs-search:desktop jobs-search:phone journal-confirm:desktop journal-confirm:phone
+                chat-continuity:phone worker-records-exports:desktop notifications-inapp:phone
+                org-roster:desktop org-roster:phone brigade-formation:desktop project-execution:desktop
+                project-context:desktop calendar-planning:desktop rota-repeat:desktop
+                marketplace-goods-services:desktop marketplace-goods-services:phone orders-bookings:desktop
+                orders-bookings:phone marketplace:desktop buyer-workspace:desktop
+                chat-confirm-once:desktop manager-chat:desktop mcp-chain:desktop mcp-agents:desktop
+                ai-off-honesty:desktop
+                documents-approvals:desktop search-support-privacy:desktop company-talent-history:desktop
+                worker-identity-split:desktop staff-review-notice:desktop public-org-locales:phone
+                mobile-surfaces:phone"
           log() { echo "$(date -u +%H:%M) $*" | tee -a "$GITHUB_STEP_SUMMARY"; }
           now=$(date -u +%FT%TZ)
           if [[ "$now" < "$WINDOW_START" || ! "$now" < "$WINDOW_END" ]]; then
@@ -87,6 +106,13 @@ jobs:
             ids=$(printf '%s\n' "$done_titles" | awk -F'\t' -v t="prod-qa-walk $1 $2" '$1 == t {print $3}')
             for id in $ids; do
               c=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
+              # A walk job that failed BEFORE its Provision step (a brake re-checked inside the walk job,
+              # e.g. production health) never reached production: it is not a run of the pair.
+              if [ "$c" = failure ]; then
+                reached=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+                  --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+                [ "${reached:-0}" -gt 0 ] || continue
+              fi
               case "$c" in
                 success) return 0 ;;
                 failure)
@@ -103,7 +129,8 @@ jobs:
             case "$t" in "prod-qa-walk "*) ;; *) continue ;; esac
             pair_ok=0; for pair in $PLAN; do [ "$t" = "prod-qa-walk ${pair%%:*} ${pair##*:}" ] && pair_ok=1; done
             [ "$pair_ok" = 1 ] || continue
-            started=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk" and (.conclusion=="success" or .conclusion=="failure")) | .startedAt][0] // ""')
+            started=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+              --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped") | .started_at][0] // ""')
             case "$started" in "$today"*) ran_today=$((ran_today + 1)) ;; esac
           done <<< "$done_titles"
           if [ "$ran_today" -ge "$DAILY_CAP" ]; then
@@ -117,7 +144,7 @@ jobs:
           done
 
           if [ -z "$next" ]; then
-            log "all fifteen pairs have run since $WINDOW_START:"
+            log "every plan pair has run since $WINDOW_START:"
             printf '%s\n' "$done_titles" | sort | tee -a "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
@@ -139,6 +166,11 @@ jobs:
           conclusion=$(gh run view "$id" -R "$REPO" --json conclusion --jq .conclusion)
           walk=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
           log "$spec $device run $id: $conclusion, walk job: ${walk:-none} (deploy ${prod_sha:0:8})"
+          # Hand over only if the walk reached production (its Provision step started); a brake inside the
+          # walk job leaves the retry to the hourly tick, as a brake before it does.
+          reached=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+            --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+          [ "${reached:-0}" -gt 0 ] || walk="refused"
           case "$walk" in
             success|failure)
               gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
