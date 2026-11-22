@@ -92,7 +92,7 @@ for (const w of WIDTHS) {
   const ROLE = `Open need welder ${w.name} ${RUN}`;
   const ASK = `Question about the need ${w.name} ${RUN}`;
   const ANSWER = `The client answers ${w.name} ${RUN}`;
-  const s = { needId: "", role: "", providerOrgId: "", conversationId: "", label: "" };
+  const s = { needId: "", role: "", providerOrgId: "", conversationId: "", label: "", clientId: "" };
 
   test.describe(`open-need messaging at ${w.viewport.width} px`, () => {
     test.describe.configure({ mode: "serial" });
@@ -113,6 +113,7 @@ for (const w of WIDTHS) {
       }
       await verifyCompanyAsLocalAdmin(CLIENT, email(`admin${w.name}`));
       const owner = await userId(CLIENT);
+      s.clientId = owner;
       const needs = sql<{ id: string; role: string }>(
         `select id, coalesce(nullif(btrim(role_or_work_type), ''), title) as role from public.customer_requests
           where (title = ${lit(ROLE)} or role_or_work_type = ${lit(ROLE)}) and profile_id = ${lit(owner)}`,
@@ -165,6 +166,16 @@ for (const w of WIDTHS) {
            from public.conversations c where c.id = ${lit(s.conversationId)}`,
       );
       expect(rows[0], "one direct thread of two, stamped open_need").toEqual({ source_type: "open_need", n: "2" });
+      // The client was told: a durable notification for the client, about this thread.
+      await expect
+        .poll(
+          () =>
+            sql<{ n: string }>(
+              `select count(*)::text as n from public.notification_events where recipient_profile_id = ${lit(s.clientId)} and metadata->>'conversationId' = ${lit(s.conversationId)}`,
+            )[0]?.n,
+          { timeout: 30_000 },
+        )
+        .not.toBe("0");
     });
 
     test(`O-2 (${w.name}). the client reads it, is told it is hidden, and answers`, async ({ browser }) => {
@@ -174,6 +185,7 @@ for (const w of WIDTHS) {
       await expect(cl.page.getByTestId("thread-counterparty")).toContainText(PROVIDER_PERSON);
       await expect(cl.page.getByTestId("thread-source")).toContainText(s.role);
       await expect(cl.page.getByTestId("open-need-identity-hidden")).toBeVisible();
+      await expect(cl.page.getByTestId("communication-attachment-add"), "no file while unnamed: its path would carry the id").toHaveCount(0);
       await cl.page.getByTestId("communication-composer-input").fill(ANSWER);
       await cl.page.getByRole("button", { name: "Send", exact: true }).click();
       await expect(message(cl.page, ANSWER)).toBeVisible({ timeout: 30_000 });
@@ -190,6 +202,26 @@ for (const w of WIDTHS) {
       await expect(pr.page.getByText(s.label).first(), "the inbox names the client the same way").toBeVisible({ timeout: 60_000 });
       await expect(pr.page.getByText(CLIENT_PERSON)).toHaveCount(0);
       await pr.done();
+
+      // The SERVER rule (owner 2026-11-22): the provider's own API session never receives the
+      // client's profile id — not in participant rows, not as a message author.
+      const parts = (await rowsAs(PROVIDER, `conversation_participants?conversation_id=eq.${s.conversationId}&select=profile_id,added_by`)) as {
+        profile_id: string;
+        added_by: string | null;
+      }[];
+      expect(parts, "the provider reads only its own participant row").toHaveLength(1);
+      const visible = (await rowsAs(PROVIDER, `conversation_messages_visible_v1?conversation_id=eq.${s.conversationId}&select=author_id`)) as {
+        author_id: string;
+      }[];
+      expect(visible, "the provider reads both messages").toHaveLength(2);
+      const raw = (await rowsAs(PROVIDER, `conversation_messages?conversation_id=eq.${s.conversationId}&select=author_id`)) as unknown[];
+      expect(raw, "the table gives the provider only its own message").toHaveLength(1);
+      const everything = JSON.stringify([parts, visible, raw]);
+      expect(everything.includes(s.clientId), "the client's id is in nothing the provider received").toBe(false);
+      expect(
+        await rowsAs(PROVIDER, `conversation_participants?profile_id=eq.${s.clientId}&select=conversation_id`),
+        "asking for the client's id directly returns nothing",
+      ).toHaveLength(0);
     });
 
     test(`O-3 (${w.name}). the client shows its name; the provider sees it; it all survives a reload`, async ({ browser }) => {
@@ -199,6 +231,7 @@ for (const w of WIDTHS) {
       await expect(cl.page.getByTestId("open-need-identity-shown")).toBeVisible({ timeout: 60_000 });
       await cl.page.reload();
       await expect(cl.page.getByTestId("open-need-identity-shown"), "the choice is stored").toBeVisible({ timeout: 60_000 });
+      await expect(cl.page.getByTestId("communication-attachment-add"), "files are offered once named").toBeVisible();
       await cl.done();
       expect(
         sql<{ n: string }>(`select count(*)::text as n from public.open_need_identity_disclosures where conversation_id = ${lit(s.conversationId)}`)[0]?.n,
@@ -210,6 +243,10 @@ for (const w of WIDTHS) {
       await expect(pr.page.getByTestId("thread-counterparty"), "now named").toContainText(CLIENT_PERSON, { timeout: 60_000 });
       for (const text of [ASK, ANSWER]) await expect(message(pr.page, text), `after a reload: ${text}`).toBeVisible();
       await pr.done();
+      expect(
+        await rowsAs(PROVIDER, `conversation_participants?conversation_id=eq.${s.conversationId}&select=profile_id`),
+        "after the client's choice the provider reads both participants",
+      ).toHaveLength(2);
     });
 
     test(`O-4 (${w.name}). the stranger reads nothing of the thread`, async ({ browser }) => {

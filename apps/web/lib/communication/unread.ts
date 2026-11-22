@@ -59,7 +59,7 @@ export const getUnreadConversationIdsResult = cache(
     if (lastReadByConv.size === 0) return { status: "ok", ids: new Set() };
 
     const { data: messagesRaw, error: mErr } = await asAny(supabase)
-      .from("conversation_messages")
+      .from("conversation_messages_visible_v1") // masks a hidden open-need client (20261122160000)
       .select("conversation_id, author_id, created_at")
       .in("conversation_id", [...lastReadByConv.keys()])
       .neq("author_id", user.id)

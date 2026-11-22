@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import { toActiveLocale } from "@/lib/i18n/config";
 import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
@@ -17,21 +16,24 @@ function asAny(supabase: SupabaseClient): any {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
- * Owner decision A (2026-11-22, decision 0033) — "write about this need".
+ * Owner decision A (2026-11-22, decision 0033; option 1 of the same day:
+ * hidden IN THE THREADS, at the server) — "write about this need".
  *
  * A provider organization's manager (agency, subcontractor, brigade) writes to
  * the client about an OPEN need the organization may already see on its board,
- * without the client being named. The ONE gate is the database's own
- * open_need_message_party_v1 (20261122160000), which calls the board's gate
- * (list_open_demand_for_team_offer_v1) for this organization: zero rows for
- * anyone else. Only after it answered is the owner's profile id used — for the
- * server's participant insert, never sent to the browser.
+ * without the client being named. The database does all of it in ONE call,
+ * open_need_conversation_open_v1 (20261122160000): the board's own gate
+ * (list_open_demand_for_team_offer_v1 for this organization), then the
+ * caller's existing open-need thread for that need or a new one with both
+ * participants, stamped 'open_need', under the same new-conversation cap. It
+ * returns ONLY the thread id: the client's profile id never reaches this
+ * server, let alone the browser. Never a thread the two already share — that
+ * would link the anonymous need to a known person.
  *
- * The thread is the existing conversation system, stamped 'open_need': the
- * client is shown to the provider as "Client XXXXXX" until the client chooses
- * to show its name (disclose_open_need_identity_v1). A pair that already
- * shares a thread reuses it (the one dedupe rule): they already know each
- * other. No first message is written for the provider.
+ * In the thread the provider is "blinded" until the client chooses to show its
+ * name (disclose_open_need_identity_v1): RLS gives it neither the client's
+ * participant row nor the client's author id. No first message is written for
+ * the provider.
  */
 export async function openNeedConversationAction(formData: FormData): Promise<void> {
   await refuseStaleWorkspace(displayedWorkspaceOf(formData));
@@ -53,24 +55,18 @@ async function resolveOpenNeedThread(orgId: string, requestId: string, locale: s
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: rows, error } = await asAny(supabase).rpc("open_need_message_party_v1", {
+  const { data, error } = await asAny(supabase).rpc("open_need_conversation_open_v1", {
     p_request_id: requestId,
     p_org_id: orgId,
   });
-  if (error) return null;
-  const party = ((rows ?? []) as { owner_profile_id: string | null; subject: string | null }[])[0];
-  const owner = party?.owner_profile_id ?? null;
-  if (!owner || owner === user.id) return null;
-
-  // Passed only AFTER the gate above held.
-  const result = await getOrCreateDirectConversation(
-    owner,
-    locale,
-    party?.subject?.trim() || null,
-    "allowed_open_need",
-    { type: "open_need", id: requestId },
-  );
-  return result.ok ? `/${locale}/dashboard/communication/${result.data.id}` : null;
+  if (error) {
+    console.warn("[open-need] open refused:", (error as { code?: string }).code ?? "unknown");
+    return null;
+  }
+  const conversationId = typeof data === "string" && UUID.test(data) ? data : null;
+  if (!conversationId) return null;
+  revalidatePath(`/${locale}/dashboard/communication`);
+  return `/${locale}/dashboard/communication/${conversationId}`;
 }
 
 /**

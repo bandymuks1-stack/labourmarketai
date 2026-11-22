@@ -62,13 +62,6 @@ const GATED_CALLERS: ReadonlyArray<
     "allowed_accepted_service_request",
     "accepted_service_request",
   ],
-  // Owner decision A (2026-11-22): a provider writes about an open need its
-  // board shows; open_need_message_party_v1 answered before the open.
-  [
-    "lib/company/open-need-conversation.ts",
-    "allowed_open_need",
-    "open_need",
-  ],
 ];
 
 /** The single generic caller — no grant literal, no sourceHint; permission is

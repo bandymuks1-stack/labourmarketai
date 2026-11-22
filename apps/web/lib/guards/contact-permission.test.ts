@@ -79,10 +79,6 @@ describe("§8.1 permission states — enumerated, no silent drift", () => {
         "allowed_marketplace_enquiry",
         "allowed_agency_connection",
         "allowed_team_demand_offer",
-        // allowed_open_need added 2026-11-22 (owner decision A: a provider's
-        // manager writes about an open need its board shows; gated by
-        // open_need_message_party_v1 in lib/company/open-need-conversation.ts).
-        "allowed_open_need",
         "allowed_team",
         "no_permission",
       ].sort(),
@@ -210,9 +206,6 @@ describe("no contact without permission — the create path is gated", () => {
       "lib/communication/contact-interested-worker.ts",
       "lib/communication/open-conversation-action.ts",
       "lib/communication/request-worker-conversation.ts",
-      // Owner decision A (2026-11-22) — open-need grant, the gated
-      // open_need_message_party_v1 answered before the conversation opens.
-      "lib/company/open-need-conversation.ts",
       // Brigade offer negotiation (2026-10-11) — team-demand-offer grant (the
       // caller's side proven by their own authorized read, offer live).
       "lib/company/team-offer-conversation.ts",

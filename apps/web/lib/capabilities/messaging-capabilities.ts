@@ -151,7 +151,7 @@ async function readConversation(caller: CapabilityCaller, conversationId: string
 
 async function lastMessageId(caller: CapabilityCaller, conversationId: string): Promise<string> {
   const { data } = await asAny(caller.supabase)
-    .from("conversation_messages")
+    .from("conversation_messages_visible_v1") // masks a hidden open-need client (20261122160000)
     .select("id")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: false })
@@ -175,7 +175,7 @@ const conversationGet: CapabilityDescriptor = {
     const conv = await readConversation(caller, conversationId);
     if (!conv) return { ok: false, code: "not_found", message: "No such conversation for this account." };
     const { data, error } = await asAny(caller.supabase)
-      .from("conversation_messages")
+      .from("conversation_messages_visible_v1") // masks a hidden open-need client (20261122160000)
       .select("id, author_id, body, created_at, original_language")
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: false })

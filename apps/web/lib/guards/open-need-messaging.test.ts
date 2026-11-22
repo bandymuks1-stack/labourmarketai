@@ -42,11 +42,45 @@ describe("migration — one channel, the client hidden until it discloses", () =
     );
   });
 
-  it("the provider door calls the board's gate rather than copying it, and returns no name", () => {
-    const door = fnBody(UP, "open_need_message_party_v1");
+  it("the provider door calls the board's gate, opens the thread in the database and returns only its id", () => {
+    const door = fnBody(UP, "open_need_conversation_open_v1");
     expect(door).toMatch(/from public\.list_open_demand_for_team_offer_v1\(p_org_id\)/);
-    expect(door).toMatch(/returns table \(owner_profile_id uuid, subject text\)/);
-    expect(door).not.toMatch(/full_name|display_name|legal_name|email|phone/);
+    expect(door).toMatch(/returns uuid/);
+    expect(door).toMatch(/c\.source_type = 'open_need' and c\.source_id = p_request_id/);
+    expect(door).toMatch(/>= 20 then\s+raise exception 'rate limited'/);
+    expect(door).toMatch(/return v_id;/);
+    expect(door).not.toMatch(/return v_owner|return query/);
+    expect(UP).not.toMatch(/open_need_message_party_v1/);
+  });
+
+  it("the policies ask about the CALLER only — no function takes a candidate profile id", () => {
+    const blinded = fnBody(UP, "open_need_viewer_blinded_v1");
+    expect(blinded).toMatch(/open_need_viewer_blinded_v1\(p_conversation_id uuid\)/);
+    expect(blinded).toMatch(/me\.profile_id = auth\.uid\(\)/);
+    expect(UP).toMatch(
+      /create policy conversation_participants_select[\s\S]*?and not public\.open_need_viewer_blinded_v1\(conversation_id\)\)/,
+    );
+    expect(UP).toMatch(
+      /create policy conversation_messages_select[\s\S]*?author_id = auth\.uid\(\) or not public\.open_need_viewer_blinded_v1\(conversation_id\)/,
+    );
+  });
+
+  it("the messages view masks the other side's author for a blinded caller and keeps the participant gate", () => {
+    const v = UP.slice(UP.indexOf("create or replace view public.conversation_messages_visible_v1"));
+    expect(v).toMatch(/with \(security_barrier = true\)/);
+    expect(v).toMatch(/then md5\('open_need_counterpart:' \|\| m\.conversation_id::text\)::uuid/);
+    expect(v).toMatch(/where public\.is_conversation_participant\(m\.conversation_id\)\s+or public\.is_admin\(\)/);
+    expect(UP).toMatch(/grant select on public\.conversation_messages_visible_v1 to authenticated/);
+  });
+
+  it("an undisclosed client cannot attach a file (its id would be in the path)", () => {
+    expect(UP).toMatch(/and not public\.open_need_caller_hidden_v1\(public\.conversation_id_of_path_v1\(name\)\)/);
+    expect(UP).toMatch(/before insert on public\.conversation_message_attachments/);
+  });
+
+  it("the recipients of a blinded sender's message are read by the server only", () => {
+    expect(UP).toMatch(/revoke all on function public\.conversation_live_recipients_v1\(uuid, uuid\) from public, anon, authenticated/);
+    expect(UP).toMatch(/grant execute on function public\.conversation_live_recipients_v1\(uuid, uuid\) to service_role/);
   });
 
   it("only the need's owner, as a participant, may disclose — and nobody writes the table directly", () => {
@@ -77,25 +111,39 @@ describe("migration — one channel, the client hidden until it discloses", () =
   it("is RED: no approval marker; the rollback refuses while a hidden client could be revealed", () => {
     expect(repo(`supabase/migrations/${N}.sql`)).not.toMatch(/@human-gate-approved/);
     expect(DOWN).toMatch(/if exists \(select 1 from public\.conversations where source_type = 'open_need'\) then\s+raise exception/);
-    expect(DOWN).toMatch(/drop function if exists public\.open_need_message_party_v1\(uuid, uuid\)/);
+    expect(DOWN).toMatch(/drop function if exists public\.open_need_conversation_open_v1\(uuid, uuid\)/);
+    expect(DOWN).toMatch(/drop view if exists public\.conversation_messages_visible_v1/);
     expect(DOWN).toMatch(/drop function if exists public\.disclose_open_need_identity_v1\(uuid\)/);
   });
 });
 
 describe("the provider's door and the client's control", () => {
-  it("the action asks the database gate first and stamps 'open_need' only after it answered", () => {
-    const gate = ACTION.indexOf('rpc("open_need_message_party_v1"');
-    const refuse = ACTION.indexOf("if (!owner || owner === user.id) return null");
-    const stamp = ACTION.indexOf('{ type: "open_need", id: requestId }');
-    expect(gate).toBeGreaterThan(-1);
-    expect(refuse).toBeGreaterThan(gate);
-    expect(stamp).toBeGreaterThan(refuse);
-    expect(ACTION).toMatch(/"allowed_open_need"/);
-    expect(ACTION).not.toMatch(/createAdminClient|service_role/);
+  it("the action makes ONE database call and handles only a thread id", () => {
+    expect(ACTION).toMatch(/rpc\("open_need_conversation_open_v1"/);
+    expect(ACTION).not.toMatch(/getOrCreateDirectConversation|owner_profile_id|createAdminClient|service_role/);
+    expect(ACTION).toMatch(/return `\/\$\{locale\}\/dashboard\/communication\/\$\{conversationId\}`/);
   });
 
-  it("the owner profile id never reaches the browser — only a route", () => {
-    expect(ACTION).toMatch(/return result\.ok \? `\/\$\{locale\}\/dashboard\/communication\/\$\{result\.data\.id\}` : null/);
+  it("every read of a thread's messages for display goes through the masking view", () => {
+    for (const rel of [
+      "app/[locale]/dashboard/communication/[conversationId]/page.tsx",
+      "lib/communication/inbox-preview.ts",
+      "lib/communication/unread.ts",
+      "lib/capabilities/messaging-capabilities.ts",
+    ]) {
+      expect(read(rel), rel).toMatch(/from\("conversation_messages_visible_v1"\)/);
+    }
+  });
+
+  it("a blinded sender's notification recipients come from the server-only read", () => {
+    const core = read("lib/communication/communication-core.ts");
+    expect(core).toMatch(/rpc\("open_need_viewer_blinded_v1"/);
+    expect(core).toMatch(/createAdminClient\(\)\)\.rpc\("conversation_live_recipients_v1"/);
+  });
+
+  it("the composer offers no attachment to the unnamed client", () => {
+    expect(THREAD).toMatch(/attachmentsAllowed=\{!\(isOpenNeedClient && openNeedDisclosed === false\)\}/);
+    expect(read("components/app/communication-composer.tsx")).toMatch(/\{attachmentsAllowed \? \(<>/);
   });
 
   it("the client's control renders only for the need's owner (the one participant the context routes)", () => {

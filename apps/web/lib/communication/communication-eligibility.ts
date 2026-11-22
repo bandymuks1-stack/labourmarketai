@@ -103,13 +103,6 @@ export function isShortlistedForContact(status: string | null | undefined): bool
  *     offer. Verified server-side by lib/company/team-offer-conversation.ts,
  *     passed as a grant; never resolved from generic facts. See
  *     evaluateTeamOfferContact below for the pure decision.
- *   - allowed_open_need — owner decision A (2026-11-22, decision 0033): a
- *     provider organization's manager writes to the client about an OPEN need
- *     that organization may already see on its board. Verified server-side by
- *     lib/company/open-need-conversation.ts through the gated
- *     open_need_message_party_v1 (20261122160000), passed as a grant; the
- *     thread is stamped 'open_need' so the client stays unnamed to the
- *     provider until the client discloses. Never resolved from generic facts.
  *   - allowed_team — the two profiles are on the SAME team: both hold an ACTIVE
  *     membership of, or an ACTIVE engagement in, one organization (owner P0
  *     2026-10-01: team member ↔ team member, and the people on a project the
@@ -134,7 +127,6 @@ export type ContactPermissionState =
   | "allowed_marketplace_enquiry"
   | "allowed_agency_connection"
   | "allowed_team_demand_offer"
-  | "allowed_open_need"
   | "allowed_team"
   | "allowed_admin"
   | "no_permission";
@@ -150,7 +142,6 @@ export const CONTACT_PERMISSION_STATES: readonly ContactPermissionState[] = [
   "allowed_marketplace_enquiry",
   "allowed_agency_connection",
   "allowed_team_demand_offer",
-  "allowed_open_need",
   "allowed_team",
   "allowed_admin",
   "no_permission",

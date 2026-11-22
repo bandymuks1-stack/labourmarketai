@@ -70,6 +70,7 @@ export function CommunicationComposer({
   locale,
   teamOfferId = null,
   defaultWriteLanguage,
+  attachmentsAllowed = true,
 }: {
   conversationId: string;
   locale: string;
@@ -80,6 +81,9 @@ export function CommunicationComposer({
   /** The offer this thread was opened from (party-checked by the page); each
    *  message sent here is labelled with it, the database guard deciding. */
   teamOfferId?: string | null;
+  /** False while this person is the unnamed client of an open-need thread:
+   *  a file's storage path would carry their id (the database refuses it). */
+  attachmentsAllowed?: boolean;
 }) {
   const t = useTranslations("communication");
   const router = useRouter();
@@ -444,6 +448,7 @@ export function CommunicationComposer({
         <div className="flex items-center gap-3">
           {/* Real file input: images (incl. mobile camera/photo picker via
               image/*) + PDF/TXT. Hidden input, visible labelled button. */}
+          {attachmentsAllowed ? (<>
           <input
             ref={fileInputRef}
             type="file"
@@ -463,6 +468,7 @@ export function CommunicationComposer({
             <Paperclip className="h-4 w-4" aria-hidden />
             {t("composer.attachments.addButton")}
           </button>
+          </>) : null}
           <span className="font-mono text-meta text-text-muted">
             {t("composer.charCount", { n: body.length, max: 10000 })}
           </span>

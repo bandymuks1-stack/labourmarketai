@@ -5,42 +5,61 @@
 -- migration by name.
 --
 -- WHY (owner decision A, 2026-11-22 — messaging about an open need, decision
--- 0033 direct counterparty): an agency, subcontractor or brigade may write to
--- the client about an OPEN NEED without the client's identity being revealed.
--- The client answers in the same in-app conversation; its identity stays
--- hidden from the provider until the client itself chooses to show it.
+-- 0033 direct counterparty; owner option 1 of 2026-11-22: hide it IN THE
+-- THREADS, at the server): an agency, subcontractor or brigade may write to the
+-- client about an OPEN NEED without the client's identity being revealed. The
+-- client answers in the same in-app conversation; its identity stays hidden
+-- from the provider until the client itself chooses to show it.
+--
+-- THE RULE: hiding a name on screen is not enough. Any signed-in user can map a
+-- profile id to a company (companies.profile_id is a discovery column), so the
+-- provider must not RECEIVE the client's profile id from any read — not from
+-- the door, not from participant rows, not from message authors, not from
+-- attachment paths.
+--
+-- ONE QUESTION, ABOUT THE CALLER ONLY: open_need_viewer_blinded_v1(conversation)
+-- is true when the caller is a participant of an UNDISCLOSED 'open_need' thread
+-- and is NOT the need's owner. It never takes a candidate profile id, so it
+-- cannot be used as an oracle ("is this profile the client?").
 --
 -- WHAT — the existing conversation system, no second channel:
---   1. conversations.source_type gains ONE member, 'open_need' (the thread is
---      about customer_requests.id = source_id). The CHECK is recreated with the
---      four existing members unchanged.
---   2. open_need_identity_disclosures — one row per thread when the client has
---      chosen to show its name. Participants may read it; nobody may write it
---      except through disclose_open_need_identity_v1.
---   3. open_need_message_party_v1(request, org) — the provider's door. Answers
---      only when the caller manages (or owns) that team / company / agency AND
---      the need is one that organization may already see on its board
---      (list_open_demand_for_team_offer_v1, the SAME gate, called — not
---      copied). Returns the need owner's profile id (for the server's
---      participant insert) and a neutral subject (the need's role). No name,
---      no company.
---   4. disclose_open_need_identity_v1(conversation) — only the need's owner,
---      as a participant of an 'open_need' thread about their own need.
---   5. conversation_counterpart_identities — in an 'open_need' thread the
---      need owner is named 'Client ' + six characters of the need id until a
---      disclosure row exists. Every other branch is byte-for-byte the
---      20261018160000 body.
---   6. conversation_source_context — one more lateral branch: 'open_need' →
---      the need's role/title; route hint 'company_needs' for the need owner
---      only, null for the provider. Every other branch unchanged.
---   7. list_open_demand_for_team_offer_v1 — company_name is returned as NULL
---      (same signature): the board no longer names the client. Every other
---      column and every gate is unchanged.
+--   1. conversations.source_type gains ONE member, 'open_need' (source_id =
+--      customer_requests.id). The CHECK is recreated with the four others.
+--   2. open_need_identity_disclosures — one row per thread once the client has
+--      chosen to show its name. Participants read it; only function 5 writes.
+--   3. open_need_viewer_blinded_v1 / open_need_caller_hidden_v1 — the two
+--      caller-only questions the policies below ask.
+--   4. open_need_conversation_open_v1(request, org) — the provider's door. The
+--      board's own gate (list_open_demand_for_team_offer_v1, called) must hold;
+--      the database then finds the caller's existing open-need thread for that
+--      need or creates one (both participants, stamped 'open_need', the same
+--      24 h / 20 cap as every new conversation) and returns ONLY its id. Never
+--      a thread the two already share (that would link the need to a person).
+--   5. disclose_open_need_identity_v1(conversation) — only the need's owner.
+--   6. RLS, narrowed (never widened):
+--      conversation_participants_select — a blinded caller sees only its own
+--        row (the client's row — profile id, read receipt — stays out);
+--      conversation_messages_select — a blinded caller reads only its OWN
+--        messages from the table;
+--      conversation_messages_visible_v1 — the ONE read of a thread's messages
+--        for the app: every column, the same participant gate, and for a
+--        blinded caller the other side's author_id replaced by a stable
+--        per-thread pseudonymous id (mine / theirs and unread still work; the
+--        real author stays stored for audit);
+--      attachments — an undisclosed client cannot upload (storage path and
+--        uploader_id would carry its id): storage insert policy + a trigger.
+--   7. conversation_live_recipients_v1 — service_role only: the live
+--      recipients of a sender's message, so the server can notify a hidden
+--      client without the provider's session ever reading it.
+--   8. conversation_counterpart_identities — the need owner is 'Client ' + six
+--      characters of the need id until disclosure (one new first branch).
+--   9. conversation_source_context — one 'open_need' branch.
+--  10. list_open_demand_for_team_offer_v1 — company_name is NULL.
 --
--- NOT CHANGED: every RLS policy on conversations / participants / messages /
--- profiles / customer_requests; team_demand_offers; offer_team_to_demand_v1;
--- team_offer_thread_party_v1 (a thread opened from a LIVE offer still names
--- both sides — the client engaged by receiving the offer; separate decision).
+-- NOT CHANGED: conversations policies; participants/messages INSERT and UPDATE
+-- policies; profiles / customer_requests / companies; team_demand_offers;
+-- team_offer_thread_party_v1 (a thread opened from a LIVE team offer still
+-- returns the counterpart to the supplier — a separate owner decision).
 --
 -- Rollback: supabase/rollbacks/20261122160000_open_need_messaging_v1.down.sql
 -- Apply via Supabase MCP apply_migration only.
@@ -84,16 +103,64 @@ begin
   on conflict (schema_name, table_name, column_name) do nothing;
 end $$;
 
--- 3) The provider's door.
-create or replace function public.open_need_message_party_v1(p_request_id uuid, p_org_id uuid)
-returns table (owner_profile_id uuid, subject text)
-language plpgsql
+-- 3) The two caller-only questions.
+create or replace function public.open_need_viewer_blinded_v1(p_conversation_id uuid)
+returns boolean
+language sql
 stable
 security definer
 set search_path = public, pg_temp
 as $$
+  select exists (
+    select 1
+      from public.conversations c
+      join public.customer_requests cr on cr.id = c.source_id
+      join public.conversation_participants me
+        on me.conversation_id = c.id and me.profile_id = auth.uid()
+     where c.id = p_conversation_id
+       and c.source_type = 'open_need'
+       and cr.profile_id is distinct from auth.uid()
+       and not exists (select 1 from public.open_need_identity_disclosures d
+                        where d.conversation_id = c.id)
+  );
+$$;
+revoke all on function public.open_need_viewer_blinded_v1(uuid) from public, anon;
+grant execute on function public.open_need_viewer_blinded_v1(uuid) to authenticated;
+
+create or replace function public.open_need_caller_hidden_v1(p_conversation_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select exists (
+    select 1
+      from public.conversations c
+      join public.customer_requests cr on cr.id = c.source_id
+     where c.id = p_conversation_id
+       and c.source_type = 'open_need'
+       and cr.profile_id = auth.uid()
+       and not exists (select 1 from public.open_need_identity_disclosures d
+                        where d.conversation_id = c.id)
+  );
+$$;
+revoke all on function public.open_need_caller_hidden_v1(uuid) from public, anon;
+grant execute on function public.open_need_caller_hidden_v1(uuid) to authenticated;
+
+-- 4) The provider's door: the database opens the thread and returns its id only.
+create or replace function public.open_need_conversation_open_v1(p_request_id uuid, p_org_id uuid)
+returns uuid
+language plpgsql
+volatile
+security definer
+set search_path = public, pg_temp
+as $$
 declare
-  uid uuid := auth.uid();
+  uid     uuid := auth.uid();
+  v_owner uuid;
+  v_title text;
+  v_id    uuid;
 begin
   if uid is null then
     raise exception 'Not authenticated' using errcode = '42501';
@@ -104,20 +171,49 @@ begin
     select 1 from public.list_open_demand_for_team_offer_v1(p_org_id) b
      where b.request_id = p_request_id
   ) then
-    return;
+    raise exception 'not allowed' using errcode = '42501';
   end if;
-  return query
   select cr.profile_id,
          left(coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')), 120)
+    into v_owner, v_title
     from public.customer_requests cr
-   where cr.id = p_request_id
-     and cr.profile_id is not null
-     and cr.profile_id <> uid;
-end $$;
-revoke all on function public.open_need_message_party_v1(uuid, uuid) from public, anon;
-grant execute on function public.open_need_message_party_v1(uuid, uuid) to authenticated;
+   where cr.id = p_request_id;
+  if v_owner is null or v_owner = uid then
+    raise exception 'not allowed' using errcode = '42501';
+  end if;
 
--- 4) The client shows its name in one thread.
+  -- The caller's own open-need thread about THIS need, if any.
+  select c.id into v_id
+    from public.conversations c
+    join public.conversation_participants me
+      on me.conversation_id = c.id and me.profile_id = uid and me.revoked_at is null
+   where c.source_type = 'open_need' and c.source_id = p_request_id
+   order by c.created_at
+   limit 1;
+  if v_id is not null then
+    return v_id;
+  end if;
+
+  -- The same abuse cap as every new conversation (lib/communication/rate-caps.ts).
+  if (select count(*) from public.conversations
+       where created_by = uid and created_at >= now() - interval '24 hours') >= 20 then
+    raise exception 'rate limited' using errcode = 'P0001';
+  end if;
+
+  insert into public.conversations (subject, kind, created_by, source_type, source_id)
+  values (v_title, 'direct', uid, 'open_need', p_request_id)
+  returning id into v_id;
+  insert into public.conversation_participants (conversation_id, profile_id, added_by)
+  values (v_id, uid, uid), (v_id, v_owner, uid);
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (uid, 'open_need_conversation_opened_v1', 'conversations', v_id,
+          jsonb_build_object('request_id', p_request_id, 'org_id', p_org_id));
+  return v_id;
+end $$;
+revoke all on function public.open_need_conversation_open_v1(uuid, uuid) from public, anon;
+grant execute on function public.open_need_conversation_open_v1(uuid, uuid) to authenticated;
+
+-- 5) The client shows its name in one thread.
 create or replace function public.disclose_open_need_identity_v1(p_conversation_id uuid)
 returns boolean
 language plpgsql
@@ -158,7 +254,7 @@ end $$;
 revoke all on function public.disclose_open_need_identity_v1(uuid) from public, anon;
 grant execute on function public.disclose_open_need_identity_v1(uuid) to authenticated;
 
--- 5) Conversation names: the client is hidden in an open-need thread until it
+-- 8) Conversation names: the client is hidden in an open-need thread until it
 --    discloses. Every other branch is the 20261018160000 body unchanged.
 create or replace function public.conversation_counterpart_identities(p_conversation_ids uuid[])
 returns table (conversation_id uuid, display_name text)
@@ -226,7 +322,7 @@ revoke all on function public.conversation_counterpart_identities(uuid[]) from p
 revoke all on function public.conversation_counterpart_identities(uuid[]) from anon;
 grant execute on function public.conversation_counterpart_identities(uuid[]) to authenticated;
 
--- 6) Source context: one more branch for 'open_need' (placed right after the
+-- 9) Source context: one more branch for 'open_need' (placed right after the
 --    other customer_requests branch; every other branch unchanged).
 create or replace function public.conversation_source_context(p_conversation_ids uuid[])
 returns table (
@@ -286,7 +382,7 @@ revoke all on function public.conversation_source_context(uuid[]) from public;
 revoke all on function public.conversation_source_context(uuid[]) from anon;
 grant execute on function public.conversation_source_context(uuid[]) to authenticated;
 
--- 7) The board no longer names the client (same signature; company_name NULL).
+-- 10) The board no longer names the client (same signature; company_name NULL).
 CREATE OR REPLACE FUNCTION public.list_open_demand_for_team_offer_v1(p_team_org_id uuid)
  RETURNS TABLE(request_id uuid, role_text text, country text, team_size integer, start_period text, company_name text, created_at timestamp with time zone, open_offer_id uuid, open_offer_status text)
  LANGUAGE plpgsql
@@ -348,5 +444,126 @@ end;
 $function$;
 revoke all on function public.list_open_demand_for_team_offer_v1(uuid) from public, anon;
 grant execute on function public.list_open_demand_for_team_offer_v1(uuid) to authenticated;
+
+-- 6) RLS, narrowed: a blinded caller never reads the other side's id.
+drop policy if exists conversation_participants_select on public.conversation_participants;
+create policy conversation_participants_select on public.conversation_participants for select
+  using (
+    profile_id = auth.uid()
+    or (public.is_conversation_participant(conversation_id)
+        and not public.open_need_viewer_blinded_v1(conversation_id))
+    or public.is_admin()
+  );
+
+drop policy if exists conversation_messages_select on public.conversation_messages;
+create policy conversation_messages_select on public.conversation_messages for select
+  using (
+    (public.is_conversation_participant(conversation_id)
+     and (author_id = auth.uid() or not public.open_need_viewer_blinded_v1(conversation_id)))
+    or public.is_admin()
+  );
+
+-- The app's one read of a thread's messages. Owner-privileged (it re-applies
+-- the participant gate itself), security_barrier so no caller predicate runs
+-- before the gate. For a blinded caller the other side's author is a stable
+-- per-thread pseudonymous id: the real author stays in the table for audit.
+create or replace view public.conversation_messages_visible_v1
+  with (security_barrier = true) as
+select m.id,
+       m.conversation_id,
+       case when m.author_id is distinct from auth.uid()
+                 and public.open_need_viewer_blinded_v1(m.conversation_id)
+            then md5('open_need_counterpart:' || m.conversation_id::text)::uuid
+            else m.author_id
+       end as author_id,
+       m.body,
+       m.created_at,
+       m.is_instruction,
+       m.original_language,
+       m.target_language,
+       m.translated_text,
+       m.translation_status,
+       m.is_clarification_request,
+       m.project_id,
+       m.team_offer_id
+  from public.conversation_messages m
+ where public.is_conversation_participant(m.conversation_id)
+    or public.is_admin();
+revoke all on public.conversation_messages_visible_v1 from public, anon, authenticated;
+grant select on public.conversation_messages_visible_v1 to authenticated;
+
+-- Attachments: an undisclosed client cannot upload (the storage path and
+-- uploader_id would carry its profile id). After disclosure it can.
+create or replace function public.conversation_id_of_path_v1(p_object_name text)
+returns uuid
+language plpgsql
+immutable
+set search_path = public, pg_temp
+as $$
+begin
+  return ((storage.foldername(p_object_name))[1])::uuid;
+exception when others then
+  return null;
+end $$;
+revoke all on function public.conversation_id_of_path_v1(text) from public, anon;
+grant execute on function public.conversation_id_of_path_v1(text) to authenticated;
+
+drop policy if exists "conversation-attachments participant insert" on storage.objects;
+create policy "conversation-attachments participant insert"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'conversation-attachments'
+    and auth.uid() is not null
+    and (storage.foldername(name))[2] = auth.uid()::text
+    and public.is_conversation_participant_path(name)
+    and not public.open_need_caller_hidden_v1(public.conversation_id_of_path_v1(name))
+  );
+
+create or replace function public.conversation_attachment_hidden_uploader_guard_v1()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if exists (
+    select 1
+      from public.conversations c
+      join public.customer_requests cr on cr.id = c.source_id
+     where c.id = new.conversation_id
+       and c.source_type = 'open_need'
+       and cr.profile_id = new.uploader_id
+       and not exists (select 1 from public.open_need_identity_disclosures d
+                        where d.conversation_id = c.id)
+  ) then
+    raise exception 'attachments wait until the name is shown' using errcode = '42501';
+  end if;
+  return new;
+end $$;
+revoke all on function public.conversation_attachment_hidden_uploader_guard_v1() from public, anon, authenticated;
+drop trigger if exists conversation_attachment_hidden_uploader_guard_v1 on public.conversation_message_attachments;
+create trigger conversation_attachment_hidden_uploader_guard_v1
+  before insert on public.conversation_message_attachments
+  for each row execute function public.conversation_attachment_hidden_uploader_guard_v1();
+
+-- 7) Server-only: the live recipients of a sender's message (notifications).
+create or replace function public.conversation_live_recipients_v1(p_conversation_id uuid, p_author_id uuid)
+returns setof uuid
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select cp.profile_id
+    from public.conversation_participants cp
+   where cp.conversation_id = p_conversation_id
+     and cp.revoked_at is null
+     and cp.profile_id <> p_author_id
+     and exists (select 1 from public.conversation_participants a
+                  where a.conversation_id = p_conversation_id
+                    and a.profile_id = p_author_id and a.revoked_at is null);
+$$;
+revoke all on function public.conversation_live_recipients_v1(uuid, uuid) from public, anon, authenticated;
+grant execute on function public.conversation_live_recipients_v1(uuid, uuid) to service_role;
 
 commit;

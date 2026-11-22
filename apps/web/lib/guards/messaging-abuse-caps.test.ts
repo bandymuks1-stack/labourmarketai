@@ -223,9 +223,6 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     // read proved (organizations.name / the receiver-gated listing), never a
     // form field; the grant follows evaluateTeamOfferContact.
     "lib/company/team-offer-conversation.ts",
-    // Owner decision A (2026-11-22) — the subject is the need's role, read
-    // through the gated open_need_message_party_v1, never a form field.
-    "lib/company/open-need-conversation.ts",
   ].sort();
 
   it("direct-subject writers are ONLY the gated fact-verified actions (demand / offering title)", () => {

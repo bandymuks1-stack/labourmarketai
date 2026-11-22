@@ -65,7 +65,6 @@ const STAMPERS: ReadonlyArray<readonly [string, string]> = [
   ["lib/communication/contact-interested-worker.ts", "demand_interest"],
   ["lib/opportunities/contact-employer.ts", "demand_interest"],
   ["lib/booking/booking-conversation.ts", "accepted_booking"],
-  ["lib/company/open-need-conversation.ts", "open_need"],
 ];
 
 /** All non-test source files under the app-side trees. */
@@ -212,8 +211,6 @@ describe("§8-2 exact stamping — each caller passes its own type, no other", (
         src.indexOf('!== "allowed"'),
         src.indexOf('status !== "accepted"'),
         src.indexOf('interestStatus === "withdrawn"'),
-        // open need: the database gate's answer (zero rows → no owner → return)
-        src.indexOf("if (!owner || owner === user.id) return null"),
       );
       const stamp = src.indexOf(`type: "${type}"`);
       expect(gate, `${rel} gate`).toBeGreaterThan(-1);

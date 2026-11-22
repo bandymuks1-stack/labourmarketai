@@ -324,6 +324,32 @@ export async function isLiveParticipant(
   }
 }
 
+/** Is the sender blinded in this thread (an undisclosed open-need thread it
+ *  does not own)? Asked of the database about the caller only. null = could
+ *  not be read (the caller then notifies nobody — fail closed). */
+async function senderIsBlinded(supabase: SupabaseClient, conversationId: string): Promise<boolean | null> {
+  const { data, error } = await asAny(supabase).rpc("open_need_viewer_blinded_v1", {
+    p_conversation_id: conversationId,
+  });
+  if (error) {
+    const code = (error as { code?: string }).code;
+    // Before the migration the function does not exist: no thread is blinded.
+    if (code === "42883" || code === "PGRST202") return false;
+    return null;
+  }
+  return data === true;
+}
+
+/** The live recipients of the author's message, read by the server only. */
+async function liveRecipientsAsServer(conversationId: string, authorId: string): Promise<string[] | null> {
+  const { data, error } = await asAny(createAdminClient()).rpc("conversation_live_recipients_v1", {
+    p_conversation_id: conversationId,
+    p_author_id: authorId,
+  });
+  if (error || !Array.isArray(data)) return null;
+  return (data as unknown[]).filter((v): v is string => typeof v === "string" && v.length > 0);
+}
+
 /**
  * Read the thread's participants under the SENDER's own session
  * (`conversation_participants_select` admits co-participants; service_role
@@ -337,6 +363,32 @@ async function notifyOtherParticipants(
   conversationId: string,
 ): Promise<void> {
   try {
+    // Open-need thread (20261122160000): a blinded sender (the provider) is
+    // not given the hidden client's participant row, so the recipients come
+    // from the server-only conversation_live_recipients_v1 (service_role; it
+    // re-checks the author is a live participant). The ids stay on the server.
+    const blinded = await senderIsBlinded(supabase, conversationId);
+    if (blinded === null) {
+      console.warn("[communication] notify: thread state unreadable");
+      return;
+    }
+    if (blinded) {
+      const recipients = await liveRecipientsAsServer(conversationId, authorId);
+      if (recipients === null) {
+        console.warn("[communication] notify: open-need recipients unreadable");
+        return;
+      }
+      await emitMessageReceivedNotifications({
+        conversationId,
+        authorProfileId: authorId,
+        participantProfileIds: recipients,
+        // Asked again right before each channel, through the same server-only
+        // read (the author must still be a live participant). Fail closed.
+        isStillParticipant: async (profileId) =>
+          ((await liveRecipientsAsServer(conversationId, authorId)) ?? []).includes(profileId),
+      });
+      return;
+    }
     const { data, error } = await asAny(supabase)
       .from("conversation_participants")
       .select("profile_id, revoked_at")

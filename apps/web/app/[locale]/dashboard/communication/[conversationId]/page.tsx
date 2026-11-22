@@ -132,8 +132,11 @@ export default async function ConversationDetailPage({
 
   // Table is `conversation_messages`, NOT `messages` — see 0021's header
   // for why (legacy public.messages chain pre-exists in prod).
+  // Read through conversation_messages_visible_v1 (20261122160000): the same
+  // participant gate; in an undisclosed open-need thread the provider gets
+  // the client's messages with a pseudonymous author, never its profile id.
   const messagesRes = await asAny(supabase)
-    .from("conversation_messages")
+    .from("conversation_messages_visible_v1")
     // select("*") instead of an explicit column list so the optional
     // original_language column (DRAFT migration 20260610190000) is picked up
     // automatically once applied, with no error while it is absent.
@@ -494,6 +497,7 @@ export default async function ConversationDetailPage({
         locale={locale}
         defaultWriteLanguage={defaultWriteLanguage}
         teamOfferId={offerContext ? (offerParam ?? null) : null}
+        attachmentsAllowed={!(isOpenNeedClient && openNeedDisclosed === false)}
       />
     </div>
   );

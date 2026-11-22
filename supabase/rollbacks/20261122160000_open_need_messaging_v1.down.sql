@@ -1,6 +1,9 @@
 -- Rollback for 20261122160000_open_need_messaging_v1
 --
--- Restores conversation_counterpart_identities (20261018160000 body),
+-- Restores the participants / messages SELECT policies (0021) and the
+-- attachments storage INSERT policy (20260712130000) to their earlier text,
+-- drops the messages view, the attachment guard and every new function,
+-- restores conversation_counterpart_identities (20261018160000 body),
 -- conversation_source_context (20260706210000 body) and
 -- list_open_demand_for_team_offer_v1 (20261028123000 body) byte for byte,
 -- drops the two new functions and the disclosure table, and narrows the
@@ -21,8 +24,41 @@ begin
   end if;
 end $$;
 
+-- The narrowed policies back to their 0021 / 20260712130000 text.
+drop policy if exists conversation_participants_select on public.conversation_participants;
+create policy conversation_participants_select on public.conversation_participants for select
+  using (
+    profile_id = auth.uid()
+    or public.is_conversation_participant(conversation_id)
+    or public.is_admin()
+  );
+
+drop policy if exists conversation_messages_select on public.conversation_messages;
+create policy conversation_messages_select on public.conversation_messages for select
+  using (
+    public.is_conversation_participant(conversation_id)
+    or public.is_admin()
+  );
+
+drop policy if exists "conversation-attachments participant insert" on storage.objects;
+create policy "conversation-attachments participant insert"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'conversation-attachments'
+    and auth.uid() is not null
+    and (storage.foldername(name))[2] = auth.uid()::text
+    and public.is_conversation_participant_path(name)
+  );
+
+drop trigger if exists conversation_attachment_hidden_uploader_guard_v1 on public.conversation_message_attachments;
+drop function if exists public.conversation_attachment_hidden_uploader_guard_v1();
+drop function if exists public.conversation_id_of_path_v1(text);
+drop view if exists public.conversation_messages_visible_v1;
+drop function if exists public.conversation_live_recipients_v1(uuid, uuid);
 drop function if exists public.disclose_open_need_identity_v1(uuid);
-drop function if exists public.open_need_message_party_v1(uuid, uuid);
+drop function if exists public.open_need_conversation_open_v1(uuid, uuid);
+drop function if exists public.open_need_viewer_blinded_v1(uuid);
+drop function if exists public.open_need_caller_hidden_v1(uuid);
 
 do $$
 begin
