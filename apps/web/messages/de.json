@@ -13087,6 +13087,7 @@
     },
     "goToRoster": "Zum Team",
     "invalidLabel": "Prüfen Sie die E-Mail-Adresse — die Einladung wurde nicht gesendet.",
+    "offerLimitLabel": "Zu viele Angebote. Bitte später erneut versuchen.",
     "deliveryHeading": "Einladungslink",
     "deliveryCreated": "Nicht per E-Mail gesendet — der E-Mail-Versand ist nicht eingerichtet. Kopieren Sie den Link und senden Sie ihn dem Kunden selbst.",
     "deliverySent": "Die Einladungs-E-Mail wurde gesendet. Sie können den Link trotzdem kopieren.",

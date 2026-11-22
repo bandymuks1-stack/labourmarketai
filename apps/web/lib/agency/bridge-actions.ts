@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { agencyBoardBurstLimited } from "@/lib/agency/board-abuse-guard";
+import { decideAgencyOffer } from "@/lib/agency/board-abuse-limits";
 import { proposalLimitOf, type ProposalLimit } from "@/lib/booking/proposal-limit";
 import { resolveCountryCode } from "@/lib/location/country-model";
 import { notifyBooking } from "@/lib/booking/booking-notify";
@@ -95,6 +97,9 @@ export type BridgeActionState =
    *  (10 waiting for an answer, 30 per 24 h). Which cap it was, so the
    *  employer is told the way out instead of a generic failure. */
   | { status: "proposal-limit"; limit: ProposalLimit }
+  /** Too many offers: in a short burst, on one need, or in 24 h (owner
+   *  decision 2026-11-22: protection against floods and fake offers). */
+  | { status: "rate-limited" }
   | { status: "error"; reason?: string };
 
 function mapErr(code: string | undefined, message: string | undefined): BridgeActionState {
@@ -308,6 +313,32 @@ export async function submitOfferAction(
   const note = validateOfferNote(String(formData.get("note") ?? ""));
   if (!isBridgeUuid(shareId) || !isBridgeUuid(workerId)) return { status: "invalid" };
   const supabase = await createClient();
+  // Abuse limits (owner decision 2026-11-22): burst per account and IP, then
+  // caps counted from the agency's own offer rows. Unread counts refuse.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "forbidden" };
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const [onNeed, today] = await Promise.all([
+    rpc(supabase)
+      .from("agency_candidate_offers")
+      .select("id", { count: "exact", head: true })
+      .eq("request_share_id", shareId)
+      .eq("status", "offered")
+      .neq("worker_id", workerId),
+    rpc(supabase)
+      .from("agency_candidate_offers")
+      .select("id", { count: "exact", head: true })
+      .eq("created_by", user.id)
+      .gte("created_at", since),
+  ]).catch(() => [null, null] as const);
+  const cap = decideAgencyOffer({
+    burstLimited: await agencyBoardBurstLimited("offer", user.id),
+    openOnNeed: onNeed && !onNeed.error && typeof onNeed.count === "number" ? onNeed.count : null,
+    last24h: today && !today.error && typeof today.count === "number" ? today.count : null,
+  });
+  if (!cap.allowed) return { status: "rate-limited" };
   const { error } = await rpc(supabase).rpc("submit_agency_candidate_offer_v1", {
     p_request_share_id: shareId,
     p_worker_id: workerId,
