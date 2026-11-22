@@ -271,6 +271,21 @@ const PEOPLE_COUNTED_IN_EVERY_LANGUAGE: readonly Intended[] = [
     reader: "value",
     now: [null, null, 30, null, null, null, null, null],
   },
+  // The need form's reader (`structureNeed`) reads number words as digits
+  // first: "eleven", "dviejų", "one", "один" count the people after them, as
+  // "11", "2", "1" already did.
+  ...headcountOf("Eleven workers needed", 11),
+  ...headcountOf("Create a programme for eleven people", 11),
+  { sentence: "Reikia dviejų santechnikų kitai savaitei Vilniuje", reader: "headcount", now: { total: 2, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Reikia dviejų santechnikų kitai savaitei Vilniuje", reader: "need", now: ["plumber", "LT", 2, null, null] },
+  { sentence: "Reikia dviejų suvirintojų Nyderlanduose kitą savaitę", reader: "headcount", now: { total: 2, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Reikia dviejų suvirintojų Nyderlanduose kitą savaitę", reader: "need", now: ["welder", "NL", 2, "this_week", null] },
+  ...headcountOf("one worker_input row per accepted slug", 1),
+  ...headcountOf("В этой организации один человек, поэтому владелец утверждает собственные запросы.", 1),
+  // "werknemers" counts people as "medewerkers" already did ("Ik heb vijf
+  // werknemers nodig" measured `unknown`).
+  { sentence: "Bekijk werknemers die bij je vraag passen.", reader: "route", now: ["need-workers", 4] },
+  { sentence: "Bekijk werknemers die bij je vraag passen.", reader: "turn", now: "new-goal" },
 ];
 
 const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED, ...PEOPLE_COUNTED_IN_EVERY_LANGUAGE];
