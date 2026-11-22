@@ -7,6 +7,8 @@ import {
   onboard,
   PASSWORD,
   publishNeed,
+  SB_SERVICE,
+  SB_URL,
   setUpCompany,
   signIn,
   signUp,
@@ -1433,5 +1435,48 @@ test.describe("popups on a short phone screen", () => {
       return el.getBoundingClientRect().bottom;
     });
     expect(bottom).toBeLessThanOrEqual(320);
+  });
+});
+
+// ── THE PEOPLE PAGE'S READINESS TABLE FOLDS AND FITS (2026-11-22) ────────────
+// Coordinator decision 2026-11-22, item 3: the readiness table repeated the
+// people listed just above (a second 600 px list at 390 px) and its third
+// column was cut. It now folds behind its title and fits the phone when open.
+test.describe("the people page's readiness signals on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("readiness-company");
+
+  test("folded behind its title; opened, no column runs past the card", async ({ browser }) => {
+    const org = await newOrganisation(browser, OWNER, "hire", `Synthetic Readiness Owner ${RUN}`, `Synthetic Readiness Co ${RUN}`);
+    // Three synthetic people on the roster (local stack only): the table shows when the roster has people.
+    for (let i = 1; i <= 3; i += 1) {
+      const res = await fetch(`${SB_URL}/auth/v1/admin/users`, {
+        method: "POST",
+        headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email(`readiness-person${i}`), password: PASSWORD, email_confirm: true }),
+      });
+      expect(res.ok, "the synthetic person is created on the local stack").toBe(true);
+    }
+    const company = sql<{ id: string }>(`select legacy_company_id as id from public.organizations where id = ${lit(org.orgId)}`)[0]!.id;
+    sqlExec(
+      `insert into public.company_workers (company_id, worker_id, status)
+       select ${lit(company)}, w.id, 'active' from public.workers w join auth.users u on u.id = w.profile_id
+       where u.email like ${lit(`phone.readiness-person%.${RUN}@local.test`)}`,
+    );
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+    await page.goto(`${BASE}/en/dashboard/company/people`);
+    const card = page.getByTestId("worker-readiness-summary");
+    await expect(card).toBeVisible({ timeout: 60_000 });
+    await expect(card.getByTestId("worker-readiness-row").first()).toBeHidden();
+    await card.getByTestId("worker-readiness-fold").locator(":scope > summary").tap();
+    await expect(card.getByTestId("worker-readiness-row").first()).toBeVisible();
+    const fit = await card.evaluate((el) => {
+      const table = el.querySelector("table")!;
+      return { table: table.getBoundingClientRect().right, card: el.getBoundingClientRect().right };
+    });
+    expect(fit.table, "the table ends inside the card on a 390 px phone").toBeLessThanOrEqual(fit.card + 1);
+    await fitsTheScreen(page, "the people page with the readiness signals open");
+    await done();
   });
 });
