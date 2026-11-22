@@ -68,7 +68,9 @@ describe("dashboard header reachability", () => {
   it("the control cluster is a shrink-0 anchor", () => {
     // Making the cluster shrink would squeeze 44px controls below the touch
     // floor instead of fixing the row.
-    expect(header).toMatch(/order-2 ml-auto flex flex-none items-center gap-1/);
+    // The gap is 2px on a phone, 4px from `md` (one-tap journal, 2026-11-22);
+    // what must hold is `flex-none`: the cluster never shrinks.
+    expect(header).toMatch(/order-2 ml-auto flex flex-none items-center gap-0\.5 md:gap-1/);
   });
 
   /**
