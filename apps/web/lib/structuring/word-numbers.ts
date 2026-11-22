@@ -76,6 +76,11 @@ const WORD_NUMBERS: Record<string, number> = {
   negen: 9, tien: 10, elf: 11, twaalf: 12, twintig: 20,
   zwei: 2, drei: 3, funf: 5, sechs: 6, sieben: 7, acht: 8, neun: 9,
   zehn: 10, zwolf: 12, zwanzig: 20,
+  // ── Polish (folded; nominative + the counted genitive) — "Potrzebuję
+  // pięciu pracowników" (owner P1 2026-11-22: number words in every locale).
+  dwa: 2, dwoch: 2, trzy: 3, trzech: 3, cztery: 4, czterech: 4,
+  piec: 5, pieciu: 5, szesc: 6, szesciu: 6, siedem: 7, siedmiu: 7,
+  osiem: 8, osmiu: 8, dziewiec: 9, dziewieciu: 9, dziesiec: 10, dziesieciu: 10,
 };
 
 /**
@@ -107,6 +112,18 @@ export interface FoundWordNumber {
   readonly raw: string;
   /** Token index in the text's word sequence (for adjacency checks). */
   readonly tokenIndex: number;
+}
+
+/**
+ * The text with every written number turned into digits ("мне нужны пять
+ * рабочих" → "мне нужны 5 рабочих"), everything else untouched. Lets a
+ * digit-only reader (the headcount) read the number words it never knew.
+ */
+export function digitizeWordNumbers(text: string, swedish: boolean = looksSwedish(text)): string {
+  return (text ?? "").replace(/\p{L}+/gu, (tok) => {
+    const n = parseWordNumber(tok, swedish);
+    return n === null ? tok : String(n);
+  });
 }
 
 /** Every written number in the text, in order, with token positions. */

@@ -13,7 +13,7 @@
 import { ALL_WORK_TYPE_SLUGS } from "@/lib/taxonomy/work-categories";
 import { isIsoCountry } from "@/lib/location/country-model";
 import { foldText } from "./normalize";
-import { parseWordNumber } from "./word-numbers";
+import { digitizeWordNumbers, parseWordNumber } from "./word-numbers";
 import { looksSwedish } from "./looks-swedish";
 
 export type StartPeriod = "flexible" | "this_week" | "urgent";
@@ -337,19 +337,19 @@ function escapeForRegex(s: string): string {
  */
 /** A number directly followed by a word for PEOPLE. */
 const PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек|рабоч\w*|сотрудник\w*|люд\w*|pracownik\w*|pracownic\w*|robotnik\w*|os[oó]b\w*|mitarbeiter\w*|arbeiter\w*|leute|werknemers?|medewerkers?|arbeiders?|mensen|personen)/i;
 // sv twin — used only for a sentence `looksSwedish` reads as Swedish.
 const SV_PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек|personer|medarbetare|arbetare|anst[äa]llda)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек|рабоч\w*|сотрудник\w*|люд\w*|pracownik\w*|pracownic\w*|robotnik\w*|os[oó]b\w*|mitarbeiter\w*|arbeiter\w*|leute|werknemers?|medewerkers?|arbeiders?|mensen|personen|personer|medarbetare|arbetare|anst[äa]llda)/i;
 
 /** Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
  *  halves of pairs whose other half was already here; DE/PL/NL the same
  *  verbs the value-statement reader already knows. */
 const DEMAND_VERB_COUNT_RE =
-  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen|suchen|zoeken|potrzebujemy|szukamy)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
+  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauche|brauchen|benotige|benotigen|suchen|zoeken|potrzebuje|potrzebujemy|szukamy)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
 // sv twin — used only for a sentence `looksSwedish` reads as Swedish.
 const SV_DEMAND_VERB_COUNT_RE =
-  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen|suchen|zoeken|potrzebujemy|szukamy|beh[öo]ver|s[öo]ker)\s+(?:about\s+|apie\s+|около\s+|cirka\s+|ungef[äa]r\s+)?(\d{1,4})\b/i;
+  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauche|brauchen|benotige|benotigen|suchen|zoeken|potrzebuje|potrzebujemy|szukamy|beh[öo]ver|s[öo]ker)\s+(?:about\s+|apie\s+|около\s+|cirka\s+|ungef[äa]r\s+)?(\d{1,4})\b/i;
 
 /**
  * Words that make the number before them a MEASURE, never a headcount:
@@ -593,14 +593,18 @@ function countFrom(m: RegExpMatchArray | null): number | null {
 
 /** A number that provably counts PEOPLE: followed by a person word or by the
  *  recognised occupation's own noun ("2 mūrininkų", "3 darbuotojų"). */
-function detectPeopleCount(hay: string, occupationNeedle: string | null, swedish: boolean): number | null {
+function detectPeopleCount(rawHay: string, occupationNeedle: string | null, swedish: boolean): number | null {
+  const hay = digitizeWordNumbers(rawHay, swedish);
   return (
     countFrom(hay.match(swedish ? SV_PEOPLE_COUNT_RE : PEOPLE_COUNT_RE)) ??
     (occupationNeedle ? countFrom(hay.match(adjacentOccupationCountRe(occupationNeedle))) : null)
   );
 }
 
-function detectTeamSize(hay: string, occupationNeedle: string | null, swedish: boolean): number | null {
+function detectTeamSize(rawHay: string, occupationNeedle: string | null, swedish: boolean): number | null {
+  // "пять рабочих", "five workers", "penkių darbuotojų" — the same counts as
+  // "5 рабочих": number words become digits first (owner P1 2026-11-22).
+  const hay = digitizeWordNumbers(rawHay, swedish);
   // A number directly tied to people/workers, OR right after a "need" verb —
   // unless what follows it is a unit (years, months, hours, money): "Need 3
   // years experience" is not three people.
