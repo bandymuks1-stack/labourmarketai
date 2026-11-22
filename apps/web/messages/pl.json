@@ -4235,9 +4235,9 @@
       "inAppBrowser": "Są Państwo we wbudowanej przeglądarce aplikacji, w której logowanie przez Google często nie działa. Proszę otworzyć tę stronę w przeglądarce telefonu (Safari lub Chrome) albo użyć poniżej e-maila i hasła."
     },
     "legalNotice": {
-      "signup": "Zakładając konto potwierdzasz, że znasz <terms>Regulamin</terms> oraz <privacy>Politykę prywatności</privacy>.",
-      "googleLogin": "Jeśli nie masz jeszcze konta, logowanie kontem społecznościowym (np. Google) je utworzy. Zakładając konto potwierdzasz, że znasz <terms>Regulamin</terms> oraz <privacy>Politykę prywatności</privacy>.",
-      "controller": "Administratorem danych Twojego konta jest UAB „Nonstop Group”. Dane są przetwarzane w celu utworzenia konta i świadczenia usługi; nie są wykorzystywane do marketingu bez Twojej odrębnej, dobrowolnej zgody."
+      "signup": "Zakładając konto, potwierdzają Państwo, że znają Państwo <terms>Regulamin</terms> oraz <privacy>Politykę prywatności</privacy>.",
+      "googleLogin": "Jeśli nie mają Państwo jeszcze konta, logowanie kontem społecznościowym (np. Google) je utworzy. Zakładając konto, potwierdzają Państwo, że znają Państwo <terms>Regulamin</terms> oraz <privacy>Politykę prywatności</privacy>.",
+      "controller": "Administratorem danych Państwa konta jest UAB „Nonstop Group”. Dane są przetwarzane w celu utworzenia konta i świadczenia usługi; nie są wykorzystywane do marketingu bez Państwa odrębnej, dobrowolnej zgody."
     },
     "errors": {
       "userAlreadyRegistered": "Ten e-mail jest już zarejestrowany. Proszę się zalogować.",

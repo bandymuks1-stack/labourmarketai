@@ -4235,9 +4235,9 @@
       "inAppBrowser": "Esate programėlės vidinėje naršyklėje, kurioje prisijungimas per „Google“ dažnai neveikia. Atidarykite šį puslapį telefono naršyklėje („Safari“ arba „Chrome“) arba žemiau naudokite el. paštą ir slaptažodį."
     },
     "legalNotice": {
-      "signup": "Kuriant paskyrą patvirtini, kad susipažinai su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
-      "googleLogin": "Jei paskyros dar neturi, prisijungiant per socialinę paskyrą (pvz., „Google“) ji bus sukurta. Kuriant paskyrą patvirtini, kad susipažinai su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
-      "controller": "Tavo paskyros duomenų valdytoja — UAB „Nonstop Group“. Duomenys tvarkomi paskyrai sukurti ir paslaugai teikti; rinkodarai jie nenaudojami be atskiro, neprivalomo sutikimo."
+      "signup": "Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
+      "googleLogin": "Jei paskyros dar neturite, prisijungiant per socialinę paskyrą (pvz., „Google“) ji bus sukurta. Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
+      "controller": "Jūsų paskyros duomenų valdytoja — UAB „Nonstop Group“. Duomenys tvarkomi paskyrai sukurti ir paslaugai teikti; rinkodarai jie nenaudojami be atskiro, neprivalomo sutikimo."
     },
     "errors": {
       "userAlreadyRegistered": "Šis el. paštas jau registruotas. Prisijunkite vietoj registracijos.",
