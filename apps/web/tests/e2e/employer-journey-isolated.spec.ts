@@ -157,7 +157,7 @@ for (const w of WIDTHS) {
       ).toHaveValue(ABOUT, { timeout: 60_000 });
       await fits(page, "the company settings");
       await done();
-      await verifyCompanyAsLocalAdmin(COMPANY, email("admin"));
+      await verifyCompanyAsLocalAdmin(COMPANY, email(`admin${w.name}`));
     });
 
     test(`E-3 (${w.name}). posting a need: stored once, listed on the company's needs`, async ({ browser }) => {
@@ -183,7 +183,7 @@ for (const w of WIDTHS) {
       await setUpCompany(st.page, STRANGER_ORG);
       sessions.set(STRANGER, await st.page.context().storageState());
       await st.done();
-      await verifyCompanyAsLocalAdmin(STRANGER, email("admin2"));
+      await verifyCompanyAsLocalAdmin(STRANGER, email(`admin2${w.name}`));
     });
 
     test(`E-4 (${w.name}). candidate search: a discoverable, available worker is found for the need`, async ({ browser }) => {
