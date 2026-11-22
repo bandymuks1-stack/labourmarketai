@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Current market demand",
-    "subtitleAgency": "What the public market asks for right now — the same pool your candidates see on the board.",
-    "subtitleInstitution": "What the public market asks for right now — the directions your learners are heading into.",
     "active": "{count} live vacancies",
     "employers": "{count} employers",
     "filtered": "{profession}: {count} vacancies",
@@ -2082,7 +2080,6 @@
       "eyebrow": "COMPANY WORKSPACE",
       "programs": {
         "title": "Programmes and cohorts",
-        "subtitle": "What you teach, pointed at a labour-market direction, and the groups of learners inside it. Demand shows live public vacancies for that direction.",
         "empty": "No programmes yet. Add the first one and point it at the work direction it leads to.",
         "addProgram": "Add a programme",
         "noDirection": "No work direction set",
@@ -7111,7 +7108,6 @@
   "learning": {
     "pageTitle": "Learning & review",
     "pageLead": "Suggestions drawn from real work activity, kept for a person to review. Nothing here is treated as proven on its own.",
-    "title": "Review queue",
     "lead": "Signals become suggestions, and a person decides. Learning never settles anything by itself.",
     "notAvailable": "Not available right now.",
     "empty": "Nothing to review yet.",
@@ -18841,8 +18837,7 @@
         "invitationAccepted": "Invitation accepted. Confirm the agency's connection request below with your company."
       },
       "education": {
-        "title": "Learning and programmes",
-        "subtitle": "Programmes, learners and the market demand for their directions."
+        "title": "Learning and programmes"
       },
       "history": {
         "title": "Data import and history",

@@ -1480,6 +1480,7 @@ export default async function JournalPage({
             <JournalEntryComposer
               key={selectedDate ?? "new"}
               defaultWorkDate={selectedDate}
+              draftOwner={quickRecordDraftOwner(user.id, activeOrganizationId)}
               engagements={composerEngagements}
               contextResolution={contextResolution}
               activeWorkspaceNotice={activeWorkspaceNotice}

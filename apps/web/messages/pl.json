@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",
-    "subtitleAgency": "O co pyta teraz rynek publiczny — ta sama pula, którą Twoi kandydaci widzą na tablicy.",
-    "subtitleInstitution": "O co pyta teraz rynek publiczny — kierunki, w które idą Twoi uczniowie.",
     "active": "aktywne oferty: {count}",
     "employers": "pracodawcy: {count}",
     "filtered": "{profession}: oferty: {count}",
@@ -2082,7 +2080,6 @@
       "eyebrow": "PRZESTRZEŃ ROBOCZA FIRMY",
       "programs": {
         "title": "Programy i grupy",
-        "subtitle": "To, czego Państwo uczą, powiązane z kierunkiem rynku pracy, oraz grupy uczestników w jego ramach. Popyt pokazuje aktualne publiczne oferty pracy dla tego kierunku.",
         "empty": "Brak programów. Proszę dodać pierwszy i wskazać kierunek zawodowy, do którego prowadzi.",
         "addProgram": "Dodaj program",
         "noDirection": "Nie ustawiono kierunku zawodowego",
@@ -7111,7 +7108,6 @@
   "learning": {
     "pageTitle": "Nauka i weryfikacja",
     "pageLead": "Sugestie wyciągnięte z rzeczywistej aktywności zawodowej, przechowywane do weryfikacji przez osobę. Nic tu nie jest traktowane jako udowodnione samo w sobie.",
-    "title": "Kolejka weryfikacji",
     "lead": "Sygnały stają się sugestiami, a decyduje osoba. Uczenie nigdy niczego nie rozstrzyga samodzielnie.",
     "notAvailable": "Chwilowo niedostępne.",
     "empty": "Nic jeszcze do weryfikacji.",
@@ -18841,8 +18837,7 @@
         "invitationAccepted": "Zaproszenie zaakceptowane. Proszę potwierdzić poniżej prośbę agencji o połączenie w imieniu swojej firmy."
       },
       "education": {
-        "title": "Nauka i programy",
-        "subtitle": "Programy, uczestnicy i popyt rynkowy na ich kierunki."
+        "title": "Nauka i programy"
       },
       "history": {
         "title": "Import danych i historia",

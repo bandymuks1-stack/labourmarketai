@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Dabartinė rinkos paklausa",
-    "subtitleAgency": "Ko vieša rinka prašo dabar — tas pats fondas, kurį jūsų kandidatai mato lentoje.",
-    "subtitleInstitution": "Ko vieša rinka prašo dabar — kryptys, į kurias eina jūsų besimokantieji.",
     "active": "{count} aktyvių darbo vietų",
     "employers": "{count} darbdavių",
     "filtered": "{profession}: {count} darbo vietos",
@@ -2082,7 +2080,6 @@
       "eyebrow": "ĮMONĖS ERDVĖ",
       "programs": {
         "title": "Programos ir grupės",
-        "subtitle": "Ko mokote, nukreipta į darbo rinkos kryptį, ir besimokančiųjų grupės viduje. Paklausa rodo gyvas viešas darbo vietas tai krypčiai.",
         "empty": "Programų dar nėra. Pridėkite pirmą ir nurodykite, į kokią darbo kryptį ji veda.",
         "addProgram": "Pridėti programą",
         "noDirection": "Darbo kryptis nenurodyta",
@@ -7111,7 +7108,6 @@
   "learning": {
     "pageTitle": "Mokymasis ir peržiūra",
     "pageLead": "Pasiūlymai iš tikros darbo veiklos, paliekami žmogui peržiūrėti. Niekas čia savaime nelaikomas įrodytu.",
-    "title": "Peržiūros eilė",
     "lead": "Signalai virsta pasiūlymais, o sprendžia žmogus. Mokymasis pats nieko nenusprendžia.",
     "notAvailable": "Šiuo metu nepasiekiama.",
     "empty": "Kol kas nėra ką peržiūrėti.",
@@ -18841,8 +18837,7 @@
         "invitationAccepted": "Kvietimas priimtas. Žemiau patvirtinkite agentūros ryšio prašymą savo įmonės vardu."
       },
       "education": {
-        "title": "Mokymai ir programos",
-        "subtitle": "Programos, besimokantieji ir rinkos paklausa jų kryptims."
+        "title": "Mokymai ir programos"
       },
       "history": {
         "title": "Duomenų įkėlimas ir istorija",

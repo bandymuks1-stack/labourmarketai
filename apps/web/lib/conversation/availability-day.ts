@@ -76,3 +76,37 @@ export function readAvailabilityDay(text: string, todayIso: string): string | nu
   }
   return null;
 }
+
+/**
+ * THE WEEKDAY A WORD NAMES, for a START date ("from next Monday", "nuo kito
+ * pirmadienio", "od przyszłego poniedziałku") — `lib/structuring/time-window.ts`
+ * `parseStartDate` reads with it, so the chat and the need intake share these
+ * stems. Index 0 = Monday. The Polish genitive ("poniedziałku", "wtorku",
+ * "czwartku", "piątku") follows the from-word "od", so it is read here; the
+ * availability reader above keeps its own answers unchanged.
+ */
+const START_EXTRA_STEMS: ReadonlyArray<readonly string[]> = [
+  ["poniedzialk"],
+  ["wtork"],
+  [],
+  ["czwartk"],
+  ["piatk"],
+  [],
+  [],
+];
+export function weekdayIndexOf(foldedWord: string, swedish = false): number | null {
+  for (let dow = 0; dow < 7; dow++) {
+    const stems = [...WEEKDAY_STEMS[dow], ...START_EXTRA_STEMS[dow], ...(swedish ? [SV_WEEKDAY_STEMS[dow]] : [])];
+    if (stems.some((stem) => foldedWord.startsWith(stem))) return dow;
+  }
+  return null;
+}
+
+/** The next `dow` (0 = Monday) from today: today itself unless `next`, which
+ *  means the one after today — the same rule as the availability reader. */
+export function upcomingWeekdayIso(todayIso: string, dow: number, next: boolean): string {
+  const todayDow = (utc(todayIso).getUTCDay() + 6) % 7;
+  let ahead = (dow - todayDow + 7) % 7;
+  if (ahead === 0 && next) ahead = 7;
+  return plusDays(todayIso, ahead);
+}
