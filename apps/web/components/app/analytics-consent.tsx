@@ -151,6 +151,7 @@ export function AnalyticsConsentControl({ strings }: { strings: AnalyticsConsent
         <Button
           variant="secondary"
           size="sm"
+          className="min-h-11"
           data-testid="analytics-consent-control-refuse"
           aria-pressed={choice === "refused"}
           onClick={refuseAnalytics}
@@ -160,6 +161,7 @@ export function AnalyticsConsentControl({ strings }: { strings: AnalyticsConsent
         <Button
           variant="secondary"
           size="sm"
+          className="min-h-11"
           data-testid="analytics-consent-control-allow"
           aria-pressed={choice === "granted"}
           onClick={() => setAnalyticsConsent("granted")}
