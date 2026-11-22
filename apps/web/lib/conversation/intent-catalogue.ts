@@ -119,6 +119,63 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   invitations: "invitations addressed to me (join an organization, become a student or an employee)",
 };
 
+/**
+ * Actions that only an ORGANISATION's own workspace performs — an agency's
+ * client desk, an institution's learners, an employer's candidates, review
+ * queue and project operations. A person acting in their personal space
+ * cannot run any of them there: each handler first needs an organisation
+ * context. They are left out of the PERSON's catalogue only (quota, owner
+ * order 2026-11-22: send the model the lines relevant to the speaker), so the
+ * proposer cannot pick them for a person. Nothing becomes unreachable:
+ *
+ *   · the deterministic router still reads every one of these sentences, for
+ *     every identity, before the model is asked anything;
+ *   · `switch-context`, `create-organization`, `need-workers` and
+ *     `find-workers` stay in the person's catalogue — the doors a person uses
+ *     to start acting for an organisation;
+ *   · the COMPANY catalogue is complete: an organisation member is also a
+ *     person and may ask anything.
+ *
+ * A guard (`intent-catalogue-identity.test.ts`) pins this list against the
+ * registry, so an id that is renamed or removed fails CI instead of silently
+ * leaving a stale exclusion.
+ */
+export const ORGANIZATION_WORKSPACE_ONLY_INTENTS: readonly RoutedIntent[] = [
+  "agency-invites",
+  "agency-offers",
+  "client-demand",
+  "company-overview",
+  "invite-candidate",
+  "invite-client",
+  "invite-student",
+  "programmes",
+  "proposal-status",
+  "propose-booking",
+  "propose-candidate",
+  "who-available",
+  "candidates",
+  // NOT `confirm-work`: the counterparty who reviews a worker's entry may be
+  // a private client acting as a person (decision 0018).
+  "move-worker",
+  "stage-status",
+  "add-task",
+  "project-risk",
+  "project-readiness",
+];
+
+/**
+ * The catalogue for ONE speaker identity. `company` receives the whole
+ * vocabulary; `person` receives it without the organisation-workspace-only
+ * actions above.
+ */
+export function intentCatalogueFor(
+  identity: "person" | "company",
+): ReadonlyArray<{ readonly id: RoutedIntent; readonly hint: string }> {
+  if (identity === "company") return intentCatalogue();
+  const excluded = new Set<RoutedIntent>(ORGANIZATION_WORKSPACE_ONLY_INTENTS);
+  return intentCatalogue().filter((row) => !excluded.has(row.id));
+}
+
 /** The catalogue as the proposer receives it — ids + hints, nothing else. */
 export function intentCatalogue(): ReadonlyArray<{ readonly id: RoutedIntent; readonly hint: string }> {
   return (Object.keys(INTENT_HINTS) as RoutedIntent[]).map((id) => ({ id, hint: INTENT_HINTS[id] }));

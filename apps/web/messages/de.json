@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
-    "subtitleAgency": "Was der öffentliche Markt gerade verlangt — derselbe Pool, den Ihre Kandidaten auf der Übersicht sehen.",
-    "subtitleInstitution": "Was der öffentliche Markt gerade verlangt — die Richtungen, in die Ihre Lernenden gehen.",
     "active": "{count} aktive Stellen",
     "employers": "{count} Arbeitgeber",
     "filtered": "{profession}: {count} Stellen",
@@ -2082,7 +2080,6 @@
       "eyebrow": "UNTERNEHMENSBEREICH",
       "programs": {
         "title": "Studiengänge und Kohorten",
-        "subtitle": "Was Sie lehren, ausgerichtet auf eine Arbeitsmarktrichtung, und die Lerngruppen darin. Nachfrage zeigt aktuelle öffentliche Stellen für diese Richtung.",
         "empty": "Noch keine Studiengänge. Fügen Sie den ersten hinzu und richten Sie ihn auf die Arbeitsrichtung aus, zu der er führt.",
         "addProgram": "Studiengang hinzufügen",
         "noDirection": "Keine Arbeitsrichtung festgelegt",
@@ -7111,7 +7108,6 @@
   "learning": {
     "pageTitle": "Lernen & Überprüfung",
     "pageLead": "Vorschläge aus echter Arbeitsaktivität, die zur Überprüfung durch eine Person aufbewahrt werden. Nichts hier gilt für sich allein als bewiesen.",
-    "title": "Überprüfungswarteschlange",
     "lead": "Signale werden zu Vorschlägen, und eine Person entscheidet. Lernen entscheidet niemals etwas von selbst.",
     "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch nichts zu überprüfen.",
@@ -18843,8 +18839,7 @@
         "invitationAccepted": "Einladung angenommen. Bestätigen Sie unten die Verbindungsanfrage der Agentur mit Ihrem Unternehmen."
       },
       "education": {
-        "title": "Ausbildung und Programme",
-        "subtitle": "Programme, Lernende und die Marktnachfrage nach ihren Richtungen."
+        "title": "Ausbildung und Programme"
       },
       "history": {
         "title": "Datenimport und Verlauf",
