@@ -1,6 +1,6 @@
 -- @human-gate-approved (acknowledgement only: RED, NOT applied; owner approval of this exact SQL required)
 -- ============================================================================
--- 20261122160000_privacy_deletion_within_one_month_v1
+-- 20261122190500_privacy_deletion_within_one_month_v1
 --
 -- SAFETY CLASS: RED. Replaces two SECURITY DEFINER bodies and adds one
 -- function; ZERO rows change at apply time.
@@ -38,7 +38,7 @@
 -- (fresh_sign_in by the holder, or owner_written_approval), the executor's
 -- plan, refusals and retention rules are untouched.
 --
--- Rollback: supabase/rollbacks/20261122160000_privacy_deletion_within_one_month_v1.down.sql
+-- Rollback: supabase/rollbacks/20261122190500_privacy_deletion_within_one_month_v1.down.sql
 -- ============================================================================
 
 create or replace function public.privacy_account_deletion_due_at(p_received timestamptz, p_confirmed timestamptz)

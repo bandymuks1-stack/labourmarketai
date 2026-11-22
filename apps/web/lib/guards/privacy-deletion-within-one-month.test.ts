@@ -2,14 +2,14 @@
  * GUARD — a confirmed account-deletion request is erased within one month of
  * receipt (GDPR Art. 12(3) / 17(1)); the 30-day cooling-off may not carry it
  * past that limit. Static checks on the RED migration
- * 20261122160000_privacy_deletion_within_one_month_v1 and its rollback.
+ * 20261122190500_privacy_deletion_within_one_month_v1 and its rollback.
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = resolve(__dirname, "../../../..");
-const N = "20261122160000_privacy_deletion_within_one_month_v1";
+const N = "20261122190500_privacy_deletion_within_one_month_v1";
 const up = readFileSync(resolve(ROOT, `supabase/migrations/${N}.sql`), "utf8");
 const down = readFileSync(resolve(ROOT, `supabase/rollbacks/${N}.down.sql`), "utf8");
 

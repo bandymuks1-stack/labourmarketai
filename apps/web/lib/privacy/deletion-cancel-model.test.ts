@@ -183,7 +183,7 @@ describe("every key the model can return exists in every active locale", () => {
       }
       expect(deletion.status.scheduledAt).toContain("{date}");
       // The date comes from the database (cooling-off capped at one month from
-      // the request, 20261122160000): the line names it and claims no fixed wait.
+      // the request, 20261122190500): the line names it and claims no fixed wait.
       expect(deletion.status.scheduledAt).not.toMatch(/30/);
       // The 30-day copy shown once the RPC answers says the one-month cap too.
       for (const k of ["confirmLabelWaiting", "confirmStepBodyWaiting", "confirmedBodyWaiting"]) {

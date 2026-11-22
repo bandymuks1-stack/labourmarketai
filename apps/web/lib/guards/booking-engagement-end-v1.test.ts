@@ -1816,7 +1816,7 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261120190000_former_employer_chain_fixes_v1.sql",
       // 2026-11-22: owner request, erasure within one month of receipt. RED draft, the marker is the
       // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
-      "20261122160000_privacy_deletion_within_one_month_v1.sql",
+      "20261122190500_privacy_deletion_within_one_month_v1.sql",
 ]);
   });
 

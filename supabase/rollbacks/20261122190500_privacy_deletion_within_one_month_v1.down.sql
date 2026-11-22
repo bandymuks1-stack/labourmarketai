@@ -1,4 +1,4 @@
--- Rollback for 20261122160000_privacy_deletion_within_one_month_v1: restores privacy_erasure_due_v1 and
+-- Rollback for 20261122190500_privacy_deletion_within_one_month_v1: restores privacy_erasure_due_v1 and
 -- privacy_account_deletion_status_v1 exactly as in 20261109120000 and drops
 -- privacy_account_deletion_due_at. Erasures already run are not undone.
 
