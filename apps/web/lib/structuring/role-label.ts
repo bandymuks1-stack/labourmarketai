@@ -107,14 +107,7 @@ export const TRADE_STEM_SOURCE =
   // English word for `montuotoj` / `монтажник` was simply absent. `fitter` is
   // bounded so it cannot open on "fitted" / "fitting"; `installer` and
   // `montuotoj` cover the other ordinary forms.
-  "fitter\\b|fitters\\b|installer|montuotoj|" +
-  // 2026-11-22: "Нужны пять строителей с понедельника" measured `unknown` —
-  // the general construction worker had no stem in any language. Not the
-  // adjective "строительн…" ("строительных лесов") nor "строительство".
-  // No English "builder" in this shared list ("website builder"); the router
-  // reads "builders" only right after a seek verb. No "statybinink" here:
-  // "Ieškau statybininko darbo" is a person seeking a builder's JOB.
-  "строител(?:ь(?![нс])|[еияю])|bauarbeiter|bouwvakker";
+  "fitter\\b|fitters\\b|installer|montuotoj";
 
 /**
  * SWEDISH TRADE NOUNS (sv activation, 2026-11-12), folded.

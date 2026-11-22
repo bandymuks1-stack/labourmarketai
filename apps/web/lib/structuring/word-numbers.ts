@@ -9,10 +9,8 @@
  * NL/DE and, in a Swedish sentence only, SV. Matching is diacritic-folded like the rest of lib/structuring, so
  * "keturiu" typed without diacritics parses identically.
  *
- * Deliberately NOT a numeral grammar: one token is one word. A RUN of number
- * words is one quantity only when it is tens + unit ("twenty five",
- * "dvidešimt trys", "двадцать пять" → 25, `wordNumberRunValue`); any other
- * run ("one hundred", "two three") is unknown — never one of its parts. Ambiguous
+ * Deliberately NOT a numeral grammar: single tokens only (compounds like
+ * "dvidešimt trys" parse as their tens word — coarse and honest). Ambiguous
  * article-words (NL "een", DE "ein") are excluded on purpose: reading every
  * Dutch article as the number 1 would fabricate quantities.
  */
@@ -141,54 +139,46 @@ export interface FoundWordNumber {
 }
 
 /**
- * The value of a RUN of adjacent number words, read as ONE quantity: a single
- * word is itself, tens + unit is their sum ([20, 5] → 25). Any other run is
- * null — unknown, never one of its parts: "twenty five workers" must not read
- * as five, nor "one hundred workers" as one or as a hundred.
+ * The text with every written number turned into digits ("мне нужны пять
+ * рабочих" → "мне нужны 5 рабочих"), everything else untouched. Lets a
+ * digit-only reader (the headcount) read the number words it never knew.
+ *
+ * A RUN of number words is one quantity: "twenty five" / "twenty-five" /
+ * "двадцать пять" / "dvidešimt penki" become 25 (tens + unit). Any other run
+ * ("one hundred", "two three") is left as words — unknown, never a part of
+ * the quantity: "20 5 workers" would read as five.
  */
-export function wordNumberRunValue(values: readonly number[]): number | null {
-  if (values.length === 1) return values[0];
-  if (values.length !== 2) return null;
-  const [tens, unit] = values;
-  return tens >= 20 && tens <= 90 && tens % 10 === 0 && unit >= 1 && unit <= 9 ? tens + unit : null;
-}
-
-/**
- * The text with every written number as digits ("мне нужны пять рабочих" →
- * "мне нужны 5 рабочих"), every other character untouched — so a digit reader
- * reads the same count said in words. A run of number words joined by spaces
- * or a hyphen becomes its `wordNumberRunValue`; a run that has none stays as
- * typed, which no digit reader counts.
- */
-export function digitizeWordNumbers(
-  text: string,
-  /** Is the SENTENCE Swedish? Pass it when `text` is no longer as typed. */
-  swedish: boolean = looksSwedish(text),
-): string {
-  return (text ?? "").replace(/\p{L}+(?:[\s-]+\p{L}+)*/gu, (phrase) => {
-    // [word, separator, word, separator, …, word]
+export function digitizeWordNumbers(text: string, swedish: boolean = looksSwedish(text)): string {
+  const src = text ?? "";
+  const re = /\p{L}+(?:[\s-]+\p{L}+)*/gu;
+  return src.replace(re, (phrase) => {
     const parts = phrase.split(/([\s-]+)/u);
-    let out = "";
+    const out: string[] = [];
     let i = 0;
     while (i < parts.length) {
-      const values: number[] = [];
-      let j = i;
-      for (;;) {
-        const v = j < parts.length ? parseWordNumber(parts[j], swedish) : null;
-        if (v === null) break;
-        values.push(v);
-        j += 2;
-      }
-      if (values.length === 0) {
-        out += parts[i] + (parts[i + 1] ?? "");
-        i += 2;
+      const n = parseWordNumber(parts[i], swedish);
+      if (n === null) {
+        out.push(parts[i]);
+        i += 1;
         continue;
       }
-      const value = wordNumberRunValue(values);
-      out += (value === null ? parts.slice(i, j - 1).join("") : String(value)) + (parts[j - 1] ?? "");
+      // Collect the run of number words joined by spaces or hyphens.
+      const run: number[] = [n];
+      let j = i + 2;
+      while (j < parts.length) {
+        const m = parseWordNumber(parts[j], swedish);
+        if (m === null) break;
+        run.push(m);
+        j += 2;
+      }
+      const tensAndUnit = run.length === 2 && run[0] >= 20 && run[0] <= 90 && run[0] % 10 === 0 && run[1] >= 1 && run[1] <= 9;
+      if (run.length === 1) out.push(String(n));
+      else if (tensAndUnit) out.push(String(run[0] + run[1]));
+      else out.push(parts.slice(i, j - 1).join(""));
+      if (j - 1 < parts.length) out.push(parts[j - 1] ?? "");
       i = j;
     }
-    return out;
+    return out.join("");
   });
 }
 

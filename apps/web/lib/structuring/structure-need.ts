@@ -335,23 +335,21 @@ function escapeForRegex(s: string): string {
  * employer reviews, and the form only ever pre-fills a field the employer left
  * empty.
  */
-/** A number directly followed by a word for PEOPLE — in every active locale
- *  (2026-11-22: "5 рабочих", "5 darbininkų", "5 Arbeiter", "5 osób" counted
- *  nothing). "5 рабочих дней" is five working days, never five workers. */
+/** A number directly followed by a word for PEOPLE. */
 const PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|darbinink\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|сотрудник\w*|человек|люд(?:и|ей)|рабоч(?:ие|их)(?!\s*(?:дн|час|мест|смен|недел))|hands\b|arbeiter|mitarbeiter|leute\b|personen\b|werknemers?\b|medewerkers?\b|arbeiders?\b|mensen\b|pracownik\w*|pracownic\w*|robotnik\w*|os[oó]b\w*|ludzi)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|darbinink\w*|работник\w*|человек|рабоч[а-яё]*(?![а-яё])(?!\s+(?:дн|день|час|смен|недел))|сотрудник\w*|люд\w*|pracownik\w*|pracownic\w*|robotnik\w*|os[oó]b\w*|mitarbeiter\w*|arbeiter\w*|leute|werknemers?|medewerkers?|arbeiders?|mensen|personen|hands\b|ludzi)/i;
 // sv twin — used only for a sentence `looksSwedish` reads as Swedish.
 const SV_PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|darbinink\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|сотрудник\w*|человек|люд(?:и|ей)|рабоч(?:ие|их)(?!\s*(?:дн|час|мест|смен|недел))|hands\b|arbeiter|mitarbeiter|leute\b|personen\b|werknemers?\b|medewerkers?\b|arbeiders?\b|mensen\b|pracownik\w*|pracownic\w*|robotnik\w*|os[oó]b\w*|ludzi|personer|medarbetare|arbetare|anst[äa]llda)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|darbinink\w*|работник\w*|человек|рабоч[а-яё]*(?![а-яё])(?!\s+(?:дн|день|час|смен|недел))|сотрудник\w*|люд\w*|pracownik\w*|pracownic\w*|robotnik\w*|os[oó]b\w*|mitarbeiter\w*|arbeiter\w*|leute|werknemers?|medewerkers?|arbeiders?|mensen|personen|hands\b|ludzi|personer|medarbetare|arbetare|anst[äa]llda)/i;
 
 /** Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
  *  halves of pairs whose other half was already here; DE/PL/NL the same
  *  verbs the value-statement reader already knows. */
 const DEMAND_VERB_COUNT_RE =
-  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen?|ben[öo]tigen?|suchen|zoeken|potrzebuj[eę]|potrzebujemy|szukamy)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
+  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauche|brauchen|ben[öo]tige|ben[öo]tigen|suchen|zoeken|potrzebuj[eę]|potrzebujemy|szukamy)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
 // sv twin — used only for a sentence `looksSwedish` reads as Swedish.
 const SV_DEMAND_VERB_COUNT_RE =
-  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen?|ben[öo]tigen?|suchen|zoeken|potrzebuj[eę]|potrzebujemy|szukamy|beh[öo]ver|s[öo]ker)\s+(?:about\s+|apie\s+|около\s+|cirka\s+|ungef[äa]r\s+)?(\d{1,4})\b/i;
+  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauche|brauchen|ben[öo]tige|ben[öo]tigen|suchen|zoeken|potrzebuj[eę]|potrzebujemy|szukamy|beh[öo]ver|s[öo]ker)\s+(?:about\s+|apie\s+|около\s+|cirka\s+|ungef[äa]r\s+)?(\d{1,4})\b/i;
 
 /**
  * Words that make the number before them a MEASURE, never a headcount:
@@ -369,12 +367,10 @@ const COUNT_UNIT_WORD_RE =
 const SV_COUNT_UNIT_WORD_RE =
   /^(?:years?|yrs?|metų|metu|metai|metus|metams|met|m|months?|mėn\p{L}*|mėnes\p{L}*|menes\p{L}*|weeks?|savait\p{L}*|days?|dien\p{L}*|d|hours?|hrs?|h|val\p{L}*|eur\p{L}*|euro|€|nok|sek|dkk|pln|usd|zl|zł|лет|год\p{L}*|месяц\p{L}*|мес|недел\p{L}*|дн\p{L}*|день|час\p{L}*|евро|руб\p{L}*|jahre?n?|monate?n?|monat|wochen?|tage?n?|stunden?|std|lata?|rok\p{L}*|miesi\p{L}*|tygodn\p{L}*|dni|godzin\p{L}*|jaar|jaren|maand\p{L}*|weken|dagen|uur|uren|år|månad\p{L}*|manad\p{L}*|veck(?:a|or|ors|an)|dag|dagar|dagars|timm\p{L}*|tim|kr|kronor|%|km)$/u;
 
-/** A word that makes the unit AFTER it a working time: "5 рабочих дней",
- *  "5 working days", "5 darbo dienų", "5 dni roboczych" is a duration, never
- *  five people. Read with the word that follows it (see `measureFollows`). */
-const WORKING_TIME_QUALIFIER_RE = /^(?:рабоч\p{L}*|working|business|darbo|robocz\p{L}*)$/u;
-/** One-word working times ("werkdagen", "Arbeitstage") the unit list lacks. */
-const WORKING_TIME_WORD_RE = /^(?:werkdag\p{L}*|arbeitstag\p{L}*|werktag\p{L}*)$/u;
+/** "5 рабочих дней", "5 working days", "5 darbo dienų" — a duration whose
+ *  first word is not itself a unit. Read on what directly follows a number. */
+export const WORKING_TIME_AHEAD_RE =
+  /^\s*(?:рабоч[а-яё]*\s+(?:дн|день|час|смен|недел)|working\s+(?:days?|hours?|weeks?)|business\s+days?|darbo\s+(?:dien|val|savait)|robocz\p{L}*\s+(?:dni|godzin)|werkdag|arbeitstag)/iu;
 
 /** Is this one token a unit of time, money or percent (see COUNT_UNIT_WORD_RE)? */
 export function isCountUnitWord(token: string | null | undefined, swedish = false): boolean {
@@ -389,16 +385,6 @@ export function isCountUnitWord(token: string | null | undefined, swedish = fals
 /** The first word of `rest` ("" when none) — what directly follows a number. */
 function firstWordOf(rest: string): string {
   return rest.match(/^\s*(?:\+\s*)?([^\s\d.,;:!?()/]+)/u)?.[1] ?? "";
-}
-
-/** Does what directly follows a number make it a MEASURE — a unit ("5
- *  years"), or a working time ("5 рабочих дней", "5 working days")? */
-export function measureFollows(rest: string, swedish: boolean): boolean {
-  const first = firstWordOf(rest);
-  if (isCountUnitWord(first, swedish) || WORKING_TIME_WORD_RE.test(foldText(first))) return true;
-  if (!WORKING_TIME_QUALIFIER_RE.test(foldText(first))) return false;
-  const second = rest.match(/^\s*(?:\+\s*)?[^\s\d.,;:!?()/]+\s+([^\s\d.,;:!?()/]+)/u)?.[1];
-  return isCountUnitWord(second, swedish);
 }
 
 /**
@@ -612,29 +598,28 @@ function countFrom(m: RegExpMatchArray | null): number | null {
 
 /** A number that provably counts PEOPLE: followed by a person word or by the
  *  recognised occupation's own noun ("2 mūrininkų", "3 darbuotojų"). */
-function detectPeopleCount(typed: string, occupationNeedle: string | null, swedish: boolean): number | null {
-  // "пять рабочих", "five workers", "penkių darbuotojų" count the same people
-  // as "5 рабочих": number words are read as digits first (2026-11-22).
-  const hay = digitizeWordNumbers(typed, swedish);
+function detectPeopleCount(rawHay: string, occupationNeedle: string | null, swedish: boolean): number | null {
+  const hay = digitizeWordNumbers(rawHay, swedish);
   return (
     countFrom(hay.match(swedish ? SV_PEOPLE_COUNT_RE : PEOPLE_COUNT_RE)) ??
     (occupationNeedle ? countFrom(hay.match(adjacentOccupationCountRe(occupationNeedle))) : null)
   );
 }
 
-function detectTeamSize(typed: string, occupationNeedle: string | null, swedish: boolean): number | null {
-  // Number words are read as digits first: "нужны пять строителей" is
-  // "нужны 5 строителей" (2026-11-22).
-  const hay = digitizeWordNumbers(typed, swedish);
+function detectTeamSize(rawHay: string, occupationNeedle: string | null, swedish: boolean): number | null {
+  // "пять рабочих", "five workers", "penkių darbuotojų" — the same counts as
+  // "5 рабочих": number words become digits first (owner P1 2026-11-22).
+  const hay = digitizeWordNumbers(rawHay, swedish);
   // A number directly tied to people/workers, OR right after a "need" verb —
-  // unless what follows it is a unit (years, months, hours, money) or a
-  // working time: "Need 3 years experience" and "нужно 5 рабочих дней" are
-  // not three or five people.
+  // unless what follows it is a unit (years, months, hours, money): "Need 3
+  // years experience" is not three people.
   const people = countFrom(hay.match(swedish ? SV_PEOPLE_COUNT_RE : PEOPLE_COUNT_RE));
   if (people !== null) return people;
   const verb = hay.match(swedish ? SV_DEMAND_VERB_COUNT_RE : DEMAND_VERB_COUNT_RE);
   if (verb && verb.index !== undefined) {
-    const n = measureFollows(hay.slice(verb.index + verb[0].length), swedish) ? null : countFrom(verb);
+    const rest = hay.slice(verb.index + verb[0].length);
+    const next = firstWordOf(rest);
+    const n = isCountUnitWord(next, swedish) || WORKING_TIME_AHEAD_RE.test(rest) ? null : countFrom(verb);
     if (n !== null) return n;
   }
   return occupationNeedle ? countFrom(hay.match(adjacentOccupationCountRe(occupationNeedle))) : null;

@@ -1,12 +1,74 @@
 import { describe, expect, it } from "vitest";
 
-import { classifyIntent } from "../conversation/intent-router";
+import { classifyIntent } from "@/lib/conversation/intent-router";
 import { countPeopleInNeed, structureNeed } from "./structure-need";
 import { structureValueStatement } from "./value-statement";
 import { digitizeWordNumbers, parseWordNumber } from "./word-numbers";
 
 /**
- * HEADCOUNT AS WORDS, IN EVERY ACTIVE LOCALE (2026-11-22).
+ * A HEADCOUNT WRITTEN IN WORDS (owner P1 2026-11-22: "мне нужны пять рабочих"
+ * must read as five workers). The headcount reader knew digits only; the same
+ * need written in words came back with no count, in every language.
+ */
+const FIVE: ReadonlyArray<readonly [string, string]> = [
+  ["ru", "мне нужны пять рабочих"],
+  ["ru", "Нужны пять строителей с понедельника"],
+  ["lt", "Man reikia penkių darbuotojų"],
+  ["en", "I need five workers"],
+  ["pl", "Potrzebuję pięciu pracowników"],
+  ["nl", "Ik heb vijf werknemers nodig"],
+  ["de", "Ich brauche fünf Arbeiter"],
+  ["sv", "Jag behöver fem arbetare"],
+];
+
+describe("a headcount written in words is the same headcount", () => {
+  it.each(FIVE)("%s — %s → 5 people, an employer need", (_locale, text) => {
+    expect(structureNeed({ description: text }).teamSize).toBe(5);
+    expect(classifyIntent(text).intent).toBe("need-workers");
+  });
+
+  it("digits and words agree", () => {
+    expect(structureNeed({ description: "мне нужны 5 рабочих" }).teamSize).toBe(5);
+    expect(countPeopleInNeed({ description: "мне нужны пять рабочих" })).toBe(5);
+    expect(countPeopleInNeed({ description: "We need three welders" })).toBe(3);
+    expect(countPeopleInNeed({ description: "Reikia trijų suvirintojų" })).toBe(3);
+  });
+
+  it("a measure in words is still never a headcount", () => {
+    for (const text of ["Need five years experience", "Reikia penkerių metų patirties", "нужно пять лет опыта", "I need work for five days"]) {
+      expect(structureNeed({ description: text }).teamSize, text).toBeNull();
+    }
+    expect(classifyIntent("I need work for five days").intent).not.toBe("need-workers");
+  });
+
+  it("a compound number is one quantity, never its last part (review P2)", () => {
+    expect(structureNeed({ description: "We need twenty five workers" }).teamSize).toBe(25);
+    expect(structureNeed({ description: "We need twenty-five workers" }).teamSize).toBe(25);
+    expect(structureNeed({ description: "Нужны двадцать пять рабочих" }).teamSize).toBe(25);
+    expect(structureNeed({ description: "Potrzebuję dwadzieścia pięć osób" }).teamSize).toBe(25);
+    expect(structureNeed({ description: "Need twenty five years experience" }).teamSize).toBeNull();
+    // A run the reader cannot add up stays unknown.
+    expect(structureNeed({ description: "We need one hundred workers" }).teamSize).toBeNull();
+  });
+
+  it("working days are a duration, not workers (review P2)", () => {
+    for (const text of ["Срок выполнения 5 рабочих дней", "Срок выполнения пять рабочих дней", "нужно 5 рабочих дней", "We need 5 working days"]) {
+      expect(structureNeed({ description: text }).teamSize, text).toBeNull();
+      expect(countPeopleInNeed({ description: text }), text).toBeNull();
+    }
+  });
+
+  it("only whole number words change; every other word is kept", () => {
+    expect(digitizeWordNumbers("мне нужны пять рабочих")).toBe("мне нужны 5 рабочих");
+    expect(digitizeWordNumbers("someone needs nineteen tones")).toBe("someone needs 19 tones");
+    expect(digitizeWordNumbers("Potrzebuję pięciu pracowników")).toBe("Potrzebuję 5 pracowników");
+    expect(digitizeWordNumbers("twenty-five, then three")).toBe("25, then 3");
+    expect(digitizeWordNumbers("one hundred")).toBe("one hundred");
+  });
+});
+
+/**
+ * HEADCOUNT AS WORDS — THE STATEMENT READER, IN EVERY ACTIVE LOCALE (2026-11-22).
  *
  * "мне нужны пять рабочих" opened the need intake with NO quantity: the
  * generic headcount reader knew "работников" but not "рабочих", not the
@@ -19,7 +81,7 @@ const TODAY = "2026-11-22";
 const headcount = (s: string) => structureValueStatement(s, TODAY).headcount;
 
 /** [locale, sentence] — each must read 5 people and route to the need intake. */
-const FIVE: ReadonlyArray<readonly [string, string]> = [
+const FIVE_SAID: ReadonlyArray<readonly [string, string]> = [
   // ru
   ["ru", "мне нужны пять рабочих"],
   ["ru", "Мне нужны пять рабочих"],
@@ -70,7 +132,7 @@ const FIVE: ReadonlyArray<readonly [string, string]> = [
 ];
 
 describe("five people, said in words or digits, in every active locale", () => {
-  for (const [locale, sentence] of FIVE) {
+  for (const [locale, sentence] of FIVE_SAID) {
     it(`${locale}: "${sentence}" → headcount 5, a workforce need, the need intake`, () => {
       const v = structureValueStatement(sentence, TODAY);
       expect(v.headcount, "the headcount").toBe(5);
@@ -181,47 +243,7 @@ describe("the digit reader of structureNeed counts the same person nouns", () =>
   }
 });
 
-/**
- * THE NEED FORM'S READER COUNTS THE SAME WORDS (2026-11-22). `structureNeed`
- * — behind the need form's pre-fill and `countPeopleInNeed` — read digits
- * only: "мне нужны пять рабочих" pre-filled no headcount there while the
- * statement reader above read 5. Number words are read as digits first
- * (`digitizeWordNumbers`), so every reader gives the one count.
- */
-describe("structureNeed reads a headcount said in words", () => {
-  const NEED_FIVE: ReadonlyArray<readonly [string, string]> = [
-    ["ru", "мне нужны пять рабочих"],
-    ["ru", "Нужны пять строителей с понедельника"],
-    ["lt", "Man reikia penkių darbuotojų"],
-    ["en", "I need five workers"],
-    ["pl", "Potrzebuję pięciu pracowników"],
-    ["nl", "Ik heb vijf werknemers nodig"],
-    ["de", "Ich brauche fünf Arbeiter"],
-    ["sv", "Jag behöver fem arbetare"],
-  ];
-  for (const [locale, sentence] of NEED_FIVE) {
-    it(`${locale}: "${sentence}" → team size 5, routed to the need intake`, () => {
-      expect(structureNeed({ description: sentence }).teamSize).toBe(5);
-      expect(classifyIntent(sentence).intent).toBe("need-workers");
-    });
-  }
-
-  it("digits and words agree, in both readers", () => {
-    expect(structureNeed({ description: "мне нужны 5 рабочих" }).teamSize).toBe(5);
-    expect(countPeopleInNeed({ description: "мне нужны пять рабочих" })).toBe(5);
-    expect(countPeopleInNeed({ description: "We need three welders" })).toBe(3);
-    expect(countPeopleInNeed({ description: "Reikia trijų suvirintojų" })).toBe(3);
-  });
-
-  it("a measure in words is never a headcount", () => {
-    for (const s of ["Need five years experience", "Reikia penkerių metų patirties", "нужно пять лет опыта", "I need work for five days"]) {
-      expect(structureNeed({ description: s }).teamSize, s).toBeNull();
-    }
-    expect(classifyIntent("I need work for five days").intent).not.toBe("need-workers");
-  });
-});
-
-describe("a compound number is ONE quantity, never one of its parts", () => {
+describe("the statement reader reads a compound or a working time as the need form does", () => {
   for (const [s, n] of [
     ["We need twenty five workers", 25],
     ["We need twenty-five workers", 25],
@@ -229,32 +251,13 @@ describe("a compound number is ONE quantity, never one of its parts", () => {
     ["Potrzebuję dwadzieścia pięć osób", 25],
     ["Reikia dvidešimt penkių darbuotojų", 25],
     ["Need twenty five years experience", null],
-    // A run that adds up to no quantity stays unknown — never 1 or 100.
     ["We need one hundred workers", null],
+    ["Срок выполнения пять рабочих дней", null],
+    ["We need 5 working days", null],
   ] as const) {
-    it(`"${s}" → ${n} in both readers`, () => {
-      expect(structureNeed({ description: s }).teamSize).toBe(n);
+    it(`"${s}" → ${n}, the same as structureNeed`, () => {
       expect(headcount(s)).toBe(n);
+      expect(structureNeed({ description: s }).teamSize).toBe(n);
     });
   }
-});
-
-describe("working days are a duration, not workers", () => {
-  for (const s of ["Срок выполнения 5 рабочих дней", "Срок выполнения пять рабочих дней", "нужно 5 рабочих дней", "We need 5 working days"]) {
-    it(`"${s}" → no headcount`, () => {
-      expect(structureNeed({ description: s }).teamSize).toBeNull();
-      expect(countPeopleInNeed({ description: s })).toBeNull();
-      expect(headcount(s)).toBeNull();
-    });
-  }
-});
-
-describe("digitizeWordNumbers — only whole number words change", () => {
-  it("every other word and mark is kept", () => {
-    expect(digitizeWordNumbers("мне нужны пять рабочих")).toBe("мне нужны 5 рабочих");
-    expect(digitizeWordNumbers("someone needs nineteen tones")).toBe("someone needs 19 tones");
-    expect(digitizeWordNumbers("Potrzebuję pięciu pracowników")).toBe("Potrzebuję 5 pracowników");
-    expect(digitizeWordNumbers("twenty-five, then three")).toBe("25, then 3");
-    expect(digitizeWordNumbers("one hundred")).toBe("one hundred");
-  });
 });

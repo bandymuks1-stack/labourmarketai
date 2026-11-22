@@ -26,7 +26,7 @@ import { readRoleLabel } from "./role-label";
 import {
   workTypeRulesFor,
   isCountUnitWord,
-  measureFollows,
+  WORKING_TIME_AHEAD_RE,
   readTeamComposition,
   type TeamClarification,
   maskServiceNoun,
@@ -35,7 +35,7 @@ import {
 import { recognizeSkills, type RecognizedSkill } from "./skill-recognition";
 import { parseTimeWindow, type TimeWindow } from "./time-window";
 import { extractQuantities } from "./universal-recognition";
-import { parseWordNumber, wordNumberRunValue } from "./word-numbers";
+import { digitizeWordNumbers } from "./word-numbers";
 import { looksSwedish } from "./looks-swedish";
 
 export type ValueAxis = "offer" | "seek";
@@ -295,7 +295,7 @@ function echoAfter(text: string, anchorEnd: number, V: Vocab): string | null {
 
 /** Digits OR word-numbers adjacent to a person/occupation noun → headcount. */
 function detectHeadcount(text: string, folded: string, V: Vocab): number | null {
-  const tokens = text.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  const tokens = digitizeWordNumbers(text, V.swedish).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   const foldedTokens = tokens.map(foldText);
   // A counted PROFESSION noun is a headcount too ("2 mechanikų", "dviejų
   // programuotojų") — the same lexicon the profession fallback reads.
@@ -309,26 +309,14 @@ function detectHeadcount(text: string, folded: string, V: Vocab): number | null 
           r.needles.some((n) => n.length >= 4 && tok.includes(foldText(n))),
         )));
 
-  const wordAt = (i: number): number | null =>
-    i >= 0 && i < tokens.length ? parseWordNumber(tokens[i], V.swedish) : null;
-  /** The number that starts at token `i`, and the token after it. A RUN of
-   *  number words is ONE quantity ("twenty five" → 25, read from its first
-   *  word); a run that adds up to none ("one hundred") is unknown — never one
-   *  of its parts (2026-11-22: "twenty five workers" read as 20). */
+  // Number words are read through the ONE reader the need form uses
+  // (`digitizeWordNumbers`): "пять" is 5, "twenty five" one 25, and a run that
+  // adds up to none ("one hundred") stays words, which count nothing — never
+  // one of its parts (2026-11-22: "twenty five workers" read as 20).
   const numberAt = (i: number): { value: number; end: number } | null => {
-    if (/^\d{1,4}$/.test(tokens[i])) {
-      const n = Number.parseInt(tokens[i], 10);
-      return n >= 1 && n <= 1000 ? { value: n, end: i + 1 } : null;
-    }
-    if (wordAt(i - 1) !== null) return null;
-    const run: number[] = [];
-    let end = i;
-    for (let v = wordAt(end); v !== null; v = wordAt(end)) {
-      run.push(v);
-      end += 1;
-    }
-    const value = run.length > 0 ? wordNumberRunValue(run) : null;
-    return value === null ? null : { value, end };
+    if (!/^\d{1,4}$/.test(tokens[i])) return null;
+    const n = Number.parseInt(tokens[i], 10);
+    return n >= 1 && n <= 1000 ? { value: n, end: i + 1 } : null;
   };
 
   for (let i = 0; i < foldedTokens.length; i++) {
@@ -354,7 +342,7 @@ function detectHeadcount(text: string, folded: string, V: Vocab): number | null 
   };
   // "need 5 working days": a working time is a measure, never people.
   const workingTime = (): boolean =>
-    m?.index !== undefined && measureFollows(folded.slice(m.index + m[0].length - m[2].length), V.swedish);
+    m?.index !== undefined && WORKING_TIME_AHEAD_RE.test(folded.slice(m.index + m[0].length - m[2].length));
   if (m && !isCountUnitWord(m[2], V.swedish) && !qualifiesUnit(m[2]) && !workingTime()) {
     const n = Number.parseInt(m[1], 10);
     if (n >= 1 && n <= 1000) return n;
