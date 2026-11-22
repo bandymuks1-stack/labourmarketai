@@ -4046,7 +4046,7 @@ const pl: Catalogue = {
   "journal.compose.futureDate":
     "Data pracy nie może być w przyszłości — wpis w dzienniku zapisuje pracę, która już się odbyła. Nic nie zostało wysłane.",
   "journal.compose.notesRequired":
-    "Przed zapisaniem opisz, co zostało zrobione. Nic nie zostało wysłane.",
+    "Przed zapisaniem proszę opisać, co zostało zrobione. Nic nie zostało wysłane.",
   "journal.compose.draftFailedTitle": "Nie udało się przygotować tego wpisu",
   "journal.compose.saveFailedTitle": "Nie udało się zapisać tego wpisu",
   "journal.compose.staleDraft":
@@ -4231,11 +4231,11 @@ const pl: Catalogue = {
   "notifications.type.event_weekly_digest_profile_completion":
     "Aby pokazać pasujące oferty, proszę potwierdzić, jaką pracę Państwo wykonują",
   "notifications.type.event_work_task_assigned":
-    "Przypisano ci zadanie",
+    "Przypisano Państwu zadanie",
   "notifications.type.event_workflow_decided":
     "Podjęto decyzję w sprawie Państwa wniosku o zatwierdzenie",
   "notifications.type.event_workflow_delegated":
-    "Przekazano Ci etap zatwierdzania",
+    "Przekazano Państwu etap zatwierdzania",
   "notifications.type.event_workflow_escalated":
     "Etap zatwierdzania przekroczył termin",
   "notifications.type.event_workflow_step_pending":
