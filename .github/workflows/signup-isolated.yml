@@ -216,7 +216,9 @@ concurrency:
 jobs:
   signup-isolated:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # 60, not 45: on 2026-11-22 the walk step alone took 35 min (subcontractor-chain and
+    # free-paths added ~2.5) and the pre-#2887 compatibility build after it was cut at 45.
+    timeout-minutes: 60
     env:
       APP_ORIGIN: http://127.0.0.1:3000
       # Owner P0 2026-11-22 walks, run after SPEC; kept apart from the SPEC line so new entries there never conflict.
