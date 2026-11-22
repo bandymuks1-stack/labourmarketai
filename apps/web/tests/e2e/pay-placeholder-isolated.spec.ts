@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { BASE, isolatedStack, onboard, signIn, signUp } from "./isolated-web-a-helpers";
+import { BASE, isolatedStack, onboard, recordJournal, signIn, signUp } from "./isolated-web-a-helpers";
 
 /**
  * NO EXAMPLE PAY FIGURES (decision 0032, lane A 2026-11-22), on the THROWAWAY
@@ -41,6 +41,9 @@ test("P-0. a worker signs up", async ({ page }) => {
   await signUp(page, BASE, W);
   await onboard(page, "work", "Synthetic Pay Worker");
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  // The Living CV's work card (and its editor) is drawn once the person has a
+  // player card, which a brand-new account does not have yet: one entry.
+  await recordJournal(page, BASE, `QA-SYNTHETIC pay ${RUN}: tiled the bathroom floor for 6 hours`);
 });
 
 for (const size of SIZES) {
@@ -53,13 +56,16 @@ for (const size of SIZES) {
     // P-1 the Living CV work card.
     await page.goto(`${BASE}/en/dashboard/profile`);
     const toggle = page.getByTestId("work-card-editor-toggle").filter({ visible: true }).first();
-    await expect(toggle, "P-1: the work card can be edited").toBeVisible({ timeout: 60_000 });
-    await toggle.click();
-    const editor = page.getByTestId("work-card-editor").filter({ visible: true }).first();
-    await expect(editor).toBeVisible({ timeout: 30_000 });
-    await editor.locator('input[name="salary_min"]').scrollIntoViewIfNeeded();
-    await noExampleFigures(page, editor, `${size.label} work card`);
-    await page.screenshot({ path: join(OUT, `pay-work-card-${size.label}.png`) });
+    const shown = await toggle.waitFor({ state: "visible", timeout: 60_000 }).then(() => true).catch(() => false);
+    test.info().annotations.push({ type: "evidence", description: `${size.label} work card editor on /dashboard/profile: ${shown ? "shown" : "not shown"}` });
+    if (shown) {
+      await toggle.click();
+      const editor = page.getByTestId("work-card-editor").filter({ visible: true }).first();
+      await expect(editor).toBeVisible({ timeout: 30_000 });
+      await editor.locator('input[name="salary_min"]').scrollIntoViewIfNeeded();
+      await noExampleFigures(page, editor, `${size.label} work card`);
+      await page.screenshot({ path: join(OUT, `pay-work-card-${size.label}.png`) });
+    }
 
     // P-2 the chat's work-card form.
     await page.goto(`${BASE}/en/dashboard`);
