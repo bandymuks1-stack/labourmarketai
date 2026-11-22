@@ -8,7 +8,7 @@ import { CONVERSATION_INTENT_SENTENCE_MAX } from "@/lib/ai/registry/agents/conve
 import { rateLimit } from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
-import { intentCatalogue } from "@/lib/conversation/intent-catalogue";
+import { intentCatalogueFor } from "@/lib/conversation/intent-catalogue";
 import { redactIntentSentence, restoreIntentTokens } from "@/lib/conversation/intent-sentence-redaction";
 import { validatePlan } from "@/lib/conversation/intent-plan";
 import { INTENT_REGISTRY, type RoutedIntent } from "@/lib/conversation/intent-registry";
@@ -111,7 +111,7 @@ export async function proposeUnderstandingAction(input: {
   try {
     const outcome = await runAiAgent(
       "conversation_intent",
-      { sentence: redacted.text, locale, identity, intents: intentCatalogue() },
+      { sentence: redacted.text, locale, identity, intents: intentCatalogueFor(identity) },
       {
         locale,
         // A LABEL for the audit row — never the sentence, never the person.
