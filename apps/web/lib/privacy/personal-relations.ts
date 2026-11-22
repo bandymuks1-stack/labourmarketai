@@ -148,9 +148,6 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   // time are theirs to see; the browser's encryption key and auth secret are
   // device credentials, not information about the person, and are left out.
   { table: "web_push_subscriptions", key: "profile_id", omitColumns: ["p256dh", "auth"] },
-  // Open-need threads (20261122160000): the person's own choice to show their
-  // name in one conversation, readable by its participants only.
-  { table: "open_need_identity_disclosures", key: "disclosed_by" },
   { table: "preferred_locations", key: "profile_id" },
   { table: "consented_login_location_signals", key: "profile_id" },
   // How the platform classifies the account for reporting (real / test /
@@ -713,6 +710,10 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // Open-need threads (20261122160000): `disclosed_by` is who pressed "Show my
+  // name" in a conversation; the row's subject is that conversation (its
+  // messages are exported through the conversation relations).
+  "open_need_identity_disclosures",
   // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no
   // content, purged after a day (20261013120000).
   "confirmation_spends",

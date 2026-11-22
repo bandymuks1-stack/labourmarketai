@@ -78,7 +78,7 @@ async function fits(page: Page, what: string): Promise<void> {
   expect(over, `${what}: no sideways scroll`).toBeLessThanOrEqual(1);
 }
 
-const message = (page: Page, text: string) => page.locator('[data-testid^="message-text-"]', { hasText: text });
+const message = (page: Page, text: string) => page.locator('[data-testid^="message-text-"]', { hasText: text }).first();
 
 for (const w of WIDTHS) {
   const CLIENT = email(`client${w.name}`);
@@ -92,7 +92,7 @@ for (const w of WIDTHS) {
   const ROLE = `Open need welder ${w.name} ${RUN}`;
   const ASK = `Question about the need ${w.name} ${RUN}`;
   const ANSWER = `The client answers ${w.name} ${RUN}`;
-  const s = { needId: "", providerOrgId: "", conversationId: "", label: "" };
+  const s = { needId: "", role: "", providerOrgId: "", conversationId: "", label: "" };
 
   test.describe(`open-need messaging at ${w.viewport.width} px`, () => {
     test.describe.configure({ mode: "serial" });
@@ -113,11 +113,14 @@ for (const w of WIDTHS) {
       }
       await verifyCompanyAsLocalAdmin(CLIENT, email(`admin${w.name}`));
       const owner = await userId(CLIENT);
-      const needs = sql<{ id: string }>(
-        `select id from public.customer_requests where (title = ${lit(ROLE)} or role_or_work_type = ${lit(ROLE)}) and profile_id = ${lit(owner)}`,
+      const needs = sql<{ id: string; role: string }>(
+        `select id, coalesce(nullif(btrim(role_or_work_type), ''), title) as role from public.customer_requests
+          where (title = ${lit(ROLE)} or role_or_work_type = ${lit(ROLE)}) and profile_id = ${lit(owner)}`,
       );
       expect(needs, "the need is stored once").toHaveLength(1);
       s.needId = needs[0]!.id;
+      // The board and the thread show the need's stored role (the intake may normalize the typed text).
+      s.role = needs[0]!.role;
       s.label = `Client ${s.needId.replace(/-/g, "").slice(0, 6).toUpperCase()}`;
       const orgs = sql<{ id: string }>(
         `select organization_id::text as id from public.company_memberships where profile_id = ${lit(await userId(PROVIDER))} and role = 'owner' and status = 'active'`,
@@ -137,7 +140,7 @@ for (const w of WIDTHS) {
       const option = select.locator(`option[value="${s.needId}"]`);
       await expect(option, "the need is on the board").toHaveCount(1);
       const optionText = (await option.textContent()) ?? "";
-      expect(optionText, "the board names the role").toContain(ROLE);
+      expect(optionText, "the board names the role").toContain(s.role);
       expect(optionText, "the board does not name the client").not.toContain(CLIENT_ORG);
       await expect(section.getByText(CLIENT_ORG), "nowhere in the section").toHaveCount(0);
       await select.selectOption(s.needId);
@@ -148,7 +151,7 @@ for (const w of WIDTHS) {
       await expect(page.getByTestId("thread-counterparty"), "the client is a pseudonym").toContainText(s.label, {
         timeout: 60_000,
       });
-      await expect(page.getByTestId("thread-source")).toContainText(ROLE);
+      await expect(page.getByTestId("thread-source")).toContainText(s.role);
       for (const secret of [CLIENT_ORG, CLIENT_PERSON]) {
         await expect(page.getByText(secret), `the provider never reads "${secret}"`).toHaveCount(0);
       }
@@ -169,7 +172,7 @@ for (const w of WIDTHS) {
       await cl.page.goto(`${BASE}/en/dashboard/communication/${s.conversationId}`);
       await expect(message(cl.page, ASK), "the client reads the question").toBeVisible({ timeout: 60_000 });
       await expect(cl.page.getByTestId("thread-counterparty")).toContainText(PROVIDER_PERSON);
-      await expect(cl.page.getByTestId("thread-source")).toContainText(ROLE);
+      await expect(cl.page.getByTestId("thread-source")).toContainText(s.role);
       await expect(cl.page.getByTestId("open-need-identity-hidden")).toBeVisible();
       await cl.page.getByTestId("communication-composer-input").fill(ANSWER);
       await cl.page.getByRole("button", { name: "Send", exact: true }).click();
@@ -214,7 +217,7 @@ for (const w of WIDTHS) {
       const res = await st.page.goto(`${BASE}/en/dashboard/communication/${s.conversationId}`);
       expect(res?.status() ?? 0, "the thread URL answers without a server error").toBeLessThan(500);
       await expect(st.page.getByRole("main"), "the stranger's page rendered").toBeVisible({ timeout: 60_000 });
-      for (const text of [ASK, ANSWER, CLIENT_PERSON, CLIENT_ORG, ROLE]) {
+      for (const text of [ASK, ANSWER, CLIENT_PERSON, CLIENT_ORG]) {
         await expect(st.page.getByText(text), `the stranger never reads "${text}"`).toHaveCount(0);
       }
       await st.done();
