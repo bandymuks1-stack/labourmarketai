@@ -46,6 +46,8 @@ export function TeamDemandOfferForm({
   defaultOpen?: boolean;
 }) {
   const t = useTranslations("teamDemandOffer");
+  const tStart = useTranslations("opportunities.urgency");
+  const tSkill = useTranslations("skillNames");
   const locale = useLocale();
   const router = useRouter();
   const uid = useId();
@@ -68,6 +70,11 @@ export function TeamDemandOfferForm({
     // Once, on mount: `load` reads nothing that changes before it runs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // A stored start code reads as its label; anything else is the client's
+  // own words and is shown as written. Skill and tool slugs read as labels.
+  const startLabel = (v: string) => (tStart.has(v) ? tStart(v) : v);
+  const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
   function refusalText(status: TeamOfferRefusal): string {
     return t(`refusal.${status}`);
@@ -156,12 +163,36 @@ export function TeamDemandOfferForm({
                   <option value="">{t("demandPlaceholder")}</option>
                   {data.demands.map((d) => (
                     <option key={d.requestId} value={d.requestId} disabled={d.openOfferId !== null}>
-                      {[d.roleText ?? "-", d.country ?? "-", d.companyName ?? "-"].join(" / ")}
+                      {[d.roleText ?? "-", d.country ?? "-", d.startPeriod ? startLabel(d.startPeriod) : null]
+                        .filter(Boolean)
+                        .join(" / ")}
                       {d.teamSize ? ` (${d.teamSize})` : ""}
                       {d.openOfferId ? ` - ${t("alreadyOffered")}` : ""}
                     </option>
                   ))}
                 </Select>
+                {(() => {
+                  // WHAT the chosen need asks for — never whose it is.
+                  const d = data.demands.find((x) => x.requestId === requestId);
+                  if (!d) return null;
+                  const rows: Array<[string, string]> = [];
+                  if (d.teamSize) rows.push([t("need.people"), String(d.teamSize)]);
+                  if (d.startPeriod) rows.push([t("need.start"), startLabel(d.startPeriod)]);
+                  if (d.duration) rows.push([t("need.duration"), d.duration]);
+                  if (d.languageRequirement) rows.push([t("need.language"), d.languageRequirement]);
+                  if (d.needSkillSlugs.length) rows.push([t("need.skills"), d.needSkillSlugs.map(skillLabel).join(", ")]);
+                  if (d.requiredTools.length) rows.push([t("need.tools"), d.requiredTools.map(skillLabel).join(", ")]);
+                  return rows.length ? (
+                    <dl className="grid gap-x-3 gap-y-1 text-xs sm:grid-cols-[auto_1fr]" data-testid={`team-offer-need-facts-${teamId}`}>
+                      {rows.map(([k, v]) => (
+                        <div key={k} className="contents">
+                          <dt className="text-text-muted">{k}</dt>
+                          <dd className="text-text-primary">{v}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : null;
+                })()}
                 <label className="text-xs text-text-secondary" htmlFor={`${uid}-note`}>
                   {t("noteLabel")}
                 </label>
@@ -226,7 +257,8 @@ export function TeamDemandOfferForm({
                   {data.sent.map((o) => (
                     <li key={o.offerId} className="flex flex-col gap-2 text-xs text-text-primary">
                       <div className="flex flex-wrap items-center gap-2">
-                      <span>{[o.roleText ?? "-", o.country ?? "-", o.companyName ?? "-"].join(" / ")}</span>
+                      {/* The client is named only once it answered yes (the database decides). */}
+                      <span>{[o.roleText ?? "-", o.country ?? "-", o.companyName].filter(Boolean).join(" / ")}</span>
                       <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                         {t(`status.${o.status}`)}
                       </span>

@@ -19628,6 +19628,14 @@
     "noDemand": "Det finns inget öppet behov att erbjuda mot just nu.",
     "demandLabel": "Behov",
     "demandPlaceholder": "Välj ett behov",
+    "need": {
+      "people": "Personer",
+      "start": "Början",
+      "duration": "Varaktighet",
+      "language": "Språk",
+      "skills": "Färdigheter",
+      "tools": "Verktyg"
+    },
     "alreadyOffered": "redan erbjudet",
     "noteLabel": "Meddelande till företaget (valfritt)",
     "notePlaceholder": "Till exempel: arbetslag på 3, kan börja om två veckor",
