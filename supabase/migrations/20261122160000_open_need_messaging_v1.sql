@@ -56,10 +56,20 @@
 --   9. conversation_source_context — one 'open_need' branch.
 --  10. list_open_demand_for_team_offer_v1 — company_name is NULL.
 --
+--  11. The other doors found by the independent review (R2): each answer is
+--      narrowed, nothing else changes —
+--      revoke_conversation_participant refuses every non-admin in an
+--        open-need thread (one constant answer: no guess test, no kick-out);
+--      my_direct_conversations_with_workers_v1 skips threads the caller is
+--        blinded in;
+--      team_offer_thread_party_v1 / list_team_demand_offers_for_team_v1 name
+--        the client to the supplier only once the client ACCEPTED the offer;
+--      send_work_instruction(_to_project) never reuses an open-need thread.
+--
 -- NOT CHANGED: conversations policies; participants/messages INSERT and UPDATE
 -- policies; profiles / customer_requests / companies; team_demand_offers;
--- team_offer_thread_party_v1 (a thread opened from a LIVE team offer still
--- returns the counterpart to the supplier — a separate owner decision).
+-- offer_team_to_demand_v1. The need's own free-text title is the client's
+-- words and is shown as it is on the board.
 --
 -- Rollback: supabase/rollbacks/20261122160000_open_need_messaging_v1.down.sql
 -- Apply via Supabase MCP apply_migration only.
@@ -111,15 +121,16 @@ stable
 security definer
 set search_path = public, pg_temp
 as $$
+  -- Keyed on the THREAD, not on the live need: the door's caller (created_by)
+  -- is the provider. Deleting or re-owning the need never un-blinds it.
   select exists (
     select 1
       from public.conversations c
-      join public.customer_requests cr on cr.id = c.source_id
       join public.conversation_participants me
         on me.conversation_id = c.id and me.profile_id = auth.uid()
      where c.id = p_conversation_id
        and c.source_type = 'open_need'
-       and cr.profile_id is distinct from auth.uid()
+       and c.created_by = auth.uid()
        and not exists (select 1 from public.open_need_identity_disclosures d
                         where d.conversation_id = c.id)
   );
@@ -134,13 +145,16 @@ stable
 security definer
 set search_path = public, pg_temp
 as $$
+  -- The caller is the hidden side: a participant of an undisclosed open-need
+  -- thread that it did not open.
   select exists (
     select 1
       from public.conversations c
-      join public.customer_requests cr on cr.id = c.source_id
+      join public.conversation_participants me
+        on me.conversation_id = c.id and me.profile_id = auth.uid()
      where c.id = p_conversation_id
        and c.source_type = 'open_need'
-       and cr.profile_id = auth.uid()
+       and c.created_by is distinct from auth.uid()
        and not exists (select 1 from public.open_need_identity_disclosures d
                         where d.conversation_id = c.id)
   );
@@ -268,8 +282,7 @@ as $$
            -- OPEN NEED (20261122160000): the need's owner is not named to the
            -- provider until the owner discloses in THIS thread.
            when c.source_type = 'open_need'
-                and exists (select 1 from public.customer_requests cr
-                             where cr.id = c.source_id and cr.profile_id = cp.profile_id)
+                and cp.profile_id is distinct from c.created_by
                 and not exists (select 1 from public.open_need_identity_disclosures d
                                  where d.conversation_id = c.id)
              then 'Client ' || upper(left(regexp_replace(c.source_id::text, '[^a-zA-Z0-9]', '', 'g'), 6))
@@ -529,10 +542,9 @@ begin
   if exists (
     select 1
       from public.conversations c
-      join public.customer_requests cr on cr.id = c.source_id
      where c.id = new.conversation_id
        and c.source_type = 'open_need'
-       and cr.profile_id = new.uploader_id
+       and c.created_by is distinct from new.uploader_id
        and not exists (select 1 from public.open_need_identity_disclosures d
                         where d.conversation_id = c.id)
   ) then
@@ -565,5 +577,346 @@ as $$
 $$;
 revoke all on function public.conversation_live_recipients_v1(uuid, uuid) from public, anon, authenticated;
 grant execute on function public.conversation_live_recipients_v1(uuid, uuid) to service_role;
+
+-- 11) The other doors R2 found (2026-11-22): each one answer changed, nothing else.
+CREATE OR REPLACE FUNCTION public.revoke_conversation_participant(p_conversation_id uuid, p_profile_id uuid)
+ RETURNS text
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  uid uuid := auth.uid();
+  v_creator uuid;
+  v_revoked timestamptz;
+begin
+  if uid is null then
+    raise exception 'not_authenticated';
+  end if;
+  select created_by into v_creator
+    from public.conversations where id = p_conversation_id;
+  if v_creator is null then
+    raise exception 'conversation_not_found';
+  end if;
+  if v_creator <> uid and not public.is_admin() then
+    raise exception 'not_authorized';
+  end if;
+  -- OPEN NEED (20261122160000): nobody but an admin removes anyone from an
+  -- open-need thread. The one constant answer, before any lookup, so the
+  -- provider cannot test a guessed profile id against it.
+  if exists (select 1 from public.conversations c
+              where c.id = p_conversation_id and c.source_type = 'open_need')
+     and not public.is_admin() then
+    raise exception 'not_authorized';
+  end if;
+  -- The creator's own grant is not revocable through this path — a thread
+  -- without its owner is a different product decision, not a side effect.
+  if p_profile_id = v_creator then
+    raise exception 'cannot_revoke_creator';
+  end if;
+  select revoked_at into v_revoked
+    from public.conversation_participants
+   where conversation_id = p_conversation_id
+     and profile_id = p_profile_id;
+  if not found then
+    raise exception 'participant_not_found';
+  end if;
+  if v_revoked is not null then
+    return 'already_revoked';
+  end if;
+
+  update public.conversation_participants
+     set revoked_at = now(),
+         revoked_by = uid
+   where conversation_id = p_conversation_id
+     and profile_id = p_profile_id;
+
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (
+    uid,
+    'conversation_participant_revoked',
+    'conversations',
+    p_conversation_id,
+    jsonb_build_object('profile_id', p_profile_id)
+  );
+
+  return 'ok';
+end $function$;
+revoke all on function public.revoke_conversation_participant(uuid, uuid) from public, anon;
+grant execute on function public.revoke_conversation_participant(uuid, uuid) to authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.my_direct_conversations_with_workers_v1(p_worker_ids uuid[])
+ RETURNS TABLE(worker_id uuid, conversation_id uuid)
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  if cardinality(p_worker_ids) > 500 then
+    raise exception 'Too many workers requested' using errcode = '22023';   -- never a silent empty answer
+  end if;
+  return query
+  select w.id, mine.conversation_id
+    from public.workers w
+    join public.conversation_participants theirs on theirs.profile_id = w.profile_id and theirs.revoked_at is null
+    join public.conversation_participants mine on mine.conversation_id = theirs.conversation_id
+                                              and mine.profile_id = auth.uid() and mine.revoked_at is null
+    join public.conversations c on c.id = mine.conversation_id and c.kind = 'direct'
+   where auth.uid() is not null
+     and w.id = any (p_worker_ids)
+     -- OPEN NEED (20261122160000): a blinded caller learns nothing about who
+     -- the other side of an undisclosed open-need thread is.
+     and not public.open_need_viewer_blinded_v1(mine.conversation_id);
+end;
+$function$;
+revoke all on function public.my_direct_conversations_with_workers_v1(uuid[]) from public, anon;
+grant execute on function public.my_direct_conversations_with_workers_v1(uuid[]) to authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.team_offer_thread_party_v1(p_offer_id uuid)
+ RETURNS TABLE(side text, offer_status text, counterpart_profile_id uuid, subject text)
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_side text;
+  o      record;
+begin
+  if auth.uid() is null or p_offer_id is null then
+    return;
+  end if;
+  v_side := public.team_offer_party_side_v1(p_offer_id);
+  if v_side is null then
+    return;
+  end if;
+  select t.status, t.offered_by, t.request_id, t.team_org_id into o
+    from public.team_demand_offers t where t.id = p_offer_id;
+  if not found then
+    return;
+  end if;
+  return query
+  select v_side,
+         o.status,
+         -- OPEN NEED (20261122160000): the supplier learns who the client is
+         -- only once the client ACCEPTED the offer (the approved cooperation
+         -- step); before that the app talks through the open-need thread.
+         case when v_side = 'supplier'
+              then case when o.status in ('accepted', 'assigned')
+                        then (select cr.profile_id from public.customer_requests cr where cr.id = o.request_id)
+                   end
+              else o.offered_by
+         end,
+         (select nullif(btrim(g.display_name), '') from public.organizations g where g.id = o.team_org_id);
+end;
+$function$;
+revoke all on function public.team_offer_thread_party_v1(uuid) from public, anon;
+grant execute on function public.team_offer_thread_party_v1(uuid) to authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.list_team_demand_offers_for_team_v1(p_team_org_id uuid)
+ RETURNS TABLE(offer_id uuid, request_id uuid, role_text text, country text, company_name text, status text, offered_at timestamp with time zone, responded_at timestamp with time zone, assignment_id uuid)
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  uid uuid := auth.uid();
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  if not coalesce(
+       public.manages_organization(p_team_org_id)
+       or exists (select 1 from public.organizations g
+                   where g.id = p_team_org_id and g.owner_profile_id = uid),
+       false) then
+    return;
+  end if;
+  return query
+  select o.id, o.request_id,
+         coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')),
+         cr.country,
+         -- OPEN NEED (20261122160000): named only once the client accepted.
+         case when o.status in ('accepted', 'assigned')
+              then coalesce(nullif(trim(c.display_name), ''), nullif(trim(c.legal_name), ''))
+         end,
+         o.status, o.offered_at, o.responded_at, o.assignment_id
+    from public.team_demand_offers o
+    join public.customer_requests cr on cr.id = o.request_id
+    left join public.companies c on c.id = public.demand_company_id_v1(cr.organization_id, cr.profile_id)
+   where o.team_org_id = p_team_org_id
+   order by o.offered_at desc
+   limit 100;
+end;
+$function$;
+revoke all on function public.list_team_demand_offers_for_team_v1(uuid) from public, anon;
+grant execute on function public.list_team_demand_offers_for_team_v1(uuid) to authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.send_work_instruction(p_worker_profile_id text, p_body text, p_original_language text DEFAULT NULL::text)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  uid       uuid := auth.uid();
+  worker_pid uuid := nullif(p_worker_profile_id, '')::uuid;
+  w_id      uuid;
+  conv_id   uuid;
+  msg_id    uuid;
+  cleaned   text := nullif(trim(coalesce(p_body, '')), '');
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  if worker_pid is null then
+    raise exception 'Worker is required' using errcode = '22023';
+  end if;
+  if cleaned is null then
+    raise exception 'Instruction text is required' using errcode = '22023';
+  end if;
+
+  select id into w_id from public.workers where profile_id = worker_pid;
+  if w_id is null then
+    raise exception 'No such worker' using errcode = 'P0002';
+  end if;
+
+  -- Relationship gate: the caller must MANAGE this worker (active roster link to
+  -- a company/agency the caller owns), or be an admin. Prevents instructing an
+  -- unrelated worker.
+  if not (
+    exists (
+      select 1 from public.company_workers cw
+       where cw.worker_id = w_id and cw.status = 'active'
+         and public.owns_company(cw.company_id)
+    )
+    or exists (
+      select 1 from public.agency_workers aw
+       where aw.worker_id = w_id and aw.status = 'active'
+         and public.owns_agency(aw.agency_id)
+    )
+    or public.is_admin()
+  ) then
+    raise exception 'Not authorized to instruct this worker' using errcode = '42501';
+  end if;
+
+  -- Find an existing direct conversation that already has BOTH the caller and
+  -- the worker as participants; otherwise create one and add both.
+  select c.id into conv_id
+    from public.conversations c
+    join public.conversation_participants p1
+      on p1.conversation_id = c.id and p1.profile_id = uid
+    join public.conversation_participants p2
+      on p2.conversation_id = c.id and p2.profile_id = worker_pid
+   where c.kind = 'direct'
+     -- OPEN NEED (20261122160000): an instruction never lands in, or tests,
+     -- an anonymous open-need thread.
+     and c.source_type is distinct from 'open_need'
+   order by c.created_at asc
+   limit 1;
+
+  if conv_id is null then
+    insert into public.conversations (subject, kind, created_by)
+      values (null, 'direct', uid)
+      returning id into conv_id;
+    insert into public.conversation_participants (conversation_id, profile_id, added_by)
+      values (conv_id, uid, uid), (conv_id, worker_pid, uid);
+  end if;
+
+  insert into public.conversation_messages
+    (conversation_id, author_id, body, is_instruction, original_language, translation_status)
+    values (conv_id, uid, left(cleaned, 10000), true,
+            nullif(trim(coalesce(p_original_language, '')), ''), 'unavailable')
+    returning id into msg_id;
+
+  update public.conversations set updated_at = now() where id = conv_id;
+  return msg_id;
+end;
+$function$;
+revoke all on function public.send_work_instruction(text, text, text) from public, anon;
+grant execute on function public.send_work_instruction(text, text, text) to authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.send_work_instruction_to_project(p_worker_profile_id text, p_body text, p_original_language text DEFAULT NULL::text, p_project_id text DEFAULT NULL::text)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  uid        uuid := auth.uid();
+  worker_pid uuid := nullif(p_worker_profile_id, '')::uuid;
+  pid        uuid := nullif(p_project_id, '')::uuid;
+  w_id       uuid;
+  conv_id    uuid;
+  msg_id     uuid;
+  cleaned    text := nullif(trim(coalesce(p_body, '')), '');
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  if worker_pid is null then
+    raise exception 'Worker is required' using errcode = '22023';
+  end if;
+  if pid is null then
+    raise exception 'Project is required' using errcode = '22023';
+  end if;
+  if cleaned is null then
+    raise exception 'Instruction text is required' using errcode = '22023';
+  end if;
+
+  select id into w_id from public.workers where profile_id = worker_pid;
+  if w_id is null then
+    raise exception 'No such worker' using errcode = 'P0002';
+  end if;
+
+  if not (
+    (
+      (
+        exists (
+          select 1 from public.project_worker_assignments pwa
+           where pwa.project_id = pid and pwa.worker_id = w_id and pwa.status = 'active'
+        )
+        or coalesce(public.team_work_context_v1(worker_pid, pid), false)
+      )
+      and public.can_manage_project(pid)
+    )
+    or public.is_admin()
+  ) then
+    raise exception 'Not authorized to instruct this worker on this project'
+      using errcode = '42501';
+  end if;
+
+  select c.id into conv_id
+    from public.conversations c
+    join public.conversation_participants p1
+      on p1.conversation_id = c.id and p1.profile_id = uid
+    join public.conversation_participants p2
+      on p2.conversation_id = c.id and p2.profile_id = worker_pid
+   where c.kind = 'direct'
+     -- OPEN NEED (20261122160000): an instruction never lands in, or tests,
+     -- an anonymous open-need thread.
+     and c.source_type is distinct from 'open_need'
+   order by c.created_at asc
+   limit 1;
+
+  if conv_id is null then
+    insert into public.conversations (subject, kind, created_by)
+      values (null, 'direct', uid)
+      returning id into conv_id;
+    insert into public.conversation_participants (conversation_id, profile_id, added_by)
+      values (conv_id, uid, uid), (conv_id, worker_pid, uid);
+  end if;
+
+  insert into public.conversation_messages
+    (conversation_id, author_id, body, is_instruction, original_language, translation_status, project_id)
+    values (conv_id, uid, left(cleaned, 10000), true,
+            nullif(trim(coalesce(p_original_language, '')), ''), 'unavailable', pid)
+    returning id into msg_id;
+
+  update public.conversations set updated_at = now() where id = conv_id;
+  return msg_id;
+end;
+$function$;
+revoke all on function public.send_work_instruction_to_project(text, text, text, text) from public, anon;
+grant execute on function public.send_work_instruction_to_project(text, text, text, text) to authenticated, service_role;
 
 commit;

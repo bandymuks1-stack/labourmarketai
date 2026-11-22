@@ -84,7 +84,9 @@ create function public._onm_take(p text) returns void language sql as \$f\$
     select p2.oid::regprocedure::text || pg_get_functiondef(p2.oid) || coalesce(p2.proacl::text, '') as x
       from pg_proc p2 join pg_namespace n on n.oid = p2.pronamespace
      where n.nspname = 'public' and p2.prokind = 'f' and p2.proname not like '\_onm\_%'
-       and p2.proname not in ('open_need_message_party_v1','open_need_conversation_open_v1','disclose_open_need_identity_v1','open_need_viewer_blinded_v1','open_need_caller_hidden_v1','conversation_live_recipients_v1','conversation_id_of_path_v1','conversation_attachment_hidden_uploader_guard_v1','conversation_counterpart_identities','conversation_source_context','list_open_demand_for_team_offer_v1')) s
+       and p2.proname not in ('open_need_message_party_v1','open_need_conversation_open_v1','disclose_open_need_identity_v1','open_need_viewer_blinded_v1','open_need_caller_hidden_v1','conversation_live_recipients_v1','conversation_id_of_path_v1','conversation_attachment_hidden_uploader_guard_v1','conversation_counterpart_identities','conversation_source_context','list_open_demand_for_team_offer_v1',
+         'revoke_conversation_participant','my_direct_conversations_with_workers_v1','team_offer_thread_party_v1',
+         'list_team_demand_offers_for_team_v1','send_work_instruction','send_work_instruction_to_project')) s
   union all
   select p, 'policies', md5(string_agg(x, '|' order by x)) from (
     select schemaname || tablename || policyname || coalesce(qual, '') || coalesce(with_check, '') || array_to_string(roles, ',') || cmd as x
@@ -115,8 +117,19 @@ insert into public.company_memberships(organization_id, profile_id, role, status
 insert into public.customer_requests(id, profile_id, organization_id, title, role_or_work_type, country, status, kind) values
   ('$N1','$CLIENT','$OC','Welders for Client Co','Welder','LT','submitted','company_request'),
   ('$N2','$CLIENT','$OC','Fitters for Client Co','Fitter','LT','submitted','company_request');
+insert into public.workers(id, profile_id) values ('0e0e0000-0000-4000-8000-0000000000b1','$CLIENT');
 set session_replication_role = origin;
 
+-- A stack that already replayed this migration (supabase start) is first
+-- rolled back INSIDE this transaction, so BEFORE is the state without it.
+select (to_regprocedure('public.open_need_conversation_open_v1(uuid,uuid)') is not null) as onm_applied \\gset
+\\if :onm_applied
+delete from public.conversations where source_type = 'open_need';
+SQL
+body "$DOWN"
+cat <<SQL
+\\echo __NOTE|the stack had the migration: BEFORE is taken after its rollback
+\\endif
 select public._onm_take('before');
 \\echo __PHASE|BEFORE
 SQL
@@ -199,6 +212,33 @@ SQL
 check "client: a storage upload while hidden is refused" "ERROR: new row violates row-level security policy for table \"objects\"" "$CLIENT" "insert into storage.objects(bucket_id, name) values ('conversation-attachments', $T::text || '/$CLIENT/0e0e0000-0000-4000-8000-0000000000f1/a.pdf') returning 'x'"
 check "client: registering an attachment while hidden is refused" "ERROR: attachments wait until the name is shown" "$CLIENT" "select public.register_conversation_message_attachment('0e0e0000-0000-4000-8000-0000000000f2', (select id from public.conversation_messages where author_id = '$CLIENT' limit 1), 'a.pdf', 'application/pdf', 10, $T::text || '/$CLIENT/0e0e0000-0000-4000-8000-0000000000f2/a.pdf')::text"
 check "agency: its own upload still works" "x" "$AGENT" "insert into storage.objects(bucket_id, name) values ('conversation-attachments', $T::text || '/$AGENT/0e0e0000-0000-4000-8000-0000000000f3/a.pdf') returning 'x'"
+# ── the other doors (R2) ─────────────────────────────────────────────────
+check "R2 guess test: revoking the right guess is refused with the one answer" "ERROR: not_authorized" "$AGENT" "select public.revoke_conversation_participant($T, '$CLIENT')"
+check "R2 guess test: revoking a wrong guess gets the same answer" "ERROR: not_authorized" "$AGENT" "select public.revoke_conversation_participant($T, '$STRANGER')"
+check "R2 guess test: the client is still a live participant" "1" postgres "select count(*)::text from public.conversation_participants where conversation_id = $T and profile_id = '$CLIENT' and revoked_at is null"
+check "R2 worker lookup: the blinded agency learns nothing from the client worker id" "0" "$AGENT" "select count(*)::text from public.my_direct_conversations_with_workers_v1(array['0e0e0000-0000-4000-8000-0000000000b1']::uuid[])"
+check "R2 worker lookup: the client (not blinded) still finds its own thread" "1" "$CLIENT" "select count(*)::text from public.my_direct_conversations_with_workers_v1(array['0e0e0000-0000-4000-8000-0000000000b1']::uuid[])"
+check "R2 offer path: the agency offers itself to the need" "created" "$AGENT" "select public.offer_team_to_demand_v1('$OA', '$N1', null)->>'outcome'"
+check "R2 offer path: its sent offers do not name the client" "1|" "$AGENT" "select count(*)::text || '|' || coalesce(string_agg(company_name, ','), '') from public.list_team_demand_offers_for_team_v1('$OA') where request_id = '$N1'"
+check "R2 offer path: the offer thread gives the supplier no counterpart" "supplier|offered|" "$AGENT" "select side || '|' || offer_status || '|' || coalesce(counterpart_profile_id::text, '') from public.team_offer_thread_party_v1((select id from public.team_demand_offers where request_id = '$N1' and team_org_id = '$OA'))"
+check "R2 offer path: the client (receiver) still sees the offering person" "receiver|$AGENT" "$CLIENT" "select side || '|' || counterpart_profile_id::text from public.team_offer_thread_party_v1((select offer_id from public.list_team_offers_for_request_v1('$N1') where team_org_id = '$OA'))"
+cat <<SQL
+savepoint onm_accept;
+update public.team_demand_offers set status = 'accepted', responded_at = now() where request_id = '$N1' and team_org_id = '$OA';
+SQL
+check "R2 offer path: once the client ACCEPTED, the supplier is told who it is" "Client Co|$CLIENT" "$AGENT" "select (select company_name from public.list_team_demand_offers_for_team_v1('$OA') where request_id = '$N1') || '|' || (select counterpart_profile_id::text from public.team_offer_thread_party_v1((select id from public.team_demand_offers where request_id = '$N1' and team_org_id = '$OA')))"
+cat <<SQL
+rollback to savepoint onm_accept;
+SQL
+check "R2 instructions: neither instruction door reuses an open-need thread" "2" postgres "select count(*)::text from pg_proc where proname in ('send_work_instruction','send_work_instruction_to_project') and pg_get_functiondef(oid) like '%source_type is distinct from ''open_need''%'"
+cat <<SQL
+savepoint onm_need_gone;
+delete from public.customer_requests where id = '$N1';
+SQL
+check "R2 need deleted by an admin: the agency stays blinded (keyed on the thread)" "true|1|$LABEL" "$AGENT" "select public.open_need_viewer_blinded_v1($T)::text || '|' || (select count(*) from public.conversation_participants where conversation_id = $T)::text || '|' || coalesce((select display_name from public.conversation_counterpart_identities(array[$T])), '')"
+cat <<SQL
+rollback to savepoint onm_need_gone;
+SQL
 # ── disclosure ───────────────────────────────────────────────────────────
 check "the agency cannot disclose for the client" "ERROR: not allowed" "$AGENT" "select public.disclose_open_need_identity_v1($T)::text"
 check "a stranger cannot disclose" "ERROR: not allowed" "$STRANGER" "select public.disclose_open_need_identity_v1($T)::text"
@@ -267,6 +307,7 @@ pass=0; fail=0; name=""; exp=""
 while IFS= read -r line; do
   case "$line" in
     __PHASE\|*) echo "${line#__PHASE|}";;
+    __NOTE\|*) echo "  NOTE  ${line#__NOTE|}";;
     __N\|*) rest="${line#__N|}"; name="${rest%%~*}"; exp="${rest#*~}";;
     __R\|*) got="${line#__R|}"
       if [ "$got" = "$exp" ]; then echo "  PASS  $name"; pass=$((pass+1)); else echo "  FAIL  $name (expected [$exp], got [$got])"; fail=$((fail+1)); fi;;

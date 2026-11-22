@@ -93,16 +93,17 @@ describe("migration — one channel, the client hidden until it discloses", () =
     expect(UP).not.toMatch(/create policy [a-z_]+ on public\.open_need_identity_disclosures\s+for (insert|update|delete|all)/);
   });
 
-  it("the name function hides only the need's owner in an open-need thread, and only until disclosure", () => {
+  it("the name function hides the side that did not open the thread, and only until disclosure", () => {
     const f = UP.slice(UP.indexOf("create or replace function public.conversation_counterpart_identities"));
     expect(f).toMatch(
-      /when c\.source_type = 'open_need'\s+and exists \(select 1 from public\.customer_requests cr\s+where cr\.id = c\.source_id and cr\.profile_id = cp\.profile_id\)\s+and not exists \(select 1 from public\.open_need_identity_disclosures d/,
+      /when c\.source_type = 'open_need'\s+and cp\.profile_id is distinct from c\.created_by\s+and not exists \(select 1 from public\.open_need_identity_disclosures d/,
     );
     expect(f).toMatch(/then 'client ' \|\| upper\(left\(regexp_replace\(c\.source_id::text/);
   });
 
   it("the board stops naming the client and keeps its signature", () => {
-    const b = UP.slice(UP.indexOf("create or replace function public.list_open_demand_for_team_offer_v1"));
+    const start = UP.indexOf("create or replace function public.list_open_demand_for_team_offer_v1");
+    const b = UP.slice(start, UP.indexOf("create or replace function", start + 10));
     expect(b).toMatch(/company_name text/);
     expect(b).toMatch(/null::text,/);
     expect(b).not.toMatch(/coalesce\(nullif\(trim\(c\.display_name\)/);
@@ -114,6 +115,49 @@ describe("migration — one channel, the client hidden until it discloses", () =
     expect(DOWN).toMatch(/drop function if exists public\.open_need_conversation_open_v1\(uuid, uuid\)/);
     expect(DOWN).toMatch(/drop view if exists public\.conversation_messages_visible_v1/);
     expect(DOWN).toMatch(/drop function if exists public\.disclose_open_need_identity_v1\(uuid\)/);
+  });
+});
+
+describe("the other doors (independent review R2) — narrowed, nothing else", () => {
+  it("blinding is keyed on the thread (who opened it), never on the live need", () => {
+    const b = fnBody(UP, "open_need_viewer_blinded_v1");
+    expect(b).toMatch(/c\.created_by = auth\.uid\(\)/);
+    expect(b).not.toMatch(/customer_requests/);
+    expect(UP).toMatch(/and cp\.profile_id is distinct from c\.created_by\s+and not exists/);
+  });
+
+  it("no guess test through revoking a participant", () => {
+    expect(UP).toMatch(/c\.id = p_conversation_id and c\.source_type = 'open_need'\)\s+and not public\.is_admin\(\) then\s+raise exception 'not_authorized'/);
+  });
+
+  it("the worker-thread lookup skips a blinded caller's threads", () => {
+    expect(UP).toMatch(/and not public\.open_need_viewer_blinded_v1\(mine\.conversation_id\);/);
+  });
+
+  it("an offer names the client to the supplier only once the client accepted", () => {
+    expect(UP).toMatch(/then case when o\.status in \('accepted', 'assigned'\)/);
+    expect(UP).toMatch(/case when o\.status in \('accepted', 'assigned'\)\s+then coalesce\(nullif\(trim\(c\.display_name\)/);
+    const app = read("lib/company/team-offer-conversation.ts");
+    expect(app).toMatch(/if \(!counterpart && side === "supplier"\)/);
+    expect(app).toMatch(/rpc\("open_need_conversation_open_v1"/);
+  });
+
+  it("work instructions never reuse an open-need thread", () => {
+    expect((UP.match(/and c\.source_type is distinct from 'open_need'/g) ?? []).length).toBe(2);
+  });
+
+  it("the rollback restores every narrowed door", () => {
+    for (const f of [
+      "revoke_conversation_participant",
+      "my_direct_conversations_with_workers_v1",
+      "team_offer_thread_party_v1",
+      "list_team_demand_offers_for_team_v1",
+      "send_work_instruction",
+      "send_work_instruction_to_project",
+    ]) {
+      expect(DOWN, f).toContain(`create or replace function public.${f}(`);
+    }
+    expect(DOWN).not.toMatch(/source_type is distinct from 'open_need'/);
   });
 });
 

@@ -27,6 +27,8 @@ import {
  *       opens one thread; the provider writes; the client is shown only as "Client XXXXXX";
  *   O-2 the client reads it under the need, sees the provider's person, is told its name is
  *       hidden, and answers; the provider reads the answer, still without the client's name;
+ *   O-2b the provider offers itself to the need: the sent offer does not name the client, the offer's
+ *       thread is the same anonymous thread, and the offer read returns no client id;
  *   O-3 the client shows its name; from then on the provider sees it; both messages survive a
  *       reload;
  *   O-4 the stranger opens the thread URL: its own page renders, and it reads nothing — in the
@@ -222,6 +224,37 @@ for (const w of WIDTHS) {
         await rowsAs(PROVIDER, `conversation_participants?profile_id=eq.${s.clientId}&select=conversation_id`),
         "asking for the client's id directly returns nothing",
       ).toHaveLength(0);
+    });
+
+    test(`O-2b (${w.name}). an offer does not reveal the client; its thread is the same anonymous one`, async ({ browser }) => {
+      const { page, done } = await open(browser, w, PROVIDER);
+      await page.goto(`${BASE}/en/dashboard/company/people`);
+      const section = page.getByTestId(`team-demand-offer-section-${s.providerOrgId}`);
+      await expect(section).toBeVisible({ timeout: 60_000 });
+      if ((await section.getAttribute("open")) === null) await section.locator("summary").click();
+      await section.getByTestId(`team-offer-demand-${s.providerOrgId}`).selectOption(s.needId);
+      await section.getByTestId(`team-offer-submit-${s.providerOrgId}`).click();
+      const sent = section.getByTestId(`team-offer-sent-${s.providerOrgId}`);
+      await expect(sent, "the offer is listed").toContainText(s.role, { timeout: 60_000 });
+      await expect(sent.getByText(CLIENT_ORG), "the sent offer does not name the client").toHaveCount(0);
+      const offerId = sql<{ id: string }>(
+        `select id from public.team_demand_offers where request_id = ${lit(s.needId)} and team_org_id = ${lit(s.providerOrgId)}`,
+      )[0]!.id;
+      await section.getByTestId(`team-offer-sent-message-${offerId}`).click();
+      await page.waitForURL(/\/en\/dashboard\/communication\/[0-9a-f-]{36}/, { timeout: 60_000 });
+      expect(/\/communication\/([0-9a-f-]{36})/.exec(page.url())![1], "the offer opens the same anonymous thread").toBe(s.conversationId);
+      await expect(page.getByTestId("thread-counterparty")).toContainText(s.label);
+      await done();
+      const party = (await fetch(`${SB_URL}/rest/v1/rpc/team_offer_thread_party_v1`, {
+        method: "POST",
+        headers: {
+          apikey: SB_ANON,
+          Authorization: `Bearer ${await accessToken(PROVIDER)}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ p_offer_id: offerId }),
+      }).then((r) => r.json())) as { counterpart_profile_id: string | null }[];
+      expect(party[0]?.counterpart_profile_id ?? null, "the offer read gives the supplier no client id").toBeNull();
     });
 
     test(`O-3 (${w.name}). the client shows its name; the provider sees it; it all survives a reload`, async ({ browser }) => {

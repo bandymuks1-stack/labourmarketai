@@ -93,6 +93,25 @@ async function resolveTeamOfferThread(offerId: string, requestId: string, locale
   const subject = party.subject?.trim() || null;
 
   if (evaluateTeamOfferContact({ offerStatus, side }) !== "allowed") return null;
+  // Open need (decision A, 20261122160000): until the client ACCEPTED the
+  // offer the supplier is not told who the client is — the party read gives
+  // no counterpart. The supplier then talks to the client through the
+  // anonymous open-need thread about the same need, opened by the database.
+  if (!counterpart && side === "supplier") {
+    const { data: offer } = await asAny(supabase)
+      .from("team_demand_offers")
+      .select("request_id, team_org_id")
+      .eq("id", offerId)
+      .maybeSingle();
+    const o = offer as { request_id?: string | null; team_org_id?: string | null } | null;
+    if (!o?.request_id || !o?.team_org_id) return null;
+    const { data: threadId, error: openError } = await asAny(supabase).rpc("open_need_conversation_open_v1", {
+      p_request_id: o.request_id,
+      p_org_id: o.team_org_id,
+    });
+    if (openError || typeof threadId !== "string" || !UUID.test(threadId)) return null;
+    return `/${locale}/dashboard/communication/${threadId}`;
+  }
   if (!counterpart || counterpart === user.id) return null;
 
   // Passed only AFTER the gate above held.

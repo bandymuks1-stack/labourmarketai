@@ -247,7 +247,7 @@ export function TeamDemandOfferForm({
                   {data.sent.map((o) => (
                     <li key={o.offerId} className="flex flex-col gap-2 text-xs text-text-primary">
                       <div className="flex flex-wrap items-center gap-2">
-                      <span>{[o.roleText ?? "-", o.country ?? "-", o.companyName ?? "-"].join(" / ")}</span>
+                      <span>{[o.roleText ?? "-", o.country ?? "-", o.companyName].filter(Boolean).join(" / ")}</span>
                       <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                         {t(`status.${o.status}`)}
                       </span>
