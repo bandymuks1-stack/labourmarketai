@@ -98,3 +98,25 @@ test.describe("about page on a phone (390 × 844)", () => {
     await expect(page.locator("h2")).not.toHaveCount(0);
   });
 });
+
+/**
+ * THE PRICING PLAN LISTS FOLD (coordinator decision 2026-11-22). Each plan's
+ * feature list opens behind its own "Includes · n" row; the plan's name,
+ * access state and statement stay in view. No price or legal text changes.
+ */
+test.describe("pricing plan boundary on a phone (390 × 844)", () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+
+  test("each plan's features fold behind one row and open complete", async ({ page }) => {
+    await page.goto("/en/pricing");
+    const boundary = page.getByTestId("plan-boundary");
+    await expect(boundary).toBeVisible({ timeout: 30_000 });
+    const folds = boundary.getByTestId("plan-boundary-features");
+    expect(await folds.count(), "every listed plan folds its features").toBeGreaterThanOrEqual(3);
+    const list = folds.first().locator('[data-features-from="plans-registry"]');
+    await expect(list).toBeHidden();
+    await folds.first().locator(":scope > summary").tap();
+    await expect(list).toBeVisible();
+    expect(await list.locator("li").count()).toBeGreaterThan(0);
+  });
+});
