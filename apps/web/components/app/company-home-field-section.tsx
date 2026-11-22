@@ -42,6 +42,7 @@ import {
   type RiskSignal,
 } from "@/lib/company/company-home-field-model";
 import type { CompanyHomeField, HomeProjectRow } from "@/lib/company/company-home-field";
+import { WORKER_INVITE_HREF } from "@/lib/navigation/work-areas";
 
 /**
  * THE ORGANISATION'S HOME — projects in time × who is free (frozen design
@@ -101,7 +102,7 @@ export async function CompanyFirstNeedCard() {
         <p className="text-sm text-text-secondary" data-testid="company-first-need-none">
           {t("noNeedYet")}{" "}
           <Link
-            href={"/dashboard/network?type=join_as_employee" as "/dashboard"}
+            href={WORKER_INVITE_HREF as "/dashboard"}
             className="font-medium text-brand-blue underline-offset-2 hover:underline"
             data-testid="company-first-need-invite"
           >
@@ -301,7 +302,7 @@ export async function CompanyHomeFieldSection({
 
   const projectsHref = "/dashboard/projects" as "/dashboard";
   const planningHref = "/dashboard/company/planning" as "/dashboard";
-  const inviteHref = "/dashboard/network?type=join_as_employee" as "/dashboard";
+  const inviteHref = WORKER_INVITE_HREF as "/dashboard";
   const partnerInviteHref = "/dashboard/network" as "/dashboard";
   // The doors (IA 2026-09-16): a need is asked for on the Needs door, a
   // partner's invitation is answered on the Partners door — never an anchor
@@ -624,7 +625,7 @@ export async function CompanyHomeFieldSection({
                         {p.people === 0 ? (
                           <Link
                             href={
-                              `/dashboard/network?type=join_project&project=${p.projectId}` as "/dashboard"
+                              `/dashboard/network?invite=1&type=join_project&project=${p.projectId}` as "/dashboard"
                             }
                             className={ACTION_LINK}
                             data-testid="company-home-project-invite"
