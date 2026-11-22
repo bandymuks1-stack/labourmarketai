@@ -545,6 +545,7 @@ export async function ProfileHubOverview({
           data-visibility={visibility}
         >
           <DiscoverabilityConsent
+            compact
             locale={locale}
             source="profile"
             state={discoverability}
