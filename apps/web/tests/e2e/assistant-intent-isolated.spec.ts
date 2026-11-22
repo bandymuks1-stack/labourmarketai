@@ -344,7 +344,7 @@ for (const device of DEVICES) {
         await say(page, phrase);
         const flow = await lastFlow(page);
         await expect(flow.getByTestId("worklog-date"), "the day the sentence named").toHaveValue(await day(page, -2));
-        await expect(flow, "eight hours, said as a word").toContainText(/\b8\s*h\b/);
+        await expect(flow, "eight hours, said as a word").toContainText(/(?<![\d.,])8\s*h(?![a-z])/);
         await expect(flow.getByTestId("worklog-notes"), "the sentence, with its trade, is the evidence").toHaveValue(trade);
         await flow.getByTestId("worklog-save").click();
         await expect(flow.getByTestId("worklog-confirm"), "the confirmation is shown").toBeVisible({ timeout: 30_000 });
