@@ -42,14 +42,14 @@ describe("navigation strips wrap instead of scrolling sideways", () => {
  */
 describe("organisation doors: one sideways row on a phone, wrapped from sm", () => {
   const src = read("components/app/organization/organization-doors.tsx");
-  it("scrolls sideways with snap below sm and wraps from sm", () => {
+  it("scrolls sideways below sm and wraps from sm (no snap: the one rail is CardRail)", () => {
     expect(src).toMatch(/max-sm:overflow-x-auto/);
     expect(src).toMatch(/max-sm:flex-nowrap/);
-    expect(src).toMatch(/max-sm:snap-x/);
+    expect(src).not.toMatch(/snap-x/);
     expect(src).toMatch(/sm:flex-wrap/);
   });
-  it("keeps 44 px door targets that snap, and brings the current door into view", () => {
-    expect(src).toMatch(/min-h-11 shrink-0 snap-start/);
+  it("keeps 44 px door targets and brings the current door into view", () => {
+    expect(src).toMatch(/min-h-11 shrink-0/);
     expect(src).toMatch(/aria-current="page"/);
   });
 });
