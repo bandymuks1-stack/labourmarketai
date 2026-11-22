@@ -7,15 +7,17 @@ import { join } from "node:path";
  *
  * Registered agencies and other providers see open needs — profession,
  * country, start, duration, requirements — with no client identity, and offer
- * without prior approval. 20261122140000 makes the database say so: the v1
+ * without prior approval. 20261122170000 makes the database say so: the v1
  * open reader returns no name, the offerer's own list names the client only
  * after the client answered yes, and the v2 reader has no client column at all.
  */
 const ROOT = join(__dirname, "..", "..", "..", "..");
 const WEB = join(ROOT, "apps", "web");
 const read = (p: string) => readFileSync(p, "utf8");
-const UP = read(join(ROOT, "supabase/migrations/20261122140000_open_need_board_no_client_identity_v1.sql"));
-const DOWN = read(join(ROOT, "supabase/rollbacks/20261122140000_open_need_board_no_client_identity_v1.down.sql"));
+const ROLE_ONLY = "nullif(btrim(cr.role_or_work_type), ''),";
+const ROLE_WITH_TITLE = "coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')),";
+const UP = read(join(ROOT, "supabase/migrations/20261122170000_open_need_board_no_client_identity_v1.sql"));
+const DOWN = read(join(ROOT, "supabase/rollbacks/20261122170000_open_need_board_no_client_identity_v1.down.sql"));
 const OPEN_BASE = read(join(ROOT, "supabase/migrations/20261028123000_synthetic_demand_cross_org_readers_v1.sql"));
 const SENT_BASE = read(join(ROOT, "supabase/migrations/20261020010000_demand_company_one_rule_v1.sql"));
 
@@ -33,9 +35,21 @@ describe("the database names no client on the open board", () => {
     const before = fnBlock(OPEN_BASE, "list_open_demand_for_team_offer_v1");
     expect(now).not.toContain(NAME_EXPR);
     expect(now).toMatch(/\n\s+null::text,\n\s+cr\.created_at,/);
-    // every other line is the prior definition
-    const strip = (s: string) => s.replace(/\n\s+-- NO CLIENT IDENTITY[^\n]*\n\s+--[^\n]*\n\s+null::text,/, `\n         ${NAME_EXPR},`);
+    // every other line is the prior definition, except role_text without the
+    // title fallback (R2 P3-1 on #3630)
+    const strip = (s: string) =>
+      s
+        .replace(/\n\s+-- NO CLIENT IDENTITY[^\n]*\n\s+--[^\n]*\n\s+null::text,/, `\n         ${NAME_EXPR},`)
+        .replace(ROLE_ONLY, ROLE_WITH_TITLE);
     expect(strip(now)).toBe(before);
+  });
+
+  it("role_text never falls back to the request's free-text title (R2 P3-1 on #3630)", () => {
+    for (const fn of ["list_open_demand_for_team_offer_v1", "list_team_demand_offers_for_team_v1", "list_open_needs_for_offer_v2"]) {
+      const b = fnBlock(UP, fn);
+      expect(b, fn).toContain(ROLE_ONLY);
+      expect(b, fn).not.toMatch(/cr\.title/);
+    }
   });
 
   it("the offerer's own list names the client only after a yes", () => {

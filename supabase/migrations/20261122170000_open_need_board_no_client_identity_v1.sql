@@ -1,4 +1,4 @@
--- 20261122140000_open_need_board_no_client_identity_v1
+-- 20261122170000_open_need_board_no_client_identity_v1
 --
 -- WHY (owner decision 2026-11-22, the open agency board): registered
 -- agencies and other providers see open needs (profession, country, start,
@@ -17,16 +17,21 @@
 --      rule as (1), plus duration, language, required skills (active
 --      catalogue slugs, the worker board's derivation) and tools (closed
 --      list). No company, person or free-text column.
--- Every other line of (1) and (2) is the latest repo definition, byte for
--- byte: (1) 20261028123000_synthetic_demand_cross_org_readers_v1,
--- (2) 20261020010000_demand_company_one_rule_v1.
+-- Every other line of (1) and (2) is the latest repo definition
+-- ((1) 20261028123000_synthetic_demand_cross_org_readers_v1,
+-- (2) 20261020010000_demand_company_one_rule_v1), except one more line in
+-- each, and in (3): role_text comes from role_or_work_type ONLY. The former
+-- fallback to the request's free-text title is dropped, because a title can
+-- name the client (R2 P3-1 on #3630). duration and language_requirement stay:
+-- they are short structured fields of the need form, not a description.
+-- (Renumbered from 20261122140000, which #3620 also uses: R2 P2-1.)
 --
 -- WHAT IS NOT DONE: no table, policy, grant widening or row change. The
 -- receiving side (the client) is unchanged. The offer thread is unchanged:
 -- whether an offerer may message the client before the client answers is
 -- an open owner question, not decided here.
 --
--- ROLLBACK: supabase/rollbacks/20261122140000_open_need_board_no_client_identity_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261122170000_open_need_board_no_client_identity_v1.down.sql
 -- (restores (1) and (2) verbatim and drops (3); refuses nothing — no data).
 
 begin;
@@ -63,7 +68,7 @@ begin
 
   return query
   select cr.id,
-         coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')),
+         nullif(btrim(cr.role_or_work_type), ''),
          cr.country,
          cr.team_size,
          cr.start_period,
@@ -118,7 +123,7 @@ begin
   end if;
   return query
   select o.id, o.request_id,
-         coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')),
+         nullif(btrim(cr.role_or_work_type), ''),
          cr.country,
          -- The client is named to the offerer only once the client has
          -- answered yes (agreed in principle, or assigned the unit); before
@@ -172,7 +177,7 @@ begin
   -- can name the client).
   return query
   select cr.id,
-         coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')),
+         nullif(btrim(cr.role_or_work_type), ''),
          cr.country,
          cr.team_size,
          cr.start_period,

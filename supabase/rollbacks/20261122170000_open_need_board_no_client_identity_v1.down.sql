@@ -1,4 +1,4 @@
--- Rollback of 20261122140000_open_need_board_no_client_identity_v1:
+-- Rollback of 20261122170000_open_need_board_no_client_identity_v1:
 -- restores both v1 readers verbatim (their latest definitions before it)
 -- and drops the v2 reader. No data is touched.
 
