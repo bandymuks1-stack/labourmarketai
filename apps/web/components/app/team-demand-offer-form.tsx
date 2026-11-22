@@ -185,7 +185,7 @@ export function TeamDemandOfferForm({
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-rate`}>
                     {t("terms.rate")}
-                    <Input id={`${uid}-rate`} type="text" maxLength={200} value={terms.rateText} placeholder={t("terms.ratePlaceholder")}
+                    <Input id={`${uid}-rate`} type="text" maxLength={200} value={terms.rateText}
                       onChange={(e) => setTerms((v) => ({ ...v, rateText: e.target.value }))}
                       className="min-h-11 sm:min-h-9 max-sm:text-base" />
                   </label>

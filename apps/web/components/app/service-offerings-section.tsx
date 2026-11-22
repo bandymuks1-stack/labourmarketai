@@ -47,7 +47,6 @@ export type ServiceOfferingsLabels = {
   formCountryPlaceholder: string;
   formRemoteLabel: string;
   formRateLabel: string;
-  formRatePlaceholder: string;
   formRateHint: string;
   save: string;
   saving: string;
@@ -305,7 +304,6 @@ export function ServiceOfferingsSection({
                   value={draft.rateText}
                   data-testid="service-offering-rate"
                   onChange={(e) => setDraft({ ...draft, rateText: e.target.value })}
-                  placeholder={labels.formRatePlaceholder}
                   maxLength={120}
                 />
                 <span className="text-meta text-text-muted">{labels.formRateHint}</span>
