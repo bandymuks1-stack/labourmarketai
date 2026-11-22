@@ -121,7 +121,7 @@ describe("education", () => {
       facts: facts({ learnersActive: 0, programmes: 0, openDemands: 0 }),
     });
     const got = ids(school);
-    expect(got[0]).toBe("link:/dashboard/network?relationship=student");
+    expect(got[0]).toBe("link:/dashboard/network?invite=1&type=join_organization&relationship=student");
     expect(got).toContain("f:company.create-demand");
     expect(got.length).toBe(STARTER_CAP);
   });

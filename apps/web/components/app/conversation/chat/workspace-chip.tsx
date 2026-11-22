@@ -168,7 +168,7 @@ export function WorkspaceChip() {
         title={`${t("workspaceLabel")}: ${titleOf(active)}`}
       >
         <span className={`size-2 flex-none rounded-full ${dotClass(active)}`} aria-hidden />
-        <span className="max-sm:line-clamp-2 max-sm:break-words max-sm:leading-tight sm:truncate">{nameOf(active)}</span>
+        <span className="text-left max-sm:line-clamp-2 max-sm:break-words max-sm:leading-tight sm:truncate">{nameOf(active)}</span>
       </span>
     );
   }
@@ -203,7 +203,7 @@ export function WorkspaceChip() {
         className="flex min-h-11 min-w-0 flex-1 sm:max-w-56 sm:flex-none cursor-pointer items-center gap-1.5 rounded-full border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
       >
         <span className={`size-2 flex-none rounded-full ${dotClass(active)}`} aria-hidden />
-        <span className="max-sm:line-clamp-2 max-sm:break-words max-sm:leading-tight sm:truncate">{pending ? tSwitcher("switching") : nameOf(active)}</span>
+        <span className="text-left max-sm:line-clamp-2 max-sm:break-words max-sm:leading-tight sm:truncate">{pending ? tSwitcher("switching") : nameOf(active)}</span>
         <ChevronDown {...iconControl("flex-none")} aria-hidden />
       </button>
       {/* The ONE portal root (owner audit P0.3): the menu renders at
