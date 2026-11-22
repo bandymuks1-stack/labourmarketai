@@ -35,7 +35,9 @@ describe("the header follows the acting role, the primary row stays the core loo
   it("the acting role comes from the ONE resolver, with the held roles", () => {
     expect(header).toMatch(/actingRoleForWorkspace\(activeWorkspace, auth\?\.roles \?\? \[\]\)/);
     expect(header).toMatch(
-      /const overflow = \[\.\.\.organizationAreas, \.\.\.customerDoors, \.\.\.getHeaderOverflowNavItems\(\{ isAdmin \}\)\]/,
+      // The worker's own doors (job search, offers) lead, then the
+      // organization's, the customer's and the catalogue's (2026-11-22).
+      /const overflow = \[\.\.\.personalDoors, \.\.\.organizationAreas, \.\.\.customerDoors, \.\.\.getHeaderOverflowNavItems\(\{ isAdmin \}\)\]/,
     );
   });
 

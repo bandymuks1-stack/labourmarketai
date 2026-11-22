@@ -9,7 +9,7 @@ import {
   getHeaderOverflowNavItems,
   type NavItem,
 } from "@/lib/config/navigation";
-import { customerHeaderDoors, organizationHeaderAreas } from "@/lib/navigation/work-areas";
+import { customerHeaderDoors, organizationHeaderAreas, personalHeaderDoors } from "@/lib/navigation/work-areas";
 import { isEducationInstitution } from "@/lib/organizations/capabilities";
 import { isEducationFirstWorkspace } from "@/lib/conversation/education-home";
 import { actingRoleForWorkspace } from "@/lib/company/organization-switch";
@@ -120,7 +120,11 @@ export function ConversationHeader({
   // role outside an organization workspace — the /dashboard/buyer gate's own
   // rule (client-side; no new read).
   const customerDoors = customerHeaderDoors(auth?.roles ?? [], activeWorkspace);
-  const overflow = [...organizationAreas, ...customerDoors, ...getHeaderOverflowNavItems({ isAdmin })];
+  // Job search and offers lead "More" / the sheet for a worker in their own
+  // workspace (coordinator 2026-11-22): they were in no header surface.
+  const personalDoors =
+    actingRole === "company" || actingRole === "agency" ? [] : personalHeaderDoors(auth?.roles ?? [], activeWorkspace);
+  const overflow = [...personalDoors, ...organizationAreas, ...customerDoors, ...getHeaderOverflowNavItems({ isAdmin })];
   const allItems = [...primary, ...overflow];
   const active = activeNavItem(pathname, allItems);
   const activeOverflow = active && overflow.some((i) => i.id === active.id) ? active : null;
