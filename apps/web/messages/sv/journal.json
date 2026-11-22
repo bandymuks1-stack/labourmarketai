@@ -609,6 +609,13 @@
     "moreDays": "Visar den senast registrerade dagen. {count, plural, one {# dag till} other {# dagar till}} med poster – välj ett datum i kalendern.",
     "periodEmpty": "Inga poster under den här perioden."
   },
+  "dayChoice": {
+    "today": "I dag",
+    "yesterday": "I går",
+    "weekAgo": "För en vecka sedan",
+    "calendar": "Kalender",
+    "earlier": "Tidigare poster"
+  },
   "spreadsheet": {
     "title": "Kalkylbladsläge – flera poster på en gång",
     "hint": "Varje rad blir en egen post i arbetsjournalen. Tomma rader hoppas över; misslyckade rader förblir redigerbara med den exakta anledningen.",
