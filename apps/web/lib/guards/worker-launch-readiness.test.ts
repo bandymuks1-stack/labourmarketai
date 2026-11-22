@@ -100,10 +100,18 @@ describe("worker launch — cross-sector example placeholders", () => {
       }
     }
   });
-  it("salary inputs carry numeric example placeholders", () => {
+  // Decision 0032 (lane A report 2026-11-22): "1500" / "2500" in the salary
+  // fields read as real values, so the fields carry no example figures — the
+  // labels ("Salary from (€)") say what goes there.
+  it("salary inputs carry no example figures that read as real pay", () => {
     const src = read("components/app/work-card-editor.tsx");
-    expect(src).toContain('placeholder="1500"');
-    expect(src).toContain('placeholder="2500"');
+    expect(src).not.toMatch(/placeholder="\d/);
+    expect(read("lib/conversation/worker-forms.ts")).not.toMatch(/salaryM(in|ax)Placeholder/);
+    for (const loc of ACTIVE) {
+      const f = deep(msg(loc), "conversation.forms.fields") as Record<string, unknown>;
+      expect(f?.salaryMinPlaceholder, `${loc} salaryMinPlaceholder`).toBeUndefined();
+      expect(f?.salaryMaxPlaceholder, `${loc} salaryMaxPlaceholder`).toBeUndefined();
+    }
   });
 });
 

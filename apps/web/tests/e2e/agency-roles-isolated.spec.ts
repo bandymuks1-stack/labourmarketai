@@ -1,6 +1,7 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
 import { collectPageErrors, expectRenderedOnce } from "./render-once";
+import { onboardInvited } from "./isolated-web-a-helpers";
 
 /**
  * AGENCY ROLES AND PERMISSIONS, end to end, on a THROWAWAY LOCAL Supabase
@@ -255,7 +256,7 @@ test("A-2. the owner invites a person by link; they register through it and acce
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(page.url())) await onboard(page, "work", MEMBER_NAME);
+  if (/\/onboarding/.test(page.url())) await onboardInvited(page, MEMBER_NAME);
   await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(page.url())) {
     const accept = page.getByTestId("invite-accept");

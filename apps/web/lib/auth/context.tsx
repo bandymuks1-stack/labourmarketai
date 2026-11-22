@@ -263,12 +263,13 @@ export function AuthProvider({
     const before = typeof window === "undefined" ? null : window.location;
     const strippedSearch = before ? withoutWorkspaceScopedDepth(before.search) : null;
     const restore = before ? before.pathname + before.search + before.hash : null;
+    // `null`, never `window.history.state`: Next marks its own entries with
+    // `__NA`, and its patched replaceState skips the router sync for any state
+    // carrying that mark. Passing it on left the router holding the old URL,
+    // and the revalidated render then wrote `?demand=` straight back. With
+    // `null`, Next copies its internals itself and syncs `useSearchParams`.
     if (before && strippedSearch !== null) {
-      window.history.replaceState(
-        window.history.state,
-        "",
-        before.pathname + strippedSearch + before.hash,
-      );
+      window.history.replaceState(null, "", before.pathname + strippedSearch + before.hash);
     }
     setRequestedWorkspaceId(workspaceId);
     return new Promise<boolean>((resolve) => {
@@ -280,7 +281,7 @@ export function AuthProvider({
           accepted = false;
         }
         if (!accepted && strippedSearch !== null && restore) {
-          window.history.replaceState(window.history.state, "", restore);
+          window.history.replaceState(null, "", restore);
         }
         resolve(accepted);
       });

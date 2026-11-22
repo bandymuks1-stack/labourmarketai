@@ -1,6 +1,7 @@
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
 
 import { clickUntilVisible } from "./click-until-visible";
+import { onboardInvited } from "./isolated-web-a-helpers";
 
 /**
  * TRAINING REACHES THE FOUR OWNER-DECIDED GROUPS — registry 11.8, on a THROWAWAY LOCAL Supabase
@@ -206,7 +207,7 @@ async function inviteAndJoin(browser: Browser, g: Group): Promise<void> {
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await p.locator('form button[type="submit"]').click();
   await p.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(p.url())) await onboard(p, "work", g.name);
+  if (/\/onboarding/.test(p.url())) await onboardInvited(p, g.name);
   await p.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(p.url())) {
     const accept = p.getByTestId("invite-accept");
