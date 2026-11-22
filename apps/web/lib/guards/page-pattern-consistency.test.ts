@@ -18,7 +18,6 @@ const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
 const NAV_STRIPS = [
-  "components/app/organization/organization-doors.tsx",
   "components/app/historical/historical-workspace.tsx",
   "components/app/player-card/player-card-modes.tsx",
   "components/app/conversation/chat/my-space-row.tsx",
@@ -32,6 +31,27 @@ describe("navigation strips wrap instead of scrolling sideways", () => {
       expect(src).toMatch(/flex-wrap/);
     });
   }
+});
+
+/**
+ * THE ORGANISATION DOORS ARE ONE ROW ON A PHONE (coordinator decision of
+ * 2026-11-22 on the owner's orders of 2026-11-21/22: horizontal card rows with
+ * the next card peeking on phones). Wrapped, 8–9 doors took three or four rows
+ * (150–200 px) above every organisation page. This replaces, for this strip
+ * only, the 2026-10-25 rule above; from `sm` the doors still wrap.
+ */
+describe("organisation doors: one sideways row on a phone, wrapped from sm", () => {
+  const src = read("components/app/organization/organization-doors.tsx");
+  it("scrolls sideways with snap below sm and wraps from sm", () => {
+    expect(src).toMatch(/max-sm:overflow-x-auto/);
+    expect(src).toMatch(/max-sm:flex-nowrap/);
+    expect(src).toMatch(/max-sm:snap-x/);
+    expect(src).toMatch(/sm:flex-wrap/);
+  });
+  it("keeps 44 px door targets that snap, and brings the current door into view", () => {
+    expect(src).toMatch(/min-h-11 shrink-0 snap-start/);
+    expect(src).toMatch(/aria-current="page"/);
+  });
 });
 
 /** Pages whose "up a level" link was converted to the shared primitive. */

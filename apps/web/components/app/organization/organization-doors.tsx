@@ -12,6 +12,7 @@ import {
   UserSearch,
   UsersRound,
 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
 import type { OrganizationDoorId } from "@/lib/company/organization-doors";
@@ -74,13 +75,29 @@ export function OrganizationDoors({
   className?: string;
 }) {
   const pathname = usePathname();
+  const navRef = useRef<HTMLElement>(null);
+  // On a phone the doors are one row that scrolls sideways; the current door
+  // is brought into it without moving the page.
+  useEffect(() => {
+    const nav = navRef.current;
+    const current = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !current || nav.scrollWidth <= nav.clientWidth) return;
+    nav.scrollLeft = Math.max(0, current.offsetLeft - nav.offsetLeft - 16);
+  }, [pathname]);
   if (doors.length === 0) return null;
   return (
     <nav
+      ref={navRef}
       aria-label={ariaLabel}
       data-testid="organization-doors"
       className={cn(
-        "flex flex-wrap gap-1.5 pb-1",
+        // PHONE: one row of door cards that scrolls sideways with snap, the
+        // next door showing at the edge (owner orders 2026-11-21/22 via the
+        // coordinator, 2026-11-22: 8–9 doors had wrapped into three or four
+        // rows, 150–200 px above every organisation page — UX gap SH-6). It
+        // replaces the 2026-10-25 "wrap, never scroll" rule for this strip.
+        // From `sm` the doors wrap as before.
+        "flex gap-1.5 pb-1 max-sm:snap-x max-sm:snap-mandatory max-sm:flex-nowrap max-sm:overflow-x-auto max-sm:overscroll-x-contain max-sm:scroll-px-4 max-sm:[scrollbar-width:none] max-sm:[&::-webkit-scrollbar]:hidden sm:flex-wrap",
         className,
       )}
     >
@@ -94,7 +111,7 @@ export function OrganizationDoors({
             aria-current={active ? "page" : undefined}
             data-testid={`organization-door-${door.id}`}
             className={cn(
-              "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-control border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan",
+              "inline-flex min-h-11 shrink-0 snap-start items-center gap-1.5 rounded-control border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan",
               active
                 ? "border-brand-orange/60 bg-brand-orange/10 text-text-primary"
                 : "border-ink-600 bg-ink-800/40 text-text-secondary hover:border-brand-blue hover:text-text-primary",
