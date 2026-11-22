@@ -313,3 +313,20 @@ export async function resolveApiIdentity(
 
   return { ok: true, identity: { userId: user.id, transport: "cookie", supabase } };
 }
+
+/**
+ * The ANONYMOUS client — anon key, no session, no credential — for the few
+ * tools a door explicitly serves to a caller who presented nothing (the
+ * curated ChatGPT door's public job search, 2026-11-11). Every query runs as
+ * the database role `anon`, so what it can read is what the public web pages
+ * read: the boundary is the SQL function's own column list and its grant,
+ * never this client. It is built here, next to the bearer client, so there is
+ * still ONE place that constructs a request client for `app/api/**`.
+ */
+export async function anonymousApiClient(): Promise<SupabaseClient<Database>> {
+  const { url, anonKey } = requireSupabaseClientEnv();
+  const { createClient: createSupabaseJsClient } = await import("@supabase/supabase-js");
+  return createSupabaseJsClient<Database>(url, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+}

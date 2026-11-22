@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { resolveApiIdentity } from "@/lib/api/api-identity";
+import { anonymousApiClient, resolveApiIdentity } from "@/lib/api/api-identity";
 import { runAsBearerCaller } from "@/lib/api/bearer-caller-scope";
-import { rateLimit } from "@/lib/security/rate-limit";
+import { clientKeyFromHeaders, rateLimit } from "@/lib/security/rate-limit";
 import {
   classifyRefusal,
   refusalBody,
@@ -19,10 +19,11 @@ import {
   parseErrorResponse,
   MCP_PROTOCOL_VERSION,
   SUPPORTED_PROTOCOL_VERSIONS,
+  type McpSecurityScheme,
   type McpToolDef,
 } from "@/lib/mcp/protocol";
 import { localeFromAcceptLanguage } from "@/lib/mcp/accept-language";
-import { CHATGPT_PROFILE_INSTRUCTIONS } from "@/lib/mcp/chatgpt-profile";
+import { CHATGPT_PROFILE_INSTRUCTIONS, CHATGPT_PUBLIC_TOOLS } from "@/lib/mcp/chatgpt-profile";
 import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 import {
   MCP_CHATGPT_RESOURCE_PATH,
@@ -42,8 +43,11 @@ import type { CapabilityDescriptor } from "@/lib/capabilities/contract";
  * (`resolveApiIdentity`) exactly as on every other shared route — a Supabase
  * user JWT over `Authorization: Bearer` (what an OAuth-authorized ChatGPT
  * presents) or a browser cookie session. There is no MCP-specific identity,
- * no service-role proxy, and no anonymous mode: every tool call below runs
- * on the caller's own RLS-scoped client.
+ * no service-role proxy, and no anonymous mode on `/api/mcp` or
+ * `/api/mcp/read`: every tool call there runs on the caller's own RLS-scoped
+ * client. The `chatgpt` profile ALSO names a few public tools
+ * (`ANONYMOUS_TOOLS`) that a caller with NO credential at all can run on the
+ * anonymous client — see `anonymousPost` below.
  *
  * A 401 carries the RFC 9728 pointer (`WWW-Authenticate: … resource_metadata`)
  * so an OAuth-capable client can discover the authorization server — see
@@ -114,10 +118,37 @@ function capabilities(profile: McpProfile): readonly CapabilityDescriptor[] {
   return (CAPABILITIES[profile] ??= profileCapabilities(exposedCapabilities(), profile));
 }
 
+/**
+ * PUBLIC JOB SEARCH WITHOUT SIGN-IN (owner P0 2026-11-11, owner approval
+ * needed): the tools a profile also runs for a caller who sent NO
+ * credential, on the anonymous client (database role `anon`). Absent = every
+ * call needs a credential (`full`, `read`). When present, every listed tool
+ * states its auth requirement (`securitySchemes`, OpenAI Apps SDK), and any
+ * other tool called anonymously answers with `mcp/www_authenticate` instead
+ * of running. A present-but-bad token is NEVER treated as anonymous.
+ */
+const ANONYMOUS_TOOLS: Partial<Record<McpProfile, ReadonlySet<string>>> = {
+  chatgpt: new Set<string>(CHATGPT_PUBLIC_TOOLS),
+};
+
+const PUBLIC_SCHEMES: readonly McpSecurityScheme[] = [{ type: "noauth" }, { type: "oauth2" }];
+const SIGNED_IN_SCHEMES: readonly McpSecurityScheme[] = [{ type: "oauth2" }];
+
 const TOOL_DEFS: Partial<Record<McpProfile, McpToolDef[]>> = {};
 
 function toolDefs(profile: McpProfile): McpToolDef[] {
-  return (TOOL_DEFS[profile] ??= toolDefsOf(capabilities(profile)));
+  const cached = TOOL_DEFS[profile];
+  if (cached) return cached;
+  const selected = toolDefsOf(capabilities(profile));
+  const anonymous = ANONYMOUS_TOOLS[profile];
+  return (TOOL_DEFS[profile] = anonymous
+    ? selected.map((d) => {
+        const schemes = anonymous.has(d.name) ? PUBLIC_SCHEMES : SIGNED_IN_SCHEMES;
+        // Top level is the Apps SDK field; `_meta` mirrors it for hosts that
+        // read tool metadata only from there.
+        return { ...d, securitySchemes: schemes, _meta: { ...d._meta, securitySchemes: schemes } };
+      })
+    : selected);
 }
 
 /** Capability lookup by MCP tool name, memoized for the same reason. */
@@ -174,6 +205,14 @@ const MAX_BODY_BYTES = 64 * 1024;
  *  runaway loop. See the brake in POST. */
 const MCP_CALLER_LIMIT = { limit: 600, windowMs: 5 * 60 * 1000 } as const;
 const MCP_CALLER_LIMITER = "api-mcp-caller" as const;
+
+/**
+ * ANONYMOUS BRAKE: a caller with no credential has no user id to key on, so
+ * it is keyed on the forwarded client key (a brake, not an identity — the
+ * same honest limit as `api-bearer-verify`) and is tighter than a person's.
+ */
+const MCP_ANONYMOUS_LIMIT = { limit: 120, windowMs: 5 * 60 * 1000 } as const;
+const MCP_ANONYMOUS_LIMITER = "api-mcp-anonymous" as const;
 
 /**
  * CORS for browser-resident MCP clients (the Inspector, a web-hosted agent).
@@ -267,6 +306,11 @@ async function post(req: Request, profile: McpProfile): Promise<Response> {
   const t0 = performance.now();
   const auth = await resolveApiIdentity(req);
   const authMs = performance.now() - t0;
+  // ONLY a request with no credential at all may be anonymous; a bad token
+  // is a 401 below exactly as on the full door.
+  if (!auth.ok && auth.reason === "no-credentials" && ANONYMOUS_TOOLS[profile]) {
+    return anonymousPost(req, profile, t0, authMs);
+  }
   if (!auth.ok) {
     const refusal = classifyRefusal(auth.reason);
     const headers: Record<string, string> = {
@@ -471,6 +515,118 @@ async function post(req: Request, profile: McpProfile): Promise<Response> {
   // A notification produces no body — 202 per streamable-HTTP MCP.
   if (response === null) return new Response(null, { status: 202, headers });
   return NextResponse.json(response, { headers });
+}
+
+/**
+ * A caller that presented NO credential, on a profile with `ANONYMOUS_TOOLS`.
+ * It may discover the door (initialize, tools/list) and run ONLY the
+ * anonymous tools, on the anonymous client; any other tool answers with the
+ * RFC 9728 challenge in `_meta["mcp/www_authenticate"]` so the host can link
+ * the account — nothing runs. No receipt (nothing is written), no bearer
+ * scope (there is no identity to enter).
+ */
+async function anonymousPost(req: Request, profile: McpProfile, t0: number, authMs: number): Promise<Response> {
+  const DOOR = DOOR_PATH[profile];
+  const anonymous = ANONYMOUS_TOOLS[profile];
+  const headers = {
+    ...CORS_HEADERS,
+    "MCP-Protocol-Version": negotiatedVersion(req),
+  };
+  // The MIME essence, exactly, as on the cookie transport (#3579).
+  if ((req.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase() !== "application/json") {
+    return NextResponse.json(
+      { ok: false, code: "unsupported_media_type", message: "This MCP endpoint accepts application/json only." },
+      { status: 415, headers },
+    );
+  }
+  const brake = rateLimit({
+    name: MCP_ANONYMOUS_LIMITER,
+    key: clientKeyFromHeaders(req.headers),
+    ...MCP_ANONYMOUS_LIMIT,
+  });
+  if (brake.limited) {
+    logEvent({ event: "external_client.auth", outcome: "refused", error_class: "RATE_LIMITED", status: 429, door: DOOR });
+    const refusal = classifyRefusal("rate-limited");
+    return NextResponse.json(refusalBody(refusal), {
+      status: refusal.status,
+      headers: { ...headers, "Retry-After": String(brake.retryAfterSeconds) },
+    });
+  }
+  const raw = await req.text();
+  if (raw.length > MAX_BODY_BYTES) {
+    return NextResponse.json({ ok: false, code: "request_too_large" }, { status: 413, headers });
+  }
+  let message: unknown;
+  try {
+    message = JSON.parse(raw);
+  } catch {
+    return NextResponse.json(parseErrorResponse(), { status: 400, headers });
+  }
+
+  const origin = requestPublicOrigin(req);
+  const challenge = wwwAuthenticateChallenge(
+    origin,
+    classifyRefusal("no-credentials").errorClass,
+    protectedResourceMetadataPath(DOOR),
+  );
+  const marks: Record<string, number> = { auth: authMs };
+  const response = await handleMcpMessage(message, {
+    transportProtocolVersion: req.headers.get("mcp-protocol-version"),
+    serverInfo: serverInfo(origin, profile),
+    instructions: INSTRUCTIONS[profile],
+    tools: toolDefs(profile),
+    callTool: async (name, args) => {
+      const descriptor = capabilityForTool(profile, name);
+      if (!descriptor) {
+        return { isError: true, payload: { ok: false, code: "unknown_capability" } };
+      }
+      if (!anonymous?.has(name)) {
+        logEvent({ event: "external_client.tool", door: DOOR, tool: name, ok: false, result_code: "sign_in_required" });
+        return {
+          isError: true,
+          payload: {
+            ok: false,
+            code: "sign_in_required",
+            message:
+              "This tool acts for a signed-in LabourMarket.ai account. Connect the account, then try again. Nothing was run.",
+          },
+          ...(challenge ? { meta: { "mcp/www_authenticate": [challenge] } } : {}),
+        };
+      }
+      const tCap = performance.now();
+      const caller = {
+        // No person is calling. The anonymous tools read only `supabase` and
+        // `locale` (lib/capabilities/public-jobs-capabilities.ts); an empty id
+        // matches no row if anything ever reads it.
+        userId: "",
+        transport: "bearer" as const,
+        supabase: await anonymousApiClient(),
+        locale: localeFromAcceptLanguage(req.headers.get("accept-language")),
+        actorKind: "agent" as const,
+      };
+      const result = await runCapability(descriptor.id, caller, args);
+      marks.capability = performance.now() - tCap;
+      logEvent({
+        event: "external_client.tool",
+        door: DOOR,
+        tool: name,
+        ok: result.ok,
+        ...(result.ok
+          ? {}
+          : {
+              result_code:
+                typeof (result as { code?: unknown }).code === "string"
+                  ? (result as { code: string }).code
+                  : "error",
+            }),
+      });
+      return { isError: !result.ok, payload: result };
+    },
+  });
+  marks.total = performance.now() - t0;
+  const out = { ...headers, "Server-Timing": serverTiming(marks) };
+  if (response === null) return new Response(null, { status: 202, headers: out });
+  return NextResponse.json(response, { headers: out });
 }
 
 function options(): Response {

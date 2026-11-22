@@ -56,6 +56,16 @@ export const CHATGPT_TOOL_PROFILE = [
 
 export type ChatgptProfileTool = (typeof CHATGPT_TOOL_PROFILE)[number];
 
+/**
+ * The ONLY profile tools a caller with no credential may run (owner P0
+ * 2026-11-11; a privacy change that needs the owner's approval). Both read
+ * the public vacancy board through SQL functions granted to `anon` that
+ * enumerate the anonymous columns — no employer, place, title, contact or
+ * application link (`lib/capabilities/public-jobs-capabilities.ts`). Pinned
+ * in `chatgpt-profile.test.ts`; widening it is a new owner decision.
+ */
+export const CHATGPT_PUBLIC_TOOLS = ["jobs_search", "jobs_get"] as const satisfies readonly ChatgptProfileTool[];
+
 const PROFILE = new Set<string>(CHATGPT_TOOL_PROFILE);
 
 /** The profile's tool list, in the registry's own order. */
