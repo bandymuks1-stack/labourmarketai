@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, LayoutGrid, MoreHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link, usePathname } from "@/lib/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import {
   getCoreNavItems,
   getHeaderOverflowNavItems,
@@ -17,6 +17,9 @@ import { activeNavItem, headerPlaceLabelKey } from "@/lib/navigation/header-plac
 import { NAV_ICONS } from "@/components/app/nav-icons";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
 import { cn } from "@/lib/utils";
+import { journalDayHref } from "@/lib/journal/day-choice";
+import { GOAL_ACROSS_PAGES_KEY, keptAssistantJournalDay } from "@/lib/journal/assistant-day";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
 import { useAuthOptional } from "@/lib/auth/context";
 import { HeaderSearch } from "@/components/app/header-search";
 import { NotificationPanel } from "@/components/app/notification-panel";
@@ -74,11 +77,15 @@ export function ConversationHeader({
   title,
   nav,
   mobile = false,
+  journalDay,
 }: {
   title: string;
   nav: ConversationNavLabels;
   /** Force the phone layout (used by the mobile design preview). */
   mobile?: boolean;
+  /** The chat's live answer to "which work day did the person name?" (the
+   *  conversation passes it; other pages read the goal the chat kept). */
+  journalDay?: () => string | null;
 }) {
   const auth = useAuthOptional();
   const pathname = usePathname();
@@ -121,6 +128,13 @@ export function ConversationHeader({
   const place = placeKey ? t(placeKey) : null;
   const badges = auth?.badges ?? {};
   const badgeOf = (item: NavItem) => (item.id === "admin" ? 0 : (badges[item.id] ?? 0));
+  const openJournal = useJournalTap(journalDay, `${auth?.user?.id ?? ""}:${auth?.activeWorkspaceId ?? ""}`);
+  // ONE-TAP JOURNAL (owner P1 2026-11-22): in the person's own workspace the
+  // work journal is one tap from the phone's top row too (from `md` it is
+  // already one tap in the core loop below). An organization workspace keeps
+  // its own doors; the area sheet keeps the journal for everyone.
+  const journalItem = primary.find((i) => i.iconKey === "journal") ?? null;
+  const showPhoneJournal = Boolean(auth && journalItem && actingRole !== "company" && actingRole !== "agency");
 
   return (
     <header
@@ -222,6 +236,7 @@ export function ConversationHeader({
               active={active?.id === item.id}
               badge={badgeOf(item)}
               testId={`header-core-nav-${item.id}`}
+              onClick={item === journalItem ? openJournal : undefined}
             />
           ))}
           {overflow.length > 0 && (
@@ -266,6 +281,15 @@ export function ConversationHeader({
 
       {/* UTILITY — a shrink-0 anchor of 44px controls. */}
       <div className={cn("order-2 ml-auto flex flex-none items-center gap-1", !mobile && "md:order-none md:ml-0")}>
+        {showPhoneJournal && journalItem && (
+          <JournalShortcut
+            item={journalItem}
+            label={t(journalItem.tabLabelKey)}
+            active={active?.id === journalItem.id}
+            onClick={openJournal}
+            className={mobile ? undefined : "md:hidden"}
+          />
+        )}
         {auth && (
           <HeaderSearch
             testId="chat-command-search"
@@ -332,17 +356,20 @@ function HeaderNavLink({
   active,
   badge,
   testId,
+  onClick,
 }: {
   item: NavItem;
   label: string;
   active: boolean;
   badge: number;
   testId: string;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }) {
   const Icon = NAV_ICONS[item.iconKey];
   return (
     <Link
       href={item.href as "/dashboard"}
+      onClick={onClick}
       aria-current={active ? "page" : undefined}
       aria-label={label}
       title={label}
@@ -356,6 +383,67 @@ function HeaderNavLink({
       {/* The ACTIVE destination always names itself — that is "where am I". */}
       <span className={active ? ACTIVE_LABEL : CORE_LABEL}>{label}</span>
       <NavLinkPending />
+    </Link>
+  );
+}
+
+/**
+ * The journal tap: opens the work day the person already named to the
+ * assistant (live goal in the chat, the kept goal elsewhere), else the
+ * journal's own default. A modified click (new tab, etc.) keeps the plain link.
+ */
+function useJournalTap(
+  journalDay: (() => string | null) | undefined,
+  owner: string,
+): (e: React.MouseEvent<HTMLAnchorElement>) => void {
+  const router = useRouter();
+  return (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const today = personCalendarDay();
+    let day: string | null = null;
+    try {
+      day = journalDay ? journalDay() : keptAssistantJournalDay(window.sessionStorage.getItem(GOAL_ACROSS_PAGES_KEY), owner, today);
+    } catch {
+      day = null;
+    }
+    if (!day) return;
+    e.preventDefault();
+    router.push(journalDayHref(day, false) as "/dashboard");
+  };
+}
+
+/** Phone: the work journal as one 44px control in the top row. */
+function JournalShortcut({
+  item,
+  label,
+  active,
+  onClick,
+  className,
+}: {
+  item: NavItem;
+  label: string;
+  active: boolean;
+  onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  className?: string;
+}) {
+  const Icon = NAV_ICONS[item.iconKey];
+  return (
+    <Link
+      href={item.href as "/dashboard"}
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      aria-current={active ? "page" : undefined}
+      data-testid="header-journal-shortcut"
+      className={cn(
+        "inline-flex size-11 flex-none items-center justify-center rounded-full border transition-colors",
+        active
+          ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+          : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary",
+        className,
+      )}
+    >
+      <Icon {...iconControl()} aria-hidden />
     </Link>
   );
 }
