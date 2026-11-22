@@ -596,12 +596,15 @@ export async function ProfileHubOverview({
               )}
               {/* Readiness signals with no setup step of their own — the
                   absorbed LiveProfileSection's missing-list, same copy. */}
-              {missingStepless.map((k) =>
+              {/* One list, one count: these rows continue the steps'
+                  numbers (the profile read "1. … 5." and then an unnumbered
+                  "Rašyti įrašą", design audit 2026-11-22). */}
+              {missingStepless.map((k, j) =>
                 row(
                   k,
                   `profile-hub-missing-${k}`,
                   PILLAR_HREF[k],
-                  tAction(k),
+                  `${missingSteps.length + j + 1}. ${tAction(k)}`,
                   null,
                   false,
                 ),

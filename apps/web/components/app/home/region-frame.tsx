@@ -29,7 +29,13 @@ export function Region({
   children,
 }: {
   readonly id: "waiting" | "running" | "because" | "outside" | "trace";
-  /** The region number — the one mono line (a number, not a label). */
+  /** Numbered or not. A numbered region shows its POSITION among the
+   *  regions actually drawn ("01", "02", …), counted by CSS from the
+   *  container that resets `home-region` — never a hard-coded figure, so a
+   *  region left out once read ("Tuščia = tvarkinga") leaves no gap: the home
+   *  read 01, 02, 03, 05 whenever "Tavo galimybės" had nothing to show
+   *  (design audit 2026-11-22). The value is the region's place in the
+   *  design, kept for reading the code; "" draws no number. */
   readonly index: string;
   readonly title: string;
   readonly state: string;
@@ -47,6 +53,7 @@ export function Region({
       data-state={state}
       className={cn(
         "relative flex flex-col gap-3 overflow-hidden rounded-card border p-4 sm:gap-4 sm:p-6",
+        index ? "[counter-increment:home-region]" : null,
         featured
           ? "border-brand-blue/35 bg-gradient-to-b from-ink-800 to-ink-800/60 shadow-card"
           : "border-ink-600/70 bg-ink-800/50",
@@ -57,7 +64,13 @@ export function Region({
         <span aria-hidden className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-brand-blue/70 to-transparent" />
       ) : null}
       <header className="flex items-baseline gap-3">
-        {index ? <span className="font-mono text-meta tabular-nums text-text-muted">{index}</span> : null}
+        {index ? (
+          <span
+            aria-hidden
+            data-region-number
+            className="font-mono text-meta tabular-nums text-text-muted before:content-[counter(home-region,decimal-leading-zero)]"
+          />
+        ) : null}
         <h2 className="min-w-0 font-display text-body font-semibold tracking-tightest text-text-primary sm:text-title">
           {title}
         </h2>
