@@ -926,9 +926,13 @@ for (const phone of PHONES) {
       await page.getByRole("option", { name: option, exact: true }).first().tap();
     };
     const workerIdOf = () => sql<{ id: string }>(`select id from public.workers where profile_id = ${lit(s.profileId)}`)[0]!.id;
+    // The production walk runs at 375 px; at 390 the job's 45-minute budget ran out (run 45059964507).
+    const onlyAtTheWalksPhone = () => test.skip(phone.name !== "375", "the profile-cv-history walk's phone is 375 px");
     const proof = (section: string, what: string) => console.info(`[profile-loop] ${phone.name} px ${section}: ${what}`);
 
     test(`M-11a (${phone.name}). the work card: availability and countries saved, stored, back after a reload, changed again`, async ({ browser }) => {
+
+      onlyAtTheWalksPhone();
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       const openCard = async (): Promise<Locator> => {
         const main = await profileAt(page, "cv-availability");
@@ -967,6 +971,8 @@ for (const phone of PHONES) {
     });
 
     test(`M-11b (${phone.name}). a language: added, stored, back after a reload, its level changed, removed`, async ({ browser }) => {
+
+      onlyAtTheWalksPhone();
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       const section = async () => {
         const main = await profileAt(page, "cv-languages");
@@ -1005,6 +1011,7 @@ for (const phone of PHONES) {
       { key: "d", name: "achievement", hash: "cv-achievements", prefix: "worker-achievements", field: "title", table: "worker_achievements", column: "title", type: null, remove: '[data-testid^="worker-achievements-remove-"]' },
     ] as const) {
       test(`M-11${c.key} (${phone.name}). ${c.name}: added, stored, back after a reload, edited, removed`, async ({ browser }) => {
+        onlyAtTheWalksPhone();
         const { page, done } = await signedInOnPhone(browser, phone, worker);
         const section = async () => {
           const sec = (await profileAt(page, c.hash)).getByTestId(c.prefix);
@@ -1052,6 +1059,8 @@ for (const phone of PHONES) {
     }
 
     test(`M-11e (${phone.name}). experience: added, stored, back after a reload, removed`, async ({ browser }) => {
+
+      onlyAtTheWalksPhone();
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       const title = `QA-SYNTHETIC experience ${phone.name} ${RUN}`;
       const stored = () =>
@@ -1081,6 +1090,8 @@ for (const phone of PHONES) {
     });
 
     test(`M-11f (${phone.name}). an own profession: added, stored, back after a reload, removed`, async ({ browser }) => {
+
+      onlyAtTheWalksPhone();
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       const profession = `QA-SYNTHETIC profession ${phone.name} ${RUN}`;
       const stored = () =>
@@ -1109,6 +1120,42 @@ for (const phone of PHONES) {
       await expect.poll(stored, { message: "removed from the store", timeout: 30_000 }).toEqual([]);
       await expect(chipIn(await own()), "stays removed after a reload").toHaveCount(0);
       proof("own profession", "removed: gone from the store and after a reload");
+      await done();
+    });
+
+    test(`M-12 (${phone.name}). the experiences result opens by itself on the phone and stays open (production walk P-15)`, async ({ browser }) => {
+
+      onlyAtTheWalksPhone();
+      // P-15, run 45051053618 at 375 px: `experiences-result` was on the page but its sheet stayed
+      // collapsed for 45 s. The walk reads the sheet's state once and taps the toggle if it reads
+      // "closed". This step taps nothing: it records whether the product itself opens the sheet for
+      // the requested result, and keeps it open, on a cold load and on a reload.
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      for (const visit of ["cold load", "reload"]) {
+        const started = Date.now();
+        if (visit === "cold load") await page.goto(`${BASE}/en/dashboard?result=experiences`);
+        else await page.reload();
+        const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
+        await expect(toggle, `${visit}: the sheet opens by itself for the requested result`).toHaveAttribute("aria-expanded", "true", {
+          timeout: 30_000,
+        });
+        const main = page.getByRole("main");
+        const shown = main
+          .getByTestId("experiences-result")
+          .or(main.getByTestId("experiences-result-unavailable"))
+          .or(main.getByTestId("experiences-result-error"))
+          .first();
+        await expect(shown, `${visit}: the result is on screen`).toBeVisible({ timeout: 30_000 });
+        const opened = Date.now() - started;
+        await expect(main.getByTestId("experiences-result-error"), `${visit}: the records load`).toHaveCount(0);
+        // Nothing that arrives later (the opening brief, a thread question) closes it again.
+        await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+        await page.waitForTimeout(3_000);
+        await expect(toggle, `${visit}: the sheet is still open once the page has settled`).toHaveAttribute("aria-expanded", "true");
+        await expect(shown, `${visit}: the result is still on screen`).toBeVisible();
+        console.info(`[experiences-sheet] ${phone.name} px ${visit}: opened by itself after ${opened} ms, still open after the page settled`);
+      }
+      await fitsTheScreen(page, "the experiences result");
       await done();
     });
 
