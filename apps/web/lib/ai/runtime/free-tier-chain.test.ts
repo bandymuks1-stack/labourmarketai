@@ -26,6 +26,8 @@ import { isSelectable, MODEL_REGISTRY } from "./model-registry";
 import { estimateCostUsd } from "./model-pricing";
 import type { AiCompletionRequest } from "./types";
 import { geminiCompletionProvider } from "./providers/gemini";
+import { createOpenAiCompatibleProvider } from "./providers/openai";
+import { CLOUDFLARE_GEMMA_NO_THINKING, CLOUDFLARE_LLM_BINDING } from "./providers/free-tier";
 
 type Behaviour = "ok" | "429" | "500" | "timeout" | "garbage";
 
@@ -179,6 +181,54 @@ describe("routing: free quota first, in a stated order", () => {
     expect(calls[0].body.model).toBe("mistral-large-latest");
     expect(calls[0].body.response_format).toEqual({ type: "json_object" });
     expect(calls[0].body).toHaveProperty("max_tokens");
+    expect(calls[0].body).not.toHaveProperty("chat_template_kwargs");
+  });
+});
+
+describe("Cloudflare Gemma 4: thinking off, so the answer fits the token cap (production 2026-11-22)", () => {
+  // Gemma 4's Workers AI schema: chat_template_kwargs.enable_thinking, default
+  // TRUE. With it on, a 200-token intent proposal spent every token on
+  // reasoning and returned no content (finish_reason "length").
+  it("the Gemma tier sends enable_thinking=false and keeps model, cap and messages", async () => {
+    expect(AI_MODEL_CANDIDATES.cloudflare.haiku).toMatch(/^@cf\/google\/gemma-4/);
+    const r = await dispatchAiCompletion(
+      { ...marketRequest(), maxOutputTokens: 200 },
+      cfg(),
+      chainFor("explain_market_demand"),
+    );
+    expect(r.status === "ok" && r.provider).toBe("cloudflare");
+    expect(calls[0].body.chat_template_kwargs).toEqual({ enable_thinking: false });
+    expect(calls[0].body.model).toBe(AI_MODEL_CANDIDATES.cloudflare.haiku);
+    expect(calls[0].body.max_tokens).toBe(200);
+    expect(Array.isArray(calls[0].body.messages)).toBe(true);
+  });
+
+  it("other Cloudflare models do not get a field their schema does not document", async () => {
+    const r = await dispatchAiCompletion(
+      { ...marketRequest(), modelAlias: "sonnet" },
+      cfg(),
+      chainFor("explain_market_demand"),
+    );
+    expect(r.status === "ok" && r.provider).toBe("cloudflare");
+    expect(calls[0].body.model).toBe(AI_MODEL_CANDIDATES.cloudflare.sonnet);
+    expect(calls[0].body.model).not.toMatch(/gemma/);
+    expect(calls[0].body).not.toHaveProperty("chat_template_kwargs");
+  });
+
+  it("model-specific fields can never replace the model, the token cap or the messages", async () => {
+    const hostile = createOpenAiCompatibleProvider({
+      ...CLOUDFLARE_LLM_BINDING,
+      modelRequestFields: () => ({ model: "@cf/other/model", max_tokens: 99_999, messages: [] }),
+    });
+    const r = await hostile.complete({ ...marketRequest(), maxOutputTokens: 200 }, cfg());
+    expect(r.status).toBe("ok");
+    expect(calls[0].body.model).toBe(AI_MODEL_CANDIDATES.cloudflare.haiku);
+    expect(calls[0].body.max_tokens).toBe(200);
+    expect((calls[0].body.messages as unknown[]).length).toBe(2);
+  });
+
+  it("the shared constant is exactly the documented switch", () => {
+    expect(CLOUDFLARE_GEMMA_NO_THINKING).toEqual({ chat_template_kwargs: { enable_thinking: false } });
   });
 });
 

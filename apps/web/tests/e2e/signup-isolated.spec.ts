@@ -994,7 +994,9 @@ test("P-3. onboarding on a phone: the bar covers neither the end of the form, a 
       const form = el.closest("form");
       if (!form) return null;
       // The last thing in the form that is not the bar itself.
-      const rest = [...form.querySelectorAll<HTMLElement>("input, select, textarea, button, [role=combobox], label, p")].filter((n) => !el.contains(n) && n.getClientRects().length > 0);
+      // Shown ones only: text folded inside a closed <details> still reports a
+      // box in Chromium (content-visibility), though nobody can see it.
+      const rest = [...form.querySelectorAll<HTMLElement>("input, select, textarea, button, [role=combobox], label, p")].filter((n) => !el.contains(n) && n.checkVisibility());
       const last = rest.reduce<number>((max, n) => Math.max(max, n.getBoundingClientRect().bottom), 0);
       return Math.round(last);
     });

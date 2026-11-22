@@ -1306,8 +1306,8 @@ test.describe("an organisation with many needs on a phone", () => {
     await expect(home).toBeVisible({ timeout: 60_000 });
     await expect(home.locator('[data-testid="company-home-need"]:visible')).toHaveCount(5);
     const rest = home.getByTestId("company-home-needs-rest");
-    await expect(rest.locator("summary")).toContainText("7");
-    await rest.locator("summary").tap();
+    await expect(rest.locator(":scope > summary")).toContainText("7");
+    await rest.locator(":scope > summary").tap();
     await expect(home.locator('[data-testid="company-home-need"]:visible')).toHaveCount(7);
 
     await page.goto(`${BASE}/en/dashboard/company/needs`);
@@ -1316,6 +1316,12 @@ test.describe("an organisation with many needs on a phone", () => {
     const heights = await rows.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
     expect(heights.length).toBeGreaterThanOrEqual(7);
     for (const h of heights) expect(h, "a need row stays compact on a phone").toBeLessThanOrEqual(300);
+    // The newest five are listed; the rest open in place.
+    await expect(page.locator('[data-testid="demand-readback-row"]:visible')).toHaveCount(5);
+    const listRest = page.getByTestId("demand-readback-rest");
+    await expect(listRest.locator(":scope > summary")).toContainText("7");
+    await listRest.locator(":scope > summary").tap();
+    await expect(page.locator('[data-testid="demand-readback-row"]:visible')).toHaveCount(7);
     // Every function of the row is still there, one tap away.
     const row = rows.first();
     await expect(row.getByTestId("demand-readback-scout-link")).toBeVisible();
