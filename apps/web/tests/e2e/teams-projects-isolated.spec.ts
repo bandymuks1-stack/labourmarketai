@@ -15,6 +15,7 @@ import {
   sql,
   stackMailLink,
   userId,
+  onboardInvited,
 } from "./isolated-web-a-helpers";
 
 /**
@@ -128,7 +129,7 @@ async function joinCompanyByLink(browser: Browser, co: Page, address: string, na
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await w.locator('form button[type="submit"]').click();
   await w.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(w.url())) await onboard(w, "work", name);
+  if (/\/onboarding/.test(w.url())) await onboardInvited(w, name);
   await w.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(w.url())) {
     const accept = w.getByTestId("invite-accept");
