@@ -5987,6 +5987,8 @@
             "Stripe — betalningshantering för betalda plattformstjänster. När en organisation påbörjar en betalning får Stripe den betalande användarens e-postadress och en intern kontoidentifierare; kortuppgifter anges på Stripes egen betalsida och lagras inte av plattformen.",
             "Google, Facebook (Meta) och LinkedIn — endast om du väljer att logga in med dem, enligt beskrivningen ovan.",
             "Google (Gemini API) — endast enligt beskrivningen i avsnittet om AI nedan.",
+            "Cloudflare (Workers AI) — först efter aktivering: 1) för att förklara offentlig, sammanställd arbetsmarknadsstatistik; 2) när plattformen inte själv förstår en begäran som skrivits i chatten, för att föreslå vilken befintlig plattformsåtgärd den avser. Före sändning tas namn, kontaktuppgifter, siffror och alla ord som inte finns på en fast lista över åtgärdsord bort; en begäran med uppgifter om hälsa eller andra känsliga uppgifter skickas inte alls. Cloudflare använder inte innehållet för att träna modeller och sparar det inte efter begäran.",
+            "Mistral AI och Groq — först efter aktivering och endast för att förklara offentlig, sammanställd arbetsmarknadsstatistik. Inga meddelandetexter och inga personuppgifter skickas till dem.",
             "Den fullständiga listan över infrastrukturleverantörer finns på sidan “Dataskydd”."
           ]
         },
@@ -6125,6 +6127,8 @@
             "Cloudflare — nätverket framför webbplatsen: domännamnstjänst, kryptering under överföring, cachelagring och skydd mot attacker. Varje förfrågan till webbplatsen passerar genom det.",
             "GitHub — lagring av källkod. Inga användaruppgifter lagras där.",
             "Google (Gemini API) — AI-behandling för översättning av meddelanden och jobbannonser och för att föreslå vad en skriven chattmening efterfrågar. Endast den text som uppgiften behöver skickas.",
+            "Cloudflare (Workers AI) — först efter aktivering: 1) för att förklara offentlig, sammanställd arbetsmarknadsstatistik; 2) när plattformen inte själv förstår en begäran som skrivits i chatten, för att föreslå vilken befintlig plattformsåtgärd den avser. Före sändning tas namn, kontaktuppgifter, siffror och alla ord som inte finns på en fast lista över åtgärdsord bort; en begäran med uppgifter om hälsa eller andra känsliga uppgifter skickas inte alls. Cloudflare använder inte innehållet för att träna modeller och sparar det inte efter begäran.",
+            "Mistral AI och Groq — först efter aktivering och endast för att förklara offentlig, sammanställd arbetsmarknadsstatistik. Inga meddelandetexter och inga personuppgifter skickas till dem.",
             "Stripe — betalningshantering. En kundpost skapas endast när en organisation påbörjar en betalning för en prenumeration.",
             "Ingen annan leverantör av e-post, AI, översättning eller betalningar är aktiv. Om en sådan aktiveras uppdateras den här listan först."
           ]

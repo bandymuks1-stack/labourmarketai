@@ -158,7 +158,7 @@ const CHIP = {
   inviteCandidate: { id: "f:company.invite-worker", labelKey: "chipInviteCandidate" },
   clientDemand: { id: "agency:demand", labelKey: "chipClientDemand" },
   proposalStatus: { id: "agency:progress", labelKey: "chipProposalStatus" },
-  inviteLearner: { id: "link:/dashboard/network?relationship=student", labelKey: "chipInviteStudent" },
+  inviteLearner: { id: "link:/dashboard/network?invite=1&type=join_organization&relationship=student", labelKey: "chipInviteStudent" },
   programmes: { id: "link:/dashboard/company/education#institution-programs-title", labelKey: "chipProgrammes" },
   eduCapabilities: { id: "link:/dashboard/company", labelKey: "chipEduCapabilities" },
   logWork: { id: "logwork", labelKey: "chipLogWork" },

@@ -58,6 +58,7 @@ import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { TeamDemandOfferForm } from "@/components/app/team-demand-offer-form";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+import { WORKER_INVITE_HREF } from "@/lib/navigation/work-areas";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
 export const generateMetadata = dashboardPageMetadata("/dashboard/company/people", "organizationDoors.pages.people.title");
@@ -387,7 +388,7 @@ export default async function CompanyPeoplePage({
           tells everyone else who handles invitations. */}
       {canManageInvitations ? (
         <Link
-          href={"/dashboard/network?type=join_as_employee" as "/dashboard"}
+          href={WORKER_INVITE_HREF as "/dashboard"}
           data-testid="company-invite-link"
           className="flex w-fit items-center gap-2 rounded-md border border-brand-blue/50 px-4 py-2 text-sm font-medium text-brand-blue transition-colors hover:border-brand-blue"
         >

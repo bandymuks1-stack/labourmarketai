@@ -1164,6 +1164,15 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     pl: "Mamy 20 spawaczy i szukamy dla nich pracy.",
     sv: "Vi har 20 svetsare tillgängliga.",
   },
+  "offer-team": {
+    lt: "Noriu pasiūlyti savo komandą",
+    en: "I want to offer my team",
+    ru: "Хочу предложить свою команду",
+    nl: "Ik wil mijn team aanbieden",
+    de: "Ich möchte unser Team anbieten",
+    pl: "Chcę zaoferować swój zespół",
+    sv: "Jag vill erbjuda mitt team",
+  },
   "agency-invites": {
     lt: "Agentūra mane pakvietė bendradarbiauti",
     en: "An agency invited us to connect",

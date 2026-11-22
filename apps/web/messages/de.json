@@ -5987,6 +5987,8 @@
             "Stripe — Zahlungsabwicklung für kostenpflichtige Plattformleistungen. Wenn eine Organisation einen Checkout beginnt, erhält Stripe die E-Mail-Adresse des zahlenden Nutzers und eine interne Kontokennung; Kartendaten werden auf Stripes eigener Zahlungsseite eingegeben und von der Plattform nicht gespeichert.",
             "Google, Facebook (Meta) und LinkedIn — nur wenn Sie sich mit ihnen anmelden, wie oben beschrieben.",
             "Google (Gemini-API) — nur wie unten im Abschnitt über KI beschrieben.",
+            "Cloudflare (Workers AI) — erst nach der Aktivierung: 1) um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern; 2) wenn die Plattform eine im Chat eingegebene Anfrage nicht selbst versteht, um vorzuschlagen, welche bestehende Plattformaktion gemeint ist. Vor dem Senden werden Namen, Kontaktdaten, Zahlen und alle Wörter entfernt, die nicht auf einer festen Liste von Aktionswörtern stehen; eine Anfrage mit Gesundheits- oder anderen sensiblen Angaben wird überhaupt nicht gesendet. Cloudflare nutzt diese Inhalte nicht zum Trainieren von Modellen und speichert sie nach der Anfrage nicht.",
+            "Mistral AI und Groq — erst nach der Aktivierung und nur, um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern. Es werden ihnen keine Nachrichtentexte und keine personenbezogenen Daten übermittelt.",
             "Die vollständige Liste der Infrastrukturanbieter steht auf der Seite „Datenschutz“."
           ]
         },
@@ -6125,6 +6127,8 @@
             "Cloudflare — das Netzwerk vor der Website: Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen. Jede Anfrage an die Website läuft darüber.",
             "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
             "Google (Gemini-API) — KI-Verarbeitung zum Übersetzen von Nachrichten und Stellenanzeigen und zum Vorschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den die Aufgabe braucht.",
+            "Cloudflare (Workers AI) — erst nach der Aktivierung: 1) um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern; 2) wenn die Plattform eine im Chat eingegebene Anfrage nicht selbst versteht, um vorzuschlagen, welche bestehende Plattformaktion gemeint ist. Vor dem Senden werden Namen, Kontaktdaten, Zahlen und alle Wörter entfernt, die nicht auf einer festen Liste von Aktionswörtern stehen; eine Anfrage mit Gesundheits- oder anderen sensiblen Angaben wird überhaupt nicht gesendet. Cloudflare nutzt diese Inhalte nicht zum Trainieren von Modellen und speichert sie nach der Anfrage nicht.",
+            "Mistral AI und Groq — erst nach der Aktivierung und nur, um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern. Es werden ihnen keine Nachrichtentexte und keine personenbezogenen Daten übermittelt.",
             "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt.",
             "Kein weiterer E-Mail-, KI-, Übersetzungs- oder Zahlungsanbieter ist aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
           ]

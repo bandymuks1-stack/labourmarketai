@@ -63,6 +63,7 @@ export type IntentAccess = "read" | "write" | "route" | "blocked";
 export type IntentHandlerId =
   | "findWork"
   | "offerCapacity"
+  | "offerTeam"
   | "professionStatement"
   | "availabilityStatement"
   | "payStatement"
@@ -372,6 +373,11 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // need (`company.create-demand`, intent "partner" → kind agency_offer),
   // so it is a company-domain WRITE behind the same confirmation token.
   "offer-capacity": { domain: "company", access: "write", handler: "offerCapacity", ownTyping: false },
+  // "Noriu pasiūlyti savo komandą" — the organisation offers its own team
+  // against an open need through the ONE team-offer flow (TeamDemandOfferForm
+  // → offer_team_to_demand_v1, which re-checks who may offer). The sentence
+  // only opens the form; its own button is the act.
+  "offer-team": { domain: "company", access: "write", handler: "offerTeam", ownTyping: false },
   // Documents first-class (§12/§14): a document RECORDED by sentence through
   // the one inline form over the canonical upsert; readiness re-answers.
   "add-document": { domain: "documents", access: "write", handler: "addDocument", ownTyping: true },
