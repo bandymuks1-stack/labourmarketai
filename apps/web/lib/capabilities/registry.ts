@@ -2,6 +2,7 @@ import "server-only";
 
 import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import { z } from "zod";
+import { isIsoCountry, resolveCountryCode } from "@/lib/location/country-model";
 import { getTranslations } from "next-intl/server";
 
 import {
@@ -1649,6 +1650,16 @@ const DEMAND_FIELDS = [
 
 /** null-vs-absent must not change the hash for optional fields — absent and
  *  null both mean "not stated" to the canonical submit. */
+/** The country as the person typed it — a code or a name in any supported
+ *  language — resolved to ISO by the ONE canonical resolver, in the draft AND
+ *  the confirm, so the token binds the resolved code both times. A name the
+ *  resolver does not know stays as typed and is refused as `country_required`
+ *  below: never a guessed market. */
+function withResolvedCountry(draft: DemandDraftInput): DemandDraftInput {
+  if (!draft.country) return draft;
+  return { ...draft, country: resolveCountryCode(draft.country) ?? draft.country };
+}
+
 function normalizedDemandForHash(draft: DemandDraftInput): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const f of DEMAND_FIELDS) out[f] = draft[f] ?? null;
@@ -1665,9 +1676,13 @@ const demandCreateDraft: CapabilityDescriptor = {
     "ACTING FOR (their active workspace), and returns a human-readable " +
     "preview naming that organization plus a one-time confirmation token. " +
     "NOTHING is created or sent. `description` is the need in the caller's " +
-    "own words (required); role/location/skills/urgency/notes are optional " +
-    "free text; workType/country/teamSize/accommodation/transport are " +
-    "structured facts a worker's board may later see. Confirming requires " +
+    "own words (required) and `country` (required: ISO-3166 alpha-2 code, or " +
+    "the country's name in any supported language, which is resolved to the code, of " +
+    "the country where the work is; ASK the person when they have not said " +
+    "it, never guess); role/location/skills/urgency/notes are optional " +
+    "free text; workType/teamSize/accommodation/transport are structured " +
+    "facts a worker's board may later see. Without a country the draft " +
+    "returns missing: [\"country\"] and no token. Confirming requires " +
     "demand.create_confirm with this exact draft and token.",
   exposed: true,
   annotations: {
@@ -1678,10 +1693,22 @@ const demandCreateDraft: CapabilityDescriptor = {
   },
   inputSchema: companyCreateDemandFields,
   run: async (caller, input): Promise<ExecResult> => {
-    const draft = companyCreateDemandFields.parse(input);
+    const draft = withResolvedCountry(companyCreateDemandFields.parse(input));
     // THE employer-workspace gate — same chain as the web (wagon 3 core).
     const employer = await requireEmployerCompanyForCaller(caller);
     if (!employer.ok) return demandContextRefusal(employer.reason);
+    // No country, no token: the canonical submit refuses a need without one
+    // (`country_required`), so the draft says what to ask before anything
+    // could be confirmed. Never a guessed market.
+    if (!draft.country || !isIsoCountry(draft.country.toUpperCase())) {
+      return {
+        ok: false,
+        code: "country_required",
+        missing: ["country"],
+        message:
+          "Ask the person which country the work is in and pass its ISO-3166 alpha-2 code as `country`. Nothing was drafted.",
+      };
+    }
 
     const fingerprint = await demandStateFingerprint(caller);
     const token = mintCapabilityConfirmation({
@@ -1737,7 +1764,8 @@ const demandCreateConfirm: CapabilityDescriptor = {
   inputSchema: demandConfirmInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = demandConfirmInput.parse(input);
-    const { confirmationToken, ...draft } = parsed;
+    const { confirmationToken, ...typed } = parsed;
+    const draft = withResolvedCountry(typed);
     const fingerprint = await demandStateFingerprint(caller);
     const verdict = await verifyCapabilityConfirmation({
       actionId: "demand.create_confirm",
@@ -1787,7 +1815,9 @@ const demandCreateConfirm: CapabilityDescriptor = {
         ok: false,
         code: result.code,
         message:
-          result.code === "needs_migration"
+          result.code === "country_required"
+            ? "The demand needs the country where the work is (ISO-3166 alpha-2 `country`). Nothing was created."
+            : result.code === "needs_migration"
             ? "The demand intake is not enabled on this environment."
             : result.code === "no_company_context"
               ? "No employer company resolves for this caller."

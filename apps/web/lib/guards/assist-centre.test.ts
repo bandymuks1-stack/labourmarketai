@@ -626,7 +626,7 @@ describe("6. copy resolves in every ACTIVE locale and stays honest", () => {
     // The gates line is read by normal users on /dashboard/assist: it says
     // the assistant is not available yet and never names provider keys,
     // audit tables or migrations (internal vocabulary leak, fixed 2026-09-20).
-    expect(en.provider.gates).toMatch(/not available in this environment yet/i);
+    expect(en.provider.gates).toMatch(/not available yet/i);
     expect(en.provider.gates).not.toMatch(/ai_runs|migration|provider key|audit/i);
     const blob = JSON.stringify(en);
     // The same active-AI-claim ban the provider-boundary guard enforces

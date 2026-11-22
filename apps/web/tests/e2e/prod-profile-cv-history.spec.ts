@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { contextPanel } from "./prod-context-panel";
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { makeDocx, makeUnicodePdf } from "../../lib/cv/__fixtures__/cv-fixtures";
@@ -119,6 +120,8 @@ async function say(page: Page, text: string): Promise<void> {
   await expect(composer).toBeVisible({ timeout: 60_000 });
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   await composer.fill(text);
+  // On a phone an open context sheet lies over the composer; a person closes it to send.
+  await contextPanel(page, "closed");
   await inMain(page).getByTestId("composer-send").click();
 }
 
@@ -755,6 +758,9 @@ test("P-15 (2.24). the experience records about the worker open, with the right 
   // Read-only on purpose: a reply has no withdraw path and goes to moderation.
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard?result=experiences");
+  // A result is shown in the context panel: on a phone that is a sheet, opened here if it is not.
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  await contextPanel(page, "open");
   const result = inMain(page).getByTestId("experiences-result");
   const unavailable = inMain(page).getByTestId("experiences-result-unavailable").first();
   const error = inMain(page).getByTestId("experiences-result-error");
@@ -881,6 +887,37 @@ test("P-20 (3.27). the company's history page opens in Alfa's workspace", async 
   await expect(history.first()).toBeVisible({ timeout: 30_000 });
   console.info(`[company-history] state=${await inMain(page).getByTestId("company-work-history").first().getAttribute("data-state").catch(() => "n/a")}`);
   await expect(inMain(page).getByTestId("company-history-hours-door")).toBeVisible();
+  await ctx.close();
+});
+
+test("P-20b (3.36). Alfa's member reads its organization CV: the projects block, its counts, and the way back from a project", async ({ browser }) => {
+  // Read-only: Alfa's own projects, opened by its owner (a member).
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await page.goto("/lt/dashboard/company/history");
+  await expect(inMain(page).getByTestId("company-history")).toBeVisible({ timeout: 30_000 });
+  const projects = inMain(page).getByTestId("company-work-history-projects");
+  await expect(projects, "Alfa has projects, so its organization CV lists them").toBeVisible({ timeout: 30_000 });
+  const counts = projects.getByTestId("company-work-history-projects-counts");
+  await expect(counts).toBeVisible();
+  // #3452: the count reads as words, never a raw ICU pattern.
+  await expect(counts).not.toContainText("{");
+  await expect(counts).not.toContainText("plural");
+  const rows = projects.getByTestId("company-work-history-project");
+  const n = await rows.count();
+  expect(n, "at least one project row").toBeGreaterThan(0);
+  expect(n, "at most 12 rows").toBeLessThanOrEqual(12);
+  const id = await rows.first().getAttribute("data-project");
+  expect(id, "the row names its project").toBeTruthy();
+  await rows.first().click();
+  await page.waitForURL(new RegExp(`/dashboard/projects/${id}`), { timeout: 30_000 });
+  // #3452: a member of the project's organization gets the way back to its history.
+  const back = inMain(page).getByTestId("project-organization-link");
+  await expect(back, "a member sees the link to the organization history").toBeVisible({ timeout: 30_000 });
+  await back.click();
+  await page.waitForURL(/\/company\/history/, { timeout: 30_000 });
+  await expect(inMain(page).getByTestId("company-work-history-projects")).toBeVisible({ timeout: 30_000 });
+  console.info(`[company-history] 3.36: projects block rows=${n} counts="${(await counts.innerText()).trim()}"; member back link works`);
   await ctx.close();
 });
 

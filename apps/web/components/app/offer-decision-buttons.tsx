@@ -3,6 +3,8 @@
 import { useActionState } from "react";
 import { Check, X } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
+import { Link } from "@/lib/i18n/navigation";
 import {
   respondCandidateOfferAction,
   type BridgeActionState,
@@ -25,6 +27,13 @@ export type OfferDecisionLabels = {
   readonly forbidden: string;
   readonly closed: string;
   readonly error: string;
+  /** Accepting stopped at the booking-proposal caps (10 waiting, 30 per
+   *  24 h): which one, and the way to the bookings where proposals that
+   *  are no longer needed can be withdrawn. */
+  readonly limitOpen: string;
+  readonly limitDaily: string;
+  readonly limitUnknown: string;
+  readonly openBookings: string;
 };
 
 const IDLE: BridgeActionState = { status: "idle" };
@@ -55,26 +64,30 @@ export function OfferDecisionButtons({
         <form action={acceptAction}>
           <input type="hidden" name="offerId" value={offerId} readOnly />
           <input type="hidden" name="decision" value="accepted" readOnly />
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="sm"
             disabled={pending}
-            className="min-h-11 sm:min-h-0 inline-flex items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="min-h-11"
             data-testid={`offer-accept-${offerId}`}
           >
             <Check className="h-3.5 w-3.5" aria-hidden /> {labels.accept}
-          </button>
+          </Button>
         </form>
         <form action={declineAction}>
           <input type="hidden" name="offerId" value={offerId} readOnly />
           <input type="hidden" name="decision" value="declined" readOnly />
-          <button
+          <Button
             type="submit"
+            variant="secondary"
+            size="sm"
             disabled={pending}
-            className="min-h-11 sm:min-h-0 inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-text-muted disabled:opacity-60"
+            className="min-h-11"
             data-testid={`offer-decline-${offerId}`}
           >
             <X className="h-3.5 w-3.5" aria-hidden /> {labels.decline}
-          </button>
+          </Button>
         </form>
       </div>
       {state.status === "needs-migration" ? (
@@ -83,6 +96,19 @@ export function OfferDecisionButtons({
         <p className="text-xs text-state-danger" role="alert">{labels.forbidden}</p>
       ) : state.status === "not-found" ? (
         <p className="text-xs text-text-muted">{labels.closed}</p>
+      ) : state.status === "proposal-limit" ? (
+        <div className="flex flex-col gap-1" role="alert" data-testid="offer-decision-limit" data-limit={state.limit}>
+          <p className="text-xs text-state-warning">
+            {state.limit === "open" ? labels.limitOpen : state.limit === "daily" ? labels.limitDaily : labels.limitUnknown}
+          </p>
+          <Link
+            href="/dashboard/bookings"
+            className="inline-flex min-h-11 w-fit items-center text-xs font-semibold text-brand-blue hover:underline"
+            data-testid="offer-decision-limit-bookings"
+          >
+            {labels.openBookings} →
+          </Link>
+        </div>
       ) : state.status === "error" || state.status === "invalid" ? (
         <p className="text-xs text-state-danger" role="alert">{labels.error}</p>
       ) : null}

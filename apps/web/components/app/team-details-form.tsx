@@ -7,6 +7,9 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { saveTeamDetailsAction } from "@/lib/company/team-brigade-actions";
 import type { TeamAvailabilityStatus, TeamDetails } from "@/lib/company/team-brigades";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 
 /**
  * Compact team-scoped details form (Trust Connect Teams v1, gap 2):
@@ -120,74 +123,74 @@ export function TeamDetailsForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {t("availabilityLabel")}
-          <select
+          <Select
             value={status}
             onChange={(e) => setStatus(e.target.value as TeamAvailabilityStatus)}
             data-testid={`team-details-status-${teamId}`}
-            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            className="max-sm:min-h-11 max-sm:text-base"
           >
             <option value="available_now">{t("status.availableNow")}</option>
             <option value="available_from">{t("status.availableFrom")}</option>
             <option value="not_available">{t("status.notAvailable")}</option>
-          </select>
+          </Select>
         </label>
         {status === "available_from" && (
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
             {t("availableFromLabel")}
-            <input
+            <Input
               type="date"
               value={availableFrom}
               onChange={(e) => setAvailableFrom(e.target.value)}
               data-testid={`team-details-from-${teamId}`}
-              className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+              className="max-sm:min-h-11 max-sm:text-base"
             />
           </label>
         )}
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {t("maxTripDaysLabel")}
-          <input
+          <Input
             type="number"
             min={1}
             max={365}
             value={maxTripDays}
             onChange={(e) => setMaxTripDays(e.target.value)}
             data-testid={`team-details-trip-${teamId}`}
-            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            className="max-sm:min-h-11 max-sm:text-base"
           />
         </label>
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {t("sizeMinLabel")}
-          <input
+          <Input
             type="number"
             min={1}
             max={200}
             value={sizeMin}
             onChange={(e) => setSizeMin(e.target.value)}
             data-testid={`team-details-size-min-${teamId}`}
-            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            className="max-sm:min-h-11 max-sm:text-base"
           />
         </label>
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {t("sizeMaxLabel")}
-          <input
+          <Input
             type="number"
             min={1}
             max={200}
             value={sizeMax}
             onChange={(e) => setSizeMax(e.target.value)}
             data-testid={`team-details-size-max-${teamId}`}
-            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            className="max-sm:min-h-11 max-sm:text-base"
           />
         </label>
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {t("countriesLabel")}
-          <input
+          <Input
             type="text"
             value={countries}
             onChange={(e) => setCountries(e.target.value)}
             placeholder={t("countriesPlaceholder")}
             data-testid={`team-details-countries-${teamId}`}
-            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            className="max-sm:min-h-11 max-sm:text-base"
           />
         </label>
       </div>
@@ -217,18 +220,19 @@ export function TeamDetailsForm({
 
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         {t("noteLabel")}
-        <textarea
+        <Textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={2}
           maxLength={500}
           data-testid={`team-details-note-${teamId}`}
-          className="rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+          className="max-sm:text-base"
         />
       </label>
 
       <div className="flex items-center gap-3">
         <Button
+          className="min-h-11"
           type="button"
           size="sm"
           disabled={pending}

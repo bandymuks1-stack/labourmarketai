@@ -30,8 +30,6 @@ import type {
  */
 
 export type LearningLabels = {
-  title: string;
-  lead: string;
   notAvailable: string;
   empty: string;
   workerHeading: string;
@@ -150,10 +148,9 @@ export function LearningReviewSection({
 
   return (
     <div className="space-y-6">
-      <header className="space-y-1">
-        <h2 className="text-lg font-semibold text-text-primary">{labels.title}</h2>
-        <p className="text-sm text-text-muted">{labels.lead}</p>
-      </header>
+      {/* No second head here: the page title names the surface and the
+          queue below has its own heading; the explanation sits one tap away
+          on the page (decision 0032). */}
 
       {/* Manager auto-confirmation policy state — DEFAULT OFF, shown honestly. */}
       <section className="rounded-lg border border-ink-500 bg-ink-800/30 p-4">

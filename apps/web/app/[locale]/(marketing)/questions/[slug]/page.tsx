@@ -2,15 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
-import { resolveSlug, publishedParams } from "@/lib/answer-engine/publishing";
+import { resolveSlug, staticSlugParams } from "@/lib/answer-engine/publishing";
 import { buildQuestionMetadata } from "@/lib/answer-engine/answer-seo";
 import { AnswerArticle } from "@/components/marketing/answer-article";
 
 export function generateStaticParams({ params }: { params: { locale: string } }) {
-  const l = resolveActiveLocale(params?.locale ?? "lt");
-  return publishedParams()
-    .filter((p) => p.locale === l)
-    .map((p) => ({ slug: p.slug }));
+  // Never empty, or Next pre-renders no answer page in any locale.
+  return staticSlugParams(resolveActiveLocale(params?.locale ?? "lt"));
 }
 
 export async function generateMetadata({

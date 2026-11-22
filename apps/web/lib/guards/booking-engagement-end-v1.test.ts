@@ -1786,6 +1786,34 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
       // RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261110190000_organization_claim_invitation_v1.sql",
+      // 2026-11-13: owner P0 invitation delivery reliability, codes-only send diagnostics +
+      // retry / dead-letter / bounce fields. RED draft #3318, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261113190000_invitation_delivery_attempts_v1.sql",
+      // 2026-11-14 owner-chosen RED: a closed need refuses a new proposal or a first accept (draft, needs-human-gate, NOT applied).
+      "20261114100000_booking_refuses_closed_need_v1.sql",
+      // 2026-11-14: owner decision, NEW/ACTIVE counts for five platform groups, aggregate only.
+      // RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
+      "20261114120000_lm_registrations_daily_v1.sql",
+      // 2026-11-14: owner decision, invitation 862a91f4 KNOWN_HISTORICAL_UNKNOWN_OUTCOME — one integer count,
+      // service_role only. RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
+      "20261114150000_invitation_known_historical_unknown_v1.sql",
+      // 2026-11-15: owner decision, an organization reads a learner's journal only while the learning link
+      // is active and review is on (one RLS policy replaced). RED draft, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261115120000_journal_learning_access_follows_link_v1.sql",
+      // 2026-09-20 — COMM-1: nullable profiles.communication_locale (CHECK = the 13 communication languages; NULL = follow the UI locale). RED by owner classification, DRAFT needs-human-gate, NOT applied.
+      "20261118100100_profiles_communication_locale_v1.sql",
+      // 2026-11-20: owner decision (coordinator relay) approves the 11.8 training migration at R2's reviewed
+      // version; the marker is its first line, the body is pinned by md5 in
+      // training-assignment-engaged-groups-v1.test.ts. NOT applied by this repository.
+      "20261118143000_training_assignment_engaged_groups_v1.sql",
+      // 2026-11-17: owner decision, a former employer keeps limited access (retained journal up to the end
+      // date, nothing new, no more writes). RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261118164500_former_employer_limited_access_v1.sql",
+      // 2026-11-20: owner approval, the two #3474 chain fixes (direct corrections only move into an ended
+      // context; cycle-safe chain root). RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261120190000_former_employer_chain_fixes_v1.sql",
 ]);
   });
 

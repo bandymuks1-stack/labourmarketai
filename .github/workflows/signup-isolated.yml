@@ -2,7 +2,7 @@ name: Signup Isolated (local Supabase)
 
 # SELF-SERVE SIGN-UP, end to end, against a throwaway LOCAL Supabase stack that
 # lives and dies inside this job (apps/web/tests/e2e/signup-isolated.spec.ts):
-# a worker, a company and an agency each fill the real sign-up form, onboard,
+# a worker, a student, a company and an agency each fill the real sign-up form, onboard,
 # and reach their first surface; the stored rows are checked. The same stack
 # then walks agency roles and permissions (agency-roles-isolated.spec.ts):
 # invite by link, a limited governance seat, refusals, cross-org isolation.
@@ -15,7 +15,13 @@ name: Signup Isolated (local Supabase)
 #     is built or started; no project is linked, no access token is used;
 #   - the app runs with LM_ACCEPTANCE_MODE=1 and refuses a non-local target;
 #   - payments, AI providers and outbound alerts stay off;
-#   - only Playwright's list output is kept (no traces, no screenshots).
+#   - only Playwright's list output is kept (no traces), with ONE exception:
+#     experience-integration-isolated.spec.ts uploads its own screenshots and
+#     failure notes as the `experience-integration` artifact (synthetic
+#     accounts on this stack only; owner decision 2026-11-14, CV screenshots
+#     from synthetic accounts as CI artifacts), and journal-day-choice-isolated
+#     uploads its 375 / 1280 px screenshots as `journal-day-choice` (owner P1
+#     2026-11-21, synthetic worker). No other walk's output is kept.
 
 on:
   workflow_dispatch:
@@ -23,12 +29,111 @@ on:
     paths:
       - ".github/workflows/signup-isolated.yml"
       - "apps/web/tests/e2e/signup-isolated.spec.ts"
+      - "apps/web/tests/e2e/invite-join-isolated.spec.ts"
+      - "apps/web/tests/e2e/outsider-isolation-isolated.spec.ts"
+      - "apps/web/lib/onboarding/invited-worker-context.ts"
+      - "apps/web/app/*/auth/signup/**"
+      - "apps/web/tests/e2e/former-employer-access-isolated.spec.ts"
+      - "supabase/migrations/20261118164500_former_employer_limited_access_v1.sql"
+      - "supabase/migrations/20261120190000_former_employer_chain_fixes_v1.sql"
+      - "apps/web/tests/e2e/sv-journey-isolated.spec.ts"
+      # Every public path reaches its last step without an auth page (Lane L).
+      - "apps/web/tests/e2e/public-paths-isolated.spec.ts"
+      - "apps/web/tests/e2e/public-paths-cases.ts"
+      - "apps/web/lib/navigation/public-intents.ts"
+      - "apps/web/app/*/(marketing)/**"
+      - "supabase/tests/20261114100000_booking_refuses_closed_need_*"
+      - "supabase/migrations/20261114100000_booking_refuses_closed_need_v1.sql"
+      - "supabase/migrations/20261115120000_journal_learning_access_follows_link_v1.sql"
+      - "supabase/migrations/20261118143000_training_assignment_engaged_groups_v1.sql"
+      - "apps/web/tests/e2e/training-groups-isolated.spec.ts"
+      - "apps/web/tests/e2e/journeys-coverage-isolated.spec.ts"
+      - "apps/web/tests/e2e/header-desktop-fit-isolated.spec.ts"
+      - "apps/web/components/app/marketplace-loop-section.tsx"
+      - "apps/web/components/app/service-offerings-section.tsx"
+      - "apps/web/components/app/business-public-profile-panel.tsx"
+      - "apps/web/lib/marketplace/service-requests*.ts"
+      - "apps/web/tests/e2e/acceptance-matrix-isolated.spec.ts"
+      - "apps/web/lib/training/**"
+      - "apps/web/components/app/training-register.tsx"
+      - "apps/web/lib/booking/**"
+      - "apps/web/lib/onboarding/**"
+      # The worker intake carried through sign-up (S-3d): its page, form,
+      # kept draft, return path and the builder that receives it.
+      - "apps/web/lib/marketing/worker-profile-door.ts"
+      - "apps/web/lib/staffing/worker-intake-draft.ts"
+      - "apps/web/app/*/(marketing)/worker-intake/**"
+      - "apps/web/components/app/worker-intake-form.tsx"
+      - "apps/web/components/app/profile-text-first-flow.tsx"
+      - "apps/web/components/app/intake-draft-sign-out-clear.tsx"
+      # ... and the header Sign up / Sign in, which carry the builder as
+      # `next` while on the intake (intake:worker).
+      - "apps/web/components/layouts/site-nav.tsx"
+      - "apps/web/components/layouts/header-auth-cta-link.tsx"
+      - "apps/web/components/app/onboarding-wizard.tsx"
+      - "apps/web/components/app/worker-education-section.tsx"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
+      - "apps/web/tests/e2e/experience-integration-isolated.spec.ts"
+      # Register 2.36, a profession journal template prefills an entry.
+      - "apps/web/tests/e2e/journal-template-isolated.spec.ts"
+      # The journal opens with the work day (owner P1 2026-11-21).
+      - "apps/web/tests/e2e/journal-day-choice-isolated.spec.ts"
+      - "apps/web/tests/e2e/journal-reach-isolated.spec.ts"
+      - "apps/web/tests/e2e/pay-placeholder-isolated.spec.ts"
+      - "apps/web/app/*/dashboard/journal/**"
+      - "apps/web/lib/journal/day-choice.ts"
+      - "apps/web/lib/journal/journal-templates*.ts"
+      - "apps/web/components/app/journal-entry-composer.tsx"
+      # ... and reaches the Living CV's journal-entry figure (T-4).
+      - "apps/web/lib/profile/trust-signals.ts"
+      # The code experience-integration-isolated.spec.ts guards (#3354, decision 0025).
+      - "apps/web/app/*/cv/**"
+      - "apps/web/app/*/dashboard/work-in-numbers/**"
+      - "apps/web/app/*/dashboard/company/history/**"
+      - "apps/web/app/*/dashboard/company/people/**"
+      - "apps/web/lib/journal/professional-experience*.ts"
+      - "apps/web/components/app/work-in-numbers/**"
+      - "apps/web/components/app/organization/company-work-history.tsx"
+      - "apps/web/components/app/organization/organizations-leadership.tsx"
+      - "apps/web/components/app/organization-roster-section.tsx"
+      - "apps/web/components/app/roster-link-offer-form.tsx"
+      - "apps/web/lib/organization-evidence/**"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
+      - "apps/web/tests/e2e/recognition-chain-isolated.spec.ts"
+      - "apps/web/tests/e2e/phone-journeys-isolated.spec.ts"
+      # The signed-in header and main screens at 320-390 px in seven languages
+      # (owner phone report 2026-11-20).
+      - "apps/web/tests/e2e/phone-header-fit-isolated.spec.ts"
+      - "apps/web/components/app/conversation/chat/conversation-header.tsx"
+      - "apps/web/components/app/conversation/chat/workspace-chip.tsx"
+      - "apps/web/components/app/dashboard-chrome.tsx"
+      # The phone confirmation path the C walk measures (worker entry -> the
+      # organization's approval -> the Living CV): the approval surfaces.
+      - "apps/web/app/*/dashboard/inbox/**"
+      - "apps/web/components/app/quick-confirm-*.tsx"
+      - "apps/web/components/app/journal-inbox-entry.tsx"
+      - "apps/web/components/app/arena/confirm-pulse.tsx"
+      - "apps/web/components/app/org-members-panel.tsx"
+      - "apps/web/components/app/entry-review-panel.tsx"
+      - "apps/web/components/app/counterparty-review-card.tsx"
+      # Client confirmation on phone and desktop, direct counterparty (decision 0033).
+      - "apps/web/tests/e2e/client-review-isolated.spec.ts"
+      - "apps/web/components/app/counterparty-link-panel.tsx"
+      - "apps/web/lib/journal/counterparty-*"
+      - "apps/web/tests/e2e/teams-projects-isolated.spec.ts"
+      - "apps/web/app/*/dashboard/projects/**"
+      - "apps/web/components/app/team-*.tsx"
+      - "apps/web/components/app/project-team-assignments.tsx"
+      - "apps/web/lib/projects/project-page-teams.ts"
+      - "apps/web/lib/projects/team-assignment*"
+      - "apps/web/lib/company/team-brigade*"
       - "apps/web/lib/journal/entry-skill-retraction.ts"
       - "apps/web/lib/journal/journal-entry-skills-actions.ts"
       - "apps/web/lib/journal/skill-pipeline-actions.ts"
+      - "apps/web/lib/today/today-server.ts"
+      - "apps/web/lib/today/today-model.ts"
+      - "apps/web/lib/journal/work-intelligence-read.ts"
       - "apps/web/app/*/dashboard/company/people/**"
       - "apps/web/app/*/dashboard/company/settings/**"
       - "apps/web/app/*/dashboard/network/**"
@@ -49,12 +154,23 @@ on:
       - "apps/web/app/*/onboarding/**"
       - "apps/web/app/*/dashboard/start/**"
       - "apps/web/lib/onboarding/**"
+      # The worker intake carried through sign-up (S-3d): its page, form,
+      # kept draft, return path and the builder that receives it.
+      - "apps/web/lib/marketing/worker-profile-door.ts"
+      - "apps/web/lib/staffing/worker-intake-draft.ts"
+      - "apps/web/app/*/(marketing)/worker-intake/**"
+      - "apps/web/components/app/worker-intake-form.tsx"
+      - "apps/web/components/app/profile-text-first-flow.tsx"
       - "apps/web/lib/invitations/signup-*"
       - "apps/web/components/app/login-form.tsx"
       - "apps/web/components/app/invite-panel.tsx"
       - "apps/web/app/*/invite/**"
       - "apps/web/components/app/reset-password-form.tsx"
       - "apps/web/app/*/dashboard/journal/**"
+      # The worker's "submit for review" panel and the client's review queue.
+      - "apps/web/components/app/entry-review-panel.tsx"
+      - "apps/web/components/app/counterparty-review-card.tsx"
+      - "apps/web/app/*/dashboard/inbox/counterparty/**"
       - "supabase/config.toml"
       - "apps/web/tests/e2e/*-isolated-web-a.spec.ts"
       - "apps/web/tests/e2e/isolated-web-a-helpers.ts"
@@ -74,6 +190,17 @@ on:
       - "apps/web/lib/market/need-skills*"
       - "apps/web/lib/demand/demand-request.ts"
       - "supabase/migrations/20261029190000_worker_board_need_skill_slugs_v1.sql"
+      # The assistant's sentence → real action (owner P1 2026-11-21): the
+      # deterministic router and the flows its acceptance phrases open.
+      - "apps/web/tests/e2e/assistant-intent-isolated.spec.ts"
+      - "apps/web/lib/conversation/intent-router.ts"
+      - "apps/web/lib/conversation/intent-registry.ts"
+      - "apps/web/lib/conversation/worklog-extract.ts"
+      - "apps/web/components/app/conversation/worker-worklog-flow.tsx"
+      - "apps/web/components/app/conversation/chat/conversation-chat.tsx"
+      - "apps/web/components/app/team-demand-offer-form.tsx"
+      - "apps/web/lib/communication/chat-open-conversation.ts"
+      - "apps/web/lib/marketplace/service-requests.ts"
 
 permissions:
   contents: read
@@ -88,12 +215,15 @@ jobs:
     timeout-minutes: 45
     env:
       APP_ORIGIN: http://127.0.0.1:3000
+      # Owner P0 2026-11-22 walks, run after SPEC; kept apart from the SPEC line so new entries there never conflict.
+      SPEC_P0: tests/e2e/invite-join-isolated.spec.ts tests/e2e/outsider-isolation-isolated.spec.ts
       # The walks share this one throwaway stack: self-serve sign-up, the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts), the
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
-      # -> matching -> dispute chain (skills-chain-isolated.spec.ts), and job fit from evidence
+      # -> matching -> dispute chain (skills-chain-isolated.spec.ts), the practice -> sign-off -> recognition
+      # chain that production no longer writes (recognition-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts tests/e2e/header-desktop-fit-isolated.spec.ts tests/e2e/journal-reach-isolated.spec.ts tests/e2e/pay-placeholder-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -169,8 +299,24 @@ jobs:
           # The runner shell is `bash -e`: without +e a failed start exits before
           # its log is printed and the cause (e.g. a migration error) is lost.
           set +e -uo pipefail
-          supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
-          rc=$?
+          # The stack publishes 54321-54334 (the tests read the mail catcher on
+          # 54324). Those ports sit inside the runner's ephemeral range
+          # (32768-60999), so an outgoing connection can hold one at start
+          # ("failed to bind host port ... address already in use"). New outgoing
+          # connections are kept below 54000, and a start that still meets a held
+          # port is stopped cleanly and tried once more. Any other failure exits.
+          sudo sysctl -w net.ipv4.ip_local_port_range="32768 54000" >/dev/null || true
+          start() {
+            supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
+          }
+          start; rc=$?
+          if [ $rc -ne 0 ] && grep -q "address already in use" "$RUNNER_TEMP/sb-start.log"; then
+            grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | grep -i "already in use"
+            echo "::warning::a stack port was held at start; stopping and starting once more"
+            supabase stop --no-backup >/dev/null 2>&1
+            sleep 5
+            start; rc=$?
+          fi
           grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60
           exit $rc
 
@@ -209,7 +355,26 @@ jobs:
           echo "migration files=$files ledger rows=$rows"
           [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
 
+      # A CLOSED NEED REFUSES A NEW PROPOSAL OR A FIRST ACCEPT
+      # (20261114100000_booking_refuses_closed_need_v1). Database-level cases in
+      # one rolled-back transaction, then two real sessions racing a close
+      # against an accept in both orders. Synthetic rows only, this stack only.
+      - name: Closed need refuses an accept — database cases
+        run: |
+          set -euo pipefail
+          docker exec -i supabase_db_labourmarketai psql -U postgres -X -q -v ON_ERROR_STOP=1 \
+            < supabase/tests/20261114100000_booking_refuses_closed_need_regression.sql
+
+      - name: Closed need refuses an accept — concurrent close and accept
+        run: bash supabase/tests/20261114100000_booking_refuses_closed_need_race.sh
+
+      # The same heap the other build jobs give `next build` (quality.yml, e2e-smoke.yml,
+      # deploy-vps.yml). Its type-check worker passes 2 GB on this code base; without the
+      # setting the build depends on Node's default for the runner's memory, next to a
+      # running Supabase stack.
       - name: Build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Guard — the build inlined the local Supabase URL
@@ -267,7 +432,34 @@ jobs:
           E2E_LOCAL_STACK: "1"
           MAIL_APP_BASE: http://127.0.0.1:3001
           APP_MAIL_API: http://127.0.0.1:54334
-        run: pnpm exec playwright test $SPEC --reporter=list --trace=off
+        run: pnpm exec playwright test $SPEC $SPEC_P0 --reporter=list --trace=off
+
+      # One continuous professional history across organizations
+      # (experience-integration-isolated.spec.ts, issue #3354): synthetic
+      # accounts on this stack only, 375 / 1440 px. Kept as a CI artifact.
+      - name: Upload the experience-integration screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: experience-integration
+          path: |
+            apps/web/test-results/experience-integration/
+            apps/web/test-results/experience-integration-iso*/error-context.md
+            apps/web/test-results/invite-join/
+          if-no-files-found: warn
+          retention-days: 14
+
+      # The journal's day choice and reach (journal-day-choice-isolated and
+      # journal-reach-isolated, owner P1 2026-11-21/22): synthetic workers on
+      # this stack, 375 / 390 / 1280 px.
+      - name: Upload the journal day-choice screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: journal-day-choice
+          path: apps/web/test-results/journal-day-choice/
+          if-no-files-found: warn
+          retention-days: 14
 
       # APP-ROLLBACK COMPATIBILITY (owner gate for 20261029190000, deploy order
       # migration -> app): the LAST app build before the job-fit code (#2887)
@@ -287,7 +479,7 @@ jobs:
           git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/main"
           cd "$RUNNER_TEMP/main"
           pnpm install --frozen-lockfile --filter=!mobile > "$RUNNER_TEMP/main-install.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/main-install.log"; exit 1; }
-          pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
+          NODE_OPTIONS=--max-old-space-size=6144 pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
           grep -rqF "127.0.0.1:54321" apps/web/.next/static apps/web/.next/server || { echo "::error::main build lacks the local Supabase URL"; exit 1; }
           pnpm -F web exec next start -H 127.0.0.1 -p 3002 > "$RUNNER_TEMP/next-main.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/next-main.pid"
@@ -303,6 +495,15 @@ jobs:
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
         run: pnpm exec playwright test tests/e2e/job-fit-main-compat-isolated.spec.ts --reporter=list --trace=off
+
+      # UX gap W-1 (2026-11-18): a new worker's home showed "Open items could
+      # not be read". The work-intelligence reads log only a read name and an
+      # error code (no ids, no values); print those lines on every run.
+      - name: Work-intelligence read failures (W-1)
+        if: always()
+        run: |
+          out="$(grep -E -A6 '\[(work-intelligence|today)\]' "$RUNNER_TEMP/next.log" | grep -viE 'key|secret|jwt|token|password|eyJ|@' | head -n 80 || true)"
+          if [ -n "$out" ]; then echo "$out"; else echo "none: no work-intelligence or today read failed"; fi
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()

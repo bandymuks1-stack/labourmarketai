@@ -33,7 +33,8 @@
   "unnamedOrganization": {
     "company": "Virksomhed uden navn",
     "agency": "Bureau uden navn",
-    "other": "Organisation uden navn"
+    "other": "Organisation uden navn",
+    "ended": "Tidligere organisation uden navn"
   },
   "activeWorkspaceNoRelationship": "Du handler på vegne af {org}, men der er ikke registreret noget arbejdsforhold med {org}, så det tilbydes ikke her. Vælg den kontekst, arbejdet reelt hører til.",
   "project": "Projekt",
@@ -99,7 +100,16 @@
       "outcomeBlocked": "ikke bekræftet ({code})",
       "receipt": "Bekræftet: {title}",
       "receiptSkills": "{count, plural, one {# færdighed} other {# færdigheder}}",
-      "skillsUnavailable": "Listen over færdigheder kunne ikke læses — trykket bekræfter kun selve registreringen."
+      "skillsUnavailable": "Listen over færdigheder kunne ikke læses — trykket bekræfter kun selve registreringen.",
+      "projectFilterLabel": "Projekt",
+      "projectAll": "Alle projekter ({n})",
+      "projectNone": "Uden projekt ({n})",
+      "projectUnnamed": "Projekt, navnet vises ikke",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Vis",
+      "projectResult": "Viser {shown} af {total} poster",
+      "projectOnCard": "Projekt: {name}",
+      "noProjectOnCard": "Uden projekt"
     },
     "result": {
       "entrySuperseded": "Posten er allerede erstattet af en nyere version — kortet er ikke længere aktuelt og fjernes fra listen.",
@@ -312,5 +322,12 @@
     "metricsInsertFailed": "Posten blev ikke gemt fuldstændigt: {reason}. Posten blev afvist — prøv igen.",
     "moduleFieldInvalid": "Disse oplysninger hører ikke til denne type engagement: {fields}. Intet blev gemt — fjern dem, og prøv igen."
   },
-  "contextEnded": "afsluttet"
+  "contextEnded": "afsluttet",
+  "dayChoice": {
+    "today": "I dag",
+    "yesterday": "I går",
+    "weekAgo": "For en uge siden",
+    "calendar": "Kalender",
+    "earlier": "Tidligere poster"
+  }
 }

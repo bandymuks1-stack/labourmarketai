@@ -54,7 +54,7 @@ describe("match preview: the AI badge appears only after an AI run", () => {
   });
 
   it("the badge copy itself stays an AI claim in every active locale (so it must stay gated)", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const m = JSON.parse(read(`messages/${locale}.json`)) as {
         matchPreview: { aiBadge: string; aiDisabled: string };
       };

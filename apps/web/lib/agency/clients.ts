@@ -1,5 +1,7 @@
 import "server-only";
 
+import { isLabourDemandRow } from "@/lib/demand/market-direction";
+
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
@@ -14,11 +16,12 @@ import {
 /**
  * Agency client read service (canonical journey P5).
  *
- * Backed by the OWNER-GATED draft migration 20260713160000_agency_clients_v1
- * (NOT applied yet). Until the owner applies it, the client read reports
- * `needs-migration` and the demand read reports `linkable: false` — the UI
- * shows the honest "prepared, owner activation pending" state, exactly the
- * established migration-gated pattern (company locations / team brigades).
+ * Backed by migration 20260713160000_agency_clients_v1, applied to production
+ * on 2026-09-14 (docs/APPLIED_LEDGER.md). On a database that does not have it
+ * (a fresh local stack mid-replay) the client read still reports
+ * `needs-migration` and the demand read reports `linkable: false`, so the UI
+ * says so instead of failing — the established migration-gated pattern
+ * (company locations / team brigades).
  *
  * REUSE, not a parallel model: the demand list below reads the CANONICAL
  * public.customer_requests table (the same rows the scouting page and the
@@ -89,7 +92,9 @@ export async function listAgencyDemands(): Promise<AgencyDemandsState> {
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { kind: "error" };
 
-  const base = "id, title, status, created_at";
+  // kind + payload let the list drop help-desk and privacy requests to the
+  // platform: they are never a need an agency may be shown (P0 2026-11-22).
+  const base = "id, title, status, created_at, kind, payload";
   try {
     let linkable = true;
     let { data, error } = await asAny(supabase)
@@ -117,7 +122,11 @@ export async function listAgencyDemands(): Promise<AgencyDemandsState> {
     return {
       kind: "ok",
       linkable,
-      rows: (data ?? []).map(
+      rows: (data ?? [])
+        .filter((r: Record<string, unknown>) =>
+          isLabourDemandRow({ kind: r.kind as string | null, payload: r.payload }),
+        )
+        .map(
         (r: Record<string, unknown>): AgencyDemandRow => ({
           id: r.id as string,
           title: (r.title as string | null) ?? "—",

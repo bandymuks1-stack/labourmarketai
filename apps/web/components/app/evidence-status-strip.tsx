@@ -98,7 +98,7 @@ export async function EvidenceStatusStrip({
             <li key={status}>
               <Link
                 href="/dashboard/reports/evidence"
-                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                className="inline-flex min-h-11 items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                 data-testid="evidence-awaiting-review-link"
               >
                 {chip}

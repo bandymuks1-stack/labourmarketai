@@ -47,7 +47,17 @@ export type OpenConversationResult =
   | { readonly ok: false; readonly reason: "not_authenticated" | "no_permission" | "not_found" | "failed" };
 
 /** Who the typed reference means, among people the caller may already see. */
-export async function findConversationPeople(query: string): Promise<FindConversationPeopleResult> {
+/**
+ * `listWhenUnnamed`: the sentence asked for contact and named NOBODY ("Padėk
+ * susisiekti", owner P1 2026-11-22). The person's own counterparts — the same
+ * RLS-scoped candidates a name is matched against, nobody else — come back as
+ * a CHOICE ("many", even for one), so the chat asks instead of opening a
+ * thread on a guess.
+ */
+export async function findConversationPeople(
+  query: string,
+  opts: { readonly listWhenUnnamed?: boolean } = {},
+): Promise<FindConversationPeopleResult> {
   const text = (query ?? "").trim().slice(0, 200);
   if (!text) return { status: "none" };
   try {
@@ -97,7 +107,8 @@ export async function findConversationPeople(query: string): Promise<FindConvers
     }
 
     // A person already in a conversation is one match, not two.
-    const matched = matchPeopleByName(text, candidates);
+    const named = matchPeopleByName(text, candidates);
+    const matched = named.length === 0 && opts.listWhenUnnamed ? candidates.map((c) => c.item) : named;
     const people: ConversationPerson[] = [];
     const labels = new Set<string>();
     for (const p of matched) {
@@ -107,7 +118,7 @@ export async function findConversationPeople(query: string): Promise<FindConvers
       people.push(p);
     }
     if (people.length === 0) return { status: "none" };
-    if (people.length === 1) return { status: "one", person: people[0] };
+    if (people.length === 1 && !(named.length === 0 && opts.listWhenUnnamed)) return { status: "one", person: people[0] };
     return { status: "many", people: people.slice(0, 5) };
   } catch {
     return { status: "none" };

@@ -48,7 +48,10 @@ export type Locale = (typeof locales)[number];
 // to /en because /pl was not routed. Same rule as NL/DE: activated only
 // after the base catalog + 6 taxonomy files reached full parity with EN
 // (AI-seeded, preview-tagged, pending §7.4 human review).
-export const activeLocales = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+// SV activated by owner decision 2026-11-11 (option A): a large Swedish
+// company tests production. Same rule: base catalog + 6 taxonomy files at
+// full parity with LT, zero [EN] markers (AI-seeded, pending §7.4 review).
+export const activeLocales = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 export type ActiveLocale = (typeof activeLocales)[number];
 
 export const defaultLocale: ActiveLocale = "lt";

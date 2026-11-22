@@ -126,7 +126,8 @@ function CreateForm({ labels }: { labels: CandidateDraftsLabels }) {
     });
   };
 
-  const field = "rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary";
+  // Phones: a field is a full 44px target and 16px text (no zoom on focus).
+  const field = "rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base";
 
   return (
     <section className="card-border flex flex-col gap-3 p-4" data-testid="candidate-draft-create">

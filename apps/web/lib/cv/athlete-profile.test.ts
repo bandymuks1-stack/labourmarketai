@@ -696,7 +696,7 @@ describe("the route stays apart from the default CV", () => {
   });
 });
 
-describe.each(["lt", "en", "ru", "nl", "de", "pl"])("the view in %s", (locale) => {
+describe.each(["lt", "en", "ru", "nl", "de", "pl", "sv"])("the view in %s", (locale) => {
   const messages = JSON.parse(readFileSync(join(process.cwd(), "messages", `${locale}.json`), "utf8")) as AbstractIntlMessages;
   const tr = (namespace: string): AthleteTranslator => {
     const t = createTranslator({ locale, messages, namespace: namespace as never });
@@ -799,5 +799,49 @@ describe.each(["lt", "en", "ru", "nl", "de", "pl"])("the view in %s", (locale) =
     const other = render(cv, { readerIsThePerson: false });
     expect(other).not.toContain('data-testid="athlete-next"');
     expect(other).not.toContain('data-testid="athlete-availability"');
+  });
+});
+
+describe("an organization without a name the person no longer works with (owner 2026-11-15, #3356)", () => {
+  // The engagement as the person's own reader returns it once it has ended:
+  // the organization row is outside their RLS, so no name and no type.
+  const shell = engagement({
+    id: "ctx-shell",
+    orgName: null,
+    organizationType: null,
+    title: null,
+    startedAt: null,
+    endedAt: "2026-09-23",
+  });
+  const role = (patch: Partial<Pe["roles"][number]> = {}): Pe["roles"][number] => ({
+    engagementContextId: "ctx-shell",
+    organizationId: "org-shell",
+    organizationName: null,
+    relationship: "employee",
+    title: null,
+    startedAt: null,
+    endedAt: "2026-09-23",
+    current: false,
+    source: "engagement",
+    businessPeriods: [],
+    ...patch,
+  });
+  const seasonOf = (roles: Pe["roles"], names: AthleteNames) =>
+    build(blank({ workHistory: [shell], professionalExperience: experience({ roles }) }), { names }).seasons.find(
+      (s) => s.key === "own:ctx-shell",
+    );
+  const PHRASE = "Earlier organization without a name";
+
+  it("is named so in the organization's place, not by its relationship word — and keeps its season and hours", () => {
+    const s = seasonOf([role()], { ...NAMES, endedUnnamedOrganization: PHRASE });
+    expect(s?.title).toBe(PHRASE);
+    expect(s?.hours).not.toBeNull();
+  });
+  it("the person's own context (no organization) keeps its own heading", () => {
+    expect(seasonOf([role({ organizationId: null })], { ...NAMES, endedUnnamedOrganization: PHRASE })?.title).toBe("rel:employee");
+  });
+  it("without the phrase (or without readable roles) the season keeps its earlier heading", () => {
+    expect(seasonOf([role()], NAMES)?.title).toBe("rel:employee");
+    expect(seasonOf([], { ...NAMES, endedUnnamedOrganization: PHRASE })?.title).toBe("rel:employee");
   });
 });

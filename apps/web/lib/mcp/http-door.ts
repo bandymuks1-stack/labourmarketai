@@ -291,7 +291,9 @@ export function createMcpDoor(config: McpDoorConfig) {
     // callers are unaffected.
     if (
       auth.identity.transport === "cookie" &&
-      !(req.headers.get("content-type") ?? "").toLowerCase().includes("application/json")
+      // The MIME essence, exactly: `text/plain; x=application/json` is a
+    // preflight-free "simple" request and must not pass as JSON.
+    (req.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase() !== "application/json"
     ) {
       return NextResponse.json(
         { ok: false, code: "unsupported_media_type", message: "This MCP endpoint accepts application/json only." },

@@ -2,10 +2,12 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page, type Route } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 import { ORGANIZATION_PLAN_KEY } from "../../lib/billing/plans";
 import { PROD_QA_MANAGER_EMAIL, PROD_QA_OWNER_EMAIL } from "../../lib/testing/prod-qa-guard";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * PRODUCTION BILLING IN STRIPE TEST MODE — owner area 13 (Payments). Every step
@@ -172,6 +174,7 @@ async function createNeed(page: Page, n: number): Promise<"done" | "limit"> {
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
   const done = page.getByTestId("demand-done");
@@ -611,4 +614,12 @@ test("9 (7.19). cleanup: subscription ended, run needs closed; refunds are a man
     expect(HOLDS_SUBSCRIPTION, `the walk's subscription is ended (status=${view.status})`).not.toContain(view.status);
   }
   await ctx.close();
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("billing-test-mode");
 });

@@ -58,6 +58,11 @@ function scoped(loc: string, ns: string) {
 }
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {} }) }));
+// The proof prompt is the network page's own client component (its own words);
+// here only its placement on the home is under test.
+vi.mock("@/components/app/verify-email-prompt", () => ({
+  VerifyEmailPrompt: () => null,
+}));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async (ns: string) => scoped(state.locale, ns)),
 }));
@@ -157,6 +162,35 @@ describe("UNKNOWN is never ZERO — every region names a failed read", () => {
     expect(w).toContain('data-testid="today-next-cta"');
     expect(w).toContain('data-testid="today-open-unknown"');
     expect(w).not.toContain('data-testid="home-waiting-clear"');
+  });
+});
+
+describe("W-1: invitations that wait on a mailbox proof are not a read failure", () => {
+  it("offers the existing proof prompt instead of 'could not be read', and never claims nothing is waiting", async () => {
+    const w = html(
+      await HomeWaitingView({
+        locale: "en",
+        region: deriveWaiting(NEXT, { kind: "known", items: [] }),
+        unknownDoors: [],
+        mailboxProof: true,
+      }),
+    );
+    expect(w).toContain('data-testid="home-mailbox-proof"');
+    expect(w).not.toContain('data-testid="today-open-unknown"');
+    expect(w).not.toContain('data-testid="home-waiting-clear"');
+  });
+
+  it("a real failure is still named, beside the prompt", async () => {
+    const w = html(
+      await HomeWaitingView({
+        locale: "en",
+        region: deriveWaiting(NEXT, { kind: "known", items: [] }),
+        unknownDoors: ["offers"],
+        mailboxProof: true,
+      }),
+    );
+    expect(w).toContain('data-testid="today-open-unknown"');
+    expect(w).toContain('data-testid="home-mailbox-proof"');
   });
 });
 

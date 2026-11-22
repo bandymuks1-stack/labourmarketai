@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { Link } from "@/lib/i18n/navigation";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import {
   EstimateSummaryView,
   type EstimateSummaryViewLabels,
@@ -139,7 +142,6 @@ export interface ProjectCostCalculatorLabels {
     readonly ctaTitle: string;
     readonly ctaBody: string;
     readonly ctaDashboard: string;
-    readonly ctaDashboardHelp: string;
     readonly ctaCompanyNeed: string;
     readonly ctaCompanyNeedHelp: string;
   };
@@ -147,8 +149,8 @@ export interface ProjectCostCalculatorLabels {
   readonly csvLabels: Readonly<Record<string, string>>;
 }
 
-const FIELD =
-  "w-full rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue";
+// The shared Input/Select carry the field look; this adds only the phone floor.
+const FIELD = "max-sm:min-h-11 max-sm:text-base";
 const LABEL = "flex flex-col gap-1 text-xs";
 const STEPS = ["context", "quantities", "rates", "result"] as const;
 type StepKey = (typeof STEPS)[number];
@@ -208,6 +210,22 @@ export function ProjectCostCalculator({
   });
   const money = (n: number) => `${nf.format(n)} ${result.currency}`;
 
+  // What both need forms receive from the estimate: the worker count and the
+  // country, bounded, never a price or a description (validated again by the
+  // company-need adapter). The account route used to receive nothing, so the
+  // person retyped what they had just entered (employer path P0 2026-11-15).
+  const bridgePrefill: Record<string, string> = {
+    ...(inputs.workerCount > 0 ? { number_of_workers: String(Math.trunc(inputs.workerCount)) } : {}),
+    ...(inputs.country ? { country: inputs.country } : {}),
+  };
+  /** A path with the prefill as its query, kept before any `#anchor`. Signing in on the way keeps the query (`next`). */
+  const withBridgeQuery = (path: string) => {
+    const query = new URLSearchParams(bridgePrefill).toString();
+    if (!query) return path;
+    const hash = path.indexOf("#");
+    return hash < 0 ? `${path}?${query}` : `${path.slice(0, hash)}?${query}${path.slice(hash)}`;
+  };
+
   const stepIndex = STEPS.indexOf(step);
 
   function downloadCsv() {
@@ -237,7 +255,7 @@ export function ProjectCostCalculator({
   ) => (
     <label className={LABEL}>
       <span className="text-text-secondary">{label}</span>
-      <input
+      <Input
         type="number"
         inputMode="decimal"
         min={0}
@@ -256,7 +274,7 @@ export function ProjectCostCalculator({
   const packNum = (key: keyof AreaQuantityInputs, label: string) => (
     <label className={LABEL}>
       <span className="text-text-secondary">{label}</span>
-      <input
+      <Input
         type="number"
         inputMode="decimal"
         min={0}
@@ -308,7 +326,7 @@ export function ProjectCostCalculator({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label className={LABEL}>
               <span className="text-text-secondary">{labels.fields.template}</span>
-              <select
+              <Select
                 value={inputs.template}
                 onChange={(e) => set("template", e.target.value as EstimateTemplate)}
                 className={FIELD}
@@ -319,11 +337,11 @@ export function ProjectCostCalculator({
                     {labels.templates[tpl] ?? tpl}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label className={LABEL}>
               <span className="text-text-secondary">{labels.fields.country}</span>
-              <select
+              <Select
                 value={inputs.country}
                 onChange={(e) => set("country", e.target.value)}
                 className={FIELD}
@@ -335,12 +353,12 @@ export function ProjectCostCalculator({
                     {c.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
           </div>
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.fields.workType}</span>
-            <input
+            <Input
               type="text"
               maxLength={120}
               value={inputs.workType}
@@ -352,7 +370,7 @@ export function ProjectCostCalculator({
           </label>
           <label className={`${LABEL} sm:max-w-[12rem]`}>
             <span className="text-text-secondary">{labels.fields.currency}</span>
-            <input
+            <Input
               type="text"
               maxLength={6}
               value={inputs.currency}
@@ -370,7 +388,7 @@ export function ProjectCostCalculator({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label className={LABEL}>
               <span className="text-text-secondary">{labels.fields.unitType}</span>
-              <select
+              <Select
                 value={inputs.unitType}
                 onChange={(e) => set("unitType", e.target.value as UnitType)}
                 className={FIELD}
@@ -381,7 +399,7 @@ export function ProjectCostCalculator({
                     {labels.units[u] ?? u}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             {num("quantity", labels.fields.quantity)}
             {num("workerCount", labels.fields.workerCount)}
@@ -393,16 +411,18 @@ export function ProjectCostCalculator({
 
           {/* Area quantity pack (insulation / area-based) — optional helper. */}
           <div className="rounded-md border border-ink-600 bg-ink-800/40 p-4">
-            <button
+            <Button
               type="button"
               onClick={() => setPackOpen((o) => !o)}
               aria-expanded={packOpen}
-              className="text-left text-sm font-semibold text-brand-blue"
+              variant="ghost"
+              size="sm"
+              className="min-h-11 justify-start text-left"
               data-testid="pcc-pack-toggle"
             >
               {packOpen ? "− " : "+ "}
               {labels.pack.toggle}
-            </button>
+            </Button>
             {packOpen && (
               <div className="mt-4 flex flex-col gap-4">
                 <p className="text-xs leading-relaxed text-text-secondary">
@@ -457,18 +477,20 @@ export function ProjectCostCalculator({
                   </dl>
                 )}
                 <div className="flex items-center gap-3">
-                  <button
+                  <Button
                     type="button"
                     disabled={packProblems.length > 0}
                     onClick={() => {
                       setInputs((prev) => applyAreaQuantityToEstimate(prev, packResult));
                       setPackApplied(true);
                     }}
-                    className="self-start rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                    variant="secondary"
+                    size="sm"
+                    className="min-h-11 self-start"
                     data-testid="pcc-pack-apply"
                   >
                     {labels.pack.apply}
-                  </button>
+                  </Button>
                   {packApplied && (
                     <span className="text-xs text-state-success" data-testid="pcc-pack-applied">
                       {labels.pack.applied}
@@ -494,7 +516,7 @@ export function ProjectCostCalculator({
             {num("contingencyPercent", labels.fields.contingency, { max: 100 })}
             <label className={LABEL}>
               <span className="text-text-secondary">{labels.vat.label}</span>
-              <input
+              <Input
                 type="text"
                 inputMode="decimal"
                 maxLength={6}
@@ -532,7 +554,7 @@ export function ProjectCostCalculator({
                 ).map(([k, l]) => (
                   <label key={k} className={LABEL}>
                     <span className="text-text-secondary">{l}</span>
-                    <input
+                    <Input
                       type="number"
                       inputMode="decimal"
                       min={0}
@@ -555,7 +577,7 @@ export function ProjectCostCalculator({
                     {money(Math.round((accTotal + Number.EPSILON) * 100) / 100)}
                   </span>
                 </span>
-                <button
+                <Button
                   type="button"
                   disabled={accTotal <= 0}
                   onClick={() =>
@@ -564,11 +586,13 @@ export function ProjectCostCalculator({
                       Math.round((accTotal + Number.EPSILON) * 100) / 100,
                     )
                   }
-                  className="rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                  variant="secondary"
+                  size="sm"
+                  className="min-h-11"
                   data-testid="pcc-acc-apply"
                 >
                   {labels.accommodation.apply}
-                </button>
+                </Button>
               </div>
             </div>
           </details>
@@ -652,22 +676,26 @@ export function ProjectCostCalculator({
                 </dl>
               )}
               <div className="flex flex-wrap gap-3 print:hidden">
-                <button
+                <Button
                   type="button"
                   onClick={downloadCsv}
-                  className="rounded-md border border-border-default px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:border-brand-blue"
+                  variant="secondary"
+                  size="sm"
+                  className="min-h-11"
                   data-testid="pcc-csv"
                 >
                   {labels.result.csv}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => window.print()}
-                  className="rounded-md border border-border-default px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:border-brand-blue"
+                  variant="secondary"
+                  size="sm"
+                  className="min-h-11"
                   data-testid="pcc-print"
                 >
                   {labels.result.print}
-                </button>
+                </Button>
               </div>
 
               {/* Bridge into the real product — both routes exist today. */}
@@ -683,7 +711,7 @@ export function ProjectCostCalculator({
                 </p>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <AuthCtaLink
-                    relPath={`/${locale}/dashboard/company/needs#demand-intake`}
+                    relPath={`/${locale}${withBridgeQuery("/dashboard/company/needs#demand-intake")}`}
                     className="inline-flex min-h-11 items-center justify-center rounded-md bg-brand-blue px-4 py-2 text-center text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80"
                   >
                     {labels.result.ctaDashboard}
@@ -691,14 +719,7 @@ export function ProjectCostCalculator({
                   <Link
                     href={{
                       pathname: "/company-need",
-                      query: {
-                        // Bounded, non-PII, non-price prefill only (validated
-                        // again by the company-need adapter).
-                        ...(inputs.workerCount > 0
-                          ? { number_of_workers: String(Math.trunc(inputs.workerCount)) }
-                          : {}),
-                        ...(inputs.country ? { country: inputs.country } : {}),
-                      },
+                      query: bridgePrefill,
                     }}
                     className="rounded-md border border-border-default px-4 py-2 text-center text-sm font-semibold text-text-primary transition-colors hover:border-brand-blue"
                     data-testid="pcc-cta-company-need"
@@ -707,7 +728,7 @@ export function ProjectCostCalculator({
                   </Link>
                 </div>
                 <p className="text-meta leading-relaxed text-text-muted">
-                  {labels.result.ctaDashboardHelp} {labels.result.ctaCompanyNeedHelp}
+                  {labels.result.ctaCompanyNeedHelp}
                 </p>
               </div>
             </>
@@ -718,27 +739,31 @@ export function ProjectCostCalculator({
       {/* ── Wizard navigation ──────────────────────────────────────────── */}
       <div className="flex items-center gap-3 print:hidden">
         {stepIndex > 0 && (
-          <button
+          <Button
             type="button"
             onClick={() => setStep(STEPS[stepIndex - 1])}
-            className="rounded-md border border-border-default px-4 py-2 text-sm font-semibold text-text-secondary transition-colors hover:border-brand-blue"
+            variant="secondary"
+            size="sm"
+            className="min-h-11"
             data-testid="pcc-back"
           >
             {labels.steps.back}
-          </button>
+          </Button>
         )}
         {stepIndex < STEPS.length - 1 && (
-          <button
+          <Button
             type="button"
             onClick={() => setStep(STEPS[stepIndex + 1])}
-            className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80"
+            variant="primary"
+            size="sm"
+            className="min-h-11"
             data-testid="pcc-next"
           >
             {labels.steps.next}
-          </button>
+          </Button>
         )}
         {step === "result" && (
-          <button
+          <Button
             type="button"
             onClick={() => {
               setInputs({ ...EMPTY_ESTIMATE_INPUTS });
@@ -748,11 +773,13 @@ export function ProjectCostCalculator({
               setAcc({ workers: 0, days: 0, perWorkerDay: 0 });
               setStep("context");
             }}
-            className="ml-auto font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-secondary"
+            variant="ghost"
+            size="sm"
+            className="ml-auto min-h-11"
             data-testid="pcc-start-over"
           >
             {labels.steps.startOver}
-          </button>
+          </Button>
         )}
       </div>
     </div>
