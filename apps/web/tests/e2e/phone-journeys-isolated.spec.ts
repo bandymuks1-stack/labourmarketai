@@ -41,6 +41,8 @@ import {
  *   M-9 SKILL    adds a free-label skill on the profile: the chip shows in place (no reload), is
  *                stored once, persists on a reload and is declared on the Living CV; then the same
  *                add at a desktop width (production walk P-13, run 44637832323 at 375 px).
+ *   M-10 SUMMARY saves the public summary again and again, the same value twice, and once while
+ *                the server answers as during a deploy: every save answers on screen (P-26).
  *
  * M-2 runs LAST in each group (first run 2026-11-14: the CV page stopped answering at 375 px), so a
  * CV fault cannot hide search, applying and messages; if it stops answering again, the step says
@@ -819,6 +821,69 @@ for (const phone of PHONES) {
       watch(dp);
       await addInPlace(dp, `QA-SYNTHETIC skill desktop ${phone.name} ${RUN}`, "desktop");
       await desk.close();
+    });
+
+    test(`M-10 (${phone.name}). every summary save answers on screen: repeated, the same value twice, and one cut off by a deploy`, async ({ browser }) => {
+      // The production walk P-26 (2.1), run 45047648320 at 375 px: tries 1 and 2 answered "saved" in
+      // about a second; try 3 was sent while a deploy activated, the action was answered
+      // `x-nextjs-action-not-found`, StaleBuildRecovery reloaded the page, and no answer ever showed
+      // (the typed text was gone too). Here the third save meets the same answer, made locally.
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      await page.goto(`${BASE}/en/dashboard/profile#profile-public-summary`);
+      await page.reload();
+      const section = page.getByRole("main").getByTestId("profile-public-summary");
+      await expect(section).toBeVisible({ timeout: 30_000 });
+      const input = section.getByTestId("profile-public-headline");
+      const save = section.getByTestId("profile-public-summary-save");
+      const saved = section.getByTestId("profile-public-summary-saved");
+      const error = section.getByTestId("profile-public-summary-error");
+      const stored = () =>
+        sql<{ headline: string | null }>(`select headline from public.workers where profile_id = ${lit(s.profileId)}`)[0]?.headline ?? null;
+      /** Types a value until the page takes it (a fill before hydration is not seen by React). */
+      const type = async (value: string, where: string) => {
+        await expect(async () => {
+          await input.fill(value);
+          await expect(save).toBeEnabled({ timeout: 2_000 });
+        }, `${where}: the typed value is taken`).toPass({ timeout: 30_000 });
+        await expect(saved, `${where}: no old answer is left on screen`).toHaveCount(0);
+      };
+
+      const first = `Summary save one ${phone.name} ${RUN}`;
+      const second = `Summary save two ${phone.name} ${RUN}`;
+      const values = [first, second, first, second];
+      for (const [i, value] of values.entries()) {
+        const where = `save ${i + 1}`;
+        await type(value, where);
+        await save.tap();
+        await expect(saved, `${where}: the save answers "saved" on screen`).toBeVisible({ timeout: 30_000 });
+        await expect.poll(stored, { message: `${where}: the headline is stored`, timeout: 30_000 }).toBe(value);
+      }
+
+      // A save cut off by a deploy: the server no longer knows the page's action.
+      const cutOff = `Summary save cut off ${phone.name} ${RUN}`;
+      let answered = 0;
+      await page.route(/\/en\/dashboard\/profile/, async (route) => {
+        if (route.request().method() === "POST" && route.request().headers()["next-action"] && answered === 0) {
+          answered += 1;
+          await route.fulfill({ status: 404, headers: { "x-nextjs-action-not-found": "1", "content-type": "text/plain" }, body: "" });
+          return;
+        }
+        await route.fallback();
+      });
+      await type(cutOff, "cut-off save");
+      const reloaded = page.waitForEvent("load", { timeout: 30_000 });
+      await save.tap();
+      await reloaded;
+      await expect(error, "cut-off save: the page answers on screen after its reload").toBeVisible({ timeout: 30_000 });
+      expect(answered, "cut-off save: the action met the deploy's answer").toBe(1);
+      await expect(input, "cut-off save: the typed text is still there").toHaveValue(cutOff);
+      expect(stored(), "cut-off save: nothing was stored").toBe(second);
+      await page.unroute(/\/en\/dashboard\/profile/);
+      await save.tap();
+      await expect(saved, "the save after it answers \"saved\"").toBeVisible({ timeout: 30_000 });
+      await expect.poll(stored, { message: "the save after it is stored", timeout: 30_000 }).toBe(cutOff);
+      await fitsTheScreen(page, "the profile after repeated summary saves");
+      await done();
     });
 
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {

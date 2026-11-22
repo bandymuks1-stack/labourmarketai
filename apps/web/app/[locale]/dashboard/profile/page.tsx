@@ -1440,6 +1440,7 @@ export default async function ProfilePage({
         <WorkerPublicSummaryEditor
           initialHeadline={(worker as { headline?: string | null } | null)?.headline ?? ""}
           initialBio={(worker as { bio?: string | null } | null)?.bio ?? ""}
+          draftOwner={user.id}
           labels={{
             title: tPublicSummary("title"),
             audience: tPublicSummary("audience"),

@@ -6,6 +6,8 @@
  *   - the full journal composer keeps its started entry until it is saved;
  *   - the worklog readback never loses the entry to a thrown action, and an
  *     expired session says "sign in", not "try again";
+ *   - the public summary save keeps its text until the server answers, so a
+ *     thrown action or a deploy's reload still answers on screen (P-26);
  *   - the public company-need form puts back what was typed after a refused
  *     send (React resets an action form after every send);
  *   - the mobile journal, need and message composers keep unsent words across
@@ -82,6 +84,23 @@ describe("surfaces keep what was typed", () => {
     const src = read("components/app/conversation/worker-worklog-flow.tsx");
     expect(src.match(/\} catch \{\n\s+(?:\/\/[^\n]*\n\s+)?setPhase\(\{ kind: "error", message: labels\.errorGeneric \}\);/g)?.length).toBe(2);
     expect(src.match(/failureCode\((?:prep|res)\) === "auth" \? labels\.notAuthed/g)?.length).toBe(2);
+  });
+
+  it("the public summary save answers every time: thrown, or cut off by a deploy's reload (P-26)", () => {
+    const src = read("components/app/worker-public-summary-editor.tsx");
+    // kept BEFORE the action is called, so StaleBuildRecovery's reload cannot lose it
+    expect(src.indexOf("writeTabDraft(PUBLIC_SUMMARY_DRAFT, draftOwner, { headline, bio });")).toBeGreaterThan(-1);
+    expect(src.indexOf("writeTabDraft(PUBLIC_SUMMARY_DRAFT")).toBeLessThan(src.indexOf("await saveWorkerPublicSummary("));
+    // only a confirmed save drops it; a thrown action answers with the error
+    expect(src).toMatch(/if \(res\.kind === "saved"\) \{\n\s+setSaved\([^\n]+\n\s+clearTabDraft\(PUBLIC_SUMMARY_DRAFT\);/);
+    expect(src).toMatch(/\} catch \{\n\s+(?:\/\/[^\n]*\n\s+)?setState\("error"\);/);
+    // the reloaded page answers the kept save: stored → "saved", otherwise the text is back with the error
+    expect(src).toContain("readTabDraft(PUBLIC_SUMMARY_DRAFT, draftOwner)");
+    expect(src).toMatch(/keptHeadline\.trim\(\) === initialHeadline && keptBio\.trim\(\) === initialBio\) \{\n\s+setState\("saved"\);/);
+    expect(src).toMatch(/setHeadline\(keptHeadline\);\n\s+setBio\(keptBio\);\n\s+setState\("error"\);/);
+    expect(read("app/[locale]/dashboard/profile/page.tsx")).toContain("draftOwner={user.id}");
+    // the reload it survives is the one StaleBuildRecovery makes on a deploy's answer
+    expect(read("components/app/stale-build-recovery.tsx")).toContain('const HEADER = "x-nextjs-action-not-found";');
   });
 
   it("the public company-need form puts back what was typed after a refused send", () => {
