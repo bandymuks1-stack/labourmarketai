@@ -127,7 +127,8 @@ describe("the runtime side: one task, one grant, least privilege", () => {
   it("the grant table holds exactly the owner's dated, sourced, task-scoped Gemini grant", () => {
     // 2026-09-17 (RED-2): a second Gemini row exists for `translate_message`;
     // it is pinned in lib/guards/ai-data-egress.test.ts. THIS row is unchanged.
-    expect(AI_EGRESS_GRANTS).toHaveLength(2);
+    // 2026-11-22: a third row, Cloudflare for this same task (free-tier-chain.test.ts).
+    expect(AI_EGRESS_GRANTS).toHaveLength(3);
     const g = AI_EGRESS_GRANTS[0];
     expect(g.provider).toBe("gemini");
     expect(g.maxSensitivity).toBe("SENSITIVE_FREE_TEXT");

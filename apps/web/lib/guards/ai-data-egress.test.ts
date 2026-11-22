@@ -43,10 +43,14 @@ describe("the gate is closed by default", () => {
     // message translation-on-read. Still one provider; still by task; the
     // `translate_message` section below pins what it opens and what it
     // does not.
-    expect(AI_EGRESS_GRANTS).toHaveLength(2);
+    // 2026-11-22 (owner decision, CLOUDFLARE WORKERS AI): a THIRD task-scoped
+    // row — Cloudflare, `propose_conversation_intent` only, on a redacted
+    // sentence; pinned in free-tier-chain.test.ts.
+    expect(AI_EGRESS_GRANTS).toHaveLength(3);
+    expect(AI_EGRESS_GRANTS[2]).toMatchObject({ provider: "cloudflare", tasks: ["propose_conversation_intent"], grantedOn: "2026-11-22" });
     expect(AI_EGRESS_GRANTS[0]).toMatchObject({ provider: "gemini", tasks: ["propose_conversation_intent"], grantedOn: "2026-09-05" });
     expect(AI_EGRESS_GRANTS[1]).toMatchObject({ provider: "gemini", tasks: ["translate_message"], maxSensitivity: "SENSITIVE_FREE_TEXT", grantedOn: "2026-09-17" });
-    expect(new Set(AI_EGRESS_GRANTS.map((g) => g.provider))).toEqual(new Set(["gemini"]));
+    expect(new Set(AI_EGRESS_GRANTS.map((g) => g.provider))).toEqual(new Set(["gemini", "cloudflare"]));
   });
 
   it("an external provider with no grant may receive PUBLIC only", () => {
@@ -394,7 +398,7 @@ describe("RED-2 (owner approval 2026-09-17, option 1): translate_message may lea
 
   it("revocation: remove the row and translation is refused again — no data to unwind", () => {
     const revoked = AI_EGRESS_GRANTS.filter((g) => !g.tasks?.includes(task));
-    expect(revoked).toHaveLength(1);
+    expect(revoked).toHaveLength(2);
     expect(egressPermitted(cloud("gemini"), s, revoked, task).permitted).toBe(false);
     // the intent grant is unaffected by revoking translation
     expect(egressPermitted(cloud("gemini"), "SENSITIVE_FREE_TEXT", revoked, "propose_conversation_intent").permitted).toBe(true);
