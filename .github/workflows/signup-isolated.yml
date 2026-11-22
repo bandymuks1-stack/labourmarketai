@@ -29,6 +29,10 @@ on:
     paths:
       - ".github/workflows/signup-isolated.yml"
       - "apps/web/tests/e2e/signup-isolated.spec.ts"
+      - "apps/web/tests/e2e/invite-join-isolated.spec.ts"
+      - "apps/web/tests/e2e/outsider-isolation-isolated.spec.ts"
+      - "apps/web/lib/onboarding/invited-worker-context.ts"
+      - "apps/web/app/*/auth/signup/**"
       - "apps/web/tests/e2e/hiring-chain-isolated.spec.ts"
       - "apps/web/tests/e2e/former-employer-access-isolated.spec.ts"
       - "supabase/migrations/20261118164500_former_employer_limited_access_v1.sql"
@@ -211,6 +215,8 @@ jobs:
     timeout-minutes: 45
     env:
       APP_ORIGIN: http://127.0.0.1:3000
+      # Owner P0 2026-11-22 walks, run after SPEC; kept apart from the SPEC line so new entries there never conflict.
+      SPEC_P0: tests/e2e/invite-join-isolated.spec.ts tests/e2e/outsider-isolation-isolated.spec.ts
       # The walks share this one throwaway stack: self-serve sign-up, the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts), the
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
@@ -426,7 +432,7 @@ jobs:
           E2E_LOCAL_STACK: "1"
           MAIL_APP_BASE: http://127.0.0.1:3001
           APP_MAIL_API: http://127.0.0.1:54334
-        run: pnpm exec playwright test $SPEC --reporter=list --trace=off
+        run: pnpm exec playwright test $SPEC $SPEC_P0 --reporter=list --trace=off
 
       # One continuous professional history across organizations
       # (experience-integration-isolated.spec.ts, issue #3354): synthetic
@@ -439,6 +445,7 @@ jobs:
           path: |
             apps/web/test-results/experience-integration/
             apps/web/test-results/experience-integration-iso*/error-context.md
+            apps/web/test-results/invite-join/
           if-no-files-found: warn
           retention-days: 14
 

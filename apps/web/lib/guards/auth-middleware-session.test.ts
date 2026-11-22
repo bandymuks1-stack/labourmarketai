@@ -145,6 +145,22 @@ describe("anonymous traffic", () => {
     expect(loc).toContain("next=%2Flt%2Fdashboard");
   });
 
+  it("sends a cookieless visitor of a protected route to login without asking Supabase (perf 2026-11-22)", async () => {
+    for (const p of ["/lt/dashboard", "/en/dashboard/company", "/en/dashboard/assist?x=1"]) {
+      getUserMock.mockClear();
+      const res = await middleware(req(p));
+      expect(res.status, p).toBe(307);
+      expect(res.headers.get("location"), p).toContain("/auth/login?next=");
+      expect(getUserMock, p).not.toHaveBeenCalled();
+    }
+  });
+
+  it("still validates a protected route that carries an auth cookie", async () => {
+    const res = await middleware(req("/lt/dashboard", { authed: true }));
+    expect(getUserMock).toHaveBeenCalledTimes(1);
+    expect(res.headers.get("location")).toContain("/lt/auth/login");
+  });
+
   it("protects market-map + communication too", async () => {
     for (const p of ["/lt/dashboard/market-map", "/lt/dashboard/communication"]) {
       const res = await middleware(req(p));

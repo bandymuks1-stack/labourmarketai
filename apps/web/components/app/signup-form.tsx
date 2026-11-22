@@ -72,6 +72,7 @@ export function SignupForm({
   linkedinEnabled = false,
   facebookEnabled = false,
   invitation,
+  inviteLines,
 }: {
   linkedinEnabled?: boolean;
   facebookEnabled?: boolean;
@@ -80,6 +81,10 @@ export function SignupForm({
    *  browser. A server action signs up with it (the e-mail binding still
    *  compares the session to exactly that address), no confirm-password field
    *  is asked, and the canonical acceptance continues once the session exists. */
+  /** Who invited the person, to which organization, and what happens next —
+   *  already localized on the server from the invitation's own preview. Shown
+   *  in place of the generic sub-copy (owner P0 2026-11-22). */
+  inviteLines?: readonly string[];
   invitation?: {
     token: string;
     maskedEmail: string;
@@ -404,9 +409,17 @@ export function SignupForm({
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
           {t("headline")}
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:mt-3">
-          {t("subcopy")}
-        </p>
+        {inviteLines && inviteLines.length > 0 ? (
+          <div className="mt-2 flex flex-col gap-1 text-sm leading-relaxed text-text-secondary sm:mt-3" data-testid="signup-invite-context">
+            {inviteLines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:mt-3">
+            {t("subcopy")}
+          </p>
+        )}
       </header>
 
       {/* Owner window 11 §21 — the sentence the visitor typed on the

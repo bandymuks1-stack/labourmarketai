@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Aktuell efterfrågan på marknaden",
-    "subtitleAgency": "Vad den öppna marknaden efterfrågar just nu – samma utbud som dina kandidater ser på tavlan.",
-    "subtitleInstitution": "Vad den öppna marknaden efterfrågar just nu – de inriktningar dina deltagare är på väg mot.",
     "active": "{count} aktuella lediga tjänster",
     "employers": "{count} arbetsgivare",
     "filtered": "{profession}: {count} lediga tjänster",
@@ -2082,7 +2080,6 @@
       "eyebrow": "FÖRETAGETS ARBETSYTA",
       "programs": {
         "title": "Program och grupper",
-        "subtitle": "Vad du undervisar i, riktat mot en inriktning på arbetsmarknaden, och grupperna av deltagare inom det. Efterfrågan visar aktuella offentliga lediga tjänster för den inriktningen.",
         "empty": "Inga program ännu. Lägg till det första och rikta det mot den arbetsinriktning det leder till.",
         "addProgram": "Lägg till ett program",
         "noDirection": "Ingen arbetsinriktning angiven",
@@ -4276,6 +4273,9 @@
         "admin": "Administratör"
       },
       "subcopy": "En profil för din arbetslivserfarenhet och dina möjligheter — i nästa steg berättar du vad du har kommit hit för.",
+      "inviteFrom": "{inviter} bjuder in dig att gå med i {organization}.",
+      "inviteTo": "Du är inbjuden att gå med i {organization}.",
+      "inviteNext": "När du registrerar dig går du med i {organization}.",
       "google_label": "Fortsätt med Google",
       "google_redirecting": "Omdirigerar...",
       "divider": "eller",
@@ -7111,7 +7111,6 @@
   "learning": {
     "pageTitle": "Lärande och granskning",
     "pageLead": "Förslag som bygger på verklig arbetsaktivitet och som sparas för att en person ska granska dem. Inget här behandlas som bevisat i sig.",
-    "title": "Granskningskö",
     "lead": "Signaler blir förslag, och en person beslutar. Lärandet avgör aldrig något på egen hand.",
     "notAvailable": "Inte tillgängligt just nu.",
     "empty": "Inget att granska än.",
@@ -12841,7 +12840,7 @@
         "invite_to_demand": "En arbetsgivare har bjudit in dig till ett arbetsbehov"
       },
       "from": "Inbjuden av {name}",
-      "organization": "Företag: {name}",
+      "organization": "Organisation: {name}",
       "project": "Projekt: {name}",
       "role": "Föreslagen roll: {role}",
       "accept": "Acceptera inbjudan",
@@ -12870,10 +12869,9 @@
       "capacity": "Relation: {capacity}",
       "capacityNotEmployment": "Det här är inget jobberbjudande och skapar ingen anställning.",
       "selfStart": "Skapa ditt eget konto",
-      "anonExplainer": "Registrera dig eller logga in för att svara på den här inbjudan. Du behåller ditt eget konto, din profil och din arbetshistorik – personen som bjöd in dig skapar kopplingen, inget mer.",
+      "anonExplainer": "Registrera dig eller logga in för att svara på den här inbjudan. Ditt konto, din profil och din arbetshistorik förblir dina: att acceptera skapar bara kopplingen, aldrig en verifierad färdighet, en anställning eller ett uppdrag.",
       "register": "Registrera dig och fortsätt",
       "signIn": "Jag har redan ett konto",
-      "youOwnYourIdentity": "Din yrkesidentitet förblir din. Att acceptera en inbjudan skapar aldrig i sig en verifierad färdighet, en anställning eller ett uppdrag.",
       "referredVia": "Hänvisad via {source}",
       "campaign": "Inbjudan: {label}",
       "seats": "{used} av {max} platser tagna",
@@ -18843,8 +18841,7 @@
         "invitationAccepted": "Inbjudan accepterad. Bekräfta bemanningsföretagets kopplingsförfrågan nedan med ditt företag."
       },
       "education": {
-        "title": "Lärande och program",
-        "subtitle": "Program, deltagare och marknadens efterfrågan inom deras inriktningar."
+        "title": "Lärande och program"
       },
       "history": {
         "title": "Dataimport och historik",
@@ -19627,6 +19624,7 @@
     "heading": "Erbjud det här teamet till ett behov",
     "intro": "Erbjud teamet som en enhet mot ett öppet behov från ett verifierat företag.",
     "privacy": "Företaget ser bara fakta på teamnivå: storlek, färdigheter, tillgänglighet. Erbjudandet namnger ingen medlem och visar ingen medlemsprofil. Medlemmarna visas i ett projekt först när företaget accepterar och tilldelar teamet dit.",
+    "orgPrivacy": "Företaget ser ert företags namn, ert meddelande och era villkor. Ingen person namnges förrän ni kommer överens om vem som arbetar.",
     "tooSmall": "Ett team behöver minst 2 aktiva medlemmar för att kunna erbjudas.",
     "loading": "Läser in …",
     "unavailable": "Öppna behov kunde inte läsas in just nu.",
@@ -19637,6 +19635,7 @@
     "noteLabel": "Meddelande till företaget (valfritt)",
     "notePlaceholder": "Till exempel: arbetslag på 3, kan börja om två veckor",
     "submit": "Erbjud team",
+    "orgSubmit": "Erbjud vårt företag",
     "submitting": "Erbjuder …",
     "sent": {
       "heading": "Dina erbjudanden",
@@ -19715,8 +19714,14 @@
       },
       "blockers": "Teamet som helhet uppfyller inte: {list}",
       "missing": "Inte angivet: {list}",
+      "missingData": {
+        "need_not_structured": "behovets krav",
+        "no_team_members": "aktiva medlemmar",
+        "team_skills_not_stated": "teamets färdigheter"
+      },
       "noNeedStructure": "Det här behovet är inte strukturerat ännu, så teamet kan inte matchas mot det.",
       "note": "Meddelande från teamet",
+      "noteCompany": "Meddelande från företaget",
       "accept": "Godkänn i princip",
       "decline": "Avböj",
       "noProjects": "Du har inget öppet projekt att tilldela teamet till ännu.",
@@ -19735,6 +19740,7 @@
       },
       "createProject": "Skapa ett projekt",
       "message": "Skicka meddelande till teamet",
+      "messageCompany": "Skicka meddelande till företaget",
       "kindOrganization": "Företagserbjudande",
       "orgNext": "Överenskommet i princip (inget avtal). Kom överens om detaljerna och vilka personer som ska arbeta i samtalet."
     },
