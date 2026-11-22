@@ -217,9 +217,11 @@ describe("a verified price is not permission to run", () => {
     // Gemini is exactly as refused as it was with an empty table.
     // 2026-09-17 (RED-2): a second task-scoped row, `translate_message`.
     // Both rows name a task, so a call that names none is still refused.
-    expect(AI_EGRESS_GRANTS).toHaveLength(2);
+    // 2026-11-22 (owner decision): a third row, Cloudflare, the intent task only.
+    expect(AI_EGRESS_GRANTS).toHaveLength(3);
     expect(AI_EGRESS_GRANTS[0].tasks).toEqual(["propose_conversation_intent"]);
     expect(AI_EGRESS_GRANTS[1].tasks).toEqual(["translate_message"]);
+    expect(AI_EGRESS_GRANTS[2]).toMatchObject({ provider: "cloudflare", tasks: ["propose_conversation_intent"] });
     const geminiProfile = { id: "gemini", locality: "cloud" as const, costClass: "paid" };
     expect(egressPermitted(geminiProfile, "PUBLIC").permitted).toBe(true);
     expect(egressPermitted(geminiProfile, "LOW_RISK_PROJECT_DATA").permitted).toBe(false);

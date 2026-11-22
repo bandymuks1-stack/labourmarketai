@@ -56,6 +56,9 @@ jobs:
           # Owner decision 2026-11-21: the project is on Supabase Pro; up to 24 per UTC day until
           # 2026-11-23, while production stays stable (every prod-qa-walk brake still applies).
           DAILY_CAP: "24"
+          # invited-worker:phone is out of the plan: its synthetic account is created by the owner only
+          # (prod-qa-invited-provision.yml) and does not exist, so every re-run after a deploy failed at
+          # the mint and spent the day's budget (run 45001807853). Dispatch it by hand once provisioned.
         run: |
           set -euo pipefail
           PLAN="company-governance:desktop
@@ -64,7 +67,7 @@ jobs:
                 need-intake:desktop need-intake:phone need-intake:phone-375
                 agency-chain:desktop agency-chain:phone agency-chain:phone-375
                 learning-practice:desktop learning-practice:phone learning-practice:phone-375
-                role-routes:desktop role-routes:phone fresh-activation:desktop invited-worker:phone
+                role-routes:desktop role-routes:phone fresh-activation:desktop
                 jobs-search:desktop jobs-search:phone journal-confirm:desktop journal-confirm:phone
                 chat-continuity:phone worker-records-exports:desktop notifications-inapp:phone
                 org-roster:desktop org-roster:phone brigade-formation:desktop project-execution:desktop

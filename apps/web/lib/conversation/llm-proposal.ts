@@ -9,6 +9,7 @@ import { rateLimit } from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 import { intentCatalogue } from "@/lib/conversation/intent-catalogue";
+import { redactIntentSentence, restoreIntentTokens } from "@/lib/conversation/intent-sentence-redaction";
 import { validatePlan } from "@/lib/conversation/intent-plan";
 import { INTENT_REGISTRY, type RoutedIntent } from "@/lib/conversation/intent-registry";
 import {
@@ -49,8 +50,9 @@ import {
  * configuration and grant decision, not a property of this contract.
  *
  * ── What leaves the platform ──────────────────────────────────────────────
- * The sentence, the locale, the coarse identity and the intent catalogue
- * (ids + hints). No profile id travels to the audit row either — the run is
+ * The sentence AFTER `redactIntentSentence` (names, contacts, ids and numbers
+ * replaced by opaque tokens; not sent when it cannot be cleaned), the locale,
+ * the coarse identity and the intent catalogue (ids + hints). No profile id travels to the audit row either — the run is
  * attributed to the surface, not to the person.
  */
 
@@ -100,10 +102,16 @@ export async function proposeUnderstandingAction(input: {
   const locale = aiLocaleFor(input.locale);
   const identity = input.identity === "company" ? "company" : "person";
 
+  // OWNER DECISION 2026-11-22: personal data never leaves with the sentence.
+  // Names, contacts, ids and numbers become opaque tokens; a sentence that
+  // cannot be cleaned safely is not sent at all.
+  const redacted = redactIntentSentence(sentence);
+  if (!redacted) return { kind: "unsupported", reason: "not_understood", source: "model" };
+
   try {
     const outcome = await runAiAgent(
       "conversation_intent",
-      { sentence, locale, identity, intents: intentCatalogue() },
+      { sentence: redacted.text, locale, identity, intents: intentCatalogue() },
       {
         locale,
         // A LABEL for the audit row — never the sentence, never the person.
@@ -126,7 +134,9 @@ export async function proposeUnderstandingAction(input: {
       data?: { kind?: unknown; intent?: unknown; reference?: unknown; steps?: unknown };
     };
     const kind = envelope.data?.kind;
-    const reference = cleanReference(envelope.data?.reference);
+    const copied = cleanReference(envelope.data?.reference);
+    // The model saw tokens only; the person's own characters come back here.
+    const reference = copied === null ? null : restoreIntentTokens(copied, redacted.tokens);
 
     switch (kind) {
       case "action": {
