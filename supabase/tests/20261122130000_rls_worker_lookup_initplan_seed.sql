@@ -57,3 +57,12 @@ insert into public.public_vacancies(id,provider_key,external_id,content_hash,cha
 insert into public.public_vacancies(id,provider_key,external_id,content_hash,channel,lifecycle,title_raw,source_language,country,published_at,captured_at,attribution_code,transform_version,request_ref,is_active) values ('00000000-0000-4000-8000-000000000040','test','00000000-0000-4000-8000-000000000040','h','snapshot','published','Welder','en','SE',now(),now(),'t','1','r',true);
 insert into public.public_vacancies(id,provider_key,external_id,content_hash,channel,lifecycle,title_raw,source_language,country,published_at,captured_at,attribution_code,transform_version,request_ref,is_active) values ('00000000-0000-4000-8000-000000000041','test','00000000-0000-4000-8000-000000000041','h','snapshot','published','Welder','en','SE',now(),now(),'t','1','r',true);
 set session_replication_role = origin;
+create function public._eq3604_try(q text) returns text language plpgsql as $f$
+declare r text;
+begin
+  execute q into r;
+  return coalesce(r, '');
+exception when others then
+  return 'ERROR: ' || sqlerrm;
+end $f$;
+grant execute on function public._eq3604_try(text) to anon, authenticated;

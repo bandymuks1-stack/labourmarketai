@@ -16,7 +16,7 @@ N=20261122130000_rls_worker_lookup_initplan
 UP="supabase/migrations/${N}_v1.sql"; DOWN="supabase/rollbacks/${N}_v1.down.sql"; T="supabase/tests/${N}"
 PSQL=${PSQL:-"docker exec -i supabase_db_labourmarketai psql -U postgres -X -q -tA"}
 body() { grep -viE '^\s*(begin|commit);\s*$' "$1"; }
-out=$(mktemp -d)
+out=${EQ_OUT:-$(mktemp -d)}; mkdir -p "$out"
 {
   echo "begin;"
   cat "${T}_seed.sql"
@@ -27,15 +27,16 @@ out=$(mktemp -d)
     cat "${T}_assert.sql"
   done
   echo "rollback;"
-} | $PSQL -v ON_ERROR_STOP=0 2>&1 \
+} | $PSQL -v ON_ERROR_STOP=0 2>"$out/err.txt" \
   | sed -E 's/^psql:[^:]*:[0-9]+: //' | grep -vE '^$|^(DETAIL|CONTEXT|HINT|NOTICE):' > "$out/raw.txt"
 awk -v d="$out" '
-  /^PHASE\|/ { ph=substr($0,7); next }
-  /^POLICY\|/ { cur="P"; print > (d "/P" ph ".txt"); next }
-  /^(READ|WRITE)\|/ { if (k!="") print k " => " v > (d "/A" kph ".txt"); k=$0; kph=ph; v=""; cur="A"; next }
-  { if (cur=="A") v=(v==""?$0:v " ; " $0); else if (cur=="P") print > (d "/P" ph ".txt") }
-  END { if (k!="") print k " => " v > (d "/A" kph ".txt") }' "$out/raw.txt"
+  /^PHASE\|/ { ph=substr($0,7); cur=""; next }
+  /^(READ|WRITE)\|/ { print > (d "/A" ph ".txt"); cur=""; next }
+  /^POLICY\|/ { cur="P" }
+  { if (cur=="P") print > (d "/P" ph ".txt") }' "$out/raw.txt"
 fail=0
+# Every expected refusal is caught inside the check; anything on stderr is a broken step.
+if grep -q "ERROR" "$out/err.txt"; then echo "::error::the run itself failed"; grep "ERROR" "$out/err.txt" | head -5; fail=1; fi
 for i in 0 1 2 3; do
   [ -s "$out/P$i.txt" ] && [ "$(wc -l < "$out/A$i.txt")" -eq 168 ] || { echo "::error::phase $i incomplete"; fail=1; }
 done
@@ -45,6 +46,6 @@ sed 's/( SELECT auth.uid() AS uid)/auth.uid()/g' "$out/P1.txt" | cmp -s - "$out/
 for i in 1 2 3; do
   cmp -s "$out/A0.txt" "$out/A$i.txt" && echo "PASS access phase $i == phase 0 (168 checks)" || { echo "::error::access differs in phase $i"; diff "$out/A0.txt" "$out/A$i.txt" | head -20; fail=1; }
 done
-grep -q "WRITE|worker|dis_insert_for_worker => rows=1" "$out/A0.txt" || { echo "::error::the allowed write did not succeed: the check would prove nothing"; fail=1; }
+grep -q "^WRITE|worker|dis_insert_for_worker => rows=1$" "$out/A0.txt" || { echo "::error::the allowed write did not succeed: the check would prove nothing"; fail=1; }
 grep -c "=> visible=" "$out/A0.txt" | sed 's/^/reads: /'; grep -c "^WRITE" "$out/A0.txt" | sed 's/^/writes: /'
 exit $fail
