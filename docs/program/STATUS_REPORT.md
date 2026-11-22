@@ -83,13 +83,7 @@ Paskutinis užbaigtas produkcijos bandymas kiekvienam scenarijui ir ekranui, nep
 
 ## Pokyčiai nuo ankstesnės ataskaitos
 
-Lyginama su ataskaita, sugeneruota 2026-11-21 09:40.
-
-- Veikia produkcijoje: 200 → 200.
-- Atvirų PR: 105 → 112; sujungta per laikotarpį 5.
-- Produkcijos diegimų per laikotarpį: 2 sėkmingi, 0 nepavykę.
-
-Funkcijų būsenų pokyčių registre nėra.
+Ankstesnė ataskaita sugeneruota tuo pačiu metu (2026-11-22 09:41) — palyginimo nėra.
 
 ## B. Trumpa vadovo suvestinė
 
@@ -176,7 +170,8 @@ Pasirengimo plano bandymai (5 scenarijai × 3 ekranai), naujausias rezultatas:
 
 Papildoma bandymų serija (`eed72052`): 36 bandymai, iš jų 33 sėkmingi.
 - Darbuotojas:
-  - jobs-search, journal-confirm, role-routes, chat-continuity – telefonas ir kompiuteris sėkmingi;
+  - jobs-search, journal-confirm, role-routes – telefonas ir kompiuteris sėkmingi;
+  - chat-continuity – telefonas sėkmingas (`44903881953`), kompiuterio pločiu nepatikrinta;
   - invited-worker – telefonu nepavyko.
 - Darbdavys: org-roster, orders-bookings – abu ekranai sėkmingi; brigade-formation, project-execution, calendar-planning, rota-repeat – kompiuteris sėkmingas.
 - Pirkėjas: buyer-workspace – kompiuteriu nepavyko.
