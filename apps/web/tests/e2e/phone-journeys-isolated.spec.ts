@@ -1112,6 +1112,40 @@ for (const phone of PHONES) {
       await done();
     });
 
+    test(`M-12 (${phone.name}). the experiences result opens by itself on the phone and stays open (production walk P-15)`, async ({ browser }) => {
+      // P-15, run 45051053618 at 375 px: `experiences-result` was on the page but its sheet stayed
+      // collapsed for 45 s. The walk reads the sheet's state once and taps the toggle if it reads
+      // "closed". This step taps nothing: it records whether the product itself opens the sheet for
+      // the requested result, and keeps it open, on a cold load and on a reload.
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      for (const visit of ["cold load", "reload"]) {
+        const started = Date.now();
+        if (visit === "cold load") await page.goto(`${BASE}/en/dashboard?result=experiences`);
+        else await page.reload();
+        const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
+        await expect(toggle, `${visit}: the sheet opens by itself for the requested result`).toHaveAttribute("aria-expanded", "true", {
+          timeout: 30_000,
+        });
+        const main = page.getByRole("main");
+        const shown = main
+          .getByTestId("experiences-result")
+          .or(main.getByTestId("experiences-result-unavailable"))
+          .or(main.getByTestId("experiences-result-error"))
+          .first();
+        await expect(shown, `${visit}: the result is on screen`).toBeVisible({ timeout: 30_000 });
+        const opened = Date.now() - started;
+        await expect(main.getByTestId("experiences-result-error"), `${visit}: the records load`).toHaveCount(0);
+        // Nothing that arrives later (the opening brief, a thread question) closes it again.
+        await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+        await page.waitForTimeout(3_000);
+        await expect(toggle, `${visit}: the sheet is still open once the page has settled`).toHaveAttribute("aria-expanded", "true");
+        await expect(shown, `${visit}: the result is still on screen`).toBeVisible();
+        console.info(`[experiences-sheet] ${phone.name} px ${visit}: opened by itself after ${opened} ms, still open after the page settled`);
+      }
+      await fitsTheScreen(page, "the experiences result");
+      await done();
+    });
+
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await accountMenu(page, "account-menu-cv-link");
