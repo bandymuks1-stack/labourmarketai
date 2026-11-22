@@ -218,11 +218,6 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     // resolved from the membership-validated employer context (pinned in
     // lib/guards/agency-client-invite-delivery.test.ts §5).
     "lib/agency/bridge-conversation.ts",
-    // Brigade offer negotiation (2026-10-11) — the subject is the offering
-    // TEAM's name read server-side from the row the caller's own authorized
-    // read proved (organizations.name / the receiver-gated listing), never a
-    // form field; the grant follows evaluateTeamOfferContact.
-    "lib/company/team-offer-conversation.ts",
   ].sort();
 
   it("direct-subject writers are ONLY the gated fact-verified actions (demand / offering title)", () => {
@@ -267,13 +262,14 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     // …the brigade-offer negotiation derives it from the REAL team row and
     // passes its grant only after evaluateTeamOfferContact held…
     const offer = read("lib/company/team-offer-conversation.ts");
-    // 2026-10-12: the subject is the offering organization's real name, read
-    // through the party-gated team_offer_thread_party_v1 (never a form field).
+    // Since 20261122160000 the offer's one thread is resolved by the database
+    // (team_offer_thread_v1) after the party-gated read and the live-offer
+    // decision; the subject is written in the database, never a form field.
     expect(offer).toMatch(/rpc\("team_offer_thread_party_v1"/);
-    expect(offer).toMatch(/const subject = party\.subject/);
     expect(offer.indexOf('evaluateTeamOfferContact({ offerStatus, side }) !== "allowed"')).toBeLessThan(
-      offer.indexOf('"allowed_team_demand_offer"'),
+      offer.indexOf('rpc("team_offer_thread_v1"'),
     );
+    expect(offer).not.toMatch(/getOrCreateDirectConversation|formData\.get\(\s*["']subject["']/);
     // …and nobody else calls getOrCreateDirectConversation.
     const callers = walkSources().filter(
       (rel) =>

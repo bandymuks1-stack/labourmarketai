@@ -255,6 +255,16 @@ for (const w of WIDTHS) {
         body: JSON.stringify({ p_offer_id: offerId }),
       }).then((r) => r.json())) as { counterpart_profile_id: string | null }[];
       expect(party[0]?.counterpart_profile_id ?? null, "the offer read gives the supplier no client id").toBeNull();
+
+      // The client answers the offer from its side: the SAME thread (one negotiation, Codex P2).
+      const cl = await open(browser, w, CLIENT);
+      await cl.page.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
+      const msg = cl.page.getByTestId(`team-offer-message-${offerId}`);
+      await expect(msg, "the client sees the offer").toBeVisible({ timeout: 60_000 });
+      await msg.click();
+      await cl.page.waitForURL(/\/en\/dashboard\/communication\/[0-9a-f-]{36}/, { timeout: 60_000 });
+      expect(/\/communication\/([0-9a-f-]{36})/.exec(cl.page.url())![1], "the client reaches the same thread").toBe(s.conversationId);
+      await cl.done();
     });
 
     test(`O-3 (${w.name}). the client shows its name; the provider sees it; it all survives a reload`, async ({ browser }) => {

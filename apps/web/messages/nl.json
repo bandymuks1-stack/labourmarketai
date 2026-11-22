@@ -7332,7 +7332,6 @@
     "loadError": "Berichten konden nu niet worden geladen. Wat u ziet is niet het volledige beeld — probeer het opnieuw.",
     "openNeed": {
       "clientName": "Klant {token}",
-      "hidden": "Uw naam is verborgen voor de aanbieder.",
       "disclose": "Mijn naam tonen",
       "shown": "Uw naam wordt getoond."
     }

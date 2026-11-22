@@ -7332,7 +7332,6 @@
     "loadError": "Nie udało się teraz wczytać wiadomości. To, co Państwo widzą, nie jest pełnym obrazem — proszę spróbować ponownie.",
     "openNeed": {
       "clientName": "Klient {token}",
-      "hidden": "Dostawca nie widzi Państwa imienia i nazwiska.",
       "disclose": "Pokaż moje imię i nazwisko",
       "shown": "Państwa imię i nazwisko jest widoczne."
     }

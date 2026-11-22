@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import { evaluateTeamOfferContact } from "@/lib/communication/communication-eligibility";
 import { toActiveLocale } from "@/lib/i18n/config";
 import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
@@ -30,13 +29,11 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  *     (team_demand_offers_select_v1 admits the offering team's managers only);
  *   - receiver: the offer is listed by list_team_offers_for_request_v1, which
  *     answers rows only to the demand's owner / org demand-access holders.
- * Only AFTER that proof is the counterpart's profile id read server-side (the
- * demand owner, or the manager who made the offer) — it never reaches the
- * client. The offer must be live (offered / accepted / assigned).
- *
- * The thread carries no source stamp: the closed source-relation set
- * (20260706210000) has no offer member, and widening that CHECK is
- * owner-gated SQL (part of the supply-offer negotiation migration).
+ * Only AFTER that proof does the database resolve the offer's ONE thread
+ * (team_offer_thread_v1, 20261122160000): the open-need thread of the offering
+ * person, the offering organization and the need, for both parties and before
+ * and after acceptance. Only its id comes back; no profile id reaches this
+ * server. The offer must be live (offered / accepted / assigned).
  */
 export async function openTeamOfferConversationAction(formData: FormData): Promise<void> {
   await refuseStaleWorkspace(displayedWorkspaceOf(formData));
@@ -83,46 +80,23 @@ async function resolveTeamOfferThread(offerId: string, requestId: string, locale
   const party = ((rows ?? []) as {
     side: "supplier" | "receiver";
     offer_status: string;
-    counterpart_profile_id: string | null;
-    subject: string | null;
   }[])[0];
   if (!party) return null;
   const side = party.side;
   const offerStatus = party.offer_status;
-  const counterpart = party.counterpart_profile_id;
-  const subject = party.subject?.trim() || null;
 
   if (evaluateTeamOfferContact({ offerStatus, side }) !== "allowed") return null;
-  // Open need (decision A, 20261122160000): until the client ACCEPTED the
-  // offer the supplier is not told who the client is — the party read gives
-  // no counterpart. The supplier then talks to the client through the
-  // anonymous open-need thread about the same need, opened by the database.
-  if (!counterpart && side === "supplier") {
-    const { data: offer } = await asAny(supabase)
-      .from("team_demand_offers")
-      .select("request_id, team_org_id")
-      .eq("id", offerId)
-      .maybeSingle();
-    const o = offer as { request_id?: string | null; team_org_id?: string | null } | null;
-    if (!o?.request_id || !o?.team_org_id) return null;
-    const { data: threadId, error: openError } = await asAny(supabase).rpc("open_need_conversation_open_v1", {
-      p_request_id: o.request_id,
-      p_org_id: o.team_org_id,
-    });
-    if (openError || typeof threadId !== "string" || !UUID.test(threadId)) return null;
-    return `/${locale}/dashboard/communication/${threadId}`;
-  }
-  if (!counterpart || counterpart === user.id) return null;
 
-  // Passed only AFTER the gate above held.
-  const result = await getOrCreateDirectConversation(
-    counterpart,
-    locale,
-    subject,
-    "allowed_team_demand_offer",
-  );
-  // ONE thread per pair stays the rule (the shared dedupe); the offer the
-  // person opened it FROM travels with the route, so the thread names which
-  // need and which offer is being discussed (party-checked again there).
-  return result.ok ? `/${locale}/dashboard/communication/${result.data.id}?offer=${offerId}` : null;
+  // ONE negotiation thread per offer, for BOTH parties and across acceptance
+  // (decision A, 20261122160000; Codex P2 on #3647): the database resolves the
+  // open-need thread of the offering person, the offering organization and
+  // the need — creating it when missing — and returns only its id. The client
+  // stays unnamed to the supplier there until it chooses to show its name.
+  const { data: threadId, error: openError } = await asAny(supabase).rpc("team_offer_thread_v1", {
+    p_offer_id: offerId,
+  });
+  if (openError || typeof threadId !== "string" || !UUID.test(threadId)) return null;
+  // The offer the person opened it FROM travels with the route, so the
+  // thread names which offer is being discussed (party-checked again there).
+  return `/${locale}/dashboard/communication/${threadId}?offer=${offerId}`;
 }

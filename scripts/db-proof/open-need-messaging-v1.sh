@@ -36,6 +36,8 @@ AG=0e0e0000-0000-4000-8000-0000000000c3      # agency row
 OA=0e0e0000-0000-4000-8000-0000000000c4      # agency organization (AGENT owns)
 AG2=0e0e0000-0000-4000-8000-0000000000c5
 OB=0e0e0000-0000-4000-8000-0000000000c6      # second agency (AGENT2 owns)
+AG3=0e0e0000-0000-4000-8000-0000000000c7
+OA2=0e0e0000-0000-4000-8000-0000000000c8     # a second organization AGENT also owns
 N1=0e0e0000-0000-4000-8000-0000000000d1      # the open need
 N2=0e0e0000-0000-4000-8000-0000000000d2      # a second open need (the cap)
 CLIENT_TOKEN=$(echo "$CLIENT" | tr -d "-" | cut -c1-12)
@@ -86,7 +88,8 @@ create function public._onm_take(p text) returns void language sql as \$f\$
      where n.nspname = 'public' and p2.prokind = 'f' and p2.proname not like '\_onm\_%'
        and p2.proname not in ('open_need_message_party_v1','open_need_conversation_open_v1','disclose_open_need_identity_v1','open_need_viewer_blinded_v1','open_need_caller_hidden_v1','conversation_live_recipients_v1','conversation_id_of_path_v1','conversation_attachment_hidden_uploader_guard_v1','conversation_counterpart_identities','conversation_source_context','list_open_demand_for_team_offer_v1',
          'revoke_conversation_participant','my_direct_conversations_with_workers_v1','team_offer_thread_party_v1',
-         'list_team_demand_offers_for_team_v1','send_work_instruction','send_work_instruction_to_project')) s
+         'list_team_demand_offers_for_team_v1','send_work_instruction','send_work_instruction_to_project',
+         'open_need_thread_ensure_v1','team_offer_thread_v1')) s
   union all
   select p, 'policies', md5(string_agg(x, '|' order by x)) from (
     select schemaname || tablename || policyname || coalesce(qual, '') || coalesce(with_check, '') || array_to_string(roles, ',') || cmd as x
@@ -109,11 +112,12 @@ insert into public.companies(id, profile_id, display_name, legal_name, verificat
   values ('$CC','$CLIENT','Client Co','Client Co UAB','verified');
 insert into public.organizations(id, organization_type, legacy_company_id, display_name, owner_profile_id)
   values ('$OC','company','$CC','Client Co','$CLIENT');
-insert into public.agencies(id, profile_id) values ('$AG','$AGENT'), ('$AG2','$AGENT2');
+insert into public.agencies(id, profile_id) values ('$AG','$AGENT'), ('$AG2','$AGENT2'), ('$AG3','$AGENT');
 insert into public.organizations(id, organization_type, legacy_agency_id, display_name, owner_profile_id) values
-  ('$OA','agency','$AG','Agency A','$AGENT'), ('$OB','agency','$AG2','Agency B','$AGENT2');
+  ('$OA','agency','$AG','Agency A','$AGENT'), ('$OB','agency','$AG2','Agency B','$AGENT2'), ('$OA2','agency','$AG3','Agency A2','$AGENT');
 insert into public.company_memberships(organization_id, profile_id, role, status, accepted_at) values
-  ('$OC','$CLIENT','owner','active',now()), ('$OA','$AGENT','owner','active',now()), ('$OB','$AGENT2','owner','active',now());
+  ('$OC','$CLIENT','owner','active',now()), ('$OA','$AGENT','owner','active',now()), ('$OB','$AGENT2','owner','active',now()),
+  ('$OA2','$AGENT','owner','active',now());
 insert into public.customer_requests(id, profile_id, organization_id, title, role_or_work_type, country, status, kind) values
   ('$N1','$CLIENT','$OC','Welders for Client Co','Welder','LT','submitted','company_request'),
   ('$N2','$CLIENT','$OC','Fitters for Client Co','Fitter','LT','submitted','company_request');
@@ -158,6 +162,10 @@ check "door: nothing was created by a refusal" "0" "$AGENT" "select count(*)::te
 check "door: the agency opens a thread and gets ONLY its id" "uuid" "$AGENT" "select pg_typeof(public.open_need_conversation_open_v1('$N1','$OA'))::text"
 check "door: a second call returns the same thread" "1|true" "$AGENT" "select (select count(*) from public.conversations where source_type = 'open_need' and source_id = '$N1')::text || '|' || (public.open_need_conversation_open_v1('$N1','$OA') = $T)::text"
 check "door: the function returns one uuid, no table, no owner column" "uuid" postgres "select pg_get_function_result('public.open_need_conversation_open_v1(uuid,uuid)'::regprocedure)"
+check "R3 per organization: the same person for another organization gets ANOTHER thread" "false" "$AGENT" "select (public.open_need_conversation_open_v1('$N1','$OA2') = $T)::text"
+check "R3 per organization: and the first organization still reuses its own" "true" "$AGENT" "select (public.open_need_conversation_open_v1('$N1','$OA') = $T)::text"
+check "R3 the threads ledger is not readable by any app role" "ERROR: permission denied for table open_need_threads" "$AGENT" "select count(*)::text from public.open_need_threads"
+check "R3 the internal ensure function is not callable" "ERROR: permission denied for function open_need_thread_ensure_v1" "$AGENT" "select public.open_need_thread_ensure_v1('$N1','$OA','$AGENT','x')::text"
 cat <<SQL
 \\echo __N|the thread: direct, two live participants, stamped open_need, audited~direct|2|1
 select '__R|' || c.kind || '|' || (select count(*) from public.conversation_participants p where p.conversation_id = c.id and p.revoked_at is null)::text
@@ -217,12 +225,23 @@ check "R2 guess test: revoking the right guess is refused with the one answer" "
 check "R2 guess test: revoking a wrong guess gets the same answer" "ERROR: not_authorized" "$AGENT" "select public.revoke_conversation_participant($T, '$STRANGER')"
 check "R2 guess test: the client is still a live participant" "1" postgres "select count(*)::text from public.conversation_participants where conversation_id = $T and profile_id = '$CLIENT' and revoked_at is null"
 check "R2 worker lookup: the blinded agency learns nothing from the client worker id" "0" "$AGENT" "select count(*)::text from public.my_direct_conversations_with_workers_v1(array['0e0e0000-0000-4000-8000-0000000000b1']::uuid[])"
-check "R2 worker lookup: the client (not blinded) still finds its own thread" "1" "$CLIENT" "select count(*)::text from public.my_direct_conversations_with_workers_v1(array['0e0e0000-0000-4000-8000-0000000000b1']::uuid[])"
+check "R2 worker lookup: the client (not blinded) still finds its own threads (one per provider organization)" "2" "$CLIENT" "select count(*)::text from public.my_direct_conversations_with_workers_v1(array['0e0e0000-0000-4000-8000-0000000000b1']::uuid[])"
 check "R2 offer path: the agency offers itself to the need" "created" "$AGENT" "select public.offer_team_to_demand_v1('$OA', '$N1', null)->>'outcome'"
 check "R2 offer path: its sent offers do not name the client" "1|" "$AGENT" "select count(*)::text || '|' || coalesce(string_agg(company_name, ','), '') from public.list_team_demand_offers_for_team_v1('$OA') where request_id = '$N1'"
 check "R2 offer path: the offer thread gives the supplier no counterpart" "supplier|offered|" "$AGENT" "select side || '|' || offer_status || '|' || coalesce(counterpart_profile_id::text, '') from public.team_offer_thread_party_v1((select id from public.team_demand_offers where request_id = '$N1' and team_org_id = '$OA'))"
 check "R2 offer path: the client (receiver) still sees the offering person" "receiver|$AGENT" "$CLIENT" "select side || '|' || counterpart_profile_id::text from public.team_offer_thread_party_v1((select offer_id from public.list_team_offers_for_request_v1('$N1') where team_org_id = '$OA'))"
+check "Codex P2: the supplier reaches the offer thread = the anonymous thread" "true" "$AGENT" "select (public.team_offer_thread_v1((select id from public.team_demand_offers where request_id = '$N1' and team_org_id = '$OA')) = $T)::text"
+check "Codex P2: the client reaches the SAME thread from the offer" "true" "$CLIENT" "select (public.team_offer_thread_v1((select offer_id from public.list_team_offers_for_request_v1('$N1') where team_org_id = '$OA')) = $T)::text"
+check "Codex P2: a stranger is refused the offer thread" "ERROR: not allowed" "$STRANGER" "select public.team_offer_thread_v1('0e0e0000-0000-4000-8000-0000000000e1')::text"
 cat <<SQL
+savepoint onm_decline;
+update public.team_demand_offers set status = 'declined', responded_at = now(), responded_by = '$CLIENT' where request_id = '$N1' and team_org_id = '$OA';
+SQL
+check "R3 a declined offer: the supplier cannot read who decided" "ERROR: permission denied for table team_demand_offers" "$AGENT" "select responded_by::text from public.team_demand_offers where request_id = '$N1'"
+check "R3 a declined offer: the supplier still reads its offer status" "declined" "$AGENT" "select status from public.team_demand_offers where request_id = '$N1' and team_org_id = '$OA'"
+check "R3 a declined offer: the offer thread is closed to new opening" "ERROR: not allowed" "$AGENT" "select public.team_offer_thread_v1((select id from public.team_demand_offers where request_id = '$N1' and team_org_id = '$OA'))::text"
+cat <<SQL
+rollback to savepoint onm_decline;
 savepoint onm_accept;
 update public.team_demand_offers set status = 'accepted', responded_at = now() where request_id = '$N1' and team_org_id = '$OA';
 SQL

@@ -1752,7 +1752,6 @@
     "loadError": "Beskederne kunne ikke indlæses lige nu. Det, du ser, er ikke det fulde billede — prøv igen.",
     "openNeed": {
       "clientName": "Kunde {token}",
-      "hidden": "Dit navn er skjult for leverandøren.",
       "disclose": "Vis mit navn",
       "shown": "Dit navn vises."
     },

@@ -7332,7 +7332,6 @@
     },
     "openNeed": {
       "clientName": "Kund {token}",
-      "hidden": "Ditt namn är dolt för leverantören.",
       "disclose": "Visa mitt namn",
       "shown": "Ditt namn visas."
     }

@@ -60,13 +60,45 @@ drop function if exists public.conversation_id_of_path_v1(text);
 drop view if exists public.conversation_messages_visible_v1;
 drop function if exists public.conversation_live_recipients_v1(uuid, uuid);
 drop function if exists public.disclose_open_need_identity_v1(uuid);
+drop function if exists public.team_offer_thread_v1(uuid);
 drop function if exists public.open_need_conversation_open_v1(uuid, uuid);
+drop function if exists public.open_need_thread_ensure_v1(uuid, uuid, uuid, text);
+do $$
+declare
+  v_rows boolean := false;
+begin
+  if to_regclass('public.open_need_threads') is not null then
+    execute 'select exists (select 1 from public.open_need_threads)' into v_rows;
+  end if;
+  if v_rows then
+    raise exception 'open_need_threads is not empty; refusing to drop it';
+  end if;
+end $$;
+drop table if exists public.open_need_threads;
+do $$
+begin
+  if to_regclass('public.privacy_erasure_registry_v3') is not null then
+    delete from public.privacy_erasure_registry_v3
+     where schema_name = 'public' and table_name = 'open_need_threads' and column_name = 'opened_by';
+  end if;
+end $$;
+
+-- team_demand_offers: the table grant back as it was (column grants removed).
+revoke select (id, team_org_id, request_id, status, note, member_count_at_offer, offered_by,
+               offered_at, responded_at, assignment_id, handed_off_at, offer_kind)
+  on public.team_demand_offers from authenticated;
+grant select on public.team_demand_offers to authenticated;
 drop function if exists public.open_need_viewer_blinded_v1(uuid);
 drop function if exists public.open_need_caller_hidden_v1(uuid);
 
 do $$
+declare
+  v_rows boolean := false;
 begin
-  if exists (select 1 from public.open_need_identity_disclosures) then
+  if to_regclass('public.open_need_identity_disclosures') is not null then
+    execute 'select exists (select 1 from public.open_need_identity_disclosures)' into v_rows;
+  end if;
+  if v_rows then
     raise exception 'open_need_identity_disclosures is not empty; refusing to drop it';
   end if;
 end $$;

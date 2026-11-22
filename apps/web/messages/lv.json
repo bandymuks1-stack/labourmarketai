@@ -1752,7 +1752,6 @@
     "loadError": "Ziņas šobrīd neizdevās ielādēt. Redzamais nav pilnīga aina — mēģiniet vēlreiz.",
     "openNeed": {
       "clientName": "Klients {token}",
-      "hidden": "Piegādātājs neredz jūsu vārdu.",
       "disclose": "Rādīt manu vārdu",
       "shown": "Jūsu vārds ir redzams."
     },

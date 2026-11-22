@@ -7332,7 +7332,6 @@
     "loadError": "Could not load messages right now. What you see is not the full picture — try again.",
     "openNeed": {
       "clientName": "Client {token}",
-      "hidden": "Your name is hidden from the provider.",
       "disclose": "Show my name",
       "shown": "Your name is shown."
     }

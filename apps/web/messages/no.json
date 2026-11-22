@@ -1752,7 +1752,6 @@
     "loadError": "Meldingene kunne ikke lastes nå. Det du ser er ikke hele bildet — prøv igjen.",
     "openNeed": {
       "clientName": "Kunde {token}",
-      "hidden": "Navnet ditt er skjult for leverandøren.",
       "disclose": "Vis navnet mitt",
       "shown": "Navnet ditt vises."
     },

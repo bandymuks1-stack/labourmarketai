@@ -1752,7 +1752,6 @@
     "loadError": "Sõnumeid ei õnnestunud praegu laadida. See, mida näed, pole täielik pilt — proovi uuesti.",
     "openNeed": {
       "clientName": "Klient {token}",
-      "hidden": "Teenusepakkuja ei näe teie nime.",
       "disclose": "Näita minu nime",
       "shown": "Teie nimi on nähtav."
     },

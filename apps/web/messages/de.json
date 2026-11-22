@@ -7332,7 +7332,6 @@
     "loadError": "Nachrichten konnten gerade nicht geladen werden. Was Sie sehen, ist nicht das vollständige Bild — bitte erneut versuchen.",
     "openNeed": {
       "clientName": "Kunde {token}",
-      "hidden": "Ihr Name ist für den Anbieter verborgen.",
       "disclose": "Meinen Namen zeigen",
       "shown": "Ihr Name wird angezeigt."
     }

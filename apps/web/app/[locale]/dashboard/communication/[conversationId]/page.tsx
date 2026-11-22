@@ -355,10 +355,10 @@ export default async function ConversationDetailPage({
               <form
                 action={discloseOpenNeedIdentityAction}
                 className="flex flex-wrap items-center gap-2 text-meta text-text-muted"
+                data-testid="open-need-identity-hidden"
               >
                 <input type="hidden" name="locale" value={locale} />
                 <input type="hidden" name="conversationId" value={conversationId} />
-                <span data-testid="open-need-identity-hidden">{t("openNeed.hidden")}</span>
                 <PendingButton size="sm" variant="secondary" className="min-h-11 sm:min-h-8" data-testid="open-need-disclose">
                   {t("openNeed.disclose")}
                 </PendingButton>

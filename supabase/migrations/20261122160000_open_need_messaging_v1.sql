@@ -29,10 +29,14 @@
 --      chosen to show its name. Participants read it; only function 5 writes.
 --   3. open_need_viewer_blinded_v1 / open_need_caller_hidden_v1 — the two
 --      caller-only questions the policies below ask.
---   4. open_need_conversation_open_v1(request, org) — the provider's door. The
+--   4. open_need_threads (server-only ledger: need, provider organization,
+--      provider person) and open_need_thread_ensure_v1 (internal); the
+--      provider's door open_need_conversation_open_v1 and the offer's thread
+--      team_offer_thread_v1 (either party, before and after acceptance).
+--      open_need_conversation_open_v1(request, org) — the provider's door. The
 --      board's own gate (list_open_demand_for_team_offer_v1, called) must hold;
---      the database then finds the caller's existing open-need thread for that
---      need or creates one (both participants, stamped 'open_need', the same
+--      the database then finds the caller's thread for that need AND that
+--      organization, or creates one (both participants, stamped 'open_need', the same
 --      24 h / 20 cap as every new conversation) and returns ONLY its id. Never
 --      a thread the two already share (that would link the need to a person).
 --   5. disclose_open_need_identity_v1(conversation) — only the need's owner.
@@ -66,7 +70,9 @@
 --        blinded in;
 --      team_offer_thread_party_v1 / list_team_demand_offers_for_team_v1 name
 --        the client to the supplier only once the client ACCEPTED the offer;
---      send_work_instruction(_to_project) never reuses an open-need thread.
+--      send_work_instruction(_to_project) never reuses an open-need thread;
+--      team_demand_offers.responded_by (the client's id) is no longer
+--        readable by app roles (R3).
 --
 -- NOT CHANGED: conversations policies; participants/messages INSERT and UPDATE
 -- policies; profiles / customer_requests / companies; team_demand_offers;
@@ -164,7 +170,92 @@ $$;
 revoke all on function public.open_need_caller_hidden_v1(uuid) from public, anon;
 grant execute on function public.open_need_caller_hidden_v1(uuid) to authenticated;
 
--- 4) The provider's door: the database opens the thread and returns its id only.
+-- 4) The threads ledger and the provider's door.
+--    open_need_threads — which organization and which provider person each
+--    open-need thread belongs to. Written and read ONLY by the functions below
+--    (no app role may read it: it would name the need behind each thread).
+create table if not exists public.open_need_threads (
+  conversation_id     uuid primary key references public.conversations(id) on delete cascade,
+  request_id          uuid not null,
+  provider_org_id     uuid not null,
+  opened_by uuid not null references public.profiles(id) on delete cascade,
+  created_at          timestamptz not null default now(),
+  unique (request_id, provider_org_id, opened_by)
+);
+alter table public.open_need_threads enable row level security;
+revoke all on table public.open_need_threads from public, anon, authenticated;
+-- No policy: no app role reads or writes it.
+do $$
+begin
+  if to_regclass('public.privacy_erasure_registry_v3') is null then
+    return;
+  end if;
+  insert into public.privacy_erasure_registry_v3
+    (schema_name, table_name, column_name, parent, fk_rule_expected, treatment, decided_by, legal_review, legal_basis, note) values
+  ('public', 'open_need_threads', 'opened_by', 'profiles', 'cascade', 'allow_cascade', 'engineering', false,
+   'Art. 17(1)(a)/(b): which provider opened an open-need thread; deleted with that account',
+   'a routing record; the conversation itself follows the conversation rules')
+  on conflict (schema_name, table_name, column_name) do nothing;
+end $$;
+
+-- The one thread of (need, provider organization, provider person): found or
+-- created. Internal: callable by the two definer doors below only.
+create or replace function public.open_need_thread_ensure_v1(
+  p_request_id uuid, p_org_id uuid, p_provider uuid, p_via text
+) returns uuid
+language plpgsql
+volatile
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_owner uuid;
+  v_title text;
+  v_id    uuid;
+begin
+  select cr.profile_id,
+         left(coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')), 120)
+    into v_owner, v_title
+    from public.customer_requests cr
+   where cr.id = p_request_id;
+  if v_owner is null or p_provider is null or v_owner = p_provider then
+    raise exception 'not allowed' using errcode = '42501';
+  end if;
+
+  -- Per organization (R3): the same person acting for two organizations gets
+  -- two threads, never one shared across them.
+  select t.conversation_id into v_id
+    from public.open_need_threads t
+    join public.conversation_participants me
+      on me.conversation_id = t.conversation_id and me.profile_id = p_provider and me.revoked_at is null
+   where t.request_id = p_request_id
+     and t.provider_org_id = p_org_id
+     and t.opened_by = p_provider;
+  if v_id is not null then
+    return v_id;
+  end if;
+
+  -- The same abuse cap as every new conversation (lib/communication/rate-caps.ts).
+  if (select count(*) from public.conversations
+       where created_by = p_provider and created_at >= now() - interval '24 hours') >= 20 then
+    raise exception 'rate limited' using errcode = 'P0001';
+  end if;
+
+  insert into public.conversations (subject, kind, created_by, source_type, source_id)
+  values (v_title, 'direct', p_provider, 'open_need', p_request_id)
+  returning id into v_id;
+  insert into public.conversation_participants (conversation_id, profile_id, added_by)
+  values (v_id, p_provider, p_provider), (v_id, v_owner, p_provider);
+  insert into public.open_need_threads (conversation_id, request_id, provider_org_id, opened_by)
+  values (v_id, p_request_id, p_org_id, p_provider);
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (coalesce(auth.uid(), p_provider), 'open_need_conversation_opened_v1', 'conversations', v_id,
+          jsonb_build_object('request_id', p_request_id, 'org_id', p_org_id, 'via', p_via));
+  return v_id;
+end $$;
+revoke all on function public.open_need_thread_ensure_v1(uuid, uuid, uuid, text) from public, anon, authenticated;
+
+-- The provider's door: the board's gate, then the one thread; only its id.
 create or replace function public.open_need_conversation_open_v1(p_request_id uuid, p_org_id uuid)
 returns uuid
 language plpgsql
@@ -173,10 +264,7 @@ security definer
 set search_path = public, pg_temp
 as $$
 declare
-  uid     uuid := auth.uid();
-  v_owner uuid;
-  v_title text;
-  v_id    uuid;
+  uid uuid := auth.uid();
 begin
   if uid is null then
     raise exception 'Not authenticated' using errcode = '42501';
@@ -189,45 +277,43 @@ begin
   ) then
     raise exception 'not allowed' using errcode = '42501';
   end if;
-  select cr.profile_id,
-         left(coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')), 120)
-    into v_owner, v_title
-    from public.customer_requests cr
-   where cr.id = p_request_id;
-  if v_owner is null or v_owner = uid then
-    raise exception 'not allowed' using errcode = '42501';
-  end if;
-
-  -- The caller's own open-need thread about THIS need, if any.
-  select c.id into v_id
-    from public.conversations c
-    join public.conversation_participants me
-      on me.conversation_id = c.id and me.profile_id = uid and me.revoked_at is null
-   where c.source_type = 'open_need' and c.source_id = p_request_id
-   order by c.created_at
-   limit 1;
-  if v_id is not null then
-    return v_id;
-  end if;
-
-  -- The same abuse cap as every new conversation (lib/communication/rate-caps.ts).
-  if (select count(*) from public.conversations
-       where created_by = uid and created_at >= now() - interval '24 hours') >= 20 then
-    raise exception 'rate limited' using errcode = 'P0001';
-  end if;
-
-  insert into public.conversations (subject, kind, created_by, source_type, source_id)
-  values (v_title, 'direct', uid, 'open_need', p_request_id)
-  returning id into v_id;
-  insert into public.conversation_participants (conversation_id, profile_id, added_by)
-  values (v_id, uid, uid), (v_id, v_owner, uid);
-  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
-  values (uid, 'open_need_conversation_opened_v1', 'conversations', v_id,
-          jsonb_build_object('request_id', p_request_id, 'org_id', p_org_id));
-  return v_id;
+  return public.open_need_thread_ensure_v1(p_request_id, p_org_id, uid, 'board');
 end $$;
 revoke all on function public.open_need_conversation_open_v1(uuid, uuid) from public, anon;
 grant execute on function public.open_need_conversation_open_v1(uuid, uuid) to authenticated;
+
+-- An offer's ONE negotiation thread (Codex P2): either party of a live offer
+-- reaches the same thread — the open-need thread of the offering person, the
+-- offering organization and the need — before and after acceptance. Only its
+-- id. The client stays unnamed in it until it discloses.
+create or replace function public.team_offer_thread_v1(p_offer_id uuid)
+returns uuid
+language plpgsql
+volatile
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  uid    uuid := auth.uid();
+  v_side text;
+  o      record;
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  v_side := public.team_offer_party_side_v1(p_offer_id);
+  if v_side is null then
+    raise exception 'not allowed' using errcode = '42501';
+  end if;
+  select t.status, t.request_id, t.team_org_id, t.offered_by into o
+    from public.team_demand_offers t where t.id = p_offer_id;
+  if not found or o.status not in ('offered', 'accepted', 'assigned') or o.offered_by is null then
+    raise exception 'not allowed' using errcode = '42501';
+  end if;
+  return public.open_need_thread_ensure_v1(o.request_id, o.team_org_id, o.offered_by, 'offer');
+end $$;
+revoke all on function public.team_offer_thread_v1(uuid) from public, anon;
+grant execute on function public.team_offer_thread_v1(uuid) to authenticated;
 
 -- 5) The client shows its name in one thread.
 create or replace function public.disclose_open_need_identity_v1(p_conversation_id uuid)
@@ -565,6 +651,14 @@ drop trigger if exists conversation_attachment_hidden_uploader_guard_v1 on publi
 create trigger conversation_attachment_hidden_uploader_guard_v1
   before insert on public.conversation_message_attachments
   for each row execute function public.conversation_attachment_hidden_uploader_guard_v1();
+
+-- 6b) team_demand_offers (R3): the raw row a supplier reads never names who
+--     decided — responded_by is the client's profile id. Every other column
+--     stays readable as before; the policy is unchanged.
+revoke select on public.team_demand_offers from authenticated;
+grant select (id, team_org_id, request_id, status, note, member_count_at_offer, offered_by,
+              offered_at, responded_at, assignment_id, handed_off_at, offer_kind)
+  on public.team_demand_offers to authenticated;
 
 -- 7) Server-only: the live recipients of a sender's message (notifications).
 create or replace function public.conversation_live_recipients_v1(p_conversation_id uuid, p_author_id uuid)

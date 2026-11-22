@@ -46,10 +46,13 @@ describe("migration — one channel, the client hidden until it discloses", () =
     const door = fnBody(UP, "open_need_conversation_open_v1");
     expect(door).toMatch(/from public\.list_open_demand_for_team_offer_v1\(p_org_id\)/);
     expect(door).toMatch(/returns uuid/);
-    expect(door).toMatch(/c\.source_type = 'open_need' and c\.source_id = p_request_id/);
-    expect(door).toMatch(/>= 20 then\s+raise exception 'rate limited'/);
-    expect(door).toMatch(/return v_id;/);
-    expect(door).not.toMatch(/return v_owner|return query/);
+    expect(door).toMatch(/return public\.open_need_thread_ensure_v1\(p_request_id, p_org_id, uid, 'board'\)/);
+    const ensure = fnBody(UP, "open_need_thread_ensure_v1");
+    expect(ensure).toMatch(/t\.provider_org_id = p_org_id\s+and t\.opened_by = p_provider/);
+    expect(ensure).toMatch(/>= 20 then\s+raise exception 'rate limited'/);
+    expect(ensure).not.toMatch(/return v_owner|return query/);
+    expect(UP).toMatch(/revoke all on function public\.open_need_thread_ensure_v1\(uuid, uuid, uuid, text\) from public, anon, authenticated;/);
+    expect(UP).toMatch(/revoke all on table public\.open_need_threads from public, anon, authenticated;/);
     expect(UP).not.toMatch(/open_need_message_party_v1/);
   });
 
@@ -144,8 +147,15 @@ describe("the other doors (independent review R2) — narrowed, nothing else", (
     expect(UP).toMatch(/then case when o\.status in \('accepted', 'assigned'\)/);
     expect(UP).toMatch(/case when o\.status in \('accepted', 'assigned'\)\s+then coalesce\(nullif\(trim\(c\.display_name\)/);
     const app = read("lib/company/team-offer-conversation.ts");
-    expect(app).toMatch(/if \(!counterpart && side === "supplier"\)/);
-    expect(app).toMatch(/rpc\("open_need_conversation_open_v1"/);
+    expect(app).toMatch(/rpc\("team_offer_thread_v1"/);
+    expect(fnBody(UP, "team_offer_thread_v1")).toMatch(/open_need_thread_ensure_v1\(o\.request_id, o\.team_org_id, o\.offered_by, 'offer'\)/);
+  });
+
+  it("the raw offer row no longer names who decided (responded_by)", () => {
+    expect(UP).toMatch(/revoke select on public\.team_demand_offers from authenticated;/);
+    const grant = UP.slice(UP.indexOf("grant select (id, team_org_id, request_id"));
+    expect(grant.slice(0, grant.indexOf(";"))).not.toMatch(/responded_by/);
+    expect(DOWN).toMatch(/grant select on public\.team_demand_offers to authenticated;/);
   });
 
   it("work instructions never reuse an open-need thread", () => {
@@ -217,7 +227,7 @@ describe("the provider's door and the client's control", () => {
 });
 
 describe("copy in every full-UI locale", () => {
-  it.each(FULL_UI)("%s carries the five strings, translated", (locale) => {
+  it.each(FULL_UI)("%s carries the strings, translated", (locale) => {
     const m = JSON.parse(read(`messages/${locale}.json`)) as {
       communication: { openNeed: Record<string, string>; source: Record<string, string> };
       teamDemandOffer: Record<string, string>;
@@ -225,7 +235,6 @@ describe("copy in every full-UI locale", () => {
     const values = [
       m.teamDemandOffer.writeAboutNeed,
       m.communication.openNeed.clientName,
-      m.communication.openNeed.hidden,
       m.communication.openNeed.disclose,
       m.communication.openNeed.shown,
       m.communication.source.open_need,

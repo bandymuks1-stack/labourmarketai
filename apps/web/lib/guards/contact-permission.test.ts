@@ -206,9 +206,6 @@ describe("no contact without permission — the create path is gated", () => {
       "lib/communication/contact-interested-worker.ts",
       "lib/communication/open-conversation-action.ts",
       "lib/communication/request-worker-conversation.ts",
-      // Brigade offer negotiation (2026-10-11) — team-demand-offer grant (the
-      // caller's side proven by their own authorized read, offer live).
-      "lib/company/team-offer-conversation.ts",
       // W13 Marketplace — marketplace-enquiry grant, verified server-side
       // (listing exists, is active, caller is not the owner) before the
       // conversation opens.
