@@ -208,6 +208,11 @@ for (const role of ROLES) {
         await page.goto(`${BASE}/${lang}${path}`);
         await expect(page.getByTestId("app-header")).toBeVisible({ timeout: 60_000 });
         await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+        // One-tap journal (owner 2026-11-22): a worker's phone header carries
+        // the journal itself; an organization workspace keeps its own doors.
+        const shortcut = page.getByTestId("header-journal-shortcut");
+        if (role.name === "worker") await expect(shortcut, `${lang}${path}: the journal is one tap away`).toBeVisible();
+        else if (role.name === "company" || role.name === "agency") await expect(shortcut).toHaveCount(0);
         for (const width of WIDTHS) {
           await page.setViewportSize({ width, height: 760 });
           // One frame for the layout to settle after the resize.
