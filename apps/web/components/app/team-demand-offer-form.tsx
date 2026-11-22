@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useEffect, useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { MessageSquare } from "lucide-react";
@@ -35,11 +35,15 @@ export function TeamDemandOfferForm({
   teamId,
   memberCount,
   kind = "team",
+  defaultOpen = false,
 }: {
   teamId: string;
   memberCount: number;
   /** "organization" = a company / agency offers ITSELF (no brigade needed). */
   kind?: "team" | "organization";
+  /** Opened and loaded at once — the conversation shows it because it was
+   *  asked for ("Noriu pasiūlyti savo komandą"), not folded on a page. */
+  defaultOpen?: boolean;
 }) {
   const t = useTranslations("teamDemandOffer");
   const locale = useLocale();
@@ -58,6 +62,12 @@ export function TeamDemandOfferForm({
       setData(await loadTeamOfferPanelAction({ teamId, kind }));
     });
   }
+
+  useEffect(() => {
+    if (defaultOpen) load();
+    // Once, on mount: `load` reads nothing that changes before it runs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function refusalText(status: TeamOfferRefusal): string {
     return t(`refusal.${status}`);
@@ -99,6 +109,7 @@ export function TeamDemandOfferForm({
 
   return (
     <details
+      open={defaultOpen || undefined}
       className="rounded-md border border-ink-600 bg-ink-800/30 p-3"
       data-testid={`team-demand-offer-section-${teamId}`}
       onToggle={(e) => {
@@ -110,7 +121,7 @@ export function TeamDemandOfferForm({
       </summary>
       <div className="flex flex-col gap-3 pt-3">
         <p className="text-xs text-text-secondary">{org ? t("orgIntro") : t("intro")}</p>
-        <p className="text-meta leading-relaxed text-text-muted">{t("privacy")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{org ? t("orgPrivacy") : t("privacy")}</p>
 
         {!org && memberCount < 2 ? (
           <p className="text-xs text-text-muted" data-testid={`team-offer-too-small-${teamId}`}>
@@ -200,7 +211,7 @@ export function TeamDemandOfferForm({
                     onClick={submit}
                     data-testid={`team-offer-submit-${teamId}`}
                   >
-                    {pending ? t("submitting") : t("submit")}
+                    {pending ? t("submitting") : org ? t("orgSubmit") : t("submit")}
                   </Button>
                 </div>
               </div>

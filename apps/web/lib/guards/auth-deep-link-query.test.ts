@@ -66,7 +66,7 @@ describe("W7 slice 3 — the middleware preserves the deep link", () => {
 
   it("clears the cloned query so login carries only `next`", () => {
     const block = middleware.slice(
-      middleware.indexOf("if (!user) {"),
+      middleware.indexOf("function redirectToLogin("),
       middleware.indexOf("NextResponse.redirect(loginUrl)"),
     );
     expect(block).toContain("loginUrl.searchParams.delete(key)");
@@ -78,7 +78,7 @@ describe("W7 slice 3 — the middleware preserves the deep link", () => {
 
   it("omits `next` entirely when there is nothing safe to carry", () => {
     const block = middleware.slice(
-      middleware.indexOf("if (!user) {"),
+      middleware.indexOf("function redirectToLogin("),
       middleware.indexOf("NextResponse.redirect(loginUrl)"),
     );
     expect(block).toMatch(/if \(returnValue\) loginUrl\.searchParams\.set\("next"/);

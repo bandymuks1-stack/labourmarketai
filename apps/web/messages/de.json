@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
-    "subtitleAgency": "Was der öffentliche Markt gerade verlangt — derselbe Pool, den Ihre Kandidaten auf der Übersicht sehen.",
-    "subtitleInstitution": "Was der öffentliche Markt gerade verlangt — die Richtungen, in die Ihre Lernenden gehen.",
     "active": "{count} aktive Stellen",
     "employers": "{count} Arbeitgeber",
     "filtered": "{profession}: {count} Stellen",
@@ -2082,7 +2080,6 @@
       "eyebrow": "UNTERNEHMENSBEREICH",
       "programs": {
         "title": "Studiengänge und Kohorten",
-        "subtitle": "Was Sie lehren, ausgerichtet auf eine Arbeitsmarktrichtung, und die Lerngruppen darin. Nachfrage zeigt aktuelle öffentliche Stellen für diese Richtung.",
         "empty": "Noch keine Studiengänge. Fügen Sie den ersten hinzu und richten Sie ihn auf die Arbeitsrichtung aus, zu der er führt.",
         "addProgram": "Studiengang hinzufügen",
         "noDirection": "Keine Arbeitsrichtung festgelegt",
@@ -4276,6 +4273,9 @@
         "admin": "Administrator"
       },
       "subcopy": "Ein Profil für Ihre Berufserfahrung und Chancen — im nächsten Schritt sagen Sie, wofür Sie hier sind.",
+      "inviteFrom": "{inviter} lädt Sie ein, {organization} beizutreten.",
+      "inviteTo": "Sie sind eingeladen, {organization} beizutreten.",
+      "inviteNext": "Mit der Registrierung treten Sie {organization} bei.",
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
@@ -4286,7 +4286,6 @@
       "confirm_password_label": "Passwort bestätigen",
       "submit_label": "Registrieren",
       "signing": "Wird erstellt...",
-      "disclaimer": "Ihr Feedback prägt das Produkt — sagen Sie uns, was funktioniert und was fehlt.",
       "has_account": "Bereits ein Konto?",
       "login_link": "Anmelden",
       "error_generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es gleich erneut.",
@@ -5995,6 +5994,8 @@
             "Stripe — Zahlungsabwicklung für kostenpflichtige Plattformleistungen. Wenn eine Organisation einen Checkout beginnt, erhält Stripe die E-Mail-Adresse des zahlenden Nutzers und eine interne Kontokennung; Kartendaten werden auf Stripes eigener Zahlungsseite eingegeben und von der Plattform nicht gespeichert.",
             "Google, Facebook (Meta) und LinkedIn — nur wenn Sie sich mit ihnen anmelden, wie oben beschrieben.",
             "Google (Gemini-API) — nur wie unten im Abschnitt über KI beschrieben.",
+            "Cloudflare (Workers AI) — erst nach der Aktivierung: 1) um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern; 2) wenn die Plattform eine im Chat eingegebene Anfrage nicht selbst versteht, um vorzuschlagen, welche bestehende Plattformaktion gemeint ist. Vor dem Senden werden Namen, Kontaktdaten, Zahlen und alle Wörter entfernt, die nicht auf einer festen Liste von Aktionswörtern stehen; eine Anfrage mit Gesundheits- oder anderen sensiblen Angaben wird überhaupt nicht gesendet. Cloudflare nutzt diese Inhalte nicht zum Trainieren von Modellen und speichert sie nach der Anfrage nicht.",
+            "Mistral AI und Groq — erst nach der Aktivierung und nur, um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern. Es werden ihnen keine Nachrichtentexte und keine personenbezogenen Daten übermittelt.",
             "Die vollständige Liste der Infrastrukturanbieter steht auf der Seite „Datenschutz“."
           ]
         },
@@ -6133,6 +6134,8 @@
             "Cloudflare — das Netzwerk vor der Website: Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen. Jede Anfrage an die Website läuft darüber.",
             "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
             "Google (Gemini-API) — KI-Verarbeitung zum Übersetzen von Nachrichten und Stellenanzeigen und zum Vorschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den die Aufgabe braucht.",
+            "Cloudflare (Workers AI) — erst nach der Aktivierung: 1) um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern; 2) wenn die Plattform eine im Chat eingegebene Anfrage nicht selbst versteht, um vorzuschlagen, welche bestehende Plattformaktion gemeint ist. Vor dem Senden werden Namen, Kontaktdaten, Zahlen und alle Wörter entfernt, die nicht auf einer festen Liste von Aktionswörtern stehen; eine Anfrage mit Gesundheits- oder anderen sensiblen Angaben wird überhaupt nicht gesendet. Cloudflare nutzt diese Inhalte nicht zum Trainieren von Modellen und speichert sie nach der Anfrage nicht.",
+            "Mistral AI und Groq — erst nach der Aktivierung und nur, um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern. Es werden ihnen keine Nachrichtentexte und keine personenbezogenen Daten übermittelt.",
             "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt.",
             "Kein weiterer E-Mail-, KI-, Übersetzungs- oder Zahlungsanbieter ist aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
           ]
@@ -7115,7 +7118,6 @@
   "learning": {
     "pageTitle": "Lernen & Überprüfung",
     "pageLead": "Vorschläge aus echter Arbeitsaktivität, die zur Überprüfung durch eine Person aufbewahrt werden. Nichts hier gilt für sich allein als bewiesen.",
-    "title": "Überprüfungswarteschlange",
     "lead": "Signale werden zu Vorschlägen, und eine Person entscheidet. Lernen entscheidet niemals etwas von selbst.",
     "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch nichts zu überprüfen.",
@@ -12845,7 +12847,7 @@
         "invite_to_demand": "Ein Arbeitgeber hat Sie zu einem Arbeitsbedarf eingeladen"
       },
       "from": "Eingeladen von {name}",
-      "organization": "Unternehmen: {name}",
+      "organization": "Organisation: {name}",
       "project": "Projekt: {name}",
       "role": "Vorgeschlagene Rolle: {role}",
       "accept": "Einladung annehmen",
@@ -12874,10 +12876,9 @@
       "capacity": "Beziehung: {capacity}",
       "capacityNotEmployment": "Dies ist kein Stellenangebot und begründet kein Arbeitsverhältnis.",
       "selfStart": "Eigenes Konto anlegen",
-      "anonExplainer": "Registrieren Sie sich oder melden Sie sich an, um diese Einladung zu beantworten. Konto, Profil und Arbeitsgeschichte bleiben Ihre — die einladende Person stellt nur die Verbindung her.",
+      "anonExplainer": "Registrieren Sie sich oder melden Sie sich an, um diese Einladung zu beantworten. Konto, Profil und Arbeitsgeschichte bleiben Ihre: Das Annehmen stellt nur die Verbindung her, nie eine verifizierte Fähigkeit, ein Arbeitsverhältnis oder eine Zuweisung.",
       "register": "Registrieren und fortfahren",
       "signIn": "Ich habe bereits ein Konto",
-      "youOwnYourIdentity": "Ihre berufliche Identität bleibt Ihre. Das Annehmen einer Einladung erzeugt für sich keine verifizierte Fähigkeit, kein Arbeitsverhältnis und keine Zuweisung.",
       "referredVia": "Vermittelt über {source}",
       "campaign": "Einladung: {label}",
       "seats": "{used} von {max} Plätzen belegt",
@@ -13095,6 +13096,7 @@
     },
     "goToRoster": "Zum Team",
     "invalidLabel": "Prüfen Sie die E-Mail-Adresse — die Einladung wurde nicht gesendet.",
+    "offerLimitLabel": "Zu viele Angebote. Bitte später erneut versuchen.",
     "deliveryHeading": "Einladungslink",
     "deliveryCreated": "Nicht per E-Mail gesendet — der E-Mail-Versand ist nicht eingerichtet. Kopieren Sie den Link und senden Sie ihn dem Kunden selbst.",
     "deliverySent": "Die Einladungs-E-Mail wurde gesendet. Sie können den Link trotzdem kopieren.",
@@ -14300,9 +14302,7 @@
         "preferredCountries": "Wunschländer",
         "preferredCountriesPlaceholder": "z. B. NL, DE",
         "salaryMin": "Lohn ab (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Lohn bis (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Umzugsbereit?",
         "hasTransport": "Können Sie selbstständig zur Arbeit kommen?",
         "needsAccommodation": "Unterkunft nötig?",
@@ -18847,8 +18847,7 @@
         "invitationAccepted": "Einladung angenommen. Bestätigen Sie unten die Verbindungsanfrage der Agentur mit Ihrem Unternehmen."
       },
       "education": {
-        "title": "Ausbildung und Programme",
-        "subtitle": "Programme, Lernende und die Marktnachfrage nach ihren Richtungen."
+        "title": "Ausbildung und Programme"
       },
       "history": {
         "title": "Datenimport und Verlauf",
@@ -19631,6 +19630,7 @@
     "heading": "Dieses Team für einen Bedarf anbieten",
     "intro": "Bieten Sie das Team als eine Einheit für einen offenen Bedarf eines verifizierten Unternehmens an.",
     "privacy": "Das Unternehmen sieht nur Fakten auf Teamebene: Größe, Fähigkeiten, Verfügbarkeit. Das Angebot nennt kein Mitglied und zeigt kein Mitgliedsprofil. Mitglieder erscheinen erst in einem Projekt, nachdem das Unternehmen das Team angenommen und dort zugewiesen hat.",
+    "orgPrivacy": "Das Unternehmen sieht den Namen Ihres Unternehmens, Ihren Hinweis und Ihre Bedingungen. Niemand wird genannt, bis Sie vereinbaren, wer arbeitet.",
     "tooSmall": "Ein Team kann nur angeboten werden, wenn es mindestens 2 aktive Mitglieder hat.",
     "loading": "Wird geladen…",
     "unavailable": "Der offene Bedarf konnte gerade nicht geladen werden.",
@@ -19641,6 +19641,7 @@
     "noteLabel": "Hinweis an das Unternehmen (optional)",
     "notePlaceholder": "Zum Beispiel: Trupp von 3, Start in zwei Wochen möglich",
     "submit": "Team anbieten",
+    "orgSubmit": "Unser Unternehmen anbieten",
     "submitting": "Wird angeboten…",
     "sent": {
       "heading": "Ihre Angebote",
@@ -19719,8 +19720,14 @@
       },
       "blockers": "Das Team als Ganzes erfüllt nicht: {list}",
       "missing": "Nicht angegeben: {list}",
+      "missingData": {
+        "need_not_structured": "die Anforderungen des Bedarfs",
+        "no_team_members": "aktive Mitglieder",
+        "team_skills_not_stated": "die Fähigkeiten des Teams"
+      },
       "noNeedStructure": "Dieser Bedarf ist noch nicht strukturiert, daher kann das Team nicht damit abgeglichen werden.",
       "note": "Hinweis des Teams",
+      "noteCompany": "Hinweis des Unternehmens",
       "accept": "Grundsätzlich zustimmen",
       "decline": "Ablehnen",
       "noProjects": "Sie haben noch kein offenes Projekt, dem Sie das Team zuweisen können.",
@@ -19739,6 +19746,7 @@
       },
       "createProject": "Projekt anlegen",
       "message": "Dem Team schreiben",
+      "messageCompany": "Dem Unternehmen schreiben",
       "kindOrganization": "Unternehmensangebot",
       "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Details und die arbeitenden Personen klären Sie im Gespräch."
     },

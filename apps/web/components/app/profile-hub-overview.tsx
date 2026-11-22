@@ -306,11 +306,17 @@ export async function ProfileHubOverview({
   // Completeness is a NAMED list, never a percentage (§19). The canonical
   // helper decides what is missing; this only drops the pillars a plain-
   // language step already covers, so nothing is stated twice.
-  const missingStepless = readiness
+  const missingSteplessAll = readiness
     ? missingReadinessPillars(readiness).filter((k) =>
         STEPLESS_PILLARS.includes(k),
       )
     : [];
+  // "Rašyti įrašą" and "Pridėti darbo įrašą" both open the journal: one row
+  // for one action (coordinator decision 2026-11-22 13:05 UTC). Evidence shows
+  // alone only once the journal itself is no longer missing.
+  const missingStepless = missingSteplessAll.includes("journal")
+    ? missingSteplessAll.filter((k) => k !== "evidence")
+    : missingSteplessAll;
   const nothingMissing =
     steps.length > 0 &&
     missingSteps.length === 0 &&
@@ -545,6 +551,7 @@ export async function ProfileHubOverview({
           data-visibility={visibility}
         >
           <DiscoverabilityConsent
+            compact
             locale={locale}
             source="profile"
             state={discoverability}
@@ -683,8 +690,15 @@ export async function ProfileHubOverview({
             {t("journalLink")} →
           </Link>
         )}
-        {/* The EXISTING CV import path, shown only when no CV text is saved. */}
-        {!aboutOk && (
+        {/* The EXISTING CV import path, shown only when no CV text is saved
+            and the primary action is the journal. When the primary action is
+            "add what is missing ↓" it already opens this same editor
+            (#profile-edit), so a second link there was a duplicate. At most two
+            quiet links follow the primary action (owner orders 2026-11-21/22,
+            decision 0032; coordinator decision 2026-11-22 13:05 UTC). The
+            opportunities link went too: the page header carries "Man tinkamos
+            galimybės" (`profile-opportunities-link`). */}
+        {!aboutOk && journalIsPrimary && (
           <a
             href="#profile-edit"
             className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
@@ -692,15 +706,6 @@ export async function ProfileHubOverview({
           >
             {t("cvImportLink")} ↓
           </a>
-        )}
-        {hasWorker && (
-          <Link
-            href="/dashboard/opportunities"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
-            data-testid="profile-hub-opportunities-link"
-          >
-            {t("opportunitiesLink")} →
-          </Link>
         )}
       </div>
 

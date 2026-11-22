@@ -189,6 +189,14 @@ export type ConversationIntent =
   //
   //    MAN REIKIA ↔ AŠ TURIU / GALIU. This is the second side.
   | "offer-capacity" // "turime 20 suvirintojų, ieškome jiems darbo" — capacity offered to the market
+  /**
+   * "Noriu pasiūlyti savo komandą" — the organisation offers ITS OWN team
+   * against an open need (owner P1 2026-11-22). Measured before this id: the
+   * sentence went to `offer-value` (6) in LT and RU and to `my-team` (6) in EN
+   * — a roster read. The answer is the existing team-offer flow
+   * (`TeamDemandOfferForm`, `offer_team_to_demand_v1`), never a second one.
+   */
+  | "offer-team"
   | "invite-client" // "noriu pakviesti klientą" — agency ↔ client connection
   | "invite-candidate" // "pakviesk darbuotoją į komandą" — roster invitation
   | "client-demand" // "ką klientas pasidalino?" — the requests clients shared
@@ -312,6 +320,11 @@ type IntentRule = { intent: ConversationIntent; patterns: Pattern[] };
  * it without importing this router; re-exported here for existing callers.
  */
 export { UNICODE_WORD_BOUNDARY };
+
+/** Units that follow a number and are not people: money, quantities,
+ *  measures. Used with DURATION_UNIT_SOURCE by the headcount rules. */
+const NOT_PEOPLE_UNIT_SOURCE =
+  "euro|eur|chf|prozent|procent|kg|km|liter|st\\b|stuck|stk|stuks|ton|palett|pallet";
 
 const UB = UNICODE_WORD_BOUNDARY;
 
@@ -437,6 +450,67 @@ const SEEK_GUARD_SOURCE =
   // "Jestem spawaczem, szukam pracy" must run the search exactly like its lt /
   // en / ru / nl / de twins do, instead of stopping at the self-introduction.
   "iesk|surask|\\brask\\b|noriu\\s+(?:dirbti|darbo)|reikia|truksta|looking\\s+for|\\bwant\\s+(?:a\\s+)?(?:job|work)|\\bneed\\b|ищу|ищем|хочу\\s+работ|нужн|\\bzoek|\\bsuche\\b|\\bbrauch|\\bszuka|\\bposzukuj|\\bpotrzebuj";
+
+/**
+ * FILLING IN A WORK RECORD IS AN ACTION ON THE JOURNAL, NOT A REPORT READ
+ * (owner P1 2026-11-21).
+ *
+ * Measured on this router before the rule existed: "noriu užpildyti darbo
+ * ataskaitas" ("I want to fill in work reports") scored 4 on `figures` — the
+ * bare `\bataskait` noun — and 0 on `log-work`, because no rule knew the verb
+ * FILL. The chat answered with the organisation's project figures and CSV
+ * exports. "Хочу заполнить рабочие отчёты" did the same through `отчёт`, and
+ * "I want to fill in work reports" went to `find-work` (10: "I want … work").
+ *
+ * The discriminator is the VERB, not the noun: "paruošk ataskaitą" / "prepare
+ * a report" asks for figures to be READ; "užpildyk ataskaitą" / "fill in the
+ * report" asks to WRITE the day's work, and the only place a person writes
+ * their work is the journal. So the rule binds a FILL verb to a WORK-RECORD
+ * noun, in either order (German and Dutch put the verb last), and is weighted
+ * above every read rule and above the job-seek direction rule (10) — an
+ * action the person asked to take outranks a read that merely shares a noun.
+ *
+ * MORPHOLOGY BY STEM, not by phrase. `pild` carries every Lithuanian form
+ * (užpildyti / užpildyk / pildau / užpildysiu / užpildžiau); `заполн` every
+ * Russian one (заполнить / заполни / заполняю); `ataskait` / `отч[её]т` /
+ * `žurnal` / `журнал` every case ending. `\b` before `pild` keeps
+ * "papildyti" (to supplement) out. Without a work-record noun a FILL verb
+ * stays where it was: "fill the position" is still the employer's need.
+ */
+const FILL_VERB_SOURCE =
+  "\\b(?:už|iš)?pild|заполн|\\bfill(?:ing|ed|s)?\\b|ausf[uü]ll|invul|wype[lł]n|uzupe[lł]n";
+const WORK_RECORD_NOUN_SOURCE =
+  "ataskait|žurnal|tabel|dienyn|\\breports?\\b|journal|time\\s*sheet|work\\s*log|отч[её]т|журнал|табел|bericht|tagebuch|stundenzettel|arbeitsnachweis|rapport|dagboek|urenbriefje|urenstaat|raport|dziennik|sprawozdan|karta\\s+pracy";
+const FILL_WORK_RECORD_SOURCES = [
+  `(${FILL_VERB_SOURCE})[^?.!]{0,40}?(${WORK_RECORD_NOUN_SOURCE})`,
+  `(${WORK_RECORD_NOUN_SOURCE})[^?.!]{0,30}?(${FILL_VERB_SOURCE})`,
+  // The separable verbs carry the noun INSIDE them: de "ich fülle den
+  // Stundenzettel aus", nl "vul het rapport in".
+  `\\bf[uü]ll\\w*\\s+[^?.!]{0,40}?(${WORK_RECORD_NOUN_SOURCE})[^?.!]{0,20}?\\baus\\b`,
+  `\\bvul\\s+[^?.!]{0,40}?(${WORK_RECORD_NOUN_SOURCE})[^?.!]{0,20}?\\bin\\b`,
+] as const;
+/** A request to get in touch that names nobody — "Padėk susisiekti", "Help
+ *  me get in touch", "Помоги связаться". Read by the `open-conversation` rule
+ *  and by `isBareContactRequest` (the handler then asks WHOM). */
+const BARE_CONTACT_SOURCES = [
+  "\\bpadek\\w*\\s+(?:man\\s+)?(?:susisiekt|susisiek|parasyt|pasikalbet)",
+  "\\bhelp\\s+me\\s+(?:to\\s+)?(?:get\\s+in\\s+touch|contact|reach\\s+out|message)",
+  "помог[^\\s]*\\s+(?:мне\\s+)?(?:связаться|написать|выйти\\s+на\\s+связь)",
+  "\\bhilf\\s+mir\\b[^?.!]{0,20}(?:kontakt|schreiben|erreichen)",
+  "\\bhelp\\s+me\\b[^?.!]{0,20}(?:contact\\s+opnemen|in\\s+contact|bereiken)",
+  "\\bpom[oó][zż]\\s+(?:mi\\s+)?(?:si[eę]\\s+)?(?:skontaktowa|napisa|dotrze)",
+] as const;
+const SV_BARE_CONTACT_SOURCE = "\\bhjalp\\s+mig\\b[^?.!]{0,20}(?:kontakt|skriva|na\\s+)";
+
+/** Up to three words between an OFFER verb and the TEAM noun — never a word
+ *  for a candidate or a worker ("pasiūlyk kandidatą komandai" proposes a
+ *  person, not the team). See the `offer-team` rule. */
+const OFFER_TEAM_GAP =
+  "(?:(?!kandidat|darbuotoj|candidat|worker|кандидат|работник|kandydat|pracownik|bewerber|mitarbeiter|medewerker|kandidaat)[^\\s]+\\s+){0,3}?";
+
+/** sv — "fyll i tidrapporten / dagboken". Swedish sentences only (see `sv()`). */
+const SV_FILL_WORK_RECORD_SOURCE =
+  "\\bfyll(?:a|er|de)?\\s+i\\b[^?.!]{0,40}?(tidrapport|rapport|dagbok|arbetslogg|journal)";
 
 /** The Swedish seek forms (folded) — "Jag är svetsare och söker jobb" runs
  *  the search too. Apart from `SEEK_GUARD_SOURCE` on purpose: they count only
@@ -780,6 +854,20 @@ const RULES: IntentRule[] = [
       // sv — "Vad behöver jag lära mig för att jobba som elektriker?" (the
       // lt 11-weight learn-for-work shape).
       sv("\\bvad\\s+(behover|borde|bor|ska|maste)\\s+jag\\s*.{0,8}lara\\s+mig\\s*.{0,40}(jobba|arbeta|jobb)", 11),
+      // RETRAINING (chat path check 2026-11-19): "Noriu persikvalifikuoti į
+      // elektriką", "I want to retrain as an electrician", "Ich möchte mich
+      // zum Elektriker umschulen" measured `unknown` in all seven languages.
+      // A person changing occupation asks what separates them from it — the
+      // same target-occupation gap as "what am I missing to work as X", read
+      // from the same sentence (targetOccupationFromSentence). The retrain
+      // VERB is required; "become" alone stays with the rules that read it.
+      p("persikvalifik", 12),
+      p("\\b(retrain|retraining|reskill|reskilling|re-skill|requalify|requalifying)\\b", 12),
+      p("(переквалифиц|переучит|переобуч)", 12),
+      p("(przekwalifik|przebranzow)", 12),
+      p("(umschul|umsattel)", 12),
+      p("\\b(omscholen|omscholing|omgeschoold|omschol)", 12),
+      sv("\\b(omskol|skola\\s+om\\s+mig)", 12),
     ],
   },
   {
@@ -993,6 +1081,13 @@ const RULES: IntentRule[] = [
       ),
       p("\\bataskait", 4),
       p("\\breport\\b", 4),
+      // STATISTICS is the reports read too (the reports hub's own synonym in
+      // lib/navigation/command-registry.ts). "Show project stats" scored 6 on
+      // `projects` and listed the projects instead; bound to a project noun
+      // it outranks that list (7 + 4 > 6). A FILL verb still wins (12).
+      p("(statisti|statystyk|\\bstats\\b|статисти)", 4),
+      p("(projekt|project|проект)[^?.!]{0,24}(statisti|statystyk|\\bstats\\b|статисти)", 7),
+      p("(statisti|statystyk|\\bstats\\b|статисти)[^?.!]{0,24}(projekt|project|проект)", 7),
       p("(отчёт|отчет)", 4),
       p("\\braport", 4), // pl — "przygotuj raport" (not the nl `rapport`)
       p("(bericht|rapport)", 3),
@@ -2628,6 +2723,11 @@ const RULES: IntentRule[] = [
   {
     intent: "log-work",
     patterns: [
+      // FILL + a WORK RECORD — "noriu užpildyti darbo ataskaitas", "fill in
+      // my timesheet", "заполни рабочий отчёт" (see FILL_VERB_SOURCE). 12:
+      // above `figures` (the shared noun, 4) and the seek direction rule (10).
+      ...FILL_WORK_RECORD_SOURCES.map((source) => p(source, 12)),
+      sv(SV_FILL_WORK_RECORD_SOURCE, 12),
       // past-tense "worked" across LT/EN/RU/other launch stems
       p("\\bdirbau\\b", 3),
       p("\\bdirbome\\b", 3),
@@ -3056,7 +3156,7 @@ const RULES: IntentRule[] = [
       p("работник", 4),
       p("сотрудник", 4),
       p("\\b(mitarbeiter|arbeiter|arbeitskräfte|fachkräfte)\\b", 4), // de
-      p("\\b(medewerkers|personeel|arbeiders|arbeidskrachten|vakmensen)\\b", 4), // nl
+      p("\\b(medewerkers|werknemers|personeel|arbeiders|arbeidskrachten|vakmensen)\\b", 4), // nl — "Ik heb vijf werknemers nodig"
       p("(pracownik|robotnik|pracownic)", 4), // pl — pracownicy / pracowników
       p("\\b(hire|hiring|recruit(ing|ment)?|staffing)\\b", 3),
       p("(нанять|наним|найм)", 3),
@@ -3080,7 +3180,7 @@ const RULES: IntentRule[] = [
         // klientui" (an agency buying for a client) uses a different verb and
         // measured `unknown`. Reading the shared seek vocabulary instead of a
         // single hard-coded verb is the point of this rule.
-        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|mensen|leute|personen|personeel|люд|человек|рабочих|žmoni|zmoni)`,
+        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|mensen|leute|personen|personeel|люд|человек|рабочих|строител|builders|statybinink|bauarbeiter|bouwvakkers|žmoni|zmoni)`,
         5,
       ),
       // pl (2026-09-20). `SEEK_VERB_SOURCE` lives in lib/structuring and
@@ -3118,6 +3218,25 @@ const RULES: IntentRule[] = [
       // pattern it would otherwise be mistaken for. Caught by the supply
       // guard's cross-check, not in production.
       p("\\bhebben\\b\\s*.{0,30}\\bnodig\\b", 10),
+      // A HEADCOUNT WITH A NEED VERB THAT IS NOT NEXT TO IT (chat path check
+      // 2026-11-19). "Ich brauche ab Montag 3 Lagerarbeiter" and "Ik heb vanaf
+      // maandag 3 magazijnmedewerkers nodig" measured `unknown`: the count is
+      // separated from the verb by a date, the trade is a compound word
+      // (no \\b before "arbeiter"), and the Dutch rule above takes the plural
+      // `hebben` only. A number of PEOPLE needed is a demand; durations,
+      // money and quantities ("3 Stunden", "500 euro nodig", "5 St. Ziegel")
+      // are excluded, so they never open the demand form. The German rule
+      // needs a word between the verb and the count: "wir brauchen 12
+      // Schweisser" is already read by the rules above and is not counted
+      // twice.
+      p(
+        `\\b(brauche|brauchen|benotige|benotigen)\\s+(?:[^\\s0-9]+\\s+){1,4}?[0-9]{1,4}\\s+(?!(?:${DURATION_UNIT_SOURCE}|${NOT_PEOPLE_UNIT_SOURCE})\\w*\\b)[a-z]`,
+        6,
+      ),
+      p(
+        `\\b(heb|hebt)\\s+(?:[^\\s0-9]+\\s+){0,4}?[0-9]{1,4}\\s+(?!(?:${DURATION_UNIT_SOURCE}|${NOT_PEOPLE_UNIT_SOURCE})\\w*\\b)[a-z]\\S*\\s*.{0,20}\\bnodig\\b`,
+        10,
+      ),
       // ── A NEED VERB AND A HEADCOUNT, WHATEVER THE TRADE IS CALLED ───────
       //
       // "reikia 12 TIG kitai savaitei" measured `unknown` on 2026-09-08. TIG
@@ -3249,6 +3368,27 @@ const RULES: IntentRule[] = [
     ],
   },
   {
+    /**
+     * OFFER OUR TEAM (owner P1 2026-11-22). An OFFER verb bound to a TEAM noun,
+     * by stem and in either order (de/nl put the verb last). Weight 12: above
+     * `offer-value` and `my-team` (6), which these sentences reached before.
+     * The words between may not name a candidate or a worker — "pasiūlyk
+     * kandidatą komandai" proposes a PERSON (`propose-candidate`).
+     */
+    intent: "offer-team",
+    patterns: [
+      p(`(pasiul|siul)\\w*\\s+${OFFER_TEAM_GAP}(komand|brigad|ekip)`, 12),
+      p(`\\boffer(?:ing|s|ed)?\\b\\s+${OFFER_TEAM_GAP}(team|crew|brigade|squad)s?\\b`, 12),
+      p(`предлож[^\\s]*\\s+${OFFER_TEAM_GAP}(команд|бригад)`, 12), // `\w` is ASCII-only, so Cyrillic endings need `[^\s]`
+      p(`\\bbiete\\w*\\s+${OFFER_TEAM_GAP}(team|brigade|kolonne)`, 12),
+      p(`\\b(team|brigade|kolonne)\\w*\\s+(?:[^\\s]+\\s+){0,2}?(anbieten|anzubieten)`, 12),
+      p(`\\bbied\\w*\\s+${OFFER_TEAM_GAP}(team|ploeg)`, 12),
+      p(`\\b(team|ploeg)\\w*\\s+(?:[^\\s]+\\s+){0,2}?aan\\s*(te\\s+)?bied`, 12),
+      p(`(zaoferow|oferow|zaproponow)\\w*\\s+${OFFER_TEAM_GAP}(zesp[oó][lł]|zespo|brygad|ekip)`, 12),
+      sv(`\\berbjud\\w*\\s+${OFFER_TEAM_GAP}(team|arbetslag|lag)\\b`, 12),
+    ],
+  },
+  {
     // FIND BUSINESS PARTNERS (owner 2026-10-01). Direction rule, not a
     // deny-list: a seek verb (any launch language) bound, within three
     // words, to the PARTNER noun. The words between may never be a WORK noun
@@ -3272,7 +3412,8 @@ const RULES: IntentRule[] = [
           // a job.
           "tiekej[^\\s]*|supplier[^\\s]*|subrangov[^\\s]*|subcontractor[^\\s]*|paslaug[^\\s]*\\s+teikej[^\\s]*|" +
           "service\\s+provider[^\\s]*|lieferant[^\\s]*|subunternehmer[^\\s]*|leverancier[^\\s]*|onderaannemer[^\\s]*|" +
-          "поставщик[^\\s]*|подрядчик[^\\s]*|dostawc[^\\s]*|podwykonawc[^\\s]*|uslugodawc[^\\s]*)",
+          // "субподрядчиков" carries its prefix: the token starts with "суб".
+          "поставщик[^\\s]*|(?:суб)?подрядчик[^\\s]*|dostawc[^\\s]*|podwykonawc[^\\s]*|uslugodawc[^\\s]*)",
         15,
       ),
       // sv (2026-11-12) — "Jag vill hitta affärspartner", "vi söker
@@ -3724,6 +3865,12 @@ const RULES: IntentRule[] = [
     patterns: [
       p("\\b(?:parasyk|parasykite|rasyk)\\s+(?:(?:jam|jai|zinute|zinutes)\\s+)?(?!siai\\b|sitam\\b|siam\\b|tam\\b|tai\\b|visiems\\b|imonei|imonej|darbdav|man\\b|kam\\b|laisk|cv\\b|ataskait|santrauk|pranesim|aprasym|tekst|atsakym|pasiulym|skelbim|zinut)[^\\s]{3,}", 9),
       p("(?:pokalb\\w*|pasikalb\\w*)\\s+su\\s+[^\\s]{3,}", 12),
+      // A CONTACT REQUEST WITH NOBODY NAMED (owner P1 2026-11-22): "Padėk
+      // susisiekti", "Help me get in touch", "Помоги связаться" scored 0. The
+      // handler asks WHICH of the person's own counterparts they mean; nothing
+      // is created or sent until a person is picked and the message is sent.
+      ...BARE_CONTACT_SOURCES.map((source) => p(source, 10)),
+      sv(SV_BARE_CONTACT_SOURCE, 10),
       p("\\bsusisiek\\s+su\\s+(?!siuo\\b|sia\\b|siai\\b|imone)[^\\s]{3,}", 12),
       p("\\b(?:message|chat\\s+with|talk\\s+to|open\\s+(?:a\\s+)?(?:conversation|chat)\\s+with)\\s+(?!the\\b|this\\b|my\\b|them\\b|an?\\b|company\\b|employer\\b|us\\b|me\\b|support\\b)[^\\s]{2,}", 10),
       p("(?:напиши|написать|свяжись\\s+с|открой\\s+(?:чат|диалог)\\s+с)\\s+(?!этой\\b|этому\\b|компании|работодател)[^\\s]{3,}", 10),
@@ -4247,14 +4394,56 @@ const JOURNAL_REQUEST_PATTERNS: readonly RegExp[] = [
   p("записать\\s+работу").re,
   // pl — "zapisz pracę", "wprowadź godziny", "uzupełnij dziennik pracy"
   p("(zapisz|zapisa[cć]|wpisz|wprowad[zź]|uzupe[lł]nij|odnotuj)\\s*.{0,20}(prac|godzin)").re,
+  // FILL + a WORK RECORD ("noriu užpildyti darbo ataskaitas", "fill in my
+  // timesheet") — the same sources the `log-work` rule routes on, so the two
+  // halves cannot disagree about a request.
+  ...FILL_WORK_RECORD_SOURCES.map((source) => p(source).re),
 ];
 /** sv — "registrera mitt arbete", "för in timmarna". A Swedish sentence only:
  *  "logga" / "registrera" beside "job…" is other languages' text too. */
 const SV_JOURNAL_REQUEST = p("(registrera|fora\\s+in|skriv\\s+in|logga)\\s*.{0,20}(arbet|jobb|timm)");
+const SV_FILL_WORK_RECORD = p(SV_FILL_WORK_RECORD_SOURCE);
 
 export function isExplicitJournalRequest(text: string): boolean {
   const q = fold(text ?? "");
   if (!q.trim()) return false;
   if (JOURNAL_REQUEST_PATTERNS.some((re) => re.test(q))) return true;
-  return looksSwedish(text) && SV_JOURNAL_REQUEST.re.test(q);
+  return looksSwedish(text) && (SV_JOURNAL_REQUEST.re.test(q) || SV_FILL_WORK_RECORD.re.test(q));
+}
+
+/**
+ * A request to get in touch that names NOBODY ("Padėk susisiekti", "Help me
+ * get in touch", "Помоги связаться") — the `open-conversation` patterns for
+ * it, read on their own so the handler knows to ASK whom rather than search
+ * for a name the sentence does not contain.
+ */
+const BARE_CONTACT_REQUEST: readonly RegExp[] = BARE_CONTACT_SOURCES.map((source) => p(source).re);
+const SV_BARE_CONTACT = p(SV_BARE_CONTACT_SOURCE);
+export function isBareContactRequest(text: string): boolean {
+  const q = fold(text ?? "");
+  if (BARE_CONTACT_REQUEST.some((re) => re.test(q))) return true;
+  return looksSwedish(text ?? "") && SV_BARE_CONTACT.re.test(q);
+}
+
+/**
+ * The sentence with its REQUEST words taken out — what is left is what the
+ * person said about the work itself (folded).
+ *
+ * WHY. `journalDraftReadiness` asks whether a sentence carries work content,
+ * and one of its signals is the skill recogniser. "Noriu užpildyti darbo
+ * ataskaitas" names REPORTS, and report writing is a real skill in the
+ * catalogue — so the request itself read as work, and the flow would have
+ * opened with "noriu užpildyti darbo ataskaitas" as the entry's evidence: the
+ * request becoming the record, the defect `journalDraftReadiness` exists to
+ * prevent. The recogniser therefore reads only what remains once the request
+ * is removed. A sentence that is not a request is returned whole (folded).
+ */
+export function withoutJournalRequest(text: string): string {
+  let q = fold(text ?? "");
+  const swedish = looksSwedish(text ?? "");
+  const patterns = swedish ? [...JOURNAL_REQUEST_PATTERNS, SV_JOURNAL_REQUEST.re, SV_FILL_WORK_RECORD.re] : JOURNAL_REQUEST_PATTERNS;
+  for (const re of patterns) {
+    q = q.replace(new RegExp(re.source, "gu"), " ");
+  }
+  return q.trim();
 }

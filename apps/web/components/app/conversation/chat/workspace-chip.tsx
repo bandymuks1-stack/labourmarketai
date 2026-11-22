@@ -164,11 +164,11 @@ export function WorkspaceChip() {
     return (
       <span
         data-testid="workspace-chip"
-        className="flex min-h-11 min-w-0 flex-1 sm:max-w-56 sm:flex-none items-center gap-1.5 rounded-full border border-ink-500 px-2.5 text-meta font-medium text-text-secondary"
+        className="flex min-h-11 min-w-0 flex-1 sm:max-w-56 sm:flex-initial items-center gap-1.5 rounded-full border border-ink-500 px-2.5 text-meta font-medium text-text-secondary"
         title={`${t("workspaceLabel")}: ${titleOf(active)}`}
       >
         <span className={`size-2 flex-none rounded-full ${dotClass(active)}`} aria-hidden />
-        <span className="max-sm:line-clamp-2 max-sm:break-words max-sm:leading-tight sm:truncate">{nameOf(active)}</span>
+        <span className="text-left max-sm:line-clamp-2 max-sm:break-words max-sm:leading-tight sm:truncate">{nameOf(active)}</span>
       </span>
     );
   }
@@ -189,7 +189,7 @@ export function WorkspaceChip() {
     // The name may also take a second line there (2026-11-19): one line of
     // ~150px still cut names of 227–249px, so the person could not tell which
     // organization they act for. Two lines of meta text fit the 44px chip.
-    <div className="relative flex min-w-0 flex-1 sm:flex-none" data-testid="workspace-chip">
+    <div className="relative flex min-w-0 flex-1 sm:flex-initial" data-testid="workspace-chip">
       <button
         ref={triggerRef}
         type="button"
@@ -200,10 +200,10 @@ export function WorkspaceChip() {
         aria-busy={pending || undefined}
         title={titleOf(active)}
         data-relationship={active.kind === "organization" ? (active.relationship ?? "other") : undefined}
-        className="flex min-h-11 min-w-0 flex-1 sm:max-w-56 sm:flex-none cursor-pointer items-center gap-1.5 rounded-full border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+        className="flex min-h-11 min-w-0 flex-1 sm:max-w-56 sm:flex-initial cursor-pointer items-center gap-1.5 rounded-full border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
       >
         <span className={`size-2 flex-none rounded-full ${dotClass(active)}`} aria-hidden />
-        <span className="max-sm:line-clamp-2 max-sm:break-words max-sm:leading-tight sm:truncate">{pending ? tSwitcher("switching") : nameOf(active)}</span>
+        <span className="text-left max-sm:line-clamp-2 max-sm:break-words max-sm:leading-tight sm:truncate">{pending ? tSwitcher("switching") : nameOf(active)}</span>
         <ChevronDown {...iconControl("flex-none")} aria-hidden />
       </button>
       {/* The ONE portal root (owner audit P0.3): the menu renders at

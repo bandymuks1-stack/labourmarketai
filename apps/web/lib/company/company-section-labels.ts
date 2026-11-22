@@ -22,7 +22,9 @@ export async function readDemandReadbackLabels() {
   const tReqStatus = await getTranslations(
     "roleDashboards.buyer.requests.understanding.requestStatus",
   );
+  const tDisclosure = await getTranslations("common.disclosure");
   return {
+    showAll: (count: number) => tDisclosure("showAll", { count }),
     syntheticTitle: {
       hiringWorkers: tReadback("syntheticTitle.hiringWorkers"),
       agencyPartnership: tReadback("syntheticTitle.agencyPartnership"),
@@ -218,6 +220,7 @@ export async function readAgencyBridgeLabels() {
     noRoster: tAB("noRoster"),
     goToRoster: tAB("goToRoster"),
     invalidLabel: tAB("invalidLabel"),
+    offerLimitLabel: tAB("offerLimitLabel"),
     progressHeading: tAB("progressHeading"),
     noOffers: tAB("noOffers"),
     withdrawButton: tAB("withdrawButton"),

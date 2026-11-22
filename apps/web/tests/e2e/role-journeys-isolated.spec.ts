@@ -1,5 +1,6 @@
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { onboardInvited } from "./isolated-web-a-helpers";
 
 /**
  * CROSS-ROLE INTEGRATION JOURNEYS, end to end, on a THROWAWAY LOCAL Supabase
@@ -435,7 +436,7 @@ test("J-EMP. a company signs up, invites a worker by link, the worker joins; the
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await emp.locator('form button[type="submit"]').click();
   await emp.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(emp.url())) await onboard(emp, "work", EMP_NAME);
+  if (/\/onboarding/.test(emp.url())) await onboardInvited(emp, EMP_NAME);
   await emp.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(emp.url())) {
     const accept = emp.getByTestId("invite-accept");
