@@ -27,7 +27,7 @@ This is the final browser acceptance matrix: eight scenarios, each checked again
 
 Per scenario it also proves:
 - one thing saved through the page and present again after a reload, with its stored row read back;
-- the wrong person refused, both by route redirect and by a read with their own session, where row-level security decides.
+- rights: PASS or FAIL only. How access is enforced stays in the private Internal Brain (AGENTS.md, public-repository rule).
 
 Measurements go to `MATRIX_REPORT` (JSON lines) and screenshots to `MATRIX_SHOTS`. Neither is committed.
 
@@ -79,7 +79,7 @@ Measurements go to `MATRIX_REPORT` (JSON lines) and screenshots to `MATRIX_SHOTS
 **2. Worker.** Matrix M-2:
 - **Surfaces:** the profile, the work board, the journal and messages.
 - **Saved after reload:** a journal entry saved through the journal flow is shown again after a reload, and is stored exactly once (`journal_entries`).
-- **Rights:** an unrelated employer's own-session read of that worker's `journal_entries` returns 0 rows, and the worker is sent away from `/dashboard/company/settings`.
+- **Rights:** PASS (matrix M-2).
 - **Deep proof elsewhere:**
   - local: `phone-journeys` M-1..M-8 and `journeys-coverage` WM (a third party cannot open a thread);
   - prod: `jobs-search`, `profile-cv-history`, `journal-confirm` and `chat-continuity`.
@@ -90,7 +90,7 @@ Measurements go to `MATRIX_REPORT` (JSON lines) and screenshots to `MATRIX_SHOTS
 **3. Employer.** Matrix M-3:
 - **Surfaces:** company home (`company-model-primary`, 44 px), need intake and people.
 - **Saved after reload:** a need published through the intake is listed again after a reload.
-- **Rights:** another organization's own-session read of the employer's `company_memberships` returns 0 rows.
+- **Rights:** PASS (matrix M-3).
 - **Deep proof elsewhere:**
   - local: `role-journeys` J-*, `teams-projects` and `journeys-coverage` ST;
   - prod: `need-intake`, `company-chain`, `org-roster` and `brigade-formation`.
@@ -98,21 +98,22 @@ Measurements go to `MATRIX_REPORT` (JSON lines) and screenshots to `MATRIX_SHOTS
 
 **4. Agency.** Matrix M-4:
 - **Surfaces:** the agency home, clients (`/dashboard/company/partners`) and people.
-- **Rights:** a worker is sent away from the clients page.
+- **Rights:** PASS (matrix M-4).
 - **Deep proof elsewhere:** `agency-roles` A-1..A-6 (seats, owner-only surfaces, isolation from another organization, each section rendered once on repeated loads at phone and desktop), and prod `agency-chain`.
 
 **5. Subcontractor.** Matrix M-5:
 - **Saved after reload:** a service offering is created through `/dashboard/services` and listed again after a reload; it is stored once (`service_offerings`).
-- **Rights:** another company's services page does not list it as its own.
+- **Rights:** PASS (matrix M-5).
 - **Surfaces:** service requests open.
 - **Deep proof elsewhere:**
-  - local: `journeys-coverage` SC, 26/26 on this build. It covers the public business page (404 before publishing), discovery with filters, request → accept with note → answer seen by the buyer, messages both ways, and a third company refused both on the page and by its own-session read.
+  - local: `journeys-coverage` SC, 26/26 on this build. It covers the public business page (404 before publishing), discovery with filters, request → accept with note → answer seen by the buyer, messages both ways; rights PASS.
   - prod: `marketplace`, `marketplace-goods-services` and `orders-bookings`.
 - **Commercial safety:** no payment exists in this flow, by design.
 
 **6. Student / education.** Matrix M-6:
-- **Student:** the learning compass with `compass-open-internships` at 44 px, and the internship board; the student is sent away from the institution's education home.
-- **Institution:** the education home leads with "Invite students" (44 px). A programme created through the form is listed again after a reload and stored (`education_programs`). Another organization's own-session read of the institution's programmes returns 0 rows.
+- **Student:** the learning compass with `compass-open-internships` at 44 px, and the internship board.
+- **Institution:** the education home leads with "Invite students" (44 px). A programme created through the form is listed again after a reload and stored.
+- **Rights:** PASS (matrix M-6).
 - **Deep proof elsewhere:**
   - local: `recognition-chain` I-1..I-15, `signup-isolated` E-1..E-4 and ST-1, `phone-journeys` S-*/T-*, and `journeys-coverage` ST (internship need → filtered board → apply → company sees the student; a second student cannot see the interest);
   - prod: `learning-practice` and `cohort-join-request`.
@@ -122,8 +123,8 @@ Measurements go to `MATRIX_REPORT` (JSON lines) and screenshots to `MATRIX_SHOTS
 
 **8. Admin.** Matrix M-8:
 - **Surfaces:** organization settings (the members invite form) and documents.
-- **Rights:** a worker is sent away from the settings page.
-- **Deep proof elsewhere:** `agency-roles` A-2..A-3 (member refused owner-only surfaces) and `audit-trail` U-1..U-3; prod `company-governance`, `documents-approvals`, `org-roster` and `search-support-privacy`. Lane F adds the permission and export cases.
+- **Rights:** PASS (matrix M-8).
+- **Deep proof elsewhere:** `agency-roles` A-2..A-3 and `audit-trail` U-1..U-3; prod `company-governance`, `documents-approvals`, `org-roster` and `search-support-privacy`. Lane F adds the permission and export cases.
 
 ## Defects found and fixed
 
