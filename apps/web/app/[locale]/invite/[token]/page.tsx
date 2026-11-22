@@ -280,9 +280,6 @@ export default async function InvitePage({
                 {t("signIn")}
               </Link>
             </div>
-            <p className="text-meta text-text-muted" data-testid="invite-owns-identity">
-              {t("youOwnYourIdentity")}
-            </p>
           </>
         )}
         {/* A closed invitation never shows a validity date next to the

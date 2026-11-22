@@ -51,6 +51,7 @@ vi.mock("@/lib/capabilities/registry", () => {
 });
 vi.mock("@/lib/mcp/toolset", () => ({
   toolName: (id: string) => id.replace(/\./g, "_"),
+  profileCapabilities: (caps: unknown[]) => caps,
   toolDefsOf: () => [{ name: "probe_who", title: "probe", description: "probe", inputSchema: { type: "object" }, annotations: {} }],
   toolsetVersionOf: () => "0.1.0+t1.00000000",
 }));

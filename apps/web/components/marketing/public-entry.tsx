@@ -8,13 +8,17 @@ import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
+// The field renders with the small carry half only. The READING half
+// (`readPublicEntry`, which imports the whole intent router) is loaded on
+// first use, so a visitor who never types does not download or parse it
+// (lighter landing first screen, 2026-11-12).
 import {
   entryDoorHref,
-  readPublicEntry,
+  entryRequestRoute,
   PUBLIC_ENTRY_MAX_CHARS,
   type EntryDoor,
-  type PublicEntryReading,
-} from "@/lib/marketing/public-entry";
+} from "@/lib/marketing/public-entry-carry";
+import type { PublicEntryReading } from "@/lib/marketing/public-entry";
 import type { FirstRunIntent } from "@/lib/onboarding/first-run-intent";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -160,7 +164,26 @@ export function LandingCtaCapture({
   );
 }
 
-export function PublicEntry({ supply }: { readonly supply: EntrySupply | null }) {
+/** The two chips of the short variant: one for each side of the market. */
+export const SHORT_EXAMPLE_KEYS = ["hire", "work"] as const satisfies readonly EntryExampleKey[];
+
+export function PublicEntry({
+  supply,
+  examples: exampleSet = "standard",
+  requestLabel,
+}: {
+  readonly supply: EntrySupply | null;
+  /** The request block's own title ("Submit a request"), from the server so the
+   *  landing's client messages stay `landing.entry` only. Without it the entry
+   *  offers no request route. */
+  readonly requestLabel?: string;
+  /**
+   * `short` (the landing since 2026-11-13, owner: less noise on the first
+   * screen): two example chips and no "more examples". `standard`: the four
+   * defaults with the rest one tap away.
+   */
+  readonly examples?: "standard" | "short" | "none";
+}) {
   const t = useTranslations("landing.entry");
   const locale = useLocale();
   const inputId = useId();
@@ -193,8 +216,28 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
     if (typed.length > 0) setDraft(typed);
   }, []);
 
-  const ask = useCallback((text: string) => {
-    const next = readPublicEntry(text);
+  // The one reader, loaded once. Started when the field is first focused or
+  // touched, so it is normally ready before the person submits.
+  const readerRef = useRef<Promise<typeof import("@/lib/marketing/public-entry")> | null>(null);
+  const loadReader = useCallback(() => {
+    readerRef.current ??= import("@/lib/marketing/public-entry");
+    return readerRef.current;
+  }, []);
+  // The newest question wins if two are asked before the reader arrives.
+  const askSeq = useRef(0);
+
+  const ask = useCallback(async (text: string) => {
+    const seq = (askSeq.current += 1);
+    let next: PublicEntryReading;
+    try {
+      next = (await loadReader()).readPublicEntry(text);
+    } catch {
+      // The reader could not be loaded (offline, a failed request). Let the
+      // next attempt fetch it again; nothing is shown as understood.
+      readerRef.current = null;
+      return;
+    }
+    if (seq !== askSeq.current) return;
     setChosen(null);
     if (next.kind === "empty") {
       setReading(null);
@@ -209,7 +252,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
       intent: next.kind === "recognised" ? next.family : undefined,
       resolution: "deterministic",
     });
-  }, []);
+  }, [loadReader]);
 
   const choose = useCallback((family: FirstRunIntent) => {
     setChosen(family);
@@ -236,6 +279,17 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
     return null;
   })();
 
+  /** A request this page can take WITHOUT an account (employer path P0
+   *  2026-11-15). The page promises it, and both forms below work signed out,
+   *  yet a sentence about needing workers or a job done got only sign-up and
+   *  sign-in. Workers: the public need form, written with the sentence. A job
+   *  for someone to do: the project request on this page. Sign-up stays, second. */
+  const requestRoute = !requestLabel ? null : entryRequestRoute(
+    reading?.kind === "recognised" ? reading.intent : null,
+    chosen,
+    sentence,
+  );
+
   const numbers = new Intl.NumberFormat(locale);
   const refreshedAt = supply?.refreshedAt
     ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(
@@ -254,7 +308,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
       <AuthCtaLink
         relPath={entryDoorHref(locale, kind, sentence)}
         className={cn(
-          buttonLinkClassName(kind === "signup" ? "primary" : "secondary"),
+          buttonLinkClassName(kind === "signup" && !requestRoute ? "primary" : "secondary"),
           "gap-1.5 rounded-full",
         )}
       >
@@ -264,7 +318,10 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
     </LandingCtaCapture>
   );
 
-  const examples = visibleExampleKeys(showAllExamples);
+  const short = exampleSet === "short";
+  const examples: readonly EntryExampleKey[] = short
+    ? SHORT_EXAMPLE_KEYS
+    : visibleExampleKeys(showAllExamples);
   const firstMoreKey = visibleExampleKeys(true)[DEFAULT_EXAMPLE_KEYS.length];
 
   return (
@@ -280,6 +337,9 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
       <Card className="flex flex-col gap-4">
         {/* ── The sentence ─────────────────────────────────────────────── */}
         <form
+          // Fetch the reader as soon as the person turns to the field.
+          onFocus={() => void loadReader()}
+          onPointerEnter={() => void loadReader()}
           className="flex flex-col gap-2"
           onSubmit={(e) => {
             e.preventDefault();
@@ -287,7 +347,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
             // effect above); `draft` mirrors it once React holds it.
             const typed = inputRef.current?.value ?? draft;
             if (typed !== draft) setDraft(typed);
-            ask(typed);
+            void ask(typed);
           }}
         >
           <label
@@ -296,7 +356,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
           >
             {t("label")}
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               ref={inputRef}
               id={inputId}
@@ -313,7 +373,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
               // viewport (measured 2026-08-09; proven by
               // tests/e2e/landing-mobile-overflow.spec.ts). `flex-1` still
               // grows the field to fill the row.
-              className="min-h-11 w-0 min-w-0 flex-1 rounded-full border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted focus:border-brand-blue"
+              className="min-h-11 w-full min-w-0 rounded-full sm:w-0 sm:flex-1 border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted max-sm:placeholder:text-sm focus:border-brand-blue"
             />
             <button
               type="submit"
@@ -364,6 +424,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
 
                The labels are ordinary speech, never the product's vocabulary:
                no SUPPLY, no DEMAND, no "capacity", no "evidence" (§18). */}
+        {exampleSet === "none" ? null : (
         <div id={examplesId} className="flex flex-wrap items-center gap-1.5">
           <span className="text-meta text-text-muted">{t("examplesLabel")}</span>
           {examples.map((key) => {
@@ -381,7 +442,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
                 title={example}
                 onClick={() => {
                   setDraft(example);
-                  ask(example);
+                  void ask(example);
                 }}
                 // COMPACT WRAPPING, not fewer chips (owner correction,
                 // 2026-09-09). MEASURED on the built app: at 320px the ten
@@ -419,7 +480,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
           })}
           {/* The rest of the graph, one tap away. Quieter than a chip on
               purpose: it is a way to see more, not a fifth thing to choose. */}
-          {showAllExamples ? null : (
+          {showAllExamples || short ? null : (
             <button
               type="button"
               data-testid="entry-more-examples"
@@ -432,6 +493,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
             </button>
           )}
         </div>
+        )}
 
         {/* ── What was understood ──────────────────────────────────────── */}
         {understanding ? (
@@ -449,10 +511,43 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
             <p className="mt-2 font-display text-card-title font-semibold text-text-primary">
               {understanding}
             </p>
-            <p className="mt-3 border-t border-ink-600 pt-2.5 text-basis text-text-secondary">
-              {t("nextHint")}
-            </p>
+            {/* "Sign in to save your request" is not true when the request can be
+                sent right here, so it is said only when it is. */}
+            {requestRoute ? null : (
+              <p className="mt-3 border-t border-ink-600 pt-2.5 text-basis text-text-secondary">
+                {t("nextHint")}
+              </p>
+            )}
             <div className="mt-3 flex flex-wrap gap-2">
+              {requestRoute ? (
+                <LandingCtaCapture
+                  testId="entry-request"
+                  surface="landing_entry"
+                  ctaId={requestRoute.kind === "need-form" ? "entry_need_form" : "entry_request_project"}
+                  intent={family ?? undefined}
+                >
+                  {requestRoute.kind === "need-form" ? (
+                    <Link
+                      href={requestRoute.href}
+                      className={cn(buttonLinkClassName("primary"), "gap-1.5 rounded-full")}
+                    >
+                      {requestLabel}
+                      <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+                    </Link>
+                  ) : (
+                    // The project request is on this page: a plain fragment link,
+                    // so the browser announces the change the request block
+                    // listens for.
+                    <a
+                      href={requestRoute.href.slice(1)}
+                      className={cn(buttonLinkClassName("primary"), "gap-1.5 rounded-full")}
+                    >
+                      {requestLabel}
+                      <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+                    </a>
+                  )}
+                </LandingCtaCapture>
+              ) : null}
               {door("signup")}
               {door("login")}
               {/* A person looking for WORK can look at real open jobs right

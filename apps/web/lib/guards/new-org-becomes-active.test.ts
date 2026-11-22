@@ -18,4 +18,12 @@ describe("creating an organization keeps the person in a working context", () =>
   it("only the switcher's core writes the pointer (no direct profiles update here)", () => {
     expect(read("lib/company/setup-actions.ts")).not.toMatch(/active_organization_id/);
   });
+  it("the acting role follows the new company, as the header switch does (decision d3, audit 2026-11-15)", () => {
+    const s = read("lib/company/setup-actions.ts");
+    // Pinned every time, so the role also follows when the company was already the default workspace.
+    expect(s).toMatch(/const pinned = await switchActiveWorkspaceCore\(\{ supabase, userId: user\.id \}, orgId\)/);
+    expect(s).toMatch(/followWorkspaceRoleCore\(\{ supabase, userId: user\.id \}, workspace\)/);
+    // The shared role core is the only writer: no role write in this file.
+    expect(s).not.toMatch(/active_role/);
+  });
 });

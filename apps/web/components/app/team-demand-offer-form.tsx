@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useEffect, useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { MessageSquare } from "lucide-react";
@@ -16,6 +16,9 @@ import type { TeamOfferRefusal } from "@/lib/market/team-offer-model";
 import { openTeamOfferConversationAction } from "@/lib/company/team-offer-conversation";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 import { TeamOfferTerms } from "@/components/app/team-offer-terms";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 
 /**
  * E6 - offer this team / brigade as ONE unit against ONE open demand.
@@ -32,11 +35,15 @@ export function TeamDemandOfferForm({
   teamId,
   memberCount,
   kind = "team",
+  defaultOpen = false,
 }: {
   teamId: string;
   memberCount: number;
   /** "organization" = a company / agency offers ITSELF (no brigade needed). */
   kind?: "team" | "organization";
+  /** Opened and loaded at once — the conversation shows it because it was
+   *  asked for ("Noriu pasiūlyti savo komandą"), not folded on a page. */
+  defaultOpen?: boolean;
 }) {
   const t = useTranslations("teamDemandOffer");
   const locale = useLocale();
@@ -55,6 +62,12 @@ export function TeamDemandOfferForm({
       setData(await loadTeamOfferPanelAction({ teamId, kind }));
     });
   }
+
+  useEffect(() => {
+    if (defaultOpen) load();
+    // Once, on mount: `load` reads nothing that changes before it runs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function refusalText(status: TeamOfferRefusal): string {
     return t(`refusal.${status}`);
@@ -96,18 +109,19 @@ export function TeamDemandOfferForm({
 
   return (
     <details
+      open={defaultOpen || undefined}
       className="rounded-md border border-ink-600 bg-ink-800/30 p-3"
       data-testid={`team-demand-offer-section-${teamId}`}
       onToggle={(e) => {
         if ((e.currentTarget as HTMLDetailsElement).open) load();
       }}
     >
-      <summary className="cursor-pointer text-xs font-medium text-text-secondary">
+      <summary className="flex min-h-11 cursor-pointer items-center text-xs font-medium text-text-secondary">
         {org ? t("orgHeading") : t("heading")}
       </summary>
       <div className="flex flex-col gap-3 pt-3">
         <p className="text-xs text-text-secondary">{org ? t("orgIntro") : t("intro")}</p>
-        <p className="text-meta leading-relaxed text-text-muted">{t("privacy")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{org ? t("orgPrivacy") : t("privacy")}</p>
 
         {!org && memberCount < 2 ? (
           <p className="text-xs text-text-muted" data-testid={`team-offer-too-small-${teamId}`}>
@@ -132,11 +146,11 @@ export function TeamDemandOfferForm({
                 <label className="text-xs text-text-secondary" htmlFor={`${uid}-demand`}>
                   {t("demandLabel")}
                 </label>
-                <select
+                <Select
                   id={`${uid}-demand`}
                   value={requestId}
                   onChange={(e) => setRequestId(e.target.value)}
-                  className="min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+                  className="min-h-11 sm:min-h-9 max-sm:text-base"
                   data-testid={`team-offer-demand-${teamId}`}
                 >
                   <option value="">{t("demandPlaceholder")}</option>
@@ -147,56 +161,57 @@ export function TeamDemandOfferForm({
                       {d.openOfferId ? ` - ${t("alreadyOffered")}` : ""}
                     </option>
                   ))}
-                </select>
+                </Select>
                 <label className="text-xs text-text-secondary" htmlFor={`${uid}-note`}>
                   {t("noteLabel")}
                 </label>
-                <textarea
+                <Textarea
                   id={`${uid}-note`}
                   value={note}
                   maxLength={500}
                   rows={2}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder={t("notePlaceholder")}
-                  className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+                  className="max-sm:text-base"
                   data-testid={`team-offer-note-${teamId}`}
                 />
                 <fieldset className="grid gap-2 sm:grid-cols-2">
                   <legend className="text-xs text-text-secondary">{t("termsLegend")}</legend>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-cap`}>
                     {t("terms.capacity")}
-                    <input id={`${uid}-cap`} type="number" min={1} max={500} inputMode="numeric" value={terms.capacity}
+                    <Input id={`${uid}-cap`} type="number" min={1} max={500} inputMode="numeric" value={terms.capacity}
                       onChange={(e) => setTerms((v) => ({ ...v, capacity: e.target.value }))}
-                      className="min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" />
+                      className="min-h-11 sm:min-h-9 max-sm:text-base" />
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-rate`}>
                     {t("terms.rate")}
-                    <input id={`${uid}-rate`} type="text" maxLength={200} value={terms.rateText} placeholder={t("terms.ratePlaceholder")}
+                    <Input id={`${uid}-rate`} type="text" maxLength={200} value={terms.rateText} placeholder={t("terms.ratePlaceholder")}
                       onChange={(e) => setTerms((v) => ({ ...v, rateText: e.target.value }))}
-                      className="min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" />
+                      className="min-h-11 sm:min-h-9 max-sm:text-base" />
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-start`}>
                     {t("terms.start")}
-                    <input id={`${uid}-start`} type="date" value={terms.startDate}
+                    <Input id={`${uid}-start`} type="date" value={terms.startDate}
                       onChange={(e) => setTerms((v) => ({ ...v, startDate: e.target.value }))}
-                      className="min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" />
+                      className="min-h-11 sm:min-h-9 max-sm:text-base" />
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2" htmlFor={`${uid}-scope`}>
                     {t("terms.scope")}
-                    <textarea id={`${uid}-scope`} rows={2} maxLength={2000} value={terms.scopeText}
+                    <Textarea id={`${uid}-scope`} rows={2} maxLength={2000} value={terms.scopeText}
                       onChange={(e) => setTerms((v) => ({ ...v, scopeText: e.target.value }))}
-                      className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" />
+                      className="max-sm:text-base" />
                   </label>
                 </fieldset>
                 <div>
                   <Button
+                    className="min-h-11"
                     type="button"
                     size="sm"
                     disabled={pending || !requestId}
                     onClick={submit}
                     data-testid={`team-offer-submit-${teamId}`}
                   >
-                    {pending ? t("submitting") : t("submit")}
+                    {pending ? t("submitting") : org ? t("orgSubmit") : t("submit")}
                   </Button>
                 </div>
               </div>
@@ -222,17 +237,17 @@ export function TeamDemandOfferForm({
                           <DisplayedWorkspaceField />
                           <input type="hidden" name="offerId" value={o.offerId} />
                           <input type="hidden" name="locale" value={locale} />
-                          <button
+                          <Button
                             type="submit"
                             data-testid={`team-offer-sent-message-${o.offerId}`}
-                            className="inline-flex min-h-11 sm:min-h-9 items-center gap-1 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue"
+                            variant="secondary" size="sm" className="min-h-11 gap-1"
                           >
                             <MessageSquare className="h-3.5 w-3.5" aria-hidden /> {t("sent.message")}
-                          </button>
+                          </Button>
                         </form>
                       ) : null}
                       {o.status === "offered" || o.status === "accepted" ? (
-                        <Button type="button" size="sm" variant="ghost" disabled={pending} onClick={() => withdraw(o.offerId)}>
+                        <Button className="min-h-11" type="button" size="sm" variant="ghost" disabled={pending} onClick={() => withdraw(o.offerId)}>
                           {t("sent.withdraw")}
                         </Button>
                       ) : null}

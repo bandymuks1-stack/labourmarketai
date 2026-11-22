@@ -1,6 +1,9 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 
 import {
   inviteAgencyWorkerAction,
@@ -304,36 +307,38 @@ export function AgencyWorkersSection({
         </header>
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-text-secondary">{labels.inviteEmailLabel}</span>
-          <input
+          <Input
             type="email"
             name="email"
             required
             placeholder={labels.inviteEmailPlaceholder}
-            className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+            className="max-sm:min-h-11 max-sm:text-base"
             data-testid="agency-workers-invite-email"
           />
         </label>
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-text-secondary">{labels.inviteNoteLabel}</span>
-          <textarea
+          <Textarea
             name="note"
             rows={2}
             maxLength={500}
-            className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+            className="max-sm:text-base"
             data-testid="agency-workers-invite-note"
           />
           <span className="text-meta text-text-muted">
             {labels.inviteNoteHint}
           </span>
         </label>
-        <button
+        <Button
           type="submit"
+          variant="primary"
+          size="sm"
           disabled={isPending}
-          className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+          className="min-h-11 self-start"
           data-testid="agency-workers-invite-submit"
         >
           {labels.inviteSubmit}
-        </button>
+        </Button>
         {outcomeLabel ? (
           <p
             className={

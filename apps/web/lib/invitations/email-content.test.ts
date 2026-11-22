@@ -89,7 +89,7 @@ describe("resolveRecipientLocale — validated server-side", () => {
   });
 
   it("an invalid or inactive requested locale falls back to the sender's", () => {
-    for (const bad of ["sv", "xx", "", null, undefined, "LT"]) {
+    for (const bad of ["da", "xx", "", null, undefined, "LT"]) {
       expect(resolveRecipientLocale(bad, "de"), String(bad)).toBe("de");
     }
   });

@@ -59,7 +59,8 @@ describe("one header for every dashboard route", () => {
   it("nothing in the header scrolls sideways or truncates a label", () => {
     expect(header).not.toMatch(/overflow-x-(auto|scroll)/);
     // The identity block never shrinks: the logo cannot be cut.
-    expect(header).toMatch(/order-1 flex flex-none items-center gap-2/);
+    // 4px on a phone, 8px from `md` (one-tap journal fits 320px, 2026-11-22).
+    expect(header).toMatch(/order-1 flex flex-none items-center gap-1 md:gap-2/);
     expect(header).toMatch(/whitespace-nowrap font-display/);
   });
 

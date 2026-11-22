@@ -178,7 +178,7 @@ export function classifyRefusal(reason: ApiIdentityFailure): AuthRefusal {
 export function wwwAuthenticateChallenge(
   origin: string,
   errorClass: ResourceServerAuthClass,
-  metadataPath: string = "/.well-known/oauth-protected-resource",
+  metadataPath = "/.well-known/oauth-protected-resource",
 ): string | null {
   const resource = `resource_metadata="${origin}${metadataPath}"`;
   switch (errorClass) {

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireSupabaseClientEnv } from "@/lib/env";
-import { CHATGPT_PROFILE_PATH } from "@/lib/mcp/chatgpt-profile";
-import { protectedResourceMetadata } from "@/lib/mcp/protected-resource-metadata";
+import { MCP_CHATGPT_RESOURCE_PATH, protectedResourceMetadata } from "@/lib/mcp/protected-resource-metadata";
 import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 
 export const runtime = "nodejs";
@@ -16,7 +15,7 @@ export const runtime = "nodejs";
 export async function GET(req: Request) {
   const { url } = requireSupabaseClientEnv();
   const origin = requestPublicOrigin(req);
-  return NextResponse.json(protectedResourceMetadata(origin, url, CHATGPT_PROFILE_PATH), {
+  return NextResponse.json(protectedResourceMetadata(origin, url, MCP_CHATGPT_RESOURCE_PATH), {
     headers: {
       "Cache-Control": "public, max-age=3600",
     },

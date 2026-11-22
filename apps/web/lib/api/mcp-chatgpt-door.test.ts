@@ -45,7 +45,10 @@ vi.mock("@/lib/capabilities/registry", () => {
     }),
   };
 });
-vi.mock("@/lib/mcp/toolset", () => ({
+// Partial: the REAL `profileCapabilities` decides what the curated door
+// lists, so this test proves the profile filter itself, not a stand-in.
+vi.mock("@/lib/mcp/toolset", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/mcp/toolset")>()),
   toolName: (id: string) => id.replace(/\./g, "_"),
   toolDefsOf: (caps: { id: string }[]) =>
     caps.map((c) => ({

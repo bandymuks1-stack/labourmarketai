@@ -1,9 +1,15 @@
 /**
- * WHICH THEME A PAGE OPENS IN when the person never chose one (owner decision
- * 2026-10-28): the PUBLIC site — landing, jobs, pricing, legal, sign-in and
- * sign-up, invitations — opens LIGHT; the signed-in workspace keeps its dark
- * default until the owner decides otherwise. A saved choice ("light"/"dark" in
- * the shared `theme` key) always wins, on every page.
+ * WHICH THEME A PAGE OPENS IN when the person never chose one.
+ *
+ * Owner decision 2026-11-15: a new account starts LIGHT — the signed-in
+ * workspace opens light too, as the public site (landing, jobs, pricing,
+ * legal, sign-in and sign-up, invitations) has since the owner decision of
+ * 2026-10-28. Dark stays one tap away (the avatar menu and the theme
+ * toggles), and a saved choice ("light"/"dark" in the shared `theme` key)
+ * always wins, on every page: a person who chose dark keeps dark.
+ *
+ * The per-area rule stays (the workspace pattern below), so a later owner
+ * decision can give one area its own default without a second mechanism.
  *
  * ONE rule, two readers: the pre-paint bootstrap (an inline script, so it is
  * built here as a string from the same pattern) and `<ThemeReapply/>`.
@@ -15,8 +21,13 @@ export const WORKSPACE_PATH_SOURCE = "^/[a-z]{2}/(dashboard|onboarding|cv)(/|$)"
 
 export type ThemeName = "light" | "dark";
 
+/** The signed-in workspace's default (owner decision 2026-11-15: light). */
+export const WORKSPACE_DEFAULT_THEME: ThemeName = "light";
+/** The public site's default (owner decision 2026-10-28: light). */
+export const PUBLIC_DEFAULT_THEME: ThemeName = "light";
+
 export function defaultThemeForPath(pathname: string): ThemeName {
-  return new RegExp(WORKSPACE_PATH_SOURCE).test(pathname) ? "dark" : "light";
+  return new RegExp(WORKSPACE_PATH_SOURCE).test(pathname) ? WORKSPACE_DEFAULT_THEME : PUBLIC_DEFAULT_THEME;
 }
 
 /** The saved choice when there is one, otherwise the page's default. */
@@ -31,6 +42,10 @@ export function resolveTheme(saved: string | null, pathname: string): ThemeName 
 export const THEME_BOOTSTRAP_SCRIPT =
   "(function(){var d=new RegExp(" +
   JSON.stringify(WORKSPACE_PATH_SOURCE) +
-  ").test(location.pathname)?'dark':'light';" +
+  ").test(location.pathname)?" +
+  JSON.stringify(WORKSPACE_DEFAULT_THEME) +
+  ":" +
+  JSON.stringify(PUBLIC_DEFAULT_THEME) +
+  ";" +
   "try{var s=localStorage.getItem('theme');var t=(s==='light'||s==='dark')?s:d;document.documentElement.dataset.theme=t;}" +
   "catch(e){document.documentElement.dataset.theme=d;}})();";

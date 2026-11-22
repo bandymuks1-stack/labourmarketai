@@ -11,7 +11,7 @@ import {
 } from "./email-confirm";
 
 const ORIGIN = "https://labourmarket.ai";
-const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 describe("parseEmailVerification", () => {
   it("accepts a token_hash + allowed type", () => {
@@ -140,5 +140,16 @@ describe("classifyExchangeFailure", () => {
       "exchange_failed",
     );
     expect(classifyExchangeFailure(null, true)).toBe("exchange_failed");
+  });
+});
+
+describe("classifyMissingCode — a callback reached with nothing to verify", () => {
+  it("on the e-mail confirmation return it is a re-sent link: sign in, not a fault", async () => {
+    const { classifyMissingCode } = await import("./email-confirm");
+    expect(classifyMissingCode(true)).toBe("confirm_link_opened");
+  });
+  it("anywhere else it stays a failed sign-in", async () => {
+    const { classifyMissingCode } = await import("./email-confirm");
+    expect(classifyMissingCode(false)).toBe("missing_code");
   });
 });

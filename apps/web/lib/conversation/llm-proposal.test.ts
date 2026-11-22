@@ -70,6 +70,29 @@ describe("the proposer is confined to the product's existing intents", () => {
     expect(ok({ kind: "action", intent: "figures", steps: [{ intent: "figures", run: true }, { intent: "projects" }] })).toBe(false);
   });
 
+  it("EMPTY IS ABSENT: null fields and an empty plan are 'not given', nothing else widens (Cloudflare Gemma 4, 2026-11-22)", () => {
+    // Verbatim replies from @cf/google/gemma-4-26b-a4b-it to ONE real
+    // production request; three failed the strict schema before this change.
+    const replies = [
+      '{"suggestion":true,"agent":"conversation_intent","confidence":"medium","evidence_refs":[],"missing_information":["work","order","company"],"needs_human_review":false,"blocked_claims":[],"data":{"kind":"action","intent":"offer-capacity","alternatives":["offer-value"],"steps":[]}}',
+      '{"suggestion":true,"agent":"conversation_intent","confidence":"medium","evidence_refs":[],"missing_information":["project","order","company"],"needs_human_review":false,"blocked_claims":[],"data":{"kind":"action","intent":"offer-capacity","alternatives":["offer-value"],"reference":null}}',
+      '{"suggestion":true,"agent":"conversation_intent","confidence":"medium","evidence_refs":[],"missing_information":["order","company"],"needs_human_review":false,"blocked_claims":[],"data":{"kind":"action","intent":"offer-capacity","alternatives":["offer-value"],"reference":"[[0]] tik [[1]] užsakymu iš [[2]]","steps":[]}}',
+      '{"suggestion":true,"agent":"conversation_intent","confidence":"high","evidence_refs":[],"missing_information":["skill","order","company"],"needs_human_review":false,"blocked_claims":[],"data":{"kind":"question","reference":"[[0]] [[1]] [[2]]"}}',
+    ];
+    for (const r of replies) expect(conversationIntentOutputSchema.safeParse(JSON.parse(r)).success, r).toBe(true);
+
+    const base = { suggestion: true, agent: "conversation_intent", confidence: "high", evidence_refs: [], missing_information: [], needs_human_review: false, blocked_claims: [] };
+    const ok = (data: unknown) => conversationIntentOutputSchema.safeParse({ ...base, data }).success;
+    expect(ok({ kind: "unsupported", intent: null, alternatives: null, reference: null, steps: null })).toBe(true);
+    expect(ok({ kind: "action", intent: "figures", steps: [] })).toBe(true);
+    // Still strict where it matters.
+    expect(ok({ kind: "action", intent: "figures", steps: [{ intent: "figures" }] })).toBe(false);
+    expect(ok({ kind: "action", intent: "", steps: [] })).toBe(false);
+    expect(ok({ kind: "question", reference: "" })).toBe(false);
+    expect(ok({ kind: "action", intent: "figures", answer: null })).toBe(false);
+    expect(ok({ kind: null })).toBe(false);
+  });
+
   it("the server action re-validates against the registry, needs a signed-in user, is rate-limited, and never writes or dispatches", () => {
     expect(ACTION.startsWith('"use server";')).toBe(true);
     expect(ACTION).toContain("supabase.auth.getUser()");
@@ -127,7 +150,8 @@ describe("the runtime side: one task, one grant, least privilege", () => {
   it("the grant table holds exactly the owner's dated, sourced, task-scoped Gemini grant", () => {
     // 2026-09-17 (RED-2): a second Gemini row exists for `translate_message`;
     // it is pinned in lib/guards/ai-data-egress.test.ts. THIS row is unchanged.
-    expect(AI_EGRESS_GRANTS).toHaveLength(2);
+    // 2026-11-22: a third row, Cloudflare for this same task (free-tier-chain.test.ts).
+    expect(AI_EGRESS_GRANTS).toHaveLength(3);
     const g = AI_EGRESS_GRANTS[0];
     expect(g.provider).toBe("gemini");
     expect(g.maxSensitivity).toBe("SENSITIVE_FREE_TEXT");

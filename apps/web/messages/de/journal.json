@@ -261,7 +261,8 @@
   "unnamedOrganization": {
     "company": "Unternehmen ohne Namen",
     "agency": "Agentur ohne Namen",
-    "other": "Organisation ohne Namen"
+    "other": "Organisation ohne Namen",
+    "ended": "Frühere Organisation ohne Namen"
   },
   "activeWorkspaceNoRelationship": "Sie handeln für {org}, aber es ist keine Arbeitsbeziehung mit {org} erfasst, daher wird sie hier nicht angeboten. Wählen Sie den Kontext, zu dem diese Arbeit wirklich gehört.",
   "project": "Projekt",
@@ -439,7 +440,16 @@
       "outcomeBlocked": "nicht bestätigt ({code})",
       "receipt": "Bestätigt: {title}",
       "receiptSkills": "{count, plural, one {# Fähigkeit} other {# Fähigkeiten}}",
-      "skillsUnavailable": "Die Fähigkeitenliste konnte nicht gelesen werden — der Tipp bestätigt nur den Eintrag selbst."
+      "skillsUnavailable": "Die Fähigkeitenliste konnte nicht gelesen werden — der Tipp bestätigt nur den Eintrag selbst.",
+      "projectFilterLabel": "Projekt",
+      "projectAll": "Alle Projekte ({n})",
+      "projectNone": "Ohne Projekt ({n})",
+      "projectUnnamed": "Projekt, Name nicht sichtbar",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Anzeigen",
+      "projectResult": "{shown} von {total} Einträgen angezeigt",
+      "projectOnCard": "Projekt: {name}",
+      "noProjectOnCard": "Ohne Projekt"
     },
     "loadFailed": "Die Prüfliste konnte nicht geladen werden. Das heißt nicht, dass nichts zu prüfen ist — bitte erneut versuchen."
   },
@@ -598,6 +608,13 @@
     "dayEmpty": "An diesem Tag gibt es keine Einträge.",
     "moreDays": "Der neueste Tag mit Einträgen wird gezeigt. Noch {count, plural, one {# Tag} other {# Tage}} mit Einträgen — Datum im Kalender wählen.",
     "periodEmpty": "In diesem Zeitraum gibt es keine Einträge."
+  },
+  "dayChoice": {
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "weekAgo": "Vor einer Woche",
+    "calendar": "Kalender",
+    "earlier": "Frühere Einträge"
   },
   "spreadsheet": {
     "title": "Tabellenmodus — mehrere Einträge auf einmal",

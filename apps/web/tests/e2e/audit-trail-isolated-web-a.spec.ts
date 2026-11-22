@@ -55,6 +55,12 @@ test("U-1. closing and reopening a need writes one audit row each, bound to the 
   );
   expect(req?.id, "the need is stored").toBeTruthy();
   state.requestId = req.id;
+  // The saved state's next step opens THIS need's candidates, not a need the
+  // scouting room picks by its own rule (employer-flow audit 2026-11-15).
+  await expect(
+    page.getByRole("main").getByTestId("demand-done-scouting-link"),
+    "the next step opens the need just saved",
+  ).toHaveAttribute("href", new RegExp(`/dashboard/company/scouting\\?request=${req.id}$`));
 
   await page.goto(`${BASE}/en/dashboard/company/scouting?request=${req.id}`);
   const controls = page.getByTestId("demand-lifecycle-controls");

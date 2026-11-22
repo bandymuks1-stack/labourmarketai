@@ -183,7 +183,7 @@ export async function JournalCalendar({
           <span
             key={iso}
             aria-hidden
-            className="py-1 text-center font-mono text-[0.625rem] uppercase tracking-label text-text-muted"
+            className="py-1 text-center font-mono text-meta uppercase tracking-label text-text-muted"
           >
             {weekdayFmt.format(new Date(`${iso}T00:00:00Z`)).slice(0, 2)}
           </span>
@@ -357,7 +357,7 @@ export async function JournalCalendar({
             key={period}
             href={`/${locale}/dashboard/journal/hours?period=${period}&date=${exportDay}`}
             download
-            className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-medium text-brand-blue hover:underline"
             data-testid={`journal-hours-export-${period}`}
           >
             {t(`exportPeriod.${period}`)}

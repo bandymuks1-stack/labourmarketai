@@ -5,6 +5,9 @@ import { z } from "zod";
 import type { CapabilityDescriptor } from "@/lib/capabilities/contract";
 
 import type { McpToolDef } from "./protocol";
+import { CHATGPT_TOOL_PROFILE } from "./chatgpt-profile";
+
+const CHATGPT_PROFILE_NAMES: ReadonlySet<string> = new Set(CHATGPT_TOOL_PROFILE);
 
 /** MCP tool names allow [a-zA-Z0-9_-]; capability ids use dots. */
 export const toolName = (capabilityId: string): string => capabilityId.replace(/\./g, "_");
@@ -24,6 +27,31 @@ function objectRoot(schema: Record<string, unknown>): Record<string, unknown> {
   );
   if (branches.length === 0 || !branches.every((b) => b?.type === "object")) return schema;
   return { ...schema, type: "object" };
+}
+
+/**
+ * WHICH TOOLS A DOOR LISTS. `full` is every exposed capability. `read` keeps a
+ * capability only when it is a read in every way the contract can say so:
+ * kind `read`, and annotations that claim no change and no destruction. A
+ * draft writes nothing either, but it mints a confirmation for a write, so it
+ * is not a read here.
+ */
+export type McpProfile = "full" | "read" | "chatgpt";
+
+export function isReadProfileCapability(c: CapabilityDescriptor): boolean {
+  return c.kind === "read" && c.annotations.readOnlyHint && !c.annotations.destructiveHint;
+}
+
+export function profileCapabilities(
+  capabilities: readonly CapabilityDescriptor[],
+  profile: McpProfile,
+): readonly CapabilityDescriptor[] {
+  if (profile === "read") return capabilities.filter(isReadProfileCapability);
+  // The curated ChatGPT profile: exactly the pinned list in
+  // `chatgpt-profile.ts`, in the registry's own order. A new registry
+  // capability never joins it by existing.
+  if (profile === "chatgpt") return capabilities.filter((c) => CHATGPT_PROFILE_NAMES.has(toolName(c.id)));
+  return capabilities;
 }
 
 /** The tool list a client is shown — derived from the capability registry. */

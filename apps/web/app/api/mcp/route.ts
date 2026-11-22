@@ -1,15 +1,14 @@
-import { createMcpDoor, FULL_DOOR_INSTRUCTIONS } from "@/lib/mcp/http-door";
+import { mcpDoor } from "@/lib/mcp/door";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * THE FULL MCP DOOR: every exposed capability, for every MCP client that
- * already connects here (the ChatGPT connector, the mobile app, the
- * production walks). The implementation is `lib/mcp/http-door.ts`; the
- * curated ChatGPT profile is the sibling door `/api/mcp/chatgpt`.
+ * MCP DOOR, full profile: every exposed capability, reads and writes.
+ * The door itself (identity, brake, receipts, brand) is `lib/mcp/door.ts`;
+ * the read-only profile is `app/api/mcp/read/route.ts`.
  */
-const door = createMcpDoor({ door: "/api/mcp", instructions: FULL_DOOR_INSTRUCTIONS });
+const door = mcpDoor("full");
 
 export const POST = door.POST;
 export const OPTIONS = door.OPTIONS;

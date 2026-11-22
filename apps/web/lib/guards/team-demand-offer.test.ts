@@ -196,6 +196,14 @@ describe("5. the application side is thin, RPC-only and registered", () => {
     expect(svc).not.toMatch(/matchTeamToNeed\([^)]*,[^)]*,/);
   });
 
+  it("a provider finds open needs where it looks for work: the services door carries the company offer", () => {
+    const page = read(join(WEB, "app/[locale]/dashboard/services/page.tsx"));
+    expect(page).toMatch(/<TeamDemandOfferForm teamId=\{employerCtx\.organizationId\} memberCount=\{0\} kind="organization" \/>/);
+    // the same authority as the People door (owner/admin), never a job title
+    expect(page).toMatch(/projectOrganizationAuthority\([\s\S]*?\)\.canManageInvitations/);
+    const areas = read(join(WEB, "lib/navigation/work-areas.ts"));
+    expect(areas).toMatch(/\{ id: "offer", href: "\/dashboard\/services"/);
+  });
   it("the offer control is mounted on the team panel", () => {
     const panel = read(join(WEB, "components/app/team-brigades-panel.tsx"));
     expect(panel).toMatch(/TeamDemandOfferForm/);
@@ -203,7 +211,7 @@ describe("5. the application side is thin, RPC-only and registered", () => {
 });
 
 describe("6. i18n - every shipped full locale carries the namespace with the same keys", () => {
-  const LOCALES = ["en", "lt", "de", "nl", "pl", "ru"];
+  const LOCALES = ["en", "lt", "de", "nl", "pl", "ru", "sv"];
   const flat = (o: unknown, prefix = ""): string[] =>
     typeof o === "object" && o !== null
       ? Object.entries(o as Record<string, unknown>).flatMap(([k, v]) => flat(v, `${prefix}${k}.`))
@@ -233,6 +241,26 @@ describe("6. i18n - every shipped full locale carries the namespace with the sam
     ]) {
       expect(refusal, code).toContain(code);
     }
+  });
+  it("every missing-data code the team match can emit has a label; no code is printed raw", () => {
+    const md = (ns("en") as { received: { missingData: Record<string, string> } }).received.missingData;
+    for (const code of ["need_not_structured", "no_team_members", "team_skills_not_stated"]) {
+      expect(Object.keys(md), code).toContain(code);
+    }
+    const card = read(join(WEB, "components/app/team-offers-received.tsx"));
+    // Criterion and missing-data codes go through a label lookup, never a raw join.
+    expect(card).not.toMatch(/match\.(missing|missingData|blockers)\.join\(/);
+    expect(card).toMatch(/useTranslations\("opportunities\.discovery\.criterion"\)/);
+  });
+  it("a company offer reads as a company: no member count, member skills or member-based fit", () => {
+    const card = read(join(WEB, "components/app/team-offers-received.tsx"));
+    expect(card).toMatch(/offer\.offerKind === "team" \? \(\s*<span[^>]*>\{t\("received\.members"/);
+    expect(card).toMatch(/offer\.offerKind === "organization" \? null : match \?/);
+    expect(card).toMatch(/t\("received\.noteCompany"\)/);
+    expect(card).toMatch(/t\("received\.messageCompany"\)/);
+    const form = read(join(WEB, "components/app/team-demand-offer-form.tsx"));
+    expect(form).toMatch(/org \? t\("orgSubmit"\) : t\("submit"\)/);
+    expect(form).toMatch(/org \? t\("orgPrivacy"\) : t\("privacy"\)/);
   });
   it('the product copy never uses the banned word "demo"', () => {
     for (const l of LOCALES) expect(JSON.stringify(ns(l)), l).not.toMatch(/\bdemo\b/i);

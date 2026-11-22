@@ -2,6 +2,9 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { proposeBookingAction, type BookingActionResult } from "@/lib/booking/booking-actions";
 import {
   PROPOSE_TIMEOUT_LABEL,
@@ -129,16 +132,14 @@ export function ProposeBookingButton({
   if (!open) {
     // Two literal test ids (one per variant) so the e2e orphan guard can see
     // both controls the walks press.
-    const openClass =
-      "rounded-md border border-brand-blue/40 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10";
     return variant === "rebook" ? (
-      <button type="button" onClick={() => setOpen(true)} className={openClass} data-testid="propose-again-open">
+      <Button type="button" variant="secondary" size="sm" onClick={() => setOpen(true)} className="min-h-11 w-fit" data-testid="propose-again-open">
         {labels.open}
-      </button>
+      </Button>
     ) : (
-      <button type="button" onClick={() => setOpen(true)} className={openClass} data-testid="propose-booking-open">
+      <Button type="button" variant="secondary" size="sm" onClick={() => setOpen(true)} className="min-h-11 w-fit" data-testid="propose-booking-open">
         {labels.open}
-      </button>
+      </Button>
     );
   }
 
@@ -153,42 +154,46 @@ export function ProposeBookingButton({
       </p>
       <label className="flex flex-col gap-1 text-meta text-text-muted">
         {labels.startDate}
-        <input
+        <Input
           type="date"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
           data-testid="propose-booking-start-date"
-          className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+          className="max-sm:min-h-11 max-sm:text-base"
         />
       </label>
       <label className="flex flex-col gap-1 text-meta text-text-muted">
         {labels.note}
-        <input
+        <Input
           type="text"
           maxLength={2000}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           data-testid="propose-booking-note"
-          className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+          className="max-sm:min-h-11 max-sm:text-base"
         />
       </label>
       <div className="flex items-center gap-2">
-        <button
+        <Button
           type="button"
+          variant="primary"
+          size="sm"
           disabled={pending}
           onClick={() => void send()}
           data-testid="propose-booking-send"
-          className="min-h-11 sm:min-h-0 rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+          className="min-h-11"
         >
           {pending ? labels.sending : labels.send}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => setOpen(false)}
-          className="min-h-11 sm:min-h-0 text-meta text-text-muted hover:text-text-secondary"
+          className="min-h-11"
         >
           {labels.cancel}
-        </button>
+        </Button>
       </div>
       {state === "unavailable" ? (
         <span className="text-meta text-text-muted" data-testid="propose-booking-unavailable">

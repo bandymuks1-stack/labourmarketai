@@ -12,6 +12,8 @@ import type {
   RecognizedCard,
   JobDemandFieldKey,
 } from "@/lib/market/recognition";
+import { Textarea } from "@/components/ui/Textarea";
+import { Button } from "@/components/ui/Button";
 
 /**
  * Offer–Demand recognizer (pre-search gate v1) — one entry point for "what do you
@@ -137,23 +139,23 @@ export function OfferDemandRecognizer() {
         >
           {t("pasteLabel")}
         </label>
-        <textarea
+        <Textarea
           id="recognizer-input"
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={4}
           placeholder={t("pastePlaceholder")}
-          className="w-full rounded-md border border-ink-500 bg-ink-900/60 p-3 text-sm leading-relaxed text-text-primary placeholder:text-text-muted focus:border-brand-blue focus:outline-none"
+          className="w-full max-sm:text-base"
         />
-        <button
+        <Button
           type="button"
           onClick={() => setCard(recognizeIntent(intent, { rawText: text }))}
           disabled={text.trim().length === 0}
           data-testid="recognizer-recognize"
-          className="self-start rounded-md border border-brand-blue bg-brand-blue/10 px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-brand-blue/20 disabled:cursor-not-allowed disabled:opacity-50"
+          variant="secondary" size="sm" className="min-h-11 self-start"
         >
           {t("recognizeCta")}
-        </button>
+        </Button>
       </div>
 
       {/* Recognition result — recognized / missing / risks / readiness / next. */}

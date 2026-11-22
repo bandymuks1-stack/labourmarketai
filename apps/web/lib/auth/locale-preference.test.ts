@@ -70,9 +70,9 @@ describe("resolvePostLoginLocale — the priority order", () => {
   });
 
   it("an inactive or invalid profile locale never overrides", () => {
-    // `sv` exists as a catalog but is NOT an active routed locale; routing
+    // `da` exists as a catalog but is NOT an active routed locale; routing
     // it would 404. Garbage values must be equally inert.
-    for (const bad of ["sv", "xx", "", "LT", "lt-LT"]) {
+    for (const bad of ["da", "xx", "", "LT", "lt-LT"]) {
       const d = resolvePostLoginLocale({
         cookieLocale: null,
         profileLocale: bad,

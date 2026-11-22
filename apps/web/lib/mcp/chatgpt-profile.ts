@@ -22,7 +22,7 @@ import type { McpToolDef } from "./protocol";
  * `chatgpt-profile.test.ts` — two edits on purpose, so the profile can never
  * widen by accident (a new capability in the registry does not appear here).
  */
-export const CHATGPT_PROFILE_PATH = "/api/mcp/chatgpt" as const;
+export { MCP_CHATGPT_RESOURCE_PATH as CHATGPT_PROFILE_PATH } from "./protected-resource-metadata";
 
 export const CHATGPT_TOOL_PROFILE = [
   // 1. Job search.

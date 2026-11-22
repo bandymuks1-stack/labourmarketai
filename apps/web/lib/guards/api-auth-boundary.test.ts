@@ -86,6 +86,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron) once payments are on — absent from it while they are off; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
   },
+  "cron/invitation-delivery-retry/route.ts": {
+    class: "public",
+    why: "Called only by the VPS (ops/vps/lm-invitation-delivery-retry.sh, scheduled solely after the owner installs /etc/cron.d/labourmarket-invitation-delivery); nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; health (default) sends nothing; retry re-sends at most 10 partner referrals whose own send was authorised, whose LAST failure was a confirmed temporary one and whose link was never opened, through the service-role-only reissue under the address lock; bounces reads delivery reports from the sender mailbox READ-ONLY (IMAP EXAMINE + BODY.PEEK) and marks only our own Message-IDs; the app itself never messages the owner (the VPS script hands new alerts to the Agentai OS project-event inbox). Answers counts, reason codes and alert codes only, no ids, no addresses.",
+  },
   "cron/referral-reprocess/route.ts": {
     class: "public",
     why: "Run BY HAND by the owner on the VPS (ops/vps/lm-referral-reprocess.sh) — never in the cron bundle; nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; dry_run by default, control = exactly one person, batch = at most 20. Every send goes through the ledgered provider path and the service-role-only reissue function re-checks consent, expiry, account and delivery. Answers counts and reason codes only, no ids, no addresses.",
@@ -122,6 +126,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Agentai OS re-verifies its LabourMarket.ai capability contract from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is aggregate integer COUNTS only (lib/api/capability-readback.ts: a fixed key list, everything else refused) — no row, name, id, email or address exists in it to leak.",
   },
+  "internal/registrations-daily/v1/route.ts": {
+    class: "public",
+    why: "Agentai OS reads one UTC day of NEW and ACTIVE counts for workers, employers, agencies, students and education institutions from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is REAL-population integer COUNTS only, 1–2 withheld (lib/api/registrations-daily.ts) — no row, name, id, email or per-person timestamp exists in it to leak.",
+  },
   "public/claims/v1/route.ts": {
     class: "public",
     why: "The public claims contract (lm-public-claims/v1) Agentai OS re-verifies marketing claims against. No identity exists or is read; the body is marketing copy already on public pages, resolved from the bundled message catalogs by lib/public-claims/registry.ts, plus the public plan price /pricing itself reads (getPlans → the anon-safe public_plans_v1 RPC) — nothing a person owns.",
@@ -154,9 +162,13 @@ const CLASSIFICATION: Record<
     class: "shared",
     why: "The MCP door for external clients (ChatGPT connector, future agents). Bearer is its primary transport by nature; it resolves identity through the one boundary and every tool call runs the caller's own RLS-scoped client via lib/capabilities.",
   },
+  "mcp/read/route.ts": {
+    class: "shared",
+    why: "The read-only profile of the same MCP door (lib/mcp/door.ts), for an app-directory review: same one identity boundary and brake, lists only kind=read capabilities and refuses every other name. Each tool runs on the caller's own RLS-scoped client.",
+  },
   "mcp/chatgpt/route.ts": {
     class: "shared",
-    why: "The curated ChatGPT door (2026-11-11): the same MCP door implementation (lib/mcp/http-door.ts) over a pinned 22-tool profile. Same boundary, same RLS-scoped capabilities; it narrows the tool list and never widens anything.",
+    why: "The curated ChatGPT profile of the same MCP door (lib/mcp/door.ts), over the pinned tool list in lib/mcp/chatgpt-profile.ts: same one identity boundary and brake, refuses every name outside the profile. Each tool runs on the caller's own RLS-scoped client; it narrows the tool list and never widens anything.",
   },
   "dashboard-search/route.ts": {
     class: "shared-blocked",
@@ -207,12 +219,11 @@ describe("one resolver, never nine parsers", () => {
   it("shared routes go through resolveApiIdentity and not the cookie client", () => {
     for (const [route, entry] of Object.entries(CLASSIFICATION)) {
       if (entry.class !== "shared") continue;
-      // An MCP route is a thin binding of the ONE door implementation; the
-      // door is what resolves identity, so the door is what is read.
-      const routeSrc = read(route);
-      const src = /createMcpDoor\(/.test(routeSrc)
-        ? routeSrc + readFileSync(join(APP_ROOT, "lib", "mcp", "http-door.ts"), "utf8")
-        : routeSrc;
+      // Every MCP route is three lines over one door module; the door is
+      // what must go through the boundary, so the door is what is read.
+      const src = /from "@\/lib\/mcp\/door"/.test(read(route))
+        ? readFileSync(join(APP_ROOT, "lib", "mcp", "door.ts"), "utf8")
+        : read(route);
       expect(src, `${route} must resolve identity through the boundary`).toMatch(
         /resolveApiIdentity/,
       );
