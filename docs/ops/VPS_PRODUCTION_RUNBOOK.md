@@ -21,7 +21,7 @@ Cost: 0 € on top of what already existed (VPS, Cloudflare Free, Supabase as be
 | Releases | `/root/lm-prod/releases/<sha>/` (standalone build, side by side), `/root/lm-prod/current` symlink | [`ops/vps/lm-deploy-receive.sh`](../../ops/vps/lm-deploy-receive.sh) |
 | Env | `/root/lm-prod/env` (600, 19 names, see §3); backups `/root/lm-prod/env.bak-*` | owner-run scripts only |
 | Cron | `/etc/cron.d/labourmarket` (**prepared, not installed** — §5) | [`ops/vps/labourmarket.cron`](../../ops/vps/labourmarket.cron), [`ops/vps/lm-cron.sh`](../../ops/vps/lm-cron.sh) |
-| Smoke | [`ops/vps/lm-smoke.sh`](../../ops/vps/lm-smoke.sh) (health, routes, OAuth PRM, MCP 401, resources, Agentai 5/5) | — |
+| Smoke | [`ops/vps/lm-smoke.sh`](../../ops/vps/lm-smoke.sh) **read-only** (2026-11-22): the release `current` points at, container health, local + public `/api/health` build = that release, routes, OAuth PRM, MCP 401, resources, Agentai healthy; `sh lm-smoke.sh <sha>` also asserts the expected release. It never starts or swaps a container (that is `lm-prod-run.sh` only); non-zero exit on any failure | — |
 
 Boot persistence (verified after the unplanned VPS reboot at 2026-10-17 16:36 UTC): `docker`,
 `nginx`, `cron` are `systemctl enabled`; the container restart policy brought it back healthy.
