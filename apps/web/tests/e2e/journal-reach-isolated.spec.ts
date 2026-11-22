@@ -129,8 +129,11 @@ test("R-3. the entry survives a validation error, in the readback, after a reloa
   await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
   await main.getByTestId("worklog-date").fill(future);
   await main.getByTestId("worklog-save").click();
+  // Preparing the confirmation is asynchronous: wait for its button or an
+  // early refusal, then confirm (the server's date rule refuses at the save).
   const confirm = main.getByTestId("worklog-confirm");
-  if (await confirm.isVisible({ timeout: 5_000 }).catch(() => false)) await confirm.click();
+  await expect(confirm.or(main.getByTestId("worklog-error"))).toBeVisible({ timeout: 30_000 });
+  if (await confirm.isVisible()) await confirm.click();
   await expect(main.getByTestId("worklog-error"), "R-3: the future day is refused on screen").toBeVisible({ timeout: 30_000 });
   await expect(main.getByTestId("worklog-flow"), "R-3: the readback stays open").toBeVisible();
   await expect(main.getByTestId("worklog-date"), "R-3: the day stays as entered").toHaveValue(future);
@@ -147,13 +150,14 @@ test("R-3. the entry survives a validation error, in the readback, after a reloa
   await main.getByTestId("journal-quick-record-restart").click({ timeout: 5_000 }).catch(() => {});
   await expect(main.getByTestId("journal-quick-record-text"), "R-3: the words survive the reload").toHaveValue(WORDS);
 
-  // Detailed form: the same refusal keeps the text.
-  await page.goto(`${BASE}/en/dashboard/journal?compose=full`);
+  // Detailed form: the same refusal keeps the text. Its compose stage has no
+  // date field; it takes the day from `?date=` (as the calendar does) and
+  // sends it with a direct save.
+  await page.goto(`${BASE}/en/dashboard/journal?compose=full&date=${future}`);
   const form = main.getByTestId("journal-compose-full");
   await expect(form).toBeVisible({ timeout: 60_000 });
   const text = form.locator("textarea").first();
   await text.fill(WORDS);
-  await form.locator('input[type="date"]').first().fill(future);
   await main.getByTestId("journal-save-entry").first().click();
   await expect(main.getByTestId("journal-save-error"), "R-3: the detailed form refuses the future day").toBeVisible({ timeout: 30_000 });
   await expect(text, "R-3: the detailed form keeps the text").toHaveValue(WORDS);
