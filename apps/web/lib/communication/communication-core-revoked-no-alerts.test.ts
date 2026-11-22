@@ -32,6 +32,9 @@ let participantFilters: Array<[string, string, unknown]> = [];
  *  ignores filters — the worst case the code has to survive. */
 function senderClient() {
   return {
+    // Not an open-need thread: the sender is not blinded (20261122160000).
+    rpc: async (fn: string) =>
+      fn === "open_need_viewer_blinded_v1" ? { data: false, error: null } : { data: null, error: { message: "x" } },
     from(table: string) {
       if (table === "conversation_participants") {
         const rows = [

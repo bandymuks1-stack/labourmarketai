@@ -21,7 +21,8 @@ describe("a removed participant's old thread link", () => {
   it("redirects to the inbox notice before any thread data is read", () => {
     const miss = THREAD.indexOf("if (!convRes.data) {");
     const redirectAt = THREAD.indexOf("communication?notice=unavailable");
-    const messagesAt = THREAD.indexOf('.from("conversation_messages")');
+    // The thread's messages are read through the masking view (20261122160000).
+    const messagesAt = THREAD.indexOf('.from("conversation_messages_visible_v1")');
     expect(miss).toBeGreaterThan(-1);
     expect(redirectAt).toBeGreaterThan(miss);
     expect(redirectAt).toBeLessThan(messagesAt);

@@ -25,7 +25,7 @@ function caller(s: Script): CommunicationCaller {
     from(table: string) {
       const chain: Record<string, unknown> = {};
       const filters: { profile?: string } = {};
-      for (const m of ["select", "in", "order", "limit"]) chain[m] = () => chain;
+      for (const m of ["select", "in", "order", "limit", "or"]) chain[m] = () => chain;
       chain.eq = (col: string, val: string) => {
         if (col === "profile_id") filters.profile = val;
         return chain;

@@ -349,10 +349,16 @@ describe("F-1 - conversation creation: the server decides, the database refuses 
   it("in the core, the service client is used ONLY to add the OTHER participants, after the authority gate", () => {
     const core = strip(rd("lib/communication/communication-core.ts", APP));
     const uses = core.match(/createAdminClient\(\)/g) ?? [];
-    expect(uses).toHaveLength(1);
+    // Two uses, each pinned: the participant insert after the authority gate,
+    // and (20261122160000) the server-only read of a hidden open-need
+    // client's recipients — a service_role-only function, read nothing else.
+    expect(uses).toHaveLength(2);
     expect(core.indexOf("isContactAuthority(authority)")).toBeGreaterThan(-1);
-    expect(core.indexOf("!isContactAuthority(authority)")).toBeLessThan(core.indexOf("createAdminClient()"));
     expect(core).toMatch(/createAdminClient\(\)\)\s*\.from\("conversation_participants"\)/);
+    expect(core).toMatch(/createAdminClient\(\)\)\.rpc\("conversation_live_recipients_v1"/);
+    const gate = core.indexOf("!isContactAuthority(authority)");
+    const participantUse = core.search(/createAdminClient\(\)\)\s*\.from\("conversation_participants"\)/);
+    expect(gate).toBeLessThan(participantUse);
   });
   it("the service client's whole footprint is ONE insert, with no read-back, and the grant is exactly that (INSERT, this table)", () => {
     const core = strip(rd("lib/communication/communication-core.ts", APP));
