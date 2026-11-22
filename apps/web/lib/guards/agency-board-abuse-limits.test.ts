@@ -45,7 +45,8 @@ describe("every board and offer path passes the limits", () => {
     const body = a.slice(a.indexOf("export async function submitOfferAction"), a.indexOf("export async function respondCandidateOfferAction"));
     expect(body).toContain('agencyBoardBurstLimited("offer", user.id)');
     expect(body).toContain('.eq("request_share_id", shareId)');
-    expect(body).toContain('.eq("created_by", user.id)');
+    expect(body).toContain('.eq("agency_company_id", agencyCompanyId)');
+    expect(body, "created_by is not readable after #3353's column grants").not.toContain('"created_by"');
     expect(body.indexOf("decideAgencyOffer(")).toBeLessThan(body.indexOf('"submit_agency_candidate_offer_v1"'));
     expect(body).toContain('if (!cap.allowed) return { status: "rate-limited" };');
     expect(body).not.toMatch(/verif/i);

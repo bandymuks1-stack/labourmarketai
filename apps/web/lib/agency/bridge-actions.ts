@@ -320,19 +320,42 @@ export async function submitOfferAction(
   } = await supabase.auth.getUser();
   if (!user) return { status: "forbidden" };
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const [onNeed, today] = await Promise.all([
-    rpc(supabase)
-      .from("agency_candidate_offers")
-      .select("id", { count: "exact", head: true })
-      .eq("request_share_id", shareId)
-      .eq("status", "offered")
-      .neq("worker_id", workerId),
-    rpc(supabase)
-      .from("agency_candidate_offers")
-      .select("id", { count: "exact", head: true })
-      .eq("created_by", user.id)
-      .gte("created_at", since),
-  ]).catch(() => [null, null] as const);
+  // The daily cap is per AGENCY (the share's connection names it) and reads
+  // only columns signed-in callers keep after #3353's column grants
+  // (agency_company_id, created_at — never created_by). R2 P2-1 on #3629.
+  const agencyCompanyId = await (async () => {
+    try {
+      const { data: share } = await rpc(supabase)
+        .from("agency_client_request_shares")
+        .select("connection_id")
+        .eq("id", shareId)
+        .maybeSingle();
+      if (!share?.connection_id) return null;
+      const { data: conn } = await rpc(supabase)
+        .from("agency_client_connections")
+        .select("agency_company_id")
+        .eq("id", share.connection_id)
+        .maybeSingle();
+      return typeof conn?.agency_company_id === "string" ? (conn.agency_company_id as string) : null;
+    } catch {
+      return null;
+    }
+  })();
+  const [onNeed, today] = agencyCompanyId
+    ? await Promise.all([
+        rpc(supabase)
+          .from("agency_candidate_offers")
+          .select("id", { count: "exact", head: true })
+          .eq("request_share_id", shareId)
+          .eq("status", "offered")
+          .neq("worker_id", workerId),
+        rpc(supabase)
+          .from("agency_candidate_offers")
+          .select("id", { count: "exact", head: true })
+          .eq("agency_company_id", agencyCompanyId)
+          .gte("created_at", since),
+      ]).catch(() => [null, null] as const)
+    : ([null, null] as const);
   const cap = decideAgencyOffer({
     burstLimited: await agencyBoardBurstLimited("offer", user.id),
     openOnNeed: onNeed && !onNeed.error && typeof onNeed.count === "number" ? onNeed.count : null,

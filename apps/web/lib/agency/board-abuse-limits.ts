@@ -10,7 +10,7 @@
  *     abuse, not a distributed quota — its own header says so);
  *   - caps counted from REAL rows (`agency_candidate_offers`, read with the
  *     caller's own session): open candidates per need, and offers per
- *     account per rolling 24 hours. A count that could not be read refuses
+ *     agency per rolling 24 hours. A count that could not be read refuses
  *     the offer (fail closed), as `lib/limits/request-rate-limits.ts` does.
  *
  * Verification is not a condition here: an unverified agency reads and
@@ -28,7 +28,7 @@ export const AGENCY_BOARD_LIMITS = {
   offerPerIp: { limit: 40, windowMs: 10 * 60 * 1000 },
   /** Open candidates one agency may have on one need at a time. */
   openOffersPerNeed: 10,
-  /** Offers one account may make in a rolling 24 hours. */
+  /** Offers one agency may make in a rolling 24 hours. */
   offersPerDay: 50,
 } as const;
 
@@ -40,7 +40,7 @@ export function decideAgencyOffer(input: {
   readonly burstLimited: boolean;
   /** Open offers of this agency on this need, other than this worker (null = unread). */
   readonly openOnNeed: number | null;
-  /** Offers this account made in the last 24 hours (null = unread). */
+  /** Offers this agency made in the last 24 hours (null = unread). */
   readonly last24h: number | null;
 }): OfferCapDecision {
   if (input.burstLimited) return { allowed: false, reason: "burst" };
