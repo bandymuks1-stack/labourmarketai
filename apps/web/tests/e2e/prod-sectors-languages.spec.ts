@@ -66,3 +66,41 @@ for (const day of DAYS) {
     await ctx.close();
   });
 }
+
+// ── Row 8.2: the exact sentences the 2026-10-24 local review misread ─────────
+// (lib/journal/journal-six-locale-data-path.test.ts pins the parser; this
+// proves the same day reads right in PRODUCTION, end to end in the UI). The
+// step only asks the journal to understand the day and reads the draft: it
+// never saves, so nothing is written.
+const MISREAD_DAY: Record<string, { browserLocale: string; text: string }> = {
+  lt: { browserLocale: "lt-LT", text: "šiandien 6 valandas mūrijau blokelių sieną objekte" },
+  en: { browserLocale: "en-GB", text: "today I laid a block wall on site for 6 hours" },
+  ru: { browserLocale: "ru-RU", text: "сегодня 6 часов клал стену из блоков на объекте" },
+  nl: { browserLocale: "nl-NL", text: "vandaag 6 uur een blokkenmuur gemetseld op de bouwplaats" },
+  de: { browserLocale: "de-DE", text: "heute 6 Stunden eine Blockmauer auf der Baustelle gemauert" },
+  pl: { browserLocale: "pl-PL", text: "dzisiaj przez 6 godzin murowałem ścianę z bloczków na budowie" },
+};
+
+for (const [locale, day] of Object.entries(MISREAD_DAY)) {
+  test(`8.2 ${locale}: a generic place word names no site, the 6 hours stay with the masonry`, async ({ browser }) => {
+    const ctx = await browser.newContext({ storageState: state("worker"), locale: day.browserLocale });
+    const page = await ctx.newPage();
+    await page.goto(`/${locale}/dashboard/journal`);
+    await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+    const main = page.getByRole("main");
+    await main.getByTestId("journal-quick-record-text").fill(day.text);
+    await main.getByTestId("journal-quick-record-understand").click();
+    await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 45_000 });
+    await chooseWorkContextIfAsked(page, /QA-SYNTHETIC Alfa/);
+    const site = await main.getByTestId("worklog-site").inputValue();
+    const record = main.getByTestId("worklog-record");
+    const recordText = (await record.count()) ? (await record.innerText()).replace(/\s+/g, " ") : "(no record)";
+    const unrecognised = (await record.count()) ? await record.locator("span.ml-1").count() : -1;
+    console.info(`[8.2] ${locale}: site="${site}" record="${recordText.slice(0, 120)}" unrecognised-fragments=${unrecognised}`);
+    expect(site, "a generic place word is never taken as the site name").toBe("");
+    expect(recordText, "the record carries the six hours").toMatch(/\b6\b/);
+    expect(unrecognised, "no fragment reads 'kind of work not recognised'").toBe(0);
+    await ctx.close();
+  });
+}
+

@@ -138,7 +138,22 @@ export type LivingCvSkillsData = {
     readonly verified: boolean;
     readonly source: string | null;
     readonly verifiedAt: string | null;
+    /** The journal's own figures for this skill (P0-B parity with the web
+     *  Living CV): own hours, involved-but-unattributed time (never summed), entries, days, evidence tier. `null` = unread. Optional
+     *  so an older server stays readable. */
+    readonly practice?: {
+      readonly attributedHours: number;
+      readonly confirmedHours: number;
+      readonly involvedUnattributedHours: number;
+      readonly entries: number;
+      readonly days: number;
+      readonly firstWorkedDay: string | null;
+      readonly lastWorkedDay: string | null;
+      readonly tier: string | null;
+    } | null;
   }[];
+  /** `unavailable` = the journal could not be read (unknown, never zero). */
+  readonly practiceStatus?: "known" | "unavailable";
 };
 
 /**
@@ -192,3 +207,634 @@ export type ContextSwitchData =
       readonly options: readonly { readonly id: string; readonly label: string }[];
       readonly note: string;
     };
+
+/**
+ * `interest.express_draft` — the SAME two-answer shape as the journal draft.
+ * Called with no `requestId` it answers with the needs this account can SEE
+ * (its own opportunity board, under its own RLS) as labelled options and
+ * mints no token; called with one of those ids it answers with a preview and
+ * a one-time token. Neither answer sends anything. A refusal
+ * (`no_visible_demand`, `no_worker_profile`) is a finding the screen names.
+ */
+export type InterestOption = {
+  readonly id: string;
+  readonly label: string;
+};
+
+export type InterestDraftPreview = {
+  readonly requestId: string;
+  /** The server's label for the need — never composed on the device. */
+  readonly demandLabel: string;
+  readonly note: string | null;
+  /** HONEST repeat: the domain refreshes a repeat express and keeps the
+   *  status; the person is told before confirming that it is a repeat. */
+  readonly alreadyExpressed: boolean;
+};
+
+export type InterestDraftData =
+  | {
+      readonly status: "demand_choice_required";
+      readonly options: readonly InterestOption[];
+      readonly note: string;
+    }
+  | {
+      readonly preview: InterestDraftPreview;
+      readonly confirmationToken: string;
+      readonly note: string;
+    };
+
+/** `interest.express_confirm` — the canonical express-interest write. */
+export type InterestConfirmData = {
+  readonly status: string;
+  readonly structuredDestination: string;
+};
+
+/**
+ * `workforce.availability` — the caller's active roster over the next 7
+ * days in three honest states. COMMITTED IS NOT UNAVAILABLE: `constraint`
+ * and `overridable` carry the difference (SEP-2), and `absencesKnown` /
+ * `commitmentsKnown` say which inputs actually answered, so an unread
+ * source is never shown as "nobody is busy" (SEP-7). Refused outside an
+ * employer workspace (`personal_workspace`, `no_organization`,
+ * `no_company_context`, `needs_migration`).
+ */
+export type WorkforceAvailabilityData = {
+  readonly actingFor: string;
+  readonly from?: string;
+  readonly to?: string;
+  readonly rosterTotal: number;
+  readonly rows: readonly {
+    readonly label: string;
+    readonly state: "free" | "committed" | "unavailable";
+    readonly constraint: "none" | "commitment" | "hard_constraint";
+    readonly overridable: boolean;
+    readonly notFreeUntil: string | null;
+    readonly committedTo: string | null;
+  }[];
+  readonly absencesKnown?: boolean;
+  readonly commitmentsKnown?: boolean;
+  readonly note?: string;
+};
+
+/**
+ * `jobs.search` / `jobs.get` — the PUBLIC vacancy board in its anonymous
+ * projection (the database function enumerates the safe columns; no title,
+ * employer, place, source or application link ever reach a client here).
+ * `webPath` is the member page for the signed-in person's browser, where the
+ * full details live — this app does not re-derive the member projection.
+ * `not_provisioned` and a timeout are refusals by name (`needs_migration`,
+ * `unavailable`), never an empty board (#1314).
+ */
+export type PublicJob = {
+  readonly id: string;
+  readonly professionSlug: string | null;
+  readonly occupation: string | null;
+  readonly employmentForm: string | null;
+  readonly workingTime: string | null;
+  readonly positions: number | null;
+  readonly compensationCurrency: string | null;
+  readonly compensationMin: number | null;
+  readonly compensationMax: number | null;
+  readonly sourceLanguage: string | null;
+  readonly publishedAt: string | null;
+  readonly webPath: string;
+};
+
+export type JobsSearchData = {
+  readonly status: "ok";
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly hasMore: boolean;
+  readonly jobs: readonly PublicJob[];
+};
+
+export type JobsGetData = { readonly job: PublicJob };
+
+/**
+ * `demand.create_draft` → `demand.create_confirm` — a worker-need for the
+ * organization the caller is ACTING FOR. The preview names that organization
+ * (the server's word), the token binds the exact draft; confirming creates
+ * the demand on the one canonical intake. Refused by name outside an employer
+ * workspace (`personal_workspace`, `no_organization`, `no_company_context`),
+ * and `over_open_need_limit` when the plan's active-position limit is reached.
+ */
+export type DemandUrgency = "flexible" | "this_week" | "urgent";
+
+export type DemandDraftFields = {
+  readonly description: string;
+  /** Where the work is: a country name in any supported language or an ISO
+   *  code; the server resolves it (`resolveCountryCode`), as the web chat does. */
+  readonly country: string;
+  readonly role?: string;
+  readonly location?: string;
+  readonly urgency?: DemandUrgency;
+  readonly teamSize?: number;
+};
+
+export type DemandDraftPreview = {
+  readonly actingFor: string;
+  readonly intent: string;
+  readonly role: string | null;
+  readonly description: string;
+  readonly teamSize: number | null;
+  readonly country: string | null;
+  readonly workType: string | null;
+  readonly urgency: string | null;
+};
+
+export type DemandCreateDraftData = {
+  readonly preview: DemandDraftPreview;
+  readonly confirmationToken: string;
+  readonly note: string;
+};
+
+export type DemandCreateConfirmData = {
+  readonly status: string;
+  readonly requestId: string;
+  readonly actingFor: string;
+  readonly structuredDestination: string;
+};
+
+/**
+ * `journal.correct_draft` / `journal.correct_confirm` — correcting one of the
+ * caller's OWN live entries (the web journal's edit, the same atomic
+ * supersede). The draft writes nothing and returns the entry BEFORE and
+ * AFTER — hours by the canonical work-time rule on both sides, so a person
+ * sees what their total will do before saving — and a one-time token bound
+ * to the exact change and the journal's head.
+ */
+export type JournalCorrectionChange = {
+  readonly entryId: string;
+  readonly notes?: string;
+  readonly workDate?: string;
+  /** A new site; `null` removes it; absent keeps the stored one. */
+  readonly siteName?: string | null;
+};
+
+export type JournalCorrectionSide = {
+  readonly notes: string;
+  readonly workDate: string | null;
+  readonly siteName: string | null;
+  readonly hours: number;
+  readonly output: { readonly value: number; readonly unitSlug: string } | null;
+};
+
+export type JournalCorrectDraftData = {
+  readonly preview: {
+    readonly entryId: string;
+    readonly before: JournalCorrectionSide;
+    readonly after: JournalCorrectionSide;
+    /** A confirmed entry keeps its confirmation; the correction becomes a
+     *  new, unconfirmed version that replaces it in every total. */
+    readonly wasConfirmed: boolean;
+  };
+  readonly confirmationToken: string;
+  readonly note: string;
+};
+
+export type JournalCorrectConfirmData = {
+  readonly entryId: string;
+  readonly correctedEntryId: string;
+  readonly wasConfirmed: boolean;
+  readonly skills: JournalConfirmData["skills"];
+};
+
+/**
+ * `conversation.list` / `conversation.get` — the caller's own in-app
+ * conversations (those they participate in, under their RLS), and the latest
+ * messages of one, oldest first. `withName` is the other party's name only
+ * when the product may show it.
+ */
+export type ConversationListData = {
+  readonly conversations: readonly {
+    readonly conversationId: string;
+    readonly subject: string | null;
+    readonly kind: string;
+    readonly withName: string | null;
+    readonly lastActivityAt: string;
+  }[];
+};
+
+export type ConversationMessage = {
+  readonly id: string;
+  readonly fromMe: boolean;
+  readonly body: string;
+  readonly language: string | null;
+  readonly at: string;
+};
+
+export type ConversationGetData = {
+  readonly conversation: {
+    readonly id: string;
+    readonly subject: string | null;
+    readonly kind: string;
+  };
+  readonly messages: readonly ConversationMessage[];
+};
+
+/**
+ * `message.send_draft` / `message.send_confirm` — one in-app message, never
+ * email or SMS. The draft sends NOTHING: it checks the contact permission and
+ * mints a token bound to the exact text and the conversation's current last
+ * message (a message arriving in between voids it).
+ */
+export type MessageSendDraftData = {
+  readonly preview: {
+    readonly conversation: "existing" | "new";
+    readonly permission: string;
+    readonly subject: string | null;
+    readonly body: string;
+  };
+  readonly confirmationToken: string;
+  readonly note: string;
+};
+
+export type MessageSendConfirmData = {
+  readonly status: "sent";
+  readonly conversationId: string;
+  readonly readBack: {
+    readonly id: string;
+    readonly sentAt: string;
+    readonly bodyMatches: boolean;
+  } | null;
+};
+
+/**
+ * `notification.list` — the caller's in-app notifications, newest first,
+ * with read state. `type` is the server's RENDERED type key (`event_<type>`,
+ * or a focused variant such as `event_weekly_digest_journal`), so the label
+ * says what the row truthfully is; `href` is the web surface the event is
+ * about. Push is OFF (owner decision, no vendor): this list is read, never
+ * delivered.
+ */
+export type NotificationItem = {
+  readonly id: string;
+  readonly type: string;
+  readonly created_at: string;
+  readonly read_at: string | null;
+  readonly href?: string;
+};
+
+export type NotificationListData = { readonly items: readonly NotificationItem[] };
+
+/**
+ * `worker.projects.list` — the projects the caller is assigned to, the same
+ * read the worker's project page uses (RLS-scoped to their own assignments):
+ * active first, at most a handful, each with what the project still needs
+ * from THIS person (the manager's open checklist rows, labels verbatim) and
+ * the manager's latest instruction. `kind: "empty"` is a LOADED answer of
+ * no assignments; a failed read arrives as a failure, never as empty.
+ */
+export type WorkerProjectAsk = {
+  readonly itemKey: string;
+  readonly label: string;
+  readonly status: "needed" | "missing" | "rejected" | "expired";
+};
+
+export type WorkerProject = {
+  readonly projectId: string;
+  readonly title: string;
+  readonly place: string | null;
+  readonly assignmentStatus: "active" | "ended";
+  readonly asks: readonly WorkerProjectAsk[];
+  /** Every open ask; `asks` names only the first few. Absent from a server
+   *  older than the field: then only `asks.length` is known. */
+  readonly asksTotal?: number;
+  /** Whether the asks are a real answer: "ok" = read (empty = nothing
+   *  open); "unavailable" = the read failed; "not_read" = not asked (an
+   *  ended assignment). Absent from an older server: then an empty list is
+   *  NOT known to be empty. */
+  readonly asksRead?: "ok" | "unavailable" | "not_read";
+  /** `asksTotal` is a lower bound. */
+  readonly asksTotalAtLeast?: boolean;
+  readonly instruction: {
+    readonly conversationId: string;
+    readonly authorName: string | null;
+    readonly text: string;
+  } | null;
+};
+
+/** All asks still open on a project: the server's total, never fewer than
+ *  the asks it named. */
+export function asksTotal(p: WorkerProject): number {
+  return Math.max(p.asksTotal ?? 0, p.asks.length);
+}
+
+/** The total as shown: "N+" when the server could only count a lower bound. */
+export function asksTotalLabel(p: WorkerProject): string {
+  return `${asksTotal(p)}${p.asksTotalAtLeast === true ? "+" : ""}`;
+}
+
+/** What may be said about the asks: only a COMPLETE read checklist may say
+ *  "none". "incomplete" = the read answered but hit its row cap
+ *  (`asksTotalAtLeast`), so a project with no row in it may still have some. */
+export function asksState(p: WorkerProject): "ok" | "unavailable" | "not_read" | "incomplete" {
+  if (p.asks.length > 0) return "ok";
+  const read = p.asksRead ?? "unavailable";
+  if (read === "ok" && p.asksTotalAtLeast === true) return "incomplete";
+  return read;
+}
+
+export type WorkerProjectsData =
+  | {
+      readonly kind: "ok";
+      readonly projects: readonly WorkerProject[];
+      readonly activeCount: number;
+    }
+  | { readonly kind: "empty" };
+
+// ── offers: proposals and invitations addressed to me ─────────────────────
+// booking.list and invitations.list are the web pages' own reads; the answer
+// goes through worker.respond-booking / worker.respond-invitation, the same
+// prepare → confirm pair the web chat card runs. Nothing new on the server.
+
+/** One booking row as `booking.list` returns it (lib/booking BookingRow). */
+export type BookingOffer = {
+  readonly id: string;
+  readonly status: "proposed" | "accepted" | "declined" | "withdrawn" | "expired";
+  readonly startDate: string | null;
+  readonly expectedEndDate: string | null;
+  readonly roleText: string | null;
+  readonly note: string | null;
+  readonly proposerName: string | null;
+  readonly responseDeadlineDate: string | null;
+};
+
+export type BookingListData = {
+  readonly kind: "ok";
+  readonly incoming: readonly BookingOffer[];
+  readonly outgoing: readonly BookingOffer[];
+};
+
+/** The server's own answer key: exactly the respond input minus `decision`. */
+export type InvitationRef =
+  | { readonly source: "invitation"; readonly invitationId: string }
+  | { readonly source: "company_roster" | "agency_roster"; readonly orgId: string };
+
+export type InvitationOffer = {
+  readonly ref: InvitationRef;
+  /** What accepting makes the person: the web's own two fields
+   *  (`invitations.list`), e.g. employee vs. intern of the same organization. */
+  readonly invitationType?: string | null;
+  readonly relationshipSlug?: string | null;
+  readonly organizationName: string | null;
+  readonly projectTitle: string | null;
+  readonly inviterName: string | null;
+  readonly personalMessage: string | null;
+  readonly expiresAt: string | null;
+};
+
+export type InvitationsListData =
+  | { readonly kind: "ok"; readonly items: readonly InvitationOffer[]; readonly total: number }
+  | { readonly kind: "empty" };
+
+/** A bridged prepare step: the exact input to confirm with, and its token. */
+export type RespondPrepareData = {
+  readonly input: unknown;
+  readonly confirmationToken: string;
+};
+
+/**
+ * `cv.verified.get` — the person's Living CV as the printable CV page renders
+ * it (`lib/cv-export/verified-cv.ts`, `buildVerifiedCv`). Only the parts the
+ * phone shows are typed; the rest is ignored, never re-derived.
+ */
+export type VerifiedCvWorkRow = {
+  readonly id: string | null;
+  readonly title: string | null;
+  readonly orgName: string | null;
+  /** Paid work vs a placement or volunteering — decided by the relationship. */
+  readonly kind: string;
+  readonly startedAt: string | null;
+  readonly endedAt: string | null;
+};
+
+export type VerifiedCvLanguageRow = { readonly lang: string; readonly level: string };
+
+export type VerifiedCvEducationRow = {
+  readonly institutionName: string;
+  readonly programOrField: string | null;
+  readonly educationTypeSlug: string;
+  readonly startYear: number | null;
+  readonly endYear: number | null;
+  readonly isCurrent: boolean;
+};
+
+export type VerifiedCvGetData =
+  | {
+      readonly ok: true;
+      readonly cv: {
+        readonly workHistory: readonly VerifiedCvWorkRow[];
+        readonly languages: readonly VerifiedCvLanguageRow[];
+        readonly education: readonly VerifiedCvEducationRow[];
+      };
+    }
+  | { readonly ok: false; readonly code: "not_authenticated" | "no_worker" };
+
+/** A one-step worker action (`worker.add-work-history`, `worker.add-language`):
+ *  the bridge answers with the action id and whatever the action returned. */
+export type WorkerActionData = { readonly action: string };
+
+/** `demand.list` — the needs of the organization the person acts for. */
+export type DemandListNeed = {
+  readonly id: string;
+  readonly title: string | null;
+  readonly status: string | null;
+  readonly role: string | null;
+  readonly location: string | null;
+  readonly headcount: number | null;
+  /** UNKNOWN ≠ ZERO: null when the count could not be read. */
+  readonly interestedPeople: number | null;
+  readonly shortlisted: number | null;
+};
+
+export type DemandListData = {
+  readonly actingFor: string;
+  readonly needs: readonly DemandListNeed[];
+};
+
+export type MatchStatus = "strong" | "possible" | "weak" | "insufficient_data";
+
+export type ShortlistStatus = "saved" | "interested" | "not_fit" | "reviewed";
+
+/** `candidate.search` — anonymized candidates for ONE need (no name, no
+ *  contact), ranked by the web scouting page's own match. */
+export type CandidateRow = {
+  readonly workerId: string;
+  readonly preview: { readonly anonymizedLabel: string };
+  readonly match: {
+    readonly status: MatchStatus;
+    readonly evidence: {
+      readonly matchedManagerConfirmed: number;
+      readonly matchedJournalSupported: number;
+      readonly matchedSelfDeclared: number;
+    };
+  };
+  readonly canContact: boolean;
+  readonly shortlistStatus: ShortlistStatus | null;
+};
+
+export type CandidateSearchData = {
+  readonly actingFor: string;
+  readonly need: { readonly id: string; readonly title: string | null; readonly status: string | null };
+  readonly totalCandidates: number;
+  readonly candidates: readonly CandidateRow[];
+};
+
+/** `shortlist.add_draft` — the preview of the decision and its one-time token. */
+export type ShortlistDraftData = {
+  readonly preview: {
+    readonly actingFor: string;
+    readonly need: { readonly id: string; readonly title: string | null };
+    readonly workerId: string;
+    readonly decision: ShortlistStatus;
+  };
+  readonly confirmationToken: string;
+};
+
+/**
+ * `client.agency_offers.get` — the employer's open agency candidate offers and
+ * the brigades / companies offered for its needs (`lib/conversation/
+ * client-offers-contract.ts`). No worker name: the read never returns one.
+ */
+export type ClientAgencyOffer = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+  readonly agencyName: string;
+  readonly note: string | null;
+  readonly createdAt: string;
+};
+
+export type ClientTeamOffer = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+  readonly teamName: string;
+  readonly status: "offered" | "accepted" | "assigned";
+  readonly memberCount: number;
+  readonly offeredAt: string;
+};
+
+export type ClientOffersData = {
+  readonly offers: readonly ClientAgencyOffer[];
+  readonly teamOffers: readonly ClientTeamOffer[];
+  readonly openDemands: number;
+};
+
+/**
+ * `education.workspace.get` — an education organization's programmes, cohorts
+ * and the learners it may assign (`lib/conversation/education-workspace-contract.ts`).
+ * `not-institution` arrives as data; an unreadable workspace arrives as a failure.
+ */
+export type EducationCohort = {
+  readonly id: string;
+  readonly name: string;
+  /** null: membership is not visible to this role — unknown, never 0. */
+  readonly memberCount: number | null;
+};
+
+export type EducationProgramme = {
+  readonly id: string;
+  readonly name: string;
+  readonly demandCount: number | null;
+  readonly cohorts: readonly EducationCohort[];
+};
+
+export type EducationWorkspaceData =
+  | {
+      readonly kind: "ok";
+      readonly organizationId: string;
+      readonly programmes: readonly EducationProgramme[];
+      readonly assignable: readonly { readonly profileId: string; readonly label: string }[];
+      readonly membersVisible: boolean;
+    }
+  | { readonly kind: "not-institution" };
+
+/**
+ * `agency.clients.get` — a staffing agency's client bridge
+ * (`lib/conversation/agency-workspace-contract.ts`): the needs clients shared,
+ * the agency's OWN roster (labels as the web's agency bridge shows them) and
+ * its proposals. `not-agency` arrives as data; an unreadable bridge as a failure.
+ */
+export type AgencySharedNeed = { readonly shareId: string; readonly requestId: string; readonly title: string };
+export type AgencyRosterWorker = { readonly workerId: string; readonly label: string };
+export type AgencyProposal = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly title: string;
+  readonly workerLabel: string;
+  readonly stageLabel: string;
+  readonly decisionLabel: string | null;
+  readonly offerStatus: string;
+};
+export type AgencyClientsData =
+  | {
+      readonly kind: "ok";
+      readonly agencyCompanyId: string;
+      readonly shared: readonly AgencySharedNeed[];
+      readonly roster: readonly AgencyRosterWorker[];
+      readonly progress: readonly AgencyProposal[];
+    }
+  | { readonly kind: "not-agency" };
+
+/**
+ * journal.review_queue.get (`apps/web/lib/capabilities/employer-operations-
+ * capabilities.ts`): the work entries waiting for the caller's decision. An
+ * entry here is the person's own record — not rejected and not verified.
+ */
+export type JournalReviewEntry = {
+  readonly entryId: string;
+  readonly person: { readonly workerProfileId: string | null; readonly name: string | null };
+  readonly text: string | null;
+  readonly projectId: string | null;
+  readonly writtenAt: string;
+};
+export type JournalReviewQueueData = { readonly pending: readonly JournalReviewEntry[]; readonly total: number };
+/** `REVIEW_DECISIONS` in `apps/web/lib/journal/review-status.ts`. */
+export type JournalReviewDecision = "approved" | "changes_requested" | "rejected";
+
+/**
+ * client.agency_connections.get (`apps/web/lib/conversation/client-bridge-
+ * contract.ts`, kind "ok"): the agency invitations waiting for this company's
+ * answer, and its open needs not yet shared with a connected agency.
+ */
+export type ClientAgencyInvite = { readonly connectionId: string; readonly agencyName: string; readonly createdAt: string };
+export type ClientAgencyShareable = {
+  readonly connectionId: string;
+  readonly agencyName: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+};
+export type ClientAgenciesData = {
+  readonly kind: "ok";
+  readonly invites: readonly ClientAgencyInvite[];
+  readonly shareable: readonly ClientAgencyShareable[];
+  readonly activeConnections: number;
+};
+
+/**
+ * absence.mine.list / absence.pending_review.list (`apps/web/lib/leave/
+ * absences.ts`, types in absences-model.ts). `workerId` is the caller's own
+ * worker record — the one absence.request needs.
+ */
+export type AbsenceType = "annual_leave" | "sickness" | "unpaid" | "training" | "other";
+export type AbsenceStatus = "requested" | "approved" | "rejected" | "cancelled";
+export type WorkerAbsence = {
+  readonly id: string;
+  readonly workerId: string;
+  readonly workerName: string | null;
+  readonly absenceType: AbsenceType;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly halfDay: boolean;
+  readonly note: string | null;
+  readonly status: AbsenceStatus;
+};
+export type MyAbsencesData =
+  | { readonly applied: false }
+  | { readonly applied: true; readonly workerId: string | null; readonly absences: readonly WorkerAbsence[] };
+export type ManagerAbsencesData =
+  | { readonly applied: false }
+  | { readonly applied: true; readonly pending: readonly WorkerAbsence[] };

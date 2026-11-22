@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
-import { Link } from "@/lib/i18n/navigation";
 import { PersonPresence } from "@/components/app/work-world/primitives";
 import { readInstitutionLearners } from "@/lib/education/institution-learners";
 import { OUTCOMES_K_ANONYMITY_FLOOR, readInstitutionLearnerOutcomes } from "@/lib/education/institution-outcomes";
@@ -113,11 +112,15 @@ export async function InstitutionLearnersSection({
                       built ONLY from what the institution typed itself — the
                       name it entered, the e-mail beneath it — never from the
                       learner's profile (least-privilege ruling 2026-08-27). */}
-                  <PersonPresence
-                    name={row.invitedName ?? row.invitedEmail}
-                    role={row.invitedName ? row.invitedEmail : null}
-                    size={28}
-                  />
+                  {/* min-w-0: a long e-mail used to push the status past the
+                      phone's right edge (owner phone report 2026-11-20). */}
+                  <div className="min-w-0 flex-1">
+                    <PersonPresence
+                      name={row.invitedName ?? row.invitedEmail}
+                      role={row.invitedName ? row.invitedEmail : null}
+                      size={28}
+                    />
+                  </div>
                   <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(
                       row.status === "accepted"
@@ -138,17 +141,6 @@ export async function InstitutionLearnersSection({
         </>
       )}
 
-      {/* Deep link straight into the ONE invitation panel with the right
-          type, organisation and relationship pre-selected (`join_organization`
-          + `student`), so inviting a learner is one click, not four
-          collapsed-panel steps. Same pattern the chat home uses. */}
-      <Link
-        href={`/dashboard/network?type=join_organization&org=${organizationId}&relationship=student` as "/dashboard/network"}
-        className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90"
-        data-testid="institution-learners-invite"
-      >
-        {t("invite")} →
-      </Link>
     </section>
     </Card>
   );

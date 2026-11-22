@@ -6,6 +6,11 @@ import { checkEngagementInvariant } from "@/lib/booking/engagement-invariant";
 import { showPlaceholderMarkers } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/project-truth");
+
 
 /**
  * Type-escape for tables not in the generated `Database` type.

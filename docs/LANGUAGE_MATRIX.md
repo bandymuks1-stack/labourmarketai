@@ -3,6 +3,7 @@
 > **Status:** canonical audit, 2026-08-27; catalog + prod-DB numbers
 > re-measured **2026-08-30** (repo at `632ad088`, prod SQL). Derived from CODE
 > and the PRODUCTION DATABASE, not from the presence of locale files.
+> **Newer coverage numbers, 2026-11-05:** `docs/program/FUNCTION_REGISTER.md`, "EU language coverage". They replace §1 and §2.1 here.
 > **This file is the ONE canonical source for language-coverage numbers.**
 > Any other doc or code comment that carries a language/ESCO count is a
 > snapshot of its own date and must defer here when it disagrees.
@@ -38,12 +39,12 @@ multilingual-ready.
 | concept | where | value |
 |---|---|---|
 | catalog (files present) | `lib/i18n/config.ts` → `locales` | `en lt lv et nl de da no sv pl ru` (11) |
-| **routed / selectable** | `lib/i18n/config.ts` → `activeLocales` | **`lt en ru nl de` (5)** |
+| **routed / selectable** | `lib/i18n/config.ts` → `activeLocales` | **`lt en ru nl de pl sv` (7)** — PL since 2026-09-20, SV since the owner decision of 2026-11-11 (catalog at full parity first) |
 | taxonomy-only, no UI | `lib/i18n/launch-language-scope.ts` → `NON_UI_TAXONOMY_LOCALES` | `fi` |
 | offline recognition packs | `lib/structuring/language-packs/` | `da de et fi lv nl no pl sv` (9) |
 | per-slug recognition status | `lib/structuring/language-packs/recognition-status.ts` | `core` / `deferred` / `not-text-recognizable` |
 
-`lv et da no sv pl` have catalogs but **do not route** — no `/lv/…` page
+`lv et da no` have catalogs but **do not route** — no `/lv/…` page
 prerenders and the URL↔locale resolver rejects the code. A file is not a
 language.
 

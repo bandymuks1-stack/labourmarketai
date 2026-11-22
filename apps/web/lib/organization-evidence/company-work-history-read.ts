@@ -2,8 +2,23 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
+import {
+  summarizeOrganizationProjects,
+  type OrganizationProjects,
+} from "@/lib/organization-evidence/organization-projects";
+import {
+  summarizeOrganizationJournal,
+  type OrganizationJournal,
+  type OrganizationJournalRow,
+} from "@/lib/organization-evidence/organization-journal";
+import {
+  JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
+  JOURNAL_ENTRY_METRICS_EMBED,
+} from "@/lib/journal/journal-list-core";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { withSessionWorkspacePointer, listWorkspaceMemberships } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
+import type { BusinessHistoryIdentity } from "./business-history-header";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
 import { untypedClient } from "./evidence-store";
 import { listEvidenceRecords, listRecordIdsAttributedTo } from "./import-core";
@@ -41,10 +56,27 @@ export type CompanyWorkHistoryLoad =
       /** The business history read in periods (owner model 2026-09-30); null
        *  when the period or source-label read failed (UNKNOWN, never empty). */
       readonly business: BusinessHistory | null;
+      /** WHO this organization legally is, for the business-history header's
+       *  own-vs-earlier split: its canonical legal name (display name only as
+       *  a fallback) and the period statements that name THIS organization as
+       *  their legal entity. A failed read leaves the names only. */
+      readonly identity: BusinessHistoryIdentity;
       readonly history: CompanyWorkHistory;
       readonly elsewhere: readonly { readonly id: string; readonly name: string; readonly count: number }[];
       /** Roster person id → linked worker id (only `linked` rows). */
       readonly linkedWorkers: Readonly<Record<string, string>>;
+      /** The organization's own projects on the platform (#3354: its track
+       *  record). Null when they could not be read — never shown as "none". */
+      readonly projects: OrganizationProjects | null;
+      /** Work its people recorded in the journal under THIS organization's
+       *  engagements (Lane G's contract, rule 2). A separate ledger from the
+       *  imported history, never added to it. Null when it could not be read
+       *  — never shown as "no hours". */
+      readonly journal: OrganizationJournal | null;
+      /** This organization's own roster rows. A person on a record another
+       *  organization attributes here belongs to THAT roster: their card is
+       *  not this organization's to open. */
+      readonly ownPeople: Readonly<Record<string, true>>;
       /** Records stored in ANOTHER organization's books that name this one as the performing company. */
       readonly attributedCount: number;
       /** A safety ceiling was reached while reading: the totals cover only
@@ -85,7 +117,7 @@ export async function loadCompanyWorkHistory(
   // Every read is PAGED to the end (the server answers at most 1000 rows):
   // production holds 2,944 records for one organization, and a bare
   // `.limit(1000)` made every total on this page silently wrong.
-  const [recs, objs, people] = await Promise.all([
+  const [recs, objs, people, projectRows, journal] = await Promise.all([
     listAllEvidenceRecords(caller, { organizationId: org.organizationId }),
     readAllPages<{
       id: string;
@@ -116,8 +148,33 @@ export async function loadCompanyWorkHistory(
           .order("id", { ascending: true })
           .range(from, to),
     ),
+    // The organization's own projects on the platform — its track record
+    // (#3354). RLS decides what the caller reads; a duplicate project is a
+    // record fact, never counted twice. Unreadable -> no projects section.
+    readAllPages<{ id: string; title: string | null; city: string | null; status: string | null; created_at: string }>(
+      (from, to) =>
+        db(supabase)
+          .from("projects")
+          .select("id, title, city, status, created_at")
+          .eq("organization_id", org.organizationId)
+          .neq("record_state", "duplicate")
+          .order("id", { ascending: true })
+          .range(from, to),
+    ),
+    readOrganizationJournal(supabase, org.organizationId),
   ]);
   if (recs.kind !== "ok" || !objs || !people) return { kind: "unavailable" };
+  const projects = projectRows
+    ? summarizeOrganizationProjects(
+        projectRows.rows.map((r) => ({
+          id: r.id,
+          title: r.title,
+          city: r.city,
+          status: r.status,
+          createdAt: r.created_at,
+        })),
+      )
+    : null;
 
   // A place on a fragment project (record_state = duplicate) belongs to the
   // canonical project it was merged into: periods count real projects and
@@ -135,7 +192,9 @@ export async function loadCompanyWorkHistory(
     archived: o.status === "archived",
   }));
   const linkedWorkers: Record<string, string> = {};
+  const ownPeople: Record<string, true> = {};
   for (const p of people.rows) {
+    ownPeople[p.id] = true;
     // Identity only by the PERSON's own confirmation (integrity doors v1).
     if (p.link_state === "linked" && p.link_method === "worker_confirmed" && p.linked_worker_id)
       linkedWorkers[p.id] = p.linked_worker_id;
@@ -161,7 +220,10 @@ export async function loadCompanyWorkHistory(
   }
   const history = buildCompanyWorkHistory([...recs.records, ...attributed], objects);
 
-  const business = await readBusinessHistory(supabase, org.organizationId, recs.records, objects);
+  const [business, identity] = await Promise.all([
+    readBusinessHistory(supabase, org.organizationId, recs.records, objects),
+    readBusinessHistoryIdentity(supabase, org.organizationId, org.organizationName),
+  ]);
 
   // Where is the work if not here? Only when this organization holds none.
   const elsewhere: { id: string; name: string; count: number }[] = [];
@@ -185,12 +247,67 @@ export async function loadCompanyWorkHistory(
     organizationId: org.organizationId,
     organizationName: org.organizationName,
     business,
+    identity,
     history,
     elsewhere,
     linkedWorkers,
+    projects,
+    journal,
+    ownPeople,
     attributedCount: attributed.length,
     truncated: recs.truncated,
   };
+}
+
+/**
+ * The organization's journal work, read the one way the contract allows: its
+ * engagements (`engagement_contexts.organization_id`), then the live entries
+ * on them (`journal_entries.engagement_context_id`). An engagement's status is
+ * not filtered: work recorded under a since-ended engagement still happened
+ * here. Ids, timestamps, review rows and metric rows only: never the entry
+ * text. RLS's org-manager branch decides what comes back; nothing widens it.
+ */
+async function readOrganizationJournal(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  organizationId: string,
+): Promise<OrganizationJournal | null> {
+  try {
+    const contexts = await readAllPages<{ id: string }>((from, to) =>
+      db(supabase)
+        .from("engagement_contexts")
+        .select("id")
+        .eq("organization_id", organizationId)
+        .order("id", { ascending: true })
+        .range(from, to),
+    );
+    if (!contexts) return null;
+    const ids = contexts.rows.map((r) => r.id);
+    const select = [
+      "id, worker_id, created_at, correction_of, engagement_context_id, subject:workers(profile_id)",
+      JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
+      JOURNAL_ENTRY_METRICS_EMBED,
+    ].join(", ");
+    const rows: OrganizationJournalRow[] = [];
+    for (let i = 0; i < ids.length; i += ID_CHUNK) {
+      const chunk = ids.slice(i, i + ID_CHUNK);
+      const page = await readAllPages<OrganizationJournalRow>((from, to) =>
+        db(supabase)
+          .from("journal_entries")
+          .select(select)
+          .in("engagement_context_id", chunk)
+          .is("deleted_at", null)
+          .is("superseded_by", null)
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      if (!page || page.truncated) return null;
+      rows.push(...page.rows);
+    }
+    const { todayIso, horizonIso } = await viewerWorkToday();
+    return summarizeOrganizationJournal(rows, todayIso, horizonIso);
+  } catch {
+    return null;
+  }
 }
 
 type PeriodRow = {
@@ -207,6 +324,8 @@ type PeriodRow = {
   statement: string | null;
   supersedes_id: string | null;
   created_at: string;
+  period_start_precision: HistoryPeriodStatement["periodStartPrecision"];
+  period_end_precision: HistoryPeriodStatement["periodEndPrecision"];
 };
 
 /**
@@ -215,6 +334,36 @@ type PeriodRow = {
  * RLS reads; either failing makes the whole reading UNKNOWN (null) - a history
  * read without its periods would place every record as "not placed".
  */
+/** The organization's legal identity for the header split (Codex P2 on
+ *  #2894): the presentation name is not the legal entity — an organization
+ *  whose display and legal names differ must still see its OWN legally named
+ *  period as its own. Best-effort: a failed read keeps the display name. */
+async function readBusinessHistoryIdentity(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  organizationId: string,
+  displayName: string,
+): Promise<BusinessHistoryIdentity> {
+  try {
+    const [org, own] = await Promise.all([
+      db(supabase).from("organizations").select("legal_name, display_name").eq("id", organizationId).maybeSingle(),
+      db(supabase)
+        .from("organization_history_periods")
+        .select("id")
+        .eq("organization_id", organizationId)
+        .eq("legal_entity_organization_id", organizationId)
+        .limit(200),
+    ]);
+    const row = (org?.data ?? null) as { legal_name: string | null; display_name: string | null } | null;
+    return {
+      legalName: row?.legal_name?.trim() || null,
+      displayName: row?.display_name?.trim() || displayName || null,
+      ownStatementIds: own?.error ? [] : ((own?.data ?? []) as { id: string }[]).map((r) => r.id),
+    };
+  } catch {
+    return { legalName: null, displayName: displayName || null, ownStatementIds: [] };
+  }
+}
+
 async function readBusinessHistory(
   supabase: Awaited<ReturnType<typeof createClient>>,
   organizationId: string,
@@ -236,7 +385,7 @@ async function readBusinessHistory(
     db(supabase)
       .from("organization_history_periods")
       .select(
-        "id, period_label, legal_entity_label, source_labels, period_start, period_end, continuity, legal_entity_relation, basis, basis_reference, statement, supersedes_id, created_at",
+        "id, period_label, legal_entity_label, source_labels, period_start, period_end, continuity, legal_entity_relation, basis, basis_reference, statement, supersedes_id, created_at, period_start_precision, period_end_precision",
       )
       .eq("organization_id", organizationId)
       .order("created_at", { ascending: true })
@@ -266,6 +415,8 @@ async function readBusinessHistory(
       statement: p.statement,
       createdAt: p.created_at,
       supersedesId: p.supersedes_id,
+      periodStartPrecision: p.period_start_precision ?? null,
+      periodEndPrecision: p.period_end_precision ?? null,
     })),
   );
   const labelOf = new Map(labels.rows.map((r) => [r.id, r.source_sheet?.trim() || null]));

@@ -22,6 +22,7 @@ import {
   readAgencyClientsLabels,
   readClientBridgeLabels,
 } from "@/lib/company/company-section-labels";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { AgencyClientsSection } from "@/components/app/agency-clients-section";
 import { AgencyBridgeSection } from "@/components/app/agency-bridge-section";
 import { ClientAgencyBridgeSection } from "@/components/app/client-agency-bridge-section";
@@ -38,6 +39,11 @@ import {
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/partners", "organizationDoors.pages.partners.title");
+
 
 /**
  * KLIENTAI IR PARTNERIAI — the relationship door (owner IA correction
@@ -224,7 +230,7 @@ export default async function CompanyPartnersPage({
             <div className="grid gap-2 sm:grid-cols-3">
               {[
                 { key: "roster", href: "/dashboard/company/people#company-team" },
-                { key: "offer", href: "/dashboard/company/needs#demand-intake" },
+                { key: "offer", href: "/dashboard/company/needs?audience=offer#demand-intake" },
                 { key: "scouting", href: "/dashboard/company/scouting" },
               ].map((a) => (
                 <Link
@@ -291,6 +297,7 @@ export default async function CompanyPartnersPage({
             requestTitles={requestTitles}
             labels={readDelegationLabels(tDelegation)}
             locale={locale}
+            countryOptions={countryOptionsForLocale(locale)}
           />
         </div>
         {/* The same organization as a CLIENT of other agencies — shown only

@@ -591,7 +591,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/candidates", "lib/scouting"],
     coreModule: "lib/candidates/candidate-drafts.ts",
     surfaces: ["app/[locale]/dashboard/candidates"],
-    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link anywhere — it was named as this row's surface until the navigation guard proved nothing leads there.",
+    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link — the public /for-companies lifecycle step linked there until 2026-11-03 and now opens `/dashboard/company/scouting`; the preview-surface guard covers that component too.",
   },
   {
     id: "ORG-8",
@@ -794,6 +794,18 @@ const WORK_EXECUTION: readonly CapabilityRow[] = [
     note:
       "Corrected 2026-09-15 (falsifiability sweep). Claimed `no_navigation` with no module and no surface named. Measured: `lib/economics/economics.ts` is the read service and `ProjectEconomicsPanel` renders at `app/[locale]/dashboard/projects/[id]/operations/page.tsx:570`, a route linked from six places. `project_budgets` holds 0 rows — that is ADOPTION, not disconnection, the same distinction this register already applied to WRK-6 and WRK-8. PARTIAL because the manager path is wired and nobody has used it yet.",
   },
+  {
+    id: "WRK-11",
+    domain: "work_execution",
+    title: "Project forecast",
+    worldElement: "projects",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/forecast/forecast-engine.ts", "lib/forecast/forecast-facts.ts", "lib/forecast/forecast-read.ts", "components/app/projects/project-forecast-panel.tsx"],
+    coreModule: "lib/forecast/forecast-engine.ts",
+    surfaces: ["app/[locale]/dashboard/projects/[id]"],
+    note: "2026-11-01 (register 3.34, owner order 2026-10-24 Stage 7): the deterministic forecast engine (#2733) is wired to the manager project page beside the project course. It is computed ON READ: the viewer's own session must pass can_manage_project, then the service-role-only facts door forecast_project_facts_v1 (applied migration 20261025045152) supplies opaque fact rows and the pure engine computes completion, deadline risk, people needed, quality risk, actions and stated assumptions, labelled as a forecast and never a fact (SEP-1); too little evidence renders as its own state (SEP-7). Still PARTIAL: forecast STORAGE, the recompute scheduler and the cadence modes (weekly/daily/hourly/live) are not wired (draft #2738 carries their app code; its tables and triggers are applied, so project_forecast_signals accumulate with no consumer), no version history or actual-vs-forecast is shown, and the panel is not yet production-walked.",
+  },
 ];
 
 // ── E. EVIDENCE · JOURNAL ───────────────────────────────────────────────────
@@ -858,9 +870,8 @@ const EVIDENCE: readonly CapabilityRow[] = [
     anchors: ["lib/journal"],
     coreModule: null,
     surfaces: ["app/[locale]/dashboard/journal"],
-    note: "13 confirmations in production, 3 of them self-confirmed by one person holding an owner engagement.",
-    ownerDecision:
-      "Block self-confirmation in review_journal_entry, or rely on the weaker classification (§6.3 item 1).",
+    note:
+      "13 confirmations in production, 3 of them self-confirmed by one person holding an owner engagement. RESOLVED by the owner 2026-11-02 (decision 0028): a person's own confirmation is a lawful personal declaration, kept apart from independent confirmation; only presenting oneself as the independent confirmer is refused (enforced since 20261003150500). Re-proof against 0028 by the journal-confirm production walk.",
   },
   {
     id: "EVID-3",
@@ -1628,7 +1639,7 @@ const PLATFORM: readonly CapabilityRow[] = [
     anchors: ["lib/ai/runtime"],
     coreModule: "lib/ai/runtime/run-core.ts",
     surfaces: ["app/api"],
-    note: "355 `ai_runs` rows in production (re-counted 2026-10-03; the earlier text said 47) with real spend. SIX of the thirteen registered agents have zero call sites (admin_risk, booking_risk, country_readiness, document_assistant, skill_evidence, support_onboarding) — this note said SEVEN until translation_copy gained its call site on 2026-09-17 (the viewer-language read of work messages, egress-gated); the count is derived by `lib/guards/ai-agent-call-sites.test.ts` so it cannot drift. Each remaining one's domain is already answered DETERMINISTICALLY and connected (documents-gap, readiness-overview, skill-pipeline, the booking-conflict logic, the country-readiness matrix), so giving them call sites would add a second model-based answer beside a working one, or six new surfaces — an owner decision, not a wiring task.",
+    note: "355 `ai_runs` rows in production (re-counted 2026-10-03; the earlier text said 47) with real spend. Every one of the 9 registered agents has a product call site (0 uncalled) — derived by `lib/guards/ai-agent-call-sites.test.ts` so it cannot drift. OWNER DECISION 2026-10-25 (registry row 10.11) closed the six that had none: country_readiness was INTEGRATED as a labelled plain-language reading of the sourced country matrix on /labour-market/[country] (the matrix stays the answer; every step cites a row; honest AI-off state); admin_risk, booking_risk, document_assistant, skill_evidence and support_onboarding were RETIRED because connected deterministic code already gives their whole output (readiness-overview, the booking-conflict RPC + roster-conflicts, documents-gap, skill-pipeline + work_journal, dashboard next-action). Decision table: docs/ai/INTERNAL_LLM_AGENTS_V1.md §4.1. No egress grant changed.",
   },
   {
     id: "AI-4",

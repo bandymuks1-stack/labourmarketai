@@ -22,7 +22,9 @@ export type HelpTopicId =
   | "warning"
   | "forecast"
   | "scheduleWorker"
-  | "doneWork";
+  | "doneWork"
+  | "account"
+  | "privacy";
 
 export type HelpChip = {
   /** `link:` target the chat renders as a button. */
@@ -36,6 +38,14 @@ export type HelpChip = {
 export type HelpTopic = {
   readonly id: HelpTopicId;
   readonly sources: readonly string[];
+  /**
+   * The SWEDISH sources — apart from `sources` on purpose. Both the router
+   * (`sv()` patterns) and the reader count them only for a sentence
+   * `looksSwedish` reads as Swedish, so a Swedish question shape ("var …
+   * timmar", "vad betyder …") can never change how another language's
+   * sentence is routed or read.
+   */
+  readonly svSources: readonly string[];
   readonly chips: readonly HelpChip[];
 };
 
@@ -50,6 +60,9 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bwie\\s+(?:benutze|nutze|verwende)\\s+ich\\s+(?:dieses\\s+|das\\s+)?projekt",
       "\\bjak\\s+korzystac\\s+z\\s+(?:tego\\s+)?projekt",
     ],
+    svSources: [
+      "\\bhur\\s+(?:anvander|borjar)\\s+jag\\s+(?:det\\s+har\\s+|detta\\s+)?projekt",
+    ],
     chips: [{ target: "/dashboard/projects", label: "chipHelpProjects" }],
   },
   {
@@ -61,6 +74,9 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bhoe\\s+voeg\\s+ik\\s+[^.]{0,20}(?:persoon|medewerker|werknemer|mensen|teamlid)",
       "\\bwie\\s+f(?:u|ue)ge\\s+ich\\s+[^.]{0,20}(?:person|mitarbeiter|mitglied|leute)",
       "\\bjak\\s+dodac\\s+(?:osobe|pracownik|czlowiek|czlonk)",
+    ],
+    svSources: [
+      "\\bhur\\s+(?:lagger\\s+jag\\s+till|bjuder\\s+jag\\s+in)\\s+(?:en\\s+)?(?:ny\\s+)?(?:person|personer|medarbetare|anstalld|kollega|deltagare)",
     ],
     chips: [{ target: "/dashboard/network", label: "chipHelpPeople" }],
   },
@@ -74,6 +90,9 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bwo\\s+(?:sind|sehe\\s+ich|finde\\s+ich)\\s+(?:meine\\s+)?(?:arbeits)?stunden",
       "\\bgdzie\\s+(?:sa\\s+|zobacze\\s+)?(?:moje\\s+)?godzin",
     ],
+    svSources: [
+      "\\bvar\\s+(?:ser\\s+jag\\s+|hittar\\s+jag\\s+|finns\\s+|ar\\s+)?(?:mina\\s+|vara\\s+)?(?:arbets)?(?:timmar|tidrapport)",
+    ],
     chips: [{ target: "/dashboard/hours", label: "workHoursChip" }],
   },
   {
@@ -85,6 +104,9 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bhoe\\s+bied\\s+ik\\s+(?:een\\s+)?dienst",
       "\\bwie\\s+biete\\s+ich\\s+(?:eine\\s+)?(?:dienstleistung|leistung)",
       "\\bjak\\s+zaoferowac\\s+usluge",
+    ],
+    svSources: [
+      "\\bhur\\s+erbjuder\\s+jag\\s+(?:en\\s+|mina\\s+)?tjanst",
     ],
     chips: [{ target: "/dashboard/services", label: "chipHelpServices" }],
   },
@@ -98,6 +120,9 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bwarum\\s+(?:erscheint|sehe\\s+ich|gibt\\s+es|bekomme\\s+ich)\\s+(?:diese\\s+|eine\\s+)?warnung",
       "\\bdlaczego\\s+(?:pojawilo\\s+sie|widze|jest)\\s+(?:to\\s+|ta\\s+)?ostrzezeni",
     ],
+    svSources: [
+      "\\bvarfor\\s+(?:fick\\s+jag|ser\\s+jag|finns\\s+det)\\s+(?:den\\s+har\\s+|en\\s+)?varning",
+    ],
     chips: [{ target: "/dashboard/activity", label: "activityChip" }],
   },
   {
@@ -110,6 +135,9 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bwas\\s+bedeutet\\s+(?:diese\\s+|die\\s+)?prognose",
       "\\bco\\s+oznacza\\s+(?:ta\\s+)?prognoza",
     ],
+    svSources: [
+      "\\bvad\\s+betyder\\s+(?:den\\s+har\\s+|denna\\s+)?prognos",
+    ],
     chips: [{ target: "/dashboard/planning", label: "chipHelpPlanning" }],
   },
   {
@@ -121,6 +149,9 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bhoe\\s+plan\\s+ik\\s+(?:een\\s+)?(?:medewerker|werknemer|persoon)",
       "\\bwie\\s+plane\\s+ich\\s+(?:einen\\s+|eine\\s+)?(?:mitarbeiter|person)",
       "\\bjak\\s+zaplanowac\\s+(?:pracownik|osobe)",
+    ],
+    svSources: [
+      "\\bhur\\s+planerar\\s+jag\\s+(?:in\\s+)?(?:en\\s+)?(?:medarbetare|anstalld|person|arbetslag)",
     ],
     chips: [{ target: "/dashboard/planning", label: "chipHelpPlanning" }],
   },
@@ -135,10 +166,68 @@ export const HELP_TOPICS: readonly HelpTopic[] = [
       "\\bwo\\s+(?:sehe|finde)\\s+ich\\s+(?:die\\s+)?(?:erledigte|geleistete|abgeschlossene)\\s+arbeit",
       "\\bgdzie\\s+(?:zobacze|widze)\\s+wykonan",
     ],
+    svSources: [
+      "\\bvar\\s+(?:ser|hittar)\\s+jag\\s+(?:mitt\\s+)?(?:utfort|genomfort|gjort|klart)\\w*\\s+arbete",
+    ],
     chips: [
       { target: "/dashboard/journal", label: "chipHelpJournal", only: "person" },
       { target: "/dashboard/hours", label: "workHoursChip", only: "company" },
     ],
+  },
+  {
+    // ACCOUNT SETTINGS (owner 2026-11-19): sign-in, password, e-mail,
+    // notifications and appearance live on the settings page. Action phrases
+    // only, so "search settings" stays the criteria answer.
+    id: "account",
+    sources: [
+      "\\bslaptazod",
+      "\\bpaskyros\\s+nustatym",
+      "\\b(?:pakeist|keist)\\w*\\s+(?:savo\\s+|mano\\s+)?el\\.?\\s*(?:pasto\\s+)?adres",
+      "\\b(?:change|reset|forgot|new)\\s+(?:my\\s+|the\\s+)?password\\b",
+      "\\bpassword\\s+(?:change|reset)\\b",
+      "\\baccount\\s+settings\\b",
+      "\\bchange\\s+(?:my\\s+)?e-?mail\\b",
+      "парол",
+      "настройки\\s+(?:аккаунт|учетн)",
+      "\\bwachtwoord",
+      "\\baccountinstelling",
+      "\\bpasswort",
+      "\\bkontoeinstellung",
+      "\\bhasl[oa]\\b",
+      "\\bustawienia\\s+konta",
+    ],
+    svSources: ["\\blosenord", "\\bkontoinstallning"],
+    chips: [{ target: "/dashboard/account", label: "chipHelpSettings" }],
+  },
+  {
+    // PRIVACY AND DATA (owner 2026-11-19): deleting the account, downloading
+    // one's data. The privacy page holds the deletion request (reviewed before
+    // anything is erased) and the data export; the chat only opens it.
+    id: "privacy",
+    sources: [
+      "\\b(?:istrint|istrink|panaikint|panaikink|pasalint|pasalink|uzdaryt|uzdaryk)\\w*\\s+(?:mano\\s+|savo\\s+)?paskyr",
+      "\\b(?:atsisiust|atsisiusk|eksportuot)\\w*\\s+(?:mano\\s+|savo\\s+)?duomen",
+      "\\b(?:delete|close|remove|erase)\\s+(?:my\\s+)?account\\b",
+      "\\b(?:download|export)\\s+(?:all\\s+)?my\\s+data\\b",
+      "удал[а-яё]*\\s+(?:мой\\s+|свой\\s+)?(?:аккаунт|учетн|профил)",
+      "(?:скачать|выгрузить|экспорт[а-яё]*)\\s+(?:мои\\s+|свои\\s+)?данн",
+      "\\b(?:verwijder|opzeg|ophef)\\w*\\s+(?:ik\\s+)?(?:mijn\\s+)?account\\b",
+      "\\baccount\\s+(?:verwijderen|opheffen)\\b",
+      "\\bmijn\\s+gegevens\\s+(?:downloaden|exporteren)",
+      "\\b(?:download|exporteer)\\s+(?:ik\\s+)?(?:al\\s+)?mijn\\s+gegevens",
+      "\\b(?:losche|loschen)\\s+(?:sie\\s+|ich\\s+)?(?:mein\\s+)?(?:konto|account)\\b",
+      "\\bkonto\\s+(?:loschen|kundigen)\\b",
+      "\\bmeine\\s+daten\\s+(?:herunterladen|exportieren)",
+      "\\b(?:lade|exportiere)\\s+ich\\s+(?:alle\\s+)?meine\\s+daten",
+      "\\busun\\w*\\s+(?:moje\\s+)?konto\\b",
+      "\\b(?:pobierz|pobrac|eksportuj)\\w*\\s+(?:moje\\s+)?dane\\b",
+    ],
+    svSources: [
+      "\\brader\\w*\\s+(?:jag\\s+)?(?:mitt\\s+)?konto",
+      "\\bta\\s+bort\\s+(?:mitt\\s+)?konto",
+      "\\bladda\\s+(?:jag\\s+)?ner\\s+mina\\s+(?:uppgifter|data)",
+    ],
+    chips: [{ target: "/dashboard/privacy", label: "chipHelpPrivacy" }],
   },
 ];
 

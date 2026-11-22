@@ -1,5 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { setProjectFactsAction } from "@/lib/projects/project-admin-actions";
 import { ALL_ISO_COUNTRIES, countryDisplayName } from "@/lib/location/country-model";
 
@@ -47,9 +50,12 @@ export async function ProjectFactsForm({
     );
   }
 
-  const field =
-    "rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue";
-  const label = "flex flex-col gap-1 text-xs text-text-secondary";
+  // `w-full min-w-0`: a date input carries its own intrinsic width (~200px in
+  // Chromium), and two of them side by side pushed the form to 456px inside
+  // a 390px phone (UX review 2026-10-24). A field fills its cell; it never
+  // decides the cell's width.
+  const field = "min-w-0 max-sm:min-h-11 max-sm:text-base";
+  const label = "flex min-w-0 flex-col gap-1 text-xs text-text-secondary";
 
   return (
     <form
@@ -59,10 +65,10 @@ export async function ProjectFactsForm({
     >
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="projectId" value={projectId} />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <label className={`${label} sm:col-span-2 lg:col-span-2`}>
           <span>{t("title")}</span>
-          <input
+          <Input
             name="title"
             type="text"
             required
@@ -75,7 +81,7 @@ export async function ProjectFactsForm({
         </label>
         <label className={label}>
           <span>{t("city")}</span>
-          <input
+          <Input
             name="city"
             type="text"
             maxLength={120}
@@ -86,7 +92,7 @@ export async function ProjectFactsForm({
         </label>
         <label className={label}>
           <span>{t("country")}</span>
-          <select
+          <Select
             name="country"
             defaultValue={project.country ?? ""}
             className={field}
@@ -98,12 +104,12 @@ export async function ProjectFactsForm({
                 {countryDisplayName(code, locale)}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
-        <div className="grid grid-cols-2 gap-3 lg:col-span-1">
+        <div className="grid min-w-0 grid-cols-2 gap-3 lg:col-span-1">
           <label className={label}>
             <span>{t("startDate")}</span>
-            <input
+            <Input
               name="startDate"
               type="date"
               defaultValue={project.startDate ?? ""}
@@ -113,7 +119,7 @@ export async function ProjectFactsForm({
           </label>
           <label className={label}>
             <span>{t("endDate")}</span>
-            <input
+            <Input
               name="endDate"
               type="date"
               defaultValue={project.endDate ?? ""}
@@ -124,13 +130,15 @@ export async function ProjectFactsForm({
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        <Button
           type="submit"
-          className="inline-flex h-9 items-center rounded-lg border border-ink-500 px-3 text-xs font-semibold text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           data-testid="ops-manage-facts-save"
         >
           {t("save")}
-        </button>
+        </Button>
         <span className="text-xs text-text-muted">{t("hint")}</span>
       </div>
     </form>

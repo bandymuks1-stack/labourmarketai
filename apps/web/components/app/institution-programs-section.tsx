@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { PlaceTimeStamp } from "@/components/app/work-world/primitives";
+import { learnerInviteHref } from "@/lib/navigation/work-areas";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
 import { readInstitutionPrograms } from "@/lib/education/programs";
@@ -9,7 +10,9 @@ import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
 
 import {
   AssignLearnerForm,
+  DecideJoinRequest,
   EditProgramForm,
+  JoinRequestsToggle,
   CreateCohortForm,
   CreateProgramForm,
   RemoveMemberButton,
@@ -50,6 +53,13 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
     chooseLearner: t("form.chooseLearner"),
     assign: t("form.assign"),
     remove: t("form.remove"),
+    openRequests: t("form.openRequests"),
+    closeRequests: t("form.closeRequests"),
+    requestsOpenHint: t("form.requestsOpenHint"),
+    accept: t("form.accept"),
+    acceptConfirm: t("form.acceptConfirm"),
+    cancel: t("form.cancelDecision"),
+    decline: t("form.decline"),
     saving: t("form.saving"),
     saved: t("form.saved"),
     forbidden: t("form.forbidden"),
@@ -91,7 +101,7 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
               const hasEmptyCohort = read.programs.some((p) =>
                 p.cohorts.some((c) => c.members.every((m) => m.status !== "active")),
               );
-              return waiting > 0 && hasEmptyCohort ? (
+              return read.membersVisible && waiting > 0 && hasEmptyCohort ? (
                 <p className="text-xs leading-relaxed text-state-warning" data-testid="institution-learners-not-in-cohort">
                   {t("unassignedLearners", { count: waiting })}
                 </p>
@@ -147,7 +157,7 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                                 <span className="text-text-primary">{c.name}</span>
                                 <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                                  {t("members", { count: c.members.filter((m) => m.status === "active").length })}
+                                  {read.membersVisible ? t("members", { count: c.members.filter((m) => m.status === "active").length }) : null}
                                   {/* The cohort's time span as a mono stamp
                                       (work-world grammar) — the dates the
                                       institution recorded, nothing derived. */}
@@ -162,6 +172,13 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                                   ) : null}
                                 </span>
                               </div>
+                              {!read.membersVisible ? (
+                                // J-12: an external manager reads the group, not its
+                                // membership — unknown, never "0 members".
+                                <p className="text-xs text-text-muted" data-testid={`cohort-members-not-for-role-${c.id}`}>
+                                  {t("membersNotForRole")}
+                                </p>
+                              ) : null}
                               {c.members.filter((m) => m.status === "active").length > 0 ? (
                                 <ul className="flex flex-wrap gap-1.5">
                                   {c.members
@@ -174,21 +191,49 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                                     ))}
                                 </ul>
                               ) : null}
-                              <AssignLearnerForm
-                                cohortId={c.id}
-                                learners={read.assignable.filter((l) => !c.members.some((m) => m.profileId === l.profileId && m.status === "active"))}
-                                labels={labels}
-                              />
+                              {/* J-12: learners' own requests to join, decided here by
+                                  the institution's authorised person. The learner
+                                  is named only by what they typed on the request. */}
+                              {c.requests.length > 0 ? (
+                                <ul className="flex flex-col gap-1.5" data-testid={`cohort-join-requests-${c.id}`}>
+                                  {c.requests.map((r) => (
+                                    <li
+                                      key={r.profileId}
+                                      className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-600 px-2 py-1.5 text-xs"
+                                      data-testid={`cohort-join-request-${c.id}-${r.profileId}`}
+                                    >
+                                      <span className="flex flex-col">
+                                        <span className="text-text-primary">{t("requestFrom", { name: r.label })}</span>
+                                        <span className="text-meta text-text-muted" data-testid={`cohort-join-request-unverified-${c.id}-${r.profileId}`}>
+                                          {t("requestUnverified")}
+                                        </span>
+                                        {r.note ? <span className="text-text-secondary">{r.note}</span> : null}
+                                      </span>
+                                      <DecideJoinRequest cohortId={c.id} profileId={r.profileId} labels={labels} />
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : null}
+                              {read.membersVisible && c.joinRequestsOpen !== null ? (
+                                <JoinRequestsToggle cohortId={c.id} open={c.joinRequestsOpen} labels={labels} />
+                              ) : null}
+                              {read.membersVisible ? (
+                                <AssignLearnerForm
+                                  cohortId={c.id}
+                                  learners={read.assignable.filter((l) => !c.members.some((m) => m.profileId === l.profileId && m.status === "active"))}
+                                  labels={labels}
+                                />
+                              ) : null}
                             </li>
                           ))}
                         </ul>
                       ) : null}
                       <CreateCohortForm programId={p.id} labels={labels} />
-                      {memberIds.size === 0 && read.assignable.length === 0 ? (
+                      {read.membersVisible && memberIds.size === 0 && read.assignable.length === 0 ? (
                         <p className="text-meta text-text-muted">
                           {t("noLearnersYet")}{" "}
                           <Link
-                            href={`/dashboard/network?type=join_organization&org=${organizationId}&relationship=student` as "/dashboard/network"}
+                            href={learnerInviteHref(organizationId) as "/dashboard/network"}
                             className="text-brand-blue hover:underline"
                             data-testid="program-invite-learners"
                           >
@@ -221,7 +266,7 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                 only door, so it starts open instead of hiding behind a
                 collapsed disclosure. */}
             <details className="rounded-md border border-ink-600 p-3" open={read.programs.length === 0}>
-              <summary className="cursor-pointer text-xs font-semibold text-text-primary">{t("addProgram")}</summary>
+              <summary className="min-h-11 cursor-pointer content-center text-xs font-semibold text-text-primary">{t("addProgram")}</summary>
               <div className="mt-3">
                 <CreateProgramForm organizationId={organizationId} professions={professions} educationTypes={educationTypes} labels={labels} />
               </div>

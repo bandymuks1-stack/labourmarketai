@@ -460,10 +460,10 @@ test.describe("Conversation UI — authenticated /dashboard (mobile)", () => {
     // Mobile navigation IS the one top bar, so assert the controls that
     // actually carry it at phone width — the command search (visible on EVERY
     // width by design) and the one avatar menu that holds profile, settings,
-    // theme, CV and sign-out — plus that no bottom tab bar came back here.
+    // theme, CV and sign-out. (The bottom tab bar component itself is deleted;
+    // lib/guards/mobile-layout.test.ts pins that it never comes back.)
     await expect(page.getByTestId("chat-command-search")).toBeVisible();
     await expect(page.getByTestId("account-menu-trigger")).toBeVisible();
-    await expect(page.locator('[data-testid^="bottom-nav-"]')).toHaveCount(0);
 
     await say(page, "Ką dar turiu padaryti?");
     await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 20_000 });

@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { OrganizationsLeadership } from "@/components/app/organization/organizations-leadership";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Check } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { PrintButton } from "@/components/app/print-button";
+import { chipLinkClassName } from "@/components/ui/Chip";
+import { Notice } from "@/components/ui/Notice";
 import { CvPrivateDetails } from "@/components/app/cv-private-details";
 import { WorkCardPlausibilityNote } from "@/components/app/work-card-plausibility-note";
 import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
@@ -18,12 +21,13 @@ import { HomeTrace } from "@/components/app/home/home-trace";
 import { toActiveLocale } from "@/lib/i18n/config";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
 import { derivePotentialSkills } from "@/lib/skills/potential-skills";
-import { presentSkills, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
+import { presentSkills, skillTimeReading, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
 import {
   cvSectionVisibility,
   orderSkillsForNeed,
 } from "@/lib/cv-export/cv-sections";
-import { CV_TEMPLATES, parseCvTemplateId } from "@/lib/cv-export/templates";
+import { CV_TEMPLATES, isCvProfileTemplate, parseCvTemplateId } from "@/lib/cv-export/templates";
+import { AthleteProfilePage } from "@/components/app/cv/athlete-profile-page";
 import {
   loadTailoredNeed,
   type TailoredNeedResult,
@@ -40,6 +44,9 @@ import {
   type PremiumCvExperience,
   type PremiumCvFact,
 } from "@/components/app/cv/premium-living-cv";
+import { ownEngagementHeading } from "@/lib/cv-export/own-engagement-heading";
+import { endedUnnamedOrganizationContexts } from "@/lib/journal/engagement-label";
+import { statedDateLabel } from "@/lib/cv/period-dates";
 import {
   buildEuFormatCv,
   resolveEuFormatDocument,
@@ -114,12 +121,14 @@ export default async function VerifiedCvPage({
   const t = await getTranslations("cvExport");
   const tProf = await getTranslations("professions");
   const tSkill = await getTranslations("skillNames");
+  const tUnits = await getTranslations("productivityUnits");
   const tRel = await getTranslations("relationshipTypes");
   const tTier = await getTranslations("evidenceTier");
   const tQuick = await getTranslations("quickNav");
   const tPremium = await getTranslations("cvExport.premium");
   const tJourney = await getTranslations("careerJourney");
   const tIntel = await getTranslations("journal.intelligence");
+  const tJournal = await getTranslations("journal");
   const fmtHours = (h: number) =>
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
   const tRole = await getTranslations("auth.signup.role");
@@ -166,6 +175,12 @@ export default async function VerifiedCvPage({
 
   const { cv } = result;
   const cvProfileId = (await (await createSupabaseServerClient()).auth.getUser()).data.user?.id ?? null;
+
+  // The athlete-profile form (owner order 2026-11-07): a view over the SAME
+  // `cv`, reachable only by this query value. Everything below is untouched.
+  if (isCvProfileTemplate(sp.template)) {
+    return <AthleteProfilePage cv={cv} locale={locale} profileId={cvProfileId} />;
+  }
 
   // Tailored mode — read-only reuse of the gated worker demand RPC + the §19
   // fit engine. Anything not "ok" falls back to the standard CV honestly.
@@ -219,6 +234,12 @@ export default async function VerifiedCvPage({
     { key: "managerConfirmations", value: cv.signals.managerConfirmations },
     { key: "journalEntries", value: cv.signals.journalEntries },
   ].map((s) => ({ ...s, text: s.value === null ? "—" : String(s.value) }));
+  // A brand-new CV has nothing to count. Three tiles reading "0" beside
+  // "manager-confirmed" look like a result on a document handed to an
+  // employer; the empty sentences further down already say what is missing
+  // and where it will come from. An unread value (null) is NOT nothing: it
+  // keeps the tiles, with its em dash.
+  const summaryHasFigures = summary.some((s) => s.value !== 0);
 
   // ONE guard-pinned visibility decision — a section with no data does not
   // exist on the export (no empty headers on a printed CV).
@@ -296,7 +317,11 @@ export default async function VerifiedCvPage({
     if (facts.outputs.length > 0) {
       factsSentences.push(
         t("facts.outputs", {
-          list: facts.outputs.map((o) => `${fmtNum.format(o.value)} ${o.unit}`).join(", "),
+          // The unit is named in the reader's language (the same catalogue
+          // Work in numbers uses), falling back to the stored code.
+          list: facts.outputs
+            .map((o) => `${fmtNum.format(o.value)} ${tUnits.has(o.unit as never) ? tUnits(o.unit as never) : o.unit}`)
+            .join(", "),
         }),
       );
     }
@@ -420,6 +445,14 @@ export default async function VerifiedCvPage({
     else proofByEngagement.set(row.engagementId, [row]);
   }
 
+  // AN ORGANIZATION WITHOUT A NAME THE PERSON NO LONGER WORKS WITH is called
+  // so wherever its name would stand (owner 2026-11-15, #3356): renamed, never
+  // hidden. Found through the one experience reading's roles (decision 0025);
+  // the row's hours, dates and confirmations are untouched.
+  const endedUnnamed = endedUnnamedOrganizationContexts(cv.professionalExperience?.roles);
+  const orgSlotOf = (e: (typeof cv.workHistory)[number]): string | null =>
+    e.orgName ?? (e.id && endedUnnamed.has(e.id) ? tJournal("unnamedOrganization.ended") : null);
+
   // One renderer for both history sections — employment and placements differ
   // in their HEADING, never in how a real engagement is described.
   const historyItems = (rows: typeof cv.workHistory) =>
@@ -438,7 +471,7 @@ export default async function VerifiedCvPage({
           ? "recorded"
           : "stated";
       const orgDisplay =
-        e.orgName ??
+        orgSlotOf(e) ??
         (e.organizationType === "company"
           ? tRole("company")
           : e.organizationType === "agency"
@@ -448,8 +481,9 @@ export default async function VerifiedCvPage({
       const roleLabel = tRel.has(e.relationship)
         ? tRel(e.relationship)
         : e.relationship;
-      const start = formatUtcDate(e.startedAt, locale);
-      const end = formatUtcDate(e.endedAt, locale);
+      // A job with no organization carries only what the person stated.
+      const start = e.orgName ? formatUtcDate(e.startedAt, locale) : statedDateLabel(e.startedAt, "start", locale);
+      const end = e.orgName ? formatUtcDate(e.endedAt, locale) : statedDateLabel(e.endedAt, "end", locale);
       const range =
         start && end
           ? `${start} – ${end}`
@@ -486,7 +520,7 @@ export default async function VerifiedCvPage({
             {range ? ` · ${range}` : ""}
           </span>
           <span
-            className="mt-0.5 font-mono text-[0.625rem] uppercase tracking-label text-text-muted"
+            className="mt-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
             data-testid="cv-history-standing"
           >
             {t(`history.chain.${standing}`)}
@@ -646,9 +680,11 @@ export default async function VerifiedCvPage({
           ? tPremium("evidence.both", { confirmed: fmtNum.format(roundHours(confirmedHours)), recorded: fmtNum.format(roundHours(hours)) })
           : hours !== null
             ? tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(hours)) })
-            : tier === "declared"
-              ? tPremium("evidence.declared")
-              : tPremium("evidence.shown");
+            : practice && practice.sharedHours > 0
+              ? tPremium("evidence.involved", { hours: fmtNum.format(roundHours(practice.sharedHours)) })
+              : tier === "declared"
+                ? tPremium("evidence.declared")
+                : tPremium("evidence.shown");
       return { key: `${tier}:${slug}`, label: skillLabel(slug), level: tierLevel[tier], hours, confirmedHours, evidenceText };
     }),
   );
@@ -725,15 +761,23 @@ export default async function VerifiedCvPage({
     ...earlierEntityStops.map(stopEntry),
     ...uncoveredRoles.map(roleEntry),
     ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
-      const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
-      const from = monthYear(e.startedAt);
-      const to = e.endedAt ? monthYear(e.endedAt) : tPremium("present");
+      const heading = ownEngagementHeading({
+        orgName: orgSlotOf(e),
+        title: e.title,
+        relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
+        practice: e.kind === "practice",
+      });
+      const from = e.orgName ? monthYear(e.startedAt) : statedDateLabel(e.startedAt, "start", locale, "month");
+      const to = !e.endedAt
+        ? tPremium("present")
+        : e.orgName
+          ? monthYear(e.endedAt)
+          : statedDateLabel(e.endedAt, "end", locale, "month");
       const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
       return {
         key: `own:${e.id ?? i}`,
         period: from ? `${from} – ${to}` : e.endedAt ? to : null,
-        title: e.orgName ? (e.title ?? org) : org,
-        subtitle: e.orgName && e.title ? e.orgName : null,
+        ...heading,
         detail: rec
           ? rec.confirmedHours > 0
             ? tPremium("evidence.both", { confirmed: fmtNum.format(roundHours(rec.confirmedHours)), recorded: fmtNum.format(roundHours(rec.hours)) })
@@ -817,15 +861,19 @@ export default async function VerifiedCvPage({
         };
       }),
       ...cv.workHistory.map((e, i) => {
-        const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
+        const heading = ownEngagementHeading({
+          orgName: orgSlotOf(e),
+          title: e.title,
+          relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
+          practice: e.kind === "practice",
+        });
         const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
         const key = `own:${e.id ?? i}`;
         const years = [yearOf(e.startedAt), e.endedAt ? yearOf(e.endedAt) : tJourney("now")].filter(Boolean).join("–");
         journeyMeta[key] = [years, rec ? premiumHours(rec.hours) : null].filter(Boolean).join(" · ");
         return {
           key,
-          title: e.orgName ? (e.title ?? org) : org,
-          subtitle: e.orgName && e.title ? e.orgName : null,
+          ...heading,
           from: e.startedAt,
           to: e.endedAt,
           current: !e.endedAt,
@@ -900,13 +948,13 @@ export default async function VerifiedCvPage({
   // The page's one <main> landmark (WCAG 2.4.1 bypass blocks): /cv renders
   // outside the dashboard chrome, which is what supplies <main> elsewhere.
   return (
-    <main className="cv-doc min-h-screen bg-ink-900 px-6 py-8 text-text-primary print:p-0">
+    <main className="cv-doc min-h-screen bg-ink-900 px-4 py-6 text-text-primary sm:px-6 sm:py-8 print:p-0">
       <div className={`mx-auto flex max-w-3xl flex-col ${pageGap}`}>
         {/* Screen-only toolbar — never printed. */}
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <Link
             href="/dashboard/profile"
-            className="text-sm font-medium text-brand-blue hover:underline"
+            className="-my-2 inline-flex min-h-11 items-center text-sm font-medium text-brand-blue hover:underline"
             data-testid="cv-back-link"
           >
             {t("back")}
@@ -918,37 +966,29 @@ export default async function VerifiedCvPage({
               <a
                 key={tpl.id}
                 href={templateHref(tpl.id)}
-                className={`rounded-md border px-2.5 py-1 text-xs ${
-                  template === tpl.id
-                    ? "border-brand-blue bg-brand-blue text-text-on-brand"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
-                }`}
+                className={chipLinkClassName(template === tpl.id)}
+                aria-current={template === tpl.id ? "page" : undefined}
                 data-testid={`cv-template-${tpl.id}`}
               >
+                {template === tpl.id ? <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" /> : null}
                 {t(`templates.${tpl.id}`)}
               </a>
             ))}
-            <PrintButton label={t("print")} tone="primary" />
+            <PrintButton label={t("print")} tone="primary" className="min-h-11" />
           </div>
         </div>
 
         {/* Tailored-mode honest fallback notes — screen-only (the printed CV
             in fallback IS the standard CV; no note needed on paper). */}
         {tailored && tailored.kind === "not-visible" ? (
-          <p
-            className="rounded-md border border-state-amber/40 bg-state-amber/10 px-3 py-2 text-xs text-state-amber print:hidden"
-            data-testid="cv-tailored-not-visible"
-          >
+          <Notice tone="warning" className="print:hidden" testId="cv-tailored-not-visible">
             {t("tailored.notVisible")}
-          </p>
+          </Notice>
         ) : null}
         {tailored && tailored.kind === "no-structure" ? (
-          <p
-            className="rounded-md border border-state-amber/40 bg-state-amber/10 px-3 py-2 text-xs text-state-amber print:hidden"
-            data-testid="cv-tailored-no-structure"
-          >
+          <Notice tone="warning" className="print:hidden" testId="cv-tailored-no-structure">
             {t("tailored.noStructure")}
-          </p>
+          </Notice>
         ) : null}
 
         {/* The EU-format export is a VIEW over the SAME `cv` object — a
@@ -962,9 +1002,9 @@ export default async function VerifiedCvPage({
               educationType: (slug) => tEduTypes(slug),
               skill: (slug) => tSkill(slug),
               profession: (slug) => tProf(slug),
-              // The standard export prints the bare code; the native name is
-              // friendlier and falls back to the same code, so the two
-              // documents never disagree about which language it is.
+              // The native name, falling back to the code: the same rule the
+              // standard template uses, so the two documents never disagree
+              // about which language it is.
               language: (code) =>
                 WORKER_LANGUAGE_NATIVE_NAMES[
                   code as keyof typeof WORKER_LANGUAGE_NATIVE_NAMES
@@ -975,6 +1015,7 @@ export default async function VerifiedCvPage({
               // keeps the same label instead of printing it like a document.
               declaredCertificate: t("declaredCertHint"),
               date: (iso) => formatUtcDate(iso, locale),
+              statedDate: (iso, edge) => statedDateLabel(iso, edge, locale),
               present: t("present"),
               // Organization-provided history: the SAME composition the
               // on-screen CV uses, so the two documents never disagree.
@@ -1119,14 +1160,19 @@ export default async function VerifiedCvPage({
               </p>
             </div>
           ) : null}
-          {!compact ? (
+          {!summaryHasFigures ? null : !compact ? (
             <dl className="mt-4 grid grid-cols-3 gap-3" data-testid="cv-summary">
               {summary.map((s) => (
                 <div
                   key={s.key}
-                  className="rounded-lg border border-ink-600 p-3 text-center"
+                  className="min-w-0 rounded-lg border border-ink-600 p-2 text-center sm:p-3"
                 >
-                  <dt className="text-meta uppercase tracking-wide text-text-muted">
+                  {/* A third of a phone is ~100px: one long compound word
+                      ("Dagboekregistraties", "Tagebucheinträge") overflowed
+                      the tile and the page slid 21px sideways (UX review
+                      2026-10-24). It hyphenates where the locale's dictionary
+                      can, and breaks inside the word where it cannot. */}
+                  <dt className="hyphens-auto break-words text-meta uppercase tracking-wide text-text-muted">
                     {t(`summary.${s.key}`)}
                   </dt>
                   <dd className="mt-1 font-display text-2xl font-bold">
@@ -1172,7 +1218,7 @@ export default async function VerifiedCvPage({
             {/* Reference, not content: collapsed by default so the CV itself
                 comes first; one tap opens how it is built. */}
             <details className="group">
-              <summary className="cursor-pointer list-none text-sm text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+              <summary className="-my-1.5 flex min-h-11 cursor-pointer list-none items-center text-sm text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
                 <span aria-hidden className="mr-1.5 inline-block transition-transform group-open:rotate-90">›</span>
                 {t("builtFrom.lead")}
               </summary>
@@ -1319,6 +1365,7 @@ export default async function VerifiedCvPage({
                 );
               })}
             </ul>
+            <p className="text-meta text-text-muted" data-testid="cv-education-self-stated">{t("educationSelfStated")}</p>
           </section>
         ) : null}
 
@@ -1332,7 +1379,12 @@ export default async function VerifiedCvPage({
                   key={l.lang}
                   className="rounded-full border border-ink-500 bg-ink-700 px-2.5 py-0.5 text-xs text-text-secondary"
                 >
-                  {l.lang.toUpperCase()} · {l.level}
+                  {/* The language's own name, as on the EU template and
+                      the profile; the code only when no name is known. */}
+                  {WORKER_LANGUAGE_NATIVE_NAMES[
+                    l.lang as keyof typeof WORKER_LANGUAGE_NATIVE_NAMES
+                  ] ?? l.lang.toUpperCase()}{" "}
+                  · {l.level}
                 </span>
               ))}
             </div>
@@ -1416,7 +1468,12 @@ export default async function VerifiedCvPage({
               {cv.recordedHoursTotal > 0
                 ? `${t("recordedHours", {
                     hours: fmtHours(cv.recordedHoursTotal),
-                    confirmed: fmtHours(cv.recordedHoursConfirmed ?? 0),
+                    // Unreadable is not zero: an em dash, as in the summary
+                    // tiles above, never "0 h confirmed".
+                    confirmed:
+                      cv.recordedHoursConfirmed === null
+                        ? "—"
+                        : fmtHours(cv.recordedHoursConfirmed),
                   })} ${
                     cv.journalCoverage?.truncated
                       ? t("recordedHoursScopeTruncated", {
@@ -1480,6 +1537,29 @@ export default async function VerifiedCvPage({
                   : ""}
               </p>
             )}
+          {/* SEP-7: work an organization recorded with NO stated duration —
+              the work is shown, its length "to be confirmed"; never 0 h and
+              never in the total above. */}
+          {(cv.professionalExperience?.durationPending ?? []).map((p) => (
+            <p
+              key={p.key}
+              className="text-meta text-text-muted"
+              data-testid="cv-duration-pending"
+              data-records={p.records}
+            >
+              {t("durationPending", {
+                organization: p.organizationName ?? t("durationPendingUnnamed"),
+                records: p.records,
+                span:
+                  p.from && p.to && p.from !== p.to
+                    ? `${formatUtcDate(p.from, locale)} – ${formatUtcDate(p.to, locale)}`
+                    : p.from
+                      ? (formatUtcDate(p.from, locale) ?? "")
+                      : t("durationPendingUndated"),
+              })}
+              {p.periodLabel ? ` · ${p.periodLabel}` : ""}
+            </p>
+          ))}
           {/* The organization's own hour records (owner §19) — the second
               ledger, named beside the journal figure and added to nothing:
               an hour record proves attendance, not a skill. Shown only when
@@ -1550,6 +1630,12 @@ export default async function VerifiedCvPage({
                     const facts = item.practice;
                     const hours = facts?.attributedHours ?? 0;
                     const confirmed = facts?.confirmedHours ?? 0;
+                    // P0-B: the skill's own hours and the time it was involved
+                    // in but the records cannot attribute to it are two
+                    // readings, stated apart, never summed (skillTimeReading).
+                    const time = skillTimeReading(facts, cv.skillPractice !== null);
+                    const involvedHours =
+                      time.kind === "attributed" || time.kind === "involvement_only" ? time.involvedHours : 0;
                     return (
                       <span
                         key={item.key}
@@ -1606,6 +1692,28 @@ export default async function VerifiedCvPage({
                             {facts && facts.share > 0
                               ? ` · ${t("skillShare", { share: Math.round(facts.share * 100) })}`
                               : ""}
+                            {facts && facts.entries > 0
+                              ? ` · ${t("skillEntries", { count: facts.entries })}`
+                              : ""}
+                            {involvedHours > 0 ? (
+                              <span
+                                className="block"
+                                title={t("skillInvolvedHoursHint")}
+                                data-testid={`cv-skill-involved-hours-${slug}`}
+                                data-involved-hours={involvedHours}
+                              >
+                                {t("skillInvolvedHoursAlso", { hours: fmtHours(involvedHours) })}
+                              </span>
+                            ) : null}
+                          </span>
+                        ) : involvedHours > 0 && slug !== null ? (
+                          <span
+                            className="tabular-nums text-meta text-text-muted"
+                            title={t("skillInvolvedHoursHint")}
+                            data-testid={`cv-skill-involved-hours-${slug}`}
+                            data-involved-hours={involvedHours}
+                          >
+                            {t("skillInvolvedHours", { hours: fmtHours(involvedHours) })}
                             {facts && facts.entries > 0
                               ? ` · ${t("skillEntries", { count: facts.entries })}`
                               : ""}

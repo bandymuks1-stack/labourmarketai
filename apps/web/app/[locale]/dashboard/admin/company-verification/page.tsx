@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 
-import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { listCompanyVerificationRequests } from "@/lib/admin/company-verification";
 import type { CompanyVerificationStatus } from "@/lib/company/company-setup";
@@ -9,6 +9,11 @@ import {
   type CompanyVerificationReviewLabels,
 } from "@/components/app/company-verification-review";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/company-verification");
+
 
 /**
  * Admin-only company verification review surface.
@@ -79,12 +84,7 @@ export default async function AdminCompanyVerificationPage({
         </p>
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
-        <Link
-          href={"/dashboard/admin" as "/dashboard"}
-          className="mt-1 self-start text-xs text-text-secondary hover:underline"
-        >
-          ← {t("back")}
-        </Link>
+        <PageBack href={"/dashboard/admin" as "/dashboard"}>{t("back")}</PageBack>
       </header>
 
       {migrationNeeded ? (

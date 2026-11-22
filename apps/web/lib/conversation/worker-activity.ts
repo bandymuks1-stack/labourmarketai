@@ -105,7 +105,8 @@ export async function getWorkerCriteriaSnapshot(
 
     return {
       hasWorkerProfile: true,
-      skillsCount: skills.count ?? 0,
+      // A failed count is unknown, never 0 (SEP-7).
+      skillsCount: skills.error ? null : (skills.count ?? 0),
       languages: ((languages.data ?? []) as { lang: string }[]).map((l) => l.lang),
       preferredCountries: (worker.preferred_countries as string[] | null) ?? [],
       salaryMinEur: (worker.salary_min_eur as number | null) ?? null,
@@ -114,7 +115,7 @@ export async function getWorkerCriteriaSnapshot(
       availableFrom: (worker.available_from as string | null) ?? null,
       willingToRelocate: (worker.willing_to_relocate as boolean | null) ?? null,
       preferredContractType: (worker.preferred_contract_type as string | null) ?? null,
-      documentsCount: documents.count ?? 0,
+      documentsCount: documents.error ? null : (documents.count ?? 0),
       locationCountry: (worker.current_location_country as string | null) ?? null,
     };
   } catch {

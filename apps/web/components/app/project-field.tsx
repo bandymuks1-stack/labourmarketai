@@ -23,7 +23,11 @@ import { updateStageStatusAction } from "@/lib/projects/stages-actions";
 import { endAssignmentAction } from "@/lib/projects/actions";
 import { sendWorkInstructionAction } from "@/lib/instructions/actions";
 import { setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { ToggleChip } from "@/components/ui/Chip";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { CapacityBand, PlaceTimeStamp } from "@/components/app/work-world/primitives";
 
 /**
@@ -105,10 +109,6 @@ const TOKEN_SYMBOL: Record<TokenState, string> = {
 
 const OBJECT_BUTTON =
   "flex min-h-11 w-full items-center gap-2 rounded-md border border-ink-600 border-l-4 px-3 py-2 text-left transition-colors duration-fast hover:border-brand-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-cyan aria-pressed:border-brand-cyan aria-pressed:bg-ink-800";
-const CONTROL =
-  "inline-flex min-h-11 items-center rounded-md border border-ink-600 px-3 text-xs font-medium text-text-secondary transition-colors hover:border-brand-cyan hover:text-text-primary disabled:opacity-50";
-const SELECT =
-  "min-h-11 rounded-md border border-ink-600 bg-ink-800/40 px-2 text-xs text-text-primary";
 const META = "font-mono text-meta uppercase tracking-label text-text-muted";
 
 function day(iso: string | null): string {
@@ -190,29 +190,28 @@ export function ProjectField({
           </p>
         </div>
         <div className="flex gap-2" role="group" aria-label={t("viewLabel")}>
-          <button
-            type="button"
-            className={CONTROL}
-            aria-pressed={view === "field"}
-            onClick={() => setView("field")}
-            data-testid="project-field-view-field"
+          <ToggleChip
+            pressed={view === "field"}
+            onPressedChange={() => setView("field")}
+            testId="project-field-view-field"
           >
             {t("viewField")}
-          </button>
-          <button
-            type="button"
-            className={CONTROL}
-            aria-pressed={view === "list"}
-            onClick={() => setView("list")}
-            data-testid="project-field-view-list"
+          </ToggleChip>
+          <ToggleChip
+            pressed={view === "list"}
+            onPressedChange={() => setView("list")}
+            testId="project-field-view-list"
           >
             {t("viewList")}
-          </button>
+          </ToggleChip>
         </div>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="flex flex-col gap-4 lg:col-span-2">
+      {/* grid-cols-1 = minmax(0,1fr): without it the phone's implicit `auto`
+          track grows to the widest truncated row and both columns end past a
+          390px screen (production walk mobile-surfaces M-4, 2026-10-25). */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="flex min-w-0 flex-col gap-4 lg:col-span-2">
           {view === "field" ? (
             <Scene field={field} isSel={isSel} toggle={toggle} />
           ) : (
@@ -221,7 +220,7 @@ export function ProjectField({
         </div>
 
         <aside
-          className="flex flex-col gap-3 rounded-md border border-ink-600 p-4"
+          className="flex min-w-0 flex-col gap-3 rounded-md border border-ink-600 p-4"
           aria-live="polite"
           aria-label={t("contextLabel")}
           data-testid="project-field-context"
@@ -504,14 +503,14 @@ function Scene({ field, isSel, toggle }: { field: ProjectField; isSel: (s: Selec
         {field.people.length === 0 ? (
           <p className="text-sm text-text-muted" data-testid="project-field-people-empty">{t("peopleEmpty")}</p>
         ) : (
-          <ul className="grid gap-2 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {field.people.map((p) => (
-              <li key={p.workerId}>
+              <li className="min-w-0" key={p.workerId}>
                 <TokenButton token={p} pressed={isSel({ kind: "token", workerId: p.workerId })} onClick={() => toggle({ kind: "token", workerId: p.workerId })} />
               </li>
             ))}
             {field.peopleTotal > field.people.length ? (
-              <li className="flex min-h-11 items-center rounded-md border border-dashed border-ink-500 px-3 text-sm text-text-secondary" data-testid="project-field-people-cluster">
+              <li className="flex min-h-11 min-w-0 items-center rounded-md border border-dashed border-ink-500 px-3 text-sm text-text-secondary" data-testid="project-field-people-cluster">
                 {t("moreInList", { n: field.peopleTotal - field.people.length })}
               </li>
             ) : null}
@@ -524,9 +523,9 @@ function Scene({ field, isSel, toggle }: { field: ProjectField; isSel: (s: Selec
           <h3 className={META}>
             {t("slotsTitle")} · {field.slotsTotal}
           </h3>
-          <ul className="grid gap-2 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {field.slots.map((s) => (
-              <li key={s.id}>
+              <li className="min-w-0" key={s.id}>
                 <SlotButton slot={s} pressed={isSel({ kind: "slot", id: s.id })} onClick={() => toggle({ kind: "slot", id: s.id })} />
               </li>
             ))}
@@ -550,9 +549,9 @@ function Scene({ field, isSel, toggle }: { field: ProjectField; isSel: (s: Selec
         {field.ready.rows.length === 0 ? (
           <ReadyEmpty field={field} />
         ) : (
-          <ul className="grid gap-2 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {field.ready.rows.map((r) => (
-              <li key={r.workerId}>
+              <li className="min-w-0" key={r.workerId}>
                 <ReadyButton row={r} pressed={isSel({ kind: "ready", workerId: r.workerId })} onClick={() => toggle({ kind: "ready", workerId: r.workerId })} />
               </li>
             ))}
@@ -604,7 +603,7 @@ function ListEquivalent({ field, isSel, toggle }: { field: ProjectField; isSel: 
         ) : (
           <ul className="flex flex-col gap-2">
             {field.people.map((p) => (
-              <li key={p.workerId}>
+              <li className="min-w-0" key={p.workerId}>
                 <TokenButton token={p} pressed={isSel({ kind: "token", workerId: p.workerId })} onClick={() => toggle({ kind: "token", workerId: p.workerId })} />
               </li>
             ))}
@@ -626,7 +625,7 @@ function ListEquivalent({ field, isSel, toggle }: { field: ProjectField; isSel: 
         ) : (
           <ul className="flex flex-col gap-2">
             {field.slots.map((s) => (
-              <li key={s.id}>
+              <li className="min-w-0" key={s.id}>
                 <SlotButton slot={s} pressed={isSel({ kind: "slot", id: s.id })} onClick={() => toggle({ kind: "slot", id: s.id })} />
               </li>
             ))}
@@ -642,7 +641,7 @@ function ListEquivalent({ field, isSel, toggle }: { field: ProjectField; isSel: 
         ) : (
           <ul className="flex flex-col gap-2">
             {field.ready.rows.map((r) => (
-              <li key={r.workerId}>
+              <li className="min-w-0" key={r.workerId}>
                 <ReadyButton row={r} pressed={isSel({ kind: "ready", workerId: r.workerId })} onClick={() => toggle({ kind: "ready", workerId: r.workerId })} />
               </li>
             ))}
@@ -747,24 +746,24 @@ function ReadinessRow({
       </div>
       <div className="flex flex-wrap gap-2">
         {open ? (
-          <button type="button" className={CONTROL} disabled={pending} onClick={ask} data-testid="project-field-ask">
+          <Button type="button" variant="secondary" size="sm" className="min-h-11" disabled={pending} onClick={ask} data-testid="project-field-ask">
             {t("actions.ask")}
-          </button>
+          </Button>
         ) : null}
         {item.status !== "received" ? (
-          <button type="button" className={CONTROL} disabled={pending} onClick={() => set("received")} data-testid="project-field-mark-received">
+          <Button type="button" variant="secondary" size="sm" className="min-h-11" disabled={pending} onClick={() => set("received")} data-testid="project-field-mark-received">
             {t("actions.received")}
-          </button>
+          </Button>
         ) : null}
         {item.status !== "checked" ? (
-          <button type="button" className={CONTROL} disabled={pending} onClick={() => set("checked")} data-testid="project-field-mark-checked">
+          <Button type="button" variant="secondary" size="sm" className="min-h-11" disabled={pending} onClick={() => set("checked")} data-testid="project-field-mark-checked">
             {t("actions.checked")}
-          </button>
+          </Button>
         ) : null}
         {item.status !== "needed" ? (
-          <button type="button" className={CONTROL} disabled={pending} onClick={() => set("needed")} data-testid="project-field-mark-needed">
+          <Button type="button" variant="secondary" size="sm" className="min-h-11" disabled={pending} onClick={() => set("needed")} data-testid="project-field-mark-needed">
             {t("actions.needed")}
-          </button>
+          </Button>
         ) : null}
       </div>
     </li>
@@ -817,23 +816,25 @@ function TokenContext({
         {confirmLeave ? (
           <>
             <span className="text-sm text-text-secondary">{t("leaveConfirm", { name: token.name })}</span>
-            <button
+            <Button
               type="button"
-              className={`${CONTROL} border-state-danger/60 text-state-danger`}
+              variant="secondary"
+              size="sm"
+              className="min-h-11 border-state-danger/60 text-state-danger"
               disabled={pending}
               onClick={() => run(() => endAssignmentAction(projectId, token.workerProfileId), onLeft)}
               data-testid="project-field-leave-confirm"
             >
               {t("actions.leaveConfirm")}
-            </button>
-            <button type="button" className={CONTROL} disabled={pending} onClick={() => setConfirmLeave(false)}>
+            </Button>
+            <Button type="button" variant="secondary" size="sm" className="min-h-11" disabled={pending} onClick={() => setConfirmLeave(false)}>
               {t("actions.cancel")}
-            </button>
+            </Button>
           </>
         ) : (
-          <button type="button" className={CONTROL} disabled={pending} onClick={() => setConfirmLeave(true)} data-testid="project-field-leave">
+          <Button type="button" variant="secondary" size="sm" className="min-h-11" disabled={pending} onClick={() => setConfirmLeave(true)} data-testid="project-field-leave">
             {t("actions.leave")}
-          </button>
+          </Button>
         )}
       </div>
     </div>
@@ -856,17 +857,19 @@ function TaskRow({ task, pending, run }: { task: WorkTask; pending: boolean; run
       <div className="flex flex-wrap items-center gap-2">
         <label className="flex items-center gap-2">
           <span className="sr-only">{t("taskStatusLabel", { title: task.title })}</span>
-          <select className={SELECT} value={next} disabled={pending} onChange={(e) => setNext(e.target.value as WorkTaskStatus)} data-testid="project-field-task-select">
+          <Select className="w-auto max-sm:min-h-11 max-sm:text-base" value={next} disabled={pending} onChange={(e) => setNext(e.target.value as WorkTaskStatus)} data-testid="project-field-task-select">
             {WORK_TASK_STATUSES.map((s) => (
               <option key={s} value={s}>
                 {tTasks(`status.${s}`)}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
-        <button
+        <Button
           type="button"
-          className={CONTROL}
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           disabled={pending || next === task.status}
           onClick={() =>
             run(async () => {
@@ -877,7 +880,7 @@ function TaskRow({ task, pending, run }: { task: WorkTask; pending: boolean; run
           data-testid="project-field-task-save"
         >
           {t("actions.save")}
-        </button>
+        </Button>
       </div>
     </li>
   );
@@ -904,18 +907,18 @@ function LaneContext({ lane, tasksById }: { lane: FieldLane; tasksById: Readonly
       <div className="flex flex-wrap items-center gap-2">
         <label className="flex items-center gap-2">
           <span className="sr-only">{tStages("statusLabel")}</span>
-          <select className={SELECT} value={next} disabled={pending} onChange={(e) => setNext(e.target.value as StageStatus)} data-testid="project-field-lane-select">
+          <Select className="w-auto max-sm:min-h-11 max-sm:text-base" value={next} disabled={pending} onChange={(e) => setNext(e.target.value as StageStatus)} data-testid="project-field-lane-select">
             {STAGE_STATUSES.map((s) => (
               <option key={s} value={s}>
                 {tStages(`statuses.${s}`)}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         {next === "blocked" ? (
-          <input
+          <Input
             type="text"
-            className={`${SELECT} flex-1`}
+            className="w-auto flex-1 max-sm:min-h-11 max-sm:text-base"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder={tStages("blockedReasonPlaceholder")}
@@ -924,15 +927,17 @@ function LaneContext({ lane, tasksById }: { lane: FieldLane; tasksById: Readonly
             data-testid="project-field-lane-reason"
           />
         ) : null}
-        <button
+        <Button
           type="button"
-          className={CONTROL}
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           disabled={pending || (next === lane.status && (next !== "blocked" || reason === (lane.blockedReason ?? "")))}
           onClick={() => run(() => updateStageStatusAction({ stageId: lane.id, status: next, blockedReason: next === "blocked" ? reason : undefined }))}
           data-testid="project-field-lane-save"
         >
           {t("actions.save")}
-        </button>
+        </Button>
       </div>
       {Message}
 

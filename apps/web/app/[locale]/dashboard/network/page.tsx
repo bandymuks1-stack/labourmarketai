@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { workspaceDisplayLabels } from "@/lib/company/organization-switch";
 import { redirect } from "next/navigation";
 
@@ -44,6 +45,12 @@ import { ManagementDecisionsSection } from "@/components/app/management-decision
 import { ApprovalsSection } from "./approvals-section";
 import { RequestsSection } from "./requests-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+import { NEW_ORGANIZATION_HREF } from "@/lib/navigation/work-areas";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/network", "network.title");
+
 
 /**
  * "Mano tinklas" (core-network area B) — a SUB-SURFACE of the person /
@@ -316,13 +323,7 @@ export default async function NetworkPage({
     return (
       <div className="flex flex-col gap-6" data-testid="network-page">
         <header className="flex flex-col gap-1">
-          <Link
-            href={"/dashboard/network" as "/dashboard"}
-            className="inline-flex min-h-11 items-center gap-1 self-start font-mono text-meta uppercase tracking-label text-text-muted transition-colors hover:text-text-primary"
-            data-testid="network-admin-back"
-          >
-            ← {t("admin.back")}
-          </Link>
+          <PageBack href={"/dashboard/network" as "/dashboard"} data-testid="network-admin-back">{t("admin.back")}</PageBack>
         </header>
         {openArea === "approvals" && (
           <ApprovalsSection
@@ -383,6 +384,61 @@ export default async function NetworkPage({
             label: [r.roleText, r.country].filter(Boolean).join(" · ") || r.id.slice(0, 8),
           }))
       : [];
+  /**
+   * THE BUTTON IS THE ACTION (owner directive 2026-11-21, P1).
+   *
+   * "Kviesti studentus" led here with `?type=…&org=…&relationship=student`,
+   * and the person landed on the whole relationships page: its title and
+   * first screen are about "your companies, teams, partners", then an e-mail
+   * proof card and a people search — the invite form was the fourth block,
+   * below the first screen. The button named one action and opened a page
+   * about the organisation.
+   *
+   * `?invite=1` is the explicit action (every invite CTA carries it), so the
+   * page opens AS that action: the form first, titled after it, with the
+   * invitations already sent under it and one way back to every relationship.
+   * Nothing is removed — the full page is one tap away, unchanged.
+   */
+  if (invite === "1") {
+    const tLearners = await getTranslations("roleDashboards.company.learners");
+    const actionTitle = relationship === "student" ? tLearners("invite") : t("invite.title");
+    return (
+      <div className="flex flex-col gap-6" data-testid="network-page" data-view="invite">
+        <PageBack href={"/dashboard/network" as "/dashboard"} data-testid="network-invite-back">
+          {t("admin.back")}
+        </PageBack>
+        <div id="network-invite">
+          <InvitePanel
+            locale={locale}
+            organizations={inviteOrganizations}
+            projects={projects.map((p) => ({ id: p.id, title: p.title }))}
+            demands={myDemands}
+            defaultType={type}
+            defaultOrganizationId={org}
+            defaultProjectId={project}
+            defaultRelationshipSlug={relationship}
+            defaultOpen
+            pageTitle={actionTitle}
+          />
+        </div>
+        <section className="flex flex-col gap-2" data-testid="network-sent">
+          <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+            {t("sent.title")}
+          </h2>
+          {sent.status === "ok" ? (
+            <SentInvitationList items={sent.items} locale={locale} />
+          ) : sent.status === "needs-migration" ? (
+            <p className="text-xs text-text-muted" data-testid="network-sent-not-enabled">
+              {t("notEnabled")}
+            </p>
+          ) : (
+            <p className="text-xs text-text-muted">{t("sent.error")}</p>
+          )}
+        </section>
+      </div>
+    );
+  }
+
   const search = q ? await searchPeopleAndCompanies(q) : null;
   // WHICH discovered people may actually be messaged (§8.1, default-closed):
   // the same resolver the open-conversation action uses, so the button is
@@ -662,7 +718,7 @@ export default async function NetworkPage({
                 identity, so without this link a one-company owner had no
                 route to a second organization anywhere in the product. */}
             <Link
-              href="/dashboard/start/company"
+              href={NEW_ORGANIZATION_HREF as "/dashboard/start/company"}
               className="inline-flex min-h-11 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
               data-testid="network-add-company"
             >
@@ -678,7 +734,7 @@ export default async function NetworkPage({
               {t("organizations.noCompanyDesc")}
             </p>
             <Link
-              href="/dashboard/start/company"
+              href={NEW_ORGANIZATION_HREF as "/dashboard/start/company"}
               className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
               data-testid="network-add-company"
             >

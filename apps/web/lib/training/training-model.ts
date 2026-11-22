@@ -26,6 +26,78 @@ export const TRAINING_ASSIGNMENT_STATUSES = [
 export type TrainingAssignmentStatus =
   (typeof TRAINING_ASSIGNMENT_STATUSES)[number];
 
+/**
+ * Who a course can be assigned to (owner decision 2026-11-18, registry 11.8):
+ * an active governance member, or a person whose engagement with the
+ * organization is current in one of these relationships (status split below)
+ * — the SAME list
+ * `assign_training_v1` checks (migration 20261118143000, pinned by
+ * lib/guards/training-assignment-engaged-groups-v1.test.ts):
+ *   members   employee, manager, owner
+ *   interns   intern     learners  student
+ *   lawfully invited external people  collaborator, consultant, freelancer
+ */
+export const TRAINING_ASSIGNABLE_RELATIONSHIPS = [
+  "employee",
+  "manager",
+  "owner",
+  "intern",
+  "student",
+  "collaborator",
+  "consultant",
+  "freelancer",
+] as const;
+
+/**
+ * The status rule, split by group (owner decision 2026-11-18, "a paused
+ * relationship is not an end"): a non-learning link counts while `active` or
+ * `paused`; a learning link (intern, student) only while `active`, as
+ * 20261115120000 requires. Both groups also need started_at <= today <
+ * ended_at. The SAME split `assign_training_v1` checks.
+ */
+export const TRAINING_LEARNING_RELATIONSHIPS = ["intern", "student"] as const;
+export const TRAINING_PAUSE_ELIGIBLE_RELATIONSHIPS = [
+  "employee",
+  "manager",
+  "owner",
+  "collaborator",
+  "consultant",
+  "freelancer",
+] as const;
+
+/** Whether one engagement row makes its person assignable on `today` (YYYY-MM-DD). */
+export function isTrainingAssignableEngagement(
+  row: {
+    readonly relationshipSlug: string;
+    readonly status: string;
+    readonly startedAt: string | null;
+    readonly endedAt: string | null;
+  },
+  today: string,
+): boolean {
+  const pauseEligible = (TRAINING_PAUSE_ELIGIBLE_RELATIONSHIPS as readonly string[]).includes(
+    row.relationshipSlug,
+  );
+  const learning = (TRAINING_LEARNING_RELATIONSHIPS as readonly string[]).includes(
+    row.relationshipSlug,
+  );
+  const statusOk =
+    (pauseEligible && (row.status === "active" || row.status === "paused")) ||
+    (learning && row.status === "active");
+  if (!statusOk) return false;
+  if (row.startedAt && row.startedAt.slice(0, 10) > today) return false;
+  if (row.endedAt && row.endedAt.slice(0, 10) <= today) return false;
+  return true;
+}
+
+/** One person the register's picker offers. */
+export type TrainingAssignee = {
+  readonly profileId: string;
+  readonly name: string;
+  /** relationship slug, or the governance membership role */
+  readonly relationship: string;
+};
+
 export const TRAINING_EVENT_TYPES = [
   "assigned",
   "completed",
@@ -103,7 +175,12 @@ export type TrainingAssignmentRow = {
 export type CertificationRow = {
   readonly source: "training" | "worker_document";
   readonly id: string;
+  /** The course title (training rows); empty for a worker document, which is
+   *  named by its type through the documents' own translated labels. */
   readonly label: string;
+  /** The document type slug of a worker-document row — rendered through
+   *  `documents.types.<slug>`, never as the raw slug. Null for training. */
+  readonly documentTypeSlug: string | null;
   readonly holderProfileId: string | null;
   readonly issuedOn: string | null;
   readonly expiresOn: string | null;
@@ -130,6 +207,68 @@ export function deriveExpiryState(
   if (days < 0) return "lapsed";
   if (days <= TRAINING_EXPIRING_SOON_DAYS) return "expiring";
   return "valid";
+}
+
+/**
+ * What the caller may DO in the training register — the forms it is offered.
+ *
+ * Read from the database's own authority predicates, the very ones the write
+ * commands enforce (migration 20260817230000_training_certification_v1):
+ *
+ *   * add a course    — `createTrainingProgramAction` resolves the active
+ *                       employer workspace, then `create_training_program_v1`
+ *                       admits `org_owner_admin_v1(org) OR is_admin()`;
+ *   * edit / retire   — `update_training_program_v1`: the same
+ *                       `org_owner_admin_v1(course org) OR is_admin()`;
+ *   * assign, attach a certificate, mark expired — `assign_training_v1`,
+ *                       `attach_training_certificate_v1`,
+ *                       `set_training_assignment_expired_v1`:
+ *                       `has_org_demand_access(org)`.
+ *
+ * NEVER "the organization already has data": an organization with no course
+ * must still be able to add its first one, and an employee who can READ a
+ * course (RLS `belongs_to_organization`) must not be offered a form the
+ * database will refuse. Every predicate that could not be read is false —
+ * fail closed: the read view stays, the forms do not appear.
+ */
+export type TrainingAuthority = {
+  /** The organization the add-a-course form writes to, or null = no form. */
+  readonly createOrganizationId: string | null;
+  /** Organizations whose courses the caller may edit or retire. */
+  readonly editOrganizationIds: ReadonlySet<string>;
+  /** Organizations in which the caller may assign a course, attach a
+   *  certificate and mark a certification expired. */
+  readonly assignOrganizationIds: ReadonlySet<string>;
+};
+
+export const NO_TRAINING_AUTHORITY: TrainingAuthority = {
+  createOrganizationId: null,
+  editOrganizationIds: new Set<string>(),
+  assignOrganizationIds: new Set<string>(),
+};
+
+/** Combine the predicate reads into the register's authority. Pure. */
+export function deriveTrainingAuthority(input: {
+  /** The active employer workspace the create action would resolve, or null. */
+  readonly employerOrganizationId: string | null;
+  /** `is_admin()` for the caller. */
+  readonly platformAdmin: boolean;
+  /** Per organization id: `org_owner_admin_v1(org)`. */
+  readonly ownerAdmin: ReadonlyMap<string, boolean>;
+  /** Per organization id: `has_org_demand_access(org)`. */
+  readonly demandAccess: ReadonlyMap<string, boolean>;
+}): TrainingAuthority {
+  const owns = (org: string) => input.ownerAdmin.get(org) === true || input.platformAdmin;
+  const edit = new Set<string>();
+  for (const org of input.ownerAdmin.keys()) if (owns(org)) edit.add(org);
+  const assign = new Set<string>();
+  for (const [org, ok] of input.demandAccess) if (ok === true) assign.add(org);
+  const employer = input.employerOrganizationId;
+  return {
+    createOrganizationId: employer !== null && owns(employer) ? employer : null,
+    editOrganizationIds: edit,
+    assignOrganizationIds: assign,
+  };
 }
 
 /** The honest `?trn=` outcomes the actions can navigate back with. */

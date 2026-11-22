@@ -257,7 +257,10 @@ export function DarkListbox({
             role="listbox"
             id={listboxId}
             aria-label={ariaLabel}
-            className="max-h-60 overflow-auto"
+            // overscroll-contain: reaching the end of the list must not chain
+            // into the page — on a phone that chain is pull-to-refresh, which
+            // reloaded the onboarding wizard mid-choice (audit 2026-10-26).
+            className="max-h-60 overflow-auto overscroll-contain"
           >
             {visible.map((o, i) => {
               const isSelected = o.value === value;
@@ -274,7 +277,7 @@ export function DarkListbox({
                     onClick={() => !o.disabled && commit(o.value)}
                     onMouseEnter={() => setActiveIndex(i)}
                     className={cn(
-                      "flex w-full items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left text-sm",
+                      "flex min-h-11 w-full items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left text-sm",
                       isSelected ? "text-brand-blue" : "text-text-primary",
                       isActive && !o.disabled && "bg-ink-700",
                       o.disabled && "cursor-not-allowed text-text-muted",

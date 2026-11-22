@@ -391,6 +391,12 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
       { model: "@cf/google/gemma-4-26b-a4b-it", alias: "haiku", input: 0.1, output: 0.3 },
       { model: "@cf/mistralai/mistral-small-3.1-24b-instruct", alias: "sonnet", input: 0.351, output: 0.555 },
       { model: "@cf/openai/gpt-oss-120b", alias: "opus", input: 0.35, output: 0.75 },
+      // MODEL FAMILIES, NOT PROVIDERS (owner order 2026-10-25). Meta Llama and
+      // NVIDIA Nemotron are registered under the HOST that serves them. They
+      // hold no tier alias, so the alias router never picks them by itself;
+      // they are priced and sourced so an explicit, evaluated choice can.
+      { model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", alias: null, input: 0.293, output: 2.253 },
+      { model: "@cf/nvidia/nemotron-3-120b-a12b", alias: null, input: 0.5, output: 1.5 },
     ] as const
   ).map((entry) => ({
     provider: "cloudflare",
@@ -456,7 +462,8 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     maxOutputTokens: null,
     latencyP50Ms: null,
     dataRestrictions: [
-      "inputs not retained by default, logs up to 30 days, Zero Data Retention switch available; data stored in GCP US; training not stated on Groq's own pages (console.groq.com/docs/your-data, read 2026-10-25)",
+      "Services Agreement §4.2 (last modified 2026-06-22): no training on inputs or outputs; DPA incorporated (§3.4)",
+      "inputs not retained by default, logs up to 30 days, Zero Data Retention switch available; data stored in GCP US (console.groq.com/docs/your-data, read 2026-10-25)",
     ],
     effectiveFrom: "2026-10-25",
     pricingSource:

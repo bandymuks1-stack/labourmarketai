@@ -30,6 +30,13 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Vælg tilknytning…",
   "engagementAmbiguous": "Dette arbejde kan høre til mere end én tilknytning. Vælg hvilken, før du gemmer.",
+  "unnamedOrganization": {
+    "company": "Virksomhed uden navn",
+    "agency": "Bureau uden navn",
+    "other": "Organisation uden navn",
+    "ended": "Tidligere organisation uden navn"
+  },
+  "activeWorkspaceNoRelationship": "Du handler på vegne af {org}, men der er ikke registreret noget arbejdsforhold med {org}, så det tilbydes ikke her. Vælg den kontekst, arbejdet reelt hører til.",
   "project": "Projekt",
   "projectChoose": "Vælg projekt…",
   "projectNone": "Ikke projektarbejde",
@@ -93,7 +100,16 @@
       "outcomeBlocked": "ikke bekræftet ({code})",
       "receipt": "Bekræftet: {title}",
       "receiptSkills": "{count, plural, one {# færdighed} other {# færdigheder}}",
-      "skillsUnavailable": "Listen over færdigheder kunne ikke læses — trykket bekræfter kun selve registreringen."
+      "skillsUnavailable": "Listen over færdigheder kunne ikke læses — trykket bekræfter kun selve registreringen.",
+      "projectFilterLabel": "Projekt",
+      "projectAll": "Alle projekter ({n})",
+      "projectNone": "Uden projekt ({n})",
+      "projectUnnamed": "Projekt, navnet vises ikke",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Vis",
+      "projectResult": "Viser {shown} af {total} poster",
+      "projectOnCard": "Projekt: {name}",
+      "noProjectOnCard": "Uden projekt"
     },
     "result": {
       "entrySuperseded": "Posten er allerede erstattet af en nyere version — kortet er ikke længere aktuelt og fjernes fra listen.",

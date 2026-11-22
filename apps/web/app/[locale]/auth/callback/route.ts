@@ -16,6 +16,7 @@ import {
   isEmailConfirmFlow,
   parseEmailVerification,
   parseRedirectToHint,
+  classifyMissingCode,
 } from "@/lib/auth/email-confirm";
 import {
   VERIFY_RESULT_PARAM,
@@ -118,11 +119,21 @@ export async function GET(
   }
 
   if (!code && !verification) {
-    console.error("[auth/callback] missing code in callback URL", {
-      locale,
-      trace: traceId,
-    });
-    loginUrl.searchParams.set("error", "missing_code");
+    // On the e-mail confirmation return this is what a RE-SENT link does (see
+    // classifyMissingCode): the address is confirmed, the person signs in.
+    const outcome = classifyMissingCode(emailConfirmFlow);
+    if (outcome === "missing_code") {
+      console.error("[auth/callback] missing code in callback URL", {
+        locale,
+        trace: traceId,
+      });
+    } else {
+      console.info("[auth/callback] confirmation link returned without a code", {
+        locale,
+        trace: traceId,
+      });
+    }
+    loginUrl.searchParams.set("error", outcome);
     return NextResponse.redirect(loginUrl);
   }
 

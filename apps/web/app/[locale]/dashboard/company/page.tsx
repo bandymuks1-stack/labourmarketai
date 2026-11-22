@@ -1,11 +1,12 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { FolderPlus, History, UserPlus, UserSearch } from "lucide-react";
 
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
-import { actsAsAgency } from "@/lib/company/agency-capability";
+import { actsAsAgency, resolveNeedsAudience } from "@/lib/company/agency-capability";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
   getAccessibleCompanyById,
@@ -31,9 +32,17 @@ import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-
 import { countWorkersWithUnconfirmableWork } from "@/lib/operations/org-members";
 import { countRosterConflicts } from "@/lib/planning/roster-conflicts";
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
+import { homeReadbackRows } from "@/lib/company/company-home-field-model";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
+import { OrganizationTodayView } from "@/components/app/organization/organization-today-view";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { NeedDoorLink } from "@/components/app/need-door-link";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company", "roleDashboards.company.title");
+
 
 // The employer demand kinds the home field's "what we are missing" reads —
 // a dual-role user's buyer service requests stay in the buyer room.
@@ -65,9 +74,8 @@ const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
  */
 export default async function CompanyDashboardPage({
   params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+  searchParams,
+}: { params: Promise<{ locale: string }>; searchParams?: Promise<{ view?: string | string[] }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
@@ -142,6 +150,9 @@ export default async function CompanyDashboardPage({
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow?.id)?.id ??
     // Only a GOVERNED active organization — never an employee-only one.
     governedActiveOrganizationId(orgContext);
+  if ((await searchParams)?.view === "today") {
+    return <OrganizationTodayView organizationId={capabilityOrgId} company={companyRow} context={employerCtx} />;
+  }
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
@@ -200,7 +211,8 @@ export default async function CompanyDashboardPage({
     // Never summed with the employer count above: its own number and label.
     {
       key: "clientReview",
-      count: clientToDecide ?? 0,
+      // null = the count could not be read (SEP-7) — kept, never 0.
+      count: clientToDecide,
       href: `/${locale}/dashboard/inbox/counterparty`,
     },
     // Recorded work nobody can confirm yet (review switched off). Unknown (a
@@ -238,12 +250,6 @@ export default async function CompanyDashboardPage({
 
   const primaryActions = [
     {
-      key: "need",
-      href: "/dashboard/company/needs#demand-intake",
-      label: tDoors("newNeed"),
-      icon: <UserSearch className="h-4 w-4" aria-hidden />,
-    },
-    {
       key: "project",
       href: "/dashboard/company/projects/new",
       label: tDoors("newProject"),
@@ -251,7 +257,7 @@ export default async function CompanyDashboardPage({
     },
     {
       key: "invite",
-      href: "/dashboard/network?type=join_as_employee",
+      href: "/dashboard/network?invite=1&type=join_as_employee",
       label: tDoors("invite"),
       icon: <UserPlus className="h-4 w-4" aria-hidden />,
     },
@@ -271,13 +277,7 @@ export default async function CompanyDashboardPage({
       />
       <header className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Link
-            href="/dashboard"
-            className="shrink-0 text-xs font-medium text-brand-blue transition-colors hover:underline"
-            data-testid="back-to-action-center"
-          >
-            ← {tRooms("backToActions")}
-          </Link>
+          <PageBack href="/dashboard" data-testid="back-to-action-center">{tRooms("backToActions")}</PageBack>
           <Link
             href="/dashboard"
             className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
@@ -364,20 +364,13 @@ export default async function CompanyDashboardPage({
       {rHomeField ? (
         <CompanyHomeFieldSection
           locale={locale}
+          companyType={companyRow?.companyType ?? null}
           capabilities={declaredCapabilities}
           field={rHomeField}
-          needs={
-            demandReadback.kind === "ok"
-              ? {
-                  kind: "ok",
-                  // NEEDS, not every request the organisation owns: an agency's
-                  // own `agency_offer` is capacity it HAS.
-                  rows: demandReadback.rows.filter((r) => r.direction === "demand"),
-                }
-              : demandReadback.kind === "needs-migration"
-                ? { kind: "needs-migration" }
-                : { kind: "error" }
-          }
+          // ONE read, two directions: its NEEDS are what is missing; an agency's
+          // own `agency_offer` is capacity it HAS, shown as what it offers.
+          needs={homeReadbackRows(demandReadback, "demand")}
+          offers={homeReadbackRows(demandReadback, "supply")}
           partners={{
             agencies: clientInvites && clientInvites.kind === "ok" ? clientInvites.rows : null,
             clients:
@@ -401,6 +394,13 @@ export default async function CompanyDashboardPage({
         data-testid="company-primary-actions"
         className="flex flex-wrap gap-2"
       >
+        {/* Not for an organisation whose Needs door opens on an offer. */}
+        {resolveNeedsAudience({ companyType: companyRow?.companyType, capabilities: declaredCapabilities }).audience === "need" ? (
+          <NeedDoorLink surface="company_home_actions" testId="company-primary-action-need"
+            icon={<UserSearch className="h-4 w-4" aria-hidden />}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+          />
+        ) : null}
         {primaryActions.map((a) => (
           <Link
             key={a.key}

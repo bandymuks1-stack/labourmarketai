@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import {
   addDefectCorrectionAction,
   deleteDefectAction,
@@ -50,24 +52,30 @@ function DefectRow({ defect, onDone }: { defect: Defect; onDone: (m: string) => 
       <div className="flex flex-wrap items-center gap-2">
         <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${SEVERITY_TONE[defect.severity]}`}>{t(`severity.${defect.severity}`)}</span>
         <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t(`category.${defect.category}`)}</span>
-        <span className="min-w-0 flex-1 truncate text-sm text-text-primary" title={defect.description}>{defect.description}</span>
         {defect.status === STATUS_ACCEPTED && (
           <span className="font-mono text-meta uppercase tracking-label text-state-success">{t(`status.${defect.status}`)}</span>
         )}
       </div>
+      {/* WHAT IS WRONG is the row's content, not a label: its own line, wrapped
+          in full. It sat truncated beside the chips, which on a phone left
+          "UXV-SY…" — the manager could not read the defect without opening
+          it (UX review 2026-10-24, row 3.10). */}
+      <p className="whitespace-pre-line break-words text-sm text-text-primary" data-testid="defect-description-text">
+        {defect.description}
+      </p>
       {defect.location ? <span className="text-meta text-text-muted">{t("locationLabel")}: {defect.location}</span> : null}
 
       <div className="flex flex-wrap items-center gap-2">
         <label className="text-meta text-text-secondary" htmlFor={`defect-status-${defect.id}`}>{t("statusLabel")}</label>
-        <select id={`defect-status-${defect.id}`} value={defect.status} disabled={pending}
+        <Select id={`defect-status-${defect.id}`} value={defect.status} disabled={pending}
           onChange={(e) => run(() => setDefectStatusAction({ defectId: defect.id, status: e.target.value }))}
-          className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="defect-status">
+          className="w-auto max-sm:min-h-11 max-sm:text-base" data-testid="defect-status">
           {DEFECT_STATUSES.map((s) => (<option key={s} value={s}>{t(`status.${s}`)}</option>))}
-        </select>
-        <button type="button" disabled={pending} onClick={() => setShowCorrection((v) => !v)}
-          className="rounded-md border border-ink-500 px-2 py-1 text-meta hover:border-brand-blue" data-testid="defect-correction-toggle">{t("addCorrection")}</button>
-        <button type="button" disabled={pending} onClick={() => run(() => deleteDefectAction({ defectId: defect.id }))}
-          className="ml-auto rounded-md border border-ink-500 px-2 py-1 text-meta text-text-muted hover:border-state-danger hover:text-state-danger" data-testid="defect-delete">{t("delete")}</button>
+        </Select>
+        <Button type="button" variant="secondary" size="sm" disabled={pending} onClick={() => setShowCorrection((v) => !v)}
+          className="min-h-11" data-testid="defect-correction-toggle">{t("addCorrection")}</Button>
+        <Button type="button" variant="secondary" size="sm" disabled={pending} onClick={() => run(() => deleteDefectAction({ defectId: defect.id }))}
+          className="ml-auto min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger" data-testid="defect-delete">{t("delete")}</Button>
       </div>
 
       {defect.corrections.length > 0 && (
@@ -82,13 +90,13 @@ function DefectRow({ defect, onDone }: { defect: Defect; onDone: (m: string) => 
 
       {showCorrection && (
         <div className="flex flex-wrap items-center gap-2 border-t border-ink-600 pt-2">
-          <input aria-label={t("workLabel")} value={work} maxLength={2000} onChange={(e) => setWork(e.target.value)}
-            placeholder={t("workPlaceholder")} className="min-w-40 flex-1 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary" data-testid="correction-work" />
-          <select aria-label={t("outcomeLabel")} value={outcome} onChange={(e) => setOutcome(e.target.value)}
-            className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="correction-outcome">
+          <Input aria-label={t("workLabel")} value={work} maxLength={2000} onChange={(e) => setWork(e.target.value)}
+            placeholder={t("workPlaceholder")} className="w-auto min-w-40 flex-1 max-sm:min-h-11 max-sm:text-base" data-testid="correction-work" />
+          <Select aria-label={t("outcomeLabel")} value={outcome} onChange={(e) => setOutcome(e.target.value)}
+            className="w-auto max-sm:min-h-11 max-sm:text-base" data-testid="correction-outcome">
             {CORRECTION_OUTCOMES.map((o) => (<option key={o} value={o}>{t(`correctionOutcome.${o}`)}</option>))}
-          </select>
-          <Button type="button" size="sm" disabled={pending || !work.trim()}
+          </Select>
+          <Button type="button" size="sm" className="min-h-11" disabled={pending || !work.trim()}
             onClick={() => run(() => addDefectCorrectionAction({ defectId: defect.id, workPerformed: work.trim(), outcome }), () => { setWork(""); setShowCorrection(false); })}
             data-testid="correction-submit">{t("save")}</Button>
         </div>
@@ -149,21 +157,21 @@ export function ProjectDefectsPanel({ projectId, data }: { projectId: string; da
           <div className="flex flex-col gap-2 border-t border-ink-600 pt-3">
             <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t("reportHeading")}</span>
             <div className="flex flex-wrap items-center gap-2">
-              <select aria-label={t("categoryLabel")} value={category} onChange={(e) => setCategory(e.target.value as DefectCategory)}
-                className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="defect-category">
+              <Select aria-label={t("categoryLabel")} value={category} onChange={(e) => setCategory(e.target.value as DefectCategory)}
+                className="w-auto max-sm:min-h-11 max-sm:text-base" data-testid="defect-category">
                 {DEFECT_CATEGORIES.map((c) => (<option key={c} value={c}>{t(`category.${c}`)}</option>))}
-              </select>
-              <select aria-label={t("severityLabel")} value={severity} onChange={(e) => setSeverity(e.target.value as DefectSeverity)}
-                className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="defect-severity">
+              </Select>
+              <Select aria-label={t("severityLabel")} value={severity} onChange={(e) => setSeverity(e.target.value as DefectSeverity)}
+                className="w-auto max-sm:min-h-11 max-sm:text-base" data-testid="defect-severity">
                 {DEFECT_SEVERITIES.map((s) => (<option key={s} value={s}>{t(`severity.${s}`)}</option>))}
-              </select>
-              <input aria-label={t("locationLabel")} value={location} maxLength={200} onChange={(e) => setLocation(e.target.value)}
-                placeholder={t("locationPlaceholder")} className="w-40 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary" data-testid="defect-location" />
+              </Select>
+              <Input aria-label={t("locationLabel")} value={location} maxLength={200} onChange={(e) => setLocation(e.target.value)}
+                placeholder={t("locationPlaceholder")} className="w-40 max-sm:min-h-11 max-sm:text-base" data-testid="defect-location" />
             </div>
-            <input aria-label={t("descriptionLabel")} value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)}
-              placeholder={t("descriptionPlaceholder")} className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary" data-testid="defect-description" />
+            <Input aria-label={t("descriptionLabel")} value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)}
+              placeholder={t("descriptionPlaceholder")} className="max-sm:min-h-11 max-sm:text-base" data-testid="defect-description" />
             <div>
-              <Button type="button" size="sm" disabled={pending || !description.trim()} onClick={submit} data-testid="defect-report">{pending ? t("saving") : t("report")}</Button>
+              <Button type="button" size="sm" className="min-h-11" disabled={pending || !description.trim()} onClick={submit} data-testid="defect-report">{pending ? t("saving") : t("report")}</Button>
             </div>
           </div>
         </>

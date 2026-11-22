@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { MessageSquare } from "lucide-react";
+import { CalendarDays, MapPin, MessageSquare, NotebookPen, Store } from "lucide-react";
 
 import { listMyBookings, type BookingRow } from "@/lib/booking/booking-actions";
 import { openBookingConversationAction } from "@/lib/booking/booking-conversation";
@@ -18,8 +18,14 @@ import {
   type BookingDisplayState,
   type BookingStatus,
 } from "@/lib/booking/booking-state";
-import { ActionCard } from "@/components/app/action-card";
+import { PremiumActionDeck } from "@/components/ui/premium-action-card";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/bookings", "bookings.title");
+
 
 /**
  * Bookings (Stage 6) — the worker's incoming proposals (accept/decline) and the
@@ -82,6 +88,9 @@ export default async function BookingsPage({
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
+      {/* Mutual, neutral pre-agreement recommendation — advice to both
+          parties, never a gate (decision 0021 extension, 2026-10-24). */}
+      <CollaborationChecksNote context={{ dealKind: "work_engagement" }} testId="bookings-collaboration-checks" />
 
       {/* Planning hub connections (§8.3): a booking is one part of the plan —
           surface the real, existing surfaces it links to (Marketplace orders,
@@ -310,24 +319,28 @@ function PlanningConnections({
       // Control room PR E: the unified planning agenda shows this booking
       // in date context together with project bands and task deadlines.
       key: "planning",
+      icon: CalendarDays,
       href: "/dashboard/planning",
       label: t("connections.planning"),
       note: t("connections.planningNote"),
     },
     {
       key: "marketplace",
+      icon: Store,
       href: "/dashboard/service-requests",
       label: t("connections.marketplace"),
       note: t("connections.marketplaceNote"),
     },
     {
       key: "map",
+      icon: MapPin,
       href: "/dashboard/market-map",
       label: t("connections.map"),
       note: t("connections.mapNote"),
     },
     {
       key: "diary",
+      icon: NotebookPen,
       href: "/dashboard/journal",
       label: t("connections.diary"),
       note: t("connections.diaryNote"),
@@ -342,18 +355,20 @@ function PlanningConnections({
         {t("connections.title")}
       </span>
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
-      {/* Shared ActionCard pattern (audit PR8). */}
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        {links.map((l) => (
-          <ActionCard
-            key={l.key}
-            href={l.href}
-            testid={`bookings-connection-${l.key}`}
-            title={l.label}
-            description={l.note}
-          />
-        ))}
-      </div>
+      {/* The ONE action-choice tile (owner 2026-11-03: no second card system). */}
+      <PremiumActionDeck
+        ariaLabel={t("connections.title")}
+        layout="list"
+        items={links.map((l) => ({
+          key: l.key,
+          href: l.href,
+          icon: l.icon,
+          label: l.label,
+          hint: l.note,
+          hintAlways: true,
+          testId: `bookings-connection-${l.key}`,
+        }))}
+      />
     </section>
   );
 }

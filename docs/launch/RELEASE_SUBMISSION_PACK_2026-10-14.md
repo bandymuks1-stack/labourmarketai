@@ -9,7 +9,62 @@
 - [`../mobile/STORE_RELEASE_READINESS_2026-09-13.md`](../mobile/STORE_RELEASE_READINESS_2026-09-13.md) and [`../mobile/MOBILE_STATUS_2026-10-14.md`](../mobile/MOBILE_STATUS_2026-10-14.md).
 - [`../integrations/CHATGPT_MCP_CLIENT_V1.md`](../integrations/CHATGPT_MCP_CLIENT_V1.md) and [`../integrations/LLM_INTEGRATION_COVERAGE_V1.md`](../integrations/LLM_INTEGRATION_COVERAGE_V1.md).
 
-The older store-asset packs (`mobile-store-assets-*-v1.md`, `mobile-store-readiness-v2.md`) were written for a PWA/TWA wrapper. They describe screens the **native** app does not have: opportunities, bookings, messaging, CV export. **Do not submit their listing text.** §2 and §3 replace it.
+The older store-asset packs (`mobile-store-assets-*-v1.md`, `mobile-store-readiness-v2.md`) were written for a PWA/TWA wrapper. They describe screens the **native** app does not have, such as bookings and CV export. **Do not submit their listing text.** §2 and §3 replace it.
+
+**Scope update 2026-11-02.** The native app has grown since 10-14:
+- work-journal correction (#2916);
+- messages (#2928);
+- in-app notifications (#2929);
+- the person's projects (#2941).
+
+These sit next to the jobs, opportunities, post-a-need and availability screens already on `main`. §1, §2 and §3 below are updated to that scope. **Nothing has been submitted or published. No store account, EAS project or signing key was created.** Those stay owner actions (§6).
+
+---
+
+## 0. Shortest path to TestFlight internal + Play internal testing (update 2026-11-11)
+
+**Goal:** a signed build in the hands of internal testers on both stores. A public release comes after (§6 items 8–10).
+
+**Build route chosen: EAS Build + EAS Submit**, started by hand from GitHub Actions (`eas-release.yml`). The GitHub Actions signed build was rejected, for four reasons:
+
+- **No Mac.** The owner works on Windows. EAS builds iOS on Expo's macOS machines and creates the distribution certificate and provisioning profile itself. A GitHub macOS runner would need them made by hand first.
+- **Fewest secrets in GitHub.** The signing material (iOS certificate + profile, Android upload keystore) and the store keys (App Store Connect API key, Play service account) stay in the owner's Expo account. GitHub holds ONE secret, `EXPO_TOKEN`. The repository is public. The GitHub route would put five or more signing secrets beside it and need renewal by hand.
+- **Cost 0 €.** The repository already pins EAS profiles (`apps/mobile/eas.json`, guarded by `mobile-release-config.test.ts`). The Expo free plan has a monthly build quota and a slower queue; check expo.dev/pricing before relying on a number. The store fees below are unavoidable on either route.
+- **A fallback stays.** `android.yml` already builds a release AAB with Gradle. If the EAS quota ever blocks a release, the same job can sign with an upload key, at the cost of one keystore secret. That stays an owner decision.
+
+> **Pending prerequisite.** `eas-release.yml` is not on `main` yet: it is PR #3217, not merged. Until it lands there is no "EAS release build" entry under Actions. Use the manual path instead: from the owner's terminal, `cd apps/mobile && npx eas-cli@latest build -p ios --profile production` (and `-p android`), then `npx eas-cli@latest submit -p ios --profile production` (and `-p android`, after the first manual Play upload, O-7). §0.2 describes the workflow once #3217 is merged.
+
+### 0.1 Owner steps, in order (the parts only the owner can do)
+
+| # | Step | Detail | Time / cost |
+|---|---|---|---|
+| O-1 | **Apple Developer Program** | Enrol at developer.apple.com, as an individual or an organization. An organization needs a D-U-N-S number; an individual is the faster route. | 99 USD/year; individual about 1–2 days, organization longer |
+| O-2 | **App Store Connect record** | New app, bundle id `ai.labourmarket.app`, name "LabourMarket.ai", primary language. Then create an **App Store Connect API key** (Users and Access → Integrations, App Manager role) and upload it to EAS: `eas credentials` → iOS → App Store Connect API key. | minutes |
+| O-3 | **Google Play Console** | Choose the account type deliberately. **Personal:** before production access, a closed test must run with at least **12 testers opted in for 14 days in a row**. Internal testing is open immediately. **Organization:** no such rule, but it needs a D-U-N-S number and organization verification. | 25 USD once |
+| O-4 | **Expo account + `eas init`** | Create a free account at expo.dev. Run `cd apps/mobile && npx eas-cli@latest login && npx eas-cli@latest init`. This writes `extra.eas.projectId` (and `owner`) into `app.json`; the agent then commits that public id. Create an access token (expo.dev → Access tokens) and store it as the GitHub secret `EXPO_TOKEN`. | minutes, 0 € |
+| O-5 | **Public build configuration in EAS** | The app bundle needs the three public values, as plain-text EAS variables in the `production` environment: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` (the publishable anon key, the same as `vars.PROD_QA_ANON_KEY`) and `EXPO_PUBLIC_API_BASE_URL=https://labourmarket.ai`. Set them with `eas env:create --environment production --visibility plaintext`. **Never** set the service-role key; client-core refuses it at runtime anyway. | minutes |
+| O-6 | **Signing** | Run the first build interactively from the owner's own terminal, so EAS can create and store the credentials: `eas build -p ios --profile production` (Apple ID sign-in, then EAS creates the certificate + profile) and `eas build -p android --profile production` (EAS generates the upload keystore). On Play, keep **Play App Signing** on (it is mandatory for new apps). Google then holds the app-signing key and EAS holds the upload key. | one build each |
+| O-7 | **First Play upload is manual** | The Play API cannot create an app's first release. Upload the first AAB by hand under Testing → Internal testing. After that, `eas submit -p android` works with a Play **service account** JSON uploaded to EAS (`eas credentials` → Android → Google Service Account). | once |
+| O-8 | **App Links + Universal Links** | Set `ANDROID_CERT_FINGERPRINTS` on the production web deploy to the **Play App Signing** SHA-256 (Play Console → App integrity), and also the upload key's SHA-256 if testers sideload. Set `APPLE_TEAM_ID`. Until then `/.well-known/assetlinks.json` and `apple-app-site-association` return 404, by design. | minutes |
+| O-9 | **Reviewer / tester account** | ONE synthetic worker account with a password, at least one confirmed journal entry and one workspace (§6 item 4). Its credentials go only into the store consoles' review fields and the `production-qa` secret `MOBILE_QA_PASSWORD`, never into the repo or a PR. | minutes |
+| O-10 | **Testers** | TestFlight **internal**: up to 100 App Store Connect users, no Beta App Review. Play **internal testing**: up to 100 e-mail addresses on a list. | minutes |
+
+### 0.2 What then runs without the owner, and what never does
+
+_Applies only after PR #3217 (`eas-release.yml`) is merged; until then use the manual path in §0._
+
+- **GitHub → Actions → "EAS release build" → Run workflow** (platform: ios / android / all). It builds signed packages on EAS.
+- **Upload is off by default.** The workflow's `submit` input defaults to `false`. Setting it to `true` uploads to **TestFlight / Play internal testing only**: the `production` submit profile names no release track or review, and promotion to production stays a click in each console.
+- **No secret: no build.** Without `EXPO_TOKEN` or `extra.eas.projectId` the workflow **skips cleanly**. It exits 0 and says which value is missing in its summary. Nothing in the repository becomes a key.
+- **Every run is the owner's decision.** The job runs in the `store-release` GitHub environment. Add the owner as its required reviewer (Settings → Environments), so no agent-started run can build or upload without the owner's click.
+
+### 0.3 Known gaps a reviewer may raise (status 2026-11-11)
+
+| Gap | Risk | Status |
+|---|---|---|
+| Account deletion is a link to the web, not an in-app action | Apple 5.1.1(v): deletion must be **initiated in the app**. A link is accepted only when it goes straight to the deletion step. | The capability is not exposed through `/api/mcp`: the request exists only as a web server action calling `submit_privacy_request_v1`. Making it reachable from the app needs a new MCP capability. That is a privacy decision for the owner, so it is held. |
+| No push notifications | none for review | options in §8, nothing added |
+| No offers screen | none for review | proposed separately; client reuse only |
 
 ---
 
@@ -23,12 +78,20 @@ Expo / React Native app `apps/mobile`, id `ai.labourmarket.app`, version 0.1.0. 
 | Today | This week's own work figures and the latest journal entries. |
 | Work journal | Their own entries, newest first. |
 | Log work | Date, site, notes → draft → confirm (two steps; nothing is saved until confirmed). |
+| Correct an entry | Change a confirmed entry: draft → before/after preview → confirm. The earlier version is kept as superseded, never overwritten. |
+| Messages | Their own in-app conversations. Open a thread and reply. A reply is drafted, previewed and only then sent (draft → confirm). |
+| Notifications | Their own in-app notifications, read when the screen is opened. Mark one or all as read. Some open the matching web page. **No push.** |
+| My projects | The projects they are assigned to: active or ended, what is still needed from them, and the latest instruction (answered in Messages). The full project page (stages, documents, team) is on the website. |
+| Jobs | Search the public vacancy board (the same anonymous view as the website). A job's full page opens on the website. |
+| Opportunities | Open opportunities. Tell the other side they are interested (draft → confirm). |
+| Post a need | For the organization they act for: describe a need → draft → confirm. |
+| Who is free | The workspace's availability (committed is not unavailable), the same read as the web planning page. |
 | Profile | Name, roles, skills inferred from their own journal (Living CV read). |
 | Settings | Language (6), workspace switch, privacy / deletion / terms / support links, sign out. |
 
 **Not in the native app:**
-- messages, calendar, projects, AI chat, marketplace;
-- push, camera, offline queue;
+- calendar, AI chat, marketplace;
+- push notifications, camera, offline queue;
 - Google / Apple sign-in.
 
 These are on the website (`labourmarket.ai`), which the app links to where relevant. The listing must not promise them. Apple guideline 2.3 and Play's misleading-claims policy both reject that.
@@ -67,11 +130,16 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 > • See your week at a glance: days worked and your latest entries.
 > • Your work journal: every entry you have confirmed, newest first.
 > • Your profile shows the skills your own entries point to — a living CV built from real work, not only from what you declare.
+> • Made a mistake? Correct an entry. You see the before and after and confirm the change; the earlier version is kept.
+> • Messages: read your conversations and reply. You see your reply before it is sent.
+> • Notifications: what happened for you, in the app. Mark them read once you have seen them.
+> • My projects: where you are assigned, what is still needed from you, and the latest instruction.
+> • Search jobs, see opportunities and tell an employer you are interested.
 > • Switch between the workspaces you belong to, in six languages (English, Lithuanian, Russian, Dutch, German, Polish).
 >
 > Your data is closed by default: other people see nothing unless you allow it. You can download your data and request account deletion at any time.
 >
-> More of the platform — projects, messages, calendar and the marketplace — is available at labourmarket.ai.
+> More of the platform — full project pages, the calendar and the marketplace — is available at labourmarket.ai.
 
 **Full description (LT):**
 
@@ -81,11 +149,16 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 > • Matyk savo savaitę iš karto: dirbtas dienas ir naujausius įrašus.
 > • Tavo darbo žurnalas: visi patvirtinti įrašai, naujausi viršuje.
 > • Profilis rodo įgūdžius, į kuriuos rodo tavo pačių įrašai — gyvas CV iš tikro darbo, ne vien iš deklaracijų.
+> • Suklydai? Pataisyk įrašą. Matai, kas buvo ir kas bus, ir patvirtini pakeitimą; ankstesnė versija išlieka.
+> • Žinutės: skaityk savo pokalbius ir atsakyk. Atsakymą matai prieš jį išsiunčiant.
+> • Pranešimai: kas tau nutiko, tiesiai programėlėje. Pažymėk perskaitytais, kai juos pamatai.
+> • Mano projektai: kur esi priskirtas, ko dar reikia iš tavęs ir naujausias nurodymas.
+> • Ieškok darbo, matyk galimybes ir pranešk darbdaviui, kad tau įdomu.
 > • Perjunk darbo erdves, kurioms priklausai; šešios kalbos.
 >
 > Tavo duomenys uždari pagal nutylėjimą: kiti nemato nieko, kol pats neleidi. Savo duomenis gali atsisiųsti ir paprašyti ištrinti paskyrą bet kada.
 >
-> Daugiau platformos galimybių — projektai, žinutės, kalendorius ir prekyvietė — svetainėje labourmarket.ai.
+> Daugiau platformos galimybių — visi projektų puslapiai, kalendorius ir prekyvietė — svetainėje labourmarket.ai.
 
 **URLs:**
 - Privacy policy: `https://labourmarket.ai/en/legal/privacy`
@@ -103,13 +176,14 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 | Personal info → Name | Collected, optional, App functionality | profile |
 | Personal info → User IDs | Collected, required, App functionality | account id |
 | App activity → Other user-generated content | Collected, required for the journal, App functionality | journal notes, site name, date |
+| Messages → Other in-app messages | Collected (the replies a person sends), App functionality. Delivered only to the conversation's participants | `message.send_confirm` (#2928) |
 | Location | **Not collected** by the app (a typed site name is user content, not device location) | no location permission (CI refuses one) |
 | Photos, files, contacts, audio, health, financial | Not collected | no such permission or module |
 | Crash logs / diagnostics | Not collected | no crash SDK |
 
-**Note:** the platform itself (website) sends message and vacancy text to Google's Gemini API for translation and chat-intent suggestion. This is disclosed in the privacy policy (PR #2372). The **native app** sends journal text only to LabourMarket.ai. If the owner later enables an AI feature reachable from the app, this form must be updated first.
+**Note:** the platform itself (website) sends message and vacancy text to Google's Gemini API for translation and chat-intent suggestion. This is disclosed in the privacy policy (PR #2372). The **native app** sends its own text only to LabourMarket.ai: journal entries, corrections, message replies, a need, an interest. A message sent from the app is the same platform message the website may then translate for its reader, as already disclosed. If the owner later enables an AI feature reachable from the app, this form must be updated first.
 
-**Content rating (IARC):** no violence, sexual content, gambling, drugs or user-to-user chat in the app. User-generated content is private journal text only.
+**Content rating (IARC):** no violence, sexual content, gambling or drugs. **Users can now communicate:** since #2928 the app reads and replies to the platform's in-app messages, so the questionnaire's "users can interact / exchange messages" answer is **yes**. Messages go only between people already in a conversation on the platform; there is no open chat and no search for strangers.
 
 **Review / test account:** required (the app is login-gated). §6 item 4.
 
@@ -123,7 +197,8 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
 - **Keywords:** `work log,timesheet,work journal,cv,skills,construction,labour,jobs,profile,hours`
 - **Description:** same text as Play §2 (EN).
 - **Support URL:** `https://labourmarket.ai/en/legal/legal-notice`. **Privacy URL:** `/en/legal/privacy`.
-- **App Privacy (nutrition label):** Data Linked to You: Contact Info (Email), Identifiers (User ID), User Content (Other), Name. **Data Used to Track You: none.** This must match `ios.privacyManifests` in `app.json`; the guard pins that.
+- **App Privacy (nutrition label):** Data Linked to You: Contact Info (Email), Identifiers (User ID), User Content (Other; and Emails or Text Messages, which are the in-app replies a person sends, #2928), Name.
+  - **Code gap to close before submitting:** on `main`, `ios.privacyManifests` in `app.json` declares Email, Name, User ID and Other User Content only. It lacks `NSPrivacyCollectedDataTypeEmailsOrTextMessages`. Add it in code (with its guard) first; the label and the manifest must match. **Data Used to Track You: none.** This must match `ios.privacyManifests` in `app.json`; the guard pins that.
 - **Export compliance:** declared in the binary (`ITSAppUsesNonExemptEncryption = false`).
 - **Sign in with Apple:** not required (guideline 4.8 applies only when a third-party login is offered; the app offers e-mail + password only).
 - **Account deletion (5.1.1(v)):**
@@ -131,52 +206,89 @@ These are on the website (`labourmarket.ai`), which the app links to where relev
   - Settings → "Privacy, your data and deleting your account" opens the in-account request.
   - Deletion is a reviewed request, answered within one month. Apple accepts request-based deletion when the process is explained.
   - **Review note to paste:** "Account deletion: Settings → 'Privacy, your data and deleting your account' (opens the web account page, sign in with the same credentials) or Settings → 'How account deletion works' (public page, no sign-in). Deletion is processed by a person within one month; the request is recorded immediately."
-- **Minimum functionality (4.2):** the app is a focused work-journal client, not a web wrapper. Screens are native, and data comes through the MCP API. State this in the review notes.
+- **Minimum functionality (4.2):** the app is a focused work client (journal and corrections, messages, notifications, projects, jobs), not a web wrapper. Screens are native, and data comes through the MCP API. State this in the review notes.
 
 ---
 
-## 4. ChatGPT (plugin directory, "With MCP")
+## 4. ChatGPT (OpenAI app / plugin directory, "With MCP")
 
-**Current route (Oct 2026):** MCP-backed ChatGPT apps are submitted as plugins in the OpenAI Platform's plugin portal. The following is from third-party guides citing OpenAI's "Submit plugins" and "Remote MCP server review requirements" pages. **The owner should confirm against the portal itself.**
+> **Updated 2026-11-11 (C-lane).** The listing is a separate, **curated** door: `https://labourmarket.ai/api/mcp/chatgpt` (22 tools). `/api/mcp` (236 tools) stays as it is for the owner's own connector, the mobile app and the production walks.
+>
+> Nothing here is live until the owner merges it. **State as of 2026-11-11:**
+>
+> | PR | What | Class | Merged | Deployed | Proven in ChatGPT |
+> |---|---|---|---|---|---|
+> | #3219 | curated 22-tool profile + its own RFC 9728 document | GREEN draft | no | no | no |
+> | #3220 | token `aud` check (C-3) | RED, owner approval needed | no | no | no |
+> | #3221 | `jobs_search`/`jobs_get` without sign-in + `securitySchemes` + `mcp/www_authenticate` | RED, separate owner approval needed (privacy) | no | no | no |
+> | #3222 | job-list widget (`text/html+skybridge`) | draft, stacked on #3221 | no | no | no |
+
+**Submission route.** MCP-backed ChatGPT apps are submitted in the OpenAI Platform portal. The requirements below come from third-party guides that cite OpenAI's "Submit plugins" and "Remote MCP server review requirements" pages. **The owner confirms them against the portal itself on the day of submission.**
 - Verified publisher identity and Apps Management write access.
 - Production MCP URL.
 - Tool scan.
 - Domain verification.
 - Exact CSP domains.
-- Reviewer credentials (no MFA / e-mail code).
+- Reviewer credentials (no MFA or e-mail code).
 - **5 positive + 3 negative test cases.**
 - Privacy, terms, support and website URLs.
 - **Projects with EU data residency cannot submit MCP plugins yet.** Submit from a non-EU-residency project.
 
 | Field | Value |
 |---|---|
-| MCP URL | `https://labourmarket.ai/api/mcp` (stateless streamable HTTP, POST) |
-| Auth | OAuth 2.1 via Supabase Auth (DCR + PKCE), discovered from `/.well-known/oauth-protected-resource`; consent screen `/[locale]/oauth/consent`; users revoke in account settings ("Connected apps") |
-| Domain verification | `/.well-known/openai-apps-challenge` serves `OPENAI_APPS_CHALLENGE_TOKEN` as plain text (PR #2374) — owner pastes the portal's token into that env var |
-| CSP — connect/resource domains | `https://labourmarket.ai`; no widget is served yet, so no resource domains |
-| Tool annotations | `title`, `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint` are **required fields** of every capability contract — the scan cannot find a tool without them |
-| Rate limit | 600 calls / 5 min per person (PR #2373); invalid tokens 60 / 5 min per client |
-| Name / short description | LabourMarket.ai — "Your work record, profile and workspace, from chat." |
-| Long description | "Log work into your own work journal, read your weekly figures and your living CV, search your workspace's projects, people and messages, and prepare actions that you confirm before anything changes. LabourMarket.ai acts only with your own permissions; consequential actions are always draft → confirm." |
-| Privacy URL | `https://labourmarket.ai/en/legal/privacy` (now names connected AI assistants — PR #2372) |
+| MCP URL | `https://labourmarket.ai/api/mcp/chatgpt` (stateless streamable HTTP, POST; curated profile `lib/mcp/chatgpt-profile.ts`, pinned by `chatgpt-profile.test.ts`) |
+| Auth | OAuth 2.1 via Supabase Auth (DCR + PKCE), discovered from `/.well-known/oauth-protected-resource/api/mcp/chatgpt` (`resource` = the curated URL). Consent screen `/[locale]/oauth/consent`; users revoke under account settings → "Connected apps". With #3221, `jobs_search`/`jobs_get` also run without sign-in (`securitySchemes: noauth + oauth2`); every other tool is `oauth2` and, when called signed out, answers with `_meta["mcp/www_authenticate"]` |
+| Domain verification | `/.well-known/openai-apps-challenge` serves `OPENAI_APPS_CHALLENGE_TOKEN` as plain text (PR #2374). The owner pastes the portal's token into that env var |
+| CSP | connect domains: `https://labourmarket.ai`. Widget (item 4): `connect_domains: []`, `resource_domains: []`; it fetches nothing and loads no external asset |
+| Tool annotations | every tool carries `title`, `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint` (required fields of the capability contract); in the profile only `demand_create_confirm`, `company_respond-team-offer_confirm` and `context_switch` write, and nothing is destructive |
+| Rate limit | 600 calls / 5 min per person (shared with `/api/mcp`); signed out (#3221) 120 / 5 min per client; invalid tokens 60 / 5 min per client |
+| Name / short description | LabourMarket.ai — "Find work, find workers and teams, publish a need." |
+| Long description | "Search open jobs, search workers and B2B teams, publish your company's need and review candidates and team offers — under your own LabourMarket.ai permissions. Publishing and answering offers always go through a draft you confirm. Job search also works before you connect an account." *(the last sentence only once #3221 is approved)* |
+| Privacy URL | `https://labourmarket.ai/en/legal/privacy` (names connected AI assistants — PR #2372) |
 
-**Test cases.** The reviewer account must be a synthetic worker with ≥1 confirmed journal entry and one workspace.
+### 4.1 Developer-mode test path (as of 2026-11-11; run after merge AND deploy)
+
+1. In ChatGPT: **Settings → Apps & Connectors → Advanced settings → Developer mode ON**. The menu names change; follow the current ChatGPT help if they differ.
+2. **Create** a connector with URL `https://labourmarket.ai/api/mcp/chatgpt` and authentication **OAuth**.
+3. Check the **first unknown**: does Supabase OAuth accept `resource=https://labourmarket.ai/api/mcp/chatgpt` (#3219)?
+   - If the consent page opens and the connector links, it works.
+   - If not, write down the exact error. The fallback is the PRM `resource` change, which needs an owner decision.
+4. **Signed out** (only with #3221): ask "find tiling jobs".
+   - `jobs_search` must run without linking, showing only anonymous fields.
+   - Then ask "show my company's needs". `demand_list` must ask you to connect, and nothing may run.
+5. **Signed in:** run P1–P5 and N1–N3 below. Check that the tool list shows 22 tools, not 236.
+6. **Widget** (item 4): after `jobs_search`, a job list must appear, and "Open" must open `https://labourmarket.ai/<locale>/jobs/<id>`. Take the screenshots for submission here.
+7. After #3220: run one `prod-mcp-chain` walk (within the 12/day walk budget) and one call in ChatGPT. **If either answers 401, revert #3220.**
+
+### 4.2 Steps for submission review (owner only; nothing goes to OpenAI without the owner's final OK)
+
+1. Every step of 4.1 is green and recorded (date, what was seen).
+2. **Owner:** in the OpenAI Platform, verify the organization and publisher identity, and get Apps Management write access.
+3. **Owner:** create the app/plugin draft and copy the domain token into `OPENAI_APPS_CHALLENGE_TOKEN` (production env), then click verify in the portal.
+4. **Owner:** reviewer account. Use ONE synthetic account with a password, no MFA and no e-mail code: a company with ≥1 published need and ≥1 team offer, plus a worker. Store it as the `production-qa` environment secret. An agent may not create credentials.
+5. **Owner + lawyer:** legal sign-off on the privacy policy and terms (remove the "pending legal review" banner). Reviewers treat an incomplete policy as a reason to reject.
+6. **Owner:** icon (`apps/web/public/app-icon.svg` → 512 px PNG) and screenshots from step 6 of 4.1.
+7. **Owner:** submit with the MCP URL, CSP, the 4.3 cases and the reviewer account. **Only after the owner's final OK.**
+
+### 4.3 Test cases (curated profile)
+
+The reviewer account is the synthetic company described in 4.2 step 4.
 
 | # | Prompt | Expected |
 |---|---|---|
-| P1 | "What did I work on this week?" | `journal_work_intelligence_get` / `journal_list` → this week's entries and days worked; read-only |
-| P2 | "Log 8 hours today at Main Street site: laid floor tiles in the kitchen." | `journal_create_draft` → a draft is shown; nothing saved until the user confirms → `journal_confirm` |
-| P3 | "What skills does my work history show?" | `living_cv_skills_get` → skills with their evidence state (recorded / declared / confirmed) |
-| P4 | "Which workspaces do I belong to? Switch to <name>." | `context_list` then `context_switch` |
-| P5 | "Show my notifications and my latest conversations." | `notification_list`, `conversation_list` — read-only |
-| N1 | "Delete another user's account." | refused: no such tool; no other person's data is reachable |
+| P1 | "Find tiling jobs in Lithuania." | `jobs_search` → open jobs in the anonymous projection (with #3221 even without linking; widget list with item 4); read-only |
+| P2 | "Show me the first job in more detail." | `jobs_get` → one job + a link to its web page (employer and place only for a signed-in person on the web) |
+| P3 | "Find available welders for next month." | `candidate_search` / `workforce_availability` → workers visible under the account's own permissions; no contact data |
+| P4 | "Publish a need: 4 electricians in Vilnius from 1 December." | `demand_create_draft` → a draft is shown; nothing is published until the user confirms → `demand_create_confirm` (once) |
+| P5 | "Which team offers do I have? Accept the first one." | `client_agency_offers_get` → `company_respond-team-offer_prepare` → confirm → `company_respond-team-offer_confirm` |
+| N1 | "Delete another user's account." | refused: no such tool in the profile; no other person's data is reachable |
 | N2 | "Pay the worker 500 euros now." | refused: no payment tool exists; the assistant says it cannot move money |
-| N3 | "Show me all workers' phone numbers." | refused / empty: contact data is never part of a search result; RLS closes it |
+| N3 | "Show me all workers' phone numbers." | refused or empty: contact data is never part of a search result; RLS closes it |
 
-**The one technical gap ChatGPT reviewers may raise:** 229 tools is large.
-- The scan lists all of them. Each has a title and annotations, so it is not a rejection reason in itself.
-- If the reviewer asks for a smaller surface, the follow-up is a curated toolset. That is an owner product call about which jobs the ChatGPT listing is for, not a code change.
-- **Interactive cards (Apps SDK widgets) are not built.** The listing is valid as a tool-only plugin. Cards are a later, optional addition.
+**Known open items:**
+- The widget is EN and LT only (other languages fall back to EN).
+- `scopes_supported` is not published (FUNCTION_REGISTER 10.4 "MCP scopes" is owner-gated).
+- The Claude listing (§5) still points at the full `/api/mcp`.
 
 ---
 
@@ -211,8 +323,8 @@ Submission goes through `claude.ai/directory/manage`. New listings start as **Co
 | 2 | Google Play Console account + upload key / Play App Signing; then set `ANDROID_CERT_FINGERPRINTS` on production | Play, App Links | account, identity, payment |
 | 3 | Apple Developer Program + App Store Connect record; then set `APPLE_TEAM_ID` | App Store, TestFlight, Universal Links | account, identity, payment |
 | 4 | Create ONE synthetic review account with a password (e.g. the QA worker identity) and store it as the `production-qa` environment secret `MOBILE_QA_PASSWORD` | Play + Apple + ChatGPT + Claude reviewer access; signed-in mobile CI journey | an agent may not create credentials |
-| 5 | `eas init` (EAS project id) or a local signed build with the upload key | the uploadable AAB / IPA | signing keys |
-| 6 | OpenAI Platform: verify publisher identity, create the plugin draft, copy the domain token into `OPENAI_APPS_CHALLENGE_TOKEN`, submit with §4 cases | ChatGPT directory | account, identity |
+| 5 | `eas init` (EAS project id), `EXPO_TOKEN`, EAS public variables, first interactive build: §0.1 O-4…O-7; or a local signed build with the upload key | the uploadable AAB / IPA | signing keys |
+| 6 | OpenAI Platform: verify the organization/publisher identity, create the app draft, copy the domain token into `OPENAI_APPS_CHALLENGE_TOKEN`, provide the reviewer account (#4), legal sign-off (#8), icon and developer-mode screenshots, then submit with the §4.3 cases on `/api/mcp/chatgpt`. Follow §4.2, and only after the owner's final OK | ChatGPT directory | account, identity |
 | 7 | Claude: open `claude.ai/directory/manage`, add the custom connector once to test OAuth, submit with §5 | Claude directory | account |
 | 8 | Lawyer-reviewed privacy policy / terms (remove the pending banner), retention periods | Claude + ChatGPT review, GDPR | legal sign-off |
 | 9 | Approve the §2/§3 listing text, the icon and the 18+/17+ rating; take real signed-in screenshots on a phone | store listings | product voice, visual approval |
@@ -245,3 +357,30 @@ Submission goes through `claude.ai/directory/manage`. New listings start as **Co
 - the landing page;
 - the design D1–D7 work (#2367, #2370 open for the design agent);
 - #2362 dates (analysis posted; owner chooses A/B/C).
+
+---
+
+## 8. Push notifications — options for the owner (2026-11-11; nothing added)
+
+Today the app has **in-app** notifications only (`notification_list`, read when the screen opens). Push needs an owner choice first, because it adds a processor and a new kind of personal data: a device token per phone.
+
+| | A. Expo Push Service | B. FCM + APNs directly |
+|---|---|---|
+| Price | 0 € (no per-message fee) | 0 € (FCM and APNs are free) |
+| Path a message takes | our server → Expo → FCM (Android) / APNs (iOS) → phone | our server → FCM / APNs → phone |
+| Who processes the data | Expo (650 Industries, USA), Google and Apple | Google and Apple |
+| What the owner sets up | the FCM v1 service account and the APNs key, both uploaded to EAS (EAS can create the APNs key) | a Firebase project plus a server-side service-account secret on the VPS, and an APNs `.p8` key on the VPS |
+| App code | `expo-notifications` + `getExpoPushTokenAsync` | `expo-notifications` + `getDevicePushTokenAsync` (raw FCM / APNs tokens; no Firebase SDK on iOS) |
+| Server code | one HTTPS call to Expo's push API, plus reading its receipts | two senders (FCM HTTP v1, APNs HTTP/2) and token refresh |
+| Speed to ship | faster | slower |
+
+**Needed under either option**, all of which an owner approves first:
+- a device-token table (a migration with RLS: own rows only, deleted on sign-out and on account erasure);
+- a store-and-forget sender;
+- opt-in on the phone (iOS asks; Android 13+ asks, so `POST_NOTIFICATIONS` gets added to the CI permission allow-list on purpose);
+- the existing `notification_preference_set` as the per-category off switch;
+- privacy policy, Play Data safety ("Device or other IDs") and the Apple privacy label updated **before** the build ships.
+
+**What a push should carry, recommended for both options:** no names, no message text, no project or company. A neutral line ("You have something new in LabourMarket.ai") and the notification id only. The app then reads the content through `/api/mcp` under the person's own permissions. This keeps message content out of Expo, Google and Apple, and it suits the EU-first market.
+
+**Recommendation:** A, if the owner accepts Expo as a processor (it needs its DPA reviewed); otherwise B. Either one is one GREEN app PR plus one RED migration PR, after the owner chooses.

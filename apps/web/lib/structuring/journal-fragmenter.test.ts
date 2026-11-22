@@ -257,6 +257,65 @@ describe("non-boundary dots + the itemising colon — ONE rule with the suggesti
   });
 });
 
+describe("LT descriptive prose — a comma enumeration is ONE fragment, not noun scraps (P1 regression)", () => {
+  /** A real production entry (owner workspace, 2026-08-04): a retrospective
+   *  summary of ANALYSIS work written as comma-separated noun phrases. The
+   *  unconditional comma boundary shattered the middle sentence into
+   *  "LabourMarket.ai: privatumo" | "sutikimų" | "pasitikėjimo … analizė" |
+   *  "dokumentacijos spragų identifikavimas" — four scraps, each surfacing as
+   *  its own unresolved_fragment. It must stay ONE coherent fragment. */
+  const OWNER_ANALYSIS_ENTRY =
+    "Retrospektyvus įrašas pagal datuotą pokalbių istoriją. " +
+    "LabourMarket.ai: privatumo, sutikimų, pasitikėjimo ir duomenų valdymo reikalavimų analizė, dokumentacijos spragų identifikavimas. " +
+    "AI agentų atlikti darbai nėra mano asmeniškai programuotos valandos. " +
+    "Tikslus darbo laikas nežinomas.";
+
+  it("the comma-separated analysis clause stays one fragment; the noun scraps are gone", () => {
+    const texts = meaningful(OWNER_ANALYSIS_ENTRY).map((f) => f.text);
+    expect(texts).toContain(
+      "LabourMarket.ai: privatumo, sutikimų, pasitikėjimo ir duomenų valdymo reikalavimų analizė, dokumentacijos spragų identifikavimas",
+    );
+    for (const scrap of [
+      "LabourMarket.ai: privatumo",
+      "privatumo",
+      "sutikimų",
+      "pasitikėjimo ir duomenų valdymo reikalavimų analizė",
+      "dokumentacijos spragų identifikavimas",
+    ]) {
+      expect(texts).not.toContain(scrap);
+    }
+  });
+
+  it("a bare noun enumeration (no verb, no time) is one fragment", () => {
+    const out = meaningful("privatumo, saugumo, sutikimų analizė");
+    expect(out).toHaveLength(1);
+    expect(out[0].text).toBe("privatumo, saugumo, sutikimų analizė");
+  });
+
+  it("the comma still splits when it ends a TIMED item", () => {
+    expect(
+      meaningful("analizavau rinką 2 val, rašiau ataskaitą 1 val").map(
+        (f) => f.normalized,
+      ),
+    ).toEqual(["analizavau rinka", "rasiau ataskaita"]);
+  });
+
+  it("the comma still splits between two VERB clauses", () => {
+    expect(
+      meaningful("tvarkiau dokumentus, analizavau reikalavimus").map(
+        (f) => f.normalized,
+      ),
+    ).toEqual(["tvarkiau dokumentus", "analizavau reikalavimus"]);
+  });
+
+  it("a timed item followed by a trailing noun note joins the note to the item", () => {
+    // "4 val. dažiau" is a work item; the bare note after it is not a second
+    // item, so the whole stays one fragment (no "pastabos" scrap).
+    const out = meaningful("dažiau sienas 4 val, papildomos pastabos");
+    expect(out).toHaveLength(1);
+  });
+});
+
 describe("isVerbLikeToken heuristics", () => {
   it.each(["ploviau", "tvarkiau", "kodavau", "dirbau", "naudojau", "cleaned", "painting", "мыл", "убирал", "built"])
     ("verb-like: %s", (tok) => {

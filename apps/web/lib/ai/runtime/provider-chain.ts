@@ -34,11 +34,14 @@
  */
 import type { AiTaskType, TaskRouteDecision } from "./task-routing";
 import type { AiEgressGrant } from "./data-egress";
+import { AI_MODEL_CANDIDATES } from "./model-candidates";
+import { pricingForModel } from "./model-pricing";
 import {
   providerEligibleForSensitivity,
   sensitivityForTask,
   type AiDataSensitivity,
 } from "./data-sensitivity";
+import { blockedByZeroPaidBudget, ZERO_PAID_BUDGET_REASON } from "./paid-budget";
 
 /** Provider ids the chain can order. `local` is the keyless self-hosted seam. */
 /**
@@ -379,9 +382,47 @@ export function profileFor(
  * Capability is checked before health so an unconfigured provider that could
  * never serve the task is not reported as a near miss.
  */
+/**
+ * Reference token shape for comparing METERED prices: a short structured task.
+ * Only the ratio between vendors matters, so a fixed shape is honest here.
+ */
+const PRICE_SHAPE = { input: 2_000, output: 600 } as const;
+
+/**
+ * What the provider's model for this tier costs at the reference shape, or
+ * +Infinity when it has no owner-reviewed price (it then sorts last — and the
+ * router would refuse it as `cost_unpriced` anyway).
+ */
+export function tierPriceUsd(providerId: string, modelAlias: string | null | undefined): number {
+  if (!modelAlias) return Number.POSITIVE_INFINITY;
+  const model = AI_MODEL_CANDIDATES[providerId]?.[modelAlias];
+  const price = model ? pricingForModel(model) : null;
+  if (!price) return Number.POSITIVE_INFINITY;
+  return (
+    (price.inputUsdPerMTok * PRICE_SHAPE.input +
+      price.outputUsdPerMTok * PRICE_SHAPE.output) /
+    1_000_000
+  );
+}
+
+/**
+ * Providers that could serve this task, cheapest class first.
+ *
+ * CHEAPEST SUFFICIENT (owner order 2026-10-25). The task policy fixes the
+ * QUALITY TIER (task-routing.ts → alias); this picks the vendor:
+ *   - free_local, then free_tier, then paid (unchanged);
+ *   - inside `paid`, the vendor whose model FOR THAT TIER is cheapest goes
+ *     first — a metered bill is the one place price should decide;
+ *   - inside the free classes `priority` decides, because the vendor charges
+ *     nothing there and the order encodes terms (no-training first) and quota,
+ *     not a list price nobody pays.
+ * Capability is checked before health so an unconfigured provider that could
+ * never serve the task is not reported as a near miss.
+ */
 export function orderedCandidatesFor(
   taskType: AiTaskType,
   profiles: readonly AiProviderProfile[] = AI_PROVIDER_PROFILES,
+  modelAlias?: string | null,
 ): readonly AiProviderProfile[] {
   return profiles
     .filter(
@@ -391,6 +432,9 @@ export function orderedCandidatesFor(
     .sort(
       (a, b) =>
         COST_RANK[a.costClass] - COST_RANK[b.costClass] ||
+        (a.costClass === "paid" && modelAlias
+          ? tierPriceUsd(a.id, modelAlias) - tierPriceUsd(b.id, modelAlias) || 0
+          : 0) ||
         a.priority - b.priority,
     );
 }
@@ -430,6 +474,10 @@ export function resolveProviderChain(
   states: readonly AiProviderState[],
   profiles: readonly AiProviderProfile[] = AI_PROVIDER_PROFILES,
   grants?: readonly AiEgressGrant[],
+  /** ZERO PAID API BUDGET (`paid-budget.ts`). The runtime passes the owner
+   *  switch explicitly; the default keeps this pure function's callers that
+   *  only study ordering unchanged. */
+  allowPaid = true,
 ): ChainOutcome {
   if (decision.tier === "deterministic") {
     return {
@@ -447,7 +495,7 @@ export function resolveProviderChain(
   }
 
   const byId = new Map(states.map((s) => [s.id, s]));
-  const ordered = orderedCandidatesFor(decision.taskType, profiles);
+  const ordered = orderedCandidatesFor(decision.taskType, profiles, decision.modelAlias);
   const sensitivity = sensitivityForTask(decision.taskType);
   const skipped: SkippedCandidate[] = [];
   const eligible: AiProviderProfile[] = [];
@@ -455,6 +503,13 @@ export function resolveProviderChain(
   // Pass 1 — the privacy veto. Ineligible providers leave the chain entirely;
   // they are not candidates for the first attempt OR for a later retry.
   for (const p of ordered) {
+    // Pass 0 — the budget. A metered provider is not a fallback while the
+    // owner keeps the paid budget at zero: it leaves the chain like a privacy
+    // exclusion, named, whether or not it happens to be configured.
+    if (blockedByZeroPaidBudget(p.costClass, allowPaid)) {
+      skipped.push({ id: p.id, reason: ZERO_PAID_BUDGET_REASON });
+      continue;
+    }
     const verdict = providerEligibleForSensitivity(p, sensitivity, grants, decision.taskType);
     if (verdict.eligible) {
       eligible.push(p);
@@ -497,7 +552,9 @@ export function resolveProviderChain(
       ordered.length === 0
         ? `no provider declares capability for task "${decision.taskType}"`
         : eligible.length === 0
-          ? `no provider may receive ${sensitivity} data for task "${decision.taskType}"`
+          ? skipped.every((s) => s.reason === ZERO_PAID_BUDGET_REASON)
+            ? `${ZERO_PAID_BUDGET_REASON} — no free provider declares task "${decision.taskType}"`
+            : `no provider may receive ${sensitivity} data for task "${decision.taskType}"`
           : `every provider for task "${decision.taskType}" is unusable`,
     skipped,
   };

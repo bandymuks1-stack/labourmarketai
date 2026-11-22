@@ -21,6 +21,7 @@ const BANNED_LT = [
   "Pateikti poreikį",
   "Tvarkyti poreikius",
   "Jūsų poreikių erdvė",
+  "Tavo poreikių erdvė",
   "Poreikių erdvė",
 ];
 
@@ -86,8 +87,8 @@ describe("stepper + future modules clarity", () => {
     expect(page).toMatch(/demand\.progressHelper/);
   });
   it("future-modules copy marks them as non-active modules", () => {
-    expect(lt.dashboard.comingLater.title).toBe("Vėliau įjungiami moduliai");
+    expect(lt.dashboard.comingLater.title).toBe("Dar neprieinami moduliai");
     expect(lt.dashboard.comingLater.body).toMatch(/nėra aktyvūs veiksmai/);
-    expect(en.dashboard.comingLater.title).toBe("Modules coming later");
+    expect(en.dashboard.comingLater.title).toBe("Modules not available yet");
   });
 });

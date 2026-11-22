@@ -44,14 +44,15 @@ describe("the global primary nav is the compact, non-duplicated set", () => {
   });
 });
 
-describe("the mobile bottom nav stays the focused core (no extra top-level entries)", () => {
-  const bottom = read("components/app/bottom-nav.tsx");
+// RE-ANCHORED 2026-10-25: the phone bottom bar and the desktop tabs were
+// retired with the one header. Its priority set is the core loop; everything
+// else (and admin, for admins only) sits behind "More" / in the phone sheet.
+describe("the header's priority set stays the focused core (no extra top-level entries)", () => {
+  const header = read("components/app/conversation/chat/conversation-header.tsx");
 
-  it("renders the catalogue-driven core items only — admin is NOT appended", () => {
-    expect(bottom).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
-    expect(bottom, "bottom nav must not append the admin item").not.toMatch(
-      /ADMIN_NAV_ITEM/,
-    );
+  it("renders the catalogue-driven core first — admin is never part of it", () => {
+    expect(header).toMatch(/const primary = getCoreNavItems\(\)/);
+    expect(header).not.toMatch(/ADMIN_NAV_ITEM/);
   });
 });
 
@@ -60,12 +61,12 @@ describe("admin stays reachable but does not dominate navigation", () => {
     expect(ADMIN_NAV_ITEM.href).toBe("/dashboard/admin");
   });
 
-  it("admin is exposed only via gated secondary surfaces (desktop tabs + account menu)", () => {
-    const tabs = read("components/app/dashboard-tabs.tsx");
+  it("admin is exposed only via gated secondary surfaces (header More + account menu)", () => {
+    const nav = read("lib/config/navigation.ts");
     const menu = read("components/app/account-menu.tsx");
-    // desktop tabs append the admin item gated by isAdmin
-    expect(tabs).toMatch(/ADMIN_NAV_ITEM/);
-    expect(tabs).toMatch(/isAdmin/);
+    // the header's More appends the admin item for admins only
+    expect(nav).toMatch(/return isAdmin \? \[\.\.\.extras, ADMIN_NAV_ITEM\] : extras;/);
+    expect(read("components/app/conversation/chat/conversation-header.tsx")).toMatch(/isAdmin/);
     // account dropdown gates the admin link by isAdmin
     expect(menu).toMatch(/\/dashboard\/admin/);
     expect(menu).toMatch(/isAdmin/);

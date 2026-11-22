@@ -25,7 +25,7 @@ export async function generateMetadata({
     locale,
     path: "/legal/data-protection",
     title: t("dataProtection.title"),
-    description: t("dataProtection.intro"),
+    description: t("dataProtection.metaDescription"),
   });
 }
 

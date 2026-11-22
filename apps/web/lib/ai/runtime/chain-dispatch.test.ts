@@ -11,7 +11,7 @@
  * never need a GPU, an Ollama install or a key to prove the free-local path
  * works — if it did, the path would be untested everywhere it matters.
  */
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { dispatchAiCompletion, type ChainDispatchContext } from "./run-core";
@@ -76,6 +76,12 @@ afterAll(async () => {
   await new Promise<void>((r) => server.close(() => r()));
 });
 
+// ZERO PAID API BUDGET (paid-budget.ts) is closed by default. These tests study
+// how METERED providers behave behind the egress gate and the chain, so they
+// run with the owner switch open; paid-budget.test.ts covers the closed state.
+beforeEach(() => {
+  vi.stubEnv("AI_PAID_PROVIDERS_ALLOWED", "true");
+});
 afterEach(() => {
   mode = "ok";
   received = [];

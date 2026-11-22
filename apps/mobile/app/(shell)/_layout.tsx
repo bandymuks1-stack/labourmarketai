@@ -52,10 +52,24 @@ export default function ShellLayout() {
         tabBarLabelStyle: { fontSize: theme.font.small },
       }}
     >
-      <Tabs.Screen name="today" options={{ title: t("nav.today") }} />
-      <Tabs.Screen name="journal" options={{ title: t("nav.journal") }} />
-      <Tabs.Screen name="profile" options={{ title: t("nav.profile") }} />
-      <Tabs.Screen name="settings" options={{ title: t("nav.settings") }} />
+      {/* tabBarButtonTestID: the signed-in Maestro journey navigates by these
+          ids, never by a label that changes with the device language. */}
+      <Tabs.Screen
+        name="today"
+        options={{ title: t("nav.today"), tabBarButtonTestID: "tab-today" }}
+      />
+      <Tabs.Screen
+        name="journal"
+        options={{ title: t("nav.journal"), tabBarButtonTestID: "tab-journal" }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{ title: t("nav.profile"), tabBarButtonTestID: "tab-profile" }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{ title: t("nav.settings"), tabBarButtonTestID: "tab-settings" }}
+      />
       {/*
         Log work is an ACTION, not a fifth destination: it is reached from the
         journal and returns there, so `href: null` keeps it out of the tab bar
@@ -66,6 +80,57 @@ export default function ShellLayout() {
       <Tabs.Screen
         name="log-work"
         options={{ href: null, title: t("journal.compose.title") }}
+      />
+      <Tabs.Screen
+        name="correct-entry"
+        options={{ href: null, title: t("journal.correct.title") }}
+      />
+      <Tabs.Screen name="add-work" options={{ href: null, title: t("cv.work.title") }} />
+      <Tabs.Screen name="add-language" options={{ href: null, title: t("cv.language.title") }} />
+      <Tabs.Screen name="add-education" options={{ href: null, title: t("cv.education.title") }} />
+      {/* Two more STATIONS reached from Today, for the same reason: */}
+      <Tabs.Screen
+        name="opportunities"
+        options={{ href: null, title: t("opportunities.title") }}
+      />
+      <Tabs.Screen
+        name="availability"
+        options={{ href: null, title: t("availability.title") }}
+      />
+      <Tabs.Screen
+        name="offers"
+        options={{ href: null, title: t("offers.title") }}
+      />
+      <Tabs.Screen name="jobs" options={{ href: null, title: t("jobs.title") }} />
+      <Tabs.Screen name="need" options={{ href: null, title: t("need.title") }} />
+      <Tabs.Screen name="candidates" options={{ href: null, title: t("candidates.title") }} />
+      <Tabs.Screen name="agency-offers" options={{ href: null, title: t("agencyOffers.title") }} />
+      <Tabs.Screen name="education" options={{ href: null, title: t("education.title") }} />
+      <Tabs.Screen name="agency" options={{ href: null, title: t("agency.title") }} />
+      <Tabs.Screen name="invite-worker" options={{ href: null, title: t("inviteWorker.title") }} />
+      <Tabs.Screen name="absences" options={{ href: null, title: t("absences.title") }} />
+      <Tabs.Screen name="sent-proposals" options={{ href: null, title: t("sentProposals.title") }} />
+      <Tabs.Screen name="agencies" options={{ href: null, title: t("clientBridge.title") }} />
+      <Tabs.Screen name="review" options={{ href: null, title: t("review.title") }} />
+      <Tabs.Screen
+        name="messages"
+        options={{ href: null, title: t("messages.title") }}
+      />
+      <Tabs.Screen
+        name="projects"
+        options={{ href: null, title: t("projects.title") }}
+      />
+      <Tabs.Screen
+        name="project"
+        options={{ href: null, title: t("projects.detailTitle") }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{ href: null, title: t("notifications.title") }}
+      />
+      <Tabs.Screen
+        name="conversation"
+        options={{ href: null, title: t("messages.conversation") }}
       />
     </Tabs>
   );

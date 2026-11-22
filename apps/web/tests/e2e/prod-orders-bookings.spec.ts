@@ -2,8 +2,10 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { proveActionTiles } from "./action-tile-proof";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
  * PRODUCTION ORDERS, BOOKINGS, EXECUTION — owner area 12 (registry rows 5.13,
@@ -158,6 +160,28 @@ test("O-0. the worker's own worker id (own row, own token)", async () => {
   workerId = rows[0].id;
 });
 
+/**
+ * The first day, at least `from` days out, on which the worker has NO accepted
+ * booking. Every run's accepted booking stays history (O-8), and an
+ * open-ended booking occupies its start day, so fixed offsets clashed when the
+ * walk ran twice in a day (run 40216243755 met the overlap constraint on the
+ * second run of 10-25). Read with the worker's own token (own rows only).
+ */
+async function firstFreeDay(from: number): Promise<string> {
+  const res = await qaApi(
+    `/rest/v1/booking_requests?select=start_date,expected_end_date&status=eq.accepted&worker_id=eq.${encodeURIComponent(workerId)}`,
+    bearerOf("worker"),
+  );
+  expect(res.status, "the worker's own accepted bookings answered").toBe(200);
+  const taken = (await res.json()) as { start_date: string; expected_end_date: string | null }[];
+  const busy = (day: string) => taken.some((b) => day >= b.start_date && day <= (b.expected_end_date ?? b.start_date));
+  for (let d = from; d < from + 365; d += 1) {
+    const day = dayFromToday(d);
+    if (!busy(day)) return day;
+  }
+  throw new Error("no free day in a year of accepted bookings");
+}
+
 async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
   await page.getByTestId("demand-role").fill(NEED_ROLE);
@@ -168,6 +192,7 @@ async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
   const done = page.getByTestId("demand-done");
@@ -213,7 +238,7 @@ test("O-1 (5.13). Gama posts this run's need through the demand intake", async (
 test("O-2 (5.13). the worker raises a hand on that need", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("main").getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const card = page.locator(`li[id="opp-${requestId}"]`);
   await expect(card, "the new need is on the worker's board").toBeVisible({ timeout: 60_000 });
   await card.getByTestId("interest-express").click();
@@ -248,10 +273,16 @@ test("O-3 (5.13). Gama proposes dates to the hand-raiser from its candidate list
   const open = candidate.getByTestId("propose-booking-open");
   await expect(open, "the candidate card offers a booking proposal").toBeVisible({ timeout: 30_000 });
   await open.click();
-  const outcome = await propose(candidate, dayFromToday(21));
+  const outcome = await propose(candidate, await firstFreeDay(21));
   expect(outcome, "the proposal was sent").toBe("sent");
   await ctx.close();
 });
+
+/** The booking's row in the page's main region. While a reloaded page is
+ *  still streaming, React briefly holds a second, hidden copy of the list
+ *  outside <main>; a page-wide locator then matches both. A copy that never
+ *  goes away is a hydration failure, which mobile-surfaces M-5 measures. */
+const bookingById = (page: Page, id: string) => page.getByRole("main").getByTestId(`booking-${id}`);
 
 test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
@@ -267,15 +298,16 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
   await row.getByTestId("booking-withdraw-form").getByTestId("booking-withdraw-confirm").click();
   await expect(row.getByTestId("booking-withdrawn")).toBeVisible({ timeout: 30_000 });
   await page.reload();
-  const withdrawn = page.getByTestId(`booking-${bookingId}`);
+  const withdrawn = bookingById(page, bookingId);
   await expect(withdrawn).toHaveAttribute("data-status", "withdrawn", { timeout: 30_000 });
 
   // The company's own withdrawal may be undone with new dates (repeat actions).
   await withdrawn.getByTestId("propose-again-open").click();
-  const outcome = await propose(withdrawn, dayFromToday(28));
+  // A free day for the proposal the worker will accept in O-5.
+  const outcome = await propose(withdrawn, await firstFreeDay(28));
   expect(outcome, "the second proposal was sent").toBe("sent");
   await page.reload();
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "proposed", {
+  await expect(bookingById(page, bookingId)).toHaveAttribute("data-status", "proposed", {
     timeout: 30_000,
   });
   await ctx.close();
@@ -284,7 +316,7 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
 test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker", true);
   await page.goto("/lt/dashboard/bookings");
-  const row = page.getByTestId(`booking-${bookingId}`);
+  const row = bookingById(page, bookingId);
   await expect(row, "the proposal reached the worker").toBeVisible({ timeout: 30_000 });
   await expect(row).toHaveAttribute("data-direction", "incoming");
   await expect(row).toHaveAttribute("data-status", "proposed");
@@ -301,12 +333,37 @@ test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browse
     // own answer is one deliberate second action, recorded as such.
     console.info("[bookings] accept met a date clash; the worker accepts knowingly");
     await row.getByTestId("booking-accept-anyway").click();
-    await expect(responded).toBeVisible({ timeout: 30_000 });
+    // Run 40216243755: the database refused the acknowledged accept (the
+    // overlap constraint still held) and the UI re-showed the same conflict,
+    // so the button visibly did nothing. That refusal is now its own answer.
+    const notRecordable = row.getByTestId("booking-overlap-not-recordable");
+    await expect(responded.or(notRecordable)).toBeVisible({ timeout: 30_000 });
+    if (await notRecordable.isVisible()) {
+      // Honest, and not a loop: the acknowledgement control is gone.
+      await expect(row.getByTestId("booking-accept-anyway")).toHaveCount(0);
+      expect(
+        false,
+        "the acknowledged overlap could not be recorded: the clash-marker migration " +
+          "(20261025180000, RED) is not applied yet — the UI says so and offers decline",
+      ).toBe(true);
+    }
   }
   await page.reload();
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "accepted", {
-    timeout: 30_000,
-  });
+  // Run 40200190351: after this reload the row matched TWICE (identical
+  // <li>s). Count where the copies live: a hidden streamed holder (#418
+  // symptom) sits outside <main>; a real double render would be inside it.
+  const copies = await page.evaluate((id) => {
+    const all = [...document.querySelectorAll(`[data-testid="booking-${id}"]`)];
+    return {
+      total: all.length,
+      inMain: all.filter((e) => e.closest("main")).length,
+      inHiddenHolder: all.filter((e) => e.closest("[hidden][id^='S:']")).length,
+    };
+  }, bookingId);
+  console.info(`[bookings] accepted row copies after reload: ${JSON.stringify(copies)}`);
+  const inMainRow = page.getByRole("main").getByTestId(`booking-${bookingId}`);
+  await expect(inMainRow, "the booking renders once on the page").toHaveCount(1, { timeout: 30_000 });
+  await expect(inMainRow).toHaveAttribute("data-status", "accepted", { timeout: 30_000 });
   await ctx.close();
 });
 
@@ -314,7 +371,7 @@ test("O-6 (5.13). Gama sees the acceptance and opens the conversation with the w
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto("/lt/dashboard/bookings");
-  const row = page.getByTestId(`booking-${bookingId}`);
+  const row = bookingById(page, bookingId);
   await expect(row).toHaveAttribute("data-status", "accepted", { timeout: 30_000 });
   await expect(row.getByTestId("booking-accepted-planning-link")).toBeVisible();
   await row.getByTestId("booking-outgoing-message-cta").click();
@@ -336,7 +393,7 @@ test("O-8 (5.13). Gama closes this run's need (cleanup, the booking stays histor
   await useWorkspace(page, GAMA);
   expect(await closeNeed(page, requestId)).toBe("closed");
   await page.goto("/lt/dashboard/bookings");
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "accepted", {
+  await expect(bookingById(page, bookingId)).toHaveAttribute("data-status", "accepted", {
     timeout: 30_000,
   });
   await ctx.close();
@@ -552,4 +609,18 @@ test("B-1 (6.4). a customer saves a request draft on the buyer workspace", async
     timeout: 30_000,
   });
   await ctx.close();
+});
+
+// ── T (#2828, owner A-09 ruling 2026-11-03): the bookings page's related-door
+// grid is the ONE action tile. Read-only: real links, no gold primary (these
+// are related doors), no destination twice, at 1280 and 390.
+test("T-1 (#2828). the bookings related-door grid renders as action tiles", async ({ browser }) => {
+  await proveActionTiles(
+    async (mobile) => {
+      const { ctx, page } = await as(browser, "manager", mobile);
+      return { page, close: () => ctx.close() };
+    },
+    "/lt/dashboard/bookings",
+    { scopeTestId: "bookings-connections", primaries: 0, prepare: (page) => useWorkspace(page, GAMA) },
+  );
 });

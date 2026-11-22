@@ -17,6 +17,7 @@ import {
 } from "./provider-chain";
 import { observeProviderStates } from "./provider-health";
 import { ProviderCooldown } from "./provider-cooldown";
+import { ProviderCounters } from "./provider-counters";
 import { resolveTaskRoute, type AiTaskType } from "./task-routing";
 import { AI_EGRESS_GRANTS, egressPermitted, maxPermittedSensitivity } from "./data-egress";
 import { sensitivityForTask } from "./data-sensitivity";
@@ -220,6 +221,65 @@ describe("failover: 429 / 5xx / timeout advance, bounded", () => {
   });
 });
 
+describe("counters: every attempt is counted per provider, nothing else is", () => {
+  it("429 → 5xx → ok: one request each, a rate limit, an error class, a success", async () => {
+    behaviour = { cloudflare: "429", mistral: "500", groq: "ok" };
+    const counters = new ProviderCounters();
+    let t = 1_000;
+    const r = await dispatchAiCompletion(
+      marketRequest(),
+      cfg(),
+      chainFor("explain_market_demand", ALL_FREE_READY, { counters, now: () => (t += 25) }),
+    );
+    expect(r.status === "ok" && r.provider).toBe("groq");
+    const rows = Object.fromEntries(counters.snapshot().map((row) => [row.provider, row]));
+    expect(rows.cloudflare).toMatchObject({ requests: 1, ok: 0, rateLimited: 1, errorTotal: 0 });
+    expect(rows.mistral).toMatchObject({ requests: 1, ok: 0, rateLimited: 0, errorTotal: 1 });
+    expect(rows.mistral.errors).toEqual({ UNAVAILABLE: 1 });
+    expect(rows.groq).toMatchObject({ requests: 1, ok: 1, rateLimited: 0, errorTotal: 0 });
+    // Latency comes from the injected clock: 25 ms per attempt.
+    for (const row of Object.values(rows)) {
+      expect(row.latencyMsMean).toBe(25);
+      expect(row.latencyMsMax).toBe(25);
+    }
+  });
+
+  it("malformed output and a timeout are counted under their own classes", async () => {
+    behaviour = { cloudflare: "timeout", mistral: "garbage", groq: "garbage" };
+    const counters = new ProviderCounters();
+    await dispatchAiCompletion(marketRequest(), cfg(), chainFor("explain_market_demand", ALL_FREE_READY, { counters }));
+    const byId = Object.fromEntries(counters.snapshot().map((row) => [row.provider, row.errors]));
+    expect(byId.cloudflare).toEqual({ TIMEOUT: 1 });
+    expect(byId.mistral).toEqual({ INVALID_OUTPUT: 1 });
+  });
+
+  it("a snapshot carries ids, classes and numbers only — never the payload or the answer", async () => {
+    const counters = new ProviderCounters();
+    await dispatchAiCompletion(marketRequest(), cfg(), chainFor("explain_market_demand", ALL_FREE_READY, { counters }));
+    const text = JSON.stringify(counters.snapshot());
+    expect(text).not.toContain("welder");
+    expect(text).not.toContain("from cloudflare");
+    expect(text).not.toContain("presence-only");
+  });
+
+  it("a disabled runtime and a refused (ungranted) payload count no request at all", async () => {
+    const counters = new ProviderCounters();
+    const disabled = resolveAiRuntimeConfig({
+      mode: "disabled",
+      provider: "cloudflare",
+      apiKey: undefined,
+      model: undefined,
+      timeoutMs: undefined,
+      maxRetries: undefined,
+      maxOutputTokens: undefined,
+      dailyRunBudget: undefined,
+    });
+    await dispatchAiCompletion(marketRequest(), disabled, chainFor("explain_market_demand", ALL_FREE_READY, { counters }));
+    expect(counters.snapshot()).toEqual([]);
+    expect(calls).toHaveLength(0);
+  });
+});
+
 describe("cooldown: a provider that just failed is tried LAST, never removed", () => {
   it("after a 429, the next run starts at the next free tier", async () => {
     const cooldown = new ProviderCooldown();
@@ -259,7 +319,10 @@ describe("egress: free tiers receive PUBLIC payloads only", () => {
     { task: "extract_cv", agentKey: "worker_profile" },
     { task: "normalize_work_scope", agentKey: "work_journal" },
     { task: "explain_match", agentKey: "matching_explanation" },
-    { task: "draft_follow_up", agentKey: "support_onboarding" },
+    // draft_follow_up has no agent since support_onboarding was retired
+    // (2026-10-25, row 10.11); the task's refusal is still pinned — the agent
+    // key in the request is only a label here.
+    { task: "draft_follow_up", agentKey: "draft_follow_up" },
     { task: "translate_message", agentKey: "translation_copy" },
     { task: "propose_conversation_intent", agentKey: "conversation_intent" },
     { task: "translate_vacancy", agentKey: "vacancy_translation" },
@@ -285,7 +348,9 @@ describe("egress: free tiers receive PUBLIC payloads only", () => {
       expect(maxPermittedSensitivity(p), id).toBe("PUBLIC");
       expect(AI_EGRESS_GRANTS.some((g) => g.provider === id), id).toBe(false);
       const generous = [{ provider: id, maxSensitivity: "SENSITIVE_FREE_TEXT" as const, basis: "t", grantedOn: "2026-10-25" }];
-      expect(maxPermittedSensitivity(p, generous), id).toBe("LOW_RISK_PROJECT_DATA");
+      // Free-tier cap LOW_RISK; Mistral's free mode trains by default, so its
+      // own terms cap it lower still (provider-catalogue.ts).
+      expect(maxPermittedSensitivity(p, generous), id).toBe(id === "mistral" ? "PUBLIC" : "LOW_RISK_PROJECT_DATA");
       expect(egressPermitted(p, "PERSONAL", generous).permitted, id).toBe(false);
     }
     expect(sensitivityForTask("explain_market_demand")).toBe("PUBLIC");
@@ -375,7 +440,8 @@ describe("Gemini: free tier is not a lawful option for an EEA-facing product", (
 describe("cost: every free-tier model is priced, sourced and inside the PUBLIC task's ceiling", () => {
   it("is selectable only with a first-hand source and a date", () => {
     const free = MODEL_REGISTRY.filter((e) => ["cloudflare", "mistral", "groq"].includes(e.provider));
-    expect(free.length).toBe(6);
+    // 6 tier models + Llama 3.3 and Nemotron registered under their host.
+    expect(free.length).toBe(8);
     for (const e of free) {
       expect(isSelectable(e), e.model).toBe(true);
       expect(e.freeTier, e.model).toBe(true);

@@ -28,7 +28,7 @@ import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/l
 import { updateStageStatusAction } from "@/lib/projects/stages-actions";
 import { seedReadinessItemsAction, upsertReadinessItemAction } from "@/lib/projects/operations-actions";
 import { getProjectOperations } from "@/lib/projects/operations";
-import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
+import { suggestedReadinessItemKeys } from "@/lib/projects/readiness-items";
 import { sendWorkInstructionAction } from "@/lib/instructions/actions";
 import { quickConfirmEntry } from "@/lib/journal/quick-confirm-actions";
 import { setEngagementJournalReview } from "@/lib/operations/org-membership";
@@ -186,6 +186,9 @@ export const COMPANY_EXECUTORS: {
             input.teamSize == null ? undefined : String(input.teamSize),
           // The declared opportunity type survives the draft leg too.
           opportunityType: input.opportunityType ?? undefined,
+          // The work country the person entered: saveDemandDraft stamps it on
+          // the column the wizard prefills, so continuing the draft keeps it.
+          country: input.country ?? undefined,
           notes: input.notes ?? undefined,
         });
         return row
@@ -473,14 +476,16 @@ export const COMPANY_EXECUTORS: {
   },
 
   "company.seed-readiness-checklist": async (input, ctx) => {
-    // Start the standard checklist for EVERY person on the project — the same
-    // seed the operations page runs per person, with the same default labels
+    // Add the SUGGESTED rows to agree for every person on the project — the
+    // same suggestions the operations page offers per person (never a
+    // universal mandatory list, decision 0021 extension 2026-10-24; rows are
+    // "to agree before the agreement", never "missing"), with the same labels
     // (`projectOps.defaults`, in the caller's locale). The people come from the
     // operations centre's own read (RLS: null = not the caller's project).
     const ops = await getProjectOperations(input.projectId);
     if (!ops) return { ok: false, code: "not_authorized" };
     const t = await getTranslations({ locale: ctx.locale, namespace: "projectOps.defaults" });
-    const items = DEFAULT_READINESS_ITEM_KEYS.map((itemKey) => ({ itemKey, label: t(itemKey) }));
+    const items = suggestedReadinessItemKeys({ crossBorder: false }).map((itemKey) => ({ itemKey, label: t(itemKey) }));
     let seeded = 0;
     for (const w of ops.workers) {
       if (w.readinessItems.length > 0) continue;

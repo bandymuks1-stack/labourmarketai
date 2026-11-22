@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { PageTitle } from "@/components/app/premium/page-title";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ArrowLeft } from "lucide-react";
 
@@ -13,6 +14,11 @@ import { EvidenceMediaStrip } from "@/components/app/evidence-media-strip";
 import { LinkedDocuments } from "@/components/app/linked-documents";
 import { HistoricalPersonProfileBlock } from "@/components/app/organization/historical-person-profile";
 import { loadCompanyPerson } from "@/lib/organization-evidence/company-person-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/people/[personId]");
+
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +84,14 @@ export default async function CompanyPersonHistoryPage({
   }
 
   const { person, organizationName } = load;
+  // What the card may SAY about the account link: "linked" only on the person's
+  // own confirmation (the open-profile link has the same rule). An older row
+  // marked linked without it reads as a link that still awaits the person.
+  const claimState = person.linkedWorkerId
+    ? "linked"
+    : person.linkState === "linked"
+      ? "link_proposed"
+      : person.linkState;
   const relationship = person.relationshipKind
     ? tRel.has(person.relationshipKind)
       ? tRel(person.relationshipKind)
@@ -94,9 +108,7 @@ export default async function CompanyPersonHistoryPage({
       {back}
       <header className="flex flex-col gap-2">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("eyebrow")}</p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary" data-testid="company-person-name">
-          {person.name || "—"}
-        </h1>
+        <PageTitle data-testid="company-person-name">{person.name || "—"}</PageTitle>
         {relationship ? (
           <p className="text-sm text-text-secondary" data-testid="company-person-relationship">
             {relationship}
@@ -110,8 +122,8 @@ export default async function CompanyPersonHistoryPage({
           <span>{t("provenance", { name: organizationName })}</span>
         </p>
         {/* THE CLAIM STATUS — information, never a gate on the history. */}
-        <p className="text-sm text-text-secondary" data-testid="company-person-claim" data-link-state={person.linkState}>
-          {t(`claim.${person.linkState}` as never)}
+        <p className="text-sm text-text-secondary" data-testid="company-person-claim" data-link-state={claimState}>
+          {t(`claim.${claimState}` as never)}
           {person.linkedWorkerId ? (
             <>
               {" "}

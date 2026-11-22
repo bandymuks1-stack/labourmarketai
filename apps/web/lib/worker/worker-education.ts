@@ -3,7 +3,11 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import type { WorkerEducationEntry } from "./worker-education-model";
+import {
+  EDUCATION_COLUMNS,
+  educationEntryFromRow,
+  type WorkerEducationEntry,
+} from "./worker-education-model";
 
 /**
  * Read service for the user's own self-declared education entries —
@@ -47,9 +51,7 @@ export async function getOwnWorkerEducation(): Promise<WorkerEducationRead> {
 
   const { data, error } = await asAny(supabase)
     .from("worker_education")
-    .select(
-      "id, institution_name, program_or_field, education_type_slug, start_year, end_year, is_current, note",
-    )
+    .select(EDUCATION_COLUMNS)
     .eq("profile_id", user.id)
     .order("end_year", { ascending: false, nullsFirst: true })
     .order("created_at", { ascending: false });
@@ -60,28 +62,8 @@ export async function getOwnWorkerEducation(): Promise<WorkerEducationRead> {
     return { kind: "ok", entries: [] };
   }
 
-  const rows = (data ?? []) as Array<{
-    id: string;
-    institution_name: string;
-    program_or_field: string | null;
-    education_type_slug: string;
-    start_year: number | null;
-    end_year: number | null;
-    is_current: boolean | null;
-    note: string | null;
-  }>;
-
   return {
     kind: "ok",
-    entries: rows.map((r) => ({
-      id: r.id,
-      institutionName: r.institution_name,
-      programOrField: r.program_or_field,
-      educationTypeSlug: r.education_type_slug,
-      startYear: r.start_year,
-      endYear: r.end_year,
-      isCurrent: r.is_current === true,
-      note: r.note,
-    })),
+    entries: ((data ?? []) as Parameters<typeof educationEntryFromRow>[0][]).map(educationEntryFromRow),
   };
 }

@@ -3,6 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { respondBookingAction } from "@/lib/booking/booking-actions";
 import { DECLINE_REASON_KINDS, REASON_NOTE_MAX } from "@/lib/booking/booking-state";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -57,6 +61,11 @@ export function BookingRespondButtons({
         acknowledgedClashes?: number;
       }
     | { kind: "conflict" }
+    /** The person acknowledged the clash and the database still could not
+     *  record the overlapping accept. Terminal for accepting: the
+     *  acknowledgement button is NOT shown again, so it cannot loop. */
+    | { kind: "overlap-not-recordable" }
+    | { kind: "need-closed" }
     | { kind: "unavailable" }
     | { kind: "error" }
   >({ kind: "idle" });
@@ -101,12 +110,88 @@ export function BookingRespondButtons({
         // a separate, explicit action rendered below, never an auto-retry.
         setState({ kind: "conflict" });
         router.refresh();
+      } else if (res.kind === "overlap-not-recordable") {
+        // The acknowledgement was given and still could not be recorded
+        // (production 2026-10-25). NOT the conflict state again — that
+        // re-offered the same button, which then did visibly nothing. What is
+        // left is to decline, or to leave the offer open for the company to
+        // change its dates; the booking itself is still `proposed`.
+        setDeclineOpen(false);
+        setState({ kind: "overlap-not-recordable" });
+      } else if (res.kind === "need-closed") {
+        // The employer closed the need before the answer arrived; the database
+        // refused the accept. Say so, keep decline, and offer no accept again:
+        // it can only be refused the same way.
+        setAcceptOpen(false);
+        setState({ kind: "need-closed" });
+        router.refresh();
       } else if (res.kind === "needs-migration") {
         setState({ kind: "unavailable" });
       } else {
         setState({ kind: "error" });
       }
     });
+  }
+
+  /** The ONE decline step — the reason select, the note, the confirm — shared
+   *  by the ordinary row and the overlap answer, so there is no second
+   *  decline wording or path. */
+  function declineForm() {
+    return (
+      <div
+        className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
+        data-testid="booking-decline-form"
+      >
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
+          {t("reason.optionalTitle")}
+          <Select
+            value={reasonKind}
+            onChange={(e) => setReasonKind(e.target.value)}
+            data-testid="booking-decline-reason"
+            className="max-sm:text-base"
+          >
+            <option value="">{t("reason.none")}</option>
+            {DECLINE_REASON_KINDS.map((kind) => (
+              <option key={kind} value={kind}>
+                {t(`reason.decline.${kind}`)}
+              </option>
+            ))}
+          </Select>
+        </label>
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
+          {t("reason.noteLabel")}
+          <Input
+            type="text"
+            maxLength={REASON_NOTE_MAX}
+            value={reasonNote}
+            onChange={(e) => setReasonNote(e.target.value)}
+            className="max-sm:text-base"
+          />
+        </label>
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+          <Button
+            type="button"
+            disabled={pending}
+            onClick={() => respond("declined")}
+            data-testid="booking-decline-confirm"
+            variant="secondary"
+            size="sm"
+            className="min-h-11 w-full sm:w-auto"
+          >
+            {t("reason.confirmDecline")}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => setDeclineOpen(false)}
+            variant="ghost"
+            size="sm"
+            className="min-h-11"
+          >
+            {t("reason.cancel")}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   if (state.kind === "done") {
@@ -139,6 +224,64 @@ export function BookingRespondButtons({
     );
   }
 
+  if (state.kind === "overlap-not-recordable") {
+    // The person said "I know it overlaps" and the database still could not
+    // record it. One calm sentence says so and names what is left. There is
+    // deliberately NO accept and NO accept-anyway control here: repeating
+    // either can only fail the same way, which is what made the button loop.
+    return (
+      <div className="flex flex-col gap-1.5" data-testid="booking-overlap-not-recordable-decision">
+        <span
+          className="text-meta text-state-warning"
+          role="status"
+          data-testid="booking-overlap-not-recordable"
+        >
+          {t("clash.notRecordable")}
+        </span>
+        {declineOpen ? (
+          declineForm()
+        ) : (
+          <Button
+            type="button"
+            disabled={pending}
+            onClick={() => setDeclineOpen(true)}
+            data-testid="booking-overlap-decline-open"
+            variant="secondary"
+            size="sm"
+            className="min-h-11 w-full sm:w-auto"
+          >
+            {labels.decline}
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  if (state.kind === "need-closed") {
+    return (
+      <div className="flex flex-col gap-1.5" data-testid="booking-need-closed-decision">
+        <span className="text-meta text-state-warning" role="status" data-testid="booking-need-closed">
+          {t("actions.needClosed")}
+        </span>
+        {declineOpen ? (
+          declineForm()
+        ) : (
+          <Button
+            type="button"
+            disabled={pending}
+            onClick={() => setDeclineOpen(true)}
+            data-testid="booking-need-closed-decline-open"
+            variant="secondary"
+            size="sm"
+            className="min-h-11 w-full sm:w-auto"
+          >
+            {labels.decline}
+          </Button>
+        )}
+      </div>
+    );
+  }
+
   if (state.kind === "conflict") {
     // The plain accept CTA stays gone — the slot really is taken. What is
     // offered instead is ONE deliberate second action, with the consequence
@@ -154,15 +297,17 @@ export function BookingRespondButtons({
           {labels.conflict}
         </span>
         <span className="text-meta text-text-muted">{t("clash.stillStands")}</span>
-        <button
+        <Button
           type="button"
           disabled={pending}
           onClick={() => respond("accepted", true)}
-          className="min-h-11 w-full rounded-md border border-state-amber/50 bg-state-amber/10 px-3 py-2 text-xs font-semibold text-state-amber disabled:opacity-50 sm:w-auto"
+          variant="secondary"
+          size="sm"
+          className="min-h-11 w-full sm:w-auto"
           data-testid="booking-accept-anyway"
         >
           {t("clash.acceptAnyway")}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -179,7 +324,7 @@ export function BookingRespondButtons({
             the profile card while the engagement is active — BEFORE the
             predicate widens. The conversation surface has said this since
             #1097; a second accept door that stayed silent was the gap. */}
-        <button
+        <Button
           type="button"
           disabled={pending}
           onClick={() => {
@@ -187,11 +332,13 @@ export function BookingRespondButtons({
             setDeclineOpen(false);
           }}
           data-testid="booking-accept-open"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success hover:bg-state-success/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+          variant="primary"
+          size="sm"
+          className="min-h-11 w-full sm:w-auto"
         >
           {labels.accept}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           disabled={pending}
           onClick={() => {
@@ -199,10 +346,12 @@ export function BookingRespondButtons({
             setAcceptOpen(false);
           }}
           data-testid="booking-decline-open"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+          variant="secondary"
+          size="sm"
+          className="min-h-11 w-full sm:w-auto"
         >
           {labels.decline}
-        </button>
+        </Button>
       </div>
       {acceptOpen ? (
         <div
@@ -216,76 +365,30 @@ export function BookingRespondButtons({
             {tBooking("confirmAcceptDisclosure")}
           </p>
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-            <button
+            <Button
               type="button"
               disabled={pending}
               onClick={() => respond("accepted")}
               data-testid="booking-accept-confirm"
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success hover:bg-state-success/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+              variant="primary"
+              size="sm"
+              className="min-h-11 w-full sm:w-auto"
             >
               {labels.accept}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setAcceptOpen(false)}
-              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
+              variant="ghost"
+              size="sm"
+              className="min-h-11"
             >
               {t("reason.cancel")}
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}
-      {declineOpen ? (
-        <div
-          className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
-          data-testid="booking-decline-form"
-        >
-          <label className="flex flex-col gap-1 text-meta text-text-muted">
-            {t("reason.optionalTitle")}
-            <select
-              value={reasonKind}
-              onChange={(e) => setReasonKind(e.target.value)}
-              data-testid="booking-decline-reason"
-              className="min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
-            >
-              <option value="">{t("reason.none")}</option>
-              {DECLINE_REASON_KINDS.map((kind) => (
-                <option key={kind} value={kind}>
-                  {t(`reason.decline.${kind}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-meta text-text-muted">
-            {t("reason.noteLabel")}
-            <input
-              type="text"
-              maxLength={REASON_NOTE_MAX}
-              value={reasonNote}
-              onChange={(e) => setReasonNote(e.target.value)}
-              className="min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
-            />
-          </label>
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => respond("declined")}
-              data-testid="booking-decline-confirm"
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
-            >
-              {t("reason.confirmDecline")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setDeclineOpen(false)}
-              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
-            >
-              {t("reason.cancel")}
-            </button>
-          </div>
-        </div>
-      ) : null}
+      {declineOpen ? declineForm() : null}
       {state.kind === "unavailable" ? (
         <span className="text-meta text-text-muted">{labels.unavailable}</span>
       ) : state.kind === "error" ? (

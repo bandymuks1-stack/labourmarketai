@@ -1,0 +1,157 @@
+{
+ "schema": 1,
+ "walks": {
+  "profile-cv-history|phone": {
+   "spec": "profile-cv-history",
+   "device": "phone",
+   "run": 44634343495,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-19T23:26:23Z"
+  },
+  "profile-cv-history|phone-375": {
+   "spec": "profile-cv-history",
+   "device": "phone-375",
+   "run": 44856987867,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T02:54:46Z"
+  },
+  "company-chain|phone": {
+   "spec": "company-chain",
+   "device": "phone",
+   "run": 44859165488,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T03:10:53Z"
+  },
+  "company-chain|phone-375": {
+   "spec": "company-chain",
+   "device": "phone-375",
+   "run": 44859841951,
+   "result": "failure",
+   "build": "d447a639",
+   "at": "2026-11-21T03:14:41Z"
+  },
+  "agency-chain|phone": {
+   "spec": "agency-chain",
+   "device": "phone",
+   "run": 44645924736,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:33:13Z"
+  },
+  "agency-chain|phone-375": {
+   "spec": "agency-chain",
+   "device": "phone-375",
+   "run": 44646951459,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:40:11Z"
+  },
+  "learning-practice|phone": {
+   "spec": "learning-practice",
+   "device": "phone",
+   "run": 43895965767,
+   "result": "success",
+   "build": "bdfff68f",
+   "at": "2026-11-16T15:29:44Z"
+  },
+  "learning-practice|phone-375": {
+   "spec": "learning-practice",
+   "device": "phone-375",
+   "run": 43829421484,
+   "result": "success",
+   "build": "a26004b3",
+   "at": "2026-11-16T08:16:57Z"
+  },
+  "cv-readonly|desktop": {
+   "spec": "cv-readonly",
+   "device": "desktop",
+   "run": 43833613507,
+   "result": "success",
+   "build": "a8dfb015",
+   "at": "2026-11-16T08:46:45Z"
+  },
+  "company-governance|phone": {
+   "spec": "company-governance",
+   "device": "phone",
+   "run": 44243678287,
+   "result": "success",
+   "build": "62903b2d",
+   "at": "2026-11-18T05:26:59Z"
+  },
+  "register-gaps|phone": {
+   "spec": "register-gaps",
+   "device": "phone",
+   "run": 44241539906,
+   "result": "success",
+   "build": "62903b2d",
+   "at": "2026-11-18T05:05:47Z"
+  },
+  "agency-chain|desktop": {
+   "spec": "agency-chain",
+   "device": "desktop",
+   "run": 44644887648,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:26:09Z"
+  },
+  "need-intake|phone-375": {
+   "spec": "need-intake",
+   "device": "phone-375",
+   "run": 44643949860,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:18:35Z"
+  },
+  "need-intake|phone": {
+   "spec": "need-intake",
+   "device": "phone",
+   "run": 44643169770,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:11:47Z"
+  },
+  "need-intake|desktop": {
+   "spec": "need-intake",
+   "device": "desktop",
+   "run": 44642526482,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:05:45Z"
+  },
+  "company-chain|desktop": {
+   "spec": "company-chain",
+   "device": "desktop",
+   "run": 44858511879,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T03:02:55Z"
+  },
+  "profile-cv-history|desktop": {
+   "spec": "profile-cv-history",
+   "device": "desktop",
+   "run": 44632628432,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-19T23:02:56Z"
+  },
+  "learning-practice|desktop": {
+   "spec": "learning-practice",
+   "device": "desktop",
+   "run": 44860184317,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T03:19:16Z"
+  },
+  "company-governance|desktop": {
+   "spec": "company-governance",
+   "device": "desktop",
+   "run": 44856477733,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T02:37:24Z"
+  }
+ }
+}

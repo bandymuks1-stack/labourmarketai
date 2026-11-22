@@ -149,9 +149,21 @@ describe("1. exactly one migration owns finance_records — the human-gated I2 p
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(I2) || f.startsWith(ORG_AUTHORITY)) continue;
         const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
-        if (TRAIN_J.some((p) => f.startsWith(p))) {
+        // 20261025045152 project_forecasts_v1 (restored byte-exact by #2913, production-applied
+        // 2026-10-25) READS finance_records for forecast economics and attaches its
+        // forecast_signal trigger; it takes the same extension rule: never create/drop the
+        // table, never (re)define a v1 RPC.
+        if (TRAIN_J.some((p) => f.startsWith(p)) || f.startsWith("20261025045152_project_forecasts_v1")) {
           // An EXTENSION may name the table (alter/insert/select) but must
           // never create or drop it, and must never (re)define a v1 RPC.
+          if (f.startsWith("20261025045152_project_forecasts_v1")) {
+            // The forecast migration is a READER only: no alter, no write, no policy.
+            expect(src, `${dir}/${f} must not alter or write finance_records`).not.toMatch(
+              // Qualified OR unqualified: its functions set `search_path = public`, so a bare
+              // `finance_records` is the same table.
+              /(alter\s+table[^;]*\bfinance_records\b|(insert\s+into|update|delete\s+from|truncate(\s+table)?)\s+(only\s+)?(public\.)?finance_records\b|policy[^;]*\bon\s+(public\.)?finance_records\b)/i,
+            );
+          }
           expect(
             src,
             `${dir}/${f} may extend but never create/drop finance_records`,

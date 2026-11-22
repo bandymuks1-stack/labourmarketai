@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { AnalyticsConsentControl } from "@/components/app/analytics-consent";
 
 /**
  * Cookie policy page (CR train WAGON 2, audit area 3).
@@ -12,7 +13,10 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
  *   - the language cookie the localization layer may set (NEXT_LOCALE),
  *   - the admin-only display preference cookie (lm_hide_admin_ui),
  *   - theme choice lives in localStorage, NOT a cookie,
- *   - NO analytics / advertising / third-party tracking cookies exist.
+ *   - NO advertising / third-party tracking cookies exist,
+ *   - first-party usage measurement and campaign attribution are stored only
+ *     after an explicit yes, changed or withdrawn here (owner decision
+ *     2026-11-03; lib/consent/analytics-consent.ts).
  */
 export async function generateMetadata({
   params,
@@ -38,6 +42,8 @@ export default async function LegalPage({
   setRequestLocale(locale);
   const t = await getTranslations("legal");
   const items = t.raw("cookies.items") as { name: string; purpose: string }[];
+  const analyticsItems = t.raw("cookies.analyticsItems") as { name: string; purpose: string }[];
+  const consentT = await getTranslations("consent");
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="legal-cookies">
@@ -60,6 +66,30 @@ export default async function LegalPage({
         <p>{t("cookies.localStorageNote")}</p>
         <p>{t("cookies.noTracking")}</p>
       </div>
+      <h2 className="mt-10 text-lg font-semibold text-text-primary">{t("cookies.analyticsTitle")}</h2>
+      <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t("cookies.analyticsIntro")}</p>
+      <ul className="mt-4 flex flex-col gap-3" data-testid="legal-cookies-analytics">
+        {analyticsItems.map((item) => (
+          <li
+            key={item.name}
+            className="rounded-md border border-border-subtle bg-surface-1 px-4 py-3"
+          >
+            <p className="text-sm font-semibold text-text-primary">{item.name}</p>
+            <p className="mt-1 text-sm leading-relaxed text-text-secondary">{item.purpose}</p>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t("cookies.analyticsBasis")}</p>
+      <AnalyticsConsentControl
+        strings={{
+          title: consentT("control.title"),
+          granted: consentT("control.granted"),
+          refused: consentT("control.refused"),
+          undecided: consentT("control.undecided"),
+          allow: consentT("control.allow"),
+          refuse: consentT("control.refuse"),
+        }}
+      />
       <div className="mt-8 flex flex-col gap-3">
         <p className="text-sm leading-relaxed text-text-secondary">{t("requestContact")}</p>
       </div>

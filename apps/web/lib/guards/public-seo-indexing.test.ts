@@ -79,6 +79,43 @@ describe("public SEO indexing foundation guard", () => {
     }
   });
 
+  // A missing record (a vacancy, business, question, category or country that
+  // does not exist) is a 404 whose title comes from not-found.tsx (UX-9). Its
+  // metadata says noindex and nothing else: a title of its own put the home
+  // page's title on the missing vacancy (#3149), and a canonical or hreflang
+  // would point search engines at a page that is not there.
+  describe("a missing record's metadata is noindex only", () => {
+    const DYNAMIC_PUBLIC_PAGES = [
+      "app/[locale]/(marketing)/jobs/[id]/page.tsx",
+      "app/[locale]/(marketing)/labour-market/[country]/page.tsx",
+      "app/[locale]/(marketing)/questions/[slug]/page.tsx",
+      "app/[locale]/(marketing)/questions/category/[category]/page.tsx",
+      "app/[locale]/business/[slug]/page.tsx",
+    ];
+    const NOINDEX_RETURN = /return\s*\{[^;]*?robots:\s*\{\s*index:\s*false,\s*follow:\s*false\s*\}\s*\}/g;
+
+    for (const file of DYNAMIC_PUBLIC_PAGES) {
+      it(`${file}: the missing branch declares no title, canonical or alternates`, () => {
+        const src = read(file);
+        expect(src, `${file} must exist`).not.toBeNull();
+        const meta = src!.slice(src!.indexOf("export async function generateMetadata"));
+        const returns = meta.match(NOINDEX_RETURN) ?? [];
+        expect(returns.length, `${file} has no noindex return for a missing record`).toBeGreaterThan(0);
+        for (const r of returns) {
+          expect(r).not.toMatch(/\btitle\s*:/);
+          expect(r).not.toMatch(/\balternates\s*:/);
+          expect(r).not.toMatch(/buildPageMetadata|buildStaticQuestionsMetadata|buildQuestionMetadata/);
+        }
+      });
+    }
+
+    it("the invitation page names itself instead of carrying the home title", () => {
+      const src = read("app/[locale]/invite/[token]/page.tsx")!;
+      expect(src).toContain('title: brandedTitle(t("pageTitle")), robots: { index: false, follow: false }');
+      expect(src).not.toMatch(/export const metadata: Metadata = \{ robots/);
+    });
+  });
+
   // The SEO strategy must COVER breadth — many professions across many
   // sectors (construction included, never alone). Professions are NOT hidden.
   describe("SEO covers many professions and sectors (not one)", () => {

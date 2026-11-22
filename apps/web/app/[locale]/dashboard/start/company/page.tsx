@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -24,6 +25,11 @@ import {
 } from "@/components/app/company-setup-form";
 import { Card } from "@/components/ui/Card";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/start/company");
+
 
 /**
  * Company profile-REQUEST setup (real persistence + honest verification).
@@ -240,6 +246,7 @@ export default async function CompanyStartPage({
     statusInvalidCountry: t("statusInvalidCountry"),
     registrationCode: t("registrationCode"),
     registrationCodeHelp: t("registrationCodeHelp"),
+    optionalDetails: t("optionalDetails"),
     address: t("address"),
     addressPlaceholder: t("addressPlaceholder"),
     website: t("website"),
@@ -277,12 +284,7 @@ export default async function CompanyStartPage({
         <PageTitle>{t("pageTitle")}</PageTitle>
       </header>
 
-      <Link
-        href={"/dashboard/start" as "/dashboard"}
-        className="self-start text-sm text-text-secondary hover:underline"
-      >
-        ← {t("backToStart")}
-      </Link>
+      <PageBack href={"/dashboard/start" as "/dashboard"}>{t("backToStart")}</PageBack>
 
       {safeNotice === AGENCY_CONNECTION_PENDING_NOTICE ? (
         <p

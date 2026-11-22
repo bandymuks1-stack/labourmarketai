@@ -16,6 +16,9 @@ import type {
   LinkedCompanyWorker,
 } from "@/lib/company/company-workers";
 import { MessageButton } from "@/components/app/message-button";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import {
   IdentityDisclosure,
   PersonIdentityCard,
@@ -168,6 +171,7 @@ export function CompanyWorkersSection({
   reviewElsewhere,
   canManageInvitations = false,
   team,
+  inviteFirst = false,
 }: {
   readonly workersResult: ListState<LinkedCompanyWorker>;
   readonly invitationsResult: ListState<CompanyWorkerInvitation>;
@@ -193,6 +197,10 @@ export function CompanyWorkersSection({
   readonly canManageInvitations?: boolean;
   /** Team state from the ONE capacity read (see `derivePeopleTeamState`). */
   readonly team?: CompanyWorkersTeamView;
+  /** An agency's first job on this page is bringing people in (UX gaps
+   *  2026-11-18, A-2): the invite form leads the section instead of
+   *  following the roster. Order only. */
+  readonly inviteFirst?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState<
     InviteCompanyFormState | null,
@@ -235,6 +243,82 @@ export function CompanyWorkersSection({
     return state.message ?? labels.statusError;
   })();
 
+  const inviteForm = (
+          <form
+            action={(fd) => {
+              setShouldShowOutcome(true);
+              return formAction(fd);
+            }}
+            className="flex flex-col gap-3"
+            data-testid="company-workers-invite-form"
+          >
+            <DisplayedWorkspaceField />
+            <header className="flex flex-col gap-1">
+              <h3 className="font-display text-sm font-semibold text-text-primary">
+                {labels.inviteHeading}
+              </h3>
+              <p className="text-xs text-text-secondary">
+                {labels.inviteDescription}
+              </p>
+            </header>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-text-secondary">{labels.inviteEmailLabel}</span>
+              <Input
+                type="email"
+                name="email"
+                required
+                placeholder={labels.inviteEmailPlaceholder}
+                className="max-sm:min-h-11 max-sm:text-base"
+                data-testid="company-workers-invite-email"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-text-secondary">{labels.inviteNoteLabel}</span>
+              <Textarea
+                name="note"
+                rows={2}
+                maxLength={500}
+                className="max-sm:text-base"
+                data-testid="company-workers-invite-note"
+              />
+              <span className="text-meta text-text-muted">
+                {labels.inviteNoteHint}
+              </span>
+            </label>
+            <Button
+              type="submit"
+              disabled={isPending}
+              variant="primary"
+              size="sm"
+              className="min-h-11 self-start"
+              data-testid="company-workers-invite-submit"
+            >
+              {labels.inviteSubmit}
+            </Button>
+            {outcomeLabel ? (
+              <p
+                className={
+                  state?.ok && state.outcome === "invited"
+                    ? "rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
+                    : "rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
+                }
+                role="status"
+                data-testid="company-workers-invite-result"
+              >
+                {outcomeLabel}
+              </p>
+            ) : null}
+            {shouldShowOutcome && state?.ok && (state.outcome === "invited" || state.outcome === "already_pending") && labels.inviteShareLinkLabel && typeof window !== "undefined" ? (
+              <InviteShareLink
+                url={`${window.location.origin}/${window.location.pathname.split("/")[1] || "lt"}/auth/signup`}
+                labels={labels}
+                copied={linkCopied}
+                onCopied={setLinkCopied}
+              />
+            ) : null}
+          </form>
+  );
+
   return (
     <section
       className="card-border flex flex-col gap-5 p-5"
@@ -246,6 +330,8 @@ export function CompanyWorkersSection({
         </h2>
         {labels.subtitle ? <p className="text-sm text-text-secondary">{labels.subtitle}</p> : null}
       </header>
+
+      {inviteFirst && canManageInvitations ? inviteForm : null}
 
       {team?.counts ? (
         <ul
@@ -523,77 +609,7 @@ export function CompanyWorkersSection({
           that reads as "nobody is invited" (SEP-7: refused ≠ empty). */}
       {canManageInvitations ? (
         <>
-          <form
-            action={(fd) => {
-              setShouldShowOutcome(true);
-              return formAction(fd);
-            }}
-            className="flex flex-col gap-3"
-            data-testid="company-workers-invite-form"
-          >
-            <DisplayedWorkspaceField />
-            <header className="flex flex-col gap-1">
-              <h3 className="font-display text-sm font-semibold text-text-primary">
-                {labels.inviteHeading}
-              </h3>
-              <p className="text-xs text-text-secondary">
-                {labels.inviteDescription}
-              </p>
-            </header>
-            <label className="flex flex-col gap-1 text-xs">
-              <span className="text-text-secondary">{labels.inviteEmailLabel}</span>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder={labels.inviteEmailPlaceholder}
-                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-                data-testid="company-workers-invite-email"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs">
-              <span className="text-text-secondary">{labels.inviteNoteLabel}</span>
-              <textarea
-                name="note"
-                rows={2}
-                maxLength={500}
-                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-                data-testid="company-workers-invite-note"
-              />
-              <span className="text-meta text-text-muted">
-                {labels.inviteNoteHint}
-              </span>
-            </label>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
-              data-testid="company-workers-invite-submit"
-            >
-              {labels.inviteSubmit}
-            </button>
-            {outcomeLabel ? (
-              <p
-                className={
-                  state?.ok && state.outcome === "invited"
-                    ? "rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
-                    : "rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
-                }
-                role="status"
-                data-testid="company-workers-invite-result"
-              >
-                {outcomeLabel}
-              </p>
-            ) : null}
-            {shouldShowOutcome && state?.ok && (state.outcome === "invited" || state.outcome === "already_pending") && labels.inviteShareLinkLabel && typeof window !== "undefined" ? (
-              <InviteShareLink
-                url={`${window.location.origin}/${window.location.pathname.split("/")[1] || "lt"}/auth/signup`}
-                labels={labels}
-                copied={linkCopied}
-                onCopied={setLinkCopied}
-              />
-            ) : null}
-          </form>
+          {inviteFirst ? null : inviteForm}
 
           <section
             id="company-invitations"
@@ -665,8 +681,11 @@ function InviteShareLink({
       <p className="text-xs text-text-secondary">{labels.inviteShareLinkHint}</p>
       <div className="flex flex-wrap items-center gap-2">
         <code className="max-w-full truncate rounded bg-ink-800 px-2 py-1 text-meta text-text-primary">{url}</code>
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           data-testid="company-workers-invite-copy-link"
           onClick={() => {
             void navigator.clipboard?.writeText(url).then(
@@ -674,10 +693,9 @@ function InviteShareLink({
               () => onCopied(false),
             );
           }}
-          className="inline-flex min-h-11 sm:min-h-9 items-center rounded border border-ink-500 px-2 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
         >
           {copied ? labels.inviteShareCopied : labels.inviteShareCopy}
-        </button>
+        </Button>
       </div>
     </div>
   );

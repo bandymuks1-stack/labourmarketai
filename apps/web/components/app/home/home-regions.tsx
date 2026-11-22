@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { HomeRetry } from "@/components/app/home/home-retry";
 import { LevelMark } from "@/components/app/premium/grammar";
 import { StatusChip } from "@/components/app/status-chip";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import {
   loadHomeBecause,
@@ -96,11 +97,68 @@ function Reading({ label }: { readonly label: string }) {
   );
 }
 
-/** The streaming placeholder a region shows while its reader is read. */
-export function HomeRegionPending({ label }: { readonly label: string }) {
+/**
+ * HEIGHTS A PENDING REGION RESERVES (home CLS P0, 2026-10-26).
+ *
+ * The placeholder used to be one line in a padded box (~62 px). Every region
+ * that then resolved grew by its whole body and pushed everything under it —
+ * the next region, the stations, the greeting — while the person was reading
+ * (production: CLS ≈ 0.55 on a phone, ≈ 0.31 on a desktop). Each placeholder
+ * now has the region's own frame (the same padding and title row as
+ * `Region`) and reserves the height of the region's SMALLEST usual answer,
+ * so arriving data only ever adds the lines beyond it:
+ *
+ *   action  WAITING with its one next action — title, the action's sentence
+ *           and its "why", and the full-width gold button on a phone (one row
+ *           with the button beside it from md);
+ *   region  a region with a title and two rows (TRACE, RUNNING, OUTSIDE,
+ *           BECAUSE) — RUNNING usually grows past it, but it sits last in its
+ *           column, so what it pushes is below it;
+ *
+ * and `HomeLinePending` reserves the compact employer-visibility line.
+ * Minimum heights only: nothing is clipped, nothing is hidden.
+ */
+const PENDING_RESERVE = {
+  action: "min-h-48 md:min-h-36",
+  region: "min-h-36 sm:min-h-40",
+} as const;
+
+/** The streaming placeholder a region shows while its reader is read — the
+ *  region's own frame at its reserved height. With a `label` it says that a
+ *  read is in progress (the region boundaries); without one it is a silent
+ *  shape (the frame-level pending, `TodayScreenPending`). */
+export function HomeRegionPending({
+  label,
+  size = "region",
+}: {
+  readonly label?: string;
+  readonly size?: keyof typeof PENDING_RESERVE;
+}) {
   return (
-    <div className="rounded-card border border-ink-600/70 bg-ink-800/40 p-5">
-      <Reading label={label} />
+    <div
+      data-testid="home-region-pending"
+      data-reserve={size}
+      className={cn(
+        "flex flex-col gap-3 rounded-card border border-ink-600/70 bg-ink-800/40 p-4 sm:gap-4 sm:p-6",
+        PENDING_RESERVE[size],
+      )}
+    >
+      <span aria-hidden className="h-6 w-40 animate-pulse rounded bg-ink-700/70 motion-reduce:animate-none sm:h-7" />
+      {label ? <Reading label={label} /> : null}
+    </div>
+  );
+}
+
+/** The pending state of the compact employer-visibility line (a compact
+ *  `Card`: a status sentence and its one 44 px control). */
+export function HomeLinePending() {
+  return (
+    <div
+      aria-hidden
+      data-testid="home-line-pending"
+      className="min-h-24 rounded-card border border-ink-600/70 bg-ink-800/40 p-4"
+    >
+      <span className="block h-5 w-3/4 animate-pulse rounded bg-ink-700/70 motion-reduce:animate-none" />
     </div>
   );
 }
@@ -111,8 +169,8 @@ import { Region, Unreadable, retryLabels, type RetryLabels } from "@/components/
 // ───────────────────────── 01 · WAITING ─────────────────────────
 
 export async function HomeWaiting({ locale }: { readonly locale: ActiveLocale }) {
-  const { region, unknownDoors } = await loadHomeWaiting();
-  return <HomeWaitingView locale={locale} region={region} unknownDoors={unknownDoors} />;
+  const { region, unknownDoors, mailboxProof } = await loadHomeWaiting();
+  return <HomeWaitingView locale={locale} region={region} unknownDoors={unknownDoors} mailboxProof={mailboxProof} />;
 }
 
 /** Data-driven view, so every state is provable without a database
@@ -121,10 +179,14 @@ export async function HomeWaitingView({
   locale,
   region,
   unknownDoors,
+  mailboxProof = false,
 }: {
   readonly locale: ActiveLocale;
   readonly region: WaitingRegion;
   readonly unknownDoors: readonly TodayDoorKind[];
+  /** Invitations wait on the person proving their mailbox (W-1): the
+   *  existing proof prompt, never "could not be read". */
+  readonly mailboxProof?: boolean;
 }) {
   const [t, tRegion, tCard, tJournal, tUnits] = await Promise.all([
     getTranslations("todayScreen.home"),
@@ -207,6 +269,19 @@ export async function HomeWaitingView({
                 {tCard("stale.body")}
               </p>
             ) : null}
+            {/* EVIDENCE FIRST keeps what it displaced reachable: the
+                profession / profile (or another unmet card dimension) as a
+                QUIET text link — never a second gold action. */}
+            {next.next.secondary ? (
+              <Link
+                href={next.next.secondary.href as "/dashboard"}
+                data-testid="today-next-secondary"
+                data-dim={next.next.secondary.dim}
+                className="mt-1 inline-flex min-h-11 items-center text-support font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline"
+              >
+                {tCard(`next.${next.next.secondary.dim}`)} →
+              </Link>
+            ) : null}
           </div>
           {/* THE ONE GOLD ACTION on the whole home. */}
           <Link
@@ -248,12 +323,27 @@ export async function HomeWaitingView({
       ) : null}
 
       {openUnknown ? (
-        <div className={cn(open.length > 0 || next ? "border-t border-ink-600/60 pt-3" : "")}>
+        <div
+          className={cn(open.length > 0 || next ? "border-t border-ink-600/60 pt-3" : "")}
+          // Which reading is unknown (no text): the journal's, and/or the door
+          // counters that could not be given (UX gap W-1 diagnosis).
+          data-journal-unknown={region.openUnknown ? "true" : undefined}
+          data-doors-unknown={unknownDoors.length > 0 ? unknownDoors.join(" ") : undefined}
+        >
           <Unreadable text={t("open.unknown")} testid="today-open-unknown" labels={rl} />
         </div>
       ) : null}
 
-      {!next && open.length === 0 && !openUnknown && !region.nextUnknown ? (
+      {/* Invitations reach only a proven mailbox (network page, the same
+          prompt and words): offered here instead of a false "could not be
+          read", and never as "no invitations" (W-1, 2026-11-19). */}
+      {mailboxProof ? (
+        <div className={cn(open.length > 0 || next || openUnknown ? "border-t border-ink-600/60 pt-3" : "")} data-testid="home-mailbox-proof">
+          <VerifyEmailPrompt locale={locale} next="/dashboard" />
+        </div>
+      ) : null}
+
+      {!next && open.length === 0 && !openUnknown && !mailboxProof && !region.nextUnknown ? (
         <p className={NOTE} data-testid="home-waiting-clear">
           {tRegion("clear")}
         </p>

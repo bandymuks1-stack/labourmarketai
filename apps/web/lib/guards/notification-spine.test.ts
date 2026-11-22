@@ -271,16 +271,22 @@ describe("bell, badges and layout consume the one spine source", () => {
   });
 
   it("the header actually renders the bell", () => {
-    expect(LAYOUT).toMatch(/<NotificationPanel \/>/);
+    // THE ONE header renders the bell on every dashboard route (the operator
+    // console's private header, which mounted its own, retired 2026-10-25).
+    const header = read("components/app/conversation/chat/conversation-header.tsx");
+    expect(header).toMatch(/<NotificationPanel \/>/);
+    expect(read("components/app/dashboard-chrome.tsx")).toMatch(/<ConversationHeader/);
+    // ...and its nav reads the SAME streamed spine badges as every nav surface.
+    expect(header).toMatch(/const badges = auth\?\.badges \?\? \{\}/);
   });
 
-  it("BOTH nav surfaces (desktop tabs + mobile bottom nav) read the spine badges", () => {
-    const tabs = read("components/app/dashboard-tabs.tsx");
-    const bottom = read("components/app/bottom-nav.tsx");
-    for (const src of [tabs, bottom]) {
-      expect(src).toMatch(/badges: spineBadges \} = useAuth\(\)/);
-      expect(src).toMatch(/badges = badges \?\? \(spineBadges/);
-    }
+  it("the ONE nav surface reads the spine badges on every width", () => {
+    // RE-ANCHORED 2026-10-25: the desktop tabs and the phone bar were retired
+    // with the one header; its bar, More menu and phone sheet all badge from
+    // the same streamed spine.
+    const header = read("components/app/conversation/chat/conversation-header.tsx");
+    expect(header).toMatch(/const badges = auth\?\.badges \?\? \{\}/);
+    expect(header).toMatch(/badgeOf=\{badgeOf\}/);
   });
 
   it("nav badges carry ONLY tabs whose surface clears the signal", () => {

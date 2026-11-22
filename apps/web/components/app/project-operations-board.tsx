@@ -18,6 +18,10 @@ import {
   upsertReadinessItemAction,
 } from "@/lib/projects/operations-actions";
 import { PrintButton } from "@/components/app/print-button";
+import { Button } from "@/components/ui/Button";
+import { ToggleChip } from "@/components/ui/Chip";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { playerInitials } from "@/lib/identity/player-identity";
 
 /**
@@ -104,6 +108,8 @@ export interface OperationsBoardLabels {
     seed: string;
     addItem: string;
     addPlaceholder: string;
+    /** Suggested rows still to agree before the agreement — neutral. */
+    toAgree: string;
     missing: string;
     received: string;
     checked: string;
@@ -261,11 +267,11 @@ function StatusEditor({
         {labels.statusTitle}
       </span>
       <div className="flex flex-wrap items-center gap-2">
-        <select
+        <Select
           aria-label={labels.statusTitle}
           value={value}
           onChange={(e) => setValue(e.target.value as OperationalStatus)}
-          className="rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 text-xs text-text-primary"
+          className="w-auto max-sm:min-h-11 max-sm:text-base"
           data-testid="ops-status-select"
         >
           <option value="">{labels.statusEmpty}</option>
@@ -274,16 +280,18 @@ function StatusEditor({
               {labels.statusLabels[s]}
             </option>
           ))}
-        </select>
-        <button
+        </Select>
+        <Button
           type="button"
           onClick={save}
           disabled={pending || !value}
-          className="rounded-md border border-ink-600 px-2 py-1 text-xs font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary disabled:opacity-50"
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           data-testid="ops-status-save"
         >
           {pending ? labels.saving : labels.save}
-        </button>
+        </Button>
         {msg ? <span className="text-meta text-text-secondary">{msg}</span> : null}
       </div>
     </div>
@@ -363,6 +371,9 @@ function ChecklistEditor({
           {labels.checklist.title}
         </span>
         <span className="flex flex-wrap gap-2 text-meta text-text-secondary">
+          <span data-testid="ops-docs-to-agree">
+            {labels.checklist.toAgree}: {worker.docsToAgree}
+          </span>
           <span data-testid="ops-docs-missing">
             {labels.checklist.missing}: {worker.docsMissing}
           </span>
@@ -390,12 +401,12 @@ function ChecklistEditor({
               className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-600 px-2 py-1"
             >
               <span className="text-meta text-text-primary">{item.label}</span>
-              <select
+              <Select
                 aria-label={item.label}
                 value={item.status}
                 disabled={pending}
                 onChange={(e) => setItemStatus(item, e.target.value as ReadinessStatus)}
-                className="rounded-md border border-ink-600 bg-ink-800/40 px-1.5 py-0.5 text-meta text-text-primary print:hidden"
+                className="w-auto max-sm:min-h-11 max-sm:text-base print:hidden"
                 data-testid="ops-item-status-select"
               >
                 {READINESS_STATUSES.map((s) => (
@@ -403,7 +414,7 @@ function ChecklistEditor({
                     {labels.readinessStatusLabels[s]}
                   </option>
                 ))}
-              </select>
+              </Select>
               <span className="hidden text-meta text-text-secondary print:inline">
                 {labels.readinessStatusLabels[item.status]}
               </span>
@@ -414,33 +425,37 @@ function ChecklistEditor({
 
       <div className="flex flex-wrap items-center gap-2 print:hidden">
         {worker.readinessItems.length === 0 ? (
-          <button
+          <Button
             type="button"
             onClick={seed}
             disabled={pending}
-            className="rounded-md border border-ink-600 px-2 py-1 text-meta font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary disabled:opacity-50"
+            variant="secondary"
+            size="sm"
+            className="min-h-11"
             data-testid="ops-checklist-seed"
           >
             {labels.checklist.seed}
-          </button>
+          </Button>
         ) : null}
-        <input
+        <Input
           value={newLabel}
           onChange={(e) => setNewLabel(e.target.value)}
           aria-label={labels.checklist.addPlaceholder}
           placeholder={labels.checklist.addPlaceholder}
-          className="min-w-0 flex-1 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 text-meta text-text-primary"
+          className="w-auto min-w-0 flex-1 max-sm:min-h-11 max-sm:text-base"
           data-testid="ops-checklist-add-input"
         />
-        <button
+        <Button
           type="button"
           onClick={addItem}
           disabled={pending || newLabel.trim().length === 0}
-          className="rounded-md border border-ink-600 px-2 py-1 text-meta font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary disabled:opacity-50"
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           data-testid="ops-checklist-add"
         >
           {labels.checklist.addItem}
-        </button>
+        </Button>
       </div>
       <p className="text-meta leading-relaxed text-text-muted">{labels.checklist.helper}</p>
       {msg ? <p className="text-meta text-text-secondary">{msg}</p> : null}
@@ -648,19 +663,13 @@ export function ProjectOperationsBoard({
   };
 
   const filterBtn = (key: FilterKey, label: string) => (
-    <button
-      type="button"
-      onClick={() => setFilter(key)}
-      aria-pressed={filter === key}
-      className={`rounded-full border px-2.5 py-1 text-meta font-medium ${
-        filter === key
-          ? "border-brand-cyan text-text-primary"
-          : "border-ink-600 text-text-secondary hover:text-text-primary"
-      }`}
-      data-testid={`ops-filter-${key}`}
+    <ToggleChip
+      pressed={filter === key}
+      onPressedChange={() => setFilter(key)}
+      testId={`ops-filter-${key}`}
     >
       {label}
-    </button>
+    </ToggleChip>
   );
 
   return (
@@ -808,11 +817,11 @@ export function ProjectOperationsBoard({
           {filterBtn("needsEvidence", labels.filters.needsEvidence)}
           {filterBtn("docsChecked", labels.filters.docsChecked)}
           {filterBtn("followUp", labels.filters.followUp)}
-          <select
+          <Select
             aria-label={labels.filters.byStatus}
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as OperationalStatus)}
-            className="rounded-full border border-ink-600 bg-ink-800/40 px-2 py-1 text-meta text-text-primary"
+            className="w-auto max-sm:min-h-11 max-sm:text-base"
             data-testid="ops-filter-status"
           >
             <option value="">{labels.filters.anyStatus}</option>
@@ -821,7 +830,7 @@ export function ProjectOperationsBoard({
                 {labels.statusLabels[s]}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </section>
 
@@ -848,17 +857,19 @@ export function ProjectOperationsBoard({
                 {labels.filters.empty[filter]}
               </p>
             ) : null}
-            <button
+            <Button
               type="button"
               onClick={() => {
                 setFilter("all");
                 setStatusFilter("");
               }}
-              className="rounded-md border border-ink-600 px-3 py-1.5 text-xs font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary"
+              variant="secondary"
+              size="sm"
+              className="min-h-11"
               data-testid="ops-filter-show-all"
             >
               {labels.filters.showAll}
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">

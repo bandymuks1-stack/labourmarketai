@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { EmptyState } from "@/components/app/empty-state";
+import { chipLinkClassName } from "@/components/ui/Chip";
 import {
   CounterpartyReviewCard,
   type CounterpartyCardView,
@@ -20,6 +21,11 @@ import {
 } from "@/lib/journal/counterparty-review-model";
 import { reviewerHoursOf } from "@/lib/journal/reviewer-hours";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/inbox/counterparty");
+
 
 export const dynamic = "force-dynamic";
 
@@ -186,7 +192,7 @@ export default async function CounterpartyQueuePage({
         ) : null}
         <Link
           href="/dashboard/inbox"
-          className="w-fit text-xs font-medium text-brand-blue hover:underline"
+          className={`${chipLinkClassName(false)} w-fit`}
         >
           {t("employerInboxLink")}
         </Link>

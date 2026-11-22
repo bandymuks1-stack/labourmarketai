@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { countryDisplayName } from "@/lib/location/country-model";
 import type { CredentialValidityState } from "@/lib/documents/credential-validity";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -11,6 +12,7 @@ import {
 } from "@/lib/config/documents";
 import {
   computeCountryReadiness,
+  documentReadinessScope,
   type DerivedDocumentStatus,
 } from "@/lib/documents/readiness";
 import { unmatchableRequirementRows } from "@/lib/country-readiness/requirement-rows";
@@ -48,6 +50,11 @@ import {
 } from "@/lib/readiness/worker-readiness";
 import type { Role } from "@/lib/auth/actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/documents", "documents.title");
+
 
 /**
  * "Mano dokumentai" — the document & work-proof centre (control room PR H,
@@ -714,7 +721,11 @@ export default async function WorkerDocumentsPage({
               statusOptions={(["ready", "missing", "blocked"] as const).map(
                 (s) => [s, t(`status.${s}` as never)] as const,
               )}
-              countryOptions={DOCUMENT_COUNTRIES}
+              // Named, not printed as an ISO code: the same reader the chat's
+              // document form uses, falling back to the code.
+              countryOptions={DOCUMENT_COUNTRIES.map(
+                (code) => [code, countryDisplayName(code, locale) || code] as const,
+              )}
             />
           </section>
 
@@ -820,6 +831,17 @@ export default async function WorkerDocumentsPage({
                     <p className="text-meta text-text-muted">
                       {t("scopeNote")}
                     </p>
+                    {/* Base country not stated: whether this work would be a
+                        POSTING is unknown, so the posting papers are not
+                        listed as missing — and the page says why. */}
+                    {!inv.readiness.homeCountry ? (
+                      <p
+                        className="text-meta text-text-muted"
+                        data-testid="documents-posting-needs-base"
+                      >
+                        {t("country.postingNeedsBase")}
+                      </p>
+                    ) : null}
 
                     {/* REQUIREMENTS THAT APPLY AND CANNOT BE CHECKED FROM
                         DOCUMENTS. `matrixRequirementRows` keys on a document
@@ -832,9 +854,11 @@ export default async function WorkerDocumentsPage({
                         folded into the status above — this list changes no
                         count and no overall verdict. */}
                     {(() => {
+                      // The SAME scope the checklist above was built in:
+                      // posting-only rules only across a known border.
                       const unmatchable = unmatchableRequirementRows(
                         country,
-                        "worker_posted",
+                        documentReadinessScope(country, inv.readiness.homeCountry),
                       );
                       if (unmatchable.length === 0) return null;
                       return (

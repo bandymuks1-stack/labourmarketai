@@ -6,6 +6,7 @@ import { join } from "node:path";
 import {
   VISIBLE_PRIMARY_NAV_ITEMS,
   ADMIN_NAV_ITEM,
+  getCoreNavItems,
 } from "../config/navigation";
 import { getFeatureConfig } from "../config/feature-availability";
 import { activeLocales } from "@/lib/i18n/config";
@@ -88,10 +89,12 @@ describe("Admin is a permission-gated nav item, never shown to non-admins", () =
     expect(ADMIN_NAV_ITEM.id).toBe("admin");
   });
 
-  it("desktop tabs gate the admin item behind isAdmin", () => {
-    const src = read("components/app/dashboard-tabs.tsx");
-    expect(src, "dashboard-tabs imports ADMIN_NAV_ITEM").toMatch(/ADMIN_NAV_ITEM/);
-    expect(src, "dashboard-tabs reads isAdmin").toMatch(/isAdmin/);
+  it("the one header gates the admin item behind isAdmin", () => {
+    // RE-ANCHORED 2026-10-25: the desktop tabs were retired with the one
+    // header; the header's "More" carries the admin item for admins only.
+    const nav = read("lib/config/navigation.ts");
+    expect(nav).toMatch(/return isAdmin \? \[\.\.\.extras, ADMIN_NAV_ITEM\] : extras;/);
+    expect(read("components/app/conversation/chat/conversation-header.tsx")).toMatch(/auth\?\.isAdmin/);
   });
 
   it("admin stays reachable for admins via the account dropdown", () => {
@@ -100,11 +103,11 @@ describe("Admin is a permission-gated nav item, never shown to non-admins", () =
     expect(menu).toMatch(/\/dashboard\/admin/);
   });
 
-  it("the mobile bottom nav stays the focused core (NO admin tab crowding it)", () => {
-    const src = read("components/app/bottom-nav.tsx");
-    expect(src, "bottom-nav must not append the admin item").not.toMatch(
-      /ADMIN_NAV_ITEM/,
-    );
+  it("the core loop stays the focused priority set (admin is never a core item)", () => {
+    // The phone bottom bar was retired with the one header (2026-10-25); the
+    // invariant it carried — admin never crowds the primary set — is pinned on
+    // the core list every width renders first.
+    expect(getCoreNavItems().map((i) => i.id)).not.toContain("admin");
   });
 });
 
