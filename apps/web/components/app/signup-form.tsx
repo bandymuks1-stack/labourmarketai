@@ -618,11 +618,6 @@ export function SignupForm({
         </span>
       </div>
 
-      {/* Pilot-feedback line: one quiet sentence under the action, not a
-          warning box between the fields and the button. */}
-      <p className="text-xs leading-relaxed text-text-muted" data-testid="signup-pilot-line">
-        {t("disclaimer")}
-      </p>
     </form>
   );
 }
