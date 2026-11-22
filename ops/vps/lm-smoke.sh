@@ -40,7 +40,9 @@ done
 
 echo "== 3. routes (local origin) =="
 for p in /lt /en /lt/auth/login /lt/jobs /lt/dashboard /lt/dashboard/journal; do
-  c=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "$H$p"); t=$(curl -s -o /dev/null -m 20 -w '%{time_total}' "$H$p")
+  read -r c t <<EOF2
+$(curl -s -o /dev/null -m 20 -w '%{http_code} %{time_total}' "$H$p")
+EOF2
   echo "$p -> $c ${t}s"
   case "$c" in 200|307|308) ;; *) fail "$p answered $c";; esac
 done
@@ -57,7 +59,9 @@ docker logs --tail 300 labourmarket-prod 2>&1 | grep -iE 'error|fatal|unhandled|
 
 echo "== 6. neighbours (Agentai OS has priority) =="
 docker ps --format '{{.Names}} {{.Status}}' | grep -i agentai
-U=$(docker ps --format '{{.Names}} {{.Status}}' | grep -i agentai | grep -vc healthy || true)
+# "(unhealthy)" contains "healthy": match the exact "(healthy)" marker. A container with no
+# healthcheck ("Up 3 days") counts as not healthy, the cautious reading.
+U=$(docker ps --format '{{.Names}} {{.Status}}' | grep -i agentai | grep -vc '(healthy)' || true)
 [ "$U" = 0 ] || fail "$U Agentai container(s) not healthy"
 head -1 /proc/pressure/cpu
 free -m | sed -n '2p'
