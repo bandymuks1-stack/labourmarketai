@@ -71,7 +71,6 @@ export interface ProjectCostCalculatorLabels {
     readonly totalHours: string;
     readonly totalHoursHelp: string;
     readonly rate: string;
-    readonly ratePlaceholder: string;
     readonly currency: string;
     readonly country: string;
     readonly countryNone: string;
@@ -507,7 +506,7 @@ export function ProjectCostCalculator({
       {step === "rates" && (
         <section className="flex flex-col gap-4" aria-label={labels.steps.rates}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {num("rate", labels.fields.rate, { placeholder: labels.fields.ratePlaceholder })}
+            {num("rate", labels.fields.rate)}
             {num("materials", labels.fields.materials)}
             {num("equipment", labels.fields.equipment)}
             {num("transportAccommodation", labels.fields.transport)}

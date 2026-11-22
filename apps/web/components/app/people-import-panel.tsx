@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Explain } from "@/components/app/premium/grammar";
 
 import {
   commitPeopleIngestAction,
@@ -70,6 +71,7 @@ export function PeopleImportPanel({
   readonly suggested?: IngestRelationship;
 }) {
   const t = useTranslations("peopleImport");
+  const tDisclosure = useTranslations("common.disclosure");
   const router = useRouter();
   const [stage, setStage] = useState<Stage>({ kind: "idle" });
   const [relationship, setRelationship] = useState<IngestRelationship>(suggested);
@@ -178,7 +180,10 @@ export function PeopleImportPanel({
       className="rounded-card border border-ink-600 bg-ink-800/60 p-4"
     >
       <h3 className="text-body font-medium text-text-primary">{t("title")}</h3>
-      <p className="mt-1 text-meta text-text-secondary">{t("lead")}</p>
+      {/* One row, the detail one tap away (coordinator decision 2026-11-22, item 5). */}
+      <Explain summary={tDisclosure("details")} testId="people-import-explain" className="mt-1">
+        <p>{t("lead")}</p>
+      </Explain>
 
       <label className="mt-3 block text-meta text-text-secondary" htmlFor="people-import-rel">
         {t("relationship")}

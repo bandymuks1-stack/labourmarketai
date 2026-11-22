@@ -209,7 +209,6 @@
     "formLabelLabel": "Plats",
     "formLabelPlaceholder": "Stad eller region",
     "formPriceLabel": "Pris",
-    "formPricePlaceholder": "t.ex. 450 €/månad eller enligt överenskommelse",
     "priceHint": "Priset är valfritt och beskrivande. Ingen betalning tas emot här.",
     "save": "Spara",
     "saving": "Sparar…",
@@ -2976,8 +2975,7 @@
           "label": "Hur många arbetstagare behövs"
         },
         "salary": {
-          "label": "Lön (€)",
-          "placeholder": "T.ex. 2200"
+          "label": "Lön (€)"
         },
         "countries": {
           "label": "Föredragna länder (ISO-koder)",
@@ -4643,7 +4641,6 @@
               "hoursPerWorker": "Timmar per arbetstagare",
               "totalHours": "Totalt antal timmar (valfri överstyrning)",
               "rate": "Tim- / dagspris",
-              "ratePlaceholder": "t.ex. 20",
               "country": "Land / plats",
               "materials": "Material",
               "equipment": "Utrustning / verktyg",
@@ -7168,7 +7165,6 @@
       "countryPlaceholder": "t.ex. LT",
       "remoteLabel": "Kan utföras på distans",
       "rateLabel": "Pris (valfritt)",
-      "ratePlaceholder": "t.ex. ca 25 EUR/h, förhandlingsbart",
       "rateHint": "Endast fritext – till exempel ett ungefärligt timpris."
     },
     "save": "Spara",
@@ -13088,6 +13084,7 @@
     },
     "goToRoster": "Gå till personalstyrkan",
     "invalidLabel": "Kontrollera e-postadressen – inbjudan skickades inte.",
+    "offerLimitLabel": "För många erbjudanden. Försök igen senare.",
     "deliveryHeading": "Inbjudningslänk",
     "deliveryCreated": "Inte skickad via e-post – e-postleverans är inte konfigurerad. Kopiera länken och skicka den till kunden själv.",
     "deliverySent": "Inbjudan skickades via e-post. Du kan fortfarande kopiera länken.",
@@ -19761,7 +19758,6 @@
       },
       "capacity": "Personer",
       "rate": "Pris",
-      "ratePlaceholder": "t.ex. 32 €/h eller fast pris",
       "period": "Period",
       "start": "Start",
       "end": "Slut",
