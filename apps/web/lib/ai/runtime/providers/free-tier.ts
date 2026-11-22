@@ -64,7 +64,25 @@ export const CLOUDFLARE_LLM_BINDING: OpenAiCompatibleBinding = {
   tokenParam: "max_tokens",
   jsonObjectMode: false,
   strictModels: true,
+  modelRequestFields: cloudflareModelRequestFields,
 };
+
+/**
+ * Gemma 4 on Workers AI reasons by default (its schema:
+ * `chat_template_kwargs.enable_thinking`, default true). The reasoning counts
+ * against `max_tokens`, so a 200-token intent proposal came back EMPTY with
+ * `finish_reason: "length"` (production 2026-11-22: 728 reasoning chars, no
+ * answer; with thinking off: the JSON in 15 tokens). Every task here asks for
+ * one small JSON object, so thinking is switched off for this family only; the
+ * other Cloudflare models' schemas do not carry this field.
+ */
+export const CLOUDFLARE_GEMMA_NO_THINKING = {
+  chat_template_kwargs: { enable_thinking: false },
+} as const;
+
+function cloudflareModelRequestFields(model: string): Readonly<Record<string, unknown>> | undefined {
+  return model.startsWith("@cf/google/gemma-4") ? CLOUDFLARE_GEMMA_NO_THINKING : undefined;
+}
 
 export const MISTRAL_BINDING: OpenAiCompatibleBinding = {
   id: "mistral",

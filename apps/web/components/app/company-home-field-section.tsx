@@ -211,6 +211,9 @@ export interface CompanyHomePartners {
   readonly teams: readonly { readonly id: string; readonly name: string; readonly members: number }[] | null;
 }
 
+/** Open needs the home names before the rest fold away. */
+const HOME_NEEDS_VISIBLE = 5;
+
 export async function CompanyHomeFieldSection({
   locale,
   capabilities,
@@ -235,6 +238,7 @@ export async function CompanyHomeFieldSection({
   readonly partners: CompanyHomePartners;
 }) {
   const t = await getTranslations("companyHome");
+  const tDisclosure = await getTranslations("common.disclosure");
   // FIRST, A NEED: no need stated yet → the first-need card stands above the
   // field and holds the screen's ONE primary action, so the field's own need
   // door and "create the first project" step down to the quiet grammar —
@@ -840,56 +844,73 @@ export async function CompanyHomeFieldSection({
             <p className="text-sm text-text-secondary">{t("missing.nothing")}</p>
           ) : null}
           {openNeeds.length > 0 ? (
-            <ul className="flex flex-col gap-1">
-              {openNeeds.map((n) => (
-                <li
-                  key={n.id}
-                  className={`flex flex-col gap-1 rounded-control border border-dashed border-ink-500 bg-ink-900/40 px-2.5 py-1.5`}
-                  data-testid="company-home-need"
-                >
-                  <span className="min-w-0 break-words text-sm text-text-primary">{n.title}</span>
-                  <span className="font-mono text-meta text-text-muted">
-                    {[
-                      n.teamSize ? t("missing.people", { count: n.teamSize }) : null,
-                      n.startPeriod ? t("missing.from", { period: n.startPeriod }) : null,
-                      n.location ?? null,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ") || t(`missing.status.${n.status}`)}
+            (() => {
+              // The home names the first few; the rest open in place (responsive
+              // pass 2026-11-22: 20 needs made this block 2,400 px at 390 px).
+              const renderNeed = (n: (typeof openNeeds)[number]) => (
+              <li
+                key={n.id}
+                className={`flex flex-col gap-1 rounded-control border border-dashed border-ink-500 bg-ink-900/40 px-2.5 py-1.5`}
+                data-testid="company-home-need"
+              >
+                <span className="min-w-0 break-words text-sm text-text-primary">{n.title}</span>
+                <span className="font-mono text-meta text-text-muted">
+                  {[
+                    n.teamSize ? t("missing.people", { count: n.teamSize }) : null,
+                    n.startPeriod ? t("missing.from", { period: n.startPeriod }) : null,
+                    n.location ?? null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ") || t(`missing.status.${n.status}`)}
+                </span>
+                {n.status !== "draft" && n.status !== "approved" ? (
+                  <span className="text-meta italic text-text-muted" data-testid="company-home-need-fit">
+                    {(() => {
+                      const fit = deriveNeedFit(n.teamSize, outlook);
+                      return fit.kind === "fits"
+                        ? t("missing.fit.fits")
+                        : fit.kind === "some"
+                          ? t("missing.fit.some")
+                          : fit.kind === "from"
+                          ? t("missing.fit.from", { date: day(fit.date) ?? fit.date })
+                          : fit.kind === "short"
+                            ? t("missing.fit.short", { count: fit.short })
+                            : t("missing.fit.unknown");
+                    })()}
                   </span>
-                  {n.status !== "draft" && n.status !== "approved" ? (
-                    <span className="text-meta italic text-text-muted" data-testid="company-home-need-fit">
-                      {(() => {
-                        const fit = deriveNeedFit(n.teamSize, outlook);
-                        return fit.kind === "fits"
-                          ? t("missing.fit.fits")
-                          : fit.kind === "some"
-                            ? t("missing.fit.some")
-                            : fit.kind === "from"
-                            ? t("missing.fit.from", { date: day(fit.date) ?? fit.date })
-                            : fit.kind === "short"
-                              ? t("missing.fit.short", { count: fit.short })
-                              : t("missing.fit.unknown");
-                      })()}
-                    </span>
+                ) : null}
+                {n.status === "draft" ? (
+                  <Link href={needsHref} className={`${ACTION_LINK} w-fit`} data-testid="company-home-need-continue">
+                    {t("missing.continueDraft")}
+                  </Link>
+                ) : (
+                  <Link
+                    href={`/dashboard/company/scouting?request=${n.id}` as "/dashboard"}
+                    className={`${ACTION_LINK} w-fit`}
+                    data-testid="company-home-need-open"
+                  >
+                    {t("missing.openNeed")}
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </Link>
+                )}
+              </li>
+              );
+              const shown = openNeeds.slice(0, HOME_NEEDS_VISIBLE);
+              const rest = openNeeds.slice(HOME_NEEDS_VISIBLE);
+              return (
+                <>
+                  <ul className="flex flex-col gap-1">{shown.map(renderNeed)}</ul>
+                  {rest.length > 0 ? (
+                    <details className="group" data-testid="company-home-needs-rest">
+                      <summary className="flex min-h-11 cursor-pointer list-none items-center text-xs font-medium text-brand-blue [&::-webkit-details-marker]:hidden">
+                        {tDisclosure("showAll", { count: openNeeds.length })}
+                      </summary>
+                      <ul className="mt-1 flex flex-col gap-1">{rest.map(renderNeed)}</ul>
+                    </details>
                   ) : null}
-                  {n.status === "draft" ? (
-                    <Link href={needsHref} className={`${ACTION_LINK} w-fit`} data-testid="company-home-need-continue">
-                      {t("missing.continueDraft")}
-                    </Link>
-                  ) : (
-                    <Link
-                      href={`/dashboard/company/scouting?request=${n.id}` as "/dashboard"}
-                      className={`${ACTION_LINK} w-fit`}
-                      data-testid="company-home-need-open"
-                    >
-                      {t("missing.openNeed")}
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-                    </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
+                </>
+              );
+            })()
           ) : null}
           {docGaps.length > 0 ? (
             <ul className="flex flex-col gap-1">
