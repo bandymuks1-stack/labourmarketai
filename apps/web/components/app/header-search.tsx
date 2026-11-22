@@ -139,7 +139,10 @@ export function HeaderSearch({
           // (z-50), dropdown menus (z-60). Inside the header its z was
           // trapped by the backdrop-blur stacking context and the right
           // panel stayed bright over it in production.
-          className="fixed inset-0 z-toast flex items-start justify-center bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
+          // overflow-y-auto: on a phone on its side (320 px high) or at 200 %
+          // text the dialog is taller than the screen; it scrolls inside the
+          // backdrop instead of running past the bottom (sweep 2026-11-21).
+          className="fixed inset-0 z-toast flex items-start justify-center overflow-y-auto overscroll-contain bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
           role="presentation"
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);

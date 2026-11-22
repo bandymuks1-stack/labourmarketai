@@ -134,7 +134,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 91 -> 92: open-conversation - 'parašyk Jonui' opens the ONE conversation.
     // 92 -> 93: new-jobs - the new ads over the one job-alert matching.
     // 93 -> 94: what-changed - the ONE consequence trace, read in the chat.
-    expect(entries.length).toBe(94);
+    // 94 -> 95: offer-team (owner P1 2026-11-22) - "Noriu pasiūlyti savo
+    // komandą" reached offer-value / my-team; it opens the ONE team-offer form.
+    expect(entries.length).toBe(95);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -185,6 +187,8 @@ describe("the intent registry is the enumerable routing contract", () => {
       "need-workers",
       // SUPPLY — the same canonical intake as a need, stamped "partner".
       "offer-capacity",
+      // "Noriu pasiūlyti savo komandą" — the ONE team-offer form; its button is the act.
+      "offer-team",
       // "mano atlyginimo lūkestis nuo 2500 iki 3500" — the work card opened
       // with the figures; the form's save is the write.
       "pay-statement",
