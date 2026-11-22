@@ -85,7 +85,8 @@ for (const [device, options] of Object.entries(DEVICES)) {
       const page = await ctx.newPage();
       const stripe: string[] = [];
       page.on("request", (r) => {
-        if (/stripe\.com/.test(r.url())) stripe.push(r.url());
+        const host = new URL(r.url()).hostname;
+        if (host === "stripe.com" || host.endsWith(".stripe.com")) stripe.push(r.url());
       });
       const res = await page.goto(`${BASE}/en/pricing`);
       expect(res?.status()).toBe(200);
