@@ -41,8 +41,7 @@ test("P-0. a worker signs up", async ({ page }) => {
   await signUp(page, BASE, W);
   await onboard(page, "work", "Synthetic Pay Worker");
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
-  // The Living CV's work card (and its editor) is drawn once the person has a
-  // player card, which a brand-new account does not have yet: one entry.
+  // Setup: one journal entry, so the Living CV has recorded work behind the card.
   await recordJournal(page, BASE, `QA-SYNTHETIC pay ${RUN}: tiled the bathroom floor for 6 hours`);
 });
 
@@ -53,19 +52,20 @@ for (const size of SIZES) {
     const page = await ctx.newPage();
     await signIn(page, BASE, W);
 
-    // P-1 the Living CV work card.
-    await page.goto(`${BASE}/en/dashboard/profile`);
-    const toggle = page.getByTestId("work-card-editor-toggle").filter({ visible: true }).first();
-    const shown = await toggle.waitFor({ state: "visible", timeout: 60_000 }).then(() => true).catch(() => false);
-    test.info().annotations.push({ type: "evidence", description: `${size.label} work card editor on /dashboard/profile: ${shown ? "shown" : "not shown"}` });
-    if (shown) {
-      await toggle.click();
-      const editor = page.getByTestId("work-card-editor").filter({ visible: true }).first();
-      await expect(editor).toBeVisible({ timeout: 30_000 });
-      await editor.locator('input[name="salary_min"]').scrollIntoViewIfNeeded();
-      await noExampleFigures(page, editor, `${size.label} work card`);
-      await page.screenshot({ path: join(OUT, `pay-work-card-${size.label}.png`) });
-    }
+    // P-1 the Living CV work card. Its editor sits inside the profile's
+    // closed "details" disclosure; the section's own deep link opens it
+    // (DetailsHashOpener), as the other worker walks do. Required, never skipped.
+    await page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+    const toggle = page.getByRole("main").getByTestId("work-card-editor-toggle");
+    await expect(toggle, "P-1: the work card editor is on the worker's profile").toBeVisible({ timeout: 60_000 });
+    const editor = page.getByRole("main").getByTestId("work-card-editor");
+    await expect(async () => {
+      if (!(await editor.isVisible())) await toggle.click();
+      await expect(editor).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 30_000 });
+    await editor.locator('input[name="salary_min"]').scrollIntoViewIfNeeded();
+    await noExampleFigures(page, editor, `${size.label} work card`);
+    await page.screenshot({ path: join(OUT, `pay-work-card-${size.label}.png`) });
 
     // P-2 the chat's work-card form.
     await page.goto(`${BASE}/en/dashboard`);
