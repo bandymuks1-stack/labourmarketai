@@ -87,8 +87,17 @@ export const PROD_QA_AGENCY_EMAIL = "qa.agency+multiw@labourmarket.ai" as const;
  * identity whose account does not exist yet, and `prod-qa-walk.yml` mints
  * them without the provision step.
  */
-export const PROD_QA_FRESH_WORKER_EMAIL = "qa.freshworker+act1@labourmarket.ai" as const;
-export const PROD_QA_FRESH_COMPANY_EMAIL = "qa.freshcompany+act1@labourmarket.ai" as const;
+export const PROD_QA_FRESH_WORKER_EMAIL = "qa.freshworker+act2@labourmarket.ai" as const;
+export const PROD_QA_FRESH_COMPANY_EMAIL = "qa.freshcompany+act2@labourmarket.ai" as const;
+
+/**
+ * The first fresh pair (act1, created 2026-10-26) is onboarded now, so it can no
+ * longer walk a new account's path; owner decision 2026-11-10 approved the act2
+ * pair above for that. act1 stays allowlisted: the buyer-workspace walk uses the
+ * act1 worker as its non-buyer, and revoke must still reach both accounts.
+ */
+export const PROD_QA_FRESH_WORKER_ACT1_EMAIL = "qa.freshworker+act1@labourmarket.ai" as const;
+export const PROD_QA_FRESH_COMPANY_ACT1_EMAIL = "qa.freshcompany+act1@labourmarket.ai" as const;
 
 /**
  * Owner decision 2026-10-26 ("6.4 PIRKĖJO TESTO LEIDIMAS"): ONE synthetic
@@ -117,6 +126,8 @@ export const PROD_QA_INVITED_EMAIL = "qa.invited@labourmarket.ai" as const;
 export const PROD_QA_FRESH_IDENTITIES: readonly string[] = [
   PROD_QA_FRESH_WORKER_EMAIL,
   PROD_QA_FRESH_COMPANY_EMAIL,
+  PROD_QA_FRESH_WORKER_ACT1_EMAIL,
+  PROD_QA_FRESH_COMPANY_ACT1_EMAIL,
   PROD_QA_BUYER_EMAIL,
   PROD_QA_INVITED_EMAIL,
 ];

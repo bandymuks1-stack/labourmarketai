@@ -29,10 +29,14 @@ describe("the company context's centre is the company model, over existing surfa
   });
   it("is mounted as the opening context only inside a company organization workspace", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
-    expect(page).toMatch(/activeOrgWorkspace && identity === "company" \? <CompanyModelScreen \/> : null/);
+    // An education institution hands the screen its learner-invite primary
+    // (UX_GAPS I-2); the mount condition itself is unchanged.
+    expect(page).toMatch(
+      /activeOrgWorkspace && identity === "company" \? \(\s*<CompanyModelScreen\b[^>]*?\/>\s*\) : null/,
+    );
   });
   it("copy exists in every routed locale", () => {
-    for (const loc of ["lt", "en", "de", "nl", "pl", "ru"]) {
+    for (const loc of ["lt", "en", "de", "nl", "pl", "ru", "sv"]) {
       const m = JSON.parse(read(`messages/${loc}.json`)) as { companyModel: Record<string, string> };
       for (const k of ["title", "areasTitle", "need", "offer", "market", "people", "projects", "messages", "more", "clients", "candidates", "calendar", "capacity", "work", "results", "history"]) {
         expect(m.companyModel[k], `${loc}.${k}`).toBeTruthy();

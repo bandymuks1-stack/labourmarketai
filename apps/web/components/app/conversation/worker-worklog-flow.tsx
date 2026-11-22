@@ -57,6 +57,7 @@ import { formatUtcDate } from "@/lib/time/display";
 import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import { addCalendarDays } from "@/lib/time/local-day";
 import { quoteText } from "@/lib/i18n/quote";
 
 export type WorkLogLabels = {
@@ -367,6 +368,8 @@ export function WorkerWorkLogFlow({
   const contextDecidedByPerson = useRef(false);
   const resolvedForDate = useRef<string | null>(null);
   const [workDate, setWorkDate] = useState(draft.date);
+  // The person's own calendar day, read once when the flow opens.
+  const [today] = useState(() => personCalendarDay());
   const [site, setSite] = useState(draft.site ?? "");
   const [notes, setNotes] = useState(draft.notes);
   const [pending, start] = useTransition();
@@ -571,6 +574,20 @@ export function WorkerWorkLogFlow({
     setEngagementId(liveResolution.selectedId ?? "");
     setMustChooseEngagement(liveResolution.rule === "C");
   }, [liveResolution, workDate]);
+
+  // UX gap W-2 (2026-11-18): on the journal page the read-back opened below
+  // the quick-record field, and on a phone only its date and hours were in
+  // view; both Save steps sat below the fold. Bring the card to the top ONCE
+  // when it first opens. Instant (no `behavior: "smooth"`), so reduced motion
+  // is respected. Journal only: the conversation thread keeps its own scroll.
+  const flowRef = useRef<HTMLDivElement>(null);
+  const openedInView = useRef(false);
+  const formOpen = phase.kind === "ready" || phase.kind === "error" || phase.kind === "confirm";
+  useEffect(() => {
+    if (surface !== "journal" || !formOpen || openedInView.current) return;
+    openedInView.current = true;
+    flowRef.current?.scrollIntoView({ block: "start" });
+  }, [surface, formOpen]);
   const showActiveWorkspaceNotice = Boolean(
     activeWorkspaceNotice && liveResolution?.activeWorkspaceWithoutContext,
   );
@@ -1038,7 +1055,7 @@ export function WorkerWorkLogFlow({
         onChange={(e) => {
           void pickPhoto(e.target.files?.[0] ?? null);
         }}
-        className="text-meta text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-meta file:text-text-primary"
+        className="min-h-11 text-meta text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-meta file:text-text-primary"
       />
       {/* The camera as a second door into the SAME field (phones only). */}
       <CameraCaptureButton
@@ -1118,6 +1135,7 @@ export function WorkerWorkLogFlow({
 
   return (
     <div
+      ref={flowRef}
       className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4"
       data-testid="worklog-flow"
     >
@@ -1141,7 +1159,7 @@ export function WorkerWorkLogFlow({
               clearError();
             }}
             data-testid="worklog-date"
-            className="w-full rounded border border-ink-500 bg-ink-800 px-2 py-1 text-support text-text-primary"
+            className="min-h-11 w-full rounded border border-ink-500 bg-ink-800 px-2 py-1 text-support text-text-primary"
           />
         </Field>
         {draft.start && draft.end && (
@@ -1163,6 +1181,36 @@ export function WorkerWorkLogFlow({
         )}
       </dl>
 
+      {/* THE DAY, OFFERED (owner P1 2026-11-21): today or yesterday in one
+          tap, any other day in the date field above. The day the sentence
+          named is already set; the person only changes it if it is wrong.
+          The journal's own day words — no new copy. */}
+      <div className="flex flex-wrap gap-2" data-testid="worklog-date-choices">
+        {[
+          { day: today, label: tCandidate("stream.today"), id: "today" },
+          { day: addCalendarDays(today, -1), label: tCandidate("stream.yesterday"), id: "yesterday" },
+        ].map((choice) => (
+          <button
+            key={choice.id}
+            type="button"
+            aria-pressed={workDate === choice.day}
+            disabled={confirming || pending}
+            onClick={() => {
+              setWorkDate(choice.day);
+              clearError();
+            }}
+            data-testid={`worklog-date-${choice.id}`}
+            className={`inline-flex min-h-11 items-center rounded-control border px-3 text-support font-semibold transition-colors disabled:opacity-50 ${
+              workDate === choice.day
+                ? "border-brand-blue bg-brand-blue/15 text-brand-blue"
+                : "border-ink-500 bg-ink-800 text-text-secondary hover:border-brand-blue/50"
+            }`}
+          >
+            {choice.label}
+          </button>
+        ))}
+      </div>
+
       <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} locale={locale} />
 
       <label className="flex flex-col gap-1 text-support">
@@ -1176,7 +1224,7 @@ export function WorkerWorkLogFlow({
             clearError();
           }}
           data-testid="worklog-site"
-          className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
+          className="min-h-11 rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
         />
       </label>
 

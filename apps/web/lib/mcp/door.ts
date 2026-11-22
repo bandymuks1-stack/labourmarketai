@@ -288,7 +288,9 @@ async function post(req: Request, profile: McpProfile): Promise<Response> {
   // cookie-identified call must be JSON. Bearer callers are unaffected.
   if (
     auth.identity.transport === "cookie" &&
-    !(req.headers.get("content-type") ?? "").toLowerCase().includes("application/json")
+    // The MIME essence, exactly: `text/plain; x=application/json` is a
+    // preflight-free "simple" request and must not pass as JSON (#3579).
+    (req.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase() !== "application/json"
   ) {
     return NextResponse.json(
       { ok: false, code: "unsupported_media_type", message: "This MCP endpoint accepts application/json only." },

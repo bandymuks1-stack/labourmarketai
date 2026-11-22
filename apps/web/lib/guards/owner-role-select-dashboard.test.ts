@@ -162,12 +162,12 @@ describe("FeatureAvailabilityGrid never gives preparing cards a primary CTA", ()
   });
 });
 
-describe("Coming-later heading copy present (LT + EN)", () => {
-  it("lt = 'Vėliau įjungiami moduliai', en = 'Modules coming later'", () => {
+describe("Not-available-yet modules heading copy present (LT + EN)", () => {
+  it("lt = 'Dar neprieinami moduliai', en = 'Modules not available yet'", () => {
     const lt = JSON.parse(read("messages/lt.json"));
     const en = JSON.parse(read("messages/en.json"));
-    expect(lt.dashboard.comingLater.title).toBe("Vėliau įjungiami moduliai");
-    expect(en.dashboard.comingLater.title).toBe("Modules coming later");
+    expect(lt.dashboard.comingLater.title).toBe("Dar neprieinami moduliai");
+    expect(en.dashboard.comingLater.title).toBe("Modules not available yet");
   });
 });
 

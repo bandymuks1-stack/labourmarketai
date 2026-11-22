@@ -41,6 +41,7 @@ const TOKEN = "t".repeat(40);
 const ID_1 = "11111111-1111-4111-8111-111111111111";
 const ID_2 = "22222222-2222-4222-8222-222222222222";
 const ID_3 = "33333333-3333-4333-8333-333333333333";
+const ID_4 = "44444444-4444-4444-8444-444444444444";
 const PRIVATE = ["Private Company", "Private Person", "person@firm.test", "+37060000000", "Private text"];
 
 function row(id: string, createdAt: string, over: Record<string, unknown> = {}) {
@@ -140,18 +141,6 @@ describe("what it returns", () => {
     expect(body.items.map((i: { type: string }) => i.type)).toEqual(paths.map(([, t]) => t));
   });
 
-  it("flags a test row and doesn't hide it", async () => {
-    result = {
-      data: [
-        row(ID_1, "2026-11-07T10:00:00+00:00", { company_name: "[QA-SYNTHETIC] Gama" }),
-        row(ID_2, "2026-11-07T10:00:01+00:00", { contact_email: "walk@example.invalid" }),
-        row(ID_3, "2026-11-07T10:00:02+00:00"),
-      ],
-      error: null,
-    };
-    const body = await (await get()).json();
-    expect(body.items.map((i: { synthetic: boolean }) => i.synthetic)).toEqual([true, true, false]);
-  });
 
   it("doesn't pass on a status outside the known list", async () => {
     result = { data: [row(ID_1, "2026-11-07T10:00:00+00:00", { status: "Call Jonas" })], error: null };
@@ -224,6 +213,114 @@ describe("the open read", () => {
     expect(await res.json()).toEqual({ ok: false, reason: "bad_status" });
     expect(reads.limit).toBeNull();
   });
+});
+
+describe("our test requests never leave the feed (owner 2026-11-14)", () => {
+  const RUN = "19400000001.1";
+  /** Exactly what the production `need-intake` walk (PR #3303) submits. */
+  const walk = {
+    source_path: "/en/company-need",
+    company_name: `QA-SYNTHETIC need walk ${RUN} (not a real company)`,
+    contact_name: null,
+    contact_email: `qa.synthetic.need.${RUN}@example.invalid`,
+    description: "QA-SYNTHETIC production walk. Not a real need.",
+  };
+  const T = (n: number) => `2026-11-14T10:00:0${n}.123456+00:00`;
+  const ids = (body: { items: Array<{ id: string }> }) => body.items.map((i) => i.id);
+
+  for (const [read, query] of [
+    ["the cursor read", ""],
+    ["the open read", "?status=open"],
+  ] as const) {
+    it(`${read}: drops the walk's row (marker + example.invalid), even after it is rejected`, async () => {
+      result = {
+        data: [
+          row(ID_1, T(1), { ...walk, status: "new" }),
+          row(ID_2, T(2), { ...walk, status: "rejected" }),
+          row(ID_3, T(3)),
+        ],
+        error: null,
+      };
+      const res = await get(query);
+      expect(res.status).toBe(200);
+      const text = await res.text();
+      expect(text).not.toContain(ID_1);
+      expect(text).not.toContain(ID_2);
+      expect(ids(JSON.parse(text))).toEqual([ID_3]);
+    });
+
+    it(`${read}: drops a marker-only row and a test-mailbox-only row`, async () => {
+      result = {
+        data: [
+          row(ID_1, T(1), { company_name: "[QA-SYNTHETIC] Gama" }),
+          row(ID_2, T(2), { description: "QA-SYNTHETIC need walk" }),
+          row(ID_3, T(3), { contact_email: "walk@example.invalid" }),
+          row(ID_4, T(4), { contact_email: "run-1@e2e-proof.local" }),
+        ],
+        error: null,
+      };
+      const body = await (await get(query)).json();
+      expect(body.items).toEqual([]);
+      expect(body.nextCursor).toBeNull();
+    });
+
+    it(`${read}: a real employer's row passes exactly as before`, async () => {
+      result = {
+        data: [
+          row(ID_1, T(1), { source_path: "/lt/company-need", company_name: "UAB Statyba", contact_email: "pirkimai@statyba.lt" }),
+          row(ID_2, T(2), { contact_email: "jonas@testas.lt", company_name: "Test Building Ltd" }),
+        ],
+        error: null,
+      };
+      const body = await (await get(query)).json();
+      expect(body.items).toEqual([
+        {
+          id: ID_1,
+          type: "company-need",
+          createdAt: T(1),
+          status: "new",
+          internalLink: `/lt/dashboard/admin/company-need-intakes#${ID_1}`,
+          synthetic: false,
+        },
+        {
+          id: ID_2,
+          type: "b2b",
+          createdAt: T(2),
+          status: "new",
+          internalLink: `/lt/dashboard/admin/company-need-intakes#${ID_2}`,
+          synthetic: false,
+        },
+      ]);
+    });
+
+    it(`${read}: the cursor moves past dropped rows, so no real row is skipped or repeated`, async () => {
+      // Page 1 (limit 2, read 3): real, walk | real → the cursor is the WALK row's.
+      result = { data: [row(ID_1, T(1)), row(ID_2, T(2), walk), row(ID_3, T(3))], error: null };
+      const first = await (await get(`?limit=2${query ? "&status=open" : ""}`)).json();
+      expect(ids(first)).toEqual([ID_1]);
+      expect(first.nextCursor).toBe(encodeFeedCursor({ createdAt: T(2), id: ID_2 }));
+
+      result = { data: [row(ID_3, T(3))], error: null };
+      const second = await (await get(`?limit=2&after=${first.nextCursor}${query ? "&status=open" : ""}`)).json();
+      expect(reads.filter).toBe(`created_at.gt."${T(2)}",and(created_at.eq."${T(2)}",id.gt.${ID_2})`);
+      expect(ids(second)).toEqual([ID_3]);
+      expect(second.nextCursor).toBeNull();
+    });
+
+    it(`${read}: a page of nothing but test rows still hands on the next cursor`, async () => {
+      result = {
+        data: [row(ID_1, T(1), walk), row(ID_2, T(2), walk), row(ID_3, T(3))],
+        error: null,
+      };
+      const page = await (await get(`?limit=2${query ? "&status=open" : ""}`)).json();
+      expect(page.items).toEqual([]);
+      expect(page.nextCursor).toBe(encodeFeedCursor({ createdAt: T(2), id: ID_2 }));
+
+      result = { data: [row(ID_3, T(3))], error: null };
+      const next = await (await get(`?limit=2&after=${page.nextCursor}${query ? "&status=open" : ""}`)).json();
+      expect(ids(next)).toEqual([ID_3]);
+    });
+  }
 });
 
 describe("a failed read is never an empty feed", () => {

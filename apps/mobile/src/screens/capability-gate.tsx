@@ -44,7 +44,7 @@ export function CapabilityGate<T>({
 
   if (state.status === "loading") {
     return (
-      <View style={styles.loading} accessibilityLabel={t("domain.loading")}>
+      <View style={styles.loading} accessibilityLabel={t("domain.loading")} testID="capability-loading">
         <ActivityIndicator color={theme.color.accent} />
         <Body muted>{t("domain.loading")}</Body>
       </View>
@@ -57,6 +57,9 @@ export function CapabilityGate<T>({
         failure={state.failure}
         refusalText={refusalText}
         retry={reload}
+        // A stable id for the device journeys: a read that failed or was
+        // refused is told apart from one still loading.
+        testID="capability-failed"
       />
     );
   }

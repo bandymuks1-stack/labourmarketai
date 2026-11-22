@@ -124,8 +124,12 @@ export function IdentityStage({
         </div>
 
         {/* ── WHO, WHAT, WHERE, NOW ───────────────────────────────────── */}
+        {/* The name keeps a 9rem minimum, so a trailing element (the readiness
+            ring) wraps below it instead of squeezing it — but never more than
+            its own cell: on a 320 px phone the cell is ~112 px, and a fixed
+            9rem pushed the name past the stage's clipped edge. */}
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-x-3 gap-y-2 self-center sm:flex-nowrap sm:self-start">
-            <div className="flex min-w-[9rem] flex-1 flex-col gap-1 [overflow-wrap:anywhere]">
+            <div className="flex min-w-[min(9rem,100%)] flex-1 flex-col gap-1 [overflow-wrap:anywhere]">
               {eyebrow}
               {heading}
             </div>
@@ -226,7 +230,7 @@ export function IdentityStage({
                         key={f.testid}
                         data-testid={f.testid}
                         data-absent="true"
-                        className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 font-mono text-[0.625rem] uppercase tracking-label text-text-secondary sm:text-meta"
+                        className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
                       >
                         <CircleDashed className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
                         <span className="min-w-0 break-words">{f.label}</span>

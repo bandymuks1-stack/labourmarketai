@@ -53,3 +53,7 @@ export declare function judgeSupabaseEdge(
   counts: { e5: number; e429: number },
   t?: typeof THRESHOLDS,
 ): { refuse: boolean; reason: string };
+
+export declare const SR1_READING_KEYS: readonly string[];
+
+export declare function judgeSr1Readings(text: string): { publish: boolean; why: string };

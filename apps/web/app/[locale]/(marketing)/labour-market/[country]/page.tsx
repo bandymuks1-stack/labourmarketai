@@ -7,6 +7,7 @@ import { CountryReadinessRequirements } from "@/components/marketing/country-rea
 import {
   SUPPORTED_COUNTRIES,
   countrySignals,
+  isCountryPageIndexable,
   isSupportedCountry,
   type CountryCode,
 } from "@/lib/labour-market/country-evidence";
@@ -33,12 +34,17 @@ export async function generateMetadata({
     return { robots: { index: false, follow: false } };
   }
   const t = await getTranslations({ locale, namespace: "labourMarket" });
-  return buildPageMetadata({
+  const meta = buildPageMetadata({
     locale,
     path: `/labour-market/${country.toLowerCase()}`,
     title: t(`countryNames.${code}`),
     description: `${t(`countryEvidence.${code}.intro`)} ${t(`countryEvidence.${code}.${countrySignals(code as CountryCode)[0]!.id}.title`)}.`,
   });
+  // IDX-20: a page without enough text of its own stays readable and keeps its
+  // links followed, but is not offered for indexing (country-evidence.ts).
+  return isCountryPageIndexable(code as CountryCode)
+    ? meta
+    : { ...meta, robots: { index: false, follow: true } };
 }
 
 export default async function CountryPage({

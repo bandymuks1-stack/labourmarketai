@@ -65,6 +65,10 @@ export interface ProjectSummary {
   startDate: string | null;
   endDate: string | null;
   status: string | null;
+  /** The organization the project belongs to (projects.organization_id) —
+   *  the link from a project to its organization's history. Null when the
+   *  row carries none. */
+  organizationId?: string | null;
 }
 
 /** Per-worker operations row, derived from manager-readable signals only. */

@@ -26,6 +26,11 @@ import { activeLocales } from "@/lib/i18n/config";
  * below are re-anchored to that rule (lib/visual/theme-default.ts) — the same
  * three failure modes are still guarded, per page instead of product-wide.
  *
+ * 2026-11-15 (owner): a new account starts LIGHT in the workspace too; dark
+ * stays selectable and a saved choice still wins. The rule keeps its per-area
+ * shape (lib/visual/theme-default.ts), so the checks below are unchanged: a
+ * definite theme per page, and a saved choice never overwritten.
+ *
  * Added by this file:
  *   • the ink ladder is the owner's tonal depth, not "some dark";
  *   • the brand accent is GOLD in both palettes;
@@ -84,7 +89,7 @@ describe("black + gold is the product default", () => {
     expect(relLum(page), "light page background must be light").toBeGreaterThan(0.5);
   });
 
-  it("the pre-paint bootstrap resolves a definite theme per page (public light, workspace dark)", () => {
+  it("the pre-paint bootstrap resolves a definite theme per page (light by default, owner 2026-11-15)", () => {
     const rule = read("lib/visual/theme-default.ts");
     // ONE rule: the bootstrap string is BUILT from the workspace pattern, so the
     // inline script and <ThemeReapply/> can never disagree.
@@ -230,6 +235,25 @@ describe("the owner's black + gold palette", () => {
         `stop at ${s.at}% must be metallic gold or brighter, not bronze`,
       ).toBeGreaterThanOrEqual(goldLum - 0.001);
     }
+  });
+
+  it("light gold text clears AA on its own gold tint (light is every new account's start, owner 2026-11-15)", () => {
+    // ~130 places put `text-brand-blue` on `bg-brand-blue/10` (and a few on
+    // /15, /20). The old light gold #8A6A12 measured 4.12:1 there — an axe
+    // finding on the signed-in workspace once it opened light by default.
+    const gold = tokenIn(LIGHT, "brand-blue");
+    const mix = (bg: number[], a: number) => bg.map((c, i) => a * gold[i] + (1 - a) * c);
+    const surfaces = { page: tokenIn(LIGHT, "ink-900"), card: tokenIn(LIGHT, "ink-800"), nested: tokenIn(LIGHT, "ink-700") };
+    for (const [name, bg] of Object.entries(surfaces)) {
+      for (const a of [0, 0.05, 0.1, 0.15]) {
+        expect(ratio(gold, mix(bg, a)), `gold text on ${a * 100} % gold over ${name}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+    for (const bg of [surfaces.page, surfaces.card]) {
+      expect(ratio(gold, mix(bg, 0.2)), "gold text on 20 % gold over the page or a card").toBeGreaterThanOrEqual(4.5);
+    }
+    // White on a light gold fill stays AA too.
+    expect(ratio([255, 255, 255], gold)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("the brand accent is GOLD in both palettes", () => {

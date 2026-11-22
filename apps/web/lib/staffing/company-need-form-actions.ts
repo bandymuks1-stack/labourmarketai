@@ -10,11 +10,14 @@
  */
 import { getLocale } from "next-intl/server";
 import { draftVacancyFromNeed } from "./company-need-actions";
+import { isSyntheticCommercialRequest } from "./commercial-requests-feed";
 import { persistPublicCompanyNeed } from "./company-need-public-intake";
 import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alerts";
 import { isConstructionWorkType } from "../taxonomy/work-categories";
 import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
+import { NO_JS_REVIEW_MARK, recordPublicFormRefusal, screenPublicFormTiming } from "../security/public-form-guard";
+import { COMPANY_NEED_ENTRY } from "./company-need-prefill";
 
 export interface CompanyNeedFormState {
   readonly ok: boolean;
@@ -57,10 +60,37 @@ function csv(value: FormDataEntryValue | null): string[] {
     .filter(Boolean);
 }
 
+/**
+ * The ONE answer for anything not stored on purpose: a rate limit, a filled
+ * honeypot, a too-fast send, a pile of links, an advert. It is the honest
+ * "prepared, not sent" state the form already shows when the backend is down, so
+ * a bot learns nothing about which check tripped and a person caught by mistake
+ * is never told "received" for a request that was dropped. No AI run, no alert.
+ */
+function notStored(profession: string): CompanyNeedFormState {
+  return {
+    ok: true,
+    persisted: false,
+    isConstruction: isConstructionWorkType(profession),
+    draftStatus: "disabled",
+  };
+}
+
 export async function submitCompanyNeedAction(
   _prev: CompanyNeedFormState | null,
   formData: FormData,
 ): Promise<CompanyNeedFormState> {
+  // Spam guard, form layer: honeypot + minimum fill time, before anything else.
+  // No fill time at all is a send without JavaScript: it goes on to the rate and
+  // content checks and, if it passes them, is stored marked for review — refusing
+  // it would lose a real lead. A forged or too-fast time is refused.
+  const timing = screenPublicFormTiming((name) => String(formData.get(name) ?? ""));
+  const needsReview = timing === "no_timestamp";
+  if (timing && !needsReview) {
+    recordPublicFormRefusal("company-need", timing);
+    return notStored(str(formData.get("profession")) ?? "");
+  }
+
   const workers = Number(formData.get("number_of_workers"));
   const urgencyRaw = str(formData.get("urgency"));
   const urgency =
@@ -100,6 +130,13 @@ export async function submitCompanyNeedAction(
 
   const rawLocale = await getLocale();
   const locale = toAiLocale(rawLocale);
+  // The public button that opened the form rides on source_path (no new
+  // column): "/de/company-need?from=companies_market_lu". Re-validated here.
+  const entryRaw = str(formData.get("from"));
+  const entry = entryRaw && COMPANY_NEED_ENTRY.test(entryRaw) ? entryRaw : null;
+  const sourcePath = `/${rawLocale}/company-need${needsReview ? NO_JS_REVIEW_MARK : ""}${
+    entry ? `${needsReview ? "&" : "?"}from=${entry}` : ""
+  }`;
 
   // Persist the structured need for follow-up (anonymous path, v1). This is
   // the real backend now: a success means a row was stored for the operator.
@@ -110,6 +147,9 @@ export async function submitCompanyNeedAction(
     companyName: raw.companyName,
     contactName: raw.contactPerson,
     contactEmail,
+    // Optional; the landing's worker-search door asked for it before it opened
+    // this form (F5), so the one form keeps it. Bounded like the door's field.
+    contactPhone: str(formData.get("contact_phone"))?.slice(0, 40) || undefined,
     country: raw.country,
     cityRegion: raw.cityRegion,
     sector: raw.profession,
@@ -122,7 +162,7 @@ export async function submitCompanyNeedAction(
     languages: raw.languageRequirements.join(", ") || undefined,
     engagementType: raw.engagementModel,
     description: raw.description,
-    sourcePath: `/${rawLocale}/company-need`,
+    sourcePath,
   });
   const persisted = persist.ok;
 
@@ -130,13 +170,9 @@ export async function submitCompanyNeedAction(
   // the AI draft. The limiter used to guard only the DB insert, leaving the
   // model call below as unmetered anonymous work reachable from a public
   // page (2026-08-17 audit, AI boundary gap). No AI run for a flooded key.
-  if (!persist.ok && persist.code === "rate_limited") {
-    return {
-      ok: true,
-      persisted: false,
-      isConstruction: isConstructionWorkType(raw.profession),
-      draftStatus: "disabled",
-    };
+  // A refused send (spam guard, `rejected`) gets the very same answer.
+  if (!persist.ok && (persist.code === "rate_limited" || persist.code === "rejected")) {
+    return notStored(raw.profession);
   }
 
   // Best-effort owner demand-signal alert (Telegram, server-only + env-gated).
@@ -145,7 +181,7 @@ export async function submitCompanyNeedAction(
   // Telegram failure can never affect the submission, persistence, or queue.
   if (persisted) {
     try {
-      // An advert is stored like any request, and raises no alert.
+      // An advert is refused before the store; the flag is kept as a second lock.
       if (!persist.advertising) await sendCompanyNeedOwnerAlert({
         companyName: raw.companyName,
         contact: [raw.contactPerson, str(formData.get("contact_email"))]
@@ -159,7 +195,7 @@ export async function submitCompanyNeedAction(
         startOrDate: raw.startDate,
         duration: raw.expectedDuration,
         languages: raw.languageRequirements.join(", ") || undefined,
-        sourcePath: `/${rawLocale}/company-need`,
+        sourcePath,
       });
     } catch {
       // never surfaced to the user
@@ -167,6 +203,23 @@ export async function submitCompanyNeedAction(
   }
 
   const isConstruction = isConstructionWorkType(raw.profession);
+
+  // OUR TEST REQUESTS NEVER REACH THE AI LAYER (owner order 2026-11-14, PR #3303
+  // need-intake walk). Even with every provider disabled, a call writes an
+  // `ai_runs` audit row, which the Agentai capability readback and the AI-demand
+  // reading count. A row the commercial feed drops (`isSyntheticCommercialRequest`,
+  // the one rule) gets the same honest "no draft" answer a throttled caller gets,
+  // and no model call. A real employer's need is unaffected.
+  if (
+    isSyntheticCommercialRequest({
+      company_name: raw.companyName,
+      contact_name: raw.contactPerson ?? null,
+      contact_email: contactEmail,
+      description: raw.description,
+    })
+  ) {
+    return { ok: true, persisted, isConstruction, draftStatus: "disabled" };
+  }
 
   // The model call gets its OWN throttle. The intake limiter above guards the
   // DB insert, but its `rate_limited` early-return is the ONLY branch that

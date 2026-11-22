@@ -1,10 +1,12 @@
 /**
  * Does a public request read as an advertisement sent to us, rather than a need?
  *
- * The row is always stored: this only decides whether someone is alerted, and the queue
- * shows the same reading as a label. A missed advert costs one mail. A genuine request
- * read as an advert loses the alert behind a 24-hour promise, so this errs towards
- * "genuine": a company may well paste its own website, and a link alone proves nothing.
+ * Since the owner's spam order (2026-11-09) a NEW request that reads as an advert is not
+ * stored at all (`lib/security/public-form-guard.ts` refuses it before the RPC). The
+ * queue still shows this reading as a label on rows stored before that. A genuine
+ * request read as an advert is now refused and told "could not send", so this still
+ * errs towards "genuine": a company may well paste its own website, and a link alone
+ * proves nothing.
  *
  * It takes a link plus one pitch, or two pitches. Each pitch below is something a seller
  * says about their own offer, not something a company says about work it needs done, so
@@ -23,7 +25,22 @@ const PITCHES: readonly RegExp[] = [
   /\bearn \d+% commission\b/i,
   /\bunsubscribe\b|\brather not hear from (?:me|us)\b|\byou didn['’]t ask for (?:it|this)\b/i,
   /\brank (?:on|in) google\b|\bguest posts?\b/i,
+  /\bdatabase of (?:[\d.,]+\s*(?:million|mln)?\s*)?(?:companies|businesses|contacts|leads)\b/i,
+  /\b(?:lead|e-?mail|contact) lists?\b/i,
+  /\bopt[- ]out\b|\bremove (?:me|you) from (?:this|our|the) list\b/i,
 ];
+
+/**
+ * How many links or bare domains the text carries. One whitespace-separated token is one
+ * link, so `https://www.firma.lt/apie` counts once although LINK matches it twice.
+ */
+export function countLinks(...freeText: readonly (string | null | undefined)[]): number {
+  return freeText
+    .filter(Boolean)
+    .join("\n")
+    .split(/\s+/)
+    .filter((token) => LINK.test(token)).length;
+}
 
 export function looksLikeAdvertising(...freeText: readonly (string | null | undefined)[]): boolean {
   const text = freeText.filter(Boolean).join("\n");

@@ -51,13 +51,14 @@ import type {
   DeductionRow,
   LanguageRow,
 } from "@/lib/demand/structured-demand-form";
+import { DEMAND_CURRENCY_OPTIONS } from "@/lib/demand/structured-demand-form";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 
 /** Language display names: the ONE native-name map (worker-languages-model). */
 const LANGUAGE_NATIVE_NAMES: Record<string, string> = WORKER_LANGUAGE_NATIVE_NAMES;
 
-const CURRENCY_OPTIONS = ["EUR", "PLN", "SEK", "NOK", "DKK"] as const;
+const CURRENCY_OPTIONS = DEMAND_CURRENCY_OPTIONS;
 
 /**
  * THE CLUSTERS THAT OPEN ALREADY EXPANDED — the demand-first launch path.
@@ -206,7 +207,7 @@ export function DemandAdvancedSections({
     testId?: string;
   }) {
     return (
-      <label className="flex items-center gap-2 text-sm text-text-secondary">
+      <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-text-secondary">
         <input
           type="checkbox"
           checked={checked}
@@ -250,7 +251,7 @@ export function DemandAdvancedSections({
                   aria-pressed={isSelected}
                   data-value={v}
                   className={cn(
-                    "inline-flex items-center rounded-full border px-3 py-1.5 text-sm transition-colors",
+                    "inline-flex min-h-11 items-center rounded-full border px-3 py-1.5 text-sm transition-colors",
                     isSelected
                       ? "border-brand-orange bg-brand-orange text-ink-900"
                       : "border-ink-500 text-text-secondary hover:border-text-muted",
@@ -334,7 +335,7 @@ export function DemandAdvancedSections({
               aria-pressed={active}
               data-tier={tier}
               className={cn(
-                "inline-flex items-center rounded-full border px-2.5 py-1 text-xs transition-colors",
+                "inline-flex min-h-11 items-center rounded-full border px-2.5 py-1 text-xs transition-colors",
                 active
                   ? tier === "mandatory"
                     ? "border-brand-orange bg-brand-orange text-ink-900"
@@ -557,6 +558,7 @@ export function DemandAdvancedSections({
                 options={[...periodOptions, { value: "once", label: t("period.once") }]}
               />
               <Button
+                className="min-h-11"
                 type="button"
                 size="sm"
                 variant="secondary"
@@ -570,6 +572,7 @@ export function DemandAdvancedSections({
           ))}
           <div className="flex flex-wrap items-center gap-3">
             <Button
+              className="min-h-11"
               type="button"
               size="sm"
               variant="secondary"
@@ -791,6 +794,7 @@ export function DemandAdvancedSections({
                 options={LANGUAGE_LEVELS.map((lv) => ({ value: lv, label: lv }))}
               />
               <Button
+                className="min-h-11"
                 type="button"
                 size="sm"
                 variant="secondary"
@@ -810,6 +814,7 @@ export function DemandAdvancedSections({
             </div>
           ))}
           <Button
+            className="min-h-11"
             type="button"
             size="sm"
             variant="secondary"
@@ -852,6 +857,7 @@ export function DemandAdvancedSections({
                 data-testid={`sdv2-certificate-${i}`}
               />
               <Button
+                className="min-h-11"
                 type="button"
                 size="sm"
                 variant="secondary"
@@ -866,6 +872,7 @@ export function DemandAdvancedSections({
             </div>
           ))}
           <Button
+            className="min-h-11"
             type="button"
             size="sm"
             variant="secondary"

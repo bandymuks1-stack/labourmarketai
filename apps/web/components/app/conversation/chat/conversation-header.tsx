@@ -10,6 +10,8 @@ import {
   type NavItem,
 } from "@/lib/config/navigation";
 import { customerHeaderDoors, organizationHeaderAreas } from "@/lib/navigation/work-areas";
+import { isEducationInstitution } from "@/lib/organizations/capabilities";
+import { isEducationFirstWorkspace } from "@/lib/conversation/education-home";
 import { actingRoleForWorkspace } from "@/lib/company/organization-switch";
 import { activeNavItem, headerPlaceLabelKey } from "@/lib/navigation/header-place";
 import { NAV_ICONS } from "@/components/app/nav-icons";
@@ -97,8 +99,16 @@ export function ConversationHeader({
   const activeWorkspace =
     auth?.workspaces?.find((w) => w.id === auth.activeWorkspaceId) ?? auth?.workspaces?.[0] ?? null;
   const actingRole = actingRoleForWorkspace(activeWorkspace, auth?.roles ?? []);
+  // An education institution's learning home joins them, by the organization
+  // doors' own gate over the active organization's capabilities (UX_GAPS I-1).
+  // It leads only for an organization that is first of all an institution.
+  const capabilities = { roleSlugs: auth?.activeOrganizationCapabilities };
+  const education = isEducationInstitution(capabilities);
+  const educationFirst = isEducationFirstWorkspace(capabilities);
   const organizationAreas =
-    actingRole === "company" || actingRole === "agency" ? organizationHeaderAreas(actingRole) : [];
+    actingRole === "company" || actingRole === "agency"
+      ? organizationHeaderAreas(actingRole, { education, educationFirst })
+      : [];
   // The customer's own door leads "More" for a person who HOLDS the customer
   // role outside an organization workspace — the /dashboard/buyer gate's own
   // rule (client-side; no new read).
@@ -116,7 +126,8 @@ export function ConversationHeader({
     <header
       data-testid="app-header"
       className={cn(
-        "flex flex-none flex-wrap items-center gap-x-2 gap-y-2 border-b border-ink-600 bg-ink-900/80 px-4 py-2.5 backdrop-blur",
+        "flex flex-none flex-wrap items-center gap-x-2 gap-y-2 border-b border-ink-600 bg-ink-900/80 px-4 py-2 backdrop-blur",
+        !mobile && "md:py-2.5",
         !mobile && "md:flex-nowrap md:gap-x-3",
       )}
     >
@@ -143,7 +154,7 @@ export function ConversationHeader({
           href="/dashboard"
           data-testid="shell-logo-home"
           aria-label={title}
-          className="flex flex-none items-center gap-2 rounded-sm outline-none ring-brand-blue focus-visible:ring-2"
+          className="flex flex-none items-center justify-center gap-2 min-h-11 min-w-11 rounded-sm outline-none ring-brand-blue focus-visible:ring-2"
         >
           {/* The canonical mark (owner §19) — never a letter standing in for
               it. Decorative: the Link's aria-label already names the product. */}
@@ -160,7 +171,11 @@ export function ConversationHeader({
       {auth && (
         <span
           className={cn(
-            "order-4 flex min-w-0 flex-1 items-center gap-1.5",
+            // max-md:min-w-[8rem]: the chip keeps room for its longest word
+            // beside the area button at 320px — "пространство" is 83px in
+            // Inter and 87px in DejaVu Sans, the fallback a phone or the CI
+            // runner draws Cyrillic with (Inter loads Latin subsets only).
+            "order-4 flex min-w-0 flex-1 items-center gap-1.5 max-md:min-w-[8rem]",
             !mobile && "md:order-none md:flex-initial",
           )}
         >
@@ -225,10 +240,18 @@ export function ConversationHeader({
       <span aria-hidden className={cn("order-3 h-0 basis-full", !mobile && "md:hidden")} />
 
       {/* Phone: ONE area button — names where the person is, opens every
-          destination they may reach in a bottom sheet. */}
+          destination they may reach in a bottom sheet. It SHARES the row with
+          the workspace chip (owner phone report 2026-11-20): as `flex-none`
+          with a one-line label it took the whole row ("Смотреть возможности"
+          at 320px) and squeezed the chip to a dot. Both now start from zero
+          width (so neither wraps to a third header row) and share the row
+          1 : 1.4, the chip keeping its 8rem minimum; both labels may wrap to
+          a second line inside 44px. Sized for the wider fallback font a
+          phone draws Cyrillic with: "возможности" needs 99px in DejaVu Sans,
+          and the button leaves 107px for it at 320px. */}
       {auth && (
         <HeaderAreaSheet
-          className={cn("order-5 flex-none", !mobile && "md:hidden")}
+          className={cn("order-5 min-w-0 flex-[1.4_1_0%]", !mobile && "md:hidden")}
           items={allItems}
           activeItem={active}
           place={place}
@@ -273,6 +296,13 @@ const CORE_LABEL = "hidden xl:inline";
  *  label (`lg`); below that its filled pill is the "you are here" mark and the
  *  page title right under the bar names it. */
 const ACTIVE_LABEL = "hidden lg:inline";
+/** "More" carrying the active page names it from `2xl`. The core loop already
+ *  names itself from `xl`, so between 1280 and 1535 px a named More was the
+ *  item that pushed the row past the screen: the nav ran into the workspace
+ *  chip (prod mobile-surfaces M-6 on the projects page, run 44977749659), or
+ *  the chip shrank to a dot in Russian. Below `2xl` the filled pill with the
+ *  page's icon is the "you are here" mark, and the page title names it. */
+const OVERFLOW_ACTIVE_LABEL = "hidden 2xl:inline";
 
 function NavBadge({ id, count }: { id: string; count: number }) {
   if (count <= 0) return null;
@@ -394,7 +424,7 @@ function HeaderMoreMenu({
           <TriggerIcon {...iconControl()} aria-hidden />
           {!activeItem && <NavBadge id="more" count={total} />}
         </span>
-        <span className={activeItem ? ACTIVE_LABEL : WIDE_LABEL}>{triggerLabel}</span>
+        <span className={activeItem ? OVERFLOW_ACTIVE_LABEL : WIDE_LABEL}>{triggerLabel}</span>
         <ChevronDown
           {...iconControl(cn("hidden transition-transform duration-150 motion-reduce:transition-none lg:block", open && "rotate-180"))}
           aria-hidden
@@ -500,13 +530,16 @@ function HeaderAreaSheet({
         aria-label={current ? `${current} · ${menuLabel}` : menuLabel}
         onClick={() => setOpen(true)}
         className={cn(
-          "relative flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full border border-ink-500 px-3 text-support font-medium text-text-primary transition-colors hover:border-brand-blue",
+          "relative flex min-h-11 items-center gap-1 rounded-full border border-ink-500 px-2.5 text-support font-medium text-text-primary transition-colors hover:border-brand-blue sm:gap-1.5 sm:px-3",
           className,
         )}
       >
-        <Icon {...iconControl("text-brand-blue")} aria-hidden />
-        <span>{current ?? menuLabel}</span>
-        <ChevronDown {...iconControl("text-text-muted")} aria-hidden />
+        {/* On a phone the label needs the icon's width: "Смотреть возможности"
+            at 320px and "Моё пространство" at 360px were cut beside it. The
+            sheet itself shows every area with its icon. */}
+        <Icon {...iconControl("flex-none text-brand-blue max-sm:hidden")} aria-hidden />
+        <span className="line-clamp-2 min-w-0 flex-1 break-words text-left leading-tight">{current ?? menuLabel}</span>
+        <ChevronDown {...iconControl("flex-none text-text-muted")} aria-hidden />
         <NavBadge id="sheet" count={total} />
       </button>
       <MobileSheet open={open} onClose={() => setOpen(false)} title={sheetTitle} closeLabel={closeLabel}>

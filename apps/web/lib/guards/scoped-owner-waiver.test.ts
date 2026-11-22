@@ -610,7 +610,18 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
       1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388, 2467, 2771, 2984, 2991, 3087,
       3149,
       3154,
+      3171,
+      3123,
+      3255,
+      3261,
+      3448,
+      3181,
     ]);
+    // #3448 + #3181 (2026-11-16) on the owner's verbatim approval, each added in its own PR: "I approve adding ONLY PRs 3181 and 3448 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3255 (2026-11-12) on the owner's approval given to the coordinator in its own session; only the number is added.
+    // #3261 (2026-11-12) on the owner's approval given to the coordinator in its own session; only the number is added.
+    // #3123 (2026-11-09) on the owner's verbatim approval: "I approve adding ONLY PR 3123 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3171 (2026-11-09) on the owner's verbatim approval: "I approve adding ONLY PR 3171 to the existing public-acquisition-route-jobs waiver pullRequests list."
     // #3154 (2026-11-08) on the owner's verbatim approval: "I approve adding ONLY PR 3154 to the existing public-acquisition-route-jobs waiver pullRequests list."
     // #3149 (2026-11-08) on the owner's verbatim approval: "I approve adding ONLY PR 3149 to the existing public-acquisition-route-jobs waiver pullRequests list."
     // #2984 + #2991 (2026-11-03) on the owner's verbatim approval: "I approve adding ONLY PR 2991 and PR 2984 to the existing public-acquisition-route-jobs waiver pullRequests list."

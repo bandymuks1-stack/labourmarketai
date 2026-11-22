@@ -8,18 +8,28 @@ import { Link } from "@/lib/i18n/navigation";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
 
 /**
- * THREE WORKING REQUEST DOORS, NO SIGN-UP (owner P0 2026-11-07). They sit under the
+ * WORKING REQUEST DOORS, NO SIGN-UP (owner P0 2026-11-07; the partner door
+ * owner P0 2026-11-15). They sit under the
  * hero and the three ways; the sign-up invitations above stay for people who serve
  * themselves. The form and its rules: `landing-request-doors-form.tsx`,
  * `lib/staffing/request-doors.ts`. No documents: no safe public upload path exists.
  */
-export async function LandingRequestDoors({ locale }: { readonly locale: string }) {
+export async function LandingRequestDoors({
+  locale,
+  embedded = false,
+}: {
+  readonly locale: string;
+  /** True inside the landing's one "send a request" block, which carries the
+   *  title, the promise and the `#request` anchor itself. */
+  readonly embedded?: boolean;
+}) {
   const t = await getTranslations("landing.requestDoors");
   const labels: RequestDoorLabels = {
     doors: {
       "worker-search": { title: t("workerSearch.title"), body: t("workerSearch.body") },
       b2b: { title: t("b2b.title"), body: t("b2b.body") },
       project: { title: t("project.title"), body: t("project.body") },
+      partner: { title: t("partner.title"), body: t("partner.body") },
     },
     name: t("name"),
     email: t("email"),
@@ -36,6 +46,7 @@ export async function LandingRequestDoors({ locale }: { readonly locale: string 
     scope: t("scope"),
     deadline: t("deadline"),
     need: t("need"),
+    proposal: t("proposal"),
     customer: t("customer"),
     customerPrivate: t("customerPrivate"),
     customerBusiness: t("customerBusiness"),
@@ -50,14 +61,25 @@ export async function LandingRequestDoors({ locale }: { readonly locale: string 
   };
   const countries = countryOptionsForLocale(locale).map((o) => ({ code: o.value, label: o.label }));
   return (
-    <section className="mt-8 scroll-mt-24" id="request" aria-labelledby="request-doors-title" data-testid="landing-request-doors">
-      <h2 id="request-doors-title" className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h2>
-      <p className="mb-4 mt-1 text-sm leading-relaxed text-text-secondary" data-testid="request-doors-promise">
-        {t("promise")}
-      </p>
+    <section
+      className={embedded ? undefined : "mt-8 scroll-mt-24"}
+      id={embedded ? undefined : "request"}
+      aria-labelledby={embedded ? undefined : "request-doors-title"}
+      aria-label={embedded ? t("title") : undefined}
+      data-testid="landing-request-doors"
+    >
+      {embedded ? null : (
+        <>
+          <h2 id="request-doors-title" className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+            {t("title")}
+          </h2>
+          <p className="mb-4 mt-1 text-sm leading-relaxed text-text-secondary" data-testid="request-doors-promise">
+            {t("promise")}
+          </p>
+        </>
+      )}
       <LandingRequestDoorsForm
+        compact={embedded}
         labels={labels}
         countries={countries}
         notice={t.rich("notice", {

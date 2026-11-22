@@ -250,6 +250,65 @@ export function judgeSupabaseEdge({ e5, e429 }, t = THRESHOLDS) {
   return { refuse: false, reason: `Supabase edge in the last ${t.supabaseWindowMinutes} min: ${e5} x 5xx, ${e429} x 429` };
 }
 
+/**
+ * SR-1 READINGS PRIVACY (2026-11-09). The readings artefact is public like every
+ * artefact of this repo, so it is published only when every line is a reading
+ * tests/e2e/prod-sr1-first-search.spec.ts writes: a JSON object with known
+ * fields, scalar values and no mail address. Anything else withholds the whole
+ * file. `why` names a line number, never a field or a value.
+ */
+export const SR1_READING_KEYS = Object.freeze([
+  "at",
+  "browser",
+  "mode",
+  "rounds",
+  "round",
+  "actor",
+  "term",
+  "outcome",
+  "board_ms",
+  "search_ms",
+  "ttfb_ms",
+  "dcl_ms",
+  "full_page_load",
+  "to_profession_filter",
+  "signed_in",
+  "kind",
+]);
+const SR1_MAX_TEXT = 80;
+
+/** @returns {{ publish: boolean, why: string }} */
+export function judgeSr1Readings(text) {
+  const lines = String(text)
+    .split("\n")
+    .filter((l) => l.trim() !== "");
+  if (lines.length === 0) return { publish: false, why: "no readings" };
+  for (const [i, line] of lines.entries()) {
+    const at = `line ${i + 1}`;
+    // The raw line, not only the parsed one: a duplicated key would hide its first value from JSON.parse.
+    if (line.includes("@")) return { publish: false, why: `${at} holds an address` };
+    let reading;
+    try {
+      reading = JSON.parse(line);
+    } catch {
+      return { publish: false, why: `${at} is not JSON` };
+    }
+    if (!reading || typeof reading !== "object" || Array.isArray(reading)) {
+      return { publish: false, why: `${at} is not a reading object` };
+    }
+    for (const [key, value] of Object.entries(reading)) {
+      if (!SR1_READING_KEYS.includes(key)) return { publish: false, why: `${at} has a field no reading writes` };
+      if (value !== null && !["string", "number", "boolean"].includes(typeof value)) {
+        return { publish: false, why: `${at} has a value that is not a single text, number or flag` };
+      }
+      if (typeof value === "string" && (value.length > SR1_MAX_TEXT || value.includes("@"))) {
+        return { publish: false, why: `${at} has a text that is too long or holds an address` };
+      }
+    }
+  }
+  return { publish: true, why: `${lines.length} readings checked` };
+}
+
 // ── I/O (only when run as a script) ──────────────────────────────────────────
 
 const REPO = process.env.GITHUB_REPOSITORY ?? "";
@@ -462,7 +521,8 @@ async function cmdGap() {
 
 async function cmdCount() {
   // Completed walks: every walk job uploads `prod-qa-<spec>-<run id>` with
-  // `if: always()`, so the artifact list names them in a few calls instead of
+  // `if: always()` (the result, or the empty marker of a result the privacy
+  // check withheld), so the artifact list names them in a few calls instead of
   // one jobs call per run (at 200 walks a day that was ~40k API calls a day,
   // past the GITHUB_TOKEN limit). In-flight runs are read one by one (few).
   const since = Date.now() - 24 * 3600_000;
@@ -490,6 +550,21 @@ async function cmdCount() {
   console.log(`used=${runIds.size}`);
 }
 
+/** Exit 0 only when the readings file passes `judgeSr1Readings`. Prints the verdict, never the file. */
+async function cmdSr1Check() {
+  const file = process.argv[3] ?? "";
+  let text;
+  try {
+    text = readFileSync(file, "utf8");
+  } catch {
+    say("sr1 readings: the file could not be read");
+    process.exit(1);
+  }
+  const verdict = judgeSr1Readings(text);
+  say(`sr1 readings: ${verdict.why}`);
+  if (!verdict.publish) process.exit(1);
+}
+
 const COMMANDS = {
   health: cmdHealth,
   deploy: cmdDeploy,
@@ -497,6 +572,7 @@ const COMMANDS = {
   supabase: cmdSupabase,
   gap: cmdGap,
   count: cmdCount,
+  "sr1-check": cmdSr1Check,
 };
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {

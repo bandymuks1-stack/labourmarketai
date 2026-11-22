@@ -278,6 +278,31 @@ into a fact.
 
 ---
 
+## No interface noise (binding, decision 0032, owner rule 2026-11-15)
+
+No primitive, redundant, self-evident or patronising text in the user interface, in any locale. That
+includes „Paskyros nereikia" / "No account needed", instructions for obvious actions, repeated
+explanations, demonstration captions and other informational noise. The bar is professional,
+minimal, Apple/macOS-level design: short clear function names, only what the user needs, no new
+helper text without a real need. Legal, consent, security and essential action-consequence texts
+stay. Reviews apply this as a criterion (`.claude/skills/code-review/SKILL.md`). Full text:
+`docs/DECISIONS/0032-no-interface-noise.md`.
+
+## Direct counterparty and responsibility chain (binding, decision 0033, owner rule 2026-11-19)
+
+This applies to every party: employers, workers, agencies, contractors, subcontractors, suppliers,
+service providers and other partners.
+- A client works only with its direct partner.
+- Each party sees only the data its own relationships and functions need.
+- Each party answers to its direct client for its own obligations and for the partners it brings in.
+- Other chain participants' identity and commercial terms are not disclosed, unless the law requires
+  it.
+- The whole chain is kept for internal audit, under access rights.
+
+The rule applies to LabourMarket.ai, Agentai OS and related projects. It is not a mandate to build or
+rework anything without a concrete need and the owner's permission. Full text:
+`docs/DECISIONS/0033-direct-counterparty-and-responsibility-chain.md`.
+
 ## Auto-commit policy
 
 After completing any work session, agents MUST automatically commit and push 

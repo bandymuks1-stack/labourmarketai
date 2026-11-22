@@ -30,6 +30,7 @@ const VALID: Record<RequestDoor, Record<string, string>> = {
   "worker-search": { ...contact, profession: "Mūrininkas", workers: "4", start: "2026-12-01", details: "Su A1" },
   b2b: { ...contact, work: "Fasadai", scope: "2000 m2", deadline: "kovas", city: "Vilnius" },
   project: { ...contact, need: "Vonios remontas", customer: "private" },
+  partner: { ...contact, proposal: "Mokymų centras siūlo praktikos vietas" },
 };
 
 describe("the type is stored and comes back", () => {
@@ -90,6 +91,13 @@ describe("each door asks only for what it needs", () => {
     expect(requestDoorIntake("project", "lt", reader({ ...VALID.project, customer: "business" }))?.description).toContain("Užsakovas: verslo");
   });
 
+  it("a partner enquiry carries the proposed cooperation (owner P0 2026-11-15, F3)", () => {
+    const i = requestDoorIntake("partner", "lt", reader(VALID.partner));
+    expect(i).toMatchObject({ sector: "partnership", headcount: 1, companyName: "UAB Testas" });
+    expect(i?.description.split("\n")[0]).toBe("Partnerystės užklausa");
+    expect(i?.description).toContain("Mokymų centras siūlo praktikos vietas");
+  });
+
   it("a phone is optional and kept when given", () => {
     expect(requestDoorIntake("b2b", "lt", reader(VALID.b2b))?.contactPhone).toBeUndefined();
     expect(requestDoorIntake("b2b", "lt", reader({ ...VALID.b2b, phone: "+370" }))?.contactPhone).toBe("+370");
@@ -110,6 +118,7 @@ describe("each door asks only for what it needs", () => {
     expect(requestDoorIntake("worker-search", "lt", reader({ ...VALID["worker-search"], workers: "0" }))).toBeNull();
     expect(requestDoorIntake("b2b", "lt", reader({ ...VALID.b2b, work: "" }))).toBeNull();
     expect(requestDoorIntake("project", "lt", reader({ ...VALID.project, need: "" }))).toBeNull();
+    expect(requestDoorIntake("partner", "lt", reader({ ...VALID.partner, proposal: "" }))).toBeNull();
   });
 });
 
@@ -130,7 +139,8 @@ describe("the action never claims what did not happen", () => {
     sendSmtp.mockResolvedValue({ status: "sent" });
     info = vi.spyOn(console, "info").mockImplementation(() => undefined);
   });
-  const send = (extra: Record<string, string> = {}) => submitRequestDoorAction(form({ door: "b2b", ...VALID.b2b, ...extra }));
+  const send = (extra: Record<string, string> = {}) =>
+    submitRequestDoorAction(form({ door: "b2b", ...VALID.b2b, started: String(Date.now() - 10_000), ...extra }));
 
   it("received: stored once, with the active locale in the path", async () => {
     expect(await send()).toBe("received");
@@ -165,7 +175,7 @@ describe("the action never claims what did not happen", () => {
   });
 
   it("not stored is never received, and no one is alerted", async () => {
-    for (const [code, answer] of [["rate_limited", "limited"], ["unavailable", "unavailable"], ["error", "unavailable"], ["invalid", "invalid"]]) {
+    for (const [code, answer] of [["rate_limited", "limited"], ["rejected", "unavailable"], ["unavailable", "unavailable"], ["error", "unavailable"], ["invalid", "invalid"]]) {
       sendSmtp.mockClear();
       persist.mockResolvedValue({ ok: false, code });
       expect(await send()).toBe(answer);
@@ -189,9 +199,12 @@ describe("the action never claims what did not happen", () => {
     expect(persist).not.toHaveBeenCalled();
   });
 
-  it("a bot filling the hidden field, or sending at once, stores nothing and alerts no one", async () => {
-    expect(await send({ website: "http://spam" })).toBe("received");
-    expect(await send({ started: String(Date.now()) })).toBe("received");
+  it("a bot filling the hidden field, sending at once, or with no fill time, stores nothing and alerts no one", async () => {
+    // One generic "could not send" whichever check tripped (owner spam order 2026-11-09):
+    // never "received" for a request that was dropped.
+    expect(await send({ website: "http://spam" })).toBe("unavailable");
+    expect(await send({ started: String(Date.now()) })).toBe("unavailable");
+    expect(await send({ started: "" })).toBe("unavailable");
     expect(persist).not.toHaveBeenCalled();
     expect(sendSmtp).not.toHaveBeenCalled();
   });
@@ -207,19 +220,30 @@ describe("the page", () => {
   const read = (p: string) => readFileSync(resolve(WEB, p), "utf8");
 
   it("the owner's words stand in Lithuanian", () => {
+    // The V3 wording the owner approved on 2026-11-13: each service is named
+    // as an enquiry, not as an order.
     const d = JSON.parse(read("messages/lt.json")).landing.requestDoors;
-    expect(d.workerSearch.title).toBe("Užsakyti darbuotojų paiešką");
-    expect(d.b2b.title).toBe("Pateikti B2B užklausą");
-    expect(d.project.title).toBe("Užsakyti individualaus projekto vykdymą");
-    expect(d.promise).toBe("Pateikite užklausą – susisieksime per 24 valandas.");
+    expect(d.workerSearch.title).toBe("Darbuotojų paieškos užklausa");
+    expect(d.b2b.title).toBe("Verslo paslaugų užklausa (B2B)");
+    expect(d.project.title).toBe("Individualaus projekto užklausa");
+    // No reply time and no promise to get in touch (owner 2026-11-10 and
+    // 2026-11-13): the request is passed to the team for review, and the
+    // confirmation says the same.
+    expect(d.promise).toBe(
+      "Aprašykite, kokių darbuotojų, paslaugų ar projekto vykdymo jums reikia. Užklausa perduodama LabourMarket.ai komandai peržiūrėti.",
+    );
+    expect(d.receivedBody).toBe("Jūsų užklausa gauta ir perduota LabourMarket.ai komandai peržiūrėti.");
+    expect(`${d.promise} ${d.receivedBody}`).not.toMatch(/susisiek/i);
   });
 
-  it.each(["lt", "en", "ru", "nl", "de", "pl"])("%s has every key, and the notice links the policy", (locale) => {
+  it.each(["lt", "en", "ru", "nl", "de", "pl", "sv"])("%s has every key, and the notice links the policy", (locale) => {
     const d = JSON.parse(read(`messages/${locale}.json`)).landing.requestDoors;
     const en = JSON.parse(read("messages/en.json")).landing.requestDoors;
     expect(Object.keys(d).sort()).toEqual(Object.keys(en).sort());
     expect(d.notice).toMatch(/<privacy>.+<\/privacy>/);
-    expect(d.promise).toMatch(/24/);
+    expect(d.promise.length).toBeGreaterThan(20);
+    expect(d.promise).not.toMatch(/\d/);
+    expect(d.receivedBody).not.toMatch(/\d/);
   });
 
   it("a failed send keeps the input: no form action, which would reset it", () => {
@@ -238,7 +262,11 @@ describe("the page", () => {
     expect(read("components/marketing/landing-request-doors-form.tsx")).not.toMatch(/type="file"/);
   });
 
-  it("both landing heroes carry the doors", () => {
-    expect(read("app/[locale]/focus-landing/focus-landing.tsx").match(/<LandingRequestDoors /g)).toHaveLength(2);
+  // One place for the doors. Since V3 (owner 2026-11-13) it is the landing's
+  // "submit a request" entry, which the landing renders exactly once.
+  it("the landing carries the doors once, inside the one request entry", () => {
+    expect(read("app/[locale]/focus-landing/focus-landing.tsx").match(/<LandingNeedPath /g)).toHaveLength(1);
+    expect(read("app/[locale]/focus-landing/focus-landing.tsx")).not.toMatch(/<LandingRequestDoors /);
+    expect(read("components/marketing/landing-v3.tsx").match(/<LandingRequestDoors /g)).toHaveLength(1);
   });
 });

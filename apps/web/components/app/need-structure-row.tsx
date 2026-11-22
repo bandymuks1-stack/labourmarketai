@@ -5,6 +5,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { buildWorkCategoryOptions, MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import { applyNeedStructureAction } from "@/lib/admin/need-backfill-actions";
 import type { UnstructuredNeed } from "@/lib/admin/need-backfill";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 /**
  * One row of the admin need-structuring backfill: shows the admin-only free
@@ -12,8 +15,8 @@ import type { UnstructuredNeed } from "@/lib/admin/need-backfill";
  * admin reviews before applying. Only closed-set values are submitted; free
  * text is never written to the structured columns.
  */
-const SELECT =
-  "w-full rounded-md border border-ink-500 bg-ink-700 px-2.5 py-1.5 text-sm text-text-primary outline-none focus:border-brand-blue";
+// The shared Select/Input carry the field look; this only adds the phone floor.
+const SELECT = "max-sm:min-h-11 max-sm:text-base";
 
 const CONFIDENCE_TONE: Record<string, string> = {
   high: "border-state-success/40 bg-state-success/10 text-state-success",
@@ -100,7 +103,7 @@ export function NeedStructureRow({ need }: { need: UnstructuredNeed }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-text-muted">{tc("profession")}</span>
-          <select className={SELECT} value={workType} onChange={(e) => setWorkType(e.target.value)} disabled={done}>
+          <Select className={SELECT} value={workType} onChange={(e) => setWorkType(e.target.value)} disabled={done}>
             <option value="">—</option>
             {categories.map((c) => (
               <optgroup key={c.key} label={c.sector}>
@@ -109,20 +112,20 @@ export function NeedStructureRow({ need }: { need: UnstructuredNeed }) {
                 ))}
               </optgroup>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-text-muted">{tc("country")}</span>
-          <select className={SELECT} value={country} onChange={(e) => setCountry(e.target.value)} disabled={done}>
+          <Select className={SELECT} value={country} onChange={(e) => setCountry(e.target.value)} disabled={done}>
             <option value="">—</option>
             {MARKET_COUNTRIES.map((code) => (
               <option key={code} value={code}>{tlm(`countryNames.${code}`)}</option>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-text-muted">{tc("numberOfWorkers")}</span>
-          <input
+          <Input
             type="number"
             min={1}
             max={100000}
@@ -134,21 +137,21 @@ export function NeedStructureRow({ need }: { need: UnstructuredNeed }) {
         </label>
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-text-muted">{t("startPeriodLabel")}</span>
-          <select className={SELECT} value={startPeriod} onChange={(e) => setStartPeriod(e.target.value)} disabled={done}>
+          <Select className={SELECT} value={startPeriod} onChange={(e) => setStartPeriod(e.target.value)} disabled={done}>
             <option value="">—</option>
             {startOptions.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="flex flex-col gap-1 text-xs sm:col-span-2">
           <span className="text-text-muted">{tc("accommodation")}</span>
-          <select className={SELECT} value={accommodation} onChange={(e) => setAccommodation(e.target.value)} disabled={done}>
+          <Select className={SELECT} value={accommodation} onChange={(e) => setAccommodation(e.target.value)} disabled={done}>
             <option value="">—</option>
             {accommodationOptions.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
-          </select>
+          </Select>
         </label>
       </div>
 
@@ -156,15 +159,17 @@ export function NeedStructureRow({ need }: { need: UnstructuredNeed }) {
         {done ? (
           <span className="text-xs font-semibold text-state-success">✓ {t("applied")}</span>
         ) : (
-          <button
+          <Button
             type="button"
+            variant="primary"
+            size="sm"
             onClick={apply}
             disabled={isPending}
-            className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
+            className="min-h-11"
             data-testid={`need-apply-${need.id}`}
           >
             {isPending ? t("applying") : t("applyButton")}
-          </button>
+          </Button>
         )}
         {error && <span className="text-xs text-state-danger">{error}</span>}
       </div>

@@ -30,7 +30,6 @@ const PUBLIC_ROUTES: readonly string[] = [
   "/lt/for-companies",
   "/lt/for-agencies",
   "/lt/pricing",
-  "/lt/vision",
   "/lt/auth/login",
   "/lt/auth/signup",
 ];
@@ -62,6 +61,15 @@ test.describe("primary route live-render smoke — public routes", () => {
       ).toEqual([]);
     });
   }
+});
+
+// The unpublished internal preview: an anonymous visitor gets a plain 404
+// (lib/guards/vision-internal-only.test.ts), never the page and never a 500.
+test.describe("primary route live-render smoke — internal preview", () => {
+  test("/lt/vision answers 404 to an anonymous visitor", async ({ page }) => {
+    const response = await page.goto("/lt/vision", { waitUntil: "domcontentloaded" });
+    expect(response?.status()).toBe(404);
+  });
 });
 
 test.describe("primary route live-render smoke — auth-gated routes", () => {

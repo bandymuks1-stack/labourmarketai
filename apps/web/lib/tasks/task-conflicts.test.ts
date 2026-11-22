@@ -143,7 +143,7 @@ describe("task conflicts + evidence detail wiring", () => {
       ["evidence", "by"],
       ["evidence", "hours"],
     ];
-    for (const loc of ["en", "lt", "de", "nl", "pl", "ru"]) {
+    for (const loc of ["en", "lt", "de", "nl", "pl", "ru", "sv"]) {
       const tasks = JSON.parse(read(`messages/${loc}.json`)).tasks;
       for (const [a, b] of keys) {
         const v = tasks?.[a]?.[b];

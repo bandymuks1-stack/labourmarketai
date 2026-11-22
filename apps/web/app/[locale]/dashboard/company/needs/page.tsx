@@ -145,6 +145,16 @@ export default async function CompanyNeedsPage({
   // Intent follows the company's own type: a staffing agency supplies
   // candidates (partner), any other company hires (hire_workers).
   const demandIntent = isStaffingAgency ? ("partner" as const) : ("hire_workers" as const);
+  // E-4 (UX gaps 2026-11-18): "Fill from my last request" only when there is
+  // one. Derived from the readback this page already reads (the caller's own
+  // rows of this direction, any status, drafts included); unknown (a failed
+  // read) keeps the button, as before.
+  const hasOwnPreviousRequest =
+    demandReadback.kind === "ok"
+      ? demandReadback.rows.some(
+          (r) => r.ownedByCaller && r.direction === (demandIntent === "partner" ? "supply" : "demand"),
+        )
+      : null;
   const demandPilotKey = demandIntent === "hire_workers" ? "hire" : "partner";
 
   return (
@@ -242,6 +252,7 @@ export default async function CompanyNeedsPage({
             intent={demandIntent}
             stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
             repeatRequestId={repeatRequestId}
+            hasOwnPreviousRequest={hasOwnPreviousRequest}
             usage={openNeedsUsage}
             organizationId={employerCtx.kind === "ok" ? employerCtx.organizationId : null}
           />
