@@ -3,6 +3,7 @@
 import { useEffect, useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { Explain } from "@/components/app/premium/grammar";
 import { MessageSquare } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
@@ -47,6 +48,7 @@ export function TeamDemandOfferForm({
   defaultOpen?: boolean;
 }) {
   const t = useTranslations("teamDemandOffer");
+  const tDisclosure = useTranslations("common.disclosure");
   const locale = useLocale();
   const router = useRouter();
   const uid = useId();
@@ -121,8 +123,11 @@ export function TeamDemandOfferForm({
         {org ? t("orgHeading") : t("heading")}
       </summary>
       <div className="flex flex-col gap-3 pt-3">
-        <p className="text-xs text-text-secondary">{org ? t("orgIntro") : t("intro")}</p>
-        <p className="text-meta leading-relaxed text-text-muted">{org ? t("orgPrivacy") : t("privacy")}</p>
+        {/* One row, the detail one tap away (coordinator decision 2026-11-22, item 5). */}
+        <Explain summary={tDisclosure("details")} testId="team-demand-offer-explain">
+          <p>{org ? t("orgIntro") : t("intro")}</p>
+          <p>{org ? t("orgPrivacy") : t("privacy")}</p>
+        </Explain>
 
         {!org && memberCount < 2 ? (
           <p className="text-xs text-text-muted" data-testid={`team-offer-too-small-${teamId}`}>
@@ -186,7 +191,7 @@ export function TeamDemandOfferForm({
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-rate`}>
                     {t("terms.rate")}
-                    <Input id={`${uid}-rate`} type="text" maxLength={200} value={terms.rateText} placeholder={t("terms.ratePlaceholder")}
+                    <Input id={`${uid}-rate`} type="text" maxLength={200} value={terms.rateText}
                       onChange={(e) => setTerms((v) => ({ ...v, rateText: e.target.value }))}
                       className="min-h-11 sm:min-h-9 max-sm:text-base" />
                   </label>

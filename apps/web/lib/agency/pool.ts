@@ -4,6 +4,7 @@ import { CONFIRMABLE_ENTRY_BY_WORKER_COLUMNS, confirmedEntriesByWorker } from "@
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { agencyBoardBurstLimited } from "@/lib/agency/board-abuse-guard";
 import { createClient } from "@/lib/supabase/server";
 import {
   getOwnAgency,
@@ -112,6 +113,13 @@ const RPC_NOT_FOUND = new Set(["42883", "PGRST202"]);
 export async function getAgencyPool(): Promise<AgencyPoolResult> {
   const agency = await getOwnAgency();
   if (!agency) return { kind: "no-agency" };
+  // Bulk reading is limited per account and IP (owner decision 2026-11-22).
+  {
+    const {
+      data: { user },
+    } = await (await createClient()).auth.getUser();
+    if (!user || (await agencyBoardBurstLimited("read", user.id))) return { kind: "error", message: "rate_limited" };
+  }
 
   const linked = await listActiveAgencyWorkers(agency.id);
   if (linked.kind === "needs-migration") return { kind: "needs-migration" };
@@ -328,6 +336,7 @@ export type MarkCanOfferOutcome =
   | "not_agency"
   | "request_not_found"
   | "request_not_open"
+  | "rate_limited"
   | "needs_gate"
   | "error";
 
@@ -340,6 +349,11 @@ export async function markAgencyCanOffer(
 ): Promise<MarkCanOfferOutcome> {
   try {
     const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return "not_agency";
+    if (await agencyBoardBurstLimited("offer", user.id)) return "rate_limited";
     const { data, error } = await asAny(supabase).rpc("mark_agency_can_offer", {
       p_request_id: requestId,
       p_note: note,

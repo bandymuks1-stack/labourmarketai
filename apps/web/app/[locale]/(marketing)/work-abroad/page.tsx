@@ -102,7 +102,7 @@ export default async function WorkAbroadPage({
           </p>
           <Link
             href="/labour-market"
-            className="mt-4 inline-block font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-champagne"
+            className="mt-2 inline-flex min-h-11 items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-champagne"
           >
             {t("directionsCta")} →
           </Link>

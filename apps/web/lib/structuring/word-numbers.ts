@@ -4,8 +4,9 @@
  * "trūks keturių suvirintojų" carries the headcount as a WORD, and every
  * digit-only extractor read it as no number at all. This module maps written
  * numbers to integers across the active locales — LT (with the case endings
- * people actually type: keturi/keturios/keturių), EN, RU — plus opportunistic
- * NL/DE. Matching is diacritic-folded like the rest of lib/structuring, so
+ * people actually type: keturi/keturios/keturių/keturis), EN, RU (with the
+ * collective "пятеро"), PL (with the counted "pięciu") — plus opportunistic
+ * NL/DE and, in a Swedish sentence only, SV. Matching is diacritic-folded like the rest of lib/structuring, so
  * "keturiu" typed without diacritics parses identically.
  *
  * Deliberately NOT a numeral grammar: single tokens only (compounds like
@@ -49,6 +50,10 @@ const WORD_NUMBERS: Record<string, number> = {
   ketveriems: 4, ketverioms: 4, penkeriems: 5, penkerioms: 5,
   seseriems: 6, seserioms: 6, septyneriems: 7, septynerioms: 7,
   astuoneriems: 8, astuonerioms: 8, devyneriems: 9, devynerioms: 9,
+  // Accusative — the counted object of "reikia / ieškau": "reikia penkis
+  // darbuotojus" (2026-11-22: read as no number at all).
+  tris: 3, keturis: 4, keturias: 4, penkis: 5, penkias: 5, sesis: 6, sesias: 6,
+  septynis: 7, septynias: 7, astuonis: 8, astuonias: 8, devynis: 9, devynias: 9,
   // ── English ──
   one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8,
   nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14,
@@ -56,7 +61,7 @@ const WORD_NUMBERS: Record<string, number> = {
   twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70,
   eighty: 80, ninety: 90, hundred: 100,
   // ── Russian (nominative + the counted genitive) ──
-  один: 1, одна: 1, одного: 1, одной: 1,
+  один: 1, одна: 1, одного: 1, одной: 1, однои: 1, // `foldText` strips the breve of й
   два: 2, две: 2, двух: 2,
   три: 3, трех: 3,
   четыре: 4, четырех: 4,
@@ -69,6 +74,12 @@ const WORD_NUMBERS: Record<string, number> = {
   одиннадцать: 11, двенадцать: 12, тринадцать: 13, четырнадцать: 14,
   пятнадцать: 15, шестнадцать: 16, семнадцать: 17, восемнадцать: 18,
   девятнадцать: 19,
+  // The counted genitive of 11–12 and the COLLECTIVE numerals people use for
+  // people: "нужно пятеро рабочих", "нужны двое" (2026-11-22: no number).
+  одиннадцати: 11, двенадцати: 12,
+  двое: 2, двоих: 2, трое: 3, троих: 3, четверо: 4, четверых: 4,
+  пятеро: 5, пятерых: 5, шестеро: 6, шестерых: 6, семеро: 7, семерых: 7,
+  восьмеро: 8, восьмерых: 8, девятеро: 9, девятерых: 9, десятеро: 10, десятерых: 10,
   двадцать: 20, тридцать: 30, сорок: 40, пятьдесят: 50, шестьдесят: 60,
   семьдесят: 70, восемьдесят: 80, девяносто: 90, сто: 100,
   // ── opportunistic NL/DE (unambiguous words only — no een/ein) ──
@@ -76,6 +87,24 @@ const WORD_NUMBERS: Record<string, number> = {
   negen: 9, tien: 10, elf: 11, twaalf: 12, twintig: 20,
   zwei: 2, drei: 3, funf: 5, sechs: 6, sieben: 7, acht: 8, neun: 9,
   zehn: 10, zwolf: 12, zwanzig: 20,
+  // ── Polish (folded: "pięć" → piec, "ośmiu" → osmiu) — the nominative and the
+  // counted genitive ("potrzebuję pięciu pracowników", 2026-11-22: no number).
+  // No `jeden` / `jedna`: the German "jeden" is "every" ("jeden Tag").
+  jednego: 1,
+  dwa: 2, dwie: 2, dwoch: 2, dwoje: 2, dwojga: 2,
+  trzy: 3, trzech: 3, troje: 3,
+  cztery: 4, czterech: 4, czworo: 4,
+  piec: 5, pieciu: 5, piecioro: 5,
+  szesc: 6, szesciu: 6,
+  siedem: 7, siedmiu: 7,
+  osiem: 8, osmiu: 8,
+  dziewiec: 9, dziewieciu: 9,
+  dziesiec: 10, dziesieciu: 10,
+  jedenascie: 11, jedenastu: 11,
+  dwanascie: 12, dwunastu: 12,
+  dwadziescia: 20, dwudziestu: 20,
+  // Tens, so "dwadzieścia pięć" is 25 and never a bare 5.
+  trzydziesci: 30, czterdziesci: 40, piecdziesiat: 50,
 };
 
 /**
@@ -94,6 +123,22 @@ const SV_WORD_NUMBERS: Record<string, number> = {
   femtio: 50, hundra: 100,
 };
 
+/**
+ * The written numbers as one regex ALTERNATION (folded, longest first), for a
+ * pattern that must accept "8" and "eight" alike — the chat router's "a day +
+ * a duration" rule (2026-11-22: "Užvakar aštuonias valandas suvirinau…"
+ * routed `unknown` while "Užvakar 8 val. …" was the journal). The SAME table
+ * as `parseWordNumber`, so the two can never disagree. Letters only — no
+ * escaping needed. The Swedish words are a separate source, for a Swedish
+ * sentence only.
+ */
+const alternation = (table: Record<string, number>): string =>
+  Object.keys(table)
+    .sort((a, b) => b.length - a.length)
+    .join("|");
+export const WORD_NUMBER_SOURCE: string = alternation(WORD_NUMBERS);
+export const SV_WORD_NUMBER_SOURCE: string = alternation(SV_WORD_NUMBERS);
+
 /** Parse ONE token as a written number; null when it is not one. */
 export function parseWordNumber(token: string, swedish = false): number | null {
   const folded = foldText((token ?? "").trim());
@@ -107,6 +152,50 @@ export interface FoundWordNumber {
   readonly raw: string;
   /** Token index in the text's word sequence (for adjacency checks). */
   readonly tokenIndex: number;
+}
+
+/**
+ * The text with every written number turned into digits ("мне нужны пять
+ * рабочих" → "мне нужны 5 рабочих"), everything else untouched. Lets a
+ * digit-only reader (the headcount) read the number words it never knew.
+ *
+ * A RUN of number words is one quantity: "twenty five" / "twenty-five" /
+ * "двадцать пять" / "dvidešimt penki" become 25 (tens + unit). Any other run
+ * ("one hundred", "two three") is left as words — unknown, never a part of
+ * the quantity: "20 5 workers" would read as five.
+ */
+export function digitizeWordNumbers(text: string, swedish: boolean = looksSwedish(text)): string {
+  const src = text ?? "";
+  const re = /\p{L}+(?:[\s-]+\p{L}+)*/gu;
+  return src.replace(re, (phrase) => {
+    const parts = phrase.split(/([\s-]+)/u);
+    const out: string[] = [];
+    let i = 0;
+    while (i < parts.length) {
+      const n = parseWordNumber(parts[i], swedish);
+      if (n === null) {
+        out.push(parts[i]);
+        i += 1;
+        continue;
+      }
+      // Collect the run of number words joined by spaces or hyphens.
+      const run: number[] = [n];
+      let j = i + 2;
+      while (j < parts.length) {
+        const m = parseWordNumber(parts[j], swedish);
+        if (m === null) break;
+        run.push(m);
+        j += 2;
+      }
+      const tensAndUnit = run.length === 2 && run[0] >= 20 && run[0] <= 90 && run[0] % 10 === 0 && run[1] >= 1 && run[1] <= 9;
+      if (run.length === 1) out.push(String(n));
+      else if (tensAndUnit) out.push(String(run[0] + run[1]));
+      else out.push(parts.slice(i, j - 1).join(""));
+      if (j - 1 < parts.length) out.push(parts[j - 1] ?? "");
+      i = j;
+    }
+    return out.join("");
+  });
 }
 
 /** Every written number in the text, in order, with token positions. */

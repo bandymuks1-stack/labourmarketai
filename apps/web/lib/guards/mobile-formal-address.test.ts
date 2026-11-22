@@ -37,6 +37,9 @@ const RULES: Record<"lt" | "nl" | "pl", readonly RegExp[]> = {
   pl: [
     /(?<![\p{L}])(ty|ciebie|tobie|cię|twój|twoja|twoje|twojego|twojej|twojemu|twoim|twoich|twoimi|twoją|jesteś|masz|możesz|chcesz)(?![\p{L}])/iu,
     /(?<![\p{L}])\p{L}{2,}(łeś|łaś)(?![\p{L}])/iu,
+    // The dative after an impersonal past ("Przypisano ci zadanie"): bare
+    // "ci" alone is also "these", so only the "-no ci" shape is a marker.
+    /(?<![\p{L}])\p{L}{3,}no (ci|Ci)(?![\p{L}])/u,
   ],
 };
 
@@ -67,5 +70,9 @@ describe("mobile catalogue speaks one polite register", () => {
     expect(RULES.pl.some((r) => r.test("Otrzymałeś propozycję rezerwacji"))).toBe(true);
     expect(RULES.pl.some((r) => r.test("Nie mogą Państwo pisać w tej rozmowie."))).toBe(false);
     expect(RULES.pl.some((r) => r.test("Zapisz"))).toBe(false);
+    expect(RULES.pl.some((r) => r.test("Przypisano ci zadanie"))).toBe(true);
+    expect(RULES.pl.some((r) => r.test("Przekazano Ci etap zatwierdzania"))).toBe(true);
+    expect(RULES.pl.some((r) => r.test("Przypisano Państwu zadanie"))).toBe(false);
+    expect(RULES.pl.some((r) => r.test("Ci pracownicy są dostępni"))).toBe(false);
   });
 });
