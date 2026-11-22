@@ -473,7 +473,7 @@ function dbState(): DbState {
            (select string_agg(r.rolname, ',' order by r.rolname) from pg_roles r where r.oid = any (p.polroles)) as roles,
            -- #3604 (20261122130000) writes this policy's auth.uid() as (select auth.uid()):
            -- the same value, proven equal by supabase/tests/20261122130000_rls_worker_lookup_initplan_equivalence.sh.
-           -- The replayed forward state therefore deparses it as `( SELECT auth.uid() AS uid)`; this
+           -- The replayed forward state therefore deparses it as "( SELECT auth.uid() AS uid)"; this
            -- walk pins the 2026-10-29 text, so it reads the call back in its earlier spelling.
            replace(pg_get_expr(p.polwithcheck, p.polrelid), '( SELECT auth.uid() AS uid)', 'auth.uid()') as check,
            md5(coalesce((select string_agg(pg_get_functiondef(f.oid), '|' order by f.oid::regprocedure::text)
