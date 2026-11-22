@@ -47,6 +47,9 @@ const OWNER_LIFECYCLE_STATUSES: ReadonlySet<string> = new Set(["draft", "submitt
  */
 
 export interface DemandRequestsReadbackLabels {
+  /** "Show all (n)": the rows past the first few open in place. Optional:
+   *  without it every row is listed as before. */
+  showAll?: (count: number) => string;
   /** Localized stand-ins for the two ENGLISH placeholder titles the write
    *  path stamps when an employer submits a need without naming the role.
    *  Optional: omitted → the stored string renders exactly as before. */
@@ -327,6 +330,38 @@ function RequestRow({
   );
 }
 
+/** Rows a list shows before the rest open in place (responsive pass
+ *  2026-11-22): the newest come first, so a new need is always on show. */
+const LIST_VISIBLE = 5;
+
+function FoldedRows({
+  rows,
+  showAll,
+  testId,
+  render,
+}: {
+  rows: readonly CustomerRequestRow[];
+  showAll?: (count: number) => string;
+  testId: string;
+  render: (r: CustomerRequestRow) => React.ReactNode;
+}) {
+  const fold = showAll && rows.length > LIST_VISIBLE;
+  const shown = fold ? rows.slice(0, LIST_VISIBLE) : rows;
+  return (
+    <>
+      <ul className="flex flex-col gap-2">{shown.map(render)}</ul>
+      {fold ? (
+        <details className="group" data-testid={testId}>
+          <summary className="flex min-h-11 cursor-pointer list-none items-center text-xs font-medium text-brand-blue [&::-webkit-details-marker]:hidden">
+            {showAll(rows.length)}
+          </summary>
+          <ul className="mt-2 flex flex-col gap-2">{rows.slice(LIST_VISIBLE).map(render)}</ul>
+        </details>
+      ) : null}
+    </>
+  );
+}
+
 export function DemandRequestsReadback({
   result,
   labels,
@@ -384,8 +419,11 @@ export function DemandRequestsReadback({
         {needs.length === 0 ? (
           <p className="text-sm text-text-muted">{labels.empty}</p>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {needs.map((r) => (
+          <FoldedRows
+            rows={needs}
+            showAll={labels.showAll}
+            testId="demand-readback-rest"
+            render={(r) => (
               <RequestRow
                 key={r.id}
                 r={r}
@@ -395,8 +433,8 @@ export function DemandRequestsReadback({
                 scoutable
                 gateMet={workersSeeNeeds}
               />
-            ))}
-          </ul>
+            )}
+          />
         )}
       </section>
       </Card>
@@ -429,8 +467,11 @@ export function DemandRequestsReadback({
               {labels.supplyNote}
             </p>
           </div>
-          <ul className="flex flex-col gap-2">
-            {offers.map((r) => (
+          <FoldedRows
+            rows={offers}
+            showAll={labels.showAll}
+            testId="supply-readback-rest"
+            render={(r) => (
               <RequestRow
                 key={r.id}
                 r={r}
@@ -439,8 +480,8 @@ export function DemandRequestsReadback({
                 scoutable={false}
                 gateMet={false}
               />
-            ))}
-          </ul>
+            )}
+          />
         </section>
         </Card>
       )}
