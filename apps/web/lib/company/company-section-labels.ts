@@ -220,6 +220,7 @@ export async function readAgencyBridgeLabels() {
     noRoster: tAB("noRoster"),
     goToRoster: tAB("goToRoster"),
     invalidLabel: tAB("invalidLabel"),
+    offerLimitLabel: tAB("offerLimitLabel"),
     progressHeading: tAB("progressHeading"),
     noOffers: tAB("noOffers"),
     withdrawButton: tAB("withdrawButton"),

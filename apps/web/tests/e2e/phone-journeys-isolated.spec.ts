@@ -41,6 +41,10 @@ import {
  *   M-9 SKILL    adds a free-label skill on the profile: the chip shows in place (no reload), is
  *                stored once, persists on a reload and is declared on the Living CV; then the same
  *                add at a desktop width (production walk P-13, run 44637832323 at 375 px).
+ *   M-10 SUMMARY saves the public summary again and again, the same value twice, and once while
+ *                the server answers as during a deploy: every save answers on screen (P-26).
+ *   M-11 SECTIONS the work card, a language, education, an achievement, experience and an own
+ *                profession: save, answer, stored, back after a reload, edited or removed again.
  *
  * M-2 runs LAST in each group (first run 2026-11-14: the CV page stopped answering at 375 px), so a
  * CV fault cannot hide search, applying and messages; if it stops answering again, the step says
@@ -819,6 +823,293 @@ for (const phone of PHONES) {
       watch(dp);
       await addInPlace(dp, `QA-SYNTHETIC skill desktop ${phone.name} ${RUN}`, "desktop");
       await desk.close();
+    });
+
+    test(`M-10 (${phone.name}). every summary save answers on screen: repeated, the same value twice, and one cut off by a deploy`, async ({ browser }) => {
+      // The production walk P-26 (2.1), run 45047648320 at 375 px: tries 1 and 2 answered "saved" in
+      // about a second; try 3 was sent while a deploy activated, the action was answered
+      // `x-nextjs-action-not-found`, StaleBuildRecovery reloaded the page, and no answer ever showed
+      // (the typed text was gone too). Here the third save meets the same answer, made locally.
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      await page.goto(`${BASE}/en/dashboard/profile#profile-public-summary`);
+      await page.reload();
+      const section = page.getByRole("main").getByTestId("profile-public-summary");
+      await expect(section).toBeVisible({ timeout: 30_000 });
+      const input = section.getByTestId("profile-public-headline");
+      const save = section.getByTestId("profile-public-summary-save");
+      const saved = section.getByTestId("profile-public-summary-saved");
+      const error = section.getByTestId("profile-public-summary-error");
+      const stored = () =>
+        sql<{ headline: string | null }>(`select headline from public.workers where profile_id = ${lit(s.profileId)}`)[0]?.headline ?? null;
+      /** Types a value until the page takes it (a fill before hydration is not seen by React). */
+      const type = async (value: string, where: string) => {
+        await expect(async () => {
+          await input.fill(value);
+          await expect(save).toBeEnabled({ timeout: 2_000 });
+        }, `${where}: the typed value is taken`).toPass({ timeout: 30_000 });
+        await expect(saved, `${where}: no old answer is left on screen`).toHaveCount(0);
+      };
+
+      const first = `Summary save one ${phone.name} ${RUN}`;
+      const second = `Summary save two ${phone.name} ${RUN}`;
+      const values = [first, second, first, second];
+      const saving = section.getByTestId("profile-public-summary-saving");
+      const isAction = (r: { method(): string; headers(): Record<string, string> }) => r.method() === "POST" && Boolean(r.headers()["next-action"]);
+      for (const [i, value] of values.entries()) {
+        const where = `save ${i + 1}`;
+        await type(value, where);
+        // The second save is held for 3 s on its way, so its "Saving…" is seen, not guessed.
+        const slow = i === 1;
+        if (slow) {
+          await page.route(/\/en\/dashboard\/profile/, async (route) => {
+            if (isAction(route.request())) await new Promise((r) => setTimeout(r, 3_000));
+            await route.fallback();
+          });
+        }
+        await save.tap();
+        if (slow) await expect(saving, `${where}: "Saving…" shows while the save is on its way`).toBeVisible({ timeout: 3_000 });
+        await expect(saved, `${where}: the save answers "saved" on screen`).toBeVisible({ timeout: 30_000 });
+        await expect(saving, `${where}: "Saving…" is gone once answered`).toHaveCount(0);
+        if (slow) await page.unroute(/\/en\/dashboard\/profile/);
+        await expect.poll(stored, { message: `${where}: the headline is stored`, timeout: 30_000 }).toBe(value);
+        await page.reload();
+        await expect(input, `${where}: a reload shows the saved text`).toHaveValue(value, { timeout: 30_000 });
+        console.info(`[summary-save] ${phone.name} px ${where}: answered saved, stored, back after a reload`);
+      }
+
+      // A save cut off by a deploy: the server no longer knows the page's action.
+      const cutOff = `Summary save cut off ${phone.name} ${RUN}`;
+      let answered = 0;
+      await page.route(/\/en\/dashboard\/profile/, async (route) => {
+        if (isAction(route.request()) && answered === 0) {
+          answered += 1;
+          await route.fulfill({ status: 404, headers: { "x-nextjs-action-not-found": "1", "content-type": "text/plain" }, body: "" });
+          return;
+        }
+        await route.fallback();
+      });
+      await type(cutOff, "cut-off save");
+      const reloaded = page.waitForEvent("load", { timeout: 30_000 });
+      await save.tap();
+      await reloaded;
+      await expect(error, "cut-off save: the page answers on screen after its reload").toBeVisible({ timeout: 30_000 });
+      expect(answered, "cut-off save: the action met the deploy's answer").toBe(1);
+      await expect(input, "cut-off save: the typed text is still there").toHaveValue(cutOff);
+      expect(stored(), "cut-off save: nothing was stored").toBe(second);
+      await page.unroute(/\/en\/dashboard\/profile/);
+      await save.tap();
+      await expect(saved, "the save after it answers \"saved\"").toBeVisible({ timeout: 30_000 });
+      await expect.poll(stored, { message: "the save after it is stored", timeout: 30_000 }).toBe(cutOff);
+      await page.reload();
+      await expect(input, "the save after it: a reload shows the saved text").toHaveValue(cutOff, { timeout: 30_000 });
+      console.info(`[summary-save] ${phone.name} px cut-off save: answered error, stored nothing, text kept; the save after it stored`);
+      await fitsTheScreen(page, "the profile after repeated summary saves");
+      await done();
+    });
+
+    // M-11: EVERY PROFILE AND CV SECTION THE PRODUCTION WALK TOUCHES (profile-cv-history), on this
+    // phone: input → save → the answer on screen → the stored row read back → a reload shows it →
+    // edit again (change, or remove) → stored → a reload shows that. The summary is M-10, the
+    // free-label skill M-9. One step per section, so one section's fault hides no other.
+    const profileAt = async (page: Page, hash: string): Promise<Locator> => {
+      await page.goto(`${BASE}/en/dashboard/profile#${hash}`);
+      await page.reload();
+      const main = page.getByRole("main");
+      const target = main.locator(`#${hash}`).first();
+      await expect(target, `#${hash} is on the page`).toBeVisible({ timeout: 30_000 });
+      // A hash naming a disclosure opens it (DetailsHashOpener); wait for that, as M-9 does.
+      if ((await target.evaluate((el) => el.tagName)) === "DETAILS") await expect(target, `#${hash} is open`).toHaveAttribute("open", "", { timeout: 30_000 });
+      return main;
+    };
+    const pickOption = async (page: Page, scope: Locator, testId: string, option: string): Promise<void> => {
+      await scope.getByTestId(testId).tap();
+      await page.getByRole("option", { name: option, exact: true }).first().tap();
+    };
+    const workerIdOf = () => sql<{ id: string }>(`select id from public.workers where profile_id = ${lit(s.profileId)}`)[0]!.id;
+    const proof = (section: string, what: string) => console.info(`[profile-loop] ${phone.name} px ${section}: ${what}`);
+
+    test(`M-11a (${phone.name}). the work card: availability and countries saved, stored, back after a reload, changed again`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const openCard = async (): Promise<Locator> => {
+        const main = await profileAt(page, "cv-availability");
+        const toggle = main.getByTestId("work-card-editor-toggle");
+        const form = main.getByTestId("work-card-editor");
+        await expect(async () => {
+          if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.tap();
+          await expect(form).toBeVisible({ timeout: 2_000 });
+        }, "the work card editor opens").toPass({ timeout: 30_000 });
+        return form;
+      };
+      const stored = () =>
+        sql<{ status: string | null; countries: string | null }>(
+          `select availability_status as status, array_to_string(preferred_countries, ',') as countries from public.workers where profile_id = ${lit(s.profileId)}`,
+        )[0] ?? { status: null, countries: null };
+      for (const [status, countries] of [
+        ["available", "LT, NO"],
+        ["busy", "LT"],
+      ] as const) {
+        const form = await openCard();
+        await form.locator('select[name="availability_status"]').selectOption(status);
+        await form.locator('input[name="preferred_countries"]').fill(countries);
+        await form.getByTestId("work-card-save").tap();
+        await expect(form.getByTestId("work-card-saved").or(form.getByTestId("work-card-error")), `${status}: the save answers`).toBeVisible({
+          timeout: 30_000,
+        });
+        await expect(form.getByTestId("work-card-error"), `${status}: the save is not refused`).toHaveCount(0);
+        await expect.poll(stored, { message: `${status}: stored`, timeout: 30_000 }).toEqual({ status, countries: countries.replace(/\s/g, "") });
+        const again = await openCard();
+        await expect(again.locator('select[name="availability_status"]'), `${status}: back after a reload`).toHaveValue(status);
+        await expect(again.locator('input[name="preferred_countries"]')).toHaveValue(new RegExp(countries.replace(", ", ",\\s*")));
+        proof("work card", `${status} ${countries}: answered, stored, back after a reload`);
+      }
+      await fitsTheScreen(page, "the work card");
+      await done();
+    });
+
+    test(`M-11b (${phone.name}). a language: added, stored, back after a reload, its level changed, removed`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const section = async () => {
+        const main = await profileAt(page, "cv-languages");
+        const sec = main.getByTestId("worker-languages");
+        await expect(sec).toBeVisible({ timeout: 30_000 });
+        return sec;
+      };
+      const stored = () =>
+        sql<{ level: string }>(`select level from public.worker_languages where worker_id = ${lit(workerIdOf())} and lang = 'uk'`).map((r) => r.level);
+      for (const level of ["B1", "C1"]) {
+        const sec = await section();
+        const form = sec.getByTestId("worker-languages-add-form");
+        await pickOption(page, form, "worker-languages-lang", "Українська");
+        await pickOption(page, form, "worker-languages-level", level);
+        await form.getByTestId("worker-languages-add").tap();
+        await expect(sec.getByTestId("worker-languages-status").and(page.locator('[data-state="added"]')).or(sec.getByTestId("worker-languages-error")), `${level}: the save answers`).toBeVisible({
+          timeout: 30_000,
+        });
+        await expect(sec.getByTestId("worker-languages-error"), `${level}: the save is not refused`).toHaveCount(0);
+        await expect(sec.getByTestId("worker-language-uk"), `${level}: the row shows`).toContainText(level, { timeout: 30_000 });
+        await expect.poll(stored, { message: `${level}: stored once`, timeout: 30_000 }).toEqual([level]);
+        await expect((await section()).getByTestId("worker-language-uk"), `${level}: back after a reload`).toContainText(level, { timeout: 30_000 });
+        proof("language", `uk ${level}: answered, stored once, back after a reload`);
+      }
+      const sec = await section();
+      await sec.getByTestId("worker-language-remove-uk").tap();
+      await expect(sec.getByTestId("worker-language-uk"), "the removed language is gone").toHaveCount(0, { timeout: 30_000 });
+      await expect.poll(stored, { message: "removed from the store", timeout: 30_000 }).toEqual([]);
+      await expect((await section()).getByTestId("worker-language-uk"), "stays removed after a reload").toHaveCount(0);
+      proof("language", "removed, gone from the store and after a reload");
+      await done();
+    });
+
+    for (const c of [
+      { key: "c", name: "education", hash: "cv-education", prefix: "worker-education", field: "institution", table: "worker_education", column: "institution_name", type: "Vocational", remove: '[data-testid^="worker-education-remove-"]' },
+      { key: "d", name: "achievement", hash: "cv-achievements", prefix: "worker-achievements", field: "title", table: "worker_achievements", column: "title", type: null, remove: '[data-testid^="worker-achievements-remove-"]' },
+    ] as const) {
+      test(`M-11${c.key} (${phone.name}). ${c.name}: added, stored, back after a reload, edited, removed`, async ({ browser }) => {
+        const { page, done } = await signedInOnPhone(browser, phone, worker);
+        const section = async () => {
+          const sec = (await profileAt(page, c.hash)).getByTestId(c.prefix);
+          await expect(sec).toBeVisible({ timeout: 30_000 });
+          return sec;
+        };
+        const stored = () =>
+          sql<{ v: string }>(`select ${c.column} as v from public.${c.table} where profile_id = ${lit(s.profileId)} order by v`).map((r) => r.v);
+        const first = `QA-SYNTHETIC ${c.name} ${phone.name} ${RUN}`;
+        const edited = `${first} edited`;
+        const rowOf = (sec: Locator, text: string) => sec.getByTestId(`${c.prefix}-row`).filter({ hasText: text });
+
+        let sec = await section();
+        await sec.getByTestId(`${c.prefix}-add-open`).tap();
+        let form = sec.getByTestId(`${c.prefix}-form`);
+        await form.getByTestId(`${c.prefix}-${c.field}`).fill(first);
+        if (c.type) await pickOption(page, form, `${c.prefix}-type`, c.type);
+        await form.getByTestId(`${c.prefix}-save`).tap();
+        await expect(rowOf(sec, first).or(sec.getByTestId(`${c.prefix}-error`)).first(), "the save answers").toBeVisible({ timeout: 30_000 });
+        await expect(sec.getByTestId(`${c.prefix}-error`), "the save is not refused").toHaveCount(0);
+        await expect.poll(stored, { message: "stored once", timeout: 30_000 }).toEqual([first]);
+        sec = await section();
+        await expect(rowOf(sec, first), "back after a reload, once").toHaveCount(1, { timeout: 30_000 });
+        proof(c.name, "added: answered, stored once, back after a reload");
+
+        await rowOf(sec, first).getByRole("button", { name: "Edit", exact: true }).tap();
+        form = sec.getByTestId(`${c.prefix}-form`);
+        await expect(form.getByTestId(`${c.prefix}-${c.field}`), "the edit opens with the saved text").toHaveValue(first);
+        await form.getByTestId(`${c.prefix}-${c.field}`).fill(edited);
+        await form.getByTestId(`${c.prefix}-save`).tap();
+        await expect(rowOf(sec, edited).or(sec.getByTestId(`${c.prefix}-error`)).first(), "the edit answers").toBeVisible({ timeout: 30_000 });
+        await expect(sec.getByTestId(`${c.prefix}-error`), "the edit is not refused").toHaveCount(0);
+        await expect.poll(stored, { message: "the edit replaced the row", timeout: 30_000 }).toEqual([edited]);
+        sec = await section();
+        await expect(rowOf(sec, edited), "the edit is back after a reload, once").toHaveCount(1, { timeout: 30_000 });
+        proof(c.name, "edited: answered, stored in place, back after a reload");
+
+        await rowOf(sec, edited).locator(c.remove).first().tap();
+        await expect(rowOf(sec, edited), "the removed row is gone").toHaveCount(0, { timeout: 30_000 });
+        await expect.poll(stored, { message: "removed from the store", timeout: 30_000 }).toEqual([]);
+        await expect(rowOf(await section(), edited), "stays removed after a reload").toHaveCount(0);
+        proof(c.name, "removed: gone from the store and after a reload");
+        await done();
+      });
+    }
+
+    test(`M-11e (${phone.name}). experience: added, stored, back after a reload, removed`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const title = `QA-SYNTHETIC experience ${phone.name} ${RUN}`;
+      const stored = () =>
+        sql<{ title: string }>(
+          `select title from public.engagement_contexts where profile_id = ${lit(s.profileId)} and organization_id is null and title = ${lit(title)}`,
+        ).map((r) => r.title);
+      const rowsIn = (m: Locator) => m.getByTestId("capability-experience-row").filter({ hasText: title });
+      let main = await profileAt(page, "capabilities");
+      await main.getByTestId("add-experience-open").tap();
+      const form = main.getByTestId("add-experience-form");
+      await form.getByTestId("add-experience-title").fill(title);
+      await form.getByTestId("add-experience-start-year").fill("2019");
+      await form.getByTestId("add-experience-current").check();
+      await form.getByTestId("add-experience-save").tap();
+      await expect(rowsIn(main).or(form.getByTestId("add-experience-error")).first(), "the save answers").toBeVisible({ timeout: 30_000 });
+      await expect(form.getByTestId("add-experience-error"), "the save is not refused").toHaveCount(0);
+      await expect.poll(stored, { message: "stored once", timeout: 30_000 }).toEqual([title]);
+      main = await profileAt(page, "capabilities");
+      await expect(rowsIn(main), "back after a reload, once").toHaveCount(1, { timeout: 30_000 });
+      proof("experience", "added: answered, stored once, back after a reload");
+      await rowsIn(main).first().locator('[data-testid^="capability-experience-remove-"]').tap();
+      await expect(rowsIn(main), "the removed row is gone").toHaveCount(0, { timeout: 30_000 });
+      await expect.poll(stored, { message: "removed from the store", timeout: 30_000 }).toEqual([]);
+      await expect(rowsIn(await profileAt(page, "capabilities")), "stays removed after a reload").toHaveCount(0);
+      proof("experience", "removed: gone from the store and after a reload");
+      await done();
+    });
+
+    test(`M-11f (${phone.name}). an own profession: added, stored, back after a reload, removed`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const profession = `QA-SYNTHETIC profession ${phone.name} ${RUN}`;
+      const stored = () =>
+        sql<{ label: string }>(`select label from public.worker_professions where worker_id = ${lit(workerIdOf())} and label = ${lit(profession)}`).map(
+          (r) => r.label,
+        );
+      const own = async (): Promise<Locator> => {
+        const main = await profileAt(page, "profile-edit");
+        const box = main.getByTestId("worker-own-professions");
+        if (!(await box.isVisible().catch(() => false))) await main.getByTestId("text-first-composer-manual").first().tap();
+        await expect(box).toBeVisible({ timeout: 30_000 });
+        return box;
+      };
+      const chipIn = (box: Locator) => box.getByTestId("worker-own-profession").filter({ hasText: profession });
+      let box = await own();
+      await box.getByTestId("worker-own-profession-input").fill(profession);
+      await box.getByTestId("worker-own-profession-add").tap();
+      await expect(chipIn(box), "the save answers with the chip").toBeVisible({ timeout: 30_000 });
+      await expect.poll(stored, { message: "stored once, verbatim", timeout: 30_000 }).toEqual([profession]);
+      box = await own();
+      await expect(chipIn(box), "back after a reload, once").toHaveCount(1, { timeout: 30_000 });
+      proof("own profession", "added: answered, stored once, back after a reload");
+      await chipIn(box).locator('[data-testid^="worker-own-profession-remove-"]').first().tap();
+      await chipIn(box).locator('[data-testid$="-yes"]').first().tap();
+      await expect(chipIn(box), "the removed profession is gone").toHaveCount(0, { timeout: 30_000 });
+      await expect.poll(stored, { message: "removed from the store", timeout: 30_000 }).toEqual([]);
+      await expect(chipIn(await own()), "stays removed after a reload").toHaveCount(0);
+      proof("own profession", "removed: gone from the store and after a reload");
+      await done();
     });
 
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {

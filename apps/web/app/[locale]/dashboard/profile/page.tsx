@@ -187,6 +187,7 @@ export default async function ProfilePage({
     tPublicSummary,
     tRoleLedger,
     tJournal,
+    tCapability,
   ] = await Promise.all([
     getTranslations("skills"),
     getTranslations("spaces"),
@@ -225,6 +226,8 @@ export default async function ProfilePage({
     getTranslations("roleLedger"),
     // The ONE "no name" phrase set (`journal.unnamedOrganization.*`, #3356).
     getTranslations("journal"),
+    // the one existing "Saving…" of this page's editors (`capabilityProfile.expSaving`)
+    getTranslations("capabilityProfile"),
   ]);
 
   /**
@@ -1440,6 +1443,7 @@ export default async function ProfilePage({
         <WorkerPublicSummaryEditor
           initialHeadline={(worker as { headline?: string | null } | null)?.headline ?? ""}
           initialBio={(worker as { bio?: string | null } | null)?.bio ?? ""}
+          draftOwner={user.id}
           labels={{
             title: tPublicSummary("title"),
             audience: tPublicSummary("audience"),
@@ -1448,6 +1452,7 @@ export default async function ProfilePage({
             bio: tPublicSummary("bio"),
             bioPlaceholder: tPublicSummary("bioPlaceholder"),
             save: tPublicSummary("save"),
+            saving: tCapability("expSaving"),
             saved: tPublicSummary("saved"),
             tooLong: tPublicSummary("tooLong"),
             error: tPublicSummary("error"),
