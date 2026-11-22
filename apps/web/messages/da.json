@@ -513,7 +513,6 @@
     },
     "signup": {
       "confirm_password_label": "[EN] Confirm password",
-      "disclaimer": "[EN] The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
       "divider": "[EN] or",
       "email_label": "[EN] Work email",
       "email_placeholder": "[EN] name@company.com",
@@ -540,6 +539,9 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "Én profil til din arbejdserfaring og dine muligheder — i næste trin fortæller du, hvad du kommer for.",
+      "inviteFrom": "{inviter} inviterer dig til at blive en del af {organization}.",
+      "inviteTo": "Du er inviteret til at blive en del af {organization}.",
+      "inviteNext": "Når du tilmelder dig, bliver du en del af {organization}.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Send linket igen",
       "resend_sent": "Sendt igen. Tjek din indbakke og spammappe.",
