@@ -105,6 +105,9 @@ export function OfferCandidatesPanel({ offerId, side }: { offerId: string; side:
                 <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                   {t(`status.${c.status}`)}
                 </span>
+                {side === "supplier" && !c.available && c.status === "offered" ? (
+                  <span className="text-state-amber" data-testid={`offer-candidate-unavailable-${c.candidateId}`}>{t("unavailable")}</span>
+                ) : null}
                 {c.bookingStatus ? (
                   <span className="text-text-secondary">{t.has(`booking.${c.bookingStatus}`) ? t(`booking.${c.bookingStatus}`) : c.bookingStatus}</span>
                 ) : null}

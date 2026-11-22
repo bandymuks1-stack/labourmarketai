@@ -236,8 +236,16 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "matches", key: "worker_id" },
   { table: "agency_candidate_offers", key: "worker_id" },
   // 20261122210000: this person proposed by an agency on a company offer for
-  // an open need (an agency's roster worker) — theirs to see.
-  { table: "team_demand_offer_candidates", key: "worker_id" },
+  // an open need (an agency's roster worker) — theirs to see. The table is
+  // RPC-only (no grant), so it is read through the person's own function,
+  // which derives the subject from auth.uid() and never names the client.
+  {
+    table: "team_demand_offer_candidates",
+    key: "worker_id",
+    rpc: "list_my_offer_candidacies_v1",
+    rlsNote:
+      "Each time an agency whose roster you are on proposed you, without your name, for a company's need: the agency, the role, the status and the dates. The client company is not named here. Until the read function is applied in production this relation is listed as unavailable.",
+  },
   // Requests to disclose THIS person's contact details — theirs above all.
   { table: "contact_disclosure_requests", key: "worker_id" },
   { table: "market_intelligence_insight_queries", key: "profile_id" },

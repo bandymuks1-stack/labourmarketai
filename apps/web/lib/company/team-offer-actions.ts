@@ -14,6 +14,7 @@ import {
   listOfferCandidates,
   selectOfferCandidate,
   withdrawOfferCandidate,
+  listMyOfferCandidacies,
   confirmOfferTerms,
   handOffTeamOffer,
   listOfferCrewOptions,
@@ -33,6 +34,7 @@ import {
   normalizeTermsInput,
   startWorkBlockers,
   type OfferCandidate,
+  type MyOfferCandidacy,
   type OfferProgress,
   type OfferTermsInput,
   type OfferTermsVersion,
@@ -296,6 +298,16 @@ export async function withdrawOfferCandidateAction(input: { candidateId: string 
   const result = await withdrawOfferCandidate(input.candidateId);
   if (result.status === "ok") revalidatePath("/", "layout");
   return result;
+}
+
+export type MyOfferCandidaciesData =
+  | { status: "ok"; rows: readonly MyOfferCandidacy[] }
+  | { status: "needs_migration" | "unavailable" };
+
+/** The worker's own proposals (read under their own session). */
+export async function loadMyOfferCandidaciesAction(): Promise<MyOfferCandidaciesData> {
+  const r = await listMyOfferCandidacies();
+  return r.status === "ok" ? { status: "ok", rows: r.rows } : { status: r.status === "needs_migration" ? "needs_migration" : "unavailable" };
 }
 
 export async function selectOfferCandidateAction(input: { candidateId: string; note?: string | null }) {

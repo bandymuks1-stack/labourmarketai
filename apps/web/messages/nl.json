@@ -13099,7 +13099,8 @@
     "getLink": "Link ophalen",
     "newLink": "Nieuwe link",
     "messageButton": "Bericht",
-    "deliveryAccepted": "Bezorgd — de klant heeft de uitnodiging geaccepteerd en bevestigt de verbinding nu op zijn pagina Partners."
+    "deliveryAccepted": "Bezorgd — de klant heeft de uitnodiging geaccepteerd en bevestigt de verbinding nu op zijn pagina Partners.",
+    "openNeedClient": "Opdrachtgever via een open behoefte (koos uw kandidaat)"
   },
   "clientBridge": {
     "title": "Uitzendbureaus",
@@ -15141,7 +15142,8 @@
       "whatChangedUnavailable": "Ik kon nu niet nagaan wat er veranderde. Uw registraties zijn veilig — probeer het zo opnieuw of open het logboek.",
       "planIntro": "{count, plural, one {Dat is # stap.} other {Dat zijn # stappen, op volgorde. Hier is de eerste — tik op de volgende wanneer u klaar bent.}}",
       "planNextOffer": "Volgende stap:",
-      "planStep": "Stap {n} van {count}"
+      "planStep": "Stap {n} van {count}",
+      "agencyClientOpenNeed": "een opdrachtgever die uw kandidaat koos op een open behoefte"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -19695,7 +19697,10 @@
       "candidate_already_selected": "De klant heeft deze kandidaat al gekozen.",
       "client_company_unknown": "Het bedrijf van de behoefte kon niet worden bepaald.",
       "unit_not_of_company": "Deze ploeg heeft geen lid op de personenlijst van het aanbiedende bedrijf.",
-      "already_started": "Het werk voor dit aanbod is al gestart in een ander project."
+      "already_started": "Het werk voor dit aanbod is al gestart in een ander project.",
+      "worker_not_discoverable": "Deze persoon koos er niet voor zichtbaar te zijn voor bedrijven. Dat kan in de privacy-instellingen worden aangezet.",
+      "candidate_not_available": "Deze kandidaat is niet meer beschikbaar.",
+      "connection_conflict": "De verbinding met dit bureau is intussen gewijzigd. Laad opnieuw en probeer het nog eens."
     },
     "received": {
       "title": "Voor deze vraag aangeboden teams",
@@ -19834,7 +19839,7 @@
     },
     "candidates": {
       "heading": "Voorgestelde kandidaten",
-      "introSupplier": "Stel specifieke mensen uit uw bestand voor. De klant ziet elk van hen zonder naam: ervaring, land, beschikbaarheid, talen en vaardigheden. De naam wordt pas getoond nadat de klant de persoon kiest en die akkoord gaat.",
+      "introSupplier": "Stel specifieke mensen uit uw bestand voor. Alleen mensen die ervoor kozen zichtbaar te zijn voor bedrijven kunnen worden voorgesteld, en ieder ziet op de pagina Boekingen dat u hen voorstelde. De opdrachtgever ziet ieder zonder naam: ervaring, land, beschikbaarheid, talen en vaardigheden. De naam wordt pas getoond nadat de opdrachtgever de persoon kiest en die accepteert.",
       "introReceiver": "Mensen die dit bureau voorstelt, zonder naam of contactgegevens. Als u er een kiest, gaat er een boekingsverzoek naar die persoon; de naam wordt getoond zodra die akkoord gaat. U handelt met het bureau.",
       "experience": "Ervaring",
       "years": "{count, plural, one {# jaar} other {# jaar}}",
@@ -19864,7 +19869,7 @@
       },
       "withdraw": "Intrekken",
       "withdrawn": "Kandidaat ingetrokken.",
-      "selectNote": "Kiezen stuurt een boekingsverzoek naar deze persoon. Het is geen contract.",
+      "selectNote": "Kiezen verbindt uw bedrijf met dit bureau: een blijvende verbinding, die u op de pagina Partners kunt beëindigen. Het stuurt ook een boekingsverzoek naar deze persoon. Het is geen contract.",
       "noteLabel": "Bericht aan de persoon (optioneel)",
       "select": "Deze kandidaat kiezen",
       "selected": "Boekingsverzoek verzonden. De persoon beslist.",
@@ -19872,7 +19877,16 @@
       "addLabel": "Persoon uit uw bestand",
       "addPlaceholder": "Kies een persoon",
       "add": "Deze persoon voorstellen",
-      "added": "Kandidaat voorgesteld."
+      "added": "Kandidaat voorgesteld.",
+      "unavailable": "Niet meer beschikbaar: niet in uw bestand of niet zichtbaar voor bedrijven"
+    },
+    "mine": {
+      "heading": "Bureaus stelden u voor",
+      "intro": "Een bureau in wiens bestand u staat, stelde u zonder naam voor bij de behoefte van een bedrijf. Het bedrijf ziet uw naam alleen als het u kiest en u de boeking accepteert. U kunt vragen om niet voor een behoefte te worden voorgesteld.",
+      "role": "voor: {role}",
+      "since": "voorgesteld op {date}",
+      "withdraw": "Stel mij hiervoor niet voor",
+      "withdrawn": "U wordt niet voor deze behoefte voorgesteld."
     }
   },
   "teamAssignment": {

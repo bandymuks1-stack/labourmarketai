@@ -251,6 +251,11 @@ export type TeamOfferRefusal =
   | "candidate_limit_reached"
   | "candidate_not_open"
   | "candidate_already_selected"
+  /** The worker has not chosen to be visible to companies. */
+  | "worker_not_discoverable"
+  /** The worker left the agency's roster or withdrew their consent. */
+  | "candidate_not_available"
+  | "connection_conflict"
   | "client_company_unknown"
   | "needs_migration"
   | "error";
@@ -289,6 +294,9 @@ const STABLE_WORDS: readonly TeamOfferRefusal[] = [
   "candidate_limit_reached",
   "candidate_not_open",
   "candidate_already_selected",
+  "worker_not_discoverable",
+  "candidate_not_available",
+  "connection_conflict",
   "client_company_unknown",
 ];
 
@@ -516,6 +524,19 @@ export interface OfferCandidate {
   readonly skills: readonly { readonly slug: string; readonly confirmed: boolean }[];
   /** The booking the client's choice proposed to the worker, once chosen. */
   readonly bookingStatus: string | null;
+  /** Still on the agency's active roster AND discoverable by the worker's own
+   *  consent. The client never receives an open candidate that is not. */
+  readonly available: boolean;
+}
+
+/** The worker's own view: one time an agency proposed them (never the client). */
+export interface MyOfferCandidacy {
+  readonly candidateId: string;
+  readonly agencyName: string;
+  readonly role: string | null;
+  readonly status: "offered" | "withdrawn" | "selected";
+  readonly createdAt: string;
+  readonly bookingStatus: string | null;
 }
 
 const CANDIDATE_STATUSES = new Set(["offered", "withdrawn", "selected"]);
@@ -535,6 +556,22 @@ export function parseOfferCandidate(raw: unknown): OfferCandidate | null {
     availableFrom: str(raw.available_from),
     languages: arr(raw.languages).flatMap((l) => (str(l.lang) ? [{ lang: str(l.lang)!, level: str(l.level) }] : [])),
     skills: arr(raw.skills).flatMap((k) => (str(k.slug) ? [{ slug: str(k.slug)!, confirmed: k.confirmed === true }] : [])),
+    bookingStatus: str(raw.booking_status),
+    available: raw.available !== false,
+  };
+}
+
+export function parseMyOfferCandidacy(raw: unknown): MyOfferCandidacy | null {
+  if (!isRow(raw)) return null;
+  const candidateId = str(raw.candidate_id);
+  const createdAt = str(raw.created_at);
+  if (!candidateId || !createdAt || typeof raw.status !== "string" || !CANDIDATE_STATUSES.has(raw.status)) return null;
+  return {
+    candidateId,
+    agencyName: str(raw.agency_name) ?? "-",
+    role: str(raw.role),
+    status: raw.status as MyOfferCandidacy["status"],
+    createdAt,
     bookingStatus: str(raw.booking_status),
   };
 }

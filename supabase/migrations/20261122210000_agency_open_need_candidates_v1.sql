@@ -19,10 +19,21 @@
 -- WHAT (additive; NO existing function, policy or grant is changed)
 --   1. team_demand_offer_candidates — workers an agency attaches to ITS
 --      company offer on an open need. RLS forced, no policy, no grant.
---   2. add_offer_candidate_v1(offer, worker) — the supplier side of a
---      company offer made by an AGENCY; the worker must be on that agency's
---      ACTIVE roster; at most 10 open candidates per offer.
---   3. withdraw_offer_candidate_v1(candidate) — the supplier side.
+--   2. add_offer_candidate_v1(offer, worker) — the OWNER of the agency
+--      company (owns_company, the same authority as the existing
+--      submit_agency_candidate_offer_v1) on a company offer made by an
+--      AGENCY. The worker must be on that agency's ACTIVE roster AND have
+--      chosen to be discoverable to companies (worker_profile_discoverable:
+--      the person's own current consent, paused while an account deletion
+--      is open). Roster membership alone is NOT consent to be shown to a
+--      company the worker has no relationship with. At most 10 open
+--      candidates per offer.
+--   3. withdraw_offer_candidate_v1(candidate) — the agency's owner, OR the
+--      worker themself ("do not propose me").
+--   3a. list_my_offer_candidacies_v1() — the worker: every time an agency
+--      proposed them (agency, the need's role, status, dates). This is the
+--      worker's notice in the product (shown on their Bookings page) and the
+--      privacy export's read for this table. The client is never named here.
 --   4. list_offer_candidates_v1(offer) — either party:
 --        supplier: its own roster worker's display name (already its own);
 --        receiver: a pseudonym ('Candidate ' + 6 chars of the candidate id)
@@ -30,12 +41,21 @@
 --                  country, availability, languages (code + level), skills
 --                  (catalogue slug + confirmed flag). No name, photo, bio,
 --                  headline, contact, document or worker id.
+--      Every read re-checks that the worker is still on the agency's active
+--      roster and still discoverable, and that the offer is still open: a
+--      worker who left the agency or withdrew consent disappears from the
+--      client's list (the agency still sees the row, marked unavailable).
 --   5. select_offer_candidate_v1(candidate, note) — the CLIENT (the need's
---      receiver) chooses one candidate. Its own act is the consent to work
---      with this agency on THIS need: the existing agency↔client connection
---      (or a new active one, accepted by the client) and the existing need
---      share are used, the candidate becomes a standard agency_candidate_
---      offers row, and the EXISTING accept path (respond_agency_candidate_
+--      receiver) chooses one candidate, re-checked as above. Choosing
+--      CONNECTS the client company with the agency — a standing connection
+--      (the existing agency↔client connection, or a new active one accepted
+--      by the client now), which the client can end on its Partners page;
+--      the copy says so before the click. The new connection carries NO
+--      person's e-mail: invited_email is NOT NULL on that table (an invite
+--      field), so it holds a non-routable marker
+--      (open-need+<client id>@connection.invalid, RFC 2606), never the
+--      client user's login address. The existing need share is used, the
+--      candidate becomes a standard agency_candidate_offers row, and the EXISTING accept path (respond_agency_candidate_
 --      offer_v1) proposes the booking to the worker. From there the canonical
 --      chain is unchanged: the worker accepts or declines the booking, an
 --      accepted booking starts the engagement, and only then is the worker
@@ -103,10 +123,35 @@ revoke all on function public.offer_agency_company_v1(uuid) from public;
 revoke all on function public.offer_agency_company_v1(uuid) from anon;
 revoke all on function public.offer_agency_company_v1(uuid) from authenticated;
 
+-- Whether a worker may be shown to a company with no relationship, as the
+-- agency's candidate: still on the agency's ACTIVE roster, and discoverable
+-- by their own current consent. Internal (no grant).
+create or replace function public.offer_candidate_available_v1(p_agency_company_id uuid, p_worker_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce((
+    select true
+      from public.company_workers cw
+      join public.workers w on w.id = cw.worker_id
+     where cw.company_id = p_agency_company_id
+       and cw.worker_id = p_worker_id
+       and cw.status = 'active'
+       and w.profile_id is not null
+       and public.worker_profile_discoverable(w.profile_id)
+     limit 1), false)
+$$;
+revoke all on function public.offer_candidate_available_v1(uuid, uuid) from public;
+revoke all on function public.offer_candidate_available_v1(uuid, uuid) from anon;
+revoke all on function public.offer_candidate_available_v1(uuid, uuid) from authenticated;
+
 -- ── add ──────────────────────────────────────────────────────────────────
 -- Returns jsonb {outcome: 'added' | 'already_added', candidate_id}.
 -- Refusals (22023): not_an_agency_offer | offer_not_open | worker_not_on_roster
--- | candidate_limit_reached.
+-- | worker_not_discoverable | candidate_limit_reached.
 create or replace function public.add_offer_candidate_v1(
   p_offer_id  uuid,
   p_worker_id uuid
@@ -126,11 +171,22 @@ begin
   end if;
   select t.id, t.status, t.offer_kind, t.team_org_id into o
     from public.team_demand_offers t where t.id = p_offer_id for update;
-  if not found or public.team_offer_party_side_v1(o.id) is distinct from 'supplier' then
+  if not found then
     raise exception 'Not authorized to propose candidates on this offer' using errcode = '42501';
   end if;
   v_agency := public.offer_agency_company_v1(o.team_org_id);
-  if o.offer_kind <> 'organization' or v_agency is null then
+  if v_agency is null then
+    -- Not an agency's offer: its own supplier is told so; anyone else learns nothing.
+    if public.team_offer_party_side_v1(o.id) is distinct from 'supplier' then
+      raise exception 'Not authorized to propose candidates on this offer' using errcode = '42501';
+    end if;
+    raise exception 'not_an_agency_offer' using errcode = '22023';
+  end if;
+  -- The same authority as submit_agency_candidate_offer_v1: the agency's owner.
+  if not public.owns_company(v_agency) then
+    raise exception 'Not authorized to propose candidates on this offer' using errcode = '42501';
+  end if;
+  if o.offer_kind <> 'organization' then
     raise exception 'not_an_agency_offer' using errcode = '22023';
   end if;
   if o.status not in ('offered', 'accepted') then
@@ -141,6 +197,11 @@ begin
        select 1 from public.company_workers cw
         where cw.company_id = v_agency and cw.worker_id = p_worker_id and cw.status = 'active') then
     raise exception 'worker_not_on_roster' using errcode = '22023';
+  end if;
+  -- Roster membership is not consent to be shown to a stranger: the worker's
+  -- own discoverability choice is.
+  if not public.offer_candidate_available_v1(v_agency, p_worker_id) then
+    raise exception 'worker_not_discoverable' using errcode = '22023';
   end if;
 
   select c.id into v_id from public.team_demand_offer_candidates c
@@ -172,15 +233,26 @@ security definer
 set search_path = public
 as $$
 declare
-  uid uuid := auth.uid();
-  c   record;
+  uid  uuid := auth.uid();
+  c    record;
+  v_by text;
 begin
   if uid is null then
     raise exception 'Not authenticated' using errcode = '42501';
   end if;
-  select k.id, k.offer_id, k.status into c
-    from public.team_demand_offer_candidates k where k.id = p_candidate_id for update;
-  if not found or public.team_offer_party_side_v1(c.offer_id) is distinct from 'supplier' then
+  select k.id, k.offer_id, k.status, k.worker_id, t.team_org_id into c
+    from public.team_demand_offer_candidates k
+    join public.team_demand_offers t on t.id = k.offer_id
+   where k.id = p_candidate_id for update of k;
+  if not found then
+    raise exception 'Not authorized to withdraw this candidate' using errcode = '42501';
+  end if;
+  -- The agency's owner, or the worker themself.
+  if exists (select 1 from public.workers w where w.id = c.worker_id and w.profile_id = uid) then
+    v_by := 'worker';
+  elsif public.owns_company(public.offer_agency_company_v1(c.team_org_id)) then
+    v_by := 'agency';
+  else
     raise exception 'Not authorized to withdraw this candidate' using errcode = '42501';
   end if;
   if c.status = 'withdrawn' then
@@ -194,8 +266,55 @@ begin
      set status = 'withdrawn', withdrawn_at = now() where id = c.id;
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
   values (uid, 'offer_candidate_withdrawn_v1', 'team_demand_offers', c.offer_id,
-    jsonb_build_object('candidate_id', c.id));
+    jsonb_build_object('candidate_id', c.id, 'by', v_by));
   return 'withdrawn';
+end;
+$$;
+
+-- ── the worker's own: every proposal of them ─────────────────────────────
+create or replace function public.list_my_offer_candidacies_v1()
+returns table (
+  candidate_id   uuid,
+  agency_name    text,
+  role           text,
+  status         text,
+  created_at     timestamptz,
+  withdrawn_at   timestamptz,
+  selected_at    timestamptz,
+  booking_status text
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  -- The worker's own rows only; the agency is the worker's own (its roster);
+  -- the client is never named — the need's role only.
+  return query
+  select k.id,
+         coalesce(nullif(btrim(co.display_name), ''), nullif(btrim(co.legal_name), ''), '-'),
+         -- The need's own public heading (what agencies already read on the
+         -- open board), else its role.
+         coalesce(nullif(btrim(cr.title), ''), nullif(btrim(cr.role_or_work_type), '')),
+         k.status,
+         k.created_at,
+         k.withdrawn_at,
+         k.selected_at,
+         (select b.status from public.booking_requests b
+            join public.agency_candidate_offers a on a.booking_id = b.id
+           where a.id = k.candidate_offer_id)
+    from public.team_demand_offer_candidates k
+    join public.workers w on w.id = k.worker_id and w.profile_id = auth.uid()
+    join public.team_demand_offers t on t.id = k.offer_id
+    left join public.organizations g on g.id = t.team_org_id
+    left join public.companies co on co.id = g.legacy_company_id
+    left join public.customer_requests cr on cr.id = t.request_id
+   order by k.created_at desc
+   limit 200;
 end;
 $$;
 
@@ -213,7 +332,8 @@ create or replace function public.list_offer_candidates_v1(
   languages          jsonb,
   skills             jsonb,
   booking_status     text,
-  created_at         timestamptz
+  created_at         timestamptz,
+  available          boolean
 )
 language plpgsql
 stable
@@ -221,13 +341,22 @@ security definer
 set search_path = public
 as $$
 declare
-  v_side text;
+  v_side   text;
+  v_agency uuid;
+  v_open   boolean;
 begin
   if auth.uid() is null then
     raise exception 'Not authenticated' using errcode = '42501';
   end if;
   v_side := public.team_offer_party_side_v1(p_offer_id);
   if v_side is null then
+    return;
+  end if;
+  select public.offer_agency_company_v1(t.team_org_id), t.status in ('offered', 'accepted')
+    into v_agency, v_open
+    from public.team_demand_offers t where t.id = p_offer_id;
+  -- The supplier side is the agency's owner (the add/withdraw authority).
+  if v_agency is null or (v_side = 'supplier' and not public.owns_company(v_agency)) then
     return;
   end if;
   return query
@@ -249,11 +378,17 @@ begin
          (select b.status from public.booking_requests b
             join public.agency_candidate_offers a on a.booking_id = b.id
            where a.id = k.candidate_offer_id),
-         k.created_at
+         k.created_at,
+         public.offer_candidate_available_v1(v_agency, k.worker_id)
     from public.team_demand_offer_candidates k
     join public.workers w on w.id = k.worker_id
    where k.offer_id = p_offer_id
-     and (v_side = 'supplier' or k.status <> 'withdrawn')
+     and (v_side = 'supplier'
+          -- The client: never a withdrawn row; an OPEN candidate only while
+          -- the offer is open and the worker is still the agency's and still
+          -- discoverable. A chosen one stays (its booking is under way).
+          or k.status = 'selected'
+          or (k.status = 'offered' and v_open and public.offer_candidate_available_v1(v_agency, k.worker_id)))
    order by k.created_at
    limit 50;
 end;
@@ -261,8 +396,9 @@ $$;
 
 -- ── select (the client) ──────────────────────────────────────────────────
 -- Returns jsonb {outcome: 'selected' | 'already_selected', candidate_offer_id,
--- booking_id}. Refusals (22023): candidate_not_open | demand_closed |
--- client_company_unknown | not_an_agency_offer; and every refusal of the
+-- booking_id}. Refusals (22023): candidate_not_open | candidate_not_available
+-- | demand_closed | client_company_unknown | not_an_agency_offer |
+-- connection_conflict; and every refusal of the
 -- existing booking path (propose_booking_request_v3) unchanged.
 create or replace function public.select_offer_candidate_v1(
   p_candidate_id uuid,
@@ -279,7 +415,6 @@ declare
   r         record;
   v_agency  uuid;
   v_client  uuid;
-  v_email   text;
   v_conn    uuid;
   v_share   uuid;
   v_aco     uuid;
@@ -311,6 +446,10 @@ begin
   if v_agency is null then
     raise exception 'not_an_agency_offer' using errcode = '22023';
   end if;
+  -- Still the agency's worker, still discoverable by their own choice.
+  if not public.offer_candidate_available_v1(v_agency, c.worker_id) then
+    raise exception 'candidate_not_available' using errcode = '22023';
+  end if;
   select cr.id, cr.status, cr.organization_id, cr.profile_id into r
     from public.customer_requests cr where cr.id = o.request_id;
   if r.status <> 'submitted' then
@@ -321,21 +460,37 @@ begin
     raise exception 'client_company_unknown' using errcode = '22023';
   end if;
 
-  -- The client's own choice is its consent to work with this agency on
-  -- THIS need: the existing active connection, or a new one it accepts now.
+  -- The client's own choice is its consent to a STANDING connection with
+  -- this agency (the copy says so; it is ended on the Partners page): the
+  -- existing active connection, or a new one it accepts now. The new row
+  -- carries no person's e-mail — a non-routable marker (RFC 2606 .invalid)
+  -- fills the NOT NULL invite field; no login address is ever copied.
   select ac.id into v_conn
     from public.agency_client_connections ac
    where ac.agency_company_id = v_agency and ac.client_company_id = v_client and ac.status = 'active'
    limit 1;
   if v_conn is null then
-    select lower(u.email) into v_email from auth.users u where u.id = uid;
-    insert into public.agency_client_connections
-        (agency_company_id, client_company_id, invited_email, status, invited_by, accepted_by, accepted_at)
-      values (v_agency, v_client, v_email, 'active', coalesce(o.offered_by, uid), uid, now())
-    returning id into v_conn;
-    insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
-    values (uid, 'agency_client_connection_from_open_need_v1', 'agency_client_connections', v_conn,
-      jsonb_build_object('offer_id', o.id, 'candidate_id', c.id, 'request_id', r.id));
+    begin
+      insert into public.agency_client_connections
+          (agency_company_id, client_company_id, invited_email, status, invited_by, accepted_by, accepted_at)
+        values (v_agency, v_client,
+                'open-need+' || replace(v_client::text, '-', '') || '@connection.invalid',
+                'active', coalesce(o.offered_by, uid), uid, now())
+      returning id into v_conn;
+      insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+      values (uid, 'agency_client_connection_from_open_need_v1', 'agency_client_connections', v_conn,
+        jsonb_build_object('offer_id', o.id, 'candidate_id', c.id, 'request_id', r.id));
+    exception when unique_violation then
+      -- A connection was made meanwhile (another choice, or an invite the
+      -- client accepted): use it; never surface the raw 23505.
+      select ac.id into v_conn
+        from public.agency_client_connections ac
+       where ac.agency_company_id = v_agency and ac.client_company_id = v_client and ac.status = 'active'
+       limit 1;
+      if v_conn is null then
+        raise exception 'connection_conflict' using errcode = '22023';
+      end if;
+    end;
   end if;
   select s.id into v_share
     from public.agency_client_request_shares s
@@ -377,6 +532,9 @@ grant execute on function public.add_offer_candidate_v1(uuid, uuid) to authentic
 revoke all on function public.withdraw_offer_candidate_v1(uuid) from public;
 revoke all on function public.withdraw_offer_candidate_v1(uuid) from anon;
 grant execute on function public.withdraw_offer_candidate_v1(uuid) to authenticated;
+revoke all on function public.list_my_offer_candidacies_v1() from public;
+revoke all on function public.list_my_offer_candidacies_v1() from anon;
+grant execute on function public.list_my_offer_candidacies_v1() to authenticated;
 revoke all on function public.list_offer_candidates_v1(uuid) from public;
 revoke all on function public.list_offer_candidates_v1(uuid) from anon;
 grant execute on function public.list_offer_candidates_v1(uuid) to authenticated;

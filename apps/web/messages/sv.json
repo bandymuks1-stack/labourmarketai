@@ -13099,7 +13099,8 @@
     "getLink": "Hämta länk",
     "newLink": "Ny länk",
     "messageButton": "Meddelande",
-    "deliveryAccepted": "Levererad – kunden accepterade inbjudan och bekräftar nu kopplingen på sin sida Partner."
+    "deliveryAccepted": "Levererad – kunden accepterade inbjudan och bekräftar nu kopplingen på sin sida Partner.",
+    "openNeedClient": "Beställare från ett öppet behov (valde er kandidat)"
   },
   "clientBridge": {
     "title": "Bemanningsföretag",
@@ -15141,7 +15142,8 @@
       "whatChangedUnavailable": "Jag kunde inte kontrollera vad som ändrades just nu. Dina registreringar är säkra – försök igen om en stund eller öppna journalen.",
       "planIntro": "{count, plural, one {Det är # steg.} other {Det är # steg, i ordning. Här är det första – tryck på nästa när du är redo.}}",
       "planNextOffer": "Nästa steg:",
-      "planStep": "Steg {n} av {count}"
+      "planStep": "Steg {n} av {count}",
+      "agencyClientOpenNeed": "en beställare som valde er kandidat på ett öppet behov"
     },
     "worklog": {
       "understood": "Så här uppfattade jag det – spara?",
@@ -19695,7 +19697,10 @@
       "candidate_already_selected": "Kunden har redan valt den här kandidaten.",
       "client_company_unknown": "Behovets företag kunde inte fastställas.",
       "unit_not_of_company": "Det här arbetslaget har ingen medlem på det erbjudande företagets personlista.",
-      "already_started": "Arbetet med det här erbjudandet har redan startat i ett annat projekt."
+      "already_started": "Arbetet med det här erbjudandet har redan startat i ett annat projekt.",
+      "worker_not_discoverable": "Den här personen har inte valt att vara synlig för företag. Det kan slås på i personens integritetsinställningar.",
+      "candidate_not_available": "Den här kandidaten är inte längre tillgänglig.",
+      "connection_conflict": "Kopplingen till den här bemanningsfirman ändrades under tiden. Ladda om och försök igen."
     },
     "received": {
       "title": "Team som erbjudits för det här behovet",
@@ -19834,7 +19839,7 @@
     },
     "candidates": {
       "heading": "Föreslagna kandidater",
-      "introSupplier": "Föreslå specifika personer från er lista. Kunden ser var och en utan namn: erfarenhet, land, tillgänglighet, språk och färdigheter. Namnet visas först när kunden väljer personen och personen tackar ja.",
+      "introSupplier": "Föreslå specifika personer från er personlista. Bara personer som valt att vara synliga för företag kan föreslås, och var och en ser på sin sida Bokningar att ni föreslog dem. Beställaren ser var och en utan namn: erfarenhet, land, tillgänglighet, språk och färdigheter. Namnet visas först när beställaren väljer personen och personen tackar ja.",
       "introReceiver": "Personer som byrån föreslår, utan namn eller kontaktuppgifter. Väljer ni en går en bokningsförfrågan till den personen; namnet visas när personen tackar ja. Ni har kontakt med byrån.",
       "experience": "Erfarenhet",
       "years": "{count, plural, one {# år} other {# år}}",
@@ -19864,7 +19869,7 @@
       },
       "withdraw": "Återkalla",
       "withdrawn": "Kandidaten återkallad.",
-      "selectNote": "Valet skickar en bokningsförfrågan till personen. Det är inget avtal.",
+      "selectNote": "Att välja kopplar ert företag till den här bemanningsfirman: en bestående koppling som ni kan avsluta på sidan Partner. Det skickar också en bokningsförfrågan till personen. Det är inget avtal.",
       "noteLabel": "Meddelande till personen (valfritt)",
       "select": "Välj denna kandidat",
       "selected": "Bokningsförfrågan skickad. Personen bestämmer.",
@@ -19872,7 +19877,16 @@
       "addLabel": "Person från er lista",
       "addPlaceholder": "Välj en person",
       "add": "Föreslå denna person",
-      "added": "Kandidaten föreslagen."
+      "added": "Kandidaten föreslagen.",
+      "unavailable": "Inte längre tillgänglig: inte på er personlista eller inte synlig för företag"
+    },
+    "mine": {
+      "heading": "Bemanningsfirmor föreslog dig",
+      "intro": "En bemanningsfirma vars personlista du finns på föreslog dig, utan namn, för ett företags behov. Företaget ser ditt namn bara om det väljer dig och du tackar ja till bokningen. Du kan be att inte föreslås för ett behov.",
+      "role": "för: {role}",
+      "since": "föreslagen {date}",
+      "withdraw": "Föreslå mig inte för detta",
+      "withdrawn": "Du föreslås inte för det här behovet."
     }
   },
   "teamAssignment": {

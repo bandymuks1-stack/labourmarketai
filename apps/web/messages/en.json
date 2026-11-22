@@ -13099,7 +13099,8 @@
     "getLink": "Get link",
     "newLink": "New link",
     "messageButton": "Message",
-    "deliveryAccepted": "Delivered — the client accepted the invitation and now confirms the connection on their Partners page."
+    "deliveryAccepted": "Delivered — the client accepted the invitation and now confirms the connection on their Partners page.",
+    "openNeedClient": "Client from an open need (chose your candidate)"
   },
   "clientBridge": {
     "title": "Staffing agencies",
@@ -15141,7 +15142,8 @@
       "whatChangedUnavailable": "I couldn't check what changed right now. Your records are safe; try again in a moment or open the journal.",
       "planIntro": "{count, plural, one {That is # step.} other {That is # steps, in order. Here is the first — tap the next one when you are ready.}}",
       "planNextOffer": "Next step:",
-      "planStep": "Step {n} of {count}"
+      "planStep": "Step {n} of {count}",
+      "agencyClientOpenNeed": "a client who chose your candidate on an open need"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -19695,7 +19697,10 @@
       "candidate_already_selected": "The client has already chosen this candidate.",
       "client_company_unknown": "The need's company could not be identified.",
       "unit_not_of_company": "This crew has no member on the offering company's people list.",
-      "already_started": "The work on this offer has already started on another project."
+      "already_started": "The work on this offer has already started on another project.",
+      "worker_not_discoverable": "This person has not chosen to be visible to companies. They can turn it on in their privacy settings.",
+      "candidate_not_available": "This candidate is no longer available.",
+      "connection_conflict": "The connection with this agency changed meanwhile. Reload and try again."
     },
     "received": {
       "title": "Teams offered for this need",
@@ -19834,7 +19839,7 @@
     },
     "candidates": {
       "heading": "Named candidates",
-      "introSupplier": "Propose specific people from your roster. The client sees each one without a name: experience, country, availability, languages and skills. The name is shown only after the client chooses the person and the person accepts.",
+      "introSupplier": "Propose specific people from your roster. Only people who chose to be visible to companies can be proposed, and each one sees on their Bookings page that you proposed them. The client sees each one without a name: experience, country, availability, languages and skills. The name is shown only after the client chooses the person and the person accepts.",
       "introReceiver": "People this agency proposes, shown without a name or contact. Choosing one sends a booking request to that person; the name is shown once they accept. You deal with the agency.",
       "experience": "Experience",
       "years": "{count, plural, one {# year} other {# years}}",
@@ -19864,7 +19869,7 @@
       },
       "withdraw": "Withdraw",
       "withdrawn": "Candidate withdrawn.",
-      "selectNote": "Choosing sends a booking request to this person. It is not a contract.",
+      "selectNote": "Choosing connects your company with this agency: a lasting connection, which you can end on the Partners page. It also sends a booking request to this person. It is not a contract.",
       "noteLabel": "Note to the person (optional)",
       "select": "Choose this candidate",
       "selected": "Booking request sent. The person decides.",
@@ -19872,7 +19877,16 @@
       "addLabel": "Person from your roster",
       "addPlaceholder": "Choose a person",
       "add": "Propose this person",
-      "added": "Candidate proposed."
+      "added": "Candidate proposed.",
+      "unavailable": "No longer available: not on your roster or not visible to companies"
+    },
+    "mine": {
+      "heading": "Agencies proposed you",
+      "intro": "An agency whose roster you are on proposed you, without your name, for a company's need. The company sees your name only if it chooses you and you accept the booking. You can ask not to be proposed for a need.",
+      "role": "for: {role}",
+      "since": "proposed on {date}",
+      "withdraw": "Do not propose me for this",
+      "withdrawn": "You will not be proposed for this need."
     }
   },
   "teamAssignment": {

@@ -26,6 +26,16 @@ export type OfferReviewStage =
   | "booking_started"
   | "accepted";
 
+/**
+ * A connection made when a client CHOSE an agency's candidate on an open need
+ * (20261122210000) carries no person's e-mail: its NOT NULL invite field holds
+ * a non-routable marker (RFC 2606 `.invalid`). Show a label, never the marker.
+ */
+export const OPEN_NEED_CONNECTION_MARKER = /^open-need\+[0-9a-f]{32}@connection\.invalid$/i;
+export function isOpenNeedConnection(invitedEmail: string): boolean {
+  return OPEN_NEED_CONNECTION_MARKER.test(invitedEmail.trim());
+}
+
 export interface AgencyConnection {
   readonly id: string;
   readonly agencyCompanyId: string;

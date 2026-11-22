@@ -27,12 +27,19 @@ function fnBlock(name: string): string {
   expect(m, `${name} not found`).toBeTruthy();
   return m![0];
 }
-const PUBLIC_FNS = ["add_offer_candidate_v1", "withdraw_offer_candidate_v1", "list_offer_candidates_v1", "select_offer_candidate_v1"];
+const PUBLIC_FNS = [
+  "add_offer_candidate_v1",
+  "withdraw_offer_candidate_v1",
+  "list_offer_candidates_v1",
+  "list_my_offer_candidacies_v1",
+  "select_offer_candidate_v1",
+];
+const INTERNAL_FNS = ["offer_agency_company_v1", "offer_candidate_available_v1"];
 
 describe("migration: additive and RPC-only", () => {
   it("replaces no existing function; defines exactly the internal helper and four RPCs", () => {
     const defined = [...code(UP).matchAll(/create or replace function public\.(\w+)\(/g)].map((m) => m[1]).sort();
-    expect(defined).toEqual(["offer_agency_company_v1", ...PUBLIC_FNS].sort());
+    expect(defined).toEqual([...INTERNAL_FNS, ...PUBLIC_FNS].sort());
     expect(code(UP)).not.toMatch(/\b(create|drop|alter) policy\b/i);
   });
   it("the table is RPC-only: RLS forced, no policy, nothing granted", () => {
@@ -40,7 +47,7 @@ describe("migration: additive and RPC-only", () => {
     expect(UP).toMatch(/revoke all on public\.team_demand_offer_candidates from public, anon, authenticated;/);
     expect(code(UP)).not.toMatch(/grant\s+(select|insert|update|delete)/i);
   });
-  it("four RPCs for signed-in callers; the helper for nobody", () => {
+  it("the RPCs for signed-in callers; the helpers for nobody", () => {
     for (const fn of PUBLIC_FNS) {
       expect(fnBlock(fn), fn).toMatch(/security definer/);
       expect(fnBlock(fn), fn).toMatch(/raise exception 'Not authenticated' using errcode = '42501'/);
@@ -48,7 +55,8 @@ describe("migration: additive and RPC-only", () => {
       expect(UP).toMatch(new RegExp(`grant execute on function public\\.${fn}\\([^)]*\\) to authenticated;`));
     }
     expect(UP).toMatch(/revoke all on function public\.offer_agency_company_v1\(uuid\) from authenticated;/);
-    expect(code(UP)).not.toMatch(/grant execute on function public\.offer_agency_company_v1/);
+    expect(UP).toMatch(/revoke all on function public\.offer_candidate_available_v1\(uuid, uuid\) from authenticated;/);
+    for (const fn of INTERNAL_FNS) expect(code(UP)).not.toMatch(new RegExp(`grant execute on function public\\.${fn}`));
   });
   it("is an agency by the ONE capability rule (ORG-2), never a company_type comparison", () => {
     expect(fnBlock("offer_agency_company_v1")).toMatch(/public\.company_acts_as_agency\(o\.legacy_company_id\)/);
@@ -57,10 +65,27 @@ describe("migration: additive and RPC-only", () => {
 });
 
 describe("the agency proposes only its own people, on its own offer", () => {
-  it("only the supplier side of a company offer made by an agency", () => {
+  it("only the agency's OWNER — the same authority as submit_agency_candidate_offer_v1 (R3 #3651-3)", () => {
     const add = fnBlock("add_offer_candidate_v1");
-    expect(add).toMatch(/team_offer_party_side_v1\(o\.id\) is distinct from 'supplier'/);
+    expect(add).toMatch(/if not public\.owns_company\(v_agency\) then\s+raise exception 'Not authorized to propose candidates on this offer' using errcode = '42501'/);
     expect(add).toMatch(/raise exception 'not_an_agency_offer'/);
+    const wd = fnBlock("withdraw_offer_candidate_v1");
+    expect(wd).toMatch(/elsif public\.owns_company\(public\.offer_agency_company_v1\(c\.team_org_id\)\) then/);
+    expect(code(fnBlock("add_offer_candidate_v1"))).not.toMatch(/manages_organization/);
+  });
+  it("roster membership is NOT consent: the worker's own discoverability choice is (R3 #3651-2)", () => {
+    const avail = fnBlock("offer_candidate_available_v1");
+    expect(avail).toMatch(/cw\.status = 'active'/);
+    expect(avail).toMatch(/public\.worker_profile_discoverable\(w\.profile_id\)/);
+    expect(fnBlock("add_offer_candidate_v1")).toMatch(/if not public\.offer_candidate_available_v1\(v_agency, p_worker_id\) then\s+raise exception 'worker_not_discoverable'/);
+  });
+  it("the worker is told, and may say no: their own list and their own withdraw", () => {
+    const mine = fnBlock("list_my_offer_candidacies_v1");
+    expect(mine).toMatch(/join public\.workers w on w\.id = k\.worker_id and w\.profile_id = auth\.uid\(\)/);
+    // The client is never named to the worker: only the need's role.
+    expect(mine).not.toMatch(/demand_company_id|client_company|cr\.organization_id|cr\.profile_id/);
+    expect(fnBlock("withdraw_offer_candidate_v1")).toMatch(/w\.id = c\.worker_id and w\.profile_id = uid\) then\s+v_by := 'worker'/);
+    expect(read(join(WEB, "app/[locale]/dashboard/bookings/page.tsx"))).toMatch(/<MyOfferCandidacies \/>/);
   });
   it("only a worker on that agency's ACTIVE roster; at most 10 open candidates", () => {
     const add = fnBlock("add_offer_candidate_v1");
@@ -84,6 +109,39 @@ describe("the client reads a pseudonym and facts — never identity", () => {
   });
   it("either party only; an agency never reads another agency's offer", () => {
     expect(list()).toMatch(/v_side := public\.team_offer_party_side_v1\(p_offer_id\);\s+if v_side is null then\s+return;/);
+  });
+});
+
+describe("every read and the choice re-check the roster, the consent and the offer (R3 #3651-4)", () => {
+  it("the client never receives an open candidate who left the agency or withdrew consent", () => {
+    const list = fnBlock("list_offer_candidates_v1");
+    expect(list).toMatch(/k\.status = 'offered' and v_open and public\.offer_candidate_available_v1\(v_agency, k\.worker_id\)/);
+    expect(list).toMatch(/v_side = 'supplier' and not public\.owns_company\(v_agency\)/);
+  });
+  it("choosing refuses a candidate who is no longer available", () => {
+    expect(fnBlock("select_offer_candidate_v1")).toMatch(/if not public\.offer_candidate_available_v1\(v_agency, c\.worker_id\) then\s+raise exception 'candidate_not_available'/);
+  });
+});
+
+describe("no person's e-mail reaches the agency (R3 #3651-1) and no raw error (R3 #3651-6)", () => {
+  const sel = () => fnBlock("select_offer_candidate_v1");
+  it("never reads a login address; the NOT NULL invite field holds a non-routable marker", () => {
+    expect(code(UP)).not.toMatch(/auth\.users|auth\.jwt|\.email\b/);
+    expect(sel()).toMatch(/'open-need\+' \|\| replace\(v_client::text, '-', ''\) \|\| '@connection\.invalid'/);
+  });
+  it("a concurrent connection is used, never a raw unique violation", () => {
+    expect(sel()).toMatch(/exception when unique_violation then/);
+    expect(sel()).toMatch(/raise exception 'connection_conflict'/);
+  });
+  it("the app labels such a connection; the marker is never shown", () => {
+    const model = read(join(WEB, "lib/agency/bridge-model.ts"));
+    expect(model).toMatch(/OPEN_NEED_CONNECTION_MARKER = \/\^open-need\\\+\[0-9a-f\]\{32\}@connection\\\.invalid\$\/i/);
+    expect(read(join(WEB, "components/app/agency-bridge-section.tsx"))).toMatch(/isOpenNeedConnection\(c\.invitedEmail\) \? labels\.openNeedClient : c\.invitedEmail/);
+    expect(read(join(WEB, "components/app/conversation/chat/conversation-chat.tsx"))).toMatch(/isOpenNeedConnection\(c\.invitedEmail\) \? labels\.agencyClientOpenNeed : c\.invitedEmail/);
+  });
+  it("the copy says the connection is a standing one, before the click (R3 #3651-5)", () => {
+    const en = JSON.parse(read(join(WEB, "messages", "en.json"))) as { teamDemandOffer: { candidates: { selectNote: string } } };
+    expect(en.teamDemandOffer.candidates.selectNote).toMatch(/lasting connection, which you can end on the Partners page/);
   });
 });
 
@@ -111,15 +169,18 @@ describe("the client's choice reuses the existing chain; the worker decides", ()
 
 describe("rollback and privacy", () => {
   it("refuses while any candidate exists; drops only what was added", () => {
+    for (const fn of [...INTERNAL_FNS, ...PUBLIC_FNS]) expect(DOWN).toMatch(new RegExp(`drop function if exists public\\.${fn}\\(`));
     expect(DOWN).toMatch(/offer candidates exist - forward-fix/);
     expect(DOWN).toMatch(/drop table if exists public\.team_demand_offer_candidates;/);
     expect(DOWN).not.toMatch(/create or replace function/);
+  });
+  it("the worker's export reads the table through their own function (R3 #3651-7)", () => {
+    expect(read(join(WEB, "lib/privacy/personal-relations.ts"))).toMatch(/table: "team_demand_offer_candidates",\s+key: "worker_id",\s+rpc: "list_my_offer_candidacies_v1"/);
   });
   it("the person references are in the erasure registry and the worker's export", () => {
     expect(UP).toMatch(/'team_demand_offer_candidates', 'worker_id', 'workers', 'cascade', 'allow_cascade'/);
     expect(UP).toMatch(/'team_demand_offer_candidates', 'added_by', 'profiles', 'set null', 'set_null'/);
     expect(UP).toMatch(/'team_demand_offer_candidates', 'selected_by', 'profiles', 'set null', 'set_null'/);
-    expect(read(join(WEB, "lib/privacy/personal-relations.ts"))).toMatch(/\{ table: "team_demand_offer_candidates", key: "worker_id" \}/);
   });
 });
 

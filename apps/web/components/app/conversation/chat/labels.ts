@@ -194,6 +194,7 @@ const CHAT_KEYS = [
   // Connected clients, labelled as the partners page labels them.
   "agencyClientsLine",
   "agencyClientActive",
+  "agencyClientOpenNeed",
   "agencyClientPending",
   "agencyClientDemandNone",
   "agencyProposalsIntro",

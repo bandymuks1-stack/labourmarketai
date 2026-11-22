@@ -20,6 +20,8 @@ import {
   parseTermsVersion,
   parseOfferProgress,
   parseOfferCandidate,
+  parseMyOfferCandidacy,
+  type MyOfferCandidacy,
   type OfferCandidate,
   type OfferProgress,
   type OfferTermsInput,
@@ -365,6 +367,11 @@ export async function proposeOfferTerms(
 /** Either party: the candidates on one offer (a pseudonym and facts for the client). */
 export function listOfferCandidates(offerId: string): Promise<ReadResult<OfferCandidate>> {
   return readRows("list_offer_candidates_v1", { p_offer_id: offerId }, parseOfferCandidate);
+}
+
+/** The worker: every time an agency proposed them (their notice; never the client). */
+export function listMyOfferCandidacies(): Promise<ReadResult<MyOfferCandidacy>> {
+  return readRows("list_my_offer_candidacies_v1", {}, parseMyOfferCandidacy);
 }
 
 /** The agency attaches one worker of its own active roster to its company offer. */

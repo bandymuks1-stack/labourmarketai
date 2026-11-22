@@ -13099,7 +13099,8 @@
     "getLink": "Pobierz link",
     "newLink": "Nowy link",
     "messageButton": "Wiadomość",
-    "deliveryAccepted": "Dostarczone — klient zaakceptował zaproszenie i teraz potwierdza połączenie na swojej stronie Partnerzy."
+    "deliveryAccepted": "Dostarczone — klient zaakceptował zaproszenie i teraz potwierdza połączenie na swojej stronie Partnerzy.",
+    "openNeedClient": "Zleceniodawca z otwartej potrzeby (wybrał Państwa kandydata)"
   },
   "clientBridge": {
     "title": "Agencje pracy",
@@ -15141,7 +15142,8 @@
       "whatChangedUnavailable": "Nie udało się teraz sprawdzić, co się zmieniło. Państwa wpisy są bezpieczne — proszę spróbować za chwilę lub otworzyć dziennik.",
       "planIntro": "{count, plural, one {To # krok.} few {To # kroki, po kolei. Oto pierwszy — proszę dotknąć następnego, gdy będą Państwo gotowi.} many {To # kroków, po kolei. Oto pierwszy — proszę dotknąć następnego, gdy będą Państwo gotowi.} other {To # kroku, po kolei. Oto pierwszy — proszę dotknąć następnego, gdy będą Państwo gotowi.}}",
       "planNextOffer": "Następny krok:",
-      "planStep": "Krok {n} z {count}"
+      "planStep": "Krok {n} z {count}",
+      "agencyClientOpenNeed": "zleceniodawca, który wybrał Państwa kandydata w otwartej potrzebie"
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",
@@ -19695,7 +19697,10 @@
       "candidate_already_selected": "Klient już wybrał tego kandydata.",
       "client_company_unknown": "Nie udało się ustalić firmy potrzeby.",
       "unit_not_of_company": "Ta brygada nie ma żadnego członka z listy osób firmy składającej ofertę.",
-      "already_started": "Prace w ramach tej oferty zostały już rozpoczęte w innym projekcie."
+      "already_started": "Prace w ramach tej oferty zostały już rozpoczęte w innym projekcie.",
+      "worker_not_discoverable": "Ta osoba nie zdecydowała się być widoczna dla firm. Może to włączyć w ustawieniach prywatności.",
+      "candidate_not_available": "Ten kandydat nie jest już dostępny.",
+      "connection_conflict": "Połączenie z tą agencją w międzyczasie się zmieniło. Prosimy odświeżyć stronę i spróbować ponownie."
     },
     "received": {
       "title": "Zespoły zaproponowane do tego zapotrzebowania",
@@ -19834,7 +19839,7 @@
     },
     "candidates": {
       "heading": "Proponowani kandydaci",
-      "introSupplier": "Proszę zaproponować konkretne osoby ze swojej listy. Klient widzi każdą bez nazwiska: doświadczenie, kraj, dostępność, języki i umiejętności. Nazwisko jest pokazywane dopiero, gdy klient wybierze osobę, a ona się zgodzi.",
+      "introSupplier": "Prosimy proponować konkretne osoby z Państwa listy. Zaproponować można tylko osoby, które zdecydowały się być widoczne dla firm, a każda widzi na stronie Rezerwacje, że ją zaproponowano. Zleceniodawca widzi każdą bez nazwiska: doświadczenie, kraj, dostępność, języki i umiejętności. Nazwisko jest pokazywane dopiero, gdy zleceniodawca wybierze osobę, a ona się zgodzi.",
       "introReceiver": "Osoby proponowane przez agencję, bez nazwiska i kontaktów. Wybór wysyła prośbę o zatrudnienie do tej osoby; nazwisko pojawia się, gdy się zgodzi. Kontakt prowadzą Państwo z agencją.",
       "experience": "Doświadczenie",
       "years": "{count, plural, one {# rok} few {# lata} many {# lat} other {# roku}}",
@@ -19864,7 +19869,7 @@
       },
       "withdraw": "Wycofaj",
       "withdrawn": "Kandydat wycofany.",
-      "selectNote": "Wybór wysyła tej osobie prośbę o zatrudnienie. To nie jest umowa.",
+      "selectNote": "Wybór łączy Państwa firmę z tą agencją: to trwałe połączenie, które można zakończyć na stronie Partnerzy. Wysyła też tej osobie prośbę o rezerwację. To nie jest umowa.",
       "noteLabel": "Wiadomość do osoby (opcjonalnie)",
       "select": "Wybierz tego kandydata",
       "selected": "Prośba wysłana. Decyduje sama osoba.",
@@ -19872,7 +19877,16 @@
       "addLabel": "Osoba z Państwa listy",
       "addPlaceholder": "Wybierz osobę",
       "add": "Zaproponuj tę osobę",
-      "added": "Kandydat zaproponowany."
+      "added": "Kandydat zaproponowany.",
+      "unavailable": "Już niedostępny: nie ma na Państwa liście lub nie jest widoczny dla firm"
+    },
+    "mine": {
+      "heading": "Agencje zaproponowały Państwa kandydaturę",
+      "intro": "Agencja, na której liście Państwo są, zaproponowała Państwa bez nazwiska do potrzeby firmy. Firma zobaczy Państwa nazwisko tylko, jeśli Państwa wybierze, a Państwo przyjmą rezerwację. Można poprosić, aby nie proponowano Państwa do tej potrzeby.",
+      "role": "do: {role}",
+      "since": "zaproponowano {date}",
+      "withdraw": "Proszę mnie do tego nie proponować",
+      "withdrawn": "Nie będą Państwo proponowani do tej potrzeby."
     }
   },
   "teamAssignment": {

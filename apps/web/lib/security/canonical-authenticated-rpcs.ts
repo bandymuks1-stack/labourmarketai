@@ -95,6 +95,7 @@ export const CANONICAL_APP_RPCS = [
   "add_offer_candidate_v1",
   "withdraw_offer_candidate_v1",
   "list_offer_candidates_v1",
+  "list_my_offer_candidacies_v1",
   "select_offer_candidate_v1",
   "confirm_team_demand_offer_terms_v1",
   "name_team_demand_offer_unit_v1",

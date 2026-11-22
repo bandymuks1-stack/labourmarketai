@@ -13099,7 +13099,8 @@
     "getLink": "Gauti nuorodą",
     "newLink": "Nauja nuoroda",
     "messageButton": "Parašyti žinutę",
-    "deliveryAccepted": "Pristatyta — klientas priėmė kvietimą ir dabar patvirtina ryšį savo puslapyje „Klientai ir partneriai“."
+    "deliveryAccepted": "Pristatyta — klientas priėmė kvietimą ir dabar patvirtina ryšį savo puslapyje „Klientai ir partneriai“.",
+    "openNeedClient": "Užsakovas iš atviro poreikio (pasirinko jūsų kandidatą)"
   },
   "clientBridge": {
     "title": "Personalo agentūros",
@@ -15141,7 +15142,8 @@
       "whatChangedUnavailable": "Dabar nepavyko patikrinti, kas pasikeitė. Jūsų įrašai niekur nedingo — pabandykite po akimirkos arba atidarykite žurnalą.",
       "planIntro": "{count, plural, one {Tai # žingsnis.} few {Tai # žingsniai, iš eilės. Štai pirmasis — paspauskite kitą, kai norėsite tęsti.} other {Tai # žingsnių, iš eilės. Štai pirmasis — paspauskite kitą, kai norėsite tęsti.}}",
       "planNextOffer": "Kitas žingsnis:",
-      "planStep": "{n} žingsnis iš {count}"
+      "planStep": "{n} žingsnis iš {count}",
+      "agencyClientOpenNeed": "užsakovas, pasirinkęs jūsų kandidatą atvirame poreikyje"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -19695,7 +19697,10 @@
       "candidate_already_selected": "Užsakovas šį kandidatą jau pasirinko.",
       "client_company_unknown": "Nepavyko nustatyti poreikio įmonės.",
       "unit_not_of_company": "Šioje brigadoje nėra nė vieno nario iš siūlančios įmonės žmonių sąrašo.",
-      "already_started": "Darbai pagal šį pasiūlymą jau pradėti kitame projekte."
+      "already_started": "Darbai pagal šį pasiūlymą jau pradėti kitame projekte.",
+      "worker_not_discoverable": "Šis žmogus nepasirinko būti matomas įmonėms. Tai jis gali įjungti savo privatumo nustatymuose.",
+      "candidate_not_available": "Šis kandidatas nebeprieinamas.",
+      "connection_conflict": "Ryšys su šia agentūra tuo metu pasikeitė. Atnaujinkite puslapį ir bandykite dar kartą."
     },
     "received": {
       "title": "Šiam poreikiui pasiūlytos komandos",
@@ -19834,7 +19839,7 @@
     },
     "candidates": {
       "heading": "Siūlomi kandidatai",
-      "introSupplier": "Pasiūlykite konkrečius žmones iš savo sąrašo. Užsakovas kiekvieną mato be vardo: patirtis, šalis, prieinamumas, kalbos ir įgūdžiai. Vardas parodomas tik užsakovui pasirinkus žmogų ir šiam sutikus.",
+      "introSupplier": "Pasiūlykite konkrečius žmones iš savo sąrašo. Pasiūlyti galima tik tuos, kurie pasirinko būti matomi įmonėms, ir kiekvienas savo užimtumo puslapyje mato, kad jį pasiūlėte. Užsakovas kiekvieną mato be vardo: patirtis, šalis, prieinamumas, kalbos ir įgūdžiai. Vardas parodomas tik užsakovui pasirinkus žmogų ir šiam sutikus.",
       "introReceiver": "Agentūros siūlomi žmonės, rodomi be vardo ir kontaktų. Pasirinkus kandidatą, jam siunčiamas užimtumo prašymas; vardas parodomas, kai jis sutinka. Bendraujate su agentūra.",
       "experience": "Patirtis",
       "years": "{count, plural, one {# metai} few {# metai} other {# metų}}",
@@ -19864,7 +19869,7 @@
       },
       "withdraw": "Atšaukti",
       "withdrawn": "Kandidatas atšauktas.",
-      "selectNote": "Pasirinkus šiam žmogui siunčiamas užimtumo prašymas. Tai nėra sutartis.",
+      "selectNote": "Pasirinkus jūsų įmonė susiejama su šia agentūra: tai ilgalaikis ryšys, kurį galite nutraukti partnerių puslapyje. Šiam žmogui taip pat siunčiamas užimtumo prašymas. Tai nėra sutartis.",
       "noteLabel": "Žinutė žmogui (neprivaloma)",
       "select": "Pasirinkti šį kandidatą",
       "selected": "Užimtumo prašymas išsiųstas. Sprendžia pats žmogus.",
@@ -19872,7 +19877,16 @@
       "addLabel": "Žmogus iš Jūsų sąrašo",
       "addPlaceholder": "Pasirinkite žmogų",
       "add": "Pasiūlyti šį žmogų",
-      "added": "Kandidatas pasiūlytas."
+      "added": "Kandidatas pasiūlytas.",
+      "unavailable": "Nebeprieinamas: nėra jūsų sąraše arba nėra matomas įmonėms"
+    },
+    "mine": {
+      "heading": "Agentūros jus pasiūlė",
+      "intro": "Agentūra, kurios sąraše esate, pasiūlė jus be vardo įmonės poreikiui. Įmonė jūsų vardą mato tik jei jus pasirenka ir jūs sutinkate su užimtumu. Galite paprašyti, kad jūsų nesiūlytų šiam poreikiui.",
+      "role": "kam: {role}",
+      "since": "pasiūlyta {date}",
+      "withdraw": "Manęs šiam poreikiui nesiūlyti",
+      "withdrawn": "Jūsų nebesiūlys šiam poreikiui."
     }
   },
   "teamAssignment": {
