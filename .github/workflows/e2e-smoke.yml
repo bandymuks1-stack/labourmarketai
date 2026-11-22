@@ -110,6 +110,7 @@ jobs:
         tests/e2e/translated-page-survives.spec.ts
         tests/e2e/worker-profile-door.spec.ts
         tests/e2e/create-cv-menu-entry.spec.ts
+        tests/e2e/overlay-viewport-fit.spec.ts
       # Excludes the env-dependent describe block named above. If that title
       # ever changes, the block comes BACK IN and this job goes red — it can
       # never silently drop coverage, which is the safe direction. And if the
