@@ -146,7 +146,7 @@ export function ConversationHeader({
       )}
     >
       {/* IDENTITY — never shrinks, so the logo is never cut ("Labour…"). */}
-      <span className={cn("order-1 flex flex-none items-center gap-2", !mobile && "md:order-none")}>
+      <span className={cn("order-1 flex flex-none items-center gap-1 md:gap-2", !mobile && "md:order-none")}>
         {isProjection && (
           <Link
             href="/dashboard"
@@ -280,7 +280,9 @@ export function ConversationHeader({
       )}
 
       {/* UTILITY — a shrink-0 anchor of 44px controls. */}
-      <div className={cn("order-2 ml-auto flex flex-none items-center gap-1", !mobile && "md:order-none md:ml-0")}>
+      {/* Phone gaps are 2px (4px from `md`): back + logo + journal + search +
+          bell + avatar = 282px, inside the 288px a 320px screen leaves (#3565). */}
+      <div className={cn("order-2 ml-auto flex flex-none items-center gap-0.5 md:gap-1", !mobile && "md:order-none md:ml-0")}>
         {showPhoneJournal && journalItem && (
           <JournalShortcut
             item={journalItem}
