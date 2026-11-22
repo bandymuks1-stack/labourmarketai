@@ -13,7 +13,10 @@ import { BASE, isolatedStack, onboard, signIn, signUp } from "./isolated-web-a-h
  *       their labels and no "1500" / "2500";
  *   P-2 the chat's work-card form ("I can work from Monday" opens it): the
  *       same — at 390 and 1280 px, screenshots in the `journal-day-choice`
- *       artifact (pay-*.png).
+ *       artifact (pay-*.png);
+ *   P-3 rates and prices (owner-approved number clean-up): the public project
+ *       cost calculator, the services page and the listings page carry no
+ *       placeholder that names a sum of money, in any input in the markup.
  */
 
 test.skip(!isolatedStack(), "local stack only (SIGNUP_ISOLATED=1, app and Supabase on 127.0.0.1)");
@@ -77,6 +80,40 @@ for (const size of SIZES) {
     await salary.scrollIntoViewIfNeeded();
     await noExampleFigures(page, form, `${size.label} chat work-card form`);
     await page.screenshot({ path: join(OUT, `pay-chat-form-${size.label}.png`) });
+    await ctx.close();
+  });
+}
+
+const MONEY = /(\d[\d\s.,]*\s*(€|eur\b|eur\/)|€\s*\d)/iu;
+
+async function placeholders(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    Array.from(document.querySelectorAll("input[placeholder], textarea[placeholder]")).map(
+      (e) => (e as HTMLInputElement).placeholder,
+    ),
+  );
+}
+
+for (const size of SIZES) {
+  test(`P-3 (${size.label}). rates and prices carry no example money`, async ({ browser }) => {
+    mkdirSync(OUT, { recursive: true });
+    const ctx = await browser.newContext({ viewport: { width: size.width, height: size.height }, deviceScaleFactor: 2 });
+    const page = await ctx.newPage();
+    // The public calculator, signed out.
+    await page.goto(`${BASE}/en/calculators/project-cost`);
+    await page.waitForLoadState("networkidle").catch(() => {});
+    expect((await placeholders(page)).filter((p) => MONEY.test(p)), `${size.label} calculator`).toEqual([]);
+    await page.screenshot({ path: join(OUT, `pay-calculator-${size.label}.png`) });
+    // The signed-in services and listings pages.
+    await signIn(page, BASE, W);
+    for (const path of ["/en/dashboard/services", "/en/dashboard/listings"]) {
+      await page.goto(`${BASE}${path}`);
+      await page.waitForLoadState("networkidle").catch(() => {});
+      const found = (await placeholders(page)).filter((p) => MONEY.test(p));
+      test.info().annotations.push({ type: "evidence", description: `${size.label} ${path} → ${new URL(page.url()).pathname}` });
+      expect(found, `${size.label} ${path}`).toEqual([]);
+      await page.screenshot({ path: join(OUT, `pay-${path.split("/").pop()}-${size.label}.png`) });
+    }
     await ctx.close();
   });
 }

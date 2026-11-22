@@ -142,7 +142,7 @@ export function EstimateBuilder({
         {num("workerCount", "f.workerCount")}
         {num("hoursPerWorker", "f.hoursPerWorker")}
         {num("totalHours", "f.totalHours")}
-        {num("rate", "f.rate", { placeholder: t("f.ratePlaceholder") })}
+        {num("rate", "f.rate")}
         <label className="flex flex-col gap-1">
           <Label>{t("f.currency")}</Label>
           <Input

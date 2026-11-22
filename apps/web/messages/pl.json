@@ -209,7 +209,6 @@
     "formLabelLabel": "Lokalizacja",
     "formLabelPlaceholder": "Miasto lub region",
     "formPriceLabel": "Cena",
-    "formPricePlaceholder": "np. 450 €/miesiąc lub do uzgodnienia",
     "priceHint": "Cena jest opcjonalna i opisowa. Płatności nie są tu realizowane.",
     "save": "Zapisz",
     "saving": "Zapisywanie…",
@@ -2976,8 +2975,7 @@
           "label": "Ilu pracowników jest potrzebnych"
         },
         "salary": {
-          "label": "Wynagrodzenie (€)",
-          "placeholder": "np. 2200"
+          "label": "Wynagrodzenie (€)"
         },
         "countries": {
           "label": "Preferowane kraje (kody ISO)",
@@ -4643,7 +4641,6 @@
               "hoursPerWorker": "Godziny na pracownika",
               "totalHours": "Łączne godziny (opcjonalne nadpisanie)",
               "rate": "Stawka godzinowa / dniówka",
-              "ratePlaceholder": "np. 20",
               "country": "Kraj / lokalizacja",
               "materials": "Materiały",
               "equipment": "Sprzęt / narzędzia",
@@ -7168,7 +7165,6 @@
       "countryPlaceholder": "np. LT",
       "remoteLabel": "Można wykonać zdalnie",
       "rateLabel": "Stawka (opcjonalnie)",
-      "ratePlaceholder": "np. ok. 25 EUR/godz., do negocjacji",
       "rateHint": "Tylko dowolny tekst — na przykład orientacyjna stawka godzinowa."
     },
     "save": "Zapisz",
@@ -19761,7 +19757,6 @@
       },
       "capacity": "Osób",
       "rate": "Stawka",
-      "ratePlaceholder": "np. 32 €/h lub cena ryczałtowa",
       "period": "Okres",
       "start": "Początek",
       "end": "Koniec",

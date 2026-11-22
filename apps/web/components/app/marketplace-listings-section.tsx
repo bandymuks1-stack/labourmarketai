@@ -786,7 +786,6 @@ export function MarketplaceListingsSection({
                   className={inputCls}
                   value={draft.priceText}
                   maxLength={80}
-                  placeholder={t("formPricePlaceholder")}
                   onChange={(e) => setDraft({ ...draft, priceText: e.target.value })}
                 />
               </label>
