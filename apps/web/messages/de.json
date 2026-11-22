@@ -5825,9 +5825,9 @@
       "confirmedTitle": "Löschung bestätigt",
       "confirmedBody": "Das System löscht das Konto in den nächsten Minuten und sendet eine Bestätigung an Ihre Konto-E-Mail-Adresse. Muss etwas geprüft werden, informieren wir Sie.",
       "inReview": "Die automatische Löschung ist zur Prüfung angehalten: Das Konto enthält Daten, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen könnten. Entscheidung und Gründe erhalten Sie innerhalb eines Monats per E-Mail. Bis dahin wird Ihr Profil in der Suche nicht angezeigt.",
-      "confirmLabelWaiting": "Ich verstehe, dass das Konto und seine Daten 30 Tage nach der Bestätigung unwiderruflich gelöscht werden, sofern ich nicht vorher storniere.",
-      "confirmStepBodyWaiting": "Ihr Antrag auf Kontolöschung ist gestellt. Bestätigen Sie ihn — das Konto bleibt 30 Tage erhalten, in dieser Zeit können Sie auf dieser Seite stornieren. Danach löscht das System das Konto automatisch und sendet Ihnen eine Bestätigung per E-Mail.",
-      "confirmedBodyWaiting": "Das Konto wird in 30 Tagen gelöscht. Bis dahin können Sie auf dieser Seite stornieren. Nach der Löschung senden wir eine Bestätigung an Ihre Konto-E-Mail-Adresse.",
+      "confirmLabelWaiting": "Ich verstehe, dass das Konto und seine Daten spätestens 30 Tage nach der Bestätigung und spätestens einen Monat nach meinem Antrag unwiderruflich gelöscht werden, sofern ich nicht vorher storniere.",
+      "confirmStepBodyWaiting": "Ihr Antrag auf Kontolöschung ist gestellt. Bestätigen Sie ihn — das Konto bleibt höchstens 30 Tage erhalten (nie länger als einen Monat ab Ihrem Antrag), in dieser Zeit können Sie auf dieser Seite stornieren. Danach löscht das System das Konto automatisch und sendet Ihnen eine Bestätigung per E-Mail.",
+      "confirmedBodyWaiting": "Das Konto wird innerhalb von 30 Tagen gelöscht, spätestens einen Monat nach Ihrem Antrag. Bis dahin können Sie auf dieser Seite stornieren. Nach der Löschung senden wir eine Bestätigung an Ihre Konto-E-Mail-Adresse.",
       "status": {
         "pending": "Ihr Antrag auf Kontolöschung ist gestellt.",
         "pendingConfirmed": "Die Kontolöschung ist bestätigt und geplant.",
@@ -5835,7 +5835,7 @@
         "inProgress": "Die Kontolöschung läuft bereits — sie kann nicht mehr storniert werden.",
         "done": "Das Konto wurde gelöscht.",
         "submittedAt": "Gestellt: {date}",
-        "scheduledAt": "Das Konto wird am {date} gelöscht (nach einer Wartezeit von 30 Tagen).",
+        "scheduledAt": "Das Konto wird am {date} gelöscht.",
         "cancelUntil": "Bis dahin können Sie stornieren.",
         "loadError": "Der Status der Kontolöschung konnte nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
       },

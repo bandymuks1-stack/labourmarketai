@@ -5825,9 +5825,9 @@
       "confirmedTitle": "Raderingen är bekräftad",
       "confirmedBody": "Systemet raderar kontot inom de närmaste minuterna och skickar en bekräftelse till kontots e-postadress. Om något behöver granskas meddelar vi dig.",
       "inReview": "Den automatiska raderingen är pausad för granskning: kontot innehåller uppgifter som kan behöva sparas enligt lag eller som rör andra personer. Du får beslutet och skälen för det via e-post inom en månad. Under tiden visas din profil inte i sökningar.",
-      "confirmLabelWaiting": "Jag förstår att kontot och dess uppgifter raderas oåterkalleligt 30 dagar efter bekräftelsen, om jag inte avbryter före dess.",
-      "confirmStepBodyWaiting": "Din begäran om radering av kontot är inlämnad. Bekräfta den – kontot sparas i 30 dagar, och du kan avbryta på den här sidan under den tiden. Därefter raderar systemet kontot automatiskt och mejlar dig en bekräftelse.",
-      "confirmedBodyWaiting": "Kontot raderas om 30 dagar. Fram till dess kan du avbryta på den här sidan. När det har raderats skickar vi en bekräftelse till kontots e-postadress.",
+      "confirmLabelWaiting": "Jag förstår att kontot och dess uppgifter raderas oåterkalleligt senast 30 dagar efter bekräftelsen och senast en månad efter min begäran, om jag inte avbryter före dess.",
+      "confirmStepBodyWaiting": "Din begäran om radering av kontot är inlämnad. Bekräfta den – kontot sparas i högst 30 dagar (aldrig längre än en månad från din begäran), och du kan avbryta på den här sidan under den tiden. Därefter raderar systemet kontot automatiskt och mejlar dig en bekräftelse.",
+      "confirmedBodyWaiting": "Kontot raderas inom 30 dagar, och senast en månad efter din begäran. Fram till dess kan du avbryta på den här sidan. När det har raderats skickar vi en bekräftelse till kontots e-postadress.",
       "status": {
         "pending": "Din begäran om radering av kontot är inlämnad.",
         "pendingConfirmed": "Raderingen av kontot är bekräftad och schemalagd.",
@@ -5835,7 +5835,7 @@
         "inProgress": "Raderingen av kontot pågår redan – den kan inte längre avbrytas.",
         "done": "Kontot har raderats.",
         "submittedAt": "Inlämnad: {date}",
-        "scheduledAt": "Kontot raderas den {date} (efter en väntetid på 30 dagar).",
+        "scheduledAt": "Kontot raderas den {date}.",
         "cancelUntil": "Fram till dess kan du avbryta.",
         "loadError": "Det gick inte att läsa in status för radering av kontot. Uppdatera sidan och försök igen."
       },
