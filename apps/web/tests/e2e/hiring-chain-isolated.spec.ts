@@ -2,7 +2,10 @@ import { expect, test, type Browser, type BrowserContext, type Page } from "@pla
 
 import { clickUntilVisible } from "./click-until-visible";
 import {
+  accessToken,
   BASE,
+  SB_ANON,
+  SB_URL,
   isolatedStack,
   lit,
   onboard,
@@ -68,6 +71,19 @@ async function open(browser: Browser, w: Width, who?: string): Promise<{ page: P
       await ctx.close();
     },
   };
+}
+
+/**
+ * What a signed-in person can read through the API under RLS, with their OWN session. A negative
+ * UI check ("the stranger sees nothing") only proves something if the read itself was allowed to
+ * run and answered; this asks the database directly, and an error is a failure, never "zero".
+ */
+async function rowsAs(address: string, path: string): Promise<unknown[]> {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${await accessToken(address)}` },
+  });
+  if (!r.ok) throw new Error(`read as ${address.split("@")[0]} → ${r.status}`);
+  return (await r.json()) as unknown[];
 }
 
 /** No sideways scroll at this width (DESIGN.md §10: phone first). */
@@ -165,13 +181,27 @@ for (const w of WIDTHS) {
     test(`H-2 (${w.name}). the company sees the applicant and proposes a start; a stranger company sees nobody`, async ({ browser }) => {
       const stranger = await open(browser, w, STRANGER);
       await stranger.page.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
-      await stranger.page.waitForLoadState("networkidle").catch(() => {});
+      // The stranger's own scouting page rendered (so the absence below is a real answer, not a
+      // page that never loaded).
+      await expect(stranger.page.getByRole("main").getByTestId("scouting-privacy-note"), "the stranger's scouting page rendered").toBeVisible({
+        timeout: 60_000,
+      });
       await expect(
         stranger.page.getByTestId(`scout-candidate-${s.workerId}`),
         "another company never sees this need's applicant",
       ).toHaveCount(0);
       await expect(stranger.page.getByText(`Synthetic Hiring Worker ${w.name} ${RUN}`), "nor their name").toHaveCount(0);
       await stranger.done();
+      // …and the database agrees: under the stranger's own session the application is not readable
+      // at all, while the owner reads it (so the read itself works).
+      expect(
+        await rowsAs(STRANGER, `demand_interest_signals?request_id=eq.${s.needId}&select=id`),
+        "the stranger reads no application for this need",
+      ).toHaveLength(0);
+      expect(
+        await rowsAs(COMPANY, `demand_interest_signals?request_id=eq.${s.needId}&select=id`),
+        "the need's owner does read it (the read itself works)",
+      ).toHaveLength(1);
 
       const { page, done } = await open(browser, w, COMPANY);
       await page.goto(`${BASE}/en/dashboard/company/scouting?request=${s.needId}`);
@@ -276,9 +306,15 @@ for (const w of WIDTHS) {
 
       // The work board is left out on purpose: the stranger's own published need is meant to be
       // there. What must never carry another company is the worker's own work with THIS one.
-      for (const path of ["/en/dashboard/projects", "/en/dashboard/bookings", "/en/dashboard/communication"]) {
+      const own: Record<string, string> = {
+        "/en/dashboard/projects": "worker-projects-list",
+        "/en/dashboard/bookings": `booking-${s.bookingId}`,
+        "/en/dashboard/communication": "communication-workspace",
+      };
+      for (const [path, marker] of Object.entries(own)) {
         await page.goto(`${BASE}${path}`);
-        await page.waitForLoadState("networkidle").catch(() => {});
+        // The page rendered the worker's own state first, so the absence below is a real answer.
+        await expect(page.getByTestId(marker).first(), `${path}: the worker's own content rendered`).toBeVisible({ timeout: 60_000 });
         await expect(page.getByText(STRANGER_ORG), `${path}: no other company's name reaches the worker`).toHaveCount(0);
       }
       await page.goto(`${BASE}/en/dashboard/bookings`);
@@ -328,12 +364,22 @@ for (const w of WIDTHS) {
       ).toBe("2");
 
       const st = await open(browser, w, STRANGER);
-      await st.page.goto(`${BASE}/en/dashboard/communication/${s.conversationId}`);
-      await st.page.waitForLoadState("networkidle").catch(() => {});
+      const res = await st.page.goto(`${BASE}/en/dashboard/communication/${s.conversationId}`);
+      // The page answered (not a crash), and with the stranger's own state, before the absence check.
+      expect(res?.status() ?? 0, "the thread URL answers the stranger without a server error").toBeLessThan(500);
+      await expect(st.page.getByRole("main"), "the stranger's page rendered").toBeVisible({ timeout: 60_000 });
       for (const text of [MESSAGE, ANSWER]) {
         await expect(st.page.getByText(text), "the stranger company reads nothing of it").toHaveCount(0);
       }
       await st.done();
+      expect(
+        await rowsAs(STRANGER, `conversation_messages?conversation_id=eq.${s.conversationId}&select=id`),
+        "the database gives the stranger no message of the thread",
+      ).toHaveLength(0);
+      expect(
+        await rowsAs(WORKER, `conversation_messages?conversation_id=eq.${s.conversationId}&select=id`),
+        "a participant does read them (the read itself works)",
+      ).toHaveLength(2);
     });
   });
 }
