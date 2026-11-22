@@ -1435,3 +1435,40 @@ test.describe("popups on a short phone screen", () => {
     expect(bottom).toBeLessThanOrEqual(320);
   });
 });
+
+// ── THE NEED FORM'S OPTIONAL DETAIL STARTS FOLDED (2026-11-22) ──────────────
+// Coordinator decision 2026-11-22, item 2: step 2 opened to ~2,700 px of
+// optional clusters at 390 px. Every cluster now starts closed; the launch-path
+// clusters (time, pay, requirements) are emphasised rows, and a closed row says
+// how many of its fields are filled.
+test.describe("the need form's optional detail on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("need-form-company");
+
+  test("step 2 starts with every cluster closed; a filled field shows on its closed row", async ({ browser }) => {
+    await newOrganisation(browser, OWNER, "hire", `Synthetic Form Owner ${RUN}`, `Synthetic Form Co ${RUN}`);
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+    await page.goto(`${BASE}/en/dashboard/company/needs`);
+    const main = page.getByRole("main");
+    await expect(main.getByTestId("demand-role")).toBeVisible({ timeout: 60_000 });
+    await main.getByTestId("demand-role").fill("Synthetic welder");
+    await main.getByTestId("demand-description").fill("Two people for three weeks.");
+    await main.getByTestId("demand-next").tap();
+    const sections = main.locator('[data-testid^="sdv2-section-"][aria-expanded]');
+    await expect(sections.first()).toBeVisible({ timeout: 30_000 });
+    const states = await sections.evaluateAll((els) => els.map((e) => e.getAttribute("aria-expanded")));
+    expect(states.length, "the clusters render").toBeGreaterThanOrEqual(7);
+    expect(states.every((s) => s === "false"), "every cluster starts closed").toBe(true);
+    const formHeight = await main.getByTestId("demand-form").evaluate((el) => el.getBoundingClientRect().height);
+    // 4,341 px with the clusters open (2026-11-22); about 2,140 folded.
+    expect(formHeight, "step 2 stays short on a phone").toBeLessThanOrEqual(2400);
+    await expect(main.locator('[data-testid="sdv2-section-time"][data-launch-path]')).toBeVisible();
+    await main.getByTestId("sdv2-section-time").tap();
+    await main.getByTestId("sdv2-start-earliest").fill("2026-12-01");
+    await main.getByTestId("sdv2-section-time").tap();
+    await expect(main.getByTestId("sdv2-section-time-filled")).toContainText("1");
+    await fitsTheScreen(page, "need form step 2");
+    await done();
+  });
+});
