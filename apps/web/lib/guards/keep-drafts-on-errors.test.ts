@@ -106,6 +106,18 @@ describe("surfaces keep what was typed", () => {
     expect(read("components/app/stale-build-recovery.tsx")).toContain('const HEADER = "x-nextjs-action-not-found";');
   });
 
+  it("an own profession's add answers: the confirmed row at once, Saving..., or the error", () => {
+    const src = read("components/app/worker-trade-profile.tsx");
+    expect(src).toContain("useSavedRows(ownProfessions)");
+    expect(src).toContain("if (result.ok && result.row) showSavedOwn(result.row);");
+    expect(src).toMatch(/\} catch \{\n\s+setOwnError\(true\);/);
+    expect(src).toContain('{ownPending ? t("saving") : t("ownProfessionAdd")}');
+    expect(src).toMatch(/await removeOwnProfession\(own\.id\);\n\s+hideRemovedOwn\(own\.id\);/);
+    expect(src).not.toContain("ownProfessions.map(");
+    // the add returns the row it wrote
+    expect(read("lib/worker/actions.ts")).toMatch(/\.insert\(\{ worker_id: workerId, label: words, original_language: language \}\)\n\s+\.select\("id, label"\)/);
+  });
+
   it("the public company-need form puts back what was typed after a refused send", () => {
     const src = read("components/app/company-need-form.tsx");
     expect(src).toContain("if (!state || state.ok !== false) return;");
