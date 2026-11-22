@@ -103,6 +103,9 @@ export const CLIENT_MESSAGE_ROOTS = [
   "marketRecognition",
   "marketplace",
   "marketplaceListings",
+  // Goods purchase requests (2026-10-23): the request form and the purchase
+  // cards are interactive client components.
+  "listingPurchases",
   "messaging",
   // Organization work-area labels (16 short strings): the one header names an
   // organization's core areas for the person who runs it (owner P0-2,

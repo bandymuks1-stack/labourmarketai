@@ -41,6 +41,11 @@ const INAPP_NAMESPACES = [
   "professions",
   "playerCard",
   "nav",
+  // Goods purchase lifecycle (registry 6.13, 2026-10-23). It HAS a data model
+  // (`listing_purchases`), but its copy is a PURCHASE REQUEST, never an
+  // "order": one transaction dictionary — service request for services,
+  // purchase request for goods.
+  "listingPurchases",
 ] as const;
 
 /** Locale → phantom-order pattern. Word-boundary / lookahead built so the

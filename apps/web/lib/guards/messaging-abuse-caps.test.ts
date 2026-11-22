@@ -204,6 +204,9 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     "lib/communication/contact-interested-worker.ts",
     "lib/communication/open-conversation-action.ts",
     "lib/communication/request-worker-conversation.ts",
+    // Goods purchase thread (2026-10-23) — subject = the purchase row's own
+    // listing_title snapshot, read under the caller's RLS (never a form field).
+    "lib/marketplace/listing-purchase-conversation.ts",
     "lib/marketplace/listings.ts",
     "lib/marketplace/service-request-conversation.ts",
     // Canonical-journey P1 — worker→employer open; subject derives from
@@ -274,6 +277,12 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     expect(offer.indexOf('evaluateTeamOfferContact({ offerStatus, side }) !== "allowed"')).toBeLessThan(
       offer.indexOf('"allowed_team_demand_offer"'),
     );
+    // …the goods purchase thread derives it from the REAL purchase row's
+    // listing_title snapshot it read under the caller's own RLS, after the
+    // live-or-done status gate…
+    const purchase = read("lib/marketplace/listing-purchase-conversation.ts");
+    expect(purchase).toMatch(/purchase!\.listing_title\?\.slice/);
+    expect(purchase).toMatch(/canOpenPurchaseConversation\(status\)/);
     // …and nobody else calls getOrCreateDirectConversation.
     const callers = walkSources().filter(
       (rel) =>
