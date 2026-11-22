@@ -250,7 +250,37 @@ const DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED: readonly Intended[] = [
   { sentence: "Ik heb 3 timmermannen nodig", reader: "turn", now: "new-goal" },
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED];
+/**
+ * (h) A HEADCOUNT WRITTEN IN WORDS, OR WITH A PERSON NOUN THE READER DID NOT
+ * KNOW, IS THE SAME HEADCOUNT (owner P1 2026-11-22: "мне нужны пять рабочих").
+ * Number words become digits before the headcount is read ("dviejų" → 2,
+ * "eleven" → 11), and "рабочих" / "Mitarbeiter" / "werknemers" / "строител…"
+ * count people as "работник…" already did. The route did not change except
+ * by score, or from `unknown` to the demand it is.
+ */
+const WORD_NUMBER_HEADCOUNT: readonly Intended[] = [
+  { sentence: "Eleven workers needed", reader: "headcount", now: { total: 11, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Eleven workers needed", reader: "need", now: [null, null, 11, null, null] },
+  { sentence: "Create a programme for eleven people", reader: "headcount", now: { total: 11, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Create a programme for eleven people", reader: "need", now: [null, null, 11, null, null] },
+  { sentence: "Personal 5 Mitarbeiter", reader: "headcount", now: { total: 5, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Personal 5 Mitarbeiter", reader: "need", now: [null, null, 5, null, null] },
+  { sentence: "Reikia dviejų santechnikų kitai savaitei Vilniuje", reader: "headcount", now: { total: 2, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Reikia dviejų santechnikų kitai savaitei Vilniuje", reader: "need", now: ["plumber", "LT", 2, null, null] },
+  { sentence: "Reikia dviejų suvirintojų Nyderlanduose kitą savaitę", reader: "headcount", now: { total: 2, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Reikia dviejų suvirintojų Nyderlanduose kitą savaitę", reader: "need", now: ["welder", "NL", 2, "this_week", null] },
+  { sentence: "Мы кадровое агентство, можем предложить 30 рабочих", reader: "headcount", now: { total: 30, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Мы кадровое агентство, можем предложить 30 рабочих", reader: "need", now: [null, null, 30, null, null] },
+  { sentence: "one worker_input row per accepted slug", reader: "headcount", now: { total: 1, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "one worker_input row per accepted slug", reader: "need", now: [null, null, 1, null, null] },
+  { sentence: "В этой организации один человек, поэтому владелец утверждает собственные запросы.", reader: "headcount", now: { total: 1, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "В этой организации один человек, поэтому владелец утверждает собственные запросы.", reader: "need", now: [null, null, 1, null, null] },
+  { sentence: "Нужны 12 монтажников строительных лесов в Роттердаме с 5 октября.", reader: "route", now: ["need-workers", 14] },
+  { sentence: "Bekijk werknemers die bij je vraag passen.", reader: "route", now: ["need-workers", 4] },
+  { sentence: "Bekijk werknemers die bij je vraag passen.", reader: "turn", now: "new-goal" },
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED, ...WORD_NUMBER_HEADCOUNT];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).
