@@ -35,10 +35,16 @@ describe("security P0 — code-only fixes", () => {
   });
 
   it("the MCP door compares the MIME essence exactly", () => {
-    // Both MCP routes are thin bindings of this one door module.
-    const src = read("lib/mcp/http-door.ts");
+    // Both profiles (/api/mcp and /api/mcp/read) are built by the one shared
+    // door, so the check lives there; the routes only re-export it.
+    const src = read("lib/mcp/door.ts");
     expect(src).toContain('.split(";")[0].trim().toLowerCase() !== "application/json"');
     expect(src).not.toContain('.includes("application/json")');
+    for (const route of ["app/api/mcp/route.ts", "app/api/mcp/read/route.ts"]) {
+      const r = read(route);
+      expect(r, route).toContain("mcpDoor(");
+      expect(r, route).not.toContain('.includes("application/json")');
+    }
   });
 
   it("a confirm tool is not advertised as idempotent", () => {

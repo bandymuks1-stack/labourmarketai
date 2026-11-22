@@ -162,9 +162,13 @@ const CLASSIFICATION: Record<
     class: "shared",
     why: "The MCP door for external clients (ChatGPT connector, future agents). Bearer is its primary transport by nature; it resolves identity through the one boundary and every tool call runs the caller's own RLS-scoped client via lib/capabilities.",
   },
+  "mcp/read/route.ts": {
+    class: "shared",
+    why: "The read-only profile of the same MCP door (lib/mcp/door.ts), for an app-directory review: same one identity boundary and brake, lists only kind=read capabilities and refuses every other name. Each tool runs on the caller's own RLS-scoped client.",
+  },
   "mcp/chatgpt/route.ts": {
     class: "shared",
-    why: "The curated ChatGPT door (2026-11-11): the same MCP door implementation (lib/mcp/http-door.ts) over a pinned 22-tool profile. Same boundary, same RLS-scoped capabilities; it narrows the tool list and never widens anything.",
+    why: "The curated ChatGPT profile of the same MCP door (lib/mcp/door.ts), over the pinned tool list in lib/mcp/chatgpt-profile.ts: same one identity boundary and brake, refuses every name outside the profile. Each tool runs on the caller's own RLS-scoped client; it narrows the tool list and never widens anything.",
   },
   "dashboard-search/route.ts": {
     class: "shared-blocked",
@@ -215,12 +219,11 @@ describe("one resolver, never nine parsers", () => {
   it("shared routes go through resolveApiIdentity and not the cookie client", () => {
     for (const [route, entry] of Object.entries(CLASSIFICATION)) {
       if (entry.class !== "shared") continue;
-      // An MCP route is a thin binding of the ONE door implementation; the
-      // door is what resolves identity, so the door is what is read.
-      const routeSrc = read(route);
-      const src = /createMcpDoor\(/.test(routeSrc)
-        ? routeSrc + readFileSync(join(APP_ROOT, "lib", "mcp", "http-door.ts"), "utf8")
-        : routeSrc;
+      // Every MCP route is three lines over one door module; the door is
+      // what must go through the boundary, so the door is what is read.
+      const src = /from "@\/lib\/mcp\/door"/.test(read(route))
+        ? readFileSync(join(APP_ROOT, "lib", "mcp", "door.ts"), "utf8")
+        : read(route);
       expect(src, `${route} must resolve identity through the boundary`).toMatch(
         /resolveApiIdentity/,
       );
