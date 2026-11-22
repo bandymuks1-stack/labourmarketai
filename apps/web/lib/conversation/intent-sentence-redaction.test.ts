@@ -48,6 +48,28 @@ describe("redactIntentSentence (owner decision 2026-11-22): an allow-list, fail 
     for (const h of hidden as string[]) expect(r.tokens).toContain(h);
   });
 
+  it.each([
+    // R2 review of #2752 (P3-1): a stem is not an open prefix
+    ["will william come", "william"],
+    ["edita nori darbo", "edita"],
+    ["norimantui parašyk žinutę", "norimantui"],
+    ["chatterjee chat", "chatterjee"],
+    ["Vakaris nori darbo", "Vakaris"],
+  ])("a name that starts like an action word never leaves: %s", (s, name) => {
+    const r = redactIntentSentence(s);
+    if (r !== null) expect(r.text.toLowerCase()).not.toContain(name.toLowerCase());
+  });
+
+  it.each([
+    // R2 review of #2752 (P3-2): health words stop the sentence
+    "мне нужен больничный на неделю",
+    "esu ligoninėje, negaliu dirbti",
+    "I had an injury at work",
+    "turiu gripą, pažymėk",
+  ])("a health sentence is not sent at all: %s", (s) => {
+    expect(redactIntentSentence(s)).toBeNull();
+  });
+
   it("contacts and long numbers become tokens and come back only locally", () => {
     const r = redactIntentSentence("parašyk jonas@pvz.lt dėl užsakymo")!;
     expect(r.text).toBe("parašyk [[0]] dėl užsakymo");

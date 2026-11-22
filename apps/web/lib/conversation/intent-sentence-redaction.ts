@@ -50,31 +50,38 @@ const NEVER_SEND: readonly string[] = [
   "serg", "susirg", "liga", "ligos", "ligon", "vėž", "covid", "kovid", "nėšč", "diagnoz", "neįgal", "depres", "psichik", "nedarbing",
   "sick", "illness", "disease", "cancer", "pregnan", "diagnos", "hiv", "disab", "depress", "mental",
   "болен", "болез", "заболе", "рак", "беремен", "диагноз", "ковид", "инвалид", "депресс",
+  "больнич", "лечен", "госпитал", "травм", "аллерг", "грипп", "алкогол", "наркот", "психиат", "терапи",
+  "ligonin", "gydym", "sužeist", "traum", "alerg", "grip", "alkohol", "narkot", "psichiatr", "terapij", "medikament", "vaist",
+  "hospital", "injur", "allerg", "alcohol", "narcot", "psychiatr", "therap", "medicat", "flu",
   // beliefs, sexuality, ethnicity, union, criminal record
   "relig", "религ", "tikėjim", "seksual", "sexual", "сексуал", "gay", "gėj", "lesbi", "гей", "etnin", "ethnic", "этнич", "rasin", "racial", "расов",
   "profsąjung", "union", "профсоюз", "teistum", "criminal", "судим", "politin", "political", "полит",
   // credentials and payment data
   "password", "slaptažod", "пароль", "passcode", "iban", "kortelės numer", "card number", "номер карты", "pin",
 ];
-const NEVER_SEND_EXACT = new Set(["ill", "pin", "рак", "gay", "гей"]);
+const NEVER_SEND_EXACT = new Set(["ill", "pin", "рак", "gay", "гей", "flu"]);
 
 /**
- * Allowed vocabulary: stems (prefix match, ≥ 3 letters) of product and
- * everyday action words, and exact short function words. Lower case.
+ * Allowed vocabulary: stems of product and everyday action words per
+ * language, and exact short function words. Lower case. A stem is NOT an open
+ * prefix: a word passes only as the stem plus one of ITS language's
+ * inflection endings, so "will" never passes "william", "edit" never
+ * "edita", "nori" never "norimantui" (R2 review of #2752, P3-1).
  */
-const STEMS: readonly string[] = [
-  // ── LT ──
+const LT_STEMS: readonly string[] = [
   "nori", "noriu", "norė", "reiki", "ieško", "ieškau", "ieškot", "rast", "surask", "suraski", "rask", "parod", "atidar", "atver", "sukur", "pridė", "pridėk",
   "užpild", "pildy", "įraš", "išsaug", "pakeis", "pervad", "pavadin", "pataisy", "ištrin", "pašalin", "patvirt", "priim", "atmes", "siųs", "išsiųs", "parašy", "rašy", "atsak",
-  "kviest", "pakviest", "pasiūl", "siūl", "susisiek", "kontakt", "padė", "padėk", "pagalb", "išvers", "verst", "priminim", "primin", "sužinot", "žinot", "pradė", "tęs",
+  "kviest", "pakviest", "kvies", "pakvies", "pasiūl", "siūl", "susisiek", "kontakt", "padė", "padėk", "pagalb", "išvers", "verst", "priminim", "primin", "sužinot", "žinot", "pradė", "tęs",
   "darb", "dirb", "darbuotoj", "darbinin", "specialist", "meistr", "komand", "brigad", "žmon", "žmog", "kandidat", "atrank", "įdarbin", "samd",
-  "įmon", "organizacij", "agentūr", "subrang", "rangov", "tiekėj", "partner", "klient", "užsakov", "užsakym", "paslaug", "projekt", "objekt", "poreik", "skelbim", "vakans", "pareig",
-  "žurnal", "ataskait", "valand", "šiandien", "vakar", "rytoj", "savait", "mėnes", "dien", "kalendor", "plan", "grafik", "pamain", "atostog",
+  "įmon", "organizacij", "agentūr", "subrangov", "rangov", "tiekėj", "partner", "klient", "užsakov", "užsakym", "paslaug", "projekt", "objekt", "poreik", "skelbim", "vakans", "pareig",
+  "žurnal", "ataskait", "valand", "šiandien", "vakar", "vakarykšt", "rytoj", "savait", "mėnes", "dien", "kalendor", "plan", "grafik", "pamain", "atostog",
   "gyvenimo aprašym", "aprašym", "profil", "patirt", "įgūdž", "kvalifikac", "išsilavin", "kalb", "dokument", "sertifikat", "pažymėjim", "licencij", "leidim",
   "mokym", "kurs", "studij", "student", "praktik", "stažuot", "mokykl", "universitet", "program",
   "žinut", "pokalb", "pranešim", "pasiūlym", "sutart", "sąskait", "kain", "atlygin", "užmokest", "eksport", "statistik", "rezultat", "būsen",
   "nauj", "kaip", "kada", "kiek", "koks", "kokia", "kokių", "kokie", "kuri", "kodėl", "visus", "keli", "penk", "dešimt", "trys", "tris", "vien",
-  // ── EN ──
+];
+
+const EN_STEMS: readonly string[] = [
   "want", "need", "look", "search", "find", "show", "open", "creat", "add", "fill", "record", "log", "sav", "chang", "edit", "renam", "fix", "delet", "remov", "confirm", "accept", "declin", "reject", "send", "writ", "repl", "answer",
   "invit", "offer", "propos", "contact", "help", "translat", "remind", "start", "continu", "resum", "download", "export", "print", "upload", "import", "post", "publish", "hir", "recruit", "apply", "join",
   "work", "job", "employ", "staff", "worker", "people", "person", "team", "crew", "candidat", "applicant", "talent", "skill", "experienc", "qualif", "educat", "languag", "document", "certific", "licen", "permit",
@@ -83,7 +90,9 @@ const STEMS: readonly string[] = [
   "profil", "resum", "train", "cours", "stud", "intern", "school", "universit", "program", "learn",
   "messag", "chat", "conversat", "notif", "invoic", "price", "pay", "salar", "wage", "statist", "result", "status", "new",
   "my", "me", "mine", "our", "we", "you", "your", "the", "a", "an", "to", "for", "of", "in", "on", "at", "with", "and", "or", "from", "about", "please", "can", "could", "would", "will", "how", "where", "what", "when", "which", "who", "why", "all", "some", "few", "five", "ten", "two", "three", "one", "is", "are", "be", "do", "does", "get", "go", "let", "make", "set", "up", "it", "this", "that", "there", "i", "i'm", "im", "am",
-  // ── RU ──
+];
+
+const RU_STEMS: readonly string[] = [
   "хочу", "хотим", "хочется", "хотел", "нужн", "надо", "ищу", "ищем", "иска", "найд", "найт", "покаж", "откр", "созд", "добав", "заполн", "запиш", "запис", "сохран", "измен", "переимен", "назван", "исправ", "удал", "подтвер", "прин", "отклон", "отправ", "напиш", "писа", "ответ",
   "пригла", "предлож", "связ", "контакт", "помог", "помощ", "перевед", "перев", "напомн", "начат", "продолж", "скача", "экспорт", "загруз", "опубли", "наня", "нанима",
   "работ", "сотрудник", "людей", "люди", "человек", "команд", "бригад", "кандидат", "навык", "опыт", "квалиф", "образован", "язык", "документ", "сертификат", "лиценз", "разреш",
@@ -106,15 +115,29 @@ function normalise(word: string): string {
   return word.toLowerCase().replace(/^[^\p{L}\p{N}[\]]+|[^\p{L}\p{N}[\]]+$/gu, "");
 }
 
-/** Endings a SHORT (≤ 3 letters) stem may take; a short stem is never an
- *  open prefix, or "man" would pass "Mantas" and "kur" "Kuraitis". */
-const SHORT_STEM_ENDINGS = ["", "s", "es", "ed", "ing", "e", "er", "ers", "d"];
+/** Inflection endings per language (the empty ending included). */
+const LT_ENDINGS = new Set([
+  "", "a", "ą", "ai", "aims", "am", "ama", "ame", "ams", "as", "au", "ate", "e", "ę", "ei", "ekite", "ėjau", "ės", "ėse", "i", "į", "ia", "ią", "iai", "iais", "iam", "iame", "iams", "ias", "ie", "iems", "imą", "ime", "imo", "imu", "imų", "imui", "ims", "imas", "is", "it", "ite", "iu", "ių", "iui", "ius", "k", "kim", "kime", "kit", "kite", "o", "oje", "om", "oms", "os", "ose", "ot", "u", "ų", "ui", "uose", "us", "y", "ys", "yje", "yk", "ykime", "ykite", "ymas", "ymą", "ymo", "ymų", "yti", "ysiu", "ysime", "iu", "siu", "sime", "ti", "tų", "ų", "ūs",
+  "ojas", "oja", "ojai", "oją", "oju", "ojų", "ojus", "ojams", "ojo", "ojui",
+  "ė", "io", "ink", "inkite", "inti", "inu", "ins", "kime",
+]);
+const EN_ENDINGS = new Set(["", "s", "es", "ed", "d", "ing", "e", "er", "ers", "ion", "ions", "ation", "ations", "y", "ies", "ied", "ment", "ments", "al", "ly", "or", "ors", "ence", "ent", "ents"]);
+const RU_ENDINGS = new Set([
+  "", "а", "у", "е", "ы", "и", "о", "ю", "я", "ь", "ой", "ей", "ом", "ем", "ам", "ям", "ами", "ями", "ах", "ях", "ов", "ев", "ий", "ый", "ая", "ое", "ые", "ую", "ого", "его", "ому", "ему", "ым", "им", "ых", "их",
+  "ть", "ти", "ет", "ит", "ете", "ите", "ут", "ют", "ат", "ят", "ешь", "ишь", "л", "ла", "ло", "ли", "й", "йте", "ние", "ния", "нию", "нием", "ник", "ники", "ников", "ка", "ки", "ку", "ке", "ков", "ть", "те", "ить", "ять", "ать", "ил", "ила", "ило", "или", "ен", "ена", "ено", "ены",
+]);
+
+/** Words that look like a stem + ending but are names (never vocabulary). */
+const NAME_COLLISIONS = new Set(["vakaris", "vakario", "vakariui", "rytis", "ryčio", "ryčiui", "dienius", "edita", "editai", "william", "will's"]);
+
+function stemPass(word: string, stems: readonly string[], endings: ReadonlySet<string>): boolean {
+  return stems.some((s) => word.startsWith(s) && endings.has(word.slice(s.length)));
+}
 
 function isVocabulary(word: string): boolean {
   if (EXACT.has(word)) return true;
-  return STEMS.some((s) =>
-    [...s].length <= 3 ? SHORT_STEM_ENDINGS.some((e) => word === s + e) : word.startsWith(s),
-  );
+  if (NAME_COLLISIONS.has(word)) return false;
+  return stemPass(word, LT_STEMS, LT_ENDINGS) || stemPass(word, EN_STEMS, EN_ENDINGS) || stemPass(word, RU_STEMS, RU_ENDINGS);
 }
 
 function hasNeverSend(lower: string): boolean {
