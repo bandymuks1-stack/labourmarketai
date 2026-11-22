@@ -112,11 +112,15 @@ export async function InstitutionLearnersSection({
                       built ONLY from what the institution typed itself — the
                       name it entered, the e-mail beneath it — never from the
                       learner's profile (least-privilege ruling 2026-08-27). */}
-                  <PersonPresence
-                    name={row.invitedName ?? row.invitedEmail}
-                    role={row.invitedName ? row.invitedEmail : null}
-                    size={28}
-                  />
+                  {/* min-w-0: a long e-mail used to push the status past the
+                      phone's right edge (owner phone report 2026-11-20). */}
+                  <div className="min-w-0 flex-1">
+                    <PersonPresence
+                      name={row.invitedName ?? row.invitedEmail}
+                      role={row.invitedName ? row.invitedEmail : null}
+                      size={28}
+                    />
+                  </div>
                   <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(
                       row.status === "accepted"

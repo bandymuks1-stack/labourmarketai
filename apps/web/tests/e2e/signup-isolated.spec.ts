@@ -1247,6 +1247,9 @@ async function inviteLearnerLink(page: Page, name: string): Promise<string> {
   await expect(page.getByTestId("company-education")).toBeVisible({ timeout: 30_000 });
   await page.getByTestId("institution-learners-invite").click();
   await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
+  // Button = action (owner directive 2026-11-21): the page opens AS the invite,
+  // titled after the button, not as the relationships overview.
+  await expect(page.getByTestId("invite-page-title")).toHaveText("Invite students", { timeout: 30_000 });
   // UX_GAPS I-4: the door preset type, organisation and relationship — one read-only line, link mode by default.
   const preset = page.getByTestId("invite-preset");
   await expect(preset).toHaveAttribute("data-relationship", "student", { timeout: 30_000 });
@@ -1297,7 +1300,7 @@ test("E-1. an institution trains people and invites a learner by link; a student
   await inst.goto(`${BASE}/en/dashboard`);
   await expect(inst.getByTestId("company-model-primary")).toHaveAttribute(
     "href",
-    /\/en\/dashboard\/network\?type=join_organization&org=[0-9a-f-]+&relationship=student$/,
+    /\/en\/dashboard\/network\?invite=1&type=join_organization&org=[0-9a-f-]+&relationship=student$/,
     { timeout: 30_000 },
   );
   const link = await inviteLearnerLink(inst, EDU.learnerName);

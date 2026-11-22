@@ -55,6 +55,11 @@ describe("I-4 — a preset invitation reads as one line", () => {
       expect(at, id).toBeGreaterThan(0);
       expect(form.slice(at, at + 200), id).toContain("${fieldHeight}");
     }
+    // The send button is a 44 px touch target on every screen (acceptance matrix 2026-11-21:
+    // it measured 40 px on a touch tablet and phone).
+    const submit = form.slice(form.indexOf('data-testid="invite-submit"'), form.indexOf('data-testid="invite-submit"') + 200);
+    expect(submit).toMatch(/className="[^"]*\bmin-h-11\b/);
+    expect(submit).not.toMatch(/\bmin-h-10\b/);
     // The mode switch stays, so a person can still choose e-mail.
     expect(panel).toMatch(/data-testid=\{`invite-mode-\$\{m\}`\}/);
   });
