@@ -305,7 +305,7 @@ export function ProjectCostCalculator({
               onClick={() => i <= stepIndex && setStep(s)}
               aria-current={s === step ? "step" : undefined}
               disabled={i > stepIndex}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+              className={`inline-flex min-h-11 items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                 s === step
                   ? "border-brand-blue bg-brand-blue/15 text-brand-blue"
                   : i < stepIndex

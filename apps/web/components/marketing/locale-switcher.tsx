@@ -149,7 +149,7 @@ export function LocaleSwitcher({
           // this 30px tall in the public header, next to a disclosure button
           // the floor is guard-pinned on. The minimum only takes effect where
           // the box was too short — padding, radius and colours are unchanged.
-          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800/70 px-3 py-1.5",
+          "inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-ink-500 bg-ink-800/70 px-3 py-1.5",
           "text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary",
         )}
       >
