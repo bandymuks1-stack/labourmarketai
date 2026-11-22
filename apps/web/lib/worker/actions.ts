@@ -155,7 +155,12 @@ export async function removeWorkerDirection(professionId: string): Promise<void>
  */
 export async function addOwnProfession(
   formData: FormData,
-): Promise<{ ok: boolean; reason?: "invalid" | "duplicate" | "failed" }> {
+): Promise<{
+  ok: boolean;
+  reason?: "invalid" | "duplicate" | "failed";
+  /** The row the insert wrote, so the profile shows it before its refresh lands. */
+  row?: { id: string; label: string };
+}> {
   const words = normalizeSelfDeclaredProfession(
     formData.get("label") as string | null,
   );
@@ -164,9 +169,11 @@ export async function addOwnProfession(
   // the words, never defaulted (SEP-7).
   const language = recordableInputLanguage(formData.get("locale") as string | null);
   const { supabase, workerId } = await currentWorkerId();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("worker_professions")
-    .insert({ worker_id: workerId, label: words, original_language: language });
+    .insert({ worker_id: workerId, label: words, original_language: language })
+    .select("id, label")
+    .maybeSingle();
   if (error) {
     // 23505 = they already hold these words; nothing is lost and nothing to do.
     if (error.code === "23505") return { ok: false, reason: "duplicate" };
@@ -177,7 +184,10 @@ export async function addOwnProfession(
     return { ok: false, reason: "failed" };
   }
   revalidatePath("/", "layout");
-  return { ok: true };
+  const row = data as { id?: unknown; label?: unknown } | null;
+  return typeof row?.id === "string" && typeof row.label === "string"
+    ? { ok: true, row: { id: row.id, label: row.label } }
+    : { ok: true };
 }
 
 /**
