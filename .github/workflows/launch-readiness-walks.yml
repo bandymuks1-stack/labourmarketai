@@ -182,11 +182,28 @@ jobs:
               gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
               log "handed over to a fresh tick" ;;
             *)
-              # A brake refused it before the walk (health, deploy, budget). GitHub's hourly schedule
-              # proved unreliable (no scheduled tick from 08:12 to 16:00 UTC on 2026-11-22), so the tick
-              # waits past the 5-minute deploy quiet period and hands over itself, at most once per
-              # refusal: one refused run per ~7 minutes, never a fast loop.
-              sleep 420
-              gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
-              log "a brake refused the walk; handed over to a fresh tick after 7 minutes" ;;
+              # A brake refused it before the walk. GitHub's hourly schedule proved unreliable (no
+              # scheduled tick from 08:12 to 16:00 UTC on 2026-11-22). Self-retry ONLY for the transient
+              # deploy brake (5-minute quiet period), and at most 3 refused runs of this pair per UTC
+              # day; every other refusal (health, errors, budget) is left to the schedule as before.
+              brake=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+                --jq '[.jobs[].steps[]? | select(.conclusion == "failure") | .name][0] // ""')
+              refused_today=0
+              for rid in $(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --created ">=$(date -u +%F)" \
+                  --limit 100 --json databaseId,displayTitle --jq ".[] | select(.displayTitle == \"prod-qa-walk $spec $device\") | .databaseId"); do
+                r=$(gh api "repos/$REPO/actions/runs/$rid/jobs?filter=all&per_page=100" \
+                  --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+                [ "${r:-0}" -gt 0 ] || refused_today=$((refused_today + 1))
+              done
+              case "$brake" in
+                "Brake (e)"*)
+                  if [ "$refused_today" -lt 3 ]; then
+                    sleep 420
+                    gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
+                    log "deploy brake refused the walk ($refused_today today); handed over after 7 minutes"
+                  else
+                    log "deploy brake refused this pair $refused_today times today; stopped, the schedule retries"
+                  fi ;;
+                *) log "brake '${brake:-unknown}' refused the walk; not retried here, the schedule retries" ;;
+              esac ;;
           esac
