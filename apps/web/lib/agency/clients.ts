@@ -1,5 +1,7 @@
 import "server-only";
 
+import { isLabourDemandRow } from "@/lib/demand/market-direction";
+
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
@@ -90,7 +92,9 @@ export async function listAgencyDemands(): Promise<AgencyDemandsState> {
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { kind: "error" };
 
-  const base = "id, title, status, created_at";
+  // kind + payload let the list drop help-desk and privacy requests to the
+  // platform: they are never a need an agency may be shown (P0 2026-11-22).
+  const base = "id, title, status, created_at, kind, payload";
   try {
     let linkable = true;
     let { data, error } = await asAny(supabase)
@@ -118,7 +122,11 @@ export async function listAgencyDemands(): Promise<AgencyDemandsState> {
     return {
       kind: "ok",
       linkable,
-      rows: (data ?? []).map(
+      rows: (data ?? [])
+        .filter((r: Record<string, unknown>) =>
+          isLabourDemandRow({ kind: r.kind as string | null, payload: r.payload }),
+        )
+        .map(
         (r: Record<string, unknown>): AgencyDemandRow => ({
           id: r.id as string,
           title: (r.title as string | null) ?? "—",
