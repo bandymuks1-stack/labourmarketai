@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# 20261122140000_open_need_board_no_client_identity_v1 — access proof.
+# 20261122170000_open_need_board_no_client_identity_v1 — access proof.
 #
 # Runs against a LOCAL Supabase stack (`supabase start`, every migration
 # replayed): the two readers depend on the whole demand/organization model
@@ -20,7 +20,7 @@ set -uo pipefail
 export PGCLIENTENCODING=UTF8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
-NAME=20261122140000_open_need_board_no_client_identity_v1
+NAME=20261122170000_open_need_board_no_client_identity_v1
 UP="$REPO/supabase/migrations/$NAME.sql"
 DOWN="$REPO/supabase/rollbacks/$NAME.down.sql"
 PGPROOF_HOST=${PGPROOF_HOST:-127.0.0.1}; PGPROOF_PORT=${PGPROOF_PORT:-54322}
