@@ -252,6 +252,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-22 (RED, needs-human-gate, NOT applied): owner decision A — messaging about an open
       // need; the client unnamed until it discloses.
       "20261122214700_",
+      // 2026-11-22 (RED, needs-human-gate, NOT applied, stacked on #3647): owner decision — providers see
+      // only per-organization order pseudonyms, never a real need id.
+      "20261122223000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

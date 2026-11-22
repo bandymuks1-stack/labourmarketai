@@ -94,7 +94,7 @@ for (const w of WIDTHS) {
   const ROLE = `Open need welder ${w.name} ${RUN}`;
   const ASK = `Question about the need ${w.name} ${RUN}`;
   const ANSWER = `The client answers ${w.name} ${RUN}`;
-  const s = { needId: "", role: "", providerOrgId: "", conversationId: "", label: "", clientId: "" };
+  const s = { needId: "", role: "", providerOrgId: "", conversationId: "", label: "", clientId: "", alias: "" };
 
   test.describe(`open-need messaging at ${w.viewport.width} px`, () => {
     test.describe.configure({ mode: "serial" });
@@ -124,7 +124,6 @@ for (const w of WIDTHS) {
       s.needId = needs[0]!.id;
       // The board and the thread show the need's stored role (the intake may normalize the typed text).
       s.role = needs[0]!.role;
-      s.label = `Client ${s.needId.replace(/-/g, "").slice(0, 6).toUpperCase()}`;
       const orgs = sql<{ id: string }>(
         `select organization_id::text as id from public.company_memberships where profile_id = ${lit(await userId(PROVIDER))} and role = 'owner' and status = 'active'`,
       );
@@ -140,17 +139,33 @@ for (const w of WIDTHS) {
       if ((await section.getAttribute("open")) === null) await section.locator("summary").click();
       const select = section.getByTestId(`team-offer-demand-${s.providerOrgId}`);
       await expect(select).toBeVisible({ timeout: 60_000 });
-      const option = select.locator(`option[value="${s.needId}"]`);
-      await expect(option, "the need is on the board").toHaveCount(1);
+      // Owner 2026-11-22 (20261122223000): the board names the need by the provider's own order
+      // pseudonym, never by the need id.
+      await expect(select.locator(`option[value="${s.needId}"]`), "the board never carries the need id").toHaveCount(0);
+      // The pseudonym this organization was issued for this need — read by the test's own
+      // service connection from the server-only ledger (no app role can read it).
+      s.alias =
+        sql<{ alias: string }>(
+          `select alias::text from public.provider_need_aliases where provider_org_id = ${lit(s.providerOrgId)} and request_id = ${lit(s.needId)}`,
+        )[0]?.alias ?? "";
+      const option = select.locator(`option[value="${s.alias}"]`);
+      await expect(option, "the need is on the board, under its pseudonym").toHaveCount(1);
+      expect(s.alias, "an order pseudonym").toMatch(/^[0-9a-f-]{36}$/);
+      expect(s.alias).not.toBe(s.needId);
       const optionText = (await option.textContent()) ?? "";
       expect(optionText, "the board names the role").toContain(s.role);
       expect(optionText, "the board does not name the client").not.toContain(CLIENT_ORG);
       await expect(section.getByText(CLIENT_ORG), "nowhere in the section").toHaveCount(0);
-      await select.selectOption(s.needId);
+      await select.selectOption(s.alias);
       await fits(page, "the provider board");
       await section.getByTestId(`open-need-write-${s.providerOrgId}`).click();
       await page.waitForURL(/\/en\/dashboard\/communication\/[0-9a-f-]{36}/, { timeout: 60_000 });
       s.conversationId = /\/communication\/([0-9a-f-]{36})/.exec(page.url())![1]!;
+      const source = sql<{ source_id: string }>(
+        `select source_id::text from public.conversations where id = ${lit(s.conversationId)}`,
+      )[0]!.source_id;
+      expect(source, "the thread's source is the pseudonym, never the need id").toBe(s.alias);
+      s.label = `Client ${source.replace(/-/g, "").slice(0, 6).toUpperCase()}`;
       await expect(page.getByTestId("thread-counterparty"), "the client is a pseudonym").toContainText(s.label, {
         timeout: 60_000,
       });
@@ -218,7 +233,9 @@ for (const w of WIDTHS) {
       expect(visible, "the provider reads both messages").toHaveLength(2);
       const raw = (await rowsAs(PROVIDER, `conversation_messages?conversation_id=eq.${s.conversationId}&select=author_id`)) as unknown[];
       expect(raw, "the table gives the provider only its own message").toHaveLength(1);
-      const everything = JSON.stringify([parts, visible, raw]);
+      const convRows = await rowsAs(PROVIDER, `conversations?id=eq.${s.conversationId}&select=id,source_id,subject`);
+      const everything = JSON.stringify([parts, visible, raw, convRows]);
+      expect(everything.includes(s.needId), "the need id is in nothing the provider received").toBe(false);
       expect(everything.includes(s.clientId), "the client's id is in nothing the provider received").toBe(false);
       expect(
         await rowsAs(PROVIDER, `conversation_participants?profile_id=eq.${s.clientId}&select=conversation_id`),
@@ -232,7 +249,7 @@ for (const w of WIDTHS) {
       const section = page.getByTestId(`team-demand-offer-section-${s.providerOrgId}`);
       await expect(section).toBeVisible({ timeout: 60_000 });
       if ((await section.getAttribute("open")) === null) await section.locator("summary").click();
-      await section.getByTestId(`team-offer-demand-${s.providerOrgId}`).selectOption(s.needId);
+      await section.getByTestId(`team-offer-demand-${s.providerOrgId}`).selectOption(s.alias);
       await section.getByTestId(`team-offer-submit-${s.providerOrgId}`).click();
       const sent = section.getByTestId(`team-offer-sent-${s.providerOrgId}`);
       await expect(sent, "the offer is listed").toContainText(s.role, { timeout: 60_000 });
