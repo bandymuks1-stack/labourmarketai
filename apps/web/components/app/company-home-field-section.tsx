@@ -213,6 +213,10 @@ export interface CompanyHomePartners {
 
 /** Open needs the home names before the rest fold away. */
 const HOME_NEEDS_VISIBLE = 5;
+/** People the home names in "who is free"; the counts line above holds the
+ *  whole roster and the planning page lists everyone (responsive pass
+ *  2026-11-22: eight 66 px rows made this block 860 px at 390 px). */
+const HOME_CAPACITY_VISIBLE = 4;
 
 export async function CompanyHomeFieldSection({
   locale,
@@ -708,7 +712,7 @@ export async function CompanyHomeFieldSection({
                 </p>
               ) : null}
               <ul className="flex flex-col gap-1">
-                {field.capacity.rows.map((w) => {
+                {field.capacity.rows.slice(0, HOME_CAPACITY_VISIBLE).map((w) => {
                   // The state in words — the same strings the row always carried.
                   const stateText =
                     w.state === "free"
@@ -788,9 +792,11 @@ export async function CompanyHomeFieldSection({
               {!field.capacity.absencesKnown ? (
                 <p className="text-meta text-text-muted">{t("capacity.absencesUnknown")}</p>
               ) : null}
-              {field.capacity.rosterTotal > field.capacity.rows.length ? (
+              {field.capacity.rosterTotal > Math.min(field.capacity.rows.length, HOME_CAPACITY_VISIBLE) ? (
                 <p className="text-meta text-text-muted">
-                  {t("capacity.more", { count: field.capacity.rosterTotal - field.capacity.rows.length })}
+                  {t("capacity.more", {
+                    count: field.capacity.rosterTotal - Math.min(field.capacity.rows.length, HOME_CAPACITY_VISIBLE),
+                  })}
                 </p>
               ) : null}
               <div className="mt-auto flex flex-wrap gap-2 pt-1">
