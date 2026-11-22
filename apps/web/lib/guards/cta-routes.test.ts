@@ -87,6 +87,20 @@ describe("critical CTAs lead to the action they name", () => {
     expect(clients.match(/dashboard\/company\/needs\?audience=need#demand-intake/g) ?? []).toHaveLength(2);
   });
 
+  it("a missing step returns to the started action (owner 2026-11-22)", () => {
+    // The student invite needs the training capability: its notice opens the
+    // capability card with the SAME invite as `next` …
+    const panel = read("components/app/invite-panel.tsx");
+    expect(panel).toMatch(/dashboard\/company\/settings\?need=training_provider&next=\$\{encodeURIComponent\(/);
+    expect(panel).toMatch(/`\/dashboard\/network\?invite=1&type=\$\{type\}/);
+    expect(panel).toMatch(/#company-capabilities`/);
+    expect(panel).not.toMatch(/href=\{`\/\$\{locale\}\/dashboard\/company`\}/);
+    // … and settings validates both and links back to that invite under the card.
+    const settings = read("app/[locale]/dashboard/company/settings/page.tsx");
+    expect(settings).toMatch(/isSafeReturnPath\(sp\.next\)/);
+    expect(settings).toMatch(/<PageBack href=\{returnTo\}[^>]*data-testid="settings-return-to-action"/);
+  });
+
   it("no link to the invite panel leaves out the action (`invite=1`)", () => {
     // Any hand-written /dashboard/network?type=… or ?relationship=… link is an
     // invite CTA; without invite=1 it lands on the relationships overview.
