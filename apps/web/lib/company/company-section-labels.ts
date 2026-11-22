@@ -317,6 +317,7 @@ export async function readOrgMembersLabels() {
 
 export async function readWorkersLabels() {
   const tWorkers = await getTranslations("roleDashboards.company.workers");
+  const tChat = await getTranslations("conversation.chat");
   return {
     title: tWorkers("title"),
     subtitle: tWorkers("subtitle"),
@@ -360,6 +361,9 @@ export async function readWorkersLabels() {
     coordinationBody: tWorkers("coordinationBody"),
     coordinationNextAction: tWorkers("coordinationNextAction"),
     identity: {
+      // The same words the company page and the chat use for a person with no
+      // name on record, never a dash.
+      unnamed: tChat("unnamedPerson"),
       availability: {
         available: tWorkers("identity.availability.available"),
         busy: tWorkers("identity.availability.busy"),
