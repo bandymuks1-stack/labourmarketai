@@ -296,6 +296,13 @@ const CORE_LABEL = "hidden xl:inline";
  *  label (`lg`); below that its filled pill is the "you are here" mark and the
  *  page title right under the bar names it. */
 const ACTIVE_LABEL = "hidden lg:inline";
+/** "More" carrying the active page names it from `2xl`. The core loop already
+ *  names itself from `xl`, so between 1280 and 1535 px a named More was the
+ *  item that pushed the row past the screen: the nav ran into the workspace
+ *  chip (prod mobile-surfaces M-6 on the projects page, run 44977749659), or
+ *  the chip shrank to a dot in Russian. Below `2xl` the filled pill with the
+ *  page's icon is the "you are here" mark, and the page title names it. */
+const OVERFLOW_ACTIVE_LABEL = "hidden 2xl:inline";
 
 function NavBadge({ id, count }: { id: string; count: number }) {
   if (count <= 0) return null;
@@ -417,7 +424,7 @@ function HeaderMoreMenu({
           <TriggerIcon {...iconControl()} aria-hidden />
           {!activeItem && <NavBadge id="more" count={total} />}
         </span>
-        <span className={activeItem ? ACTIVE_LABEL : WIDE_LABEL}>{triggerLabel}</span>
+        <span className={activeItem ? OVERFLOW_ACTIVE_LABEL : WIDE_LABEL}>{triggerLabel}</span>
         <ChevronDown
           {...iconControl(cn("hidden transition-transform duration-150 motion-reduce:transition-none lg:block", open && "rotate-180"))}
           aria-hidden
