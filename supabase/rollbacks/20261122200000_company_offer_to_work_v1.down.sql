@@ -1,7 +1,7 @@
 -- Rollback of 20261122200000_company_offer_to_work_v1.
 -- Refuses while the new columns hold anything (a confirmation, a place, a
 -- named crew): those are agreements people made and must not vanish — then
--- forward-fix instead. Otherwise drops the six new functions and the columns.
+-- forward-fix instead. Otherwise drops the eight new functions and the columns.
 -- No existing function, policy or grant was changed, so none is restored.
 
 begin;
