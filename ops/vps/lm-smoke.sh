@@ -63,6 +63,8 @@ docker ps --format '{{.Names}} {{.Status}}' | grep -i agentai
 # healthcheck ("Up 3 days") counts as not healthy, the cautious reading.
 U=$(docker ps --format '{{.Names}} {{.Status}}' | grep -i agentai | grep -vc '(healthy)' || true)
 [ "$U" = 0 ] || fail "$U Agentai container(s) not healthy"
+N=$(docker ps --format '{{.Names}}' | grep -ci agentai || true)
+[ "$N" -ge 1 ] || fail "no Agentai container is running"
 head -1 /proc/pressure/cpu
 free -m | sed -n '2p'
 
