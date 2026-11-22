@@ -225,13 +225,14 @@ function RequestRow({
           a total would be worse than showing none. Interest count is response,
           never a claim that anyone is committed. */}
       {r.teamSize && r.teamSize > 0 ? (
-        <div data-testid="demand-readback-capacity">
+        // A list row carries the band at 32 px, not its 56 px card height (the
+        // band itself is frozen with the landing; the row sizes it).
+        <div data-testid="demand-readback-capacity" className="[&>span]:h-8">
           <CapacityBand
             filled={waiting?.count ?? 0}
             total={r.teamSize}
             leftLabel={labels.capacityNeeded(r.teamSize)}
             rightLabel={labels.capacityInterested(waiting?.count ?? 0)}
-            size="compact"
           />
         </div>
       ) : null}
