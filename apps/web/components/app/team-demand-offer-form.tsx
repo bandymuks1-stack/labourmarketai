@@ -125,7 +125,7 @@ export function TeamDemandOfferForm({
         {/* One row, the detail one tap away (coordinator decision 2026-11-22, item 5). */}
         <Explain summary={tDisclosure("details")} testId="team-demand-offer-explain">
           <p>{org ? t("orgIntro") : t("intro")}</p>
-          <p>{t("privacy")}</p>
+          <p>{org ? t("orgPrivacy") : t("privacy")}</p>
         </Explain>
 
         {!org && memberCount < 2 ? (
@@ -216,7 +216,7 @@ export function TeamDemandOfferForm({
                     onClick={submit}
                     data-testid={`team-offer-submit-${teamId}`}
                   >
-                    {pending ? t("submitting") : t("submit")}
+                    {pending ? t("submitting") : org ? t("orgSubmit") : t("submit")}
                   </Button>
                 </div>
               </div>

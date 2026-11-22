@@ -21,6 +21,7 @@ import {
   sql,
   sqlExec,
   userId,
+  onboardInvited,
 } from "./isolated-web-a-helpers";
 
 /**
@@ -202,7 +203,7 @@ test("M-3. a notification e-mail: the invited person registers and the inviter i
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(page.url())) await onboard(page, "work", "Synthetic Notify Invitee");
+  if (/\/onboarding/.test(page.url())) await onboardInvited(page, "Synthetic Notify Invitee");
   await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(page.url())) {
     const accept = page.getByTestId("invite-accept");

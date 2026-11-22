@@ -15,7 +15,7 @@ const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf-8");
 
 const CASES: ReadonlyArray<{ rel: string; testId: string; keys: readonly string[] }> = [
   { rel: "components/app/team-brigades-panel.tsx", testId: "team-brigades-explain", keys: ['t("intro")', 't("honestNote")'] },
-  { rel: "components/app/team-demand-offer-form.tsx", testId: "team-demand-offer-explain", keys: ['t("orgIntro")', 't("intro")', 't("privacy")'] },
+  { rel: "components/app/team-demand-offer-form.tsx", testId: "team-demand-offer-explain", keys: ['t("orgIntro")', 't("intro")', 't("orgPrivacy")', 't("privacy")'] },
   { rel: "components/app/people-import-panel.tsx", testId: "people-import-explain", keys: ['t("lead")'] },
   { rel: "components/app/organization-roster-section.tsx", testId: "organization-roster-explain", keys: ['t("intro")'] },
 ];
