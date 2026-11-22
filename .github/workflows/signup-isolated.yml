@@ -19,7 +19,9 @@ name: Signup Isolated (local Supabase)
 #     experience-integration-isolated.spec.ts uploads its own screenshots and
 #     failure notes as the `experience-integration` artifact (synthetic
 #     accounts on this stack only; owner decision 2026-11-14, CV screenshots
-#     from synthetic accounts as CI artifacts). No other walk's output is kept.
+#     from synthetic accounts as CI artifacts), and journal-day-choice-isolated
+#     uploads its 375 / 1280 px screenshots as `journal-day-choice` (owner P1
+#     2026-11-21, synthetic worker). No other walk's output is kept.
 
 on:
   workflow_dispatch:
@@ -73,6 +75,10 @@ on:
       - "apps/web/tests/e2e/experience-integration-isolated.spec.ts"
       # Register 2.36, a profession journal template prefills an entry.
       - "apps/web/tests/e2e/journal-template-isolated.spec.ts"
+      # The journal opens with the work day (owner P1 2026-11-21).
+      - "apps/web/tests/e2e/journal-day-choice-isolated.spec.ts"
+      - "apps/web/app/*/dashboard/journal/**"
+      - "apps/web/lib/journal/day-choice.ts"
       - "apps/web/lib/journal/journal-templates*.ts"
       - "apps/web/components/app/journal-entry-composer.tsx"
       # ... and reaches the Living CV's journal-entry figure (T-4).
@@ -206,15 +212,15 @@ jobs:
     timeout-minutes: 45
     env:
       APP_ORIGIN: http://127.0.0.1:3000
+      # Owner P0 2026-11-22 walks, run after SPEC; kept apart from the SPEC line so new entries there never conflict.
+      SPEC_P0: tests/e2e/invite-join-isolated.spec.ts tests/e2e/outsider-isolation-isolated.spec.ts
       # The walks share this one throwaway stack: self-serve sign-up, the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts), the
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), the practice -> sign-off -> recognition
       # chain that production no longer writes (recognition-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts
-      # Owner P0 2026-11-22 walks, kept on their own line so a new SPEC entry above never conflicts with them.
-      SPEC_P0: tests/e2e/invite-join-isolated.spec.ts tests/e2e/outsider-isolation-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -437,6 +443,17 @@ jobs:
             apps/web/test-results/experience-integration/
             apps/web/test-results/experience-integration-iso*/error-context.md
             apps/web/test-results/invite-join/
+          if-no-files-found: warn
+          retention-days: 14
+
+      # The journal's day choice (journal-day-choice-isolated.spec.ts, owner P1
+      # 2026-11-21): one synthetic worker on this stack, 375 / 1280 px.
+      - name: Upload the journal day-choice screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: journal-day-choice
+          path: apps/web/test-results/journal-day-choice/
           if-no-files-found: warn
           retention-days: 14
 
