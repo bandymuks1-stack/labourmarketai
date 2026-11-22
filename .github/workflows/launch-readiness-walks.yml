@@ -59,6 +59,11 @@ jobs:
           # invited-worker:phone is out of the plan: its synthetic account is created by the owner only
           # (prod-qa-invited-provision.yml) and does not exist, so every re-run after a deploy failed at
           # the mint and spent the day's budget (run 45001807853). Dispatch it by hand once provisioned.
+          # Owner order 2026-11-22: these pairs run once more on the current build, even though they
+          # passed earlier (P-13 phone-375, and orders-bookings after #3625). Only a run created after
+          # RERUN_START counts for them.
+          RERUN: "profile-cv-history:phone-375 orders-bookings:desktop orders-bookings:phone"
+          RERUN_START: "2026-11-22T16:00:00Z"
         run: |
           set -euo pipefail
           PLAN="company-governance:desktop
@@ -93,7 +98,7 @@ jobs:
           # The pairs that already have a completed dispatch since the window opened (title: "prod-qa-walk <spec> <device>").
           done_titles=$(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --status completed \
             --created ">=${WINDOW_START%%T*}" --limit 200 --json displayTitle,createdAt,conclusion,databaseId \
-            --jq ".[] | select(.createdAt >= \"$WINDOW_START\") | \"\(.displayTitle)\t\(.conclusion)\t\(.databaseId)\"")
+            --jq ".[] | select(.createdAt >= \"$WINDOW_START\") | \"\(.displayTitle)\t\(.conclusion)\t\(.databaseId)\t\(.createdAt)\"")
 
           # A pair counts as run only if its walk job actually ran (success or failure). A run refused by a
           # brake before the walk job (health, deploy, budget) does not count, and is dispatched again.
@@ -102,8 +107,9 @@ jobs:
           last_deploy=$(gh run list -R "$REPO" -w deploy-vps.yml --branch main --status success --limit 1 \
             --json updatedAt --jq '.[0].updatedAt // ""')
           ran() {
-            local ids id c ended
-            ids=$(printf '%s\n' "$done_titles" | awk -F'\t' -v t="prod-qa-walk $1 $2" '$1 == t {print $3}')
+            local ids id c ended since="$WINDOW_START"
+            case " $RERUN " in *" $1:$2 "*) since="$RERUN_START" ;; esac
+            ids=$(printf '%s\n' "$done_titles" | awk -F'\t' -v t="prod-qa-walk $1 $2" -v s="$since" '$1 == t && $4 >= s {print $3}')
             for id in $ids; do
               c=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
               # A walk job that failed BEFORE its Provision step (a brake re-checked inside the walk job,
@@ -176,7 +182,11 @@ jobs:
               gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
               log "handed over to a fresh tick" ;;
             *)
-              # A brake refused it before the walk (health, deploy, budget): no fast loop. The hourly
-              # scheduled tick tries again.
-              log "a brake refused the walk; the next scheduled tick tries again" ;;
+              # A brake refused it before the walk (health, deploy, budget). GitHub's hourly schedule
+              # proved unreliable (no scheduled tick from 08:12 to 16:00 UTC on 2026-11-22), so the tick
+              # waits past the 5-minute deploy quiet period and hands over itself, at most once per
+              # refusal: one refused run per ~7 minutes, never a fast loop.
+              sleep 420
+              gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
+              log "a brake refused the walk; handed over to a fresh tick after 7 minutes" ;;
           esac
