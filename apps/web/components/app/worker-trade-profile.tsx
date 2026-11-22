@@ -20,6 +20,7 @@ import {
   normalizeSelfDeclaredProfession,
 } from "@/lib/worker/self-declared-profession";
 import { type Role } from "@/lib/auth/actions";
+import { useSavedRows } from "@/lib/hooks/use-saved-rows";
 import { cn } from "@/lib/utils";
 
 type ProfessionOption = { id: string; slug: string };
@@ -69,6 +70,12 @@ export function WorkerTradeProfile({
   const [ownDraft, setOwnDraft] = useState("");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // EVERY ADD ANSWERS (P-13's pattern, `useSavedRows`): the row the save
+  // confirmed shows at once, a removed one goes at once, while the profile's
+  // refresh catches up; "Saving..." while it is on its way, the error if not.
+  const { rows: ownRows, showSaved: showSavedOwn, hideRemoved: hideRemovedOwn } = useSavedRows(ownProfessions);
+  const [ownPending, startOwn] = useTransition();
+  const [ownError, setOwnError] = useState(false);
 
   const run = (fn: () => Promise<void>) => {
     setError(null);
@@ -130,9 +137,9 @@ export function WorkerTradeProfile({
           <h3 className="font-display text-sm font-semibold text-text-primary">
             {t("ownProfessionsTitle")}
           </h3>
-          {ownProfessions.length > 0 && (
+          {ownRows.length > 0 && (
           <ul className="flex flex-wrap gap-2">
-            {ownProfessions.map((own) => (
+            {ownRows.map((own) => (
               <li
                 key={own.id}
                 className="inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-blue/10 py-1 pl-3 pr-1 text-sm text-text-primary"
@@ -146,7 +153,12 @@ export function WorkerTradeProfile({
                   cancelLabel={t("keepDirection")}
                   tier="important_write"
                   disabled={pending}
-                  onConfirm={() => run(() => removeOwnProfession(own.id))}
+                  onConfirm={() =>
+                    run(async () => {
+                      await removeOwnProfession(own.id);
+                      hideRemovedOwn(own.id);
+                    })
+                  }
                   className="flex-none rounded-full px-1.5 py-0.5 text-text-muted transition-colors hover:bg-state-danger/10 hover:text-state-danger"
                   testId={`worker-own-profession-remove-${own.id}`}
                 />
@@ -158,9 +170,19 @@ export function WorkerTradeProfile({
               papildyti". Without it these words could only ever be entered in
               the first minutes of an account. */}
           <form
-            action={async (formData: FormData) => {
-              const result = await addOwnProfession(formData);
-              setOwnDraft(result.ok ? "" : ownDraft);
+            action={(formData: FormData) => {
+              setOwnError(false);
+              startOwn(async () => {
+                try {
+                  const result = await addOwnProfession(formData);
+                  if (result.ok && result.row) showSavedOwn(result.row);
+                  // a duplicate is already on the list: nothing was lost
+                  if (result.ok || result.reason === "duplicate") setOwnDraft("");
+                  else setOwnError(true);
+                } catch {
+                  setOwnError(true);
+                }
+              });
             }}
             className="flex gap-2"
           >
@@ -179,14 +201,19 @@ export function WorkerTradeProfile({
             <Button
               type="submit"
               variant="secondary"
-              disabled={!normalizeSelfDeclaredProfession(ownDraft)}
+              disabled={ownPending || !normalizeSelfDeclaredProfession(ownDraft)}
               data-testid="worker-own-profession-add"
               className="flex-none rounded-md"
             >
-              {t("ownProfessionAdd")}
+              {ownPending ? t("saving") : t("ownProfessionAdd")}
             </Button>
           </form>
-          {ownProfessions.length > 0 && (
+          {ownError && !ownPending ? (
+            <span className="text-xs text-state-danger" role="alert" data-testid="worker-own-profession-error">
+              {t("saveError")}
+            </span>
+          ) : null}
+          {ownRows.length > 0 && (
             <p className="text-meta leading-relaxed text-text-muted">
               {t("ownProfessionsNote")}
             </p>

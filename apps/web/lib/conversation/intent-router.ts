@@ -3156,7 +3156,7 @@ const RULES: IntentRule[] = [
       p("работник", 4),
       p("сотрудник", 4),
       p("\\b(mitarbeiter|arbeiter|arbeitskräfte|fachkräfte)\\b", 4), // de
-      p("\\b(medewerkers|personeel|arbeiders|arbeidskrachten|vakmensen)\\b", 4), // nl
+      p("\\b(medewerkers|werknemers|personeel|arbeiders|arbeidskrachten|vakmensen)\\b", 4), // nl — "Ik heb vijf werknemers nodig"
       p("(pracownik|robotnik|pracownic)", 4), // pl — pracownicy / pracowników
       p("\\b(hire|hiring|recruit(ing|ment)?|staffing)\\b", 3),
       p("(нанять|наним|найм)", 3),
@@ -3180,7 +3180,7 @@ const RULES: IntentRule[] = [
         // klientui" (an agency buying for a client) uses a different verb and
         // measured `unknown`. Reading the shared seek vocabulary instead of a
         // single hard-coded verb is the point of this rule.
-        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|mensen|leute|personen|personeel|люд|человек|рабочих|žmoni|zmoni)`,
+        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|mensen|leute|personen|personeel|люд|человек|рабочих|строител|builders|statybinink|bauarbeiter|bouwvakkers|žmoni|zmoni)`,
         5,
       ),
       // pl (2026-09-20). `SEEK_VERB_SOURCE` lives in lib/structuring and
