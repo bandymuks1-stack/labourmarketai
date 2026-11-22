@@ -229,3 +229,50 @@ describe("the second owner list reaches its real action, in LT, EN and RU", () =
     expect(classifyIntent("Ищу работу").intent).toBe("find-work");
   });
 });
+
+/**
+ * CLOSE VARIANTS (2026-11-22). The acceptance phrases are not the only way
+ * people say them: singular / plural, a digit for the number, "me", another
+ * verb. Each still reaches the SAME door, with AI off.
+ */
+describe("close LT/EN/RU variants reach the same doors", () => {
+  it.each([
+    ["ieškau subrangovo", "find-partners"],
+    ["reikia subrangovų", "find-partners"],
+    ["looking for a subcontractor", "find-partners"],
+    ["find me subcontractors", "find-partners"],
+    ["ищу субподрядчика", "find-partners"],
+    ["нужны субподрядчики", "find-partners"],
+    ["reikia 5 darbuotojų", "need-workers"],
+    ["I need 5 workers", "need-workers"],
+    ["нужно 5 работников", "need-workers"],
+    ["find me candidates", "candidates"],
+    ["surask man kandidatų", "candidates"],
+    ["show candidates", "candidates"],
+    ["найди мне кандидатов", "candidates"],
+    ["noriu pasiūlyti komandą", "offer-team"],
+    ["offer my team", "offer-team"],
+    ["padėk man susisiekti", "open-conversation"],
+    ["help me contact someone", "open-conversation"],
+    ["помоги мне связаться", "open-conversation"],
+    ["noriu rasti darbą", "find-work"],
+    ["find me a job", "find-work"],
+    ["найди мне работу", "find-work"],
+    ["užpildyk vakar dienos žurnalą", "log-work"],
+    ["fill yesterday's journal", "log-work"],
+    ["заполни журнал за вчера", "log-work"],
+  ])('"%s" → %s', (phrase, intent) => {
+    expect(classifyIntent(phrase).intent).toBe(intent);
+  });
+
+  it.each(["reikia 5 darbuotojų", "I need 5 workers", "нужно 5 работников"])('"%s" → headcount 5 (a digit, as said)', (phrase) => {
+    expect(structureValueStatement(phrase).headcount).toBe(5);
+  });
+
+  it.each(["užpildyk vakar dienos žurnalą", "fill yesterday's journal", "заполни журнал за вчера"])(
+    '"%s" → a draft dated yesterday',
+    (phrase) => {
+      expect(extractWorkLog(phrase, TODAY).date).toBe(YESTERDAY);
+    },
+  );
+});

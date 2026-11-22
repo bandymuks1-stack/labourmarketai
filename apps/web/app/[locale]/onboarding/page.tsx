@@ -159,7 +159,7 @@ export default async function OnboardingPage({
   const visibility = await loadEmployerVisibilityForChat();
   const employerVisibility =
     visibility.kind === "state" && visibility.consent ? (
-      <DiscoverabilityConsent locale={locale} source="onboarding" {...visibility.consent} />
+      <DiscoverabilityConsent compact locale={locale} source="onboarding" {...visibility.consent} />
     ) : null;
   const tOnboard = await getTranslations("auth.onboarding");
   // Student step (universal first-run router): the education-type registry
