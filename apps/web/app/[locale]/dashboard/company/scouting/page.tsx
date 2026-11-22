@@ -137,13 +137,18 @@ export default async function CompanyScoutingPage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<{
     request?: string;
+    needs?: string;
     skill?: string;
     country?: string;
     available?: string;
   }>;
 }) {
   const { locale } = await params;
-  const { request, ...rawFilterParams } = await searchParams;
+  const { request, needs, ...rawFilterParams } = await searchParams;
+  // On a phone the need picker shows the first few needs and the chosen one;
+  // "Show all" opens the rest (design audit 2026-11-22: 14 needs took ~750 px).
+  const PICKER_VISIBLE = 5;
+  const showAllNeeds = needs === "all";
   // Bounded facet filters (Wagon 1): syntax-validated here, allowlisted
   // against the visible supply inside runScouting — never widening.
   const requestedFilters = parseScoutFilterParams(rawFilterParams);
@@ -151,6 +156,7 @@ export default async function CompanyScoutingPage({
   await requireRoleOrRedirect(locale, "company");
 
   const t = await getTranslations("scouting");
+  const tDisclosure = await getTranslations("common.disclosure");
 
   // W8 slice 1 — ACTING CONTEXT FIRST. Holding the company role gets you onto
   // this route; it does not say which company you are acting for. Without an
@@ -530,12 +536,14 @@ export default async function CompanyScoutingPage({
         </div>
       ) : (
         <nav className="flex flex-wrap gap-2" aria-label={t("pickDemand")}>
-          {demands.map((d) => (
+          {demands.map((d, i) => (
             <Link
               key={d.id}
               href={`/${locale}/dashboard/company/scouting?request=${d.id}`}
               aria-current={selected === d.id ? "page" : undefined}
-              className={`${chipLinkClassName(selected === d.id)} max-w-full`}
+              className={`${chipLinkClassName(selected === d.id)} max-w-full${
+                !showAllNeeds && i >= PICKER_VISIBLE && selected !== d.id ? " max-sm:hidden" : ""
+              }`}
             >
               {selected === d.id ? (
                 <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
@@ -571,6 +579,15 @@ export default async function CompanyScoutingPage({
               ) : null}
             </Link>
           ))}
+          {!showAllNeeds && demands.length > PICKER_VISIBLE ? (
+            <Link
+              href={`/${locale}/dashboard/company/scouting?${selected ? `request=${selected}&` : ""}needs=all`}
+              className={`${chipLinkClassName(false)} sm:hidden`}
+              data-testid="scouting-needs-show-all"
+            >
+              {tDisclosure("showAll", { count: demands.length })}
+            </Link>
+          ) : null}
         </nav>
       )}
 
