@@ -14,6 +14,7 @@ import { useLocale } from "../i18n/locale-context";
 import { Body, Button, Divider, Field, NotAvailable } from "../ui/primitives";
 import { theme } from "../ui/theme";
 import { CapabilityFailureNotice } from "./capability-failure";
+import { useKeptDraft } from "../use-kept-draft";
 
 /**
  * POST A NEED — `demand.create_draft` → `demand.create_confirm` for the
@@ -60,6 +61,16 @@ export function NeedIntakeScreen({ onDone }: { onDone: () => void }) {
   const [location, setLocation] = useState("");
   const [country, setCountry] = useState("");
   const [teamSize, setTeamSize] = useState("");
+  // UNSENT WORDS SURVIVE A SIGN-IN AGAIN (owner P0 2026-11-22).
+  const kept = useKeptDraft("need-intake", { description, role, location, country, teamSize }, (d) => {
+    const keep = (set: (f: (now: string) => string) => void, v: string | undefined) =>
+      set((now) => (now.trim() === "" ? v ?? "" : now));
+    keep(setDescription, d.description);
+    keep(setRole, d.role);
+    keep(setLocation, d.location);
+    keep(setCountry, d.country);
+    keep(setTeamSize, d.teamSize);
+  });
   const [urgency, setUrgency] = useState<DemandUrgency | null>(null);
   const [flow, setFlow] = useState<FlowState>({ kind: "writing", localError: null });
 
@@ -146,6 +157,7 @@ export function NeedIntakeScreen({ onDone }: { onDone: () => void }) {
         setFlow({ kind: "send_failed", fields, preview, token, failure: result.failure });
         return;
       }
+      kept.clear();
       setFlow({ kind: "sent", preview, result: result.data });
     },
     [accessToken, locale],
