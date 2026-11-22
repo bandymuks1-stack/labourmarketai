@@ -7,7 +7,9 @@
  *   - the worklog readback never loses the entry to a thrown action, and an
  *     expired session says "sign in", not "try again";
  *   - the public company-need form puts back what was typed after a refused
- *     send (React resets an action form after every send).
+ *     send (React resets an action form after every send);
+ *   - the mobile journal, need and message composers keep unsent words across
+ *     a sign-in again, for the same person only, and sign-out removes them.
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -87,5 +89,29 @@ describe("surfaces keep what was typed", () => {
     expect(src).toContain("if (!state || state.ok !== false) return;");
     expect(src).toContain("queueMicrotask(refill);");
     expect(src).toContain("typedRef.current = form");
+  });
+});
+
+describe("mobile composers keep unsent words", () => {
+  const MOBILE = resolve(WEB, "../mobile/src");
+  const readM = (p: string) => readFileSync(resolve(MOBILE, p), "utf8");
+
+  it("the draft store is owner-bound, time-limited and cleared on sign-out", () => {
+    const src = readM("drafts.ts");
+    expect(src).toContain("k.owner !== owner");
+    expect(src).toContain("const TTL_MS = 12 * 60 * 60 * 1000;");
+    expect(readM("auth-context.tsx")).toMatch(/clearStoredSession\(sessionStore\);\n[^\n]*\n\s+clearAllDrafts\(\);/);
+  });
+
+  it("each composer restores its draft and clears it once sent", () => {
+    for (const [file, surface] of [
+      ["screens/journal-composer.tsx", '"journal-composer"'],
+      ["screens/need-intake.tsx", '"need-intake"'],
+      ["screens/message-composer.tsx", "`message:${conversationId}`"],
+    ] as const) {
+      const src = readM(file);
+      expect(src, file).toContain(`useKeptDraft(${surface}`);
+      expect(src, file).toContain("kept.clear();");
+    }
   });
 });
