@@ -6,12 +6,19 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
 import {
+  confirmOfferTermsAction,
   loadOfferTermsAction,
   proposeOfferTermsAction,
   respondToTeamOfferAction,
   type OfferTermsData,
 } from "@/lib/company/team-offer-actions";
-import { answerableTerms, type OfferTermsVersion, type TeamOfferRefusal } from "@/lib/market/team-offer-model";
+import {
+  answerableTerms,
+  confirmableTerms,
+  type OfferTermsVersion,
+  type TeamOfferRefusal,
+  type TeamOfferStatus,
+} from "@/lib/market/team-offer-model";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 
@@ -25,22 +32,27 @@ import { Textarea } from "@/components/ui/Textarea";
  */
 export function TeamOfferTerms({
   offerId,
-  offerOpen,
+  offerStatus,
   canAgree,
 }: {
   offerId: string;
-  /** The offer is still `offered` — new versions may be proposed. */
-  offerOpen: boolean;
+  /** offered: propose + the preliminary yes; accepted (after the client's
+   *  preliminary yes): keep proposing, and BOTH sides confirm one version
+   *  (20261122200000); anything else: history only. */
+  offerStatus: TeamOfferStatus;
   /** This reader may agree to the OTHER side's open version. */
   canAgree: boolean;
 }) {
+  const offerOpen = offerStatus === "offered";
+  const canPropose = offerStatus === "offered" || offerStatus === "accepted";
   const t = useTranslations("teamDemandOffer.terms");
   const tRefusal = useTranslations("teamDemandOffer.refusal");
   const router = useRouter();
   const uid = useId();
   const [pending, startTransition] = useTransition();
   const [data, setData] = useState<OfferTermsData | null>(null);
-  const [form, setForm] = useState({ capacity: "", rateText: "", startDate: "", endDate: "", scopeText: "", conditionsText: "" });
+  const EMPTY = { capacity: "", rateText: "", startDate: "", endDate: "", scopeText: "", conditionsText: "", placeText: "" };
+  const [form, setForm] = useState(EMPTY);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   const reload = async () => setData(await loadOfferTermsAction({ offerId }));
@@ -57,7 +69,7 @@ export function TeamOfferTerms({
       const r = await proposeOfferTermsAction({ offerId, terms: form });
       if (r.status === "ok") {
         setMsg({ ok: true, text: t("proposed", { version: r.version }) });
-        setForm({ capacity: "", rateText: "", startDate: "", endDate: "", scopeText: "", conditionsText: "" });
+        setForm(EMPTY);
         await reload();
         router.refresh();
       } else {
@@ -87,8 +99,26 @@ export function TeamOfferTerms({
     });
   }
 
+  function confirm() {
+    if (!confirmable) return;
+    setMsg(null);
+    startTransition(async () => {
+      // Confirm the version ON THE SCREEN — a newer one refuses and reloads.
+      const r = await confirmOfferTermsAction({ offerId, expectedVersion: confirmable.version });
+      if (r.status === "ok") {
+        setMsg({ ok: true, text: r.outcome === "agreed" ? t("agreedBoth", { version: r.version }) : t("confirmedMine") });
+        await reload();
+        router.refresh();
+      } else {
+        setMsg({ ok: false, text: refusal(r.status) });
+        if (r.status === "terms_changed") await reload();
+      }
+    });
+  }
+
   const versions: readonly OfferTermsVersion[] = data?.status === "ok" ? data.versions : [];
   const answerable = answerableTerms(versions);
+  const confirmable = offerStatus === "accepted" ? confirmableTerms(versions) : null;
   // The shared Input/Textarea carry the field look; this only adds the phone floor.
   const input = "min-h-11 max-sm:text-base";
 
@@ -135,6 +165,7 @@ export function TeamOfferTerms({
                         <Row k={t("period")} v={`${v.startDate ?? "?"} – ${v.endDate ?? "?"}`} />
                       ) : null}
                       {v.scopeText ? <Row k={t("scope")} v={v.scopeText} wide /> : null}
+                      {v.placeText ? <Row k={t("place")} v={v.placeText} wide /> : null}
                       {v.conditionsText ? <Row k={t("conditions")} v={v.conditionsText} wide /> : null}
                     </dl>
                   </li>
@@ -153,7 +184,34 @@ export function TeamOfferTerms({
               </div>
             ) : null}
 
-            {offerOpen ? (
+            {offerStatus === "accepted" ? (
+              <div className="flex flex-col gap-1" data-testid={`team-offer-terms-confirm-${offerId}`}>
+                {confirmable === null ? (
+                  <p className="text-meta text-text-muted">{t("confirmNeedsTerms")}</p>
+                ) : confirmable.supplierConfirmed && confirmable.receiverConfirmed ? (
+                  <p className="text-xs text-state-success">{t("agreedBoth", { version: confirmable.version })}</p>
+                ) : (
+                  <>
+                    <p className="text-meta text-text-muted">{t("confirmNote")}</p>
+                    <p className="text-xs text-text-secondary">
+                      {confirmable.confirmedByMe ? t("confirmedByYou", { version: confirmable.version }) : t("notConfirmedByYou", { version: confirmable.version })}
+                      {" · "}
+                      {otherConfirmed(confirmable) ? t("otherConfirmed") : t("otherNotConfirmed")}
+                    </p>
+                    {!confirmable.confirmedByMe ? (
+                      <div>
+                        <Button className="min-h-11" type="button" size="sm" disabled={pending} onClick={confirm}
+                          data-testid={`team-offer-terms-confirm-submit-${offerId}`}>
+                          {t("confirm", { version: confirmable.version })}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </div>
+            ) : null}
+
+            {canPropose ? (
               <fieldset className="flex flex-col gap-2" data-testid={`team-offer-terms-form-${offerId}`}>
                 <legend className="text-xs font-medium text-text-secondary">
                   {versions.length === 0 ? t("proposeFirst") : t("proposeNext")}
@@ -185,6 +243,11 @@ export function TeamOfferTerms({
                   <Textarea id={`${uid}-scope`} rows={2} maxLength={2000} value={form.scopeText}
                     onChange={(e) => setForm((f) => ({ ...f, scopeText: e.target.value }))} className={input} />
                 </label>
+                <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-place`}>
+                  {t("place")}
+                  <Input id={`${uid}-place`} type="text" maxLength={300} value={form.placeText} placeholder={t("placePlaceholder")}
+                    onChange={(e) => setForm((f) => ({ ...f, placeText: e.target.value }))} className={input} />
+                </label>
                 <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-cond`}>
                   {t("conditions")}
                   <Textarea id={`${uid}-cond`} rows={2} maxLength={2000} value={form.conditionsText}
@@ -209,6 +272,13 @@ export function TeamOfferTerms({
       </div>
     </details>
   );
+}
+
+/** Whether the OTHER party confirmed this version: the reader's side is the
+ *  author's when the version is `mine`, the opposite side otherwise. */
+function otherConfirmed(v: OfferTermsVersion): boolean {
+  const mySide = v.mine ? v.proposedSide : v.proposedSide === "supplier" ? "receiver" : "supplier";
+  return mySide === "supplier" ? v.receiverConfirmed : v.supplierConfirmed;
 }
 
 function Row({ k, v, wide }: { k: string; v: string; wide?: boolean }) {

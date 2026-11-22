@@ -178,6 +178,10 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
     // 20261007150000 body (the same work_tasks read) plus one offer_kind check; its rollback restores
     // that body verbatim. Creates/alters/writes nothing on work_tasks.
     "20261011200000_supply_offer_negotiation_v1",
+    // 20261122200000 - company offer to work: hand_off_team_demand_offer_v2 repeats v1's read of
+    // public.work_tasks (a task belongs to the project the crew is handed off to). Creates/alters/
+    // writes nothing on work_tasks; its rollback only drops the v2 function.
+    "20261122200000_company_offer_to_work_v1",
     // 20261003150700 — team assignment as an active Journal/work context: widens the wt_select
     // predicate with ONE team-task OR-term (team assigned to THAT task or its work object) and
     // adds the team-or-person authority to the evidence link. Creates/drops/writes nothing on

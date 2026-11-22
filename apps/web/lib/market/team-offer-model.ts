@@ -234,6 +234,13 @@ export type TeamOfferRefusal =
   | "terms_limit_reached"
   | "terms_await_other_side"
   | "organization_offer_not_a_unit"
+  /** Company offer to work (20261122200000). */
+  | "terms_missing"
+  | "terms_not_agreed"
+  | "unit_not_named"
+  | "unit_not_yours"
+  | "unit_has_no_members"
+  | "not_an_organization_offer"
   | "needs_migration"
   | "error";
 
@@ -259,6 +266,12 @@ const STABLE_WORDS: readonly TeamOfferRefusal[] = [
   "terms_limit_reached",
   "terms_await_other_side",
   "organization_offer_not_a_unit",
+  "terms_missing",
+  "terms_not_agreed",
+  "unit_not_named",
+  "unit_not_yours",
+  "unit_has_no_members",
+  "not_an_organization_offer",
 ];
 
 const MISSING_CODES = new Set(["42P01", "42703", "42883", "PGRST202", "PGRST205"]);
@@ -338,9 +351,16 @@ export interface OfferTermsVersion {
   readonly endDate: string | null;
   readonly scopeText: string | null;
   readonly conditionsText: string | null;
+  /** Where the work is done (v2; null on v1). */
+  readonly placeText: string | null;
   readonly status: "proposed" | "superseded" | "accepted" | "declined";
   readonly createdAt: string;
   readonly decidedAt: string | null;
+  /** Explicit confirmations after the client's preliminary yes (v2; false on v1).
+   *  Both on the same, latest version = the terms both parties agreed. */
+  readonly supplierConfirmed: boolean;
+  readonly receiverConfirmed: boolean;
+  readonly confirmedByMe: boolean;
 }
 
 const TERMS_STATUSES = new Set(["proposed", "superseded", "accepted", "declined"]);
@@ -363,9 +383,13 @@ export function parseTermsVersion(raw: unknown): OfferTermsVersion | null {
     endDate: s(r.end_date),
     scopeText: s(r.scope_text),
     conditionsText: s(r.conditions_text),
+    placeText: s(r.place_text),
     status: r.status as OfferTermsVersion["status"],
     createdAt: s(r.created_at) ?? "",
     decidedAt: s(r.decided_at),
+    supplierConfirmed: r.supplier_confirmed === true,
+    receiverConfirmed: r.receiver_confirmed === true,
+    confirmedByMe: r.confirmed_by_me === true,
   };
 }
 
@@ -382,6 +406,7 @@ export interface OfferTermsInput {
   readonly endDate: string | null;
   readonly scopeText: string | null;
   readonly conditionsText: string | null;
+  readonly placeText: string | null;
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -400,6 +425,58 @@ export function normalizeTermsInput(raw: Partial<Record<keyof OfferTermsInput, u
     endDate: date(raw.endDate),
     scopeText: text(raw.scopeText, 2000),
     conditionsText: text(raw.conditionsText, 2000),
+    placeText: text(raw.placeText, 300),
   };
   return Object.values(out).some((v) => v !== null) ? out : null;
+}
+
+// ── Company offer to work (20261122200000) ────────────────────────────────
+
+/** The latest terms version both parties may confirm after the preliminary
+ *  yes: the newest one, unless it was superseded or declined. */
+export function confirmableTerms(versions: readonly OfferTermsVersion[]): OfferTermsVersion | null {
+  const latest = versions[0];
+  return latest && (latest.status === "proposed" || latest.status === "accepted") ? latest : null;
+}
+
+/** Where one offer stands, for either party (no person, no profile id). */
+export interface OfferProgress {
+  readonly mySide: "supplier" | "receiver";
+  readonly offerKind: OfferKind;
+  readonly status: TeamOfferStatus;
+  readonly unitNamed: boolean;
+  readonly unitName: string | null;
+  readonly unitMemberCount: number;
+  readonly latestVersion: number | null;
+  readonly supplierConfirmed: boolean;
+  readonly receiverConfirmed: boolean;
+  /** Both parties confirmed the latest terms version. */
+  readonly agreed: boolean;
+}
+
+export function parseOfferProgress(raw: unknown): OfferProgress | null {
+  if (!isRow(raw)) return null;
+  const side = raw.my_side;
+  if ((side !== "supplier" && side !== "receiver") || !isStatus(raw.status)) return null;
+  return {
+    mySide: side,
+    offerKind: raw.offer_kind === "organization" ? "organization" : "team",
+    status: raw.status,
+    unitNamed: raw.unit_named === true,
+    unitName: str(raw.unit_name),
+    unitMemberCount: num(raw.unit_member_count) ?? 0,
+    latestVersion: num(raw.latest_version),
+    supplierConfirmed: raw.supplier_confirmed === true,
+    receiverConfirmed: raw.receiver_confirmed === true,
+    agreed: raw.agreed === true,
+  };
+}
+
+/** What a company offer still needs before the client can start the work. */
+export function startWorkBlockers(p: OfferProgress): readonly ("terms_not_agreed" | "unit_not_named")[] {
+  if (p.offerKind !== "organization") return [];
+  const out: ("terms_not_agreed" | "unit_not_named")[] = [];
+  if (!p.agreed) out.push("terms_not_agreed");
+  if (!p.unitNamed) out.push("unit_not_named");
+  return out;
 }

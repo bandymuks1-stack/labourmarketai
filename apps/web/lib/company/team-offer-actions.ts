@@ -2,8 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 
+import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
+import { insertProjectForCompany, rollbackCreatedProject } from "@/lib/projects/create-project-core";
 import {
+  confirmOfferTerms,
   handOffTeamOffer,
+  listOwnCrews,
+  loadOfferProgress,
+  nameOfferUnit,
   listOfferableDemand,
   listOfferTerms,
   listSentOffers,
@@ -16,6 +24,8 @@ import {
 import {
   answerableTerms,
   normalizeTermsInput,
+  startWorkBlockers,
+  type OfferProgress,
   type OfferTermsInput,
   type OfferTermsVersion,
   type OfferableDemand,
@@ -144,4 +154,73 @@ export async function loadTeamOfferPanelAction(input: {
   if (demands.status === "needs_migration" || sent.status === "needs_migration") return { status: "needs_migration" };
   if (demands.status !== "ok" || sent.status !== "ok") return { status: "unavailable" };
   return { status: "ok", demands: demands.rows, sent: sent.rows };
+}
+
+// ── Company offer to work (owner decision 2026-11-22, item 2) ─────────────
+
+export async function confirmOfferTermsAction(input: { offerId: string; expectedVersion: number }) {
+  if (!UUID.test(input.offerId) || !Number.isInteger(input.expectedVersion) || input.expectedVersion < 1) return BAD;
+  const result = await confirmOfferTerms(input.offerId, input.expectedVersion);
+  if (result.status === "ok") revalidatePath("/", "layout");
+  return result;
+}
+
+export async function nameOfferUnitAction(input: { offerId: string; unitTeamOrgId: string }) {
+  if (!UUID.test(input.offerId) || !UUID.test(input.unitTeamOrgId)) return BAD;
+  const result = await nameOfferUnit(input.offerId, input.unitTeamOrgId);
+  if (result.status === "ok") revalidatePath("/", "layout");
+  return result;
+}
+
+export type OfferProgressData =
+  | { status: "ok"; progress: OfferProgress; crews: readonly { id: string; name: string }[] }
+  | { status: "needs_migration" | "unavailable" | "error" };
+
+/** Where the offer stands; for the supplier also the crews it may name. */
+export async function loadOfferProgressAction(input: { offerId: string }): Promise<OfferProgressData> {
+  if (!UUID.test(input.offerId)) return { status: "error" };
+  const r = await loadOfferProgress(input.offerId);
+  if (r.status !== "ok") return { status: r.status };
+  const progress = r.rows[0];
+  if (!progress) return { status: "unavailable" };
+  const crews =
+    progress.mySide === "supplier" && progress.offerKind === "organization"
+      ? await listOwnCrews().then((c) => (c.status === "ok" ? c.rows : []))
+      : [];
+  return { status: "ok", progress, crews };
+}
+
+export type StartWorkResult =
+  | { status: "ok"; projectId: string }
+  | { status: TeamOfferRefusal | "invalid_title" | "no_company" | "project_not_created" };
+
+/**
+ * The client starts the work: ONE new project of its own (the same create
+ * core and the same manage-projects gate as the projects page), then the
+ * existing hand-off puts the supplier's crew on it. If the hand-off is
+ * refused, the just-created empty project is removed again, so a refusal
+ * never leaves a stray project behind.
+ */
+export async function startWorkFromOfferAction(input: { offerId: string; title: string }): Promise<StartWorkResult> {
+  if (!UUID.test(input.offerId)) return BAD;
+  const title = String(input.title ?? "").trim();
+  const before = await loadOfferProgress(input.offerId);
+  if (before.status === "ok" && before.rows[0]) {
+    const blockers = startWorkBlockers(before.rows[0]);
+    if (blockers.length > 0) return { status: blockers[0]! };
+    if (before.rows[0].status !== "accepted") return { status: "offer_not_accepted" };
+  }
+  const company = await requireEmployerCompany();
+  if (!company.ok) return { status: "no_company" };
+  if (!hasOrganizationCapability(company.role, "manage-projects")) return { status: "not_authorized" };
+  const supabase = await createClient();
+  const created = await insertProjectForCompany(supabase, company.companyId, { title, city: null });
+  if (!created.ok) return { status: created.reason === "invalid_title" ? "invalid_title" : "project_not_created" };
+  const handed = await handOffTeamOffer({ offerId: input.offerId, projectId: created.id });
+  if (handed.status !== "ok") {
+    await rollbackCreatedProject(supabase, created.id);
+    return { status: handed.status };
+  }
+  revalidatePath("/", "layout");
+  return { status: "ok", projectId: created.id };
 }

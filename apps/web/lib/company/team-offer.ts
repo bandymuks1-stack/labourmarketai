@@ -18,6 +18,8 @@ import {
   parseReceivedOffer,
   parseSentOffer,
   parseTermsVersion,
+  parseOfferProgress,
+  type OfferProgress,
   type OfferTermsInput,
   type OfferTermsVersion,
   type OfferWriteOutcome,
@@ -127,8 +129,76 @@ async function readReceivedOffers(requestId: string): Promise<ReadResult<Receive
 }
 
 /** Every terms version of one offer, for either party; zero rows for anyone else. */
-export function listOfferTerms(offerId: string): Promise<ReadResult<OfferTermsVersion>> {
+/** v2 (20261122200000) = v1 + place + the two confirmations; v1 while it is missing. */
+export async function listOfferTerms(offerId: string): Promise<ReadResult<OfferTermsVersion>> {
+  const v2 = await readRows("list_team_demand_offer_terms_v2", { p_offer_id: offerId }, parseTermsVersion);
+  if (v2.status !== "needs_migration") return v2;
   return readRows("list_team_demand_offer_terms_v1", { p_offer_id: offerId }, parseTermsVersion);
+}
+
+/** Where one offer stands, for either party; null when unreadable or not a party. */
+export async function loadOfferProgress(offerId: string): Promise<ReadResult<OfferProgress>> {
+  return readRows("team_demand_offer_progress_v1", { p_offer_id: offerId }, parseOfferProgress);
+}
+
+const MISSING_FN = new Set(["42883", "PGRST202"]);
+const missingFn = (error: unknown) => MISSING_FN.has(((error as { code?: string } | null)?.code) ?? "");
+
+/** A party confirms the LATEST terms version it has on screen (after the
+ *  client's preliminary yes). Both confirmations on one version = agreed. */
+export async function confirmOfferTerms(
+  offerId: string,
+  expectedVersion: number,
+): Promise<TeamOfferWriteResult<{ outcome: "confirmed" | "agreed" | "already_confirmed"; version: number }>> {
+  const ctx = await authed();
+  if (!ctx) return { status: "not_authed" };
+  const { data, error } = await asAny(ctx.supabase).rpc("confirm_team_demand_offer_terms_v1", {
+    p_offer_id: offerId,
+    p_expected_version: expectedVersion,
+  });
+  if (error) return { status: offerRefusalOf(error) };
+  const d = (data ?? {}) as { outcome?: unknown; version?: unknown };
+  const outcome = d.outcome === "agreed" || d.outcome === "already_confirmed" ? d.outcome : d.outcome === "confirmed" ? "confirmed" : null;
+  return outcome && typeof d.version === "number" ? { status: "ok", outcome, version: d.version } : { status: "error" };
+}
+
+/** The supplier names the crew (one of its own brigades) a company offer works with. */
+export async function nameOfferUnit(
+  offerId: string,
+  unitTeamOrgId: string,
+): Promise<TeamOfferWriteResult<{ outcome: "named" | "unchanged" }>> {
+  const ctx = await authed();
+  if (!ctx) return { status: "not_authed" };
+  const { data, error } = await asAny(ctx.supabase).rpc("name_team_demand_offer_unit_v1", {
+    p_offer_id: offerId,
+    p_unit_team_org_id: unitTeamOrgId,
+  });
+  if (error) return { status: offerRefusalOf(error) };
+  const outcome = (data as { outcome?: unknown } | null)?.outcome;
+  return outcome === "named" || outcome === "unchanged" ? { status: "ok", outcome } : { status: "error" };
+}
+
+/** The caller's own brigades (crews it may name). Read under its own session. */
+export async function listOwnCrews(): Promise<ReadResult<{ id: string; name: string }>> {
+  const ctx = await authed();
+  if (!ctx) return { status: "unavailable" };
+  try {
+    const { data, error } = await asAny(ctx.supabase)
+      .from("organizations")
+      .select("id, display_name")
+      .eq("owner_profile_id", ctx.userId)
+      .eq("organization_type", "team")
+      .is("archived_at", null)
+      .order("created_at", { ascending: true })
+      .limit(50);
+    if (error) return { status: "unavailable" };
+    const rows = (Array.isArray(data) ? data : []).flatMap((r: { id?: unknown; display_name?: unknown }) =>
+      typeof r.id === "string" ? [{ id: r.id, name: typeof r.display_name === "string" && r.display_name.trim() ? r.display_name.trim() : "-" }] : [],
+    );
+    return { status: "ok", rows };
+  } catch {
+    return { status: "unavailable" };
+  }
 }
 
 /** Whether the negotiation migration is live (a nil-id read answers zero rows when it is). */
@@ -245,12 +315,18 @@ export async function handOffTeamOffer(input: {
 }): Promise<TeamOfferWriteResult<{ outcome: "created" | "already_assigned"; assignmentId: string }>> {
   const ctx = await authed();
   if (!ctx) return { status: "not_authed" };
-  const { data, error } = await asAny(ctx.supabase).rpc("hand_off_team_demand_offer_v1", {
+  const args = {
     p_offer_id: input.offerId,
     p_project_id: input.projectId,
     p_work_object_id: input.workObjectId ?? null,
     p_task_id: input.taskId ?? null,
-  });
+  };
+  // v2 (20261122200000): a company offer hands off its named crew once the
+  // terms are agreed by both; a brigade exactly as v1. v1 while v2 is missing.
+  let { data, error } = await asAny(ctx.supabase).rpc("hand_off_team_demand_offer_v2", args);
+  if (error && missingFn(error)) {
+    ({ data, error } = await asAny(ctx.supabase).rpc("hand_off_team_demand_offer_v1", args));
+  }
   if (error) return { status: offerRefusalOf(error) };
   const parsed = parseHandOffResult(data);
   return parsed ? { status: "ok", ...parsed } : { status: "error" };
@@ -262,7 +338,7 @@ export async function proposeOfferTerms(
 ): Promise<TeamOfferWriteResult<{ version: number }>> {
   const ctx = await authed();
   if (!ctx) return { status: "not_authed" };
-  const { data, error } = await asAny(ctx.supabase).rpc("propose_team_demand_offer_terms_v1", {
+  const v1Args = {
     p_offer_id: offerId,
     p_capacity: terms.capacity,
     p_rate_text: terms.rateText,
@@ -270,7 +346,15 @@ export async function proposeOfferTerms(
     p_end_date: terms.endDate,
     p_scope_text: terms.scopeText,
     p_conditions_text: terms.conditionsText,
+  };
+  // v2 (20261122200000) = v1 + place, and also after the preliminary yes.
+  let { data, error } = await asAny(ctx.supabase).rpc("propose_team_demand_offer_terms_v2", {
+    ...v1Args,
+    p_place_text: terms.placeText,
   });
+  if (error && missingFn(error)) {
+    ({ data, error } = await asAny(ctx.supabase).rpc("propose_team_demand_offer_terms_v1", v1Args));
+  }
   if (error) return { status: offerRefusalOf(error) };
   const version = data && typeof data === "object" ? (data as { version?: unknown }).version : null;
   return typeof version === "number" ? { status: "ok", version } : { status: "error" };

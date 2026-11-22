@@ -16,6 +16,7 @@ import type { TeamOfferRefusal } from "@/lib/market/team-offer-model";
 import { openTeamOfferConversationAction } from "@/lib/company/team-offer-conversation";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 import { TeamOfferTerms } from "@/components/app/team-offer-terms";
+import { OfferProgressPanel } from "@/components/app/offer-progress-panel";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
@@ -253,7 +254,12 @@ export function TeamDemandOfferForm({
                       ) : null}
                       </div>
                       {o.status === "offered" || o.status === "accepted" || o.status === "assigned" ? (
-                        <TeamOfferTerms offerId={o.offerId} offerOpen={o.status === "offered"} canAgree />
+                        <TeamOfferTerms offerId={o.offerId} offerStatus={o.status} canAgree />
+                      ) : null}
+                      {org && (o.status === "offered" || o.status === "accepted" || o.status === "assigned") ? (
+                        // A company offer: name the crew that will do the work,
+                        // and see where the agreement and the start stand.
+                        <OfferProgressPanel offerId={o.offerId} side="supplier" />
                       ) : null}
                     </li>
                   ))}

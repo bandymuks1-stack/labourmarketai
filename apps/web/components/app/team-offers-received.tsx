@@ -11,6 +11,7 @@ import { handOffTeamOfferAction, respondToTeamOfferAction } from "@/lib/company/
 import { openTeamOfferConversationAction } from "@/lib/company/team-offer-conversation";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 import { TeamOfferTerms } from "@/components/app/team-offer-terms";
+import { OfferProgressPanel } from "@/components/app/offer-progress-panel";
 import type { OfferMatchView, ReceivedTeamOffer, TeamOfferRefusal } from "@/lib/market/team-offer-model";
 
 /**
@@ -33,8 +34,11 @@ export function TeamOffersReceived({
   offers,
   projects,
   needOpen,
+  needTitle = null,
 }: {
   requestId: string;
+  /** The need's title, prefilled as the new project's name. */
+  needTitle?: string | null;
   offers: readonly { offer: ReceivedTeamOffer; match: OfferMatchView | null }[];
   projects: readonly { id: string; title: string | null }[];
   needOpen: boolean;
@@ -241,7 +245,7 @@ export function TeamOffersReceived({
               ) : null}
 
               {offer.status === "offered" || offer.status === "accepted" || offer.status === "assigned" ? (
-                <TeamOfferTerms offerId={offer.offerId} offerOpen={offer.status === "offered"} canAgree />
+                <TeamOfferTerms offerId={offer.offerId} offerStatus={offer.status} canAgree />
               ) : null}
 
               {offer.status === "offered" ? (
@@ -268,10 +272,17 @@ export function TeamOffersReceived({
                 </div>
               ) : null}
 
-              {offer.status === "accepted" && offer.offerKind === "organization" ? (
-                <p className="text-xs text-text-secondary" data-testid={`team-offer-org-next-${offer.offerId}`}>
-                  {t("received.orgNext")}
-                </p>
+              {(offer.status === "accepted" || offer.status === "assigned") && offer.offerKind === "organization" ? (
+                // After the preliminary yes: confirm the terms together, the
+                // company names its crew, then the work starts on a project.
+                <div className="flex flex-col gap-2">
+                  {offer.status === "accepted" ? (
+                    <p className="text-xs text-text-secondary" data-testid={`team-offer-org-next-${offer.offerId}`}>
+                      {t("received.orgNext")}
+                    </p>
+                  ) : null}
+                  <OfferProgressPanel offerId={offer.offerId} side="receiver" needTitle={needTitle} />
+                </div>
               ) : offer.status === "accepted" ? (
                 projects.length === 0 ? (
                   <p className="text-xs text-text-muted">

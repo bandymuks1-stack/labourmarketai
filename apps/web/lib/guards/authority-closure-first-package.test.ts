@@ -249,6 +249,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-18 (RED, needs-human-gate, NOT applied): registry 11.8 — assign_training_v1 admits the four
       // owner-decided groups (members, interns, learners, invited external people) while their link is active.
       "20261118143000_",
+      // 2026-11-22 owner decision (company offer to work): terms confirmed by both, the supplier's named crew,
+      // hand-off v2. Additive columns + six new SECURITY DEFINER functions; draft, NOT applied.
+      "20261122200000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

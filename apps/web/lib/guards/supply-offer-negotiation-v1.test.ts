@@ -125,6 +125,7 @@ describe("app reading", () => {
       endDate: null,
       scopeText: null,
       conditionsText: null,
+      placeText: null,
     });
     expect(normalizeTermsInput({ capacity: "0" })).toBeNull();
     expect(normalizeTermsInput({ capacity: "501", rateText: "x" })?.capacity).toBeNull();
