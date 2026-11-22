@@ -3187,7 +3187,7 @@ const RULES: IntentRule[] = [
         // single hard-coded verb is the point of this rule. `рабочие`,
         // `darbininkai` and `hands` join 2026-11-22: "требуются пять рабочие",
         // "reikia penki darbininkai", "we need five hands" measured `unknown`.
-        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|hands|mensen|leute|personen|personeel|arbeiders|люд|человек|рабоч(?:их|ие|ий)(?!\\s+(?:дн|час|мест|смен|недел|журнал|график|одежд|инструмент|врем|процесс))|žmoni|zmoni|darbinink)`,
+        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|hands|mensen|leute|personen|personeel|arbeiders|люд|человек|рабоч(?:их|ие|ий)(?!\\s+(?:дн|час|мест|смен|недел|журнал|график|одежд|инструмент|врем|процесс))|строител|builders|statybinink|bauarbeiter|bouwvakkers|žmoni|zmoni|darbinink)`,
         5,
       ),
       // pl (2026-09-20). `SEEK_VERB_SOURCE` lives in lib/structuring and

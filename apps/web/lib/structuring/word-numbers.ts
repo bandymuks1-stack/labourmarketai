@@ -105,6 +105,8 @@ const WORD_NUMBERS: Record<string, number> = {
   jedenascie: 11, jedenastu: 11,
   dwanascie: 12, dwunastu: 12,
   dwadziescia: 20, dwudziestu: 20,
+  // Tens, so "dwadzieścia pięć" is 25 and never a bare 5.
+  trzydziesci: 30, czterdziesci: 40, piecdziesiat: 50,
 };
 
 /**
@@ -179,9 +181,9 @@ export function digitizeWordNumbers(
   /** Is the SENTENCE Swedish? Pass it when `text` is no longer as typed. */
   swedish: boolean = looksSwedish(text),
 ): string {
-  return (text ?? "").replace(/\p{L}+(?:[ \t-]+\p{L}+)*/gu, (phrase) => {
+  return (text ?? "").replace(/\p{L}+(?:[\s-]+\p{L}+)*/gu, (phrase) => {
     // [word, separator, word, separator, …, word]
-    const parts = phrase.split(/([ \t-]+)/u);
+    const parts = phrase.split(/([\s-]+)/u);
     let out = "";
     let i = 0;
     while (i < parts.length) {

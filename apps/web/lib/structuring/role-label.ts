@@ -113,9 +113,11 @@ export const TRADE_STEM_SOURCE =
   "spawacz|elektryk|hydraulik|stolarz|cie[sś]l|murarz|malarz|dekarz|kierowc|kucharz|kelner|sprz[aą]tacz|magazynier|glazurnik|tynkarz|betoniarz|zbrojarz|monter(?:a|ów|ow|zy|ami)?\\b|" +
   // 2026-11-22: "Нужны пять строителей с понедельника" measured `unknown` —
   // the general construction worker had no stem in any language. Not the
-  // adjective "строительн…" ("строительных лесов") nor "строительство";
-  // never the English "builder" ("website builder").
-  "строител(?:ь(?![нс])|[еияю])|statybinink|bauarbeiter|bouwvakker";
+  // adjective "строительн…" ("строительных лесов") nor "строительство".
+  // No English "builder" in this shared list ("website builder"); the router
+  // reads "builders" only right after a seek verb. No "statybinink" here:
+  // "Ieškau statybininko darbo" is a person seeking a builder's JOB.
+  "строител(?:ь(?![нс])|[еияю])|bauarbeiter|bouwvakker";
 
 /**
  * SWEDISH TRADE NOUNS (sv activation, 2026-11-12), folded.

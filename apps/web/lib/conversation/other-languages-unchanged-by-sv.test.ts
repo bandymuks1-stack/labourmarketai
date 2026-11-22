@@ -282,6 +282,9 @@ const PEOPLE_COUNTED_IN_EVERY_LANGUAGE: readonly Intended[] = [
   { sentence: "Reikia dviejų suvirintojų Nyderlanduose kitą savaitę", reader: "need", now: ["welder", "NL", 2, "this_week", null] },
   ...headcountOf("one worker_input row per accepted slug", 1),
   ...headcountOf("В этой организации один человек, поэтому владелец утверждает собственные запросы.", 1),
+  // "строител…" after a seek verb counts people (#3648): the scaffolders'
+  // need scores higher, the route is the same.
+  { sentence: "Нужны 12 монтажников строительных лесов в Роттердаме с 5 октября.", reader: "route", now: ["need-workers", 14] },
   // "werknemers" counts people as "medewerkers" already did ("Ik heb vijf
   // werknemers nodig" measured `unknown`).
   { sentence: "Bekijk werknemers die bij je vraag passen.", reader: "route", now: ["need-workers", 4] },
