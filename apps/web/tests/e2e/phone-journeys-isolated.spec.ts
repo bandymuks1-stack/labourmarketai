@@ -1277,6 +1277,56 @@ for (const phone of PHONES) {
 
 }
 
+// ── AN ORGANISATION WITH VOLUME STAYS SHORT (responsive pass 2026-11-22) ─────
+// Measured on this stack at 390 px with 18 needs and 15 people: the agency's
+// Needs page was 9,883 px (about 400 px a need), its People page 7,500 px
+// (285 px a person) and the company workspace 5,080 px (the home listed up to
+// 20 open needs). A need now keeps its next step on the row and folds the
+// rest; the home names five open needs and folds the others.
+test.describe("an organisation with many needs on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("volume-agency");
+  const org = { profileId: "", orgId: "" };
+
+  test("seven open needs: the home names five, a need row stays short, its extras are one tap away", async ({ browser }) => {
+    Object.assign(org, await newOrganisation(browser, OWNER, "agency", `Synthetic Volume Owner ${RUN}`, `Synthetic Volume Staffing ${RUN}`));
+    // Synthetic needs written straight to the local stack (a volume, not a flow under test).
+    sqlExec(
+      `insert into public.customer_requests (profile_id, title, need_summary, role_or_work_type, team_size, status, kind, payload, organization_id)
+       select ${lit(org.profileId)}, 'Synthetic volume need ' || g, 'Two people for three weeks.', 'Synthetic role ' || g, 2, 'submitted',
+              'company_request', jsonb_build_object('intent', 'hire_workers', 'role', 'Synthetic role ' || g), ${lit(org.orgId)}
+       from generate_series(1, 7) g`,
+    );
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+
+    await page.goto(`${BASE}/en/dashboard/company`);
+    const home = page.getByTestId("company-home-missing");
+    await expect(home).toBeVisible({ timeout: 60_000 });
+    await expect(home.locator('[data-testid="company-home-need"]:visible')).toHaveCount(5);
+    const rest = home.getByTestId("company-home-needs-rest");
+    await expect(rest.locator("summary")).toContainText("7");
+    await rest.locator("summary").tap();
+    await expect(home.locator('[data-testid="company-home-need"]:visible')).toHaveCount(7);
+
+    await page.goto(`${BASE}/en/dashboard/company/needs`);
+    const rows = page.getByTestId("demand-readback-row");
+    await expect(rows.first()).toBeVisible({ timeout: 60_000 });
+    const heights = await rows.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+    expect(heights.length).toBeGreaterThanOrEqual(7);
+    for (const h of heights) expect(h, "a need row stays compact on a phone").toBeLessThanOrEqual(300);
+    // Every function of the row is still there, one tap away.
+    const row = rows.first();
+    await expect(row.getByTestId("demand-readback-scout-link")).toBeVisible();
+    await expect(row.getByTestId("demand-location-capture-open")).toBeHidden();
+    await row.getByTestId("demand-readback-more").locator("summary").tap();
+    await expect(row.getByTestId("demand-location-capture-open")).toBeVisible();
+    await expect(row.getByTestId("demand-readback-details")).toBeVisible();
+    await fitsTheScreen(page, "the needs page with many needs");
+    await done();
+  });
+});
+
 // ── POPUPS STAY ON THE SCREEN (responsive sweep 2026-11-21) ──────────────────
 // Measured on this stack before the fix: at 320 × 568 the onboarding country
 // list opened from y = 423 to 721, under the fixed Finish bar and past the
