@@ -47,4 +47,15 @@ describe("privacy requests stay off commercial surfaces", () => {
     const m = read("../../supabase/migrations/20261028123000_synthetic_demand_cross_org_readers_v1.sql");
     expect(m).toMatch(/cr\.kind is null or cr\.kind in \('company_request',\s*'buyer_request'\)/);
   });
+
+  it("the database refuses to share a privacy request with an agency (RED 20261122180000, not applied)", () => {
+    const N = "20261122180000_share_refuses_privacy_requests_v1";
+    const up = read(`../../supabase/migrations/${N}.sql`);
+    const down = read(`../../supabase/rollbacks/${N}.down.sql`);
+    expect(up).toContain("and not (r.payload ? 'privacy_request_type')");
+    expect(up).toContain("and r.payload->>'source' is distinct from 'privacy_self_service'");
+    expect(up).toContain("raise exception 'request_not_found' using errcode = 'P0002';");
+    expect(down).not.toContain("privacy_request_type");
+    expect(up).not.toMatch(/grant [^;]* to (anon|public)\b/i);
+  });
 });
