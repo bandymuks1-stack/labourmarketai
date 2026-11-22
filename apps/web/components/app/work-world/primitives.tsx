@@ -173,17 +173,20 @@ export function CapacityBand({
   total,
   leftLabel,
   rightLabel,
+  size = "regular",
 }: {
   filled: number;
   total: number;
   leftLabel: string;
   rightLabel: string;
+  /** `compact`: one row of a list (32 px instead of 56). */
+  size?: "regular" | "compact";
 }) {
   const pct = total > 0 ? Math.min(100, Math.max(0, (filled / total) * 100)) : 0;
   return (
     <span
       data-testid="ww-capacity-band"
-      className="relative block h-14 overflow-hidden rounded-lg border border-border-subtle bg-surface-1"
+      className={`relative block overflow-hidden rounded-lg border border-border-subtle bg-surface-1 ${size === "compact" ? "h-8" : "h-14"}`}
     >
       <span
         className="absolute inset-y-0 left-0 border-r-2 border-brand-blue bg-brand-blue/20"
