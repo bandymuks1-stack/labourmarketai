@@ -146,7 +146,7 @@ export function DashboardChrome({
     return (
       <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple" data-surface={mode}>
         <ConversationHeader title={headerTitle} nav={nav} />
-        <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
+        <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 pt-4 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 sm:pt-6 md:pb-8">
           <SlotBoundary>
             {children}
           </SlotBoundary>
@@ -165,7 +165,7 @@ export function DashboardChrome({
   return (
     <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="full" data-surface={mode}>
       <ConversationHeader title={headerTitle} nav={nav} />
-      <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
+      <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 pt-4 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 sm:pt-6 md:pb-8">
         <SlotBoundary>
           {children}
         </SlotBoundary>

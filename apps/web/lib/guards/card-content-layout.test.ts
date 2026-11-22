@@ -44,12 +44,12 @@ describe("Card content layout reaches the content", () => {
       ),
     );
     expect(html).toMatch(
-      /^<div class="card-border p-6 flex flex-col opacity-70"><div class="relative min-w-0 flex-1 flex items-center justify-between gap-3"><span>Lietuva<\/span><span>PERŽIŪRĖTI<\/span><\/div><\/div>$/,
+      /^<div class="card-border p-4 sm:p-6 flex flex-col opacity-70"><div class="relative min-w-0 flex-1 flex items-center justify-between gap-3"><span>Lietuva<\/span><span>PERŽIŪRĖTI<\/span><\/div><\/div>$/,
     );
   });
 
   it("leaves a card without content layout exactly as before", () => {
     const html = renderToStaticMarkup(createElement(CardEl, { className: "mt-4" }, "x"));
-    expect(html).toBe('<div class="card-border p-6 mt-4"><div class="relative">x</div></div>');
+    expect(html).toBe('<div class="card-border p-4 sm:p-6 mt-4"><div class="relative">x</div></div>');
   });
 });

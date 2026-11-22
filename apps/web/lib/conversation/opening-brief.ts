@@ -443,7 +443,7 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
       const learners = await readInstitutionLearners(ws.organizationId);
       if (learners.status === "ok" && learners.counts.pending > 0 && lines.length < MAX_LINES) {
         lines.push(t("briefEduLearnerInvitesPending", { count: learners.counts.pending }));
-        addChip("link:/dashboard/network?relationship=student", t("chipInviteStudent"));
+        addChip("link:/dashboard/network?invite=1&type=join_organization&relationship=student", t("chipInviteStudent"));
       }
     }
     // Agency offers on the company's OWN demands still awaiting the client's
