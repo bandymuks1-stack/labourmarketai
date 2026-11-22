@@ -57,14 +57,17 @@ docker stats --no-stream --format '{{.Name}} cpu={{.CPUPerc}} mem={{.MemUsage}} 
 echo "log lines matching error/fatal/unhandled (last 300): $(docker logs --tail 300 labourmarket-prod 2>&1 | grep -ciE 'error|fatal|unhandled|ECONN' || true)"
 docker logs --tail 300 labourmarket-prod 2>&1 | grep -iE 'error|fatal|unhandled|ECONN' | cut -c1-160 | head -5
 
-echo "== 6. neighbours (Agentai OS has priority) =="
-docker ps --format '{{.Names}} {{.Status}}' | grep -i agentai
-# "(unhealthy)" contains "healthy": match the exact "(healthy)" marker. A container with no
-# healthcheck ("Up 3 days") counts as not healthy, the cautious reading.
-U=$(docker ps --format '{{.Names}} {{.Status}}' | grep -i agentai | grep -vc '(healthy)' || true)
-[ "$U" = 0 ] || fail "$U Agentai container(s) not healthy"
-N=$(docker ps --format '{{.Names}}' | grep -ci agentai || true)
-[ "$N" -ge 1 ] || fail "no Agentai container is running"
+echo "== 6. host (diagnostic only; never changes the LabourMarket.ai result) =="
+# Owner decision 2026-11-22: Agentai OS is a separate project. Its containers are reported for
+# information only and can never fail this LabourMarket.ai smoke test.
+A=$(docker ps --format '{{.Names}} {{.Status}}' | grep -i agentai || true)
+if [ -n "$A" ]; then
+  printf '%s\n' "$A"
+  NH=$(printf '%s\n' "$A" | grep -vc '(healthy)' || true)
+  echo "info: Agentai OS containers: $(printf '%s\n' "$A" | wc -l), not reporting (healthy): $NH"
+else
+  echo "info: no Agentai OS container is running"
+fi
 head -1 /proc/pressure/cpu
 free -m | sed -n '2p'
 
