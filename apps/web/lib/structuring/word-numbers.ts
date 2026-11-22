@@ -121,6 +121,22 @@ const SV_WORD_NUMBERS: Record<string, number> = {
   femtio: 50, hundra: 100,
 };
 
+/**
+ * The written numbers as one regex ALTERNATION (folded, longest first), for a
+ * pattern that must accept "8" and "eight" alike — the chat router's "a day +
+ * a duration" rule (2026-11-22: "Užvakar aštuonias valandas suvirinau…"
+ * routed `unknown` while "Užvakar 8 val. …" was the journal). The SAME table
+ * as `parseWordNumber`, so the two can never disagree. Letters only — no
+ * escaping needed. The Swedish words are a separate source, for a Swedish
+ * sentence only.
+ */
+const alternation = (table: Record<string, number>): string =>
+  Object.keys(table)
+    .sort((a, b) => b.length - a.length)
+    .join("|");
+export const WORD_NUMBER_SOURCE: string = alternation(WORD_NUMBERS);
+export const SV_WORD_NUMBER_SOURCE: string = alternation(SV_WORD_NUMBERS);
+
 /** Parse ONE token as a written number; null when it is not one. */
 export function parseWordNumber(token: string, swedish = false): number | null {
   const folded = foldText((token ?? "").trim());

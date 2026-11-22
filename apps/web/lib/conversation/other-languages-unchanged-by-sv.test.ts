@@ -273,7 +273,30 @@ const PEOPLE_COUNTED_IN_EVERY_LANGUAGE: readonly Intended[] = [
   },
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED, ...PEOPLE_COUNTED_IN_EVERY_LANGUAGE];
+/**
+ * (i) MARKETS, POLISH TRADES AND THE DAY BEFORE YESTERDAY, IN EVERY LANGUAGE
+ * (entity-recognition audit 2026-11-22, entity-recognition-7-locales.test.ts).
+ *
+ * A market named in German, Dutch or Polish ("in Schweden", "in Zweden", "w
+ * Szwecji") resolved no country: the needles held only the LT/EN/RU names.
+ * The Polish need verbs had no Polish trade to bind to, so "Potrzebuję 4
+ * murarzy" was `unknown` and "Szukamy spawacza, 40 godzin tygodniowo" (we are
+ * hiring a welder) was read as a work log. "Eergisteren" / "позавчера" now
+ * count as a day for the day + duration rule, as "užvakar" already did.
+ */
+const ENTITIES_IN_EVERY_LANGUAGE: readonly Intended[] = [
+  { sentence: "Arbeit in Schweden", reader: "need", now: [null, "SE", null, null, null] },
+  { sentence: "Werk in Zweden", reader: "need", now: [null, "SE", null, null, null] },
+  { sentence: "Praca w Szwecji", reader: "need", now: [null, "SE", null, null, null] },
+  { sentence: "Potrzebuję 4 murarzy w Malmö", reader: "route", now: ["need-workers", 6] },
+  { sentence: "Potrzebuję 4 murarzy w Malmö", reader: "turn", now: "new-goal" },
+  { sentence: "Szukamy spawacza, 40 godzin tygodniowo", reader: "route", now: ["need-workers", 6] },
+  { sentence: "Szukamy spawacza, 40 godzin tygodniowo", reader: "turn", now: "new-goal" },
+  { sentence: "Eergisteren 8 uur gewerkt.", reader: "route", now: ["log-work", 7] },
+  { sentence: "Позавчера работал 8 часов.", reader: "route", now: ["log-work", 7] },
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED, ...PEOPLE_COUNTED_IN_EVERY_LANGUAGE, ...ENTITIES_IN_EVERY_LANGUAGE];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).

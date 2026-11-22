@@ -167,6 +167,21 @@ const YESTERDAY = [
   ["EN", "Fill in yesterday's work journal"],
   ["RU", "Заполни вчерашний рабочий журнал"],
 ] as const;
+/**
+ * A DATE + A NUMBER + A PROFESSION, one work sentence per active locale
+ * (2026-11-22): the day before yesterday, eight hours said as a WORD, the
+ * trade named. The deterministic readers must open the journal draft on that
+ * day with 8 h — and nothing is saved before the person confirms.
+ */
+const WORKED = [
+  ["LT", "Užvakar dirbau suvirintoju aštuonias valandas", /suvirintoju/],
+  ["EN", "The day before yesterday I worked as a welder for eight hours", /welder/],
+  ["RU", "Позавчера работал сварщиком восемь часов", /сварщиком/],
+  ["DE", "Vorgestern habe ich acht Stunden als Schweißer gearbeitet", /Schweißer/],
+  ["NL", "Eergisteren heb ik acht uur als lasser gewerkt", /lasser/],
+  ["PL", "Przedwczoraj pracowałem osiem godzin jako spawacz", /spawacz/],
+  ["SV", "I förrgår jobbade jag åtta timmar som svetsare", /svetsare/],
+] as const;
 const SUBCONTRACTORS = [
   ["LT", "Ieškau subrangovų"],
   ["EN", "I'm looking for subcontractors"],
@@ -317,6 +332,24 @@ for (const device of DEVICES) {
         await flow.getByTestId("worklog-save").click();
         await expect(flow.getByTestId("worklog-confirm"), "the confirmation is shown").toBeVisible({ timeout: 30_000 });
         expect(entries(s.workerId), "no new row without the confirm").toHaveLength(1);
+        await ctx.close();
+      });
+    }
+
+    for (const [lang, phrase, trade] of WORKED) {
+      test(`D-${lang} (${device.name}). "${phrase}": the day before yesterday, 8 h, the trade; nothing is saved before confirm`, async ({ browser }) => {
+        const { ctx, page } = await open(browser, device, s.worker);
+        await home(page);
+        const before = entries(s.workerId).length;
+        await say(page, phrase);
+        const flow = await lastFlow(page);
+        await expect(flow.getByTestId("worklog-date"), "the day the sentence named").toHaveValue(await day(page, -2));
+        await expect(flow, "eight hours, said as a word").toContainText(/\b8\s*h\b/);
+        await expect(flow.getByTestId("worklog-notes"), "the sentence, with its trade, is the evidence").toHaveValue(trade);
+        await flow.getByTestId("worklog-save").click();
+        await expect(flow.getByTestId("worklog-confirm"), "the confirmation is shown").toBeVisible({ timeout: 30_000 });
+        expect(entries(s.workerId), "nothing is saved before confirm").toHaveLength(before);
+        await fits(page, `worked ${lang}`);
         await ctx.close();
       });
     }

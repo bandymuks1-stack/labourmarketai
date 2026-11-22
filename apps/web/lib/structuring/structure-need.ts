@@ -88,7 +88,7 @@ export const WORK_TYPE_RULES: { slug: string; needles: string[] }[] = [
   { slug: "machine_operator", needles: ["machine operator", "cnc", "staklių operat", "stakliu operat", "оператор станк"] },
   { slug: "quality_control", needles: ["quality control", "quality inspector", "kokybės kontrol", "kokybes kontrol", "контролёр качества", "контролер качества"] },
   { slug: "production_worker", needles: ["production worker", "factory worker", "gamybos darbinink", "производственн", "productiemedewerker", "produktionsmitarbeiter", "pracownik produkcj", "pracownikow produkcj"] },
-  { slug: "cook", needles: ["cook", "chef", "virėj", "virej", "повар", "kucharz", "kucharzy"] },
+  { slug: "cook", needles: ["cook", "chef", "virėj", "virej", "повар", "kucharz", "kucharzy", "köche", "koche", "köchin", "kochin"] },
   { slug: "kitchen_helper", needles: ["kitchen helper", "kitchen porter", "virtuvės pagalb", "virtuves pagalb", "помощник повара"] },
   { slug: "dishwasher", needles: ["dishwasher", "indų plov", "indu plov", "посудомой"] },
   { slug: "waiter", needles: ["waiter", "waitress", "padavėj", "padavej", "официант", "kellner", "kelner"] },
@@ -174,27 +174,31 @@ export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   // left the location empty (production 2026-10-23). Where a short stem is a
   // prefix of ordinary words ("alyt" in "analytic", "uten" = Norwegian
   // "without"), the needles are the inflected forms themselves.
-  { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilni", "вильн", "wiln", "kaun", "klaipėd", "klaiped", "šiaul", "siaul", "panevėž", "panevez", "alytuj", "alytus", "alytaus", "marijampol", "utenoj", "utena", "utenos"] },
+  { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilni", "вильн", "wiln", "kaun", "klaipėd", "klaiped", "šiaul", "siaul", "panevėž", "panevez", "alytuj", "alytus", "alytaus", "marijampol", "utenoj", "utena", "utenos", "litauen", "litouwen", "^litwa$", "^litwie$", "^litwy$", "^litwe$", "^litwę$"] },
   // "^riga" / "^ryg": a word START — "riga" is inside "brigada" / "brigade",
   // "ryga" inside the Polish "brygada". "^ryg" also reads the Lithuanian
   // locative "Rygoje", which the old nominative needle "ryga" never did.
-  { code: "LV", needles: ["latvia", "latvij", "латв", "^riga", "^ryg"] },
-  { code: "EE", needles: ["estonia", "eston", "estij", "эстон", "tallinn", "talin"] },
-  { code: "PL", needles: ["poland", "lenkij", "polska", "польш", "warsaw", "warszaw", "varsuv", "krak", "wroc", "vroclav", "gdansk", "gdańsk"] },
-  { code: "DE", needles: ["germany", "vokietij", "deutschland", "герман", "berlin", "berlyn", "hamburg", "munich", "münchen", "munchen", "miunchen", "frankfurt", "cologne", "köln", "koln", "keln", "stuttgart", "stutgart"] },
-  { code: "NL", needles: ["netherlands", "holland", "nyderland", "niderland", "нидерланд", "голланд", "amsterdam", "rotterdam", "roterdam", "роттердам", "hague", "haag", "haga", "eindhoven", "utrecht"] },
-  { code: "DK", needles: ["denmark", "danij", "дани", "copenhagen", "kopenhag", "копенгаг", "aarhus"] },
+  { code: "LV", needles: ["latvia", "latvij", "латв", "^riga", "^ryg", "^lettland$", "letland", "^lotwa$", "^lotwie$", "^lotwy$", "^łotwa$", "^łotwie$"] },
+  { code: "EE", needles: ["estonia", "eston", "estij", "эстон", "tallinn", "talin", "^estland$"] },
+  { code: "PL", needles: ["poland", "lenkij", "polska", "польш", "warsaw", "warszaw", "varsuv", "krak", "wroc", "vroclav", "gdansk", "gdańsk", "^polen$", "polsce"] },
+  { code: "DE", needles: ["germany", "vokietij", "deutschland", "герман", "berlin", "berlyn", "hamburg", "munich", "münchen", "munchen", "miunchen", "frankfurt", "cologne", "köln", "koln", "keln", "stuttgart", "stutgart", "duitsland", "tyskland", "niemczech", "^niemcy$", "^niemiec$"] },
+  { code: "NL", needles: ["netherlands", "holland", "nyderland", "niderland", "нидерланд", "голланд", "amsterdam", "rotterdam", "roterdam", "роттердам", "hague", "haag", "haga", "eindhoven", "utrecht", "^nederland$", "nederlanderna", "nederländerna", "^niederlande$", "^niederlanden$", "holandi"] },
+  { code: "DK", needles: ["denmark", "danij", "дани", "copenhagen", "kopenhag", "копенгаг", "aarhus", "danemark", "dänemark", "denemarken", "danmark", "^danii$"] },
   // "osle" is the Lithuanian locative ("Osle" = in Oslo).
-  { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "osle", "осло", "bergen", "берген", "trondheim"] },
-  { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "stokholm", "gothenburg", "göteborg", "goteborg", "gioteborg", "malmö", "malmo", "malme"] },
-  { code: "FI", needles: ["finland", "suomi", "suomij", "финлянд", "helsinki", "helsink", "espoo", "tampere"] },
+  { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "osle", "осло", "bergen", "берген", "trondheim", "norwegen", "noorwegen", "^norwegia$", "^norwegii$", "^norwegie$", "^norwegię$", "^norge$"] },
+  { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "stokholm", "gothenburg", "göteborg", "goteborg", "gioteborg", "malmö", "malmo", "malme", "schweden", "^zweden$", "szwecj"] },
+  { code: "FI", needles: ["finland", "suomi", "suomij", "финлянд", "helsinki", "helsink", "espoo", "tampere", "^finnland$"] },
+  // 2026-11-22: each market's name in the other active languages ("in
+  // Deutschland / Duitsland / Niemczech / Tyskland"). DE/NL/PL/SV needs named
+  // no market at all. ADJECTIVES are deliberately absent ("German company",
+  // "Ich spreche Deutsch"): a nationality or a language is not a location.
   // Open-markets update 2026-07-17 — the six newly opened markets.
   { code: "GE", needles: ["georgia", "gruzij", "sakartvel", "грузия", "грузии", "грузию", "tbilisi", "tbilis", "batumi", "kutaisi", "rustavi"] },
-  { code: "BE", needles: ["belgium", "belgij", "бельги", "brussel", "briusel", "antwerp"] },
-  { code: "FR", needles: ["france", "prancūz", "prancuz", "франц", "paris", "paryž", "paryz", "lyon", "marseille"] },
-  { code: "ES", needles: ["spain", "ispanij", "испани", "españa", "espana", "madrid", "barcelona", "valencia"] },
-  { code: "AT", needles: ["austria", "austrij", "австри", "vienna", "wien", "graz", "linz"] },
-  { code: "CH", needles: ["switzerland", "šveicar", "sveicar", "швейцар", "zurich", "zürich", "geneva", "genev", "basel"] },
+  { code: "BE", needles: ["belgium", "belgij", "бельги", "brussel", "briusel", "antwerp", "belgien", "^belgie$", "^belgië$", "^belgii$", "^belgia$"] },
+  { code: "FR", needles: ["france", "prancūz", "prancuz", "франц", "paris", "paryž", "paryz", "lyon", "marseille", "frankreich", "frankrijk", "francj", "frankrike"] },
+  { code: "ES", needles: ["spain", "ispanij", "испани", "españa", "espana", "madrid", "barcelona", "valencia", "spanien", "spanje", "hiszpani"] },
+  { code: "AT", needles: ["austria", "austrij", "австри", "vienna", "wien", "graz", "linz", "^osterreich$", "^österreich$", "oostenrijk", "austrii"] },
+  { code: "CH", needles: ["switzerland", "šveicar", "sveicar", "швейцар", "zurich", "zürich", "geneva", "genev", "basel", "^schweiz$", "zwitserland", "szwajcari"] },
   // PR-G global location model — the USA becomes a first-class market. Country
   // words + major metros only (no 50-state needle list; note "georgia" above
   // maps to the country GE, which sits earlier in this ordered rule list).
@@ -270,14 +274,22 @@ export function maskServiceNoun(hay: string): string {
  * Does the hay contain this needle? Needles are substrings ("lietuv" reads
  * "Lietuvoje"). A needle written "^riga" must START a word: "riga" sits
  * inside "brigada" / "brigade", so every brigade sentence used to resolve to
- * Latvia.
+ * Latvia. A needle ending "$" must also END a word.
  */
 const WORD_START_NEEDLES = new Map<string, RegExp>();
 export function hayHasNeedle(hay: string, needle: string): boolean {
-  if (!needle.startsWith("^")) return hay.includes(needle);
+  // "…$" must END a word: "^nederland$" is the country, never the language
+  // "Nederlands"; "^niemiec$" never the adjective "niemiecki".
+  const start = needle.startsWith("^");
+  const end = needle.endsWith("$");
+  if (!start && !end) return hay.includes(needle);
   let re = WORD_START_NEEDLES.get(needle);
   if (!re) {
-    re = new RegExp(`(?:^|[^\\p{L}\\p{N}])${escapeForRegex(needle.slice(1))}`, "u");
+    const core = needle.slice(start ? 1 : 0, end ? -1 : undefined);
+    re = new RegExp(
+      `${start ? "(?:^|[^\\p{L}\\p{N}])" : ""}${escapeForRegex(core)}${end ? "(?![\\p{L}\\p{N}])" : ""}`,
+      "u",
+    );
     WORD_START_NEEDLES.set(needle, re);
   }
   return re.test(hay);
