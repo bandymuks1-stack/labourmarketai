@@ -61,13 +61,14 @@ describe("an invitation into an existing organization", () => {
   it("the sign-up form shows who invited and what happens next", () => {
     const page = read("app/[locale]/auth/signup/page.tsx");
     expect(page).toContain('tSignup("inviteFrom"');
-    expect(page).toContain('tSignup("inviteNext"');
+    expect(page).toContain('tSignup("inviteNext", { organization })');
     expect(read("components/app/signup-form.tsx")).toContain('data-testid="signup-invite-context"');
     for (const l of LOCALES) {
       const s = JSON.parse(read(`messages/${l}.json`)).auth.signup;
       for (const k of ["inviteFrom", "inviteTo", "inviteNext"]) expect(typeof s[k], `${l} ${k}`).toBe("string");
       expect(s.inviteFrom, l).toContain("{inviter}");
       expect(s.inviteNext, l).toContain("{organization}");
+      expect(s.inviteFrom, l).toContain("{organization}");
     }
   });
 });

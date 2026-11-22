@@ -66,8 +66,8 @@ test("IJ-1. the sign-up form says who invited, to which organization, and what h
   await p.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
   const context = p.getByTestId("signup-invite-context");
   await expect(context, "the sign-up form carries the invitation").toBeVisible({ timeout: 30_000 });
-  await expect(context).toContainText(`${OWNER_NAME} invited you to ${ORG}.`);
-  await expect(context).toContainText(`After sign-up you join ${ORG}.`);
+  await expect(context).toContainText(`${OWNER_NAME} invites you to join ${ORG}.`);
+  await expect(context).toContainText(`When you sign up, you join ${ORG}.`);
   await p.screenshot({ path: `${SHOTS}/2-signup-with-invitation.png`, fullPage: true });
 
   await p.locator('input[type="email"]').fill(PERSON);

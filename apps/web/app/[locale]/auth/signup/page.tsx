@@ -79,6 +79,8 @@ export default async function SignupPage({
       ...(pub.preview.relationshipSlug
         ? [tPage("capacity", { capacity: tRelationships(pub.preview.relationshipSlug) })]
         : []),
+      // Both an addressed invitation and an open link are accepted when the
+      // person finishes signing up (onboarding-wizard: acceptInvitationAfterSignup).
       tSignup("inviteNext", { organization }),
     ];
   }
