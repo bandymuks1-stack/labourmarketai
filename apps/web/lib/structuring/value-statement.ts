@@ -184,15 +184,29 @@ const SV_STRONG_SELL_RE = /parduo|продам|прода(ю|ем)|\bsell(ing)?\
 /** Person/occupation nouns that make a number a HEADCOUNT. */
 const PERSON_NOUN_RES: RegExp[] = [
   /darbuotoj/u,
+  /darbinink/u, // "penkių darbininkų" (2026-11-22: no headcount)
   /zmon(es|iu|ems)/u,
   /asmen/u,
-  /\bworkers?\b|\bpeople\b|\bmen\b/u,
+  /\bworkers?\b|\bpeople\b|\bmen\b|^hands$/u, // "five hands" — five helpers
   /работник|человек|сотрудник/u,
+  // "мне нужны пять рабочих" (2026-11-22: no headcount). The substantivised
+  // adjective counts PEOPLE unless it qualifies the next word ("пять рабочих
+  // дней / мест") — `detectHeadcount` reads that with RU_WORKER_ADJECTIVE_RE.
+  /^рабоч(?:ий|ии|ие|их|его|им|ими|ему)$/u,
+  /^люд(?:и|ей|еи|ям|ьми|ях)$/u,
   /brigad/u,
-  /\bwerknemers?\b|\bmedewerkers?\b|\bmensen\b/u, // nl
+  /\bwerknemers?\b|\bmedewerkers?\b|\bmensen\b|^arbeiders?$|^personen$/u, // nl (+ de "Personen")
   /\bmitarbeiter|\barbeiter|\barbeitskraft|\bleute\b/u, // de
-  /pracownik|\bosob\b|\bludzi\b/u, // pl
+  /pracownik|pracownic|robotnik|^osob(?:y|a|e|ami|om)?$|^ludzi(?:e)?$/u, // pl
 ];
+
+/** The RU worker adjective ("рабочих") and the words it QUALIFIES rather than
+ *  counts as people: "пять рабочих дней / часов / мест / смен" is five working
+ *  days, hours, places, shifts — never five workers. */
+// `ии` / `еи`: `foldText` strips the breve of й ("рабочий" → "рабочии").
+const RU_WORKER_ADJECTIVE_RE = /^рабоч(?:ий|ии|ие|их|его|им|ими|ему)$/u;
+const RU_WORKER_ADJECTIVE_QUALIFIES_RE =
+  /^(?:дн|день|час|мест|смен|недел|сут|журнал|одежд|инструмент|врем|процесс|график|сил|стол|програм|документ|вопрос|задач|групп|бригад|площад|зон|режим)/u;
 // sv — never `personal` (the English adjective) or `folk`.
 const SV_PERSON_NOUN_RES: RegExp[] = [...PERSON_NOUN_RES, /\bpersoner\b|\bmedarbetare\b|arbetare\b|\banstallda\b/u];
 
@@ -284,8 +298,10 @@ function detectHeadcount(text: string, folded: string, V: Vocab): number | null 
   const foldedTokens = tokens.map(foldText);
   // A counted PROFESSION noun is a headcount too ("2 mechanikų", "dviejų
   // programuotojų") — the same lexicon the profession fallback reads.
-  const isPersonish = (tok: string): boolean =>
-    V.PERSON_NOUN_RES.some((re) => re.test(tok)) ||
+  const isPersonish = (tok: string, next?: string): boolean =>
+    (RU_WORKER_ADJECTIVE_RE.test(tok)
+      ? !next || !RU_WORKER_ADJECTIVE_QUALIFIES_RE.test(next)
+      : V.PERSON_NOUN_RES.some((re) => re.test(tok))) ||
     (!/^paslaug/u.test(tok) &&
       (workTypeRulesFor(V.swedish).some((r) => r.needles.some((n) => tok.includes(n))) ||
         PROFESSION_HINTS_LT.some((r) =>
@@ -310,13 +326,19 @@ function detectHeadcount(text: string, folded: string, V: Vocab): number | null 
     // patirties suvirintojo" three years of experience — neither is a count.
     for (let ahead = 1; ahead <= 2 && i + ahead < foldedTokens.length; ahead++) {
       if (isCountUnitWord(tokens[i + ahead], V.swedish)) break;
-      if (isPersonish(foldedTokens[i + ahead])) return value;
+      if (isPersonish(foldedTokens[i + ahead], foldedTokens[i + ahead + 1])) return value;
     }
   }
   // "reikia 4" / "need 4" with the occupation elsewhere in the sentence —
   // unless a unit follows the number ("reikia 3 metų patirties").
   const m = folded.match(V.DEMAND_COUNT_RE);
-  if (m && !isCountUnitWord(m[2], V.swedish)) {
+  // "нужны 5 рабочих часов": the adjective qualifies the unit after it.
+  const qualifiesUnit = (adj: string): boolean => {
+    if (!RU_WORKER_ADJECTIVE_RE.test(adj) || m?.index === undefined) return false;
+    const after = folded.slice(m.index + m[0].length).match(/^\s+([^\s\d.,;:!?()/]+)/u)?.[1];
+    return after !== undefined && RU_WORKER_ADJECTIVE_QUALIFIES_RE.test(after);
+  };
+  if (m && !isCountUnitWord(m[2], V.swedish) && !qualifiesUnit(m[2])) {
     const n = Number.parseInt(m[1], 10);
     if (n >= 1 && n <= 1000) return n;
   }

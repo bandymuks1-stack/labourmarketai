@@ -154,6 +154,13 @@ const NEED = [
   ["LT", "Man reikia penkių darbuotojų"],
   ["EN", "I need five workers"],
   ["RU", "Мне нужно пять работников"],
+  // 2026-11-22: "рабочих" was not read as workers — the need opened with no
+  // quantity. The same five in the other active locales, said in words.
+  ["RU-rabochikh", "мне нужны пять рабочих"],
+  ["DE", "Wir brauchen fünf Arbeiter"],
+  ["NL", "We zoeken vijf medewerkers"],
+  ["PL", "Potrzebuję pięciu pracowników"],
+  ["SV", "Vi behöver fem arbetare"],
 ] as const;
 const YESTERDAY = [
   ["LT", "Užpildyk vakarykštį darbo žurnalą"],

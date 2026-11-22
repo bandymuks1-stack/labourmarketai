@@ -335,12 +335,14 @@ function escapeForRegex(s: string): string {
  * employer reviews, and the form only ever pre-fills a field the employer left
  * empty.
  */
-/** A number directly followed by a word for PEOPLE. */
+/** A number directly followed by a word for PEOPLE — in every active locale
+ *  (2026-11-22: "5 рабочих", "5 darbininkų", "5 Arbeiter", "5 osób" counted
+ *  nothing). "5 рабочих дней" is five working days, never five workers. */
 const PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|darbinink\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек|люд(?:и|ей)|рабоч(?:ие|их)(?!\s*(?:дн|час|мест|смен|недел))|hands\b|arbeiter|mitarbeiter|leute\b|personen\b|werknemers?\b|medewerkers?\b|arbeiders?\b|mensen\b|pracownik\w*|pracownic\w*|robotnik\w*|os[oó]b\w*|ludzi)/i;
 // sv twin — used only for a sentence `looksSwedish` reads as Swedish.
 const SV_PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек|personer|medarbetare|arbetare|anst[äa]llda)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|darbinink\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек|люд(?:и|ей)|рабоч(?:ие|их)(?!\s*(?:дн|час|мест|смен|недел))|hands\b|arbeiter|mitarbeiter|leute\b|personen\b|werknemers?\b|medewerkers?\b|arbeiders?\b|mensen\b|pracownik\w*|pracownic\w*|robotnik\w*|os[oó]b\w*|ludzi|personer|medarbetare|arbetare|anst[äa]llda)/i;
 
 /** Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
  *  halves of pairs whose other half was already here; DE/PL/NL the same

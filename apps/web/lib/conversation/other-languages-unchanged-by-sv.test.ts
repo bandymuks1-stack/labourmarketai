@@ -250,7 +250,30 @@ const DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED: readonly Intended[] = [
   { sentence: "Ik heb 3 timmermannen nodig", reader: "turn", now: "new-goal" },
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED];
+/**
+ * (h) A COUNT OF PEOPLE IS A HEADCOUNT IN EVERY LANGUAGE (2026-11-22).
+ *
+ * "мне нужны пять рабочих" opened the need intake with no quantity: the
+ * shared person nouns knew "работников" but not "рабочих", and the digit
+ * reader of `structureNeed` knew no German, Polish or Dutch person noun at
+ * all. "5 Mitarbeiter", "3 ludzi" and "30 рабочих" now count those people.
+ */
+const headcountOf = (sentence: string, total: number): Intended[] => [
+  { sentence, reader: "headcount", now: { total, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence, reader: "need", now: [null, null, total, null, null] },
+];
+const PEOPLE_COUNTED_IN_EVERY_LANGUAGE: readonly Intended[] = [
+  ...headcountOf("Personal 5 Mitarbeiter", 5),
+  ...headcountOf("Mamy budowę w Umeå, potrzeba 3 ludzi", 3),
+  ...headcountOf("Мы кадровое агентство, можем предложить 30 рабочих", 30),
+  {
+    sentence: "Мы кадровое агентство, можем предложить 30 рабочих",
+    reader: "value",
+    now: [null, null, 30, null, null, null, null, null],
+  },
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED, ...PEOPLE_COUNTED_IN_EVERY_LANGUAGE];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).

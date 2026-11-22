@@ -3179,8 +3179,10 @@ const RULES: IntentRule[] = [
         // — but by `\breikia\s+žmoni`, bound to ONE verb. "ieškome 10 žmonių
         // klientui" (an agency buying for a client) uses a different verb and
         // measured `unknown`. Reading the shared seek vocabulary instead of a
-        // single hard-coded verb is the point of this rule.
-        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|mensen|leute|personen|personeel|люд|человек|рабочих|žmoni|zmoni)`,
+        // single hard-coded verb is the point of this rule. `рабочие`,
+        // `darbininkai` and `hands` join 2026-11-22: "требуются пять рабочие",
+        // "reikia penki darbininkai", "we need five hands" measured `unknown`.
+        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|hands|mensen|leute|personen|personeel|arbeiders|люд|человек|рабоч(?:их|ие|ий)(?!\\s+(?:дн|час|мест|смен|недел|журнал|график|одежд|инструмент|врем|процесс))|žmoni|zmoni|darbinink)`,
         5,
       ),
       // pl (2026-09-20). `SEEK_VERB_SOURCE` lives in lib/structuring and
