@@ -5987,7 +5987,8 @@
             "„Stripe“ — mokėjimų už mokamas platformos paslaugas apdorojimas. Kai organizacija pradeda apmokėjimą, „Stripe“ gauna mokančio naudotojo el. pašto adresą ir vidinį paskyros identifikatorių; kortelės duomenys įvedami pačios „Stripe“ mokėjimo puslapyje ir platforma jų nesaugo.",
             "„Google“, „Facebook“ („Meta“) ir „LinkedIn“ — tik jei pasirenkate prisijungti per juos, kaip aprašyta aukščiau.",
             "„Google“ (Gemini API) — tik taip, kaip aprašyta toliau esančiame skyriuje apie DI.",
-            "„Cloudflare“ (Workers AI), „Mistral AI“ ir „Groq“ — tik juos įjungus ir tik viešai, apibendrintai darbo rinkos statistikai paaiškinti (pavyzdžiui, kiek laisvų darbo vietų turi profesija). Jiems nesiunčiamas joks žinučių tekstas ir jokie asmens duomenys.",
+            "„Cloudflare“ (Workers AI) — tik jį įjungus: 1) viešai, apibendrintai darbo rinkos statistikai paaiškinti; 2) kai platforma pati nesupranta pokalbyje įvesto prašymo — pasiūlyti, kurį esamą platformos veiksmą jis reiškia. Prieš siuntimą pašalinami vardai, kontaktai, skaičiai ir visi žodžiai, kurių nėra nustatytame veiksmų žodžių sąraše; prašymas su sveikatos ar kita jautria informacija nesiunčiamas visai. „Cloudflare“ šio turinio nenaudoja modeliams mokyti ir nesaugo po užklausos.",
+            "„Mistral AI“ ir „Groq“ — tik juos įjungus ir tik viešai, apibendrintai darbo rinkos statistikai paaiškinti. Jiems nesiunčiamas joks žinučių tekstas ir jokie asmens duomenys.",
             "Visas infrastruktūros paslaugų teikėjų sąrašas pateiktas puslapyje „Duomenų apsauga“."
           ]
         },
@@ -6126,7 +6127,8 @@
             "Cloudflare — tinklas prieš svetainę: domeno vardų sistema, šifravimas perdavimo metu, podėlis ir apsauga nuo atakų. Per jį eina kiekviena užklausa į svetainę.",
             "GitHub — programinio kodo saugykla. Naudotojų duomenys ten nesaugomi.",
             "„Google“ (Gemini API) — DI apdorojimas žinutėms ir darbo skelbimams versti ir pasiūlyti, ko prašoma pokalbyje įvestu sakiniu. Siunčiamas tik tam darbui reikalingas tekstas.",
-            "„Cloudflare“ (Workers AI), „Mistral AI“ ir „Groq“ — tik juos įjungus ir tik viešai, apibendrintai darbo rinkos statistikai paaiškinti (pavyzdžiui, kiek laisvų darbo vietų turi profesija). Jiems nesiunčiamas joks žinučių tekstas ir jokie asmens duomenys.",
+            "„Cloudflare“ (Workers AI) — tik jį įjungus: 1) viešai, apibendrintai darbo rinkos statistikai paaiškinti; 2) kai platforma pati nesupranta pokalbyje įvesto prašymo — pasiūlyti, kurį esamą platformos veiksmą jis reiškia. Prieš siuntimą pašalinami vardai, kontaktai, skaičiai ir visi žodžiai, kurių nėra nustatytame veiksmų žodžių sąraše; prašymas su sveikatos ar kita jautria informacija nesiunčiamas visai. „Cloudflare“ šio turinio nenaudoja modeliams mokyti ir nesaugo po užklausos.",
+            "„Mistral AI“ ir „Groq“ — tik juos įjungus ir tik viešai, apibendrintai darbo rinkos statistikai paaiškinti. Jiems nesiunčiamas joks žinučių tekstas ir jokie asmens duomenys.",
             "„Stripe“ — mokėjimų apdorojimas. Kliento įrašas sukuriamas tik tada, kai organizacija pradeda prenumeratos apmokėjimą.",
             "Joks kitas el. pašto, DI, vertimo ar mokėjimų paslaugų teikėjas neveikia. Jei toks būtų įjungtas, pirmiausia būtų atnaujintas šis sąrašas."
           ]
