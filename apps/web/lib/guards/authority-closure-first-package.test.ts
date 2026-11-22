@@ -236,6 +236,15 @@ describe("the four migrations ship paired, gated and stated", () => {
       // it corrects that context's record; the chain root walk is cycle-safe, no depth cap). Two SECURITY DEFINER
       // bodies; RED draft, needs-human-gate, NOT applied.
       "20261120190000_",
+      // 2026-11-21 owner P0 security directive: sign-up role allow-list, admin grant guard, manager grant needs an
+      // accepted governance membership; journal lineage guard and manager-labelled metrics. SECURITY DEFINER bodies,
+      // a trigger and one policy; RED draft, needs-human-gate, NOT applied.
+      "20261121100000_",
+      "20261121100100_",
+      // 2026-11-21 owner P0 security (B): access arms follow ended governance membership; the invited person
+      // sees who invited them. RED draft, needs-human-gate, NOT applied.
+      "20261121100200_",
+      "20261121100300_",
       // 2026-11-22 worker-lookup policies read auth.uid() once (RED by ALTER POLICY, needs-human-gate, #3604).
       "20261122130000_",
       // 2026-11-18 COMM-1 profiles.communication_locale (renamed from 20260920122000; RED draft, needs-human-gate, NOT applied).

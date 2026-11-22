@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Aktuell efterfrågan på marknaden",
-    "subtitleAgency": "Vad den öppna marknaden efterfrågar just nu – samma utbud som dina kandidater ser på tavlan.",
-    "subtitleInstitution": "Vad den öppna marknaden efterfrågar just nu – de inriktningar dina deltagare är på väg mot.",
     "active": "{count} aktuella lediga tjänster",
     "employers": "{count} arbetsgivare",
     "filtered": "{profession}: {count} lediga tjänster",
@@ -2082,7 +2080,6 @@
       "eyebrow": "FÖRETAGETS ARBETSYTA",
       "programs": {
         "title": "Program och grupper",
-        "subtitle": "Vad du undervisar i, riktat mot en inriktning på arbetsmarknaden, och grupperna av deltagare inom det. Efterfrågan visar aktuella offentliga lediga tjänster för den inriktningen.",
         "empty": "Inga program ännu. Lägg till det första och rikta det mot den arbetsinriktning det leder till.",
         "addProgram": "Lägg till ett program",
         "noDirection": "Ingen arbetsinriktning angiven",
@@ -7111,7 +7108,6 @@
   "learning": {
     "pageTitle": "Lärande och granskning",
     "pageLead": "Förslag som bygger på verklig arbetsaktivitet och som sparas för att en person ska granska dem. Inget här behandlas som bevisat i sig.",
-    "title": "Granskningskö",
     "lead": "Signaler blir förslag, och en person beslutar. Lärandet avgör aldrig något på egen hand.",
     "notAvailable": "Inte tillgängligt just nu.",
     "empty": "Inget att granska än.",
@@ -18843,8 +18839,7 @@
         "invitationAccepted": "Inbjudan accepterad. Bekräfta bemanningsföretagets kopplingsförfrågan nedan med ditt företag."
       },
       "education": {
-        "title": "Lärande och program",
-        "subtitle": "Program, deltagare och marknadens efterfrågan inom deras inriktningar."
+        "title": "Lärande och program"
       },
       "history": {
         "title": "Dataimport och historik",
@@ -18921,7 +18916,8 @@
       "heading": "Inbjudningar från organisationer",
       "explainer": "Ledningsinbjudningar riktade till dig. När du accepterar visas organisationen i din arbetsyteväljare.",
       "accept": "Acceptera",
-      "decline": "Avböj"
+      "decline": "Avböj",
+      "invitedBy": "Inbjuden av {name}"
     },
     "members": {
       "heading": "Organisationens medlemmar",
