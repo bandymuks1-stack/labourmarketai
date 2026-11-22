@@ -7303,7 +7303,8 @@
       "scouting": "O zapytaniu o pracę (scouting)",
       "demand_interest": "O zapytaniu o pracę (zainteresowanie pracownika)",
       "accepted_service_request": "O zaakceptowanym zapytaniu o usługę",
-      "accepted_booking": "O zaakceptowanej rezerwacji"
+      "accepted_booking": "O zaakceptowanej rezerwacji",
+      "open_need": "W sprawie otwartej potrzeby"
     },
     "attachmentUnavailable": "Nie można teraz otworzyć tego załącznika. Proszę odświeżyć stronę.",
     "conversationFallback": "Rozmowa",
@@ -7328,7 +7329,13 @@
     "translatedFrom": "Tłumaczenie maszynowe z {lang}",
     "showOriginal": "Oryginał ({lang})",
     "translationUnavailable": "Oryginał ({lang}) — brak tłumaczenia",
-    "loadError": "Nie udało się teraz wczytać wiadomości. To, co Państwo widzą, nie jest pełnym obrazem — proszę spróbować ponownie."
+    "loadError": "Nie udało się teraz wczytać wiadomości. To, co Państwo widzą, nie jest pełnym obrazem — proszę spróbować ponownie.",
+    "openNeed": {
+      "clientName": "Klient {token}",
+      "hidden": "Dostawca nie widzi Państwa imienia i nazwiska.",
+      "disclose": "Pokaż moje imię i nazwisko",
+      "shown": "Państwa imię i nazwisko jest widoczne."
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Państwa organizacja",
@@ -19777,7 +19784,8 @@
     },
     "threadContext": "Dotyczy oferty: {subject}",
     "messageAbout": "Dotyczy oferty: {subject}",
-    "threadContextShared": "Wszystkie oferty między stronami są omawiane w tej jednej rozmowie; otwarto ją dla oferty powyżej."
+    "threadContextShared": "Wszystkie oferty między stronami są omawiane w tej jednej rozmowie; otwarto ją dla oferty powyżej.",
+    "writeAboutNeed": "Napisz w sprawie tej potrzeby"
   },
   "teamAssignment": {
     "title": "Zespoły w tym projekcie",

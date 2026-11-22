@@ -1749,7 +1749,16 @@
       "sent": "[EN] Reply sent."
     },
     "translationUnavailable": "Original ({lang}) — ingen oversettelse tilgjengelig",
-    "loadError": "Meldingene kunne ikke lastes nå. Det du ser er ikke hele bildet — prøv igjen."
+    "loadError": "Meldingene kunne ikke lastes nå. Det du ser er ikke hele bildet — prøv igjen.",
+    "openNeed": {
+      "clientName": "Kunde {token}",
+      "hidden": "Navnet ditt er skjult for leverandøren.",
+      "disclose": "Vis navnet mitt",
+      "shown": "Navnet ditt vises."
+    },
+    "source": {
+      "open_need": "Om et åpent behov"
+    }
   },
   "trust": {
     "unreadHint": "Noe av dette kunne ikke telles akkurat nå og vises som «—». Det betyr ikke at du ikke har noen — tallene kunne bare ikke leses. Last inn på nytt om et øyeblikk.",
@@ -8118,5 +8127,8 @@
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
     }
+  },
+  "teamDemandOffer": {
+    "writeAboutNeed": "Skriv om dette behovet"
   }
 }

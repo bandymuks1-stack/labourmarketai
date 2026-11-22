@@ -7299,7 +7299,8 @@
       "scouting": "Om en arbetsförfrågan (rekrytering)",
       "demand_interest": "Om en arbetsförfrågan (arbetstagarens intresse)",
       "accepted_service_request": "Om en accepterad förfrågan om tjänst",
-      "accepted_booking": "Om en accepterad bokning"
+      "accepted_booking": "Om en accepterad bokning",
+      "open_need": "Om ett öppet behov"
     },
     "attachmentUnavailable": "Den här bilagan kan inte öppnas just nu. Uppdatera sidan.",
     "conversationFallback": "Konversation",
@@ -7328,6 +7329,12 @@
     "noLongerAvailable": {
       "title": "Den här konversationen är inte längre tillgänglig",
       "body": "Du deltar inte längre i den, så dess meddelanden visas inte."
+    },
+    "openNeed": {
+      "clientName": "Kund {token}",
+      "hidden": "Ditt namn är dolt för leverantören.",
+      "disclose": "Visa mitt namn",
+      "shown": "Ditt namn visas."
     }
   },
   "orgTier1Warning": {
@@ -19777,7 +19784,8 @@
     },
     "threadContext": "Om erbjudandet: {subject}",
     "messageAbout": "Sv: {subject}",
-    "threadContextShared": "Alla erbjudanden mellan er diskuteras i det här enda samtalet; det öppnades för erbjudandet ovan."
+    "threadContextShared": "Alla erbjudanden mellan er diskuteras i det här enda samtalet; det öppnades för erbjudandet ovan.",
+    "writeAboutNeed": "Skriv om det här behovet"
   },
   "teamAssignment": {
     "title": "Team i det här projektet",

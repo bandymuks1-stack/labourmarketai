@@ -148,6 +148,9 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   // time are theirs to see; the browser's encryption key and auth secret are
   // device credentials, not information about the person, and are left out.
   { table: "web_push_subscriptions", key: "profile_id", omitColumns: ["p256dh", "auth"] },
+  // Open-need threads (20261122160000): the person's own choice to show their
+  // name in one conversation, readable by its participants only.
+  { table: "open_need_identity_disclosures", key: "disclosed_by" },
   { table: "preferred_locations", key: "profile_id" },
   { table: "consented_login_location_signals", key: "profile_id" },
   // How the platform classifies the account for reporting (real / test /

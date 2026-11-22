@@ -7303,7 +7303,8 @@
       "scouting": "Dėl jūsų darbo užklausos (atranka)",
       "demand_interest": "Dėl darbo užklausos (darbuotojo susidomėjimas)",
       "accepted_service_request": "Dėl priimtos paslaugų užklausos",
-      "accepted_booking": "Dėl priimtos rezervacijos"
+      "accepted_booking": "Dėl priimtos rezervacijos",
+      "open_need": "Dėl atviro poreikio"
     },
     "attachmentUnavailable": "Priedo šiuo metu atidaryti nepavyko. Atnaujinkite puslapį.",
     "conversationFallback": "Pokalbis",
@@ -7328,7 +7329,13 @@
     "translatedFrom": "Mašininis vertimas iš {lang}",
     "showOriginal": "Originalas ({lang})",
     "translationUnavailable": "Originalas ({lang}) — vertimo nėra",
-    "loadError": "Šiuo metu žinučių įkelti nepavyko. Tai, ką matote, nėra visas vaizdas — bandykite dar kartą."
+    "loadError": "Šiuo metu žinučių įkelti nepavyko. Tai, ką matote, nėra visas vaizdas — bandykite dar kartą.",
+    "openNeed": {
+      "clientName": "Klientas {token}",
+      "hidden": "Tiekėjas nemato jūsų vardo.",
+      "disclose": "Rodyti mano vardą",
+      "shown": "Jūsų vardas rodomas."
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Jūsų organizacija",
@@ -19777,7 +19784,8 @@
     },
     "threadContext": "Pokalbis apie pasiūlymą: {subject}",
     "messageAbout": "Dėl pasiūlymo: {subject}",
-    "threadContextShared": "Visi pasiūlymai tarp jūsų vyksta šiame viename pokalbyje; šis atidarytas apie aukščiau nurodytą."
+    "threadContextShared": "Visi pasiūlymai tarp jūsų vyksta šiame viename pokalbyje; šis atidarytas apie aukščiau nurodytą.",
+    "writeAboutNeed": "Rašyti dėl šio poreikio"
   },
   "teamAssignment": {
     "title": "Komandos šiame projekte",

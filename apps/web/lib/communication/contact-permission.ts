@@ -172,9 +172,12 @@ export async function readCounterpartIdentities(
   // Lithuanian employer reads "Kandidatas XXXXXX", never English (UX review
   // 2026-10-24, 4.16). A real name is returned unchanged.
   let candidateName: (token: string) => string = (token) => `Candidate ${token}`;
+  let clientName: (token: string) => string = (token) => `Client ${token}`;
   try {
     const t = await getTranslations("people");
     candidateName = (token) => t("anonymousName", { token });
+    const tc = await getTranslations("communication");
+    clientName = (token) => tc("openNeed.clientName", { token });
   } catch {
     // outside a request (tests, scripts): keep the neutral fallback
   }
@@ -187,7 +190,7 @@ export async function readCounterpartIdentities(
       typeof row?.display_name === "string" ? row.display_name.trim() : "";
     // Only the stored pseudonym's WORD is translated — an empty value stays
     // empty, so nothing is ever fabricated.
-    const name = stored ? localizePseudonymousName(stored, candidateName) : "";
+    const name = stored ? localizePseudonymousName(stored, candidateName, clientName) : "";
     if (id && name) out.set(id, name);
   }
   return out;

@@ -51,6 +51,10 @@ const MIGRATION =
   "../../supabase/migrations/20260706210000_conversation_source_relation.sql";
 const ROLLBACK =
   "../../supabase/rollbacks/20260706210000_conversation_source_relation.down.sql";
+/** The one later migration that widened the closed set (owner decision A,
+ *  2026-11-22: 'open_need'); it recreates the CHECK, so it is the live list. */
+const OPEN_NEED_MIGRATION =
+  "../../supabase/migrations/20261122160000_open_need_messaging_v1.sql";
 
 /** The sanctioned context callers and the ONE type each may stamp
  *  (review pack §1.3 rows 2-5; canonical-journey P1 added the worker-side
@@ -61,6 +65,7 @@ const STAMPERS: ReadonlyArray<readonly [string, string]> = [
   ["lib/communication/contact-interested-worker.ts", "demand_interest"],
   ["lib/opportunities/contact-employer.ts", "demand_interest"],
   ["lib/booking/booking-conversation.ts", "accepted_booking"],
+  ["lib/company/open-need-conversation.ts", "open_need"],
 ];
 
 /** All non-test source files under the app-side trees. */
@@ -88,23 +93,34 @@ function walkSources(): string[] {
 // ── 0. The closed type set is the single source of truth ─────────────────
 
 describe("closed source-type set — model mirrors the migration CHECK", () => {
-  it("the enumeration is EXACTLY the four sanctioned context types", () => {
+  it("the enumeration is EXACTLY the sanctioned context types", () => {
     expect([...CONVERSATION_SOURCE_TYPES].sort()).toEqual(
       [
         "scouting",
         "accepted_service_request",
         "demand_interest",
         "accepted_booking",
+        "open_need",
       ].sort(),
     );
   });
 
-  it("the migration's CHECK constraint carries the same closed set", () => {
+  it("the first migration's CHECK carries the original four", () => {
     const sql = stripSql(read(MIGRATION)).toLowerCase();
+    const check = sql.match(/check \(source_type in\s*\(([^)]+)\)\)/);
+    expect(check).not.toBeNull();
+    const listed = [...check![1].matchAll(/'([a-z_]+)'/g)].map((m) => m[1]);
+    expect(listed.sort()).toEqual(
+      ["scouting", "accepted_service_request", "demand_interest", "accepted_booking"].sort(),
+    );
+  });
+
+  it("the live CHECK (the open-need migration recreates it) carries the same closed set", () => {
+    const sql = stripSql(read(OPEN_NEED_MIGRATION)).toLowerCase();
     for (const t of CONVERSATION_SOURCE_TYPES) {
       expect(sql, `CHECK must include '${t}'`).toContain(`'${t}'`);
     }
-    // And nothing beyond it: the check list is exactly the four types.
+    // And nothing beyond it: the check list is exactly the model's set.
     const check = sql.match(/check \(source_type in\s*\(([^)]+)\)\)/);
     expect(check).not.toBeNull();
     const listed = [...check![1].matchAll(/'([a-z_]+)'/g)].map((m) => m[1]);
@@ -196,6 +212,8 @@ describe("§8-2 exact stamping — each caller passes its own type, no other", (
         src.indexOf('!== "allowed"'),
         src.indexOf('status !== "accepted"'),
         src.indexOf('interestStatus === "withdrawn"'),
+        // open need: the database gate's answer (zero rows → no owner → return)
+        src.indexOf("if (!owner || owner === user.id) return null"),
       );
       const stamp = src.indexOf(`type: "${type}"`);
       expect(gate, `${rel} gate`).toBeGreaterThan(-1);
@@ -208,11 +226,11 @@ describe("§8-2 exact stamping — each caller passes its own type, no other", (
     expect(read(SUPPORT_LAUNCHER)).not.toMatch(/sourceHint|source_type|source_id/);
   });
 
-  it("nobody outside the four stampers passes a typed hint literal", () => {
+  it("nobody outside the sanctioned stampers passes a typed hint literal", () => {
     // A caller stamps by passing `{ type: "<closed-set type>", id }` into the
     // direct-conversation path. The only files combining a
     // getOrCreateDirectConversation call with a closed-set type literal must
-    // be exactly the four sanctioned stampers.
+    // be exactly the sanctioned stampers.
     const stamperFiles = walkSources().filter((rel) => {
       const src = read(rel);
       return (

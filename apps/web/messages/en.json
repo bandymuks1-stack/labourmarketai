@@ -7303,7 +7303,8 @@
       "scouting": "About a work request (scouting)",
       "demand_interest": "About a work request (worker interest)",
       "accepted_service_request": "About an accepted service request",
-      "accepted_booking": "About an accepted booking"
+      "accepted_booking": "About an accepted booking",
+      "open_need": "About an open need"
     },
     "attachmentUnavailable": "This attachment can't be opened right now. Refresh the page.",
     "conversationFallback": "Conversation",
@@ -7328,7 +7329,13 @@
     "translatedFrom": "Machine translation from {lang}",
     "showOriginal": "Original ({lang})",
     "translationUnavailable": "Original ({lang}) — no translation available",
-    "loadError": "Could not load messages right now. What you see is not the full picture — try again."
+    "loadError": "Could not load messages right now. What you see is not the full picture — try again.",
+    "openNeed": {
+      "clientName": "Client {token}",
+      "hidden": "Your name is hidden from the provider.",
+      "disclose": "Show my name",
+      "shown": "Your name is shown."
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Your organisation",
@@ -19777,7 +19784,8 @@
     },
     "threadContext": "About the offer: {subject}",
     "messageAbout": "Re: {subject}",
-    "threadContextShared": "Every offer between you is discussed in this one conversation; it was opened for the one above."
+    "threadContextShared": "Every offer between you is discussed in this one conversation; it was opened for the one above.",
+    "writeAboutNeed": "Write about this need"
   },
   "teamAssignment": {
     "title": "Teams on this project",

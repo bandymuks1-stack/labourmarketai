@@ -27,6 +27,9 @@ export const CONVERSATION_SOURCE_TYPES = [
   "accepted_service_request",
   "demand_interest",
   "accepted_booking",
+  // Owner decision A (2026-11-22): a provider writes about an open need; the
+  // client stays unnamed until it discloses (20261122160000).
+  "open_need",
 ] as const;
 
 export type ConversationSourceType = (typeof CONVERSATION_SOURCE_TYPES)[number];
@@ -90,6 +93,7 @@ const SOURCE_ROUTE_BY_HINT: Readonly<Record<string, string>> = {
   bookings: "/dashboard/bookings",
   service_requests: "/dashboard/service-requests",
   company_scouting: "/dashboard/company/scouting",
+  company_needs: "/dashboard/company/needs",
 };
 
 export function resolveSourceRoute(

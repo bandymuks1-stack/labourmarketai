@@ -14,10 +14,22 @@ export function pseudonymToken(name: string): string | null {
   return m ? m[1]! : null;
 }
 
+/** Open-need threads (20261122160000) name an undisclosed client
+ *  `Client ` + six characters of the need id. */
+const CLIENT_PSEUDONYM_RE = /^Client ([A-Z0-9]{1,6})$/;
+
+export function clientPseudonymToken(name: string): string | null {
+  const m = CLIENT_PSEUDONYM_RE.exec(name.trim());
+  return m ? m[1]! : null;
+}
+
 export function localizePseudonymousName(
   name: string,
   candidateName: (token: string) => string,
+  clientName: (token: string) => string = (token) => `Client ${token}`,
 ): string {
   const token = pseudonymToken(name);
-  return token === null ? name : candidateName(token);
+  if (token !== null) return candidateName(token);
+  const client = clientPseudonymToken(name);
+  return client === null ? name : clientName(client);
 }

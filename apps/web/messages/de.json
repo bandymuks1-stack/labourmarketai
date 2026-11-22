@@ -7303,7 +7303,8 @@
       "scouting": "Zu einer Arbeitsanfrage (Scouting)",
       "demand_interest": "Zu einer Arbeitsanfrage (Interesse einer Arbeitskraft)",
       "accepted_service_request": "Zu einer angenommenen Dienstleistungsanfrage",
-      "accepted_booking": "Zu einer angenommenen Buchung"
+      "accepted_booking": "Zu einer angenommenen Buchung",
+      "open_need": "Zu einem offenen Bedarf"
     },
     "attachmentUnavailable": "Dieser Anhang kann gerade nicht geöffnet werden. Aktualisieren Sie die Seite.",
     "conversationFallback": "Unterhaltung",
@@ -7328,7 +7329,13 @@
     "translatedFrom": "Maschinelle Übersetzung aus {lang}",
     "showOriginal": "Originaltext ({lang})",
     "translationUnavailable": "Original ({lang}) — keine Übersetzung verfügbar",
-    "loadError": "Nachrichten konnten gerade nicht geladen werden. Was Sie sehen, ist nicht das vollständige Bild — bitte erneut versuchen."
+    "loadError": "Nachrichten konnten gerade nicht geladen werden. Was Sie sehen, ist nicht das vollständige Bild — bitte erneut versuchen.",
+    "openNeed": {
+      "clientName": "Kunde {token}",
+      "hidden": "Ihr Name ist für den Anbieter verborgen.",
+      "disclose": "Meinen Namen zeigen",
+      "shown": "Ihr Name wird angezeigt."
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Ihre Organisation",
@@ -19777,7 +19784,8 @@
     },
     "threadContext": "Zum Angebot: {subject}",
     "messageAbout": "Betrifft Angebot: {subject}",
-    "threadContextShared": "Alle Angebote zwischen Ihnen werden in diesem einen Gespräch besprochen; es wurde für das obige geöffnet."
+    "threadContextShared": "Alle Angebote zwischen Ihnen werden in diesem einen Gespräch besprochen; es wurde für das obige geöffnet.",
+    "writeAboutNeed": "Zu diesem Bedarf schreiben"
   },
   "teamAssignment": {
     "title": "Teams in diesem Projekt",

@@ -1749,7 +1749,16 @@
       "sent": "[EN] Reply sent."
     },
     "translationUnavailable": "Originaal ({lang}) — tõlge pole saadaval",
-    "loadError": "Sõnumeid ei õnnestunud praegu laadida. See, mida näed, pole täielik pilt — proovi uuesti."
+    "loadError": "Sõnumeid ei õnnestunud praegu laadida. See, mida näed, pole täielik pilt — proovi uuesti.",
+    "openNeed": {
+      "clientName": "Klient {token}",
+      "hidden": "Teenusepakkuja ei näe teie nime.",
+      "disclose": "Näita minu nime",
+      "shown": "Teie nimi on nähtav."
+    },
+    "source": {
+      "open_need": "Avatud vajaduse kohta"
+    }
   },
   "trust": {
     "unreadHint": "Osa sellest ei õnnestunud praegu kokku lugeda ja on näidatud kui „—“. See ei tähenda, et sul neid ei ole — lihtsalt ei õnnestunud numbreid lugeda. Laadi hetke pärast uuesti.",
@@ -8118,5 +8127,8 @@
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
     }
+  },
+  "teamDemandOffer": {
+    "writeAboutNeed": "Kirjuta selle vajaduse kohta"
   }
 }

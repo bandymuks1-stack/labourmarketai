@@ -1749,7 +1749,16 @@
       "sent": "[EN] Reply sent."
     },
     "translationUnavailable": "Oriģināls ({lang}) — tulkojums nav pieejams",
-    "loadError": "Ziņas šobrīd neizdevās ielādēt. Redzamais nav pilnīga aina — mēģiniet vēlreiz."
+    "loadError": "Ziņas šobrīd neizdevās ielādēt. Redzamais nav pilnīga aina — mēģiniet vēlreiz.",
+    "openNeed": {
+      "clientName": "Klients {token}",
+      "hidden": "Piegādātājs neredz jūsu vārdu.",
+      "disclose": "Rādīt manu vārdu",
+      "shown": "Jūsu vārds ir redzams."
+    },
+    "source": {
+      "open_need": "Par atvērtu vajadzību"
+    }
   },
   "trust": {
     "unreadHint": "Daļu no tā tikko neizdevās saskaitīt, un tā tiek rādīta kā “—”. Tas nenozīmē, ka jums to nav — vienkārši neizdevās nolasīt skaitļus. Pārlādējiet pēc brīža.",
@@ -8118,5 +8127,8 @@
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
     }
+  },
+  "teamDemandOffer": {
+    "writeAboutNeed": "Rakstīt par šo vajadzību"
   }
 }

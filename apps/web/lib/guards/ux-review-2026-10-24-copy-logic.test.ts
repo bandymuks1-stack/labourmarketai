@@ -63,7 +63,7 @@ describe("4.16 scouting: a raised hand is a working contact door, said so", () =
   });
   it("the counterpart reader translates the RPC's English pseudonym", () => {
     const src = read("lib/communication/contact-permission.ts");
-    expect(src).toMatch(/localizePseudonymousName\(stored, candidateName\)/);
+    expect(src).toMatch(/localizePseudonymousName\(stored, candidateName(, clientName)?\)/);
     expect(src).toMatch(/t\("anonymousName", \{ token \}\)/);
   });
 });

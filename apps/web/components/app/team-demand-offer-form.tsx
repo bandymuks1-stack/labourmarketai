@@ -14,6 +14,8 @@ import {
 } from "@/lib/company/team-offer-actions";
 import type { TeamOfferRefusal } from "@/lib/market/team-offer-model";
 import { openTeamOfferConversationAction } from "@/lib/company/team-offer-conversation";
+import { openNeedConversationAction } from "@/lib/company/open-need-conversation";
+import { PendingButton } from "@/components/app/pending-submit";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 import { TeamOfferTerms } from "@/components/app/team-offer-terms";
 import { Input } from "@/components/ui/Input";
@@ -156,12 +158,31 @@ export function TeamDemandOfferForm({
                   <option value="">{t("demandPlaceholder")}</option>
                   {data.demands.map((d) => (
                     <option key={d.requestId} value={d.requestId} disabled={d.openOfferId !== null}>
-                      {[d.roleText ?? "-", d.country ?? "-", d.companyName ?? "-"].join(" / ")}
+                      {[d.roleText ?? "-", d.country ?? "-", d.companyName].filter(Boolean).join(" / ")}
                       {d.teamSize ? ` (${d.teamSize})` : ""}
                       {d.openOfferId ? ` - ${t("alreadyOffered")}` : ""}
                     </option>
                   ))}
                 </Select>
+                {requestId ? (
+                  // Decision A: write to the client about this need; the client
+                  // stays unnamed until it chooses to show its name.
+                  <form action={openNeedConversationAction}>
+                    <DisplayedWorkspaceField />
+                    <input type="hidden" name="orgId" value={teamId} />
+                    <input type="hidden" name="requestId" value={requestId} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <PendingButton
+                      size="sm"
+                      variant="secondary"
+                      className="min-h-11 sm:min-h-9"
+                      data-testid={`open-need-write-${teamId}`}
+                    >
+                      <MessageSquare className="h-4 w-4" aria-hidden />
+                      {t("writeAboutNeed")}
+                    </PendingButton>
+                  </form>
+                ) : null}
                 <label className="text-xs text-text-secondary" htmlFor={`${uid}-note`}>
                   {t("noteLabel")}
                 </label>

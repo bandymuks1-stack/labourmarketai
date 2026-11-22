@@ -20,7 +20,12 @@ import { initialWriteLanguage } from "@/lib/communication/initial-write-language
 import type { ViewerText } from "@/lib/communication/translation";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
+import { PendingButton } from "@/components/app/pending-submit";
 import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
+import {
+  discloseOpenNeedIdentityAction,
+  readOpenNeedDisclosure,
+} from "@/lib/company/open-need-conversation";
 import {
   listConversationAttachments,
   type ConversationMessageAttachment,
@@ -105,6 +110,11 @@ export default async function ConversationDetailPage({
   // specific offer, the thread names it — read through the SAME party-gated
   // RPC that opened it (a non-party gets zero rows, so a crafted ?offer=
   // shows nothing).
+  // Open need (decision A): the client — the only participant the source
+  // context gives a route — is unnamed to the provider until it discloses.
+  const openNeedSource = sourceContexts.get(conversationId) ?? null;
+  const isOpenNeedClient = openNeedSource?.sourceType === "open_need" && openNeedSource.href !== null;
+  const openNeedDisclosed = isOpenNeedClient ? await readOpenNeedDisclosure(conversationId) : null;
   const offerContext = await readTeamOfferThreadContext(offerParam);
   const tOffer = offerContext ? await getTranslations("teamDemandOffer") : null;
   const card = describeConversationCard({
@@ -332,6 +342,25 @@ export default async function ConversationDetailPage({
                 </span>
               )}
             </div>
+          )}
+          {isOpenNeedClient && openNeedDisclosed !== null && (
+            openNeedDisclosed ? (
+              <p className="text-meta text-text-muted" data-testid="open-need-identity-shown">
+                {t("openNeed.shown")}
+              </p>
+            ) : (
+              <form
+                action={discloseOpenNeedIdentityAction}
+                className="flex flex-wrap items-center gap-2 text-meta text-text-muted"
+              >
+                <input type="hidden" name="locale" value={locale} />
+                <input type="hidden" name="conversationId" value={conversationId} />
+                <span data-testid="open-need-identity-hidden">{t("openNeed.hidden")}</span>
+                <PendingButton size="sm" variant="secondary" className="min-h-11 sm:min-h-8" data-testid="open-need-disclose">
+                  {t("openNeed.disclose")}
+                </PendingButton>
+              </form>
+            )
           )}
         </div>
       </header>

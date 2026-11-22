@@ -7303,7 +7303,8 @@
       "scouting": "Over een werkaanvraag (scouting)",
       "demand_interest": "Over een werkaanvraag (interesse van werknemer)",
       "accepted_service_request": "Over een geaccepteerde dienstaanvraag",
-      "accepted_booking": "Over een geaccepteerde boeking"
+      "accepted_booking": "Over een geaccepteerde boeking",
+      "open_need": "Over een open behoefte"
     },
     "attachmentUnavailable": "Deze bijlage kan nu niet worden geopend. Vernieuw de pagina.",
     "conversationFallback": "Gesprek",
@@ -7328,7 +7329,13 @@
     "translatedFrom": "Machinevertaling uit {lang}",
     "showOriginal": "Origineel ({lang})",
     "translationUnavailable": "Origineel ({lang}) — geen vertaling beschikbaar",
-    "loadError": "Berichten konden nu niet worden geladen. Wat u ziet is niet het volledige beeld — probeer het opnieuw."
+    "loadError": "Berichten konden nu niet worden geladen. Wat u ziet is niet het volledige beeld — probeer het opnieuw.",
+    "openNeed": {
+      "clientName": "Klant {token}",
+      "hidden": "Uw naam is verborgen voor de aanbieder.",
+      "disclose": "Mijn naam tonen",
+      "shown": "Uw naam wordt getoond."
+    }
   },
   "orgTier1Warning": {
     "eyebrow": "Uw organisatie",
@@ -19777,7 +19784,8 @@
     },
     "threadContext": "Over het aanbod: {subject}",
     "messageAbout": "Betreft aanbod: {subject}",
-    "threadContextShared": "Alle aanbiedingen tussen u beiden worden in dit ene gesprek besproken; het is geopend voor het aanbod hierboven."
+    "threadContextShared": "Alle aanbiedingen tussen u beiden worden in dit ene gesprek besproken; het is geopend voor het aanbod hierboven.",
+    "writeAboutNeed": "Schrijf over deze behoefte"
   },
   "teamAssignment": {
     "title": "Teams in dit project",
